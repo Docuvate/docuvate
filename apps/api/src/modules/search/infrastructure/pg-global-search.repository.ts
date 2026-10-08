@@ -19,7 +19,11 @@ import { cosineSimilarity } from '../domain/cosine-similarity.js';
 import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
 import { parseQueryScalarProbe } from '../domain/normalize-field-value.js';
-import { loadFieldDefinitionLookup } from './document-field-value-index.js';
+import {
+  defaultFieldLabel,
+  loadFieldDefinitionLookup,
+  type FieldDefinitionLookup,
+} from './document-field-value-index.js';
 import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
 
 const TRGM_THRESHOLD = 0.32;
@@ -79,7 +83,11 @@ export class PgGlobalSearchRepository {
 
   async userHasDocumentEmbeddings(userId: string): Promise<boolean> {
     const row = await this.pool.query<{ ok: number }>(
-      `SELECT 1 AS ok FROM document_embeddings WHERE user_id = $1 LIMIT 1`,
+      `SELECT 1 AS ok
+       FROM document_embeddings e
+       JOIN documents d ON d.id = e.document_id
+       WHERE d.user_id = $1
+       LIMIT 1`,
       [userId]
     );
     return row.rows.length > 0;
@@ -91,9 +99,9 @@ export class PgGlobalSearchRepository {
     for (let i = 0; i < chunks.length; i += 1) {
       const body = chunks[i]!;
       await this.pool.query(
-        `INSERT INTO document_text_chunks (document_id, user_id, chunk_index, body, updated_at)
-         VALUES ($1, $2, $3, $4, now())`,
-        [documentId, userId, i, body]
+        `INSERT INTO document_text_chunks (document_id, chunk_index, body, updated_at)
+         VALUES ($1, $2, $3, now())`,
+        [documentId, i, body]
       );
       await this.upsertVocabularyTerms(userId, body, 'chunk');
     }
@@ -130,9 +138,11 @@ export class PgGlobalSearchRepository {
          SELECT term FROM search_vocabulary_terms WHERE user_id = $1 AND length(term) >= 3
          UNION
          SELECT DISTINCT unnest(
-           regexp_split_to_array(unaccent(lower(coalesce(value_text_norm, value_text, ''))), '\\s+')
+           regexp_split_to_array(unaccent(lower(coalesce(v.value_text_norm, v.value_text, ''))), '\\s+')
          ) AS term
-         FROM document_field_values WHERE user_id = $1
+         FROM document_field_values v
+         JOIN documents fd ON fd.id = v.document_id
+         WHERE fd.user_id = $1
          UNION
          SELECT DISTINCT unnest(
            regexp_split_to_array(unaccent(lower(coalesce(d.title, ''))), '[^[:alnum:]]+')
@@ -147,7 +157,9 @@ export class PgGlobalSearchRepository {
          SELECT DISTINCT unnest(
            regexp_split_to_array(unaccent(lower(coalesce(c.body, ''))), '[^[:alnum:]]+')
          ) AS term
-         FROM document_text_chunks c WHERE c.user_id = $1
+         FROM document_text_chunks c
+         JOIN documents cd ON cd.id = c.document_id
+         WHERE cd.user_id = $1
        )
        SELECT term,
               GREATEST(
@@ -305,7 +317,8 @@ export class PgGlobalSearchRepository {
         ? this.pool.query<{ document_id: string; body: string; score: number }>(
             `SELECT c.document_id, c.body, ts_rank_cd(c.search_vector, plainto_tsquery('simple', $2::text)) AS score
              FROM document_text_chunks c
-             WHERE c.user_id = $1
+             JOIN documents cd ON cd.id = c.document_id
+             WHERE cd.user_id = $1
                AND c.search_vector @@ plainto_tsquery('simple', $2::text)
              ORDER BY score DESC
              LIMIT 32`,
@@ -319,8 +332,9 @@ export class PgGlobalSearchRepository {
             `SELECT c.document_id, c.body,
                     MAX(GREATEST(word_similarity(p.token, c.body), similarity(c.body, p.token))) AS score
              FROM document_text_chunks c
+             JOIN documents cd ON cd.id = c.document_id
              CROSS JOIN unnest($2::text[]) AS p(token)
-             WHERE c.user_id = $1
+             WHERE cd.user_id = $1
              GROUP BY c.document_id, c.body
              HAVING MAX(GREATEST(word_similarity(p.token, c.body), similarity(c.body, p.token))) >= $3
              ORDER BY score DESC
@@ -466,18 +480,18 @@ export class PgGlobalSearchRepository {
       if (t.length >= 3) textProbes.add(t);
     }
 
-    const textQueries: Array<Promise<{ rows: Array<{ document_id: string; field_label: string; value_text: string; score: number }> }>> = [];
+    const textQueries: Array<Promise<{ rows: Array<{ document_id: string; field_storage_key: string; value_text: string; score: number }> }>> = [];
     for (const textProbe of textProbes) {
       textQueries.push(
         this.pool.query(
-          `SELECT v.document_id, v.field_label, v.value_text,
+          `SELECT v.document_id, v.field_storage_key, v.value_text,
                   GREATEST(
                     word_similarity($2::text, v.value_text_norm),
                     word_similarity($2::text, v.value_text)
                   ) AS score
            FROM document_field_values v
-           WHERE v.user_id = $1
-             AND v.field_type = 'text'
+           JOIN documents fd ON fd.id = v.document_id
+           WHERE fd.user_id = $1
              AND v.value_text_norm IS NOT NULL
              AND GREATEST(
                word_similarity($2::text, v.value_text_norm),
@@ -494,10 +508,11 @@ export class PgGlobalSearchRepository {
     if (freeScalar?.numeric != null) {
       textQueries.push(
         this.pool.query(
-          `SELECT v.document_id, v.field_label, v.value_text, 1::float8 AS score
+          `SELECT v.document_id, v.field_storage_key, v.value_text, 1::float8 AS score
            FROM document_field_values v
-           WHERE v.user_id = $1
-             AND v.field_type IN ('number', 'currency')
+           JOIN documents fd ON fd.id = v.document_id
+           WHERE fd.user_id = $1
+             AND v.value_numeric IS NOT NULL
              AND v.value_numeric = $2`,
           [userId, freeScalar.numeric]
         )
@@ -506,10 +521,11 @@ export class PgGlobalSearchRepository {
     if (freeScalar?.dateIso) {
       textQueries.push(
         this.pool.query(
-          `SELECT v.document_id, v.field_label, v.value_text, 1::float8 AS score
+          `SELECT v.document_id, v.field_storage_key, v.value_text, 1::float8 AS score
            FROM document_field_values v
-           WHERE v.user_id = $1
-             AND v.field_type = 'date'
+           JOIN documents fd ON fd.id = v.document_id
+           WHERE fd.user_id = $1
+             AND v.value_date IS NOT NULL
              AND v.value_date = $2::date`,
           [userId, freeScalar.dateIso]
         )
@@ -521,10 +537,11 @@ export class PgGlobalSearchRepository {
       if (scalar.numeric != null) {
         textQueries.push(
           this.pool.query(
-            `SELECT v.document_id, v.field_label, v.value_text, 1::float8 AS score
+            `SELECT v.document_id, v.field_storage_key, v.value_text, 1::float8 AS score
              FROM document_field_values v
-             WHERE v.user_id = $1
-               AND v.field_type IN ('number', 'currency')
+             JOIN documents fd ON fd.id = v.document_id
+             WHERE fd.user_id = $1
+               AND v.value_numeric IS NOT NULL
                AND v.value_numeric = $2
                AND v.field_storage_key = ANY($3::text[])`,
             [userId, scalar.numeric, filter.storageKeys]
@@ -533,10 +550,11 @@ export class PgGlobalSearchRepository {
       } else if (scalar.dateIso) {
         textQueries.push(
           this.pool.query(
-            `SELECT v.document_id, v.field_label, v.value_text, 1::float8 AS score
+            `SELECT v.document_id, v.field_storage_key, v.value_text, 1::float8 AS score
              FROM document_field_values v
-             WHERE v.user_id = $1
-               AND v.field_type = 'date'
+             JOIN documents fd ON fd.id = v.document_id
+             WHERE fd.user_id = $1
+               AND v.value_date IS NOT NULL
                AND v.value_date = $2::date
                AND ($3::text[] IS NULL OR v.field_storage_key = ANY($3::text[]))`,
             [userId, scalar.dateIso, filter.storageKeys]
@@ -545,14 +563,15 @@ export class PgGlobalSearchRepository {
       } else if (scalar.textProbe.length >= 2) {
         textQueries.push(
           this.pool.query(
-            `SELECT v.document_id, v.field_label, v.value_text,
+            `SELECT v.document_id, v.field_storage_key, v.value_text,
                     GREATEST(
                       word_similarity($3::text, v.value_text_norm),
                       word_similarity($3::text, v.value_text)
                     ) AS score
              FROM document_field_values v
-             WHERE v.user_id = $1
-               AND v.field_type = 'text'
+             JOIN documents fd ON fd.id = v.document_id
+             WHERE fd.user_id = $1
+               AND v.value_text_norm IS NOT NULL
                AND v.field_storage_key = ANY($2::text[])
                AND (
                  $3::text <% v.value_text_norm
@@ -566,12 +585,18 @@ export class PgGlobalSearchRepository {
       }
     }
 
-    const results = await Promise.all(textQueries);
+    const [results, definitions] = await Promise.all([
+      Promise.all(textQueries),
+      textQueries.length > 0
+        ? loadFieldDefinitionLookup(this.pool, userId)
+        : Promise.resolve(new Map<string, FieldDefinitionLookup>()),
+    ]);
     for (const result of results) {
       for (const row of result.rows) {
+        const storageKey = String(row.field_storage_key);
         register(
           String(row.document_id),
-          String(row.field_label),
+          definitions.get(storageKey)?.label ?? defaultFieldLabel(storageKey),
           String(row.value_text),
           Number(row.score ?? 0)
         );

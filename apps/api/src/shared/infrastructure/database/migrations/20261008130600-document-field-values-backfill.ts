@@ -1,26 +1,14 @@
-import pg from 'pg';
 import type { MigrationInterface, QueryRunner } from 'typeorm';
-import { backfillDocumentFieldValuesFromJsonb } from '../../../../modules/search/infrastructure/document-field-value-index.js';
 
-function migrationPool(queryRunner: QueryRunner): pg.Pool {
-  const options = queryRunner.connection.options as { url?: string };
-  const connectionString = process.env['DATABASE_URL'] ?? options.url;
-  if (!connectionString) {
-    throw new Error('DATABASE_URL is required for document_field_values backfill');
-  }
-  return new pg.Pool({ connectionString });
-}
-
+/**
+ * Historical step kept for ordering. Field values are rebuilt from the extraction payload by
+ * SchemaNormalization3nf20261008131000, which owns the final table shape, so nothing runs here.
+ */
 export class DocumentFieldValuesBackfill20261008130600 implements MigrationInterface {
   name = 'DocumentFieldValuesBackfill20261008130600';
 
-  public async up(queryRunner: QueryRunner): Promise<void> {
-    const pool = migrationPool(queryRunner);
-    try {
-      await backfillDocumentFieldValuesFromJsonb(pool);
-    } finally {
-      await pool.end();
-    }
+  public async up(_queryRunner: QueryRunner): Promise<void> {
+    // Intentionally empty, see class comment.
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

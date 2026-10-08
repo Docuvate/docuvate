@@ -68,8 +68,10 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
     userId: string
   ): Promise<{ stackId: string; role: 'primary' | 'version' } | null> {
     const result = await this.pool.query(
-      `SELECT stack_id, role FROM document_stack_members
-       WHERE document_id = $1 AND user_id = $2`,
+      `SELECT m.stack_id, m.role
+       FROM document_stack_members m
+       INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
+       WHERE m.document_id = $1 AND s.user_id = $2`,
       [documentId, userId]
     );
     const row = result.rows[0];
@@ -84,8 +86,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
       `SELECT m.stack_id, m.document_id, m.role, m.joined_at,
               d.title, d.filename, d.status, d.mime_type
        FROM document_stack_members m
+       INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
        JOIN documents d ON d.id = m.document_id
-       WHERE m.stack_id = $1 AND m.user_id = $2
+       WHERE m.stack_id = $1 AND s.user_id = $2
        ORDER BY CASE WHEN m.role = 'primary' THEN 0 ELSE 1 END, m.joined_at ASC`,
       [stackId, userId]
     );
@@ -112,8 +115,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
       `SELECT m_primary.document_id AS primary_id, m.stack_id,
               COUNT(*) FILTER (WHERE m.role = 'version')::int AS version_count
        FROM document_stack_members m_primary
+       INNER JOIN document_duplicate_stacks s ON s.id = m_primary.stack_id
        JOIN document_stack_members m ON m.stack_id = m_primary.stack_id
-       WHERE m_primary.user_id = $1
+       WHERE s.user_id = $1
          AND m_primary.role = 'primary'
          AND m_primary.document_id = ANY($2::uuid[])
        GROUP BY m_primary.document_id, m.stack_id`,
@@ -137,13 +141,15 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
     }
 
     await this.pool.query(
-      `UPDATE document_stack_members SET role = 'version'
-       WHERE stack_id = $1 AND user_id = $2 AND role = 'primary'`,
+      `UPDATE document_stack_members m SET role = 'version'
+       FROM document_duplicate_stacks s
+       WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1 AND m.role = 'primary'`,
       [stackId, userId]
     );
     await this.pool.query(
-      `UPDATE document_stack_members SET role = 'primary'
-       WHERE stack_id = $1 AND user_id = $2 AND document_id = $3`,
+      `UPDATE document_stack_members m SET role = 'primary'
+       FROM document_duplicate_stacks s
+       WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1 AND m.document_id = $3`,
       [stackId, userId, documentId]
     );
     await this.pool.query(
@@ -158,9 +164,10 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
 
     if (member.role === 'primary') {
       const versions = await this.pool.query(
-        `SELECT document_id FROM document_stack_members
-         WHERE stack_id = $1 AND user_id = $2 AND role = 'version'
-         ORDER BY joined_at ASC LIMIT 1`,
+        `SELECT m.document_id FROM document_stack_members m
+         INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
+         WHERE m.stack_id = $1 AND s.user_id = $2 AND m.role = 'version'
+         ORDER BY m.joined_at ASC LIMIT 1`,
         [member.stackId, userId]
       );
       const nextPrimary = versions.rows[0]
@@ -168,14 +175,17 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
         : null;
 
       await this.pool.query(
-        `DELETE FROM document_stack_members WHERE document_id = $1 AND user_id = $2`,
+        `DELETE FROM document_stack_members m
+         USING document_duplicate_stacks s
+         WHERE m.document_id = $1 AND m.stack_id = s.id AND s.user_id = $2`,
         [documentId, userId]
       );
 
       if (nextPrimary) {
         await this.pool.query(
-          `UPDATE document_stack_members SET role = 'primary'
-           WHERE stack_id = $1 AND user_id = $2 AND document_id = $3`,
+          `UPDATE document_stack_members m SET role = 'primary'
+           FROM document_duplicate_stacks s
+           WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1 AND m.document_id = $3`,
           [member.stackId, userId, nextPrimary]
         );
       } else {
@@ -188,7 +198,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
     }
 
     await this.pool.query(
-      `DELETE FROM document_stack_members WHERE document_id = $1 AND user_id = $2`,
+      `DELETE FROM document_stack_members m
+       USING document_duplicate_stacks s
+       WHERE m.document_id = $1 AND m.stack_id = s.id AND s.user_id = $2`,
       [documentId, userId]
     );
     await this.dissolveStackIfOnlyPrimary(member.stackId, userId);
@@ -211,7 +223,8 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
           (c.document_id = a.document_id AND c.candidate_document_id = b.document_id)
           OR (c.document_id = b.document_id AND c.candidate_document_id = a.document_id)
         )
-       WHERE a.stack_id = $2 AND a.user_id = $1
+       INNER JOIN document_duplicate_stacks s ON s.id = a.stack_id
+       WHERE a.stack_id = $2 AND s.user_id = $1
        LIMIT 1`,
       [userId, stackId]
     );
@@ -261,8 +274,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
 
     if (role === 'primary') {
       const hasPrimary = await this.pool.query(
-        `SELECT 1 FROM document_stack_members
-         WHERE stack_id = $1 AND user_id = $2 AND role = 'primary'`,
+        `SELECT 1 FROM document_stack_members m
+         INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
+         WHERE m.stack_id = $1 AND s.user_id = $2 AND m.role = 'primary'`,
         [stackId, userId]
       );
       if (hasPrimary.rows.length > 0) {
@@ -271,10 +285,12 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
     }
 
     await this.pool.query(
-      `INSERT INTO document_stack_members (stack_id, document_id, user_id, role)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO document_stack_members (stack_id, document_id, role)
+       SELECT $1, $2, $3
+       FROM document_duplicate_stacks s
+       WHERE s.id = $1 AND s.user_id = $4
        ON CONFLICT (document_id) DO NOTHING`,
-      [stackId, documentId, userId, role]
+      [stackId, documentId, role, userId]
     );
     await this.pool.query(
       `UPDATE document_duplicate_stacks SET updated_at = now() WHERE id = $1`,
@@ -297,25 +313,29 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
     }
 
     await this.pool.query(
-      `UPDATE document_stack_members SET role = 'version'
-       WHERE stack_id = $1 AND user_id = $2 AND role = 'primary'`,
+      `UPDATE document_stack_members m SET role = 'version'
+       FROM document_duplicate_stacks s
+       WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1 AND m.role = 'primary'`,
       [keepStackId, userId]
     );
     await this.pool.query(
-      `UPDATE document_stack_members SET role = 'version'
-       WHERE stack_id = $1 AND user_id = $2`,
+      `UPDATE document_stack_members m SET role = 'version'
+       FROM document_duplicate_stacks s
+       WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1`,
       [dropStackId, userId]
     );
 
     await this.pool.query(
-      `UPDATE document_stack_members SET stack_id = $1
-       WHERE stack_id = $2 AND user_id = $3`,
+      `UPDATE document_stack_members m SET stack_id = $1
+       FROM document_duplicate_stacks s
+       WHERE m.stack_id = s.id AND s.user_id = $3 AND m.stack_id = $2`,
       [keepStackId, dropStackId, userId]
     );
 
     await this.pool.query(
-      `UPDATE document_stack_members SET role = 'primary'
-       WHERE stack_id = $1 AND user_id = $2 AND document_id = $3`,
+      `UPDATE document_stack_members m SET role = 'primary'
+       FROM document_duplicate_stacks s
+       WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1 AND m.document_id = $3`,
       [keepStackId, userId, keepPrimaryId]
     );
 
@@ -327,8 +347,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
 
   private async findPrimaryId(stackId: string, userId: string): Promise<string | null> {
     const result = await this.pool.query(
-      `SELECT document_id FROM document_stack_members
-       WHERE stack_id = $1 AND user_id = $2 AND role = 'primary'`,
+      `SELECT m.document_id FROM document_stack_members m
+       INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
+       WHERE m.stack_id = $1 AND s.user_id = $2 AND m.role = 'primary'`,
       [stackId, userId]
     );
     return result.rows[0] ? String(result.rows[0]['document_id']) : null;
@@ -339,15 +360,18 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
       `SELECT
          COUNT(*)::int AS total,
          COUNT(*) FILTER (WHERE role = 'version')::int AS version_count
-       FROM document_stack_members
-       WHERE stack_id = $1 AND user_id = $2`,
+       FROM document_stack_members m
+       INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
+       WHERE m.stack_id = $1 AND s.user_id = $2`,
       [stackId, userId]
     );
     const total = Number(result.rows[0]?.['total'] ?? 0);
     const versionCount = Number(result.rows[0]?.['version_count'] ?? 0);
     if (total === 1 && versionCount === 0) {
       await this.pool.query(
-        `DELETE FROM document_stack_members WHERE stack_id = $1 AND user_id = $2`,
+        `DELETE FROM document_stack_members m
+         USING document_duplicate_stacks s
+         WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1`,
         [stackId, userId]
       );
       await this.pool.query(
@@ -359,7 +383,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
 
   private async cleanupEmptyStack(stackId: string, userId: string): Promise<void> {
     const result = await this.pool.query(
-      `SELECT 1 FROM document_stack_members WHERE stack_id = $1 AND user_id = $2 LIMIT 1`,
+      `SELECT 1 FROM document_stack_members m
+       INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
+       WHERE m.stack_id = $1 AND s.user_id = $2 LIMIT 1`,
       [stackId, userId]
     );
     if (result.rows.length === 0) {

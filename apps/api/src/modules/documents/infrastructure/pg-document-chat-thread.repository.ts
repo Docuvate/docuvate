@@ -120,9 +120,9 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
       const threadId = String(threadRow['id']);
       for (const documentId of documentIds) {
         await client.query(
-          `INSERT INTO chat_thread_documents (thread_id, document_id, user_id)
-           VALUES ($1, $2, $3)`,
-          [threadId, documentId, userId]
+          `INSERT INTO chat_thread_documents (thread_id, document_id)
+           VALUES ($1, $2)`,
+          [threadId, documentId]
         );
       }
       await client.query('COMMIT');

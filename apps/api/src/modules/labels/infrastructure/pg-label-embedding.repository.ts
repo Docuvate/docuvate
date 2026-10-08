@@ -38,11 +38,11 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
     embedding: number[]
   ): Promise<void> {
     await this.pool.query(
-      `INSERT INTO document_embeddings (document_id, user_id, model, embedding, updated_at)
-       VALUES ($1, $2, $3, $4::jsonb, now())
+      `INSERT INTO document_embeddings (document_id, model, embedding, updated_at)
+       VALUES ($1, $2, $3::jsonb, now())
        ON CONFLICT (document_id) DO UPDATE
-       SET model = $3, embedding = $4::jsonb, updated_at = now()`,
-      [documentId, userId, model, JSON.stringify(embedding)]
+       SET model = $2, embedding = $3::jsonb, updated_at = now()`,
+      [documentId, model, JSON.stringify(embedding)]
     );
   }
 
@@ -86,7 +86,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        INNER JOIN documents d ON d.id = de.document_id
        LEFT JOIN document_tags dt ON dt.document_id = de.document_id
        LEFT JOIN tags t ON t.id = dt.tag_id
-       WHERE de.user_id = $1
+       WHERE d.user_id = $1
          AND d.status = 'ready'
          AND NOT EXISTS (
            SELECT 1 FROM document_stack_members m
@@ -239,9 +239,10 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
       `SELECT de.document_id, de.embedding,
               COALESCE(array_agg(dt.tag_id) FILTER (WHERE t.is_inbox = false), '{}') AS tag_ids
        FROM document_embeddings de
+       INNER JOIN documents d ON d.id = de.document_id
        INNER JOIN document_tags dt ON dt.document_id = de.document_id
        INNER JOIN tags t ON t.id = dt.tag_id
-       WHERE de.user_id = $1
+       WHERE d.user_id = $1
          AND de.document_id <> $2
        GROUP BY de.document_id, de.embedding
        HAVING bool_or(t.is_inbox = false)`,
@@ -258,7 +259,10 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
 
   async getTagCentroids(userId: string): Promise<TagCentroidRecord[]> {
     const result = await this.pool.query(
-      `SELECT tag_id, sample_count, centroid FROM tag_embedding_centroids WHERE user_id = $1`,
+      `SELECT tec.tag_id, tec.sample_count, tec.centroid
+       FROM tag_embedding_centroids tec
+       INNER JOIN tags t ON t.id = tec.tag_id
+       WHERE t.user_id = $1`,
       [userId]
     );
     return result.rows.map((row) => ({
@@ -270,19 +274,20 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
 
   async saveTagCentroid(
     tagId: string,
-    userId: string,
+    _userId: string,
     model: string,
     sampleCount: number,
     centroid: number[]
   ): Promise<void> {
     await this.pool.query(
-      `INSERT INTO tag_embedding_centroids (tag_id, user_id, model, sample_count, centroid, updated_at)
-       VALUES ($1, $2, $3, $4, $5::jsonb, now())
+      `INSERT INTO tag_embedding_centroids (tag_id, model, sample_count, centroid, updated_at)
+       VALUES ($1, $2, $3, $4::jsonb, now())
        ON CONFLICT (tag_id) DO UPDATE
-       SET sample_count = $4, centroid = $5::jsonb, model = $3, updated_at = now()`,
-      [tagId, userId, model, sampleCount, JSON.stringify(centroid)]
+       SET sample_count = $3, centroid = $4::jsonb, model = $2, updated_at = now()`,
+      [tagId, model, sampleCount, JSON.stringify(centroid)]
     );
   }
+
 
   async recordFeedback(
     userId: string,

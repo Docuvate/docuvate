@@ -8,7 +8,7 @@ Accepted.
 
 - Compose targets `postgres:18.6-alpine`. **pg_trgm** and **unaccent** ship as contrib extensions. **No pgvector** in the default Alpine image.
 - Document embeddings live in **`document_embeddings.embedding` (JSONB)** with FK to `documents`.
-- Extracted field *values* are indexed in **`document_field_values`** (FK `documents`, `"user"`), derived from the document's extraction result. A versioned migration builds the index for documents that already exist. **No duplicate table.**
+- Extracted field *values* live in **`document_field_values`** (FK `documents`), the single source of truth for a document's fields (ADR 015). Its search columns (`value_text_norm`, `value_numeric`, `value_date`) are derived from the raw value and the field definition type. **No duplicate table.**
 - DDL and index changes are delivered as TypeORM migrations with `up`/`down`.
 
 ## Decision
@@ -23,7 +23,7 @@ Accepted.
    - **Text:** same normalization + trgm as titles (e.g. typo `Nordwnd` → Absender **Nordwind**).
    - **Amounts / dates:** normalize both sides (`12,50` / `12.50` / `EUR 12.50`; `15.03.2024` / `2024-03-15` / localized dates) then **exact** match on `value_numeric` / `value_date` (no edit distance on numbers).
    - **Field filters:** `absender:nordwind`, `betrag:12,50`; the field name fuzzy-matched against catalog keys/labels; palette may suggest field keys while typing.
-   - **Writes:** `document_field_values` updated only from extraction / field confirmation via **`SyncDocumentFieldValuesUseCase`** (application layer). **Search is read-only** on the HTTP path. Initial data: versioned backfill migration (up/down).
+   - **Writes:** `document_field_values` is written only by the document repository (extraction result, field edits, recognized field extraction) through one writer that also fills the search columns. **Search is read-only** on the HTTP path.
 4. **Chunk index + vocabulary:** `document_text_chunks` and `search_vocabulary_terms` updated only from extraction / document update via **`SyncDocumentSearchIndexUseCase`**. **Search GET is read-only.** Existing document rows: versioned backfill migration (up/down).
 
 ## Consequences

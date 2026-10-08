@@ -129,9 +129,9 @@ async function seedData(pool, userId) {
     }
     if (status === 'ready') {
       await pool.query(
-        `INSERT INTO document_embeddings (document_id, user_id, model, embedding, updated_at)
-         VALUES ($1, $2, 'seed', $3::jsonb, now())`,
-        [id, userId, JSON.stringify(doc.embedding)]
+        `INSERT INTO document_embeddings (document_id, model, embedding, updated_at)
+         VALUES ($1, 'seed', $2::jsonb, now())`,
+        [id, JSON.stringify(doc.embedding)]
       );
     }
     return id;
@@ -170,9 +170,9 @@ async function seedData(pool, userId) {
     [stackId, userId]
   );
   await pool.query(
-    `INSERT INTO document_stack_members (stack_id, document_id, user_id, role)
-     VALUES ($1, $2, $3, 'primary'), ($1, $4, $3, 'version')`,
-    [stackId, vertragPrimary, userId, vertragOldVersion]
+    `INSERT INTO document_stack_members (stack_id, document_id, role)
+     VALUES ($1, $2, 'primary'), ($1, $3, 'version')`,
+    [stackId, vertragPrimary, vertragOldVersion]
   );
 
   const removedId = await insertDoc({
@@ -191,10 +191,10 @@ async function seedData(pool, userId) {
   ];
   for (const [tagId, centroid, sampleCount] of centroidRows) {
     await pool.query(
-      `INSERT INTO tag_embedding_centroids (tag_id, user_id, model, sample_count, centroid, updated_at)
-       VALUES ($1, $2, 'seed', $3, $4::jsonb, now())
-       ON CONFLICT (tag_id) DO UPDATE SET centroid = $4::jsonb, sample_count = $3, updated_at = now()`,
-      [tagId, userId, sampleCount, JSON.stringify(centroid)]
+      `INSERT INTO tag_embedding_centroids (tag_id, model, sample_count, centroid, updated_at)
+       VALUES ($1, 'seed', $2, $3::jsonb, now())
+       ON CONFLICT (tag_id) DO UPDATE SET centroid = $3::jsonb, sample_count = $2, updated_at = now()`,
+      [tagId, sampleCount, JSON.stringify(centroid)]
     );
   }
 

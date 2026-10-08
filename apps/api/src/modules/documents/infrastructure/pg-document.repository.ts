@@ -4,6 +4,13 @@ import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.j
 import type { DocumentRepository, DocumentUpdatePatch } from '../../../shared/domain/ports.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { NotFoundError } from '../../../shared/domain/errors.js';
+import {
+  type DocumentExtractionRows,
+  loadExtractionForDocument,
+  loadExtractionForDocuments,
+  replaceDocumentExtractionBlocks,
+  replaceDocumentExtractionFields,
+} from './document-extraction.persistence.js';
 import { mapDocumentRow, parseTagsJson } from './document-row.mapper.js';
 import { textFromExtractionBlocks } from './extraction-text.util.js';
 import type pg from 'pg';
@@ -74,7 +81,7 @@ export class PgDocumentRepository implements DocumentRepository {
       `${LIST_SELECT} WHERE d.id = $1 GROUP BY d.id, f.id, c.id`,
       [id]
     );
-    return result.rows[0] ? this.mapListRow(result.rows[0]) : null;
+    return result.rows[0] ? await this.mapListRow(result.rows[0]) : null;
   }
 
   async findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null> {
@@ -82,7 +89,7 @@ export class PgDocumentRepository implements DocumentRepository {
       `${LIST_SELECT} WHERE d.id = $1 AND d.user_id = $2 GROUP BY d.id, f.id, c.id`,
       [id, userId]
     );
-    return result.rows[0] ? this.mapListRow(result.rows[0]) : null;
+    return result.rows[0] ? await this.mapListRow(result.rows[0]) : null;
   }
 
   async listForUser(userId: string, filters: DocumentListQuery = {}): Promise<DocumentEntity[]> {
@@ -177,7 +184,13 @@ export class PgDocumentRepository implements DocumentRepository {
       ORDER BY ${orderBy} ${order} NULLS LAST`;
 
     const result = await this.pool.query(sql, params);
-    return result.rows.map((row) => this.mapListRow(row));
+    const extractions = await loadExtractionForDocuments(
+      this.pool,
+      result.rows.map((row) => String(row['id']))
+    );
+    return result.rows.map((row) =>
+      this.mapRow(row, extractions.get(String(row['id'])) ?? { fields: [], blocks: [] })
+    );
   }
 
   async updateStatus(id: string, status: DocumentStatus): Promise<void> {
@@ -188,14 +201,26 @@ export class PgDocumentRepository implements DocumentRepository {
   }
 
   async saveExtraction(id: string, result: ExtractionResult): Promise<void> {
-    const payload = {
-      fields: dedupeExtractedFields(result.fields),
-      blocks: result.blocks ?? [],
-    };
-    await this.pool.query(
-      `UPDATE documents SET extracted_text = $2, extracted_markdown = $4, extracted_fields = $3::jsonb, updated_at = now() WHERE id = $1`,
-      [id, result.text, JSON.stringify(payload), result.markdown ?? null]
-    );
+    const doc = await this.pool.query(`SELECT user_id FROM documents WHERE id = $1`, [id]);
+    const userId = doc.rows[0] ? String(doc.rows[0]['user_id']) : null;
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(
+        `UPDATE documents SET extracted_text = $2, extracted_markdown = $3, updated_at = now() WHERE id = $1`,
+        [id, result.text, result.markdown ?? null]
+      );
+      if (userId) {
+        await replaceDocumentExtractionFields(client, id, userId, result.fields);
+        await replaceDocumentExtractionBlocks(client, id, result.blocks ?? []);
+      }
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async setContentHash(id: string, hash: string): Promise<void> {
@@ -241,20 +266,11 @@ export class PgDocumentRepository implements DocumentRepository {
       fields.push(`correspondent_id = $${idx++}`);
       params.push(patch.correspondentId);
     }
-    if (patch.extractionFields !== undefined || patch.extractionBlocks !== undefined) {
-      const nextFields = dedupeExtractedFields(
-        patch.extractionFields ?? existing.extraction?.fields ?? []
-      );
-      const nextBlocks = patch.extractionBlocks ?? existing.extraction?.blocks ?? [];
-      fields.push(`extracted_fields = $${idx++}::jsonb`);
-      params.push(JSON.stringify({ fields: nextFields, blocks: nextBlocks }));
-      if (patch.extractionBlocks !== undefined) {
-        const nextText =
-          textFromExtractionBlocks(nextBlocks) || existing.extraction?.text || '';
-        fields.push(`extracted_text = $${idx++}`);
-        params.push(nextText);
-      }
-    }
+    const nextFields =
+      patch.extractionFields !== undefined
+        ? dedupeExtractedFields(patch.extractionFields)
+        : undefined;
+    const nextBlocks = patch.extractionBlocks;
 
     if (fields.length > 0) {
       fields.push('updated_at = now()');
@@ -262,6 +278,33 @@ export class PgDocumentRepository implements DocumentRepository {
         `UPDATE documents SET ${fields.join(', ')} WHERE id = $1 AND user_id = $2`,
         params
       );
+    }
+
+    if (nextFields !== undefined || nextBlocks !== undefined) {
+      const client = await this.pool.connect();
+      try {
+        await client.query('BEGIN');
+        if (nextBlocks !== undefined) {
+          const nextText =
+            textFromExtractionBlocks(nextBlocks) || existing.extraction?.text || '';
+          await client.query(
+            `UPDATE documents SET extracted_text = $3, updated_at = now() WHERE id = $1 AND user_id = $2`,
+            [id, userId, nextText]
+          );
+        }
+        if (nextFields !== undefined) {
+          await replaceDocumentExtractionFields(client, id, userId, nextFields);
+        }
+        if (nextBlocks !== undefined) {
+          await replaceDocumentExtractionBlocks(client, id, nextBlocks);
+        }
+        await client.query('COMMIT');
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
+      }
     }
 
     if (patch.tagIds !== undefined) {
@@ -360,14 +403,17 @@ export class PgDocumentRepository implements DocumentRepository {
     return docs;
   }
 
-  private mapListRow(row: Record<string, unknown>): DocumentEntity {
+  private async mapListRow(row: Record<string, unknown>): Promise<DocumentEntity> {
+    return this.mapRow(row, await loadExtractionForDocument(this.pool, String(row['id'])));
+  }
+
+  private mapRow(row: Record<string, unknown>, extraction: DocumentExtractionRows): DocumentEntity {
     const tags = parseTagsJson(row['tags_json']);
-
     const corrId = row['corr_id'];
-
     return mapDocumentRow(row, {
       tags,
       correspondent: corrId ? { id: String(corrId), name: String(row['corr_name']) } : null,
+      extraction,
     });
   }
 }

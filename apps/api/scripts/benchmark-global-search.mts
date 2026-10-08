@@ -6,14 +6,13 @@
 import pg from 'pg';
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-const apiRoot = dirname(fileURLToPath(import.meta.url)) + '/..';
 import { PgGlobalSearchRepository } from '../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { splitTextChunks } from '../src/modules/search/domain/split-text-chunks.js';
+import { runDatabaseMigrations } from '../src/shared/infrastructure/database/run-database-migrations.js';
 
 const DATABASE_URL =
   process.env['DATABASE_URL'] ?? 'postgresql://docuvate:docuvate@127.0.0.1:5434/docuvate';
@@ -33,12 +32,9 @@ function fakeVector(seed: number, dim = 384): number[] {
   return v.map((x) => x / n);
 }
 
-async function migrate(pool: pg.Pool): Promise<void> {
-  const migratePath = join(apiRoot, 'src/shared/infrastructure/database/migrate.ts');
-  const source = readFileSync(migratePath, 'utf8');
-  const match = /MIGRATION_SQL = `([\s\S]*?)`;/u.exec(source);
-  if (!match) throw new Error('migration sql missing');
-  await pool.query(match[1]!);
+async function migrate(): Promise<void> {
+  process.env['DATABASE_URL'] = DATABASE_URL;
+  await runDatabaseMigrations();
 }
 
 async function seed(pool: pg.Pool, repo: PgGlobalSearchRepository): Promise<void> {
@@ -47,10 +43,9 @@ async function seed(pool: pg.Pool, repo: PgGlobalSearchRepository): Promise<void
      VALUES ($1, 'Bench', 'bench@local', true, now(), now()) ON CONFLICT DO NOTHING`,
     [USER]
   );
+  // Embeddings, chunks and field values cascade from documents.
   await pool.query('DELETE FROM documents WHERE user_id = $1', [USER]);
-  await pool.query('DELETE FROM document_embeddings WHERE user_id = $1', [USER]);
   await pool.query('DELETE FROM search_vocabulary_terms WHERE user_id = $1', [USER]);
-  await pool.query('DELETE FROM document_field_values WHERE user_id = $1', [USER]);
 
   for (let i = 0; i < DOC_COUNT; i += 1) {
     const id = randomUUID();
@@ -64,26 +59,23 @@ async function seed(pool: pg.Pool, repo: PgGlobalSearchRepository): Promise<void
     const chunks = splitTextChunks(text).slice(0, CHUNKS_PER_DOC);
     for (let c = 0; c < chunks.length; c += 1) {
       await pool.query(
-        `INSERT INTO document_text_chunks (document_id, user_id, chunk_index, body, updated_at)
-         VALUES ($1,$2,$3,$4, now())`,
-        [id, USER, c, chunks[c]]
+        `INSERT INTO document_text_chunks (document_id, chunk_index, body, updated_at)
+         VALUES ($1,$2,$3, now())`,
+        [id, c, chunks[c]]
       );
     }
     await pool.query(
-      `INSERT INTO document_embeddings (document_id, user_id, model, embedding, updated_at)
-       VALUES ($1,$2,'bench', $3::jsonb, now())`,
-      [id, USER, JSON.stringify(fakeVector(i))]
+      `INSERT INTO document_embeddings (document_id, model, embedding, updated_at)
+       VALUES ($1,'bench', $2::jsonb, now())`,
+      [id, JSON.stringify(fakeVector(i))]
     );
     for (let f = 0; f < FIELD_COUNT; f += 1) {
-      const label = `Field ${f}`;
       const storageKey = `global:bench_field_${f}`;
       const value = f === 0 ? `Vendor Nordwind ${i}` : `neutral value ${i}-${f}`;
       await pool.query(
-        `INSERT INTO document_field_values (
-           document_id, user_id, field_storage_key, field_label, field_type,
-           value_text, value_text_norm, updated_at
-         ) VALUES ($1,$2,$3,$4,'text',$5,$6, now())`,
-        [id, USER, storageKey, label, value, value.toLowerCase()]
+        `INSERT INTO document_field_values (document_id, field_storage_key, value_text, value_text_norm)
+         VALUES ($1,$2,$3,$4)`,
+        [id, storageKey, value, value.toLowerCase()]
       );
     }
   }
@@ -109,13 +101,15 @@ async function measure(
 async function main(): Promise<void> {
   const pool = new pg.Pool({ connectionString: DATABASE_URL });
   const repo = new PgGlobalSearchRepository(pool);
-  await migrate(pool);
+  await migrate();
   if (process.env['BENCH_SKIP_SEED'] !== '1') {
     console.log('Seeding…');
     await seed(pool, repo);
   }
   const chunkCount = await pool.query(
-    `SELECT count(*)::int AS n FROM document_text_chunks WHERE user_id = $1`,
+    `SELECT count(*)::int AS n
+     FROM document_text_chunks c JOIN documents d ON d.id = c.document_id
+     WHERE d.user_id = $1`,
     [USER]
   );
   console.log(JSON.stringify({ documents: DOC_COUNT, chunks: chunkCount.rows[0]?.n }));
@@ -174,11 +168,11 @@ async function main(): Promise<void> {
 
   const fieldExplain = await pool.query(
     `EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
-     SELECT v.document_id, v.field_label, v.value_text,
+     SELECT v.document_id, v.field_storage_key, v.value_text,
             GREATEST(word_similarity($2::text, v.value_text_norm), word_similarity($2::text, v.value_text)) AS score
      FROM document_field_values v
-     WHERE v.user_id = $1
-       AND v.field_type = 'text'
+     JOIN documents fd ON fd.id = v.document_id
+     WHERE fd.user_id = $1
        AND v.value_text_norm IS NOT NULL
        AND ($2::text <% v.value_text_norm OR v.value_text_norm %> $2::text)
      ORDER BY score DESC

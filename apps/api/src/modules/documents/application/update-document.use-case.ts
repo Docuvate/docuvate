@@ -14,7 +14,6 @@ import { mergeDocumentPlacementPatch } from '../domain/document-placement.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
 import { RecordExtractionFieldCorrectionsUseCase } from '../../extraction-feedback/application/record-extraction-field-corrections.use-case.js';
-import { SyncDocumentFieldValuesUseCase } from '../../search/application/sync-document-field-values.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 
 export interface UpdateDocumentResult {
@@ -30,7 +29,6 @@ export class UpdateDocumentUseCase {
     @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
     @Inject(MAPPE_REPOSITORY) private readonly mappen: MappeRepository,
     private readonly recordFieldCorrections: RecordExtractionFieldCorrectionsUseCase,
-    private readonly syncFieldValues: SyncDocumentFieldValuesUseCase,
     private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
   ) {}
 
@@ -102,10 +100,6 @@ export class UpdateDocumentUseCase {
       extractionFields: body.extractionFields,
       extractionBlocks: body.extractionBlocks,
     });
-
-    if (body.extractionFields !== undefined) {
-      await this.syncFieldValues.execute(userId, id, document.extraction?.fields ?? []);
-    }
 
     const searchMetaTouched =
       body.title !== undefined ||

@@ -197,10 +197,23 @@ export class PgDuplicateRepository implements DuplicateRepository {
   > {
     const result = await this.pool.query(
       `SELECT e.document_id, e.embedding,
-              d.filename, d.title, d.document_date, d.extracted_text, d.extracted_fields
+              d.filename, d.title, d.document_date, d.extracted_text,
+              (
+                SELECT jsonb_build_object(
+                  'blocks',
+                  COALESCE(
+                    (
+                      SELECT jsonb_agg(jsonb_build_object('page', b.page) ORDER BY b.page)
+                      FROM document_extraction_blocks b
+                      WHERE b.document_id = d.id
+                    ),
+                    '[]'::jsonb
+                  )
+                )
+              ) AS extraction_payload
        FROM document_embeddings e
-       JOIN documents d ON d.id = e.document_id AND d.user_id = e.user_id
-       WHERE e.user_id = $1 AND e.document_id <> $2`,
+       JOIN documents d ON d.id = e.document_id
+       WHERE d.user_id = $1 AND e.document_id <> $2`,
       [userId, excludeDocumentId]
     );
     return result.rows
@@ -216,7 +229,7 @@ export class PgDuplicateRepository implements DuplicateRepository {
               ? new Date(String(documentDateRaw))
               : null,
           extractedText: (row['extracted_text'] as string | null) ?? null,
-          extractedFields: row['extracted_fields'],
+          extractedFields: row['extraction_payload'],
         };
       })
       .filter((row) => row.embedding.length > 0);

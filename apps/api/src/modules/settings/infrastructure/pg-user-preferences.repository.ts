@@ -7,10 +7,10 @@ import type {
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 function parseRequiredLabelIds(raw: unknown): string[] {
-  if (!Array.isArray(raw)) {
-    return [];
+  if (Array.isArray(raw)) {
+    return raw.filter((id): id is string => typeof id === 'string' && id.length > 0);
   }
-  return raw.map((id) => String(id)).filter((id) => id.length > 0);
+  return [];
 }
 
 function mapRow(row: Record<string, unknown>): UserPreferencesEntity {
@@ -34,7 +34,7 @@ function mapRow(row: Record<string, unknown>): UserPreferencesEntity {
       row['field_extraction_confidence_gate_enabled'] != null
         ? Boolean(row['field_extraction_confidence_gate_enabled'])
         : true,
-    fieldExtractionRequiredLabelIds: parseRequiredLabelIds(row['field_extraction_required_label_ids']),
+    fieldExtractionRequiredLabelIds: parseRequiredLabelIds(row['required_label_ids']),
     advancedFeaturesEnabled:
       row['advanced_features_enabled'] != null
         ? Boolean(row['advanced_features_enabled'])
@@ -66,15 +66,42 @@ const DEFAULTS: Omit<UserPreferencesEntity, 'userId'> = {
   updatedAt: new Date(0),
 };
 
+const SELECT_PREFERENCES_SQL = `
+  SELECT up.*,
+    COALESCE(
+      (
+        SELECT array_agg(upl.tag_id::text ORDER BY upl.tag_id)
+        FROM user_preference_required_labels upl
+        WHERE upl.user_id = up.user_id
+      ),
+      ARRAY[]::text[]
+    ) AS required_label_ids
+  FROM user_preferences up
+  WHERE up.user_id = $1
+`;
+
+async function syncRequiredLabels(
+  client: pg.PoolClient,
+  userId: string,
+  tagIds: string[]
+): Promise<void> {
+  await client.query(`DELETE FROM user_preference_required_labels WHERE user_id = $1`, [userId]);
+  if (tagIds.length === 0) return;
+  await client.query(
+    `INSERT INTO user_preference_required_labels (user_id, tag_id)
+     SELECT $1, t.id FROM tags t
+     WHERE t.user_id = $1 AND t.id::text = ANY($2::text[])
+     ON CONFLICT DO NOTHING`,
+    [userId, tagIds]
+  );
+}
+
 @Injectable()
 export class PgUserPreferencesRepository implements UserPreferencesRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
   async getForUser(userId: string): Promise<UserPreferencesEntity> {
-    const result = await this.pool.query(
-      `SELECT * FROM user_preferences WHERE user_id = $1`,
-      [userId]
-    );
+    const result = await this.pool.query(SELECT_PREFERENCES_SQL, [userId]);
     if (result.rows.length === 0) {
       return { userId, ...DEFAULTS };
     }
@@ -126,47 +153,55 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
       locale: patch.locale !== undefined ? patch.locale : existing.locale,
     };
 
-    await this.pool.query(
-      `INSERT INTO user_preferences (
-         user_id, preferred_extractor_engine, preferred_chat_provider,
-         use_arena_winner_as_default, arena_winner_engine,
-         label_field_confidence_threshold,
-         label_near_similarity_threshold,
-         field_extraction_confidence_gate_enabled,
-         field_extraction_required_label_ids,
-         advanced_features_enabled,
-         theme_preference,
-         locale,
-         updated_at
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb, $10, $11, $12, now())
-       ON CONFLICT (user_id) DO UPDATE SET
-         preferred_extractor_engine = EXCLUDED.preferred_extractor_engine,
-         preferred_chat_provider = EXCLUDED.preferred_chat_provider,
-         use_arena_winner_as_default = EXCLUDED.use_arena_winner_as_default,
-         arena_winner_engine = EXCLUDED.arena_winner_engine,
-         label_field_confidence_threshold = EXCLUDED.label_field_confidence_threshold,
-         label_near_similarity_threshold = EXCLUDED.label_near_similarity_threshold,
-         field_extraction_confidence_gate_enabled = EXCLUDED.field_extraction_confidence_gate_enabled,
-         field_extraction_required_label_ids = EXCLUDED.field_extraction_required_label_ids,
-         advanced_features_enabled = EXCLUDED.advanced_features_enabled,
-         theme_preference = EXCLUDED.theme_preference,
-         locale = EXCLUDED.locale,
-         updated_at = now()`,
-      [
-        userId,
-        next.preferredExtractorEngine,
-        next.preferredChatProvider,
-        next.useArenaWinnerAsDefault,
-        next.arenaWinnerEngine,
-        next.labelFieldConfidenceThreshold,
-        next.labelNearSimilarityThreshold,
-        next.fieldExtractionConfidenceGateEnabled,
-        JSON.stringify(next.fieldExtractionRequiredLabelIds),
-        next.advancedFeaturesEnabled,
-        next.themePreference,
-        next.locale,
-      ]
-    );
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(
+        `INSERT INTO user_preferences (
+           user_id, preferred_extractor_engine, preferred_chat_provider,
+           use_arena_winner_as_default, arena_winner_engine,
+           label_field_confidence_threshold,
+           label_near_similarity_threshold,
+           field_extraction_confidence_gate_enabled,
+           advanced_features_enabled,
+           theme_preference,
+           locale,
+           updated_at
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now())
+         ON CONFLICT (user_id) DO UPDATE SET
+           preferred_extractor_engine = EXCLUDED.preferred_extractor_engine,
+           preferred_chat_provider = EXCLUDED.preferred_chat_provider,
+           use_arena_winner_as_default = EXCLUDED.use_arena_winner_as_default,
+           arena_winner_engine = EXCLUDED.arena_winner_engine,
+           label_field_confidence_threshold = EXCLUDED.label_field_confidence_threshold,
+           label_near_similarity_threshold = EXCLUDED.label_near_similarity_threshold,
+           field_extraction_confidence_gate_enabled = EXCLUDED.field_extraction_confidence_gate_enabled,
+           advanced_features_enabled = EXCLUDED.advanced_features_enabled,
+           theme_preference = EXCLUDED.theme_preference,
+           locale = EXCLUDED.locale,
+           updated_at = now()`,
+        [
+          userId,
+          next.preferredExtractorEngine,
+          next.preferredChatProvider,
+          next.useArenaWinnerAsDefault,
+          next.arenaWinnerEngine,
+          next.labelFieldConfidenceThreshold,
+          next.labelNearSimilarityThreshold,
+          next.fieldExtractionConfidenceGateEnabled,
+          next.advancedFeaturesEnabled,
+          next.themePreference,
+          next.locale,
+        ]
+      );
+      await syncRequiredLabels(client, userId, next.fieldExtractionRequiredLabelIds);
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
     return this.getForUser(userId);
   }
 
@@ -179,19 +214,47 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
     source?: 'manual' | 'sample';
     compareSnapshot?: Record<string, unknown> | null;
   }): Promise<void> {
-    await this.pool.query(
-      `INSERT INTO extraction_arena_ratings (
-         user_id, document_id, winner_engine, compared_engines, rating, source, compare_snapshot
-       ) VALUES ($1, $2, $3, $4::jsonb, $5, $6, $7::jsonb)`,
-      [
-        input.userId,
-        input.documentId,
-        input.winnerEngine,
-        JSON.stringify(input.comparedEngines),
-        input.rating ?? null,
-        input.source ?? 'manual',
-        input.compareSnapshot != null ? JSON.stringify(input.compareSnapshot) : null,
-      ]
-    );
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const inserted = await client.query<{ id: string }>(
+        `INSERT INTO extraction_arena_ratings (
+           user_id, document_id, winner_engine, rating, source, compare_snapshot
+         ) VALUES ($1, $2, $3, $4, $5, $6::jsonb)
+         RETURNING id`,
+        [
+          input.userId,
+          input.documentId,
+          input.winnerEngine,
+          input.rating ?? null,
+          input.source ?? 'manual',
+          input.compareSnapshot != null ? JSON.stringify(input.compareSnapshot) : null,
+        ]
+      );
+      const ratingId = inserted.rows[0]?.id;
+      if (!ratingId) {
+        throw new Error('extraction_arena_ratings insert missing id');
+      }
+      let sortOrder = 0;
+      for (const engine of input.comparedEngines) {
+        const name = engine.trim();
+        if (!name) {
+          continue;
+        }
+        await client.query(
+          `INSERT INTO extraction_arena_rating_compared_engines (rating_id, engine_name, sort_order)
+           VALUES ($1, $2, $3)
+           ON CONFLICT DO NOTHING`,
+          [ratingId, name, sortOrder]
+        );
+        sortOrder += 1;
+      }
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 }
