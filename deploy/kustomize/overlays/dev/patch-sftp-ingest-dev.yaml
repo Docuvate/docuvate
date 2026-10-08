@@ -19,17 +19,6 @@ metadata:
   name: docuvate-sftp-ingest
 spec:
   ingress:
-    - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: docuvate-api
-      ports:
-        - port: 8080
-          protocol: TCP
-    # Kubelet HTTP probes and dev port-forwards hit :8080 from outside pod selectors.
-    - ports:
-        - port: 8080
-          protocol: TCP
     - ports:
         - port: 2222
           protocol: TCP

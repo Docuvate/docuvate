@@ -96,6 +96,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.secrets.existingSecret }}
                   key: DOCUVATE_SFTP_INGEST_SERVICE_KEY
+            - name: DOCUVATE_SERVICE_API_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.existingSecret }}
+                  key: DOCUVATE_SERVICE_API_KEYS
+                  optional: true
             {{- end }}
           startupProbe:
             httpGet:

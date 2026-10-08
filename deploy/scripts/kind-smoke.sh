@@ -89,8 +89,6 @@ flatten_push() {
 build_app_images() {
   export DOCKER_BUILDKIT=1
   export BUILDX_NO_DEFAULT_ATTESTATIONS=1
-  # shellcheck source=../../scripts/ci/compose-local-image-names.sh
-  source "$ROOT/scripts/ci/compose-local-image-names.sh"
   run_docker compose -p docuvate -f docker-compose.yml build api web worker sftp-ingest
   flatten_push docuvate-api "docuvate-api:smoke"
   flatten_push docuvate-web "docuvate-web:smoke"
@@ -260,7 +258,8 @@ kubectl -n docuvate create secret generic docuvate-secrets \
   --from-literal=MINIO_SECRET_KEY=docuvate-secret \
   --from-literal=WORKER_SECRET=worker-shared-secret \
   --from-literal=DOCUVATE_CONNECTOR_SECRETS_KEY=local-dev-connector-secrets-key!! \
-  --from-literal=DOCUVATE_SFTP_INGEST_SERVICE_KEY="${SFTP_INGEST_SERVICE_KEY:-$(openssl rand -base64 32 | tr -d '/+=' | head -c 43)}" \
+  --from-literal=DOCUVATE_SFTP_INGEST_SERVICE_KEY=local-sftp-ingest-service-key \
+  --from-literal='DOCUVATE_SERVICE_API_KEYS=[{"keyId":"sftp-ingest","secret":"local-sftp-ingest-service-key","tenantUserId":"local-dev-owner","roles":["integrator"],"claims":["sftp_ingress:service"]}]' \
   --dry-run=client -o yaml | kubectl apply -f -
 
 MANIFEST="$ART/kind-smoke-kustomize.yaml"
@@ -285,7 +284,8 @@ kubectl -n docuvate create secret generic docuvate-secrets \
   --from-literal=MINIO_SECRET_KEY=docuvate-secret \
   --from-literal=WORKER_SECRET=worker-shared-secret \
   --from-literal=DOCUVATE_CONNECTOR_SECRETS_KEY=local-dev-connector-secrets-key!! \
-  --from-literal=DOCUVATE_SFTP_INGEST_SERVICE_KEY="${SFTP_INGEST_SERVICE_KEY:-$(openssl rand -base64 32 | tr -d '/+=' | head -c 43)}"
+  --from-literal=DOCUVATE_SFTP_INGEST_SERVICE_KEY=local-sftp-ingest-service-key \
+  --from-literal='DOCUVATE_SERVICE_API_KEYS=[{"keyId":"sftp-ingest","secret":"local-sftp-ingest-service-key","tenantUserId":"local-dev-owner","roles":["integrator"],"claims":["sftp_ingress:service"]}]'
 
 if ! helm upgrade --install docuvate "$ROOT/deploy/helm/docuvate" \
   -f "$ROOT/deploy/helm/docuvate/values-dev.yaml" \
