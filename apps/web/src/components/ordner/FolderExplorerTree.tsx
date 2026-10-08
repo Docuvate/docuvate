@@ -35,6 +35,7 @@ import {
 import type { ContextMenuEntry } from '../ui/ContextMenu';
 import { ContextMenu } from '../ui/ContextMenu';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
+import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
 import { DateisystemTreeRow, TREE_ICON } from './DateisystemTreeRow';
 
@@ -242,15 +243,14 @@ export function FolderExplorerTree({
             aria-label={t('filesystem.treeSearchAria')}
           />
         </div>
-        <button
-          type="button"
+        <IconButton
+          icon={Plus}
+          label={t('filesystem.newRootButton')}
+          size="md"
+          strokeWidth={2}
           className="dateisystem-tree-head-add"
-          aria-label={t('filesystem.newRootButton')}
-          title={t('filesystem.newRootButton')}
           onClick={() => setRootCreateOpen((v) => !v)}
-        >
-          <Plus size={18} strokeWidth={2} aria-hidden />
-        </button>
+        />
       </div>
 
       {rootCreateOpen ? (
@@ -346,15 +346,15 @@ export function FolderExplorerTree({
                           onCreateChildFolder({ mappeId: mappe.id, parentId: null, name })
                         }
                       />
-                      <button
-                        type="button"
-                        className="sidebar-icon-btn sidebar-row-action dateisystem-tree-menu-btn"
-                        aria-label={t('filesystem.contextMenuAria', { name: mappe.name })}
-                        title={t('filesystem.contextMenuAria', { name: mappe.name })}
+                      <IconButton
+                        icon={MoreHorizontal}
+                        label={t('filesystem.contextMenuAria', { name: mappe.name })}
+                        size="md"
+                        strokeWidth={2}
+                        className="sidebar-row-action dateisystem-tree-menu-btn"
                         onClick={(e) => openMappeMenu(e, mappe)}
-                      >
-                        <MoreHorizontal size={14} strokeWidth={2} aria-hidden />
-                      </button>
+                        hasPopup="menu"
+                      />
                     </>
                   }
                 />
@@ -555,15 +555,15 @@ function FolderTreeNode({
                 onCreateChildFolder({ mappeId: folder.mappeId!, parentId: folder.id, name })
               }
             />
-            <button
-              type="button"
-              className="sidebar-icon-btn sidebar-row-action dateisystem-tree-menu-btn"
-              aria-label={t('filesystem.contextMenuAria', { name: folder.name })}
-              title={t('filesystem.contextMenuAria', { name: folder.name })}
+            <IconButton
+              icon={MoreHorizontal}
+              label={t('filesystem.contextMenuAria', { name: folder.name })}
+              size="md"
+              strokeWidth={2}
+              className="sidebar-row-action dateisystem-tree-menu-btn"
               onClick={(e) => onOpenMenu(e, folder)}
-            >
-              <MoreHorizontal size={14} strokeWidth={2} aria-hidden />
-            </button>
+              hasPopup="menu"
+            />
           </>
         }
       />
@@ -634,15 +634,15 @@ function LooseFolderRow({
         chevron={<span className="dateisystem-tree-chevron-spacer" aria-hidden />}
         icon={<Folder size={TREE_ICON} strokeWidth={TREE_ICON_STROKE} aria-hidden />}
         actions={
-          <button
-            type="button"
-            className="sidebar-icon-btn sidebar-row-action dateisystem-tree-menu-btn"
-            aria-label={t('filesystem.contextMenuAria', { name: folder.name })}
-            title={t('filesystem.contextMenuAria', { name: folder.name })}
+          <IconButton
+            icon={MoreHorizontal}
+            label={t('filesystem.contextMenuAria', { name: folder.name })}
+            size="md"
+            strokeWidth={2}
+            className="sidebar-row-action dateisystem-tree-menu-btn"
             onClick={(e) => onOpenMenu(e, folder)}
-          >
-            <MoreHorizontal size={14} strokeWidth={2} aria-hidden />
-          </button>
+            hasPopup="menu"
+          />
         }
       />
     </li>
@@ -715,12 +715,14 @@ function TreeAddFolderButton({
 
   if (!open) {
     return (
-      <button
-        type="button"
-        className="sidebar-icon-btn sidebar-row-action dateisystem-tree-add-btn"
-        aria-label={ariaLabel}
+      <IconButton
+        icon={Plus}
+        label={ariaLabel}
         title={depthHint ?? ariaLabel}
+        size="md"
+        strokeWidth={2}
         disabled={disabled}
+        className="sidebar-row-action dateisystem-tree-add-btn"
         onClick={() => {
           if (disabled) {
             setDepthError(depthHint ?? t('filesystem.maxDepthInline', { max: MAX_FOLDER_DEPTH }));
@@ -729,9 +731,7 @@ function TreeAddFolderButton({
           setDepthError(null);
           setOpen(true);
         }}
-      >
-        <Plus size={14} strokeWidth={2} aria-hidden />
-      </button>
+      />
     );
   }
 

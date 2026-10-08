@@ -53,6 +53,7 @@ export function LabelSuggestionDismissActions({ labelName, disabled, onDismiss }
         ref={menuAnchorRef}
         icon={MoreHorizontal}
         label={t('labels.todoDismissMenuAria', { name: labelName })}
+        hasPopup="menu"
         expanded={menuOpen}
         disabled={blocked}
         className="labels-overflow-btn"

@@ -6,17 +6,30 @@ import { Input } from '../ui/Input';
 
 interface DateisystemNewFolderButtonProps {
   onCreate: (name: string) => Promise<void>;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function DateisystemNewFolderButton({ onCreate }: DateisystemNewFolderButtonProps) {
+export function DateisystemNewFolderButton({
+  onCreate,
+  open: openProp,
+  onOpenChange,
+}: DateisystemNewFolderButtonProps) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = openProp ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
 
   if (!open) {
     return (
-      <Button type="button" variant="secondary" onClick={() => setOpen(true)}>
+      <Button
+        type="button"
+        variant="secondary"
+        data-dateisystem-new-folder-trigger
+        onClick={() => setOpen(true)}
+      >
         <FolderPlus size={16} strokeWidth={2} aria-hidden />
         {t('filesystem.newRootButton')}
       </Button>

@@ -11,7 +11,11 @@ interface LibraryViewSwitcherProps {
   variant?: 'default' | 'segmented';
 }
 
-export function LibraryViewSwitcher({ value, onChange, variant = 'default' }: LibraryViewSwitcherProps) {
+export function LibraryViewSwitcher({
+  value,
+  onChange,
+  variant = 'default',
+}: LibraryViewSwitcherProps) {
   const { t } = useTranslation();
   const modes = useMemo(
     () =>

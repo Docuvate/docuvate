@@ -53,7 +53,6 @@ export function DateisystemTreeRow({
         <div className="dateisystem-tree-chevron-cell">{chevron}</div>
         <NavLink
           to={to}
-          title={name}
           className={({ isActive: navActive }) =>
             `sidebar-tree-link dateisystem-tree-link${navActive || isActive ? ' active' : ''} ${linkClassName}`.trim()
           }

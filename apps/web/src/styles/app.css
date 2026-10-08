@@ -1206,29 +1206,19 @@ mark.global-search-mark {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  height: 36px;
-  min-height: 36px;
+  height: var(--dv-control-height);
+  min-height: var(--dv-control-height);
   padding-block: 0;
   font-size: 0.875rem;
   line-height: 1.25;
 }
 
-.dateisystem-tree-head-add {
+.dateisystem-tree-toolbar .icon-btn-md {
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--dv-color-border);
-  border-radius: var(--dv-radius-md);
-  background: var(--dv-color-bg-raised);
-  color: var(--dv-color-text);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dateisystem-tree-head-add:hover {
-  background: var(--dv-color-bg-overlay);
+  width: var(--dv-control-height);
+  height: var(--dv-control-height);
+  min-width: var(--dv-control-height);
+  min-height: var(--dv-control-height);
 }
 
 .dateisystem-tree-root-inline {
@@ -1245,6 +1235,23 @@ mark.global-search-mark {
 .dateisystem-tree-menu-btn {
   border: none;
   background: transparent;
+}
+
+.dateisystem-shell .icon-btn-md,
+.dateisystem-content-action--overflow .icon-btn-md {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.dateisystem-tree-actions .icon-btn-md {
+  border: none;
+  background: transparent;
+}
+
+.dateisystem-tree-actions .icon-btn-md:hover:not(:disabled) {
+  background: var(--dv-color-bg-overlay);
 }
 
 .dateisystem-tree-menu-btn:hover {
@@ -4004,7 +4011,11 @@ mark.global-search-mark {
 
 .library-main-card-filesystem .library-table {
   width: 100%;
-  min-width: 100%;
+  min-width: 0;
+}
+
+.library-main-card-filesystem .library-table-wrap {
+  overflow-x: visible;
 }
 
 .library-list-toolbar {
@@ -4039,6 +4050,52 @@ mark.global-search-mark {
 .library-list-toolbar-filesystem .library-list-search input {
   max-width: 100%;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  height: var(--dv-control-height);
+  min-height: var(--dv-control-height);
+}
+
+.library-list-toolbar-filesystem .library-list-search .btn-secondary {
+  flex: none;
+  flex-shrink: 0;
+}
+
+.dateisystem-shell .library-list-toolbar-filesystem .library-list-search.search-row {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  flex: 1 1 0;
+  max-width: none;
+}
+
+.dateisystem-shell .library-list-search.search-row {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  margin-bottom: 0;
+}
+
+.library-list-toolbar-filesystem .library-list-toolbar-controls .view-switcher-segmented {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.library-list-toolbar-filesystem
+  .library-list-toolbar-controls
+  .library-view-switcher-segmented,
+.library-list-toolbar-filesystem .library-list-toolbar-controls .custom-select-trigger {
+  min-height: var(--dv-control-height);
+  height: var(--dv-control-height);
+  box-sizing: border-box;
+}
+
+.dateisystem-shell .library-list-toolbar-filesystem .search-row .btn-secondary {
+  min-height: var(--dv-control-height);
+  height: var(--dv-control-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
 }
 
@@ -4056,6 +4113,18 @@ mark.global-search-mark {
 .library-list-toolbar-filesystem .library-list-toolbar-controls .library-view-switcher-segmented {
   flex: 0 1 auto;
   min-width: 0;
+  flex-shrink: 0;
+  height: var(--dv-control-height);
+  min-height: var(--dv-control-height);
+}
+
+.library-list-toolbar-filesystem
+  .library-list-toolbar-controls
+  .library-view-switcher-segmented
+  .segmented-control__option {
+  min-width: 4.75rem;
+  height: 100%;
+  min-height: var(--dv-control-height);
 }
 
 .library-list-toolbar-filesystem .library-list-toolbar-controls .custom-select,
@@ -5913,6 +5982,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex-direction: column;
   width: 100%;
   min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .library-doc-stack-select-all {
@@ -5925,14 +5997,21 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .library-doc-stack-item {
-  padding: var(--dv-space-sm) 0;
+  padding: 0;
   border-bottom: 1px solid var(--dv-color-border);
+  min-width: 0;
+  list-style: none;
+}
+
+.library-doc-stack-item-inner {
+  padding: var(--dv-space-sm) 0;
   min-width: 0;
 }
 
-.library-doc-stack-item:focus-visible {
+.library-doc-stack-item-inner:focus-visible {
   outline: 2px solid var(--dv-color-focus);
   outline-offset: 2px;
+  border-radius: var(--dv-radius-sm);
 }
 
 .library-doc-stack-primary {
@@ -5987,9 +6066,14 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .library-doc-stack-meta-main .document-labels-cell {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
+}
+
+.library-doc-stack-meta-main .document-labels-cell-row {
+  flex-wrap: wrap;
+  row-gap: var(--dv-space-2xs);
 }
 
 .library-doc-stack-meta-actions {
@@ -8407,6 +8491,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   width: var(--dateisystem-sidebar-width, 280px);
   flex-shrink: 0;
   background: var(--dv-color-bg-overlay);
+  border-right: 1px solid var(--dv-color-border);
 }
 
 @media (max-width: 1280px) {
@@ -8420,8 +8505,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex-shrink: 0;
   cursor: col-resize;
   background: transparent;
-  border-left: 1px solid var(--dv-color-border);
-  border-right: 1px solid var(--dv-color-border);
+  border: none;
 }
 
 .dateisystem-split-handle:hover {
@@ -8485,7 +8569,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .dateisystem-content-header {
   flex-shrink: 0;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: space-between;
   align-items: flex-start;
   gap: var(--dv-space-sm);
@@ -8502,6 +8586,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   min-width: 0;
   flex: 1 1 14rem;
   max-width: 100%;
+  overflow: hidden;
+}
+
+.dateisystem-breadcrumb {
+  min-width: 0;
+  overflow: hidden;
 }
 
 .dateisystem-page-title {
@@ -8523,15 +8613,55 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dateisystem-content-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--dv-space-xs);
   flex: 1 1 auto;
   min-width: 0;
   max-width: 100%;
   margin-left: auto;
+}
+
+.dateisystem-content-actions-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--dv-space-xs);
+}
+
+.dateisystem-content-actions .btn,
+.dateisystem-content-actions button {
+  white-space: nowrap;
+}
+
+.dateisystem-content-action--overflow {
+  display: none;
+}
+
+@media (max-width: 1280px) {
+  .dateisystem-content-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
+  .dateisystem-content-heading {
+    flex: 0 1 100%;
+    max-width: 100%;
+  }
+
+  .dateisystem-content-actions {
+    flex: 0 0 auto;
+    margin-left: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .dateisystem-content-action--secondary:not(.dateisystem-content-action--force-visible) {
+    display: none;
+  }
+
+  .dateisystem-content-action--overflow {
+    display: inline-flex;
+  }
 }
 
 .dateisystem-content-body .card,
@@ -8583,6 +8713,64 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   box-sizing: border-box;
 }
 
+@media (max-width: 1280px) {
+  .library-list-toolbar-filesystem {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--dv-space-sm);
+  }
+
+  .library-list-toolbar-filesystem .library-list-search.search-row {
+    width: 100%;
+    flex: none;
+  }
+
+  .library-list-toolbar-filesystem .library-list-toolbar-controls {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--dv-space-xs);
+  }
+
+  .library-list-toolbar-filesystem .library-list-toolbar-controls .library-view-switcher-segmented,
+  .library-list-toolbar-filesystem .library-list-toolbar-controls .custom-select,
+  .library-list-toolbar-filesystem .library-list-toolbar-controls .library-toolbar-sort-select {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .library-list-toolbar-filesystem .library-list-toolbar-controls .custom-select-trigger {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1280px) {
+  .library-list-toolbar-filesystem .library-list-toolbar-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .library-list-toolbar-filesystem .library-list-toolbar-controls .library-view-switcher-segmented {
+    flex: 1 1 16rem;
+    width: auto;
+    max-width: 100%;
+  }
+
+  .library-list-toolbar-filesystem .library-list-toolbar-controls .custom-select,
+  .library-list-toolbar-filesystem .library-list-toolbar-controls .library-toolbar-sort-select {
+    flex: 1 1 10.5rem;
+    width: auto;
+  }
+
+  .library-list-toolbar-filesystem .library-list-toolbar-controls .custom-select-trigger {
+    width: 100%;
+  }
+}
+
 .library-list-toolbar-filesystem .library-list-search.search-row {
   min-width: 0;
   width: 100%;
@@ -8612,7 +8800,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
   .library-list-toolbar-filesystem .library-list-search .input,
   .library-list-toolbar-filesystem .library-list-search input {
-    min-width: 360px;
+    min-width: 0;
   }
 }
 
@@ -8769,23 +8957,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   }
 }
 
-@media (max-width: 1280px) {
-  .dateisystem-content-heading {
-    flex-basis: 100%;
-  }
-
-  .dateisystem-content-actions {
-    flex-basis: 100%;
-    margin-left: 0;
-    justify-content: flex-end;
-  }
-}
-
 @media (max-width: 900px) {
-  .library-list-toolbar-filesystem {
-    grid-template-columns: 1fr;
-  }
-
   .library-list-toolbar-controls {
     width: 100%;
     justify-content: flex-start;
@@ -8854,10 +9026,26 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin: 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: var(--dv-space-2xs);
   font-size: 0.875rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dateisystem-breadcrumb ol li {
+  flex-shrink: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dateisystem-breadcrumb ol li:last-child {
+  flex-shrink: 1;
 }
 
 .dateisystem-breadcrumb a {
@@ -8891,14 +9079,14 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   box-sizing: border-box;
   padding-right: calc(var(--tree-trailing-gutter) + var(--dv-space-2xs));
   border-radius: var(--dv-radius-md);
-  min-height: 32px;
-  overflow: hidden;
+  min-height: 40px;
+  overflow: visible;
 }
 
 .dateisystem-tree-row-lead {
   flex: 1 1 auto;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   min-width: 0;
   margin-inline-start: calc(var(--tree-depth, 0) * var(--tree-indent-step));
   gap: var(--dv-space-2xs);
@@ -8925,16 +9113,27 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .dateisystem-tree-chevron-cell {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   flex-shrink: 0;
   width: 20px;
   min-height: 32px;
+  padding-top: 4px;
 }
 
 .dateisystem-tree-link {
   min-width: 0;
   padding: 4px var(--dv-space-2xs);
+  overflow: visible;
+  align-items: flex-start;
+}
+
+.dateisystem-tree-row .sidebar-tree-name {
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
 }
 
 .dateisystem-tree-row-trailing {
@@ -8946,7 +9145,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   align-items: center;
   justify-content: flex-end;
   min-width: var(--tree-trailing-gutter);
-  height: 28px;
+  height: 40px;
   pointer-events: none;
 }
 
@@ -9206,7 +9405,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
   .dateisystem-sidebar {
     width: 100% !important;
-    max-height: 40vh;
+    max-height: none;
+    flex: 0 0 auto;
     border-right: none;
     border-bottom: 1px solid var(--dv-color-border);
   }
@@ -9217,6 +9417,37 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
   .dateisystem-content-header {
     flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: var(--dv-space-2xs);
+    padding-block: var(--dv-space-xs) var(--dv-space-xs);
+  }
+
+  .dateisystem-content-heading {
+    flex: 0 0 auto;
+  }
+
+  .dateisystem-page-title {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.2;
+  }
+
+  .dateisystem-breadcrumb {
+    margin-bottom: 0;
+  }
+
+  .dateisystem-content-actions {
+    flex: 0 0 auto;
+    margin-left: 0;
+    margin-top: 0;
+    width: 100%;
+  }
+
+  .dateisystem-content-actions-row {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: var(--dv-space-2xs);
   }
 
   .dateisystem-content-toolbar {

@@ -36,7 +36,7 @@ interface LibraryPageDocumentSectionProps {
   filterToggle?: LibraryFilterToggleProps;
   /**
    * Ordner view: hide redundant folder column (`hideFolderColumn` only).
-   * Shared table column layout/responsive rules live in #80 — do not add here.
+   * Shared table column layout/responsive rules live in the library table styles — do not add here.
    */
   filesystemLayout?: boolean;
 }
@@ -52,6 +52,13 @@ export function LibraryPageDocumentSection({
   const { t } = useTranslation();
   const sortOptions = useMemo(() => librarySortSelectOptions(t), [t]);
   const compactLibrarySearch = useNarrowTopbar();
+  const searchPlaceholderKey = filesystemLayout
+    ? compactLibrarySearch
+      ? 'library.searchPlaceholderShort'
+      : 'library.searchPlaceholderFilesystem'
+    : compactLibrarySearch
+      ? 'library.searchPlaceholderCompact'
+      : 'library.searchPlaceholder';
   const filterToggleLabel = filterToggle
     ? filterToggle.expanded
       ? t('library.filterToggleCollapse')
@@ -78,12 +85,10 @@ export function LibraryPageDocumentSection({
         <div className={`library-list-toolbar${filesystemLayout ? ' library-list-toolbar-filesystem' : ''}`}>
           <form
             onSubmit={(e) => void data.onSearch(e)}
-            className={`search-row library-list-search${filterToggle ? ' library-search-row' : ''}${compactLibrarySearch ? ' library-list-search--compact' : ''}`}
+            className={`search-row library-list-search${filterToggle ? ' library-search-row' : ''}${!filesystemLayout && compactLibrarySearch ? ' library-list-search--compact' : ''}`}
           >
             <Input
-              placeholder={t(
-                compactLibrarySearch ? 'library.searchPlaceholderCompact' : 'library.searchPlaceholder'
-              )}
+              placeholder={t(searchPlaceholderKey)}
               value={data.query}
               onChange={(e) => data.setQuery(e.target.value)}
               aria-label={t('library.searchDocsAria')}
