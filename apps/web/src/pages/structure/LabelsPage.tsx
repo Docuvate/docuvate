@@ -117,13 +117,18 @@ export function LabelsPage() {
   const showMatchText = labelAssignmentModeNeedsMatchText(assignmentMode);
 
   return (
-    <div className="page labels-page">
+    <div className="page labels-page" data-ux="page">
       <header className="page-header">
         <div>
-          <h1>{t('labels.pageTitle')}</h1>
+          <h1 data-ux="page-title">{t('labels.pageTitle')}</h1>
           <p className="muted">{t('labels.pageLead')}</p>
         </div>
-        <Button type="button" className="labels-page-new-label-btn" onClick={() => startCreate()}>
+        <Button
+          type="button"
+          className="labels-page-new-label-btn"
+          data-ux="primary-action"
+          onClick={() => startCreate()}
+        >
           {t('labels.newLabel')}
         </Button>
       </header>

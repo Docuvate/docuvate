@@ -34,6 +34,7 @@ export function UploadFileTrigger({
       <Button
         type="button"
         variant={variant}
+        data-ux={variant === 'primary' ? 'primary-action' : undefined}
         title={disabled && disabledTitle ? disabledTitle : undefined}
         onClick={() => {
           if (disabled) {

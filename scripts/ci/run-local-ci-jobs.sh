@@ -22,6 +22,12 @@ fi
 RESULTS="$ROOT/tmp/local-ci-results.tsv"
 : >"$RESULTS"
 FAILED=0
+RUN_UX=0
+for arg in "$@"; do
+  case "$arg" in
+    --ux) RUN_UX=1 ;;
+  esac
+done
 
 export DOCUVATE_LOCAL_CI_RUN_ID="${DOCUVATE_LOCAL_CI_RUN_ID:-localci$(date +%s)-$$}"
 export DOCUVATE_LOCAL_CI_IMAGE_TAG="${DOCUVATE_LOCAL_CI_RUN_ID}"
@@ -190,6 +196,38 @@ run_local_ci_job db-migrate-fresh job_db_migrate_fresh
 run_local_ci_job integration-test job_integration_test
 run_local_ci_job docker-build job_docker_build
 run_local_ci_job compose-smoke job_compose_smoke
+
+if [[ "$RUN_UX" -eq 1 ]]; then
+  # compose-smoke tears its stack down, so the UX job brings up its own one.
+  job_ux_metrics() {
+    cd "$ROOT"
+    local project ux_down
+    docuvate_ci_compose_files_array
+    project="$(docuvate_ci_prepare_stack_compose)"
+    docuvate_ci_assert_ports_free 3001 5173 5433 6379 8025 8000 9010 9011 11434
+    ux_down() {
+      docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" down --rmi local -v --remove-orphans 2>/dev/null || true
+    }
+    trap ux_down RETURN
+    ux_down
+    docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" up -d --build \
+      postgres migrate db-storage-guard minio minio-init valkey mailpit ollama-init api worker web
+    for i in $(seq 1 90); do
+      if curl -sf http://localhost:3001/health/ready | jq -e '.status == "ready"' >/dev/null; then break; fi
+      if [[ "$i" -eq 90 ]]; then
+        docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" logs api migrate worker valkey
+        exit 1
+      fi
+      sleep 2
+    done
+    pnpm exec playwright install chromium
+    DATABASE_URL=postgresql://docuvate:docuvate@localhost:5433/docuvate \
+      AUTH_BASE=http://localhost:3001 \
+      WEB_ORIGIN=http://localhost:5173 \
+      pnpm ux:metrics -- --check
+  }
+  run_local_ci_job ux-metrics job_ux_metrics
+fi
 
 echo "--- results ---"
 column -t -s $'\t' "$RESULTS"

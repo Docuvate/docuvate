@@ -43,7 +43,9 @@ export function DateisystemContentHeader({
             ))}
           </ol>
         </nav>
-        <h1 className="dateisystem-page-title">{pageTitle}</h1>
+        <h1 className="dateisystem-page-title" data-ux="page-title">
+          {pageTitle}
+        </h1>
       </div>
 
       <div className="dateisystem-content-actions">

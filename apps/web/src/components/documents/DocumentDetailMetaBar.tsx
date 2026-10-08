@@ -58,13 +58,18 @@ export function DocumentDetailMetaBar({ doc, onDelete }: DocumentDetailMetaBarPr
       <div className="document-detail-meta-top">
         <div className="document-detail-meta-primary">
           <Badge status={doc.status} />
-          <h1 className="document-detail-title" title={`${title}${doc.filename !== title ? ` · ${doc.filename}` : ''}`}>
+          <h1
+            className="document-detail-title"
+            data-ux="page-title"
+            title={`${title}${doc.filename !== title ? ` · ${doc.filename}` : ''}`}
+          >
             {title}
           </h1>
         </div>
         <div className="document-detail-meta-actions">
           <a
             className="btn btn-secondary document-detail-download"
+            data-ux="primary-action"
             href={documentContentUrl(doc.id, true)}
             download={doc.filename}
           >
