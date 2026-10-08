@@ -166,19 +166,46 @@ a.btn:hover {
   line-height: 1.4;
 }
 
+:root {
+  --dv-control-height: 40px;
+  --dv-icon-btn-sm: 28px;
+  --dv-icon-btn-md: 36px;
+}
+
 .icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  min-width: 2.25rem;
+  box-sizing: border-box;
   padding: 0;
+  margin: 0;
+  line-height: 0;
+  vertical-align: middle;
   border: 1px solid var(--dv-color-border);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-bg-overlay);
   color: var(--dv-color-text);
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.icon-btn-sm {
+  width: var(--dv-icon-btn-sm);
+  height: var(--dv-icon-btn-sm);
+  min-width: var(--dv-icon-btn-sm);
+  min-height: var(--dv-icon-btn-sm);
+}
+
+.icon-btn-md {
+  width: var(--dv-icon-btn-md);
+  height: var(--dv-icon-btn-md);
+  min-width: var(--dv-icon-btn-md);
+  min-height: var(--dv-icon-btn-md);
+}
+
+.icon-btn svg {
+  display: block;
+  flex-shrink: 0;
 }
 
 .icon-btn:hover:not(:disabled) {

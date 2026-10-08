@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { OrdnerBreadcrumbSegment } from '../../lib/ordnerTree';
 import { DateisystemNewFolderButton } from '../../components/ordner/DateisystemNewFolderButton';
 import { UploadFileTrigger } from '../../components/upload/UploadFileTrigger';
 import { Button } from '../../components/ui/Button';
+import { DateisystemContentActions } from './DateisystemContentActions';
 
 interface DateisystemContentHeaderProps {
   breadcrumbs: OrdnerBreadcrumbSegment[];
@@ -25,6 +27,37 @@ export function DateisystemContentHeader({
   onRequestUploadTarget,
 }: DateisystemContentHeaderProps) {
   const { t } = useTranslation();
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
+
+  const secondary = [
+    {
+      id: 'new-folder',
+      menuLabel: t('filesystem.newRootButton'),
+      onMenuSelect: () => setNewFolderOpen(true),
+      forceVisible: newFolderOpen,
+      node: (
+        <DateisystemNewFolderButton
+          onCreate={onCreateFolder}
+          open={newFolderOpen}
+          onOpenChange={setNewFolderOpen}
+        />
+      ),
+    },
+    ...(showDocuments && onAddExistingDocuments
+      ? [
+          {
+            id: 'add-existing',
+            menuLabel: t('filesystem.addExistingButton'),
+            onMenuSelect: () => onAddExistingDocuments(),
+            node: (
+              <Button type="button" variant="secondary" onClick={onAddExistingDocuments}>
+                {t('filesystem.addExistingButton')}
+              </Button>
+            ),
+          },
+        ]
+      : []),
+  ];
 
   return (
     <header className="dateisystem-content-header">
@@ -48,19 +81,16 @@ export function DateisystemContentHeader({
         </h1>
       </div>
 
-      <div className="dateisystem-content-actions">
-        <UploadFileTrigger
-          variant="primary"
-          disabledTitle={uploadDisabledTitle}
-          onDisabledClick={onRequestUploadTarget}
-        />
-        <DateisystemNewFolderButton onCreate={onCreateFolder} />
-        {showDocuments && onAddExistingDocuments ? (
-          <Button type="button" variant="secondary" onClick={onAddExistingDocuments}>
-            {t('filesystem.addExistingButton')}
-          </Button>
-        ) : null}
-      </div>
+      <DateisystemContentActions
+        primary={
+          <UploadFileTrigger
+            variant="primary"
+            disabledTitle={uploadDisabledTitle}
+            onDisabledClick={onRequestUploadTarget}
+          />
+        }
+        secondary={secondary}
+      />
     </header>
   );
 }

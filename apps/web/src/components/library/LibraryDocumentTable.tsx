@@ -17,6 +17,7 @@ import {
 } from './duplicateStackLabel';
 import { setDocumentDragData } from '../../lib/documentDnD';
 import { documentDisplayDate } from './libraryDocumentUtils';
+import { useFilesystemCompactDocs } from '../../lib/useFilesystemCompactDocs';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 
 type SortField = 'title' | 'documentDate' | 'updatedAt';
@@ -167,7 +168,9 @@ export function LibraryDocumentTable({
     }
   };
 
-  const mobileStack = useNarrowTopbar();
+  const narrowTopbar = useNarrowTopbar();
+  const filesystemCompactDocs = useFilesystemCompactDocs(hideFolderColumn);
+  const mobileStack = narrowTopbar || filesystemCompactDocs;
 
   if (items.length === 0) {
     return null;
@@ -193,8 +196,8 @@ export function LibraryDocumentTable({
         <div
           className={`library-table-wrap library-table-wrap--stack${hideFolderColumn ? ' library-table-wrap-hide-folder' : ''}`}
         >
-          <div className="library-doc-stack-list" role="list" data-testid="library-doc-stack-list">
-            <div className="library-doc-stack-select-all">
+          <ul className="library-doc-stack-list" data-testid="library-doc-stack-list">
+            <li className="library-doc-stack-select-all">
               <input
                 type="checkbox"
                 checked={selected.size === items.length && items.length > 0}
@@ -202,7 +205,7 @@ export function LibraryDocumentTable({
                 aria-label={t('library.selectAll')}
               />
               <span>{t('library.selectAll')}</span>
-            </div>
+            </li>
             {items.map((doc) => {
               const stackLabel = duplicateStackVersionLabel(doc, t);
               const hasStack = showDuplicateStackBadge(doc);
@@ -217,101 +220,101 @@ export function LibraryDocumentTable({
                 .join(' ');
 
               return (
-                <article
-                  key={doc.id}
-                  role="listitem"
-                  className={rowClassName}
-                  tabIndex={0}
-                  aria-selected={rowSelected}
-                  onContextMenu={(event) => onContextMenu(event, doc.id)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
-                      onContextMenuKeyboard(event, doc.id);
-                    }
-                  }}
-                >
-                  <div className="library-doc-stack-primary">
-                    <input
-                      type="checkbox"
-                      checked={selected.has(doc.id)}
-                      onChange={() => onToggleSelect(doc.id)}
-                      aria-label={`${doc.title} auswählen`}
-                    />
-                    <div className="library-doc-stack-text">
-                      <div className="library-doc-stack-title">
-                        <Link to={`/documents/${doc.id}`} className="library-title-link">
-                          {doc.title}
-                        </Link>
-                        {stackLabel ? (
-                          <button
-                            type="button"
-                            className="stack-badge"
-                            title={t('library.stackVersionsTitle')}
-                            onClick={() => onReviewStack(doc.id)}
-                          >
-                            {stackLabel}
-                          </button>
-                        ) : null}
-                        {showLegacyDuplicateHint(doc) ? (
-                          <span className="dup-badge" title={t('library.duplicateHintTitle')}>
-                            {t('library.duplicateHintBadge')}
-                          </span>
+                <li key={doc.id} className={rowClassName}>
+                  <article
+                    className="library-doc-stack-item-inner"
+                    tabIndex={0}
+                    aria-current={rowSelected ? 'true' : undefined}
+                    onContextMenu={(event) => onContextMenu(event, doc.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+                        onContextMenuKeyboard(event, doc.id);
+                      }
+                    }}
+                  >
+                    <div className="library-doc-stack-primary">
+                      <input
+                        type="checkbox"
+                        checked={selected.has(doc.id)}
+                        onChange={() => onToggleSelect(doc.id)}
+                        aria-label={`${doc.title} auswählen`}
+                      />
+                      <div className="library-doc-stack-text">
+                        <div className="library-doc-stack-title">
+                          <Link to={`/documents/${doc.id}`} className="library-title-link">
+                            {doc.title}
+                          </Link>
+                          {stackLabel ? (
+                            <button
+                              type="button"
+                              className="stack-badge"
+                              title={t('library.stackVersionsTitle')}
+                              onClick={() => onReviewStack(doc.id)}
+                            >
+                              {stackLabel}
+                            </button>
+                          ) : null}
+                          {showLegacyDuplicateHint(doc) ? (
+                            <span className="dup-badge" title={t('library.duplicateHintTitle')}>
+                              {t('library.duplicateHintBadge')}
+                            </span>
+                          ) : null}
+                        </div>
+                        {doc.filename.trim() !== doc.title.trim() ? (
+                          <div className="muted library-doc-stack-filename" title={doc.filename}>
+                            {doc.filename}
+                          </div>
                         ) : null}
                       </div>
-                      {doc.filename.trim() !== doc.title.trim() ? (
-                        <div className="muted library-doc-stack-filename" title={doc.filename}>
-                          {doc.filename}
-                        </div>
-                      ) : null}
                     </div>
-                  </div>
-                  <div className="library-doc-stack-meta">
-                    <div className="library-doc-stack-meta-main">
-                      <DocumentLabelsCell tags={doc.tags} />
-                      {doc.duplicateStack?.pendingReview ? (
-                        <span className="badge badge-warn">{t('library.reviewPending')}</span>
-                      ) : isExtractionPending(doc.status) ? (
-                        <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
-                      ) : (
-                        <Badge status={doc.status} />
-                      )}
-                      <span className="library-doc-stack-date">{documentDisplayDate(doc)}</span>
-                    </div>
-                    <div className="library-doc-stack-meta-actions">
-                      {hasStack ? (
-                        <Button
+                    <div className="library-doc-stack-meta">
+                      <div className="library-doc-stack-meta-main">
+                        <DocumentLabelsCell tags={doc.tags} />
+                        {doc.duplicateStack?.pendingReview ? (
+                          <span className="badge badge-warn">{t('library.reviewPending')}</span>
+                        ) : isExtractionPending(doc.status) ? (
+                          <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
+                        ) : (
+                          <Badge status={doc.status} />
+                        )}
+                        <span className="library-doc-stack-date">{documentDisplayDate(doc)}</span>
+                      </div>
+                      <div className="library-doc-stack-meta-actions">
+                        {hasStack ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="library-inline-action library-doc-stack-action-btn"
+                            onClick={() => onReviewStack(doc.id)}
+                          >
+                            {t('library.stackReviewAction')}
+                          </Button>
+                        ) : (
+                          <Link
+                            to={`/documents/${doc.id}`}
+                            className="library-open-doc-btn library-doc-stack-action-btn"
+                            aria-label={t('library.contextOpen')}
+                            title={t('library.contextOpen')}
+                          >
+                            <ExternalLink size={20} strokeWidth={1.75} aria-hidden />
+                          </Link>
+                        )}
+                        <button
                           type="button"
-                          variant="ghost"
-                          className="library-inline-action library-doc-stack-action-btn"
-                          onClick={() => onReviewStack(doc.id)}
+                          className="library-row-menu-btn library-doc-stack-menu-btn library-doc-stack-action-btn"
+                          aria-label={t('library.rowActionsAria', { title: doc.title })}
+                          aria-haspopup="menu"
+                          onClick={(event) => onRowMenu(event, doc.id)}
                         >
-                          {t('library.stackReviewAction')}
-                        </Button>
-                      ) : (
-                        <Link
-                          to={`/documents/${doc.id}`}
-                          className="library-open-doc-btn library-doc-stack-action-btn"
-                          aria-label={t('library.contextOpen')}
-                          title={t('library.contextOpen')}
-                        >
-                          <ExternalLink size={20} strokeWidth={1.75} aria-hidden />
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        className="library-row-menu-btn library-doc-stack-menu-btn library-doc-stack-action-btn"
-                        aria-label={t('library.rowActionsAria', { title: doc.title })}
-                        aria-haspopup="menu"
-                        onClick={(event) => onRowMenu(event, doc.id)}
-                      >
-                        ⋯
-                      </button>
+                          ⋯
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </article>
+                  </article>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
         {confirmDialog}
       </>
@@ -469,15 +472,6 @@ export function LibraryDocumentTable({
                         title={doc.folder.name}
                       >
                         {doc.folder.name}
-                      </div>
-                    ) : null}
-                    {doc.status !== 'ready' ? (
-                      <div className="library-title-status-fallback">
-                        {isExtractionPending(doc.status) ? (
-                          <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
-                        ) : (
-                          <Badge status={doc.status} />
-                        )}
                       </div>
                     ) : null}
                   </td>

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Landing-page Ordnerbaum seed (neutral names, populated folders).
- * PR/test tree (EHW+, long names): scripts/seed-ordnerbaum-screenshots.mjs
+ * PR/test tree (EHW+, long names): tools/screenshots/ordnerbaum/seed.mjs
  */
 import { createRequire } from 'node:module';
 import { randomUUID } from 'node:crypto';

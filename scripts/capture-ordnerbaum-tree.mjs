@@ -3,26 +3,28 @@ import { chromium } from 'playwright';
 import { execSync } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const OUT = process.env.SCREENSHOT_DIR ?? '/opt/cursor/artifacts/screenshots';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const OUT = process.env.SCREENSHOT_DIR ?? 'artifacts/screenshots/ordnerbaum';
 const BASE = process.env.WEB_BASE ?? 'http://localhost:5174';
 const BASE_HOST = new URL(BASE).hostname;
 
 function refreshSeed() {
   for (let attempt = 0; attempt < 6; attempt += 1) {
     try {
-      const seedOut = execSync('node scripts/seed-ordnerbaum-screenshots.mjs', {
-        cwd: '/workspace',
+      const seedOut = execSync('node tools/screenshots/ordnerbaum/seed.mjs', {
+        cwd: ROOT,
         timeout: 120_000,
         env: process.env,
       }).toString();
       return JSON.parse(seedOut);
     } catch {
-      if (attempt >= 5) throw new Error('seed-ordnerbaum-screenshots failed');
+      if (attempt >= 5) throw new Error('ordnerbaum seed failed');
       execSync(`sleep ${2 + attempt * 2}`);
     }
   }
-  throw new Error('seed-ordnerbaum-screenshots failed');
+  throw new Error('ordnerbaum seed failed');
 }
 
 async function addSession(context, authCookie) {

@@ -103,6 +103,7 @@ export function LabelsVocabularyTable(props: Props) {
                         <IconButton
                           icon={MoreHorizontal}
                           label={t('labels.deleteMenuAria', { name: tag.name })}
+                          hasPopup="menu"
                           expanded={menuOpen && menuTagId === tag.id}
                           className="labels-overflow-btn"
                           onClick={(e) => openMenu(tag.id, e.currentTarget)}
