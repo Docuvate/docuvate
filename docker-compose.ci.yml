@@ -7,3 +7,9 @@ services:
     image: alpine:3.20
     entrypoint: ['sh', '-c', 'exit 0']
     depends_on: !reset []
+
+  api:
+    environment:
+      # Ollama is not started in compose-smoke; avoid ~4s DNS/connect stalls on settings.
+      OLLAMA_URL: ''
+      WORKER_DEPENDENCY_TIMEOUT_MS: '2500'

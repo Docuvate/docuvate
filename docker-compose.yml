@@ -176,6 +176,18 @@ services:
       PASSWORD_RESET_MAIL_MODE: ${PASSWORD_RESET_MAIL_MODE:-smtp}
       SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
       MAIL_FROM: ${MAIL_FROM:-Docuvate <no-reply@docuvate.local>}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3001/health/ready').then((r)=>r.json()).then((j)=>process.exit(j.status==='ready'?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -191,6 +203,8 @@ services:
         condition: service_completed_successfully
       mailpit:
         condition: service_started
+      worker:
+        condition: service_healthy
 
   worker:
     mem_limit: 3g
@@ -209,6 +223,18 @@ services:
       PADDLE_PREWARM_ON_START: ${PADDLE_PREWARM_ON_START:-0}
     volumes:
       - workermlcache:/var/lib/docuvate-ml
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'python',
+          '-c',
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/v1/health', timeout=5)",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 90s
     depends_on:
       migrate:
         condition: service_completed_successfully

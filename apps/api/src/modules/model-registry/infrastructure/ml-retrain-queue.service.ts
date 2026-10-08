@@ -1,6 +1,10 @@
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import type IORedis from 'ioredis';
+import {
+  createValkeyConnection,
+  waitForValkeyReady,
+} from '../../../shared/infrastructure/valkey/valkey-connection.js';
 import {
   CORRECTION_DRIVEN_FAMILY_IDS,
   mlopsEnabled,
@@ -29,12 +33,12 @@ export class MlRetrainQueueService implements OnModuleInit, OnModuleDestroy {
     private readonly workerClient: HttpMlRetrainAdapter
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     if (!mlopsEnabled()) {
       return;
     }
-    const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
-    this.connection = new IORedis(valkeyUrl, { maxRetriesPerRequest: null });
+    this.connection = createValkeyConnection();
+    await waitForValkeyReady(this.connection);
     this.queue = new Queue(QUEUE_NAME, { connection: this.connection });
 
     this.worker = new Worker(

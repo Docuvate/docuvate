@@ -5,7 +5,7 @@ import {
   type ExtractionPort,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
+import { fetchWorkerDependency } from '../../../shared/infrastructure/worker/worker-dependency-fetch.js';
 import { fallbackExtractionEngines } from './extraction-engine-fallback.js';
 import { GetHardwareCapabilitiesUseCase } from './hardware-capabilities.use-case.js';
 import {
@@ -65,10 +65,10 @@ export class ListDocumentChatProvidersUseCase {
 
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     try {
-      const response = await fetch(workerApiUrl(workerUrl, '/document-chat/providers'), {
+      const response = await fetchWorkerDependency(workerUrl, '/document-chat/providers', {
         headers: this.workerHeaders(),
       });
-      if (response.ok) {
+      if (response?.ok) {
         const data = (await response.json()) as {
           providers: Array<{ id: string; label: string; description: string; available: boolean }>;
         };

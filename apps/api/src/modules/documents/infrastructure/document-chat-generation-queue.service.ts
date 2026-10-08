@@ -1,6 +1,10 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import type IORedis from 'ioredis';
+import {
+  createValkeyConnection,
+  waitForValkeyReady,
+} from '../../../shared/infrastructure/valkey/valkey-connection.js';
 import {
   RunDocumentChatGenerationUseCase,
   type DocumentChatGenerationJobPayload,
@@ -16,9 +20,9 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
 
   constructor(private readonly runGeneration: RunDocumentChatGenerationUseCase) {}
 
-  onModuleInit(): void {
-    const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
-    this.connection = new IORedis(valkeyUrl, { maxRetriesPerRequest: null });
+  async onModuleInit(): Promise<void> {
+    this.connection = createValkeyConnection();
+    await waitForValkeyReady(this.connection);
 
     const concurrency = documentChatGenerationConcurrency();
 
