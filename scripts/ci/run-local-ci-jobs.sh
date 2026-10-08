@@ -5,6 +5,19 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 mkdir -p "$ROOT/tmp"
 cd "$ROOT"
+
+# Prefer Node 24 from nvm when the VM default node is older (see .nvmrc).
+if [[ -s "${HOME}/.nvm/nvm.sh" ]]; then
+  # shellcheck source=/dev/null
+  source "${HOME}/.nvm/nvm.sh"
+  nvm install 24 >/dev/null 2>&1 || true
+  nvm use 24 >/dev/null 2>&1 || true
+fi
+node_major="$(node -p "Number(process.versions.node.split('.')[0])")"
+if [[ "$node_major" -lt 24 ]]; then
+  echo "ERROR: Node.js 24+ required for local CI (found v$(node -p process.versions.node)). Use nvm (see .nvmrc) or upgrade the host Node." >&2
+  exit 1
+fi
 RESULTS="$ROOT/tmp/local-ci-results.tsv"
 : >"$RESULTS"
 FAILED=0
@@ -42,6 +55,7 @@ job_lint_test() {
   docuvate_ci_start_postgres lint_pg_cid "lint-test"
   trap 'docuvate_ci_stop_postgres "$lint_pg_cid"' RETURN
   pnpm install
+  pnpm docs:check-mermaid
   node scripts/testing/check-no-legacy.mjs
   bash scripts/ci/check-conflict-markers.sh
   if [[ ! -x /opt/flutter/bin/flutter ]]; then

@@ -25,7 +25,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/license-AGPL--3.0-cb3a00" alt="License AGPL-3.0">
   <img src="https://img.shields.io/badge/version-0.1.0-120f09" alt="Version 0.1.0">
-  <img src="https://img.shields.io/badge/node-%3E%3D22-cb3a00?logo=node.js&logoColor=white" alt="Node 22+">
+  <img src="https://img.shields.io/badge/node-%3E%3D24-cb3a00?logo=node.js&logoColor=white" alt="Node 24+">
   <img src="https://img.shields.io/badge/python-%3E%3D3.12-cb3a00?logo=python&logoColor=white" alt="Python 3.12+">
   <img src="https://img.shields.io/badge/self--hosted-yes-cb3a00" alt="Self-hosted">
   <img src="https://img.shields.io/badge/docker-compose-cb3a00?logo=docker&logoColor=white" alt="Docker Compose">
@@ -79,24 +79,24 @@ Docker Compose runs **PostgreSQL 18.6** (`postgres:18.6-alpine`). Fresh installs
 
 **Back up your database and MinIO `documents` bucket before upgrading production data.** Never use `docker compose down -v` to reset a stack: that **deletes all documents and the database**. See [Self-hosting](docs/self-hosting.md) for volumes and recovery.
 
-Local development without Docker also expects **PostgreSQL 18.6** (or compatible 18.x), plus MinIO, Valkey, and Node 22+ / uv for the worker.
+Local development without Docker also expects **PostgreSQL 18.6** (or compatible 18.x), plus MinIO, Valkey, and Node 24+ / uv for the worker.
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-  subgraph clients [Clients]
-    Web[Web app]
-    SDK[SDKs / integrations]
+  subgraph clients ["Clients"]
+    Web["Web app"]
+    SDK["SDKs and integrations"]
   end
-  Web --> API[NestJS API]
+  Web --> API["NestJS API"]
   SDK --> API
-  API --> PG[(PostgreSQL 18)]
-  API --> VK[(Valkey)]
-  API --> S3[(MinIO)]
-  API --> Worker[FastAPI worker]
+  API --> PG[("PostgreSQL 18")]
+  API --> VK[("Valkey")]
+  API --> S3[("MinIO")]
+  API --> Worker["FastAPI worker"]
   Worker --> S3
-  API --> Ollama[Ollama optional]
+  API --> Ollama["Ollama optional"]
   Worker --> Ollama
 ```
 
