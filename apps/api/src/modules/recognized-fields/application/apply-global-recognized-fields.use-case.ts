@@ -16,6 +16,7 @@ import { mergeExtractedFields } from '../../document-pipeline/domain/merge-extra
 import { globalFieldStorageKey } from '../domain/recognized-field.entity.js';
 import { evaluateFieldExtractionGate } from '../domain/field-extraction-gate.js';
 import { resolveFieldExtractionGateConfig } from '../domain/resolve-field-extraction-gate.js';
+import { SyncDocumentFieldValuesUseCase } from '../../search/application/sync-document-field-values.use-case.js';
 
 @Injectable()
 export class ApplyGlobalRecognizedFieldsUseCase {
@@ -26,7 +27,8 @@ export class ApplyGlobalRecognizedFieldsUseCase {
     @Inject(RECOGNIZED_FIELD_REPOSITORY) private readonly fieldDefs: RecognizedFieldRepository,
     @Inject(LABEL_FIELD_EXTRACTION_PORT) private readonly extraction: LabelFieldExtractionPort,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
-    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository
+    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    private readonly syncFieldValues: SyncDocumentFieldValuesUseCase
   ) {}
 
   async execute(documentId: string, userId: string): Promise<void> {
@@ -100,6 +102,7 @@ export class ApplyGlobalRecognizedFieldsUseCase {
       await this.documents.updateForUser(documentId, userId, {
         extractionFields: nextFields,
       });
+      await this.syncFieldValues.execute(userId, documentId, nextFields);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Recognized field extraction failed: ${message}`);

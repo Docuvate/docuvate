@@ -847,6 +847,104 @@ export interface SetMlModelLifecycleRequest {
   lifecycle: MlModelLifecycle;
 }
 
+export type GlobalSearchScopeType =
+  | 'documents'
+  | 'folders'
+  | 'labels'
+  | 'settings'
+  | 'actions';
+
+export interface SearchHighlightSpan {
+  start: number;
+  end: number;
+}
+
+export interface GlobalSearchDocumentHitDto {
+  type: 'document';
+  id: string;
+  title: string;
+  filename: string;
+  snippet: string;
+  /** When matched via custom/recognized field leg, label shown in snippet prefix. */
+  matchedFieldLabel?: string | null;
+  /** Highlights in `title` (and filename when shown). */
+  highlightSpans: SearchHighlightSpan[];
+  /** Highlights in `snippet` (offsets relative to snippet text). */
+  snippetHighlightSpans: SearchHighlightSpan[];
+  labelNames: string[];
+  folderPath: string | null;
+  documentDate: string | null;
+  updatedAt: string;
+  score: number;
+}
+
+export interface GlobalSearchFolderHitDto {
+  type: 'folder';
+  id: string;
+  name: string;
+  path: string;
+  documentCount: number;
+  highlightSpans: SearchHighlightSpan[];
+  score: number;
+}
+
+export interface GlobalSearchLabelHitDto {
+  type: 'label';
+  id: string;
+  name: string;
+  color: string | null;
+  documentCount: number;
+  highlightSpans: SearchHighlightSpan[];
+  score: number;
+}
+
+export interface GlobalSearchSettingHitDto {
+  type: 'setting';
+  id: string;
+  title: string;
+  description: string;
+  route: string;
+  highlightSpans: SearchHighlightSpan[];
+  score: number;
+}
+
+export interface GlobalSearchActionHitDto {
+  type: 'action';
+  id: string;
+  title: string;
+  description: string;
+  route: string;
+  highlightSpans: SearchHighlightSpan[];
+  score: number;
+}
+
+export type GlobalSearchHitDto =
+  | GlobalSearchDocumentHitDto
+  | GlobalSearchFolderHitDto
+  | GlobalSearchLabelHitDto
+  | GlobalSearchSettingHitDto
+  | GlobalSearchActionHitDto;
+
+export interface GlobalSearchGroupDto {
+  type: GlobalSearchScopeType;
+  total: number;
+  items: GlobalSearchHitDto[];
+  showAllHref: string | null;
+}
+
+export interface GlobalSearchResponseDto {
+  query: string;
+  normalizedQuery: string;
+  expandedTerms: string[];
+  groups: GlobalSearchGroupDto[];
+}
+
+export interface GlobalSearchQuery {
+  q: string;
+  types?: string;
+  limit?: number;
+}
+
 export {
   summarizeLabelAssignmentInventory,
   type LabelAssignmentInventory,

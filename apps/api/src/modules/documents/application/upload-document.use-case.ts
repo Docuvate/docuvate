@@ -21,6 +21,7 @@ import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
 import { resolveDocumentPlacement } from '../domain/document-placement.js';
 import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
+import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 
 export interface UploadDocumentInput {
   userId: string;
@@ -47,7 +48,8 @@ export class UploadDocumentUseCase {
     @Inject(ID_GENERATOR) private readonly ids: IdGenerator,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly queueExtraction: QueueExtractionUseCase,
-    private readonly applyDuplicateDetection: ApplyDuplicateDetectionUseCase
+    private readonly applyDuplicateDetection: ApplyDuplicateDetectionUseCase,
+    private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
   ) {}
 
   async execute(input: UploadDocumentInput): Promise<DocumentEntity> {
@@ -103,6 +105,11 @@ export class UploadDocumentUseCase {
     if (isPlainTextUploadMime(input.mimeType)) {
       const text = input.buffer.toString('utf8');
       await this.documents.saveExtraction(saved.id, { text, fields: [], blocks: [] });
+      await this.syncSearchIndex.execute(input.userId, saved.id, {
+        text,
+        title: saved.title,
+        filename: saved.filename,
+      });
       await this.documents.updateStatus(saved.id, 'ready');
     } else {
       await this.queueExtraction.execute(saved.id, input.userId);

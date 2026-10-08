@@ -1,16 +1,12 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Menu } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { authClient } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { normalizeFilterQueryForSubmit } from '../lib/documentFilterQuery';
-import { routes } from '../lib/routes';
 import { AppSidebar } from './layout/AppSidebar';
 import { LocaleSwitcher } from './layout/LocaleSwitcher';
 import { UserAccountMenu } from './layout/UserAccountMenu';
-import { Button } from './ui/Button';
-import { Input } from './ui/Input';
+import { GlobalSearch } from './search/GlobalSearch';
 import { getUserSettings } from '../lib/api';
 import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import { SaveBarLayoutSync } from './save/SaveBarLayoutSync';
@@ -20,9 +16,6 @@ import { useNarrowTopbar } from '../lib/useNarrowTopbar';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const [query, setQuery] = useState('');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const narrowTopbar = useNarrowTopbar();
   const { data: session } = authClient.useSession();
@@ -32,15 +25,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       markAuthenticatedSessionHint();
     }
   }, [session?.session]);
-
-  useEffect(() => {
-    const filter = searchParams.get('filter');
-    if (filter?.trim()) {
-      setQuery(filter);
-      return;
-    }
-    setQuery(searchParams.get('q') ?? '');
-  }, [searchParams]);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -76,14 +60,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [mobileNavOpen]);
 
-  function onSearch(e: FormEvent) {
-    e.preventDefault();
-    const q = normalizeFilterQueryForSubmit(query.trim(), t);
-    navigate(
-      q ? `${routes.documents}?filter=${encodeURIComponent(q)}` : routes.documents
-    );
-  }
-
   return (
     <ToastProvider>
       <ToastGlobalBridge />
@@ -105,19 +81,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <strong>Docuvate</strong>
           </div>
           {narrowTopbar ? (
-            <div className="topbar-search-slot" aria-hidden="true" />
+            <div className="topbar-search-slot">
+              <GlobalSearch narrowTopbar />
+            </div>
           ) : (
-            <form className="topbar-search topbar-search--desktop" onSubmit={onSearch}>
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={t('shell.searchPlaceholder')}
-                aria-label={t('shell.globalSearch')}
-              />
-              <Button type="submit" variant="secondary">
-                {t('shell.search')}
-              </Button>
-            </form>
+            <div className="topbar-search topbar-search--desktop global-search-desktop-host">
+              <GlobalSearch narrowTopbar={false} />
+            </div>
           )}
           <div className="topbar-user">
             {!narrowTopbar ? <LocaleSwitcher placement="topbar" /> : null}

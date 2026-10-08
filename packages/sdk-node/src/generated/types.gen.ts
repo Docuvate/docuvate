@@ -2186,6 +2186,34 @@ export type ReplaceRecognizedFieldsResponses = {
     200: unknown;
 };
 
+export type GlobalSearchData = {
+    body?: never;
+    path?: never;
+    query: {
+        q: string;
+        types?: string;
+        limit?: number;
+    };
+    url: '/search';
+};
+
+export type GlobalSearchErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GlobalSearchError = GlobalSearchErrors[keyof GlobalSearchErrors];
+
+export type GlobalSearchResponses = {
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GlobalSearchResponse = GlobalSearchResponses[keyof GlobalSearchResponses];
+
 export type GetUserSettingsData = {
     body?: never;
     path?: never;

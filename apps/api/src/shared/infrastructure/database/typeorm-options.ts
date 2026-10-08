@@ -1,6 +1,9 @@
 import type { DataSourceOptions } from 'typeorm';
 import { TYPEORM_ENTITIES } from './entities/index.js';
 import { InitialSchema20261008120000 } from './migrations/20261008120000-initial-schema.js';
+import { GlobalSearchSchema20261008130500 } from './migrations/20261008130500-global-search-schema.js';
+import { DocumentFieldValuesBackfill20261008130600 } from './migrations/20261008130600-document-field-values-backfill.js';
+import { SearchIndexBackfill20261008130700 } from './migrations/20261008130700-search-index-backfill.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -25,10 +28,16 @@ export function buildTypeOrmOptions(): DataSourceOptions {
     type: 'postgres',
     url,
     entities: [...TYPEORM_ENTITIES],
-    migrations: [InitialSchema20261008120000],
+    migrations: [
+      InitialSchema20261008120000,
+      GlobalSearchSchema20261008130500,
+      DocumentFieldValuesBackfill20261008130600,
+      SearchIndexBackfill20261008130700,
+    ],
     migrationsTableName: 'migrations',
     synchronize: false,
     migrationsRun: false,
+    migrationsTransactionMode: 'each',
     logging: process.env['TYPEORM_LOGGING'] === 'true',
   };
 }

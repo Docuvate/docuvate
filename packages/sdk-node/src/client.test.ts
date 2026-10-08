@@ -30,5 +30,25 @@ describe('DocuvateClient', () => {
     expect(typeof client.api.getDocument).toBe('function');
     expect(typeof client.api.listTags).toBe('function');
     expect(typeof client.api.getConnectorCatalog).toBe('function');
+    expect(typeof client.api.globalSearch).toBe('function');
+  });
+
+  it('binds globalSearch query params', async () => {
+    const calls: string[] = [];
+    const mockFetch: typeof fetch = async (input) => {
+      calls.push(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
+      return new Response(JSON.stringify({ query: 'x', normalizedQuery: 'x', expandedTerms: [], groups: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    };
+    const client = new DocuvateClient({
+      baseUrl: 'http://127.0.0.1:3001/v1',
+      apiKey: 'test-key',
+      fetch: mockFetch,
+    });
+    await client.api.globalSearch({ query: { q: 'rechnung', types: 'documents', limit: 5 } });
+    expect(calls[0]).toContain('/v1/search');
+    expect(calls[0]).toContain('q=rechnung');
   });
 });

@@ -14,6 +14,8 @@ import { mergeDocumentPlacementPatch } from '../domain/document-placement.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
 import { RecordExtractionFieldCorrectionsUseCase } from '../../extraction-feedback/application/record-extraction-field-corrections.use-case.js';
+import { SyncDocumentFieldValuesUseCase } from '../../search/application/sync-document-field-values.use-case.js';
+import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 
 export interface UpdateDocumentResult {
   document: DocumentEntity;
@@ -27,7 +29,9 @@ export class UpdateDocumentUseCase {
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
     @Inject(MAPPE_REPOSITORY) private readonly mappen: MappeRepository,
-    private readonly recordFieldCorrections: RecordExtractionFieldCorrectionsUseCase
+    private readonly recordFieldCorrections: RecordExtractionFieldCorrectionsUseCase,
+    private readonly syncFieldValues: SyncDocumentFieldValuesUseCase,
+    private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
   ) {}
 
   async execute(
@@ -98,6 +102,22 @@ export class UpdateDocumentUseCase {
       extractionFields: body.extractionFields,
       extractionBlocks: body.extractionBlocks,
     });
+
+    if (body.extractionFields !== undefined) {
+      await this.syncFieldValues.execute(userId, id, document.extraction?.fields ?? []);
+    }
+
+    const searchMetaTouched =
+      body.title !== undefined ||
+      body.extractionFields !== undefined ||
+      body.extractionBlocks !== undefined;
+    if (searchMetaTouched) {
+      await this.syncSearchIndex.execute(userId, id, {
+        text: document.extraction?.text ?? '',
+        title: document.title,
+        filename: document.filename,
+      });
+    }
 
     return { document, fieldCorrectionsRecorded };
   }

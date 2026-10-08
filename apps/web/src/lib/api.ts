@@ -52,6 +52,7 @@ import type {
   ConnectorCatalogResponse,
   ConnectorInstallationDto,
   CreateConnectorInstallationRequest,
+  GlobalSearchResponseDto,
 } from '@docuvate/contracts';
 import { throwApiRequestError } from './apiErrors';
 
@@ -524,6 +525,19 @@ export async function retryDocumentChatMessage(
 
 export async function getUserSettings(): Promise<UserSettingsDto> {
   return request<UserSettingsDto>('/settings');
+}
+
+export async function globalSearch(
+  params: { q: string; types?: string; limit?: number },
+  init?: { signal?: AbortSignal }
+): Promise<GlobalSearchResponseDto> {
+  const search = new URLSearchParams();
+  search.set('q', params.q);
+  if (params.types) search.set('types', params.types);
+  if (params.limit != null) search.set('limit', String(params.limit));
+  return request<GlobalSearchResponseDto>(`/search?${search.toString()}`, {
+    signal: init?.signal,
+  });
 }
 
 export async function updateUserSettings(
