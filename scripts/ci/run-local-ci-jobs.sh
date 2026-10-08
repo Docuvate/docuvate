@@ -6,16 +6,34 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 mkdir -p "$ROOT/tmp"
 cd "$ROOT"
 
-# Prefer Node 24 from nvm when the VM default node is older (see .nvmrc).
+NODE_PIN="$(awk '/^nodejs /{print $2; exit}' "$ROOT/.tool-versions")"
+NODE_MAJOR_PIN="${NODE_PIN%%.*}"
 if [[ -s "${HOME}/.nvm/nvm.sh" ]]; then
   # shellcheck source=/dev/null
   source "${HOME}/.nvm/nvm.sh"
-  nvm install 24 >/dev/null 2>&1 || true
-  nvm use 24 >/dev/null 2>&1 || true
+  nvm install "$NODE_PIN" >/dev/null 2>&1 || true
+  nvm use "$NODE_PIN" >/dev/null 2>&1 || true
+  if [[ -d "${NVM_DIR}/versions/node/v${NODE_PIN}/bin" ]]; then
+    export PATH="${NVM_DIR}/versions/node/v${NODE_PIN}/bin:${PATH}"
+  fi
 fi
 node_major="$(node -p "Number(process.versions.node.split('.')[0])")"
-if [[ "$node_major" -lt 24 ]]; then
-  echo "ERROR: Node.js 24+ required for local CI (found v$(node -p process.versions.node)). Use nvm (see .nvmrc) or upgrade the host Node." >&2
+if [[ "$node_major" -lt "$NODE_MAJOR_PIN" ]]; then
+  echo "ERROR: Node.js ${NODE_PIN}+ required for local CI (found v$(node -p process.versions.node)). Install via asdf (see .tool-versions) or nvm." >&2
+  exit 1
+fi
+
+PNPM_PIN="$(awk '/^pnpm /{print $2; exit}' "$ROOT/.tool-versions")"
+UV_PIN="$(awk '/^uv /{print $2; exit}' "$ROOT/.tool-versions")"
+if command -v node >/dev/null 2>&1; then
+  export PATH="$(dirname "$(command -v node)"):${PATH}"
+fi
+if command -v corepack >/dev/null 2>&1; then
+  corepack enable >/dev/null 2>&1 || true
+  corepack prepare "pnpm@${PNPM_PIN}" --activate >/dev/null 2>&1 || true
+fi
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "ERROR: pnpm ${PNPM_PIN} not on PATH (install via asdf or corepack prepare)." >&2
   exit 1
 fi
 
@@ -66,6 +84,8 @@ job_lint_test() {
   bash scripts/ci/check-mermaid-markdown.sh
   node scripts/testing/check-no-legacy.mjs
   bash scripts/ci/check-conflict-markers.sh
+  node scripts/ci/check-tool-versions.mjs
+  node --test scripts/ci/check-tool-versions.test.mjs
   if [[ ! -x /opt/flutter/bin/flutter ]]; then
     if [[ "${DV_AGENT_VM:-0}" != "1" ]]; then
       echo "flutter not found; install it or run with DV_AGENT_VM=1" >&2
@@ -91,7 +111,9 @@ job_lint_test() {
   pnpm --filter @docuvate/web test:coverage
   node scripts/testing/coverage-ratchet.mjs
   export PATH="${HOME}/.local/bin:${PATH}"
-  pip install -q uv
+  pip install -q "uv==${UV_PIN}"
+  cd "$ROOT/apps/worker" && uv lock --check
+  cd "$ROOT"
   node scripts/testing/doctor-ratchet.mjs
   pnpm --filter @docuvate/sdk build
   pnpm --filter @docuvate/sdk test
@@ -100,7 +122,8 @@ job_lint_test() {
   dart analyze
   dart test
   cd "$ROOT/apps/worker"
-  UV_VENV_CLEAR=1 uv venv .venv
+  PY_PIN="$(awk '/^python /{print $2; exit}' "$ROOT/.tool-versions")"
+  UV_VENV_CLEAR=1 UV_PYTHON="$PY_PIN" uv venv .venv
   uv pip install -e ".[dev]"
   ./.venv/bin/ruff check src
   ./.venv/bin/pytest tests -q --ignore=tests/integration --maxfail=1
@@ -126,12 +149,14 @@ job_integration_test() {
   docker pull axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
   pnpm install
   pnpm --filter @docuvate/contracts build
+  pnpm --filter @docuvate/otel build
   pnpm --filter @docuvate/api build
   pnpm --filter @docuvate/api test:integration
   export PATH="${HOME}/.local/bin:${PATH}"
-  pip install uv
+  pip install "uv==${UV_PIN}"
   cd "$ROOT/apps/worker"
-  UV_VENV_CLEAR=1 uv venv .venv
+  PY_PIN="$(awk '/^python /{print $2; exit}' "$ROOT/.tool-versions")"
+  UV_VENV_CLEAR=1 UV_PYTHON="$PY_PIN" uv venv .venv
   uv pip install -e ".[dev]"
   ./.venv/bin/pytest tests/integration -q --maxfail=1
 }

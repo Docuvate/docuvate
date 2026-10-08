@@ -10,7 +10,18 @@ Thank you for helping improve Docuvate. This guide covers local setup, quality c
 
 ## Development setup
 
-1. Install **Node.js 24+**, **pnpm**, **Docker**, and **uv** (Python worker).
+1. Install [asdf](https://asdf-vm.com/) and the plugins you need, then from the repo root:
+
+   ```bash
+   asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+   asdf plugin add pnpm https://github.com/jonathanmorley/asdf-pnpm.git
+   asdf plugin add python https://github.com/asdf-community/asdf-python.git
+   asdf plugin add uv https://github.com/asdf-community/asdf-uv.git
+   asdf install
+   ```
+
+   You also need **Docker** for integration tests and Compose.
+
 2. Clone the repository and copy environment defaults:
 
    ```bash

@@ -20,7 +20,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: 24
+          node-version-file: .tool-versions
           cache: pnpm
       - run: pnpm install
       - name: Cache Puppeteer browser (Mermaid CLI)
@@ -36,6 +36,17 @@ jobs:
         run: node scripts/testing/check-no-legacy.mjs
       - name: No unresolved merge conflict markers
         run: bash scripts/ci/check-conflict-markers.sh
+      - name: Runtime pins match .tool-versions
+        run: node scripts/ci/check-tool-versions.mjs
+      - name: Tool-versions drift guard tests
+        run: node --test scripts/ci/check-tool-versions.test.mjs
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
+      - name: uv.lock matches pyproject
+        run: |
+          pip install 'uv==0.12.23'
+          cd apps/worker && uv lock --check
       - name: Install Flutter
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq curl
@@ -64,7 +75,7 @@ jobs:
       - name: Coverage ratchet (no regression vs baseline)
         run: node scripts/testing/coverage-ratchet.mjs
       - name: Install uv (uvx for fastapi doctor)
-        run: pipx install uv
+        run: pipx install 'uv==0.12.23'
       - name: Doctor ratchet (no regression vs baseline)
         run: node scripts/testing/doctor-ratchet.mjs
       - name: Upload coverage summaries
@@ -80,9 +91,12 @@ jobs:
       - run: pnpm --filter @docuvate/sdk test
       - name: Flutter SDK
         run: cd packages/sdk-flutter && flutter pub get && dart analyze && dart test
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
       - name: Worker lint and unit tests
         run: |
-          pip install uv
+          pip install 'uv==0.12.23'
           cd apps/worker && uv venv .venv && uv pip install -e ".[dev]"
           .venv/bin/ruff check src
           .venv/bin/pytest tests -q --ignore=tests/integration --maxfail=1
@@ -108,7 +122,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: 24
+          node-version-file: .tool-versions
           cache: pnpm
       - run: pnpm install
       - run: pnpm --filter @docuvate/contracts build
@@ -127,7 +141,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: 24
+          node-version-file: .tool-versions
           cache: pnpm
       - name: Cache Testcontainers base images
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
@@ -148,9 +162,12 @@ jobs:
       - run: pnpm --filter @docuvate/api build
       - name: API adapter integration (Testcontainers)
         run: pnpm --filter @docuvate/api test:integration
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
       - name: Worker integration fixtures (Testcontainers)
         run: |
-          pip install uv
+          pip install 'uv==0.12.23'
           cd apps/worker && uv venv .venv && uv pip install -e ".[dev]"
           .venv/bin/pytest tests/integration -q --maxfail=1
   docker-build:
@@ -199,7 +216,7 @@ jobs:
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
-          node-version: 24
+          node-version-file: .tool-versions
           cache: pnpm
       - run: pnpm install --filter @docuvate/e2e... --ignore-scripts
       - name: Seed labels screenshot user (duplicate stack FK)

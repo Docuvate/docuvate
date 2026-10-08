@@ -1,9 +1,9 @@
-FROM node:24-alpine AS build
+FROM node:24.21.0-alpine AS build
 ARG VITE_API_URL=/api
 ARG VITE_DOCUVATE_BUILD_SHA=dev
 ENV VITE_API_URL=$VITE_API_URL
 ENV VITE_DOCUVATE_BUILD_SHA=$VITE_DOCUVATE_BUILD_SHA
-RUN corepack enable && corepack prepare pnpm@10.33.3 --activate
+RUN corepack enable && corepack prepare pnpm@10.34.6 --activate
 WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY packages/contracts/package.json packages/contracts/

@@ -1,4 +1,5 @@
-FROM python:3.12-slim
+FROM python:3.12.15-slim
+ARG UV_VERSION=0.12.23
 RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
     libgomp1 \
@@ -17,7 +18,7 @@ ENV HOME=/opt/models
 ENV FASTEMBED_CACHE_PATH=/opt/models/fastembed
 ENV PADDLE_PDX_CACHE_HOME=/opt/models/paddle
 RUN mkdir -p /opt/models/fastembed /opt/models/paddle /opt/models/.paddleocr
-RUN pip install --no-cache-dir uv \
+RUN pip install --no-cache-dir "uv==${UV_VERSION}" \
  && if [ -n "$WORKER_OPTIONAL_EXTRAS" ]; then \
       uv pip install --system -e "./apps/worker[${WORKER_OPTIONAL_EXTRAS}]"; \
     else \
