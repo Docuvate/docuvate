@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
-import IORedis from 'ioredis';
+import type IORedis from 'ioredis';
+import { createValkeyConnection } from '../../../shared/infrastructure/valkey/valkey-connection.js';
 
 const KEY_PREFIX = 'chat:gen:cancel:';
 const TTL_SECONDS = 60 * 60;
@@ -10,8 +11,7 @@ export class DocumentChatGenerationCancelRegistry implements OnModuleDestroy {
 
   private getConnection(): IORedis {
     if (!this.connection) {
-      const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
-      this.connection = new IORedis(valkeyUrl, { maxRetriesPerRequest: null });
+      this.connection = createValkeyConnection();
     }
     return this.connection;
   }

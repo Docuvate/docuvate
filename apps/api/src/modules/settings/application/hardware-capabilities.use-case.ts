@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { HardwareCapabilitiesDto } from '@docuvate/contracts';
-import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
+import { fetchWorkerDependency } from '../../../shared/infrastructure/worker/worker-dependency-fetch.js';
 
 function withDockerMemoryHints(base: HardwareCapabilitiesDto): HardwareCapabilitiesDto {
   const warn = process.env['DOCUVATE_DOCKER_MEMORY_WARNING'] !== 'false';
@@ -44,10 +44,10 @@ export class GetHardwareCapabilitiesUseCase {
       return CPU_FALLBACK;
     }
     try {
-      const response = await fetch(workerApiUrl(workerUrl, '/settings/hardware'), {
+      const response = await fetchWorkerDependency(workerUrl, '/settings/hardware', {
         headers: this.workerHeaders(),
       });
-      if (!response.ok) {
+      if (!response?.ok) {
         return CPU_FALLBACK;
       }
       const data = (await response.json()) as HardwareCapabilitiesDto;

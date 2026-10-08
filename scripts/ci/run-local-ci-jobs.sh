@@ -160,9 +160,9 @@ job_compose_smoke() {
   code="$(docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" ps -a migrate --format '{{.ExitCode}}')"
   test "$code" = "0"
   for i in $(seq 1 90); do
-    if curl -sf http://localhost:3001/health >/dev/null; then break; fi
+    if curl -sf http://localhost:3001/health/ready | jq -e '.status == "ready"' >/dev/null; then break; fi
     if [[ "$i" -eq 90 ]]; then
-      docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" logs api migrate
+      docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" logs api migrate worker valkey
       exit 1
     fi
     sleep 2

@@ -1,15 +1,21 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import type IORedis from 'ioredis';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
+import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
+import {
+  createValkeyConnection,
+  waitForValkeyReady,
+} from '../../../shared/infrastructure/valkey/valkey-connection.js';
 
 const QUEUE_NAME = 'document-extraction';
 const ARENA_COUNTER_KEY = 'arena:sample:counter';
 
 @Injectable()
 export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(ExtractionQueueService.name);
   private connection!: IORedis;
   private queue!: Queue;
   private worker!: Worker;
@@ -19,9 +25,9 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     private readonly runArenaSample: RunArenaSampleCompareUseCase
   ) {}
 
-  onModuleInit(): void {
-    const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
-    this.connection = new IORedis(valkeyUrl, { maxRetriesPerRequest: null });
+  async onModuleInit(): Promise<void> {
+    this.connection = createValkeyConnection();
+    await waitForValkeyReady(this.connection);
 
     this.queue = new Queue(QUEUE_NAME, { connection: this.connection });
 
@@ -41,7 +47,21 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   async enqueue(documentId: string, _userId: string): Promise<void> {
-    await this.queue.add('extract', { documentId, userId: _userId });
+    await enqueueBullJobWithRetry(
+      () =>
+        this.queue.add(
+          'extract',
+          { documentId, userId: _userId },
+          {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 2_000 },
+            removeOnComplete: 1_000,
+            removeOnFail: 500,
+          }
+        ),
+      { maxAttempts: 5, label: QUEUE_NAME }
+    );
+    this.logger.debug(`Enqueued extraction for document ${documentId}`);
   }
 
   async maybeEnqueueArenaSample(documentId: string): Promise<void> {

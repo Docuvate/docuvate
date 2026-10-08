@@ -1,11 +1,12 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { Public } from '../../shared/infrastructure/auth/public.decorator.js';
 import { ApiExcludeController } from '@nestjs/swagger';
-import IORedis from 'ioredis';
 import pg from 'pg';
 import * as Minio from 'minio';
 import { PG_POOL } from '../../shared/infrastructure/database/tokens.js';
 import { HealthResponseDto, ReadinessResponseDto } from '../../shared/presentation/dtos/health.dto.js';
+import { createValkeyConnection } from '../../shared/infrastructure/valkey/valkey-connection.js';
+import { fetchWorkerDependency } from '../../shared/infrastructure/worker/worker-dependency-fetch.js';
 
 @ApiExcludeController()
 @Controller('health')
@@ -31,13 +32,22 @@ export class HealthController {
     }
 
     try {
-      const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
-      const redis = new IORedis(valkeyUrl);
+      const redis = createValkeyConnection();
       await redis.ping();
       await redis.quit();
       checks.valkey = 'ok';
     } catch {
       checks.valkey = 'fail';
+    }
+
+    const workerUrl = process.env['WORKER_URL'];
+    if (workerUrl) {
+      try {
+        const response = await fetchWorkerDependency(workerUrl, '/health');
+        checks.worker = response?.ok ? 'ok' : 'fail';
+      } catch {
+        checks.worker = 'fail';
+      }
     }
 
     try {

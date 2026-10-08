@@ -184,12 +184,12 @@ jobs:
         run: |
           set -euo pipefail
           for i in $(seq 1 90); do
-            if curl -sf http://localhost:3001/health >/dev/null; then
+            if curl -sf http://localhost:3001/health/ready | jq -e '.status == "ready"' >/dev/null; then
               break
             fi
             if [ "$i" -eq 90 ]; then
-              echo "API health check timed out"
-              docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate
+              echo "API readiness check timed out"
+              docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate worker valkey
               exit 1
             fi
             sleep 2
