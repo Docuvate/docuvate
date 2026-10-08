@@ -2,6 +2,7 @@ import type { ThemePreference, UiLocale } from '@docuvate/contracts';
 import { updateUserSettings } from './api';
 import { formatUserFacingError } from './apiErrors';
 import { applyThemePreference } from './docuvateTheme';
+import { notifySaved } from './saveNotify';
 import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
 
 type PersistPatch =
@@ -15,6 +16,7 @@ export async function persistUserUiPreference(
     applyThemePreference(patch.next);
     try {
       await updateUserSettings({ themePreference: patch.next });
+      notifySaved();
       return { ok: true };
     } catch (err) {
       applyThemePreference(patch.previous);
@@ -30,6 +32,7 @@ export async function persistUserUiPreference(
   window.localStorage.setItem(LOCALE_STORAGE_KEY, patch.next);
   try {
     await updateUserSettings({ locale: patch.next });
+    notifySaved();
     return { ok: true };
   } catch (err) {
     void i18n.changeLanguage(patch.previous);
