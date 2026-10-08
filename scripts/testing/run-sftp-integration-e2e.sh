@@ -42,7 +42,7 @@ for i in $(seq 1 60); do
   sleep 1
 done
 
-pnpm install --filter @docuvate/api...
+pnpm install --filter @docuvate/api... --ignore-scripts
 node scripts/testing/seed-sftp-e2e.mjs
 
 export DOCUVATE_SFTP_E2E=1
