@@ -1,21 +1,20 @@
-import { useSyncExternalStore } from 'react';
+import { useLayoutEffect, useState } from 'react';
+import { NARROW_VIEWPORT_MEDIA_QUERY, readNarrowViewport } from './narrowViewport';
 
-const QUERY = '(max-width: 768px)';
-
-function subscribe(onChange: () => void): () => void {
-  const mq = window.matchMedia(QUERY);
-  mq.addEventListener('change', onChange);
-  return () => mq.removeEventListener('change', onChange);
-}
-
-function getSnapshot(): boolean {
-  return window.matchMedia(QUERY).matches;
-}
-
-function getServerSnapshot(): boolean {
-  return false;
-}
-
+/**
+ * True when viewport width is ≤ {@link NARROW_VIEWPORT_MAX_WIDTH_PX} (768px).
+ * Uses layout effect so the first paint matches matchMedia (avoids table flash on phones).
+ */
 export function useNarrowTopbar(): boolean {
-  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [matches, setMatches] = useState(readNarrowViewport);
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia(NARROW_VIEWPORT_MEDIA_QUERY);
+    const sync = () => setMatches(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+
+  return matches;
 }

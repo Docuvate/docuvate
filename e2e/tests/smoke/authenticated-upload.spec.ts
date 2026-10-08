@@ -47,7 +47,10 @@ test.describe('Authenticated compose smoke', () => {
 
     await attachScreenshot(page, testInfo, '02-after-upload-list.png');
 
-    await docRow.getByRole('link', { name: /^open$|^öffnen$/i }).click();
+    await docRow
+      .locator('a.library-open-doc-btn, a[href*="/documents/"]')
+      .first()
+      .click();
     await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
 
     await expect(page.getByText(/loading pdf/i)).toHaveCount(0);

@@ -226,6 +226,7 @@
     "mappeDocCount": "{{count}} Dokumente",
     "mappeFolderCount": "{{count}} Unterordner",
     "searchPlaceholder": "Suche nach Titel, Dateiname oder Text…",
+    "searchPlaceholderCompact": "Dokumente durchsuchen",
     "searchDocsAria": "Dokumente suchen",
     "filterToggle": "Filter einblenden",
     "filterToggleCollapse": "Filter ausblenden",
