@@ -226,6 +226,7 @@
     "mappeDocCount": "{{count}} documents",
     "mappeFolderCount": "{{count}} subfolders",
     "searchPlaceholder": "Search title, filename, or text…",
+    "searchPlaceholderCompact": "Search documents",
     "searchDocsAria": "Search documents",
     "filterToggle": "Show filters",
     "filterToggleCollapse": "Hide filters",

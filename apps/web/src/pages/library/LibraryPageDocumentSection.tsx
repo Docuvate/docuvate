@@ -1,5 +1,6 @@
 import type { ReactNode, RefObject } from 'react';
 import { useMemo } from 'react';
+import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { useTranslation } from 'react-i18next';
 import { DuplicateStackReviewDialog } from '../../components/library/DuplicateStackReviewDialog';
 import { LibraryBulkBar } from '../../components/library/LibraryBulkBar';
@@ -50,6 +51,7 @@ export function LibraryPageDocumentSection({
 }: LibraryPageDocumentSectionProps) {
   const { t } = useTranslation();
   const sortOptions = useMemo(() => librarySortSelectOptions(t), [t]);
+  const compactLibrarySearch = useNarrowTopbar();
   const filterToggleLabel = filterToggle
     ? filterToggle.expanded
       ? t('library.filterToggleCollapse')
@@ -76,29 +78,33 @@ export function LibraryPageDocumentSection({
         <div className={`library-list-toolbar${filesystemLayout ? ' library-list-toolbar-filesystem' : ''}`}>
           <form
             onSubmit={(e) => void data.onSearch(e)}
-            className={`search-row library-list-search${filterToggle ? ' library-search-row' : ''}`}
+            className={`search-row library-list-search${filterToggle ? ' library-search-row' : ''}${compactLibrarySearch ? ' library-list-search--compact' : ''}`}
           >
             <Input
-              placeholder={t('library.searchPlaceholder')}
+              placeholder={t(
+                compactLibrarySearch ? 'library.searchPlaceholderCompact' : 'library.searchPlaceholder'
+              )}
               value={data.query}
               onChange={(e) => data.setQuery(e.target.value)}
               aria-label={t('library.searchDocsAria')}
             />
-            {filterToggle && filterToggleLabel ? (
-              <Button
-                ref={filterToggle.buttonRef ?? undefined}
-                type="button"
-                variant="secondary"
-                className="library-filter-toggle"
-                aria-expanded={filterToggle.expanded}
-                onClick={filterToggle.onToggle}
-              >
-                {filterToggleLabel}
+            <div className="library-list-search-actions">
+              {filterToggle && filterToggleLabel ? (
+                <Button
+                  ref={filterToggle.buttonRef ?? undefined}
+                  type="button"
+                  variant="secondary"
+                  className="library-filter-toggle"
+                  aria-expanded={filterToggle.expanded}
+                  onClick={filterToggle.onToggle}
+                >
+                  {filterToggleLabel}
+                </Button>
+              ) : null}
+              <Button type="submit" variant="secondary">
+                {t('shell.search')}
               </Button>
-            ) : null}
-            <Button type="submit" variant="secondary">
-              {t('shell.search')}
-            </Button>
+            </div>
           </form>
           {filesystemLayout ? (
             <div className="library-list-toolbar-controls">
