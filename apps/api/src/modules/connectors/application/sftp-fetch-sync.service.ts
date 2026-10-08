@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  OnApplicationBootstrap,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import type pg from 'pg';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { validateScanFile } from '../../sftp-ingress/domain/scan-file-validation.js';
@@ -14,7 +19,7 @@ interface SftpInstallationRow {
 }
 
 @Injectable()
-export class SftpFetchSyncService implements OnModuleInit, OnModuleDestroy {
+export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDestroy {
   private timer: ReturnType<typeof setInterval> | null = null;
   private running = false;
 
@@ -24,13 +29,16 @@ export class SftpFetchSyncService implements OnModuleInit, OnModuleDestroy {
     private readonly uploadDocument: UploadDocumentUseCase
   ) {}
 
-  onModuleInit(): void {
+  onApplicationBootstrap(): void {
     const intervalMs = Number(process.env['DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS'] ?? 60_000);
     if (intervalMs <= 0) return;
-    this.timer = setInterval(() => {
-      void this.tick();
-    }, intervalMs);
-    void this.tick();
+    const runTick = () => {
+      void this.tick().catch(() => {
+        /* background sync; failures are logged per installation */
+      });
+    };
+    this.timer = setInterval(runTick, intervalMs);
+    runTick();
   }
 
   onModuleDestroy(): void {

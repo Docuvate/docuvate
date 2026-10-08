@@ -127,7 +127,7 @@ wait_core_resources() {
     sleep 2
   done
   echo "Timed out waiting for secrets and postgres"
-  kubectl -n docuvate get events --sort-by=.lastTimestamp | tail -25
+  kubectl -n docuvate get events --sort-by=.metadata.creationTimestamp | tail -25
   return 1
 }
 
