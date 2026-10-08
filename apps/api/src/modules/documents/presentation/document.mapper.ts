@@ -60,11 +60,6 @@ export function toDocumentDto(
     status: entity.status,
     extractionFailureReason: entity.extractionFailureReason ?? null,
     mimeType: entity.mimeType,
-    formatBadge: documentFormatBadge(entity.mimeType, entity.filename),
-    previewAvailable: documentUsesPdfPreview(
-      entity.mimeType,
-      Boolean(entity.previewStorageKey?.trim())
-    ),
     ingestSource: entity.ingestSource ?? null,
     documentDate: entity.documentDate ? entity.documentDate.toISOString().slice(0, 10) : null,
     notes: entity.notes ?? null,

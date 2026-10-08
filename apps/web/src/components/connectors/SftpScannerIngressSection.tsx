@@ -1,13 +1,10 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type {
   SftpIngressAccountDto,
   SftpIngressEventDto,
   SftpIngressServerInfoDto,
 } from '@docuvate/contracts';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-
 import {
   createSftpIngressAccount,
   getSftpIngressServer,
@@ -17,8 +14,8 @@ import {
   revokeSftpIngressAccount,
 } from '../../lib/api';
 import { Button } from '../ui/Button';
-import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { CopyButton } from '../ui/CopyButton';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ConnectorPluginIcon } from './ConnectorPluginIcon';
 import { SftpIngressSetupDialog } from './SftpIngressSetupDialog';
 import { SftpScannerIngressManageDrawer } from './SftpScannerIngressManageDrawer';
@@ -26,17 +23,10 @@ import { SftpScannerIngressManageDrawer } from './SftpScannerIngressManageDrawer
 function lastReceivedAt(events: SftpIngressEventDto[]): string | null {
   const ok = events.filter((e) => e.status === 'processed' || e.status === 'received');
   if (!ok.length) return null;
-  return ok.reduce(
-    (latest, row) => (row.createdAt > latest ? row.createdAt : latest),
-    ok[0].createdAt
-  );
+  return ok.reduce((latest, row) => (row.createdAt > latest ? row.createdAt : latest), ok[0]!.createdAt);
 }
 
-export function SftpScannerIngressSection({
-  viewerIsServerAdmin = false,
-}: {
-  viewerIsServerAdmin?: boolean;
-}) {
+export function SftpScannerIngressSection({ viewerIsServerAdmin = false }: { viewerIsServerAdmin?: boolean }) {
   const { t, i18n } = useTranslation();
   const manageButtonRef = useRef<HTMLButtonElement>(null);
   const [server, setServer] = useState<SftpIngressServerInfoDto | null>(null);
@@ -135,7 +125,7 @@ export function SftpScannerIngressSection({
     }
   }
 
-  const endpointLine = `${server?.host ?? t('sftpIngress.hostNotConfigured')}:${String(server?.port ?? 2222)}`;
+  const endpointLine = `${server?.host ?? '—'}:${server?.port ?? 2222}`;
   const fingerprint = server?.hostKeyFingerprintSha256 ?? null;
 
   const formatReceivedTime = (iso: string) =>
@@ -170,9 +160,7 @@ export function SftpScannerIngressSection({
                   </span>
                 ) : null}
               </div>
-              <p className="connector-catalog-category">
-                {t('connectors.categories.scannerSftp.label')}
-              </p>
+              <p className="connector-catalog-category">{t('connectors.categories.scannerSftp.label')}</p>
               <p className="muted connector-catalog-description">{summaryLine}</p>
             </div>
           </div>
@@ -191,7 +179,7 @@ export function SftpScannerIngressSection({
               ref={manageButtonRef}
               type="button"
               variant="secondary"
-              onClick={() => { setManageOpen(true); }}
+              onClick={() => setManageOpen(true)}
             >
               {t('sftpIngress.manageCta')}
             </Button>
@@ -201,7 +189,7 @@ export function SftpScannerIngressSection({
 
       <SftpScannerIngressManageDrawer
         open={manageOpen}
-        onClose={() => { setManageOpen(false); }}
+        onClose={() => setManageOpen(false)}
         returnFocusRef={manageButtonRef}
         accounts={accounts}
         eventsByAccount={eventsByAccount}
@@ -214,7 +202,7 @@ export function SftpScannerIngressSection({
           setManageOpen(false);
           setSetupOpen(true);
         }}
-        onRevoke={(account) => { setRevokeTarget(account); }}
+        onRevoke={(account) => setRevokeTarget(account)}
       />
 
       <SftpIngressSetupDialog
@@ -223,7 +211,7 @@ export function SftpScannerIngressSection({
         server={server}
         serverReady={serverReady}
         folders={folders}
-        onCancel={() => { setSetupOpen(false); }}
+        onCancel={() => setSetupOpen(false)}
         onComplete={() => void reload()}
         onSubmit={handleSubmit}
       />
@@ -231,14 +219,12 @@ export function SftpScannerIngressSection({
       <ConfirmDialog
         open={Boolean(revokeTarget)}
         title={t('sftpIngress.revokeConfirmTitle')}
-        description={t('sftpIngress.revokeConfirmDescription', {
-          name: revokeTarget?.displayName ?? '',
-        })}
+        description={t('sftpIngress.revokeConfirmDescription', { name: revokeTarget?.displayName ?? '' })}
         confirmLabel={revokeBusy ? t('sftpIngress.revokePending') : t('sftpIngress.revokeCta')}
         busy={revokeBusy}
         tone="danger"
         onConfirm={() => void handleRevoke()}
-        onCancel={() => { setRevokeTarget(null); }}
+        onCancel={() => setRevokeTarget(null)}
       />
     </>
   );

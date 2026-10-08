@@ -3120,79 +3120,6 @@
         ]
       }
     },
-    "/connectors/plugins/paperless/test-connection": {
-      "post": {
-        "operationId": "testPaperlessConnection",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TestPaperlessConnectionRequestDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          },
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Validate Paperless-ngx credentials",
-        "tags": [
-          "Connectors"
-        ]
-      }
-    },
     "/connectors/plugins/sftp_fetch/probe-host-key": {
       "post": {
         "operationId": "probeSftpFetchHostKey",
@@ -3213,7 +3140,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -3223,7 +3150,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -3233,7 +3160,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -3243,7 +3170,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11224,7 +11151,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11234,7 +11161,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11244,7 +11171,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11254,7 +11181,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11276,16 +11203,6 @@
       "post": {
         "operationId": "createSftpIngressAccount",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SftpIngressCreateAccountBodyDto"
-              }
-            }
-          }
-        },
         "responses": {
           "201": {
             "description": "",
@@ -11302,7 +11219,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11312,7 +11229,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11322,7 +11239,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11332,7 +11249,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11374,7 +11291,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11384,7 +11301,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11394,7 +11311,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11404,7 +11321,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11454,7 +11371,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11464,7 +11381,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11474,7 +11391,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11484,7 +11401,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11524,7 +11441,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11534,7 +11451,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11544,7 +11461,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11554,7 +11471,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
                 }
               }
             }
@@ -11571,6 +11488,258 @@
         "summary": "SFTP scanner ingress server info",
         "tags": [
           "sftp-ingress"
+        ]
+      }
+    },
+    "/sftp-ingress/service/audit": {
+      "post": {
+        "operationId": "recordSftpIngressAudit",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Record SFTP ingress audit event",
+        "tags": [
+          "sftp-ingress/service"
+        ]
+      }
+    },
+    "/sftp-ingress/service/authenticate": {
+      "post": {
+        "operationId": "authenticateSftpIngressAccount",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Validate SFTP ingress credentials (service)",
+        "tags": [
+          "sftp-ingress/service"
+        ]
+      }
+    },
+    "/sftp-ingress/service/ingest": {
+      "post": {
+        "operationId": "ingestSftpScan",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ingest completed SFTP scan (service)",
+        "tags": [
+          "sftp-ingress/service"
+        ]
+      }
+    },
+    "/sftp-ingress/service/resolve": {
+      "post": {
+        "operationId": "resolveSftpIngressAccount",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Resolve account after SSH auth",
+        "tags": [
+          "sftp-ingress/service"
         ]
       }
     },

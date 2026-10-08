@@ -1,15 +1,12 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPlugin } from '../../../domain/connector.ports.js';
 import type {
   ConnectorConfigurationInput,
   ConnectorValidationResult,
 } from '../../../domain/connector.types.js';
-import { readConnectorConfigString } from '../shared/connector-config-string.js';
 import { requiredFieldsPresent } from '../shared/required-fields.validation.js';
 import { remoteValidationFailed } from '../shared/validation-message.js';
-import { openSftpFetchRuntime } from './sftp-fetch.runtime.js';
 import { probeSftpPullHostKey } from './sftp-pull.gateway.js';
+import { openSftpFetchRuntime } from './sftp-fetch.runtime.js';
 import { listSftpPullFiles } from './sftp-pull.gateway.js';
 
 export class SftpFetchConnector implements ConnectorPlugin {
@@ -26,12 +23,7 @@ export class SftpFetchConnector implements ConnectorPlugin {
     return {
       strategy: 'custom' as const,
       fields: [
-        {
-          key: 'host',
-          labelKey: 'connectors.auth.fields.host',
-          type: 'text' as const,
-          required: true,
-        },
+        { key: 'host', labelKey: 'connectors.auth.fields.host', type: 'text' as const, required: true },
         {
           key: 'port',
           labelKey: 'connectors.auth.fields.port',
@@ -39,12 +31,7 @@ export class SftpFetchConnector implements ConnectorPlugin {
           required: true,
           placeholderKey: 'connectors.plugins.sftpFetch.portPlaceholder',
         },
-        {
-          key: 'username',
-          labelKey: 'connectors.auth.fields.username',
-          type: 'text' as const,
-          required: true,
-        },
+        { key: 'username', labelKey: 'connectors.auth.fields.username', type: 'text' as const, required: true },
         {
           key: 'password',
           labelKey: 'connectors.auth.fields.password',
@@ -117,9 +104,7 @@ export class SftpFetchConnector implements ConnectorPlugin {
     return openSftpFetchRuntime(credentials);
   }
 
-  async validateConfiguration(
-    input: ConnectorConfigurationInput
-  ): Promise<ConnectorValidationResult> {
+  async validateConfiguration(input: ConnectorConfigurationInput): Promise<ConnectorValidationResult> {
     const required = requiredFieldsPresent(input, [
       'host',
       'port',
@@ -130,14 +115,7 @@ export class SftpFetchConnector implements ConnectorPlugin {
       'after_import',
     ]);
     if (!required.ok) return required;
-    const poll = Number(input.poll_interval_seconds);
-    if (!Number.isFinite(poll) || poll < 60) {
-      return remoteValidationFailed('connectors.errors.sftpPollIntervalInvalid');
-    }
-    if (
-      !readConnectorConfigString(input, 'password') &&
-      !readConnectorConfigString(input, 'private_key')
-    ) {
+    if (!input['password']?.trim() && !input['private_key']?.trim()) {
       return remoteValidationFailed('connectors.errors.sftpAuthRequired');
     }
     try {

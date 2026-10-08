@@ -12,7 +12,6 @@ import (
 
 	httpadapter "github.com/docuvate/sftp-ingest/internal/adapters/http"
 	sftpadapter "github.com/docuvate/sftp-ingest/internal/adapters/sftp"
-	"github.com/docuvate/sftp-ingest/internal/config"
 	"github.com/docuvate/sftp-ingest/internal/security"
 )
 
@@ -22,9 +21,9 @@ func main() {
 	defer stop()
 
 	apiURL := env("DOCUVATE_API_URL", "http://api:3001")
-	apiKey, err := config.LoadServiceAPIKey()
-	if err != nil {
-		logger.Error("service API key", "err", err)
+	apiKey := os.Getenv("DOCUVATE_SERVICE_API_KEY")
+	if apiKey == "" {
+		logger.Error("DOCUVATE_SERVICE_API_KEY is required")
 		os.Exit(1)
 	}
 	client := httpadapter.NewClient(apiURL, apiKey)
@@ -34,7 +33,6 @@ func main() {
 		DataDir:                   env("SFTP_DATA_DIR", "/data/staging"),
 		MaxFileBytes:              envInt64("DOCUVATE_SFTP_INGEST_MAX_BYTES", 26_214_400),
 		MaxPendingBytesPerAccount: envInt64("DOCUVATE_SFTP_MAX_PENDING_BYTES", 104_857_600),
-		MaxConnections:            int(envInt64("DOCUVATE_SFTP_MAX_CONNECTIONS", 64)),
 		Limiter:                   security.NewLimiter(security.DefaultConfig()),
 	}
 	server, err := sftpadapter.NewServer(cfg, client, client, client, logger)
@@ -69,14 +67,7 @@ func startHealthServer(ctx context.Context, logger *slog.Logger, server *sftpada
 	mux.HandleFunc("/pull/list", httpadapter.PullListHandler(apiKey))
 	mux.HandleFunc("/pull/fetch", httpadapter.PullFetchHandler(apiKey))
 	mux.HandleFunc("/pull/post-process", httpadapter.PullPostProcessHandler(apiKey))
-	httpServer := &http.Server{
-		Addr:              addr,
-		Handler:           mux,
-		ReadHeaderTimeout: 5 * time.Second,
-		ReadTimeout:       30 * time.Second,
-		WriteTimeout:      120 * time.Second,
-		IdleTimeout:       60 * time.Second,
-	}
+	httpServer := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
 	go func() {
 		<-ctx.Done()
 		_ = httpServer.Shutdown(context.Background())

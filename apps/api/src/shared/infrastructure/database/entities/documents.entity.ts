@@ -101,7 +101,16 @@ export class DocumentsEntity {
   @Column('text', { name: 'extracted_markdown', nullable: true })
   extractedMarkdown: string | null;
 
-  @OneToMany(() => ChatThreadDocumentsEntity, (chatThreadDocuments) => chatThreadDocuments.document)
+  @Column("uuid", { name: "mappe_id", nullable: true })
+  mappeId: string | null;
+
+  @Column("text", { name: "ingest_source", nullable: true })
+  ingestSource: string | null;
+
+  @OneToMany(
+    () => ChatThreadDocumentsEntity,
+    (chatThreadDocuments) => chatThreadDocuments.document
+  )
   chatThreadDocuments: ChatThreadDocumentsEntity[];
 
   @OneToMany(

@@ -1,7 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
-
 import { ConnectorInstallationsEntity } from './connector-installations.entity.js';
 
 @Index('sftp_pull_sync_state_pkey', ['installationId'], { unique: true })
@@ -16,12 +13,11 @@ export class SftpPullSyncStateEntity {
   @Column('text', { name: 'last_error_key', nullable: true })
   lastErrorKey: string | null;
 
-  @Column('text', { name: 'processed_refs', array: true, default: () => "'{}'" })
-  processedRefs: string[];
-
-  @OneToOne(() => ConnectorInstallationsEntity, (installation) => installation.sftpPullSyncState, {
-    onDelete: 'CASCADE',
-  })
+  @OneToOne(
+    () => ConnectorInstallationsEntity,
+    (installation) => installation.sftpPullSyncState,
+    { onDelete: 'CASCADE' },
+  )
   @JoinColumn([{ name: 'installation_id', referencedColumnName: 'id' }])
   installation: ConnectorInstallationsEntity;
 }

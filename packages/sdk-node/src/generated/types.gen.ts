@@ -1949,26 +1949,6 @@ export type StartConnectorOAuthResponses = {
 
 export type StartConnectorOAuthResponse = StartConnectorOAuthResponses[keyof StartConnectorOAuthResponses];
 
-export type TestPaperlessConnectionData = {
-    body: TestPaperlessConnectionRequestDto;
-    path?: never;
-    query?: never;
-    url: '/connectors/plugins/paperless/test-connection';
-};
-
-export type TestPaperlessConnectionErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
-};
-
-export type TestPaperlessConnectionError = TestPaperlessConnectionErrors[keyof TestPaperlessConnectionErrors];
-
-export type TestPaperlessConnectionResponses = {
-    201: unknown;
-};
-
 export type ProbeSftpFetchHostKeyData = {
     body?: never;
     path?: never;
@@ -1977,10 +1957,10 @@ export type ProbeSftpFetchHostKeyData = {
 };
 
 export type ProbeSftpFetchHostKeyErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
 };
 
 export type ProbeSftpFetchHostKeyError = ProbeSftpFetchHostKeyErrors[keyof ProbeSftpFetchHostKeyErrors];
@@ -4328,10 +4308,10 @@ export type ListSftpIngressAccountsData = {
 };
 
 export type ListSftpIngressAccountsErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
 };
 
 export type ListSftpIngressAccountsError = ListSftpIngressAccountsErrors[keyof ListSftpIngressAccountsErrors];
@@ -4341,17 +4321,17 @@ export type ListSftpIngressAccountsResponses = {
 };
 
 export type CreateSftpIngressAccountData = {
-    body: SftpIngressCreateAccountBodyDto;
+    body?: never;
     path?: never;
     query?: never;
     url: '/sftp-ingress/accounts';
 };
 
 export type CreateSftpIngressAccountErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
 };
 
 export type CreateSftpIngressAccountError = CreateSftpIngressAccountErrors[keyof CreateSftpIngressAccountErrors];
@@ -4374,10 +4354,10 @@ export type RevokeSftpIngressAccountData = {
 };
 
 export type RevokeSftpIngressAccountErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
 };
 
 export type RevokeSftpIngressAccountError = RevokeSftpIngressAccountErrors[keyof RevokeSftpIngressAccountErrors];
@@ -4398,10 +4378,10 @@ export type ListSftpIngressEventsData = {
 };
 
 export type ListSftpIngressEventsErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
 };
 
 export type ListSftpIngressEventsError = ListSftpIngressEventsErrors[keyof ListSftpIngressEventsErrors];
@@ -4418,10 +4398,10 @@ export type GetSftpIngressServerData = {
 };
 
 export type GetSftpIngressServerErrors = {
-    401: ProblemDetailsDto;
-    403: ProblemDetailsDto;
-    404: ProblemDetailsDto;
-    422: ProblemDetailsDto;
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
 };
 
 export type GetSftpIngressServerError = GetSftpIngressServerErrors[keyof GetSftpIngressServerErrors];
@@ -4433,6 +4413,86 @@ export type GetSftpIngressServerResponses = {
 };
 
 export type GetSftpIngressServerResponse = GetSftpIngressServerResponses[keyof GetSftpIngressServerResponses];
+
+export type RecordSftpIngressAuditData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/service/audit';
+};
+
+export type RecordSftpIngressAuditErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type RecordSftpIngressAuditError = RecordSftpIngressAuditErrors[keyof RecordSftpIngressAuditErrors];
+
+export type RecordSftpIngressAuditResponses = {
+    201: unknown;
+};
+
+export type AuthenticateSftpIngressAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/service/authenticate';
+};
+
+export type AuthenticateSftpIngressAccountErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type AuthenticateSftpIngressAccountError = AuthenticateSftpIngressAccountErrors[keyof AuthenticateSftpIngressAccountErrors];
+
+export type AuthenticateSftpIngressAccountResponses = {
+    201: unknown;
+};
+
+export type IngestSftpScanData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/service/ingest';
+};
+
+export type IngestSftpScanErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type IngestSftpScanError = IngestSftpScanErrors[keyof IngestSftpScanErrors];
+
+export type IngestSftpScanResponses = {
+    201: unknown;
+};
+
+export type ResolveSftpIngressAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/service/resolve';
+};
+
+export type ResolveSftpIngressAccountErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ResolveSftpIngressAccountError = ResolveSftpIngressAccountErrors[keyof ResolveSftpIngressAccountErrors];
+
+export type ResolveSftpIngressAccountResponses = {
+    201: unknown;
+};
 
 export type ListTagsData = {
     body?: never;

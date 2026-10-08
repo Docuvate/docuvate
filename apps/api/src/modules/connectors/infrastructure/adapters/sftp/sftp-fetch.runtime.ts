@@ -1,10 +1,5 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ConnectorRuntimePorts, ConnectorSourcePort } from '../../../domain/connector-runtime.ports.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
-import type {
-  ConnectorRuntimePorts,
-  ConnectorSourcePort,
-} from '../../../domain/connector-runtime.ports.js';
 import type {
   ConnectorImportableItem,
   ConnectorImportedBlob,
@@ -20,18 +15,18 @@ function guessMimeType(name: string): string {
   return 'application/octet-stream';
 }
 
-export function openSftpFetchRuntime(
-  credentials: ConnectorConfigurationInput
-): ConnectorRuntimePorts {
+export function openSftpFetchRuntime(credentials: ConnectorConfigurationInput): ConnectorRuntimePorts {
   const source: ConnectorSourcePort = {
     async listImportables({ limit }) {
       const files = await listSftpPullFiles(credentials, limit);
-      return files.map((file): ConnectorImportableItem => ({
-        ref: file.path,
-        title: file.name,
-        mimeType: guessMimeType(file.name),
-        sizeBytes: file.sizeBytes,
-      }));
+      return files.map(
+        (file): ConnectorImportableItem => ({
+          ref: file.path,
+          title: file.name,
+          mimeType: guessMimeType(file.name),
+          sizeBytes: file.sizeBytes ?? null,
+        })
+      );
     },
     async fetchImportable(ref: string) {
       const buffer = await fetchSftpPullFile(credentials, ref);

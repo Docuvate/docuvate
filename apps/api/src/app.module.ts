@@ -28,6 +28,9 @@ import { AuthModule } from './shared/infrastructure/auth/auth.module.js';
 import { AuthorizationModule } from './shared/infrastructure/authorization/authorization.module.js';
 import { DatabaseModule } from './shared/infrastructure/database/database.module.js';
 import { ExtensionHostModule } from './shared/infrastructure/extensions/extension-host.module.js';
+import { SearchModule } from './modules/search/search.module.js';
+import { SftpIngressModule } from './modules/sftp-ingress/sftp-ingress.module.js';
+
 @Module({
   imports: [
     ExtensionHostModule.register(),
@@ -51,11 +54,7 @@ import { ExtensionHostModule } from './shared/infrastructure/extensions/extensio
     ModelRegistryModule,
     AuthPublicModule,
     SearchModule,
-    AdminModule,
-    AuthInvitationsModule,
-    WorkspaceModule,
     SftpIngressModule,
-    ChatModule,
   ],
 })
 // Nest requires a module class token; this module has no instance state.

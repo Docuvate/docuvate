@@ -1,10 +1,7 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { X } from 'lucide-react';
-import { type ReactNode, type RefObject,useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-
 import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
 
 interface SftpIngressManageDrawerShellProps {
@@ -44,7 +41,7 @@ export function SftpIngressManageDrawerShell({
       }
     }
     document.addEventListener('keydown', onKeyDown);
-    return () => { document.removeEventListener('keydown', onKeyDown); };
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, [open, closeAndRestoreFocus]);
 
   useEffect(() => {
@@ -90,6 +87,6 @@ export function SftpIngressManageDrawerShell({
         {children}
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

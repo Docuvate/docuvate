@@ -32,6 +32,7 @@ func (c *Client) Authenticate(ctx context.Context, req ports.AuthRequest) (ports
 		"username":  req.Username,
 		"password":  req.Password,
 		"publicKey": req.PublicKey,
+		"clientIp":  req.ClientIP,
 	})
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, c.baseURL+"/v1/sftp-ingress/service/authenticate", bytes.NewReader(body))
 	if err != nil {

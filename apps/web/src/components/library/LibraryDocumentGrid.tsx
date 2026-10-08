@@ -90,11 +90,9 @@ export function LibraryDocumentGrid({
                 {doc.filename}
                 {doc.ingestSource === 'scanner_sftp' ? (
                   <span className="library-title-ingest-meta">
-                    <ScanLine
-                      className="library-title-ingest-icon"
-                      size={14}
-                      aria-label={t('documents.ingestSourceScanner')}
-                    />
+                    <span className="library-title-ingest-icon" aria-hidden>
+                      ⎙
+                    </span>
                     {t('documents.ingestSourceScanner')}
                   </span>
                 ) : null}

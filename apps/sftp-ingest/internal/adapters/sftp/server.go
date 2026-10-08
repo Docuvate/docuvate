@@ -4,9 +4,10 @@ import (
 	"context"
 	"crypto/ed25519"
 	"crypto/rand"
+	"crypto/sha256"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
-	"fmt"
 	"io"
 	"log/slog"
 	"net"
@@ -23,30 +24,22 @@ import (
 	"github.com/docuvate/sftp-ingest/internal/security"
 )
 
-type ctxKey string
-
-const (
-	ctxAccountID ctxKey = "accountID"
-	ctxUserNorm  ctxKey = "usernameNorm"
-)
-
 type Config struct {
 	ListenAddr                string
 	HostKeyPath               string
 	DataDir                   string
 	MaxFileBytes              int64
 	MaxPendingBytesPerAccount int64
-	MaxConnections            int
 	Limiter                   *security.Limiter
 }
 
 type Server struct {
-	cfg            Config
-	creds          ports.CredentialStorePort
-	ingest         ports.IngestPort
-	audit          ports.AuditPort
-	logger         *slog.Logger
-	signer         gossh.Signer
+	cfg     Config
+	creds   ports.CredentialStorePort
+	ingest  ports.IngestPort
+	audit   ports.AuditPort
+	logger  *slog.Logger
+	signer  gossh.Signer
 }
 
 func NewServer(cfg Config, creds ports.CredentialStorePort, ingest ports.IngestPort, audit ports.AuditPort, logger *slog.Logger) (*Server, error) {
@@ -66,14 +59,12 @@ func NewServer(cfg Config, creds ports.CredentialStorePort, ingest ports.IngestP
 	if cfg.Limiter == nil {
 		cfg.Limiter = security.NewLimiter(security.DefaultConfig())
 	}
-	if cfg.MaxConnections <= 0 {
-		cfg.MaxConnections = 64
-	}
 	return &Server{cfg: cfg, creds: creds, ingest: ingest, audit: audit, logger: logger, signer: signer}, nil
 }
 
 func (s *Server) HostKeyFingerprint() ports.HostKeyInfo {
-	return ports.HostKeyInfo{FingerprintSHA256: security.FingerprintSHA256(s.signer.PublicKey())}
+	sum := sha256.Sum256(s.signer.PublicKey().Marshal())
+	return ports.HostKeyInfo{FingerprintSHA256: base64.StdEncoding.EncodeToString(sum[:])}
 }
 
 func (s *Server) ListenAndServe(ctx context.Context) error {
@@ -82,11 +73,9 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 		Handler:          func(sess gliderssh.Session) { _ = sess.Exit(1) },
 		PasswordHandler:  s.passwordHandler,
 		PublicKeyHandler: s.publicKeyHandler,
-		MaxTimeout:       30 * time.Minute,
-		IdleTimeout:      5 * time.Minute,
 		RequestHandlers: map[string]gliderssh.RequestHandler{
-			"tcpip-forward":                   denyForwardRequest,
-			"direct-tcpip":                    denyForwardRequest,
+			"tcpip-forward":                 denyForwardRequest,
+			"direct-tcpip":                  denyForwardRequest,
 			"streamlocal-forward@openssh.com": denyForwardRequest,
 		},
 		SessionRequestCallback: func(_ gliderssh.Session, requestType string) bool {
@@ -110,27 +99,18 @@ func (s *Server) ListenAndServe(ctx context.Context) error {
 }
 
 func (s *Server) handleSftp(sess gliderssh.Session) {
-	accountID, _ := sess.Context().Value(ctxAccountID).(string)
-	if accountID == "" {
+	auth, err := s.creds.ResolveByUsername(context.Background(), sess.User())
+	if err != nil {
 		_ = sess.Exit(1)
 		return
 	}
-	username := security.NormalizeUsername(sess.User())
-	now := time.Now()
-	outcome := s.cfg.Limiter.RecordLogin(username, true, now)
-	if outcome == security.OutcomeLocked {
-		s.recordAudit("sftp.login_locked", sess.User(), remoteAddr(sess), accountID)
-		_ = sess.Exit(1)
-		return
-	}
-	s.recordAudit("sftp.login_ok", sess.User(), remoteAddr(sess), accountID)
-	root := filepath.Join(s.cfg.DataDir, accountID)
+	root := filepath.Join(s.cfg.DataDir, auth.AccountID)
 	_ = os.MkdirAll(root, 0o700)
 	_ = os.MkdirAll(filepath.Join(root, "failed"), 0o700)
 	handlers := sftp.Handlers{
 		FileGet:  uploadOnlyDeny{},
-		FilePut:  writeRoot{root: root, server: s, accountID: accountID},
-		FileCmd:  cmdRoot{root: root, server: s, accountID: accountID},
+		FilePut:  writeRoot{root: root, server: s, accountID: auth.AccountID},
+		FileCmd:  cmdRoot{root: root, server: s, accountID: auth.AccountID},
 		FileList: uploadOnlyDeny{},
 	}
 	server := sftp.NewRequestServer(sess, handlers)
@@ -153,22 +133,21 @@ func (uploadOnlyDeny) Filelist(_ *sftp.Request) (sftp.ListerAt, error) {
 }
 
 func (s *Server) passwordHandler(ctx gliderssh.Context, password string) bool {
-	return s.attemptLogin(ctx, password, "", true)
+	return s.login(ctx, password, "")
 }
 
 func (s *Server) publicKeyHandler(ctx gliderssh.Context, key gliderssh.PublicKey) bool {
-	return s.attemptLogin(ctx, "", string(gossh.MarshalAuthorizedKey(key)), false)
+	return s.login(ctx, "", string(gossh.MarshalAuthorizedKey(key)))
 }
 
-func (s *Server) attemptLogin(ctx gliderssh.Context, password, publicKey string, recordFailures bool) bool {
+func (s *Server) login(ctx gliderssh.Context, password, publicKey string) bool {
 	ip := remoteIP(ctx)
 	now := time.Now()
-	username := security.NormalizeUsername(ctx.User())
 	if !s.cfg.Limiter.CheckIP(ip, now) {
 		s.recordAudit("sftp.login_locked", ctx.User(), ip, "")
 		return false
 	}
-	if s.cfg.Limiter.CheckAccount(username, now) {
+	if s.cfg.Limiter.CheckAccount(ctx.User(), now) {
 		s.recordAudit("sftp.login_locked", ctx.User(), ip, "")
 		return false
 	}
@@ -179,20 +158,19 @@ func (s *Server) attemptLogin(ctx gliderssh.Context, password, publicKey string,
 		ClientIP:  ip,
 	})
 	ok := err == nil
-	if !ok {
-		if recordFailures {
-			outcome := s.cfg.Limiter.RecordLogin(username, false, now)
-			if outcome == security.OutcomeLocked {
-				s.recordAudit("sftp.login_locked", ctx.User(), ip, authResult.AccountID)
-			} else {
-				s.recordAudit("sftp.login_failed", ctx.User(), ip, authResult.AccountID)
-			}
-		}
+	accountID := authResult.AccountID
+	outcome := s.cfg.Limiter.RecordLogin(ctx.User(), ok, now)
+	switch outcome {
+	case security.OutcomeOK:
+		s.recordAudit("sftp.login_ok", ctx.User(), ip, accountID)
+		return true
+	case security.OutcomeLocked:
+		s.recordAudit("sftp.login_locked", ctx.User(), ip, accountID)
+		return false
+	default:
+		s.recordAudit("sftp.login_failed", ctx.User(), ip, accountID)
 		return false
 	}
-	ctx.SetValue(ctxAccountID, authResult.AccountID)
-	ctx.SetValue(ctxUserNorm, username)
-	return true
 }
 
 func (s *Server) recordAudit(kind, username, ip, accountID string) {
@@ -205,13 +183,9 @@ func (s *Server) recordAudit(kind, username, ip, accountID string) {
 }
 
 func remoteIP(ctx gliderssh.Context) string {
-	return remoteAddr(ctx)
-}
-
-func remoteAddr(addr interface{ RemoteAddr() net.Addr }) string {
-	host, _, err := net.SplitHostPort(addr.RemoteAddr().String())
+	host, _, err := net.SplitHostPort(ctx.RemoteAddr().String())
 	if err != nil {
-		return addr.RemoteAddr().String()
+		return ctx.RemoteAddr().String()
 	}
 	return host
 }
@@ -255,37 +229,11 @@ type closeTrackWriter struct {
 	remotePath string
 	server     *Server
 	accountID  string
-	written    int64
-}
-
-func (w *closeTrackWriter) WriteAt(p []byte, off int64) (int, error) {
-	max := w.server.cfg.MaxFileBytes
-	if max > 0 {
-		end := off + int64(len(p))
-		if end > max {
-			return 0, os.ErrPermission
-		}
-		if end > w.written {
-			w.written = end
-		}
-	}
-	n, err := w.File.WriteAt(p, off)
-	if err == nil && max > 0 {
-		end := off + int64(n)
-		if end > w.written {
-			w.written = end
-		}
-	}
-	return n, err
 }
 
 func (w *closeTrackWriter) Close() error {
 	if err := w.File.Close(); err != nil {
 		return err
-	}
-	if w.server.cfg.MaxFileBytes > 0 && w.written > w.server.cfg.MaxFileBytes {
-		_ = w.server.moveFailed(w.path)
-		return nil
 	}
 	go w.server.finalizeUpload(w.accountID, w.path, w.remotePath)
 	return nil
@@ -324,10 +272,12 @@ func (s *Server) ensureQuota(root string) error {
 	if s.cfg.MaxPendingBytesPerAccount <= 0 {
 		return nil
 	}
-	s.cleanupFailedOlderThan(root, 7*24*time.Hour)
 	var total int64
 	_ = filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
+			return nil
+		}
+		if strings.Contains(path, string(filepath.Separator)+"failed"+string(filepath.Separator)) {
 			return nil
 		}
 		info, err := d.Info()
@@ -341,27 +291,6 @@ func (s *Server) ensureQuota(root string) error {
 		return os.ErrPermission
 	}
 	return nil
-}
-
-func (s *Server) cleanupFailedOlderThan(root string, maxAge time.Duration) {
-	failedDir := filepath.Join(root, "failed")
-	cutoff := time.Now().Add(-maxAge)
-	entries, err := os.ReadDir(failedDir)
-	if err != nil {
-		return
-	}
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
-		}
-		info, err := e.Info()
-		if err != nil {
-			continue
-		}
-		if info.ModTime().Before(cutoff) {
-			_ = os.Remove(filepath.Join(failedDir, e.Name()))
-		}
-	}
 }
 
 func (s *Server) finalizeUpload(accountID, path, remotePath string) {
@@ -380,22 +309,11 @@ func (s *Server) finalizeUpload(accountID, path, remotePath string) {
 	if err != nil || info2.Size() != size1 {
 		return
 	}
-	max := s.cfg.MaxFileBytes
-	if max > 0 && size1 > max {
-		_ = s.moveFailed(path)
-		return
-	}
-	f, err := os.Open(path)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		return
 	}
-	defer f.Close()
-	limited := io.LimitReader(f, max+1)
-	content, err := io.ReadAll(limited)
-	if err != nil {
-		return
-	}
-	if max > 0 && int64(len(content)) > max {
+	if s.cfg.MaxFileBytes > 0 && int64(len(content)) > s.cfg.MaxFileBytes {
 		_ = s.moveFailed(path)
 		return
 	}
@@ -413,19 +331,26 @@ func (s *Server) finalizeUpload(accountID, path, remotePath string) {
 }
 
 func (s *Server) moveFailed(path string) error {
-	failedDir := filepath.Join(filepath.Dir(path), "failed")
-	_ = os.MkdirAll(failedDir, 0o700)
-	base := filepath.Base(path)
-	dest := filepath.Join(failedDir, base)
-	if _, err := os.Stat(dest); err == nil {
-		dest = filepath.Join(failedDir, fmt.Sprintf("%d-%s", time.Now().UnixNano(), base))
-	}
-	return os.Rename(path, dest)
+	failed := filepath.Join(filepath.Dir(path), "failed", filepath.Base(path))
+	return os.Rename(path, failed)
 }
 
 func isTemporaryName(name string) bool {
 	lower := strings.ToLower(name)
 	return strings.HasSuffix(lower, ".tmp") || strings.HasSuffix(lower, ".part") || strings.HasSuffix(lower, "~")
+}
+
+type listerAt []os.FileInfo
+
+func (l listerAt) ListAt(f []os.FileInfo, offset int64) (int, error) {
+	if offset >= int64(len(l)) {
+		return 0, io.EOF
+	}
+	n := copy(f, l[offset:])
+	if int(offset)+n >= len(l) {
+		return n, io.EOF
+	}
+	return n, nil
 }
 
 func EnsureHostKey(path string) (ports.HostKeyInfo, error) {
@@ -438,7 +363,8 @@ func EnsureHostKey(path string) (ports.HostKeyInfo, error) {
 		if err != nil {
 			return ports.HostKeyInfo{}, err
 		}
-		return ports.HostKeyInfo{FingerprintSHA256: security.FingerprintSHA256(signer.PublicKey())}, nil
+		sum := sha256.Sum256(signer.PublicKey().Marshal())
+		return ports.HostKeyInfo{FingerprintSHA256: base64.StdEncoding.EncodeToString(sum[:])}, nil
 	}
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -459,5 +385,6 @@ func EnsureHostKey(path string) (ports.HostKeyInfo, error) {
 	if err != nil {
 		return ports.HostKeyInfo{}, err
 	}
-	return ports.HostKeyInfo{FingerprintSHA256: security.FingerprintSHA256(sshPub)}, nil
+	sum := sha256.Sum256(sshPub.Marshal())
+	return ports.HostKeyInfo{FingerprintSHA256: base64.StdEncoding.EncodeToString(sum[:])}, nil
 }

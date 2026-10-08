@@ -49,8 +49,7 @@ CREATE INDEX IF NOT EXISTS sftp_ingress_events_account_idx
 CREATE TABLE IF NOT EXISTS sftp_pull_sync_state (
   installation_id UUID PRIMARY KEY REFERENCES connector_installations(id) ON DELETE CASCADE,
   last_run_at TIMESTAMPTZ,
-  last_error_key TEXT,
-  processed_refs TEXT[] NOT NULL DEFAULT '{}'
+  last_error_key TEXT
 );
 
 CREATE TABLE IF NOT EXISTS sftp_ingress_audit (

@@ -655,10 +655,6 @@ export interface DocumentDto {
   /** Set when status is failed (extraction or enqueue error). */
   extractionFailureReason?: string | null;
   mimeType: string;
-  /** Short file-type badge (DOCX, PDF, …). */
-  formatBadge?: string;
-  /** True when GET /documents/:id/preview serves an application/pdf body. */
-  previewAvailable?: boolean;
   /** Machine ingest channel (e.g. scanner_sftp). */
   ingestSource?: string | null;
   documentDate?: string | null;
@@ -1110,7 +1106,12 @@ export type ConnectorTier = 'oss' | 'commercial';
 export type ConnectorCategoryId = 'mail' | 'dms' | 'home_automation' | 'storage' | 'scanner_sftp';
 
 export type ConnectorPluginId =
-  'gmail' | 'outlook' | 'paperless' | 'home_assistant' | 'amazon_s3' | 'sftp_fetch';
+  | 'gmail'
+  | 'outlook'
+  | 'paperless'
+  | 'home_assistant'
+  | 'amazon_s3'
+  | 'sftp_fetch';
 
 export type ConnectorCapabilityRole = 'source' | 'sink';
 
@@ -1422,25 +1423,6 @@ export {
 } from './label-document-inventory.js';
 
 export type {
-  SavedViewVisibility,
-  SavedViewListScope,
-  SavedViewViewMode,
-  SavedViewFilterMode,
-  LibraryTableColumnId,
-  SavedDocumentViewDto,
-  SavedDocumentViewListResponse,
-  CreateSavedDocumentViewRequest,
-  UpdateSavedDocumentViewRequest,
-  ReorderSavedDocumentViewsRequest,
-  DashboardWidgetType,
-  DashboardWidgetDto,
-  DashboardLayoutResponse,
-  ReplaceDashboardLayoutRequest,
-  DashboardStatisticsDto,
-  InstallationDashboardDefaultResponse,
-} from './workspace.js';
-
-export type {
   SftpFetchHostProbeRequest,
   SftpFetchHostProbeResponse,
   SftpIngressAccountDto,
@@ -1450,78 +1432,3 @@ export type {
   SftpIngressEventStatus,
   SftpIngressServerInfoDto,
 } from './sftp-ingress.js';
-
-export {
-  buildDuplicateFeatureVector,
-  compareDocumentTexts,
-  duplicatePairDifferenceRows,
-  isValueToken,
-  normalizeDocumentText,
-  tokenizeDocumentText,
-} from './duplicate-content-compare.js';
-export type {
-  ContentAlignmentStats,
-  DuplicateCompareDocumentInput,
-  DuplicateFeatureVector,
-  DuplicatePairContext,
-  DuplicatePairDifferenceRow,
-} from './duplicate-content-compare.js';
-export {
-  decideDuplicatePair,
-  evaluateModelOnSamples,
-  trainDefaultDuplicateClassifierModel,
-  VALUE_TOKEN_DIFF_AUTO_STACK_CEILING,
-} from './duplicate-classifier.js';
-export type { DuplicatePairDecision } from './duplicate-classifier.js';
-export {
-  DUPLICATE_FEATURE_ORDER,
-  binaryMetricsAtThreshold,
-  calibrateThresholdForPrecision,
-  featureVectorToArray,
-  fitUserLogitInterceptDelta,
-  predictProbability,
-  trainLogisticRegression,
-} from './duplicate-logistic-regression.js';
-export type {
-  BinaryMetrics,
-  DuplicateClassifierModel,
-  DuplicateTrainingSample,
-} from './duplicate-logistic-regression.js';
-export { DEFAULT_DUPLICATE_CLASSIFIER_MODEL } from './duplicate-default-model.js';
-export { generateSyntheticDuplicateDataset } from './duplicate-synthetic-data.js';
-export type { SyntheticDatasetSplit } from './duplicate-synthetic-data.js';
-export {
-  EXACT_FACT_MATCH_C5_SAMPLES,
-  EXACT_FACT_MATCH_PRIOR_STRICT_THRESHOLD,
-} from './exact-fact-match-c5.fixture.js';
-export {
-  EXACT_FACT_MATCH_CALIBRATION,
-  EXACT_FACT_MATCH_C5_CALIBRATION_AUDIT,
-  EXACT_FACT_MATCH_DEFAULT_THRESHOLD,
-} from './exact-fact-match-calibration.js';
-export {
-  calibrateExactFactMatchThreshold,
-  estimateFellegiSunterWeights,
-  exactFactFullPredicateMatch,
-  exactFactMatchScoreTokens,
-  exactFactTokenCoverage,
-  fellegiSunterExactFactMatchScore,
-  normalizeExactFactMatchText,
-  sigmoidMatchScore,
-} from './exact-fact-match.js';
-export type {
-  ExactFactFellegiSunterWeights,
-  ExactFactMatchCalibration,
-  ExactFactMatchLabeledSample,
-  ExactFactThresholdCalibrationResult,
-} from './exact-fact-match.js';
-export {
-  duplicateSetBulkArchiveEligible,
-  duplicateSetDisplaySimilarityPercent,
-  duplicateSetIdFromDocumentIds,
-  duplicateSetMaxSimilarityForDisplay,
-  groupDuplicatePairsIntoSets,
-  groupDuplicateSetsWithHashSubsets,
-  parseDuplicateSetId,
-} from './duplicate-set-groups.js';
-export type { DuplicatePairEdge, DuplicatePairMetaEdge } from './duplicate-set-groups.js';

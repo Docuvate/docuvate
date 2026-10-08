@@ -25,7 +25,7 @@ import 'package:docuvate/src/generated/src/api/review_queue_api.dart';
 import 'package:docuvate/src/generated/src/api/search_api.dart';
 import 'package:docuvate/src/generated/src/api/settings_api.dart';
 import 'package:docuvate/src/generated/src/api/sftp_ingress_api.dart';
-import 'package:docuvate/src/generated/src/api/workspace_api.dart';
+import 'package:docuvate/src/generated/src/api/sftp_ingress_service_api.dart';
 
 class DocuvateApi {
   static const String basePath = r'/v1';
@@ -177,9 +177,9 @@ class DocuvateApi {
     return SftpIngressApi(dio, serializers);
   }
 
-  /// Get WorkspaceApi instance, base route and serializer can be overridden by a given but be careful,
+  /// Get SftpIngressServiceApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
-  WorkspaceApi getWorkspaceApi() {
-    return WorkspaceApi(dio, serializers);
+  SftpIngressServiceApi getSftpIngressServiceApi() {
+    return SftpIngressServiceApi(dio, serializers);
   }
 }

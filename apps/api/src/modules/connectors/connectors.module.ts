@@ -49,6 +49,7 @@ import { PaperlessImportQueueService } from './infrastructure/adapters/paperless
 import { PaperlessImportRepository } from './infrastructure/adapters/paperless/paperless-import.repository.js';
 import { AmazonS3StorageConnector } from './infrastructure/adapters/s3/amazon-s3-storage.connector.js';
 import { SftpFetchConnector } from './infrastructure/adapters/sftp/sftp-fetch.connector.js';
+import { SftpFetchSyncService } from './application/sftp-fetch-sync.service.js';
 import { PgConnectorInstallationRepository } from './infrastructure/pg-connector-installation.repository.js';
 import { PgConnectorSourceScopeRepository } from './infrastructure/pg-connector-source-scope.repository.js';
 import { ConnectorOAuthCallbackGuard } from './presentation/connector-oauth-callback.guard.js';
@@ -110,16 +111,6 @@ const SCANNER_SFTP_CATEGORY = {
     ImportFromConnectorUseCase,
     ExportToConnectorUseCase,
     SftpFetchSyncService,
-    PaperlessImportRepository,
-    PaperlessImportExecutor,
-    PaperlessImportQueueService,
-    TestPaperlessConnectionUseCase,
-    TestPaperlessInstallationConnectionUseCase,
-    GetPaperlessInstallationUseCase,
-    UpdatePaperlessInstallationUseCase,
-    PaperlessImportDryRunUseCase,
-    StartPaperlessImportUseCase,
-    GetPaperlessImportRunUseCase,
     StartMailOAuthUseCase,
     CompleteMailOAuthUseCase,
     ConnectorOAuthCallbackGuard,

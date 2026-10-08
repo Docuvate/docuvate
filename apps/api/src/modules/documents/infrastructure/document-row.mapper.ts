@@ -166,22 +166,22 @@ export function mapDocumentRow(
   const documentDate = parseOptionalDate(row.document_date);
 
   return {
-    id: parseString(row.id),
-    userId: parseString(row.user_id),
-    filename: parseString(row.filename),
-    title: parseString(row.title ?? row.filename),
-    mimeType: parseString(row.mime_type),
-    storageKey: parseString(row.storage_key),
-    previewStorageKey: parseOptionalString(row.preview_storage_key),
-    archivedStorageKey: parseOptionalString(row.archived_storage_key),
-    contentHash: parseOptionalString(row.content_hash),
-    status: parseEnum(row.status, DOCUMENT_STATUSES, 'uploaded'),
-    extractionFailureReason: parseOptionalString(row.extraction_failure_reason),
-    heuristicFieldExtractorVersion: parseOptionalNumber(row.heuristic_field_extractor_version) ?? 0,
-    documentDate,
-    notes: parseOptionalString(row.notes),
-    ingestSource: parseOptionalString(row.ingest_source),
-    folderId,
+    id: String(row['id']),
+    userId: String(row['user_id']),
+    filename: String(row['filename']),
+    title: String(row['title'] ?? row['filename']),
+    mimeType: String(row['mime_type']),
+    storageKey: String(row['storage_key']),
+    contentHash: (row['content_hash'] as string | null) ?? null,
+    status: row['status'] as DocumentStatus,
+    documentDate:
+      documentDateRaw != null && documentDateRaw !== ''
+        ? new Date(String(documentDateRaw))
+        : null,
+    notes: (row['notes'] as string | null) ?? null,
+    ingestSource: (row['ingest_source'] as string | null) ?? null,
+    folderId: folderIdRaw != null ? String(folderIdRaw) : null,
+    mappeId: row['mappe_id'] != null ? String(row['mappe_id']) : null,
     folder:
       folderId != null && folderName != null
         ? {

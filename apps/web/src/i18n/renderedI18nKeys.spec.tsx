@@ -1,18 +1,9 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
-import { afterEach, describe, expect, it, vi } from 'vitest';
-
-import { ToastProvider } from '../components/save/ToastProvider';
-import { CopyButton } from '../components/ui/CopyButton';
 import i18n from '../i18n';
 import { LibraryPageDocumentSection } from '../pages/library/LibraryPageDocumentSection';
-import {
-  createLibraryPageContextStub,
-  createLibraryPageDataStub,
-} from '../test-utils/libraryPageStubs';
 
 const RAW_KEY = /^[a-z][a-z0-9]*(\.[a-zA-Z0-9]+)+$/;
 
@@ -48,32 +39,49 @@ describe('rendered i18n keys', () => {
         dispatchEvent: vi.fn(),
       })),
     });
-    const data = createLibraryPageDataStub();
-    const ctx = createLibraryPageContextStub();
+    const data = {
+      loading: false,
+      error: null,
+      items: [],
+      query: '',
+      setQuery: () => undefined,
+      onSearch: async (e: { preventDefault: () => void }) => e.preventDefault(),
+      viewMode: 'klassisch' as const,
+      onViewModeChange: () => undefined,
+      filters: { sort: 'updatedAt' as const, order: 'desc' as const },
+      onSortChange: () => undefined,
+      visibleSelectedCount: 0,
+      selected: new Set<string>(),
+      toggleSelect: () => undefined,
+      toggleSelectAll: () => undefined,
+      onSort: () => undefined,
+      refresh: () => undefined,
+    };
+    const ctx = {
+      contextMenu: null,
+      closeContextMenu: () => undefined,
+      openContextMenu: () => undefined,
+      contextMenuItems: [],
+      duplicateReview: null,
+      closeDuplicateReview: () => undefined,
+      bulkDeleteOpen: false,
+      setBulkDeleteOpen: () => undefined,
+      confirmBulkDelete: async () => undefined,
+      bulkDeleteBusy: false,
+    };
 
     const { container } = render(
       <I18nextProvider i18n={i18n}>
-        <ToastProvider>
-          <LibraryPageDocumentSection
-            data={data}
-            ctx={ctx}
-            filterToggle={{ expanded: false, activeCount: 0, onToggle: () => undefined }}
-          />
-        </ToastProvider>
+        <LibraryPageDocumentSection
+          data={data as never}
+          ctx={ctx as never}
+          filterToggle={{ expanded: false, activeCount: 0, onToggle: () => undefined }}
+        />
       </I18nextProvider>
     );
 
     expect(screen.getByRole('button', { name: /Filter/i })).toBeTruthy();
     const raw = collectRawKeys(container);
     expect(raw).toEqual([]);
-  });
-
-  it('CopyButton does not render unresolved translation keys', () => {
-    const { container } = render(
-      <I18nextProvider i18n={i18n}>
-        <CopyButton value="test-value" />
-      </I18nextProvider>
-    );
-    expect(collectRawKeys(container)).toEqual([]);
   });
 });

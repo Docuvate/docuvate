@@ -1,33 +1,17 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import type {
   SftpIngressAccountDto,
+  SftpIngressCreateAccountRequest,
   SftpIngressCreateAccountResponseDto,
   SftpIngressEventDto,
   SftpIngressServerInfoDto,
 } from '@docuvate/contracts';
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
-
-import {
   AuthGuard,
-  type AuthSession,
   Session,
+  type AuthSession,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
-import { SourceConnectorsFeatureGuard } from '../../../shared/infrastructure/auth/feature-flag.guard.js';
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   CreateSftpIngressAccountUseCase,
   GetSftpIngressServerInfoUseCase,
@@ -35,7 +19,6 @@ import {
   ListSftpIngressEventsUseCase,
   RevokeSftpIngressAccountUseCase,
 } from '../application/sftp-ingress.use-cases.js';
-import { SftpIngressCreateAccountBodyDto } from './dtos/sftp-ingress-user.dto.js';
 import {
   toCreateAccountResponse,
   toSftpIngressAccountDto,
@@ -45,7 +28,7 @@ import {
 
 @ApiDocuvateController('sftp-ingress')
 @Controller('sftp-ingress')
-@UseGuards(AuthGuard, SourceConnectorsFeatureGuard)
+@UseGuards(AuthGuard)
 export class SftpIngressController {
   constructor(
     private readonly serverInfo: GetSftpIngressServerInfoUseCase,
@@ -56,32 +39,24 @@ export class SftpIngressController {
   ) {}
 
   @Get('server')
-  @ApiDocuvateRoute({
-    operationId: 'getSftpIngressServer',
-    summary: 'SFTP scanner ingress server info',
-  })
-  getServer(): SftpIngressServerInfoDto {
+  @ApiDocuvateRoute({ operationId: 'getSftpIngressServer', summary: 'SFTP scanner ingress server info' })
+  getServer(@Session() session: AuthSession): SftpIngressServerInfoDto {
+    void session;
     return toSftpIngressServerInfoDto(this.serverInfo.execute());
   }
 
   @Get('accounts')
-  @ApiDocuvateRoute({
-    operationId: 'listSftpIngressAccounts',
-    summary: 'List SFTP scanner ingress accounts',
-  })
+  @ApiDocuvateRoute({ operationId: 'listSftpIngressAccounts', summary: 'List SFTP scanner ingress accounts' })
   async accounts(@Session() session: AuthSession): Promise<{ accounts: SftpIngressAccountDto[] }> {
     const rows = await this.listAccounts.execute(session.user.id);
     return { accounts: rows.map(toSftpIngressAccountDto) };
   }
 
   @Post('accounts')
-  @ApiDocuvateRoute({
-    operationId: 'createSftpIngressAccount',
-    summary: 'Create SFTP scanner ingress account',
-  })
+  @ApiDocuvateRoute({ operationId: 'createSftpIngressAccount', summary: 'Create SFTP scanner ingress account' })
   async create(
     @Session() session: AuthSession,
-    @Body() body: SftpIngressCreateAccountBodyDto
+    @Body() body: SftpIngressCreateAccountRequest
   ): Promise<SftpIngressCreateAccountResponseDto> {
     const result = await this.createAccount.execute(session.user.id, body);
     return toCreateAccountResponse(
@@ -92,31 +67,21 @@ export class SftpIngressController {
   }
 
   @Delete('accounts/:accountId')
-  @ApiDocuvateRoute({
-    operationId: 'revokeSftpIngressAccount',
-    summary: 'Revoke SFTP scanner ingress account',
-  })
-  async revoke(
-    @Session() session: AuthSession,
-    @Param('accountId', ParseUUIDPipe) accountId: string
-  ) {
+  @ApiDocuvateRoute({ operationId: 'revokeSftpIngressAccount', summary: 'Revoke SFTP scanner ingress account' })
+  async revoke(@Session() session: AuthSession, @Param('accountId') accountId: string) {
     await this.revokeAccount.execute(session.user.id, accountId);
     return { ok: true };
   }
 
   @Get('accounts/:accountId/events')
-  @ApiDocuvateRoute({
-    operationId: 'listSftpIngressEvents',
-    summary: 'List SFTP ingress events for account',
-  })
+  @ApiDocuvateRoute({ operationId: 'listSftpIngressEvents', summary: 'List SFTP ingress events for account' })
   async events(
     @Session() session: AuthSession,
-    @Param('accountId', ParseUUIDPipe) accountId: string,
+    @Param('accountId') accountId: string,
     @Query('limit') limit?: string
   ): Promise<{ events: SftpIngressEventDto[] }> {
-    const parsedLimit = limit ? Number.parseInt(limit, 10) : 20;
-    const safeLimit = Number.isFinite(parsedLimit) ? parsedLimit : 20;
-    const rows = await this.listEvents.execute(session.user.id, accountId, safeLimit);
+    const parsedLimit = limit ? Number(limit) : 20;
+    const rows = await this.listEvents.execute(session.user.id, accountId, parsedLimit);
     return { events: rows.map(toSftpIngressEventDto) };
   }
 }

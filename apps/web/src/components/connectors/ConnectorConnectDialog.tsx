@@ -11,7 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { listFolders, listTags, previewConnectorSourceNodes, probeSftpFetchHostKey } from '../../lib/api';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../../lib/connectorOAuthSetupDoc';
-import { connectorPluginSupportsSourceSelection } from '../../lib/connectorSourceSelection';
+import { probeSftpFetchHostKey } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
 import { Input } from '../ui/Input';
@@ -52,11 +52,6 @@ export function ConnectorConnectDialog({
   const [credentials, setCredentials] = useState<Record<string, string>>({});
   const [probeMessage, setProbeMessage] = useState<string | null>(null);
   const [probeBusy, setProbeBusy] = useState(false);
-  const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
-  const [tags, setTags] = useState<{ id: string; name: string }[]>([]);
-  const [step, setStep] = useState<ConnectorSetupStep>('access');
-  const [sourceScope, setSourceScope] = useState<ConnectorSourceScopeDto>({ mode: 'all', paths: [] });
-  const [stepError, setStepError] = useState<string | null>(null);
 
   const fields = useMemo(() => plugin?.auth.fields ?? [], [plugin]);
   const isOAuth = plugin?.auth.strategy === 'oauth2';
@@ -83,34 +78,22 @@ export function ConnectorConnectDialog({
     }
     setCredentials(initial);
     setProbeMessage(null);
-    setStep('access');
-    setSourceScope({ mode: 'all', paths: [] });
-    setStepError(null);
   }, [plugin, t]);
 
-  useEffect(() => {
-    if (!open || plugin?.id !== 'sftp_fetch') return;
-    void Promise.all([listFolders(), listTags()]).then(([folderRows, tagRows]) => {
-      setFolders(folderRows);
-      setTags(tagRows);
-    });
-  }, [open, plugin?.id]);
-
   async function handleProbeHostKey() {
-    if (plugin?.id !== 'sftp_fetch') return;
+    if (!plugin || plugin.id !== 'sftp_fetch') return;
     setProbeBusy(true);
     setProbeMessage(null);
     try {
       const result = await probeSftpFetchHostKey({
-        host: credentials.host,
-        port: Number(credentials.port) || 22,
-        username: credentials.username,
-        password: credentials.password || undefined,
-        privateKey: credentials.private_key || undefined,
+        host: credentials['host'] ?? '',
+        port: Number(credentials['port'] ?? 22) || 22,
+        username: credentials['username'] ?? '',
+        password: credentials['password'] || undefined,
+        privateKey: credentials['private_key'] || undefined,
       });
-      setProbeMessage(
-        t('connectors.sftpProbeSuccess', { fingerprint: result.hostKeyFingerprintSha256 })
-      );
+      setCredentials((prev) => ({ ...prev, host_key_fingerprint: result.hostKeyFingerprintSha256 }));
+      setProbeMessage(t('connectors.sftpProbeSuccess', { fingerprint: result.hostKeyFingerprintSha256 }));
     } catch {
       setProbeMessage(t('connectors.sftpProbeFailed'));
     } finally {
@@ -364,26 +347,21 @@ export function ConnectorConnectDialog({
                   previewConnectorSourceNodes(plugin.id, credentials, parentPath)
                 }
               />
-            )}
-          </DialogBody>
-          <DialogFooter>
-            {hasSelectionStep && step === 'selection' ? (
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={busy}
-                onClick={() => {
-                  setStep('access');
-                  setStepError(null);
-                }}
-              >
-                {t('connectors.stepper.back')}
+              {field.helpKey ? <span className="muted settings-hint">{t(field.helpKey)}</span> : null}
+            </label>
+          ))}
+          {plugin.id === 'sftp_fetch' ? (
+            <div className="connector-sftp-probe">
+              <Button type="button" variant="secondary" disabled={busy || probeBusy} onClick={() => void handleProbeHostKey()}>
+                {probeBusy ? t('connectors.sftpProbePending') : t('connectors.sftpProbeCta')}
               </Button>
-            ) : (
-              <Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
-                {t('common.cancel')}
-              </Button>
-            )}
+              {probeMessage ? <p className="muted settings-hint">{probeMessage}</p> : null}
+            </div>
+          ) : null}
+          <div className="confirm-dialog-actions">
+            <Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
+              {t('common.cancel')}
+            </Button>
             <Button type="submit" disabled={busy || (isOAuth && !oauthReady)}>
               {busy
                 ? isOAuth

@@ -115,13 +115,13 @@ describe('buildTypeOrmOptions', () => {
   it('registers initial schema, global search, 3NF, MFA, IAM, saved views, SFTP ingress, layout IR, and Paperless connector migrations in order', () => {
     process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
     const opts = buildTypeOrmOptions();
-    expect(opts.migrations).toEqual(EXPECTED_MIGRATIONS);
-    expect(InitialSchema20261008120000.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);
-  });
-
-  it('keeps baseline schema markers aligned with registered migrations', () => {
-    process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
-    const registeredNames = EXPECTED_MIGRATIONS.map((ctor) => new ctor().name);
-    expect([...BASELINE_MARKER_MIGRATION_NAMES]).toEqual(registeredNames);
+    const migrations = opts.migrations as Array<{ name: string }>;
+    expect(migrations).toHaveLength(6);
+    expect(migrations[0]?.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);
+    expect(migrations[1]?.name).toBe('GlobalSearchSchema20261008130500');
+    expect(migrations[2]?.name).toBe('DocumentFieldValuesBackfill20261008130600');
+    expect(migrations[3]?.name).toBe('SearchIndexBackfill20261008130700');
+    expect(migrations[4]?.name).toBe('SchemaNormalization3nf20261008131000');
+    expect(migrations[5]?.name).toBe('SftpIngress20261008131500');
   });
 });

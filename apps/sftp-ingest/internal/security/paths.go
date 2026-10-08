@@ -15,9 +15,6 @@ func SafeUploadPath(root, reqPath string) (string, error) {
 		if part == ".." {
 			return "", os.ErrPermission
 		}
-		if strings.EqualFold(part, "failed") {
-			return "", os.ErrPermission
-		}
 	}
 	rel := strings.TrimPrefix(filepath.Clean("/"+slash), "/")
 	if rel == ".." || strings.HasPrefix(rel, "../") {

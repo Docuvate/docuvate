@@ -1,6 +1,5 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -14,46 +13,33 @@ function isAdministrationSectionPath(pathname: string): boolean {
 
 export function SettingsSectionTabs() {
   const { t } = useTranslation();
-  const { pathname } = useLocation();
-  const [isAdministrator, setIsAdministrator] = useState(false);
+  const items = getSettingsSectionNavItems();
+  const location = useLocation();
+  const listRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
-    void getAdminAccess()
-      .then((access) => { setIsAdministrator(access.isAdministrator); })
-      .catch(() => { setIsAdministrator(false); });
-  }, []);
-
-  const items = useMemo(() => {
-    const base = getSettingsSectionNavItems();
-    if (!isAdministrator) {
-      return base;
-    }
-    return [
-      ...base,
-      { to: routes.settingsAdmin, end: false, labelKey: 'settings.navAdministration' },
-    ];
-  }, [isAdministrator]);
+    const active = listRef.current?.querySelector(
+      '.settings-section-tab--active, .settings-section-tab[aria-current="page"]',
+    );
+    active?.scrollIntoView({ inline: 'nearest', block: 'nearest' });
+  }, [location.pathname]);
 
   return (
     <nav className="settings-section-tabs" aria-label={t('settings.navAria')}>
-      <ul className="settings-section-tabs-list">
-        {items.map((item) => {
-          const adminTab = item.to === routes.settingsAdmin;
-          return (
-            <li key={item.to}>
-              <NavLink
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) => {
-                  const active = adminTab ? isAdministrationSectionPath(pathname) : isActive;
-                  return `settings-section-tab${active ? ' settings-section-tab--active' : ''}`;
-                }}
-              >
-                {t(item.labelKey)}
-              </NavLink>
-            </li>
-          );
-        })}
+      <ul ref={listRef} className="settings-section-tabs-list">
+        {items.map((item) => (
+          <li key={item.to}>
+            <NavLink
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `settings-section-tab${isActive ? ' settings-section-tab--active' : ''}`
+              }
+            >
+              {t(item.labelKey)}
+            </NavLink>
+          </li>
+        ))}
       </ul>
     </nav>
   );

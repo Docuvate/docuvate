@@ -31,8 +31,13 @@ import {
 import { formatConnectorError } from '../lib/connectorErrors';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../lib/connectorOAuthSetupDoc';
-import { isSourceConnectorPlugin, useFeatureFlags } from '../lib/remoteConfig';
-import { routes } from '../lib/routes';
+import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { ConnectorConnectDialog } from '../components/connectors/ConnectorConnectDialog';
+import { ConnectorPluginIcon } from '../components/connectors/ConnectorPluginIcon';
+import { useToastNotify } from '../components/save/ToastProvider';
+import { SftpScannerIngressSection } from '../components/connectors/SftpScannerIngressSection';
 
 function capabilityLabel(t: (key: string) => string, role: 'source' | 'sink') {
   return t(`connectors.capabilities.${role}`);
@@ -131,9 +136,6 @@ export function ConnectorsPage() {
     return category ? t(category.labelKey) : plugin.categoryId;
   }
   const showSftpScannerCard = useMemo(() => {
-    if (!featureFlags.sourceConnectors) {
-      return false;
-    }
     if (categoryFilter !== 'all' && categoryFilter !== 'scanner_sftp') {
       return false;
     }
@@ -149,7 +151,7 @@ export function ConnectorsPage() {
       .join(' ')
       .toLowerCase();
     return haystack.includes(query);
-  }, [categoryFilter, featureFlags.sourceConnectors, searchQuery, t]);
+  }, [categoryFilter, searchQuery, t]);
 
   async function submitConnect(payload: {
     displayName: string;
@@ -419,9 +421,7 @@ export function ConnectorsPage() {
           ) : (
             <div className="connector-catalog-grid">
               {showSftpScannerCard ? (
-                <SftpScannerIngressSection
-                  viewerIsServerAdmin={catalog.viewerIsServerAdmin}
-                />
+                <SftpScannerIngressSection viewerIsServerAdmin={catalog.viewerIsServerAdmin ?? false} />
               ) : null}
               {sortedFilteredPlugins.map(renderPluginCard)}
             </div>

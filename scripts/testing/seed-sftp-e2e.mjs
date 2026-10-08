@@ -6,10 +6,10 @@
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { hashSftpIngressPassword } from '../../apps/api/src/modules/sftp-ingress/infrastructure/sftp-ingress-password.codec.ts';
 
 const require = createRequire(resolve(dirname(fileURLToPath(import.meta.url)), '../../apps/api/package.json'));
 const pg = require('pg');
+const { hash } = require('@node-rs/argon2');
 
 const databaseUrl = process.env.DATABASE_URL ?? 'postgresql://docuvate:docuvate@localhost:5433/docuvate';
 const ownerId = process.env.DOCUVATE_E2E_USER_ID ?? 'local-dev-owner';
@@ -17,6 +17,10 @@ const uploadUser = 'e2e-scan-upload';
 const lockoutUser = 'e2e-scan-lockout';
 const uploadPassword = process.env.DOCUVATE_SFTP_E2E_PASSWORD ?? 'E2eSftpUpload9!';
 const lockoutPassword = 'correct-but-unused';
+
+async function hashPassword(plain) {
+  return hash(plain, { algorithm: 2, memoryCost: 19456, timeCost: 2, parallelism: 1 });
+}
 
 async function main() {
   const pool = new pg.Pool({ connectionString: databaseUrl });
@@ -26,13 +30,16 @@ async function main() {
      ON CONFLICT (id) DO NOTHING`,
     [ownerId, 'E2E Owner', 'e2e-owner@fixture.docuvate.test']
   );
-  const uploadHash = await hashSftpIngressPassword(uploadPassword);
-  const lockoutHash = await hashSftpIngressPassword(lockoutPassword);
+  const uploadHash = await hashPassword(uploadPassword);
+  const lockoutHash = await hashPassword(lockoutPassword);
   for (const row of [
     { username: uploadUser, displayName: 'E2E Upload', passwordHash: uploadHash },
     { username: lockoutUser, displayName: 'E2E Lockout', passwordHash: lockoutHash },
   ]) {
-    await pool.query(`DELETE FROM sftp_ingress_accounts WHERE lower(username) = lower($1)`, [row.username]);
+    await pool.query(
+      `DELETE FROM sftp_ingress_accounts WHERE lower(username) = lower($1)`,
+      [row.username]
+    );
     await pool.query(
       `INSERT INTO sftp_ingress_accounts (user_id, display_name, username, password_hash)
        VALUES ($1, $2, $3, $4)`,

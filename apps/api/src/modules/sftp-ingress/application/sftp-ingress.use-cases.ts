@@ -1,28 +1,21 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash, randomBytes } from 'node:crypto';
-
 import { Inject, Injectable } from '@nestjs/common';
-
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   FOLDER_REPOSITORY,
-  type FolderRepository,
   TAXONOMY_REPOSITORY,
+  type FolderRepository,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
-import { validateScanFile } from '../domain/scan-file-validation.js';
 import {
   SFTP_INGRESS_ACCOUNT_REPOSITORY,
   SFTP_INGRESS_EVENT_REPOSITORY,
   type SftpIngressAccountRepository,
   type SftpIngressEventRepository,
 } from '../domain/sftp-ingress.ports.js';
-import type {
-  SftpIngressAccountEntity,
-  SftpIngressEventEntity,
-} from '../domain/sftp-ingress.types.js';
+import type { SftpIngressAccountEntity, SftpIngressEventEntity } from '../domain/sftp-ingress.types.js';
+import { validateScanFile } from '../domain/scan-file-validation.js';
 import {
   hashSftpIngressPassword,
   verifySftpIngressPassword,
@@ -36,10 +29,9 @@ function readMaxBytes(): number {
 }
 
 function readServerInfo() {
-  const host = process.env['DOCUVATE_SFTP_PUBLIC_HOST']?.trim() ?? 'localhost';
+  const host = process.env['DOCUVATE_SFTP_PUBLIC_HOST']?.trim() || 'localhost';
   const port = Number(process.env['DOCUVATE_SFTP_PUBLIC_PORT'] ?? 2222);
-  const fingerprintRaw = process.env['DOCUVATE_SFTP_HOST_KEY_FINGERPRINT']?.trim() ?? '';
-  const fingerprint = fingerprintRaw.length > 0 ? fingerprintRaw : null;
+  const fingerprint = process.env['DOCUVATE_SFTP_HOST_KEY_FINGERPRINT']?.trim() || null;
   return { host, port: Number.isFinite(port) ? port : 2222, hostKeyFingerprintSha256: fingerprint };
 }
 
@@ -73,8 +65,7 @@ export class ListSftpIngressAccountsUseCase {
 @Injectable()
 export class ListSftpIngressEventsUseCase {
   constructor(
-    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY)
-    private readonly accounts: SftpIngressAccountRepository,
+    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository,
     @Inject(SFTP_INGRESS_EVENT_REPOSITORY) private readonly events: SftpIngressEventRepository
   ) {}
 
@@ -94,8 +85,7 @@ export interface CreateSftpIngressAccountResult {
 @Injectable()
 export class CreateSftpIngressAccountUseCase {
   constructor(
-    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY)
-    private readonly accounts: SftpIngressAccountRepository,
+    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository,
     @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository
   ) {}
@@ -116,15 +106,11 @@ export class CreateSftpIngressAccountUseCase {
     if (!displayName) {
       throw new ValidationError('sftpIngress.errors.displayNameRequired');
     }
-    const username = await this.allocateUsername(
-      userId,
-      input.username?.trim() ? input.username.trim().toLowerCase() : null
-    );
+    const username = (input.username?.trim() || generateUsername(userId)).toLowerCase();
     if (!/^[a-z0-9][a-z0-9._-]{2,63}$/.test(username)) {
       throw new ValidationError('sftpIngress.errors.usernameInvalid');
     }
-    const folderIdRaw = input.folderId?.trim() ?? '';
-    const folderId = folderIdRaw.length > 0 ? folderIdRaw : null;
+    const folderId = input.folderId?.trim() || null;
     if (folderId) {
       const folder = await this.folders.findByIdForUser(folderId, userId);
       if (!folder) throw new NotFoundError('Folder');
@@ -134,14 +120,17 @@ export class CreateSftpIngressAccountUseCase {
       const tag = await this.taxonomy.findTagByIdForUser(tagId, userId);
       if (!tag) throw new NotFoundError('Tag');
     }
-    const passwordPlain = input.passwordPlain ?? generatePassword();
-    if (passwordPlain && passwordPlain.length < 16) {
-      throw new ValidationError('sftpIngress.errors.passwordTooShort');
-    }
-    const sshPublicKeyRaw = input.sshPublicKey?.trim() ?? '';
-    const sshPublicKey = sshPublicKeyRaw.length > 0 ? sshPublicKeyRaw : null;
+    const passwordPlain =
+      input.passwordPlain === undefined || input.passwordPlain === null
+        ? generatePassword()
+        : input.passwordPlain;
+    const sshPublicKey = input.sshPublicKey?.trim() || null;
     if (!passwordPlain && !sshPublicKey) {
       throw new ValidationError('sftpIngress.errors.authRequired');
+    }
+    const existing = await this.accounts.findActiveByUsername(username);
+    if (existing) {
+      throw new ValidationError('sftpIngress.errors.usernameTaken');
     }
     const passwordHash = passwordPlain ? await hashSftpIngressPassword(passwordPlain) : null;
     const account = await this.accounts.create({
@@ -155,30 +144,7 @@ export class CreateSftpIngressAccountUseCase {
       mapSubfolders: Boolean(input.mapSubfolders),
       passwordHash,
     });
-    return {
-      account,
-      passwordPlain: passwordPlain.length > 0 ? passwordPlain : null,
-      server: readServerInfo(),
-    };
-  }
-
-  private async allocateUsername(userId: string, preferred: string | null): Promise<string> {
-    if (preferred) {
-      const existing = await this.accounts.findActiveByUsername(preferred);
-      if (existing) {
-        throw new ValidationError('sftpIngress.errors.usernameTaken');
-      }
-      return preferred;
-    }
-    for (let attempt = 0; attempt < 8; attempt++) {
-      const suffix = attempt === 0 ? '' : `-${randomBytes(2).toString('hex')}`;
-      const candidate = `${generateUsername(userId)}${suffix}`;
-      const existing = await this.accounts.findActiveByUsername(candidate);
-      if (!existing) {
-        return candidate;
-      }
-    }
-    throw new ValidationError('sftpIngress.errors.usernameTaken');
+    return { account, passwordPlain: passwordPlain || null, server: readServerInfo() };
   }
 }
 
@@ -197,7 +163,7 @@ export class RevokeSftpIngressAccountUseCase {
 @Injectable()
 export class AuthenticateSftpIngressAccountUseCase {
   constructor(
-    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository
+    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository,
   ) {}
 
   async execute(input: {
@@ -248,8 +214,7 @@ export class ResolveSftpIngressAccountUseCase {
 @Injectable()
 export class IngestSftpScanUseCase {
   constructor(
-    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY)
-    private readonly accounts: SftpIngressAccountRepository,
+    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository,
     @Inject(SFTP_INGRESS_EVENT_REPOSITORY) private readonly events: SftpIngressEventRepository,
     @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,

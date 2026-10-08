@@ -26,7 +26,7 @@ export 'package:docuvate/src/generated/src/api/review_queue_api.dart';
 export 'package:docuvate/src/generated/src/api/search_api.dart';
 export 'package:docuvate/src/generated/src/api/settings_api.dart';
 export 'package:docuvate/src/generated/src/api/sftp_ingress_api.dart';
-export 'package:docuvate/src/generated/src/api/workspace_api.dart';
+export 'package:docuvate/src/generated/src/api/sftp_ingress_service_api.dart';
 
 export 'package:docuvate/src/generated/src/model/accept_document_review_batch_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/accept_document_review_batch_response_dto_class.dart';

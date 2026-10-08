@@ -65,6 +65,11 @@ import {
 import { probeSftpFetchHost } from '../infrastructure/adapters/sftp/sftp-fetch.connector.js';
 import { PgConnectorSourceScopeRepository } from '../infrastructure/pg-connector-source-scope.repository.js';
 import { toConnectorInstallationDto } from './connectors.mapper.js';
+import { toDocumentDto } from '../../documents/presentation/document.mapper.js';
+import type { SftpFetchHostProbeRequest, SftpFetchHostProbeResponse } from '@docuvate/contracts';
+import { probeSftpFetchHost } from '../infrastructure/adapters/sftp/sftp-fetch.connector.js';
+
+import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('connectors')
 @Controller('connectors')
@@ -253,11 +258,7 @@ export class ConnectorsController {
     operationId: 'probeSftpFetchHostKey',
     summary: 'Probe remote SFTP host key fingerprint',
   })
-  async probeSftpHost(
-    @Session() session: AuthSession,
-    @Body() body: SftpFetchHostProbeRequest
-  ): Promise<SftpFetchHostProbeResponse> {
-    await this.resolveFeatureFlags.assertEnabled(session.user.id, 'sourceConnectors');
+  async probeSftpHost(@Body() body: SftpFetchHostProbeRequest): Promise<SftpFetchHostProbeResponse> {
     return probeSftpFetchHost({
       host: body.host,
       port: String(body.port ?? 22),

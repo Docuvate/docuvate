@@ -1,20 +1,13 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type {
-  FolderDto,
-  SftpIngressCreateAccountResponseDto,
-  SftpIngressServerInfoDto,
-} from '@docuvate/contracts';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
+import type { FolderDto, SftpIngressCreateAccountResponseDto, SftpIngressServerInfoDto } from '@docuvate/contracts';
+import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
 import { SettingsCallout } from '../settings/SettingsCallout';
 import { Button } from '../ui/Button';
 import { CopyButton } from '../ui/CopyButton';
-import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
 import { Input } from '../ui/Input';
-import { SegmentedControl } from '../ui/SegmentedControl';
 import { Select, type SelectOption } from '../ui/Select';
+import { SegmentedControl } from '../ui/SegmentedControl';
 
 type AuthMode = 'password' | 'sshKey';
 
@@ -34,15 +27,7 @@ interface SftpIngressSetupDialogProps {
   }) => Promise<SftpIngressCreateAccountResponseDto>;
 }
 
-function ValueRow({
-  label,
-  value,
-  copyValue,
-}: {
-  label: string;
-  value: string;
-  copyValue?: string;
-}) {
+function ValueRow({ label, value, copyValue }: { label: string; value: string; copyValue?: string }) {
   return (
     <div className="connector-sftp-kv-row">
       <span className="connector-sftp-kv-label">{label}</span>
@@ -54,11 +39,7 @@ function ValueRow({
   );
 }
 
-const STEP_LABEL_KEYS = [
-  'sftpIngress.setupStepName',
-  'sftpIngress.setupStepDevice',
-  'sftpIngress.setupStepDone',
-] as const;
+const STEP_LABEL_KEYS = ['sftpIngress.setupStepName', 'sftpIngress.setupStepDevice', 'sftpIngress.setupStepDone'] as const;
 
 export function SftpIngressSetupDialog({
   open,
@@ -72,6 +53,7 @@ export function SftpIngressSetupDialog({
 }: SftpIngressSetupDialogProps) {
   const { t } = useTranslation();
   const titleId = useId();
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
   const displayNameRef = useRef<HTMLInputElement>(null);
   const sshPublicKeyRef = useRef<HTMLTextAreaElement>(null);
@@ -86,6 +68,18 @@ export function SftpIngressSetupDialog({
   const [nameBlurred, setNameBlurred] = useState(false);
   const [sshBlurred, setSshBlurred] = useState(false);
   const [step0Attempted, setStep0Attempted] = useState(false);
+
+  useDialogFocusTrap(dialogRef, open, cancelRef);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open) {
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) {
+      dialog.close();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -102,10 +96,10 @@ export function SftpIngressSetupDialog({
   }, [open]);
 
   const endpointLine = useMemo(() => {
-    const host = server?.host ?? t('sftpIngress.hostNotConfigured');
+    const host = server?.host ?? '—';
     const port = server?.port ?? 2222;
-    return `${host}:${String(port)}`;
-  }, [server?.host, server?.port, t]);
+    return `${host}:${port}`;
+  }, [server]);
 
   const folderOptions: SelectOption[] = useMemo(
     () => [
@@ -162,20 +156,21 @@ export function SftpIngressSetupDialog({
     (step0Attempted || sshBlurred) && authMode === 'sshKey' && !sshPublicKey.trim();
 
   return (
-    <Dialog
-      open={open}
-      busy={busy}
-      onCancel={onCancel}
+    <dialog
+      ref={dialogRef}
+      className="confirm-dialog connector-sftp-ingress-dialog"
       aria-labelledby={titleId}
-      initialFocusRef={cancelRef}
-      className="connector-sftp-ingress-modal"
+      aria-modal="true"
+      onCancel={(e) => {
+        e.preventDefault();
+        if (!busy) onCancel();
+      }}
     >
-      <DialogHeader title={t('sftpIngress.setupTitle')} titleId={titleId} />
-      <DialogBody>
-      <ol
-        className="connector-sftp-wizard-steps"
-        aria-label={t('sftpIngress.setupStep', { current: step + 1, total: 3 })}
-      >
+      <h2 id={titleId} className="confirm-dialog-title">
+        {t('sftpIngress.setupTitle')}
+      </h2>
+
+      <ol className="connector-sftp-wizard-steps" aria-label={t('sftpIngress.setupStep', { current: step + 1, total: 3 })}>
         {STEP_LABEL_KEYS.map((key, index) => (
           <li
             key={key}
@@ -195,8 +190,8 @@ export function SftpIngressSetupDialog({
             <Input
               ref={displayNameRef}
               value={displayName}
-              onChange={(e) => { setDisplayName(e.target.value); }}
-              onBlur={() => { setNameBlurred(true); }}
+              onChange={(e) => setDisplayName(e.target.value)}
+              onBlur={() => setNameBlurred(true)}
               autoComplete="off"
               aria-invalid={showNameError || undefined}
               aria-describedby={showNameError ? nameErrorId : undefined}
@@ -230,8 +225,8 @@ export function SftpIngressSetupDialog({
                 className={`input connector-sftp-textarea${showSshKeyError ? ' input-invalid' : ''}`}
                 rows={4}
                 value={sshPublicKey}
-                onChange={(e) => { setSshPublicKey(e.target.value); }}
-                onBlur={() => { setSshBlurred(true); }}
+                onChange={(e) => setSshPublicKey(e.target.value)}
+                onBlur={() => setSshBlurred(true)}
                 aria-invalid={showSshKeyError || undefined}
                 aria-describedby={showSshKeyError ? sshErrorId : undefined}
               />
@@ -295,15 +290,9 @@ export function SftpIngressSetupDialog({
           </div>
         </div>
       ) : null}
-      </DialogBody>
-      <DialogFooter className="connector-sftp-ingress-dialog-actions">
-        <Button
-          type="button"
-          variant="secondary"
-          ref={cancelRef}
-          disabled={busy}
-          onClick={onCancel}
-        >
+
+      <div className="confirm-dialog-actions connector-sftp-ingress-dialog-actions">
+        <Button type="button" variant="secondary" ref={cancelRef} disabled={busy} onClick={onCancel}>
           {step === 2 ? t('common.close') : t('common.cancel')}
         </Button>
         {step === 0 ? (
@@ -313,19 +302,15 @@ export function SftpIngressSetupDialog({
         ) : null}
         {step === 1 ? (
           <>
-            <Button type="button" variant="secondary" disabled={busy} onClick={() => { setStep(0); }}>
+            <Button type="button" variant="secondary" disabled={busy} onClick={() => setStep(0)}>
               {t('sftpIngress.setupBack')}
             </Button>
-            <Button
-              type="button"
-              disabled={busy || !displayName.trim()}
-              onClick={() => void handleCreate()}
-            >
+            <Button type="button" disabled={busy || !displayName.trim()} onClick={() => void handleCreate()}>
               {busy ? t('sftpIngress.createPending') : t('sftpIngress.createSubmit')}
             </Button>
           </>
         ) : null}
-      </DialogFooter>
-    </Dialog>
+      </div>
+    </dialog>
   );
 }

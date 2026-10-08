@@ -1,7 +1,8 @@
 package pull
 
 import (
-	"errors"
+	"crypto/sha256"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"net"
@@ -11,11 +12,7 @@ import (
 
 	"github.com/pkg/sftp"
 	gossh "golang.org/x/crypto/ssh"
-
-	"github.com/docuvate/sftp-ingest/internal/security"
 )
-
-const maxFetchBytes = 26_214_400
 
 type Config struct {
 	Host               string
@@ -33,17 +30,17 @@ type RemoteFile struct {
 	SizeBytes int64  `json:"sizeBytes"`
 }
 
-var errProbeCaptured = errors.New("probe: host key captured")
-
 func ProbeHostKey(cfg Config) (string, error) {
 	var fingerprint string
-	_, err := dial(cfg, func(_ string, _ net.Addr, key gossh.PublicKey) error {
-		fingerprint = security.FingerprintSHA256(key)
-		return errProbeCaptured
-	}, false)
-	if err != nil && !errors.Is(err, errProbeCaptured) && fingerprint == "" {
+	client, err := dial(cfg, func(_ string, _ net.Addr, key gossh.PublicKey) error {
+		sum := sha256.Sum256(key.Marshal())
+		fingerprint = base64.StdEncoding.EncodeToString(sum[:])
+		return nil
+	})
+	if err != nil {
 		return "", err
 	}
+	client.Close()
 	if fingerprint == "" {
 		return "", fmt.Errorf("host key missing")
 	}
@@ -51,7 +48,7 @@ func ProbeHostKey(cfg Config) (string, error) {
 }
 
 func ListFiles(cfg Config, limit int) ([]RemoteFile, error) {
-	client, err := dial(cfg, pinnedVerifier(cfg.HostKeyFingerprint), true)
+	client, err := dial(cfg, pinnedVerifier(cfg.HostKeyFingerprint))
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +81,7 @@ func ListFiles(cfg Config, limit int) ([]RemoteFile, error) {
 }
 
 func FetchFile(cfg Config, ref string) ([]byte, error) {
-	client, err := dial(cfg, pinnedVerifier(cfg.HostKeyFingerprint), true)
+	client, err := dial(cfg, pinnedVerifier(cfg.HostKeyFingerprint))
 	if err != nil {
 		return nil, err
 	}
@@ -99,19 +96,11 @@ func FetchFile(cfg Config, ref string) ([]byte, error) {
 		return nil, err
 	}
 	defer f.Close()
-	limited := io.LimitReader(f, maxFetchBytes+1)
-	data, err := io.ReadAll(limited)
-	if err != nil {
-		return nil, err
-	}
-	if len(data) > maxFetchBytes {
-		return nil, fmt.Errorf("file too large")
-	}
-	return data, nil
+	return io.ReadAll(f)
 }
 
 func DeleteRemote(cfg Config, ref string) error {
-	client, err := dial(cfg, pinnedVerifier(cfg.HostKeyFingerprint), true)
+	client, err := dial(cfg, pinnedVerifier(cfg.HostKeyFingerprint))
 	if err != nil {
 		return err
 	}
@@ -125,7 +114,7 @@ func DeleteRemote(cfg Config, ref string) error {
 }
 
 func MoveRemote(cfg Config, ref, archiveDir, name string) error {
-	client, err := dial(cfg, pinnedVerifier(cfg.HostKeyFingerprint), true)
+	client, err := dial(cfg, pinnedVerifier(cfg.HostKeyFingerprint))
 	if err != nil {
 		return err
 	}
@@ -148,24 +137,17 @@ func joinRemote(base, name string) string {
 	return base + "/" + name
 }
 
-func dial(cfg Config, verify gossh.HostKeyCallback, withCredentials bool) (*gossh.Client, error) {
-	allowlist := security.ParseAllowlist()
-	addr, err := security.ResolveDialAddr(cfg.Host, cfg.Port, allowlist)
-	if err != nil {
-		return nil, err
-	}
+func dial(cfg Config, verify gossh.HostKeyCallback) (*gossh.Client, error) {
 	auth := []gossh.AuthMethod{}
-	if withCredentials {
-		if cfg.Password != "" {
-			auth = append(auth, gossh.Password(cfg.Password))
+	if cfg.Password != "" {
+		auth = append(auth, gossh.Password(cfg.Password))
+	}
+	if cfg.PrivateKeyPEM != "" {
+		signer, err := gossh.ParsePrivateKey([]byte(cfg.PrivateKeyPEM))
+		if err != nil {
+			return nil, err
 		}
-		if cfg.PrivateKeyPEM != "" {
-			signer, err := gossh.ParsePrivateKey([]byte(cfg.PrivateKeyPEM))
-			if err != nil {
-				return nil, err
-			}
-			auth = append(auth, gossh.PublicKeys(signer))
-		}
+		auth = append(auth, gossh.PublicKeys(signer))
 	}
 	config := &gossh.ClientConfig{
 		User:            cfg.Username,
@@ -173,13 +155,15 @@ func dial(cfg Config, verify gossh.HostKeyCallback, withCredentials bool) (*goss
 		HostKeyCallback: verify,
 		Timeout:         20 * time.Second,
 	}
-	return security.DialSSH(addr, config)
+	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	return gossh.Dial("tcp", addr, config)
 }
 
 func pinnedVerifier(expected string) gossh.HostKeyCallback {
 	return func(_ string, _ net.Addr, key gossh.PublicKey) error {
-		fp := security.FingerprintSHA256(key)
-		if !security.FingerprintsEqual(fp, expected) {
+		sum := sha256.Sum256(key.Marshal())
+		fp := base64.StdEncoding.EncodeToString(sum[:])
+		if fp != expected {
 			return fmt.Errorf("host key mismatch")
 		}
 		return nil

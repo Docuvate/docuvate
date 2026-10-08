@@ -91,6 +91,20 @@ import type {
   UpdateTagRequest,
   UpdateUserSettingsRequest,
   UserSettingsDto,
+  ExtractionCompareResponse,
+  ExtractionEngineInfo,
+  ExtractionArenaRatingRequest,
+  ConnectorCatalogResponse,
+  ConnectorInstallationDto,
+  CreateConnectorInstallationRequest,
+  GlobalSearchResponseDto,
+  SftpIngressAccountDto,
+  SftpIngressCreateAccountRequest,
+  SftpIngressCreateAccountResponseDto,
+  SftpIngressEventDto,
+  SftpIngressServerInfoDto,
+  SftpFetchHostProbeRequest,
+  SftpFetchHostProbeResponse,
 } from '@docuvate/contracts';
 
 import { isRecord, notifyApiRequestSucceeded, throwApiRequestError } from './apiErrors';
@@ -1109,146 +1123,45 @@ export async function submitExtractionArenaRating(
   });
 }
 
-export async function getAdminAccess(): Promise<AdminAccessResponse> {
-  return request<AdminAccessResponse>('/admin/access');
+export async function getSftpIngressServer(): Promise<SftpIngressServerInfoDto> {
+  return request<SftpIngressServerInfoDto>('/sftp-ingress/server');
 }
 
-export async function getPasswordPolicy(): Promise<PasswordPolicyDto> {
-  return request<PasswordPolicyDto>('/auth/password-policy');
+export async function listSftpIngressAccounts(): Promise<SftpIngressAccountDto[]> {
+  const res = await request<{ accounts: SftpIngressAccountDto[] }>('/sftp-ingress/accounts');
+  return res.accounts;
 }
 
-export async function getAdminPasswordPolicy(): Promise<PasswordPolicyDto> {
-  return request<PasswordPolicyDto>('/admin/password-policy');
-}
-
-export async function updateAdminPasswordPolicy(body: PasswordPolicyDto): Promise<PasswordPolicyDto> {
-  return request<PasswordPolicyDto>('/admin/password-policy', {
-    method: 'PUT',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function listAdminUsers(search?: string): Promise<AdminUserListResponse> {
-  const qs = search?.trim() ? `?search=${encodeURIComponent(search.trim())}` : '';
-  return request<AdminUserListResponse>(`/admin/users${qs}`);
-}
-
-export async function inviteAdminUser(body: InviteAdminUserRequest): Promise<AdminUserDto> {
-  return request<AdminUserDto>('/admin/users/invite', {
+export async function createSftpIngressAccount(
+  body: SftpIngressCreateAccountRequest
+): Promise<SftpIngressCreateAccountResponseDto> {
+  return request<SftpIngressCreateAccountResponseDto>('/sftp-ingress/accounts', {
     method: 'POST',
     body: JSON.stringify(body),
   });
 }
 
-export async function setAdminUserRole(
-  userId: string,
-  body: SetAdminUserRoleRequest
-): Promise<void> {
-  await request(`/admin/users/${encodeURIComponent(userId)}/role`, {
-    method: 'PUT',
-    body: JSON.stringify(body),
-  });
+export async function revokeSftpIngressAccount(accountId: string): Promise<void> {
+  await request(`/sftp-ingress/accounts/${encodeURIComponent(accountId)}`, { method: 'DELETE' });
 }
 
-export async function banAdminUser(userId: string, body: BanAdminUserRequest): Promise<void> {
-  await request(`/admin/users/${encodeURIComponent(userId)}/ban`, {
+export async function listSftpIngressEvents(
+  accountId: string,
+  limit = 20
+): Promise<SftpIngressEventDto[]> {
+  const res = await request<{ events: SftpIngressEventDto[] }>(
+    `/sftp-ingress/accounts/${encodeURIComponent(accountId)}/events?limit=${limit}`
+  );
+  return res.events;
+}
+
+export async function probeSftpFetchHostKey(
+  body: SftpFetchHostProbeRequest
+): Promise<SftpFetchHostProbeResponse> {
+  return request<SftpFetchHostProbeResponse>('/connectors/plugins/sftp_fetch/probe-host-key', {
     method: 'POST',
     body: JSON.stringify(body),
   });
-}
-
-export async function unbanAdminUser(userId: string): Promise<void> {
-  await request(`/admin/users/${encodeURIComponent(userId)}/unban`, { method: 'POST' });
-}
-
-export async function revokeAdminUserSessions(userId: string): Promise<void> {
-  await request(`/admin/users/${encodeURIComponent(userId)}/revoke-sessions`, {
-    method: 'POST',
-  });
-}
-
-export async function acceptUserInvitation(body: {
-  token: string;
-  password: string;
-}): Promise<void> {
-  await request<{ ok: true }>('/invitations/accept', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function resendAdminUserInvitation(userId: string): Promise<void> {
-  await request<{ ok: true }>(`/admin/users/${encodeURIComponent(userId)}/resend-invitation`, {
-    method: 'POST',
-  });
-}
-
-export async function revokeAdminUserInvitation(userId: string): Promise<void> {
-  await request<{ ok: true }>(`/admin/users/${encodeURIComponent(userId)}/revoke-invitation`, {
-    method: 'POST',
-  });
-}
-
-export async function listSavedDocumentViews(): Promise<SavedDocumentViewDto[]> {
-  const data = await request<SavedDocumentViewListResponse>('/saved-views');
-  return data.items;
-}
-
-export async function getSavedDocumentView(id: string): Promise<SavedDocumentViewDto> {
-  return request<SavedDocumentViewDto>(`/saved-views/${encodeURIComponent(id)}`);
-}
-
-export async function createSavedDocumentView(
-  body: CreateSavedDocumentViewRequest
-): Promise<SavedDocumentViewDto> {
-  return request<SavedDocumentViewDto>('/saved-views', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function updateSavedDocumentView(
-  id: string,
-  body: UpdateSavedDocumentViewRequest
-): Promise<SavedDocumentViewDto> {
-  return request<SavedDocumentViewDto>(`/saved-views/${encodeURIComponent(id)}`, {
-    method: 'PATCH',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function deleteSavedDocumentView(id: string): Promise<void> {
-  await requestNoContent(`/saved-views/${encodeURIComponent(id)}`, { method: 'DELETE' });
-}
-
-export async function reorderSavedDocumentViews(
-  body: ReorderSavedDocumentViewsRequest
-): Promise<void> {
-  await requestNoContent('/saved-views/reorder', {
-    method: 'PUT',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function getDashboardLayout(): Promise<DashboardLayoutResponse> {
-  return request<DashboardLayoutResponse>('/dashboard');
-}
-
-export async function replaceDashboardLayout(
-  body: ReplaceDashboardLayoutRequest
-): Promise<DashboardLayoutResponse> {
-  return request<DashboardLayoutResponse>('/dashboard', {
-    method: 'PUT',
-    body: JSON.stringify(body),
-  });
-}
-
-export async function getDashboardStatistics(): Promise<DashboardStatisticsDto> {
-  return request<DashboardStatisticsDto>('/dashboard/statistics');
-}
-
-export async function getInstallationAdminStatus(): Promise<{ isInstallationAdmin: boolean }> {
-  return request<{ isInstallationAdmin: boolean }>('/dashboard/installation-admin');
 }
 
 export { baseURL };

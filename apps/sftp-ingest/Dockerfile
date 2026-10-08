@@ -1,11 +1,11 @@
-FROM golang:1.26.9-bookworm@sha256:bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff AS build
+FROM golang:1.22.2-bookworm AS build
 WORKDIR /src
 COPY apps/sftp-ingest/go.mod apps/sftp-ingest/go.sum ./
 RUN go mod download
 COPY apps/sftp-ingest/ ./
 RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/sftp-ingest ./cmd/sftp-ingest
 
-FROM alpine:3.20@sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e
+FROM alpine:3.20
 RUN apk add --no-cache ca-certificates curl
 WORKDIR /app
 COPY --from=build /out/sftp-ingest /app/sftp-ingest

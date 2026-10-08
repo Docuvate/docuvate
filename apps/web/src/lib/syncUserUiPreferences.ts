@@ -12,5 +12,6 @@ export function applyUserSettingsUiPreferences(settings: UserSettingsDto): void 
   if (settings.locale === 'de' || settings.locale === 'en') {
     void i18n.changeLanguage(settings.locale);
     window.localStorage.setItem(LOCALE_STORAGE_KEY, settings.locale);
+    document.documentElement.lang = settings.locale;
   }
 }

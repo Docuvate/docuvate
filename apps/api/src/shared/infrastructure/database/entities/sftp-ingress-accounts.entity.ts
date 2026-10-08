@@ -1,5 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   Column,
   Entity,
@@ -9,7 +7,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 import { FoldersEntity } from './folders.entity.js';
 import { SftpIngressAccountLabelsEntity } from './sftp-ingress-account-labels.entity.js';
 import { SftpIngressAuditEntity } from './sftp-ingress-audit.entity.js';
@@ -71,7 +68,10 @@ export class SftpIngressAccountsEntity {
   @JoinColumn([{ name: 'folder_id', referencedColumnName: 'id' }])
   folder: FoldersEntity | null;
 
-  @OneToMany(() => SftpIngressAccountLabelsEntity, (labels) => labels.account)
+  @OneToMany(
+    () => SftpIngressAccountLabelsEntity,
+    (labels) => labels.account,
+  )
   accountLabels: SftpIngressAccountLabelsEntity[];
 
   @OneToMany(() => SftpIngressEventsEntity, (events) => events.account)

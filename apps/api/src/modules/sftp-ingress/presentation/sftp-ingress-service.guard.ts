@@ -1,5 +1,3 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   CanActivate,
   ExecutionContext,
@@ -8,9 +6,8 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
-
-import type { AuthenticatedRequest } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { ServiceApiKeyRegistry } from '../../../shared/infrastructure/auth/service-api-key.registry.js';
+import type { AuthenticatedRequest } from '../../../shared/infrastructure/auth/auth.guard.js';
 
 const REQUIRED_CLAIM = 'sftp_ingress:service';
 

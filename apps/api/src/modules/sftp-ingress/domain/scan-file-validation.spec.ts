@@ -1,7 +1,4 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
-
 import { isTemporaryScanFilename, validateScanFile } from './scan-file-validation.js';
 
 describe('scan-file-validation', () => {
@@ -19,16 +16,8 @@ describe('scan-file-validation', () => {
     }
   });
 
-  it('accepts txt by extension', () => {
-    const result = validateScanFile('note.txt', Buffer.from('hello'), 1024);
-    expect(result.ok).toBe(true);
-    if (result.ok) {
-      expect(result.mimeType).toBe('text/plain');
-    }
-  });
-
   it('rejects unknown content', () => {
-    const result = validateScanFile('note.bin', Buffer.from('hello'), 1024);
+    const result = validateScanFile('note.txt', Buffer.from('hello'), 1024);
     expect(result.ok).toBe(false);
   });
 });

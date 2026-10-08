@@ -10,8 +10,7 @@ import 'package:dio/dio.dart';
 
 import 'package:built_value/json_object.dart';
 import 'package:docuvate/src/generated/src/api_util.dart';
-import 'package:docuvate/src/generated/src/model/problem_details_dto.dart';
-import 'package:docuvate/src/generated/src/model/sftp_ingress_create_account_body_dto.dart';
+import 'package:docuvate/src/generated/src/model/api_error_envelope_dto.dart';
 
 class SftpIngressApi {
 
@@ -25,7 +24,6 @@ class SftpIngressApi {
   /// 
   ///
   /// Parameters:
-  /// * [sftpIngressCreateAccountBodyDto] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -36,7 +34,6 @@ class SftpIngressApi {
   /// Returns a [Future] containing a [Response] with a [JsonObject] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<JsonObject>> createSftpIngressAccount({ 
-    required SftpIngressCreateAccountBodyDto sftpIngressCreateAccountBodyDto,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -65,31 +62,11 @@ class SftpIngressApi {
         ],
         ...?extra,
       },
-      contentType: 'application/json',
       validateStatus: validateStatus,
     );
 
-    dynamic _bodyData;
-
-    try {
-      const _type = FullType(SftpIngressCreateAccountBodyDto);
-      _bodyData = _serializers.serialize(sftpIngressCreateAccountBodyDto, specifiedType: _type);
-
-    } catch(error, stackTrace) {
-      throw DioException(
-         requestOptions: _options.compose(
-          _dio.options,
-          _path,
-        ),
-        type: DioExceptionType.unknown,
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
     final _response = await _dio.request<Object>(
       _path,
-      data: _bodyData,
       options: _options,
       cancelToken: cancelToken,
       onSendProgress: onSendProgress,

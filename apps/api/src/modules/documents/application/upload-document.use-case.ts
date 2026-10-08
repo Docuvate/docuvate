@@ -33,6 +33,7 @@ export interface UploadDocumentInput {
   mimeType: string;
   buffer: Buffer;
   folderId?: string | null;
+  mappeId?: string | null;
   tagIds?: string[];
   ingestSource?: string | null;
 }
@@ -98,11 +99,12 @@ export class UploadDocumentUseCase {
         if (tag) extraTags.push(tag);
       }
     }
-    const tags = skipInbox
-      ? extraTags
-      : inboxTag
-        ? [inboxTag, ...extraTags.filter((t) => t.id !== inboxTag.id)]
-        : extraTags;
+    const tags =
+      skipInbox
+        ? extraTags
+        : inboxTag
+          ? [inboxTag, ...extraTags.filter((t) => t.id !== inboxTag.id)]
+          : extraTags;
     const now = this.clock.now();
     const doc: DocumentEntity = {
       id,
@@ -115,6 +117,8 @@ export class UploadDocumentUseCase {
       documentDate: null,
       notes: null,
       folderId: placement.folderId,
+      mappeId: placement.mappeId,
+      correspondent: null,
       tags,
       ingestSource: input.ingestSource ?? null,
       createdAt: now,

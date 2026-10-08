@@ -15,7 +15,7 @@ const AUTH_BASE = process.env.AUTH_BASE ?? 'http://localhost:3001';
 const OUT = process.env.SCREENSHOT_DIR ?? join(ROOT, 'artifacts/screenshots/sftp');
 const ARTIFACT_MIRROR = process.env.SCREENSHOT_ARTIFACT_DIR ?? null;
 const EMAIL = process.env.SEED_EMAIL ?? 'elena.kraemer@beispiel.de';
-const PASSWORD = process.env.SEED_PASSWORD ?? 'AdminDemo12!';
+const PASSWORD = process.env.SEED_PASSWORD ?? 'ElenaScreenshot1!';
 
 const THEME_PREF_KEY = 'docuvate-theme-preference';
 const THEME_LEGACY_KEY = 'docuvate-theme';
@@ -138,60 +138,22 @@ async function main() {
   const page = await ctx.newPage();
   await login(page);
 
-  const viewportVariants = [
+  const index = [];
+  for (const [locale, theme, tag, w, h] of [
     ['de', 'light', 'de-light-1280', 1280, 900],
     ['de', 'dark', 'de-dark-1280', 1280, 900],
-    ['de', 'light', 'de-light-390', 390, 900],
+    ['en', 'dark', 'en-dark-1280', 1280, 900],
+    ['en', 'light', 'en-light-390', 390, 900],
     ['de', 'dark', 'de-dark-390', 390, 900],
-  ];
-
-  const index = [];
-  for (const [locale, theme, tag, w, h] of viewportVariants) {
+  ]) {
     await page.setViewportSize({ width: w, height: h });
     await applyPreferences(page, locale, theme);
     await waitConfiguredCard(page);
     await assertShotEnvironment(page, locale, theme);
     await maskSecrets(page);
-    const file = `connectors-sftp-scanner-${tag}.png`;
+    const file = `connectors-sftp-configured-${tag}.png`;
     await fullViewportShot(page, join(OUT, file));
-    index.push({ file, desc: `Scanner SFTP ingress configured (${tag}, ${w}×${h})` });
-  }
-
-  async function openSftpFetchConnectDialog(page) {
-    const card = page.locator('.connector-catalog-card').filter({
-      has: page.getByRole('heading', { name: 'SFTP-Server abholen' }),
-    });
-    await card.getByRole('button', { name: /^Verbinden$/i }).click();
-    await page.waitForSelector('dialog[open] form', { timeout: 15_000 });
-  }
-
-  async function fillSftpFetchForm(page) {
-    const form = page.locator('dialog[open] form');
-    await form.getByLabel('Anzeigename', { exact: true }).fill('NAS Scans Büro');
-    await form.getByLabel('Host', { exact: true }).fill('sftp.beispiel-intern.local');
-    await form.getByLabel('Port', { exact: true }).fill('22');
-    await form.getByLabel('Benutzername', { exact: true }).fill('scan-import');
-    await form.getByLabel('Passwort', { exact: true }).fill('synthetic-demo-passwort');
-    await form.getByLabel('Remote-Pfad', { exact: true }).fill('/scans/inbox');
-    await form.getByLabel('Host-Key-Fingerabdruck (SHA-256)', { exact: true }).fill(
-      'SHA256:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abCD',
-    );
-    await form.getByLabel('Abholintervall (Sekunden)', { exact: true }).fill('300');
-    await form.getByLabel('Nach Import', { exact: true }).fill('delete');
-  }
-
-  for (const [locale, theme, tag, w, h] of viewportVariants) {
-    await page.setViewportSize({ width: w, height: h });
-    await applyPreferences(page, locale, theme);
-    await openSftpFetchConnectDialog(page);
-    await fillSftpFetchForm(page);
-    await assertShotEnvironment(page, locale, theme);
-    await maskSecrets(page);
-    const file = `connectors-sftp-pull-${tag}.png`;
-    await fullViewportShot(page, join(OUT, file));
-    index.push({ file, desc: `SFTP pull connector connect dialog (${tag}, ${w}×${h})` });
-    await page.keyboard.press('Escape');
-    await page.waitForSelector('dialog[open]', { state: 'detached', timeout: 10_000 }).catch(() => {});
+    index.push({ file, desc: `Connectors SFTP configured (${tag}, ${w}×${h})` });
   }
 
   await browser.close();

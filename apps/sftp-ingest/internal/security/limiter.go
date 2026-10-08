@@ -13,8 +13,6 @@ const (
 	OutcomeLocked
 )
 
-const maxLimiterEntries = 10_000
-
 type Config struct {
 	MaxFailures         int
 	LockoutBaseSeconds  int
@@ -39,7 +37,6 @@ type bucket struct {
 type accountState struct {
 	failures    int
 	lockedUntil time.Time
-	lockouts    int
 }
 
 type Limiter struct {
@@ -54,18 +51,6 @@ func NewLimiter(cfg Config) *Limiter {
 		cfg:       cfg,
 		accounts:  map[string]*accountState{},
 		ipBuckets: map[string]*bucket{},
-	}
-}
-
-func (l *Limiter) pruneIfNeeded() {
-	if len(l.accounts) <= maxLimiterEntries {
-		return
-	}
-	for k := range l.accounts {
-		delete(l.accounts, k)
-		if len(l.accounts) <= maxLimiterEntries/2 {
-			break
-		}
 	}
 }
 
@@ -85,21 +70,20 @@ func (l *Limiter) CheckIP(ip string, now time.Time) bool {
 }
 
 func (l *Limiter) CheckAccount(username string, now time.Time) (locked bool) {
-	username = NormalizeUsername(username)
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	st := l.accounts[username]
 	if st != nil && !st.lockedUntil.IsZero() && now.Before(st.lockedUntil) {
 		return true
 	}
-	if st != nil && !st.lockedUntil.IsZero() && !now.Before(st.lockedUntil) {
+	if st != nil && !st.lockedUntil.IsZero() {
+		st.failures = 0
 		st.lockedUntil = time.Time{}
 	}
 	return false
 }
 
 func (l *Limiter) RecordLogin(username string, ok bool, now time.Time) LoginOutcome {
-	username = NormalizeUsername(username)
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	st := l.accounts[username]
@@ -107,13 +91,11 @@ func (l *Limiter) RecordLogin(username string, ok bool, now time.Time) LoginOutc
 		st = &accountState{}
 		l.accounts[username] = st
 	}
-	l.pruneIfNeeded()
 	if !st.lockedUntil.IsZero() && now.Before(st.lockedUntil) {
 		return OutcomeLocked
 	}
 	if ok {
 		st.failures = 0
-		st.lockouts = 0
 		st.lockedUntil = time.Time{}
 		return OutcomeOK
 	}
@@ -121,15 +103,11 @@ func (l *Limiter) RecordLogin(username string, ok bool, now time.Time) LoginOutc
 	if st.failures < l.cfg.MaxFailures {
 		return OutcomeFailed
 	}
-	st.lockouts++
-	shift := st.lockouts
+	shift := st.failures - l.cfg.MaxFailures
 	if shift > 10 {
 		shift = 10
 	}
-	backoff := l.cfg.LockoutBaseSeconds << (shift - 1)
-	if backoff < l.cfg.LockoutBaseSeconds {
-		backoff = l.cfg.LockoutBaseSeconds
-	}
+	backoff := l.cfg.LockoutBaseSeconds << shift
 	if backoff > l.cfg.LockoutMaxSeconds {
 		backoff = l.cfg.LockoutMaxSeconds
 	}

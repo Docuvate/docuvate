@@ -5,7 +5,12 @@ export type ConnectorTier = 'oss' | 'commercial';
 export type ConnectorCategoryId = 'mail' | 'dms' | 'home_automation' | 'storage' | 'scanner_sftp';
 
 export type ConnectorPluginId =
-  'gmail' | 'outlook' | 'paperless' | 'home_assistant' | 'amazon_s3' | 'sftp_fetch';
+  | 'gmail'
+  | 'outlook'
+  | 'paperless'
+  | 'home_assistant'
+  | 'amazon_s3'
+  | 'sftp_fetch';
 
 export type ConnectorCapabilityRole = 'source' | 'sink';
 

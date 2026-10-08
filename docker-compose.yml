@@ -149,18 +149,13 @@ services:
     restart: 'no'
 
   sftp-ingest-data-init:
-    image: alpine:3.20@sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e
+    image: alpine:3.20
     user: '0:0'
     volumes:
       - sftpingestdata:/data
     entrypoint: >
       /bin/sh -c "
-      set -e;
       mkdir -p /data/staging;
-      if [ ! -s /data/service_api_key ]; then
-        dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d '/+=' | head -c 43 > /data/service_api_key;
-        chmod 600 /data/service_api_key;
-      fi;
       chown -R 65532:65532 /data;
       chmod 700 /data;
       "
@@ -169,13 +164,11 @@ services:
     build:
       context: .
       dockerfile: apps/sftp-ingest/Dockerfile
-    restart: unless-stopped
-    mem_limit: 256m
     ports:
       - '${SFTP_INGEST_PORT:-2222}:2222'
     environment:
       DOCUVATE_API_URL: http://api:3001
-      DOCUVATE_SERVICE_API_KEY_FILE: /data/service_api_key
+      DOCUVATE_SERVICE_API_KEY: ${DOCUVATE_SFTP_INGEST_SERVICE_KEY:-local-sftp-ingest-service-key}
       SFTP_LISTEN_ADDR: ':2222'
       SFTP_HOST_KEY_PATH: /data/host_key
       SFTP_DATA_DIR: /data/staging
@@ -248,19 +241,10 @@ services:
       MAIL_FROM: ${MAIL_FROM:-Docuvate <no-reply@docuvate.local>}
       DOCUVATE_SFTP_PUBLIC_HOST: ${DOCUVATE_SFTP_PUBLIC_HOST:-localhost}
       DOCUVATE_SFTP_PUBLIC_PORT: ${DOCUVATE_SFTP_PUBLIC_PORT:-2222}
-      DOCUVATE_SFTP_INGEST_SERVICE_KEY_FILE: /var/lib/docuvate/sftp-ingest/service_api_key
+      DOCUVATE_SFTP_INGEST_SERVICE_KEY: ${DOCUVATE_SFTP_INGEST_SERVICE_KEY:-local-sftp-ingest-service-key}
       DOCUVATE_SFTP_PULL_GATEWAY_URL: http://sftp-ingest:8080
       DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS: ${DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS:-60000}
-      DOCUVATE_SERVICE_API_KEYS: ${DOCUVATE_SERVICE_API_KEYS:-}
-      DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE: ${DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE:-false}
-      DOCUVATE_FEATURE_SOURCE_CONNECTORS: ${DOCUVATE_FEATURE_SOURCE_CONNECTORS:-false}
-      DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS: ${DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS:-false}
-      DOCUVATE_FEATURE_EXACT_ANSWERS: ${DOCUVATE_FEATURE_EXACT_ANSWERS:-false}
-      DOCUVATE_FEATURE_SMART_DUPLICATES: ${DOCUVATE_FEATURE_SMART_DUPLICATES:-false}
-      DOCUVATE_FEATURE_ANSWER_ABSTENTION: ${DOCUVATE_FEATURE_ANSWER_ABSTENTION:-false}
-      DOCUVATE_FEATURE_LEARNED_VALUE_TYPES: ${DOCUVATE_FEATURE_LEARNED_VALUE_TYPES:-true}
-      DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES: ${DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES:-false}
-      DOCUVATE_FEATURE_LOCAL_CHAT_MODEL: ${DOCUVATE_FEATURE_LOCAL_CHAT_MODEL:-false}
+      DOCUVATE_SERVICE_API_KEYS: ${DOCUVATE_SERVICE_API_KEYS:-[{"keyId":"sftp-ingest","secret":"local-sftp-ingest-service-key","tenantUserId":"local-dev-owner","roles":["integrator"],"claims":["sftp_ingress:service"]}]}
     healthcheck:
       test:
         [
