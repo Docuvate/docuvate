@@ -11,8 +11,6 @@
 </p>
 
 <p align="center">
-  <a href="README.de.md">Deutsch</a>
-  ·
   <a href="https://docuvate.de">Website</a>
   ·
   <a href="docs/">Documentation</a>
