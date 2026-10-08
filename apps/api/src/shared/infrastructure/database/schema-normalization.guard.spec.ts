@@ -14,6 +14,7 @@ const FORWARD_SQL_ORDER = [
   'initial-schema-up.sql',
   'global-search-up.sql',
   'schema-normalization-3nf-up.sql',
+  'sftp-ingress-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

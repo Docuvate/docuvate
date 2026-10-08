@@ -32,6 +32,11 @@ import { MlTrainingDataSnapshotsEntity } from './ml-training-data-snapshots.enti
 import { RecognizedFieldDefinitionGateLabelsEntity } from './recognized-field-definition-gate-labels.entity.js';
 import { RecognizedFieldDefinitionsEntity } from './recognized-field-definitions.entity.js';
 import { SearchVocabularyTermsEntity } from './search-vocabulary-terms.entity.js';
+import { SftpIngressAccountLabelsEntity } from './sftp-ingress-account-labels.entity.js';
+import { SftpIngressAccountsEntity } from './sftp-ingress-accounts.entity.js';
+import { SftpIngressAuditEntity } from './sftp-ingress-audit.entity.js';
+import { SftpIngressEventsEntity } from './sftp-ingress-events.entity.js';
+import { SftpPullSyncStateEntity } from './sftp-pull-sync-state.entity.js';
 import { SessionEntity } from './session.entity.js';
 import { TagCustomFieldDefinitionsEntity } from './tag-custom-field-definitions.entity.js';
 import { TagEmbeddingCentroidsEntity } from './tag-embedding-centroids.entity.js';
@@ -75,6 +80,11 @@ export const TYPEORM_ENTITIES = [
   RecognizedFieldDefinitionGateLabelsEntity,
   RecognizedFieldDefinitionsEntity,
   SearchVocabularyTermsEntity,
+  SftpIngressAccountLabelsEntity,
+  SftpIngressAccountsEntity,
+  SftpIngressAuditEntity,
+  SftpIngressEventsEntity,
+  SftpPullSyncStateEntity,
   SessionEntity,
   TagCustomFieldDefinitionsEntity,
   TagEmbeddingCentroidsEntity,
@@ -119,6 +129,11 @@ export {
   RecognizedFieldDefinitionGateLabelsEntity,
   RecognizedFieldDefinitionsEntity,
   SearchVocabularyTermsEntity,
+  SftpIngressAccountLabelsEntity,
+  SftpIngressAccountsEntity,
+  SftpIngressAuditEntity,
+  SftpIngressEventsEntity,
+  SftpPullSyncStateEntity,
   SessionEntity,
   TagCustomFieldDefinitionsEntity,
   TagEmbeddingCentroidsEntity,

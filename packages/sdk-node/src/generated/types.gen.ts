@@ -698,6 +698,30 @@ export type StartConnectorOAuthResponses = {
 
 export type StartConnectorOAuthResponse = StartConnectorOAuthResponses[keyof StartConnectorOAuthResponses];
 
+export type ProbeSftpFetchHostKeyData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/connectors/plugins/sftp_fetch/probe-host-key';
+};
+
+export type ProbeSftpFetchHostKeyErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ProbeSftpFetchHostKeyError = ProbeSftpFetchHostKeyErrors[keyof ProbeSftpFetchHostKeyErrors];
+
+export type ProbeSftpFetchHostKeyResponses = {
+    201: {
+        [key: string]: unknown;
+    };
+};
+
+export type ProbeSftpFetchHostKeyResponse = ProbeSftpFetchHostKeyResponses[keyof ProbeSftpFetchHostKeyResponses];
+
 export type GetConnectorPluginData = {
     body?: never;
     path: {
@@ -2325,6 +2349,200 @@ export type GetHardwareCapabilitiesResponses = {
 };
 
 export type GetHardwareCapabilitiesResponse = GetHardwareCapabilitiesResponses[keyof GetHardwareCapabilitiesResponses];
+
+export type ListSftpIngressAccountsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/accounts';
+};
+
+export type ListSftpIngressAccountsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ListSftpIngressAccountsError = ListSftpIngressAccountsErrors[keyof ListSftpIngressAccountsErrors];
+
+export type ListSftpIngressAccountsResponses = {
+    200: unknown;
+};
+
+export type CreateSftpIngressAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/accounts';
+};
+
+export type CreateSftpIngressAccountErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type CreateSftpIngressAccountError = CreateSftpIngressAccountErrors[keyof CreateSftpIngressAccountErrors];
+
+export type CreateSftpIngressAccountResponses = {
+    201: {
+        [key: string]: unknown;
+    };
+};
+
+export type CreateSftpIngressAccountResponse = CreateSftpIngressAccountResponses[keyof CreateSftpIngressAccountResponses];
+
+export type RevokeSftpIngressAccountData = {
+    body?: never;
+    path: {
+        accountId: string;
+    };
+    query?: never;
+    url: '/sftp-ingress/accounts/{accountId}';
+};
+
+export type RevokeSftpIngressAccountErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type RevokeSftpIngressAccountError = RevokeSftpIngressAccountErrors[keyof RevokeSftpIngressAccountErrors];
+
+export type RevokeSftpIngressAccountResponses = {
+    200: unknown;
+};
+
+export type ListSftpIngressEventsData = {
+    body?: never;
+    path: {
+        accountId: string;
+    };
+    query?: {
+        limit?: string;
+    };
+    url: '/sftp-ingress/accounts/{accountId}/events';
+};
+
+export type ListSftpIngressEventsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ListSftpIngressEventsError = ListSftpIngressEventsErrors[keyof ListSftpIngressEventsErrors];
+
+export type ListSftpIngressEventsResponses = {
+    200: unknown;
+};
+
+export type GetSftpIngressServerData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/server';
+};
+
+export type GetSftpIngressServerErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetSftpIngressServerError = GetSftpIngressServerErrors[keyof GetSftpIngressServerErrors];
+
+export type GetSftpIngressServerResponses = {
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetSftpIngressServerResponse = GetSftpIngressServerResponses[keyof GetSftpIngressServerResponses];
+
+export type RecordSftpIngressAuditData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/service/audit';
+};
+
+export type RecordSftpIngressAuditErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type RecordSftpIngressAuditError = RecordSftpIngressAuditErrors[keyof RecordSftpIngressAuditErrors];
+
+export type RecordSftpIngressAuditResponses = {
+    201: unknown;
+};
+
+export type AuthenticateSftpIngressAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/service/authenticate';
+};
+
+export type AuthenticateSftpIngressAccountErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type AuthenticateSftpIngressAccountError = AuthenticateSftpIngressAccountErrors[keyof AuthenticateSftpIngressAccountErrors];
+
+export type AuthenticateSftpIngressAccountResponses = {
+    201: unknown;
+};
+
+export type IngestSftpScanData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/service/ingest';
+};
+
+export type IngestSftpScanErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type IngestSftpScanError = IngestSftpScanErrors[keyof IngestSftpScanErrors];
+
+export type IngestSftpScanResponses = {
+    201: unknown;
+};
+
+export type ResolveSftpIngressAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/sftp-ingress/service/resolve';
+};
+
+export type ResolveSftpIngressAccountErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ResolveSftpIngressAccountError = ResolveSftpIngressAccountErrors[keyof ResolveSftpIngressAccountErrors];
+
+export type ResolveSftpIngressAccountResponses = {
+    201: unknown;
+};
 
 export type ListTagsData = {
     body?: never;

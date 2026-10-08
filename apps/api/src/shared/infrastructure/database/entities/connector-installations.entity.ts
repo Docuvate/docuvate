@@ -1,6 +1,8 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { UserEntity } from './user.entity.js';
+import { SftpPullSyncStateEntity } from './sftp-pull-sync-state.entity.js';
 
+@Index("connector_installations_pkey", ["id"], { unique: true })
 @Index(
   "connector_installations_user_id_plugin_id_key",
   ["pluginId", "userId"],
@@ -44,4 +46,11 @@ export class ConnectorInstallationsEntity {
   })
   @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])
   user: UserEntity;
+
+  @OneToOne(
+    () => SftpPullSyncStateEntity,
+    (sftpPullSyncState) => sftpPullSyncState.installation,
+    { onDelete: "CASCADE" },
+  )
+  sftpPullSyncState: SftpPullSyncStateEntity;
 }

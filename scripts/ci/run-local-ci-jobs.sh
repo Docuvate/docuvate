@@ -141,6 +141,10 @@ job_db_migrate_fresh() {
 
 job_integration_test() {
   cd "$ROOT"
+  cd apps/sftp-ingest
+  go vet ./...
+  go test ./...
+  cd "$ROOT"
   docker info
   node scripts/testing/verify-container-images.mjs
   docker pull postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
@@ -159,6 +163,7 @@ job_integration_test() {
   UV_VENV_CLEAR=1 UV_PYTHON="$PY_PIN" uv venv .venv
   uv pip install -e ".[dev]"
   ./.venv/bin/pytest tests/integration -q --maxfail=1
+  bash "$ROOT/scripts/testing/run-sftp-integration-e2e.sh"
 }
 
 job_docker_build() {
@@ -166,7 +171,7 @@ job_docker_build() {
   local project
   docuvate_ci_compose_files_array
   project="$(docuvate_ci_prepare_stack_compose)"
-  docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" build web api worker
+  docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" build web api worker sftp-ingest
 }
 
 job_compose_smoke() {

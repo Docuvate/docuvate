@@ -19,6 +19,7 @@ import { ModelRegistryModule } from './modules/model-registry/model-registry.mod
 import { AuthPublicModule } from './modules/auth/auth-public.module.js';
 import { ExtensionHostModule } from './shared/infrastructure/extensions/extension-host.module.js';
 import { SearchModule } from './modules/search/search.module.js';
+import { SftpIngressModule } from './modules/sftp-ingress/sftp-ingress.module.js';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { SearchModule } from './modules/search/search.module.js';
     ModelRegistryModule,
     AuthPublicModule,
     SearchModule,
+    SftpIngressModule,
   ],
 })
 export class AppModule {}

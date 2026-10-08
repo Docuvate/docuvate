@@ -6,6 +6,7 @@ import type {
 } from '@docuvate/contracts';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../../lib/connectorOAuthSetupDoc';
+import { probeSftpFetchHostKey } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 
@@ -36,6 +37,8 @@ export function ConnectorConnectDialog({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [displayName, setDisplayName] = useState('');
   const [credentials, setCredentials] = useState<Record<string, string>>({});
+  const [probeMessage, setProbeMessage] = useState<string | null>(null);
+  const [probeBusy, setProbeBusy] = useState(false);
 
   const fields = useMemo(
     () => plugin?.auth.fields ?? [],
@@ -64,7 +67,29 @@ export function ConnectorConnectDialog({
       initial[field.key] = '';
     }
     setCredentials(initial);
+    setProbeMessage(null);
   }, [plugin, t]);
+
+  async function handleProbeHostKey() {
+    if (!plugin || plugin.id !== 'sftp_fetch') return;
+    setProbeBusy(true);
+    setProbeMessage(null);
+    try {
+      const result = await probeSftpFetchHostKey({
+        host: credentials['host'] ?? '',
+        port: Number(credentials['port'] ?? 22) || 22,
+        username: credentials['username'] ?? '',
+        password: credentials['password'] || undefined,
+        privateKey: credentials['private_key'] || undefined,
+      });
+      setCredentials((prev) => ({ ...prev, host_key_fingerprint: result.hostKeyFingerprintSha256 }));
+      setProbeMessage(t('connectors.sftpProbeSuccess', { fingerprint: result.hostKeyFingerprintSha256 }));
+    } catch {
+      setProbeMessage(t('connectors.sftpProbeFailed'));
+    } finally {
+      setProbeBusy(false);
+    }
+  }
 
   function fieldLabel(field: ConnectorAuthFieldDescriptorDto) {
     return t(field.labelKey);
@@ -157,6 +182,14 @@ export function ConnectorConnectDialog({
               {field.helpKey ? <span className="muted settings-hint">{t(field.helpKey)}</span> : null}
             </label>
           ))}
+          {plugin.id === 'sftp_fetch' ? (
+            <div className="connector-sftp-probe">
+              <Button type="button" variant="secondary" disabled={busy || probeBusy} onClick={() => void handleProbeHostKey()}>
+                {probeBusy ? t('connectors.sftpProbePending') : t('connectors.sftpProbeCta')}
+              </Button>
+              {probeMessage ? <p className="muted settings-hint">{probeMessage}</p> : null}
+            </div>
+          ) : null}
           <div className="confirm-dialog-actions">
             <Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
               {t('common.cancel')}

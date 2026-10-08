@@ -9968,3 +9968,409 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   max-width: 36rem;
   width: calc(100vw - 2 * var(--dv-space-lg));
 }
+.connector-sftp-manage-drawer-root {
+  position: fixed;
+  inset: 0;
+  z-index: var(--dv-z-overlay, 1200);
+  pointer-events: none;
+}
+
+.connector-sftp-manage-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: color-mix(in srgb, var(--dv-color-bg) 35%, transparent);
+  backdrop-filter: blur(2px);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.connector-sftp-manage-drawer {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: min(100vw, 28rem);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-sm);
+  padding: var(--dv-space-md);
+  box-sizing: border-box;
+  background: var(--dv-color-bg-raised);
+  border-inline-end: 1px solid var(--dv-color-border);
+  box-shadow: var(--dv-shadow-md);
+  overflow: auto;
+  pointer-events: auto;
+}
+
+.connector-sftp-manage-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-sm);
+  flex-shrink: 0;
+  padding-bottom: var(--dv-space-xs);
+  border-bottom: 1px solid var(--dv-color-border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--dv-color-bg-raised);
+}
+
+.connector-sftp-manage-drawer-head .filter-heading {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.connector-sftp-manage-drawer-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-bg-raised);
+  color: var(--dv-color-text);
+  cursor: pointer;
+}
+
+.connector-sftp-manage-drawer-close:hover {
+  background: var(--dv-color-bg-overlay);
+}
+
+.connector-sftp-card {
+  min-width: 0;
+}
+
+.connector-sftp-card--compact .connector-catalog-card-body {
+  gap: var(--dv-space-xs);
+}
+
+.connector-sftp-active-badge {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--dv-color-ok) 12%, var(--dv-color-bg-raised));
+  color: var(--dv-color-ok);
+  border: 1px solid color-mix(in srgb, var(--dv-color-ok) 25%, var(--dv-color-border));
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.connector-sftp-card-endpoint {
+  display: grid;
+  gap: var(--dv-space-2xs);
+  margin-top: var(--dv-space-xs);
+}
+
+.copy-btn {
+  min-height: 2.5rem;
+  gap: var(--dv-space-xs);
+}
+
+.connector-sftp-manage-drawer-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-md);
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.connector-sftp-fingerprint-lead {
+  margin: 0 0 var(--dv-space-2xs);
+}
+
+.connector-sftp-fingerprint-status {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.input.input-invalid {
+  border-color: var(--dv-color-danger-strong);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--dv-color-danger-strong) 35%, transparent);
+}
+
+.field-inline-error {
+  margin: var(--dv-space-2xs) 0 0;
+  font-size: 0.875rem;
+  color: var(--dv-color-danger-strong);
+}
+
+.connector-sftp-manage-actions {
+  margin-top: var(--dv-space-md);
+}
+
+
+.library-title-filename {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-width: 0;
+}
+
+.library-title-ingest-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dv-color-text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.library-title-ingest-icon {
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.doc-card-filename .library-title-ingest-meta {
+  margin-inline-start: var(--dv-space-xs);
+}
+
+
+.connector-sftp-kv-grid {
+  display: grid;
+  gap: var(--dv-space-sm);
+  margin-top: var(--dv-space-sm);
+}
+
+.connector-sftp-kv-grid--compact {
+  margin-top: var(--dv-space-xs);
+}
+
+.connector-sftp-kv-row {
+  display: grid;
+  gap: var(--dv-space-2xs);
+}
+
+.connector-sftp-kv-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--dv-color-text-muted);
+}
+
+.connector-sftp-kv-value {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-height: 2.5rem;
+}
+
+.connector-sftp-kv-value code {
+  font-size: 0.875rem;
+  word-break: break-all;
+}
+
+.connector-sftp-kv-muted {
+  color: var(--dv-color-text-muted);
+  font-style: normal;
+}
+
+.connector-sftp-copy-btn {
+  min-height: 2.5rem;
+  flex-shrink: 0;
+}
+
+.connector-sftp-access-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--dv-space-sm) 0 0;
+  display: grid;
+  gap: var(--dv-space-sm);
+}
+
+.connector-sftp-access-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dv-space-sm);
+  padding: var(--dv-space-sm);
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-bg-overlay);
+}
+
+.connector-sftp-access-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-xs);
+}
+
+.connector-sftp-access-meta {
+  display: grid;
+  gap: var(--dv-space-2xs);
+  margin: var(--dv-space-xs) 0 0;
+  font-size: 0.875rem;
+}
+
+.connector-sftp-access-meta dt {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--dv-color-text-subtle);
+  margin: 0;
+}
+
+.connector-sftp-access-meta dd {
+  margin: 0;
+  color: var(--dv-color-text-muted);
+}
+
+.connector-sftp-revoke-btn {
+  min-height: 2.5rem;
+  color: var(--dv-color-danger);
+  border-color: color-mix(in srgb, var(--dv-color-danger) 35%, var(--dv-color-border));
+}
+
+.connector-sftp-revoke-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--dv-color-danger) 8%, var(--dv-color-bg-raised));
+}
+
+.connector-sftp-wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--dv-space-xs);
+  list-style: none;
+  padding: 0;
+  margin: var(--dv-space-sm) 0 var(--dv-space-md);
+}
+
+.connector-sftp-wizard-step {
+  display: flex;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  font-size: 0.8125rem;
+  color: var(--dv-color-text-subtle);
+  min-height: 2.5rem;
+}
+
+.connector-sftp-wizard-step--active {
+  color: var(--dv-color-text);
+  font-weight: 600;
+}
+
+.connector-sftp-wizard-step--done {
+  color: var(--dv-color-ok);
+}
+
+.connector-sftp-wizard-step-index {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--dv-color-border);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.connector-sftp-wizard-step--active .connector-sftp-wizard-step-index {
+  border-color: var(--dv-color-accent);
+  background: color-mix(in srgb, var(--dv-color-accent) 12%, transparent);
+}
+
+.connector-sftp-field-grid {
+  display: grid;
+  gap: var(--dv-space-md);
+}
+
+.connector-sftp-field-grid .field {
+  display: grid;
+  gap: var(--dv-space-2xs);
+  margin: 0;
+}
+
+.connector-sftp-field-grid .input,
+.connector-sftp-field-grid .custom-select-trigger,
+.connector-sftp-textarea,
+.connector-sftp-ingress-dialog .btn {
+  min-height: 2.5rem;
+}
+
+.connector-sftp-textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.connector-sftp-setup-hint {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.connector-sftp-ingress-dialog {
+  max-width: 36rem;
+}
+
+.connector-sftp-ingress-header h2 {
+  margin: 0 0 var(--dv-space-2xs);
+  font-size: 1.15rem;
+}
+
+.connector-sftp-ingress-server dl {
+  display: grid;
+  gap: var(--dv-space-sm);
+  margin: var(--dv-space-sm) 0;
+}
+
+.connector-sftp-ingress-server dt {
+  font-size: 0.85rem;
+  color: var(--dv-color-text-muted);
+}
+
+.connector-sftp-ingress-server dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  margin: 0;
+}
+
+.connector-sftp-ingress-accounts {
+  list-style: none;
+  padding: 0;
+  margin: var(--dv-space-md) 0 0;
+  display: grid;
+  gap: var(--dv-space-sm);
+}
+
+.connector-sftp-ingress-account {
+  padding: var(--dv-space-sm);
+  border: 1px solid var(--dv-color-border);
+  border-radius: 12px;
+}
+
+.connector-sftp-ingress-events {
+  list-style: none;
+  padding: 0;
+  margin: var(--dv-space-xs) 0 0;
+  font-size: 0.88rem;
+  display: grid;
+  gap: var(--dv-space-2xs);
+}
+
+.connector-sftp-ingress-dialog {
+  margin-top: var(--dv-space-md);
+  padding: var(--dv-space-md);
+  border: 1px solid var(--dv-color-border);
+  border-radius: 12px;
+  background: var(--dv-color-bg);
+}
+
+.connector-sftp-ingress-dialog-actions {
+  display: flex;
+  gap: var(--dv-space-sm);
+  margin-top: var(--dv-space-sm);
+}

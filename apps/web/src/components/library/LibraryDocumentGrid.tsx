@@ -62,7 +62,17 @@ export function LibraryDocumentGrid({
                   </span>
                 ) : null}
               </div>
-              <p className="muted doc-card-filename">{doc.filename}</p>
+              <p className="muted doc-card-filename">
+                {doc.filename}
+                {doc.ingestSource === 'scanner_sftp' ? (
+                  <span className="library-title-ingest-meta">
+                    <span className="library-title-ingest-icon" aria-hidden>
+                      ⎙
+                    </span>
+                    {t('documents.ingestSourceScanner')}
+                  </span>
+                ) : null}
+              </p>
               <div className="doc-card-meta">
                 <Badge status={doc.status} />
                 <time dateTime={doc.documentDate ?? doc.updatedAt}>{documentDisplayDate(doc)}</time>

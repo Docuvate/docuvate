@@ -429,6 +429,7 @@
     "deleteConfirm": "Delete document?",
     "deleteTitle": "Delete document?",
     "deleteDescription": "\"{{filename}}\" will be removed along with its file, extracted text, assigned labels, and recognized field values. This cannot be undone.",
+    "ingestSourceScanner": "Scanner ingress",
     "backToLibrary": "Back to library",
     "download": "Download",
     "deleteDocument": "Delete document",
@@ -744,6 +745,10 @@
       "storage": {
         "label": "Cloud storage",
         "description": "Import files or store documents in the cloud."
+      },
+      "scannerSftp": {
+        "label": "Scanner & SFTP",
+        "description": "Scanner inbox and fetch from SFTP servers."
       }
     },
     "plugins": {
@@ -779,6 +784,19 @@
         "endpointHelp": "Leave empty for AWS. Set for MinIO or other S3-compatible endpoints.",
         "pathStylePlaceholder": "true",
         "pathStyleHelp": "Optional. Use true for path-style addressing (common with MinIO)."
+      },
+      "sftpFetch": {
+        "label": "Fetch from SFTP server",
+        "description": "Periodically import files from an external SFTP server or NAS.",
+        "portPlaceholder": "22",
+        "remotePathPlaceholder": "/scans",
+        "privateKeyHelp": "Optional when you use a password instead. PEM format.",
+        "hostKeyHelp": "SHA-256 fingerprint of the server host key. Use connection test to discover and confirm.",
+        "pollIntervalPlaceholder": "300",
+        "afterImportPlaceholder": "delete",
+        "afterImportHelp": "delete removes imported files. move relocates them to a subfolder.",
+        "archiveSubpathPlaceholder": "imported",
+        "labelIdsHelp": "Optional. Comma-separated label IDs applied to imported documents."
       }
     },
     "auth": {
@@ -794,7 +812,17 @@
         "accessKeyId": "Access key ID",
         "secretAccessKey": "Secret access key",
         "endpoint": "Custom endpoint (optional)",
-        "pathStyle": "Path-style access (optional)"
+        "pathStyle": "Path-style access (optional)",
+        "host": "Host",
+        "port": "Port",
+        "privateKey": "Private SSH key (optional)",
+        "remotePath": "Remote path",
+        "hostKeyFingerprint": "Host key fingerprint (SHA-256)",
+        "pollIntervalSeconds": "Poll interval (seconds)",
+        "afterImport": "After import",
+        "archiveSubpath": "Archive subfolder",
+        "targetFolderId": "Target folder ID (optional)",
+        "labelIds": "Label IDs (optional)"
       },
       "strategy": {
         "oauth2": "OAuth 2.0: you will be redirected to the provider and return here after sign-in.",
@@ -830,7 +858,11 @@
       "importRefRequired": "Import reference is missing.",
       "importEmpty": "Imported object is empty.",
       "installationDisabled": "New connections are disabled on this server."
-    }
+    },
+    "sftpProbeCta": "Test connection",
+    "sftpProbePending": "Testing…",
+    "sftpProbeSuccess": "Host key confirmed: {{fingerprint}}",
+    "sftpProbeFailed": "Connection test failed. Check host, port, and credentials."
   },
   "labels": {
     "pageTitle": "Labels",
@@ -1121,5 +1153,85 @@
     "correspondentsDeleteDescription": "The correspondent will be removed from your list. Existing document links are unchanged.",
     "correspondentsNewPlaceholder": "New correspondent",
     "noResults": "No matches."
+  },
+  "sftpIngress": {
+    "title": "Scanner inbox (SFTP)",
+    "lead": "Let printers or scan apps upload files to Docuvate over SFTP. Each access belongs to your account.",
+    "activeBadge_one": "1 account active",
+    "activeBadge_other": "{{count}} accounts active",
+    "manageCta": "Manage",
+    "manageDrawerTitle": "Manage scanner inbox",
+    "cardSummaryLastReceived": "Last received {{time}}",
+    "cardSummaryNoActivity": "No files received yet",
+    "cardSummaryNone": "No accesses yet",
+    "fingerprintPurpose": "The host key fingerprint lets you verify on the device that it is connecting to your Docuvate server.",
+    "fingerprintPendingStatus": "The value appears here once the SFTP service is reachable.",
+    "fingerprintInfo": "Shown once the SFTP service is reachable.",
+    "serverAddress": "Server address",
+    "fingerprint": "Host key fingerprint",
+    "fingerprintPending": "Loading…",
+    "copy": "Copy",
+    "printerHelp": "On the device: protocol SFTP, server and port as above, path /, username and password from the access.",
+    "printerHelpShort": "Set up SFTP on your printer and create an access here.",
+    "printerStepLead": "Enter these values on the printer or scanner and verify the fingerprint.",
+    "remotePath": "Folder on the server",
+    "setupTitle": "Set up scanner inbox",
+    "setupStep": "Step {{current}} of {{total}}",
+    "setupStepName": "Access",
+    "setupStepDevice": "Device",
+    "setupStepDone": "Done",
+    "setupMissingLead": "Still required:",
+    "setupMissingName": "display name",
+    "setupMissingSshKey": "public SSH key",
+    "setupFieldErrorName": "Enter a label for this access.",
+    "setupFieldErrorSshKey": "Paste the public SSH key.",
+    "serverLoading": "Contacting server…",
+    "fingerprintUnavailable": "Fingerprint not available right now",
+    "lastReceivedLabel": "Last received",
+    "setupNext": "Continue",
+    "setupBack": "Back",
+    "authModeLegend": "Sign-in on the device",
+    "authModePassword": "Username and password",
+    "authModeSshKey": "SSH key",
+    "sshPublicKey": "Public SSH key",
+    "targetFolder": "Destination in Docuvate",
+    "targetFolderInbox": "Inbox (default)",
+    "targetFolderLabel": "Destination folder",
+    "lastReceived": "Last received: {{time}}",
+    "lastReceivedNever": "nothing received yet",
+    "badgePassword": "Password",
+    "badgeSshKey": "SSH key",
+    "createCta": "Create access",
+    "createTitle": "Create scanner access",
+    "displayName": "Label",
+    "createSubmit": "Create access",
+    "createPending": "Creating…",
+    "username": "Username",
+    "passwordOnce": "Password (shown once)",
+    "createdTitle": "Access created",
+    "createdDescription": "Save these credentials. The password will not be shown again.",
+    "createdUsername": "Username: {{username}}",
+    "createdPassword": "Password: {{password}}",
+    "revokeCta": "Revoke access",
+    "revokePending": "Revoking…",
+    "revokeConfirmTitle": "Revoke access?",
+    "revokeConfirmDescription": "Access “{{name}}” will no longer be able to upload.",
+    "loadFailed": "Could not load scanner inbox",
+    "createFailed": "Could not create access",
+    "revokeFailed": "Could not revoke access",
+    "eventStatus": {
+      "received": "Received",
+      "processed": "Processed",
+      "rejected": "Rejected"
+    },
+    "errors": {
+      "emptyFilename": "Filename is missing",
+      "temporaryFilename": "Temporary file extension",
+      "emptyFile": "File is empty",
+      "fileTooLarge": "File is too large",
+      "unsupportedType": "File type not allowed",
+      "processingFailed": "Processing failed",
+      "authFailed": "Sign-in failed"
+    }
   }
 }
