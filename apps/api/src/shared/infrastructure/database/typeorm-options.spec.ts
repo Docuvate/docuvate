@@ -30,6 +30,6 @@ describe('buildTypeOrmOptions', () => {
     expect(migrations[2]?.name).toBe('DocumentFieldValuesBackfill20261008130600');
     expect(migrations[3]?.name).toBe('SearchIndexBackfill20261008130700');
     expect(migrations[4]?.name).toBe('SchemaNormalization3nf20261008131000');
-    expect(migrations[5]?.name).toBe('SftpIngress20261008131500');
+    expect(migrations[5]?.name).toBe('SftpIngress20261008133500');
   });
 });
