@@ -265,6 +265,14 @@ export function LibraryDocumentTable({
                             {doc.filename}
                           </div>
                         ) : null}
+                        {doc.ingestSource === 'scanner_sftp' ? (
+                          <span className="library-title-ingest-meta">
+                            <span className="library-title-ingest-icon" aria-hidden>
+                              ⎙
+                            </span>
+                            {t('documents.ingestSourceScanner')}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     <div className="library-doc-stack-meta">
@@ -457,6 +465,14 @@ export function LibraryDocumentTable({
                       {showLegacyDuplicateHint(doc) ? (
                         <span className="dup-badge" title={t('library.duplicateHintTitle')}>
                           {t('library.duplicateHintBadge')}
+                        </span>
+                      ) : null}
+                      {doc.ingestSource === 'scanner_sftp' ? (
+                        <span className="library-title-ingest-meta">
+                          <span className="library-title-ingest-icon" aria-hidden>
+                            ⎙
+                          </span>
+                          {t('documents.ingestSourceScanner')}
                         </span>
                       ) : null}
                     </div>
