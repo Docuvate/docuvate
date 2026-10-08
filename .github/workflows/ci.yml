@@ -54,6 +54,8 @@ jobs:
         run: pnpm --filter @docuvate/web test:coverage
       - name: Coverage ratchet (no regression vs baseline)
         run: node scripts/testing/coverage-ratchet.mjs
+      - name: Install uv (uvx for fastapi doctor)
+        run: pipx install uv
       - name: Doctor ratchet (no regression vs baseline)
         run: node scripts/testing/doctor-ratchet.mjs
       - name: Upload coverage summaries
@@ -100,6 +102,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install
+      - run: pnpm --filter @docuvate/contracts build
+      - run: pnpm --filter @docuvate/otel build
       - name: TypeORM migration roundtrip + generate-check
         env:
           DATABASE_URL: postgresql://docuvate:docuvate@localhost:5432/docuvate
@@ -131,6 +135,7 @@ jobs:
           docker pull axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
       - run: pnpm install
       - run: pnpm --filter @docuvate/contracts build
+      - run: pnpm --filter @docuvate/otel build
       - run: pnpm --filter @docuvate/api build
       - name: API adapter integration (Testcontainers)
         run: pnpm --filter @docuvate/api test:integration
