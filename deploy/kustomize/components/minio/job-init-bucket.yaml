@@ -1,0 +1,51 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: docuvate-minio-init-0-1-0
+  labels:
+    app.kubernetes.io/name: docuvate-minio-init
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: docuvate-minio-init
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: mc
+          image: cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: MINIO_ACCESS_KEY
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: MINIO_SECRET_KEY
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              mc alias set local http://docuvate-minio-0.docuvate-minio:9000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+              mc mb --ignore-existing local/documents
+              mc ls local/documents
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsUser: 65532
+            runAsGroup: 65532

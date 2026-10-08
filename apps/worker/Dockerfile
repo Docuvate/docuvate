@@ -13,6 +13,10 @@ COPY apps/worker ./apps/worker
 ARG WORKER_OPTIONAL_EXTRAS=
 ENV FLAGS_use_mkldnn=0
 ENV PYTHONPATH=/app/apps/worker/src
+ENV HOME=/opt/models
+ENV FASTEMBED_CACHE_PATH=/opt/models/fastembed
+ENV PADDLE_PDX_CACHE_HOME=/opt/models/paddle
+RUN mkdir -p /opt/models/fastembed /opt/models/paddle /opt/models/.paddleocr
 RUN pip install --no-cache-dir uv \
  && if [ -n "$WORKER_OPTIONAL_EXTRAS" ]; then \
       uv pip install --system -e "./apps/worker[${WORKER_OPTIONAL_EXTRAS}]"; \
@@ -23,7 +27,8 @@ RUN pip install --no-cache-dir uv \
  && uv pip install --system --reinstall "opencv-python-headless>=4.8.0,<5.0.0" "numpy>=1.26,<2" \
  && python -c "import cv2; from paddleocr import PaddleOCR; print('opencv', cv2.__version__)" \
  && python -c "from docuvate_worker.infrastructure.extractors.paddle_engine import prewarm_paddle_models; prewarm_paddle_models()" \
- && python -c "from docuvate_worker.infrastructure.fastembed_model import get_embedding_model; get_embedding_model()"
+ && python -c "from docuvate_worker.infrastructure.fastembed_model import get_embedding_model; get_embedding_model()" \
+ && chown -R 65534:65534 /opt/models
 ENV EXTRACTOR_ENGINE=pipeline
 ENV PADDLE_OCR_LANG=german
 WORKDIR /app/apps/worker

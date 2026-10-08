@@ -38,7 +38,7 @@ Move adapters module-by-module from raw `pg` pools to TypeORM repositories:
 ### Coordination
 
 - **Compose:** `postgres` healthy → `migrate` → `db-storage-guard` → `api` / `worker`.
-- **#86 (K8s):** Helm pre-install/pre-upgrade Job; Kustomize sync-wave `-5`. Reference manifests: `deploy/kubernetes/migrate-job-helm.yaml`, `deploy/kubernetes/migrate-job-kustomize.yaml` (same command as Compose).
+- **Kubernetes:** Helm `post-install,pre-upgrade` migrate Job; Kustomize Job `deploy/kustomize/base/jobs/db-migrate.yaml` (same command as Compose).
 
 ## Consequences
 

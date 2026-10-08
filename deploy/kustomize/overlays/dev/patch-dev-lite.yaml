@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docuvate-config
+data:
+  DOCUMENT_CHAT_PROVIDER: context
+  PASSWORD_RESET_MAIL_MODE: smtp
+  SMTP_URL: smtp://docuvate-mailpit:1025
+  DOCUVATE_PUBLIC_WEB_URL: http://localhost:8080
+  DOCUVATE_PUBLIC_API_URL: http://localhost:8080/api
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: docuvate-api
+spec:
+  minReplicas: 1
+  maxReplicas: 1
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: docuvate-worker
+spec:
+  minReplicas: 1
+  maxReplicas: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuvate-worker
+spec:
+  progressDeadlineSeconds: 1200
+  template:
+    spec:
+      containers:
+        - name: worker
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          startupProbe:
+            httpGet:
+              path: /v1/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 90

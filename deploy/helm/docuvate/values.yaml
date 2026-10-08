@@ -1,0 +1,100 @@
+global:
+  imageRegistry: ghcr.io/docuvate
+  imageTag: ""
+  imagePullPolicy: IfNotPresent
+
+ingress:
+  enabled: true
+  className: traefik
+  host: docuvate.local
+  tls: []
+  annotations: {}
+
+networkPolicies:
+  enabled: true
+  ingressNamespace: kube-system
+  allowExternalEgress: false
+
+api:
+  replicas: 1
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPU: 70
+
+web:
+  replicas: 1
+
+worker:
+  replicas: 1
+  imageSuffix: ""
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 5
+    targetCPU: 75
+  resources:
+    requests:
+      cpu: "1"
+      memory: 2Gi
+    limits:
+      cpu: "4"
+      memory: 4Gi
+  startupProbe:
+    periodSeconds: 10
+    failureThreshold: 30
+
+gpuWorker:
+  enabled: false
+
+postgres:
+  enabled: false
+  createSecret: false
+  existingSecret: docuvate-postgres
+  image: postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+  storage: 20Gi
+  storageClassName: ""
+
+valkey:
+  enabled: true
+
+minio:
+  enabled: false
+  storage: 50Gi
+  storageClassName: ""
+  image: cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
+  mcImage: cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
+  # When true, the init Job uses the mcImage (Chainguard MinIO ships mc) for bucket setup.
+  initUseAwsCli: false
+
+ollama:
+  enabled: false
+  model: qwen2.5:3b
+  storage: 30Gi
+  image: ollama/ollama:0.12.6@sha256:a61a8fd395dbb931cc8cb1b5da7a2510746575c87113fdc45b647ee59ef7f808
+
+mailpit:
+  enabled: false
+  image: axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+
+migrate:
+  enabled: true
+  command:
+    - node
+    - dist/shared/infrastructure/database/run-migrate.js
+
+secrets:
+  create: false
+  existingSecret: docuvate-secrets
+
+config:
+  documentChatProvider: context
+  minioEndpoint: docuvate-minio-0.docuvate-minio
+  minioPort: "9000"
+  minioUseSsl: "false"
+  minioRegion: ""
+  minioBucket: documents
+  publicWebUrl: REPLACE_WITH_PUBLIC_WEB_URL
+  publicApiUrl: REPLACE_WITH_PUBLIC_API_URL
+  smtpUrl: REPLACE_WITH_SMTP_URL

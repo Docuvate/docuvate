@@ -227,3 +227,56 @@ jobs:
       - name: Dump API logs on failure
         if: failure()
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate worker
+
+  kubernetes-manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install Kubernetes CI tools
+        run: |
+          set -euo pipefail
+          bash scripts/ci/install-k8s-ci-tools.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: PyYAML for parity report
+        run: pip install 'pyyaml==6.0.2'
+      - name: Validate Kustomize, Helm, kubeconform, parity
+        run: bash tools/k8s-manifest-validate.sh
+
+  kind-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Detect kind-smoke path changes
+        id: paths
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+          GITHUB_EVENT_PULL_REQUEST_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if bash scripts/ci/kind-smoke-paths-changed.sh; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Require Docker
+        if: steps.paths.outputs.run == 'true'
+        run: docker info
+      - name: Install Kubernetes CI tools
+        if: steps.paths.outputs.run == 'true'
+        run: |
+          set -euo pipefail
+          bash scripts/ci/install-k8s-ci-tools.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: PyYAML for kind-smoke helpers
+        if: steps.paths.outputs.run == 'true'
+        run: pip install 'pyyaml==6.0.2'
+      - name: Kind cluster smoke (Kustomize dev + Helm dev)
+        if: steps.paths.outputs.run == 'true'
+        run: bash tools/k8s-kind-smoke.sh
+      - name: Skipped (no matching path changes)
+        if: steps.paths.outputs.run != 'true'
+        run: echo 'kind-smoke skipped (no deploy/k8s-related paths in this diff).'

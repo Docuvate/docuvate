@@ -1,0 +1,13 @@
+# Documented Kustomize vs Helm differences permitted by parity_report.py
+entries:
+  - profiles: [dev]
+    resource: Service/docuvate-web
+    reason: Dev overlay NodePort 30080 for kind-smoke; Helm dev values keep ClusterIP (NodePort is a Kustomize patch only).
+
+  - profiles: [dev]
+    resource: Ingress/docuvate
+    reason: Dev localhost Ingress + NodePort are kind-smoke conveniences in Kustomize only.
+
+  - profiles: [dev]
+    resource: NetworkPolicy/docuvate-web
+    reason: Dev overlay adds in-namespace web ingress for kind without ingress-controller namespace.

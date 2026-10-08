@@ -3,6 +3,7 @@ import { Public } from '../../shared/infrastructure/auth/public.decorator.js';
 import { ApiExcludeController } from '@nestjs/swagger';
 import pg from 'pg';
 import * as Minio from 'minio';
+import { createMinioClientOptionsFromEnv } from '../../shared/infrastructure/storage/minio-client.config.js';
 import { PG_POOL } from '../../shared/infrastructure/database/tokens.js';
 import { HealthResponseDto, ReadinessResponseDto } from '../../shared/presentation/dtos/health.dto.js';
 import { createValkeyConnection } from '../../shared/infrastructure/valkey/valkey-connection.js';
@@ -51,13 +52,7 @@ export class HealthController {
     }
 
     try {
-      const client = new Minio.Client({
-        endPoint: process.env['MINIO_ENDPOINT'] ?? 'localhost',
-        port: Number(process.env['MINIO_PORT'] ?? 9000),
-        useSSL: false,
-        accessKey: process.env['MINIO_ACCESS_KEY'] ?? 'docuvate',
-        secretKey: process.env['MINIO_SECRET_KEY'] ?? 'docuvate-secret',
-      });
+      const client = new Minio.Client(createMinioClientOptionsFromEnv());
       await client.bucketExists(process.env['MINIO_BUCKET'] ?? 'documents');
       checks.minio = 'ok';
     } catch {

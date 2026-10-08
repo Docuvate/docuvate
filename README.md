@@ -81,6 +81,31 @@ Docker Compose runs **PostgreSQL 18.6** (`postgres:18.6-alpine`). Fresh installs
 
 Local development without Docker also expects **PostgreSQL 18.6** (or compatible 18.x), plus MinIO, Valkey, and Node 24+ / uv for the worker.
 
+## Kubernetes
+
+Deploy Docuvate on Kubernetes with **Kustomize** (primary, GitOps-friendly) or an equivalent **Helm** chart. Overlays cover local **dev** (kind smoke), **homelab** (in-cluster Postgres 18, MinIO, Valkey), and **cloud** (managed Postgres and S3-compatible object storage; no in-cluster database).
+
+| Path | Purpose |
+| ---- | ------- |
+| [docs/deploy/kubernetes.md](docs/deploy/kubernetes.md) | Homelab, cloud, migrations, backups |
+| [deploy/README.md](deploy/README.md) | Layout of manifests, scripts, and examples |
+| `deploy/kustomize/overlays/*` | Environment-specific manifests |
+| `deploy/helm/docuvate` | Helm chart with matching values files |
+
+Validate rendered manifests locally (kubeconform strict, Helm/Kustomize parity):
+
+```bash
+bash tools/k8s-manifest-validate.sh
+```
+
+Optional end-to-end smoke on [kind](https://kind.sigs.k8s.io/) (local registry, migrate Job, health and OpenAPI checks):
+
+```bash
+bash tools/k8s-kind-smoke.sh
+```
+
+CI runs manifest validation on every workflow; kind smoke runs when deploy or image-related paths change.
+
 ## Architecture
 
 ```mermaid
