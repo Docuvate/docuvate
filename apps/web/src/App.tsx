@@ -7,8 +7,13 @@ import { DocumentDetailPage } from './pages/DocumentDetailPage';
 import { LibraryPage } from './pages/LibraryPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { LoginPage } from './pages/LoginPage';
+import { LoginTwoFactorPage } from './pages/LoginTwoFactorPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { InviteAcceptPage } from './pages/InviteAcceptPage';
+import { AccountSecuritySettingsPage } from './pages/AccountSecuritySettingsPage';
+import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
+import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { NotFoundRoute } from './pages/NotFoundRoute';
 import { SettingsPage } from './pages/SettingsPage';
 import { ConnectorsPage } from './pages/ConnectorsPage';
@@ -52,7 +57,9 @@ export function App() {
   return (
     <Routes>
       <Route path={routes.login} element={<LoginPage />} />
+      <Route path={routes.loginTwoFactor} element={<LoginTwoFactorPage />} />
       <Route path={routes.register} element={<RegisterPage />} />
+      <Route path={routes.inviteAccept} element={<InviteAcceptPage />} />
       <Route path={routes.forgotPassword} element={<ForgotPasswordPage />} />
       <Route path={routes.resetPassword} element={<ResetPasswordPage />} />
       <Route
@@ -94,6 +101,18 @@ export function App() {
       <Route
         path={routes.settingsBlockedLabels}
         element={<ShellRoute><BlockedLabelsSettingsPage /></ShellRoute>}
+      />
+      <Route
+        path={routes.settingsAccountSecurity}
+        element={<ShellRoute><AccountSecuritySettingsPage /></ShellRoute>}
+      />
+      <Route
+        path={routes.settingsAdmin}
+        element={<ShellRoute><AdminSettingsPage /></ShellRoute>}
+      />
+      <Route
+        path={routes.settingsAdminUsers}
+        element={<ShellRoute><AdminUsersPage /></ShellRoute>}
       />
       <Route
         path="/documents/:id"

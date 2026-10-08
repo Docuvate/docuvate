@@ -242,7 +242,7 @@ kubectl -n docuvate create secret generic docuvate-postgres \
   --dry-run=client -o yaml | kubectl apply -f -
 kubectl -n docuvate create secret generic docuvate-secrets \
   --from-literal=DATABASE_URL=postgresql://docuvate:docuvate@docuvate-postgres:5432/docuvate \
-  --from-literal=BETTER_AUTH_SECRET=local-dev-secret-change-me-32chars!! \
+  --from-literal=BETTER_AUTH_SECRET=docuvate-kind-smoke-better-auth-signing-key-32 \
   --from-literal=MINIO_ACCESS_KEY=docuvate \
   --from-literal=MINIO_SECRET_KEY=docuvate-secret \
   --from-literal=WORKER_SECRET=worker-shared-secret \
@@ -266,7 +266,7 @@ kubectl -n docuvate create secret generic docuvate-postgres \
   --from-literal=POSTGRES_DB=docuvate
 kubectl -n docuvate create secret generic docuvate-secrets \
   --from-literal=DATABASE_URL=postgresql://docuvate:docuvate@docuvate-postgres:5432/docuvate \
-  --from-literal=BETTER_AUTH_SECRET=local-dev-secret-change-me-32chars!! \
+  --from-literal=BETTER_AUTH_SECRET=docuvate-kind-smoke-better-auth-signing-key-32 \
   --from-literal=MINIO_ACCESS_KEY=docuvate \
   --from-literal=MINIO_SECRET_KEY=docuvate-secret \
   --from-literal=WORKER_SECRET=worker-shared-secret \

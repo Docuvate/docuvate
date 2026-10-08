@@ -58,3 +58,13 @@ Helm: `post-install,pre-upgrade` migrate **Job**. Kustomize: Job in `deploy/kust
 |-----------|----------|-------------------------|-------------------------|
 | `pgcrypto` | UUID generation | yes | yes |
 | `vector` | Document embeddings | optional (worker) | optional |
+
+## Authentication secrets
+
+Docker Compose requires **`BETTER_AUTH_SECRET`** in a `.env` file (or the shell environment). Use a long random value (at least 32 characters). When the API runs with `NODE_ENV=production`, known placeholders and patterns such as `change-me` or `REPLACE_WITH` are rejected at startup.
+
+Copy `.env.example` to `.env`, set `BETTER_AUTH_SECRET`, then start the stack.
+
+## User registration policy
+
+By default, email/password signup is allowed only until the **first** user account exists. After that, new accounts require an **administrator invitation**. Set **`DV_ALLOW_SIGNUP=true`** to keep open self-registration, or **`DV_ALLOW_SIGNUP=false`** to disable self-registration entirely. CI compose-smoke sets `DV_ALLOW_SIGNUP=true` so tests can register a second user.

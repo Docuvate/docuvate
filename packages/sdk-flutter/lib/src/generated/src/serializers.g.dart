@@ -9,8 +9,16 @@ part of 'serializers.dart';
 Serializers _$serializers = (new Serializers().toBuilder()
       ..add(AcceptLabelRecommendationRequestDto.serializer)
       ..add(AcceptLabelRecommendationResponseDto.serializer)
+      ..add(AcceptUserInvitationRequestDto.serializer)
       ..add(AddLabelRecommendationBlocklistRequestDto.serializer)
+      ..add(AdminAccessResponseDto.serializer)
+      ..add(AdminAccessResponseDtoRoleEnum.serializer)
+      ..add(AdminUserListResponseDto.serializer)
+      ..add(AdminUserResponseDto.serializer)
+      ..add(AdminUserResponseDtoAccountStatusEnum.serializer)
+      ..add(AdminUserResponseDtoRoleEnum.serializer)
       ..add(ApiErrorEnvelopeDto.serializer)
+      ..add(BanAdminUserRequestDto.serializer)
       ..add(ChatMessageDto.serializer)
       ..add(ChatMessageDtoRoleEnum.serializer)
       ..add(ChatMessageRecordDto.serializer)
@@ -58,6 +66,8 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(ExtractionEngineListResponseDto.serializer)
       ..add(FolderListResponseDto.serializer)
       ..add(ImportFromConnectorRequestDto.serializer)
+      ..add(InviteAdminUserRequestDto.serializer)
+      ..add(InviteAdminUserRequestDtoRoleEnum.serializer)
       ..add(LabelMapResponseDtoClass.serializer)
       ..add(LabelMapResponseDtoClassEmptyReasonEnum.serializer)
       ..add(LabelRecommendationBlocklistEntryResponseDto.serializer)
@@ -86,6 +96,8 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(ReplaceTagCustomFieldsRequestDto.serializer)
       ..add(SendDocumentChatThreadMessageRequestDto.serializer)
       ..add(SendDocumentChatThreadMessageResponseDto.serializer)
+      ..add(SetAdminUserRoleRequestDto.serializer)
+      ..add(SetAdminUserRoleRequestDtoRoleEnum.serializer)
       ..add(SetMlModelLifecycleRequestDto.serializer)
       ..add(SetMlModelLifecycleRequestDtoLifecycleEnum.serializer)
       ..add(StartMailOAuthRequestDto.serializer)
@@ -106,6 +118,10 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(UserSettingsResponseDtoDocumentChatReadinessEnum.serializer)
       ..add(UserSettingsResponseDtoLocaleEnum.serializer)
       ..add(UserSettingsResponseDtoThemePreferenceEnum.serializer)
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(AdminUserResponseDto)]),
+          () => new ListBuilder<AdminUserResponseDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(ChatMessageDto)]),
           () => new ListBuilder<ChatMessageDto>())
@@ -133,6 +149,9 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(BuiltList,
               const [const FullType(DocumentPipelineModuleDescriptorDto)]),
           () => new ListBuilder<DocumentPipelineModuleDescriptorDto>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(JsonObject)]),
+          () => new ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
           () => new ListBuilder<JsonObject>())

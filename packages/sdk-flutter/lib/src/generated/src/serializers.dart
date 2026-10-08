@@ -16,8 +16,13 @@ import 'package:docuvate/src/generated/src/model/date.dart';
 
 import 'package:docuvate/src/generated/src/model/accept_label_recommendation_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/accept_label_recommendation_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/accept_user_invitation_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/add_label_recommendation_blocklist_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/admin_access_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/admin_user_list_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/admin_user_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/api_error_envelope_dto.dart';
+import 'package:docuvate/src/generated/src/model/ban_admin_user_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/chat_message_dto.dart';
 import 'package:docuvate/src/generated/src/model/chat_message_record_dto.dart';
 import 'package:docuvate/src/generated/src/model/confirm_label_recommendation_blocklist_pattern_request_dto.dart';
@@ -55,6 +60,7 @@ import 'package:docuvate/src/generated/src/model/extraction_compare_request_dto.
 import 'package:docuvate/src/generated/src/model/extraction_engine_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/folder_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/import_from_connector_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/invite_admin_user_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/label_map_response_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/label_recommendation_blocklist_entry_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/label_recommendation_blocklist_list_response_dto.dart';
@@ -74,6 +80,7 @@ import 'package:docuvate/src/generated/src/model/replace_tag_custom_field_item_d
 import 'package:docuvate/src/generated/src/model/replace_tag_custom_fields_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/set_admin_user_role_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/set_ml_model_lifecycle_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/start_mail_o_auth_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/tag_custom_field_list_response_dto.dart';
@@ -92,8 +99,13 @@ part 'serializers.g.dart';
 @SerializersFor([
   AcceptLabelRecommendationRequestDto,
   AcceptLabelRecommendationResponseDto,
+  AcceptUserInvitationRequestDto,
   AddLabelRecommendationBlocklistRequestDto,
+  AdminAccessResponseDto,
+  AdminUserListResponseDto,
+  AdminUserResponseDto,
   ApiErrorEnvelopeDto,
+  BanAdminUserRequestDto,
   ChatMessageDto,
   ChatMessageRecordDto,
   ConfirmLabelRecommendationBlocklistPatternRequestDto,
@@ -131,6 +143,7 @@ part 'serializers.g.dart';
   ExtractionEngineListResponseDto,
   FolderListResponseDto,
   ImportFromConnectorRequestDto,
+  InviteAdminUserRequestDto,
   LabelMapResponseDtoClass,
   LabelRecommendationBlocklistEntryResponseDto,
   LabelRecommendationBlocklistListResponseDto,
@@ -150,6 +163,7 @@ part 'serializers.g.dart';
   ReplaceTagCustomFieldsRequestDto,
   SendDocumentChatThreadMessageRequestDto,
   SendDocumentChatThreadMessageResponseDto,
+  SetAdminUserRoleRequestDto,
   SetMlModelLifecycleRequestDto,
   StartMailOAuthRequestDto,
   TagCustomFieldListResponseDto,

@@ -20,10 +20,13 @@ import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.
 import { ExtractionFieldCorrectionLabelsEntity } from './extraction-field-correction-labels.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
 import { FoldersEntity } from './folders.entity.js';
+import { InstallationUserRolesEntity } from './installation-user-roles.entity.js';
+import { InstallationUserSuspensionsEntity } from './installation-user-suspensions.entity.js';
 import { LabelRecommendationBlocklistEntity } from './label-recommendation-blocklist.entity.js';
 import { LabelRecommendationBlocklistPatternsEntity } from './label-recommendation-blocklist-patterns.entity.js';
 import { LabelRecommendationDismissalsEntity } from './label-recommendation-dismissals.entity.js';
 import { MappenEntity } from './mappen.entity.js';
+import { PasskeyEntity } from './passkey.entity.js';
 import { MlCanaryEvaluationsEntity } from './ml-canary-evaluations.entity.js';
 import { MlModelFamiliesEntity } from './ml-model-families.entity.js';
 import { MlModelVersionsEntity } from './ml-model-versions.entity.js';
@@ -33,11 +36,14 @@ import { RecognizedFieldDefinitionGateLabelsEntity } from './recognized-field-de
 import { RecognizedFieldDefinitionsEntity } from './recognized-field-definitions.entity.js';
 import { SearchVocabularyTermsEntity } from './search-vocabulary-terms.entity.js';
 import { SessionEntity } from './session.entity.js';
+import { TenantsEntity } from './tenants.entity.js';
+import { TwoFactorEntity } from './two-factor.entity.js';
 import { TagCustomFieldDefinitionsEntity } from './tag-custom-field-definitions.entity.js';
 import { TagEmbeddingCentroidsEntity } from './tag-embedding-centroids.entity.js';
 import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
 import { TagsEntity } from './tags.entity.js';
 import { UserEntity } from './user.entity.js';
+import { UserInvitationsEntity } from './user-invitations.entity.js';
 import { UserPreferenceRequiredLabelsEntity } from './user-preference-required-labels.entity.js';
 import { UserPreferencesEntity } from './user-preferences.entity.js';
 import { VerificationEntity } from './verification.entity.js';
@@ -63,10 +69,13 @@ export const TYPEORM_ENTITIES = [
   ExtractionFieldCorrectionLabelsEntity,
   ExtractionFieldCorrectionsEntity,
   FoldersEntity,
+  InstallationUserRolesEntity,
+  InstallationUserSuspensionsEntity,
   LabelRecommendationBlocklistEntity,
   LabelRecommendationBlocklistPatternsEntity,
   LabelRecommendationDismissalsEntity,
   MappenEntity,
+  PasskeyEntity,
   MlCanaryEvaluationsEntity,
   MlModelFamiliesEntity,
   MlModelVersionsEntity,
@@ -76,11 +85,14 @@ export const TYPEORM_ENTITIES = [
   RecognizedFieldDefinitionsEntity,
   SearchVocabularyTermsEntity,
   SessionEntity,
+  TenantsEntity,
+  TwoFactorEntity,
   TagCustomFieldDefinitionsEntity,
   TagEmbeddingCentroidsEntity,
   TagEmbeddingFeedbackEntity,
   TagsEntity,
   UserEntity,
+  UserInvitationsEntity,
   UserPreferenceRequiredLabelsEntity,
   UserPreferencesEntity,
   VerificationEntity,
@@ -107,10 +119,13 @@ export {
   ExtractionFieldCorrectionLabelsEntity,
   ExtractionFieldCorrectionsEntity,
   FoldersEntity,
+  InstallationUserRolesEntity,
+  InstallationUserSuspensionsEntity,
   LabelRecommendationBlocklistEntity,
   LabelRecommendationBlocklistPatternsEntity,
   LabelRecommendationDismissalsEntity,
   MappenEntity,
+  PasskeyEntity,
   MlCanaryEvaluationsEntity,
   MlModelFamiliesEntity,
   MlModelVersionsEntity,
@@ -120,11 +135,14 @@ export {
   RecognizedFieldDefinitionsEntity,
   SearchVocabularyTermsEntity,
   SessionEntity,
+  TenantsEntity,
+  TwoFactorEntity,
   TagCustomFieldDefinitionsEntity,
   TagEmbeddingCentroidsEntity,
   TagEmbeddingFeedbackEntity,
   TagsEntity,
   UserEntity,
+  UserInvitationsEntity,
   UserPreferenceRequiredLabelsEntity,
   UserPreferencesEntity,
   VerificationEntity,

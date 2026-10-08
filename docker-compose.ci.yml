@@ -10,6 +10,8 @@ services:
 
   api:
     environment:
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-docuvate-ci-compose-better-auth-signing-key-2026}
+      DV_ALLOW_SIGNUP: 'true'
       # Ollama is not started in compose-smoke; avoid ~4s DNS/connect stalls on settings.
       OLLAMA_URL: ''
       WORKER_DEPENDENCY_TIMEOUT_MS: '2500'

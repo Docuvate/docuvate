@@ -17,7 +17,7 @@ function subjectForUser(userId: string): AuthorizationSubject {
     kind: 'user',
     id: userId,
     tenantId: userId,
-    roles: ['owner'],
+    roles: ['member'],
     claims: ['document:*'],
   };
 }

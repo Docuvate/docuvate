@@ -17,6 +17,8 @@ import { RecognizedFieldsModule } from './modules/recognized-fields/recognized-f
 import { ConnectorsModule } from './modules/connectors/connectors.module.js';
 import { ModelRegistryModule } from './modules/model-registry/model-registry.module.js';
 import { AuthPublicModule } from './modules/auth/auth-public.module.js';
+import { AdminModule } from './modules/admin/admin.module.js';
+import { AuthInvitationsModule } from './modules/auth/auth-invitations.module.js';
 import { ExtensionHostModule } from './shared/infrastructure/extensions/extension-host.module.js';
 import { SearchModule } from './modules/search/search.module.js';
 
@@ -42,6 +44,8 @@ import { SearchModule } from './modules/search/search.module.js';
     ModelRegistryModule,
     AuthPublicModule,
     SearchModule,
+    AdminModule,
+    AuthInvitationsModule,
   ],
 })
 export class AppModule {}

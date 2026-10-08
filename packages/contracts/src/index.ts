@@ -945,6 +945,57 @@ export interface GlobalSearchQuery {
   limit?: number;
 }
 
+export type InstanceRole = 'admin' | 'member';
+
+export interface AdminRoleDescriptionDto {
+  role: InstanceRole;
+  /** i18n key for a short capability summary (no raw ABAC JSON). */
+  summaryKey: string;
+}
+
+export interface AdminAccessResponse {
+  isAdministrator: boolean;
+  role: InstanceRole;
+  roleDescriptions: AdminRoleDescriptionDto[];
+}
+
+export type AdminUserAccountStatus = 'active' | 'invited' | 'suspended';
+
+export interface AdminUserDto {
+  id: string;
+  name: string;
+  email: string;
+  role: InstanceRole;
+  banned: boolean;
+  banReason: string | null;
+  accountStatus: AdminUserAccountStatus;
+  createdAt: string;
+}
+
+export interface AcceptUserInvitationRequest {
+  token: string;
+  password: string;
+}
+
+export interface AdminUserListResponse {
+  users: AdminUserDto[];
+  total: number;
+}
+
+export interface InviteAdminUserRequest {
+  email: string;
+  name: string;
+  role?: InstanceRole;
+}
+
+export interface SetAdminUserRoleRequest {
+  role: InstanceRole;
+}
+
+export interface BanAdminUserRequest {
+  reason?: string;
+}
+
 export {
   summarizeLabelAssignmentInventory,
   type LabelAssignmentInventory,

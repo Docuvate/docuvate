@@ -53,6 +53,12 @@ import type {
   ConnectorInstallationDto,
   CreateConnectorInstallationRequest,
   GlobalSearchResponseDto,
+  AdminAccessResponse,
+  AdminUserListResponse,
+  AdminUserDto,
+  BanAdminUserRequest,
+  InviteAdminUserRequest,
+  SetAdminUserRoleRequest,
 } from '@docuvate/contracts';
 import { throwApiRequestError } from './apiErrors';
 
@@ -619,6 +625,71 @@ export async function submitExtractionArenaRating(
   await request(`/documents/${documentId}/extraction/arena-rating`, {
     method: 'POST',
     body: JSON.stringify(body),
+  });
+}
+
+export async function getAdminAccess(): Promise<AdminAccessResponse> {
+  return request<AdminAccessResponse>('/admin/access');
+}
+
+export async function listAdminUsers(search?: string): Promise<AdminUserListResponse> {
+  const qs = search?.trim() ? `?search=${encodeURIComponent(search.trim())}` : '';
+  return request<AdminUserListResponse>(`/admin/users${qs}`);
+}
+
+export async function inviteAdminUser(body: InviteAdminUserRequest): Promise<AdminUserDto> {
+  return request<AdminUserDto>('/admin/users/invite', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function setAdminUserRole(
+  userId: string,
+  body: SetAdminUserRoleRequest
+): Promise<void> {
+  await request(`/admin/users/${encodeURIComponent(userId)}/role`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function banAdminUser(userId: string, body: BanAdminUserRequest): Promise<void> {
+  await request(`/admin/users/${encodeURIComponent(userId)}/ban`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function unbanAdminUser(userId: string): Promise<void> {
+  await request(`/admin/users/${encodeURIComponent(userId)}/unban`, { method: 'POST' });
+}
+
+export async function revokeAdminUserSessions(userId: string): Promise<void> {
+  await request(`/admin/users/${encodeURIComponent(userId)}/revoke-sessions`, {
+    method: 'POST',
+  });
+}
+
+export async function acceptUserInvitation(body: {
+  token: string;
+  password: string;
+}): Promise<void> {
+  await request<{ ok: true }>('/invitations/accept', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function resendAdminUserInvitation(userId: string): Promise<void> {
+  await request<{ ok: true }>(`/admin/users/${encodeURIComponent(userId)}/resend-invitation`, {
+    method: 'POST',
+  });
+}
+
+export async function revokeAdminUserInvitation(userId: string): Promise<void> {
+  await request<{ ok: true }>(`/admin/users/${encodeURIComponent(userId)}/revoke-invitation`, {
+    method: 'POST',
   });
 }
 

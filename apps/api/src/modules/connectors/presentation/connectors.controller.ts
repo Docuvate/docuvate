@@ -12,6 +12,7 @@ import {
   type AuthSession,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { isInstanceAdmin } from '../../../shared/infrastructure/auth/user-authorization-subject.js';
 import {
   ConnectorPluginIdParamDto,
   CreateConnectorInstallationRequestDto,
@@ -57,7 +58,7 @@ export class ConnectorsController {
   @Get('catalog')
   @ApiDocuvateRoute({ operationId: 'getConnectorCatalog', summary: 'Connector plugin catalog' })
   getCatalog(@AuthSubject() subject: AuthorizationSubject): ConnectorCatalogResponse {
-    const viewerIsServerAdmin = subject.roles.includes('owner');
+    const viewerIsServerAdmin = isInstanceAdmin(subject);
     return this.catalog.execute({ viewerIsServerAdmin });
   }
 

@@ -148,7 +148,8 @@ services:
       MINIO_ACCESS_KEY: docuvate
       MINIO_SECRET_KEY: docuvate-secret
       MINIO_BUCKET: documents
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-local-dev-better-auth-secret-min-32-chars!!}
+      # Set in .env (required at API runtime in production; see docs/self-hosting.md).
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
       BETTER_AUTH_URL: http://localhost:5173
       DOCUVATE_API_PUBLIC_URL: http://localhost:3001
       DOCUVATE_CONNECTOR_SECRETS_KEY: ${DOCUVATE_CONNECTOR_SECRETS_KEY:-local-dev-connector-secrets-key!!}

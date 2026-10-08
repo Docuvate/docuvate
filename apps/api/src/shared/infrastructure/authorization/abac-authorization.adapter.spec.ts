@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { AbacAuthorizationAdapter } from './abac-authorization.adapter.js';
 import type { AuthorizationSubject } from '../../domain/authorization.js';
+import { INSTALLATION_TENANT_ID } from '../../../modules/auth/domain/installation.constants.js';
 
 const owner: AuthorizationSubject = {
   kind: 'user',
   id: 'user-1',
   tenantId: 'user-1',
-  roles: ['owner'],
+  roles: ['member'],
   claims: ['document:*'],
 };
 
@@ -41,10 +42,20 @@ describe('AbacAuthorizationAdapter', () => {
     ).resolves.toBe('allow');
   });
 
-  it('denies cross-tenant access', async () => {
+  it('denies access to another user document', async () => {
     await expect(
       adapter.authorize({
-        subject: { ...owner, tenantId: 'other' },
+        subject: owner,
+        action: 'document:read',
+        resource: { ...resource, ownerId: 'other-user' },
+      })
+    ).resolves.toBe('deny');
+  });
+
+  it('denies when tenant scope is missing', async () => {
+    await expect(
+      adapter.authorize({
+        subject: { ...owner, tenantId: '' },
         action: 'document:read',
         resource,
       })
@@ -58,5 +69,28 @@ describe('AbacAuthorizationAdapter', () => {
     await expect(
       adapter.authorize({ subject: serviceRead, action: 'document:read', resource })
     ).resolves.toBe('allow');
+  });
+
+  it('allows user document read when tenantId is installation scope but user id matches owner', async () => {
+    const installationUser: AuthorizationSubject = {
+      kind: 'user',
+      id: 'user-1',
+      tenantId: INSTALLATION_TENANT_ID,
+      roles: ['member'],
+      claims: ['document:*'],
+    };
+    await expect(
+      adapter.authorize({ subject: installationUser, action: 'document:read', resource })
+    ).resolves.toBe('allow');
+  });
+
+  it('denies service principals for another owner document', async () => {
+    await expect(
+      adapter.authorize({
+        subject: serviceRead,
+        action: 'document:read',
+        resource: { ...resource, ownerId: 'other-user' },
+      })
+    ).resolves.toBe('deny');
   });
 });

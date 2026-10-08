@@ -43,6 +43,10 @@ export class AbacAuthorizationAdapter implements AuthorizationPort {
   async authorize(request: AuthorizationRequest): Promise<AuthorizationDecision> {
     const { subject, action, resource } = request;
 
+    if (!subject.tenantId) {
+      return 'deny';
+    }
+
     if (!resource) {
       if (action === 'document:list') {
         return this.allowCollectionList(subject) ? 'allow' : 'deny';
@@ -50,7 +54,11 @@ export class AbacAuthorizationAdapter implements AuthorizationPort {
       return 'deny';
     }
 
-    if (subject.tenantId !== resource.ownerId) {
+    const ownsResource =
+      subject.kind === 'user'
+        ? subject.id === resource.ownerId
+        : subject.tenantId === resource.ownerId;
+    if (!ownsResource) {
       return 'deny';
     }
 
@@ -59,7 +67,7 @@ export class AbacAuthorizationAdapter implements AuthorizationPort {
     }
 
     if (subject.kind === 'user') {
-      return subject.id === resource.ownerId ? 'allow' : 'deny';
+      return 'allow';
     }
 
     if (subject.kind === 'service') {
@@ -71,6 +79,9 @@ export class AbacAuthorizationAdapter implements AuthorizationPort {
   }
 
   private allowCollectionList(subject: AuthorizationSubject): boolean {
+    if (!subject.tenantId) {
+      return false;
+    }
     if (subject.kind === 'user') return true;
     return hasClaim(subject, 'document:list') || hasClaim(subject, 'document:read');
   }

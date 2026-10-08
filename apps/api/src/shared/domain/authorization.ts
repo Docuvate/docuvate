@@ -16,6 +16,7 @@ export type AuthorizationSubjectKind = 'user' | 'service';
 export interface AuthorizationSubject {
   kind: AuthorizationSubjectKind;
   id: string;
+  /** Installation tenant id; required - missing scope must deny. */
   tenantId: string;
   roles: readonly string[];
   claims: readonly string[];
