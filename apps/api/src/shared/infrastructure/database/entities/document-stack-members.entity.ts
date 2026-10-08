@@ -1,8 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from "typeorm";
 import { DocumentsEntity } from './documents.entity.js';
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
-import { UserEntity } from './user.entity.js';
-
 @Index("document_stack_members_one_primary_idx", ["stackId"], { unique: true })
 @Index("document_stack_members_stack_idx", ["stackId"], {})
 @Entity("document_stack_members", { schema: "public" })
@@ -35,10 +33,4 @@ export class DocumentStackMembersEntity {
   )
   @JoinColumn([{ name: "stack_id", referencedColumnName: "id" }])
   stack: DocumentDuplicateStacksEntity;
-
-  @ManyToOne(() => UserEntity, (user) => user.documentStackMembers, {
-    onDelete: "CASCADE",
-  })
-  @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])
-  user: UserEntity;
 }

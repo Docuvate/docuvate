@@ -692,8 +692,3 @@ export const MAPPE_REPOSITORY = Symbol('MAPPE_REPOSITORY');
 export const FOLDER_REPOSITORY = Symbol('FOLDER_REPOSITORY');
 export const DUPLICATE_REPOSITORY = Symbol('DUPLICATE_REPOSITORY');
 export const DUPLICATE_STACK_REPOSITORY = Symbol('DUPLICATE_STACK_REPOSITORY');
-export const DOCUMENT_FIELD_VALUE_SYNC = Symbol('DOCUMENT_FIELD_VALUE_SYNC');
-
-export interface DocumentFieldValueSyncPort {
-  replaceForDocument(userId: string, documentId: string, fields: ExtractedField[]): Promise<void>;
-}

@@ -4,6 +4,7 @@ import { InitialSchema20261008120000 } from './migrations/20261008120000-initial
 import { GlobalSearchSchema20261008130500 } from './migrations/20261008130500-global-search-schema.js';
 import { DocumentFieldValuesBackfill20261008130600 } from './migrations/20261008130600-document-field-values-backfill.js';
 import { SearchIndexBackfill20261008130700 } from './migrations/20261008130700-search-index-backfill.js';
+import { SchemaNormalization3nf20261008131000 } from './migrations/20261008131000-schema-normalization-3nf.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -33,6 +34,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       GlobalSearchSchema20261008130500,
       DocumentFieldValuesBackfill20261008130600,
       SearchIndexBackfill20261008130700,
+      SchemaNormalization3nf20261008131000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

@@ -1,5 +1,6 @@
-import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 import { UserEntity } from './user.entity.js';
+import { UserPreferenceRequiredLabelsEntity } from './user-preference-required-labels.entity.js';
 
 @Entity("user_preferences", { schema: "public" })
 export class UserPreferencesEntity {
@@ -43,9 +44,6 @@ export class UserPreferencesEntity {
   })
   fieldExtractionConfidenceGateEnabled: boolean;
 
-  @Column("jsonb", { name: "field_extraction_required_label_ids", default: [] })
-  fieldExtractionRequiredLabelIds: object;
-
   @Column("real", {
     name: "label_near_similarity_threshold",
     precision: 24,
@@ -67,6 +65,12 @@ export class UserPreferencesEntity {
 
   @Column("text", { name: "locale", nullable: true })
   locale: string | null;
+
+  @OneToMany(
+    () => UserPreferenceRequiredLabelsEntity,
+    (requiredLabels) => requiredLabels.userPreferences
+  )
+  requiredLabels: UserPreferenceRequiredLabelsEntity[];
 
   @OneToOne(() => UserEntity, (user) => user.userPreferences, { onDelete: "CASCADE", createForeignKeyConstraints: false })
   @JoinColumn([{ name: "user_id", referencedColumnName: "id" }])

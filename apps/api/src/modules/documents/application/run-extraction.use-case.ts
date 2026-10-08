@@ -11,7 +11,6 @@ import { NotFoundError } from '../../../shared/domain/errors.js';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
 import { ResolveUserExtractorEngineUseCase } from '../../settings/application/settings.use-cases.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
-import { SyncDocumentFieldValuesUseCase } from '../../search/application/sync-document-field-values.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 
 @Injectable()
@@ -23,7 +22,6 @@ export class RunExtractionUseCase {
     private readonly postOcrPipeline: RunDocumentPostOcrPipelineUseCase,
     private readonly applyDuplicateDetection: ApplyDuplicateDetectionUseCase,
     private readonly resolveExtractorEngine: ResolveUserExtractorEngineUseCase,
-    private readonly syncFieldValues: SyncDocumentFieldValuesUseCase,
     private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
   ) {}
 
@@ -39,7 +37,6 @@ export class RunExtractionUseCase {
       const engine = await this.resolveExtractorEngine.execute(doc.userId);
       const result = await this.extraction.extract(buffer, doc.mimeType, { engine });
       await this.documents.saveExtraction(documentId, result);
-      await this.syncFieldValues.execute(doc.userId, documentId, result.fields);
       await this.syncSearchIndex.execute(doc.userId, documentId, {
         text: result.text,
         title: doc.title,

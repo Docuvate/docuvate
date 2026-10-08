@@ -25,6 +25,19 @@ function mapRow(row: Record<string, unknown>): ExtractionFieldCorrectionRecord {
   };
 }
 
+const LIST_SQL = `
+  SELECT c.*,
+    COALESCE(
+      (
+        SELECT array_agg(l.tag_id::text ORDER BY l.tag_id)
+        FROM extraction_field_correction_labels l
+        WHERE l.correction_id = c.id
+      ),
+      ARRAY[]::text[]
+    ) AS label_tag_ids
+  FROM extraction_field_corrections c
+`;
+
 @Injectable()
 export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedbackRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
@@ -47,21 +60,33 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
     try {
       await client.query('BEGIN');
       for (const row of rows) {
-        await client.query(
+        const inserted = await client.query<{ id: string }>(
           `INSERT INTO extraction_field_corrections (
-             user_id, document_id, field_key, old_value, new_value,
-             label_tag_ids, field_tag_id, source
-           ) VALUES ($1, $2, $3, $4, $5, $6::jsonb, $7, 'user_correction')`,
+             user_id, document_id, field_key, old_value, new_value, field_tag_id, source
+           ) VALUES ($1, $2, $3, $4, $5, $6, 'user_correction')
+           RETURNING id`,
           [
             userId,
             row.documentId,
             row.fieldKey,
             row.oldValue,
             row.newValue,
-            JSON.stringify(row.labelTagIds),
             row.fieldTagId,
           ]
         );
+        const correctionId = inserted.rows[0]?.id;
+        if (!correctionId) {
+          throw new Error('extraction_field_corrections insert missing id');
+        }
+        if (row.labelTagIds.length > 0) {
+          await client.query(
+            `INSERT INTO extraction_field_correction_labels (correction_id, tag_id)
+             SELECT $1, t.id FROM tags t
+             WHERE t.user_id = $2 AND t.id::text = ANY($3::text[])
+             ON CONFLICT DO NOTHING`,
+            [correctionId, userId, row.labelTagIds]
+          );
+        }
       }
       await client.query('COMMIT');
       return rows.length;
@@ -82,14 +107,14 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
     let cursorClause = '';
     if (options?.afterCreatedAt && options.afterId) {
       params.push(options.afterCreatedAt.toISOString(), options.afterId);
-      cursorClause = `AND (created_at, id) < ($2::timestamptz, $3::uuid)`;
+      cursorClause = `AND (c.created_at, c.id) < ($2::timestamptz, $3::uuid)`;
     }
     params.push(limit);
     const limitParam = params.length;
     const result = await this.pool.query(
-      `SELECT * FROM extraction_field_corrections
-       WHERE user_id = $1 ${cursorClause}
-       ORDER BY created_at DESC, id DESC
+      `${LIST_SQL}
+       WHERE c.user_id = $1 ${cursorClause}
+       ORDER BY c.created_at DESC, c.id DESC
        LIMIT $${limitParam}`,
       params
     );

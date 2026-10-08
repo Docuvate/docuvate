@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mapDocumentRow } from './document-row.mapper.js';
+import { mapDocumentRow, normalizeExtraction } from './document-row.mapper.js';
 
 describe('mapDocumentRow extraction markdown', () => {
   it('maps extracted_markdown onto extraction.markdown', () => {
@@ -13,7 +13,6 @@ describe('mapDocumentRow extraction markdown', () => {
       status: 'ready',
       extracted_text: 'plain',
       extracted_markdown: '## Title\n\nBody',
-      extracted_fields: JSON.stringify({ fields: [], blocks: [] }),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
@@ -33,11 +32,33 @@ describe('mapDocumentRow extraction markdown', () => {
       status: 'ready',
       extracted_text: 'plain',
       extracted_markdown: '   ',
-      extracted_fields: JSON.stringify({ fields: [], blocks: [] }),
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
 
     expect(entity.extraction?.markdown).toBeUndefined();
+  });
+});
+
+describe('normalizeExtraction', () => {
+  it('dedupes fields and drops invalid blocks', () => {
+    const result = normalizeExtraction({
+      fields: [
+        { key: 'betrag', value: '10' },
+        { key: 'betrag', value: '12', confidence: 0.9 },
+      ],
+      blocks: [
+        { page: 1, x: 0.1, y: 0.2, width: 0.3, height: 0.1, text: ' Rechnung ' },
+        { page: 0, x: 0, y: 0, width: 0, height: 0, text: 'invalid page' },
+        { page: 1, x: 1.4, y: 0, width: 0.2, height: 0.2, text: 'clamped' },
+      ],
+    });
+    expect(result.fields).toHaveLength(1);
+    expect(result.blocks.map((b) => b.text)).toEqual(['Rechnung', 'clamped']);
+    expect(result.blocks[1]?.x).toBe(1);
+  });
+
+  it('returns empty lists when nothing is stored', () => {
+    expect(normalizeExtraction(undefined)).toEqual({ fields: [], blocks: [] });
   });
 });

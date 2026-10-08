@@ -13,7 +13,7 @@ function normalizeBlock(raw: unknown): ExtractionBlock | null {
   const text = String(row['text'] ?? '').trim();
   if (!Number.isFinite(page) || page < 1 || !text) return null;
   if (![x, y, width, height].every(Number.isFinite)) return null;
-  const blockIndexRaw = row['blockIndex'] ?? row['block_index'];
+  const blockIndexRaw = row['blockIndex'];
   const blockIndex =
     blockIndexRaw === undefined || blockIndexRaw === null ? undefined : Number(blockIndexRaw);
   return {
@@ -27,29 +27,21 @@ function normalizeBlock(raw: unknown): ExtractionBlock | null {
   };
 }
 
-export function parseExtractedPayload(raw: unknown): {
-  fields: ExtractedField[];
-  blocks: ExtractionBlock[];
-} {
-  if (raw == null) return { fields: [], blocks: [] };
-  if (Array.isArray(raw)) {
-    return { fields: dedupeExtractedFields(raw as ExtractedField[]), blocks: [] };
-  }
-  const obj = raw as Record<string, unknown>;
-  const blockRaw = obj['blocks'];
-  const blocks = Array.isArray(blockRaw)
-    ? blockRaw.map(normalizeBlock).filter((b): b is ExtractionBlock => b != null)
-    : [];
-  const rawFields = (obj['fields'] as ExtractedField[] | undefined) ?? [];
+/** Applies read-side normalization (dedupe, block clamping) to stored extraction rows. */
+export function normalizeExtraction(
+  raw: { fields: ExtractedField[]; blocks: ExtractionBlock[] } | undefined
+): { fields: ExtractedField[]; blocks: ExtractionBlock[] } {
+  if (!raw) return { fields: [], blocks: [] };
   return {
-    fields: dedupeExtractedFields(rawFields),
-    blocks,
+    fields: dedupeExtractedFields(raw.fields),
+    blocks: raw.blocks.map(normalizeBlock).filter((b): b is ExtractionBlock => b != null),
   };
 }
 
 export interface DocumentRowJoins {
   tags?: TagEntity[];
   correspondent?: { id: string; name: string } | null;
+  extraction?: { fields: ExtractedField[]; blocks: ExtractionBlock[] };
 }
 
 /** Maps tag objects from Postgres `json_agg` / JSON columns (snake_case keys). */
@@ -80,7 +72,7 @@ export function mapDocumentRow(
   row: Record<string, unknown>,
   joins: DocumentRowJoins = {}
 ): DocumentEntity {
-  const { fields, blocks } = parseExtractedPayload(row['extracted_fields']);
+  const { fields, blocks } = normalizeExtraction(joins.extraction);
   const text = row['extracted_text'] as string | null;
   const markdownRaw = row['extracted_markdown'] as string | null;
   const markdown = markdownRaw?.trim() ? markdownRaw : undefined;

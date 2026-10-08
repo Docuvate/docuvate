@@ -1,4 +1,5 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ExtractionArenaRatingComparedEnginesEntity } from './extraction-arena-rating-compared-engines.entity.js';
 import { DocumentsEntity } from './documents.entity.js';
 import { UserEntity } from './user.entity.js';
 
@@ -14,9 +15,6 @@ export class ExtractionArenaRatingsEntity {
   @Column("text", { name: "winner_engine" })
   winnerEngine: string;
 
-  @Column("jsonb", { name: "compared_engines", default: [] })
-  comparedEngines: object;
-
   @Column("smallint", { name: "rating", nullable: true })
   rating: number | null;
 
@@ -31,6 +29,12 @@ export class ExtractionArenaRatingsEntity {
     default: () => "now()",
   })
   createdAt: Date;
+
+  @OneToMany(
+    () => ExtractionArenaRatingComparedEnginesEntity,
+    (comparedEngines) => comparedEngines.rating
+  )
+  comparedEngines: ExtractionArenaRatingComparedEnginesEntity[];
 
   @ManyToOne(() => DocumentsEntity, (documents) => documents.extractionArenaRatings, {
     onDelete: "SET NULL",

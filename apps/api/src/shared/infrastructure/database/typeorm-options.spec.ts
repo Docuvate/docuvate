@@ -20,14 +20,15 @@ describe('buildTypeOrmOptions', () => {
     expect(() => buildTypeOrmOptions()).toThrow(/DATABASE_URL/);
   });
 
-  it('registers initial schema and global search migrations in order', () => {
+  it('registers initial schema, global search and 3NF migrations in order', () => {
     process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
     const opts = buildTypeOrmOptions();
     const migrations = opts.migrations as Array<{ name: string }>;
-    expect(migrations).toHaveLength(4);
+    expect(migrations).toHaveLength(5);
     expect(migrations[0]?.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);
     expect(migrations[1]?.name).toBe('GlobalSearchSchema20261008130500');
     expect(migrations[2]?.name).toBe('DocumentFieldValuesBackfill20261008130600');
     expect(migrations[3]?.name).toBe('SearchIndexBackfill20261008130700');
+    expect(migrations[4]?.name).toBe('SchemaNormalization3nf20261008131000');
   });
 });

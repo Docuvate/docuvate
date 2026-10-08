@@ -1,13 +1,10 @@
 import { Column, Entity, Index, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
 import { AccountEntity } from './account.entity.js';
-import { ChatThreadDocumentsEntity } from './chat-thread-documents.entity.js';
 import { ChatThreadsEntity } from './chat-threads.entity.js';
 import { ConnectorInstallationsEntity } from './connector-installations.entity.js';
 import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
-import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
-import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
 import { DocumentsEntity } from './documents.entity.js';
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
@@ -19,7 +16,6 @@ import { MappenEntity } from './mappen.entity.js';
 import { RecognizedFieldDefinitionsEntity } from './recognized-field-definitions.entity.js';
 import { SessionEntity } from './session.entity.js';
 import { TagCustomFieldDefinitionsEntity } from './tag-custom-field-definitions.entity.js';
-import { TagEmbeddingCentroidsEntity } from './tag-embedding-centroids.entity.js';
 import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
 import { TagsEntity } from './tags.entity.js';
 import { UserPreferencesEntity } from './user-preferences.entity.js';
@@ -57,12 +53,6 @@ export class UserEntity {
   @OneToMany(() => AccountEntity, (account) => account.user)
   accounts: AccountEntity[];
 
-  @OneToMany(
-    () => ChatThreadDocumentsEntity,
-    (chatThreadDocuments) => chatThreadDocuments.user
-  )
-  chatThreadDocuments: ChatThreadDocumentsEntity[];
-
   @OneToMany(() => ChatThreadsEntity, (chatThreads) => chatThreads.user)
   chatThreads: ChatThreadsEntity[];
 
@@ -86,18 +76,6 @@ export class UserEntity {
     (documentDuplicateStacks) => documentDuplicateStacks.user
   )
   documentDuplicateStacks: DocumentDuplicateStacksEntity[];
-
-  @OneToMany(
-    () => DocumentEmbeddingsEntity,
-    (documentEmbeddings) => documentEmbeddings.user
-  )
-  documentEmbeddings: DocumentEmbeddingsEntity[];
-
-  @OneToMany(
-    () => DocumentStackMembersEntity,
-    (documentStackMembers) => documentStackMembers.user
-  )
-  documentStackMembers: DocumentStackMembersEntity[];
 
   @OneToMany(() => DocumentsEntity, (documents) => documents.user)
   documents: DocumentsEntity[];
@@ -153,12 +131,6 @@ export class UserEntity {
     (tagCustomFieldDefinitions) => tagCustomFieldDefinitions.user
   )
   tagCustomFieldDefinitions: TagCustomFieldDefinitionsEntity[];
-
-  @OneToMany(
-    () => TagEmbeddingCentroidsEntity,
-    (tagEmbeddingCentroids) => tagEmbeddingCentroids.user
-  )
-  tagEmbeddingCentroids: TagEmbeddingCentroidsEntity[];
 
   @OneToMany(
     () => TagEmbeddingFeedbackEntity,

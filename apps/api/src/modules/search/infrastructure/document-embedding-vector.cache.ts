@@ -39,14 +39,20 @@ export class DocumentEmbeddingVectorCache {
     let rows: Array<{ document_id: string; embedding: unknown }>;
     if (documentIds && documentIds.length > 0) {
       const result = await pool.query<{ document_id: string; embedding: unknown }>(
-        `SELECT document_id, embedding FROM document_embeddings
-         WHERE user_id = $1 AND document_id = ANY($2::uuid[])`,
+        `SELECT e.document_id, e.embedding
+         FROM document_embeddings e
+         JOIN documents d ON d.id = e.document_id
+         WHERE d.user_id = $1 AND e.document_id = ANY($2::uuid[])`,
         [userId, documentIds]
       );
       rows = result.rows;
     } else {
       const result = await pool.query<{ document_id: string; embedding: unknown }>(
-        `SELECT document_id, embedding FROM document_embeddings WHERE user_id = $1 LIMIT 10000`,
+        `SELECT e.document_id, e.embedding
+         FROM document_embeddings e
+         JOIN documents d ON d.id = e.document_id
+         WHERE d.user_id = $1
+         LIMIT 10000`,
         [userId]
       );
       rows = result.rows;

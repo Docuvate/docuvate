@@ -53,9 +53,18 @@ export class PgRecognizedFieldRepository implements RecognizedFieldRepository {
 
   async listForUser(userId: string): Promise<RecognizedFieldEntity[]> {
     const result = await this.pool.query(
-      `SELECT * FROM recognized_field_definitions
-       WHERE user_id = $1
-       ORDER BY sort_order ASC, label ASC`,
+      `SELECT r.*,
+         COALESCE(
+           (
+             SELECT array_agg(g.tag_id::text ORDER BY g.tag_id)
+             FROM recognized_field_definition_gate_labels g
+             WHERE g.field_definition_id = r.id
+           ),
+           ARRAY[]::text[]
+         ) AS gate_label_ids
+       FROM recognized_field_definitions r
+       WHERE r.user_id = $1
+       ORDER BY r.sort_order ASC, r.label ASC`,
       [userId]
     );
     return result.rows.map((row) => mapRow(row as Record<string, unknown>));
@@ -95,11 +104,12 @@ export class PgRecognizedFieldRepository implements RecognizedFieldRepository {
           throw new ValidationError('Feldbezeichnung ist erforderlich');
         }
         const gateLabelIds = [...new Set(field.gateLabelIds)];
-        await client.query(
+        const inserted = await client.query<{ id: string }>(
           `INSERT INTO recognized_field_definitions
              (user_id, field_key, label, field_type, sort_order, extract_for_all_documents,
-              gate_label_ids, gate_label_match, min_label_confidence, confidence_gate_enabled)
-           VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10)`,
+              gate_label_match, min_label_confidence, confidence_gate_enabled)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+           RETURNING id`,
           [
             userId,
             key,
@@ -107,12 +117,21 @@ export class PgRecognizedFieldRepository implements RecognizedFieldRepository {
             field.fieldType,
             field.sortOrder ?? index,
             field.extractForAllDocuments,
-            JSON.stringify(gateLabelIds),
             field.gateLabelMatch === 'any' ? 'any' : 'all',
             field.minLabelConfidence,
             field.confidenceGateEnabled,
           ]
         );
+        const definitionId = inserted.rows[0]!.id;
+        if (gateLabelIds.length > 0) {
+          await client.query(
+            `INSERT INTO recognized_field_definition_gate_labels (field_definition_id, tag_id)
+             SELECT $1, t.id FROM tags t
+             WHERE t.user_id = $2 AND t.id::text = ANY($3::text[])
+             ON CONFLICT DO NOTHING`,
+            [definitionId, userId, gateLabelIds]
+          );
+        }
       }
       await client.query('COMMIT');
     } catch (error) {

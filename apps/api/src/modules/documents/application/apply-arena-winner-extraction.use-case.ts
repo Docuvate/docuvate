@@ -9,7 +9,6 @@ import {
 } from '../../../shared/domain/ports.js';
 import { NotFoundError } from '../../../shared/domain/errors.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
-import { SyncDocumentFieldValuesUseCase } from '../../search/application/sync-document-field-values.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 
 @Injectable()
@@ -19,7 +18,6 @@ export class ApplyArenaWinnerExtractionUseCase {
     @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
     @Inject(EXTRACTION_PORT) private readonly extraction: ExtractionPort,
     private readonly postOcrPipeline: RunDocumentPostOcrPipelineUseCase,
-    private readonly syncFieldValues: SyncDocumentFieldValuesUseCase,
     private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
   ) {}
 
@@ -32,7 +30,6 @@ export class ApplyArenaWinnerExtractionUseCase {
     const buffer = await this.storage.getObject(doc.storageKey);
     const result = await this.extraction.extract(buffer, doc.mimeType, { engine: winnerEngine });
     await this.documents.saveExtraction(documentId, result);
-    await this.syncFieldValues.execute(doc.userId, documentId, result.fields);
     await this.syncSearchIndex.execute(doc.userId, documentId, {
       text: result.text,
       title: doc.title,

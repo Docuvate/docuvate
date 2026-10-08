@@ -1,32 +1,25 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { DocumentsEntity } from './documents.entity.js';
-import { UserEntity } from './user.entity.js';
 
-@Index('document_field_values_pkey', ['id'], { unique: true })
-@Index('document_field_values_user_idx', ['userId'], {})
-@Index('document_field_values_document_idx', ['documentId'], {})
+/**
+ * One extracted or confirmed field value per document and field storage key (ADR 015).
+ * `value_text_norm`, `value_numeric` and `value_date` are search columns derived from `value_text`
+ * and the field type on every write (documented denormalization, ADR 015 / ADR 016).
+ */
+@Index('document_field_values_pkey', ['documentId', 'fieldStorageKey'], { unique: true })
 @Entity('document_field_values', { schema: 'public' })
 export class DocumentFieldValuesEntity {
-  @PrimaryColumn('uuid', { name: 'id', default: () => 'gen_random_uuid()' })
-  id: string;
-
-  @Column('uuid', { name: 'document_id' })
+  @PrimaryColumn('uuid', { name: 'document_id' })
   documentId: string;
 
-  @Column('text', { name: 'user_id' })
-  userId: string;
-
-  @Column('text', { name: 'field_storage_key' })
+  @PrimaryColumn('text', { name: 'field_storage_key' })
   fieldStorageKey: string;
-
-  @Column('text', { name: 'field_label' })
-  fieldLabel: string;
-
-  @Column('text', { name: 'field_type' })
-  fieldType: string;
 
   @Column('text', { name: 'value_text', default: () => "''" })
   valueText: string;
+
+  @Column('real', { name: 'confidence', nullable: true, precision: 24 })
+  confidence: number | null;
 
   @Column('text', { name: 'value_text_norm', nullable: true })
   valueTextNorm: string | null;
@@ -37,14 +30,7 @@ export class DocumentFieldValuesEntity {
   @Column('date', { name: 'value_date', nullable: true })
   valueDate: string | null;
 
-  @Column('timestamp with time zone', { name: 'updated_at', default: () => 'now()' })
-  updatedAt: Date;
-
   @ManyToOne(() => DocumentsEntity, { onDelete: 'CASCADE' })
   @JoinColumn([{ name: 'document_id', referencedColumnName: 'id' }])
   document: DocumentsEntity;
-
-  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
-  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
-  user: UserEntity;
 }

@@ -85,7 +85,7 @@ Environment knobs (API + worker):
 
 ## Data lineage
 
-1. **Corrections** — `RecordExtractionFieldCorrectionsUseCase` (extraction-feedback) writes `extraction_field_corrections` on document field saves (`old_value`, `new_value`, `label_tag_ids`, `field_tag_id`, source `user_correction`). List/export via `GET /v1/extraction-feedback/field-corrections`.
+1. **Corrections** — `RecordExtractionFieldCorrectionsUseCase` (extraction-feedback) writes `extraction_field_corrections` on document field saves (`old_value`, `new_value`, `field_tag_id`, source `user_correction`; the document labels at that time in `extraction_field_correction_labels`). List/export via `GET /v1/extraction-feedback/field-corrections`.
 2. **Snapshot** — Retrain job creates `ml_training_data_snapshots` with `dataset_version` (e.g. `2026-04-07T12:00:00Z`), `row_count`, optional `storage_uri` (exported JSONL in MinIO), `source_watermark` = max(correction.created_at) included.
 3. **Model version** — Worker stub registers `ml_model_versions` with `version_tag`, `metrics`, `training_snapshot_id`, `lifecycle=registered`.
 4. **Canary** — Promotion to `canary` runs evaluation rows in `ml_canary_evaluations` (baseline = current `active`). If any required metric drops more than `MLOPS_CANARY_MAX_METRIC_DROP`, lifecycle → `failed` and job marked failed (**auto-abort**).

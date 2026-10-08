@@ -125,9 +125,9 @@ async function seedData(pool, userId) {
     }
     if (status === 'ready') {
       await pool.query(
-        `INSERT INTO document_embeddings (document_id, user_id, model, embedding, updated_at)
-         VALUES ($1, $2, 'seed', $3::jsonb, now())`,
-        [id, userId, JSON.stringify(doc.embedding)]
+        `INSERT INTO document_embeddings (document_id, model, embedding, updated_at)
+         VALUES ($1, 'seed', $2::jsonb, now())`,
+        [id, JSON.stringify(doc.embedding)]
       );
     }
     return id;

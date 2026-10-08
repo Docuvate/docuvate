@@ -4,11 +4,11 @@ import { PgUserPreferencesRepository } from './pg-user-preferences.repository.js
 
 describe('PgUserPreferencesRepository.upsert', () => {
   it('persists themePreference and locale on insert', async () => {
-    const query = vi
-      .fn()
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({ rows: [] })
-      .mockResolvedValueOnce({
+    const query = vi.fn().mockImplementation(async (sql: string) => {
+      if (String(sql).includes('INSERT INTO user_preferences')) {
+        return { rows: [] };
+      }
+      return {
         rows: [
           {
             user_id: 'user-1',
@@ -19,15 +19,23 @@ describe('PgUserPreferencesRepository.upsert', () => {
             label_field_confidence_threshold: 0.62,
             label_near_similarity_threshold: 0.62,
             field_extraction_confidence_gate_enabled: true,
-            field_extraction_required_label_ids: [],
+            required_label_ids: [],
             advanced_features_enabled: false,
             theme_preference: 'dark',
             locale: 'en',
             updated_at: '2026-01-01T00:00:00.000Z',
           },
         ],
-      });
-    const pool = { query } as unknown as pg.Pool;
+      };
+    });
+    const client = {
+      query,
+      release: vi.fn(),
+    };
+    const pool = {
+      query,
+      connect: vi.fn().mockResolvedValue(client),
+    } as unknown as pg.Pool;
     const repo = new PgUserPreferencesRepository(pool);
 
     const row = await repo.upsert('user-1', {

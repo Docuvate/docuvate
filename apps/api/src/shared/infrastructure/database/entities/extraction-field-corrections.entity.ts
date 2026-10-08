@@ -1,4 +1,5 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { ExtractionFieldCorrectionLabelsEntity } from './extraction-field-correction-labels.entity.js';
 import { DocumentsEntity } from './documents.entity.js';
 import { TagsEntity } from './tags.entity.js';
 import { UserEntity } from './user.entity.js';
@@ -33,9 +34,6 @@ export class ExtractionFieldCorrectionsEntity {
   @Column("text", { name: "new_value", default: () => "''" })
   newValue: string;
 
-  @Column("jsonb", { name: "label_tag_ids", default: [] })
-  labelTagIds: object;
-
   @Column("text", { name: "source", default: () => "'user_correction'" })
   source: string;
 
@@ -44,6 +42,12 @@ export class ExtractionFieldCorrectionsEntity {
     default: () => "now()",
   })
   createdAt: Date;
+
+  @OneToMany(
+    () => ExtractionFieldCorrectionLabelsEntity,
+    (labelTags) => labelTags.correction
+  )
+  labelTags: ExtractionFieldCorrectionLabelsEntity[];
 
   @ManyToOne(
     () => DocumentsEntity,

@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
 import { GlobalSearchUseCase } from '../../src/modules/search/application/global-search.use-case.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
-import { upsertDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
+import { replaceDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
@@ -46,11 +46,11 @@ describe('Global search typo correction (Testcontainers Postgres)', () => {
     kontoauszugDocId = uuidv4();
     await pool.query(
       `INSERT INTO documents (
-        id, user_id, filename, title, mime_type, storage_key, status, extracted_text, extracted_fields, created_at, updated_at
+        id, user_id, filename, title, mime_type, storage_key, status, extracted_text, created_at, updated_at
       ) VALUES ($1,$2,'rechnung.pdf','Rechnung Nordwind GmbH','application/pdf','k/r','ready',
-        'Rechnung über Beratungsleistungen.', '{}'::jsonb, now(), now()),
+        'Rechnung über Beratungsleistungen.', now(), now()),
       ($3,$2,'kontoauszug.pdf','Kontoauszug Nordwind','application/pdf','k/k','ready',
-        'Der monatliche Kontoauszug weist eine Gebühr aus.', '{}'::jsonb, now(), now())`,
+        'Der monatliche Kontoauszug weist eine Gebühr aus.', now(), now())`,
       [rechnungDocId, userId, kontoauszugDocId]
     );
     await repo.indexDocumentChunks(
@@ -64,19 +64,11 @@ describe('Global search typo correction (Testcontainers Postgres)', () => {
       'Der monatliche Kontoauszug weist eine Gebühr für den Zahlungsverkehr aus.'
     );
 
-    const defs = await repo.listFieldDefinitions(userId);
-    const lookup = new Map(
-      defs.map((d) => [
-        d.storageKey,
-        { storageKey: d.storageKey, label: d.label, fieldType: d.fieldType },
-      ])
-    );
-    await upsertDocumentFieldValues(
+    await replaceDocumentFieldValues(
       pool,
-      userId,
       rechnungDocId,
-      [{ key: 'global:absender', value: 'Nordwind GmbH' }],
-      lookup
+      userId,
+      [{ key: 'global:absender', value: 'Nordwind GmbH' }]
     );
   }, 120_000);
 

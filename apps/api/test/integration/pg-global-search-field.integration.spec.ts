@@ -6,7 +6,7 @@ import {
   FIELD_TYPO_SEARCH_CORPUS,
   recallFieldAtK,
 } from '../../src/modules/search/domain/field-typo-corpus.js';
-import { upsertDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
+import { replaceDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
@@ -50,71 +50,38 @@ describe('Global search field values (Testcontainers Postgres)', () => {
 
     const docId = uuidv4();
     await pool.query(
-      `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, extracted_fields, created_at, updated_at)
-       VALUES ($1,$2,'r.pdf','Rechnung Nordwind GmbH','application/pdf','k/1','ready','text',
-       $3::jsonb, now(), now())`,
-      [
-        docId,
-        userId,
-        JSON.stringify({
-          fields: [
-            { key: 'global:absender', value: 'Nordwind GmbH' },
-            { key: 'global:betrag', value: '12,50 €' },
-            { key: 'global:rechnungsdatum', value: '15.03.2024' },
-            { key: 'global:iban', value: 'DE89370400440532013000' },
-            { key: 'global:rechnungsnummer', value: 'INV-2024-77' },
-          ],
-        }),
-      ]
+      `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, created_at, updated_at)
+       VALUES ($1,$2,'r.pdf','Rechnung Nordwind GmbH','application/pdf','k/1','ready','text', now(), now())`,
+      [docId, userId]
     );
     const acmeId = uuidv4();
     await pool.query(
-      `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, extracted_fields, created_at, updated_at)
-       VALUES ($1,$2,'i.pdf','Invoice Acme Corp','application/pdf','k/2','ready','text',
-       $3::jsonb, now(), now())`,
-      [
-        acmeId,
-        userId,
-        JSON.stringify({
-          fields: [
-            { key: 'global:absender', value: 'Acme Corp' },
-            { key: 'global:betrag', value: 'EUR 99.00' },
-            { key: 'global:rechnungsdatum', value: '2024-03-15' },
-          ],
-        }),
-      ]
+      `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, created_at, updated_at)
+       VALUES ($1,$2,'i.pdf','Invoice Acme Corp','application/pdf','k/2','ready','text', now(), now())`,
+      [acmeId, userId]
     );
 
-    const defs = await repo.listFieldDefinitions(userId);
-    const lookup = new Map(
-      defs.map((d) => [
-        d.storageKey,
-        { storageKey: d.storageKey, label: d.label, fieldType: d.fieldType },
-      ])
-    );
-    await upsertDocumentFieldValues(
+    await replaceDocumentFieldValues(
       pool,
-      userId,
       docId,
+      userId,
       [
         { key: 'global:absender', value: 'Nordwind GmbH' },
         { key: 'global:betrag', value: '12,50 €' },
         { key: 'global:rechnungsdatum', value: '15.03.2024' },
         { key: 'global:iban', value: 'DE89370400440532013000' },
         { key: 'global:rechnungsnummer', value: 'INV-2024-77' },
-      ],
-      lookup
+      ]
     );
-    await upsertDocumentFieldValues(
+    await replaceDocumentFieldValues(
       pool,
-      userId,
       acmeId,
+      userId,
       [
         { key: 'global:absender', value: 'Acme Corp' },
         { key: 'global:betrag', value: 'EUR 99.00' },
         { key: 'global:rechnungsdatum', value: '2024-03-15' },
-      ],
-      lookup
+      ]
     );
   }, 120_000);
 

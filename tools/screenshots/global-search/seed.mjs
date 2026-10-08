@@ -25,29 +25,17 @@ async function ensureUser() {
   }
 }
 
-async function upsertField(pool, userId, documentId, row) {
+async function upsertField(pool, documentId, row) {
   await pool.query(
     `INSERT INTO document_field_values (
-       document_id, user_id, field_storage_key, field_label, field_type,
-       value_text, value_text_norm, value_numeric, value_date, updated_at
-     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9::date, now())
+       document_id, field_storage_key, value_text, value_text_norm, value_numeric, value_date
+     ) VALUES ($1,$2,$3,$4,$5,$6::date)
      ON CONFLICT (document_id, field_storage_key) DO UPDATE SET
        value_text = EXCLUDED.value_text,
        value_text_norm = EXCLUDED.value_text_norm,
        value_numeric = EXCLUDED.value_numeric,
-       value_date = EXCLUDED.value_date,
-       updated_at = now()`,
-    [
-      documentId,
-      userId,
-      row.storageKey,
-      row.label,
-      row.type,
-      row.text,
-      row.textNorm,
-      row.numeric,
-      row.dateIso,
-    ]
+       value_date = EXCLUDED.value_date`,
+    [documentId, row.storageKey, row.text, row.textNorm, row.numeric, row.dateIso]
   );
 }
 
@@ -85,63 +73,62 @@ async function main() {
   await pool.query('DELETE FROM documents WHERE user_id = $1', [userId]);
   const semanticId = randomUUID();
   const typoId = randomUUID();
-  const rechnungFields = {
-    fields: [
-      { key: 'global:absender', value: 'Nordwind GmbH' },
-      { key: 'global:betrag', value: '12,50 €' },
-      { key: 'global:rechnungsdatum', value: '15.03.2024' },
-      { key: 'global:iban', value: 'DE89370400440532013000' },
-      { key: 'global:rechnungsnummer', value: 'INV-2024-77' },
-    ],
-  };
   await pool.query(
-    `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, extracted_fields, created_at, updated_at)
+    `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, created_at, updated_at)
      VALUES ($1,$2,'kontoauszug.pdf','Kontoauszug Nordwind','application/pdf','k/1','ready',
-     'Der monatliche Kontoauszug weist eine Gebühr für den Zahlungsverkehr aus.', '{}'::jsonb, now(), now())`,
+     'Der monatliche Kontoauszug weist eine Gebühr für den Zahlungsverkehr aus.', now(), now())`,
     [semanticId, userId]
   );
   await pool.query(
-    `INSERT INTO document_text_chunks (document_id, user_id, chunk_index, body, updated_at)
-     VALUES ($1,$2,0,'Der monatliche Kontoauszug weist eine Gebühr für den Zahlungsverkehr aus.', now())`,
-    [semanticId, userId]
+    `INSERT INTO document_text_chunks (document_id, chunk_index, body, updated_at)
+     VALUES ($1,0,'Der monatliche Kontoauszug weist eine Gebühr für den Zahlungsverkehr aus.', now())`,
+    [semanticId]
   );
   await pool.query(
-    `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, extracted_fields, created_at, updated_at)
+    `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, created_at, updated_at)
      VALUES ($1,$2,'rechnung.pdf','Rechnung Nordwind GmbH','application/pdf','k/2','ready',
-     'Rechnung über Beratungsleistungen im ersten Quartal.', $3::jsonb, now(), now())`,
-    [typoId, userId, JSON.stringify(rechnungFields)]
-  );
-  await pool.query(
-    `INSERT INTO document_text_chunks (document_id, user_id, chunk_index, body, updated_at)
-     VALUES ($1,$2,0,'Rechnung über Beratungsleistungen im ersten Quartal.', now())`,
+     'Rechnung über Beratungsleistungen im ersten Quartal.', now(), now())`,
     [typoId, userId]
   );
-  await upsertField(pool, userId, typoId, {
+  await pool.query(
+    `INSERT INTO document_text_chunks (document_id, chunk_index, body, updated_at)
+     VALUES ($1,0,'Rechnung über Beratungsleistungen im ersten Quartal.', now())`,
+    [typoId]
+  );
+  await upsertField(pool, typoId, {
     storageKey: 'global:absender',
-    label: 'Absender',
-    type: 'text',
     text: 'Nordwind GmbH',
     textNorm: 'nordwind gmbh',
     numeric: null,
     dateIso: null,
   });
-  await upsertField(pool, userId, typoId, {
+  await upsertField(pool, typoId, {
     storageKey: 'global:betrag',
-    label: 'Betrag',
-    type: 'currency',
     text: '12,50 €',
-    textNorm: '12,50',
+    textNorm: null,
     numeric: 12.5,
     dateIso: null,
   });
-  await upsertField(pool, userId, typoId, {
+  await upsertField(pool, typoId, {
     storageKey: 'global:rechnungsdatum',
-    label: 'Rechnungsdatum',
-    type: 'date',
     text: '15.03.2024',
-    textNorm: '15.03.2024',
+    textNorm: null,
     numeric: null,
     dateIso: '2024-03-15',
+  });
+  await upsertField(pool, typoId, {
+    storageKey: 'global:iban',
+    text: 'DE89370400440532013000',
+    textNorm: 'de89370400440532013000',
+    numeric: null,
+    dateIso: null,
+  });
+  await upsertField(pool, typoId, {
+    storageKey: 'global:rechnungsnummer',
+    text: 'INV-2024-77',
+    textNorm: 'inv-2024-77',
+    numeric: null,
+    dateIso: null,
   });
   await pool.query(
     `INSERT INTO folders (id, user_id, name, created_at, updated_at) VALUES ($1,$2,'Projekt Alpha', now(), now())

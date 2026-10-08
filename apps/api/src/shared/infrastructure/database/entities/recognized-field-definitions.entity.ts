@@ -1,4 +1,5 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { RecognizedFieldDefinitionGateLabelsEntity } from './recognized-field-definition-gate-labels.entity.js';
 import { UserEntity } from './user.entity.js';
 
 @Index(
@@ -45,9 +46,6 @@ export class RecognizedFieldDefinitionsEntity {
   })
   updatedAt: Date;
 
-  @Column("jsonb", { name: "gate_label_ids", default: [] })
-  gateLabelIds: object;
-
   @Column("text", { name: "gate_label_match", default: () => "'all'" })
   gateLabelMatch: string;
 
@@ -60,6 +58,12 @@ export class RecognizedFieldDefinitionsEntity {
 
   @Column("boolean", { name: "confidence_gate_enabled", nullable: true })
   confidenceGateEnabled: boolean | null;
+
+  @OneToMany(
+    () => RecognizedFieldDefinitionGateLabelsEntity,
+    (gateLabels) => gateLabels.fieldDefinition
+  )
+  gateLabels: RecognizedFieldDefinitionGateLabelsEntity[];
 
   @ManyToOne(() => UserEntity, (user) => user.recognizedFieldDefinitions, {
     onDelete: "CASCADE",

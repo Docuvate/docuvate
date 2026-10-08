@@ -41,9 +41,6 @@ export class DocumentsEntity {
   @Column("text", { name: "extracted_text", nullable: true })
   extractedText: string | null;
 
-  @Column("jsonb", { name: "extracted_fields", nullable: true })
-  extractedFields: object | null;
-
   @Column("tsvector", { name: "search_vector", nullable: true })
   searchVector: string | null;
 
