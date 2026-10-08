@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - pvc.yaml
+  - secret-placeholder.yaml
+  - deployment.yaml
+  - service.yaml
+  - networkpolicy.yaml
+patches:
+  - path: patch-api-sftp-env.yaml
+  - target:
+      group: networking.k8s.io
+      version: v1
+      kind: NetworkPolicy
+      name: docuvate-api
+    patch: |
+      - op: add
+        path: /spec/egress/-
+        value:
+          to:
+            - podSelector:
+                matchLabels:
+                  app.kubernetes.io/name: docuvate-sftp-ingest
+          ports:
+            - port: 8080
+              protocol: TCP
+images:
+  - name: docuvate-sftp-ingest
+    newName: ghcr.io/docuvate/docuvate-sftp-ingest
+    newTag: "v0.1.0"

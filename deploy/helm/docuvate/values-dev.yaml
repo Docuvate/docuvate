@@ -8,6 +8,8 @@ config:
   publicApiUrl: http://localhost:8080/api
   smtpUrl: smtp://docuvate-mailpit:1025
   documentChatProvider: context
+  sftpPublicHost: localhost
+  sftpPublicPort: "30222"
 
 postgres:
   enabled: true
@@ -20,6 +22,10 @@ valkey:
 
 mailpit:
   enabled: true
+
+sftpIngest:
+  enabled: true
+  exposeSftp: true
 
 ollama:
   enabled: false

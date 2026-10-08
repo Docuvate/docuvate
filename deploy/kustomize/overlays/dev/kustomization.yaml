@@ -8,8 +8,10 @@ components:
   - ../../components/valkey
   - ../../components/minio
   - ../../components/mailpit
+  - ../../components/sftp-ingest
 patches:
   - path: patch-dev-lite.yaml
   - path: patch-ingress-nodeport.yaml
   - path: patch-networkpolicy-dev.yaml
   - path: patch-db-migrate-wait.yaml
+  - path: patch-sftp-ingest-dev.yaml

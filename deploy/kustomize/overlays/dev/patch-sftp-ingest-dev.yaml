@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: docuvate-sftp-ingest
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+    - name: sftp
+      port: 2222
+      targetPort: sftp
+      nodePort: 30222
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-sftp-ingest
+spec:
+  ingress:
+    - ports:
+        - port: 2222
+          protocol: TCP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docuvate-config
+data:
+  DOCUVATE_SFTP_PUBLIC_HOST: localhost
+  DOCUVATE_SFTP_PUBLIC_PORT: "30222"
