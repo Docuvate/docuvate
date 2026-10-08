@@ -217,4 +217,4 @@ jobs:
         run: pnpm --filter @docuvate/e2e test
       - name: Dump API logs on failure
         if: failure()
-        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate worker
