@@ -112,7 +112,7 @@ job_db_migrate_fresh() {
   docuvate_ci_start_postgres migrate_pg_cid "db-migrate-fresh"
   trap 'docuvate_ci_stop_postgres "$migrate_pg_cid"' RETURN
   docuvate_ci_prepend_docker_psql "$migrate_pg_cid" "$ROOT/tmp/ci-bin-${DOCUVATE_LOCAL_CI_RUN_ID}-migrate"
-  bash scripts/ci/test-docker-psql-shim.sh
+  bash scripts/ci/test-docker-psql-shim.sh "$migrate_pg_cid"
   bash scripts/db/migration-roundtrip-check.sh
 }
 
