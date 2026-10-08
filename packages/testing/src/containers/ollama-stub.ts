@@ -10,7 +10,7 @@ export type StartedOllamaStub = {
  * Returns canned JSON for /api/tags and /api/chat.
  */
 export async function startOllamaStubContainer(): Promise<StartedOllamaStub> {
-  const container = await new GenericContainer('node:22-alpine')
+  const container = await new GenericContainer('node:24-alpine')
     .withExposedPorts(11434)
     .withCommand([
       'node',

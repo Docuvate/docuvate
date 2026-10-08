@@ -42,7 +42,7 @@ Es gab vor diesem Konzept **keine** Testcontainers-Nutzung, **kein** Playwright 
 
 Worker: kein Coverage-Report in CI (Ziel: `pytest-cov` in Etappe 2).
 
-### 1.4 Laufzeiten (lokal, Node 22)
+### 1.4 Laufzeiten (lokal, Node 24)
 
 | Suite | Dauer (typisch) |
 |-------|-----------------|
@@ -62,7 +62,7 @@ Keine markierten flaky Tests im Repo; Retries nur in Playwright-CI-Konfiguration
 
 **Cloud-Agent-VM:** Vor Compose/Testcontainers ggf. Bridge-Forwarding freischalten (`sudo DV_AGENT_VM=1 ./scripts/ci/agent-vm-docker-setup.sh`; siehe `docs/local-ci.md`).
 
-Voraussetzungen: Node 22, pnpm, Docker (`docker info`), optional Flutter für SDK-Flutter in `lint-test`.
+Voraussetzungen: Node 24, pnpm, Docker (`docker info`), optional Flutter für SDK-Flutter in `lint-test`.
 
 | Job | Prüfung |
 |-----|---------|

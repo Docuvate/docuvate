@@ -2,6 +2,8 @@
 
 GitHub Actions may be disabled; run the same jobs locally and post results on the PR.
 
+**Prerequisites:** Node.js 24+ (see `.nvmrc`), pnpm, and Docker.
+
 ## Runner
 
 ```bash
