@@ -143,6 +143,7 @@ jobs:
       - name: Go vet and unit tests (sftp-ingest)
         run: cd apps/sftp-ingest && go vet ./... && go test ./...
 
+  # End-to-end SFTP ingest against compose (see scripts/testing/run-sftp-integration-e2e.sh).
   sftp-integration:
     runs-on: ubuntu-latest
     steps:
