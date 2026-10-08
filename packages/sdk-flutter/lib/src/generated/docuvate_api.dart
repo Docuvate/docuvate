@@ -19,6 +19,8 @@ export 'package:docuvate/src/generated/src/api/models_api.dart';
 export 'package:docuvate/src/generated/src/api/organizer_api.dart';
 export 'package:docuvate/src/generated/src/api/search_api.dart';
 export 'package:docuvate/src/generated/src/api/settings_api.dart';
+export 'package:docuvate/src/generated/src/api/sftp_ingress_api.dart';
+export 'package:docuvate/src/generated/src/api/sftp_ingress_service_api.dart';
 
 export 'package:docuvate/src/generated/src/model/accept_label_recommendation_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/accept_label_recommendation_response_dto.dart';

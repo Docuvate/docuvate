@@ -28,6 +28,7 @@ export function toDocumentDto(
     title: entity.title,
     status: entity.status,
     mimeType: entity.mimeType,
+    ingestSource: entity.ingestSource ?? null,
     documentDate: entity.documentDate ? entity.documentDate.toISOString().slice(0, 10) : null,
     notes: entity.notes ?? null,
     folderId: entity.folderId ?? null,

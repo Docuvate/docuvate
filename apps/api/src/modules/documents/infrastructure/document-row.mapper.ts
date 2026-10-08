@@ -107,6 +107,7 @@ export function mapDocumentRow(
         ? new Date(String(documentDateRaw))
         : null,
     notes: (row['notes'] as string | null) ?? null,
+    ingestSource: (row['ingest_source'] as string | null) ?? null,
     folderId: folderIdRaw != null ? String(folderIdRaw) : null,
     mappeId: row['mappe_id'] != null ? String(row['mappe_id']) : null,
     folder:

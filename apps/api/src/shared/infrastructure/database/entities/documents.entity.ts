@@ -77,6 +77,9 @@ export class DocumentsEntity {
   @Column("uuid", { name: "mappe_id", nullable: true })
   mappeId: string | null;
 
+  @Column("text", { name: "ingest_source", nullable: true })
+  ingestSource: string | null;
+
   @OneToMany(
     () => ChatThreadDocumentsEntity,
     (chatThreadDocuments) => chatThreadDocuments.document

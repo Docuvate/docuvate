@@ -29,6 +29,7 @@ import { Input } from '../components/ui/Input';
 import { ConnectorConnectDialog } from '../components/connectors/ConnectorConnectDialog';
 import { ConnectorPluginIcon } from '../components/connectors/ConnectorPluginIcon';
 import { useToastNotify } from '../components/save/ToastProvider';
+import { SftpScannerIngressSection } from '../components/connectors/SftpScannerIngressSection';
 
 function capabilityLabel(t: (key: string) => string, role: 'source' | 'sink') {
   return t(`connectors.capabilities.${role}`);
@@ -116,6 +117,23 @@ export function ConnectorsPage() {
     const category = catalog?.categories.find((entry) => entry.id === plugin.categoryId);
     return category ? t(category.labelKey) : plugin.categoryId;
   }
+  const showSftpScannerCard = useMemo(() => {
+    if (categoryFilter !== 'all' && categoryFilter !== 'scanner_sftp') {
+      return false;
+    }
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return true;
+    const haystack = [
+      t('sftpIngress.title'),
+      t('sftpIngress.lead'),
+      'sftp',
+      'scanner',
+      t('connectors.categories.scannerSftp.label'),
+    ]
+      .join(' ')
+      .toLowerCase();
+    return haystack.includes(query);
+  }, [categoryFilter, searchQuery, t]);
 
   async function submitConnect(payload: {
     displayName: string;
@@ -341,10 +359,15 @@ export function ConnectorsPage() {
             </div>
           </div>
 
-          {filteredPlugins.length === 0 ? (
+          {filteredPlugins.length === 0 && !showSftpScannerCard ? (
             <p className="muted">{t('connectors.emptySearch')}</p>
           ) : (
-            <div className="connector-catalog-grid">{sortedFilteredPlugins.map(renderPluginCard)}</div>
+            <div className="connector-catalog-grid">
+              {showSftpScannerCard ? (
+                <SftpScannerIngressSection viewerIsServerAdmin={catalog.viewerIsServerAdmin ?? false} />
+              ) : null}
+              {sortedFilteredPlugins.map(renderPluginCard)}
+            </div>
           )}
         </>
       ) : null}

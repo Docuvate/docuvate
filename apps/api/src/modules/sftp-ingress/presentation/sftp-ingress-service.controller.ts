@@ -1,0 +1,60 @@
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import type { FastifyRequest } from 'fastify';
+import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  AuthenticateSftpIngressAccountUseCase,
+  ResolveSftpIngressAccountUseCase,
+} from '../application/sftp-ingress.use-cases.js';
+import { IngestSftpMultipartUseCase } from '../application/ingest-sftp-multipart.use-case.js';
+import { RecordSftpAuditUseCase } from '../application/record-sftp-audit.use-case.js';
+import { SftpIngressServiceGuard } from './sftp-ingress-service.guard.js';
+import { toSftpIngressEventDto } from './sftp-ingress.mapper.js';
+
+@ApiDocuvateController('sftp-ingress/service')
+@Controller('sftp-ingress/service')
+@UseGuards(SftpIngressServiceGuard)
+export class SftpIngressServiceController {
+  constructor(
+    private readonly authenticate: AuthenticateSftpIngressAccountUseCase,
+    private readonly ingestMultipart: IngestSftpMultipartUseCase,
+    private readonly resolveAccount: ResolveSftpIngressAccountUseCase,
+    private readonly recordAudit: RecordSftpAuditUseCase
+  ) {}
+
+  @Post('audit')
+  @ApiDocuvateRoute({ operationId: 'recordSftpIngressAudit', summary: 'Record SFTP ingress audit event' })
+  async audit(@Body() body: { kind: string; username: string; clientIp?: string; accountId?: string }) {
+    await this.recordAudit.execute(body);
+    return { ok: true };
+  }
+
+  @Post('authenticate')
+  @ApiDocuvateRoute({
+    operationId: 'authenticateSftpIngressAccount',
+    summary: 'Validate SFTP ingress credentials (service)',
+  })
+  async auth(
+    @Body() body: { username: string; password?: string; publicKey?: string }
+  ): Promise<{ accountId: string; userId: string }> {
+    const account = await this.authenticate.execute(body);
+    return { accountId: account.id, userId: account.userId };
+  }
+
+  @Post('resolve')
+  @ApiDocuvateRoute({ operationId: 'resolveSftpIngressAccount', summary: 'Resolve account after SSH auth' })
+  async resolve(@Body() body: { username: string }) {
+    const account = await this.resolveAccount.execute(body.username);
+    return { accountId: account.id, userId: account.userId };
+  }
+
+  @Post('ingest')
+  @ApiDocuvateRoute({ operationId: 'ingestSftpScan', summary: 'Ingest completed SFTP scan (service)' })
+  async ingestScan(@Req() req: FastifyRequest) {
+    const parsed = await this.ingestMultipart.parseRequest(req);
+    const result = await this.ingestMultipart.execute(parsed);
+    return {
+      documentId: result.documentId,
+      event: toSftpIngressEventDto(result.event),
+    };
+  }
+}
