@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "lint": "eslint src && stylelint \"src/**/*.css\"",
     "typecheck": "tsc -b --noEmit",
-    "test": "vitest run && node ./scripts/check-ui-literals.mjs && node ./scripts/check-i18n-keys.mjs",
+    "test": "vitest run && node ./scripts/check-ui-literals.mjs && node ./scripts/check-i18n-keys.mjs && node ../../scripts/testing/check-global-search-css-tokens.mjs",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

@@ -17,6 +17,7 @@ export 'package:docuvate/src/generated/src/api/documents_api.dart';
 export 'package:docuvate/src/generated/src/api/labels_api.dart';
 export 'package:docuvate/src/generated/src/api/models_api.dart';
 export 'package:docuvate/src/generated/src/api/organizer_api.dart';
+export 'package:docuvate/src/generated/src/api/search_api.dart';
 export 'package:docuvate/src/generated/src/api/settings_api.dart';
 
 export 'package:docuvate/src/generated/src/model/accept_label_recommendation_request_dto.dart';

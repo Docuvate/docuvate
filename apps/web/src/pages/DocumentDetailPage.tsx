@@ -3,6 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { routes } from '../lib/routes';
+import { authClient } from '../lib/auth-client';
+import { pushRecentDocument } from '../lib/search/searchRecent';
 import type { DocumentDto, ExtractedField, ExtractionBlock, FolderDto, TagDto } from '@docuvate/contracts';
 import { formatUserFacingError } from '../lib/apiErrors';
 import {
@@ -72,6 +74,7 @@ function isSameDocumentSnapshot(a: DocumentDto, b: DocumentDto): boolean {
 
 export function DocumentDetailPage() {
   const { t } = useTranslation();
+  const { data: session } = authClient.useSession();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [doc, setDoc] = useState<DocumentDto | null>(null);
@@ -114,6 +117,13 @@ export function DocumentDetailPage() {
   useEffect(() => {
     docRef.current = doc;
   }, [doc]);
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (userId && doc) {
+      pushRecentDocument(userId, { id: doc.id, title: doc.title || doc.filename });
+    }
+  }, [session?.user?.id, doc]);
 
   const isPdf = doc?.mimeType === 'application/pdf';
   const isImage = doc?.mimeType?.startsWith('image/') ?? false;

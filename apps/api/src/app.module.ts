@@ -18,6 +18,7 @@ import { ConnectorsModule } from './modules/connectors/connectors.module.js';
 import { ModelRegistryModule } from './modules/model-registry/model-registry.module.js';
 import { AuthPublicModule } from './modules/auth/auth-public.module.js';
 import { ExtensionHostModule } from './shared/infrastructure/extensions/extension-host.module.js';
+import { SearchModule } from './modules/search/search.module.js';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { ExtensionHostModule } from './shared/infrastructure/extensions/extensio
     ConnectorsModule,
     ModelRegistryModule,
     AuthPublicModule,
+    SearchModule,
   ],
 })
 export class AppModule {}

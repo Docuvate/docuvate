@@ -78,6 +78,7 @@ import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.m
     RefreshEmbeddingSuggestionsUseCase,
     LoadDocumentLabelSuggestionsUseCase,
     LABEL_EMBEDDING_REPOSITORY,
+    EMBEDDING_PORT,
   ],
 })
 export class LabelsModule {}

@@ -33,6 +33,7 @@ import { RunArenaSampleCompareUseCase } from './application/run-arena-sample-com
 import { RequeueDocumentExtractionUseCase } from './application/requeue-document-extraction.use-case.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
+import { SearchModule } from '../search/search.module.js';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { DocumentChatModule } from '../../shared/infrastructure/chat/document-ch
     SettingsModule,
     DocumentPipelineModule,
     ExtractionFeedbackModule,
+    SearchModule,
   ],
   controllers: [DocumentsController],
   providers: [

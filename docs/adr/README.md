@@ -7,7 +7,7 @@ Numbers **011–015** are reserved for in-flight work. Check this index before a
 | 011 | User / roles       | _(not yet in repo)_                | **reserved**   |
 | 014 | Kubernetes / Kustomize | _(not yet in repo)_            | **reserved**   |
 | 015 | 3NF (data model)   | _(not yet in repo)_                | **reserved**   |
-| **016** | Global search  | _(reserved)_                       | **reserved**   |
+| 016 | Global search      | [016-global-search-embeddings.md](./016-global-search-embeddings.md) | accepted |
 | [017](017-typeorm-migrations-phase1.md) | TypeORM migrations (phase 1) | accepted |
 | 018+ | _(see files in this directory)_ | | |
 

@@ -9,6 +9,8 @@ import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
 import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
+import { DocumentFieldValuesEntity } from './document-field-values.entity.js';
+import { DocumentTextChunksEntity } from './document-text-chunks.entity.js';
 import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
 import { DocumentsEntity } from './documents.entity.js';
@@ -25,6 +27,7 @@ import { MlModelVersionsEntity } from './ml-model-versions.entity.js';
 import { MlRetrainJobsEntity } from './ml-retrain-jobs.entity.js';
 import { MlTrainingDataSnapshotsEntity } from './ml-training-data-snapshots.entity.js';
 import { RecognizedFieldDefinitionsEntity } from './recognized-field-definitions.entity.js';
+import { SearchVocabularyTermsEntity } from './search-vocabulary-terms.entity.js';
 import { SessionEntity } from './session.entity.js';
 import { TagCustomFieldDefinitionsEntity } from './tag-custom-field-definitions.entity.js';
 import { TagEmbeddingCentroidsEntity } from './tag-embedding-centroids.entity.js';
@@ -44,6 +47,8 @@ export const TYPEORM_ENTITIES = [
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
   DocumentEmbeddingsEntity,
+  DocumentFieldValuesEntity,
+  DocumentTextChunksEntity,
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,
   DocumentsEntity,
@@ -60,6 +65,7 @@ export const TYPEORM_ENTITIES = [
   MlRetrainJobsEntity,
   MlTrainingDataSnapshotsEntity,
   RecognizedFieldDefinitionsEntity,
+  SearchVocabularyTermsEntity,
   SessionEntity,
   TagCustomFieldDefinitionsEntity,
   TagEmbeddingCentroidsEntity,
@@ -80,6 +86,8 @@ export {
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
   DocumentEmbeddingsEntity,
+  DocumentFieldValuesEntity,
+  DocumentTextChunksEntity,
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,
   DocumentsEntity,
@@ -96,6 +104,7 @@ export {
   MlRetrainJobsEntity,
   MlTrainingDataSnapshotsEntity,
   RecognizedFieldDefinitionsEntity,
+  SearchVocabularyTermsEntity,
   SessionEntity,
   TagCustomFieldDefinitionsEntity,
   TagEmbeddingCentroidsEntity,

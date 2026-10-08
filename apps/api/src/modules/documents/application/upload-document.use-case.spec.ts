@@ -28,6 +28,7 @@ function buildUseCase(overrides?: {
     { generate: () => 'doc-1' } as never,
     { now: () => new Date('2026-01-01') } as never,
     { execute: vi.fn() } as never,
+    { execute: vi.fn() } as never,
     { execute: vi.fn() } as never
   );
 
