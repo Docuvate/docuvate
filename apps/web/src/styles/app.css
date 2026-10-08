@@ -720,6 +720,14 @@ mark.global-search-mark {
   box-shadow: var(--elevation-popover, 0 10px 40px rgba(15, 23, 42, 0.18));
 }
 
+.user-account-menu-panel--portal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: auto;
+  z-index: 1200;
+}
+
 .user-account-menu-identity {
   display: grid;
   gap: 2px;

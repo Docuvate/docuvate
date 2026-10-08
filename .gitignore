@@ -60,6 +60,7 @@ docker-compose.override.yml
 # Misc
 .turbo/
 tmp/
+artifacts/screenshots/
 
 dist/
 **/dist/

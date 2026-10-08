@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
+import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ThemePreference } from '@docuvate/contracts';
@@ -11,6 +20,47 @@ import { useDocuvateTheme } from '../../lib/useDocuvateTheme';
 import { ThemePreferencePicker } from './ThemePreferencePicker';
 import { LocaleSwitcher } from './LocaleSwitcher';
 
+function positionAccountMenuPanel(
+  trigger: HTMLElement,
+  panel: HTMLElement,
+  pad = 8,
+  gap = 4
+): void {
+  panel.style.visibility = 'hidden';
+  panel.style.left = '0px';
+  panel.style.top = '0px';
+
+  const menuWidth = panel.offsetWidth;
+  const menuHeight = panel.offsetHeight;
+  const anchorRect = trigger.getBoundingClientRect();
+
+  let left = anchorRect.right - menuWidth;
+  let top = anchorRect.bottom + gap;
+
+  if (top + menuHeight > window.innerHeight - pad) {
+    const above = anchorRect.top - menuHeight - gap;
+    if (above >= pad) {
+      top = above;
+    }
+  }
+  if (left + menuWidth > window.innerWidth - pad) {
+    left = window.innerWidth - pad - menuWidth;
+  }
+  if (left < pad) {
+    left = pad;
+  }
+  if (top + menuHeight > window.innerHeight - pad) {
+    top = Math.max(pad, window.innerHeight - menuHeight - pad);
+  }
+  if (top < pad) {
+    top = pad;
+  }
+
+  panel.style.left = `${left}px`;
+  panel.style.top = `${top}px`;
+  panel.style.visibility = '';
+}
+
 export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwitcher?: boolean }) {
   const { t } = useTranslation();
   const { data } = authClient.useSession();
@@ -18,6 +68,7 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const firstItemRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -28,16 +79,44 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
     triggerRef.current?.focus();
   }, []);
 
+  const displayName = user?.name?.trim();
+  const email = user?.email?.trim();
+  const initials = userInitials(user);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      return;
+    }
+    const trigger = triggerRef.current;
+    const panel = panelRef.current;
+    if (!trigger || !panel) {
+      return;
+    }
+    const reposition = () => {
+      positionAccountMenuPanel(trigger, panel);
+    };
+    reposition();
+    window.addEventListener('resize', reposition);
+    window.addEventListener('scroll', reposition, true);
+    return () => {
+      window.removeEventListener('resize', reposition);
+      window.removeEventListener('scroll', reposition, true);
+    };
+  }, [open, showLocaleSwitcher, displayName, email, saveError, themePreference]);
+
   useEffect(() => {
     if (!open) {
       return;
     }
     firstItemRef.current?.focus();
     function onPointerDown(event: MouseEvent) {
+      const target = event.target as Node;
       const root = rootRef.current;
-      if (root && !root.contains(event.target as Node)) {
-        setOpen(false);
+      const panel = panelRef.current;
+      if (root?.contains(target) || panel?.contains(target)) {
+        return;
       }
+      setOpen(false);
     }
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
@@ -78,9 +157,52 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
     void performSignOut();
   }
 
-  const displayName = user?.name?.trim();
-  const email = user?.email?.trim();
-  const initials = userInitials(user);
+  const menuPanel: ReactNode = open ? (
+    <div
+      ref={panelRef}
+      id={menuId}
+      className="user-account-menu-panel user-account-menu-panel--portal"
+      role="menu"
+    >
+      <div className="user-account-menu-identity" role="presentation">
+        {displayName ? <span className="user-account-menu-name">{displayName}</span> : null}
+        {email ? <span className="user-account-menu-email">{email}</span> : null}
+      </div>
+      <hr className="user-account-menu-divider" />
+      {showLocaleSwitcher ? (
+        <>
+          <div role="presentation" className="user-account-menu-locale-section">
+            <LocaleSwitcher placement="menu" />
+          </div>
+          <hr className="user-account-menu-divider" />
+        </>
+      ) : null}
+      <div role="presentation" className="user-account-menu-theme-section">
+        <ThemePreferencePicker
+          value={themePreference}
+          onChange={(next) => void onThemePreferenceChange(next)}
+          firstOptionRef={firstItemRef}
+        />
+        {saveError ? (
+          <p className="user-account-menu-error" role="alert">
+            {saveError}
+          </p>
+        ) : null}
+      </div>
+      <hr className="user-account-menu-divider" />
+      <Link
+        to={routes.settings}
+        role="menuitem"
+        className="user-account-menu-item"
+        onClick={() => setOpen(false)}
+      >
+        {t('shell.account')}
+      </Link>
+      <button type="button" role="menuitem" className="user-account-menu-item" onClick={signOut}>
+        {t('shell.signOut')}
+      </button>
+    </div>
+  ) : null;
 
   return (
     <div className="user-account-menu" ref={rootRef}>
@@ -98,54 +220,7 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
           {initials}
         </span>
       </button>
-      {open ? (
-        <div id={menuId} className="user-account-menu-panel" role="menu">
-          <div className="user-account-menu-identity" role="presentation">
-            {displayName ? (
-              <span className="user-account-menu-name">{displayName}</span>
-            ) : null}
-            {email ? <span className="user-account-menu-email">{email}</span> : null}
-          </div>
-          <hr className="user-account-menu-divider" />
-          {showLocaleSwitcher ? (
-            <>
-              <div role="presentation" className="user-account-menu-locale-section">
-                <LocaleSwitcher placement="menu" />
-              </div>
-              <hr className="user-account-menu-divider" />
-            </>
-          ) : null}
-          <div role="presentation" className="user-account-menu-theme-section">
-            <ThemePreferencePicker
-              value={themePreference}
-              onChange={(next) => void onThemePreferenceChange(next)}
-              firstOptionRef={firstItemRef}
-            />
-            {saveError ? (
-              <p className="user-account-menu-error" role="alert">
-                {saveError}
-              </p>
-            ) : null}
-          </div>
-          <hr className="user-account-menu-divider" />
-          <Link
-            to={routes.settings}
-            role="menuitem"
-            className="user-account-menu-item"
-            onClick={() => setOpen(false)}
-          >
-            {t('shell.account')}
-          </Link>
-          <button
-            type="button"
-            role="menuitem"
-            className="user-account-menu-item"
-            onClick={signOut}
-          >
-            {t('shell.signOut')}
-          </button>
-        </div>
-      ) : null}
+      {menuPanel ? createPortal(menuPanel, document.body) : null}
     </div>
   );
 }

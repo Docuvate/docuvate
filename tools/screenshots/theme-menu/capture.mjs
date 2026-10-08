@@ -2,10 +2,13 @@
 /**
  * Theme menu screenshots (Hell/Dunkel/System + Sprache) for PR review.
  */
-import { chromium, devices } from 'playwright';
+import { chromium } from 'playwright';
 import { execSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 import {
   THEME_MENU_EMAIL,
   THEME_MENU_NAME,
@@ -13,7 +16,9 @@ import {
   seedThemeMenuLibrary,
 } from './seed.mjs';
 
-const OUT = '/opt/cursor/artifacts/theme-menu-r7';
+const OUT = process.env.SCREENSHOT_DIR
+  ? path.resolve(process.env.SCREENSHOT_DIR)
+  : path.join(REPO_ROOT, 'artifacts/screenshots/theme-menu');
 const BASE = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:5173';
 const DOCUMENTS = `${BASE}/documents`;
 const AUTH = `${BASE}/api/auth`;
@@ -82,9 +87,10 @@ async function gotoDocuments(page, locale, themePreference) {
   await page.locator('.library-doc-table-card, .library-documents-panel').first().waitFor({
     timeout: 30_000,
   });
-  await page.getByRole('row').filter({ hasText: /Rechnung|Versicherung|Kontoauszug|Mietvertrag/ }).first().waitFor({
-    timeout: 15_000,
-  });
+  await page
+    .getByText(/Rechnung Stadtwerke|Versicherung Hausrat|Kontoauszug Februar|Mietvertrag Wohnung/)
+    .first()
+    .waitFor({ timeout: 15_000 });
 }
 
 async function openMenu(page) {
@@ -99,11 +105,12 @@ async function openMenu(page) {
 async function shot(page, file) {
   const filePath = path.join(OUT, file);
   await page.screenshot({ path: filePath, fullPage: false });
-  return { file, path: filePath };
+  const rel = path.relative(REPO_ROOT, filePath);
+  return { file, path: rel.startsWith('..') ? filePath : rel };
 }
 
 const manifest = {
-  sha: SHA,
+  capturedGitHead: SHA,
   persona: { name: THEME_MENU_NAME, email: THEME_MENU_EMAIL },
   capturedAt: new Date().toISOString(),
   files: [],
@@ -113,40 +120,38 @@ const browser = await chromium.launch();
 
 const desktopCtx = await browser.newContext({
   locale: 'de-DE',
-  viewport: { width: 1440, height: 900 },
+  viewport: { width: 1280, height: 800 },
 });
 await apiLogin(desktopCtx);
 const desktopPage = await desktopCtx.newPage();
 
-for (const { locale, theme, file } of [
-  { locale: 'de', theme: 'light', file: 'de-light-1440.png' },
-  { locale: 'de', theme: 'dark', file: 'de-dark-1440.png' },
-]) {
-  await patchSettings(desktopCtx, { themePreference: theme, locale });
-  await gotoDocuments(desktopPage, locale, theme);
+for (const theme of ['light', 'dark']) {
+  await patchSettings(desktopCtx, { themePreference: theme, locale: 'de' });
+  await gotoDocuments(desktopPage, 'de', theme);
+  manifest.files.push(await shot(desktopPage, `de-${theme}-1280-documents.png`));
   await openMenu(desktopPage);
-  manifest.files.push(await shot(desktopPage, file));
+  manifest.files.push(await shot(desktopPage, `de-${theme}-1280-avatar-menu.png`));
   await desktopPage.keyboard.press('Escape');
 }
 
 const mobileCtx = await browser.newContext({
-  ...devices['iPhone 12'],
   locale: 'de-DE',
+  viewport: { width: 390, height: 844 },
+  isMobile: true,
+  hasTouch: true,
 });
 await apiLogin(mobileCtx);
 const mobilePage = await mobileCtx.newPage();
 
-await patchSettings(mobileCtx, { themePreference: 'light', locale: 'en' });
-await gotoDocuments(mobilePage, 'en', 'light');
-await openMenu(mobilePage);
-manifest.files.push(await shot(mobilePage, 'en-light-390.png'));
-await mobilePage.keyboard.press('Escape');
-
-await patchSettings(mobileCtx, { themePreference: 'dark', locale: 'de' });
-await gotoDocuments(mobilePage, 'de', 'dark');
-await openMenu(mobilePage);
-manifest.files.push(await shot(mobilePage, 'de-dark-390.png'));
+for (const theme of ['light', 'dark']) {
+  await patchSettings(mobileCtx, { themePreference: theme, locale: 'de' });
+  await gotoDocuments(mobilePage, 'de', theme);
+  manifest.files.push(await shot(mobilePage, `de-${theme}-390-documents.png`));
+  await openMenu(mobilePage);
+  manifest.files.push(await shot(mobilePage, `de-${theme}-390-avatar-menu.png`));
+  await mobilePage.keyboard.press('Escape');
+}
 
 await browser.close();
 await writeFile(path.join(OUT, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
-console.log('theme-menu-r7 complete', OUT, 'sha', SHA);
+console.log('theme-menu screenshots complete', OUT, 'sha', SHA);
