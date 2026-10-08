@@ -2,7 +2,7 @@
 
 GitHub Actions may be disabled; run the same jobs locally and post results on the PR.
 
-**Prerequisites:** Node.js 24+ (see `.nvmrc`), pnpm, and Docker.
+**Prerequisites:** Runtimes from `.tool-versions` (asdf: `asdf install`), and Docker.
 
 ## Runner
 

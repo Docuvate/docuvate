@@ -25,8 +25,8 @@
 <p align="center">
   <img src="https://img.shields.io/badge/license-AGPL--3.0-cb3a00" alt="License AGPL-3.0">
   <img src="https://img.shields.io/badge/version-0.1.0-120f09" alt="Version 0.1.0">
-  <img src="https://img.shields.io/badge/node-%3E%3D24-cb3a00?logo=node.js&logoColor=white" alt="Node 24+">
-  <img src="https://img.shields.io/badge/python-%3E%3D3.12-cb3a00?logo=python&logoColor=white" alt="Python 3.12+">
+  <img src="https://img.shields.io/badge/node-24.21.0-cb3a00?logo=node.js&logoColor=white" alt="Node 24.21.0">
+  <img src="https://img.shields.io/badge/python-3.12.15-cb3a00?logo=python&logoColor=white" alt="Python 3.12.15">
   <img src="https://img.shields.io/badge/self--hosted-yes-cb3a00" alt="Self-hosted">
   <img src="https://img.shields.io/badge/docker-compose-cb3a00?logo=docker&logoColor=white" alt="Docker Compose">
 </p>
@@ -49,6 +49,22 @@ Paperless tools often stop at full-text search. Docuvate targets **structured ex
 | Auth            | Email and password via better-auth, password reset (Mailpit locally) |
 
 ## Quickstart
+
+### Toolchain (local development)
+
+Runtime versions are pinned in [`.tool-versions`](.tool-versions). With [asdf](https://asdf-vm.com/):
+
+```bash
+asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+asdf plugin add pnpm https://github.com/jonathanmorley/asdf-pnpm.git
+asdf plugin add python https://github.com/asdf-community/asdf-python.git
+asdf plugin add uv https://github.com/asdf-community/asdf-uv.git
+asdf install
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md#development-setup) for the full development setup.
+
+### Docker Compose
 
 From the repository root:
 
@@ -79,7 +95,7 @@ Docker Compose runs **PostgreSQL 18.6** (`postgres:18.6-alpine`). Fresh installs
 
 **Back up your database and MinIO `documents` bucket before upgrading production data.** Never use `docker compose down -v` to reset a stack: that **deletes all documents and the database**. See [Self-hosting](docs/self-hosting.md) for volumes and recovery.
 
-Local development without Docker also expects **PostgreSQL 18.6** (or compatible 18.x), plus MinIO, Valkey, and Node 24+ / uv for the worker.
+Local development without Docker also expects **PostgreSQL 18.6** (or compatible 18.x), plus MinIO, Valkey, and the Node / Python / uv versions from `.tool-versions` for API, web, and worker.
 
 ## Kubernetes
 
