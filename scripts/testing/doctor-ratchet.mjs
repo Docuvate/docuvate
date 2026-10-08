@@ -11,8 +11,26 @@ function runCommand(command, cwd) {
     cwd,
     shell: true,
     encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
   });
-  return `${result.stdout ?? ''}${result.stderr ?? ''}`;
+  return {
+    output: `${result.stdout ?? ''}${result.stderr ?? ''}`,
+    status: result.status,
+    signal: result.signal,
+    error: result.error,
+  };
+}
+
+function printDiagnostics(name, command, cwd, res) {
+  const lines = res.output.split('\n');
+  console.error(`--- ${name} doctor diagnostics ---`);
+  console.error(`command: ${command}`);
+  console.error(`cwd: ${cwd}`);
+  console.error(`exit status: ${res.status}${res.signal ? ` (signal ${res.signal})` : ''}`);
+  if (res.error) console.error(`spawn error: ${res.error.message}`);
+  console.error(`last ${Math.min(40, lines.length)} of ${lines.length} output lines:`);
+  console.error(lines.slice(-40).join('\n'));
+  console.error(`--- end ${name} doctor diagnostics ---`);
 }
 
 function parseNestjsScore(output) {
@@ -27,7 +45,8 @@ function parseReactScore(output) {
 
 function run(name, cfg) {
   const cwd = name === 'fastapi' ? resolve(process.cwd(), cfg.path) : process.cwd();
-  const out = runCommand(cfg.command, cwd);
+  const res = runCommand(cfg.command, cwd);
+  const out = res.output;
   let score;
   if (name === 'nestjs') {
     score = parseNestjsScore(out);
@@ -38,6 +57,7 @@ function run(name, cfg) {
   }
   if (Number.isNaN(score)) {
     console.error(`Could not parse ${name} doctor score`);
+    printDiagnostics(name, cfg.command, cwd, res);
     process.exit(1);
   }
   if (score < cfg.baselineScore) {
