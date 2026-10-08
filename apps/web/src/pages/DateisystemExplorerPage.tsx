@@ -379,7 +379,7 @@ function DateisystemExplorerLayout({
     ) : null;
 
   return (
-    <div className="page dateisystem-page">
+    <div className="page dateisystem-page" data-ux="page">
       {treeError ? (
         <p className="error dateisystem-page-error" role="alert">
           {treeError}

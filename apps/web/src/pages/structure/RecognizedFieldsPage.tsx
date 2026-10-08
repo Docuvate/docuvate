@@ -115,10 +115,13 @@ export function RecognizedFieldsPage() {
   }
 
   return (
-    <div className="page library-page recognized-fields-page page--with-save-bar">
+    <div
+      className="page library-page recognized-fields-page page--with-save-bar"
+      data-ux="page"
+    >
       <header className="page-header recognized-fields-header">
         <div>
-          <h1>{t('recognizedFields.pageTitle')}</h1>
+          <h1 data-ux="page-title">{t('recognizedFields.pageTitle')}</h1>
           <p className="muted">{t('recognizedFields.pageLead')}</p>
         </div>
       </header>

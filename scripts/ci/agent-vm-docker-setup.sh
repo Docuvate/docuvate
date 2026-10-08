@@ -44,6 +44,18 @@ if ! $SUDO docker info >/dev/null 2>&1; then
   exit 1
 fi
 
+TARGET_USER="${SUDO_USER:-${USER:-}}"
+if [[ -n "$TARGET_USER" ]] && [[ "$TARGET_USER" != "root" ]]; then
+  if ! id -nG "$TARGET_USER" 2>/dev/null | tr ' ' '\n' | grep -qx docker; then
+    $SUDO usermod -aG docker "$TARGET_USER" 2>/dev/null || true
+    log "Added ${TARGET_USER} to docker group (new login may be required on long-lived hosts)"
+  fi
+  if [[ -S /var/run/docker.sock ]]; then
+    $SUDO chmod 0666 /var/run/docker.sock 2>/dev/null || true
+    log "docker.sock opened for ${TARGET_USER} (Agent VM only; not for Mac/production hosts)"
+  fi
+fi
+
 if command -v iptables-legacy >/dev/null 2>&1; then
   before=$($SUDO iptables-legacy -S FORWARD 2>/dev/null | head -1 || true)
   if [[ "$before" == *DROP* ]]; then

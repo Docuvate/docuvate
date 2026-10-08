@@ -363,7 +363,7 @@ export function DocumentDetailPage() {
     previewFetchState === 'missing' && !isExtractionPending(doc.status);
 
   return (
-    <div className="page document-detail-page page--with-save-bar">
+    <div className="page document-detail-page page--with-save-bar" data-ux="page">
       <p className="document-detail-back">
         <Link to={routes.documents} className="document-detail-back-link">
           <ArrowLeft size={16} strokeWidth={2} aria-hidden />

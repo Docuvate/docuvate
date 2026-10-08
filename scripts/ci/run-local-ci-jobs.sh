@@ -33,6 +33,13 @@ run_local_ci_job() {
   docuvate_ci_stop_owned_containers
 }
 
+RUN_UX=0
+for arg in "$@"; do
+  case "$arg" in
+    --ux) RUN_UX=1 ;;
+  esac
+done
+
 job_lint_test() {
   cd "$ROOT"
   bash scripts/ci/test-run-job.sh
@@ -174,6 +181,17 @@ run_local_ci_job db-migrate-fresh job_db_migrate_fresh
 run_local_ci_job integration-test job_integration_test
 run_local_ci_job docker-build job_docker_build
 run_local_ci_job compose-smoke job_compose_smoke
+
+if [[ "$RUN_UX" -eq 1 ]]; then
+  job_ux_metrics() {
+    cd "$ROOT"
+    DATABASE_URL=postgresql://docuvate:docuvate@localhost:5433/docuvate \
+      AUTH_BASE=http://localhost:3001 \
+      WEB_ORIGIN=http://localhost:5173 \
+      pnpm ux:metrics -- --check
+  }
+  run_job ux-metrics job_ux_metrics
+fi
 
 echo "--- results ---"
 column -t -s $'\t' "$RESULTS"

@@ -61,7 +61,12 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
         >
           <p className="dropzone-title">{t('upload.dropTitle')}</p>
           <p className="muted dropzone-hint">{t('upload.dropHint')}</p>
-          <Button type="button" variant="secondary" onClick={() => inputRef.current?.click()}>
+          <Button
+            type="button"
+            variant="secondary"
+            data-ux="primary-action"
+            onClick={() => inputRef.current?.click()}
+          >
             {t('upload.chooseFiles')}
           </Button>
           <input
