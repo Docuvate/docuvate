@@ -1,0 +1,56 @@
+/* docuvate-scalar-accent-overrides — must load after @scalar/api-reference-react/style.css */
+
+.scalar-embed-light .scalar-app,
+.scalar-embed-light .scalar-app.light-mode {
+  --scalar-color-accent: #cb3a00;
+  --scalar-link-color: #cb3a00;
+  --scalar-link-color-hover: #cb3a00;
+  --scalar-sidebar-color-active: #cb3a00;
+  --scalar-sidebar-item-hover-color: #cb3a00;
+  --scalar-color-blue: #cb3a00;
+}
+
+.scalar-embed-dark .scalar-app,
+.scalar-embed-dark .scalar-app.dark-mode {
+  --scalar-color-accent: #e96f49;
+  --scalar-link-color: #e96f49;
+  --scalar-link-color-hover: #e96f49;
+  --scalar-sidebar-color-active: #e96f49;
+  --scalar-sidebar-item-hover-color: #e96f49;
+  --scalar-color-blue: #e96f49;
+}
+
+.scalar-embed .scalar-app .scalar-link,
+.scalar-embed .scalar-app a.scalar-link,
+.scalar-embed .scalar-app a.download-button,
+.scalar-embed .scalar-app button.download-button,
+.scalar-embed .scalar-app .download-button a {
+  color: var(--scalar-link-color, var(--scalar-color-accent)) !important;
+}
+
+.scalar-embed .scalar-app a.download-button:hover,
+.scalar-embed .scalar-app button.download-button:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.scalar-embed .scalar-app a.download-button:focus-visible,
+.scalar-embed .scalar-app button.download-button:focus-visible {
+  outline: 2px solid var(--scalar-color-accent, #cb3a00);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.scalar-embed .scalar-app .sidebar-heading-link-title,
+.scalar-embed .scalar-app .sidebar-group-item__folder,
+.scalar-embed .scalar-app .sidebar-group-title {
+  --scalar-sidebar-item-hover-color: var(--scalar-sidebar-color-active);
+}
+
+.scalar-embed-light .scalar-app .sidebar-heading:hover .sidebar-heading-link-title {
+  color: #cb3a00 !important;
+}
+
+.scalar-embed-dark .scalar-app .sidebar-heading:hover .sidebar-heading-link-title {
+  color: #e96f49 !important;
+}

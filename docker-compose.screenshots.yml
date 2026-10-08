@@ -1,0 +1,29 @@
+# Local-only override for screenshot runs (no Ollama pull). Not used in CI.
+services:
+  minio-init:
+    image: alpine:3.20
+    entrypoint: ['sh', '-c', 'exit 0']
+    command: []
+    depends_on: {}
+    environment: {}
+
+  ollama-init:
+    image: alpine:3.20
+    entrypoint: ['sh', '-c', 'exit 0']
+    command: []
+    depends_on: {}
+    environment: {}
+    volumes: []
+
+  api:
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      ollama-init:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started

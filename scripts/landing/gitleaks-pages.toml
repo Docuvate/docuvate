@@ -1,0 +1,11 @@
+title = "Docuvate GitHub Pages publish scan"
+
+[allowlist]
+description = "Static marketing site: SDK example placeholders and stack labels are not secrets"
+regexTarget = "line"
+regexes = [
+  '''apiKey:\s*process\.env\.DOCUVATE_API_KEY''',
+  '''DOCUVATE_API_KEY''',
+  '''S3-compatible storage''',
+  '''S3-kompatibler Speicher''',
+]

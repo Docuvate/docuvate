@@ -1,0 +1,38 @@
+/** @type {import('stylelint').Config} */
+export default {
+  extends: ['stylelint-config-standard'],
+  rules: {
+    'color-no-hex': true,
+    'declaration-property-value-disallowed-list': {
+      '/^border(-.*)?-radius$/': [
+        /999/,
+        /9999/,
+        /50%/,
+        /100%/,
+        /\b(1[3-9]|[2-9]\d|\d{3,})px\b/,
+      ],
+    },
+    'import-notation': null,
+    'selector-class-pattern': null,
+    'color-function-notation': null,
+    'alpha-value-notation': null,
+    'media-feature-range-notation': null,
+    'no-descending-specificity': null,
+    'custom-property-empty-line-before': null,
+    'rule-empty-line-before': null,
+    'comment-empty-line-before': null,
+    'declaration-block-single-line-max-declarations': null,
+    'length-zero-no-unit': null,
+    'shorthand-property-no-redundant-values': null,
+    'value-no-vendor-prefix': null,
+    'property-no-vendor-prefix': null,
+    'declaration-property-value-keyword-no-deprecated': null,
+    'keyframes-name-pattern': null,
+    'font-family-name-quotes': null,
+    'declaration-block-no-redundant-longhand-properties': null,
+    'number-max-precision': null,
+    'no-duplicate-selectors': null,
+    'declaration-empty-line-before': null,
+  },
+  ignoreFiles: ['**/node_modules/**'],
+};

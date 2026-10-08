@@ -1,0 +1,47 @@
+{
+  "name": "@docuvate/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/copy-pdf-worker.mjs && vite",
+    "build": "pnpm --filter @docuvate/tokens build && node scripts/copy-pdf-worker.mjs && tsc -b && vite build && node scripts/verify-production-bundle.mjs",
+    "preview": "vite preview",
+    "lint": "eslint src && stylelint \"src/**/*.css\"",
+    "typecheck": "tsc -b --noEmit",
+    "test": "vitest run && node ./scripts/check-ui-literals.mjs && node ./scripts/check-i18n-keys.mjs",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "@docuvate/contracts": "workspace:*",
+    "@docuvate/tokens": "workspace:*",
+    "@docuvate/ui-catalog": "workspace:*",
+    "better-auth": "^1.7.7",
+    "i18next": "^26.4.2",
+    "i18next-browser-languagedetector": "^8.2.1",
+    "lucide-react": "^0.544.0",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.16",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.28.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@testing-library/react": "^16.0.0",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "jsdom": "^25.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "eslint": "^9.39.5",
+    "stylelint": "^16.14.0",
+    "stylelint-config-standard": "^37.0.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.71.1",
+    "vite": "^5.4.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "vitest": "^2.1.0"
+  }
+}

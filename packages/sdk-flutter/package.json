@@ -1,0 +1,7 @@
+{
+  "name": "docuvate",
+  "private": true,
+  "scripts": {
+    "codegen": "bash ../../scripts/openapi/generate-flutter-sdk.sh"
+  }
+}

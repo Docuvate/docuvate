@@ -1,0 +1,27 @@
+{
+  "name": "@docuvate/tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Docuvate design tokens (Style Dictionary)",
+  "type": "module",
+  "types": "./dist/js/tokens.d.ts",
+  "exports": {
+    "./css": "./dist/css/tokens.css",
+    "./tokens.css": "./dist/css/tokens.css",
+    ".": {
+      "types": "./dist/js/tokens.d.ts",
+      "import": "./dist/js/tokens.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node ./build.mjs",
+    "test": "node ./contrast.test.mjs",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "style-dictionary": "^4.3.0"
+  }
+}

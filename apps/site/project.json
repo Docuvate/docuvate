@@ -1,0 +1,12 @@
+{
+  "name": "site",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/site/src",
+  "projectType": "application",
+  "targets": {
+    "build": { "command": "pnpm run build", "options": { "cwd": "apps/site" } },
+    "dev": { "command": "pnpm run dev", "options": { "cwd": "apps/site" } },
+    "lint": { "command": "pnpm run lint", "options": { "cwd": "apps/site" } },
+    "typecheck": { "command": "pnpm run typecheck", "options": { "cwd": "apps/site" } }
+  }
+}

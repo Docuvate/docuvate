@@ -1,0 +1,344 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type { MatchingAlgorithm } from '@docuvate/contracts';
+import type { TagWriteOptions, TaxonomyRepository } from '../../../shared/domain/ports.js';
+import type {
+  CorrespondentEntity,
+  TagEntity,
+  TagSuggestionEntity,
+} from '../domain/taxonomy.entity.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import type pg from 'pg';
+
+const INBOX_NAME = 'Posteingang';
+
+@Injectable()
+export class PgTaxonomyRepository implements TaxonomyRepository {
+  constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
+
+  async listTags(userId: string): Promise<TagEntity[]> {
+    const result = await this.pool.query(
+      `SELECT * FROM tags WHERE user_id = $1 ORDER BY is_inbox DESC, name ASC`,
+      [userId]
+    );
+    return result.rows.map((row) => this.mapTag(row));
+  }
+
+  async findTagByIdForUser(id: string, userId: string): Promise<TagEntity | null> {
+    const result = await this.pool.query(`SELECT * FROM tags WHERE id = $1 AND user_id = $2`, [
+      id,
+      userId,
+    ]);
+    return result.rows[0] ? this.mapTag(result.rows[0]) : null;
+  }
+
+  async createTag(userId: string, name: string, options: TagWriteOptions = {}): Promise<TagEntity> {
+    const trimmed = name.trim();
+    if (!trimmed) throw new ValidationError('Tag name is required');
+    if (options.isInbox) {
+      await this.pool.query(
+        `UPDATE tags SET is_inbox = false, updated_at = now() WHERE user_id = $1 AND is_inbox = true`,
+        [userId]
+      );
+    }
+    const id = crypto.randomUUID();
+    const result = await this.pool.query(
+      `INSERT INTO tags (id, user_id, name, color, is_inbox, matching_algorithm, match_text)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [
+        id,
+        userId,
+        trimmed,
+        options.color ?? null,
+        options.isInbox ?? false,
+        options.matchingAlgorithm ?? 'none',
+        options.match?.trim() ?? '',
+      ]
+    );
+    return this.mapTag(result.rows[0]!);
+  }
+
+  async updateTag(
+    id: string,
+    userId: string,
+    patch: TagWriteOptions & { name?: string }
+  ): Promise<TagEntity> {
+    const existing = await this.findTagByIdForUser(id, userId);
+    if (!existing) throw new NotFoundError('Tag');
+    if (existing.isInbox && patch.name && patch.name.trim() !== existing.name) {
+      throw new ValidationError('Inbox tag name cannot be changed');
+    }
+    if (patch.isInbox) {
+      await this.pool.query(
+        `UPDATE tags SET is_inbox = false, updated_at = now() WHERE user_id = $1 AND is_inbox = true AND id <> $2`,
+        [userId, id]
+      );
+    }
+    const result = await this.pool.query(
+      `UPDATE tags SET
+         name = COALESCE($3, name),
+         color = COALESCE($4, color),
+         is_inbox = COALESCE($5, is_inbox),
+         matching_algorithm = COALESCE($6, matching_algorithm),
+         match_text = COALESCE($7, match_text),
+         updated_at = now()
+       WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [
+        id,
+        userId,
+        patch.name?.trim() ?? null,
+        patch.color === undefined ? null : patch.color,
+        patch.isInbox ?? null,
+        patch.matchingAlgorithm ?? null,
+        patch.match?.trim() ?? null,
+      ]
+    );
+    return this.mapTag(result.rows[0]!);
+  }
+
+  async deleteTag(id: string, userId: string): Promise<void> {
+    const existing = await this.findTagByIdForUser(id, userId);
+    if (!existing) throw new NotFoundError('Tag');
+    if (existing.isInbox) throw new ValidationError('Inbox tag cannot be deleted');
+    await this.pool.query(`DELETE FROM tags WHERE id = $1 AND user_id = $2`, [id, userId]);
+  }
+
+  async mergeTags(userId: string, keepTagId: string, removeTagId: string): Promise<void> {
+    if (keepTagId === removeTagId) {
+      throw new ValidationError('Cannot merge a tag with itself');
+    }
+    const keep = await this.findTagByIdForUser(keepTagId, userId);
+    const remove = await this.findTagByIdForUser(removeTagId, userId);
+    if (!keep || !remove) {
+      throw new NotFoundError('Tag');
+    }
+    if (keep.isInbox || remove.isInbox) {
+      throw new ValidationError('Inbox tag cannot be merged');
+    }
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(
+        `INSERT INTO document_tags (document_id, tag_id)
+         SELECT document_id, $1 FROM document_tags WHERE tag_id = $2
+         ON CONFLICT DO NOTHING`,
+        [keepTagId, removeTagId]
+      );
+      await client.query(`DELETE FROM document_tags WHERE tag_id = $1`, [removeTagId]);
+      await client.query(`DELETE FROM document_tag_suggestions WHERE tag_id = $1`, [removeTagId]);
+      await client.query(`DELETE FROM tag_embedding_centroids WHERE tag_id = $1`, [removeTagId]);
+      await client.query(`DELETE FROM tag_embedding_feedback WHERE tag_id = $1`, [removeTagId]);
+      await client.query(`DELETE FROM tags WHERE id = $1 AND user_id = $2`, [removeTagId, userId]);
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async ensureInboxTag(userId: string): Promise<TagEntity> {
+    const existing = await this.pool.query(
+      `SELECT * FROM tags WHERE user_id = $1 AND is_inbox = true LIMIT 1`,
+      [userId]
+    );
+    if (existing.rows[0]) return this.mapTag(existing.rows[0]);
+    return this.createTag(userId, INBOX_NAME, { color: '#2563eb', isInbox: true });
+  }
+
+  async listCorrespondents(userId: string): Promise<CorrespondentEntity[]> {
+    const result = await this.pool.query(
+      `SELECT * FROM correspondents WHERE user_id = $1 ORDER BY name ASC`,
+      [userId]
+    );
+    return result.rows.map((row) => this.mapCorrespondent(row));
+  }
+
+  async findCorrespondentByIdForUser(
+    id: string,
+    userId: string
+  ): Promise<CorrespondentEntity | null> {
+    const result = await this.pool.query(
+      `SELECT * FROM correspondents WHERE id = $1 AND user_id = $2`,
+      [id, userId]
+    );
+    return result.rows[0] ? this.mapCorrespondent(result.rows[0]) : null;
+  }
+
+  async createCorrespondent(
+    userId: string,
+    name: string,
+    matchingAlgorithm: MatchingAlgorithm = 'none',
+    match = ''
+  ): Promise<CorrespondentEntity> {
+    const trimmed = name.trim();
+    if (!trimmed) throw new ValidationError('Correspondent name is required');
+    const id = crypto.randomUUID();
+    const result = await this.pool.query(
+      `INSERT INTO correspondents (id, user_id, name, matching_algorithm, match_text)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [id, userId, trimmed, matchingAlgorithm, match.trim()]
+    );
+    return this.mapCorrespondent(result.rows[0]!);
+  }
+
+  async updateCorrespondent(
+    id: string,
+    userId: string,
+    patch: { name?: string; matchingAlgorithm?: MatchingAlgorithm; match?: string }
+  ): Promise<CorrespondentEntity> {
+    const result = await this.pool.query(
+      `UPDATE correspondents SET
+         name = COALESCE($3, name),
+         matching_algorithm = COALESCE($4, matching_algorithm),
+         match_text = COALESCE($5, match_text),
+         updated_at = now()
+       WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [
+        id,
+        userId,
+        patch.name?.trim() ?? null,
+        patch.matchingAlgorithm ?? null,
+        patch.match?.trim() ?? null,
+      ]
+    );
+    if (!result.rows[0]) throw new NotFoundError('Correspondent');
+    return this.mapCorrespondent(result.rows[0]);
+  }
+
+  async deleteCorrespondent(id: string, userId: string): Promise<void> {
+    const result = await this.pool.query(
+      `DELETE FROM correspondents WHERE id = $1 AND user_id = $2 RETURNING id`,
+      [id, userId]
+    );
+    if (!result.rows[0]) throw new NotFoundError('Correspondent');
+  }
+
+  async listTagsForDocument(documentId: string): Promise<TagEntity[]> {
+    const result = await this.pool.query(
+      `SELECT t.* FROM tags t
+       INNER JOIN document_tags dt ON dt.tag_id = t.id
+       WHERE dt.document_id = $1 ORDER BY t.name ASC`,
+      [documentId]
+    );
+    return result.rows.map((row) => this.mapTag(row));
+  }
+
+  async assignTagToDocument(documentId: string, tagId: string): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO document_tags (document_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
+      [documentId, tagId]
+    );
+  }
+
+  async removeTagFromDocument(documentId: string, tagId: string): Promise<void> {
+    await this.pool.query(`DELETE FROM document_tags WHERE document_id = $1 AND tag_id = $2`, [
+      documentId,
+      tagId,
+    ]);
+  }
+
+  async clearInboxTagForDocument(documentId: string, userId: string): Promise<void> {
+    await this.pool.query(
+      `DELETE FROM document_tags dt
+       USING tags t
+       WHERE dt.document_id = $1 AND dt.tag_id = t.id AND t.user_id = $2 AND t.is_inbox = true`,
+      [documentId, userId]
+    );
+  }
+
+  async listSuggestions(documentId: string, userId: string): Promise<TagSuggestionEntity[]> {
+    const result = await this.pool.query(
+      `SELECT s.reason, s.confidence, s.source, t.* FROM document_tag_suggestions s
+       INNER JOIN tags t ON t.id = s.tag_id
+       WHERE s.document_id = $1 AND t.user_id = $2 AND s.dismissed = false
+       ORDER BY t.name ASC`,
+      [documentId, userId]
+    );
+    return result.rows.map((row) => ({
+      tag: this.mapTag(row),
+      reason: String(row['reason'] ?? ''),
+      confidence:
+        row['confidence'] === null || row['confidence'] === undefined
+          ? undefined
+          : Number(row['confidence']),
+      source: (row['source'] as 'rule' | 'embedding' | undefined) ?? 'rule',
+    }));
+  }
+
+  async upsertSuggestion(
+    documentId: string,
+    tagId: string,
+    reason: string,
+    options?: { source?: 'rule' | 'embedding'; confidence?: number }
+  ): Promise<void> {
+    const source = options?.source ?? 'rule';
+    const confidence = options?.confidence ?? null;
+    await this.pool.query(
+      `INSERT INTO document_tag_suggestions (document_id, tag_id, reason, dismissed, source, confidence)
+       VALUES ($1, $2, $3, false, $4, $5)
+       ON CONFLICT (document_id, tag_id) DO UPDATE SET
+         reason = CASE
+           WHEN document_tag_suggestions.source = 'rule' AND EXCLUDED.source = 'embedding'
+           THEN document_tag_suggestions.reason
+           ELSE EXCLUDED.reason
+         END,
+         source = CASE
+           WHEN document_tag_suggestions.source = 'rule' AND EXCLUDED.source = 'embedding'
+           THEN document_tag_suggestions.source
+           ELSE EXCLUDED.source
+         END,
+         confidence = COALESCE(EXCLUDED.confidence, document_tag_suggestions.confidence),
+         dismissed = false`,
+      [documentId, tagId, reason, source, confidence]
+    );
+  }
+
+  async dismissSuggestion(documentId: string, tagId: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE document_tag_suggestions SET dismissed = true WHERE document_id = $1 AND tag_id = $2`,
+      [documentId, tagId]
+    );
+  }
+
+  async clearSuggestion(documentId: string, tagId: string): Promise<void> {
+    await this.pool.query(
+      `DELETE FROM document_tag_suggestions WHERE document_id = $1 AND tag_id = $2`,
+      [documentId, tagId]
+    );
+  }
+
+  async setCorrespondentForDocument(
+    documentId: string,
+    correspondentId: string | null
+  ): Promise<void> {
+    await this.pool.query(
+      `UPDATE documents SET correspondent_id = $2, updated_at = now() WHERE id = $1`,
+      [documentId, correspondentId]
+    );
+  }
+
+  private mapTag(row: Record<string, unknown>): TagEntity {
+    return {
+      id: String(row['id']),
+      userId: String(row['user_id']),
+      name: String(row['name']),
+      color: (row['color'] as string | null) ?? null,
+      isInbox: Boolean(row['is_inbox']),
+      matchingAlgorithm: (row['matching_algorithm'] as MatchingAlgorithm) ?? 'none',
+      match: String(row['match_text'] ?? ''),
+    };
+  }
+
+  private mapCorrespondent(row: Record<string, unknown>): CorrespondentEntity {
+    return {
+      id: String(row['id']),
+      userId: String(row['user_id']),
+      name: String(row['name']),
+      matchingAlgorithm: (row['matching_algorithm'] as MatchingAlgorithm) ?? 'none',
+      match: String(row['match_text'] ?? ''),
+    };
+  }
+
+}

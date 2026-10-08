@@ -1,0 +1,55 @@
+{
+  "name": "docuvate",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Docuvate — Document management with structured extraction",
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@10.33.3",
+  "scripts": {
+    "build": "nx run-many --target=build --all",
+    "dev": "nx run-many --target=dev --all --parallel",
+    "dev:api": "nx run api:dev",
+    "dev:web": "nx run web:dev",
+    "lint": "nx run-many --target=lint --all",
+    "test": "nx run-many --target=test --all",
+    "test:integration": "pnpm --filter @docuvate/api test:integration",
+    "test:e2e": "pnpm --filter @docuvate/e2e test",
+    "typecheck": "nx run-many --target=typecheck --all",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "nx reset && rm -rf node_modules apps/*/node_modules packages/*/node_modules",
+    "postinstall": "pnpm --filter @docuvate/tokens build",
+    "doctors": "./scripts/doctors.sh",
+    "openapi:export": "pnpm --filter @docuvate/contracts build && pnpm --filter @docuvate/otel build && pnpm --filter @docuvate/api openapi:export",
+    "openapi:check": "pnpm openapi:export && git diff --exit-code openapi/docuvate.v1.json",
+    "sdk:codegen": "pnpm openapi:export && pnpm --filter @docuvate/sdk codegen && bash scripts/openapi/generate-flutter-sdk.sh",
+    "sdk:check": "pnpm sdk:codegen && git diff --exit-code openapi/docuvate.v1.json packages/sdk-node/src/generated packages/sdk-flutter/lib/src/generated",
+    "db:migrate": "bash scripts/db/typeorm-cli.sh migrate",
+    "db:revert": "bash scripts/db/typeorm-cli.sh revert",
+    "db:status": "bash scripts/db/typeorm-cli.sh status",
+    "db:new": "bash scripts/db/typeorm-cli.sh new",
+    "db:generate": "bash scripts/db/typeorm-cli.sh generate"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "2.18.4",
+    "@types/node": "^22.0.0",
+    "@vitest/coverage-v8": "^2.1.0",
+    "nx": "^20.0.0",
+    "playwright": "^1.64.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0"
+  },
+  "pnpm": {
+    "overrides": {},
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "esbuild",
+      "msgpackr-extract",
+      "nx",
+      "protobufjs"
+    ]
+  }
+}

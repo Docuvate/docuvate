@@ -1,0 +1,21 @@
+{
+  "name": "@docuvate/ui-catalog",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles-catalog.css"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "@docuvate/tokens": "workspace:*"
+  }
+}

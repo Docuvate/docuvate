@@ -1,0 +1,20 @@
+{
+  "name": "@docuvate/testing",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./containers": "./src/containers/index.ts",
+    "./factories": "./src/factories/index.ts"
+  },
+  "dependencies": {
+    "@testcontainers/postgresql": "^10.28.0",
+    "testcontainers": "^10.28.0",
+    "uuid": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0"
+  }
+}

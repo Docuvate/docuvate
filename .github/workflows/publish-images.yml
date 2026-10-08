@@ -1,0 +1,46 @@
+name: Publish container images
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - service: api
+            file: apps/api/Dockerfile
+            image: ghcr.io/docuvate/docuvate-api
+          - service: web
+            file: apps/web/Dockerfile
+            image: ghcr.io/docuvate/docuvate-web
+          - service: worker
+            file: apps/worker/Dockerfile
+            image: ghcr.io/docuvate/docuvate-worker
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102
+      - uses: docker/setup-buildx-action@b5ca514318fb6a0dbbfd176639a9199694e3eae # v3.10.0
+      - uses: docker/login-action@9780f0c4fdaa5fbf9e2a6f3eeee79c9d544f015 # v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@4711f7a4d0e45a0095a6a857073144b763b9643 # v6.15.0
+        with:
+          context: .
+          file: ${{ matrix.file }}
+          push: true
+          tags: |
+            ${{ matrix.image }}:latest
+            ${{ matrix.image }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}

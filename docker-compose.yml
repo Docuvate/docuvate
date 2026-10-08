@@ -1,0 +1,248 @@
+name: docuvate
+
+services:
+  db-storage-guard:
+    image: public.ecr.aws/aws-cli/aws-cli:latest
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      minio-init:
+        condition: service_completed_successfully
+    environment:
+      AWS_ACCESS_KEY_ID: docuvate
+      AWS_SECRET_ACCESS_KEY: docuvate-secret
+      AWS_DEFAULT_REGION: us-east-1
+      PGHOST: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-docuvate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docuvate}
+      POSTGRES_DB: ${POSTGRES_DB:-docuvate}
+      DOCUVATE_FRESH_STACK: ${DOCUVATE_FRESH_STACK:-0}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_BUCKET: documents
+    volumes:
+      - ./scripts/db/db-storage-guard.sh:/guard.sh:ro
+    entrypoint: ['/bin/sh', '-c', 'yum install -y postgresql15 >/dev/null 2>&1 || microdnf install -y postgresql15 >/dev/null 2>&1 || true; sh /guard.sh']
+    restart: 'no'
+
+  postgres:
+    image: postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-docuvate}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docuvate}
+      POSTGRES_DB: ${POSTGRES_DB:-docuvate}
+    ports:
+      - '5433:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    command: ['node', 'dist/shared/infrastructure/database/run-migrate.js']
+    working_dir: /app/apps/api
+    environment:
+      DATABASE_URL: postgresql://docuvate:docuvate@postgres:5432/docuvate
+    volumes:
+      - ./scripts/db:/app/scripts/db:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+
+  minio:
+    image: cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
+    user: '0:0'
+    command: ['server', '/data', '--console-address', ':9001']
+    environment:
+      MINIO_ROOT_USER: docuvate
+      MINIO_ROOT_PASSWORD: docuvate-secret
+    ports:
+      - '9010:9000'
+      - '9011:9001'
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'mc alias set local http://127.0.0.1:9000 docuvate docuvate-secret >/dev/null 2>&1 && mc ready local',
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 12
+      start_period: 10s
+
+  minio-init:
+    image: cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
+    network_mode: service:minio
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      set -e;
+      mc alias set docuvate http://127.0.0.1:9000 docuvate docuvate-secret;
+      mc mb --ignore-existing docuvate/documents;
+      mc ls docuvate/documents;
+      "
+
+  valkey:
+    image: valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'valkey-cli', 'ping']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    mem_limit: ${OLLAMA_MEM_LIMIT:-3g}
+    volumes:
+      - ollamadata:/root/.ollama
+    ports:
+      - '127.0.0.1:11434:11434'
+    healthcheck:
+      test: ['CMD', 'ollama', 'list']
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 15s
+
+  ollama-init:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      set -e;
+      ollama pull ${OLLAMA_MODEL:-qwen2.5:3b};
+      "
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    restart: 'no'
+
+  api:
+    mem_limit: 2g
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_URL: postgresql://docuvate:docuvate@postgres:5432/docuvate
+      VALKEY_URL: redis://valkey:6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: '9000'
+      MINIO_ACCESS_KEY: docuvate
+      MINIO_SECRET_KEY: docuvate-secret
+      MINIO_BUCKET: documents
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-local-dev-better-auth-secret-min-32-chars!!}
+      BETTER_AUTH_URL: http://localhost:5173
+      DOCUVATE_API_PUBLIC_URL: http://localhost:3001
+      DOCUVATE_CONNECTOR_SECRETS_KEY: ${DOCUVATE_CONNECTOR_SECRETS_KEY:-local-dev-connector-secrets-key!!}
+      DOCUVATE_CONNECTOR_OAUTH_REDIRECT_URI: ${DOCUVATE_CONNECTOR_OAUTH_REDIRECT_URI:-http://localhost:3001/v1/connectors/oauth/callback}
+      DOCUVATE_GMAIL_OAUTH_CLIENT_ID: ${DOCUVATE_GMAIL_OAUTH_CLIENT_ID:-}
+      DOCUVATE_GMAIL_OAUTH_CLIENT_SECRET: ${DOCUVATE_GMAIL_OAUTH_CLIENT_SECRET:-}
+      DOCUVATE_OUTLOOK_OAUTH_CLIENT_ID: ${DOCUVATE_OUTLOOK_OAUTH_CLIENT_ID:-}
+      DOCUVATE_OUTLOOK_OAUTH_CLIENT_SECRET: ${DOCUVATE_OUTLOOK_OAUTH_CLIENT_SECRET:-}
+      WORKER_URL: http://worker:8000
+      WORKER_SECRET: worker-shared-secret
+      WORKER_COMPARE_TIMEOUT_MS: '600000'
+      DOCUMENT_CHAT_PROVIDER: rag-ollama
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      OLLAMA_CHAT_TIMEOUT_MS: '180000'
+      OLLAMA_CHAT_IDLE_TIMEOUT_MS: '120000'
+      OLLAMA_NUM_CTX: '4096'
+      OLLAMA_NUM_PREDICT: '512'
+      OLLAMA_KEEP_ALIVE: '30m'
+      WORKER_RAG_CONTEXT_TIMEOUT_MS: '120000'
+      DOCUMENT_CHAT_GENERATION_CONCURRENCY: '2'
+      OTEL_SDK_DISABLED: 'true'
+      NODE_ENV: production
+      WEB_ORIGIN: http://localhost:5173
+      PASSWORD_RESET_MAIL_MODE: ${PASSWORD_RESET_MAIL_MODE:-smtp}
+      SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
+      MAIL_FROM: ${MAIL_FROM:-Docuvate <no-reply@docuvate.local>}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      db-storage-guard:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      ollama-init:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_started
+
+  worker:
+    mem_limit: 3g
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+      args:
+        WORKER_OPTIONAL_EXTRAS: ${WORKER_OPTIONAL_EXTRAS:-}
+    ports:
+      - '8000:8000'
+    environment:
+      WORKER_SECRET: worker-shared-secret
+      OTEL_SDK_DISABLED: 'true'
+      EXTRACTOR_ENGINE: pipeline
+      PADDLE_OCR_LANG: german
+      PADDLE_PREWARM_ON_START: ${PADDLE_PREWARM_ON_START:-0}
+    volumes:
+      - workermlcache:/var/lib/docuvate-ml
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      db-storage-guard:
+        condition: service_completed_successfully
+      minio:
+        condition: service_started
+
+  mailpit:
+    image: axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+    ports:
+      - '127.0.0.1:8025:8025'
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: /api
+        VITE_BUILD_SHA: ${VITE_BUILD_SHA:-unknown}
+    ports:
+      - '5173:80'
+    depends_on:
+      - api
+
+  site:
+    build:
+      context: .
+      dockerfile: apps/site/Dockerfile
+    ports:
+      - '8081:80'
+
+volumes:
+  pgdata:
+  miniodata:
+  ollamadata:
+  workermlcache:

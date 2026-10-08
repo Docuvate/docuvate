@@ -1,0 +1,4 @@
+# Integration tests: avoid host port 5433 conflicts when multiple compose projects run postgres.
+services:
+  postgres:
+    ports: !reset []

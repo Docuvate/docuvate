@@ -1,0 +1,53 @@
+const DEFAULT_NUM_CTX = 4096;
+const DEFAULT_NUM_PREDICT = 512;
+const DEFAULT_KEEP_ALIVE = '30m';
+
+export function ollamaNumCtx(): number {
+  const raw = process.env['OLLAMA_NUM_CTX'];
+  if (!raw) {
+    return DEFAULT_NUM_CTX;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_NUM_CTX;
+}
+
+export function ollamaNumPredict(): number {
+  const raw = process.env['OLLAMA_NUM_PREDICT'];
+  if (!raw) {
+    return DEFAULT_NUM_PREDICT;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_NUM_PREDICT;
+}
+
+export function ollamaKeepAlive(): string {
+  const raw = process.env['OLLAMA_KEEP_ALIVE'];
+  return raw?.trim() || DEFAULT_KEEP_ALIVE;
+}
+
+export function ollamaChatIdleTimeoutMs(): number {
+  const raw = process.env['OLLAMA_CHAT_IDLE_TIMEOUT_MS'];
+  const fallback = 120_000;
+  if (!raw) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+export function buildOllamaChatBody(
+  model: string,
+  messages: Array<{ role: string; content: string }>,
+  stream: boolean
+): Record<string, unknown> {
+  return {
+    model,
+    messages,
+    stream,
+    keep_alive: ollamaKeepAlive(),
+    options: {
+      num_ctx: ollamaNumCtx(),
+      num_predict: ollamaNumPredict(),
+    },
+  };
+}

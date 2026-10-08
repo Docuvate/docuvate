@@ -1,0 +1,13 @@
+{
+  "name": "api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/api/src",
+  "projectType": "application",
+  "targets": {
+    "build": { "command": "pnpm run build", "options": { "cwd": "apps/api" } },
+    "dev": { "command": "pnpm run dev", "options": { "cwd": "apps/api" } },
+    "lint": { "command": "pnpm run lint", "options": { "cwd": "apps/api" } },
+    "typecheck": { "command": "pnpm run typecheck", "options": { "cwd": "apps/api" } },
+    "test": { "command": "pnpm run test", "options": { "cwd": "apps/api" } }
+  }
+}

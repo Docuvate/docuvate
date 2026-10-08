@@ -1,0 +1,224 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type pg from 'pg';
+import type { DuplicateCandidateSource } from '@docuvate/contracts';
+import type {
+  DuplicateRepository,
+  DuplicateCandidateEntity,
+} from '../../../shared/domain/ports.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+
+function parseVector(raw: unknown): number[] {
+  if (Array.isArray(raw)) return raw.map((v) => Number(v));
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return Array.isArray(parsed) ? parsed.map((v) => Number(v)) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+@Injectable()
+export class PgDuplicateRepository implements DuplicateRepository {
+  constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
+
+  async upsertCandidate(
+    userId: string,
+    documentId: string,
+    candidateDocumentId: string,
+    similarity: number,
+    source: DuplicateCandidateSource
+  ): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO document_duplicate_candidates
+         (user_id, document_id, candidate_document_id, similarity, source)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (document_id, candidate_document_id) DO UPDATE SET
+         similarity = GREATEST(document_duplicate_candidates.similarity, EXCLUDED.similarity),
+         source = CASE
+           WHEN EXCLUDED.source = 'hash' THEN 'hash'
+           ELSE document_duplicate_candidates.source
+         END`,
+      [userId, documentId, candidateDocumentId, similarity, source]
+    );
+    await this.pool.query(
+      `INSERT INTO document_duplicate_candidates
+         (user_id, document_id, candidate_document_id, similarity, source)
+       VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (document_id, candidate_document_id) DO UPDATE SET
+         similarity = GREATEST(document_duplicate_candidates.similarity, EXCLUDED.similarity),
+         source = CASE
+           WHEN EXCLUDED.source = 'hash' THEN 'hash'
+           ELSE document_duplicate_candidates.source
+         END`,
+      [userId, candidateDocumentId, documentId, similarity, source]
+    );
+  }
+
+  async isPairDismissed(
+    userId: string,
+    documentId: string,
+    candidateDocumentId: string
+  ): Promise<boolean> {
+    const result = await this.pool.query(
+      `SELECT bool_or(dismissed) AS dismissed
+       FROM document_duplicate_candidates
+       WHERE user_id = $1
+         AND (
+           (document_id = $2 AND candidate_document_id = $3)
+           OR (document_id = $3 AND candidate_document_id = $2)
+         )`,
+      [userId, documentId, candidateDocumentId]
+    );
+    return Boolean(result.rows[0]?.['dismissed']);
+  }
+
+  async listForDocument(documentId: string, userId: string): Promise<DuplicateCandidateEntity[]> {
+    const result = await this.pool.query(
+      `SELECT c.id, c.user_id, c.document_id, c.candidate_document_id, c.similarity, c.source, c.dismissed,
+              d.title AS candidate_title, d.filename AS candidate_filename
+       FROM document_duplicate_candidates c
+       JOIN documents d ON d.id = c.candidate_document_id
+       WHERE c.document_id = $1 AND c.user_id = $2 AND c.dismissed = false
+       ORDER BY c.similarity DESC`,
+      [documentId, userId]
+    );
+    return result.rows.map((row) => ({
+      id: String(row['id']),
+      userId: String(row['user_id']),
+      documentId: String(row['document_id']),
+      candidateDocumentId: String(row['candidate_document_id']),
+      candidateTitle: String(row['candidate_title']),
+      candidateFilename: String(row['candidate_filename']),
+      similarity: Number(row['similarity']),
+      source: row['source'] as DuplicateCandidateSource,
+      dismissed: Boolean(row['dismissed']),
+    }));
+  }
+
+  async dismiss(documentId: string, candidateDocumentId: string, userId: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE document_duplicate_candidates SET dismissed = true
+       WHERE user_id = $1 AND document_id = $2 AND candidate_document_id = $3`,
+      [userId, documentId, candidateDocumentId]
+    );
+    await this.pool.query(
+      `UPDATE document_duplicate_candidates SET dismissed = true
+       WHERE user_id = $1 AND document_id = $2 AND candidate_document_id = $3`,
+      [userId, candidateDocumentId, documentId]
+    );
+  }
+
+  async countPendingByDocumentIds(
+    userId: string,
+    documentIds: string[]
+  ): Promise<Map<string, number>> {
+    const counts = new Map<string, number>();
+    if (documentIds.length === 0) return counts;
+    const result = await this.pool.query(
+      `SELECT document_id, COUNT(*)::int AS cnt
+       FROM document_duplicate_candidates
+       WHERE user_id = $1 AND dismissed = false AND document_id = ANY($2::uuid[])
+       GROUP BY document_id`,
+      [userId, documentIds]
+    );
+    for (const row of result.rows) {
+      counts.set(String(row['document_id']), Number(row['cnt']));
+    }
+    return counts;
+  }
+
+  async findDocumentIdsByHash(
+    userId: string,
+    hash: string,
+    excludeDocumentId: string
+  ): Promise<string[]> {
+    const result = await this.pool.query(
+      `SELECT id FROM documents
+       WHERE user_id = $1 AND content_hash = $2 AND id <> $3`,
+      [userId, hash, excludeDocumentId]
+    );
+    return result.rows.map((row) => String(row['id']));
+  }
+
+  async listDocumentIdsBySharedHash(userId: string): Promise<string[][]> {
+    const result = await this.pool.query(
+      `SELECT array_agg(id ORDER BY created_at ASC) AS ids
+       FROM documents
+       WHERE user_id = $1 AND content_hash IS NOT NULL AND content_hash <> ''
+       GROUP BY content_hash
+       HAVING COUNT(*) > 1`,
+      [userId]
+    );
+    return result.rows.map((row) => {
+      const raw = row['ids'];
+      if (Array.isArray(raw)) return raw.map((id) => String(id));
+      if (typeof raw === 'string') {
+        return raw
+          .replace(/^\{|\}$/g, '')
+          .split(',')
+          .filter(Boolean)
+          .map((id) => id.replace(/^"|"$/g, ''));
+      }
+      return [];
+    });
+  }
+
+  async listPendingPairs(
+    userId: string
+  ): Promise<{ documentId: string; candidateDocumentId: string }[]> {
+    const result = await this.pool.query(
+      `SELECT document_id, candidate_document_id
+       FROM document_duplicate_candidates
+       WHERE user_id = $1 AND dismissed = false`,
+      [userId]
+    );
+    return result.rows.map((row) => ({
+      documentId: String(row['document_id']),
+      candidateDocumentId: String(row['candidate_document_id']),
+    }));
+  }
+
+  async listDocumentEmbeddings(
+    userId: string,
+    excludeDocumentId: string
+  ): Promise<
+    {
+      documentId: string;
+      embedding: number[];
+      filename: string;
+      title: string;
+      documentDate: Date | null;
+      extractedText: string | null;
+      extractedFields: unknown;
+    }[]
+  > {
+    const result = await this.pool.query(
+      `SELECT e.document_id, e.embedding,
+              d.filename, d.title, d.document_date, d.extracted_text, d.extracted_fields
+       FROM document_embeddings e
+       JOIN documents d ON d.id = e.document_id AND d.user_id = e.user_id
+       WHERE e.user_id = $1 AND e.document_id <> $2`,
+      [userId, excludeDocumentId]
+    );
+    return result.rows
+      .map((row) => {
+        const documentDateRaw = row['document_date'];
+        return {
+          documentId: String(row['document_id']),
+          embedding: parseVector(row['embedding']),
+          filename: String(row['filename']),
+          title: String(row['title'] ?? row['filename']),
+          documentDate:
+            documentDateRaw != null && documentDateRaw !== ''
+              ? new Date(String(documentDateRaw))
+              : null,
+          extractedText: (row['extracted_text'] as string | null) ?? null,
+          extractedFields: row['extracted_fields'],
+        };
+      })
+      .filter((row) => row.embedding.length > 0);
+  }
+}

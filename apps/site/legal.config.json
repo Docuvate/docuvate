@@ -1,0 +1,24 @@
+{
+  "imprint": {
+    "providerName": "Thomas Faust",
+    "legalForm": "",
+    "street": "Berliner Str. 6",
+    "postalCode": "64409",
+    "city": "Messel",
+    "country": "Deutschland",
+    "email": "hello@docuvate.de",
+    "phone": "",
+    "representative": "",
+    "registerCourt": "",
+    "registerNumber": "",
+    "vatId": "",
+    "ddgHeading": "Angaben gemäß § 5 DDG",
+    "mstvResponsible": "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV: Thomas Faust, Berliner Str. 6, 64409 Messel"
+  },
+  "privacy": {
+    "controllerName": "Thomas Faust",
+    "controllerAddress": "Berliner Str. 6, 64409 Messel",
+    "contactEmail": "hello@docuvate.de",
+    "dpoEmail": ""
+  }
+}

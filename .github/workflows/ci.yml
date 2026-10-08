@@ -1,0 +1,215 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
+      - uses: pnpm/action-setup@7486602735bdefe81eb25a17778cba0270c66c7 # v4.1.0
+      - uses: actions/setup-node@39370e3970a6ba2057d6c82b73261ffd8912a819 # v4.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
+      - name: No install-compat banned tokens
+        run: node scripts/testing/check-no-legacy.mjs
+      - name: No unresolved merge conflict markers
+        run: bash scripts/ci/check-conflict-markers.sh
+      - name: Install Flutter
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq curl
+          curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.5-stable.tar.xz | tar xJ -C /opt
+          echo "/opt/flutter/bin" >> "$GITHUB_PATH"
+      - run: pnpm --filter @docuvate/tokens build
+      - run: pnpm --filter @docuvate/tokens test
+      - run: pnpm openapi:check
+      - run: pnpm sdk:check
+      - run: pnpm --filter @docuvate/contracts build
+      - run: pnpm --filter @docuvate/otel build
+      - run: pnpm --filter @docuvate/api typecheck
+      - run: pnpm --filter @docuvate/web typecheck
+      - run: pnpm --filter @docuvate/web lint
+      - run: node apps/site/scripts/enhance-openapi.mjs
+      - run: pnpm --filter @docuvate/site typecheck
+      - run: pnpm --filter @docuvate/site lint
+      - run: node --experimental-strip-types apps/site/scripts/check-de-locale.mjs
+      - run: pnpm --filter @docuvate/site build
+      - run: pnpm --filter @docuvate/api test
+      - run: pnpm --filter @docuvate/web test
+      - name: Unit coverage (API)
+        run: pnpm --filter @docuvate/api test:coverage
+      - name: Unit coverage (Web)
+        run: pnpm --filter @docuvate/web test:coverage
+      - name: Coverage ratchet (no regression vs baseline)
+        run: node scripts/testing/coverage-ratchet.mjs
+      - name: Doctor ratchet (no regression vs baseline)
+        run: node scripts/testing/doctor-ratchet.mjs
+      - name: Upload coverage summaries
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e74b763a5e133264772155a5170 # v4.6.2
+        with:
+          name: coverage-summaries
+          path: |
+            apps/api/coverage/coverage-summary.json
+            apps/web/coverage/coverage-summary.json
+          if-no-files-found: ignore
+      - run: pnpm --filter @docuvate/sdk build
+      - run: pnpm --filter @docuvate/sdk test
+      - name: Flutter SDK
+        run: cd packages/sdk-flutter && flutter pub get && dart analyze && dart test
+      - name: Worker lint and unit tests
+        run: |
+          pip install uv
+          cd apps/worker && uv venv .venv && uv pip install -e ".[dev]"
+          .venv/bin/ruff check src
+          .venv/bin/pytest tests -q --ignore=tests/integration --maxfail=1
+
+  db-migrate-fresh:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+        env:
+          POSTGRES_USER: docuvate
+          POSTGRES_PASSWORD: docuvate
+          POSTGRES_DB: docuvate
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U docuvate -d docuvate"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
+      - uses: pnpm/action-setup@7486602735bdefe81eb25a17778cba0270c66c7 # v4.1.0
+      - uses: actions/setup-node@39370e3970a6ba2057d6c82b73261ffd8912a819 # v4.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
+      - name: TypeORM migration roundtrip + generate-check
+        env:
+          DATABASE_URL: postgresql://docuvate:docuvate@localhost:5432/docuvate
+        run: bash scripts/db/migration-roundtrip-check.sh
+
+  integration-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
+      - name: Require Docker (Testcontainers; fail hard if unavailable)
+        run: docker info
+      - uses: pnpm/action-setup@7486602735bdefe81eb25a17778cba0270c66c7 # v4.1.0
+      - uses: actions/setup-node@39370e3970a6ba2057d6c82b73261ffd8912a819 # v4.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Cache Testcontainers base images
+        uses: actions/cache@1bd1e0a26ac446167105132f912046e82fbbe049 # v4.2.0
+        with:
+          path: /tmp/docuvate-tc-images
+          key: tc-images-v1-${{ runner.os }}
+      - name: Pre-pull Testcontainers images (digest-pinned)
+        run: |
+          set -euo pipefail
+          node scripts/testing/verify-container-images.mjs
+          docker pull postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+          docker pull valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
+          docker pull cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
+          docker pull axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+      - run: pnpm install
+      - run: pnpm --filter @docuvate/contracts build
+      - run: pnpm --filter @docuvate/api build
+      - name: API adapter integration (Testcontainers)
+        run: pnpm --filter @docuvate/api test:integration
+      - name: Worker integration fixtures (Testcontainers)
+        run: |
+          pip install uv
+          cd apps/worker && uv venv .venv && uv pip install -e ".[dev]"
+          .venv/bin/pytest tests/integration -q --maxfail=1
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
+      - run: docker compose -f docker-compose.yml build web api site
+
+  compose-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
+      - name: Start compose stack (CI override, no Ollama)
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            if docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build \
+              postgres migrate db-storage-guard minio minio-init valkey mailpit ollama-init api worker web; then
+              break
+            fi
+            if [ "$attempt" -eq 4 ]; then exit 1; fi
+            echo "compose up failed (attempt $attempt), retrying..."
+            sleep $((attempt * 15))
+          done
+      - name: Verify migrate one-shot succeeded
+        run: |
+          set -euo pipefail
+          code="$(docker compose -f docker-compose.yml -f docker-compose.ci.yml ps -a migrate --format '{{.ExitCode}}')"
+          test "$code" = "0"
+      - name: Wait for API and web
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if curl -sf http://localhost:3001/health >/dev/null; then
+              break
+            fi
+            if [ "$i" -eq 90 ]; then
+              echo "API health check timed out"
+              docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate
+              exit 1
+            fi
+            sleep 2
+          done
+          curl -sf http://localhost:3001/v1/openapi.json | jq -e '.info.title' >/dev/null
+          curl -sf http://localhost:5173/ >/dev/null
+      - uses: pnpm/action-setup@7486602735bdefe81eb25a17778cba0270c66c7 # v4.1.0
+      - uses: actions/setup-node@39370e3970a6ba2057d6c82b73261ffd8912a819 # v4.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --filter @docuvate/e2e... --ignore-scripts
+      - name: Seed labels screenshot user (duplicate stack FK)
+        run: |
+          set -euo pipefail
+          pnpm install --filter @docuvate/api... --ignore-scripts
+          DATABASE_URL=postgresql://docuvate:docuvate@localhost:5433/docuvate \
+          AUTH_BASE=http://localhost:3001 \
+          WEB_ORIGIN=http://localhost:5173 \
+          node scripts/seed-labels-screenshots.mjs
+      - name: Seed E2E smoke user (synthetic, empty library)
+        run: |
+          set -euo pipefail
+          DATABASE_URL=postgresql://docuvate:docuvate@localhost:5433/docuvate \
+          AUTH_BASE=http://localhost:3001 \
+          WEB_ORIGIN=http://localhost:5173 \
+          node scripts/seed-e2e-smoke-user.mjs
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+      - name: Playwright smoke (compose stack)
+        env:
+          E2E_WEB_URL: http://localhost:5173
+          E2E_API_URL: http://localhost:3001
+        run: pnpm --filter @docuvate/e2e test
+      - name: Dump API logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate

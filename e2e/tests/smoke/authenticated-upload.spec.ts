@@ -1,0 +1,61 @@
+import { expect, test } from '@playwright/test';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const fixturePdf = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
+const fixturePhrase = 'E2E_SYNTHETIC_FIXTURE_PHRASE_Q1';
+
+const email = process.env['E2E_SMOKE_EMAIL'] ?? 'alex.upload@fixture.docuvate.test';
+const password = process.env['E2E_SMOKE_PASSWORD'] ?? 'E2eSmokeFixture1!';
+const uploadTitle = 'synthetic-upload.pdf';
+
+test.use({ trace: 'on' });
+
+async function attachScreenshot(page: import('@playwright/test').Page, testInfo: import('@playwright/test').TestInfo, name: string) {
+  const body = await page.screenshot({ fullPage: true });
+  await testInfo.attach(name, { body, contentType: 'image/png' });
+  const artifactDir = process.env['E2E_ARTIFACT_DIR'];
+  if (artifactDir) {
+    fs.mkdirSync(artifactDir, { recursive: true });
+    fs.writeFileSync(path.join(artifactDir, name), body);
+  }
+}
+
+test.describe('Authenticated compose smoke', () => {
+  test('login, upload synthetic PDF, extraction and preview succeed', async ({ page }, testInfo) => {
+    test.setTimeout(300_000);
+    testInfo.annotations.push({ type: 'journey', description: 'compose-smoke-auth-happy-path' });
+
+    await page.goto('/login');
+    await page.getByLabel(/e-mail|email/i).fill(email);
+    await page.getByLabel(/^passwort$|^password$/i).fill(password);
+    await page.getByRole('button', { name: /anmelden|sign in/i }).click();
+
+    await expect(page).toHaveURL(/\/documents(\?|$)/, { timeout: 30_000 });
+    await attachScreenshot(page, testInfo, '01-after-login.png');
+
+    await expect(page.getByRole('region', { name: /upload documents|dokumente hochladen/i })).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await page.locator('input[type="file"]').first().setInputFiles(fixturePdf);
+
+    const docRow = page.getByRole('row').filter({ hasText: uploadTitle });
+    await expect(docRow).toBeVisible({ timeout: 90_000 });
+    await expect(docRow).not.toContainText(/^failed$|^fehlgeschlagen$/i);
+    await expect(docRow.locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, { timeout: 180_000 });
+
+    await attachScreenshot(page, testInfo, '02-after-upload-list.png');
+
+    await docRow.getByRole('link', { name: /^open$|^öffnen$/i }).click();
+    await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
+
+    await expect(page.getByText(/loading pdf/i)).toHaveCount(0);
+    await expect(page.getByRole('region', { name: /^page 1$/i })).toContainText(fixturePhrase, {
+      timeout: 30_000,
+    });
+    await expect(page.locator('.pdf-page-canvas').first()).toBeVisible({ timeout: 90_000 });
+
+    await attachScreenshot(page, testInfo, '03-document-open-preview.png');
+  });
+});

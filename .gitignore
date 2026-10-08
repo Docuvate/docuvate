@@ -1,0 +1,69 @@
+# Dependencies
+node_modules
+packages/tokens/.sd-cache/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+apps/web/public/pdf.worker.min.mjs
+.nx/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+apps/worker/.venv/
+experiments/.venv/
+experiments/out/
+apps/worker/.ruff_cache/
+venv/
+*.egg-info/
+.eggs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Environment
+.env
+.env.local
+apps/site/scripts/.screenshot-auth.json
+apps/site/scripts/.screenshot-manifest.json
+apps/site/scripts/.screenshot-chat-marketing.json
+.env.*.local
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+.pytest_cache/
+e2e/test-results/
+e2e/playwright-report/
+playwright-report/
+
+# Docker
+docker-compose.override.yml
+
+# Misc
+.turbo/
+tmp/
+
+dist/
+**/dist/
+rd-main-wt/
+packages/sdk-flutter/.dart_tool/
+packages/sdk-flutter/pubspec.lock
+packages/sdk-flutter/example/.dart_tool/
+packages/sdk-flutter/example/pubspec.lock

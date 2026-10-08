@@ -1,0 +1,20 @@
+/** Customer-facing URL paths (English). */
+export const routes = {
+  login: '/login',
+  register: '/register',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  inbox: '/inbox',
+  documents: '/documents',
+  document: (id: string) => `/documents/${id}`,
+  filesystem: '/filesystem',
+  filesystemContainer: (mappeId: string) => `/filesystem/containers/${mappeId}`,
+  filesystemFolder: (folderId: string) => `/filesystem/folders/${folderId}`,
+  structureLabels: '/structure/labels',
+  structureRecognizedFields: '/structure/recognized-fields',
+  settings: '/settings',
+  settingsConnectors: '/settings/connectors',
+  settingsBlockedLabels: '/settings/blocked-labels',
+  docsStyles: '/docs/styles',
+  docsConnectorsOAuthSetup: '/docs/connectors/oauth-setup',
+} as const;

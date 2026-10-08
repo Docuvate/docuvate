@@ -1,0 +1,13 @@
+@import '@docuvate/tokens/css';
+
+:root {
+  --chip-max-width: 14rem;
+  --dv-header-control-height: 2.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

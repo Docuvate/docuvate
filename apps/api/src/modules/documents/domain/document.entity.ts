@@ -1,0 +1,26 @@
+import type { ExtractionResult } from '@docuvate/contracts';
+import type { CorrespondentEntity, TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
+import type { FolderEntity } from '../../../shared/domain/ports.js';
+
+export type DocumentStatus = 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
+
+export interface DocumentEntity {
+  id: string;
+  userId: string;
+  filename: string;
+  title: string;
+  mimeType: string;
+  storageKey: string;
+  contentHash?: string | null;
+  status: DocumentStatus;
+  documentDate?: Date | null;
+  notes?: string | null;
+  folderId?: string | null;
+  mappeId?: string | null;
+  folder?: Pick<FolderEntity, 'id' | 'name' | 'mappeId'> | null;
+  correspondent?: CorrespondentEntity | null;
+  tags: TagEntity[];
+  createdAt: Date;
+  updatedAt: Date;
+  extraction?: ExtractionResult;
+}

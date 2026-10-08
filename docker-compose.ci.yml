@@ -1,0 +1,9 @@
+# CI compose-smoke: skip Ollama model pull; worker stays up for PDF extraction E2E.
+services:
+  ollama:
+    profiles: [ci-heavy]
+
+  ollama-init:
+    image: alpine:3.20
+    entrypoint: ['sh', '-c', 'exit 0']
+    depends_on: !reset []

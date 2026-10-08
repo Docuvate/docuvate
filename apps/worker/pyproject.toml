@@ -1,0 +1,57 @@
+[project]
+name = "docuvate-worker"
+version = "0.1.0"
+description = "Docuvate extraction worker"
+requires-python = ">=3.12"
+dependencies = [
+  "setuptools>=75.0",
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "pydantic>=2.9.0",
+  "Pillow>=11.0.0",
+  "pdf2image>=1.17.0",
+  "pdfplumber>=0.11.0",
+  "pypdf>=5.0.0",
+  "numpy>=1.26.0,<2",
+  "paddleocr==2.9.1",
+  "paddlepaddle==3.0.0",
+  "opencv-python-headless>=4.8.0,<5.0.0",
+  "opentelemetry-api>=1.28.0",
+  "opentelemetry-sdk>=1.28.0",
+  "opentelemetry-exporter-otlp-proto-http>=1.28.0",
+  "opentelemetry-instrumentation-fastapi>=0.49b0",
+  "fastembed>=0.4.2",
+]
+
+[project.optional-dependencies]
+dev = [
+  "psycopg[binary]>=3.2.0",
+  "pytest>=8.3.0",
+  "ruff>=0.8.0",
+  "testcontainers>=4.9.0",
+]
+tesseract = [
+  "pytesseract>=0.3.13",
+]
+docling = [
+  "docling>=2.134.0",
+]
+donut = [
+  "transformers>=4.44.0",
+  "torch>=2.2.0",
+  "accelerate>=0.33.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

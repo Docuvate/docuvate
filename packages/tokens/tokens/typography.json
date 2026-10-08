@@ -1,0 +1,28 @@
+{
+  "font": {
+    "family": {
+      "sans": { "value": "'IBM Plex Sans', system-ui, sans-serif" },
+      "mono": { "value": "'IBM Plex Mono', ui-monospace, monospace" }
+    },
+    "size": {
+      "3xl": { "value": "3.5rem" },
+      "2xl": { "value": "2.5rem" },
+      "xl": { "value": "1.75rem" },
+      "lg": { "value": "1.25rem" },
+      "md": { "value": "1rem" },
+      "sm": { "value": "0.875rem" },
+      "xs": { "value": "0.75rem" }
+    },
+    "weight": {
+      "regular": { "value": "400" },
+      "medium": { "value": "500" },
+      "semibold": { "value": "600" },
+      "bold": { "value": "700" }
+    },
+    "line-height": {
+      "tight": { "value": "1.2" },
+      "normal": { "value": "1.5" },
+      "relaxed": { "value": "1.65" }
+    }
+  }
+}

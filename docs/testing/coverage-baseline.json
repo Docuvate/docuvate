@@ -1,0 +1,13 @@
+{
+  "api": {
+    "lines": 0.1631,
+    "statements": 0.1631,
+    "recordedAt": "2026-10-08",
+    "note": "Vitest v8 unit scope; update only when main intentionally improves coverage"
+  },
+  "web": {
+    "lines": 0.0629,
+    "statements": 0.0629,
+    "recordedAt": "2026-10-08"
+  }
+}

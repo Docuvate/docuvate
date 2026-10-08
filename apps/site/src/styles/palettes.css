@@ -1,0 +1,121 @@
+/*
+ * Marketing site theme: warm stone neutrals + c1 vermilion accent (OKLCH hue ~38).
+ * Default on `html`; no palette query param in production.
+ */
+
+:root,
+html {
+  --landing-vivid: oklch(56% 0.19 38deg);
+  --landing-vivid-hover: oklch(50% 0.19 38deg);
+  --landing-vivid-on: oklch(99% 0.01 85deg);
+  --landing-vivid-link: oklch(52% 0.19 38deg);
+  --landing-hero-bg: oklch(97% 0.012 85deg);
+  --landing-hero-fg: oklch(17% 0.012 85deg);
+  --landing-hero-fg-muted: oklch(43% 0.014 85deg);
+  --landing-surface-dark: oklch(28% 0.018 75deg);
+  --landing-surface-dark-mid: oklch(32% 0.018 75deg);
+  --landing-header-bg: oklch(97% 0.012 85deg / 90%);
+  --landing-header-fg: oklch(17% 0.012 85deg);
+  --landing-header-fg-muted: oklch(42% 0.014 85deg);
+  --landing-header-border: oklch(17% 0.012 85deg / 12%);
+  --landing-card-bg: oklch(99.5% 0.01 85deg);
+  --landing-card-fg: oklch(17% 0.012 85deg);
+  --landing-card-fg-muted: oklch(45% 0.014 85deg);
+  --landing-card-border: oklch(17% 0.012 85deg / 12%);
+  --landing-card-shadow: oklch(25% 0.02 75deg / 12%);
+  --landing-section-tint: oklch(94% 0.016 90deg);
+  --landing-band-hairline: oklch(72% 0.008 85deg / 28%);
+  --landing-btn-secondary-bg: oklch(99.5% 0.01 85deg);
+  --landing-btn-secondary-border: oklch(17% 0.012 85deg / 18%);
+  --landing-btn-secondary-fg: oklch(20% 0.012 85deg);
+  --dv-color-danger: oklch(46% 0.2 25deg);
+  --dv-color-danger-strong: oklch(40% 0.18 25deg);
+  --dv-color-ok: oklch(52% 0.11 65deg);
+  --dv-color-ok-soft: oklch(96% 0.03 85deg);
+  --dv-color-bg: oklch(96% 0.012 85deg);
+  --dv-color-bg-raised: oklch(99.5% 0.01 85deg);
+  --dv-color-bg-overlay: oklch(98% 0.011 85deg);
+  --dv-color-text: oklch(17% 0.012 85deg);
+  --dv-color-text-muted: oklch(43% 0.014 85deg);
+  --dv-color-text-subtle: oklch(52% 0.012 85deg);
+  --dv-color-border: oklch(17% 0.012 85deg / 14%);
+  --dv-color-accent: var(--landing-vivid-link);
+  --dv-color-accent-hover: var(--landing-vivid-hover);
+  --dv-color-on-accent: var(--landing-vivid-on);
+  --dv-color-accent-soft: oklch(94% 0.022 85deg);
+  --dv-color-focus: var(--landing-vivid-link);
+}
+
+:root[data-docuvate-theme='dark'],
+html[data-docuvate-theme='dark'] {
+  --landing-vivid: oklch(56% 0.19 38deg);
+  --landing-vivid-hover: oklch(50% 0.19 38deg);
+  --landing-vivid-on: oklch(99% 0.01 85deg);
+  --landing-vivid-link: oklch(68% 0.16 38deg);
+  --landing-hero-bg: oklch(22% 0.014 75deg);
+  --landing-hero-fg: oklch(96% 0.01 85deg);
+  --landing-hero-fg-muted: oklch(78% 0.012 85deg);
+  --landing-header-bg: oklch(22% 0.014 75deg / 92%);
+  --landing-header-fg: oklch(96% 0.01 85deg);
+  --landing-header-fg-muted: oklch(78% 0.012 85deg);
+  --landing-header-border: oklch(96% 0.01 85deg / 12%);
+  --landing-card-bg: oklch(26% 0.016 75deg);
+  --landing-card-fg: oklch(96% 0.01 85deg);
+  --landing-card-fg-muted: oklch(80% 0.012 85deg);
+  --landing-card-border: oklch(96% 0.01 85deg / 14%);
+  --landing-section-tint: oklch(24% 0.016 80deg);
+  --landing-band-hairline: oklch(52% 0.01 85deg / 22%);
+  --landing-btn-secondary-bg: oklch(28% 0.016 75deg);
+  --landing-btn-secondary-border: oklch(96% 0.01 85deg / 24%);
+  --landing-btn-secondary-fg: oklch(96% 0.01 85deg);
+  --dv-color-bg: oklch(19% 0.014 75deg);
+  --dv-color-bg-raised: oklch(22% 0.014 75deg);
+  --dv-color-bg-overlay: oklch(25% 0.014 75deg);
+  --dv-color-text: oklch(96% 0.01 85deg);
+  --dv-color-text-muted: oklch(78% 0.012 85deg);
+  --dv-color-text-subtle: oklch(68% 0.012 85deg);
+  --dv-color-border: oklch(96% 0.01 85deg / 14%);
+  --dv-color-ok: oklch(72% 0.12 65deg);
+  --dv-color-ok-soft: oklch(28% 0.03 75deg);
+  --dv-color-accent: var(--landing-vivid-link);
+  --dv-color-accent-hover: var(--landing-vivid-hover);
+  --dv-color-on-accent: var(--landing-vivid-on);
+  --dv-color-accent-soft: oklch(26% 0.018 75deg);
+  --dv-color-focus: var(--landing-vivid-link);
+}
+
+.btn-primary {
+  background: var(--landing-vivid);
+  color: var(--landing-vivid-on);
+  border-color: transparent;
+}
+
+.btn-primary:hover {
+  background: var(--landing-vivid-hover);
+}
+
+.landing-page .btn-secondary {
+  background: var(--landing-btn-secondary-bg);
+  border-color: var(--landing-btn-secondary-border);
+  color: var(--landing-btn-secondary-fg);
+}
+
+.landing-page .btn-secondary:hover {
+  filter: brightness(0.98);
+}
+
+html[data-docuvate-theme='dark'] .landing-page .btn-secondary:hover {
+  filter: brightness(1.06);
+}
+
+.landing-page .badge-ok {
+  color: oklch(46% 0.11 65deg);
+  background: oklch(96% 0.03 85deg);
+  border-color: color-mix(in srgb, oklch(52% 0.11 65deg) 35%, var(--dv-color-border));
+}
+
+html[data-docuvate-theme='dark'] .landing-page .badge-ok {
+  color: oklch(74% 0.11 65deg);
+  background: oklch(28% 0.03 75deg);
+  border-color: color-mix(in srgb, oklch(72% 0.12 65deg) 35%, var(--dv-color-border));
+}

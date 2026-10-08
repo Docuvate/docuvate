@@ -1,0 +1,48 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  min-height: 100%;
+}
+
+#root {
+  overflow: hidden;
+}
+
+html[data-docuvate-theme='light'] {
+  color-scheme: light;
+}
+
+html[data-docuvate-theme='dark'] {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--dv-font-family-sans);
+  color: var(--dv-color-text);
+  background: var(--dv-color-bg);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--dv-color-accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+:focus-visible {
+  outline: 2px solid var(--dv-color-focus);
+  outline-offset: 2px;
+}

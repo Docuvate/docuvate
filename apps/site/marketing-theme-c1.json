@@ -1,0 +1,50 @@
+{
+  "name": "docuvate-marketing-c1-vermilion",
+  "description": "Warm stone neutrals + vermilion accent (landing default, 2026). OKLCH hue 38°.",
+  "light": {
+    "accent": "oklch(56% 0.19 38deg)",
+    "accentHover": "oklch(50% 0.19 38deg)",
+    "accentFg": "oklch(99% 0.01 85deg)",
+    "accentLink": "oklch(52% 0.19 38deg)",
+    "stone": {
+      "heroBg": "oklch(97% 0.012 85deg)",
+      "heroFg": "oklch(17% 0.012 85deg)",
+      "heroFgMuted": "oklch(43% 0.014 85deg)",
+      "pageBg": "oklch(96% 0.012 85deg)",
+      "cardBg": "oklch(99.5% 0.01 85deg)",
+      "cardFg": "oklch(17% 0.012 85deg)",
+      "cardFgMuted": "oklch(45% 0.014 85deg)"
+    }
+  },
+  "dark": {
+    "accent": "oklch(56% 0.19 38deg)",
+    "accentHover": "oklch(50% 0.19 38deg)",
+    "accentFg": "oklch(99% 0.01 85deg)",
+    "accentLink": "oklch(68% 0.16 38deg)",
+    "stone": {
+      "heroBg": "oklch(22% 0.014 75deg)",
+      "heroFg": "oklch(96% 0.01 85deg)",
+      "heroFgMuted": "oklch(78% 0.012 85deg)",
+      "pageBg": "oklch(19% 0.014 75deg)",
+      "cardBg": "oklch(26% 0.016 75deg)",
+      "cardFg": "oklch(96% 0.01 85deg)",
+      "cardFgMuted": "oklch(80% 0.012 85deg)"
+    }
+  },
+  "cssVariables": {
+    "light": {
+      "--landing-vivid": "oklch(56% 0.19 38deg)",
+      "--landing-vivid-hover": "oklch(50% 0.19 38deg)",
+      "--landing-vivid-on": "oklch(99% 0.01 85deg)",
+      "--landing-vivid-link": "oklch(52% 0.19 38deg)",
+      "--landing-hero-bg": "oklch(97% 0.012 85deg)"
+    },
+    "dark": {
+      "--landing-vivid": "oklch(56% 0.19 38deg)",
+      "--landing-vivid-hover": "oklch(50% 0.19 38deg)",
+      "--landing-vivid-on": "oklch(99% 0.01 85deg)",
+      "--landing-vivid-link": "oklch(68% 0.16 38deg)",
+      "--landing-hero-bg": "oklch(22% 0.014 75deg)"
+    }
+  }
+}

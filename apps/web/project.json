@@ -1,0 +1,13 @@
+{
+  "name": "web",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/web/src",
+  "projectType": "application",
+  "targets": {
+    "build": { "command": "pnpm run build", "options": { "cwd": "apps/web" } },
+    "dev": { "command": "pnpm run dev", "options": { "cwd": "apps/web" } },
+    "lint": { "command": "pnpm run lint", "options": { "cwd": "apps/web" } },
+    "typecheck": { "command": "pnpm run typecheck", "options": { "cwd": "apps/web" } },
+    "test": { "command": "pnpm run test", "options": { "cwd": "apps/web" } }
+  }
+}
