@@ -16,9 +16,9 @@ jobs:
   lint-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
-      - uses: pnpm/action-setup@7486602735bdefe81eb25a17778cba0270c66c7 # v4.1.0
-      - uses: actions/setup-node@39370e3970a6ba2057d6c82b73261ffd8912a819 # v4.1.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: 22
           cache: pnpm
@@ -54,11 +54,13 @@ jobs:
         run: pnpm --filter @docuvate/web test:coverage
       - name: Coverage ratchet (no regression vs baseline)
         run: node scripts/testing/coverage-ratchet.mjs
+      - name: Install uv (uvx for fastapi doctor)
+        run: pipx install uv
       - name: Doctor ratchet (no regression vs baseline)
         run: node scripts/testing/doctor-ratchet.mjs
       - name: Upload coverage summaries
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e74b763a5e133264772155a5170 # v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: coverage-summaries
           path: |
@@ -93,13 +95,15 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
-      - uses: pnpm/action-setup@7486602735bdefe81eb25a17778cba0270c66c7 # v4.1.0
-      - uses: actions/setup-node@39370e3970a6ba2057d6c82b73261ffd8912a819 # v4.1.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: 22
           cache: pnpm
       - run: pnpm install
+      - run: pnpm --filter @docuvate/contracts build
+      - run: pnpm --filter @docuvate/otel build
       - name: TypeORM migration roundtrip + generate-check
         env:
           DATABASE_URL: postgresql://docuvate:docuvate@localhost:5432/docuvate
@@ -108,16 +112,16 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Require Docker (Testcontainers; fail hard if unavailable)
         run: docker info
-      - uses: pnpm/action-setup@7486602735bdefe81eb25a17778cba0270c66c7 # v4.1.0
-      - uses: actions/setup-node@39370e3970a6ba2057d6c82b73261ffd8912a819 # v4.1.0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: 22
           cache: pnpm
       - name: Cache Testcontainers base images
-        uses: actions/cache@1bd1e0a26ac446167105132f912046e82fbbe049 # v4.2.0
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
         with:
           path: /tmp/docuvate-tc-images
           key: tc-images-v1-${{ runner.os }}
@@ -131,6 +135,7 @@ jobs:
           docker pull axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
       - run: pnpm install
       - run: pnpm --filter @docuvate/contracts build
+      - run: pnpm --filter @docuvate/otel build
       - run: pnpm --filter @docuvate/api build
       - name: API adapter integration (Testcontainers)
         run: pnpm --filter @docuvate/api test:integration
@@ -142,13 +147,13 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - run: docker compose -f docker-compose.yml build web api site
 
   compose-smoke:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1635ceea3daa5c9a7c4120102 # v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Start compose stack (CI override, no Ollama)
         run: |
           set -euo pipefail
@@ -182,8 +187,8 @@ jobs:
           done
           curl -sf http://localhost:3001/v1/openapi.json | jq -e '.info.title' >/dev/null
           curl -sf http://localhost:5173/ >/dev/null
-      - uses: pnpm/action-setup@7486602735bdefe81eb25a17778cba0270c66c7 # v4.1.0
-      - uses: actions/setup-node@39370e3970a6ba2057d6c82b73261ffd8912a819 # v4.1.0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: 22
           cache: pnpm
@@ -212,4 +217,4 @@ jobs:
         run: pnpm --filter @docuvate/e2e test
       - name: Dump API logs on failure
         if: failure()
-        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml logs api migrate worker

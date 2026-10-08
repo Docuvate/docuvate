@@ -68,7 +68,7 @@ async function checkReadme(file) {
 }
 
 async function main() {
-  const all = [...(await checkReadme('README.md')), ...(await checkReadme('README.de.md'))];
+  const all = [...(await checkReadme('README.md'))];
   for (const name of [
     'export-logo-assets.mjs',
     'render-readme-preview.mjs',

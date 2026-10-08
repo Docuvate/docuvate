@@ -193,7 +193,6 @@ async function main() {
   }
   try {
     await renderFile('README.md', 'readme', assetBase);
-    await renderFile('README.de.md', 'readme-de', assetBase);
   } finally {
     server?.close();
   }
