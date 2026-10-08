@@ -166,17 +166,18 @@ async function main() {
   }
 
   async function fillSftpFetchForm(page) {
-    await page.getByLabel('Anzeigename', { exact: false }).fill('NAS Scans Büro');
-    await page.getByLabel('Host', { exact: false }).fill('sftp.beispiel-intern.local');
-    await page.getByLabel('Port', { exact: false }).fill('22');
-    await page.getByLabel('Benutzername', { exact: false }).fill('scan-import');
-    await page.getByLabel('Passwort', { exact: false }).fill('synthetic-demo-passwort');
-    await page.getByLabel('Remote-Pfad', { exact: false }).fill('/scans/inbox');
-    await page.getByLabel('Host-Key-Fingerabdruck (SHA-256)', { exact: false }).fill(
+    const form = page.locator('dialog[open] form');
+    await form.getByLabel('Anzeigename', { exact: true }).fill('NAS Scans Büro');
+    await form.getByLabel('Host', { exact: true }).fill('sftp.beispiel-intern.local');
+    await form.getByLabel('Port', { exact: true }).fill('22');
+    await form.getByLabel('Benutzername', { exact: true }).fill('scan-import');
+    await form.getByLabel('Passwort', { exact: true }).fill('synthetic-demo-passwort');
+    await form.getByLabel('Remote-Pfad', { exact: true }).fill('/scans/inbox');
+    await form.getByLabel('Host-Key-Fingerabdruck (SHA-256)', { exact: true }).fill(
       'SHA256:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abCD',
     );
-    await page.getByLabel('Abholintervall (Sekunden)', { exact: false }).fill('300');
-    await page.getByLabel('Nach Import', { exact: false }).fill('delete');
+    await form.getByLabel('Abholintervall (Sekunden)', { exact: true }).fill('300');
+    await form.getByLabel('Nach Import', { exact: true }).fill('delete');
   }
 
   for (const [locale, theme, tag, w, h] of viewportVariants) {
