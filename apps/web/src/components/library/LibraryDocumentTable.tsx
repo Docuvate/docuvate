@@ -438,11 +438,9 @@ export function LibraryDocumentTable({
                         ) : null}
                         {doc.ingestSource === 'scanner_sftp' ? (
                           <span className="library-title-ingest-meta">
-                            <ScanLine
-                              className="library-title-ingest-icon"
-                              size={14}
-                              aria-label={t('documents.ingestSourceScanner')}
-                            />
+                            <span className="library-title-ingest-icon" aria-hidden>
+                              ⎙
+                            </span>
                             {t('documents.ingestSourceScanner')}
                           </span>
                         ) : null}
@@ -627,6 +625,38 @@ export function LibraryDocumentTable({
                           {expanded ? '▾' : '▸'}
                         </button>
                       ) : null}
+                      {showLegacyDuplicateHint(doc) ? (
+                        <span className="dup-badge" title={t('library.duplicateHintTitle')}>
+                          {t('library.duplicateHintBadge')}
+                        </span>
+                      ) : null}
+                      {doc.ingestSource === 'scanner_sftp' ? (
+                        <span className="library-title-ingest-meta">
+                          <span className="library-title-ingest-icon" aria-hidden>
+                            ⎙
+                          </span>
+                          {t('documents.ingestSourceScanner')}
+                        </span>
+                      ) : null}
+                    </div>
+                    {doc.filename.trim() !== doc.title.trim() ? (
+                      <div className="muted cell-sub" title={doc.filename}>
+                        {doc.filename}
+                      </div>
+                    ) : null}
+                    {doc.folder?.name &&
+                    doc.folder.id !== suppressFolderFallbackForId ? (
+                      <div
+                        className="muted cell-sub library-title-folder-fallback"
+                        title={doc.folder.name}
+                      >
+                        {doc.folder.name}
+                      </div>
+                    ) : null}
+                  </td>
+                  {hideFolderColumn ? null : (
+                    <td className="library-col-meta" title={doc.folder?.name ?? ''}>
+                      {doc.folder?.name ?? ''}
                     </td>
                     <td>
                       <input
