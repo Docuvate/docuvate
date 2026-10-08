@@ -1,0 +1,26 @@
+ingress:
+  className: traefik
+  host: docuvate.example.com
+
+config:
+  publicWebUrl: https://docuvate.example.com
+  publicApiUrl: https://docuvate.example.com/api
+  smtpUrl: smtp://REPLACE_SMTP_HOST:587
+
+postgres:
+  enabled: true
+
+minio:
+  enabled: true
+
+ollama:
+  enabled: false
+
+mailpit:
+  enabled: false
+
+networkPolicies:
+  allowExternalEgress: true
+
+secrets:
+  create: false

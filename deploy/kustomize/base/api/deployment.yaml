@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuvate-api
+  labels:
+    app.kubernetes.io/name: docuvate-api
+    app.kubernetes.io/component: api
+    app.kubernetes.io/instance: docuvate
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/version: "0.1.0"
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: docuvate-api
+        app.kubernetes.io/component: api
+        app.kubernetes.io/instance: docuvate
+        app.kubernetes.io/part-of: docuvate
+    spec:
+      serviceAccountName: docuvate-api
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: docuvate-api
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: docuvate-config
+          env:
+            - name: PORT
+              value: "3001"
+            - name: DOCUVATE_RUN_MIGRATIONS_ON_START
+              value: "false"
+            - name: WEB_ORIGIN
+              valueFrom:
+                configMapKeyRef:
+                  name: docuvate-config
+                  key: DOCUVATE_PUBLIC_WEB_URL
+            - name: BETTER_AUTH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docuvate-config
+                  key: DOCUVATE_PUBLIC_WEB_URL
+            - name: DOCUVATE_API_PUBLIC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docuvate-config
+                  key: DOCUVATE_PUBLIC_API_URL
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: DATABASE_URL
+            - name: BETTER_AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: BETTER_AUTH_SECRET
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: MINIO_ACCESS_KEY
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: MINIO_SECRET_KEY
+            - name: WORKER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: WORKER_SECRET
+            - name: DOCUVATE_CONNECTOR_SECRETS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: DOCUVATE_CONNECTOR_SECRETS_KEY
+                  optional: true
+          startupProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

@@ -1,0 +1,20 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: docuvate-homelab
+  namespace: flux-system
+spec:
+  interval: 10m
+  path: ./deploy/kustomize/overlays/homelab
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: docuvate
+  targetNamespace: docuvate
+  dependsOn:
+    - name: docuvate-secrets
+  healthChecks:
+    - apiVersion: apps/v1
+      kind: Deployment
+      name: docuvate-api
+      namespace: docuvate

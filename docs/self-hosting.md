@@ -50,7 +50,7 @@ pnpm db:generate SyncEntities
 
 ### Kubernetes
 
-Helm: pre-install/pre-upgrade **Job** (`helm.sh/hook-weight: "-5"`). Kustomize/Argo: sync-wave Job before API/worker. Same migrate command as Compose. Reference YAML: `deploy/kubernetes/migrate-job-helm.yaml`, `deploy/kubernetes/migrate-job-kustomize.yaml`.
+Helm: `post-install,pre-upgrade` migrate **Job**. Kustomize: Job in `deploy/kustomize/base/jobs/db-migrate.yaml` before API/worker. Same migrate command as Compose. See `deploy/gitops/examples/MIGRATIONS.md`.
 
 ## Extensions
 

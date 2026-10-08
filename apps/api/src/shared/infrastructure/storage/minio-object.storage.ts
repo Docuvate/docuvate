@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as Minio from 'minio';
 import type { ObjectStorage } from '../../domain/ports.js';
+import { createMinioClientOptionsFromEnv } from './minio-client.config.js';
 
 @Injectable()
 export class MinioObjectStorage implements ObjectStorage {
@@ -8,16 +9,8 @@ export class MinioObjectStorage implements ObjectStorage {
   private readonly bucket: string;
 
   constructor() {
-    const endpoint = process.env['MINIO_ENDPOINT'] ?? 'localhost';
-    const port = Number(process.env['MINIO_PORT'] ?? 9000);
     this.bucket = process.env['MINIO_BUCKET'] ?? 'documents';
-    this.client = new Minio.Client({
-      endPoint: endpoint,
-      port,
-      useSSL: false,
-      accessKey: process.env['MINIO_ACCESS_KEY'] ?? 'docuvate',
-      secretKey: process.env['MINIO_SECRET_KEY'] ?? 'docuvate-secret',
-    });
+    this.client = new Minio.Client(createMinioClientOptionsFromEnv());
   }
 
   async putObject(key: string, data: Buffer, mimeType: string): Promise<void> {

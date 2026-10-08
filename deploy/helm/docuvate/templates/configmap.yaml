@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docuvate-config
+data:
+  NODE_ENV: production
+  OTEL_SDK_DISABLED: "true"
+  MINIO_PORT: {{ .Values.config.minioPort | quote }}
+  MINIO_USE_SSL: {{ .Values.config.minioUseSsl | quote }}
+  MINIO_BUCKET: {{ .Values.config.minioBucket | quote }}
+  MINIO_ENDPOINT: {{ .Values.config.minioEndpoint | quote }}
+  {{- if .Values.config.minioRegion }}
+  MINIO_REGION: {{ .Values.config.minioRegion | quote }}
+  {{- end }}
+  VALKEY_URL: redis://docuvate-valkey:6379
+  WORKER_URL: http://docuvate-worker:8000
+  EXTRACTOR_ENGINE: pipeline
+  PADDLE_OCR_LANG: german
+  DOCUMENT_CHAT_PROVIDER: {{ .Values.config.documentChatProvider | quote }}
+  {{- if .Values.ollama.enabled }}
+  OLLAMA_URL: http://docuvate-ollama:11434
+  OLLAMA_MODEL: {{ .Values.ollama.model | quote }}
+  OLLAMA_CHAT_TIMEOUT_MS: "180000"
+  OLLAMA_CHAT_IDLE_TIMEOUT_MS: "120000"
+  OLLAMA_NUM_CTX: "4096"
+  OLLAMA_NUM_PREDICT: "512"
+  OLLAMA_KEEP_ALIVE: "30m"
+  WORKER_RAG_CONTEXT_TIMEOUT_MS: "120000"
+  DOCUMENT_CHAT_GENERATION_CONCURRENCY: "2"
+  {{- end }}
+  WORKER_COMPARE_TIMEOUT_MS: "600000"
+  PASSWORD_RESET_MAIL_MODE: smtp
+  MAIL_FROM: "Docuvate <no-reply@docuvate.local>"
+  SMTP_URL: {{ .Values.config.smtpUrl | quote }}
+  DOCUVATE_PUBLIC_WEB_URL: {{ .Values.config.publicWebUrl | quote }}
+  DOCUVATE_PUBLIC_API_URL: {{ .Values.config.publicApiUrl | quote }}

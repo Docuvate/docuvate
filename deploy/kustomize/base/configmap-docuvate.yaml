@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docuvate-config
+data:
+  NODE_ENV: production
+  OTEL_SDK_DISABLED: "true"
+  MINIO_PORT: "9000"
+  MINIO_USE_SSL: "false"
+  MINIO_BUCKET: documents
+  MINIO_ENDPOINT: docuvate-minio-0.docuvate-minio
+  VALKEY_URL: redis://docuvate-valkey:6379
+  WORKER_URL: http://docuvate-worker:8000
+  EXTRACTOR_ENGINE: pipeline
+  PADDLE_OCR_LANG: german
+  DOCUMENT_CHAT_PROVIDER: context
+  WORKER_RAG_CONTEXT_TIMEOUT_MS: "120000"
+  DOCUMENT_CHAT_GENERATION_CONCURRENCY: "2"
+  WORKER_COMPARE_TIMEOUT_MS: "600000"
+  PASSWORD_RESET_MAIL_MODE: smtp
+  MAIL_FROM: "Docuvate <no-reply@docuvate.local>"
+  SMTP_URL: REPLACE_WITH_SMTP_URL
+  DOCUVATE_PUBLIC_WEB_URL: REPLACE_WITH_PUBLIC_WEB_URL
+  DOCUVATE_PUBLIC_API_URL: REPLACE_WITH_PUBLIC_API_URL

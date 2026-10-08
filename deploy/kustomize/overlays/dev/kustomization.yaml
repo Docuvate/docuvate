@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: docuvate
+resources:
+  - ../../base
+components:
+  - ../../components/postgres
+  - ../../components/valkey
+  - ../../components/minio
+  - ../../components/mailpit
+patches:
+  - path: patch-dev-lite.yaml
+  - path: patch-ingress-nodeport.yaml
+  - path: patch-networkpolicy-dev.yaml
+  - path: patch-db-migrate-wait.yaml

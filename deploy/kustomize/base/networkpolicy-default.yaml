@@ -1,0 +1,277 @@
+# Ingress controller namespace: k3s Traefik lives in kube-system (override in overlay for ingress-nginx).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-default-deny
+spec:
+  podSelector: {}
+  # Ingress default-deny only; egress is explicit per workload + docuvate-dns-egress.
+  policyTypes: [Ingress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-dns-egress
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-web
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-web
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-api
+      ports:
+        - port: 3001
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-api
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-api
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-web
+      ports:
+        - port: 3001
+          protocol: TCP
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-worker
+      ports:
+        - port: 8000
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-postgres
+      ports:
+        - port: 5432
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-valkey
+      ports:
+        - port: 6379
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-minio
+      ports:
+        - port: 9000
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-ollama
+      ports:
+        - port: 11434
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-mailpit
+      ports:
+        - port: 1025
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-worker
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-worker
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-api
+      ports:
+        - port: 8000
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-postgres
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-postgres
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-api
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-db-migrate
+      ports:
+        - port: 5432
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-valkey
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-valkey
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-api
+      ports:
+        - port: 6379
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-minio
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-minio
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-api
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-minio-init
+      ports:
+        - port: 9000
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-ollama
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-ollama
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-api
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-ollama-init
+      ports:
+        - port: 11434
+          protocol: TCP
+  egress:
+    - ports:
+        - port: 443
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-db-migrate
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-db-migrate
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-postgres
+      ports:
+        - port: 5432
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-minio-init
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-minio-init
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-minio
+      ports:
+        - port: 9000
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: docuvate-ollama-init
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-ollama-init
+  policyTypes: [Egress]
+  egress:
+    - ports:
+        - port: 443
+          protocol: TCP
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: docuvate-ollama
+      ports:
+        - port: 11434
+          protocol: TCP
