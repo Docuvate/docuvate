@@ -5,7 +5,7 @@
   "description": "Docuvate — Document management with structured extraction",
   "license": "AGPL-3.0",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=24.0.0"
   },
   "packageManager": "pnpm@10.33.3",
   "scripts": {
@@ -31,11 +31,12 @@
     "db:revert": "bash scripts/db/typeorm-cli.sh revert",
     "db:status": "bash scripts/db/typeorm-cli.sh status",
     "db:new": "bash scripts/db/typeorm-cli.sh new",
-    "db:generate": "bash scripts/db/typeorm-cli.sh generate"
+    "db:generate": "bash scripts/db/typeorm-cli.sh generate",
+    "docs:check-mermaid": "bash scripts/ci/check-mermaid-markdown.sh"
   },
   "devDependencies": {
     "@openapitools/openapi-generator-cli": "2.18.4",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^2.1.0",
     "nx": "^20.0.0",
     "playwright": "^1.64.0",

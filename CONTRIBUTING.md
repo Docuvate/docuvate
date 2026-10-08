@@ -10,7 +10,7 @@ Thank you for helping improve Docuvate. This guide covers local setup, quality c
 
 ## Development setup
 
-1. Install **Node.js 22+**, **pnpm**, **Docker**, and **uv** (Python worker).
+1. Install **Node.js 24+**, **pnpm**, **Docker**, and **uv** (Python worker).
 2. Clone the repository and copy environment defaults:
 
    ```bash

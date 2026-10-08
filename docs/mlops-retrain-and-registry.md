@@ -20,32 +20,32 @@ This document is the **recommended stack** and **first implementation slice**. C
 
 ```mermaid
 flowchart TB
-  subgraph ingest [Training signal]
-    DocUpload[Document upload + OCR]
-    UserEdit[User field edits]
-    DocUpload --> PG[(Postgres)]
-    UserEdit --> Corrections[extraction_field_corrections]
+  subgraph ingest ["Training signal"]
+    DocUpload["Document upload and OCR"]
+    UserEdit["User field edits"]
+    DocUpload --> PG[("Postgres")]
+    UserEdit --> Corrections["extraction_field_corrections"]
     Corrections --> PG
   end
 
-  subgraph api [API NestJS]
-    Scheduler[MlRetrainScheduler]
-    RegistryAPI[GET/PATCH /ml/models]
-    Queue[Valkey BullMQ ml-retrain]
+  subgraph api ["API NestJS"]
+    Scheduler["MlRetrainScheduler"]
+    RegistryAPI["GET and PATCH ml models"]
+    Queue["Valkey BullMQ ml-retrain"]
     Scheduler --> Queue
     RegistryAPI --> PG
     Queue --> PG
   end
 
-  subgraph worker [Worker FastAPI]
-    RetrainStub[POST /v1/ml/retrain/run stub]
-    MLRegistry[ml.registry resolve artifact]
+  subgraph worker ["Worker FastAPI"]
+    RetrainStub["POST ml retrain run stub"]
+    MLRegistry["ml.registry resolve artifact"]
     RetrainStub --> MLRegistry
-    RetrainStub --> MinIO[(MinIO artifacts - future)]
+    RetrainStub --> MinIO[("MinIO artifacts future")]
   end
 
-  Queue -->|HTTP| RetrainStub
-  RetrainStub -->|register version + metrics| PG
+  Queue -->|"HTTP"| RetrainStub
+  RetrainStub -->|"register version and metrics"| PG
 ```
 
 ### Clean Architecture mapping

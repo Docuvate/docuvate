@@ -10,6 +10,6 @@ await esbuild.build({
   bundle: true,
   platform: 'node',
   format: 'cjs',
-  target: 'node22',
+  target: 'node24',
   sourcemap: true,
 });

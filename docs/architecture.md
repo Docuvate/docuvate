@@ -11,11 +11,11 @@ Docuvate follows **Clean Architecture** in the API and worker:
 
 ```mermaid
 flowchart LR
-  Web --> API
-  API --> Postgres
-  API --> MinIO
-  API --> Valkey
-  API --> Worker
+  Web["Web app"] --> API["NestJS API"]
+  API --> Postgres[("PostgreSQL")]
+  API --> MinIO[("MinIO")]
+  API --> Valkey[("Valkey")]
+  API --> Worker["FastAPI worker"]
 ```
 
 Compose ships without a collector (OTEL off). Production can export to SigNoz/Sentry via `packages/otel`.
