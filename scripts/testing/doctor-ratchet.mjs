@@ -6,6 +6,16 @@ const baseline = JSON.parse(
   readFileSync(resolve(process.cwd(), 'docs/testing/doctor-baseline.json'), 'utf8')
 );
 
+// Doctor CLIs colorize output when CI is set (picocolors enables ANSI colors for
+// CI=true even without a TTY), which splits e.g. "100 / 100" into
+// "\x1b[32m100\x1b[39m / 100". Strip escape sequences before parsing.
+// eslint-disable-next-line no-control-regex
+const ANSI_PATTERN = /\x1b\[[0-9;?]*[ -\/]*[@-~]|\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g;
+
+function stripAnsi(text) {
+  return text.replace(ANSI_PATTERN, '');
+}
+
 function runCommand(command, cwd) {
   const result = spawnSync(command, {
     cwd,
@@ -13,8 +23,10 @@ function runCommand(command, cwd) {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
   });
+  const stdout = stripAnsi(result.stdout ?? '');
   return {
-    output: `${result.stdout ?? ''}${result.stderr ?? ''}`,
+    stdout,
+    output: `${stdout}${stripAnsi(result.stderr ?? '')}`,
     status: result.status,
     signal: result.signal,
     error: result.error,
@@ -53,7 +65,9 @@ function run(name, cfg) {
   } else if (name === 'react') {
     score = parseReactScore(out);
   } else {
-    score = Number(out.trim().split('\n').pop());
+    // `--score` prints only the number on stdout; uvx writes install progress
+    // ("Installed 1 package in 4ms") to stderr on a cold cache, so read stdout.
+    score = Number(res.stdout.trim().split('\n').pop());
   }
   if (Number.isNaN(score)) {
     console.error(`Could not parse ${name} doctor score`);
