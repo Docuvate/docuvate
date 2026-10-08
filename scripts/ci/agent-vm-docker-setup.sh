@@ -22,7 +22,18 @@ fi
 if ! command -v docker >/dev/null 2>&1; then
   log "Installing docker.io + compose plugin…"
   $SUDO apt-get update -qq
-  $SUDO DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io docker-compose-v2
+  $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io docker-compose-v2
+  docker_user="${SUDO_USER:-${USER:-}}"
+  # docker group is root-equivalent on Linux; only acceptable on throwaway agent VMs (DV_AGENT_VM=1).
+  # Never chmod/chown /var/run/docker.sock — add the invoking user to the group instead.
+  if [ -n "$docker_user" ] && [ "$docker_user" != "root" ]; then
+    if id -nG "$docker_user" 2>/dev/null | tr ' ' '\n' | grep -qx docker; then
+      log "User $docker_user already in docker group"
+    else
+      log "Adding $docker_user to docker group"
+      $SUDO usermod -aG docker "$docker_user"
+    fi
+  fi
 fi
 
 if ! $SUDO docker info >/dev/null 2>&1; then
