@@ -138,22 +138,59 @@ async function main() {
   const page = await ctx.newPage();
   await login(page);
 
-  const index = [];
-  for (const [locale, theme, tag, w, h] of [
+  const viewportVariants = [
     ['de', 'light', 'de-light-1280', 1280, 900],
     ['de', 'dark', 'de-dark-1280', 1280, 900],
-    ['en', 'dark', 'en-dark-1280', 1280, 900],
-    ['en', 'light', 'en-light-390', 390, 900],
+    ['de', 'light', 'de-light-390', 390, 900],
     ['de', 'dark', 'de-dark-390', 390, 900],
-  ]) {
+  ];
+
+  const index = [];
+  for (const [locale, theme, tag, w, h] of viewportVariants) {
     await page.setViewportSize({ width: w, height: h });
     await applyPreferences(page, locale, theme);
     await waitConfiguredCard(page);
     await assertShotEnvironment(page, locale, theme);
     await maskSecrets(page);
-    const file = `connectors-sftp-configured-${tag}.png`;
+    const file = `connectors-sftp-scanner-${tag}.png`;
     await fullViewportShot(page, join(OUT, file));
-    index.push({ file, desc: `Connectors SFTP configured (${tag}, ${w}×${h})` });
+    index.push({ file, desc: `Scanner SFTP ingress configured (${tag}, ${w}×${h})` });
+  }
+
+  async function openSftpFetchConnectDialog(page) {
+    const card = page.locator('.connector-catalog-card').filter({
+      has: page.getByRole('heading', { name: 'SFTP-Server abholen' }),
+    });
+    await card.getByRole('button', { name: /^Verbinden$/i }).click();
+    await page.waitForSelector('dialog[open] form', { timeout: 15_000 });
+  }
+
+  async function fillSftpFetchForm(page) {
+    await page.getByLabel('Anzeigename', { exact: false }).fill('NAS Scans Büro');
+    await page.getByLabel('Host', { exact: false }).fill('sftp.beispiel-intern.local');
+    await page.getByLabel('Port', { exact: false }).fill('22');
+    await page.getByLabel('Benutzername', { exact: false }).fill('scan-import');
+    await page.getByLabel('Passwort', { exact: false }).fill('synthetic-demo-passwort');
+    await page.getByLabel('Remote-Pfad', { exact: false }).fill('/scans/inbox');
+    await page.getByLabel('Host-Key-Fingerabdruck (SHA-256)', { exact: false }).fill(
+      'SHA256:AbCdEfGhIjKlMnOpQrStUvWxYz0123456789abCD',
+    );
+    await page.getByLabel('Abholintervall (Sekunden)', { exact: false }).fill('300');
+    await page.getByLabel('Nach Import', { exact: false }).fill('delete');
+  }
+
+  for (const [locale, theme, tag, w, h] of viewportVariants) {
+    await page.setViewportSize({ width: w, height: h });
+    await applyPreferences(page, locale, theme);
+    await openSftpFetchConnectDialog(page);
+    await fillSftpFetchForm(page);
+    await assertShotEnvironment(page, locale, theme);
+    await maskSecrets(page);
+    const file = `connectors-sftp-pull-${tag}.png`;
+    await fullViewportShot(page, join(OUT, file));
+    index.push({ file, desc: `SFTP pull connector connect dialog (${tag}, ${w}×${h})` });
+    await page.keyboard.press('Escape');
+    await page.waitForSelector('dialog[open]', { state: 'detached', timeout: 10_000 }).catch(() => {});
   }
 
   await browser.close();
