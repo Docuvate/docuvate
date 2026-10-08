@@ -66,10 +66,10 @@ export function LibraryPage() {
 
   return (
     <DocumentUploadProvider dropTarget={dropTarget} onUploaded={onUploaded}>
-      <div className="page library-page">
+      <div className="page library-page" data-ux="page">
         <header className="page-header">
           <div>
-            <h1>{data.pageTitle}</h1>
+            <h1 data-ux="page-title">{data.pageTitle}</h1>
             {subtitle ? <p className="muted">{subtitle}</p> : null}
           </div>
           <div className="library-toolbar">

@@ -18,7 +18,7 @@ export function SaveBar({ visible, saving, error, onSave, onDiscard }: SaveBarPr
   }
 
   return createPortal(
-    <div className="save-bar" role="region" aria-label={t('save.barAria')}>
+    <div className="save-bar" data-ux="save-bar" role="region" aria-label={t('save.barAria')}>
       <div className="save-bar-inner">
         <p className="save-bar-status" role="status" aria-live="polite">
           {saving ? t('save.saving') : t('save.unsavedHint')}
@@ -32,7 +32,7 @@ export function SaveBar({ visible, saving, error, onSave, onDiscard }: SaveBarPr
           <Button type="button" variant="secondary" disabled={saving} onClick={onDiscard}>
             {t('save.discard')}
           </Button>
-          <Button type="button" variant="primary" disabled={saving} onClick={onSave}>
+          <Button type="button" variant="primary" disabled={saving} data-ux="primary-action" onClick={onSave}>
             {saving ? t('save.saving') : t('save.save')}
           </Button>
         </div>

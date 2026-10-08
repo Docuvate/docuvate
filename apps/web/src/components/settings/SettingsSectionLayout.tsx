@@ -19,10 +19,10 @@ export function SettingsSectionLayout({
   const isOverview = sectionTitle == null;
 
   return (
-    <div className="page settings-page">
+    <div className="page settings-page" data-ux="page">
       <header className="settings-section-header">
         <div className="settings-section-header-main">
-          <h1>{t('settings.title')}</h1>
+          <h1 data-ux={isOverview ? 'page-title' : undefined}>{t('settings.title')}</h1>
           <p className="muted settings-section-lead">{t('settings.lead')}</p>
         </div>
         {headerAside ? <div className="settings-section-header-aside">{headerAside}</div> : null}
@@ -30,7 +30,9 @@ export function SettingsSectionLayout({
       <SettingsSectionTabs />
       {!isOverview && sectionTitle ? (
         <div className="settings-section-intro">
-          <h2 className="settings-section-title">{sectionTitle}</h2>
+          <h2 className="settings-section-title" data-ux="page-title">
+            {sectionTitle}
+          </h2>
           {sectionLead ? <p className="muted settings-section-lead">{sectionLead}</p> : null}
         </div>
       ) : null}

@@ -323,6 +323,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
               <div
                 ref={dialogRef}
                 className="global-search-palette"
+                data-ux="search-palette"
                 role="dialog"
                 aria-modal="true"
                 aria-label={t('search.paletteTitle')}
@@ -415,6 +416,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                               <li key={d.id}>
                                 <button
                                   type="button"
+                                  data-ux="search-recent-document"
                                   onClick={() => navigate(routes.document(d.id))}
                                 >
                                   {d.title}
@@ -468,6 +470,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                                     aria-selected={active}
                                     id={flatId}
                                     className={`global-search-option${active ? ' active' : ''}`}
+                                    data-ux="search-result"
                                     onMouseEnter={() => setActiveId(flatId)}
                                     onClick={() => activateHit(hit, false)}
                                   >

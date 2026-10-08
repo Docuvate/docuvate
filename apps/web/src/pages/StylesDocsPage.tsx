@@ -79,6 +79,8 @@ const catalogComponents = {
 export function StylesDocsPage() {
   const { theme, setTheme } = useDocuvateTheme();
   return (
-    <StylesCatalog components={catalogComponents} theme={theme} onThemeChange={setTheme} />
+    <div data-ux="page" data-ux-scope="dev">
+      <StylesCatalog components={catalogComponents} theme={theme} onThemeChange={setTheme} />
+    </div>
   );
 }
