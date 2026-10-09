@@ -12,10 +12,9 @@ class _$DismissTagSuggestionRequestDto extends DismissTagSuggestionRequestDto {
 
   factory _$DismissTagSuggestionRequestDto(
           [void Function(DismissTagSuggestionRequestDtoBuilder)? updates]) =>
-      (new DismissTagSuggestionRequestDtoBuilder()..update(updates))._build();
+      (DismissTagSuggestionRequestDtoBuilder()..update(updates))._build();
 
   _$DismissTagSuggestionRequestDto._({this.blockFuture}) : super._();
-
   @override
   DismissTagSuggestionRequestDto rebuild(
           void Function(DismissTagSuggestionRequestDtoBuilder) updates) =>
@@ -23,7 +22,7 @@ class _$DismissTagSuggestionRequestDto extends DismissTagSuggestionRequestDto {
 
   @override
   DismissTagSuggestionRequestDtoBuilder toBuilder() =>
-      new DismissTagSuggestionRequestDtoBuilder()..replace(this);
+      DismissTagSuggestionRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -73,7 +72,6 @@ class DismissTagSuggestionRequestDtoBuilder
 
   @override
   void replace(DismissTagSuggestionRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DismissTagSuggestionRequestDto;
   }
 
@@ -86,8 +84,10 @@ class DismissTagSuggestionRequestDtoBuilder
   DismissTagSuggestionRequestDto build() => _build();
 
   _$DismissTagSuggestionRequestDto _build() {
-    final _$result =
-        _$v ?? new _$DismissTagSuggestionRequestDto._(blockFuture: blockFuture);
+    final _$result = _$v ??
+        _$DismissTagSuggestionRequestDto._(
+          blockFuture: blockFuture,
+        );
     replace(_$result);
     return _$result;
   }

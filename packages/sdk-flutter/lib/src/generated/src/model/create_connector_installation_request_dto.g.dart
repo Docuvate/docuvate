@@ -36,12 +36,12 @@ CreateConnectorInstallationRequestDtoPluginIdEnum
     case 'amazonS3':
       return _$createConnectorInstallationRequestDtoPluginIdEnum_amazonS3;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateConnectorInstallationRequestDtoPluginIdEnum>
-    _$createConnectorInstallationRequestDtoPluginIdEnumValues = new BuiltSet<
+    _$createConnectorInstallationRequestDtoPluginIdEnumValues = BuiltSet<
         CreateConnectorInstallationRequestDtoPluginIdEnum>(const <CreateConnectorInstallationRequestDtoPluginIdEnum>[
   _$createConnectorInstallationRequestDtoPluginIdEnum_gmail,
   _$createConnectorInstallationRequestDtoPluginIdEnum_outlook,
@@ -52,7 +52,7 @@ final BuiltSet<CreateConnectorInstallationRequestDtoPluginIdEnum>
 
 Serializer<CreateConnectorInstallationRequestDtoPluginIdEnum>
     _$createConnectorInstallationRequestDtoPluginIdEnumSerializer =
-    new _$CreateConnectorInstallationRequestDtoPluginIdEnumSerializer();
+    _$CreateConnectorInstallationRequestDtoPluginIdEnumSerializer();
 
 class _$CreateConnectorInstallationRequestDtoPluginIdEnumSerializer
     implements
@@ -105,22 +105,14 @@ class _$CreateConnectorInstallationRequestDto
   factory _$CreateConnectorInstallationRequestDto(
           [void Function(CreateConnectorInstallationRequestDtoBuilder)?
               updates]) =>
-      (new CreateConnectorInstallationRequestDtoBuilder()..update(updates))
+      (CreateConnectorInstallationRequestDtoBuilder()..update(updates))
           ._build();
 
   _$CreateConnectorInstallationRequestDto._(
       {required this.pluginId,
       required this.displayName,
       required this.credentials})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        pluginId, r'CreateConnectorInstallationRequestDto', 'pluginId');
-    BuiltValueNullFieldError.checkNotNull(
-        displayName, r'CreateConnectorInstallationRequestDto', 'displayName');
-    BuiltValueNullFieldError.checkNotNull(
-        credentials, r'CreateConnectorInstallationRequestDto', 'credentials');
-  }
-
+      : super._();
   @override
   CreateConnectorInstallationRequestDto rebuild(
           void Function(CreateConnectorInstallationRequestDtoBuilder)
@@ -129,7 +121,7 @@ class _$CreateConnectorInstallationRequestDto
 
   @override
   CreateConnectorInstallationRequestDtoBuilder toBuilder() =>
-      new CreateConnectorInstallationRequestDtoBuilder()..replace(this);
+      CreateConnectorInstallationRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -179,7 +171,7 @@ class CreateConnectorInstallationRequestDtoBuilder
 
   MapBuilder<String, String>? _credentials;
   MapBuilder<String, String> get credentials =>
-      _$this._credentials ??= new MapBuilder<String, String>();
+      _$this._credentials ??= MapBuilder<String, String>();
   set credentials(MapBuilder<String, String>? credentials) =>
       _$this._credentials = credentials;
 
@@ -200,7 +192,6 @@ class CreateConnectorInstallationRequestDtoBuilder
 
   @override
   void replace(CreateConnectorInstallationRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CreateConnectorInstallationRequestDto;
   }
 
@@ -217,19 +208,20 @@ class CreateConnectorInstallationRequestDtoBuilder
     _$CreateConnectorInstallationRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$CreateConnectorInstallationRequestDto._(
-              pluginId: BuiltValueNullFieldError.checkNotNull(pluginId,
-                  r'CreateConnectorInstallationRequestDto', 'pluginId'),
-              displayName: BuiltValueNullFieldError.checkNotNull(displayName,
-                  r'CreateConnectorInstallationRequestDto', 'displayName'),
-              credentials: credentials.build());
+          _$CreateConnectorInstallationRequestDto._(
+            pluginId: BuiltValueNullFieldError.checkNotNull(
+                pluginId, r'CreateConnectorInstallationRequestDto', 'pluginId'),
+            displayName: BuiltValueNullFieldError.checkNotNull(displayName,
+                r'CreateConnectorInstallationRequestDto', 'displayName'),
+            credentials: credentials.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'credentials';
         credentials.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'CreateConnectorInstallationRequestDto',
             _$failedField,
             e.toString());

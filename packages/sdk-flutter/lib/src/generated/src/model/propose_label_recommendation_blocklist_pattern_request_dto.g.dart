@@ -15,17 +15,13 @@ class _$ProposeLabelRecommendationBlocklistPatternRequestDto
           [void Function(
                   ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder)?
               updates]) =>
-      (new ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder()
+      (ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder()
             ..update(updates))
           ._build();
 
   _$ProposeLabelRecommendationBlocklistPatternRequestDto._(
       {required this.phrases})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(phrases,
-        r'ProposeLabelRecommendationBlocklistPatternRequestDto', 'phrases');
-  }
-
+      : super._();
   @override
   ProposeLabelRecommendationBlocklistPatternRequestDto rebuild(
           void Function(
@@ -35,7 +31,7 @@ class _$ProposeLabelRecommendationBlocklistPatternRequestDto
 
   @override
   ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder toBuilder() =>
-      new ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder()
+      ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder()
         ..replace(this);
 
   @override
@@ -69,8 +65,7 @@ class ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder
   _$ProposeLabelRecommendationBlocklistPatternRequestDto? _$v;
 
   ListBuilder<String>? _phrases;
-  ListBuilder<String> get phrases =>
-      _$this._phrases ??= new ListBuilder<String>();
+  ListBuilder<String> get phrases => _$this._phrases ??= ListBuilder<String>();
   set phrases(ListBuilder<String>? phrases) => _$this._phrases = phrases;
 
   ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder() {
@@ -88,7 +83,6 @@ class ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder
 
   @override
   void replace(ProposeLabelRecommendationBlocklistPatternRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ProposeLabelRecommendationBlocklistPatternRequestDto;
   }
 
@@ -107,15 +101,16 @@ class ProposeLabelRecommendationBlocklistPatternRequestDtoBuilder
     _$ProposeLabelRecommendationBlocklistPatternRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$ProposeLabelRecommendationBlocklistPatternRequestDto._(
-              phrases: phrases.build());
+          _$ProposeLabelRecommendationBlocklistPatternRequestDto._(
+            phrases: phrases.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'phrases';
         phrases.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'ProposeLabelRecommendationBlocklistPatternRequestDto',
             _$failedField,
             e.toString());

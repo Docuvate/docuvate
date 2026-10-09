@@ -14,15 +14,11 @@ class _$AddLabelRecommendationBlocklistRequestDto
   factory _$AddLabelRecommendationBlocklistRequestDto(
           [void Function(AddLabelRecommendationBlocklistRequestDtoBuilder)?
               updates]) =>
-      (new AddLabelRecommendationBlocklistRequestDtoBuilder()..update(updates))
+      (AddLabelRecommendationBlocklistRequestDtoBuilder()..update(updates))
           ._build();
 
   _$AddLabelRecommendationBlocklistRequestDto._({required this.phrase})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        phrase, r'AddLabelRecommendationBlocklistRequestDto', 'phrase');
-  }
-
+      : super._();
   @override
   AddLabelRecommendationBlocklistRequestDto rebuild(
           void Function(AddLabelRecommendationBlocklistRequestDtoBuilder)
@@ -31,7 +27,7 @@ class _$AddLabelRecommendationBlocklistRequestDto
 
   @override
   AddLabelRecommendationBlocklistRequestDtoBuilder toBuilder() =>
-      new AddLabelRecommendationBlocklistRequestDtoBuilder()..replace(this);
+      AddLabelRecommendationBlocklistRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -82,7 +78,6 @@ class AddLabelRecommendationBlocklistRequestDtoBuilder
 
   @override
   void replace(AddLabelRecommendationBlocklistRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AddLabelRecommendationBlocklistRequestDto;
   }
 
@@ -98,9 +93,10 @@ class AddLabelRecommendationBlocklistRequestDtoBuilder
 
   _$AddLabelRecommendationBlocklistRequestDto _build() {
     final _$result = _$v ??
-        new _$AddLabelRecommendationBlocklistRequestDto._(
-            phrase: BuiltValueNullFieldError.checkNotNull(phrase,
-                r'AddLabelRecommendationBlocklistRequestDto', 'phrase'));
+        _$AddLabelRecommendationBlocklistRequestDto._(
+          phrase: BuiltValueNullFieldError.checkNotNull(
+              phrase, r'AddLabelRecommendationBlocklistRequestDto', 'phrase'),
+        );
     replace(_$result);
     return _$result;
   }

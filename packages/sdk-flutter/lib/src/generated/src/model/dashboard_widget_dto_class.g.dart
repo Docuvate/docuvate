@@ -35,12 +35,12 @@ DashboardWidgetDtoClassTypeEnum _$dashboardWidgetDtoClassTypeEnumValueOf(
     case 'attention':
       return _$dashboardWidgetDtoClassTypeEnum_attention;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DashboardWidgetDtoClassTypeEnum>
-    _$dashboardWidgetDtoClassTypeEnumValues = new BuiltSet<
+    _$dashboardWidgetDtoClassTypeEnumValues = BuiltSet<
         DashboardWidgetDtoClassTypeEnum>(const <DashboardWidgetDtoClassTypeEnum>[
   _$dashboardWidgetDtoClassTypeEnum_upload,
   _$dashboardWidgetDtoClassTypeEnum_savedView,
@@ -51,7 +51,7 @@ final BuiltSet<DashboardWidgetDtoClassTypeEnum>
 
 Serializer<DashboardWidgetDtoClassTypeEnum>
     _$dashboardWidgetDtoClassTypeEnumSerializer =
-    new _$DashboardWidgetDtoClassTypeEnumSerializer();
+    _$DashboardWidgetDtoClassTypeEnumSerializer();
 
 class _$DashboardWidgetDtoClassTypeEnumSerializer
     implements PrimitiveSerializer<DashboardWidgetDtoClassTypeEnum> {
@@ -107,7 +107,7 @@ class _$DashboardWidgetDtoClass extends DashboardWidgetDtoClass {
 
   factory _$DashboardWidgetDtoClass(
           [void Function(DashboardWidgetDtoClassBuilder)? updates]) =>
-      (new DashboardWidgetDtoClassBuilder()..update(updates))._build();
+      (DashboardWidgetDtoClassBuilder()..update(updates))._build();
 
   _$DashboardWidgetDtoClass._(
       {required this.id,
@@ -117,18 +117,7 @@ class _$DashboardWidgetDtoClass extends DashboardWidgetDtoClass {
       required this.heightRows,
       this.savedViewId,
       this.itemLimit})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(id, r'DashboardWidgetDtoClass', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        type, r'DashboardWidgetDtoClass', 'type');
-    BuiltValueNullFieldError.checkNotNull(
-        position, r'DashboardWidgetDtoClass', 'position');
-    BuiltValueNullFieldError.checkNotNull(
-        widthCols, r'DashboardWidgetDtoClass', 'widthCols');
-    BuiltValueNullFieldError.checkNotNull(
-        heightRows, r'DashboardWidgetDtoClass', 'heightRows');
-  }
-
+      : super._();
   @override
   DashboardWidgetDtoClass rebuild(
           void Function(DashboardWidgetDtoClassBuilder) updates) =>
@@ -136,7 +125,7 @@ class _$DashboardWidgetDtoClass extends DashboardWidgetDtoClass {
 
   @override
   DashboardWidgetDtoClassBuilder toBuilder() =>
-      new DashboardWidgetDtoClassBuilder()..replace(this);
+      DashboardWidgetDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -233,7 +222,6 @@ class DashboardWidgetDtoClassBuilder
 
   @override
   void replace(DashboardWidgetDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DashboardWidgetDtoClass;
   }
 
@@ -247,19 +235,20 @@ class DashboardWidgetDtoClassBuilder
 
   _$DashboardWidgetDtoClass _build() {
     final _$result = _$v ??
-        new _$DashboardWidgetDtoClass._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'DashboardWidgetDtoClass', 'id'),
-            type: BuiltValueNullFieldError.checkNotNull(
-                type, r'DashboardWidgetDtoClass', 'type'),
-            position: BuiltValueNullFieldError.checkNotNull(
-                position, r'DashboardWidgetDtoClass', 'position'),
-            widthCols: BuiltValueNullFieldError.checkNotNull(
-                widthCols, r'DashboardWidgetDtoClass', 'widthCols'),
-            heightRows: BuiltValueNullFieldError.checkNotNull(
-                heightRows, r'DashboardWidgetDtoClass', 'heightRows'),
-            savedViewId: savedViewId,
-            itemLimit: itemLimit);
+        _$DashboardWidgetDtoClass._(
+          id: BuiltValueNullFieldError.checkNotNull(
+              id, r'DashboardWidgetDtoClass', 'id'),
+          type: BuiltValueNullFieldError.checkNotNull(
+              type, r'DashboardWidgetDtoClass', 'type'),
+          position: BuiltValueNullFieldError.checkNotNull(
+              position, r'DashboardWidgetDtoClass', 'position'),
+          widthCols: BuiltValueNullFieldError.checkNotNull(
+              widthCols, r'DashboardWidgetDtoClass', 'widthCols'),
+          heightRows: BuiltValueNullFieldError.checkNotNull(
+              heightRows, r'DashboardWidgetDtoClass', 'heightRows'),
+          savedViewId: savedViewId,
+          itemLimit: itemLimit,
+        );
     replace(_$result);
     return _$result;
   }

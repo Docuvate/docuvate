@@ -28,7 +28,7 @@ class _$LayoutIrTableCellDto extends LayoutIrTableCellDto {
 
   factory _$LayoutIrTableCellDto(
           [void Function(LayoutIrTableCellDtoBuilder)? updates]) =>
-      (new LayoutIrTableCellDtoBuilder()..update(updates))._build();
+      (LayoutIrTableCellDtoBuilder()..update(updates))._build();
 
   _$LayoutIrTableCellDto._(
       {required this.text,
@@ -40,17 +40,7 @@ class _$LayoutIrTableCellDto extends LayoutIrTableCellDto {
       this.weight,
       this.blockIndex,
       this.cellRole})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        text, r'LayoutIrTableCellDto', 'text');
-    BuiltValueNullFieldError.checkNotNull(x, r'LayoutIrTableCellDto', 'x');
-    BuiltValueNullFieldError.checkNotNull(y, r'LayoutIrTableCellDto', 'y');
-    BuiltValueNullFieldError.checkNotNull(
-        width, r'LayoutIrTableCellDto', 'width');
-    BuiltValueNullFieldError.checkNotNull(
-        height, r'LayoutIrTableCellDto', 'height');
-  }
-
+      : super._();
   @override
   LayoutIrTableCellDto rebuild(
           void Function(LayoutIrTableCellDtoBuilder) updates) =>
@@ -58,7 +48,7 @@ class _$LayoutIrTableCellDto extends LayoutIrTableCellDto {
 
   @override
   LayoutIrTableCellDtoBuilder toBuilder() =>
-      new LayoutIrTableCellDtoBuilder()..replace(this);
+      LayoutIrTableCellDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -170,7 +160,6 @@ class LayoutIrTableCellDtoBuilder
 
   @override
   void replace(LayoutIrTableCellDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutIrTableCellDto;
   }
 
@@ -184,21 +173,22 @@ class LayoutIrTableCellDtoBuilder
 
   _$LayoutIrTableCellDto _build() {
     final _$result = _$v ??
-        new _$LayoutIrTableCellDto._(
-            text: BuiltValueNullFieldError.checkNotNull(
-                text, r'LayoutIrTableCellDto', 'text'),
-            x: BuiltValueNullFieldError.checkNotNull(
-                x, r'LayoutIrTableCellDto', 'x'),
-            y: BuiltValueNullFieldError.checkNotNull(
-                y, r'LayoutIrTableCellDto', 'y'),
-            width: BuiltValueNullFieldError.checkNotNull(
-                width, r'LayoutIrTableCellDto', 'width'),
-            height: BuiltValueNullFieldError.checkNotNull(
-                height, r'LayoutIrTableCellDto', 'height'),
-            fontSizePt: fontSizePt,
-            weight: weight,
-            blockIndex: blockIndex,
-            cellRole: cellRole);
+        _$LayoutIrTableCellDto._(
+          text: BuiltValueNullFieldError.checkNotNull(
+              text, r'LayoutIrTableCellDto', 'text'),
+          x: BuiltValueNullFieldError.checkNotNull(
+              x, r'LayoutIrTableCellDto', 'x'),
+          y: BuiltValueNullFieldError.checkNotNull(
+              y, r'LayoutIrTableCellDto', 'y'),
+          width: BuiltValueNullFieldError.checkNotNull(
+              width, r'LayoutIrTableCellDto', 'width'),
+          height: BuiltValueNullFieldError.checkNotNull(
+              height, r'LayoutIrTableCellDto', 'height'),
+          fontSizePt: fontSizePt,
+          weight: weight,
+          blockIndex: blockIndex,
+          cellRole: cellRole,
+        );
     replace(_$result);
     return _$result;
   }

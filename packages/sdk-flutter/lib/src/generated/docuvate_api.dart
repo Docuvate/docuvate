@@ -12,6 +12,7 @@ export 'package:docuvate/src/generated/src/model/date.dart';
 
 export 'package:docuvate/src/generated/src/api/api_metadata_api.dart';
 export 'package:docuvate/src/generated/src/api/admin_api.dart';
+export 'package:docuvate/src/generated/src/api/chat_api.dart';
 export 'package:docuvate/src/generated/src/api/connectors_api.dart';
 export 'package:docuvate/src/generated/src/api/correspondents_api.dart';
 export 'package:docuvate/src/generated/src/api/documents_api.dart';

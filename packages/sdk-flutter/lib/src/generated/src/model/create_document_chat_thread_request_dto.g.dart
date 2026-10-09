@@ -14,11 +14,9 @@ class _$CreateDocumentChatThreadRequestDto
   factory _$CreateDocumentChatThreadRequestDto(
           [void Function(CreateDocumentChatThreadRequestDtoBuilder)?
               updates]) =>
-      (new CreateDocumentChatThreadRequestDtoBuilder()..update(updates))
-          ._build();
+      (CreateDocumentChatThreadRequestDtoBuilder()..update(updates))._build();
 
   _$CreateDocumentChatThreadRequestDto._({this.title}) : super._();
-
   @override
   CreateDocumentChatThreadRequestDto rebuild(
           void Function(CreateDocumentChatThreadRequestDtoBuilder) updates) =>
@@ -26,7 +24,7 @@ class _$CreateDocumentChatThreadRequestDto
 
   @override
   CreateDocumentChatThreadRequestDtoBuilder toBuilder() =>
-      new CreateDocumentChatThreadRequestDtoBuilder()..replace(this);
+      CreateDocumentChatThreadRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -75,7 +73,6 @@ class CreateDocumentChatThreadRequestDtoBuilder
 
   @override
   void replace(CreateDocumentChatThreadRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CreateDocumentChatThreadRequestDto;
   }
 
@@ -89,8 +86,10 @@ class CreateDocumentChatThreadRequestDtoBuilder
   CreateDocumentChatThreadRequestDto build() => _build();
 
   _$CreateDocumentChatThreadRequestDto _build() {
-    final _$result =
-        _$v ?? new _$CreateDocumentChatThreadRequestDto._(title: title);
+    final _$result = _$v ??
+        _$CreateDocumentChatThreadRequestDto._(
+          title: title,
+        );
     replace(_$result);
     return _$result;
   }

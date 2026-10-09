@@ -22,8 +22,7 @@ class _$DocumentPipelineModuleDescriptorDto
   factory _$DocumentPipelineModuleDescriptorDto(
           [void Function(DocumentPipelineModuleDescriptorDtoBuilder)?
               updates]) =>
-      (new DocumentPipelineModuleDescriptorDtoBuilder()..update(updates))
-          ._build();
+      (DocumentPipelineModuleDescriptorDtoBuilder()..update(updates))._build();
 
   _$DocumentPipelineModuleDescriptorDto._(
       {required this.id,
@@ -31,19 +30,7 @@ class _$DocumentPipelineModuleDescriptorDto
       required this.description,
       required this.defaultEnabled,
       required this.defaultOrder})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        id, r'DocumentPipelineModuleDescriptorDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        label, r'DocumentPipelineModuleDescriptorDto', 'label');
-    BuiltValueNullFieldError.checkNotNull(
-        description, r'DocumentPipelineModuleDescriptorDto', 'description');
-    BuiltValueNullFieldError.checkNotNull(defaultEnabled,
-        r'DocumentPipelineModuleDescriptorDto', 'defaultEnabled');
-    BuiltValueNullFieldError.checkNotNull(
-        defaultOrder, r'DocumentPipelineModuleDescriptorDto', 'defaultOrder');
-  }
-
+      : super._();
   @override
   DocumentPipelineModuleDescriptorDto rebuild(
           void Function(DocumentPipelineModuleDescriptorDtoBuilder) updates) =>
@@ -51,7 +38,7 @@ class _$DocumentPipelineModuleDescriptorDto
 
   @override
   DocumentPipelineModuleDescriptorDtoBuilder toBuilder() =>
-      new DocumentPipelineModuleDescriptorDtoBuilder()..replace(this);
+      DocumentPipelineModuleDescriptorDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -134,7 +121,6 @@ class DocumentPipelineModuleDescriptorDtoBuilder
 
   @override
   void replace(DocumentPipelineModuleDescriptorDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentPipelineModuleDescriptorDto;
   }
 
@@ -149,19 +135,18 @@ class DocumentPipelineModuleDescriptorDtoBuilder
 
   _$DocumentPipelineModuleDescriptorDto _build() {
     final _$result = _$v ??
-        new _$DocumentPipelineModuleDescriptorDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'DocumentPipelineModuleDescriptorDto', 'id'),
-            label: BuiltValueNullFieldError.checkNotNull(
-                label, r'DocumentPipelineModuleDescriptorDto', 'label'),
-            description: BuiltValueNullFieldError.checkNotNull(description,
-                r'DocumentPipelineModuleDescriptorDto', 'description'),
-            defaultEnabled: BuiltValueNullFieldError.checkNotNull(
-                defaultEnabled,
-                r'DocumentPipelineModuleDescriptorDto',
-                'defaultEnabled'),
-            defaultOrder: BuiltValueNullFieldError.checkNotNull(defaultOrder,
-                r'DocumentPipelineModuleDescriptorDto', 'defaultOrder'));
+        _$DocumentPipelineModuleDescriptorDto._(
+          id: BuiltValueNullFieldError.checkNotNull(
+              id, r'DocumentPipelineModuleDescriptorDto', 'id'),
+          label: BuiltValueNullFieldError.checkNotNull(
+              label, r'DocumentPipelineModuleDescriptorDto', 'label'),
+          description: BuiltValueNullFieldError.checkNotNull(description,
+              r'DocumentPipelineModuleDescriptorDto', 'description'),
+          defaultEnabled: BuiltValueNullFieldError.checkNotNull(defaultEnabled,
+              r'DocumentPipelineModuleDescriptorDto', 'defaultEnabled'),
+          defaultOrder: BuiltValueNullFieldError.checkNotNull(defaultOrder,
+              r'DocumentPipelineModuleDescriptorDto', 'defaultOrder'),
+        );
     replace(_$result);
     return _$result;
   }

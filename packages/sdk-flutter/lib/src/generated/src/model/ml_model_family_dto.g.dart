@@ -26,12 +26,12 @@ MlModelFamilyDtoKindEnum _$mlModelFamilyDtoKindEnumValueOf(String name) {
     case 'fieldExtractor':
       return _$mlModelFamilyDtoKindEnum_fieldExtractor;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<MlModelFamilyDtoKindEnum> _$mlModelFamilyDtoKindEnumValues =
-    new BuiltSet<MlModelFamilyDtoKindEnum>(const <MlModelFamilyDtoKindEnum>[
+    BuiltSet<MlModelFamilyDtoKindEnum>(const <MlModelFamilyDtoKindEnum>[
   _$mlModelFamilyDtoKindEnum_embedding,
   _$mlModelFamilyDtoKindEnum_ocr,
   _$mlModelFamilyDtoKindEnum_docqa,
@@ -39,7 +39,7 @@ final BuiltSet<MlModelFamilyDtoKindEnum> _$mlModelFamilyDtoKindEnumValues =
 ]);
 
 Serializer<MlModelFamilyDtoKindEnum> _$mlModelFamilyDtoKindEnumSerializer =
-    new _$MlModelFamilyDtoKindEnumSerializer();
+    _$MlModelFamilyDtoKindEnumSerializer();
 
 class _$MlModelFamilyDtoKindEnumSerializer
     implements PrimitiveSerializer<MlModelFamilyDtoKindEnum> {
@@ -86,29 +86,21 @@ class _$MlModelFamilyDto extends MlModelFamilyDto {
 
   factory _$MlModelFamilyDto(
           [void Function(MlModelFamilyDtoBuilder)? updates]) =>
-      (new MlModelFamilyDtoBuilder()..update(updates))._build();
+      (MlModelFamilyDtoBuilder()..update(updates))._build();
 
   _$MlModelFamilyDto._(
       {required this.id,
       required this.kind,
       required this.displayName,
       required this.description})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(id, r'MlModelFamilyDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(kind, r'MlModelFamilyDto', 'kind');
-    BuiltValueNullFieldError.checkNotNull(
-        displayName, r'MlModelFamilyDto', 'displayName');
-    BuiltValueNullFieldError.checkNotNull(
-        description, r'MlModelFamilyDto', 'description');
-  }
-
+      : super._();
   @override
   MlModelFamilyDto rebuild(void Function(MlModelFamilyDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   MlModelFamilyDtoBuilder toBuilder() =>
-      new MlModelFamilyDtoBuilder()..replace(this);
+      MlModelFamilyDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -180,7 +172,6 @@ class MlModelFamilyDtoBuilder
 
   @override
   void replace(MlModelFamilyDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MlModelFamilyDto;
   }
 
@@ -194,15 +185,16 @@ class MlModelFamilyDtoBuilder
 
   _$MlModelFamilyDto _build() {
     final _$result = _$v ??
-        new _$MlModelFamilyDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'MlModelFamilyDto', 'id'),
-            kind: BuiltValueNullFieldError.checkNotNull(
-                kind, r'MlModelFamilyDto', 'kind'),
-            displayName: BuiltValueNullFieldError.checkNotNull(
-                displayName, r'MlModelFamilyDto', 'displayName'),
-            description: BuiltValueNullFieldError.checkNotNull(
-                description, r'MlModelFamilyDto', 'description'));
+        _$MlModelFamilyDto._(
+          id: BuiltValueNullFieldError.checkNotNull(
+              id, r'MlModelFamilyDto', 'id'),
+          kind: BuiltValueNullFieldError.checkNotNull(
+              kind, r'MlModelFamilyDto', 'kind'),
+          displayName: BuiltValueNullFieldError.checkNotNull(
+              displayName, r'MlModelFamilyDto', 'displayName'),
+          description: BuiltValueNullFieldError.checkNotNull(
+              description, r'MlModelFamilyDto', 'description'),
+        );
     replace(_$result);
     return _$result;
   }

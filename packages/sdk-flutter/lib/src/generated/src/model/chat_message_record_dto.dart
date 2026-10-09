@@ -44,7 +44,7 @@ abstract class ChatMessageRecordDto implements Built<ChatMessageRecordDto, ChatM
 
   @BuiltValueField(wireName: r'generationPhase')
   ChatMessageRecordDtoGenerationPhaseEnum? get generationPhase;
-  // enum generationPhaseEnum {  retrieving,  generating,  };
+  // enum generationPhaseEnum {  retrieving,  generating,  verifying,  };
 
   @BuiltValueField(wireName: r'errorCode')
   String? get errorCode;
@@ -268,6 +268,8 @@ class ChatMessageRecordDtoGenerationPhaseEnum extends EnumClass {
   static const ChatMessageRecordDtoGenerationPhaseEnum retrieving = _$chatMessageRecordDtoGenerationPhaseEnum_retrieving;
   @BuiltValueEnumConst(wireName: r'generating')
   static const ChatMessageRecordDtoGenerationPhaseEnum generating = _$chatMessageRecordDtoGenerationPhaseEnum_generating;
+  @BuiltValueEnumConst(wireName: r'verifying')
+  static const ChatMessageRecordDtoGenerationPhaseEnum verifying = _$chatMessageRecordDtoGenerationPhaseEnum_verifying;
 
   static Serializer<ChatMessageRecordDtoGenerationPhaseEnum> get serializer => _$chatMessageRecordDtoGenerationPhaseEnumSerializer;
 

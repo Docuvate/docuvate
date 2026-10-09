@@ -21,12 +21,12 @@ SavedDocumentViewDtoClassVisibilityEnum
     case 'shared':
       return _$savedDocumentViewDtoClassVisibilityEnum_shared;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<SavedDocumentViewDtoClassVisibilityEnum>
-    _$savedDocumentViewDtoClassVisibilityEnumValues = new BuiltSet<
+    _$savedDocumentViewDtoClassVisibilityEnumValues = BuiltSet<
         SavedDocumentViewDtoClassVisibilityEnum>(const <SavedDocumentViewDtoClassVisibilityEnum>[
   _$savedDocumentViewDtoClassVisibilityEnum_private,
   _$savedDocumentViewDtoClassVisibilityEnum_shared,
@@ -57,12 +57,12 @@ SavedDocumentViewDtoClassSortEnum _$savedDocumentViewDtoClassSortEnumValueOf(
     case 'documentDate':
       return _$savedDocumentViewDtoClassSortEnum_documentDate;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<SavedDocumentViewDtoClassSortEnum>
-    _$savedDocumentViewDtoClassSortEnumValues = new BuiltSet<
+    _$savedDocumentViewDtoClassSortEnumValues = BuiltSet<
         SavedDocumentViewDtoClassSortEnum>(const <SavedDocumentViewDtoClassSortEnum>[
   _$savedDocumentViewDtoClassSortEnum_createdAt,
   _$savedDocumentViewDtoClassSortEnum_updatedAt,
@@ -85,12 +85,12 @@ SavedDocumentViewDtoClassOrderEnum _$savedDocumentViewDtoClassOrderEnumValueOf(
     case 'desc':
       return _$savedDocumentViewDtoClassOrderEnum_desc;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<SavedDocumentViewDtoClassOrderEnum>
-    _$savedDocumentViewDtoClassOrderEnumValues = new BuiltSet<
+    _$savedDocumentViewDtoClassOrderEnumValues = BuiltSet<
         SavedDocumentViewDtoClassOrderEnum>(const <SavedDocumentViewDtoClassOrderEnum>[
   _$savedDocumentViewDtoClassOrderEnum_asc,
   _$savedDocumentViewDtoClassOrderEnum_desc,
@@ -116,12 +116,12 @@ SavedDocumentViewDtoClassViewModeEnum
     case 'fokus':
       return _$savedDocumentViewDtoClassViewModeEnum_fokus;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<SavedDocumentViewDtoClassViewModeEnum>
-    _$savedDocumentViewDtoClassViewModeEnumValues = new BuiltSet<
+    _$savedDocumentViewDtoClassViewModeEnumValues = BuiltSet<
         SavedDocumentViewDtoClassViewModeEnum>(const <SavedDocumentViewDtoClassViewModeEnum>[
   _$savedDocumentViewDtoClassViewModeEnum_klassisch,
   _$savedDocumentViewDtoClassViewModeEnum_karten,
@@ -143,12 +143,12 @@ SavedDocumentViewDtoClassFilterModeEnum
     case 'ui':
       return _$savedDocumentViewDtoClassFilterModeEnum_ui;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<SavedDocumentViewDtoClassFilterModeEnum>
-    _$savedDocumentViewDtoClassFilterModeEnumValues = new BuiltSet<
+    _$savedDocumentViewDtoClassFilterModeEnumValues = BuiltSet<
         SavedDocumentViewDtoClassFilterModeEnum>(const <SavedDocumentViewDtoClassFilterModeEnum>[
   _$savedDocumentViewDtoClassFilterModeEnum_query,
   _$savedDocumentViewDtoClassFilterModeEnum_ui,
@@ -174,12 +174,12 @@ SavedDocumentViewDtoClassListScopeEnum
     case 'folder':
       return _$savedDocumentViewDtoClassListScopeEnum_folder;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<SavedDocumentViewDtoClassListScopeEnum>
-    _$savedDocumentViewDtoClassListScopeEnumValues = new BuiltSet<
+    _$savedDocumentViewDtoClassListScopeEnumValues = BuiltSet<
         SavedDocumentViewDtoClassListScopeEnum>(const <SavedDocumentViewDtoClassListScopeEnum>[
   _$savedDocumentViewDtoClassListScopeEnum_all,
   _$savedDocumentViewDtoClassListScopeEnum_mappe,
@@ -216,12 +216,12 @@ SavedDocumentViewDtoClassStatusEnum
     case 'failed':
       return _$savedDocumentViewDtoClassStatusEnum_failed;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<SavedDocumentViewDtoClassStatusEnum>
-    _$savedDocumentViewDtoClassStatusEnumValues = new BuiltSet<
+    _$savedDocumentViewDtoClassStatusEnumValues = BuiltSet<
         SavedDocumentViewDtoClassStatusEnum>(const <SavedDocumentViewDtoClassStatusEnum>[
   _$savedDocumentViewDtoClassStatusEnum_uploaded,
   _$savedDocumentViewDtoClassStatusEnum_queued,
@@ -232,25 +232,25 @@ final BuiltSet<SavedDocumentViewDtoClassStatusEnum>
 
 Serializer<SavedDocumentViewDtoClassVisibilityEnum>
     _$savedDocumentViewDtoClassVisibilityEnumSerializer =
-    new _$SavedDocumentViewDtoClassVisibilityEnumSerializer();
+    _$SavedDocumentViewDtoClassVisibilityEnumSerializer();
 Serializer<SavedDocumentViewDtoClassSortEnum>
     _$savedDocumentViewDtoClassSortEnumSerializer =
-    new _$SavedDocumentViewDtoClassSortEnumSerializer();
+    _$SavedDocumentViewDtoClassSortEnumSerializer();
 Serializer<SavedDocumentViewDtoClassOrderEnum>
     _$savedDocumentViewDtoClassOrderEnumSerializer =
-    new _$SavedDocumentViewDtoClassOrderEnumSerializer();
+    _$SavedDocumentViewDtoClassOrderEnumSerializer();
 Serializer<SavedDocumentViewDtoClassViewModeEnum>
     _$savedDocumentViewDtoClassViewModeEnumSerializer =
-    new _$SavedDocumentViewDtoClassViewModeEnumSerializer();
+    _$SavedDocumentViewDtoClassViewModeEnumSerializer();
 Serializer<SavedDocumentViewDtoClassFilterModeEnum>
     _$savedDocumentViewDtoClassFilterModeEnumSerializer =
-    new _$SavedDocumentViewDtoClassFilterModeEnumSerializer();
+    _$SavedDocumentViewDtoClassFilterModeEnumSerializer();
 Serializer<SavedDocumentViewDtoClassListScopeEnum>
     _$savedDocumentViewDtoClassListScopeEnumSerializer =
-    new _$SavedDocumentViewDtoClassListScopeEnumSerializer();
+    _$SavedDocumentViewDtoClassListScopeEnumSerializer();
 Serializer<SavedDocumentViewDtoClassStatusEnum>
     _$savedDocumentViewDtoClassStatusEnumSerializer =
-    new _$SavedDocumentViewDtoClassStatusEnumSerializer();
+    _$SavedDocumentViewDtoClassStatusEnumSerializer();
 
 class _$SavedDocumentViewDtoClassVisibilityEnumSerializer
     implements PrimitiveSerializer<SavedDocumentViewDtoClassVisibilityEnum> {
@@ -534,7 +534,7 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
 
   factory _$SavedDocumentViewDtoClass(
           [void Function(SavedDocumentViewDtoClassBuilder)? updates]) =>
-      (new SavedDocumentViewDtoClassBuilder()..update(updates))._build();
+      (SavedDocumentViewDtoClassBuilder()..update(updates))._build();
 
   _$SavedDocumentViewDtoClass._(
       {required this.visibleColumns,
@@ -559,41 +559,7 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
       required this.position,
       required this.createdAt,
       required this.updatedAt})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        visibleColumns, r'SavedDocumentViewDtoClass', 'visibleColumns');
-    BuiltValueNullFieldError.checkNotNull(
-        id, r'SavedDocumentViewDtoClass', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        name, r'SavedDocumentViewDtoClass', 'name');
-    BuiltValueNullFieldError.checkNotNull(
-        visibility, r'SavedDocumentViewDtoClass', 'visibility');
-    BuiltValueNullFieldError.checkNotNull(
-        ownerUserId, r'SavedDocumentViewDtoClass', 'ownerUserId');
-    BuiltValueNullFieldError.checkNotNull(
-        searchQuery, r'SavedDocumentViewDtoClass', 'searchQuery');
-    BuiltValueNullFieldError.checkNotNull(
-        sort, r'SavedDocumentViewDtoClass', 'sort');
-    BuiltValueNullFieldError.checkNotNull(
-        order, r'SavedDocumentViewDtoClass', 'order');
-    BuiltValueNullFieldError.checkNotNull(
-        viewMode, r'SavedDocumentViewDtoClass', 'viewMode');
-    BuiltValueNullFieldError.checkNotNull(
-        filterMode, r'SavedDocumentViewDtoClass', 'filterMode');
-    BuiltValueNullFieldError.checkNotNull(
-        listScope, r'SavedDocumentViewDtoClass', 'listScope');
-    BuiltValueNullFieldError.checkNotNull(
-        tagIds, r'SavedDocumentViewDtoClass', 'tagIds');
-    BuiltValueNullFieldError.checkNotNull(
-        pinnedSidebar, r'SavedDocumentViewDtoClass', 'pinnedSidebar');
-    BuiltValueNullFieldError.checkNotNull(
-        position, r'SavedDocumentViewDtoClass', 'position');
-    BuiltValueNullFieldError.checkNotNull(
-        createdAt, r'SavedDocumentViewDtoClass', 'createdAt');
-    BuiltValueNullFieldError.checkNotNull(
-        updatedAt, r'SavedDocumentViewDtoClass', 'updatedAt');
-  }
-
+      : super._();
   @override
   SavedDocumentViewDtoClass rebuild(
           void Function(SavedDocumentViewDtoClassBuilder) updates) =>
@@ -601,7 +567,7 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
 
   @override
   SavedDocumentViewDtoClassBuilder toBuilder() =>
-      new SavedDocumentViewDtoClassBuilder()..replace(this);
+      SavedDocumentViewDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -696,7 +662,7 @@ class SavedDocumentViewDtoClassBuilder
 
   ListBuilder<LibraryTableColumnId>? _visibleColumns;
   ListBuilder<LibraryTableColumnId> get visibleColumns =>
-      _$this._visibleColumns ??= new ListBuilder<LibraryTableColumnId>();
+      _$this._visibleColumns ??= ListBuilder<LibraryTableColumnId>();
   set visibleColumns(ListBuilder<LibraryTableColumnId>? visibleColumns) =>
       _$this._visibleColumns = visibleColumns;
 
@@ -772,8 +738,7 @@ class SavedDocumentViewDtoClassBuilder
       _$this._withoutNonInboxLabel = withoutNonInboxLabel;
 
   ListBuilder<String>? _tagIds;
-  ListBuilder<String> get tagIds =>
-      _$this._tagIds ??= new ListBuilder<String>();
+  ListBuilder<String> get tagIds => _$this._tagIds ??= ListBuilder<String>();
   set tagIds(ListBuilder<String>? tagIds) => _$this._tagIds = tagIds;
 
   bool? _pinnedSidebar;
@@ -829,7 +794,6 @@ class SavedDocumentViewDtoClassBuilder
 
   @override
   void replace(SavedDocumentViewDtoClass other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SavedDocumentViewDtoClass;
   }
 
@@ -845,37 +809,44 @@ class SavedDocumentViewDtoClassBuilder
     _$SavedDocumentViewDtoClass _$result;
     try {
       _$result = _$v ??
-          new _$SavedDocumentViewDtoClass._(
-              visibleColumns: visibleColumns.build(),
-              id: BuiltValueNullFieldError.checkNotNull(
-                  id, r'SavedDocumentViewDtoClass', 'id'),
-              name: BuiltValueNullFieldError.checkNotNull(
-                  name, r'SavedDocumentViewDtoClass', 'name'),
-              visibility: BuiltValueNullFieldError.checkNotNull(
-                  visibility, r'SavedDocumentViewDtoClass', 'visibility'),
-              ownerUserId: BuiltValueNullFieldError.checkNotNull(
-                  ownerUserId, r'SavedDocumentViewDtoClass', 'ownerUserId'),
-              searchQuery: BuiltValueNullFieldError.checkNotNull(
-                  searchQuery, r'SavedDocumentViewDtoClass', 'searchQuery'),
-              sort: BuiltValueNullFieldError.checkNotNull(
-                  sort, r'SavedDocumentViewDtoClass', 'sort'),
-              order: BuiltValueNullFieldError.checkNotNull(
-                  order, r'SavedDocumentViewDtoClass', 'order'),
-              viewMode: BuiltValueNullFieldError.checkNotNull(
-                  viewMode, r'SavedDocumentViewDtoClass', 'viewMode'),
-              filterMode: BuiltValueNullFieldError.checkNotNull(filterMode, r'SavedDocumentViewDtoClass', 'filterMode'),
-              listScope: BuiltValueNullFieldError.checkNotNull(listScope, r'SavedDocumentViewDtoClass', 'listScope'),
-              folderId: folderId,
-              mappeId: mappeId,
-              correspondentId: correspondentId,
-              status: status,
-              inbox: inbox,
-              withoutNonInboxLabel: withoutNonInboxLabel,
-              tagIds: tagIds.build(),
-              pinnedSidebar: BuiltValueNullFieldError.checkNotNull(pinnedSidebar, r'SavedDocumentViewDtoClass', 'pinnedSidebar'),
-              position: BuiltValueNullFieldError.checkNotNull(position, r'SavedDocumentViewDtoClass', 'position'),
-              createdAt: BuiltValueNullFieldError.checkNotNull(createdAt, r'SavedDocumentViewDtoClass', 'createdAt'),
-              updatedAt: BuiltValueNullFieldError.checkNotNull(updatedAt, r'SavedDocumentViewDtoClass', 'updatedAt'));
+          _$SavedDocumentViewDtoClass._(
+            visibleColumns: visibleColumns.build(),
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'SavedDocumentViewDtoClass', 'id'),
+            name: BuiltValueNullFieldError.checkNotNull(
+                name, r'SavedDocumentViewDtoClass', 'name'),
+            visibility: BuiltValueNullFieldError.checkNotNull(
+                visibility, r'SavedDocumentViewDtoClass', 'visibility'),
+            ownerUserId: BuiltValueNullFieldError.checkNotNull(
+                ownerUserId, r'SavedDocumentViewDtoClass', 'ownerUserId'),
+            searchQuery: BuiltValueNullFieldError.checkNotNull(
+                searchQuery, r'SavedDocumentViewDtoClass', 'searchQuery'),
+            sort: BuiltValueNullFieldError.checkNotNull(
+                sort, r'SavedDocumentViewDtoClass', 'sort'),
+            order: BuiltValueNullFieldError.checkNotNull(
+                order, r'SavedDocumentViewDtoClass', 'order'),
+            viewMode: BuiltValueNullFieldError.checkNotNull(
+                viewMode, r'SavedDocumentViewDtoClass', 'viewMode'),
+            filterMode: BuiltValueNullFieldError.checkNotNull(
+                filterMode, r'SavedDocumentViewDtoClass', 'filterMode'),
+            listScope: BuiltValueNullFieldError.checkNotNull(
+                listScope, r'SavedDocumentViewDtoClass', 'listScope'),
+            folderId: folderId,
+            mappeId: mappeId,
+            correspondentId: correspondentId,
+            status: status,
+            inbox: inbox,
+            withoutNonInboxLabel: withoutNonInboxLabel,
+            tagIds: tagIds.build(),
+            pinnedSidebar: BuiltValueNullFieldError.checkNotNull(
+                pinnedSidebar, r'SavedDocumentViewDtoClass', 'pinnedSidebar'),
+            position: BuiltValueNullFieldError.checkNotNull(
+                position, r'SavedDocumentViewDtoClass', 'position'),
+            createdAt: BuiltValueNullFieldError.checkNotNull(
+                createdAt, r'SavedDocumentViewDtoClass', 'createdAt'),
+            updatedAt: BuiltValueNullFieldError.checkNotNull(
+                updatedAt, r'SavedDocumentViewDtoClass', 'updatedAt'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -885,7 +856,7 @@ class SavedDocumentViewDtoClassBuilder
         _$failedField = 'tagIds';
         tagIds.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'SavedDocumentViewDtoClass', _$failedField, e.toString());
       }
       rethrow;

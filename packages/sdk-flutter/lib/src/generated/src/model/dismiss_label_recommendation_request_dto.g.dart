@@ -18,13 +18,11 @@ class _$DismissLabelRecommendationRequestDto
   factory _$DismissLabelRecommendationRequestDto(
           [void Function(DismissLabelRecommendationRequestDtoBuilder)?
               updates]) =>
-      (new DismissLabelRecommendationRequestDtoBuilder()..update(updates))
-          ._build();
+      (DismissLabelRecommendationRequestDtoBuilder()..update(updates))._build();
 
   _$DismissLabelRecommendationRequestDto._(
       {this.phrase, this.phrases, this.blockFuture})
       : super._();
-
   @override
   DismissLabelRecommendationRequestDto rebuild(
           void Function(DismissLabelRecommendationRequestDtoBuilder) updates) =>
@@ -32,7 +30,7 @@ class _$DismissLabelRecommendationRequestDto
 
   @override
   DismissLabelRecommendationRequestDtoBuilder toBuilder() =>
-      new DismissLabelRecommendationRequestDtoBuilder()..replace(this);
+      DismissLabelRecommendationRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -74,8 +72,7 @@ class DismissLabelRecommendationRequestDtoBuilder
   set phrase(String? phrase) => _$this._phrase = phrase;
 
   ListBuilder<String>? _phrases;
-  ListBuilder<String> get phrases =>
-      _$this._phrases ??= new ListBuilder<String>();
+  ListBuilder<String> get phrases => _$this._phrases ??= ListBuilder<String>();
   set phrases(ListBuilder<String>? phrases) => _$this._phrases = phrases;
 
   bool? _blockFuture;
@@ -99,7 +96,6 @@ class DismissLabelRecommendationRequestDtoBuilder
 
   @override
   void replace(DismissLabelRecommendationRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DismissLabelRecommendationRequestDto;
   }
 
@@ -116,17 +112,18 @@ class DismissLabelRecommendationRequestDtoBuilder
     _$DismissLabelRecommendationRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$DismissLabelRecommendationRequestDto._(
-              phrase: phrase,
-              phrases: _phrases?.build(),
-              blockFuture: blockFuture);
+          _$DismissLabelRecommendationRequestDto._(
+            phrase: phrase,
+            phrases: _phrases?.build(),
+            blockFuture: blockFuture,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'phrases';
         _phrases?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DismissLabelRecommendationRequestDto',
             _$failedField,
             e.toString());

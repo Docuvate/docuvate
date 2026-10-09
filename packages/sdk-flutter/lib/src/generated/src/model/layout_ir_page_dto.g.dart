@@ -25,7 +25,7 @@ class _$LayoutIrPageDto extends LayoutIrPageDto {
   final BuiltList<LayoutIrWidgetDto>? widgets;
 
   factory _$LayoutIrPageDto([void Function(LayoutIrPageDtoBuilder)? updates]) =>
-      (new LayoutIrPageDtoBuilder()..update(updates))._build();
+      (LayoutIrPageDtoBuilder()..update(updates))._build();
 
   _$LayoutIrPageDto._(
       {required this.page,
@@ -36,22 +36,13 @@ class _$LayoutIrPageDto extends LayoutIrPageDto {
       this.tables,
       this.vectors,
       this.widgets})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(page, r'LayoutIrPageDto', 'page');
-    BuiltValueNullFieldError.checkNotNull(
-        widthPt, r'LayoutIrPageDto', 'widthPt');
-    BuiltValueNullFieldError.checkNotNull(
-        heightPt, r'LayoutIrPageDto', 'heightPt');
-    BuiltValueNullFieldError.checkNotNull(blocks, r'LayoutIrPageDto', 'blocks');
-  }
-
+      : super._();
   @override
   LayoutIrPageDto rebuild(void Function(LayoutIrPageDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  LayoutIrPageDtoBuilder toBuilder() =>
-      new LayoutIrPageDtoBuilder()..replace(this);
+  LayoutIrPageDtoBuilder toBuilder() => LayoutIrPageDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -115,28 +106,28 @@ class LayoutIrPageDtoBuilder
 
   ListBuilder<LayoutIrBlockDto>? _blocks;
   ListBuilder<LayoutIrBlockDto> get blocks =>
-      _$this._blocks ??= new ListBuilder<LayoutIrBlockDto>();
+      _$this._blocks ??= ListBuilder<LayoutIrBlockDto>();
   set blocks(ListBuilder<LayoutIrBlockDto>? blocks) => _$this._blocks = blocks;
 
   ListBuilder<LayoutIrLineDto>? _lines;
   ListBuilder<LayoutIrLineDto> get lines =>
-      _$this._lines ??= new ListBuilder<LayoutIrLineDto>();
+      _$this._lines ??= ListBuilder<LayoutIrLineDto>();
   set lines(ListBuilder<LayoutIrLineDto>? lines) => _$this._lines = lines;
 
   ListBuilder<LayoutIrTableDto>? _tables;
   ListBuilder<LayoutIrTableDto> get tables =>
-      _$this._tables ??= new ListBuilder<LayoutIrTableDto>();
+      _$this._tables ??= ListBuilder<LayoutIrTableDto>();
   set tables(ListBuilder<LayoutIrTableDto>? tables) => _$this._tables = tables;
 
   ListBuilder<LayoutIrVectorDto>? _vectors;
   ListBuilder<LayoutIrVectorDto> get vectors =>
-      _$this._vectors ??= new ListBuilder<LayoutIrVectorDto>();
+      _$this._vectors ??= ListBuilder<LayoutIrVectorDto>();
   set vectors(ListBuilder<LayoutIrVectorDto>? vectors) =>
       _$this._vectors = vectors;
 
   ListBuilder<LayoutIrWidgetDto>? _widgets;
   ListBuilder<LayoutIrWidgetDto> get widgets =>
-      _$this._widgets ??= new ListBuilder<LayoutIrWidgetDto>();
+      _$this._widgets ??= ListBuilder<LayoutIrWidgetDto>();
   set widgets(ListBuilder<LayoutIrWidgetDto>? widgets) =>
       _$this._widgets = widgets;
 
@@ -162,7 +153,6 @@ class LayoutIrPageDtoBuilder
 
   @override
   void replace(LayoutIrPageDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutIrPageDto;
   }
 
@@ -178,18 +168,19 @@ class LayoutIrPageDtoBuilder
     _$LayoutIrPageDto _$result;
     try {
       _$result = _$v ??
-          new _$LayoutIrPageDto._(
-              page: BuiltValueNullFieldError.checkNotNull(
-                  page, r'LayoutIrPageDto', 'page'),
-              widthPt: BuiltValueNullFieldError.checkNotNull(
-                  widthPt, r'LayoutIrPageDto', 'widthPt'),
-              heightPt: BuiltValueNullFieldError.checkNotNull(
-                  heightPt, r'LayoutIrPageDto', 'heightPt'),
-              blocks: blocks.build(),
-              lines: _lines?.build(),
-              tables: _tables?.build(),
-              vectors: _vectors?.build(),
-              widgets: _widgets?.build());
+          _$LayoutIrPageDto._(
+            page: BuiltValueNullFieldError.checkNotNull(
+                page, r'LayoutIrPageDto', 'page'),
+            widthPt: BuiltValueNullFieldError.checkNotNull(
+                widthPt, r'LayoutIrPageDto', 'widthPt'),
+            heightPt: BuiltValueNullFieldError.checkNotNull(
+                heightPt, r'LayoutIrPageDto', 'heightPt'),
+            blocks: blocks.build(),
+            lines: _lines?.build(),
+            tables: _tables?.build(),
+            vectors: _vectors?.build(),
+            widgets: _widgets?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -204,7 +195,7 @@ class LayoutIrPageDtoBuilder
         _$failedField = 'widgets';
         _widgets?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'LayoutIrPageDto', _$failedField, e.toString());
       }
       rethrow;

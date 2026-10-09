@@ -26,12 +26,12 @@ UpdateUserSettingsRequestDtoThemePreferenceEnum
     case 'system':
       return _$updateUserSettingsRequestDtoThemePreferenceEnum_system;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateUserSettingsRequestDtoThemePreferenceEnum>
-    _$updateUserSettingsRequestDtoThemePreferenceEnumValues = new BuiltSet<
+    _$updateUserSettingsRequestDtoThemePreferenceEnumValues = BuiltSet<
         UpdateUserSettingsRequestDtoThemePreferenceEnum>(const <UpdateUserSettingsRequestDtoThemePreferenceEnum>[
   _$updateUserSettingsRequestDtoThemePreferenceEnum_light,
   _$updateUserSettingsRequestDtoThemePreferenceEnum_dark,
@@ -53,12 +53,12 @@ UpdateUserSettingsRequestDtoLocaleEnum
     case 'en':
       return _$updateUserSettingsRequestDtoLocaleEnum_en;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateUserSettingsRequestDtoLocaleEnum>
-    _$updateUserSettingsRequestDtoLocaleEnumValues = new BuiltSet<
+    _$updateUserSettingsRequestDtoLocaleEnumValues = BuiltSet<
         UpdateUserSettingsRequestDtoLocaleEnum>(const <UpdateUserSettingsRequestDtoLocaleEnum>[
   _$updateUserSettingsRequestDtoLocaleEnum_de,
   _$updateUserSettingsRequestDtoLocaleEnum_en,
@@ -66,10 +66,10 @@ final BuiltSet<UpdateUserSettingsRequestDtoLocaleEnum>
 
 Serializer<UpdateUserSettingsRequestDtoThemePreferenceEnum>
     _$updateUserSettingsRequestDtoThemePreferenceEnumSerializer =
-    new _$UpdateUserSettingsRequestDtoThemePreferenceEnumSerializer();
+    _$UpdateUserSettingsRequestDtoThemePreferenceEnumSerializer();
 Serializer<UpdateUserSettingsRequestDtoLocaleEnum>
     _$updateUserSettingsRequestDtoLocaleEnumSerializer =
-    new _$UpdateUserSettingsRequestDtoLocaleEnumSerializer();
+    _$UpdateUserSettingsRequestDtoLocaleEnumSerializer();
 
 class _$UpdateUserSettingsRequestDtoThemePreferenceEnumSerializer
     implements
@@ -160,7 +160,7 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
 
   factory _$UpdateUserSettingsRequestDto(
           [void Function(UpdateUserSettingsRequestDtoBuilder)? updates]) =>
-      (new UpdateUserSettingsRequestDtoBuilder()..update(updates))._build();
+      (UpdateUserSettingsRequestDtoBuilder()..update(updates))._build();
 
   _$UpdateUserSettingsRequestDto._(
       {this.preferredExtractorEngine,
@@ -173,7 +173,6 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
       this.themePreference,
       this.locale})
       : super._();
-
   @override
   UpdateUserSettingsRequestDto rebuild(
           void Function(UpdateUserSettingsRequestDtoBuilder) updates) =>
@@ -181,7 +180,7 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
 
   @override
   UpdateUserSettingsRequestDtoBuilder toBuilder() =>
-      new UpdateUserSettingsRequestDtoBuilder()..replace(this);
+      UpdateUserSettingsRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -271,7 +270,7 @@ class UpdateUserSettingsRequestDtoBuilder
 
   ListBuilder<String>? _fieldExtractionRequiredLabelIds;
   ListBuilder<String> get fieldExtractionRequiredLabelIds =>
-      _$this._fieldExtractionRequiredLabelIds ??= new ListBuilder<String>();
+      _$this._fieldExtractionRequiredLabelIds ??= ListBuilder<String>();
   set fieldExtractionRequiredLabelIds(
           ListBuilder<String>? fieldExtractionRequiredLabelIds) =>
       _$this._fieldExtractionRequiredLabelIds = fieldExtractionRequiredLabelIds;
@@ -318,7 +317,6 @@ class UpdateUserSettingsRequestDtoBuilder
 
   @override
   void replace(UpdateUserSettingsRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateUserSettingsRequestDto;
   }
 
@@ -334,25 +332,26 @@ class UpdateUserSettingsRequestDtoBuilder
     _$UpdateUserSettingsRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$UpdateUserSettingsRequestDto._(
-              preferredExtractorEngine: preferredExtractorEngine,
-              preferredChatProvider: preferredChatProvider,
-              useArenaWinnerAsDefault: useArenaWinnerAsDefault,
-              labelFieldConfidenceThreshold: labelFieldConfidenceThreshold,
-              fieldExtractionConfidenceGateEnabled:
-                  fieldExtractionConfidenceGateEnabled,
-              fieldExtractionRequiredLabelIds:
-                  _fieldExtractionRequiredLabelIds?.build(),
-              advancedFeaturesEnabled: advancedFeaturesEnabled,
-              themePreference: themePreference,
-              locale: locale);
+          _$UpdateUserSettingsRequestDto._(
+            preferredExtractorEngine: preferredExtractorEngine,
+            preferredChatProvider: preferredChatProvider,
+            useArenaWinnerAsDefault: useArenaWinnerAsDefault,
+            labelFieldConfidenceThreshold: labelFieldConfidenceThreshold,
+            fieldExtractionConfidenceGateEnabled:
+                fieldExtractionConfidenceGateEnabled,
+            fieldExtractionRequiredLabelIds:
+                _fieldExtractionRequiredLabelIds?.build(),
+            advancedFeaturesEnabled: advancedFeaturesEnabled,
+            themePreference: themePreference,
+            locale: locale,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'fieldExtractionRequiredLabelIds';
         _fieldExtractionRequiredLabelIds?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'UpdateUserSettingsRequestDto', _$failedField, e.toString());
       }
       rethrow;

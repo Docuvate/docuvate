@@ -18,18 +18,18 @@ LayoutIrWidgetDtoKindEnum _$layoutIrWidgetDtoKindEnumValueOf(String name) {
     case 'checkbox':
       return _$layoutIrWidgetDtoKindEnum_checkbox;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<LayoutIrWidgetDtoKindEnum> _$layoutIrWidgetDtoKindEnumValues =
-    new BuiltSet<LayoutIrWidgetDtoKindEnum>(const <LayoutIrWidgetDtoKindEnum>[
+    BuiltSet<LayoutIrWidgetDtoKindEnum>(const <LayoutIrWidgetDtoKindEnum>[
   _$layoutIrWidgetDtoKindEnum_text,
   _$layoutIrWidgetDtoKindEnum_checkbox,
 ]);
 
 Serializer<LayoutIrWidgetDtoKindEnum> _$layoutIrWidgetDtoKindEnumSerializer =
-    new _$LayoutIrWidgetDtoKindEnumSerializer();
+    _$LayoutIrWidgetDtoKindEnumSerializer();
 
 class _$LayoutIrWidgetDtoKindEnumSerializer
     implements PrimitiveSerializer<LayoutIrWidgetDtoKindEnum> {
@@ -92,7 +92,7 @@ class _$LayoutIrWidgetDto extends LayoutIrWidgetDto {
 
   factory _$LayoutIrWidgetDto(
           [void Function(LayoutIrWidgetDtoBuilder)? updates]) =>
-      (new LayoutIrWidgetDtoBuilder()..update(updates))._build();
+      (LayoutIrWidgetDtoBuilder()..update(updates))._build();
 
   _$LayoutIrWidgetDto._(
       {required this.kind,
@@ -109,23 +109,14 @@ class _$LayoutIrWidgetDto extends LayoutIrWidgetDto {
       this.fontFamily,
       this.align,
       this.checkMark})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(kind, r'LayoutIrWidgetDto', 'kind');
-    BuiltValueNullFieldError.checkNotNull(page, r'LayoutIrWidgetDto', 'page');
-    BuiltValueNullFieldError.checkNotNull(x, r'LayoutIrWidgetDto', 'x');
-    BuiltValueNullFieldError.checkNotNull(y, r'LayoutIrWidgetDto', 'y');
-    BuiltValueNullFieldError.checkNotNull(width, r'LayoutIrWidgetDto', 'width');
-    BuiltValueNullFieldError.checkNotNull(
-        height, r'LayoutIrWidgetDto', 'height');
-  }
-
+      : super._();
   @override
   LayoutIrWidgetDto rebuild(void Function(LayoutIrWidgetDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   LayoutIrWidgetDtoBuilder toBuilder() =>
-      new LayoutIrWidgetDtoBuilder()..replace(this);
+      LayoutIrWidgetDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -277,7 +268,6 @@ class LayoutIrWidgetDtoBuilder
 
   @override
   void replace(LayoutIrWidgetDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutIrWidgetDto;
   }
 
@@ -291,27 +281,28 @@ class LayoutIrWidgetDtoBuilder
 
   _$LayoutIrWidgetDto _build() {
     final _$result = _$v ??
-        new _$LayoutIrWidgetDto._(
-            kind: BuiltValueNullFieldError.checkNotNull(
-                kind, r'LayoutIrWidgetDto', 'kind'),
-            page: BuiltValueNullFieldError.checkNotNull(
-                page, r'LayoutIrWidgetDto', 'page'),
-            x: BuiltValueNullFieldError.checkNotNull(
-                x, r'LayoutIrWidgetDto', 'x'),
-            y: BuiltValueNullFieldError.checkNotNull(
-                y, r'LayoutIrWidgetDto', 'y'),
-            width: BuiltValueNullFieldError.checkNotNull(
-                width, r'LayoutIrWidgetDto', 'width'),
-            height: BuiltValueNullFieldError.checkNotNull(
-                height, r'LayoutIrWidgetDto', 'height'),
-            value: value,
-            checked: checked,
-            fieldName: fieldName,
-            rotationDeg: rotationDeg,
-            fontSizePt: fontSizePt,
-            fontFamily: fontFamily,
-            align: align,
-            checkMark: checkMark);
+        _$LayoutIrWidgetDto._(
+          kind: BuiltValueNullFieldError.checkNotNull(
+              kind, r'LayoutIrWidgetDto', 'kind'),
+          page: BuiltValueNullFieldError.checkNotNull(
+              page, r'LayoutIrWidgetDto', 'page'),
+          x: BuiltValueNullFieldError.checkNotNull(
+              x, r'LayoutIrWidgetDto', 'x'),
+          y: BuiltValueNullFieldError.checkNotNull(
+              y, r'LayoutIrWidgetDto', 'y'),
+          width: BuiltValueNullFieldError.checkNotNull(
+              width, r'LayoutIrWidgetDto', 'width'),
+          height: BuiltValueNullFieldError.checkNotNull(
+              height, r'LayoutIrWidgetDto', 'height'),
+          value: value,
+          checked: checked,
+          fieldName: fieldName,
+          rotationDeg: rotationDeg,
+          fontSizePt: fontSizePt,
+          fontFamily: fontFamily,
+          align: align,
+          checkMark: checkMark,
+        );
     replace(_$result);
     return _$result;
   }

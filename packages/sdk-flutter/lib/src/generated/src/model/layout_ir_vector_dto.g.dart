@@ -22,19 +22,19 @@ LayoutIrVectorDtoKindEnum _$layoutIrVectorDtoKindEnumValueOf(String name) {
     case 'path':
       return _$layoutIrVectorDtoKindEnum_path;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<LayoutIrVectorDtoKindEnum> _$layoutIrVectorDtoKindEnumValues =
-    new BuiltSet<LayoutIrVectorDtoKindEnum>(const <LayoutIrVectorDtoKindEnum>[
+    BuiltSet<LayoutIrVectorDtoKindEnum>(const <LayoutIrVectorDtoKindEnum>[
   _$layoutIrVectorDtoKindEnum_rect,
   _$layoutIrVectorDtoKindEnum_line,
   _$layoutIrVectorDtoKindEnum_path,
 ]);
 
 Serializer<LayoutIrVectorDtoKindEnum> _$layoutIrVectorDtoKindEnumSerializer =
-    new _$LayoutIrVectorDtoKindEnumSerializer();
+    _$LayoutIrVectorDtoKindEnumSerializer();
 
 class _$LayoutIrVectorDtoKindEnumSerializer
     implements PrimitiveSerializer<LayoutIrVectorDtoKindEnum> {
@@ -93,7 +93,7 @@ class _$LayoutIrVectorDto extends LayoutIrVectorDto {
 
   factory _$LayoutIrVectorDto(
           [void Function(LayoutIrVectorDtoBuilder)? updates]) =>
-      (new LayoutIrVectorDtoBuilder()..update(updates))._build();
+      (LayoutIrVectorDtoBuilder()..update(updates))._build();
 
   _$LayoutIrVectorDto._(
       {required this.kind,
@@ -107,22 +107,14 @@ class _$LayoutIrVectorDto extends LayoutIrVectorDto {
       this.fillRgb,
       this.strokeRgb,
       this.pathD})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(kind, r'LayoutIrVectorDto', 'kind');
-    BuiltValueNullFieldError.checkNotNull(x, r'LayoutIrVectorDto', 'x');
-    BuiltValueNullFieldError.checkNotNull(y, r'LayoutIrVectorDto', 'y');
-    BuiltValueNullFieldError.checkNotNull(width, r'LayoutIrVectorDto', 'width');
-    BuiltValueNullFieldError.checkNotNull(
-        height, r'LayoutIrVectorDto', 'height');
-  }
-
+      : super._();
   @override
   LayoutIrVectorDto rebuild(void Function(LayoutIrVectorDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   LayoutIrVectorDtoBuilder toBuilder() =>
-      new LayoutIrVectorDtoBuilder()..replace(this);
+      LayoutIrVectorDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -215,12 +207,11 @@ class LayoutIrVectorDtoBuilder
   set fillGray(num? fillGray) => _$this._fillGray = fillGray;
 
   ListBuilder<num>? _fillRgb;
-  ListBuilder<num> get fillRgb => _$this._fillRgb ??= new ListBuilder<num>();
+  ListBuilder<num> get fillRgb => _$this._fillRgb ??= ListBuilder<num>();
   set fillRgb(ListBuilder<num>? fillRgb) => _$this._fillRgb = fillRgb;
 
   ListBuilder<num>? _strokeRgb;
-  ListBuilder<num> get strokeRgb =>
-      _$this._strokeRgb ??= new ListBuilder<num>();
+  ListBuilder<num> get strokeRgb => _$this._strokeRgb ??= ListBuilder<num>();
   set strokeRgb(ListBuilder<num>? strokeRgb) => _$this._strokeRgb = strokeRgb;
 
   String? _pathD;
@@ -252,7 +243,6 @@ class LayoutIrVectorDtoBuilder
 
   @override
   void replace(LayoutIrVectorDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutIrVectorDto;
   }
 
@@ -268,23 +258,24 @@ class LayoutIrVectorDtoBuilder
     _$LayoutIrVectorDto _$result;
     try {
       _$result = _$v ??
-          new _$LayoutIrVectorDto._(
-              kind: BuiltValueNullFieldError.checkNotNull(
-                  kind, r'LayoutIrVectorDto', 'kind'),
-              x: BuiltValueNullFieldError.checkNotNull(
-                  x, r'LayoutIrVectorDto', 'x'),
-              y: BuiltValueNullFieldError.checkNotNull(
-                  y, r'LayoutIrVectorDto', 'y'),
-              width: BuiltValueNullFieldError.checkNotNull(
-                  width, r'LayoutIrVectorDto', 'width'),
-              height: BuiltValueNullFieldError.checkNotNull(
-                  height, r'LayoutIrVectorDto', 'height'),
-              strokeWidthPt: strokeWidthPt,
-              filled: filled,
-              fillGray: fillGray,
-              fillRgb: _fillRgb?.build(),
-              strokeRgb: _strokeRgb?.build(),
-              pathD: pathD);
+          _$LayoutIrVectorDto._(
+            kind: BuiltValueNullFieldError.checkNotNull(
+                kind, r'LayoutIrVectorDto', 'kind'),
+            x: BuiltValueNullFieldError.checkNotNull(
+                x, r'LayoutIrVectorDto', 'x'),
+            y: BuiltValueNullFieldError.checkNotNull(
+                y, r'LayoutIrVectorDto', 'y'),
+            width: BuiltValueNullFieldError.checkNotNull(
+                width, r'LayoutIrVectorDto', 'width'),
+            height: BuiltValueNullFieldError.checkNotNull(
+                height, r'LayoutIrVectorDto', 'height'),
+            strokeWidthPt: strokeWidthPt,
+            filled: filled,
+            fillGray: fillGray,
+            fillRgb: _fillRgb?.build(),
+            strokeRgb: _strokeRgb?.build(),
+            pathD: pathD,
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -293,7 +284,7 @@ class LayoutIrVectorDtoBuilder
         _$failedField = 'strokeRgb';
         _strokeRgb?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'LayoutIrVectorDto', _$failedField, e.toString());
       }
       rethrow;

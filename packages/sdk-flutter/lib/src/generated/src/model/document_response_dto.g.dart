@@ -31,12 +31,12 @@ DocumentResponseDtoStatusEnum _$documentResponseDtoStatusEnumValueOf(
     case 'failed':
       return _$documentResponseDtoStatusEnum_failed;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentResponseDtoStatusEnum>
-    _$documentResponseDtoStatusEnumValues = new BuiltSet<
+    _$documentResponseDtoStatusEnumValues = BuiltSet<
         DocumentResponseDtoStatusEnum>(const <DocumentResponseDtoStatusEnum>[
   _$documentResponseDtoStatusEnum_uploaded,
   _$documentResponseDtoStatusEnum_queued,
@@ -47,7 +47,7 @@ final BuiltSet<DocumentResponseDtoStatusEnum>
 
 Serializer<DocumentResponseDtoStatusEnum>
     _$documentResponseDtoStatusEnumSerializer =
-    new _$DocumentResponseDtoStatusEnumSerializer();
+    _$DocumentResponseDtoStatusEnumSerializer();
 
 class _$DocumentResponseDtoStatusEnumSerializer
     implements PrimitiveSerializer<DocumentResponseDtoStatusEnum> {
@@ -107,7 +107,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
 
   factory _$DocumentResponseDto(
           [void Function(DocumentResponseDtoBuilder)? updates]) =>
-      (new DocumentResponseDtoBuilder()..update(updates))._build();
+      (DocumentResponseDtoBuilder()..update(updates))._build();
 
   _$DocumentResponseDto._(
       {required this.id,
@@ -119,23 +119,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
       required this.createdAt,
       required this.updatedAt,
       this.extraction})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(id, r'DocumentResponseDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        filename, r'DocumentResponseDto', 'filename');
-    BuiltValueNullFieldError.checkNotNull(
-        title, r'DocumentResponseDto', 'title');
-    BuiltValueNullFieldError.checkNotNull(
-        status, r'DocumentResponseDto', 'status');
-    BuiltValueNullFieldError.checkNotNull(
-        mimeType, r'DocumentResponseDto', 'mimeType');
-    BuiltValueNullFieldError.checkNotNull(tags, r'DocumentResponseDto', 'tags');
-    BuiltValueNullFieldError.checkNotNull(
-        createdAt, r'DocumentResponseDto', 'createdAt');
-    BuiltValueNullFieldError.checkNotNull(
-        updatedAt, r'DocumentResponseDto', 'updatedAt');
-  }
-
+      : super._();
   @override
   DocumentResponseDto rebuild(
           void Function(DocumentResponseDtoBuilder) updates) =>
@@ -143,7 +127,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
 
   @override
   DocumentResponseDtoBuilder toBuilder() =>
-      new DocumentResponseDtoBuilder()..replace(this);
+      DocumentResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -218,7 +202,7 @@ class DocumentResponseDtoBuilder
 
   ListBuilder<JsonObject>? _tags;
   ListBuilder<JsonObject> get tags =>
-      _$this._tags ??= new ListBuilder<JsonObject>();
+      _$this._tags ??= ListBuilder<JsonObject>();
   set tags(ListBuilder<JsonObject>? tags) => _$this._tags = tags;
 
   String? _createdAt;
@@ -231,7 +215,7 @@ class DocumentResponseDtoBuilder
 
   DocumentExtractionSummaryDtoBuilder? _extraction;
   DocumentExtractionSummaryDtoBuilder get extraction =>
-      _$this._extraction ??= new DocumentExtractionSummaryDtoBuilder();
+      _$this._extraction ??= DocumentExtractionSummaryDtoBuilder();
   set extraction(DocumentExtractionSummaryDtoBuilder? extraction) =>
       _$this._extraction = extraction;
 
@@ -258,7 +242,6 @@ class DocumentResponseDtoBuilder
 
   @override
   void replace(DocumentResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentResponseDto;
   }
 
@@ -274,23 +257,24 @@ class DocumentResponseDtoBuilder
     _$DocumentResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentResponseDto._(
-              id: BuiltValueNullFieldError.checkNotNull(
-                  id, r'DocumentResponseDto', 'id'),
-              filename: BuiltValueNullFieldError.checkNotNull(
-                  filename, r'DocumentResponseDto', 'filename'),
-              title: BuiltValueNullFieldError.checkNotNull(
-                  title, r'DocumentResponseDto', 'title'),
-              status: BuiltValueNullFieldError.checkNotNull(
-                  status, r'DocumentResponseDto', 'status'),
-              mimeType: BuiltValueNullFieldError.checkNotNull(
-                  mimeType, r'DocumentResponseDto', 'mimeType'),
-              tags: tags.build(),
-              createdAt: BuiltValueNullFieldError.checkNotNull(
-                  createdAt, r'DocumentResponseDto', 'createdAt'),
-              updatedAt: BuiltValueNullFieldError.checkNotNull(
-                  updatedAt, r'DocumentResponseDto', 'updatedAt'),
-              extraction: _extraction?.build());
+          _$DocumentResponseDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'DocumentResponseDto', 'id'),
+            filename: BuiltValueNullFieldError.checkNotNull(
+                filename, r'DocumentResponseDto', 'filename'),
+            title: BuiltValueNullFieldError.checkNotNull(
+                title, r'DocumentResponseDto', 'title'),
+            status: BuiltValueNullFieldError.checkNotNull(
+                status, r'DocumentResponseDto', 'status'),
+            mimeType: BuiltValueNullFieldError.checkNotNull(
+                mimeType, r'DocumentResponseDto', 'mimeType'),
+            tags: tags.build(),
+            createdAt: BuiltValueNullFieldError.checkNotNull(
+                createdAt, r'DocumentResponseDto', 'createdAt'),
+            updatedAt: BuiltValueNullFieldError.checkNotNull(
+                updatedAt, r'DocumentResponseDto', 'updatedAt'),
+            extraction: _extraction?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -300,7 +284,7 @@ class DocumentResponseDtoBuilder
         _$failedField = 'extraction';
         _extraction?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentResponseDto', _$failedField, e.toString());
       }
       rethrow;

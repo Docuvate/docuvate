@@ -18,22 +18,13 @@ class _$DocumentChatProvidersCatalogMetaDto
   factory _$DocumentChatProvidersCatalogMetaDto(
           [void Function(DocumentChatProvidersCatalogMetaDtoBuilder)?
               updates]) =>
-      (new DocumentChatProvidersCatalogMetaDtoBuilder()..update(updates))
-          ._build();
+      (DocumentChatProvidersCatalogMetaDtoBuilder()..update(updates))._build();
 
   _$DocumentChatProvidersCatalogMetaDto._(
       {required this.ollamaModel,
       required this.ollamaConfigured,
       required this.runsOnCpu})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        ollamaModel, r'DocumentChatProvidersCatalogMetaDto', 'ollamaModel');
-    BuiltValueNullFieldError.checkNotNull(ollamaConfigured,
-        r'DocumentChatProvidersCatalogMetaDto', 'ollamaConfigured');
-    BuiltValueNullFieldError.checkNotNull(
-        runsOnCpu, r'DocumentChatProvidersCatalogMetaDto', 'runsOnCpu');
-  }
-
+      : super._();
   @override
   DocumentChatProvidersCatalogMetaDto rebuild(
           void Function(DocumentChatProvidersCatalogMetaDtoBuilder) updates) =>
@@ -41,7 +32,7 @@ class _$DocumentChatProvidersCatalogMetaDto
 
   @override
   DocumentChatProvidersCatalogMetaDtoBuilder toBuilder() =>
-      new DocumentChatProvidersCatalogMetaDtoBuilder()..replace(this);
+      DocumentChatProvidersCatalogMetaDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -108,7 +99,6 @@ class DocumentChatProvidersCatalogMetaDtoBuilder
 
   @override
   void replace(DocumentChatProvidersCatalogMetaDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatProvidersCatalogMetaDto;
   }
 
@@ -123,15 +113,16 @@ class DocumentChatProvidersCatalogMetaDtoBuilder
 
   _$DocumentChatProvidersCatalogMetaDto _build() {
     final _$result = _$v ??
-        new _$DocumentChatProvidersCatalogMetaDto._(
-            ollamaModel: BuiltValueNullFieldError.checkNotNull(ollamaModel,
-                r'DocumentChatProvidersCatalogMetaDto', 'ollamaModel'),
-            ollamaConfigured: BuiltValueNullFieldError.checkNotNull(
-                ollamaConfigured,
-                r'DocumentChatProvidersCatalogMetaDto',
-                'ollamaConfigured'),
-            runsOnCpu: BuiltValueNullFieldError.checkNotNull(runsOnCpu,
-                r'DocumentChatProvidersCatalogMetaDto', 'runsOnCpu'));
+        _$DocumentChatProvidersCatalogMetaDto._(
+          ollamaModel: BuiltValueNullFieldError.checkNotNull(ollamaModel,
+              r'DocumentChatProvidersCatalogMetaDto', 'ollamaModel'),
+          ollamaConfigured: BuiltValueNullFieldError.checkNotNull(
+              ollamaConfigured,
+              r'DocumentChatProvidersCatalogMetaDto',
+              'ollamaConfigured'),
+          runsOnCpu: BuiltValueNullFieldError.checkNotNull(
+              runsOnCpu, r'DocumentChatProvidersCatalogMetaDto', 'runsOnCpu'),
+        );
     replace(_$result);
     return _$result;
   }

@@ -14,17 +14,11 @@ class _$DashboardLayoutResponseDto extends DashboardLayoutResponseDto {
 
   factory _$DashboardLayoutResponseDto(
           [void Function(DashboardLayoutResponseDtoBuilder)? updates]) =>
-      (new DashboardLayoutResponseDtoBuilder()..update(updates))._build();
+      (DashboardLayoutResponseDtoBuilder()..update(updates))._build();
 
   _$DashboardLayoutResponseDto._(
       {required this.widgets, required this.editMode})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        widgets, r'DashboardLayoutResponseDto', 'widgets');
-    BuiltValueNullFieldError.checkNotNull(
-        editMode, r'DashboardLayoutResponseDto', 'editMode');
-  }
-
+      : super._();
   @override
   DashboardLayoutResponseDto rebuild(
           void Function(DashboardLayoutResponseDtoBuilder) updates) =>
@@ -32,7 +26,7 @@ class _$DashboardLayoutResponseDto extends DashboardLayoutResponseDto {
 
   @override
   DashboardLayoutResponseDtoBuilder toBuilder() =>
-      new DashboardLayoutResponseDtoBuilder()..replace(this);
+      DashboardLayoutResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -67,7 +61,7 @@ class DashboardLayoutResponseDtoBuilder
 
   ListBuilder<DashboardWidgetDtoClass>? _widgets;
   ListBuilder<DashboardWidgetDtoClass> get widgets =>
-      _$this._widgets ??= new ListBuilder<DashboardWidgetDtoClass>();
+      _$this._widgets ??= ListBuilder<DashboardWidgetDtoClass>();
   set widgets(ListBuilder<DashboardWidgetDtoClass>? widgets) =>
       _$this._widgets = widgets;
 
@@ -91,7 +85,6 @@ class DashboardLayoutResponseDtoBuilder
 
   @override
   void replace(DashboardLayoutResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DashboardLayoutResponseDto;
   }
 
@@ -107,17 +100,18 @@ class DashboardLayoutResponseDtoBuilder
     _$DashboardLayoutResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DashboardLayoutResponseDto._(
-              widgets: widgets.build(),
-              editMode: BuiltValueNullFieldError.checkNotNull(
-                  editMode, r'DashboardLayoutResponseDto', 'editMode'));
+          _$DashboardLayoutResponseDto._(
+            widgets: widgets.build(),
+            editMode: BuiltValueNullFieldError.checkNotNull(
+                editMode, r'DashboardLayoutResponseDto', 'editMode'),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'widgets';
         widgets.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DashboardLayoutResponseDto', _$failedField, e.toString());
       }
       rethrow;

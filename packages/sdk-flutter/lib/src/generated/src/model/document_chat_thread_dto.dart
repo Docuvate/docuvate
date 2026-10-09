@@ -30,7 +30,7 @@ abstract class DocumentChatThreadDto implements Built<DocumentChatThreadDto, Doc
 
   @BuiltValueField(wireName: r'scope')
   DocumentChatThreadDtoScopeEnum get scope;
-  // enum scopeEnum {  document,  corpus,  };
+  // enum scopeEnum {  document,  library,  };
 
   @BuiltValueField(wireName: r'documentIds')
   BuiltList<String> get documentIds;
@@ -227,8 +227,8 @@ class DocumentChatThreadDtoScopeEnum extends EnumClass {
 
   @BuiltValueEnumConst(wireName: r'document')
   static const DocumentChatThreadDtoScopeEnum document = _$documentChatThreadDtoScopeEnum_document;
-  @BuiltValueEnumConst(wireName: r'corpus')
-  static const DocumentChatThreadDtoScopeEnum corpus = _$documentChatThreadDtoScopeEnum_corpus;
+  @BuiltValueEnumConst(wireName: r'library')
+  static const DocumentChatThreadDtoScopeEnum library_ = _$documentChatThreadDtoScopeEnum_library_;
 
   static Serializer<DocumentChatThreadDtoScopeEnum> get serializer => _$documentChatThreadDtoScopeEnumSerializer;
 

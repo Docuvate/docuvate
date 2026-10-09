@@ -8,26 +8,26 @@ part of 'document_chat_thread_dto.dart';
 
 const DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnum_document =
     const DocumentChatThreadDtoScopeEnum._('document');
-const DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnum_corpus =
-    const DocumentChatThreadDtoScopeEnum._('corpus');
+const DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnum_library_ =
+    const DocumentChatThreadDtoScopeEnum._('library_');
 
 DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnumValueOf(
     String name) {
   switch (name) {
     case 'document':
       return _$documentChatThreadDtoScopeEnum_document;
-    case 'corpus':
-      return _$documentChatThreadDtoScopeEnum_corpus;
+    case 'library_':
+      return _$documentChatThreadDtoScopeEnum_library_;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentChatThreadDtoScopeEnum>
-    _$documentChatThreadDtoScopeEnumValues = new BuiltSet<
+    _$documentChatThreadDtoScopeEnumValues = BuiltSet<
         DocumentChatThreadDtoScopeEnum>(const <DocumentChatThreadDtoScopeEnum>[
   _$documentChatThreadDtoScopeEnum_document,
-  _$documentChatThreadDtoScopeEnum_corpus,
+  _$documentChatThreadDtoScopeEnum_library_,
 ]);
 
 const DocumentChatThreadDtoActiveGenerationStatusEnum
@@ -55,12 +55,12 @@ DocumentChatThreadDtoActiveGenerationStatusEnum
     case 'done':
       return _$documentChatThreadDtoActiveGenerationStatusEnum_done;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentChatThreadDtoActiveGenerationStatusEnum>
-    _$documentChatThreadDtoActiveGenerationStatusEnumValues = new BuiltSet<
+    _$documentChatThreadDtoActiveGenerationStatusEnumValues = BuiltSet<
         DocumentChatThreadDtoActiveGenerationStatusEnum>(const <DocumentChatThreadDtoActiveGenerationStatusEnum>[
   _$documentChatThreadDtoActiveGenerationStatusEnum_failed,
   _$documentChatThreadDtoActiveGenerationStatusEnum_pending,
@@ -70,20 +70,20 @@ final BuiltSet<DocumentChatThreadDtoActiveGenerationStatusEnum>
 
 Serializer<DocumentChatThreadDtoScopeEnum>
     _$documentChatThreadDtoScopeEnumSerializer =
-    new _$DocumentChatThreadDtoScopeEnumSerializer();
+    _$DocumentChatThreadDtoScopeEnumSerializer();
 Serializer<DocumentChatThreadDtoActiveGenerationStatusEnum>
     _$documentChatThreadDtoActiveGenerationStatusEnumSerializer =
-    new _$DocumentChatThreadDtoActiveGenerationStatusEnumSerializer();
+    _$DocumentChatThreadDtoActiveGenerationStatusEnumSerializer();
 
 class _$DocumentChatThreadDtoScopeEnumSerializer
     implements PrimitiveSerializer<DocumentChatThreadDtoScopeEnum> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'document': 'document',
-    'corpus': 'corpus',
+    'library_': 'library',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'document': 'document',
-    'corpus': 'corpus',
+    'library': 'library_',
   };
 
   @override
@@ -162,7 +162,7 @@ class _$DocumentChatThreadDto extends DocumentChatThreadDto {
 
   factory _$DocumentChatThreadDto(
           [void Function(DocumentChatThreadDtoBuilder)? updates]) =>
-      (new DocumentChatThreadDtoBuilder()..update(updates))._build();
+      (DocumentChatThreadDtoBuilder()..update(updates))._build();
 
   _$DocumentChatThreadDto._(
       {required this.id,
@@ -173,20 +173,7 @@ class _$DocumentChatThreadDto extends DocumentChatThreadDto {
       required this.updatedAt,
       this.lastMessagePreview,
       this.activeGenerationStatus})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(id, r'DocumentChatThreadDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        title, r'DocumentChatThreadDto', 'title');
-    BuiltValueNullFieldError.checkNotNull(
-        scope, r'DocumentChatThreadDto', 'scope');
-    BuiltValueNullFieldError.checkNotNull(
-        documentIds, r'DocumentChatThreadDto', 'documentIds');
-    BuiltValueNullFieldError.checkNotNull(
-        createdAt, r'DocumentChatThreadDto', 'createdAt');
-    BuiltValueNullFieldError.checkNotNull(
-        updatedAt, r'DocumentChatThreadDto', 'updatedAt');
-  }
-
+      : super._();
   @override
   DocumentChatThreadDto rebuild(
           void Function(DocumentChatThreadDtoBuilder) updates) =>
@@ -194,7 +181,7 @@ class _$DocumentChatThreadDto extends DocumentChatThreadDto {
 
   @override
   DocumentChatThreadDtoBuilder toBuilder() =>
-      new DocumentChatThreadDtoBuilder()..replace(this);
+      DocumentChatThreadDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -258,7 +245,7 @@ class DocumentChatThreadDtoBuilder
 
   ListBuilder<String>? _documentIds;
   ListBuilder<String> get documentIds =>
-      _$this._documentIds ??= new ListBuilder<String>();
+      _$this._documentIds ??= ListBuilder<String>();
   set documentIds(ListBuilder<String>? documentIds) =>
       _$this._documentIds = documentIds;
 
@@ -305,7 +292,6 @@ class DocumentChatThreadDtoBuilder
 
   @override
   void replace(DocumentChatThreadDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatThreadDto;
   }
 
@@ -321,27 +307,28 @@ class DocumentChatThreadDtoBuilder
     _$DocumentChatThreadDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentChatThreadDto._(
-              id: BuiltValueNullFieldError.checkNotNull(
-                  id, r'DocumentChatThreadDto', 'id'),
-              title: BuiltValueNullFieldError.checkNotNull(
-                  title, r'DocumentChatThreadDto', 'title'),
-              scope: BuiltValueNullFieldError.checkNotNull(
-                  scope, r'DocumentChatThreadDto', 'scope'),
-              documentIds: documentIds.build(),
-              createdAt: BuiltValueNullFieldError.checkNotNull(
-                  createdAt, r'DocumentChatThreadDto', 'createdAt'),
-              updatedAt: BuiltValueNullFieldError.checkNotNull(
-                  updatedAt, r'DocumentChatThreadDto', 'updatedAt'),
-              lastMessagePreview: lastMessagePreview,
-              activeGenerationStatus: activeGenerationStatus);
+          _$DocumentChatThreadDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'DocumentChatThreadDto', 'id'),
+            title: BuiltValueNullFieldError.checkNotNull(
+                title, r'DocumentChatThreadDto', 'title'),
+            scope: BuiltValueNullFieldError.checkNotNull(
+                scope, r'DocumentChatThreadDto', 'scope'),
+            documentIds: documentIds.build(),
+            createdAt: BuiltValueNullFieldError.checkNotNull(
+                createdAt, r'DocumentChatThreadDto', 'createdAt'),
+            updatedAt: BuiltValueNullFieldError.checkNotNull(
+                updatedAt, r'DocumentChatThreadDto', 'updatedAt'),
+            lastMessagePreview: lastMessagePreview,
+            activeGenerationStatus: activeGenerationStatus,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'documentIds';
         documentIds.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentChatThreadDto', _$failedField, e.toString());
       }
       rethrow;
