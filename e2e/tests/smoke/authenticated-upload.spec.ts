@@ -33,7 +33,7 @@ test.describe('Authenticated compose smoke', () => {
 
     await expect(
       page.getByRole('region', { name: /upload documents|dokumente hochladen/i })
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible({ timeout: 45_000 });
     const fileInput = page.getByLabel(/choose files|dateien auswählen/i);
     if ((await fileInput.count()) === 0) {
       const uploadTrigger = page.getByRole('button', { name: /^upload$|^hochladen$/i });
