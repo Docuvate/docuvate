@@ -10,4 +10,3 @@ All notable changes to this project are documented here.
   [Sustainable Use License 1.0](./LICENSE) (fair-code model). Enterprise and Cloud are
   separate commercial products that build on CE (not shipped in this repository). Official
   SDKs (`@docuvate/sdk`, `docuvate` on Flutter) are **MIT**.
-- Earlier versions through commit `c3212765` / release **0.1.0** were **AGPL-3.0**.

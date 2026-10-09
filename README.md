@@ -191,4 +191,4 @@ Report vulnerabilities privately: [SECURITY.md](SECURITY.md).
 
 ## License
 
-Community Edition: [LICENSE](LICENSE) (Sustainable Use License 1.0). Releases and commits at or before `c3212765e196269b3c47a5e597897553c17824dd` (release **0.1.0**) were **AGPL-3.0**. Enterprise and Cloud are offered separately under commercial terms ([docuvate.de](https://docuvate.de)). SDKs: MIT. Trademarks: [TRADEMARKS.md](TRADEMARKS.md).
+Community Edition: [LICENSE](LICENSE) (Sustainable Use License 1.0). Enterprise and Cloud are offered separately under commercial terms ([docuvate.de](https://docuvate.de)). SDKs: MIT. Trademarks: [TRADEMARKS.md](TRADEMARKS.md).
