@@ -82,12 +82,140 @@ export interface ExtractionBlock {
   blockIndex?: number;
 }
 
+export type LayoutIrTextAlign = 'left' | 'center' | 'right' | 'justify';
+export type LayoutIrFontWeight = 'normal' | 'bold';
+
+/** Positioned text region in layout IR (line or paragraph cluster). */
+export interface LayoutIrBlock {
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text: string;
+  fontFamily?: string;
+  fontSizePt?: number;
+  weight?: LayoutIrFontWeight;
+  align?: LayoutIrTextAlign;
+  columnIndex?: number;
+  /** Index into document `extraction.blocks` for PDF ↔ layout crosslink. */
+  blockIndex?: number;
+  rotationDeg?: number;
+  matrix?: [number, number, number, number, number, number];
+  textRgb?: [number, number, number];
+  textOriginX?: number;
+  textOriginY?: number;
+}
+
+/** Semantic reading-order line (optional; blocks drive fidelity render). */
+export interface LayoutIrLine {
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text: string;
+  fontFamily?: string;
+  fontSizePt?: number;
+  weight?: LayoutIrFontWeight;
+  align?: LayoutIrTextAlign;
+  blockIndex?: number;
+}
+
+export type LayoutIrVectorKind = 'rect' | 'line' | 'path';
+
+export interface LayoutIrVector {
+  kind: LayoutIrVectorKind;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  strokeWidthPt?: number;
+  filled?: boolean;
+  fillGray?: number;
+  fillRgb?: [number, number, number];
+  strokeRgb?: [number, number, number];
+  pathD?: string;
+}
+
+export type LayoutIrCellRole = 'header' | 'label' | 'value';
+
+export interface LayoutIrTableCell {
+  text: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fontSizePt?: number;
+  weight?: LayoutIrFontWeight;
+  blockIndex?: number;
+  cellRole?: LayoutIrCellRole;
+}
+
+export interface LayoutIrTable {
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  columnCount: number;
+  rows: LayoutIrTableCell[][];
+}
+
+export type LayoutIrWidgetKind = 'text' | 'checkbox';
+
+export interface LayoutIrWidget {
+  kind: LayoutIrWidgetKind;
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  value?: string;
+  checked?: boolean;
+  fieldName?: string;
+  rotationDeg?: number;
+  fontSizePt?: number;
+  fontFamily?: string;
+  align?: LayoutIrTextAlign;
+  checkMark?: string;
+}
+
+export interface LayoutIrPageSummary {
+  page: number;
+  widthPt: number;
+  heightPt: number;
+}
+
+export interface LayoutIrPage {
+  page: number;
+  widthPt: number;
+  heightPt: number;
+  blocks: LayoutIrBlock[];
+  lines?: LayoutIrLine[];
+  tables?: LayoutIrTable[];
+  vectors?: LayoutIrVector[];
+  widgets?: LayoutIrWidget[];
+}
+
+/** Versioned layout intermediate representation for HTML and Typst rendering. */
+export interface LayoutIrDocument {
+  version: 1;
+  pages: LayoutIrPage[];
+}
+
 export interface ExtractionResult {
   text: string;
   fields: ExtractedField[];
   blocks?: ExtractionBlock[];
   /** Layout-aware Markdown when the worker produces it (plain `text` unchanged for search/embeddings). */
   markdown?: string;
+  /** Persisted on extraction save; not included on document GET payloads. */
+  layoutIr?: LayoutIrDocument;
+  /** True when persisted layout IR exists (fetch via GET /documents/:id/layout-ir). */
+  layoutIrAvailable?: boolean;
+  /** Page dimensions from persisted layout IR (no block payload). */
+  layoutIrPages?: LayoutIrPageSummary[];
 }
 
 export interface MappeDto {

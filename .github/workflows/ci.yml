@@ -94,6 +94,8 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version-file: .tool-versions
+      - name: Install typst (layout IR compile tests)
+        run: bash scripts/ci/install-typst.sh
       - name: Worker lint and unit tests
         run: |
           pip install 'uv==0.12.23'

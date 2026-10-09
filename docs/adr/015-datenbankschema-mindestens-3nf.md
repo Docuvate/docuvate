@@ -49,6 +49,11 @@ Only junction rows whose tag exists (and belongs to the same user on writes) are
 | `ml_training_data_snapshots` | `metadata` | Opaque dataset description |
 | `ml_model_versions` | `metrics` | Opaque metric map per version |
 | `saved_document_views` | `visible_columns` | Ordered presentation column ids for the library table; never filtered or joined in SQL |
+| `document_layout_ir` | `ir` | Versioned layout render artifact; loaded only by document id for layout endpoints, never filtered or joined by JSON attributes in SQL |
+
+### Layout IR (`document_layout_ir`)
+
+Layout IR is stored in a 1:1 child table (`document_id` PK, `version`, `ir` JSONB). List queries use `EXISTS (SELECT 1 FROM document_layout_ir …)` for `layout_ir_available` and never select the blob or expand JSON attributes in SQL. Page dimensions for the web layout preview live in the relational child table `document_layout_ir_pages` (`document_id`, `page`, `width_pt`, `height_pt`); detail reads join that table only for a single document id. The JSON is an opaque, versioned render snapshot (not a substitute for `document_extraction_blocks`); it does not introduce transitive dependencies on `documents` and stays in 3NF.
 
 ## Documented denormalization
 

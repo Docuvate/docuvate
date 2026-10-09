@@ -40,6 +40,10 @@ from docuvate_worker.presentation.schemas import (
     HealthResponse,
     LabelFieldsExtractRequest,
     LabelFieldsExtractResponse,
+    LayoutRenderHtmlRequest,
+    LayoutRenderHtmlResponse,
+    LayoutRenderTypstRequest,
+    LayoutRenderTypstResponse,
     MlResolvedModelResponse,
     MlRetrainRunRequest,
     MlRetrainRunResponse,
@@ -111,6 +115,7 @@ def extract(
             for b in (result.blocks or [])
         ],
         markdown=result.markdown,
+        layout_ir=result.layout_ir,
         engine=active,
     )
 
@@ -290,6 +295,42 @@ def ml_retrain_run(
         external_run_id=result.external_run_id,
         notes=result.notes,
     )
+
+
+@router.post("/layout/render-html", response_model=LayoutRenderHtmlResponse)
+def layout_render_html(
+    body: LayoutRenderHtmlRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> LayoutRenderHtmlResponse:
+    _require_worker_secret(x_worker_secret)
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
+    from docuvate_worker.infrastructure.layout.render_html import layout_ir_to_html
+
+    wire = body.layout_ir.model_dump()
+    try:
+        doc = document_from_dict(wire)
+        html = layout_ir_to_html(doc)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
+    return LayoutRenderHtmlResponse(html=html)
+
+
+@router.post("/layout/render-typst", response_model=LayoutRenderTypstResponse)
+def layout_render_typst(
+    body: LayoutRenderTypstRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> LayoutRenderTypstResponse:
+    _require_worker_secret(x_worker_secret)
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
+    from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typst
+
+    wire = body.layout_ir.model_dump()
+    try:
+        doc = document_from_dict(wire)
+        typst = layout_ir_to_typst(doc)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
+    return LayoutRenderTypstResponse(typst=typst)
 
 
 @router.get("/ml/models/{family_id}/active", response_model=MlResolvedModelResponse)

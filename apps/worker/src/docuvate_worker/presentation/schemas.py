@@ -1,4 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Self
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ExtractRequest(BaseModel):
@@ -37,10 +39,13 @@ class ExtractionBlockModel(BaseModel):
 
 
 class ExtractResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, ser_json_by_alias=True)
+
     text: str
     fields: list[ExtractedField]
     blocks: list[ExtractionBlockModel] = Field(default_factory=list)
     markdown: str | None = None
+    layout_ir: dict[str, object] | None = Field(default=None, alias="layoutIr")
     engine: str | None = None
 
 
@@ -186,3 +191,68 @@ class LabelFieldsExtractRequest(BaseModel):
 
 class LabelFieldsExtractResponse(BaseModel):
     fields: list[ExtractedField] = Field(default_factory=list)
+
+
+class LayoutIrWireModel(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    version: int = Field(ge=1, le=1)
+    pages: list[dict[str, object]] = Field(min_length=1, max_length=100)
+
+    @model_validator(mode="after")
+    def _element_bounds(self) -> Self:
+        from docuvate_worker.infrastructure.layout.layout_ir_limits import (
+            MAX_LAYOUT_BLOCKS,
+            MAX_LAYOUT_ELEMENTS,
+            MAX_LAYOUT_LINES,
+            MAX_LAYOUT_TABLES,
+            MAX_LAYOUT_VECTORS,
+            MAX_LAYOUT_WIDGETS,
+        )
+
+        blocks = lines = tables = vectors = widgets = 0
+        for p in self.pages:
+            if isinstance(p.get("blocks"), list):
+                blocks += len(p["blocks"])
+            if isinstance(p.get("lines"), list):
+                lines += len(p["lines"])
+            if isinstance(p.get("tables"), list):
+                tables += len(p["tables"])
+            if isinstance(p.get("vectors"), list):
+                vectors += len(p["vectors"])
+            if isinstance(p.get("widgets"), list):
+                widgets += len(p["widgets"])
+        total = blocks + lines + tables + vectors + widgets
+        if blocks > MAX_LAYOUT_BLOCKS:
+            raise ValueError("Too many layout blocks")
+        if lines > MAX_LAYOUT_LINES:
+            raise ValueError("Too many layout lines")
+        if tables > MAX_LAYOUT_TABLES:
+            raise ValueError("Too many layout tables")
+        if vectors > MAX_LAYOUT_VECTORS:
+            raise ValueError("Too many layout vectors")
+        if widgets > MAX_LAYOUT_WIDGETS:
+            raise ValueError("Too many layout widgets")
+        if total > MAX_LAYOUT_ELEMENTS:
+            raise ValueError("Too many layout elements")
+        return self
+
+
+class LayoutRenderHtmlRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
+
+
+class LayoutRenderHtmlResponse(BaseModel):
+    html: str
+
+
+class LayoutRenderTypstRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
+
+
+class LayoutRenderTypstResponse(BaseModel):
+    typst: str

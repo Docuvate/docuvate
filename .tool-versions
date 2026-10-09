@@ -9,3 +9,8 @@ uv 0.12.23
 # docuvate:tool:puppeteer=23.11.1
 # docuvate:tool:mermaid-cli=11.12.0
 # docuvate:tool:playwright=1.64.0
+# docuvate:tool:typst=0.13.1
+# docuvate:tool:typst:checksum:x86_64-unknown-linux-musl=7d214bfeffc2e585dc422d1a09d2b144969421281e8c7f5d784b65fc69b5673f
+# docuvate:tool:typst:checksum:aarch64-unknown-linux-musl=4f5b7ee6e57fb639019ee0f6bffcf940edad228ede6ff5269a9f05a1544ceed4
+# docuvate:tool:typst:checksum:x86_64-apple-darwin=4dabfe647f7f01ed9cc13ad8196a6c7f5e16f0732821b522d50740d3a9f5207b
+# docuvate:tool:typst:checksum:aarch64-apple-darwin=541e4f9eaca3f34ee865f81fc663e4839cb84d6253f71a372cd855b0a7283213

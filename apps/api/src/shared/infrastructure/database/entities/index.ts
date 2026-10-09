@@ -9,6 +9,8 @@ import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
 import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
+import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
+import { DocumentLayoutIrPagesEntity } from './document-layout-ir-pages.entity.js';
 import { DocumentExtractionBlocksEntity } from './document-extraction-blocks.entity.js';
 import { DocumentFieldValuesEntity } from './document-field-values.entity.js';
 import { DocumentTextChunksEntity } from './document-text-chunks.entity.js';
@@ -64,6 +66,8 @@ export const TYPEORM_ENTITIES = [
   DocumentEmbeddingsEntity,
   DocumentExtractionBlocksEntity,
   DocumentFieldValuesEntity,
+  DocumentLayoutIrEntity,
+  DocumentLayoutIrPagesEntity,
   DocumentTextChunksEntity,
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,
@@ -118,6 +122,8 @@ export {
   DocumentEmbeddingsEntity,
   DocumentExtractionBlocksEntity,
   DocumentFieldValuesEntity,
+  DocumentLayoutIrEntity,
+  DocumentLayoutIrPagesEntity,
   DocumentTextChunksEntity,
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,

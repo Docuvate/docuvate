@@ -121,6 +121,8 @@ job_lint_test() {
   flutter pub get
   dart analyze
   dart test
+  TYPST_BIN_DIR="$(bash "$ROOT/scripts/ci/install-typst.sh" | awk -F= '/^typst_bin_dir=/{print $2}')"
+  export PATH="${TYPST_BIN_DIR}:${PATH}"
   cd "$ROOT/apps/worker"
   PY_PIN="$(awk '/^python /{print $2; exit}' "$ROOT/.tool-versions")"
   UV_VENV_CLEAR=1 UV_PYTHON="$PY_PIN" uv venv .venv

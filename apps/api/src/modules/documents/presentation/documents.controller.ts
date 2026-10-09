@@ -32,6 +32,7 @@ import {
 import {
   DocumentListQueryDto,
   DocumentListResponseDto,
+  DocumentResponseDto,
   UpdateDocumentRequestDto,
 } from '../../../shared/presentation/dtos/documents.dto.js';
 import {
@@ -77,9 +78,18 @@ import {
 import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
 import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
+import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
+import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
+import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
+import type { LayoutIrDocument } from '@docuvate/contracts';
+import {
+  LayoutHtmlResponseDto,
+  LayoutIrDocumentDto,
+  LayoutTypstResponseDto,
+} from '../../../shared/presentation/dtos/layout-ir.dto.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
 
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
 import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('documents')
@@ -109,6 +119,9 @@ export class DocumentsController {
     private readonly compareExtraction: CompareDocumentExtractionUseCase,
     private readonly applyArenaWinner: ApplyArenaWinnerExtractionUseCase,
     private readonly requeueExtraction: RequeueDocumentExtractionUseCase,
+    private readonly getDocumentLayoutIr: GetDocumentLayoutIrUseCase,
+    private readonly getDocumentLayoutHtml: GetDocumentLayoutHtmlUseCase,
+    private readonly getDocumentLayoutTypst: GetDocumentLayoutTypstUseCase,
     private readonly recordArenaRating: RecordExtractionArenaRatingUseCase,
     private readonly getDuplicateStack: GetDuplicateStackUseCase,
     private readonly setDuplicateStackPrimary: SetDuplicateStackPrimaryUseCase,
@@ -132,6 +145,41 @@ export class DocumentsController {
   @ApiDocuvateRoute({ operationId: 'bulk', summary: 'bulk' })
   async bulk(@Session() session: AuthSession, @Body() body: DocumentBulkRequestDto) {
     return this.bulkDocuments.execute(session.user.id, body as DocumentBulkRequest);
+  }
+
+  @Get(':id/layout-ir')
+  @ApiDocuvateRoute({ operationId: 'getDocumentLayoutIr', summary: 'Layout IR for document re-render' })
+  @ApiOkResponse({ type: LayoutIrDocumentDto })
+  async layoutIr(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string
+  ): Promise<LayoutIrDocumentDto & LayoutIrDocument> {
+    return this.getDocumentLayoutIr.execute(id, session.user.id, subject);
+  }
+
+  @Get(':id/layout-html')
+  @ApiDocuvateRoute({ operationId: 'getDocumentLayoutHtml', summary: 'Rendered layout HTML' })
+  @ApiOkResponse({ type: LayoutHtmlResponseDto })
+  async layoutHtml(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string
+  ): Promise<{ html: string }> {
+    const html = await this.getDocumentLayoutHtml.execute(id, session.user.id, subject);
+    return { html };
+  }
+
+  @Get(':id/layout-typst')
+  @ApiDocuvateRoute({ operationId: 'getDocumentLayoutTypst', summary: 'Typst source for layout export' })
+  @ApiOkResponse({ type: LayoutTypstResponseDto })
+  async layoutTypst(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string
+  ): Promise<{ typst: string }> {
+    const typst = await this.getDocumentLayoutTypst.execute(id, session.user.id, subject);
+    return { typst };
   }
 
   @Get(':id/content')
@@ -433,6 +481,7 @@ export class DocumentsController {
 
   @Get(':id')
   @ApiDocuvateRoute({ operationId: 'getDocument', summary: 'Get document (ABAC)' })
+  @ApiOkResponse({ type: DocumentResponseDto })
   async getOne(
     @Session() session: AuthSession,
     @AuthSubject() subject: AuthorizationSubject,

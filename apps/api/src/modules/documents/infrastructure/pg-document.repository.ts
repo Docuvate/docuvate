@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { dedupeExtractedFields, type DocumentListQuery, type ExtractionResult } from '@docuvate/contracts';
 import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
 import type { DocumentRepository, DocumentUpdatePatch } from '../../../shared/domain/ports.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   type DocumentExtractionRows,
   loadExtractionForDocument,
@@ -17,6 +17,7 @@ import type pg from 'pg';
 
 const LIST_SELECT = `
   SELECT d.*,
+    EXISTS (SELECT 1 FROM document_layout_ir li WHERE li.document_id = d.id) AS layout_ir_available,
     f.name AS folder_name,
     f.mappe_id AS folder_mappe_id,
     c.id AS corr_id, c.name AS corr_name,
@@ -41,7 +42,37 @@ const LIST_SELECT = `
 
 @Injectable()
 export class PgDocumentRepository implements DocumentRepository {
+  private readonly logger = new Logger(PgDocumentRepository.name);
+
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
+
+  private async loadLayoutIrPageSummaries(
+    documentId: string
+  ): Promise<{ page: number; widthPt: number; heightPt: number }[]> {
+    const result = await this.pool.query(
+      `SELECT page, width_pt, height_pt
+       FROM document_layout_ir_pages
+       WHERE document_id = $1
+       ORDER BY page`,
+      [documentId]
+    );
+    return result.rows.map((row) => ({
+      page: Number(row['page']),
+      widthPt: Number(row['width_pt']),
+      heightPt: Number(row['height_pt']),
+    }));
+  }
+
+  private attachLayoutIrPages(
+    entity: DocumentEntity,
+    pages: { page: number; widthPt: number; heightPt: number }[]
+  ): DocumentEntity {
+    if (!entity.extraction || pages.length === 0) return entity;
+    return {
+      ...entity,
+      extraction: { ...entity.extraction, layoutIrPages: pages },
+    };
+  }
 
   async create(doc: DocumentEntity): Promise<DocumentEntity> {
     await this.pool.query(
@@ -81,7 +112,10 @@ export class PgDocumentRepository implements DocumentRepository {
       `${LIST_SELECT} WHERE d.id = $1 GROUP BY d.id, f.id, c.id`,
       [id]
     );
-    return result.rows[0] ? await this.mapListRow(result.rows[0]) : null;
+    if (!result.rows[0]) return null;
+    const entity = await this.mapListRow(result.rows[0]);
+    const pages = await this.loadLayoutIrPageSummaries(id);
+    return this.attachLayoutIrPages(entity, pages);
   }
 
   async findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null> {
@@ -89,7 +123,10 @@ export class PgDocumentRepository implements DocumentRepository {
       `${LIST_SELECT} WHERE d.id = $1 AND d.user_id = $2 GROUP BY d.id, f.id, c.id`,
       [id, userId]
     );
-    return result.rows[0] ? await this.mapListRow(result.rows[0]) : null;
+    if (!result.rows[0]) return null;
+    const entity = await this.mapListRow(result.rows[0]);
+    const pages = await this.loadLayoutIrPageSummaries(id);
+    return this.attachLayoutIrPages(entity, pages);
   }
 
   async listForUser(userId: string, filters: DocumentListQuery = {}): Promise<DocumentEntity[]> {
@@ -218,6 +255,38 @@ export class PgDocumentRepository implements DocumentRepository {
         `UPDATE documents SET extracted_text = $2, extracted_markdown = $3, updated_at = now() WHERE id = $1`,
         [id, result.text, result.markdown ?? null]
       );
+      await client.query(`DELETE FROM document_layout_ir WHERE document_id = $1`, [id]);
+      if (result.layoutIr != null) {
+        const version = (result.layoutIr as { version?: number }).version;
+        if (version !== 1) {
+          this.logger.warn(`Skipping layout IR for document ${id}: version must be 1`);
+        } else {
+          await client.query(
+            `INSERT INTO document_layout_ir (document_id, version, ir) VALUES ($1, $2, $3::jsonb)`,
+            [id, version, JSON.stringify(result.layoutIr)]
+          );
+          const pages = (result.layoutIr as { pages?: { page: number; widthPt: number; heightPt: number }[] })
+            .pages;
+          if (pages?.length) {
+            const byPage = new Map<number, { page: number; widthPt: number; heightPt: number }>();
+            for (const page of pages) {
+              if (!byPage.has(page.page)) {
+                byPage.set(page.page, page);
+              }
+            }
+            for (const page of [...byPage.values()].sort((a, b) => a.page - b.page)) {
+              await client.query(
+                `INSERT INTO document_layout_ir_pages (document_id, page, width_pt, height_pt)
+                 VALUES ($1, $2, $3, $4)
+                 ON CONFLICT (document_id, page) DO UPDATE SET
+                   width_pt = EXCLUDED.width_pt,
+                   height_pt = EXCLUDED.height_pt`,
+                [id, page.page, page.widthPt, page.heightPt]
+              );
+            }
+          }
+        }
+      }
       if (userId) {
         await replaceDocumentExtractionFields(client, id, userId, result.fields);
         await replaceDocumentExtractionBlocks(client, id, result.blocks ?? []);
@@ -229,6 +298,26 @@ export class PgDocumentRepository implements DocumentRepository {
     } finally {
       client.release();
     }
+  }
+
+  async findLayoutIrForUser(
+    id: string,
+    userId: string
+  ): Promise<Record<string, unknown> | null> {
+    const result = await this.pool.query(
+      `SELECT li.ir
+       FROM document_layout_ir li
+       INNER JOIN documents d ON d.id = li.document_id
+       WHERE li.document_id = $1 AND d.user_id = $2`,
+      [id, userId]
+    );
+    const raw = result.rows[0]?.['ir'];
+    if (raw == null) return null;
+    if (typeof raw === 'object') return raw as Record<string, unknown>;
+    if (typeof raw === 'string' && raw.trim()) {
+      return JSON.parse(raw) as Record<string, unknown>;
+    }
+    return null;
   }
 
   async setContentHash(id: string, hash: string): Promise<void> {
@@ -305,6 +394,7 @@ export class PgDocumentRepository implements DocumentRepository {
         }
         if (nextBlocks !== undefined) {
           await replaceDocumentExtractionBlocks(client, id, nextBlocks);
+          await client.query(`DELETE FROM document_layout_ir WHERE document_id = $1`, [id]);
         }
         await client.query('COMMIT');
       } catch (error) {

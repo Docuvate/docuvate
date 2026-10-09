@@ -3,6 +3,7 @@
  * Any other JSONB column added in TypeORM migrations must be documented in the ADR first.
  */
 export const SCHEMA_JSONB_ALLOWLIST = [
+  { table: 'document_layout_ir', column: 'ir' },
   { table: 'document_embeddings', column: 'embedding' },
   { table: 'document_text_chunks', column: 'embedding' },
   { table: 'tag_embedding_centroids', column: 'centroid' },

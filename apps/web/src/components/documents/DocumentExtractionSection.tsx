@@ -50,6 +50,8 @@ export function DocumentExtractionSection({
   const { advancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
   const fullText = doc.extraction?.text ?? '';
   const extractionMarkdown = doc.extraction?.markdown ?? null;
+  const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;
+  const layoutIrPages = doc.extraction?.layoutIrPages;
   const [editMode, setEditMode] = useState(false);
   const arenaDetailsRef = useRef<HTMLDetailsElement>(null);
   const hasContent = hasExtractedContent(doc, blocks);
@@ -114,16 +116,22 @@ export function DocumentExtractionSection({
         </div>
       ) : null}
 
-      {hasContent ? (
+      {hasContent || layoutIrAvailable ? (
         <ExtractedTextPanel
+          documentId={doc.id}
           fullText={fullText}
           markdown={extractionMarkdown}
+          layoutIrAvailable={layoutIrAvailable}
+          layoutIrPages={layoutIrPages}
           blocks={blocks}
           activePage={viewerPage}
           activeBlockIndex={activeBlockIndex}
           editMode={editMode}
           pageSynced
           allowCopy={hasContent}
+          requeueBusy={requeueBusy}
+          onRequeueExtraction={onRequeueExtraction}
+          documentTitle={doc.title ?? doc.filename}
           onActivePageChange={onViewerPageChange}
           onHighlightBlocks={onHighlightBlocks}
           onBlocksChange={onBlocksChange}

@@ -136,6 +136,32 @@ export function collectToolVersionErrors(root = TOOL_VERSIONS_ROOT, read = defau
     }
   }
 
+  const typstVer = versions.tools.typst;
+  if (typstVer) {
+    if (!ci.includes('bash scripts/ci/install-typst.sh')) {
+      fail('.github/workflows/ci.yml must install typst via scripts/ci/install-typst.sh');
+    }
+    const typstSh = read('scripts/ci/install-typst.sh');
+    if (!typstSh.includes('.tool-versions')) {
+      fail('scripts/ci/install-typst.sh must read typst version from .tool-versions');
+    }
+    if (!localCi.includes('scripts/ci/install-typst.sh')) {
+      fail('scripts/ci/run-local-ci-jobs.sh must call scripts/ci/install-typst.sh before worker pytest');
+    }
+    const toolVersions = read('.tool-versions');
+    for (const asset of [
+      'x86_64-unknown-linux-musl',
+      'aarch64-unknown-linux-musl',
+      'x86_64-apple-darwin',
+      'aarch64-apple-darwin',
+    ]) {
+      const needle = `# docuvate:tool:typst:checksum:${asset}=`;
+      if (!toolVersions.includes(needle)) {
+        fail(`.tool-versions must pin typst checksum for ${asset} (docuvate:tool:typst:checksum:...)`);
+      }
+    }
+  }
+
   const mermaidCheck = read('tools/docs/check-mermaid.mjs');
   const mermaidCli = versions.tools['mermaid-cli'];
   if (!mermaidCheck.includes(`const MERMAID_CLI_VERSION = '${mermaidCli}'`)) {

@@ -36,10 +36,34 @@ export function mapWorkerCompareHttpStatus(status: number): DomainError {
   return new ServiceUnavailableError(`Extraktions-Vergleich fehlgeschlagen (${status}).`);
 }
 
+export type WorkerFetchErrorMapping = {
+  onTimeout?: () => GatewayTimeoutError;
+  onHttpError?: (status: number) => DomainError;
+};
+
+export function workerLayoutTimeoutError(): GatewayTimeoutError {
+  return new GatewayTimeoutError(
+    'Layout-Rendering hat das Zeitlimit überschritten. Bitte erneut versuchen.'
+  );
+}
+
+export function mapWorkerLayoutHttpStatus(status: number): DomainError {
+  if (status === 504 || status === 408) {
+    return workerLayoutTimeoutError();
+  }
+  if (status === 502 || status === 503) {
+    return new ServiceUnavailableError(
+      'Layout-Worker vorübergehend nicht erreichbar. Bitte später erneut versuchen.'
+    );
+  }
+  return new ServiceUnavailableError(`Layout-Rendering fehlgeschlagen (${status}).`);
+}
+
 export async function fetchWorkerJson<T>(
   url: string,
   init: RequestInit,
-  timeoutMs: number
+  timeoutMs: number,
+  errors: WorkerFetchErrorMapping = {}
 ): Promise<T> {
   let response: Response;
   try {
@@ -52,13 +76,13 @@ export async function fetchWorkerJson<T>(
       error instanceof Error &&
       (error.name === 'TimeoutError' || error.name === 'AbortError')
     ) {
-      throw workerCompareTimeoutError();
+      throw errors.onTimeout?.() ?? workerCompareTimeoutError();
     }
     throw error;
   }
 
   if (!response.ok) {
-    throw mapWorkerCompareHttpStatus(response.status);
+    throw errors.onHttpError?.(response.status) ?? mapWorkerCompareHttpStatus(response.status);
   }
 
   return (await response.json()) as T;
