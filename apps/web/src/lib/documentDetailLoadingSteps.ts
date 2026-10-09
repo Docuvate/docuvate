@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
 import { isExtractionPending } from './documentExtractionState';
 
@@ -20,7 +22,9 @@ export interface DocumentDetailLoadProgressInput {
   pipelinePending: boolean;
 }
 
-export function resolveDocumentDetailLoadStep(input: DocumentDetailLoadProgressInput): DocumentDetailLoadStepId {
+export function resolveDocumentDetailLoadStep(
+  input: DocumentDetailLoadProgressInput
+): DocumentDetailLoadStepId {
   if (!input.metadataReady) {
     return 'metadata';
   }
@@ -48,7 +52,9 @@ export function isDocumentPreviewPending(
   return !previewData && !previewUrl;
 }
 
-export function isDocumentPipelinePending(doc: Pick<DocumentDto, 'status'> | null | undefined): boolean {
+export function isDocumentPipelinePending(
+  doc: Pick<DocumentDto, 'status'> | null | undefined
+): boolean {
   if (!doc) {
     return false;
   }

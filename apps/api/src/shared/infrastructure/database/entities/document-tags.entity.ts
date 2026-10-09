@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
 @Index('document_tags_tag_id_idx', ['tagId'], {})

@@ -3,7 +3,9 @@ import { expect, test } from '@playwright/test';
 const MIN_LINES = 8;
 
 async function expectTightLineLayout(panel: import('@playwright/test').Locator) {
-  const sourceLines = Number(await panel.locator('.code-panel-shell').getAttribute('data-source-lines'));
+  const sourceLines = Number(
+    await panel.locator('.code-panel-shell').getAttribute('data-source-lines')
+  );
   expect(sourceLines).toBeGreaterThanOrEqual(MIN_LINES);
 
   const body = panel.locator('.code-panel-body');
@@ -36,7 +38,9 @@ test.describe('highlighted code blocks preserve line breaks', () => {
   test('landing SDK block line count matches source without double spacing', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/#dev-heading');
-    const panel = page.locator('.landing-code-slot .code-panel').filter({ hasText: 'DocuvateClient' });
+    const panel = page
+      .locator('.landing-code-slot .code-panel')
+      .filter({ hasText: 'DocuvateClient' });
     await expect(panel).toBeVisible();
     await expectTightLineLayout(panel);
   });
@@ -53,7 +57,8 @@ test.describe('highlighted code blocks preserve line breaks', () => {
         return { ok: false, reason: 'missing-body' };
       }
       const fits = body.scrollWidth <= body.clientWidth + 1;
-      const canScroll = body.scrollWidth > body.clientWidth + 1 && shell.dataset.scrollableX === 'true';
+      const canScroll =
+        body.scrollWidth > body.clientWidth + 1 && shell.dataset.scrollableX === 'true';
       return { ok: fits || canScroll, scrollable: shell.dataset.scrollableX };
     });
     expect(metrics.ok).toBe(true);

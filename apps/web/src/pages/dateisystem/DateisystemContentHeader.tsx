@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -66,7 +68,11 @@ export function DateisystemContentHeader({
           <ol>
             {breadcrumbs.map((seg, i) => (
               <li key={seg.to}>
-                {i > 0 ? <span className="dateisystem-breadcrumb-sep" aria-hidden>›</span> : null}
+                {i > 0 ? (
+                  <span className="dateisystem-breadcrumb-sep" aria-hidden>
+                    ›
+                  </span>
+                ) : null}
                 {i === breadcrumbs.length - 1 ? (
                   <span className="dateisystem-breadcrumb-current">{seg.label}</span>
                 ) : (

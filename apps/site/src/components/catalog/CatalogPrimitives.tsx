@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode, ButtonHTMLAttributes, InputHTMLAttributes } from 'react';
 
 export function CatalogButton({
@@ -75,7 +77,13 @@ export function CatalogAlert({
   variant?: 'info' | 'success' | 'warn' | 'danger';
 }) {
   const tone =
-    variant === 'success' ? 'badge-ok' : variant === 'danger' ? '' : variant === 'warn' ? 'badge-oauth' : '';
+    variant === 'success'
+      ? 'badge-ok'
+      : variant === 'danger'
+        ? ''
+        : variant === 'warn'
+          ? 'badge-oauth'
+          : '';
   return <div className={`card ${tone}`.trim()}>{children}</div>;
 }
 

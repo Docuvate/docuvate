@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { RequestMethod, type INestApplication } from '@nestjs/common';
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 import { MetadataScanner, ModulesContainer } from '@nestjs/core';
@@ -26,7 +28,15 @@ export const OPENAPI_PUBLIC_OPERATION_IDS = new Set<string>([
   'connectorOAuthCallback',
 ]);
 
-const HTTP_METHODS = new Set<HttpMethod>(['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS']);
+const HTTP_METHODS = new Set<HttpMethod>([
+  'GET',
+  'POST',
+  'PUT',
+  'PATCH',
+  'DELETE',
+  'HEAD',
+  'OPTIONS',
+]);
 
 export function normalizeFastifyPath(rawPath: string): string {
   let path = rawPath.split('?')[0] ?? rawPath;
@@ -99,8 +109,10 @@ export function collectNestHttpRoutes(
       for (const methodName of scanner.getAllMethodNames(prototype)) {
         const handler = prototype[methodName as keyof typeof prototype];
         if (typeof handler !== 'function') continue;
-        const requestMethod = Reflect.getMetadata(METHOD_METADATA, handler) as RequestMethod | undefined;
-        const httpMethod = requestMethod !== undefined ? NEST_METHOD_TO_HTTP[requestMethod] : undefined;
+        const requestMethod = Reflect.getMetadata(METHOD_METADATA, handler) as
+          RequestMethod | undefined;
+        const httpMethod =
+          requestMethod !== undefined ? NEST_METHOD_TO_HTTP[requestMethod] : undefined;
         if (!httpMethod || httpMethod === 'HEAD' || httpMethod === 'OPTIONS') continue;
 
         const methodPath = Reflect.getMetadata(PATH_METADATA, handler) ?? '';

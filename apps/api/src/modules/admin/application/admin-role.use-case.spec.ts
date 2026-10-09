@@ -1,7 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 import { SetAdminUserRoleUseCase } from './admin.use-cases.js';
 import { ForbiddenError } from '../../../shared/domain/errors.js';
-import { INSTANCE_ROLE_ADMIN, INSTANCE_ROLE_MEMBER } from '../../auth/domain/instance-role.constants.js';
+import {
+  INSTANCE_ROLE_ADMIN,
+  INSTANCE_ROLE_MEMBER,
+} from '../../auth/domain/instance-role.constants.js';
 
 describe('SetAdminUserRoleUseCase', () => {
   it('rejects self role change before touching infrastructure', async () => {

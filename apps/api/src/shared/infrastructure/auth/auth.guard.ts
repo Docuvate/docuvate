@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   CanActivate,
   ExecutionContext,
@@ -86,13 +88,15 @@ export class AuthGuard implements CanActivate {
   }
 }
 
-export const Session = createParamDecorator((_data: unknown, ctx: ExecutionContext): AuthSession => {
-  const req = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
-  if (!req.authSession) {
-    throw new UnauthorizedException('Not authenticated');
+export const Session = createParamDecorator(
+  (_data: unknown, ctx: ExecutionContext): AuthSession => {
+    const req = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
+    if (!req.authSession) {
+      throw new UnauthorizedException('Not authenticated');
+    }
+    return req.authSession;
   }
-  return req.authSession;
-});
+);
 
 export const AuthSubject = createParamDecorator(
   (_data: unknown, ctx: ExecutionContext): AuthorizationSubject => {

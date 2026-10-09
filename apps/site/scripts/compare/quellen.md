@@ -7,7 +7,7 @@ Kürzel werden in allen Vergleichstabellen verwendet.
 - **W2** Dokumentation: https://docuvate.de/docs (Schnellstart, Konzepte, Self-Hosting-Variablen)
 - **W3** SDKs: https://docuvate.de/docs/sdks (Preview-Status, Service-Schlüssel)
 - **W4** Konzepte (Ordner, Labels): https://docuvate.de/docs#concepts
-- **R1** README (Version 0.1.0, AGPL-3.0, Kubernetes, ABAC): https://github.com/Docuvate/docuvate/blob/main/README.md
+- **R1** README (Version 0.1.0, Sustainable Use License 1.0 / fair-code, Kubernetes, ABAC): https://github.com/Docuvate/docuvate/blob/main/README.md
 - **R2** KI-Modelle (PaddleOCR, Embeddings, Ollama, Chat): https://github.com/Docuvate/docuvate/blob/main/docs/ai-models.md
 - **R3** Unterstützte Scan-Dateitypen (PDF/JPEG/PNG/TIFF): https://github.com/Docuvate/docuvate/blob/main/apps/api/src/modules/sftp-ingress/domain/scan-file-validation.ts
 - **R4** Dokumenten-Pipeline und Feldkorrekturen: https://github.com/Docuvate/docuvate/blob/main/docs/document-processing-pipeline.md

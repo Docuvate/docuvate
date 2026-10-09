@@ -1,7 +1,6 @@
-import type {
-  ConnectorPluginId,
-  CreateConnectorInstallationRequest,
-} from '@docuvate/contracts';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ConnectorPluginId, CreateConnectorInstallationRequest } from '@docuvate/contracts';
 import { IsIn, IsObject, IsString, MinLength } from 'class-validator';
 
 const PLUGIN_IDS: ConnectorPluginId[] = [

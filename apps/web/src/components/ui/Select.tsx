@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   useCallback,
   useEffect,
@@ -11,10 +13,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  computeSelectMenuPlacement,
-  resolveSelectMenuPortalRoot,
-} from './selectMenuPlacement';
+import { computeSelectMenuPlacement, resolveSelectMenuPortalRoot } from './selectMenuPlacement';
 
 export interface SelectOption {
   value: string;

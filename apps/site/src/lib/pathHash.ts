@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SiteLocale } from './routes';
 
 export function splitPathAndHash(path: string): { pathname: string; hash: string } {

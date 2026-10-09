@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 import io
 
 from docuvate_worker.domain.models import ExtractionBlock, ExtractionResult

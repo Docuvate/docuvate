@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -61,7 +63,10 @@ function renderPage() {
   return render(
     <MemoryRouter initialEntries={[`/settings/connectors/paperless/${installationId}`]}>
       <Routes>
-        <Route path="/settings/connectors/paperless/:installationId" element={<PaperlessConnectorSetupPage />} />
+        <Route
+          path="/settings/connectors/paperless/:installationId"
+          element={<PaperlessConnectorSetupPage />}
+        />
       </Routes>
     </MemoryRouter>
   );

@@ -1,4 +1,9 @@
-import type { ConnectorRuntimePorts, ConnectorSourcePort } from '../../../domain/connector-runtime.ports.js';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  ConnectorRuntimePorts,
+  ConnectorSourcePort,
+} from '../../../domain/connector-runtime.ports.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorImportableItem,
@@ -10,7 +15,9 @@ import {
   resolvePaperlessCredentials,
 } from './paperless-api.client.js';
 
-export function openPaperlessRuntime(credentials: ConnectorConfigurationInput): ConnectorRuntimePorts {
+export function openPaperlessRuntime(
+  credentials: ConnectorConfigurationInput
+): ConnectorRuntimePorts {
   const source: ConnectorSourcePort = {
     async listImportables({ limit }) {
       const resolved = await resolvePaperlessCredentials(credentials);

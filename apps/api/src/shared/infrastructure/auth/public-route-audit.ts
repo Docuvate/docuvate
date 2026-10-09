@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { RequestMethod, type INestApplication } from '@nestjs/common';
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
 import { MetadataScanner, ModulesContainer } from '@nestjs/core';
@@ -69,8 +71,10 @@ export function collectPublicHttpRoutes(
         if (typeof handler !== 'function') continue;
         if (!isPublicHandler(handler, controllerClass)) continue;
 
-        const requestMethod = Reflect.getMetadata(METHOD_METADATA, handler) as RequestMethod | undefined;
-        const httpMethod = requestMethod !== undefined ? NEST_METHOD_TO_HTTP[requestMethod] : undefined;
+        const requestMethod = Reflect.getMetadata(METHOD_METADATA, handler) as
+          RequestMethod | undefined;
+        const httpMethod =
+          requestMethod !== undefined ? NEST_METHOD_TO_HTTP[requestMethod] : undefined;
         if (!httpMethod || !HTTP_METHODS.has(httpMethod)) continue;
 
         const methodPath = Reflect.getMetadata(PATH_METADATA, handler) ?? '';
@@ -96,7 +100,9 @@ export function auditPublicRoutes(discovered: PublicRouteEntry[]): {
   const allowlistKeys = new Set(PUBLIC_ROUTE_ALLOWLIST.map(publicRouteKey));
 
   const missingFromAllowlist = discovered.filter((r) => !allowlistKeys.has(publicRouteKey(r)));
-  const extraInAllowlist = PUBLIC_ROUTE_ALLOWLIST.filter((r) => !discoveredKeys.has(publicRouteKey(r)));
+  const extraInAllowlist = PUBLIC_ROUTE_ALLOWLIST.filter(
+    (r) => !discoveredKeys.has(publicRouteKey(r))
+  );
 
   return { missingFromAllowlist, extraInAllowlist };
 }

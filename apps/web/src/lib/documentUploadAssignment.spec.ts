@@ -1,8 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import type { FolderDto, MappeDto } from '@docuvate/contracts';
 import { resolveFilesystemDropTarget } from './documentUploadAssignment';
 
-const mappen: MappeDto[] = [{ id: 'm1', name: 'EHW+', documentCount: 0, createdAt: '', updatedAt: '' }];
+const mappen: MappeDto[] = [
+  { id: 'm1', name: 'EHW+', documentCount: 0, createdAt: '', updatedAt: '' },
+];
 const folders: FolderDto[] = [
   {
     id: 'f1',
@@ -49,8 +53,24 @@ describe('resolveFilesystemDropTarget', () => {
 
   it('targets the mappe when browsing a container with child folders', () => {
     const withRoots: FolderDto[] = [
-      { id: 'r1', name: 'Haus', mappeId: 'm1', parentId: null, documentCount: 0, createdAt: '', updatedAt: '' },
-      { id: 'r2', name: 'B', mappeId: 'm1', parentId: null, documentCount: 0, createdAt: '', updatedAt: '' },
+      {
+        id: 'r1',
+        name: 'Haus',
+        mappeId: 'm1',
+        parentId: null,
+        documentCount: 0,
+        createdAt: '',
+        updatedAt: '',
+      },
+      {
+        id: 'r2',
+        name: 'B',
+        mappeId: 'm1',
+        parentId: null,
+        documentCount: 0,
+        createdAt: '',
+        updatedAt: '',
+      },
     ];
     const target = resolveFilesystemDropTarget({
       browseMode: 'mappe',

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 import { NotFoundError } from '../../../shared/domain/errors.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
@@ -16,11 +18,7 @@ const LAYOUT_WORKER_TIMEOUT_MS = 120_000;
 export class GetDocumentLayoutTypstUseCase {
   constructor(private readonly getLayoutIr: GetDocumentLayoutIrUseCase) {}
 
-  async execute(
-    id: string,
-    userId: string,
-    subject: AuthorizationSubject
-  ): Promise<string> {
+  async execute(id: string, userId: string, subject: AuthorizationSubject): Promise<string> {
     const layoutIr = await this.getLayoutIr.execute(id, userId, subject);
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     const data = await fetchWorkerJson<{ typst?: string }>(

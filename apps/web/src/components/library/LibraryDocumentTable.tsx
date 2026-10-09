@@ -1,8 +1,21 @@
-import { Fragment, useCallback, useEffect, useState, type KeyboardEvent, type MouseEvent } from 'react';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink, ScanLine } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentDto, DuplicateStackMemberDto, LibraryTableColumnId } from '@docuvate/contracts';
+import type {
+  DocumentDto,
+  DuplicateStackMemberDto,
+  LibraryTableColumnId,
+} from '@docuvate/contracts';
 import { deleteDocument, getDuplicateStack } from '../../lib/api';
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { ExtractionProgressBar } from '../documents/ExtractionProgressBar';
@@ -41,7 +54,10 @@ interface LibraryDocumentTableProps {
   visibleColumns?: LibraryTableColumnId[];
 }
 
-function showColumn(columns: LibraryTableColumnId[] | undefined, id: LibraryTableColumnId): boolean {
+function showColumn(
+  columns: LibraryTableColumnId[] | undefined,
+  id: LibraryTableColumnId
+): boolean {
   return !columns || columns.includes(id);
 }
 
@@ -289,7 +305,11 @@ export function LibraryDocumentTable({
                         {doc.duplicateStack?.pendingReview ? (
                           <span className="badge badge-warn">{t('library.reviewPending')}</span>
                         ) : isExtractionPending(doc.status) ? (
-                          <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
+                          <ExtractionProgressBar
+                            doc={doc}
+                            compact
+                            className="library-row-progress"
+                          />
                         ) : (
                           <Badge status={doc.status} />
                         )}
@@ -342,279 +362,292 @@ export function LibraryDocumentTable({
       <div
         className={`library-table-wrap${hideFolderColumn ? ' library-table-wrap-hide-folder' : ''}`}
       >
-      <table className="data-table library-table">
-        <colgroup>
-          <col className="library-col-expand" />
-          <col className="library-col-check" />
-          <col className="library-col-title" />
-          {hideFolderColumn ? null : <col className="library-col-meta" />}
-          <col className="library-col-labels" />
-          <col className="library-col-status" />
-          <col className="library-col-date" />
-          <col className="library-col-action" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th className="library-col-expand" aria-hidden="true" />
-            <th className="library-col-check">
-              <input
-                type="checkbox"
-                checked={selected.size === items.length && items.length > 0}
-                onChange={onToggleSelectAll}
-                aria-label={t('library.selectAll')}
-              />
-            </th>
-            <th className="library-col-title">
-              <button type="button" className="sort-btn" onClick={() => onSort('title')}>
-                {t('library.colTitle')}
-              </button>
-            </th>
-            {hideFolderColumn || !showColumn(visibleColumns, 'folder') ? null : (
-              <th className="library-col-meta">
-                <span className="library-th-label">{t('library.colFolder')}</span>
+        <table className="data-table library-table">
+          <colgroup>
+            <col className="library-col-expand" />
+            <col className="library-col-check" />
+            <col className="library-col-title" />
+            {hideFolderColumn ? null : <col className="library-col-meta" />}
+            <col className="library-col-labels" />
+            <col className="library-col-status" />
+            <col className="library-col-date" />
+            <col className="library-col-action" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th className="library-col-expand" aria-hidden="true" />
+              <th className="library-col-check">
+                <input
+                  type="checkbox"
+                  checked={selected.size === items.length && items.length > 0}
+                  onChange={onToggleSelectAll}
+                  aria-label={t('library.selectAll')}
+                />
               </th>
-            )}
-            {showColumn(visibleColumns, 'labels') ? (
-              <th className="library-col-labels">
-                <span className="library-th-label">{t('library.colLabels')}</span>
-              </th>
-            ) : null}
-            {showColumn(visibleColumns, 'status') ? (
-              <th className="library-col-status">
-                <span className="library-th-label">{t('library.colStatus')}</span>
-              </th>
-            ) : null}
-            {showColumn(visibleColumns, 'date') ? (
-              <th className="library-col-date">
-                <button type="button" className="sort-btn" onClick={() => onSort('documentDate')}>
-                  {t('library.colDate')}
+              <th className="library-col-title">
+                <button type="button" className="sort-btn" onClick={() => onSort('title')}>
+                  {t('library.colTitle')}
                 </button>
               </th>
-            ) : null}
-            <th className="library-col-action">
-              <span className="sr-only">{t('library.colAction')}</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((doc) => {
-            const stackLabel = duplicateStackVersionLabel(doc, t);
-            const hasStack = showDuplicateStackBadge(doc);
-            const expanded = expandedIds.has(doc.id);
-            const members = stackMembers[doc.id]?.filter((m) => m.role === 'version') ?? [];
+              {hideFolderColumn || !showColumn(visibleColumns, 'folder') ? null : (
+                <th className="library-col-meta">
+                  <span className="library-th-label">{t('library.colFolder')}</span>
+                </th>
+              )}
+              {showColumn(visibleColumns, 'labels') ? (
+                <th className="library-col-labels">
+                  <span className="library-th-label">{t('library.colLabels')}</span>
+                </th>
+              ) : null}
+              {showColumn(visibleColumns, 'status') ? (
+                <th className="library-col-status">
+                  <span className="library-th-label">{t('library.colStatus')}</span>
+                </th>
+              ) : null}
+              {showColumn(visibleColumns, 'date') ? (
+                <th className="library-col-date">
+                  <button type="button" className="sort-btn" onClick={() => onSort('documentDate')}>
+                    {t('library.colDate')}
+                  </button>
+                </th>
+              ) : null}
+              <th className="library-col-action">
+                <span className="sr-only">{t('library.colAction')}</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((doc) => {
+              const stackLabel = duplicateStackVersionLabel(doc, t);
+              const hasStack = showDuplicateStackBadge(doc);
+              const expanded = expandedIds.has(doc.id);
+              const members = stackMembers[doc.id]?.filter((m) => m.role === 'version') ?? [];
 
-            const rowSelected = selected.has(doc.id);
-            const rowContextOpen = contextMenuDocumentId === doc.id;
-            const rowClassName = [
-              hasStack ? 'library-row-stack' : '',
-              rowSelected ? 'library-row-selected' : '',
-              rowContextOpen ? 'library-row-context-open' : '',
-            ]
-              .filter(Boolean)
-              .join(' ');
+              const rowSelected = selected.has(doc.id);
+              const rowContextOpen = contextMenuDocumentId === doc.id;
+              const rowClassName = [
+                hasStack ? 'library-row-stack' : '',
+                rowSelected ? 'library-row-selected' : '',
+                rowContextOpen ? 'library-row-context-open' : '',
+              ]
+                .filter(Boolean)
+                .join(' ');
 
-            return (
-              <Fragment key={doc.id}>
-                <tr
-                  className={rowClassName || undefined}
-                  tabIndex={0}
-                  aria-selected={rowSelected}
-                  draggable={enableDocumentDrag ? true : undefined}
-                  onDragStart={
-                    enableDocumentDrag
-                      ? (event) => {
-                          if (event.dataTransfer) setDocumentDragData(event.dataTransfer, doc.id);
-                        }
-                      : undefined
-                  }
-                  onContextMenu={(event) => onContextMenu(event, doc.id)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
-                      onContextMenuKeyboard(event, doc.id);
+              return (
+                <Fragment key={doc.id}>
+                  <tr
+                    className={rowClassName || undefined}
+                    tabIndex={0}
+                    aria-selected={rowSelected}
+                    draggable={enableDocumentDrag ? true : undefined}
+                    onDragStart={
+                      enableDocumentDrag
+                        ? (event) => {
+                            if (event.dataTransfer) setDocumentDragData(event.dataTransfer, doc.id);
+                          }
+                        : undefined
                     }
-                  }}
-                >
-                  <td className="library-col-expand">
-                    {hasStack ? (
-                      <button
-                        type="button"
-                        className="stack-toggle"
-                        aria-expanded={expanded}
-                        aria-label={
-                          expanded ? t('library.stackCollapseAria') : t('library.stackExpandAria')
-                        }
-                        onClick={() => void toggleExpanded(doc)}
-                      >
-                        {expanded ? '▾' : '▸'}
-                      </button>
-                    ) : null}
-                  </td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={selected.has(doc.id)}
-                      onChange={() => onToggleSelect(doc.id)}
-                      aria-label={`${doc.title} auswählen`}
-                    />
-                  </td>
-                  <td className="library-col-title">
-                    <div className="cell-title">
-                      <Link
-                        to={`/documents/${doc.id}`}
-                        className="library-title-link"
-                        title={doc.title}
-                      >
-                        {doc.title}
-                      </Link>
-                      {stackLabel ? (
+                    onContextMenu={(event) => onContextMenu(event, doc.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+                        onContextMenuKeyboard(event, doc.id);
+                      }
+                    }}
+                  >
+                    <td className="library-col-expand">
+                      {hasStack ? (
                         <button
                           type="button"
-                          className="stack-badge"
-                          title={t('library.stackVersionsTitle')}
-                          onClick={() => onReviewStack(doc.id)}
+                          className="stack-toggle"
+                          aria-expanded={expanded}
+                          aria-label={
+                            expanded ? t('library.stackCollapseAria') : t('library.stackExpandAria')
+                          }
+                          onClick={() => void toggleExpanded(doc)}
                         >
-                          {stackLabel}
+                          {expanded ? '▾' : '▸'}
                         </button>
                       ) : null}
-                      {showLegacyDuplicateHint(doc) ? (
-                        <span className="dup-badge" title={t('library.duplicateHintTitle')}>
-                          {t('library.duplicateHintBadge')}
-                        </span>
+                    </td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selected.has(doc.id)}
+                        onChange={() => onToggleSelect(doc.id)}
+                        aria-label={`${doc.title} auswählen`}
+                      />
+                    </td>
+                    <td className="library-col-title">
+                      <div className="cell-title">
+                        <Link
+                          to={`/documents/${doc.id}`}
+                          className="library-title-link"
+                          title={doc.title}
+                        >
+                          {doc.title}
+                        </Link>
+                        {stackLabel ? (
+                          <button
+                            type="button"
+                            className="stack-badge"
+                            title={t('library.stackVersionsTitle')}
+                            onClick={() => onReviewStack(doc.id)}
+                          >
+                            {stackLabel}
+                          </button>
+                        ) : null}
+                        {showLegacyDuplicateHint(doc) ? (
+                          <span className="dup-badge" title={t('library.duplicateHintTitle')}>
+                            {t('library.duplicateHintBadge')}
+                          </span>
+                        ) : null}
+                        {doc.ingestSource === 'scanner_sftp' ? (
+                          <span className="library-title-ingest-meta">
+                            <ScanLine
+                              className="library-title-ingest-icon"
+                              size={14}
+                              aria-label={t('documents.ingestSourceScanner')}
+                            />
+                            {t('documents.ingestSourceScanner')}
+                          </span>
+                        ) : null}
+                      </div>
+                      {doc.filename.trim() !== doc.title.trim() ? (
+                        <div className="muted cell-sub" title={doc.filename}>
+                          {doc.filename}
+                        </div>
                       ) : null}
-                      {doc.ingestSource === 'scanner_sftp' ? (
-                        <span className="library-title-ingest-meta">
-                          <ScanLine
-                            className="library-title-ingest-icon"
-                            size={14}
-                            aria-label={t('documents.ingestSourceScanner')}
+                      {doc.folder?.name && doc.folder.id !== suppressFolderFallbackForId ? (
+                        <div
+                          className="muted cell-sub library-title-folder-fallback"
+                          title={doc.folder.name}
+                        >
+                          {doc.folder.name}
+                        </div>
+                      ) : null}
+                      {!showColumn(visibleColumns, 'status') && doc.status !== 'ready' ? (
+                        <div className="library-title-status-fallback">
+                          {isExtractionPending(doc.status) ? (
+                            <ExtractionProgressBar
+                              doc={doc}
+                              compact
+                              className="library-row-progress"
+                            />
+                          ) : (
+                            <Badge status={doc.status} />
+                          )}
+                        </div>
+                      ) : null}
+                    </td>
+                    {hideFolderColumn || !showColumn(visibleColumns, 'folder') ? null : (
+                      <td className="library-col-meta" title={doc.folder?.name ?? ''}>
+                        {doc.folder?.name ?? ''}
+                      </td>
+                    )}
+                    {showColumn(visibleColumns, 'labels') ? (
+                      <td className="library-col-labels">
+                        <DocumentLabelsCell tags={doc.tags} />
+                      </td>
+                    ) : null}
+                    {showColumn(visibleColumns, 'status') ? (
+                      <td className="library-col-status">
+                        {doc.duplicateStack?.pendingReview ? (
+                          <span
+                            className="badge badge-warn"
+                            title={t('library.reviewPendingTooltip')}
+                          >
+                            {t('library.reviewPending')}
+                          </span>
+                        ) : isExtractionPending(doc.status) ? (
+                          <ExtractionProgressBar
+                            doc={doc}
+                            compact
+                            className="library-row-progress"
                           />
-                          {t('documents.ingestSourceScanner')}
-                        </span>
-                      ) : null}
-                    </div>
-                    {doc.filename.trim() !== doc.title.trim() ? (
-                      <div className="muted cell-sub" title={doc.filename}>
-                        {doc.filename}
-                      </div>
-                    ) : null}
-                    {doc.folder?.name &&
-                    doc.folder.id !== suppressFolderFallbackForId ? (
-                      <div
-                        className="muted cell-sub library-title-folder-fallback"
-                        title={doc.folder.name}
-                      >
-                        {doc.folder.name}
-                      </div>
-                    ) : null}
-                    {!showColumn(visibleColumns, 'status') && doc.status !== 'ready' ? (
-                      <div className="library-title-status-fallback">
-                        {isExtractionPending(doc.status) ? (
-                          <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
                         ) : (
                           <Badge status={doc.status} />
                         )}
-                      </div>
+                      </td>
                     ) : null}
-                  </td>
-                  {hideFolderColumn || !showColumn(visibleColumns, 'folder') ? null : (
-                    <td className="library-col-meta" title={doc.folder?.name ?? ''}>
-                      {doc.folder?.name ?? ''}
-                    </td>
-                  )}
-                  {showColumn(visibleColumns, 'labels') ? (
-                    <td className="library-col-labels">
-                      <DocumentLabelsCell tags={doc.tags} />
-                    </td>
-                  ) : null}
-                  {showColumn(visibleColumns, 'status') ? (
-                    <td className="library-col-status">
-                      {doc.duplicateStack?.pendingReview ? (
-                        <span className="badge badge-warn" title={t('library.reviewPendingTooltip')}>
-                          {t('library.reviewPending')}
-                        </span>
-                      ) : isExtractionPending(doc.status) ? (
-                        <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
-                      ) : (
-                        <Badge status={doc.status} />
-                      )}
-                    </td>
-                  ) : null}
-                  {showColumn(visibleColumns, 'date') ? (
-                    <td className="library-col-date">{documentDisplayDate(doc)}</td>
-                  ) : null}
-                  <td className="library-col-action">
-                    <div className="library-row-actions">
-                      {hasStack ? (
-                        <Button
+                    {showColumn(visibleColumns, 'date') ? (
+                      <td className="library-col-date">{documentDisplayDate(doc)}</td>
+                    ) : null}
+                    <td className="library-col-action">
+                      <div className="library-row-actions">
+                        {hasStack ? (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="library-inline-action"
+                            onClick={() => onReviewStack(doc.id)}
+                          >
+                            {t('library.stackReviewAction')}
+                          </Button>
+                        ) : (
+                          <Link
+                            to={`/documents/${doc.id}`}
+                            className="library-open-doc-btn"
+                            aria-label={t('library.contextOpen')}
+                            title={t('library.contextOpen')}
+                          >
+                            <ExternalLink size={20} strokeWidth={1.75} aria-hidden />
+                          </Link>
+                        )}
+                        <button
                           type="button"
-                          variant="ghost"
-                          className="library-inline-action"
-                          onClick={() => onReviewStack(doc.id)}
+                          className="library-row-menu-btn"
+                          aria-label={t('library.rowActionsAria', { title: doc.title })}
+                          aria-haspopup="menu"
+                          onClick={(event) => onRowMenu(event, doc.id)}
                         >
-                          {t('library.stackReviewAction')}
-                        </Button>
-                      ) : (
-                        <Link
-                          to={`/documents/${doc.id}`}
-                          className="library-open-doc-btn"
-                          aria-label={t('library.contextOpen')}
-                          title={t('library.contextOpen')}
+                          ⋯
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {expanded && members.length > 0
+                    ? members.map((member) => (
+                        <tr
+                          key={`${doc.id}-${member.documentId}`}
+                          className="library-row-stack-version"
                         >
-                          <ExternalLink size={20} strokeWidth={1.75} aria-hidden />
-                        </Link>
-                      )}
-                      <button
-                        type="button"
-                        className="library-row-menu-btn"
-                        aria-label={t('library.rowActionsAria', { title: doc.title })}
-                        aria-haspopup="menu"
-                        onClick={(event) => onRowMenu(event, doc.id)}
-                      >
-                        ⋯
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                {expanded && members.length > 0
-                  ? members.map((member) => (
-                      <tr key={`${doc.id}-${member.documentId}`} className="library-row-stack-version">
-                        <td />
-                        <td />
-                        <td colSpan={hideFolderColumn ? 5 : 6}>
-                          <div className="stack-version-row">
-                            <span className="muted">{t('library.stackVersionLabel')}</span>
-                            <strong>{member.title}</strong>
-                            <span className="muted cell-sub">{member.filename}</span>
-                            <Badge status={member.status} />
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="library-inline-action"
-                              onClick={() => onReviewStack(doc.id, member.documentId)}
-                            >
-                              {t('library.stackCompareAction')}
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="library-inline-action library-inline-action-danger"
-                              onClick={() =>
-                                setVersionDeleteTarget({ primaryDocId: doc.id, member })
-                              }
-                            >
-                              {t('library.stackDeleteAction')}
-                            </Button>
-                          </div>
-                        </td>
-                        <td />
-                      </tr>
-                    ))
-                  : null}
-              </Fragment>
-            );
-          })}
-        </tbody>
-      </table>
+                          <td />
+                          <td />
+                          <td colSpan={hideFolderColumn ? 5 : 6}>
+                            <div className="stack-version-row">
+                              <span className="muted">{t('library.stackVersionLabel')}</span>
+                              <strong>{member.title}</strong>
+                              <span className="muted cell-sub">{member.filename}</span>
+                              <Badge status={member.status} />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                className="library-inline-action"
+                                onClick={() => onReviewStack(doc.id, member.documentId)}
+                              >
+                                {t('library.stackCompareAction')}
+                              </Button>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                className="library-inline-action library-inline-action-danger"
+                                onClick={() =>
+                                  setVersionDeleteTarget({ primaryDocId: doc.id, member })
+                                }
+                              >
+                                {t('library.stackDeleteAction')}
+                              </Button>
+                            </div>
+                          </td>
+                          <td />
+                        </tr>
+                      ))
+                    : null}
+                </Fragment>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
 
       {confirmDialog}

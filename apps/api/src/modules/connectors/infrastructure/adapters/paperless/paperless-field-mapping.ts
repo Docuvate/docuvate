@@ -1,9 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CustomFieldType } from '@docuvate/contracts';
 import type { PaperlessCustomFieldDataType } from './paperless-api.types.js';
 
 export type PaperlessOcrMode = 'keep_paperless' | 'rerun_docuvate';
 
-export function mapPaperlessCustomFieldType(dataType: PaperlessCustomFieldDataType): CustomFieldType {
+export function mapPaperlessCustomFieldType(
+  dataType: PaperlessCustomFieldDataType
+): CustomFieldType {
   switch (dataType) {
     case 'date':
       return 'date';
@@ -26,7 +30,11 @@ export function mapPaperlessCustomFieldType(dataType: PaperlessCustomFieldDataTy
 }
 
 export function paperlessCustomFieldStorageKey(paperlessFieldId: number, slug: string): string {
-  const safe = slug.trim().toLowerCase().replace(/[^a-z0-9_]+/g, '_').replace(/^_|_$/g, '');
+  const safe = slug
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_]+/g, '_')
+    .replace(/^_|_$/g, '');
   const suffix = safe.length > 0 ? safe : `field_${paperlessFieldId}`;
   return `global:paperless_${paperlessFieldId}_${suffix}`;
 }
@@ -73,14 +81,15 @@ export function mergePaperlessNotes(notes: PaperlessDocumentNotes): string | nul
     const trimmed = notes.trim();
     return trimmed.length > 0 ? trimmed : null;
   }
-  const lines = notes
-    .map((row) => row.note?.trim() ?? '')
-    .filter((line) => line.length > 0);
+  const lines = notes.map((row) => row.note?.trim() ?? '').filter((line) => line.length > 0);
   return lines.length > 0 ? lines.join('\n') : null;
 }
 
 type PaperlessDocumentNotes = Array<{ note: string }> | string | null | undefined;
 
-export function paperlessDocumentChecksum(doc: { checksum: string | null; modified: string }): string {
+export function paperlessDocumentChecksum(doc: {
+  checksum: string | null;
+  modified: string;
+}): string {
   return (doc.checksum?.trim() || doc.modified).trim();
 }

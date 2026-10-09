@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 import { EXTRACTION_FIELD_FEEDBACK_REPOSITORY } from '../../shared/domain/ports.js';
 import { PgExtractionFieldFeedbackRepository } from './infrastructure/pg-extraction-field-feedback.repository.js';
@@ -8,7 +10,10 @@ import { ExtractionFeedbackController } from './presentation/extraction-feedback
 @Module({
   controllers: [ExtractionFeedbackController],
   providers: [
-    { provide: EXTRACTION_FIELD_FEEDBACK_REPOSITORY, useClass: PgExtractionFieldFeedbackRepository },
+    {
+      provide: EXTRACTION_FIELD_FEEDBACK_REPOSITORY,
+      useClass: PgExtractionFieldFeedbackRepository,
+    },
     RecordExtractionFieldCorrectionsUseCase,
     ListExtractionFieldCorrectionsUseCase,
   ],

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { mlopsEnabled } from '../../../shared/infrastructure/mlops/mlops-config.js';
@@ -18,7 +20,10 @@ import {
 } from './model-registry.dto.js';
 import { toFamilyDto, toJobDto, toVersionDto } from './model-registry.mapper.js';
 
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('ml')
 @Controller('ml')

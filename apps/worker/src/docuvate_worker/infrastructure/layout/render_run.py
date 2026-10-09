@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Shared run placement helpers for HTML and Typst fidelity renderers."""
 
 from __future__ import annotations

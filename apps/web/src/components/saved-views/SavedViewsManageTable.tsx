@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -146,7 +148,9 @@ export function SavedViewsManageTable({
                   >
                     {view.name}
                   </Link>
-                  <p className="saved-views-manage-list-meta muted">{formatPinnedMeta(view, true)}</p>
+                  <p className="saved-views-manage-list-meta muted">
+                    {formatPinnedMeta(view, true)}
+                  </p>
                 </div>
                 <div className="saved-views-manage-list-actions">
                   {renderActions(view, canEdit)}
@@ -158,11 +162,15 @@ export function SavedViewsManageTable({
         <table className="saved-views-manage-table">
           <thead>
             <tr>
-              <th scope="col" className="saved-views-col-order">{t('savedViews.colOrder')}</th>
+              <th scope="col" className="saved-views-col-order">
+                {t('savedViews.colOrder')}
+              </th>
               <th scope="col">{t('savedViews.nameLabel')}</th>
               <th scope="col">{t('savedViews.visibilityLabel')}</th>
               <th scope="col">{t('savedViews.colPinned')}</th>
-              <th scope="col" className="saved-views-col-actions">{t('savedViews.colActions')}</th>
+              <th scope="col" className="saved-views-col-actions">
+                {t('savedViews.colActions')}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -211,7 +219,9 @@ export function SavedViewsManageTable({
                           onChange={(e) => setRenameValue(e.target.value)}
                           aria-label={t('savedViews.nameLabel')}
                         />
-                        <Button type="submit" disabled={busy}>{t('savedViews.saveConfirm')}</Button>
+                        <Button type="submit" disabled={busy}>
+                          {t('savedViews.saveConfirm')}
+                        </Button>
                         <Button type="button" variant="secondary" onClick={() => setRenameId(null)}>
                           {t('common.cancel')}
                         </Button>

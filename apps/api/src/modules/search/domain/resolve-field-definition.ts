@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CustomFieldType } from '@docuvate/contracts';
 import { normalizeSearchText } from './normalize-search-text.js';
 

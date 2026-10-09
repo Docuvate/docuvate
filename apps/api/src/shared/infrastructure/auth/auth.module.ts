@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Global, Module } from '@nestjs/common';
 import { AdminGuard } from './admin.guard.js';
 import { AuthGuard } from './auth.guard.js';

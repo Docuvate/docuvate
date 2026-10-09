@@ -1,5 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   CreateSavedDocumentViewRequestDto,
@@ -8,7 +14,10 @@ import {
   SavedDocumentViewListResponseDto,
   UpdateSavedDocumentViewRequestDto,
 } from '../../../shared/presentation/dtos/workspace.dto.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   CreateSavedViewUseCase,
   DeleteSavedViewUseCase,
@@ -40,7 +49,10 @@ export class SavedViewsController {
   }
 
   @Put('reorder')
-  @ApiDocuvateRoute({ operationId: 'reorderSavedDocumentViews', summary: 'Reorder owned saved views' })
+  @ApiDocuvateRoute({
+    operationId: 'reorderSavedDocumentViews',
+    summary: 'Reorder owned saved views',
+  })
   async reorder(
     @Session() session: AuthSession,
     @Body() body: ReorderSavedDocumentViewsRequestDto
@@ -51,13 +63,19 @@ export class SavedViewsController {
 
   @Get(':id')
   @ApiDocuvateRoute({ operationId: 'getSavedDocumentView', summary: 'Get one saved document view' })
-  async get(@Session() session: AuthSession, @Param('id') id: string): Promise<SavedDocumentViewDtoClass> {
+  async get(
+    @Session() session: AuthSession,
+    @Param('id') id: string
+  ): Promise<SavedDocumentViewDtoClass> {
     const view = await this.getView.execute(session.user.id, id);
     return toSavedDocumentViewDto(view);
   }
 
   @Post()
-  @ApiDocuvateRoute({ operationId: 'createSavedDocumentView', summary: 'Create saved document view' })
+  @ApiDocuvateRoute({
+    operationId: 'createSavedDocumentView',
+    summary: 'Create saved document view',
+  })
   async create(
     @Session() session: AuthSession,
     @Body() body: CreateSavedDocumentViewRequestDto
@@ -67,7 +85,10 @@ export class SavedViewsController {
   }
 
   @Patch(':id')
-  @ApiDocuvateRoute({ operationId: 'updateSavedDocumentView', summary: 'Update saved document view' })
+  @ApiDocuvateRoute({
+    operationId: 'updateSavedDocumentView',
+    summary: 'Update saved document view',
+  })
   async patch(
     @Session() session: AuthSession,
     @Param('id') id: string,
@@ -78,10 +99,12 @@ export class SavedViewsController {
   }
 
   @Delete(':id')
-  @ApiDocuvateRoute({ operationId: 'deleteSavedDocumentView', summary: 'Delete saved document view' })
+  @ApiDocuvateRoute({
+    operationId: 'deleteSavedDocumentView',
+    summary: 'Delete saved document view',
+  })
   async remove(@Session() session: AuthSession, @Param('id') id: string): Promise<OkResponseDto> {
     await this.deleteView.execute(session.user.id, id);
     return { ok: true };
   }
-
 }

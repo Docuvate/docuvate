@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Keep in sync with `scripts/prerender-routes.mjs`. */
 export const prerenderRoutes = [
   '/',
@@ -18,6 +20,7 @@ export const prerenderRoutes = [
   '/docs/sdks',
   '/impressum',
   '/datenschutz',
+  '/lizenz',
   '/en',
   '/en/docs',
   '/en/docs/motivation',
@@ -36,6 +39,7 @@ export const prerenderRoutes = [
   '/en/docs/sdks',
   '/en/impressum',
   '/en/datenschutz',
+  '/en/license',
 ] as const;
 
 export type PrerenderRoute = (typeof prerenderRoutes)[number];

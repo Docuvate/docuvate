@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const DEFAULT_TIMEOUT_MS = 15_000;
 
 export async function connectorFetch(

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import {
   calibrationThresholds,
@@ -13,10 +15,9 @@ describe('rag gate calibration fixture', () => {
 
   it('matches recorded DE+EN fixture expectations', () => {
     for (const row of RAG_GATE_CALIBRATION_FIXTURE) {
-      const pass =
-        row.id.startsWith('fusion')
-          ? fusionGatePasses(row.score)
-          : rerankerGatePasses(row.score);
+      const pass = row.id.startsWith('fusion')
+        ? fusionGatePasses(row.score)
+        : rerankerGatePasses(row.score);
       expect(pass).toBe(row.expectPass);
     }
   });

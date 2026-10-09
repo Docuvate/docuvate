@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useState } from 'react';
 import i18n from '../i18n';
 import { uploadDocument } from './api';
@@ -85,7 +87,9 @@ export function useDocumentUploadQueue(onUploaded?: () => void) {
   );
 
   const clearTerminalItems = useCallback(() => {
-    setQueue((prev) => prev.filter((item) => item.status === 'pending' || item.status === 'uploading'));
+    setQueue((prev) =>
+      prev.filter((item) => item.status === 'pending' || item.status === 'uploading')
+    );
   }, []);
 
   const removeUploadItem = useCallback((id: string) => {

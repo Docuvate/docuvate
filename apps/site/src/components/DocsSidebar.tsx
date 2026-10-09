@@ -1,11 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Link, useLocation } from 'react-router-dom';
 import { getDocsExtended } from '../content/docsExtended';
 import { useLocale } from '../context/LocaleContext';
 import { useMemo } from 'react';
 
-function sidebarHashFragments(
-  groups: ReturnType<typeof getDocsExtended>['nav'],
-): Set<string> {
+function sidebarHashFragments(groups: ReturnType<typeof getDocsExtended>['nav']): Set<string> {
   const fragments = new Set<string>();
   for (const group of groups) {
     for (const item of group.items) {
@@ -21,7 +21,7 @@ function isActive(
   pathname: string,
   hash: string,
   itemPath: string,
-  sidebarHashFragments: Set<string>,
+  sidebarHashFragments: Set<string>
 ): boolean {
   const normalizedPath = pathname.replace(/\/$/, '') || '/';
   const normalizedHash = hash || '';

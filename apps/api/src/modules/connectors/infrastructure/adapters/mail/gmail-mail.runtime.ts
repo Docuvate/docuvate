@@ -1,6 +1,14 @@
-import type { ConnectorRuntimePorts, ConnectorSourcePort } from '../../../domain/connector-runtime.ports.js';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  ConnectorRuntimePorts,
+  ConnectorSourcePort,
+} from '../../../domain/connector-runtime.ports.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
-import type { ConnectorImportableItem, ConnectorImportedBlob } from '../../../domain/connector-runtime.types.js';
+import type {
+  ConnectorImportableItem,
+  ConnectorImportedBlob,
+} from '../../../domain/connector-runtime.types.js';
 import { connectorFetch } from '../shared/connector-http.js';
 
 interface GmailMessageListResponse {
@@ -31,7 +39,10 @@ function decodeBase64Url(data: string): Buffer {
   return Buffer.from(normalized, 'base64');
 }
 
-function walkParts(part: GmailPayloadPart | undefined, visit: (part: GmailPayloadPart) => void): void {
+function walkParts(
+  part: GmailPayloadPart | undefined,
+  visit: (part: GmailPayloadPart) => void
+): void {
   if (!part) return;
   visit(part);
   for (const child of part.parts ?? []) {

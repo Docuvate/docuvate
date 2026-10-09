@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useMemo, useState } from 'react';
 import {
   summarizeLabelAssignmentInventory,
@@ -139,24 +141,21 @@ export function useLabelsInsights(onReloadTags: () => Promise<void>) {
     [load, onReloadTags]
   );
 
-  const dismiss = useCallback(
-    async (item: LabelRecommendationDto, scope: 'local' | 'global') => {
-      setBusyId(item.id);
-      try {
-        await dismissLabelRecommendation(item.id, {
-          blockFuture: scope === 'global',
-          phrase: dismissPhrase(item),
-          phrases: dismissPhrases(item),
-        });
-        setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
-      } catch (err) {
-        setError(formatUserFacingError(err, 'errors.dismissFailed'));
-      } finally {
-        setBusyId(null);
-      }
-    },
-    []
-  );
+  const dismiss = useCallback(async (item: LabelRecommendationDto, scope: 'local' | 'global') => {
+    setBusyId(item.id);
+    try {
+      await dismissLabelRecommendation(item.id, {
+        blockFuture: scope === 'global',
+        phrase: dismissPhrase(item),
+        phrases: dismissPhrases(item),
+      });
+      setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
+    } catch (err) {
+      setError(formatUserFacingError(err, 'errors.dismissFailed'));
+    } finally {
+      setBusyId(null);
+    }
+  }, []);
 
   return {
     queueItems,

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { MutableRefObject } from 'react';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -64,9 +66,7 @@ export function ThemePreferencePicker({
         firstOptionRef={firstOptionRef}
         options={OPTIONS.map((preference) => ({
           value: preference,
-          label: (
-            <SegmentedIconLabel Icon={iconFor(preference)} label={labelFor(preference)} />
-          ),
+          label: <SegmentedIconLabel Icon={iconFor(preference)} label={labelFor(preference)} />,
         }))}
         onChange={onChange}
       />

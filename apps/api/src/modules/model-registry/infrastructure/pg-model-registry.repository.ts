@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
@@ -120,7 +122,10 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
     return row ? mapVersion(row as Record<string, unknown>) : null;
   }
 
-  async setVersionLifecycle(versionId: string, lifecycle: MlModelLifecycle): Promise<MlModelVersionEntity> {
+  async setVersionLifecycle(
+    versionId: string,
+    lifecycle: MlModelLifecycle
+  ): Promise<MlModelVersionEntity> {
     const promotedAt = lifecycle === 'active' ? new Date() : null;
     const result = await this.pool.query(
       `UPDATE ml_model_versions
@@ -172,10 +177,8 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
       baselineVersionId:
         saved['baseline_version_id'] == null ? null : String(saved['baseline_version_id']),
       metricName: String(saved['metric_name']),
-      baselineValue:
-        saved['baseline_value'] == null ? null : Number(saved['baseline_value']),
-      candidateValue:
-        saved['candidate_value'] == null ? null : Number(saved['candidate_value']),
+      baselineValue: saved['baseline_value'] == null ? null : Number(saved['baseline_value']),
+      candidateValue: saved['candidate_value'] == null ? null : Number(saved['candidate_value']),
       maxAllowedDrop: Number(saved['max_allowed_drop']),
       passed: Boolean(saved['passed']),
       evaluatedAt: new Date(String(saved['evaluated_at'])),
@@ -211,7 +214,12 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
     patch: Partial<
       Pick<
         MlRetrainJobEntity,
-        'status' | 'trainingSnapshotId' | 'resultVersionId' | 'errorMessage' | 'startedAt' | 'finishedAt'
+        | 'status'
+        | 'trainingSnapshotId'
+        | 'resultVersionId'
+        | 'errorMessage'
+        | 'startedAt'
+        | 'finishedAt'
       >
     >
   ): Promise<MlRetrainJobEntity> {
@@ -243,7 +251,9 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
       params.push(patch.finishedAt);
     }
     if (fields.length === 0) {
-      const existing = await this.pool.query(`SELECT * FROM ml_retrain_jobs WHERE id = $1`, [jobId]);
+      const existing = await this.pool.query(`SELECT * FROM ml_retrain_jobs WHERE id = $1`, [
+        jobId,
+      ]);
       const row = existing.rows[0];
       if (!row) {
         throw new NotFoundError('Retrain job');
@@ -336,5 +346,4 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
     );
     return mapVersion(result.rows[0] as Record<string, unknown>);
   }
-
 }

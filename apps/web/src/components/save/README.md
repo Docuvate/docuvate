@@ -56,13 +56,13 @@ export function ExampleSettingsSection() {
 
 ### `PageFormSaveKit` props
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `dirty` | `boolean` | Show SaveBar and enable guard / Cmd/Ctrl+S |
-| `saving` | `boolean` | Disable actions; bar shows saving copy |
-| `error` | `string \| null \| undefined` | Optional inline error in the bar (localized) |
-| `onSave` | `() => void` | Persist draft; parent updates baseline via `form.commit` on success |
-| `onDiscard` | `() => void` | Reset draft to baseline |
+| Prop        | Type                          | Description                                                         |
+| ----------- | ----------------------------- | ------------------------------------------------------------------- |
+| `dirty`     | `boolean`                     | Show SaveBar and enable guard / Cmd/Ctrl+S                          |
+| `saving`    | `boolean`                     | Disable actions; bar shows saving copy                              |
+| `error`     | `string \| null \| undefined` | Optional inline error in the bar (localized)                        |
+| `onSave`    | `() => void`                  | Persist draft; parent updates baseline via `form.commit` on success |
+| `onDiscard` | `() => void`                  | Reset draft to baseline                                             |
 
 Includes: fixed `SaveBar`, `useUnsavedChangesGuard` (router + `beforeunload`), `UnsavedChangesDialog`, Cmd/Ctrl+S.
 
@@ -70,13 +70,13 @@ Includes: fixed `SaveBar`, `useUnsavedChangesGuard` (router + `beforeunload`), `
 
 Use when the page already handles guards/keyboard (rare). **Do not** change prop names without updating ADR 011 (Appearance page).
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `visible` | `boolean` | When false, renders nothing |
-| `saving` | `boolean` | Disables discard/save; status text uses saving i18n |
-| `error` | `string \| null \| undefined` | Shown above actions when set |
-| `onSave` | `() => void` | Primary action |
-| `onDiscard` | `() => void` | Secondary action |
+| Prop        | Type                          | Description                                         |
+| ----------- | ----------------------------- | --------------------------------------------------- |
+| `visible`   | `boolean`                     | When false, renders nothing                         |
+| `saving`    | `boolean`                     | Disables discard/save; status text uses saving i18n |
+| `error`     | `string \| null \| undefined` | Shown above actions when set                        |
+| `onSave`    | `() => void`                  | Primary action                                      |
+| `onDiscard` | `() => void`                  | Secondary action                                    |
 
 Rendered via portal on `document.body`; positioned with CSS vars from `SaveBarLayoutSync`.
 
@@ -108,10 +108,10 @@ export function ExampleAction() {
 }
 ```
 
-| Method | Description |
-| --- | --- |
-| `toast.success(message?)` | Green status toast, check icon, ~3s auto-dismiss |
-| `toast.error(message, retry?)` | Error toast, optional retry action |
+| Method                         | Description                                      |
+| ------------------------------ | ------------------------------------------------ |
+| `toast.success(message?)`      | Green status toast, check icon, ~3s auto-dismiss |
+| `toast.error(message, retry?)` | Error toast, optional retry action               |
 
 Behaviour: **16px** below the app header and from the right edge; `role="status"` + `aria-live="polite"` (errors use `role="alert"`); no autofocus; **Escape** dismisses only when focus is inside the toast; **pause on hover**; radius ≤12px (`--dv-radius-lg`); semantic ok/danger colors (light + dark tokens).
 

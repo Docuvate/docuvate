@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DocumentDto, ExtractedField, ExtractionBlock } from '@docuvate/contracts';
@@ -62,8 +64,7 @@ export function DocumentExtractionSection({
     !hasContent && !pending && !failed && doc.status === 'ready' && onRequeueExtraction;
   const [arenaOpenOverride, setArenaOpenOverride] = useState<boolean | null>(null);
   const arenaOpen =
-    arenaOpenOverride ??
-    (advancedFeaturesEnabled && (failed || !hasExtractedContent(doc, blocks)));
+    arenaOpenOverride ?? (advancedFeaturesEnabled && (failed || !hasExtractedContent(doc, blocks)));
 
   function openArena() {
     const details = arenaDetailsRef.current;
@@ -85,7 +86,9 @@ export function DocumentExtractionSection({
                 aria-pressed={editMode}
                 onClick={() => setEditMode((on) => !on)}
               >
-                {editMode ? t('documents.doneEditingExtractedText') : t('documents.editExtractedText')}
+                {editMode
+                  ? t('documents.doneEditingExtractedText')
+                  : t('documents.editExtractedText')}
               </Button>
               {editMode && blocksDirty ? (
                 <Button type="button" variant="secondary" disabled={saving} onClick={onSaveBlocks}>

@@ -193,7 +193,9 @@
   color: var(--dv-color-header-input-fg);
   cursor: pointer;
   transform: translateX(-50%);
-  transition: width 180ms ease, box-shadow 180ms ease;
+  transition:
+    width 180ms ease,
+    box-shadow 180ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -856,7 +858,9 @@ mark.global-search-mark {
 .border-collapsible-panel {
   min-height: 0;
   height: 100%;
-  transition: width 0.15s ease, opacity 0.12s ease;
+  transition:
+    width 0.15s ease,
+    opacity 0.12s ease;
 }
 
 .border-collapsible-rail-collapsed .border-collapsible-panel.app-sidebar-collapsed {
@@ -891,7 +895,9 @@ mark.global-search-mark {
 .app-sidebar-rail {
   flex: 0 0 var(--app-sidebar-width, 220px);
   width: var(--app-sidebar-width, 220px);
-  transition: width 0.15s ease, flex-basis 0.15s ease;
+  transition:
+    width 0.15s ease,
+    flex-basis 0.15s ease;
 }
 
 .app-sidebar-rail.border-collapsible-rail-collapsed {
@@ -2736,7 +2742,11 @@ mark.global-search-mark {
 }
 
 .doc-chat-assistant-failed {
-  border-color: color-mix(in srgb, var(--dv-color-danger, var(--dv-color-danger)) 35%, var(--dv-color-border));
+  border-color: color-mix(
+    in srgb,
+    var(--dv-color-danger, var(--dv-color-danger)) 35%,
+    var(--dv-color-border)
+  );
 }
 
 .doc-chat-error-block {
@@ -3353,7 +3363,9 @@ mark.global-search-mark {
   box-shadow: inset 0 0 0 1px transparent;
 }
 
-.segmented-control--preference.segmented-control--shell .segmented-control__option + .segmented-control__option {
+.segmented-control--preference.segmented-control--shell
+  .segmented-control__option
+  + .segmented-control__option {
   border-left: 1px solid var(--dv-color-border);
 }
 
@@ -3393,7 +3405,9 @@ mark.global-search-mark {
   color: var(--dv-color-header-input-fg);
 }
 
-.app-topbar .segmented-control--preference.segmented-control--shell .segmented-control__option--selected {
+.app-topbar
+  .segmented-control--preference.segmented-control--shell
+  .segmented-control__option--selected {
   background: var(--dv-color-accent-soft);
   color: var(--dv-color-accent);
   box-shadow: inset 0 0 0 1px var(--dv-color-accent);
@@ -3779,7 +3793,9 @@ mark.global-search-mark {
   padding: var(--dv-space-lg);
   text-align: center;
   background: var(--dv-color-bg-raised);
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .dropzone-active {
@@ -4003,10 +4019,12 @@ mark.global-search-mark {
   overflow-x: hidden;
 }
 
-
 .library-layout {
   display: grid;
-  grid-template-columns: minmax(var(--dv-layout-library-filter-min), var(--dv-layout-library-filter-max)) minmax(0, 1fr);
+  grid-template-columns: minmax(
+      var(--dv-layout-library-filter-min),
+      var(--dv-layout-library-filter-max)
+    ) minmax(0, 1fr);
   gap: var(--dv-space-md);
   align-items: start;
   min-width: 0;
@@ -4133,9 +4151,7 @@ mark.global-search-mark {
   min-width: 0;
 }
 
-.library-list-toolbar-filesystem
-  .library-list-toolbar-controls
-  .library-view-switcher-segmented,
+.library-list-toolbar-filesystem .library-list-toolbar-controls .library-view-switcher-segmented,
 .library-list-toolbar-filesystem .library-list-toolbar-controls .custom-select-trigger {
   min-height: var(--dv-control-height);
   height: var(--dv-control-height);
@@ -6322,7 +6338,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-bg-raised);
   overflow: hidden;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .doc-card-selected {
@@ -7996,7 +8014,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   letter-spacing: 0.01em;
   color: var(--dv-color-text);
   background: color-mix(in srgb, var(--dv-color-bg-raised) 94%, transparent);
-  border: 1px solid color-mix(in srgb, var(--tag-badge-accent, var(--dv-color-accent)) 55%, var(--dv-color-border));
+  border: 1px solid
+    color-mix(in srgb, var(--tag-badge-accent, var(--dv-color-accent)) 55%, var(--dv-color-border));
   box-shadow: var(--dv-shadow-sm);
   white-space: nowrap;
   user-select: none;
@@ -8005,7 +8024,11 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .label-space-tag-badge--active {
   border-color: var(--tag-badge-accent, var(--dv-color-accent));
-  background: color-mix(in srgb, var(--tag-badge-accent, var(--dv-color-accent)) 12%, var(--dv-color-bg-raised));
+  background: color-mix(
+    in srgb,
+    var(--tag-badge-accent, var(--dv-color-accent)) 12%,
+    var(--dv-color-bg-raised)
+  );
 }
 
 .label-space-tag-badge--dimmed {
@@ -8894,7 +8917,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   }
 
   .library-list-search.library-search-row:not(.library-list-search--compact) .library-filter-toggle,
-  .library-list-search.library-search-row:not(.library-list-search--compact) button[type="submit"] {
+  .library-list-search.library-search-row:not(.library-list-search--compact) button[type='submit'] {
     flex: 1 1 calc(50% - var(--dv-space-xs));
     min-width: 0;
   }
@@ -10299,7 +10322,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   height: 3.25rem;
 }
 
-
 .admin-status-badge {
   display: inline-flex;
   align-items: center;
@@ -10466,18 +10488,42 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   background: var(--dv-color-bg-raised);
 }
 
-.dashboard-widget-span-1 { grid-column: span 1; }
-.dashboard-widget-span-2 { grid-column: span 2; }
-.dashboard-widget-span-3 { grid-column: span 3; }
-.dashboard-widget-span-4 { grid-column: span 4; }
-.dashboard-widget-span-5 { grid-column: span 5; }
-.dashboard-widget-span-6 { grid-column: span 6; }
-.dashboard-widget-span-7 { grid-column: span 7; }
-.dashboard-widget-span-8 { grid-column: span 8; }
-.dashboard-widget-span-9 { grid-column: span 9; }
-.dashboard-widget-span-10 { grid-column: span 10; }
-.dashboard-widget-span-11 { grid-column: span 11; }
-.dashboard-widget-span-12 { grid-column: span 12; }
+.dashboard-widget-span-1 {
+  grid-column: span 1;
+}
+.dashboard-widget-span-2 {
+  grid-column: span 2;
+}
+.dashboard-widget-span-3 {
+  grid-column: span 3;
+}
+.dashboard-widget-span-4 {
+  grid-column: span 4;
+}
+.dashboard-widget-span-5 {
+  grid-column: span 5;
+}
+.dashboard-widget-span-6 {
+  grid-column: span 6;
+}
+.dashboard-widget-span-7 {
+  grid-column: span 7;
+}
+.dashboard-widget-span-8 {
+  grid-column: span 8;
+}
+.dashboard-widget-span-9 {
+  grid-column: span 9;
+}
+.dashboard-widget-span-10 {
+  grid-column: span 10;
+}
+.dashboard-widget-span-11 {
+  grid-column: span 11;
+}
+.dashboard-widget-span-12 {
+  grid-column: span 12;
+}
 
 .dashboard-widget-title {
   margin: 0;
@@ -10992,7 +11038,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin-top: var(--dv-space-md);
 }
 
-
 .library-title-filename {
   display: flex;
   flex-wrap: wrap;
@@ -11021,7 +11066,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .doc-card-filename .library-title-ingest-meta {
   margin-inline-start: var(--dv-space-xs);
 }
-
 
 .connector-sftp-kv-grid {
   display: grid;
@@ -11602,7 +11646,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   letter-spacing: 0.01em;
   color: var(--dv-color-text);
   background: color-mix(in srgb, var(--dv-color-bg-raised) 94%, transparent);
-  border: 1px solid color-mix(in srgb, var(--tag-badge-accent, var(--dv-color-accent)) 55%, var(--dv-color-border));
+  border: 1px solid
+    color-mix(in srgb, var(--tag-badge-accent, var(--dv-color-accent)) 55%, var(--dv-color-border));
   box-shadow: var(--dv-shadow-sm);
   white-space: nowrap;
   user-select: none;
@@ -11611,7 +11656,11 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .label-space-tag-badge--active {
   border-color: var(--tag-badge-accent, var(--dv-color-accent));
-  background: color-mix(in srgb, var(--tag-badge-accent, var(--dv-color-accent)) 12%, var(--dv-color-bg-raised));
+  background: color-mix(
+    in srgb,
+    var(--tag-badge-accent, var(--dv-color-accent)) 12%,
+    var(--dv-color-bg-raised)
+  );
 }
 
 .label-space-tag-badge--dimmed {
@@ -11979,4 +12028,3 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin-top: var(--dv-space-xs);
   font-size: 0.85rem;
 }
-

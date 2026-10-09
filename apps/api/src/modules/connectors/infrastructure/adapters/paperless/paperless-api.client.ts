@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import { joinUrl, trimTrailingSlash } from '../shared/connector-http.js';
 import type {
@@ -35,7 +37,9 @@ export async function resolveValidatedPaperlessBaseUrl(
   return validatePaperlessBaseUrl(resolvePaperlessBaseUrl(credentials));
 }
 
-export function paperlessAuthHeaders(credentials: ConnectorConfigurationInput): PaperlessAuthHeaders {
+export function paperlessAuthHeaders(
+  credentials: ConnectorConfigurationInput
+): PaperlessAuthHeaders {
   const token = credentials['api_token']?.trim();
   if (token) {
     return { Authorization: `Token ${token}` };
@@ -228,10 +232,7 @@ export class PaperlessApiClient {
     }
   }
 
-  async listAllPages<T>(
-    path: string,
-    pageSize = 100
-  ): Promise<{ items: T[]; total: number }> {
+  async listAllPages<T>(path: string, pageSize = 100): Promise<{ items: T[]; total: number }> {
     const items: T[] = [];
     let page = 1;
     let total = 0;

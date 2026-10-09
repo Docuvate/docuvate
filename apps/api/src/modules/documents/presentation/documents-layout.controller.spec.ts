@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import type { AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
@@ -13,13 +15,11 @@ function useCaseMock() {
 }
 
 /** Wires layout use cases by constructor position (Vitest does not emit decorator metadata). */
-function createDocumentsController(
-  layout: {
-    getDocumentLayoutIr: ReturnType<typeof useCaseMock>;
-    getDocumentLayoutHtml: ReturnType<typeof useCaseMock>;
-    getDocumentLayoutTypst: ReturnType<typeof useCaseMock>;
-  }
-): DocumentsController {
+function createDocumentsController(layout: {
+  getDocumentLayoutIr: ReturnType<typeof useCaseMock>;
+  getDocumentLayoutHtml: ReturnType<typeof useCaseMock>;
+  getDocumentLayoutTypst: ReturnType<typeof useCaseMock>;
+}): DocumentsController {
   const m = (): never => useCaseMock() as never;
   return new DocumentsController(
     m(),

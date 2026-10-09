@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { CITED_CHAT_ABSTENTION_DE } from '../domain/cited-chat-constants.js';
 

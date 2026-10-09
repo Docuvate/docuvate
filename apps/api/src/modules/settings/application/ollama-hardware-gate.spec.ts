@@ -1,8 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
-import {
-  ollamaAvailableForHardware,
-  ollamaModelLikelyNeedsGpu,
-} from './ollama-hardware-gate.js';
+import { ollamaAvailableForHardware, ollamaModelLikelyNeedsGpu } from './ollama-hardware-gate.js';
 
 describe('ollamaModelLikelyNeedsGpu', () => {
   it('treats small defaults as CPU-safe', () => {

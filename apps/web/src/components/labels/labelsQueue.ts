@@ -1,4 +1,10 @@
-import type { DocumentDto, LabelRecommendationDto, LabelRecommendationKind } from '@docuvate/contracts';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  DocumentDto,
+  LabelRecommendationDto,
+  LabelRecommendationKind,
+} from '@docuvate/contracts';
 
 const KIND_ORDER: Record<LabelRecommendationKind, number> = {
   assign: 0,

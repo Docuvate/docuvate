@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Controller, Get, Query } from '@nestjs/common';
 import { Public } from '../../../shared/infrastructure/auth/public.decorator.js';
 import { ApiExcludeController } from '@nestjs/swagger';

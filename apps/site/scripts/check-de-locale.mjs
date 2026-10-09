@@ -20,6 +20,7 @@ const ALLOW_IDENTICAL = new Set([
 ]);
 
 const FORBIDDEN_IN_DE = [
+  /\bOpen Source\b/i,
   /Self-hosted/i,
   /self-hosted document intelligence/i,
   /Document Intelligence/i,

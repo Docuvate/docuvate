@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type {
@@ -287,7 +289,6 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
       [tagId, model, sampleCount, JSON.stringify(centroid)]
     );
   }
-
 
   async recordFeedback(
     userId: string,

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const QUOTE_WORD_LIMIT = 10;
 
 export function normalizeForQuoteMatch(text: string): string {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export interface RankedItem {
   id: string;
   rank: number;
@@ -6,10 +8,7 @@ export interface RankedItem {
 const DEFAULT_K = 60;
 
 /** Reciprocal rank fusion across multiple ranked lists (same id may appear in multiple lists). */
-export function reciprocalRankFusion(
-  lists: RankedItem[][],
-  k = DEFAULT_K
-): Map<string, number> {
+export function reciprocalRankFusion(lists: RankedItem[][], k = DEFAULT_K): Map<string, number> {
   const scores = new Map<string, number>();
   for (const list of lists) {
     for (const { id, rank } of list) {
@@ -20,9 +19,6 @@ export function reciprocalRankFusion(
   return scores;
 }
 
-export function sortByFusionScore(
-  ids: string[],
-  scores: Map<string, number>
-): string[] {
+export function sortByFusionScore(ids: string[], scores: Map<string, number>): string[] {
   return [...ids].sort((a, b) => (scores.get(b) ?? 0) - (scores.get(a) ?? 0));
 }

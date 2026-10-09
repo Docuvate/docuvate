@@ -1,8 +1,6 @@
-import {
-  DomainError,
-  GatewayTimeoutError,
-  ServiceUnavailableError,
-} from '../../domain/errors.js';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { DomainError, GatewayTimeoutError, ServiceUnavailableError } from '../../domain/errors.js';
 
 const DEFAULT_COMPARE_TIMEOUT_MS = 600_000;
 
@@ -72,10 +70,7 @@ export async function fetchWorkerJson<T>(
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.name === 'TimeoutError' || error.name === 'AbortError')
-    ) {
+    if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
       throw errors.onTimeout?.() ?? workerCompareTimeoutError();
     }
     throw error;

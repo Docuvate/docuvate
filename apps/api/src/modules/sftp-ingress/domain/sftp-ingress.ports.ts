@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   CreateSftpIngressAccountInput,
   SftpIngressAccountEntity,
@@ -13,12 +15,18 @@ export interface SftpIngressAccountRepository {
   findByIdForUser(id: string, userId: string): Promise<SftpIngressAccountEntity | null>;
   findActiveByUsername(username: string): Promise<SftpIngressAccountEntity | null>;
   findActiveById(id: string): Promise<SftpIngressAccountEntity | null>;
-  create(input: CreateSftpIngressAccountInput & { passwordHash: string | null }): Promise<SftpIngressAccountEntity>;
+  create(
+    input: CreateSftpIngressAccountInput & { passwordHash: string | null }
+  ): Promise<SftpIngressAccountEntity>;
   revoke(id: string, userId: string): Promise<boolean>;
 }
 
 export interface SftpIngressEventRepository {
-  listForAccount(accountId: string, userId: string, limit: number): Promise<SftpIngressEventEntity[]>;
+  listForAccount(
+    accountId: string,
+    userId: string,
+    limit: number
+  ): Promise<SftpIngressEventEntity[]>;
   create(input: {
     accountId: string;
     userId: string;

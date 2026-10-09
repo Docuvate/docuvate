@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useMemo, type RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FolderDto, SftpIngressAccountDto, SftpIngressEventDto } from '@docuvate/contracts';
@@ -9,7 +11,10 @@ import { SettingsCallout } from '../settings/SettingsCallout';
 function lastReceivedAt(events: SftpIngressEventDto[]): string | null {
   const ok = events.filter((e) => e.status === 'processed' || e.status === 'received');
   if (!ok.length) return null;
-  return ok.reduce((latest, row) => (row.createdAt > latest ? row.createdAt : latest), ok[0]!.createdAt);
+  return ok.reduce(
+    (latest, row) => (row.createdAt > latest ? row.createdAt : latest),
+    ok[0]!.createdAt
+  );
 }
 
 function authMethodLabel(account: SftpIngressAccountDto, t: (key: string) => string): string {
@@ -58,7 +63,7 @@ export function SftpScannerIngressManageDrawer({
         minute: '2-digit',
         hour12: false,
       }).format(new Date(iso)),
-    [i18n.language],
+    [i18n.language]
   );
 
   const sortedAccounts = useMemo(
@@ -68,7 +73,7 @@ export function SftpScannerIngressManageDrawer({
         const bAt = lastReceivedAt(eventsByAccount[b.id] ?? []) ?? '';
         return bAt.localeCompare(aAt);
       }),
-    [accounts, eventsByAccount],
+    [accounts, eventsByAccount]
   );
 
   const renderFingerprintValue = useCallback(() => {
@@ -84,7 +89,9 @@ export function SftpScannerIngressManageDrawer({
       <SettingsCallout variant="info">
         <p className="connector-sftp-fingerprint-lead">{t('sftpIngress.fingerprintPurpose')}</p>
         <p className="muted connector-sftp-fingerprint-status">
-          {!serverReady ? t('sftpIngress.serverLoading') : t('sftpIngress.fingerprintPendingStatus')}
+          {!serverReady
+            ? t('sftpIngress.serverLoading')
+            : t('sftpIngress.fingerprintPendingStatus')}
         </p>
       </SettingsCallout>
     );
@@ -119,13 +126,16 @@ export function SftpScannerIngressManageDrawer({
             const events = eventsByAccount[account.id] ?? [];
             const received = lastReceivedAt(events);
             const folderName =
-              folders.find((f) => f.id === account.folderId)?.name ?? t('sftpIngress.targetFolderInbox');
+              folders.find((f) => f.id === account.folderId)?.name ??
+              t('sftpIngress.targetFolderInbox');
             return (
               <li key={account.id} className="connector-sftp-access-row">
                 <div className="connector-sftp-access-main">
                   <div className="connector-sftp-access-title">
                     <strong>{account.displayName}</strong>
-                    <span className="connector-capability-badge">{authMethodLabel(account, t)}</span>
+                    <span className="connector-capability-badge">
+                      {authMethodLabel(account, t)}
+                    </span>
                   </div>
                   <dl className="connector-sftp-access-meta">
                     <div>

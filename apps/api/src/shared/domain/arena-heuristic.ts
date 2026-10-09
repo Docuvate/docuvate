@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionCompareItem } from '@docuvate/contracts';
 
 export function pickHeuristicArenaWinner(items: ExtractionCompareItem[]): string | null {

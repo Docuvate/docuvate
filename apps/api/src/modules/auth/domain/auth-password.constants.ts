@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Matches better-auth default when `emailAndPassword.minPasswordLength` is unset. */
 export const AUTH_MIN_PASSWORD_LENGTH = 8;
 

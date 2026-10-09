@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FolderDto, MappeDto } from '@docuvate/contracts';
 import i18n from '../../i18n';
 import { findFolder, findMappe, type OrdnerSelection } from '../../lib/ordnerTree';

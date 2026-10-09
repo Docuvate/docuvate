@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   dedupeExtractedFields,
   type ExtractionBlock,
@@ -137,9 +139,7 @@ export function mapDocumentRow(
     contentHash: (row['content_hash'] as string | null) ?? null,
     status: row['status'] as DocumentStatus,
     documentDate:
-      documentDateRaw != null && documentDateRaw !== ''
-        ? new Date(String(documentDateRaw))
-        : null,
+      documentDateRaw != null && documentDateRaw !== '' ? new Date(String(documentDateRaw)) : null,
     notes: (row['notes'] as string | null) ?? null,
     ingestSource: (row['ingest_source'] as string | null) ?? null,
     folderId: folderIdRaw != null ? String(folderIdRaw) : null,

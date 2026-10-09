@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const STORAGE_KEY = 'docuvate.had-authenticated-session';
 
 /** Non-sensitive hint that this browser had a signed-in session (httpOnly cookies are invisible to JS). */

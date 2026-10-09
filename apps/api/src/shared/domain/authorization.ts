@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentStatus } from '../../modules/documents/domain/document.entity.js';
 
 export type AuthorizationAction =

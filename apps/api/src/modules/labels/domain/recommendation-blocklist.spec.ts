@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import {
   clusterBlocklistPhrases,
@@ -19,11 +21,7 @@ describe('recommendation-blocklist', () => {
   });
 
   it('clusters related phrases', () => {
-    const clusters = clusterBlocklistPhrases([
-      'PDF-XChange',
-      'PDF-XCHANGE Editor',
-      'Rechnung',
-    ]);
+    const clusters = clusterBlocklistPhrases(['PDF-XChange', 'PDF-XCHANGE Editor', 'Rechnung']);
     expect(clusters).toHaveLength(1);
     expect(clusters[0]).toHaveLength(2);
   });

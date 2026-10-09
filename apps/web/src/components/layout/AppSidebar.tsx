@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Fragment } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
@@ -33,7 +35,12 @@ function NavIcon({ children }: { children: React.ReactNode }) {
 
 const primaryNav = [
   { to: routes.home, labelKey: 'nav.home', end: true as const, icon: 'home' as const },
-  { to: routes.documents, labelKey: 'nav.documents', end: false as const, icon: 'documents' as const },
+  {
+    to: routes.documents,
+    labelKey: 'nav.documents',
+    end: false as const,
+    icon: 'documents' as const,
+  },
   { to: routes.globalChat, labelKey: 'nav.globalChat', end: true as const, icon: 'chat' as const },
   {
     to: routes.structureLabels,
@@ -107,57 +114,59 @@ export function AppSidebar({ mobileDrawerOpen = false, onCloseMobileDrawer }: Ap
         <nav className="sidebar-nav">
           {primaryNav.map(({ to, labelKey, end, icon }) => (
             <Fragment key={to}>
-            <NavLink
-              to={to}
-              end={end}
-              className={({ isActive }) => {
-                if (to === routes.documents) {
-                  return sidebarLinkClass(
-                    documentsNavIsActive(location.pathname, location.search)
-                  );
-                }
-                return sidebarLinkClass(isActive);
-              }}
-              title={collapsed ? t(labelKey) : undefined}
-            >
-              {icon === 'home' ? (
-                <NavIcon>
-                  <LayoutDashboard size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                </NavIcon>
+              <NavLink
+                to={to}
+                end={end}
+                className={({ isActive }) => {
+                  if (to === routes.documents) {
+                    return sidebarLinkClass(
+                      documentsNavIsActive(location.pathname, location.search)
+                    );
+                  }
+                  return sidebarLinkClass(isActive);
+                }}
+                title={collapsed ? t(labelKey) : undefined}
+              >
+                {icon === 'home' ? (
+                  <NavIcon>
+                    <LayoutDashboard size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
+                  </NavIcon>
+                ) : null}
+                {icon === 'documents' ? (
+                  <NavIcon>
+                    <FileText size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
+                  </NavIcon>
+                ) : null}
+                {icon === 'labels' ? (
+                  <NavIcon>
+                    <Tags size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
+                  </NavIcon>
+                ) : null}
+                {icon === 'recognized' ? (
+                  <NavIcon>
+                    <ListChecks size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
+                  </NavIcon>
+                ) : null}
+                {icon === 'folders' ? (
+                  <NavIcon>
+                    <Folder size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
+                  </NavIcon>
+                ) : null}
+                {icon === 'chat' ? (
+                  <NavIcon>
+                    <MessageSquare size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
+                  </NavIcon>
+                ) : null}
+                <span className="sidebar-link-label">{t(labelKey)}</span>
+              </NavLink>
+              {to === routes.documents ? (
+                <>
+                  <SavedViewsSidebar key={`${to}-saved`} collapsed={collapsed} />
+                  {!collapsed ? (
+                    <div className="sidebar-nav-separator" role="presentation" />
+                  ) : null}
+                </>
               ) : null}
-              {icon === 'documents' ? (
-                <NavIcon>
-                  <FileText size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                </NavIcon>
-              ) : null}
-              {icon === 'labels' ? (
-                <NavIcon>
-                  <Tags size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                </NavIcon>
-              ) : null}
-              {icon === 'recognized' ? (
-                <NavIcon>
-                  <ListChecks size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                </NavIcon>
-              ) : null}
-              {icon === 'folders' ? (
-                <NavIcon>
-                  <Folder size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                </NavIcon>
-              ) : null}
-              {icon === 'chat' ? (
-                <NavIcon>
-                  <MessageSquare size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
-                </NavIcon>
-              ) : null}
-              <span className="sidebar-link-label">{t(labelKey)}</span>
-            </NavLink>
-            {to === routes.documents ? (
-              <>
-                <SavedViewsSidebar key={`${to}-saved`} collapsed={collapsed} />
-                {!collapsed ? <div className="sidebar-nav-separator" role="presentation" /> : null}
-              </>
-            ) : null}
             </Fragment>
           ))}
 

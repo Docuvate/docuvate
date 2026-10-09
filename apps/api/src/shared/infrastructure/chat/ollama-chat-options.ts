@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const DEFAULT_NUM_CTX = 2048;
 const DEFAULT_NUM_PREDICT = 256;
 const DEFAULT_KEEP_ALIVE = '30m';

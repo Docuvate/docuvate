@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export type PrimaryNavKey = 'docs' | 'comparisons' | 'api' | 'sdks';
 
 /** Documentation path without locale prefix (e.g. `/docs/api`). */

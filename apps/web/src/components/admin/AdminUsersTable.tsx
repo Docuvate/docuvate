@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { AdminUserDto, InstanceRole } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
@@ -150,20 +152,12 @@ export function AdminUsersTable({
           {users.map((user) => {
             const state = getUserRowState(user, busy, currentUserId, soleAdministratorUserId, t);
             return (
-              <tr
-                key={user.id}
-                className={state.self ? 'admin-users-row--self' : undefined}
-              >
+              <tr key={user.id} className={state.self ? 'admin-users-row--self' : undefined}>
                 <td className="admin-users-col-person">
                   <AdminUserPersonCell user={user} self={state.self} t={t} />
                 </td>
                 <td className="admin-users-col-role">
-                  <AdminUserRoleCell
-                    user={user}
-                    state={state}
-                    t={t}
-                    onRoleChange={onRoleChange}
-                  />
+                  <AdminUserRoleCell user={user} state={state} t={t} onRoleChange={onRoleChange} />
                 </td>
                 <td>
                   <AdminUserStatusBadge user={user} />
@@ -197,12 +191,7 @@ export function AdminUsersTable({
               </div>
               <div className="admin-users-card-field">
                 <span className="admin-users-card-label">{t('admin.usersRoleLabel')}</span>
-                <AdminUserRoleCell
-                  user={user}
-                  state={state}
-                  t={t}
-                  onRoleChange={onRoleChange}
-                />
+                <AdminUserRoleCell user={user} state={state} t={t} onRoleChange={onRoleChange} />
               </div>
               <div className="admin-users-card-field">
                 <span className="admin-users-card-label">{t('admin.usersStatusLabel')}</span>

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   Column,
   Entity,
@@ -68,10 +70,7 @@ export class SftpIngressAccountsEntity {
   @JoinColumn([{ name: 'folder_id', referencedColumnName: 'id' }])
   folder: FoldersEntity | null;
 
-  @OneToMany(
-    () => SftpIngressAccountLabelsEntity,
-    (labels) => labels.account,
-  )
+  @OneToMany(() => SftpIngressAccountLabelsEntity, (labels) => labels.account)
   accountLabels: SftpIngressAccountLabelsEntity[];
 
   @OneToMany(() => SftpIngressEventsEntity, (events) => events.account)

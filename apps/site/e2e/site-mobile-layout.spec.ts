@@ -2,7 +2,16 @@ import { expect, test } from '@playwright/test';
 
 const WIDTHS = [360, 390, 768, 1280] as const;
 
-const PATHS = ['/', '/docs', '/docs/sdks', '/docs/api', '/impressum', '/en', '/en/docs', '/en/docs/api'] as const;
+const PATHS = [
+  '/',
+  '/docs',
+  '/docs/sdks',
+  '/docs/api',
+  '/impressum',
+  '/en',
+  '/en/docs',
+  '/en/docs/api',
+] as const;
 
 async function expectNoHorizontalOverflow(page: import('@playwright/test').Page) {
   const overflow = await page.evaluate(() => {

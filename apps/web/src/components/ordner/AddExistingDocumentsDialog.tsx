@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DocumentDto } from '@docuvate/contracts';
@@ -79,7 +81,11 @@ export function AddExistingDocumentsDialog({
   if (!open) return null;
 
   return (
-    <dialog className="confirm-dialog add-existing-docs-dialog" open aria-labelledby="add-existing-title">
+    <dialog
+      className="confirm-dialog add-existing-docs-dialog"
+      open
+      aria-labelledby="add-existing-title"
+    >
       <h2 id="add-existing-title" className="confirm-dialog-title">
         {t('filesystem.addExistingTitle')}
       </h2>
@@ -131,7 +137,9 @@ export function AddExistingDocumentsDialog({
                 />
                 <span className="add-existing-docs-title">{doc.title || doc.filename}</span>
                 {inFolder ? (
-                  <span className="muted add-existing-docs-badge">{t('filesystem.alreadyInFolder')}</span>
+                  <span className="muted add-existing-docs-badge">
+                    {t('filesystem.alreadyInFolder')}
+                  </span>
                 ) : null}
               </label>
             </li>
@@ -142,7 +150,11 @@ export function AddExistingDocumentsDialog({
         <Button type="button" variant="secondary" disabled={busy} onClick={onClose}>
           {t('common.cancel')}
         </Button>
-        <Button type="button" disabled={busy || selected.size === 0} onClick={() => void onConfirm()}>
+        <Button
+          type="button"
+          disabled={busy || selected.size === 0}
+          onClick={() => void onConfirm()}
+        >
           {t('filesystem.addExistingConfirm', { count: selected.size })}
         </Button>
       </div>

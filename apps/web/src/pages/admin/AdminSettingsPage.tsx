@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -39,7 +41,10 @@ export function AdminSettingsPage() {
           description={t('admin.usersLinkLead')}
           footer={
             <div className="settings-section-card-footer">
-              <Link className="settings-card-link btn btn-secondary settings-card-link-btn" to={routes.settingsAdminUsers}>
+              <Link
+                className="settings-card-link btn btn-secondary settings-card-link-btn"
+                to={routes.settingsAdminUsers}
+              >
                 <span>{t('admin.usersLinkCta')}</span>
               </Link>
             </div>

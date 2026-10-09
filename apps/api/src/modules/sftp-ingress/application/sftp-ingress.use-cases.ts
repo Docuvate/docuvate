@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash, randomBytes } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
@@ -14,7 +16,10 @@ import {
   type SftpIngressAccountRepository,
   type SftpIngressEventRepository,
 } from '../domain/sftp-ingress.ports.js';
-import type { SftpIngressAccountEntity, SftpIngressEventEntity } from '../domain/sftp-ingress.types.js';
+import type {
+  SftpIngressAccountEntity,
+  SftpIngressEventEntity,
+} from '../domain/sftp-ingress.types.js';
 import { validateScanFile } from '../domain/scan-file-validation.js';
 import {
   hashSftpIngressPassword,
@@ -65,7 +70,8 @@ export class ListSftpIngressAccountsUseCase {
 @Injectable()
 export class ListSftpIngressEventsUseCase {
   constructor(
-    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository,
+    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY)
+    private readonly accounts: SftpIngressAccountRepository,
     @Inject(SFTP_INGRESS_EVENT_REPOSITORY) private readonly events: SftpIngressEventRepository
   ) {}
 
@@ -85,7 +91,8 @@ export interface CreateSftpIngressAccountResult {
 @Injectable()
 export class CreateSftpIngressAccountUseCase {
   constructor(
-    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository,
+    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY)
+    private readonly accounts: SftpIngressAccountRepository,
     @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository
   ) {}
@@ -158,10 +165,7 @@ export class CreateSftpIngressAccountUseCase {
       return preferred;
     }
     for (let attempt = 0; attempt < 8; attempt++) {
-      const suffix =
-        attempt === 0
-          ? ''
-          : `-${randomBytes(2).toString('hex')}`;
+      const suffix = attempt === 0 ? '' : `-${randomBytes(2).toString('hex')}`;
       const candidate = `${generateUsername(userId)}${suffix}`;
       const existing = await this.accounts.findActiveByUsername(candidate);
       if (!existing) {
@@ -187,7 +191,7 @@ export class RevokeSftpIngressAccountUseCase {
 @Injectable()
 export class AuthenticateSftpIngressAccountUseCase {
   constructor(
-    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository,
+    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository
   ) {}
 
   async execute(input: {
@@ -238,7 +242,8 @@ export class ResolveSftpIngressAccountUseCase {
 @Injectable()
 export class IngestSftpScanUseCase {
   constructor(
-    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY) private readonly accounts: SftpIngressAccountRepository,
+    @Inject(SFTP_INGRESS_ACCOUNT_REPOSITORY)
+    private readonly accounts: SftpIngressAccountRepository,
     @Inject(SFTP_INGRESS_EVENT_REPOSITORY) private readonly events: SftpIngressEventRepository,
     @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,

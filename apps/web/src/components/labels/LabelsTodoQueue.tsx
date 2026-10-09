@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -27,7 +29,10 @@ type Props = {
   busyId: string | null;
   onAccept: (item: LabelRecommendationDto) => void | Promise<void>;
   onRename: (item: LabelRecommendationDto) => void;
-  onDismiss: (item: LabelRecommendationDto, scope: LabelSuggestionDismissScope) => void | Promise<void>;
+  onDismiss: (
+    item: LabelRecommendationDto,
+    scope: LabelSuggestionDismissScope
+  ) => void | Promise<void>;
 };
 
 function TodoHead() {
@@ -106,9 +111,7 @@ function TodoRowMain(props: TodoRowMainProps) {
                 key={name}
                 label={name}
                 variant="assigned"
-                color={
-                  item.tagIds?.[tagIndex] ? tagColorById[item.tagIds[tagIndex]!] : undefined
-                }
+                color={item.tagIds?.[tagIndex] ? tagColorById[item.tagIds[tagIndex]!] : undefined}
               />
             ))}
           </div>

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode, RefObject } from 'react';
 import { useMemo } from 'react';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
@@ -73,16 +75,20 @@ export function LibraryPageDocumentSection({
   return (
     <>
       <Card
-        className={[
-          data.viewMode === 'fokus' ? 'library-main-card-focus' : '',
-          filesystemLayout
-            ? 'library-main-card-filesystem library-doc-table-card'
-            : 'library-doc-table-card',
-        ]
-          .filter(Boolean)
-          .join(' ') || undefined}
+        className={
+          [
+            data.viewMode === 'fokus' ? 'library-main-card-focus' : '',
+            filesystemLayout
+              ? 'library-main-card-filesystem library-doc-table-card'
+              : 'library-doc-table-card',
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
       >
-        <div className={`library-list-toolbar${filesystemLayout ? ' library-list-toolbar-filesystem' : ''}`}>
+        <div
+          className={`library-list-toolbar${filesystemLayout ? ' library-list-toolbar-filesystem' : ''}`}
+        >
           <form
             onSubmit={(e) => void data.onSearch(e)}
             className={`search-row library-list-search${filterToggle ? ' library-search-row' : ''}${!filesystemLayout && compactLibrarySearch ? ' library-list-search--compact' : ''}`}
@@ -158,20 +164,16 @@ export function LibraryPageDocumentSection({
         ) : null}
 
         {!data.loading && !data.error && data.items.length === 0
-          ? emptyStateOverride ?? (
+          ? (emptyStateOverride ?? (
               <div className="empty-state">
                 <h2>{t('library.emptyTitle')}</h2>
                 <p className="muted">{t('library.emptyHint')}</p>
               </div>
-            )
+            ))
           : null}
 
         {showTableArea ? (
-          <div
-            className="library-documents-panel"
-            aria-busy={data.loading}
-            aria-live="polite"
-          >
+          <div className="library-documents-panel" aria-busy={data.loading} aria-live="polite">
             {data.loading ? (
               <div className="library-table-loading" role="status">
                 <span className="library-table-loading-spinner" aria-hidden />
@@ -199,9 +201,7 @@ export function LibraryPageDocumentSection({
                 enableDocumentDrag={enableDocumentDrag}
                 hideFolderColumn={filesystemLayout}
                 visibleColumns={data.visibleColumns}
-                suppressFolderFallbackForId={
-                  filesystemLayout ? data.activeFolderId : undefined
-                }
+                suppressFolderFallbackForId={filesystemLayout ? data.activeFolderId : undefined}
               />
             ) : null}
             {data.viewMode === 'karten' ? (

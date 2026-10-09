@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useRef } from 'react';
 import type {
   DocumentChatMessageRecordDto,
@@ -12,9 +14,7 @@ function parseSseChunk(buffer: string): { events: DocumentChatMessageStreamEvent
   const parts = buffer.split('\n\n');
   const rest = parts.pop() ?? '';
   for (const part of parts) {
-    const line = part
-      .split('\n')
-      .find((l) => l.startsWith('data:'));
+    const line = part.split('\n').find((l) => l.startsWith('data:'));
     if (!line) {
       continue;
     }
@@ -64,10 +64,7 @@ export function useDocumentChatMessageStream(
           const message = data.messages.find((m) => m.id === messageId);
           if (message) {
             onUpdate(message);
-            if (
-              message.generationStatus === 'done' ||
-              message.generationStatus === 'failed'
-            ) {
+            if (message.generationStatus === 'done' || message.generationStatus === 'failed') {
               stop();
             }
           }
@@ -121,11 +118,7 @@ export function useDocumentChatMessageStream(
             buffer = parsed.rest;
             for (const event of parsed.events) {
               onUpdate(event.message);
-              if (
-                event.type === 'done' ||
-                event.type === 'failed' ||
-                event.type === 'cancelled'
-              ) {
+              if (event.type === 'done' || event.type === 'failed' || event.type === 'cancelled') {
                 stop();
                 return;
               }

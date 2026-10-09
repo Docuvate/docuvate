@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPluginId } from '../../../domain/connector.types.js';
 
 export interface MailOAuthProviderConfig {
@@ -48,9 +50,9 @@ export function connectorOAuthRedirectUri(): string {
   return 'http://localhost:3001/v1/connectors/oauth/callback';
 }
 
-export function mailOAuthConfig(pluginId: Extract<ConnectorPluginId, 'gmail' | 'outlook'>):
-  | MailOAuthProviderConfig
-  | null {
+export function mailOAuthConfig(
+  pluginId: Extract<ConnectorPluginId, 'gmail' | 'outlook'>
+): MailOAuthProviderConfig | null {
   if (pluginId === 'gmail') {
     const clientId = env('DOCUVATE_GMAIL_OAUTH_CLIENT_ID');
     const clientSecret = env('DOCUVATE_GMAIL_OAUTH_CLIENT_SECRET');
@@ -83,13 +85,16 @@ export function mailOAuthConfig(pluginId: Extract<ConnectorPluginId, 'gmail' | '
   };
 }
 
-export function mailOAuthConfigured(pluginId: Extract<ConnectorPluginId, 'gmail' | 'outlook'>): boolean {
+export function mailOAuthConfigured(
+  pluginId: Extract<ConnectorPluginId, 'gmail' | 'outlook'>
+): boolean {
   return mailOAuthMissingEnvVars(pluginId).length === 0;
 }
 
-export function mailOAuthSetupStatus(
-  pluginId: Extract<ConnectorPluginId, 'gmail' | 'outlook'>
-): { configured: boolean; missingEnvVars: string[] } {
+export function mailOAuthSetupStatus(pluginId: Extract<ConnectorPluginId, 'gmail' | 'outlook'>): {
+  configured: boolean;
+  missingEnvVars: string[];
+} {
   const missingEnvVars = mailOAuthMissingEnvVars(pluginId);
   return { configured: missingEnvVars.length === 0, missingEnvVars: [...missingEnvVars] };
 }

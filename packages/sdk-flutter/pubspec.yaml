@@ -2,6 +2,7 @@ name: docuvate
 description: Official Dart client for the Docuvate /v1 headless API
 version: 1.0.0
 publish_to: none
+license: MIT
 
 environment:
   sdk: ^3.5.0

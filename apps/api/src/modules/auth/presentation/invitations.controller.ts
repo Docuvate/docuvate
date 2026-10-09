@@ -1,8 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AcceptUserInvitationRequestDto } from '../../../shared/presentation/dtos/invitations.dto.js';
 import { AcceptUserInvitationUseCase } from '../application/accept-user-invitation.use-case.js';
 import { InvitationAcceptRateLimitGuard } from '../infrastructure/invitation-accept-rate-limit.guard.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('invitations')
 @Controller('invitations')

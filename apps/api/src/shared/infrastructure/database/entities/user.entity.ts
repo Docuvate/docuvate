@@ -1,4 +1,6 @@
-import { Column, Entity, Index, OneToMany, OneToOne, PrimaryColumn } from "typeorm";
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Column, Entity, Index, OneToMany, OneToOne, PrimaryColumn } from 'typeorm';
 import { AccountEntity } from './account.entity.js';
 import { ChatThreadsEntity } from './chat-threads.entity.js';
 import { ConnectorInstallationsEntity } from './connector-installations.entity.js';
@@ -20,36 +22,36 @@ import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
 import { TagsEntity } from './tags.entity.js';
 import { UserPreferencesEntity } from './user-preferences.entity.js';
 
-@Index("user_email_key", ["email"], { unique: true })
-@Entity("user", { schema: "public" })
+@Index('user_email_key', ['email'], { unique: true })
+@Entity('user', { schema: 'public' })
 export class UserEntity {
-  @PrimaryColumn("text", { name: "id" })
+  @PrimaryColumn('text', { name: 'id' })
   id: string;
 
-  @Column("text", { name: "name" })
+  @Column('text', { name: 'name' })
   name: string;
 
-  @Column("text", { name: "email", unique: true })
+  @Column('text', { name: 'email', unique: true })
   email: string;
 
-  @Column("boolean", { name: "emailVerified", default: () => "false" })
+  @Column('boolean', { name: 'emailVerified', default: () => 'false' })
   emailVerified: boolean;
 
-  @Column("text", { name: "image", nullable: true })
+  @Column('text', { name: 'image', nullable: true })
   image: string | null;
 
-  @Column("boolean", { name: "twoFactorEnabled", default: () => "false" })
+  @Column('boolean', { name: 'twoFactorEnabled', default: () => 'false' })
   twoFactorEnabled: boolean;
 
-  @Column("timestamp with time zone", {
-    name: "createdAt",
-    default: () => "now()",
+  @Column('timestamp with time zone', {
+    name: 'createdAt',
+    default: () => 'now()',
   })
   createdAt: Date;
 
-  @Column("timestamp with time zone", {
-    name: "updatedAt",
-    default: () => "now()",
+  @Column('timestamp with time zone', {
+    name: 'updatedAt',
+    default: () => 'now()',
   })
   updatedAt: Date;
 
@@ -106,8 +108,7 @@ export class UserEntity {
 
   @OneToMany(
     () => LabelRecommendationBlocklistPatternsEntity,
-    (labelRecommendationBlocklistPatterns) =>
-      labelRecommendationBlocklistPatterns.user
+    (labelRecommendationBlocklistPatterns) => labelRecommendationBlocklistPatterns.user
   )
   labelRecommendationBlocklistPatterns: LabelRecommendationBlocklistPatternsEntity[];
 
@@ -135,10 +136,7 @@ export class UserEntity {
   )
   tagCustomFieldDefinitions: TagCustomFieldDefinitionsEntity[];
 
-  @OneToMany(
-    () => TagEmbeddingFeedbackEntity,
-    (tagEmbeddingFeedback) => tagEmbeddingFeedback.user
-  )
+  @OneToMany(() => TagEmbeddingFeedbackEntity, (tagEmbeddingFeedback) => tagEmbeddingFeedback.user)
   tagEmbeddingFeedbacks: TagEmbeddingFeedbackEntity[];
 
   @OneToOne(() => TagsEntity, (tags) => tags.user)

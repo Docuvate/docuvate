@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TFunction } from 'i18next';
 import type { ExtractionEngineInfo } from '@docuvate/contracts';
 import type { SelectOption } from '../components/ui/Select';
@@ -6,7 +8,7 @@ import { extractionEngineLabel } from './extractionEngineI18n';
 export function shouldShowExtractionOfflineCallout(
   enginesLoadFailed: boolean,
   engines: ExtractionEngineInfo[],
-  selectedEngineId: string,
+  selectedEngineId: string
 ): boolean {
   if (enginesLoadFailed) {
     return true;
@@ -20,7 +22,7 @@ export function shouldShowExtractionOfflineCallout(
 
 export function buildExtractionEngineSelectOptions(
   t: TFunction,
-  engines: ExtractionEngineInfo[],
+  engines: ExtractionEngineInfo[]
 ): SelectOption[] {
   if (engines.length === 0) {
     return [

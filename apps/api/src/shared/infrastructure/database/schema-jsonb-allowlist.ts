@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /**
  * JSONB columns permitted on the Docuvate Postgres schema (ADR 015).
  * Any other JSONB column added in TypeORM migrations must be documented in the ADR first.

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { buildOllamaChatBody } from '../../../shared/infrastructure/chat/ollama-chat-options.js';
 import {
   ollamaChatBaseUrl,
@@ -35,10 +37,10 @@ const ANSWER_JSON_SCHEMA = {
   required: ['claims'],
 };
 
-export function buildCitedChatSystemPrompt(passages: Array<{ label: string; text: string }>): string {
-  const blocks = passages
-    .map((p) => `[${p.label}]\n${p.text}`)
-    .join('\n\n');
+export function buildCitedChatSystemPrompt(
+  passages: Array<{ label: string; text: string }>
+): string {
+  const blocks = passages.map((p) => `[${p.label}]\n${p.text}`).join('\n\n');
   return [
     'Du bist ein Assistent für Docuvate. Antworte nur mit JSON.',
     'Gib ein Objekt mit claims zurück. Jeder claim hat text (kurzer Satz), source (Quellenlabel wie S1) und quote (wörtliches Zitat, höchstens 10 Wörter aus der Quelle).',

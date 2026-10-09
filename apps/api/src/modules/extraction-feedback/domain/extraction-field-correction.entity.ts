@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** User correction of an extracted field value — training signal for pipeline re-finetune. */
 export interface ExtractionFieldCorrectionEntity {
   id: string;

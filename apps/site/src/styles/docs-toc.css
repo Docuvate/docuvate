@@ -118,7 +118,9 @@
   margin-left: -0.5px;
   background: var(--dv-color-accent);
   border-radius: 1px;
-  transition: transform 0.22s ease, height 0.22s ease;
+  transition:
+    transform 0.22s ease,
+    height 0.22s ease;
   pointer-events: none;
 }
 

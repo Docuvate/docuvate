@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const SHOW_MORE_EN = 'Show More';
 const SHOW_MORE_DE = 'Mehr anzeigen';
 
@@ -115,14 +117,16 @@ function patchAccessibilityLabels(root: HTMLElement): void {
     if (next !== raw.trim()) node.setAttribute('aria-label', next);
   });
 
-  root.querySelectorAll('aside[aria-label], nav[aria-label], [role="complementary"][aria-label]').forEach((el) => {
-    const node = connectedEl(el);
-    if (!node) return;
-    const raw = node.getAttribute('aria-label');
-    if (!raw) return;
-    const next = localizeScalarAriaLabel(raw);
-    if (next !== raw.trim()) node.setAttribute('aria-label', next);
-  });
+  root
+    .querySelectorAll('aside[aria-label], nav[aria-label], [role="complementary"][aria-label]')
+    .forEach((el) => {
+      const node = connectedEl(el);
+      if (!node) return;
+      const raw = node.getAttribute('aria-label');
+      if (!raw) return;
+      const next = localizeScalarAriaLabel(raw);
+      if (next !== raw.trim()) node.setAttribute('aria-label', next);
+    });
 
   root.querySelectorAll('ul[aria-label], nav[aria-label]').forEach((el) => {
     const node = connectedEl(el);
@@ -165,8 +169,8 @@ function patchAccessibilityLabels(root: HTMLElement): void {
 function isOperationChromeElement(el: Element): boolean {
   return Boolean(
     el.closest(
-      'button.schema-card-title, button.schema-properties, .request-body, .responses, .response-card, .operation-details, .section-header, .parameter-item, .authentication-section',
-    ),
+      'button.schema-card-title, button.schema-properties, .request-body, .responses, .response-card, .operation-details, .section-header, .parameter-item, .authentication-section'
+    )
   );
 }
 
@@ -258,12 +262,14 @@ function patchTagSectionPermalinkChrome(root: HTMLElement): void {
     if (next !== t) el.textContent = next;
   });
 
-  root.querySelectorAll('.tag-section-container .anchor-copy, .tag-section-container .anchor').forEach((el) => {
-    const t = el.textContent ?? '';
-    if (t.includes('Copy link')) {
-      el.textContent = t.replaceAll('Copy link', 'Link kopieren');
-    }
-  });
+  root
+    .querySelectorAll('.tag-section-container .anchor-copy, .tag-section-container .anchor')
+    .forEach((el) => {
+      const t = el.textContent ?? '';
+      if (t.includes('Copy link')) {
+        el.textContent = t.replaceAll('Copy link', 'Link kopieren');
+      }
+    });
 
   root.querySelectorAll('.tag-section-container .label').forEach((el) => {
     const t = el.textContent ?? '';
@@ -310,14 +316,16 @@ function patchShowSchemaCheckboxLabels(root: HTMLElement): void {
 }
 
 function patchDownloadButtons(root: HTMLElement): void {
-  root.querySelectorAll('a.download-button, button.download-button, .download .download-button').forEach((el) => {
-    el.setAttribute('aria-label', 'OpenAPI-Dokument herunterladen');
-    el.childNodes.forEach((child) => {
-      if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
-        child.textContent = '';
-      }
+  root
+    .querySelectorAll('a.download-button, button.download-button, .download .download-button')
+    .forEach((el) => {
+      el.setAttribute('aria-label', 'OpenAPI-Dokument herunterladen');
+      el.childNodes.forEach((child) => {
+        if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
+          child.textContent = '';
+        }
+      });
     });
-  });
 }
 
 export function patchSidebarGroupToggleSrOnly(root: HTMLElement): void {
@@ -325,7 +333,10 @@ export function patchSidebarGroupToggleSrOnly(root: HTMLElement): void {
     if (!(btn instanceof HTMLElement)) return;
     const expanded = btn.getAttribute('aria-expanded') === 'true';
     const title =
-      btn.closest('li.sidebar-group-item')?.querySelector('.sidebar-heading-link-title')?.textContent?.trim() ??
+      btn
+        .closest('li.sidebar-group-item')
+        ?.querySelector('.sidebar-heading-link-title')
+        ?.textContent?.trim() ??
       btn.closest('li')?.querySelector('.sidebar-heading-link-title')?.textContent?.trim();
     if (!title) return;
     const sr = btn.querySelector('.sr-only, .screenreader-only');

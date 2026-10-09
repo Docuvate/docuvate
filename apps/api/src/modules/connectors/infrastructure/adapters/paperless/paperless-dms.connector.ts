@@ -1,11 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPlugin } from '../../../domain/connector.ports.js';
 import type {
   ConnectorConfigurationInput,
   ConnectorValidationResult,
 } from '../../../domain/connector.types.js';
-import {
-  requireHostAndTokenOrBasicAuth,
-} from '../shared/required-fields.validation.js';
+import { requireHostAndTokenOrBasicAuth } from '../shared/required-fields.validation.js';
 import { remoteValidationFailed } from '../shared/validation-message.js';
 import { validatePaperlessConnection } from './paperless-api.client.js';
 import { openPaperlessRuntime } from './paperless-dms.runtime.js';
@@ -61,7 +61,9 @@ export class PaperlessDmsConnector implements ConnectorPlugin {
     return openPaperlessRuntime(credentials);
   }
 
-  async validateConfiguration(input: ConnectorConfigurationInput): Promise<ConnectorValidationResult> {
+  async validateConfiguration(
+    input: ConnectorConfigurationInput
+  ): Promise<ConnectorValidationResult> {
     const shape = requireHostAndTokenOrBasicAuth(input, 'base_url', 'api_token', [
       'username',
       'password',

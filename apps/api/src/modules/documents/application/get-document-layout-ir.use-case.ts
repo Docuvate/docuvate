@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';

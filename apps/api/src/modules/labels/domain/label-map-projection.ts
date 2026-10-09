@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { UMAP } from 'umap-js';
 import { normalizePlotCoords, projectTo2D } from './pca2.js';
 

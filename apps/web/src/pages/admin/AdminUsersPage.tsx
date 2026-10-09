@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { AdminUserDto, InstanceRole } from '@docuvate/contracts';
@@ -239,7 +241,12 @@ export function AdminUsersPage() {
       {loadError ? (
         <div className="admin-load-error" role="alert">
           <p className="error">{t('admin.usersLoadFailed')}</p>
-          <Button type="button" variant="secondary" disabled={reloadBusy} onClick={() => void reload()}>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={reloadBusy}
+            onClick={() => void reload()}
+          >
             {t('actions.retry')}
           </Button>
         </div>
@@ -264,7 +271,8 @@ export function AdminUsersPage() {
             currentUserId={currentUserId}
             soleAdministratorUserId={
               users.filter((u) => u.role === 'admin' && u.accountStatus !== 'invited').length === 1
-                ? (users.find((u) => u.role === 'admin' && u.accountStatus !== 'invited')?.id ?? null)
+                ? (users.find((u) => u.role === 'admin' && u.accountStatus !== 'invited')?.id ??
+                  null)
                 : null
             }
             onRoleChange={requestRoleChange}

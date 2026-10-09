@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
@@ -131,11 +133,7 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
     throw new Error('Direct user creation is not supported; use invitations');
   }
 
-  async setRole(input: {
-    headers: Headers;
-    userId: string;
-    role: InstanceRole;
-  }): Promise<void> {
+  async setRole(input: { headers: Headers; userId: string; role: InstanceRole }): Promise<void> {
     const dbRole = instanceRoleToDbRole(input.role);
     if (dbRole !== 'installation_admin') {
       await withLastAdministratorGuard(this.pool, input.userId, async (client) => {
@@ -156,11 +154,7 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
     );
   }
 
-  async banUser(input: {
-    headers: Headers;
-    userId: string;
-    reason?: string;
-  }): Promise<void> {
+  async banUser(input: { headers: Headers; userId: string; reason?: string }): Promise<void> {
     await withLastAdministratorGuard(this.pool, input.userId, async (client) => {
       await client.query(
         `INSERT INTO installation_user_suspensions (user_id, reason)
@@ -206,8 +200,7 @@ function mapRow(row: DirectoryRow): AdminUserListItem {
   const role = normalizeInstanceRole(
     row.role === 'installation_admin' ? INSTANCE_ROLE_ADMIN : INSTANCE_ROLE_MEMBER
   );
-  const suspended =
-    row.suspended && (row.expires_at == null || row.expires_at > new Date());
+  const suspended = row.suspended && (row.expires_at == null || row.expires_at > new Date());
   return {
     id: row.id,
     name: row.name,

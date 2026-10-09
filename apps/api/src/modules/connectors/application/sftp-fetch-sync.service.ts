@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   Inject,
   Injectable,
@@ -58,11 +60,13 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
       );
       for (const row of rows) {
         try {
-          await this.syncInstallation(row.id, row.user_id, decryptConnectorCredentials(row.credentials_encrypted));
-        } catch (err) {
-          this.logger.warn(
-            `SFTP pull sync failed for installation ${row.id}: ${String(err)}`
+          await this.syncInstallation(
+            row.id,
+            row.user_id,
+            decryptConnectorCredentials(row.credentials_encrypted)
           );
+        } catch (err) {
+          this.logger.warn(`SFTP pull sync failed for installation ${row.id}: ${String(err)}`);
           await this.updateSyncState(row.id, 'connectors.sftpFetch.syncFailed', null);
         }
       }
@@ -129,7 +133,13 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
         const blob = await resolved.ports.source.fetchImportable(item.ref);
         const validation = validateScanFile(blob.filename, blob.buffer, maxBytes);
         if (!validation.ok) {
-          await this.quarantineRemote(credentials, item.ref, blob.filename, afterImport, archiveSubpath);
+          await this.quarantineRemote(
+            credentials,
+            item.ref,
+            blob.filename,
+            afterImport,
+            archiveSubpath
+          );
           processed.add(item.ref);
           await this.saveProcessedRefs(installationId, processed);
           continue;
@@ -156,7 +166,11 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
         } catch (err) {
           processed.add(item.ref);
           await this.saveProcessedRefs(installationId, processed);
-          await this.updateSyncState(installationId, 'connectors.sftpFetch.postProcessFailed', null);
+          await this.updateSyncState(
+            installationId,
+            'connectors.sftpFetch.postProcessFailed',
+            null
+          );
           this.logger.warn(
             `SFTP post-process failed for ${installationId}/${item.ref}: ${String(err)}`
           );

@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
-import { LABEL_EMBEDDING_REPOSITORY, type LabelEmbeddingRepository } from '../../../shared/domain/ports.js';
+import {
+  LABEL_EMBEDDING_REPOSITORY,
+  type LabelEmbeddingRepository,
+} from '../../../shared/domain/ports.js';
 import { ValidationError } from '../../../shared/domain/errors.js';
 
 @Injectable()

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -78,10 +80,7 @@ export function DocumentChatPanel({
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const streamTargetRef = useRef<string | null>(null);
 
-  const generationInProgress = useMemo(
-    () => messages.some(isGenerationActive),
-    [messages]
-  );
+  const generationInProgress = useMemo(() => messages.some(isGenerationActive), [messages]);
 
   const upsertMessage = useCallback((next: DocumentChatMessageRecordDto) => {
     setMessages((prev) => {
@@ -145,9 +144,7 @@ export function DocumentChatPanel({
       })
       .catch((err: unknown) => {
         if (active) {
-          setError(
-            formatUserFacingError(err, 'documents.documentChat.errorLoadThreads')
-          );
+          setError(formatUserFacingError(err, 'documents.documentChat.errorLoadThreads'));
         }
       })
       .finally(() => {
@@ -175,9 +172,7 @@ export function DocumentChatPanel({
       })
       .catch((err: unknown) => {
         if (active) {
-          setError(
-            formatUserFacingError(err, 'documents.documentChat.errorLoadMessages')
-          );
+          setError(formatUserFacingError(err, 'documents.documentChat.errorLoadMessages'));
           setMessages([]);
         }
       })
@@ -253,12 +248,7 @@ export function DocumentChatPanel({
         setServiceNotice(false);
       }
       setMessages((prev) =>
-        mergeThreadMessagesAfterSend(
-          prev,
-          '',
-          response.userMessage,
-          response.assistantMessage
-        )
+        mergeThreadMessagesAfterSend(prev, '', response.userMessage, response.assistantMessage)
       );
       streamTargetRef.current = response.assistantMessage.id;
       connectStream(response.assistantMessage.id);
@@ -295,7 +285,8 @@ export function DocumentChatPanel({
   }
 
   const hasThreads = threads.length > 0;
-  const showBootstrapEmpty = !loadingThreads && !hasThreads && !loadingMessages && messages.length === 0;
+  const showBootstrapEmpty =
+    !loadingThreads && !hasThreads && !loadingMessages && messages.length === 0;
   const showThreadEmpty =
     hasThreads &&
     !loadingMessages &&
@@ -336,7 +327,9 @@ export function DocumentChatPanel({
         {hasThreads ? (
           <aside className="doc-chat-threads" aria-label={t('documents.documentChat.threadsAria')}>
             <div className="doc-chat-threads-head">
-              <span className="doc-chat-threads-label">{t('documents.documentChat.threadsLabel')}</span>
+              <span className="doc-chat-threads-label">
+                {t('documents.documentChat.threadsLabel')}
+              </span>
               <Button
                 type="button"
                 variant="secondary"
@@ -401,7 +394,10 @@ export function DocumentChatPanel({
                 <p className="muted doc-chat-disabled-lead">
                   {t('documents.documentChat.disabledOverlayBody')}
                 </p>
-                <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
+                <Link
+                  className="doc-chat-notice-link"
+                  to={`${routes.settings}#settings-document-chat`}
+                >
                   {t('documents.documentChat.disabledOverlaySettings')}
                 </Link>
                 <details className="doc-chat-admin-details">
@@ -428,16 +424,26 @@ export function DocumentChatPanel({
               {showBootstrapEmpty ? (
                 <div className="doc-chat-empty-state doc-chat-empty-state-bootstrap">
                   <DocumentChatEmptyIcon />
-                  <h3 className="doc-chat-empty-title">{t('documents.documentChat.bootstrapTitle')}</h3>
-                  <p className="muted doc-chat-empty-lead">{t('documents.documentChat.bootstrapLead')}</p>
-                  <p className="muted doc-chat-empty-hint">{t('documents.documentChat.bootstrapHint')}</p>
+                  <h3 className="doc-chat-empty-title">
+                    {t('documents.documentChat.bootstrapTitle')}
+                  </h3>
+                  <p className="muted doc-chat-empty-lead">
+                    {t('documents.documentChat.bootstrapLead')}
+                  </p>
+                  <p className="muted doc-chat-empty-hint">
+                    {t('documents.documentChat.bootstrapHint')}
+                  </p>
                 </div>
               ) : null}
 
               {showThreadEmpty ? (
                 <div className="doc-chat-empty-state doc-chat-empty-state-thread">
-                  <p className="muted doc-chat-empty-lead">{t('documents.documentChat.threadEmptyLead')}</p>
-                  <p className="muted doc-chat-empty-hint">{t('documents.documentChat.threadEmptyExample')}</p>
+                  <p className="muted doc-chat-empty-lead">
+                    {t('documents.documentChat.threadEmptyLead')}
+                  </p>
+                  <p className="muted doc-chat-empty-hint">
+                    {t('documents.documentChat.threadEmptyExample')}
+                  </p>
                 </div>
               ) : null}
 
@@ -454,7 +460,9 @@ export function DocumentChatPanel({
                       />
                     ) : (
                       <li key={msg.id} className="doc-chat-bubble doc-chat-user">
-                        <span className="doc-chat-role">{t('documents.documentChat.roleUser')}</span>
+                        <span className="doc-chat-role">
+                          {t('documents.documentChat.roleUser')}
+                        </span>
                         <p>{msg.content}</p>
                       </li>
                     )
@@ -503,7 +511,11 @@ export function DocumentChatPanel({
               >
                 {generationInProgress ? (
                   <>
-                    <Spinner size="sm" tone="onPrimary" label={t('documents.documentChat.sending')} />
+                    <Spinner
+                      size="sm"
+                      tone="onPrimary"
+                      label={t('documents.documentChat.sending')}
+                    />
                     <span>{t('documents.documentChat.sending')}</span>
                   </>
                 ) : (

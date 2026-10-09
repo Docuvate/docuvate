@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import { contentMatchesRule, shouldAutoAssignTag, shouldSuggestTag } from './matching.js';
 
@@ -6,9 +8,9 @@ describe('contentMatchesRule (Regelbasiertes Matching)', () => {
     'Rechnung Nr. 2026-001\nKestrel Auto Service\nBetrag: 688,40 EUR\nVersicherung nicht enthalten.';
 
   it('ignoriert none', () => {
-    expect(
-      contentMatchesRule({ algorithm: 'none', pattern: 'Rechnung', content: text })
-    ).toBe(false);
+    expect(contentMatchesRule({ algorithm: 'none', pattern: 'Rechnung', content: text })).toBe(
+      false
+    );
   });
 
   it('any: trifft bei mindestens einem Schlüsselwort', () => {

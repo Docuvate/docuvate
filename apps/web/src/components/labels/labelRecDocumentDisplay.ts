@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LabelRecommendationDocumentPreviewDto } from '@docuvate/contracts';
 
 export function stripPdfExtension(name: string): string {
@@ -7,11 +9,7 @@ export function stripPdfExtension(name: string): string {
 /** Compare title vs filename ignoring case, underscores, spaces, and .pdf suffix. */
 export function docTitleAndFilenameEquivalent(title: string, filename: string): boolean {
   const normalize = (value: string) =>
-    stripPdfExtension(value)
-      .replace(/_/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .toLowerCase();
+    stripPdfExtension(value).replace(/_/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
   return normalize(title) === normalize(filename);
 }
 

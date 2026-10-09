@@ -67,7 +67,10 @@ function adminUsersDeepLinkHash(): string {
   return `#tag/${slug}/GET/admin/users`;
 }
 
-async function hashHeadingAligned(page: import('@playwright/test').Page, requestedHash: string): Promise<boolean> {
+async function hashHeadingAligned(
+  page: import('@playwright/test').Page,
+  requestedHash: string
+): Promise<boolean> {
   return page.evaluate((hash) => {
     if (location.hash !== hash) return false;
     const id = decodeURIComponent(hash.slice(1));
@@ -81,7 +84,10 @@ async function hashHeadingAligned(page: import('@playwright/test').Page, request
   }, requestedHash);
 }
 
-async function waitForScalarDeepLinkSettled(page: import('@playwright/test').Page, requestedHash: string) {
+async function waitForScalarDeepLinkSettled(
+  page: import('@playwright/test').Page,
+  requestedHash: string
+) {
   await expect
     .poll(
       async () => {
@@ -103,19 +109,20 @@ async function waitForScalarDeepLinkSettled(page: import('@playwright/test').Pag
           if (!section) return false;
           const hb = document.querySelector('.site-header')?.getBoundingClientRect().bottom ?? 0;
           const heading =
-            section.querySelector('h1, h2, h3, h4, .section-header, .section-header-label') ?? section;
+            section.querySelector('h1, h2, h3, h4, .section-header, .section-header-label') ??
+            section;
           const top = heading.getBoundingClientRect().top;
           return top >= hb - 1 && top <= hb + 24;
         }, requestedHash);
       },
-      { timeout: 35_000 },
+      { timeout: 35_000 }
     )
     .toBe(true);
 }
 
 async function expectScalarHashTargetInViewport(
   page: import('@playwright/test').Page,
-  requestedHash: string,
+  requestedHash: string
 ) {
   await waitForScalarDeepLinkSettled(page, requestedHash);
   expect(await hashHeadingAligned(page, requestedHash)).toBe(true);
@@ -124,10 +131,15 @@ async function expectScalarHashTargetInViewport(
   expect(await hashHeadingAligned(page, requestedHash)).toBe(true);
 }
 
-async function assertOperationRowsInsideTagCard(page: import('@playwright/test').Page, tagSlug: string) {
+async function assertOperationRowsInsideTagCard(
+  page: import('@playwright/test').Page,
+  tagSlug: string
+) {
   const offenders = await page.evaluate((slug) => {
     const card = [...document.querySelectorAll('.scalar-embed .scalar-card-sticky')].find(
-      (el) => el.querySelector(`a.endpoint[href*="#tag/${slug}/"]`) && el.getBoundingClientRect().width > 0,
+      (el) =>
+        el.querySelector(`a.endpoint[href*="#tag/${slug}/"]`) &&
+        el.getBoundingClientRect().width > 0
     );
     if (!card) {
       return ['missing-operation-card'];
@@ -148,7 +160,7 @@ async function assertOperationRowsInsideTagCard(page: import('@playwright/test')
       if (card.contains(endpoint)) return;
       if (
         endpoint.closest(
-          'nav.sidebar-pages, aside.references-navigation, .references-navigation, .references-navigation-list',
+          'nav.sidebar-pages, aside.references-navigation, .references-navigation, .references-navigation-list'
         )
       ) {
         return;
@@ -172,12 +184,12 @@ async function assertOperationRowsInsideTagCard(page: import('@playwright/test')
 
 async function assertOperationPathsFit(page: import('@playwright/test').Page) {
   const offenders = await page.evaluate(() => {
-    const paths = [...document.querySelectorAll('.scalar-embed .scalar-card-sticky .endpoint-path')].filter(
-      (el) => {
-        const r = el.getBoundingClientRect();
-        return r.width > 0 && r.height > 0;
-      },
-    );
+    const paths = [
+      ...document.querySelectorAll('.scalar-embed .scalar-card-sticky .endpoint-path'),
+    ].filter((el) => {
+      const r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    });
     return paths
       .filter((el) => el.scrollWidth > el.clientWidth + 1)
       .map((el) => el.textContent?.trim())
@@ -222,13 +234,17 @@ test.describe('API reference operations', () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/docs/api#tag/labels');
-    const tagOperationLinks = page.locator('.scalar-embed .scalar-card-sticky a.endpoint[href*="#tag/labels/"]');
+    const tagOperationLinks = page.locator(
+      '.scalar-embed .scalar-card-sticky a.endpoint[href*="#tag/labels/"]'
+    );
     await expect(tagOperationLinks.first()).toBeVisible({ timeout: 60_000 });
     expect(await tagOperationLinks.count()).toBeGreaterThan(2);
 
     await page.locator('.scalar-embed a[href*="#tag/dokumente"]').first().click();
     await page.waitForURL(/#tag\/dokumente/, { timeout: 30_000 });
-    const docLinks = page.locator('.scalar-embed .scalar-card-sticky a.endpoint[href*="#tag/dokumente/"]');
+    const docLinks = page.locator(
+      '.scalar-embed .scalar-card-sticky a.endpoint[href*="#tag/dokumente/"]'
+    );
     await expect(docLinks.first()).toBeVisible({ timeout: 60_000 });
     expect(await docLinks.count()).toBeGreaterThan(2);
   });
@@ -242,33 +258,35 @@ test.describe('API reference operations', () => {
       .poll(
         async () =>
           page.evaluate(() => {
-      const scope = document.querySelector('.scalar-embed-locale-de .scalar-app');
-      if (!scope) return ['missing-embed'];
-      const forbidden = [
-        ['Show More', /\bShow More\b/],
-        ['Show Child Attributes', /\bShow Child Attributes\b/],
-        ['Hide Child Attributes', /\bHide Child Attributes\b/],
-        ['Test Request', /\bTest Request\b/],
-        ['required', /\brequired\b/],
-        ['Auth Type', /\bAuth Type\b/],
-        ['No authentication selected', /\bNo authentication selected\b/],
-        ['Copy', /\bCopy\b/],
-        ['Copied', /\bCopied\b/],
-        ['Responses', /\bResponses\b/],
-        ['Operations', /\bOperations\b/],
-        ['Show Schema', /\bShow Schema\b/],
-        ['Body', /\bBody\b/],
-      ] as const;
-      const chunks: string[] = [];
-      scope.querySelectorAll('button, label, summary, th, td, h1, h2, h3, h4, p, span').forEach((el) => {
-        if (el.closest('pre, code, .hljs')) return;
-        const t = el.textContent?.trim();
-        if (t) chunks.push(t);
-      });
-      const text = chunks.join('\n');
+            const scope = document.querySelector('.scalar-embed-locale-de .scalar-app');
+            if (!scope) return ['missing-embed'];
+            const forbidden = [
+              ['Show More', /\bShow More\b/],
+              ['Show Child Attributes', /\bShow Child Attributes\b/],
+              ['Hide Child Attributes', /\bHide Child Attributes\b/],
+              ['Test Request', /\bTest Request\b/],
+              ['required', /\brequired\b/],
+              ['Auth Type', /\bAuth Type\b/],
+              ['No authentication selected', /\bNo authentication selected\b/],
+              ['Copy', /\bCopy\b/],
+              ['Copied', /\bCopied\b/],
+              ['Responses', /\bResponses\b/],
+              ['Operations', /\bOperations\b/],
+              ['Show Schema', /\bShow Schema\b/],
+              ['Body', /\bBody\b/],
+            ] as const;
+            const chunks: string[] = [];
+            scope
+              .querySelectorAll('button, label, summary, th, td, h1, h2, h3, h4, p, span')
+              .forEach((el) => {
+                if (el.closest('pre, code, .hljs')) return;
+                const t = el.textContent?.trim();
+                if (t) chunks.push(t);
+              });
+            const text = chunks.join('\n');
             return forbidden.filter(([, pattern]) => pattern.test(text)).map(([label]) => label);
           }),
-        { timeout: 30_000 },
+        { timeout: 30_000 }
       )
       .toEqual([]);
   });
@@ -307,16 +325,24 @@ test.describe('API reference operations', () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/docs/api#tag/labels');
-    await page.waitForSelector('.scalar-embed button.show-more', { state: 'attached', timeout: 60_000 });
+    await page.waitForSelector('.scalar-embed button.show-more', {
+      state: 'attached',
+      timeout: 60_000,
+    });
     await expect(page.getByText('Show More', { exact: true })).toHaveCount(0);
-    await expect(page.locator('.scalar-embed button.show-more').first()).toHaveText('Mehr anzeigen');
+    await expect(page.locator('.scalar-embed button.show-more').first()).toHaveText(
+      'Mehr anzeigen'
+    );
   });
 
   test('labels Operationen rows stay inside the card at 1280', async ({ page }) => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/docs/api#tag/labels');
-    await page.waitForSelector('.scalar-embed .endpoint-path', { state: 'attached', timeout: 60_000 });
+    await page.waitForSelector('.scalar-embed .endpoint-path', {
+      state: 'attached',
+      timeout: 60_000,
+    });
     await assertOperationRowsInsideTagCard(page, 'labels');
   });
 
@@ -342,7 +368,8 @@ test.describe('API reference operations', () => {
         0;
       const bad: string[] = [];
       main.querySelectorAll('a.endpoint').forEach((link) => {
-        if (link.closest('nav.sidebar-pages, aside.references-navigation, .references-navigation')) return;
+        if (link.closest('nav.sidebar-pages, aside.references-navigation, .references-navigation'))
+          return;
         const r = link.getBoundingClientRect();
         if (r.width < 1 || r.height < 1) return;
         if (r.bottom < 0 || r.top > window.innerHeight) return;
@@ -361,7 +388,10 @@ test.describe('API reference operations', () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/docs/api#tag/labels');
-    await page.waitForSelector('.scalar-embed .endpoint-path', { state: 'attached', timeout: 60_000 });
+    await page.waitForSelector('.scalar-embed .endpoint-path', {
+      state: 'attached',
+      timeout: 60_000,
+    });
     const overlaps = await page.evaluate(() => {
       const labelsCard = [...document.querySelectorAll('.scalar-card-sticky')].find((card) => {
         const r = card.getBoundingClientRect();
@@ -394,15 +424,15 @@ test.describe('API reference operations', () => {
     await page.waitForFunction(
       () =>
         [...document.querySelectorAll('.scalar-embed .endpoint-path')].some(
-          (el) => el.getBoundingClientRect().width > 0,
+          (el) => el.getBoundingClientRect().width > 0
         ),
       undefined,
-      { timeout: 60_000 },
+      { timeout: 60_000 }
     );
     const broken = await page.evaluate(() => {
       const offenders: string[] = [];
       const paths = [...document.querySelectorAll('.scalar-embed .endpoint-path')].filter(
-        (el) => el.getBoundingClientRect().width > 0,
+        (el) => el.getBoundingClientRect().width > 0
       );
       for (const el of paths) {
         const full = el.textContent ?? '';
@@ -450,7 +480,10 @@ test.describe('API reference operations', () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/docs/api#tag/labels');
-    await page.waitForSelector('.scalar-embed .endpoint-path', { state: 'attached', timeout: 60_000 });
+    await page.waitForSelector('.scalar-embed .endpoint-path', {
+      state: 'attached',
+      timeout: 60_000,
+    });
     await assertNoTopBlackBar(page);
     await assertOperationPathsFit(page);
     await assertOperationRowsInsideTagCard(page, 'labels');
@@ -472,15 +505,19 @@ test.describe('API reference operations', () => {
         await page.goto(`/docs/api#tag/${tag}`, { waitUntil: 'networkidle', timeout: 90_000 });
         await page.waitForFunction(
           (tagSlug) =>
-            [...document.querySelectorAll(`.scalar-embed a.endpoint[href*="#tag/${tagSlug}/"]`)].some((a) => {
+            [
+              ...document.querySelectorAll(`.scalar-embed a.endpoint[href*="#tag/${tagSlug}/"]`),
+            ].some((a) => {
               const r = a.getBoundingClientRect();
               return r.width > 0 && r.height > 0;
             }),
           tag,
-          { timeout: 60_000 },
+          { timeout: 60_000 }
         );
         const visibleRows = await page.evaluate((tagSlug) => {
-          return [...document.querySelectorAll(`.scalar-embed a.endpoint[href*="#tag/${tagSlug}/"]`)].filter((a) => {
+          return [
+            ...document.querySelectorAll(`.scalar-embed a.endpoint[href*="#tag/${tagSlug}/"]`),
+          ].filter((a) => {
             const r = a.getBoundingClientRect();
             return r.width > 0 && r.height > 0;
           }).length;
@@ -499,7 +536,10 @@ test.describe('API reference operations', () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/docs/api#tag/labels');
-    await page.waitForSelector('.scalar-embed .sidebar-search', { state: 'attached', timeout: 60_000 });
+    await page.waitForSelector('.scalar-embed .sidebar-search', {
+      state: 'attached',
+      timeout: 60_000,
+    });
     await page.evaluate(() => window.scrollTo(0, 1500));
     await page.waitForTimeout(200);
     await page.evaluate(() => window.scrollTo(0, 0));
@@ -519,7 +559,10 @@ test.describe('API reference operations', () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/docs/api');
-    await page.waitForSelector('.scalar-embed nav.sidebar-pages', { state: 'attached', timeout: 60_000 });
+    await page.waitForSelector('.scalar-embed nav.sidebar-pages', {
+      state: 'attached',
+      timeout: 60_000,
+    });
     await page
       .locator('.scalar-embed nav.sidebar-pages li.sidebar-group-item')
       .filter({ hasText: 'Dokumente' })
@@ -534,17 +577,26 @@ test.describe('API reference operations', () => {
       .first()
       .click();
     await page.waitForTimeout(500);
-    const expanded = await page.locator('.scalar-embed nav.sidebar-pages button[aria-expanded="true"]').count();
+    const expanded = await page
+      .locator('.scalar-embed nav.sidebar-pages button[aria-expanded="true"]')
+      .count();
     expect(expanded).toBe(1);
-    await expect(page.locator('.scalar-embed nav.sidebar-pages button[aria-expanded="true"]')).toContainText(/Labels/i);
+    await expect(
+      page.locator('.scalar-embed nav.sidebar-pages button[aria-expanded="true"]')
+    ).toContainText(/Labels/i);
   });
 
   for (const height of [800, 720] as const) {
-    test(`Labels sidebar reaches Label löschen within two viewports at 1280×${height}`, async ({ page }) => {
+    test(`Labels sidebar reaches Label löschen within two viewports at 1280×${height}`, async ({
+      page,
+    }) => {
       test.setTimeout(120_000);
       await page.setViewportSize({ width: 1280, height });
       await page.goto('/docs/api#tag/labels');
-      await page.waitForSelector('.scalar-embed nav.sidebar-pages', { state: 'attached', timeout: 60_000 });
+      await page.waitForSelector('.scalar-embed nav.sidebar-pages', {
+        state: 'attached',
+        timeout: 60_000,
+      });
       await waitForScalarDeepLinkSettled(page, '#tag/labels');
       await page
         .locator('.scalar-embed nav.sidebar-pages li.sidebar-group-item')
@@ -567,19 +619,21 @@ test.describe('API reference operations', () => {
         layout = await page.evaluate(() => {
           const header = document.querySelector('.site-header');
           const footer = document.querySelector('.site-footer');
-          const link = [...document.querySelectorAll('.scalar-embed nav.sidebar-pages a')].find((a) => {
-            const href = a.getAttribute('href') ?? '';
-            const text = a.textContent?.trim() ?? '';
-            return href.includes('DELETE/tags/{id}') || text.includes('Label löschen');
-          });
-          if (!header || !footer || !link) return { inViewport: false, overlapsFooter: true, scrollDelta: window.scrollY };
+          const link = [...document.querySelectorAll('.scalar-embed nav.sidebar-pages a')].find(
+            (a) => {
+              const href = a.getAttribute('href') ?? '';
+              const text = a.textContent?.trim() ?? '';
+              return href.includes('DELETE/tags/{id}') || text.includes('Label löschen');
+            }
+          );
+          if (!header || !footer || !link)
+            return { inViewport: false, overlapsFooter: true, scrollDelta: window.scrollY };
           const hb = header.getBoundingClientRect().bottom;
           const lr = link.getBoundingClientRect();
           const fr = footer.getBoundingClientRect();
           const inViewport = lr.top >= hb - 1 && lr.bottom <= window.innerHeight + 1;
           const footerVisible = fr.top < window.innerHeight;
-          const overlapsFooter =
-            footerVisible && lr.bottom > fr.top + 2 && lr.top < fr.bottom;
+          const overlapsFooter = footerVisible && lr.bottom > fr.top + 2 && lr.top < fr.bottom;
           return { inViewport, overlapsFooter, scrollDelta: window.scrollY };
         });
         if (layout.inViewport && !layout.overlapsFooter) break;
@@ -587,7 +641,9 @@ test.describe('API reference operations', () => {
         await page.waitForTimeout(120);
       }
       const scrollDelta = Math.abs(layout.scrollDelta - startY);
-      expect(scrollDelta, JSON.stringify({ scrollDelta, maxDelta, startY })).toBeLessThanOrEqual(maxDelta + 120);
+      expect(scrollDelta, JSON.stringify({ scrollDelta, maxDelta, startY })).toBeLessThanOrEqual(
+        maxDelta + 120
+      );
       expect(layout.inViewport, JSON.stringify(layout)).toBe(true);
       expect(layout.overlapsFooter, JSON.stringify(layout)).toBe(false);
     });
@@ -603,29 +659,29 @@ test.describe('API reference operations', () => {
     await expect
       .poll(
         async () => {
-        const snap = await appRoot.ariaSnapshot();
-        const forbidden = [
-          /\bExpand\b/,
-          /\bCollapse\b/,
-          /\bShow all\b/i,
-          /\bExample Responses\b/,
-          /\bDownload OpenAPI Document\b/,
-          /\bOpen API Documentation\b/,
-          /\bShow sidebar\b/,
-          /\bShow search\b/i,
-          /\bClose Group\b/,
-          /\bHTTP Method\b/,
-          /\bSidebar for\b/,
-          /\bType:\b/,
-          /\bNo Body\b/,
-          /\bBody\b/,
-          /\bShow Schema\b/,
-          /\bbinary data\b/i,
-          /\bendpoints\b/mi,
-        ];
-        return forbidden.filter((re) => re.test(snap)).map((re) => String(re));
+          const snap = await appRoot.ariaSnapshot();
+          const forbidden = [
+            /\bExpand\b/,
+            /\bCollapse\b/,
+            /\bShow all\b/i,
+            /\bExample Responses\b/,
+            /\bDownload OpenAPI Document\b/,
+            /\bOpen API Documentation\b/,
+            /\bShow sidebar\b/,
+            /\bShow search\b/i,
+            /\bClose Group\b/,
+            /\bHTTP Method\b/,
+            /\bSidebar for\b/,
+            /\bType:\b/,
+            /\bNo Body\b/,
+            /\bBody\b/,
+            /\bShow Schema\b/,
+            /\bbinary data\b/i,
+            /\bendpoints\b/im,
+          ];
+          return forbidden.filter((re) => re.test(snap)).map((re) => String(re));
         },
-        { timeout: 30_000 },
+        { timeout: 30_000 }
       )
       .toEqual([]);
   });
@@ -634,13 +690,16 @@ test.describe('API reference operations', () => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/docs/api');
-    await page.waitForSelector('.scalar-embed nav.sidebar-pages', { state: 'attached', timeout: 60_000 });
+    await page.waitForSelector('.scalar-embed nav.sidebar-pages', {
+      state: 'attached',
+      timeout: 60_000,
+    });
     await page.evaluate(() => window.scrollTo(0, 800));
     await page.waitForTimeout(300);
     const nested = await page.evaluate(() => {
       const scrollRoots = [
         ...document.querySelectorAll(
-          '.scalar-embed .references-navigation-list, .scalar-embed aside.references-navigation, .scalar-embed nav.sidebar-pages',
+          '.scalar-embed .references-navigation-list, .scalar-embed aside.references-navigation, .scalar-embed nav.sidebar-pages'
         ),
       ];
       for (const el of scrollRoots) {
@@ -692,33 +751,46 @@ test.describe('API reference operations', () => {
     expect(offenders).toEqual([]);
   });
 
-  test('site header stays at viewport top on API landing and operation deep link', async ({ page }) => {
+  test('site header stays at viewport top on API landing and operation deep link', async ({
+    page,
+  }) => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/docs/api');
     await page.waitForSelector('.scalar-embed', { state: 'attached', timeout: 60_000 });
     await page.waitForTimeout(800);
-    expect(await page.evaluate(() => document.querySelector('.site-header')?.getBoundingClientRect().top)).toBe(0);
+    expect(
+      await page.evaluate(() => document.querySelector('.site-header')?.getBoundingClientRect().top)
+    ).toBe(0);
 
     await page.goto('/docs/api#tag/labels/PUT/tags/{tagId}/custom-fields');
     await page.waitForSelector('.scalar-embed', { state: 'attached', timeout: 60_000 });
     await page.waitForTimeout(1500);
-    expect(await page.evaluate(() => document.querySelector('.site-header')?.getBoundingClientRect().top)).toBe(0);
+    expect(
+      await page.evaluate(() => document.querySelector('.site-header')?.getBoundingClientRect().top)
+    ).toBe(0);
 
     await page.goto('/docs/api#tag/labels', { waitUntil: 'networkidle', timeout: 90_000 });
     await page.waitForSelector('.scalar-embed', { state: 'attached', timeout: 60_000 });
     await page.waitForTimeout(1200);
-    expect(await page.evaluate(() => document.querySelector('.site-header')?.getBoundingClientRect().top)).toBe(0);
+    expect(
+      await page.evaluate(() => document.querySelector('.site-header')?.getBoundingClientRect().top)
+    ).toBe(0);
     await page.evaluate(() => window.scrollBy(0, 240));
     await page.waitForTimeout(200);
-    expect(await page.evaluate(() => document.querySelector('.site-header')?.getBoundingClientRect().top)).toBe(0);
+    expect(
+      await page.evaluate(() => document.querySelector('.site-header')?.getBoundingClientRect().top)
+    ).toBe(0);
   });
 
   test('expanded sidebar group headings are not letter-stacked at 1280', async ({ page }) => {
     test.setTimeout(90_000);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/docs/api');
-    await page.waitForSelector('.scalar-embed nav.sidebar-pages', { state: 'attached', timeout: 60_000 });
+    await page.waitForSelector('.scalar-embed nav.sidebar-pages', {
+      state: 'attached',
+      timeout: 60_000,
+    });
     for (const name of [/Dokumente/, /Labels/]) {
       await page.locator('.scalar-embed button').filter({ hasText: name }).first().click();
       await page.waitForTimeout(300);
@@ -748,7 +820,9 @@ test.describe('API reference operations', () => {
       await page.waitForTimeout(80);
     }
     await expect
-      .poll(async () => page.locator('.scalar-embed .tag-section-container').count(), { timeout: 30_000 })
+      .poll(async () => page.locator('.scalar-embed .tag-section-container').count(), {
+        timeout: 30_000,
+      })
       .toBeGreaterThanOrEqual(expectedTags);
   });
 
@@ -767,7 +841,9 @@ test.describe('API reference operations', () => {
     await page.waitForSelector('.scalar-embed-locale-de', { state: 'attached', timeout: 60_000 });
     await expectScalarHashTargetInViewport(page, hash);
     await expect(page.locator('.scalar-embed-locale-de')).not.toContainText(/List instance users/i);
-    await expect(page.locator('.scalar-embed-locale-de')).toContainText(/Instanz-Benutzer auflisten/i);
+    await expect(page.locator('.scalar-embed-locale-de')).toContainText(
+      /Instanz-Benutzer auflisten/i
+    );
   });
 
   for (const hash of [
@@ -804,7 +880,8 @@ test.describe('API reference operations', () => {
         const id = decodeURIComponent(requestedHash.slice(1));
         const section = document.getElementById(id);
         const heading =
-          section?.querySelector('h1, h2, h3, h4, .section-header, .section-header-label') ?? section;
+          section?.querySelector('h1, h2, h3, h4, .section-header, .section-header-label') ??
+          section;
         const targetTop = heading?.getBoundingClientRect().top ?? hb;
         const operation = /^tag\/([^/]+)\/(GET|PUT|POST|PATCH|DELETE)(\/.*)$/i.exec(id);
         const ft = footer.getBoundingClientRect().top;
@@ -818,7 +895,10 @@ test.describe('API reference operations', () => {
         });
         const isOperation = Boolean(operation);
         const okLayout = isOperation
-          ? targetTop >= hb - 8 && targetTop < window.innerHeight - 48 && !overflow && !mainPastFooter
+          ? targetTop >= hb - 8 &&
+            targetTop < window.innerHeight - 48 &&
+            !overflow &&
+            !mainPastFooter
           : targetTop <= hb + 120 && !overflow && !mainPastFooter;
         return {
           ok: okLayout,
@@ -852,10 +932,12 @@ test.describe('API reference operations', () => {
     await toggle.click();
     await page.waitForTimeout(400);
     await expect(
-      page.locator(`[id="${sectionId}"] button.schema-card-title`).filter({ hasText: 'Unterattribute ausblenden' }),
+      page
+        .locator(`[id="${sectionId}"] button.schema-card-title`)
+        .filter({ hasText: 'Unterattribute ausblenden' })
     ).toBeVisible({ timeout: 10_000 });
     await expect(
-      page.locator(`[id="${sectionId}"] button.schema-card-title[aria-expanded="true"]`),
+      page.locator(`[id="${sectionId}"] button.schema-card-title[aria-expanded="true"]`)
     ).toBeVisible({ timeout: 10_000 });
     expect(errors, errors.join('\n')).toEqual([]);
   });

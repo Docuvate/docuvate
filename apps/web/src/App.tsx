@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { authClient } from './lib/auth-client';
 import { formatAuthClientError } from './lib/authErrors';
@@ -70,29 +72,94 @@ export function App() {
         path={routes.inbox}
         element={<Navigate to={`${routes.documents}?filter=in%3Ainbox`} replace />}
       />
-      <Route path={routes.home} element={<ShellRoute><DashboardPage /></ShellRoute>} />
-      <Route path={routes.documents} element={<ShellRoute><LibraryPage /></ShellRoute>} />
-      <Route path={routes.globalChat} element={<ShellRoute><GlobalChatPage /></ShellRoute>} />
-      <Route path={routes.savedViews} element={<ShellRoute><SavedViewsPage /></ShellRoute>} />
+      <Route
+        path={routes.home}
+        element={
+          <ShellRoute>
+            <DashboardPage />
+          </ShellRoute>
+        }
+      />
+      <Route
+        path={routes.documents}
+        element={
+          <ShellRoute>
+            <LibraryPage />
+          </ShellRoute>
+        }
+      />
+      <Route
+        path={routes.globalChat}
+        element={
+          <ShellRoute>
+            <GlobalChatPage />
+          </ShellRoute>
+        }
+      />
+      <Route
+        path={routes.savedViews}
+        element={
+          <ShellRoute>
+            <SavedViewsPage />
+          </ShellRoute>
+        }
+      />
       <Route
         path={routes.filesystem}
-        element={<ShellRoute><DateisystemExplorerPage browseMode="root" /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <DateisystemExplorerPage browseMode="root" />
+          </ShellRoute>
+        }
       />
       <Route
         path="/filesystem/containers/:mappeId"
-        element={<ShellRoute><DateisystemExplorerPage browseMode="mappe" /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <DateisystemExplorerPage browseMode="mappe" />
+          </ShellRoute>
+        }
       />
       <Route
         path="/filesystem/folders/:folderId"
-        element={<ShellRoute><DateisystemExplorerPage browseMode="folder" /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <DateisystemExplorerPage browseMode="folder" />
+          </ShellRoute>
+        }
       />
-      <Route path={routes.structureLabels} element={<ShellRoute><LabelsPage /></ShellRoute>} />
+      <Route
+        path={routes.structureLabels}
+        element={
+          <ShellRoute>
+            <LabelsPage />
+          </ShellRoute>
+        }
+      />
       <Route
         path={routes.structureRecognizedFields}
-        element={<ShellRoute><RecognizedFieldsPage /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <RecognizedFieldsPage />
+          </ShellRoute>
+        }
       />
-      <Route path={routes.settings} element={<ShellRoute><SettingsPage /></ShellRoute>} />
-      <Route path={routes.docsStyles} element={<ShellRoute><StylesDocsPage /></ShellRoute>} />
+      <Route
+        path={routes.settings}
+        element={
+          <ShellRoute>
+            <SettingsPage />
+          </ShellRoute>
+        }
+      />
+      <Route
+        path={routes.docsStyles}
+        element={
+          <ShellRoute>
+            <StylesDocsPage />
+          </ShellRoute>
+        }
+      />
       <Route
         path={routes.docsConnectorsOAuthSetup}
         element={
@@ -103,27 +170,51 @@ export function App() {
       />
       <Route
         path={routes.settingsConnectors}
-        element={<ShellRoute><ConnectorsPage /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <ConnectorsPage />
+          </ShellRoute>
+        }
       />
       <Route
         path="/settings/connectors/paperless/:installationId"
-        element={<ShellRoute><PaperlessConnectorSetupPage /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <PaperlessConnectorSetupPage />
+          </ShellRoute>
+        }
       />
       <Route
         path={routes.settingsBlockedLabels}
-        element={<ShellRoute><BlockedLabelsSettingsPage /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <BlockedLabelsSettingsPage />
+          </ShellRoute>
+        }
       />
       <Route
         path={routes.settingsAccountSecurity}
-        element={<ShellRoute><AccountSecuritySettingsPage /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <AccountSecuritySettingsPage />
+          </ShellRoute>
+        }
       />
       <Route
         path={routes.settingsAdmin}
-        element={<ShellRoute><AdminSettingsPage /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <AdminSettingsPage />
+          </ShellRoute>
+        }
       />
       <Route
         path={routes.settingsAdminUsers}
-        element={<ShellRoute><AdminUsersPage /></ShellRoute>}
+        element={
+          <ShellRoute>
+            <AdminUsersPage />
+          </ShellRoute>
+        }
       />
       <Route
         path="/documents/:id"

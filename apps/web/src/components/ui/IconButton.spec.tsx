@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Plus } from 'lucide-react';
@@ -17,9 +19,13 @@ describe('IconButton', () => {
 
   it('exposes menu popup semantics only when requested', () => {
     const { rerender } = render(<IconButton icon={Plus} label="Menu plain" size="sm" />);
-    expect(screen.getByRole('button', { name: 'Menu plain' }).getAttribute('aria-haspopup')).toBeNull();
+    expect(
+      screen.getByRole('button', { name: 'Menu plain' }).getAttribute('aria-haspopup')
+    ).toBeNull();
     rerender(<IconButton icon={Plus} label="Menu popup" size="sm" hasPopup="menu" />);
-    expect(screen.getByRole('button', { name: 'Menu popup' }).getAttribute('aria-haspopup')).toBe('menu');
+    expect(screen.getByRole('button', { name: 'Menu popup' }).getAttribute('aria-haspopup')).toBe(
+      'menu'
+    );
   });
 });
 

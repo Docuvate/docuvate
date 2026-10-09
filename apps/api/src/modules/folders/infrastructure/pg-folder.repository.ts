@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
-import type { FolderRepository, FolderEntity, FolderListItem } from '../../../shared/domain/ports.js';
+import type {
+  FolderRepository,
+  FolderEntity,
+  FolderListItem,
+} from '../../../shared/domain/ports.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { NotFoundError } from '../../../shared/domain/errors.js';
 
@@ -41,10 +47,10 @@ export class PgFolderRepository implements FolderRepository {
   }
 
   async findByIdForUser(id: string, userId: string): Promise<FolderEntity | null> {
-    const result = await this.pool.query(
-      `SELECT * FROM folders WHERE id = $1 AND user_id = $2`,
-      [id, userId]
-    );
+    const result = await this.pool.query(`SELECT * FROM folders WHERE id = $1 AND user_id = $2`, [
+      id,
+      userId,
+    ]);
     return result.rows[0] ? mapRow(result.rows[0]) : null;
   }
 
@@ -85,10 +91,10 @@ export class PgFolderRepository implements FolderRepository {
   }
 
   async delete(id: string, userId: string): Promise<void> {
-    const result = await this.pool.query(
-      `DELETE FROM folders WHERE id = $1 AND user_id = $2`,
-      [id, userId]
-    );
+    const result = await this.pool.query(`DELETE FROM folders WHERE id = $1 AND user_id = $2`, [
+      id,
+      userId,
+    ]);
     if ((result.rowCount ?? 0) === 0) throw new NotFoundError('Folder');
   }
 }

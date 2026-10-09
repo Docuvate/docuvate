@@ -1,4 +1,14 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { UserEntity } from './user.entity.js';
 import { SavedDocumentViewTagsEntity } from './saved-document-view-tags.entity.js';
 import { FoldersEntity } from './folders.entity.js';
@@ -70,7 +80,10 @@ export class SavedDocumentViewsEntity {
   @Column('integer', { name: 'position', default: () => '0' })
   position: number;
 
-  @Column('jsonb', { name: 'visible_columns', default: () => "'[\"title\",\"labels\",\"date\",\"status\"]'::jsonb" })
+  @Column('jsonb', {
+    name: 'visible_columns',
+    default: () => '\'["title","labels","date","status"]\'::jsonb',
+  })
   visibleColumns: string[];
 
   @Column('timestamp with time zone', { name: 'created_at', default: () => 'now()' })

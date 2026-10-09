@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createCipheriv, createDecipheriv, randomBytes, scryptSync } from 'node:crypto';
 import type { ConnectorConfigurationInput } from '../domain/connector.types.js';
 
@@ -5,8 +7,7 @@ const SCRYPT_SALT = 'docuvate-connector-installations-v1';
 
 function deriveKey(): Buffer {
   const secret =
-    process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'] ??
-    'dev-insecure-connector-secrets-key-change-me';
+    process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'] ?? 'dev-insecure-connector-secrets-key-change-me';
   return scryptSync(secret, SCRYPT_SALT, 32);
 }
 

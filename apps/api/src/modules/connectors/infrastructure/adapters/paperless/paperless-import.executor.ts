@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash } from 'node:crypto';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ExtractedField, MatchingAlgorithm } from '@docuvate/contracts';
@@ -99,10 +101,12 @@ export class PaperlessImportExecutor {
     return { ...summary, paperlessApiVersion: apiVersion };
   }
 
-  async runImportJob(run: ConnectorImportRunRow, credentials: ConnectorConfigurationInput): Promise<void> {
+  async runImportJob(
+    run: ConnectorImportRunRow,
+    credentials: ConnectorConfigurationInput
+  ): Promise<void> {
     const resolved = await resolvePaperlessCredentials(credentials);
-    const apiVersion =
-      run.paperlessApiVersion ?? (await detectPaperlessApiVersion(resolved));
+    const apiVersion = run.paperlessApiVersion ?? (await detectPaperlessApiVersion(resolved));
     const client = new PaperlessApiClient(resolved, apiVersion);
 
     const firstPage = await client.listDocuments({ page: 1, pageSize: 1 });
@@ -141,12 +145,7 @@ export class PaperlessImportExecutor {
             detail === 'PAPERLESS_DOWNLOAD_TOO_LARGE'
               ? 'connectors.paperlessImport.documentTooLarge'
               : 'connectors.paperlessImport.documentFailed';
-          await this.imports.addRunError(
-            run.id,
-            String(row.id),
-            messageKey,
-            detail.slice(0, 500)
-          );
+          await this.imports.addRunError(run.id, String(row.id), messageKey, detail.slice(0, 500));
         }
         processed += 1;
         modifiedCursor = new Date(row.modified);
@@ -213,12 +212,7 @@ export class PaperlessImportExecutor {
     const tagIds = await this.resolveTagIds(run, fullDoc);
     const correspondentId = await this.resolveCorrespondentId(run, fullDoc.correspondent);
     const folderId = await this.resolveFolderId(run, fullDoc.storage_path);
-    const customFields = await this.buildCustomFields(
-      run,
-      fullDoc,
-      customFieldById,
-      run.userId
-    );
+    const customFields = await this.buildCustomFields(run, fullDoc, customFieldById, run.userId);
 
     let documentId = existing?.documentId;
     if (!documentId) {
@@ -282,7 +276,13 @@ export class PaperlessImportExecutor {
       }
     }
 
-    await this.applyOcrPipeline(run.ocrMode, documentId, run.userId, fullDoc.content ?? '', customFields);
+    await this.applyOcrPipeline(
+      run.ocrMode,
+      documentId,
+      run.userId,
+      fullDoc.content ?? '',
+      customFields
+    );
 
     await this.imports.upsertSourceLink({
       installationId: run.installationId,
@@ -307,12 +307,7 @@ export class PaperlessImportExecutor {
     const tagIds = await this.resolveTagIds(run, fullDoc);
     const correspondentId = await this.resolveCorrespondentId(run, fullDoc.correspondent);
     const folderId = await this.resolveFolderId(run, fullDoc.storage_path);
-    const customFields = await this.buildCustomFields(
-      run,
-      fullDoc,
-      customFieldById,
-      run.userId
-    );
+    const customFields = await this.buildCustomFields(run, fullDoc, customFieldById, run.userId);
     const filename = fullDoc.original_file_name?.trim() || `${fullDoc.title || fullDoc.id}.bin`;
     await this.documents.updateForUser(documentId, run.userId, {
       title: fullDoc.title?.trim() || filename,
@@ -323,7 +318,13 @@ export class PaperlessImportExecutor {
       tagIds: [...new Set([(await this.taxonomy.ensureInboxTag(run.userId)).id, ...tagIds])],
       extractionFields: customFields,
     });
-    await this.applyOcrPipeline(run.ocrMode, documentId, run.userId, fullDoc.content ?? '', customFields);
+    await this.applyOcrPipeline(
+      run.ocrMode,
+      documentId,
+      run.userId,
+      fullDoc.content ?? '',
+      customFields
+    );
   }
 
   private async applyOcrPipeline(
@@ -353,7 +354,10 @@ export class PaperlessImportExecutor {
     }
   }
 
-  private async resolveTagIds(run: ConnectorImportRunRow, doc: PaperlessDocument): Promise<string[]> {
+  private async resolveTagIds(
+    run: ConnectorImportRunRow,
+    doc: PaperlessDocument
+  ): Promise<string[]> {
     const ids: string[] = [];
     for (const tagId of doc.tags ?? []) {
       const local = await this.imports.findEntityLink(run.installationId, 'tag', tagId);
@@ -505,7 +509,9 @@ export class PaperlessImportExecutor {
     row: { id: number; name: string; matching_algorithm: number; match: string }
   ): Promise<string> {
     const list = await this.taxonomy.listCorrespondents(userId);
-    const found = list.find((c) => c.name.localeCompare(row.name, undefined, { sensitivity: 'accent' }) === 0);
+    const found = list.find(
+      (c) => c.name.localeCompare(row.name, undefined, { sensitivity: 'accent' }) === 0
+    );
     if (found) {
       return found.id;
     }
@@ -535,7 +541,9 @@ export class PaperlessImportExecutor {
 
   private async findTagByName(userId: string, name: string): Promise<string | null> {
     const tags = await this.taxonomy.listTags(userId);
-    const found = tags.find((t) => t.name.localeCompare(name, undefined, { sensitivity: 'accent' }) === 0);
+    const found = tags.find(
+      (t) => t.name.localeCompare(name, undefined, { sensitivity: 'accent' }) === 0
+    );
     return found?.id ?? null;
   }
 }

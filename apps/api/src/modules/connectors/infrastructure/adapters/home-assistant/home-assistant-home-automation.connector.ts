@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPlugin } from '../../../domain/connector.ports.js';
 import type {
   ConnectorConfigurationInput,
@@ -46,7 +48,9 @@ export class HomeAssistantHomeAutomationConnector implements ConnectorPlugin {
     return openHomeAssistantRuntime(credentials);
   }
 
-  async validateConfiguration(input: ConnectorConfigurationInput): Promise<ConnectorValidationResult> {
+  async validateConfiguration(
+    input: ConnectorConfigurationInput
+  ): Promise<ConnectorValidationResult> {
     const required = requiredFieldsPresent(input, ['base_url', 'access_token']);
     if (!required.ok) {
       return required;

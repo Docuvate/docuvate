@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export function isScalarApiHash(hash: string): boolean {
   if (!hash || hash.length < 2) return false;
   const decoded = decodeURIComponent(hash.slice(1));
@@ -195,7 +197,7 @@ export function scheduleApiPageScrollSync(): void {
     session.timeoutIds.push(
       window.setTimeout(() => {
         run();
-      }, delay),
+      }, delay)
     );
   }
   session.timeoutIds.push(
@@ -204,6 +206,6 @@ export function scheduleApiPageScrollSync(): void {
       window.removeEventListener('scroll', onScrollTrackSettle);
       session.removeIntentListeners();
       if (activeSession === session) activeSession = null;
-    }, 4000),
+    }, 4000)
   );
 }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ThemePreference } from '@docuvate/contracts';
 
 export const THEME_PREFERENCE_STORAGE_KEY = 'docuvate-theme-preference';

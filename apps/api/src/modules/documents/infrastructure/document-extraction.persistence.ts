@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
 import type { ExtractionBlock, ExtractedField } from '@docuvate/contracts';
 import {
@@ -44,7 +46,10 @@ export async function replaceDocumentExtractionBlocks(
   }
 }
 
-async function loadBlocks(client: Db, documentIds: string[]): Promise<Map<string, ExtractionBlock[]>> {
+async function loadBlocks(
+  client: Db,
+  documentIds: string[]
+): Promise<Map<string, ExtractionBlock[]>> {
   const out = new Map<string, ExtractionBlock[]>();
   if (documentIds.length === 0) return out;
   const result = await client.query(

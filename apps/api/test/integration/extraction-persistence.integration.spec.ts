@@ -2,7 +2,11 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PgDocumentRepository } from '../../src/modules/documents/infrastructure/pg-document.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
-import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+import {
+  deleteSyntheticUser,
+  insertSyntheticUser,
+  newIsolationUserId,
+} from './pg-test-isolation.js';
 
 describe('extraction persistence in normalized tables (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
@@ -129,9 +133,10 @@ describe('extraction persistence in normalized tables (Testcontainers Postgres)'
     });
     const textRow = await pool.query(`SELECT extracted_text FROM documents WHERE id = $1`, [docId]);
     expect(textRow.rows[0]?.extracted_text).toBe('body');
-    const layout = await pool.query(`SELECT count(*)::int AS c FROM document_layout_ir WHERE document_id = $1`, [
-      docId,
-    ]);
+    const layout = await pool.query(
+      `SELECT count(*)::int AS c FROM document_layout_ir WHERE document_id = $1`,
+      [docId]
+    );
     expect(layout.rows[0]?.c).toBe(0);
   });
 

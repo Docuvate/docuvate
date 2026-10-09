@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const AMOUNT_KEYS = new Set(['amount', 'total', 'betrag', 'summe']);
 
 function parseStoredAmount(value: string): number | null {

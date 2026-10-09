@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useRef, useState, type ReactNode } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -37,7 +39,9 @@ export function DateisystemContentActions({ primary, secondary }: DateisystemCon
   return (
     <div className="dateisystem-content-actions">
       <div className="dateisystem-content-actions-row">
-        <div className="dateisystem-content-action dateisystem-content-action--primary">{primary}</div>
+        <div className="dateisystem-content-action dateisystem-content-action--primary">
+          {primary}
+        </div>
         {secondary.map((entry) => (
           <div
             key={entry.id}

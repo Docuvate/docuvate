@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,10 +16,7 @@ import { Spinner } from '../components/ui/Spinner';
 const MIN_PASSWORD_LENGTH = 8;
 
 type TokenGateState =
-  | { kind: 'idle' }
-  | { kind: 'checking' }
-  | { kind: 'invalid' }
-  | { kind: 'valid' };
+  { kind: 'idle' } | { kind: 'checking' } | { kind: 'invalid' } | { kind: 'valid' };
 
 export function ResetPasswordPage() {
   const { t } = useTranslation();
@@ -79,7 +78,7 @@ export function ResetPasswordPage() {
               PASSWORD_TOO_SHORT: t('auth.passwordTooShort'),
               INVALID_TOKEN: t('auth.resetPasswordInvalidLink'),
             },
-            'resetPassword',
+            'resetPassword'
           )
         );
         return;

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { dedupeExtractedFields, type ExtractedField } from '@docuvate/contracts';
 
 /** Merge patches by storage key, then collapse semantic duplicates (e.g. plain `date` + `global:datum`). */

@@ -1,4 +1,8 @@
-export function userInitials(user: { name?: string | null; email?: string | null } | undefined): string {
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+export function userInitials(
+  user: { name?: string | null; email?: string | null } | undefined
+): string {
   if (!user) {
     return '?';
   }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ThemePreference, UiLocale } from '@docuvate/contracts';
 import { updateUserSettings } from './api';
 import { formatUserFacingError } from './apiErrors';

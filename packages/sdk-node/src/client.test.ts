@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: MIT
 import { describe, expect, it } from 'vitest';
 import { DocuvateClient } from './client.js';
 import { DocuvateApiError } from './errors.js';
@@ -37,10 +39,13 @@ describe('DocuvateClient', () => {
     const calls: string[] = [];
     const mockFetch: typeof fetch = async (input) => {
       calls.push(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
-      return new Response(JSON.stringify({ query: 'x', normalizedQuery: 'x', expandedTerms: [], groups: [] }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(
+        JSON.stringify({ query: 'x', normalizedQuery: 'x', expandedTerms: [], groups: [] }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     };
     const client = new DocuvateClient({
       baseUrl: 'http://127.0.0.1:3001/v1',

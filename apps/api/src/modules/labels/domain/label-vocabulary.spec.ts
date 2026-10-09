@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import {
   collectNewLabelCandidates,
@@ -27,12 +29,11 @@ describe('label-vocabulary', () => {
 
   it('names embedding clusters from shared Beleg terms', () => {
     expect(
-      inferClusterLabelNameFromSnippets([
-        'Kontoauszug Januar 2024',
-        'Kontoauszug Februar 2024',
-      ])
+      inferClusterLabelNameFromSnippets(['Kontoauszug Januar 2024', 'Kontoauszug Februar 2024'])
     ).toBe('Kontoauszug');
-    expect(inferClusterLabelNameFromSnippets(['Allgemeine Notiz', 'Sonstiges Schreiben'])).toBeNull();
+    expect(
+      inferClusterLabelNameFromSnippets(['Allgemeine Notiz', 'Sonstiges Schreiben'])
+    ).toBeNull();
   });
 
   it('rejects PDF producer metadata as label names', () => {

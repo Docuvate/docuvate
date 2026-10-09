@@ -96,10 +96,9 @@ describe('admin security (integration)', () => {
       `INSERT INTO "user" (id, name, email, "emailVerified", "createdAt", "updatedAt")
        VALUES ('inviter', 'Inviter', 'inviter@example.com', true, now(), now())`
     );
-    await pool.query(
-      `INSERT INTO installation_user_roles (user_id, role) VALUES ('inviter', $1)`,
-      [INSTALLATION_DB_ROLE_ADMIN]
-    );
+    await pool.query(`INSERT INTO installation_user_roles (user_id, role) VALUES ('inviter', $1)`, [
+      INSTALLATION_DB_ROLE_ADMIN,
+    ]);
     await pool.query(
       `INSERT INTO user_invitations (
          id, invitee_email, invitee_name, assigned_role, invited_by_user_id, token_hash, expires_at
@@ -240,7 +239,9 @@ describe('admin security (integration)', () => {
       `INSERT INTO installation_user_roles (user_id, role) VALUES ('suspended-user', $1)`,
       [INSTALLATION_DB_ROLE_ADMIN]
     );
-    await pool.query(`INSERT INTO installation_user_suspensions (user_id) VALUES ('suspended-user')`);
+    await pool.query(
+      `INSERT INTO installation_user_suspensions (user_id) VALUES ('suspended-user')`
+    );
     const adapter = new PgUserAdministrationAdapter(pool);
     const { users } = await adapter.listUsers({
       headers: new Headers(),

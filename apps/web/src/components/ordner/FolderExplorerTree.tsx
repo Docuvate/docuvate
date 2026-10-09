@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   useCallback,
   useMemo,
@@ -7,14 +9,7 @@ import {
   type KeyboardEvent,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ChevronDown,
-  ChevronRight,
-  Folder,
-  FolderOpen,
-  MoreHorizontal,
-  Plus,
-} from 'lucide-react';
+import { ChevronDown, ChevronRight, Folder, FolderOpen, MoreHorizontal, Plus } from 'lucide-react';
 import type { FolderDto, MappeDto } from '@docuvate/contracts';
 import { isFileDrag } from '../../lib/documentUploadConstants';
 import { isDocumentDrag, readDocumentDragIds } from '../../lib/documentDnD';
@@ -53,7 +48,11 @@ interface FolderExplorerTreeProps {
   treeQuery: string;
   onTreeQueryChange: (value: string) => void;
   onCreateRootOrdner: (name: string) => Promise<void>;
-  onCreateChildFolder: (args: { mappeId: string; parentId: string | null; name: string }) => Promise<void>;
+  onCreateChildFolder: (args: {
+    mappeId: string;
+    parentId: string | null;
+    name: string;
+  }) => Promise<void>;
   onRenameFolder: (folderId: string, name: string) => Promise<void>;
   onDeleteFolder: (folderId: string) => Promise<void>;
   onAddDocuments: (target: FolderDocumentTarget) => void;
@@ -85,9 +84,10 @@ export function FolderExplorerTree({
     y: number;
     items: ContextMenuEntry[];
   } | null>(null);
-  const [pendingDeleteFolder, setPendingDeleteFolder] = useState<{ id: string; name: string } | null>(
-    null
-  );
+  const [pendingDeleteFolder, setPendingDeleteFolder] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const sortedMappen = useMemo(() => sortByNameDe(mappen), [mappen]);
   const looseRoots = useMemo(() => foldersWithoutMappe(folders), [folders]);
@@ -121,8 +121,7 @@ export function FolderExplorerTree({
           kind: 'item',
           id: 'add-docs',
           label: t('filesystem.contextAddDocuments'),
-          onSelect: () =>
-            onAddDocuments({ folderId: folder.id, label: folder.name }),
+          onSelect: () => onAddDocuments({ folderId: folder.id, label: folder.name }),
         },
         {
           kind: 'item',
@@ -186,7 +185,11 @@ export function FolderExplorerTree({
           id: 'new-child',
           label: t('filesystem.contextNewSubfolder'),
           onSelect: () =>
-            void onCreateChildFolder({ mappeId: mappe.id, parentId: null, name: t('filesystem.newFolderDefaultName') }),
+            void onCreateChildFolder({
+              mappeId: mappe.id,
+              parentId: null,
+              name: t('filesystem.newFolderDefaultName'),
+            }),
         },
       ];
       setContextMenu({ x: event.clientX, y: event.clientY, items });
@@ -286,8 +289,7 @@ export function FolderExplorerTree({
                 folders.some(
                   (f) =>
                     f.id === selection.folderId &&
-                    (f.mappeId === mappe.id ||
-                      folderAncestorIncludesMappe(folders, f.id, mappe.id))
+                    (f.mappeId === mappe.id || folderAncestorIncludesMappe(folders, f.id, mappe.id))
                 ));
             const defaultOpen = onPath || mappeSubtreeMatchesSearch(folders, mappe.id, treeQuery);
             const open = isExpanded(mappeKey, defaultOpen);
@@ -385,7 +387,9 @@ export function FolderExplorerTree({
 
           {looseRoots.length > 0 ? (
             <li className="sidebar-tree-item dateisystem-tree-loose" role="treeitem">
-              <span className="dateisystem-tree-loose-label">{t('filesystem.looseFoldersSection')}</span>
+              <span className="dateisystem-tree-loose-label">
+                {t('filesystem.looseFoldersSection')}
+              </span>
               <ul className="sidebar-mappe-children dateisystem-tree-children" role="group">
                 {looseRoots
                   .filter((f) => nodeMatchesQuery(f.name, treeQuery))
@@ -448,7 +452,11 @@ export function FolderExplorerTree({
   );
 }
 
-function folderAncestorIncludesMappe(folders: FolderDto[], folderId: string, mappeId: string): boolean {
+function folderAncestorIncludesMappe(
+  folders: FolderDto[],
+  folderId: string,
+  mappeId: string
+): boolean {
   const byId = new Map(folders.map((f) => [f.id, f]));
   let current = byId.get(folderId);
   while (current) {
@@ -467,7 +475,11 @@ interface FolderTreeNodeProps {
   expanded: Set<string>;
   dropHighlightId: string | null;
   onSetExpandedExplicit: (key: string, open: boolean) => void;
-  onCreateChildFolder: (args: { mappeId: string; parentId: string | null; name: string }) => Promise<void>;
+  onCreateChildFolder: (args: {
+    mappeId: string;
+    parentId: string | null;
+    name: string;
+  }) => Promise<void>;
   onOpenMenu: (event: React.MouseEvent, folder: FolderDto) => void;
   onDragHighlight: (id: string | null) => void;
   onDrop: (folderId: string, event: DragEvent) => void;
@@ -649,7 +661,11 @@ function LooseFolderRow({
   );
 }
 
-function isDescendant(folders: FolderDto[], maybeDescendantId: string, ancestorId: string): boolean {
+function isDescendant(
+  folders: FolderDto[],
+  maybeDescendantId: string,
+  ancestorId: string
+): boolean {
   const byId = new Map(folders.map((f) => [f.id, f]));
   let current = byId.get(maybeDescendantId);
   while (current?.parentId) {

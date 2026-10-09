@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { TagsEntity } from './tags.entity.js';
 import { UserPreferencesEntity } from './user-preferences.entity.js';

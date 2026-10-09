@@ -1,9 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
-import {
-  buildHighlightTerms,
-  fuzzyWordMatch,
-  highlightFuzzyMatches,
-} from './highlight-fuzzy.js';
+import { buildHighlightTerms, fuzzyWordMatch, highlightFuzzyMatches } from './highlight-fuzzy.js';
 
 function sliceHighlight(text: string, spans: Array<{ start: number; end: number }>): string[] {
   return spans.map((s) => text.slice(s.start, s.end));

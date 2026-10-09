@@ -3,9 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const colorJson = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'tokens/color.json'), 'utf8'),
-);
+const colorJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'tokens/color.json'), 'utf8'));
 
 const MIN_RATIO = 4.5;
 const MIN_PLACEHOLDER_RATIO = 3;
@@ -69,8 +67,7 @@ for (const theme of ['light', 'dark']) {
   for (const [fgKey, bgKey] of PAIRS) {
     const { fg, bg } = pair(theme, fgKey, bgKey);
     const ratio = contrastRatio(fg, bg);
-    const minRequired =
-      fgKey === 'header-input-placeholder' ? MIN_PLACEHOLDER_RATIO : MIN_RATIO;
+    const minRequired = fgKey === 'header-input-placeholder' ? MIN_PLACEHOLDER_RATIO : MIN_RATIO;
     if (ratio < minRequired) {
       failures.push({ theme, fgKey, bgKey, fg, bg, ratio, minRequired });
     }
@@ -81,7 +78,7 @@ if (failures.length > 0) {
   console.error('Token contrast check failed (min 4.5:1):');
   for (const f of failures) {
     console.error(
-      `  ${f.theme} ${f.fgKey} on ${f.bgKey}: ${f.ratio.toFixed(2)} (${f.fg} / ${f.bg})`,
+      `  ${f.theme} ${f.fgKey} on ${f.bgKey}: ${f.ratio.toFixed(2)} (${f.fg} / ${f.bg})`
     );
   }
   process.exit(1);

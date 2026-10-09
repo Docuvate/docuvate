@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +11,10 @@ import {
   RecognizedFieldQualityGateEditor,
   type RecognizedFieldGateDraft,
 } from '../../components/settings/RecognizedFieldQualityGateEditor';
-import { draftsFromRecognizedDefinitions, type RecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
+import {
+  draftsFromRecognizedDefinitions,
+  type RecognizedFieldDraft,
+} from '../../lib/recognizedFieldDraft';
 import { validateRecognizedFieldDrafts } from '../../lib/recognizedFieldRules';
 import { persistRecognizedFieldCatalog } from '../../lib/recognizedFieldsPersist';
 import { routes } from '../../lib/routes';
@@ -58,7 +63,8 @@ export function RecognizedFieldsPage() {
 
   const validationMessages = useMemo(
     () => ({
-      missingLabel: (position: number) => t('recognizedFields.validationMissingLabel', { position }),
+      missingLabel: (position: number) =>
+        t('recognizedFields.validationMissingLabel', { position }),
       missingKey: (label: string) => t('recognizedFields.validationMissingKey', { label }),
       labelsRequired: (label: string) => t('recognizedFields.validationLabelsRequired', { label }),
     }),
@@ -115,10 +121,7 @@ export function RecognizedFieldsPage() {
   }
 
   return (
-    <div
-      className="page library-page recognized-fields-page page--with-save-bar"
-      data-ux="page"
-    >
+    <div className="page library-page recognized-fields-page page--with-save-bar" data-ux="page">
       <header className="page-header recognized-fields-header">
         <div>
           <h1 data-ux="page-title">{t('recognizedFields.pageTitle')}</h1>
@@ -161,7 +164,9 @@ export function RecognizedFieldsPage() {
 
           <Card className="recognized-fields-defaults-card">
             <h2>{t('recognizedFields.defaultsTitle')}</h2>
-            <p className="muted recognized-fields-defaults-lead">{t('recognizedFields.defaultsLead')}</p>
+            <p className="muted recognized-fields-defaults-lead">
+              {t('recognizedFields.defaultsLead')}
+            </p>
             <RecognizedFieldQualityGateEditor
               tags={tags}
               gate={gateForm.draft}

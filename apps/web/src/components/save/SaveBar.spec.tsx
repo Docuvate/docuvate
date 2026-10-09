@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach } from 'vitest';
@@ -28,7 +30,10 @@ describe('SaveBar', () => {
 
   it('disables actions while saving', () => {
     render(<SaveBar visible saving onSave={vi.fn()} onDiscard={vi.fn()} />);
-    expect(screen.getByRole('button', { name: /discard changes/i })).toHaveProperty('disabled', true);
+    expect(screen.getByRole('button', { name: /discard changes/i })).toHaveProperty(
+      'disabled',
+      true
+    );
     expect(screen.getByRole('button', { name: /saving/i })).toHaveProperty('disabled', true);
   });
 });

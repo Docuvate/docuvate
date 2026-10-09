@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
 import { TagsEntity } from './tags.entity.js';
@@ -11,11 +13,9 @@ export class ExtractionFieldCorrectionLabelsEntity {
   @PrimaryColumn('uuid', { name: 'tag_id' })
   tagId: string;
 
-  @ManyToOne(
-    () => ExtractionFieldCorrectionsEntity,
-    (correction) => correction.labelTags,
-    { onDelete: 'CASCADE' }
-  )
+  @ManyToOne(() => ExtractionFieldCorrectionsEntity, (correction) => correction.labelTags, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn([{ name: 'correction_id', referencedColumnName: 'id' }])
   correction: ExtractionFieldCorrectionsEntity;
 

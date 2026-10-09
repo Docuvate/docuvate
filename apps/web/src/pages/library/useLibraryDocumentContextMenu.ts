@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   useCallback,
   useEffect,
@@ -28,22 +30,14 @@ interface LibraryContextMenuState {
 
 export function useLibraryDocumentContextMenu(data: LibraryData) {
   const { t, i18n } = useTranslation();
-  const {
-    selectForContextMenu,
-    runBulk,
-    selected,
-    items,
-    tags,
-    folders,
-    mappen,
-    bulkBusy,
-  } = data;
+  const { selectForContextMenu, runBulk, selected, items, tags, folders, mappen, bulkBusy } = data;
   const navigate = useNavigate();
   const contextMenuAnchorRef = useRef<HTMLElement | null>(null);
   const [contextMenu, setContextMenu] = useState<LibraryContextMenuState | null>(null);
-  const [stackReview, setStackReview] = useState<{ primaryId: string; versionId: string | null } | null>(
-    null
-  );
+  const [stackReview, setStackReview] = useState<{
+    primaryId: string;
+    versionId: string | null;
+  } | null>(null);
   const [bulkDeleteConfirmCount, setBulkDeleteConfirmCount] = useState<number | null>(null);
 
   const closeContextMenu = useCallback(() => {

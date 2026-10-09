@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 from docuvate_worker.infrastructure.fastembed_model import MODEL_NAME, embed_passages
 
 MAX_CHARS = 8000

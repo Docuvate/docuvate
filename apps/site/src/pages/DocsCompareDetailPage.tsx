@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Link } from 'react-router-dom';
 import { CompareCriteriaTable } from '../components/CompareCriteriaTable';
 import { DocsPageLayout } from '../components/DocsPageLayout';
@@ -35,7 +37,9 @@ export function DocsCompareDetailPage({ slug }: DocsCompareDetailPageProps) {
         {ui.standLabel}: {data.stand}
       </p>
       <div className="hero-actions docs-compare-actions">
-        <Link className="btn btn-primary" to={localizePath('/docs#quickstart')}>{ui.selfHostCta}</Link>
+        <Link className="btn btn-primary" to={localizePath('/docs#quickstart')}>
+          {ui.selfHostCta}
+        </Link>
         <Link className="btn btn-secondary" to={localizePath(comparisonsHubPath(locale))}>
           {ui.allLink}
         </Link>
@@ -93,7 +97,9 @@ export function DocsCompareDetailPage({ slug }: DocsCompareDetailPageProps) {
           {ui.testCtaHeading}
         </h2>
         <p>{ui.testCtaBody}</p>
-        <Link className="btn btn-primary" to={localizePath('/docs#quickstart')}>{ui.selfHostCta}</Link>
+        <Link className="btn btn-primary" to={localizePath('/docs#quickstart')}>
+          {ui.selfHostCta}
+        </Link>
       </section>
     </DocsPageLayout>
   );

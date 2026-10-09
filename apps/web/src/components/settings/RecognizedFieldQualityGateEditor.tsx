@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TagDto } from '@docuvate/contracts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -35,10 +37,7 @@ export function RecognizedFieldQualityGateEditor({
   }
 
   const nonInboxTags = tags.filter((tag) => !tag.isInbox);
-  const requiredLabelIdSet = useMemo(
-    () => new Set(gate.requiredLabelIds),
-    [gate.requiredLabelIds]
-  );
+  const requiredLabelIdSet = useMemo(() => new Set(gate.requiredLabelIds), [gate.requiredLabelIds]);
 
   return (
     <div className="recognized-field-gate stack">

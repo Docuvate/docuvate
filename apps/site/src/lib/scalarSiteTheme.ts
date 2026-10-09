@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** c1 vermilion accents for Scalar; backgrounds follow site tokens. */
 export const SCALAR_ACCENT_LIGHT = '#cb3a00';
 export const SCALAR_ACCENT_DARK = '#e96f49';

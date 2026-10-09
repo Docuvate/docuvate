@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
@@ -14,7 +16,12 @@ type MobileNavProps = {
   ctaLandingPrimary?: boolean;
 };
 
-export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimary = false }: MobileNavProps) {
+export function MobileNav({
+  onLanding = false,
+  ctaTo,
+  ctaLabel,
+  ctaLandingPrimary = false,
+}: MobileNavProps) {
   const [open, setOpen] = useState(false);
   const sheetRef = useRef<HTMLElement>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -28,7 +35,8 @@ export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimar
     setOpen(false);
   }, [location.pathname]);
 
-  const comparePath = locale === 'de' ? '/docs/vergleiche/methodik' : '/docs/comparisons/methodology';
+  const comparePath =
+    locale === 'de' ? '/docs/vergleiche/methodik' : '/docs/comparisons/methodology';
   const path = location.pathname.replace(/^\/en/, '') || '/';
   const activeNavKey = resolvePrimaryNavKey(path);
   const links: { key: PrimaryNavKey | null; to: string; label: string }[] = [
@@ -46,10 +54,12 @@ export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimar
     }
 
     document.body.classList.add('mobile-nav-open');
-    restoreFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    restoreFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
 
     const focusTarget =
-      sheetRef.current?.querySelector<HTMLElement>('a, button:not(.mobile-nav-backdrop)') ?? sheetRef.current;
+      sheetRef.current?.querySelector<HTMLElement>('a, button:not(.mobile-nav-backdrop)') ??
+      sheetRef.current;
     focusTarget?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -94,13 +104,20 @@ export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimar
                   <Link
                     key={link.to}
                     to={localizePath(link.to)}
-                    aria-current={link.key !== null && activeNavKey === link.key ? 'page' : undefined}
+                    aria-current={
+                      link.key !== null && activeNavKey === link.key ? 'page' : undefined
+                    }
                     onClick={() => setOpen(false)}
                   >
                     {link.label}
                   </Link>
                 ))}
-                <a href={GITHUB_URL} target="_blank" rel="noreferrer" onClick={() => setOpen(false)}>
+                <a
+                  href={GITHUB_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setOpen(false)}
+                >
                   {content.nav.github}
                 </a>
               </div>
@@ -113,7 +130,7 @@ export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimar
               </Link>
             </nav>
           </div>,
-          document.body,
+          document.body
         )
       : null;
 

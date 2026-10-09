@@ -1,9 +1,8 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import type { ExtractedField } from '@docuvate/contracts';
-import {
-  dedupeExtractedFields,
-  isPlausibleExtractedDateValue,
-} from '@docuvate/contracts';
+import { dedupeExtractedFields, isPlausibleExtractedDateValue } from '@docuvate/contracts';
 import { mergeExtractedFields } from './merge-extracted-fields.js';
 
 describe('isPlausibleExtractedDateValue', () => {

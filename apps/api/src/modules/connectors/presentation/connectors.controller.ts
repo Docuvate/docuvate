@@ -1,4 +1,16 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, UseGuards } from '@nestjs/common';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import type {
   ConnectorCatalogResponse,
   ConnectorImportableItemDto,
@@ -40,7 +52,10 @@ import { toDocumentDto } from '../../documents/presentation/document.mapper.js';
 import type { SftpFetchHostProbeRequest, SftpFetchHostProbeResponse } from '@docuvate/contracts';
 import { probeSftpFetchHost } from '../infrastructure/adapters/sftp/sftp-fetch.connector.js';
 
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('connectors')
 @Controller('connectors')
@@ -71,14 +86,22 @@ export class ConnectorsController {
   }
 
   @Get('installations')
-  @ApiDocuvateRoute({ operationId: 'listConnectorInstallations', summary: 'List connector installations' })
-  async list(@Session() session: AuthSession): Promise<{ installations: ConnectorInstallationDto[] }> {
+  @ApiDocuvateRoute({
+    operationId: 'listConnectorInstallations',
+    summary: 'List connector installations',
+  })
+  async list(
+    @Session() session: AuthSession
+  ): Promise<{ installations: ConnectorInstallationDto[] }> {
     const rows = await this.listInstallations.execute(session.user.id);
     return { installations: rows.map(toConnectorInstallationDto) };
   }
 
   @Post('installations')
-  @ApiDocuvateRoute({ operationId: 'createConnectorInstallation', summary: 'Create connector installation' })
+  @ApiDocuvateRoute({
+    operationId: 'createConnectorInstallation',
+    summary: 'Create connector installation',
+  })
   async create(
     @Session() session: AuthSession,
     @Body() body: CreateConnectorInstallationRequestDto
@@ -89,7 +112,10 @@ export class ConnectorsController {
 
   @Delete('installations/:installationId')
   @HttpCode(204)
-  @ApiDocuvateRoute({ operationId: 'deleteConnectorInstallation', summary: 'Delete connector installation' })
+  @ApiDocuvateRoute({
+    operationId: 'deleteConnectorInstallation',
+    summary: 'Delete connector installation',
+  })
   async remove(
     @Session() session: AuthSession,
     @Param('installationId') installationId: string
@@ -132,7 +158,9 @@ export class ConnectorsController {
     operationId: 'probeSftpFetchHostKey',
     summary: 'Probe remote SFTP host key fingerprint',
   })
-  async probeSftpHost(@Body() body: SftpFetchHostProbeRequest): Promise<SftpFetchHostProbeResponse> {
+  async probeSftpHost(
+    @Body() body: SftpFetchHostProbeRequest
+  ): Promise<SftpFetchHostProbeResponse> {
     return probeSftpFetchHost({
       host: body.host,
       port: String(body.port ?? 22),

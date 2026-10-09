@@ -4,13 +4,7 @@ export default {
   rules: {
     'color-no-hex': true,
     'declaration-property-value-disallowed-list': {
-      '/^border(-.*)?-radius$/': [
-        /999/,
-        /9999/,
-        /50%/,
-        /100%/,
-        /\b(1[3-9]|[2-9]\d|\d{3,})px\b/,
-      ],
+      '/^border(-.*)?-radius$/': [/999/, /9999/, /50%/, /100%/, /\b(1[3-9]|[2-9]\d|\d{3,})px\b/],
     },
     'import-notation': null,
     'selector-class-pattern': null,

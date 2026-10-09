@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
@@ -51,8 +53,7 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
     if (!trimmed) return;
     const form = e.currentTarget;
     const pinFromForm = form.elements.namedItem('pinnedSidebar');
-    const pinnedSidebar =
-      pinFromForm instanceof HTMLInputElement ? pinFromForm.checked : pinned;
+    const pinnedSidebar = pinFromForm instanceof HTMLInputElement ? pinFromForm.checked : pinned;
     setBusy(true);
     try {
       const created = await createSavedDocumentView(
@@ -90,8 +91,12 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
         if (!busy) onClose();
       }}
     >
-      <h2 id={titleId} className="confirm-dialog-title">{t('savedViews.saveDialogTitle')}</h2>
-      <p id={descId} className="muted confirm-dialog-desc">{t('savedViews.saveDialogLead')}</p>
+      <h2 id={titleId} className="confirm-dialog-title">
+        {t('savedViews.saveDialogTitle')}
+      </h2>
+      <p id={descId} className="muted confirm-dialog-desc">
+        {t('savedViews.saveDialogLead')}
+      </p>
       <form className="stack-form save-view-dialog-form" onSubmit={(e) => void onSubmit(e)}>
         <label className="field-label">
           {t('savedViews.nameLabel')}
@@ -122,7 +127,13 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
           <span>{t('savedViews.pinSidebar')}</span>
         </label>
         <div className="confirm-dialog-actions">
-          <Button type="button" variant="secondary" ref={cancelRef} disabled={busy} onClick={onClose}>
+          <Button
+            type="button"
+            variant="secondary"
+            ref={cancelRef}
+            disabled={busy}
+            onClick={onClose}
+          >
             {t('common.cancel')}
           </Button>
           <Button type="submit" disabled={busy || !name.trim()}>

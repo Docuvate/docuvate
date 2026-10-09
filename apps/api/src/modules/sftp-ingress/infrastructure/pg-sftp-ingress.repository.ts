@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
@@ -25,7 +27,8 @@ async function mapAccount(
   row: Record<string, unknown>
 ): Promise<SftpIngressAccountEntity> {
   const id = String(row['id']);
-  const labelIds = row['label_ids'] != null ? (row['label_ids'] as string[]) : await loadLabelIds(client, id);
+  const labelIds =
+    row['label_ids'] != null ? (row['label_ids'] as string[]) : await loadLabelIds(client, id);
   return {
     id,
     userId: String(row['user_id']),
@@ -194,7 +197,11 @@ export class PgSftpIngressAccountRepository implements SftpIngressAccountReposit
 export class PgSftpIngressEventRepository implements SftpIngressEventRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
 
-  async listForAccount(accountId: string, userId: string, limit: number): Promise<SftpIngressEventEntity[]> {
+  async listForAccount(
+    accountId: string,
+    userId: string,
+    limit: number
+  ): Promise<SftpIngressEventEntity[]> {
     const { rows } = await this.pool.query(
       `SELECT e.*, a.user_id AS owner_user_id FROM sftp_ingress_events e
        JOIN sftp_ingress_accounts a ON a.id = e.account_id

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock } from '@docuvate/contracts';
 
 const LINE_Y_TOLERANCE = 0.014;

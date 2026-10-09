@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { PaperlessImportRunDto } from '@docuvate/contracts';
 import type { ConnectorImportRunRow } from '../infrastructure/adapters/paperless/paperless-import.repository.js';
 

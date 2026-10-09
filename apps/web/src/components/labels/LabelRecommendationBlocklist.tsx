@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
@@ -189,7 +191,9 @@ export function LabelRecommendationBlocklist(props: Props) {
           {error}
         </p>
       ) : null}
-      {loading ? <p className="muted label-rec-blocklist-meta">{t('labelBlocklist.loading')}</p> : null}
+      {loading ? (
+        <p className="muted label-rec-blocklist-meta">{t('labelBlocklist.loading')}</p>
+      ) : null}
       {!loading && items.length === 0 && (!showAdvancedPatterns || patterns.length === 0) ? (
         <p className="muted label-rec-blocklist-meta">{t('labelBlocklist.empty')}</p>
       ) : null}
@@ -222,7 +226,9 @@ export function LabelRecommendationBlocklist(props: Props) {
 
       {showAdvancedPatterns && patterns.length > 0 ? (
         <div className="label-rec-blocklist-patterns">
-          <h4 className="label-rec-blocklist-patterns-title">{t('labelBlocklist.patternsTitle')}</h4>
+          <h4 className="label-rec-blocklist-patterns-title">
+            {t('labelBlocklist.patternsTitle')}
+          </h4>
           <ul className="label-rec-blocklist-entries">
             {patterns.map((entry) => (
               <li key={entry.id} className="label-rec-blocklist-row">

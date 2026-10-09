@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Runtime probes for which extractors are installed and runnable in this worker."""
 
 from __future__ import annotations

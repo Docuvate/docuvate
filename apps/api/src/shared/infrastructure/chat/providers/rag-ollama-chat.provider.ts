@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 import { buildDocumentRagSystemPrompt } from '../build-system-prompt.js';
 import { fetchWorkerRagContext } from '../fetch-worker-rag-context.js';
@@ -41,7 +43,9 @@ export class RagOllamaChatProvider implements DocumentChatProvider {
     const messages = [
       {
         role: 'system',
-        content: buildDocumentRagSystemPrompt(input.context, rag.contextText, { ollamaModel: model }),
+        content: buildDocumentRagSystemPrompt(input.context, rag.contextText, {
+          ollamaModel: model,
+        }),
       },
       ...input.history.map((m) => ({ role: m.role, content: m.content })),
       { role: 'user', content: trimmed },

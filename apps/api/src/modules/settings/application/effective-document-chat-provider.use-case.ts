@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import {
   USER_PREFERENCES_REPOSITORY,
@@ -59,18 +61,14 @@ export class EffectiveDocumentChatProviderUseCase {
       catalog?: DocumentChatProvidersCatalog;
     }
   ): Promise<EffectiveChatProviderResult> {
-    const catalog =
-      options?.catalog ?? (await this.listChatProviders.execute());
-    const providers =
-      options?.providers ?? runtimeChatProviderAvailability(catalog);
+    const catalog = options?.catalog ?? (await this.listChatProviders.execute());
+    const providers = options?.providers ?? runtimeChatProviderAvailability(catalog);
     const preferred = resolveDocumentChatProvider(preferredChatProvider);
     const effective = resolveEffectiveDocumentChatProvider(preferred, providers);
     const customerEffective = resolveCustomerDocumentChatProvider(preferred, providers);
 
     const shouldClear =
-      options?.persistForUserId &&
-      preferredChatProvider?.trim() &&
-      effective !== preferred;
+      options?.persistForUserId && preferredChatProvider?.trim() && effective !== preferred;
 
     if (shouldClear && options.persistForUserId) {
       await this.prefs.upsert(options.persistForUserId, {

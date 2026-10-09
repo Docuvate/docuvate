@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { PaperlessImportQueueService } from './paperless-import.queue.js';
 
@@ -16,11 +18,7 @@ describe('PaperlessImportQueueService', () => {
     const imports = {
       resumePendingRuns: vi.fn().mockRejectedValue(new Error('relation does not exist')),
     };
-    const service = new PaperlessImportQueueService(
-      imports as never,
-      {} as never,
-      {} as never
-    );
+    const service = new PaperlessImportQueueService(imports as never, {} as never, {} as never);
     const resume = (
       service as unknown as { resumeInterruptedRuns: () => Promise<void> }
     ).resumeInterruptedRuns.bind(service);

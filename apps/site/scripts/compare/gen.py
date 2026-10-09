@@ -81,7 +81,7 @@ SOURCES = {
 TOOLS = {
 "docuvate": dict(name="Docuvate", short="Docuvate", rows={
  "K1":("i","Teams, Selbständige und Entwickler, die Dokumente selbst hosten und per API anbinden wollen","W1"),
- "K2":("i","AGPL-3.0 (Community). Kommerzielle Editionen werden im README erwähnt, Inhalte/Preise nicht veröffentlicht","W1,R1"),
+ "K2":("i","Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes betriebliches Self-Hosting; kein Managed-Service/White-Label/Embedding in verkaufte Produkte. Enterprise/Cloud: LICENSE_EE.md","W1,R1"),
  "K3":("i","Nur self-hosted: Docker Compose; Kubernetes (Kustomize/Helm) laut Repo","W2,R1"),
  "K4":("i","Kostenlos (Community). Keine Preise für kommerzielle Editionen veröffentlicht","W1,R1"),
  "K5":("i","Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview","R1,W3"),
@@ -298,7 +298,7 @@ PROSE = {
 ),
 "docuware": dict(
  title="Docuvate vs. DocuWare",
- lead="DocuWare ist eine kommerzielle DMS- und Workflow-Plattform für Unternehmen, vor allem als Cloud-Dienst. Docuvate ist Open Source und läuft nur auf Ihrer eigenen Infrastruktur.",
+ lead="DocuWare ist eine kommerzielle DMS- und Workflow-Plattform für Unternehmen, vor allem als Cloud-Dienst. Docuvate ist source-available (fair-code) und läuft nur auf Ihrer eigenen Infrastruktur.",
  audience="DocuWare passt zu Unternehmen, die einen Anbieter mit Vertrag, Support, Workflows und Integrationen wie SAP suchen. Docuvate passt zu Teams, die Kontrolle über Daten und Kosten wollen und selbst betreiben können.",
  better=[
   "Vollständige Unternehmensplattform: Workflow Manager, Formulare, Integrationen (z. B. SAP), Mobile-App.",
@@ -307,7 +307,7 @@ PROSE = {
   "Betrieb ohne eigenes IT-Team möglich (Cloud).",
  ],
  ours=[
-  "Open Source (AGPL) ohne Lizenzgebühr pro Nutzer.",
+  "Source-available (SUL 1.0) ohne Lizenzgebühr pro Nutzer für Self-Hosting auf eigener Infrastruktur.",
   "Daten und KI bleiben auf Ihrer Hardware; keine Cloud nötig.",
   "Offene API mit OpenAPI-Spezifikation und SDKs; Sie können den Code prüfen und anpassen.",
   "Schnell testbar: docker compose up statt Vertriebsgespräch.",

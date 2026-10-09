@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DocumentDto } from '@docuvate/contracts';
@@ -16,7 +18,11 @@ interface ProgressStore {
   percent: number;
 }
 
-export function ExtractionProgressBar({ doc, compact = false, className }: ExtractionProgressBarProps) {
+export function ExtractionProgressBar({
+  doc,
+  compact = false,
+  className,
+}: ExtractionProgressBarProps) {
   const { t } = useTranslation();
   const snapshot = extractionProgressSnapshot(doc);
   const storeRef = useRef<ProgressStore>({ docId: '', status: doc.status, percent: 0 });
@@ -61,7 +67,10 @@ export function ExtractionProgressBar({ doc, compact = false, className }: Extra
           <span className="extraction-progress-stage">{snapshot.stageLabel}</span>
           <span className="muted extraction-progress-meta">
             {snapshot.stepLabel}
-            <span className="extraction-progress-estimate" title={t('extraction.progressEstimateTitle')}>
+            <span
+              className="extraction-progress-estimate"
+              title={t('extraction.progressEstimateTitle')}
+            >
               {' '}
               · {t('extraction.progressEstimate')}
             </span>
@@ -85,7 +94,10 @@ export function ExtractionProgressBar({ doc, compact = false, className }: Extra
         aria-valuetext={
           snapshot.indeterminate
             ? t('extraction.progressIndeterminateAria', { stage: snapshot.stageLabel })
-            : t('extraction.progressDeterminateAria', { stage: snapshot.stageLabel, percent: displayPercent })
+            : t('extraction.progressDeterminateAria', {
+                stage: snapshot.stageLabel,
+                percent: displayPercent,
+              })
         }
         aria-busy={snapshot.indeterminate ? true : undefined}
       >

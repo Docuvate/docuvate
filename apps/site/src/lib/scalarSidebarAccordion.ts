@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { patchSidebarGroupToggleSrOnly } from './scalarDeDomPatch';
 
 const ACCORDION_CLICK_ATTR = 'data-docuvate-accordion-click';
@@ -27,7 +29,7 @@ export function observeScalarSidebarAccordion(root: HTMLElement): () => void {
     const target = event.target;
     if (!(target instanceof Element)) return;
     const toggle = target.closest(
-      'nav.sidebar-pages button[aria-expanded], nav.sidebar-pages .sidebar-heading button',
+      'nav.sidebar-pages button[aria-expanded], nav.sidebar-pages .sidebar-heading button'
     );
     if (!(toggle instanceof HTMLElement)) return;
     const li = sidebarGroupItem(toggle);

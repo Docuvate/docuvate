@@ -1,14 +1,23 @@
-import type { ConnectorRuntimePorts, ConnectorSinkPort } from '../../../domain/connector-runtime.ports.js';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  ConnectorRuntimePorts,
+  ConnectorSinkPort,
+} from '../../../domain/connector-runtime.ports.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
-import type { ConnectorExportInput, ConnectorExportResult } from '../../../domain/connector-runtime.types.js';
+import type {
+  ConnectorExportInput,
+  ConnectorExportResult,
+} from '../../../domain/connector-runtime.types.js';
 import { homeAssistantApiFetch } from './home-assistant-api.client.js';
 
-export function openHomeAssistantRuntime(credentials: ConnectorConfigurationInput): ConnectorRuntimePorts {
+export function openHomeAssistantRuntime(
+  credentials: ConnectorConfigurationInput
+): ConnectorRuntimePorts {
   const sink: ConnectorSinkPort = {
     async exportDocument(input: ConnectorExportInput): Promise<ConnectorExportResult> {
       const message =
-        input.destinationRef?.trim() ||
-        `Docuvate export: ${input.filename} (${input.documentId})`;
+        input.destinationRef?.trim() || `Docuvate export: ${input.filename} (${input.documentId})`;
       const response = await homeAssistantApiFetch(credentials, '/api/services/notify/notify', {
         method: 'POST',
         body: JSON.stringify({

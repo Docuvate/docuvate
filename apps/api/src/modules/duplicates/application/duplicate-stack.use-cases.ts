@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type { DuplicateStackDto, DuplicateStackMemberDto } from '@docuvate/contracts';
 import {
@@ -125,7 +127,11 @@ export class ConfirmDuplicateVersionUseCase {
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
   ) {}
 
-  async execute(primaryDocumentId: string, versionDocumentId: string, userId: string): Promise<void> {
+  async execute(
+    primaryDocumentId: string,
+    versionDocumentId: string,
+    userId: string
+  ): Promise<void> {
     const primary = await this.documents.findByIdForUser(primaryDocumentId, userId);
     const version = await this.documents.findByIdForUser(versionDocumentId, userId);
     if (!primary || !version) throw new NotFoundException('Document not found');
@@ -155,7 +161,9 @@ export class ReleaseDuplicateStackMemberUseCase {
 
 @Injectable()
 export class HandleDuplicateStackDocumentDeletedUseCase {
-  constructor(@Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository) {}
+  constructor(
+    @Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository
+  ) {}
 
   async execute(userId: string, documentId: string): Promise<void> {
     await this.stacks.handleDocumentDeleted(userId, documentId);

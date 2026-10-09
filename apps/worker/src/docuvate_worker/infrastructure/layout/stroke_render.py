@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Map PDF stroke widths to HTML/SVG widths that match pdf2image hairlines at raster DPI."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Braces, Check, Copy, FileCode2, Terminal } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import highlights from '../generated/code-highlights.json';
@@ -49,7 +51,11 @@ function LanguageIcon({ language }: { language: CodeLanguage }) {
   return <FileCode2 {...props} />;
 }
 
-function highlightedHtml(key: string | undefined, theme: 'light' | 'dark', fallback: string): string {
+function highlightedHtml(
+  key: string | undefined,
+  theme: 'light' | 'dark',
+  fallback: string
+): string {
   if (!key) return fallback;
   const entry = highlights[key as keyof typeof highlights];
   if (!entry) return fallback;
@@ -96,7 +102,11 @@ export function CodeBlock({
   return (
     <figure className="code-panel">
       {title ? <figcaption className="code-panel-example-title">{title}</figcaption> : null}
-      <div ref={shellRef} className="code-panel-shell" data-source-lines={String(code.split('\n').length)}>
+      <div
+        ref={shellRef}
+        className="code-panel-shell"
+        data-source-lines={String(code.split('\n').length)}
+      >
         <div className="code-panel-header">
           <div className="code-panel-file">
             <LanguageIcon language={language} />
@@ -123,9 +133,5 @@ export function CodeBlock({
 }
 
 function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
-

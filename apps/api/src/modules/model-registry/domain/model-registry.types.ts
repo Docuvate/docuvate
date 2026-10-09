@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export type MlModelKind = 'ocr' | 'embedding' | 'docqa' | 'field_extractor';
 
 export type MlModelLifecycle = 'registered' | 'canary' | 'active' | 'archived' | 'failed';

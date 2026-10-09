@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 const WINDOW_MS = 60_000;

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 import { buildDocumentSystemPrompt } from '../build-system-prompt.js';
 import { ollamaChatModel, postOllamaChat } from '../ollama-chat-request.js';

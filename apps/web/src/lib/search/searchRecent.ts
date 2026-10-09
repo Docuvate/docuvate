@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const RECENT_SEARCHES_KEY = 'docuvate.recentSearches';
 const RECENT_DOCS_KEY = 'docuvate.recentDocuments';
 

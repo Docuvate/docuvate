@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { ForbiddenError } from '../../../shared/domain/errors.js';
 import {
@@ -68,10 +70,7 @@ export function assertInstallationInviteRoleAllowed(
   if (!canPerformInstallationAction(subject, 'installation:invite', { assignedRole })) {
     throw new ForbiddenError('installation:invite denied');
   }
-  if (
-    assignedRole === INSTANCE_ROLE_ADMIN &&
-    !subjectIsInstanceAdministrator(subject)
-  ) {
+  if (assignedRole === INSTANCE_ROLE_ADMIN && !subjectIsInstanceAdministrator(subject)) {
     throw new ForbiddenError('installation:invite role escalation denied');
   }
 }

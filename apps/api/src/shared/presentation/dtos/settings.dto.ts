@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
@@ -10,10 +12,7 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
-import {
-  THEME_PREFERENCES,
-  UI_LOCALES,
-} from '../../../modules/settings/domain/ui-preferences.js';
+import { THEME_PREFERENCES, UI_LOCALES } from '../../../modules/settings/domain/ui-preferences.js';
 import type {
   DocumentChatProviderInfo,
   DocumentChatProvidersCatalogDto,

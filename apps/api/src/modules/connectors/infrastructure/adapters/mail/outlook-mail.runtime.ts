@@ -1,6 +1,14 @@
-import type { ConnectorRuntimePorts, ConnectorSourcePort } from '../../../domain/connector-runtime.ports.js';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  ConnectorRuntimePorts,
+  ConnectorSourcePort,
+} from '../../../domain/connector-runtime.ports.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
-import type { ConnectorImportableItem, ConnectorImportedBlob } from '../../../domain/connector-runtime.types.js';
+import type {
+  ConnectorImportableItem,
+  ConnectorImportedBlob,
+} from '../../../domain/connector-runtime.types.js';
 import { connectorFetch } from '../shared/connector-http.js';
 
 interface GraphMessageListResponse {
@@ -11,7 +19,9 @@ interface GraphAttachmentListResponse {
   value: { id: string; name?: string; contentType?: string; size?: number }[];
 }
 
-export function openOutlookRuntime(credentials: ConnectorConfigurationInput): ConnectorRuntimePorts {
+export function openOutlookRuntime(
+  credentials: ConnectorConfigurationInput
+): ConnectorRuntimePorts {
   const accessToken = credentials['access_token']?.trim() ?? '';
 
   const source: ConnectorSourcePort = {

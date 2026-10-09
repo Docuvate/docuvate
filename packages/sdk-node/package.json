@@ -2,7 +2,7 @@
   "name": "@docuvate/sdk",
   "version": "1.0.0",
   "description": "Official TypeScript client for the Docuvate /v1 headless API",
-  "license": "AGPL-3.0",
+  "license": "MIT",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -14,7 +14,11 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "codegen": "openapi-ts -c @hey-api/client-fetch -i ../../openapi/docuvate.v1.json -o src/generated",
     "build": "pnpm codegen && tsc -p tsconfig.json && node scripts/build-cjs.mjs",

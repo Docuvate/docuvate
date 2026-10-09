@@ -14,7 +14,11 @@ import { MinioObjectStorage } from '../../src/shared/infrastructure/storage/mini
 import { SystemClock } from '../../src/shared/infrastructure/time/system-clock.js';
 import { UuidIdGenerator } from '../../src/shared/infrastructure/ids/uuid-id-generator.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
-import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+import {
+  deleteSyntheticUser,
+  insertSyntheticUser,
+  newIsolationUserId,
+} from './pg-test-isolation.js';
 import { ensurePaperlessTestStack, teardownPaperlessTestStack } from './paperless-test-stack.js';
 
 const noopUseCase = { execute: async () => undefined };
@@ -59,7 +63,11 @@ describe('Paperless-ngx import (live stack)', () => {
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
-      await insertSyntheticUser(client, { id: userId, name: 'Paperless IT', email: `${userId}@example.test` });
+      await insertSyntheticUser(client, {
+        id: userId,
+        name: 'Paperless IT',
+        email: `${userId}@example.test`,
+      });
     } finally {
       client.release();
     }

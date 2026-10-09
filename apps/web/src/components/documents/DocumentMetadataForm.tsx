@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useTranslation } from 'react-i18next';
 import type { FolderDto } from '@docuvate/contracts';
 import { Input } from '../ui/Input';
@@ -32,14 +34,15 @@ export function DocumentMetadataForm(props: DocumentMetadataFormProps) {
       <div className="stack document-metadata-fields">
         <label>
           {t('documents.metadataTitle')}
-          <Input value={props.title} onChange={(e) => props.onTitleChange(e.target.value)} required />
+          <Input
+            value={props.title}
+            onChange={(e) => props.onTitleChange(e.target.value)}
+            required
+          />
         </label>
         <label>
           {t('documents.metadataDocumentDate')}
-          <LocalizedDateInput
-            value={props.documentDate}
-            onChange={props.onDocumentDateChange}
-          />
+          <LocalizedDateInput value={props.documentDate} onChange={props.onDocumentDateChange} />
         </label>
         <label>
           {t('documents.metadataNotes')}

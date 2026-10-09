@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type { CreateFolderRequest, UpdateFolderRequest } from '@docuvate/contracts';
 import {
@@ -46,13 +48,7 @@ export class CreateFolderUseCase {
       const mappe = await this.mappen.findByIdForUser(mappeId, userId);
       if (!mappe) throw new NotFoundError('Mappe');
     }
-    return this.folders.create(
-      this.ids.generate(),
-      userId,
-      name,
-      body.parentId ?? null,
-      mappeId
-    );
+    return this.folders.create(this.ids.generate(), userId, name, body.parentId ?? null, mappeId);
   }
 }
 

@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import type { HardwareCapabilitiesDto } from '@docuvate/contracts';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   DocumentChatProviderListResponseDto,
   ExtractionEngineListResponseDto,
@@ -16,7 +22,10 @@ import {
 import { EffectiveDocumentChatProviderUseCase } from '../application/effective-document-chat-provider.use-case.js';
 import { GetHardwareCapabilitiesUseCase } from '../application/hardware-capabilities.use-case.js';
 
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { toUserSettingsResponseDto } from '../application/user-settings-response.mapper.js';
 
 @ApiDocuvateController('settings')
@@ -72,7 +81,10 @@ export class SettingsController {
   }
 
   @Get('hardware')
-  @ApiDocuvateRoute({ operationId: 'getHardwareCapabilities', summary: 'Worker hardware capabilities' })
+  @ApiDocuvateRoute({
+    operationId: 'getHardwareCapabilities',
+    summary: 'Worker hardware capabilities',
+  })
   async hardware(): Promise<HardwareCapabilitiesDto> {
     return this.hardwareCapabilities.execute();
   }

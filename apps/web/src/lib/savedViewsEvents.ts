@@ -1,7 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SavedDocumentViewDto } from '@docuvate/contracts';
 
 export const SAVED_VIEWS_CHANGED = 'docuvate:saved-views-changed';
 
 export function notifySavedViewsChanged(view?: SavedDocumentViewDto): void {
-  window.dispatchEvent(new CustomEvent<SavedDocumentViewDto | undefined>(SAVED_VIEWS_CHANGED, { detail: view }));
+  window.dispatchEvent(
+    new CustomEvent<SavedDocumentViewDto | undefined>(SAVED_VIEWS_CHANGED, { detail: view })
+  );
 }

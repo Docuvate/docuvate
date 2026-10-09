@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -217,13 +219,17 @@ export function GlobalChatPage() {
     <div className="page global-chat-page" data-ux="page">
       <header className="page-header global-chat-page-header">
         <div>
-          <h1 id="global-chat-heading" data-ux="page-title">{t('globalChat.title')}</h1>
+          <h1 id="global-chat-heading" data-ux="page-title">
+            {t('globalChat.title')}
+          </h1>
           <p className="muted">{t('globalChat.subtitle')}</p>
         </div>
       </header>
 
       {error ? (
-        <p className="error" role="alert">{error}</p>
+        <p className="error" role="alert">
+          {error}
+        </p>
       ) : null}
 
       <section className="doc-chat global-chat-doc-chat" aria-labelledby="global-chat-heading">
@@ -274,7 +280,9 @@ export function GlobalChatPage() {
                           ) : null}
                         </span>
                         {thread.lastMessagePreview ? (
-                          <span className="doc-chat-thread-preview">{thread.lastMessagePreview}</span>
+                          <span className="doc-chat-thread-preview">
+                            {thread.lastMessagePreview}
+                          </span>
                         ) : null}
                         <span className="doc-chat-thread-meta">
                           {formatThreadMeta(thread, dateLocale)}
@@ -313,7 +321,9 @@ export function GlobalChatPage() {
 
                 {showThreadEmpty ? (
                   <div className="doc-chat-empty-state doc-chat-empty-state-thread">
-                    <p className="muted doc-chat-empty-lead">{t('documents.documentChat.threadEmptyLead')}</p>
+                    <p className="muted doc-chat-empty-lead">
+                      {t('documents.documentChat.threadEmptyLead')}
+                    </p>
                   </div>
                 ) : null}
 
@@ -346,7 +356,10 @@ export function GlobalChatPage() {
                             <Link
                               key={citation.ordinal}
                               to={routes.document(citation.documentId)}
-                              state={{ highlightBlocks: citation.blocks, citationPage: citation.page }}
+                              state={{
+                                highlightBlocks: citation.blocks,
+                                citationPage: citation.page,
+                              }}
                               className="doc-chat-citation-chip"
                             >
                               [{citation.ordinal}]
@@ -355,7 +368,9 @@ export function GlobalChatPage() {
                         />
                       ) : (
                         <li key={message.id} className="doc-chat-bubble doc-chat-user">
-                          <span className="doc-chat-role">{t('documents.documentChat.roleUser')}</span>
+                          <span className="doc-chat-role">
+                            {t('documents.documentChat.roleUser')}
+                          </span>
                           <p>{message.content}</p>
                         </li>
                       )
@@ -382,7 +397,11 @@ export function GlobalChatPage() {
                 >
                   {generationInProgress ? (
                     <>
-                      <Spinner size="sm" tone="onPrimary" label={t('documents.documentChat.sending')} />
+                      <Spinner
+                        size="sm"
+                        tone="onPrimary"
+                        label={t('documents.documentChat.sending')}
+                      />
                       <span>{t('documents.documentChat.sending')}</span>
                     </>
                   ) : (

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { getDocsScrollOffsetPx } from './scrollOffset';
 
 export function scrollToHeading(id: string, behavior: ScrollBehavior = 'smooth'): boolean {

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Render LayoutIrDocument to absolute-position HTML (pdf2htmlEX-style fidelity)."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { initOtel } from '@docuvate/otel';
 initOtel({ serviceName: process.env['OTEL_SERVICE_NAME'] ?? 'docuvate-api' });
 
@@ -9,7 +11,8 @@ import type { FastifyRequest } from 'fastify';
 import { API_VERSION_PREFIX } from './shared/presentation/api-version.js';
 import { DomainExceptionFilter } from './shared/presentation/domain-exception.filter.js';
 async function bootstrap(): Promise<void> {
-  const { isOpenApiHeadlessMode } = await import('./shared/infrastructure/database/typeorm-options.js');
+  const { isOpenApiHeadlessMode } =
+    await import('./shared/infrastructure/database/typeorm-options.js');
   if (isOpenApiHeadlessMode()) {
     console.error(
       'Refusing to start HTTP server: DOCUVATE_OPENAPI_HEADLESS=1 is only for scripts/export-openapi.mts'
@@ -19,25 +22,20 @@ async function bootstrap(): Promise<void> {
 
   const { AppModule } = await import('./app.module.js');
   const { auth } = await import('./shared/infrastructure/auth/better-auth.config.js');
-  const { registerBetterAuthHttpRoutes } = await import(
-    './shared/infrastructure/auth/register-better-auth-http-routes.js'
-  );
+  const { registerBetterAuthHttpRoutes } =
+    await import('./shared/infrastructure/auth/register-better-auth-http-routes.js');
 
   const adapter = new FastifyAdapter({ logger: true });
   const fastifyPre = adapter.getInstance();
-  fastifyPre.addContentTypeParser(
-    'application/json',
-    { parseAs: 'buffer' },
-    (req, body, done) => {
-      (req as FastifyRequest & { rawBody?: Buffer }).rawBody = body as Buffer;
-      try {
-        const json = JSON.parse((body as Buffer).toString('utf8')) as unknown;
-        done(null, json);
-      } catch (err) {
-        done(err as Error, undefined);
-      }
+  fastifyPre.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
+    (req as FastifyRequest & { rawBody?: Buffer }).rawBody = body as Buffer;
+    try {
+      const json = JSON.parse((body as Buffer).toString('utf8')) as unknown;
+      done(null, json);
+    } catch (err) {
+      done(err as Error, undefined);
     }
-  );
+  });
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
     bodyParser: false,

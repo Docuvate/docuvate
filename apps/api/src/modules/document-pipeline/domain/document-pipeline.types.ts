@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /**
  * Stable ids for post-OCR processing steps. A future settings UI can persist
  * `{ moduleId, enabled, order }[]` in user preferences and filter/sort against this list.

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
 
 /** Neutral synthetic person names for fixtures (no real PII). */

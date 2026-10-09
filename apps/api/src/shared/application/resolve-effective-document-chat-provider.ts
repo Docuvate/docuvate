@@ -1,11 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatProviderId } from '../infrastructure/chat/chat-provider.types.js';
 
 export type ChatProviderAvailability = { id: string; available?: boolean };
 
-function isAvailable(
-  id: DocumentChatProviderId,
-  providers: ChatProviderAvailability[]
-): boolean {
+function isAvailable(id: DocumentChatProviderId, providers: ChatProviderAvailability[]): boolean {
   const entry = providers.find((p) => p.id === id);
   if (!entry) {
     return false;

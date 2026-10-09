@@ -9,7 +9,11 @@ import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/sp
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
-import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+import {
+  deleteSyntheticUser,
+  insertSyntheticUser,
+  newIsolationUserId,
+} from './pg-test-isolation.js';
 
 const noopEmbedding: EmbeddingPort = {
   async embedTexts(texts: string[]) {
@@ -30,7 +34,11 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
-      await insertSyntheticUser(client, { id: userId, name: 'Cited', email: `${userId}@example.test` });
+      await insertSyntheticUser(client, {
+        id: userId,
+        name: 'Cited',
+        email: `${userId}@example.test`,
+      });
     } finally {
       client.release();
     }
@@ -95,7 +103,9 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     return new Response(stream, { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
 
-  function mockRerankAndOllama(ollamaClaims: Array<{ text: string; source: string; quote: string }>) {
+  function mockRerankAndOllama(
+    ollamaClaims: Array<{ text: string; source: string; quote: string }>
+  ) {
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {

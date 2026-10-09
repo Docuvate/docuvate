@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Minimal document shape for label assignment KPIs (library list, one row per document). */
 export type LabelInventoryDocument = {
   id: string;

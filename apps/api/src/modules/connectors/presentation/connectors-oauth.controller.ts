@@ -1,7 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ConnectorOAuthCallbackGuard } from './connector-oauth-callback.guard.js';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import { Public } from '../../../shared/infrastructure/auth/public.decorator.js';
 import { ConnectorPluginIdParamDto } from '../../../shared/presentation/dtos/connectors.dto.js';
 import { StartMailOAuthRequestDto } from '../../../shared/presentation/dtos/connector-actions.dto.js';
@@ -33,7 +39,10 @@ export class ConnectorsOAuthController {
   @Post(':pluginId/start')
   @UseGuards(AuthGuard)
   @ApiDocuvateAuth()
-  @ApiDocuvateRoute({ operationId: 'startConnectorOAuth', summary: 'Start OAuth for connector plugin' })
+  @ApiDocuvateRoute({
+    operationId: 'startConnectorOAuth',
+    summary: 'Start OAuth for connector plugin',
+  })
   start(
     @Session() session: AuthSession,
     @Param() params: ConnectorPluginIdParamDto,

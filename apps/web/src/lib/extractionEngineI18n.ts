@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TFunction } from 'i18next';
 
 const ENGINE_IDS = ['pipeline', 'paddle', 'docling', 'pdf_native', 'tesseract'] as const;

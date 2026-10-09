@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Same breakpoint as {@link useNarrowTopbar} (#93 compact header). */
 export const NARROW_VIEWPORT_MAX_WIDTH_PX = 768;
 

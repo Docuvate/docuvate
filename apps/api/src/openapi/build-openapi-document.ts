@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import type { OpenAPIObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface.js';
@@ -50,7 +52,8 @@ const OPENAPI_TAG_CATALOG = [
   {
     key: 'taxonomy',
     name: 'Labels',
-    description: 'Tags (labels), recommendations, mapping, patterns, blocklist, and per-tag custom fields.',
+    description:
+      'Tags (labels), recommendations, mapping, patterns, blocklist, and per-tag custom fields.',
   },
   {
     key: 'correspondents',
@@ -65,7 +68,8 @@ const OPENAPI_TAG_CATALOG = [
   {
     key: 'settings',
     name: 'Settings',
-    description: 'User preferences, document-chat provider selection, and extraction engine options.',
+    description:
+      'User preferences, document-chat provider selection, and extraction engine options.',
   },
   {
     key: 'connectors',

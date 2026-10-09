@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Cluster pdfplumber chars into typographic runs (pdf2htmlEX-style fidelity)."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ExtractionBlock } from '@docuvate/contracts';
 import {
@@ -20,10 +22,7 @@ import {
 import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
-import {
-  buildCitedChatSystemPrompt,
-  requestCitedAnswerFromOllama,
-} from './cited-chat-ollama.js';
+import { buildCitedChatSystemPrompt, requestCitedAnswerFromOllama } from './cited-chat-ollama.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 import { extractReadableCitedAnswerPreview } from '../domain/extract-cited-stream-preview.js';
 
@@ -96,7 +95,13 @@ export class CitedChatGenerationService {
 
     const aborted = async (): Promise<boolean> => (await shouldAbort?.()) ?? false;
     if (await aborted()) {
-      await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'cancelled',
+        'User cancelled generation'
+      );
       return { content: '', abstained: true };
     }
 
@@ -113,8 +118,7 @@ export class CitedChatGenerationService {
       queryVector = undefined;
     }
 
-    const filterIds =
-      scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
+    const filterIds = scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
 
     const candidates = await this.retrieval.hybridRetrieveChunks(userId, userMessage, {
       documentIds: filterIds,
@@ -123,7 +127,13 @@ export class CitedChatGenerationService {
 
     if (await aborted()) {
       await this.citationsRepo.replaceCitations(messageId, []);
-      await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'cancelled',
+        'User cancelled generation'
+      );
       return { content: '', abstained: true };
     }
 
@@ -181,7 +191,13 @@ export class CitedChatGenerationService {
 
     if (await aborted()) {
       await this.citationsRepo.replaceCitations(messageId, []);
-      await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'cancelled',
+        'User cancelled generation'
+      );
       return { content: '', abstained: true };
     }
 
@@ -231,7 +247,13 @@ export class CitedChatGenerationService {
     if (!llm.ok) {
       if (llm.detail === 'aborted' || llm.detail === 'cancelled') {
         await this.citationsRepo.replaceCitations(messageId, []);
-        await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+        await this.failGeneration(
+          messageId,
+          threadId,
+          userId,
+          'cancelled',
+          'User cancelled generation'
+        );
         return { content: '', abstained: true };
       }
       await this.failGeneration(messageId, threadId, userId, 'ollama_error', llm.detail);
@@ -240,7 +262,13 @@ export class CitedChatGenerationService {
 
     if (await aborted()) {
       await this.citationsRepo.replaceCitations(messageId, []);
-      await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'cancelled',
+        'User cancelled generation'
+      );
       return { content: '', abstained: true };
     }
 
@@ -260,7 +288,9 @@ export class CitedChatGenerationService {
 
     let ordinal = 1;
     for (const claim of llm.parsed.claims) {
-      const chunkRow = top.find((row) => labelByChunk.get(row.chunk.chunkId) === claim.source.trim());
+      const chunkRow = top.find(
+        (row) => labelByChunk.get(row.chunk.chunkId) === claim.source.trim()
+      );
       if (!chunkRow) {
         continue;
       }
@@ -305,9 +335,7 @@ export class CitedChatGenerationService {
       }))
     );
 
-    const content = verified
-      .map((v) => `${v.text} [${v.ordinal}]`)
-      .join(' ');
+    const content = verified.map((v) => `${v.text} [${v.ordinal}]`).join(' ');
 
     await this.threads.updateMessageGeneration(messageId, {
       content,

@@ -125,7 +125,9 @@
     0 0 0 1px color-mix(in srgb, var(--landing-vivid) 14%, transparent);
   color: var(--landing-card-fg);
   text-decoration: none;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
   overflow: visible;
 }
 
@@ -416,7 +418,9 @@ html[data-docuvate-theme='dark'] .landing-band-dark {
 }
 
 .landing-integration-card {
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .landing-integration-card:hover {
@@ -609,7 +613,6 @@ html[data-docuvate-theme='dark'] .landing-btn-on-hero.btn-secondary:hover {
   gap: var(--dv-space-xs);
   margin-bottom: var(--dv-space-xs);
 }
-
 
 .integration-logo-tile {
   width: 2.5rem;

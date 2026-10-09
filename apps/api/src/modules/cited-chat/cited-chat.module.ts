@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 import { ChatInfrastructureModule } from '../chat-infrastructure/chat-infrastructure.module.js';
 import { SearchModule } from '../search/search.module.js';

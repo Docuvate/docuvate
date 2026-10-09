@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import i18n from '../i18n';
 import {
@@ -25,19 +27,31 @@ const tesseractUnavailable: ExtractionEngineInfo = {
 describe('shouldShowExtractionOfflineCallout', () => {
   it('is false when all engines are available', () => {
     expect(
-      shouldShowExtractionOfflineCallout(false, [pipelineAvailable, { ...tesseractUnavailable, available: true }], 'pipeline'),
+      shouldShowExtractionOfflineCallout(
+        false,
+        [pipelineAvailable, { ...tesseractUnavailable, available: true }],
+        'pipeline'
+      )
     ).toBe(false);
   });
 
   it('is false when an optional engine is unavailable but another is selected', () => {
     expect(
-      shouldShowExtractionOfflineCallout(false, [pipelineAvailable, tesseractUnavailable], 'pipeline'),
+      shouldShowExtractionOfflineCallout(
+        false,
+        [pipelineAvailable, tesseractUnavailable],
+        'pipeline'
+      )
     ).toBe(false);
   });
 
   it('is true when the selected engine is unavailable', () => {
     expect(
-      shouldShowExtractionOfflineCallout(false, [pipelineAvailable, tesseractUnavailable], 'tesseract'),
+      shouldShowExtractionOfflineCallout(
+        false,
+        [pipelineAvailable, tesseractUnavailable],
+        'tesseract'
+      )
     ).toBe(true);
   });
 
@@ -50,15 +64,18 @@ describe('shouldShowExtractionOfflineCallout', () => {
       shouldShowExtractionOfflineCallout(
         false,
         [pipelineAvailable, tesseractUnavailable].map((e) => ({ ...e, available: false })),
-        'pipeline',
-      ),
+        'pipeline'
+      )
     ).toBe(true);
   });
 });
 
 describe('buildExtractionEngineSelectOptions', () => {
   it('marks unavailable engines disabled with a short reason', () => {
-    const options = buildExtractionEngineSelectOptions(tDe, [pipelineAvailable, tesseractUnavailable]);
+    const options = buildExtractionEngineSelectOptions(tDe, [
+      pipelineAvailable,
+      tesseractUnavailable,
+    ]);
     expect(options.find((o) => o.value === 'pipeline')?.disabled).toBeFalsy();
     const tess = options.find((o) => o.value === 'tesseract');
     expect(tess?.disabled).toBe(true);

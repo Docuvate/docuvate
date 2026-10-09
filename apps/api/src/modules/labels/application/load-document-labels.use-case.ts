@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import {
   LABEL_EMBEDDING_REPOSITORY,
@@ -24,8 +26,7 @@ export class LoadDocumentLabelSuggestionsUseCase {
     const blockPhrases = blocklist.map((entry) => entry.phrase);
     const blockPatterns = patterns.map((entry) => entry.pattern);
     return suggestions.filter(
-      (suggestion) =>
-        !isBlockedLabelCandidate(suggestion.tag.name, blockPhrases, blockPatterns)
+      (suggestion) => !isBlockedLabelCandidate(suggestion.tag.name, blockPhrases, blockPatterns)
     );
   }
 }

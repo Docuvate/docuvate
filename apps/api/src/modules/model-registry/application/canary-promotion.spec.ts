@@ -1,9 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import { SetMlModelVersionLifecycleUseCase } from './model-registry.use-cases.js';
 import type { ModelRegistryRepository } from '../domain/model-registry.repository.port.js';
 import type { MlModelVersionEntity } from '../domain/model-registry.types.js';
 
-function version(partial: Partial<MlModelVersionEntity> & Pick<MlModelVersionEntity, 'id' | 'familyId'>): MlModelVersionEntity {
+function version(
+  partial: Partial<MlModelVersionEntity> & Pick<MlModelVersionEntity, 'id' | 'familyId'>
+): MlModelVersionEntity {
   return {
     versionTag: 'v2',
     artifactUri: null,
@@ -29,9 +33,19 @@ describe('SetMlModelVersionLifecycleUseCase canary gate', () => {
           ? version({ id: 'cand', familyId: 'heuristic-fields', metrics: { field_f1: 0.5 } })
           : null,
       getActiveVersionForFamily: async () =>
-        version({ id: 'base', familyId: 'heuristic-fields', lifecycle: 'active', metrics: { field_f1: 0.7 } }),
+        version({
+          id: 'base',
+          familyId: 'heuristic-fields',
+          lifecycle: 'active',
+          metrics: { field_f1: 0.7 },
+        }),
       setVersionLifecycle: async (_id, lifecycle) =>
-        version({ id: 'cand', familyId: 'heuristic-fields', lifecycle, metrics: { field_f1: 0.5 } }),
+        version({
+          id: 'cand',
+          familyId: 'heuristic-fields',
+          lifecycle,
+          metrics: { field_f1: 0.5 },
+        }),
       archiveActiveForFamily: async () => {},
       insertCanaryEvaluation: async (row) => ({
         id: 'eval-1',

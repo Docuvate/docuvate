@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { getContent } from '../content';
 import { getDocsExtended } from '../content/docsExtended';
 import { comparePageBySlug } from './compareData';
@@ -80,9 +82,17 @@ export function pageMetaForPath(pathname: string): PageHelmet {
 
   switch (path) {
     case '/':
-      return { ...base, title: content.landing.meta.title, description: content.landing.meta.description };
+      return {
+        ...base,
+        title: content.landing.meta.title,
+        description: content.landing.meta.description,
+      };
     case '/docs':
-      return { ...base, title: content.docs.meta.title, description: content.docs.meta.description };
+      return {
+        ...base,
+        title: content.docs.meta.title,
+        description: content.docs.meta.description,
+      };
     case '/docs/api':
       return {
         ...base,
@@ -90,7 +100,11 @@ export function pageMetaForPath(pathname: string): PageHelmet {
         description: content.apiPage.lead,
       };
     case '/docs/sdks':
-      return { ...base, title: content.sdks.meta.title, description: content.sdks.meta.description };
+      return {
+        ...base,
+        title: content.sdks.meta.title,
+        description: content.sdks.meta.description,
+      };
     case '/impressum':
       return {
         ...base,
@@ -102,6 +116,15 @@ export function pageMetaForPath(pathname: string): PageHelmet {
         ...base,
         title: content.legal.privacy.title,
         description: content.legal.privacy.paragraphs[0] ?? content.legal.privacy.title,
+      };
+    case '/lizenz':
+    case '/license':
+      return {
+        ...base,
+        title: content.legal.license.title,
+        description: content.legal.license.intro[0] ?? content.legal.license.title,
+        alternateDePath: '/lizenz',
+        alternateEnPath: '/en/license',
       };
     default:
       return { ...base, title: 'Docuvate', description: content.landing.meta.description };

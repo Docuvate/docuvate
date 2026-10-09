@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TagDto } from '@docuvate/contracts';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -42,7 +44,8 @@ function formatRuleSummary(
     row.gateLabelMatch === 'any'
       ? t('recognizedFields.ruleSummaryLabelsOr')
       : t('recognizedFields.ruleSummaryLabelsAnd');
-  const labels = names.length > 0 ? names.join(joiner) : t('recognizedFields.ruleSummaryLabelsMissing');
+  const labels =
+    names.length > 0 ? names.join(joiner) : t('recognizedFields.ruleSummaryLabelsMissing');
   return t('recognizedFields.ruleSummaryLabelsWithSafety', {
     labels,
     percent: Math.round(row.minLabelConfidence * 100),
@@ -122,7 +125,12 @@ export function RecognizedFieldCatalogEditor({
             >
               {t('recognizedFields.starterPreset')}
             </Button>
-            <Button type="button" variant="secondary" disabled={catalogBusy} onClick={() => openCreate()}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={catalogBusy}
+              onClick={() => openCreate()}
+            >
               {t('recognizedFields.addField')}
             </Button>
           </div>
@@ -215,7 +223,12 @@ export function RecognizedFieldCatalogEditor({
           </div>
 
           <div className="form-actions recognized-fields-table-actions">
-            <Button type="button" variant="secondary" disabled={catalogBusy} onClick={() => openCreate()}>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={catalogBusy}
+              onClick={() => openCreate()}
+            >
               {t('recognizedFields.addField')}
             </Button>
           </div>

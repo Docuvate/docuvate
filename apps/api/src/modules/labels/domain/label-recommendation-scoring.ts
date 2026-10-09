@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
 import { cosineSimilarity } from './cosine.js';
@@ -248,7 +250,12 @@ function clusterKey(documentIds: string[]): string {
 }
 
 export function suggestEmbeddingClusterNewLabels(input: {
-  rows: { documentId: string; embedding: number[]; nonInboxTagIds: string[]; textSnippet: string }[];
+  rows: {
+    documentId: string;
+    embedding: number[];
+    nonInboxTagIds: string[];
+    textSnippet: string;
+  }[];
   centroids: TagCentroidRef[];
   threshold: number;
   dismissedKeys: ReadonlySet<string>;

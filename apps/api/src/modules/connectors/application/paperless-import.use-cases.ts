@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import { ConflictError, NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
@@ -106,7 +108,8 @@ export class GetPaperlessInstallationUseCase {
       keepOcrText: settings?.keepOcrText ?? true,
       rerunOcr: settings?.rerunOcr ?? false,
       includeArchivedPdf: settings?.includeArchivedPdf ?? false,
-      lastSuccessfulModifiedAt: (await this.imports.getSyncWatermark(installationId))?.toISOString() ?? null,
+      lastSuccessfulModifiedAt:
+        (await this.imports.getSyncWatermark(installationId))?.toISOString() ?? null,
     };
   }
 }
@@ -135,8 +138,14 @@ export class UpdatePaperlessInstallationUseCase {
     if (!row || row.pluginId !== 'paperless') {
       throw new NotFoundError('Connector installation');
     }
-    if (body.credentials && Object.values(body.credentials).some((v) => typeof v === 'string' && v.trim().length > 0)) {
-      const merged = mergePaperlessCredentials(row.credentials, coerceCredentialPatch(body.credentials));
+    if (
+      body.credentials &&
+      Object.values(body.credentials).some((v) => typeof v === 'string' && v.trim().length > 0)
+    ) {
+      const merged = mergePaperlessCredentials(
+        row.credentials,
+        coerceCredentialPatch(body.credentials)
+      );
       await this.testConnection.execute(merged);
       await this.installations.updateCredentials(userId, installationId, merged);
     }
@@ -196,8 +205,7 @@ export class StartPaperlessImportUseCase {
       throw new ConflictError('connectors.paperlessImport.runAlreadyActive');
     }
     const settings = await this.imports.getInstallationSettings(installationId, userId);
-    const ocrMode: PaperlessOcrMode =
-      settings?.rerunOcr ? 'rerun_docuvate' : 'keep_paperless';
+    const ocrMode: PaperlessOcrMode = settings?.rerunOcr ? 'rerun_docuvate' : 'keep_paperless';
     const watermark = await this.imports.getSyncWatermark(installationId);
     const run = await this.imports.createRun({
       installationId,

@@ -1,10 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Static catalog when the worker `/extract/engines` endpoint is unreachable. */
 export const EXTRACTION_ENGINE_FALLBACK = [
   {
     id: 'pipeline',
     label: 'Pipeline (Standard)',
-    description:
-      'Born-digital PDF zuerst, sonst PaddleOCR. Empfohlen für CPU-Compose.',
+    description: 'Born-digital PDF zuerst, sonst PaddleOCR. Empfohlen für CPU-Compose.',
     arenaEligible: true,
   },
   {
@@ -29,8 +30,7 @@ export const EXTRACTION_ENGINE_FALLBACK = [
   {
     id: 'tesseract',
     label: 'Tesseract',
-    description:
-      'Klassisches OCR (deu+eng). Optional, nicht im Standard-Docker-Image.',
+    description: 'Klassisches OCR (deu+eng). Optional, nicht im Standard-Docker-Image.',
     arenaEligible: false,
   },
 ] as const;

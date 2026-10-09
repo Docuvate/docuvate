@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ApiReferencePanel } from '../components/ApiReferencePanel';
 import { ClientOnly } from '../components/ClientOnly';
 import { useLocale } from '../context/LocaleContext';

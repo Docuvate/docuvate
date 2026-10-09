@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ComponentProps, ReactNode } from 'react';
 import { StylesCatalog, type StylesCatalogComponents } from '@docuvate/ui-catalog';
 import '@docuvate/ui-catalog/styles.css';

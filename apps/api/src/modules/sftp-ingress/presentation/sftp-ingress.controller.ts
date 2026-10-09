@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   Body,
   Controller,
@@ -20,7 +22,10 @@ import {
   Session,
   type AuthSession,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   CreateSftpIngressAccountUseCase,
   GetSftpIngressServerInfoUseCase,
@@ -49,21 +54,30 @@ export class SftpIngressController {
   ) {}
 
   @Get('server')
-  @ApiDocuvateRoute({ operationId: 'getSftpIngressServer', summary: 'SFTP scanner ingress server info' })
+  @ApiDocuvateRoute({
+    operationId: 'getSftpIngressServer',
+    summary: 'SFTP scanner ingress server info',
+  })
   getServer(@Session() session: AuthSession): SftpIngressServerInfoDto {
     void session;
     return toSftpIngressServerInfoDto(this.serverInfo.execute());
   }
 
   @Get('accounts')
-  @ApiDocuvateRoute({ operationId: 'listSftpIngressAccounts', summary: 'List SFTP scanner ingress accounts' })
+  @ApiDocuvateRoute({
+    operationId: 'listSftpIngressAccounts',
+    summary: 'List SFTP scanner ingress accounts',
+  })
   async accounts(@Session() session: AuthSession): Promise<{ accounts: SftpIngressAccountDto[] }> {
     const rows = await this.listAccounts.execute(session.user.id);
     return { accounts: rows.map(toSftpIngressAccountDto) };
   }
 
   @Post('accounts')
-  @ApiDocuvateRoute({ operationId: 'createSftpIngressAccount', summary: 'Create SFTP scanner ingress account' })
+  @ApiDocuvateRoute({
+    operationId: 'createSftpIngressAccount',
+    summary: 'Create SFTP scanner ingress account',
+  })
   async create(
     @Session() session: AuthSession,
     @Body() body: SftpIngressCreateAccountBodyDto
@@ -77,7 +91,10 @@ export class SftpIngressController {
   }
 
   @Delete('accounts/:accountId')
-  @ApiDocuvateRoute({ operationId: 'revokeSftpIngressAccount', summary: 'Revoke SFTP scanner ingress account' })
+  @ApiDocuvateRoute({
+    operationId: 'revokeSftpIngressAccount',
+    summary: 'Revoke SFTP scanner ingress account',
+  })
   async revoke(
     @Session() session: AuthSession,
     @Param('accountId', ParseUUIDPipe) accountId: string
@@ -87,7 +104,10 @@ export class SftpIngressController {
   }
 
   @Get('accounts/:accountId/events')
-  @ApiDocuvateRoute({ operationId: 'listSftpIngressEvents', summary: 'List SFTP ingress events for account' })
+  @ApiDocuvateRoute({
+    operationId: 'listSftpIngressEvents',
+    summary: 'List SFTP ingress events for account',
+  })
   async events(
     @Session() session: AuthSession,
     @Param('accountId', ParseUUIDPipe) accountId: string,

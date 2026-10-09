@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useRef, useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import type { AdminUserDto } from '@docuvate/contracts';

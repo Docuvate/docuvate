@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 
@@ -12,11 +14,9 @@ export class ExtractionArenaRatingComparedEnginesEntity {
   @Column('integer', { name: 'sort_order', default: () => '0' })
   sortOrder: number;
 
-  @ManyToOne(
-    () => ExtractionArenaRatingsEntity,
-    (rating) => rating.comparedEngines,
-    { onDelete: 'CASCADE' }
-  )
+  @ManyToOne(() => ExtractionArenaRatingsEntity, (rating) => rating.comparedEngines, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn([{ name: 'rating_id', referencedColumnName: 'id' }])
   rating: ExtractionArenaRatingsEntity;
 }

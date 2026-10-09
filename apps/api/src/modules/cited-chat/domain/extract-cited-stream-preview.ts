@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Human-readable preview from partial Ollama cited-answer JSON (never show raw JSON in UI). */
 
 function unescapeJsonStringFragment(fragment: string): string {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { UserInvitationMailPayload } from '../../domain/invite-mailer.port.js';
 
 /** Light theme colors from @docuvate/tokens (dist/js/tokens.js colorLight). */

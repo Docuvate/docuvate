@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ExtractionBlock, LayoutIrPageSummary } from '@docuvate/contracts';
@@ -229,8 +231,7 @@ export function ExtractedTextPanel({
   const pageHint = editMode
     ? `${crosslinkHint}${t('documents.extractedTextEditHint')}`
     : crosslinkHint;
-  const hasDisplayContent =
-    blocks.length > 0 || (fullText?.trim().length ?? 0) > 0;
+  const hasDisplayContent = blocks.length > 0 || (fullText?.trim().length ?? 0) > 0;
   const showToolbar = allowCopy || hasDisplayContent;
 
   const showCopy = allowCopy && canCopy;
@@ -412,7 +413,11 @@ export function ExtractedTextPanel({
       ) : null}
 
       {showLayoutPane ? (
-        <div className="layout-ir-zoom-toolbar" role="toolbar" aria-label={t('documents.layoutZoomAria')}>
+        <div
+          className="layout-ir-zoom-toolbar"
+          role="toolbar"
+          aria-label={t('documents.layoutZoomAria')}
+        >
           {LAYOUT_IR_ZOOM_STEPS.map((step) => (
             <Button
               key={step}

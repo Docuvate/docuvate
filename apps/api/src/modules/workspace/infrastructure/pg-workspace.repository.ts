@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type {
@@ -34,7 +36,10 @@ function mapViewRow(row: Record<string, unknown>, tagIds: string[]): SavedDocume
     folderId: row['folder_id'] != null ? String(row['folder_id']) : null,
     mappeId: row['mappe_id'] != null ? String(row['mappe_id']) : null,
     correspondentId: row['correspondent_id'] != null ? String(row['correspondent_id']) : null,
-    status: row['status_filter'] != null ? (String(row['status_filter']) as SavedDocumentViewEntity['status']) : null,
+    status:
+      row['status_filter'] != null
+        ? (String(row['status_filter']) as SavedDocumentViewEntity['status'])
+        : null,
     inbox: row['inbox_filter'] != null ? Boolean(row['inbox_filter']) : null,
     withoutNonInboxLabel:
       row['without_non_inbox_label'] != null ? Boolean(row['without_non_inbox_label']) : null,
@@ -98,9 +103,7 @@ export class PgWorkspaceRepository {
     );
     const ids = result.rows.map((r) => String(r['id']));
     const tagMap = await this.loadTagIdsForViews(ids);
-    return result.rows.map((row) =>
-      mapViewRow(row, tagMap.get(String(row['id'])) ?? [])
-    );
+    return result.rows.map((row) => mapViewRow(row, tagMap.get(String(row['id'])) ?? []));
   }
 
   async findViewById(id: string): Promise<SavedDocumentViewEntity | null> {
@@ -208,7 +211,8 @@ export class PgWorkspaceRepository {
     if ('correspondentId' in input) assign('correspondent_id', input.correspondentId);
     if ('status' in input) assign('status_filter', input.status);
     if ('inbox' in input) assign('inbox_filter', input.inbox);
-    if ('withoutNonInboxLabel' in input) assign('without_non_inbox_label', input.withoutNonInboxLabel);
+    if ('withoutNonInboxLabel' in input)
+      assign('without_non_inbox_label', input.withoutNonInboxLabel);
     if ('documentDateFrom' in input) assign('document_date_from', input.documentDateFrom);
     if ('documentDateTo' in input) assign('document_date_to', input.documentDateTo);
     if (input.pinnedSidebar !== undefined) assign('pinned_sidebar', input.pinnedSidebar);
@@ -241,8 +245,7 @@ export class PgWorkspaceRepository {
         }
       }
       await client.query('COMMIT');
-      const tagIds =
-        input.tagIds !== undefined ? input.tagIds : existing.tagIds;
+      const tagIds = input.tagIds !== undefined ? input.tagIds : existing.tagIds;
       return mapViewRow(result.rows[0]!, tagIds);
     } catch (err) {
       await client.query('ROLLBACK');
@@ -331,7 +334,10 @@ export class PgWorkspaceRepository {
     }
   }
 
-  async seedWidgetsFromTemplate(userId: string, template: DashboardWidgetTemplate[]): Promise<void> {
+  async seedWidgetsFromTemplate(
+    userId: string,
+    template: DashboardWidgetTemplate[]
+  ): Promise<void> {
     await this.replaceWidgetsForUser(
       userId,
       template.map((w) => ({

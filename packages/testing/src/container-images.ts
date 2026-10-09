@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /**
  * Container images shared with docker-compose.yml (keep byte-identical).
  * Update only with digest pins; run node scripts/testing/verify-container-images.mjs

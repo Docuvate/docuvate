@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import * as Minio from 'minio';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 
@@ -13,9 +15,7 @@ function parseEndpoint(endpointUrl: string): { host: string; port: number; useSS
   return { host: parsed.hostname, port, useSSL };
 }
 
-export function createS3ClientConfig(
-  credentials: ConnectorConfigurationInput
-): S3ConnectorConfig {
+export function createS3ClientConfig(credentials: ConnectorConfigurationInput): S3ConnectorConfig {
   const bucket = credentials['bucket']?.trim() ?? '';
   const region = credentials['region']?.trim() ?? '';
   const accessKey = credentials['access_key_id']?.trim() ?? '';

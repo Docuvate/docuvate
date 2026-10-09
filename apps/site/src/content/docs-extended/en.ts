@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocsExtendedContent } from './types';
 
 export const docsExtendedEn: DocsExtendedContent = {
@@ -54,8 +56,7 @@ export const docsExtendedEn: DocsExtendedContent = {
       description: 'Runtime topology, layers, and core ports.',
     },
     title: 'Architecture',
-    lead:
-      'Docuvate uses clean architecture in the API and worker: domain, application, infrastructure, and presentation stay separate.',
+    lead: 'Docuvate uses clean architecture in the API and worker: domain, application, infrastructure, and presentation stay separate.',
     sections: [
       {
         id: 'runtime',
@@ -95,8 +96,7 @@ export const docsExtendedEn: DocsExtendedContent = {
       description: 'Service API keys, claims, and permissions for integrations.',
     },
     title: 'Service API keys and claims',
-    lead:
-      'Use service API keys for scripts and third-party systems instead of browser sessions. Each key is bound to a user and carries ABAC permissions.',
+    lead: 'Use service API keys for scripts and third-party systems instead of browser sessions. Each key is bound to a user and carries ABAC permissions.',
     sections: [
       {
         id: 'create',
@@ -134,8 +134,7 @@ export const docsExtendedEn: DocsExtendedContent = {
       description: 'Backups, migrations, and controlled upgrades when self-hosting.',
     },
     title: 'Backup and upgrade',
-    lead:
-      'Docuvate stores metadata in PostgreSQL and files in MinIO. Back up both layers and apply schema changes through TypeORM migrations.',
+    lead: 'Docuvate stores metadata in PostgreSQL and files in MinIO. Back up both layers and apply schema changes through TypeORM migrations.',
     sections: [
       {
         id: 'volumes',
@@ -175,8 +174,7 @@ export const docsExtendedEn: DocsExtendedContent = {
       description: 'OCR, embeddings, and document chat: CPU-first, GPU optional.',
     },
     title: 'Models and hardware',
-    lead:
-      'Docuvate is CPU-first: OCR, embeddings, and the default chat run without a GPU. Heavier models are optional and documented in settings.',
+    lead: 'Docuvate is CPU-first: OCR, embeddings, and the default chat run without a GPU. Heavier models are optional and documented in settings.',
     sections: [
       {
         id: 'ocr',
@@ -216,8 +214,7 @@ export const docsExtendedEn: DocsExtendedContent = {
       description: 'Kustomize and Helm manifests for Docuvate on Kubernetes.',
     },
     title: 'Kubernetes',
-    lead:
-      'For production the repository ships Kustomize bases and Helm charts. The flow matches Compose: migrate job, then API and worker.',
+    lead: 'For production the repository ships Kustomize bases and Helm charts. The flow matches Compose: migrate job, then API and worker.',
     sections: [
       {
         id: 'manifests',
@@ -249,7 +246,8 @@ export const docsExtendedEn: DocsExtendedContent = {
   comparisons: {
     meta: {
       title: 'Comparisons | Docuvate documentation',
-      description: 'Honest comparisons with Paperless-ngx, Papra, Docspell, Mayan EDMS, and DocuWare.',
+      description:
+        'Honest comparisons with Paperless-ngx, Papra, Docspell, Mayan EDMS, and DocuWare.',
     },
     overviewTitle: 'Comparisons',
     overviewLead:
@@ -259,8 +257,7 @@ export const docsExtendedEn: DocsExtendedContent = {
     selfHostCta: 'Self-host',
     testCtaHeading: 'Try Docuvate in 10 minutes',
     testCtaBody: 'Start the stack with Docker Compose on your machine.',
-    correctionNote:
-      'Something outdated? Email hello@docuvate.de and we will update the tables.',
+    correctionNote: 'Something outdated? Email hello@docuvate.de and we will update the tables.',
     competitorStrengthsTitle: (name) => `Where ${name} is stronger`,
     docuvateStrengthsTitle: 'Where Docuvate is stronger',
     whenToChooseTitle: 'When to choose which',

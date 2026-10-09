@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Detect drawn checkbox squares and diagonal marks from pdfplumber geometry."""
 
 from __future__ import annotations

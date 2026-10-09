@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
@@ -137,7 +139,10 @@ export class TriggerMlRetrainUseCase {
     @Inject(MODEL_REGISTRY_REPOSITORY) private readonly registry: ModelRegistryRepository
   ) {}
 
-  async execute(familyId: string, triggerKind: MlRetrainTriggerKind = 'manual'): Promise<MlRetrainJobEntity> {
+  async execute(
+    familyId: string,
+    triggerKind: MlRetrainTriggerKind = 'manual'
+  ): Promise<MlRetrainJobEntity> {
     const family = await this.registry.findFamilyById(familyId);
     if (!family) {
       throw new NotFoundError('Model family');

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 import { connectorFetch, trimTrailingSlash } from '../shared/connector-http.js';
@@ -125,7 +127,9 @@ export async function paperlessSafeFetch(
   pathOrUrl: string,
   init: RequestInit & { timeoutMs?: number } = {}
 ): Promise<Response> {
-  const target = pathOrUrl.startsWith('http') ? pathOrUrl : new URL(pathOrUrl, `${baseUrl}/`).toString();
+  const target = pathOrUrl.startsWith('http')
+    ? pathOrUrl
+    : new URL(pathOrUrl, `${baseUrl}/`).toString();
   let current = target;
   for (let hop = 0; hop <= MAX_REDIRECT_HOPS; hop += 1) {
     const normalized = normalizePaperlessBaseUrl(current.split('?')[0] ?? current);

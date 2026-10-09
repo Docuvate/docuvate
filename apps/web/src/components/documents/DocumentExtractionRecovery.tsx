@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { DocumentDto } from '@docuvate/contracts';
@@ -55,7 +57,9 @@ export function DocumentExtractionRecovery({
             </Link>
           </>
         ) : (
-          <span className="muted extraction-recovery-pending">{t('documents.extractionPleaseWait')}</span>
+          <span className="muted extraction-recovery-pending">
+            {t('documents.extractionPleaseWait')}
+          </span>
         )}
       </div>
     </div>

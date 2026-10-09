@@ -1,7 +1,16 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import type { GlobalSearchResponseDto } from '@docuvate/contracts';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { GlobalSearchUseCase } from '../application/global-search.use-case.js';
 import { GlobalSearchQueryDto } from './global-search-query.dto.js';
 

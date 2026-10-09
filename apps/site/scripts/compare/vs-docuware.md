@@ -2,7 +2,7 @@
 
 > Seitenvorschlag: `/docs/vergleiche/docuware` · Stand: 09.10.2026 · Rubrik: [00-rubrik.md](./00-rubrik.md)
 
-DocuWare ist eine kommerzielle DMS- und Workflow-Plattform für Unternehmen, vor allem als Cloud-Dienst. Docuvate ist Open Source und läuft nur auf Ihrer eigenen Infrastruktur.
+DocuWare ist eine kommerzielle DMS- und Workflow-Plattform für Unternehmen, vor allem als Cloud-Dienst. Docuvate ist source-available (fair-code) und läuft nur auf Ihrer eigenen Infrastruktur.
 
 [Selbst hosten](/docs#schnellstart) · [Alle Vergleiche](./01-uebersicht-matrix.md)
 
@@ -17,7 +17,7 @@ DocuWare ist eine kommerzielle DMS- und Workflow-Plattform für Unternehmen, vor
 | # | Kriterium | Docuvate | DocuWare |
 |---|---|---|---|
 | K1 | Zielgruppe | Teams, Selbständige und Entwickler, die Dokumente selbst hosten und per API anbinden wollen [W1] | Unternehmen (KMU bis Konzern) mit Dokumenten-Workflows, z. B. Rechnungseingang, Personalakten [X1] |
-| K2 | Lizenz | AGPL-3.0 (Community). Kommerzielle Editionen werden im README erwähnt, Inhalte/Preise nicht veröffentlicht [W1] [R1] | Proprietär [X1] |
+| K2 | Lizenz | Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes betriebliches Self-Hosting; kein Managed-Service/White-Label/Embedding in verkaufte Produkte. Enterprise/Cloud: LICENSE_EE.md [W1] [R1] | Proprietär [X1] |
 | K3 | Betrieb | Nur self-hosted: Docker Compose; Kubernetes (Kustomize/Helm) laut Repo [W2] [R1] | DocuWare Cloud oder On-Premises (laut Hersteller) [X1] |
 | K4 | Kosten | Kostenlos (Community). Keine Preise für kommerzielle Editionen veröffentlicht [W1] [R1] | Auf Anfrage; Hersteller nennt typisch 30 bis 125+ US-$ pro Nutzer/Monat. Cloud-Pakete 4/15/40/100 Nutzer. IDP volumenbasiertes Add-on [X1] [X2] [X3] |
 | K5 | Reife & Pflege | Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview [R1] [W3] | Etabliertes Produkt; neue Oberfläche ab Mitte Oktober 2026 mit Version 7.15 (Cloud zuerst) [X5] |
@@ -45,7 +45,7 @@ DocuWare ist eine kommerzielle DMS- und Workflow-Plattform für Unternehmen, vor
 
 ## Wo Docuvate stärker ist
 
-- Open Source (AGPL) ohne Lizenzgebühr pro Nutzer.
+- Source-available (SUL 1.0) ohne Lizenzgebühr pro Nutzer für Self-Hosting auf eigener Infrastruktur.
 - Daten und KI bleiben auf Ihrer Hardware; keine Cloud nötig.
 - Offene API mit OpenAPI-Spezifikation und SDKs; Sie können den Code prüfen und anpassen.
 - Schnell testbar: docker compose up statt Vertriebsgespräch.

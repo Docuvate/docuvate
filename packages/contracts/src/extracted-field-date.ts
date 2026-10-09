@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** True when value looks like a real calendar date (DE + ISO); rejects label bleed-through. */
 export function isPlausibleExtractedDateValue(raw: string): boolean {
   const value = raw.trim();

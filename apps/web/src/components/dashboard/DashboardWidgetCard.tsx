@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DashboardWidgetDto } from '@docuvate/contracts';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -50,13 +52,31 @@ export function DashboardWidgetCard({
         <h2 className="dashboard-widget-title">{title}</h2>
         {editMode ? (
           <div className="dashboard-widget-edit-actions">
-            <Button type="button" variant="secondary" className="btn-compact" onClick={onMoveUp} aria-label={t('dashboard.moveUp')}>
+            <Button
+              type="button"
+              variant="secondary"
+              className="btn-compact"
+              onClick={onMoveUp}
+              aria-label={t('dashboard.moveUp')}
+            >
               ↑
             </Button>
-            <Button type="button" variant="secondary" className="btn-compact" onClick={onMoveDown} aria-label={t('dashboard.moveDown')}>
+            <Button
+              type="button"
+              variant="secondary"
+              className="btn-compact"
+              onClick={onMoveDown}
+              aria-label={t('dashboard.moveDown')}
+            >
               ↓
             </Button>
-            <Button type="button" variant="secondary" className="btn-compact" onClick={onRemove} aria-label={t('dashboard.removeWidget')}>
+            <Button
+              type="button"
+              variant="secondary"
+              className="btn-compact"
+              onClick={onRemove}
+              aria-label={t('dashboard.removeWidget')}
+            >
               ×
             </Button>
           </div>

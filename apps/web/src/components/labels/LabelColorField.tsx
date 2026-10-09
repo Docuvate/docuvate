@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';

@@ -50,8 +50,7 @@ async function waitForPaperless(baseUrl: string, timeoutMs = 600_000): Promise<v
     try {
       const token = await obtainPaperlessToken(baseUrl);
       for (const version of [3, 2, 0]) {
-        const accept =
-          version === 0 ? 'application/json' : `application/json; version=${version}`;
+        const accept = version === 0 ? 'application/json' : `application/json; version=${version}`;
         const response = await fetch(`${baseUrl}/api/documents/?page=1&page_size=1`, {
           headers: {
             Authorization: `Token ${token}`,

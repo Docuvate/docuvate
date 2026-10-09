@@ -12,11 +12,11 @@ FastAPI service for document extraction and **CPU/ARM embedding** (no GPU requir
 
 The default Docker image **pre-downloads** Paddle det/rec weights at build time (`prewarm_paddle_models`). Cold Arena/compare on a fresh dev install may still download into `~/.paddleocr` until prewarm completes.
 
-| Env | Default | Description |
-|-----|---------|-------------|
-| `EXTRACTOR_ENGINE` | `pipeline` | `pipeline` (native PDF + Paddle), `paddle`, `docling` (extra), or `tesseract` |
-| `PDF_NATIVE_MIN_CHARS` | `80` | Min extracted chars to treat PDF as born-digital |
-| `PADDLE_OCR_LANG` | `german` | PaddleOCR lang (`german`, `de`, or `latin`; default Belege-first) |
+| Env                    | Default    | Description                                                                   |
+| ---------------------- | ---------- | ----------------------------------------------------------------------------- |
+| `EXTRACTOR_ENGINE`     | `pipeline` | `pipeline` (native PDF + Paddle), `paddle`, `docling` (extra), or `tesseract` |
+| `PDF_NATIVE_MIN_CHARS` | `80`       | Min extracted chars to treat PDF as born-digital                              |
+| `PADDLE_OCR_LANG`      | `german`   | PaddleOCR lang (`german`, `de`, or `latin`; default Belege-first)             |
 
 ## Embeddings
 
@@ -26,10 +26,10 @@ The default Docker image **pre-downloads** Paddle det/rec weights at build time 
 
 ### Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/extract` | Text + heuristic fields + layout blocks |
-| POST | `/embed` | Batch text → L2-normalized vectors (passage prefix for E5) |
+| Method | Path       | Description                                                |
+| ------ | ---------- | ---------------------------------------------------------- |
+| POST   | `/extract` | Text + heuristic fields + layout blocks                    |
+| POST   | `/embed`   | Batch text → L2-normalized vectors (passage prefix for E5) |
 
 Both require header `X-Worker-Secret` (default `worker-shared-secret`).
 
@@ -47,10 +47,10 @@ Poppler (`pdftoppm`) is required for scan PDF OCR (`brew install poppler` on Mac
 
 Install the extra: `uv pip install -e ".[donut]"`. Device selection (first match wins unless overridden):
 
-| Env | Default | Description |
-|-----|---------|-------------|
-| `DONUT_INFERENCE_DEVICE` | `auto` | `auto`, `cuda`, `mps`, or `cpu` |
-| `TORCH_INFERENCE_DEVICE` | — | Alias for `DONUT_INFERENCE_DEVICE` |
+| Env                      | Default | Description                        |
+| ------------------------ | ------- | ---------------------------------- |
+| `DONUT_INFERENCE_DEVICE` | `auto`  | `auto`, `cuda`, `mps`, or `cpu`    |
+| `TORCH_INFERENCE_DEVICE` | —       | Alias for `DONUT_INFERENCE_DEVICE` |
 
 With `auto`, the worker uses **CUDA → MPS → CPU** for inference env overrides. **Settings/UI** only enable Donut when `GET /v1/settings/hardware` reports a GPU with ≥ 4096 MB VRAM — CPU-only hosts should use Ollama + small GGUF or dev `context` RAG (see `docs/adr/010-cpu-docqa.md`).
 

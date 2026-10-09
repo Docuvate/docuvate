@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
@@ -11,7 +13,11 @@ import { ConnectorRuntimeResolver } from './connector-runtime.resolver.js';
 export class ListConnectorImportablesUseCase {
   constructor(private readonly runtime: ConnectorRuntimeResolver) {}
 
-  async execute(userId: string, installationId: string, limit = 20): Promise<ConnectorImportableItem[]> {
+  async execute(
+    userId: string,
+    installationId: string,
+    limit = 20
+  ): Promise<ConnectorImportableItem[]> {
     const resolved = await this.runtime.resolve(userId, installationId);
     if (!resolved.ports.source) {
       throw new ValidationError('connectors.errors.sourceNotSupported');

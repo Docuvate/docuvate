@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 import { ForbiddenError } from '../../../shared/domain/errors.js';
 import { assertTargetIsNotLastAdministrator } from '../domain/last-admin.policy.js';
@@ -33,9 +35,9 @@ function mockPoolForLastAdmin(targetRole: string, adminCount: string) {
 describe('last administrator policy', () => {
   it('blocks demoting the sole administrator', async () => {
     const pool = mockPoolForLastAdmin(INSTALLATION_DB_ROLE_ADMIN, '1');
-    await expect(assertTargetIsNotLastAdministrator(pool as never, 'user-1')).rejects.toBeInstanceOf(
-      ForbiddenError
-    );
+    await expect(
+      assertTargetIsNotLastAdministrator(pool as never, 'user-1')
+    ).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   it('allows demoting when another administrator exists', async () => {

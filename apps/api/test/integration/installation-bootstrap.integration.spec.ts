@@ -11,9 +11,7 @@ const installationIamBackfillSql = readFileSync(
     '../../src/shared/infrastructure/database/migrations/sql/installation-iam-up.sql'
   ),
   'utf8'
-).match(
-  /INSERT INTO installation_user_roles[\s\S]+?ON CONFLICT \(user_id\) DO NOTHING;/
-)?.[0];
+).match(/INSERT INTO installation_user_roles[\s\S]+?ON CONFLICT \(user_id\) DO NOTHING;/)?.[0];
 
 describe('installation bootstrap (integration)', () => {
   const pool = getIntegrationPool();

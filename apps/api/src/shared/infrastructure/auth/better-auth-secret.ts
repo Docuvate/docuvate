@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const FORBIDDEN_PRODUCTION_SECRETS = new Set(
   [
     'dev-secret-change-me-32chars-minimum!!',

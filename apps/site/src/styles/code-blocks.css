@@ -57,7 +57,11 @@
 }
 
 .docs-callout--warning {
-  border-color: color-mix(in srgb, var(--dv-color-warn, oklch(62% 0.14 70deg)) 45%, var(--dv-color-border));
+  border-color: color-mix(
+    in srgb,
+    var(--dv-color-warn, oklch(62% 0.14 70deg)) 45%,
+    var(--dv-color-border)
+  );
 }
 
 .docs-callout-icon {

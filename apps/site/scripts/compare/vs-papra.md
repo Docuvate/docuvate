@@ -17,7 +17,7 @@ Papra ist ein bewusst schlankes Dokumentenarchiv, selbst gehostet oder als Cloud
 | # | Kriterium | Docuvate | Papra |
 |---|---|---|---|
 | K1 | Zielgruppe | Teams, Selbständige und Entwickler, die Dokumente selbst hosten und per API anbinden wollen [W1] | Minimalistisches Dokumentenarchiv für Privatpersonen, Familien, kleine Teams [A1] |
-| K2 | Lizenz | AGPL-3.0 (Community). Kommerzielle Editionen werden im README erwähnt, Inhalte/Preise nicht veröffentlicht [W1] [R1] | AGPL-3.0 [A1] |
+| K2 | Lizenz | Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes betriebliches Self-Hosting; kein Managed-Service/White-Label/Embedding in verkaufte Produkte. Enterprise/Cloud: LICENSE_EE.md [W1] [R1] | AGPL-3.0 [A1] |
 | K3 | Betrieb | Nur self-hosted: Docker Compose; Kubernetes (Kustomize/Helm) laut Repo [W2] [R1] | Beides: self-hosted (ein Docker-Image) oder gehostet auf papra.app [A1] [A2] |
 | K4 | Kosten | Kostenlos (Community). Keine Preise für kommerzielle Editionen veröffentlicht [W1] [R1] | Self-hosted kostenlos. Cloud: Free 0 $, Plus 9 $/Monat, Pro 30 $/Monat (jährlich günstiger), Enterprise auf Anfrage [A3] |
 | K5 | Reife & Pflege | Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview [R1] [W3] | Aktiv entwickelt; öffentliche Commits und Releases im Oktober 2026 [A6] |

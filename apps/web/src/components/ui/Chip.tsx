@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode } from 'react';
 import { chipColorStyle } from '../../lib/chipColorStyle';
 
@@ -32,7 +34,12 @@ export function Chip({
       <span className="chip-label">{label}</span>
       {trailing}
       {onRemove ? (
-        <button type="button" className="chip-remove" onClick={onRemove} aria-label={`${label} entfernen`}>
+        <button
+          type="button"
+          className="chip-remove"
+          onClick={onRemove}
+          aria-label={`${label} entfernen`}
+        >
           ×
         </button>
       ) : null}

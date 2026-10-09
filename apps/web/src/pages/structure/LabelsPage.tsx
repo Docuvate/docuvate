@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -106,13 +108,17 @@ export function LabelsPage() {
   const error = pageError ?? insights.error;
   const tagColorById = useMemo(
     () =>
-      Object.fromEntries(
-        tags.map((tag) => [tag.id, tag.color ?? defaultLabelColor])
-      ) as Record<string, string>,
+      Object.fromEntries(tags.map((tag) => [tag.id, tag.color ?? defaultLabelColor])) as Record<
+        string,
+        string
+      >,
     [tags]
   );
   const showEmptyHint =
-    !loading && tags.filter((tag) => !tag.isInbox).length === 0 && !insights.loading && insights.queueItems.length === 0;
+    !loading &&
+    tags.filter((tag) => !tag.isInbox).length === 0 &&
+    !insights.loading &&
+    insights.queueItems.length === 0;
   const assignmentMode = readLabelAssignmentModeFromForm(form);
   const showMatchText = labelAssignmentModeNeedsMatchText(assignmentMode);
 
@@ -239,8 +245,8 @@ export function LabelsPage() {
           </form>
           <p className="muted label-fields-pointer">
             {t('labels.fieldsPointer')}{' '}
-            <Link to={routes.structureRecognizedFields}>{t('nav.recognizedFields')}</Link>
-            . {t('labels.fieldsPointerGate')}
+            <Link to={routes.structureRecognizedFields}>{t('nav.recognizedFields')}</Link>.{' '}
+            {t('labels.fieldsPointerGate')}
           </p>
         </Card>
       ) : null}

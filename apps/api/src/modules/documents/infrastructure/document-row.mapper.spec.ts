@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import { mapDocumentRow, normalizeExtraction } from './document-row.mapper.js';
 
@@ -40,7 +42,6 @@ describe('mapDocumentRow extraction markdown', () => {
     );
     expect(entity.extraction?.layoutIrAvailable).toBe(true);
   });
-
 
   it('omits markdown when column is blank', () => {
     const entity = mapDocumentRow({

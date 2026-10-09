@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export const DEFAULT_CHAT_THREAD_TITLE = 'Neuer Chat';
 
 export function chatThreadTitleFromMessage(message: string): string {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 import { MappenController } from './presentation/mappen.controller.js';
 import {
@@ -9,11 +11,6 @@ import {
 
 @Module({
   controllers: [MappenController],
-  providers: [
-    ListMappenUseCase,
-    CreateMappeUseCase,
-    UpdateMappeUseCase,
-    DeleteMappeUseCase,
-  ],
+  providers: [ListMappenUseCase, CreateMappeUseCase, UpdateMappeUseCase, DeleteMappeUseCase],
 })
 export class MappenModule {}

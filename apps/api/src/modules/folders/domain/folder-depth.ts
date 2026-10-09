@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export const MAX_FOLDER_DEPTH = 3;
 
 export interface FolderDepthNode {

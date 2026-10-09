@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Damerau-Levenshtein distance (adjacent transpositions count as one edit). */
 export function damerauLevenshtein(a: string, b: string): number {
   const al = a.length;

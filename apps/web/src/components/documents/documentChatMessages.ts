@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatMessageRecordDto } from '@docuvate/contracts';
 
 /** Merge server messages after send; avoids duplicate user rows when a stale list fetch races the POST. */

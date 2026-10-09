@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useRef, useState } from 'react';
 import { isFileDrag } from '../../lib/documentUploadConstants';
 import { useDocumentUploadContext } from './DocumentUploadProvider';

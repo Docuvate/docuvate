@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import { NotFoundError } from '../../../shared/domain/errors.js';
@@ -70,9 +72,13 @@ function mapMessageRow(row: Record<string, unknown>): DocumentChatMessageEntity 
     createdAt: new Date(String(row['created_at'])),
     updatedAt: new Date(String(row['updated_at'] ?? row['created_at'])),
     generationStatus:
-      generationStatusRaw != null ? (String(generationStatusRaw) as DocumentChatMessageEntity['generationStatus']) : null,
+      generationStatusRaw != null
+        ? (String(generationStatusRaw) as DocumentChatMessageEntity['generationStatus'])
+        : null,
     generationPhase:
-      generationPhaseRaw != null ? (String(generationPhaseRaw) as DocumentChatMessageEntity['generationPhase']) : null,
+      generationPhaseRaw != null
+        ? (String(generationPhaseRaw) as DocumentChatMessageEntity['generationPhase'])
+        : null,
     errorCode: row['error_code'] != null ? String(row['error_code']) : null,
     errorDetail: row['error_detail'] != null ? String(row['error_detail']) : null,
   };
@@ -232,13 +238,7 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, thread_id, role, content, created_at, updated_at,
                  generation_status, generation_phase, error_code, error_detail`,
-      [
-        threadId,
-        role,
-        content,
-        options?.generationStatus ?? null,
-        options?.generationPhase ?? null,
-      ]
+      [threadId, role, content, options?.generationStatus ?? null, options?.generationPhase ?? null]
     );
     return mapMessageRow(result.rows[0] as Record<string, unknown>);
   }

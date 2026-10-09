@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
@@ -32,7 +34,13 @@ export function SaveBar({ visible, saving, error, onSave, onDiscard }: SaveBarPr
           <Button type="button" variant="secondary" disabled={saving} onClick={onDiscard}>
             {t('save.discard')}
           </Button>
-          <Button type="button" variant="primary" disabled={saving} data-ux="primary-action" onClick={onSave}>
+          <Button
+            type="button"
+            variant="primary"
+            disabled={saving}
+            data-ux="primary-action"
+            onClick={onSave}
+          >
             {saving ? t('save.saving') : t('save.save')}
           </Button>
         </div>

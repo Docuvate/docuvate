@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   CustomFieldType,
   DocumentBulkAction,
@@ -8,7 +10,10 @@ import type {
   ExtractedField,
   MatchingAlgorithm,
 } from '@docuvate/contracts';
-import type { DocumentEntity, DocumentStatus } from '../../modules/documents/domain/document.entity.js';
+import type {
+  DocumentEntity,
+  DocumentStatus,
+} from '../../modules/documents/domain/document.entity.js';
 import type {
   CorrespondentEntity,
   TagEntity,
@@ -77,7 +82,11 @@ export interface TaxonomyRepository {
   listTags(userId: string): Promise<TagEntity[]>;
   findTagByIdForUser(id: string, userId: string): Promise<TagEntity | null>;
   createTag(userId: string, name: string, options?: TagWriteOptions): Promise<TagEntity>;
-  updateTag(id: string, userId: string, patch: TagWriteOptions & { name?: string }): Promise<TagEntity>;
+  updateTag(
+    id: string,
+    userId: string,
+    patch: TagWriteOptions & { name?: string }
+  ): Promise<TagEntity>;
   deleteTag(id: string, userId: string): Promise<void>;
   mergeTags(userId: string, keepTagId: string, removeTagId: string): Promise<void>;
   ensureInboxTag(userId: string): Promise<TagEntity>;
@@ -240,9 +249,7 @@ export interface ExtractionFieldFeedbackRepository {
   ): Promise<ExtractionFieldCorrectionRecord[]>;
 }
 
-export const EXTRACTION_FIELD_FEEDBACK_REPOSITORY = Symbol(
-  'EXTRACTION_FIELD_FEEDBACK_REPOSITORY'
-);
+export const EXTRACTION_FIELD_FEEDBACK_REPOSITORY = Symbol('EXTRACTION_FIELD_FEEDBACK_REPOSITORY');
 
 export interface TagCustomFieldRecord {
   id: string;
@@ -383,7 +390,9 @@ export interface LabelEmbeddingRepository {
     source: 'manual' | 'dismiss'
   ): Promise<LabelRecommendationBlocklistEntry>;
   removeRecommendationBlocklist(userId: string, entryId: string): Promise<void>;
-  listRecommendationBlocklistPatterns(userId: string): Promise<LabelRecommendationBlocklistPattern[]>;
+  listRecommendationBlocklistPatterns(
+    userId: string
+  ): Promise<LabelRecommendationBlocklistPattern[]>;
   addRecommendationBlocklistPattern(
     userId: string,
     pattern: string
@@ -406,7 +415,11 @@ export interface LabelEmbeddingRepository {
 }
 
 export interface SearchPort {
-  search(userId: string, query: string, filters?: Omit<DocumentListQuery, 'q'>): Promise<DocumentEntity[]>;
+  search(
+    userId: string,
+    query: string,
+    filters?: Omit<DocumentListQuery, 'q'>
+  ): Promise<DocumentEntity[]>;
 }
 
 export interface PaperlessImportPort {
@@ -556,12 +569,7 @@ export interface MappeListItem extends MappeEntity {
 export interface MappeRepository {
   listForUser(userId: string): Promise<MappeListItem[]>;
   findByIdForUser(id: string, userId: string): Promise<MappeEntity | null>;
-  create(
-    id: string,
-    userId: string,
-    name: string,
-    color: string | null
-  ): Promise<MappeEntity>;
+  create(id: string, userId: string, name: string, color: string | null): Promise<MappeEntity>;
   update(
     id: string,
     userId: string,
@@ -629,15 +637,8 @@ export interface DuplicateRepository {
     documentId: string,
     candidateDocumentId: string
   ): Promise<boolean>;
-  countPendingByDocumentIds(
-    userId: string,
-    documentIds: string[]
-  ): Promise<Map<string, number>>;
-  findDocumentIdsByHash(
-    userId: string,
-    hash: string,
-    excludeDocumentId: string
-  ): Promise<string[]>;
+  countPendingByDocumentIds(userId: string, documentIds: string[]): Promise<Map<string, number>>;
+  findDocumentIdsByHash(userId: string, hash: string, excludeDocumentId: string): Promise<string[]>;
   listDocumentEmbeddings(
     userId: string,
     excludeDocumentId: string

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Default cosine similarity for “near label space” (Labelraum + assign recommendations). */
 export const DEFAULT_LABEL_NEAR_SIMILARITY_THRESHOLD = 0.62;
 

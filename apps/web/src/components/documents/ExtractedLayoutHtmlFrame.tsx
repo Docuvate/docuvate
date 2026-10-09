@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -111,8 +113,7 @@ export function ExtractedLayoutHtmlFrame({
   }, [activePage, pageSynced, pageCount, html]);
 
   const effectiveHostWidth = hostWidth > 0 ? hostWidth : skeletonWidth;
-  const baseScale =
-    naturalWidthPx > 0 ? Math.min(1, effectiveHostWidth / naturalWidthPx) : 1;
+  const baseScale = naturalWidthPx > 0 ? Math.min(1, effectiveHostWidth / naturalWidthPx) : 1;
   const scale = baseScale * (zoom / 100);
   const displayWidth = naturalWidthPx > 0 ? naturalWidthPx * scale : skeletonWidth * scale;
   const displayHeight = totalNaturalHeight * scale;
@@ -131,13 +132,11 @@ export function ExtractedLayoutHtmlFrame({
   const loading = suspendHtmlFetch || !html;
 
   return (
-    <div
-      className="layout-ir-preview layout-ir-html-host"
-      ref={hostRef}
-      aria-busy={loading}
-    >
+    <div className="layout-ir-preview layout-ir-html-host" ref={hostRef} aria-busy={loading}>
       {loading ? (
-        <p className="visually-hidden" aria-live="polite">{t('documents.layoutIrLoading')}</p>
+        <p className="visually-hidden" aria-live="polite">
+          {t('documents.layoutIrLoading')}
+        </p>
       ) : null}
       <div
         className="layout-ir-skeleton"

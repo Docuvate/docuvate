@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import pg from 'pg';
 import { INSTALLATION_DB_ROLE_ADMIN } from '../modules/auth/domain/installation.constants.js';
 

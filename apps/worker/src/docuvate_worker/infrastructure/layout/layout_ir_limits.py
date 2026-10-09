@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Shared bounds for layout IR extraction, wire validation, and render."""
 
 MAX_LAYOUT_PAGES = 100

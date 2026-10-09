@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { type MouseEvent } from 'react';
 import { ScanLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -53,7 +55,10 @@ export function LibraryDocumentGrid({
               <div className="doc-card-title-row">
                 <h3 className="doc-card-title">{doc.title}</h3>
                 {showDuplicateStackBadge(doc) ? (
-                  <span className="stack-badge stack-badge-compact" title={t('library.stackVersionsTitle')}>
+                  <span
+                    className="stack-badge stack-badge-compact"
+                    title={t('library.stackVersionsTitle')}
+                  >
                     {duplicateStackVersionLabel(doc, t)}
                   </span>
                 ) : null}
@@ -89,7 +94,13 @@ export function LibraryDocumentGrid({
                       <Chip key={t.id} label={t.name} variant="assigned" color={t.color} />
                     ))}
                     {labelTags.length > 4 ? (
-                      <span className="muted doc-card-tags-more" title={labelTags.slice(4).map((t) => t.name).join(', ')}>
+                      <span
+                        className="muted doc-card-tags-more"
+                        title={labelTags
+                          .slice(4)
+                          .map((t) => t.name)
+                          .join(', ')}
+                      >
                         +{labelTags.length - 4}
                       </span>
                     ) : null}

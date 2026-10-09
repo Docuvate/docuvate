@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DataSourceOptions } from 'typeorm';
 import { TYPEORM_ENTITIES } from './entities/index.js';
 import { InitialSchema20261008120000 } from './migrations/20261008120000-initial-schema.js';

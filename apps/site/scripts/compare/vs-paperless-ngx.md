@@ -17,7 +17,7 @@ Paperless-ngx ist das bekannteste selbst gehostete Dokumentenarchiv und seit Jah
 | # | Kriterium | Docuvate | Paperless-ngx |
 |---|---|---|---|
 | K1 | Zielgruppe | Teams, Selbständige und Entwickler, die Dokumente selbst hosten und per API anbinden wollen [W1] | Privatpersonen, Haushalte, kleine Büros: Papier scannen, durchsuchbar archivieren [P1] |
-| K2 | Lizenz | AGPL-3.0 (Community). Kommerzielle Editionen werden im README erwähnt, Inhalte/Preise nicht veröffentlicht [W1] [R1] | GPL-3.0 [P1] |
+| K2 | Lizenz | Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes betriebliches Self-Hosting; kein Managed-Service/White-Label/Embedding in verkaufte Produkte. Enterprise/Cloud: LICENSE_EE.md [W1] [R1] | GPL-3.0 [P1] |
 | K3 | Betrieb | Nur self-hosted: Docker Compose; Kubernetes (Kustomize/Helm) laut Repo [W2] [R1] | Self-hosted (Docker Compose, Installationsskript). Kein offizielles Cloud-Angebot; Drittanbieter-Hosting laut Community-Wiki [P1] [P5] |
 | K4 | Kosten | Kostenlos (Community). Keine Preise für kommerzielle Editionen veröffentlicht [W1] [R1] | Kostenlos [P1] |
 | K5 | Reife & Pflege | Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview [R1] [W3] | Lange Produktgeschichte und aktive Community; Release v3.3.0 vom 06.10.2026 [P1] [P6] |

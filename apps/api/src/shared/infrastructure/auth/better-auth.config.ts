@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { passkey } from '@better-auth/passkey';
 import { betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins/two-factor';
@@ -29,8 +31,7 @@ function passkeyRpId(): string {
   }
 }
 
-const authSecret =
-  process.env['BETTER_AUTH_SECRET'] ?? 'dev-secret-change-me-32chars-minimum!!';
+const authSecret = process.env['BETTER_AUTH_SECRET'] ?? 'dev-secret-change-me-32chars-minimum!!';
 
 async function isUserSuspended(userId: string): Promise<boolean> {
   const result = await pool.query<{ suspended: boolean }>(

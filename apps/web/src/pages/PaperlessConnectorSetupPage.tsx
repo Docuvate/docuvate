@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -159,7 +161,12 @@ export function PaperlessConnectorSetupPage() {
   }, [load]);
 
   useEffect(() => {
-    if (!run || run.status === 'completed' || run.status === 'failed' || run.status === 'cancelled') {
+    if (
+      !run ||
+      run.status === 'completed' ||
+      run.status === 'failed' ||
+      run.status === 'cancelled'
+    ) {
       return undefined;
     }
     const timer = window.setInterval(() => {
@@ -224,9 +231,13 @@ export function PaperlessConnectorSetupPage() {
         installationId,
         buildCredentialsPatch(form) ?? {}
       );
-      setActionMessage(t('connectors.plugins.paperless.testSuccess', { version: result.apiVersion }));
+      setActionMessage(
+        t('connectors.plugins.paperless.testSuccess', { version: result.apiVersion })
+      );
     } catch (err) {
-      setActionMessage(formatConnectorError(err, 'connectors.plugins.paperless.errors.unreachable'));
+      setActionMessage(
+        formatConnectorError(err, 'connectors.plugins.paperless.errors.unreachable')
+      );
     } finally {
       setTestBusy(false);
     }
@@ -290,20 +301,26 @@ export function PaperlessConnectorSetupPage() {
       />
 
       {loading ? (
-        <p className="settings-status-line" aria-busy="true">{t('connectors.loading')}</p>
+        <p className="settings-status-line" aria-busy="true">
+          {t('connectors.loading')}
+        </p>
       ) : null}
 
       {!loading && installationMeta ? (
         <div className="paperless-connector-setup">
           <section className="settings-section-card settings-section-card--compact">
             <div className="settings-section-body stack gap-md">
-              <h2 className="settings-subheading">{t('connectors.plugins.paperless.connectionTitle')}</h2>
+              <h2 className="settings-subheading">
+                {t('connectors.plugins.paperless.connectionTitle')}
+              </h2>
               <label className="settings-field">
                 <span>{t('connectors.plugins.paperless.displayName')}</span>
                 <Input
                   className="paperless-control"
                   value={form.displayName}
-                  onChange={(event) => setForm((prev) => ({ ...prev, displayName: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, displayName: event.target.value }))
+                  }
                 />
               </label>
               <label className="settings-field">
@@ -313,7 +330,9 @@ export function PaperlessConnectorSetupPage() {
                   type="url"
                   value={form.baseUrl}
                   placeholder={t('connectors.plugins.paperless.baseUrlPlaceholder')}
-                  onChange={(event) => setForm((prev) => ({ ...prev, baseUrl: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, baseUrl: event.target.value }))
+                  }
                 />
               </label>
               <label className="settings-field">
@@ -327,11 +346,15 @@ export function PaperlessConnectorSetupPage() {
                       ? secretPlaceholder
                       : t('connectors.plugins.paperless.apiTokenHelp')
                   }
-                  onChange={(event) => setForm((prev) => ({ ...prev, apiToken: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, apiToken: event.target.value }))
+                  }
                   autoComplete="off"
                 />
                 {storedFlags.hasStoredApiToken && !form.apiToken ? (
-                  <span className="settings-hint">{t('connectors.plugins.paperless.storedHint')}</span>
+                  <span className="settings-hint">
+                    {t('connectors.plugins.paperless.storedHint')}
+                  </span>
                 ) : null}
               </label>
               <label className="settings-field">
@@ -342,7 +365,9 @@ export function PaperlessConnectorSetupPage() {
                   placeholder={
                     storedFlags.hasStoredUsername && !form.username ? secretPlaceholder : undefined
                   }
-                  onChange={(event) => setForm((prev) => ({ ...prev, username: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, username: event.target.value }))
+                  }
                   autoComplete="off"
                 />
               </label>
@@ -355,7 +380,9 @@ export function PaperlessConnectorSetupPage() {
                   placeholder={
                     storedFlags.hasStoredPassword && !form.password ? secretPlaceholder : undefined
                   }
-                  onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, password: event.target.value }))
+                  }
                   autoComplete="new-password"
                 />
               </label>
@@ -367,7 +394,9 @@ export function PaperlessConnectorSetupPage() {
                   disabled={testBusy}
                   onClick={() => void handleTestConnection()}
                 >
-                  {testBusy ? t('connectors.plugins.paperless.testing') : t('connectors.plugins.paperless.testConnection')}
+                  {testBusy
+                    ? t('connectors.plugins.paperless.testing')
+                    : t('connectors.plugins.paperless.testConnection')}
                 </Button>
               </div>
             </div>
@@ -375,7 +404,9 @@ export function PaperlessConnectorSetupPage() {
 
           <section className="settings-section-card settings-section-card--compact">
             <div className="settings-section-body stack gap-md">
-              <h2 className="settings-subheading">{t('connectors.plugins.paperless.pipelineTitle')}</h2>
+              <h2 className="settings-subheading">
+                {t('connectors.plugins.paperless.pipelineTitle')}
+              </h2>
               <label className="settings-check paperless-check">
                 <input
                   type="checkbox"
@@ -419,7 +450,9 @@ export function PaperlessConnectorSetupPage() {
 
           <section className="settings-section-card settings-section-card--compact">
             <div className="settings-section-body stack gap-md">
-              <h2 className="settings-subheading">{t('connectors.plugins.paperless.importTitle')}</h2>
+              <h2 className="settings-subheading">
+                {t('connectors.plugins.paperless.importTitle')}
+              </h2>
               <div className="paperless-action-row">
                 <Button
                   type="button"
@@ -428,7 +461,9 @@ export function PaperlessConnectorSetupPage() {
                   disabled={dryRunBusy}
                   onClick={() => void handleDryRun()}
                 >
-                  {dryRunBusy ? t('connectors.plugins.paperless.dryRunBusy') : t('connectors.plugins.paperless.dryRun')}
+                  {dryRunBusy
+                    ? t('connectors.plugins.paperless.dryRunBusy')
+                    : t('connectors.plugins.paperless.dryRun')}
                 </Button>
                 <Button
                   type="button"
@@ -436,19 +471,47 @@ export function PaperlessConnectorSetupPage() {
                   disabled={importBusy || importLocked}
                   onClick={() => void handleStartImport()}
                 >
-                  {importBusy ? t('connectors.plugins.paperless.importBusy') : t('connectors.plugins.paperless.startImport')}
+                  {importBusy
+                    ? t('connectors.plugins.paperless.importBusy')
+                    : t('connectors.plugins.paperless.startImport')}
                 </Button>
               </div>
               {dryRun ? (
                 <div className="paperless-dry-run-summary settings-kv-list">
-                  <div>{t('connectors.plugins.paperless.countDocuments', { count: dryRun.documentCount })}</div>
-                  <div>{t('connectors.plugins.paperless.countTags', { count: dryRun.tagCount })}</div>
-                  <div>{t('connectors.plugins.paperless.countCorrespondents', { count: dryRun.correspondentCount })}</div>
-                  <div>{t('connectors.plugins.paperless.countTypes', { count: dryRun.documentTypeCount })}</div>
-                  <div>{t('connectors.plugins.paperless.countPaths', { count: dryRun.storagePathCount })}</div>
-                  <div>{t('connectors.plugins.paperless.countFields', { count: dryRun.customFieldCount })}</div>
+                  <div>
+                    {t('connectors.plugins.paperless.countDocuments', {
+                      count: dryRun.documentCount,
+                    })}
+                  </div>
+                  <div>
+                    {t('connectors.plugins.paperless.countTags', { count: dryRun.tagCount })}
+                  </div>
+                  <div>
+                    {t('connectors.plugins.paperless.countCorrespondents', {
+                      count: dryRun.correspondentCount,
+                    })}
+                  </div>
+                  <div>
+                    {t('connectors.plugins.paperless.countTypes', {
+                      count: dryRun.documentTypeCount,
+                    })}
+                  </div>
+                  <div>
+                    {t('connectors.plugins.paperless.countPaths', {
+                      count: dryRun.storagePathCount,
+                    })}
+                  </div>
+                  <div>
+                    {t('connectors.plugins.paperless.countFields', {
+                      count: dryRun.customFieldCount,
+                    })}
+                  </div>
                   {dryRun.mappingConflicts.length > 0 ? (
-                    <div>{t('connectors.plugins.paperless.conflicts', { count: dryRun.mappingConflicts.length })}</div>
+                    <div>
+                      {t('connectors.plugins.paperless.conflicts', {
+                        count: dryRun.mappingConflicts.length,
+                      })}
+                    </div>
                   ) : null}
                 </div>
               ) : null}
@@ -456,7 +519,10 @@ export function PaperlessConnectorSetupPage() {
           </section>
 
           {actionMessage ? (
-            <p className="settings-callout settings-callout--info paperless-action-feedback" role="status">
+            <p
+              className="settings-callout settings-callout--info paperless-action-feedback"
+              role="status"
+            >
               {actionMessage}
             </p>
           ) : null}
@@ -464,7 +530,9 @@ export function PaperlessConnectorSetupPage() {
           {run ? (
             <section className="settings-section-card settings-section-card--compact">
               <div className="settings-section-body stack gap-md">
-                <h2 className="settings-subheading">{t('connectors.plugins.paperless.runTitle')}</h2>
+                <h2 className="settings-subheading">
+                  {t('connectors.plugins.paperless.runTitle')}
+                </h2>
                 <p className="settings-status-line" role="status">
                   {run.status === 'completed' && errors.length > 0
                     ? t('connectors.plugins.paperless.runCompletedWithErrors', {

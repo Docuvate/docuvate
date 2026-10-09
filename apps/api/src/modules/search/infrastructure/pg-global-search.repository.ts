@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
@@ -30,9 +32,7 @@ const TRGM_THRESHOLD = 0.32;
 const WORD_SIM_THRESHOLD = 0.32;
 const PER_GROUP_LIMIT = 8;
 const LEXICAL_CANDIDATE_CAP = 64;
-const EMBED_CANDIDATE_CAP = Number(
-  process.env['GLOBAL_SEARCH_EMBED_CANDIDATE_CAP'] ?? 24
-);
+const EMBED_CANDIDATE_CAP = Number(process.env['GLOBAL_SEARCH_EMBED_CANDIDATE_CAP'] ?? 24);
 
 function escapeTsToken(term: string): string {
   return term.replace(/[&|!():*'"]/g, ' ').trim();
@@ -102,22 +102,13 @@ export class PgGlobalSearchRepository {
     await this.pool.query(`DELETE FROM document_text_chunks WHERE document_id = $1`, [documentId]);
     for (let i = 0; i < chunks.length; i += 1) {
       const chunk = chunks[i]!;
-      const embeddingJson =
-        embeddings?.[i] != null ? JSON.stringify(embeddings[i]) : null;
+      const embeddingJson = embeddings?.[i] != null ? JSON.stringify(embeddings[i]) : null;
       await this.pool.query(
         `INSERT INTO document_text_chunks (
            document_id, chunk_index, body, page, char_start, char_end, embedding, updated_at
          )
          VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, now())`,
-        [
-          documentId,
-          i,
-          chunk.body,
-          chunk.page,
-          chunk.charStart,
-          chunk.charEnd,
-          embeddingJson,
-        ]
+        [documentId, i, chunk.body, chunk.page, chunk.charStart, chunk.charEnd, embeddingJson]
       );
       await this.upsertVocabularyTerms(userId, chunk.body, 'chunk');
     }
@@ -477,12 +468,7 @@ export class PgGlobalSearchRepository {
     const snippets = new Map<string, { fieldLabel: string; valueText: string }>();
     const scored = new Map<string, number>();
 
-    const register = (
-      documentId: string,
-      fieldLabel: string,
-      valueText: string,
-      score: number
-    ) => {
+    const register = (documentId: string, fieldLabel: string, valueText: string, score: number) => {
       const prev = scored.get(documentId) ?? 0;
       if (score >= prev) {
         scored.set(documentId, score);
@@ -497,7 +483,16 @@ export class PgGlobalSearchRepository {
       if (t.length >= 3) textProbes.add(t);
     }
 
-    const textQueries: Array<Promise<{ rows: Array<{ document_id: string; field_storage_key: string; value_text: string; score: number }> }>> = [];
+    const textQueries: Array<
+      Promise<{
+        rows: Array<{
+          document_id: string;
+          field_storage_key: string;
+          value_text: string;
+          score: number;
+        }>;
+      }>
+    > = [];
     for (const textProbe of textProbes) {
       textQueries.push(
         this.pool.query(

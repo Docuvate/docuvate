@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '../i18n';
 import {
@@ -29,7 +31,7 @@ describe('toUserFacingError', () => {
   it('translates API message i18n keys directly', () => {
     const facing = toUserFacingError(
       new ApiRequestError(422, 'VALIDATION_ERROR', 'connectors.errors.displayNameRequired'),
-      'errors.saveFailed',
+      'errors.saveFailed'
     );
     expect(facing.i18nKey).toBe('connectors.errors.displayNameRequired');
     expect(facing.retryable).toBe(false);
@@ -38,7 +40,7 @@ describe('toUserFacingError', () => {
   it('maps NOT_FOUND by code', () => {
     const facing = toUserFacingError(
       new ApiRequestError(404, 'NOT_FOUND', 'Document not found'),
-      'errors.loadFailed',
+      'errors.loadFailed'
     );
     expect(facing.i18nKey).toBe('errors.notFound');
   });
@@ -46,7 +48,7 @@ describe('toUserFacingError', () => {
   it('maps HTTP 429 as retryable', () => {
     const facing = toUserFacingError(
       new ApiRequestError(429, undefined, 'Too Many Requests'),
-      'errors.actionFailed',
+      'errors.actionFailed'
     );
     expect(facing.i18nKey).toBe('errors.tooManyRequests');
     expect(facing.retryable).toBe(true);
@@ -61,7 +63,7 @@ describe('toUserFacingError', () => {
   it('uses fallback for unknown English messages', () => {
     const facing = toUserFacingError(
       new ApiRequestError(400, 'VALIDATION_ERROR', 'No file uploaded'),
-      'errors.saveFailed',
+      'errors.saveFailed'
     );
     expect(facing.i18nKey).toBe('errors.validation');
   });
@@ -99,7 +101,7 @@ describe('formatUserFacingError', () => {
   it('returns localized string', () => {
     const text = formatUserFacingError(
       new ApiRequestError(401, 'FORBIDDEN', 'Forbidden'),
-      'errors.loadFailed',
+      'errors.loadFailed'
     );
     expect(text).toBe('Sie haben keine Berechtigung für diese Aktion.');
   });

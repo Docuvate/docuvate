@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Regression guard for ADR 015 (3NF + JSONB allowlist). See docs/adr/015-datenbankschema-mindestens-3nf.md */
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
@@ -68,7 +70,9 @@ describe('schema normalization guard (ADR 015)', () => {
   const sql = loadForwardMigrationSql();
 
   it('reads every forward migration SQL file', () => {
-    const upFiles = readdirSync(sqlDir).filter((f) => f.endsWith('-up.sql')).sort();
+    const upFiles = readdirSync(sqlDir)
+      .filter((f) => f.endsWith('-up.sql'))
+      .sort();
     expect([...FORWARD_SQL_ORDER].sort()).toEqual(upFiles);
   });
 

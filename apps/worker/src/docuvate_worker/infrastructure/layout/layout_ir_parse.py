@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Parse layout IR JSON (camelCase API) into domain dataclasses."""
 
 from __future__ import annotations

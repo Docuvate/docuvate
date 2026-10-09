@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Client-side mirror of API cited stream preview (hide partial JSON in UI). */
 
 function unescapeJsonStringFragment(fragment: string): string {

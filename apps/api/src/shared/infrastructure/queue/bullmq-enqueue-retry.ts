@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export type EnqueueRetryOptions = {
   maxAttempts: number;
   initialDelayMs?: number;
@@ -31,6 +33,12 @@ export async function enqueueBullJobWithRetry(
   }
 
   const detail =
-    lastError instanceof Error ? lastError.message : lastError != null ? String(lastError) : 'unknown';
-  throw new Error(`${options.label} enqueue failed after ${options.maxAttempts} attempts: ${detail}`);
+    lastError instanceof Error
+      ? lastError.message
+      : lastError != null
+        ? String(lastError)
+        : 'unknown';
+  throw new Error(
+    `${options.label} enqueue failed after ${options.maxAttempts} attempts: ${detail}`
+  );
 }
