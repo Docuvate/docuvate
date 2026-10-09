@@ -7707,13 +7707,13 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .pdf-layout-overlay-field {
-  border-color: color-mix(in srgb, #3d9a5a 60%, transparent);
-  background: color-mix(in srgb, #3d9a5a 14%, transparent);
+  border-color: color-mix(in srgb, var(--dv-color-text) 35%, var(--dv-color-accent) 65%);
+  background: color-mix(in srgb, var(--dv-color-text) 8%, transparent);
 }
 
 .pdf-layout-overlay-table {
-  border-color: color-mix(in srgb, #4a7fd4 60%, transparent);
-  background: color-mix(in srgb, #4a7fd4 12%, transparent);
+  border-color: color-mix(in srgb, var(--dv-color-text-muted) 50%, var(--dv-color-accent) 50%);
+  background: color-mix(in srgb, var(--dv-color-text-muted) 10%, transparent);
 }
 
 .pdf-layout-overlay-active {

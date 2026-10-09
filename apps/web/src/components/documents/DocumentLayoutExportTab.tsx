@@ -13,7 +13,6 @@ interface DocumentLayoutExportTabProps {
   documentId: string;
   documentTitle?: string;
   hasLayoutIr: boolean;
-  fullText: string;
   markdown?: string | null;
   blocks: ExtractionBlock[];
 }
@@ -22,7 +21,6 @@ export function DocumentLayoutExportTab({
   documentId,
   documentTitle,
   hasLayoutIr,
-  fullText: _fullText,
   markdown,
   blocks,
 }: DocumentLayoutExportTabProps) {

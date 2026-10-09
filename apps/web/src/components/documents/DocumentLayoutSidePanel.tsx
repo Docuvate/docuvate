@@ -20,7 +20,6 @@ interface DocumentLayoutSidePanelProps {
   layoutIr: LayoutIrDocument;
   fields: ExtractedField[];
   blocks: ExtractionBlock[];
-  fullText: string;
   markdown?: string | null;
   knownFieldKeys: Set<string>;
   fieldLabelForKey: (key: string) => string;
@@ -39,7 +38,6 @@ export function DocumentLayoutSidePanel({
   layoutIr,
   fields,
   blocks,
-  fullText,
   markdown,
   knownFieldKeys,
   fieldLabelForKey,
@@ -205,7 +203,6 @@ export function DocumentLayoutSidePanel({
             documentId={documentId}
             documentTitle={documentTitle}
             hasLayoutIr={layoutIr.pages.length > 0}
-            fullText={fullText}
             markdown={markdown}
             blocks={blocks}
           />

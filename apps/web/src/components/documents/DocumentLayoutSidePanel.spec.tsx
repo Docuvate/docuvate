@@ -47,7 +47,6 @@ describe('DocumentLayoutSidePanel', () => {
         layoutIr={layoutIr}
         fields={[{ key: 'datum', value: '01.01.2026' }]}
         blocks={[]}
-        fullText=""
         knownFieldKeys={new Set()}
         fieldLabelForKey={(k) => k}
         activeTab="fields"

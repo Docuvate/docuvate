@@ -334,7 +334,6 @@ export function DocumentLayoutWorkspace({
           layoutIr={layoutIr}
           fields={fields}
           blocks={blocks}
-          fullText={doc.extraction?.text ?? ''}
           markdown={doc.extraction?.markdown}
           knownFieldKeys={knownFieldKeys}
           fieldLabelForKey={fieldLabelForKey}
