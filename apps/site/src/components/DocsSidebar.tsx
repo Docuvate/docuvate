@@ -1,8 +1,28 @@
 import { Link, useLocation } from 'react-router-dom';
 import { getDocsExtended } from '../content/docsExtended';
 import { useLocale } from '../context/LocaleContext';
+import { useMemo } from 'react';
 
-function isActive(pathname: string, hash: string, itemPath: string): boolean {
+function sidebarHashFragments(
+  groups: ReturnType<typeof getDocsExtended>['nav'],
+): Set<string> {
+  const fragments = new Set<string>();
+  for (const group of groups) {
+    for (const item of group.items) {
+      if (!item.path.includes('#')) continue;
+      const fragment = item.path.split('#')[1];
+      if (fragment) fragments.add(fragment);
+    }
+  }
+  return fragments;
+}
+
+function isActive(
+  pathname: string,
+  hash: string,
+  itemPath: string,
+  sidebarHashFragments: Set<string>,
+): boolean {
   const normalizedPath = pathname.replace(/\/$/, '') || '/';
   const normalizedHash = hash || '';
 
@@ -13,11 +33,16 @@ function isActive(pathname: string, hash: string, itemPath: string): boolean {
     return normalizedHash === `#${fragment ?? ''}`;
   }
 
-  if (itemPath === '/docs') {
-    return normalizedPath === '/docs' && !normalizedHash;
+  const normalizedItem = itemPath.replace(/\/$/, '') || '/';
+  if (normalizedItem === '/docs') {
+    if (normalizedPath !== '/docs') return false;
+    if (normalizedHash) {
+      const frag = normalizedHash.slice(1);
+      if (sidebarHashFragments.has(frag)) return false;
+    }
+    return true;
   }
 
-  const normalizedItem = itemPath.replace(/\/$/, '') || '/';
   if (normalizedPath === normalizedItem) return !normalizedHash;
   return normalizedPath.startsWith(`${normalizedItem}/`);
 }
@@ -28,6 +53,7 @@ export function DocsSidebar() {
   const pathname = location.pathname.replace(/\/$/, '') || '/';
   const hash = location.hash;
   const groups = getDocsExtended(locale).nav;
+  const hashFragments = useMemo(() => sidebarHashFragments(groups), [groups]);
 
   return (
     <nav className="docs-sidebar" aria-label="Documentation">
@@ -38,7 +64,7 @@ export function DocsSidebar() {
             {group.items.map((item) => {
               const to = localizePath(item.path);
               const matchPath = localizePath(item.path);
-              const active = isActive(pathname, hash, matchPath);
+              const active = isActive(pathname, hash, matchPath, hashFragments);
               return (
                 <Link key={item.path} to={to} aria-current={active ? 'page' : undefined}>
                   {item.label}

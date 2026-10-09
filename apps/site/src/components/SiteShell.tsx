@@ -5,6 +5,7 @@ import { observeSiteHeaderHeight } from '../lib/siteHeaderHeight';
 import { useLocale } from '../context/LocaleContext';
 import { withLocale, type SiteLocale } from '../lib/routes';
 import { comparisonsDetailPath, comparisonsHubPath } from '../lib/compareData';
+import { resolvePrimaryNavKey, type PrimaryNavKey } from '../lib/sitePrimaryNav';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
 import { MobileNav } from './MobileNav';
 import { SiteLogo } from './SiteLogo';
@@ -61,10 +62,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const onLanding = path === '/';
   const onLegal = path === '/impressum' || path === '/datenschutz';
   const compareHub = comparisonsHubPath(locale);
+  const activeNavKey = resolvePrimaryNavKey(path);
 
-  const navLink = (to: string, label: string) => {
+  const navLink = (key: PrimaryNavKey, to: string, label: string) => {
     const localized = localizePath(to);
-    const active = path === to || path.startsWith(`${to}/`);
+    const active = activeNavKey === key;
     return (
       <Link to={localized} aria-current={active ? 'page' : undefined}>
         {label}
@@ -91,11 +93,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <SiteLogo />
           </Link>
           <nav className="site-nav" aria-label="Primary">
-            {navLink('/docs', content.nav.docs)}
-            {navLink(compareHub, content.nav.comparisons)}
+            {navLink('docs', '/docs', content.nav.docs)}
+            {navLink('comparisons', compareHub, content.nav.comparisons)}
             <Link to={localizePath('/#editions-heading')}>{content.nav.editions}</Link>
-            {navLink('/docs/api', content.nav.api)}
-            {navLink('/docs/sdks', content.nav.sdks)}
+            {navLink('api', '/docs/api', content.nav.api)}
+            {navLink('sdks', '/docs/sdks', content.nav.sdks)}
             <a href={GITHUB_URL} target="_blank" rel="noreferrer">
               {content.nav.github}
             </a>

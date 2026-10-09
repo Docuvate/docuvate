@@ -47,8 +47,6 @@ Kürzel werden in allen Vergleichstabellen verwendet.
 - **M2** Features 4.12.2: https://docs.mayan-edms.com/chapters/features.html
 - **M3** LICENSE (GPL-2.0, Markenhinweis): https://gitlab.com/mayan-edms/mayan-edms/-/blob/master/LICENSE
 - **M4** PyPI (4.12.2, 16.09.2026): https://pypi.org/project/mayan-edms/
-- **M5** ACLs: https://docs.mayan-edms.com/chapters/apps/acls/index.html
-
 ## DocuWare
 - **X1** DocuWare Cloud (Pakete, enthaltene Funktionen): https://start.docuware.com/de/docuware-cloud
 - **X2** Preis-FAQ (30 bis 125+ $/Nutzer/Monat, Add-ons): https://start.docuware.com/faq/docuware-pricing

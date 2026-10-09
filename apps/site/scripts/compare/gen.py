@@ -70,7 +70,6 @@ SOURCES = {
     "M2": ("Mayan EDMS Features 4.12.2", "https://docs.mayan-edms.com/chapters/features.html"),
     "M3": ("Mayan EDMS LICENSE", "https://gitlab.com/mayan-edms/mayan-edms/-/blob/master/LICENSE"),
     "M4": ("Mayan EDMS auf PyPI", "https://pypi.org/project/mayan-edms/"),
-    "M5": ("Mayan EDMS ACLs", "https://docs.mayan-edms.com/chapters/apps/acls/index.html"),
     "X1": ("DocuWare Cloud", "https://start.docuware.com/de/docuware-cloud"),
     "X2": ("DocuWare Preise", "https://start.docuware.com/faq/docuware-pricing"),
     "X3": ("DocuWare IDP", "https://start.docuware.com/de/blog/produkt/docuware-idp-funktionen-ueberblick"),
@@ -89,9 +88,9 @@ TOOLS = {
  "K6":("y","PaddleOCR (PP-OCRv4, lateinische Schrift inkl. Deutsch) lokal; Text-Layer-PDFs ohne OCR; Tesseract/Docling optional","R2"),
  "K7":("p","PDF und Bilder (JPEG, PNG, TIFF). Office-Dokumente: nicht verifiziert","W1,R3"),
  "K8":("y","Matching-Regeln (any/all/exact/regex) und Label-Vorschläge per Embeddings; Vorschläge werden bestätigt, nicht erzwungen","W1,R2"),
- "K9":("p","LLM für Chat (Ollama, Standard qwen2.5:3b, CPU). Tagging nutzt Embeddings, kein LLM. Cloud-LLM-Anbieter nicht vorgesehen","W1,R2"),
+ "K9":("p","LLM für Chat (Ollama, Standard qwen2.5:1.5b, CPU, auch ARM64). Tagging nutzt Embeddings, kein LLM. Cloud-LLM-Anbieter nicht vorgesehen","W1,R2"),
  "K10":("y","Vorschläge für Betrag, Datum, Absender plus eigener Feldkatalog; Bestätigung per Klick; Korrekturen werden gespeichert","W1,R4"),
- "K11":("p","Chat pro Dokument und bibliotheksweiter Chat (RAG mit Quellzitaten, lokal). Kein Cloud-LLM im Standard","W1,R2,R9"),
+ "K11":("y","Chat pro Dokument und über die ganze Bibliothek, lokal, jede Aussage mit verlinkter Quellpassage","W1,R2,R9"),
  "K12":("y","Volltext; laut Repo hybrid mit Tippfehler-Toleranz (pg_trgm) und optionaler semantischer Komponente; Feldfilter wie betrag:12,50","W1,R5"),
  "K13":("y","Farbige Labels, hierarchische Ordner (Mehrfachzuordnung), Korrespondenten, erkannte Felder, Duplikat-Stapel","W4,R1"),
  "K14":("p","Feste Verarbeitungs-Pipeline und Matching-Regeln; kein frei konfigurierbarer Workflow-Editor. Webhooks: nicht verifiziert","R4"),
@@ -181,7 +180,7 @@ TOOLS = {
  "K14":("y","Ausgereifte Workflow-Engine (Zustände, Übergänge, Eskalation, Aktionen), Aufbewahrungsrichtlinien, Signaturen","M2"),
  "K15":("y","Watch-/Staging-Ordner, IMAP/POP3, Cloud-Objektspeicher, SANE-Scanner, Upload","M2"),
  "K16":("p","Versionierte REST-API mit OpenAPI-Doku und Batch-Requests. Offizielle SDKs: nicht verifiziert","M2"),
- "K17":("y","RBAC mit Rechten pro Objekt und Vererbung, 2FA (TOTP); SSO/LDAP erweiterbar","M2,M5"),
+ "K17":("y","RBAC mit Rechten pro Objekt und Vererbung, 2FA (TOTP); SSO/LDAP erweiterbar","M2"),
  "K18":("u","Offizielle App: nicht verifiziert","M2"),
  "K19":("p","Im Standard lokal; OpenAI-Integration sendet Inhalte an OpenAI (Ollama-Variante lokal)","M2"),
 }),
@@ -217,7 +216,6 @@ PROSE = {
   "Reife und Community: viele Jahre Betrieb, sehr große Nutzerbasis, viele Anleitungen und Drittanbieter-Apps.",
   "Mehr Formate: Office-Dokumente und E-Mails (über Apache Tika), Archivierung als PDF/A, über 100 OCR-Sprachen.",
   "Workflow-System, Consume-Ordner, E-Mail-Regeln für mehrere Konten.",
-  "Optionaler Chat über mehrere Dokumente mit LLM-Index (laut Usage-Doku).",
   "Objektbezogene Rechte, OIDC-Login und Zwei-Faktor-Anmeldung sind dokumentiert.",
  ],
  ours=[
@@ -226,6 +224,7 @@ PROSE = {
   "Architektur für Skalierung: PostgreSQL, S3-kompatibler Speicher (MinIO) und Kubernetes-Manifeste (Kustomize/Helm) im Repo.",
   "KI im Standard vollständig lokal und CPU-tauglich (PaddleOCR, Embeddings, Ollama); kein Cloud-Anbieter nötig.",
   "Tippfehler-tolerante Suche und Feldfilter wie betrag:12,50.",
+  "Antworten mit geprüften Zitaten (Seite und Textstelle), ohne passende Quelle keine Antwort.",
  ],
  choose_them="Sie wollen ein bewährtes Archiv mit großer Community, brauchen Office/E-Mail-Verarbeitung, Workflows oder Chat über das ganze Archiv, oder Ihnen ist Stabilität wichtiger als neue Funktionen.",
  choose_us="Sie brauchen bestätigte Feldwerte für Buchhaltung oder Backoffice, wollen Dokumente headless per API in eigene Anwendungen bringen oder auf PostgreSQL/S3/Kubernetes betreiben, und Sie können mit einem jungen Projekt (0.1.0) leben.",
@@ -463,6 +462,9 @@ def validate_sources():
     missing = sorted(k for k in used if k not in SOURCES)
     if missing:
         raise SystemExit(f"Missing SOURCES entries for: {', '.join(missing)}")
+    unused = sorted(k for k in SOURCES if k not in used)
+    if unused:
+        raise SystemExit(f"Unused SOURCES entries (remove or cite): {', '.join(unused)}")
     for key, (label, url) in SOURCES.items():
         if not url.startswith("https://"):
             raise SystemExit(f"Source {key} must have https URL")

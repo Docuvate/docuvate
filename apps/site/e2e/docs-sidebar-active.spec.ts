@@ -20,6 +20,12 @@ test.describe('docs sidebar active state', () => {
     await expect(page.locator('.docs-sidebar a[aria-current="page"]')).toHaveText('Übersicht');
   });
 
+  test('quickstart hash keeps Übersicht active', async ({ page }) => {
+    await page.goto('/docs#quickstart');
+    await expect(page.locator('.docs-sidebar a[aria-current="page"]')).toHaveCount(1);
+    await expect(page.locator('.docs-sidebar a[aria-current="page"]')).toHaveText('Übersicht');
+  });
+
   test('self-hosting hash highlights only the Betrieb entry', async ({ page }) => {
     await page.goto('/docs#self-hosting');
     await expect(page.locator('.docs-sidebar a[aria-current="page"]')).toHaveCount(1);
