@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Comprehensive SFTP screenshot capture for PR #22
+ * Comprehensive SFTP screenshot capture.
  * Captures: setup wizard (steps 1-3), validation errors, password reveal,
  * manage drawer, scanner badge (1280/390 light+dark), pull dialog variants, etc.
  */
@@ -13,10 +13,10 @@ import { fileURLToPath } from 'node:url';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '../../..');
 const BASE = process.env.WEB_BASE ?? 'http://localhost:5173';
 const AUTH_BASE = process.env.AUTH_BASE ?? 'http://localhost:3001';
-const OUT = '/opt/cursor/artifacts/screenshots/sftp';
+const OUT = process.env.SCREENSHOT_DIR ?? join(ROOT, 'tools/screenshots/sftp/out');
 const EMAIL = process.env.SEED_EMAIL ?? 'elena.kraemer@beispiel.de';
 const PASSWORD = process.env.SEED_PASSWORD ?? 'AdminDemo12!';
-const HEAD_SHA = '3366b3c5023a262258b625ee9726d5cd53a4a3a5';
+const HEAD_SHA = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim();
 
 const THEME_PREF_KEY = 'docuvate-theme-preference';
 const THEME_LEGACY_KEY = 'docuvate-theme';
@@ -297,7 +297,6 @@ async function main() {
   // ============================================================
   const manifest = {
     head: HEAD_SHA,
-    pr: 22,
     feature: 'sftp',
     locale: 'de',
     capturedAt: new Date().toISOString(),
@@ -306,7 +305,7 @@ async function main() {
   await writeFile(join(OUT, 'manifest.json'), JSON.stringify(manifest, null, 2));
   
   const md = [
-    '# SFTP Comprehensive Screenshots (PR #22)',
+    '# SFTP Comprehensive Screenshots',
     '',
     `HEAD: ${HEAD_SHA}`,
     `Captured: ${manifest.capturedAt}`,
