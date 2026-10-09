@@ -1,6 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import type { LayoutIrDocument } from '@docuvate/contracts';
+
+vi.mock('../../lib/api', () => ({
+  fetchDocumentLayoutTypst: vi.fn(),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => key,
+  }),
+}));
+
 import { DocumentLayoutSidePanel } from './DocumentLayoutSidePanel';
 
 const layoutIr: LayoutIrDocument = {
@@ -27,12 +38,6 @@ const layoutIr: LayoutIrDocument = {
     },
   ],
 };
-
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string) => key,
-  }),
-}));
 
 describe('DocumentLayoutSidePanel', () => {
   it('renders layout tab labels', () => {
