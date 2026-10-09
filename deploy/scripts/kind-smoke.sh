@@ -42,6 +42,7 @@ run_kind version | tee "$ART/kind-version.txt"
 
 start_registry() {
   run_docker rm -f "$REG_CONTAINER" 2>/dev/null || true
+  bash "$ROOT/scripts/ci/docker-pull-with-retry.sh" "$REGISTRY_IMAGE"
   run_docker run -d --restart=always -p "127.0.0.1:5001:5000" --name "$REG_CONTAINER" "$REGISTRY_IMAGE"
 }
 
