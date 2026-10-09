@@ -4,7 +4,16 @@ import { AccountEntity } from './account.entity.js';
 import { ChatMessagesEntity } from './chat-messages.entity.js';
 import { ChatThreadDocumentsEntity } from './chat-thread-documents.entity.js';
 import { ChatThreadsEntity } from './chat-threads.entity.js';
+import { ConnectorImportRunErrorsEntity } from './connector-import-run-errors.entity.js';
+import { ConnectorImportRunsEntity } from './connector-import-runs.entity.js';
 import { ConnectorInstallationsEntity } from './connector-installations.entity.js';
+import { ConnectorPaperlessSettingsEntity } from './connector-paperless-settings.entity.js';
+import { ConnectorPaperlessCorrespondentLinksEntity } from './connector-paperless-correspondent-links.entity.js';
+import { ConnectorPaperlessDocumentTypeLinksEntity } from './connector-paperless-document-type-links.entity.js';
+import { ConnectorPaperlessFieldLinksEntity } from './connector-paperless-field-links.entity.js';
+import { ConnectorPaperlessFolderLinksEntity } from './connector-paperless-folder-links.entity.js';
+import { ConnectorPaperlessTagLinksEntity } from './connector-paperless-tag-links.entity.js';
+import { ConnectorSourceDocumentsEntity } from './connector-source-documents.entity.js';
 import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
@@ -64,7 +73,16 @@ export const TYPEORM_ENTITIES = [
   ChatMessagesEntity,
   ChatThreadDocumentsEntity,
   ChatThreadsEntity,
+  ConnectorImportRunErrorsEntity,
+  ConnectorImportRunsEntity,
   ConnectorInstallationsEntity,
+  ConnectorPaperlessSettingsEntity,
+  ConnectorPaperlessTagLinksEntity,
+  ConnectorPaperlessDocumentTypeLinksEntity,
+  ConnectorPaperlessCorrespondentLinksEntity,
+  ConnectorPaperlessFolderLinksEntity,
+  ConnectorPaperlessFieldLinksEntity,
+  ConnectorSourceDocumentsEntity,
   CorrespondentsEntity,
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
@@ -125,7 +143,16 @@ export {
   ChatMessagesEntity,
   ChatThreadDocumentsEntity,
   ChatThreadsEntity,
+  ConnectorImportRunErrorsEntity,
+  ConnectorImportRunsEntity,
   ConnectorInstallationsEntity,
+  ConnectorPaperlessSettingsEntity,
+  ConnectorPaperlessTagLinksEntity,
+  ConnectorPaperlessDocumentTypeLinksEntity,
+  ConnectorPaperlessCorrespondentLinksEntity,
+  ConnectorPaperlessFolderLinksEntity,
+  ConnectorPaperlessFieldLinksEntity,
+  ConnectorSourceDocumentsEntity,
   CorrespondentsEntity,
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,

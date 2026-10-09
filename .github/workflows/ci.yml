@@ -194,6 +194,9 @@ jobs:
       - run: pnpm --filter @docuvate/api build
       - name: API adapter integration (Testcontainers)
         run: pnpm --filter @docuvate/api test:integration
+      - name: Tear down Paperless test stack
+        if: always()
+        run: docker compose -f tools/paperless-test/docker-compose.paperless-test.yml down 2>/dev/null || true
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version-file: .tool-versions

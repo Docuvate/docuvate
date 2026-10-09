@@ -33,6 +33,22 @@ import { SftpFetchConnector } from './infrastructure/adapters/sftp/sftp-fetch.co
 import { SftpFetchSyncService } from './application/sftp-fetch-sync.service.js';
 import { PgConnectorInstallationRepository } from './infrastructure/pg-connector-installation.repository.js';
 import { DocumentsModule } from '../documents/documents.module.js';
+import { DuplicatesModule } from '../duplicates/duplicates.module.js';
+import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.module.js';
+import { SearchModule } from '../search/search.module.js';
+import { PaperlessImportExecutor } from './infrastructure/adapters/paperless/paperless-import.executor.js';
+import { PaperlessImportRepository } from './infrastructure/adapters/paperless/paperless-import.repository.js';
+import { PaperlessImportQueueService } from './infrastructure/adapters/paperless/paperless-import.queue.js';
+import {
+  GetPaperlessImportRunUseCase,
+  GetPaperlessInstallationUseCase,
+  PaperlessImportDryRunUseCase,
+  StartPaperlessImportUseCase,
+  TestPaperlessConnectionUseCase,
+  TestPaperlessInstallationConnectionUseCase,
+  UpdatePaperlessInstallationUseCase,
+} from './application/paperless-import.use-cases.js';
+import { PaperlessImportController } from './presentation/paperless-import.controller.js';
 
 const MAIL_CATEGORY = {
   id: 'mail' as const,
@@ -65,8 +81,8 @@ const SCANNER_SFTP_CATEGORY = {
 };
 
 @Module({
-  imports: [DocumentsModule],
-  controllers: [ConnectorsController, ConnectorsOAuthController],
+  imports: [DocumentsModule, DuplicatesModule, DocumentPipelineModule, SearchModule],
+  controllers: [ConnectorsController, ConnectorsOAuthController, PaperlessImportController],
   providers: [
     ConnectorRegistry,
     { provide: CONNECTOR_REGISTRY, useExisting: ConnectorRegistry },
@@ -84,6 +100,16 @@ const SCANNER_SFTP_CATEGORY = {
     ImportFromConnectorUseCase,
     ExportToConnectorUseCase,
     SftpFetchSyncService,
+    PaperlessImportRepository,
+    PaperlessImportExecutor,
+    PaperlessImportQueueService,
+    TestPaperlessConnectionUseCase,
+    TestPaperlessInstallationConnectionUseCase,
+    GetPaperlessInstallationUseCase,
+    UpdatePaperlessInstallationUseCase,
+    PaperlessImportDryRunUseCase,
+    StartPaperlessImportUseCase,
+    GetPaperlessImportRunUseCase,
     StartMailOAuthUseCase,
     CompleteMailOAuthUseCase,
     ConnectorOAuthCallbackGuard,

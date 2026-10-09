@@ -11,6 +11,7 @@ import {
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import { deleteDocumentObjectKeys } from './delete-document-storage.js';
 
 @Injectable()
 export class BulkDocumentsUseCase {
@@ -65,7 +66,7 @@ export class BulkDocumentsUseCase {
       }
       case 'delete': {
         const deleted = await this.documents.deleteDocuments(userId, ids);
-        await Promise.all(deleted.map((d) => this.storage.deleteObject(d.storageKey)));
+        await Promise.all(deleted.map((d) => deleteDocumentObjectKeys(this.storage, d)));
         return { affected: deleted.length };
       }
       default: {

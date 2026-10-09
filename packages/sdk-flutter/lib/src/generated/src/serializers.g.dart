@@ -149,12 +149,15 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(StartMailOAuthRequestDto.serializer)
       ..add(TagCustomFieldListResponseDto.serializer)
       ..add(TagListResponseDto.serializer)
+      ..add(TestPaperlessConnectionRequestDto.serializer)
+      ..add(TestPaperlessInstallationConnectionRequestDto.serializer)
       ..add(TriggerMlRetrainRequestDto.serializer)
       ..add(UpdateCorrespondentRequestDto.serializer)
       ..add(UpdateCorrespondentRequestDtoMatchingAlgorithmEnum.serializer)
       ..add(UpdateDocumentRequestDto.serializer)
       ..add(UpdateFolderRequestDto.serializer)
       ..add(UpdateMappeRequestDto.serializer)
+      ..add(UpdatePaperlessInstallationRequestDto.serializer)
       ..add(UpdateSavedDocumentViewRequestDto.serializer)
       ..add(UpdateSavedDocumentViewRequestDtoFilterModeEnum.serializer)
       ..add(UpdateSavedDocumentViewRequestDtoListScopeEnum.serializer)
@@ -383,6 +386,18 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(num)]),
           () => new ListBuilder<num>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltMap, const [const FullType(String), const FullType(String)]),
+          () => new MapBuilder<String, String>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltMap, const [const FullType(String), const FullType(String)]),
+          () => new MapBuilder<String, String>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltMap, const [const FullType(String), const FullType(String)]),
+          () => new MapBuilder<String, String>())
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(String)]),

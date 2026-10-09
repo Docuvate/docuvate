@@ -720,6 +720,18 @@ export type TagListResponseDto = {
     }>;
 };
 
+export type TestPaperlessConnectionRequestDto = {
+    credentials: {
+        [key: string]: string;
+    };
+};
+
+export type TestPaperlessInstallationConnectionRequestDto = {
+    credentials?: {
+        [key: string]: string;
+    };
+};
+
 export type TriggerMlRetrainRequestDto = {
     familyId: string;
 };
@@ -751,6 +763,16 @@ export type UpdateFolderRequestDto = {
 export type UpdateMappeRequestDto = {
     name?: string;
     color?: string;
+};
+
+export type UpdatePaperlessInstallationRequestDto = {
+    displayName?: string;
+    credentials?: {
+        [key: string]: string;
+    };
+    keepOcrText?: boolean;
+    rerunOcr?: boolean;
+    includeArchivedPdf?: boolean;
 };
 
 export type UpdateSavedDocumentViewRequestDto = {
@@ -1180,6 +1202,161 @@ export type ImportablesResponses = {
     200: unknown;
 };
 
+export type GetPaperlessInstallationData = {
+    body?: never;
+    path: {
+        installationId: string;
+    };
+    query?: never;
+    url: '/connectors/installations/{installationId}/paperless';
+};
+
+export type GetPaperlessInstallationErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetPaperlessInstallationError = GetPaperlessInstallationErrors[keyof GetPaperlessInstallationErrors];
+
+export type GetPaperlessInstallationResponses = {
+    200: unknown;
+};
+
+export type UpdatePaperlessInstallationData = {
+    body: UpdatePaperlessInstallationRequestDto;
+    path: {
+        installationId: string;
+    };
+    query?: never;
+    url: '/connectors/installations/{installationId}/paperless';
+};
+
+export type UpdatePaperlessInstallationErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type UpdatePaperlessInstallationError = UpdatePaperlessInstallationErrors[keyof UpdatePaperlessInstallationErrors];
+
+export type UpdatePaperlessInstallationResponses = {
+    200: unknown;
+};
+
+export type PaperlessImportDryRunData = {
+    body?: never;
+    path: {
+        installationId: string;
+    };
+    query?: never;
+    url: '/connectors/installations/{installationId}/paperless/dry-run';
+};
+
+export type PaperlessImportDryRunErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type PaperlessImportDryRunError = PaperlessImportDryRunErrors[keyof PaperlessImportDryRunErrors];
+
+export type PaperlessImportDryRunResponses = {
+    201: unknown;
+};
+
+export type StartPaperlessImportData = {
+    body?: never;
+    path: {
+        installationId: string;
+    };
+    query?: never;
+    url: '/connectors/installations/{installationId}/paperless/import';
+};
+
+export type StartPaperlessImportErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type StartPaperlessImportError = StartPaperlessImportErrors[keyof StartPaperlessImportErrors];
+
+export type StartPaperlessImportResponses = {
+    201: unknown;
+};
+
+export type GetLatestPaperlessImportRunData = {
+    body?: never;
+    path: {
+        installationId: string;
+    };
+    query?: never;
+    url: '/connectors/installations/{installationId}/paperless/import-runs/latest';
+};
+
+export type GetLatestPaperlessImportRunErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetLatestPaperlessImportRunError = GetLatestPaperlessImportRunErrors[keyof GetLatestPaperlessImportRunErrors];
+
+export type GetLatestPaperlessImportRunResponses = {
+    200: unknown;
+};
+
+export type GetPaperlessImportRunData = {
+    body?: never;
+    path: {
+        installationId: string;
+        runId: string;
+    };
+    query?: never;
+    url: '/connectors/installations/{installationId}/paperless/import-runs/{runId}';
+};
+
+export type GetPaperlessImportRunErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetPaperlessImportRunError = GetPaperlessImportRunErrors[keyof GetPaperlessImportRunErrors];
+
+export type GetPaperlessImportRunResponses = {
+    200: unknown;
+};
+
+export type TestPaperlessInstallationConnectionData = {
+    body: TestPaperlessInstallationConnectionRequestDto;
+    path: {
+        installationId: string;
+    };
+    query?: never;
+    url: '/connectors/installations/{installationId}/paperless/test-connection';
+};
+
+export type TestPaperlessInstallationConnectionErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type TestPaperlessInstallationConnectionError = TestPaperlessInstallationConnectionErrors[keyof TestPaperlessInstallationConnectionErrors];
+
+export type TestPaperlessInstallationConnectionResponses = {
+    201: unknown;
+};
+
 export type ConnectorOAuthCallbackData = {
     body?: never;
     path?: never;
@@ -1241,6 +1418,26 @@ export type StartConnectorOAuthResponses = {
 };
 
 export type StartConnectorOAuthResponse = StartConnectorOAuthResponses[keyof StartConnectorOAuthResponses];
+
+export type TestPaperlessConnectionData = {
+    body: TestPaperlessConnectionRequestDto;
+    path?: never;
+    query?: never;
+    url: '/connectors/plugins/paperless/test-connection';
+};
+
+export type TestPaperlessConnectionErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type TestPaperlessConnectionError = TestPaperlessConnectionErrors[keyof TestPaperlessConnectionErrors];
+
+export type TestPaperlessConnectionResponses = {
+    201: unknown;
+};
 
 export type ProbeSftpFetchHostKeyData = {
     body?: never;

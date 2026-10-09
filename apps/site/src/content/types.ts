@@ -52,7 +52,6 @@ export type LandingContent = {
     primaryCta: string;
     secondaryCta: string;
     codeCaption: string;
-    installSnippet: string;
     code: string;
   };
   closingCta: {
@@ -105,7 +104,6 @@ export type SdkPackageContent = {
 
 export type SdkContent = {
   meta: { title: string; description: string };
-  pageLead: string;
   previewBadge: string;
   overviewTable: {
     headings: { sdk: string; package: string; status: string; section: string };

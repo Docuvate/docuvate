@@ -18,6 +18,8 @@ export const routes = {
   structureRecognizedFields: '/structure/recognized-fields',
   settings: '/settings',
   settingsConnectors: '/settings/connectors',
+  settingsPaperlessConnector: (installationId: string) =>
+    `/settings/connectors/paperless/${installationId}`,
   settingsBlockedLabels: '/settings/blocked-labels',
   settingsAdmin: '/settings/admin',
   settingsAdminUsers: '/settings/admin/users',

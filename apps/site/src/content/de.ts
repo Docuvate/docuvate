@@ -1,4 +1,3 @@
-import { SDK_FLUTTER_PUBSPEC, SDK_NODE_INSTALL_PNPM } from '../lib/sdkInstallSnippets.ts';
 import type { SiteContent } from './types';
 
 export const deContent: SiteContent = {
@@ -157,22 +156,15 @@ export const deContent: SiteContent = {
       primaryCta: 'API-Referenz',
       secondaryCta: 'SDK-Anleitung',
       codeCaption: 'Node.js',
-      installSnippet: SDK_NODE_INSTALL_PNPM,
       code: `import { DocuvateClient } from '@docuvate/sdk';
 
 const client = new DocuvateClient({
-  baseUrl: 'https://ihr-host/v1',
+  baseUrl: 'https://ihr-host',
   apiKey: process.env.DOCUVATE_API_KEY,
 });
 
-const { data, error } = await client.api.listDocuments({
-  query: { q: 'Mietvertrag', status: 'ready' },
-});
-if (error) throw error;
-
-for (const doc of data.items) {
-  console.log(doc.title, doc.documentDate);
-}`,
+const { data } = await client.api.listDocuments();
+console.log(data?.items?.[0]?.title);`,
     },
     closingCta: {
       heading: 'Selbst hosten auf Ihrer Infrastruktur',
@@ -254,7 +246,7 @@ for (const doc of data.items) {
       steps: [
         'Repository klonen und `.env.example` nach `.env` kopieren.',
         'Secrets anpassen: BETTER_AUTH_SECRET (mindestens 32 Zeichen), DOCUVATE_CONNECTOR_SECRETS_KEY.',
-        '`docker compose up --build` im Repository-Root (Docker Compose). Web unter Port 5173, API unter 3001.',
+        '`docker compose up --build` im Repository-Root. Web unter Port 5173, API unter 3001.',
         'Ersten Benutzer in der Web-Oberfläche registrieren und ein Testdokument hochladen.',
       ],
     },
@@ -299,7 +291,7 @@ for (const doc of data.items) {
           ],
         },
         {
-          title: 'Objektspeicher (S3)',
+          title: 'Object Storage',
           vars: [
             { name: 'MINIO_ENDPOINT', description: 'Hostname des S3-kompatiblen Endpunkts.' },
             { name: 'MINIO_PORT', description: 'Port des Storage-Dienstes.' },
@@ -348,8 +340,6 @@ for (const doc of data.items) {
       title: 'Docuvate SDKs',
       description: 'Node- und Flutter-Clients für die Headless-API /v1.',
     },
-    pageLead:
-      'Offizielle Clients für Skripte und Integrationen. Vertrag und Codegenerierung folgen dem exportierten OpenAPI-Dokument Ihrer Instanz.',
     previewBadge: 'Preview',
     overviewTable: {
       headings: {
@@ -360,10 +350,10 @@ for (const doc of data.items) {
       },
       rows: [
         {
-          sdk: 'Node.js und TypeScript',
+          sdk: 'Node / TypeScript',
           packageName: '@docuvate/sdk',
           sectionId: 'node-sdk',
-          sectionLabel: 'Node.js und TypeScript',
+          sectionLabel: 'Node / TypeScript',
           preview: true,
         },
         {
@@ -378,7 +368,7 @@ for (const doc of data.items) {
     introLead:
       'Offizielle Node- und Flutter-Clients für die Headless-API /v1. Vertrag und Codegenerierung folgen dem exportierten OpenAPI-Dokument.',
     introRuntimeSpec:
-      'Ihre Instanz liefert die OpenAPI-Beschreibung unter `GET /v1/openapi.json`, identisch mit der [interaktiven API-Referenz](/docs/api).',
+      'Laufzeit: `GET /v1/openapi.json` auf Ihrer Instanz liefert dieselbe Beschreibung wie in der [interaktiven API-Referenz](/docs/api).',
     introCodegenNote:
       'Nach API-Änderungen im Selbst-Hosting-Setup: OpenAPI exportieren und SDK-Code neu erzeugen (`pnpm openapi:export`, `pnpm sdk:codegen`).',
     copyCode: 'Kopieren',
@@ -395,18 +385,20 @@ for (const doc of data.items) {
     },
     node: {
       id: 'node-sdk',
-      heading: 'Node.js und TypeScript',
+      heading: 'Node / TypeScript (@docuvate/sdk)',
       preview: true,
-      previewNote: '',
-      installHeading: 'Node.js installieren',
-      installBody: 'Installieren Sie `@docuvate/sdk` direkt aus dem öffentlichen Git-Repository:',
-      installSnippet: SDK_NODE_INSTALL_PNPM,
+      previewNote:
+        'Preview: @docuvate/sdk ist noch nicht auf npm veröffentlicht. Heute: Paket aus dem Monorepo bauen (packages/sdk-node) und per workspace:-Pfad oder file: einbinden.',
+      installHeading: 'Installation (Preview)',
+      installBody:
+        'Veröffentlichung auf npm folgt. Bis dahin binden Sie das Paket aus dem geklonten Repository ein:',
+      installSnippet: 'pnpm add @docuvate/sdk@file:../docuvate/packages/sdk-node',
       installSnippetLanguage: 'typescript',
       auth:
-        '`DocuvateClient` mit `baseUrl` und `apiKey` (Service-API-Schlüssel). Service-Schlüssel richten Sie im Abschnitt [Service-Zugang einrichten](#service-credentials) ein.',
+        'DocuvateClient mit baseUrl und apiKey (Service-API-Schlüssel). Service-Schlüssel richten Sie im Abschnitt Service-Zugang einrichten auf dieser Seite ein.',
       examples: [
         {
-          title: 'Dokumente suchen',
+          title: 'Dokumente auflisten',
           language: 'typescript',
           code: [
             "import { DocuvateClient } from '@docuvate/sdk';",
@@ -416,14 +408,7 @@ for (const doc of data.items) {
             "  apiKey: process.env.DOCUVATE_API_KEY,",
             '});',
             '',
-            'const { data, error } = await client.api.listDocuments({',
-            "  query: { q: 'Mietvertrag', status: 'ready' },",
-            '});',
-            'if (error) throw error;',
-            '',
-            'for (const doc of data.items) {',
-            '  console.log(doc.title, doc.documentDate);',
-            '}',
+            "const list = await client.api.listDocuments({ query: { status: 'ready' } });",
           ].join('\n'),
         },
         {
@@ -439,22 +424,26 @@ for (const doc of data.items) {
             '  path: { id: documentId },',
             "  body: { message: 'Welche Fälligkeit ist genannt?' },",
             '});',
-            'if (reply.error) throw reply.error;',
-            'console.log(reply.data.reply.content);',
+            'console.log(reply.data?.reply?.content);',
           ].join('\n'),
         },
       ],
     },
     flutter: {
       id: 'flutter-sdk',
-      heading: 'Flutter',
+      heading: 'Flutter (docuvate)',
       preview: true,
-      previewNote: '',
-      installHeading: 'Flutter installieren',
-      installBody: 'Tragen Sie die Git-Abhängigkeit in `pubspec.yaml` ein und führen Sie `flutter pub get` aus:',
-      installSnippet: SDK_FLUTTER_PUBSPEC,
+      previewNote:
+        'Preview: Das Flutter-Paket ist noch nicht auf pub.dev. Heute: path-Abhängigkeit auf packages/sdk-flutter im Monorepo.',
+      installHeading: 'Installation (Preview)',
+      installBody: 'Tragen Sie das Paket als Pfad-Abhängigkeit ein und führen Sie flutter pub get aus:',
+      installSnippet: [
+        'dependencies:',
+        '  docuvate:',
+        '    path: ../docuvate/packages/sdk-flutter',
+      ].join('\n'),
       installSnippetLanguage: 'yaml',
-      auth: '`DocuvateClientConfig` mit `baseUrl` und `apiKey` für Headless-Zugriff.',
+      auth: 'DocuvateClientConfig mit baseUrl und apiKey für Headless-Zugriff.',
       examples: [
         {
           title: 'Dokument hochladen',
@@ -472,10 +461,7 @@ for (const doc of data.items) {
         {
           title: 'Labels lesen',
           language: 'dart',
-          code: [
-            'final tags = await client.taxonomy.listTags();',
-            'print(tags.data?.items);',
-          ].join('\n'),
+          code: "final tags = await client.taxonomy.listTags();\nprint(tags.data?.items);",
         },
         {
           title: 'Chat-Frage stellen',

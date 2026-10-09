@@ -7,11 +7,12 @@ import {
   type ConnectorRegistryPort,
 } from '../domain/connector.ports.js';
 import type { ConnectorRuntimePorts } from '../domain/connector-runtime.ports.js';
-import type { ConnectorPluginId } from '../domain/connector.types.js';
+import type { ConnectorConfigurationInput, ConnectorPluginId } from '../domain/connector.types.js';
 
 export interface ResolvedConnectorRuntime {
   pluginId: ConnectorPluginId;
   displayName: string;
+  credentials: ConnectorConfigurationInput;
   ports: ConnectorRuntimePorts;
 }
 
@@ -38,6 +39,7 @@ export class ConnectorRuntimeResolver {
     return {
       pluginId: installation.pluginId,
       displayName: installation.displayName,
+      credentials: installation.credentials,
       ports: plugin.openRuntime(installation.credentials),
     };
   }

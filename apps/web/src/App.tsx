@@ -19,6 +19,7 @@ import { AdminUsersPage } from './pages/admin/AdminUsersPage';
 import { NotFoundRoute } from './pages/NotFoundRoute';
 import { SettingsPage } from './pages/SettingsPage';
 import { ConnectorsPage } from './pages/ConnectorsPage';
+import { PaperlessConnectorSetupPage } from './pages/PaperlessConnectorSetupPage';
 import { BlockedLabelsSettingsPage } from './pages/BlockedLabelsSettingsPage';
 import { LabelsPage } from './pages/structure/LabelsPage';
 import { RecognizedFieldsPage } from './pages/structure/RecognizedFieldsPage';
@@ -101,6 +102,10 @@ export function App() {
       <Route
         path={routes.settingsConnectors}
         element={<ShellRoute><ConnectorsPage /></ShellRoute>}
+      />
+      <Route
+        path="/settings/connectors/paperless/:installationId"
+        element={<ShellRoute><PaperlessConnectorSetupPage /></ShellRoute>}
       />
       <Route
         path={routes.settingsBlockedLabels}

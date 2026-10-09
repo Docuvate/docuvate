@@ -1,16 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import { getDocsScrollOffsetPx } from '../lib/scrollOffset';
+import { useEffect, useState } from 'react';
 
-export type ScrollSpyController = {
-  activeId: string;
-  /** Pause spy updates until programmatic scroll finishes (TOC click). */
-  pauseUntilScrollSettled: () => void;
-};
+const HEADER_PX = 72;
 
-export function useScrollSpy(sectionIds: string[]): ScrollSpyController {
+export function useScrollSpy(sectionIds: string[]): string {
   const [activeId, setActiveId] = useState(sectionIds[0] ?? '');
-  const pausedRef = useRef(false);
-  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!sectionIds.length) {
@@ -18,69 +11,40 @@ export function useScrollSpy(sectionIds: string[]): ScrollSpyController {
       return undefined;
     }
 
-    const resolveActive = () => {
-      if (pausedRef.current) return;
+    const elements = sectionIds
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => Boolean(el));
 
-      const threshold = getDocsScrollOffsetPx();
-      const elements = sectionIds
-        .map((id) => document.getElementById(id))
-        .filter((el): el is HTMLElement => Boolean(el));
+    if (!elements.length) return undefined;
 
-      if (!elements.length) return;
-
-      const first = elements[0];
-      const last = elements[elements.length - 1];
-      if (!first || !last) return;
-
-      let current = first.id;
-      for (const el of elements) {
-        const top = el.getBoundingClientRect().top;
-        if (top <= threshold + 0.5) {
-          current = el.id;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        const firstVisible = visible[0];
+        if (firstVisible) {
+          setActiveId(firstVisible.target.id);
+          return;
         }
+        const above = entries
+          .filter((e) => e.boundingClientRect.top < HEADER_PX)
+          .sort((a, b) => b.boundingClientRect.top - a.boundingClientRect.top);
+        const firstAbove = above[0];
+        if (firstAbove) {
+          setActiveId(firstAbove.target.id);
+        }
+      },
+      {
+        root: null,
+        rootMargin: `-${HEADER_PX}px 0px -60% 0px`,
+        threshold: [0, 0.1, 0.5, 1],
       }
+    );
 
-      const doc = document.documentElement;
-      const atBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - 4;
-      if (atBottom) {
-        current = last.id;
-      }
-
-      setActiveId((prev) => (prev === current ? prev : current));
-    };
-
-    const onScroll = () => {
-      if (rafRef.current !== null) return;
-      rafRef.current = window.requestAnimationFrame(() => {
-        rafRef.current = null;
-        resolveActive();
-      });
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    resolveActive();
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-      }
-    };
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, [sectionIds.join('|')]);
 
-  const pauseUntilScrollSettled = () => {
-    pausedRef.current = true;
-    const end = () => {
-      pausedRef.current = false;
-      window.dispatchEvent(new Event('scroll'));
-    };
-    if ('onscrollend' in window) {
-      window.addEventListener('scrollend', end, { once: true });
-    }
-    window.setTimeout(end, 1000);
-  };
-
-  return { activeId, pauseUntilScrollSettled };
+  return activeId;
 }

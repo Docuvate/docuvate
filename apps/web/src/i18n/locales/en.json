@@ -785,10 +785,51 @@
       },
       "paperless": {
         "label": "Paperless-ngx",
-        "description": "Pull documents from your Paperless instance or send them there.",
+        "description": "Import documents and metadata from your Paperless-ngx archive.",
         "baseUrlPlaceholder": "https://paperless.example.com",
         "apiTokenHelp": "Preferred for Paperless-ngx. Leave empty if you use username and password instead.",
-        "passwordHelp": "Use with username when no API token is configured."
+        "passwordHelp": "Use with username when no API token is configured.",
+        "openSetup": "Import setup",
+        "setupTitle": "Paperless-ngx import",
+        "setupLead": "Connect your Paperless-ngx instance and bring documents into Docuvate. Later runs import only changes.",
+        "setupMissing": "No Paperless connector is linked to this page.",
+        "connectionTitle": "Connection",
+        "displayName": "Display name",
+        "testConnection": "Test connection",
+        "testing": "Testing…",
+        "testSuccess": "Connection successful (API version {{version}}).",
+        "pipelineTitle": "Processing",
+        "keepOcr": "Keep Paperless OCR text and run Docuvate field extraction",
+        "rerunOcr": "Re-run Docuvate OCR on imported files",
+        "includeArchived": "Store archived PDF copy when available",
+        "importTitle": "Import",
+        "dryRun": "Preview import",
+        "dryRunBusy": "Preview running…",
+        "dryRunFailed": "Import preview failed.",
+        "startImport": "Start import",
+        "importBusy": "Starting…",
+        "importFailed": "Could not start import.",
+        "countDocuments_one": "{{count}} document",
+        "countDocuments_other": "{{count}} documents",
+        "countTags": "{{count}} tags",
+        "countCorrespondents": "{{count}} correspondents",
+        "countTypes": "{{count}} document types",
+        "countPaths": "{{count}} storage paths",
+        "countFields_one": "{{count}} custom field",
+        "countFields_other": "{{count}} custom fields",
+        "conflicts": "{{count}} name conflicts to review",
+        "runTitle": "Import run",
+        "runProgress": "{{status}}: {{processed}} of {{total}} documents",
+        "runProgressNoTotal": "{{status}}: {{processed}} documents",
+        "runCompletedWithErrors": "Completed with errors: {{processed}} documents processed",
+        "runFailedGeneric": "The import run failed.",
+        "runStatus": {
+          "pending": "Pending",
+          "running": "Running",
+          "completed": "Completed",
+          "failed": "Failed",
+          "cancelled": "Cancelled"
+        }
       },
       "homeAssistant": {
         "label": "Home Assistant",
@@ -886,7 +927,11 @@
     "sftpProbeCta": "Test connection",
     "sftpProbePending": "Testing…",
     "sftpProbeSuccess": "Host key confirmed: {{fingerprint}}",
-    "sftpProbeFailed": "Connection test failed. Check host, port, and credentials."
+    "sftpProbeFailed": "Connection test failed. Check host, port, and credentials.",
+    "paperlessImport": {
+      "documentFailed": "This document could not be imported.",
+      "runFailed": "The import run stopped because of a connection error."
+    }
   },
   "labels": {
     "pageTitle": "Labels",

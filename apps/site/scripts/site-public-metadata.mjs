@@ -4,7 +4,7 @@ import { sitePublicDePathSummaries } from './site-public-metadata-de-path-summar
 export const sitePublicOpenApiMetadata = {
   exampleServerUrl: 'https://ihre-instanz.example/v1',
   serverDescription:
-    'Beispiel-URL Ihrer selbst gehosteten API (in Docker Compose durch Ihre Domain ersetzen).',
+    'Beispiel-URL Ihrer selbst gehosteten API (in docker compose durch Ihre Domain ersetzen).',
   info: {
     title: 'Docuvate API',
     description:
@@ -12,7 +12,6 @@ export const sitePublicOpenApiMetadata = {
   },
   tagRenames: {
     'API metadata': 'System',
-    search: 'Suche',
     Documents: 'Dokumente',
     Labels: 'Labels',
     Correspondents: 'Korrespondenten',
@@ -20,15 +19,9 @@ export const sitePublicOpenApiMetadata = {
     Settings: 'Einstellungen',
     Connectors: 'Verbindungen',
     Models: 'Erweiterungen',
-    admin: 'Benutzerverwaltung',
-    invitations: 'Einladungen',
-  },
-  tagDisplayNames: {
-    Suche: 'Suche',
   },
   tagDescriptions: {
     System: 'API-Beschreibung und Metadaten',
-    Suche: 'Globale Suche (Volltext, Ähnlichkeit, semantisch)',
     Dokumente: 'Hochladen, Lesen, Suchen und Dokumenten-Chat',
     Labels: 'Labels, Vorschläge, Muster und benutzerdefinierte Felder',
     Korrespondenten: 'Absender und Partner für die Dokumentzuordnung',
@@ -36,8 +29,6 @@ export const sitePublicOpenApiMetadata = {
     Einstellungen: 'Kontoeinstellungen',
     Verbindungen: 'Anbindungen an externe Quellen',
     Erweiterungen: 'Modellbetrieb (optional)',
-    Benutzerverwaltung: 'Benutzer, Rollen, Einladungen und Sitzungen verwalten',
-    Einladungen: 'Einladungen annehmen und Passwort setzen',
   },
   pathSummaries: sitePublicDePathSummaries,
   pathDescriptions: {

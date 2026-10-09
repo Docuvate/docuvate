@@ -61,6 +61,12 @@ export interface ConnectorInstallationRepository {
   listForUser(userId: string): Promise<ConnectorInstallationEntity[]>;
   findByIdForUser(userId: string, installationId: string): Promise<ConnectorInstallationRecord | null>;
   create(input: CreateConnectorInstallationInput): Promise<ConnectorInstallationEntity>;
+  updateCredentials(
+    userId: string,
+    installationId: string,
+    credentials: ConnectorConfigurationInput
+  ): Promise<void>;
+  updateDisplayName(userId: string, installationId: string, displayName: string): Promise<void>;
   deleteForUser(userId: string, installationId: string): Promise<boolean>;
   deleteForUserByPlugin(userId: string, pluginId: ConnectorPluginId): Promise<void>;
 }

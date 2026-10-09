@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Info } from 'lucide-react';
 import type {
@@ -29,6 +29,7 @@ import { Input } from '../components/ui/Input';
 import { ConnectorConnectDialog } from '../components/connectors/ConnectorConnectDialog';
 import { ConnectorPluginIcon } from '../components/connectors/ConnectorPluginIcon';
 import { useToastNotify } from '../components/save/ToastProvider';
+import { routes } from '../lib/routes';
 import { SftpScannerIngressSection } from '../components/connectors/SftpScannerIngressSection';
 
 function capabilityLabel(t: (key: string) => string, role: 'source' | 'sink') {
@@ -290,16 +291,26 @@ export function ConnectorsPage() {
           </div>
           <div className="connector-catalog-actions">
             {installed ? (
-              <Button
-                type="button"
-                variant="secondary"
-                disabled={disconnectingId === installed.id}
-                onClick={() => void disconnectInstallation(installed)}
-              >
-                {disconnectingId === installed.id
-                  ? t('connectors.disconnectPending')
-                  : t('connectors.disconnectCta')}
-              </Button>
+              <>
+                {plugin.id === 'paperless' ? (
+                  <Link
+                    className="button button-secondary"
+                    to={routes.settingsPaperlessConnector(installed.id)}
+                  >
+                    {t('connectors.plugins.paperless.openSetup')}
+                  </Link>
+                ) : null}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={disconnectingId === installed.id}
+                  onClick={() => void disconnectInstallation(installed)}
+                >
+                  {disconnectingId === installed.id
+                    ? t('connectors.disconnectPending')
+                    : t('connectors.disconnectCta')}
+                </Button>
+              </>
             ) : (
               <Button
                 type="button"

@@ -75,6 +75,10 @@ import type {
   SftpIngressServerInfoDto,
   SftpFetchHostProbeRequest,
   SftpFetchHostProbeResponse,
+  PaperlessImportDryRunSummaryDto,
+  PaperlessImportRunDto,
+  PaperlessImportRunErrorDto,
+  PaperlessInstallationDto,
 } from '@docuvate/contracts';
 import { throwApiRequestError } from './apiErrors';
 
@@ -624,6 +628,87 @@ export async function deleteConnectorInstallation(installationId: string): Promi
   await request<void>(`/connectors/installations/${encodeURIComponent(installationId)}`, {
     method: 'DELETE',
   });
+}
+
+export async function testPaperlessConnection(
+  credentials: Record<string, string>
+): Promise<{ ok: true; apiVersion: number }> {
+  return request<{ ok: true; apiVersion: number }>('/connectors/plugins/paperless/test-connection', {
+    method: 'POST',
+    body: JSON.stringify({ credentials }),
+  });
+}
+
+export async function getPaperlessInstallation(
+  installationId: string
+): Promise<PaperlessInstallationDto> {
+  return request<PaperlessInstallationDto>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless`
+  );
+}
+
+export async function testPaperlessInstallationConnection(
+  installationId: string,
+  credentials: Record<string, string>
+): Promise<{ ok: true; apiVersion: number }> {
+  return request<{ ok: true; apiVersion: number }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/test-connection`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ credentials }),
+    }
+  );
+}
+
+export async function updatePaperlessInstallation(
+  installationId: string,
+  body: {
+    displayName?: string;
+    credentials?: Record<string, string>;
+    keepOcrText?: boolean;
+    rerunOcr?: boolean;
+    includeArchivedPdf?: boolean;
+  }
+): Promise<void> {
+  await request(`/connectors/installations/${encodeURIComponent(installationId)}/paperless`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function paperlessImportDryRun(
+  installationId: string
+): Promise<{ summary: PaperlessImportDryRunSummaryDto }> {
+  return request<{ summary: PaperlessImportDryRunSummaryDto }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/dry-run`,
+    { method: 'POST', body: '{}' }
+  );
+}
+
+export async function startPaperlessImport(
+  installationId: string
+): Promise<{ run: PaperlessImportRunDto }> {
+  return request<{ run: PaperlessImportRunDto }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/import`,
+    { method: 'POST', body: '{}' }
+  );
+}
+
+export async function getPaperlessImportRun(
+  installationId: string,
+  runId: string
+): Promise<{ run: PaperlessImportRunDto; errors: PaperlessImportRunErrorDto[] }> {
+  return request<{ run: PaperlessImportRunDto; errors: PaperlessImportRunErrorDto[] }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/import-runs/${encodeURIComponent(runId)}`
+  );
+}
+
+export async function getLatestPaperlessImportRun(
+  installationId: string
+): Promise<{ run: PaperlessImportRunDto; errors: PaperlessImportRunErrorDto[] }> {
+  return request<{ run: PaperlessImportRunDto; errors: PaperlessImportRunErrorDto[] }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/import-runs/latest`
+  );
 }
 
 export async function startConnectorOAuth(

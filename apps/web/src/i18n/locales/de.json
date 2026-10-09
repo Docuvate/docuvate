@@ -785,10 +785,63 @@
       },
       "paperless": {
         "label": "Paperless-ngx",
-        "description": "Dokumente von Ihrer Paperless-Installation holen oder dorthin senden.",
+        "description": "Dokumente und Metadaten aus Ihrer Paperless-ngx-Installation importieren.",
         "baseUrlPlaceholder": "https://paperless.example.com",
         "apiTokenHelp": "Bevorzugt für Paperless-ngx. Leer lassen, wenn Sie Benutzername und Passwort nutzen.",
-        "passwordHelp": "Zusammen mit Benutzername, wenn kein API-Token gesetzt ist."
+        "passwordHelp": "Zusammen mit Benutzername, wenn kein API-Token gesetzt ist.",
+        "openSetup": "Import einrichten",
+        "setupTitle": "Paperless-ngx Import",
+        "setupLead": "Verbinden Sie Ihre Paperless-ngx-Instanz und übernehmen Sie Dokumente nach Docuvate. Spätere Läufe importieren nur Änderungen.",
+        "setupMissing": "Für diese Seite ist kein Paperless-Connector verknüpft.",
+        "connectionTitle": "Verbindung",
+        "displayName": "Anzeigename",
+        "testConnection": "Verbindung testen",
+        "testing": "Test läuft…",
+        "testSuccess": "Verbindung erfolgreich (API Version {{version}}).",
+        "storedSecret": "Gespeichert",
+        "storedHint": "Ein gespeichertes Geheimnis bleibt aktiv, bis Sie einen neuen Wert eingeben.",
+        "saveSuccess": "Einstellungen wurden gespeichert.",
+        "dryRunSuccess": "Vorschau abgeschlossen: {{count}} Dokumente erkannt.",
+        "importStarted": "Import wurde gestartet.",
+        "errors": {
+          "unauthorized": "Paperless hat die Anmeldung abgelehnt. Token oder Passwort prüfen.",
+          "notFound": "Die Paperless API wurde unter dieser URL nicht gefunden.",
+          "timeout": "Paperless antwortet nicht rechtzeitig. Bitte später erneut versuchen.",
+          "versionUnsupported": "Diese Paperless-ngx-Version wird nicht unterstützt. Bitte Paperless-ngx 2.x oder 3.x nutzen.",
+          "unreachable": "Paperless ist nicht erreichbar. URL und Netzwerk prüfen."
+        },
+        "pipelineTitle": "Verarbeitung",
+        "keepOcr": "Paperless-OCR-Text behalten und Docuvate-Felder extrahieren",
+        "rerunOcr": "Docuvate-OCR für importierte Dateien erneut ausführen",
+        "includeArchived": "Archivierte PDF-Kopie speichern, wenn verfügbar",
+        "importTitle": "Import",
+        "dryRun": "Import-Vorschau",
+        "dryRunBusy": "Vorschau läuft…",
+        "dryRunFailed": "Import-Vorschau fehlgeschlagen.",
+        "startImport": "Import starten",
+        "importBusy": "Startet…",
+        "importFailed": "Import konnte nicht gestartet werden.",
+        "countDocuments_one": "{{count}} Dokument",
+        "countDocuments_other": "{{count}} Dokumente",
+        "countTags": "{{count}} Labels",
+        "countCorrespondents": "{{count}} Absender",
+        "countTypes": "{{count}} Dokumenttypen",
+        "countPaths": "{{count}} Ablagepfade",
+        "countFields_one": "{{count}} benutzerdefiniertes Feld",
+        "countFields_other": "{{count}} benutzerdefinierte Felder",
+        "conflicts": "{{count}} Namenskonflikte prüfen",
+        "runTitle": "Importlauf",
+        "runProgress": "{{status}}: {{processed}} von {{total}} Dokumenten",
+        "runProgressNoTotal": "{{status}}: {{processed}} Dokumente",
+        "runCompletedWithErrors": "Abgeschlossen mit Fehlern: {{processed}} Dokumente verarbeitet",
+        "runFailedGeneric": "Der Importlauf ist fehlgeschlagen.",
+        "runStatus": {
+          "pending": "Wartet",
+          "running": "Läuft",
+          "completed": "Abgeschlossen",
+          "failed": "Fehlgeschlagen",
+          "cancelled": "Abgebrochen"
+        }
       },
       "homeAssistant": {
         "label": "Home Assistant",
@@ -886,7 +939,11 @@
     "sftpProbeCta": "Verbindung testen",
     "sftpProbePending": "Test läuft…",
     "sftpProbeSuccess": "Host-Key bestätigt: {{fingerprint}}",
-    "sftpProbeFailed": "Verbindungstest fehlgeschlagen. Host, Port und Zugangsdaten prüfen."
+    "sftpProbeFailed": "Verbindungstest fehlgeschlagen. Host, Port und Zugangsdaten prüfen.",
+    "paperlessImport": {
+      "documentFailed": "Dieses Dokument konnte nicht importiert werden.",
+      "runFailed": "Der Importlauf wurde wegen eines Verbindungsfehlers beendet."
+    }
   },
   "labels": {
     "pageTitle": "Labels",

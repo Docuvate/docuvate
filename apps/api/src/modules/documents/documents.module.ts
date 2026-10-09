@@ -81,6 +81,6 @@ import { SearchModule } from '../search/search.module.js';
     GetDocumentLayoutHtmlUseCase,
     GetDocumentLayoutTypstUseCase,
   ],
-  exports: [UploadDocumentUseCase, GetDocumentContentUseCase],
+  exports: [UploadDocumentUseCase, GetDocumentContentUseCase, QueueExtractionUseCase],
 })
 export class DocumentsModule {}

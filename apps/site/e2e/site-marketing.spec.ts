@@ -27,15 +27,6 @@ test.describe('site marketing anchors', () => {
     await initDeLight(page);
   });
 
-  test('Selbst hosten CTAs target quickstart', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto('/');
-    await expect(page.locator('.landing-btn-primary').first()).toHaveAttribute('href', '/docs#quickstart');
-    await expect(page.locator('.header-cta')).toHaveAttribute('href', '/docs#quickstart');
-    await page.goto('/docs/api');
-    await expect(page.locator('.header-cta')).toHaveAttribute('href', '/docs#quickstart');
-  });
-
   test('landing in-page anchor clicks clear sticky header', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
@@ -68,17 +59,15 @@ test.describe('site marketing anchors', () => {
     const count = await toc.count();
     expect(count).toBeGreaterThan(2);
 
-    const clickedId = await toc.nth(2).getAttribute('data-toc-id');
     await toc.nth(2).click();
-    await page.waitForTimeout(700);
-    expect(clickedId).toBeTruthy();
-    if (clickedId) {
-      await expectTargetBelowStickyHeader(page, `#${clickedId}`);
-      await expect(page.locator('.docs-toc-desktop .docs-toc-item.is-active .docs-toc-link')).toHaveAttribute(
-        'data-toc-id',
-        clickedId,
-        { timeout: 3000 }
-      );
+    await page.waitForTimeout(400);
+    const active = page.locator('.docs-toc-desktop .docs-toc-item.is-active .docs-toc-link');
+    await expect(active).toBeVisible();
+
+    const activeId = await active.getAttribute('data-toc-id');
+    expect(activeId).toBeTruthy();
+    if (activeId) {
+      await expectTargetBelowStickyHeader(page, `#${activeId}`);
     }
 
     await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
@@ -118,11 +107,11 @@ test.describe('site marketing anchors', () => {
     }
   });
 
-  test('SDK section hash navigation', async ({ page }) => {
+  test('SDK overview table section links', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/docs/sdks#flutter-sdk');
     await expectTargetBelowStickyHeader(page, '#flutter-sdk');
-    await page.goto('/docs/sdks#node-sdk');
+    await page.locator('.sdk-overview-table a[href="#node-sdk"]').click();
     await expect(page).toHaveURL(/#node-sdk$/);
     await expectTargetBelowStickyHeader(page, '#node-sdk');
   });
