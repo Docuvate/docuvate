@@ -565,6 +565,64 @@ export async function retryDocumentChatMessage(
   return data.message;
 }
 
+export async function listLibraryChatThreads(): Promise<DocumentChatThreadDto[]> {
+  const data = await request<DocumentChatThreadListResponse>('/chat/threads');
+  return data.threads;
+}
+
+export async function createLibraryChatThread(
+  body: CreateDocumentChatThreadRequest = {}
+): Promise<DocumentChatThreadDto> {
+  const data = await request<{ thread: DocumentChatThreadDto }>('/chat/threads', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  return data.thread;
+}
+
+export async function listLibraryChatThreadMessages(
+  threadId: string
+): Promise<DocumentChatMessageRecordDto[]> {
+  const data = await request<DocumentChatThreadMessagesResponse>(
+    `/chat/threads/${threadId}/messages`
+  );
+  return data.messages;
+}
+
+export async function sendLibraryChatThreadMessage(
+  threadId: string,
+  body: SendDocumentChatThreadMessageRequest
+): Promise<SendDocumentChatThreadMessageResponse> {
+  return request<SendDocumentChatThreadMessageResponse>(
+    `/chat/threads/${threadId}/messages`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }
+  );
+}
+
+export async function cancelLibraryChatMessage(
+  threadId: string,
+  messageId: string
+): Promise<void> {
+  await request<{ ok: boolean }>(
+    `/chat/threads/${threadId}/messages/${messageId}/cancel`,
+    { method: 'POST' }
+  );
+}
+
+export async function retryLibraryChatMessage(
+  threadId: string,
+  messageId: string
+): Promise<DocumentChatMessageRecordDto> {
+  const data = await request<{ message: DocumentChatMessageRecordDto }>(
+    `/chat/threads/${threadId}/messages/${messageId}/retry`,
+    { method: 'POST' }
+  );
+  return data.message;
+}
+
 export async function getUserSettings(): Promise<UserSettingsDto> {
   return request<UserSettingsDto>('/settings');
 }

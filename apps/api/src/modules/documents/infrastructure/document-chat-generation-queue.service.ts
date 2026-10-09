@@ -59,8 +59,8 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
 function documentChatGenerationConcurrency(): number {
   const raw = process.env['DOCUMENT_CHAT_GENERATION_CONCURRENCY'];
   if (!raw) {
-    return 2;
+    return 1;
   }
   const parsed = Number.parseInt(raw, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 2;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 }

@@ -47,4 +47,38 @@ export class RetryDocumentChatMessageUseCase {
     });
     return reset;
   }
+
+  async executeLibrary(
+    threadId: string,
+    messageId: string,
+    userId: string
+  ): Promise<DocumentChatMessageEntity> {
+    const thread = await this.threads.findThreadForUser(threadId, userId);
+    if (!thread || thread.scope !== 'library') {
+      throw new NotFoundError('Chat thread');
+    }
+    const message = await this.threads.findMessageForUser(messageId, userId);
+    if (!message || message.threadId !== threadId || message.role !== 'assistant') {
+      throw new NotFoundError('Chat message');
+    }
+    if (message.generationStatus !== 'failed') {
+      throw new ValidationError('Nur fehlgeschlagene Antworten können erneut versucht werden.');
+    }
+
+    const allMessages = await this.threads.listMessages(threadId, userId);
+    const index = allMessages.findIndex((m) => m.id === messageId);
+    const userMessage = index > 0 ? allMessages[index - 1] : null;
+    if (!userMessage || userMessage.role !== 'user') {
+      throw new ValidationError('Keine zugehörige Nutzerfrage gefunden.');
+    }
+
+    const reset = await this.threads.resetMessageForRetry(messageId);
+    await this.generationQueue.enqueue({
+      messageId,
+      threadId,
+      userId,
+      userMessage: userMessage.content,
+    });
+    return reset;
+  }
 }

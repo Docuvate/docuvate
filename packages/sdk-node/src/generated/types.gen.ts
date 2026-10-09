@@ -68,7 +68,7 @@ export type ChatMessageRecordDto = {
     createdAt: string;
     updatedAt?: string;
     generationStatus?: 'failed' | 'pending' | 'streaming' | 'done';
-    generationPhase?: 'retrieving' | 'generating';
+    generationPhase?: 'retrieving' | 'generating' | 'verifying';
     errorCode?: string;
 };
 
@@ -236,7 +236,7 @@ export type DocumentChatResponseDto = {
 export type DocumentChatThreadDto = {
     id: string;
     title: string;
-    scope: 'document' | 'corpus';
+    scope: 'document' | 'library';
     documentIds: Array<string>;
     createdAt: string;
     updatedAt: string;
@@ -1040,6 +1040,165 @@ export type UnbanAdminUserError = UnbanAdminUserErrors[keyof UnbanAdminUserError
 
 export type UnbanAdminUserResponses = {
     201: unknown;
+};
+
+export type ListLibraryChatThreadsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/chat/threads';
+};
+
+export type ListLibraryChatThreadsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ListLibraryChatThreadsError = ListLibraryChatThreadsErrors[keyof ListLibraryChatThreadsErrors];
+
+export type ListLibraryChatThreadsResponses = {
+    200: DocumentChatThreadListResponseDto;
+};
+
+export type ListLibraryChatThreadsResponse = ListLibraryChatThreadsResponses[keyof ListLibraryChatThreadsResponses];
+
+export type CreateLibraryChatThreadData = {
+    body: CreateDocumentChatThreadRequestDto;
+    path?: never;
+    query?: never;
+    url: '/chat/threads';
+};
+
+export type CreateLibraryChatThreadErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type CreateLibraryChatThreadError = CreateLibraryChatThreadErrors[keyof CreateLibraryChatThreadErrors];
+
+export type CreateLibraryChatThreadResponses = {
+    201: unknown;
+};
+
+export type ListLibraryChatThreadMessagesData = {
+    body?: never;
+    path: {
+        threadId: string;
+    };
+    query?: never;
+    url: '/chat/threads/{threadId}/messages';
+};
+
+export type ListLibraryChatThreadMessagesErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ListLibraryChatThreadMessagesError = ListLibraryChatThreadMessagesErrors[keyof ListLibraryChatThreadMessagesErrors];
+
+export type ListLibraryChatThreadMessagesResponses = {
+    200: DocumentChatThreadMessagesResponseDto;
+};
+
+export type ListLibraryChatThreadMessagesResponse = ListLibraryChatThreadMessagesResponses[keyof ListLibraryChatThreadMessagesResponses];
+
+export type SendLibraryChatThreadMessageData = {
+    body: SendDocumentChatThreadMessageRequestDto;
+    path: {
+        threadId: string;
+    };
+    query?: never;
+    url: '/chat/threads/{threadId}/messages';
+};
+
+export type SendLibraryChatThreadMessageErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type SendLibraryChatThreadMessageError = SendLibraryChatThreadMessageErrors[keyof SendLibraryChatThreadMessageErrors];
+
+export type SendLibraryChatThreadMessageResponses = {
+    201: SendDocumentChatThreadMessageResponseDto;
+};
+
+export type SendLibraryChatThreadMessageResponse = SendLibraryChatThreadMessageResponses[keyof SendLibraryChatThreadMessageResponses];
+
+export type CancelLibraryChatGenerationData = {
+    body?: never;
+    path: {
+        threadId: string;
+        messageId: string;
+    };
+    query?: never;
+    url: '/chat/threads/{threadId}/messages/{messageId}/cancel';
+};
+
+export type CancelLibraryChatGenerationErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type CancelLibraryChatGenerationError = CancelLibraryChatGenerationErrors[keyof CancelLibraryChatGenerationErrors];
+
+export type CancelLibraryChatGenerationResponses = {
+    201: unknown;
+};
+
+export type RetryLibraryChatMessageData = {
+    body?: never;
+    path: {
+        threadId: string;
+        messageId: string;
+    };
+    query?: never;
+    url: '/chat/threads/{threadId}/messages/{messageId}/retry';
+};
+
+export type RetryLibraryChatMessageErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type RetryLibraryChatMessageError = RetryLibraryChatMessageErrors[keyof RetryLibraryChatMessageErrors];
+
+export type RetryLibraryChatMessageResponses = {
+    201: unknown;
+};
+
+export type StreamLibraryChatMessageData = {
+    body?: never;
+    path: {
+        threadId: string;
+        messageId: string;
+    };
+    query?: never;
+    url: '/chat/threads/{threadId}/messages/{messageId}/stream';
+};
+
+export type StreamLibraryChatMessageErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type StreamLibraryChatMessageError = StreamLibraryChatMessageErrors[keyof StreamLibraryChatMessageErrors];
+
+export type StreamLibraryChatMessageResponses = {
+    200: unknown;
 };
 
 export type GetConnectorCatalogData = {

@@ -28,6 +28,7 @@ import { StylesDocsPage } from './pages/StylesDocsPage';
 import { hadAuthenticatedSessionHint } from './lib/authSessionHint';
 import { ConnectorsOAuthSetupDocPage } from './pages/ConnectorsOAuthSetupDocPage';
 import { routes } from './lib/routes';
+import { GlobalChatPage } from './pages/GlobalChatPage';
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { data, isPending, error } = authClient.useSession();
@@ -71,6 +72,7 @@ export function App() {
       />
       <Route path={routes.home} element={<ShellRoute><DashboardPage /></ShellRoute>} />
       <Route path={routes.documents} element={<ShellRoute><LibraryPage /></ShellRoute>} />
+      <Route path={routes.globalChat} element={<ShellRoute><GlobalChatPage /></ShellRoute>} />
       <Route path={routes.savedViews} element={<ShellRoute><SavedViewsPage /></ShellRoute>} />
       <Route
         path={routes.filesystem}

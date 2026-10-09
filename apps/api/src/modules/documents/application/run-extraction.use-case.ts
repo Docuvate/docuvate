@@ -41,6 +41,7 @@ export class RunExtractionUseCase {
         text: result.text,
         title: doc.title,
         filename: doc.filename,
+        blocks: result.blocks,
       });
       const content = `${doc.filename}\n${doc.title}\n${result.text}`;
       await this.postOcrPipeline.execute(documentId, doc.userId, content);

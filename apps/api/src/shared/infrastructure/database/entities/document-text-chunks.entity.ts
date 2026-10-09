@@ -17,6 +17,15 @@ export class DocumentTextChunksEntity {
   @Column('text', { name: 'body' })
   body: string;
 
+  @Column('integer', { name: 'page', nullable: true })
+  page: number | null;
+
+  @Column('integer', { name: 'char_start', nullable: true })
+  charStart: number | null;
+
+  @Column('integer', { name: 'char_end', nullable: true })
+  charEnd: number | null;
+
   @Column('tsvector', { name: 'search_vector', nullable: true })
   searchVector: string | null;
 

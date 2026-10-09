@@ -14,7 +14,7 @@ import {
 } from '../domain/normalize-search-text.js';
 import type { GlobalSearchRepositoryResult } from '../domain/global-search.types.js';
 import { reciprocalRankFusion, type RankedItem } from '../domain/reciprocal-rank-fusion.js';
-import { splitTextChunks } from '../domain/split-text-chunks.js';
+import type { TextChunkSpan } from '../../cited-chat/domain/split-text-chunks-with-spans.js';
 import { cosineSimilarity } from '../domain/cosine-similarity.js';
 import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
@@ -93,19 +93,36 @@ export class PgGlobalSearchRepository {
     return row.rows.length > 0;
   }
 
-  async indexDocumentChunks(userId: string, documentId: string, text: string): Promise<void> {
-    const chunks = splitTextChunks(text);
+  async indexDocumentChunks(
+    userId: string,
+    documentId: string,
+    chunks: TextChunkSpan[],
+    embeddings?: number[][] | undefined
+  ): Promise<void> {
     await this.pool.query(`DELETE FROM document_text_chunks WHERE document_id = $1`, [documentId]);
     for (let i = 0; i < chunks.length; i += 1) {
-      const body = chunks[i]!;
+      const chunk = chunks[i]!;
+      const embeddingJson =
+        embeddings?.[i] != null ? JSON.stringify(embeddings[i]) : null;
       await this.pool.query(
-        `INSERT INTO document_text_chunks (document_id, chunk_index, body, updated_at)
-         VALUES ($1, $2, $3, now())`,
-        [documentId, i, body]
+        `INSERT INTO document_text_chunks (
+           document_id, chunk_index, body, page, char_start, char_end, embedding, updated_at
+         )
+         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, now())`,
+        [
+          documentId,
+          i,
+          chunk.body,
+          chunk.page,
+          chunk.charStart,
+          chunk.charEnd,
+          embeddingJson,
+        ]
       );
-      await this.upsertVocabularyTerms(userId, body, 'chunk');
+      await this.upsertVocabularyTerms(userId, chunk.body, 'chunk');
     }
-    await this.upsertVocabularyTerms(userId, text.slice(0, 4000), 'document');
+    const fullText = chunks.map((c) => c.body).join(' ');
+    await this.upsertVocabularyTerms(userId, fullText.slice(0, 4000), 'document');
   }
 
   async upsertVocabularyTerms(

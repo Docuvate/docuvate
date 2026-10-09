@@ -1,6 +1,7 @@
 /** TypeORM persistence entities (infrastructure). Do not use in domain/application. */
 
 import { AccountEntity } from './account.entity.js';
+import { ChatMessageCitationsEntity } from './chat-message-citations.entity.js';
 import { ChatMessagesEntity } from './chat-messages.entity.js';
 import { ChatThreadDocumentsEntity } from './chat-thread-documents.entity.js';
 import { ChatThreadsEntity } from './chat-threads.entity.js';
@@ -70,6 +71,7 @@ import { VerificationEntity } from './verification.entity.js';
 
 export const TYPEORM_ENTITIES = [
   AccountEntity,
+  ChatMessageCitationsEntity,
   ChatMessagesEntity,
   ChatThreadDocumentsEntity,
   ChatThreadsEntity,
@@ -140,6 +142,7 @@ export const TYPEORM_ENTITIES = [
 
 export {
   AccountEntity,
+  ChatMessageCitationsEntity,
   ChatMessagesEntity,
   ChatThreadDocumentsEntity,
   ChatThreadsEntity,

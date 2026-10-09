@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentChatMessageRecordDto } from '@docuvate/contracts';
+import type { ChatMessageCitationDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
 import { formatChatGenerationError, toUserFacingChatGenerationError } from '../../lib/apiErrors';
 import { Button } from '../ui/Button';
 import { Spinner } from '../ui/Spinner';
@@ -10,6 +10,7 @@ interface DocumentChatAssistantMessageProps {
   onRetry: (messageId: string) => void;
   onCancel: (messageId: string) => void;
   retryBusy: boolean;
+  renderCitationLink?: (citation: ChatMessageCitationDto) => React.ReactNode;
 }
 
 function formatElapsed(seconds: number): string {
@@ -23,6 +24,7 @@ export function DocumentChatAssistantMessage({
   onRetry,
   onCancel,
   retryBusy,
+  renderCitationLink,
 }: DocumentChatAssistantMessageProps) {
   const { t } = useTranslation();
   const status = message.generationStatus ?? 'done';
@@ -48,6 +50,8 @@ export function DocumentChatAssistantMessage({
   if (isActive) {
     if (message.generationPhase === 'retrieving' || status === 'pending') {
       statusLine = t('documents.documentChat.phaseRetrieving');
+    } else if (message.generationPhase === 'verifying') {
+      statusLine = t('documents.documentChat.phaseVerifying');
     } else {
       statusLine = t('documents.documentChat.phaseGenerating');
     }
@@ -80,6 +84,27 @@ export function DocumentChatAssistantMessage({
       ) : null}
 
       {message.content ? <p className="doc-chat-assistant-content">{message.content}</p> : null}
+
+      {message.citations && message.citations.length > 0 ? (
+        <div className="doc-chat-sources">
+          <span className="doc-chat-sources-label">{t('documents.documentChat.sources')}</span>
+          <ul className="doc-chat-sources-list">
+            {message.citations.map((citation) => (
+              <li key={citation.ordinal}>
+                {renderCitationLink ? (
+                  renderCitationLink(citation)
+                ) : (
+                  <span className="doc-chat-citation-chip">[{citation.ordinal}]</span>
+                )}
+                <span className="muted">
+                  {citation.documentTitle}
+                  {citation.page != null ? `, S. ${citation.page}` : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
 
       {isFailed ? (
         <div className="doc-chat-error-block" role="alert">

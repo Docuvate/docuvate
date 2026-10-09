@@ -15,7 +15,7 @@ export function ollamaChatTimeoutMs(): number {
 }
 
 export function ollamaChatModel(): string {
-  return process.env['OLLAMA_MODEL'] ?? 'qwen2.5:3b';
+  return process.env['OLLAMA_MODEL'] ?? 'qwen2.5:1.5b';
 }
 
 export function ollamaChatBaseUrl(): string {

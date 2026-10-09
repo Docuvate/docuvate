@@ -18,5 +18,15 @@ export function toDocumentChatMessageRecordDto(
     generationStatus,
     generationPhase: entity.generationPhase ?? null,
     errorCode: entity.errorCode ?? null,
+    citations: entity.citations?.map((c) => ({
+      ordinal: c.ordinal,
+      documentId: c.documentId,
+      documentTitle: c.documentTitle,
+      page: c.page,
+      charStart: c.charStart,
+      charEnd: c.charEnd,
+      quote: c.quote,
+      blocks: c.blocks,
+    })),
   };
 }

@@ -74,6 +74,9 @@ const ChatMessageRecordDtoGenerationPhaseEnum
 const ChatMessageRecordDtoGenerationPhaseEnum
     _$chatMessageRecordDtoGenerationPhaseEnum_generating =
     const ChatMessageRecordDtoGenerationPhaseEnum._('generating');
+const ChatMessageRecordDtoGenerationPhaseEnum
+    _$chatMessageRecordDtoGenerationPhaseEnum_verifying =
+    const ChatMessageRecordDtoGenerationPhaseEnum._('verifying');
 
 ChatMessageRecordDtoGenerationPhaseEnum
     _$chatMessageRecordDtoGenerationPhaseEnumValueOf(String name) {
@@ -82,6 +85,8 @@ ChatMessageRecordDtoGenerationPhaseEnum
       return _$chatMessageRecordDtoGenerationPhaseEnum_retrieving;
     case 'generating':
       return _$chatMessageRecordDtoGenerationPhaseEnum_generating;
+    case 'verifying':
+      return _$chatMessageRecordDtoGenerationPhaseEnum_verifying;
     default:
       throw new ArgumentError(name);
   }
@@ -92,6 +97,7 @@ final BuiltSet<ChatMessageRecordDtoGenerationPhaseEnum>
         ChatMessageRecordDtoGenerationPhaseEnum>(const <ChatMessageRecordDtoGenerationPhaseEnum>[
   _$chatMessageRecordDtoGenerationPhaseEnum_retrieving,
   _$chatMessageRecordDtoGenerationPhaseEnum_generating,
+  _$chatMessageRecordDtoGenerationPhaseEnum_verifying,
 ]);
 
 Serializer<ChatMessageRecordDtoRoleEnum>
@@ -174,10 +180,12 @@ class _$ChatMessageRecordDtoGenerationPhaseEnumSerializer
   static const Map<String, Object> _toWire = const <String, Object>{
     'retrieving': 'retrieving',
     'generating': 'generating',
+    'verifying': 'verifying',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'retrieving': 'retrieving',
     'generating': 'generating',
+    'verifying': 'verifying',
   };
 
   @override

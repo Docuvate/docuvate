@@ -83,6 +83,19 @@ function mapMessageRow(row: Record<string, unknown>): DocumentChatMessageEntity 
 export class PgDocumentChatThreadRepository implements DocumentChatThreadRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
+  async listThreadsForLibrary(userId: string): Promise<DocumentChatThreadEntity[]> {
+    const result = await this.pool.query(
+      `SELECT ${THREAD_LIST_SELECT}
+       FROM chat_threads t
+       LEFT JOIN chat_thread_documents ctd ON ctd.thread_id = t.id
+       WHERE t.user_id = $1 AND t.scope = 'library'
+       GROUP BY t.id
+       ORDER BY t.updated_at DESC`,
+      [userId]
+    );
+    return result.rows.map((row) => mapThreadRow(row as Record<string, unknown>));
+  }
+
   async listThreadsForDocument(
     documentId: string,
     userId: string
@@ -104,8 +117,9 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
     documentIds: string[],
     options?: { title?: string; scope?: ChatThreadScope }
   ): Promise<DocumentChatThreadEntity> {
-    if (documentIds.length === 0) {
-      throw new Error('At least one document is required for a chat thread');
+    const scope = options?.scope ?? 'document';
+    if (scope === 'document' && documentIds.length === 0) {
+      throw new Error('At least one document is required for a document-scoped chat thread');
     }
     const client = await this.pool.connect();
     try {
@@ -114,7 +128,7 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
         `INSERT INTO chat_threads (user_id, title, scope)
          VALUES ($1, $2, $3)
          RETURNING id, user_id, title, scope, created_at, updated_at`,
-        [userId, options?.title?.trim() || DEFAULT_THREAD_TITLE, options?.scope ?? 'document']
+        [userId, options?.title?.trim() || DEFAULT_THREAD_TITLE, scope]
       );
       const threadRow = threadResult.rows[0] as Record<string, unknown>;
       const threadId = String(threadRow['id']);
@@ -151,7 +165,7 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
     const result = await this.pool.query(
       `SELECT ${THREAD_LIST_SELECT}
        FROM chat_threads t
-       INNER JOIN chat_thread_documents ctd ON ctd.thread_id = t.id
+       LEFT JOIN chat_thread_documents ctd ON ctd.thread_id = t.id
        WHERE t.id = $1 AND t.user_id = $2
        GROUP BY t.id`,
       [threadId, userId]

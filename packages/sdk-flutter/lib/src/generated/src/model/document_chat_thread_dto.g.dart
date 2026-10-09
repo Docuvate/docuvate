@@ -8,16 +8,16 @@ part of 'document_chat_thread_dto.dart';
 
 const DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnum_document =
     const DocumentChatThreadDtoScopeEnum._('document');
-const DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnum_corpus =
-    const DocumentChatThreadDtoScopeEnum._('corpus');
+const DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnum_library_ =
+    const DocumentChatThreadDtoScopeEnum._('library_');
 
 DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnumValueOf(
     String name) {
   switch (name) {
     case 'document':
       return _$documentChatThreadDtoScopeEnum_document;
-    case 'corpus':
-      return _$documentChatThreadDtoScopeEnum_corpus;
+    case 'library_':
+      return _$documentChatThreadDtoScopeEnum_library_;
     default:
       throw new ArgumentError(name);
   }
@@ -27,7 +27,7 @@ final BuiltSet<DocumentChatThreadDtoScopeEnum>
     _$documentChatThreadDtoScopeEnumValues = new BuiltSet<
         DocumentChatThreadDtoScopeEnum>(const <DocumentChatThreadDtoScopeEnum>[
   _$documentChatThreadDtoScopeEnum_document,
-  _$documentChatThreadDtoScopeEnum_corpus,
+  _$documentChatThreadDtoScopeEnum_library_,
 ]);
 
 const DocumentChatThreadDtoActiveGenerationStatusEnum
@@ -79,11 +79,11 @@ class _$DocumentChatThreadDtoScopeEnumSerializer
     implements PrimitiveSerializer<DocumentChatThreadDtoScopeEnum> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'document': 'document',
-    'corpus': 'corpus',
+    'library_': 'library',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'document': 'document',
-    'corpus': 'corpus',
+    'library': 'library_',
   };
 
   @override

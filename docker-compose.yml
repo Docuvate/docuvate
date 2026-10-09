@@ -127,7 +127,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       set -e;
-      ollama pull ${OLLAMA_MODEL:-qwen2.5:3b};
+      ollama pull ${OLLAMA_MODEL:-qwen2.5:1.5b};
       "
     environment:
       OLLAMA_HOST: http://ollama:11434
@@ -210,14 +210,17 @@ services:
       WORKER_COMPARE_TIMEOUT_MS: '600000'
       DOCUMENT_CHAT_PROVIDER: rag-ollama
       OLLAMA_URL: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:1.5b}
       OLLAMA_CHAT_TIMEOUT_MS: '180000'
       OLLAMA_CHAT_IDLE_TIMEOUT_MS: '120000'
-      OLLAMA_NUM_CTX: '4096'
-      OLLAMA_NUM_PREDICT: '512'
+      OLLAMA_NUM_CTX: '2048'
+      OLLAMA_NUM_PREDICT: '256'
       OLLAMA_KEEP_ALIVE: '30m'
       WORKER_RAG_CONTEXT_TIMEOUT_MS: '120000'
-      DOCUMENT_CHAT_GENERATION_CONCURRENCY: '2'
+      DOCUMENT_CHAT_GENERATION_CONCURRENCY: '1'
+      DOCUVATE_AI_PROFILE: ${DOCUVATE_AI_PROFILE:-cpu-small}
+      RAG_RERANKER_GATE_MIN: '0.5'
+      RAG_FUSION_GATE_MIN: '0.02'
       OTEL_SDK_DISABLED: 'true'
       NODE_ENV: production
       WEB_ORIGIN: http://localhost:5173
@@ -277,6 +280,8 @@ services:
       EXTRACTOR_ENGINE: pipeline
       PADDLE_OCR_LANG: german
       PADDLE_PREWARM_ON_START: ${PADDLE_PREWARM_ON_START:-0}
+      DOCUVATE_AI_PROFILE: ${DOCUVATE_AI_PROFILE:-cpu-small}
+      DOCUVATE_RERANKER_MODEL: BAAI/bge-reranker-base
     volumes:
       - workermlcache:/var/lib/docuvate-ml
     healthcheck:

@@ -10,7 +10,16 @@
     "settings": "Settings",
     "collapseSidebar": "Collapse navigation",
     "expandSidebar": "Expand navigation",
-    "home": "Start"
+    "home": "Start",
+    "globalChat": "Chat"
+  },
+  "globalChat": {
+    "title": "Chat across documents",
+    "subtitle": "Answers with verified sources from your library.",
+    "threads": "Conversations",
+    "newThread": "New chat",
+    "placeholder": "Ask about your documents…",
+    "send": "Send"
   },
   "shell": {
     "globalSearch": "Global search",
@@ -546,6 +555,8 @@
       "typingAria": "Assistant is processing your message",
       "phaseRetrieving": "Searching the document for relevant passages…",
       "phaseGenerating": "Generating reply…",
+      "phaseVerifying": "Verifying sources…",
+      "sources": "Sources",
       "cancel": "Cancel",
       "retry": "Try again",
       "errorTimeout": "The reply took too long.",

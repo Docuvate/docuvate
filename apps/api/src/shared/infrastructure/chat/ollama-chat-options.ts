@@ -1,5 +1,5 @@
-const DEFAULT_NUM_CTX = 4096;
-const DEFAULT_NUM_PREDICT = 512;
+const DEFAULT_NUM_CTX = 2048;
+const DEFAULT_NUM_PREDICT = 256;
 const DEFAULT_KEEP_ALIVE = '30m';
 
 export function ollamaNumCtx(): number {
@@ -35,12 +35,17 @@ export function ollamaChatIdleTimeoutMs(): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function ollamaThinkingDisabled(model: string): boolean {
+  const normalized = model.trim().toLowerCase();
+  return normalized.startsWith('qwen2') || normalized.startsWith('qwen3');
+}
+
 export function buildOllamaChatBody(
   model: string,
   messages: Array<{ role: string; content: string }>,
   stream: boolean
 ): Record<string, unknown> {
-  return {
+  const body: Record<string, unknown> = {
     model,
     messages,
     stream,
@@ -50,4 +55,8 @@ export function buildOllamaChatBody(
       num_predict: ollamaNumPredict(),
     },
   };
+  if (ollamaThinkingDisabled(model)) {
+    body['think'] = false;
+  }
+  return body;
 }

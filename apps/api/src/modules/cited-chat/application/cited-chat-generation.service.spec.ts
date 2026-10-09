@@ -1,0 +1,120 @@
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { CITED_CHAT_ABSTENTION_DE } from '../domain/cited-chat-constants.js';
+
+vi.mock('../infrastructure/fetch-worker-rag-rerank.js', () => ({
+  fetchWorkerRagRerank: vi.fn(),
+}));
+
+import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
+import { CitedChatGenerationService } from './cited-chat-generation.service.js';
+
+const messageId = 'msg-1';
+const threadId = 'thread-1';
+const userId = 'user-1';
+
+describe('CitedChatGenerationService abstention', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env['RAG_RERANKER_GATE_MIN'] = '0.5';
+    process.env['RAG_FUSION_GATE_MIN'] = '0.02';
+  });
+
+  it('abstains on off-topic reranker score', async () => {
+    vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
+      reachable: true,
+      rerankerUsed: true,
+      rerankerModel: 'BAAI/bge-reranker-base',
+      results: [{ id: 'c1', score: 0.01 }],
+    });
+
+    const threads = {
+      updateMessageGeneration: vi.fn(),
+      touchThread: vi.fn(),
+      listMessages: vi.fn().mockResolvedValue([]),
+    };
+    const retrieval = {
+      hybridRetrieveChunks: vi.fn().mockResolvedValue([
+        {
+          chunkId: 'c1',
+          documentId: 'd1',
+          documentTitle: 'Doc',
+          body: 'irrelevant',
+          page: 1,
+          charStart: 0,
+          charEnd: 10,
+          fusionScore: 0.03,
+        },
+      ]),
+      indexPassageForRerank: (c: { documentTitle: string; body: string }) =>
+        `${c.documentTitle}\n${c.body}`,
+    };
+    const service = new CitedChatGenerationService(
+      threads as never,
+      { embedTexts: vi.fn().mockResolvedValue({ embeddings: [[0.1]] }) } as never,
+      retrieval as never,
+      { replaceCitations: vi.fn() } as never
+    );
+
+    const result = await service.generate({
+      messageId,
+      threadId,
+      userId,
+      userMessage: 'Wetter morgen?',
+      documentIds: [],
+      scope: 'library',
+    });
+
+    expect(result.abstained).toBe(true);
+    expect(result.content).toBe(CITED_CHAT_ABSTENTION_DE);
+    expect(threads.updateMessageGeneration).toHaveBeenCalled();
+  });
+
+  it('abstains when reranker is down and fusion is weak', async () => {
+    vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
+      reachable: false,
+      rerankerUsed: false,
+      rerankerModel: null,
+      results: [],
+    });
+
+    const threads = {
+      updateMessageGeneration: vi.fn(),
+      touchThread: vi.fn(),
+      listMessages: vi.fn().mockResolvedValue([]),
+    };
+    const retrieval = {
+      hybridRetrieveChunks: vi.fn().mockResolvedValue([
+        {
+          chunkId: 'c1',
+          documentId: 'd1',
+          documentTitle: 'Doc',
+          body: 'noise',
+          page: 1,
+          charStart: 0,
+          charEnd: 5,
+          fusionScore: 0.01,
+        },
+      ]),
+      indexPassageForRerank: (c: { documentTitle: string; body: string }) =>
+        `${c.documentTitle}\n${c.body}`,
+    };
+    const service = new CitedChatGenerationService(
+      threads as never,
+      { embedTexts: vi.fn().mockResolvedValue({ embeddings: [[0.1]] }) } as never,
+      retrieval as never,
+      { replaceCitations: vi.fn() } as never
+    );
+
+    const result = await service.generate({
+      messageId,
+      threadId,
+      userId,
+      userMessage: 'Bitcoin?',
+      documentIds: [],
+      scope: 'library',
+    });
+
+    expect(result.abstained).toBe(true);
+    expect(result.content).toBe(CITED_CHAT_ABSTENTION_DE);
+  });
+});

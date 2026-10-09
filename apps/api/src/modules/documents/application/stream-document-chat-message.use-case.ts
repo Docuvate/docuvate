@@ -19,6 +19,20 @@ export class StreamDocumentChatMessageUseCase {
     private readonly threads: DocumentChatThreadRepository
   ) {}
 
+  async executeLibrary(
+    threadId: string,
+    messageId: string,
+    userId: string,
+    rawResponse: ServerResponse,
+    isClientClosed: () => boolean
+  ): Promise<void> {
+    const thread = await this.threads.findThreadForUser(threadId, userId);
+    if (!thread || thread.scope !== 'library') {
+      throw new NotFoundError('Chat thread');
+    }
+    await this.runStream(threadId, messageId, userId, rawResponse, isClientClosed);
+  }
+
   async execute(
     documentId: string,
     threadId: string,
@@ -28,6 +42,16 @@ export class StreamDocumentChatMessageUseCase {
     isClientClosed: () => boolean
   ): Promise<void> {
     await this.threads.assertThreadLinkedToDocument(threadId, documentId, userId);
+    await this.runStream(threadId, messageId, userId, rawResponse, isClientClosed);
+  }
+
+  private async runStream(
+    threadId: string,
+    messageId: string,
+    userId: string,
+    rawResponse: ServerResponse,
+    isClientClosed: () => boolean
+  ): Promise<void> {
 
     rawResponse.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
@@ -55,7 +79,10 @@ export class StreamDocumentChatMessageUseCase {
         type = lastContent.length === 0 ? 'snapshot' : 'token';
         lastContent = message.content;
       }
-      if (message.generationPhase === 'retrieving') {
+      if (
+        message.generationPhase === 'retrieving' ||
+        message.generationPhase === 'verifying'
+      ) {
         type = 'phase';
       }
       if (status === 'done') {

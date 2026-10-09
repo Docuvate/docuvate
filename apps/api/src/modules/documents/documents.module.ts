@@ -20,8 +20,6 @@ import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-
 import { CancelDocumentChatGenerationUseCase } from './application/cancel-document-chat-generation.use-case.js';
 import { RetryDocumentChatMessageUseCase } from './application/retry-document-chat-message.use-case.js';
 import { StreamDocumentChatMessageUseCase } from './application/stream-document-chat-message.use-case.js';
-import { PgDocumentChatThreadRepository } from './infrastructure/pg-document-chat-thread.repository.js';
-import { DOCUMENT_CHAT_THREAD_REPOSITORY } from '../../shared/domain/ports.js';
 import { ExtractionQueueService } from '../extraction/infrastructure/extraction-queue.service.js';
 import { LabelsModule } from '../labels/labels.module.js';
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
@@ -37,6 +35,8 @@ import { GetDocumentLayoutTypstUseCase } from './application/get-document-layout
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
 import { SearchModule } from '../search/search.module.js';
+import { CitedChatModule } from '../cited-chat/cited-chat.module.js';
+import { ChatInfrastructureModule } from '../chat-infrastructure/chat-infrastructure.module.js';
 
 @Module({
   imports: [
@@ -47,6 +47,8 @@ import { SearchModule } from '../search/search.module.js';
     DocumentPipelineModule,
     ExtractionFeedbackModule,
     SearchModule,
+    CitedChatModule,
+    ChatInfrastructureModule,
   ],
   controllers: [DocumentsController],
   providers: [
@@ -71,8 +73,6 @@ import { SearchModule } from '../search/search.module.js';
     CancelDocumentChatGenerationUseCase,
     RetryDocumentChatMessageUseCase,
     StreamDocumentChatMessageUseCase,
-    PgDocumentChatThreadRepository,
-    { provide: DOCUMENT_CHAT_THREAD_REPOSITORY, useExisting: PgDocumentChatThreadRepository },
     CompareDocumentExtractionUseCase,
     ApplyArenaWinnerExtractionUseCase,
     RunArenaSampleCompareUseCase,
@@ -81,6 +81,16 @@ import { SearchModule } from '../search/search.module.js';
     GetDocumentLayoutHtmlUseCase,
     GetDocumentLayoutTypstUseCase,
   ],
-  exports: [UploadDocumentUseCase, GetDocumentContentUseCase, QueueExtractionUseCase],
+  exports: [
+    UploadDocumentUseCase,
+    GetDocumentContentUseCase,
+    QueueExtractionUseCase,
+    ListDocumentChatThreadMessagesUseCase,
+    StreamDocumentChatMessageUseCase,
+    CancelDocumentChatGenerationUseCase,
+    RetryDocumentChatMessageUseCase,
+    DocumentChatGenerationQueueService,
+    ChatInfrastructureModule,
+  ],
 })
 export class DocumentsModule {}

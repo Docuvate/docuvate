@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
+import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { TYPO_SEARCH_CORPUS, recallAtK } from '../../src/modules/search/domain/typo-corpus.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
@@ -31,7 +32,11 @@ describe('PgGlobalSearchRepository (Testcontainers Postgres)', () => {
         ) VALUES ($1, $2, $3, $4, 'application/pdf', $5, 'ready', $6, now(), now())`,
         [id, userId, `${title}.pdf`, title, `key/${id}`, `${title}. Body text for ${title}.`]
       );
-      await repo.indexDocumentChunks(userId, id, `${title}. Monatliche ${title} Inhalt.`);
+      await repo.indexDocumentChunks(
+        userId,
+        id,
+        splitTextChunksWithSpans(`${title}. Monatliche ${title} Inhalt.`)
+      );
     }
   }, 120_000);
 

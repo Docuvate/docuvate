@@ -166,6 +166,27 @@ class DocumentChatRagContextResponse(BaseModel):
     chunks: list[str] = Field(default_factory=list)
 
 
+class RagRetrievePassage(BaseModel):
+    id: str
+    text: str
+
+
+class RagRetrieveRequest(BaseModel):
+    query: str
+    passages: list[RagRetrievePassage] = Field(default_factory=list)
+
+
+class RagRetrieveResultItem(BaseModel):
+    id: str
+    score: float
+
+
+class RagRetrieveResponse(BaseModel):
+    results: list[RagRetrieveResultItem] = Field(default_factory=list)
+    reranker_used: bool = False
+    reranker_model: str | None = None
+
+
 class DocumentChatProviderInfo(BaseModel):
     id: str
     label: str

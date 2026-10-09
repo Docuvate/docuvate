@@ -58,10 +58,13 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
       `INSERT INTO chat_thread_documents (thread_id, document_id) VALUES ($1, $2)`,
       [threadId, docA]
     );
+    const { splitTextChunksWithSpans } = await import(
+      '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js'
+    );
     await new PgGlobalSearchRepository(pool).indexDocumentChunks(
       userA,
       docA,
-      'Vertrauliche Vereinbarung zwischen den Parteien.'
+      splitTextChunksWithSpans('Vertrauliche Vereinbarung zwischen den Parteien.')
     );
   }, 60_000);
 

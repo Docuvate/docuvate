@@ -18,11 +18,12 @@ import { buildDocumentRagSystemPrompt } from '../../../shared/infrastructure/cha
 import { fetchWorkerRagContext } from '../../../shared/infrastructure/chat/fetch-worker-rag-context.js';
 import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
 import { DocumentChatGenerationCancelRegistry } from '../infrastructure/document-chat-generation-cancel.registry.js';
+import { CitedChatGenerationService } from '../../cited-chat/application/cited-chat-generation.service.js';
 
 export interface DocumentChatGenerationJobPayload {
   messageId: string;
   threadId: string;
-  documentId: string;
+  documentId?: string;
   userId: string;
   userMessage: string;
 }
@@ -41,7 +42,8 @@ export class RunDocumentChatGenerationUseCase {
     @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     private readonly effectiveChatProvider: EffectiveDocumentChatProviderUseCase,
-    private readonly cancelRegistry: DocumentChatGenerationCancelRegistry
+    private readonly cancelRegistry: DocumentChatGenerationCancelRegistry,
+    private readonly citedChat: CitedChatGenerationService
   ) {}
 
   async execute(payload: DocumentChatGenerationJobPayload): Promise<void> {
@@ -53,8 +55,18 @@ export class RunDocumentChatGenerationUseCase {
       throw new NotFoundError('Chat message');
     }
 
-    const doc = await this.documents.findByIdForUser(documentId, userId);
-    if (!doc) {
+    const thread = await this.threads.findThreadForUser(threadId, userId);
+    if (!thread) {
+      throw new NotFoundError('Chat thread');
+    }
+
+    const effectiveDocumentId =
+      documentId ?? (thread.documentIds.length === 1 ? thread.documentIds[0] : undefined);
+    const doc =
+      effectiveDocumentId != null
+        ? await this.documents.findByIdForUser(effectiveDocumentId, userId)
+        : null;
+    if (thread.scope === 'document' && !doc) {
       throw new NotFoundError('Document');
     }
 
@@ -65,6 +77,7 @@ export class RunDocumentChatGenerationUseCase {
           m.id !== messageId &&
           !(m.role === 'assistant' && (m.generationStatus === 'pending' || m.generationStatus === 'streaming'))
       )
+      .slice(-2)
       .map(({ role, content }) => ({ role, content }));
 
     const preferences = await this.prefs.getForUser(userId);
@@ -87,14 +100,31 @@ export class RunDocumentChatGenerationUseCase {
     });
 
     const context = {
-      title: doc.title,
-      filename: doc.filename,
-      text: doc.extraction?.text ?? '',
-      fields: doc.extraction?.fields ?? [],
+      title: doc?.title ?? 'Bibliothek',
+      filename: doc?.filename ?? '',
+      text: doc?.extraction?.text ?? '',
+      fields: doc?.extraction?.fields ?? [],
     };
 
     try {
-      if (providerId === 'rag-ollama' || providerId === 'ollama') {
+      if (providerId === 'rag-ollama') {
+        await this.citedChat.generate({
+          messageId,
+          threadId,
+          userId,
+          userMessage,
+          documentIds:
+            thread.scope === 'library'
+              ? thread.documentIds
+              : effectiveDocumentId
+                ? [effectiveDocumentId]
+                : thread.documentIds,
+          scope: thread.scope === 'library' ? 'library' : 'document',
+        });
+        return;
+      }
+
+      if (providerId === 'ollama') {
         await this.runOllamaPath(
           userId,
           messageId,
@@ -114,6 +144,9 @@ export class RunDocumentChatGenerationUseCase {
 
       let file: { buffer: Buffer; mimeType: string } | undefined;
       if (providerId === 'donut-ml') {
+        if (!doc) {
+          throw new NotFoundError('Document');
+        }
         const buffer = await this.storage.getObject(doc.storageKey);
         file = { buffer, mimeType: doc.mimeType };
       }
@@ -181,9 +214,10 @@ export class RunDocumentChatGenerationUseCase {
       generationPhase: 'generating',
     });
 
+    const model = process.env['OLLAMA_MODEL'] ?? 'qwen2.5:1.5b';
     const systemContent =
       providerId === 'rag-ollama'
-        ? buildDocumentRagSystemPrompt(context, ragContextText)
+        ? buildDocumentRagSystemPrompt(context, ragContextText, { ollamaModel: model })
         : `Du beantwortest Fragen zum Dokument „${context.title}“ (${context.filename}).`;
 
     const messages = [

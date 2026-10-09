@@ -9,6 +9,7 @@ export const routes = {
   inviteAccept: '/invite',
   inbox: '/inbox',
   documents: '/documents',
+  globalChat: '/chat',
   savedViews: '/documents/views',
   document: (id: string) => `/documents/${id}`,
   filesystem: '/filesystem',

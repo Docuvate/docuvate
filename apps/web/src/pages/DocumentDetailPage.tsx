@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { routes } from '../lib/routes';
@@ -77,6 +77,7 @@ export function DocumentDetailPage() {
   const { data: session } = authClient.useSession();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [doc, setDoc] = useState<DocumentDto | null>(null);
   const [folders, setFolders] = useState<FolderDto[]>([]);
   const [tags, setTags] = useState<TagDto[]>([]);
@@ -117,6 +118,17 @@ export function DocumentDetailPage() {
   useEffect(() => {
     docRef.current = doc;
   }, [doc]);
+
+  useEffect(() => {
+    const state = location.state as { highlightBlocks?: ExtractionBlock[]; citationPage?: number } | null;
+    if (state?.highlightBlocks?.length) {
+      setHighlightBlocks(state.highlightBlocks);
+    } else if (state?.citationPage != null) {
+      setHighlightBlocks((prev) =>
+        prev.length > 0 ? prev : blocks.filter((b) => b.page === state.citationPage)
+      );
+    }
+  }, [location.state, blocks]);
 
   useEffect(() => {
     const userId = session?.user?.id;
