@@ -63,6 +63,14 @@ export class DocumentListQueryDto {
   inbox?: string;
 
   @IsOptional()
+  @IsString()
+  documentDateFrom?: string;
+
+  @IsOptional()
+  @IsString()
+  documentDateTo?: string;
+
+  @IsOptional()
   @IsIn(SORT_FIELDS)
   sort?: DocumentSortField;
 

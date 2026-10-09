@@ -20,6 +20,7 @@ import 'package:docuvate/src/generated/src/api/models_api.dart';
 import 'package:docuvate/src/generated/src/api/organizer_api.dart';
 import 'package:docuvate/src/generated/src/api/search_api.dart';
 import 'package:docuvate/src/generated/src/api/settings_api.dart';
+import 'package:docuvate/src/generated/src/api/workspace_api.dart';
 
 class DocuvateApi {
   static const String basePath = r'/v1';
@@ -139,5 +140,11 @@ class DocuvateApi {
   /// by doing that all interceptors will not be executed
   SettingsApi getSettingsApi() {
     return SettingsApi(dio, serializers);
+  }
+
+  /// Get WorkspaceApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  WorkspaceApi getWorkspaceApi() {
+    return WorkspaceApi(dio, serializers);
   }
 }

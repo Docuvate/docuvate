@@ -558,6 +558,10 @@ export interface DocumentListQuery {
   inbox?: boolean;
   /** Ready documents with no non-inbox label assigned. */
   withoutNonInboxLabel?: boolean;
+  /** Inclusive ISO date (YYYY-MM-DD) on document_date. */
+  documentDateFrom?: string;
+  /** Inclusive ISO date (YYYY-MM-DD) on document_date. */
+  documentDateTo?: string;
   sort?: DocumentSortField;
   order?: SortOrder;
 }
@@ -1001,3 +1005,22 @@ export {
   type LabelAssignmentInventory,
   type LabelInventoryDocument,
 } from './label-document-inventory.js';
+
+export type {
+  SavedViewVisibility,
+  SavedViewListScope,
+  SavedViewViewMode,
+  SavedViewFilterMode,
+  LibraryTableColumnId,
+  SavedDocumentViewDto,
+  SavedDocumentViewListResponse,
+  CreateSavedDocumentViewRequest,
+  UpdateSavedDocumentViewRequest,
+  ReorderSavedDocumentViewsRequest,
+  DashboardWidgetType,
+  DashboardWidgetDto,
+  DashboardLayoutResponse,
+  ReplaceDashboardLayoutRequest,
+  DashboardStatisticsDto,
+  InstallationDashboardDefaultResponse,
+} from './workspace.js';

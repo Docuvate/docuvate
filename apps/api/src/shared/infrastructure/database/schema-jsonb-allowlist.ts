@@ -9,6 +9,7 @@ export const SCHEMA_JSONB_ALLOWLIST = [
   { table: 'extraction_arena_ratings', column: 'compare_snapshot' },
   { table: 'ml_training_data_snapshots', column: 'metadata' },
   { table: 'ml_model_versions', column: 'metrics' },
+  { table: 'saved_document_views', column: 'visible_columns' },
 ] as const;
 
 /** JSONB id-array and payload columns removed by the 3NF migration; they must not reappear. */

@@ -34,8 +34,23 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(CreateDocumentChatThreadRequestDto.serializer)
       ..add(CreateFolderRequestDto.serializer)
       ..add(CreateMappeRequestDto.serializer)
+      ..add(CreateSavedDocumentViewRequestDto.serializer)
+      ..add(CreateSavedDocumentViewRequestDtoFilterModeEnum.serializer)
+      ..add(CreateSavedDocumentViewRequestDtoListScopeEnum.serializer)
+      ..add(CreateSavedDocumentViewRequestDtoOrderEnum.serializer)
+      ..add(CreateSavedDocumentViewRequestDtoSortEnum.serializer)
+      ..add(CreateSavedDocumentViewRequestDtoStatusEnum.serializer)
+      ..add(CreateSavedDocumentViewRequestDtoViewModeEnum.serializer)
+      ..add(CreateSavedDocumentViewRequestDtoVisibilityEnum.serializer)
       ..add(CreateTagRequestDto.serializer)
       ..add(CreateTagRequestDtoMatchingAlgorithmEnum.serializer)
+      ..add(DashboardLayoutResponseDto.serializer)
+      ..add(DashboardStatisticsDtoClass.serializer)
+      ..add(DashboardStatisticsDtoClassTopLabelsInner.serializer)
+      ..add(DashboardWidgetDtoClass.serializer)
+      ..add(DashboardWidgetDtoClassTypeEnum.serializer)
+      ..add(DashboardWidgetInputDto.serializer)
+      ..add(DashboardWidgetInputDtoTypeEnum.serializer)
       ..add(DismissLabelRecommendationRequestDto.serializer)
       ..add(DismissTagSuggestionRequestDto.serializer)
       ..add(DocumentBulkActionDto.serializer)
@@ -66,6 +81,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(ExtractionEngineListResponseDto.serializer)
       ..add(FolderListResponseDto.serializer)
       ..add(ImportFromConnectorRequestDto.serializer)
+      ..add(InstallationDashboardDefaultResponseDto.serializer)
       ..add(InviteAdminUserRequestDto.serializer)
       ..add(InviteAdminUserRequestDtoRoleEnum.serializer)
       ..add(LabelMapResponseDtoClass.serializer)
@@ -74,6 +90,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(LabelRecommendationBlocklistEntryResponseDtoSource_Enum.serializer)
       ..add(LabelRecommendationBlocklistListResponseDto.serializer)
       ..add(LabelRecommendationListResponseDto.serializer)
+      ..add(LibraryTableColumnId.serializer)
       ..add(MappeListResponseDto.serializer)
       ..add(MlModelFamilyDto.serializer)
       ..add(MlModelFamilyDtoKindEnum.serializer)
@@ -87,6 +104,8 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(MlRetrainJobListResponseDto.serializer)
       ..add(OkResponseDto.serializer)
       ..add(ProposeLabelRecommendationBlocklistPatternRequestDto.serializer)
+      ..add(ReorderSavedDocumentViewsRequestDto.serializer)
+      ..add(ReplaceDashboardLayoutRequestDto.serializer)
       ..add(ReplaceRecognizedFieldItemDto.serializer)
       ..add(ReplaceRecognizedFieldItemDtoFieldTypeEnum.serializer)
       ..add(ReplaceRecognizedFieldItemDtoGateLabelMatchEnum.serializer)
@@ -94,6 +113,15 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(ReplaceTagCustomFieldItemDto.serializer)
       ..add(ReplaceTagCustomFieldItemDtoFieldTypeEnum.serializer)
       ..add(ReplaceTagCustomFieldsRequestDto.serializer)
+      ..add(SavedDocumentViewDtoClass.serializer)
+      ..add(SavedDocumentViewDtoClassFilterModeEnum.serializer)
+      ..add(SavedDocumentViewDtoClassListScopeEnum.serializer)
+      ..add(SavedDocumentViewDtoClassOrderEnum.serializer)
+      ..add(SavedDocumentViewDtoClassSortEnum.serializer)
+      ..add(SavedDocumentViewDtoClassStatusEnum.serializer)
+      ..add(SavedDocumentViewDtoClassViewModeEnum.serializer)
+      ..add(SavedDocumentViewDtoClassVisibilityEnum.serializer)
+      ..add(SavedDocumentViewListResponseDto.serializer)
       ..add(SendDocumentChatThreadMessageRequestDto.serializer)
       ..add(SendDocumentChatThreadMessageResponseDto.serializer)
       ..add(SetAdminUserRoleRequestDto.serializer)
@@ -109,6 +137,14 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(UpdateDocumentRequestDto.serializer)
       ..add(UpdateFolderRequestDto.serializer)
       ..add(UpdateMappeRequestDto.serializer)
+      ..add(UpdateSavedDocumentViewRequestDto.serializer)
+      ..add(UpdateSavedDocumentViewRequestDtoFilterModeEnum.serializer)
+      ..add(UpdateSavedDocumentViewRequestDtoListScopeEnum.serializer)
+      ..add(UpdateSavedDocumentViewRequestDtoOrderEnum.serializer)
+      ..add(UpdateSavedDocumentViewRequestDtoSortEnum.serializer)
+      ..add(UpdateSavedDocumentViewRequestDtoStatusEnum.serializer)
+      ..add(UpdateSavedDocumentViewRequestDtoViewModeEnum.serializer)
+      ..add(UpdateSavedDocumentViewRequestDtoVisibilityEnum.serializer)
       ..add(UpdateTagRequestDto.serializer)
       ..add(UpdateTagRequestDtoMatchingAlgorithmEnum.serializer)
       ..add(UpdateUserSettingsRequestDto.serializer)
@@ -129,6 +165,18 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(
               BuiltList, const [const FullType(ChatMessageRecordDto)]),
           () => new ListBuilder<ChatMessageRecordDto>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(DashboardWidgetDtoClass)]),
+          () => new ListBuilder<DashboardWidgetDtoClass>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(DashboardWidgetInputDto)]),
+          () => new ListBuilder<DashboardWidgetInputDto>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(DashboardWidgetInputDto)]),
+          () => new ListBuilder<DashboardWidgetInputDto>())
       ..addBuilderFactory(
           const FullType(
               BuiltList, const [const FullType(DocumentChatProviderInfoDto)]),
@@ -186,6 +234,27 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(BuiltList, const [const FullType(JsonObject)]),
           () => new ListBuilder<JsonObject>())
       ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(LibraryTableColumnId)]),
+          () => new ListBuilder<LibraryTableColumnId>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(LibraryTableColumnId)]),
+          () => new ListBuilder<LibraryTableColumnId>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(LibraryTableColumnId)]),
+          () => new ListBuilder<LibraryTableColumnId>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
+      ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(MlModelFamilyDto)]),
           () => new ListBuilder<MlModelFamilyDto>())
       ..addBuilderFactory(
@@ -202,6 +271,13 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(
               BuiltList, const [const FullType(ReplaceTagCustomFieldItemDto)]),
           () => new ListBuilder<ReplaceTagCustomFieldItemDto>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(SavedDocumentViewDtoClass)]),
+          () => new ListBuilder<SavedDocumentViewDtoClass>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
           () => new ListBuilder<String>())
@@ -245,7 +321,16 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(
               BuiltMap, const [const FullType(String), const FullType(num)]),
-          () => new MapBuilder<String, num>()))
+          () => new MapBuilder<String, num>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltMap, const [const FullType(String), const FullType(num)]),
+          () => new MapBuilder<String, num>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [
+            const FullType(DashboardStatisticsDtoClassTopLabelsInner)
+          ]),
+          () => new ListBuilder<DashboardStatisticsDtoClassTopLabelsInner>()))
     .build();
 
 // ignore_for_file: deprecated_member_use_from_same_package,type=lint

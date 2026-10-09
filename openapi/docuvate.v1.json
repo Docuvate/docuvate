@@ -1801,6 +1801,435 @@
         ]
       }
     },
+    "/dashboard": {
+      "get": {
+        "operationId": "getDashboardLayout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardLayoutResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get personal dashboard layout",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "put": {
+        "operationId": "replaceDashboardLayout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceDashboardLayoutRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardLayoutResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Replace personal dashboard layout",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/dashboard/installation-admin": {
+      "get": {
+        "operationId": "getInstallationAdminStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Whether the current user is an installation admin (ADR 019)",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/dashboard/installation-default": {
+      "get": {
+        "operationId": "getInstallationDashboardDefault",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationDashboardDefaultResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Installation default dashboard template",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "put": {
+        "operationId": "setInstallationDashboardDefault",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceDashboardLayoutRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstallationDashboardDefaultResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Set installation default dashboard (admin)",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/dashboard/statistics": {
+      "get": {
+        "operationId": "getDashboardStatistics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardStatisticsDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Dashboard document statistics",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
     "/document-pipeline/modules": {
       "get": {
         "description": "Read-only module descriptors for OCR and post-OCR steps (order not persisted yet).",
@@ -1961,6 +2390,22 @@
           },
           {
             "name": "inbox",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentDateFrom",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "documentDateTo",
             "required": false,
             "in": "query",
             "schema": {
@@ -6582,6 +7027,477 @@
         ]
       }
     },
+    "/saved-views": {
+      "get": {
+        "operationId": "listSavedDocumentViews",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedDocumentViewListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List saved document views",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "post": {
+        "operationId": "createSavedDocumentView",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSavedDocumentViewRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedDocumentViewDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create saved document view",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/saved-views/reorder": {
+      "put": {
+        "operationId": "reorderSavedDocumentViews",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderSavedDocumentViewsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Reorder owned saved views",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/saved-views/{id}": {
+      "get": {
+        "operationId": "getSavedDocumentView",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedDocumentViewDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get one saved document view",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "patch": {
+        "operationId": "updateSavedDocumentView",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSavedDocumentViewRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedDocumentViewDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update saved document view",
+        "tags": [
+          "workspace"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteSavedDocumentView",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete saved document view",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
     "/search": {
       "get": {
         "description": "Combines Postgres FTS, pg_trgm, and unaccent with optional semantic ranking over document_embeddings JSONB (bounded lexical candidates + in-API cosine, ADR 016). ABAC: only the caller’s own data.",
@@ -7961,6 +8877,125 @@
           "name"
         ]
       },
+      "CreateSavedDocumentViewRequestDto": {
+        "type": "object",
+        "properties": {
+          "visibleColumns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryTableColumnId"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "private",
+              "shared"
+            ]
+          },
+          "searchQuery": {
+            "type": "string"
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "updatedAt",
+              "createdAt",
+              "title",
+              "documentDate"
+            ]
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          "viewMode": {
+            "type": "string",
+            "enum": [
+              "klassisch",
+              "karten",
+              "fokus"
+            ]
+          },
+          "filterMode": {
+            "type": "string",
+            "enum": [
+              "ui",
+              "query"
+            ]
+          },
+          "listScope": {
+            "type": "string",
+            "enum": [
+              "all",
+              "folder",
+              "mappe"
+            ]
+          },
+          "folderId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "mappeId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "correspondentId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "uploaded",
+              "queued",
+              "extracting",
+              "ready",
+              "failed"
+            ]
+          },
+          "inbox": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "withoutNonInboxLabel": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "documentDateFrom": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentDateTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "pinnedSidebar": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "searchQuery"
+        ]
+      },
       "CreateTagRequestDto": {
         "type": "object",
         "properties": {
@@ -7989,6 +9024,161 @@
         },
         "required": [
           "name"
+        ]
+      },
+      "DashboardLayoutResponseDto": {
+        "type": "object",
+        "properties": {
+          "widgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardWidgetDtoClass"
+            }
+          },
+          "editMode": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "widgets",
+          "editMode"
+        ]
+      },
+      "DashboardStatisticsDtoClass": {
+        "type": "object",
+        "properties": {
+          "documentsTotal": {
+            "type": "number"
+          },
+          "byStatus": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "labelsAssignedCount": {
+            "type": "number"
+          },
+          "unlabeledCount": {
+            "type": "number"
+          },
+          "topLabels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "count": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "name",
+                "count"
+              ]
+            }
+          }
+        },
+        "required": [
+          "documentsTotal",
+          "byStatus",
+          "labelsAssignedCount",
+          "unlabeledCount",
+          "topLabels"
+        ]
+      },
+      "DashboardWidgetDtoClass": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "upload",
+              "saved_view",
+              "statistics",
+              "recent_documents",
+              "attention"
+            ]
+          },
+          "position": {
+            "type": "number"
+          },
+          "widthCols": {
+            "type": "number"
+          },
+          "heightRows": {
+            "type": "number"
+          },
+          "savedViewId": {
+            "type": "string",
+            "nullable": true
+          },
+          "itemLimit": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "position",
+          "widthCols",
+          "heightRows"
+        ]
+      },
+      "DashboardWidgetInputDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "saved_view",
+              "upload",
+              "statistics",
+              "recent_documents",
+              "attention"
+            ]
+          },
+          "position": {
+            "type": "number",
+            "minimum": 0
+          },
+          "widthCols": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 12
+          },
+          "heightRows": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 6
+          },
+          "savedViewId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "itemLimit": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "maximum": 50
+          }
+        },
+        "required": [
+          "type",
+          "position",
+          "widthCols",
+          "heightRows"
         ]
       },
       "DismissLabelRecommendationRequestDto": {
@@ -8538,6 +9728,20 @@
           "ref"
         ]
       },
+      "InstallationDashboardDefaultResponseDto": {
+        "type": "object",
+        "properties": {
+          "widgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardWidgetInputDto"
+            }
+          }
+        },
+        "required": [
+          "widgets"
+        ]
+      },
       "InviteAdminUserRequestDto": {
         "type": "object",
         "properties": {
@@ -8656,6 +9860,17 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "LibraryTableColumnId": {
+        "type": "string",
+        "enum": [
+          "title",
+          "labels",
+          "date",
+          "status",
+          "folder",
+          "updated"
         ]
       },
       "MappeListResponseDto": {
@@ -8899,6 +10114,35 @@
           "phrases"
         ]
       },
+      "ReorderSavedDocumentViewsRequestDto": {
+        "type": "object",
+        "properties": {
+          "orderedIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "orderedIds"
+        ]
+      },
+      "ReplaceDashboardLayoutRequestDto": {
+        "type": "object",
+        "properties": {
+          "widgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardWidgetInputDto"
+            }
+          }
+        },
+        "required": [
+          "widgets"
+        ]
+      },
       "ReplaceRecognizedFieldItemDto": {
         "type": "object",
         "properties": {
@@ -9007,6 +10251,156 @@
         },
         "required": [
           "fields"
+        ]
+      },
+      "SavedDocumentViewDtoClass": {
+        "type": "object",
+        "properties": {
+          "visibleColumns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryTableColumnId"
+            }
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "visibility": {
+            "enum": [
+              "private",
+              "shared"
+            ],
+            "type": "string"
+          },
+          "ownerUserId": {
+            "type": "string"
+          },
+          "searchQuery": {
+            "type": "string"
+          },
+          "sort": {
+            "enum": [
+              "createdAt",
+              "updatedAt",
+              "title",
+              "documentDate"
+            ],
+            "type": "string"
+          },
+          "order": {
+            "enum": [
+              "asc",
+              "desc"
+            ],
+            "type": "string"
+          },
+          "viewMode": {
+            "enum": [
+              "klassisch",
+              "karten",
+              "fokus"
+            ],
+            "type": "string"
+          },
+          "filterMode": {
+            "enum": [
+              "query",
+              "ui"
+            ],
+            "type": "string"
+          },
+          "listScope": {
+            "enum": [
+              "all",
+              "mappe",
+              "folder"
+            ],
+            "type": "string"
+          },
+          "folderId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mappeId": {
+            "type": "string",
+            "nullable": true
+          },
+          "correspondentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "nullable": true,
+            "enum": [
+              "uploaded",
+              "queued",
+              "extracting",
+              "ready",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "inbox": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "withoutNonInboxLabel": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pinnedSidebar": {
+            "type": "boolean"
+          },
+          "position": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "visibleColumns",
+          "id",
+          "name",
+          "visibility",
+          "ownerUserId",
+          "searchQuery",
+          "sort",
+          "order",
+          "viewMode",
+          "filterMode",
+          "listScope",
+          "tagIds",
+          "pinnedSidebar",
+          "position",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SavedDocumentViewListResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SavedDocumentViewDtoClass"
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "SendDocumentChatThreadMessageRequestDto": {
@@ -9237,6 +10631,121 @@
           "color": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "UpdateSavedDocumentViewRequestDto": {
+        "type": "object",
+        "properties": {
+          "visibleColumns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LibraryTableColumnId"
+            }
+          },
+          "name": {
+            "type": "string"
+          },
+          "visibility": {
+            "type": "string",
+            "enum": [
+              "private",
+              "shared"
+            ]
+          },
+          "searchQuery": {
+            "type": "string"
+          },
+          "sort": {
+            "type": "string",
+            "enum": [
+              "updatedAt",
+              "createdAt",
+              "title",
+              "documentDate"
+            ]
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "asc",
+              "desc"
+            ]
+          },
+          "viewMode": {
+            "type": "string",
+            "enum": [
+              "klassisch",
+              "karten",
+              "fokus"
+            ]
+          },
+          "filterMode": {
+            "type": "string",
+            "enum": [
+              "ui",
+              "query"
+            ]
+          },
+          "listScope": {
+            "type": "string",
+            "enum": [
+              "all",
+              "folder",
+              "mappe"
+            ]
+          },
+          "folderId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "mappeId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "correspondentId": {
+            "type": "string",
+            "nullable": true,
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true,
+            "enum": [
+              "uploaded",
+              "queued",
+              "extracting",
+              "ready",
+              "failed"
+            ]
+          },
+          "inbox": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "withoutNonInboxLabel": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "documentDateFrom": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentDateTo": {
+            "type": "string",
+            "nullable": true
+          },
+          "tagIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "pinnedSidebar": {
+            "type": "boolean"
           }
         }
       },

@@ -103,7 +103,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           />
         ) : null}
         <div className="app-body">
-          <AppSidebar />
+          <AppSidebar
+            mobileDrawerOpen={narrowTopbar && mobileNavOpen}
+            onCloseMobileDrawer={() => setMobileNavOpen(false)}
+          />
           <main className="app-main">{children}</main>
         </div>
       </div>

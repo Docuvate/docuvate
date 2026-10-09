@@ -167,6 +167,14 @@ export class PgDocumentRepository implements DocumentRepository {
       params.push(q);
       paramIndex++;
     }
+    if (filters.documentDateFrom) {
+      conditions.push(`d.document_date >= $${paramIndex++}::date`);
+      params.push(filters.documentDateFrom);
+    }
+    if (filters.documentDateTo) {
+      conditions.push(`d.document_date <= $${paramIndex++}::date`);
+      params.push(filters.documentDateTo);
+    }
 
     const sortField = filters.sort ?? 'updatedAt';
     const order = filters.order === 'asc' ? 'ASC' : 'DESC';

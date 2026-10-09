@@ -30,6 +30,11 @@ async function purgeDocuments(userId) {
   const pg = require('pg');
   const pool = new pg.Pool({ connectionString: DATABASE_URL });
   try {
+    await pool.query(
+      'DELETE FROM saved_document_view_tags WHERE view_id IN (SELECT id FROM saved_document_views WHERE owner_user_id = $1)',
+      [userId]
+    );
+    await pool.query('DELETE FROM saved_document_views WHERE owner_user_id = $1', [userId]);
     await pool.query('DELETE FROM documents WHERE user_id = $1', [userId]);
   } finally {
     await pool.end();

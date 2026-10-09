@@ -13,17 +13,24 @@ import { LibraryPageDocumentSection } from './library/LibraryPageDocumentSection
 import { useLibraryDocumentContextMenu } from './library/useLibraryDocumentContextMenu';
 import { countLibraryActiveFilters } from '../lib/libraryActiveFilterCount';
 import { useLibraryPageData } from './library/useLibraryPageData';
+import { SaveViewDialog } from '../components/library/SaveViewDialog';
+import { Button } from '../components/ui/Button';
+import { useToastNotify } from '../components/save/ToastProvider';
+import { Link } from 'react-router-dom';
+import { routes } from '../lib/routes';
 
 export function LibraryPage() {
   const mode = 'all' as const;
   const { t } = useTranslation();
   const { folderId, mappeId } = useParams<{ folderId?: string; mappeId?: string }>();
   const data = useLibraryPageData(mode);
+  const { pushSuccess, pushError } = useToastNotify();
   const ctx = useLibraryDocumentContextMenu(data);
   const filterToggleRef = useRef<HTMLButtonElement | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1280px)').matches
   );
+  const [saveViewOpen, setSaveViewOpen] = useState(false);
   const [narrowFilters, setNarrowFilters] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(max-width: 1279px)').matches
   );
@@ -69,10 +76,34 @@ export function LibraryPage() {
       <div className="page library-page" data-ux="page">
         <header className="page-header">
           <div>
-            <h1 data-ux="page-title">{data.pageTitle}</h1>
-            {subtitle ? <p className="muted">{subtitle}</p> : null}
+            <h1 data-ux="page-title">{data.activeViewName ?? data.pageTitle}</h1>
+            {data.activeViewName ? (
+              <p className="muted">{t('savedViews.activeViewLead', { name: data.activeViewName })}</p>
+            ) : subtitle ? (
+              <p className="muted">{subtitle}</p>
+            ) : null}
           </div>
           <div className="library-toolbar">
+            <Button type="button" variant="secondary" onClick={() => setSaveViewOpen(true)}>
+              {t('savedViews.saveAction')}
+            </Button>
+            {data.activeViewId ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => {
+                  void data
+                    .updateActiveSavedView()
+                    .then(() => pushSuccess(t('common.saved')))
+                    .catch((err) =>
+                      pushError(err instanceof Error ? err.message : t('errors.generic'))
+                    );
+                }}
+              >
+                {t('savedViews.updateFromFilters')}
+              </Button>
+            ) : null}
+            <Link className="btn btn-secondary" to={routes.savedViews}>{t('savedViews.manageNav')}</Link>
             <LibraryViewSwitcher value={data.viewMode} onChange={data.onViewModeChange} />
             <Select
               value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
@@ -143,6 +174,8 @@ export function LibraryPage() {
             />
           </LibraryFilterDrawer>
         ) : null}
+
+        <SaveViewDialog open={saveViewOpen} onClose={() => setSaveViewOpen(false)} data={data} />
       </div>
     </DocumentUploadProvider>
   );

@@ -59,6 +59,14 @@ import type {
   BanAdminUserRequest,
   InviteAdminUserRequest,
   SetAdminUserRoleRequest,
+  CreateSavedDocumentViewRequest,
+  DashboardLayoutResponse,
+  DashboardStatisticsDto,
+  ReplaceDashboardLayoutRequest,
+  ReorderSavedDocumentViewsRequest,
+  SavedDocumentViewDto,
+  SavedDocumentViewListResponse,
+  UpdateSavedDocumentViewRequest,
 } from '@docuvate/contracts';
 import { throwApiRequestError } from './apiErrors';
 
@@ -142,6 +150,8 @@ export async function listDocuments(filters: DocumentListQuery = {}): Promise<Do
     mappeId: filters.mappeId,
     unfiled: filters.unfiled ? 'true' : undefined,
     withoutNonInboxLabel: filters.withoutNonInboxLabel ? 'true' : undefined,
+    documentDateFrom: filters.documentDateFrom,
+    documentDateTo: filters.documentDateTo,
     sort: filters.sort,
     order: filters.order,
   });
@@ -691,6 +701,68 @@ export async function revokeAdminUserInvitation(userId: string): Promise<void> {
   await request<{ ok: true }>(`/admin/users/${encodeURIComponent(userId)}/revoke-invitation`, {
     method: 'POST',
   });
+}
+
+export async function listSavedDocumentViews(): Promise<SavedDocumentViewDto[]> {
+  const data = await request<SavedDocumentViewListResponse>('/saved-views');
+  return data.items;
+}
+
+export async function getSavedDocumentView(id: string): Promise<SavedDocumentViewDto> {
+  return request<SavedDocumentViewDto>(`/saved-views/${encodeURIComponent(id)}`);
+}
+
+export async function createSavedDocumentView(
+  body: CreateSavedDocumentViewRequest
+): Promise<SavedDocumentViewDto> {
+  return request<SavedDocumentViewDto>('/saved-views', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateSavedDocumentView(
+  id: string,
+  body: UpdateSavedDocumentViewRequest
+): Promise<SavedDocumentViewDto> {
+  return request<SavedDocumentViewDto>(`/saved-views/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteSavedDocumentView(id: string): Promise<void> {
+  await request<void>(`/saved-views/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+export async function reorderSavedDocumentViews(
+  body: ReorderSavedDocumentViewsRequest
+): Promise<void> {
+  await request<void>('/saved-views/reorder', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getDashboardLayout(): Promise<DashboardLayoutResponse> {
+  return request<DashboardLayoutResponse>('/dashboard');
+}
+
+export async function replaceDashboardLayout(
+  body: ReplaceDashboardLayoutRequest
+): Promise<DashboardLayoutResponse> {
+  return request<DashboardLayoutResponse>('/dashboard', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getDashboardStatistics(): Promise<DashboardStatisticsDto> {
+  return request<DashboardStatisticsDto>('/dashboard/statistics');
+}
+
+export async function getInstallationAdminStatus(): Promise<{ isInstallationAdmin: boolean }> {
+  return request<{ isInstallationAdmin: boolean }>('/dashboard/installation-admin');
 }
 
 export { baseURL };
