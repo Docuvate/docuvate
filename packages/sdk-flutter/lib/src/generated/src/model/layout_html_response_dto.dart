@@ -12,17 +12,26 @@ part 'layout_html_response_dto.g.dart';
 ///
 /// Properties:
 /// * [html] 
+/// * [reconstructionReliable] 
+/// * [unreliableReason] 
 @BuiltValue()
 abstract class LayoutHtmlResponseDto implements Built<LayoutHtmlResponseDto, LayoutHtmlResponseDtoBuilder> {
   @BuiltValueField(wireName: r'html')
   String get html;
+
+  @BuiltValueField(wireName: r'reconstructionReliable')
+  bool get reconstructionReliable;
+
+  @BuiltValueField(wireName: r'unreliableReason')
+  String? get unreliableReason;
 
   LayoutHtmlResponseDto._();
 
   factory LayoutHtmlResponseDto([void updates(LayoutHtmlResponseDtoBuilder b)]) = _$LayoutHtmlResponseDto;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(LayoutHtmlResponseDtoBuilder b) => b;
+  static void _defaults(LayoutHtmlResponseDtoBuilder b) => b
+      ..reconstructionReliable = true;
 
   @BuiltValueSerializer(custom: true)
   static Serializer<LayoutHtmlResponseDto> get serializer => _$LayoutHtmlResponseDtoSerializer();
@@ -45,6 +54,18 @@ class _$LayoutHtmlResponseDtoSerializer implements PrimitiveSerializer<LayoutHtm
       object.html,
       specifiedType: const FullType(String),
     );
+    yield r'reconstructionReliable';
+    yield serializers.serialize(
+      object.reconstructionReliable,
+      specifiedType: const FullType(bool),
+    );
+    if (object.unreliableReason != null) {
+      yield r'unreliableReason';
+      yield serializers.serialize(
+        object.unreliableReason,
+        specifiedType: const FullType(String),
+      );
+    }
   }
 
   @override
@@ -74,6 +95,20 @@ class _$LayoutHtmlResponseDtoSerializer implements PrimitiveSerializer<LayoutHtm
             specifiedType: const FullType(String),
           ) as String;
           result.html = valueDes;
+          break;
+        case r'reconstructionReliable':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.reconstructionReliable = valueDes;
+          break;
+        case r'unreliableReason':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.unreliableReason = valueDes;
           break;
         default:
           unhandled.add(key);
