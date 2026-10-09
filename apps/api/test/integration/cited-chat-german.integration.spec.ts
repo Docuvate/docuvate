@@ -81,6 +81,17 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     await closeIntegrationPool();
   });
 
+  function ollamaStreamResponse(content: string): Response {
+    const line = `${JSON.stringify({ message: { content }, done: true })}\n`;
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode(line));
+        controller.close();
+      },
+    });
+    return new Response(stream, { status: 200, headers: { 'Content-Type': 'application/json' } });
+  }
+
   function mockRerankAndOllama(ollamaClaims: Array<{ text: string; source: string; quote: string }>) {
     vi.stubGlobal(
       'fetch',
@@ -90,10 +101,13 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
           const body = JSON.parse(String(init?.body ?? '{}')) as {
             passages: Array<{ id: string }>;
           };
-          const id = body.passages[0]?.id ?? 'chunk';
+          const results = body.passages.map((p, i) => ({
+            id: p.id,
+            score: 0.95 - i * 0.05,
+          }));
           return new Response(
             JSON.stringify({
-              results: [{ id, score: 0.31 }],
+              results,
               reranker_used: true,
               reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
             }),
@@ -101,11 +115,14 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
           );
         }
         if (url.includes('/api/chat')) {
+          const payload = JSON.stringify({ claims: ollamaClaims });
+          const reqBody = JSON.parse(String(init?.body ?? '{}')) as { stream?: boolean };
+          if (reqBody.stream) {
+            return ollamaStreamResponse(payload);
+          }
           return new Response(
             JSON.stringify({
-              message: {
-                content: JSON.stringify({ claims: ollamaClaims }),
-              },
+              message: { content: payload },
             }),
             { status: 200 }
           );
@@ -268,27 +285,25 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
           );
         }
         if (url.includes('/api/chat')) {
-          return new Response(
-            JSON.stringify({
-              message: {
-                content: JSON.stringify({
-                  claims: [
-                    {
-                      text: 'Gesamtsumme 1.234,56 EUR',
-                      source: 'S1',
-                      quote: 'Gesamtsumme: 1.234,56 EUR',
-                    },
-                    {
-                      text: 'Hundesteuer 120,00 EUR',
-                      source: 'S2',
-                      quote: 'Jahresgebühr: 120,00 EUR',
-                    },
-                  ],
-                }),
+          const payload = JSON.stringify({
+            claims: [
+              {
+                text: 'Gesamtsumme 1.234,56 EUR',
+                source: 'S1',
+                quote: 'Gesamtsumme: 1.234,56 EUR',
               },
-            }),
-            { status: 200 }
-          );
+              {
+                text: 'Hundesteuer 120,00 EUR',
+                source: 'S2',
+                quote: 'Jahresgebühr: 120,00 EUR',
+              },
+            ],
+          });
+          const reqBody = JSON.parse(String(init?.body ?? '{}')) as { stream?: boolean };
+          if (reqBody.stream) {
+            return ollamaStreamResponse(payload);
+          }
+          return new Response(JSON.stringify({ message: { content: payload } }), { status: 200 });
         }
         throw new Error(`unexpected fetch ${url}`);
       })

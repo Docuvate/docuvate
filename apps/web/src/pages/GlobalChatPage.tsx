@@ -217,7 +217,7 @@ export function GlobalChatPage() {
     <div className="page global-chat-page" data-ux="page">
       <header className="page-header global-chat-page-header">
         <div>
-          <h1 data-ux="page-title">{t('globalChat.title')}</h1>
+          <h1 id="global-chat-heading" data-ux="page-title">{t('globalChat.title')}</h1>
           <p className="muted">{t('globalChat.subtitle')}</p>
         </div>
       </header>
@@ -227,8 +227,6 @@ export function GlobalChatPage() {
       ) : null}
 
       <section className="doc-chat global-chat-doc-chat" aria-labelledby="global-chat-heading">
-        <h2 id="global-chat-heading" className="sr-only">{t('globalChat.title')}</h2>
-
         <div
           className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}`}
         >
