@@ -60,8 +60,3 @@ export function comparisonsDetailPath(locale: SiteLocale, slug: string): string 
 export function comparisonsHubPath(locale: SiteLocale): string {
   return locale === 'de' ? '/docs/vergleiche/methodik' : '/docs/comparisons/methodology';
 }
-
-/** @deprecated Use {@link comparisonsHubPath} for index links. */
-export function comparisonsBasePath(locale: SiteLocale): string {
-  return comparisonsHubPath(locale);
-}
