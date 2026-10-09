@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "Docuvate — Document management with structured extraction",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "LicenseRef-Docuvate-SUL-1.0",
   "engines": {
     "node": ">=24.21.0"
   },

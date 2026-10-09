@@ -1,35 +1,6 @@
 # License
 
-Copyright (c) 2026 Thomas Faust. All rights reserved.
-
-Portions of the Docuvate software in this repository are licensed as follows:
-
-- **Historical releases:** Commits on the default branch at or before
-  `c3212765e196269b3c47a5e597897553c17824dd` (including tagged release **0.1.0**)
-  were distributed under **GNU Affero General Public License v3.0 (AGPL-3.0)**. That
-  license continues to apply to those versions only; it does not apply to newer
-  commits unless you remain on an older revision.
-- **Enterprise Edition:** Docuvate Enterprise and Docuvate Cloud are **separate commercial
-  products** (private repository and packages) that **depend on and include** this Community
-  Edition. They are not part of this repository. Production use of Enterprise features or
-  vendor-hosted Cloud requires a commercial agreement with Thomas Faust; see
-  [docuvate.de](https://docuvate.de).
-- **SDKs:** The packages `packages/sdk-node` and `packages/sdk-flutter` (and their
-  `LICENSE` files) are under the **MIT License** so you may embed them in your
-  applications freely.
-- **Third-party components** incorporated into Docuvate remain under the licenses
-  provided by their respective owners (see dependency notices and package metadata).
-- **Everything else** in this repository (Community Edition) is available under the
-  **Sustainable Use License 1.0** below.
-
-Docuvate is **source-available** / **fair-code**, not “open source” in the OSI sense.
-See [TRADEMARKS.md](./TRADEMARKS.md) for brand use.
-
-The Sustainable Use License text below is reused from
-[n8n’s Sustainable Use License 1.0](https://github.com/n8n-io/n8n/blob/master/LICENSE.md)
-(n8n explicitly permits reuse).
-
----
+Copyright (c) 2026 Thomas Faust.
 
 ## Sustainable Use License
 
@@ -51,12 +22,6 @@ You may use or modify the software only for your own internal business purposes 
 personal use. You may distribute the software or provide it to others only if you do so free of charge for
 non-commercial purposes. You may not alter, remove, or obscure any licensing, copyright, or other notices of
 the licensor in the software. Any use of the licensor’s trademarks is subject to applicable law.
-
-Commercial restrictions (Community Edition): you may **not** offer Docuvate as a hosted or managed service to
-third parties, white-label it, embed it in a commercial product you sell, or operate it as an invisible backend
-inside someone else’s SaaS. Private and internal business self-hosting on infrastructure you control **is**
-allowed, including having an IT service provider install or support Docuvate on **your** servers for setup or
-support fees.
 
 ### Patents
 
@@ -94,7 +59,7 @@ any kind of legal claim.
 
 ### Definitions
 
-The “licensor” is the entity offering these terms (Thomas Faust for Docuvate Community Edition).
+The “licensor” is the entity offering these terms.
 
 The “software” is the software the licensor makes available under these terms, including any portion of it.
 
