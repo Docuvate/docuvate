@@ -12,9 +12,13 @@ class _$LayoutHtmlResponseDto extends LayoutHtmlResponseDto {
 
   factory _$LayoutHtmlResponseDto(
           [void Function(LayoutHtmlResponseDtoBuilder)? updates]) =>
-      (LayoutHtmlResponseDtoBuilder()..update(updates))._build();
+      (new LayoutHtmlResponseDtoBuilder()..update(updates))._build();
 
-  _$LayoutHtmlResponseDto._({required this.html}) : super._();
+  _$LayoutHtmlResponseDto._({required this.html}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        html, r'LayoutHtmlResponseDto', 'html');
+  }
+
   @override
   LayoutHtmlResponseDto rebuild(
           void Function(LayoutHtmlResponseDtoBuilder) updates) =>
@@ -22,7 +26,7 @@ class _$LayoutHtmlResponseDto extends LayoutHtmlResponseDto {
 
   @override
   LayoutHtmlResponseDtoBuilder toBuilder() =>
-      LayoutHtmlResponseDtoBuilder()..replace(this);
+      new LayoutHtmlResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -69,6 +73,7 @@ class LayoutHtmlResponseDtoBuilder
 
   @override
   void replace(LayoutHtmlResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutHtmlResponseDto;
   }
 
@@ -82,10 +87,9 @@ class LayoutHtmlResponseDtoBuilder
 
   _$LayoutHtmlResponseDto _build() {
     final _$result = _$v ??
-        _$LayoutHtmlResponseDto._(
-          html: BuiltValueNullFieldError.checkNotNull(
-              html, r'LayoutHtmlResponseDto', 'html'),
-        );
+        new _$LayoutHtmlResponseDto._(
+            html: BuiltValueNullFieldError.checkNotNull(
+                html, r'LayoutHtmlResponseDto', 'html'));
     replace(_$result);
     return _$result;
   }

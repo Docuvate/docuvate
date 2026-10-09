@@ -14,10 +14,16 @@ class _$AdminUserListResponseDto extends AdminUserListResponseDto {
 
   factory _$AdminUserListResponseDto(
           [void Function(AdminUserListResponseDtoBuilder)? updates]) =>
-      (AdminUserListResponseDtoBuilder()..update(updates))._build();
+      (new AdminUserListResponseDtoBuilder()..update(updates))._build();
 
   _$AdminUserListResponseDto._({required this.users, required this.total})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        users, r'AdminUserListResponseDto', 'users');
+    BuiltValueNullFieldError.checkNotNull(
+        total, r'AdminUserListResponseDto', 'total');
+  }
+
   @override
   AdminUserListResponseDto rebuild(
           void Function(AdminUserListResponseDtoBuilder) updates) =>
@@ -25,7 +31,7 @@ class _$AdminUserListResponseDto extends AdminUserListResponseDto {
 
   @override
   AdminUserListResponseDtoBuilder toBuilder() =>
-      AdminUserListResponseDtoBuilder()..replace(this);
+      new AdminUserListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -60,7 +66,7 @@ class AdminUserListResponseDtoBuilder
 
   ListBuilder<AdminUserResponseDto>? _users;
   ListBuilder<AdminUserResponseDto> get users =>
-      _$this._users ??= ListBuilder<AdminUserResponseDto>();
+      _$this._users ??= new ListBuilder<AdminUserResponseDto>();
   set users(ListBuilder<AdminUserResponseDto>? users) => _$this._users = users;
 
   num? _total;
@@ -83,6 +89,7 @@ class AdminUserListResponseDtoBuilder
 
   @override
   void replace(AdminUserListResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AdminUserListResponseDto;
   }
 
@@ -98,18 +105,17 @@ class AdminUserListResponseDtoBuilder
     _$AdminUserListResponseDto _$result;
     try {
       _$result = _$v ??
-          _$AdminUserListResponseDto._(
-            users: users.build(),
-            total: BuiltValueNullFieldError.checkNotNull(
-                total, r'AdminUserListResponseDto', 'total'),
-          );
+          new _$AdminUserListResponseDto._(
+              users: users.build(),
+              total: BuiltValueNullFieldError.checkNotNull(
+                  total, r'AdminUserListResponseDto', 'total'));
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'users';
         users.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'AdminUserListResponseDto', _$failedField, e.toString());
       }
       rethrow;

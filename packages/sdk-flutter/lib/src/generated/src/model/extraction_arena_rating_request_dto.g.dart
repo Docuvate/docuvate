@@ -19,14 +19,20 @@ class _$ExtractionArenaRatingRequestDto
 
   factory _$ExtractionArenaRatingRequestDto(
           [void Function(ExtractionArenaRatingRequestDtoBuilder)? updates]) =>
-      (ExtractionArenaRatingRequestDtoBuilder()..update(updates))._build();
+      (new ExtractionArenaRatingRequestDtoBuilder()..update(updates))._build();
 
   _$ExtractionArenaRatingRequestDto._(
       {required this.winnerEngine,
       required this.comparedEngines,
       this.rating,
       this.applyAsDefault})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        winnerEngine, r'ExtractionArenaRatingRequestDto', 'winnerEngine');
+    BuiltValueNullFieldError.checkNotNull(
+        comparedEngines, r'ExtractionArenaRatingRequestDto', 'comparedEngines');
+  }
+
   @override
   ExtractionArenaRatingRequestDto rebuild(
           void Function(ExtractionArenaRatingRequestDtoBuilder) updates) =>
@@ -34,7 +40,7 @@ class _$ExtractionArenaRatingRequestDto
 
   @override
   ExtractionArenaRatingRequestDtoBuilder toBuilder() =>
-      ExtractionArenaRatingRequestDtoBuilder()..replace(this);
+      new ExtractionArenaRatingRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -80,7 +86,7 @@ class ExtractionArenaRatingRequestDtoBuilder
 
   ListBuilder<String>? _comparedEngines;
   ListBuilder<String> get comparedEngines =>
-      _$this._comparedEngines ??= ListBuilder<String>();
+      _$this._comparedEngines ??= new ListBuilder<String>();
   set comparedEngines(ListBuilder<String>? comparedEngines) =>
       _$this._comparedEngines = comparedEngines;
 
@@ -111,6 +117,7 @@ class ExtractionArenaRatingRequestDtoBuilder
 
   @override
   void replace(ExtractionArenaRatingRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ExtractionArenaRatingRequestDto;
   }
 
@@ -126,20 +133,19 @@ class ExtractionArenaRatingRequestDtoBuilder
     _$ExtractionArenaRatingRequestDto _$result;
     try {
       _$result = _$v ??
-          _$ExtractionArenaRatingRequestDto._(
-            winnerEngine: BuiltValueNullFieldError.checkNotNull(winnerEngine,
-                r'ExtractionArenaRatingRequestDto', 'winnerEngine'),
-            comparedEngines: comparedEngines.build(),
-            rating: rating,
-            applyAsDefault: applyAsDefault,
-          );
+          new _$ExtractionArenaRatingRequestDto._(
+              winnerEngine: BuiltValueNullFieldError.checkNotNull(winnerEngine,
+                  r'ExtractionArenaRatingRequestDto', 'winnerEngine'),
+              comparedEngines: comparedEngines.build(),
+              rating: rating,
+              applyAsDefault: applyAsDefault);
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'comparedEngines';
         comparedEngines.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'ExtractionArenaRatingRequestDto', _$failedField, e.toString());
       }
       rethrow;

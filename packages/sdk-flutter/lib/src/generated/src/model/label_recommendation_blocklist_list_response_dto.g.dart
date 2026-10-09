@@ -16,12 +16,19 @@ class _$LabelRecommendationBlocklistListResponseDto
   factory _$LabelRecommendationBlocklistListResponseDto(
           [void Function(LabelRecommendationBlocklistListResponseDtoBuilder)?
               updates]) =>
-      (LabelRecommendationBlocklistListResponseDtoBuilder()..update(updates))
+      (new LabelRecommendationBlocklistListResponseDtoBuilder()
+            ..update(updates))
           ._build();
 
   _$LabelRecommendationBlocklistListResponseDto._(
       {required this.items, required this.patterns})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        items, r'LabelRecommendationBlocklistListResponseDto', 'items');
+    BuiltValueNullFieldError.checkNotNull(
+        patterns, r'LabelRecommendationBlocklistListResponseDto', 'patterns');
+  }
+
   @override
   LabelRecommendationBlocklistListResponseDto rebuild(
           void Function(LabelRecommendationBlocklistListResponseDtoBuilder)
@@ -30,7 +37,7 @@ class _$LabelRecommendationBlocklistListResponseDto
 
   @override
   LabelRecommendationBlocklistListResponseDtoBuilder toBuilder() =>
-      LabelRecommendationBlocklistListResponseDtoBuilder()..replace(this);
+      new LabelRecommendationBlocklistListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -67,12 +74,12 @@ class LabelRecommendationBlocklistListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= ListBuilder<JsonObject>();
+      _$this._items ??= new ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   ListBuilder<JsonObject>? _patterns;
   ListBuilder<JsonObject> get patterns =>
-      _$this._patterns ??= ListBuilder<JsonObject>();
+      _$this._patterns ??= new ListBuilder<JsonObject>();
   set patterns(ListBuilder<JsonObject>? patterns) =>
       _$this._patterns = patterns;
 
@@ -92,6 +99,7 @@ class LabelRecommendationBlocklistListResponseDtoBuilder
 
   @override
   void replace(LabelRecommendationBlocklistListResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LabelRecommendationBlocklistListResponseDto;
   }
 
@@ -109,10 +117,8 @@ class LabelRecommendationBlocklistListResponseDtoBuilder
     _$LabelRecommendationBlocklistListResponseDto _$result;
     try {
       _$result = _$v ??
-          _$LabelRecommendationBlocklistListResponseDto._(
-            items: items.build(),
-            patterns: patterns.build(),
-          );
+          new _$LabelRecommendationBlocklistListResponseDto._(
+              items: items.build(), patterns: patterns.build());
     } catch (_) {
       late String _$failedField;
       try {
@@ -121,7 +127,7 @@ class LabelRecommendationBlocklistListResponseDtoBuilder
         _$failedField = 'patterns';
         patterns.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'LabelRecommendationBlocklistListResponseDto',
             _$failedField,
             e.toString());

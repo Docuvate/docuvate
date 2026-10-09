@@ -14,9 +14,14 @@ class _$DocumentPipelineModulesResponseDto
   factory _$DocumentPipelineModulesResponseDto(
           [void Function(DocumentPipelineModulesResponseDtoBuilder)?
               updates]) =>
-      (DocumentPipelineModulesResponseDtoBuilder()..update(updates))._build();
+      (new DocumentPipelineModulesResponseDtoBuilder()..update(updates))
+          ._build();
 
-  _$DocumentPipelineModulesResponseDto._({required this.modules}) : super._();
+  _$DocumentPipelineModulesResponseDto._({required this.modules}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        modules, r'DocumentPipelineModulesResponseDto', 'modules');
+  }
+
   @override
   DocumentPipelineModulesResponseDto rebuild(
           void Function(DocumentPipelineModulesResponseDtoBuilder) updates) =>
@@ -24,7 +29,7 @@ class _$DocumentPipelineModulesResponseDto
 
   @override
   DocumentPipelineModulesResponseDtoBuilder toBuilder() =>
-      DocumentPipelineModulesResponseDtoBuilder()..replace(this);
+      new DocumentPipelineModulesResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -57,7 +62,8 @@ class DocumentPipelineModulesResponseDtoBuilder
 
   ListBuilder<DocumentPipelineModuleDescriptorDto>? _modules;
   ListBuilder<DocumentPipelineModuleDescriptorDto> get modules =>
-      _$this._modules ??= ListBuilder<DocumentPipelineModuleDescriptorDto>();
+      _$this._modules ??=
+          new ListBuilder<DocumentPipelineModuleDescriptorDto>();
   set modules(ListBuilder<DocumentPipelineModuleDescriptorDto>? modules) =>
       _$this._modules = modules;
 
@@ -76,6 +82,7 @@ class DocumentPipelineModulesResponseDtoBuilder
 
   @override
   void replace(DocumentPipelineModulesResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentPipelineModulesResponseDto;
   }
 
@@ -92,16 +99,14 @@ class DocumentPipelineModulesResponseDtoBuilder
     _$DocumentPipelineModulesResponseDto _$result;
     try {
       _$result = _$v ??
-          _$DocumentPipelineModulesResponseDto._(
-            modules: modules.build(),
-          );
+          new _$DocumentPipelineModulesResponseDto._(modules: modules.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'modules';
         modules.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'DocumentPipelineModulesResponseDto', _$failedField, e.toString());
       }
       rethrow;

@@ -21,12 +21,12 @@ SetAdminUserRoleRequestDtoRoleEnum _$setAdminUserRoleRequestDtoRoleEnumValueOf(
     case 'member':
       return _$setAdminUserRoleRequestDtoRoleEnum_member;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<SetAdminUserRoleRequestDtoRoleEnum>
-    _$setAdminUserRoleRequestDtoRoleEnumValues = BuiltSet<
+    _$setAdminUserRoleRequestDtoRoleEnumValues = new BuiltSet<
         SetAdminUserRoleRequestDtoRoleEnum>(const <SetAdminUserRoleRequestDtoRoleEnum>[
   _$setAdminUserRoleRequestDtoRoleEnum_admin,
   _$setAdminUserRoleRequestDtoRoleEnum_member,
@@ -34,7 +34,7 @@ final BuiltSet<SetAdminUserRoleRequestDtoRoleEnum>
 
 Serializer<SetAdminUserRoleRequestDtoRoleEnum>
     _$setAdminUserRoleRequestDtoRoleEnumSerializer =
-    _$SetAdminUserRoleRequestDtoRoleEnumSerializer();
+    new _$SetAdminUserRoleRequestDtoRoleEnumSerializer();
 
 class _$SetAdminUserRoleRequestDtoRoleEnumSerializer
     implements PrimitiveSerializer<SetAdminUserRoleRequestDtoRoleEnum> {
@@ -72,9 +72,13 @@ class _$SetAdminUserRoleRequestDto extends SetAdminUserRoleRequestDto {
 
   factory _$SetAdminUserRoleRequestDto(
           [void Function(SetAdminUserRoleRequestDtoBuilder)? updates]) =>
-      (SetAdminUserRoleRequestDtoBuilder()..update(updates))._build();
+      (new SetAdminUserRoleRequestDtoBuilder()..update(updates))._build();
 
-  _$SetAdminUserRoleRequestDto._({required this.role}) : super._();
+  _$SetAdminUserRoleRequestDto._({required this.role}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        role, r'SetAdminUserRoleRequestDto', 'role');
+  }
+
   @override
   SetAdminUserRoleRequestDto rebuild(
           void Function(SetAdminUserRoleRequestDtoBuilder) updates) =>
@@ -82,7 +86,7 @@ class _$SetAdminUserRoleRequestDto extends SetAdminUserRoleRequestDto {
 
   @override
   SetAdminUserRoleRequestDtoBuilder toBuilder() =>
-      SetAdminUserRoleRequestDtoBuilder()..replace(this);
+      new SetAdminUserRoleRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -130,6 +134,7 @@ class SetAdminUserRoleRequestDtoBuilder
 
   @override
   void replace(SetAdminUserRoleRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SetAdminUserRoleRequestDto;
   }
 
@@ -143,10 +148,9 @@ class SetAdminUserRoleRequestDtoBuilder
 
   _$SetAdminUserRoleRequestDto _build() {
     final _$result = _$v ??
-        _$SetAdminUserRoleRequestDto._(
-          role: BuiltValueNullFieldError.checkNotNull(
-              role, r'SetAdminUserRoleRequestDto', 'role'),
-        );
+        new _$SetAdminUserRoleRequestDto._(
+            role: BuiltValueNullFieldError.checkNotNull(
+                role, r'SetAdminUserRoleRequestDto', 'role'));
     replace(_$result);
     return _$result;
   }

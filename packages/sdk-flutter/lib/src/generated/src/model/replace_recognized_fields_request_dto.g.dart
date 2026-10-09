@@ -13,9 +13,14 @@ class _$ReplaceRecognizedFieldsRequestDto
 
   factory _$ReplaceRecognizedFieldsRequestDto(
           [void Function(ReplaceRecognizedFieldsRequestDtoBuilder)? updates]) =>
-      (ReplaceRecognizedFieldsRequestDtoBuilder()..update(updates))._build();
+      (new ReplaceRecognizedFieldsRequestDtoBuilder()..update(updates))
+          ._build();
 
-  _$ReplaceRecognizedFieldsRequestDto._({required this.fields}) : super._();
+  _$ReplaceRecognizedFieldsRequestDto._({required this.fields}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        fields, r'ReplaceRecognizedFieldsRequestDto', 'fields');
+  }
+
   @override
   ReplaceRecognizedFieldsRequestDto rebuild(
           void Function(ReplaceRecognizedFieldsRequestDtoBuilder) updates) =>
@@ -23,7 +28,7 @@ class _$ReplaceRecognizedFieldsRequestDto
 
   @override
   ReplaceRecognizedFieldsRequestDtoBuilder toBuilder() =>
-      ReplaceRecognizedFieldsRequestDtoBuilder()..replace(this);
+      new ReplaceRecognizedFieldsRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -55,7 +60,7 @@ class ReplaceRecognizedFieldsRequestDtoBuilder
 
   ListBuilder<ReplaceRecognizedFieldItemDto>? _fields;
   ListBuilder<ReplaceRecognizedFieldItemDto> get fields =>
-      _$this._fields ??= ListBuilder<ReplaceRecognizedFieldItemDto>();
+      _$this._fields ??= new ListBuilder<ReplaceRecognizedFieldItemDto>();
   set fields(ListBuilder<ReplaceRecognizedFieldItemDto>? fields) =>
       _$this._fields = fields;
 
@@ -74,6 +79,7 @@ class ReplaceRecognizedFieldsRequestDtoBuilder
 
   @override
   void replace(ReplaceRecognizedFieldsRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ReplaceRecognizedFieldsRequestDto;
   }
 
@@ -90,16 +96,14 @@ class ReplaceRecognizedFieldsRequestDtoBuilder
     _$ReplaceRecognizedFieldsRequestDto _$result;
     try {
       _$result = _$v ??
-          _$ReplaceRecognizedFieldsRequestDto._(
-            fields: fields.build(),
-          );
+          new _$ReplaceRecognizedFieldsRequestDto._(fields: fields.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'fields';
         fields.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'ReplaceRecognizedFieldsRequestDto', _$failedField, e.toString());
       }
       rethrow;

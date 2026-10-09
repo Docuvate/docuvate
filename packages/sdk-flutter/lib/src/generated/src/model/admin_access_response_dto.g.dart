@@ -19,12 +19,12 @@ AdminAccessResponseDtoRoleEnum _$adminAccessResponseDtoRoleEnumValueOf(
     case 'member':
       return _$adminAccessResponseDtoRoleEnum_member;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<AdminAccessResponseDtoRoleEnum>
-    _$adminAccessResponseDtoRoleEnumValues = BuiltSet<
+    _$adminAccessResponseDtoRoleEnumValues = new BuiltSet<
         AdminAccessResponseDtoRoleEnum>(const <AdminAccessResponseDtoRoleEnum>[
   _$adminAccessResponseDtoRoleEnum_admin,
   _$adminAccessResponseDtoRoleEnum_member,
@@ -32,7 +32,7 @@ final BuiltSet<AdminAccessResponseDtoRoleEnum>
 
 Serializer<AdminAccessResponseDtoRoleEnum>
     _$adminAccessResponseDtoRoleEnumSerializer =
-    _$AdminAccessResponseDtoRoleEnumSerializer();
+    new _$AdminAccessResponseDtoRoleEnumSerializer();
 
 class _$AdminAccessResponseDtoRoleEnumSerializer
     implements PrimitiveSerializer<AdminAccessResponseDtoRoleEnum> {
@@ -74,13 +74,21 @@ class _$AdminAccessResponseDto extends AdminAccessResponseDto {
 
   factory _$AdminAccessResponseDto(
           [void Function(AdminAccessResponseDtoBuilder)? updates]) =>
-      (AdminAccessResponseDtoBuilder()..update(updates))._build();
+      (new AdminAccessResponseDtoBuilder()..update(updates))._build();
 
   _$AdminAccessResponseDto._(
       {required this.isAdministrator,
       required this.role,
       required this.roleDescriptions})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        isAdministrator, r'AdminAccessResponseDto', 'isAdministrator');
+    BuiltValueNullFieldError.checkNotNull(
+        role, r'AdminAccessResponseDto', 'role');
+    BuiltValueNullFieldError.checkNotNull(
+        roleDescriptions, r'AdminAccessResponseDto', 'roleDescriptions');
+  }
+
   @override
   AdminAccessResponseDto rebuild(
           void Function(AdminAccessResponseDtoBuilder) updates) =>
@@ -88,7 +96,7 @@ class _$AdminAccessResponseDto extends AdminAccessResponseDto {
 
   @override
   AdminAccessResponseDtoBuilder toBuilder() =>
-      AdminAccessResponseDtoBuilder()..replace(this);
+      new AdminAccessResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -134,7 +142,7 @@ class AdminAccessResponseDtoBuilder
 
   ListBuilder<JsonObject>? _roleDescriptions;
   ListBuilder<JsonObject> get roleDescriptions =>
-      _$this._roleDescriptions ??= ListBuilder<JsonObject>();
+      _$this._roleDescriptions ??= new ListBuilder<JsonObject>();
   set roleDescriptions(ListBuilder<JsonObject>? roleDescriptions) =>
       _$this._roleDescriptions = roleDescriptions;
 
@@ -155,6 +163,7 @@ class AdminAccessResponseDtoBuilder
 
   @override
   void replace(AdminAccessResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AdminAccessResponseDto;
   }
 
@@ -170,20 +179,21 @@ class AdminAccessResponseDtoBuilder
     _$AdminAccessResponseDto _$result;
     try {
       _$result = _$v ??
-          _$AdminAccessResponseDto._(
-            isAdministrator: BuiltValueNullFieldError.checkNotNull(
-                isAdministrator, r'AdminAccessResponseDto', 'isAdministrator'),
-            role: BuiltValueNullFieldError.checkNotNull(
-                role, r'AdminAccessResponseDto', 'role'),
-            roleDescriptions: roleDescriptions.build(),
-          );
+          new _$AdminAccessResponseDto._(
+              isAdministrator: BuiltValueNullFieldError.checkNotNull(
+                  isAdministrator,
+                  r'AdminAccessResponseDto',
+                  'isAdministrator'),
+              role: BuiltValueNullFieldError.checkNotNull(
+                  role, r'AdminAccessResponseDto', 'role'),
+              roleDescriptions: roleDescriptions.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'roleDescriptions';
         roleDescriptions.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'AdminAccessResponseDto', _$failedField, e.toString());
       }
       rethrow;

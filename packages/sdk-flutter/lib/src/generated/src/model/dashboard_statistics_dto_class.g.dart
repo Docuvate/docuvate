@@ -20,7 +20,7 @@ class _$DashboardStatisticsDtoClass extends DashboardStatisticsDtoClass {
 
   factory _$DashboardStatisticsDtoClass(
           [void Function(DashboardStatisticsDtoClassBuilder)? updates]) =>
-      (DashboardStatisticsDtoClassBuilder()..update(updates))._build();
+      (new DashboardStatisticsDtoClassBuilder()..update(updates))._build();
 
   _$DashboardStatisticsDtoClass._(
       {required this.documentsTotal,
@@ -28,7 +28,19 @@ class _$DashboardStatisticsDtoClass extends DashboardStatisticsDtoClass {
       required this.labelsAssignedCount,
       required this.unlabeledCount,
       required this.topLabels})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        documentsTotal, r'DashboardStatisticsDtoClass', 'documentsTotal');
+    BuiltValueNullFieldError.checkNotNull(
+        byStatus, r'DashboardStatisticsDtoClass', 'byStatus');
+    BuiltValueNullFieldError.checkNotNull(labelsAssignedCount,
+        r'DashboardStatisticsDtoClass', 'labelsAssignedCount');
+    BuiltValueNullFieldError.checkNotNull(
+        unlabeledCount, r'DashboardStatisticsDtoClass', 'unlabeledCount');
+    BuiltValueNullFieldError.checkNotNull(
+        topLabels, r'DashboardStatisticsDtoClass', 'topLabels');
+  }
+
   @override
   DashboardStatisticsDtoClass rebuild(
           void Function(DashboardStatisticsDtoClassBuilder) updates) =>
@@ -36,7 +48,7 @@ class _$DashboardStatisticsDtoClass extends DashboardStatisticsDtoClass {
 
   @override
   DashboardStatisticsDtoClassBuilder toBuilder() =>
-      DashboardStatisticsDtoClassBuilder()..replace(this);
+      new DashboardStatisticsDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -86,7 +98,7 @@ class DashboardStatisticsDtoClassBuilder
 
   MapBuilder<String, num>? _byStatus;
   MapBuilder<String, num> get byStatus =>
-      _$this._byStatus ??= MapBuilder<String, num>();
+      _$this._byStatus ??= new MapBuilder<String, num>();
   set byStatus(MapBuilder<String, num>? byStatus) =>
       _$this._byStatus = byStatus;
 
@@ -103,7 +115,7 @@ class DashboardStatisticsDtoClassBuilder
   ListBuilder<DashboardStatisticsDtoClassTopLabelsInner>? _topLabels;
   ListBuilder<DashboardStatisticsDtoClassTopLabelsInner> get topLabels =>
       _$this._topLabels ??=
-          ListBuilder<DashboardStatisticsDtoClassTopLabelsInner>();
+          new ListBuilder<DashboardStatisticsDtoClassTopLabelsInner>();
   set topLabels(
           ListBuilder<DashboardStatisticsDtoClassTopLabelsInner>? topLabels) =>
       _$this._topLabels = topLabels;
@@ -127,6 +139,7 @@ class DashboardStatisticsDtoClassBuilder
 
   @override
   void replace(DashboardStatisticsDtoClass other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DashboardStatisticsDtoClass;
   }
 
@@ -142,22 +155,21 @@ class DashboardStatisticsDtoClassBuilder
     _$DashboardStatisticsDtoClass _$result;
     try {
       _$result = _$v ??
-          _$DashboardStatisticsDtoClass._(
-            documentsTotal: BuiltValueNullFieldError.checkNotNull(
-                documentsTotal,
-                r'DashboardStatisticsDtoClass',
-                'documentsTotal'),
-            byStatus: byStatus.build(),
-            labelsAssignedCount: BuiltValueNullFieldError.checkNotNull(
-                labelsAssignedCount,
-                r'DashboardStatisticsDtoClass',
-                'labelsAssignedCount'),
-            unlabeledCount: BuiltValueNullFieldError.checkNotNull(
-                unlabeledCount,
-                r'DashboardStatisticsDtoClass',
-                'unlabeledCount'),
-            topLabels: topLabels.build(),
-          );
+          new _$DashboardStatisticsDtoClass._(
+              documentsTotal: BuiltValueNullFieldError.checkNotNull(
+                  documentsTotal,
+                  r'DashboardStatisticsDtoClass',
+                  'documentsTotal'),
+              byStatus: byStatus.build(),
+              labelsAssignedCount: BuiltValueNullFieldError.checkNotNull(
+                  labelsAssignedCount,
+                  r'DashboardStatisticsDtoClass',
+                  'labelsAssignedCount'),
+              unlabeledCount: BuiltValueNullFieldError.checkNotNull(
+                  unlabeledCount,
+                  r'DashboardStatisticsDtoClass',
+                  'unlabeledCount'),
+              topLabels: topLabels.build());
     } catch (_) {
       late String _$failedField;
       try {
@@ -167,7 +179,7 @@ class DashboardStatisticsDtoClassBuilder
         _$failedField = 'topLabels';
         topLabels.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'DashboardStatisticsDtoClass', _$failedField, e.toString());
       }
       rethrow;

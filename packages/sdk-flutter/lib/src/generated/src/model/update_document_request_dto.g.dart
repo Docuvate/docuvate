@@ -28,7 +28,7 @@ class _$UpdateDocumentRequestDto extends UpdateDocumentRequestDto {
 
   factory _$UpdateDocumentRequestDto(
           [void Function(UpdateDocumentRequestDtoBuilder)? updates]) =>
-      (UpdateDocumentRequestDtoBuilder()..update(updates))._build();
+      (new UpdateDocumentRequestDtoBuilder()..update(updates))._build();
 
   _$UpdateDocumentRequestDto._(
       {this.title,
@@ -41,6 +41,7 @@ class _$UpdateDocumentRequestDto extends UpdateDocumentRequestDto {
       this.extractionFields,
       this.extractionBlocks})
       : super._();
+
   @override
   UpdateDocumentRequestDto rebuild(
           void Function(UpdateDocumentRequestDtoBuilder) updates) =>
@@ -48,7 +49,7 @@ class _$UpdateDocumentRequestDto extends UpdateDocumentRequestDto {
 
   @override
   UpdateDocumentRequestDtoBuilder toBuilder() =>
-      UpdateDocumentRequestDtoBuilder()..replace(this);
+      new UpdateDocumentRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -128,18 +129,19 @@ class UpdateDocumentRequestDtoBuilder
       _$this._correspondentId = correspondentId;
 
   ListBuilder<String>? _tagIds;
-  ListBuilder<String> get tagIds => _$this._tagIds ??= ListBuilder<String>();
+  ListBuilder<String> get tagIds =>
+      _$this._tagIds ??= new ListBuilder<String>();
   set tagIds(ListBuilder<String>? tagIds) => _$this._tagIds = tagIds;
 
   ListBuilder<ExtractedFieldDto>? _extractionFields;
   ListBuilder<ExtractedFieldDto> get extractionFields =>
-      _$this._extractionFields ??= ListBuilder<ExtractedFieldDto>();
+      _$this._extractionFields ??= new ListBuilder<ExtractedFieldDto>();
   set extractionFields(ListBuilder<ExtractedFieldDto>? extractionFields) =>
       _$this._extractionFields = extractionFields;
 
   ListBuilder<ExtractionBlockDto>? _extractionBlocks;
   ListBuilder<ExtractionBlockDto> get extractionBlocks =>
-      _$this._extractionBlocks ??= ListBuilder<ExtractionBlockDto>();
+      _$this._extractionBlocks ??= new ListBuilder<ExtractionBlockDto>();
   set extractionBlocks(ListBuilder<ExtractionBlockDto>? extractionBlocks) =>
       _$this._extractionBlocks = extractionBlocks;
 
@@ -166,6 +168,7 @@ class UpdateDocumentRequestDtoBuilder
 
   @override
   void replace(UpdateDocumentRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateDocumentRequestDto;
   }
 
@@ -181,17 +184,16 @@ class UpdateDocumentRequestDtoBuilder
     _$UpdateDocumentRequestDto _$result;
     try {
       _$result = _$v ??
-          _$UpdateDocumentRequestDto._(
-            title: title,
-            documentDate: documentDate,
-            notes: notes,
-            folderId: folderId,
-            mappeId: mappeId,
-            correspondentId: correspondentId,
-            tagIds: _tagIds?.build(),
-            extractionFields: _extractionFields?.build(),
-            extractionBlocks: _extractionBlocks?.build(),
-          );
+          new _$UpdateDocumentRequestDto._(
+              title: title,
+              documentDate: documentDate,
+              notes: notes,
+              folderId: folderId,
+              mappeId: mappeId,
+              correspondentId: correspondentId,
+              tagIds: _tagIds?.build(),
+              extractionFields: _extractionFields?.build(),
+              extractionBlocks: _extractionBlocks?.build());
     } catch (_) {
       late String _$failedField;
       try {
@@ -202,7 +204,7 @@ class UpdateDocumentRequestDtoBuilder
         _$failedField = 'extractionBlocks';
         _extractionBlocks?.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'UpdateDocumentRequestDto', _$failedField, e.toString());
       }
       rethrow;

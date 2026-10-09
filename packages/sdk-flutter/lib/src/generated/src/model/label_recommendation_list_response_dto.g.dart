@@ -14,9 +14,14 @@ class _$LabelRecommendationListResponseDto
   factory _$LabelRecommendationListResponseDto(
           [void Function(LabelRecommendationListResponseDtoBuilder)?
               updates]) =>
-      (LabelRecommendationListResponseDtoBuilder()..update(updates))._build();
+      (new LabelRecommendationListResponseDtoBuilder()..update(updates))
+          ._build();
 
-  _$LabelRecommendationListResponseDto._({required this.items}) : super._();
+  _$LabelRecommendationListResponseDto._({required this.items}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        items, r'LabelRecommendationListResponseDto', 'items');
+  }
+
   @override
   LabelRecommendationListResponseDto rebuild(
           void Function(LabelRecommendationListResponseDtoBuilder) updates) =>
@@ -24,7 +29,7 @@ class _$LabelRecommendationListResponseDto
 
   @override
   LabelRecommendationListResponseDtoBuilder toBuilder() =>
-      LabelRecommendationListResponseDtoBuilder()..replace(this);
+      new LabelRecommendationListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -56,7 +61,7 @@ class LabelRecommendationListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= ListBuilder<JsonObject>();
+      _$this._items ??= new ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   LabelRecommendationListResponseDtoBuilder() {
@@ -74,6 +79,7 @@ class LabelRecommendationListResponseDtoBuilder
 
   @override
   void replace(LabelRecommendationListResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LabelRecommendationListResponseDto;
   }
 
@@ -90,16 +96,14 @@ class LabelRecommendationListResponseDtoBuilder
     _$LabelRecommendationListResponseDto _$result;
     try {
       _$result = _$v ??
-          _$LabelRecommendationListResponseDto._(
-            items: items.build(),
-          );
+          new _$LabelRecommendationListResponseDto._(items: items.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'LabelRecommendationListResponseDto', _$failedField, e.toString());
       }
       rethrow;

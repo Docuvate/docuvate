@@ -14,9 +14,10 @@ class _$ExtractionCompareRequestDto extends ExtractionCompareRequestDto {
 
   factory _$ExtractionCompareRequestDto(
           [void Function(ExtractionCompareRequestDtoBuilder)? updates]) =>
-      (ExtractionCompareRequestDtoBuilder()..update(updates))._build();
+      (new ExtractionCompareRequestDtoBuilder()..update(updates))._build();
 
   _$ExtractionCompareRequestDto._({this.engines, this.maxPages}) : super._();
+
   @override
   ExtractionCompareRequestDto rebuild(
           void Function(ExtractionCompareRequestDtoBuilder) updates) =>
@@ -24,7 +25,7 @@ class _$ExtractionCompareRequestDto extends ExtractionCompareRequestDto {
 
   @override
   ExtractionCompareRequestDtoBuilder toBuilder() =>
-      ExtractionCompareRequestDtoBuilder()..replace(this);
+      new ExtractionCompareRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -59,7 +60,8 @@ class ExtractionCompareRequestDtoBuilder
   _$ExtractionCompareRequestDto? _$v;
 
   ListBuilder<String>? _engines;
-  ListBuilder<String> get engines => _$this._engines ??= ListBuilder<String>();
+  ListBuilder<String> get engines =>
+      _$this._engines ??= new ListBuilder<String>();
   set engines(ListBuilder<String>? engines) => _$this._engines = engines;
 
   num? _maxPages;
@@ -82,6 +84,7 @@ class ExtractionCompareRequestDtoBuilder
 
   @override
   void replace(ExtractionCompareRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ExtractionCompareRequestDto;
   }
 
@@ -97,17 +100,15 @@ class ExtractionCompareRequestDtoBuilder
     _$ExtractionCompareRequestDto _$result;
     try {
       _$result = _$v ??
-          _$ExtractionCompareRequestDto._(
-            engines: _engines?.build(),
-            maxPages: maxPages,
-          );
+          new _$ExtractionCompareRequestDto._(
+              engines: _engines?.build(), maxPages: maxPages);
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'engines';
         _engines?.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'ExtractionCompareRequestDto', _$failedField, e.toString());
       }
       rethrow;

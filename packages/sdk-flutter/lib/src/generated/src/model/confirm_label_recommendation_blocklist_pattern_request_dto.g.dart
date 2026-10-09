@@ -15,13 +15,17 @@ class _$ConfirmLabelRecommendationBlocklistPatternRequestDto
           [void Function(
                   ConfirmLabelRecommendationBlocklistPatternRequestDtoBuilder)?
               updates]) =>
-      (ConfirmLabelRecommendationBlocklistPatternRequestDtoBuilder()
+      (new ConfirmLabelRecommendationBlocklistPatternRequestDtoBuilder()
             ..update(updates))
           ._build();
 
   _$ConfirmLabelRecommendationBlocklistPatternRequestDto._(
       {required this.pattern})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(pattern,
+        r'ConfirmLabelRecommendationBlocklistPatternRequestDto', 'pattern');
+  }
+
   @override
   ConfirmLabelRecommendationBlocklistPatternRequestDto rebuild(
           void Function(
@@ -31,7 +35,7 @@ class _$ConfirmLabelRecommendationBlocklistPatternRequestDto
 
   @override
   ConfirmLabelRecommendationBlocklistPatternRequestDtoBuilder toBuilder() =>
-      ConfirmLabelRecommendationBlocklistPatternRequestDtoBuilder()
+      new ConfirmLabelRecommendationBlocklistPatternRequestDtoBuilder()
         ..replace(this);
 
   @override
@@ -83,6 +87,7 @@ class ConfirmLabelRecommendationBlocklistPatternRequestDtoBuilder
 
   @override
   void replace(ConfirmLabelRecommendationBlocklistPatternRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ConfirmLabelRecommendationBlocklistPatternRequestDto;
   }
 
@@ -99,12 +104,11 @@ class ConfirmLabelRecommendationBlocklistPatternRequestDtoBuilder
 
   _$ConfirmLabelRecommendationBlocklistPatternRequestDto _build() {
     final _$result = _$v ??
-        _$ConfirmLabelRecommendationBlocklistPatternRequestDto._(
-          pattern: BuiltValueNullFieldError.checkNotNull(
-              pattern,
-              r'ConfirmLabelRecommendationBlocklistPatternRequestDto',
-              'pattern'),
-        );
+        new _$ConfirmLabelRecommendationBlocklistPatternRequestDto._(
+            pattern: BuiltValueNullFieldError.checkNotNull(
+                pattern,
+                r'ConfirmLabelRecommendationBlocklistPatternRequestDto',
+                'pattern'));
     replace(_$result);
     return _$result;
   }

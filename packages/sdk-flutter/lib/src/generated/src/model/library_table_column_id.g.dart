@@ -28,12 +28,12 @@ LibraryTableColumnId _$valueOf(String name) {
     case 'updated':
       return _$updated;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<LibraryTableColumnId> _$values =
-    BuiltSet<LibraryTableColumnId>(const <LibraryTableColumnId>[
+    new BuiltSet<LibraryTableColumnId>(const <LibraryTableColumnId>[
   _$title,
   _$labels,
   _$date,
@@ -61,7 +61,7 @@ mixin _$LibraryTableColumnIdMixin {
 }
 
 Serializer<LibraryTableColumnId> _$libraryTableColumnIdSerializer =
-    _$LibraryTableColumnIdSerializer();
+    new _$LibraryTableColumnIdSerializer();
 
 class _$LibraryTableColumnIdSerializer
     implements PrimitiveSerializer<LibraryTableColumnId> {

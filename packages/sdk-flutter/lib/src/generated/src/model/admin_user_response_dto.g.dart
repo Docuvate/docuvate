@@ -19,13 +19,13 @@ AdminUserResponseDtoRoleEnum _$adminUserResponseDtoRoleEnumValueOf(
     case 'member':
       return _$adminUserResponseDtoRoleEnum_member;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<AdminUserResponseDtoRoleEnum>
-    _$adminUserResponseDtoRoleEnumValues =
-    BuiltSet<AdminUserResponseDtoRoleEnum>(const <AdminUserResponseDtoRoleEnum>[
+    _$adminUserResponseDtoRoleEnumValues = new BuiltSet<
+        AdminUserResponseDtoRoleEnum>(const <AdminUserResponseDtoRoleEnum>[
   _$adminUserResponseDtoRoleEnum_admin,
   _$adminUserResponseDtoRoleEnum_member,
 ]);
@@ -50,12 +50,12 @@ AdminUserResponseDtoAccountStatusEnum
     case 'suspended':
       return _$adminUserResponseDtoAccountStatusEnum_suspended;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<AdminUserResponseDtoAccountStatusEnum>
-    _$adminUserResponseDtoAccountStatusEnumValues = BuiltSet<
+    _$adminUserResponseDtoAccountStatusEnumValues = new BuiltSet<
         AdminUserResponseDtoAccountStatusEnum>(const <AdminUserResponseDtoAccountStatusEnum>[
   _$adminUserResponseDtoAccountStatusEnum_active,
   _$adminUserResponseDtoAccountStatusEnum_invited,
@@ -64,10 +64,10 @@ final BuiltSet<AdminUserResponseDtoAccountStatusEnum>
 
 Serializer<AdminUserResponseDtoRoleEnum>
     _$adminUserResponseDtoRoleEnumSerializer =
-    _$AdminUserResponseDtoRoleEnumSerializer();
+    new _$AdminUserResponseDtoRoleEnumSerializer();
 Serializer<AdminUserResponseDtoAccountStatusEnum>
     _$adminUserResponseDtoAccountStatusEnumSerializer =
-    _$AdminUserResponseDtoAccountStatusEnumSerializer();
+    new _$AdminUserResponseDtoAccountStatusEnumSerializer();
 
 class _$AdminUserResponseDtoRoleEnumSerializer
     implements PrimitiveSerializer<AdminUserResponseDtoRoleEnum> {
@@ -152,7 +152,7 @@ class _$AdminUserResponseDto extends AdminUserResponseDto {
 
   factory _$AdminUserResponseDto(
           [void Function(AdminUserResponseDtoBuilder)? updates]) =>
-      (AdminUserResponseDtoBuilder()..update(updates))._build();
+      (new AdminUserResponseDtoBuilder()..update(updates))._build();
 
   _$AdminUserResponseDto._(
       {required this.id,
@@ -163,7 +163,22 @@ class _$AdminUserResponseDto extends AdminUserResponseDto {
       this.banReason,
       required this.accountStatus,
       required this.createdAt})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(id, r'AdminUserResponseDto', 'id');
+    BuiltValueNullFieldError.checkNotNull(
+        name, r'AdminUserResponseDto', 'name');
+    BuiltValueNullFieldError.checkNotNull(
+        email, r'AdminUserResponseDto', 'email');
+    BuiltValueNullFieldError.checkNotNull(
+        role, r'AdminUserResponseDto', 'role');
+    BuiltValueNullFieldError.checkNotNull(
+        banned, r'AdminUserResponseDto', 'banned');
+    BuiltValueNullFieldError.checkNotNull(
+        accountStatus, r'AdminUserResponseDto', 'accountStatus');
+    BuiltValueNullFieldError.checkNotNull(
+        createdAt, r'AdminUserResponseDto', 'createdAt');
+  }
+
   @override
   AdminUserResponseDto rebuild(
           void Function(AdminUserResponseDtoBuilder) updates) =>
@@ -171,7 +186,7 @@ class _$AdminUserResponseDto extends AdminUserResponseDto {
 
   @override
   AdminUserResponseDtoBuilder toBuilder() =>
-      AdminUserResponseDtoBuilder()..replace(this);
+      new AdminUserResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -277,6 +292,7 @@ class AdminUserResponseDtoBuilder
 
   @override
   void replace(AdminUserResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AdminUserResponseDto;
   }
 
@@ -290,23 +306,22 @@ class AdminUserResponseDtoBuilder
 
   _$AdminUserResponseDto _build() {
     final _$result = _$v ??
-        _$AdminUserResponseDto._(
-          id: BuiltValueNullFieldError.checkNotNull(
-              id, r'AdminUserResponseDto', 'id'),
-          name: BuiltValueNullFieldError.checkNotNull(
-              name, r'AdminUserResponseDto', 'name'),
-          email: BuiltValueNullFieldError.checkNotNull(
-              email, r'AdminUserResponseDto', 'email'),
-          role: BuiltValueNullFieldError.checkNotNull(
-              role, r'AdminUserResponseDto', 'role'),
-          banned: BuiltValueNullFieldError.checkNotNull(
-              banned, r'AdminUserResponseDto', 'banned'),
-          banReason: banReason,
-          accountStatus: BuiltValueNullFieldError.checkNotNull(
-              accountStatus, r'AdminUserResponseDto', 'accountStatus'),
-          createdAt: BuiltValueNullFieldError.checkNotNull(
-              createdAt, r'AdminUserResponseDto', 'createdAt'),
-        );
+        new _$AdminUserResponseDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'AdminUserResponseDto', 'id'),
+            name: BuiltValueNullFieldError.checkNotNull(
+                name, r'AdminUserResponseDto', 'name'),
+            email: BuiltValueNullFieldError.checkNotNull(
+                email, r'AdminUserResponseDto', 'email'),
+            role: BuiltValueNullFieldError.checkNotNull(
+                role, r'AdminUserResponseDto', 'role'),
+            banned: BuiltValueNullFieldError.checkNotNull(
+                banned, r'AdminUserResponseDto', 'banned'),
+            banReason: banReason,
+            accountStatus: BuiltValueNullFieldError.checkNotNull(
+                accountStatus, r'AdminUserResponseDto', 'accountStatus'),
+            createdAt: BuiltValueNullFieldError.checkNotNull(
+                createdAt, r'AdminUserResponseDto', 'createdAt'));
     replace(_$result);
     return _$result;
   }

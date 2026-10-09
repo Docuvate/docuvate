@@ -34,12 +34,12 @@ DocumentBulkActionDtoActionEnum _$documentBulkActionDtoActionEnumValueOf(
     case 'delete':
       return _$documentBulkActionDtoActionEnum_delete;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentBulkActionDtoActionEnum>
-    _$documentBulkActionDtoActionEnumValues = BuiltSet<
+    _$documentBulkActionDtoActionEnumValues = new BuiltSet<
         DocumentBulkActionDtoActionEnum>(const <DocumentBulkActionDtoActionEnum>[
   _$documentBulkActionDtoActionEnum_addTag,
   _$documentBulkActionDtoActionEnum_removeTag,
@@ -50,7 +50,7 @@ final BuiltSet<DocumentBulkActionDtoActionEnum>
 
 Serializer<DocumentBulkActionDtoActionEnum>
     _$documentBulkActionDtoActionEnumSerializer =
-    _$DocumentBulkActionDtoActionEnumSerializer();
+    new _$DocumentBulkActionDtoActionEnumSerializer();
 
 class _$DocumentBulkActionDtoActionEnumSerializer
     implements PrimitiveSerializer<DocumentBulkActionDtoActionEnum> {
@@ -100,11 +100,15 @@ class _$DocumentBulkActionDto extends DocumentBulkActionDto {
 
   factory _$DocumentBulkActionDto(
           [void Function(DocumentBulkActionDtoBuilder)? updates]) =>
-      (DocumentBulkActionDtoBuilder()..update(updates))._build();
+      (new DocumentBulkActionDtoBuilder()..update(updates))._build();
 
   _$DocumentBulkActionDto._(
       {required this.action, this.tagId, this.correspondentId, this.folderId})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        action, r'DocumentBulkActionDto', 'action');
+  }
+
   @override
   DocumentBulkActionDto rebuild(
           void Function(DocumentBulkActionDtoBuilder) updates) =>
@@ -112,7 +116,7 @@ class _$DocumentBulkActionDto extends DocumentBulkActionDto {
 
   @override
   DocumentBulkActionDtoBuilder toBuilder() =>
-      DocumentBulkActionDtoBuilder()..replace(this);
+      new DocumentBulkActionDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -186,6 +190,7 @@ class DocumentBulkActionDtoBuilder
 
   @override
   void replace(DocumentBulkActionDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentBulkActionDto;
   }
 
@@ -199,13 +204,12 @@ class DocumentBulkActionDtoBuilder
 
   _$DocumentBulkActionDto _build() {
     final _$result = _$v ??
-        _$DocumentBulkActionDto._(
-          action: BuiltValueNullFieldError.checkNotNull(
-              action, r'DocumentBulkActionDto', 'action'),
-          tagId: tagId,
-          correspondentId: correspondentId,
-          folderId: folderId,
-        );
+        new _$DocumentBulkActionDto._(
+            action: BuiltValueNullFieldError.checkNotNull(
+                action, r'DocumentBulkActionDto', 'action'),
+            tagId: tagId,
+            correspondentId: correspondentId,
+            folderId: folderId);
     replace(_$result);
     return _$result;
   }

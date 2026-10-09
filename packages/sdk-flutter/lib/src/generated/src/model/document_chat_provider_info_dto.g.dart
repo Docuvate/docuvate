@@ -18,14 +18,24 @@ class _$DocumentChatProviderInfoDto extends DocumentChatProviderInfoDto {
 
   factory _$DocumentChatProviderInfoDto(
           [void Function(DocumentChatProviderInfoDtoBuilder)? updates]) =>
-      (DocumentChatProviderInfoDtoBuilder()..update(updates))._build();
+      (new DocumentChatProviderInfoDtoBuilder()..update(updates))._build();
 
   _$DocumentChatProviderInfoDto._(
       {required this.id,
       required this.label,
       required this.description,
       required this.available})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        id, r'DocumentChatProviderInfoDto', 'id');
+    BuiltValueNullFieldError.checkNotNull(
+        label, r'DocumentChatProviderInfoDto', 'label');
+    BuiltValueNullFieldError.checkNotNull(
+        description, r'DocumentChatProviderInfoDto', 'description');
+    BuiltValueNullFieldError.checkNotNull(
+        available, r'DocumentChatProviderInfoDto', 'available');
+  }
+
   @override
   DocumentChatProviderInfoDto rebuild(
           void Function(DocumentChatProviderInfoDtoBuilder) updates) =>
@@ -33,7 +43,7 @@ class _$DocumentChatProviderInfoDto extends DocumentChatProviderInfoDto {
 
   @override
   DocumentChatProviderInfoDtoBuilder toBuilder() =>
-      DocumentChatProviderInfoDtoBuilder()..replace(this);
+      new DocumentChatProviderInfoDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -107,6 +117,7 @@ class DocumentChatProviderInfoDtoBuilder
 
   @override
   void replace(DocumentChatProviderInfoDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatProviderInfoDto;
   }
 
@@ -120,16 +131,15 @@ class DocumentChatProviderInfoDtoBuilder
 
   _$DocumentChatProviderInfoDto _build() {
     final _$result = _$v ??
-        _$DocumentChatProviderInfoDto._(
-          id: BuiltValueNullFieldError.checkNotNull(
-              id, r'DocumentChatProviderInfoDto', 'id'),
-          label: BuiltValueNullFieldError.checkNotNull(
-              label, r'DocumentChatProviderInfoDto', 'label'),
-          description: BuiltValueNullFieldError.checkNotNull(
-              description, r'DocumentChatProviderInfoDto', 'description'),
-          available: BuiltValueNullFieldError.checkNotNull(
-              available, r'DocumentChatProviderInfoDto', 'available'),
-        );
+        new _$DocumentChatProviderInfoDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'DocumentChatProviderInfoDto', 'id'),
+            label: BuiltValueNullFieldError.checkNotNull(
+                label, r'DocumentChatProviderInfoDto', 'label'),
+            description: BuiltValueNullFieldError.checkNotNull(
+                description, r'DocumentChatProviderInfoDto', 'description'),
+            available: BuiltValueNullFieldError.checkNotNull(
+                available, r'DocumentChatProviderInfoDto', 'available'));
     replace(_$result);
     return _$result;
   }

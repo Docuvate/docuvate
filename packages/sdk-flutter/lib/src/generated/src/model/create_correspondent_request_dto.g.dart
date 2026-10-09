@@ -36,12 +36,12 @@ CreateCorrespondentRequestDtoMatchingAlgorithmEnum
     case 'regex':
       return _$createCorrespondentRequestDtoMatchingAlgorithmEnum_regex;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateCorrespondentRequestDtoMatchingAlgorithmEnum>
-    _$createCorrespondentRequestDtoMatchingAlgorithmEnumValues = BuiltSet<
+    _$createCorrespondentRequestDtoMatchingAlgorithmEnumValues = new BuiltSet<
         CreateCorrespondentRequestDtoMatchingAlgorithmEnum>(const <CreateCorrespondentRequestDtoMatchingAlgorithmEnum>[
   _$createCorrespondentRequestDtoMatchingAlgorithmEnum_none,
   _$createCorrespondentRequestDtoMatchingAlgorithmEnum_any,
@@ -52,7 +52,7 @@ final BuiltSet<CreateCorrespondentRequestDtoMatchingAlgorithmEnum>
 
 Serializer<CreateCorrespondentRequestDtoMatchingAlgorithmEnum>
     _$createCorrespondentRequestDtoMatchingAlgorithmEnumSerializer =
-    _$CreateCorrespondentRequestDtoMatchingAlgorithmEnumSerializer();
+    new _$CreateCorrespondentRequestDtoMatchingAlgorithmEnumSerializer();
 
 class _$CreateCorrespondentRequestDtoMatchingAlgorithmEnumSerializer
     implements
@@ -104,11 +104,15 @@ class _$CreateCorrespondentRequestDto extends CreateCorrespondentRequestDto {
 
   factory _$CreateCorrespondentRequestDto(
           [void Function(CreateCorrespondentRequestDtoBuilder)? updates]) =>
-      (CreateCorrespondentRequestDtoBuilder()..update(updates))._build();
+      (new CreateCorrespondentRequestDtoBuilder()..update(updates))._build();
 
   _$CreateCorrespondentRequestDto._(
       {required this.name, this.matchingAlgorithm, this.match})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        name, r'CreateCorrespondentRequestDto', 'name');
+  }
+
   @override
   CreateCorrespondentRequestDto rebuild(
           void Function(CreateCorrespondentRequestDtoBuilder) updates) =>
@@ -116,7 +120,7 @@ class _$CreateCorrespondentRequestDto extends CreateCorrespondentRequestDto {
 
   @override
   CreateCorrespondentRequestDtoBuilder toBuilder() =>
-      CreateCorrespondentRequestDtoBuilder()..replace(this);
+      new CreateCorrespondentRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -186,6 +190,7 @@ class CreateCorrespondentRequestDtoBuilder
 
   @override
   void replace(CreateCorrespondentRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CreateCorrespondentRequestDto;
   }
 
@@ -199,12 +204,11 @@ class CreateCorrespondentRequestDtoBuilder
 
   _$CreateCorrespondentRequestDto _build() {
     final _$result = _$v ??
-        _$CreateCorrespondentRequestDto._(
-          name: BuiltValueNullFieldError.checkNotNull(
-              name, r'CreateCorrespondentRequestDto', 'name'),
-          matchingAlgorithm: matchingAlgorithm,
-          match: match,
-        );
+        new _$CreateCorrespondentRequestDto._(
+            name: BuiltValueNullFieldError.checkNotNull(
+                name, r'CreateCorrespondentRequestDto', 'name'),
+            matchingAlgorithm: matchingAlgorithm,
+            match: match);
     replace(_$result);
     return _$result;
   }

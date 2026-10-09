@@ -12,9 +12,13 @@ class _$FolderListResponseDto extends FolderListResponseDto {
 
   factory _$FolderListResponseDto(
           [void Function(FolderListResponseDtoBuilder)? updates]) =>
-      (FolderListResponseDtoBuilder()..update(updates))._build();
+      (new FolderListResponseDtoBuilder()..update(updates))._build();
 
-  _$FolderListResponseDto._({required this.items}) : super._();
+  _$FolderListResponseDto._({required this.items}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        items, r'FolderListResponseDto', 'items');
+  }
+
   @override
   FolderListResponseDto rebuild(
           void Function(FolderListResponseDtoBuilder) updates) =>
@@ -22,7 +26,7 @@ class _$FolderListResponseDto extends FolderListResponseDto {
 
   @override
   FolderListResponseDtoBuilder toBuilder() =>
-      FolderListResponseDtoBuilder()..replace(this);
+      new FolderListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -52,7 +56,7 @@ class FolderListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= ListBuilder<JsonObject>();
+      _$this._items ??= new ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   FolderListResponseDtoBuilder() {
@@ -70,6 +74,7 @@ class FolderListResponseDtoBuilder
 
   @override
   void replace(FolderListResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$FolderListResponseDto;
   }
 
@@ -84,17 +89,14 @@ class FolderListResponseDtoBuilder
   _$FolderListResponseDto _build() {
     _$FolderListResponseDto _$result;
     try {
-      _$result = _$v ??
-          _$FolderListResponseDto._(
-            items: items.build(),
-          );
+      _$result = _$v ?? new _$FolderListResponseDto._(items: items.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'FolderListResponseDto', _$failedField, e.toString());
       }
       rethrow;

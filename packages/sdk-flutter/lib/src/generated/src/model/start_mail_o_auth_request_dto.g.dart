@@ -14,10 +14,14 @@ class _$StartMailOAuthRequestDto extends StartMailOAuthRequestDto {
 
   factory _$StartMailOAuthRequestDto(
           [void Function(StartMailOAuthRequestDtoBuilder)? updates]) =>
-      (StartMailOAuthRequestDtoBuilder()..update(updates))._build();
+      (new StartMailOAuthRequestDtoBuilder()..update(updates))._build();
 
   _$StartMailOAuthRequestDto._({required this.displayName, this.accountHint})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        displayName, r'StartMailOAuthRequestDto', 'displayName');
+  }
+
   @override
   StartMailOAuthRequestDto rebuild(
           void Function(StartMailOAuthRequestDtoBuilder) updates) =>
@@ -25,7 +29,7 @@ class _$StartMailOAuthRequestDto extends StartMailOAuthRequestDto {
 
   @override
   StartMailOAuthRequestDtoBuilder toBuilder() =>
-      StartMailOAuthRequestDtoBuilder()..replace(this);
+      new StartMailOAuthRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -82,6 +86,7 @@ class StartMailOAuthRequestDtoBuilder
 
   @override
   void replace(StartMailOAuthRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$StartMailOAuthRequestDto;
   }
 
@@ -95,11 +100,10 @@ class StartMailOAuthRequestDtoBuilder
 
   _$StartMailOAuthRequestDto _build() {
     final _$result = _$v ??
-        _$StartMailOAuthRequestDto._(
-          displayName: BuiltValueNullFieldError.checkNotNull(
-              displayName, r'StartMailOAuthRequestDto', 'displayName'),
-          accountHint: accountHint,
-        );
+        new _$StartMailOAuthRequestDto._(
+            displayName: BuiltValueNullFieldError.checkNotNull(
+                displayName, r'StartMailOAuthRequestDto', 'displayName'),
+            accountHint: accountHint);
     replace(_$result);
     return _$result;
   }

@@ -13,9 +13,13 @@ class _$ReplaceDashboardLayoutRequestDto
 
   factory _$ReplaceDashboardLayoutRequestDto(
           [void Function(ReplaceDashboardLayoutRequestDtoBuilder)? updates]) =>
-      (ReplaceDashboardLayoutRequestDtoBuilder()..update(updates))._build();
+      (new ReplaceDashboardLayoutRequestDtoBuilder()..update(updates))._build();
 
-  _$ReplaceDashboardLayoutRequestDto._({required this.widgets}) : super._();
+  _$ReplaceDashboardLayoutRequestDto._({required this.widgets}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        widgets, r'ReplaceDashboardLayoutRequestDto', 'widgets');
+  }
+
   @override
   ReplaceDashboardLayoutRequestDto rebuild(
           void Function(ReplaceDashboardLayoutRequestDtoBuilder) updates) =>
@@ -23,7 +27,7 @@ class _$ReplaceDashboardLayoutRequestDto
 
   @override
   ReplaceDashboardLayoutRequestDtoBuilder toBuilder() =>
-      ReplaceDashboardLayoutRequestDtoBuilder()..replace(this);
+      new ReplaceDashboardLayoutRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -56,7 +60,7 @@ class ReplaceDashboardLayoutRequestDtoBuilder
 
   ListBuilder<DashboardWidgetInputDto>? _widgets;
   ListBuilder<DashboardWidgetInputDto> get widgets =>
-      _$this._widgets ??= ListBuilder<DashboardWidgetInputDto>();
+      _$this._widgets ??= new ListBuilder<DashboardWidgetInputDto>();
   set widgets(ListBuilder<DashboardWidgetInputDto>? widgets) =>
       _$this._widgets = widgets;
 
@@ -75,6 +79,7 @@ class ReplaceDashboardLayoutRequestDtoBuilder
 
   @override
   void replace(ReplaceDashboardLayoutRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ReplaceDashboardLayoutRequestDto;
   }
 
@@ -90,16 +95,14 @@ class ReplaceDashboardLayoutRequestDtoBuilder
     _$ReplaceDashboardLayoutRequestDto _$result;
     try {
       _$result = _$v ??
-          _$ReplaceDashboardLayoutRequestDto._(
-            widgets: widgets.build(),
-          );
+          new _$ReplaceDashboardLayoutRequestDto._(widgets: widgets.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'widgets';
         widgets.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'ReplaceDashboardLayoutRequestDto', _$failedField, e.toString());
       }
       rethrow;

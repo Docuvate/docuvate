@@ -16,12 +16,18 @@ class _$DashboardStatisticsDtoClassTopLabelsInner
   factory _$DashboardStatisticsDtoClassTopLabelsInner(
           [void Function(DashboardStatisticsDtoClassTopLabelsInnerBuilder)?
               updates]) =>
-      (DashboardStatisticsDtoClassTopLabelsInnerBuilder()..update(updates))
+      (new DashboardStatisticsDtoClassTopLabelsInnerBuilder()..update(updates))
           ._build();
 
   _$DashboardStatisticsDtoClassTopLabelsInner._(
       {required this.name, required this.count})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        name, r'DashboardStatisticsDtoClassTopLabelsInner', 'name');
+    BuiltValueNullFieldError.checkNotNull(
+        count, r'DashboardStatisticsDtoClassTopLabelsInner', 'count');
+  }
+
   @override
   DashboardStatisticsDtoClassTopLabelsInner rebuild(
           void Function(DashboardStatisticsDtoClassTopLabelsInnerBuilder)
@@ -30,7 +36,7 @@ class _$DashboardStatisticsDtoClassTopLabelsInner
 
   @override
   DashboardStatisticsDtoClassTopLabelsInnerBuilder toBuilder() =>
-      DashboardStatisticsDtoClassTopLabelsInnerBuilder()..replace(this);
+      new DashboardStatisticsDtoClassTopLabelsInnerBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -89,6 +95,7 @@ class DashboardStatisticsDtoClassTopLabelsInnerBuilder
 
   @override
   void replace(DashboardStatisticsDtoClassTopLabelsInner other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DashboardStatisticsDtoClassTopLabelsInner;
   }
 
@@ -104,12 +111,11 @@ class DashboardStatisticsDtoClassTopLabelsInnerBuilder
 
   _$DashboardStatisticsDtoClassTopLabelsInner _build() {
     final _$result = _$v ??
-        _$DashboardStatisticsDtoClassTopLabelsInner._(
-          name: BuiltValueNullFieldError.checkNotNull(
-              name, r'DashboardStatisticsDtoClassTopLabelsInner', 'name'),
-          count: BuiltValueNullFieldError.checkNotNull(
-              count, r'DashboardStatisticsDtoClassTopLabelsInner', 'count'),
-        );
+        new _$DashboardStatisticsDtoClassTopLabelsInner._(
+            name: BuiltValueNullFieldError.checkNotNull(
+                name, r'DashboardStatisticsDtoClassTopLabelsInner', 'name'),
+            count: BuiltValueNullFieldError.checkNotNull(
+                count, r'DashboardStatisticsDtoClassTopLabelsInner', 'count'));
     replace(_$result);
     return _$result;
   }

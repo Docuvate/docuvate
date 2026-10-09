@@ -32,12 +32,12 @@ MlModelVersionDtoLifecycleEnum _$mlModelVersionDtoLifecycleEnumValueOf(
     case 'archived':
       return _$mlModelVersionDtoLifecycleEnum_archived;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<MlModelVersionDtoLifecycleEnum>
-    _$mlModelVersionDtoLifecycleEnumValues = BuiltSet<
+    _$mlModelVersionDtoLifecycleEnumValues = new BuiltSet<
         MlModelVersionDtoLifecycleEnum>(const <MlModelVersionDtoLifecycleEnum>[
   _$mlModelVersionDtoLifecycleEnum_failed,
   _$mlModelVersionDtoLifecycleEnum_active,
@@ -48,7 +48,7 @@ final BuiltSet<MlModelVersionDtoLifecycleEnum>
 
 Serializer<MlModelVersionDtoLifecycleEnum>
     _$mlModelVersionDtoLifecycleEnumSerializer =
-    _$MlModelVersionDtoLifecycleEnumSerializer();
+    new _$MlModelVersionDtoLifecycleEnumSerializer();
 
 class _$MlModelVersionDtoLifecycleEnumSerializer
     implements PrimitiveSerializer<MlModelVersionDtoLifecycleEnum> {
@@ -112,7 +112,7 @@ class _$MlModelVersionDto extends MlModelVersionDto {
 
   factory _$MlModelVersionDto(
           [void Function(MlModelVersionDtoBuilder)? updates]) =>
-      (MlModelVersionDtoBuilder()..update(updates))._build();
+      (new MlModelVersionDtoBuilder()..update(updates))._build();
 
   _$MlModelVersionDto._(
       {required this.id,
@@ -126,14 +126,36 @@ class _$MlModelVersionDto extends MlModelVersionDto {
       required this.notes,
       required this.createdAt,
       required this.promotedAt})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(id, r'MlModelVersionDto', 'id');
+    BuiltValueNullFieldError.checkNotNull(
+        familyId, r'MlModelVersionDto', 'familyId');
+    BuiltValueNullFieldError.checkNotNull(
+        versionTag, r'MlModelVersionDto', 'versionTag');
+    BuiltValueNullFieldError.checkNotNull(
+        artifactUri, r'MlModelVersionDto', 'artifactUri');
+    BuiltValueNullFieldError.checkNotNull(
+        externalRunId, r'MlModelVersionDto', 'externalRunId');
+    BuiltValueNullFieldError.checkNotNull(
+        metrics, r'MlModelVersionDto', 'metrics');
+    BuiltValueNullFieldError.checkNotNull(
+        lifecycle, r'MlModelVersionDto', 'lifecycle');
+    BuiltValueNullFieldError.checkNotNull(
+        trainingSnapshotId, r'MlModelVersionDto', 'trainingSnapshotId');
+    BuiltValueNullFieldError.checkNotNull(notes, r'MlModelVersionDto', 'notes');
+    BuiltValueNullFieldError.checkNotNull(
+        createdAt, r'MlModelVersionDto', 'createdAt');
+    BuiltValueNullFieldError.checkNotNull(
+        promotedAt, r'MlModelVersionDto', 'promotedAt');
+  }
+
   @override
   MlModelVersionDto rebuild(void Function(MlModelVersionDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   MlModelVersionDtoBuilder toBuilder() =>
-      MlModelVersionDtoBuilder()..replace(this);
+      new MlModelVersionDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -215,7 +237,7 @@ class MlModelVersionDtoBuilder
 
   MapBuilder<String, num>? _metrics;
   MapBuilder<String, num> get metrics =>
-      _$this._metrics ??= MapBuilder<String, num>();
+      _$this._metrics ??= new MapBuilder<String, num>();
   set metrics(MapBuilder<String, num>? metrics) => _$this._metrics = metrics;
 
   MlModelVersionDtoLifecycleEnum? _lifecycle;
@@ -265,6 +287,7 @@ class MlModelVersionDtoBuilder
 
   @override
   void replace(MlModelVersionDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MlModelVersionDto;
   }
 
@@ -280,36 +303,33 @@ class MlModelVersionDtoBuilder
     _$MlModelVersionDto _$result;
     try {
       _$result = _$v ??
-          _$MlModelVersionDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'MlModelVersionDto', 'id'),
-            familyId: BuiltValueNullFieldError.checkNotNull(
-                familyId, r'MlModelVersionDto', 'familyId'),
-            versionTag: BuiltValueNullFieldError.checkNotNull(
-                versionTag, r'MlModelVersionDto', 'versionTag'),
-            artifactUri: BuiltValueNullFieldError.checkNotNull(
-                artifactUri, r'MlModelVersionDto', 'artifactUri'),
-            externalRunId: BuiltValueNullFieldError.checkNotNull(
-                externalRunId, r'MlModelVersionDto', 'externalRunId'),
-            metrics: metrics.build(),
-            lifecycle: BuiltValueNullFieldError.checkNotNull(
-                lifecycle, r'MlModelVersionDto', 'lifecycle'),
-            trainingSnapshotId: BuiltValueNullFieldError.checkNotNull(
-                trainingSnapshotId, r'MlModelVersionDto', 'trainingSnapshotId'),
-            notes: BuiltValueNullFieldError.checkNotNull(
-                notes, r'MlModelVersionDto', 'notes'),
-            createdAt: BuiltValueNullFieldError.checkNotNull(
-                createdAt, r'MlModelVersionDto', 'createdAt'),
-            promotedAt: BuiltValueNullFieldError.checkNotNull(
-                promotedAt, r'MlModelVersionDto', 'promotedAt'),
-          );
+          new _$MlModelVersionDto._(
+              id: BuiltValueNullFieldError.checkNotNull(
+                  id, r'MlModelVersionDto', 'id'),
+              familyId: BuiltValueNullFieldError.checkNotNull(
+                  familyId, r'MlModelVersionDto', 'familyId'),
+              versionTag: BuiltValueNullFieldError.checkNotNull(
+                  versionTag, r'MlModelVersionDto', 'versionTag'),
+              artifactUri: BuiltValueNullFieldError.checkNotNull(
+                  artifactUri, r'MlModelVersionDto', 'artifactUri'),
+              externalRunId: BuiltValueNullFieldError.checkNotNull(
+                  externalRunId, r'MlModelVersionDto', 'externalRunId'),
+              metrics: metrics.build(),
+              lifecycle: BuiltValueNullFieldError.checkNotNull(
+                  lifecycle, r'MlModelVersionDto', 'lifecycle'),
+              trainingSnapshotId: BuiltValueNullFieldError.checkNotNull(
+                  trainingSnapshotId, r'MlModelVersionDto', 'trainingSnapshotId'),
+              notes: BuiltValueNullFieldError.checkNotNull(
+                  notes, r'MlModelVersionDto', 'notes'),
+              createdAt: BuiltValueNullFieldError.checkNotNull(createdAt, r'MlModelVersionDto', 'createdAt'),
+              promotedAt: BuiltValueNullFieldError.checkNotNull(promotedAt, r'MlModelVersionDto', 'promotedAt'));
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'metrics';
         metrics.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'MlModelVersionDto', _$failedField, e.toString());
       }
       rethrow;

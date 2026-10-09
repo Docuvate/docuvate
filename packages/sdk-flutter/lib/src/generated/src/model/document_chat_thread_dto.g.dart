@@ -19,12 +19,12 @@ DocumentChatThreadDtoScopeEnum _$documentChatThreadDtoScopeEnumValueOf(
     case 'library_':
       return _$documentChatThreadDtoScopeEnum_library_;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentChatThreadDtoScopeEnum>
-    _$documentChatThreadDtoScopeEnumValues = BuiltSet<
+    _$documentChatThreadDtoScopeEnumValues = new BuiltSet<
         DocumentChatThreadDtoScopeEnum>(const <DocumentChatThreadDtoScopeEnum>[
   _$documentChatThreadDtoScopeEnum_document,
   _$documentChatThreadDtoScopeEnum_library_,
@@ -55,12 +55,12 @@ DocumentChatThreadDtoActiveGenerationStatusEnum
     case 'done':
       return _$documentChatThreadDtoActiveGenerationStatusEnum_done;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<DocumentChatThreadDtoActiveGenerationStatusEnum>
-    _$documentChatThreadDtoActiveGenerationStatusEnumValues = BuiltSet<
+    _$documentChatThreadDtoActiveGenerationStatusEnumValues = new BuiltSet<
         DocumentChatThreadDtoActiveGenerationStatusEnum>(const <DocumentChatThreadDtoActiveGenerationStatusEnum>[
   _$documentChatThreadDtoActiveGenerationStatusEnum_failed,
   _$documentChatThreadDtoActiveGenerationStatusEnum_pending,
@@ -70,10 +70,10 @@ final BuiltSet<DocumentChatThreadDtoActiveGenerationStatusEnum>
 
 Serializer<DocumentChatThreadDtoScopeEnum>
     _$documentChatThreadDtoScopeEnumSerializer =
-    _$DocumentChatThreadDtoScopeEnumSerializer();
+    new _$DocumentChatThreadDtoScopeEnumSerializer();
 Serializer<DocumentChatThreadDtoActiveGenerationStatusEnum>
     _$documentChatThreadDtoActiveGenerationStatusEnumSerializer =
-    _$DocumentChatThreadDtoActiveGenerationStatusEnumSerializer();
+    new _$DocumentChatThreadDtoActiveGenerationStatusEnumSerializer();
 
 class _$DocumentChatThreadDtoScopeEnumSerializer
     implements PrimitiveSerializer<DocumentChatThreadDtoScopeEnum> {
@@ -162,7 +162,7 @@ class _$DocumentChatThreadDto extends DocumentChatThreadDto {
 
   factory _$DocumentChatThreadDto(
           [void Function(DocumentChatThreadDtoBuilder)? updates]) =>
-      (DocumentChatThreadDtoBuilder()..update(updates))._build();
+      (new DocumentChatThreadDtoBuilder()..update(updates))._build();
 
   _$DocumentChatThreadDto._(
       {required this.id,
@@ -173,7 +173,20 @@ class _$DocumentChatThreadDto extends DocumentChatThreadDto {
       required this.updatedAt,
       this.lastMessagePreview,
       this.activeGenerationStatus})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(id, r'DocumentChatThreadDto', 'id');
+    BuiltValueNullFieldError.checkNotNull(
+        title, r'DocumentChatThreadDto', 'title');
+    BuiltValueNullFieldError.checkNotNull(
+        scope, r'DocumentChatThreadDto', 'scope');
+    BuiltValueNullFieldError.checkNotNull(
+        documentIds, r'DocumentChatThreadDto', 'documentIds');
+    BuiltValueNullFieldError.checkNotNull(
+        createdAt, r'DocumentChatThreadDto', 'createdAt');
+    BuiltValueNullFieldError.checkNotNull(
+        updatedAt, r'DocumentChatThreadDto', 'updatedAt');
+  }
+
   @override
   DocumentChatThreadDto rebuild(
           void Function(DocumentChatThreadDtoBuilder) updates) =>
@@ -181,7 +194,7 @@ class _$DocumentChatThreadDto extends DocumentChatThreadDto {
 
   @override
   DocumentChatThreadDtoBuilder toBuilder() =>
-      DocumentChatThreadDtoBuilder()..replace(this);
+      new DocumentChatThreadDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -245,7 +258,7 @@ class DocumentChatThreadDtoBuilder
 
   ListBuilder<String>? _documentIds;
   ListBuilder<String> get documentIds =>
-      _$this._documentIds ??= ListBuilder<String>();
+      _$this._documentIds ??= new ListBuilder<String>();
   set documentIds(ListBuilder<String>? documentIds) =>
       _$this._documentIds = documentIds;
 
@@ -292,6 +305,7 @@ class DocumentChatThreadDtoBuilder
 
   @override
   void replace(DocumentChatThreadDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatThreadDto;
   }
 
@@ -307,28 +321,27 @@ class DocumentChatThreadDtoBuilder
     _$DocumentChatThreadDto _$result;
     try {
       _$result = _$v ??
-          _$DocumentChatThreadDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'DocumentChatThreadDto', 'id'),
-            title: BuiltValueNullFieldError.checkNotNull(
-                title, r'DocumentChatThreadDto', 'title'),
-            scope: BuiltValueNullFieldError.checkNotNull(
-                scope, r'DocumentChatThreadDto', 'scope'),
-            documentIds: documentIds.build(),
-            createdAt: BuiltValueNullFieldError.checkNotNull(
-                createdAt, r'DocumentChatThreadDto', 'createdAt'),
-            updatedAt: BuiltValueNullFieldError.checkNotNull(
-                updatedAt, r'DocumentChatThreadDto', 'updatedAt'),
-            lastMessagePreview: lastMessagePreview,
-            activeGenerationStatus: activeGenerationStatus,
-          );
+          new _$DocumentChatThreadDto._(
+              id: BuiltValueNullFieldError.checkNotNull(
+                  id, r'DocumentChatThreadDto', 'id'),
+              title: BuiltValueNullFieldError.checkNotNull(
+                  title, r'DocumentChatThreadDto', 'title'),
+              scope: BuiltValueNullFieldError.checkNotNull(
+                  scope, r'DocumentChatThreadDto', 'scope'),
+              documentIds: documentIds.build(),
+              createdAt: BuiltValueNullFieldError.checkNotNull(
+                  createdAt, r'DocumentChatThreadDto', 'createdAt'),
+              updatedAt: BuiltValueNullFieldError.checkNotNull(
+                  updatedAt, r'DocumentChatThreadDto', 'updatedAt'),
+              lastMessagePreview: lastMessagePreview,
+              activeGenerationStatus: activeGenerationStatus);
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'documentIds';
         documentIds.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'DocumentChatThreadDto', _$failedField, e.toString());
       }
       rethrow;

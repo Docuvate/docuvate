@@ -16,11 +16,18 @@ class _$DuplicateStackSetPrimaryRequestDto
   factory _$DuplicateStackSetPrimaryRequestDto(
           [void Function(DuplicateStackSetPrimaryRequestDtoBuilder)?
               updates]) =>
-      (DuplicateStackSetPrimaryRequestDtoBuilder()..update(updates))._build();
+      (new DuplicateStackSetPrimaryRequestDtoBuilder()..update(updates))
+          ._build();
 
   _$DuplicateStackSetPrimaryRequestDto._(
       {required this.documentId, required this.stackId})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        documentId, r'DuplicateStackSetPrimaryRequestDto', 'documentId');
+    BuiltValueNullFieldError.checkNotNull(
+        stackId, r'DuplicateStackSetPrimaryRequestDto', 'stackId');
+  }
+
   @override
   DuplicateStackSetPrimaryRequestDto rebuild(
           void Function(DuplicateStackSetPrimaryRequestDtoBuilder) updates) =>
@@ -28,7 +35,7 @@ class _$DuplicateStackSetPrimaryRequestDto
 
   @override
   DuplicateStackSetPrimaryRequestDtoBuilder toBuilder() =>
-      DuplicateStackSetPrimaryRequestDtoBuilder()..replace(this);
+      new DuplicateStackSetPrimaryRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -86,6 +93,7 @@ class DuplicateStackSetPrimaryRequestDtoBuilder
 
   @override
   void replace(DuplicateStackSetPrimaryRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DuplicateStackSetPrimaryRequestDto;
   }
 
@@ -100,12 +108,11 @@ class DuplicateStackSetPrimaryRequestDtoBuilder
 
   _$DuplicateStackSetPrimaryRequestDto _build() {
     final _$result = _$v ??
-        _$DuplicateStackSetPrimaryRequestDto._(
-          documentId: BuiltValueNullFieldError.checkNotNull(
-              documentId, r'DuplicateStackSetPrimaryRequestDto', 'documentId'),
-          stackId: BuiltValueNullFieldError.checkNotNull(
-              stackId, r'DuplicateStackSetPrimaryRequestDto', 'stackId'),
-        );
+        new _$DuplicateStackSetPrimaryRequestDto._(
+            documentId: BuiltValueNullFieldError.checkNotNull(documentId,
+                r'DuplicateStackSetPrimaryRequestDto', 'documentId'),
+            stackId: BuiltValueNullFieldError.checkNotNull(
+                stackId, r'DuplicateStackSetPrimaryRequestDto', 'stackId'));
     replace(_$result);
     return _$result;
   }

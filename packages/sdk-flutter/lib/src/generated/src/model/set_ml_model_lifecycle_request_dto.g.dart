@@ -36,12 +36,12 @@ SetMlModelLifecycleRequestDtoLifecycleEnum
     case 'archived':
       return _$setMlModelLifecycleRequestDtoLifecycleEnum_archived;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<SetMlModelLifecycleRequestDtoLifecycleEnum>
-    _$setMlModelLifecycleRequestDtoLifecycleEnumValues = BuiltSet<
+    _$setMlModelLifecycleRequestDtoLifecycleEnumValues = new BuiltSet<
         SetMlModelLifecycleRequestDtoLifecycleEnum>(const <SetMlModelLifecycleRequestDtoLifecycleEnum>[
   _$setMlModelLifecycleRequestDtoLifecycleEnum_failed,
   _$setMlModelLifecycleRequestDtoLifecycleEnum_active,
@@ -52,7 +52,7 @@ final BuiltSet<SetMlModelLifecycleRequestDtoLifecycleEnum>
 
 Serializer<SetMlModelLifecycleRequestDtoLifecycleEnum>
     _$setMlModelLifecycleRequestDtoLifecycleEnumSerializer =
-    _$SetMlModelLifecycleRequestDtoLifecycleEnumSerializer();
+    new _$SetMlModelLifecycleRequestDtoLifecycleEnumSerializer();
 
 class _$SetMlModelLifecycleRequestDtoLifecycleEnumSerializer
     implements PrimitiveSerializer<SetMlModelLifecycleRequestDtoLifecycleEnum> {
@@ -98,9 +98,13 @@ class _$SetMlModelLifecycleRequestDto extends SetMlModelLifecycleRequestDto {
 
   factory _$SetMlModelLifecycleRequestDto(
           [void Function(SetMlModelLifecycleRequestDtoBuilder)? updates]) =>
-      (SetMlModelLifecycleRequestDtoBuilder()..update(updates))._build();
+      (new SetMlModelLifecycleRequestDtoBuilder()..update(updates))._build();
 
-  _$SetMlModelLifecycleRequestDto._({required this.lifecycle}) : super._();
+  _$SetMlModelLifecycleRequestDto._({required this.lifecycle}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        lifecycle, r'SetMlModelLifecycleRequestDto', 'lifecycle');
+  }
+
   @override
   SetMlModelLifecycleRequestDto rebuild(
           void Function(SetMlModelLifecycleRequestDtoBuilder) updates) =>
@@ -108,7 +112,7 @@ class _$SetMlModelLifecycleRequestDto extends SetMlModelLifecycleRequestDto {
 
   @override
   SetMlModelLifecycleRequestDtoBuilder toBuilder() =>
-      SetMlModelLifecycleRequestDtoBuilder()..replace(this);
+      new SetMlModelLifecycleRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -160,6 +164,7 @@ class SetMlModelLifecycleRequestDtoBuilder
 
   @override
   void replace(SetMlModelLifecycleRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SetMlModelLifecycleRequestDto;
   }
 
@@ -173,10 +178,9 @@ class SetMlModelLifecycleRequestDtoBuilder
 
   _$SetMlModelLifecycleRequestDto _build() {
     final _$result = _$v ??
-        _$SetMlModelLifecycleRequestDto._(
-          lifecycle: BuiltValueNullFieldError.checkNotNull(
-              lifecycle, r'SetMlModelLifecycleRequestDto', 'lifecycle'),
-        );
+        new _$SetMlModelLifecycleRequestDto._(
+            lifecycle: BuiltValueNullFieldError.checkNotNull(
+                lifecycle, r'SetMlModelLifecycleRequestDto', 'lifecycle'));
     replace(_$result);
     return _$result;
   }

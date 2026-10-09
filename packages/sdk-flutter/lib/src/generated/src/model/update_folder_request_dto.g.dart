@@ -16,10 +16,11 @@ class _$UpdateFolderRequestDto extends UpdateFolderRequestDto {
 
   factory _$UpdateFolderRequestDto(
           [void Function(UpdateFolderRequestDtoBuilder)? updates]) =>
-      (UpdateFolderRequestDtoBuilder()..update(updates))._build();
+      (new UpdateFolderRequestDtoBuilder()..update(updates))._build();
 
   _$UpdateFolderRequestDto._({this.name, this.parentId, this.mappeId})
       : super._();
+
   @override
   UpdateFolderRequestDto rebuild(
           void Function(UpdateFolderRequestDtoBuilder) updates) =>
@@ -27,7 +28,7 @@ class _$UpdateFolderRequestDto extends UpdateFolderRequestDto {
 
   @override
   UpdateFolderRequestDtoBuilder toBuilder() =>
-      UpdateFolderRequestDtoBuilder()..replace(this);
+      new UpdateFolderRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -91,6 +92,7 @@ class UpdateFolderRequestDtoBuilder
 
   @override
   void replace(UpdateFolderRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateFolderRequestDto;
   }
 
@@ -104,11 +106,8 @@ class UpdateFolderRequestDtoBuilder
 
   _$UpdateFolderRequestDto _build() {
     final _$result = _$v ??
-        _$UpdateFolderRequestDto._(
-          name: name,
-          parentId: parentId,
-          mappeId: mappeId,
-        );
+        new _$UpdateFolderRequestDto._(
+            name: name, parentId: parentId, mappeId: mappeId);
     replace(_$result);
     return _$result;
   }

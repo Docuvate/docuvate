@@ -12,9 +12,13 @@ class _$MappeListResponseDto extends MappeListResponseDto {
 
   factory _$MappeListResponseDto(
           [void Function(MappeListResponseDtoBuilder)? updates]) =>
-      (MappeListResponseDtoBuilder()..update(updates))._build();
+      (new MappeListResponseDtoBuilder()..update(updates))._build();
 
-  _$MappeListResponseDto._({required this.items}) : super._();
+  _$MappeListResponseDto._({required this.items}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        items, r'MappeListResponseDto', 'items');
+  }
+
   @override
   MappeListResponseDto rebuild(
           void Function(MappeListResponseDtoBuilder) updates) =>
@@ -22,7 +26,7 @@ class _$MappeListResponseDto extends MappeListResponseDto {
 
   @override
   MappeListResponseDtoBuilder toBuilder() =>
-      MappeListResponseDtoBuilder()..replace(this);
+      new MappeListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -52,7 +56,7 @@ class MappeListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= ListBuilder<JsonObject>();
+      _$this._items ??= new ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   MappeListResponseDtoBuilder() {
@@ -70,6 +74,7 @@ class MappeListResponseDtoBuilder
 
   @override
   void replace(MappeListResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MappeListResponseDto;
   }
 
@@ -84,17 +89,14 @@ class MappeListResponseDtoBuilder
   _$MappeListResponseDto _build() {
     _$MappeListResponseDto _$result;
     try {
-      _$result = _$v ??
-          _$MappeListResponseDto._(
-            items: items.build(),
-          );
+      _$result = _$v ?? new _$MappeListResponseDto._(items: items.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'MappeListResponseDto', _$failedField, e.toString());
       }
       rethrow;

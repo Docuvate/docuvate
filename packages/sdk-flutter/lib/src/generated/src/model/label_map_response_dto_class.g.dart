@@ -26,12 +26,12 @@ LabelMapResponseDtoClassEmptyReasonEnum
     case 'embeddingUnavailable':
       return _$labelMapResponseDtoClassEmptyReasonEnum_embeddingUnavailable;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<LabelMapResponseDtoClassEmptyReasonEnum>
-    _$labelMapResponseDtoClassEmptyReasonEnumValues = BuiltSet<
+    _$labelMapResponseDtoClassEmptyReasonEnumValues = new BuiltSet<
         LabelMapResponseDtoClassEmptyReasonEnum>(const <LabelMapResponseDtoClassEmptyReasonEnum>[
   _$labelMapResponseDtoClassEmptyReasonEnum_noExtractedDocuments,
   _$labelMapResponseDtoClassEmptyReasonEnum_awaitingEmbeddings,
@@ -40,7 +40,7 @@ final BuiltSet<LabelMapResponseDtoClassEmptyReasonEnum>
 
 Serializer<LabelMapResponseDtoClassEmptyReasonEnum>
     _$labelMapResponseDtoClassEmptyReasonEnumSerializer =
-    _$LabelMapResponseDtoClassEmptyReasonEnumSerializer();
+    new _$LabelMapResponseDtoClassEmptyReasonEnumSerializer();
 
 class _$LabelMapResponseDtoClassEmptyReasonEnumSerializer
     implements PrimitiveSerializer<LabelMapResponseDtoClassEmptyReasonEnum> {
@@ -90,7 +90,7 @@ class _$LabelMapResponseDtoClass extends LabelMapResponseDtoClass {
 
   factory _$LabelMapResponseDtoClass(
           [void Function(LabelMapResponseDtoClassBuilder)? updates]) =>
-      (LabelMapResponseDtoClassBuilder()..update(updates))._build();
+      (new LabelMapResponseDtoClassBuilder()..update(updates))._build();
 
   _$LabelMapResponseDtoClass._(
       {required this.points,
@@ -98,7 +98,17 @@ class _$LabelMapResponseDtoClass extends LabelMapResponseDtoClass {
       required this.tagCount,
       required this.extractedDocumentCount,
       this.emptyReason})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        points, r'LabelMapResponseDtoClass', 'points');
+    BuiltValueNullFieldError.checkNotNull(
+        documentCount, r'LabelMapResponseDtoClass', 'documentCount');
+    BuiltValueNullFieldError.checkNotNull(
+        tagCount, r'LabelMapResponseDtoClass', 'tagCount');
+    BuiltValueNullFieldError.checkNotNull(extractedDocumentCount,
+        r'LabelMapResponseDtoClass', 'extractedDocumentCount');
+  }
+
   @override
   LabelMapResponseDtoClass rebuild(
           void Function(LabelMapResponseDtoClassBuilder) updates) =>
@@ -106,7 +116,7 @@ class _$LabelMapResponseDtoClass extends LabelMapResponseDtoClass {
 
   @override
   LabelMapResponseDtoClassBuilder toBuilder() =>
-      LabelMapResponseDtoClassBuilder()..replace(this);
+      new LabelMapResponseDtoClassBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -150,7 +160,7 @@ class LabelMapResponseDtoClassBuilder
 
   ListBuilder<JsonObject>? _points;
   ListBuilder<JsonObject> get points =>
-      _$this._points ??= ListBuilder<JsonObject>();
+      _$this._points ??= new ListBuilder<JsonObject>();
   set points(ListBuilder<JsonObject>? points) => _$this._points = points;
 
   num? _documentCount;
@@ -192,6 +202,7 @@ class LabelMapResponseDtoClassBuilder
 
   @override
   void replace(LabelMapResponseDtoClass other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LabelMapResponseDtoClass;
   }
 
@@ -207,25 +218,24 @@ class LabelMapResponseDtoClassBuilder
     _$LabelMapResponseDtoClass _$result;
     try {
       _$result = _$v ??
-          _$LabelMapResponseDtoClass._(
-            points: points.build(),
-            documentCount: BuiltValueNullFieldError.checkNotNull(
-                documentCount, r'LabelMapResponseDtoClass', 'documentCount'),
-            tagCount: BuiltValueNullFieldError.checkNotNull(
-                tagCount, r'LabelMapResponseDtoClass', 'tagCount'),
-            extractedDocumentCount: BuiltValueNullFieldError.checkNotNull(
-                extractedDocumentCount,
-                r'LabelMapResponseDtoClass',
-                'extractedDocumentCount'),
-            emptyReason: emptyReason,
-          );
+          new _$LabelMapResponseDtoClass._(
+              points: points.build(),
+              documentCount: BuiltValueNullFieldError.checkNotNull(
+                  documentCount, r'LabelMapResponseDtoClass', 'documentCount'),
+              tagCount: BuiltValueNullFieldError.checkNotNull(
+                  tagCount, r'LabelMapResponseDtoClass', 'tagCount'),
+              extractedDocumentCount: BuiltValueNullFieldError.checkNotNull(
+                  extractedDocumentCount,
+                  r'LabelMapResponseDtoClass',
+                  'extractedDocumentCount'),
+              emptyReason: emptyReason);
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'points';
         points.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'LabelMapResponseDtoClass', _$failedField, e.toString());
       }
       rethrow;

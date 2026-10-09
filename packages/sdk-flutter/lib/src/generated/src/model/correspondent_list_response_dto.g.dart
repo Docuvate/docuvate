@@ -12,9 +12,13 @@ class _$CorrespondentListResponseDto extends CorrespondentListResponseDto {
 
   factory _$CorrespondentListResponseDto(
           [void Function(CorrespondentListResponseDtoBuilder)? updates]) =>
-      (CorrespondentListResponseDtoBuilder()..update(updates))._build();
+      (new CorrespondentListResponseDtoBuilder()..update(updates))._build();
 
-  _$CorrespondentListResponseDto._({required this.items}) : super._();
+  _$CorrespondentListResponseDto._({required this.items}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        items, r'CorrespondentListResponseDto', 'items');
+  }
+
   @override
   CorrespondentListResponseDto rebuild(
           void Function(CorrespondentListResponseDtoBuilder) updates) =>
@@ -22,7 +26,7 @@ class _$CorrespondentListResponseDto extends CorrespondentListResponseDto {
 
   @override
   CorrespondentListResponseDtoBuilder toBuilder() =>
-      CorrespondentListResponseDtoBuilder()..replace(this);
+      new CorrespondentListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -54,7 +58,7 @@ class CorrespondentListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= ListBuilder<JsonObject>();
+      _$this._items ??= new ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   CorrespondentListResponseDtoBuilder() {
@@ -72,6 +76,7 @@ class CorrespondentListResponseDtoBuilder
 
   @override
   void replace(CorrespondentListResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CorrespondentListResponseDto;
   }
 
@@ -86,17 +91,15 @@ class CorrespondentListResponseDtoBuilder
   _$CorrespondentListResponseDto _build() {
     _$CorrespondentListResponseDto _$result;
     try {
-      _$result = _$v ??
-          _$CorrespondentListResponseDto._(
-            items: items.build(),
-          );
+      _$result =
+          _$v ?? new _$CorrespondentListResponseDto._(items: items.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'CorrespondentListResponseDto', _$failedField, e.toString());
       }
       rethrow;

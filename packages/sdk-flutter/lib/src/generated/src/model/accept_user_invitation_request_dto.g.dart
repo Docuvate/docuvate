@@ -14,11 +14,17 @@ class _$AcceptUserInvitationRequestDto extends AcceptUserInvitationRequestDto {
 
   factory _$AcceptUserInvitationRequestDto(
           [void Function(AcceptUserInvitationRequestDtoBuilder)? updates]) =>
-      (AcceptUserInvitationRequestDtoBuilder()..update(updates))._build();
+      (new AcceptUserInvitationRequestDtoBuilder()..update(updates))._build();
 
   _$AcceptUserInvitationRequestDto._(
       {required this.token, required this.password})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        token, r'AcceptUserInvitationRequestDto', 'token');
+    BuiltValueNullFieldError.checkNotNull(
+        password, r'AcceptUserInvitationRequestDto', 'password');
+  }
+
   @override
   AcceptUserInvitationRequestDto rebuild(
           void Function(AcceptUserInvitationRequestDtoBuilder) updates) =>
@@ -26,7 +32,7 @@ class _$AcceptUserInvitationRequestDto extends AcceptUserInvitationRequestDto {
 
   @override
   AcceptUserInvitationRequestDtoBuilder toBuilder() =>
-      AcceptUserInvitationRequestDtoBuilder()..replace(this);
+      new AcceptUserInvitationRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -84,6 +90,7 @@ class AcceptUserInvitationRequestDtoBuilder
 
   @override
   void replace(AcceptUserInvitationRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AcceptUserInvitationRequestDto;
   }
 
@@ -97,12 +104,11 @@ class AcceptUserInvitationRequestDtoBuilder
 
   _$AcceptUserInvitationRequestDto _build() {
     final _$result = _$v ??
-        _$AcceptUserInvitationRequestDto._(
-          token: BuiltValueNullFieldError.checkNotNull(
-              token, r'AcceptUserInvitationRequestDto', 'token'),
-          password: BuiltValueNullFieldError.checkNotNull(
-              password, r'AcceptUserInvitationRequestDto', 'password'),
-        );
+        new _$AcceptUserInvitationRequestDto._(
+            token: BuiltValueNullFieldError.checkNotNull(
+                token, r'AcceptUserInvitationRequestDto', 'token'),
+            password: BuiltValueNullFieldError.checkNotNull(
+                password, r'AcceptUserInvitationRequestDto', 'password'));
     replace(_$result);
     return _$result;
   }

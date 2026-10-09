@@ -12,9 +12,10 @@ class _$BanAdminUserRequestDto extends BanAdminUserRequestDto {
 
   factory _$BanAdminUserRequestDto(
           [void Function(BanAdminUserRequestDtoBuilder)? updates]) =>
-      (BanAdminUserRequestDtoBuilder()..update(updates))._build();
+      (new BanAdminUserRequestDtoBuilder()..update(updates))._build();
 
   _$BanAdminUserRequestDto._({this.reason}) : super._();
+
   @override
   BanAdminUserRequestDto rebuild(
           void Function(BanAdminUserRequestDtoBuilder) updates) =>
@@ -22,7 +23,7 @@ class _$BanAdminUserRequestDto extends BanAdminUserRequestDto {
 
   @override
   BanAdminUserRequestDtoBuilder toBuilder() =>
-      BanAdminUserRequestDtoBuilder()..replace(this);
+      new BanAdminUserRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -69,6 +70,7 @@ class BanAdminUserRequestDtoBuilder
 
   @override
   void replace(BanAdminUserRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$BanAdminUserRequestDto;
   }
 
@@ -81,10 +83,7 @@ class BanAdminUserRequestDtoBuilder
   BanAdminUserRequestDto build() => _build();
 
   _$BanAdminUserRequestDto _build() {
-    final _$result = _$v ??
-        _$BanAdminUserRequestDto._(
-          reason: reason,
-        );
+    final _$result = _$v ?? new _$BanAdminUserRequestDto._(reason: reason);
     replace(_$result);
     return _$result;
   }

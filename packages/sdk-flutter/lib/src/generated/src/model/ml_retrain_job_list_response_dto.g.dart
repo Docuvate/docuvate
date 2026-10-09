@@ -12,9 +12,13 @@ class _$MlRetrainJobListResponseDto extends MlRetrainJobListResponseDto {
 
   factory _$MlRetrainJobListResponseDto(
           [void Function(MlRetrainJobListResponseDtoBuilder)? updates]) =>
-      (MlRetrainJobListResponseDtoBuilder()..update(updates))._build();
+      (new MlRetrainJobListResponseDtoBuilder()..update(updates))._build();
 
-  _$MlRetrainJobListResponseDto._({required this.jobs}) : super._();
+  _$MlRetrainJobListResponseDto._({required this.jobs}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        jobs, r'MlRetrainJobListResponseDto', 'jobs');
+  }
+
   @override
   MlRetrainJobListResponseDto rebuild(
           void Function(MlRetrainJobListResponseDtoBuilder) updates) =>
@@ -22,7 +26,7 @@ class _$MlRetrainJobListResponseDto extends MlRetrainJobListResponseDto {
 
   @override
   MlRetrainJobListResponseDtoBuilder toBuilder() =>
-      MlRetrainJobListResponseDtoBuilder()..replace(this);
+      new MlRetrainJobListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -54,7 +58,7 @@ class MlRetrainJobListResponseDtoBuilder
 
   ListBuilder<MlRetrainJobDto>? _jobs;
   ListBuilder<MlRetrainJobDto> get jobs =>
-      _$this._jobs ??= ListBuilder<MlRetrainJobDto>();
+      _$this._jobs ??= new ListBuilder<MlRetrainJobDto>();
   set jobs(ListBuilder<MlRetrainJobDto>? jobs) => _$this._jobs = jobs;
 
   MlRetrainJobListResponseDtoBuilder() {
@@ -72,6 +76,7 @@ class MlRetrainJobListResponseDtoBuilder
 
   @override
   void replace(MlRetrainJobListResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MlRetrainJobListResponseDto;
   }
 
@@ -86,17 +91,14 @@ class MlRetrainJobListResponseDtoBuilder
   _$MlRetrainJobListResponseDto _build() {
     _$MlRetrainJobListResponseDto _$result;
     try {
-      _$result = _$v ??
-          _$MlRetrainJobListResponseDto._(
-            jobs: jobs.build(),
-          );
+      _$result = _$v ?? new _$MlRetrainJobListResponseDto._(jobs: jobs.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'jobs';
         jobs.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'MlRetrainJobListResponseDto', _$failedField, e.toString());
       }
       rethrow;

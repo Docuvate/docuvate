@@ -31,12 +31,12 @@ UserSettingsResponseDtoDocumentChatReadinessEnum
     case 'starting':
       return _$userSettingsResponseDtoDocumentChatReadinessEnum_starting;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UserSettingsResponseDtoDocumentChatReadinessEnum>
-    _$userSettingsResponseDtoDocumentChatReadinessEnumValues = BuiltSet<
+    _$userSettingsResponseDtoDocumentChatReadinessEnumValues = new BuiltSet<
         UserSettingsResponseDtoDocumentChatReadinessEnum>(const <UserSettingsResponseDtoDocumentChatReadinessEnum>[
   _$userSettingsResponseDtoDocumentChatReadinessEnum_ready,
   _$userSettingsResponseDtoDocumentChatReadinessEnum_off,
@@ -64,12 +64,12 @@ UserSettingsResponseDtoThemePreferenceEnum
     case 'system':
       return _$userSettingsResponseDtoThemePreferenceEnum_system;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UserSettingsResponseDtoThemePreferenceEnum>
-    _$userSettingsResponseDtoThemePreferenceEnumValues = BuiltSet<
+    _$userSettingsResponseDtoThemePreferenceEnumValues = new BuiltSet<
         UserSettingsResponseDtoThemePreferenceEnum>(const <UserSettingsResponseDtoThemePreferenceEnum>[
   _$userSettingsResponseDtoThemePreferenceEnum_light,
   _$userSettingsResponseDtoThemePreferenceEnum_dark,
@@ -89,12 +89,12 @@ UserSettingsResponseDtoLocaleEnum _$userSettingsResponseDtoLocaleEnumValueOf(
     case 'en':
       return _$userSettingsResponseDtoLocaleEnum_en;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UserSettingsResponseDtoLocaleEnum>
-    _$userSettingsResponseDtoLocaleEnumValues = BuiltSet<
+    _$userSettingsResponseDtoLocaleEnumValues = new BuiltSet<
         UserSettingsResponseDtoLocaleEnum>(const <UserSettingsResponseDtoLocaleEnum>[
   _$userSettingsResponseDtoLocaleEnum_de,
   _$userSettingsResponseDtoLocaleEnum_en,
@@ -102,13 +102,13 @@ final BuiltSet<UserSettingsResponseDtoLocaleEnum>
 
 Serializer<UserSettingsResponseDtoDocumentChatReadinessEnum>
     _$userSettingsResponseDtoDocumentChatReadinessEnumSerializer =
-    _$UserSettingsResponseDtoDocumentChatReadinessEnumSerializer();
+    new _$UserSettingsResponseDtoDocumentChatReadinessEnumSerializer();
 Serializer<UserSettingsResponseDtoThemePreferenceEnum>
     _$userSettingsResponseDtoThemePreferenceEnumSerializer =
-    _$UserSettingsResponseDtoThemePreferenceEnumSerializer();
+    new _$UserSettingsResponseDtoThemePreferenceEnumSerializer();
 Serializer<UserSettingsResponseDtoLocaleEnum>
     _$userSettingsResponseDtoLocaleEnumSerializer =
-    _$UserSettingsResponseDtoLocaleEnumSerializer();
+    new _$UserSettingsResponseDtoLocaleEnumSerializer();
 
 class _$UserSettingsResponseDtoDocumentChatReadinessEnumSerializer
     implements
@@ -251,7 +251,7 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
 
   factory _$UserSettingsResponseDto(
           [void Function(UserSettingsResponseDtoBuilder)? updates]) =>
-      (UserSettingsResponseDtoBuilder()..update(updates))._build();
+      (new UserSettingsResponseDtoBuilder()..update(updates))._build();
 
   _$UserSettingsResponseDto._(
       {required this.preferredExtractorEngine,
@@ -272,7 +272,13 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
       this.fieldExtractionRequiredLabelIds,
       this.themePreference,
       this.locale})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(preferredExtractorEngine,
+        r'UserSettingsResponseDto', 'preferredExtractorEngine');
+    BuiltValueNullFieldError.checkNotNull(useArenaWinnerAsDefault,
+        r'UserSettingsResponseDto', 'useArenaWinnerAsDefault');
+  }
+
   @override
   UserSettingsResponseDto rebuild(
           void Function(UserSettingsResponseDtoBuilder) updates) =>
@@ -280,7 +286,7 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
 
   @override
   UserSettingsResponseDtoBuilder toBuilder() =>
-      UserSettingsResponseDtoBuilder()..replace(this);
+      new UserSettingsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -450,7 +456,7 @@ class UserSettingsResponseDtoBuilder
 
   ListBuilder<String>? _fieldExtractionRequiredLabelIds;
   ListBuilder<String> get fieldExtractionRequiredLabelIds =>
-      _$this._fieldExtractionRequiredLabelIds ??= ListBuilder<String>();
+      _$this._fieldExtractionRequiredLabelIds ??= new ListBuilder<String>();
   set fieldExtractionRequiredLabelIds(
           ListBuilder<String>? fieldExtractionRequiredLabelIds) =>
       _$this._fieldExtractionRequiredLabelIds = fieldExtractionRequiredLabelIds;
@@ -501,6 +507,7 @@ class UserSettingsResponseDtoBuilder
 
   @override
   void replace(UserSettingsResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UserSettingsResponseDto;
   }
 
@@ -516,41 +523,40 @@ class UserSettingsResponseDtoBuilder
     _$UserSettingsResponseDto _$result;
     try {
       _$result = _$v ??
-          _$UserSettingsResponseDto._(
-            preferredExtractorEngine: BuiltValueNullFieldError.checkNotNull(
-                preferredExtractorEngine,
-                r'UserSettingsResponseDto',
-                'preferredExtractorEngine'),
-            preferredChatProvider: preferredChatProvider,
-            effectiveChatProvider: effectiveChatProvider,
-            customerChatProvider: customerChatProvider,
-            documentChatUiEnabled: documentChatUiEnabled,
-            documentChatAvailable: documentChatAvailable,
-            documentChatReadiness: documentChatReadiness,
-            documentChatReadinessReason: documentChatReadinessReason,
-            documentChatOllamaModel: documentChatOllamaModel,
-            documentChatRunsOnCpu: documentChatRunsOnCpu,
-            advancedFeaturesEnabled: advancedFeaturesEnabled,
-            useArenaWinnerAsDefault: BuiltValueNullFieldError.checkNotNull(
-                useArenaWinnerAsDefault,
-                r'UserSettingsResponseDto',
-                'useArenaWinnerAsDefault'),
-            arenaWinnerEngine: arenaWinnerEngine,
-            labelFieldConfidenceThreshold: labelFieldConfidenceThreshold,
-            fieldExtractionConfidenceGateEnabled:
-                fieldExtractionConfidenceGateEnabled,
-            fieldExtractionRequiredLabelIds:
-                _fieldExtractionRequiredLabelIds?.build(),
-            themePreference: themePreference,
-            locale: locale,
-          );
+          new _$UserSettingsResponseDto._(
+              preferredExtractorEngine: BuiltValueNullFieldError.checkNotNull(
+                  preferredExtractorEngine,
+                  r'UserSettingsResponseDto',
+                  'preferredExtractorEngine'),
+              preferredChatProvider: preferredChatProvider,
+              effectiveChatProvider: effectiveChatProvider,
+              customerChatProvider: customerChatProvider,
+              documentChatUiEnabled: documentChatUiEnabled,
+              documentChatAvailable: documentChatAvailable,
+              documentChatReadiness: documentChatReadiness,
+              documentChatReadinessReason: documentChatReadinessReason,
+              documentChatOllamaModel: documentChatOllamaModel,
+              documentChatRunsOnCpu: documentChatRunsOnCpu,
+              advancedFeaturesEnabled: advancedFeaturesEnabled,
+              useArenaWinnerAsDefault: BuiltValueNullFieldError.checkNotNull(
+                  useArenaWinnerAsDefault,
+                  r'UserSettingsResponseDto',
+                  'useArenaWinnerAsDefault'),
+              arenaWinnerEngine: arenaWinnerEngine,
+              labelFieldConfidenceThreshold: labelFieldConfidenceThreshold,
+              fieldExtractionConfidenceGateEnabled:
+                  fieldExtractionConfidenceGateEnabled,
+              fieldExtractionRequiredLabelIds:
+                  _fieldExtractionRequiredLabelIds?.build(),
+              themePreference: themePreference,
+              locale: locale);
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'fieldExtractionRequiredLabelIds';
         _fieldExtractionRequiredLabelIds?.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'UserSettingsResponseDto', _$failedField, e.toString());
       }
       rethrow;

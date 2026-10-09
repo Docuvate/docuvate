@@ -12,9 +12,13 @@ class _$TriggerMlRetrainRequestDto extends TriggerMlRetrainRequestDto {
 
   factory _$TriggerMlRetrainRequestDto(
           [void Function(TriggerMlRetrainRequestDtoBuilder)? updates]) =>
-      (TriggerMlRetrainRequestDtoBuilder()..update(updates))._build();
+      (new TriggerMlRetrainRequestDtoBuilder()..update(updates))._build();
 
-  _$TriggerMlRetrainRequestDto._({required this.familyId}) : super._();
+  _$TriggerMlRetrainRequestDto._({required this.familyId}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        familyId, r'TriggerMlRetrainRequestDto', 'familyId');
+  }
+
   @override
   TriggerMlRetrainRequestDto rebuild(
           void Function(TriggerMlRetrainRequestDtoBuilder) updates) =>
@@ -22,7 +26,7 @@ class _$TriggerMlRetrainRequestDto extends TriggerMlRetrainRequestDto {
 
   @override
   TriggerMlRetrainRequestDtoBuilder toBuilder() =>
-      TriggerMlRetrainRequestDtoBuilder()..replace(this);
+      new TriggerMlRetrainRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -70,6 +74,7 @@ class TriggerMlRetrainRequestDtoBuilder
 
   @override
   void replace(TriggerMlRetrainRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$TriggerMlRetrainRequestDto;
   }
 
@@ -83,10 +88,9 @@ class TriggerMlRetrainRequestDtoBuilder
 
   _$TriggerMlRetrainRequestDto _build() {
     final _$result = _$v ??
-        _$TriggerMlRetrainRequestDto._(
-          familyId: BuiltValueNullFieldError.checkNotNull(
-              familyId, r'TriggerMlRetrainRequestDto', 'familyId'),
-        );
+        new _$TriggerMlRetrainRequestDto._(
+            familyId: BuiltValueNullFieldError.checkNotNull(
+                familyId, r'TriggerMlRetrainRequestDto', 'familyId'));
     replace(_$result);
     return _$result;
   }

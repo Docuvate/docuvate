@@ -14,11 +14,15 @@ class _$InstallationDashboardDefaultResponseDto
   factory _$InstallationDashboardDefaultResponseDto(
           [void Function(InstallationDashboardDefaultResponseDtoBuilder)?
               updates]) =>
-      (InstallationDashboardDefaultResponseDtoBuilder()..update(updates))
+      (new InstallationDashboardDefaultResponseDtoBuilder()..update(updates))
           ._build();
 
   _$InstallationDashboardDefaultResponseDto._({required this.widgets})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        widgets, r'InstallationDashboardDefaultResponseDto', 'widgets');
+  }
+
   @override
   InstallationDashboardDefaultResponseDto rebuild(
           void Function(InstallationDashboardDefaultResponseDtoBuilder)
@@ -27,7 +31,7 @@ class _$InstallationDashboardDefaultResponseDto
 
   @override
   InstallationDashboardDefaultResponseDtoBuilder toBuilder() =>
-      InstallationDashboardDefaultResponseDtoBuilder()..replace(this);
+      new InstallationDashboardDefaultResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -61,7 +65,7 @@ class InstallationDashboardDefaultResponseDtoBuilder
 
   ListBuilder<DashboardWidgetInputDto>? _widgets;
   ListBuilder<DashboardWidgetInputDto> get widgets =>
-      _$this._widgets ??= ListBuilder<DashboardWidgetInputDto>();
+      _$this._widgets ??= new ListBuilder<DashboardWidgetInputDto>();
   set widgets(ListBuilder<DashboardWidgetInputDto>? widgets) =>
       _$this._widgets = widgets;
 
@@ -80,6 +84,7 @@ class InstallationDashboardDefaultResponseDtoBuilder
 
   @override
   void replace(InstallationDashboardDefaultResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$InstallationDashboardDefaultResponseDto;
   }
 
@@ -96,16 +101,15 @@ class InstallationDashboardDefaultResponseDtoBuilder
     _$InstallationDashboardDefaultResponseDto _$result;
     try {
       _$result = _$v ??
-          _$InstallationDashboardDefaultResponseDto._(
-            widgets: widgets.build(),
-          );
+          new _$InstallationDashboardDefaultResponseDto._(
+              widgets: widgets.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'widgets';
         widgets.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'InstallationDashboardDefaultResponseDto',
             _$failedField,
             e.toString());

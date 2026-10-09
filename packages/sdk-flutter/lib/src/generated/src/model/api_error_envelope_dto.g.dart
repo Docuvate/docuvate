@@ -14,10 +14,15 @@ class _$ApiErrorEnvelopeDto extends ApiErrorEnvelopeDto {
 
   factory _$ApiErrorEnvelopeDto(
           [void Function(ApiErrorEnvelopeDtoBuilder)? updates]) =>
-      (ApiErrorEnvelopeDtoBuilder()..update(updates))._build();
+      (new ApiErrorEnvelopeDtoBuilder()..update(updates))._build();
 
   _$ApiErrorEnvelopeDto._({required this.code, required this.message})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(code, r'ApiErrorEnvelopeDto', 'code');
+    BuiltValueNullFieldError.checkNotNull(
+        message, r'ApiErrorEnvelopeDto', 'message');
+  }
+
   @override
   ApiErrorEnvelopeDto rebuild(
           void Function(ApiErrorEnvelopeDtoBuilder) updates) =>
@@ -25,7 +30,7 @@ class _$ApiErrorEnvelopeDto extends ApiErrorEnvelopeDto {
 
   @override
   ApiErrorEnvelopeDtoBuilder toBuilder() =>
-      ApiErrorEnvelopeDtoBuilder()..replace(this);
+      new ApiErrorEnvelopeDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -81,6 +86,7 @@ class ApiErrorEnvelopeDtoBuilder
 
   @override
   void replace(ApiErrorEnvelopeDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ApiErrorEnvelopeDto;
   }
 
@@ -94,12 +100,11 @@ class ApiErrorEnvelopeDtoBuilder
 
   _$ApiErrorEnvelopeDto _build() {
     final _$result = _$v ??
-        _$ApiErrorEnvelopeDto._(
-          code: BuiltValueNullFieldError.checkNotNull(
-              code, r'ApiErrorEnvelopeDto', 'code'),
-          message: BuiltValueNullFieldError.checkNotNull(
-              message, r'ApiErrorEnvelopeDto', 'message'),
-        );
+        new _$ApiErrorEnvelopeDto._(
+            code: BuiltValueNullFieldError.checkNotNull(
+                code, r'ApiErrorEnvelopeDto', 'code'),
+            message: BuiltValueNullFieldError.checkNotNull(
+                message, r'ApiErrorEnvelopeDto', 'message'));
     replace(_$result);
     return _$result;
   }

@@ -31,7 +31,7 @@ class _$LayoutIrLineDto extends LayoutIrLineDto {
   final num? blockIndex;
 
   factory _$LayoutIrLineDto([void Function(LayoutIrLineDtoBuilder)? updates]) =>
-      (LayoutIrLineDtoBuilder()..update(updates))._build();
+      (new LayoutIrLineDtoBuilder()..update(updates))._build();
 
   _$LayoutIrLineDto._(
       {required this.page,
@@ -45,13 +45,22 @@ class _$LayoutIrLineDto extends LayoutIrLineDto {
       this.weight,
       this.align,
       this.blockIndex})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(page, r'LayoutIrLineDto', 'page');
+    BuiltValueNullFieldError.checkNotNull(x, r'LayoutIrLineDto', 'x');
+    BuiltValueNullFieldError.checkNotNull(y, r'LayoutIrLineDto', 'y');
+    BuiltValueNullFieldError.checkNotNull(width, r'LayoutIrLineDto', 'width');
+    BuiltValueNullFieldError.checkNotNull(height, r'LayoutIrLineDto', 'height');
+    BuiltValueNullFieldError.checkNotNull(text, r'LayoutIrLineDto', 'text');
+  }
+
   @override
   LayoutIrLineDto rebuild(void Function(LayoutIrLineDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  LayoutIrLineDtoBuilder toBuilder() => LayoutIrLineDtoBuilder()..replace(this);
+  LayoutIrLineDtoBuilder toBuilder() =>
+      new LayoutIrLineDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -179,6 +188,7 @@ class LayoutIrLineDtoBuilder
 
   @override
   void replace(LayoutIrLineDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutIrLineDto;
   }
 
@@ -192,23 +202,24 @@ class LayoutIrLineDtoBuilder
 
   _$LayoutIrLineDto _build() {
     final _$result = _$v ??
-        _$LayoutIrLineDto._(
-          page: BuiltValueNullFieldError.checkNotNull(
-              page, r'LayoutIrLineDto', 'page'),
-          x: BuiltValueNullFieldError.checkNotNull(x, r'LayoutIrLineDto', 'x'),
-          y: BuiltValueNullFieldError.checkNotNull(y, r'LayoutIrLineDto', 'y'),
-          width: BuiltValueNullFieldError.checkNotNull(
-              width, r'LayoutIrLineDto', 'width'),
-          height: BuiltValueNullFieldError.checkNotNull(
-              height, r'LayoutIrLineDto', 'height'),
-          text: BuiltValueNullFieldError.checkNotNull(
-              text, r'LayoutIrLineDto', 'text'),
-          fontFamily: fontFamily,
-          fontSizePt: fontSizePt,
-          weight: weight,
-          align: align,
-          blockIndex: blockIndex,
-        );
+        new _$LayoutIrLineDto._(
+            page: BuiltValueNullFieldError.checkNotNull(
+                page, r'LayoutIrLineDto', 'page'),
+            x: BuiltValueNullFieldError.checkNotNull(
+                x, r'LayoutIrLineDto', 'x'),
+            y: BuiltValueNullFieldError.checkNotNull(
+                y, r'LayoutIrLineDto', 'y'),
+            width: BuiltValueNullFieldError.checkNotNull(
+                width, r'LayoutIrLineDto', 'width'),
+            height: BuiltValueNullFieldError.checkNotNull(
+                height, r'LayoutIrLineDto', 'height'),
+            text: BuiltValueNullFieldError.checkNotNull(
+                text, r'LayoutIrLineDto', 'text'),
+            fontFamily: fontFamily,
+            fontSizePt: fontSizePt,
+            weight: weight,
+            align: align,
+            blockIndex: blockIndex);
     replace(_$result);
     return _$result;
   }

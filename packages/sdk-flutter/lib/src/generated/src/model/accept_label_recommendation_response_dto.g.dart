@@ -16,11 +16,18 @@ class _$AcceptLabelRecommendationResponseDto
   factory _$AcceptLabelRecommendationResponseDto(
           [void Function(AcceptLabelRecommendationResponseDtoBuilder)?
               updates]) =>
-      (AcceptLabelRecommendationResponseDtoBuilder()..update(updates))._build();
+      (new AcceptLabelRecommendationResponseDtoBuilder()..update(updates))
+          ._build();
 
   _$AcceptLabelRecommendationResponseDto._(
       {required this.tagId, required this.action})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        tagId, r'AcceptLabelRecommendationResponseDto', 'tagId');
+    BuiltValueNullFieldError.checkNotNull(
+        action, r'AcceptLabelRecommendationResponseDto', 'action');
+  }
+
   @override
   AcceptLabelRecommendationResponseDto rebuild(
           void Function(AcceptLabelRecommendationResponseDtoBuilder) updates) =>
@@ -28,7 +35,7 @@ class _$AcceptLabelRecommendationResponseDto
 
   @override
   AcceptLabelRecommendationResponseDtoBuilder toBuilder() =>
-      AcceptLabelRecommendationResponseDtoBuilder()..replace(this);
+      new AcceptLabelRecommendationResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -86,6 +93,7 @@ class AcceptLabelRecommendationResponseDtoBuilder
 
   @override
   void replace(AcceptLabelRecommendationResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AcceptLabelRecommendationResponseDto;
   }
 
@@ -100,12 +108,11 @@ class AcceptLabelRecommendationResponseDtoBuilder
 
   _$AcceptLabelRecommendationResponseDto _build() {
     final _$result = _$v ??
-        _$AcceptLabelRecommendationResponseDto._(
-          tagId: BuiltValueNullFieldError.checkNotNull(
-              tagId, r'AcceptLabelRecommendationResponseDto', 'tagId'),
-          action: BuiltValueNullFieldError.checkNotNull(
-              action, r'AcceptLabelRecommendationResponseDto', 'action'),
-        );
+        new _$AcceptLabelRecommendationResponseDto._(
+            tagId: BuiltValueNullFieldError.checkNotNull(
+                tagId, r'AcceptLabelRecommendationResponseDto', 'tagId'),
+            action: BuiltValueNullFieldError.checkNotNull(
+                action, r'AcceptLabelRecommendationResponseDto', 'action'));
     replace(_$result);
     return _$result;
   }

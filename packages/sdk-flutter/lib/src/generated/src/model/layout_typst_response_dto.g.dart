@@ -12,9 +12,13 @@ class _$LayoutTypstResponseDto extends LayoutTypstResponseDto {
 
   factory _$LayoutTypstResponseDto(
           [void Function(LayoutTypstResponseDtoBuilder)? updates]) =>
-      (LayoutTypstResponseDtoBuilder()..update(updates))._build();
+      (new LayoutTypstResponseDtoBuilder()..update(updates))._build();
 
-  _$LayoutTypstResponseDto._({required this.typst}) : super._();
+  _$LayoutTypstResponseDto._({required this.typst}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        typst, r'LayoutTypstResponseDto', 'typst');
+  }
+
   @override
   LayoutTypstResponseDto rebuild(
           void Function(LayoutTypstResponseDtoBuilder) updates) =>
@@ -22,7 +26,7 @@ class _$LayoutTypstResponseDto extends LayoutTypstResponseDto {
 
   @override
   LayoutTypstResponseDtoBuilder toBuilder() =>
-      LayoutTypstResponseDtoBuilder()..replace(this);
+      new LayoutTypstResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -69,6 +73,7 @@ class LayoutTypstResponseDtoBuilder
 
   @override
   void replace(LayoutTypstResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutTypstResponseDto;
   }
 
@@ -82,10 +87,9 @@ class LayoutTypstResponseDtoBuilder
 
   _$LayoutTypstResponseDto _build() {
     final _$result = _$v ??
-        _$LayoutTypstResponseDto._(
-          typst: BuiltValueNullFieldError.checkNotNull(
-              typst, r'LayoutTypstResponseDto', 'typst'),
-        );
+        new _$LayoutTypstResponseDto._(
+            typst: BuiltValueNullFieldError.checkNotNull(
+                typst, r'LayoutTypstResponseDto', 'typst'));
     replace(_$result);
     return _$result;
   }

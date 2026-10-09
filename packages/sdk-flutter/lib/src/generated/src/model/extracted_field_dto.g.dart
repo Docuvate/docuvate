@@ -16,18 +16,22 @@ class _$ExtractedFieldDto extends ExtractedFieldDto {
 
   factory _$ExtractedFieldDto(
           [void Function(ExtractedFieldDtoBuilder)? updates]) =>
-      (ExtractedFieldDtoBuilder()..update(updates))._build();
+      (new ExtractedFieldDtoBuilder()..update(updates))._build();
 
   _$ExtractedFieldDto._(
       {required this.key, required this.value, this.confidence})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(key, r'ExtractedFieldDto', 'key');
+    BuiltValueNullFieldError.checkNotNull(value, r'ExtractedFieldDto', 'value');
+  }
+
   @override
   ExtractedFieldDto rebuild(void Function(ExtractedFieldDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   ExtractedFieldDtoBuilder toBuilder() =>
-      ExtractedFieldDtoBuilder()..replace(this);
+      new ExtractedFieldDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -91,6 +95,7 @@ class ExtractedFieldDtoBuilder
 
   @override
   void replace(ExtractedFieldDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ExtractedFieldDto;
   }
 
@@ -104,13 +109,12 @@ class ExtractedFieldDtoBuilder
 
   _$ExtractedFieldDto _build() {
     final _$result = _$v ??
-        _$ExtractedFieldDto._(
-          key: BuiltValueNullFieldError.checkNotNull(
-              key, r'ExtractedFieldDto', 'key'),
-          value: BuiltValueNullFieldError.checkNotNull(
-              value, r'ExtractedFieldDto', 'value'),
-          confidence: confidence,
-        );
+        new _$ExtractedFieldDto._(
+            key: BuiltValueNullFieldError.checkNotNull(
+                key, r'ExtractedFieldDto', 'key'),
+            value: BuiltValueNullFieldError.checkNotNull(
+                value, r'ExtractedFieldDto', 'value'),
+            confidence: confidence);
     replace(_$result);
     return _$result;
   }

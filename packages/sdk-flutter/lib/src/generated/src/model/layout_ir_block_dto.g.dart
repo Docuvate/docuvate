@@ -44,7 +44,7 @@ class _$LayoutIrBlockDto extends LayoutIrBlockDto {
 
   factory _$LayoutIrBlockDto(
           [void Function(LayoutIrBlockDtoBuilder)? updates]) =>
-      (LayoutIrBlockDtoBuilder()..update(updates))._build();
+      (new LayoutIrBlockDtoBuilder()..update(updates))._build();
 
   _$LayoutIrBlockDto._(
       {required this.page,
@@ -64,14 +64,23 @@ class _$LayoutIrBlockDto extends LayoutIrBlockDto {
       this.textRgb,
       this.textOriginX,
       this.textOriginY})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(page, r'LayoutIrBlockDto', 'page');
+    BuiltValueNullFieldError.checkNotNull(x, r'LayoutIrBlockDto', 'x');
+    BuiltValueNullFieldError.checkNotNull(y, r'LayoutIrBlockDto', 'y');
+    BuiltValueNullFieldError.checkNotNull(width, r'LayoutIrBlockDto', 'width');
+    BuiltValueNullFieldError.checkNotNull(
+        height, r'LayoutIrBlockDto', 'height');
+    BuiltValueNullFieldError.checkNotNull(text, r'LayoutIrBlockDto', 'text');
+  }
+
   @override
   LayoutIrBlockDto rebuild(void Function(LayoutIrBlockDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
   LayoutIrBlockDtoBuilder toBuilder() =>
-      LayoutIrBlockDtoBuilder()..replace(this);
+      new LayoutIrBlockDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -201,11 +210,11 @@ class LayoutIrBlockDtoBuilder
   set rotationDeg(num? rotationDeg) => _$this._rotationDeg = rotationDeg;
 
   ListBuilder<num>? _matrix;
-  ListBuilder<num> get matrix => _$this._matrix ??= ListBuilder<num>();
+  ListBuilder<num> get matrix => _$this._matrix ??= new ListBuilder<num>();
   set matrix(ListBuilder<num>? matrix) => _$this._matrix = matrix;
 
   ListBuilder<num>? _textRgb;
-  ListBuilder<num> get textRgb => _$this._textRgb ??= ListBuilder<num>();
+  ListBuilder<num> get textRgb => _$this._textRgb ??= new ListBuilder<num>();
   set textRgb(ListBuilder<num>? textRgb) => _$this._textRgb = textRgb;
 
   num? _textOriginX;
@@ -247,6 +256,7 @@ class LayoutIrBlockDtoBuilder
 
   @override
   void replace(LayoutIrBlockDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutIrBlockDto;
   }
 
@@ -262,31 +272,30 @@ class LayoutIrBlockDtoBuilder
     _$LayoutIrBlockDto _$result;
     try {
       _$result = _$v ??
-          _$LayoutIrBlockDto._(
-            page: BuiltValueNullFieldError.checkNotNull(
-                page, r'LayoutIrBlockDto', 'page'),
-            x: BuiltValueNullFieldError.checkNotNull(
-                x, r'LayoutIrBlockDto', 'x'),
-            y: BuiltValueNullFieldError.checkNotNull(
-                y, r'LayoutIrBlockDto', 'y'),
-            width: BuiltValueNullFieldError.checkNotNull(
-                width, r'LayoutIrBlockDto', 'width'),
-            height: BuiltValueNullFieldError.checkNotNull(
-                height, r'LayoutIrBlockDto', 'height'),
-            text: BuiltValueNullFieldError.checkNotNull(
-                text, r'LayoutIrBlockDto', 'text'),
-            fontFamily: fontFamily,
-            fontSizePt: fontSizePt,
-            weight: weight,
-            align: align,
-            columnIndex: columnIndex,
-            blockIndex: blockIndex,
-            rotationDeg: rotationDeg,
-            matrix: _matrix?.build(),
-            textRgb: _textRgb?.build(),
-            textOriginX: textOriginX,
-            textOriginY: textOriginY,
-          );
+          new _$LayoutIrBlockDto._(
+              page: BuiltValueNullFieldError.checkNotNull(
+                  page, r'LayoutIrBlockDto', 'page'),
+              x: BuiltValueNullFieldError.checkNotNull(
+                  x, r'LayoutIrBlockDto', 'x'),
+              y: BuiltValueNullFieldError.checkNotNull(
+                  y, r'LayoutIrBlockDto', 'y'),
+              width: BuiltValueNullFieldError.checkNotNull(
+                  width, r'LayoutIrBlockDto', 'width'),
+              height: BuiltValueNullFieldError.checkNotNull(
+                  height, r'LayoutIrBlockDto', 'height'),
+              text: BuiltValueNullFieldError.checkNotNull(
+                  text, r'LayoutIrBlockDto', 'text'),
+              fontFamily: fontFamily,
+              fontSizePt: fontSizePt,
+              weight: weight,
+              align: align,
+              columnIndex: columnIndex,
+              blockIndex: blockIndex,
+              rotationDeg: rotationDeg,
+              matrix: _matrix?.build(),
+              textRgb: _textRgb?.build(),
+              textOriginX: textOriginX,
+              textOriginY: textOriginY);
     } catch (_) {
       late String _$failedField;
       try {
@@ -295,7 +304,7 @@ class LayoutIrBlockDtoBuilder
         _$failedField = 'textRgb';
         _textRgb?.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'LayoutIrBlockDto', _$failedField, e.toString());
       }
       rethrow;

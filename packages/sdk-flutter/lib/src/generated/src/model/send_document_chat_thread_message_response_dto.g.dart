@@ -26,7 +26,7 @@ class _$SendDocumentChatThreadMessageResponseDto
   factory _$SendDocumentChatThreadMessageResponseDto(
           [void Function(SendDocumentChatThreadMessageResponseDtoBuilder)?
               updates]) =>
-      (SendDocumentChatThreadMessageResponseDtoBuilder()..update(updates))
+      (new SendDocumentChatThreadMessageResponseDtoBuilder()..update(updates))
           ._build();
 
   _$SendDocumentChatThreadMessageResponseDto._(
@@ -37,7 +37,17 @@ class _$SendDocumentChatThreadMessageResponseDto
       required this.configured,
       this.provider,
       this.setupHint})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(userMessage,
+        r'SendDocumentChatThreadMessageResponseDto', 'userMessage');
+    BuiltValueNullFieldError.checkNotNull(assistantMessage,
+        r'SendDocumentChatThreadMessageResponseDto', 'assistantMessage');
+    BuiltValueNullFieldError.checkNotNull(
+        reply, r'SendDocumentChatThreadMessageResponseDto', 'reply');
+    BuiltValueNullFieldError.checkNotNull(
+        configured, r'SendDocumentChatThreadMessageResponseDto', 'configured');
+  }
+
   @override
   SendDocumentChatThreadMessageResponseDto rebuild(
           void Function(SendDocumentChatThreadMessageResponseDtoBuilder)
@@ -46,7 +56,7 @@ class _$SendDocumentChatThreadMessageResponseDto
 
   @override
   SendDocumentChatThreadMessageResponseDtoBuilder toBuilder() =>
-      SendDocumentChatThreadMessageResponseDtoBuilder()..replace(this);
+      new SendDocumentChatThreadMessageResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -98,13 +108,13 @@ class SendDocumentChatThreadMessageResponseDtoBuilder
 
   ChatMessageRecordDtoBuilder? _userMessage;
   ChatMessageRecordDtoBuilder get userMessage =>
-      _$this._userMessage ??= ChatMessageRecordDtoBuilder();
+      _$this._userMessage ??= new ChatMessageRecordDtoBuilder();
   set userMessage(ChatMessageRecordDtoBuilder? userMessage) =>
       _$this._userMessage = userMessage;
 
   ChatMessageRecordDtoBuilder? _assistantMessage;
   ChatMessageRecordDtoBuilder get assistantMessage =>
-      _$this._assistantMessage ??= ChatMessageRecordDtoBuilder();
+      _$this._assistantMessage ??= new ChatMessageRecordDtoBuilder();
   set assistantMessage(ChatMessageRecordDtoBuilder? assistantMessage) =>
       _$this._assistantMessage = assistantMessage;
 
@@ -114,7 +124,8 @@ class SendDocumentChatThreadMessageResponseDtoBuilder
       _$this._asyncGeneration = asyncGeneration;
 
   ChatMessageDtoBuilder? _reply;
-  ChatMessageDtoBuilder get reply => _$this._reply ??= ChatMessageDtoBuilder();
+  ChatMessageDtoBuilder get reply =>
+      _$this._reply ??= new ChatMessageDtoBuilder();
   set reply(ChatMessageDtoBuilder? reply) => _$this._reply = reply;
 
   bool? _configured;
@@ -150,6 +161,7 @@ class SendDocumentChatThreadMessageResponseDtoBuilder
 
   @override
   void replace(SendDocumentChatThreadMessageResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SendDocumentChatThreadMessageResponseDto;
   }
 
@@ -166,16 +178,15 @@ class SendDocumentChatThreadMessageResponseDtoBuilder
     _$SendDocumentChatThreadMessageResponseDto _$result;
     try {
       _$result = _$v ??
-          _$SendDocumentChatThreadMessageResponseDto._(
-            userMessage: userMessage.build(),
-            assistantMessage: assistantMessage.build(),
-            asyncGeneration: asyncGeneration,
-            reply: reply.build(),
-            configured: BuiltValueNullFieldError.checkNotNull(configured,
-                r'SendDocumentChatThreadMessageResponseDto', 'configured'),
-            provider: provider,
-            setupHint: setupHint,
-          );
+          new _$SendDocumentChatThreadMessageResponseDto._(
+              userMessage: userMessage.build(),
+              assistantMessage: assistantMessage.build(),
+              asyncGeneration: asyncGeneration,
+              reply: reply.build(),
+              configured: BuiltValueNullFieldError.checkNotNull(configured,
+                  r'SendDocumentChatThreadMessageResponseDto', 'configured'),
+              provider: provider,
+              setupHint: setupHint);
     } catch (_) {
       late String _$failedField;
       try {
@@ -187,7 +198,7 @@ class SendDocumentChatThreadMessageResponseDtoBuilder
         _$failedField = 'reply';
         reply.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'SendDocumentChatThreadMessageResponseDto',
             _$failedField,
             e.toString());

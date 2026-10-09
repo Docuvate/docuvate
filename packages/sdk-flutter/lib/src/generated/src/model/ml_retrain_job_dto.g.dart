@@ -24,12 +24,12 @@ MlRetrainJobDtoTriggerKindEnum _$mlRetrainJobDtoTriggerKindEnumValueOf(
     case 'threshold':
       return _$mlRetrainJobDtoTriggerKindEnum_threshold;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<MlRetrainJobDtoTriggerKindEnum>
-    _$mlRetrainJobDtoTriggerKindEnumValues = BuiltSet<
+    _$mlRetrainJobDtoTriggerKindEnumValues = new BuiltSet<
         MlRetrainJobDtoTriggerKindEnum>(const <MlRetrainJobDtoTriggerKindEnum>[
   _$mlRetrainJobDtoTriggerKindEnum_manual,
   _$mlRetrainJobDtoTriggerKindEnum_cron,
@@ -60,12 +60,12 @@ MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnumValueOf(String name) {
     case 'succeeded':
       return _$mlRetrainJobDtoStatusEnum_succeeded;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<MlRetrainJobDtoStatusEnum> _$mlRetrainJobDtoStatusEnumValues =
-    BuiltSet<MlRetrainJobDtoStatusEnum>(const <MlRetrainJobDtoStatusEnum>[
+    new BuiltSet<MlRetrainJobDtoStatusEnum>(const <MlRetrainJobDtoStatusEnum>[
   _$mlRetrainJobDtoStatusEnum_queued,
   _$mlRetrainJobDtoStatusEnum_failed,
   _$mlRetrainJobDtoStatusEnum_cancelled,
@@ -75,9 +75,9 @@ final BuiltSet<MlRetrainJobDtoStatusEnum> _$mlRetrainJobDtoStatusEnumValues =
 
 Serializer<MlRetrainJobDtoTriggerKindEnum>
     _$mlRetrainJobDtoTriggerKindEnumSerializer =
-    _$MlRetrainJobDtoTriggerKindEnumSerializer();
+    new _$MlRetrainJobDtoTriggerKindEnumSerializer();
 Serializer<MlRetrainJobDtoStatusEnum> _$mlRetrainJobDtoStatusEnumSerializer =
-    _$MlRetrainJobDtoStatusEnumSerializer();
+    new _$MlRetrainJobDtoStatusEnumSerializer();
 
 class _$MlRetrainJobDtoTriggerKindEnumSerializer
     implements PrimitiveSerializer<MlRetrainJobDtoTriggerKindEnum> {
@@ -169,7 +169,7 @@ class _$MlRetrainJobDto extends MlRetrainJobDto {
   final String finishedAt;
 
   factory _$MlRetrainJobDto([void Function(MlRetrainJobDtoBuilder)? updates]) =>
-      (MlRetrainJobDtoBuilder()..update(updates))._build();
+      (new MlRetrainJobDtoBuilder()..update(updates))._build();
 
   _$MlRetrainJobDto._(
       {required this.id,
@@ -182,13 +182,34 @@ class _$MlRetrainJobDto extends MlRetrainJobDto {
       required this.createdAt,
       required this.startedAt,
       required this.finishedAt})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(id, r'MlRetrainJobDto', 'id');
+    BuiltValueNullFieldError.checkNotNull(
+        familyId, r'MlRetrainJobDto', 'familyId');
+    BuiltValueNullFieldError.checkNotNull(
+        triggerKind, r'MlRetrainJobDto', 'triggerKind');
+    BuiltValueNullFieldError.checkNotNull(status, r'MlRetrainJobDto', 'status');
+    BuiltValueNullFieldError.checkNotNull(
+        trainingSnapshotId, r'MlRetrainJobDto', 'trainingSnapshotId');
+    BuiltValueNullFieldError.checkNotNull(
+        resultVersionId, r'MlRetrainJobDto', 'resultVersionId');
+    BuiltValueNullFieldError.checkNotNull(
+        errorMessage, r'MlRetrainJobDto', 'errorMessage');
+    BuiltValueNullFieldError.checkNotNull(
+        createdAt, r'MlRetrainJobDto', 'createdAt');
+    BuiltValueNullFieldError.checkNotNull(
+        startedAt, r'MlRetrainJobDto', 'startedAt');
+    BuiltValueNullFieldError.checkNotNull(
+        finishedAt, r'MlRetrainJobDto', 'finishedAt');
+  }
+
   @override
   MlRetrainJobDto rebuild(void Function(MlRetrainJobDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  MlRetrainJobDtoBuilder toBuilder() => MlRetrainJobDtoBuilder()..replace(this);
+  MlRetrainJobDtoBuilder toBuilder() =>
+      new MlRetrainJobDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -311,6 +332,7 @@ class MlRetrainJobDtoBuilder
 
   @override
   void replace(MlRetrainJobDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MlRetrainJobDto;
   }
 
@@ -324,28 +346,26 @@ class MlRetrainJobDtoBuilder
 
   _$MlRetrainJobDto _build() {
     final _$result = _$v ??
-        _$MlRetrainJobDto._(
-          id: BuiltValueNullFieldError.checkNotNull(
-              id, r'MlRetrainJobDto', 'id'),
-          familyId: BuiltValueNullFieldError.checkNotNull(
-              familyId, r'MlRetrainJobDto', 'familyId'),
-          triggerKind: BuiltValueNullFieldError.checkNotNull(
-              triggerKind, r'MlRetrainJobDto', 'triggerKind'),
-          status: BuiltValueNullFieldError.checkNotNull(
-              status, r'MlRetrainJobDto', 'status'),
-          trainingSnapshotId: BuiltValueNullFieldError.checkNotNull(
-              trainingSnapshotId, r'MlRetrainJobDto', 'trainingSnapshotId'),
-          resultVersionId: BuiltValueNullFieldError.checkNotNull(
-              resultVersionId, r'MlRetrainJobDto', 'resultVersionId'),
-          errorMessage: BuiltValueNullFieldError.checkNotNull(
-              errorMessage, r'MlRetrainJobDto', 'errorMessage'),
-          createdAt: BuiltValueNullFieldError.checkNotNull(
-              createdAt, r'MlRetrainJobDto', 'createdAt'),
-          startedAt: BuiltValueNullFieldError.checkNotNull(
-              startedAt, r'MlRetrainJobDto', 'startedAt'),
-          finishedAt: BuiltValueNullFieldError.checkNotNull(
-              finishedAt, r'MlRetrainJobDto', 'finishedAt'),
-        );
+        new _$MlRetrainJobDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'MlRetrainJobDto', 'id'),
+            familyId: BuiltValueNullFieldError.checkNotNull(
+                familyId, r'MlRetrainJobDto', 'familyId'),
+            triggerKind: BuiltValueNullFieldError.checkNotNull(
+                triggerKind, r'MlRetrainJobDto', 'triggerKind'),
+            status: BuiltValueNullFieldError.checkNotNull(
+                status, r'MlRetrainJobDto', 'status'),
+            trainingSnapshotId: BuiltValueNullFieldError.checkNotNull(
+                trainingSnapshotId, r'MlRetrainJobDto', 'trainingSnapshotId'),
+            resultVersionId: BuiltValueNullFieldError.checkNotNull(
+                resultVersionId, r'MlRetrainJobDto', 'resultVersionId'),
+            errorMessage: BuiltValueNullFieldError.checkNotNull(
+                errorMessage, r'MlRetrainJobDto', 'errorMessage'),
+            createdAt: BuiltValueNullFieldError.checkNotNull(
+                createdAt, r'MlRetrainJobDto', 'createdAt'),
+            startedAt:
+                BuiltValueNullFieldError.checkNotNull(startedAt, r'MlRetrainJobDto', 'startedAt'),
+            finishedAt: BuiltValueNullFieldError.checkNotNull(finishedAt, r'MlRetrainJobDto', 'finishedAt'));
     replace(_$result);
     return _$result;
   }

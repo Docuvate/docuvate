@@ -31,12 +31,12 @@ ReplaceTagCustomFieldItemDtoFieldTypeEnum
     case 'currency':
       return _$replaceTagCustomFieldItemDtoFieldTypeEnum_currency;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<ReplaceTagCustomFieldItemDtoFieldTypeEnum>
-    _$replaceTagCustomFieldItemDtoFieldTypeEnumValues = BuiltSet<
+    _$replaceTagCustomFieldItemDtoFieldTypeEnumValues = new BuiltSet<
         ReplaceTagCustomFieldItemDtoFieldTypeEnum>(const <ReplaceTagCustomFieldItemDtoFieldTypeEnum>[
   _$replaceTagCustomFieldItemDtoFieldTypeEnum_text,
   _$replaceTagCustomFieldItemDtoFieldTypeEnum_date,
@@ -46,7 +46,7 @@ final BuiltSet<ReplaceTagCustomFieldItemDtoFieldTypeEnum>
 
 Serializer<ReplaceTagCustomFieldItemDtoFieldTypeEnum>
     _$replaceTagCustomFieldItemDtoFieldTypeEnumSerializer =
-    _$ReplaceTagCustomFieldItemDtoFieldTypeEnumSerializer();
+    new _$ReplaceTagCustomFieldItemDtoFieldTypeEnumSerializer();
 
 class _$ReplaceTagCustomFieldItemDtoFieldTypeEnumSerializer
     implements PrimitiveSerializer<ReplaceTagCustomFieldItemDtoFieldTypeEnum> {
@@ -96,11 +96,17 @@ class _$ReplaceTagCustomFieldItemDto extends ReplaceTagCustomFieldItemDto {
 
   factory _$ReplaceTagCustomFieldItemDto(
           [void Function(ReplaceTagCustomFieldItemDtoBuilder)? updates]) =>
-      (ReplaceTagCustomFieldItemDtoBuilder()..update(updates))._build();
+      (new ReplaceTagCustomFieldItemDtoBuilder()..update(updates))._build();
 
   _$ReplaceTagCustomFieldItemDto._(
       {required this.key, required this.label, this.fieldType, this.sortOrder})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        key, r'ReplaceTagCustomFieldItemDto', 'key');
+    BuiltValueNullFieldError.checkNotNull(
+        label, r'ReplaceTagCustomFieldItemDto', 'label');
+  }
+
   @override
   ReplaceTagCustomFieldItemDto rebuild(
           void Function(ReplaceTagCustomFieldItemDtoBuilder) updates) =>
@@ -108,7 +114,7 @@ class _$ReplaceTagCustomFieldItemDto extends ReplaceTagCustomFieldItemDto {
 
   @override
   ReplaceTagCustomFieldItemDtoBuilder toBuilder() =>
-      ReplaceTagCustomFieldItemDtoBuilder()..replace(this);
+      new ReplaceTagCustomFieldItemDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -183,6 +189,7 @@ class ReplaceTagCustomFieldItemDtoBuilder
 
   @override
   void replace(ReplaceTagCustomFieldItemDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ReplaceTagCustomFieldItemDto;
   }
 
@@ -196,14 +203,13 @@ class ReplaceTagCustomFieldItemDtoBuilder
 
   _$ReplaceTagCustomFieldItemDto _build() {
     final _$result = _$v ??
-        _$ReplaceTagCustomFieldItemDto._(
-          key: BuiltValueNullFieldError.checkNotNull(
-              key, r'ReplaceTagCustomFieldItemDto', 'key'),
-          label: BuiltValueNullFieldError.checkNotNull(
-              label, r'ReplaceTagCustomFieldItemDto', 'label'),
-          fieldType: fieldType,
-          sortOrder: sortOrder,
-        );
+        new _$ReplaceTagCustomFieldItemDto._(
+            key: BuiltValueNullFieldError.checkNotNull(
+                key, r'ReplaceTagCustomFieldItemDto', 'key'),
+            label: BuiltValueNullFieldError.checkNotNull(
+                label, r'ReplaceTagCustomFieldItemDto', 'label'),
+            fieldType: fieldType,
+            sortOrder: sortOrder);
     replace(_$result);
     return _$result;
   }

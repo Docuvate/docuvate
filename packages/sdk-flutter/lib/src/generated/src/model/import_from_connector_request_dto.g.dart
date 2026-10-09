@@ -12,9 +12,13 @@ class _$ImportFromConnectorRequestDto extends ImportFromConnectorRequestDto {
 
   factory _$ImportFromConnectorRequestDto(
           [void Function(ImportFromConnectorRequestDtoBuilder)? updates]) =>
-      (ImportFromConnectorRequestDtoBuilder()..update(updates))._build();
+      (new ImportFromConnectorRequestDtoBuilder()..update(updates))._build();
 
-  _$ImportFromConnectorRequestDto._({required this.ref}) : super._();
+  _$ImportFromConnectorRequestDto._({required this.ref}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        ref, r'ImportFromConnectorRequestDto', 'ref');
+  }
+
   @override
   ImportFromConnectorRequestDto rebuild(
           void Function(ImportFromConnectorRequestDtoBuilder) updates) =>
@@ -22,7 +26,7 @@ class _$ImportFromConnectorRequestDto extends ImportFromConnectorRequestDto {
 
   @override
   ImportFromConnectorRequestDtoBuilder toBuilder() =>
-      ImportFromConnectorRequestDtoBuilder()..replace(this);
+      new ImportFromConnectorRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -71,6 +75,7 @@ class ImportFromConnectorRequestDtoBuilder
 
   @override
   void replace(ImportFromConnectorRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ImportFromConnectorRequestDto;
   }
 
@@ -84,10 +89,9 @@ class ImportFromConnectorRequestDtoBuilder
 
   _$ImportFromConnectorRequestDto _build() {
     final _$result = _$v ??
-        _$ImportFromConnectorRequestDto._(
-          ref: BuiltValueNullFieldError.checkNotNull(
-              ref, r'ImportFromConnectorRequestDto', 'ref'),
-        );
+        new _$ImportFromConnectorRequestDto._(
+            ref: BuiltValueNullFieldError.checkNotNull(
+                ref, r'ImportFromConnectorRequestDto', 'ref'));
     replace(_$result);
     return _$result;
   }

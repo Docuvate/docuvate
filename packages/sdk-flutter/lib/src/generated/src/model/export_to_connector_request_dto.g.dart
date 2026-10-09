@@ -14,11 +14,15 @@ class _$ExportToConnectorRequestDto extends ExportToConnectorRequestDto {
 
   factory _$ExportToConnectorRequestDto(
           [void Function(ExportToConnectorRequestDtoBuilder)? updates]) =>
-      (ExportToConnectorRequestDtoBuilder()..update(updates))._build();
+      (new ExportToConnectorRequestDtoBuilder()..update(updates))._build();
 
   _$ExportToConnectorRequestDto._(
       {required this.documentId, this.destinationRef})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        documentId, r'ExportToConnectorRequestDto', 'documentId');
+  }
+
   @override
   ExportToConnectorRequestDto rebuild(
           void Function(ExportToConnectorRequestDtoBuilder) updates) =>
@@ -26,7 +30,7 @@ class _$ExportToConnectorRequestDto extends ExportToConnectorRequestDto {
 
   @override
   ExportToConnectorRequestDtoBuilder toBuilder() =>
-      ExportToConnectorRequestDtoBuilder()..replace(this);
+      new ExportToConnectorRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -85,6 +89,7 @@ class ExportToConnectorRequestDtoBuilder
 
   @override
   void replace(ExportToConnectorRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ExportToConnectorRequestDto;
   }
 
@@ -98,11 +103,10 @@ class ExportToConnectorRequestDtoBuilder
 
   _$ExportToConnectorRequestDto _build() {
     final _$result = _$v ??
-        _$ExportToConnectorRequestDto._(
-          documentId: BuiltValueNullFieldError.checkNotNull(
-              documentId, r'ExportToConnectorRequestDto', 'documentId'),
-          destinationRef: destinationRef,
-        );
+        new _$ExportToConnectorRequestDto._(
+            documentId: BuiltValueNullFieldError.checkNotNull(
+                documentId, r'ExportToConnectorRequestDto', 'documentId'),
+            destinationRef: destinationRef);
     replace(_$result);
     return _$result;
   }

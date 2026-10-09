@@ -13,9 +13,13 @@ class _$ReplaceTagCustomFieldsRequestDto
 
   factory _$ReplaceTagCustomFieldsRequestDto(
           [void Function(ReplaceTagCustomFieldsRequestDtoBuilder)? updates]) =>
-      (ReplaceTagCustomFieldsRequestDtoBuilder()..update(updates))._build();
+      (new ReplaceTagCustomFieldsRequestDtoBuilder()..update(updates))._build();
 
-  _$ReplaceTagCustomFieldsRequestDto._({required this.fields}) : super._();
+  _$ReplaceTagCustomFieldsRequestDto._({required this.fields}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        fields, r'ReplaceTagCustomFieldsRequestDto', 'fields');
+  }
+
   @override
   ReplaceTagCustomFieldsRequestDto rebuild(
           void Function(ReplaceTagCustomFieldsRequestDtoBuilder) updates) =>
@@ -23,7 +27,7 @@ class _$ReplaceTagCustomFieldsRequestDto
 
   @override
   ReplaceTagCustomFieldsRequestDtoBuilder toBuilder() =>
-      ReplaceTagCustomFieldsRequestDtoBuilder()..replace(this);
+      new ReplaceTagCustomFieldsRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -55,7 +59,7 @@ class ReplaceTagCustomFieldsRequestDtoBuilder
 
   ListBuilder<ReplaceTagCustomFieldItemDto>? _fields;
   ListBuilder<ReplaceTagCustomFieldItemDto> get fields =>
-      _$this._fields ??= ListBuilder<ReplaceTagCustomFieldItemDto>();
+      _$this._fields ??= new ListBuilder<ReplaceTagCustomFieldItemDto>();
   set fields(ListBuilder<ReplaceTagCustomFieldItemDto>? fields) =>
       _$this._fields = fields;
 
@@ -74,6 +78,7 @@ class ReplaceTagCustomFieldsRequestDtoBuilder
 
   @override
   void replace(ReplaceTagCustomFieldsRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ReplaceTagCustomFieldsRequestDto;
   }
 
@@ -89,16 +94,14 @@ class ReplaceTagCustomFieldsRequestDtoBuilder
     _$ReplaceTagCustomFieldsRequestDto _$result;
     try {
       _$result = _$v ??
-          _$ReplaceTagCustomFieldsRequestDto._(
-            fields: fields.build(),
-          );
+          new _$ReplaceTagCustomFieldsRequestDto._(fields: fields.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'fields';
         fields.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'ReplaceTagCustomFieldsRequestDto', _$failedField, e.toString());
       }
       rethrow;

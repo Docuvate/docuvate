@@ -13,9 +13,13 @@ class _$ExtractionEngineListResponseDto
 
   factory _$ExtractionEngineListResponseDto(
           [void Function(ExtractionEngineListResponseDtoBuilder)? updates]) =>
-      (ExtractionEngineListResponseDtoBuilder()..update(updates))._build();
+      (new ExtractionEngineListResponseDtoBuilder()..update(updates))._build();
 
-  _$ExtractionEngineListResponseDto._({required this.engines}) : super._();
+  _$ExtractionEngineListResponseDto._({required this.engines}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        engines, r'ExtractionEngineListResponseDto', 'engines');
+  }
+
   @override
   ExtractionEngineListResponseDto rebuild(
           void Function(ExtractionEngineListResponseDtoBuilder) updates) =>
@@ -23,7 +27,7 @@ class _$ExtractionEngineListResponseDto
 
   @override
   ExtractionEngineListResponseDtoBuilder toBuilder() =>
-      ExtractionEngineListResponseDtoBuilder()..replace(this);
+      new ExtractionEngineListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -55,7 +59,7 @@ class ExtractionEngineListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _engines;
   ListBuilder<JsonObject> get engines =>
-      _$this._engines ??= ListBuilder<JsonObject>();
+      _$this._engines ??= new ListBuilder<JsonObject>();
   set engines(ListBuilder<JsonObject>? engines) => _$this._engines = engines;
 
   ExtractionEngineListResponseDtoBuilder() {
@@ -73,6 +77,7 @@ class ExtractionEngineListResponseDtoBuilder
 
   @override
   void replace(ExtractionEngineListResponseDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ExtractionEngineListResponseDto;
   }
 
@@ -88,16 +93,14 @@ class ExtractionEngineListResponseDtoBuilder
     _$ExtractionEngineListResponseDto _$result;
     try {
       _$result = _$v ??
-          _$ExtractionEngineListResponseDto._(
-            engines: engines.build(),
-          );
+          new _$ExtractionEngineListResponseDto._(engines: engines.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'engines';
         engines.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'ExtractionEngineListResponseDto', _$failedField, e.toString());
       }
       rethrow;

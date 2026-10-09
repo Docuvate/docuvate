@@ -31,12 +31,12 @@ ReplaceRecognizedFieldItemDtoFieldTypeEnum
     case 'currency':
       return _$replaceRecognizedFieldItemDtoFieldTypeEnum_currency;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<ReplaceRecognizedFieldItemDtoFieldTypeEnum>
-    _$replaceRecognizedFieldItemDtoFieldTypeEnumValues = BuiltSet<
+    _$replaceRecognizedFieldItemDtoFieldTypeEnumValues = new BuiltSet<
         ReplaceRecognizedFieldItemDtoFieldTypeEnum>(const <ReplaceRecognizedFieldItemDtoFieldTypeEnum>[
   _$replaceRecognizedFieldItemDtoFieldTypeEnum_text,
   _$replaceRecognizedFieldItemDtoFieldTypeEnum_date,
@@ -59,12 +59,12 @@ ReplaceRecognizedFieldItemDtoGateLabelMatchEnum
     case 'all':
       return _$replaceRecognizedFieldItemDtoGateLabelMatchEnum_all;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<ReplaceRecognizedFieldItemDtoGateLabelMatchEnum>
-    _$replaceRecognizedFieldItemDtoGateLabelMatchEnumValues = BuiltSet<
+    _$replaceRecognizedFieldItemDtoGateLabelMatchEnumValues = new BuiltSet<
         ReplaceRecognizedFieldItemDtoGateLabelMatchEnum>(const <ReplaceRecognizedFieldItemDtoGateLabelMatchEnum>[
   _$replaceRecognizedFieldItemDtoGateLabelMatchEnum_any,
   _$replaceRecognizedFieldItemDtoGateLabelMatchEnum_all,
@@ -72,10 +72,10 @@ final BuiltSet<ReplaceRecognizedFieldItemDtoGateLabelMatchEnum>
 
 Serializer<ReplaceRecognizedFieldItemDtoFieldTypeEnum>
     _$replaceRecognizedFieldItemDtoFieldTypeEnumSerializer =
-    _$ReplaceRecognizedFieldItemDtoFieldTypeEnumSerializer();
+    new _$ReplaceRecognizedFieldItemDtoFieldTypeEnumSerializer();
 Serializer<ReplaceRecognizedFieldItemDtoGateLabelMatchEnum>
     _$replaceRecognizedFieldItemDtoGateLabelMatchEnumSerializer =
-    _$ReplaceRecognizedFieldItemDtoGateLabelMatchEnumSerializer();
+    new _$ReplaceRecognizedFieldItemDtoGateLabelMatchEnumSerializer();
 
 class _$ReplaceRecognizedFieldItemDtoFieldTypeEnumSerializer
     implements PrimitiveSerializer<ReplaceRecognizedFieldItemDtoFieldTypeEnum> {
@@ -168,7 +168,7 @@ class _$ReplaceRecognizedFieldItemDto extends ReplaceRecognizedFieldItemDto {
 
   factory _$ReplaceRecognizedFieldItemDto(
           [void Function(ReplaceRecognizedFieldItemDtoBuilder)? updates]) =>
-      (ReplaceRecognizedFieldItemDtoBuilder()..update(updates))._build();
+      (new ReplaceRecognizedFieldItemDtoBuilder()..update(updates))._build();
 
   _$ReplaceRecognizedFieldItemDto._(
       {required this.key,
@@ -180,7 +180,13 @@ class _$ReplaceRecognizedFieldItemDto extends ReplaceRecognizedFieldItemDto {
       this.gateLabelMatch,
       this.minLabelConfidence,
       this.confidenceGateEnabled})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        key, r'ReplaceRecognizedFieldItemDto', 'key');
+    BuiltValueNullFieldError.checkNotNull(
+        label, r'ReplaceRecognizedFieldItemDto', 'label');
+  }
+
   @override
   ReplaceRecognizedFieldItemDto rebuild(
           void Function(ReplaceRecognizedFieldItemDtoBuilder) updates) =>
@@ -188,7 +194,7 @@ class _$ReplaceRecognizedFieldItemDto extends ReplaceRecognizedFieldItemDto {
 
   @override
   ReplaceRecognizedFieldItemDtoBuilder toBuilder() =>
-      ReplaceRecognizedFieldItemDtoBuilder()..replace(this);
+      new ReplaceRecognizedFieldItemDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -268,7 +274,7 @@ class ReplaceRecognizedFieldItemDtoBuilder
 
   ListBuilder<String>? _gateLabelIds;
   ListBuilder<String> get gateLabelIds =>
-      _$this._gateLabelIds ??= ListBuilder<String>();
+      _$this._gateLabelIds ??= new ListBuilder<String>();
   set gateLabelIds(ListBuilder<String>? gateLabelIds) =>
       _$this._gateLabelIds = gateLabelIds;
 
@@ -312,6 +318,7 @@ class ReplaceRecognizedFieldItemDtoBuilder
 
   @override
   void replace(ReplaceRecognizedFieldItemDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ReplaceRecognizedFieldItemDto;
   }
 
@@ -327,26 +334,25 @@ class ReplaceRecognizedFieldItemDtoBuilder
     _$ReplaceRecognizedFieldItemDto _$result;
     try {
       _$result = _$v ??
-          _$ReplaceRecognizedFieldItemDto._(
-            key: BuiltValueNullFieldError.checkNotNull(
-                key, r'ReplaceRecognizedFieldItemDto', 'key'),
-            label: BuiltValueNullFieldError.checkNotNull(
-                label, r'ReplaceRecognizedFieldItemDto', 'label'),
-            fieldType: fieldType,
-            sortOrder: sortOrder,
-            extractForAllDocuments: extractForAllDocuments,
-            gateLabelIds: _gateLabelIds?.build(),
-            gateLabelMatch: gateLabelMatch,
-            minLabelConfidence: minLabelConfidence,
-            confidenceGateEnabled: confidenceGateEnabled,
-          );
+          new _$ReplaceRecognizedFieldItemDto._(
+              key: BuiltValueNullFieldError.checkNotNull(
+                  key, r'ReplaceRecognizedFieldItemDto', 'key'),
+              label: BuiltValueNullFieldError.checkNotNull(
+                  label, r'ReplaceRecognizedFieldItemDto', 'label'),
+              fieldType: fieldType,
+              sortOrder: sortOrder,
+              extractForAllDocuments: extractForAllDocuments,
+              gateLabelIds: _gateLabelIds?.build(),
+              gateLabelMatch: gateLabelMatch,
+              minLabelConfidence: minLabelConfidence,
+              confidenceGateEnabled: confidenceGateEnabled);
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'gateLabelIds';
         _gateLabelIds?.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'ReplaceRecognizedFieldItemDto', _$failedField, e.toString());
       }
       rethrow;

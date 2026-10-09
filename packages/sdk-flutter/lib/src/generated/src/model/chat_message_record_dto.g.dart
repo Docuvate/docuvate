@@ -19,13 +19,13 @@ ChatMessageRecordDtoRoleEnum _$chatMessageRecordDtoRoleEnumValueOf(
     case 'assistant':
       return _$chatMessageRecordDtoRoleEnum_assistant;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<ChatMessageRecordDtoRoleEnum>
-    _$chatMessageRecordDtoRoleEnumValues =
-    BuiltSet<ChatMessageRecordDtoRoleEnum>(const <ChatMessageRecordDtoRoleEnum>[
+    _$chatMessageRecordDtoRoleEnumValues = new BuiltSet<
+        ChatMessageRecordDtoRoleEnum>(const <ChatMessageRecordDtoRoleEnum>[
   _$chatMessageRecordDtoRoleEnum_user,
   _$chatMessageRecordDtoRoleEnum_assistant,
 ]);
@@ -55,12 +55,12 @@ ChatMessageRecordDtoGenerationStatusEnum
     case 'done':
       return _$chatMessageRecordDtoGenerationStatusEnum_done;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<ChatMessageRecordDtoGenerationStatusEnum>
-    _$chatMessageRecordDtoGenerationStatusEnumValues = BuiltSet<
+    _$chatMessageRecordDtoGenerationStatusEnumValues = new BuiltSet<
         ChatMessageRecordDtoGenerationStatusEnum>(const <ChatMessageRecordDtoGenerationStatusEnum>[
   _$chatMessageRecordDtoGenerationStatusEnum_failed,
   _$chatMessageRecordDtoGenerationStatusEnum_pending,
@@ -88,12 +88,12 @@ ChatMessageRecordDtoGenerationPhaseEnum
     case 'verifying':
       return _$chatMessageRecordDtoGenerationPhaseEnum_verifying;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<ChatMessageRecordDtoGenerationPhaseEnum>
-    _$chatMessageRecordDtoGenerationPhaseEnumValues = BuiltSet<
+    _$chatMessageRecordDtoGenerationPhaseEnumValues = new BuiltSet<
         ChatMessageRecordDtoGenerationPhaseEnum>(const <ChatMessageRecordDtoGenerationPhaseEnum>[
   _$chatMessageRecordDtoGenerationPhaseEnum_retrieving,
   _$chatMessageRecordDtoGenerationPhaseEnum_generating,
@@ -102,13 +102,13 @@ final BuiltSet<ChatMessageRecordDtoGenerationPhaseEnum>
 
 Serializer<ChatMessageRecordDtoRoleEnum>
     _$chatMessageRecordDtoRoleEnumSerializer =
-    _$ChatMessageRecordDtoRoleEnumSerializer();
+    new _$ChatMessageRecordDtoRoleEnumSerializer();
 Serializer<ChatMessageRecordDtoGenerationStatusEnum>
     _$chatMessageRecordDtoGenerationStatusEnumSerializer =
-    _$ChatMessageRecordDtoGenerationStatusEnumSerializer();
+    new _$ChatMessageRecordDtoGenerationStatusEnumSerializer();
 Serializer<ChatMessageRecordDtoGenerationPhaseEnum>
     _$chatMessageRecordDtoGenerationPhaseEnumSerializer =
-    _$ChatMessageRecordDtoGenerationPhaseEnumSerializer();
+    new _$ChatMessageRecordDtoGenerationPhaseEnumSerializer();
 
 class _$ChatMessageRecordDtoRoleEnumSerializer
     implements PrimitiveSerializer<ChatMessageRecordDtoRoleEnum> {
@@ -229,7 +229,7 @@ class _$ChatMessageRecordDto extends ChatMessageRecordDto {
 
   factory _$ChatMessageRecordDto(
           [void Function(ChatMessageRecordDtoBuilder)? updates]) =>
-      (ChatMessageRecordDtoBuilder()..update(updates))._build();
+      (new ChatMessageRecordDtoBuilder()..update(updates))._build();
 
   _$ChatMessageRecordDto._(
       {required this.id,
@@ -240,7 +240,16 @@ class _$ChatMessageRecordDto extends ChatMessageRecordDto {
       this.generationStatus,
       this.generationPhase,
       this.errorCode})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(id, r'ChatMessageRecordDto', 'id');
+    BuiltValueNullFieldError.checkNotNull(
+        role, r'ChatMessageRecordDto', 'role');
+    BuiltValueNullFieldError.checkNotNull(
+        content, r'ChatMessageRecordDto', 'content');
+    BuiltValueNullFieldError.checkNotNull(
+        createdAt, r'ChatMessageRecordDto', 'createdAt');
+  }
+
   @override
   ChatMessageRecordDto rebuild(
           void Function(ChatMessageRecordDtoBuilder) updates) =>
@@ -248,7 +257,7 @@ class _$ChatMessageRecordDto extends ChatMessageRecordDto {
 
   @override
   ChatMessageRecordDtoBuilder toBuilder() =>
-      ChatMessageRecordDtoBuilder()..replace(this);
+      new ChatMessageRecordDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -358,6 +367,7 @@ class ChatMessageRecordDtoBuilder
 
   @override
   void replace(ChatMessageRecordDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ChatMessageRecordDto;
   }
 
@@ -371,20 +381,19 @@ class ChatMessageRecordDtoBuilder
 
   _$ChatMessageRecordDto _build() {
     final _$result = _$v ??
-        _$ChatMessageRecordDto._(
-          id: BuiltValueNullFieldError.checkNotNull(
-              id, r'ChatMessageRecordDto', 'id'),
-          role: BuiltValueNullFieldError.checkNotNull(
-              role, r'ChatMessageRecordDto', 'role'),
-          content: BuiltValueNullFieldError.checkNotNull(
-              content, r'ChatMessageRecordDto', 'content'),
-          createdAt: BuiltValueNullFieldError.checkNotNull(
-              createdAt, r'ChatMessageRecordDto', 'createdAt'),
-          updatedAt: updatedAt,
-          generationStatus: generationStatus,
-          generationPhase: generationPhase,
-          errorCode: errorCode,
-        );
+        new _$ChatMessageRecordDto._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'ChatMessageRecordDto', 'id'),
+            role: BuiltValueNullFieldError.checkNotNull(
+                role, r'ChatMessageRecordDto', 'role'),
+            content: BuiltValueNullFieldError.checkNotNull(
+                content, r'ChatMessageRecordDto', 'content'),
+            createdAt: BuiltValueNullFieldError.checkNotNull(
+                createdAt, r'ChatMessageRecordDto', 'createdAt'),
+            updatedAt: updatedAt,
+            generationStatus: generationStatus,
+            generationPhase: generationPhase,
+            errorCode: errorCode);
     replace(_$result);
     return _$result;
   }

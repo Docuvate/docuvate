@@ -25,7 +25,7 @@ class _$SftpIngressCreateAccountBodyDto
 
   factory _$SftpIngressCreateAccountBodyDto(
           [void Function(SftpIngressCreateAccountBodyDtoBuilder)? updates]) =>
-      (SftpIngressCreateAccountBodyDtoBuilder()..update(updates))._build();
+      (new SftpIngressCreateAccountBodyDtoBuilder()..update(updates))._build();
 
   _$SftpIngressCreateAccountBodyDto._(
       {required this.displayName,
@@ -35,7 +35,11 @@ class _$SftpIngressCreateAccountBodyDto
       this.folderId,
       this.labelIds,
       this.mapSubfolders})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        displayName, r'SftpIngressCreateAccountBodyDto', 'displayName');
+  }
+
   @override
   SftpIngressCreateAccountBodyDto rebuild(
           void Function(SftpIngressCreateAccountBodyDtoBuilder) updates) =>
@@ -43,7 +47,7 @@ class _$SftpIngressCreateAccountBodyDto
 
   @override
   SftpIngressCreateAccountBodyDtoBuilder toBuilder() =>
-      SftpIngressCreateAccountBodyDtoBuilder()..replace(this);
+      new SftpIngressCreateAccountBodyDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -115,7 +119,7 @@ class SftpIngressCreateAccountBodyDtoBuilder
 
   ListBuilder<String>? _labelIds;
   ListBuilder<String> get labelIds =>
-      _$this._labelIds ??= ListBuilder<String>();
+      _$this._labelIds ??= new ListBuilder<String>();
   set labelIds(ListBuilder<String>? labelIds) => _$this._labelIds = labelIds;
 
   bool? _mapSubfolders;
@@ -144,6 +148,7 @@ class SftpIngressCreateAccountBodyDtoBuilder
 
   @override
   void replace(SftpIngressCreateAccountBodyDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SftpIngressCreateAccountBodyDto;
   }
 
@@ -159,23 +164,22 @@ class SftpIngressCreateAccountBodyDtoBuilder
     _$SftpIngressCreateAccountBodyDto _$result;
     try {
       _$result = _$v ??
-          _$SftpIngressCreateAccountBodyDto._(
-            displayName: BuiltValueNullFieldError.checkNotNull(
-                displayName, r'SftpIngressCreateAccountBodyDto', 'displayName'),
-            username: username,
-            passwordPlain: passwordPlain,
-            sshPublicKey: sshPublicKey,
-            folderId: folderId,
-            labelIds: _labelIds?.build(),
-            mapSubfolders: mapSubfolders,
-          );
+          new _$SftpIngressCreateAccountBodyDto._(
+              displayName: BuiltValueNullFieldError.checkNotNull(displayName,
+                  r'SftpIngressCreateAccountBodyDto', 'displayName'),
+              username: username,
+              passwordPlain: passwordPlain,
+              sshPublicKey: sshPublicKey,
+              folderId: folderId,
+              labelIds: _labelIds?.build(),
+              mapSubfolders: mapSubfolders);
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'labelIds';
         _labelIds?.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'SftpIngressCreateAccountBodyDto', _$failedField, e.toString());
       }
       rethrow;

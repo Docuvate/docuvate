@@ -21,12 +21,12 @@ UpdateSavedDocumentViewRequestDtoVisibilityEnum
     case 'shared':
       return _$updateSavedDocumentViewRequestDtoVisibilityEnum_shared;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateSavedDocumentViewRequestDtoVisibilityEnum>
-    _$updateSavedDocumentViewRequestDtoVisibilityEnumValues = BuiltSet<
+    _$updateSavedDocumentViewRequestDtoVisibilityEnumValues = new BuiltSet<
         UpdateSavedDocumentViewRequestDtoVisibilityEnum>(const <UpdateSavedDocumentViewRequestDtoVisibilityEnum>[
   _$updateSavedDocumentViewRequestDtoVisibilityEnum_private,
   _$updateSavedDocumentViewRequestDtoVisibilityEnum_shared,
@@ -57,12 +57,12 @@ UpdateSavedDocumentViewRequestDtoSortEnum
     case 'documentDate':
       return _$updateSavedDocumentViewRequestDtoSortEnum_documentDate;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateSavedDocumentViewRequestDtoSortEnum>
-    _$updateSavedDocumentViewRequestDtoSortEnumValues = BuiltSet<
+    _$updateSavedDocumentViewRequestDtoSortEnumValues = new BuiltSet<
         UpdateSavedDocumentViewRequestDtoSortEnum>(const <UpdateSavedDocumentViewRequestDtoSortEnum>[
   _$updateSavedDocumentViewRequestDtoSortEnum_updatedAt,
   _$updateSavedDocumentViewRequestDtoSortEnum_createdAt,
@@ -85,12 +85,12 @@ UpdateSavedDocumentViewRequestDtoOrderEnum
     case 'desc':
       return _$updateSavedDocumentViewRequestDtoOrderEnum_desc;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateSavedDocumentViewRequestDtoOrderEnum>
-    _$updateSavedDocumentViewRequestDtoOrderEnumValues = BuiltSet<
+    _$updateSavedDocumentViewRequestDtoOrderEnumValues = new BuiltSet<
         UpdateSavedDocumentViewRequestDtoOrderEnum>(const <UpdateSavedDocumentViewRequestDtoOrderEnum>[
   _$updateSavedDocumentViewRequestDtoOrderEnum_asc,
   _$updateSavedDocumentViewRequestDtoOrderEnum_desc,
@@ -116,12 +116,12 @@ UpdateSavedDocumentViewRequestDtoViewModeEnum
     case 'fokus':
       return _$updateSavedDocumentViewRequestDtoViewModeEnum_fokus;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateSavedDocumentViewRequestDtoViewModeEnum>
-    _$updateSavedDocumentViewRequestDtoViewModeEnumValues = BuiltSet<
+    _$updateSavedDocumentViewRequestDtoViewModeEnumValues = new BuiltSet<
         UpdateSavedDocumentViewRequestDtoViewModeEnum>(const <UpdateSavedDocumentViewRequestDtoViewModeEnum>[
   _$updateSavedDocumentViewRequestDtoViewModeEnum_klassisch,
   _$updateSavedDocumentViewRequestDtoViewModeEnum_karten,
@@ -143,12 +143,12 @@ UpdateSavedDocumentViewRequestDtoFilterModeEnum
     case 'query':
       return _$updateSavedDocumentViewRequestDtoFilterModeEnum_query;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateSavedDocumentViewRequestDtoFilterModeEnum>
-    _$updateSavedDocumentViewRequestDtoFilterModeEnumValues = BuiltSet<
+    _$updateSavedDocumentViewRequestDtoFilterModeEnumValues = new BuiltSet<
         UpdateSavedDocumentViewRequestDtoFilterModeEnum>(const <UpdateSavedDocumentViewRequestDtoFilterModeEnum>[
   _$updateSavedDocumentViewRequestDtoFilterModeEnum_ui,
   _$updateSavedDocumentViewRequestDtoFilterModeEnum_query,
@@ -174,12 +174,12 @@ UpdateSavedDocumentViewRequestDtoListScopeEnum
     case 'mappe':
       return _$updateSavedDocumentViewRequestDtoListScopeEnum_mappe;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateSavedDocumentViewRequestDtoListScopeEnum>
-    _$updateSavedDocumentViewRequestDtoListScopeEnumValues = BuiltSet<
+    _$updateSavedDocumentViewRequestDtoListScopeEnumValues = new BuiltSet<
         UpdateSavedDocumentViewRequestDtoListScopeEnum>(const <UpdateSavedDocumentViewRequestDtoListScopeEnum>[
   _$updateSavedDocumentViewRequestDtoListScopeEnum_all,
   _$updateSavedDocumentViewRequestDtoListScopeEnum_folder,
@@ -216,12 +216,12 @@ UpdateSavedDocumentViewRequestDtoStatusEnum
     case 'failed':
       return _$updateSavedDocumentViewRequestDtoStatusEnum_failed;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateSavedDocumentViewRequestDtoStatusEnum>
-    _$updateSavedDocumentViewRequestDtoStatusEnumValues = BuiltSet<
+    _$updateSavedDocumentViewRequestDtoStatusEnumValues = new BuiltSet<
         UpdateSavedDocumentViewRequestDtoStatusEnum>(const <UpdateSavedDocumentViewRequestDtoStatusEnum>[
   _$updateSavedDocumentViewRequestDtoStatusEnum_uploaded,
   _$updateSavedDocumentViewRequestDtoStatusEnum_queued,
@@ -232,25 +232,25 @@ final BuiltSet<UpdateSavedDocumentViewRequestDtoStatusEnum>
 
 Serializer<UpdateSavedDocumentViewRequestDtoVisibilityEnum>
     _$updateSavedDocumentViewRequestDtoVisibilityEnumSerializer =
-    _$UpdateSavedDocumentViewRequestDtoVisibilityEnumSerializer();
+    new _$UpdateSavedDocumentViewRequestDtoVisibilityEnumSerializer();
 Serializer<UpdateSavedDocumentViewRequestDtoSortEnum>
     _$updateSavedDocumentViewRequestDtoSortEnumSerializer =
-    _$UpdateSavedDocumentViewRequestDtoSortEnumSerializer();
+    new _$UpdateSavedDocumentViewRequestDtoSortEnumSerializer();
 Serializer<UpdateSavedDocumentViewRequestDtoOrderEnum>
     _$updateSavedDocumentViewRequestDtoOrderEnumSerializer =
-    _$UpdateSavedDocumentViewRequestDtoOrderEnumSerializer();
+    new _$UpdateSavedDocumentViewRequestDtoOrderEnumSerializer();
 Serializer<UpdateSavedDocumentViewRequestDtoViewModeEnum>
     _$updateSavedDocumentViewRequestDtoViewModeEnumSerializer =
-    _$UpdateSavedDocumentViewRequestDtoViewModeEnumSerializer();
+    new _$UpdateSavedDocumentViewRequestDtoViewModeEnumSerializer();
 Serializer<UpdateSavedDocumentViewRequestDtoFilterModeEnum>
     _$updateSavedDocumentViewRequestDtoFilterModeEnumSerializer =
-    _$UpdateSavedDocumentViewRequestDtoFilterModeEnumSerializer();
+    new _$UpdateSavedDocumentViewRequestDtoFilterModeEnumSerializer();
 Serializer<UpdateSavedDocumentViewRequestDtoListScopeEnum>
     _$updateSavedDocumentViewRequestDtoListScopeEnumSerializer =
-    _$UpdateSavedDocumentViewRequestDtoListScopeEnumSerializer();
+    new _$UpdateSavedDocumentViewRequestDtoListScopeEnumSerializer();
 Serializer<UpdateSavedDocumentViewRequestDtoStatusEnum>
     _$updateSavedDocumentViewRequestDtoStatusEnumSerializer =
-    _$UpdateSavedDocumentViewRequestDtoStatusEnumSerializer();
+    new _$UpdateSavedDocumentViewRequestDtoStatusEnumSerializer();
 
 class _$UpdateSavedDocumentViewRequestDtoVisibilityEnumSerializer
     implements
@@ -538,7 +538,8 @@ class _$UpdateSavedDocumentViewRequestDto
 
   factory _$UpdateSavedDocumentViewRequestDto(
           [void Function(UpdateSavedDocumentViewRequestDtoBuilder)? updates]) =>
-      (UpdateSavedDocumentViewRequestDtoBuilder()..update(updates))._build();
+      (new UpdateSavedDocumentViewRequestDtoBuilder()..update(updates))
+          ._build();
 
   _$UpdateSavedDocumentViewRequestDto._(
       {this.visibleColumns,
@@ -561,6 +562,7 @@ class _$UpdateSavedDocumentViewRequestDto
       this.tagIds,
       this.pinnedSidebar})
       : super._();
+
   @override
   UpdateSavedDocumentViewRequestDto rebuild(
           void Function(UpdateSavedDocumentViewRequestDtoBuilder) updates) =>
@@ -568,7 +570,7 @@ class _$UpdateSavedDocumentViewRequestDto
 
   @override
   UpdateSavedDocumentViewRequestDtoBuilder toBuilder() =>
-      UpdateSavedDocumentViewRequestDtoBuilder()..replace(this);
+      new UpdateSavedDocumentViewRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -655,7 +657,7 @@ class UpdateSavedDocumentViewRequestDtoBuilder
 
   ListBuilder<LibraryTableColumnId>? _visibleColumns;
   ListBuilder<LibraryTableColumnId> get visibleColumns =>
-      _$this._visibleColumns ??= ListBuilder<LibraryTableColumnId>();
+      _$this._visibleColumns ??= new ListBuilder<LibraryTableColumnId>();
   set visibleColumns(ListBuilder<LibraryTableColumnId>? visibleColumns) =>
       _$this._visibleColumns = visibleColumns;
 
@@ -739,7 +741,8 @@ class UpdateSavedDocumentViewRequestDtoBuilder
       _$this._documentDateTo = documentDateTo;
 
   ListBuilder<String>? _tagIds;
-  ListBuilder<String> get tagIds => _$this._tagIds ??= ListBuilder<String>();
+  ListBuilder<String> get tagIds =>
+      _$this._tagIds ??= new ListBuilder<String>();
   set tagIds(ListBuilder<String>? tagIds) => _$this._tagIds = tagIds;
 
   bool? _pinnedSidebar;
@@ -780,6 +783,7 @@ class UpdateSavedDocumentViewRequestDtoBuilder
 
   @override
   void replace(UpdateSavedDocumentViewRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateSavedDocumentViewRequestDto;
   }
 
@@ -796,27 +800,26 @@ class UpdateSavedDocumentViewRequestDtoBuilder
     _$UpdateSavedDocumentViewRequestDto _$result;
     try {
       _$result = _$v ??
-          _$UpdateSavedDocumentViewRequestDto._(
-            visibleColumns: _visibleColumns?.build(),
-            name: name,
-            visibility: visibility,
-            searchQuery: searchQuery,
-            sort: sort,
-            order: order,
-            viewMode: viewMode,
-            filterMode: filterMode,
-            listScope: listScope,
-            folderId: folderId,
-            mappeId: mappeId,
-            correspondentId: correspondentId,
-            status: status,
-            inbox: inbox,
-            withoutNonInboxLabel: withoutNonInboxLabel,
-            documentDateFrom: documentDateFrom,
-            documentDateTo: documentDateTo,
-            tagIds: _tagIds?.build(),
-            pinnedSidebar: pinnedSidebar,
-          );
+          new _$UpdateSavedDocumentViewRequestDto._(
+              visibleColumns: _visibleColumns?.build(),
+              name: name,
+              visibility: visibility,
+              searchQuery: searchQuery,
+              sort: sort,
+              order: order,
+              viewMode: viewMode,
+              filterMode: filterMode,
+              listScope: listScope,
+              folderId: folderId,
+              mappeId: mappeId,
+              correspondentId: correspondentId,
+              status: status,
+              inbox: inbox,
+              withoutNonInboxLabel: withoutNonInboxLabel,
+              documentDateFrom: documentDateFrom,
+              documentDateTo: documentDateTo,
+              tagIds: _tagIds?.build(),
+              pinnedSidebar: pinnedSidebar);
     } catch (_) {
       late String _$failedField;
       try {
@@ -826,7 +829,7 @@ class UpdateSavedDocumentViewRequestDtoBuilder
         _$failedField = 'tagIds';
         _tagIds?.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(
+        throw new BuiltValueNestedFieldError(
             r'UpdateSavedDocumentViewRequestDto', _$failedField, e.toString());
       }
       rethrow;

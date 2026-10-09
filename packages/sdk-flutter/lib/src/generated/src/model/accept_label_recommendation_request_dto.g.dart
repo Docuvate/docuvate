@@ -24,7 +24,8 @@ class _$AcceptLabelRecommendationRequestDto
   factory _$AcceptLabelRecommendationRequestDto(
           [void Function(AcceptLabelRecommendationRequestDtoBuilder)?
               updates]) =>
-      (AcceptLabelRecommendationRequestDtoBuilder()..update(updates))._build();
+      (new AcceptLabelRecommendationRequestDtoBuilder()..update(updates))
+          ._build();
 
   _$AcceptLabelRecommendationRequestDto._(
       {this.recommendationId,
@@ -34,6 +35,7 @@ class _$AcceptLabelRecommendationRequestDto
       this.removeTagId,
       this.color})
       : super._();
+
   @override
   AcceptLabelRecommendationRequestDto rebuild(
           void Function(AcceptLabelRecommendationRequestDtoBuilder) updates) =>
@@ -41,7 +43,7 @@ class _$AcceptLabelRecommendationRequestDto
 
   @override
   AcceptLabelRecommendationRequestDtoBuilder toBuilder() =>
-      AcceptLabelRecommendationRequestDtoBuilder()..replace(this);
+      new AcceptLabelRecommendationRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -132,6 +134,7 @@ class AcceptLabelRecommendationRequestDtoBuilder
 
   @override
   void replace(AcceptLabelRecommendationRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AcceptLabelRecommendationRequestDto;
   }
 
@@ -146,14 +149,13 @@ class AcceptLabelRecommendationRequestDtoBuilder
 
   _$AcceptLabelRecommendationRequestDto _build() {
     final _$result = _$v ??
-        _$AcceptLabelRecommendationRequestDto._(
-          recommendationId: recommendationId,
-          proposedName: proposedName,
-          tagId: tagId,
-          keepTagId: keepTagId,
-          removeTagId: removeTagId,
-          color: color,
-        );
+        new _$AcceptLabelRecommendationRequestDto._(
+            recommendationId: recommendationId,
+            proposedName: proposedName,
+            tagId: tagId,
+            keepTagId: keepTagId,
+            removeTagId: removeTagId,
+            color: color);
     replace(_$result);
     return _$result;
   }

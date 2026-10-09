@@ -24,7 +24,7 @@ class _$ExtractionBlockDto extends ExtractionBlockDto {
 
   factory _$ExtractionBlockDto(
           [void Function(ExtractionBlockDtoBuilder)? updates]) =>
-      (ExtractionBlockDtoBuilder()..update(updates))._build();
+      (new ExtractionBlockDtoBuilder()..update(updates))._build();
 
   _$ExtractionBlockDto._(
       {required this.page,
@@ -34,7 +34,17 @@ class _$ExtractionBlockDto extends ExtractionBlockDto {
       required this.height,
       required this.text,
       this.blockIndex})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(page, r'ExtractionBlockDto', 'page');
+    BuiltValueNullFieldError.checkNotNull(x, r'ExtractionBlockDto', 'x');
+    BuiltValueNullFieldError.checkNotNull(y, r'ExtractionBlockDto', 'y');
+    BuiltValueNullFieldError.checkNotNull(
+        width, r'ExtractionBlockDto', 'width');
+    BuiltValueNullFieldError.checkNotNull(
+        height, r'ExtractionBlockDto', 'height');
+    BuiltValueNullFieldError.checkNotNull(text, r'ExtractionBlockDto', 'text');
+  }
+
   @override
   ExtractionBlockDto rebuild(
           void Function(ExtractionBlockDtoBuilder) updates) =>
@@ -42,7 +52,7 @@ class _$ExtractionBlockDto extends ExtractionBlockDto {
 
   @override
   ExtractionBlockDtoBuilder toBuilder() =>
-      ExtractionBlockDtoBuilder()..replace(this);
+      new ExtractionBlockDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -138,6 +148,7 @@ class ExtractionBlockDtoBuilder
 
   @override
   void replace(ExtractionBlockDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ExtractionBlockDto;
   }
 
@@ -151,21 +162,20 @@ class ExtractionBlockDtoBuilder
 
   _$ExtractionBlockDto _build() {
     final _$result = _$v ??
-        _$ExtractionBlockDto._(
-          page: BuiltValueNullFieldError.checkNotNull(
-              page, r'ExtractionBlockDto', 'page'),
-          x: BuiltValueNullFieldError.checkNotNull(
-              x, r'ExtractionBlockDto', 'x'),
-          y: BuiltValueNullFieldError.checkNotNull(
-              y, r'ExtractionBlockDto', 'y'),
-          width: BuiltValueNullFieldError.checkNotNull(
-              width, r'ExtractionBlockDto', 'width'),
-          height: BuiltValueNullFieldError.checkNotNull(
-              height, r'ExtractionBlockDto', 'height'),
-          text: BuiltValueNullFieldError.checkNotNull(
-              text, r'ExtractionBlockDto', 'text'),
-          blockIndex: blockIndex,
-        );
+        new _$ExtractionBlockDto._(
+            page: BuiltValueNullFieldError.checkNotNull(
+                page, r'ExtractionBlockDto', 'page'),
+            x: BuiltValueNullFieldError.checkNotNull(
+                x, r'ExtractionBlockDto', 'x'),
+            y: BuiltValueNullFieldError.checkNotNull(
+                y, r'ExtractionBlockDto', 'y'),
+            width: BuiltValueNullFieldError.checkNotNull(
+                width, r'ExtractionBlockDto', 'width'),
+            height: BuiltValueNullFieldError.checkNotNull(
+                height, r'ExtractionBlockDto', 'height'),
+            text: BuiltValueNullFieldError.checkNotNull(
+                text, r'ExtractionBlockDto', 'text'),
+            blockIndex: blockIndex);
     replace(_$result);
     return _$result;
   }

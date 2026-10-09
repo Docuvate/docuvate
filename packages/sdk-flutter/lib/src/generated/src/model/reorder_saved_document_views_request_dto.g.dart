@@ -14,10 +14,15 @@ class _$ReorderSavedDocumentViewsRequestDto
   factory _$ReorderSavedDocumentViewsRequestDto(
           [void Function(ReorderSavedDocumentViewsRequestDtoBuilder)?
               updates]) =>
-      (ReorderSavedDocumentViewsRequestDtoBuilder()..update(updates))._build();
+      (new ReorderSavedDocumentViewsRequestDtoBuilder()..update(updates))
+          ._build();
 
   _$ReorderSavedDocumentViewsRequestDto._({required this.orderedIds})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        orderedIds, r'ReorderSavedDocumentViewsRequestDto', 'orderedIds');
+  }
+
   @override
   ReorderSavedDocumentViewsRequestDto rebuild(
           void Function(ReorderSavedDocumentViewsRequestDtoBuilder) updates) =>
@@ -25,7 +30,7 @@ class _$ReorderSavedDocumentViewsRequestDto
 
   @override
   ReorderSavedDocumentViewsRequestDtoBuilder toBuilder() =>
-      ReorderSavedDocumentViewsRequestDtoBuilder()..replace(this);
+      new ReorderSavedDocumentViewsRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -58,7 +63,7 @@ class ReorderSavedDocumentViewsRequestDtoBuilder
 
   ListBuilder<String>? _orderedIds;
   ListBuilder<String> get orderedIds =>
-      _$this._orderedIds ??= ListBuilder<String>();
+      _$this._orderedIds ??= new ListBuilder<String>();
   set orderedIds(ListBuilder<String>? orderedIds) =>
       _$this._orderedIds = orderedIds;
 
@@ -77,6 +82,7 @@ class ReorderSavedDocumentViewsRequestDtoBuilder
 
   @override
   void replace(ReorderSavedDocumentViewsRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ReorderSavedDocumentViewsRequestDto;
   }
 
@@ -93,17 +99,18 @@ class ReorderSavedDocumentViewsRequestDtoBuilder
     _$ReorderSavedDocumentViewsRequestDto _$result;
     try {
       _$result = _$v ??
-          _$ReorderSavedDocumentViewsRequestDto._(
-            orderedIds: orderedIds.build(),
-          );
+          new _$ReorderSavedDocumentViewsRequestDto._(
+              orderedIds: orderedIds.build());
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'orderedIds';
         orderedIds.build();
       } catch (e) {
-        throw BuiltValueNestedFieldError(r'ReorderSavedDocumentViewsRequestDto',
-            _$failedField, e.toString());
+        throw new BuiltValueNestedFieldError(
+            r'ReorderSavedDocumentViewsRequestDto',
+            _$failedField,
+            e.toString());
       }
       rethrow;
     }

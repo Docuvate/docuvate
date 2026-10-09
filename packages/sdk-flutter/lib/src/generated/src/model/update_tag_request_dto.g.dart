@@ -36,12 +36,12 @@ UpdateTagRequestDtoMatchingAlgorithmEnum
     case 'regex':
       return _$updateTagRequestDtoMatchingAlgorithmEnum_regex;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<UpdateTagRequestDtoMatchingAlgorithmEnum>
-    _$updateTagRequestDtoMatchingAlgorithmEnumValues = BuiltSet<
+    _$updateTagRequestDtoMatchingAlgorithmEnumValues = new BuiltSet<
         UpdateTagRequestDtoMatchingAlgorithmEnum>(const <UpdateTagRequestDtoMatchingAlgorithmEnum>[
   _$updateTagRequestDtoMatchingAlgorithmEnum_none,
   _$updateTagRequestDtoMatchingAlgorithmEnum_any,
@@ -52,7 +52,7 @@ final BuiltSet<UpdateTagRequestDtoMatchingAlgorithmEnum>
 
 Serializer<UpdateTagRequestDtoMatchingAlgorithmEnum>
     _$updateTagRequestDtoMatchingAlgorithmEnumSerializer =
-    _$UpdateTagRequestDtoMatchingAlgorithmEnumSerializer();
+    new _$UpdateTagRequestDtoMatchingAlgorithmEnumSerializer();
 
 class _$UpdateTagRequestDtoMatchingAlgorithmEnumSerializer
     implements PrimitiveSerializer<UpdateTagRequestDtoMatchingAlgorithmEnum> {
@@ -106,11 +106,12 @@ class _$UpdateTagRequestDto extends UpdateTagRequestDto {
 
   factory _$UpdateTagRequestDto(
           [void Function(UpdateTagRequestDtoBuilder)? updates]) =>
-      (UpdateTagRequestDtoBuilder()..update(updates))._build();
+      (new UpdateTagRequestDtoBuilder()..update(updates))._build();
 
   _$UpdateTagRequestDto._(
       {this.name, this.color, this.isInbox, this.matchingAlgorithm, this.match})
       : super._();
+
   @override
   UpdateTagRequestDto rebuild(
           void Function(UpdateTagRequestDtoBuilder) updates) =>
@@ -118,7 +119,7 @@ class _$UpdateTagRequestDto extends UpdateTagRequestDto {
 
   @override
   UpdateTagRequestDtoBuilder toBuilder() =>
-      UpdateTagRequestDtoBuilder()..replace(this);
+      new UpdateTagRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -201,6 +202,7 @@ class UpdateTagRequestDtoBuilder
 
   @override
   void replace(UpdateTagRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateTagRequestDto;
   }
 
@@ -214,13 +216,12 @@ class UpdateTagRequestDtoBuilder
 
   _$UpdateTagRequestDto _build() {
     final _$result = _$v ??
-        _$UpdateTagRequestDto._(
-          name: name,
-          color: color,
-          isInbox: isInbox,
-          matchingAlgorithm: matchingAlgorithm,
-          match: match,
-        );
+        new _$UpdateTagRequestDto._(
+            name: name,
+            color: color,
+            isInbox: isInbox,
+            matchingAlgorithm: matchingAlgorithm,
+            match: match);
     replace(_$result);
     return _$result;
   }

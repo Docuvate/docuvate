@@ -14,9 +14,10 @@ class _$UpdateMappeRequestDto extends UpdateMappeRequestDto {
 
   factory _$UpdateMappeRequestDto(
           [void Function(UpdateMappeRequestDtoBuilder)? updates]) =>
-      (UpdateMappeRequestDtoBuilder()..update(updates))._build();
+      (new UpdateMappeRequestDtoBuilder()..update(updates))._build();
 
   _$UpdateMappeRequestDto._({this.name, this.color}) : super._();
+
   @override
   UpdateMappeRequestDto rebuild(
           void Function(UpdateMappeRequestDtoBuilder) updates) =>
@@ -24,7 +25,7 @@ class _$UpdateMappeRequestDto extends UpdateMappeRequestDto {
 
   @override
   UpdateMappeRequestDtoBuilder toBuilder() =>
-      UpdateMappeRequestDtoBuilder()..replace(this);
+      new UpdateMappeRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -80,6 +81,7 @@ class UpdateMappeRequestDtoBuilder
 
   @override
   void replace(UpdateMappeRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateMappeRequestDto;
   }
 
@@ -92,11 +94,8 @@ class UpdateMappeRequestDtoBuilder
   UpdateMappeRequestDto build() => _build();
 
   _$UpdateMappeRequestDto _build() {
-    final _$result = _$v ??
-        _$UpdateMappeRequestDto._(
-          name: name,
-          color: color,
-        );
+    final _$result =
+        _$v ?? new _$UpdateMappeRequestDto._(name: name, color: color);
     replace(_$result);
     return _$result;
   }

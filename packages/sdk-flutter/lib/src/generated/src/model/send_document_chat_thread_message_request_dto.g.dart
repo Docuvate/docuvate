@@ -14,11 +14,15 @@ class _$SendDocumentChatThreadMessageRequestDto
   factory _$SendDocumentChatThreadMessageRequestDto(
           [void Function(SendDocumentChatThreadMessageRequestDtoBuilder)?
               updates]) =>
-      (SendDocumentChatThreadMessageRequestDtoBuilder()..update(updates))
+      (new SendDocumentChatThreadMessageRequestDtoBuilder()..update(updates))
           ._build();
 
   _$SendDocumentChatThreadMessageRequestDto._({required this.message})
-      : super._();
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        message, r'SendDocumentChatThreadMessageRequestDto', 'message');
+  }
+
   @override
   SendDocumentChatThreadMessageRequestDto rebuild(
           void Function(SendDocumentChatThreadMessageRequestDtoBuilder)
@@ -27,7 +31,7 @@ class _$SendDocumentChatThreadMessageRequestDto
 
   @override
   SendDocumentChatThreadMessageRequestDtoBuilder toBuilder() =>
-      SendDocumentChatThreadMessageRequestDtoBuilder()..replace(this);
+      new SendDocumentChatThreadMessageRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -78,6 +82,7 @@ class SendDocumentChatThreadMessageRequestDtoBuilder
 
   @override
   void replace(SendDocumentChatThreadMessageRequestDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$SendDocumentChatThreadMessageRequestDto;
   }
 
@@ -92,10 +97,9 @@ class SendDocumentChatThreadMessageRequestDtoBuilder
 
   _$SendDocumentChatThreadMessageRequestDto _build() {
     final _$result = _$v ??
-        _$SendDocumentChatThreadMessageRequestDto._(
-          message: BuiltValueNullFieldError.checkNotNull(
-              message, r'SendDocumentChatThreadMessageRequestDto', 'message'),
-        );
+        new _$SendDocumentChatThreadMessageRequestDto._(
+            message: BuiltValueNullFieldError.checkNotNull(message,
+                r'SendDocumentChatThreadMessageRequestDto', 'message'));
     replace(_$result);
     return _$result;
   }

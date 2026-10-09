@@ -18,18 +18,18 @@ ChatMessageDtoRoleEnum _$chatMessageDtoRoleEnumValueOf(String name) {
     case 'assistant':
       return _$chatMessageDtoRoleEnum_assistant;
     default:
-      throw ArgumentError(name);
+      throw new ArgumentError(name);
   }
 }
 
 final BuiltSet<ChatMessageDtoRoleEnum> _$chatMessageDtoRoleEnumValues =
-    BuiltSet<ChatMessageDtoRoleEnum>(const <ChatMessageDtoRoleEnum>[
+    new BuiltSet<ChatMessageDtoRoleEnum>(const <ChatMessageDtoRoleEnum>[
   _$chatMessageDtoRoleEnum_user,
   _$chatMessageDtoRoleEnum_assistant,
 ]);
 
 Serializer<ChatMessageDtoRoleEnum> _$chatMessageDtoRoleEnumSerializer =
-    _$ChatMessageDtoRoleEnumSerializer();
+    new _$ChatMessageDtoRoleEnumSerializer();
 
 class _$ChatMessageDtoRoleEnumSerializer
     implements PrimitiveSerializer<ChatMessageDtoRoleEnum> {
@@ -66,15 +66,21 @@ class _$ChatMessageDto extends ChatMessageDto {
   final String content;
 
   factory _$ChatMessageDto([void Function(ChatMessageDtoBuilder)? updates]) =>
-      (ChatMessageDtoBuilder()..update(updates))._build();
+      (new ChatMessageDtoBuilder()..update(updates))._build();
 
-  _$ChatMessageDto._({required this.role, required this.content}) : super._();
+  _$ChatMessageDto._({required this.role, required this.content}) : super._() {
+    BuiltValueNullFieldError.checkNotNull(role, r'ChatMessageDto', 'role');
+    BuiltValueNullFieldError.checkNotNull(
+        content, r'ChatMessageDto', 'content');
+  }
+
   @override
   ChatMessageDto rebuild(void Function(ChatMessageDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  ChatMessageDtoBuilder toBuilder() => ChatMessageDtoBuilder()..replace(this);
+  ChatMessageDtoBuilder toBuilder() =>
+      new ChatMessageDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -130,6 +136,7 @@ class ChatMessageDtoBuilder
 
   @override
   void replace(ChatMessageDto other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$ChatMessageDto;
   }
 
@@ -143,12 +150,11 @@ class ChatMessageDtoBuilder
 
   _$ChatMessageDto _build() {
     final _$result = _$v ??
-        _$ChatMessageDto._(
-          role: BuiltValueNullFieldError.checkNotNull(
-              role, r'ChatMessageDto', 'role'),
-          content: BuiltValueNullFieldError.checkNotNull(
-              content, r'ChatMessageDto', 'content'),
-        );
+        new _$ChatMessageDto._(
+            role: BuiltValueNullFieldError.checkNotNull(
+                role, r'ChatMessageDto', 'role'),
+            content: BuiltValueNullFieldError.checkNotNull(
+                content, r'ChatMessageDto', 'content'));
     replace(_$result);
     return _$result;
   }

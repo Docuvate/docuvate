@@ -18,12 +18,14 @@ class _$DocumentExtractionSummaryDtoLayoutIrPagesInner
   factory _$DocumentExtractionSummaryDtoLayoutIrPagesInner(
           [void Function(DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder)?
               updates]) =>
-      (DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder()..update(updates))
+      (new DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder()
+            ..update(updates))
           ._build();
 
   _$DocumentExtractionSummaryDtoLayoutIrPagesInner._(
       {this.page, this.widthPt, this.heightPt})
       : super._();
+
   @override
   DocumentExtractionSummaryDtoLayoutIrPagesInner rebuild(
           void Function(DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder)
@@ -32,7 +34,8 @@ class _$DocumentExtractionSummaryDtoLayoutIrPagesInner
 
   @override
   DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder toBuilder() =>
-      DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder()..replace(this);
+      new DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder()
+        ..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -99,6 +102,7 @@ class DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder
 
   @override
   void replace(DocumentExtractionSummaryDtoLayoutIrPagesInner other) {
+    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentExtractionSummaryDtoLayoutIrPagesInner;
   }
 
@@ -114,11 +118,8 @@ class DocumentExtractionSummaryDtoLayoutIrPagesInnerBuilder
 
   _$DocumentExtractionSummaryDtoLayoutIrPagesInner _build() {
     final _$result = _$v ??
-        _$DocumentExtractionSummaryDtoLayoutIrPagesInner._(
-          page: page,
-          widthPt: widthPt,
-          heightPt: heightPt,
-        );
+        new _$DocumentExtractionSummaryDtoLayoutIrPagesInner._(
+            page: page, widthPt: widthPt, heightPt: heightPt);
     replace(_$result);
     return _$result;
   }
