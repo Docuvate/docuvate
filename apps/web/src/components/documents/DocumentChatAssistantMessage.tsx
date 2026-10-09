@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { CHAT_GENERATION_MAX_WAIT_SEC } from '../../lib/chatGenerationLimits';
 import { useTranslation } from 'react-i18next';
 import type { ChatMessageCitationDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
 import { formatChatGenerationError, toUserFacingChatGenerationError } from '../../lib/apiErrors';
@@ -10,6 +11,8 @@ interface DocumentChatAssistantMessageProps {
   onRetry: (messageId: string) => void;
   onCancel: (messageId: string) => void;
   retryBusy: boolean;
+  /** Library/global chat uses broader retrieval copy. */
+  chatScope?: 'document' | 'library';
   renderCitationLink?: (citation: ChatMessageCitationDto) => React.ReactNode;
 }
 
@@ -24,11 +27,13 @@ export function DocumentChatAssistantMessage({
   onRetry,
   onCancel,
   retryBusy,
+  chatScope = 'document',
   renderCitationLink,
 }: DocumentChatAssistantMessageProps) {
   const { t } = useTranslation();
   const status = message.generationStatus ?? 'done';
   const [elapsed, setElapsed] = useState(0);
+  const timedOutRef = useRef(false);
 
   const isActive = status === 'pending' || status === 'streaming';
   const isFailed = status === 'failed';
@@ -46,10 +51,25 @@ export function DocumentChatAssistantMessage({
     return () => clearInterval(id);
   }, [isActive, message.createdAt]);
 
+  useEffect(() => {
+    timedOutRef.current = false;
+  }, [message.id]);
+
+  useEffect(() => {
+    if (!isActive || elapsed < CHAT_GENERATION_MAX_WAIT_SEC || timedOutRef.current) {
+      return;
+    }
+    timedOutRef.current = true;
+    onCancel(message.id);
+  }, [elapsed, isActive, message.id, onCancel]);
+
   let statusLine: string | null = null;
   if (isActive) {
     if (message.generationPhase === 'retrieving' || status === 'pending') {
-      statusLine = t('documents.documentChat.phaseRetrieving');
+      statusLine =
+        chatScope === 'library'
+          ? t('documents.documentChat.phaseRetrievingLibrary')
+          : t('documents.documentChat.phaseRetrieving');
     } else if (message.generationPhase === 'verifying') {
       statusLine = t('documents.documentChat.phaseVerifying');
     } else {
