@@ -12,13 +12,16 @@ Document chat was slow on CPU (thinking tokens, re-embedding per question) and a
 
 1. **Persistent chunk index** on `document_text_chunks` with `page`, `char_start`, `char_end`, and ONNX embeddings at ingest (worker fastembed).
 2. **Hybrid retrieval** in Postgres (FTS + pg_trgm + cosine on chunk embeddings, RRF), permission via document ownership.
-3. **Reranker** in worker (`POST /v1/rag/retrieve`, fastembed cross-encoder, ONNX, CPU) with score gate before LLM.
-4. **Small Ollama model** with `think: false`, JSON claims, server-side quote verification; citations in `chat_message_citations`.
-5. **Thread scope `library`** for chat across all documents (replaces `corpus` in DB check).
-6. **Profiles** via `DOCUVATE_AI_PROFILE` (`off`, `cpu-small`, `cpu-medium`, `gpu`).
-7. **Images** published `linux/amd64` and `linux/arm64`; worker uses ARM-capable wheels (Paddle, fastembed ONNX).
+3. **Reranker** in worker (`POST /v1/rag/retrieve`, fastembed `TextCrossEncoder`, ONNX, CPU) with **sigmoid-normalized** scores and `RAG_RERANKER_GATE_MIN` (default **0.5**, calibrated on DE fixtures). Default model **`BAAI/bge-reranker-base`** (MIT, ~1 GB ONNX). Permissive allowlist enforced in worker tests; NC-licensed models are rejected.
+4. When the reranker is unavailable, the API **does not** invent passing scores; it applies **`RAG_FUSION_GATE_MIN`** (default **0.02**) on RRF fusion or abstains.
+5. **Small Ollama model** with `think: false`, JSON claims, server-side quote verification; citations in `chat_message_citations` with **body-accurate** `quote` and char offsets.
+6. **Thread scope `library`** for chat across all documents (replaces `corpus` in DB check). Library threads **do not** populate `chat_thread_documents`; retrieval uses all documents owned by the user at question time.
+7. **Profiles** via `DOCUVATE_AI_PROFILE` (`off`, `cpu-small`, `cpu-medium`, `gpu`).
+8. **Images** published `linux/amd64` and `linux/arm64`; worker uses ARM-capable wheels (Paddle, fastembed ONNX).
+9. **Generation UX:** cited `rag-ollama` uses **non-streaming** Ollama JSON (`stream: false`); the UI shows **retrieving** and **verifying** phases until the full answer is ready (typical CPU wait tens of seconds).
 
 ## Consequences
 
 - ADR 010 remains for retrieval philosophy; generation path is superseded for `rag-ollama`.
-- Median end-to-end latency should be measured with `bench/cited_chat_eval.py` on target hardware (reports `machine`, thread env vars).
+- End-to-end latency (TTFT + total, multi-doc + abstention) is measured with `bench/cited_chat_eval.py` (`DOCUVATE_E2E=1` against compose).
+- Worker `/v1/health/ready` and document-chat provider listing report reranker load failures.

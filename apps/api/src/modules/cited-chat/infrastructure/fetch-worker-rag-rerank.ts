@@ -10,6 +10,8 @@ export interface RagRetrieveResultItem {
 
 export interface RagRetrieveResponse {
   reachable: boolean;
+  rerankerUsed: boolean;
+  rerankerModel: string | null;
   results: RagRetrieveResultItem[];
 }
 
@@ -20,7 +22,7 @@ export async function fetchWorkerRagRerank(
   const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
   const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
   if (!passages.length) {
-    return { reachable: true, results: [] };
+    return { reachable: true, rerankerUsed: true, rerankerModel: null, results: [] };
   }
   try {
     const response = await fetch(`${workerUrl.replace(/\/$/, '')}/v1/rag/retrieve`, {
@@ -33,14 +35,20 @@ export async function fetchWorkerRagRerank(
       signal: AbortSignal.timeout(Number(process.env['WORKER_RAG_TIMEOUT_MS'] ?? 30_000)),
     });
     if (!response.ok) {
-      return { reachable: false, results: [] };
+      return { reachable: false, rerankerUsed: false, rerankerModel: null, results: [] };
     }
-    const data = (await response.json()) as { results?: Array<{ id: string; score: number }> };
+    const data = (await response.json()) as {
+      results?: Array<{ id: string; score: number }>;
+      reranker_used?: boolean;
+      reranker_model?: string | null;
+    };
     return {
       reachable: true,
+      rerankerUsed: Boolean(data.reranker_used),
+      rerankerModel: data.reranker_model ?? null,
       results: (data.results ?? []).map((r) => ({ id: String(r.id), score: Number(r.score) })),
     };
   } catch {
-    return { reachable: false, results: [] };
+    return { reachable: false, rerankerUsed: false, rerankerModel: null, results: [] };
   }
 }

@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type { ExtractionBlock } from '@docuvate/contracts';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { normalizeForQuoteMatch } from '../domain/verify-citation-quote.js';
 
 export interface StoredChatCitation {
   ordinal: number;
@@ -37,6 +38,49 @@ export class PgChatMessageCitationsRepository {
         [messageId, c.chunkId, c.ordinal, c.quote, c.charStart, c.charEnd]
       );
     }
+  }
+
+  async listForMessages(messageIds: string[]): Promise<Map<string, StoredChatCitation[]>> {
+    if (messageIds.length === 0) {
+      return new Map();
+    }
+    const result = await this.pool.query<{
+      message_id: string;
+      ordinal: number;
+      chunk_id: string;
+      quote: string;
+      char_start: number;
+      char_end: number;
+      document_id: string;
+      title: string;
+      page: number | null;
+    }>(
+      `SELECT c.message_id, c.ordinal, c.chunk_id, c.quote, c.char_start, c.char_end,
+              ch.document_id, d.title, ch.page
+       FROM chat_message_citations c
+       JOIN document_text_chunks ch ON ch.id = c.chunk_id
+       JOIN documents d ON d.id = ch.document_id
+       WHERE c.message_id = ANY($1::uuid[])
+       ORDER BY c.message_id, c.ordinal ASC`,
+      [messageIds]
+    );
+    const byMessage = new Map<string, StoredChatCitation[]>();
+    for (const row of result.rows) {
+      const list = byMessage.get(row.message_id) ?? [];
+      list.push({
+        ordinal: row.ordinal,
+        chunkId: row.chunk_id,
+        quote: row.quote,
+        charStart: row.char_start,
+        charEnd: row.char_end,
+        documentId: row.document_id,
+        documentTitle: row.title,
+        page: row.page,
+        blocks: [],
+      });
+      byMessage.set(row.message_id, list);
+    }
+    return byMessage;
   }
 
   async listForMessage(messageId: string): Promise<StoredChatCitation[]> {
@@ -79,6 +123,7 @@ export class PgChatMessageCitationsRepository {
       return citations;
     }
     const docIds = [...new Set(citations.map((c) => c.documentId))];
+    const pages = [...new Set(citations.map((c) => c.page ?? 1))];
     const blocksResult = await this.pool.query<{
       document_id: string;
       page: number;
@@ -91,8 +136,9 @@ export class PgChatMessageCitationsRepository {
     }>(
       `SELECT document_id, page, x, y, width, height, text, block_index
        FROM document_extraction_blocks
-       WHERE document_id = ANY($1::uuid[])`,
-      [docIds]
+       WHERE document_id = ANY($1::uuid[])
+         AND page = ANY($2::int[])`,
+      [docIds, pages]
     );
     const byDoc = new Map<string, ExtractionBlock[]>();
     for (const row of blocksResult.rows) {
@@ -111,10 +157,13 @@ export class PgChatMessageCitationsRepository {
     return citations.map((c) => {
       const blocks = byDoc.get(c.documentId) ?? [];
       const pageBlocks = blocks.filter((b) => b.page === (c.page ?? 1));
-      const hit =
-        pageBlocks.find((b) => (b.text ?? '').toLowerCase().includes(c.quote.toLowerCase())) ??
-        pageBlocks[0] ??
-        blocks[0];
+      const needle = normalizeForQuoteMatch(c.quote);
+      if (!needle) {
+        return { ...c, blocks: [] };
+      }
+      const hit = pageBlocks.find((b) =>
+        normalizeForQuoteMatch(b.text ?? '').includes(needle)
+      );
       return { ...c, blocks: hit ? [hit] : [] };
     });
   }

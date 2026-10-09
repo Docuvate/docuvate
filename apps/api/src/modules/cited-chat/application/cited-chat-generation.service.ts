@@ -9,9 +9,14 @@ import {
 import {
   CITED_CHAT_ABSTENTION_DE,
   RAG_RERANK_TOP_K,
+  ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
-import { findQuoteInChunk, passesRerankerGate } from '../domain/verify-citation-quote.js';
+import {
+  findQuoteInChunk,
+  passesFusionGate,
+  passesRerankerGate,
+} from '../domain/verify-citation-quote.js';
 import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
@@ -61,7 +66,7 @@ export class CitedChatGenerationService {
     }
 
     const filterIds =
-      scope === 'document' && documentIds.length > 0 ? documentIds : documentIds.length > 0 ? documentIds : undefined;
+      scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
 
     const candidates = await this.retrieval.hybridRetrieveChunks(userId, userMessage, {
       documentIds: filterIds,
@@ -87,21 +92,29 @@ export class CitedChatGenerationService {
       }))
     );
 
-    const ranked = rerank.reachable
-      ? rerank.results
-          .map((r) => {
-            const chunk = candidates.find((c) => c.chunkId === r.id);
-            return chunk ? { chunk, score: r.score } : null;
-          })
-          .filter((row): row is { chunk: (typeof candidates)[0]; score: number } => row != null)
-      : candidates.slice(0, RAG_RERANK_TOP_K).map((chunk, i) => ({
-          chunk,
-          score: candidates.length - i,
-        }));
+    let ranked: Array<{ chunk: (typeof candidates)[0]; score: number }>;
+    if (rerank.reachable && rerank.rerankerUsed && rerank.results.length > 0) {
+      ranked = rerank.results
+        .map((r) => {
+          const chunk = candidates.find((c) => c.chunkId === r.id);
+          return chunk ? { chunk, score: r.score } : null;
+        })
+        .filter((row): row is { chunk: (typeof candidates)[0]; score: number } => row != null);
+    } else {
+      ranked = candidates
+        .slice()
+        .sort((a, b) => b.fusionScore - a.fusionScore)
+        .slice(0, RAG_RERANK_TOP_K)
+        .map((chunk) => ({ chunk, score: chunk.fusionScore }));
+    }
 
     const top = ranked.slice(0, RAG_RERANK_TOP_K);
     const bestScore = top[0]?.score ?? -1;
-    if (!passesRerankerGate(bestScore, ragRerankerGateThreshold())) {
+    const gateOk =
+      rerank.reachable && rerank.rerankerUsed
+        ? passesRerankerGate(bestScore, ragRerankerGateThreshold())
+        : passesFusionGate(bestScore, ragFusionGateThreshold());
+    if (!gateOk) {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
         content: CITED_CHAT_ABSTENTION_DE,
@@ -173,7 +186,7 @@ export class CitedChatGenerationService {
         ordinal,
         text,
         chunkId: chunkRow.chunk.chunkId,
-        quote: claim.quote.trim(),
+        quote: match.bodyQuote,
         charStart: (chunkRow.chunk.charStart ?? 0) + match.charStart,
         charEnd: (chunkRow.chunk.charStart ?? 0) + match.charEnd,
       });

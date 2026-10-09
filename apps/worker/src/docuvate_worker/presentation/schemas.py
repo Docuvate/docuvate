@@ -183,6 +183,8 @@ class RagRetrieveResultItem(BaseModel):
 
 class RagRetrieveResponse(BaseModel):
     results: list[RagRetrieveResultItem] = Field(default_factory=list)
+    reranker_used: bool = False
+    reranker_model: str | None = None
 
 
 class DocumentChatProviderInfo(BaseModel):

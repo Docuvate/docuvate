@@ -31,6 +31,9 @@ venv/
 *.swo
 .DS_Store
 
+# Bench artifacts (local eval output)
+bench/cited-chat-eval-latest.json
+
 # Environment
 .env
 .env.local

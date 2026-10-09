@@ -6,11 +6,26 @@ export const CITED_CHAT_ABSTENTION_EN =
 export const RAG_HYBRID_CANDIDATE_LIMIT = 20;
 export const RAG_RERANK_TOP_K = 4;
 
+/** Sigmoid rerank score; calibrated on DE fixtures (in-domain ~0.94+, off-topic ~0). */
+export const RAG_RERANKER_GATE_MIN_DEFAULT = 0.5;
+
+/** RRF fusion score when reranker is down (weak matches stay below ~0.02). */
+export const RAG_FUSION_GATE_MIN_DEFAULT = 0.02;
+
 export function ragRerankerGateThreshold(): number {
   const raw = process.env['RAG_RERANKER_GATE_MIN'];
   if (!raw) {
-    return 0;
+    return RAG_RERANKER_GATE_MIN_DEFAULT;
   }
   const parsed = Number.parseFloat(raw);
-  return Number.isFinite(parsed) ? parsed : 0;
+  return Number.isFinite(parsed) ? parsed : RAG_RERANKER_GATE_MIN_DEFAULT;
+}
+
+export function ragFusionGateThreshold(): number {
+  const raw = process.env['RAG_FUSION_GATE_MIN'];
+  if (!raw) {
+    return RAG_FUSION_GATE_MIN_DEFAULT;
+  }
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) ? parsed : RAG_FUSION_GATE_MIN_DEFAULT;
 }

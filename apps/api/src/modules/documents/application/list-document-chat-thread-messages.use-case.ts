@@ -47,16 +47,27 @@ export class ListDocumentChatThreadMessagesUseCase {
   private async attachCitations(
     messages: DocumentChatMessageEntity[]
   ): Promise<DocumentChatMessageEntity[]> {
-    const enriched: DocumentChatMessageEntity[] = [];
-    for (const message of messages) {
-      if (message.role !== 'assistant' || message.generationStatus !== 'done') {
-        enriched.push(message);
-        continue;
-      }
-      const stored = await this.citationsRepo.listForMessage(message.id);
-      const withBlocks = await this.citationsRepo.loadHighlightBlocksForCitations(stored);
-      enriched.push({ ...message, citations: withBlocks });
+    const assistantIds = messages
+      .filter((m) => m.role === 'assistant' && m.generationStatus === 'done')
+      .map((m) => m.id);
+    if (assistantIds.length === 0) {
+      return messages;
     }
-    return enriched;
+    const citationsByMessage = await this.citationsRepo.listForMessages(assistantIds);
+    const allCitations = [...citationsByMessage.values()].flat();
+    const withBlocks = await this.citationsRepo.loadHighlightBlocksForCitations(allCitations);
+    let highlightIndex = 0;
+    return messages.map((message) => {
+      if (message.role !== 'assistant' || message.generationStatus !== 'done') {
+        return message;
+      }
+      const stored = citationsByMessage.get(message.id) ?? [];
+      const citations = stored.map((c) => {
+        const highlighted = withBlocks[highlightIndex];
+        highlightIndex += 1;
+        return highlighted ? { ...c, blocks: highlighted.blocks } : c;
+      });
+      return { ...message, citations };
+    });
   }
 }

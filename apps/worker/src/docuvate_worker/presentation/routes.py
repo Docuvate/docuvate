@@ -12,7 +12,12 @@ from docuvate_worker.application.embedding import embed_texts
 from docuvate_worker.application.extract import compare_engines, extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.infrastructure.chat.context_qa import retrieve_document_rag_context
-from docuvate_worker.infrastructure.chat.rag_rerank import RagPassage, rerank_passages
+from docuvate_worker.infrastructure.chat.rag_rerank import (
+    RERANKER_MODEL,
+    RagPassage,
+    rerank_passages,
+    reranker_status,
+)
 from docuvate_worker.infrastructure.extractors.engine_catalog import list_engine_meta
 from docuvate_worker.infrastructure.extractors.label_custom_fields import (
     extract_label_custom_fields,
@@ -71,6 +76,19 @@ def _decode_content(content_base64: str) -> bytes:
 
 @router.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
+    return HealthResponse(status="ok")
+
+
+@router.get("/health/ready", response_model=HealthResponse)
+def health_ready() -> HealthResponse:
+    status = reranker_status()
+    if status.get("available") and not status.get("loaded"):
+        from docuvate_worker.infrastructure.chat.rag_rerank import ensure_reranker_loaded
+
+        ensure_reranker_loaded()
+        status = reranker_status()
+    if not status.get("available"):
+        return HealthResponse(status="degraded")
     return HealthResponse(status="ok")
 
 
@@ -219,9 +237,11 @@ def rag_retrieve(
 ) -> RagRetrieveResponse:
     _require_worker_secret(x_worker_secret)
     passages = [RagPassage(id=p.id, text=p.text) for p in body.passages]
-    ranked = rerank_passages(body.query, passages, top_k=4)
+    ranked, reranker_used = rerank_passages(body.query, passages, top_k=4)
     return RagRetrieveResponse(
-        results=[RagRetrieveResultItem(id=r.id, score=r.score) for r in ranked]
+        results=[RagRetrieveResultItem(id=r.id, score=r.score) for r in ranked],
+        reranker_used=reranker_used,
+        reranker_model=RERANKER_MODEL if reranker_used else None,
     )
 
 

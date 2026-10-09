@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   findQuoteInChunk,
   normalizeForQuoteMatch,
+  passesFusionGate,
   passesRerankerGate,
   truncateQuoteWords,
 } from './verify-citation-quote.js';
@@ -12,11 +13,27 @@ describe('verify-citation-quote', () => {
     expect(normalizeForQuoteMatch('  Rechnung   „123“  ')).toBe('rechnung 123');
   });
 
-  it('finds quote in chunk body', () => {
+  it('finds quote in chunk body with body-relative offsets and stored substring', () => {
     const body = 'Die Gesamtsumme beträgt 1.234,56 EUR fällig am 15.03.';
     const hit = findQuoteInChunk(body, 'Gesamtsumme beträgt 1.234,56');
     expect(hit).not.toBeNull();
-    expect(hit!.charStart).toBeGreaterThanOrEqual(0);
+    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
+    expect(hit!.bodyQuote).toContain('Gesamtsumme');
+  });
+
+  it('maps typographic quotes and double spaces to original body indices', () => {
+    const body = 'Summe  „1.234,56“   EUR';
+    const hit = findQuoteInChunk(body, '„1.234,56“');
+    expect(hit).not.toBeNull();
+    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
+    expect(hit!.bodyQuote).toMatch(/1\.234,56/);
+  });
+
+  it('handles umlauts without normalized-length drift', () => {
+    const body = 'Größe der Hundesteuer: 120 EUR';
+    const hit = findQuoteInChunk(body, 'Hundesteuer');
+    expect(hit).not.toBeNull();
+    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
   });
 
   it('truncates long quotes to ten words', () => {
@@ -24,8 +41,13 @@ describe('verify-citation-quote', () => {
   });
 
   it('gate rejects low reranker scores', () => {
-    expect(passesRerankerGate(-0.5, 0)).toBe(false);
-    expect(passesRerankerGate(1.2, 0)).toBe(true);
+    expect(passesRerankerGate(0.2, 0.5)).toBe(false);
+    expect(passesRerankerGate(0.9, 0.5)).toBe(true);
+  });
+
+  it('fusion gate rejects weak RRF scores', () => {
+    expect(passesFusionGate(0.01, 0.02)).toBe(false);
+    expect(passesFusionGate(0.03, 0.02)).toBe(true);
   });
 });
 

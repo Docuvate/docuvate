@@ -74,6 +74,9 @@ def _donut_description(*, installed: bool, available: bool) -> str:
 
 
 def chat_provider_status() -> list[dict[str, str | bool]]:
+    from docuvate_worker.infrastructure.chat.rag_rerank import reranker_status
+
+    rerank = reranker_status()
     donut_installed = False
     try:
         import transformers  # noqa: F401
@@ -82,7 +85,22 @@ def chat_provider_status() -> list[dict[str, str | bool]]:
     except ImportError:
         donut_installed = False
     donut_ok = donut_available()
+    rerank_available = bool(rerank.get("available"))
+    rerank_reason = str(rerank.get("reason") or "")
     return [
+        {
+            "id": "rag-reranker",
+            "label": "RAG Reranker (cross-encoder)",
+            "description": (
+                f"ONNX reranker ({rerank.get('model', '')}); "
+                + (
+                    "bereit."
+                    if rerank_available
+                    else f"nicht verfügbar: {rerank_reason or 'unbekannt'}."
+                )
+            ),
+            "available": rerank_available,
+        },
         {
             "id": "context",
             "label": "Kontext (Embeddings)",
