@@ -16,6 +16,8 @@ Synthetic layout regression document with enough words to classify as born digit
 
 = Synthetic electronic payroll certificate for tax year 2025 (fictional employer, no personal data)
 
+#fields([Employee ID:], [SYN-4711])
+
 #table(
   columns: (auto, auto, auto),
   stroke: 0.5pt,
@@ -23,4 +25,3 @@ Synthetic layout regression document with enough words to classify as born digit
   table.header([1.], [Reporting period], [01.01. - 31.12.]),
   [3.], [Gross wages incl. benefits], [48.250,00], [5.], [Income tax withheld], [9.120,00],
 )
-#fields([Employee ID:], [SYN-4711])

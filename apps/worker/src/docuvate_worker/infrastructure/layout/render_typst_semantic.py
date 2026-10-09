@@ -158,18 +158,29 @@ def _cluster_columns(
 ) -> list[list[LayoutIrLine]]:
     if not lines:
         return []
-    ordered = sorted(lines, key=lambda ln: ln.x)
-    columns: list[list[LayoutIrLine]] = [[ordered[0]]]
-    ref_x = ordered[0].x + ordered[0].width * 0.5
-    for line in ordered[1:]:
-        cx = line.x + line.width * 0.5
-        if cx - ref_x >= min_gap:
-            columns.append([line])
-            ref_x = cx
+    by_center = sorted(
+        ((ln.x + ln.width * 0.5, ln) for ln in lines),
+        key=lambda pair: pair[0],
+    )
+    centers: list[float] = []
+    for cx, _ln in by_center:
+        if not centers or cx - centers[-1] > 0.03:
+            centers.append(cx)
         else:
-            columns[-1].append(line)
-            ref_x = max(ref_x, cx)
-    return columns
+            centers[-1] = (centers[-1] + cx) * 0.5
+    if len(centers) == 1:
+        return [[ln for _, ln in by_center]]
+    col_centers: list[float] = [centers[0]]
+    for cx in centers[1:]:
+        if cx - col_centers[-1] >= min_gap:
+            col_centers.append(cx)
+        else:
+            col_centers[-1] = (col_centers[-1] + cx) * 0.5
+    columns: list[list[LayoutIrLine]] = [[] for _ in col_centers]
+    for cx, ln in by_center:
+        idx = min(range(len(col_centers)), key=lambda i: abs(cx - col_centers[i]))
+        columns[idx].append(ln)
+    return [col for col in columns if col]
 
 
 def _lines_column_major(lines: tuple[LayoutIrLine, ...]) -> tuple[LayoutIrLine, ...]:
@@ -182,13 +193,23 @@ def _lines_column_major(lines: tuple[LayoutIrLine, ...]) -> tuple[LayoutIrLine, 
     return tuple(out)
 
 
+def _is_full_width_line(line: LayoutIrLine) -> bool:
+    return line.width > 0.38
+
+
 def _lines_semantic_flow_order(
     lines: tuple[LayoutIrLine, ...], regions: tuple[_Region, ...]
 ) -> tuple[LayoutIrLine, ...]:
-    outside = tuple(ln for ln in lines if not _line_in_tables(ln, regions))
-    if len(_cluster_columns(outside)) >= 2:
-        return _lines_column_major(lines)
-    return tuple(sorted(lines, key=lambda ln: (ln.y, ln.x)))
+    usable = tuple(ln for ln in lines if not _line_in_tables(ln, regions))
+    wide = tuple(ln for ln in usable if _is_full_width_line(ln))
+    narrow = tuple(ln for ln in usable if not _is_full_width_line(ln))
+    ordered: list[LayoutIrLine] = []
+    ordered.extend(sorted(wide, key=lambda ln: (ln.y, ln.x)))
+    if len(_cluster_columns(narrow)) >= 2:
+        ordered.extend(_lines_column_major(narrow))
+    else:
+        ordered.extend(sorted(narrow, key=lambda ln: (ln.y, ln.x)))
+    return tuple(ordered)
 
 
 def _enrich_table(table: LayoutIrTable, page: LayoutIrPage) -> LayoutIrTable:
@@ -424,9 +445,6 @@ def _page_set_block(page: LayoutIrPage) -> str:
     margin = "margin: (x: 14mm, y: 14mm)"
     if w <= 0 or h <= 0:
         return f"#set page(paper: \"a4\", {margin})\n\n"
-    landscape = w > h * 1.02
-    if landscape:
-        return f"#set page(width: {w:.2f}pt, height: {h:.2f}pt, flipped: true, {margin})\n\n"
     portrait_a4 = abs(w - 595.28) < 2 and abs(h - 841.89) < 3
     if portrait_a4:
         return f"#set page(paper: \"a4\", {margin})\n\n"

@@ -8,6 +8,7 @@ import {
   textFromExtractionBlocks,
 } from '../../lib/extractionLayout';
 import { fetchDocumentLayoutTypst } from '../../lib/api';
+import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu';
@@ -149,7 +150,10 @@ export function ExtractedTextPanel({
     async (mode: 'exakt' | 'semantisch') => {
       if (!documentId) return;
       try {
-        const { typst, reconstructionReliable } = await fetchDocumentLayoutTypst(documentId, mode);
+        const { typst, reconstructionReliable, unreliableReason } = await fetchDocumentLayoutTypst(
+          documentId,
+          mode
+        );
         const blob = new Blob([typst], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -161,7 +165,7 @@ export function ExtractedTextPanel({
         window.setTimeout(() => URL.revokeObjectURL(url), 0);
         setExportMenuOpen(false);
         if (!reconstructionReliable) {
-          pushSuccess(t('documents.layoutExportTypstDegraded'));
+          pushSuccess(typstExportDegradedMessage(t, unreliableReason));
         }
       } catch {
         pushError(t('documents.layoutExportTypstFailed'));
