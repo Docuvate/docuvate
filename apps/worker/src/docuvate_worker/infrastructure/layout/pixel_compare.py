@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Rasterize PDF pages and compare original vs Typst reconstruction (SSIM + diff heatmap)."""
 
 from __future__ import annotations

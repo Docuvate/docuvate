@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Evaluate exact Typst layout reconstruction fidelity (SSIM) with graceful degradation."""
 
 from __future__ import annotations
