@@ -19,7 +19,8 @@
     "threads": "Conversations",
     "newThread": "New chat",
     "placeholder": "Ask about your documents…",
-    "send": "Send"
+    "send": "Send",
+    "bootstrapLead": "Ask a question about your documents. The first chat thread is created automatically."
   },
   "shell": {
     "globalSearch": "Global search",
@@ -554,6 +555,7 @@
       "typing": "Generating reply…",
       "typingAria": "Assistant is processing your message",
       "phaseRetrieving": "Searching the document for relevant passages…",
+      "phaseRetrievingLibrary": "Searching your documents for relevant passages…",
       "phaseGenerating": "Generating reply…",
       "phaseVerifying": "Verifying sources…",
       "sources": "Sources",

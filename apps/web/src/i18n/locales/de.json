@@ -19,7 +19,8 @@
     "threads": "Unterhaltungen",
     "newThread": "Neuer Chat",
     "placeholder": "Frage zu Ihren Dokumenten…",
-    "send": "Senden"
+    "send": "Senden",
+    "bootstrapLead": "Stellen Sie eine Frage zu Ihren Dokumenten. Der erste Chat wird automatisch angelegt."
   },
   "shell": {
     "globalSearch": "Globale Suche",
@@ -554,6 +555,7 @@
       "typing": "Antwort wird erstellt…",
       "typingAria": "Assistent verarbeitet Ihre Nachricht",
       "phaseRetrieving": "Suche passende Stellen im Dokument…",
+      "phaseRetrievingLibrary": "Suche passende Stellen in Ihren Dokumenten…",
       "phaseGenerating": "Antwort wird erstellt…",
       "phaseVerifying": "Quellen werden geprüft…",
       "sources": "Quellen",

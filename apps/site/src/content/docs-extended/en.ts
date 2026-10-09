@@ -200,7 +200,7 @@ export const docsExtendedEn: DocsExtendedContent = {
         id: 'chat',
         heading: 'Document chat',
         bullets: [
-          'Compose default: RAG over extracted text plus Ollama (for example `qwen2.5:3b` on CPU).',
+          'Compose default: RAG over extracted text plus Ollama (for example `qwen2.5:1.5b` on CPU).',
           'Donut/GPU paths are optional and enabled in the UI only with suitable hardware.',
           'No sending your files to cloud LLM vendors on the product path.',
         ],

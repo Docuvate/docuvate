@@ -9,16 +9,12 @@ import type {
   DocumentChatThreadRepository,
 } from '../../../shared/domain/ports.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
 
 const DEFAULT_THREAD_TITLE = 'Neuer Chat';
 
 function mapThreadRow(row: Record<string, unknown>): DocumentChatThreadEntity {
-  const documentIdsRaw = row['document_ids'];
-  const documentIds = Array.isArray(documentIdsRaw)
-    ? documentIdsRaw.map(String)
-    : documentIdsRaw != null
-      ? [String(documentIdsRaw)]
-      : [];
+  const documentIds = sanitizeChatThreadDocumentIds(row['document_ids']);
   const activeGenRaw = row['active_generation_status'];
   return {
     id: String(row['id']),
@@ -44,7 +40,10 @@ const THREAD_LIST_SELECT = `
          t.scope,
          t.created_at,
          t.updated_at,
-         array_agg(ctd.document_id ORDER BY ctd.linked_at) AS document_ids,
+         COALESCE(
+           array_remove(array_agg(ctd.document_id ORDER BY ctd.linked_at), NULL),
+           '{}'::uuid[]
+         ) AS document_ids,
          (
            SELECT m.content
            FROM chat_messages m

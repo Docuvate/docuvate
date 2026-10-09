@@ -219,7 +219,7 @@ services:
       WORKER_RAG_CONTEXT_TIMEOUT_MS: '120000'
       DOCUMENT_CHAT_GENERATION_CONCURRENCY: '1'
       DOCUVATE_AI_PROFILE: ${DOCUVATE_AI_PROFILE:-cpu-small}
-      RAG_RERANKER_GATE_MIN: '0.5'
+      RAG_RERANKER_GATE_MIN: '0.21'
       RAG_FUSION_GATE_MIN: '0.02'
       OTEL_SDK_DISABLED: 'true'
       NODE_ENV: production
@@ -281,7 +281,7 @@ services:
       PADDLE_OCR_LANG: german
       PADDLE_PREWARM_ON_START: ${PADDLE_PREWARM_ON_START:-0}
       DOCUVATE_AI_PROFILE: ${DOCUVATE_AI_PROFILE:-cpu-small}
-      DOCUVATE_RERANKER_MODEL: BAAI/bge-reranker-base
+      DOCUVATE_RERANKER_MODEL: BAAI/bge-reranker-v2-m3-int8
     volumes:
       - workermlcache:/var/lib/docuvate-ml
     healthcheck:

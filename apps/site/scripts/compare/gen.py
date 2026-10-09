@@ -226,7 +226,7 @@ PROSE = {
   "Tippfehler-tolerante Suche und Feldfilter wie betrag:12,50.",
   "Antworten mit geprüften Zitaten (Seite und Textstelle), ohne passende Quelle keine Antwort.",
  ],
- choose_them="Sie wollen ein bewährtes Archiv mit großer Community, brauchen Office/E-Mail-Verarbeitung, Workflows oder Chat über das ganze Archiv, oder Ihnen ist Stabilität wichtiger als neue Funktionen.",
+ choose_them="Sie wollen ein bewährtes Archiv mit großer Community, brauchen Office/E-Mail-Verarbeitung oder Workflows, oder Ihnen ist Stabilität wichtiger als neue Funktionen.",
  choose_us="Sie brauchen bestätigte Feldwerte für Buchhaltung oder Backoffice, wollen Dokumente headless per API in eigene Anwendungen bringen oder auf PostgreSQL/S3/Kubernetes betreiben, und Sie können mit einem jungen Projekt (0.1.0) leben.",
  migration="Docuvate hat eine Paperless-ngx-Verbindung (Import aus bestehenden Ablagen). Ein vollständiger Migrationsadapter steht laut Roadmap noch aus. Beide können parallel laufen.",
 ),

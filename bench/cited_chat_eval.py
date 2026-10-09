@@ -19,6 +19,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "apps" / "worker" / "src"))
+sys.path.insert(0, str(ROOT / "bench"))
+
+from cited_stream_preview import extract_readable_cited_answer_preview, looks_like_cited_answer_json
 
 ABSTENTION_SNIPPET = "nichts gefunden"
 
@@ -128,7 +131,8 @@ class ApiClient:
             headers["Cookie"] = self.cookie.split(";")[0]
         req = urllib.request.Request(url, headers=headers, method="GET")
         t0 = time.perf_counter()
-        first_ms: float | None = None
+        first_phase_ms: float | None = None
+        first_content_ms: float | None = None
         last_phase = ""
         final_status = "unknown"
         citation_count = 0
@@ -144,10 +148,16 @@ class ApiClient:
                 phase = msg.get("generationPhase")
                 if phase and phase != last_phase:
                     last_phase = str(phase)
-                    if first_ms is None:
-                        first_ms = now_ms
-                if msg.get("content") and first_ms is None:
-                    first_ms = now_ms
+                    if first_phase_ms is None:
+                        first_phase_ms = now_ms
+                content = str(msg.get("content") or "")
+                preview = (
+                    extract_readable_cited_answer_preview(content)
+                    if looks_like_cited_answer_json(content)
+                    else content.strip()
+                )
+                if preview and first_content_ms is None:
+                    first_content_ms = now_ms
                 if event.get("type") == "done":
                     final_status = str(msg.get("generationStatus", "done"))
                     content = str(msg.get("content", ""))
@@ -158,8 +168,11 @@ class ApiClient:
             citations = final_msg.get("citations") or []
             citation_count = len(citations)
         total_ms = (time.perf_counter() - t0) * 1000
+        ttft_ms = first_content_ms or first_phase_ms or total_ms
         return {
-            "ttft_ms": round(first_ms or total_ms, 2),
+            "ttft_ms": round(ttft_ms, 2),
+            "first_phase_ms": round(first_phase_ms or ttft_ms, 2),
+            "first_content_ms": round(first_content_ms or ttft_ms, 2),
             "total_ms": round(total_ms, 2),
             "final_status": final_status,
             "citation_count": citation_count,

@@ -19,6 +19,7 @@ import { fetchWorkerRagContext } from '../../../shared/infrastructure/chat/fetch
 import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
 import { DocumentChatGenerationCancelRegistry } from '../infrastructure/document-chat-generation-cancel.registry.js';
 import { CitedChatGenerationService } from '../../cited-chat/application/cited-chat-generation.service.js';
+import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
 
 export interface DocumentChatGenerationJobPayload {
   messageId: string;
@@ -60,8 +61,9 @@ export class RunDocumentChatGenerationUseCase {
       throw new NotFoundError('Chat thread');
     }
 
+    const threadDocumentIds = sanitizeChatThreadDocumentIds(thread.documentIds);
     const effectiveDocumentId =
-      documentId ?? (thread.documentIds.length === 1 ? thread.documentIds[0] : undefined);
+      documentId ?? (threadDocumentIds.length === 1 ? threadDocumentIds[0] : undefined);
     const doc =
       effectiveDocumentId != null
         ? await this.documents.findByIdForUser(effectiveDocumentId, userId)
@@ -115,11 +117,12 @@ export class RunDocumentChatGenerationUseCase {
           userMessage,
           documentIds:
             thread.scope === 'library'
-              ? thread.documentIds
+              ? threadDocumentIds
               : effectiveDocumentId
                 ? [effectiveDocumentId]
-                : thread.documentIds,
+                : threadDocumentIds,
           scope: thread.scope === 'library' ? 'library' : 'document',
+          shouldAbort: () => this.cancelRegistry.isCancelled(messageId),
         });
         return;
       }

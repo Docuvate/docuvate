@@ -200,7 +200,7 @@ export const docsExtendedDe: DocsExtendedContent = {
         id: 'chat',
         heading: 'Dokumenten-Chat',
         bullets: [
-          'Standard in Compose: RAG über erkannten Text plus Ollama (z. B. `qwen2.5:3b` auf CPU).',
+          'Standard in Compose: RAG über erkannten Text plus Ollama (z. B. `qwen2.5:1.5b` auf CPU).',
           'Donut/GPU-Pfade sind optional und in der UI nur bei passender Hardware freigeschaltet.',
           'Kein Versand Ihrer Dateien an Cloud-LLM-Anbieter im Produktpfad.',
         ],

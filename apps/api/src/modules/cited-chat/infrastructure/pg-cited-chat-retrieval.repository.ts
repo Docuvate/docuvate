@@ -10,6 +10,7 @@ import { reciprocalRankFusion, type RankedItem } from '../../search/domain/recip
 import { cosineSimilarity } from '../../search/domain/cosine-similarity.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
+import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 
 const TRGM_THRESHOLD = 0.32;
 
@@ -54,12 +55,10 @@ export class PgCitedChatRetrievalRepository {
       ...new Set([probe, ...tokenizeSearchQuery(trimmed).map(normalizeSearchText)]),
     ].filter((t) => t.length >= 3);
 
+    const scopedDocumentIds = sanitizeChatThreadDocumentIds(options?.documentIds ?? []);
     const docFilter =
-      options?.documentIds && options.documentIds.length > 0
-        ? `AND c.document_id = ANY($3::uuid[])`
-        : '';
-    const docParams =
-      options?.documentIds && options.documentIds.length > 0 ? [options.documentIds] : [];
+      scopedDocumentIds.length > 0 ? `AND c.document_id = ANY($3::uuid[])` : '';
+    const docParams = scopedDocumentIds.length > 0 ? [scopedDocumentIds] : [];
 
     const ftsPromise =
       probe.length >= 2

@@ -2761,6 +2761,58 @@ mark.global-search-mark {
   padding: 0 var(--dv-space-sm) var(--dv-space-xs);
 }
 
+/* Global library chat: fill main column, single scroll in .doc-chat-messages */
+.app-main:has(.global-chat-page) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.global-chat-page.page {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--dv-space-lg);
+  box-sizing: border-box;
+}
+
+.global-chat-page-header {
+  flex-shrink: 0;
+  margin-bottom: var(--dv-space-sm);
+}
+
+.global-chat-doc-chat {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.global-chat-page .doc-chat-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.global-chat-page .doc-chat-layout-split {
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  min-height: 0;
+}
+
+.global-chat-page .doc-chat-threads {
+  max-height: min(640px, calc(100dvh - 11rem));
+}
+
+.global-chat-page .global-chat-pane {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: min(640px, calc(100dvh - 11rem));
+}
+
 .doc-chat-log-anchor {
   height: 0;
   width: 100%;

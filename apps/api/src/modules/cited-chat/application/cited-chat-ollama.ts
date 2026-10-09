@@ -1,5 +1,10 @@
 import { buildOllamaChatBody } from '../../../shared/infrastructure/chat/ollama-chat-options.js';
-import { ollamaChatBaseUrl, ollamaChatModel, ollamaChatTimeoutMs } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
+import {
+  ollamaChatBaseUrl,
+  ollamaChatModel,
+  ollamaChatTimeoutMs,
+} from '../../../shared/infrastructure/chat/ollama-chat-request.js';
+import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
 
 export interface CitedClaimJson {
   text: string;
@@ -46,7 +51,11 @@ export function buildCitedChatSystemPrompt(passages: Array<{ label: string; text
 export async function requestCitedAnswerFromOllama(
   userMessage: string,
   systemPrompt: string,
-  history: Array<{ role: string; content: string }>
+  history: Array<{ role: string; content: string }>,
+  options?: {
+    onToken?: (partialJson: string) => void | Promise<void>;
+    shouldAbort?: () => boolean | Promise<boolean>;
+  }
 ): Promise<{ ok: true; parsed: CitedAnswerJson } | { ok: false; detail: string }> {
   const model = ollamaChatModel();
   const messages = [
@@ -54,6 +63,29 @@ export async function requestCitedAnswerFromOllama(
     ...history.slice(-2),
     { role: 'user', content: userMessage },
   ];
+
+  if (options?.onToken) {
+    const streamResult = await streamOllamaChat({
+      messages,
+      extraBody: { format: ANSWER_JSON_SCHEMA, think: false },
+      onToken: async (_token, fullText) => {
+        await options.onToken?.(fullText);
+      },
+      shouldAbort: options.shouldAbort ?? (() => false),
+    });
+    if ('failure' in streamResult) {
+      if (streamResult.failure.kind === 'aborted') {
+        return { ok: false, detail: 'cancelled' };
+      }
+      const detail =
+        streamResult.failure.kind === 'http_error'
+          ? `HTTP ${streamResult.failure.status}`
+          : streamResult.failure.kind;
+      return { ok: false, detail };
+    }
+    return parseCitedAnswerJson(streamResult.content);
+  }
+
   const body = {
     ...buildOllamaChatBody(model, messages, false),
     format: ANSWER_JSON_SCHEMA,
@@ -74,12 +106,22 @@ export async function requestCitedAnswerFromOllama(
     if (!raw) {
       return { ok: false, detail: 'empty model response' };
     }
+    return parseCitedAnswerJson(raw);
+  } catch (err) {
+    return { ok: false, detail: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+function parseCitedAnswerJson(
+  raw: string
+): { ok: true; parsed: CitedAnswerJson } | { ok: false; detail: string } {
+  try {
     const parsed = JSON.parse(raw) as CitedAnswerJson;
     if (!Array.isArray(parsed.claims)) {
       return { ok: false, detail: 'invalid claims array' };
     }
     return { ok: true, parsed };
-  } catch (err) {
-    return { ok: false, detail: err instanceof Error ? err.message : String(err) };
+  } catch {
+    return { ok: false, detail: 'invalid json response' };
   }
 }

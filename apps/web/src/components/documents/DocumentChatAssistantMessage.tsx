@@ -1,4 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { CHAT_GENERATION_MAX_WAIT_SEC } from '../../lib/chatGenerationLimits';
+import { chatGenerationWaitStartMs } from '../../lib/chatGenerationWaitStart';
+import {
+  extractReadableCitedAnswerPreview,
+  looksLikeCitedAnswerJson,
+} from '../../lib/extractCitedStreamPreview';
 import { useTranslation } from 'react-i18next';
 import type { ChatMessageCitationDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
 import { formatChatGenerationError, toUserFacingChatGenerationError } from '../../lib/apiErrors';
@@ -10,6 +16,8 @@ interface DocumentChatAssistantMessageProps {
   onRetry: (messageId: string) => void;
   onCancel: (messageId: string) => void;
   retryBusy: boolean;
+  /** Library/global chat uses broader retrieval copy. */
+  chatScope?: 'document' | 'library';
   renderCitationLink?: (citation: ChatMessageCitationDto) => React.ReactNode;
 }
 
@@ -24,11 +32,13 @@ export function DocumentChatAssistantMessage({
   onRetry,
   onCancel,
   retryBusy,
+  chatScope = 'document',
   renderCitationLink,
 }: DocumentChatAssistantMessageProps) {
   const { t } = useTranslation();
   const status = message.generationStatus ?? 'done';
   const [elapsed, setElapsed] = useState(0);
+  const timedOutRef = useRef(false);
 
   const isActive = status === 'pending' || status === 'streaming';
   const isFailed = status === 'failed';
@@ -37,19 +47,41 @@ export function DocumentChatAssistantMessage({
     if (!isActive) {
       return undefined;
     }
-    const started = Date.parse(message.createdAt);
     const tick = () => {
+      const started = chatGenerationWaitStartMs(message);
+      if (started == null) {
+        setElapsed(0);
+        return;
+      }
       setElapsed(Math.max(0, Math.floor((Date.now() - started) / 1000)));
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [isActive, message.createdAt]);
+  }, [isActive, message.createdAt, message.updatedAt, message.generationPhase, message.generationStatus]);
+
+  useEffect(() => {
+    timedOutRef.current = false;
+  }, [message.id]);
+
+  useEffect(() => {
+    if (!isActive || chatGenerationWaitStartMs(message) == null) {
+      return;
+    }
+    if (elapsed < CHAT_GENERATION_MAX_WAIT_SEC || timedOutRef.current) {
+      return;
+    }
+    timedOutRef.current = true;
+    onCancel(message.id);
+  }, [elapsed, isActive, message, onCancel]);
 
   let statusLine: string | null = null;
   if (isActive) {
     if (message.generationPhase === 'retrieving' || status === 'pending') {
-      statusLine = t('documents.documentChat.phaseRetrieving');
+      statusLine =
+        chatScope === 'library'
+          ? t('documents.documentChat.phaseRetrievingLibrary')
+          : t('documents.documentChat.phaseRetrieving');
     } else if (message.generationPhase === 'verifying') {
       statusLine = t('documents.documentChat.phaseVerifying');
     } else {
@@ -58,6 +90,11 @@ export function DocumentChatAssistantMessage({
   }
 
   const generationError = toUserFacingChatGenerationError(message.errorCode);
+
+  const displayContent =
+    message.content && looksLikeCitedAnswerJson(message.content)
+      ? extractReadableCitedAnswerPreview(message.content)
+      : message.content;
 
   return (
     <li
@@ -83,7 +120,7 @@ export function DocumentChatAssistantMessage({
         </div>
       ) : null}
 
-      {message.content ? <p className="doc-chat-assistant-content">{message.content}</p> : null}
+      {displayContent ? <p className="doc-chat-assistant-content">{displayContent}</p> : null}
 
       {message.citations && message.citations.length > 0 ? (
         <div className="doc-chat-sources">

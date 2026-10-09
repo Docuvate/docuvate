@@ -1,0 +1,102 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { randomUUID } from 'node:crypto';
+import type { APIRequestContext } from '@playwright/test';
+
+const pdfPath = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
+
+export type CitedChatFixtureCreds = {
+  email: string;
+  password: string;
+  invoiceDocId: string;
+  taxDocId: string;
+};
+
+let sharedProvision: Promise<CitedChatFixtureCreds> | null = null;
+
+export function provisionCitedChatLibraryOnce(
+  request: APIRequestContext,
+  opts: { apiBase: string; webOrigin: string }
+): Promise<CitedChatFixtureCreds> {
+  if (!sharedProvision) {
+    sharedProvision = provisionCitedChatLibrary(request, opts);
+  }
+  return sharedProvision;
+}
+
+async function signUpAndIn(
+  request: APIRequestContext,
+  apiBase: string,
+  webOrigin: string
+): Promise<{ email: string; password: string }> {
+  const email = `e2e-cited-${randomUUID().slice(0, 8)}@fixture.docuvate.test`;
+  const password = 'E2eCitedChatFixture1!';
+  const headers = { origin: webOrigin };
+  await request.post(`${apiBase}/api/auth/sign-up/email`, {
+    headers,
+    data: { email, password, name: 'E2E Cited Chat' },
+  });
+  const login = await request.post(`${apiBase}/api/auth/sign-in/email`, {
+    headers,
+    data: { email, password },
+  });
+  if (!login.ok()) {
+    throw new Error(`sign-in failed: ${login.status()} ${await login.text()}`);
+  }
+  return { email, password };
+}
+
+async function uploadPdf(request: APIRequestContext, apiBase: string, filename: string) {
+  const res = await request.post(`${apiBase}/v1/documents`, {
+    multipart: {
+      file: {
+        name: filename,
+        mimeType: 'application/pdf',
+        buffer: fs.readFileSync(pdfPath),
+      },
+    },
+  });
+  if (!res.ok()) {
+    throw new Error(`upload ${filename}: ${res.status()} ${await res.text()}`);
+  }
+  const body = (await res.json()) as { id: string };
+  return body.id;
+}
+
+function block(text: string) {
+  return [
+    {
+      page: 1,
+      x: 0.1,
+      y: 0.1,
+      width: 0.8,
+      height: 0.05,
+      text,
+      blockIndex: 0,
+    },
+  ];
+}
+
+export async function provisionCitedChatLibrary(
+  request: APIRequestContext,
+  opts: { apiBase: string; webOrigin: string }
+): Promise<CitedChatFixtureCreds> {
+  const creds = await signUpAndIn(request, opts.apiBase, opts.webOrigin);
+  const invoiceDocId = await uploadPdf(request, opts.apiBase, 'rechnung-nordwind.pdf');
+  await request.patch(`${opts.apiBase}/v1/documents/${invoiceDocId}`, {
+    data: {
+      title: 'Rechnung Nordwind GmbH',
+      extractionBlocks: block(
+        'Rechnung Nordwind GmbH. Gesamtsumme: 1.234,56 EUR. IBAN DE89370400440532013000.'
+      ),
+    },
+  });
+  const taxDocId = await uploadPdf(request, opts.apiBase, 'hundesteuer.pdf');
+  await request.patch(`${opts.apiBase}/v1/documents/${taxDocId}`, {
+    data: {
+      title: 'Bescheid Hundesteuer',
+      extractionBlocks: block('Hundesteuer Stadt Muster. Jahresgebühr: 120,00 EUR.'),
+    },
+  });
+  return { ...creds, invoiceDocId, taxDocId };
+}

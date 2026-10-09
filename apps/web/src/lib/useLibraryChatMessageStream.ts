@@ -4,6 +4,7 @@ import type {
   DocumentChatMessageStreamEvent,
 } from '@docuvate/contracts';
 import { apiBaseUrl, authHeaders, listLibraryChatThreadMessages } from './api';
+import { CHAT_GENERATION_MAX_WAIT_SEC } from './chatGenerationLimits';
 
 type MessageUpdater = (message: DocumentChatMessageRecordDto) => void;
 
@@ -46,6 +47,7 @@ export function useLibraryChatMessageStream(_threadId: string | null, onUpdate: 
       const url = `${apiBaseUrl()}/chat/threads/${activeThreadId}/messages/${messageId}/stream`;
       const controller = new AbortController();
       abortRef.current = controller;
+      const startedAt = Date.now();
 
       void (async () => {
         try {
@@ -76,9 +78,20 @@ export function useLibraryChatMessageStream(_threadId: string | null, onUpdate: 
           }
         } catch {
           pollingRef.current = setInterval(() => {
+            if (Date.now() - startedAt > CHAT_GENERATION_MAX_WAIT_SEC * 1000) {
+              stop();
+              return;
+            }
             void listLibraryChatThreadMessages(activeThreadId).then((messages) => {
               const hit = messages.find((m) => m.id === messageId);
               if (hit) onUpdate(hit);
+              if (
+                hit &&
+                hit.generationStatus !== 'pending' &&
+                hit.generationStatus !== 'streaming'
+              ) {
+                stop();
+              }
             });
           }, 800);
         }

@@ -19,6 +19,19 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Spinner } from '../components/ui/Spinner';
 
+function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string {
+  const date = new Date(thread.updatedAt);
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+  return date.toLocaleString(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 function isGenerationActive(message: DocumentChatMessageRecordDto): boolean {
   return (
     message.role === 'assistant' &&
@@ -27,7 +40,7 @@ function isGenerationActive(message: DocumentChatMessageRecordDto): boolean {
 }
 
 export function GlobalChatPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [threads, setThreads] = useState<DocumentChatThreadDto[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DocumentChatMessageRecordDto[]>([]);
@@ -37,8 +50,11 @@ export function GlobalChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryBusy, setRetryBusy] = useState(false);
   const logEndRef = useRef<HTMLDivElement | null>(null);
+  const streamTargetRef = useRef<string | null>(null);
 
   const generationInProgress = useMemo(() => messages.some(isGenerationActive), [messages]);
+  const hasThreads = threads.length > 0;
+  const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
 
   const upsertMessage = useCallback((next: DocumentChatMessageRecordDto) => {
     setMessages((prev) => {
@@ -55,6 +71,25 @@ export function GlobalChatPage() {
   const { connect: connectStream, stop: stopStream } = useLibraryChatMessageStream(
     activeThreadId,
     upsertMessage
+  );
+
+  const refreshThreads = useCallback(async (selectThreadId?: string) => {
+    const list = await listLibraryChatThreads();
+    setThreads(list);
+    if (selectThreadId) {
+      setActiveThreadId(selectThreadId);
+    }
+  }, []);
+
+  const attachStreamIfNeeded = useCallback(
+    (rows: DocumentChatMessageRecordDto[]) => {
+      const active = [...rows].reverse().find(isGenerationActive);
+      if (active && activeThreadId && streamTargetRef.current !== active.id) {
+        streamTargetRef.current = active.id;
+        connectStream(activeThreadId, active.id);
+      }
+    },
+    [activeThreadId, connectStream]
   );
 
   useEffect(() => {
@@ -84,13 +119,16 @@ export function GlobalChatPage() {
   useEffect(() => {
     if (!activeThreadId) {
       setMessages([]);
+      streamTargetRef.current = null;
       return;
     }
     let cancelled = false;
     setLoadingMessages(true);
     void listLibraryChatThreadMessages(activeThreadId)
       .then((list) => {
-        if (!cancelled) setMessages(list);
+        if (cancelled) return;
+        setMessages(list);
+        attachStreamIfNeeded(list);
       })
       .catch((err) => {
         if (!cancelled) setError(formatUserFacingError(err, 'common.error'));
@@ -102,16 +140,41 @@ export function GlobalChatPage() {
       cancelled = true;
       stopStream();
     };
-  }, [activeThreadId, stopStream]);
+  }, [activeThreadId, attachStreamIfNeeded, stopStream]);
+
+  useEffect(() => {
+    if (!generationInProgress) {
+      return undefined;
+    }
+    const id = setInterval(() => {
+      void refreshThreads(activeThreadId ?? undefined);
+    }, 2500);
+    return () => clearInterval(id);
+  }, [generationInProgress, refreshThreads, activeThreadId]);
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages]);
 
+  async function onNewThread() {
+    setError(null);
+    try {
+      const thread = await createLibraryChatThread({});
+      setThreads((prev) => [thread, ...prev]);
+      setActiveThreadId(thread.id);
+      setMessages([]);
+      streamTargetRef.current = null;
+    } catch (err) {
+      setError(formatUserFacingError(err, 'documents.documentChat.errorNewThread'));
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     const trimmed = input.trim();
-    if (!trimmed || generationInProgress) return;
+    if (!trimmed || generationInProgress || loadingMessages) {
+      return;
+    }
 
     setError(null);
     try {
@@ -122,109 +185,215 @@ export function GlobalChatPage() {
         setThreads((prev) => [thread, ...prev]);
         setActiveThreadId(threadId);
       }
-      const result = await sendLibraryChatThreadMessage(threadId, { message: trimmed });
+      const sendThreadId = threadId;
+      if (!sendThreadId) {
+        return;
+      }
+      const result = await sendLibraryChatThreadMessage(sendThreadId, { message: trimmed });
       setInput('');
       setMessages((prev) =>
         mergeThreadMessagesAfterSend(prev, '', result.userMessage, result.assistantMessage)
       );
       if (result.asyncGeneration) {
-        connectStream(threadId, result.assistantMessage.id);
+        streamTargetRef.current = result.assistantMessage.id;
+        connectStream(sendThreadId, result.assistantMessage.id);
       }
+      await refreshThreads(sendThreadId);
     } catch (err) {
       setError(formatUserFacingError(err, 'common.error'));
     }
   }
 
+  const showBootstrapEmpty =
+    !loadingThreads && !hasThreads && !loadingMessages && messages.length === 0;
+  const showThreadEmpty =
+    hasThreads &&
+    !loadingMessages &&
+    messages.length === 0 &&
+    !generationInProgress &&
+    activeThreadId != null;
+
   return (
     <div className="page global-chat-page" data-ux="page">
-      <header className="page-header">
-        <h1>{t('globalChat.title')}</h1>
-        <p className="muted">{t('globalChat.subtitle')}</p>
+      <header className="page-header global-chat-page-header">
+        <div>
+          <h1 id="global-chat-heading" data-ux="page-title">{t('globalChat.title')}</h1>
+          <p className="muted">{t('globalChat.subtitle')}</p>
+        </div>
       </header>
 
       {error ? (
         <p className="error" role="alert">{error}</p>
       ) : null}
 
-      <div className="global-chat-layout">
-        <aside className="global-chat-threads" aria-label={t('globalChat.threads')}>
-          {loadingThreads ? <Spinner size="sm" label={t('common.loading')} /> : null}
-          <Button type="button" variant="secondary" onClick={() => setActiveThreadId(null)}>
-            {t('globalChat.newThread')}
-          </Button>
-          <ul className="global-chat-thread-list">
-            {threads.map((thread) => (
-              <li key={thread.id}>
-                <button
+      <section className="doc-chat global-chat-doc-chat" aria-labelledby="global-chat-heading">
+        <div
+          className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}`}
+        >
+          {hasThreads ? (
+            <aside className="doc-chat-threads" aria-label={t('globalChat.threads')}>
+              <div className="doc-chat-threads-head">
+                <span className="doc-chat-threads-label">{t('globalChat.threads')}</span>
+                <Button
                   type="button"
-                  className={`global-chat-thread-btn${thread.id === activeThreadId ? ' active' : ''}`}
-                  onClick={() => setActiveThreadId(thread.id)}
+                  variant="secondary"
+                  className="doc-chat-new-thread"
+                  onClick={() => void onNewThread()}
                 >
-                  {thread.title}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
+                  {t('globalChat.newThread')}
+                </Button>
+              </div>
+              {loadingThreads ? (
+                <p className="muted doc-chat-threads-loading" role="status">
+                  <Spinner size="sm" label={t('common.loading')} />
+                  <span>{t('common.loading')}</span>
+                </p>
+              ) : null}
+              <ul className="doc-chat-thread-list">
+                {threads.map((thread) => {
+                  const selected = thread.id === activeThreadId;
+                  const threadBusy =
+                    thread.activeGenerationStatus === 'pending' ||
+                    thread.activeGenerationStatus === 'streaming';
+                  return (
+                    <li key={thread.id}>
+                      <button
+                        type="button"
+                        className={`doc-chat-thread-item${selected ? ' active' : ''}`}
+                        aria-current={selected ? 'true' : undefined}
+                        onClick={() => setActiveThreadId(thread.id)}
+                      >
+                        <span className="doc-chat-thread-title-row">
+                          <span className="doc-chat-thread-title">{thread.title}</span>
+                          {threadBusy ? (
+                            <Spinner
+                              size="sm"
+                              className="doc-chat-thread-status"
+                              label={t('documents.documentChat.threadGenerating')}
+                            />
+                          ) : null}
+                        </span>
+                        {thread.lastMessagePreview ? (
+                          <span className="doc-chat-thread-preview">{thread.lastMessagePreview}</span>
+                        ) : null}
+                        <span className="doc-chat-thread-meta">
+                          {formatThreadMeta(thread, dateLocale)}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </aside>
+          ) : null}
 
-        <section className="global-chat-panel doc-chat-panel">
-          {loadingMessages ? <Spinner size="md" label={t('common.loading')} /> : null}
-          <ul className="doc-chat-log">
-            {messages.map((message) =>
-              message.role === 'assistant' ? (
-                <DocumentChatAssistantMessage
-                  key={message.id}
-                  message={message}
-                  onRetry={async (messageId) => {
-                    if (!activeThreadId) return;
-                    setRetryBusy(true);
-                    try {
-                      const next = await retryLibraryChatMessage(activeThreadId, messageId);
-                      upsertMessage(next);
-                      connectStream(activeThreadId, messageId);
-                    } finally {
-                      setRetryBusy(false);
-                    }
-                  }}
-                  onCancel={async (messageId) => {
-                    if (!activeThreadId) return;
-                    await cancelLibraryChatMessage(activeThreadId, messageId);
-                  }}
-                  retryBusy={retryBusy}
-                  renderCitationLink={(citation) => (
-                    <Link
-                      key={citation.ordinal}
-                      to={routes.document(citation.documentId)}
-                      state={{ highlightBlocks: citation.blocks, citationPage: citation.page }}
-                      className="doc-chat-citation-chip"
-                    >
-                      [{citation.ordinal}]
-                    </Link>
-                  )}
+          <div className="doc-chat-conversation">
+            <div className="doc-chat-pane global-chat-pane">
+              <div className="doc-chat-messages">
+                {loadingThreads && !hasThreads ? (
+                  <p className="muted doc-chat-messages-loading" role="status">
+                    <Spinner size="sm" label={t('common.loading')} />
+                    <span>{t('common.loading')}</span>
+                  </p>
+                ) : null}
+
+                {loadingMessages ? (
+                  <p className="muted doc-chat-messages-loading" role="status">
+                    <Spinner size="sm" label={t('documents.documentChat.messagesLoading')} />
+                    <span>{t('documents.documentChat.messagesLoading')}</span>
+                  </p>
+                ) : null}
+
+                {showBootstrapEmpty ? (
+                  <div className="doc-chat-empty-state doc-chat-empty-state-bootstrap">
+                    <p className="muted doc-chat-empty-lead">{t('globalChat.bootstrapLead')}</p>
+                    <p className="muted doc-chat-empty-hint">{t('globalChat.placeholder')}</p>
+                  </div>
+                ) : null}
+
+                {showThreadEmpty ? (
+                  <div className="doc-chat-empty-state doc-chat-empty-state-thread">
+                    <p className="muted doc-chat-empty-lead">{t('documents.documentChat.threadEmptyLead')}</p>
+                  </div>
+                ) : null}
+
+                {messages.length > 0 ? (
+                  <ul className="doc-chat-log" aria-live="polite">
+                    {messages.map((message) =>
+                      message.role === 'assistant' ? (
+                        <DocumentChatAssistantMessage
+                          key={message.id}
+                          message={message}
+                          chatScope="library"
+                          onRetry={async (messageId) => {
+                            if (!activeThreadId) return;
+                            setRetryBusy(true);
+                            try {
+                              const next = await retryLibraryChatMessage(activeThreadId, messageId);
+                              upsertMessage(next);
+                              streamTargetRef.current = messageId;
+                              connectStream(activeThreadId, messageId);
+                            } finally {
+                              setRetryBusy(false);
+                            }
+                          }}
+                          onCancel={async (messageId) => {
+                            if (!activeThreadId) return;
+                            await cancelLibraryChatMessage(activeThreadId, messageId);
+                          }}
+                          retryBusy={retryBusy}
+                          renderCitationLink={(citation) => (
+                            <Link
+                              key={citation.ordinal}
+                              to={routes.document(citation.documentId)}
+                              state={{ highlightBlocks: citation.blocks, citationPage: citation.page }}
+                              className="doc-chat-citation-chip"
+                            >
+                              [{citation.ordinal}]
+                            </Link>
+                          )}
+                        />
+                      ) : (
+                        <li key={message.id} className="doc-chat-bubble doc-chat-user">
+                          <span className="doc-chat-role">{t('documents.documentChat.roleUser')}</span>
+                          <p>{message.content}</p>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                ) : null}
+
+                <div ref={logEndRef} className="doc-chat-log-anchor" aria-hidden="true" />
+              </div>
+
+              <form className="doc-chat-composer" onSubmit={(e) => void onSubmit(e)}>
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder={t('globalChat.placeholder')}
+                  disabled={generationInProgress || loadingMessages}
+                  aria-label={t('globalChat.placeholder')}
                 />
-              ) : (
-                <li key={message.id} className="doc-chat-bubble doc-chat-user">
-                  <span className="doc-chat-role">{t('documents.documentChat.roleUser')}</span>
-                  <p>{message.content}</p>
-                </li>
-              )
-            )}
-          </ul>
-          <div ref={logEndRef} />
-          <form className="doc-chat-compose" onSubmit={onSubmit}>
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={t('globalChat.placeholder')}
-              disabled={generationInProgress}
-              aria-label={t('globalChat.placeholder')}
-            />
-            <Button type="submit" disabled={generationInProgress || !input.trim()}>
-              {t('globalChat.send')}
-            </Button>
-          </form>
-        </section>
-      </div>
+                <Button
+                  type="submit"
+                  className="doc-chat-submit"
+                  disabled={generationInProgress || loadingMessages || !input.trim()}
+                  aria-busy={generationInProgress}
+                >
+                  {generationInProgress ? (
+                    <>
+                      <Spinner size="sm" tone="onPrimary" label={t('documents.documentChat.sending')} />
+                      <span>{t('documents.documentChat.sending')}</span>
+                    </>
+                  ) : (
+                    t('globalChat.send')
+                  )}
+                </Button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
