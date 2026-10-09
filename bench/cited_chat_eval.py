@@ -3,6 +3,9 @@
 
 Prints JSON with platform, thread env vars, medians (TTFT + total), and per-question runs.
 Does not commit bench/cited-chat-eval-latest.json (gitignored).
+
+When the API runs with DOCUVATE_CITED_CHAT_BENCH_STATS=1, rejected-claim counts are
+returned in assistant message error_detail as JSON (bench only).
 """
 
 from __future__ import annotations

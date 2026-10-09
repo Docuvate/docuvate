@@ -17,6 +17,7 @@ import { SendDocumentChatThreadMessageUseCase } from './application/send-documen
 import { RunDocumentChatGenerationUseCase } from './application/run-document-chat-generation.use-case.js';
 import { DocumentChatGenerationQueueService } from './infrastructure/document-chat-generation-queue.service.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
+import { DocumentChatGenerationActiveRegistry } from './infrastructure/document-chat-generation-active.registry.js';
 import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-chat-generation-cancel.registry.js';
 import { CancelDocumentChatGenerationUseCase } from './application/cancel-document-chat-generation.use-case.js';
 import { RetryDocumentChatMessageUseCase } from './application/retry-document-chat-message.use-case.js';
@@ -71,6 +72,7 @@ import { ChatInfrastructureModule } from '../chat-infrastructure/chat-infrastruc
     RunDocumentChatGenerationUseCase,
     DocumentChatGenerationQueueService,
     StaleChatGenerationReconcileService,
+    DocumentChatGenerationActiveRegistry,
     DocumentChatGenerationCancelRegistry,
     CancelDocumentChatGenerationUseCase,
     RetryDocumentChatMessageUseCase,

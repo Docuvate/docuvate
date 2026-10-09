@@ -497,6 +497,8 @@ export interface DocumentChatMessageGenerationPatch {
   generationPhase?: DocumentChatGenerationPhase | null;
   errorCode?: string | null;
   errorDetail?: string | null;
+  /** When true, terminal status updates apply only if the message is still in-flight. */
+  finalizeOnlyIfInFlight?: boolean;
 }
 
 export interface DocumentChatThreadRepository {
@@ -532,7 +534,9 @@ export interface DocumentChatThreadRepository {
   touchThread(threadId: string): Promise<void>;
   updateTitleIfDefault(threadId: string, title: string): Promise<void>;
   /** Mark pending/streaming assistant messages older than maxAgeMs as failed (generation_timeout). */
-  failStaleAssistantGenerations(maxAgeMs: number): Promise<number>;
+  listInFlightAssistantMessageIdsOlderThan(maxAgeMs: number): Promise<string[]>;
+  failAssistantGenerationsByIds(messageIds: string[]): Promise<number>;
+  touchMessageGenerationHeartbeat(messageId: string): Promise<void>;
 }
 
 export interface IdentityProviderPort {

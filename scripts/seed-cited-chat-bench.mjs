@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto';
 /**
  * Seeds the E2E smoke user with German cited-chat bench documents (ADR 024).
  * Idempotent: purges prior documents for the user, then inserts four fixtures.
+ * Local / compose-smoke helper (FTS chunks, no embeddings). Playwright cited-chat
+ * tests use provisionCitedChatLibraryOnce instead.
  */
 const DATABASE_URL =
   process.env.DATABASE_URL ?? 'postgresql://docuvate:docuvate@127.0.0.1:5433/docuvate';

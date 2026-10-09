@@ -39,7 +39,7 @@ export function buildCitedChatSystemPrompt(passages: Array<{ label: string; text
     'Jeder claim: text = kurzer Antwortsatz auf Deutsch; source = exakt das Quellenlabel (z. B. S1); quote = wörtliches Zitat aus dieser Quelle, höchstens 10 Wörter, Zeichen für Zeichen wie im Text (keine Paraphrase).',
     'Erfinde nichts. Fehlen passende Quellen, gib "claims":[] zurück.',
     'Beispiel:',
-    '{"claims":[{"text":"Die Gesamtsumme beträgt 1.234,56 EUR.","source":"S1","quote":"Gesamtsumme: 1.234,56 EUR"}]}',
+    '{"claims":[{"text":"Die Miete ist bis zum 3. Werktag fällig.","source":"S1","quote":"bis zum 3. Werktag"}]}',
     'Quellen:',
     blocks || '(keine)',
   ].join('\n');

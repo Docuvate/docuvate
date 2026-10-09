@@ -34,7 +34,7 @@ describe('verifyCitedClaims', () => {
         {
           text: 'Miete bis zum 3. Werktag fällig.',
           source: 'S1',
-          quote: 'Miete bis 3 Werktag',
+          quote: 'bis zum 3. Werktag',
         },
       ],
       top,

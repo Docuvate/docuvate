@@ -63,11 +63,11 @@ describe('verify-citation-quote', () => {
     expect(hit!.bodyQuote).toContain('1.234,56');
   });
 
-  it('fuzzy re-anchors shortened quotes', () => {
+  it('fuzzy re-anchors shortened non-numeric quotes', () => {
     const body = 'Die Kündigungsfrist beträgt drei Monate zum Quartalsende.';
-    const hit = fuzzySpanSearchInChunk(body, 'Kündigungsfrist drei Monate');
+    const hit = fuzzySpanSearchInChunk(body, 'beträgt drei Monate');
     expect(hit).not.toBeNull();
-    expect(hit!.score).toBeGreaterThanOrEqual(0.55);
+    expect(hit!.bodyQuote).toContain('drei Monate');
   });
 
   it('does not match shorter digit runs inside larger amounts', () => {

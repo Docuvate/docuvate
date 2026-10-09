@@ -1,3 +1,9 @@
+import {
+  extractNumericTokens,
+  fuzzyWordsMatch,
+  numericTokensPresentInText,
+} from './quote-numeric-consistency.js';
+
 const QUOTE_WORD_LIMIT = 10;
 
 export function normalizeForQuoteMatch(text: string): string {
@@ -194,24 +200,15 @@ export function findQuoteInChunk(
 }
 
 function significantWords(text: string): string[] {
-  return normalizeForQuoteMatch(text)
+  return normalizeForQuoteMatch(truncateQuoteWords(text))
     .split(' ')
-    .filter((w) => w.length >= 2);
+    .filter((w) => w.length >= 1);
 }
 
-/**
- * Fuzzy sliding-window match when the model paraphrased or shortened the quote.
- */
-export function fuzzySpanSearchInChunk(
-  chunkBody: string,
-  needleText: string
-): QuoteSpanMatch | null {
-  const words = significantWords(truncateQuoteWords(needleText));
-  if (words.length === 0) {
-    return null;
-  }
-  const bodyMap = buildNormalizedBodyMap(chunkBody);
-  const bodyWords: Array<{ word: string; normStart: number; normEnd: number }> = [];
+function tokenizeBodyWords(
+  bodyMap: NormalizedBodyMap
+): Array<{ raw: string; normStart: number; normEnd: number }> {
+  const bodyWords: Array<{ raw: string; normStart: number; normEnd: number }> = [];
   let i = 0;
   while (i < bodyMap.normalized.length) {
     while (i < bodyMap.normalized.length && bodyMap.normalized[i] === ' ') {
@@ -225,42 +222,23 @@ export function fuzzySpanSearchInChunk(
       i += 1;
     }
     bodyWords.push({
-      word: bodyMap.normalized.slice(start, i),
+      raw: bodyMap.normalized.slice(start, i),
       normStart: start,
       normEnd: i,
     });
   }
-  if (bodyWords.length === 0) {
-    return null;
-  }
+  return bodyWords;
+}
 
-  const windowSize = Math.min(Math.max(words.length, 3), 12);
-  let best: { score: number; startWord: number; endWord: number } | null = null;
-
-  for (let start = 0; start < bodyWords.length; start += 1) {
-    const end = Math.min(bodyWords.length, start + windowSize);
-    if (end - start < Math.min(3, words.length)) {
-      continue;
-    }
-    const window = bodyWords.slice(start, end).map((w) => w.word);
-    let hits = 0;
-    for (const w of words) {
-      if (window.some((bw) => bw.includes(w) || w.includes(bw))) {
-        hits += 1;
-      }
-    }
-    const score = hits / words.length;
-    if (!best || score > best.score) {
-      best = { score, startWord: start, endWord: end - 1 };
-    }
-  }
-
-  if (!best || best.score < 0.55) {
-    return null;
-  }
-
-  const normStart = bodyWords[best.startWord].normStart;
-  const normEnd = bodyWords[best.endWord].normEnd;
+function sliceBodyWordsToQuote(
+  chunkBody: string,
+  bodyMap: NormalizedBodyMap,
+  bodyWords: Array<{ raw: string; normStart: number; normEnd: number }>,
+  firstIdx: number,
+  lastIdx: number
+): QuoteSpanMatch | null {
+  const normStart = bodyWords[firstIdx].normStart;
+  const normEnd = bodyWords[lastIdx].normEnd;
   const startBodyIndex = bodyMap.bodyIndexAt[normStart];
   const endBodyIndex = bodyMap.bodyIndexAt[normEnd - 1];
   if (startBodyIndex === undefined || endBodyIndex === undefined) {
@@ -273,8 +251,85 @@ export function fuzzySpanSearchInChunk(
     charEnd,
     bodyQuote,
     method: 'fuzzy',
-    score: best.score,
+    score: 1,
   };
+}
+
+/**
+ * Ordered, contiguous fuzzy match: non-numeric words may differ by <=1 edit; numeric tokens must match exactly.
+ */
+export function fuzzySpanSearchInChunk(
+  chunkBody: string,
+  needleText: string
+): QuoteSpanMatch | null {
+  const needleWords = significantWords(needleText);
+  if (needleWords.length === 0) {
+    return null;
+  }
+  const bodyMap = buildNormalizedBodyMap(chunkBody);
+  const bodyWords = tokenizeBodyWords(bodyMap);
+  if (bodyWords.length === 0) {
+    return null;
+  }
+
+  for (let start = 0; start < bodyWords.length; start += 1) {
+    let bwIdx = start;
+    const matchedIndices: number[] = [];
+    let allMatched = true;
+    for (const nw of needleWords) {
+      while (bwIdx < bodyWords.length && !fuzzyWordsMatch(nw, bodyWords[bwIdx].raw)) {
+        bwIdx += 1;
+      }
+      if (bwIdx >= bodyWords.length) {
+        allMatched = false;
+        break;
+      }
+      matchedIndices.push(bwIdx);
+      bwIdx += 1;
+    }
+    if (!allMatched || matchedIndices.length !== needleWords.length) {
+      continue;
+    }
+    const contiguous = matchedIndices.every(
+      (idx, i) => i === 0 || idx === matchedIndices[i - 1] + 1
+    );
+    if (!contiguous) {
+      continue;
+    }
+    const hit = sliceBodyWordsToQuote(
+      chunkBody,
+      bodyMap,
+      bodyWords,
+      matchedIndices[0],
+      matchedIndices[matchedIndices.length - 1]
+    );
+    if (!hit) {
+      continue;
+    }
+    const quoteNums = extractNumericTokens(needleText);
+    if (!numericTokensPresentInText(quoteNums, hit.bodyQuote)) {
+      continue;
+    }
+    return hit;
+  }
+  return null;
+}
+
+export function validateMatchedSpanNumbers(input: {
+  quote: string;
+  claimText: string;
+  bodyQuote: string;
+  chunkBody: string;
+}): boolean {
+  const quoteNums = extractNumericTokens(input.quote);
+  if (!numericTokensPresentInText(quoteNums, input.bodyQuote)) {
+    return false;
+  }
+  const claimNums = extractNumericTokens(input.claimText);
+  return (
+    numericTokensPresentInText(claimNums, input.bodyQuote) ||
+    numericTokensPresentInText(claimNums, input.chunkBody)
+  );
 }
 
 export function bestQuoteMatchScore(chunkBody: string, quote: string): number {
@@ -290,35 +345,49 @@ export function bestQuoteMatchScore(chunkBody: string, quote: string): number {
   return fuzzy?.score ?? 0;
 }
 
+function acceptResolvedMatch(
+  chunkBody: string,
+  quote: string,
+  claimText: string,
+  match: { charStart: number; charEnd: number; bodyQuote: string },
+  method: QuoteSpanMatch['method'],
+  score: number
+): QuoteSpanMatch | null {
+  if (
+    !validateMatchedSpanNumbers({
+      quote,
+      claimText,
+      bodyQuote: match.bodyQuote,
+      chunkBody,
+    })
+  ) {
+    return null;
+  }
+  return asQuoteSpanMatch(match, method, score);
+}
+
 export function resolveQuoteInChunk(
   chunkBody: string,
   quote: string,
   options?: { claimText?: string }
 ): QuoteSpanMatch | null {
+  const claimText = options?.claimText?.trim() ?? '';
   const trimmed = truncateQuoteWords(quote);
   if (trimmed) {
-    const literal = findQuoteInChunk(chunkBody, trimmed);
-    if (literal) {
-      const numericNeedle = normalizeNumbersForQuoteMatch(trimmed);
-      const method =
-        numericNeedle !== normalizeForQuoteMatch(trimmed) ? 'numeric' : 'literal';
-      return asQuoteSpanMatch(literal, method, 1);
+    const direct = findQuoteInChunk(chunkBody, trimmed);
+    if (direct) {
+      return acceptResolvedMatch(chunkBody, trimmed, claimText, direct, 'literal', 1);
     }
     const fuzzy = fuzzySpanSearchInChunk(chunkBody, trimmed);
     if (fuzzy) {
-      return fuzzy;
-    }
-  }
-
-  const claimText = options?.claimText?.trim();
-  if (claimText) {
-    const fromClaim = findQuoteInChunk(chunkBody, claimText);
-    if (fromClaim) {
-      return asQuoteSpanMatch(fromClaim, 'regex', 0.9);
-    }
-    const fuzzyClaim = fuzzySpanSearchInChunk(chunkBody, claimText);
-    if (fuzzyClaim) {
-      return fuzzyClaim;
+      return acceptResolvedMatch(
+        chunkBody,
+        trimmed,
+        claimText,
+        fuzzy,
+        fuzzy.method,
+        fuzzy.score
+      );
     }
   }
 

@@ -18,6 +18,7 @@ import { buildDocumentRagSystemPrompt } from '../../../shared/infrastructure/cha
 import { fetchWorkerRagContext } from '../../../shared/infrastructure/chat/fetch-worker-rag-context.js';
 import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
 import { DocumentChatGenerationCancelRegistry } from '../infrastructure/document-chat-generation-cancel.registry.js';
+import { DocumentChatGenerationActiveRegistry } from '../infrastructure/document-chat-generation-active.registry.js';
 import { CitedChatGenerationService } from '../../cited-chat/application/cited-chat-generation.service.js';
 import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
 
@@ -30,16 +31,6 @@ export interface DocumentChatGenerationJobPayload {
 }
 
 const CONTENT_FLUSH_MS = 400;
-
-function documentChatGenerationStaleMs(): number {
-  const raw = process.env['DOCUMENT_CHAT_GENERATION_STALE_MS'];
-  const fallback = 120_000;
-  if (!raw) {
-    return fallback;
-  }
-  const parsed = Number.parseInt(raw, 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
-}
 
 @Injectable()
 export class RunDocumentChatGenerationUseCase {
@@ -54,26 +45,18 @@ export class RunDocumentChatGenerationUseCase {
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     private readonly effectiveChatProvider: EffectiveDocumentChatProviderUseCase,
     private readonly cancelRegistry: DocumentChatGenerationCancelRegistry,
+    private readonly activeRegistry: DocumentChatGenerationActiveRegistry,
     private readonly citedChat: CitedChatGenerationService
   ) {}
 
   async execute(payload: DocumentChatGenerationJobPayload): Promise<void> {
     const { messageId, threadId, documentId, userId, userMessage } = payload;
     await this.cancelRegistry.clear(messageId);
+    await this.activeRegistry.markActive(messageId);
 
     const message = await this.threads.findMessageForUser(messageId, userId);
     if (!message || message.threadId !== threadId || message.role !== 'assistant') {
       throw new NotFoundError('Chat message');
-    }
-
-    const staleMs = documentChatGenerationStaleMs();
-    const messageAgeMs = Date.now() - message.updatedAt.getTime();
-    if (
-      (message.generationStatus === 'pending' || message.generationStatus === 'streaming') &&
-      messageAgeMs > staleMs
-    ) {
-      await this.failMessage(userId, messageId, 'generation_timeout', 'Stale generation before worker run');
-      return;
     }
 
     const thread = await this.threads.findThreadForUser(threadId, userId);
@@ -143,6 +126,10 @@ export class RunDocumentChatGenerationUseCase {
                 : threadDocumentIds,
           scope: thread.scope === 'library' ? 'library' : 'document',
           shouldAbort: () => this.cancelRegistry.isCancelled(messageId),
+          onHeartbeat: async () => {
+            await this.threads.touchMessageGenerationHeartbeat(messageId);
+            await this.activeRegistry.touchActive(messageId);
+          },
         });
         return;
       }
@@ -205,6 +192,7 @@ export class RunDocumentChatGenerationUseCase {
       );
     } finally {
       await this.cancelRegistry.clear(messageId);
+      await this.activeRegistry.clearActive(messageId);
     }
   }
 

@@ -1,11 +1,18 @@
 import type { CitedClaimJson } from './cited-answer-json.js';
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
-import { bestQuoteMatchScore, resolveQuoteInChunk } from './verify-citation-quote.js';
+import {
+  bestQuoteMatchScore,
+  findQuoteInChunk,
+  fuzzySpanSearchInChunk,
+  resolveQuoteInChunk,
+  validateMatchedSpanNumbers,
+} from './verify-citation-quote.js';
 
 export type CitedClaimRejectReason =
   | 'unknown_source'
   | 'empty_claim_text'
-  | 'quote_not_in_chunk';
+  | 'quote_not_in_chunk'
+  | 'claim_number_not_in_quote';
 
 export interface RejectedCitedClaim {
   claimText: string;
@@ -102,11 +109,23 @@ export function verifyCitedClaims(input: {
 
     const match = resolveQuoteInChunk(chunkRow.chunk.body, quote, { claimText });
     if (!match) {
+      const body = chunkRow.chunk.body;
+      const spanHit = findQuoteInChunk(body, quote) ?? fuzzySpanSearchInChunk(body, quote);
+      const reason: CitedClaimRejectReason =
+        spanHit &&
+        !validateMatchedSpanNumbers({
+          quote,
+          claimText,
+          bodyQuote: spanHit.bodyQuote,
+          chunkBody: body,
+        })
+          ? 'claim_number_not_in_quote'
+          : 'quote_not_in_chunk';
       rejected.push({
         claimText,
         quote,
-        bestMatchScore: bestQuoteMatchScore(chunkRow.chunk.body, quote),
-        reason: 'quote_not_in_chunk',
+        bestMatchScore: bestQuoteMatchScore(body, quote),
+        reason,
         source: claim.source,
       });
       continue;

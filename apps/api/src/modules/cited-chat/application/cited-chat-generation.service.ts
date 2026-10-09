@@ -27,6 +27,7 @@ import {
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 
 const CONTENT_FLUSH_MS = 250;
+const GENERATION_HEARTBEAT_MS = 15_000;
 
 export interface CitedChatGenerationInput {
   messageId: string;
@@ -36,6 +37,7 @@ export interface CitedChatGenerationInput {
   documentIds: string[];
   scope: 'document' | 'library';
   shouldAbort?: () => boolean | Promise<boolean>;
+  onHeartbeat?: () => void | Promise<void>;
 }
 
 export interface CitedChatGenerationResult {
@@ -68,6 +70,7 @@ export class CitedChatGenerationService {
         documentIds,
         scope,
         shouldAbort: input.shouldAbort,
+        onHeartbeat: input.onHeartbeat,
       });
     } catch (err) {
       this.logger.warn(`Cited chat generation failed for ${messageId}: ${String(err)}`);
@@ -90,8 +93,20 @@ export class CitedChatGenerationService {
     documentIds: string[];
     scope: 'document' | 'library';
     shouldAbort?: () => boolean | Promise<boolean>;
+    onHeartbeat?: () => void | Promise<void>;
   }): Promise<CitedChatGenerationResult> {
-    const { messageId, threadId, userId, userMessage, documentIds, scope, shouldAbort } = input;
+    const { messageId, threadId, userId, userMessage, documentIds, scope, shouldAbort, onHeartbeat } =
+      input;
+
+    let lastHeartbeat = Date.now();
+    const heartbeat = async (): Promise<void> => {
+      const now = Date.now();
+      if (now - lastHeartbeat < GENERATION_HEARTBEAT_MS) {
+        return;
+      }
+      lastHeartbeat = now;
+      await onHeartbeat?.();
+    };
 
     const aborted = async (): Promise<boolean> => (await shouldAbort?.()) ?? false;
     if (await aborted()) {
@@ -103,6 +118,7 @@ export class CitedChatGenerationService {
       generationStatus: 'pending',
       generationPhase: 'retrieving',
     });
+    await heartbeat();
 
     let queryVector: number[] | undefined;
     try {
@@ -132,6 +148,7 @@ export class CitedChatGenerationService {
         content: CITED_CHAT_ABSTENTION_DE,
         generationStatus: 'done',
         generationPhase: null,
+        finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
       return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
@@ -176,6 +193,7 @@ export class CitedChatGenerationService {
         content: CITED_CHAT_ABSTENTION_DE,
         generationStatus: 'done',
         generationPhase: null,
+        finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
       return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
@@ -216,6 +234,7 @@ export class CitedChatGenerationService {
     const llm = await requestCitedAnswerFromOllama(userMessage, systemPrompt, history, {
       shouldAbort: () => aborted(),
       onToken: async (partialJson) => {
+        await heartbeat();
         const partialClaims = extractCompleteCitedClaims(partialJson);
         if (partialClaims.length <= processedClaimCount) {
           return;
@@ -309,6 +328,7 @@ export class CitedChatGenerationService {
         generationStatus: 'done',
         generationPhase: null,
         errorDetail: benchStats,
+        finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
       return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
@@ -334,6 +354,7 @@ export class CitedChatGenerationService {
       generationStatus: 'done',
       generationPhase: null,
       errorDetail: benchStats,
+      finalizeOnlyIfInFlight: true,
     });
     await this.threads.touchThread(threadId);
     return { content, abstained: false };
@@ -353,6 +374,7 @@ export class CitedChatGenerationService {
       errorCode,
       errorDetail,
       content: existing?.content ?? '',
+      finalizeOnlyIfInFlight: true,
     });
     await this.threads.touchThread(threadId);
   }
