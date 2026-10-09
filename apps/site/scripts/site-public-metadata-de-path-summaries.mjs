@@ -81,5 +81,15 @@ export const sitePublicDePathSummaries = {
   "updateTag": "Label aktualisieren",
   "deleteTag": "Label löschen",
   "getCustomFields": "Benutzerdefinierte Felder abrufen",
-  "putCustomFields": "Benutzerdefinierte Felder speichern"
+  "putCustomFields": "Benutzerdefinierte Felder speichern",
+  "getAdminAccess": "Administrativen Lesezugriff anzeigen",
+  "listAdminUsers": "Instanz-Benutzer auflisten",
+  "inviteAdminUser": "Benutzer einladen",
+  "banAdminUser": "Benutzer sperren",
+  "unbanAdminUser": "Benutzersperre aufheben",
+  "setAdminUserRole": "Benutzerrolle ändern",
+  "resendAdminUserInvitation": "Einladung erneut senden",
+  "revokeAdminUserInvitation": "Ausstehende Einladung widerrufen",
+  "revokeAdminUserSessions": "Alle Sitzungen eines Benutzers beenden",
+  "acceptUserInvitation": "Einladung annehmen und Passwort setzen"
 };

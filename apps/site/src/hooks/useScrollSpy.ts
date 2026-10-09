@@ -1,9 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { getDocsScrollOffsetPx } from '../lib/scrollOffset';
 
-const HEADER_PX = 72;
+export type ScrollSpyController = {
+  activeId: string;
+  /** Pause spy updates until programmatic scroll finishes (TOC click). */
+  pauseUntilScrollSettled: () => void;
+};
 
-export function useScrollSpy(sectionIds: string[]): string {
+export function useScrollSpy(sectionIds: string[]): ScrollSpyController {
   const [activeId, setActiveId] = useState(sectionIds[0] ?? '');
+  const pausedRef = useRef(false);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!sectionIds.length) {
@@ -11,40 +18,69 @@ export function useScrollSpy(sectionIds: string[]): string {
       return undefined;
     }
 
-    const elements = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => Boolean(el));
+    const resolveActive = () => {
+      if (pausedRef.current) return;
 
-    if (!elements.length) return undefined;
+      const threshold = getDocsScrollOffsetPx();
+      const elements = sectionIds
+        .map((id) => document.getElementById(id))
+        .filter((el): el is HTMLElement => Boolean(el));
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        const firstVisible = visible[0];
-        if (firstVisible) {
-          setActiveId(firstVisible.target.id);
-          return;
+      if (!elements.length) return;
+
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (!first || !last) return;
+
+      let current = first.id;
+      for (const el of elements) {
+        const top = el.getBoundingClientRect().top;
+        if (top <= threshold + 0.5) {
+          current = el.id;
         }
-        const above = entries
-          .filter((e) => e.boundingClientRect.top < HEADER_PX)
-          .sort((a, b) => b.boundingClientRect.top - a.boundingClientRect.top);
-        const firstAbove = above[0];
-        if (firstAbove) {
-          setActiveId(firstAbove.target.id);
-        }
-      },
-      {
-        root: null,
-        rootMargin: `-${HEADER_PX}px 0px -60% 0px`,
-        threshold: [0, 0.1, 0.5, 1],
       }
-    );
 
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+      const doc = document.documentElement;
+      const atBottom = window.innerHeight + window.scrollY >= doc.scrollHeight - 4;
+      if (atBottom) {
+        current = last.id;
+      }
+
+      setActiveId((prev) => (prev === current ? prev : current));
+    };
+
+    const onScroll = () => {
+      if (rafRef.current !== null) return;
+      rafRef.current = window.requestAnimationFrame(() => {
+        rafRef.current = null;
+        resolveActive();
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    resolveActive();
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      if (rafRef.current !== null) {
+        window.cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, [sectionIds.join('|')]);
 
-  return activeId;
+  const pauseUntilScrollSettled = () => {
+    pausedRef.current = true;
+    const end = () => {
+      pausedRef.current = false;
+      window.dispatchEvent(new Event('scroll'));
+    };
+    if ('onscrollend' in window) {
+      window.addEventListener('scrollend', end, { once: true });
+    }
+    window.setTimeout(end, 1000);
+  };
+
+  return { activeId, pauseUntilScrollSettled };
 }

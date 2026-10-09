@@ -1,5 +1,6 @@
 import { DocsPageLayout } from '../components/DocsPageLayout';
 import { DocsHeading } from '../components/DocsHeading';
+import { DocsPageHeader } from '../components/DocsPageHeader';
 import { useLocale } from '../context/LocaleContext';
 import { RichText } from '../lib/richText';
 import { slugifyHeading } from '../lib/slugify';
@@ -10,8 +11,7 @@ export function DocsPage() {
 
   return (
     <DocsPageLayout>
-      <h1>{docs.intro.heading}</h1>
-      <p>{docs.intro.lead}</p>
+      <DocsPageHeader title={docs.intro.heading} lead={docs.intro.lead} />
 
       <DocsHeading as="h2" id="quickstart">
         {docs.quickstart.heading}
@@ -41,30 +41,34 @@ export function DocsPage() {
       <DocsHeading as="h2" id="self-hosting">
         {docs.selfHosting.heading}
       </DocsHeading>
-      <p>{docs.selfHosting.intro}</p>
+      <p>
+        <RichText text={docs.selfHosting.intro} />
+      </p>
       {docs.selfHosting.envGroups.map((group) => (
         <section key={group.title}>
           <DocsHeading as="h3" id={slugifyHeading(group.title)}>
             {group.title}
           </DocsHeading>
-          <table className="env-table">
-            <thead>
-              <tr>
-                <th scope="col">Variable</th>
-                <th scope="col">{locale === 'de' ? 'Bedeutung' : 'Description'}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {group.vars.map((v) => (
-                <tr key={v.name}>
-                  <td>
-                    <code>{v.name}</code>
-                  </td>
-                  <td>{v.description}</td>
+          <div className="env-table-wrap">
+            <table className="env-table">
+              <thead>
+                <tr>
+                  <th scope="col">Variable</th>
+                  <th scope="col">{locale === 'de' ? 'Bedeutung' : 'Description'}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {group.vars.map((v) => (
+                  <tr key={v.name}>
+                    <td>
+                      <code>{v.name}</code>
+                    </td>
+                    <td>{v.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       ))}
     </DocsPageLayout>
