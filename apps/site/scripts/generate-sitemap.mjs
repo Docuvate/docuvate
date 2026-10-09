@@ -3,22 +3,10 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const siteRoot = join(fileURLToPath(import.meta.url), '..', '..');
-const baseUrl = process.env.SITE_URL ?? 'https://docuvate.example';
+import { prerenderRoutes } from './prerender-routes.mjs';
 
-const paths = [
-  '/',
-  '/docs',
-  '/docs/api',
-  '/docs/sdks',
-  '/impressum',
-  '/datenschutz',
-  '/en',
-  '/en/docs',
-  '/en/docs/api',
-  '/en/docs/sdks',
-  '/en/impressum',
-  '/en/datenschutz',
-];
+const baseUrl = process.env.SITE_URL ?? 'https://docuvate.de';
+const paths = prerenderRoutes;
 
 const urls = paths
   .map(

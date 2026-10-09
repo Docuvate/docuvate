@@ -8,9 +8,10 @@ import { docuvateDark, docuvateLight } from './shiki-docuvate-themes.mjs';
 const siteRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const destDir = join(siteRoot, 'src', 'generated');
 
-const json = execSync('pnpm exec tsx scripts/export-code-snippets.ts', {
+const json = execSync('node --import tsx scripts/export-code-snippets.ts', {
   cwd: siteRoot,
   encoding: 'utf8',
+  stdio: ['ignore', 'pipe', 'ignore'],
 });
 const entries = JSON.parse(json);
 

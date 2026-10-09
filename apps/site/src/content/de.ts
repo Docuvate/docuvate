@@ -7,18 +7,23 @@ export const deContent: SiteContent = {
     api: 'API',
     sdks: 'SDKs',
     github: 'GitHub',
+    comparisons: 'Vergleiche',
+    editions: 'Editionen',
   },
   footer: {
     tagline: 'Selbst gehostete Dokumentenanalyse für Ihre Infrastruktur.',
     product: 'Produkt',
     developers: 'Entwickler',
+    comparisons: 'Vergleiche',
     project: 'Projekt',
-    language: 'Sprache',
     legal: 'Rechtliches',
     privacy: 'Datenschutz',
     imprint: 'Impressum',
     license: 'Lizenz (AGPL)',
     github: 'GitHub',
+    contactEmail: 'hello@docuvate.de',
+    copyrightLine: '© 2026 Docuvate',
+    openApiJson: 'OpenAPI als JSON',
   },
   legal: {
     emptyValue: 'Noch nicht hinterlegt',
@@ -31,9 +36,13 @@ export const deContent: SiteContent = {
       title: 'Datenschutz',
       contactLabel: 'Kontakt',
       paragraphs: [
-        'Diese Marketing-Website ist eine statische Seite, die über GitHub Pages ausgeliefert wird.',
-        'Beim Aufruf kann GitHub (GitHub, Inc.) technische Daten wie IP-Adressen in Server-Logfiles verarbeiten. Details finden Sie in der Datenschutzerklärung von GitHub.',
-        'Wir setzen auf dieser Site keine eigenen Cookies ein und nutzen kein Tracking oder Analytics durch Docuvate.',
+        'Verantwortlicher: Thomas Faust, Berliner Str. 6, 64409 Messel, hello@docuvate.de.',
+        'Diese Marketing-Website ist eine statische Seite, die über GitHub Pages (GitHub, Inc., USA) ausgeliefert wird. Beim Aufruf können technische Daten wie IP-Adressen in Server-Logfiles verarbeitet werden. Details: https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement',
+        'Rechtsgrundlage für den Betrieb dieser Informationsseite ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer erreichbaren Produkt- und Dokumentationspräsenz).',
+        'Speicherdauer: Logdaten beim Hosting-Anbieter richten sich nach dessen Richtlinien; wir speichern auf dieser Site keine Besucherprofile.',
+        'Sie haben Rechte nach Art. 15 bis 21 DSGVO (Auskunft, Berichtigung, Löschung, Einschränkung, Widerspruch, Datenübertragbarkeit) sowie das Recht, sich bei einer Aufsichtsbehörde zu beschweren.',
+        'Lokale Speicherung: Im Browser speichern wir nur Ihre Wahl für Sprache (`docuvate-site-locale`) und Farbschema (`docuvate-site-theme`) in localStorage, damit Einstellungen beim nächsten Besuch erhalten bleiben.',
+        'Wir setzen keine eigenen Cookies ein und nutzen kein Tracking oder Analytics durch Docuvate.',
       ],
     },
   },
@@ -70,10 +79,10 @@ export const deContent: SiteContent = {
     },
     proof: {
       items: [
-        { id: 'agpl', label: 'AGPL-Lizenz' },
-        { id: 'docker', label: 'Docker Compose' },
-        { id: 'stack', label: 'PostgreSQL, Valkey, S3' },
-        { id: 'api', label: 'HTTP-API für Integrationen' },
+        { id: 'agpl', label: 'Open Source (AGPL-3.0)' },
+        { id: 'local', label: 'Läuft komplett lokal' },
+        { id: 'cpu', label: 'CPU reicht, keine GPU nötig' },
+        { id: 'openapi', label: 'OpenAPI und SDKs' },
       ],
     },
     featuresSection: {
@@ -182,6 +191,35 @@ for (const doc of data.items) {
       primaryCta: 'Installationsanleitung',
       secondaryCta: 'Quellcode auf GitHub',
     },
+    why: {
+      heading: 'Warum Docuvate',
+      lead: 'Lokal betreiben, strukturierte Felder nutzen und per API anbinden.',
+      cards: [
+        {
+          title: 'Lokal und CPU-tauglich',
+          body: 'OCR, Embeddings und Chat laufen auf Ihrer Hardware ohne Cloud-Zwang.',
+        },
+        {
+          title: 'Felder statt nur Volltext',
+          body: 'Betrag, Datum und Absender werden vorgeschlagen und mit einem Klick bestätigt.',
+        },
+        {
+          title: 'API-first',
+          body: 'OpenAPI-Vertrag, Service-Schlüssel und SDKs für Ihre Integrationen.',
+        },
+      ],
+      compareLink: 'Docuvate vs. Paperless-ngx und andere',
+    },
+    editions: {
+      heading: 'Kosten und Editionen',
+      lead: 'Community-Edition zum Selbst-Hosten und kommerzielle Angebote für Betrieb mit Docuvate.',
+      selfHostedTitle: 'Selbst gehostet (Community)',
+      selfHostedBody:
+        'AGPL-3.0, kostenlos, voller Funktionskern. Sie betreiben Docker Compose oder Kubernetes auf Ihrer Infrastruktur.',
+      cloudTitle: 'Docuvate Cloud / Business',
+      cloudBody:
+        'Kommerzielles Angebot mit Support und Betrieb durch Docuvate. Details folgen; Preise werden hier nicht gelistet.',
+    },
     integrations: {
       heading: 'Integrationen',
       lead: 'Anbindungen für Import und Automatisierung, von Cloud-Speichern bis zu Diensten in Ihrem Netzwerk.',
@@ -210,6 +248,11 @@ for (const doc of data.items) {
           id: 'outlook',
           name: 'Microsoft Outlook',
           description: 'E-Mail-Anhänge als Quelle.',
+        },
+        {
+          id: 'sftp',
+          name: 'SFTP-Scanner',
+          description: 'Scanner-Eingang per SFTP in Ihr Netzwerk (laut Repository).',
         },
       ],
     },

@@ -1,23 +1,7 @@
 import { withLocalePath } from './pathHash';
-
 export type SiteLocale = 'de' | 'en';
 
-export const prerenderRoutes = [
-  '/',
-  '/docs',
-  '/docs/api',
-  '/docs/sdks',
-  '/impressum',
-  '/datenschutz',
-  '/en',
-  '/en/docs',
-  '/en/docs/api',
-  '/en/docs/sdks',
-  '/en/impressum',
-  '/en/datenschutz',
-] as const;
-
-export type PrerenderRoute = (typeof prerenderRoutes)[number];
+export { prerenderRoutes, type PrerenderRoute } from './prerenderRoutes';
 
 export function localeFromPathname(pathname: string): SiteLocale {
   return pathname === '/en' || pathname.startsWith('/en/') ? 'en' : 'de';

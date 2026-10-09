@@ -7,18 +7,23 @@ export const enContent: SiteContent = {
     api: 'API',
     sdks: 'SDKs',
     github: 'GitHub',
+    comparisons: 'Comparisons',
+    editions: 'Editions',
   },
   footer: {
     tagline: 'Self-hosted document intelligence on your own hardware.',
     product: 'Product',
     developers: 'Developers',
+    comparisons: 'Comparisons',
     project: 'Project',
     legal: 'Legal',
     privacy: 'Privacy',
     imprint: 'Imprint',
     license: 'License (AGPL)',
     github: 'GitHub',
-    language: 'Language',
+    contactEmail: 'hello@docuvate.de',
+    copyrightLine: '© 2026 Docuvate',
+    openApiJson: 'OpenAPI (JSON)',
   },
   legal: {
     emptyValue: 'Not provided yet',
@@ -31,9 +36,13 @@ export const enContent: SiteContent = {
       title: 'Privacy',
       contactLabel: 'Contact',
       paragraphs: [
-        'This marketing site is a static website served via GitHub Pages.',
-        'When you visit the site, GitHub (GitHub, Inc.) may process technical data such as IP addresses in server logs. See GitHub’s privacy statement for details.',
-        'We do not set our own cookies on this site and do not use Docuvate-operated tracking or analytics.',
+        'Controller: Thomas Faust, Berliner Str. 6, 64409 Messel, Germany, hello@docuvate.de.',
+        'This marketing site is a static website served via GitHub Pages (GitHub, Inc., USA). When you visit, technical data such as IP addresses may be processed in server logs. See https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement',
+        'Legal basis for operating this information site is Art. 6(1)(f) GDPR (legitimate interest in an accessible product and documentation presence).',
+        'Retention: log data at the hosting provider follows their policies; we do not store visitor profiles on this site.',
+        'You have rights under Art. 15 to 21 GDPR (access, rectification, erasure, restriction, objection, data portability) and may lodge a complaint with a supervisory authority.',
+        'Local storage: we only store your language (`docuvate-site-locale`) and theme (`docuvate-site-theme`) choices in localStorage so settings persist on your next visit.',
+        'We do not set our own cookies and do not use Docuvate-operated tracking or analytics.',
       ],
     },
   },
@@ -70,11 +79,40 @@ export const enContent: SiteContent = {
     },
     proof: {
       items: [
-        { id: 'agpl', label: 'Open source (AGPL)' },
-        { id: 'api', label: 'HTTP API for integrations' },
-        { id: 'docker', label: 'Docker Compose' },
-        { id: 'stack', label: 'PostgreSQL, Valkey, object storage (S3 API)' },
+        { id: 'agpl', label: 'Open Source (AGPL-3.0)' },
+        { id: 'local', label: 'Runs fully on your hardware' },
+        { id: 'cpu', label: 'CPU is enough, no GPU required' },
+        { id: 'openapi', label: 'OpenAPI and SDKs' },
       ],
+    },
+    why: {
+      heading: 'Why Docuvate',
+      lead: 'Self-host, work with structured fields, and integrate through an API.',
+      cards: [
+        {
+          title: 'Local and CPU-friendly',
+          body: 'OCR, embeddings, and chat run on your hardware without a cloud mandate.',
+        },
+        {
+          title: 'Fields, not just full text',
+          body: 'Amount, date, and sender are suggested and confirmed with one click.',
+        },
+        {
+          title: 'API-first',
+          body: 'OpenAPI contract, service keys, and SDKs for your integrations.',
+        },
+      ],
+      compareLink: 'Docuvate vs. Paperless-ngx and others',
+    },
+    editions: {
+      heading: 'Cost and editions',
+      lead: 'Community self-hosting and commercial offerings operated by Docuvate.',
+      selfHostedTitle: 'Self-hosted (Community)',
+      selfHostedBody:
+        'AGPL-3.0, free, full core feature set. You run Docker Compose or Kubernetes on your infrastructure.',
+      cloudTitle: 'Docuvate Cloud / Business',
+      cloudBody:
+        'Commercial offering with support and operations by Docuvate. Details to follow; no prices listed here.',
     },
     featuresSection: {
       kicker: 'Product',
@@ -210,6 +248,11 @@ for (const doc of data.items) {
           id: 'outlook',
           name: 'Microsoft Outlook',
           description: 'Mail attachments as a source.',
+        },
+        {
+          id: 'sftp',
+          name: 'SFTP scanner',
+          description: 'Scanner ingest via SFTP on your network (per repository).',
         },
       ],
     },

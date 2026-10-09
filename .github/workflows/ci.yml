@@ -61,6 +61,7 @@ jobs:
       - run: pnpm --filter @docuvate/api typecheck
       - run: pnpm --filter @docuvate/web typecheck
       - run: pnpm --filter @docuvate/web lint
+      - run: node apps/site/scripts/materialize-compare.mjs
       - run: node apps/site/scripts/enhance-openapi.mjs
       - run: pnpm --filter @docuvate/site typecheck
       - run: pnpm --filter @docuvate/site lint
@@ -202,6 +203,41 @@ jobs:
           pip install 'uv==0.12.23'
           cd apps/worker && uv venv .venv && uv pip install -e ".[dev]"
           .venv/bin/pytest tests/integration -q --maxfail=1
+  site-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm --filter @docuvate/tokens build
+      - run: node apps/site/scripts/materialize-compare.mjs
+      - run: node apps/site/scripts/enhance-openapi.mjs
+      - run: pnpm --filter @docuvate/site build
+      - name: Start preview server
+        run: |
+          SESSION_NAME="site-preview-e2e"
+          tmux -f /exec-daemon/tmux.portal.conf has-session -t "=$SESSION_NAME" 2>/dev/null || \
+            tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION_NAME" -c "$PWD/apps/site" -- "${SHELL:-zsh}" -l
+          tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION_NAME:0.0" 'pnpm run preview' C-m
+      - name: Wait for site preview
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8081/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+      - name: Playwright site tests (retries=0)
+        working-directory: apps/site
+        run: pnpm exec playwright test --retries=0
+        env:
+          E2E_SITE_URL: http://127.0.0.1:8081
+
   docker-build:
     runs-on: ubuntu-latest
     steps:

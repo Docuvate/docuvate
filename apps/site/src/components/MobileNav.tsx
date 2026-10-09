@@ -27,8 +27,11 @@ export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimar
     setOpen(false);
   }, [location.pathname]);
 
+  const comparePath = locale === 'de' ? '/docs/vergleiche' : '/docs/comparisons';
   const links = [
     { to: '/docs', label: content.nav.docs },
+    { to: comparePath, label: content.nav.comparisons },
+    { to: '/#editions-heading', label: content.nav.editions },
     { to: '/docs/api', label: content.nav.api },
     { to: '/docs/sdks', label: content.nav.sdks },
   ];

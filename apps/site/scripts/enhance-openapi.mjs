@@ -229,7 +229,49 @@ function enhanceSpec(spec, meta, locale) {
   return next;
 }
 
+const SCHEMA_RENAMES = {
+  DashboardStatisticsDtoClass: 'DashboardStatistics',
+  DashboardWidgetDtoClass: 'DashboardWidget',
+  LabelMapResponseDtoClass: 'LabelMapResponse',
+  SavedDocumentViewDtoClass: 'SavedDocumentView',
+};
+
+function renamePublicSchemas(spec) {
+  const next = structuredClone(spec);
+  const schemas = next.components?.schemas;
+  if (!schemas) return next;
+  for (const [from, to] of Object.entries(SCHEMA_RENAMES)) {
+    if (!schemas[from]) continue;
+    schemas[to] = schemas[from];
+    delete schemas[from];
+  }
+  const rewriteRef = (node) => {
+    if (!node || typeof node !== 'object') return;
+    if (typeof node.$ref === 'string') {
+      for (const [from, to] of Object.entries(SCHEMA_RENAMES)) {
+        if (node.$ref.endsWith(`/components/schemas/${from}`)) {
+          node.$ref = node.$ref.replace(from, to);
+        }
+      }
+    }
+    for (const value of Object.values(node)) {
+      if (value && typeof value === 'object') rewriteRef(value);
+    }
+  };
+  rewriteRef(next);
+  return next;
+}
+
+const deSpec = enhanceSpec(baseSpec, metaDe, 'de');
+const enSpec = enhanceSpec(baseSpec, metaEn, 'en');
+
 mkdirSync(destDir, { recursive: true });
-writeFileSync(join(destDir, 'openapi.v1.json'), JSON.stringify(enhanceSpec(baseSpec, metaDe, 'de'), null, 2));
-writeFileSync(join(destDir, 'openapi.v1.en.json'), JSON.stringify(enhanceSpec(baseSpec, metaEn, 'en'), null, 2));
-console.log('Enhanced OpenAPI specs at', destDir);
+writeFileSync(join(destDir, 'openapi.v1.json'), JSON.stringify(deSpec, null, 2));
+writeFileSync(join(destDir, 'openapi.v1.en.json'), JSON.stringify(enSpec, null, 2));
+
+const publicDir = join(siteRoot, 'public');
+mkdirSync(publicDir, { recursive: true });
+writeFileSync(join(publicDir, 'openapi.json'), JSON.stringify(renamePublicSchemas(deSpec), null, 2));
+writeFileSync(join(publicDir, 'openapi.en.json'), JSON.stringify(renamePublicSchemas(enSpec), null, 2));
+
+console.log('Enhanced OpenAPI specs at', destDir, 'and public/openapi*.json');
