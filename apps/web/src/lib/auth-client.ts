@@ -1,4 +1,7 @@
+import { passkeyClient } from '@better-auth/passkey/client';
 import { createAuthClient } from 'better-auth/react';
+import { twoFactorClient } from 'better-auth/client/plugins';
+import { routes } from './routes';
 
 /**
  * better-auth requires an absolute origin (throws on relative "/api").
@@ -17,4 +20,14 @@ function authBaseURL(): string {
 
 export const authClient = createAuthClient({
   baseURL: authBaseURL(),
+  plugins: [
+    twoFactorClient({
+      onTwoFactorRedirect() {
+        if (typeof window !== 'undefined') {
+          window.location.assign(`${routes.loginTwoFactor}?return=${encodeURIComponent(window.location.pathname)}`);
+        }
+      },
+    }),
+    passkeyClient(),
+  ],
 });

@@ -10,11 +10,13 @@ import { IS_PUBLIC_ROUTE_KEY } from './public.decorator.js';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyRequest } from 'fastify';
 import type { AuthorizationSubject } from '../../domain/authorization.js';
+import { InstallationMembershipService } from '../../../modules/auth/infrastructure/installation-membership.service.js';
 import { auth } from './better-auth.config.js';
 import { ServiceApiKeyRegistry } from './service-api-key.registry.js';
+import { buildUserAuthorizationSubject } from './user-authorization-subject.js';
 
 export type AuthSession = {
-  user: { id: string; email: string; name: string };
+  user: { id: string; email: string; name: string; role?: string | null };
   session: { id: string; token: string };
 };
 
@@ -37,7 +39,8 @@ function extractApiKey(req: FastifyRequest): string | undefined {
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly apiKeys: ServiceApiKeyRegistry,
-    private readonly reflector: Reflector
+    private readonly reflector: Reflector,
+    private readonly installationMembership: InstallationMembershipService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -53,6 +56,10 @@ export class AuthGuard implements CanActivate {
 
     const service = this.apiKeys.resolve(extractApiKey(req));
     if (service) {
+      const membership = await this.installationMembership.loadForUser(service.subject.tenantId);
+      if (membership.suspended) {
+        throw new UnauthorizedException('Account suspended');
+      }
       req.authSession = {
         user: service.sessionUser,
         session: { id: `service:${service.subject.id}`, token: 'service' },
@@ -66,14 +73,15 @@ export class AuthGuard implements CanActivate {
     if (!session?.user) {
       throw new UnauthorizedException('Not authenticated');
     }
+    const membership = await this.installationMembership.loadForUser(session.user.id);
+    if (membership.suspended) {
+      throw new UnauthorizedException('Account suspended');
+    }
     req.authSession = session as AuthSession;
-    req.authSubject = {
-      kind: 'user',
+    req.authSubject = buildUserAuthorizationSubject({
       id: session.user.id,
-      tenantId: session.user.id,
-      roles: ['owner'],
-      claims: ['document:*'],
-    };
+      installationRole: this.installationMembership.instanceRoleFor(membership),
+    });
     return true;
   }
 }

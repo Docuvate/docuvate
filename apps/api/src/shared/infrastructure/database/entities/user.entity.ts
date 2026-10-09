@@ -38,6 +38,9 @@ export class UserEntity {
   @Column("text", { name: "image", nullable: true })
   image: string | null;
 
+  @Column("boolean", { name: "twoFactorEnabled", default: () => "false" })
+  twoFactorEnabled: boolean;
+
   @Column("timestamp with time zone", {
     name: "createdAt",
     default: () => "now()",

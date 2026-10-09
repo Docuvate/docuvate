@@ -15,11 +15,13 @@
     "test:coverage": "vitest run -c vitest.config.ts --coverage",
     "db:migrate": "node scripts/run-migrations.mjs",
     "auth:reset-password": "node dist/scripts/auth-reset-password.js",
+    "auth:promote-admin": "node dist/scripts/auth-promote-admin.js",
     "openapi:export": "nest build && node --import tsx scripts/export-openapi.mts"
   },
   "dependencies": {
     "@docuvate/contracts": "workspace:*",
     "@docuvate/otel": "workspace:*",
+    "@better-auth/passkey": "1.7.7",
     "@fastify/multipart": "^9.0.0",
     "@nestjs/common": "^11.0.10",
     "@nestjs/core": "^11.0.10",

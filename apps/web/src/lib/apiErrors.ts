@@ -86,6 +86,9 @@ function isLikelyTimeout(err: unknown): boolean {
 }
 
 function statusI18nKey(status: number): string | undefined {
+  if (status === 403) {
+    return 'errors.forbidden';
+  }
   if (status === 409) {
     return 'errors.conflict';
   }

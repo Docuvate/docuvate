@@ -1,9 +1,11 @@
 /** Customer-facing URL paths (English). */
 export const routes = {
   login: '/login',
+  loginTwoFactor: '/login/two-factor',
   register: '/register',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
+  inviteAccept: '/invite',
   inbox: '/inbox',
   documents: '/documents',
   document: (id: string) => `/documents/${id}`,
@@ -15,6 +17,9 @@ export const routes = {
   settings: '/settings',
   settingsConnectors: '/settings/connectors',
   settingsBlockedLabels: '/settings/blocked-labels',
+  settingsAdmin: '/settings/admin',
+  settingsAdminUsers: '/settings/admin/users',
+  settingsAccountSecurity: '/settings/account-security',
   docsStyles: '/docs/styles',
   docsConnectorsOAuthSetup: '/docs/connectors/oauth-setup',
 } as const;

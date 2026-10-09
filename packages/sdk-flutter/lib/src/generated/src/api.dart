@@ -10,9 +10,11 @@ import 'package:docuvate/src/generated/src/auth/basic_auth.dart';
 import 'package:docuvate/src/generated/src/auth/bearer_auth.dart';
 import 'package:docuvate/src/generated/src/auth/oauth.dart';
 import 'package:docuvate/src/generated/src/api/api_metadata_api.dart';
+import 'package:docuvate/src/generated/src/api/admin_api.dart';
 import 'package:docuvate/src/generated/src/api/connectors_api.dart';
 import 'package:docuvate/src/generated/src/api/correspondents_api.dart';
 import 'package:docuvate/src/generated/src/api/documents_api.dart';
+import 'package:docuvate/src/generated/src/api/invitations_api.dart';
 import 'package:docuvate/src/generated/src/api/labels_api.dart';
 import 'package:docuvate/src/generated/src/api/models_api.dart';
 import 'package:docuvate/src/generated/src/api/organizer_api.dart';
@@ -79,6 +81,12 @@ class DocuvateApi {
     return APIMetadataApi(dio, serializers);
   }
 
+  /// Get AdminApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AdminApi getAdminApi() {
+    return AdminApi(dio, serializers);
+  }
+
   /// Get ConnectorsApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   ConnectorsApi getConnectorsApi() {
@@ -95,6 +103,12 @@ class DocuvateApi {
   /// by doing that all interceptors will not be executed
   DocumentsApi getDocumentsApi() {
     return DocumentsApi(dio, serializers);
+  }
+
+  /// Get InvitationsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  InvitationsApi getInvitationsApi() {
+    return InvitationsApi(dio, serializers);
   }
 
   /// Get LabelsApi instance, base route and serializer can be overridden by a given but be careful,

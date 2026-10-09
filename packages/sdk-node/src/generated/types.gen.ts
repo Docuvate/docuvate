@@ -14,13 +14,46 @@ export type AcceptLabelRecommendationResponseDto = {
     action: string;
 };
 
+export type AcceptUserInvitationRequestDto = {
+    token: string;
+    password: string;
+};
+
 export type AddLabelRecommendationBlocklistRequestDto = {
     phrase: string;
+};
+
+export type AdminAccessResponseDto = {
+    isAdministrator: boolean;
+    role: 'admin' | 'member';
+    roleDescriptions: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+export type AdminUserListResponseDto = {
+    users: Array<AdminUserResponseDto>;
+    total: number;
+};
+
+export type AdminUserResponseDto = {
+    id: string;
+    name: string;
+    email: string;
+    role: 'admin' | 'member';
+    banned: boolean;
+    banReason?: string;
+    accountStatus: 'active' | 'invited' | 'suspended';
+    createdAt: string;
 };
 
 export type ApiErrorEnvelopeDto = {
     code: string;
     message: string;
+};
+
+export type BanAdminUserRequestDto = {
+    reason?: string;
 };
 
 export type ChatMessageDto = {
@@ -246,6 +279,12 @@ export type ImportFromConnectorRequestDto = {
     ref: string;
 };
 
+export type InviteAdminUserRequestDto = {
+    email: string;
+    name: string;
+    role?: 'admin' | 'member';
+};
+
 export type LabelMapResponseDtoClass = {
     points: Array<{
         [key: string]: unknown;
@@ -381,6 +420,10 @@ export type SendDocumentChatThreadMessageResponseDto = {
     setupHint?: string;
 };
 
+export type SetAdminUserRoleRequestDto = {
+    role: 'admin' | 'member';
+};
+
 export type SetMlModelLifecycleRequestDto = {
     lifecycle: 'failed' | 'active' | 'registered' | 'canary' | 'archived';
 };
@@ -474,6 +517,210 @@ export type UserSettingsResponseDto = {
     fieldExtractionRequiredLabelIds?: Array<string>;
     themePreference?: 'light' | 'dark' | 'system';
     locale?: 'de' | 'en';
+};
+
+export type GetAdminAccessData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/access';
+};
+
+export type GetAdminAccessErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetAdminAccessError = GetAdminAccessErrors[keyof GetAdminAccessErrors];
+
+export type GetAdminAccessResponses = {
+    200: AdminAccessResponseDto;
+};
+
+export type GetAdminAccessResponse = GetAdminAccessResponses[keyof GetAdminAccessResponses];
+
+export type ListAdminUsersData = {
+    body?: never;
+    path?: never;
+    query?: {
+        limit?: number;
+        offset?: number;
+        search?: string;
+    };
+    url: '/admin/users';
+};
+
+export type ListAdminUsersErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ListAdminUsersError = ListAdminUsersErrors[keyof ListAdminUsersErrors];
+
+export type ListAdminUsersResponses = {
+    200: AdminUserListResponseDto;
+};
+
+export type ListAdminUsersResponse = ListAdminUsersResponses[keyof ListAdminUsersResponses];
+
+export type InviteAdminUserData = {
+    body: InviteAdminUserRequestDto;
+    path?: never;
+    query?: never;
+    url: '/admin/users';
+};
+
+export type InviteAdminUserErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type InviteAdminUserError = InviteAdminUserErrors[keyof InviteAdminUserErrors];
+
+export type InviteAdminUserResponses = {
+    201: {
+        [key: string]: unknown;
+    };
+};
+
+export type InviteAdminUserResponse = InviteAdminUserResponses[keyof InviteAdminUserResponses];
+
+export type BanAdminUserData = {
+    body: BanAdminUserRequestDto;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/admin/users/{userId}/ban';
+};
+
+export type BanAdminUserErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type BanAdminUserError = BanAdminUserErrors[keyof BanAdminUserErrors];
+
+export type BanAdminUserResponses = {
+    201: unknown;
+};
+
+export type ResendAdminUserInvitationData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/admin/users/{userId}/resend-invitation';
+};
+
+export type ResendAdminUserInvitationErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ResendAdminUserInvitationError = ResendAdminUserInvitationErrors[keyof ResendAdminUserInvitationErrors];
+
+export type ResendAdminUserInvitationResponses = {
+    201: unknown;
+};
+
+export type RevokeAdminUserInvitationData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/admin/users/{userId}/revoke-invitation';
+};
+
+export type RevokeAdminUserInvitationErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type RevokeAdminUserInvitationError = RevokeAdminUserInvitationErrors[keyof RevokeAdminUserInvitationErrors];
+
+export type RevokeAdminUserInvitationResponses = {
+    201: unknown;
+};
+
+export type RevokeAdminUserSessionsData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/admin/users/{userId}/revoke-sessions';
+};
+
+export type RevokeAdminUserSessionsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type RevokeAdminUserSessionsError = RevokeAdminUserSessionsErrors[keyof RevokeAdminUserSessionsErrors];
+
+export type RevokeAdminUserSessionsResponses = {
+    201: unknown;
+};
+
+export type SetAdminUserRoleData = {
+    body: SetAdminUserRoleRequestDto;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/admin/users/{userId}/role';
+};
+
+export type SetAdminUserRoleErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type SetAdminUserRoleError = SetAdminUserRoleErrors[keyof SetAdminUserRoleErrors];
+
+export type SetAdminUserRoleResponses = {
+    200: unknown;
+};
+
+export type UnbanAdminUserData = {
+    body?: never;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/admin/users/{userId}/unban';
+};
+
+export type UnbanAdminUserErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type UnbanAdminUserError = UnbanAdminUserErrors[keyof UnbanAdminUserErrors];
+
+export type UnbanAdminUserResponses = {
+    201: unknown;
 };
 
 export type GetConnectorCatalogData = {
@@ -1668,6 +1915,26 @@ export type UpdateFolderResponses = {
 };
 
 export type UpdateFolderResponse = UpdateFolderResponses[keyof UpdateFolderResponses];
+
+export type AcceptUserInvitationData = {
+    body: AcceptUserInvitationRequestDto;
+    path?: never;
+    query?: never;
+    url: '/invitations/accept';
+};
+
+export type AcceptUserInvitationErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type AcceptUserInvitationError = AcceptUserInvitationErrors[keyof AcceptUserInvitationErrors];
+
+export type AcceptUserInvitationResponses = {
+    201: unknown;
+};
 
 export type MapData = {
     body?: never;

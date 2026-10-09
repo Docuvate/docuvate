@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
   Ban,
@@ -52,6 +53,8 @@ const settingsIconProps = { size: SETTINGS_ICON_SIZE, strokeWidth: 1.75, 'aria-h
 export function SettingsPage() {
   const { t } = useTranslation();
   const toast = useToast();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { advancedFeaturesEnabled, setAdvancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
   const { data } = authClient.useSession();
   const [settings, setSettings] = useState<UserSettingsDto | null>(null);
@@ -61,6 +64,14 @@ export function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [blockedLabelCount, setBlockedLabelCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const state = location.state as { adminDenied?: boolean } | null;
+    if (state?.adminDenied) {
+      toast.error(t('admin.accessDeniedToast'));
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.pathname, location.state, navigate, t, toast]);
 
   useEffect(() => {
     void Promise.all([
@@ -306,10 +317,13 @@ export function SettingsPage() {
           title={t('settings.accountTitle')}
           description={t('settings.accountLeadFallback')}
           footer={
-            <div className="settings-account-row">
+            <div className="settings-section-card-footer settings-section-card-footer--stack">
               <p className="settings-account-email">
                 {data?.user?.email ?? t('settings.accountLeadFallback')}
               </p>
+              <SettingsCardLink to={routes.settingsAccountSecurity}>
+                {t('settings.accountSecurity.linkCta')}
+              </SettingsCardLink>
               <Button
                 type="button"
                 variant="secondary"

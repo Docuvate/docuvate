@@ -1,4 +1,5 @@
 import type { TestingModuleBuilder } from '@nestjs/testing';
+import { getDataSourceToken } from '@nestjs/typeorm';
 import { DocumentChatGenerationCancelRegistry } from '../modules/documents/infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from '../modules/documents/infrastructure/document-chat-generation-queue.service.js';
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
@@ -29,9 +30,29 @@ const mockPool: Record<string, unknown> = {
   on: (): Record<string, unknown> => mockPool,
 };
 
+type MockDataSource = {
+  isInitialized: boolean;
+  initialize: () => Promise<MockDataSource>;
+  destroy: () => Promise<void>;
+  runMigrations: () => Promise<unknown[]>;
+  manager: { query: () => Promise<unknown[]> };
+};
+
+const mockDataSource: MockDataSource = {
+  isInitialized: true,
+  initialize: async (): Promise<MockDataSource> => mockDataSource,
+  destroy: async (): Promise<void> => undefined,
+  runMigrations: async (): Promise<unknown[]> => [],
+  manager: {
+    query: async (): Promise<unknown[]> => [],
+  },
+};
+
 /** Headless OpenAPI export: no Postgres, Valkey, or BullMQ connections. */
 export function applyOpenApiGenerationOverrides(builder: TestingModuleBuilder): TestingModuleBuilder {
   return builder
+    .overrideProvider(getDataSourceToken())
+    .useValue(mockDataSource)
     .overrideProvider(PG_POOL)
     .useValue(mockPool)
     .overrideProvider(ExtractionQueueService)

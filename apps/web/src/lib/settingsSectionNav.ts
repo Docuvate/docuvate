@@ -13,5 +13,6 @@ export function getSettingsSectionNavItems(): SettingsSectionNavItem[] {
     { to: routes.settings, end: true, labelKey: 'settings.navOverview' },
     { to: routes.settingsConnectors, end: false, labelKey: 'settings.navConnectors' },
     { to: routes.settingsBlockedLabels, end: false, labelKey: 'settings.navBlockedLabels' },
+    { to: routes.settingsAccountSecurity, end: false, labelKey: 'settings.tabAccountSecurity' },
   ];
 }

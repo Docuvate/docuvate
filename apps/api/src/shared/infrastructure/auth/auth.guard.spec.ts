@@ -1,39 +1,43 @@
-import { UnauthorizedException, type ExecutionContext } from '@nestjs/common';
+import { describe, expect, it, vi } from 'vitest';
+import { UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthGuard } from './auth.guard.js';
+import type { InstallationMembershipService } from '../../../modules/auth/infrastructure/installation-membership.service.js';
 import { ServiceApiKeyRegistry } from './service-api-key.registry.js';
 
-vi.mock('./better-auth.config.js', () => ({
-  auth: {
-    api: {
-      getSession: vi.fn(async () => null),
-    },
-  },
-}));
-
-function mockExecutionContext(): ExecutionContext {
-  class ProtectedController {}
-  const handler = function protectedHandler() {};
-  return {
-    getHandler: () => handler,
-    getClass: () => ProtectedController,
-    switchToHttp: () => ({
-      getRequest: () => ({ headers: {} }),
-    }),
-  } as unknown as ExecutionContext;
-}
-
 describe('AuthGuard', () => {
-  let guard: AuthGuard;
+  it('rejects service API keys bound to a suspended user', async () => {
+    const apiKeys = {
+      resolve: () => ({
+        sessionUser: { id: 'user-1', email: 'u@example.com', name: 'U' },
+        subject: {
+          kind: 'service' as const,
+          id: 'svc',
+          tenantId: 'user-1',
+          roles: ['integrator'],
+          claims: ['document:read'],
+        },
+      }),
+    } as unknown as ServiceApiKeyRegistry;
+    const installationMembership = {
+      loadForUser: vi.fn().mockResolvedValue({
+        userId: 'user-1',
+        dbRole: 'installation_member',
+        suspended: true,
+        suspensionReason: 'test',
+      }),
+    } as unknown as InstallationMembershipService;
 
-  beforeEach(() => {
-    guard = new AuthGuard(new ServiceApiKeyRegistry(), new Reflector());
-  });
+    const reflector = { getAllAndOverride: () => false } as unknown as Reflector;
+    const guard = new AuthGuard(apiKeys, reflector, installationMembership);
+    const context = {
+      getHandler: () => undefined,
+      getClass: () => undefined,
+      switchToHttp: () => ({
+        getRequest: () => ({ headers: { 'x-docuvate-api-key': 'secret' } }),
+      }),
+    };
 
-  it('throws UnauthorizedException when route is not public and there is no session or API key', async () => {
-    await expect(guard.canActivate(mockExecutionContext())).rejects.toBeInstanceOf(
-      UnauthorizedException
-    );
+    await expect(guard.canActivate(context as never)).rejects.toBeInstanceOf(UnauthorizedException);
   });
 });
