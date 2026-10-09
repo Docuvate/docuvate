@@ -59,7 +59,14 @@ pull_push() {
   local upstream="$1"
   local repo_tag="$2"
   bash "$ROOT/scripts/ci/docker-pull-with-retry.sh" "$upstream"
-  run_docker tag "$upstream" "${REG_HOST}/${repo_tag}"
+  local src="$upstream"
+  if [[ "$upstream" == *@sha256:* ]]; then
+    local tag_only="${upstream%%@sha256:*}"
+    if run_docker image inspect "$tag_only" >/dev/null 2>&1; then
+      src="$tag_only"
+    fi
+  fi
+  run_docker tag "$src" "${REG_HOST}/${repo_tag}"
   run_docker push "${REG_HOST}/${repo_tag}"
 }
 
