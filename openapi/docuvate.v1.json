@@ -66,7 +66,9 @@
           }
         ],
         "summary": "Viewer administration access",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       }
     },
     "/admin/users": {
@@ -162,7 +164,9 @@
           }
         ],
         "summary": "List instance users",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       },
       "post": {
         "operationId": "inviteAdminUser",
@@ -238,7 +242,9 @@
           }
         ],
         "summary": "Invite a user",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       }
     },
     "/admin/users/{userId}/ban": {
@@ -318,7 +324,9 @@
           }
         ],
         "summary": "Ban a user",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       }
     },
     "/admin/users/{userId}/resend-invitation": {
@@ -388,7 +396,9 @@
           }
         ],
         "summary": "Resend user invitation",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       }
     },
     "/admin/users/{userId}/revoke-invitation": {
@@ -458,7 +468,9 @@
           }
         ],
         "summary": "Revoke pending invitation",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       }
     },
     "/admin/users/{userId}/revoke-sessions": {
@@ -528,7 +540,9 @@
           }
         ],
         "summary": "Revoke all sessions for a user",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       }
     },
     "/admin/users/{userId}/role": {
@@ -608,7 +622,9 @@
           }
         ],
         "summary": "Change a user role",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       }
     },
     "/admin/users/{userId}/unban": {
@@ -678,7 +694,9 @@
           }
         ],
         "summary": "Unban a user",
-        "tags": ["admin"]
+        "tags": [
+          "admin"
+        ]
       }
     },
     "/chat/threads": {
@@ -746,7 +764,9 @@
           }
         ],
         "summary": "List library-scoped chat threads",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       },
       "post": {
         "operationId": "createLibraryChatThread",
@@ -815,7 +835,9 @@
           }
         ],
         "summary": "Create library-scoped chat thread",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       }
     },
     "/chat/threads/{threadId}/messages": {
@@ -892,7 +914,9 @@
           }
         ],
         "summary": "List messages in library chat thread",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       },
       "post": {
         "operationId": "sendLibraryChatThreadMessage",
@@ -977,7 +1001,9 @@
           }
         ],
         "summary": "Send message in library chat thread",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       }
     },
     "/chat/threads/{threadId}/messages/{messageId}/cancel": {
@@ -1055,7 +1081,9 @@
           }
         ],
         "summary": "Cancel library chat generation",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       }
     },
     "/chat/threads/{threadId}/messages/{messageId}/retry": {
@@ -1133,7 +1161,9 @@
           }
         ],
         "summary": "Retry failed library chat message",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       }
     },
     "/chat/threads/{threadId}/messages/{messageId}/stream": {
@@ -1211,7 +1241,9 @@
           }
         ],
         "summary": "SSE stream for library chat message generation",
-        "tags": ["chat"]
+        "tags": [
+          "chat"
+        ]
       }
     },
     "/connectors/catalog": {
@@ -1279,7 +1311,9 @@
           }
         ],
         "summary": "Connector plugin catalog",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations": {
@@ -1340,7 +1374,9 @@
           }
         ],
         "summary": "List connector installations",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       },
       "post": {
         "operationId": "createConnectorInstallation",
@@ -1416,7 +1452,9 @@
           }
         ],
         "summary": "Create connector installation",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}": {
@@ -1486,7 +1524,9 @@
           }
         ],
         "summary": "Delete connector installation",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/export": {
@@ -1567,7 +1607,9 @@
           }
         ],
         "summary": "Export One",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/import": {
@@ -1648,7 +1690,9 @@
           }
         ],
         "summary": "Import One",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/importables": {
@@ -1729,7 +1773,9 @@
           }
         ],
         "summary": "Importables",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/paperless": {
@@ -1800,7 +1846,9 @@
           }
         ],
         "summary": "Get Paperless connector settings (no secrets)",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       },
       "put": {
         "operationId": "updatePaperlessInstallation",
@@ -1879,7 +1927,9 @@
           }
         ],
         "summary": "Update Paperless connector installation",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/paperless/dry-run": {
@@ -1950,7 +2000,9 @@
           }
         ],
         "summary": "Preview Paperless import counts",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/paperless/import": {
@@ -2021,7 +2073,9 @@
           }
         ],
         "summary": "Start Paperless bulk import",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/paperless/import-runs/latest": {
@@ -2092,7 +2146,9 @@
           }
         ],
         "summary": "Get latest Paperless import run",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/paperless/import-runs/{runId}": {
@@ -2172,7 +2228,9 @@
           }
         ],
         "summary": "Get Paperless import run status",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/installations/{installationId}/paperless/test-connection": {
@@ -2253,7 +2311,9 @@
           }
         ],
         "summary": "Validate Paperless credentials for an installation",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/oauth/callback": {
@@ -2325,7 +2385,9 @@
           }
         },
         "summary": "OAuth callback (browser redirect)",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/oauth/{pluginId}/start": {
@@ -2338,7 +2400,13 @@
             "in": "path",
             "schema": {
               "type": "string",
-              "enum": ["gmail", "outlook", "paperless", "home_assistant", "amazon_s3"]
+              "enum": [
+                "gmail",
+                "outlook",
+                "paperless",
+                "home_assistant",
+                "amazon_s3"
+              ]
             }
           }
         ],
@@ -2413,7 +2481,9 @@
           }
         ],
         "summary": "Start OAuth for connector plugin",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/plugins/paperless/test-connection": {
@@ -2484,7 +2554,9 @@
           }
         ],
         "summary": "Validate Paperless-ngx credentials",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/plugins/sftp_fetch/probe-host-key": {
@@ -2552,7 +2624,9 @@
           }
         ],
         "summary": "Probe remote SFTP host key fingerprint",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/connectors/plugins/{pluginId}": {
@@ -2565,7 +2639,13 @@
             "in": "path",
             "schema": {
               "type": "string",
-              "enum": ["gmail", "outlook", "paperless", "home_assistant", "amazon_s3"]
+              "enum": [
+                "gmail",
+                "outlook",
+                "paperless",
+                "home_assistant",
+                "amazon_s3"
+              ]
             }
           }
         ],
@@ -2630,7 +2710,9 @@
           }
         ],
         "summary": "Connector plugin descriptor",
-        "tags": ["Connectors"]
+        "tags": [
+          "Connectors"
+        ]
       }
     },
     "/correspondents": {
@@ -2698,7 +2780,9 @@
           }
         ],
         "summary": "List correspondents",
-        "tags": ["Correspondents"]
+        "tags": [
+          "Correspondents"
+        ]
       },
       "post": {
         "operationId": "createCorrespondent",
@@ -2774,7 +2858,9 @@
           }
         ],
         "summary": "Create correspondent",
-        "tags": ["Correspondents"]
+        "tags": [
+          "Correspondents"
+        ]
       }
     },
     "/correspondents/{id}": {
@@ -2861,7 +2947,9 @@
           }
         ],
         "summary": "Update correspondent",
-        "tags": ["Correspondents"]
+        "tags": [
+          "Correspondents"
+        ]
       },
       "delete": {
         "operationId": "deleteCorrespondent",
@@ -2936,7 +3024,9 @@
           }
         ],
         "summary": "Delete correspondent",
-        "tags": ["Correspondents"]
+        "tags": [
+          "Correspondents"
+        ]
       }
     },
     "/dashboard": {
@@ -3004,7 +3094,9 @@
           }
         ],
         "summary": "Get personal dashboard layout",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       },
       "put": {
         "operationId": "replaceDashboardLayout",
@@ -3080,7 +3172,9 @@
           }
         ],
         "summary": "Replace personal dashboard layout",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       }
     },
     "/dashboard/installation-admin": {
@@ -3141,7 +3235,9 @@
           }
         ],
         "summary": "Whether the current user is an installation admin (ADR 019)",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       }
     },
     "/dashboard/installation-default": {
@@ -3209,7 +3305,9 @@
           }
         ],
         "summary": "Installation default dashboard template",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       },
       "put": {
         "operationId": "setInstallationDashboardDefault",
@@ -3285,7 +3383,9 @@
           }
         ],
         "summary": "Set installation default dashboard (admin)",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       }
     },
     "/dashboard/statistics": {
@@ -3353,7 +3453,9 @@
           }
         ],
         "summary": "Dashboard document statistics",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       }
     },
     "/document-pipeline/modules": {
@@ -3422,7 +3524,9 @@
           }
         ],
         "summary": "Read-only catalog for a future workflow UI (enable/order not persisted yet).",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       }
     },
     "/documents": {
@@ -3470,7 +3574,13 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["uploaded", "queued", "extracting", "ready", "failed"]
+              "enum": [
+                "uploaded",
+                "queued",
+                "extracting",
+                "ready",
+                "failed"
+              ]
             }
           },
           {
@@ -3539,7 +3649,12 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["updatedAt", "createdAt", "title", "documentDate"]
+              "enum": [
+                "updatedAt",
+                "createdAt",
+                "title",
+                "documentDate"
+              ]
             }
           },
           {
@@ -3548,7 +3663,10 @@
             "in": "query",
             "schema": {
               "type": "string",
-              "enum": ["asc", "desc"]
+              "enum": [
+                "asc",
+                "desc"
+              ]
             }
           }
         ],
@@ -3613,7 +3731,9 @@
           }
         ],
         "summary": "List or search documents (ABAC filtered)",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       },
       "post": {
         "operationId": "createDocument",
@@ -3647,7 +3767,9 @@
                     "format": "binary"
                   }
                 },
-                "required": ["file"]
+                "required": [
+                  "file"
+                ]
               }
             }
           }
@@ -3713,7 +3835,9 @@
           }
         ],
         "summary": "Upload document (multipart file field)",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/bulk": {
@@ -3784,7 +3908,9 @@
           }
         ],
         "summary": "Bulk",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{documentId}/tag-suggestions/{tagId}/accept": {
@@ -3869,7 +3995,9 @@
           }
         ],
         "summary": "Accept tag suggestion on document",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{documentId}/tag-suggestions/{tagId}/dismiss": {
@@ -3964,7 +4092,9 @@
           }
         ],
         "summary": "Dismiss tag suggestion on document",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{documentId}/tags/{tagId}": {
@@ -4049,7 +4179,9 @@
           }
         ],
         "summary": "Assign tag to document",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       },
       "delete": {
         "operationId": "removeDocumentTag",
@@ -4132,7 +4264,9 @@
           }
         ],
         "summary": "Remove tag from document",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}": {
@@ -4209,7 +4343,9 @@
           }
         ],
         "summary": "Get document (ABAC)",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       },
       "patch": {
         "operationId": "patch",
@@ -4287,7 +4423,9 @@
           }
         ],
         "summary": "Patch",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       },
       "delete": {
         "operationId": "deleteDocument",
@@ -4355,7 +4493,9 @@
           }
         ],
         "summary": "Delete document",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/chat": {
@@ -4442,7 +4582,9 @@
           }
         ],
         "summary": "Chat",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/chat/threads": {
@@ -4519,7 +4661,9 @@
           }
         ],
         "summary": "List Chat Threads",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       },
       "post": {
         "operationId": "createChatThread",
@@ -4597,7 +4741,9 @@
           }
         ],
         "summary": "Create Chat Thread",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/chat/threads/{threadId}/messages": {
@@ -4682,7 +4828,9 @@
           }
         ],
         "summary": "List Chat Thread Messages",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       },
       "post": {
         "operationId": "sendChatThreadMessage",
@@ -4775,7 +4923,9 @@
           }
         ],
         "summary": "Send Chat Thread Message",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/chat/threads/{threadId}/messages/{messageId}/cancel": {
@@ -4868,7 +5018,9 @@
           }
         ],
         "summary": "Cancel in-flight async chat generation",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/chat/threads/{threadId}/messages/{messageId}/retry": {
@@ -4954,7 +5106,9 @@
           }
         ],
         "summary": "Retry failed async chat message generation",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/chat/threads/{threadId}/messages/{messageId}/stream": {
@@ -5040,7 +5194,9 @@
           }
         ],
         "summary": "SSE stream for async assistant message generation",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/content": {
@@ -5116,7 +5272,9 @@
           }
         ],
         "summary": "Content",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/duplicate-candidates": {
@@ -5186,7 +5344,9 @@
           }
         ],
         "summary": "Duplicate Candidates",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/duplicate-candidates/{candidateId}/dismiss": {
@@ -5264,7 +5424,9 @@
           }
         ],
         "summary": "Dismiss Duplicate",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/duplicate-stack": {
@@ -5334,7 +5496,9 @@
           }
         ],
         "summary": "Duplicate Stack",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/duplicate-stack/keep-version": {
@@ -5414,7 +5578,9 @@
           }
         ],
         "summary": "Duplicate Stack Keep Version",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/duplicate-stack/not-duplicate": {
@@ -5501,7 +5667,9 @@
           }
         ],
         "summary": "Duplicate Stack Not Duplicate",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/duplicate-stack/set-primary": {
@@ -5581,7 +5749,9 @@
           }
         ],
         "summary": "Duplicate Stack Set Primary",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/extraction/arena-rating": {
@@ -5668,7 +5838,9 @@
           }
         ],
         "summary": "Extraction Arena Rating",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/extraction/compare": {
@@ -5755,7 +5927,9 @@
           }
         ],
         "summary": "Extraction Compare",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/extraction/requeue": {
@@ -5832,7 +6006,9 @@
           }
         ],
         "summary": "Extraction Requeue",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/layout-html": {
@@ -5909,7 +6085,9 @@
           }
         ],
         "summary": "Rendered layout HTML",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/layout-ir": {
@@ -5986,7 +6164,9 @@
           }
         ],
         "summary": "Layout IR for document re-render",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/layout-typst": {
@@ -6063,7 +6243,9 @@
           }
         ],
         "summary": "Typst source for layout export",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/documents/{id}/tag-suggestions/refresh": {
@@ -6140,7 +6322,9 @@
           }
         ],
         "summary": "Refresh Suggestions",
-        "tags": ["Documents"]
+        "tags": [
+          "Documents"
+        ]
       }
     },
     "/extraction-feedback/field-corrections": {
@@ -6226,7 +6410,9 @@
           }
         ],
         "summary": "Export hook for pipeline / re-finetune jobs (cursor via afterCreatedAt + afterId).",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       }
     },
     "/folders": {
@@ -6294,7 +6480,9 @@
           }
         ],
         "summary": "List folders",
-        "tags": ["Organizer"]
+        "tags": [
+          "Organizer"
+        ]
       },
       "post": {
         "operationId": "createFolder",
@@ -6370,7 +6558,9 @@
           }
         ],
         "summary": "Create folder",
-        "tags": ["Organizer"]
+        "tags": [
+          "Organizer"
+        ]
       }
     },
     "/folders/{id}": {
@@ -6457,7 +6647,9 @@
           }
         ],
         "summary": "Update folder",
-        "tags": ["Organizer"]
+        "tags": [
+          "Organizer"
+        ]
       },
       "delete": {
         "operationId": "deleteFolder",
@@ -6532,7 +6724,9 @@
           }
         ],
         "summary": "Delete folder",
-        "tags": ["Organizer"]
+        "tags": [
+          "Organizer"
+        ]
       }
     },
     "/invitations/accept": {
@@ -6603,7 +6797,9 @@
           }
         ],
         "summary": "Accept invitation and set password",
-        "tags": ["invitations"]
+        "tags": [
+          "invitations"
+        ]
       }
     },
     "/labels/map": {
@@ -6671,7 +6867,9 @@
           }
         ],
         "summary": "Map",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/labels/recommendation-blocklist": {
@@ -6739,7 +6937,9 @@
           }
         ],
         "summary": "Blocklist",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       },
       "post": {
         "operationId": "addBlocklistEntry",
@@ -6815,7 +7015,9 @@
           }
         ],
         "summary": "Add Blocklist Entry",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/labels/recommendation-blocklist/patterns": {
@@ -6886,7 +7088,9 @@
           }
         ],
         "summary": "Confirm Pattern",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/labels/recommendation-blocklist/patterns/{id}": {
@@ -6963,7 +7167,9 @@
           }
         ],
         "summary": "Remove Pattern",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/labels/recommendation-blocklist/propose-pattern": {
@@ -7041,7 +7247,9 @@
           }
         ],
         "summary": "Propose Pattern",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/labels/recommendation-blocklist/{id}": {
@@ -7118,7 +7326,9 @@
           }
         ],
         "summary": "Remove Blocklist Entry",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/labels/recommendations": {
@@ -7186,7 +7396,9 @@
           }
         ],
         "summary": "Recommendations",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/labels/recommendations/{id}/accept": {
@@ -7273,7 +7485,9 @@
           }
         ],
         "summary": "Accept label recommendation",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/labels/recommendations/{id}/dismiss": {
@@ -7360,7 +7574,9 @@
           }
         ],
         "summary": "Dismiss label recommendation",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/mappen": {
@@ -7428,7 +7644,9 @@
           }
         ],
         "summary": "List root Ordner buckets",
-        "tags": ["Organizer"]
+        "tags": [
+          "Organizer"
+        ]
       },
       "post": {
         "operationId": "createMappe",
@@ -7504,7 +7722,9 @@
           }
         ],
         "summary": "Create root Ordner bucket",
-        "tags": ["Organizer"]
+        "tags": [
+          "Organizer"
+        ]
       }
     },
     "/mappen/{id}": {
@@ -7591,7 +7811,9 @@
           }
         ],
         "summary": "Update root Ordner bucket",
-        "tags": ["Organizer"]
+        "tags": [
+          "Organizer"
+        ]
       },
       "delete": {
         "operationId": "deleteMappe",
@@ -7666,7 +7888,9 @@
           }
         ],
         "summary": "Delete root Ordner bucket",
-        "tags": ["Organizer"]
+        "tags": [
+          "Organizer"
+        ]
       }
     },
     "/ml/models/families": {
@@ -7734,7 +7958,9 @@
           }
         ],
         "summary": "Families",
-        "tags": ["Models"]
+        "tags": [
+          "Models"
+        ]
       }
     },
     "/ml/models/families/{familyId}/versions": {
@@ -7811,7 +8037,9 @@
           }
         ],
         "summary": "Versions",
-        "tags": ["Models"]
+        "tags": [
+          "Models"
+        ]
       }
     },
     "/ml/models/versions/{versionId}/lifecycle": {
@@ -7898,7 +8126,9 @@
           }
         ],
         "summary": "Patch Lifecycle",
-        "tags": ["Models"]
+        "tags": [
+          "Models"
+        ]
       }
     },
     "/ml/retrain": {
@@ -7976,7 +8206,9 @@
           }
         ],
         "summary": "Retrain",
-        "tags": ["Models"]
+        "tags": [
+          "Models"
+        ]
       }
     },
     "/ml/retrain/jobs": {
@@ -8061,7 +8293,9 @@
           }
         ],
         "summary": "Jobs",
-        "tags": ["Models"]
+        "tags": [
+          "Models"
+        ]
       }
     },
     "/openapi.json": {
@@ -8122,7 +8356,9 @@
           }
         },
         "summary": "Download OpenAPI 3.1 specification",
-        "tags": ["API metadata"]
+        "tags": [
+          "API metadata"
+        ]
       }
     },
     "/recognized-fields": {
@@ -8183,7 +8419,9 @@
           }
         ],
         "summary": "List recognized field catalog",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       },
       "put": {
         "operationId": "replaceRecognizedFields",
@@ -8252,7 +8490,9 @@
           }
         ],
         "summary": "Replace recognized field catalog",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       }
     },
     "/saved-views": {
@@ -8320,7 +8560,9 @@
           }
         ],
         "summary": "List saved document views",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       },
       "post": {
         "operationId": "createSavedDocumentView",
@@ -8396,7 +8638,9 @@
           }
         ],
         "summary": "Create saved document view",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       }
     },
     "/saved-views/reorder": {
@@ -8474,7 +8718,9 @@
           }
         ],
         "summary": "Reorder owned saved views",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       }
     },
     "/saved-views/{id}": {
@@ -8551,7 +8797,9 @@
           }
         ],
         "summary": "Get one saved document view",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       },
       "patch": {
         "operationId": "updateSavedDocumentView",
@@ -8636,7 +8884,9 @@
           }
         ],
         "summary": "Update saved document view",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       },
       "delete": {
         "operationId": "deleteSavedDocumentView",
@@ -8711,7 +8961,9 @@
           }
         ],
         "summary": "Delete saved document view",
-        "tags": ["workspace"]
+        "tags": [
+          "workspace"
+        ]
       }
     },
     "/search": {
@@ -8807,7 +9059,9 @@
           }
         ],
         "summary": "Hybrid global search (FTS, trigram, semantic)",
-        "tags": ["search"]
+        "tags": [
+          "search"
+        ]
       }
     },
     "/settings": {
@@ -8875,7 +9129,9 @@
           }
         ],
         "summary": "Get user settings",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       },
       "patch": {
         "operationId": "updateUserSettings",
@@ -8951,7 +9207,9 @@
           }
         ],
         "summary": "Update user settings",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       }
     },
     "/settings/chat-providers": {
@@ -9019,7 +9277,9 @@
           }
         ],
         "summary": "List document chat providers",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       }
     },
     "/settings/extraction-engines": {
@@ -9087,7 +9347,9 @@
           }
         ],
         "summary": "List extraction engines",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       }
     },
     "/settings/hardware": {
@@ -9155,7 +9417,9 @@
           }
         ],
         "summary": "Worker hardware capabilities",
-        "tags": ["Settings"]
+        "tags": [
+          "Settings"
+        ]
       }
     },
     "/sftp-ingress/accounts": {
@@ -9216,7 +9480,9 @@
           }
         ],
         "summary": "List SFTP scanner ingress accounts",
-        "tags": ["sftp-ingress"]
+        "tags": [
+          "sftp-ingress"
+        ]
       },
       "post": {
         "operationId": "createSftpIngressAccount",
@@ -9292,7 +9558,9 @@
           }
         ],
         "summary": "Create SFTP scanner ingress account",
-        "tags": ["sftp-ingress"]
+        "tags": [
+          "sftp-ingress"
+        ]
       }
     },
     "/sftp-ingress/accounts/{accountId}": {
@@ -9362,7 +9630,9 @@
           }
         ],
         "summary": "Revoke SFTP scanner ingress account",
-        "tags": ["sftp-ingress"]
+        "tags": [
+          "sftp-ingress"
+        ]
       }
     },
     "/sftp-ingress/accounts/{accountId}/events": {
@@ -9440,7 +9710,9 @@
           }
         ],
         "summary": "List SFTP ingress events for account",
-        "tags": ["sftp-ingress"]
+        "tags": [
+          "sftp-ingress"
+        ]
       }
     },
     "/sftp-ingress/server": {
@@ -9508,7 +9780,9 @@
           }
         ],
         "summary": "SFTP scanner ingress server info",
-        "tags": ["sftp-ingress"]
+        "tags": [
+          "sftp-ingress"
+        ]
       }
     },
     "/tags": {
@@ -9576,7 +9850,9 @@
           }
         ],
         "summary": "List tags",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       },
       "post": {
         "operationId": "createTag",
@@ -9652,7 +9928,9 @@
           }
         ],
         "summary": "Create tag",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/tags/{id}": {
@@ -9739,7 +10017,9 @@
           }
         ],
         "summary": "Update tag",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       },
       "delete": {
         "operationId": "deleteTag",
@@ -9814,7 +10094,9 @@
           }
         ],
         "summary": "Delete tag",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     },
     "/tags/{tagId}/custom-fields": {
@@ -9891,7 +10173,9 @@
           }
         ],
         "summary": "Get Custom Fields",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       },
       "put": {
         "operationId": "putCustomFields",
@@ -9976,7 +10260,9 @@
           }
         ],
         "summary": "Put Custom Fields",
-        "tags": ["Labels"]
+        "tags": [
+          "Labels"
+        ]
       }
     }
   },
@@ -10078,7 +10364,10 @@
             "type": "string"
           }
         },
-        "required": ["tagId", "action"]
+        "required": [
+          "tagId",
+          "action"
+        ]
       },
       "AcceptUserInvitationRequestDto": {
         "type": "object",
@@ -10092,7 +10381,10 @@
             "minLength": 8
           }
         },
-        "required": ["token", "password"]
+        "required": [
+          "token",
+          "password"
+        ]
       },
       "AddLabelRecommendationBlocklistRequestDto": {
         "type": "object",
@@ -10101,7 +10393,9 @@
             "type": "string"
           }
         },
-        "required": ["phrase"]
+        "required": [
+          "phrase"
+        ]
       },
       "AdminAccessResponseDto": {
         "type": "object",
@@ -10110,7 +10404,10 @@
             "type": "boolean"
           },
           "role": {
-            "enum": ["admin", "member"],
+            "enum": [
+              "admin",
+              "member"
+            ],
             "type": "string"
           },
           "roleDescriptions": {
@@ -10120,7 +10417,11 @@
             }
           }
         },
-        "required": ["isAdministrator", "role", "roleDescriptions"]
+        "required": [
+          "isAdministrator",
+          "role",
+          "roleDescriptions"
+        ]
       },
       "AdminUserListResponseDto": {
         "type": "object",
@@ -10135,7 +10436,10 @@
             "type": "number"
           }
         },
-        "required": ["users", "total"]
+        "required": [
+          "users",
+          "total"
+        ]
       },
       "AdminUserResponseDto": {
         "type": "object",
@@ -10150,7 +10454,10 @@
             "type": "string"
           },
           "role": {
-            "enum": ["admin", "member"],
+            "enum": [
+              "admin",
+              "member"
+            ],
             "type": "string"
           },
           "banned": {
@@ -10161,14 +10468,26 @@
             "nullable": true
           },
           "accountStatus": {
-            "enum": ["active", "invited", "suspended"],
+            "enum": [
+              "active",
+              "invited",
+              "suspended"
+            ],
             "type": "string"
           },
           "createdAt": {
             "type": "string"
           }
         },
-        "required": ["id", "name", "email", "role", "banned", "accountStatus", "createdAt"]
+        "required": [
+          "id",
+          "name",
+          "email",
+          "role",
+          "banned",
+          "accountStatus",
+          "createdAt"
+        ]
       },
       "ApiErrorEnvelopeDto": {
         "type": "object",
@@ -10182,7 +10501,10 @@
             "example": "ABAC denied"
           }
         },
-        "required": ["code", "message"]
+        "required": [
+          "code",
+          "message"
+        ]
       },
       "BanAdminUserRequestDto": {
         "type": "object",
@@ -10197,13 +10519,19 @@
         "properties": {
           "role": {
             "type": "string",
-            "enum": ["user", "assistant"]
+            "enum": [
+              "user",
+              "assistant"
+            ]
           },
           "content": {
             "type": "string"
           }
         },
-        "required": ["role", "content"]
+        "required": [
+          "role",
+          "content"
+        ]
       },
       "ChatMessageRecordDto": {
         "type": "object",
@@ -10213,7 +10541,10 @@
           },
           "role": {
             "type": "string",
-            "enum": ["user", "assistant"]
+            "enum": [
+              "user",
+              "assistant"
+            ]
           },
           "content": {
             "type": "string"
@@ -10227,19 +10558,33 @@
           "generationStatus": {
             "type": "string",
             "nullable": true,
-            "enum": ["failed", "pending", "streaming", "done"]
+            "enum": [
+              "failed",
+              "pending",
+              "streaming",
+              "done"
+            ]
           },
           "generationPhase": {
             "type": "string",
             "nullable": true,
-            "enum": ["retrieving", "generating", "verifying"]
+            "enum": [
+              "retrieving",
+              "generating",
+              "verifying"
+            ]
           },
           "errorCode": {
             "type": "string",
             "nullable": true
           }
         },
-        "required": ["id", "role", "content", "createdAt"]
+        "required": [
+          "id",
+          "role",
+          "content",
+          "createdAt"
+        ]
       },
       "ConfirmLabelRecommendationBlocklistPatternRequestDto": {
         "type": "object",
@@ -10248,7 +10593,9 @@
             "type": "string"
           }
         },
-        "required": ["pattern"]
+        "required": [
+          "pattern"
+        ]
       },
       "CorrespondentListResponseDto": {
         "type": "object",
@@ -10260,14 +10607,22 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "CreateConnectorInstallationRequestDto": {
         "type": "object",
         "properties": {
           "pluginId": {
             "type": "string",
-            "enum": ["gmail", "outlook", "paperless", "home_assistant", "amazon_s3"]
+            "enum": [
+              "gmail",
+              "outlook",
+              "paperless",
+              "home_assistant",
+              "amazon_s3"
+            ]
           },
           "displayName": {
             "type": "string",
@@ -10280,7 +10635,11 @@
             }
           }
         },
-        "required": ["pluginId", "displayName", "credentials"]
+        "required": [
+          "pluginId",
+          "displayName",
+          "credentials"
+        ]
       },
       "CreateCorrespondentRequestDto": {
         "type": "object",
@@ -10290,13 +10649,21 @@
           },
           "matchingAlgorithm": {
             "type": "string",
-            "enum": ["none", "any", "all", "exact", "regex"]
+            "enum": [
+              "none",
+              "any",
+              "all",
+              "exact",
+              "regex"
+            ]
           },
           "match": {
             "type": "string"
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "CreateDocumentChatThreadRequestDto": {
         "type": "object",
@@ -10323,7 +10690,9 @@
             "format": "uuid"
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "CreateMappeRequestDto": {
         "type": "object",
@@ -10336,7 +10705,9 @@
             "nullable": true
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "CreateSavedDocumentViewRequestDto": {
         "type": "object",
@@ -10352,30 +10723,52 @@
           },
           "visibility": {
             "type": "string",
-            "enum": ["private", "shared"]
+            "enum": [
+              "private",
+              "shared"
+            ]
           },
           "searchQuery": {
             "type": "string"
           },
           "sort": {
             "type": "string",
-            "enum": ["updatedAt", "createdAt", "title", "documentDate"]
+            "enum": [
+              "updatedAt",
+              "createdAt",
+              "title",
+              "documentDate"
+            ]
           },
           "order": {
             "type": "string",
-            "enum": ["asc", "desc"]
+            "enum": [
+              "asc",
+              "desc"
+            ]
           },
           "viewMode": {
             "type": "string",
-            "enum": ["klassisch", "karten", "fokus"]
+            "enum": [
+              "klassisch",
+              "karten",
+              "fokus"
+            ]
           },
           "filterMode": {
             "type": "string",
-            "enum": ["ui", "query"]
+            "enum": [
+              "ui",
+              "query"
+            ]
           },
           "listScope": {
             "type": "string",
-            "enum": ["all", "folder", "mappe"]
+            "enum": [
+              "all",
+              "folder",
+              "mappe"
+            ]
           },
           "folderId": {
             "type": "string",
@@ -10395,7 +10788,13 @@
           "status": {
             "type": "string",
             "nullable": true,
-            "enum": ["uploaded", "queued", "extracting", "ready", "failed"]
+            "enum": [
+              "uploaded",
+              "queued",
+              "extracting",
+              "ready",
+              "failed"
+            ]
           },
           "inbox": {
             "type": "boolean",
@@ -10424,7 +10823,10 @@
             "type": "boolean"
           }
         },
-        "required": ["name", "searchQuery"]
+        "required": [
+          "name",
+          "searchQuery"
+        ]
       },
       "CreateTagRequestDto": {
         "type": "object",
@@ -10440,13 +10842,21 @@
           },
           "matchingAlgorithm": {
             "type": "string",
-            "enum": ["none", "any", "all", "exact", "regex"]
+            "enum": [
+              "none",
+              "any",
+              "all",
+              "exact",
+              "regex"
+            ]
           },
           "match": {
             "type": "string"
           }
         },
-        "required": ["name"]
+        "required": [
+          "name"
+        ]
       },
       "DashboardLayoutResponseDto": {
         "type": "object",
@@ -10461,7 +10871,10 @@
             "type": "boolean"
           }
         },
-        "required": ["widgets", "editMode"]
+        "required": [
+          "widgets",
+          "editMode"
+        ]
       },
       "DashboardStatisticsDtoClass": {
         "type": "object",
@@ -10493,7 +10906,10 @@
                   "type": "number"
                 }
               },
-              "required": ["name", "count"]
+              "required": [
+                "name",
+                "count"
+              ]
             }
           }
         },
@@ -10513,7 +10929,13 @@
           },
           "type": {
             "type": "string",
-            "enum": ["upload", "saved_view", "statistics", "recent_documents", "attention"]
+            "enum": [
+              "upload",
+              "saved_view",
+              "statistics",
+              "recent_documents",
+              "attention"
+            ]
           },
           "position": {
             "type": "number"
@@ -10533,7 +10955,13 @@
             "nullable": true
           }
         },
-        "required": ["id", "type", "position", "widthCols", "heightRows"]
+        "required": [
+          "id",
+          "type",
+          "position",
+          "widthCols",
+          "heightRows"
+        ]
       },
       "DashboardWidgetInputDto": {
         "type": "object",
@@ -10544,7 +10972,13 @@
           },
           "type": {
             "type": "string",
-            "enum": ["saved_view", "upload", "statistics", "recent_documents", "attention"]
+            "enum": [
+              "saved_view",
+              "upload",
+              "statistics",
+              "recent_documents",
+              "attention"
+            ]
           },
           "position": {
             "type": "number",
@@ -10572,7 +11006,12 @@
             "maximum": 50
           }
         },
-        "required": ["type", "position", "widthCols", "heightRows"]
+        "required": [
+          "type",
+          "position",
+          "widthCols",
+          "heightRows"
+        ]
       },
       "DismissLabelRecommendationRequestDto": {
         "type": "object",
@@ -10604,7 +11043,13 @@
         "properties": {
           "action": {
             "type": "string",
-            "enum": ["addTag", "removeTag", "setCorrespondent", "setFolder", "delete"]
+            "enum": [
+              "addTag",
+              "removeTag",
+              "setCorrespondent",
+              "setFolder",
+              "delete"
+            ]
           },
           "tagId": {
             "type": "string",
@@ -10621,7 +11066,9 @@
             "format": "uuid"
           }
         },
-        "required": ["action"]
+        "required": [
+          "action"
+        ]
       },
       "DocumentBulkRequestDto": {
         "type": "object",
@@ -10637,7 +11084,10 @@
             "$ref": "#/components/schemas/DocumentBulkActionDto"
           }
         },
-        "required": ["ids", "bulk"]
+        "required": [
+          "ids",
+          "bulk"
+        ]
       },
       "DocumentChatProviderInfoDto": {
         "type": "object",
@@ -10655,7 +11105,12 @@
             "type": "boolean"
           }
         },
-        "required": ["id", "label", "description", "available"]
+        "required": [
+          "id",
+          "label",
+          "description",
+          "available"
+        ]
       },
       "DocumentChatProviderListResponseDto": {
         "type": "object",
@@ -10682,7 +11137,11 @@
             "$ref": "#/components/schemas/DocumentChatProvidersCatalogMetaDto"
           }
         },
-        "required": ["selectable", "unavailable", "meta"]
+        "required": [
+          "selectable",
+          "unavailable",
+          "meta"
+        ]
       },
       "DocumentChatProvidersCatalogMetaDto": {
         "type": "object",
@@ -10698,7 +11157,11 @@
             "type": "boolean"
           }
         },
-        "required": ["ollamaModel", "ollamaConfigured", "runsOnCpu"]
+        "required": [
+          "ollamaModel",
+          "ollamaConfigured",
+          "runsOnCpu"
+        ]
       },
       "DocumentChatRequestDto": {
         "type": "object",
@@ -10713,7 +11176,9 @@
             }
           }
         },
-        "required": ["message"]
+        "required": [
+          "message"
+        ]
       },
       "DocumentChatResponseDto": {
         "type": "object",
@@ -10732,7 +11197,10 @@
             "nullable": true
           }
         },
-        "required": ["reply", "configured"]
+        "required": [
+          "reply",
+          "configured"
+        ]
       },
       "DocumentChatThreadDto": {
         "type": "object",
@@ -10745,7 +11213,10 @@
           },
           "scope": {
             "type": "string",
-            "enum": ["document", "library"]
+            "enum": [
+              "document",
+              "library"
+            ]
           },
           "documentIds": {
             "type": "array",
@@ -10766,10 +11237,22 @@
           "activeGenerationStatus": {
             "type": "string",
             "nullable": true,
-            "enum": ["failed", "pending", "streaming", "done"]
+            "enum": [
+              "failed",
+              "pending",
+              "streaming",
+              "done"
+            ]
           }
         },
-        "required": ["id", "title", "scope", "documentIds", "createdAt", "updatedAt"]
+        "required": [
+          "id",
+          "title",
+          "scope",
+          "documentIds",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "DocumentChatThreadListResponseDto": {
         "type": "object",
@@ -10781,7 +11264,9 @@
             }
           }
         },
-        "required": ["threads"]
+        "required": [
+          "threads"
+        ]
       },
       "DocumentChatThreadMessagesResponseDto": {
         "type": "object",
@@ -10793,7 +11278,9 @@
             }
           }
         },
-        "required": ["messages"]
+        "required": [
+          "messages"
+        ]
       },
       "DocumentChatUnavailableBackendInfoDto": {
         "type": "object",
@@ -10811,7 +11298,12 @@
             "type": "string"
           }
         },
-        "required": ["id", "label", "reason", "setupHint"]
+        "required": [
+          "id",
+          "label",
+          "reason",
+          "setupHint"
+        ]
       },
       "DocumentExtractionSummaryDto": {
         "type": "object",
@@ -10851,7 +11343,10 @@
             }
           }
         },
-        "required": ["text", "fields"]
+        "required": [
+          "text",
+          "fields"
+        ]
       },
       "DocumentListResponseDto": {
         "type": "object",
@@ -10863,7 +11358,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "DocumentPipelineModuleDescriptorDto": {
         "type": "object",
@@ -10884,7 +11381,13 @@
             "type": "number"
           }
         },
-        "required": ["id", "label", "description", "defaultEnabled", "defaultOrder"]
+        "required": [
+          "id",
+          "label",
+          "description",
+          "defaultEnabled",
+          "defaultOrder"
+        ]
       },
       "DocumentPipelineModulesResponseDto": {
         "type": "object",
@@ -10896,7 +11399,9 @@
             }
           }
         },
-        "required": ["modules"]
+        "required": [
+          "modules"
+        ]
       },
       "DocumentResponseDto": {
         "type": "object",
@@ -10911,7 +11416,13 @@
             "type": "string"
           },
           "status": {
-            "enum": ["uploaded", "queued", "extracting", "ready", "failed"],
+            "enum": [
+              "uploaded",
+              "queued",
+              "extracting",
+              "ready",
+              "failed"
+            ],
             "type": "string"
           },
           "mimeType": {
@@ -10952,7 +11463,9 @@
             "format": "uuid"
           }
         },
-        "required": ["versionDocumentId"]
+        "required": [
+          "versionDocumentId"
+        ]
       },
       "DuplicateStackNotDuplicateRequestDto": {
         "type": "object",
@@ -10962,7 +11475,9 @@
             "format": "uuid"
           }
         },
-        "required": ["otherDocumentId"]
+        "required": [
+          "otherDocumentId"
+        ]
       },
       "DuplicateStackSetPrimaryRequestDto": {
         "type": "object",
@@ -10976,7 +11491,10 @@
             "format": "uuid"
           }
         },
-        "required": ["documentId", "stackId"]
+        "required": [
+          "documentId",
+          "stackId"
+        ]
       },
       "ExportToConnectorRequestDto": {
         "type": "object",
@@ -10989,7 +11507,9 @@
             "type": "string"
           }
         },
-        "required": ["documentId"]
+        "required": [
+          "documentId"
+        ]
       },
       "ExtractedFieldDto": {
         "type": "object",
@@ -11006,7 +11526,10 @@
             "maximum": 1
           }
         },
-        "required": ["key", "value"]
+        "required": [
+          "key",
+          "value"
+        ]
       },
       "ExtractionArenaRatingRequestDto": {
         "type": "object",
@@ -11029,7 +11552,10 @@
             "type": "boolean"
           }
         },
-        "required": ["winnerEngine", "comparedEngines"]
+        "required": [
+          "winnerEngine",
+          "comparedEngines"
+        ]
       },
       "ExtractionBlockDto": {
         "type": "object",
@@ -11065,7 +11591,14 @@
             "type": "number"
           }
         },
-        "required": ["page", "x", "y", "width", "height", "text"]
+        "required": [
+          "page",
+          "x",
+          "y",
+          "width",
+          "height",
+          "text"
+        ]
       },
       "ExtractionCompareRequestDto": {
         "type": "object",
@@ -11093,7 +11626,9 @@
             }
           }
         },
-        "required": ["engines"]
+        "required": [
+          "engines"
+        ]
       },
       "FolderListResponseDto": {
         "type": "object",
@@ -11105,7 +11640,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "ImportFromConnectorRequestDto": {
         "type": "object",
@@ -11114,7 +11651,9 @@
             "type": "string"
           }
         },
-        "required": ["ref"]
+        "required": [
+          "ref"
+        ]
       },
       "InstallationDashboardDefaultResponseDto": {
         "type": "object",
@@ -11126,7 +11665,9 @@
             }
           }
         },
-        "required": ["widgets"]
+        "required": [
+          "widgets"
+        ]
       },
       "InviteAdminUserRequestDto": {
         "type": "object",
@@ -11140,10 +11681,16 @@
           },
           "role": {
             "type": "string",
-            "enum": ["admin", "member"]
+            "enum": [
+              "admin",
+              "member"
+            ]
           }
         },
-        "required": ["email", "name"]
+        "required": [
+          "email",
+          "name"
+        ]
       },
       "LabelMapResponseDtoClass": {
         "type": "object",
@@ -11166,10 +11713,19 @@
           "emptyReason": {
             "type": "string",
             "nullable": true,
-            "enum": ["no_extracted_documents", "awaiting_embeddings", "embedding_unavailable"]
+            "enum": [
+              "no_extracted_documents",
+              "awaiting_embeddings",
+              "embedding_unavailable"
+            ]
           }
         },
-        "required": ["points", "documentCount", "tagCount", "extractedDocumentCount"]
+        "required": [
+          "points",
+          "documentCount",
+          "tagCount",
+          "extractedDocumentCount"
+        ]
       },
       "LabelRecommendationBlocklistEntryResponseDto": {
         "type": "object",
@@ -11182,13 +11738,21 @@
           },
           "source": {
             "type": "string",
-            "enum": ["manual", "dismiss"]
+            "enum": [
+              "manual",
+              "dismiss"
+            ]
           },
           "createdAt": {
             "type": "string"
           }
         },
-        "required": ["id", "phrase", "source", "createdAt"]
+        "required": [
+          "id",
+          "phrase",
+          "source",
+          "createdAt"
+        ]
       },
       "LabelRecommendationBlocklistListResponseDto": {
         "type": "object",
@@ -11206,7 +11770,10 @@
             }
           }
         },
-        "required": ["items", "patterns"]
+        "required": [
+          "items",
+          "patterns"
+        ]
       },
       "LabelRecommendationListResponseDto": {
         "type": "object",
@@ -11218,7 +11785,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "LayoutHtmlResponseDto": {
         "type": "object",
@@ -11227,7 +11796,9 @@
             "type": "string"
           }
         },
-        "required": ["html"]
+        "required": [
+          "html"
+        ]
       },
       "LayoutIrBlockDto": {
         "type": "object",
@@ -11294,14 +11865,23 @@
             "type": "number"
           }
         },
-        "required": ["page", "x", "y", "width", "height", "text"]
+        "required": [
+          "page",
+          "x",
+          "y",
+          "width",
+          "height",
+          "text"
+        ]
       },
       "LayoutIrDocumentDto": {
         "type": "object",
         "properties": {
           "version": {
             "type": "number",
-            "enum": [1]
+            "enum": [
+              1
+            ]
           },
           "pages": {
             "type": "array",
@@ -11310,7 +11890,10 @@
             }
           }
         },
-        "required": ["version", "pages"]
+        "required": [
+          "version",
+          "pages"
+        ]
       },
       "LayoutIrLineDto": {
         "type": "object",
@@ -11349,7 +11932,14 @@
             "type": "number"
           }
         },
-        "required": ["page", "x", "y", "width", "height", "text"]
+        "required": [
+          "page",
+          "x",
+          "y",
+          "width",
+          "height",
+          "text"
+        ]
       },
       "LayoutIrPageDto": {
         "type": "object",
@@ -11394,7 +11984,12 @@
             }
           }
         },
-        "required": ["page", "widthPt", "heightPt", "blocks"]
+        "required": [
+          "page",
+          "widthPt",
+          "heightPt",
+          "blocks"
+        ]
       },
       "LayoutIrTableCellDto": {
         "type": "object",
@@ -11427,7 +12022,13 @@
             "type": "string"
           }
         },
-        "required": ["text", "x", "y", "width", "height"]
+        "required": [
+          "text",
+          "x",
+          "y",
+          "width",
+          "height"
+        ]
       },
       "LayoutIrTableDto": {
         "type": "object",
@@ -11460,14 +12061,26 @@
             }
           }
         },
-        "required": ["page", "x", "y", "width", "height", "columnCount", "rows"]
+        "required": [
+          "page",
+          "x",
+          "y",
+          "width",
+          "height",
+          "columnCount",
+          "rows"
+        ]
       },
       "LayoutIrVectorDto": {
         "type": "object",
         "properties": {
           "kind": {
             "type": "string",
-            "enum": ["rect", "line", "path"]
+            "enum": [
+              "rect",
+              "line",
+              "path"
+            ]
           },
           "x": {
             "type": "number"
@@ -11510,14 +12123,23 @@
             "type": "string"
           }
         },
-        "required": ["kind", "x", "y", "width", "height"]
+        "required": [
+          "kind",
+          "x",
+          "y",
+          "width",
+          "height"
+        ]
       },
       "LayoutIrWidgetDto": {
         "type": "object",
         "properties": {
           "kind": {
             "type": "string",
-            "enum": ["text", "checkbox"]
+            "enum": [
+              "text",
+              "checkbox"
+            ]
           },
           "page": {
             "type": "number"
@@ -11559,7 +12181,14 @@
             "type": "string"
           }
         },
-        "required": ["kind", "page", "x", "y", "width", "height"]
+        "required": [
+          "kind",
+          "page",
+          "x",
+          "y",
+          "width",
+          "height"
+        ]
       },
       "LayoutTypstResponseDto": {
         "type": "object",
@@ -11568,11 +12197,20 @@
             "type": "string"
           }
         },
-        "required": ["typst"]
+        "required": [
+          "typst"
+        ]
       },
       "LibraryTableColumnId": {
         "type": "string",
-        "enum": ["title", "labels", "date", "status", "folder", "updated"]
+        "enum": [
+          "title",
+          "labels",
+          "date",
+          "status",
+          "folder",
+          "updated"
+        ]
       },
       "MappeListResponseDto": {
         "type": "object",
@@ -11584,7 +12222,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "MlModelFamilyDto": {
         "type": "object",
@@ -11594,7 +12234,12 @@
           },
           "kind": {
             "type": "string",
-            "enum": ["embedding", "ocr", "docqa", "field_extractor"]
+            "enum": [
+              "embedding",
+              "ocr",
+              "docqa",
+              "field_extractor"
+            ]
           },
           "displayName": {
             "type": "string"
@@ -11604,7 +12249,12 @@
             "nullable": true
           }
         },
-        "required": ["id", "kind", "displayName", "description"]
+        "required": [
+          "id",
+          "kind",
+          "displayName",
+          "description"
+        ]
       },
       "MlModelFamilyListResponseDto": {
         "type": "object",
@@ -11616,7 +12266,9 @@
             }
           }
         },
-        "required": ["families"]
+        "required": [
+          "families"
+        ]
       },
       "MlModelVersionDto": {
         "type": "object",
@@ -11646,7 +12298,13 @@
           },
           "lifecycle": {
             "type": "string",
-            "enum": ["failed", "active", "registered", "canary", "archived"]
+            "enum": [
+              "failed",
+              "active",
+              "registered",
+              "canary",
+              "archived"
+            ]
           },
           "trainingSnapshotId": {
             "type": "string",
@@ -11688,7 +12346,9 @@
             }
           }
         },
-        "required": ["versions"]
+        "required": [
+          "versions"
+        ]
       },
       "MlRetrainJobDto": {
         "type": "object",
@@ -11701,11 +12361,21 @@
           },
           "triggerKind": {
             "type": "string",
-            "enum": ["manual", "cron", "threshold"]
+            "enum": [
+              "manual",
+              "cron",
+              "threshold"
+            ]
           },
           "status": {
             "type": "string",
-            "enum": ["queued", "failed", "cancelled", "running", "succeeded"]
+            "enum": [
+              "queued",
+              "failed",
+              "cancelled",
+              "running",
+              "succeeded"
+            ]
           },
           "trainingSnapshotId": {
             "type": "string",
@@ -11754,7 +12424,9 @@
             }
           }
         },
-        "required": ["jobs"]
+        "required": [
+          "jobs"
+        ]
       },
       "OkResponseDto": {
         "type": "object",
@@ -11763,7 +12435,9 @@
             "type": "boolean"
           }
         },
-        "required": ["ok"]
+        "required": [
+          "ok"
+        ]
       },
       "ProposeLabelRecommendationBlocklistPatternRequestDto": {
         "type": "object",
@@ -11775,7 +12449,9 @@
             }
           }
         },
-        "required": ["phrases"]
+        "required": [
+          "phrases"
+        ]
       },
       "ReorderSavedDocumentViewsRequestDto": {
         "type": "object",
@@ -11788,7 +12464,9 @@
             }
           }
         },
-        "required": ["orderedIds"]
+        "required": [
+          "orderedIds"
+        ]
       },
       "ReplaceDashboardLayoutRequestDto": {
         "type": "object",
@@ -11800,7 +12478,9 @@
             }
           }
         },
-        "required": ["widgets"]
+        "required": [
+          "widgets"
+        ]
       },
       "ReplaceRecognizedFieldItemDto": {
         "type": "object",
@@ -11813,7 +12493,12 @@
           },
           "fieldType": {
             "type": "string",
-            "enum": ["text", "date", "number", "currency"]
+            "enum": [
+              "text",
+              "date",
+              "number",
+              "currency"
+            ]
           },
           "sortOrder": {
             "type": "number",
@@ -11830,7 +12515,10 @@
           },
           "gateLabelMatch": {
             "type": "string",
-            "enum": ["any", "all"]
+            "enum": [
+              "any",
+              "all"
+            ]
           },
           "minLabelConfidence": {
             "type": "number",
@@ -11843,7 +12531,10 @@
             "nullable": true
           }
         },
-        "required": ["key", "label"]
+        "required": [
+          "key",
+          "label"
+        ]
       },
       "ReplaceRecognizedFieldsRequestDto": {
         "type": "object",
@@ -11855,7 +12546,9 @@
             }
           }
         },
-        "required": ["fields"]
+        "required": [
+          "fields"
+        ]
       },
       "ReplaceTagCustomFieldItemDto": {
         "type": "object",
@@ -11868,14 +12561,22 @@
           },
           "fieldType": {
             "type": "string",
-            "enum": ["text", "date", "number", "currency"]
+            "enum": [
+              "text",
+              "date",
+              "number",
+              "currency"
+            ]
           },
           "sortOrder": {
             "type": "number",
             "minimum": 0
           }
         },
-        "required": ["key", "label"]
+        "required": [
+          "key",
+          "label"
+        ]
       },
       "ReplaceTagCustomFieldsRequestDto": {
         "type": "object",
@@ -11887,7 +12588,9 @@
             }
           }
         },
-        "required": ["fields"]
+        "required": [
+          "fields"
+        ]
       },
       "SavedDocumentViewDtoClass": {
         "type": "object",
@@ -11905,7 +12608,10 @@
             "type": "string"
           },
           "visibility": {
-            "enum": ["private", "shared"],
+            "enum": [
+              "private",
+              "shared"
+            ],
             "type": "string"
           },
           "ownerUserId": {
@@ -11915,23 +12621,42 @@
             "type": "string"
           },
           "sort": {
-            "enum": ["createdAt", "updatedAt", "title", "documentDate"],
+            "enum": [
+              "createdAt",
+              "updatedAt",
+              "title",
+              "documentDate"
+            ],
             "type": "string"
           },
           "order": {
-            "enum": ["asc", "desc"],
+            "enum": [
+              "asc",
+              "desc"
+            ],
             "type": "string"
           },
           "viewMode": {
-            "enum": ["klassisch", "karten", "fokus"],
+            "enum": [
+              "klassisch",
+              "karten",
+              "fokus"
+            ],
             "type": "string"
           },
           "filterMode": {
-            "enum": ["query", "ui"],
+            "enum": [
+              "query",
+              "ui"
+            ],
             "type": "string"
           },
           "listScope": {
-            "enum": ["all", "mappe", "folder"],
+            "enum": [
+              "all",
+              "mappe",
+              "folder"
+            ],
             "type": "string"
           },
           "folderId": {
@@ -11948,7 +12673,13 @@
           },
           "status": {
             "nullable": true,
-            "enum": ["uploaded", "queued", "extracting", "ready", "failed"],
+            "enum": [
+              "uploaded",
+              "queued",
+              "extracting",
+              "ready",
+              "failed"
+            ],
             "type": "string"
           },
           "inbox": {
@@ -12007,7 +12738,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "SendDocumentChatThreadMessageRequestDto": {
         "type": "object",
@@ -12016,7 +12749,9 @@
             "type": "string"
           }
         },
-        "required": ["message"]
+        "required": [
+          "message"
+        ]
       },
       "SendDocumentChatThreadMessageResponseDto": {
         "type": "object",
@@ -12044,27 +12779,45 @@
             "nullable": true
           }
         },
-        "required": ["userMessage", "assistantMessage", "reply", "configured"]
+        "required": [
+          "userMessage",
+          "assistantMessage",
+          "reply",
+          "configured"
+        ]
       },
       "SetAdminUserRoleRequestDto": {
         "type": "object",
         "properties": {
           "role": {
             "type": "string",
-            "enum": ["admin", "member"]
+            "enum": [
+              "admin",
+              "member"
+            ]
           }
         },
-        "required": ["role"]
+        "required": [
+          "role"
+        ]
       },
       "SetMlModelLifecycleRequestDto": {
         "type": "object",
         "properties": {
           "lifecycle": {
             "type": "string",
-            "enum": ["failed", "active", "registered", "canary", "archived"]
+            "enum": [
+              "failed",
+              "active",
+              "registered",
+              "canary",
+              "archived"
+            ]
           }
         },
-        "required": ["lifecycle"]
+        "required": [
+          "lifecycle"
+        ]
       },
       "SftpIngressCreateAccountBodyDto": {
         "type": "object",
@@ -12105,7 +12858,9 @@
             "type": "boolean"
           }
         },
-        "required": ["displayName"]
+        "required": [
+          "displayName"
+        ]
       },
       "StartMailOAuthRequestDto": {
         "type": "object",
@@ -12117,7 +12872,9 @@
             "type": "string"
           }
         },
-        "required": ["displayName"]
+        "required": [
+          "displayName"
+        ]
       },
       "TagCustomFieldListResponseDto": {
         "type": "object",
@@ -12129,7 +12886,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "TagListResponseDto": {
         "type": "object",
@@ -12141,7 +12900,9 @@
             }
           }
         },
-        "required": ["items"]
+        "required": [
+          "items"
+        ]
       },
       "TestPaperlessConnectionRequestDto": {
         "type": "object",
@@ -12153,7 +12914,9 @@
             }
           }
         },
-        "required": ["credentials"]
+        "required": [
+          "credentials"
+        ]
       },
       "TestPaperlessInstallationConnectionRequestDto": {
         "type": "object",
@@ -12173,7 +12936,9 @@
             "type": "string"
           }
         },
-        "required": ["familyId"]
+        "required": [
+          "familyId"
+        ]
       },
       "UpdateCorrespondentRequestDto": {
         "type": "object",
@@ -12183,7 +12948,13 @@
           },
           "matchingAlgorithm": {
             "type": "string",
-            "enum": ["none", "any", "all", "exact", "regex"]
+            "enum": [
+              "none",
+              "any",
+              "all",
+              "exact",
+              "regex"
+            ]
           },
           "match": {
             "type": "string"
@@ -12308,30 +13079,52 @@
           },
           "visibility": {
             "type": "string",
-            "enum": ["private", "shared"]
+            "enum": [
+              "private",
+              "shared"
+            ]
           },
           "searchQuery": {
             "type": "string"
           },
           "sort": {
             "type": "string",
-            "enum": ["updatedAt", "createdAt", "title", "documentDate"]
+            "enum": [
+              "updatedAt",
+              "createdAt",
+              "title",
+              "documentDate"
+            ]
           },
           "order": {
             "type": "string",
-            "enum": ["asc", "desc"]
+            "enum": [
+              "asc",
+              "desc"
+            ]
           },
           "viewMode": {
             "type": "string",
-            "enum": ["klassisch", "karten", "fokus"]
+            "enum": [
+              "klassisch",
+              "karten",
+              "fokus"
+            ]
           },
           "filterMode": {
             "type": "string",
-            "enum": ["ui", "query"]
+            "enum": [
+              "ui",
+              "query"
+            ]
           },
           "listScope": {
             "type": "string",
-            "enum": ["all", "folder", "mappe"]
+            "enum": [
+              "all",
+              "folder",
+              "mappe"
+            ]
           },
           "folderId": {
             "type": "string",
@@ -12351,7 +13144,13 @@
           "status": {
             "type": "string",
             "nullable": true,
-            "enum": ["uploaded", "queued", "extracting", "ready", "failed"]
+            "enum": [
+              "uploaded",
+              "queued",
+              "extracting",
+              "ready",
+              "failed"
+            ]
           },
           "inbox": {
             "type": "boolean",
@@ -12396,7 +13195,13 @@
           },
           "matchingAlgorithm": {
             "type": "string",
-            "enum": ["none", "any", "all", "exact", "regex"]
+            "enum": [
+              "none",
+              "any",
+              "all",
+              "exact",
+              "regex"
+            ]
           },
           "match": {
             "type": "string"
@@ -12435,12 +13240,19 @@
           },
           "themePreference": {
             "type": "string",
-            "enum": ["light", "dark", "system"]
+            "enum": [
+              "light",
+              "dark",
+              "system"
+            ]
           },
           "locale": {
             "type": "string",
             "nullable": true,
-            "enum": ["de", "en"]
+            "enum": [
+              "de",
+              "en"
+            ]
           }
         }
       },
@@ -12467,7 +13279,12 @@
             "type": "boolean"
           },
           "documentChatReadiness": {
-            "enum": ["ready", "off", "unavailable", "starting"],
+            "enum": [
+              "ready",
+              "off",
+              "unavailable",
+              "starting"
+            ],
             "type": "string"
           },
           "documentChatReadinessReason": {
@@ -12504,16 +13321,26 @@
             }
           },
           "themePreference": {
-            "enum": ["light", "dark", "system"],
+            "enum": [
+              "light",
+              "dark",
+              "system"
+            ],
             "type": "string"
           },
           "locale": {
             "nullable": true,
-            "enum": ["de", "en"],
+            "enum": [
+              "de",
+              "en"
+            ],
             "type": "string"
           }
         },
-        "required": ["preferredExtractorEngine", "useArenaWinnerAsDefault"]
+        "required": [
+          "preferredExtractorEngine",
+          "useArenaWinnerAsDefault"
+        ]
       }
     }
   }
