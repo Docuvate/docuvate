@@ -40,9 +40,23 @@ describe('verify-citation-quote', () => {
     expect(truncateQuoteWords('a b c d e f g h i j k l')).toBe('a b c d e f g h i j');
   });
 
+  it('matches quotes across line breaks in chunk body', () => {
+    const body = 'Die Miete ist\nbis zum 3. Werktag\ndes Monats fällig.';
+    const hit = findQuoteInChunk(body, 'Miete ist bis zum 3. Werktag');
+    expect(hit).not.toBeNull();
+    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
+  });
+
+  it('matches German currency formatting variants', () => {
+    const body = 'Gesamtsumme: 1.234,56 EUR';
+    const hit = findQuoteInChunk(body, 'Gesamtsumme 1234.56 EUR');
+    expect(hit).not.toBeNull();
+    expect(hit!.bodyQuote).toContain('1.234,56');
+  });
+
   it('gate rejects low reranker scores', () => {
-    expect(passesRerankerGate(0.2, 0.5)).toBe(false);
-    expect(passesRerankerGate(0.9, 0.5)).toBe(true);
+    expect(passesRerankerGate(0.2, 0.28)).toBe(false);
+    expect(passesRerankerGate(0.29, 0.28)).toBe(true);
   });
 
   it('fusion gate rejects weak RRF scores', () => {

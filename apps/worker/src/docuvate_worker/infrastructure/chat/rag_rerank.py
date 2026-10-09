@@ -15,11 +15,13 @@ _reranker_failed = False
 _reranker_failure_reason: str | None = None
 
 # Permissive licenses only (see apps/worker/tests/test_reranker_license.py).
-DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-base"
+DEFAULT_RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
 RERANKER_MODEL = os.environ.get("DOCUVATE_RERANKER_MODEL", DEFAULT_RERANKER_MODEL)
 
+# Permissive licenses only (Apache-2.0 / MIT). See apps/worker/tests/test_reranker_license.py.
 PERMISSIVE_RERANKER_MODELS = frozenset(
     {
+        "BAAI/bge-reranker-v2-m3",
         "BAAI/bge-reranker-base",
         "Xenova/ms-marco-MiniLM-L-6-v2",
         "Xenova/ms-marco-MiniLM-L-12-v2",

@@ -1,6 +1,10 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
+import {
+  DOCUMENT_CHAT_THREAD_REPOSITORY,
+  type DocumentChatThreadRepository,
+} from '../../../shared/domain/ports.js';
 import {
   createValkeyConnection,
   waitForValkeyReady,
@@ -14,11 +18,16 @@ const QUEUE_NAME = 'document-chat-generation';
 
 @Injectable()
 export class DocumentChatGenerationQueueService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(DocumentChatGenerationQueueService.name);
   private connection!: IORedis;
   private queue!: Queue;
   private worker!: Worker;
 
-  constructor(private readonly runGeneration: RunDocumentChatGenerationUseCase) {}
+  constructor(
+    private readonly runGeneration: RunDocumentChatGenerationUseCase,
+    @Inject(DOCUMENT_CHAT_THREAD_REPOSITORY)
+    private readonly threads: DocumentChatThreadRepository
+  ) {}
 
   async onModuleInit(): Promise<void> {
     this.connection = createValkeyConnection();
@@ -35,6 +44,37 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
       },
       { connection: this.connection, concurrency }
     );
+
+    this.worker.on('failed', (job, err) => {
+      void this.markJobFailed(job?.data as DocumentChatGenerationJobPayload | undefined, err);
+    });
+  }
+
+  private async markJobFailed(
+    payload: DocumentChatGenerationJobPayload | undefined,
+    err: Error
+  ): Promise<void> {
+    if (!payload?.messageId || !payload.userId) {
+      return;
+    }
+    try {
+      const existing = await this.threads.findMessageForUser(payload.messageId, payload.userId);
+      if (!existing || existing.generationStatus === 'done' || existing.generationStatus === 'failed') {
+        return;
+      }
+      await this.threads.updateMessageGeneration(payload.messageId, {
+        generationStatus: 'failed',
+        generationPhase: null,
+        errorCode: 'generation_failed',
+        errorDetail: err.message,
+        content: existing.content ?? '',
+      });
+      if (payload.threadId) {
+        await this.threads.touchThread(payload.threadId);
+      }
+    } catch (markErr) {
+      this.logger.warn(`Could not mark chat generation failed: ${String(markErr)}`);
+    }
   }
 
   async enqueue(payload: DocumentChatGenerationJobPayload): Promise<void> {

@@ -54,7 +54,7 @@ Paperless-ngx ist das bekannteste selbst gehostete Dokumentenarchiv und seit Jah
 
 ## Wann Sie was wählen sollten
 
-- **Paperless-ngx wählen, wenn:** Sie wollen ein bewährtes Archiv mit großer Community, brauchen Office/E-Mail-Verarbeitung, Workflows oder Chat über das ganze Archiv, oder Ihnen ist Stabilität wichtiger als neue Funktionen.
+- **Paperless-ngx wählen, wenn:** Sie wollen ein bewährtes Archiv mit großer Community, brauchen Office/E-Mail-Verarbeitung oder Workflows, oder Ihnen ist Stabilität wichtiger als neue Funktionen.
 - **Docuvate wählen, wenn:** Sie brauchen bestätigte Feldwerte für Buchhaltung oder Backoffice, wollen Dokumente headless per API in eigene Anwendungen bringen oder auf PostgreSQL/S3/Kubernetes betreiben, und Sie können mit einem jungen Projekt (0.1.0) leben.
 
 ## Wechsel und Parallelbetrieb

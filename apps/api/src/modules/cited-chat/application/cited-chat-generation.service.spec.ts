@@ -15,7 +15,7 @@ const userId = 'user-1';
 describe('CitedChatGenerationService abstention', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env['RAG_RERANKER_GATE_MIN'] = '0.5';
+    process.env['RAG_RERANKER_GATE_MIN'] = '0.28';
     process.env['RAG_FUSION_GATE_MIN'] = '0.02';
   });
 

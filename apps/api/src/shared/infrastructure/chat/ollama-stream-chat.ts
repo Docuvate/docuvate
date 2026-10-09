@@ -12,6 +12,7 @@ export interface StreamOllamaChatParams {
   onToken: (token: string, fullText: string) => void | Promise<void>;
   shouldAbort: () => boolean | Promise<boolean>;
   idleTimeoutMs?: number;
+  extraBody?: Record<string, unknown>;
 }
 
 export async function streamOllamaChat(
@@ -26,7 +27,10 @@ export async function streamOllamaChat(
     response = await fetch(`${ollamaUrl}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(buildOllamaChatBody(model, params.messages, true)),
+      body: JSON.stringify({
+        ...buildOllamaChatBody(model, params.messages, true),
+        ...params.extraBody,
+      }),
     });
   } catch (err) {
     return {

@@ -3,9 +3,23 @@ const QUOTE_WORD_LIMIT = 10;
 export function normalizeForQuoteMatch(text: string): string {
   return text
     .toLowerCase()
+    .replace(/[„“"''`´:;]/g, ' ')
     .replace(/\s+/g, ' ')
-    .replace(/[„“"''`´]/g, '')
     .trim();
+}
+
+/** Collapse German/English number formatting so 1.234,56 and 1234.56 align for matching. */
+export function normalizeNumbersForQuoteMatch(text: string): string {
+  let out = normalizeForQuoteMatch(text);
+  out = out.replace(
+    /\b(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{1,2}))?\b/g,
+    (_match, intPart: string, frac?: string) => {
+      const digits = String(intPart).replace(/\./g, '');
+      return frac != null && frac !== '' ? `${digits}.${frac}` : digits;
+    }
+  );
+  out = out.replace(/\b(\d+)\.(\d{1,2})\b/g, '$1.$2');
+  return out.replace(/\s+/g, ' ').trim();
 }
 
 export function truncateQuoteWords(quote: string, maxWords = QUOTE_WORD_LIMIT): string {
@@ -63,6 +77,53 @@ export function buildNormalizedBodyMap(chunkBody: string): NormalizedBodyMap {
   };
 }
 
+function sliceFromBodyMap(
+  chunkBody: string,
+  bodyMap: NormalizedBodyMap,
+  idx: number,
+  needleLen: number
+): { charStart: number; charEnd: number; bodyQuote: string } | null {
+  const startBodyIndex = bodyMap.bodyIndexAt[idx];
+  const lastNormIndex = idx + needleLen - 1;
+  const endBodyIndex = bodyMap.bodyIndexAt[lastNormIndex];
+  if (startBodyIndex === undefined || endBodyIndex === undefined) {
+    return null;
+  }
+  const charEnd = endBodyIndex + 1;
+  const bodyQuote = chunkBody.slice(startBodyIndex, charEnd);
+  return { charStart: startBodyIndex, charEnd, bodyQuote };
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function findQuoteRegexInChunk(
+  chunkBody: string,
+  quote: string
+): { charStart: number; charEnd: number; bodyQuote: string } | null {
+  const words = normalizeForQuoteMatch(truncateQuoteWords(quote)).split(' ').filter(Boolean);
+  if (words.length === 0) {
+    return null;
+  }
+  const parts = words.map((word) => {
+    const digits = word.replace(/[^\d]/g, '');
+    if (digits.length >= 3) {
+      const digitPattern = digits.split('').join('[\\d.,\\s]*');
+      return `(?:${escapeRegExp(word)}|${digitPattern})`;
+    }
+    return escapeRegExp(word);
+  });
+  const pattern = parts.join('[\\s\\n\\r:;]+');
+  const re = new RegExp(pattern, 'iu');
+  const match = chunkBody.match(re);
+  if (!match || match.index === undefined) {
+    return null;
+  }
+  const bodyQuote = match[0];
+  return { charStart: match.index, charEnd: match.index + bodyQuote.length, bodyQuote };
+}
+
 export function findQuoteInChunk(
   chunkBody: string,
   quote: string
@@ -72,20 +133,26 @@ export function findQuoteInChunk(
     return null;
   }
   const bodyMap = buildNormalizedBodyMap(chunkBody);
-  const needle = normalizeForQuoteMatch(trimmed);
-  const idx = bodyMap.normalized.indexOf(needle);
-  if (idx < 0 || needle.length === 0) {
-    return null;
+  const literalNeedle = normalizeForQuoteMatch(trimmed);
+  const literalIdx = bodyMap.normalized.indexOf(literalNeedle);
+  if (literalIdx >= 0) {
+    return sliceFromBodyMap(chunkBody, bodyMap, literalIdx, literalNeedle.length);
   }
-  const startBodyIndex = bodyMap.bodyIndexAt[idx];
-  const lastNormIndex = idx + needle.length - 1;
-  const endBodyIndex = bodyMap.bodyIndexAt[lastNormIndex];
-  if (startBodyIndex === undefined || endBodyIndex === undefined) {
-    return null;
+
+  const numericNeedle = normalizeNumbersForQuoteMatch(trimmed);
+  const numericBody = normalizeNumbersForQuoteMatch(bodyMap.normalized);
+  if (numericNeedle.length > 0 && numericBody.length === bodyMap.normalized.length) {
+    const numericIdx = numericBody.indexOf(numericNeedle);
+    if (numericIdx >= 0) {
+      return sliceFromBodyMap(chunkBody, bodyMap, numericIdx, numericNeedle.length);
+    }
   }
-  const charEnd = endBodyIndex + 1;
-  const bodyQuote = chunkBody.slice(startBodyIndex, charEnd);
-  return { charStart: startBodyIndex, charEnd, bodyQuote };
+
+  const regexHit = findQuoteRegexInChunk(chunkBody, trimmed);
+  if (regexHit) {
+    return regexHit;
+  }
+  return null;
 }
 
 export function passesRerankerGate(bestScore: number, threshold: number): boolean {

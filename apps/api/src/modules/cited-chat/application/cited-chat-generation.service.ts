@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ExtractionBlock } from '@docuvate/contracts';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
@@ -24,6 +24,9 @@ import {
   buildCitedChatSystemPrompt,
   requestCitedAnswerFromOllama,
 } from './cited-chat-ollama.js';
+import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
+
+const CONTENT_FLUSH_MS = 250;
 
 export interface CitedChatGenerationInput {
   messageId: string;
@@ -41,6 +44,8 @@ export interface CitedChatGenerationResult {
 
 @Injectable()
 export class CitedChatGenerationService {
+  private readonly logger = new Logger(CitedChatGenerationService.name);
+
   constructor(
     @Inject(DOCUMENT_CHAT_THREAD_REPOSITORY)
     private readonly threads: DocumentChatThreadRepository,
@@ -50,6 +55,39 @@ export class CitedChatGenerationService {
   ) {}
 
   async generate(input: CitedChatGenerationInput): Promise<CitedChatGenerationResult> {
+    const { messageId, threadId, userId, userMessage, scope } = input;
+    const documentIds = sanitizeChatThreadDocumentIds(input.documentIds);
+
+    try {
+      return await this.runGeneration({
+        messageId,
+        threadId,
+        userId,
+        userMessage,
+        documentIds,
+        scope,
+      });
+    } catch (err) {
+      this.logger.warn(`Cited chat generation failed for ${messageId}: ${String(err)}`);
+      await this.failGeneration(
+        messageId,
+        threadId,
+        userId,
+        'unknown',
+        err instanceof Error ? err.message : String(err)
+      );
+      return { content: '', abstained: true };
+    }
+  }
+
+  private async runGeneration(input: {
+    messageId: string;
+    threadId: string;
+    userId: string;
+    userMessage: string;
+    documentIds: string[];
+    scope: 'document' | 'library';
+  }): Promise<CitedChatGenerationResult> {
     const { messageId, threadId, userId, userMessage, documentIds, scope } = input;
 
     await this.threads.updateMessageGeneration(messageId, {
@@ -127,7 +165,7 @@ export class CitedChatGenerationService {
 
     await this.threads.updateMessageGeneration(messageId, {
       generationStatus: 'streaming',
-      generationPhase: 'verifying',
+      generationPhase: 'generating',
     });
 
     const labelByChunk = new Map<string, string>();
@@ -148,16 +186,30 @@ export class CitedChatGenerationService {
       }))
     );
 
-    const llm = await requestCitedAnswerFromOllama(userMessage, systemPrompt, history);
+    let lastFlush = 0;
+    const llm = await requestCitedAnswerFromOllama(userMessage, systemPrompt, history, {
+      onToken: async (partial) => {
+        const now = Date.now();
+        if (now - lastFlush < CONTENT_FLUSH_MS) {
+          return;
+        }
+        lastFlush = now;
+        await this.threads.updateMessageGeneration(messageId, {
+          content: partial,
+          generationStatus: 'streaming',
+          generationPhase: 'generating',
+        });
+      },
+    });
     if (!llm.ok) {
-      await this.threads.updateMessageGeneration(messageId, {
-        generationStatus: 'failed',
-        generationPhase: null,
-        errorCode: 'ollama_error',
-        errorDetail: llm.detail,
-      });
+      await this.failGeneration(messageId, threadId, userId, 'ollama_error', llm.detail);
       return { content: '', abstained: true };
     }
+
+    await this.threads.updateMessageGeneration(messageId, {
+      generationStatus: 'streaming',
+      generationPhase: 'verifying',
+    });
 
     const verified: Array<{
       ordinal: number;
@@ -226,5 +278,23 @@ export class CitedChatGenerationService {
     });
     await this.threads.touchThread(threadId);
     return { content, abstained: false };
+  }
+
+  private async failGeneration(
+    messageId: string,
+    threadId: string,
+    userId: string,
+    errorCode: string,
+    errorDetail: string
+  ): Promise<void> {
+    const existing = await this.threads.findMessageForUser(messageId, userId);
+    await this.threads.updateMessageGeneration(messageId, {
+      generationStatus: 'failed',
+      generationPhase: null,
+      errorCode,
+      errorDetail,
+      content: existing?.content ?? '',
+    });
+    await this.threads.touchThread(threadId);
   }
 }

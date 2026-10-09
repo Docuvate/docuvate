@@ -1,0 +1,208 @@
+import { randomUUID } from 'node:crypto';
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
+import { CITED_CHAT_ABSTENTION_DE } from '../../src/modules/cited-chat/domain/cited-chat-constants.js';
+import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
+import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
+import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
+import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
+import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
+import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
+import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
+import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+
+const noopEmbedding: EmbeddingPort = {
+  async embedTexts(texts: string[]) {
+    return { embeddings: texts.map(() => []), model: 'noop' };
+  },
+};
+
+describe('cited chat German fixtures (Testcontainers Postgres)', () => {
+  const pool = getIntegrationPool();
+  let userId: string;
+  let invoiceDocId: string;
+  let taxDocId: string;
+  let threads: PgDocumentChatThreadRepository;
+  let service: CitedChatGenerationService;
+
+  beforeAll(async () => {
+    userId = newIsolationUserId();
+    const client = await pool.connect();
+    try {
+      await insertSyntheticUser(client, { id: userId, name: 'Cited', email: `${userId}@example.test` });
+    } finally {
+      client.release();
+    }
+
+    invoiceDocId = randomUUID();
+    taxDocId = randomUUID();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text)
+       VALUES ($1,$2,'rechnung.pdf','Rechnung Nordwind GmbH','application/pdf','k/1','ready',$3),
+              ($4,$2,'steuer.pdf','Bescheid Hundesteuer','application/pdf','k/2','ready',$5)`,
+      [
+        invoiceDocId,
+        userId,
+        'Rechnung Nordwind GmbH\nGesamtsumme: 1.234,56 EUR\nIBAN DE89370400440532013000',
+        taxDocId,
+        'Hundesteuer Stadt Muster\nJahresgebühr: 120,00 EUR',
+      ]
+    );
+
+    const searchRepo = new PgGlobalSearchRepository(pool);
+    await searchRepo.indexDocumentChunks(
+      userId,
+      invoiceDocId,
+      splitTextChunksWithSpans(
+        'Rechnung Nordwind GmbH\nGesamtsumme: 1.234,56 EUR\nIBAN DE89370400440532013000'
+      )
+    );
+    await searchRepo.indexDocumentChunks(
+      userId,
+      taxDocId,
+      splitTextChunksWithSpans('Hundesteuer Stadt Muster\nJahresgebühr: 120,00 EUR')
+    );
+
+    threads = new PgDocumentChatThreadRepository(pool);
+    service = new CitedChatGenerationService(
+      threads,
+      noopEmbedding,
+      new PgCitedChatRetrievalRepository(pool),
+      new PgChatMessageCitationsRepository(pool)
+    );
+  }, 60_000);
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  afterAll(async () => {
+    await deleteSyntheticUser(pool, userId);
+    await closeIntegrationPool();
+  });
+
+  function mockRerankAndOllama(ollamaClaims: Array<{ text: string; source: string; quote: string }>) {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.includes('/v1/rag/retrieve')) {
+          const body = JSON.parse(String(init?.body ?? '{}')) as {
+            passages: Array<{ id: string }>;
+          };
+          const id = body.passages[0]?.id ?? 'chunk';
+          return new Response(
+            JSON.stringify({
+              results: [{ id, score: 0.31 }],
+              reranker_used: true,
+              reranker_model: 'BAAI/bge-reranker-v2-m3',
+            }),
+            { status: 200 }
+          );
+        }
+        if (url.includes('/api/chat')) {
+          return new Response(
+            JSON.stringify({
+              message: {
+                content: JSON.stringify({ claims: ollamaClaims }),
+              },
+            }),
+            { status: 200 }
+          );
+        }
+        throw new Error(`unexpected fetch ${url}`);
+      })
+    );
+  }
+
+  async function createLibraryThread(): Promise<string> {
+    const thread = await threads.createThread(userId, [], { scope: 'library' });
+    expect(thread.documentIds).toEqual([]);
+    const listed = await threads.findThreadForUser(thread.id, userId);
+    expect(listed?.documentIds).toEqual([]);
+    return thread.id;
+  }
+
+  it('library thread without linked documents does not pass invalid document ids to retrieval', async () => {
+    mockRerankAndOllama([
+      {
+        text: 'Gesamtsumme: 1.234,56 EUR',
+        source: 'S1',
+        quote: 'Gesamtsumme: 1.234,56 EUR',
+      },
+    ]);
+    const threadId = await createLibraryThread();
+    const assistant = await threads.appendMessage(threadId, 'assistant', '', {
+      generationStatus: 'pending',
+      generationPhase: 'retrieving',
+    });
+    const result = await service.generate({
+      messageId: assistant.id,
+      threadId,
+      userId,
+      userMessage: 'Welche Gesamtsumme steht auf der Rechnung Nordwind?',
+      documentIds: ['null'],
+      scope: 'library',
+    });
+    expect(result.abstained).toBe(false);
+    const updated = await threads.findMessageForUser(assistant.id, userId);
+    expect(updated?.generationStatus).toBe('done');
+    expect(updated?.content).toContain('1.234,56');
+  });
+
+  it('document-scoped thread answers from a single linked document', async () => {
+    mockRerankAndOllama([
+      { text: 'Hundesteuer: 120,00 EUR', source: 'S1', quote: 'Jahresgebühr: 120,00 EUR' },
+    ]);
+    const thread = await threads.createThread(userId, [taxDocId], { scope: 'document' });
+    const assistant = await threads.appendMessage(thread.id, 'assistant', '', {
+      generationStatus: 'pending',
+      generationPhase: 'retrieving',
+    });
+    const result = await service.generate({
+      messageId: assistant.id,
+      threadId: thread.id,
+      userId,
+      userMessage: 'Was kostet die Hundesteuer?',
+      documentIds: [taxDocId],
+      scope: 'document',
+    });
+    expect(result.abstained).toBe(false);
+    expect(result.content).toContain('120');
+  });
+
+  it('abstains on off-topic question when reranker score is low', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes('/v1/rag/retrieve')) {
+          return new Response(
+            JSON.stringify({
+              results: [{ id: 'c1', score: 0.02 }],
+              reranker_used: true,
+              reranker_model: 'BAAI/bge-reranker-v2-m3',
+            }),
+            { status: 200 }
+          );
+        }
+        throw new Error(`unexpected fetch ${url}`);
+      })
+    );
+    const threadId = await createLibraryThread();
+    const assistant = await threads.appendMessage(threadId, 'assistant', '', {
+      generationStatus: 'pending',
+      generationPhase: 'retrieving',
+    });
+    const result = await service.generate({
+      messageId: assistant.id,
+      threadId,
+      userId,
+      userMessage: 'Wie wird das Wetter morgen in Berlin?',
+      documentIds: [],
+      scope: 'library',
+    });
+    expect(result.abstained).toBe(true);
+    expect(result.content).toBe(CITED_CHAT_ABSTENTION_DE);
+  });
+});
