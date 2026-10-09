@@ -5,11 +5,8 @@ from __future__ import annotations
 import math
 
 from docuvate_worker.domain.layout_ir import FontWeight, LayoutIrBlock, LayoutIrPage
-from docuvate_worker.infrastructure.layout.font_map import (
-    is_italic_fontname,
-    typst_font_and_scale,
-)
-from docuvate_worker.infrastructure.layout.text_fit import horizontal_scale_factor
+from .font_map import is_italic_fontname, typst_font_and_scale
+from .text_fit import horizontal_scale_factor
 
 
 def _is_rotated_block(block: LayoutIrBlock) -> bool:

@@ -15,6 +15,8 @@ from tests.synthetic_layout_fpdf import (
     cyrillic_body_pdf,
     embedded_subset_dejavu_pdf,
     greek_body_pdf,
+    times_tight_serif_scale_left_pdf,
+    times_tight_serif_scale_right_pdf,
 )
 from tests.synthetic_layout_pdfs import (
     delivery_note_multipage_pdf,
@@ -70,6 +72,18 @@ LAYOUT_SSIM_FIXTURES: tuple[LayoutSsimFixture, ...] = (
     LayoutSsimFixture("rotated_heading", "rotated", rotated_heading_pdf, CATEGORY_SSIM_FLOOR["rotated"]),
     LayoutSsimFixture("mixed_standard_fonts", "mixed_fonts", mixed_standard_fonts_pdf, CATEGORY_SSIM_FLOOR["mixed_fonts"]),
     LayoutSsimFixture("symbol_and_helvetica", "mixed_fonts", symbol_and_helvetica_pdf, CATEGORY_SSIM_FLOOR["mixed_fonts"]),
+    LayoutSsimFixture(
+        "times_tight_serif_scale_left",
+        "mixed_fonts",
+        times_tight_serif_scale_left_pdf,
+        CATEGORY_SSIM_FLOOR["mixed_fonts"],
+    ),
+    LayoutSsimFixture(
+        "times_tight_serif_scale_right",
+        "mixed_fonts",
+        times_tight_serif_scale_right_pdf,
+        CATEGORY_SSIM_FLOOR["mixed_fonts"],
+    ),
     LayoutSsimFixture("embedded_subset_dejavu", "embedded_fonts", embedded_subset_dejavu_pdf, CATEGORY_SSIM_FLOOR["embedded_fonts"]),
     LayoutSsimFixture("german_umlaut_body", "non_latin", german_umlaut_body_pdf, CATEGORY_SSIM_FLOOR["non_latin"]),
     LayoutSsimFixture("cyrillic_body", "non_latin", cyrillic_body_pdf, CATEGORY_SSIM_FLOOR["non_latin"]),

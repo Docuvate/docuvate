@@ -8,79 +8,87 @@
     },
     "layout_regression_payroll": {
       "category": "payroll_form",
-      "before_ssim": 0.993301
+      "before_ssim": 0.957496
     },
     "form_disclosure": {
       "category": "born_digital_standard",
-      "before_ssim": 0.999384
+      "before_ssim": 0.991673
     },
     "form_disclosure_acroform": {
       "category": "form_acroform",
-      "before_ssim": 0.997948
+      "before_ssim": 0.989655
     },
     "two_column_words": {
       "category": "multi_column",
-      "before_ssim": 0.999946
+      "before_ssim": 0.99167
     },
     "three_column_words": {
       "category": "multi_column",
-      "before_ssim": 0.999928
+      "before_ssim": 0.990113
     },
     "delivery_note_multipage": {
       "category": "multi_page",
-      "before_ssim": 0.991615
+      "before_ssim": 0.98058
     },
     "mixed_page_sizes": {
       "category": "multi_page",
-      "before_ssim": 0.999948
+      "before_ssim": 0.993518
     },
     "multipage_portrait_landscape_table": {
       "category": "multi_page",
-      "before_ssim": 0.994395
+      "before_ssim": 0.984828
     },
     "landscape_table": {
       "category": "landscape",
-      "before_ssim": 0.999725
+      "before_ssim": 0.995599
     },
     "rotated_mediabox": {
       "category": "rotated",
-      "before_ssim": 0.992307
+      "before_ssim": 0.993401
     },
     "rotated_heading": {
       "category": "rotated",
-      "before_ssim": 0.997778
+      "before_ssim": 0.991152
     },
     "mixed_standard_fonts": {
       "category": "mixed_fonts",
-      "before_ssim": 0.989888
+      "before_ssim": 0.985295
     },
     "symbol_and_helvetica": {
       "category": "mixed_fonts",
-      "before_ssim": 0.999646
+      "before_ssim": 0.98694
+    },
+    "times_tight_serif_scale_left": {
+      "category": "mixed_fonts",
+      "before_ssim": 0.973588
+    },
+    "times_tight_serif_scale_right": {
+      "category": "mixed_fonts",
+      "before_ssim": 0.974257
     },
     "embedded_subset_dejavu": {
       "category": "embedded_fonts",
-      "before_ssim": 0.984974
+      "before_ssim": 0.982608
     },
     "german_umlaut_body": {
       "category": "non_latin",
-      "before_ssim": 0.991192
+      "before_ssim": 0.983823
     },
     "cyrillic_body": {
       "category": "non_latin",
-      "before_ssim": 0.990201
+      "before_ssim": 0.988451
     },
     "greek_body": {
       "category": "non_latin",
-      "before_ssim": 0.990149
+      "before_ssim": 0.988641
     },
     "scanned_invisible_ocr": {
       "category": "scanned_text_layer",
-      "before_ssim": 0.980046
+      "before_ssim": 0.98073
     },
     "scanned_rotated_90": {
       "category": "scanned_text_layer",
-      "before_ssim": 0.990073
+      "before_ssim": 0.989567
     }
   }
 }

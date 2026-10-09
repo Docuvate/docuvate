@@ -96,6 +96,58 @@ def arabic_rtl_pdf() -> bytes:
     return _fpdf_bytes(build)
 
 
+def _times_tight_serif_scale_pdf(
+    *,
+    cell_width_mm: float,
+    row_labels: tuple[str, ...],
+    x_mm: float,
+) -> bytes:
+    """Times in very narrow cells so post-fix Typst keeps #scale(..., origin: left)."""
+
+    def build(pdf: FPDF, _font_path: Path) -> None:
+        pdf.add_page()
+        pdf.set_font("Helvetica", size=9)
+        pdf.multi_cell(0, 5, _BORN_DIGITAL_BANNER)
+        pdf.set_font("Times", size=12)
+        y = 28.0
+        for label in row_labels:
+            pdf.set_xy(x_mm, y)
+            pdf.multi_cell(cell_width_mm, 5, label)
+            y += 8.0
+
+    return _fpdf_bytes(build)
+
+
+def times_tight_serif_scale_left_pdf() -> bytes:
+    return _times_tight_serif_scale_pdf(
+        cell_width_mm=9.0,
+        row_labels=(
+            "ScaleOriginTight0XYZABCDEFGHIJ",
+            "ScaleOriginTight1XYZABCDEFGHIJ",
+            "ScaleOriginTight2XYZABCDEFGHIJ",
+            "ScaleOriginTight3XYZABCDEFGHIJ",
+            "ScaleOriginTight4XYZABCDEFGHIJ",
+            "ScaleOriginTight5XYZABCDEFGHIJ",
+        ),
+        x_mm=14.0,
+    )
+
+
+def times_tight_serif_scale_right_pdf() -> bytes:
+    return _times_tight_serif_scale_pdf(
+        cell_width_mm=8.5,
+        row_labels=(
+            "SerifScaleRightColAABCDEFGHIJ",
+            "SerifScaleRightColBABCDEFGHIJ",
+            "SerifScaleRightColCABCDEFGHIJ",
+            "SerifScaleRightColDABCDEFGHIJ",
+            "SerifScaleRightColEABCDEFGHIJ",
+            "SerifScaleRightColFABCDEFGHIJ",
+        ),
+        x_mm=105.0,
+    )
+
+
 def cjk_body_pdf() -> bytes:
     def build(pdf: FPDF, _font_path: Path) -> None:
         cjk_font = _cjk_font_path()

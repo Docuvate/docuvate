@@ -12,12 +12,8 @@ from docuvate_worker.domain.layout_ir import (
     LayoutIrWidget,
     LayoutIrWidgetKind,
 )
-from docuvate_worker.infrastructure.layout.font_map import is_italic_fontname, typst_font_and_scale
-from docuvate_worker.infrastructure.layout.render_run import (
-    run_anchor_pt,
-    run_font_size_pt,
-    run_scale_x,
-)
+from .font_map import is_italic_fontname, typst_font_and_scale
+from .render_run import run_anchor_pt, run_font_size_pt, run_scale_x
 from docuvate_worker.infrastructure.layout.widget_placement import (
     typst_align_in_box,
     widget_text_origin_pt,
