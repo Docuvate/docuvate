@@ -253,7 +253,7 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     const rows = await pool.query<{ quote: string; body: string }>(
       `SELECT c.quote, dc.body
        FROM chat_message_citations c
-       JOIN document_chunks dc ON dc.id = c.chunk_id
+       JOIN document_text_chunks dc ON dc.id = c.chunk_id
        WHERE c.message_id = $1`,
       [assistant.id]
     );
@@ -325,7 +325,7 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     const rows = await pool.query<{ document_id: string }>(
       `SELECT DISTINCT dc.document_id
        FROM chat_message_citations c
-       JOIN document_chunks dc ON dc.id = c.chunk_id
+       JOIN document_text_chunks dc ON dc.id = c.chunk_id
        WHERE c.message_id = $1`,
       [assistant.id]
     );
