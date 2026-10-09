@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import io
 import re
 
@@ -23,6 +24,15 @@ _HEBREW = re.compile(r"[\u0590-\u05FF]")
 _CJK = re.compile(r"[\u3040-\u30FF\u3400-\u9FFF\uF900-\uFAFF]")
 
 _DEFAULT_API_SSIM_FLOOR = 0.90
+
+
+def decode_optional_pdf(original_pdf_base64: str | None) -> bytes | None:
+    if not original_pdf_base64:
+        return None
+    try:
+        return base64.b64decode(original_pdf_base64, validate=True)
+    except (ValueError, TypeError):
+        return None
 
 
 def _iter_block_text(doc: LayoutIrDocument | None) -> str:

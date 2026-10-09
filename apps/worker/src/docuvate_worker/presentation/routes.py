@@ -346,15 +346,20 @@ def layout_render_html(
     from docuvate_worker.infrastructure.layout.render_html import layout_ir_to_html
 
     wire = body.layout_ir.model_dump()
-    from docuvate_worker.infrastructure.layout.layout_render_fidelity import (
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+        assess_layout_reconstruction,
         decode_optional_pdf,
-        fidelity_for_layout_render,
     )
 
     try:
         doc = document_from_dict(wire)
         html = layout_ir_to_html(doc)
-        fidelity = fidelity_for_layout_render(doc, decode_optional_pdf(body.original_pdf_base64))
+        fidelity = assess_layout_reconstruction(
+            doc,
+            decode_optional_pdf(body.original_pdf_base64),
+            fixture_id="render",
+            category="born_digital_standard",
+        )
     except (KeyError, TypeError, ValueError) as exc:
         raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
     return LayoutRenderHtmlResponse(
@@ -376,15 +381,20 @@ def layout_render_typst(
     from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typst
 
     wire = body.layout_ir.model_dump()
-    from docuvate_worker.infrastructure.layout.layout_render_fidelity import (
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+        assess_layout_reconstruction,
         decode_optional_pdf,
-        fidelity_for_layout_render,
     )
 
     try:
         doc = document_from_dict(wire)
         typst = layout_ir_to_typst(doc)
-        fidelity = fidelity_for_layout_render(doc, decode_optional_pdf(body.original_pdf_base64))
+        fidelity = assess_layout_reconstruction(
+            doc,
+            decode_optional_pdf(body.original_pdf_base64),
+            fixture_id="render",
+            category="born_digital_standard",
+        )
     except (KeyError, TypeError, ValueError) as exc:
         raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
     return LayoutRenderTypstResponse(
