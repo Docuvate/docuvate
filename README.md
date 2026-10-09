@@ -191,4 +191,4 @@ Report vulnerabilities privately: [SECURITY.md](SECURITY.md).
 
 ## License
 
-Community Edition: [LICENSE](LICENSE) (Sustainable Use License 1.0). Enterprise and Cloud are offered separately under commercial terms ([docuvate.de](https://docuvate.de)). SDKs: MIT. Trademarks: [TRADEMARKS.md](TRADEMARKS.md).
+Community Edition: [LICENSE](LICENSE) (Sustainable Use License 1.0). Enterprise and Cloud are offered separately under commercial terms ([docuvate.de](https://docuvate.de)). SDKs: MIT. Name and branding policy: [TRADEMARKS.md](TRADEMARKS.md).

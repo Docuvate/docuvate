@@ -74,7 +74,7 @@ export const deContent: SiteContent = {
         {
           question: 'Was ist mit Forks und dem Namen Docuvate?',
           answer:
-            'Forks müssen einen anderen Produktnamen tragen (siehe TRADEMARKS.md). Der Quellcode der Community Edition darf eingesehen und für erlaubte Nutzung angepasst werden.',
+            'Forks und Weiterverbreitungen müssen einen eigenen Produktnamen und eigenes Branding nutzen und dürfen nicht so wirken, als wären sie das offizielle Projekt oder von uns empfohlen. Details: Name-und-Branding-Richtlinie im Repository (TRADEMARKS.md). Der Community-Quellcode darf für erlaubte Nutzung eingesehen und angepasst werden.',
         },
       ],
       repoLinkLabel: 'LICENSE (Community, SUL 1.0) im Repository',

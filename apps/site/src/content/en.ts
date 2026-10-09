@@ -74,7 +74,7 @@ export const enContent: SiteContent = {
         {
           question: 'What about forks and the Docuvate name?',
           answer:
-            'Forks must use a distinct product name (see TRADEMARKS.md). Community Edition source may be viewed and modified for permitted use.',
+            'Forks and redistributions must use a distinct product name and branding and must not imply they are the official project or endorsed by us. See the name and branding policy in the repository (TRADEMARKS.md). Community Edition source may be viewed and modified for permitted use.',
         },
       ],
       repoLinkLabel: 'LICENSE (Community, SUL 1.0) in the repository',
