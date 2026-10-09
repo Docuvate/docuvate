@@ -145,6 +145,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(SetAdminUserRoleRequestDtoRoleEnum.serializer)
       ..add(SetMlModelLifecycleRequestDto.serializer)
       ..add(SetMlModelLifecycleRequestDtoLifecycleEnum.serializer)
+      ..add(SftpIngressCreateAccountBodyDto.serializer)
       ..add(StartMailOAuthRequestDto.serializer)
       ..add(TagCustomFieldListResponseDto.serializer)
       ..add(TagListResponseDto.serializer)
@@ -328,6 +329,9 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(
               BuiltList, const [const FullType(SavedDocumentViewDtoClass)]),
           () => new ListBuilder<SavedDocumentViewDtoClass>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
           () => new ListBuilder<String>())

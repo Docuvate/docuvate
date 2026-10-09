@@ -133,8 +133,55 @@ services:
       OLLAMA_HOST: http://ollama:11434
     restart: 'no'
 
+  sftp-ingest-data-init:
+    image: alpine:3.20@sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e
+    user: '0:0'
+    volumes:
+      - sftpingestdata:/data
+    entrypoint: >
+      /bin/sh -c "
+      set -e;
+      mkdir -p /data/staging;
+      if [ ! -s /data/service_api_key ]; then
+        dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d '/+=' | head -c 43 > /data/service_api_key;
+        chmod 600 /data/service_api_key;
+      fi;
+      chown -R 65532:65532 /data;
+      chmod 700 /data;
+      "
+
+  sftp-ingest:
+    build:
+      context: .
+      dockerfile: apps/sftp-ingest/Dockerfile
+    ports:
+      - '${SFTP_INGEST_PORT:-2222}:2222'
+    environment:
+      DOCUVATE_API_URL: http://api:3001
+      DOCUVATE_SERVICE_API_KEY_FILE: /data/service_api_key
+      SFTP_LISTEN_ADDR: ':2222'
+      SFTP_HOST_KEY_PATH: /data/host_key
+      SFTP_DATA_DIR: /data/staging
+      DOCUVATE_SFTP_INGEST_MAX_BYTES: ${DOCUVATE_SFTP_INGEST_MAX_BYTES:-26214400}
+      OTEL_SDK_DISABLED: 'true'
+    volumes:
+      - sftpingestdata:/data
+    depends_on:
+      api:
+        condition: service_started
+      sftp-ingest-data-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'curl', '-sf', 'http://127.0.0.1:8080/health']
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 15s
+
   api:
     mem_limit: 2g
+    volumes:
+      - sftpingestdata:/var/lib/docuvate/sftp-ingest:ro
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -177,6 +224,12 @@ services:
       PASSWORD_RESET_MAIL_MODE: ${PASSWORD_RESET_MAIL_MODE:-smtp}
       SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
       MAIL_FROM: ${MAIL_FROM:-Docuvate <no-reply@docuvate.local>}
+      DOCUVATE_SFTP_PUBLIC_HOST: ${DOCUVATE_SFTP_PUBLIC_HOST:-localhost}
+      DOCUVATE_SFTP_PUBLIC_PORT: ${DOCUVATE_SFTP_PUBLIC_PORT:-2222}
+      DOCUVATE_SFTP_INGEST_SERVICE_KEY_FILE: /var/lib/docuvate/sftp-ingest/service_api_key
+      DOCUVATE_SFTP_PULL_GATEWAY_URL: http://sftp-ingest:8080
+      DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS: ${DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS:-60000}
+      DOCUVATE_SERVICE_API_KEYS: ${DOCUVATE_SERVICE_API_KEYS:-}
     healthcheck:
       test:
         [
@@ -190,6 +243,8 @@ services:
       retries: 30
       start_period: 30s
     depends_on:
+      sftp-ingest-data-init:
+        condition: service_completed_successfully
       migrate:
         condition: service_completed_successfully
       db-storage-guard:
@@ -273,3 +328,4 @@ volumes:
   miniodata:
   ollamadata:
   workermlcache:
+  sftpingestdata:

@@ -20,6 +20,7 @@ export interface DocumentEntity {
   folder?: Pick<FolderEntity, 'id' | 'name' | 'mappeId'> | null;
   correspondent?: CorrespondentEntity | null;
   tags: TagEntity[];
+  ingestSource?: string | null;
   createdAt: Date;
   updatedAt: Date;
   extraction?: ExtractionResult;

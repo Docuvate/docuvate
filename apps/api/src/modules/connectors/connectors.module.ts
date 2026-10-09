@@ -29,6 +29,8 @@ import { OutlookMailConnector } from './infrastructure/adapters/mail/outlook-mai
 import { PaperlessDmsConnector } from './infrastructure/adapters/paperless/paperless-dms.connector.js';
 import { HomeAssistantHomeAutomationConnector } from './infrastructure/adapters/home-assistant/home-assistant-home-automation.connector.js';
 import { AmazonS3StorageConnector } from './infrastructure/adapters/s3/amazon-s3-storage.connector.js';
+import { SftpFetchConnector } from './infrastructure/adapters/sftp/sftp-fetch.connector.js';
+import { SftpFetchSyncService } from './application/sftp-fetch-sync.service.js';
 import { PgConnectorInstallationRepository } from './infrastructure/pg-connector-installation.repository.js';
 import { DocumentsModule } from '../documents/documents.module.js';
 
@@ -56,6 +58,12 @@ const STORAGE_CATEGORY = {
   descriptionKey: 'connectors.categories.storage.description',
 };
 
+const SCANNER_SFTP_CATEGORY = {
+  id: 'scanner_sftp' as const,
+  labelKey: 'connectors.categories.scannerSftp.label',
+  descriptionKey: 'connectors.categories.scannerSftp.description',
+};
+
 @Module({
   imports: [DocumentsModule],
   controllers: [ConnectorsController, ConnectorsOAuthController],
@@ -75,6 +83,7 @@ const STORAGE_CATEGORY = {
     ListConnectorImportablesUseCase,
     ImportFromConnectorUseCase,
     ExportToConnectorUseCase,
+    SftpFetchSyncService,
     StartMailOAuthUseCase,
     CompleteMailOAuthUseCase,
     ConnectorOAuthCallbackGuard,
@@ -85,11 +94,13 @@ const STORAGE_CATEGORY = {
         registry.registerCategory(DMS_CATEGORY);
         registry.registerCategory(HOME_AUTOMATION_CATEGORY);
         registry.registerCategory(STORAGE_CATEGORY);
+        registry.registerCategory(SCANNER_SFTP_CATEGORY);
         registry.registerPlugin(new GmailMailConnector());
         registry.registerPlugin(new OutlookMailConnector());
         registry.registerPlugin(new PaperlessDmsConnector());
         registry.registerPlugin(new HomeAssistantHomeAutomationConnector());
         registry.registerPlugin(new AmazonS3StorageConnector());
+        registry.registerPlugin(new SftpFetchConnector());
         return true;
       },
       inject: [ConnectorRegistry],

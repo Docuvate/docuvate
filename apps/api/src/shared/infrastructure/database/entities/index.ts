@@ -41,6 +41,11 @@ import { RecognizedFieldDefinitionsEntity } from './recognized-field-definitions
 import { SavedDocumentViewTagsEntity } from './saved-document-view-tags.entity.js';
 import { SavedDocumentViewsEntity } from './saved-document-views.entity.js';
 import { SearchVocabularyTermsEntity } from './search-vocabulary-terms.entity.js';
+import { SftpIngressAccountLabelsEntity } from './sftp-ingress-account-labels.entity.js';
+import { SftpIngressAccountsEntity } from './sftp-ingress-accounts.entity.js';
+import { SftpIngressAuditEntity } from './sftp-ingress-audit.entity.js';
+import { SftpIngressEventsEntity } from './sftp-ingress-events.entity.js';
+import { SftpPullSyncStateEntity } from './sftp-pull-sync-state.entity.js';
 import { SessionEntity } from './session.entity.js';
 import { TenantsEntity } from './tenants.entity.js';
 import { TwoFactorEntity } from './two-factor.entity.js';
@@ -96,6 +101,11 @@ export const TYPEORM_ENTITIES = [
   SavedDocumentViewTagsEntity,
   SavedDocumentViewsEntity,
   SearchVocabularyTermsEntity,
+  SftpIngressAccountLabelsEntity,
+  SftpIngressAccountsEntity,
+  SftpIngressAuditEntity,
+  SftpIngressEventsEntity,
+  SftpPullSyncStateEntity,
   SessionEntity,
   TenantsEntity,
   TwoFactorEntity,
@@ -152,6 +162,11 @@ export {
   SavedDocumentViewTagsEntity,
   SavedDocumentViewsEntity,
   SearchVocabularyTermsEntity,
+  SftpIngressAccountLabelsEntity,
+  SftpIngressAccountsEntity,
+  SftpIngressAuditEntity,
+  SftpIngressEventsEntity,
+  SftpPullSyncStateEntity,
   SessionEntity,
   TenantsEntity,
   TwoFactorEntity,

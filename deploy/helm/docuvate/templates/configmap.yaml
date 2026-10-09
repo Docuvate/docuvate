@@ -34,3 +34,7 @@ data:
   SMTP_URL: {{ .Values.config.smtpUrl | quote }}
   DOCUVATE_PUBLIC_WEB_URL: {{ .Values.config.publicWebUrl | quote }}
   DOCUVATE_PUBLIC_API_URL: {{ .Values.config.publicApiUrl | quote }}
+  {{- if and .Values.sftpIngest.enabled .Values.config.sftpPublicHost }}
+  DOCUVATE_SFTP_PUBLIC_HOST: {{ .Values.config.sftpPublicHost | quote }}
+  DOCUVATE_SFTP_PUBLIC_PORT: {{ .Values.config.sftpPublicPort | quote }}
+  {{- end }}

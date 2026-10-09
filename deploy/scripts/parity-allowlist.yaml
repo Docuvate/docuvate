@@ -11,3 +11,11 @@ entries:
   - profiles: [dev]
     resource: NetworkPolicy/docuvate-web
     reason: Dev overlay adds in-namespace web ingress for kind without ingress-controller namespace.
+
+  - profiles: [dev]
+    resource: Service/docuvate-sftp-ingest
+    reason: Dev Kustomize patch exposes SFTP NodePort 30222; Helm dev values use matching exposeSftp/sftpNodePort.
+
+  - profiles: [dev]
+    resource: NetworkPolicy/docuvate-sftp-ingest
+    reason: Dev allows optional SFTP port 2222 ingress when scanners connect via NodePort.

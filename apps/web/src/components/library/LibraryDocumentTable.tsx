@@ -1,6 +1,6 @@
 import { Fragment, useCallback, useEffect, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, ScanLine } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { DocumentDto, DuplicateStackMemberDto, LibraryTableColumnId } from '@docuvate/contracts';
 import { deleteDocument, getDuplicateStack } from '../../lib/api';
@@ -271,6 +271,16 @@ export function LibraryDocumentTable({
                             {doc.filename}
                           </div>
                         ) : null}
+                        {doc.ingestSource === 'scanner_sftp' ? (
+                          <span className="library-title-ingest-meta">
+                            <ScanLine
+                              className="library-title-ingest-icon"
+                              size={14}
+                              aria-label={t('documents.ingestSourceScanner')}
+                            />
+                            {t('documents.ingestSourceScanner')}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
                     <div className="library-doc-stack-meta">
@@ -469,6 +479,16 @@ export function LibraryDocumentTable({
                       {showLegacyDuplicateHint(doc) ? (
                         <span className="dup-badge" title={t('library.duplicateHintTitle')}>
                           {t('library.duplicateHintBadge')}
+                        </span>
+                      ) : null}
+                      {doc.ingestSource === 'scanner_sftp' ? (
+                        <span className="library-title-ingest-meta">
+                          <ScanLine
+                            className="library-title-ingest-icon"
+                            size={14}
+                            aria-label={t('documents.ingestSourceScanner')}
+                          />
+                          {t('documents.ingestSourceScanner')}
                         </span>
                       ) : null}
                     </div>

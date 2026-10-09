@@ -17,6 +17,7 @@ const FORWARD_SQL_ORDER = [
   'auth-mfa-passkey-up.sql',
   'installation-iam-up.sql',
   '20261008133000-saved-views-dashboard-up.sql',
+  'sftp-ingress-up.sql',
   'document-extracted-layout-ir-up.sql',
 ];
 

@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuvate-sftp-ingest
+  labels:
+    app.kubernetes.io/name: docuvate-sftp-ingest
+    app.kubernetes.io/component: sftp-ingest
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-sftp-ingest
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: docuvate-sftp-ingest
+        app.kubernetes.io/component: sftp-ingest
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: data-init
+          image: alpine:3.20@sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              mkdir -p /data/staging
+          securityContext:
+            runAsUser: 65532
+            runAsGroup: 65532
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      containers:
+        - name: sftp-ingest
+          image: docuvate-sftp-ingest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: sftp
+              containerPort: 2222
+          env:
+            - name: DOCUVATE_API_URL
+              value: http://docuvate-api:3001
+            - name: DOCUVATE_SERVICE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: DOCUVATE_SFTP_INGEST_SERVICE_KEY
+            - name: SFTP_LISTEN_ADDR
+              value: ":2222"
+            - name: SFTP_HOST_KEY_PATH
+              value: /data/host_key
+            - name: SFTP_DATA_DIR
+              value: /data/staging
+            - name: SFTP_HEALTH_ADDR
+              value: ":8080"
+            - name: OTEL_SDK_DISABLED
+              value: "true"
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: docuvate-sftp-ingest-data
+        - name: tmp
+          emptyDir: {}
