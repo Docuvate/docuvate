@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-import tempfile
 from dataclasses import dataclass
-from pathlib import Path
 
 import cv2
 import numpy as np
@@ -45,18 +43,15 @@ def compile_typst_to_pdf_bytes(typst_source: str, typst_bin: str | None = None) 
     binary = typst_bin or shutil.which("typst")
     if not binary:
         raise RuntimeError("typst CLI is required to compile reconstruction PDF")
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        typ_path = root / "page.typ"
-        pdf_path = root / "page.pdf"
-        typ_path.write_text(typst_source, encoding="utf-8")
-        subprocess.run(
-            [binary, "compile", str(typ_path), str(pdf_path)],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
-        return pdf_path.read_bytes()
+    result = subprocess.run(
+        [binary, "compile", "-", "-", "-f", "pdf"],
+        input=typst_source.encode("utf-8"),
+        check=True,
+        capture_output=True,
+    )
+    if not result.stdout:
+        raise RuntimeError("typst compile produced empty PDF output")
+    return result.stdout
 
 
 def _align_sizes(a: np.ndarray, b: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
