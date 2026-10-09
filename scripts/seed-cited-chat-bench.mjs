@@ -1,18 +1,20 @@
 #!/usr/bin/env node
-import { randomUUID } from 'node:crypto';
 /**
  * Seeds the E2E smoke user with German cited-chat bench documents (ADR 024).
- * Idempotent: purges prior documents for the user, then inserts four fixtures.
- * Local / compose-smoke helper (FTS chunks, no embeddings). Playwright cited-chat
- * tests use provisionCitedChatLibraryOnce instead.
+ * Uses the HTTP API only (no direct chunk SQL). Local / compose helper; Playwright
+ * cited-chat tests use provisionCitedChatLibraryOnce instead.
  */
-const DATABASE_URL =
-  process.env.DATABASE_URL ?? 'postgresql://docuvate:docuvate@127.0.0.1:5433/docuvate';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 const AUTH_BASE = process.env.AUTH_BASE ?? 'http://127.0.0.1:3001';
 const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://127.0.0.1:5173';
 const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'alex.upload@fixture.docuvate.test';
 const PASSWORD = process.env.E2E_SMOKE_PASSWORD ?? 'E2eSmokeFixture1!';
 const NAME = process.env.E2E_SMOKE_NAME ?? 'Alex Testmann';
+
+const pdfPath = join(process.cwd(), 'e2e/fixtures/synthetic-upload.pdf');
+const pdfBuffer = readFileSync(pdfPath);
 
 const FIXTURES = [
   {
@@ -37,77 +39,83 @@ const FIXTURES = [
   },
 ];
 
-async function ensureUser() {
-  const res = await fetch(`${AUTH_BASE}/api/auth/sign-up/email`, {
+function block(text) {
+  return [
+    {
+      page: 1,
+      x: 0.1,
+      y: 0.1,
+      width: 0.8,
+      height: 0.05,
+      text,
+      blockIndex: 0,
+    },
+  ];
+}
+
+async function signIn() {
+  const res = await fetch(`${AUTH_BASE}/api/auth/sign-in/email`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', origin: WEB_ORIGIN },
-    body: JSON.stringify({ email: EMAIL, password: PASSWORD, name: NAME }),
+    body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
   });
-  if (!res.ok && res.status !== 422) {
-    throw new Error(`sign-up failed ${res.status}: ${await res.text()}`);
-  }
-}
-
-async function withPool(fn) {
-  const { createRequire } = await import('node:module');
-  const require = createRequire(new URL('../apps/api/package.json', import.meta.url));
-  const pg = require('pg');
-  const pool = new pg.Pool({ connectionString: DATABASE_URL });
-  try {
-    return await fn(pool);
-  } finally {
-    await pool.end();
-  }
-}
-
-async function purgeDocuments(pool, userId) {
-  await pool.query('DELETE FROM documents WHERE user_id = $1', [userId]);
-}
-
-function splitChunks(text) {
-  const max = 1200;
-  const chunks = [];
-  for (let i = 0; i < text.length; i += max) {
-    const body = text.slice(i, i + max);
-    chunks.push({
-      body,
-      charStart: i,
-      charEnd: i + body.length,
-      page: 1,
+  if (!res.ok) {
+    const signUp = await fetch(`${AUTH_BASE}/api/auth/sign-up/email`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: WEB_ORIGIN },
+      body: JSON.stringify({ email: EMAIL, password: PASSWORD, name: NAME }),
     });
+    if (!signUp.ok && signUp.status !== 422) {
+      throw new Error(`sign-up failed ${signUp.status}: ${await signUp.text()}`);
+    }
+    const retry = await fetch(`${AUTH_BASE}/api/auth/sign-in/email`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: WEB_ORIGIN },
+      body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
+    });
+    if (!retry.ok) {
+      throw new Error(`sign-in failed ${retry.status}: ${await retry.text()}`);
+    }
+    return retry.headers.get('set-cookie') ?? '';
   }
-  return chunks;
+  return res.headers.get('set-cookie') ?? '';
 }
 
-async function indexDocument(pool, userId, fixture) {
-  const docId = randomUUID();
-  await pool.query(
-    `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text)
-     VALUES ($1, $2, $3, $4, 'application/pdf', $5, 'ready', $6)`,
-    [docId, userId, fixture.filename, fixture.title, `bench/${fixture.filename}`, fixture.text]
+async function api(cookie, method, path, body) {
+  const headers = { origin: WEB_ORIGIN };
+  if (cookie) {
+    headers.cookie = cookie.split(';')[0];
+  }
+  let payload;
+  if (body instanceof FormData) {
+    payload = body;
+  } else if (body != null) {
+    headers['content-type'] = 'application/json';
+    payload = JSON.stringify(body);
+  }
+  const res = await fetch(`${AUTH_BASE}${path}`, { method, headers, body: payload });
+  if (!res.ok) {
+    throw new Error(`${method} ${path}: ${res.status} ${await res.text()}`);
+  }
+  return res.json();
+}
+
+async function uploadFixture(cookie, fixture) {
+  const form = new FormData();
+  form.append(
+    'file',
+    new Blob([pdfBuffer], { type: 'application/pdf' }),
+    fixture.filename
   );
-  const chunks = splitChunks(fixture.text);
-  for (let i = 0; i < chunks.length; i += 1) {
-    const c = chunks[i];
-    await pool.query(
-      `INSERT INTO document_text_chunks (document_id, user_id, chunk_index, body, page, char_start, char_end, search_vector)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, to_tsvector('simple', $4))`,
-      [docId, userId, i, c.body, c.page, c.charStart, c.charEnd]
-    );
-  }
-  return docId;
+  const created = await api(cookie, 'POST', '/v1/documents', form);
+  await api(cookie, 'PATCH', `/v1/documents/${created.id}`, {
+    title: fixture.title,
+    extractionBlocks: block(fixture.text),
+  });
 }
 
-await ensureUser();
-await withPool(async (pool) => {
-  const user = await pool.query('SELECT id FROM "user" WHERE email = $1 LIMIT 1', [EMAIL]);
-  const userId = user.rows[0]?.id;
-  if (!userId) {
-    throw new Error(`user not found: ${EMAIL}`);
-  }
-  await purgeDocuments(pool, userId);
-  for (const fixture of FIXTURES) {
-    await indexDocument(pool, userId, fixture);
-  }
-});
+const cookie = await signIn();
+for (const fixture of FIXTURES) {
+  await uploadFixture(cookie, fixture);
+}
 console.log(`Cited-chat bench fixtures ready for ${EMAIL}`);
