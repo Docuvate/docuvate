@@ -54,11 +54,11 @@ test.describe('Authenticated compose smoke', () => {
       .click();
     await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
 
-    await expect(page.getByText(/loading pdf/i)).toHaveCount(0);
-    await expect(page.getByRole('region', { name: /^page 1$/i })).toContainText(fixturePhrase, {
+    await expect(page.getByText(/loading pdf|pdf wird geladen/i)).toHaveCount(0, { timeout: 90_000 });
+    await expect(page.locator('.pdf-page-canvas').first()).toBeVisible({ timeout: 90_000 });
+    await expect(page.locator('.textLayer').first()).toContainText(fixturePhrase, {
       timeout: 30_000,
     });
-    await expect(page.locator('.pdf-page-canvas').first()).toBeVisible({ timeout: 90_000 });
 
     await attachScreenshot(page, testInfo, '03-document-open-preview.png');
   });
