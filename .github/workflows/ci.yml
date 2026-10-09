@@ -97,6 +97,8 @@ jobs:
           python-version-file: .tool-versions
       - name: Install typst (layout IR compile tests)
         run: bash scripts/ci/install-typst.sh
+      - name: Poppler for layout pixel-compare tests
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
       - name: Worker lint and unit tests
         run: |
           pip install 'uv==0.12.23'

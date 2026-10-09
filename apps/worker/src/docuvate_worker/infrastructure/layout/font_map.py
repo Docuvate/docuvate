@@ -60,6 +60,25 @@ def css_font_family(fontname: str | None) -> str:
     return '"Liberation Sans", "Helvetica Neue", Helvetica, Arial, sans-serif'
 
 
+def uses_metric_typst_substitute(fontname: str | None) -> bool:
+    """True when PDF font maps to Typst with no horizontal scale fudge (e.g. Helvetica)."""
+    if not fontname:
+        return True
+    for pattern, (family, mult) in _PATTERNS:
+        if abs(mult - 1.0) > 0.001:
+            continue
+        if pattern.search(fontname):
+            return family in ("Liberation Sans", "Liberation Mono")
+    base = fontname.split("-")[0].split("+")[-1]
+    if base:
+        for pattern, (family, mult) in _PATTERNS:
+            if abs(mult - 1.0) > 0.001:
+                continue
+            if pattern.search(base):
+                return family in ("Liberation Sans", "Liberation Mono")
+    return False
+
+
 def typst_font_and_scale(fontname: str | None) -> tuple[str, float]:
     if not fontname:
         return _DEFAULT

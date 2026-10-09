@@ -40,6 +40,65 @@ def _banner_stream() -> str:
     return f"BT /F1 9 Tf 36 760 Td ({_BORN_DIGITAL_BANNER}) Tj ET"
 
 
+def layout_regression_payroll_pdf() -> bytes:
+    """Single-page grid form: long bold title, table lines, label/value pairs (synthetic)."""
+    title = (
+        "Synthetic electronic payroll certificate for tax year 2025 "
+        "(fictional employer, no personal data)"
+    )
+    w, h = 612.0, 792.0
+    lines = [
+        _banner_stream(),
+        f"BT /F2 13 Tf 40 720 Td ({title}) Tj ET",
+        "0.5 680 m 520 680 l S",
+        "0.5 660 m 520 660 l S",
+        "0.5 640 m 520 640 l S",
+        "0.5 620 m 520 620 l S",
+        "0.5 600 m 520 600 l S",
+        "0.5 580 m 520 580 l S",
+        "120 680 m 120 580 l S",
+        "280 680 m 280 580 l S",
+        "400 680 m 400 580 l S",
+        "520 680 m 520 580 l S",
+        "BT /F1 8 Tf 48 668 Td (1.) Tj ET",
+        "BT /F1 8 Tf 130 668 Td (Reporting period) Tj ET",
+        "BT /F1 8 Tf 410 668 Td (01.01. - 31.12.) Tj ET",
+        "BT /F1 8 Tf 48 648 Td (3.) Tj ET",
+        "BT /F1 8 Tf 130 648 Td (Gross wages incl. benefits) Tj ET",
+        "BT /F1 8 Tf 410 648 Td (48.250,00) Tj ET",
+        "BT /F1 8 Tf 48 628 Td (5.) Tj ET",
+        "BT /F1 8 Tf 130 628 Td (Income tax withheld) Tj ET",
+        "BT /F1 8 Tf 410 628 Td (9.120,00) Tj ET",
+        "BT /F1 9 Tf 40 540 Td (Employee ID:) Tj ET",
+        "BT /F1 9 Tf 200 540 Td (SYN-4711) Tj ET",
+    ]
+    stream = "\n".join(lines)
+    stream_b = stream.encode("latin-1")
+    mb = f"[0 0 {w:.0f} {h:.0f}]"
+    objects = [
+        b"1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj\n",
+        b"2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj\n",
+        (
+            f"3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox {mb} "
+            f"/Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>endobj\n"
+        ).encode("latin-1"),
+        bytes(f"4 0 obj<< /Length {len(stream_b)} >>stream\n", "latin-1") + stream_b + b"\nendstream\nendobj\n",
+        b"5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj\n",
+        b"6 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>endobj\n",
+    ]
+    body = b"%PDF-1.4\n" + b"".join(objects)
+    xref_start = len(body)
+    xref_lines = [b"xref\n0 7\n0000000000 65535 f \n"]
+    offset = len(b"%PDF-1.4\n")
+    for obj in objects:
+        xref_lines.append(f"{offset:010d} 00000 n \n".encode("latin-1"))
+        offset += len(obj)
+    trailer = (
+        f"trailer<< /Size 7 /Root 1 0 R >>\nstartxref\n{xref_start}\n%%EOF\n".encode("latin-1")
+    )
+    return body + b"".join(xref_lines) + trailer
+
+
 def delivery_note_table_pdf() -> bytes:
     stream = "\n".join(
         [
