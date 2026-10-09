@@ -36,9 +36,10 @@ Docling gives strong layout semantics but depends on **PyTorch** and multi-hundr
 - `DOCUMENT_CHAT_PROVIDER`: `rag-ollama` (default in Compose when `WORKER_URL` + `OLLAMA_URL`), `context`, `donut-ml`, `ollama`, `mock`, `off`
 - `DOCUMENT_CHAT_MODE`: alternate name for provider (`mock` / `ollama` / `off`)
 - User override: `user_preferences.preferred_chat_provider` (Settings UI)
-- `OLLAMA_URL`, `OLLAMA_MODEL`: RAG+Ollama product path (`rag-ollama`). Compose defaults: `http://ollama:11434`, **`qwen2.5:3b`** (passt zu `OLLAMA_MEM_LIMIT=3g`). Dev-only full-doc `ollama` / `mock` require `NODE_ENV=development` or `DOCUMENT_CHAT_DEV_PROVIDERS=true`.
+- `OLLAMA_URL`, `OLLAMA_MODEL`: RAG+Ollama product path (`rag-ollama`). Compose defaults: `http://ollama:11434`, **`qwen2.5:1.5b`** (CPU, auch ARM64/k3s). Dev-only full-doc `ollama` / `mock` require `NODE_ENV=development` or `DOCUMENT_CHAT_DEV_PROVIDERS=true`.
+- `DOCUVATE_AI_PROFILE`: `off` (retrieval only), `cpu-small` (1.5B, default), `cpu-medium` (3B), `gpu` (hardware gate).
 - `OLLAMA_MEM_LIMIT`: Docker `mem_limit` for the Ollama service (default **`3g`**). **`qwen3:4b` needs ≥ `5g`** loaded (~3.5 GB model + overhead); otherwise OOM/restart.
-- `OLLAMA_CHAT_TIMEOUT_MS` (sync `/chat`), `OLLAMA_CHAT_IDLE_TIMEOUT_MS` (streaming idle), `OLLAMA_NUM_CTX`, `OLLAMA_NUM_PREDICT`, `OLLAMA_KEEP_ALIVE`, `WORKER_RAG_CONTEXT_TIMEOUT_MS`: CPU tuning (Compose defaults: 180s / 120s idle / 4096 ctx / 512 predict / 30m keep-alive / 120s RAG).
+- `OLLAMA_CHAT_TIMEOUT_MS` (sync `/chat`), `OLLAMA_CHAT_IDLE_TIMEOUT_MS` (streaming idle), `OLLAMA_NUM_CTX`, `OLLAMA_NUM_PREDICT`, `OLLAMA_KEEP_ALIVE`, `WORKER_RAG_CONTEXT_TIMEOUT_MS`: CPU tuning (Compose defaults: 180s / 120s idle / **2048 ctx / 256 predict** / 30m keep-alive / 120s RAG). Set `OLLAMA_NUM_THREADS` / `OMP_NUM_THREADS` on ARM64 nodes (see `bench/cited_chat_eval.py` output).
 - Docker Desktop: allocate **10–12 GB** RAM total for worker + Ollama + API; see `OLLAMA_MEM_LIMIT` in `docker-compose.yml`.
 - **Donut DocVQA** (optional): large worker image (transformers + torch). **Product UI gates Donut** unless the worker reports a GPU with sufficient VRAM (`GET /settings/hardware`). CPU inference is not offered for chat even if `[donut]` is installed.
   - **Docker Compose:** set `WORKER_OPTIONAL_EXTRAS=donut`, **rebuild** worker, and reserve a GPU (see `docker-compose.yml` comments). Without Donut or RAG+Ollama, the document **Chat tab stays visible but disabled** (overlay + Settings hint).

@@ -169,14 +169,14 @@ export class ChatMessageRecordDto {
   createdAt!: string;
   updatedAt?: string;
   generationStatus?: 'pending' | 'streaming' | 'done' | 'failed' | null;
-  generationPhase?: 'retrieving' | 'generating' | null;
+  generationPhase?: 'retrieving' | 'generating' | 'verifying' | null;
   errorCode?: string | null;
 }
 
 export class DocumentChatThreadDto {
   id!: string;
   title!: string;
-  scope!: 'document' | 'corpus';
+  scope!: 'document' | 'library';
   documentIds!: string[];
   createdAt!: string;
   updatedAt!: string;

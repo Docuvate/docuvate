@@ -31,4 +31,15 @@ export class CancelDocumentChatGenerationUseCase {
     }
     await this.cancelRegistry.requestCancel(messageId);
   }
+
+  async executeForMessage(messageId: string, userId: string): Promise<void> {
+    const message = await this.threads.findMessageForUser(messageId, userId);
+    if (!message) {
+      throw new NotFoundError('Chat message');
+    }
+    if (!isActiveGenerationStatus(message.generationStatus)) {
+      throw new ValidationError('Diese Antwort wird nicht mehr erzeugt.');
+    }
+    await this.cancelRegistry.requestCancel(messageId);
+  }
 }

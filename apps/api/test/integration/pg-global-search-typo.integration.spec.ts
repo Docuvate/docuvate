@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
 import { GlobalSearchUseCase } from '../../src/modules/search/application/global-search.use-case.js';
+import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { replaceDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
@@ -56,12 +57,14 @@ describe('Global search typo correction (Testcontainers Postgres)', () => {
     await repo.indexDocumentChunks(
       userId,
       rechnungDocId,
-      'Rechnung über Beratungsleistungen im ersten Quartal.'
+      splitTextChunksWithSpans('Rechnung über Beratungsleistungen im ersten Quartal.')
     );
     await repo.indexDocumentChunks(
       userId,
       kontoauszugDocId,
-      'Der monatliche Kontoauszug weist eine Gebühr für den Zahlungsverkehr aus.'
+      splitTextChunksWithSpans(
+        'Der monatliche Kontoauszug weist eine Gebühr für den Zahlungsverkehr aus.'
+      )
     );
 
     await replaceDocumentFieldValues(

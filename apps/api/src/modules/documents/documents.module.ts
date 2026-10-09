@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { DocumentsController } from './presentation/documents.controller.js';
 import { UploadDocumentUseCase } from './application/upload-document.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
@@ -37,6 +37,7 @@ import { GetDocumentLayoutTypstUseCase } from './application/get-document-layout
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
 import { SearchModule } from '../search/search.module.js';
+import { CitedChatModule } from '../cited-chat/cited-chat.module.js';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { SearchModule } from '../search/search.module.js';
     DocumentPipelineModule,
     ExtractionFeedbackModule,
     SearchModule,
+    forwardRef(() => CitedChatModule),
   ],
   controllers: [DocumentsController],
   providers: [
@@ -81,6 +83,17 @@ import { SearchModule } from '../search/search.module.js';
     GetDocumentLayoutHtmlUseCase,
     GetDocumentLayoutTypstUseCase,
   ],
-  exports: [UploadDocumentUseCase, GetDocumentContentUseCase, QueueExtractionUseCase],
+  exports: [
+    UploadDocumentUseCase,
+    GetDocumentContentUseCase,
+    QueueExtractionUseCase,
+    ListDocumentChatThreadMessagesUseCase,
+    StreamDocumentChatMessageUseCase,
+    CancelDocumentChatGenerationUseCase,
+    RetryDocumentChatMessageUseCase,
+    DocumentChatGenerationQueueService,
+    PgDocumentChatThreadRepository,
+    { provide: DOCUMENT_CHAT_THREAD_REPOSITORY, useExisting: PgDocumentChatThreadRepository },
+  ],
 })
 export class DocumentsModule {}

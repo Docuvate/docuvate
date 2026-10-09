@@ -447,7 +447,7 @@ export interface DocumentChatPort {
   }>;
 }
 
-export type ChatThreadScope = 'document' | 'corpus';
+export type ChatThreadScope = 'document' | 'library';
 
 export interface DocumentChatThreadEntity {
   id: string;
@@ -463,7 +463,19 @@ export interface DocumentChatThreadEntity {
 
 export type DocumentChatGenerationStatus = 'pending' | 'streaming' | 'done' | 'failed';
 
-export type DocumentChatGenerationPhase = 'retrieving' | 'generating';
+export type DocumentChatGenerationPhase = 'retrieving' | 'generating' | 'verifying';
+
+export interface DocumentChatMessageCitationEntity {
+  ordinal: number;
+  documentId: string;
+  documentTitle: string;
+  chunkId: string;
+  quote: string;
+  charStart: number;
+  charEnd: number;
+  page: number | null;
+  blocks: ExtractionBlock[];
+}
 
 export interface DocumentChatMessageEntity {
   id: string;
@@ -476,6 +488,7 @@ export interface DocumentChatMessageEntity {
   generationPhase?: DocumentChatGenerationPhase | null;
   errorCode?: string | null;
   errorDetail?: string | null;
+  citations?: DocumentChatMessageCitationEntity[];
 }
 
 export interface DocumentChatMessageGenerationPatch {
@@ -487,6 +500,7 @@ export interface DocumentChatMessageGenerationPatch {
 }
 
 export interface DocumentChatThreadRepository {
+  listThreadsForLibrary(userId: string): Promise<DocumentChatThreadEntity[]>;
   listThreadsForDocument(documentId: string, userId: string): Promise<DocumentChatThreadEntity[]>;
   createThread(
     userId: string,

@@ -10,7 +10,16 @@
     "settings": "Einstellungen",
     "collapseSidebar": "Navigation einklappen",
     "expandSidebar": "Navigation ausklappen",
-    "home": "Start"
+    "home": "Start",
+    "globalChat": "Chat"
+  },
+  "globalChat": {
+    "title": "Chat über alle Dokumente",
+    "subtitle": "Antworten mit geprüften Quellen aus Ihrer Bibliothek.",
+    "threads": "Unterhaltungen",
+    "newThread": "Neuer Chat",
+    "placeholder": "Frage zu Ihren Dokumenten…",
+    "send": "Senden"
   },
   "shell": {
     "globalSearch": "Globale Suche",
@@ -546,6 +555,8 @@
       "typingAria": "Assistent verarbeitet Ihre Nachricht",
       "phaseRetrieving": "Suche passende Stellen im Dokument…",
       "phaseGenerating": "Antwort wird erstellt…",
+      "phaseVerifying": "Quellen werden geprüft…",
+      "sources": "Quellen",
       "cancel": "Abbrechen",
       "retry": "Erneut versuchen",
       "errorTimeout": "Die Antwort hat zu lange gedauert.",

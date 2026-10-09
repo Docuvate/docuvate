@@ -19,6 +19,7 @@ import { SearchController } from './presentation/search.controller.js';
     GlobalSearchUseCase,
     SyncDocumentSearchIndexUseCase,
     PgGlobalSearchRepository,
+    EMBEDDING_PORT,
   ],
 })
 export class SearchModule {}

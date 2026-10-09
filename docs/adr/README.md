@@ -13,6 +13,7 @@ Numbers **011–015** are reserved for in-flight work. Check this index before a
 | 021 | Layout IR render target | [021-layout-ir-render-target.md](./021-layout-ir-render-target.md) | accepted |
 | 023 | Saved views and dashboard | [023-saved-views-dashboard-schema.md](./023-saved-views-dashboard-schema.md) | accepted |
 | 020 | Paperless-ngx source connector | [020-paperless-ngx-source-connector.md](./020-paperless-ngx-source-connector.md) | accepted |
+| 024 | Cited document chat | [024-cited-chat.md](./024-cited-chat.md) | accepted |
 | 018+ | _(see files in this directory)_ | | |
 
 Older ADRs: `001` through `010` in this directory.

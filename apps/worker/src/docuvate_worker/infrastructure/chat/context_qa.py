@@ -6,8 +6,8 @@ from dataclasses import dataclass
 
 from docuvate_worker.infrastructure.fastembed_model import embed_passages, embed_query
 
-CHUNK_SIZE = 480
-CHUNK_OVERLAP = 96
+CHUNK_SIZE = 320
+CHUNK_OVERLAP = 64
 TOP_K = 5
 MIN_DENSE_SCORE = 0.38
 HYBRID_DENSE_WEIGHT = 0.55

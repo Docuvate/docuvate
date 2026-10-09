@@ -1,5 +1,5 @@
-const CHUNK_SIZE = 480;
-const CHUNK_OVERLAP = 96;
+const CHUNK_SIZE = 320;
+const CHUNK_OVERLAP = 64;
 
 /** Mirrors worker context_qa chunking for consistent semantic snippets. */
 export function splitTextChunks(text: string): string[] {

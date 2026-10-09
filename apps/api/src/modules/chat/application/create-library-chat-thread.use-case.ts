@@ -1,0 +1,22 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type { DocumentChatThreadEntity } from '../../../shared/domain/ports.js';
+import {
+  DOCUMENT_CHAT_THREAD_REPOSITORY,
+  type DocumentChatThreadRepository,
+} from '../../../shared/domain/ports.js';
+import { DEFAULT_CHAT_THREAD_TITLE } from '../../documents/application/chat-thread-title.js';
+
+@Injectable()
+export class CreateLibraryChatThreadUseCase {
+  constructor(
+    @Inject(DOCUMENT_CHAT_THREAD_REPOSITORY)
+    private readonly threads: DocumentChatThreadRepository
+  ) {}
+
+  async execute(userId: string, title?: string): Promise<DocumentChatThreadEntity> {
+    return this.threads.createThread(userId, [], {
+      title: title?.trim() || DEFAULT_CHAT_THREAD_TITLE,
+      scope: 'library',
+    });
+  }
+}

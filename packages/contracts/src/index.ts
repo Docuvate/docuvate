@@ -396,7 +396,7 @@ export interface DocumentChatResponse {
   setupHint?: string | null;
 }
 
-export type ChatThreadScope = 'document' | 'corpus';
+export type ChatThreadScope = 'document' | 'library';
 
 export interface DocumentChatThreadDto {
   id: string;
@@ -420,7 +420,18 @@ export interface CreateDocumentChatThreadRequest {
 
 export type DocumentChatGenerationStatus = 'pending' | 'streaming' | 'done' | 'failed';
 
-export type DocumentChatGenerationPhase = 'retrieving' | 'generating';
+export type DocumentChatGenerationPhase = 'retrieving' | 'generating' | 'verifying';
+
+export interface ChatMessageCitationDto {
+  ordinal: number;
+  documentId: string;
+  documentTitle: string;
+  page: number | null;
+  charStart: number;
+  charEnd: number;
+  quote: string;
+  blocks: ExtractionBlock[];
+}
 
 export type DocumentChatGenerationErrorCode =
   | 'generation_timeout'
@@ -437,6 +448,7 @@ export interface DocumentChatMessageRecordDto extends ChatMessageDto {
   generationStatus?: DocumentChatGenerationStatus | null;
   generationPhase?: DocumentChatGenerationPhase | null;
   errorCode?: DocumentChatGenerationErrorCode | string | null;
+  citations?: ChatMessageCitationDto[];
 }
 
 export interface DocumentChatThreadMessagesResponse {

@@ -23,6 +23,7 @@ import { WorkspaceModule } from './modules/workspace/workspace.module.js';
 import { ExtensionHostModule } from './shared/infrastructure/extensions/extension-host.module.js';
 import { SearchModule } from './modules/search/search.module.js';
 import { SftpIngressModule } from './modules/sftp-ingress/sftp-ingress.module.js';
+import { ChatModule } from './modules/chat/chat.module.js';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { SftpIngressModule } from './modules/sftp-ingress/sftp-ingress.module.js
     AuthInvitationsModule,
     WorkspaceModule,
     SftpIngressModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

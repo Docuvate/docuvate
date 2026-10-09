@@ -12,6 +12,7 @@ from docuvate_worker.application.embedding import embed_texts
 from docuvate_worker.application.extract import compare_engines, extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.infrastructure.chat.context_qa import retrieve_document_rag_context
+from docuvate_worker.infrastructure.chat.rag_rerank import RagPassage, rerank_passages
 from docuvate_worker.infrastructure.extractors.engine_catalog import list_engine_meta
 from docuvate_worker.infrastructure.extractors.label_custom_fields import (
     extract_label_custom_fields,
@@ -26,6 +27,9 @@ from docuvate_worker.presentation.schemas import (
     DocumentChatProviderListResponse,
     DocumentChatRagContextRequest,
     DocumentChatRagContextResponse,
+    RagRetrieveRequest,
+    RagRetrieveResponse,
+    RagRetrieveResultItem,
     DocumentChatRequest,
     DocumentChatResponse,
     EmbedRequest,
@@ -205,6 +209,19 @@ def list_document_chat_providers(
             )
             for p in chat_provider_status()
         ]
+    )
+
+
+@router.post("/rag/retrieve", response_model=RagRetrieveResponse)
+def rag_retrieve(
+    body: RagRetrieveRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> RagRetrieveResponse:
+    _require_worker_secret(x_worker_secret)
+    passages = [RagPassage(id=p.id, text=p.text) for p in body.passages]
+    ranked = rerank_passages(body.query, passages, top_k=4)
+    return RagRetrieveResponse(
+        results=[RagRetrieveResultItem(id=r.id, score=r.score) for r in ranked]
     )
 
 
