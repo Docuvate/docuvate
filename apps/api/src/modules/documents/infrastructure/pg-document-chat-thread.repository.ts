@@ -54,7 +54,9 @@ const THREAD_LIST_SELECT = `
          (
            SELECT m.generation_status
            FROM chat_messages m
-           WHERE m.thread_id = t.id AND m.role = 'assistant'
+           WHERE m.thread_id = t.id
+             AND m.role = 'assistant'
+             AND m.generation_status IN ('pending', 'streaming')
            ORDER BY m.created_at DESC
            LIMIT 1
          ) AS active_generation_status`;
@@ -272,18 +274,45 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
       values.push(patch.errorDetail);
     }
 
+    const terminal =
+      patch.generationStatus === 'done' || patch.generationStatus === 'failed';
+    const inFlightGuard =
+      patch.finalizeOnlyIfInFlight === true && terminal
+        ? ` AND generation_status IN ('pending', 'streaming')`
+        : '';
+
     const result = await this.pool.query(
       `UPDATE chat_messages
        SET ${sets.join(', ')}
-       WHERE id = $1
+       WHERE id = $1${inFlightGuard}
        RETURNING id, thread_id, role, content, created_at, updated_at,
                  generation_status, generation_phase, error_code, error_detail`,
       values
     );
     if (result.rows.length === 0) {
+      if (patch.finalizeOnlyIfInFlight === true && terminal) {
+        const existing = await this.pool.query(
+          `SELECT id, thread_id, role, content, created_at, updated_at,
+                  generation_status, generation_phase, error_code, error_detail
+           FROM chat_messages WHERE id = $1`,
+          [messageId]
+        );
+        if (existing.rows.length > 0) {
+          return mapMessageRow(existing.rows[0] as Record<string, unknown>);
+        }
+      }
       throw new NotFoundError('Chat message');
     }
     return mapMessageRow(result.rows[0] as Record<string, unknown>);
+  }
+
+  async touchMessageGenerationHeartbeat(messageId: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE chat_messages
+       SET updated_at = now()
+       WHERE id = $1 AND generation_status IN ('pending', 'streaming')`,
+      [messageId]
+    );
   }
 
   async resetMessageForRetry(messageId: string): Promise<DocumentChatMessageEntity> {
@@ -321,6 +350,38 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
        WHERE id = $1 AND title = $3`,
       [threadId, trimmed, DEFAULT_THREAD_TITLE]
     );
+  }
+
+  async listInFlightAssistantMessageIdsOlderThan(maxAgeMs: number): Promise<string[]> {
+    const result = await this.pool.query<{ id: string }>(
+      `SELECT id
+       FROM chat_messages
+       WHERE role = 'assistant'
+         AND generation_status IN ('pending', 'streaming')
+         AND updated_at < now() - ($1::bigint * interval '1 millisecond')`,
+      [maxAgeMs]
+    );
+    return result.rows.map((row) => row.id);
+  }
+
+  async failAssistantGenerationsByIds(messageIds: string[]): Promise<number> {
+    if (messageIds.length === 0) {
+      return 0;
+    }
+    const result = await this.pool.query(
+      `UPDATE chat_messages
+       SET generation_status = 'failed',
+           generation_phase = NULL,
+           error_code = 'generation_timeout',
+           error_detail = 'Stale generation reconciled',
+           updated_at = now()
+       WHERE id = ANY($1::uuid[])
+         AND role = 'assistant'
+         AND generation_status IN ('pending', 'streaming')
+       RETURNING id`,
+      [messageIds]
+    );
+    return result.rowCount ?? 0;
   }
 
   private async assertThreadExistsForUser(threadId: string, userId: string): Promise<void> {

@@ -215,6 +215,9 @@ job_compose_smoke() {
   DATABASE_URL=postgresql://docuvate:docuvate@localhost:5433/docuvate \
     AUTH_BASE=http://localhost:3001 WEB_ORIGIN=http://localhost:5173 \
     node scripts/seed-e2e-smoke-user.mjs
+  DATABASE_URL=postgresql://docuvate:docuvate@localhost:5433/docuvate \
+    AUTH_BASE=http://localhost:3001 WEB_ORIGIN=http://localhost:5173 \
+    node scripts/seed-cited-chat-bench.mjs
   pnpm exec playwright install chromium --with-deps
   E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 pnpm --filter @docuvate/e2e test
 }

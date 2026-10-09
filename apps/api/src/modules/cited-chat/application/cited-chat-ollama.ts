@@ -6,15 +6,9 @@ import {
 } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
 import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
 
-export interface CitedClaimJson {
-  text: string;
-  source: string;
-  quote: string;
-}
+import type { CitedAnswerJson } from '../domain/cited-answer-json.js';
 
-export interface CitedAnswerJson {
-  claims: CitedClaimJson[];
-}
+export type { CitedClaimJson, CitedAnswerJson } from '../domain/cited-answer-json.js';
 
 const ANSWER_JSON_SCHEMA = {
   type: 'object',
@@ -40,9 +34,12 @@ export function buildCitedChatSystemPrompt(passages: Array<{ label: string; text
     .map((p) => `[${p.label}]\n${p.text}`)
     .join('\n\n');
   return [
-    'Du bist ein Assistent für Docuvate. Antworte nur mit JSON.',
-    'Gib ein Objekt mit claims zurück. Jeder claim hat text (kurzer Satz), source (Quellenlabel wie S1) und quote (wörtliches Zitat, höchstens 10 Wörter aus der Quelle).',
-    'Erfinde nichts. Fehlen passende Quellen, gib claims als leeres Array zurück.',
+    'Du bist ein Assistent für Docuvate. Antworte nur mit gültigem JSON (kein Markdown).',
+    'Format: {"claims":[{"text":"...","source":"S1","quote":"..."}]}',
+    'Jeder claim: text = kurzer Antwortsatz auf Deutsch; source = exakt das Quellenlabel (z. B. S1); quote = wörtliches Zitat aus dieser Quelle, höchstens 10 Wörter, Zeichen für Zeichen wie im Text (keine Paraphrase).',
+    'Erfinde nichts. Fehlen passende Quellen, gib "claims":[] zurück.',
+    'Beispiel:',
+    '{"claims":[{"text":"Die Miete ist bis zum 3. Werktag fällig.","source":"S1","quote":"bis zum 3. Werktag"}]}',
     'Quellen:',
     blocks || '(keine)',
   ].join('\n');

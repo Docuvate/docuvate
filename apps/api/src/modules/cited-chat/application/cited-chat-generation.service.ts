@@ -9,14 +9,14 @@ import {
 import {
   CITED_CHAT_ABSTENTION_DE,
   RAG_RERANK_TOP_K,
+  citedChatBenchStatsEnabled,
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
-import {
-  findQuoteInChunk,
-  passesFusionGate,
-  passesRerankerGate,
-} from '../domain/verify-citation-quote.js';
+import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
+import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
+import { passesFusionGate, passesRerankerGate } from '../domain/verify-citation-quote.js';
+import { verifyCitedClaims } from '../domain/verify-cited-claims.js';
 import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
@@ -25,9 +25,9 @@ import {
   requestCitedAnswerFromOllama,
 } from './cited-chat-ollama.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
-import { extractReadableCitedAnswerPreview } from '../domain/extract-cited-stream-preview.js';
 
 const CONTENT_FLUSH_MS = 250;
+const GENERATION_HEARTBEAT_MS = 15_000;
 
 export interface CitedChatGenerationInput {
   messageId: string;
@@ -37,6 +37,7 @@ export interface CitedChatGenerationInput {
   documentIds: string[];
   scope: 'document' | 'library';
   shouldAbort?: () => boolean | Promise<boolean>;
+  onHeartbeat?: () => void | Promise<void>;
 }
 
 export interface CitedChatGenerationResult {
@@ -69,6 +70,7 @@ export class CitedChatGenerationService {
         documentIds,
         scope,
         shouldAbort: input.shouldAbort,
+        onHeartbeat: input.onHeartbeat,
       });
     } catch (err) {
       this.logger.warn(`Cited chat generation failed for ${messageId}: ${String(err)}`);
@@ -91,8 +93,20 @@ export class CitedChatGenerationService {
     documentIds: string[];
     scope: 'document' | 'library';
     shouldAbort?: () => boolean | Promise<boolean>;
+    onHeartbeat?: () => void | Promise<void>;
   }): Promise<CitedChatGenerationResult> {
-    const { messageId, threadId, userId, userMessage, documentIds, scope, shouldAbort } = input;
+    const { messageId, threadId, userId, userMessage, documentIds, scope, shouldAbort, onHeartbeat } =
+      input;
+
+    let lastHeartbeat = Date.now();
+    const heartbeat = async (): Promise<void> => {
+      const now = Date.now();
+      if (now - lastHeartbeat < GENERATION_HEARTBEAT_MS) {
+        return;
+      }
+      lastHeartbeat = now;
+      await onHeartbeat?.();
+    };
 
     const aborted = async (): Promise<boolean> => (await shouldAbort?.()) ?? false;
     if (await aborted()) {
@@ -104,6 +118,7 @@ export class CitedChatGenerationService {
       generationStatus: 'pending',
       generationPhase: 'retrieving',
     });
+    await heartbeat();
 
     let queryVector: number[] | undefined;
     try {
@@ -133,6 +148,7 @@ export class CitedChatGenerationService {
         content: CITED_CHAT_ABSTENTION_DE,
         generationStatus: 'done',
         generationPhase: null,
+        finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
       return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
@@ -162,7 +178,10 @@ export class CitedChatGenerationService {
         .map((chunk) => ({ chunk, score: chunk.fusionScore }));
     }
 
-    const top = ranked.slice(0, RAG_RERANK_TOP_K);
+    const top =
+      scope === 'library'
+        ? diversifyLibraryRerank(ranked, RAG_RERANK_TOP_K)
+        : ranked.slice(0, RAG_RERANK_TOP_K);
     const bestScore = top[0]?.score ?? -1;
     const gateOk =
       rerank.reachable && rerank.rerankerUsed
@@ -174,6 +193,7 @@ export class CitedChatGenerationService {
         content: CITED_CHAT_ABSTENTION_DE,
         generationStatus: 'done',
         generationPhase: null,
+        finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
       return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
@@ -209,20 +229,53 @@ export class CitedChatGenerationService {
     );
 
     let lastFlush = 0;
+    let processedClaimCount = 0;
+    const streamedVerified: Array<{ text: string; ordinal: number }> = [];
     const llm = await requestCitedAnswerFromOllama(userMessage, systemPrompt, history, {
       shouldAbort: () => aborted(),
       onToken: async (partialJson) => {
-        const preview = extractReadableCitedAnswerPreview(partialJson);
-        if (!preview) {
+        await heartbeat();
+        const partialClaims = extractCompleteCitedClaims(partialJson);
+        if (partialClaims.length <= processedClaimCount) {
           return;
         }
+        const newClaims = partialClaims.slice(processedClaimCount);
+        processedClaimCount = partialClaims.length;
+        for (const claim of newClaims) {
+          const { verified, rejected } = verifyCitedClaims({
+            claims: [claim],
+            top,
+            labelByChunk,
+          });
+          for (const rej of rejected) {
+            this.logger.debug(
+              `Cited claim rejected: ${JSON.stringify({
+                claimText: rej.claimText,
+                quote: rej.quote,
+                bestMatchScore: rej.bestMatchScore,
+                reason: rej.reason,
+              })}`
+            );
+          }
+          const row = verified[0];
+          if (!row) {
+            continue;
+          }
+          streamedVerified.push({ text: row.text, ordinal: streamedVerified.length + 1 });
+        }
+        if (streamedVerified.length === 0) {
+          return;
+        }
+        const contentPreview = streamedVerified
+          .map((v) => `${v.text} [${v.ordinal}]`)
+          .join(' ');
         const now = Date.now();
         if (now - lastFlush < CONTENT_FLUSH_MS) {
           return;
         }
         lastFlush = now;
         await this.threads.updateMessageGeneration(messageId, {
-          content: preview,
+          content: contentPreview,
           generationStatus: 'streaming',
           generationPhase: 'generating',
         });
@@ -249,39 +302,24 @@ export class CitedChatGenerationService {
       generationPhase: 'verifying',
     });
 
-    const verified: Array<{
-      ordinal: number;
-      text: string;
-      chunkId: string;
-      quote: string;
-      charStart: number;
-      charEnd: number;
-    }> = [];
-
-    let ordinal = 1;
-    for (const claim of llm.parsed.claims) {
-      const chunkRow = top.find((row) => labelByChunk.get(row.chunk.chunkId) === claim.source.trim());
-      if (!chunkRow) {
-        continue;
-      }
-      const match = findQuoteInChunk(chunkRow.chunk.body, claim.quote);
-      if (!match) {
-        continue;
-      }
-      const text = claim.text.trim();
-      if (!text) {
-        continue;
-      }
-      verified.push({
-        ordinal,
-        text,
-        chunkId: chunkRow.chunk.chunkId,
-        quote: match.bodyQuote,
-        charStart: (chunkRow.chunk.charStart ?? 0) + match.charStart,
-        charEnd: (chunkRow.chunk.charStart ?? 0) + match.charEnd,
-      });
-      ordinal += 1;
+    const { verified, rejected } = verifyCitedClaims({
+      claims: llm.parsed.claims,
+      top,
+      labelByChunk,
+    });
+    for (const rej of rejected) {
+      this.logger.debug(
+        `Cited claim rejected: ${JSON.stringify({
+          claimText: rej.claimText,
+          quote: rej.quote,
+          bestMatchScore: rej.bestMatchScore,
+          reason: rej.reason,
+        })}`
+      );
     }
+    const benchStats = citedChatBenchStatsEnabled()
+      ? JSON.stringify({ citedRejectedClaims: rejected.length })
+      : undefined;
 
     if (verified.length === 0) {
       await this.citationsRepo.replaceCitations(messageId, []);
@@ -289,6 +327,8 @@ export class CitedChatGenerationService {
         content: CITED_CHAT_ABSTENTION_DE,
         generationStatus: 'done',
         generationPhase: null,
+        errorDetail: benchStats,
+        finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
       return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
@@ -313,6 +353,8 @@ export class CitedChatGenerationService {
       content,
       generationStatus: 'done',
       generationPhase: null,
+      errorDetail: benchStats,
+      finalizeOnlyIfInFlight: true,
     });
     await this.threads.touchThread(threadId);
     return { content, abstained: false };
@@ -332,6 +374,7 @@ export class CitedChatGenerationService {
       errorCode,
       errorDetail,
       content: existing?.content ?? '',
+      finalizeOnlyIfInFlight: true,
     });
     await this.threads.touchThread(threadId);
   }

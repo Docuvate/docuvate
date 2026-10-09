@@ -3,6 +3,9 @@
 
 Prints JSON with platform, thread env vars, medians (TTFT + total), and per-question runs.
 Does not commit bench/cited-chat-eval-latest.json (gitignored).
+
+When the API runs with DOCUVATE_CITED_CHAT_BENCH_STATS=1, rejected-claim counts are
+returned in assistant message error_detail as JSON (bench only).
 """
 
 from __future__ import annotations
@@ -162,11 +165,18 @@ class ApiClient:
                     final_status = str(msg.get("generationStatus", "done"))
                     content = str(msg.get("content", ""))
                     break
+        rejected_claims = 0
         final_msg = self.get_message(thread_id, message_id)
         if final_msg:
             content = str(final_msg.get("content", content))
             citations = final_msg.get("citations") or []
             citation_count = len(citations)
+            detail = final_msg.get("errorDetail")
+            if isinstance(detail, str) and detail.strip().startswith("{"):
+                try:
+                    rejected_claims = int(json.loads(detail).get("citedRejectedClaims", 0))
+                except json.JSONDecodeError:
+                    rejected_claims = 0
         total_ms = (time.perf_counter() - t0) * 1000
         ttft_ms = first_content_ms or first_phase_ms or total_ms
         return {
@@ -176,6 +186,7 @@ class ApiClient:
             "total_ms": round(total_ms, 2),
             "final_status": final_status,
             "citation_count": citation_count,
+            "rejected_claims": rejected_claims,
             "content_preview": content[:120],
         }
 
@@ -211,13 +222,110 @@ def run_e2e() -> dict[str, object]:
         runs.append(run)
     ttfts = [float(r["ttft_ms"]) for r in runs]
     totals = [float(r["total_ms"]) for r in runs]
+    rejected_total = sum(int(r.get("rejected_claims", 0)) for r in runs)
+    passed = sum(1 for r in runs if r.get("pass"))
     return {
         "meta": meta_block("e2e_api"),
         "medians": {
             "median_ttft_ms": median(ttfts),
             "median_total_ms": median(totals),
         },
+        "summary": {
+            "passed": passed,
+            "total": len(runs),
+            "rejected_claims_total": rejected_total,
+        },
         "runs": runs,
+    }
+
+
+OLLAMA_COMPARE_MODELS = (
+    "qwen2.5:1.5b",
+    "qwen2.5:3b",
+)
+
+
+def run_ollama_model_compare() -> dict[str, object]:
+    """Calls local Ollama for German fixture prompts; reports accuracy proxy and latency."""
+    ollama = os.environ.get("OLLAMA_URL", "http://localhost:11434").rstrip("/")
+    models = os.environ.get("OLLAMA_COMPARE_MODELS", ",".join(OLLAMA_COMPARE_MODELS)).split(",")
+    models = [m.strip() for m in models if m.strip()]
+    passages = (
+        "[S1]\nRechnung Nordwind GmbH\nGesamtsumme: 1.234,56 EUR\nIBAN DE89370400440532013000\n\n"
+        "[S2]\nBescheid Hundesteuer Stadt Muster\nJahresgebühr: 120,00 EUR"
+    )
+    system = (
+        "Antworte nur mit JSON. claims: text, source (S1/S2), quote wörtlich max 10 Wörter. "
+        "Beispiel: "
+        '{"claims":[{"text":"Die Gesamtsumme beträgt 1.234,56 EUR.","source":"S1","quote":"Gesamtsumme: 1.234,56 EUR"}]}'
+        f"\nQuellen:\n{passages}"
+    )
+    questions = E2E_QUESTIONS[:5]
+    rows: list[dict[str, object]] = []
+    for model in models:
+        model_pass = 0
+        totals: list[float] = []
+        for item in questions:
+            body = json.dumps(
+                {
+                    "model": model,
+                    "stream": False,
+                    "think": False,
+                    "format": "json",
+                    "messages": [
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": item["question"]},
+                    ],
+                    "options": {"temperature": 0, "num_predict": 256},
+                }
+            ).encode()
+            t0 = time.perf_counter()
+            try:
+                req = urllib.request.Request(
+                    f"{ollama}/api/chat",
+                    data=body,
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urllib.request.urlopen(req, timeout=180) as resp:
+                    payload = json.loads(resp.read().decode())
+            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as exc:
+                rows.append(
+                    {
+                        "model": model,
+                        "question_id": item["id"],
+                        "error": str(exc),
+                        "pass": False,
+                    }
+                )
+                continue
+            total_ms = (time.perf_counter() - t0) * 1000
+            totals.append(total_ms)
+            raw = str((payload.get("message") or {}).get("content") or "")
+            ok = '"claims"' in raw and "quote" in raw and ABSTENTION_SNIPPET not in raw.lower()
+            if ok:
+                model_pass += 1
+            rows.append(
+                {
+                    "model": model,
+                    "question_id": item["id"],
+                    "total_ms": round(total_ms, 2),
+                    "pass": ok,
+                }
+            )
+        rows.append(
+            {
+                "model": model,
+                "summary": True,
+                "accuracy": round(model_pass / max(len(questions), 1), 3),
+                "median_total_ms": median(totals),
+                "under_10s": all(t <= 10_000 for t in totals) if totals else None,
+            }
+        )
+    return {
+        "meta": meta_block("ollama_model_compare"),
+        "default_recommendation": "qwen2.5:1.5b when accuracy within 1 of 3b and median_total_ms <= 10000",
+        "runs": rows,
     }
 
 
@@ -269,12 +377,19 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--e2e", action="store_true", help="Force API end-to-end eval")
     parser.add_argument("--micro", action="store_true", help="Worker embed+rerank only")
+    parser.add_argument(
+        "--compare-models",
+        action="store_true",
+        help="Ollama JSON generation compare on German fixture prompts",
+    )
     args = parser.parse_args()
     use_e2e = args.e2e or os.environ.get("DOCUVATE_E2E", "").lower() in ("1", "true", "yes")
     if args.micro:
         use_e2e = False
     try:
-        if use_e2e:
+        if args.compare_models:
+            out = run_ollama_model_compare()
+        elif use_e2e:
             out = run_e2e()
         else:
             out = run_micro()

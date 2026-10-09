@@ -18,6 +18,7 @@ import { buildDocumentRagSystemPrompt } from '../../../shared/infrastructure/cha
 import { fetchWorkerRagContext } from '../../../shared/infrastructure/chat/fetch-worker-rag-context.js';
 import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
 import { DocumentChatGenerationCancelRegistry } from '../infrastructure/document-chat-generation-cancel.registry.js';
+import { DocumentChatGenerationActiveRegistry } from '../infrastructure/document-chat-generation-active.registry.js';
 import { CitedChatGenerationService } from '../../cited-chat/application/cited-chat-generation.service.js';
 import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
 
@@ -44,12 +45,14 @@ export class RunDocumentChatGenerationUseCase {
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     private readonly effectiveChatProvider: EffectiveDocumentChatProviderUseCase,
     private readonly cancelRegistry: DocumentChatGenerationCancelRegistry,
+    private readonly activeRegistry: DocumentChatGenerationActiveRegistry,
     private readonly citedChat: CitedChatGenerationService
   ) {}
 
   async execute(payload: DocumentChatGenerationJobPayload): Promise<void> {
     const { messageId, threadId, documentId, userId, userMessage } = payload;
     await this.cancelRegistry.clear(messageId);
+    await this.activeRegistry.markActive(messageId);
 
     const message = await this.threads.findMessageForUser(messageId, userId);
     if (!message || message.threadId !== threadId || message.role !== 'assistant') {
@@ -123,6 +126,10 @@ export class RunDocumentChatGenerationUseCase {
                 : threadDocumentIds,
           scope: thread.scope === 'library' ? 'library' : 'document',
           shouldAbort: () => this.cancelRegistry.isCancelled(messageId),
+          onHeartbeat: async () => {
+            await this.threads.touchMessageGenerationHeartbeat(messageId);
+            await this.activeRegistry.touchActive(messageId);
+          },
         });
         return;
       }
@@ -185,6 +192,7 @@ export class RunDocumentChatGenerationUseCase {
       );
     } finally {
       await this.cancelRegistry.clear(messageId);
+      await this.activeRegistry.clearActive(messageId);
     }
   }
 
