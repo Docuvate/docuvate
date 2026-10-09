@@ -138,6 +138,8 @@ def extract(
         ],
         markdown=result.markdown,
         layout_ir=result.layout_ir,
+        layout_reconstruction_reliable=result.layout_reconstruction_reliable,
+        layout_unreliable_reason=result.layout_unreliable_reason,
         engine=active,
     )
 
@@ -344,12 +346,24 @@ def layout_render_html(
     from docuvate_worker.infrastructure.layout.render_html import layout_ir_to_html
 
     wire = body.layout_ir.model_dump()
+    from docuvate_worker.infrastructure.layout.layout_render_fidelity import (
+        decode_optional_pdf,
+        fidelity_for_layout_render,
+    )
+
     try:
         doc = document_from_dict(wire)
         html = layout_ir_to_html(doc)
+        fidelity = fidelity_for_layout_render(doc, decode_optional_pdf(body.original_pdf_base64))
     except (KeyError, TypeError, ValueError) as exc:
         raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
-    return LayoutRenderHtmlResponse(html=html)
+    return LayoutRenderHtmlResponse(
+        html=html,
+        reconstruction_reliable=fidelity.reconstruction_reliable,
+        unreliable_reason=(
+            fidelity.unreliable_reason.value if fidelity.unreliable_reason else None
+        ),
+    )
 
 
 @router.post("/layout/render-typst", response_model=LayoutRenderTypstResponse)
@@ -362,12 +376,24 @@ def layout_render_typst(
     from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typst
 
     wire = body.layout_ir.model_dump()
+    from docuvate_worker.infrastructure.layout.layout_render_fidelity import (
+        decode_optional_pdf,
+        fidelity_for_layout_render,
+    )
+
     try:
         doc = document_from_dict(wire)
         typst = layout_ir_to_typst(doc)
+        fidelity = fidelity_for_layout_render(doc, decode_optional_pdf(body.original_pdf_base64))
     except (KeyError, TypeError, ValueError) as exc:
         raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
-    return LayoutRenderTypstResponse(typst=typst)
+    return LayoutRenderTypstResponse(
+        typst=typst,
+        reconstruction_reliable=fidelity.reconstruction_reliable,
+        unreliable_reason=(
+            fidelity.unreliable_reason.value if fidelity.unreliable_reason else None
+        ),
+    )
 
 
 @router.get("/ml/models/{family_id}/active", response_model=MlResolvedModelResponse)

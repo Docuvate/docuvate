@@ -179,14 +179,23 @@ export async function fetchDocumentLayoutIr(documentId: string): Promise<LayoutI
   return request<LayoutIrDocument>(`/documents/${documentId}/layout-ir`);
 }
 
+export type LayoutRenderResponse = {
+  html?: string;
+  typst?: string;
+  reconstructionReliable: boolean;
+  unreliableReason?: string | null;
+};
+
 export async function fetchDocumentLayoutHtml(
   documentId: string
-): Promise<{ html: string }> {
-  return request<{ html: string }>(`/documents/${documentId}/layout-html`);
+): Promise<{ html: string; reconstructionReliable: boolean; unreliableReason?: string | null }> {
+  return request(`/documents/${documentId}/layout-html`);
 }
 
-export async function fetchDocumentLayoutTypst(documentId: string): Promise<{ typst: string }> {
-  return request<{ typst: string }>(`/documents/${documentId}/layout-typst`);
+export async function fetchDocumentLayoutTypst(
+  documentId: string
+): Promise<{ typst: string; reconstructionReliable: boolean; unreliableReason?: string | null }> {
+  return request(`/documents/${documentId}/layout-typst`);
 }
 
 export async function updateDocument(

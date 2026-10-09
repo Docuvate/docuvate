@@ -29,6 +29,7 @@ CATEGORY_SSIM_FLOOR: Final[dict[str, float]] = {
     "non_latin": 0.94,
     "scanned_text_layer": 0.90,
     "payroll_form": 0.97,
+    "embedded_fonts": 0.93,
 }
 
 
@@ -37,7 +38,11 @@ class ReconstructionUnreliableReason(StrEnum):
     EMPTY_DOCUMENT = "empty_document"
     TYPST_COMPILE_FAILED = "typst_compile_failed"
     RASTERIZE_FAILED = "rasterize_failed"
+    SSIM_FAILED = "ssim_failed"
+    COMPARE_FAILED = "compare_failed"
     BELOW_SSIM_THRESHOLD = "below_ssim_threshold"
+    UNSUPPORTED_SCRIPT = "unsupported_script"
+    SCAN_WITHOUT_TEXT_LAYER = "scan_without_text_layer"
     INTERNAL_ERROR = "internal_error"
 
 
@@ -72,7 +77,7 @@ def _compare_page_safe(
     *,
     page_number: int,
     dpi: int,
-) -> tuple[PagePixelCompareResult | None, str | None]:
+) -> tuple[PagePixelCompareResult | None, ReconstructionUnreliableReason | None, str | None]:
     try:
         return (
             compare_pdf_pages(
@@ -82,9 +87,20 @@ def _compare_page_safe(
                 dpi=dpi,
             ),
             None,
+            None,
         )
-    except Exception as exc:  # noqa: BLE001 — return reason to caller, never crash API
-        return None, str(exc)
+    except ValueError as exc:
+        return None, ReconstructionUnreliableReason.RASTERIZE_FAILED, str(exc)
+    except RuntimeError as exc:
+        msg = str(exc)
+        if "typst" in msg.lower():
+            return None, ReconstructionUnreliableReason.TYPST_COMPILE_FAILED, msg
+        return None, ReconstructionUnreliableReason.RASTERIZE_FAILED, msg
+    except Exception as exc:  # noqa: BLE001
+        msg = str(exc)
+        if "ssim" in msg.lower() or "structural" in msg.lower():
+            return None, ReconstructionUnreliableReason.SSIM_FAILED, msg
+        return None, ReconstructionUnreliableReason.COMPARE_FAILED, msg
 
 
 def evaluate_layout_ir_typst_reconstruction(
@@ -117,7 +133,7 @@ def evaluate_layout_ir_typst_reconstruction(
         page_metrics: list[PageReconstructionMetrics] = []
         ssim_values: list[float] = []
         for page in sorted(doc.pages, key=lambda p: p.page):
-            result, err = _compare_page_safe(
+            result, fail_reason, err = _compare_page_safe(
                 original_pdf,
                 reconstruction_pdf,
                 page_number=page.page,
@@ -138,7 +154,7 @@ def evaluate_layout_ir_typst_reconstruction(
                     pages=tuple(page_metrics),
                     aggregate_ssim=None,
                     reconstruction_reliable=False,
-                    unreliable_reason=ReconstructionUnreliableReason.RASTERIZE_FAILED,
+                    unreliable_reason=fail_reason or ReconstructionUnreliableReason.COMPARE_FAILED,
                     detail=err,
                 )
             page_metrics.append(

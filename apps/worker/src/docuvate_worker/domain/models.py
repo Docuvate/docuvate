@@ -26,3 +26,5 @@ class ExtractionResult:
     blocks: list[ExtractionBlock] | None = None
     markdown: str | None = None
     layout_ir: dict[str, object] | None = None
+    layout_reconstruction_reliable: bool | None = None
+    layout_unreliable_reason: str | None = None

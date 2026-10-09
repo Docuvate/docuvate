@@ -11794,10 +11794,19 @@
         "properties": {
           "html": {
             "type": "string"
+          },
+          "reconstructionReliable": {
+            "type": "boolean",
+            "default": true
+          },
+          "unreliableReason": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
-          "html"
+          "html",
+          "reconstructionReliable"
         ]
       },
       "LayoutIrBlockDto": {
@@ -12195,10 +12204,19 @@
         "properties": {
           "typst": {
             "type": "string"
+          },
+          "reconstructionReliable": {
+            "type": "boolean",
+            "default": true
+          },
+          "unreliableReason": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
-          "typst"
+          "typst",
+          "reconstructionReliable"
         ]
       },
       "LibraryTableColumnId": {

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 import cv2
 import numpy as np
 from pdf2image import convert_from_bytes
+from skimage.metrics import structural_similarity as skimage_ssim
 
 DEFAULT_COMPARE_DPI = 100
 _INK_DIFF_THRESHOLD = 12
@@ -61,11 +62,10 @@ def _align_sizes(a: np.ndarray, b: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 
 
 def structural_similarity(gray_a: np.ndarray, gray_b: np.ndarray) -> float:
-    """SSIM for 8-bit grayscale images (OpenCV quality module)."""
+    """SSIM for 8-bit grayscale images (scikit-image; no cv2.quality)."""
     a, b = _align_sizes(gray_a, gray_b)
-    scorer = cv2.quality.QualitySSIM_create(a)
-    values = scorer.compute(b)
-    return float(max(0.0, min(1.0, values[0])))
+    score = skimage_ssim(a, b, data_range=255)
+    return float(max(0.0, min(1.0, score)))
 
 
 def diff_heatmap_gray(gray_a: np.ndarray, gray_b: np.ndarray) -> np.ndarray:

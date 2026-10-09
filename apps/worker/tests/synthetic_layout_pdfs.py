@@ -229,72 +229,38 @@ def german_umlaut_body_pdf() -> bytes:
 
 
 def scanned_page_with_ocr_text_layer_pdf() -> bytes:
-    """Raster background plus selectable text (invisible ink) for OCR-style PDFs."""
-    from io import BytesIO
+    from tests.synthetic_scan_pdfs import scanned_with_invisible_ocr_text_layer_pdf
 
-    from PIL import Image, ImageDraw
-    from pypdf import PdfReader, PdfWriter
-    from pypdf.generic import (
-        ArrayObject,
-        DictionaryObject,
-        NameObject,
-        NumberObject,
-        StreamObject,
+    return scanned_with_invisible_ocr_text_layer_pdf()
+
+
+def multipage_portrait_landscape_table_pdf() -> bytes:
+    """Portrait table header + landscape continuation page."""
+    page1 = _single_page_pdf(
+        "\n".join(
+            [
+                _banner_stream(),
+                "0.5 700 m 400 700 l S",
+                "0.5 680 m 400 680 l S",
+                "100 700 m 100 660 l S",
+                "BT /F1 10 Tf 12 688 Td (Item) Tj ET",
+                "BT /F1 10 Tf 112 688 Td (Qty) Tj ET",
+                "BT /F1 10 Tf 12 668 Td (Row on page one) Tj ET",
+            ]
+        )
     )
-
-    w_pt, h_pt = 612.0, 792.0
-    dpi = 100
-    w_px, h_px = int(w_pt * dpi / 72), int(h_pt * dpi / 72)
-    img = Image.new("RGB", (w_px, h_px), color=(245, 242, 235))
-    draw = ImageDraw.Draw(img)
-    draw.rectangle((0, 0, w_px - 1, h_px - 1), outline=(200, 195, 185), width=3)
-    draw.text((40, 40), "Synthetic scan background", fill=(30, 30, 30))
-    buf = BytesIO()
-    img.save(buf, format="JPEG", quality=85)
-    jpeg = buf.getvalue()
-
-    # Visible text layer for extraction (image simulates scan background).
-    stream = "\n".join(
+    page2_stream = "\n".join(
         [
-            "q",
-            f"{w_pt:.2f} 0 0 {h_pt:.2f} 0 0 cm",
-            "/Im1 Do",
-            "Q",
-            f"BT /F1 9 Tf 36 760 Td ({_BORN_DIGITAL_BANNER}) Tj ET",
-            "BT /F1 10 Tf 40 120 Td (OCR layer body text for layout extraction.) Tj ET",
+            _banner_stream(),
+            "0.5 500 m 700 500 l S",
+            "0.5 480 m 700 480 l S",
+            "120 500 m 120 440 l S",
+            "BT /F1 10 Tf 40 488 Td (Row on landscape page two) Tj ET",
+            "BT /F1 10 Tf 200 488 Td (Continued table) Tj ET",
         ]
     )
-    base = _single_page_pdf(stream)
-    reader = PdfReader(BytesIO(base))
-    writer = PdfWriter()
-    page = reader.pages[0]
-    img_stream = StreamObject()
-    img_stream._data = jpeg
-    img_stream.update(
-        {
-            NameObject("/Type"): NameObject("/XObject"),
-            NameObject("/Subtype"): NameObject("/Image"),
-            NameObject("/Width"): NumberObject(w_px),
-            NameObject("/Height"): NumberObject(h_px),
-            NameObject("/ColorSpace"): NameObject("/DeviceRGB"),
-            NameObject("/BitsPerComponent"): NumberObject(8),
-            NameObject("/Filter"): NameObject("/DCTDecode"),
-        }
-    )
-    img_ref = writer._add_object(img_stream)
-    resources = page.get("/Resources")
-    if resources is None:
-        resources = DictionaryObject()
-        page[NameObject("/Resources")] = resources
-    xobj = resources.get("/XObject")
-    if xobj is None:
-        xobj = DictionaryObject()
-        resources[NameObject("/XObject")] = xobj
-    xobj[NameObject("/Im1")] = img_ref
-    writer.add_page(page)
-    out = BytesIO()
-    writer.write(out)
-    return out.getvalue()
+    page2 = _single_page_pdf(page2_stream, media=(792.0, 612.0))
+    return _merge_two_pages(page1, page2)
 
 
 def two_column_words_pdf() -> bytes:

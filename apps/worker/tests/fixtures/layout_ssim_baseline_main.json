@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "dpi": 100,
+  "fixtures": {
+    "delivery_note_table": {
+      "category": "table_grid",
+      "before_ssim": 0.98058
+    },
+    "layout_regression_payroll": {
+      "category": "payroll_form",
+      "before_ssim": 0.993301
+    },
+    "form_disclosure": {
+      "category": "born_digital_standard",
+      "before_ssim": 0.999384
+    },
+    "form_disclosure_acroform": {
+      "category": "form_acroform",
+      "before_ssim": 0.997948
+    },
+    "two_column_words": {
+      "category": "multi_column",
+      "before_ssim": 0.999946
+    },
+    "three_column_words": {
+      "category": "multi_column",
+      "before_ssim": 0.999928
+    },
+    "delivery_note_multipage": {
+      "category": "multi_page",
+      "before_ssim": 0.991615
+    },
+    "mixed_page_sizes": {
+      "category": "multi_page",
+      "before_ssim": 0.999948
+    },
+    "multipage_portrait_landscape_table": {
+      "category": "multi_page",
+      "before_ssim": 0.994395
+    },
+    "landscape_table": {
+      "category": "landscape",
+      "before_ssim": 0.999725
+    },
+    "rotated_mediabox": {
+      "category": "rotated",
+      "before_ssim": 0.992307
+    },
+    "rotated_heading": {
+      "category": "rotated",
+      "before_ssim": 0.997778
+    },
+    "mixed_standard_fonts": {
+      "category": "mixed_fonts",
+      "before_ssim": 0.989888
+    },
+    "symbol_and_helvetica": {
+      "category": "mixed_fonts",
+      "before_ssim": 0.999646
+    },
+    "embedded_subset_dejavu": {
+      "category": "embedded_fonts",
+      "before_ssim": 0.984974
+    },
+    "german_umlaut_body": {
+      "category": "non_latin",
+      "before_ssim": 0.991192
+    },
+    "cyrillic_body": {
+      "category": "non_latin",
+      "before_ssim": 0.990201
+    },
+    "greek_body": {
+      "category": "non_latin",
+      "before_ssim": 0.990149
+    },
+    "scanned_invisible_ocr": {
+      "category": "scanned_text_layer",
+      "before_ssim": 0.980046
+    },
+    "scanned_rotated_90": {
+      "category": "scanned_text_layer",
+      "before_ssim": 0.990073
+    }
+  }
+}
