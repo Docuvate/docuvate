@@ -19,7 +19,11 @@ export function extractNumericTokens(text: string): string[] {
     if (!wordContainsDigit(word)) {
       continue;
     }
-    tokens.push(normalizeNumbersForQuoteMatch(word));
+    const stripped = word.replace(/[.,;:!?]+$/g, '').replace(/^[.,;:!?]+/g, '');
+    if (!stripped) {
+      continue;
+    }
+    tokens.push(normalizeNumbersForQuoteMatch(stripped));
   }
   return tokens;
 }

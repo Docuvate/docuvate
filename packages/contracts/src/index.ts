@@ -441,6 +441,11 @@ export type DocumentChatGenerationErrorCode =
   | 'provider_unavailable'
   | 'unknown';
 
+/** Present only when API runs with DOCUVATE_CITED_CHAT_BENCH_STATS=1 (bench harness). */
+export interface CitedChatBenchStatsDto {
+  citedRejectedClaims: number;
+}
+
 export interface DocumentChatMessageRecordDto extends ChatMessageDto {
   id: string;
   createdAt: string;
@@ -449,6 +454,7 @@ export interface DocumentChatMessageRecordDto extends ChatMessageDto {
   generationPhase?: DocumentChatGenerationPhase | null;
   errorCode?: DocumentChatGenerationErrorCode | string | null;
   citations?: ChatMessageCitationDto[];
+  citedBenchStats?: CitedChatBenchStatsDto;
 }
 
 export interface DocumentChatThreadMessagesResponse {

@@ -17,6 +17,7 @@ import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { passesFusionGate, passesRerankerGate } from '../domain/verify-citation-quote.js';
 import { verifyCitedClaims } from '../domain/verify-cited-claims.js';
+import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
@@ -229,6 +230,7 @@ export class CitedChatGenerationService {
     );
 
     let lastFlush = 0;
+    let hasStreamedContent = false;
     let processedClaimCount = 0;
     const streamedVerified: Array<{ text: string; ordinal: number }> = [];
     const llm = await requestCitedAnswerFromOllama(userMessage, systemPrompt, history, {
@@ -242,42 +244,31 @@ export class CitedChatGenerationService {
         const newClaims = partialClaims.slice(processedClaimCount);
         processedClaimCount = partialClaims.length;
         for (const claim of newClaims) {
-          const { verified, rejected } = verifyCitedClaims({
+          const { verified } = verifyCitedClaims({
             claims: [claim],
             top,
             labelByChunk,
           });
-          for (const rej of rejected) {
-            this.logger.debug(
-              `Cited claim rejected: ${JSON.stringify({
-                claimText: rej.claimText,
-                quote: rej.quote,
-                bestMatchScore: rej.bestMatchScore,
-                reason: rej.reason,
-              })}`
-            );
-          }
-          const row = verified[0];
-          if (!row) {
+          if (verified.length === 0) {
             continue;
           }
-          streamedVerified.push({ text: row.text, ordinal: streamedVerified.length + 1 });
+          const streamOrdinal = streamedVerified.length + 1;
+          streamedVerified.push({ text: verified[0].text, ordinal: streamOrdinal });
         }
         if (streamedVerified.length === 0) {
           return;
         }
-        const contentPreview = streamedVerified
-          .map((v) => `${v.text} [${v.ordinal}]`)
-          .join(' ');
+        const contentPreview = formatVerifiedCitedContent(streamedVerified);
         const now = Date.now();
-        if (now - lastFlush < CONTENT_FLUSH_MS) {
+        if (hasStreamedContent && now - lastFlush < CONTENT_FLUSH_MS) {
           return;
         }
         lastFlush = now;
+        hasStreamedContent = true;
         await this.threads.updateMessageGeneration(messageId, {
           content: contentPreview,
           generationStatus: 'streaming',
-          generationPhase: 'generating',
+          generationPhase: 'verifying',
         });
       },
     });
@@ -307,15 +298,17 @@ export class CitedChatGenerationService {
       top,
       labelByChunk,
     });
-    for (const rej of rejected) {
-      this.logger.debug(
-        `Cited claim rejected: ${JSON.stringify({
-          claimText: rej.claimText,
-          quote: rej.quote,
-          bestMatchScore: rej.bestMatchScore,
-          reason: rej.reason,
-        })}`
-      );
+    if (!citedChatBenchStatsEnabled()) {
+      for (const rej of rejected) {
+        this.logger.debug(
+          `Cited claim rejected: ${JSON.stringify({
+            claimText: rej.claimText,
+            quote: rej.quote,
+            bestMatchScore: rej.bestMatchScore,
+            reason: rej.reason,
+          })}`
+        );
+      }
     }
     const benchStats = citedChatBenchStatsEnabled()
       ? JSON.stringify({ citedRejectedClaims: rejected.length })
@@ -345,9 +338,13 @@ export class CitedChatGenerationService {
       }))
     );
 
-    const content = verified
-      .map((v) => `${v.text} [${v.ordinal}]`)
-      .join(' ');
+    const content = formatVerifiedCitedContent(verified);
+
+    if (citedChatBenchStatsEnabled() && rejected.length > 0) {
+      this.logger.log(
+        `Cited chat bench: ${rejected.length} rejected claim(s) for message ${messageId}`
+      );
+    }
 
     await this.threads.updateMessageGeneration(messageId, {
       content,

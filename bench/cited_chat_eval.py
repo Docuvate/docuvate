@@ -5,7 +5,7 @@ Prints JSON with platform, thread env vars, medians (TTFT + total), and per-ques
 Does not commit bench/cited-chat-eval-latest.json (gitignored).
 
 When the API runs with DOCUVATE_CITED_CHAT_BENCH_STATS=1, rejected-claim counts are
-returned in assistant message error_detail as JSON (bench only).
+returned on assistant messages as citedBenchStats (bench only).
 """
 
 from __future__ import annotations
@@ -171,12 +171,16 @@ class ApiClient:
             content = str(final_msg.get("content", content))
             citations = final_msg.get("citations") or []
             citation_count = len(citations)
-            detail = final_msg.get("errorDetail")
-            if isinstance(detail, str) and detail.strip().startswith("{"):
-                try:
-                    rejected_claims = int(json.loads(detail).get("citedRejectedClaims", 0))
-                except json.JSONDecodeError:
-                    rejected_claims = 0
+            bench_stats = final_msg.get("citedBenchStats")
+            if isinstance(bench_stats, dict):
+                rejected_claims = int(bench_stats.get("citedRejectedClaims", 0))
+            else:
+                detail = final_msg.get("errorDetail")
+                if isinstance(detail, str) and detail.strip().startswith("{"):
+                    try:
+                        rejected_claims = int(json.loads(detail).get("citedRejectedClaims", 0))
+                    except json.JSONDecodeError:
+                        rejected_claims = 0
         total_ms = (time.perf_counter() - t0) * 1000
         ttft_ms = first_content_ms or first_phase_ms or total_ms
         return {
@@ -241,7 +245,6 @@ def run_e2e() -> dict[str, object]:
 
 OLLAMA_COMPARE_MODELS = (
     "qwen2.5:1.5b",
-    "qwen2.5:3b",
 )
 
 
@@ -324,7 +327,7 @@ def run_ollama_model_compare() -> dict[str, object]:
         )
     return {
         "meta": meta_block("ollama_model_compare"),
-        "default_recommendation": "qwen2.5:1.5b when accuracy within 1 of 3b and median_total_ms <= 10000",
+        "default_recommendation": "qwen2.5:1.5b default; qwen2.5:3b needs ~6GB+ Ollama RAM on Apple Silicon (often OOM in Docker)",
         "runs": rows,
     }
 

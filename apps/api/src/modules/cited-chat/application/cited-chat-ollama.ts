@@ -21,8 +21,19 @@ const ANSWER_JSON_SCHEMA = {
           text: { type: 'string' },
           source: { type: 'string' },
           quote: { type: 'string' },
+          citations: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                source: { type: 'string' },
+                quote: { type: 'string' },
+              },
+              required: ['source', 'quote'],
+            },
+          },
         },
-        required: ['text', 'source', 'quote'],
+        required: ['text'],
       },
     },
   },
@@ -36,7 +47,8 @@ export function buildCitedChatSystemPrompt(passages: Array<{ label: string; text
   return [
     'Du bist ein Assistent für Docuvate. Antworte nur mit gültigem JSON (kein Markdown).',
     'Format: {"claims":[{"text":"...","source":"S1","quote":"..."}]}',
-    'Jeder claim: text = kurzer Antwortsatz auf Deutsch; source = exakt das Quellenlabel (z. B. S1); quote = wörtliches Zitat aus dieser Quelle, höchstens 10 Wörter, Zeichen für Zeichen wie im Text (keine Paraphrase).',
+    'Jeder claim: text = kurzer Antwortsatz auf Deutsch. Pro dokument oder pro Fakt ein eigener claim (nicht mehrere Dokumente in einem Satz mischen).',
+    'Zitat: source = exakt das Quellenlabel (z. B. S1); quote = wörtlich aus dieser Quelle, höchstens 10 Wörter. Mehrere Zitate: citations:[{source,quote},...] und jede Zahl/IBAN im text muss in einem der quotes vorkommen.',
     'Erfinde nichts. Fehlen passende Quellen, gib "claims":[] zurück.',
     'Beispiel:',
     '{"claims":[{"text":"Die Miete ist bis zum 3. Werktag fällig.","source":"S1","quote":"bis zum 3. Werktag"}]}',
