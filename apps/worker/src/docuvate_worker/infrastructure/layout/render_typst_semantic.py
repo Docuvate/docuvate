@@ -132,7 +132,9 @@ def _lines_for_page(page: LayoutIrPage) -> tuple[LayoutIrLine, ...]:
     return tuple(synthetic)
 
 
-def _cluster_row_y(lines: tuple[LayoutIrLine, ...], y_tol: float = 0.02) -> list[list[LayoutIrLine]]:
+def _cluster_row_y(
+    lines: tuple[LayoutIrLine, ...], y_tol: float = 0.02
+) -> list[list[LayoutIrLine]]:
     ordered = sorted(lines, key=lambda ln: (ln.y, ln.x))
     rows: list[list[LayoutIrLine]] = []
     current: list[LayoutIrLine] = []
@@ -151,7 +153,9 @@ def _cluster_row_y(lines: tuple[LayoutIrLine, ...], y_tol: float = 0.02) -> list
     return rows
 
 
-def _cluster_columns(lines: tuple[LayoutIrLine, ...], min_gap: float = 0.12) -> list[list[LayoutIrLine]]:
+def _cluster_columns(
+    lines: tuple[LayoutIrLine, ...], min_gap: float = 0.12
+) -> list[list[LayoutIrLine]]:
     if not lines:
         return []
     ordered = sorted(lines, key=lambda ln: ln.x)
@@ -404,7 +408,11 @@ class _FlowItem:
     payload: object
 
 
-def _table_flow_order(flow_lines: tuple[LayoutIrLine, ...], regions: tuple[_Region, ...], table: LayoutIrTable) -> int:
+def _table_flow_order(
+    flow_lines: tuple[LayoutIrLine, ...],
+    regions: tuple[_Region, ...],
+    table: LayoutIrTable,
+) -> int:
     indices = [i for i, ln in enumerate(flow_lines) if _line_in_tables(ln, regions)]
     if indices:
         return min(indices)
