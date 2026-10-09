@@ -187,10 +187,11 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/testing/verify-container-images.mjs
-          docker pull postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
-          docker pull valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
-          docker pull cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
-          docker pull axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+          bash scripts/ci/docker-pull-with-retry.sh \
+            postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873 \
+            valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507 \
+            cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0 \
+            axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
       - run: pnpm install
       - run: pnpm --filter @docuvate/contracts build
       - run: pnpm --filter @docuvate/otel build
@@ -244,7 +245,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - run: docker compose -f docker-compose.yml build web api site sftp-ingest
+      - name: Build service images (retry on registry rate limits)
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            if docker compose -f docker-compose.yml build web api site sftp-ingest; then
+              exit 0
+            fi
+            echo "docker compose build failed (attempt ${attempt}), retrying…"
+            sleep $((attempt * 20))
+          done
+          exit 1
 
   compose-smoke:
     runs-on: ubuntu-latest
@@ -253,12 +264,12 @@ jobs:
       - name: Start compose stack (CI override, no Ollama)
         run: |
           set -euo pipefail
-          for attempt in 1 2 3 4; do
+          for attempt in 1 2 3 4 5; do
             if docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build \
               postgres migrate db-storage-guard minio minio-init valkey mailpit ollama-init api worker web; then
               break
             fi
-            if [ "$attempt" -eq 4 ]; then exit 1; fi
+            if [ "$attempt" -eq 5 ]; then exit 1; fi
             echo "compose up failed (attempt $attempt), retrying..."
             sleep $((attempt * 15))
           done
