@@ -41,14 +41,6 @@ export function pageMetaForPath(pathname: string): PageHelmet {
 
   const docsExt = getDocsExtended(locale);
 
-  if (path === '/docs/vergleiche' || path === '/docs/comparisons') {
-    return {
-      ...base,
-      title: docsExt.comparisons.meta.title,
-      description: docsExt.comparisons.meta.description,
-    };
-  }
-
   const compareMatch = /^\/docs\/(?:vergleiche|comparisons)\/([^/]+)$/.exec(path);
   if (compareMatch) {
     const slug = compareMatch[1] ?? '';

@@ -5,7 +5,9 @@ import { DocsHeading } from '../components/DocsHeading';
 import { DocsPageHeader } from '../components/DocsPageHeader';
 import { getDocsExtended } from '../content/docsExtended';
 import { useLocale } from '../context/LocaleContext';
-import { compareDataset, comparePageBySlug, comparisonsBasePath } from '../lib/compareData';
+import { CompareReferencesList } from '../components/CompareReferencesList';
+import { sourceIdsFromRows } from '../lib/compareSourceIds';
+import { compareDataset, comparePageBySlug, comparisonsHubPath } from '../lib/compareData';
 
 type DocsCompareDetailPageProps = {
   slug: string;
@@ -34,7 +36,7 @@ export function DocsCompareDetailPage({ slug }: DocsCompareDetailPageProps) {
       </p>
       <div className="hero-actions docs-compare-actions">
         <Link className="btn btn-primary" to={localizePath('/docs#quickstart')}>{ui.selfHostCta}</Link>
-        <Link className="btn btn-secondary" to={localizePath(comparisonsBasePath(locale))}>
+        <Link className="btn btn-secondary" to={localizePath(comparisonsHubPath(locale))}>
           {ui.allLink}
         </Link>
       </div>
@@ -84,6 +86,7 @@ export function DocsCompareDetailPage({ slug }: DocsCompareDetailPageProps) {
         {ui.migrationTitle}
       </DocsHeading>
       <p>{page.migration}</p>
+      <CompareReferencesList sourceIds={sourceIdsFromRows(page.rows)} />
       <p>{ui.correctionNote}</p>
       <section className="docs-compare-cta-band" aria-labelledby="compare-cta-heading">
         <h2 id="compare-cta-heading" className="landing-section-title">

@@ -3,18 +3,19 @@
 Kürzel werden in allen Vergleichstabellen verwendet.
 
 ## Docuvate
-- **W1** Startseite: https://docuvate.de/ (Texte in `../text_.txt`)
+- **W1** Startseite: https://docuvate.de/
 - **W2** Dokumentation: https://docuvate.de/docs (Schnellstart, Konzepte, Self-Hosting-Variablen)
 - **W3** SDKs: https://docuvate.de/docs/sdks (Preview-Status, Service-Schlüssel)
-- **W4** Konzepte „Ordner: Dokumente können mehreren Ordnern zugeordnet sein“: https://docuvate.de/docs
-- **R1** README, Repo `Docuvate/docuvate`, Commit 27cae51 (09.10.2026 08:21): https://github.com/Docuvate/docuvate (Version 0.1.0, AGPL-3.0, Kubernetes, ABAC, Editions, Roadmap)
-- **R2** `docs/ai-models.md` (PaddleOCR, Embeddings, Ollama qwen2.5:3b, Chat-Provider): https://github.com/Docuvate/docuvate/blob/main/docs/ai-models.md
-- **R3** `apps/api/src/modules/sftp-ingress/domain/scan-file-validation.ts` (PDF/JPEG/PNG/TIFF)
-- **R4** `docs/document-processing-pipeline.md` (Pipeline-Module, Feldkorrekturen)
-- **R5** `docs/adr/016-global-search-embeddings.md` (hybride Suche, pg_trgm, semantisch optional)
-- **R6** `docs/connectors.md` (Gmail/Outlook OAuth, S3, Paperless, Home Assistant)
-- **R7** `docs/connectors/sftp.md` und `docs/parity-paperless.md` (SFTP-Eingang; Consume-Ordner noch offen)
-- **R8** `docs/user-administration.md` (Rollen, Einladungen, Sperren)
+- **W4** Konzepte (Ordner, Labels): https://docuvate.de/docs#concepts
+- **R1** README (Version 0.1.0, AGPL-3.0, Kubernetes, ABAC): https://github.com/Docuvate/docuvate/blob/main/README.md
+- **R2** KI-Modelle (PaddleOCR, Embeddings, Ollama, Chat): https://github.com/Docuvate/docuvate/blob/main/docs/ai-models.md
+- **R3** Unterstützte Scan-Dateitypen (PDF/JPEG/PNG/TIFF): https://github.com/Docuvate/docuvate/blob/main/apps/api/src/modules/sftp-ingress/domain/scan-file-validation.ts
+- **R4** Dokumenten-Pipeline und Feldkorrekturen: https://github.com/Docuvate/docuvate/blob/main/docs/document-processing-pipeline.md
+- **R5** Hybride Suche (pg_trgm, Embeddings): https://github.com/Docuvate/docuvate/blob/main/docs/adr/016-global-search-embeddings.md
+- **R6** Konnektoren (Gmail/Outlook OAuth, S3, Paperless, Home Assistant): https://github.com/Docuvate/docuvate/blob/main/docs/connectors.md
+- **R7** SFTP-Eingang und Paperless-Parität: https://github.com/Docuvate/docuvate/blob/main/docs/connectors/sftp.md · https://github.com/Docuvate/docuvate/blob/main/docs/parity-paperless.md
+- **R8** Benutzer und Rollen: https://github.com/Docuvate/docuvate/blob/main/docs/user-administration.md
+- **R9** Bibliotheks-Chat mit Zitaten (ADR): https://github.com/Docuvate/docuvate/blob/main/docs/adr/024-cited-chat.md
 
 ## Paperless-ngx
 - **P1** README: https://github.com/paperless-ngx/paperless-ngx (GPL-3.0 via GitHub-API)
@@ -30,7 +31,7 @@ Kürzel werden in allen Vergleichstabellen verwendet.
 - **A3** Preise: https://papra.app/pricing
 - **A4** Content extraction: https://docs.papra.app/guides/content-extraction (Quelle: `apps/docs/.../13-content-extraction.mdx`)
 - **A5** LLM-Konfiguration und Auto-Tagging: https://docs.papra.app/guides/llm-configuration · https://docs.papra.app/guides/auto-tagging
-- **A6** GitHub-API Repo-Metadaten (Sterne, Aktivität)
+- **A6** Repository (Commits, Releases): https://github.com/papra-hq/papra
 - **A7** Repo-Struktur `apps/mobile` (package.json 1.1.0), `packages/api-sdk`, `packages/webhooks`, `packages/cli`; Release `@papra/mobile@1.1.0` (01.10.2026)
 - **A8** Roles and Administration: https://docs.papra.app/guides/roles-administration · Custom OAuth2: https://docs.papra.app/guides/setup-custom-oauth2-providers
 
@@ -46,13 +47,10 @@ Kürzel werden in allen Vergleichstabellen verwendet.
 - **M2** Features 4.12.2: https://docs.mayan-edms.com/chapters/features.html
 - **M3** LICENSE (GPL-2.0, Markenhinweis): https://gitlab.com/mayan-edms/mayan-edms/-/blob/master/LICENSE
 - **M4** PyPI (4.12.2, 16.09.2026): https://pypi.org/project/mayan-edms/
-- **M5** ACLs: https://docs.mayan-edms.com/chapters/apps/acls/index.html
-
 ## DocuWare
 - **X1** DocuWare Cloud (Pakete, enthaltene Funktionen): https://start.docuware.com/de/docuware-cloud
 - **X2** Preis-FAQ (30 bis 125+ $/Nutzer/Monat, Add-ons): https://start.docuware.com/faq/docuware-pricing
 - **X3** IDP-Funktionen: https://start.docuware.com/de/blog/produkt/docuware-idp-funktionen-ueberblick
-- **X4** Drittquelle (Azure, ISO 27001/SOC 2): https://www.softwarelotsen.de/loesungen/docuware-idp/ (**Drittquelle**, vor Veröffentlichung durch Herstellerseite ersetzen)
 - **X5** Neues DocuWare, Aura, Mobile-App, Version 7.15: https://start.docuware.com/de/blog/produkt/eine-neue-aera-im-dokumenten-management
 - **X6** Entwickler-Doku REST/OAuth2/.NET: https://developer.docuware.com/rest/documentation.html · https://support.docuware.com/en-US/knowledgebase/article/KBA-37505
 

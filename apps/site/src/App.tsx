@@ -13,7 +13,7 @@ import { DocsServiceApiKeysPage } from './pages/docs/DocsServiceApiKeysPage';
 import { DocsBackupUpgradePage } from './pages/docs/DocsBackupUpgradePage';
 import { DocsModelsPage } from './pages/docs/DocsModelsPage';
 import { DocsKubernetesPage } from './pages/docs/DocsKubernetesPage';
-import { DocsCompareOverviewPage } from './pages/DocsCompareOverviewPage';
+import { DocsCompareIndexRedirect } from './pages/DocsCompareIndexRedirect';
 import { DocsCompareMethodologyPage } from './pages/DocsCompareMethodologyPage';
 import { DocsCompareDetailRoute } from './pages/docs/DocsCompareDetailRoute';
 import { localeFromPathname } from './lib/routes';
@@ -35,7 +35,7 @@ function SiteRoutes() {
           <Route path="/docs/backup-und-upgrade" element={<DocsBackupUpgradePage />} />
           <Route path="/docs/modelle" element={<DocsModelsPage />} />
           <Route path="/docs/kubernetes" element={<DocsKubernetesPage />} />
-          <Route path="/docs/vergleiche" element={<DocsCompareOverviewPage />} />
+          <Route path="/docs/vergleiche" element={<DocsCompareIndexRedirect />} />
           <Route path="/docs/vergleiche/methodik" element={<DocsCompareMethodologyPage />} />
           <Route path="/docs/vergleiche/:slug" element={<DocsCompareDetailRoute />} />
           <Route path="/docs/api" element={<DocsApiPage />} />
@@ -51,7 +51,7 @@ function SiteRoutes() {
           <Route path="/en/docs/backup-and-upgrade" element={<DocsBackupUpgradePage />} />
           <Route path="/en/docs/models" element={<DocsModelsPage />} />
           <Route path="/en/docs/kubernetes" element={<DocsKubernetesPage />} />
-          <Route path="/en/docs/comparisons" element={<DocsCompareOverviewPage />} />
+          <Route path="/en/docs/comparisons" element={<DocsCompareIndexRedirect />} />
           <Route path="/en/docs/comparisons/methodology" element={<DocsCompareMethodologyPage />} />
           <Route path="/en/docs/comparisons/:slug" element={<DocsCompareDetailRoute />} />
           <Route path="/en/docs/api" element={<DocsApiPage />} />

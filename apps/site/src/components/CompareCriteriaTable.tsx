@@ -1,4 +1,6 @@
-import type { CompareCell, CompareRow } from '../lib/compareData';
+import type { CompareRow } from '../lib/compareData';
+import { useLocale } from '../context/LocaleContext';
+import { CompareSourceText } from './CompareSourceText';
 
 type CompareCriteriaTableProps = {
   legend: string;
@@ -7,19 +9,10 @@ type CompareCriteriaTableProps = {
   rows: CompareRow[];
 };
 
-function formatCell(cell: CompareCell): string {
-  const src = cell.sources?.trim();
-  if (!src) return cell.text;
-  const refs = src
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((code) => `[${code}]`)
-    .join(' ');
-  return `${cell.text} ${refs}`;
-}
-
 export function CompareCriteriaTable({ legend, docuvateLabel, otherLabel, rows }: CompareCriteriaTableProps) {
+  const { locale } = useLocale();
+  const criterionHeader = locale === 'de' ? 'Kriterium' : 'Criterion';
+
   return (
     <div className="compare-table-block">
       <p className="compare-legend">{legend}</p>
@@ -28,7 +21,7 @@ export function CompareCriteriaTable({ legend, docuvateLabel, otherLabel, rows }
           <thead>
             <tr>
               <th scope="col">#</th>
-              <th scope="col">Kriterium</th>
+              <th scope="col">{criterionHeader}</th>
               <th scope="col">{docuvateLabel}</th>
               <th scope="col">{otherLabel}</th>
             </tr>
@@ -38,8 +31,12 @@ export function CompareCriteriaTable({ legend, docuvateLabel, otherLabel, rows }
               <tr key={row.id}>
                 <th scope="row">{row.id}</th>
                 <td>{row.criterion}</td>
-                <td>{formatCell(row.docuvate)}</td>
-                <td>{formatCell(row.other)}</td>
+                <td>
+                  <CompareSourceText text={row.docuvate.text} sources={row.docuvate.sources} />
+                </td>
+                <td>
+                  <CompareSourceText text={row.other.text} sources={row.other.sources} />
+                </td>
               </tr>
             ))}
           </tbody>

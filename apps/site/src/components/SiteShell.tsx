@@ -4,7 +4,8 @@ import { useEffect, type ReactNode } from 'react';
 import { observeSiteHeaderHeight } from '../lib/siteHeaderHeight';
 import { useLocale } from '../context/LocaleContext';
 import { withLocale, type SiteLocale } from '../lib/routes';
-import { comparisonsBasePath } from '../lib/compareData';
+import { comparisonsDetailPath, comparisonsHubPath } from '../lib/compareData';
+import { resolvePrimaryNavKey, type PrimaryNavKey } from '../lib/sitePrimaryNav';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
 import { MobileNav } from './MobileNav';
 import { SiteLogo } from './SiteLogo';
@@ -60,11 +61,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const path = location.pathname.replace(/^\/en/, '') || '/';
   const onLanding = path === '/';
   const onLegal = path === '/impressum' || path === '/datenschutz';
-  const compareBase = comparisonsBasePath(locale);
+  const compareHub = comparisonsHubPath(locale);
+  const activeNavKey = resolvePrimaryNavKey(path);
 
-  const navLink = (to: string, label: string) => {
+  const navLink = (key: PrimaryNavKey, to: string, label: string) => {
     const localized = localizePath(to);
-    const active = path === to || path.startsWith(`${to}/`);
+    const active = activeNavKey === key;
     return (
       <Link to={localized} aria-current={active ? 'page' : undefined}>
         {label}
@@ -91,11 +93,11 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <SiteLogo />
           </Link>
           <nav className="site-nav" aria-label="Primary">
-            {navLink('/docs', content.nav.docs)}
-            {navLink(compareBase, content.nav.comparisons)}
+            {navLink('docs', '/docs', content.nav.docs)}
+            {navLink('comparisons', compareHub, content.nav.comparisons)}
             <Link to={localizePath('/#editions-heading')}>{content.nav.editions}</Link>
-            {navLink('/docs/api', content.nav.api)}
-            {navLink('/docs/sdks', content.nav.sdks)}
+            {navLink('api', '/docs/api', content.nav.api)}
+            {navLink('sdks', '/docs/sdks', content.nav.sdks)}
             <a href={GITHUB_URL} target="_blank" rel="noreferrer">
               {content.nav.github}
             </a>
@@ -154,14 +156,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <div>
             <strong className="site-footer-heading">{content.footer.comparisons}</strong>
             <div className="site-footer-links site-footer-links-col">
-              <Link to={localizePath(compareBase)}>
-                {locale === 'de' ? 'Alle Vergleiche' : 'All comparisons'}
+              <Link to={localizePath(compareHub)}>
+                {locale === 'de' ? 'Rubrik und Methodik' : 'Rubric and methodology'}
               </Link>
-              <Link to={localizePath(`${compareBase}/paperless-ngx`)}>vs Paperless-ngx</Link>
-              <Link to={localizePath(`${compareBase}/papra`)}>vs Papra</Link>
-              <Link to={localizePath(`${compareBase}/docspell`)}>vs Docspell</Link>
-              <Link to={localizePath(`${compareBase}/mayan-edms`)}>vs Mayan EDMS</Link>
-              <Link to={localizePath(`${compareBase}/docuware`)}>vs DocuWare</Link>
+              <Link to={localizePath(comparisonsDetailPath(locale, 'paperless-ngx'))}>vs Paperless-ngx</Link>
+              <Link to={localizePath(comparisonsDetailPath(locale, 'papra'))}>vs Papra</Link>
+              <Link to={localizePath(comparisonsDetailPath(locale, 'docspell'))}>vs Docspell</Link>
+              <Link to={localizePath(comparisonsDetailPath(locale, 'mayan-edms'))}>vs Mayan EDMS</Link>
+              <Link to={localizePath(comparisonsDetailPath(locale, 'docuware'))}>vs DocuWare</Link>
             </div>
           </div>
           <div>

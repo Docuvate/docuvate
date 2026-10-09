@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useLocale } from '../context/LocaleContext';
+import { resolvePrimaryNavKey, type PrimaryNavKey } from '../lib/sitePrimaryNav';
 
 const GITHUB_URL = 'https://github.com/Docuvate/docuvate';
 
@@ -27,13 +28,15 @@ export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimar
     setOpen(false);
   }, [location.pathname]);
 
-  const comparePath = locale === 'de' ? '/docs/vergleiche' : '/docs/comparisons';
-  const links = [
-    { to: '/docs', label: content.nav.docs },
-    { to: comparePath, label: content.nav.comparisons },
-    { to: '/#editions-heading', label: content.nav.editions },
-    { to: '/docs/api', label: content.nav.api },
-    { to: '/docs/sdks', label: content.nav.sdks },
+  const comparePath = locale === 'de' ? '/docs/vergleiche/methodik' : '/docs/comparisons/methodology';
+  const path = location.pathname.replace(/^\/en/, '') || '/';
+  const activeNavKey = resolvePrimaryNavKey(path);
+  const links: { key: PrimaryNavKey | null; to: string; label: string }[] = [
+    { key: 'docs', to: '/docs', label: content.nav.docs },
+    { key: 'comparisons', to: comparePath, label: content.nav.comparisons },
+    { key: null, to: '/#editions-heading', label: content.nav.editions },
+    { key: 'api', to: '/docs/api', label: content.nav.api },
+    { key: 'sdks', to: '/docs/sdks', label: content.nav.sdks },
   ];
 
   useEffect(() => {
@@ -88,7 +91,12 @@ export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimar
             >
               <div className="mobile-nav-sheet-links">
                 {links.map((link) => (
-                  <Link key={link.to} to={localizePath(link.to)} onClick={() => setOpen(false)}>
+                  <Link
+                    key={link.to}
+                    to={localizePath(link.to)}
+                    aria-current={link.key !== null && activeNavKey === link.key ? 'page' : undefined}
+                    onClick={() => setOpen(false)}
+                  >
                     {link.label}
                   </Link>
                 ))}

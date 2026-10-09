@@ -4,7 +4,7 @@ import { CodeBlock } from '../components/CodeBlock';
 import { FaqItem } from '../components/FaqItem';
 import { useLocale } from '../context/LocaleContext';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
-import { comparisonsBasePath } from '../lib/compareData';
+import { comparisonsHubPath } from '../lib/compareData';
 import { screenshotSrc } from '../lib/screenshotAssets';
 import type { ProofItem } from '../content/types';
 
@@ -127,7 +127,7 @@ export function LandingPage() {
             ))}
           </div>
           <p className="landing-why-compare">
-            <Link to={localizePath(comparisonsBasePath(locale))}>{landing.why.compareLink}</Link>
+            <Link to={localizePath(comparisonsHubPath(locale))}>{landing.why.compareLink}</Link>
           </p>
         </div>
       </section>
