@@ -27,7 +27,7 @@ export function MobileNav({ onLanding = false, ctaTo, ctaLabel, ctaLandingPrimar
     setOpen(false);
   }, [location.pathname]);
 
-  const comparePath = locale === 'de' ? '/docs/vergleiche' : '/docs/comparisons';
+  const comparePath = locale === 'de' ? '/docs/vergleiche/methodik' : '/docs/comparisons/methodology';
   const links = [
     { to: '/docs', label: content.nav.docs },
     { to: comparePath, label: content.nav.comparisons },

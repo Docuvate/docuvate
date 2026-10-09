@@ -20,13 +20,13 @@ Paperless-ngx ist das bekannteste selbst gehostete Dokumentenarchiv und seit Jah
 | K2 | Lizenz | AGPL-3.0 (Community). Kommerzielle Editionen werden im README erwähnt, Inhalte/Preise nicht veröffentlicht [W1] [R1] | GPL-3.0 [P1] |
 | K3 | Betrieb | Nur self-hosted: Docker Compose; Kubernetes (Kustomize/Helm) laut Repo [W2] [R1] | Self-hosted (Docker Compose, Installationsskript). Kein offizielles Cloud-Angebot; Drittanbieter-Hosting laut Community-Wiki [P1] [P5] |
 | K4 | Kosten | Kostenlos (Community). Keine Preise für kommerzielle Editionen veröffentlicht [W1] [R1] | Kostenlos [P1] |
-| K5 | Reife & Pflege | Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview [R1] [W3] | Sehr reif, große Community (~46.000 GitHub-Sterne); v3.3.0 vom 06.10.2026 [P1] [P6] |
+| K5 | Reife & Pflege | Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview [R1] [W3] | Lange Produktgeschichte und aktive Community; Release v3.3.0 vom 06.10.2026 [P1] [P6] |
 | K6 | OCR | ✅ PaddleOCR (PP-OCRv4, lateinische Schrift inkl. Deutsch) lokal; Text-Layer-PDFs ohne OCR; Tesseract/Docling optional [R2] | ✅ Tesseract, über 100 Sprachen, lokal; optional Remote-OCR über Azure AI (opt-in) [P2] |
 | K7 | Dateiformate | 🟡 PDF und Bilder (JPEG, PNG, TIFF). Office-Dokumente: nicht verifiziert [W1] [R3] | ✅ PDF, Bilder, Text, Office (Word, Excel, PowerPoint, LibreOffice) und E-Mails via optionalem Apache Tika; Archivierung als PDF/A [P2] |
 | K8 | Auto-Zuordnung ohne LLM | ✅ Matching-Regeln (any/all/exact/regex) und Label-Vorschläge per Embeddings; Vorschläge werden bestätigt, nicht erzwungen [W1] [R2] | ✅ Klassisches ML (ohne LLM) schlägt Tags, Korrespondenten, Dokumenttypen, Speicherpfade vor; Matching-Regeln [P2] [P3] |
-| K9 | LLM-Funktionen & lokale Modelle | 🟡 LLM nur für den Chat (Ollama, Standard qwen2.5:3b, CPU). Tagging nutzt Embeddings, kein LLM. Cloud-LLM-Anbieter nicht vorgesehen [W1] [R2] | ✅ Optional (Standard aus): LLM-Vorschläge für Titel, Datum, Tags u. a.; Backends Ollama (lokal) oder OpenAI-kompatibel; als Workflow-Aktion automatisierbar [P3] [P4] |
+| K9 | LLM-Funktionen & lokale Modelle | 🟡 LLM für Chat (Ollama, Standard qwen2.5:3b, CPU). Tagging nutzt Embeddings, kein LLM. Cloud-LLM-Anbieter nicht vorgesehen [W1] [R2] | ✅ Optional (Standard aus): LLM-Vorschläge für Titel, Datum, Tags u. a.; Backends Ollama (lokal) oder OpenAI-kompatibel; als Workflow-Aktion automatisierbar [P3] [P4] |
 | K10 | Strukturierte Felder | ✅ Vorschläge für Betrag, Datum, Absender plus eigener Feldkatalog; Bestätigung per Klick; Korrekturen werden gespeichert [W1] [R4] | 🟡 Eigene Felder (Custom Fields) mit Datentypen, Werte manuell. Automatische Feldwerte wie Betrag: nicht verifiziert [P3] |
-| K11 | Chat mit Dokumenten | 🟡 Chat pro Dokument (RAG über den erkannten Text, lokal). Chat über das gesamte Archiv: nicht vorhanden [W1] [R2] | ✅ Optional: Chat pro Dokument und über mehrere Dokumente (RAG mit LLM-Index) [P3] |
+| K11 | Chat mit Dokumenten | 🟡 Chat pro Dokument und bibliotheksweiter Chat (RAG mit Quellzitaten, lokal). Kein Cloud-LLM im Standard [W1] [R2] [R9] | ✅ Optional: Chat pro Dokument und über mehrere Dokumente (RAG mit LLM-Index) [P3] |
 | K12 | Suche | ✅ Volltext; laut Repo hybrid mit Tippfehler-Toleranz (pg_trgm) und optionaler semantischer Komponente; Feldfilter wie betrag:12,50 [W1] [R5] | ✅ Volltext mit Autovervollständigung, Relevanz, Hervorhebung, "More like this"; mit KI zusätzlich Ähnlichkeitssuche [P2] [P3] |
 | K13 | Ordnungsmodell | ✅ Farbige Labels, hierarchische Ordner (Mehrfachzuordnung), Korrespondenten, erkannte Felder, Duplikat-Stapel [W4] [R1] | ✅ Tags, Korrespondenten, Dokumenttypen, Speicherpfade, Custom Fields, gespeicherte Ansichten, Versionen [P2] |
 | K14 | Workflows & Automatisierung | 🟡 Feste Verarbeitungs-Pipeline und Matching-Regeln; kein frei konfigurierbarer Workflow-Editor. Webhooks: nicht verifiziert [R4] | ✅ Workflow-System mit Auslösern und Aktionen (inkl. KI-Vorschläge anwenden) [P2] [P3] |
@@ -41,7 +41,7 @@ Paperless-ngx ist das bekannteste selbst gehostete Dokumentenarchiv und seit Jah
 - Reife und Community: viele Jahre Betrieb, sehr große Nutzerbasis, viele Anleitungen und Drittanbieter-Apps.
 - Mehr Formate: Office-Dokumente und E-Mails (über Apache Tika), Archivierung als PDF/A, über 100 OCR-Sprachen.
 - Workflow-System, Consume-Ordner, E-Mail-Regeln für mehrere Konten.
-- Chat über mehrere Dokumente (optional, mit LLM-Index). Docuvate chattet nur pro Dokument.
+- Optionaler Chat über mehrere Dokumente mit LLM-Index (laut Usage-Doku).
 - Objektbezogene Rechte, OIDC-Login und Zwei-Faktor-Anmeldung sind dokumentiert.
 
 ## Wo Docuvate stärker ist

@@ -30,13 +30,12 @@ export const docsExtendedEn: DocsExtendedContent = {
     {
       title: 'Comparisons',
       items: [
-        { path: '/docs/comparisons', label: 'Overview' },
+        { path: '/docs/comparisons/methodology', label: 'Methodology' },
         { path: '/docs/comparisons/paperless-ngx', label: 'vs Paperless-ngx' },
         { path: '/docs/comparisons/papra', label: 'vs Papra' },
         { path: '/docs/comparisons/docspell', label: 'vs Docspell' },
         { path: '/docs/comparisons/mayan-edms', label: 'vs Mayan EDMS' },
         { path: '/docs/comparisons/docuware', label: 'vs DocuWare' },
-        { path: '/docs/comparisons/methodology', label: 'Methodology' },
       ],
     },
   ],
@@ -256,7 +255,7 @@ export const docsExtendedEn: DocsExtendedContent = {
     overviewLead:
       'Same criteria in the same order. Unknown items are marked as not verified, not omitted.',
     methodologyTitle: 'Rubric and methodology',
-    allLink: 'All comparisons',
+    allLink: 'Rubric and methodology',
     selfHostCta: 'Self-host',
     testCtaHeading: 'Try Docuvate in 10 minutes',
     testCtaBody: 'Start the stack with Docker Compose on your machine.',

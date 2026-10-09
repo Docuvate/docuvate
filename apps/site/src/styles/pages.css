@@ -1209,6 +1209,34 @@ html[data-docuvate-theme='dark'] .landing-integration-card .integration-logo {
   color: var(--dv-color-text-muted);
 }
 
+.compare-source-ref {
+  color: var(--dv-color-accent);
+  text-decoration: none;
+  font-weight: var(--dv-font-weight-medium);
+  white-space: nowrap;
+}
+
+.compare-source-ref:hover {
+  text-decoration: underline;
+}
+
+.compare-references {
+  margin-top: var(--dv-space-xl);
+}
+
+.compare-references-list {
+  margin: var(--dv-space-md) 0 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-xs);
+  font-size: var(--dv-font-size-sm);
+}
+
+.compare-references-list a {
+  color: var(--dv-color-accent);
+}
+
 .landing-why-grid {
   display: grid;
   gap: var(--dv-space-md);

@@ -1,14 +1,17 @@
+import { Link } from 'react-router-dom';
+import { CompareReferencesList } from '../components/CompareReferencesList';
 import { DocsPageLayout } from '../components/DocsPageLayout';
 import { DocsHeading } from '../components/DocsHeading';
 import { DocsPageHeader } from '../components/DocsPageHeader';
 import { getDocsExtended } from '../content/docsExtended';
 import { useLocale } from '../context/LocaleContext';
-import { compareDataset } from '../lib/compareData';
+import { compareDataset, comparisonsDetailPath } from '../lib/compareData';
 
 export function DocsCompareMethodologyPage() {
-  const { locale } = useLocale();
+  const { locale, localizePath } = useLocale();
   const ui = getDocsExtended(locale).comparisons;
   const data = compareDataset(locale);
+  const allSourceIds = Object.keys(data.sources);
 
   return (
     <DocsPageLayout>
@@ -16,6 +19,18 @@ export function DocsCompareMethodologyPage() {
       <p className="compare-stand">
         {ui.standLabel}: {data.stand}
       </p>
+      <DocsHeading as="h2" id="einzelvergleiche">
+        {locale === 'de' ? 'Einzelvergleiche' : 'Individual comparisons'}
+      </DocsHeading>
+      <ul className="compare-link-list">
+        {data.competitors.map((c) => (
+          <li key={c.slug}>
+            <Link to={localizePath(comparisonsDetailPath(locale, c.slug))}>
+              Docuvate vs. {c.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
       <DocsHeading as="h2" id="kriterien">
         {locale === 'de' ? 'Kriterien' : 'Criteria'}
       </DocsHeading>
@@ -48,6 +63,7 @@ export function DocsCompareMethodologyPage() {
           ? 'K1 bis K5 sind beschreibend (ohne Symbol). Kriterien werden auf allen Vergleichsseiten in derselben Reihenfolge geführt.'
           : 'K1 to K5 are descriptive (no symbol). Criteria appear in the same order on every comparison page.'}
       </p>
+      <CompareReferencesList sourceIds={allSourceIds} />
     </DocsPageLayout>
   );
 }

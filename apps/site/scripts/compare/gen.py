@@ -32,6 +32,52 @@ RUBRIC = [
 S = {"y":"✅","p":"🟡","n":"❌","u":"❔","i":""}
 LEGEND = "✅ vorhanden · 🟡 teilweise / mit Einschränkung · ❌ nicht vorhanden (laut Doku) · ❔ nicht verifiziert"
 
+# Public URLs for reference markers (keep in sync with quellen.md).
+SOURCES = {
+    "W1": ("Docuvate Startseite", "https://docuvate.de/"),
+    "W2": ("Docuvate Dokumentation", "https://docuvate.de/docs"),
+    "W3": ("Docuvate SDKs", "https://docuvate.de/docs/sdks"),
+    "W4": ("Docuvate Konzepte", "https://docuvate.de/docs#concepts"),
+    "R1": ("Docuvate README", "https://github.com/Docuvate/docuvate/blob/main/README.md"),
+    "R2": ("Docuvate KI-Modelle", "https://github.com/Docuvate/docuvate/blob/main/docs/ai-models.md"),
+    "R3": ("Docuvate Scan-Dateitypen", "https://github.com/Docuvate/docuvate/blob/main/apps/api/src/modules/sftp-ingress/domain/scan-file-validation.ts"),
+    "R4": ("Docuvate Dokumenten-Pipeline", "https://github.com/Docuvate/docuvate/blob/main/docs/document-processing-pipeline.md"),
+    "R5": ("Docuvate hybride Suche", "https://github.com/Docuvate/docuvate/blob/main/docs/adr/016-global-search-embeddings.md"),
+    "R6": ("Docuvate Konnektoren", "https://github.com/Docuvate/docuvate/blob/main/docs/connectors.md"),
+    "R7": ("Docuvate SFTP-Eingang", "https://github.com/Docuvate/docuvate/blob/main/docs/connectors/sftp.md"),
+    "R8": ("Docuvate Benutzerverwaltung", "https://github.com/Docuvate/docuvate/blob/main/docs/user-administration.md"),
+    "R9": ("Docuvate Bibliotheks-Chat (ADR)", "https://github.com/Docuvate/docuvate/blob/main/docs/adr/024-cited-chat.md"),
+    "P1": ("Paperless-ngx README", "https://github.com/paperless-ngx/paperless-ngx"),
+    "P2": ("Paperless-ngx Features", "https://docs.paperless-ngx.com/#features"),
+    "P3": ("Paperless-ngx Usage", "https://github.com/paperless-ngx/paperless-ngx/blob/main/docs/usage.md"),
+    "P4": ("Paperless-ngx Konfiguration", "https://github.com/paperless-ngx/paperless-ngx/blob/main/docs/configuration.md"),
+    "P5": ("Paperless-ngx Related Projects", "https://github.com/paperless-ngx/paperless-ngx/wiki/Related-Projects"),
+    "P6": ("Paperless-ngx Releases", "https://github.com/paperless-ngx/paperless-ngx/releases"),
+    "A1": ("Papra README", "https://github.com/papra-hq/papra"),
+    "A2": ("Papra Dokumentation", "https://docs.papra.app/"),
+    "A3": ("Papra Preise", "https://papra.app/pricing"),
+    "A4": ("Papra Content Extraction", "https://docs.papra.app/guides/content-extraction"),
+    "A5": ("Papra LLM und Auto-Tagging", "https://docs.papra.app/guides/llm-configuration"),
+    "A6": ("Papra Repository", "https://github.com/papra-hq/papra"),
+    "A7": ("Papra Mobile und SDK", "https://github.com/papra-hq/papra/tree/main/apps/mobile"),
+    "A8": ("Papra Rollen und OAuth", "https://docs.papra.app/guides/roles-administration"),
+    "D1": ("Docspell README", "https://github.com/eikek/docspell"),
+    "D2": ("Docspell Website", "https://docspell.org/"),
+    "D3": ("Docspell Releases", "https://github.com/eikek/docspell/releases"),
+    "D4": ("Docspell Features", "https://docspell.org/docs/features/"),
+    "D5": ("Docspell Authentifizierung", "https://docspell.org/docs/configure/authentication/"),
+    "M1": ("Mayan EDMS Website", "https://www.mayan-edms.com/"),
+    "M2": ("Mayan EDMS Features 4.12.2", "https://docs.mayan-edms.com/chapters/features.html"),
+    "M3": ("Mayan EDMS LICENSE", "https://gitlab.com/mayan-edms/mayan-edms/-/blob/master/LICENSE"),
+    "M4": ("Mayan EDMS auf PyPI", "https://pypi.org/project/mayan-edms/"),
+    "M5": ("Mayan EDMS ACLs", "https://docs.mayan-edms.com/chapters/apps/acls/index.html"),
+    "X1": ("DocuWare Cloud", "https://start.docuware.com/de/docuware-cloud"),
+    "X2": ("DocuWare Preise", "https://start.docuware.com/faq/docuware-pricing"),
+    "X3": ("DocuWare IDP", "https://start.docuware.com/de/blog/produkt/docuware-idp-funktionen-ueberblick"),
+    "X5": ("DocuWare Aura und Version 7.15", "https://start.docuware.com/de/blog/produkt/eine-neue-aera-im-dokumenten-management"),
+    "X6": ("DocuWare Entwickler-Doku", "https://developer.docuware.com/rest/documentation.html"),
+}
+
 # Source keys -> see quellen.md
 TOOLS = {
 "docuvate": dict(name="Docuvate", short="Docuvate", rows={
@@ -43,9 +89,9 @@ TOOLS = {
  "K6":("y","PaddleOCR (PP-OCRv4, lateinische Schrift inkl. Deutsch) lokal; Text-Layer-PDFs ohne OCR; Tesseract/Docling optional","R2"),
  "K7":("p","PDF und Bilder (JPEG, PNG, TIFF). Office-Dokumente: nicht verifiziert","W1,R3"),
  "K8":("y","Matching-Regeln (any/all/exact/regex) und Label-Vorschläge per Embeddings; Vorschläge werden bestätigt, nicht erzwungen","W1,R2"),
- "K9":("p","LLM nur für den Chat (Ollama, Standard qwen2.5:3b, CPU). Tagging nutzt Embeddings, kein LLM. Cloud-LLM-Anbieter nicht vorgesehen","W1,R2"),
+ "K9":("p","LLM für Chat (Ollama, Standard qwen2.5:3b, CPU). Tagging nutzt Embeddings, kein LLM. Cloud-LLM-Anbieter nicht vorgesehen","W1,R2"),
  "K10":("y","Vorschläge für Betrag, Datum, Absender plus eigener Feldkatalog; Bestätigung per Klick; Korrekturen werden gespeichert","W1,R4"),
- "K11":("p","Chat pro Dokument (RAG über den erkannten Text, lokal). Chat über das gesamte Archiv: nicht vorhanden","W1,R2"),
+ "K11":("p","Chat pro Dokument und bibliotheksweiter Chat (RAG mit Quellzitaten, lokal). Kein Cloud-LLM im Standard","W1,R2,R9"),
  "K12":("y","Volltext; laut Repo hybrid mit Tippfehler-Toleranz (pg_trgm) und optionaler semantischer Komponente; Feldfilter wie betrag:12,50","W1,R5"),
  "K13":("y","Farbige Labels, hierarchische Ordner (Mehrfachzuordnung), Korrespondenten, erkannte Felder, Duplikat-Stapel","W4,R1"),
  "K14":("p","Feste Verarbeitungs-Pipeline und Matching-Regeln; kein frei konfigurierbarer Workflow-Editor. Webhooks: nicht verifiziert","R4"),
@@ -60,7 +106,7 @@ TOOLS = {
  "K2":("i","GPL-3.0","P1"),
  "K3":("i","Self-hosted (Docker Compose, Installationsskript). Kein offizielles Cloud-Angebot; Drittanbieter-Hosting laut Community-Wiki","P1,P5"),
  "K4":("i","Kostenlos","P1"),
- "K5":("i","Sehr reif, große Community (~46.000 GitHub-Sterne); v3.3.0 vom 06.10.2026","P1,P6"),
+ "K5":("i","Lange Produktgeschichte und aktive Community; Release v3.3.0 vom 06.10.2026","P1,P6"),
  "K6":("y","Tesseract, über 100 Sprachen, lokal; optional Remote-OCR über Azure AI (opt-in)","P2"),
  "K7":("y","PDF, Bilder, Text, Office (Word, Excel, PowerPoint, LibreOffice) und E-Mails via optionalem Apache Tika; Archivierung als PDF/A","P2"),
  "K8":("y","Klassisches ML (ohne LLM) schlägt Tags, Korrespondenten, Dokumenttypen, Speicherpfade vor; Matching-Regeln","P2,P3"),
@@ -81,7 +127,7 @@ TOOLS = {
  "K2":("i","AGPL-3.0","A1"),
  "K3":("i","Beides: self-hosted (ein Docker-Image) oder gehostet auf papra.app","A1,A2"),
  "K4":("i","Self-hosted kostenlos. Cloud: Free 0 $, Plus 9 $/Monat, Pro 30 $/Monat (jährlich günstiger), Enterprise auf Anfrage","A3"),
- "K5":("i","Aktiv entwickelt (~5.500 GitHub-Sterne, Commits im Oktober 2026)","A6"),
+ "K5":("i","Aktiv entwickelt; öffentliche Commits und Releases im Oktober 2026","A6"),
  "K6":("y","Tesseract (intern, lokal); optional Mistral OCR, Azure Document Intelligence, Docling oder eigener HTTP-Dienst","A4"),
  "K7":("p","Gängige Formate über die Bibliothek lecture; genaue Liste (Office): nicht verifiziert","A4"),
  "K8":("y","Tagging-Regeln (regelbasiert)","A1"),
@@ -142,7 +188,7 @@ TOOLS = {
 "docuware": dict(name="DocuWare", short="DocuWare", slug="docuware", rows={
  "K1":("i","Unternehmen (KMU bis Konzern) mit Dokumenten-Workflows, z. B. Rechnungseingang, Personalakten","X1"),
  "K2":("i","Proprietär","X1"),
- "K3":("i","DocuWare Cloud (auf Microsoft Azure) oder On-Premises","X1,X4"),
+ "K3":("i","DocuWare Cloud oder On-Premises (laut Hersteller)","X1"),
  "K4":("i","Auf Anfrage; Hersteller nennt typisch 30 bis 125+ US-$ pro Nutzer/Monat. Cloud-Pakete 4/15/40/100 Nutzer. IDP volumenbasiertes Add-on","X1,X2,X3"),
  "K5":("i","Etabliertes Produkt; neue Oberfläche ab Mitte Oktober 2026 mit Version 7.15 (Cloud zuerst)","X5"),
  "K6":("y","OCR enthalten; IDP-Add-on mit Handschrifterkennung (HTR). Verarbeitung in der Cloud oder on-prem","X3,X5"),
@@ -158,7 +204,7 @@ TOOLS = {
  "K16":("y","REST-API (OAuth2) und .NET-SDK","X6"),
  "K17":("y","Mehrbenutzer mit Zugriffsrechten; Identity Service mit OAuth2/OIDC. Details SSO/2FA: nicht verifiziert","X2,X6"),
  "K18":("y","Offizielle Mobile-App","X5"),
- "K19":("p","Cloud: Dokumente liegen beim Anbieter (Azure). On-Premises möglich; ob IDP/Aura on-prem voll verfügbar sind: nicht verifiziert","X3,X4,X5"),
+ "K19":("p","Cloud: Dokumente liegen beim Anbieter. On-Premises möglich; ob IDP/Aura on-prem voll verfügbar sind: nicht verifiziert","X1,X3,X5"),
 }),
 }
 
@@ -171,7 +217,7 @@ PROSE = {
   "Reife und Community: viele Jahre Betrieb, sehr große Nutzerbasis, viele Anleitungen und Drittanbieter-Apps.",
   "Mehr Formate: Office-Dokumente und E-Mails (über Apache Tika), Archivierung als PDF/A, über 100 OCR-Sprachen.",
   "Workflow-System, Consume-Ordner, E-Mail-Regeln für mehrere Konten.",
-  "Chat über mehrere Dokumente (optional, mit LLM-Index). Docuvate chattet nur pro Dokument.",
+  "Optionaler Chat über mehrere Dokumente mit LLM-Index (laut Usage-Doku).",
   "Objektbezogene Rechte, OIDC-Login und Zwei-Faktor-Anmeldung sind dokumentiert.",
  ],
  ours=[
@@ -327,13 +373,7 @@ Es gibt gute Werkzeuge für Dokumentenablage. Hier sehen Sie ehrlich, wo Docuvat
 |---|---|
 """ + "\n".join(f"| [Docuvate vs. {TOOLS[t]['name']}](./vs-{t}.md) | {PROSE[t]['lead'].split('. ')[0]}. |" for t in ORDER) + f"""
 
-## Übersichtsmatrix
-
-{LEGEND}
-
-{table(['docuvate']+ORDER, with_src=False)}
-
-Quellen je Zelle stehen auf den Einzelseiten und in [quellen.md](./quellen.md).
+Die vollständige Matrix aller Produkte in einer Tabelle entfällt. Jeder Einzelvergleich nutzt dieselbe Rubrik; Quellen stehen in den Tabellen und in [quellen.md](./quellen.md).
 
 ## Kurz: Wann was?
 
@@ -408,15 +448,32 @@ def row_payload(tool, k):
     text, sr = cell(tool, k)
     return {"text": text, "sources": sr if sr and sr != "—" else ""}
 
+def collect_source_keys():
+    keys = set()
+    for tool in TOOLS.values():
+        for _, _, sr in tool["rows"].values():
+            if not sr or sr == "—":
+                continue
+            for part in sr.split(","):
+                keys.add(part.strip())
+    return keys
+
+def validate_sources():
+    used = collect_source_keys()
+    missing = sorted(k for k in used if k not in SOURCES)
+    if missing:
+        raise SystemExit(f"Missing SOURCES entries for: {', '.join(missing)}")
+    for key, (label, url) in SOURCES.items():
+        if not url.startswith("https://"):
+            raise SystemExit(f"Source {key} must have https URL")
+
 def compare_json():
+    validate_sources()
     rubric = [{"id": k, "title": n, "description": d} for k, n, d in RUBRIC]
-    overview_rows = []
-    for k, name, _ in RUBRIC:
-        overview_rows.append({
-            "id": k,
-            "criterion": name,
-            "cells": {t: row_payload(t, k) for t in ["docuvate"] + ORDER},
-        })
+    sources = {
+        key: {"id": key, "label": label, "url": url}
+        for key, (label, url) in sorted(SOURCES.items())
+    }
     pages = []
     for t in ORDER:
         p = PROSE[t]
@@ -445,7 +502,7 @@ def compare_json():
         "stand": STAND,
         "legend": LEGEND,
         "rubric": rubric,
-        "overviewRows": overview_rows,
+        "sources": sources,
         "competitors": [{"slug": t, "name": TOOLS[t]["name"]} for t in ORDER],
         "pages": pages,
     }
