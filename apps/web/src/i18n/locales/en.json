@@ -461,6 +461,7 @@
     "layoutExportTypst": "Export as Typst file",
     "layoutExportTypstSemantisch": "Export Typst (readable)",
     "layoutExportTypstExakt": "Export Typst (pixel-exact)",
+    "layoutExportTypstDegraded": "Typst file downloaded. Reconstruction may not match the original reliably; use the PDF view for decisions.",
     "extractedTextCopyPlain": "Copy as text",
     "layoutZoomAria": "Layout zoom",
     "layoutZoomPercent": "{{value}}%",

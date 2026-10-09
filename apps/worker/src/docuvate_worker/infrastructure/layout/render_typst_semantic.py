@@ -3,55 +3,67 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from docuvate_worker.domain.layout_ir import (
     FontWeight,
+    LayoutIrCellRole,
     LayoutIrDocument,
     LayoutIrLine,
     LayoutIrPage,
     LayoutIrTable,
+    LayoutIrTableCell,
+    LayoutIrVectorKind,
     LayoutIrWidget,
     LayoutIrWidgetKind,
 )
+from docuvate_worker.infrastructure.layout.semantic_typst_metrics import tokenize_words
 
 _SEMANTIC_PREAMBLE = """// Docuvate Export (semantisch). Quelle: Layout IR v1
-// Stile: hier zentral anpassen, unten steht nur Inhalt.
-#set page(paper: "a4", margin: (x: 14mm, y: 14mm))
 #set text(font: "Liberation Sans", size: 10pt, lang: "de")
 #set par(spacing: 0.85em)
 #show heading.where(level: 1): set text(size: 14pt, weight: "bold")
 #show heading.where(level: 2): set text(size: 11pt, weight: "bold")
 #show heading: set block(above: 1.1em, below: 0.5em)
 
-#let small(body) = text(size: 8pt, fill: luma(80), body)
 #let fields(..cells) = table(
   columns: (auto, 1fr), stroke: none, inset: (x: 0pt, y: 2pt),
   align: (left, left), ..cells,
 )
-#let form-table(columns: (auto, 1fr, auto), ..cells) = table(
-  columns: columns, stroke: 0.5pt, inset: 4pt,
-  align: (left, left, right), ..cells,
-)
 
 """
 
-
 def _escape_semantic_inline(text: str) -> str:
-    """Minimal escaping: keep dates like 01.01. - 31.12. readable (no \\-)."""
     stripped = text.replace("\r", "")
     if not stripped:
         return ""
     out = stripped.replace("\\", "\\\\")
     for ch in ("#", "$", "@", "[", "]", "_", "*"):
         out = out.replace(ch, f"\\{ch}")
-    if out.startswith("="):
-        out = "\\=" + out[1:]
     return out
 
 
+def _escape_semantic_line(line: str) -> str:
+    if not line:
+        return ""
+    raw = line
+    if re.match(r"^\d+\.\s", raw):
+        return "\\" + _escape_semantic_inline(raw)
+    for prefix in ("- ", "+ ", "/ ", "//"):
+        if raw.startswith(prefix):
+            return "\\" + _escape_semantic_inline(raw)
+    out = _escape_semantic_inline(raw)
+    out = out.replace("//", "\\/\\/").replace("~", "\\~").replace("`", "\\`").replace("<", "\\<")
+    return out
+
+
+def _escape_semantic_text(text: str) -> str:
+    lines = text.replace("\r", "").split("\n")
+    return "\n".join(_escape_semantic_line(ln) for ln in lines)
+
+
 def _cell_content(text: str) -> str:
-    body = _escape_semantic_inline(text.strip())
+    body = _escape_semantic_text(text.strip())
     if not body:
         return "[ ]"
     return f"[{body}]"
@@ -64,48 +76,33 @@ class _Region:
     x0: float
     x1: float
 
-    def contains_norm(self, y: float, x: float) -> bool:
+    def contains_center(self, y: float, x: float) -> bool:
         return self.y0 <= y <= self.y1 and self.x0 <= x <= self.x1
 
 
-def _table_regions(tables: tuple[LayoutIrTable, ...]) -> tuple[_Region, ...]:
-    return tuple(
-        _Region(t.y, t.y + t.height, t.x, t.x + t.width) for t in tables
-    )
+def _expand_table_region(table: LayoutIrTable, page: LayoutIrPage) -> _Region:
+    x0, y0 = table.x, table.y
+    x1, y1 = table.x + table.width, table.y + table.height
+    for vector in page.vectors:
+        if vector.kind != LayoutIrVectorKind.LINE:
+            continue
+        vx1 = vector.x + vector.width
+        vy1 = vector.y + vector.height
+        overlaps_y = vy1 >= y0 - 0.01 and vector.y <= y1 + 0.01
+        if not overlaps_y:
+            continue
+        if vector.width > vector.height * 2:
+            x0 = min(x0, vector.x)
+            x1 = max(x1, vx1)
+        elif vector.height > vector.width * 2:
+            y0 = min(y0, vector.y)
+            y1 = max(y1, vy1)
+    return _Region(y0, y1, x0, x1)
 
 
-def _line_in_tables(line: LayoutIrLine, regions: tuple[_Region, ...]) -> bool:
-    cy = line.y + line.height * 0.5
-    cx = line.x + line.width * 0.5
-    return any(r.contains_norm(cy, cx) for r in regions)
-
-
-def _median_font_size(lines: tuple[LayoutIrLine, ...]) -> float:
-    sizes = [ln.font_size_pt for ln in lines if ln.font_size_pt and ln.font_size_pt > 0]
-    if not sizes:
-        return 10.0
-    sizes.sort()
-    return sizes[len(sizes) // 2]
-
-
-def _heading_level(line: LayoutIrLine, median_pt: float) -> int | None:
-    size = line.font_size_pt or median_pt
-    text = line.text.strip()
-    if not text or len(text) > 200:
-        return None
-    bold = line.weight == FontWeight.BOLD
-    if size >= median_pt * 1.35 or (bold and size >= median_pt * 1.15):
-        return 1
-    if bold and size >= median_pt * 1.05:
-        return 2
-    if text.endswith(":") and len(text) < 80 and bold:
-        return 2
-    return None
-
-
-def _lines_reading_order(page: LayoutIrPage) -> tuple[LayoutIrLine, ...]:
+def _lines_for_page(page: LayoutIrPage) -> tuple[LayoutIrLine, ...]:
     if page.lines:
-        return tuple(sorted(page.lines, key=lambda ln: (ln.y, ln.x)))
+        return tuple(page.lines)
     buckets: dict[int, list] = {}
     for block in page.blocks:
         key = int(round(block.y * 10_000))
@@ -135,29 +132,250 @@ def _lines_reading_order(page: LayoutIrPage) -> tuple[LayoutIrLine, ...]:
     return tuple(synthetic)
 
 
+def _cluster_row_y(lines: tuple[LayoutIrLine, ...], y_tol: float = 0.02) -> list[list[LayoutIrLine]]:
+    ordered = sorted(lines, key=lambda ln: (ln.y, ln.x))
+    rows: list[list[LayoutIrLine]] = []
+    current: list[LayoutIrLine] = []
+    ref_y: float | None = None
+    for line in ordered:
+        cy = line.y + line.height * 0.5
+        if ref_y is None or abs(cy - ref_y) <= y_tol:
+            current.append(line)
+            ref_y = cy if ref_y is None else (ref_y + cy) * 0.5
+        else:
+            rows.append(current)
+            current = [line]
+            ref_y = cy
+    if current:
+        rows.append(current)
+    return rows
+
+
+def _cluster_columns(lines: tuple[LayoutIrLine, ...], min_gap: float = 0.12) -> list[list[LayoutIrLine]]:
+    if not lines:
+        return []
+    ordered = sorted(lines, key=lambda ln: ln.x)
+    columns: list[list[LayoutIrLine]] = [[ordered[0]]]
+    ref_x = ordered[0].x + ordered[0].width * 0.5
+    for line in ordered[1:]:
+        cx = line.x + line.width * 0.5
+        if cx - ref_x >= min_gap:
+            columns.append([line])
+            ref_x = cx
+        else:
+            columns[-1].append(line)
+            ref_x = max(ref_x, cx)
+    return columns
+
+
+def _lines_column_major(lines: tuple[LayoutIrLine, ...]) -> tuple[LayoutIrLine, ...]:
+    columns = _cluster_columns(lines)
+    if len(columns) <= 1:
+        return tuple(sorted(lines, key=lambda ln: (ln.y, ln.x)))
+    out: list[LayoutIrLine] = []
+    for col in columns:
+        out.extend(sorted(col, key=lambda ln: (ln.y, ln.x)))
+    return tuple(out)
+
+
+def _lines_semantic_flow_order(
+    lines: tuple[LayoutIrLine, ...], regions: tuple[_Region, ...]
+) -> tuple[LayoutIrLine, ...]:
+    outside = tuple(ln for ln in lines if not _line_in_tables(ln, regions))
+    if len(_cluster_columns(outside)) >= 2:
+        return _lines_column_major(lines)
+    return tuple(sorted(lines, key=lambda ln: (ln.y, ln.x)))
+
+
+def _enrich_table(table: LayoutIrTable, page: LayoutIrPage) -> LayoutIrTable:
+    region = _expand_table_region(table, page)
+    candidates = [
+        ln
+        for ln in _lines_for_page(page)
+        if region.contains_center(ln.y + ln.height * 0.5, ln.x + ln.width * 0.5)
+    ]
+    if not candidates:
+        return table
+    row_groups = _cluster_row_y(tuple(candidates))
+    grid: list[list[str]] = []
+    roles: list[list[LayoutIrCellRole | None]] = []
+    max_cols = 0
+    for row_idx, group in enumerate(row_groups):
+        row_lines = sorted(group, key=lambda ln: ln.x)
+        texts = [ln.text.strip() for ln in row_lines if ln.text.strip()]
+        if not texts:
+            continue
+        grid.append(texts)
+        row_roles: list[LayoutIrCellRole | None] = []
+        for ln in row_lines:
+            if not ln.text.strip():
+                continue
+            if row_idx == 0:
+                role = LayoutIrCellRole.HEADER
+            elif ln.text.strip().endswith(":"):
+                role = LayoutIrCellRole.LABEL
+            else:
+                role = None
+            row_roles.append(role)
+        roles.append(row_roles)
+        max_cols = max(max_cols, len(texts))
+    if max_cols <= 1 and table.column_count <= 1:
+        return table
+    cells_rows: list[tuple[LayoutIrTableCell, ...]] = []
+    for r_idx, texts in enumerate(grid):
+        padded = texts + [""] * (max_cols - len(texts))
+        row_cells: list[LayoutIrTableCell] = []
+        for c_idx, text in enumerate(padded):
+            if not text:
+                continue
+            role = None
+            if r_idx < len(roles) and c_idx < len(roles[r_idx]):
+                role = roles[r_idx][c_idx]
+            row_cells.append(
+                LayoutIrTableCell(
+                    text=text,
+                    x=table.x,
+                    y=table.y,
+                    width=table.width / max_cols,
+                    height=table.height / max(len(grid), 1),
+                    cell_role=role,
+                )
+            )
+        if row_cells:
+            cells_rows.append(tuple(row_cells))
+    if not cells_rows:
+        return table
+    return replace(table, rows=tuple(cells_rows), column_count=max_cols)
+
+
+def _table_regions(tables: tuple[LayoutIrTable, ...], page: LayoutIrPage) -> tuple[_Region, ...]:
+    return tuple(_expand_table_region(t, page) for t in tables)
+
+
+def _line_in_tables(line: LayoutIrLine, regions: tuple[_Region, ...]) -> bool:
+    cy = line.y + line.height * 0.5
+    cx = line.x + line.width * 0.5
+    return any(r.contains_center(cy, cx) for r in regions)
+
+
+def _median_font_size(lines: tuple[LayoutIrLine, ...]) -> float:
+    sizes = [ln.font_size_pt for ln in lines if ln.font_size_pt and ln.font_size_pt > 0]
+    if not sizes:
+        return 10.0
+    sizes.sort()
+    return sizes[len(sizes) // 2]
+
+
+def _heading_level(line: LayoutIrLine, median_pt: float) -> int | None:
+    size = line.font_size_pt or median_pt
+    text = line.text.strip()
+    if not text or len(text) > 200:
+        return None
+    bold = line.weight == FontWeight.BOLD
+    if size >= median_pt * 1.35 or (bold and size >= median_pt * 1.15):
+        return 1
+    if bold and size >= median_pt * 1.05:
+        return 2
+    if text.endswith(":") and len(text) < 80 and bold:
+        return 2
+    return None
+
+
 def _render_table(table: LayoutIrTable) -> str:
     cols = max(table.column_count, 1)
     col_spec = ", ".join(["auto"] * cols)
-    cells: list[str] = []
-    for row in table.rows:
+    flat: list[str] = []
+    header_cells: list[str] = []
+    body_rows: list[tuple[LayoutIrTableCell, ...]] = list(table.rows)
+    if table.rows and len(table.rows) >= 2:
+        first = table.rows[0]
+        if any(c.cell_role == LayoutIrCellRole.HEADER for c in first) or len(first) >= 2:
+            header_cells = [_cell_content(c.text) for c in first]
+            body_rows = list(table.rows[1:])
+    for row in body_rows:
         for cell in row:
-            cells.append(_cell_content(cell.text))
-    if not cells:
-        return ""
-    inner = ", ".join(cells)
-    return f"#table(\n  columns: ({col_spec}),\n  stroke: 0.5pt,\n  inset: 4pt,\n  {inner},\n)\n"
+            flat.append(_cell_content(cell.text))
+    parts: list[str] = [f"#table(\n  columns: ({col_spec}),\n  stroke: 0.5pt,\n  inset: 4pt,"]
+    if header_cells:
+        parts.append(f"  table.header({', '.join(header_cells)}),")
+    if flat:
+        parts.append(f"  {', '.join(flat)},")
+    parts.append(")\n")
+    return "\n".join(parts)
 
 
-def _render_widget(widget: LayoutIrWidget) -> str:
+def _line_index(lines: tuple[LayoutIrLine, ...], target: LayoutIrLine) -> int | None:
+    for idx, line in enumerate(lines):
+        if line is target:
+            return idx
+        if (
+            line.text == target.text
+            and abs(line.x - target.x) < 1e-6
+            and abs(line.y - target.y) < 1e-6
+        ):
+            return idx
+    return None
+
+
+def _label_line_for_widget(
+    widget: LayoutIrWidget, lines: tuple[LayoutIrLine, ...], used: set[int]
+) -> LayoutIrLine | None:
+    wy = widget.y + widget.height * 0.5
+    best: tuple[float, LayoutIrLine] | None = None
+    for idx, line in enumerate(lines):
+        if idx in used:
+            continue
+        text = line.text.strip()
+        if not text:
+            continue
+        ly = line.y + line.height * 0.5
+        if abs(ly - wy) > 0.03:
+            continue
+        line_end = line.x + line.width
+        if line_end <= widget.x + 0.08:
+            dist = widget.x - line_end
+            if best is None or dist < best[0]:
+                best = (dist, line)
+    if best:
+        return best[1]
+    for idx, line in enumerate(lines):
+        if idx in used:
+            continue
+        text = line.text.strip()
+        if not text:
+            continue
+        if line.y + line.height <= widget.y and widget.y - (line.y + line.height) < 0.04:
+            if line.x <= widget.x + 0.05:
+                return line
+    return None
+
+
+def _render_widget(
+    widget: LayoutIrWidget,
+    lines: tuple[LayoutIrLine, ...],
+    used_line_idx: set[int],
+) -> str:
     if widget.kind == LayoutIrWidgetKind.CHECKBOX:
         mark = "[x]" if widget.checked else "[ ]"
-        label = widget.field_name or widget.value or "Checkbox"
-        return f"{mark} {_escape_semantic_inline(label)}\n"
+        label_line = _label_line_for_widget(widget, lines, used_line_idx)
+        label = label_line.text.strip() if label_line else (widget.field_name or "Checkbox")
+        if label_line is not None:
+            idx = _line_index(lines, label_line)
+            if idx is not None:
+                used_line_idx.add(idx)
+        return f"{mark} {_escape_semantic_text(label)}\n"
     value = widget.value.strip()
-    if widget.field_name:
+    label_line = _label_line_for_widget(widget, lines, used_line_idx)
+    if label_line is not None:
+        idx = _line_index(lines, label_line)
+        if idx is not None:
+            used_line_idx.add(idx)
+        label = label_line.text.strip()
+        return f"#fields({_cell_content(label)}, {_cell_content(value)})\n"
+    if widget.field_name and value:
         return f"#fields({_cell_content(widget.field_name)}, {_cell_content(value)})\n"
     if value:
-        return f"{_escape_semantic_inline(value)}\n"
+        return f"{_escape_semantic_text(value)}\n"
     return ""
 
 
@@ -166,7 +384,7 @@ def _render_line(line: LayoutIrLine, median_pt: float) -> str:
     if not text:
         return ""
     level = _heading_level(line, median_pt)
-    body = _escape_semantic_inline(text)
+    body = _escape_semantic_text(text)
     if level == 1:
         return f"= {body}\n\n"
     if level == 2:
@@ -174,93 +392,200 @@ def _render_line(line: LayoutIrLine, median_pt: float) -> str:
     return f"{body}\n\n"
 
 
+def _render_label_value_pair(left: LayoutIrLine, right: LayoutIrLine) -> str:
+    return f"#fields({_cell_content(left.text)}, {_cell_content(right.text)})\n\n"
+
+
 @dataclass(frozen=True)
 class _FlowItem:
-    y: float
+    order: int
+    x: float
     kind: str
     payload: object
 
 
-def _page_body(page: LayoutIrPage) -> str:
-    regions = _table_regions(page.tables)
-    lines = _lines_reading_order(page)
-    median = _median_font_size(lines)
+def _table_flow_order(flow_lines: tuple[LayoutIrLine, ...], regions: tuple[_Region, ...], table: LayoutIrTable) -> int:
+    indices = [i for i, ln in enumerate(flow_lines) if _line_in_tables(ln, regions)]
+    if indices:
+        return min(indices)
+    return int(table.y * 10_000)
+
+
+def _page_set_block(page: LayoutIrPage) -> str:
+    w, h = page.width_pt, page.height_pt
+    margin = "margin: (x: 14mm, y: 14mm)"
+    if w <= 0 or h <= 0:
+        return f"#set page(paper: \"a4\", {margin})\n\n"
+    landscape = w > h * 1.02
+    if landscape:
+        return f"#set page(width: {w:.2f}pt, height: {h:.2f}pt, flipped: true, {margin})\n\n"
+    portrait_a4 = abs(w - 595.28) < 2 and abs(h - 841.89) < 3
+    if portrait_a4:
+        return f"#set page(paper: \"a4\", {margin})\n\n"
+    return f"#set page(width: {w:.2f}pt, height: {h:.2f}pt, {margin})\n\n"
+
+
+def _page_body(page: LayoutIrPage) -> tuple[str, int]:
+    enriched_tables = tuple(_enrich_table(t, page) for t in page.tables)
+    regions = _table_regions(enriched_tables, page)
+    all_lines = _lines_for_page(page)
+    flow_lines = _lines_semantic_flow_order(all_lines, regions)
+    median = _median_font_size(flow_lines)
+    used_line_idx: set[int] = set()
     items: list[_FlowItem] = []
-    for table in page.tables:
-        items.append(_FlowItem(table.y, "table", table))
-    for line in lines:
+    for table in enriched_tables:
+        t_order = _table_flow_order(flow_lines, regions, table)
+        items.append(_FlowItem(t_order, table.x, "table", table))
+    widget_label_idx: set[int] = set()
+    for widget in page.widgets:
+        label = _label_line_for_widget(widget, flow_lines, set())
+        if label is not None:
+            li = _line_index(flow_lines, label)
+            if li is not None:
+                widget_label_idx.add(li)
+    for widget in page.widgets:
+        w_order = next(
+            (i for i, ln in enumerate(flow_lines) if abs(ln.y - widget.y) < 0.04),
+            int(widget.y * 10_000),
+        )
+        items.append(_FlowItem(w_order, widget.x, "widget", widget))
+    for idx, line in enumerate(flow_lines):
         if _line_in_tables(line, regions):
             continue
-        items.append(_FlowItem(line.y, "line", line))
-    for widget in page.widgets:
-        items.append(_FlowItem(widget.y, "widget", widget))
-    items.sort(key=lambda it: (it.y, 0 if it.kind == "line" else 1))
+        if idx in widget_label_idx:
+            continue
+        if any(abs(line.y - w.y) < 0.03 and abs(line.x - w.x) < 0.15 for w in page.widgets):
+            continue
+        items.append(_FlowItem(idx, line.x, "line", (idx, line)))
+    items.sort(key=lambda it: (it.order, it.x, 0 if it.kind == "line" else 1))
 
     parts: list[str] = []
-    for item in items:
+    consumed: set[int] = set()
+    i = 0
+    flow_list = list(items)
+    while i < len(flow_list):
+        item = flow_list[i]
+        if item.kind == "line":
+            idx, line = item.payload  # type: ignore[misc]
+            if idx in consumed or idx in used_line_idx:
+                i += 1
+                continue
+            text = line.text.strip()
+            if text.endswith(":"):
+                if i + 1 < len(flow_list) and flow_list[i + 1].kind == "line":
+                    nidx, nline = flow_list[i + 1].payload  # type: ignore[misc]
+                    if nidx not in consumed and abs(nline.y - line.y) < 0.03 and nline.x > line.x:
+                        parts.append(_render_label_value_pair(line, nline))
+                        consumed.add(idx)
+                        consumed.add(nidx)
+                        i += 2
+                        continue
+            part = _render_line(line, median)
+            if part:
+                parts.append(part)
+                consumed.add(idx)
+            i += 1
+            continue
         if item.kind == "table":
-            part = _render_table(item.payload)  # type: ignore[arg-type]
+            parts.append(_render_table(item.payload))  # type: ignore[arg-type]
         elif item.kind == "widget":
-            part = _render_widget(item.payload)  # type: ignore[arg-type]
-        else:
-            part = _render_line(item.payload, median)  # type: ignore[arg-type]
-        if part:
-            parts.append(part)
-    covered = "".join(parts)
-    for block in sorted(page.blocks, key=lambda b: (b.y, b.x)):
-        text = block.text.strip()
-        if text and text not in covered:
-            parts.append(f"{_escape_semantic_inline(text)}\n\n")
-    return "".join(parts)
+            parts.append(_render_widget(item.payload, flow_lines, used_line_idx))  # type: ignore[arg-type]
+        i += 1
+
+    leftover = sum(
+        1
+        for idx, line in enumerate(flow_lines)
+        if idx not in consumed
+        and idx not in used_line_idx
+        and not _line_in_tables(line, regions)
+        and line.text.strip()
+    )
+    return "".join(parts), leftover
+
+
+def semantic_export_leftover_line_count(doc: LayoutIrDocument) -> int:
+    total = 0
+    for page in doc.pages:
+        _, leftover = _page_body(page)
+        total += leftover
+    return total
 
 
 def layout_ir_to_typst_semantic(doc: LayoutIrDocument) -> str:
-    body_parts: list[str] = []
+    body_parts: list[str] = [_SEMANTIC_PREAMBLE]
     pages = sorted(doc.pages, key=lambda p: p.page)
     for idx, page in enumerate(pages):
-        if len(pages) > 1:
-            body_parts.append(f"// --- Seite {page.page} ---\n\n")
-        body_parts.append(_page_body(page))
-    return _SEMANTIC_PREAMBLE + "\n".join(body_parts).strip() + "\n"
+        if idx > 0:
+            body_parts.append("#pagebreak()\n\n")
+        body_parts.append(_page_set_block(page))
+        page_text, _leftover = _page_body(page)
+        body_parts.append(page_text)
+    return "".join(body_parts).strip() + "\n"
 
 
-_TOKEN_RE = re.compile(r"[\wäöüÄÖÜß]+", re.UNICODE)
-
-
-def _append_tokens(text: str, seen: set[str], ordered: list[str]) -> None:
-    for tok in _TOKEN_RE.findall(text):
-        key = tok.lower()
-        if key in seen:
+def _page_semantic_token_events(page: LayoutIrPage) -> list[str]:
+    enriched_tables = tuple(_enrich_table(t, page) for t in page.tables)
+    regions = _table_regions(enriched_tables, page)
+    flow_lines = _lines_semantic_flow_order(_lines_for_page(page), regions)
+    events: list[tuple[int, list[str]]] = []
+    widget_label_idx: set[int] = set()
+    for widget in page.widgets:
+        label = _label_line_for_widget(widget, flow_lines, set())
+        if label is not None:
+            li = _line_index(flow_lines, label)
+            if li is not None:
+                widget_label_idx.add(li)
+    for idx, line in enumerate(flow_lines):
+        if _line_in_tables(line, regions):
             continue
-        seen.add(key)
-        ordered.append(key)
+        if idx in widget_label_idx:
+            continue
+        if any(abs(line.y - w.y) < 0.03 and abs(line.x - w.x) < 0.15 for w in page.widgets):
+            continue
+        events.append((idx, tokenize_words(line.text)))
+    for table in enriched_tables:
+        order = _table_flow_order(flow_lines, regions, table)
+        row_tokens: list[str] = []
+        for row in table.rows:
+            for cell in row:
+                row_tokens.extend(tokenize_words(cell.text))
+        events.append((order, row_tokens))
+    for widget in page.widgets:
+        w_order = next(
+            (i for i, ln in enumerate(flow_lines) if abs(ln.y - widget.y) < 0.04),
+            int(widget.y * 10_000),
+        )
+        chunk: list[str] = []
+        label = _label_line_for_widget(widget, flow_lines, set())
+        if label:
+            chunk.extend(tokenize_words(label.text))
+        if widget.value:
+            chunk.extend(tokenize_words(widget.value))
+        elif widget.field_name and widget.kind == LayoutIrWidgetKind.CHECKBOX:
+            chunk.extend(tokenize_words(widget.field_name))
+        events.append((w_order, chunk))
+    events.sort(key=lambda item: item[0])
+    out: list[str] = []
+    for _, chunk in events:
+        out.extend(chunk)
+    return out
+
+
+def semantic_ir_token_sequence(doc: LayoutIrDocument) -> list[str]:
+    tokens: list[str] = []
+    for page in sorted(doc.pages, key=lambda p: p.page):
+        tokens.extend(_page_semantic_token_events(page))
+    return tokens
 
 
 def collect_layout_ir_tokens(doc: LayoutIrDocument) -> list[str]:
-    """Normalized word tokens from IR text (for semantic export coverage tests)."""
-    seen: set[str] = set()
-    ordered: list[str] = []
-    for page in doc.pages:
-        for line in _lines_reading_order(page):
-            _append_tokens(line.text, seen, ordered)
-        for table in page.tables:
-            for row in table.rows:
-                for cell in row:
-                    _append_tokens(cell.text, seen, ordered)
-        for widget in page.widgets:
-            for field in (widget.field_name, widget.value):
-                if field:
-                    _append_tokens(field, seen, ordered)
-        for block in page.blocks:
-            _append_tokens(block.text, seen, ordered)
-    return ordered
+    """Reading-order token sequence (with duplicates) for semantic export metrics."""
+    return semantic_ir_token_sequence(doc)
 
 
 def tokens_from_pdf_text(pdf_bytes: bytes) -> set[str]:
-    import io
+    from docuvate_worker.infrastructure.layout.semantic_typst_metrics import (
+        tokens_from_pdf_text as _pdf_set,
+    )
 
-    from pypdf import PdfReader
-
-    reader = PdfReader(io.BytesIO(pdf_bytes))
-    combined = "\n".join((page.extract_text() or "") for page in reader.pages)
-    return {tok.lower() for tok in _TOKEN_RE.findall(combined)}
+    return _pdf_set(pdf_bytes)
