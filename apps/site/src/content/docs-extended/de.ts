@@ -43,15 +43,10 @@ export const docsExtendedDe: DocsExtendedContent = {
   motivation: {
     meta: {
       title: 'Motivation | Docuvate Dokumentation',
-      description: 'Hintergrund und Ziele von Docuvate (Platzhalter für den Betreiber).',
+      description: 'Hintergrund und Ziele von Docuvate.',
     },
     title: 'Motivation',
     lead: 'Warum Docuvate entstanden ist und welche Probleme es lösen soll.',
-    ownerPlaceholder: {
-      heading: 'Text vom Betreiber (noch auszufüllen)',
-      body:
-        'Dieser Abschnitt ist bewusst neutral gehalten. Thomas Faust ergänzt hier persönliche Motivation, Zielbild und Abgrenzung in eigenen Worten.',
-    },
     sections: [],
   },
   architecture: {

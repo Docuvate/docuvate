@@ -4,7 +4,6 @@ import { enContent } from '../src/content/en.ts';
 const ALLOW_IDENTICAL = new Set([
   '© 2026 Docuvate',
   'Docuvate Cloud / Business',
-  'Open Source (AGPL-3.0)',
   'Docker Compose',
   'Paperless-ngx',
   'Home Assistant',

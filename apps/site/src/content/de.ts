@@ -79,7 +79,7 @@ export const deContent: SiteContent = {
     },
     proof: {
       items: [
-        { id: 'agpl', label: 'Open Source (AGPL-3.0)' },
+        { id: 'agpl', label: 'AGPL-Lizenz' },
         { id: 'local', label: 'Läuft komplett lokal' },
         { id: 'cpu', label: 'CPU reicht, keine GPU nötig' },
         { id: 'openapi', label: 'OpenAPI und SDKs' },

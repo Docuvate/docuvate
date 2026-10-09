@@ -218,11 +218,8 @@ jobs:
       - run: node apps/site/scripts/enhance-openapi.mjs
       - run: pnpm --filter @docuvate/site build
       - name: Start preview server
-        run: |
-          SESSION_NAME="site-preview-e2e"
-          tmux -f /exec-daemon/tmux.portal.conf has-session -t "=$SESSION_NAME" 2>/dev/null || \
-            tmux -f /exec-daemon/tmux.portal.conf new-session -d -s "$SESSION_NAME" -c "$PWD/apps/site" -- "${SHELL:-zsh}" -l
-          tmux -f /exec-daemon/tmux.portal.conf send-keys -t "$SESSION_NAME:0.0" 'pnpm run preview' C-m
+        working-directory: apps/site
+        run: nohup pnpm run preview > "$RUNNER_TEMP/site-preview.log" 2>&1 &
       - name: Wait for site preview
         run: |
           for i in $(seq 1 60); do

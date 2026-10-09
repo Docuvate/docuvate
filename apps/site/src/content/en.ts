@@ -79,7 +79,7 @@ export const enContent: SiteContent = {
     },
     proof: {
       items: [
-        { id: 'agpl', label: 'Open Source (AGPL-3.0)' },
+        { id: 'agpl', label: 'Open source (AGPL)' },
         { id: 'local', label: 'Runs fully on your hardware' },
         { id: 'cpu', label: 'CPU is enough, no GPU required' },
         { id: 'openapi', label: 'OpenAPI and SDKs' },

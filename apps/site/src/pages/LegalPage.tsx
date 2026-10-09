@@ -22,8 +22,6 @@ export function ImprintPage() {
           {data.postalCode} {data.city}
           <br />
           {copy.emailLabel}:{' '}
-          <a className="legal-contact-link" href="mailto:thomas@docuvate.de">thomas@docuvate.de</a>
-          {' · '}
           <a className="legal-contact-link" href={`mailto:${data.email}`}>
             {data.email}
           </a>
