@@ -33,7 +33,11 @@ pull_one() {
     for ref in "${refs[@]}"; do
       if docker pull "$ref"; then
         if [[ "$ref" != "$image" ]]; then
-          docker tag "$ref" "$image"
+          if [[ "$image" == *@sha256:* ]]; then
+            docker tag "$ref" "${image%%@sha256:*}"
+          else
+            docker tag "$ref" "$image"
+          fi
         fi
         return 0
       fi
