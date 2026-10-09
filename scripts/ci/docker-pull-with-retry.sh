@@ -23,7 +23,7 @@ pull_one() {
     mirror=""
   fi
 
-  for attempt in 1 2 3 4 5; do
+  for attempt in 1 2 3 4 5 6 7 8; do
     local refs=()
     if [[ -n "$mirror" ]]; then
       refs+=("$mirror")
@@ -43,8 +43,8 @@ pull_one() {
       fi
     done
 
-    if [ "$attempt" -eq 5 ]; then
-      echo "docker pull failed after 5 attempts: ${image}" >&2
+    if [ "$attempt" -eq 8 ]; then
+      echo "docker pull failed after 8 attempts: ${image}" >&2
       return 1
     fi
     echo "docker pull failed (attempt ${attempt}), retrying ${image}…" >&2
