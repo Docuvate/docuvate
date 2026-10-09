@@ -1,9 +1,14 @@
 import { ApiReferenceReact } from '@scalar/api-reference-react';
 import '@scalar/api-reference-react/style.css';
+import { useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { scheduleApiPageScrollSync } from '../lib/apiPageScroll';
 import '../styles/scalar-site-overrides.css';
 import openApiSpecDe from '../generated/openapi.v1.json';
 import openApiSpecEn from '../generated/openapi.v1.en.json';
 import { useLocale } from '../context/LocaleContext';
+import { observeScalarDeChrome } from '../lib/scalarDeDomPatch';
+import { observeScalarSidebarAccordion, observeScalarSidebarSticky } from '../lib/scalarSidebarAccordion';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
 import {
   marketingOpenApiServerDescription,
@@ -14,18 +19,44 @@ import {
 import { buildScalarCustomCss } from '../lib/scalarSiteTheme';
 
 export function ApiReferencePanel() {
+  const { hash } = useLocation();
   const { locale } = useLocale();
   const { theme } = useDocuvateTheme();
+  const embedRef = useRef<HTMLDivElement>(null);
   const openApiSpec = locale === 'en' ? openApiSpecEn : openApiSpecDe;
   const isDark = theme === 'dark';
   const serverUrl = marketingOpenApiServerUrl(locale);
+  const tagSlug = hash.match(/^#tag\/([^/]+)/i)?.[1] ?? '';
+
+  useEffect(() => {
+    scheduleApiPageScrollSync();
+    const onHash = () => scheduleApiPageScrollSync();
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [hash, locale]);
+
+  useEffect(() => {
+    const root = embedRef.current;
+    if (!root) {
+      return undefined;
+    }
+    const stopAccordion = observeScalarSidebarAccordion(root);
+    const stopSticky = observeScalarSidebarSticky(root);
+    const stopChrome = locale === 'de' ? observeScalarDeChrome(root) : () => undefined;
+    return () => {
+      stopAccordion();
+      stopSticky();
+      stopChrome();
+    };
+  }, [locale]);
 
   return (
     <div
+      ref={embedRef}
       className={`scalar-embed scalar-embed-locale-${locale}${isDark ? ' scalar-embed-dark' : ' scalar-embed-light'}`}
     >
       <ApiReferenceReact
-        key={locale}
+        key={`${locale}-${tagSlug}`}
         configuration={{
           spec: { content: openApiSpec },
           theme: 'none',

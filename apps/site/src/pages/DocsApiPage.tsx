@@ -8,10 +8,12 @@ export function DocsApiPage() {
   return (
     <div className="docs-api-full">
       <div className="site-container docs-api-intro">
-        <h1>{content.nav.api}</h1>
-        <p className="section-lead">
-          <RichText text={content.apiPage.lead} />
-        </p>
+        <header className="docs-page-header">
+          <h1 className="docs-page-title">{content.nav.api}</h1>
+          <p className="docs-page-lead">
+            <RichText text={content.apiPage.lead} />
+          </p>
+        </header>
       </div>
       <ClientOnly fallback={<div className="scalar-embed-loading">…</div>}>
         <ApiReferencePanel />

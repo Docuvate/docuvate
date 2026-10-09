@@ -2,7 +2,7 @@
 export const sitePublicOpenApiMetadataEn = {
   exampleServerUrl: 'https://your-instance.example/v1',
   serverDescription:
-    'Example URL for your self-hosted API (replace with your domain in docker compose).',
+    'Example URL for your self-hosted API (replace with your domain in Docker Compose).',
   info: {
     title: 'Docuvate API',
     description:
@@ -10,6 +10,7 @@ export const sitePublicOpenApiMetadataEn = {
   },
   tagRenames: {
     'API metadata': 'System',
+    search: 'Search',
     Documents: 'Documents',
     Labels: 'Labels',
     Correspondents: 'Correspondents',
@@ -17,9 +18,16 @@ export const sitePublicOpenApiMetadataEn = {
     Settings: 'Settings',
     Connectors: 'Connections',
     Models: 'Extensions',
+    admin: 'User administration',
+    invitations: 'Invitations',
+  },
+  tagDisplayNames: {
+    'User administration': 'User administration',
+    Invitations: 'Invitations',
   },
   tagDescriptions: {
     System: 'API description and metadata',
+    Search: 'Hybrid global search (full text, similarity, semantic)',
     Documents: 'Upload, read, search, and document chat',
     Labels: 'Labels, suggestions, patterns, and custom fields',
     Correspondents: 'Senders and partners for document assignment',
@@ -27,6 +35,8 @@ export const sitePublicOpenApiMetadataEn = {
     Settings: 'Account settings',
     Connections: 'Connections to external sources',
     Extensions: 'Model operations (optional)',
+    'User administration': 'Manage users, roles, invitations, and sessions',
+    Invitations: 'Accept invitations and set passwords',
   },
   pathSummaries: {
     getOpenApiDocument: 'OpenAPI JSON',
