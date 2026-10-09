@@ -16,6 +16,7 @@ const FORWARD_SQL_ORDER = [
   'schema-normalization-3nf-up.sql',
   'installation-iam-up.sql',
   'auth-mfa-passkey-up.sql',
+  '20261008133000-saved-views-dashboard-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

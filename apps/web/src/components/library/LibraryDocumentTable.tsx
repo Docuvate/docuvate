@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useState, type KeyboardEvent, type Mo
 import { Link } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentDto, DuplicateStackMemberDto } from '@docuvate/contracts';
+import type { DocumentDto, DuplicateStackMemberDto, LibraryTableColumnId } from '@docuvate/contracts';
 import { deleteDocument, getDuplicateStack } from '../../lib/api';
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { ExtractionProgressBar } from '../documents/ExtractionProgressBar';
@@ -38,6 +38,11 @@ interface LibraryDocumentTableProps {
   hideFolderColumn?: boolean;
   /** When set, hide redundant folder line under title for docs in this folder. */
   suppressFolderFallbackForId?: string;
+  visibleColumns?: LibraryTableColumnId[];
+}
+
+function showColumn(columns: LibraryTableColumnId[] | undefined, id: LibraryTableColumnId): boolean {
+  return !columns || columns.includes(id);
 }
 
 export function LibraryDocumentTable({
@@ -55,6 +60,7 @@ export function LibraryDocumentTable({
   enableDocumentDrag,
   hideFolderColumn = false,
   suppressFolderFallbackForId,
+  visibleColumns,
 }: LibraryDocumentTableProps) {
   const { t } = useTranslation();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -353,22 +359,28 @@ export function LibraryDocumentTable({
                 {t('library.colTitle')}
               </button>
             </th>
-            {hideFolderColumn ? null : (
+            {hideFolderColumn || !showColumn(visibleColumns, 'folder') ? null : (
               <th className="library-col-meta">
                 <span className="library-th-label">{t('library.colFolder')}</span>
               </th>
             )}
-            <th className="library-col-labels">
-              <span className="library-th-label">{t('library.colLabels')}</span>
-            </th>
-            <th className="library-col-status">
-              <span className="library-th-label">{t('library.colStatus')}</span>
-            </th>
-            <th className="library-col-date">
-              <button type="button" className="sort-btn" onClick={() => onSort('documentDate')}>
-                {t('library.colDate')}
-              </button>
-            </th>
+            {showColumn(visibleColumns, 'labels') ? (
+              <th className="library-col-labels">
+                <span className="library-th-label">{t('library.colLabels')}</span>
+              </th>
+            ) : null}
+            {showColumn(visibleColumns, 'status') ? (
+              <th className="library-col-status">
+                <span className="library-th-label">{t('library.colStatus')}</span>
+              </th>
+            ) : null}
+            {showColumn(visibleColumns, 'date') ? (
+              <th className="library-col-date">
+                <button type="button" className="sort-btn" onClick={() => onSort('documentDate')}>
+                  {t('library.colDate')}
+                </button>
+              </th>
+            ) : null}
             <th className="library-col-action">
               <span className="sr-only">{t('library.colAction')}</span>
             </th>
@@ -474,27 +486,42 @@ export function LibraryDocumentTable({
                         {doc.folder.name}
                       </div>
                     ) : null}
+                    {!showColumn(visibleColumns, 'status') && doc.status !== 'ready' ? (
+                      <div className="library-title-status-fallback">
+                        {isExtractionPending(doc.status) ? (
+                          <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
+                        ) : (
+                          <Badge status={doc.status} />
+                        )}
+                      </div>
+                    ) : null}
                   </td>
-                  {hideFolderColumn ? null : (
+                  {hideFolderColumn || !showColumn(visibleColumns, 'folder') ? null : (
                     <td className="library-col-meta" title={doc.folder?.name ?? ''}>
                       {doc.folder?.name ?? ''}
                     </td>
                   )}
-                  <td className="library-col-labels">
-                    <DocumentLabelsCell tags={doc.tags} />
-                  </td>
-                  <td className="library-col-status">
-                    {doc.duplicateStack?.pendingReview ? (
-                      <span className="badge badge-warn" title={t('library.reviewPendingTooltip')}>
-                        {t('library.reviewPending')}
-                      </span>
-                    ) : isExtractionPending(doc.status) ? (
-                      <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
-                    ) : (
-                      <Badge status={doc.status} />
-                    )}
-                  </td>
-                  <td className="library-col-date">{documentDisplayDate(doc)}</td>
+                  {showColumn(visibleColumns, 'labels') ? (
+                    <td className="library-col-labels">
+                      <DocumentLabelsCell tags={doc.tags} />
+                    </td>
+                  ) : null}
+                  {showColumn(visibleColumns, 'status') ? (
+                    <td className="library-col-status">
+                      {doc.duplicateStack?.pendingReview ? (
+                        <span className="badge badge-warn" title={t('library.reviewPendingTooltip')}>
+                          {t('library.reviewPending')}
+                        </span>
+                      ) : isExtractionPending(doc.status) ? (
+                        <ExtractionProgressBar doc={doc} compact className="library-row-progress" />
+                      ) : (
+                        <Badge status={doc.status} />
+                      )}
+                    </td>
+                  ) : null}
+                  {showColumn(visibleColumns, 'date') ? (
+                    <td className="library-col-date">{documentDisplayDate(doc)}</td>
+                  ) : null}
                   <td className="library-col-action">
                     <div className="library-row-actions">
                       {hasStack ? (

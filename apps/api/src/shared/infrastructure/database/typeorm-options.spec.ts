@@ -20,11 +20,11 @@ describe('buildTypeOrmOptions', () => {
     expect(() => buildTypeOrmOptions()).toThrow(/DATABASE_URL/);
   });
 
-  it('registers initial schema, global search, 3NF, admin IAM, and MFA migrations in order', () => {
+  it('registers initial schema, global search, 3NF, admin IAM, MFA, and saved-views migrations in order', () => {
     process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
     const opts = buildTypeOrmOptions();
     const migrations = opts.migrations as Array<{ name: string }>;
-    expect(migrations).toHaveLength(7);
+    expect(migrations).toHaveLength(8);
     expect(migrations[0]?.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);
     expect(migrations[1]?.name).toBe('GlobalSearchSchema20261008130500');
     expect(migrations[2]?.name).toBe('DocumentFieldValuesBackfill20261008130600');
@@ -32,5 +32,6 @@ describe('buildTypeOrmOptions', () => {
     expect(migrations[4]?.name).toBe('SchemaNormalization3nf20261008131000');
     expect(migrations[5]?.name).toBe('AuthMfaPasskey20261008132100');
     expect(migrations[6]?.name).toBe('InstallationIam20261008132200');
+    expect(migrations[7]?.name).toBe('SavedViewsDashboard20261008133000');
   });
 });

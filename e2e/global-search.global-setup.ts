@@ -3,6 +3,10 @@ import path from 'node:path';
 import { request as playwrightRequest } from '@playwright/test';
 import { provisionGlobalSearchLibrary } from './helpers/global-search-fixture.js';
 import { globalSearchCredsPath } from './helpers/global-search-creds.js';
+import {
+  smokeFixtureCredentials,
+  smokeFixtureStoragePath,
+} from './helpers/smoke-fixture-auth.js';
 
 const storagePath = path.join(process.cwd(), '.auth', 'global-search-storage.json');
 
@@ -24,6 +28,18 @@ export default async function globalSetup() {
       throw new Error(`global-setup sign-in failed: ${login.status()} ${await login.text()}`);
     }
     await ctx.storageState({ path: storagePath });
+
+    const smoke = smokeFixtureCredentials();
+    const smokeLogin = await ctx.post(`${apiBase}/api/auth/sign-in/email`, {
+      headers: { origin: webOrigin },
+      data: { email: smoke.email, password: smoke.password },
+    });
+    if (!smokeLogin.ok()) {
+      throw new Error(
+        `smoke-fixture sign-in failed: ${smokeLogin.status()} ${await smokeLogin.text()}`
+      );
+    }
+    await ctx.storageState({ path: smokeFixtureStoragePath() });
   } finally {
     await ctx.dispose();
   }

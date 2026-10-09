@@ -198,6 +198,7 @@ export function LibraryPageDocumentSection({
                 }
                 enableDocumentDrag={enableDocumentDrag}
                 hideFolderColumn={filesystemLayout}
+                visibleColumns={data.visibleColumns}
                 suppressFolderFallbackForId={
                   filesystemLayout ? data.activeFolderId : undefined
                 }

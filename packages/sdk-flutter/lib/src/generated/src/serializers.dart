@@ -32,7 +32,13 @@ import 'package:docuvate/src/generated/src/model/create_correspondent_request_dt
 import 'package:docuvate/src/generated/src/model/create_document_chat_thread_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_folder_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_mappe_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/create_saved_document_view_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_tag_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/dashboard_layout_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/dashboard_statistics_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/dashboard_statistics_dto_class_top_labels_inner.dart';
+import 'package:docuvate/src/generated/src/model/dashboard_widget_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/dashboard_widget_input_dto.dart';
 import 'package:docuvate/src/generated/src/model/dismiss_label_recommendation_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/dismiss_tag_suggestion_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_bulk_action_dto.dart';
@@ -60,11 +66,13 @@ import 'package:docuvate/src/generated/src/model/extraction_compare_request_dto.
 import 'package:docuvate/src/generated/src/model/extraction_engine_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/folder_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/import_from_connector_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/installation_dashboard_default_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/invite_admin_user_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/label_map_response_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/label_recommendation_blocklist_entry_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/label_recommendation_blocklist_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/label_recommendation_list_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/library_table_column_id.dart';
 import 'package:docuvate/src/generated/src/model/mappe_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/ml_model_family_dto.dart';
 import 'package:docuvate/src/generated/src/model/ml_model_family_list_response_dto.dart';
@@ -74,10 +82,14 @@ import 'package:docuvate/src/generated/src/model/ml_retrain_job_dto.dart';
 import 'package:docuvate/src/generated/src/model/ml_retrain_job_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/ok_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/propose_label_recommendation_blocklist_pattern_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/reorder_saved_document_views_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/replace_dashboard_layout_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_recognized_field_item_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_recognized_fields_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_tag_custom_field_item_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_tag_custom_fields_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/saved_document_view_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/saved_document_view_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/set_admin_user_role_request_dto.dart';
@@ -90,6 +102,7 @@ import 'package:docuvate/src/generated/src/model/update_correspondent_request_dt
 import 'package:docuvate/src/generated/src/model/update_document_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_folder_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_mappe_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/update_saved_document_view_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_tag_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_user_settings_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/user_settings_response_dto.dart';
@@ -115,7 +128,13 @@ part 'serializers.g.dart';
   CreateDocumentChatThreadRequestDto,
   CreateFolderRequestDto,
   CreateMappeRequestDto,
+  CreateSavedDocumentViewRequestDto,
   CreateTagRequestDto,
+  DashboardLayoutResponseDto,
+  DashboardStatisticsDtoClass,
+  DashboardStatisticsDtoClassTopLabelsInner,
+  DashboardWidgetDtoClass,
+  DashboardWidgetInputDto,
   DismissLabelRecommendationRequestDto,
   DismissTagSuggestionRequestDto,
   DocumentBulkActionDto,
@@ -143,11 +162,13 @@ part 'serializers.g.dart';
   ExtractionEngineListResponseDto,
   FolderListResponseDto,
   ImportFromConnectorRequestDto,
+  InstallationDashboardDefaultResponseDto,
   InviteAdminUserRequestDto,
   LabelMapResponseDtoClass,
   LabelRecommendationBlocklistEntryResponseDto,
   LabelRecommendationBlocklistListResponseDto,
   LabelRecommendationListResponseDto,
+  LibraryTableColumnId,
   MappeListResponseDto,
   MlModelFamilyDto,
   MlModelFamilyListResponseDto,
@@ -157,10 +178,14 @@ part 'serializers.g.dart';
   MlRetrainJobListResponseDto,
   OkResponseDto,
   ProposeLabelRecommendationBlocklistPatternRequestDto,
+  ReorderSavedDocumentViewsRequestDto,
+  ReplaceDashboardLayoutRequestDto,
   ReplaceRecognizedFieldItemDto,
   ReplaceRecognizedFieldsRequestDto,
   ReplaceTagCustomFieldItemDto,
   ReplaceTagCustomFieldsRequestDto,
+  SavedDocumentViewDtoClass,
+  SavedDocumentViewListResponseDto,
   SendDocumentChatThreadMessageRequestDto,
   SendDocumentChatThreadMessageResponseDto,
   SetAdminUserRoleRequestDto,
@@ -173,6 +198,7 @@ part 'serializers.g.dart';
   UpdateDocumentRequestDto,
   UpdateFolderRequestDto,
   UpdateMappeRequestDto,
+  UpdateSavedDocumentViewRequestDto,
   UpdateTagRequestDto,
   UpdateUserSettingsRequestDto,
   UserSettingsResponseDto,

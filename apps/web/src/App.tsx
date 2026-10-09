@@ -5,6 +5,8 @@ import { AppBootLoading } from './components/AppBootLoading';
 import { AppShell } from './components/AppShell';
 import { DocumentDetailPage } from './pages/DocumentDetailPage';
 import { LibraryPage } from './pages/LibraryPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { SavedViewsPage } from './pages/SavedViewsPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { LoginPage } from './pages/LoginPage';
 import { LoginTwoFactorPage } from './pages/LoginTwoFactorPage';
@@ -66,7 +68,9 @@ export function App() {
         path={routes.inbox}
         element={<Navigate to={`${routes.documents}?filter=in%3Ainbox`} replace />}
       />
+      <Route path={routes.home} element={<ShellRoute><DashboardPage /></ShellRoute>} />
       <Route path={routes.documents} element={<ShellRoute><LibraryPage /></ShellRoute>} />
+      <Route path={routes.savedViews} element={<ShellRoute><SavedViewsPage /></ShellRoute>} />
       <Route
         path={routes.filesystem}
         element={<ShellRoute><DateisystemExplorerPage browseMode="root" /></ShellRoute>}

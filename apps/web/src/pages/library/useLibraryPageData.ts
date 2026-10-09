@@ -6,12 +6,15 @@ import type {
   DocumentListQuery,
   DocumentStatus,
   FolderDto,
+  LibraryTableColumnId,
   MappeDto,
   TagDto,
 } from '@docuvate/contracts';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import {
   bulkDocuments,
+  getSavedDocumentView,
+  updateSavedDocumentView,
   listDocuments,
   listFolders,
   listMappen,
@@ -33,6 +36,7 @@ import {
   writeLibraryViewMode,
   type LibraryViewMode,
 } from '../../lib/libraryViewMode';
+import { applySavedViewToLibrary, buildSavedViewPayload } from '../../lib/savedViewState';
 type SortField = NonNullable<DocumentListQuery['sort']>;
 
 export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-root') {
@@ -59,6 +63,14 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
   const [filterMode, setFilterModeState] = useState<LibraryFilterMode>(() => readLibraryFilterMode());
   const [filterQueryText, setFilterQueryText] = useState('');
   const [filterParseIssues, setFilterParseIssues] = useState<DocumentFilterParseIssue[]>([]);
+  const [visibleColumns, setVisibleColumns] = useState<LibraryTableColumnId[]>([
+    'title',
+    'labels',
+    'date',
+    'status',
+  ]);
+  const [activeViewId, setActiveViewId] = useState<string | null>(null);
+  const [activeViewName, setActiveViewName] = useState<string | null>(null);
   const urlHydratedRef = useRef(false);
   const filtersRef = useRef(filters);
   const queryRef = useRef(query);
@@ -164,6 +176,26 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
 
   useEffect(() => {
     if (mode !== 'all' || tags.length === 0) return;
+    const viewId = searchParams.get('view');
+    if (viewId) {
+      void getSavedDocumentView(viewId)
+        .then((view) => {
+          const applied = applySavedViewToLibrary(view, tags);
+          setFilters(applied.filters);
+          setQuery(applied.query);
+          setViewMode(applied.viewMode);
+          writeLibraryViewMode(applied.viewMode);
+          setFilterModeState(applied.filterMode);
+          writeLibraryFilterMode(applied.filterMode);
+          setFilterQueryText(applied.filterQueryText);
+          setVisibleColumns(applied.visibleColumns);
+          setActiveViewId(view.id);
+          setActiveViewName(view.name);
+          urlHydratedRef.current = true;
+        })
+        .catch(() => undefined);
+      return;
+    }
     const filterParam = searchParams.get('filter');
     if (filterParam === null) return;
     if (!urlHydratedRef.current) return;
@@ -384,6 +416,30 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
 
   const hasDocuments = items.length > 0;
 
+  async function updateActiveSavedView() {
+    if (!activeViewId) return;
+    const payload = buildSavedViewPayload(activeViewName ?? t('library.titleDocuments'), {
+      filters,
+      query,
+      tags,
+      viewMode,
+      filterMode,
+      visibleColumns,
+    });
+    await updateSavedDocumentView(activeViewId, {
+      searchQuery: payload.searchQuery,
+      sort: payload.sort,
+      order: payload.order,
+      viewMode: payload.viewMode,
+      filterMode: payload.filterMode,
+      tagIds: payload.tagIds,
+      status: payload.status,
+      inbox: payload.inbox,
+      withoutNonInboxLabel: payload.withoutNonInboxLabel,
+      visibleColumns: payload.visibleColumns,
+    });
+  }
+
   return {
     items,
     folders,
@@ -427,5 +483,9 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
     load,
     loadTaxonomy,
     activeFolderId: mode === 'folder' ? folderId : undefined,
+    visibleColumns,
+    activeViewId,
+    activeViewName,
+    updateActiveSavedView,
   };
 }

@@ -1,11 +1,15 @@
+import { Fragment } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   FileText,
   Folder,
+  LayoutDashboard,
   ListChecks,
   Settings,
   Tags,
+  X,
 } from 'lucide-react';
+import { SavedViewsSidebar } from './SavedViewsSidebar';
 import { useTranslation } from 'react-i18next';
 import { routes } from '../../lib/routes';
 import { usePersistedSidebarCollapsed } from '../../lib/usePersistedSidebarCollapsed';
@@ -27,33 +31,49 @@ function NavIcon({ children }: { children: React.ReactNode }) {
 }
 
 const primaryNav = [
-  { to: routes.documents, labelKey: 'nav.documents', end: false as const },
+  { to: routes.home, labelKey: 'nav.home', end: true as const, icon: 'home' as const },
+  { to: routes.documents, labelKey: 'nav.documents', end: false as const, icon: 'documents' as const },
   {
     to: routes.structureLabels,
     labelKey: 'nav.labels',
     end: true as const,
+    icon: 'labels' as const,
   },
   {
     to: routes.structureRecognizedFields,
     labelKey: 'nav.recognizedFields',
     end: true as const,
+    icon: 'recognized' as const,
   },
   {
     to: routes.filesystem,
     labelKey: 'nav.folders',
     end: false as const,
+    icon: 'folders' as const,
   },
 ] as const;
 
-function documentsNavIsActive(pathname: string): boolean {
+function documentsNavIsActive(pathname: string, search: string): boolean {
+  if (pathname === routes.savedViews) {
+    return false;
+  }
+  const params = new URLSearchParams(search);
+  if (pathname === routes.documents && params.has('view')) {
+    return false;
+  }
   return (
     pathname === routes.documents ||
     pathname === routes.inbox ||
-    (pathname.startsWith('/documents/') && !pathname.startsWith('/documents?'))
+    (pathname.startsWith('/documents/') && !pathname.startsWith('/documents/views'))
   );
 }
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  mobileDrawerOpen?: boolean;
+  onCloseMobileDrawer?: () => void;
+};
+
+export function AppSidebar({ mobileDrawerOpen = false, onCloseMobileDrawer }: AppSidebarProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const [collapsed, setCollapsed] = usePersistedSidebarCollapsed();
@@ -69,42 +89,69 @@ export function AppSidebar() {
       collapsedPanelClassName="app-sidebar-collapsed"
     >
       <aside aria-label={t('nav.main')}>
+        {mobileDrawerOpen ? (
+          <div className="sidebar-drawer-header">
+            <span className="sidebar-drawer-title">{t('nav.main')}</span>
+            <button
+              type="button"
+              className="sidebar-drawer-close"
+              aria-label={t('common.close')}
+              onClick={() => onCloseMobileDrawer?.()}
+            >
+              <X size={20} strokeWidth={2} aria-hidden />
+            </button>
+          </div>
+        ) : null}
         <nav className="sidebar-nav">
-          {primaryNav.map(({ to, labelKey, end }) => (
+          {primaryNav.map(({ to, labelKey, end, icon }) => (
+            <Fragment key={to}>
             <NavLink
-              key={to}
               to={to}
               end={end}
               className={({ isActive }) => {
                 if (to === routes.documents) {
-                  return sidebarLinkClass(documentsNavIsActive(location.pathname));
+                  return sidebarLinkClass(
+                    documentsNavIsActive(location.pathname, location.search)
+                  );
                 }
                 return sidebarLinkClass(isActive);
               }}
               title={collapsed ? t(labelKey) : undefined}
             >
-              {to === routes.documents ? (
+              {icon === 'home' ? (
+                <NavIcon>
+                  <LayoutDashboard size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
+                </NavIcon>
+              ) : null}
+              {icon === 'documents' ? (
                 <NavIcon>
                   <FileText size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
                 </NavIcon>
               ) : null}
-              {to === routes.structureLabels ? (
+              {icon === 'labels' ? (
                 <NavIcon>
                   <Tags size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
                 </NavIcon>
               ) : null}
-              {to === routes.structureRecognizedFields ? (
+              {icon === 'recognized' ? (
                 <NavIcon>
                   <ListChecks size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
                 </NavIcon>
               ) : null}
-              {to === routes.filesystem ? (
+              {icon === 'folders' ? (
                 <NavIcon>
                   <Folder size={NAV_ICON_SIZE} strokeWidth={NAV_ICON_STROKE} />
                 </NavIcon>
               ) : null}
               <span className="sidebar-link-label">{t(labelKey)}</span>
             </NavLink>
+            {to === routes.documents ? (
+              <>
+                <SavedViewsSidebar key={`${to}-saved`} collapsed={collapsed} />
+                {!collapsed ? <div className="sidebar-nav-separator" role="presentation" /> : null}
+              </>
+            ) : null}
+            </Fragment>
           ))}
 
           <div className="sidebar-footer">

@@ -9,7 +9,8 @@
     "correspondents": "Korrespondenten",
     "settings": "Einstellungen",
     "collapseSidebar": "Navigation einklappen",
-    "expandSidebar": "Navigation ausklappen"
+    "expandSidebar": "Navigation ausklappen",
+    "home": "Start"
   },
   "shell": {
     "globalSearch": "Globale Suche",
@@ -139,7 +140,8 @@
     "review": "Prüfen",
     "none": "Keiner",
     "noLabels": "Keine Labels",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "saved": "Gespeichert"
   },
   "save": {
     "saved": "Gespeichert",
@@ -1248,6 +1250,72 @@
       "uploadDesc": "Dokumente zur Bibliothek hinzufügen",
       "newFolder": "Neuer Ordner",
       "newFolderDesc": "Ordner im Dateisystem anlegen"
+    }
+  },
+  "savedViews": {
+    "saveAction": "Ansicht speichern",
+    "saveConfirm": "Speichern",
+    "saveDialogTitle": "Ansicht speichern",
+    "saveDialogLead": "Aktuelle Filter, Sortierung und Darstellung unter einem Namen speichern.",
+    "nameLabel": "Name",
+    "visibilityLabel": "Sichtbarkeit",
+    "visibilityPrivate": "Privat",
+    "visibilityShared": "Für alle freigegeben",
+    "pinSidebar": "In der Seitenleiste anheften",
+    "sidebarGroup": "Gespeicherte Ansichten",
+    "sidebarGroupShort": "Gespeichert",
+    "manageSettingsAria": "Gespeicherte Ansichten verwalten",
+    "manageNav": "Gespeicherte Ansichten",
+    "manageTitle": "Gespeicherte Ansichten",
+    "manageLead": "Private Ansichten und für alle freigegebene Ansichten dieser Installation.",
+    "openLibrary": "Dokumente öffnen",
+    "rename": "Umbenennen",
+    "unpin": "Anheftung aufheben",
+    "deleteTitle": "Gespeicherte Ansicht löschen?",
+    "deleteLead": "„{{name}}“ wird für alle Nutzer entfernt, die sie sehen konnten.",
+    "updateFromFilters": "Ansicht mit aktuellen Filtern aktualisieren",
+    "activeViewLead": "Gespeicherte Ansicht: {{name}}",
+    "colOrder": "Reihenfolge",
+    "colPinned": "Angeheftet",
+    "colActions": "Aktionen",
+    "pinnedYes": "Ja",
+    "pinnedNo": "Nein",
+    "pinnedStatePinned": "Angeheftet",
+    "pinnedStateUnpinned": "Nicht angeheftet",
+    "sharedByOther": "Freigegeben von einer anderen Person",
+    "reorderHandle": "Reihenfolge für {{name}} ändern",
+    "rowMenuAria": "Aktionen für {{name}}",
+    "manageEmpty": "Noch keine gespeicherten Ansichten."
+  },
+  "dashboard": {
+    "title": "Start",
+    "lead": "Dokumente, Uploads und Listen auf einen Blick.",
+    "loading": "Startseite wird geladen…",
+    "customize": "Anpassen",
+    "doneEditing": "Fertig",
+    "addWidget": "Widget hinzufügen",
+    "addWidgetAction": "Hinzufügen",
+    "pickSavedView": "Gespeicherte Ansicht wählen",
+    "moveUp": "Widget nach oben",
+    "moveDown": "Widget nach unten",
+    "removeWidget": "Widget entfernen",
+    "widgetEmpty": "Noch nichts anzuzeigen. Dokumente hochladen oder Filter anpassen.",
+    "widgetUpload": "Upload",
+    "widgetStatistics": "Statistik",
+    "widgetRecent": "Zuletzt hinzugefügt",
+    "widgetAttention": "Aufmerksamkeit nötig",
+    "widgetSavedView": "Gespeicherte Ansicht",
+    "statTotal": "Dokumente",
+    "statReady": "Bereit",
+    "statUnlabeled": "Ohne Label",
+    "statLabelDistribution": "Labels nach Anzahl",
+    "statLabeled": "Mit Labels",
+    "widgetType": {
+      "upload": "Upload",
+      "statistics": "Statistik",
+      "recent_documents": "Zuletzt hinzugefügt",
+      "attention": "Aufmerksamkeit nötig",
+      "saved_view": "Gespeicherte Ansicht"
     }
   }
 }

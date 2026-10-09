@@ -1,5 +1,6 @@
 /** Customer-facing URL paths (English). */
 export const routes = {
+  home: '/',
   login: '/login',
   loginTwoFactor: '/login/two-factor',
   register: '/register',
@@ -8,6 +9,7 @@ export const routes = {
   inviteAccept: '/invite',
   inbox: '/inbox',
   documents: '/documents',
+  savedViews: '/documents/views',
   document: (id: string) => `/documents/${id}`,
   filesystem: '/filesystem',
   filesystemContainer: (mappeId: string) => `/filesystem/containers/${mappeId}`,

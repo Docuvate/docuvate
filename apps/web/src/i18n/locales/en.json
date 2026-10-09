@@ -9,7 +9,8 @@
     "correspondents": "Correspondents",
     "settings": "Settings",
     "collapseSidebar": "Collapse navigation",
-    "expandSidebar": "Expand navigation"
+    "expandSidebar": "Expand navigation",
+    "home": "Start"
   },
   "shell": {
     "globalSearch": "Global search",
@@ -139,7 +140,8 @@
     "review": "Review",
     "none": "None",
     "noLabels": "No labels",
-    "retry": "Try again"
+    "retry": "Try again",
+    "saved": "Saved"
   },
   "save": {
     "saved": "Saved",
@@ -1248,6 +1250,72 @@
       "uploadDesc": "Add documents to the library",
       "newFolder": "New folder",
       "newFolderDesc": "Create a folder in Filesystem"
+    }
+  },
+  "savedViews": {
+    "saveAction": "Save view",
+    "saveConfirm": "Save",
+    "saveDialogTitle": "Save view",
+    "saveDialogLead": "Store the current filters, sort, and layout under a name.",
+    "nameLabel": "Name",
+    "visibilityLabel": "Visibility",
+    "visibilityPrivate": "Private",
+    "visibilityShared": "Shared with everyone",
+    "pinSidebar": "Pin to sidebar",
+    "sidebarGroup": "Saved views",
+    "sidebarGroupShort": "Saved",
+    "manageSettingsAria": "Manage saved views",
+    "manageNav": "Saved views",
+    "manageTitle": "Saved views",
+    "manageLead": "Your private views and views shared with everyone on this installation.",
+    "openLibrary": "Open documents",
+    "rename": "Rename",
+    "unpin": "Unpin from sidebar",
+    "deleteTitle": "Delete saved view?",
+    "deleteLead": "“{{name}}” will be removed for everyone who could see it.",
+    "updateFromFilters": "Update view with current filters",
+    "activeViewLead": "Saved view: {{name}}",
+    "colOrder": "Order",
+    "colPinned": "Pinned",
+    "colActions": "Actions",
+    "pinnedYes": "Yes",
+    "pinnedNo": "No",
+    "pinnedStatePinned": "Pinned",
+    "pinnedStateUnpinned": "Not pinned",
+    "sharedByOther": "Shared by someone else",
+    "reorderHandle": "Reorder {{name}}",
+    "rowMenuAria": "Actions for {{name}}",
+    "manageEmpty": "No saved views yet."
+  },
+  "dashboard": {
+    "title": "Start",
+    "lead": "Your documents, uploads, and lists at a glance.",
+    "loading": "Loading dashboard…",
+    "customize": "Customize",
+    "doneEditing": "Done",
+    "addWidget": "Add widget",
+    "addWidgetAction": "Add",
+    "pickSavedView": "Choose saved view",
+    "moveUp": "Move widget up",
+    "moveDown": "Move widget down",
+    "removeWidget": "Remove widget",
+    "widgetEmpty": "Nothing to show yet. Upload documents or adjust filters.",
+    "widgetUpload": "Upload",
+    "widgetStatistics": "Statistics",
+    "widgetRecent": "Recently added",
+    "widgetAttention": "Needs attention",
+    "widgetSavedView": "Saved view",
+    "statTotal": "Documents",
+    "statReady": "Ready",
+    "statUnlabeled": "Without label",
+    "statLabelDistribution": "Labels by count",
+    "statLabeled": "With labels",
+    "widgetType": {
+      "upload": "Upload",
+      "statistics": "Statistics",
+      "recent_documents": "Recently added",
+      "attention": "Needs attention",
+      "saved_view": "Saved view"
     }
   }
 }

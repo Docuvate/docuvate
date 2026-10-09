@@ -19,6 +19,8 @@ export function parseDocumentListQuery(params: DocumentListQueryDto): DocumentLi
     withoutNonInboxLabel:
       params.withoutNonInboxLabel === 'true' || params.withoutNonInboxLabel === '1',
     inbox: params.inbox === 'true' || params.inbox === '1',
+    documentDateFrom: params.documentDateFrom,
+    documentDateTo: params.documentDateTo,
     sort: params.sort,
     order: params.order,
   };

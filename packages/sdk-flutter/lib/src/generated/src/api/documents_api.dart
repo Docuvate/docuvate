@@ -2020,6 +2020,8 @@ class DocumentsApi {
   /// * [withoutNonInboxLabel] 
   /// * [unfiled] 
   /// * [inbox] 
+  /// * [documentDateFrom] 
+  /// * [documentDateTo] 
   /// * [sort] 
   /// * [order] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -2042,6 +2044,8 @@ class DocumentsApi {
     String? withoutNonInboxLabel,
     String? unfiled,
     String? inbox,
+    String? documentDateFrom,
+    String? documentDateTo,
     String? sort,
     String? order,
     CancelToken? cancelToken,
@@ -2086,6 +2090,8 @@ class DocumentsApi {
       if (withoutNonInboxLabel != null) r'withoutNonInboxLabel': encodeQueryParameter(_serializers, withoutNonInboxLabel, const FullType(String)),
       if (unfiled != null) r'unfiled': encodeQueryParameter(_serializers, unfiled, const FullType(String)),
       if (inbox != null) r'inbox': encodeQueryParameter(_serializers, inbox, const FullType(String)),
+      if (documentDateFrom != null) r'documentDateFrom': encodeQueryParameter(_serializers, documentDateFrom, const FullType(String)),
+      if (documentDateTo != null) r'documentDateTo': encodeQueryParameter(_serializers, documentDateTo, const FullType(String)),
       if (sort != null) r'sort': encodeQueryParameter(_serializers, sort, const FullType(String)),
       if (order != null) r'order': encodeQueryParameter(_serializers, order, const FullType(String)),
     };

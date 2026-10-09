@@ -12,8 +12,10 @@ import {
 import { EffectiveDocumentChatProviderUseCase } from './application/effective-document-chat-provider.use-case.js';
 import { GetHardwareCapabilitiesUseCase } from './application/hardware-capabilities.use-case.js';
 import { USER_PREFERENCES_REPOSITORY } from '../../shared/domain/ports.js';
+import { WorkspaceModule } from '../workspace/workspace.module.js';
 
 @Module({
+  imports: [WorkspaceModule],
   controllers: [SettingsController],
   providers: [
     { provide: USER_PREFERENCES_REPOSITORY, useClass: PgUserPreferencesRepository },

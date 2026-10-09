@@ -19,7 +19,9 @@ import { ExtractionArenaRatingComparedEnginesEntity } from './extraction-arena-r
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 import { ExtractionFieldCorrectionLabelsEntity } from './extraction-field-correction-labels.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
+import { DashboardWidgetsEntity } from './dashboard-widgets.entity.js';
 import { FoldersEntity } from './folders.entity.js';
+import { InstallationDashboardWidgetsEntity } from './installation-dashboard-widgets.entity.js';
 import { InstallationUserRolesEntity } from './installation-user-roles.entity.js';
 import { InstallationUserSuspensionsEntity } from './installation-user-suspensions.entity.js';
 import { LabelRecommendationBlocklistEntity } from './label-recommendation-blocklist.entity.js';
@@ -34,6 +36,8 @@ import { MlRetrainJobsEntity } from './ml-retrain-jobs.entity.js';
 import { MlTrainingDataSnapshotsEntity } from './ml-training-data-snapshots.entity.js';
 import { RecognizedFieldDefinitionGateLabelsEntity } from './recognized-field-definition-gate-labels.entity.js';
 import { RecognizedFieldDefinitionsEntity } from './recognized-field-definitions.entity.js';
+import { SavedDocumentViewTagsEntity } from './saved-document-view-tags.entity.js';
+import { SavedDocumentViewsEntity } from './saved-document-views.entity.js';
 import { SearchVocabularyTermsEntity } from './search-vocabulary-terms.entity.js';
 import { SessionEntity } from './session.entity.js';
 import { TenantsEntity } from './tenants.entity.js';
@@ -68,7 +72,9 @@ export const TYPEORM_ENTITIES = [
   ExtractionArenaRatingsEntity,
   ExtractionFieldCorrectionLabelsEntity,
   ExtractionFieldCorrectionsEntity,
+  DashboardWidgetsEntity,
   FoldersEntity,
+  InstallationDashboardWidgetsEntity,
   InstallationUserRolesEntity,
   InstallationUserSuspensionsEntity,
   LabelRecommendationBlocklistEntity,
@@ -83,6 +89,8 @@ export const TYPEORM_ENTITIES = [
   MlTrainingDataSnapshotsEntity,
   RecognizedFieldDefinitionGateLabelsEntity,
   RecognizedFieldDefinitionsEntity,
+  SavedDocumentViewTagsEntity,
+  SavedDocumentViewsEntity,
   SearchVocabularyTermsEntity,
   SessionEntity,
   TenantsEntity,
@@ -118,7 +126,9 @@ export {
   ExtractionArenaRatingsEntity,
   ExtractionFieldCorrectionLabelsEntity,
   ExtractionFieldCorrectionsEntity,
+  DashboardWidgetsEntity,
   FoldersEntity,
+  InstallationDashboardWidgetsEntity,
   InstallationUserRolesEntity,
   InstallationUserSuspensionsEntity,
   LabelRecommendationBlocklistEntity,
@@ -133,6 +143,8 @@ export {
   MlTrainingDataSnapshotsEntity,
   RecognizedFieldDefinitionGateLabelsEntity,
   RecognizedFieldDefinitionsEntity,
+  SavedDocumentViewTagsEntity,
+  SavedDocumentViewsEntity,
   SearchVocabularyTermsEntity,
   SessionEntity,
   TenantsEntity,

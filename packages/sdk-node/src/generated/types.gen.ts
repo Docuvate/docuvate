@@ -111,12 +111,72 @@ export type CreateMappeRequestDto = {
     color?: string;
 };
 
+export type CreateSavedDocumentViewRequestDto = {
+    visibleColumns?: Array<LibraryTableColumnId>;
+    name: string;
+    visibility?: 'private' | 'shared';
+    searchQuery: string;
+    sort?: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
+    order?: 'asc' | 'desc';
+    viewMode?: 'klassisch' | 'karten' | 'fokus';
+    filterMode?: 'ui' | 'query';
+    listScope?: 'all' | 'folder' | 'mappe';
+    folderId?: string;
+    mappeId?: string;
+    correspondentId?: string;
+    status?: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
+    inbox?: boolean;
+    withoutNonInboxLabel?: boolean;
+    documentDateFrom?: string;
+    documentDateTo?: string;
+    tagIds?: Array<string>;
+    pinnedSidebar?: boolean;
+};
+
 export type CreateTagRequestDto = {
     name: string;
     color?: string;
     isInbox?: boolean;
     matchingAlgorithm?: 'none' | 'any' | 'all' | 'exact' | 'regex';
     match?: string;
+};
+
+export type DashboardLayoutResponseDto = {
+    widgets: Array<DashboardWidgetDtoClass>;
+    editMode: boolean;
+};
+
+export type DashboardStatisticsDtoClass = {
+    documentsTotal: number;
+    byStatus: {
+        [key: string]: number;
+    };
+    labelsAssignedCount: number;
+    unlabeledCount: number;
+    topLabels: Array<{
+        name: string;
+        count: number;
+    }>;
+};
+
+export type DashboardWidgetDtoClass = {
+    id: string;
+    type: 'upload' | 'saved_view' | 'statistics' | 'recent_documents' | 'attention';
+    position: number;
+    widthCols: number;
+    heightRows: number;
+    savedViewId?: string;
+    itemLimit?: number;
+};
+
+export type DashboardWidgetInputDto = {
+    id?: string;
+    type: 'saved_view' | 'upload' | 'statistics' | 'recent_documents' | 'attention';
+    position: number;
+    widthCols: number;
+    heightRows: number;
+    savedViewId?: string;
+    itemLimit?: number;
 };
 
 export type DismissLabelRecommendationRequestDto = {
@@ -279,6 +339,10 @@ export type ImportFromConnectorRequestDto = {
     ref: string;
 };
 
+export type InstallationDashboardDefaultResponseDto = {
+    widgets: Array<DashboardWidgetInputDto>;
+};
+
 export type InviteAdminUserRequestDto = {
     email: string;
     name: string;
@@ -316,6 +380,8 @@ export type LabelRecommendationListResponseDto = {
         [key: string]: unknown;
     }>;
 };
+
+export type LibraryTableColumnId = 'title' | 'labels' | 'date' | 'status' | 'folder' | 'updated';
 
 export type MappeListResponseDto = {
     items: Array<{
@@ -379,6 +445,14 @@ export type ProposeLabelRecommendationBlocklistPatternRequestDto = {
     phrases: Array<string>;
 };
 
+export type ReorderSavedDocumentViewsRequestDto = {
+    orderedIds: Array<string>;
+};
+
+export type ReplaceDashboardLayoutRequestDto = {
+    widgets: Array<DashboardWidgetInputDto>;
+};
+
 export type ReplaceRecognizedFieldItemDto = {
     key: string;
     label: string;
@@ -404,6 +478,35 @@ export type ReplaceTagCustomFieldItemDto = {
 
 export type ReplaceTagCustomFieldsRequestDto = {
     fields: Array<ReplaceTagCustomFieldItemDto>;
+};
+
+export type SavedDocumentViewDtoClass = {
+    visibleColumns: Array<LibraryTableColumnId>;
+    id: string;
+    name: string;
+    visibility: 'private' | 'shared';
+    ownerUserId: string;
+    searchQuery: string;
+    sort: 'createdAt' | 'updatedAt' | 'title' | 'documentDate';
+    order: 'asc' | 'desc';
+    viewMode: 'klassisch' | 'karten' | 'fokus';
+    filterMode: 'query' | 'ui';
+    listScope: 'all' | 'mappe' | 'folder';
+    folderId?: string;
+    mappeId?: string;
+    correspondentId?: string;
+    status?: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
+    inbox?: boolean;
+    withoutNonInboxLabel?: boolean;
+    tagIds: Array<string>;
+    pinnedSidebar: boolean;
+    position: number;
+    createdAt: string;
+    updatedAt: string;
+};
+
+export type SavedDocumentViewListResponseDto = {
+    items: Array<SavedDocumentViewDtoClass>;
 };
 
 export type SendDocumentChatThreadMessageRequestDto = {
@@ -476,6 +579,28 @@ export type UpdateFolderRequestDto = {
 export type UpdateMappeRequestDto = {
     name?: string;
     color?: string;
+};
+
+export type UpdateSavedDocumentViewRequestDto = {
+    visibleColumns?: Array<LibraryTableColumnId>;
+    name?: string;
+    visibility?: 'private' | 'shared';
+    searchQuery?: string;
+    sort?: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
+    order?: 'asc' | 'desc';
+    viewMode?: 'klassisch' | 'karten' | 'fokus';
+    filterMode?: 'ui' | 'query';
+    listScope?: 'all' | 'folder' | 'mappe';
+    folderId?: string;
+    mappeId?: string;
+    correspondentId?: string;
+    status?: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
+    inbox?: boolean;
+    withoutNonInboxLabel?: boolean;
+    documentDateFrom?: string;
+    documentDateTo?: string;
+    tagIds?: Array<string>;
+    pinnedSidebar?: boolean;
 };
 
 export type UpdateTagRequestDto = {
@@ -1067,6 +1192,136 @@ export type UpdateCorrespondentResponses = {
 
 export type UpdateCorrespondentResponse = UpdateCorrespondentResponses[keyof UpdateCorrespondentResponses];
 
+export type GetDashboardLayoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/dashboard';
+};
+
+export type GetDashboardLayoutErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetDashboardLayoutError = GetDashboardLayoutErrors[keyof GetDashboardLayoutErrors];
+
+export type GetDashboardLayoutResponses = {
+    200: DashboardLayoutResponseDto;
+};
+
+export type GetDashboardLayoutResponse = GetDashboardLayoutResponses[keyof GetDashboardLayoutResponses];
+
+export type ReplaceDashboardLayoutData = {
+    body: ReplaceDashboardLayoutRequestDto;
+    path?: never;
+    query?: never;
+    url: '/dashboard';
+};
+
+export type ReplaceDashboardLayoutErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ReplaceDashboardLayoutError = ReplaceDashboardLayoutErrors[keyof ReplaceDashboardLayoutErrors];
+
+export type ReplaceDashboardLayoutResponses = {
+    200: DashboardLayoutResponseDto;
+};
+
+export type ReplaceDashboardLayoutResponse = ReplaceDashboardLayoutResponses[keyof ReplaceDashboardLayoutResponses];
+
+export type GetInstallationAdminStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/dashboard/installation-admin';
+};
+
+export type GetInstallationAdminStatusErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetInstallationAdminStatusError = GetInstallationAdminStatusErrors[keyof GetInstallationAdminStatusErrors];
+
+export type GetInstallationAdminStatusResponses = {
+    200: unknown;
+};
+
+export type GetInstallationDashboardDefaultData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/dashboard/installation-default';
+};
+
+export type GetInstallationDashboardDefaultErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetInstallationDashboardDefaultError = GetInstallationDashboardDefaultErrors[keyof GetInstallationDashboardDefaultErrors];
+
+export type GetInstallationDashboardDefaultResponses = {
+    200: InstallationDashboardDefaultResponseDto;
+};
+
+export type GetInstallationDashboardDefaultResponse = GetInstallationDashboardDefaultResponses[keyof GetInstallationDashboardDefaultResponses];
+
+export type SetInstallationDashboardDefaultData = {
+    body: ReplaceDashboardLayoutRequestDto;
+    path?: never;
+    query?: never;
+    url: '/dashboard/installation-default';
+};
+
+export type SetInstallationDashboardDefaultErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type SetInstallationDashboardDefaultError = SetInstallationDashboardDefaultErrors[keyof SetInstallationDashboardDefaultErrors];
+
+export type SetInstallationDashboardDefaultResponses = {
+    200: InstallationDashboardDefaultResponseDto;
+};
+
+export type SetInstallationDashboardDefaultResponse = SetInstallationDashboardDefaultResponses[keyof SetInstallationDashboardDefaultResponses];
+
+export type GetDashboardStatisticsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/dashboard/statistics';
+};
+
+export type GetDashboardStatisticsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetDashboardStatisticsError = GetDashboardStatisticsErrors[keyof GetDashboardStatisticsErrors];
+
+export type GetDashboardStatisticsResponses = {
+    200: DashboardStatisticsDtoClass;
+};
+
+export type GetDashboardStatisticsResponse = GetDashboardStatisticsResponses[keyof GetDashboardStatisticsResponses];
+
 export type ListDocumentPipelineModulesData = {
     body?: never;
     path?: never;
@@ -1103,6 +1358,8 @@ export type ListDocumentsData = {
         withoutNonInboxLabel?: string;
         unfiled?: string;
         inbox?: string;
+        documentDateFrom?: string;
+        documentDateTo?: string;
         sort?: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
         order?: 'asc' | 'desc';
     };
@@ -2452,6 +2709,144 @@ export type ReplaceRecognizedFieldsError = ReplaceRecognizedFieldsErrors[keyof R
 export type ReplaceRecognizedFieldsResponses = {
     200: unknown;
 };
+
+export type ListSavedDocumentViewsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/saved-views';
+};
+
+export type ListSavedDocumentViewsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ListSavedDocumentViewsError = ListSavedDocumentViewsErrors[keyof ListSavedDocumentViewsErrors];
+
+export type ListSavedDocumentViewsResponses = {
+    200: SavedDocumentViewListResponseDto;
+};
+
+export type ListSavedDocumentViewsResponse = ListSavedDocumentViewsResponses[keyof ListSavedDocumentViewsResponses];
+
+export type CreateSavedDocumentViewData = {
+    body: CreateSavedDocumentViewRequestDto;
+    path?: never;
+    query?: never;
+    url: '/saved-views';
+};
+
+export type CreateSavedDocumentViewErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type CreateSavedDocumentViewError = CreateSavedDocumentViewErrors[keyof CreateSavedDocumentViewErrors];
+
+export type CreateSavedDocumentViewResponses = {
+    201: SavedDocumentViewDtoClass;
+};
+
+export type CreateSavedDocumentViewResponse = CreateSavedDocumentViewResponses[keyof CreateSavedDocumentViewResponses];
+
+export type ReorderSavedDocumentViewsData = {
+    body: ReorderSavedDocumentViewsRequestDto;
+    path?: never;
+    query?: never;
+    url: '/saved-views/reorder';
+};
+
+export type ReorderSavedDocumentViewsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ReorderSavedDocumentViewsError = ReorderSavedDocumentViewsErrors[keyof ReorderSavedDocumentViewsErrors];
+
+export type ReorderSavedDocumentViewsResponses = {
+    200: OkResponseDto;
+};
+
+export type ReorderSavedDocumentViewsResponse = ReorderSavedDocumentViewsResponses[keyof ReorderSavedDocumentViewsResponses];
+
+export type DeleteSavedDocumentViewData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/saved-views/{id}';
+};
+
+export type DeleteSavedDocumentViewErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type DeleteSavedDocumentViewError = DeleteSavedDocumentViewErrors[keyof DeleteSavedDocumentViewErrors];
+
+export type DeleteSavedDocumentViewResponses = {
+    200: OkResponseDto;
+};
+
+export type DeleteSavedDocumentViewResponse = DeleteSavedDocumentViewResponses[keyof DeleteSavedDocumentViewResponses];
+
+export type GetSavedDocumentViewData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/saved-views/{id}';
+};
+
+export type GetSavedDocumentViewErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetSavedDocumentViewError = GetSavedDocumentViewErrors[keyof GetSavedDocumentViewErrors];
+
+export type GetSavedDocumentViewResponses = {
+    200: SavedDocumentViewDtoClass;
+};
+
+export type GetSavedDocumentViewResponse = GetSavedDocumentViewResponses[keyof GetSavedDocumentViewResponses];
+
+export type UpdateSavedDocumentViewData = {
+    body: UpdateSavedDocumentViewRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/saved-views/{id}';
+};
+
+export type UpdateSavedDocumentViewErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type UpdateSavedDocumentViewError = UpdateSavedDocumentViewErrors[keyof UpdateSavedDocumentViewErrors];
+
+export type UpdateSavedDocumentViewResponses = {
+    200: SavedDocumentViewDtoClass;
+};
+
+export type UpdateSavedDocumentViewResponse = UpdateSavedDocumentViewResponses[keyof UpdateSavedDocumentViewResponses];
 
 export type GlobalSearchData = {
     body?: never;

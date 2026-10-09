@@ -10,6 +10,7 @@ Numbers **011–015** are reserved for in-flight work. Check this index before a
 | 016 | Global search      | [016-global-search-embeddings.md](./016-global-search-embeddings.md) | accepted |
 | [017](017-typeorm-migrations-phase1.md) | TypeORM migrations (phase 1) | accepted |
 | 019 | Instance roles and administration | [019-user-roles-and-administration.md](./019-user-roles-and-administration.md) | accepted |
+| 023 | Saved views and dashboard | [023-saved-views-dashboard-schema.md](./023-saved-views-dashboard-schema.md) | accepted |
 | 018+ | _(see files in this directory)_ | | |
 
 Older ADRs: `001` through `010` in this directory.

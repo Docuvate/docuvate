@@ -48,6 +48,7 @@ Only junction rows whose tag exists (and belongs to the same user on writes) are
 | `extraction_arena_ratings` | `compare_snapshot` | UI comparison snapshot, not used in joins |
 | `ml_training_data_snapshots` | `metadata` | Opaque dataset description |
 | `ml_model_versions` | `metrics` | Opaque metric map per version |
+| `saved_document_views` | `visible_columns` | Ordered presentation column ids for the library table; never filtered or joined in SQL |
 
 ## Documented denormalization
 
