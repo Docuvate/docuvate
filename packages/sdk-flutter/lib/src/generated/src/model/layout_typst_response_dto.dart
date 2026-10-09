@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -12,12 +13,17 @@ part 'layout_typst_response_dto.g.dart';
 ///
 /// Properties:
 /// * [typst] 
+/// * [exportMode] 
 /// * [reconstructionReliable] 
 /// * [unreliableReason] 
 @BuiltValue()
 abstract class LayoutTypstResponseDto implements Built<LayoutTypstResponseDto, LayoutTypstResponseDtoBuilder> {
   @BuiltValueField(wireName: r'typst')
   String get typst;
+
+  @BuiltValueField(wireName: r'exportMode')
+  LayoutTypstResponseDtoExportModeEnum get exportMode;
+  // enum exportModeEnum {  exakt,  semantisch,  };
 
   @BuiltValueField(wireName: r'reconstructionReliable')
   bool get reconstructionReliable;
@@ -31,6 +37,7 @@ abstract class LayoutTypstResponseDto implements Built<LayoutTypstResponseDto, L
 
   @BuiltValueHook(initializeBuilder: true)
   static void _defaults(LayoutTypstResponseDtoBuilder b) => b
+      ..exportMode = const LayoutTypstResponseDtoExportModeEnum._('exakt')
       ..reconstructionReliable = true;
 
   @BuiltValueSerializer(custom: true)
@@ -53,6 +60,11 @@ class _$LayoutTypstResponseDtoSerializer implements PrimitiveSerializer<LayoutTy
     yield serializers.serialize(
       object.typst,
       specifiedType: const FullType(String),
+    );
+    yield r'exportMode';
+    yield serializers.serialize(
+      object.exportMode,
+      specifiedType: const FullType(LayoutTypstResponseDtoExportModeEnum),
     );
     yield r'reconstructionReliable';
     yield serializers.serialize(
@@ -96,6 +108,13 @@ class _$LayoutTypstResponseDtoSerializer implements PrimitiveSerializer<LayoutTy
           ) as String;
           result.typst = valueDes;
           break;
+        case r'exportMode':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(LayoutTypstResponseDtoExportModeEnum),
+          ) as LayoutTypstResponseDtoExportModeEnum;
+          result.exportMode = valueDes;
+          break;
         case r'reconstructionReliable':
           final valueDes = serializers.deserialize(
             value,
@@ -137,5 +156,20 @@ class _$LayoutTypstResponseDtoSerializer implements PrimitiveSerializer<LayoutTy
     );
     return result.build();
   }
+}
+
+class LayoutTypstResponseDtoExportModeEnum extends EnumClass {
+
+  @BuiltValueEnumConst(wireName: r'exakt')
+  static const LayoutTypstResponseDtoExportModeEnum exakt = _$layoutTypstResponseDtoExportModeEnum_exakt;
+  @BuiltValueEnumConst(wireName: r'semantisch')
+  static const LayoutTypstResponseDtoExportModeEnum semantisch = _$layoutTypstResponseDtoExportModeEnum_semantisch;
+
+  static Serializer<LayoutTypstResponseDtoExportModeEnum> get serializer => _$layoutTypstResponseDtoExportModeEnumSerializer;
+
+  const LayoutTypstResponseDtoExportModeEnum._(String name): super(name);
+
+  static BuiltSet<LayoutTypstResponseDtoExportModeEnum> get values => _$layoutTypstResponseDtoExportModeEnumValues;
+  static LayoutTypstResponseDtoExportModeEnum valueOf(String name) => _$layoutTypstResponseDtoExportModeEnumValueOf(name);
 }
 
