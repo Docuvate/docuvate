@@ -130,17 +130,20 @@ export class CitedChatGenerationService {
     await heartbeat();
 
     const generationStarted = Date.now();
+    let embedMs = 0;
     let retrieveMs = 0;
     let rerankMs = 0;
     let llmMs = 0;
 
     let queryVector: number[] | undefined;
+    const embedStarted = Date.now();
     try {
       const { embeddings } = await this.embedding.embedTexts([userMessage]);
       queryVector = embeddings[0];
     } catch {
       queryVector = undefined;
     }
+    embedMs = Date.now() - embedStarted;
 
     const filterIds =
       scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
@@ -360,6 +363,7 @@ export class CitedChatGenerationService {
       ? serializeCitedChatBenchStats({
           citedRejectedClaims: rejected.length,
           timingMs: {
+            embedMs,
             retrieveMs,
             rerankMs,
             llmMs,

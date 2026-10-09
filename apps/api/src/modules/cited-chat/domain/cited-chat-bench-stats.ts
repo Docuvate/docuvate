@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
 export interface CitedChatBenchTimingMs {
+  embedMs: number;
   retrieveMs: number;
   rerankMs: number;
   llmMs: number;

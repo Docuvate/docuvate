@@ -442,6 +442,7 @@ export type DocumentChatGenerationErrorCode =
 export interface CitedChatBenchStatsDto {
   citedRejectedClaims: number;
   timingMs?: {
+    embedMs: number;
     retrieveMs: number;
     rerankMs: number;
     llmMs: number;

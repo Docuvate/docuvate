@@ -5,7 +5,6 @@ import {
   fuzzyWordsMatch,
   numericTokensPresentInText,
 } from './quote-numeric-consistency.js';
-import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
 import { chunkIndexText } from './split-text-chunks-with-spans.js';
 
 const QUOTE_WORD_LIMIT = 10;
@@ -49,41 +48,76 @@ function appendNormalizedChar(map: NormalizedBodyMap, bodyIndex: number, ch: str
   map.bodyIndexAt.push(bodyIndex);
 }
 
+function isInvisibleQuoteChar(codePoint: number): boolean {
+  return (
+    codePoint === 0x00ad ||
+    codePoint === 0x200b ||
+    codePoint === 0x200c ||
+    codePoint === 0x200d ||
+    codePoint === 0xfeff
+  );
+}
+
+function appendExpandedChar(map: NormalizedBodyMap, bodyIndex: number, ch: string): void {
+  if (/[„“"''`´]/.test(ch)) {
+    return;
+  }
+  if (/[:;]/.test(ch)) {
+    if (map.normalized.length > 0 && map.normalized[map.normalized.length - 1] !== ' ') {
+      appendNormalizedChar(map, bodyIndex, ' ');
+    }
+    return;
+  }
+  if (/\s/.test(ch)) {
+    if (map.normalized.length > 0 && map.normalized[map.normalized.length - 1] !== ' ') {
+      appendNormalizedChar(map, bodyIndex, ' ');
+    }
+    return;
+  }
+  const lower = ch.toLocaleLowerCase('de');
+  for (const normCh of lower) {
+    appendNormalizedChar(map, bodyIndex, normCh);
+  }
+}
+
 /** Build lowercase normalized text while tracking original body indices (per code unit). */
 export function buildNormalizedBodyMap(chunkBody: string): NormalizedBodyMap {
   const map: NormalizedBodyMap = { normalized: '', bodyIndexAt: [] };
   let i = 0;
   while (i < chunkBody.length) {
-    const ch = chunkBody[i];
-    if (ch === '\u00ad' || ch === '\u200b') {
-      i += 1;
+    const cp = chunkBody.codePointAt(i);
+    if (cp === undefined) {
+      break;
+    }
+    const charLen = cp > 0xffff ? 2 : 1;
+    const bodyIndex = i;
+
+    if (isInvisibleQuoteChar(cp)) {
+      i += charLen;
       continue;
     }
-    if (/[„“"''`´]/.test(ch)) {
-      i += 1;
-      continue;
-    }
-    if (/[:;]/.test(ch)) {
+
+    const asString = String.fromCodePoint(cp);
+    if (/\s/.test(asString)) {
       if (map.normalized.length > 0 && map.normalized[map.normalized.length - 1] !== ' ') {
-        appendNormalizedChar(map, i, ' ');
+        appendNormalizedChar(map, bodyIndex, ' ');
       }
-      i += 1;
-      continue;
-    }
-    if (/\s/.test(ch)) {
-      if (map.normalized.length > 0 && map.normalized[map.normalized.length - 1] !== ' ') {
-        appendNormalizedChar(map, i, ' ');
-      }
-      while (i < chunkBody.length && /\s/.test(chunkBody[i])) {
-        i += 1;
+      i += charLen;
+      while (i < chunkBody.length) {
+        const ws = chunkBody.codePointAt(i);
+        if (ws === undefined || !/\s/.test(String.fromCodePoint(ws))) {
+          break;
+        }
+        i += ws > 0xffff ? 2 : 1;
       }
       continue;
     }
-    const lower = ch.toLocaleLowerCase('de');
-    for (const normCh of lower) {
-      appendNormalizedChar(map, i, normCh);
+
+    const nfkcExpanded = asString.normalize('NFKC');
+    for (const ch of nfkcExpanded) {
+      appendExpandedChar(map, bodyIndex, ch);
     }
-    i += 1;
+    i += charLen;
   }
   let start = 0;
   let end = map.normalized.length;
@@ -323,20 +357,26 @@ export function fuzzySpanSearchInChunk(
   return null;
 }
 
+function textForNumericQuoteCheck(text: string): string {
+  return text.replace(/\u00ad/g, '').replace(/[\u200b-\u200d\ufeff]/g, '');
+}
+
 export function validateMatchedSpanNumbers(input: {
   quote: string;
   claimText: string;
   bodyQuote: string;
   chunkBody: string;
 }): boolean {
+  const bodyQuoteNums = textForNumericQuoteCheck(input.bodyQuote);
+  const chunkBodyNums = textForNumericQuoteCheck(input.chunkBody);
   const quoteNums = extractNumericTokens(input.quote);
-  if (!numericTokensPresentInText(quoteNums, input.bodyQuote)) {
+  if (!numericTokensPresentInText(quoteNums, bodyQuoteNums)) {
     return false;
   }
   const claimNums = extractNumericTokens(input.claimText);
   return (
-    numericTokensPresentInText(claimNums, input.bodyQuote) ||
-    numericTokensPresentInText(claimNums, input.chunkBody)
+    numericTokensPresentInText(claimNums, bodyQuoteNums) ||
+    numericTokensPresentInText(claimNums, chunkBodyNums)
   );
 }
 
@@ -403,21 +443,19 @@ export function resolveQuoteInCandidateChunk(
   quote: string,
   options?: { claimText?: string }
 ): QuoteSpanMatch | null {
-  const body = normalizeExtractionSurfaceText(candidate.body);
-  const title = normalizeExtractionSurfaceText(candidate.documentTitle);
-  const direct = resolveQuoteInChunk(body, quote, options);
+  const direct = resolveQuoteInChunk(candidate.body, quote, options);
   if (direct) {
     return direct;
   }
-  const passage = chunkIndexText(title, body);
-  if (passage === body) {
+  const passage = chunkIndexText(candidate.documentTitle, candidate.body);
+  if (passage === candidate.body) {
     return null;
   }
   const passageHit = resolveQuoteInChunk(passage, quote, { claimText: '' });
   if (!passageHit) {
     return null;
   }
-  return mapPassageMatchToBody(title, body, passageHit);
+  return mapPassageMatchToBody(candidate.documentTitle, candidate.body, passageHit);
 }
 
 export function resolveQuoteInChunk(
