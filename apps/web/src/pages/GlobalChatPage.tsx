@@ -18,6 +18,10 @@ import { useLibraryChatMessageStream } from '../lib/useLibraryChatMessageStream'
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Spinner } from '../components/ui/Spinner';
+import {
+  isChatGenerationInProgress,
+  threadListShowsGenerationSpinner,
+} from '../lib/chatGenerationActive';
 
 function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string {
   const date = new Date(thread.updatedAt);
@@ -30,13 +34,6 @@ function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-function isGenerationActive(message: DocumentChatMessageRecordDto): boolean {
-  return (
-    message.role === 'assistant' &&
-    (message.generationStatus === 'pending' || message.generationStatus === 'streaming')
-  );
 }
 
 export function GlobalChatPage() {
@@ -52,7 +49,10 @@ export function GlobalChatPage() {
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const streamTargetRef = useRef<string | null>(null);
 
-  const generationInProgress = useMemo(() => messages.some(isGenerationActive), [messages]);
+  const generationInProgress = useMemo(
+    () => isChatGenerationInProgress(messages, loadingMessages),
+    [messages, loadingMessages]
+  );
   const hasThreads = threads.length > 0;
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
 
@@ -83,13 +83,22 @@ export function GlobalChatPage() {
 
   const attachStreamIfNeeded = useCallback(
     (rows: DocumentChatMessageRecordDto[]) => {
-      const active = [...rows].reverse().find(isGenerationActive);
+      const active = [...rows].reverse().find(
+        (m) =>
+          m.role === 'assistant' &&
+          (m.generationStatus === 'pending' || m.generationStatus === 'streaming')
+      );
       if (active && activeThreadId && streamTargetRef.current !== active.id) {
         streamTargetRef.current = active.id;
         connectStream(activeThreadId, active.id);
+        return;
+      }
+      if (!active) {
+        streamTargetRef.current = null;
+        stopStream();
       }
     },
-    [activeThreadId, connectStream]
+    [activeThreadId, connectStream, stopStream]
   );
 
   useEffect(() => {
@@ -123,6 +132,9 @@ export function GlobalChatPage() {
       return;
     }
     let cancelled = false;
+    setMessages([]);
+    streamTargetRef.current = null;
+    stopStream();
     setLoadingMessages(true);
     void listLibraryChatThreadMessages(activeThreadId)
       .then((list) => {
@@ -252,9 +264,7 @@ export function GlobalChatPage() {
               <ul className="doc-chat-thread-list">
                 {threads.map((thread) => {
                   const selected = thread.id === activeThreadId;
-                  const threadBusy =
-                    thread.activeGenerationStatus === 'pending' ||
-                    thread.activeGenerationStatus === 'streaming';
+                  const threadBusy = threadListShowsGenerationSpinner(thread);
                   return (
                     <li key={thread.id}>
                       <button

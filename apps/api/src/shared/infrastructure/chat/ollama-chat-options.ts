@@ -53,6 +53,8 @@ export function buildOllamaChatBody(
     options: {
       num_ctx: ollamaNumCtx(),
       num_predict: ollamaNumPredict(),
+      temperature: 0,
+      top_p: 1,
     },
   };
   if (ollamaThinkingDisabled(model)) {

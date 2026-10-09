@@ -2408,11 +2408,18 @@ mark.global-search-mark {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   gap: var(--dv-space-2xs);
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+}
+
+.doc-chat-thread-list > li {
+  flex: 0 0 auto;
 }
 
 .doc-chat-thread-item {

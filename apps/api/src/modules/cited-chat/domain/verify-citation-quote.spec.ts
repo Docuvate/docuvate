@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   findQuoteInChunk,
+  fuzzySpanSearchInChunk,
   normalizeForQuoteMatch,
   passesFusionGate,
   passesRerankerGate,
@@ -60,6 +61,13 @@ describe('verify-citation-quote', () => {
     const hit = findQuoteInChunk(body, '1234,56');
     expect(hit).not.toBeNull();
     expect(hit!.bodyQuote).toContain('1.234,56');
+  });
+
+  it('fuzzy re-anchors shortened quotes', () => {
+    const body = 'Die Kündigungsfrist beträgt drei Monate zum Quartalsende.';
+    const hit = fuzzySpanSearchInChunk(body, 'Kündigungsfrist drei Monate');
+    expect(hit).not.toBeNull();
+    expect(hit!.score).toBeGreaterThanOrEqual(0.55);
   });
 
   it('does not match shorter digit runs inside larger amounts', () => {

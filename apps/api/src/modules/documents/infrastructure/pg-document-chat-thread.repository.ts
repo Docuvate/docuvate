@@ -54,7 +54,9 @@ const THREAD_LIST_SELECT = `
          (
            SELECT m.generation_status
            FROM chat_messages m
-           WHERE m.thread_id = t.id AND m.role = 'assistant'
+           WHERE m.thread_id = t.id
+             AND m.role = 'assistant'
+             AND m.generation_status IN ('pending', 'streaming')
            ORDER BY m.created_at DESC
            LIMIT 1
          ) AS active_generation_status`;
@@ -321,6 +323,23 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
        WHERE id = $1 AND title = $3`,
       [threadId, trimmed, DEFAULT_THREAD_TITLE]
     );
+  }
+
+  async failStaleAssistantGenerations(maxAgeMs: number): Promise<number> {
+    const result = await this.pool.query(
+      `UPDATE chat_messages
+       SET generation_status = 'failed',
+           generation_phase = NULL,
+           error_code = 'generation_timeout',
+           error_detail = 'Stale generation reconciled',
+           updated_at = now()
+       WHERE role = 'assistant'
+         AND generation_status IN ('pending', 'streaming')
+         AND updated_at < now() - ($1::bigint * interval '1 millisecond')
+       RETURNING id`,
+      [maxAgeMs]
+    );
+    return result.rowCount ?? 0;
   }
 
   private async assertThreadExistsForUser(threadId: string, userId: string): Promise<void> {

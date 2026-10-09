@@ -31,6 +31,16 @@ export interface DocumentChatGenerationJobPayload {
 
 const CONTENT_FLUSH_MS = 400;
 
+function documentChatGenerationStaleMs(): number {
+  const raw = process.env['DOCUMENT_CHAT_GENERATION_STALE_MS'];
+  const fallback = 120_000;
+  if (!raw) {
+    return fallback;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
 @Injectable()
 export class RunDocumentChatGenerationUseCase {
   private readonly logger = new Logger(RunDocumentChatGenerationUseCase.name);
@@ -54,6 +64,16 @@ export class RunDocumentChatGenerationUseCase {
     const message = await this.threads.findMessageForUser(messageId, userId);
     if (!message || message.threadId !== threadId || message.role !== 'assistant') {
       throw new NotFoundError('Chat message');
+    }
+
+    const staleMs = documentChatGenerationStaleMs();
+    const messageAgeMs = Date.now() - message.updatedAt.getTime();
+    if (
+      (message.generationStatus === 'pending' || message.generationStatus === 'streaming') &&
+      messageAgeMs > staleMs
+    ) {
+      await this.failMessage(userId, messageId, 'generation_timeout', 'Stale generation before worker run');
+      return;
     }
 
     const thread = await this.threads.findThreadForUser(threadId, userId);

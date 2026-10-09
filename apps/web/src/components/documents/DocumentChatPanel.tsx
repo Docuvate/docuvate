@@ -18,6 +18,10 @@ import { DocumentChatAssistantMessage } from './DocumentChatAssistantMessage';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Spinner } from '../ui/Spinner';
+import {
+  isChatGenerationInProgress,
+  threadListShowsGenerationSpinner,
+} from '../../lib/chatGenerationActive';
 
 interface DocumentChatPanelProps {
   documentId: string;
@@ -36,13 +40,6 @@ function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-function isGenerationActive(message: DocumentChatMessageRecordDto): boolean {
-  return (
-    message.role === 'assistant' &&
-    (message.generationStatus === 'pending' || message.generationStatus === 'streaming')
-  );
 }
 
 function DocumentChatEmptyIcon() {
@@ -79,8 +76,8 @@ export function DocumentChatPanel({
   const streamTargetRef = useRef<string | null>(null);
 
   const generationInProgress = useMemo(
-    () => messages.some(isGenerationActive),
-    [messages]
+    () => isChatGenerationInProgress(messages, loadingMessages),
+    [messages, loadingMessages]
   );
 
   const upsertMessage = useCallback((next: DocumentChatMessageRecordDto) => {
@@ -114,7 +111,13 @@ export function DocumentChatPanel({
 
   const attachStreamIfNeeded = useCallback(
     (rows: DocumentChatMessageRecordDto[]) => {
-      const active = [...rows].reverse().find(isGenerationActive);
+      const active = [...rows]
+        .reverse()
+        .find(
+          (m) =>
+            m.role === 'assistant' &&
+            (m.generationStatus === 'pending' || m.generationStatus === 'streaming')
+        );
       if (active && streamTargetRef.current !== active.id) {
         streamTargetRef.current = active.id;
         connectStream(active.id);
@@ -165,6 +168,9 @@ export function DocumentChatPanel({
       return undefined;
     }
     let active = true;
+    setMessages([]);
+    streamTargetRef.current = null;
+    stopStream();
     setLoadingMessages(true);
     setError(null);
     void listDocumentChatThreadMessages(documentId, activeThreadId)
@@ -356,9 +362,7 @@ export function DocumentChatPanel({
             <ul className="doc-chat-thread-list">
               {threads.map((thread) => {
                 const selected = thread.id === activeThreadId;
-                const threadBusy =
-                  thread.activeGenerationStatus === 'pending' ||
-                  thread.activeGenerationStatus === 'streaming';
+                const threadBusy = threadListShowsGenerationSpinner(thread);
                 return (
                   <li key={thread.id}>
                     <button
