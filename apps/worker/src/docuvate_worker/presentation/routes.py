@@ -29,9 +29,6 @@ from docuvate_worker.presentation.schemas import (
     DocumentChatRagContextResponse,
     DocumentChatRequest,
     DocumentChatResponse,
-    RagRetrieveRequest,
-    RagRetrieveResponse,
-    RagRetrieveResultItem,
     EmbedRequest,
     EmbedResponse,
     EngineInfo,
@@ -51,6 +48,9 @@ from docuvate_worker.presentation.schemas import (
     MlResolvedModelResponse,
     MlRetrainRunRequest,
     MlRetrainRunResponse,
+    RagRetrieveRequest,
+    RagRetrieveResponse,
+    RagRetrieveResultItem,
 )
 
 router = APIRouter(prefix="/v1")
