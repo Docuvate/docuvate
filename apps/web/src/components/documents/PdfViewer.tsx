@@ -319,12 +319,14 @@ export function PdfViewer({
 
         pdfDocRef.current = pdf;
         setPageCount(pdf.numPages);
-        const sizes: { width: number; height: number }[] = [];
-        for (let i = 1; i <= pdf.numPages; i += 1) {
-          const page = await pdf.getPage(i);
-          const vp = page.getViewport({ scale: 1 });
-          sizes.push({ width: vp.width, height: vp.height });
-        }
+        const sizes = await Promise.all(
+          Array.from({ length: pdf.numPages }, (_, index) =>
+            pdf.getPage(index + 1).then((page) => {
+              const vp = page.getViewport({ scale: 1 });
+              return { width: vp.width, height: vp.height };
+            })
+          )
+        );
         if (cancelled) return;
         setPageSizes(sizes);
         setVirtualRenderWindow(computeVirtualPageWindow([1], pdf.numPages));
@@ -522,38 +524,43 @@ export function PdfViewer({
         const renderStamp = `${Math.round(scale * 1000)}:${overlayKey}:${highlightKey}`;
 
         for (let pageNum = 1; pageNum <= pageCount; pageNum += 1) {
+          if (virtualRenderWindow.has(pageNum)) continue;
           const slot = pagesHost.querySelector<HTMLElement>(
             `.pdf-page-slot[data-page="${pageNum}"]`
           );
-          if (!slot) continue;
-          if (!virtualRenderWindow.has(pageNum)) {
-            if (slot.dataset.renderStamp) {
-              slot.replaceChildren();
-              delete slot.dataset.renderStamp;
-            }
-            continue;
-          }
-          if (slot.dataset.renderStamp === renderStamp && slot.childElementCount > 0) {
-            continue;
-          }
-          const pdfPage = await pdf.getPage(pageNum);
-          if (cancelled) return;
-          const wrap = await renderPdfPage(
-            pdfPage,
-            pageNum,
-            highlights,
-            layoutOverlays,
-            layoutOverlayEnabled,
-            activeLayoutOverlayId,
-            scale,
-            (p, nx, ny) => onPageClickRef.current?.(p, nx, ny),
-            (id) => onLayoutOverlaySelectRef.current?.(id),
-            (o) => onLayoutOverlayHoverRef.current?.(o)
-          );
-          if (cancelled) return;
-          slot.replaceChildren(wrap);
-          slot.dataset.renderStamp = renderStamp;
+          if (!slot?.dataset.renderStamp) continue;
+          slot.replaceChildren();
+          delete slot.dataset.renderStamp;
         }
+
+        await Promise.all(
+          [...virtualRenderWindow].map(async (pageNum) => {
+            const slot = pagesHost.querySelector<HTMLElement>(
+              `.pdf-page-slot[data-page="${pageNum}"]`
+            );
+            if (!slot) return;
+            if (slot.dataset.renderStamp === renderStamp && slot.childElementCount > 0) {
+              return;
+            }
+            const pdfPage = await pdf.getPage(pageNum);
+            if (cancelled) return;
+            const wrap = await renderPdfPage(
+              pdfPage,
+              pageNum,
+              highlights,
+              layoutOverlays,
+              layoutOverlayEnabled,
+              activeLayoutOverlayId,
+              scale,
+              (p, nx, ny) => onPageClickRef.current?.(p, nx, ny),
+              (id) => onLayoutOverlaySelectRef.current?.(id),
+              (o) => onLayoutOverlayHoverRef.current?.(o)
+            );
+            if (cancelled) return;
+            slot.replaceChildren(wrap);
+            slot.dataset.renderStamp = renderStamp;
+          })
+        );
         if (!cancelled) {
           setRenderedPages(virtualRenderWindow.size);
         }

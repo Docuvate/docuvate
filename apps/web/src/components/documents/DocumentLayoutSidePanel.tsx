@@ -16,6 +16,8 @@ import { Button } from '../ui/Button';
 
 export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'export';
 
+const LAYOUT_SIDE_TAB_ORDER: LayoutSideTab[] = ['fields', 'tables', 'outline', 'export'];
+
 interface DocumentLayoutSidePanelProps {
   documentId: string;
   documentTitle?: string;
@@ -76,12 +78,22 @@ export function DocumentLayoutSidePanel({
     );
   }, [layoutIr, knownFieldKeys, fields, dismissedSuggestions]);
 
-  const tabs: { id: LayoutSideTab; label: string }[] = [
-    { id: 'fields', label: t('documents.layoutTabFields') },
-    { id: 'tables', label: t('documents.layoutTabTables') },
-    { id: 'outline', label: t('documents.layoutTabOutline') },
-    { id: 'export', label: t('documents.layoutTabExport') },
-  ];
+  const tabs = useMemo(
+    () =>
+      LAYOUT_SIDE_TAB_ORDER.map((id) => ({
+        id,
+        label: t(
+          id === 'fields'
+            ? 'documents.layoutTabFields'
+            : id === 'tables'
+              ? 'documents.layoutTabTables'
+              : id === 'outline'
+                ? 'documents.layoutTabOutline'
+                : 'documents.layoutTabExport'
+        ),
+      })),
+    [t]
+  );
 
   const activeTabMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
   const activePanelId = `${tabsBaseId}-panel-${activeTabMeta.id}`;
@@ -97,29 +109,30 @@ export function DocumentLayoutSidePanel({
 
   const onTabListKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      const idx = tabs.findIndex((tab) => tab.id === activeTab);
+      const idx = LAYOUT_SIDE_TAB_ORDER.indexOf(activeTab);
       if (idx < 0) return;
       let nextIdx: number | null = null;
+      const tabCount = LAYOUT_SIDE_TAB_ORDER.length;
       switch (event.key) {
         case 'ArrowRight':
-          nextIdx = (idx + 1) % tabs.length;
+          nextIdx = (idx + 1) % tabCount;
           break;
         case 'ArrowLeft':
-          nextIdx = (idx - 1 + tabs.length) % tabs.length;
+          nextIdx = (idx - 1 + tabCount) % tabCount;
           break;
         case 'Home':
           nextIdx = 0;
           break;
         case 'End':
-          nextIdx = tabs.length - 1;
+          nextIdx = tabCount - 1;
           break;
         default:
           return;
       }
       event.preventDefault();
-      focusTab(tabs[nextIdx].id);
+      focusTab(LAYOUT_SIDE_TAB_ORDER[nextIdx]);
     },
-    [activeTab, focusTab, tabs]
+    [activeTab, focusTab]
   );
 
   useEffect(() => {
