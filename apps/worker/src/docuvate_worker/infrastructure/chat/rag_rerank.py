@@ -46,7 +46,9 @@ def _get_reranker():
         return _reranker
 
 
-def rerank_passages(query: str, passages: list[RagPassage], top_k: int = 4) -> list[RagRetrieveResult]:
+def rerank_passages(
+    query: str, passages: list[RagPassage], top_k: int = 4
+) -> list[RagRetrieveResult]:
     if not passages:
         return []
     model = _get_reranker()
