@@ -10,6 +10,7 @@ import { InstallationIam20261008132200 } from './migrations/20261008132200-insta
 import { SavedViewsDashboard20261008133000 } from './migrations/20261008133000-saved-views-dashboard.js';
 import { SftpIngress20261008133500 } from './migrations/20261008133500-sftp-ingress.js';
 import { DocumentExtractedLayoutIr20261008213000 } from './migrations/20261008213000-document-extracted-layout-ir.js';
+import { ConnectorPaperlessImport20261008234500 } from './migrations/20261008234500-connector-paperless-import.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -45,6 +46,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       SavedViewsDashboard20261008133000,
       SftpIngress20261008133500,
       DocumentExtractedLayoutIr20261008213000,
+      ConnectorPaperlessImport20261008234500,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

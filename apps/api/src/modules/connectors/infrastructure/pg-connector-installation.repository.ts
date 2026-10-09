@@ -85,7 +85,15 @@ export class PgConnectorInstallationRepository implements ConnectorInstallationR
          RETURNING id, user_id, plugin_id, display_name, enabled, created_at, updated_at`,
         [id, input.userId, input.pluginId, input.displayName, encrypted]
       );
-      return mapRow(result.rows[0]!);
+      const row = mapRow(result.rows[0]!);
+      if (input.pluginId === 'paperless') {
+        await this.pool.query(
+          `INSERT INTO connector_paperless_settings (installation_id) VALUES ($1)
+           ON CONFLICT (installation_id) DO NOTHING`,
+          [id]
+        );
+      }
+      return row;
     } catch (err: unknown) {
       const code = typeof err === 'object' && err !== null && 'code' in err ? err.code : null;
       if (code === '23505') {
@@ -93,6 +101,29 @@ export class PgConnectorInstallationRepository implements ConnectorInstallationR
       }
       throw err;
     }
+  }
+
+  async updateCredentials(
+    userId: string,
+    installationId: string,
+    credentials: import('../domain/connector.types.js').ConnectorConfigurationInput
+  ): Promise<void> {
+    const encrypted = encryptConnectorCredentials(credentials);
+    await this.pool.query(
+      `UPDATE connector_installations
+       SET credentials_encrypted = $3, updated_at = now()
+       WHERE id = $1 AND user_id = $2`,
+      [installationId, userId, encrypted]
+    );
+  }
+
+  async updateDisplayName(userId: string, installationId: string, displayName: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE connector_installations
+       SET display_name = $3, updated_at = now()
+       WHERE id = $1 AND user_id = $2`,
+      [installationId, userId, displayName]
+    );
   }
 
   async deleteForUser(userId: string, installationId: string): Promise<boolean> {

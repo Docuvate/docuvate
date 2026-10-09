@@ -19,6 +19,7 @@ const FORWARD_SQL_ORDER = [
   '20261008133000-saved-views-dashboard-up.sql',
   'sftp-ingress-up.sql',
   'document-extracted-layout-ir-up.sql',
+  'connector-paperless-import-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

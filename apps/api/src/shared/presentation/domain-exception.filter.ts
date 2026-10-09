@@ -7,6 +7,7 @@ import {
   NotFoundError,
   ServiceUnavailableError,
   ValidationError,
+  ConflictError,
 } from '../domain/errors.js';
 
 @Catch(DomainError)
@@ -21,6 +22,7 @@ export class DomainExceptionFilter implements ExceptionFilter {
     if (exception instanceof ValidationError) status = HttpStatus.UNPROCESSABLE_ENTITY;
     if (exception instanceof GatewayTimeoutError) status = HttpStatus.GATEWAY_TIMEOUT;
     if (exception instanceof ServiceUnavailableError) status = HttpStatus.SERVICE_UNAVAILABLE;
+    if (exception instanceof ConflictError) status = HttpStatus.CONFLICT;
 
     void reply.status(status).send({
       code: exception.code,

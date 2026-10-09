@@ -410,7 +410,7 @@ export interface SearchPort {
 }
 
 export interface PaperlessImportPort {
-  importFromPaperless(): Promise<never>;
+  startBulkImport(installationId: string, userId: string): Promise<{ runId: string }>;
 }
 
 export interface ChatMessage {

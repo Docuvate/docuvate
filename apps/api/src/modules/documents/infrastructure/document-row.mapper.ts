@@ -133,6 +133,7 @@ export function mapDocumentRow(
     title: String(row['title'] ?? row['filename']),
     mimeType: String(row['mime_type']),
     storageKey: String(row['storage_key']),
+    archivedStorageKey: (row['archived_storage_key'] as string | null) ?? null,
     contentHash: (row['content_hash'] as string | null) ?? null,
     status: row['status'] as DocumentStatus,
     documentDate:

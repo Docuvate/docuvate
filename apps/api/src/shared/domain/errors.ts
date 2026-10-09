@@ -37,3 +37,9 @@ export class ServiceUnavailableError extends DomainError {
     super('SERVICE_UNAVAILABLE', message);
   }
 }
+
+export class ConflictError extends DomainError {
+  constructor(message: string) {
+    super('CONFLICT', message);
+  }
+}

@@ -72,14 +72,17 @@ export class DocumentsEntity {
   @Column("text", { name: "content_hash", nullable: true })
   contentHash: string | null;
 
+  @Column("text", { name: "archived_storage_key", nullable: true })
+  archivedStorageKey: string | null;
+
+  @Column("text", { name: "ingest_source", nullable: true })
+  ingestSource: string | null;
+
   @Column("text", { name: "extracted_markdown", nullable: true })
   extractedMarkdown: string | null;
 
   @Column("uuid", { name: "mappe_id", nullable: true })
   mappeId: string | null;
-
-  @Column("text", { name: "ingest_source", nullable: true })
-  ingestSource: string | null;
 
   @OneToMany(
     () => ChatThreadDocumentsEntity,

@@ -121,11 +121,14 @@ export 'package:docuvate/src/generated/src/model/sftp_ingress_create_account_bod
 export 'package:docuvate/src/generated/src/model/start_mail_o_auth_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/tag_custom_field_list_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/tag_list_response_dto.dart';
+export 'package:docuvate/src/generated/src/model/test_paperless_connection_request_dto.dart';
+export 'package:docuvate/src/generated/src/model/test_paperless_installation_connection_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/trigger_ml_retrain_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_correspondent_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_document_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_folder_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_mappe_request_dto.dart';
+export 'package:docuvate/src/generated/src/model/update_paperless_installation_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_saved_document_view_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_tag_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_user_settings_request_dto.dart';

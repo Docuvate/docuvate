@@ -16,7 +16,7 @@ export class PaperlessDmsConnector implements ConnectorPlugin {
     categoryId: 'dms' as const,
     labelKey: 'connectors.plugins.paperless.label',
     descriptionKey: 'connectors.plugins.paperless.description',
-    capabilities: ['source' as const, 'sink' as const],
+    capabilities: ['source' as const],
     tier: 'oss' as const,
   };
 
@@ -75,9 +75,9 @@ export class PaperlessDmsConnector implements ConnectorPlugin {
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : '';
       if (message === 'PAPERLESS_UNAUTHORIZED') {
-        return remoteValidationFailed('connectors.errors.paperlessUnauthorized');
+        return remoteValidationFailed('connectors.plugins.paperless.errors.unauthorized');
       }
-      return remoteValidationFailed('connectors.errors.paperlessUnreachable');
+      return remoteValidationFailed('connectors.plugins.paperless.errors.unreachable');
     }
   }
 }

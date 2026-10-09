@@ -11,6 +11,7 @@ export interface DocumentEntity {
   title: string;
   mimeType: string;
   storageKey: string;
+  archivedStorageKey?: string | null;
   contentHash?: string | null;
   status: DocumentStatus;
   documentDate?: Date | null;

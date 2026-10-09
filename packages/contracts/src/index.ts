@@ -323,6 +323,62 @@ export interface TagSuggestionDto {
   source?: TagSuggestionSource;
 }
 
+export type PaperlessImportRunStatus =
+  | 'pending'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
+export type PaperlessOcrMode = 'keep_paperless' | 'rerun_docuvate';
+
+export interface PaperlessImportRunDto {
+  id: string;
+  installationId: string;
+  status: PaperlessImportRunStatus;
+  paperlessApiVersion: number | null;
+  ocrMode: PaperlessOcrMode;
+  includeArchivedPdf: boolean;
+  progressProcessed: number;
+  progressTotal: number | null;
+  fatalErrorKey: string | null;
+  startedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PaperlessImportDryRunSummaryDto {
+  documentCount: number;
+  tagCount: number;
+  correspondentCount: number;
+  documentTypeCount: number;
+  storagePathCount: number;
+  customFieldCount: number;
+  mappingConflicts: string[];
+  paperlessApiVersion: number;
+}
+
+export interface PaperlessInstallationDto {
+  displayName: string;
+  baseUrl: string;
+  hasStoredApiToken: boolean;
+  hasStoredUsername: boolean;
+  hasStoredPassword: boolean;
+  keepOcrText: boolean;
+  rerunOcr: boolean;
+  includeArchivedPdf: boolean;
+  lastSuccessfulModifiedAt: string | null;
+}
+
+export interface PaperlessImportRunErrorDto {
+  id: string;
+  sourceDocumentId: string;
+  messageKey: string;
+  messageDetail: string | null;
+  createdAt: string;
+}
+
 export interface ChatMessageDto {
   role: 'user' | 'assistant';
   content: string;
