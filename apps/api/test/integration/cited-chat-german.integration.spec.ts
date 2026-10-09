@@ -23,6 +23,7 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
   let invoiceDocId: string;
   let taxDocId: string;
   let threads: PgDocumentChatThreadRepository;
+  let retrieval: PgCitedChatRetrievalRepository;
   let service: CitedChatGenerationService;
 
   beforeAll(async () => {
@@ -64,16 +65,18 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     );
 
     threads = new PgDocumentChatThreadRepository(pool);
+    retrieval = new PgCitedChatRetrievalRepository(pool);
     service = new CitedChatGenerationService(
       threads,
       noopEmbedding,
-      new PgCitedChatRetrievalRepository(pool),
+      retrieval,
       new PgChatMessageCitationsRepository(pool)
     );
   }, 60_000);
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   afterAll(async () => {
@@ -263,6 +266,37 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
   });
 
   it('cites two documents for a multi-part library question', async () => {
+    const invoiceChunk = await pool.query<{ id: string; body: string }>(
+      `SELECT id, body FROM document_text_chunks WHERE document_id = $1 ORDER BY chunk_index LIMIT 1`,
+      [invoiceDocId]
+    );
+    const taxChunk = await pool.query<{ id: string; body: string }>(
+      `SELECT id, body FROM document_text_chunks WHERE document_id = $1 ORDER BY chunk_index LIMIT 1`,
+      [taxDocId]
+    );
+    vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([
+      {
+        chunkId: invoiceChunk.rows[0].id,
+        documentId: invoiceDocId,
+        documentTitle: 'Rechnung Nordwind GmbH',
+        body: invoiceChunk.rows[0].body,
+        page: 1,
+        charStart: 0,
+        charEnd: invoiceChunk.rows[0].body.length,
+        fusionScore: 0.04,
+      },
+      {
+        chunkId: taxChunk.rows[0].id,
+        documentId: taxDocId,
+        documentTitle: 'Bescheid Hundesteuer',
+        body: taxChunk.rows[0].body,
+        page: 1,
+        charStart: 0,
+        charEnd: taxChunk.rows[0].body.length,
+        fusionScore: 0.03,
+      },
+    ]);
+
     vi.stubGlobal(
       'fetch',
       vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
