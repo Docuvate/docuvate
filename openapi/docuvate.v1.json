@@ -3057,7 +3057,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/DocumentResponseDto"
                 }
               }
             }
@@ -4775,6 +4775,243 @@
           }
         ],
         "summary": "Extraction Requeue",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/layout-html": {
+      "get": {
+        "operationId": "getDocumentLayoutHtml",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutHtmlResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Rendered layout HTML",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/layout-ir": {
+      "get": {
+        "operationId": "getDocumentLayoutIr",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutIrDocumentDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Layout IR for document re-render",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/layout-typst": {
+      "get": {
+        "operationId": "getDocumentLayoutTypst",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutTypstResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Typst source for layout export",
         "tags": [
           "Documents"
         ]
@@ -9473,6 +9710,49 @@
           "setupHint"
         ]
       },
+      "DocumentExtractionSummaryDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExtractedFieldDto"
+            }
+          },
+          "markdown": {
+            "type": "string"
+          },
+          "layoutIrAvailable": {
+            "type": "boolean",
+            "description": "True when persisted layout IR exists (fetch via GET /documents/:id/layout-ir)."
+          },
+          "layoutIrPages": {
+            "type": "array",
+            "description": "Page dimensions from persisted layout IR (no block payload).",
+            "items": {
+              "type": "object",
+              "properties": {
+                "page": {
+                  "type": "integer"
+                },
+                "widthPt": {
+                  "type": "number"
+                },
+                "heightPt": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "text",
+          "fields"
+        ]
+      },
       "DocumentListResponseDto": {
         "type": "object",
         "properties": {
@@ -9526,6 +9806,58 @@
         },
         "required": [
           "modules"
+        ]
+      },
+      "DocumentResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "uploaded",
+              "queued",
+              "extracting",
+              "ready",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "extraction": {
+            "$ref": "#/components/schemas/DocumentExtractionSummaryDto"
+          }
+        },
+        "required": [
+          "id",
+          "filename",
+          "title",
+          "status",
+          "mimeType",
+          "tags",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "DuplicateStackKeepVersionRequestDto": {
@@ -9860,6 +10192,418 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "LayoutHtmlResponseDto": {
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "html"
+        ]
+      },
+      "LayoutIrBlockDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          },
+          "fontFamily": {
+            "type": "string"
+          },
+          "fontSizePt": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "string"
+          },
+          "align": {
+            "type": "string"
+          },
+          "columnIndex": {
+            "type": "number"
+          },
+          "blockIndex": {
+            "type": "number"
+          },
+          "rotationDeg": {
+            "type": "number"
+          },
+          "matrix": {
+            "minItems": 6,
+            "maxItems": 6,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "textRgb": {
+            "minItems": 3,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "textOriginX": {
+            "type": "number"
+          },
+          "textOriginY": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "page",
+          "x",
+          "y",
+          "width",
+          "height",
+          "text"
+        ]
+      },
+      "LayoutIrDocumentDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "number",
+            "enum": [
+              1
+            ]
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutIrPageDto"
+            }
+          }
+        },
+        "required": [
+          "version",
+          "pages"
+        ]
+      },
+      "LayoutIrLineDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "text": {
+            "type": "string"
+          },
+          "fontFamily": {
+            "type": "string"
+          },
+          "fontSizePt": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "string"
+          },
+          "align": {
+            "type": "string"
+          },
+          "blockIndex": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "page",
+          "x",
+          "y",
+          "width",
+          "height",
+          "text"
+        ]
+      },
+      "LayoutIrPageDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number"
+          },
+          "widthPt": {
+            "type": "number"
+          },
+          "heightPt": {
+            "type": "number"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutIrBlockDto"
+            }
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutIrLineDto"
+            }
+          },
+          "tables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutIrTableDto"
+            }
+          },
+          "vectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutIrVectorDto"
+            }
+          },
+          "widgets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutIrWidgetDto"
+            }
+          }
+        },
+        "required": [
+          "page",
+          "widthPt",
+          "heightPt",
+          "blocks"
+        ]
+      },
+      "LayoutIrTableCellDto": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "fontSizePt": {
+            "type": "number"
+          },
+          "weight": {
+            "type": "string"
+          },
+          "blockIndex": {
+            "type": "number"
+          },
+          "cellRole": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "x",
+          "y",
+          "width",
+          "height"
+        ]
+      },
+      "LayoutIrTableDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "columnCount": {
+            "type": "number"
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/LayoutIrTableCellDto"
+              }
+            }
+          }
+        },
+        "required": [
+          "page",
+          "x",
+          "y",
+          "width",
+          "height",
+          "columnCount",
+          "rows"
+        ]
+      },
+      "LayoutIrVectorDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "rect",
+              "line",
+              "path"
+            ]
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "strokeWidthPt": {
+            "type": "number"
+          },
+          "filled": {
+            "type": "boolean"
+          },
+          "fillGray": {
+            "type": "number"
+          },
+          "fillRgb": {
+            "minItems": 3,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "strokeRgb": {
+            "minItems": 3,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "pathD": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "x",
+          "y",
+          "width",
+          "height"
+        ]
+      },
+      "LayoutIrWidgetDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "text",
+              "checkbox"
+            ]
+          },
+          "page": {
+            "type": "number"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "value": {
+            "type": "string"
+          },
+          "checked": {
+            "type": "boolean"
+          },
+          "fieldName": {
+            "type": "string"
+          },
+          "rotationDeg": {
+            "type": "number"
+          },
+          "fontSizePt": {
+            "type": "number"
+          },
+          "fontFamily": {
+            "type": "string"
+          },
+          "align": {
+            "type": "string"
+          },
+          "checkMark": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "page",
+          "x",
+          "y",
+          "width",
+          "height"
+        ]
+      },
+      "LayoutTypstResponseDto": {
+        "type": "object",
+        "properties": {
+          "typst": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "typst"
         ]
       },
       "LibraryTableColumnId": {

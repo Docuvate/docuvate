@@ -21,6 +21,27 @@ describe('mapDocumentRow extraction markdown', () => {
     expect(entity.extraction?.markdown).toBe('## Title\n\nBody');
   });
 
+  it('sets layoutIrAvailable when layout_ir_available is true', () => {
+    const entity = mapDocumentRow(
+      {
+        id: 'd1',
+        user_id: 'u1',
+        filename: 'f.pdf',
+        title: 'T',
+        mime_type: 'application/pdf',
+        storage_key: 'k',
+        status: 'ready',
+        extracted_text: 'plain',
+        layout_ir_available: true,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      { extraction: { fields: [], blocks: [] } }
+    );
+    expect(entity.extraction?.layoutIrAvailable).toBe(true);
+  });
+
+
   it('omits markdown when column is blank', () => {
     const entity = mapDocumentRow({
       id: 'doc-1',

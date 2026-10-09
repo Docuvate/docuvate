@@ -1,4 +1,9 @@
-import { dedupeExtractedFields, type ExtractionBlock, type ExtractedField } from '@docuvate/contracts';
+import {
+  dedupeExtractedFields,
+  type ExtractionBlock,
+  type ExtractedField,
+  type LayoutIrPageSummary,
+} from '@docuvate/contracts';
 import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
 import type { TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 
@@ -57,6 +62,30 @@ export function mapTagFromJson(raw: Record<string, unknown>): TagEntity {
   };
 }
 
+export function parseLayoutIrPagesJson(raw: unknown): LayoutIrPageSummary[] {
+  let parsed: unknown = raw;
+  if (typeof raw === 'string') {
+    try {
+      parsed = JSON.parse(raw) as unknown;
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(parsed)) return [];
+  const pages: LayoutIrPageSummary[] = [];
+  for (const item of parsed) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    const page = Number(row['page']);
+    const widthPt = Number(row['widthPt']);
+    const heightPt = Number(row['heightPt']);
+    if (!Number.isFinite(page) || page < 1) continue;
+    if (!Number.isFinite(widthPt) || !Number.isFinite(heightPt)) continue;
+    pages.push({ page, widthPt, heightPt });
+  }
+  return pages;
+}
+
 export function parseTagsJson(tagsRaw: unknown): TagEntity[] {
   if (typeof tagsRaw === 'string') {
     const parsed = JSON.parse(tagsRaw) as Record<string, unknown>[];
@@ -76,6 +105,8 @@ export function mapDocumentRow(
   const text = row['extracted_text'] as string | null;
   const markdownRaw = row['extracted_markdown'] as string | null;
   const markdown = markdownRaw?.trim() ? markdownRaw : undefined;
+  const layoutIrAvailable = Boolean(row['layout_ir_available']);
+  const layoutIrPages = parseLayoutIrPagesJson(row['layout_ir_pages_json']);
   const extraction =
     text != null
       ? {
@@ -83,6 +114,8 @@ export function mapDocumentRow(
           fields,
           blocks: blocks.length > 0 ? blocks : undefined,
           markdown,
+          layoutIrAvailable,
+          ...(layoutIrPages.length > 0 ? { layoutIrPages } : {}),
         }
       : undefined;
 

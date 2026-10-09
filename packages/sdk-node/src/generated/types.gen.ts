@@ -259,6 +259,24 @@ export type DocumentChatUnavailableBackendInfoDto = {
     setupHint: string;
 };
 
+export type DocumentExtractionSummaryDto = {
+    text: string;
+    fields: Array<ExtractedFieldDto>;
+    markdown?: string;
+    /**
+     * True when persisted layout IR exists (fetch via GET /documents/:id/layout-ir).
+     */
+    layoutIrAvailable?: boolean;
+    /**
+     * Page dimensions from persisted layout IR (no block payload).
+     */
+    layoutIrPages?: Array<{
+        page?: number;
+        widthPt?: number;
+        heightPt?: number;
+    }>;
+};
+
 export type DocumentListResponseDto = {
     items: Array<{
         [key: string]: unknown;
@@ -275,6 +293,20 @@ export type DocumentPipelineModuleDescriptorDto = {
 
 export type DocumentPipelineModulesResponseDto = {
     modules: Array<DocumentPipelineModuleDescriptorDto>;
+};
+
+export type DocumentResponseDto = {
+    id: string;
+    filename: string;
+    title: string;
+    status: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
+    mimeType: string;
+    tags: Array<{
+        [key: string]: unknown;
+    }>;
+    createdAt: string;
+    updatedAt: string;
+    extraction?: DocumentExtractionSummaryDto;
 };
 
 export type DuplicateStackKeepVersionRequestDto = {
@@ -379,6 +411,136 @@ export type LabelRecommendationListResponseDto = {
     items: Array<{
         [key: string]: unknown;
     }>;
+};
+
+export type LayoutHtmlResponseDto = {
+    html: string;
+};
+
+export type LayoutIrBlockDto = {
+    page: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    text: string;
+    fontFamily?: string;
+    fontSizePt?: number;
+    weight?: string;
+    align?: string;
+    columnIndex?: number;
+    blockIndex?: number;
+    rotationDeg?: number;
+    matrix?: [
+        number,
+        number,
+        number,
+        number,
+        number,
+        number
+    ];
+    textRgb?: [
+        number,
+        number,
+        number
+    ];
+    textOriginX?: number;
+    textOriginY?: number;
+};
+
+export type LayoutIrDocumentDto = {
+    version: 1;
+    pages: Array<LayoutIrPageDto>;
+};
+
+export type LayoutIrLineDto = {
+    page: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    text: string;
+    fontFamily?: string;
+    fontSizePt?: number;
+    weight?: string;
+    align?: string;
+    blockIndex?: number;
+};
+
+export type LayoutIrPageDto = {
+    page: number;
+    widthPt: number;
+    heightPt: number;
+    blocks: Array<LayoutIrBlockDto>;
+    lines?: Array<LayoutIrLineDto>;
+    tables?: Array<LayoutIrTableDto>;
+    vectors?: Array<LayoutIrVectorDto>;
+    widgets?: Array<LayoutIrWidgetDto>;
+};
+
+export type LayoutIrTableCellDto = {
+    text: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    fontSizePt?: number;
+    weight?: string;
+    blockIndex?: number;
+    cellRole?: string;
+};
+
+export type LayoutIrTableDto = {
+    page: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    columnCount: number;
+    rows: Array<Array<LayoutIrTableCellDto>>;
+};
+
+export type LayoutIrVectorDto = {
+    kind: 'rect' | 'line' | 'path';
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    strokeWidthPt?: number;
+    filled?: boolean;
+    fillGray?: number;
+    fillRgb?: [
+        number,
+        number,
+        number
+    ];
+    strokeRgb?: [
+        number,
+        number,
+        number
+    ];
+    pathD?: string;
+};
+
+export type LayoutIrWidgetDto = {
+    kind: 'text' | 'checkbox';
+    page: number;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    value?: string;
+    checked?: boolean;
+    fieldName?: string;
+    rotationDeg?: number;
+    fontSizePt?: number;
+    fontFamily?: string;
+    align?: string;
+    checkMark?: string;
+};
+
+export type LayoutTypstResponseDto = {
+    typst: string;
 };
 
 export type LibraryTableColumnId = 'title' | 'labels' | 'date' | 'status' | 'folder' | 'updated';
@@ -1571,9 +1733,7 @@ export type GetDocumentErrors = {
 export type GetDocumentError = GetDocumentErrors[keyof GetDocumentErrors];
 
 export type GetDocumentResponses = {
-    200: {
-        [key: string]: unknown;
-    };
+    200: DocumentResponseDto;
 };
 
 export type GetDocumentResponse = GetDocumentResponses[keyof GetDocumentResponses];
@@ -2026,6 +2186,78 @@ export type ExtractionRequeueResponses = {
 };
 
 export type ExtractionRequeueResponse = ExtractionRequeueResponses[keyof ExtractionRequeueResponses];
+
+export type GetDocumentLayoutHtmlData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/layout-html';
+};
+
+export type GetDocumentLayoutHtmlErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetDocumentLayoutHtmlError = GetDocumentLayoutHtmlErrors[keyof GetDocumentLayoutHtmlErrors];
+
+export type GetDocumentLayoutHtmlResponses = {
+    200: LayoutHtmlResponseDto;
+};
+
+export type GetDocumentLayoutHtmlResponse = GetDocumentLayoutHtmlResponses[keyof GetDocumentLayoutHtmlResponses];
+
+export type GetDocumentLayoutIrData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/layout-ir';
+};
+
+export type GetDocumentLayoutIrErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetDocumentLayoutIrError = GetDocumentLayoutIrErrors[keyof GetDocumentLayoutIrErrors];
+
+export type GetDocumentLayoutIrResponses = {
+    200: LayoutIrDocumentDto;
+};
+
+export type GetDocumentLayoutIrResponse = GetDocumentLayoutIrResponses[keyof GetDocumentLayoutIrResponses];
+
+export type GetDocumentLayoutTypstData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/layout-typst';
+};
+
+export type GetDocumentLayoutTypstErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetDocumentLayoutTypstError = GetDocumentLayoutTypstErrors[keyof GetDocumentLayoutTypstErrors];
+
+export type GetDocumentLayoutTypstResponses = {
+    200: LayoutTypstResponseDto;
+};
+
+export type GetDocumentLayoutTypstResponse = GetDocumentLayoutTypstResponses[keyof GetDocumentLayoutTypstResponses];
 
 export type RefreshSuggestionsData = {
     body?: never;

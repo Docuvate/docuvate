@@ -46,6 +46,7 @@ export interface DocumentRepository {
   listForUser(userId: string, filters?: DocumentListQuery): Promise<DocumentEntity[]>;
   updateStatus(id: string, status: DocumentStatus): Promise<void>;
   saveExtraction(id: string, result: ExtractionResult): Promise<void>;
+  findLayoutIrForUser(id: string, userId: string): Promise<Record<string, unknown> | null>;
   updateForUser(id: string, userId: string, patch: DocumentUpdatePatch): Promise<DocumentEntity>;
   deleteForUser(id: string, userId: string): Promise<DocumentEntity>;
   setTagsForDocument(documentId: string, tagIds: string[]): Promise<void>;

@@ -10,15 +10,12 @@ import {
   fetchWorkerJson,
   workerCompareTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
+import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
 
 @Injectable()
 export class HttpExtractionAdapter implements ExtractionPort {
   private workerHeaders(): Record<string, string> {
-    const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
-    return {
-      'Content-Type': 'application/json',
-      'X-Worker-Secret': secret,
-    };
+    return workerRequestHeaders();
   }
 
   private workerUrl(): string {
@@ -44,13 +41,17 @@ export class HttpExtractionAdapter implements ExtractionPort {
       throw new Error(`Worker extraction failed: ${response.status}`);
     }
 
-    const data = (await response.json()) as ExtractionResult;
+    const data = (await response.json()) as ExtractionResult & {
+      layoutIr?: ExtractionResult['layoutIr'];
+    };
     const markdown = data.markdown?.trim();
+    const layoutIr = data.layoutIr;
     return {
       text: data.text ?? '',
       fields: data.fields ?? [],
       blocks: data.blocks ?? [],
       ...(markdown ? { markdown } : {}),
+      ...(layoutIr ? { layoutIr } : {}),
     };
   }
 

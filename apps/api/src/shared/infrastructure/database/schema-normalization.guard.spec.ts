@@ -14,9 +14,10 @@ const FORWARD_SQL_ORDER = [
   'initial-schema-up.sql',
   'global-search-up.sql',
   'schema-normalization-3nf-up.sql',
-  'installation-iam-up.sql',
   'auth-mfa-passkey-up.sql',
+  'installation-iam-up.sql',
   '20261008133000-saved-views-dashboard-up.sql',
+  'document-extracted-layout-ir-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {
@@ -72,6 +73,11 @@ describe('schema normalization guard (ADR 015)', () => {
     const allowSet = new Set(SCHEMA_JSONB_ALLOWLIST.map((e) => `${e.table}.${e.column}`));
     const undocumented = [...liveJsonbColumns(sql)].filter((c) => !allowSet.has(c));
     expect(undocumented).toEqual([]);
+  });
+
+  it('stores layout IR page dimensions relationally', () => {
+    expect(sql).toContain('document_layout_ir_pages');
+    expect(sql).not.toMatch(/jsonb_array_elements\s*\(\s*li_pages\.ir->'pages'\s*\)/i);
   });
 
   it('keeps no JSONB id-array column alive', () => {

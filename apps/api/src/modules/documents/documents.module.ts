@@ -31,6 +31,9 @@ import { CompareDocumentExtractionUseCase } from './application/compare-extracti
 import { ApplyArenaWinnerExtractionUseCase } from './application/apply-arena-winner-extraction.use-case.js';
 import { RunArenaSampleCompareUseCase } from './application/run-arena-sample-compare.use-case.js';
 import { RequeueDocumentExtractionUseCase } from './application/requeue-document-extraction.use-case.js';
+import { GetDocumentLayoutIrUseCase } from './application/get-document-layout-ir.use-case.js';
+import { GetDocumentLayoutHtmlUseCase } from './application/get-document-layout-html.use-case.js';
+import { GetDocumentLayoutTypstUseCase } from './application/get-document-layout-typst.use-case.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
 import { SearchModule } from '../search/search.module.js';
@@ -74,6 +77,9 @@ import { SearchModule } from '../search/search.module.js';
     ApplyArenaWinnerExtractionUseCase,
     RunArenaSampleCompareUseCase,
     RequeueDocumentExtractionUseCase,
+    GetDocumentLayoutIrUseCase,
+    GetDocumentLayoutHtmlUseCase,
+    GetDocumentLayoutTypstUseCase,
   ],
   exports: [UploadDocumentUseCase, GetDocumentContentUseCase],
 })

@@ -113,4 +113,99 @@ describe('extraction persistence in normalized tables (Testcontainers Postgres)'
     );
     expect(blocks.rows[0]?.c).toBe(0);
   });
+
+  it('skips invalid layout IR version but persists extraction', async () => {
+    const docId = randomUUID();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
+       VALUES ($1, $2, 'layout.pdf', 'application/pdf', 'k2', 'ready')`,
+      [docId, userId]
+    );
+    await repo.saveExtraction(docId, {
+      text: 'body',
+      fields: [],
+      blocks: [{ page: 1, blockIndex: 0, x: 0, y: 0, width: 1, height: 1, text: 'a' }],
+      layoutIr: { version: 2, pages: [] },
+    });
+    const textRow = await pool.query(`SELECT extracted_text FROM documents WHERE id = $1`, [docId]);
+    expect(textRow.rows[0]?.extracted_text).toBe('body');
+    const layout = await pool.query(`SELECT count(*)::int AS c FROM document_layout_ir WHERE document_id = $1`, [
+      docId,
+    ]);
+    expect(layout.rows[0]?.c).toBe(0);
+  });
+
+  it('persists layout IR page summaries relationally', async () => {
+    const docId = randomUUID();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
+       VALUES ($1, $2, 'layout.pdf', 'application/pdf', 'k3', 'ready')`,
+      [docId, userId]
+    );
+    await repo.saveExtraction(docId, {
+      text: 'body',
+      fields: [],
+      blocks: [],
+      layoutIr: {
+        version: 1,
+        pages: [
+          { page: 1, widthPt: 595, heightPt: 842, blocks: [] },
+          { page: 2, widthPt: 595, heightPt: 842, blocks: [] },
+        ],
+      },
+    });
+    const pages = await pool.query(
+      `SELECT page, width_pt, height_pt FROM document_layout_ir_pages WHERE document_id = $1 ORDER BY page`,
+      [docId]
+    );
+    expect(pages.rows).toEqual([
+      { page: 1, width_pt: 595, height_pt: 842 },
+      { page: 2, width_pt: 595, height_pt: 842 },
+    ]);
+    const loaded = await repo.findByIdForUser(docId, userId);
+    expect(loaded?.extraction?.layoutIrPages).toEqual([
+      { page: 1, widthPt: 595, heightPt: 842 },
+      { page: 2, widthPt: 595, heightPt: 842 },
+    ]);
+  });
+
+  it('dedupes duplicate layout IR page numbers on save (first page entry wins)', async () => {
+    const docId = randomUUID();
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
+       VALUES ($1, $2, 'dup-pages.pdf', 'application/pdf', 'k4', 'ready')`,
+      [docId, userId]
+    );
+    await repo.saveExtraction(docId, {
+      text: 'body',
+      fields: [],
+      blocks: [],
+      layoutIr: {
+        version: 1,
+        pages: [
+          { page: 1, widthPt: 400, heightPt: 500, blocks: [] },
+          { page: 1, widthPt: 595, heightPt: 842, blocks: [] },
+          { page: 2, widthPt: 612, heightPt: 792, blocks: [] },
+        ],
+      },
+    });
+    const pages = await pool.query(
+      `SELECT page, width_pt, height_pt FROM document_layout_ir_pages WHERE document_id = $1 ORDER BY page`,
+      [docId]
+    );
+    expect(pages.rows).toEqual([
+      { page: 1, width_pt: 400, height_pt: 500 },
+      { page: 2, width_pt: 612, height_pt: 792 },
+    ]);
+    const layoutCount = await pool.query(
+      `SELECT count(*)::int AS c FROM document_layout_ir WHERE document_id = $1`,
+      [docId]
+    );
+    expect(layoutCount.rows[0]?.c).toBe(1);
+    const loaded = await repo.findByIdForUser(docId, userId);
+    expect(loaded?.extraction?.layoutIrPages).toEqual([
+      { page: 1, widthPt: 400, heightPt: 500 },
+      { page: 2, widthPt: 612, heightPt: 792 },
+    ]);
+  });
 });

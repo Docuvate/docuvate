@@ -25,3 +25,4 @@ class ExtractionResult:
     fields: list[ExtractedField]
     blocks: list[ExtractionBlock] | None = None
     markdown: str | None = None
+    layout_ir: dict[str, object] | None = None

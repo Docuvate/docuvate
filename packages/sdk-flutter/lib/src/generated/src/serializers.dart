@@ -52,9 +52,12 @@ import 'package:docuvate/src/generated/src/model/document_chat_thread_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_chat_thread_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_chat_thread_messages_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_chat_unavailable_backend_info_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_extraction_summary_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_extraction_summary_dto_layout_ir_pages_inner.dart';
 import 'package:docuvate/src/generated/src/model/document_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_module_descriptor_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_modules_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_keep_version_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_not_duplicate_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_set_primary_request_dto.dart';
@@ -72,6 +75,16 @@ import 'package:docuvate/src/generated/src/model/label_map_response_dto_class.da
 import 'package:docuvate/src/generated/src/model/label_recommendation_blocklist_entry_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/label_recommendation_blocklist_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/label_recommendation_list_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_html_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_ir_block_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_ir_document_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_ir_line_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_ir_page_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_ir_table_cell_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_ir_table_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_ir_vector_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_ir_widget_dto.dart';
+import 'package:docuvate/src/generated/src/model/layout_typst_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/library_table_column_id.dart';
 import 'package:docuvate/src/generated/src/model/mappe_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/ml_model_family_dto.dart';
@@ -148,9 +161,12 @@ part 'serializers.g.dart';
   DocumentChatThreadListResponseDto,
   DocumentChatThreadMessagesResponseDto,
   DocumentChatUnavailableBackendInfoDto,
+  DocumentExtractionSummaryDto,
+  DocumentExtractionSummaryDtoLayoutIrPagesInner,
   DocumentListResponseDto,
   DocumentPipelineModuleDescriptorDto,
   DocumentPipelineModulesResponseDto,
+  DocumentResponseDto,
   DuplicateStackKeepVersionRequestDto,
   DuplicateStackNotDuplicateRequestDto,
   DuplicateStackSetPrimaryRequestDto,
@@ -168,6 +184,16 @@ part 'serializers.g.dart';
   LabelRecommendationBlocklistEntryResponseDto,
   LabelRecommendationBlocklistListResponseDto,
   LabelRecommendationListResponseDto,
+  LayoutHtmlResponseDto,
+  LayoutIrBlockDto,
+  LayoutIrDocumentDto,
+  LayoutIrLineDto,
+  LayoutIrPageDto,
+  LayoutIrTableCellDto,
+  LayoutIrTableDto,
+  LayoutIrVectorDto,
+  LayoutIrWidgetDto,
+  LayoutTypstResponseDto,
   LibraryTableColumnId,
   MappeListResponseDto,
   MlModelFamilyDto,

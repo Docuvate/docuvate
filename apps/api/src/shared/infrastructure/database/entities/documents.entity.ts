@@ -12,6 +12,7 @@ import { UserEntity } from './user.entity.js';
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
 import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
+import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
 
 @Index("documents_content_hash_idx", ["contentHash", "userId"], {})
 @Index("documents_folder_id_idx", ["folderId"], {})
@@ -95,6 +96,9 @@ export class DocumentsEntity {
     (documentDuplicateCandidates) => documentDuplicateCandidates.document
   )
   documentDuplicateCandidates2: DocumentDuplicateCandidatesEntity[];
+
+  @OneToOne(() => DocumentLayoutIrEntity, (layoutIr) => layoutIr.document)
+  layoutIr: DocumentLayoutIrEntity;
 
   @OneToOne(
     () => DocumentEmbeddingsEntity,

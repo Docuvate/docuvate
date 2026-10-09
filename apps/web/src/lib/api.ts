@@ -13,6 +13,7 @@ import type {
   SendDocumentChatThreadMessageRequest,
   SendDocumentChatThreadMessageResponse,
   DocumentDto,
+  LayoutIrDocument,
   DocumentListQuery,
   DuplicateCandidateDto,
   DuplicateStackDto,
@@ -161,6 +162,20 @@ export async function listDocuments(filters: DocumentListQuery = {}): Promise<Do
 
 export async function getDocument(id: string): Promise<DocumentDto> {
   return request<DocumentDto>(`/documents/${id}`);
+}
+
+export async function fetchDocumentLayoutIr(documentId: string): Promise<LayoutIrDocument> {
+  return request<LayoutIrDocument>(`/documents/${documentId}/layout-ir`);
+}
+
+export async function fetchDocumentLayoutHtml(
+  documentId: string
+): Promise<{ html: string }> {
+  return request<{ html: string }>(`/documents/${documentId}/layout-html`);
+}
+
+export async function fetchDocumentLayoutTypst(documentId: string): Promise<{ typst: string }> {
+  return request<{ typst: string }>(`/documents/${documentId}/layout-typst`);
 }
 
 export async function updateDocument(
