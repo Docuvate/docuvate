@@ -58,7 +58,7 @@ connect_registry_to_kind() {
 pull_push() {
   local upstream="$1"
   local repo_tag="$2"
-  run_docker pull --platform linux/amd64 "$upstream"
+  bash "$ROOT/scripts/ci/docker-pull-with-retry.sh" "$upstream"
   run_docker tag "$upstream" "${REG_HOST}/${repo_tag}"
   run_docker push "${REG_HOST}/${repo_tag}"
 }

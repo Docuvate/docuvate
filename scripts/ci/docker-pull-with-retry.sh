@@ -48,7 +48,11 @@ pull_one() {
       return 1
     fi
     echo "docker pull failed (attempt ${attempt}), retrying ${image}…" >&2
-    sleep $((attempt * 20))
+    local backoff=20
+    if [[ -z "$mirror" ]]; then
+      backoff=45
+    fi
+    sleep $((attempt * backoff))
   done
 }
 

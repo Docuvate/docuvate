@@ -110,6 +110,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Start Postgres (digest-pinned; avoid Hub service-container pull limits)
         run: |
           set -euo pipefail
@@ -159,6 +164,11 @@ jobs:
           buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Require Docker
         run: docker info
       - name: Pre-pull compose base images
@@ -182,6 +192,11 @@ jobs:
           buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Require Docker (Testcontainers; fail hard if unavailable)
         run: docker info
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -261,8 +276,13 @@ jobs:
           buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Pre-pull Dockerfile base images
-        run: bash scripts/ci/pull-compose-ci-images.sh
+        run: bash scripts/ci/pull-dockerfile-base-images.sh
       - name: Build service images (retry on registry rate limits)
         run: |
           set -euo pipefail
@@ -284,6 +304,11 @@ jobs:
           buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Pre-pull compose base images
         run: bash scripts/ci/pull-compose-ci-images.sh
       - name: Start compose stack (CI override, no Ollama)
@@ -391,6 +416,12 @@ jobs:
           buildkitd-config-inline: |
             [registry."docker.io"]
               mirrors = ["mirror.gcr.io"]
+      - name: Docker Hub login (optional)
+        if: steps.paths.outputs.run == 'true'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Require Docker
         if: steps.paths.outputs.run == 'true'
         run: docker info
