@@ -3,7 +3,6 @@ import {
   fuzzyWordsMatch,
   numericTokensPresentInText,
 } from './quote-numeric-consistency.js';
-import { chunkIndexText } from './split-text-chunks-with-spans.js';
 
 const QUOTE_WORD_LIMIT = 10;
 
@@ -372,17 +371,6 @@ export function resolveQuoteInCandidateChunk(
   quote: string,
   options?: { claimText?: string }
 ): QuoteSpanMatch | null {
-  const bodyHit = resolveQuoteInChunk(candidate.body, quote, options);
-  if (bodyHit) {
-    return bodyHit;
-  }
-  const passage = chunkIndexText(candidate.documentTitle, candidate.body);
-  if (passage === candidate.body) {
-    return null;
-  }
-  if (!resolveQuoteInChunk(passage, quote, options)) {
-    return null;
-  }
   return resolveQuoteInChunk(candidate.body, quote, options);
 }
 

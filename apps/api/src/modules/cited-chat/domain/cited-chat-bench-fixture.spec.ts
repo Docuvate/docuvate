@@ -11,12 +11,13 @@ const RECHNUNG_BODY =
 function row(
   id: string,
   title: string,
-  body: string
+  body: string,
+  documentId?: string
 ): { chunk: CitedChatChunkCandidate } {
   return {
     chunk: {
       chunkId: id,
-      documentId: id,
+      documentId: documentId ?? id,
       documentTitle: title,
       body,
       page: 1,
@@ -41,7 +42,7 @@ describe('cited chat bench fixtures (quote + source mapping)', () => {
     ['hund', 'S4'],
   ]);
 
-  it('verifies Miete quote when model cites wrong source label but quote is unique', () => {
+  it('rejects cross-document rebind when label points at another doc', () => {
     const { verified, rejected } = verifyCitedClaims({
       claims: [
         {
@@ -53,13 +54,71 @@ describe('cited chat bench fixtures (quote + source mapping)', () => {
       top,
       labelByChunk,
     });
-    expect(rejected).toHaveLength(0);
-    expect(verified).toHaveLength(1);
-    expect(verified[0].chunkId).toBe('miete');
-    expect(verified[0].quote).toContain('Werktag');
+    expect(verified).toHaveLength(0);
+    expect(rejected[0]?.reason).toBe('quote_in_other_document');
   });
 
-  it('verifies Kündigungsfrist quote with passage title prefix on chunk body', () => {
+  it('rejects wrong Hundesteuer amount bound to Nordwind invoice quote', () => {
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: 'Die Hundesteuer beträgt 1.234,56 EUR.',
+          source: 'S4',
+          quote: 'Gesamtsumme: 1.234,56 EUR',
+        },
+      ],
+      top,
+      labelByChunk,
+    });
+    expect(verified).toHaveLength(0);
+    expect(rejected[0]?.reason).toBe('quote_in_other_document');
+  });
+
+  it('rejects non-numeric cross-document quote with labeled source', () => {
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: 'Die Hundesteuer ist bis zum 3. Werktag fällig.',
+          source: 'S4',
+          quote: 'bis zum 3. Werktag',
+        },
+      ],
+      top,
+      labelByChunk,
+    });
+    expect(verified).toHaveLength(0);
+    expect(rejected[0]?.reason).toBe('quote_in_other_document');
+  });
+
+  it('rebinds to another chunk of the same document when label chunk lacks the quote', () => {
+    const docId = 'hund-doc';
+    const sameDocTop = [
+      row('hund-head', 'Bescheid Hundesteuer', 'Bescheid Hundesteuer Stadt Muster', docId),
+      row('hund-body', 'Bescheid Hundesteuer', 'Jahresgebühr: 120,00 EUR', docId),
+      row('rechnung', 'Rechnung Nordwind GmbH', RECHNUNG_BODY),
+    ];
+    const sameDocLabels = new Map([
+      ['hund-head', 'S4'],
+      ['hund-body', 'S5'],
+      ['rechnung', 'S1'],
+    ]);
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: 'Die Jahresgebühr beträgt 120,00 EUR.',
+          source: 'S4',
+          quote: 'Jahresgebühr: 120,00 EUR',
+        },
+      ],
+      top: sameDocTop,
+      labelByChunk: sameDocLabels,
+    });
+    expect(rejected).toHaveLength(0);
+    expect(verified).toHaveLength(1);
+    expect(verified[0].chunkId).toBe('hund-body');
+  });
+
+  it('verifies Kündigungsfrist quote with correct source label', () => {
     const { verified, rejected } = verifyCitedClaims({
       claims: [
         {

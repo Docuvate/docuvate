@@ -1,9 +1,15 @@
 import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import {
+  extractNumericTokens,
+  numericTokensPresentInText,
+  wordContainsDigit,
+} from './quote-numeric-consistency.js';
+import {
   bestQuoteMatchScore,
   findQuoteInChunk,
   fuzzySpanSearchInChunk,
+  normalizeForQuoteMatch,
   resolveQuoteInCandidateChunk,
   validateMatchedSpanNumbers,
 } from './verify-citation-quote.js';
@@ -12,7 +18,8 @@ export type CitedClaimRejectReason =
   | 'unknown_source'
   | 'empty_claim_text'
   | 'quote_not_in_chunk'
-  | 'claim_number_not_in_quote';
+  | 'claim_number_not_in_quote'
+  | 'quote_in_other_document';
 
 export interface RejectedCitedClaim {
   claimText: string;
@@ -76,6 +83,10 @@ export function expandClaimCitations(claim: CitedClaimJson): CitedClaimCitationJ
 
 type TopRow = { chunk: CitedChatChunkCandidate };
 
+type CitationRowResolve =
+  | { ok: true; row: TopRow }
+  | { ok: false; reason: CitedClaimRejectReason };
+
 function rowForSourceLabel(
   top: TopRow[],
   labelByChunk: Map<string, string>,
@@ -84,12 +95,37 @@ function rowForSourceLabel(
   return top.find((row) => labelByChunk.get(row.chunk.chunkId) === sourceLabel);
 }
 
-function rowsMatchingQuote(
-  top: TopRow[],
-  quote: string,
-  claimText: string
-): TopRow[] {
-  return top.filter((row) => resolveQuoteInCandidateChunk(row.chunk, quote, { claimText }) != null);
+function rowsMatchingQuote(top: TopRow[], quote: string): TopRow[] {
+  return top.filter(
+    (row) => resolveQuoteInCandidateChunk(row.chunk, quote, { claimText: '' }) != null
+  );
+}
+
+function chunkHaystack(chunk: CitedChatChunkCandidate): string {
+  return normalizeForQuoteMatch(`${chunk.documentTitle} ${chunk.body}`);
+}
+
+/** Unlabeled unique quote bind: claim numbers must appear in chunk; half of significant words must align. */
+export function claimTextAlignsWithChunk(
+  claimText: string,
+  chunk: CitedChatChunkCandidate
+): boolean {
+  const haystack = chunkHaystack(chunk);
+  const claimNums = extractNumericTokens(claimText);
+  if (
+    claimNums.length > 0 &&
+    !numericTokensPresentInText(claimNums, `${chunk.documentTitle} ${chunk.body}`)
+  ) {
+    return false;
+  }
+  const words = normalizeForQuoteMatch(claimText)
+    .split(' ')
+    .filter((w) => w.length >= 3 && !wordContainsDigit(w));
+  if (words.length === 0) {
+    return true;
+  }
+  const hits = words.filter((w) => haystack.includes(w));
+  return hits.length >= Math.ceil(words.length / 2);
 }
 
 function resolveCitationRow(
@@ -98,21 +134,45 @@ function resolveCitationRow(
   sourceLabel: string | null,
   quote: string,
   claimText: string
-): TopRow | undefined {
+): CitationRowResolve {
   if (sourceLabel) {
     const labeled = rowForSourceLabel(top, labelByChunk, sourceLabel);
-    if (labeled && resolveQuoteInCandidateChunk(labeled.chunk, quote, { claimText })) {
-      return labeled;
+    if (!labeled) {
+      return { ok: false, reason: 'unknown_source' };
     }
+    if (resolveQuoteInCandidateChunk(labeled.chunk, quote, { claimText: '' })) {
+      return { ok: true, row: labeled };
+    }
+
+    const hits = rowsMatchingQuote(top, quote);
+    const sameDoc = hits.filter(
+      (row) => row.chunk.documentId === labeled.chunk.documentId
+    );
+    if (sameDoc.length > 0) {
+      return { ok: true, row: sameDoc[0] };
+    }
+
+    const otherDoc = hits.filter(
+      (row) => row.chunk.documentId !== labeled.chunk.documentId
+    );
+    if (otherDoc.length > 0) {
+      return { ok: false, reason: 'quote_in_other_document' };
+    }
+
+    return { ok: true, row: labeled };
   }
-  const hits = rowsMatchingQuote(top, quote, claimText);
+
+  const hits = rowsMatchingQuote(top, quote);
   if (hits.length === 1) {
-    return hits[0];
+    if (!claimTextAlignsWithChunk(claimText, hits[0].chunk)) {
+      return { ok: false, reason: 'quote_not_in_chunk' };
+    }
+    return { ok: true, row: hits[0] };
   }
-  if (sourceLabel) {
-    return rowForSourceLabel(top, labelByChunk, sourceLabel);
+  if (hits.length > 1) {
+    return { ok: false, reason: 'quote_not_in_chunk' };
   }
-  return hits[0];
+  return { ok: false, reason: 'quote_not_in_chunk' };
 }
 
 function rejectReasonForQuote(
@@ -197,24 +257,25 @@ export function verifyCitedClaims(input: {
         break;
       }
 
-      const row = resolveCitationRow(
+      const rowResult = resolveCitationRow(
         input.top,
         input.labelByChunk,
         sourceLabel,
         citation.quote,
         claimTextForQuoteMatch || claimText
       );
-      if (!row) {
+      if (!rowResult.ok) {
         rejected.push({
           claimText,
           quote: citation.quote,
           bestMatchScore: 0,
-          reason: 'unknown_source',
-          source: citation.source,
+          reason: rowResult.reason,
+          source: citation.source || sourceLabel || '',
         });
         resolved.length = 0;
         break;
       }
+      const row = rowResult.row;
 
       const match = resolveQuoteInCandidateChunk(row.chunk, citation.quote, {
         claimText: claimTextForQuoteMatch,
