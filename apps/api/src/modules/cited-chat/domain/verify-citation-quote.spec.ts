@@ -52,11 +52,26 @@ describe('verify-citation-quote', () => {
     const hit = findQuoteInChunk(body, 'Gesamtsumme 1234.56 EUR');
     expect(hit).not.toBeNull();
     expect(hit!.bodyQuote).toContain('1.234,56');
+    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
+  });
+
+  it('matches 1.234,56 against 1234,56 variant', () => {
+    const body = 'Betrag 1.234,56 EUR';
+    const hit = findQuoteInChunk(body, '1234,56');
+    expect(hit).not.toBeNull();
+    expect(hit!.bodyQuote).toContain('1.234,56');
+  });
+
+  it('does not match shorter digit runs inside larger amounts', () => {
+    const body = 'Summe 15.230,45 EUR';
+    expect(findQuoteInChunk(body, '1234')).toBeNull();
+    expect(findQuoteInChunk(body, '12.340,00')).toBeNull();
+    expect(findQuoteInChunk(body, '1 2 3 4 5')).toBeNull();
   });
 
   it('gate rejects low reranker scores', () => {
-    expect(passesRerankerGate(0.2, 0.28)).toBe(false);
-    expect(passesRerankerGate(0.29, 0.28)).toBe(true);
+    expect(passesRerankerGate(0.2, 0.21)).toBe(false);
+    expect(passesRerankerGate(0.22, 0.21)).toBe(true);
   });
 
   it('fusion gate rejects weak RRF scores', () => {

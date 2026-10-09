@@ -74,6 +74,9 @@ export async function requestCitedAnswerFromOllama(
       shouldAbort: options.shouldAbort ?? (() => false),
     });
     if ('failure' in streamResult) {
+      if (streamResult.failure.kind === 'aborted') {
+        return { ok: false, detail: 'cancelled' };
+      }
       const detail =
         streamResult.failure.kind === 'http_error'
           ? `HTTP ${streamResult.failure.status}`

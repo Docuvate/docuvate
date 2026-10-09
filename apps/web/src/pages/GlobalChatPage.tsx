@@ -196,9 +196,9 @@ export function GlobalChatPage() {
       );
       if (result.asyncGeneration) {
         streamTargetRef.current = result.assistantMessage.id;
-        connectStream(threadId, result.assistantMessage.id);
+        connectStream(sendThreadId, result.assistantMessage.id);
       }
-      await refreshThreads(threadId);
+      await refreshThreads(sendThreadId);
     } catch (err) {
       setError(formatUserFacingError(err, 'common.error'));
     }

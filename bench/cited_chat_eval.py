@@ -19,6 +19,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "apps" / "worker" / "src"))
+sys.path.insert(0, str(ROOT / "bench"))
+
+from cited_stream_preview import extract_readable_cited_answer_preview, looks_like_cited_answer_json
 
 ABSTENTION_SNIPPET = "nichts gefunden"
 
@@ -148,7 +151,12 @@ class ApiClient:
                     if first_phase_ms is None:
                         first_phase_ms = now_ms
                 content = str(msg.get("content") or "")
-                if content and first_content_ms is None:
+                preview = (
+                    extract_readable_cited_answer_preview(content)
+                    if looks_like_cited_answer_json(content)
+                    else content.strip()
+                )
+                if preview and first_content_ms is None:
                     first_content_ms = now_ms
                 if event.get("type") == "done":
                     final_status = str(msg.get("generationStatus", "done"))

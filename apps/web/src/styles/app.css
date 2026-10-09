@@ -2813,10 +2813,6 @@ mark.global-search-mark {
   max-height: min(640px, calc(100dvh - 11rem));
 }
 
-.global-chat-page .doc-chat-log {
-  overflow: visible;
-}
-
 .doc-chat-log-anchor {
   height: 0;
   width: 100%;

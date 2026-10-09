@@ -122,6 +122,7 @@ export class RunDocumentChatGenerationUseCase {
                 ? [effectiveDocumentId]
                 : threadDocumentIds,
           scope: thread.scope === 'library' ? 'library' : 'document',
+          shouldAbort: () => this.cancelRegistry.isCancelled(messageId),
         });
         return;
       }

@@ -7,6 +7,7 @@ from docuvate_worker.infrastructure.chat.rag_rerank import (
 # SPDX identifiers recorded in-repo (Hugging Face model cards).
 PERMISSIVE_RERANKER_LICENSES = {
     "BAAI/bge-reranker-v2-m3": "apache-2.0",
+    "BAAI/bge-reranker-v2-m3-int8": "apache-2.0",
     "BAAI/bge-reranker-base": "mit",
     "Xenova/ms-marco-MiniLM-L-6-v2": "apache-2.0",
     "Xenova/ms-marco-MiniLM-L-12-v2": "apache-2.0",

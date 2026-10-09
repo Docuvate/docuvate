@@ -8,7 +8,7 @@ import {
 
 describe('rag gate calibration fixture', () => {
   it('uses recalibrated default thresholds', () => {
-    expect(calibrationThresholds()).toEqual({ reranker: 0.28, fusion: 0.02 });
+    expect(calibrationThresholds()).toEqual({ reranker: 0.21, fusion: 0.02 });
   });
 
   it('matches recorded DE+EN fixture expectations', () => {

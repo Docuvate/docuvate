@@ -3,7 +3,8 @@ const QUOTE_WORD_LIMIT = 10;
 export function normalizeForQuoteMatch(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[„“"''`´:;]/g, ' ')
+    .replace(/[„“"''`´]/g, '')
+    .replace(/[:;]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -45,6 +46,13 @@ export function buildNormalizedBodyMap(chunkBody: string): NormalizedBodyMap {
   while (i < chunkBody.length) {
     const ch = chunkBody[i];
     if (/[„“"''`´]/.test(ch)) {
+      i += 1;
+      continue;
+    }
+    if (/[:;]/.test(ch)) {
+      if (map.normalized.length > 0 && map.normalized[map.normalized.length - 1] !== ' ') {
+        appendNormalizedChar(map, i, ' ');
+      }
       i += 1;
       continue;
     }
@@ -98,6 +106,14 @@ function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function digitSequencePattern(digits: string): string {
+  if (digits.length < 3) {
+    return '';
+  }
+  const sep = '[.,\\s]?';
+  return `(?<![\\d])${digits.split('').join(sep)}(?!\\d)`;
+}
+
 function findQuoteRegexInChunk(
   chunkBody: string,
   quote: string
@@ -109,8 +125,14 @@ function findQuoteRegexInChunk(
   const parts = words.map((word) => {
     const digits = word.replace(/[^\d]/g, '');
     if (digits.length >= 3) {
-      const digitPattern = digits.split('').join('[\\d.,\\s]*');
-      return `(?:${escapeRegExp(word)}|${digitPattern})`;
+      const flex = digitSequencePattern(digits);
+      if (!flex) {
+        return escapeRegExp(word);
+      }
+      if (word === digits) {
+        return flex;
+      }
+      return `(?:${escapeRegExp(word)}|${flex})`;
     }
     return escapeRegExp(word);
   });

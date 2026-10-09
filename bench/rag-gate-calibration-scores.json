@@ -1,0 +1,128 @@
+{
+  "model": "BAAI/bge-reranker-v2-m3-int8",
+  "min_in_domain": 0.0004,
+  "max_off_topic": 0.945,
+  "suggested_gate_midpoint": 0.21,
+  "runs": [
+    {
+      "id": "de-invoice-total",
+      "kind": "in_domain",
+      "question": "Welche Gesamtsumme steht auf der Rechnung Nordwind?",
+      "top_passage_id": "de-invoice",
+      "score": 0.9943,
+      "reranker_used": true
+    },
+    {
+      "id": "de-rent-due",
+      "kind": "in_domain",
+      "question": "Bis wann ist die Miete fällig?",
+      "top_passage_id": "de-rent",
+      "score": 0.974,
+      "reranker_used": true
+    },
+    {
+      "id": "de-notice-period",
+      "kind": "in_domain",
+      "question": "Welche Kündigungsfrist gilt im Vertrag?",
+      "top_passage_id": "de-notice",
+      "score": 0.9383,
+      "reranker_used": true
+    },
+    {
+      "id": "de-tax-fee",
+      "kind": "in_domain",
+      "question": "Was kostet die Hundesteuer?",
+      "top_passage_id": "de-tax",
+      "score": 0.2305,
+      "reranker_used": true
+    },
+    {
+      "id": "de-iban",
+      "kind": "in_domain",
+      "question": "Welche IBAN hat der Absender?",
+      "top_passage_id": "de-invoice",
+      "score": 0.0004,
+      "reranker_used": true
+    },
+    {
+      "id": "de-rent-wording",
+      "kind": "in_domain",
+      "question": "Wann muss die Miete bezahlt werden?",
+      "top_passage_id": "de-rent",
+      "score": 0.595,
+      "reranker_used": true
+    },
+    {
+      "id": "de-invoice-vendor",
+      "kind": "in_domain",
+      "question": "Wer hat die Rechnung ausgestellt?",
+      "top_passage_id": "de-invoice",
+      "score": 0.9945,
+      "reranker_used": true
+    },
+    {
+      "id": "de-notice-end",
+      "kind": "in_domain",
+      "question": "Bis wann kann gekündigt werden?",
+      "top_passage_id": "de-notice",
+      "score": 0.999,
+      "reranker_used": true
+    },
+    {
+      "id": "de-tax-city",
+      "kind": "in_domain",
+      "question": "Welche Jahresgebühr gilt für die Hundesteuer?",
+      "top_passage_id": "de-tax",
+      "score": 0.9309,
+      "reranker_used": true
+    },
+    {
+      "id": "de-invoice-currency",
+      "kind": "in_domain",
+      "question": "Welcher Betrag steht auf der Rechnung in EUR?",
+      "top_passage_id": "de-invoice",
+      "score": 0.3917,
+      "reranker_used": true
+    },
+    {
+      "id": "de-off-topic-weather",
+      "kind": "off_topic",
+      "question": "Wie wird das Wetter morgen in Berlin?",
+      "top_passage_id": "de-tax",
+      "score": 0.0,
+      "reranker_used": true
+    },
+    {
+      "id": "en-off-topic",
+      "kind": "off_topic",
+      "question": "What is the capital of France?",
+      "top_passage_id": "de-tax",
+      "score": 0.0,
+      "reranker_used": true
+    },
+    {
+      "id": "de-off-topic-sports",
+      "kind": "off_topic",
+      "question": "Wer gewann die Fußball-WM 2022?",
+      "top_passage_id": "de-invoice",
+      "score": 0.0379,
+      "reranker_used": true
+    },
+    {
+      "id": "de-off-topic-crypto",
+      "kind": "off_topic",
+      "question": "Wie hoch ist der Bitcoin-Preis heute?",
+      "top_passage_id": "de-rent",
+      "score": 0.945,
+      "reranker_used": true
+    },
+    {
+      "id": "en-off-topic-stocks",
+      "kind": "off_topic",
+      "question": "How did the NASDAQ close yesterday?",
+      "top_passage_id": "de-tax",
+      "score": 0.0001,
+      "reranker_used": true
+    }
+  ]
+}

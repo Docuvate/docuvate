@@ -95,7 +95,7 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
             JSON.stringify({
               results: [{ id, score: 0.31 }],
               reranker_used: true,
-              reranker_model: 'BAAI/bge-reranker-v2-m3',
+              reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
             }),
             { status: 200 }
           );
@@ -181,7 +181,7 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
             JSON.stringify({
               results: [{ id: 'c1', score: 0.02 }],
               reranker_used: true,
-              reranker_model: 'BAAI/bge-reranker-v2-m3',
+              reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
             }),
             { status: 200 }
           );
@@ -204,5 +204,116 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     });
     expect(result.abstained).toBe(true);
     expect(result.content).toBe(CITED_CHAT_ABSTENTION_DE);
+    const citations = await pool.query(
+      'SELECT COUNT(*)::int AS n FROM chat_message_citations WHERE message_id = $1',
+      [assistant.id]
+    );
+    expect(citations.rows[0]?.n).toBe(0);
+  });
+
+  it('answers in-domain library question with verified citation quote substring', async () => {
+    mockRerankAndOllama([
+      {
+        text: 'Die Jahresgebühr beträgt 120,00 EUR.',
+        source: 'S1',
+        quote: 'Jahresgebühr: 120,00 EUR',
+      },
+    ]);
+    const threadId = await createLibraryThread();
+    const assistant = await threads.appendMessage(threadId, 'assistant', '', {
+      generationStatus: 'pending',
+      generationPhase: 'retrieving',
+    });
+    const result = await service.generate({
+      messageId: assistant.id,
+      threadId,
+      userId,
+      userMessage: 'Was kostet die Hundesteuer?',
+      documentIds: [],
+      scope: 'library',
+    });
+    expect(result.abstained).toBe(false);
+    const rows = await pool.query<{ quote: string; body: string }>(
+      `SELECT c.quote, dc.body
+       FROM chat_message_citations c
+       JOIN document_chunks dc ON dc.id = c.chunk_id
+       WHERE c.message_id = $1`,
+      [assistant.id]
+    );
+    expect(rows.rows.length).toBeGreaterThanOrEqual(1);
+    const row = rows.rows[0];
+    expect(row.body.includes(row.quote)).toBe(true);
+  });
+
+  it('cites two documents for a multi-part library question', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url.includes('/v1/rag/retrieve')) {
+          const body = JSON.parse(String(init?.body ?? '{}')) as {
+            passages: Array<{ id: string }>;
+          };
+          const results = body.passages.map((p, i) => ({
+            id: p.id,
+            score: 0.9 - i * 0.05,
+          }));
+          return new Response(
+            JSON.stringify({
+              results,
+              reranker_used: true,
+              reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
+            }),
+            { status: 200 }
+          );
+        }
+        if (url.includes('/api/chat')) {
+          return new Response(
+            JSON.stringify({
+              message: {
+                content: JSON.stringify({
+                  claims: [
+                    {
+                      text: 'Gesamtsumme 1.234,56 EUR',
+                      source: 'S1',
+                      quote: 'Gesamtsumme: 1.234,56 EUR',
+                    },
+                    {
+                      text: 'Hundesteuer 120,00 EUR',
+                      source: 'S2',
+                      quote: 'Jahresgebühr: 120,00 EUR',
+                    },
+                  ],
+                }),
+              },
+            }),
+            { status: 200 }
+          );
+        }
+        throw new Error(`unexpected fetch ${url}`);
+      })
+    );
+    const threadId = await createLibraryThread();
+    const assistant = await threads.appendMessage(threadId, 'assistant', '', {
+      generationStatus: 'pending',
+      generationPhase: 'retrieving',
+    });
+    const result = await service.generate({
+      messageId: assistant.id,
+      threadId,
+      userId,
+      userMessage: 'Nenne Gesamtsumme der Rechnung Nordwind und die Hundesteuer.',
+      documentIds: [],
+      scope: 'library',
+    });
+    expect(result.abstained).toBe(false);
+    const rows = await pool.query<{ document_id: string }>(
+      `SELECT DISTINCT dc.document_id
+       FROM chat_message_citations c
+       JOIN document_chunks dc ON dc.id = c.chunk_id
+       WHERE c.message_id = $1`,
+      [assistant.id]
+    );
+    expect(rows.rows.length).toBeGreaterThanOrEqual(2);
   });
 });
