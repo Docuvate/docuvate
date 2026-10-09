@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { DocumentsController } from './presentation/documents.controller.js';
 import { UploadDocumentUseCase } from './application/upload-document.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
@@ -20,8 +20,6 @@ import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-
 import { CancelDocumentChatGenerationUseCase } from './application/cancel-document-chat-generation.use-case.js';
 import { RetryDocumentChatMessageUseCase } from './application/retry-document-chat-message.use-case.js';
 import { StreamDocumentChatMessageUseCase } from './application/stream-document-chat-message.use-case.js';
-import { PgDocumentChatThreadRepository } from './infrastructure/pg-document-chat-thread.repository.js';
-import { DOCUMENT_CHAT_THREAD_REPOSITORY } from '../../shared/domain/ports.js';
 import { ExtractionQueueService } from '../extraction/infrastructure/extraction-queue.service.js';
 import { LabelsModule } from '../labels/labels.module.js';
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
@@ -38,6 +36,7 @@ import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feed
 import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
 import { SearchModule } from '../search/search.module.js';
 import { CitedChatModule } from '../cited-chat/cited-chat.module.js';
+import { ChatInfrastructureModule } from '../chat-infrastructure/chat-infrastructure.module.js';
 
 @Module({
   imports: [
@@ -48,7 +47,8 @@ import { CitedChatModule } from '../cited-chat/cited-chat.module.js';
     DocumentPipelineModule,
     ExtractionFeedbackModule,
     SearchModule,
-    forwardRef(() => CitedChatModule),
+    CitedChatModule,
+    ChatInfrastructureModule,
   ],
   controllers: [DocumentsController],
   providers: [
@@ -73,8 +73,6 @@ import { CitedChatModule } from '../cited-chat/cited-chat.module.js';
     CancelDocumentChatGenerationUseCase,
     RetryDocumentChatMessageUseCase,
     StreamDocumentChatMessageUseCase,
-    PgDocumentChatThreadRepository,
-    { provide: DOCUMENT_CHAT_THREAD_REPOSITORY, useExisting: PgDocumentChatThreadRepository },
     CompareDocumentExtractionUseCase,
     ApplyArenaWinnerExtractionUseCase,
     RunArenaSampleCompareUseCase,
@@ -92,8 +90,7 @@ import { CitedChatModule } from '../cited-chat/cited-chat.module.js';
     CancelDocumentChatGenerationUseCase,
     RetryDocumentChatMessageUseCase,
     DocumentChatGenerationQueueService,
-    PgDocumentChatThreadRepository,
-    { provide: DOCUMENT_CHAT_THREAD_REPOSITORY, useExisting: PgDocumentChatThreadRepository },
+    ChatInfrastructureModule,
   ],
 })
 export class DocumentsModule {}
