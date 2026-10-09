@@ -1,8 +1,20 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import { rectsOverlap } from './confidenceSliderOverlap';
 
 function box(left: number, top: number, width: number, height: number): DOMRect {
-  return { left, top, right: left + width, bottom: top + height, width, height, x: left, y: top, toJSON: () => ({}) };
+  return {
+    left,
+    top,
+    right: left + width,
+    bottom: top + height,
+    width,
+    height,
+    x: left,
+    y: top,
+    toJSON: () => ({}),
+  };
 }
 
 describe('rectsOverlap', () => {

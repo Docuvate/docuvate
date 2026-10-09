@@ -1,5 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   AcceptLabelRecommendationRequestDto,
@@ -30,7 +36,10 @@ import {
   RemoveRecommendationBlocklistUseCase,
 } from '../application/recommendation-blocklist.use-case.js';
 
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('taxonomy')
 @Controller('labels')
@@ -51,7 +60,9 @@ export class LabelsOverviewController {
 
   @Get('recommendations')
   @ApiDocuvateRoute({ operationId: 'recommendations', summary: 'recommendations' })
-  async recommendations(@Session() session: AuthSession): Promise<LabelRecommendationListResponseDto> {
+  async recommendations(
+    @Session() session: AuthSession
+  ): Promise<LabelRecommendationListResponseDto> {
     const items = await this.getRecommendations.execute(session.user.id);
     return { items };
   }
@@ -63,7 +74,10 @@ export class LabelsOverviewController {
   }
 
   @Post('recommendations/:id/accept')
-  @ApiDocuvateRoute({ operationId: 'acceptLabelRecommendation', summary: 'Accept label recommendation' })
+  @ApiDocuvateRoute({
+    operationId: 'acceptLabelRecommendation',
+    summary: 'Accept label recommendation',
+  })
   async accept(
     @Session() session: AuthSession,
     @Param('id') id: string,
@@ -76,7 +90,10 @@ export class LabelsOverviewController {
   }
 
   @Post('recommendations/:id/dismiss')
-  @ApiDocuvateRoute({ operationId: 'dismissLabelRecommendation', summary: 'Dismiss label recommendation' })
+  @ApiDocuvateRoute({
+    operationId: 'dismissLabelRecommendation',
+    summary: 'Dismiss label recommendation',
+  })
   async dismiss(
     @Session() session: AuthSession,
     @Param('id') id: string,
@@ -88,7 +105,9 @@ export class LabelsOverviewController {
 
   @Get('recommendation-blocklist')
   @ApiDocuvateRoute({ operationId: 'blocklist', summary: 'blocklist' })
-  async blocklist(@Session() session: AuthSession): Promise<LabelRecommendationBlocklistListResponseDto> {
+  async blocklist(
+    @Session() session: AuthSession
+  ): Promise<LabelRecommendationBlocklistListResponseDto> {
     return this.listBlocklist.execute(session.user.id);
   }
 

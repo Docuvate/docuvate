@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import type { MappeDto } from '@docuvate/contracts';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   CreateMappeRequestDto,
@@ -14,7 +20,10 @@ import {
   ListMappenUseCase,
   UpdateMappeUseCase,
 } from '../application/mappe.use-cases.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 function toMappeDto(entity: MappeEntity | MappeListItem): MappeDto {
   const counts =
@@ -51,7 +60,10 @@ export class MappenController {
 
   @Post()
   @ApiDocuvateRoute({ operationId: 'createMappe', summary: 'Create root Ordner bucket' })
-  async create(@Session() session: AuthSession, @Body() body: CreateMappeRequestDto): Promise<MappeDto> {
+  async create(
+    @Session() session: AuthSession,
+    @Body() body: CreateMappeRequestDto
+  ): Promise<MappeDto> {
     const mappe = await this.createMappe.execute(session.user.id, body);
     return toMappeDto(mappe);
   }

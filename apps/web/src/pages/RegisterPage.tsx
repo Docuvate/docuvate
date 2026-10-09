@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useId, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -90,8 +92,7 @@ export function RegisterPage() {
           </Button>
         </form>
         <p className="muted">
-          {t('auth.hasAccount')}{' '}
-          <Link to={routes.login}>{t('auth.signIn')}</Link>
+          {t('auth.hasAccount')} <Link to={routes.login}>{t('auth.signIn')}</Link>
         </p>
       </Card>
     </div>

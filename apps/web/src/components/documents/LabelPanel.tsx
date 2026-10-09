@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatUserFacingError } from '../../lib/apiErrors';
@@ -25,7 +27,10 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const [busy, setBusy] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
 
-  const assignedIds = useMemo(() => new Set((document.tags ?? []).map((tag) => tag.id)), [document.tags]);
+  const assignedIds = useMemo(
+    () => new Set((document.tags ?? []).map((tag) => tag.id)),
+    [document.tags]
+  );
 
   const trimmedQuery = query.trim();
   const exactMatch = trimmedQuery.length > 0 ? findTagByName(allTags, trimmedQuery) : undefined;
@@ -82,7 +87,9 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
         doc = await assignDocumentTag(document.id, existing.id);
       } else {
         const created = await createTag({ name: trimmedQuery });
-        setAllTags((prev) => (prev.some((tag) => tag.id === created.id) ? prev : [...prev, created]));
+        setAllTags((prev) =>
+          prev.some((tag) => tag.id === created.id) ? prev : [...prev, created]
+        );
         doc = await assignDocumentTag(document.id, created.id);
       }
       onUpdated(doc);
@@ -119,10 +126,7 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
               variant={tag.isInbox ? 'inbox' : 'assigned'}
               color={tag.isInbox ? undefined : tag.color}
               onRemove={() =>
-                void run(
-                  () => removeDocumentTag(document.id, tag.id),
-                  `remove-${tag.id}`
-                )
+                void run(() => removeDocumentTag(document.id, tag.id), `remove-${tag.id}`)
               }
             />
           ))
@@ -176,13 +180,14 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
                   className="label-picker-item"
                   disabled={busy !== null}
                   onClick={() =>
-                    void run(
-                      () => assignDocumentTag(document.id, tag.id),
-                      `add-${tag.id}`
-                    )
+                    void run(() => assignDocumentTag(document.id, tag.id), `add-${tag.id}`)
                   }
                 >
-                  <Chip label={tag.name} variant={tag.isInbox ? 'inbox' : 'outline'} color={tag.color} />
+                  <Chip
+                    label={tag.name}
+                    variant={tag.isInbox ? 'inbox' : 'outline'}
+                    color={tag.color}
+                  />
                 </button>
               </li>
             ))}

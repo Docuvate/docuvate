@@ -73,7 +73,13 @@ That script refuses to run unless `DV_AGENT_VM=1` is set. It is **not** for Mac,
 
 ## Contributor License Agreement
 
-By submitting a pull request, you confirm that you have the right to license your contribution under the project license (AGPL-3.0 for community edition code) and you grant Docuvate the rights needed to merge and distribute your contribution. If your employer requires a signed CLA, open a [GitHub issue](https://github.com/Docuvate/docuvate/issues) before large contributions.
+You must sign the [Contributor License Agreement (CLA)](CLA.md) before we can merge your pull request.
+The CLA Assistant bot will comment on your PR with a link to sign electronically.
+
+The CLA grants Thomas Faust the rights to license your contributions under the Community Edition
+[Sustainable Use License](./LICENSE), under commercial licenses used for separate Enterprise
+products, and under permissive licenses (such as MIT) for SDK packages. If your employer requires a corporate agreement,
+open a [GitHub issue](https://github.com/Docuvate/docuvate/issues) before large contributions.
 
 ## Secret scanning
 

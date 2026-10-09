@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   CustomFieldType,
   RecognizedFieldDefinitionDto,
@@ -33,10 +35,8 @@ export function draftsFromRecognizedDefinitions(
     extractForAllDocuments: d.extractForAllDocuments,
     gateLabelIds: d.gateLabelIds ?? [],
     gateLabelMatch: d.gateLabelMatch ?? 'all',
-    minLabelConfidence:
-      d.minLabelConfidence ?? defaults?.labelFieldConfidenceThreshold ?? 0.62,
-    confidenceGateEnabled:
-      d.confidenceGateEnabled ?? defaults?.confidenceGateEnabled ?? true,
+    minLabelConfidence: d.minLabelConfidence ?? defaults?.labelFieldConfidenceThreshold ?? 0.62,
+    confidenceGateEnabled: d.confidenceGateEnabled ?? defaults?.confidenceGateEnabled ?? true,
   }));
 }
 

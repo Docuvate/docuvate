@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type {
   AcceptLabelRecommendationRequest,
@@ -24,7 +26,7 @@ import { cosineSimilarity } from '../domain/cosine.js';
 export class DismissLabelRecommendationUseCase {
   constructor(
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
-    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository
   ) {}
 
   async execute(
@@ -38,11 +40,8 @@ export class DismissLabelRecommendationUseCase {
     if (options.blockFuture !== true) {
       return;
     }
-    const fromList = (options.phrases ?? [])
-      .map((p) => p.trim())
-      .filter((p) => p.length >= 2);
-    const single =
-      options.phrase?.trim() || phraseFromRecommendationKey(recommendationId) || '';
+    const fromList = (options.phrases ?? []).map((p) => p.trim()).filter((p) => p.length >= 2);
+    const single = options.phrase?.trim() || phraseFromRecommendationKey(recommendationId) || '';
     const phrases = [...new Set(single.length >= 2 ? [...fromList, single] : fromList)];
     for (const phrase of phrases) {
       await this.labelEmbeddings.addRecommendationBlocklist(userId, phrase, 'dismiss');

@@ -36,6 +36,8 @@ jobs:
         run: node scripts/testing/check-no-legacy.mjs
       - name: No unresolved merge conflict markers
         run: bash scripts/ci/check-conflict-markers.sh
+      - name: SPDX license headers
+        run: node scripts/license/check-spdx-headers.mjs
       - name: Runtime pins match .tool-versions
         run: node scripts/ci/check-tool-versions.mjs
       - name: Tool-versions drift guard tests

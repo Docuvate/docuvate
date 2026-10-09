@@ -1,4 +1,10 @@
-import type { ConnectorRuntimePorts, ConnectorSinkPort, ConnectorSourcePort } from '../../../domain/connector-runtime.ports.js';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  ConnectorRuntimePorts,
+  ConnectorSinkPort,
+  ConnectorSourcePort,
+} from '../../../domain/connector-runtime.ports.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorExportInput,
@@ -69,8 +75,7 @@ export function openS3Runtime(credentials: ConnectorConfigurationInput): Connect
   const sink: ConnectorSinkPort = {
     async exportDocument(input: ConnectorExportInput): Promise<ConnectorExportResult> {
       const key =
-        input.destinationRef?.trim() ||
-        `docuvate-export/${input.documentId}/${input.filename}`;
+        input.destinationRef?.trim() || `docuvate-export/${input.documentId}/${input.filename}`;
       await client.putObject(bucket, key, input.buffer, input.buffer.length, {
         'Content-Type': input.mimeType,
       });

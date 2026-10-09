@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 function normalizeModelTag(name: string): string {
   return name.split(':')[0]?.trim().toLowerCase() ?? name.trim().toLowerCase();
 }

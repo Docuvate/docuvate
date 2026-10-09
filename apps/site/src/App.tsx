@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { LocaleProvider } from './context/LocaleContext';
 import { SiteShell } from './components/SiteShell';
@@ -6,7 +8,7 @@ import { LandingPage } from './pages/LandingPage';
 import { DocsPage } from './pages/DocsPage';
 import { DocsApiPage } from './pages/DocsApiPage';
 import { DocsSdksPage } from './pages/DocsSdksPage';
-import { ImprintPage, PrivacyPage } from './pages/LegalPage';
+import { ImprintPage, LicensePage, PrivacyPage } from './pages/LegalPage';
 import { DocsMotivationPage } from './pages/docs/DocsMotivationPage';
 import { DocsArchitecturePage } from './pages/docs/DocsArchitecturePage';
 import { DocsServiceApiKeysPage } from './pages/docs/DocsServiceApiKeysPage';
@@ -42,6 +44,7 @@ function SiteRoutes() {
           <Route path="/docs/sdks" element={<DocsSdksPage />} />
           <Route path="/impressum" element={<ImprintPage />} />
           <Route path="/datenschutz" element={<PrivacyPage />} />
+          <Route path="/lizenz" element={<LicensePage />} />
 
           <Route path="/en" element={<LandingPage />} />
           <Route path="/en/docs" element={<DocsPage />} />
@@ -58,6 +61,7 @@ function SiteRoutes() {
           <Route path="/en/docs/sdks" element={<DocsSdksPage />} />
           <Route path="/en/impressum" element={<ImprintPage />} />
           <Route path="/en/datenschutz" element={<PrivacyPage />} />
+          <Route path="/en/license" element={<LicensePage />} />
         </Routes>
       </SiteShell>
     </LocaleProvider>

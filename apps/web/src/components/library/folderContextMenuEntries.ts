@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TFunction } from 'i18next';
 import type { DocumentBulkAction, FolderDto, MappeDto } from '@docuvate/contracts';
 import type { ContextMenuEntry } from '../ui/ContextMenu';

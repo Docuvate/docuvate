@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   useCallback,
   useEffect,
@@ -186,9 +188,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
       const target = e.target as HTMLElement | null;
       const typing =
         target &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.isContentEditable);
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         openPalette();
@@ -354,26 +354,38 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                   </button>
                 </div>
 
-                <div className="global-search-scope-chips" role="toolbar" aria-label={t('search.scopeFilters')}>
-                  {(['documents', 'folders', 'labels', 'settings', 'actions'] as const).map((scope) => (
-                    <button
-                      key={scope}
-                      type="button"
-                      className={`global-search-scope-chip${activeScopes.includes(scope) ? ' active' : ''}`}
-                      aria-pressed={activeScopes.includes(scope)}
-                      onClick={() =>
-                        setActiveScopes((prev) =>
-                          prev.includes(scope) ? prev.filter((s) => s !== scope) : [...prev, scope]
-                        )
-                      }
-                    >
-                      {t(`search.groups.${scope}`)}
-                    </button>
-                  ))}
+                <div
+                  className="global-search-scope-chips"
+                  role="toolbar"
+                  aria-label={t('search.scopeFilters')}
+                >
+                  {(['documents', 'folders', 'labels', 'settings', 'actions'] as const).map(
+                    (scope) => (
+                      <button
+                        key={scope}
+                        type="button"
+                        className={`global-search-scope-chip${activeScopes.includes(scope) ? ' active' : ''}`}
+                        aria-pressed={activeScopes.includes(scope)}
+                        onClick={() =>
+                          setActiveScopes((prev) =>
+                            prev.includes(scope)
+                              ? prev.filter((s) => s !== scope)
+                              : [...prev, scope]
+                          )
+                        }
+                      >
+                        {t(`search.groups.${scope}`)}
+                      </button>
+                    )
+                  )}
                 </div>
 
                 {fieldSuggestions.length > 0 ? (
-                  <div className="global-search-field-suggestions" role="listbox" aria-label={t('search.fieldSuggestions')}>
+                  <div
+                    className="global-search-field-suggestions"
+                    role="listbox"
+                    aria-label={t('search.fieldSuggestions')}
+                  >
                     {fieldSuggestions.map((name) => (
                       <button
                         key={name}
@@ -429,13 +441,15 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                       <section>
                         <h3>{t('search.quickActions')}</h3>
                         <ul>
-                          {searchRegistry('hochladen', t, isAdmin).slice(0, 3).map((a) => (
-                            <li key={a.id}>
-                              <button type="button" onClick={() => navigate(a.route)}>
-                                {a.title}
-                              </button>
-                            </li>
-                          ))}
+                          {searchRegistry('hochladen', t, isAdmin)
+                            .slice(0, 3)
+                            .map((a) => (
+                              <li key={a.id}>
+                                <button type="button" onClick={() => navigate(a.route)}>
+                                  {a.title}
+                                </button>
+                              </li>
+                            ))}
                         </ul>
                       </section>
                     </div>
@@ -505,18 +519,18 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                   ) : null}
                 </div>
                 {!noResults ? (
-                <footer className="global-search-footer global-search-footer-desktop" aria-hidden>
-                  <span className="global-search-footer-hint">
-                    <kbd>↑</kbd>
-                    <kbd>↓</kbd> {t('search.footerNavigate')}
-                  </span>
-                  <span className="global-search-footer-hint">
-                    <kbd>↵</kbd> {t('search.footerOpen')}
-                  </span>
-                  <span className="global-search-footer-hint">
-                    <kbd>Esc</kbd> {t('search.footerClose')}
-                  </span>
-                </footer>
+                  <footer className="global-search-footer global-search-footer-desktop" aria-hidden>
+                    <span className="global-search-footer-hint">
+                      <kbd>↑</kbd>
+                      <kbd>↓</kbd> {t('search.footerNavigate')}
+                    </span>
+                    <span className="global-search-footer-hint">
+                      <kbd>↵</kbd> {t('search.footerOpen')}
+                    </span>
+                    <span className="global-search-footer-hint">
+                      <kbd>Esc</kbd> {t('search.footerClose')}
+                    </span>
+                  </footer>
                 ) : null}
               </div>
             </div>,

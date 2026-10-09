@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock } from '@docuvate/contracts';
 
 const LINE_Y_TOLERANCE = 0.014;
@@ -121,10 +123,7 @@ export function findBlockAtPoint(
 
   const hits = onPage.filter(
     (b) =>
-      clampedX >= b.x &&
-      clampedX <= b.x + b.width &&
-      clampedY >= b.y &&
-      clampedY <= b.y + b.height
+      clampedX >= b.x && clampedX <= b.x + b.width && clampedY >= b.y && clampedY <= b.y + b.height
   );
   if (hits.length > 0) {
     return hits.sort((a, b) => a.width * a.height - b.width * b.height)[0] ?? null;

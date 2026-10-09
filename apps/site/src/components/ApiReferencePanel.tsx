@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ApiReferenceReact } from '@scalar/api-reference-react';
 import '@scalar/api-reference-react/style.css';
 import { useEffect, useRef } from 'react';
@@ -6,7 +8,10 @@ import { scheduleApiPageScrollSync } from '../lib/apiPageScroll';
 import '../styles/scalar-site-overrides.css';
 import { useLocale } from '../context/LocaleContext';
 import { observeScalarDeChrome } from '../lib/scalarDeDomPatch';
-import { observeScalarSidebarAccordion, observeScalarSidebarSticky } from '../lib/scalarSidebarAccordion';
+import {
+  observeScalarSidebarAccordion,
+  observeScalarSidebarSticky,
+} from '../lib/scalarSidebarAccordion';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
 import {
   marketingOpenApiServerDescription,

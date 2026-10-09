@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Fragment, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { InlineCode } from '../components/CodeBlock';

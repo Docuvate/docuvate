@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Build layout IR from extraction blocks when geometry-only engines ran (OCR)."""
 
 from __future__ import annotations

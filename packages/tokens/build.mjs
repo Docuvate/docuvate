@@ -47,9 +47,7 @@ function tokenPathToCssVar(pathParts) {
 
 function tokenPathToCamel(pathParts) {
   const flat = pathParts.join('-').split('-').filter(Boolean);
-  return flat
-    .map((p, i) => (i === 0 ? p : p.charAt(0).toUpperCase() + p.slice(1)))
-    .join('');
+  return flat.map((p, i) => (i === 0 ? p : p.charAt(0).toUpperCase() + p.slice(1))).join('');
 }
 
 function tokenPathToDartField(pathParts) {
@@ -80,7 +78,13 @@ function buildThemedCss(colorJson) {
 
 function buildStaticCss() {
   const chunks = [];
-  for (const file of ['typography.json', 'space.json', 'radius.json', 'shadow.json', 'motion.json']) {
+  for (const file of [
+    'typography.json',
+    'space.json',
+    'radius.json',
+    'shadow.json',
+    'motion.json',
+  ]) {
     const data = readJson(file);
     chunks.push(...flattenObject(data));
   }
@@ -95,7 +99,13 @@ function buildStaticCss() {
 
 function buildTs(colorJson) {
   const staticFlat = [];
-  for (const file of ['typography.json', 'space.json', 'radius.json', 'shadow.json', 'motion.json']) {
+  for (const file of [
+    'typography.json',
+    'space.json',
+    'radius.json',
+    'shadow.json',
+    'motion.json',
+  ]) {
     staticFlat.push(...flattenObject(readJson(file)));
   }
   const lines = [
@@ -125,7 +135,13 @@ function buildTs(colorJson) {
 
 function buildTsDecl(colorJson) {
   const staticFlat = [];
-  for (const file of ['typography.json', 'space.json', 'radius.json', 'shadow.json', 'motion.json']) {
+  for (const file of [
+    'typography.json',
+    'space.json',
+    'radius.json',
+    'shadow.json',
+    'motion.json',
+  ]) {
     staticFlat.push(...flattenObject(readJson(file)));
   }
   const lines = [
@@ -165,7 +181,13 @@ function hexToFlutterColor(hex) {
 
 function buildDart(colorJson) {
   const staticFlat = [];
-  for (const file of ['typography.json', 'space.json', 'radius.json', 'shadow.json', 'motion.json']) {
+  for (const file of [
+    'typography.json',
+    'space.json',
+    'radius.json',
+    'shadow.json',
+    'motion.json',
+  ]) {
     staticFlat.push(...flattenObject(readJson(file)));
   }
   const lines = [
@@ -207,7 +229,7 @@ function buildDart(colorJson) {
       lines.push(`      case '${key}':`);
       lines.push(`        return ${hexToFlutterColor(token.value)};`);
     }
-    lines.push("      default:");
+    lines.push('      default:');
     lines.push('        return const Color(0xFF000000);');
     lines.push('    }');
     lines.push('  }');
@@ -216,8 +238,8 @@ function buildDart(colorJson) {
   lines.push('}');
   lines.push('');
   lines.push('extension DocuvateThemeData on DocuvateThemeId {');
-  lines.push('  Color bg() => DocuvateTokens.color(this, \'bg\');');
-  lines.push('  Color accent() => DocuvateTokens.color(this, \'accent\');');
+  lines.push("  Color bg() => DocuvateTokens.color(this, 'bg');");
+  lines.push("  Color accent() => DocuvateTokens.color(this, 'accent');");
   lines.push('}');
   lines.push('');
   return lines.join('\n');

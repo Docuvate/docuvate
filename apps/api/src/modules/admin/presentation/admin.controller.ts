@@ -1,14 +1,6 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { fromNodeHeaders } from 'better-auth/node';
 import {
@@ -28,7 +20,10 @@ import {
   ListAdminUsersQueryDto,
   SetAdminUserRoleRequestDto,
 } from '../../../shared/presentation/dtos/admin.dto.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   BanAdminUserUseCase,
   GetAdminAccessUseCase,
@@ -178,7 +173,10 @@ export class AdminController {
 
   @Post('users/:userId/revoke-invitation')
   @UseGuards(AdminGuard)
-  @ApiDocuvateRoute({ operationId: 'revokeAdminUserInvitation', summary: 'Revoke pending invitation' })
+  @ApiDocuvateRoute({
+    operationId: 'revokeAdminUserInvitation',
+    summary: 'Revoke pending invitation',
+  })
   async revokeAdminUserInvitation(
     @Session() session: AuthSession,
     @Param() params: AdminUserIdParamDto,
@@ -193,7 +191,10 @@ export class AdminController {
 
   @Post('users/:userId/revoke-sessions')
   @UseGuards(AdminGuard)
-  @ApiDocuvateRoute({ operationId: 'revokeAdminUserSessions', summary: 'Revoke all sessions for a user' })
+  @ApiDocuvateRoute({
+    operationId: 'revokeAdminUserSessions',
+    summary: 'Revoke all sessions for a user',
+  })
   async revokeAdminUserSessions(
     @Session() session: AuthSession,
     @Param() params: AdminUserIdParamDto,
@@ -206,5 +207,4 @@ export class AdminController {
     });
     return { ok: true };
   }
-
 }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { GlobalSearchScopeType } from '@docuvate/contracts';
 
 const PREFIX_MAP: Record<string, GlobalSearchScopeType> = {

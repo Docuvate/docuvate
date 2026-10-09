@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { passkeyClient } from '@better-auth/passkey/client';
 import { createAuthClient } from 'better-auth/react';
 import { twoFactorClient } from 'better-auth/client/plugins';
@@ -24,7 +26,9 @@ export const authClient = createAuthClient({
     twoFactorClient({
       onTwoFactorRedirect() {
         if (typeof window !== 'undefined') {
-          window.location.assign(`${routes.loginTwoFactor}?return=${encodeURIComponent(window.location.pathname)}`);
+          window.location.assign(
+            `${routes.loginTwoFactor}?return=${encodeURIComponent(window.location.pathname)}`
+          );
         }
       },
     }),

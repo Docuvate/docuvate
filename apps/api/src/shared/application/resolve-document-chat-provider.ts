@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatProviderId } from '../infrastructure/chat/chat-provider.types.js';
 
 const PROVIDER_IDS: DocumentChatProviderId[] = [
@@ -42,8 +44,7 @@ export function resolveDocumentChatProvider(
     return fromUser;
   }
 
-  const fromEnv =
-    normalizeProvider(process.env['DOCUMENT_CHAT_PROVIDER']) ?? legacyMode();
+  const fromEnv = normalizeProvider(process.env['DOCUMENT_CHAT_PROVIDER']) ?? legacyMode();
   if (fromEnv) {
     return fromEnv;
   }

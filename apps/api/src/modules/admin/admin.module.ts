@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../../shared/infrastructure/auth/auth.module.js';
 import { USER_ADMINISTRATION_PORT } from './domain/user-administration.port.js';

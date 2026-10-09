@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import {
   findQuoteInChunk,
@@ -91,8 +93,14 @@ describe('verify-citation-quote', () => {
 describe('reciprocalRankFusion', () => {
   it('fuses two ranked lists', () => {
     const scores = reciprocalRankFusion([
-      [{ id: 'a', rank: 1 }, { id: 'b', rank: 2 }],
-      [{ id: 'b', rank: 1 }, { id: 'c', rank: 2 }],
+      [
+        { id: 'a', rank: 1 },
+        { id: 'b', rank: 2 },
+      ],
+      [
+        { id: 'b', rank: 1 },
+        { id: 'c', rank: 2 },
+      ],
     ]);
     expect(scores.get('b')).toBeGreaterThan(scores.get('a') ?? 0);
   });

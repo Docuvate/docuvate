@@ -1,10 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatProviderInfo } from '@docuvate/contracts';
 import type { ChatProviderAvailability } from '../../../shared/application/resolve-effective-document-chat-provider.js';
 import { ollamaAvailableForHardware } from './ollama-hardware-gate.js';
-import {
-  modelFitsOllamaMemLimit,
-  ollamaMemLimitGiBFromEnv,
-} from './ollama-compose-memory.js';
+import { modelFitsOllamaMemLimit, ollamaMemLimitGiBFromEnv } from './ollama-compose-memory.js';
 import type { GetHardwareCapabilitiesUseCase } from './hardware-capabilities.use-case.js';
 
 export type DocumentChatUnavailableBackend = {
@@ -63,8 +62,7 @@ export function buildDocumentChatProvidersCatalog(input: {
   const donutWorker = workerById.get('donut-ml');
   const donutAvailable = donutWorker?.available === true;
 
-  const ragEnvReady =
-    workerConfigured && ollamaConfigured && ollamaHardwareOk && ollamaMemOk;
+  const ragEnvReady = workerConfigured && ollamaConfigured && ollamaHardwareOk && ollamaMemOk;
   const ragOllamaAvailable = ragEnvReady && input.ollamaModelReady;
 
   const runsOnCpu = !input.hardware?.gpuAvailable;

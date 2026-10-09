@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export type DocumentStatus = 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
 
 export type MatchingAlgorithm = 'none' | 'any' | 'all' | 'exact' | 'regex';
@@ -323,12 +325,7 @@ export interface TagSuggestionDto {
   source?: TagSuggestionSource;
 }
 
-export type PaperlessImportRunStatus =
-  | 'pending'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+export type PaperlessImportRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 export type PaperlessOcrMode = 'keep_paperless' | 'rerun_docuvate';
 
@@ -649,9 +646,7 @@ export interface LabelMapPointDto {
 }
 
 export type LabelMapEmptyReason =
-  | 'no_extracted_documents'
-  | 'awaiting_embeddings'
-  | 'embedding_unavailable';
+  'no_extracted_documents' | 'awaiting_embeddings' | 'embedding_unavailable';
 
 export interface LabelMapResponseDto {
   points: LabelMapPointDto[];
@@ -770,12 +765,7 @@ export interface DocumentListQuery {
   order?: SortOrder;
 }
 
-export type ExtractorEngineId =
-  | 'pipeline'
-  | 'paddle'
-  | 'docling'
-  | 'pdf_native'
-  | 'tesseract';
+export type ExtractorEngineId = 'pipeline' | 'paddle' | 'docling' | 'pdf_native' | 'tesseract';
 
 export interface ExtractionEngineInfo {
   id: ExtractorEngineId | string;
@@ -786,12 +776,7 @@ export interface ExtractionEngineInfo {
 }
 
 export type DocumentChatProviderId =
-  | 'mock'
-  | 'context'
-  | 'rag-ollama'
-  | 'ollama'
-  | 'donut-ml'
-  | 'off';
+  'mock' | 'context' | 'rag-ollama' | 'ollama' | 'donut-ml' | 'off';
 
 export interface DocumentChatProviderInfo {
   id: DocumentChatProviderId | string;
@@ -918,21 +903,11 @@ export type ConnectorTier = 'oss' | 'commercial';
 export type ConnectorCategoryId = 'mail' | 'dms' | 'home_automation' | 'storage' | 'scanner_sftp';
 
 export type ConnectorPluginId =
-  | 'gmail'
-  | 'outlook'
-  | 'paperless'
-  | 'home_assistant'
-  | 'amazon_s3'
-  | 'sftp_fetch';
+  'gmail' | 'outlook' | 'paperless' | 'home_assistant' | 'amazon_s3' | 'sftp_fetch';
 
 export type ConnectorCapabilityRole = 'source' | 'sink';
 
-export type ConnectorAuthStrategyKind =
-  | 'oauth2'
-  | 'bearer'
-  | 'basic'
-  | 'api_key'
-  | 'custom';
+export type ConnectorAuthStrategyKind = 'oauth2' | 'bearer' | 'basic' | 'api_key' | 'custom';
 
 export type ConnectorAuthFieldType = 'text' | 'password' | 'url' | 'email';
 
@@ -1056,12 +1031,7 @@ export interface SetMlModelLifecycleRequest {
   lifecycle: MlModelLifecycle;
 }
 
-export type GlobalSearchScopeType =
-  | 'documents'
-  | 'folders'
-  | 'labels'
-  | 'settings'
-  | 'actions';
+export type GlobalSearchScopeType = 'documents' | 'folders' | 'labels' | 'settings' | 'actions';
 
 export interface SearchHighlightSpan {
   start: number;

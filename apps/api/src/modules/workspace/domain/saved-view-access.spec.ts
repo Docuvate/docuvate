@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError } from '../../../shared/domain/errors.js';
 import {
@@ -45,9 +47,7 @@ describe('saved view access', () => {
   });
 
   it('allows any user to read shared views', () => {
-    expect(() =>
-      assertCanReadView('other', baseView({ visibility: 'shared' }))
-    ).not.toThrow();
+    expect(() => assertCanReadView('other', baseView({ visibility: 'shared' }))).not.toThrow();
   });
 
   it('allows admin to mutate shared views they do not own', () => {

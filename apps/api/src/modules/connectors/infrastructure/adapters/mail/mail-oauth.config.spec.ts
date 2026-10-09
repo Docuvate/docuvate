@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   connectorOAuthRedirectUri,
@@ -25,9 +27,7 @@ describe('mail oauth config', () => {
   it('prefers explicit redirect URI', () => {
     process.env['DOCUVATE_CONNECTOR_OAUTH_REDIRECT_URI'] =
       'http://localhost:3001/v1/connectors/oauth/callback';
-    expect(connectorOAuthRedirectUri()).toBe(
-      'http://localhost:3001/v1/connectors/oauth/callback'
-    );
+    expect(connectorOAuthRedirectUri()).toBe('http://localhost:3001/v1/connectors/oauth/callback');
   });
 
   it('builds redirect from public API URL', () => {

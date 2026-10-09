@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { IsArray, IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
 import type {
   AddLabelRecommendationBlocklistRequest,
@@ -75,9 +77,7 @@ export class DismissLabelRecommendationRequestDto implements DismissLabelRecomme
   blockFuture?: boolean;
 }
 
-export class AddLabelRecommendationBlocklistRequestDto
-  implements AddLabelRecommendationBlocklistRequest
-{
+export class AddLabelRecommendationBlocklistRequestDto implements AddLabelRecommendationBlocklistRequest {
   @IsString()
   phrase!: string;
 }
@@ -87,24 +87,18 @@ export class LabelRecommendationBlocklistListResponseDto {
   patterns!: LabelRecommendationBlocklistPatternDto[];
 }
 
-export class ProposeLabelRecommendationBlocklistPatternRequestDto
-  implements ProposeLabelRecommendationBlocklistPatternRequest
-{
+export class ProposeLabelRecommendationBlocklistPatternRequestDto implements ProposeLabelRecommendationBlocklistPatternRequest {
   @IsArray()
   @IsString({ each: true })
   phrases!: string[];
 }
 
-export class ConfirmLabelRecommendationBlocklistPatternRequestDto
-  implements ConfirmLabelRecommendationBlocklistPatternRequest
-{
+export class ConfirmLabelRecommendationBlocklistPatternRequestDto implements ConfirmLabelRecommendationBlocklistPatternRequest {
   @IsString()
   pattern!: string;
 }
 
-export class LabelRecommendationBlocklistEntryResponseDto
-  implements LabelRecommendationBlocklistEntryDto
-{
+export class LabelRecommendationBlocklistEntryResponseDto implements LabelRecommendationBlocklistEntryDto {
   id!: string;
   phrase!: string;
   source!: 'manual' | 'dismiss';

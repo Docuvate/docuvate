@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { UPLOAD_ACCEPT } from '../lib/documentUploadConstants';
@@ -38,14 +40,14 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
   );
 
   const active = dragOver;
-  const uploadBusy = queue.some(
-    (item) => item.status === 'pending' || item.status === 'uploading'
-  );
+  const uploadBusy = queue.some((item) => item.status === 'pending' || item.status === 'uploading');
   const showFullDropzone = !compact || expanded || active || uploadBusy;
 
   return (
     <div className={`upload-section${compact ? ' upload-section-compact' : ''}`}>
-      {compact && !showFullDropzone ? <UploadCompactBar onExpand={() => setExpanded(true)} /> : null}
+      {compact && !showFullDropzone ? (
+        <UploadCompactBar onExpand={() => setExpanded(true)} />
+      ) : null}
       {showFullDropzone ? (
         <div
           className={`dropzone${active ? ' dropzone-active' : ''}${compact ? ' dropzone-compact-mode' : ''}`}
@@ -86,7 +88,12 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
       ) : null}
 
       {compact && showFullDropzone && !active && !uploadBusy ? (
-        <Button type="button" variant="ghost" className="upload-collapse-btn" onClick={() => setExpanded(false)}>
+        <Button
+          type="button"
+          variant="ghost"
+          className="upload-collapse-btn"
+          onClick={() => setExpanded(false)}
+        >
           {t('upload.collapseBar')}
         </Button>
       ) : null}

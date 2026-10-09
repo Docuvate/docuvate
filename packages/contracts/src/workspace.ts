@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 type DocumentSortField = 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
 type SortOrder = 'asc' | 'desc';
 type DocumentStatus = 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
@@ -89,11 +91,7 @@ export interface ReorderSavedDocumentViewsRequest {
 }
 
 export type DashboardWidgetType =
-  | 'saved_view'
-  | 'upload'
-  | 'statistics'
-  | 'recent_documents'
-  | 'attention';
+  'saved_view' | 'upload' | 'statistics' | 'recent_documents' | 'attention';
 
 export interface DashboardWidgetDto {
   id: string;

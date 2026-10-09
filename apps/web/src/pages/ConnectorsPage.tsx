@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -16,10 +18,7 @@ import {
   startConnectorOAuth,
 } from '../lib/api';
 import { formatConnectorError } from '../lib/connectorErrors';
-import {
-  connectorOAuthConfigured,
-  connectorOAuthMissingEnvVars,
-} from '../lib/connectorOAuth';
+import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../lib/connectorOAuth';
 import { AlertDialog } from '../components/ui/AlertDialog';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { connectorsOAuthSetupDocUrl } from '../lib/connectorOAuthSetupDoc';
@@ -236,7 +235,10 @@ export function ConnectorsPage() {
     );
   }
 
-  function connectDisabledHint(plugin: ConnectorPluginCatalogEntryDto, oauthReady: boolean): string | undefined {
+  function connectDisabledHint(
+    plugin: ConnectorPluginCatalogEntryDto,
+    oauthReady: boolean
+  ): string | undefined {
     if (oauthReady || plugin.auth.strategy !== 'oauth2') {
       return undefined;
     }
@@ -258,7 +260,9 @@ export function ConnectorsPage() {
               <div className="connector-catalog-title-row">
                 <h3>{t(plugin.labelKey)}</h3>
                 {installed ? (
-                  <span className="connector-connected-badge">{t('connectors.connectedBadge')}</span>
+                  <span className="connector-connected-badge">
+                    {t('connectors.connectedBadge')}
+                  </span>
                 ) : null}
               </div>
               <p className="connector-catalog-category">{categoryLabelFor(plugin)}</p>
@@ -266,10 +270,15 @@ export function ConnectorsPage() {
             </div>
           </div>
           {installed ? (
-            <p className="connector-connected-as">{t('connectors.connectedAs', { name: installed.displayName })}</p>
+            <p className="connector-connected-as">
+              {t('connectors.connectedAs', { name: installed.displayName })}
+            </p>
           ) : null}
           {!installed && !oauthReady && plugin.auth.strategy === 'oauth2' ? (
-            <p className="connector-oauth-status muted" title={connectDisabledHint(plugin, oauthReady)}>
+            <p
+              className="connector-oauth-status muted"
+              title={connectDisabledHint(plugin, oauthReady)}
+            >
               <Info size={16} strokeWidth={2} aria-hidden />
               <span>{t('connectors.oauthNotConfiguredShort')}</span>
             </p>
@@ -349,7 +358,11 @@ export function ConnectorsPage() {
               aria-label={t('connectors.searchAria')}
               className="connector-catalog-search"
             />
-            <div className="connector-category-chips" role="group" aria-label={t('connectors.filterGroupAria')}>
+            <div
+              className="connector-category-chips"
+              role="group"
+              aria-label={t('connectors.filterGroupAria')}
+            >
               <button
                 type="button"
                 className={`connector-category-chip${categoryFilter === 'all' ? ' active' : ''}`}
@@ -375,7 +388,9 @@ export function ConnectorsPage() {
           ) : (
             <div className="connector-catalog-grid">
               {showSftpScannerCard ? (
-                <SftpScannerIngressSection viewerIsServerAdmin={catalog.viewerIsServerAdmin ?? false} />
+                <SftpScannerIngressSection
+                  viewerIsServerAdmin={catalog.viewerIsServerAdmin ?? false}
+                />
               ) : null}
               {sortedFilteredPlugins.map(renderPluginCard)}
             </div>

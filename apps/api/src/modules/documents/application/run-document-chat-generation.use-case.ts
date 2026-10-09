@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   DOCUMENT_CHAT_PORT,
@@ -80,7 +82,10 @@ export class RunDocumentChatGenerationUseCase {
       .filter(
         (m) =>
           m.id !== messageId &&
-          !(m.role === 'assistant' && (m.generationStatus === 'pending' || m.generationStatus === 'streaming'))
+          !(
+            m.role === 'assistant' &&
+            (m.generationStatus === 'pending' || m.generationStatus === 'streaming')
+          )
       )
       .slice(-2)
       .map(({ role, content }) => ({ role, content }));

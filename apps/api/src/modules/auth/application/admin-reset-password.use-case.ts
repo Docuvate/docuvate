@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   AUTH_MAX_PASSWORD_LENGTH,
   AUTH_MIN_PASSWORD_LENGTH,

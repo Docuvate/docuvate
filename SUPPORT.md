@@ -1,6 +1,6 @@
 # Support
 
-## Community edition (AGPL)
+## Community edition (source-available)
 
 - [Documentation](docs/)
 - [GitHub Issues](https://github.com/Docuvate/docuvate/issues) for bugs, feature requests, and questions

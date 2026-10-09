@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: MIT
 export type ApiErrorBody = {
   code: string;
   message: string;
@@ -16,7 +18,10 @@ export class DocuvateApiError extends Error {
 }
 
 export class DocuvateNetworkError extends Error {
-  constructor(message: string, readonly cause?: unknown) {
+  constructor(
+    message: string,
+    readonly cause?: unknown
+  ) {
     super(message);
     this.name = 'DocuvateNetworkError';
   }

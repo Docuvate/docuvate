@@ -1,6 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
-import type { DuplicateRepository, DuplicateStackRepository } from '../../../shared/domain/ports.js';
+import type {
+  DuplicateRepository,
+  DuplicateStackRepository,
+} from '../../../shared/domain/ports.js';
 
 describe('LinkDuplicatePairUseCase', () => {
   it('skips linking when the pair was dismissed as not duplicate', async () => {

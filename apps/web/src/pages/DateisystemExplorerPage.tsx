@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -12,13 +14,7 @@ import {
   useDocumentUploadContext,
 } from '../components/upload/DocumentUploadProvider';
 import { UploadQueueList } from '../components/upload/UploadQueueList';
-import {
-  bulkDocuments,
-  createFolder,
-  createMappe,
-  deleteFolder,
-  updateFolder,
-} from '../lib/api';
+import { bulkDocuments, createFolder, createMappe, deleteFolder, updateFolder } from '../lib/api';
 import { isFileDrag } from '../lib/documentUploadConstants';
 import { isDocumentDrag, readDocumentDragIds } from '../lib/documentDnD';
 import {
@@ -56,9 +52,10 @@ export function DateisystemExplorerPage({ browseMode }: DateisystemExplorerPageP
   const [treeError, setTreeError] = useState<string | null>(null);
   const [uploadOverride, setUploadOverride] = useState<DocumentUploadAssignment | null>(null);
   const [folderPickerOpen, setFolderPickerOpen] = useState(false);
-  const [addExistingTarget, setAddExistingTarget] = useState<{ folderId: string; label: string } | null>(
-    null
-  );
+  const [addExistingTarget, setAddExistingTarget] = useState<{
+    folderId: string;
+    label: string;
+  } | null>(null);
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     const stored = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     const parsed = stored ? Number(stored) : NaN;
@@ -114,7 +111,10 @@ export function DateisystemExplorerPage({ browseMode }: DateisystemExplorerPageP
     function onMove(event: MouseEvent) {
       if (!resizeRef.current) return;
       const delta = event.clientX - resizeRef.current.startX;
-      const next = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, resizeRef.current.startWidth + delta));
+      const next = Math.min(
+        SIDEBAR_MAX,
+        Math.max(SIDEBAR_MIN, resizeRef.current.startWidth + delta)
+      );
       setSidebarWidth(next);
     }
     function onUp() {
@@ -244,7 +244,15 @@ function DateisystemExplorerLayout({
       return { label: dropTarget.assignment.label };
     }
     return null;
-  }, [browseMode, routeFolderId, routeMappeId, data.folders, data.mappen, dropTarget.assignment, t]);
+  }, [
+    browseMode,
+    routeFolderId,
+    routeMappeId,
+    data.folders,
+    data.mappen,
+    dropTarget.assignment,
+    t,
+  ]);
 
   async function onCreateRootOrdner(name: string) {
     setTreeError(null);
@@ -371,9 +379,7 @@ function DateisystemExplorerLayout({
             label: activeFolderTarget.label,
           });
         }}
-        uploadDisabledTitle={
-          dropTarget.enabled ? undefined : t('filesystem.uploadPickFolderFirst')
-        }
+        uploadDisabledTitle={dropTarget.enabled ? undefined : t('filesystem.uploadPickFolderFirst')}
         onRequestUploadTarget={() => setFolderPickerOpen(true)}
       />
     ) : null;

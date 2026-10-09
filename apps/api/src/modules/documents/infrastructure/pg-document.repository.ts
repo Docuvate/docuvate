@@ -1,5 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { dedupeExtractedFields, type DocumentListQuery, type ExtractionResult } from '@docuvate/contracts';
+import {
+  dedupeExtractedFields,
+  type DocumentListQuery,
+  type ExtractionResult,
+} from '@docuvate/contracts';
 import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
 import type { DocumentRepository, DocumentUpdatePatch } from '../../../shared/domain/ports.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
@@ -149,9 +155,7 @@ export class PgDocumentRepository implements DocumentRepository {
       conditions.push(`d.correspondent_id = $${paramIndex++}`);
       params.push(filters.correspondentId);
     }
-    const tagIds =
-      filters.tagIds?.filter(Boolean) ??
-      (filters.tagId ? [filters.tagId] : undefined);
+    const tagIds = filters.tagIds?.filter(Boolean) ?? (filters.tagId ? [filters.tagId] : undefined);
     if (tagIds?.length) {
       for (const tagId of tagIds) {
         conditions.push(
@@ -240,10 +244,10 @@ export class PgDocumentRepository implements DocumentRepository {
   }
 
   async updateStatus(id: string, status: DocumentStatus): Promise<void> {
-    await this.pool.query(
-      `UPDATE documents SET status = $2, updated_at = now() WHERE id = $1`,
-      [id, status]
-    );
+    await this.pool.query(`UPDATE documents SET status = $2, updated_at = now() WHERE id = $1`, [
+      id,
+      status,
+    ]);
   }
 
   async saveExtraction(id: string, result: ExtractionResult): Promise<void> {
@@ -266,8 +270,9 @@ export class PgDocumentRepository implements DocumentRepository {
             `INSERT INTO document_layout_ir (document_id, version, ir) VALUES ($1, $2, $3::jsonb)`,
             [id, version, JSON.stringify(result.layoutIr)]
           );
-          const pages = (result.layoutIr as { pages?: { page: number; widthPt: number; heightPt: number }[] })
-            .pages;
+          const pages = (
+            result.layoutIr as { pages?: { page: number; widthPt: number; heightPt: number }[] }
+          ).pages;
           if (pages?.length) {
             const byPage = new Map<number, { page: number; widthPt: number; heightPt: number }>();
             for (const page of pages) {
@@ -301,10 +306,7 @@ export class PgDocumentRepository implements DocumentRepository {
     }
   }
 
-  async findLayoutIrForUser(
-    id: string,
-    userId: string
-  ): Promise<Record<string, unknown> | null> {
+  async findLayoutIrForUser(id: string, userId: string): Promise<Record<string, unknown> | null> {
     const result = await this.pool.query(
       `SELECT li.ir
        FROM document_layout_ir li
@@ -322,10 +324,10 @@ export class PgDocumentRepository implements DocumentRepository {
   }
 
   async setContentHash(id: string, hash: string): Promise<void> {
-    await this.pool.query(`UPDATE documents SET content_hash = $2, updated_at = now() WHERE id = $1`, [
-      id,
-      hash,
-    ]);
+    await this.pool.query(
+      `UPDATE documents SET content_hash = $2, updated_at = now() WHERE id = $1`,
+      [id, hash]
+    );
   }
 
   async updateForUser(
@@ -383,8 +385,7 @@ export class PgDocumentRepository implements DocumentRepository {
       try {
         await client.query('BEGIN');
         if (nextBlocks !== undefined) {
-          const nextText =
-            textFromExtractionBlocks(nextBlocks) || existing.extraction?.text || '';
+          const nextText = textFromExtractionBlocks(nextBlocks) || existing.extraction?.text || '';
           await client.query(
             `UPDATE documents SET extracted_text = $3, updated_at = now() WHERE id = $1 AND user_id = $2`,
             [id, userId, nextText]
@@ -426,10 +427,10 @@ export class PgDocumentRepository implements DocumentRepository {
     await this.pool.query(`DELETE FROM document_tags WHERE document_id = $1`, [documentId]);
     if (tagIds.length === 0) return;
     const values = tagIds.map((tagId, i) => `($1, $${i + 2})`).join(', ');
-    await this.pool.query(
-      `INSERT INTO document_tags (document_id, tag_id) VALUES ${values}`,
-      [documentId, ...tagIds]
-    );
+    await this.pool.query(`INSERT INTO document_tags (document_id, tag_id) VALUES ${values}`, [
+      documentId,
+      ...tagIds,
+    ]);
   }
 
   async addTagToDocuments(userId: string, documentIds: string[], tagId: string): Promise<number> {

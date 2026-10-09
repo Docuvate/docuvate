@@ -1,15 +1,17 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DashboardWidgetDto, DashboardWidgetType, SavedDocumentViewDto } from '@docuvate/contracts';
+import type {
+  DashboardWidgetDto,
+  DashboardWidgetType,
+  SavedDocumentViewDto,
+} from '@docuvate/contracts';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { DashboardWidgets } from '../components/dashboard/DashboardWidgets';
 import { useToastNotify } from '../components/save/ToastProvider';
-import {
-  getDashboardLayout,
-  listSavedDocumentViews,
-  replaceDashboardLayout,
-} from '../lib/api';
+import { getDashboardLayout, listSavedDocumentViews, replaceDashboardLayout } from '../lib/api';
 
 const ADDABLE_WIDGET_TYPES: DashboardWidgetType[] = [
   'upload',
@@ -164,7 +166,11 @@ export function DashboardPage() {
                 aria-label={t('dashboard.pickSavedView')}
               />
             ) : null}
-            <Button type="button" onClick={onAddWidget} disabled={addType === 'saved_view' && !addViewId}>
+            <Button
+              type="button"
+              onClick={onAddWidget}
+              disabled={addType === 'saved_view' && !addViewId}
+            >
               {t('dashboard.addWidgetAction')}
             </Button>
           </div>

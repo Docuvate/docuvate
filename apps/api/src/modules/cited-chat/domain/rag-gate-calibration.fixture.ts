@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { passesFusionGate, passesRerankerGate } from './verify-citation-quote.js';
 import {
   RAG_FUSION_GATE_MIN_DEFAULT,

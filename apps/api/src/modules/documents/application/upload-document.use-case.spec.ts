@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 import { UploadDocumentUseCase, isPlainTextUploadMime } from './upload-document.use-case.js';
 import { ValidationError } from '../../../shared/domain/errors.js';
@@ -8,7 +10,8 @@ function buildUseCase(overrides?: {
 }) {
   const created: { mappeId?: string | null; folderId?: string | null } = {};
   const documents = {
-    create: overrides?.create ??
+    create:
+      overrides?.create ??
       vi.fn(async (doc: typeof created) => {
         Object.assign(created, doc);
         return { ...doc, id: 'doc-1', tags: [] };

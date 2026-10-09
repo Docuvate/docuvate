@@ -5,7 +5,11 @@ import { PgDuplicateStackRepository } from '../../src/modules/duplicates/infrast
 import { PgLabelEmbeddingRepository } from '../../src/modules/labels/infrastructure/pg-label-embedding.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
-import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+import {
+  deleteSyntheticUser,
+  insertSyntheticUser,
+  newIsolationUserId,
+} from './pg-test-isolation.js';
 
 /** Child tables without user_id are scoped through their parent rows (ADR 015). */
 describe('junction ownership via parent joins (Testcontainers Postgres)', () => {
@@ -36,7 +40,10 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
       `INSERT INTO document_embeddings (document_id, model, embedding) VALUES ($1, 'm', $2::jsonb)`,
       [docA, JSON.stringify([0.1, 0.2])]
     );
-    await pool.query(`INSERT INTO document_tags (document_id, tag_id) VALUES ($1, $2)`, [docA, tagA]);
+    await pool.query(`INSERT INTO document_tags (document_id, tag_id) VALUES ($1, $2)`, [
+      docA,
+      tagA,
+    ]);
     await pool.query(
       `INSERT INTO tag_embedding_centroids (tag_id, model, sample_count, centroid)
        VALUES ($1, 'm', 3, $2::jsonb)`,
@@ -54,13 +61,12 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
       `INSERT INTO chat_threads (id, user_id, title, scope) VALUES ($1, $2, 'x', 'document')`,
       [threadId, userA]
     );
-    await pool.query(
-      `INSERT INTO chat_thread_documents (thread_id, document_id) VALUES ($1, $2)`,
-      [threadId, docA]
-    );
-    const { splitTextChunksWithSpans } = await import(
-      '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js'
-    );
+    await pool.query(`INSERT INTO chat_thread_documents (thread_id, document_id) VALUES ($1, $2)`, [
+      threadId,
+      docA,
+    ]);
+    const { splitTextChunksWithSpans } =
+      await import('../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js');
     await new PgGlobalSearchRepository(pool).indexDocumentChunks(
       userA,
       docA,

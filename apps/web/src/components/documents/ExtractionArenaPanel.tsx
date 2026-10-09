@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ExtractionCompareItem, ExtractionEngineInfo } from '@docuvate/contracts';
@@ -81,9 +83,7 @@ export function ExtractionArenaPanel({
     try {
       await submitExtractionArenaRating(documentId, {
         winnerEngine: winner,
-        comparedEngines: comparedEngines.length
-          ? comparedEngines
-          : items.map((i) => i.engine),
+        comparedEngines: comparedEngines.length ? comparedEngines : items.map((i) => i.engine),
         rating,
         applyAsDefault: applyDefault,
       });

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type { ExtractionBlock } from '@docuvate/contracts';
@@ -161,9 +163,7 @@ export class PgChatMessageCitationsRepository {
       if (!needle) {
         return { ...c, blocks: [] };
       }
-      const hit = pageBlocks.find((b) =>
-        normalizeForQuoteMatch(b.text ?? '').includes(needle)
-      );
+      const hit = pageBlocks.find((b) => normalizeForQuoteMatch(b.text ?? '').includes(needle));
       return { ...c, blocks: hit ? [hit] : [] };
     });
   }

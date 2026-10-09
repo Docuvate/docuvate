@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import { ForbiddenError, ValidationError } from '../../../shared/domain/errors.js';
@@ -52,12 +54,7 @@ export class GetAdminAccessUseCase {
 export class ListAdminUsersUseCase {
   constructor(@Inject(USER_ADMINISTRATION_PORT) private readonly users: UserAdministrationPort) {}
 
-  async execute(input: {
-    headers: Headers;
-    limit: number;
-    offset: number;
-    search?: string;
-  }) {
+  async execute(input: { headers: Headers; limit: number; offset: number; search?: string }) {
     return await this.users.listUsers(input);
   }
 }
@@ -196,12 +193,7 @@ export class SetAdminUserRoleUseCase {
 export class BanAdminUserUseCase {
   constructor(@Inject(USER_ADMINISTRATION_PORT) private readonly users: UserAdministrationPort) {}
 
-  async execute(input: {
-    actorUserId: string;
-    headers: Headers;
-    userId: string;
-    reason?: string;
-  }) {
+  async execute(input: { actorUserId: string; headers: Headers; userId: string; reason?: string }) {
     if (input.actorUserId === input.userId) {
       throw new ForbiddenError('admin.errors.cannotBanSelf');
     }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Stable URL fragment from heading text (per locale page). */
 export function slugifyHeading(text: string): string {
   return text

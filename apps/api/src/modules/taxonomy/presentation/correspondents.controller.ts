@@ -1,14 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   CorrespondentListResponseDto,
   CreateCorrespondentRequestDto,
@@ -22,7 +19,10 @@ import {
   UpdateCorrespondentUseCase,
 } from '../application/taxonomy.use-cases.js';
 import { toCorrespondentDto } from './taxonomy.mapper.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('correspondents')
 @Controller('correspondents')

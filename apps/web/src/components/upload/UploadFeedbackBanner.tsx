@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UploadItem } from '../../lib/useDocumentUploadQueue';
@@ -14,8 +16,7 @@ export function UploadFeedbackBanner() {
   const { queue, clearTerminalItems } = useDocumentUploadContext();
   const dismissTimerRef = useRef<number | null>(null);
 
-  const activeCount =
-    countByStatus(queue, 'pending') + countByStatus(queue, 'uploading');
+  const activeCount = countByStatus(queue, 'pending') + countByStatus(queue, 'uploading');
   const doneCount = countByStatus(queue, 'done');
   const errorCount = countByStatus(queue, 'error');
 

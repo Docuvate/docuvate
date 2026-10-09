@@ -1,6 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Bumped at site build time so marketing pages load fresh PNGs from public/screenshots. */
-export const SCREENSHOT_ASSET_SHA =
-  import.meta.env.VITE_SCREENSHOT_ASSET_SHA ?? 'dev';
+export const SCREENSHOT_ASSET_SHA = import.meta.env.VITE_SCREENSHOT_ASSET_SHA ?? 'dev';
 
 export function screenshotSrc(baseName: string): string {
   return `/screenshots/${baseName}.png?v=${SCREENSHOT_ASSET_SHA}`;

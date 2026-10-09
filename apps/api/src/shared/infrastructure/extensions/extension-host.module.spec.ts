@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, afterEach } from 'vitest';
 import { ExtensionHostModule } from './extension-host.module.js';
 
@@ -20,7 +22,7 @@ describe('ExtensionHostModule', () => {
   });
 
   it('refuses to start when extension env is set in community build', () => {
-    process.env['DOCUVATE_EXTENSION_MODULES'] = 'FakeEeModule';
+    process.env['DOCUVATE_EXTENSION_MODULES'] = 'FakeExtensionModule';
     expect(() => ExtensionHostModule.register()).toThrow(/Community Edition/);
   });
 });

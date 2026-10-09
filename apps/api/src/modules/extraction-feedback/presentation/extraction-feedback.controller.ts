@@ -1,9 +1,18 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import { ListExtractionFieldCorrectionsUseCase } from '../application/list-extraction-field-corrections.use-case.js';
 import { toExtractionFieldCorrectionDto } from './extraction-feedback.mapper.js';
 
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('settings')
 @Controller('extraction-feedback')

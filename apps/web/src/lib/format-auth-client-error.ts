@@ -1,13 +1,15 @@
-import {
-  formatAuthClientError as mapAuthClientError,
-  type AuthErrorContext,
-} from './authErrors';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { formatAuthClientError as mapAuthClientError, type AuthErrorContext } from './authErrors';
 
-type AuthErrorShape = {
-  message?: string;
-  code?: string;
-  status?: number;
-} | null | undefined;
+type AuthErrorShape =
+  | {
+      message?: string;
+      code?: string;
+      status?: number;
+    }
+  | null
+  | undefined;
 
 /**
  * Password-reset pages (PR #73): optional per-code overrides, otherwise
@@ -17,7 +19,7 @@ export function formatAuthClientError(
   error: AuthErrorShape,
   fallback: string,
   byCode?: Record<string, string>,
-  context: AuthErrorContext = 'signIn',
+  context: AuthErrorContext = 'signIn'
 ): string {
   if (!error) {
     return fallback;

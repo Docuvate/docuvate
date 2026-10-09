@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   useCallback,
   useRef,
@@ -70,8 +72,7 @@ export function SegmentedControl<T extends string>({
     }
     if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
       event.preventDefault();
-      const next =
-        enabledIndexes[(position - 1 + enabledIndexes.length) % enabledIndexes.length]!;
+      const next = enabledIndexes[(position - 1 + enabledIndexes.length) % enabledIndexes.length]!;
       onChange(options[next]!.value);
       focusOption(next);
       return;

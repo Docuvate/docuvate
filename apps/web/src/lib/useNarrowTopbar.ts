@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useLayoutEffect, useState } from 'react';
 import { NARROW_VIEWPORT_MEDIA_QUERY, readNarrowViewport } from './narrowViewport';
 

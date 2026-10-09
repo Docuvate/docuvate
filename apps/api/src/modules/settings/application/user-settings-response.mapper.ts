@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { UserPreferencesEntity } from '../../../shared/domain/ports.js';
 import type { UserSettingsResponseDto } from '../../../shared/presentation/dtos/settings.dto.js';
 import type { EffectiveChatProviderResult } from './effective-document-chat-provider.use-case.js';

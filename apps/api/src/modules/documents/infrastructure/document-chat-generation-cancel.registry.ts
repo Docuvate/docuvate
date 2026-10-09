@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import type IORedis from 'ioredis';
 import { createValkeyConnection } from '../../../shared/infrastructure/valkey/valkey-connection.js';

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type { DocumentEntity } from '../../modules/documents/domain/document.entity.js';
 import { ForbiddenError } from '../domain/errors.js';
@@ -38,7 +40,10 @@ export class DocumentAuthorizationService {
     }
   }
 
-  async assertCollection(subject: AuthorizationSubject, action: AuthorizationAction): Promise<void> {
+  async assertCollection(
+    subject: AuthorizationSubject,
+    action: AuthorizationAction
+  ): Promise<void> {
     const decision = await this.authorization.authorize({ subject, action });
     if (decision === 'deny') {
       throw new ForbiddenError('Not authorized');

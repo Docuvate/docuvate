@@ -1,6 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentBulkAction, DocumentDto, FolderDto, MappeDto, TagDto } from '@docuvate/contracts';
+import type {
+  DocumentBulkAction,
+  DocumentDto,
+  FolderDto,
+  MappeDto,
+  TagDto,
+} from '@docuvate/contracts';
 import { Button } from '../ui/Button';
 import { ContextMenuPanel } from '../ui/ContextMenu';
 import { buildFolderContextMenuEntries } from './folderContextMenuEntries';

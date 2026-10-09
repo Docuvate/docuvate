@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { InstanceRole } from '../../auth/domain/instance-role.constants.js';
 import type { UserInvitationMailerPort } from '../../auth/domain/invite-mailer.port.js';
 import {

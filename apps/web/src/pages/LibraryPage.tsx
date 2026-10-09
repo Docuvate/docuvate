@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -43,10 +45,7 @@ export function LibraryPage() {
     return () => mq.removeEventListener('change', sync);
   }, []);
   const sortOptions = useMemo(() => librarySortSelectOptions(t), [t]);
-  const activeFilterCount = useMemo(
-    () => countLibraryActiveFilters(data.filters),
-    [data.filters]
-  );
+  const activeFilterCount = useMemo(() => countLibraryActiveFilters(data.filters), [data.filters]);
 
   const dropTarget = useMemo(
     () =>
@@ -69,7 +68,7 @@ export function LibraryPage() {
     ? t('library.withoutLabelFilter')
     : data.activeLabelNames.length > 0
       ? t('library.labelFilter', { labels: data.activeLabelNames.join(' + ') })
-      : data.mappeSubtitle ?? (data.hasDocuments ? '' : t('library.hintEmpty'));
+      : (data.mappeSubtitle ?? (data.hasDocuments ? '' : t('library.hintEmpty')));
 
   return (
     <DocumentUploadProvider dropTarget={dropTarget} onUploaded={onUploaded}>
@@ -78,7 +77,9 @@ export function LibraryPage() {
           <div>
             <h1 data-ux="page-title">{data.activeViewName ?? data.pageTitle}</h1>
             {data.activeViewName ? (
-              <p className="muted">{t('savedViews.activeViewLead', { name: data.activeViewName })}</p>
+              <p className="muted">
+                {t('savedViews.activeViewLead', { name: data.activeViewName })}
+              </p>
             ) : subtitle ? (
               <p className="muted">{subtitle}</p>
             ) : null}
@@ -103,7 +104,9 @@ export function LibraryPage() {
                 {t('savedViews.updateFromFilters')}
               </Button>
             ) : null}
-            <Link className="btn btn-secondary" to={routes.savedViews}>{t('savedViews.manageNav')}</Link>
+            <Link className="btn btn-secondary" to={routes.savedViews}>
+              {t('savedViews.manageNav')}
+            </Link>
             <LibraryViewSwitcher value={data.viewMode} onChange={data.onViewModeChange} />
             <Select
               value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}

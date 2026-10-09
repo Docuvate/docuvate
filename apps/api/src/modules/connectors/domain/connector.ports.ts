@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorRuntimePorts } from './connector-runtime.ports.js';
 import type {
   ConnectorAuthDescriptor,
@@ -59,7 +61,10 @@ export interface ConnectorInstallationRecord extends ConnectorInstallationEntity
 
 export interface ConnectorInstallationRepository {
   listForUser(userId: string): Promise<ConnectorInstallationEntity[]>;
-  findByIdForUser(userId: string, installationId: string): Promise<ConnectorInstallationRecord | null>;
+  findByIdForUser(
+    userId: string,
+    installationId: string
+  ): Promise<ConnectorInstallationRecord | null>;
   create(input: CreateConnectorInstallationInput): Promise<ConnectorInstallationEntity>;
   updateCredentials(
     userId: string,

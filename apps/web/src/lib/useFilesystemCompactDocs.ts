@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useLayoutEffect, useState } from 'react';
 
 /** Ordner/filesystem doc list: stack rows when viewport is narrow (tree + table). */

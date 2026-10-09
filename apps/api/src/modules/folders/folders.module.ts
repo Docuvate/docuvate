@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 import { FoldersController } from './presentation/folders.controller.js';
 import {
@@ -9,11 +11,6 @@ import {
 
 @Module({
   controllers: [FoldersController],
-  providers: [
-    ListFoldersUseCase,
-    CreateFolderUseCase,
-    UpdateFolderUseCase,
-    DeleteFolderUseCase,
-  ],
+  providers: [ListFoldersUseCase, CreateFolderUseCase, UpdateFolderUseCase, DeleteFolderUseCase],
 })
 export class FoldersModule {}

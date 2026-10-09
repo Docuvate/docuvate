@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   MlCanaryEvaluationEntity,
   MlModelFamilyEntity,
@@ -14,17 +16,30 @@ export interface ModelRegistryRepository {
   listVersionsForFamily(familyId: string): Promise<MlModelVersionEntity[]>;
   findVersionById(versionId: string): Promise<MlModelVersionEntity | null>;
   getActiveVersionForFamily(familyId: string): Promise<MlModelVersionEntity | null>;
-  setVersionLifecycle(versionId: string, lifecycle: MlModelLifecycle): Promise<MlModelVersionEntity>;
+  setVersionLifecycle(
+    versionId: string,
+    lifecycle: MlModelLifecycle
+  ): Promise<MlModelVersionEntity>;
   archiveActiveForFamily(familyId: string, exceptVersionId: string): Promise<void>;
-  insertCanaryEvaluation(row: Omit<MlCanaryEvaluationEntity, 'id' | 'evaluatedAt'>): Promise<MlCanaryEvaluationEntity>;
+  insertCanaryEvaluation(
+    row: Omit<MlCanaryEvaluationEntity, 'id' | 'evaluatedAt'>
+  ): Promise<MlCanaryEvaluationEntity>;
   listRecentJobs(familyId: string, limit: number): Promise<MlRetrainJobEntity[]>;
-  createRetrainJob(familyId: string, triggerKind: MlRetrainTriggerKind): Promise<MlRetrainJobEntity>;
+  createRetrainJob(
+    familyId: string,
+    triggerKind: MlRetrainTriggerKind
+  ): Promise<MlRetrainJobEntity>;
   updateRetrainJob(
     jobId: string,
     patch: Partial<
       Pick<
         MlRetrainJobEntity,
-        'status' | 'trainingSnapshotId' | 'resultVersionId' | 'errorMessage' | 'startedAt' | 'finishedAt'
+        | 'status'
+        | 'trainingSnapshotId'
+        | 'resultVersionId'
+        | 'errorMessage'
+        | 'startedAt'
+        | 'finishedAt'
       >
     >
   ): Promise<MlRetrainJobEntity>;

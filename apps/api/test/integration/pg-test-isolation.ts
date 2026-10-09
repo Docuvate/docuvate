@@ -8,7 +8,10 @@ import { randomUUID } from 'node:crypto';
  *
  * Template: one synthetic user per test; CASCADE delete on user cleans folders/documents.
  */
-export async function insertSyntheticUser(client: pg.PoolClient, user: { id: string; name: string; email: string }) {
+export async function insertSyntheticUser(
+  client: pg.PoolClient,
+  user: { id: string; name: string; email: string }
+) {
   await client.query(
     `INSERT INTO "user" (id, name, email, "emailVerified", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, true, now(), now())`,

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { SDK_FLUTTER_PUBSPEC, SDK_NODE_INSTALL_PNPM } from '../lib/sdkInstallSnippets.ts';
 import type { SiteContent } from './types';
 
@@ -19,7 +21,7 @@ export const enContent: SiteContent = {
     legal: 'Legal',
     privacy: 'Privacy',
     imprint: 'Imprint',
-    license: 'License (AGPL)',
+    license: 'License',
     github: 'GitHub',
     contactEmail: 'hello@docuvate.de',
     copyrightLine: '© 2026 Docuvate',
@@ -45,6 +47,40 @@ export const enContent: SiteContent = {
         'We do not set our own cookies and do not use Docuvate-operated tracking or analytics.',
       ],
     },
+    license: {
+      title: 'License (Community & Enterprise)',
+      intro: [
+        'Docuvate is source-available (fair-code), not OSI “open source”. The Community Edition uses the Sustainable Use License 1.0 (SUL): free for private and internal business self-hosting on infrastructure you control.',
+        'Docuvate Enterprise and Docuvate Cloud are separate commercial products (private repository) built on this Community Edition. This repository is the complete CE core for self-hosters.',
+        'SDKs (@docuvate/sdk, Flutter package docuvate) are MIT-licensed.',
+      ],
+      faqHeading: 'License FAQ',
+      faq: [
+        {
+          question: 'Can my company self-host Docuvate?',
+          answer:
+            'Yes, for internal business use on servers your organization owns or rents and operates. That is what the Community Edition is for.',
+        },
+        {
+          question: 'Can an IT service provider install it for me?',
+          answer:
+            'Yes, when the software runs on your servers and the provider charges for setup, maintenance, or support — not for offering Docuvate as multi-tenant SaaS to others.',
+        },
+        {
+          question: 'What is not allowed?',
+          answer:
+            'Offering Docuvate as a hosted or managed service to third parties, white-labeling, embedding it in a product you sell, or running it as an invisible backend inside someone else’s SaaS.',
+        },
+        {
+          question: 'What about forks and the Docuvate name?',
+          answer:
+            'Forks and redistributions must use a distinct product name and branding and must not imply they are the official project or endorsed by us. See the name and branding policy in the repository (TRADEMARKS.md). Community Edition source may be viewed and modified for permitted use.',
+        },
+      ],
+      repoLinkLabel: 'LICENSE (Community, SUL 1.0) in the repository',
+      commercialLabel: 'Enterprise & Cloud (commercial)',
+      commercialUrl: 'https://docuvate.de',
+    },
   },
   landing: {
     meta: {
@@ -56,8 +92,7 @@ export const enContent: SiteContent = {
       eyebrow: 'Self-hosted document intelligence',
       titleLine1: 'Understand your documents.',
       titleAccent: 'On your hardware.',
-      lead:
-        'OCR, auto-labeling, search and chat over your documents, on your own hardware.',
+      lead: 'OCR, auto-labeling, search and chat over your documents, on your own hardware.',
       primaryCta: 'Self-host',
       secondaryCta: 'Quickstart',
       productCards: [
@@ -79,7 +114,7 @@ export const enContent: SiteContent = {
     },
     proof: {
       items: [
-        { id: 'agpl', label: 'Open source (AGPL)' },
+        { id: 'fairCode', label: 'Fair-code license' },
         { id: 'local', label: 'Runs fully on your hardware' },
         { id: 'cpu', label: 'CPU is enough, no GPU required' },
         { id: 'openapi', label: 'OpenAPI and SDKs' },
@@ -109,7 +144,7 @@ export const enContent: SiteContent = {
       lead: 'Community self-hosting and commercial offerings operated by Docuvate.',
       selfHostedTitle: 'Self-hosted (Community)',
       selfHostedBody:
-        'AGPL-3.0, free, full core feature set. You run Docker Compose or Kubernetes on your infrastructure.',
+        'Sustainable Use License 1.0, free for private and internal self-hosting, full core feature set. You run Docker Compose or Kubernetes on your infrastructure.',
       cloudTitle: 'Docuvate Cloud / Business',
       cloudBody:
         'Commercial offering with support and operations by Docuvate. Details to follow; no prices listed here.',
@@ -117,15 +152,13 @@ export const enContent: SiteContent = {
     featuresSection: {
       kicker: 'Product',
       heading: 'One workspace for ingest, structure, and answers',
-      lead:
-        'Crisp UI shots from the real app: library, fields, labels, folders, and document chat on infrastructure you operate.',
+      lead: 'Crisp UI shots from the real app: library, fields, labels, folders, and document chat on infrastructure you operate.',
     },
     features: [
       {
         id: 'library',
         title: 'Library and upload',
-        body:
-          'Upload PDFs and scans, filter by status and metadata, and track extraction progress in one place.',
+        body: 'Upload PDFs and scans, filter by status and metadata, and track extraction progress in one place.',
         bullets: [
           'Central upload and connector import',
           'Filter by status, labels, and metadata',
@@ -136,8 +169,7 @@ export const enContent: SiteContent = {
       {
         id: 'fields',
         title: 'Recognized fields',
-        body:
-          'Amounts, dates, senders, and custom fields are suggested automatically. You confirm suggestions with one click.',
+        body: 'Amounts, dates, senders, and custom fields are suggested automatically. You confirm suggestions with one click.',
         bullets: [
           'Suggestions for amount, date, and sender',
           'Custom fields with one-click confirm',
@@ -148,8 +180,7 @@ export const enContent: SiteContent = {
       {
         id: 'labels',
         title: 'Labels and folders',
-        body:
-          'Labels group topics; folders mirror how you file. Recommendations assist without forcing automation.',
+        body: 'Labels group topics; folders mirror how you file. Recommendations assist without forcing automation.',
         bullets: [
           'Color labels for topics and projects',
           'Folder tree that matches how you file',
@@ -160,8 +191,7 @@ export const enContent: SiteContent = {
       {
         id: 'chat',
         title: 'Document chat',
-        body:
-          'Ask about a document with a locally connected chat model (e.g. Ollama). Answers use the recognized text in your file.',
+        body: 'Ask about a document with a locally connected chat model (e.g. Ollama). Answers use the recognized text in your file.',
         bullets: [
           'Chat per document on extracted text',
           'Locally connected model (e.g. Ollama)',
@@ -183,15 +213,13 @@ export const enContent: SiteContent = {
         },
         {
           title: '3. Use',
-          body:
-            'Find documents again with labels, folders, and full-text search. Chat and the API use the same underlying data.',
+          body: 'Find documents again with labels, folders, and full-text search. Chat and the API use the same underlying data.',
         },
       ],
     },
     developers: {
       heading: 'API-first for your stack',
-      body:
-        'Connect scripts, portals, and back-office tools with service keys. Same documents and labels as the web UI, without screen scraping.',
+      body: 'Connect scripts, portals, and back-office tools with service keys. Same documents and labels as the web UI, without screen scraping.',
       primaryCta: 'API reference',
       secondaryCta: 'SDK guide',
       codeCaption: 'Node.js',
@@ -214,8 +242,7 @@ for (const doc of data.items) {
     },
     closingCta: {
       heading: 'Self-host on infrastructure you control',
-      body:
-        'No per-seat cloud bill. Run Docuvate on your server, VM, or NAS. You choose when to upgrade, with optional fully local AI. License: AGPL. You run the stack; you own the data.',
+      body: 'No per-seat cloud bill. Run Docuvate on your server, VM, or NAS. You choose when to upgrade, with optional fully local AI. License: SUL 1.0 (fair-code). You run the stack; you own the data.',
       note: '',
       primaryCta: 'Installation guide',
       secondaryCta: 'View source on GitHub',
@@ -289,8 +316,7 @@ for (const doc of data.items) {
     },
     intro: {
       heading: 'Overview',
-      lead:
-        'Docuvate combines a web app, API, and extraction service. This page covers operations, concepts, and self-hosting.',
+      lead: 'Docuvate combines a web app, API, and extraction service. This page covers operations, concepts, and self-hosting.',
     },
     quickstart: {
       heading: 'Quickstart with Docker Compose',
@@ -348,13 +374,19 @@ for (const doc of data.items) {
             { name: 'MINIO_PORT', description: 'Port of the storage service.' },
             { name: 'MINIO_ACCESS_KEY', description: 'Access key for buckets.' },
             { name: 'MINIO_SECRET_KEY', description: 'Secret key for buckets.' },
-            { name: 'MINIO_BUCKET', description: 'Bucket name for document files (for example documents).' },
+            {
+              name: 'MINIO_BUCKET',
+              description: 'Bucket name for document files (for example documents).',
+            },
           ],
         },
         {
           title: 'Auth and web',
           vars: [
-            { name: 'BETTER_AUTH_SECRET', description: 'Signing secret for sessions (long, random).' },
+            {
+              name: 'BETTER_AUTH_SECRET',
+              description: 'Signing secret for sessions (long, random).',
+            },
             { name: 'BETTER_AUTH_URL', description: 'Public API URL for auth callbacks.' },
             { name: 'WEB_ORIGIN', description: 'Allowed browser origin for CORS and cookies.' },
             { name: 'VITE_API_URL', description: 'API base for the web app dev build.' },
@@ -364,7 +396,10 @@ for (const doc of data.items) {
           title: 'Extraction and chat',
           vars: [
             { name: 'WORKER_URL', description: 'Internal URL of the extraction service.' },
-            { name: 'WORKER_SECRET', description: 'Shared secret between API and extraction service.' },
+            {
+              name: 'WORKER_SECRET',
+              description: 'Shared secret between API and extraction service.',
+            },
             { name: 'DOCUMENT_CHAT_PROVIDER', description: 'Chat backend for document Q&A.' },
             { name: 'OLLAMA_URL', description: 'Optional endpoint for local language models.' },
             { name: 'OLLAMA_MODEL', description: 'Optional model name for local answers.' },
@@ -373,18 +408,29 @@ for (const doc of data.items) {
         {
           title: 'Service API and connections',
           vars: [
-            { name: 'DOCUVATE_SERVICE_API_KEYS', description: 'JSON array with keyId, secret, tenantUserId, claims.' },
-            { name: 'DOCUVATE_CONNECTOR_SECRETS_KEY', description: 'AES key for connection secrets.' },
-            { name: 'DOCUVATE_GMAIL_OAUTH_CLIENT_ID', description: 'Optional for Gmail connection.' },
-            { name: 'DOCUVATE_OUTLOOK_OAUTH_CLIENT_ID', description: 'Optional for Outlook connection.' },
+            {
+              name: 'DOCUVATE_SERVICE_API_KEYS',
+              description: 'JSON array with keyId, secret, tenantUserId, claims.',
+            },
+            {
+              name: 'DOCUVATE_CONNECTOR_SECRETS_KEY',
+              description: 'AES key for connection secrets.',
+            },
+            {
+              name: 'DOCUVATE_GMAIL_OAUTH_CLIENT_ID',
+              description: 'Optional for Gmail connection.',
+            },
+            {
+              name: 'DOCUVATE_OUTLOOK_OAUTH_CLIENT_ID',
+              description: 'Optional for Outlook connection.',
+            },
           ],
         },
       ],
     },
   },
   apiPage: {
-    lead:
-      'HTTP interface for documents, labels, folders, and chat. Contract: `GET /v1/openapi.json` on your instance, the same description as the [interactive API reference](/docs/api).',
+    lead: 'HTTP interface for documents, labels, folders, and chat. Contract: `GET /v1/openapi.json` on your instance, the same description as the [interactive API reference](/docs/api).',
   },
   sdks: {
     meta: {
@@ -428,8 +474,7 @@ for (const doc of data.items) {
     copiedCode: 'Copied',
     serviceCredentials: {
       heading: 'Set up service access',
-      body:
-        'Scripts and integrations use a service API key. The key is bound to a user and can carry document permissions.',
+      body: 'Scripts and integrations use a service API key. The key is bound to a user and can carry document permissions.',
       steps: [
         'Set `DOCUVATE_SERVICE_API_KEYS` in `.env` as a JSON array (keyId, secret, tenantUserId, claims).',
         'Call the API at `https://your-host/v1`.',
@@ -445,8 +490,7 @@ for (const doc of data.items) {
       installBody: 'Install `@docuvate/sdk` from the public Git repository:',
       installSnippet: SDK_NODE_INSTALL_PNPM,
       installSnippetLanguage: 'typescript',
-      auth:
-        '`DocuvateClient` with `baseUrl` and `apiKey` (service API key). Configure keys in the Service access section on this page.',
+      auth: '`DocuvateClient` with `baseUrl` and `apiKey` (service API key). Configure keys in the Service access section on this page.',
       examples: [
         {
           title: 'Search documents',
@@ -456,7 +500,7 @@ for (const doc of data.items) {
             '',
             'const client = new DocuvateClient({',
             "  baseUrl: 'https://your-host/v1',",
-            "  apiKey: process.env.DOCUVATE_API_KEY,",
+            '  apiKey: process.env.DOCUVATE_API_KEY,',
             '});',
             '',
             'const { data, error } = await client.api.listDocuments({',
@@ -515,7 +559,7 @@ for (const doc of data.items) {
         {
           title: 'List labels',
           language: 'dart',
-          code: "final tags = await client.taxonomy.listTags();\nprint(tags.data?.items);",
+          code: 'final tags = await client.taxonomy.listTags();\nprint(tags.data?.items);',
         },
         {
           title: 'Ask in chat',

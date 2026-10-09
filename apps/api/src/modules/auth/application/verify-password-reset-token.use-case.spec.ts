@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 import { VerifyPasswordResetTokenUseCase } from './verify-password-reset-token.use-case.js';
 

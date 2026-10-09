@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TFunction } from 'i18next';
 import type { LabelRecommendationDto } from '@docuvate/contracts';
 
@@ -12,9 +14,7 @@ export function todoWhyLine(
     return t('labels.todoWhyAssignSimilarContent', { count });
   }
   if (item.kind === 'new') {
-    return item.source === 'text'
-      ? t('labels.todoWhyNewText')
-      : t('labels.todoWhyNewEmbedding');
+    return item.source === 'text' ? t('labels.todoWhyNewText') : t('labels.todoWhyNewEmbedding');
   }
   if (item.kind === 'merge') {
     const idA = item.tagIds?.[0];
@@ -82,7 +82,9 @@ export function todoAcceptActionKey(item: LabelRecommendationDto): string {
   }
 }
 
-export function mergeLabelPairNames(item: LabelRecommendationDto): { keep: string; remove: string } | null {
+export function mergeLabelPairNames(
+  item: LabelRecommendationDto
+): { keep: string; remove: string } | null {
   if (item.kind !== 'merge' || item.tagNames?.length !== 2) {
     return null;
   }

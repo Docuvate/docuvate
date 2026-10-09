@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type {
@@ -8,9 +10,7 @@ import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 function mapRow(row: Record<string, unknown>): ExtractionFieldCorrectionRecord {
   const labelTagIdsRaw = row['label_tag_ids'];
-  const labelTagIds = Array.isArray(labelTagIdsRaw)
-    ? labelTagIdsRaw.map((id) => String(id))
-    : [];
+  const labelTagIds = Array.isArray(labelTagIdsRaw) ? labelTagIdsRaw.map((id) => String(id)) : [];
   return {
     id: String(row['id']),
     userId: String(row['user_id']),
@@ -65,14 +65,7 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
              user_id, document_id, field_key, old_value, new_value, field_tag_id, source
            ) VALUES ($1, $2, $3, $4, $5, $6, 'user_correction')
            RETURNING id`,
-          [
-            userId,
-            row.documentId,
-            row.fieldKey,
-            row.oldValue,
-            row.newValue,
-            row.fieldTagId,
-          ]
+          [userId, row.documentId, row.fieldKey, row.oldValue, row.newValue, row.fieldTagId]
         );
         const correctionId = inserted.rows[0]?.id;
         if (!correctionId) {

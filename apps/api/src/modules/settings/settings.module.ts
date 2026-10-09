@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 import { PgUserPreferencesRepository } from './infrastructure/pg-user-preferences.repository.js';
 import { SettingsController } from './presentation/settings.controller.js';

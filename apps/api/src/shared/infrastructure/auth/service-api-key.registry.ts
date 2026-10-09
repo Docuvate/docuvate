@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 import type { AuthorizationSubject } from '../../domain/authorization.js';
 import {
@@ -23,7 +25,9 @@ export class ServiceApiKeyRegistry {
   private readonly keys: ServiceApiKeyRecord[];
 
   constructor() {
-    this.keys = mergeSftpIngestServiceKey(parseServiceApiKeys(process.env['DOCUVATE_SERVICE_API_KEYS']));
+    this.keys = mergeSftpIngestServiceKey(
+      parseServiceApiKeys(process.env['DOCUVATE_SERVICE_API_KEYS'])
+    );
   }
 
   resolve(rawKey: string | undefined): ResolvedServicePrincipal | null {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Stored on better-auth `user.role`. */
 export const INSTANCE_ROLE_ADMIN = 'admin' as const;
 export const INSTANCE_ROLE_MEMBER = 'member' as const;

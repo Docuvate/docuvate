@@ -1,14 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   CreateTagRequestDto,
   TagListResponseDto,
@@ -22,7 +19,10 @@ import {
   UpdateTagUseCase,
 } from '../application/taxonomy.use-cases.js';
 import { toTagDto } from './taxonomy.mapper.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('taxonomy')
 @Controller()
@@ -60,7 +60,10 @@ export class TaxonomyController {
 
   @Delete('tags/:id')
   @ApiDocuvateRoute({ operationId: 'deleteTag', summary: 'Delete tag' })
-  async removeTag(@Session() session: AuthSession, @Param('id') id: string): Promise<OkResponseDto> {
+  async removeTag(
+    @Session() session: AuthSession,
+    @Param('id') id: string
+  ): Promise<OkResponseDto> {
     await this.deleteTag.execute(session.user.id, id);
     return { ok: true };
   }

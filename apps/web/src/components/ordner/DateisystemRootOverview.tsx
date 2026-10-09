@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { FolderDto, MappeDto } from '@docuvate/contracts';
@@ -10,7 +12,11 @@ interface DateisystemRootOverviewProps {
   onCreateRoot: () => void;
 }
 
-export function DateisystemRootOverview({ mappen, folders, onCreateRoot }: DateisystemRootOverviewProps) {
+export function DateisystemRootOverview({
+  mappen,
+  folders,
+  onCreateRoot,
+}: DateisystemRootOverviewProps) {
   const { t } = useTranslation();
   const sorted = sortByNameDe(mappen);
 

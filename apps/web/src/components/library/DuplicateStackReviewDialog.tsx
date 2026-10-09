@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DuplicateStackDto, DuplicateStackMemberDto } from '@docuvate/contracts';
@@ -24,12 +26,8 @@ interface DuplicateStackReviewDialogProps {
   onChanged: () => void;
 }
 
-function memberLabel(
-  member: DuplicateStackMemberDto,
-  t: (key: string) => string
-): string {
-  const pct =
-    member.similarity != null ? `${Math.round(member.similarity * 100)} %` : null;
+function memberLabel(member: DuplicateStackMemberDto, t: (key: string) => string): string {
+  const pct = member.similarity != null ? `${Math.round(member.similarity * 100)} %` : null;
   const source =
     member.source === 'hash'
       ? t('library.duplicateStackMemberHash')
@@ -90,10 +88,7 @@ export function DuplicateStackReviewDialog({
     void load();
   }, [load]);
 
-  const primary = useMemo(
-    () => stack?.members.find((m) => m.role === 'primary') ?? null,
-    [stack]
-  );
+  const primary = useMemo(() => stack?.members.find((m) => m.role === 'primary') ?? null, [stack]);
   const version = useMemo(
     () => stack?.members.find((m) => m.documentId === versionId) ?? null,
     [stack, versionId]
@@ -183,15 +178,15 @@ export function DuplicateStackReviewDialog({
 
   return (
     <>
-    <dialog
-      ref={dialogRef}
-      className="dup-dialog"
-      aria-labelledby="dup-dialog-title"
-      onCancel={(e) => {
-        e.preventDefault();
-        onClose();
-      }}
-    >
+      <dialog
+        ref={dialogRef}
+        className="dup-dialog"
+        aria-labelledby="dup-dialog-title"
+        onCancel={(e) => {
+          e.preventDefault();
+          onClose();
+        }}
+      >
         <header className="dup-dialog-header">
           <div>
             <h2 id="dup-dialog-title">{t('library.duplicateStackReviewTitle')}</h2>
@@ -246,7 +241,11 @@ export function DuplicateStackReviewDialog({
                   onClick={() =>
                     void runAction(async () => {
                       if (!stack) return;
-                      await setDuplicateStackPrimary(primaryDocumentId, stack.stackId, version.documentId);
+                      await setDuplicateStackPrimary(
+                        primaryDocumentId,
+                        stack.stackId,
+                        version.documentId
+                      );
                     })
                   }
                 >
@@ -289,20 +288,20 @@ export function DuplicateStackReviewDialog({
             ) : null}
           </>
         ) : null}
-    </dialog>
-    <ConfirmDialog
-      open={deleteConfirmOpen}
-      title={t('library.duplicateDeleteTitle')}
-      description={t('library.duplicateDeleteDescription', {
-        filename: version?.filename ?? t('library.duplicateDeleteFallbackFile'),
-      })}
-      confirmLabel={t('common.deletePermanently')}
-      cancelLabel={t('common.cancel')}
-      tone="danger"
-      busy={busy}
-      onCancel={() => setDeleteConfirmOpen(false)}
-      onConfirm={() => void deleteSelectedVersion()}
-    />
+      </dialog>
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        title={t('library.duplicateDeleteTitle')}
+        description={t('library.duplicateDeleteDescription', {
+          filename: version?.filename ?? t('library.duplicateDeleteFallbackFile'),
+        })}
+        confirmLabel={t('common.deletePermanently')}
+        cancelLabel={t('common.cancel')}
+        tone="danger"
+        busy={busy}
+        onCancel={() => setDeleteConfirmOpen(false)}
+        onConfirm={() => void deleteSelectedVersion()}
+      />
     </>
   );
 }
@@ -319,8 +318,7 @@ const ComparePane = memo(function ComparePane({
   const { t } = useTranslation();
   const isPdf = isPdfMime(member.mimeType);
   const isImage = isImageMime(member.mimeType);
-  const imageSrc =
-    isImage && previewData ? bufferToDataUrl(previewData, member.mimeType) : null;
+  const imageSrc = isImage && previewData ? bufferToDataUrl(previewData, member.mimeType) : null;
 
   return (
     <div className="dup-compare-pane">

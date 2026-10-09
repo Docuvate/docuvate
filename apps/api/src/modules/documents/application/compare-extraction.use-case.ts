@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import {
   DOCUMENT_REPOSITORY,
@@ -17,12 +19,7 @@ export class CompareDocumentExtractionUseCase {
     @Inject(EXTRACTION_PORT) private readonly extraction: ExtractionPort
   ) {}
 
-  async execute(
-    documentId: string,
-    userId: string,
-    engines: string[],
-    maxPages?: number | null
-  ) {
+  async execute(documentId: string, userId: string, engines: string[], maxPages?: number | null) {
     const doc = await this.documents.findByIdForUser(documentId, userId);
     if (!doc) {
       throw new NotFoundError('Document');

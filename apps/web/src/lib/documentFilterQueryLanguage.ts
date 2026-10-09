@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Quote-aware tokenizer and value helpers for the library filter query mini-language. */
 
 export function unescapeFilterQuotedValue(value: string): string {
@@ -33,7 +35,10 @@ export function parseFilterTokenValue(raw: string): string {
   return trimmed;
 }
 
-function readQuotedSegment(source: string, startIndex: number): { value: string; nextIndex: number } {
+function readQuotedSegment(
+  source: string,
+  startIndex: number
+): { value: string; nextIndex: number } {
   let i = startIndex + 1;
   let buf = '';
   while (i < source.length && source[i] !== '"') {

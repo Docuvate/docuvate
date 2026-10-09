@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useRef, useState } from 'react';
 import { CHAT_GENERATION_MAX_WAIT_SEC } from '../../lib/chatGenerationLimits';
 import { chatGenerationWaitStartMs } from '../../lib/chatGenerationWaitStart';
@@ -58,7 +60,13 @@ export function DocumentChatAssistantMessage({
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [isActive, message.createdAt, message.updatedAt, message.generationPhase, message.generationStatus]);
+  }, [
+    isActive,
+    message.createdAt,
+    message.updatedAt,
+    message.generationPhase,
+    message.generationStatus,
+  ]);
 
   useEffect(() => {
     timedOutRef.current = false;
@@ -106,7 +114,9 @@ export function DocumentChatAssistantMessage({
         <div className="doc-chat-status-block" role="status" aria-live="polite">
           <div className="doc-chat-typing-body">
             <Spinner size="sm" label={statusLine ?? t('documents.documentChat.typing')} />
-            <span className="doc-chat-typing-text">{statusLine ?? t('documents.documentChat.typing')}</span>
+            <span className="doc-chat-typing-text">
+              {statusLine ?? t('documents.documentChat.typing')}
+            </span>
           </div>
           <span className="muted doc-chat-elapsed">{formatElapsed(elapsed)}</span>
           <Button

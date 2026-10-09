@@ -1,12 +1,21 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   DashboardLayoutResponseDto,
   DashboardStatisticsDtoClass,
   InstallationDashboardDefaultResponseDto,
   ReplaceDashboardLayoutRequestDto,
 } from '../../../shared/presentation/dtos/workspace.dto.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   GetDashboardLayoutUseCase,
   GetDashboardStatisticsUseCase,
@@ -35,7 +44,9 @@ export class DashboardController {
     operationId: 'getInstallationAdminStatus',
     summary: 'Whether the current user is an installation admin (ADR 019)',
   })
-  async installationAdminStatus(@Session() session: AuthSession): Promise<{ isInstallationAdmin: boolean }> {
+  async installationAdminStatus(
+    @Session() session: AuthSession
+  ): Promise<{ isInstallationAdmin: boolean }> {
     const isInstallationAdmin = await this.installationAdmin.execute(session.user.id);
     return { isInstallationAdmin };
   }
@@ -48,7 +59,10 @@ export class DashboardController {
   }
 
   @Put()
-  @ApiDocuvateRoute({ operationId: 'replaceDashboardLayout', summary: 'Replace personal dashboard layout' })
+  @ApiDocuvateRoute({
+    operationId: 'replaceDashboardLayout',
+    summary: 'Replace personal dashboard layout',
+  })
   async replace(
     @Session() session: AuthSession,
     @Body() body: ReplaceDashboardLayoutRequestDto
@@ -58,7 +72,10 @@ export class DashboardController {
   }
 
   @Get('statistics')
-  @ApiDocuvateRoute({ operationId: 'getDashboardStatistics', summary: 'Dashboard document statistics' })
+  @ApiDocuvateRoute({
+    operationId: 'getDashboardStatistics',
+    summary: 'Dashboard document statistics',
+  })
   async statistics(@Session() session: AuthSession): Promise<DashboardStatisticsDtoClass> {
     const stats = await this.getStatistics.execute(session.user.id);
     return {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: MIT
 import { createClient, createConfig, type Client } from '@hey-api/client-fetch';
 import * as generatedSdk from './generated/sdk.gen.js';
 

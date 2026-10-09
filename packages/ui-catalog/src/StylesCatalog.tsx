@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ComponentType, ReactNode, ButtonHTMLAttributes, InputHTMLAttributes } from 'react';
 import { docuvateThemeAttribute } from '@docuvate/tokens';
 import './styles-catalog.css';

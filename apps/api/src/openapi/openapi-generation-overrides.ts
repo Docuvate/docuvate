@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TestingModuleBuilder } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 import { DocumentChatGenerationCancelRegistry } from '../modules/documents/infrastructure/document-chat-generation-cancel.registry.js';
@@ -50,7 +52,9 @@ const mockDataSource: MockDataSource = {
 };
 
 /** Headless OpenAPI export: no Postgres, Valkey, or BullMQ connections. */
-export function applyOpenApiGenerationOverrides(builder: TestingModuleBuilder): TestingModuleBuilder {
+export function applyOpenApiGenerationOverrides(
+  builder: TestingModuleBuilder
+): TestingModuleBuilder {
   return builder
     .overrideProvider(getDataSourceToken())
     .useValue(mockDataSource)

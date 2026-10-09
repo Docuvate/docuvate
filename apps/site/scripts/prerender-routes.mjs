@@ -18,6 +18,7 @@ export const prerenderRoutes = [
   '/docs/sdks',
   '/impressum',
   '/datenschutz',
+  '/lizenz',
   '/en',
   '/en/docs',
   '/en/docs/motivation',
@@ -36,4 +37,5 @@ export const prerenderRoutes = [
   '/en/docs/sdks',
   '/en/impressum',
   '/en/datenschutz',
+  '/en/license',
 ];

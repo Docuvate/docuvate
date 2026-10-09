@@ -4,7 +4,11 @@ import { PgRecognizedFieldRepository } from '../../src/modules/recognized-fields
 import { PgUserPreferencesRepository } from '../../src/modules/settings/infrastructure/pg-user-preferences.repository.js';
 import { PgExtractionFieldFeedbackRepository } from '../../src/modules/extraction-feedback/infrastructure/pg-extraction-field-feedback.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
-import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+import {
+  deleteSyntheticUser,
+  insertSyntheticUser,
+  newIsolationUserId,
+} from './pg-test-isolation.js';
 
 /** Label sets and engine lists are junction tables (ADR 015); repositories read and write them. */
 describe('normalized junction tables (Testcontainers Postgres)', () => {

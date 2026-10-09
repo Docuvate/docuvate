@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatMessageRecordDto } from '@docuvate/contracts';
 
 /** When the server actually started work (not queue wait). */

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Estimate horizontal scale so rendered text matches PDF word bbox width."""
 
 from __future__ import annotations

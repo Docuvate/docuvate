@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type {
@@ -36,17 +38,14 @@ function mapRow(row: Record<string, unknown>): UserPreferencesEntity {
         : true,
     fieldExtractionRequiredLabelIds: parseRequiredLabelIds(row['required_label_ids']),
     advancedFeaturesEnabled:
-      row['advanced_features_enabled'] != null
-        ? Boolean(row['advanced_features_enabled'])
-        : false,
+      row['advanced_features_enabled'] != null ? Boolean(row['advanced_features_enabled']) : false,
     themePreference:
       row['theme_preference'] === 'light' ||
       row['theme_preference'] === 'dark' ||
       row['theme_preference'] === 'system'
         ? row['theme_preference']
         : 'system',
-    locale:
-      row['locale'] === 'de' || row['locale'] === 'en' ? row['locale'] : null,
+    locale: row['locale'] === 'de' || row['locale'] === 'en' ? row['locale'] : null,
     updatedAt: new Date(String(row['updated_at'])),
   };
 }
@@ -126,14 +125,12 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
   ): Promise<UserPreferencesEntity> {
     const existing = await this.getForUser(userId);
     const next = {
-      preferredExtractorEngine:
-        patch.preferredExtractorEngine ?? existing.preferredExtractorEngine,
+      preferredExtractorEngine: patch.preferredExtractorEngine ?? existing.preferredExtractorEngine,
       preferredChatProvider:
         patch.preferredChatProvider !== undefined
           ? patch.preferredChatProvider
           : existing.preferredChatProvider,
-      useArenaWinnerAsDefault:
-        patch.useArenaWinnerAsDefault ?? existing.useArenaWinnerAsDefault,
+      useArenaWinnerAsDefault: patch.useArenaWinnerAsDefault ?? existing.useArenaWinnerAsDefault,
       arenaWinnerEngine:
         patch.arenaWinnerEngine !== undefined
           ? patch.arenaWinnerEngine
@@ -143,12 +140,10 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
       labelNearSimilarityThreshold:
         patch.labelNearSimilarityThreshold ?? existing.labelNearSimilarityThreshold,
       fieldExtractionConfidenceGateEnabled:
-        patch.fieldExtractionConfidenceGateEnabled ??
-        existing.fieldExtractionConfidenceGateEnabled,
+        patch.fieldExtractionConfidenceGateEnabled ?? existing.fieldExtractionConfidenceGateEnabled,
       fieldExtractionRequiredLabelIds:
         patch.fieldExtractionRequiredLabelIds ?? existing.fieldExtractionRequiredLabelIds,
-      advancedFeaturesEnabled:
-        patch.advancedFeaturesEnabled ?? existing.advancedFeaturesEnabled,
+      advancedFeaturesEnabled: patch.advancedFeaturesEnabled ?? existing.advancedFeaturesEnabled,
       themePreference: patch.themePreference ?? existing.themePreference,
       locale: patch.locale !== undefined ? patch.locale : existing.locale,
     };

@@ -1,8 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
-import {
-  isoDateToLocalizedDisplay,
-  localizedDisplayToIsoDate,
-} from './localizedDate';
+import { isoDateToLocalizedDisplay, localizedDisplayToIsoDate } from './localizedDate';
 
 describe('localizedDate', () => {
   it('formats and parses German dates', () => {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash } from 'node:crypto';
 import { Inject, Injectable } from '@nestjs/common';
 import type { DocumentEntity } from '../domain/document.entity.js';
@@ -89,12 +91,11 @@ export class UploadDocumentUseCase {
         if (tag) extraTags.push(tag);
       }
     }
-    const tags =
-      skipInbox
-        ? extraTags
-        : inboxTag
-          ? [inboxTag, ...extraTags.filter((t) => t.id !== inboxTag.id)]
-          : extraTags;
+    const tags = skipInbox
+      ? extraTags
+      : inboxTag
+        ? [inboxTag, ...extraTags.filter((t) => t.id !== inboxTag.id)]
+        : extraTags;
     const now = this.clock.now();
     const doc: DocumentEntity = {
       id,

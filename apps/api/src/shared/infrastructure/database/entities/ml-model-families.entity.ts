@@ -1,25 +1,27 @@
-import { Column, Entity, Index, OneToMany, PrimaryColumn } from "typeorm";
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
 import { MlModelVersionsEntity } from './ml-model-versions.entity.js';
 import { MlRetrainJobsEntity } from './ml-retrain-jobs.entity.js';
 import { MlTrainingDataSnapshotsEntity } from './ml-training-data-snapshots.entity.js';
 
-@Entity("ml_model_families", { schema: "public" })
+@Entity('ml_model_families', { schema: 'public' })
 export class MlModelFamiliesEntity {
-  @PrimaryColumn("text", { name: "id" })
+  @PrimaryColumn('text', { name: 'id' })
   id: string;
 
-  @Column("text", { name: "kind" })
+  @Column('text', { name: 'kind' })
   kind: string;
 
-  @Column("text", { name: "display_name" })
+  @Column('text', { name: 'display_name' })
   displayName: string;
 
-  @Column("text", { name: "description", nullable: true })
+  @Column('text', { name: 'description', nullable: true })
   description: string | null;
 
-  @Column("timestamp with time zone", {
-    name: "created_at",
-    default: () => "now()",
+  @Column('timestamp with time zone', {
+    name: 'created_at',
+    default: () => 'now()',
   })
   createdAt: Date;
 

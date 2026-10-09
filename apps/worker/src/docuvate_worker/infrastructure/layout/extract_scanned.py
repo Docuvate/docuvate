@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Heuristics for born-digital vs scanned PDFs (no OCR here)."""
 
 from __future__ import annotations

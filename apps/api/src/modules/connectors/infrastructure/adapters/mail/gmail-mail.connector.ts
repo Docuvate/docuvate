@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPlugin } from '../../../domain/connector.ports.js';
 import type {
   ConnectorConfigurationInput,
@@ -39,7 +41,9 @@ export class GmailMailConnector implements ConnectorPlugin {
     return openGmailRuntime(credentials);
   }
 
-  async validateConfiguration(input: ConnectorConfigurationInput): Promise<ConnectorValidationResult> {
+  async validateConfiguration(
+    input: ConnectorConfigurationInput
+  ): Promise<ConnectorValidationResult> {
     if (!mailOAuthConfigured('gmail')) {
       return remoteValidationFailed('connectors.errors.oauthNotConfigured');
     }
@@ -48,9 +52,12 @@ export class GmailMailConnector implements ConnectorPlugin {
       return remoteValidationFailed('connectors.errors.oauthTokenMissing');
     }
     const accessToken = input['access_token']?.trim() ?? '';
-    const response = await connectorFetch('https://gmail.googleapis.com/gmail/v1/users/me/profile', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const response = await connectorFetch(
+      'https://gmail.googleapis.com/gmail/v1/users/me/profile',
+      {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    );
     if (response.status === 401 || response.status === 403) {
       return remoteValidationFailed('connectors.errors.gmailUnauthorized');
     }

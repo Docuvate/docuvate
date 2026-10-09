@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useLayoutEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import { slugifyHeading } from '../lib/slugify';

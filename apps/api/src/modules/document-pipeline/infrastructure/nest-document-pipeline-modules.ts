@@ -1,12 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
 import { ApplyEmbeddingSuggestionsUseCase } from '../../labels/application/apply-embedding-suggestions.use-case.js';
 import { ApplyLabelMatchingUseCase } from '../../labels/application/apply-label-matching.use-case.js';
 import { ApplyGlobalRecognizedFieldsUseCase } from '../../recognized-fields/application/apply-global-recognized-fields.use-case.js';
-import {
-  DOCUMENT_REPOSITORY,
-  type DocumentRepository,
-} from '../../../shared/domain/ports.js';
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
 import type {
   DocumentPipelineContext,
   DocumentPipelineModule,
@@ -25,11 +24,7 @@ export class LabelMatchingDocumentPipelineStep implements DocumentPipelineModule
   constructor(private readonly applyLabelMatching: ApplyLabelMatchingUseCase) {}
 
   run(context: DocumentPipelineContext): Promise<void> {
-    return this.applyLabelMatching.execute(
-      context.documentId,
-      context.userId,
-      context.content
-    );
+    return this.applyLabelMatching.execute(context.documentId, context.userId, context.content);
   }
 }
 

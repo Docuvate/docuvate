@@ -1,9 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
-import type {
-  ChatMessage,
-  DocumentChatContext,
-  DocumentChatPort,
-} from '../../domain/ports.js';
+import type { ChatMessage, DocumentChatContext, DocumentChatPort } from '../../domain/ports.js';
 import type {
   DocumentChatFilePayload,
   DocumentChatProvider,

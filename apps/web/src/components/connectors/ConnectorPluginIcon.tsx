@@ -1,6 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPluginCatalogEntryDto } from '@docuvate/contracts';
 
-const PLUGIN_LOGO_SRC: Partial<Record<ConnectorPluginCatalogEntryDto['id'] | 'sftp_scanner', string>> = {
+const PLUGIN_LOGO_SRC: Partial<
+  Record<ConnectorPluginCatalogEntryDto['id'] | 'sftp_scanner', string>
+> = {
   gmail: '/plugin-logos/gmail.svg',
   outlook: '/plugin-logos/microsoftoutlook.svg',
   paperless: '/plugin-logos/paperlessngx.svg',

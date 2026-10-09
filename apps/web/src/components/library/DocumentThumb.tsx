@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchDocumentContentBlob } from '../../lib/api';
@@ -57,7 +59,9 @@ export function DocumentThumb({ documentId, mimeType, title }: DocumentThumbProp
     <div ref={rootRef} className="doc-thumb" aria-hidden={title ? undefined : true}>
       {url ? <img src={url} alt="" className="doc-thumb-image" /> : null}
       {!url && pdf ? <span className="doc-thumb-fallback">PDF</span> : null}
-      {!url && image && !failed ? <span className="doc-thumb-fallback doc-thumb-loading">…</span> : null}
+      {!url && image && !failed ? (
+        <span className="doc-thumb-fallback doc-thumb-loading">…</span>
+      ) : null}
       {!url && !pdf && !image ? (
         <span className="doc-thumb-fallback">{t('library.thumbFile')}</span>
       ) : null}

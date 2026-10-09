@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 import { splitTextChunks } from '../../../../modules/search/domain/split-text-chunks.js';
 import { tokenizeSearchQuery } from '../../../../modules/search/domain/normalize-search-text.js';

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -90,12 +92,7 @@ export class MatchingAlgorithmFieldsDto {
 
 export class DocumentBulkActionDto {
   @IsIn(['addTag', 'removeTag', 'setCorrespondent', 'setFolder', 'delete'])
-  action!:
-    | 'addTag'
-    | 'removeTag'
-    | 'setCorrespondent'
-    | 'setFolder'
-    | 'delete';
+  action!: 'addTag' | 'removeTag' | 'setCorrespondent' | 'setFolder' | 'delete';
 
   @ValidateIf((o: DocumentBulkActionDto) => o.action === 'addTag' || o.action === 'removeTag')
   @IsUUID('4')

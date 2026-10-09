@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import {
   formatAssignRecommendationReason,
@@ -18,11 +20,13 @@ describe('similarity display', () => {
         labelSupportCount: 1,
       })
     ).toContain('hohe');
-    expect(formatAssignRecommendationReason({
-      tagName: 'Bilanz',
-      similarity: 0.99,
-      labelSupportCount: 1,
-    })).not.toContain('100');
+    expect(
+      formatAssignRecommendationReason({
+        tagName: 'Bilanz',
+        similarity: 0.99,
+        labelSupportCount: 1,
+      })
+    ).not.toContain('100');
   });
 
   it('shows capped percent when enough documents support the label', () => {
@@ -159,13 +163,19 @@ describe('merge scoring', () => {
         tagId: 'a',
         name: 'A',
         centroid: [1, 0, 0],
-        docEmbeddings: [[0.98, 0.02, 0], [0.97, 0.03, 0]],
+        docEmbeddings: [
+          [0.98, 0.02, 0],
+          [0.97, 0.03, 0],
+        ],
       },
       {
         tagId: 'b',
         name: 'B',
         centroid: [0.92, 0.08, 0],
-        docEmbeddings: [[0.9, 0.1, 0], [0.88, 0.12, 0]],
+        docEmbeddings: [
+          [0.9, 0.1, 0],
+          [0.88, 0.12, 0],
+        ],
       }
     );
     expect(scored).not.toBeNull();
@@ -195,8 +205,22 @@ describe('merge scoring', () => {
         { tagId: 'b', name: 'Auftragsbestätigung', centroid: [0.9, 0.1, 0] },
       ],
       docEmbeddingsByTagId: new Map([
-        ['a', [[0.99, 0.01, 0], [0.98, 0.02, 0], [0.97, 0.03, 0]]],
-        ['b', [[0.91, 0.09, 0], [0.89, 0.11, 0], [0.88, 0.12, 0]]],
+        [
+          'a',
+          [
+            [0.99, 0.01, 0],
+            [0.98, 0.02, 0],
+            [0.97, 0.03, 0],
+          ],
+        ],
+        [
+          'b',
+          [
+            [0.91, 0.09, 0],
+            [0.89, 0.11, 0],
+            [0.88, 0.12, 0],
+          ],
+        ],
       ]),
       dismissedKeys: new Set(),
       nameNearDuplicate: () => false,
@@ -211,8 +235,22 @@ describe('merge scoring', () => {
         { tagId: 'b', name: 'Rechnungen', centroid: [0, 0.98, 0.02] },
       ],
       docEmbeddingsByTagId: new Map([
-        ['a', [[0, 1, 0], [0, 0.99, 0.01], [0, 0.98, 0.02]]],
-        ['b', [[0, 0.97, 0.03], [0, 0.96, 0.04], [0, 0.95, 0.05]]],
+        [
+          'a',
+          [
+            [0, 1, 0],
+            [0, 0.99, 0.01],
+            [0, 0.98, 0.02],
+          ],
+        ],
+        [
+          'b',
+          [
+            [0, 0.97, 0.03],
+            [0, 0.96, 0.04],
+            [0, 0.95, 0.05],
+          ],
+        ],
       ]),
       dismissedKeys: new Set(),
       nameNearDuplicate: (x, y) => x.startsWith('Rechnung') && y.startsWith('Rechnung'),

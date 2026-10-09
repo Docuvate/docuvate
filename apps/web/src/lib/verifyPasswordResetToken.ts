@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { apiBaseUrl } from './api';
 
 export type PasswordResetTokenVerification = {
@@ -11,12 +13,14 @@ function passwordResetVerifyBaseUrl(): string {
   return apiBaseUrl();
 }
 
-export async function verifyPasswordResetToken(token: string): Promise<PasswordResetTokenVerification> {
+export async function verifyPasswordResetToken(
+  token: string
+): Promise<PasswordResetTokenVerification> {
   const params = new URLSearchParams({ token });
   const response = await fetch(
     `${passwordResetVerifyBaseUrl()}/auth/password-reset/verify?${params.toString()}`,
     {
-    credentials: 'include',
+      credentials: 'include',
     }
   );
   if (!response.ok) {

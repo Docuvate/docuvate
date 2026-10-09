@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
@@ -59,7 +61,11 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
     }
     try {
       const existing = await this.threads.findMessageForUser(payload.messageId, payload.userId);
-      if (!existing || existing.generationStatus === 'done' || existing.generationStatus === 'failed') {
+      if (
+        !existing ||
+        existing.generationStatus === 'done' ||
+        existing.generationStatus === 'failed'
+      ) {
         return;
       }
       await this.threads.updateMessageGeneration(payload.messageId, {

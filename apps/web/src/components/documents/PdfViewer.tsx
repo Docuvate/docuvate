@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as pdfjs from 'pdfjs-dist';
@@ -295,12 +297,8 @@ export function PdfViewer({
         if (paginated) {
           const pdfPage = await pdf.getPage(currentPage);
           if (cancelled) return;
-          const wrap = await renderPdfPage(
-            pdfPage,
-            currentPage,
-            highlights,
-            scale,
-            (p, nx, ny) => onPageClickRef.current?.(p, nx, ny)
+          const wrap = await renderPdfPage(pdfPage, currentPage, highlights, scale, (p, nx, ny) =>
+            onPageClickRef.current?.(p, nx, ny)
           );
           if (cancelled) return;
           pagesHost.replaceChildren(wrap);

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Link2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { slugifyHeading } from '../lib/slugify';
@@ -11,7 +13,8 @@ type DocsHeadingProps = {
 
 function headingText(children: ReactNode): string {
   if (typeof children === 'string') return children;
-  if (Array.isArray(children)) return children.map((c) => (typeof c === 'string' ? c : '')).join('');
+  if (Array.isArray(children))
+    return children.map((c) => (typeof c === 'string' ? c : '')).join('');
   return '';
 }
 

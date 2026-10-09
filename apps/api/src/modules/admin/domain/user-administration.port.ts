@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { InstanceRole } from '../../auth/domain/instance-role.constants.js';
 
 export type AdminUserAccountStatus = 'active' | 'invited' | 'suspended';
@@ -29,17 +31,9 @@ export type UserAdministrationPort = {
     role: InstanceRole;
   }): Promise<AdminUserListItem>;
 
-  setRole(input: {
-    headers: Headers;
-    userId: string;
-    role: InstanceRole;
-  }): Promise<void>;
+  setRole(input: { headers: Headers; userId: string; role: InstanceRole }): Promise<void>;
 
-  banUser(input: {
-    headers: Headers;
-    userId: string;
-    reason?: string;
-  }): Promise<void>;
+  banUser(input: { headers: Headers; userId: string; reason?: string }): Promise<void>;
 
   unbanUser(input: { headers: Headers; userId: string }): Promise<void>;
 

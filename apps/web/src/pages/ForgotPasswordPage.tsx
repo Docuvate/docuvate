@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +30,12 @@ export function ForgotPasswordPage() {
       });
       if (result.error) {
         setError(
-          formatAuthClientError(result.error, t('auth.forgotPasswordFailed'), undefined, 'forgotPassword'),
+          formatAuthClientError(
+            result.error,
+            t('auth.forgotPasswordFailed'),
+            undefined,
+            'forgotPassword'
+          )
         );
         return;
       }

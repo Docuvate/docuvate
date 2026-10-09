@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type {
   CreateSavedDocumentViewRequest,
@@ -16,7 +18,10 @@ import {
   assertCanReadView,
   assertCanSetVisibility,
 } from '../domain/saved-view-access.js';
-import { parseDashboardWidgetFields, assertDashboardWidgetType } from '../domain/dashboard-widget-config.js';
+import {
+  parseDashboardWidgetFields,
+  assertDashboardWidgetType,
+} from '../domain/dashboard-widget-config.js';
 import { PgWorkspaceRepository } from '../infrastructure/pg-workspace.repository.js';
 import { SavedViewScopeValidator } from '../infrastructure/saved-view-scope.validator.js';
 import type { SavedDocumentViewEntity } from '../domain/workspace.types.js';
@@ -207,7 +212,9 @@ export class SetInstallationDashboardDefaultUseCase {
 
 @Injectable()
 export class GetInstallationAdminStatusUseCase {
-  constructor(@Inject(INSTALLATION_ROLE_READER) private readonly installationRoles: InstallationRoleReader) {}
+  constructor(
+    @Inject(INSTALLATION_ROLE_READER) private readonly installationRoles: InstallationRoleReader
+  ) {}
 
   execute(userId: string) {
     return this.installationRoles.isInstallationAdmin(userId);

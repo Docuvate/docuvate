@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SearchHighlightSpan } from '@docuvate/contracts';
 import { damerauLevenshtein } from './damerau-levenshtein.js';
 import { normalizeSearchText } from './normalize-search-text.js';
@@ -51,7 +53,11 @@ export function highlightFuzzyMatches(text: string, queryWords: string[]): Searc
   return mergeSpans(spans);
 }
 
-export function snippetAroundMatch(text: string, spans: SearchHighlightSpan[], maxLen = 160): string {
+export function snippetAroundMatch(
+  text: string,
+  spans: SearchHighlightSpan[],
+  maxLen = 160
+): string {
   if (!text) return '';
   if (spans.length === 0) {
     return text.length <= maxLen ? text : `${text.slice(0, maxLen - 1)}…`;

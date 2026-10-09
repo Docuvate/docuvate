@@ -1,12 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ChatMessage, DocumentChatContext } from '../../domain/ports.js';
 
 export type DocumentChatProviderId =
-  | 'mock'
-  | 'context'
-  | 'rag-ollama'
-  | 'ollama'
-  | 'donut-ml'
-  | 'off';
+  'mock' | 'context' | 'rag-ollama' | 'ollama' | 'donut-ml' | 'off';
 
 export interface DocumentChatFilePayload {
   buffer: Buffer;

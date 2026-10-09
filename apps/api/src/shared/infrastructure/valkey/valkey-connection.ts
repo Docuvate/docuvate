@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import IORedis, { type RedisOptions } from 'ioredis';
 
 const DEFAULT_CONNECT_TIMEOUT_MS = 3_000;

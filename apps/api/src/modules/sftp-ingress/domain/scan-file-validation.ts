@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 const TEMP_SUFFIXES = ['.tmp', '.part', '.partial', '~'];
 
 export function isTemporaryScanFilename(filename: string): boolean {
@@ -5,11 +7,7 @@ export function isTemporaryScanFilename(filename: string): boolean {
   return TEMP_SUFFIXES.some((suffix) => lower.endsWith(suffix));
 }
 
-export type AllowedScanMime =
-  | 'application/pdf'
-  | 'image/jpeg'
-  | 'image/png'
-  | 'image/tiff';
+export type AllowedScanMime = 'application/pdf' | 'image/jpeg' | 'image/png' | 'image/tiff';
 
 export interface ScanFileValidationResult {
   ok: true;

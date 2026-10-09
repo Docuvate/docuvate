@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export type FaqItem = { question: string; answer: string };
 
 export type FeatureBlock = {
@@ -19,7 +21,7 @@ export type HeroProductCard = {
 };
 
 export type ProofItem = {
-  id: 'agpl' | 'local' | 'cpu' | 'openapi';
+  id: 'fairCode' | 'local' | 'cpu' | 'openapi';
   label: string;
 };
 
@@ -85,7 +87,11 @@ export type DocsContent = {
   intro: { heading: string; lead: string };
   quickstart: { heading: string; steps: string[] };
   concepts: { heading: string; items: { title: string; body: string }[] };
-  selfHosting: { heading: string; intro: string; envGroups: { title: string; vars: { name: string; description: string }[] }[] };
+  selfHosting: {
+    heading: string;
+    intro: string;
+    envGroups: { title: string; vars: { name: string; description: string }[] }[];
+  };
 };
 
 export type SdkExample = {
@@ -171,6 +177,15 @@ export type SiteContent = {
       contactLabel: string;
       controllerLabel: string;
       paragraphs: string[];
+    };
+    license: {
+      title: string;
+      intro: string[];
+      faqHeading: string;
+      faq: FaqItem[];
+      repoLinkLabel: string;
+      commercialLabel: string;
+      commercialUrl: string;
     };
   };
   landing: LandingContent;

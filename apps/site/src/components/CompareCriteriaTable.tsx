@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CompareRow } from '../lib/compareData';
 import { useLocale } from '../context/LocaleContext';
 import { CompareSourceText } from './CompareSourceText';
@@ -9,7 +11,12 @@ type CompareCriteriaTableProps = {
   rows: CompareRow[];
 };
 
-export function CompareCriteriaTable({ legend, docuvateLabel, otherLabel, rows }: CompareCriteriaTableProps) {
+export function CompareCriteriaTable({
+  legend,
+  docuvateLabel,
+  otherLabel,
+  rows,
+}: CompareCriteriaTableProps) {
   const { locale } = useLocale();
   const criterionHeader = locale === 'de' ? 'Kriterium' : 'Criterion';
 

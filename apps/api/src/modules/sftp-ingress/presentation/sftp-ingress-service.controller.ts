@@ -1,7 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   AuthenticateSftpIngressAccountUseCase,
   ResolveSftpIngressAccountUseCase,
@@ -31,7 +36,10 @@ export class SftpIngressServiceController {
   ) {}
 
   @Post('audit')
-  @ApiDocuvateRoute({ operationId: 'recordSftpIngressAudit', summary: 'Record SFTP ingress audit event' })
+  @ApiDocuvateRoute({
+    operationId: 'recordSftpIngressAudit',
+    summary: 'Record SFTP ingress audit event',
+  })
   async audit(@Body() body: SftpIngressServiceAuditDto) {
     await this.recordAudit.execute(body);
     return { ok: true };
@@ -56,14 +64,20 @@ export class SftpIngressServiceController {
   }
 
   @Post('resolve')
-  @ApiDocuvateRoute({ operationId: 'resolveSftpIngressAccount', summary: 'Resolve account after SSH auth' })
+  @ApiDocuvateRoute({
+    operationId: 'resolveSftpIngressAccount',
+    summary: 'Resolve account after SSH auth',
+  })
   async resolve(@Body() body: SftpIngressServiceResolveDto) {
     const account = await this.resolveAccount.execute(body.username);
     return { accountId: account.id, userId: account.userId };
   }
 
   @Post('ingest')
-  @ApiDocuvateRoute({ operationId: 'ingestSftpScan', summary: 'Ingest completed SFTP scan (service)' })
+  @ApiDocuvateRoute({
+    operationId: 'ingestSftpScan',
+    summary: 'Ingest completed SFTP scan (service)',
+  })
   async ingestScan(@Req() req: FastifyRequest) {
     const parsed = await this.ingestMultipart.parseRequest(req);
     const result = await this.ingestMultipart.execute(parsed);

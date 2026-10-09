@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Post-OCR pipeline module ids — aligned with API DocumentPipelineModuleId.
 
 The API orchestrates label matching, embeddings, and field extraction today.

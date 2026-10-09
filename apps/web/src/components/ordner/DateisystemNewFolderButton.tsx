@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FolderPlus } from 'lucide-react';

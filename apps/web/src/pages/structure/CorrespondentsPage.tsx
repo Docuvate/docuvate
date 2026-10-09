@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatUserFacingError } from '../../lib/apiErrors';
@@ -69,11 +71,7 @@ export function CorrespondentsPage() {
           {filteredItems.map((c) => (
             <li key={c.id}>
               <span>{c.name}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setPendingDelete(c)}
-              >
+              <Button type="button" variant="ghost" onClick={() => setPendingDelete(c)}>
                 {t('common.delete')}
               </Button>
             </li>

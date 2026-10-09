@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentEntity } from '../domain/document.entity.js';
 import type { ObjectStorage } from '../../../shared/domain/ports.js';
 

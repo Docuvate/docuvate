@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
 import { useEffect, type ReactNode } from 'react';
@@ -11,7 +13,7 @@ import { MobileNav } from './MobileNav';
 import { SiteLogo } from './SiteLogo';
 
 const GITHUB_URL = 'https://github.com/Docuvate/docuvate';
-const LICENSE_URL = `${GITHUB_URL}/blob/main/LICENSE`;
+const GITHUB_LICENSE_URL = `${GITHUB_URL}/blob/main/LICENSE`;
 const SECURITY_URL = `${GITHUB_URL}/blob/main/SECURITY.md`;
 const RELEASES_URL = `${GITHUB_URL}/releases`;
 
@@ -60,7 +62,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const location = useLocation();
   const path = location.pathname.replace(/^\/en/, '') || '/';
   const onLanding = path === '/';
-  const onLegal = path === '/impressum' || path === '/datenschutz';
+  const onLegal =
+    path === '/impressum' || path === '/datenschutz' || path === '/lizenz' || path === '/license';
+  const licensePath = locale === 'de' ? '/lizenz' : '/license';
   const compareHub = comparisonsHubPath(locale);
   const activeNavKey = resolvePrimaryNavKey(path);
 
@@ -135,7 +139,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <div className="site-footer-links site-footer-links-col">
               <Link to={localizePath('/')}>{locale === 'de' ? 'Startseite' : 'Home'}</Link>
               <Link to={localizePath('/docs')}>{content.nav.docs}</Link>
-              <Link to={localizePath('/#features-heading')}>{locale === 'de' ? 'Funktionen' : 'Features'}</Link>
+              <Link to={localizePath('/#features-heading')}>
+                {locale === 'de' ? 'Funktionen' : 'Features'}
+              </Link>
               <Link to={localizePath('/#integrations-heading')}>
                 {locale === 'de' ? 'Integrationen' : 'Integrations'}
               </Link>
@@ -147,7 +153,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <div className="site-footer-links site-footer-links-col">
               <Link to={localizePath('/docs/api')}>{content.nav.api}</Link>
               <Link to={localizePath('/docs/sdks')}>{content.nav.sdks}</Link>
-              <a href="/openapi.json" download>{content.footer.openApiJson}</a>
+              <a href="/openapi.json" download>
+                {content.footer.openApiJson}
+              </a>
               <Link to={localizePath(locale === 'de' ? '/docs/architektur' : '/docs/architecture')}>
                 {locale === 'de' ? 'Architektur' : 'Architecture'}
               </Link>
@@ -159,18 +167,27 @@ export function SiteShell({ children }: { children: ReactNode }) {
               <Link to={localizePath(compareHub)}>
                 {locale === 'de' ? 'Rubrik und Methodik' : 'Rubric and methodology'}
               </Link>
-              <Link to={localizePath(comparisonsDetailPath(locale, 'paperless-ngx'))}>vs Paperless-ngx</Link>
+              <Link to={localizePath(comparisonsDetailPath(locale, 'paperless-ngx'))}>
+                vs Paperless-ngx
+              </Link>
               <Link to={localizePath(comparisonsDetailPath(locale, 'papra'))}>vs Papra</Link>
               <Link to={localizePath(comparisonsDetailPath(locale, 'docspell'))}>vs Docspell</Link>
-              <Link to={localizePath(comparisonsDetailPath(locale, 'mayan-edms'))}>vs Mayan EDMS</Link>
+              <Link to={localizePath(comparisonsDetailPath(locale, 'mayan-edms'))}>
+                vs Mayan EDMS
+              </Link>
               <Link to={localizePath(comparisonsDetailPath(locale, 'docuware'))}>vs DocuWare</Link>
             </div>
           </div>
           <div>
             <strong className="site-footer-heading">{content.footer.project}</strong>
             <div className="site-footer-links site-footer-links-col">
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer">{content.footer.github}</a>
-              <a href={LICENSE_URL} target="_blank" rel="noreferrer">{content.footer.license}</a>
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer">
+                {content.footer.github}
+              </a>
+              <Link to={localizePath(licensePath)}>{content.footer.license}</Link>
+              <a href={GITHUB_LICENSE_URL} target="_blank" rel="noreferrer">
+                {locale === 'de' ? 'LICENSE (GitHub)' : 'LICENSE (GitHub)'}
+              </a>
               <a href={RELEASES_URL} target="_blank" rel="noreferrer">
                 {locale === 'de' ? 'Releases' : 'Releases'}
               </a>
@@ -185,6 +202,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <div className="site-footer-links site-footer-links-col">
               <Link to={localizePath('/impressum')}>{content.footer.imprint}</Link>
               <Link to={localizePath('/datenschutz')}>{content.footer.privacy}</Link>
+              <Link to={localizePath(licensePath)}>{content.footer.license}</Link>
             </div>
           </div>
         </div>
@@ -192,9 +210,13 @@ export function SiteShell({ children }: { children: ReactNode }) {
           <p>
             {content.footer.copyrightLine} ·{' '}
             <a href={`mailto:${content.footer.contactEmail}`}>{content.footer.contactEmail}</a> ·{' '}
-            <Link to={withLocale('de', path)} hrefLang="de">Deutsch</Link>
+            <Link to={withLocale('de', path)} hrefLang="de">
+              Deutsch
+            </Link>
             {' / '}
-            <Link to={withLocale('en', path)} hrefLang="en">English</Link>
+            <Link to={withLocale('en', path)} hrefLang="en">
+              English
+            </Link>
           </p>
         </div>
       </footer>

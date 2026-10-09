@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 import { AuthModule } from './shared/infrastructure/auth/auth.module.js';
 import { AuthorizationModule } from './shared/infrastructure/authorization/authorization.module.js';
@@ -24,7 +26,6 @@ import { ExtensionHostModule } from './shared/infrastructure/extensions/extensio
 import { SearchModule } from './modules/search/search.module.js';
 import { SftpIngressModule } from './modules/sftp-ingress/sftp-ingress.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
-
 @Module({
   imports: [
     ExtensionHostModule.register(),

@@ -1,5 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TFunction } from 'i18next';
-import type { DocumentBulkAction, DocumentDto, FolderDto, MappeDto, TagDto } from '@docuvate/contracts';
+import type {
+  DocumentBulkAction,
+  DocumentDto,
+  FolderDto,
+  MappeDto,
+  TagDto,
+} from '@docuvate/contracts';
 import type { ContextMenuEntry } from '../ui/ContextMenu';
 import { routes } from '../../lib/routes';
 import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
@@ -75,7 +83,10 @@ export function buildLibraryContextMenuItems(
   } = args;
   const single = selectedIds.length === 1;
   const anchorInSelection = selectedIds.includes(anchorDoc.id);
-  const focusDoc = anchorInSelection && single ? anchorDoc : args.items.find((d) => d.id === selectedIds[0]) ?? anchorDoc;
+  const focusDoc =
+    anchorInSelection && single
+      ? anchorDoc
+      : (args.items.find((d) => d.id === selectedIds[0]) ?? anchorDoc);
   const hasStack = showDuplicateStackBadge(focusDoc);
 
   const menu: ContextMenuEntry[] = [];

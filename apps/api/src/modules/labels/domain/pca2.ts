@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 function dot(a: number[], b: number[]): number {
   let s = 0;
   for (let i = 0; i < a.length; i++) {
@@ -118,4 +120,3 @@ export function normalizePlotCoords(coords: [number, number][]): [number, number
   const ny = normalizeAxis(ys, pad);
   return nx.map((x, i) => [x, ny[i]!] as [number, number]);
 }
-

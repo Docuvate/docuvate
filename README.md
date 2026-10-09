@@ -23,7 +23,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/license-AGPL--3.0-cb3a00" alt="License AGPL-3.0">
+  <img src="https://img.shields.io/badge/license-SUL%201.0%20(fair--code)-cb3a00" alt="License Sustainable Use 1.0 (fair-code)">
   <img src="https://img.shields.io/badge/version-0.1.0-120f09" alt="Version 0.1.0">
   <img src="https://img.shields.io/badge/node-24.21.0-cb3a00?logo=node.js&logoColor=white" alt="Node 24.21.0">
   <img src="https://img.shields.io/badge/python-3.12.15-cb3a00?logo=python&logoColor=white" alt="Python 3.12.15">
@@ -37,16 +37,16 @@ Paperless tools often stop at full-text search. Docuvate targets **structured ex
 
 ## Features
 
-| Area            | Highlights                                                           |
-| --------------- | -------------------------------------------------------------------- |
-| Library         | Filter, bulk actions, duplicate stacks, inbox flow                   |
-| Document detail | Preview, OCR text, layout blocks, editable fields, labels            |
-| Labels          | Vocabulary, suggestions from embeddings, inbox triage                |
-| Connectors      | Plugin catalog (mail, DMS, HA, S3) with connect and import flows     |
-| Filesystem      | Nested folders and explorer alongside labels                         |
-| Chat            | Per-document chat when a provider (for example Ollama) is configured |
+| Area            | Highlights                                                            |
+| --------------- | --------------------------------------------------------------------- |
+| Library         | Filter, bulk actions, duplicate stacks, inbox flow                    |
+| Document detail | Preview, OCR text, layout blocks, editable fields, labels             |
+| Labels          | Vocabulary, suggestions from embeddings, inbox triage                 |
+| Connectors      | Plugin catalog (mail, DMS, HA, S3) with connect and import flows      |
+| Filesystem      | Nested folders and explorer alongside labels                          |
+| Chat            | Per-document chat when a provider (for example Ollama) is configured  |
 | Integrations    | API-first: use Docuvate headless behind your own apps (OpenAPI, ABAC) |
-| Auth            | Email and password via better-auth, password reset (Mailpit locally) |
+| Auth            | Email and password via better-auth, password reset (Mailpit locally)  |
 
 ## Quickstart
 
@@ -101,12 +101,12 @@ Local development without Docker also expects **PostgreSQL 18.6** (or compatible
 
 Deploy Docuvate on Kubernetes with **Kustomize** (primary, GitOps-friendly) or an equivalent **Helm** chart. Overlays cover local **dev** (kind smoke), **homelab** (in-cluster Postgres 18, MinIO, Valkey), and **cloud** (managed Postgres and S3-compatible object storage; no in-cluster database).
 
-| Path | Purpose |
-| ---- | ------- |
-| [docs/deploy/kubernetes.md](docs/deploy/kubernetes.md) | Homelab, cloud, migrations, backups |
-| [deploy/README.md](deploy/README.md) | Layout of manifests, scripts, and examples |
-| `deploy/kustomize/overlays/*` | Environment-specific manifests |
-| `deploy/helm/docuvate` | Helm chart with matching values files |
+| Path                                                   | Purpose                                    |
+| ------------------------------------------------------ | ------------------------------------------ |
+| [docs/deploy/kubernetes.md](docs/deploy/kubernetes.md) | Homelab, cloud, migrations, backups        |
+| [deploy/README.md](deploy/README.md)                   | Layout of manifests, scripts, and examples |
+| `deploy/kustomize/overlays/*`                          | Environment-specific manifests             |
+| `deploy/helm/docuvate`                                 | Helm chart with matching values files      |
 
 Validate rendered manifests locally (kubeconform strict, Helm/Kustomize parity):
 
@@ -153,11 +153,14 @@ Use Docuvate headless behind your own apps and automations.
 
 ## Editions
 
-| Edition       | License  |
-| ------------- | -------- |
-| **Community** | AGPL-3.0 |
+| Edition                     | What you get                                                                            | License                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Community (self-hosted)** | Full core product: OCR, labels, search, chat, connectors, API                           | [Sustainable Use License 1.0](./LICENSE) — free private and internal business use on your infrastructure |
+| **Enterprise + Cloud**      | Business features, vendor-hosted SaaS, support — separate product built on CE ([docuvate.de](https://docuvate.de)) | Commercial license (not in this repository)                                                              |
 
-Commercial editions are offered separately; see [docuvate.de](https://docuvate.de). Community source in this repository remains AGPL-3.0.
+Docuvate is **source-available** / **fair-code**, not OSI “open source”. Official SDKs ([`packages/sdk-node`](packages/sdk-node), [`packages/sdk-flutter`](packages/sdk-flutter)) are **MIT**.
+
+Commercial builds extend CE via optional Nest extension modules (`DOCUVATE_EXTENSION_MODULES` / `DOCUVATE_EXTENSION_PATH` in [`ExtensionHostModule`](apps/api/src/shared/infrastructure/extensions/extension-host.module.ts)); this repository does not ship those modules.
 
 ## Documentation
 
@@ -188,4 +191,4 @@ Report vulnerabilities privately: [SECURITY.md](SECURITY.md).
 
 ## License
 
-AGPL-3.0. See [LICENSE](LICENSE).
+Community Edition: [LICENSE](LICENSE) (Sustainable Use License 1.0). Enterprise and Cloud are offered separately under commercial terms ([docuvate.de](https://docuvate.de)). SDKs: MIT. Name and branding policy: [TRADEMARKS.md](TRADEMARKS.md).

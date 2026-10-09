@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { buildOllamaChatBody } from './ollama-chat-options.js';
 
 const DEFAULT_OLLAMA_CHAT_TIMEOUT_MS = 180_000;

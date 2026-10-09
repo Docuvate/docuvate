@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Git subdirectory installs (no npm / pub.dev publish required). */
 export const SDK_NODE_INSTALL_PNPM =
   'pnpm add "@docuvate/sdk@github:Docuvate/docuvate#path:packages/sdk-node"';

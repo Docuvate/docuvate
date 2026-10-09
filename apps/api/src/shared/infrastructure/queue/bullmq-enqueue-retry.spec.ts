@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 import { enqueueBullJobWithRetry } from './bullmq-enqueue-retry.js';
 
@@ -18,7 +20,11 @@ describe('enqueueBullJobWithRetry', () => {
     const add = vi.fn().mockRejectedValue(new Error('valkey down'));
 
     await expect(
-      enqueueBullJobWithRetry(add, { maxAttempts: 3, initialDelayMs: 1, label: 'document-extraction' })
+      enqueueBullJobWithRetry(add, {
+        maxAttempts: 3,
+        initialDelayMs: 1,
+        label: 'document-extraction',
+      })
     ).rejects.toThrow(/document-extraction enqueue failed after 3 attempts/);
 
     expect(add).toHaveBeenCalledTimes(3);

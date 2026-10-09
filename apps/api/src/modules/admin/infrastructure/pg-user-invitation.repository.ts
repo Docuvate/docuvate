@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import { instanceRoleToDbRole } from '../../auth/domain/installation-authorization.js';
@@ -174,7 +176,9 @@ function mapRow(row: Row): UserInvitationRecord {
     id: row.id,
     email: row.email,
     invitedName: row.invited_name,
-    assignedRole: dbRoleToInstanceRole(row.assigned_role as 'installation_admin' | 'installation_member'),
+    assignedRole: dbRoleToInstanceRole(
+      row.assigned_role as 'installation_admin' | 'installation_member'
+    ),
     invitedByUserId: row.invited_by_user_id,
     expiresAt: row.expires_at,
     acceptedAt: row.accepted_at,

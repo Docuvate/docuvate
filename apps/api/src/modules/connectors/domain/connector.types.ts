@@ -1,23 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export type ConnectorTier = 'oss' | 'commercial';
 
 export type ConnectorCategoryId = 'mail' | 'dms' | 'home_automation' | 'storage' | 'scanner_sftp';
 
 export type ConnectorPluginId =
-  | 'gmail'
-  | 'outlook'
-  | 'paperless'
-  | 'home_assistant'
-  | 'amazon_s3'
-  | 'sftp_fetch';
+  'gmail' | 'outlook' | 'paperless' | 'home_assistant' | 'amazon_s3' | 'sftp_fetch';
 
 export type ConnectorCapabilityRole = 'source' | 'sink';
 
-export type ConnectorAuthStrategyKind =
-  | 'oauth2'
-  | 'bearer'
-  | 'basic'
-  | 'api_key'
-  | 'custom';
+export type ConnectorAuthStrategyKind = 'oauth2' | 'bearer' | 'basic' | 'api_key' | 'custom';
 
 export type ConnectorAuthFieldType = 'text' | 'password' | 'url' | 'email';
 

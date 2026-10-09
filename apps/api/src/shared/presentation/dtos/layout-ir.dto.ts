@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ApiExtraModels, ApiProperty, getSchemaPath } from '@nestjs/swagger';
 
 /** OpenAPI DTOs for layout IR (field names aligned with `@docuvate/contracts` JSON). */

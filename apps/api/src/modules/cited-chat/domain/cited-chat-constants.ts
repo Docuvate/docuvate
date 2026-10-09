@@ -1,7 +1,7 @@
-export const CITED_CHAT_ABSTENTION_DE =
-  'Dazu habe ich in Ihren Dokumenten nichts gefunden.';
-export const CITED_CHAT_ABSTENTION_EN =
-  'I did not find anything about that in your documents.';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+export const CITED_CHAT_ABSTENTION_DE = 'Dazu habe ich in Ihren Dokumenten nichts gefunden.';
+export const CITED_CHAT_ABSTENTION_EN = 'I did not find anything about that in your documents.';
 
 export const RAG_HYBRID_CANDIDATE_LIMIT = 20;
 export const RAG_RERANK_TOP_K = 4;

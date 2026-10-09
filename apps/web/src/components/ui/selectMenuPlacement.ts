@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export const SELECT_MENU_GAP_PX = 2;
 export const SELECT_MENU_MAX_HEIGHT_PX = 240;
 export const SELECT_MENU_MAX_OPTIONS_WITHOUT_SCROLL = 10;
@@ -50,7 +52,10 @@ export function computeSelectMenuPlacement(input: SelectMenuPlacementInput): Sel
     maxHeight = contentHeight;
     scrollable = false;
   } else {
-    maxHeight = Math.min(SELECT_MENU_MAX_HEIGHT_PX, Math.max(SELECT_MENU_ITEM_ESTIMATE_PX, available));
+    maxHeight = Math.min(
+      SELECT_MENU_MAX_HEIGHT_PX,
+      Math.max(SELECT_MENU_ITEM_ESTIMATE_PX, available)
+    );
     scrollable = contentHeight > maxHeight;
   }
 

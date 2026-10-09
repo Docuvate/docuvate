@@ -67,12 +67,9 @@ describe('Global search typo correction (Testcontainers Postgres)', () => {
       )
     );
 
-    await replaceDocumentFieldValues(
-      pool,
-      rechnungDocId,
-      userId,
-      [{ key: 'global:absender', value: 'Nordwind GmbH' }]
-    );
+    await replaceDocumentFieldValues(pool, rechnungDocId, userId, [
+      { key: 'global:absender', value: 'Nordwind GmbH' },
+    ]);
   }, 120_000);
 
   afterAll(async () => {

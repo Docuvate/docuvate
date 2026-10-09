@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { namesAreNearDuplicate, normalizeLabelKey } from './label-vocabulary.js';
 
 const MAX_BLOCKLIST_PATTERN_LENGTH = 200;
@@ -93,8 +95,7 @@ export function parseBlocklistPatternProposal(raw: string): {
   try {
     const parsed = JSON.parse(jsonText) as { pattern?: unknown; explanation?: unknown };
     const pattern = typeof parsed.pattern === 'string' ? parsed.pattern.trim() : '';
-    const explanation =
-      typeof parsed.explanation === 'string' ? parsed.explanation.trim() : '';
+    const explanation = typeof parsed.explanation === 'string' ? parsed.explanation.trim() : '';
     if (!pattern || !compileBlocklistPattern(pattern)) {
       return null;
     }
@@ -127,7 +128,10 @@ export function matchesUserBlocklist(candidateName: string, blockPhrases: string
   return false;
 }
 
-export function phraseFromRecommendationKey(recommendationId: string, phraseHint?: string): string | null {
+export function phraseFromRecommendationKey(
+  recommendationId: string,
+  phraseHint?: string
+): string | null {
   const hint = phraseHint?.trim();
   if (hint) {
     return hint;

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 from __future__ import annotations
 
 from docuvate_worker.infrastructure.chat.context_qa import answer_from_document_context

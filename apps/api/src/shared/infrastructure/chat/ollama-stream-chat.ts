@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ollamaChatBaseUrl, ollamaChatModel } from './ollama-chat-request.js';
 import { buildOllamaChatBody, ollamaChatIdleTimeoutMs } from './ollama-chat-options.js';
 

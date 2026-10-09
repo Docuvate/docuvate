@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { getContent } from '../content';
 import type { SiteContent } from '../content/types';
@@ -12,13 +14,7 @@ type LocaleContextValue = {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-export function LocaleProvider({
-  locale,
-  children,
-}: {
-  locale: SiteLocale;
-  children: ReactNode;
-}) {
+export function LocaleProvider({ locale, children }: { locale: SiteLocale; children: ReactNode }) {
   const value = useMemo(
     (): LocaleContextValue => ({
       locale,

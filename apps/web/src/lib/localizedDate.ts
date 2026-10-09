@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export type DocuvateLocale = 'de' | 'en';
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
@@ -6,7 +8,10 @@ import {
   searchTextVariants,
   tokenizeSearchQuery,
 } from '../../search/domain/normalize-search-text.js';
-import { reciprocalRankFusion, type RankedItem } from '../../search/domain/reciprocal-rank-fusion.js';
+import {
+  reciprocalRankFusion,
+  type RankedItem,
+} from '../../search/domain/reciprocal-rank-fusion.js';
 import { cosineSimilarity } from '../../search/domain/cosine-similarity.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
@@ -56,8 +61,7 @@ export class PgCitedChatRetrievalRepository {
     ].filter((t) => t.length >= 3);
 
     const scopedDocumentIds = sanitizeChatThreadDocumentIds(options?.documentIds ?? []);
-    const docFilter =
-      scopedDocumentIds.length > 0 ? `AND c.document_id = ANY($3::uuid[])` : '';
+    const docFilter = scopedDocumentIds.length > 0 ? `AND c.document_id = ANY($3::uuid[])` : '';
     const docParams = scopedDocumentIds.length > 0 ? [scopedDocumentIds] : [];
 
     const ftsPromise =

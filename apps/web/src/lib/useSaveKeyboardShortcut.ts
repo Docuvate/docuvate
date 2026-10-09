@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect } from 'react';
 
 export function useSaveKeyboardShortcut(enabled: boolean, onSave: () => void) {

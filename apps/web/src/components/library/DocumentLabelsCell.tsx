@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TagDto } from '@docuvate/contracts';
@@ -38,7 +40,10 @@ export function DocumentLabelsCell({ tags }: DocumentLabelsCellProps) {
           <details className="document-labels-overflow-details">
             <summary
               className="chip chip-outline document-labels-overflow-btn"
-              aria-label={t('library.moreLabelsAria', { count: overflow.length, names: overflowNames })}
+              aria-label={t('library.moreLabelsAria', {
+                count: overflow.length,
+                names: overflowNames,
+              })}
               title={overflowNames}
             >
               <span className="chip-label">+{overflow.length}</span>

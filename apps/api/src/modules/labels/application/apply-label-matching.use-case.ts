@@ -1,10 +1,8 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import { TAXONOMY_REPOSITORY, type TaxonomyRepository } from '../../../shared/domain/ports.js';
-import {
-  contentMatchesRule,
-  shouldAutoAssignTag,
-  shouldSuggestTag,
-} from '../domain/matching.js';
+import { contentMatchesRule, shouldAutoAssignTag, shouldSuggestTag } from '../domain/matching.js';
 
 @Injectable()
 export class ApplyLabelMatchingUseCase {

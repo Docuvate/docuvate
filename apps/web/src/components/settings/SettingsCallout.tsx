@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode } from 'react';
 import { CircleCheck, Info, TriangleAlert } from 'lucide-react';
 
@@ -11,8 +13,7 @@ type SettingsCalloutProps = {
 const ICON_SIZE = 18;
 
 export function SettingsCallout({ variant, children }: SettingsCalloutProps) {
-  const Icon =
-    variant === 'warn' ? TriangleAlert : variant === 'info' ? Info : CircleCheck;
+  const Icon = variant === 'warn' ? TriangleAlert : variant === 'info' ? Info : CircleCheck;
 
   return (
     <div className={`settings-callout settings-callout--${variant}`} role="status">

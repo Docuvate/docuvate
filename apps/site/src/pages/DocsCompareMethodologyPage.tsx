@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Link } from 'react-router-dom';
 import { CompareReferencesList } from '../components/CompareReferencesList';
 import { DocsPageLayout } from '../components/DocsPageLayout';

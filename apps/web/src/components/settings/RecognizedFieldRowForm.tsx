@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CustomFieldType, TagDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 import { deriveKeyFromLabel } from '../../lib/recognizedFieldKey';

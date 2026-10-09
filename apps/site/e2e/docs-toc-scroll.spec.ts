@@ -13,16 +13,20 @@ test.describe('docs TOC scroll spy', () => {
   });
 
   test('each heading scroll position activates matching TOC aria-current', async ({ page }) => {
-    const ids = await page.locator('.docs-toc-desktop .docs-toc-link').evaluateAll((links) =>
-      links.map((a) => a.getAttribute('data-toc-id')).filter((id): id is string => Boolean(id)),
-    );
+    const ids = await page
+      .locator('.docs-toc-desktop .docs-toc-link')
+      .evaluateAll((links) =>
+        links.map((a) => a.getAttribute('data-toc-id')).filter((id): id is string => Boolean(id))
+      );
     expect(ids.length).toBeGreaterThan(3);
 
     for (const id of ids) {
       await page.evaluate((headingId) => {
         const el = document.getElementById(headingId);
         if (!el) return;
-        const raw = getComputedStyle(document.documentElement).getPropertyValue('--site-header-height').trim();
+        const raw = getComputedStyle(document.documentElement)
+          .getPropertyValue('--site-header-height')
+          .trim();
         const n = parseFloat(raw);
         const headerPx = Number.isFinite(n) ? (raw.endsWith('rem') ? n * 16 : n) : 68;
         const offset = headerPx + 16;
@@ -32,20 +36,24 @@ test.describe('docs TOC scroll spy', () => {
       await page.waitForTimeout(80);
       await expect(page.locator(`.docs-toc-desktop a[data-toc-id="${id}"]`)).toHaveAttribute(
         'aria-current',
-        'location',
+        'location'
       );
     }
   });
 
   test('active item advances monotonically when scrolling down and up', async ({ page }) => {
-    const ids = await page.locator('.docs-toc-desktop .docs-toc-link').evaluateAll((links) =>
-      links.map((a) => a.getAttribute('data-toc-id')).filter((id): id is string => Boolean(id)),
-    );
+    const ids = await page
+      .locator('.docs-toc-desktop .docs-toc-link')
+      .evaluateAll((links) =>
+        links.map((a) => a.getAttribute('data-toc-id')).filter((id): id is string => Boolean(id))
+      );
     expect(ids.length).toBeGreaterThan(3);
 
     const activeIndex = async () => {
       const activeId = await page
-        .locator('.docs-toc-desktop .docs-toc-item.is-active .docs-toc-link, .docs-toc-desktop a[aria-current="location"]')
+        .locator(
+          '.docs-toc-desktop .docs-toc-item.is-active .docs-toc-link, .docs-toc-desktop a[aria-current="location"]'
+        )
         .first()
         .getAttribute('data-toc-id');
       return ids.indexOf(activeId ?? '');
@@ -61,7 +69,9 @@ test.describe('docs TOC scroll spy', () => {
       lastDown = idx;
     }
 
-    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' })
+    );
     await page.waitForTimeout(150);
     const atBottom = await activeIndex();
     expect(atBottom).toBe(ids.length - 1);
@@ -148,7 +158,10 @@ test.describe('docs mobile TOC anchor offset', () => {
         const r = pre.getBoundingClientRect();
         if (r.width < 1) return;
         if (pre.scrollWidth > pre.clientWidth + 2) {
-          bad.push(pre.closest('.code-panel-shell')?.querySelector('.code-panel-filename')?.textContent ?? 'pre');
+          bad.push(
+            pre.closest('.code-panel-shell')?.querySelector('.code-panel-filename')?.textContent ??
+              'pre'
+          );
         }
       });
       return bad;

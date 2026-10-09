@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { stdin, stdout } from 'node:process';
 
 async function readStdinAll(): Promise<string> {
@@ -5,7 +7,9 @@ async function readStdinAll(): Promise<string> {
   for await (const chunk of stdin) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
-  return Buffer.concat(chunks).toString('utf8').replace(/\r?\n$/, '');
+  return Buffer.concat(chunks)
+    .toString('utf8')
+    .replace(/\r?\n$/, '');
 }
 
 export async function readHiddenPassword(prompt: string): Promise<string> {

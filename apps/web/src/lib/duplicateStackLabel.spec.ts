@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import type { DocumentDto } from '@docuvate/contracts';
 import {
@@ -19,8 +21,7 @@ function docWithVersions(count: number): DocumentDto {
   } as DocumentDto;
 }
 
-const t = (_key: 'library.stackVersionBadge', { count }: { count: number }) =>
-  `${count} Versionen`;
+const t = (_key: 'library.stackVersionBadge', { count }: { count: number }) => `${count} Versionen`;
 
 describe('duplicateStackVersionLabel', () => {
   it('hides badge label for a single version', () => {

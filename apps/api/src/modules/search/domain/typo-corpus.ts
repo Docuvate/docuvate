@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Synthetic typo evaluation set (neutral invented names only). */
 export interface TypoCorpusCase {
   id: string;
@@ -21,8 +23,18 @@ export const TYPO_SEARCH_CORPUS: TypoCorpusCase[] = [
   { id: 'de-11', locale: 'de', query: 'Versicherun', expectedTitleNeedle: 'Versicherung Gamma' },
   { id: 'de-12', locale: 'de', query: 'Kündigung', expectedTitleNeedle: 'Kündigung Miete' },
   { id: 'de-13', locale: 'de', query: 'Kuendigung', expectedTitleNeedle: 'Kündigung Miete' },
-  { id: 'de-14', locale: 'de', query: 'Gehaltsabrechnung', expectedTitleNeedle: 'Gehaltsabrechnung' },
-  { id: 'de-15', locale: 'de', query: 'Gehaltabrechnung', expectedTitleNeedle: 'Gehaltsabrechnung' },
+  {
+    id: 'de-14',
+    locale: 'de',
+    query: 'Gehaltsabrechnung',
+    expectedTitleNeedle: 'Gehaltsabrechnung',
+  },
+  {
+    id: 'de-15',
+    locale: 'de',
+    query: 'Gehaltabrechnung',
+    expectedTitleNeedle: 'Gehaltsabrechnung',
+  },
   { id: 'en-01', locale: 'en', query: 'invioce', expectedTitleNeedle: 'Invoice Acme' },
   { id: 'en-02', locale: 'en', query: 'recipt', expectedTitleNeedle: 'Receipt Workshop' },
   { id: 'en-03', locale: 'en', query: 'contrat', expectedTitleNeedle: 'Contract Delta' },
@@ -35,11 +47,7 @@ export const TYPO_SEARCH_CORPUS: TypoCorpusCase[] = [
   { id: 'en-10', locale: 'en', query: 'maintainance', expectedTitleNeedle: 'Maintenance Log' },
 ];
 
-export function recallAtK(
-  rankedTitles: string[],
-  expectedNeedle: string,
-  k: number
-): boolean {
+export function recallAtK(rankedTitles: string[], expectedNeedle: string, k: number): boolean {
   const top = rankedTitles.slice(0, k);
   return top.some((title) => title.toLowerCase().includes(expectedNeedle.toLowerCase()));
 }

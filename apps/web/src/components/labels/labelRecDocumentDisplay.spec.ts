@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import {
   docTitleAndFilenameEquivalent,
@@ -7,9 +9,9 @@ import {
 
 describe('labelRecDocumentDisplay', () => {
   it('treats title and filename as equivalent when only separators differ', () => {
-    expect(
-      docTitleAndFilenameEquivalent('Posteingang Scan.pdf', 'Posteingang_Scan.pdf')
-    ).toBe(true);
+    expect(docTitleAndFilenameEquivalent('Posteingang Scan.pdf', 'Posteingang_Scan.pdf')).toBe(
+      true
+    );
   });
 
   it('shows title without .pdf and hides redundant filename', () => {

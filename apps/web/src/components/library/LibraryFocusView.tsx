@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useMemo, useState, type KeyboardEvent, type MouseEvent } from 'react';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+} from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { DocumentDto } from '@docuvate/contracts';
@@ -19,7 +28,12 @@ interface LibraryFocusViewProps {
   onContextMenu: (event: MouseEvent, documentId: string) => void;
 }
 
-export function LibraryFocusView({ items, selected, onToggleSelect, onContextMenu }: LibraryFocusViewProps) {
+export function LibraryFocusView({
+  items,
+  selected,
+  onToggleSelect,
+  onContextMenu,
+}: LibraryFocusViewProps) {
   const { t } = useTranslation();
   const [focusId, setFocusId] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<ArrayBuffer | null>(null);
@@ -67,9 +81,7 @@ export function LibraryFocusView({ items, selected, onToggleSelect, onContextMen
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
       event.preventDefault();
       const next =
-        event.key === 'ArrowDown'
-          ? Math.min(index + 1, items.length - 1)
-          : Math.max(index - 1, 0);
+        event.key === 'ArrowDown' ? Math.min(index + 1, items.length - 1) : Math.max(index - 1, 0);
       const doc = items[next];
       if (doc) setFocusId(doc.id);
     },

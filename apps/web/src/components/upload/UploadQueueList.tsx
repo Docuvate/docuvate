@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Check, Loader2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
@@ -27,7 +29,12 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
       <div className="upload-queue-panel-head">
         <span className="upload-queue-panel-title">{t('upload.queuePanelTitle')}</span>
         {hasTerminal ? (
-          <Button type="button" variant="ghost" className="upload-queue-clear" onClick={clearTerminalItems}>
+          <Button
+            type="button"
+            variant="ghost"
+            className="upload-queue-clear"
+            onClick={clearTerminalItems}
+          >
             {t('upload.clearFinished')}
           </Button>
         ) : null}
@@ -37,10 +44,18 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
           <li key={item.id} className={`upload-queue-item upload-${item.status}`}>
             <span className="upload-queue-item-leading" aria-hidden>
               {item.status === 'uploading' || item.status === 'pending' ? (
-                <Loader2 className="upload-queue-icon upload-queue-icon-spin" size={16} strokeWidth={2} />
+                <Loader2
+                  className="upload-queue-icon upload-queue-icon-spin"
+                  size={16}
+                  strokeWidth={2}
+                />
               ) : null}
               {item.status === 'done' ? (
-                <Check className="upload-queue-icon upload-queue-icon-done" size={16} strokeWidth={2} />
+                <Check
+                  className="upload-queue-icon upload-queue-icon-done"
+                  size={16}
+                  strokeWidth={2}
+                />
               ) : null}
               {item.status === 'error' ? (
                 <span className="upload-queue-icon upload-queue-icon-error">!</span>
@@ -83,7 +98,9 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
           </li>
         ))}
         {queue.length > 12 ? (
-          <li className="muted upload-queue-more">{t('upload.queueMore', { count: queue.length - 12 })}</li>
+          <li className="muted upload-queue-more">
+            {t('upload.queueMore', { count: queue.length - 12 })}
+          </li>
         ) : null}
       </ul>
     </section>

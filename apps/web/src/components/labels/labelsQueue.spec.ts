@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import type { DocumentDto, LabelRecommendationDto } from '@docuvate/contracts';
 import { enrichMergeRecommendations, prepareLabelQueue, sortLabelQueue } from './labelsQueue';
@@ -58,11 +60,7 @@ describe('enrichMergeRecommendations', () => {
         tagIds: ['tag-a', 'tag-b'],
       }),
     ];
-    const documents = [
-      doc('d1', ['tag-a']),
-      doc('d2', ['tag-a']),
-      doc('d3', ['tag-b']),
-    ];
+    const documents = [doc('d1', ['tag-a']), doc('d2', ['tag-a']), doc('d3', ['tag-b'])];
     const enriched = enrichMergeRecommendations(items, documents, 1);
     expect(enriched[0]?.sampleDocuments?.map((d) => d.id)).toEqual(['d1', 'd3']);
   });

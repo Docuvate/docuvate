@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Token multiset coverage and reading-order metrics for semantic Typst export."""
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useState, type ReactNode } from 'react';
 
 /** Renders children only in the browser (Scalar and other DOM-only UI). */

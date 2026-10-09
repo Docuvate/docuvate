@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect } from 'react';
 
 /** Keeps fixed SaveBar aligned with `.app-main` when the sidebar resizes. */

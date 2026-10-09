@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '../i18n';
 import { authErrorI18nKeyForCode, formatAuthClientError } from './authErrors';
@@ -5,7 +7,7 @@ import { authErrorI18nKeyForCode, formatAuthClientError } from './authErrors';
 describe('authErrorI18nKeyForCode', () => {
   it('maps known better-auth codes', () => {
     expect(authErrorI18nKeyForCode('INVALID_EMAIL_OR_PASSWORD')).toBe(
-      'auth.errors.invalidEmailOrPassword',
+      'auth.errors.invalidEmailOrPassword'
     );
     expect(authErrorI18nKeyForCode('USER_ALREADY_EXISTS')).toBe('auth.errors.userAlreadyExists');
   });
@@ -25,7 +27,7 @@ describe('formatAuthClientError', () => {
     const warn = vi.mocked(console.warn);
     const text = formatAuthClientError(
       { code: 'INVALID_EMAIL_OR_PASSWORD', message: 'Invalid email or password' },
-      'signIn',
+      'signIn'
     );
     expect(text).toBe('E-Mail oder Passwort ist falsch.');
     expect(warn).not.toHaveBeenCalled();
@@ -44,7 +46,7 @@ describe('formatAuthClientError', () => {
   it('uses context fallback for unknown codes', () => {
     const text = formatAuthClientError(
       { code: 'MYSTERY_CODE', message: 'Something broke' },
-      'signOut',
+      'signOut'
     );
     expect(text).toBe('Abmeldung fehlgeschlagen. Bitte erneut versuchen.');
   });

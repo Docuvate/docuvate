@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { AlertTriangle, Info } from 'lucide-react';
 import type { ReactNode } from 'react';
 

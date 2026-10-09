@@ -1,7 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Param, Post, UseGuards } from '@nestjs/common';
 import type { DismissTagSuggestionRequest } from '@docuvate/contracts';
 import { DismissTagSuggestionRequestDto } from '../../../shared/presentation/dtos/labels.dto.js';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   AcceptTagSuggestionUseCase,
@@ -10,7 +16,10 @@ import {
   RemoveDocumentTagUseCase,
 } from '../application/document-label.use-cases.js';
 
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('documents')
 @Controller('documents/:documentId')
@@ -46,7 +55,10 @@ export class DocumentLabelsController {
   }
 
   @Post('tag-suggestions/:tagId/accept')
-  @ApiDocuvateRoute({ operationId: 'acceptDocumentTagSuggestion', summary: 'Accept tag suggestion on document' })
+  @ApiDocuvateRoute({
+    operationId: 'acceptDocumentTagSuggestion',
+    summary: 'Accept tag suggestion on document',
+  })
   async accept(
     @Session() session: AuthSession,
     @Param('documentId') documentId: string,
@@ -57,7 +69,10 @@ export class DocumentLabelsController {
   }
 
   @Post('tag-suggestions/:tagId/dismiss')
-  @ApiDocuvateRoute({ operationId: 'dismissDocumentTagSuggestion', summary: 'Dismiss tag suggestion on document' })
+  @ApiDocuvateRoute({
+    operationId: 'dismissDocumentTagSuggestion',
+    summary: 'Dismiss tag suggestion on document',
+  })
   async dismiss(
     @Session() session: AuthSession,
     @Param('documentId') documentId: string,

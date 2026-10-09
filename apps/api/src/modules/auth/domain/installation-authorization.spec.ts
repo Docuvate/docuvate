@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError } from '../../../shared/domain/errors.js';
 import {
@@ -5,10 +7,7 @@ import {
   canPerformInstallationAction,
 } from './installation-authorization.js';
 import { INSTALLATION_TENANT_ID } from './installation.constants.js';
-import {
-  INSTANCE_ROLE_ADMIN,
-  INSTANCE_ROLE_MEMBER,
-} from './instance-role.constants.js';
+import { INSTANCE_ROLE_ADMIN, INSTANCE_ROLE_MEMBER } from './instance-role.constants.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 
 const adminSubject: AuthorizationSubject = {
@@ -30,11 +29,9 @@ const memberSubject: AuthorizationSubject = {
 describe('installation authorization', () => {
   it('denies invite without tenant scope', () => {
     expect(
-      canPerformInstallationAction(
-        { ...adminSubject, tenantId: '' },
-        'installation:invite',
-        { assignedRole: INSTANCE_ROLE_MEMBER }
-      )
+      canPerformInstallationAction({ ...adminSubject, tenantId: '' }, 'installation:invite', {
+        assignedRole: INSTANCE_ROLE_MEMBER,
+      })
     ).toBe(false);
   });
 
@@ -44,9 +41,9 @@ describe('installation authorization', () => {
         assignedRole: INSTANCE_ROLE_MEMBER,
       })
     ).toBe(false);
-    expect(() =>
-      assertInstallationInviteRoleAllowed(memberSubject, INSTANCE_ROLE_MEMBER)
-    ).toThrow(ForbiddenError);
+    expect(() => assertInstallationInviteRoleAllowed(memberSubject, INSTANCE_ROLE_MEMBER)).toThrow(
+      ForbiddenError
+    );
   });
 
   it('allows administrators to invite members', () => {

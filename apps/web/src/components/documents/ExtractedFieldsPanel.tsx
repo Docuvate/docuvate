@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
@@ -56,7 +58,10 @@ export function ExtractedFieldsPanel({
   }
 
   return (
-    <section className="detail-tab-section extracted-fields-section" aria-labelledby="extracted-fields-heading">
+    <section
+      className="detail-tab-section extracted-fields-section"
+      aria-labelledby="extracted-fields-heading"
+    >
       <h2 id="extracted-fields-heading" className="detail-section-title">
         {t('recognizedFields.documentSectionTitle')}
       </h2>
@@ -76,7 +81,9 @@ export function ExtractedFieldsPanel({
         <summary className="extracted-fields-edit-summary">
           {t('recognizedFields.correctFieldsSummary')}
         </summary>
-        <p className="muted extracted-fields-edit-hint">{t('recognizedFields.correctFieldsHint')}</p>
+        <p className="muted extracted-fields-edit-hint">
+          {t('recognizedFields.correctFieldsHint')}
+        </p>
         <div className="extraction-fields-grid extraction-fields-grid-compact">
           {visibleFields.map((field) => (
             <label key={rowKey(field)} className="extraction-field-cell">

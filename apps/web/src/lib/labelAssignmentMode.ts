@@ -1,14 +1,10 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CreateTagRequest, MatchingAlgorithm, TagDto } from '@docuvate/contracts';
 
 /** UI-only assignment modes mapped to inbox + matchingAlgorithm. */
 export type LabelAssignmentMode =
-  | 'never'
-  | 'recommend'
-  | 'inbox'
-  | 'any'
-  | 'all'
-  | 'exact'
-  | 'regex';
+  'never' | 'recommend' | 'inbox' | 'any' | 'all' | 'exact' | 'regex';
 
 export const LABEL_ASSIGNMENT_MODES: LabelAssignmentMode[] = [
   'never',

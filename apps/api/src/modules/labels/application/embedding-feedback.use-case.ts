@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import {
   LABEL_EMBEDDING_REPOSITORY,
@@ -49,11 +51,7 @@ export class RecordEmbeddingFeedbackUseCase {
     }
     const centroids = await this.labelEmbeddings.getTagCentroids(userId);
     const existing = centroids.find((c) => c.tagId === tagId);
-    const merged = mergeCentroid(
-      existing?.centroid ?? null,
-      existing?.sampleCount ?? 0,
-      vector
-    );
+    const merged = mergeCentroid(existing?.centroid ?? null, existing?.sampleCount ?? 0, vector);
     await this.labelEmbeddings.saveTagCentroid(
       tagId,
       userId,

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export { startMailpitContainer, type StartedMailpit } from './mailpit.js';
 export { startMinioContainer, type StartedMinio } from './minio.js';
 export { startOllamaStubContainer, type StartedOllamaStub } from './ollama-stub.js';

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import {
   collectReportingYears,
@@ -14,7 +16,9 @@ const defaultConfig: DuplicateDetectionConfig = {
   pageCountGateMaxSimilarity: 0.95,
 };
 
-function signals(partial: Partial<DuplicateDocumentSignals> & Pick<DuplicateDocumentSignals, 'documentId'>): DuplicateDocumentSignals {
+function signals(
+  partial: Partial<DuplicateDocumentSignals> & Pick<DuplicateDocumentSignals, 'documentId'>
+): DuplicateDocumentSignals {
   return {
     filename: '',
     title: '',
@@ -125,8 +129,8 @@ describe('evaluateEmbeddingDuplicateCandidate', () => {
     const source = signals({ documentId: 'a', filename: 'scan-a.pdf', pageCount: 10 });
     const candidate = signals({ documentId: 'b', filename: 'scan-b.pdf', pageCount: 6 });
 
-    expect(
-      evaluateEmbeddingDuplicateCandidate(source, candidate, 0.97, defaultConfig).accept
-    ).toBe(true);
+    expect(evaluateEmbeddingDuplicateCandidate(source, candidate, 0.97, defaultConfig).accept).toBe(
+      true
+    );
   });
 });

@@ -1,14 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Ban,
-  Cable,
-  MessageSquareText,
-  FlaskConical,
-  ScanText,
-  UserRound,
-} from 'lucide-react';
+import { Ban, Cable, MessageSquareText, FlaskConical, ScanText, UserRound } from 'lucide-react';
 import type {
   DocumentChatProviderInfo,
   DocumentChatProvidersCatalogDto,
@@ -33,10 +28,7 @@ import { SettingsSectionCard } from '../components/settings/SettingsSectionCard'
 import { SettingsCardLink } from '../components/settings/SettingsCardLink';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { chatProviderLabel } from '../lib/chatProviderLabels';
-import {
-  useAdvancedFeaturesEnabled,
-  writeAdvancedFeaturesEnabled,
-} from '../lib/advancedFeatures';
+import { useAdvancedFeaturesEnabled, writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
 import { settingsChatStatusPresentation } from '../lib/settingsChatStatus';
 import { SettingsCallout } from '../components/settings/SettingsCallout';
@@ -48,7 +40,11 @@ import {
 } from '../lib/settingsExtractionEngines';
 
 const SETTINGS_ICON_SIZE = 20;
-const settingsIconProps = { size: SETTINGS_ICON_SIZE, strokeWidth: 1.75, 'aria-hidden': true as const };
+const settingsIconProps = {
+  size: SETTINGS_ICON_SIZE,
+  strokeWidth: 1.75,
+  'aria-hidden': true as const,
+};
 
 export function SettingsPage() {
   const { t } = useTranslation();
@@ -193,7 +189,7 @@ export function SettingsPage() {
   const showExtractionOfflineCallout = shouldShowExtractionOfflineCallout(
     enginesLoadFailed,
     engines,
-    selectedEngine,
+    selectedEngine
   );
   const chatStatus = settingsChatStatusPresentation(t, settings);
   const engineOptions = buildExtractionEngineSelectOptions(t, engines);

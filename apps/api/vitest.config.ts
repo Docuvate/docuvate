@@ -8,8 +8,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@docuvate/testing': path.resolve(rootDir, '../../packages/testing/src/index.ts'),
-      '@docuvate/testing/containers': path.resolve(rootDir, '../../packages/testing/src/containers/index.ts'),
-      '@docuvate/testing/factories': path.resolve(rootDir, '../../packages/testing/src/factories/index.ts'),
+      '@docuvate/testing/containers': path.resolve(
+        rootDir,
+        '../../packages/testing/src/containers/index.ts'
+      ),
+      '@docuvate/testing/factories': path.resolve(
+        rootDir,
+        '../../packages/testing/src/factories/index.ts'
+      ),
     },
   },
   test: {

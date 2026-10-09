@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorPlugin } from '../../../domain/connector.ports.js';
 import type {
   ConnectorConfigurationInput,
@@ -73,7 +75,9 @@ export class AmazonS3StorageConnector implements ConnectorPlugin {
     return openS3Runtime(credentials);
   }
 
-  async validateConfiguration(input: ConnectorConfigurationInput): Promise<ConnectorValidationResult> {
+  async validateConfiguration(
+    input: ConnectorConfigurationInput
+  ): Promise<ConnectorValidationResult> {
     const required = requiredFieldsPresent(input, [
       'bucket',
       'region',

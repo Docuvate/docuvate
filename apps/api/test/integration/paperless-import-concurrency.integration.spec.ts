@@ -7,7 +7,11 @@ import { PaperlessImportRepository } from '../../src/modules/connectors/infrastr
 import { PgConnectorInstallationRepository } from '../../src/modules/connectors/infrastructure/pg-connector-installation.repository.js';
 import { ConflictError } from '../../src/shared/domain/errors.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
-import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
+import {
+  deleteSyntheticUser,
+  insertSyntheticUser,
+  newIsolationUserId,
+} from './pg-test-isolation.js';
 
 const QUEUE_NAME = 'connector-paperless-import-test';
 
@@ -37,7 +41,11 @@ describe('Paperless import concurrency (integration)', () => {
     userIds.push(userId);
     const client = await pool.connect();
     try {
-      await insertSyntheticUser(client, { id: userId, name: 'Concurrency IT', email: `${userId}@example.test` });
+      await insertSyntheticUser(client, {
+        id: userId,
+        name: 'Concurrency IT',
+        email: `${userId}@example.test`,
+      });
     } finally {
       client.release();
     }

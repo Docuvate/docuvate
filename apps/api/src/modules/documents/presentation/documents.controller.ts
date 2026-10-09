@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   Body,
   Controller,
@@ -52,10 +54,7 @@ import { SendDocumentChatThreadMessageUseCase } from '../application/send-docume
 import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
 import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
 import { RetryDocumentChatMessageUseCase } from '../application/retry-document-chat-message.use-case.js';
-import {
-  toDocumentChatMessageRecordDto,
-  toDocumentChatThreadDto,
-} from './document-chat.mapper.js';
+import { toDocumentChatMessageRecordDto, toDocumentChatThreadDto } from './document-chat.mapper.js';
 import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
 import { GetDocumentUseCase } from '../application/get-document.use-case.js';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
@@ -90,7 +89,10 @@ import {
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
 
 import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('documents')
 @Controller('documents')
@@ -130,7 +132,10 @@ export class DocumentsController {
   ) {}
 
   @Get()
-  @ApiDocuvateRoute({ operationId: 'listDocuments', summary: 'List or search documents (ABAC filtered)' })
+  @ApiDocuvateRoute({
+    operationId: 'listDocuments',
+    summary: 'List or search documents (ABAC filtered)',
+  })
   async list(
     @Session() session: AuthSession,
     @AuthSubject() subject: AuthorizationSubject,
@@ -148,7 +153,10 @@ export class DocumentsController {
   }
 
   @Get(':id/layout-ir')
-  @ApiDocuvateRoute({ operationId: 'getDocumentLayoutIr', summary: 'Layout IR for document re-render' })
+  @ApiDocuvateRoute({
+    operationId: 'getDocumentLayoutIr',
+    summary: 'Layout IR for document re-render',
+  })
   @ApiOkResponse({ type: LayoutIrDocumentDto })
   async layoutIr(
     @Session() session: AuthSession,
@@ -175,7 +183,10 @@ export class DocumentsController {
   }
 
   @Get(':id/layout-typst')
-  @ApiDocuvateRoute({ operationId: 'getDocumentLayoutTypst', summary: 'Typst source for layout export' })
+  @ApiDocuvateRoute({
+    operationId: 'getDocumentLayoutTypst',
+    summary: 'Typst source for layout export',
+  })
   @ApiOkResponse({ type: LayoutTypstResponseDto })
   async layoutTypst(
     @Session() session: AuthSession,
@@ -212,8 +223,7 @@ export class DocumentsController {
       session.user.id,
       subject
     );
-    const disposition =
-      download === '1' || download === 'true' ? 'attachment' : 'inline';
+    const disposition = download === '1' || download === 'true' ? 'attachment' : 'inline';
     void reply
       .header('Content-Type', mimeType)
       .header('Content-Disposition', `${disposition}; filename="${encodeURIComponent(filename)}"`)
@@ -461,7 +471,10 @@ export class DocumentsController {
   }
 
   @Post(':id/duplicate-stack/set-primary')
-  @ApiDocuvateRoute({ operationId: 'duplicateStackSetPrimary', summary: 'duplicateStackSetPrimary' })
+  @ApiDocuvateRoute({
+    operationId: 'duplicateStackSetPrimary',
+    summary: 'duplicateStackSetPrimary',
+  })
   async duplicateStackSetPrimary(
     @Session() session: AuthSession,
     @Param('id') id: string,
@@ -473,7 +486,10 @@ export class DocumentsController {
   }
 
   @Post(':id/duplicate-stack/keep-version')
-  @ApiDocuvateRoute({ operationId: 'duplicateStackKeepVersion', summary: 'duplicateStackKeepVersion' })
+  @ApiDocuvateRoute({
+    operationId: 'duplicateStackKeepVersion',
+    summary: 'duplicateStackKeepVersion',
+  })
   async duplicateStackKeepVersion(
     @Session() session: AuthSession,
     @Param('id') id: string,
@@ -485,7 +501,10 @@ export class DocumentsController {
   }
 
   @Post(':id/duplicate-stack/not-duplicate')
-  @ApiDocuvateRoute({ operationId: 'duplicateStackNotDuplicate', summary: 'duplicateStackNotDuplicate' })
+  @ApiDocuvateRoute({
+    operationId: 'duplicateStackNotDuplicate',
+    summary: 'duplicateStackNotDuplicate',
+  })
   async duplicateStackNotDuplicate(
     @Session() session: AuthSession,
     @Param('id') id: string,
@@ -544,7 +563,10 @@ export class DocumentsController {
       required: ['file'],
     },
   })
-  @ApiDocuvateRoute({ operationId: 'createDocument', summary: 'Upload document (multipart file field)' })
+  @ApiDocuvateRoute({
+    operationId: 'createDocument',
+    summary: 'Upload document (multipart file field)',
+  })
   async upload(
     @Session() session: AuthSession,
     @Req() req: FastifyRequest,

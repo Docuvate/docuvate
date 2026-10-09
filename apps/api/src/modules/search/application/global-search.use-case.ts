@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type {
   GlobalSearchGroupDto,
@@ -23,7 +25,8 @@ export class GlobalSearchUseCase {
     const parsed = parseSearchScope(query.q ?? '');
     const types = resolveSearchTypes(parsed.scopes, query.types);
     const perGroup = Math.min(Math.max(query.limit ?? DEFAULT_LIMIT, 1), 20);
-    const textQuery = parsed.textQuery || (parsed.fieldFilters.length === 0 ? query.q?.trim() : '') || '';
+    const textQuery =
+      parsed.textQuery || (parsed.fieldFilters.length === 0 ? query.q?.trim() : '') || '';
     const fieldDefs = await this.searchRepo.listFieldDefinitions(userId);
     const resolvedFieldFilters = resolveFieldFilters(parsed.fieldFilters, fieldDefs);
 
@@ -63,11 +66,11 @@ export class GlobalSearchUseCase {
         id: d.id,
         title: d.title,
         filename: d.filename,
-          snippet: d.snippetText,
-          matchedFieldLabel: d.matchedFieldLabel,
-          highlightSpans: d.highlightSpans,
-          snippetHighlightSpans: d.snippetHighlightSpans,
-          labelNames: d.labelNames,
+        snippet: d.snippetText,
+        matchedFieldLabel: d.matchedFieldLabel,
+        highlightSpans: d.highlightSpans,
+        snippetHighlightSpans: d.snippetHighlightSpans,
+        labelNames: d.labelNames,
         folderPath: d.folderPath,
         documentDate: d.documentDate,
         updatedAt: d.updatedAt,
@@ -78,9 +81,7 @@ export class GlobalSearchUseCase {
         total: result.documentTotal,
         items,
         showAllHref:
-          textQuery &&
-          result.documentTotal > items.length &&
-          items.length > 0
+          textQuery && result.documentTotal > items.length && items.length > 0
             ? `/documents?filter=${encodeURIComponent(textQuery)}`
             : null,
       });

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import { ValidationError } from '../../../shared/domain/errors.js';
 import type { ConnectorPluginId } from '../domain/connector.types.js';
@@ -80,7 +82,10 @@ export class CompleteMailOAuthUseCase {
     private readonly installations: ConnectorInstallationRepository
   ) {}
 
-  async execute(input: { code: string; state: string }): Promise<{ installationId: string; pluginId: MailPluginId }> {
+  async execute(input: {
+    code: string;
+    state: string;
+  }): Promise<{ installationId: string; pluginId: MailPluginId }> {
     const payload = decodeMailOAuthState(input.state);
     if (!payload) {
       throw new ValidationError('connectors.errors.oauthStateInvalid');

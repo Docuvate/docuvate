@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import i18n from '../i18n';
 
 export type UserFacingError = {
@@ -170,13 +172,9 @@ export function formatUserFacingError(err: unknown, fallbackKey: string): string
   return i18n.t(facing.i18nKey, facing.params ?? {});
 }
 
-export function throwApiRequestError(
-  status: number,
-  body: Record<string, unknown>,
-): never {
+export function throwApiRequestError(status: number, body: Record<string, unknown>): never {
   const code = typeof body.code === 'string' ? body.code : undefined;
-  const message =
-    typeof body.message === 'string' ? body.message : `Request failed (${status})`;
+  const message = typeof body.message === 'string' ? body.message : `Request failed (${status})`;
   throw new ApiRequestError(status, code, message);
 }
 
@@ -190,11 +188,10 @@ const CHAT_GENERATION_ERROR_KEYS: Record<string, string> = {
 };
 
 export function toUserFacingChatGenerationError(
-  errorCode: string | null | undefined,
+  errorCode: string | null | undefined
 ): UserFacingError {
   const normalized = errorCode?.trim() || 'unknown';
-  const i18nKey =
-    CHAT_GENERATION_ERROR_KEYS[normalized] ?? CHAT_GENERATION_ERROR_KEYS.unknown;
+  const i18nKey = CHAT_GENERATION_ERROR_KEYS[normalized] ?? CHAT_GENERATION_ERROR_KEYS.unknown;
   console.warn('[api]', 'chatGeneration', { errorCode: normalized, i18nKey });
   return {
     i18nKey,

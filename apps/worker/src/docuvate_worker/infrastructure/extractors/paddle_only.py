@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_fields

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import {
   createPasswordResetMailer,
@@ -38,8 +40,6 @@ describe('createPasswordResetMailer', () => {
   });
 
   it('requires SMTP in production without log override', () => {
-    expect(() => createPasswordResetMailer({ NODE_ENV: 'production' })).toThrow(
-      /not configured/
-    );
+    expect(() => createPasswordResetMailer({ NODE_ENV: 'production' })).toThrow(/not configured/);
   });
 });

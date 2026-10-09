@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
@@ -105,7 +107,11 @@ export class MlRetrainQueueService implements OnModuleInit, OnModuleDestroy {
     if (!this.queue) {
       return;
     }
-    await this.queue.add('retrain', { jobId, familyId }, { removeOnComplete: 100, removeOnFail: 50 });
+    await this.queue.add(
+      'retrain',
+      { jobId, familyId },
+      { removeOnComplete: 100, removeOnFail: 50 }
+    );
   }
 
   private async scanThresholds(): Promise<void> {

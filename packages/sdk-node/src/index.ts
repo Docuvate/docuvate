@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: MIT
 export { DocuvateClient, type DocuvateClientConfig } from './client.js';
 export {
   DocuvateApiError,

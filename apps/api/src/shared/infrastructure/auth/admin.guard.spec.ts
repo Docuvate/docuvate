@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError } from '../../domain/errors.js';
 import { AdminGuard } from './admin.guard.js';
@@ -31,8 +33,8 @@ describe('AdminGuard', () => {
         claims: ['document:*', 'admin:*'],
       },
     } as unknown as AuthenticatedRequest;
-    expect(
-      guard.canActivate({ switchToHttp: () => ({ getRequest: () => req }) } as never)
-    ).toBe(true);
+    expect(guard.canActivate({ switchToHttp: () => ({ getRequest: () => req }) } as never)).toBe(
+      true
+    );
   });
 });

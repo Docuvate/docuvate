@@ -1,7 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LayoutIrDocument } from '@docuvate/contracts';
-import { ForbiddenError, NotFoundError, ServiceUnavailableError } from '../../../shared/domain/errors.js';
+import {
+  ForbiddenError,
+  NotFoundError,
+  ServiceUnavailableError,
+} from '../../../shared/domain/errors.js';
 import { GetDocumentLayoutTypstUseCase } from './get-document-layout-typst.use-case.js';
 import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
 import { GetDocumentLayoutHtmlUseCase } from './get-document-layout-html.use-case.js';
@@ -16,7 +22,13 @@ describe('layout document use cases', () => {
   const userId = 'user-a';
   const otherId = 'user-b';
   const docId = randomUUID();
-  const subject = { kind: 'user' as const, id: userId, tenantId: userId, roles: ['owner'], claims: ['document:*'] };
+  const subject = {
+    kind: 'user' as const,
+    id: userId,
+    tenantId: userId,
+    roles: ['owner'],
+    claims: ['document:*'],
+  };
 
   const documents = {
     findByIdForUser: vi.fn(),
@@ -127,7 +139,9 @@ describe('layout document use cases', () => {
       'fetch',
       vi.fn().mockResolvedValue({ ok: false, status: 503, json: async () => ({}) })
     );
-    await expect(htmlUc.execute(docId, userId, subject)).rejects.toBeInstanceOf(ServiceUnavailableError);
+    await expect(htmlUc.execute(docId, userId, subject)).rejects.toBeInstanceOf(
+      ServiceUnavailableError
+    );
     vi.unstubAllGlobals();
   });
 });

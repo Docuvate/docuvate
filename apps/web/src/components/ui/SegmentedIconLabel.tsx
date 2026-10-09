@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LucideIcon } from 'lucide-react';
 
 export function SegmentedIconLabel({ Icon, label }: { Icon: LucideIcon; label: string }) {

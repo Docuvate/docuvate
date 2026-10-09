@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -75,9 +77,7 @@ export function DashboardWidgets({
 
   const removeWidget = useCallback(
     (id: string) => {
-      onWidgetsChange(
-        sorted.filter((w) => w.id !== id).map((w, position) => ({ ...w, position }))
-      );
+      onWidgetsChange(sorted.filter((w) => w.id !== id).map((w, position) => ({ ...w, position })));
     },
     [onWidgetsChange, sorted]
   );
@@ -145,12 +145,16 @@ function DashboardWidgetBody({
   savedViews: SavedDocumentViewDto[];
 }) {
   const { t } = useTranslation();
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof getDashboardStatistics>> | null>(null);
+  const [stats, setStats] = useState<Awaited<ReturnType<typeof getDashboardStatistics>> | null>(
+    null
+  );
   const [docs, setDocs] = useState<DocumentDto[]>([]);
 
   useEffect(() => {
     if (widget.type === 'statistics') {
-      void getDashboardStatistics().then(setStats).catch(() => setStats(null));
+      void getDashboardStatistics()
+        .then(setStats)
+        .catch(() => setStats(null));
     }
   }, [widget.type]);
 
@@ -215,7 +219,10 @@ function DashboardWidgetBody({
             </div>
           </dl>
           {stats.topLabels.length > 0 ? (
-            <ul className="dashboard-label-distribution" aria-label={t('dashboard.statLabelDistribution')}>
+            <ul
+              className="dashboard-label-distribution"
+              aria-label={t('dashboard.statLabelDistribution')}
+            >
               {stats.topLabels.map((row) => (
                 <li key={row.name}>
                   <span>{row.name}</span>

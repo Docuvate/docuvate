@@ -1,10 +1,14 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { PasswordResetMailerPort } from '../../domain/password-reset-mailer.port.js';
 import { LoggingPasswordResetMailerAdapter } from './logging-password-reset-mailer.adapter.js';
 import { SmtpPasswordResetMailerAdapter } from './smtp-password-reset-mailer.adapter.js';
 
 export type PasswordResetMailMode = 'auto' | 'log' | 'smtp';
 
-export function resolvePasswordResetMailMode(env: NodeJS.ProcessEnv = process.env): PasswordResetMailMode {
+export function resolvePasswordResetMailMode(
+  env: NodeJS.ProcessEnv = process.env
+): PasswordResetMailMode {
   const raw = env['PASSWORD_RESET_MAIL_MODE']?.trim().toLowerCase();
   if (raw === 'log' || raw === 'smtp' || raw === 'auto') {
     return raw;
@@ -12,7 +16,9 @@ export function resolvePasswordResetMailMode(env: NodeJS.ProcessEnv = process.en
   return 'auto';
 }
 
-export function createPasswordResetMailer(env: NodeJS.ProcessEnv = process.env): PasswordResetMailerPort {
+export function createPasswordResetMailer(
+  env: NodeJS.ProcessEnv = process.env
+): PasswordResetMailerPort {
   const mode = resolvePasswordResetMailMode(env);
   const smtpUrl = env['SMTP_URL']?.trim();
   const mailFrom = env['MAIL_FROM']?.trim();

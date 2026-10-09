@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -89,7 +91,9 @@ export function LabelsVocabularyTable(props: Props) {
                           {t('labels.vocabularyDocCount', { count })}
                         </Link>
                       ) : (
-                        <span className="muted">{t('labels.vocabularyDocCount', { count: 0 })}</span>
+                        <span className="muted">
+                          {t('labels.vocabularyDocCount', { count: 0 })}
+                        </span>
                       )}
                     </td>
                     <td className="labels-vocabulary-auto muted">

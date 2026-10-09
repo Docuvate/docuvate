@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import type { FolderDto } from '@docuvate/contracts';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   CreateFolderRequestDto,
@@ -14,7 +20,10 @@ import {
   UpdateFolderUseCase,
 } from '../application/folder.use-cases.js';
 import type { FolderEntity, FolderListItem } from '../../../shared/domain/ports.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 function toFolderDto(entity: FolderEntity, documentCount?: number): FolderDto {
   return {
@@ -52,7 +61,10 @@ export class FoldersController {
 
   @Post()
   @ApiDocuvateRoute({ operationId: 'createFolder', summary: 'Create folder' })
-  async create(@Session() session: AuthSession, @Body() body: CreateFolderRequestDto): Promise<FolderDto> {
+  async create(
+    @Session() session: AuthSession,
+    @Body() body: CreateFolderRequestDto
+  ): Promise<FolderDto> {
     const folder = await this.createFolder.execute(session.user.id, body);
     return toFolderDto(folder);
   }

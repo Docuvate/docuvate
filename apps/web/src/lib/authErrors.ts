@@ -1,12 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import i18n from '../i18n';
 
 export type AuthErrorContext =
-  | 'signIn'
-  | 'signUp'
-  | 'signOut'
-  | 'session'
-  | 'forgotPassword'
-  | 'resetPassword';
+  'signIn' | 'signUp' | 'signOut' | 'session' | 'forgotPassword' | 'resetPassword';
 
 export type AuthClientErrorLike = {
   code?: string | null;
@@ -89,10 +86,7 @@ function isLikelyNetworkError(error: unknown, status: number | null | undefined)
   return false;
 }
 
-function isExpectedSignInFailure(
-  parsed: AuthClientErrorLike,
-  context: AuthErrorContext
-): boolean {
+function isExpectedSignInFailure(parsed: AuthClientErrorLike, context: AuthErrorContext): boolean {
   if (context !== 'signIn') {
     return false;
   }
@@ -113,9 +107,7 @@ function logRawAuthError(error: unknown, context: AuthErrorContext): void {
     return;
   }
   const rawMessage =
-    parsed.message ??
-    (error instanceof Error ? error.message : undefined) ??
-    String(error);
+    parsed.message ?? (error instanceof Error ? error.message : undefined) ?? String(error);
   console.warn('[auth]', context, {
     code: parsed.code,
     status: parsed.status,

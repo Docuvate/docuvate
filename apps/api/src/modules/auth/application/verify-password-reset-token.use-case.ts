@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
@@ -17,10 +19,9 @@ export class VerifyPasswordResetTokenUseCase {
   async execute(rawToken: string): Promise<VerifyPasswordResetTokenResult> {
     const token = rawToken.trim();
     if (!token || token.length > PASSWORD_RESET_TOKEN_MAX_LENGTH) {
-      await this.pool.query(
-        `SELECT "expiresAt" FROM verification WHERE identifier = $1 LIMIT 1`,
-        [PASSWORD_RESET_DUMMY_VERIFICATION_IDENTIFIER]
-      );
+      await this.pool.query(`SELECT "expiresAt" FROM verification WHERE identifier = $1 LIMIT 1`, [
+        PASSWORD_RESET_DUMMY_VERIFICATION_IDENTIFIER,
+      ]);
       return { valid: false };
     }
 
@@ -31,10 +32,9 @@ export class VerifyPasswordResetTokenUseCase {
     );
 
     if (result.rowCount === 0) {
-      await this.pool.query(
-        `SELECT "expiresAt" FROM verification WHERE identifier = $1 LIMIT 1`,
-        [PASSWORD_RESET_DUMMY_VERIFICATION_IDENTIFIER]
-      );
+      await this.pool.query(`SELECT "expiresAt" FROM verification WHERE identifier = $1 LIMIT 1`, [
+        PASSWORD_RESET_DUMMY_VERIFICATION_IDENTIFIER,
+      ]);
       return { valid: false };
     }
 

@@ -1,15 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
 import { PG_POOL } from '../../../../../shared/infrastructure/database/tokens.js';
 import type { PaperlessOcrMode } from './paperless-field-mapping.js';
 
-export type ConnectorImportRunStatus =
-  | 'pending'
-  | 'running'
-  | 'completed'
-  | 'failed'
-  | 'cancelled';
+export type ConnectorImportRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 export interface ConnectorImportRunRow {
   id: string;
@@ -143,13 +140,7 @@ export class PaperlessImportRepository {
        FROM connector_installations ci
        WHERE ps.installation_id = ci.id
          AND ci.id = $1 AND ci.user_id = $2 AND ci.plugin_id = 'paperless'`,
-      [
-        installationId,
-        userId,
-        settings.keepOcrText,
-        settings.rerunOcr,
-        settings.includeArchivedPdf,
-      ]
+      [installationId, userId, settings.keepOcrText, settings.rerunOcr, settings.includeArchivedPdf]
     );
   }
 
@@ -319,7 +310,7 @@ export class PaperlessImportRepository {
            resume_modified_cursor = $4,
            updated_at = now()
        WHERE id = $1`,
-      [runId, patch.progressProcessed, patch.resumePage, patch.resumeModifiedCursor],
+      [runId, patch.progressProcessed, patch.resumePage, patch.resumeModifiedCursor]
     );
   }
 

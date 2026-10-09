@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import {
@@ -12,7 +14,10 @@ import {
   SendDocumentChatThreadMessageRequestDto,
   SendDocumentChatThreadMessageResponseDto,
 } from '../../../shared/presentation/dtos/common.dto.js';
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { CreateLibraryChatThreadUseCase } from '../application/create-library-chat-thread.use-case.js';
 import { ListLibraryChatThreadsUseCase } from '../application/list-library-chat-threads.use-case.js';
 import { SendLibraryChatThreadMessageUseCase } from '../application/send-library-chat-thread-message.use-case.js';
@@ -40,14 +45,20 @@ export class ChatController {
   ) {}
 
   @Get('threads')
-  @ApiDocuvateRoute({ operationId: 'listLibraryChatThreads', summary: 'List library-scoped chat threads' })
+  @ApiDocuvateRoute({
+    operationId: 'listLibraryChatThreads',
+    summary: 'List library-scoped chat threads',
+  })
   async listThreads(@Session() session: AuthSession): Promise<DocumentChatThreadListResponseDto> {
     const threads = await this.listLibraryThreads.execute(session.user.id);
     return { threads: threads.map(toDocumentChatThreadDto) };
   }
 
   @Post('threads')
-  @ApiDocuvateRoute({ operationId: 'createLibraryChatThread', summary: 'Create library-scoped chat thread' })
+  @ApiDocuvateRoute({
+    operationId: 'createLibraryChatThread',
+    summary: 'Create library-scoped chat thread',
+  })
   async createThread(
     @Session() session: AuthSession,
     @Body() body: CreateDocumentChatThreadRequestDto
@@ -57,7 +68,10 @@ export class ChatController {
   }
 
   @Get('threads/:threadId/messages')
-  @ApiDocuvateRoute({ operationId: 'listLibraryChatThreadMessages', summary: 'List messages in library chat thread' })
+  @ApiDocuvateRoute({
+    operationId: 'listLibraryChatThreadMessages',
+    summary: 'List messages in library chat thread',
+  })
   async listMessages(
     @Session() session: AuthSession,
     @Param('threadId') threadId: string
@@ -67,7 +81,10 @@ export class ChatController {
   }
 
   @Post('threads/:threadId/messages')
-  @ApiDocuvateRoute({ operationId: 'sendLibraryChatThreadMessage', summary: 'Send message in library chat thread' })
+  @ApiDocuvateRoute({
+    operationId: 'sendLibraryChatThreadMessage',
+    summary: 'Send message in library chat thread',
+  })
   async sendMessage(
     @Session() session: AuthSession,
     @Param('threadId') threadId: string,
@@ -86,7 +103,10 @@ export class ChatController {
   }
 
   @Get('threads/:threadId/messages/:messageId/stream')
-  @ApiDocuvateRoute({ operationId: 'streamLibraryChatMessage', summary: 'SSE stream for library chat message generation' })
+  @ApiDocuvateRoute({
+    operationId: 'streamLibraryChatMessage',
+    summary: 'SSE stream for library chat message generation',
+  })
   async stream(
     @Session() session: AuthSession,
     @Param('threadId') threadId: string,
@@ -108,7 +128,10 @@ export class ChatController {
   }
 
   @Post('threads/:threadId/messages/:messageId/cancel')
-  @ApiDocuvateRoute({ operationId: 'cancelLibraryChatGeneration', summary: 'Cancel library chat generation' })
+  @ApiDocuvateRoute({
+    operationId: 'cancelLibraryChatGeneration',
+    summary: 'Cancel library chat generation',
+  })
   async cancel(
     @Session() session: AuthSession,
     @Param('threadId') threadId: string,
@@ -119,7 +142,10 @@ export class ChatController {
   }
 
   @Post('threads/:threadId/messages/:messageId/retry')
-  @ApiDocuvateRoute({ operationId: 'retryLibraryChatMessage', summary: 'Retry failed library chat message' })
+  @ApiDocuvateRoute({
+    operationId: 'retryLibraryChatMessage',
+    summary: 'Retry failed library chat message',
+  })
   async retry(
     @Session() session: AuthSession,
     @Param('threadId') threadId: string,

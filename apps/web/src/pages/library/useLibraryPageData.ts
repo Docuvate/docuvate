@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -60,7 +62,9 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
   const [bulkFolderId, setBulkFolderId] = useState('');
   const [bulkBusy, setBulkBusy] = useState(false);
   const [viewMode, setViewMode] = useState<LibraryViewMode>(() => readLibraryViewMode());
-  const [filterMode, setFilterModeState] = useState<LibraryFilterMode>(() => readLibraryFilterMode());
+  const [filterMode, setFilterModeState] = useState<LibraryFilterMode>(() =>
+    readLibraryFilterMode()
+  );
   const [filterQueryText, setFilterQueryText] = useState('');
   const [filterParseIssues, setFilterParseIssues] = useState<DocumentFilterParseIssue[]>([]);
   const [visibleColumns, setVisibleColumns] = useState<LibraryTableColumnId[]>([
@@ -216,28 +220,31 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
     };
   }, [filters, query, mode, folderId, mappeId]);
 
-  const load = useCallback(async (options?: { silent?: boolean }) => {
-    if (!listFilters) {
-      setItems([]);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-    if (!options?.silent) {
-      setLoading(true);
-    }
-    setError(null);
-    try {
-      const docs = await listDocuments(listFilters);
-      setItems(docs);
-    } catch (err) {
-      setError(formatUserFacingError(err, 'errors.loadFailed'));
-    } finally {
-      if (!options?.silent) {
+  const load = useCallback(
+    async (options?: { silent?: boolean }) => {
+      if (!listFilters) {
+        setItems([]);
         setLoading(false);
+        setError(null);
+        return;
       }
-    }
-  }, [listFilters, t]);
+      if (!options?.silent) {
+        setLoading(true);
+      }
+      setError(null);
+      try {
+        const docs = await listDocuments(listFilters);
+        setItems(docs);
+      } catch (err) {
+        setError(formatUserFacingError(err, 'errors.loadFailed'));
+      } finally {
+        if (!options?.silent) {
+          setLoading(false);
+        }
+      }
+    },
+    [listFilters, t]
+  );
 
   useEffect(() => {
     void load();
@@ -268,9 +275,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
   }, [items, selected]);
 
   useEffect(() => {
-    const hasPending = items.some((d) =>
-      ['uploaded', 'queued', 'extracting'].includes(d.status)
-    );
+    const hasPending = items.some((d) => ['uploaded', 'queued', 'extracting'].includes(d.status));
     if (!hasPending) return;
     const timer = window.setInterval(() => void load({ silent: true }), 4000);
     return () => window.clearInterval(timer);
@@ -376,13 +381,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
     writeLibraryViewMode(next);
   }
 
-  const statusOptions: DocumentStatus[] = [
-    'ready',
-    'extracting',
-    'queued',
-    'uploaded',
-    'failed',
-  ];
+  const statusOptions: DocumentStatus[] = ['ready', 'extracting', 'queued', 'uploaded', 'failed'];
 
   const pageTitle = useMemo(() => {
     if (mode === 'all' && filters.inbox) return t('library.titleInbox');

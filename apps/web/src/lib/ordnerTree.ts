@@ -1,11 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FolderDto, MappeDto } from '@docuvate/contracts';
 import i18n from '../i18n';
 import { routes } from './routes';
 
 export type OrdnerSelection =
-  | { kind: 'root' }
-  | { kind: 'mappe'; mappeId: string }
-  | { kind: 'folder'; folderId: string };
+  { kind: 'root' } | { kind: 'mappe'; mappeId: string } | { kind: 'folder'; folderId: string };
 
 export interface OrdnerBreadcrumbSegment {
   label: string;

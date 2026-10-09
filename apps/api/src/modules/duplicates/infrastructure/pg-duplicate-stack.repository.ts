@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 import type {
@@ -21,11 +23,7 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
       [userId]
     );
     for (const row of result.rows) {
-      await this.linkPair(
-        userId,
-        String(row['document_id']),
-        String(row['candidate_document_id'])
-      );
+      await this.linkPair(userId, String(row['document_id']), String(row['candidate_document_id']));
     }
   }
 
@@ -170,9 +168,7 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
          ORDER BY m.joined_at ASC LIMIT 1`,
         [member.stackId, userId]
       );
-      const nextPrimary = versions.rows[0]
-        ? String(versions.rows[0]['document_id'])
-        : null;
+      const nextPrimary = versions.rows[0] ? String(versions.rows[0]['document_id']) : null;
 
       await this.pool.query(
         `DELETE FROM document_stack_members m
@@ -292,10 +288,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
        ON CONFLICT (document_id) DO NOTHING`,
       [stackId, documentId, role, userId]
     );
-    await this.pool.query(
-      `UPDATE document_duplicate_stacks SET updated_at = now() WHERE id = $1`,
-      [stackId]
-    );
+    await this.pool.query(`UPDATE document_duplicate_stacks SET updated_at = now() WHERE id = $1`, [
+      stackId,
+    ]);
   }
 
   private async mergeStacks(userId: string, stackIdA: string, stackIdB: string): Promise<void> {
@@ -339,10 +334,10 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
       [keepStackId, userId, keepPrimaryId]
     );
 
-    await this.pool.query(
-      `DELETE FROM document_duplicate_stacks WHERE id = $1 AND user_id = $2`,
-      [dropStackId, userId]
-    );
+    await this.pool.query(`DELETE FROM document_duplicate_stacks WHERE id = $1 AND user_id = $2`, [
+      dropStackId,
+      userId,
+    ]);
   }
 
   private async findPrimaryId(stackId: string, userId: string): Promise<string | null> {

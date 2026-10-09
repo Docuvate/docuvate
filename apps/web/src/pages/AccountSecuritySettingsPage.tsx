@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyRound, ShieldCheck } from 'lucide-react';
@@ -223,7 +225,12 @@ export function AccountSecuritySettingsPage() {
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </label>
-              <Button type="button" variant="secondary" disabled={busy || !password} onClick={() => void disableTotp()}>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={busy || !password}
+                onClick={() => void disableTotp()}
+              >
                 {t('settings.accountSecurity.totpDisable')}
               </Button>
             </div>
@@ -247,9 +254,7 @@ export function AccountSecuritySettingsPage() {
                   ? t('settings.accountSecurity.totpHideKey')
                   : t('settings.accountSecurity.totpShowKey')}
               </Button>
-              {showTotpSecret ? (
-                <p className="settings-totp-uri muted">{totpUri}</p>
-              ) : null}
+              {showTotpSecret ? <p className="settings-totp-uri muted">{totpUri}</p> : null}
               {backupCodes?.length ? (
                 <div className="settings-backup-codes">
                   <p className="muted">{t('settings.accountSecurity.backupCodesLead')}</p>

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
 """Background retrain stub — no GPU training; produces synthetic metrics for pipeline wiring."""
 
 from __future__ import annotations

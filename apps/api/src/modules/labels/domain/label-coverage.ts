@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
 import { DEFAULT_LABEL_NEAR_SIMILARITY_THRESHOLD } from './label-near-threshold.js';
 import { countCoverageGaps, coveredDocumentPercent } from './label-coverage-score.js';
@@ -54,8 +56,7 @@ export function computeDocumentCoverage(
     for (const tagId of assigned) {
       bestAssigned = Math.max(bestAssigned, simByTag.get(tagId) ?? 0);
     }
-    const status: LabelMapCoverageStatus =
-      bestAssigned >= threshold ? 'explained' : 'unexplained';
+    const status: LabelMapCoverageStatus = bestAssigned >= threshold ? 'explained' : 'unexplained';
     return {
       status,
       bestAnySimilarity: bestAny,
@@ -64,8 +65,7 @@ export function computeDocumentCoverage(
     };
   }
 
-  const status: LabelMapCoverageStatus =
-    bestAny >= threshold ? 'unlabeled_near' : 'outside';
+  const status: LabelMapCoverageStatus = bestAny >= threshold ? 'unlabeled_near' : 'outside';
   return {
     status,
     bestAnySimilarity: bestAny,

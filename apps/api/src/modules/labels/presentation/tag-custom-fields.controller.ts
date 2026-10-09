@@ -1,5 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Param, Put, UseGuards } from '@nestjs/common';
-import { AuthGuard, Session, type AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  AuthGuard,
+  Session,
+  type AuthSession,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   ReplaceTagCustomFieldsRequestDto,
   TagCustomFieldListResponseDto,
@@ -10,7 +16,10 @@ import {
 } from '../application/tag-custom-field.use-cases.js';
 import { toTagCustomFieldDto } from './tag-custom-fields.mapper.js';
 
-import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('taxonomy')
 @Controller('tags')

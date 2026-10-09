@@ -23,7 +23,12 @@ services:
       MINIO_BUCKET: documents
     volumes:
       - ./scripts/db/db-storage-guard.sh:/guard.sh:ro
-    entrypoint: ['/bin/sh', '-c', 'yum install -y postgresql15 >/dev/null 2>&1 || microdnf install -y postgresql15 >/dev/null 2>&1 || true; sh /guard.sh']
+    entrypoint:
+      [
+        '/bin/sh',
+        '-c',
+        'yum install -y postgresql15 >/dev/null 2>&1 || microdnf install -y postgresql15 >/dev/null 2>&1 || true; sh /guard.sh',
+      ]
     restart: 'no'
 
   postgres:

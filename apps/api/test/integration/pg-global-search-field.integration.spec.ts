@@ -61,28 +61,18 @@ describe('Global search field values (Testcontainers Postgres)', () => {
       [acmeId, userId]
     );
 
-    await replaceDocumentFieldValues(
-      pool,
-      docId,
-      userId,
-      [
-        { key: 'global:absender', value: 'Nordwind GmbH' },
-        { key: 'global:betrag', value: '12,50 €' },
-        { key: 'global:rechnungsdatum', value: '15.03.2024' },
-        { key: 'global:iban', value: 'DE89370400440532013000' },
-        { key: 'global:rechnungsnummer', value: 'INV-2024-77' },
-      ]
-    );
-    await replaceDocumentFieldValues(
-      pool,
-      acmeId,
-      userId,
-      [
-        { key: 'global:absender', value: 'Acme Corp' },
-        { key: 'global:betrag', value: 'EUR 99.00' },
-        { key: 'global:rechnungsdatum', value: '2024-03-15' },
-      ]
-    );
+    await replaceDocumentFieldValues(pool, docId, userId, [
+      { key: 'global:absender', value: 'Nordwind GmbH' },
+      { key: 'global:betrag', value: '12,50 €' },
+      { key: 'global:rechnungsdatum', value: '15.03.2024' },
+      { key: 'global:iban', value: 'DE89370400440532013000' },
+      { key: 'global:rechnungsnummer', value: 'INV-2024-77' },
+    ]);
+    await replaceDocumentFieldValues(pool, acmeId, userId, [
+      { key: 'global:absender', value: 'Acme Corp' },
+      { key: 'global:betrag', value: 'EUR 99.00' },
+      { key: 'global:rechnungsdatum', value: '2024-03-15' },
+    ]);
   }, 120_000);
 
   afterAll(async () => {
@@ -103,7 +93,9 @@ describe('Global search field values (Testcontainers Postgres)', () => {
     }
     const recall = hits / FIELD_TYPO_SEARCH_CORPUS.length;
     // eslint-disable-next-line no-console -- PR benchmark artifact
-    console.info(`field_typo_corpus_recall_at_5=${recall.toFixed(3)} n=${FIELD_TYPO_SEARCH_CORPUS.length}`);
+    console.info(
+      `field_typo_corpus_recall_at_5=${recall.toFixed(3)} n=${FIELD_TYPO_SEARCH_CORPUS.length}`
+    );
     expect(recall).toBeGreaterThanOrEqual(0.75);
   });
 });

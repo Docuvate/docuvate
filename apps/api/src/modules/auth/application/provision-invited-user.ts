@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
 import { instanceRoleToDbRole } from '../domain/installation-authorization.js';
@@ -43,10 +45,10 @@ export async function provisionInvitedUser(input: {
      VALUES ($1, $2, $3, true, $4, $4)`,
     [userId, input.name.trim() || email, email, now]
   );
-  await input.pool.query(
-    `INSERT INTO installation_user_roles (user_id, role) VALUES ($1, $2)`,
-    [userId, instanceRoleToDbRole(input.role)]
-  );
+  await input.pool.query(`INSERT INTO installation_user_roles (user_id, role) VALUES ($1, $2)`, [
+    userId,
+    instanceRoleToDbRole(input.role),
+  ]);
   await createCredentialPassword(input.pool, userId, input.password);
   return { userId };
 }

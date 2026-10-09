@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocsExtendedContent } from './types';
 
 export const docsExtendedDe: DocsExtendedContent = {
@@ -54,8 +56,7 @@ export const docsExtendedDe: DocsExtendedContent = {
       description: 'Laufzeit, Schichten und zentrale Ports der Docuvate-Plattform.',
     },
     title: 'Architektur',
-    lead:
-      'Docuvate folgt Clean Architecture in API und Worker: Domain, Anwendungslogik, Infrastruktur und Präsentation sind getrennt.',
+    lead: 'Docuvate folgt Clean Architecture in API und Worker: Domain, Anwendungslogik, Infrastruktur und Präsentation sind getrennt.',
     sections: [
       {
         id: 'laufzeit',
@@ -95,8 +96,7 @@ export const docsExtendedDe: DocsExtendedContent = {
       description: 'Service-API-Schlüssel, Claims und Berechtigungen für Integrationen.',
     },
     title: 'Service-Schlüssel und Claims',
-    lead:
-      'Für Skripte und Drittsysteme verwenden Sie Service-API-Schlüssel statt Browser-Sessions. Jeder Schlüssel ist an einen Benutzer gebunden und trägt Berechtigungen (ABAC).',
+    lead: 'Für Skripte und Drittsysteme verwenden Sie Service-API-Schlüssel statt Browser-Sessions. Jeder Schlüssel ist an einen Benutzer gebunden und trägt Berechtigungen (ABAC).',
     sections: [
       {
         id: 'anlegen',
@@ -134,8 +134,7 @@ export const docsExtendedDe: DocsExtendedContent = {
       description: 'Daten sichern, Migrationen und kontrollierte Upgrades bei Self-Hosting.',
     },
     title: 'Backup und Upgrade',
-    lead:
-      'Docuvate speichert Metadaten in PostgreSQL und Dateien in MinIO. Planen Sie Backups beider Ebenen und führen Sie Schema-Änderungen über TypeORM-Migrationen aus.',
+    lead: 'Docuvate speichert Metadaten in PostgreSQL und Dateien in MinIO. Planen Sie Backups beider Ebenen und führen Sie Schema-Änderungen über TypeORM-Migrationen aus.',
     sections: [
       {
         id: 'volumes',
@@ -175,8 +174,7 @@ export const docsExtendedDe: DocsExtendedContent = {
       description: 'OCR, Embeddings und Dokumenten-Chat: CPU-first, optional GPU.',
     },
     title: 'Modelle und Hardware',
-    lead:
-      'Docuvate ist CPU-first: OCR, Embeddings und der Standard-Chat laufen ohne GPU. Schwere Modelle sind optional und in den Einstellungen dokumentiert.',
+    lead: 'Docuvate ist CPU-first: OCR, Embeddings und der Standard-Chat laufen ohne GPU. Schwere Modelle sind optional und in den Einstellungen dokumentiert.',
     sections: [
       {
         id: 'ocr',
@@ -216,8 +214,7 @@ export const docsExtendedDe: DocsExtendedContent = {
       description: 'Kustomize- und Helm-Manifeste für Docuvate auf Kubernetes.',
     },
     title: 'Kubernetes',
-    lead:
-      'Für Produktion stellt das Repository Kustomize-Basen und Helm-Charts bereit. Der Ablauf entspricht Compose: Migration-Job, dann API und Worker.',
+    lead: 'Für Produktion stellt das Repository Kustomize-Basen und Helm-Charts bereit. Der Ablauf entspricht Compose: Migration-Job, dann API und Worker.',
     sections: [
       {
         id: 'manifeste',
@@ -249,7 +246,8 @@ export const docsExtendedDe: DocsExtendedContent = {
   comparisons: {
     meta: {
       title: 'Vergleiche | Docuvate Dokumentation',
-      description: 'Ehrliche Gegenüberstellung mit Paperless-ngx, Papra, Docspell, Mayan EDMS und DocuWare.',
+      description:
+        'Ehrliche Gegenüberstellung mit Paperless-ngx, Papra, Docspell, Mayan EDMS und DocuWare.',
     },
     overviewTitle: 'Vergleiche',
     overviewLead:

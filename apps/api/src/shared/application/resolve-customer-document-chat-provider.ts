@@ -1,13 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatProviderId } from '../infrastructure/chat/chat-provider.types.js';
 import type { ChatProviderAvailability } from './resolve-effective-document-chat-provider.js';
 
 /** Customer settings/UI only — never mock or dev-only ollama full-text. */
 const CUSTOMER_CHAT_PROVIDERS: DocumentChatProviderId[] = ['rag-ollama', 'donut-ml'];
 
-function isAvailable(
-  id: DocumentChatProviderId,
-  providers: ChatProviderAvailability[]
-): boolean {
+function isAvailable(id: DocumentChatProviderId, providers: ChatProviderAvailability[]): boolean {
   const entry = providers.find((p) => p.id === id);
   if (!entry) {
     return false;
@@ -15,18 +14,14 @@ function isAvailable(
   return entry.available !== false;
 }
 
-export function isCustomerFacingDocumentChatProvider(
-  id: DocumentChatProviderId
-): boolean {
+export function isCustomerFacingDocumentChatProvider(id: DocumentChatProviderId): boolean {
   return CUSTOMER_CHAT_PROVIDERS.includes(id);
 }
 
 /**
  * Provider used for document chat in the product UI — never the embedding/context dump.
  */
-function normalizeCustomerPreference(
-  preferred: DocumentChatProviderId
-): DocumentChatProviderId {
+function normalizeCustomerPreference(preferred: DocumentChatProviderId): DocumentChatProviderId {
   if (preferred === 'ollama') {
     return 'rag-ollama';
   }

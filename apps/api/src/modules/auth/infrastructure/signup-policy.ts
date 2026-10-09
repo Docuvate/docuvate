@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
 
 function explicitSignupFlag(env: NodeJS.ProcessEnv = process.env): 'open' | 'closed' | 'default' {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FolderDto, MappeDto } from '@docuvate/contracts';
@@ -57,7 +59,11 @@ export function FolderTargetPickerDialog({
   if (!open) return null;
 
   return (
-    <dialog className="confirm-dialog folder-picker-dialog" open aria-labelledby="folder-picker-title">
+    <dialog
+      className="confirm-dialog folder-picker-dialog"
+      open
+      aria-labelledby="folder-picker-title"
+    >
       <h2 id="folder-picker-title" className="confirm-dialog-title">
         {t('filesystem.pickUploadFolderTitle')}
       </h2>
@@ -69,7 +75,11 @@ export function FolderTargetPickerDialog({
         aria-label={t('filesystem.treeSearchAria')}
         autoFocus
       />
-      <ul className="folder-picker-list" role="listbox" aria-label={t('filesystem.pickUploadFolderTitle')}>
+      <ul
+        className="folder-picker-list"
+        role="listbox"
+        aria-label={t('filesystem.pickUploadFolderTitle')}
+      >
         {filtered.map((option) => (
           <li key={option.folderId}>
             <button

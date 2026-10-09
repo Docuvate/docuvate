@@ -1,9 +1,9 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DuplicateDetectionConfig } from './duplicate-detection.config.js';
 import type { DuplicateDocumentSignals } from './duplicate-document-signals.js';
 
-export type DuplicateGateRejectionReason =
-  | 'conflicting_reporting_years'
-  | 'page_count_mismatch';
+export type DuplicateGateRejectionReason = 'conflicting_reporting_years' | 'page_count_mismatch';
 
 export interface EmbeddingDuplicateGateResult {
   accept: boolean;
@@ -17,11 +17,7 @@ const DECEMBER_CLOSING_DATE_RE =
 /** Collect likely fiscal/reporting years from filename, title, OCR sample, and document date. */
 export function collectReportingYears(signals: DuplicateDocumentSignals): number[] {
   const years = new Set<number>();
-  const textParts = [
-    signals.filename,
-    signals.title,
-    signals.extractedTextSample,
-  ];
+  const textParts = [signals.filename, signals.title, signals.extractedTextSample];
 
   for (const part of textParts) {
     for (const match of part.matchAll(CALENDAR_YEAR_RE)) {

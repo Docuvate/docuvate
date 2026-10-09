@@ -1,9 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { IsOptional, IsString, IsUUID } from 'class-validator';
-import type {
-  CreateFolderRequest,
-  FolderDto,
-  UpdateFolderRequest,
-} from '@docuvate/contracts';
+import type { CreateFolderRequest, FolderDto, UpdateFolderRequest } from '@docuvate/contracts';
 
 export class CreateFolderRequestDto implements CreateFolderRequest {
   @IsString()

@@ -39,7 +39,7 @@ test.describe('mobile menu sheet', () => {
         if (!el) return { ok: false, reason: 'no-element' };
         const onBackdrop = Boolean(el.closest('.mobile-nav-backdrop'));
         const onHeroCopy = Boolean(
-          el.closest('.landing-hero-title, .landing-hero-lead, .landing-hero-actions'),
+          el.closest('.landing-hero-title, .landing-hero-lead, .landing-hero-actions')
         );
         return { ok: onBackdrop && !onHeroCopy, tag: el.tagName, className: String(el.className) };
       });

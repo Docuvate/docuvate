@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type { ServerResponse } from 'node:http';
 import type { DocumentChatMessageStreamEvent } from '@docuvate/contracts';
@@ -52,7 +54,6 @@ export class StreamDocumentChatMessageUseCase {
     rawResponse: ServerResponse,
     isClientClosed: () => boolean
   ): Promise<void> {
-
     rawResponse.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache, no-transform',
@@ -79,10 +80,7 @@ export class StreamDocumentChatMessageUseCase {
         type = lastContent.length === 0 ? 'snapshot' : 'token';
         lastContent = message.content;
       }
-      if (
-        message.generationPhase === 'retrieving' ||
-        message.generationPhase === 'verifying'
-      ) {
+      if (message.generationPhase === 'retrieving' || message.generationPhase === 'verifying') {
         type = 'phase';
       }
       if (status === 'done') {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 import type pg from 'pg';
 import { PgUserPreferencesRepository } from './pg-user-preferences.repository.js';
@@ -47,9 +49,7 @@ describe('PgUserPreferencesRepository.upsert', () => {
       String(call[0]).includes('INSERT INTO user_preferences')
     );
     expect(insertCall).toBeDefined();
-    expect(insertCall?.[1]).toEqual(
-      expect.arrayContaining(['user-1', 'dark', 'en'])
-    );
+    expect(insertCall?.[1]).toEqual(expect.arrayContaining(['user-1', 'dark', 'en']));
     expect(row.themePreference).toBe('dark');
     expect(row.locale).toBe('en');
   });

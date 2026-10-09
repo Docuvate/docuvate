@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 import { NotFoundError } from '../../../shared/domain/errors.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';

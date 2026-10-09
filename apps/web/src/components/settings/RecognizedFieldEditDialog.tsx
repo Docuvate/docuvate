@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useId, useRef, useState } from 'react';
 import type { TagDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
@@ -33,8 +35,8 @@ export function RecognizedFieldEditDialog({
   const titleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const cancelRef = useRef<HTMLButtonElement>(null);
-  const [draft, setDraft] = useState<RecognizedFieldDraft>(() =>
-    initialRow ?? emptyRecognizedFieldDraft(gateDefaults)
+  const [draft, setDraft] = useState<RecognizedFieldDraft>(
+    () => initialRow ?? emptyRecognizedFieldDraft(gateDefaults)
   );
   const [keyManual, setKeyManual] = useState(false);
 
@@ -57,7 +59,9 @@ export function RecognizedFieldEditDialog({
   }, [open, initialRow, gateDefaults]);
 
   const title =
-    mode === 'create' ? t('recognizedFields.dialogCreateTitle') : t('recognizedFields.dialogEditTitle');
+    mode === 'create'
+      ? t('recognizedFields.dialogCreateTitle')
+      : t('recognizedFields.dialogEditTitle');
 
   return (
     <dialog

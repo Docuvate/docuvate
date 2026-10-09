@@ -30,7 +30,10 @@ test.describe('site marketing anchors', () => {
   test('Selbst hosten CTAs target quickstart', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/');
-    await expect(page.locator('.landing-btn-primary').first()).toHaveAttribute('href', '/docs#quickstart');
+    await expect(page.locator('.landing-btn-primary').first()).toHaveAttribute(
+      'href',
+      '/docs#quickstart'
+    );
     await expect(page.locator('.header-cta')).toHaveAttribute('href', '/docs#quickstart');
     await page.goto('/docs/api');
     await expect(page.locator('.header-cta')).toHaveAttribute('href', '/docs#quickstart');
@@ -74,21 +77,20 @@ test.describe('site marketing anchors', () => {
     expect(clickedId).toBeTruthy();
     if (clickedId) {
       await expectTargetBelowStickyHeader(page, `#${clickedId}`);
-      await expect(page.locator('.docs-toc-desktop .docs-toc-item.is-active .docs-toc-link')).toHaveAttribute(
-        'data-toc-id',
-        clickedId,
-        { timeout: 3000 }
-      );
+      await expect(
+        page.locator('.docs-toc-desktop .docs-toc-item.is-active .docs-toc-link')
+      ).toHaveAttribute('data-toc-id', clickedId, { timeout: 3000 });
     }
 
-    await page.evaluate(() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' }));
+    await page.evaluate(() =>
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'instant' })
+    );
     await page.waitForTimeout(500);
     const lastId = await toc.nth(count - 1).getAttribute('data-toc-id');
     if (lastId) {
-      await expect(page.locator('.docs-toc-desktop .docs-toc-item.is-active .docs-toc-link')).toHaveAttribute(
-        'data-toc-id',
-        lastId
-      );
+      await expect(
+        page.locator('.docs-toc-desktop .docs-toc-item.is-active .docs-toc-link')
+      ).toHaveAttribute('data-toc-id', lastId);
     }
   });
 

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { UserInvitationMailerPort } from '../../domain/invite-mailer.port.js';
 import { resolvePasswordResetMailMode } from './password-reset-mailer.factory.js';
 import { LoggingUserInvitationMailerAdapter } from './logging-user-invitation-mailer.adapter.js';

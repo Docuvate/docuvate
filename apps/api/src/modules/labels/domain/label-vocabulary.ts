@@ -1,4 +1,9 @@
-import { namesAreNearDuplicate, normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  namesAreNearDuplicate,
+  normalizeLabelKey,
+} from '../../../shared/domain/label-name-similarity.js';
 import { cosineSimilarity } from './cosine.js';
 import { isBlockedLabelCandidate } from './recommendation-blocklist.js';
 
@@ -253,7 +258,10 @@ export function collectNewLabelCandidates(
     for (const hit of inferCanonicalLabelsFromSnippet(doc.text, REASON_IN_TEXT)) {
       bump(hit.name, doc.documentId, hit.reason);
     }
-    for (const hit of inferCanonicalLabelsFromSnippet(`${doc.title} ${doc.filename}`, REASON_IN_TITLE)) {
+    for (const hit of inferCanonicalLabelsFromSnippet(
+      `${doc.title} ${doc.filename}`,
+      REASON_IN_TITLE
+    )) {
       bump(hit.name, doc.documentId, hit.reason);
     }
   }

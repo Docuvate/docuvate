@@ -296,8 +296,16 @@
 }
 
 .mobile-nav-toggle-open {
-  background: color-mix(in srgb, var(--landing-vivid) 18%, var(--landing-btn-secondary-bg, var(--dv-color-bg-raised)));
-  border-color: color-mix(in srgb, var(--landing-vivid) 45%, var(--landing-btn-secondary-border, var(--dv-color-border)));
+  background: color-mix(
+    in srgb,
+    var(--landing-vivid) 18%,
+    var(--landing-btn-secondary-bg, var(--dv-color-bg-raised))
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--landing-vivid) 45%,
+    var(--landing-btn-secondary-border, var(--dv-color-border))
+  );
   color: var(--landing-header-fg, var(--dv-color-text));
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--landing-vivid) 35%, transparent);
 }

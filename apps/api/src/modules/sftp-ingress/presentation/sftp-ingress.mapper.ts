@@ -1,10 +1,15 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   SftpIngressAccountDto,
   SftpIngressCreateAccountResponseDto,
   SftpIngressEventDto,
   SftpIngressServerInfoDto,
 } from '@docuvate/contracts';
-import type { SftpIngressAccountEntity, SftpIngressEventEntity } from '../domain/sftp-ingress.types.js';
+import type {
+  SftpIngressAccountEntity,
+  SftpIngressEventEntity,
+} from '../domain/sftp-ingress.types.js';
 
 export function toSftpIngressAccountDto(entity: SftpIngressAccountEntity): SftpIngressAccountDto {
   return {

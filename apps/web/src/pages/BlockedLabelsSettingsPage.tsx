@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
@@ -337,7 +339,10 @@ export function BlockedLabelsSettingsPage() {
       </Card>
 
       {advancedFeaturesEnabled && !loading && patterns.length > 0 ? (
-        <section className="blocked-labels-advanced card" aria-labelledby="blocked-labels-patterns-title">
+        <section
+          className="blocked-labels-advanced card"
+          aria-labelledby="blocked-labels-patterns-title"
+        >
           <h2 id="blocked-labels-patterns-title" className="blocked-labels-advanced-title">
             {t('labelBlocklist.patternsTitle')}
           </h2>
@@ -385,7 +390,11 @@ export function BlockedLabelsSettingsPage() {
       ) : null}
 
       {proposal ? (
-        <div className="blocked-labels-proposal card" role="region" aria-label={t('labelBlocklist.regexSuggestAria')}>
+        <div
+          className="blocked-labels-proposal card"
+          role="region"
+          aria-label={t('labelBlocklist.regexSuggestAria')}
+        >
           <p className="blocked-labels-proposal-lead">
             {t('settings.blockedLabels.regexProposalFor', {
               phrases: proposingFor?.join(', ') ?? proposal.phrases.join(', '),

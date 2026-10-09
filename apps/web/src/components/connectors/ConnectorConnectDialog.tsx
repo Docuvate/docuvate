@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
@@ -43,10 +45,7 @@ export function ConnectorConnectDialog({
   const [folders, setFolders] = useState<Array<{ id: string; name: string }>>([]);
   const [tags, setTags] = useState<Array<{ id: string; name: string }>>([]);
 
-  const fields = useMemo(
-    () => plugin?.auth.fields ?? [],
-    [plugin]
-  );
+  const fields = useMemo(() => plugin?.auth.fields ?? [], [plugin]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -97,7 +96,9 @@ export function ConnectorConnectDialog({
         password: credentials['password'] || undefined,
         privateKey: credentials['private_key'] || undefined,
       });
-      setProbeMessage(t('connectors.sftpProbeSuccess', { fingerprint: result.hostKeyFingerprintSha256 }));
+      setProbeMessage(
+        t('connectors.sftpProbeSuccess', { fingerprint: result.hostKeyFingerprintSha256 })
+      );
     } catch {
       setProbeMessage(t('connectors.sftpProbeFailed'));
     } finally {
@@ -122,8 +123,7 @@ export function ConnectorConnectDialog({
     onSubmit({ displayName: displayName.trim(), credentials });
   }
 
-  const strategyHint =
-    plugin != null ? t(`connectors.auth.strategy.${plugin.auth.strategy}`) : '';
+  const strategyHint = plugin != null ? t(`connectors.auth.strategy.${plugin.auth.strategy}`) : '';
   const isOAuth = plugin?.auth.strategy === 'oauth2';
   const oauthReady = plugin != null ? connectorOAuthConfigured(plugin) : true;
   const docUrl = connectorsOAuthSetupDocUrl();
@@ -164,7 +164,9 @@ export function ConnectorConnectDialog({
                 </div>
               </details>
             ) : (
-              <p className="muted connector-connect-oauth-block">{t('connectors.connectDisabledOAuth')}</p>
+              <p className="muted connector-connect-oauth-block">
+                {t('connectors.connectDisabledOAuth')}
+              </p>
             )
           ) : null}
           <label className="settings-field">
@@ -181,38 +183,47 @@ export function ConnectorConnectDialog({
             .filter(
               (field) =>
                 plugin.id !== 'sftp_fetch' ||
-                !['after_import', 'poll_interval_seconds', 'target_folder_id', 'label_ids'].includes(
-                  field.key
-                )
+                ![
+                  'after_import',
+                  'poll_interval_seconds',
+                  'target_folder_id',
+                  'label_ids',
+                ].includes(field.key)
             )
             .map((field) => (
-            <label key={field.key} className="settings-field">
-              {fieldLabel(field)}
-              {field.required ? ' *' : ''}
-              <Input
-                type={field.type === 'password' ? 'password' : field.type === 'email' ? 'email' : 'text'}
-                value={credentials[field.key] ?? ''}
-                required={field.required}
-                disabled={busy}
-                autoComplete={field.secret ? 'off' : undefined}
-                placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
-                onChange={(e) =>
-                  setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }))
-                }
-                aria-label={fieldLabel(field)}
-              />
-              {field.helpKey ? <span className="muted settings-hint">{t(field.helpKey)}</span> : null}
-            </label>
-          ))}
+              <label key={field.key} className="settings-field">
+                {fieldLabel(field)}
+                {field.required ? ' *' : ''}
+                <Input
+                  type={
+                    field.type === 'password'
+                      ? 'password'
+                      : field.type === 'email'
+                        ? 'email'
+                        : 'text'
+                  }
+                  value={credentials[field.key] ?? ''}
+                  required={field.required}
+                  disabled={busy}
+                  autoComplete={field.secret ? 'off' : undefined}
+                  placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
+                  onChange={(e) =>
+                    setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }))
+                  }
+                  aria-label={fieldLabel(field)}
+                />
+                {field.helpKey ? (
+                  <span className="muted settings-hint">{t(field.helpKey)}</span>
+                ) : null}
+              </label>
+            ))}
           {plugin.id === 'sftp_fetch' ? (
             <>
               <label className="settings-field">
                 {t('connectors.auth.fields.afterImport')} *
                 <Select
                   value={credentials['after_import'] ?? 'delete'}
-                  onChange={(value) =>
-                    setCredentials((prev) => ({ ...prev, after_import: value }))
-                  }
+                  onChange={(value) => setCredentials((prev) => ({ ...prev, after_import: value }))}
                   options={[
                     { value: 'delete', label: t('connectors.plugins.sftpFetch.afterImportDelete') },
                     { value: 'move', label: t('connectors.plugins.sftpFetch.afterImportMove') },
@@ -271,13 +282,20 @@ export function ConnectorConnectDialog({
                     </option>
                   ))}
                 </select>
-                <span className="muted settings-hint">{t('connectors.plugins.sftpFetch.labelIdsHelp')}</span>
+                <span className="muted settings-hint">
+                  {t('connectors.plugins.sftpFetch.labelIdsHelp')}
+                </span>
               </label>
             </>
           ) : null}
           {plugin.id === 'sftp_fetch' ? (
             <div className="connector-sftp-probe">
-              <Button type="button" variant="secondary" disabled={busy || probeBusy} onClick={() => void handleProbeHostKey()}>
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={busy || probeBusy}
+                onClick={() => void handleProbeHostKey()}
+              >
                 {probeBusy ? t('connectors.sftpProbePending') : t('connectors.sftpProbeCta')}
               </Button>
               {probeMessage ? <p className="muted settings-hint">{probeMessage}</p> : null}

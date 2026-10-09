@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Global, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import pg from 'pg';
@@ -39,14 +41,15 @@ import { PostgresSearchAdapter } from '../../../modules/documents/infrastructure
 import { DocumentChatModule } from '../chat/document-chat.module.js';
 import { PG_POOL } from './tokens.js';
 
-const typeOrmRootImports = isOpenApiHeadlessMode() || isOpenApiContractTestMode()
-  ? []
-  : [
-      TypeOrmModule.forRoot({
-        ...buildTypeOrmOptions(),
-        autoLoadEntities: false,
-      }),
-    ];
+const typeOrmRootImports =
+  isOpenApiHeadlessMode() || isOpenApiContractTestMode()
+    ? []
+    : [
+        TypeOrmModule.forRoot({
+          ...buildTypeOrmOptions(),
+          autoLoadEntities: false,
+        }),
+      ];
 
 @Global()
 @Module({

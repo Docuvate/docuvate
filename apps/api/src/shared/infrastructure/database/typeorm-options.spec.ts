@@ -1,8 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-  TYPEORM_INITIAL_MIGRATION_NAME,
-  buildTypeOrmOptions,
-} from './typeorm-options.js';
+import { TYPEORM_INITIAL_MIGRATION_NAME, buildTypeOrmOptions } from './typeorm-options.js';
 
 describe('buildTypeOrmOptions', () => {
   const prev = process.env['DATABASE_URL'];

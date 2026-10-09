@@ -1,13 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   MlModelFamilyEntity,
   MlModelVersionEntity,
   MlRetrainJobEntity,
 } from '../domain/model-registry.types.js';
-import type {
-  MlModelFamilyDto,
-  MlModelVersionDto,
-  MlRetrainJobDto,
-} from './model-registry.dto.js';
+import type { MlModelFamilyDto, MlModelVersionDto, MlRetrainJobDto } from './model-registry.dto.js';
 
 export function toFamilyDto(entity: MlModelFamilyEntity): MlModelFamilyDto {
   return {

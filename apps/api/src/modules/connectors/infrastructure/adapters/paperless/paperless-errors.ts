@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ValidationError } from '../../../../../shared/domain/errors.js';
 import { PaperlessUrlValidationError } from './paperless-url-security.js';
 

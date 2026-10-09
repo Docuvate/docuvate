@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useRef, type ReactNode, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
@@ -87,6 +89,6 @@ export function SftpIngressManageDrawerShell({
         {children}
       </div>
     </div>,
-    document.body,
+    document.body
   );
 }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { hash, verify } from '@node-rs/argon2';
 
 export async function hashSftpIngressPassword(plain: string): Promise<string> {

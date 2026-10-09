@@ -1,6 +1,12 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FolderDto, SftpIngressCreateAccountResponseDto, SftpIngressServerInfoDto } from '@docuvate/contracts';
+import type {
+  FolderDto,
+  SftpIngressCreateAccountResponseDto,
+  SftpIngressServerInfoDto,
+} from '@docuvate/contracts';
 import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
 import { SettingsCallout } from '../settings/SettingsCallout';
 import { Button } from '../ui/Button';
@@ -27,7 +33,15 @@ interface SftpIngressSetupDialogProps {
   }) => Promise<SftpIngressCreateAccountResponseDto>;
 }
 
-function ValueRow({ label, value, copyValue }: { label: string; value: string; copyValue?: string }) {
+function ValueRow({
+  label,
+  value,
+  copyValue,
+}: {
+  label: string;
+  value: string;
+  copyValue?: string;
+}) {
   return (
     <div className="connector-sftp-kv-row">
       <span className="connector-sftp-kv-label">{label}</span>
@@ -39,7 +53,11 @@ function ValueRow({ label, value, copyValue }: { label: string; value: string; c
   );
 }
 
-const STEP_LABEL_KEYS = ['sftpIngress.setupStepName', 'sftpIngress.setupStepDevice', 'sftpIngress.setupStepDone'] as const;
+const STEP_LABEL_KEYS = [
+  'sftpIngress.setupStepName',
+  'sftpIngress.setupStepDevice',
+  'sftpIngress.setupStepDone',
+] as const;
 
 export function SftpIngressSetupDialog({
   open,
@@ -170,7 +188,10 @@ export function SftpIngressSetupDialog({
         {t('sftpIngress.setupTitle')}
       </h2>
 
-      <ol className="connector-sftp-wizard-steps" aria-label={t('sftpIngress.setupStep', { current: step + 1, total: 3 })}>
+      <ol
+        className="connector-sftp-wizard-steps"
+        aria-label={t('sftpIngress.setupStep', { current: step + 1, total: 3 })}
+      >
         {STEP_LABEL_KEYS.map((key, index) => (
           <li
             key={key}
@@ -292,7 +313,13 @@ export function SftpIngressSetupDialog({
       ) : null}
 
       <div className="confirm-dialog-actions connector-sftp-ingress-dialog-actions">
-        <Button type="button" variant="secondary" ref={cancelRef} disabled={busy} onClick={onCancel}>
+        <Button
+          type="button"
+          variant="secondary"
+          ref={cancelRef}
+          disabled={busy}
+          onClick={onCancel}
+        >
           {step === 2 ? t('common.close') : t('common.cancel')}
         </Button>
         {step === 0 ? (
@@ -305,7 +332,11 @@ export function SftpIngressSetupDialog({
             <Button type="button" variant="secondary" disabled={busy} onClick={() => setStep(0)}>
               {t('sftpIngress.setupBack')}
             </Button>
-            <Button type="button" disabled={busy || !displayName.trim()} onClick={() => void handleCreate()}>
+            <Button
+              type="button"
+              disabled={busy || !displayName.trim()}
+              onClick={() => void handleCreate()}
+            >
               {busy ? t('sftpIngress.createPending') : t('sftpIngress.createSubmit')}
             </Button>
           </>

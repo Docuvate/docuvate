@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 import { DOCUMENT_CHAT_THREAD_REPOSITORY } from '../../shared/domain/ports.js';
 import { PgDocumentChatThreadRepository } from '../documents/infrastructure/pg-document-chat-thread.repository.js';

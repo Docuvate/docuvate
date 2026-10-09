@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useRef, type KeyboardEvent } from 'react';
 import { AlertCircle, CircleCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

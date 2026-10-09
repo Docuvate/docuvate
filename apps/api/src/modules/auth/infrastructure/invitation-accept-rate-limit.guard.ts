@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { InvitationAcceptRateLimitService } from './invitation-accept-rate-limit.service.js';

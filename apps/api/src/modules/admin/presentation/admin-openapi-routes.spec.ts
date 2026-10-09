@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -28,7 +30,9 @@ describe('admin OpenAPI routes', () => {
   });
 
   it('requires administrator for every admin route except access probe', () => {
-    const privileged = adminRoutes.filter((route) => !PUBLIC_ADMIN_OPERATIONS.has(route.operationId));
+    const privileged = adminRoutes.filter(
+      (route) => !PUBLIC_ADMIN_OPERATIONS.has(route.operationId)
+    );
     const labels = privileged.map((route) => `${route.method} ${route.path}`).sort();
     expect(labels).toEqual([
       'GET /admin/users',

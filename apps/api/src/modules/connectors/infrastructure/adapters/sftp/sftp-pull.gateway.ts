@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import { resolveSftpIngestServiceKey } from '../../../../../shared/infrastructure/auth/sftp-ingest-service-key.js';
 
@@ -74,7 +76,9 @@ export async function listSftpPullFiles(
   if (!res.ok) {
     throw new Error('SFTP_LIST_FAILED');
   }
-  const parsed = (await res.json()) as { files: Array<{ Path: string; Name: string; SizeBytes: number }> };
+  const parsed = (await res.json()) as {
+    files: Array<{ Path: string; Name: string; SizeBytes: number }>;
+  };
   return (parsed.files ?? []).map((f) => ({
     path: f.Path ?? (f as unknown as { path: string }).path,
     name: f.Name ?? (f as unknown as { name: string }).name,

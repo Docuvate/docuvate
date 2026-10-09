@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import type { ConnectorPluginId } from '../../../domain/connector.types.js';
 
@@ -13,8 +15,7 @@ export interface MailOAuthStatePayload {
 
 function stateSecret(): string {
   return (
-    process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'] ??
-    'dev-insecure-connector-secrets-key-change-me'
+    process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'] ?? 'dev-insecure-connector-secrets-key-change-me'
   );
 }
 
@@ -40,7 +41,9 @@ export function decodeMailOAuthState(state: string): MailOAuthStatePayload | nul
     return null;
   }
   try {
-    const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8')) as MailOAuthStatePayload;
+    const parsed = JSON.parse(
+      Buffer.from(payloadB64, 'base64url').toString('utf8')
+    ) as MailOAuthStatePayload;
     if (Date.now() - parsed.issuedAtMs > 15 * 60 * 1000) {
       return null;
     }

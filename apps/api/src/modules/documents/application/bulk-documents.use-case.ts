@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type { DocumentBulkRequest } from '@docuvate/contracts';
 import {
@@ -57,11 +59,7 @@ export class BulkDocumentsUseCase {
           const folder = await this.folders.findByIdForUser(bulk.folderId, userId);
           if (!folder) throw new NotFoundError('Folder');
         }
-        const affected = await this.documents.setFolderForDocuments(
-          userId,
-          ids,
-          bulk.folderId
-        );
+        const affected = await this.documents.setFolderForDocuments(userId, ids, bulk.folderId);
         return { affected };
       }
       case 'delete': {

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SiteLocale } from '../lib/routes';
 import type { SiteContent } from './types';
 import { deContent } from './de';

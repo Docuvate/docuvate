@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 function envFlag(name: string, defaultValue = false): boolean {
   const raw = process.env[name];
   if (raw === undefined || raw.trim() === '') {

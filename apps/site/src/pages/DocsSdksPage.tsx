@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { CodeBlock } from '../components/CodeBlock';
 import { DocsHeading } from '../components/DocsHeading';
 import { DocsPageHeader } from '../components/DocsPageHeader';
@@ -94,8 +96,18 @@ export function DocsSdksPage() {
         ))}
       </ol>
 
-      <SdkSection pkg={sdks.node} locale={locale} copyCode={sdks.copyCode} copiedCode={sdks.copiedCode} />
-      <SdkSection pkg={sdks.flutter} locale={locale} copyCode={sdks.copyCode} copiedCode={sdks.copiedCode} />
+      <SdkSection
+        pkg={sdks.node}
+        locale={locale}
+        copyCode={sdks.copyCode}
+        copiedCode={sdks.copiedCode}
+      />
+      <SdkSection
+        pkg={sdks.flutter}
+        locale={locale}
+        copyCode={sdks.copyCode}
+        copiedCode={sdks.copiedCode}
+      />
     </DocsPageLayout>
   );
 }

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ValidationError } from './errors.js';
 import { namesAreNearDuplicate, normalizeLabelKey } from './label-name-similarity.js';
 

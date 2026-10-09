@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /**
  * Lowercase and fold common German umlaut / eszett spellings for fuzzy matching.
  * Postgres queries also apply `unaccent()` (contrib) for trigram/FTS legs.

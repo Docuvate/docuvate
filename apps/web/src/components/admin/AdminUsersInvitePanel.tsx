@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { InstanceRole } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/Button';
@@ -33,11 +35,19 @@ export function AdminUsersInvitePanel({
       <div className="admin-invite-form">
         <label>
           {t('auth.email')}
-          <Input value={inviteEmail} onChange={(e) => onEmailChange(e.target.value)} autoComplete="off" />
+          <Input
+            value={inviteEmail}
+            onChange={(e) => onEmailChange(e.target.value)}
+            autoComplete="off"
+          />
         </label>
         <label>
           {t('auth.name')}
-          <Input value={inviteName} onChange={(e) => onNameChange(e.target.value)} autoComplete="off" />
+          <Input
+            value={inviteName}
+            onChange={(e) => onNameChange(e.target.value)}
+            autoComplete="off"
+          />
         </label>
         <label>
           {t('admin.usersRoleLabel')}

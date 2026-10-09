@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -5,7 +7,13 @@ import { useTranslation } from 'react-i18next';
 import { routes } from '../lib/routes';
 import { authClient } from '../lib/auth-client';
 import { pushRecentDocument } from '../lib/search/searchRecent';
-import type { DocumentDto, ExtractedField, ExtractionBlock, FolderDto, TagDto } from '@docuvate/contracts';
+import type {
+  DocumentDto,
+  ExtractedField,
+  ExtractionBlock,
+  FolderDto,
+  TagDto,
+} from '@docuvate/contracts';
 import { formatUserFacingError } from '../lib/apiErrors';
 import {
   deleteDocument,
@@ -120,7 +128,10 @@ export function DocumentDetailPage() {
   }, [doc]);
 
   useEffect(() => {
-    const state = location.state as { highlightBlocks?: ExtractionBlock[]; citationPage?: number } | null;
+    const state = location.state as {
+      highlightBlocks?: ExtractionBlock[];
+      citationPage?: number;
+    } | null;
     if (state?.highlightBlocks?.length) {
       setHighlightBlocks(state.highlightBlocks);
     } else if (state?.citationPage != null) {
@@ -377,12 +388,16 @@ export function DocumentDetailPage() {
   );
 
   if (loading) return <DocumentDetailLoadingShell />;
-  if (error && !doc) return <p className="error" role="alert">{error}</p>;
+  if (error && !doc)
+    return (
+      <p className="error" role="alert">
+        {error}
+      </p>
+    );
   if (!doc) return <p className="error">{t('documents.notFound')}</p>;
 
   const previewLoading = previewFetchState === 'loading';
-  const previewUnavailable =
-    previewFetchState === 'missing' && !isExtractionPending(doc.status);
+  const previewUnavailable = previewFetchState === 'missing' && !isExtractionPending(doc.status);
 
   return (
     <div className="page document-detail-page page--with-save-bar" data-ux="page">
@@ -408,7 +423,11 @@ export function DocumentDetailPage() {
           onTabChange={setActiveTab}
         />
         {activeTab === 'details' ? (
-          <div className="detail-tab-panel-surface" role="tabpanel" aria-label={t('documents.tabDetails')}>
+          <div
+            className="detail-tab-panel-surface"
+            role="tabpanel"
+            aria-label={t('documents.tabDetails')}
+          >
             <DocumentMetadataForm
               title={title}
               documentDate={documentDate}
@@ -440,14 +459,22 @@ export function DocumentDetailPage() {
         ) : null}
 
         {activeTab === 'labels' ? (
-          <div className="detail-tab-panel-surface" role="tabpanel" aria-label={t('documents.tabLabels')}>
+          <div
+            className="detail-tab-panel-surface"
+            role="tabpanel"
+            aria-label={t('documents.tabLabels')}
+          >
             <LabelPanel document={doc} onUpdated={setDoc} />
             <LabelPlacementHints document={doc} />
           </div>
         ) : null}
 
         {activeTab === 'chat' ? (
-          <div className="detail-tab-panel-surface" role="tabpanel" aria-label={t('documents.tabChat')}>
+          <div
+            className="detail-tab-panel-surface"
+            role="tabpanel"
+            aria-label={t('documents.tabChat')}
+          >
             <DocumentChatPanel documentId={doc.id} compact chatAvailable={documentChatAvailable} />
           </div>
         ) : null}
