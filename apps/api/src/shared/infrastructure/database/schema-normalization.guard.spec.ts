@@ -23,6 +23,7 @@ const FORWARD_SQL_ORDER = [
   'document-extracted-layout-ir-up.sql',
   'connector-paperless-import-up.sql',
   'cited-chat-up.sql',
+  'stale-chat-generation-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

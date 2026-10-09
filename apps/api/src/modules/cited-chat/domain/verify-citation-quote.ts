@@ -1,5 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  extractNumericTokens,
+  fuzzyWordsMatch,
+  numericTokensPresentInText,
+} from './quote-numeric-consistency.js';
+
 const QUOTE_WORD_LIMIT = 10;
 
 export function normalizeForQuoteMatch(text: string): string {
@@ -148,6 +154,22 @@ function findQuoteRegexInChunk(
   return { charStart: match.index, charEnd: match.index + bodyQuote.length, bodyQuote };
 }
 
+export type QuoteSpanMatch = {
+  charStart: number;
+  charEnd: number;
+  bodyQuote: string;
+  method: 'literal' | 'numeric' | 'regex' | 'fuzzy';
+  score: number;
+};
+
+function asQuoteSpanMatch(
+  hit: { charStart: number; charEnd: number; bodyQuote: string },
+  method: QuoteSpanMatch['method'],
+  score: number
+): QuoteSpanMatch {
+  return { ...hit, method, score };
+}
+
 export function findQuoteInChunk(
   chunkBody: string,
   quote: string
@@ -176,6 +198,201 @@ export function findQuoteInChunk(
   if (regexHit) {
     return regexHit;
   }
+  return null;
+}
+
+function significantWords(text: string): string[] {
+  return normalizeForQuoteMatch(truncateQuoteWords(text))
+    .split(' ')
+    .filter((w) => w.length >= 1);
+}
+
+function tokenizeBodyWords(
+  bodyMap: NormalizedBodyMap
+): Array<{ raw: string; normStart: number; normEnd: number }> {
+  const bodyWords: Array<{ raw: string; normStart: number; normEnd: number }> = [];
+  let i = 0;
+  while (i < bodyMap.normalized.length) {
+    while (i < bodyMap.normalized.length && bodyMap.normalized[i] === ' ') {
+      i += 1;
+    }
+    if (i >= bodyMap.normalized.length) {
+      break;
+    }
+    const start = i;
+    while (i < bodyMap.normalized.length && bodyMap.normalized[i] !== ' ') {
+      i += 1;
+    }
+    bodyWords.push({
+      raw: bodyMap.normalized.slice(start, i),
+      normStart: start,
+      normEnd: i,
+    });
+  }
+  return bodyWords;
+}
+
+function sliceBodyWordsToQuote(
+  chunkBody: string,
+  bodyMap: NormalizedBodyMap,
+  bodyWords: Array<{ raw: string; normStart: number; normEnd: number }>,
+  firstIdx: number,
+  lastIdx: number
+): QuoteSpanMatch | null {
+  const normStart = bodyWords[firstIdx].normStart;
+  const normEnd = bodyWords[lastIdx].normEnd;
+  const startBodyIndex = bodyMap.bodyIndexAt[normStart];
+  const endBodyIndex = bodyMap.bodyIndexAt[normEnd - 1];
+  if (startBodyIndex === undefined || endBodyIndex === undefined) {
+    return null;
+  }
+  const charEnd = endBodyIndex + 1;
+  const bodyQuote = chunkBody.slice(startBodyIndex, charEnd);
+  return {
+    charStart: startBodyIndex,
+    charEnd,
+    bodyQuote,
+    method: 'fuzzy',
+    score: 1,
+  };
+}
+
+/**
+ * Ordered, contiguous fuzzy match: non-numeric words may differ by <=1 edit; numeric tokens must match exactly.
+ */
+export function fuzzySpanSearchInChunk(
+  chunkBody: string,
+  needleText: string
+): QuoteSpanMatch | null {
+  const needleWords = significantWords(needleText);
+  if (needleWords.length === 0) {
+    return null;
+  }
+  const bodyMap = buildNormalizedBodyMap(chunkBody);
+  const bodyWords = tokenizeBodyWords(bodyMap);
+  if (bodyWords.length === 0) {
+    return null;
+  }
+
+  for (let start = 0; start < bodyWords.length; start += 1) {
+    let bwIdx = start;
+    const matchedIndices: number[] = [];
+    let allMatched = true;
+    for (const nw of needleWords) {
+      while (bwIdx < bodyWords.length && !fuzzyWordsMatch(nw, bodyWords[bwIdx].raw)) {
+        bwIdx += 1;
+      }
+      if (bwIdx >= bodyWords.length) {
+        allMatched = false;
+        break;
+      }
+      matchedIndices.push(bwIdx);
+      bwIdx += 1;
+    }
+    if (!allMatched || matchedIndices.length !== needleWords.length) {
+      continue;
+    }
+    const contiguous = matchedIndices.every(
+      (idx, i) => i === 0 || idx === matchedIndices[i - 1] + 1
+    );
+    if (!contiguous) {
+      continue;
+    }
+    const hit = sliceBodyWordsToQuote(
+      chunkBody,
+      bodyMap,
+      bodyWords,
+      matchedIndices[0],
+      matchedIndices[matchedIndices.length - 1]
+    );
+    if (!hit) {
+      continue;
+    }
+    const quoteNums = extractNumericTokens(needleText);
+    if (!numericTokensPresentInText(quoteNums, hit.bodyQuote)) {
+      continue;
+    }
+    return hit;
+  }
+  return null;
+}
+
+export function validateMatchedSpanNumbers(input: {
+  quote: string;
+  claimText: string;
+  bodyQuote: string;
+  chunkBody: string;
+}): boolean {
+  const quoteNums = extractNumericTokens(input.quote);
+  if (!numericTokensPresentInText(quoteNums, input.bodyQuote)) {
+    return false;
+  }
+  const claimNums = extractNumericTokens(input.claimText);
+  return (
+    numericTokensPresentInText(claimNums, input.bodyQuote) ||
+    numericTokensPresentInText(claimNums, input.chunkBody)
+  );
+}
+
+export function bestQuoteMatchScore(chunkBody: string, quote: string): number {
+  const trimmed = truncateQuoteWords(quote);
+  if (!trimmed) {
+    return 0;
+  }
+  const direct = findQuoteInChunk(chunkBody, trimmed);
+  if (direct) {
+    return 1;
+  }
+  const fuzzy = fuzzySpanSearchInChunk(chunkBody, trimmed);
+  return fuzzy?.score ?? 0;
+}
+
+function acceptResolvedMatch(
+  chunkBody: string,
+  quote: string,
+  claimText: string,
+  match: { charStart: number; charEnd: number; bodyQuote: string },
+  method: QuoteSpanMatch['method'],
+  score: number
+): QuoteSpanMatch | null {
+  if (
+    !validateMatchedSpanNumbers({
+      quote,
+      claimText,
+      bodyQuote: match.bodyQuote,
+      chunkBody,
+    })
+  ) {
+    return null;
+  }
+  return asQuoteSpanMatch(match, method, score);
+}
+
+export function resolveQuoteInChunk(
+  chunkBody: string,
+  quote: string,
+  options?: { claimText?: string }
+): QuoteSpanMatch | null {
+  const claimText = options?.claimText?.trim() ?? '';
+  const trimmed = truncateQuoteWords(quote);
+  if (trimmed) {
+    const direct = findQuoteInChunk(chunkBody, trimmed);
+    if (direct) {
+      return acceptResolvedMatch(chunkBody, trimmed, claimText, direct, 'literal', 1);
+    }
+    const fuzzy = fuzzySpanSearchInChunk(chunkBody, trimmed);
+    if (fuzzy) {
+      return acceptResolvedMatch(
+        chunkBody,
+        trimmed,
+        claimText,
+        fuzzy,
+        fuzzy.method,
+        fuzzy.score
+      );
+    }
+  }
+
   return null;
 }
 

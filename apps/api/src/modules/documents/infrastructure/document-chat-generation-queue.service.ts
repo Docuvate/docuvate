@@ -83,6 +83,18 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
     }
   }
 
+  async isJobQueuedOrActive(messageId: string): Promise<boolean> {
+    if (!this.queue) {
+      return false;
+    }
+    const job = await this.queue.getJob(messageId);
+    if (!job) {
+      return false;
+    }
+    const state = await job.getState();
+    return state === 'active' || state === 'waiting' || state === 'delayed';
+  }
+
   async enqueue(payload: DocumentChatGenerationJobPayload): Promise<void> {
     const existing = await this.queue.getJob(payload.messageId);
     if (existing) {

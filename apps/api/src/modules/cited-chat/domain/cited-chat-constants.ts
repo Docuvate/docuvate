@@ -21,6 +21,10 @@ export function ragRerankerGateThreshold(): number {
   return Number.isFinite(parsed) ? parsed : RAG_RERANKER_GATE_MIN_DEFAULT;
 }
 
+export function citedChatBenchStatsEnabled(): boolean {
+  return process.env['DOCUVATE_CITED_CHAT_BENCH_STATS']?.toLowerCase() === '1';
+}
+
 export function ragFusionGateThreshold(): number {
   const raw = process.env['RAG_FUSION_GATE_MIN'];
   if (!raw) {

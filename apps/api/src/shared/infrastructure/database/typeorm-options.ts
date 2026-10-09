@@ -14,6 +14,7 @@ import { SftpIngress20261008133500 } from './migrations/20261008133500-sftp-ingr
 import { DocumentExtractedLayoutIr20261008213000 } from './migrations/20261008213000-document-extracted-layout-ir.js';
 import { ConnectorPaperlessImport20261008234500 } from './migrations/20261008234500-connector-paperless-import.js';
 import { CitedChat20261009120000 } from './migrations/20261009120000-cited-chat.js';
+import { StaleChatGeneration20261009183000 } from './migrations/20261009183000-stale-chat-generation.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -51,6 +52,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DocumentExtractedLayoutIr20261008213000,
       ConnectorPaperlessImport20261008234500,
       CitedChat20261009120000,
+      StaleChatGeneration20261009183000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,
