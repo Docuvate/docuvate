@@ -5,15 +5,8 @@ from __future__ import annotations
 import math
 
 from docuvate_worker.domain.layout_ir import FontWeight, LayoutIrBlock, LayoutIrPage
-from docuvate_worker.infrastructure.layout.font_map import (
-    is_italic_fontname,
-    typst_font_and_scale,
-    uses_metric_typst_substitute,
-)
-from docuvate_worker.infrastructure.layout.text_fit import (
-    horizontal_scale_factor,
-    measured_text_width_pt,
-)
+from .font_map import is_italic_fontname, typst_font_and_scale
+from .text_fit import horizontal_scale_factor
 
 
 def _is_rotated_block(block: LayoutIrBlock) -> bool:
@@ -46,25 +39,8 @@ def run_scale_x(
         if block.block_index in measured:
             return measured[block.block_index]
         return 1.0
-    if uses_metric_typst_substitute(block.font_family):
-        return 1.0
     target = block.width * page.width_pt
     size = run_font_size_pt(block)
-    family, _ = typst_font_and_scale(block.font_family)
-    measured = measured_text_width_pt(
-        block.text,
-        size,
-        family,
-        bold=block.weight == FontWeight.BOLD,
-    )
-    if measured is not None and measured > 0 and target > 0:
-        return horizontal_scale_factor(
-            block.text,
-            size,
-            target,
-            bold=block.weight == FontWeight.BOLD,
-            estimated_width_pt=measured,
-        )
     estimated = len(block.text.rstrip()) * size * 0.48
     if target <= 0 or estimated <= 0:
         return 1.0
@@ -80,13 +56,8 @@ def run_font_weight_css(block: LayoutIrBlock) -> int:
     return 700 if block.weight == FontWeight.BOLD else 400
 
 
-def run_anchor_pt(
-    block: LayoutIrBlock,
-    page: LayoutIrPage,
-    *,
-    baseline_origin: bool = False,
-) -> tuple[float, float]:
-    """Placement point in pdfplumber top-down pt space."""
+def run_anchor_pt(block: LayoutIrBlock, page: LayoutIrPage) -> tuple[float, float]:
+    """Placement point in pdfplumber top-down pt space (baseline origin for CSS)."""
     pw, ph = page.width_pt, page.height_pt
     if block.text_origin_x is not None and block.text_origin_y is not None:
         baseline_x = block.text_origin_x * pw
@@ -99,9 +70,9 @@ def run_anchor_pt(
         baseline_x = block.x * pw
         baseline_y = (block.y + block.height) * ph
 
-    if _is_rotated_block(block) or baseline_origin:
+    if _is_rotated_block(block):
         return baseline_x, baseline_y
-    # Upright HTML: pdfplumber char bbox top aligns with pdf2image raster better than ascent.
+    # Upright: pdfplumber char bbox top aligns with pdf2image raster better than ascent guess.
     top_y = block.y * ph
     left_x = block.x * pw
     return left_x, top_y

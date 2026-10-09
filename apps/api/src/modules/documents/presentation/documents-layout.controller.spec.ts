@@ -93,16 +93,28 @@ describe('DocumentsController layout routes', () => {
   });
 
   it('returns layout HTML envelope', async () => {
-    getDocumentLayoutHtml.execute.mockResolvedValue('<html></html>');
+    getDocumentLayoutHtml.execute.mockResolvedValue({
+      html: '<html></html>',
+      reconstructionReliable: true,
+      unreliableReason: null,
+    });
     await expect(controller.layoutHtml(session, subject, 'doc-1')).resolves.toEqual({
       html: '<html></html>',
+      reconstructionReliable: true,
+      unreliableReason: null,
     });
   });
 
   it('returns layout Typst envelope', async () => {
-    getDocumentLayoutTypst.execute.mockResolvedValue('#set page(margin: 0pt)');
+    getDocumentLayoutTypst.execute.mockResolvedValue({
+      typst: '#set page(margin: 0pt)',
+      reconstructionReliable: false,
+      unreliableReason: 'unsupported_script',
+    });
     await expect(controller.layoutTypst(session, subject, 'doc-1')).resolves.toEqual({
       typst: '#set page(margin: 0pt)',
+      reconstructionReliable: false,
+      unreliableReason: 'unsupported_script',
     });
   });
 });

@@ -41,12 +41,23 @@ def _with_layout_ir(
         return result
     if layout is None:
         return result
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+        assess_layout_reconstruction,
+    )
+
+    doc = document_from_dict(layout.to_json())
+    fidelity = assess_layout_reconstruction(doc, content)
     return ExtractionResult(
         text=result.text,
         fields=result.fields,
         blocks=result.blocks,
         markdown=result.markdown,
         layout_ir=layout.to_json(),
+        layout_reconstruction_reliable=fidelity.reconstruction_reliable,
+        layout_unreliable_reason=(
+            fidelity.unreliable_reason.value if fidelity.unreliable_reason else None
+        ),
     )
 
 

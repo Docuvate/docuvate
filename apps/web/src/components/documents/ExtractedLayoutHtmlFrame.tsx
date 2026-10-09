@@ -39,6 +39,7 @@ export function ExtractedLayoutHtmlFrame({
   const hostRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [html, setHtml] = useState<string | null>(null);
+  const [reconstructionReliable, setReconstructionReliable] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [naturalWidthPx, setNaturalWidthPx] = useState(0);
   const [naturalHeightPx, setNaturalHeightPx] = useState(0);
@@ -81,7 +82,10 @@ export function ExtractedLayoutHtmlFrame({
     setNaturalHeightPx(0);
     void fetchDocumentLayoutHtml(documentId)
       .then((payload) => {
-        if (active) setHtml(payload.html);
+        if (active) {
+          setHtml(payload.html);
+          setReconstructionReliable(payload.reconstructionReliable ?? true);
+        }
       })
       .catch(() => {
         if (active) setError('layout');
@@ -155,6 +159,11 @@ export function ExtractedLayoutHtmlFrame({
         }}
         aria-hidden={!loading}
       />
+      {html && !reconstructionReliable ? (
+        <p className="layout-ir-reconstruction-warning" role="status">
+          {t('documents.layoutReconstructionUnreliable')}
+        </p>
+      ) : null}
       {html ? (
         <div
           className="layout-ir-scale-outer"

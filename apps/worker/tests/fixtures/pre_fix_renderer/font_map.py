@@ -31,7 +31,6 @@ _PATTERNS: list[tuple[re.Pattern[str], tuple[str, float]]] = [
         re.compile(r"helvetica|arial|liberationsans|univers|frutiger|calibri|verdana", re.I),
         ("Liberation Sans", 1.0),
     ),
-    (re.compile(r"dejavu|docusubset", re.I), ("Liberation Sans", 1.0)),
     (re.compile(r"bundessans|ttnorms", re.I), ("Liberation Sans", 0.96)),
     (re.compile(r"serif|palatino|garamond|minion", re.I), ("Liberation Serif", 0.96)),
 ]
@@ -59,25 +58,6 @@ def css_font_family(fontname: str | None) -> str:
     if family == "Liberation Mono":
         return '"Liberation Mono", "Courier New", Courier, monospace'
     return '"Liberation Sans", "Helvetica Neue", Helvetica, Arial, sans-serif'
-
-
-def uses_metric_typst_substitute(fontname: str | None) -> bool:
-    """True when PDF font maps to Typst with no horizontal scale fudge (e.g. Helvetica)."""
-    if not fontname:
-        return True
-    for pattern, (family, mult) in _PATTERNS:
-        if abs(mult - 1.0) > 0.001:
-            continue
-        if pattern.search(fontname):
-            return family in ("Liberation Sans", "Liberation Mono")
-    base = fontname.split("-")[0].split("+")[-1]
-    if base:
-        for pattern, (family, mult) in _PATTERNS:
-            if abs(mult - 1.0) > 0.001:
-                continue
-            if pattern.search(base):
-                return family in ("Liberation Sans", "Liberation Mono")
-    return False
 
 
 def typst_font_and_scale(fontname: str | None) -> tuple[str, float]:
