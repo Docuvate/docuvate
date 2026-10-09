@@ -4,8 +4,6 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { scheduleApiPageScrollSync } from '../lib/apiPageScroll';
 import '../styles/scalar-site-overrides.css';
-import openApiSpecDe from '../generated/openapi.v1.json';
-import openApiSpecEn from '../generated/openapi.v1.en.json';
 import { useLocale } from '../context/LocaleContext';
 import { observeScalarDeChrome } from '../lib/scalarDeDomPatch';
 import { observeScalarSidebarAccordion, observeScalarSidebarSticky } from '../lib/scalarSidebarAccordion';
@@ -23,9 +21,12 @@ export function ApiReferencePanel() {
   const { locale } = useLocale();
   const { theme } = useDocuvateTheme();
   const embedRef = useRef<HTMLDivElement>(null);
-  const openApiSpec = locale === 'en' ? openApiSpecEn : openApiSpecDe;
   const isDark = theme === 'dark';
   const serverUrl = marketingOpenApiServerUrl(locale);
+  const openApiSpecUrl =
+    locale === 'en'
+      ? `${import.meta.env.BASE_URL}openapi.en.json`
+      : `${import.meta.env.BASE_URL}openapi.json`;
   const tagSlug = hash.match(/^#tag\/([^/]+)/i)?.[1] ?? '';
 
   useEffect(() => {
@@ -58,7 +59,7 @@ export function ApiReferencePanel() {
       <ApiReferenceReact
         key={`${locale}-${tagSlug}`}
         configuration={{
-          spec: { content: openApiSpec },
+          spec: { url: openApiSpecUrl },
           theme: 'none',
           darkMode: isDark,
           baseServerURL: serverUrl,

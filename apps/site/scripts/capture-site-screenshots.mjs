@@ -202,5 +202,28 @@ for (const theme of ['light', 'dark']) {
   await context.close();
 }
 
+for (const [width, height, label] of [
+  [1440, 900, '1440'],
+  [390, 844, '390'],
+]) {
+  for (const theme of ['light', 'dark']) {
+    for (const [slug, path] of [
+      ['landing', '/'],
+      ['docs', '/docs'],
+      ['api', '/docs/api#tag/labels'],
+      ['compare-paperless', '/docs/vergleiche/paperless-ngx'],
+    ]) {
+      const { context, page } = await newPreparedPage(browser, { width, height, theme });
+      await gotoAndSettle(page, path);
+      if (slug === 'api') {
+        await page.waitForSelector('.scalar-embed', { state: 'attached', timeout: 60_000 });
+        await page.waitForTimeout(1200);
+      }
+      await page.screenshot({ path: join(outDir, `${slug}-${label}-${theme}.png`), fullPage: slug !== 'api' });
+      await context.close();
+    }
+  }
+}
+
 console.log('Wrote artifacts to', outDir);
 await browser.close();

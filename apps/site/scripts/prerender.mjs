@@ -25,6 +25,15 @@ function copyDir(src, dest) {
 const outDir = join(siteRoot, 'dist');
 mkdirSync(outDir, { recursive: true });
 
+const SITE_URL = process.env.SITE_URL ?? 'https://docuvate.de';
+
+function escapeAttr(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;');
+}
+
 for (const route of prerenderRoutes) {
   const { html, helmet } = render(route);
   let doc = template.replace('<div id="root"></div>', `<div id="root">${html}</div>`);
@@ -44,6 +53,23 @@ for (const route of prerenderRoutes) {
   if (helmet.lang) {
     doc = doc.replace('<html lang="de">', `<html lang="${helmet.lang}">`);
   }
+
+  const canonicalPath = helmet.canonicalPath ?? route;
+  const canonicalUrl = `${SITE_URL}${canonicalPath === '/' ? '/' : canonicalPath.replace(/\/$/, '')}`;
+  const ogImage = `${SITE_URL}${helmet.ogImagePath ?? '/og-image.png'}`;
+  const deAlt = `${SITE_URL}${helmet.alternateDePath === '/' ? '/' : helmet.alternateDePath}`;
+  const enAlt = `${SITE_URL}${helmet.alternateEnPath}`;
+  const headExtras = `
+  <link rel="canonical" href="${escapeAttr(canonicalUrl)}" />
+  <meta property="og:url" content="${escapeAttr(canonicalUrl)}" />
+  <meta property="og:title" content="${escapeAttr(helmet.title ?? 'Docuvate')}" />
+  <meta property="og:description" content="${escapeAttr(helmet.description ?? '')}" />
+  <meta property="og:image" content="${escapeAttr(ogImage)}" />
+  <link rel="alternate" hreflang="de" href="${escapeAttr(deAlt)}" />
+  <link rel="alternate" hreflang="en" href="${escapeAttr(enAlt)}" />
+  <link rel="alternate" hreflang="x-default" href="${escapeAttr(deAlt)}" />
+`;
+  doc = doc.replace('</head>', `${headExtras}</head>`);
 
   const filePath =
     route === '/'

@@ -1,9 +1,10 @@
-import { ArrowRight, Check, Container, Database, FileCode2, Plug } from 'lucide-react';
+import { ArrowRight, Check, Cpu, HardDrive, Plug, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { CodeBlock } from '../components/CodeBlock';
 import { FaqItem } from '../components/FaqItem';
 import { useLocale } from '../context/LocaleContext';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
+import { comparisonsBasePath } from '../lib/compareData';
 import { screenshotSrc } from '../lib/screenshotAssets';
 import type { ProofItem } from '../content/types';
 
@@ -17,8 +18,8 @@ const LOGO_MAP: Record<string, string> = {
   outlook: '/plugin-logos/microsoftoutlook.svg',
 };
 
-function integrationAvailableLabel(locale: 'de' | 'en') {
-  return locale === 'de' ? 'Verfügbar' : 'Available';
+function showIntegrationBadge(id: string) {
+  return id === 'sftp';
 }
 
 function featureScreenshotBase(featureId: string): string {
@@ -31,12 +32,12 @@ function ProofIcon({ id }: { id: ProofItem['id'] }) {
   const props = { size, strokeWidth: 2, 'aria-hidden': true as const };
   switch (id) {
     case 'agpl':
-      return <FileCode2 {...props} />;
-    case 'docker':
-      return <Container {...props} />;
-    case 'stack':
-      return <Database {...props} />;
-    case 'api':
+      return <Shield {...props} />;
+    case 'local':
+      return <HardDrive {...props} />;
+    case 'cpu':
+      return <Cpu {...props} />;
+    case 'openapi':
       return <Plug {...props} />;
     default: {
       const _exhaustive: never = id;
@@ -110,6 +111,24 @@ export function LandingPage() {
               </div>
             </Link>
           ))}
+        </div>
+      </section>
+
+      <section className="landing-band landing-band-light landing-section" aria-labelledby="why-heading">
+        <div className="site-container">
+          <h2 id="why-heading" className="landing-section-title landing-section-title-wide">{landing.why.heading}</h2>
+          <p className="section-lead landing-section-lead">{landing.why.lead}</p>
+          <div className="landing-why-grid">
+            {landing.why.cards.map((card) => (
+              <article key={card.title} className="card landing-why-card">
+                <h3>{card.title}</h3>
+                <p>{card.body}</p>
+              </article>
+            ))}
+          </div>
+          <p className="landing-why-compare">
+            <Link to={localizePath(comparisonsBasePath(locale))}>{landing.why.compareLink}</Link>
+          </p>
         </div>
       </section>
 
@@ -209,6 +228,27 @@ export function LandingPage() {
         </div>
       </section>
 
+      <section className="landing-band landing-band-light landing-section" aria-labelledby="editions-heading">
+        <div className="site-container landing-editions-grid">
+          <div>
+            <h2 id="editions-heading" className="landing-section-title landing-section-title-wide">
+              {landing.editions.heading}
+            </h2>
+            <p className="section-lead">{landing.editions.lead}</p>
+          </div>
+          <div className="landing-editions-cards">
+            <article className="card landing-edition-card">
+              <h3>{landing.editions.selfHostedTitle}</h3>
+              <p>{landing.editions.selfHostedBody}</p>
+            </article>
+            <article className="card landing-edition-card">
+              <h3>{landing.editions.cloudTitle}</h3>
+              <p>{landing.editions.cloudBody}</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section className="landing-band landing-band-tint landing-section" aria-labelledby="integrations-heading">
         <div className="site-container">
         <h2 id="integrations-heading" className="landing-section-title landing-section-title-wide">
@@ -219,18 +259,24 @@ export function LandingPage() {
           {landing.integrations.items.map((item) => (
             <article key={item.id} className="integration-card landing-integration-card">
               <div className="integration-logo-tile" aria-hidden>
-                <img
-                  className="integration-logo"
-                  src={LOGO_MAP[item.id] ?? '/plugin-logos/amazons3.svg'}
-                  alt=""
-                  width={28}
-                  height={28}
-                />
+                {LOGO_MAP[item.id] ? (
+                  <img
+                    className="integration-logo"
+                    src={LOGO_MAP[item.id]}
+                    alt=""
+                    width={28}
+                    height={28}
+                  />
+                ) : (
+                  <span className="integration-logo-fallback">{item.name.slice(0, 4)}</span>
+                )}
               </div>
               <div className="integration-card-body">
                 <div className="integration-card-head">
                   <h3>{item.name}</h3>
-                  <span className="badge badge-ok">{integrationAvailableLabel(locale)}</span>
+                  {showIntegrationBadge(item.id) ? (
+                    <span className="badge badge-ok">{locale === 'de' ? 'Laut Repo' : 'Per repo'}</span>
+                  ) : null}
                 </div>
                 <p>{item.description}</p>
               </div>

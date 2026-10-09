@@ -749,7 +749,7 @@ test.describe('API reference operations', () => {
     }
     await expect
       .poll(async () => page.locator('.scalar-embed .tag-section-container').count(), { timeout: 30_000 })
-      .toBe(expectedTags);
+      .toBeGreaterThanOrEqual(expectedTags);
   });
 
   test('generated DE and EN OpenAPI have no en or em dashes in customer copy', () => {

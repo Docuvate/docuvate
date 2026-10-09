@@ -7,6 +7,14 @@ async function openMobileMenu(page: import('@playwright/test').Page) {
 }
 
 test.describe('mobile menu sheet', () => {
+  test('menu is closed on initial load', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/');
+    await expect(page.locator('.mobile-nav-sheet')).toHaveCount(0);
+    await expect(page.locator('.mobile-nav-toggle')).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.locator('.landing-hero-title')).toBeVisible();
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('docuvate-site-locale', 'de');

@@ -4,12 +4,15 @@ import { useEffect, type ReactNode } from 'react';
 import { observeSiteHeaderHeight } from '../lib/siteHeaderHeight';
 import { useLocale } from '../context/LocaleContext';
 import { withLocale, type SiteLocale } from '../lib/routes';
+import { comparisonsBasePath } from '../lib/compareData';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
 import { MobileNav } from './MobileNav';
 import { SiteLogo } from './SiteLogo';
 
 const GITHUB_URL = 'https://github.com/Docuvate/docuvate';
 const LICENSE_URL = `${GITHUB_URL}/blob/main/LICENSE`;
+const SECURITY_URL = `${GITHUB_URL}/blob/main/SECURITY.md`;
+const RELEASES_URL = `${GITHUB_URL}/releases`;
 
 function LocaleSwitcher({ locale, onDarkHero }: { locale: SiteLocale; onDarkHero: boolean }) {
   const location = useLocation();
@@ -25,34 +28,6 @@ function LocaleSwitcher({ locale, onDarkHero }: { locale: SiteLocale; onDarkHero
     >
       {targetLocale === 'en' ? 'EN' : 'DE'}
     </Link>
-  );
-}
-
-function FooterLocaleLinks({ locale }: { locale: SiteLocale }) {
-  const location = useLocation();
-  const pathWithoutLocale =
-    locale === 'en' ? location.pathname.replace(/^\/en/, '') || '/' : location.pathname;
-  const label = locale === 'de' ? 'Sprachauswahl' : 'Language';
-  return (
-    <nav className="footer-locale-links" aria-label={label}>
-      <Link
-        to={withLocale('de', pathWithoutLocale)}
-        hrefLang="de"
-        aria-current={locale === 'de' ? 'page' : undefined}
-      >
-        Deutsch
-      </Link>
-      <span className="footer-locale-sep" aria-hidden>
-        /
-      </span>
-      <Link
-        to={withLocale('en', pathWithoutLocale)}
-        hrefLang="en"
-        aria-current={locale === 'en' ? 'page' : undefined}
-      >
-        English
-      </Link>
-    </nav>
   );
 }
 
@@ -85,6 +60,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const path = location.pathname.replace(/^\/en/, '') || '/';
   const onLanding = path === '/';
   const onLegal = path === '/impressum' || path === '/datenschutz';
+  const compareBase = comparisonsBasePath(locale);
 
   const navLink = (to: string, label: string) => {
     const localized = localizePath(to);
@@ -116,6 +92,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
           </Link>
           <nav className="site-nav" aria-label="Primary">
             {navLink('/docs', content.nav.docs)}
+            {navLink(compareBase, content.nav.comparisons)}
+            <Link to={localizePath('/#editions-heading')}>{content.nav.editions}</Link>
             {navLink('/docs/api', content.nav.api)}
             {navLink('/docs/sdks', content.nav.sdks)}
             <a href={GITHUB_URL} target="_blank" rel="noreferrer">
@@ -155,6 +133,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <div className="site-footer-links site-footer-links-col">
               <Link to={localizePath('/')}>{locale === 'de' ? 'Startseite' : 'Home'}</Link>
               <Link to={localizePath('/docs')}>{content.nav.docs}</Link>
+              <Link to={localizePath('/#features-heading')}>{locale === 'de' ? 'Funktionen' : 'Features'}</Link>
+              <Link to={localizePath('/#integrations-heading')}>
+                {locale === 'de' ? 'Integrationen' : 'Integrations'}
+              </Link>
               <Link to={quickstartPath}>{content.landing.hero.primaryCta}</Link>
             </div>
           </div>
@@ -163,25 +145,55 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <div className="site-footer-links site-footer-links-col">
               <Link to={localizePath('/docs/api')}>{content.nav.api}</Link>
               <Link to={localizePath('/docs/sdks')}>{content.nav.sdks}</Link>
+              <a href="/openapi.json" download>{content.footer.openApiJson}</a>
+              <Link to={localizePath(locale === 'de' ? '/docs/architektur' : '/docs/architecture')}>
+                {locale === 'de' ? 'Architektur' : 'Architecture'}
+              </Link>
+            </div>
+          </div>
+          <div>
+            <strong className="site-footer-heading">{content.footer.comparisons}</strong>
+            <div className="site-footer-links site-footer-links-col">
+              <Link to={localizePath(compareBase)}>
+                {locale === 'de' ? 'Alle Vergleiche' : 'All comparisons'}
+              </Link>
+              <Link to={localizePath(`${compareBase}/paperless-ngx`)}>vs Paperless-ngx</Link>
+              <Link to={localizePath(`${compareBase}/papra`)}>vs Papra</Link>
+              <Link to={localizePath(`${compareBase}/docspell`)}>vs Docspell</Link>
+              <Link to={localizePath(`${compareBase}/mayan-edms`)}>vs Mayan EDMS</Link>
+              <Link to={localizePath(`${compareBase}/docuware`)}>vs DocuWare</Link>
             </div>
           </div>
           <div>
             <strong className="site-footer-heading">{content.footer.project}</strong>
             <div className="site-footer-links site-footer-links-col">
-              <a href={GITHUB_URL} target="_blank" rel="noreferrer">
-                {content.footer.github}
+              <a href={GITHUB_URL} target="_blank" rel="noreferrer">{content.footer.github}</a>
+              <a href={LICENSE_URL} target="_blank" rel="noreferrer">{content.footer.license}</a>
+              <a href={RELEASES_URL} target="_blank" rel="noreferrer">
+                {locale === 'de' ? 'Releases' : 'Releases'}
               </a>
-              <a href={LICENSE_URL} target="_blank" rel="noreferrer">
-                {content.footer.license}
+              <a href={SECURITY_URL} target="_blank" rel="noreferrer">
+                {locale === 'de' ? 'Sicherheit' : 'Security'}
               </a>
+              <a href={`mailto:${content.footer.contactEmail}`}>{content.footer.contactEmail}</a>
+            </div>
+          </div>
+          <div>
+            <strong className="site-footer-heading">{content.footer.legal}</strong>
+            <div className="site-footer-links site-footer-links-col">
               <Link to={localizePath('/impressum')}>{content.footer.imprint}</Link>
               <Link to={localizePath('/datenschutz')}>{content.footer.privacy}</Link>
             </div>
           </div>
-          <div>
-            <strong className="site-footer-heading">{content.footer.language}</strong>
-            <FooterLocaleLinks locale={locale} />
-          </div>
+        </div>
+        <div className="site-container site-footer-bottom footer-locale-links">
+          <p>
+            {content.footer.copyrightLine} ·{' '}
+            <a href={`mailto:${content.footer.contactEmail}`}>{content.footer.contactEmail}</a> ·{' '}
+            <Link to={withLocale('de', path)} hrefLang="de">Deutsch</Link>
+            {' / '}
+            <Link to={withLocale('en', path)} hrefLang="en">English</Link>
+          </p>
         </div>
       </footer>
     </div>

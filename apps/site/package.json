@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/enhance-openapi.mjs && node scripts/materialize-code-highlights.mjs && node scripts/sync-brand-assets.mjs && vite",
-    "build": "node scripts/enhance-openapi.mjs && node scripts/materialize-code-highlights.mjs && node scripts/assert-public-openapi-docs.mjs && node scripts/sync-brand-assets.mjs && node scripts/assert-public-screenshots.mjs && rm -rf dist && tsc -b --noEmit && vite build && vite build --ssr src/entry-server.tsx --outDir dist/server && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs && node scripts/check-dist-marketing-palette.mjs",
-    "preview": "vite preview --port 8081",
+    "dev": "node scripts/materialize-compare.mjs && node scripts/enhance-openapi.mjs && node scripts/materialize-code-highlights.mjs && node scripts/sync-brand-assets.mjs && vite",
+    "build": "node scripts/materialize-compare.mjs && node scripts/enhance-openapi.mjs && node scripts/materialize-code-highlights.mjs && node scripts/assert-public-openapi-docs.mjs && node scripts/sync-brand-assets.mjs && node scripts/assert-public-screenshots.mjs && rm -rf dist && tsc -b --noEmit && vite build && vite build --ssr src/entry-server.tsx --outDir dist/server && node scripts/prerender.mjs && node scripts/generate-sitemap.mjs && node scripts/check-dist-marketing-palette.mjs",
+    "preview": "vite preview --port 8081 --outDir dist --host 127.0.0.1",
     "lint": "stylelint \"src/**/*.css\"",
     "check:de-locale": "node --experimental-strip-types ./scripts/check-de-locale.mjs",
     "typecheck": "node scripts/materialize-code-highlights.mjs && tsc -b --noEmit",

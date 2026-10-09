@@ -2,6 +2,8 @@ import { deContent } from '../src/content/de.ts';
 import { enContent } from '../src/content/en.ts';
 
 const ALLOW_IDENTICAL = new Set([
+  '© 2026 Docuvate',
+  'Docuvate Cloud / Business',
   'Docker Compose',
   'Paperless-ngx',
   'Home Assistant',

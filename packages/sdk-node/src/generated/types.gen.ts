@@ -1741,6 +1741,18 @@ export type ListDocumentsData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * When true, only documents without a non-inbox label are returned.
+         */
+        withoutNonInboxLabel?: boolean;
+        /**
+         * When true, only documents without a folder assignment are returned.
+         */
+        unfiled?: boolean;
+        /**
+         * When true, only documents in the inbox label are returned.
+         */
+        inbox?: boolean;
         q?: string;
         status?: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
         tagId?: string;
@@ -1748,9 +1760,6 @@ export type ListDocumentsData = {
         correspondentId?: string;
         folderId?: string;
         mappeId?: string;
-        withoutNonInboxLabel?: string;
-        unfiled?: string;
-        inbox?: string;
         documentDateFrom?: string;
         documentDateTo?: string;
         sort?: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';

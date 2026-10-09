@@ -19,7 +19,7 @@ export type HeroProductCard = {
 };
 
 export type ProofItem = {
-  id: 'agpl' | 'docker' | 'stack' | 'api';
+  id: 'agpl' | 'local' | 'cpu' | 'openapi';
   label: string;
 };
 
@@ -63,6 +63,20 @@ export type LandingContent = {
     secondaryCta: string;
   };
   integrations: { heading: string; lead: string; items: IntegrationItem[] };
+  why: {
+    heading: string;
+    lead: string;
+    cards: { title: string; body: string }[];
+    compareLink: string;
+  };
+  editions: {
+    heading: string;
+    lead: string;
+    selfHostedTitle: string;
+    selfHostedBody: string;
+    cloudTitle: string;
+    cloudBody: string;
+  };
   faq: { heading: string; items: FaqItem[] };
 };
 
@@ -127,18 +141,23 @@ export type SiteContent = {
     api: string;
     sdks: string;
     github: string;
+    comparisons: string;
+    editions: string;
   };
   footer: {
     tagline: string;
     product: string;
     developers: string;
+    comparisons: string;
     project: string;
-    language: string;
     legal: string;
     privacy: string;
     imprint: string;
     license: string;
     github: string;
+    contactEmail: string;
+    copyrightLine: string;
+    openApiJson: string;
   };
   legal: {
     emptyValue: string;
@@ -150,6 +169,7 @@ export type SiteContent = {
     privacy: {
       title: string;
       contactLabel: string;
+      controllerLabel: string;
       paragraphs: string[];
     };
   };

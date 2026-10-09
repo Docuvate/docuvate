@@ -1148,3 +1148,119 @@ html[data-docuvate-theme='dark'] .landing-integration-card .integration-logo {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+.docs-sidebar-group {
+  margin-bottom: var(--dv-space-md);
+}
+
+.docs-sidebar-group-title {
+  margin: 0 0 var(--dv-space-2xs);
+  font-size: var(--dv-font-size-xs);
+  font-weight: var(--dv-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dv-color-text-muted);
+}
+
+.docs-sidebar-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-2xs);
+}
+
+.docs-owner-placeholder {
+  border: 1px dashed var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+  padding: var(--dv-space-md);
+  margin-bottom: var(--dv-space-lg);
+  background: var(--dv-color-bg-overlay);
+}
+
+.compare-table-wrap {
+  overflow-x: auto;
+  margin: var(--dv-space-md) 0 var(--dv-space-lg);
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--dv-font-size-sm);
+}
+
+.compare-table th,
+.compare-table td {
+  border: 1px solid var(--dv-color-border);
+  padding: var(--dv-space-xs) var(--dv-space-sm);
+  vertical-align: top;
+  text-align: left;
+}
+
+.compare-table th {
+  background: var(--dv-color-bg-overlay);
+}
+
+.compare-legend {
+  font-size: var(--dv-font-size-sm);
+  color: var(--dv-color-text-muted);
+}
+
+.compare-stand {
+  font-size: var(--dv-font-size-sm);
+  color: var(--dv-color-text-muted);
+}
+
+.landing-why-grid {
+  display: grid;
+  gap: var(--dv-space-md);
+  margin-top: var(--dv-space-md);
+}
+
+.landing-editions-grid {
+  display: grid;
+  gap: var(--dv-space-lg);
+}
+
+.landing-editions-cards {
+  display: grid;
+  gap: var(--dv-space-md);
+}
+
+.landing-why-compare {
+  margin-top: var(--dv-space-md);
+}
+
+.integration-logo-fallback {
+  font-size: var(--dv-font-size-xs);
+  font-weight: var(--dv-font-weight-semibold);
+}
+
+.site-footer-bottom {
+  margin-top: var(--dv-space-lg);
+  padding-top: var(--dv-space-md);
+  border-top: 1px solid var(--dv-color-border);
+  font-size: var(--dv-font-size-sm);
+  color: var(--dv-color-text-muted);
+}
+
+@media (min-width: 768px) {
+  .landing-why-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .landing-editions-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .site-footer-grid-rich {
+    grid-template-columns: 1.4fr repeat(5, minmax(0, 1fr));
+  }
+}
+
+.site-footer-bottom a {
+  display: inline-block;
+  min-height: 2.5rem;
+  line-height: 2.5rem;
+  padding-inline: 0.125rem;
+}

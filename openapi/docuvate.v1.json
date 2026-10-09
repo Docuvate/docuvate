@@ -2987,6 +2987,33 @@
         "operationId": "listDocuments",
         "parameters": [
           {
+            "name": "withoutNonInboxLabel",
+            "required": false,
+            "in": "query",
+            "description": "When true, only documents without a non-inbox label are returned.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "unfiled",
+            "required": false,
+            "in": "query",
+            "description": "When true, only documents without a folder assignment are returned.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "inbox",
+            "required": false,
+            "in": "query",
+            "description": "When true, only documents in the inbox label are returned.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "q",
             "required": false,
             "in": "query",
@@ -3050,30 +3077,6 @@
             "in": "query",
             "schema": {
               "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "withoutNonInboxLabel",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "unfiled",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "inbox",
-            "required": false,
-            "in": "query",
-            "schema": {
               "type": "string"
             }
           },

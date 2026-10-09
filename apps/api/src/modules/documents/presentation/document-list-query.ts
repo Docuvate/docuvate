@@ -15,10 +15,9 @@ export function parseDocumentListQuery(params: DocumentListQueryDto): DocumentLi
     correspondentId: params.correspondentId,
     folderId: params.folderId,
     mappeId: params.mappeId,
-    unfiled: params.unfiled === 'true' || params.unfiled === '1',
-    withoutNonInboxLabel:
-      params.withoutNonInboxLabel === 'true' || params.withoutNonInboxLabel === '1',
-    inbox: params.inbox === 'true' || params.inbox === '1',
+    unfiled: params.unfiled ?? undefined,
+    withoutNonInboxLabel: params.withoutNonInboxLabel ?? undefined,
+    inbox: params.inbox ?? undefined,
     documentDateFrom: params.documentDateFrom,
     documentDateTo: params.documentDateTo,
     sort: params.sort,

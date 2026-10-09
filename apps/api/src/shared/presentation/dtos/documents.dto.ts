@@ -1,13 +1,21 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsIn,
   IsOptional,
   IsString,
   IsUUID,
   ValidateNested,
 } from 'class-validator';
+
+function parseOptionalQueryBoolean(value: unknown): boolean | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (value === true || value === 'true' || value === '1') return true;
+  if (value === false || value === 'false' || value === '0') return false;
+  return undefined;
+}
 import type {
   DocumentDto,
   DocumentSortField,
@@ -52,17 +60,32 @@ export class DocumentListQueryDto {
   @IsUUID('4')
   mappeId?: string;
 
+  @ApiPropertyOptional({
+    type: Boolean,
+    description: 'When true, only documents without a non-inbox label are returned.',
+  })
   @IsOptional()
-  @IsString()
-  withoutNonInboxLabel?: string;
+  @Transform(({ value }) => parseOptionalQueryBoolean(value))
+  @IsBoolean()
+  withoutNonInboxLabel?: boolean;
 
+  @ApiPropertyOptional({
+    type: Boolean,
+    description: 'When true, only documents without a folder assignment are returned.',
+  })
   @IsOptional()
-  @IsString()
-  unfiled?: string;
+  @Transform(({ value }) => parseOptionalQueryBoolean(value))
+  @IsBoolean()
+  unfiled?: boolean;
 
+  @ApiPropertyOptional({
+    type: Boolean,
+    description: 'When true, only documents in the inbox label are returned.',
+  })
   @IsOptional()
-  @IsString()
-  inbox?: string;
+  @Transform(({ value }) => parseOptionalQueryBoolean(value))
+  @IsBoolean()
+  inbox?: boolean;
 
   @IsOptional()
   @IsString()

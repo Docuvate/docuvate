@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://docuvate.example/sitemap.xml
+Sitemap: https://docuvate.de/sitemap.xml
