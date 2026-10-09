@@ -78,6 +78,16 @@ mailpit:
   enabled: false
   image: axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
 
+sftpIngest:
+  enabled: false
+  storage: 5Gi
+  storageClassName: ""
+  exposeSftp: false
+  sftpNodePort: 30222
+  createSecret: false
+  existingSecret: docuvate-secrets
+  serviceApiKeySecretKey: DOCUVATE_SFTP_INGEST_SERVICE_KEY
+
 migrate:
   enabled: true
   command:
@@ -98,3 +108,5 @@ config:
   publicWebUrl: REPLACE_WITH_PUBLIC_WEB_URL
   publicApiUrl: REPLACE_WITH_PUBLIC_API_URL
   smtpUrl: REPLACE_WITH_SMTP_URL
+  sftpPublicHost: ""
+  sftpPublicPort: "2222"

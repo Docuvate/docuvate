@@ -68,6 +68,13 @@ import type {
   SavedDocumentViewDto,
   SavedDocumentViewListResponse,
   UpdateSavedDocumentViewRequest,
+  SftpIngressAccountDto,
+  SftpIngressCreateAccountRequest,
+  SftpIngressCreateAccountResponseDto,
+  SftpIngressEventDto,
+  SftpIngressServerInfoDto,
+  SftpFetchHostProbeRequest,
+  SftpFetchHostProbeResponse,
 } from '@docuvate/contracts';
 import { throwApiRequestError } from './apiErrors';
 
@@ -781,3 +788,44 @@ export async function getInstallationAdminStatus(): Promise<{ isInstallationAdmi
 }
 
 export { baseURL };
+
+export async function getSftpIngressServer(): Promise<SftpIngressServerInfoDto> {
+  return request<SftpIngressServerInfoDto>('/sftp-ingress/server');
+}
+
+export async function listSftpIngressAccounts(): Promise<SftpIngressAccountDto[]> {
+  const res = await request<{ accounts: SftpIngressAccountDto[] }>('/sftp-ingress/accounts');
+  return res.accounts;
+}
+
+export async function createSftpIngressAccount(
+  body: SftpIngressCreateAccountRequest
+): Promise<SftpIngressCreateAccountResponseDto> {
+  return request<SftpIngressCreateAccountResponseDto>('/sftp-ingress/accounts', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function revokeSftpIngressAccount(accountId: string): Promise<void> {
+  await request(`/sftp-ingress/accounts/${encodeURIComponent(accountId)}`, { method: 'DELETE' });
+}
+
+export async function listSftpIngressEvents(
+  accountId: string,
+  limit = 20
+): Promise<SftpIngressEventDto[]> {
+  const res = await request<{ events: SftpIngressEventDto[] }>(
+    `/sftp-ingress/accounts/${encodeURIComponent(accountId)}/events?limit=${limit}`
+  );
+  return res.events;
+}
+
+export async function probeSftpFetchHostKey(
+  body: SftpFetchHostProbeRequest
+): Promise<SftpFetchHostProbeResponse> {
+  return request<SftpFetchHostProbeResponse>('/connectors/plugins/sftp_fetch/probe-host-key', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}

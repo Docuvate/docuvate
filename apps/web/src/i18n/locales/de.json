@@ -141,7 +141,9 @@
     "none": "Keiner",
     "noLabels": "Keine Labels",
     "retry": "Erneut versuchen",
-    "saved": "Gespeichert"
+    "saved": "Gespeichert",
+    "copy": "Kopieren",
+    "copied": "Kopiert"
   },
   "save": {
     "saved": "Gespeichert",
@@ -559,7 +561,13 @@
       "errorLoadMessages": "Verlauf konnte nicht geladen werden",
       "errorNewThread": "Neuer Chat fehlgeschlagen",
       "errorSend": "Chat fehlgeschlagen"
-    }
+    },
+    "extractedTextCopy": "Kopieren",
+    "extractedContentModeMarkdown": "Markdown",
+    "extractedMarkdownPreview": "Vorschau",
+    "extractedMarkdownSource": "Quelle",
+    "extractedMarkdownViewAria": "Markdown-Ansicht",
+    "ingestSourceScanner": "Scanner-Eingang"
   },
   "settings": {
     "title": "Einstellungen",
@@ -759,6 +767,10 @@
       "storage": {
         "label": "Cloud-Speicher",
         "description": "Dateien importieren oder Dokumente ablegen."
+      },
+      "scannerSftp": {
+        "label": "Scanner & SFTP",
+        "description": "Scanner-Eingang und Abruf von SFTP-Servern."
       }
     },
     "plugins": {
@@ -794,6 +806,21 @@
         "endpointHelp": "Leer lassen für AWS. Für MinIO oder andere S3-kompatible Endpunkte setzen.",
         "pathStylePlaceholder": "true",
         "pathStyleHelp": "Optional. true für Path-Style (häufig bei MinIO)."
+      },
+      "sftpFetch": {
+        "label": "SFTP-Server abholen",
+        "description": "Dateien periodisch von einem externen SFTP-Server oder NAS importieren.",
+        "portPlaceholder": "22",
+        "remotePathPlaceholder": "/scans",
+        "privateKeyHelp": "Optional, wenn Sie stattdessen ein Passwort nutzen. PEM-Format.",
+        "hostKeyHelp": "Fingerabdruck (SHA-256) des Hostschlüssels. Über „Verbindung testen“ ermitteln und bestätigen.",
+        "pollIntervalPlaceholder": "300",
+        "afterImportPlaceholder": "delete",
+        "afterImportHelp": "Nach dem Import können Dateien gelöscht oder in ein Unterverzeichnis verschoben werden.",
+        "afterImportDelete": "Löschen",
+        "afterImportMove": "In Unterordner verschieben",
+        "archiveSubpathPlaceholder": "imported",
+        "labelIdsHelp": "Optional. Kommagetrennte Label-IDs, die importierten Dokumenten zugewiesen werden."
       }
     },
     "auth": {
@@ -809,7 +836,17 @@
         "accessKeyId": "Access-Key-ID",
         "secretAccessKey": "Secret Access Key",
         "endpoint": "Custom Endpoint (optional)",
-        "pathStyle": "Path-Style-Zugriff (optional)"
+        "pathStyle": "Path-Style-Zugriff (optional)",
+        "host": "Host",
+        "port": "Port",
+        "privateKey": "Privater SSH-Schlüssel (optional)",
+        "remotePath": "Remote-Pfad",
+        "hostKeyFingerprint": "Host-Key-Fingerabdruck (SHA-256)",
+        "pollIntervalSeconds": "Abholintervall (Sekunden)",
+        "afterImport": "Nach Import",
+        "archiveSubpath": "Archiv-Unterordner",
+        "targetFolderId": "Zielordner-ID (optional)",
+        "labelIds": "Label-IDs (optional)"
       },
       "strategy": {
         "oauth2": "OAuth 2.0: Sie werden zum Anbieter weitergeleitet und kehren nach erfolgreicher Anmeldung zurück.",
@@ -845,7 +882,11 @@
       "importRefRequired": "Import-Referenz fehlt.",
       "importEmpty": "Importiertes Objekt ist leer.",
       "installationDisabled": "Neue Verbindungen sind auf diesem Server deaktiviert."
-    }
+    },
+    "sftpProbeCta": "Verbindung testen",
+    "sftpProbePending": "Test läuft…",
+    "sftpProbeSuccess": "Host-Key bestätigt: {{fingerprint}}",
+    "sftpProbeFailed": "Verbindungstest fehlgeschlagen. Host, Port und Zugangsdaten prüfen."
   },
   "labels": {
     "pageTitle": "Labels",
@@ -1326,6 +1367,87 @@
       "recent_documents": "Zuletzt hinzugefügt",
       "attention": "Aufmerksamkeit nötig",
       "saved_view": "Gespeicherte Ansicht"
+    }
+  },
+  "sftpIngress": {
+    "title": "Scanner-Eingang (SFTP)",
+    "lead": "Lassen Sie Drucker oder Scan-Apps Dateien per SFTP an Docuvate senden. Jeder Zugang ist einem Konto zugeordnet.",
+    "activeBadge_one": "1 Zugang aktiv",
+    "activeBadge_other": "{{count}} Zugänge aktiv",
+    "manageCta": "Verwalten",
+    "manageDrawerTitle": "Scanner-Eingang verwalten",
+    "cardSummaryLastReceived": "Zuletzt empfangen {{time}}",
+    "cardSummaryNoActivity": "Noch keine Dateien empfangen",
+    "cardSummaryNone": "Noch keine Zugänge",
+    "fingerprintPurpose": "Der Host-Key-Fingerabdruck bestätigt am Drucker, dass Sie mit dem richtigen Docuvate-Server verbunden sind.",
+    "fingerprintPendingStatus": "Der Wert erscheint hier, sobald der SFTP-Dienst erreichbar ist.",
+    "fingerprintInfo": "Wird angezeigt, sobald der SFTP-Dienst erreichbar ist.",
+    "serverAddress": "Serveradresse",
+    "hostNotConfigured": "Nicht konfiguriert",
+    "fingerprint": "Host-Key-Fingerabdruck",
+    "fingerprintPending": "Wird geladen…",
+    "copy": "Kopieren",
+    "printerHelp": "Am Gerät: Protokoll SFTP, Server und Port wie oben, Pfad /, Benutzername und Passwort aus dem Zugang.",
+    "printerHelpShort": "Richten Sie am Drucker SFTP ein und legen Sie hier einen Zugang an.",
+    "printerStepLead": "Tragen Sie diese Werte am Drucker oder Scanner ein und prüfen Sie den Fingerabdruck.",
+    "remotePath": "Zielordner auf dem Server",
+    "setupTitle": "Scanner-Eingang einrichten",
+    "setupStep": "Schritt {{current}} von {{total}}",
+    "setupStepName": "Zugang",
+    "setupStepDevice": "Drucker",
+    "setupStepDone": "Fertig",
+    "setupMissingLead": "Bitte ergänzen:",
+    "setupMissingName": "Bezeichnung",
+    "setupMissingSshKey": "öffentlicher SSH-Schlüssel",
+    "setupFieldErrorName": "Bitte geben Sie eine Bezeichnung ein.",
+    "setupFieldErrorSshKey": "Bitte fügen Sie den öffentlichen SSH-Schlüssel ein.",
+    "serverLoading": "Server wird abgefragt…",
+    "fingerprintUnavailable": "Fingerabdruck derzeit nicht verfügbar",
+    "lastReceivedLabel": "Zuletzt empfangen",
+    "setupNext": "Weiter",
+    "setupBack": "Zurück",
+    "authModeLegend": "Anmeldung am Gerät",
+    "authModePassword": "Benutzername und Passwort",
+    "authModeSshKey": "SSH-Schlüssel",
+    "sshPublicKey": "Öffentlicher SSH-Schlüssel",
+    "targetFolder": "Ablage in Docuvate",
+    "targetFolderInbox": "Posteingang (Standard)",
+    "targetFolderLabel": "Zielordner",
+    "lastReceived": "Zuletzt empfangen: {{time}}",
+    "lastReceivedNever": "noch nichts empfangen",
+    "badgePassword": "Passwort",
+    "badgeSshKey": "SSH-Schlüssel",
+    "createCta": "Zugang anlegen",
+    "createTitle": "Scanner-Zugang anlegen",
+    "displayName": "Bezeichnung",
+    "createSubmit": "Zugang erstellen",
+    "createPending": "Wird erstellt…",
+    "username": "Benutzername",
+    "passwordOnce": "Passwort (nur jetzt sichtbar)",
+    "createdTitle": "Zugang erstellt",
+    "createdDescription": "Notieren Sie die Zugangsdaten. Das Passwort wird nicht erneut angezeigt.",
+    "createdUsername": "Benutzername: {{username}}",
+    "createdPassword": "Passwort: {{password}}",
+    "revokeCta": "Zugang widerrufen",
+    "revokePending": "Wird widerrufen…",
+    "revokeConfirmTitle": "Zugang widerrufen?",
+    "revokeConfirmDescription": "Der Zugang „{{name}}“ kann danach nicht mehr hochladen.",
+    "loadFailed": "Scanner-Eingang konnte nicht geladen werden",
+    "createFailed": "Zugang konnte nicht erstellt werden",
+    "revokeFailed": "Zugang konnte nicht widerrufen werden",
+    "eventStatus": {
+      "received": "Empfangen",
+      "processed": "Verarbeitet",
+      "rejected": "Abgelehnt"
+    },
+    "errors": {
+      "emptyFilename": "Dateiname fehlt",
+      "temporaryFilename": "Temporäre Dateiendung",
+      "emptyFile": "Datei ist leer",
+      "fileTooLarge": "Datei ist zu groß",
+      "unsupportedType": "Dateityp nicht erlaubt",
+      "processingFailed": "Verarbeitung fehlgeschlagen",
+      "authFailed": "Anmeldung fehlgeschlagen"
     }
   }
 }

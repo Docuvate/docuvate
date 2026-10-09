@@ -22,6 +22,7 @@ import { AuthInvitationsModule } from './modules/auth/auth-invitations.module.js
 import { WorkspaceModule } from './modules/workspace/workspace.module.js';
 import { ExtensionHostModule } from './shared/infrastructure/extensions/extension-host.module.js';
 import { SearchModule } from './modules/search/search.module.js';
+import { SftpIngressModule } from './modules/sftp-ingress/sftp-ingress.module.js';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { SearchModule } from './modules/search/search.module.js';
     AdminModule,
     AuthInvitationsModule,
     WorkspaceModule,
+    SftpIngressModule,
   ],
 })
 export class AppModule {}

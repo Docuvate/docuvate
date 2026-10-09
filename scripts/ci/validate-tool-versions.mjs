@@ -106,6 +106,33 @@ export function collectToolVersionErrors(root = TOOL_VERSIONS_ROOT, read = defau
   });
 
   const ci = read('.github/workflows/ci.yml');
+  const compose = read('docker-compose.yml');
+  const goVer = versions.asdf.golang;
+  const goModPath = join(root, 'apps/sftp-ingest/go.mod');
+  if (existsSync(goModPath)) {
+    const goMod = read('apps/sftp-ingest/go.mod');
+    if (!goMod.includes(`go ${goVer}`)) {
+      fail(`apps/sftp-ingest/go.mod must declare go ${goVer}`);
+    }
+    const sftpDf = read('apps/sftp-ingest/Dockerfile');
+  const golangBuild =
+    'golang:1.26.9-bookworm@sha256:bcef992b77b1e2031aaaa51da75cebc32da8e9c182e12e633ea79023c79d9eff';
+    const alpineImg =
+      'alpine:3.20@sha256:c64c687cbea9300178b30c95835354e34c4e4febc4badfe27102879de0483b5e';
+    if (!sftpDf.includes(golangBuild)) {
+      fail(`apps/sftp-ingest/Dockerfile must use pinned golang build image ${golangBuild}`);
+    }
+    if (!sftpDf.includes(alpineImg)) {
+      fail(`apps/sftp-ingest/Dockerfile must use pinned alpine runtime ${alpineImg}`);
+    }
+    if (!compose.includes(alpineImg)) {
+      fail(`docker-compose.yml must pin sftp-ingest-data-init alpine image ${alpineImg}`);
+    }
+    if (!ci.includes('scripts/ci/install-go-toolchain.sh')) {
+      fail('.github/workflows/ci.yml must install Go via scripts/ci/install-go-toolchain.sh for sftp-ingest jobs');
+    }
+  }
+
   if (!ci.includes('node-version-file: .tool-versions')) {
     fail('.github/workflows/ci.yml must use node-version-file: .tool-versions');
   }
@@ -174,7 +201,6 @@ export function collectToolVersionErrors(root = TOOL_VERSIONS_ROOT, read = defau
   }
 
   const imagesTs = read('packages/testing/src/container-images.ts');
-  const compose = read('docker-compose.yml');
   for (const [name, ref] of Object.entries(versions.images)) {
     const cn = IMAGE_CONST_MAP[name];
     if (!cn) {

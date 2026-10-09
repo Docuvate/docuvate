@@ -1,4 +1,5 @@
 import { type MouseEvent } from 'react';
+import { ScanLine } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { DocumentDto } from '@docuvate/contracts';
@@ -62,7 +63,19 @@ export function LibraryDocumentGrid({
                   </span>
                 ) : null}
               </div>
-              <p className="muted doc-card-filename">{doc.filename}</p>
+              <p className="muted doc-card-filename">
+                {doc.filename}
+                {doc.ingestSource === 'scanner_sftp' ? (
+                  <span className="library-title-ingest-meta">
+                    <ScanLine
+                      className="library-title-ingest-icon"
+                      size={14}
+                      aria-label={t('documents.ingestSourceScanner')}
+                    />
+                    {t('documents.ingestSourceScanner')}
+                  </span>
+                ) : null}
+              </p>
               <div className="doc-card-meta">
                 <Badge status={doc.status} />
                 <time dateTime={doc.documentDate ?? doc.updatedAt}>{documentDisplayDate(doc)}</time>

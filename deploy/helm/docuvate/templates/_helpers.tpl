@@ -10,6 +10,10 @@
 {{ .Values.global.imageRegistry }}/docuvate-web:{{ include "docuvate.imageTag" . }}
 {{- end -}}
 
+{{- define "docuvate.sftpIngestImage" -}}
+{{ .Values.global.imageRegistry }}/docuvate-sftp-ingest:{{ include "docuvate.imageTag" . }}
+{{- end -}}
+
 {{- define "docuvate.workerImage" -}}
 {{- if .Values.gpuWorker.enabled -}}
 {{ .Values.global.imageRegistry }}/docuvate-worker-gpu:{{ include "docuvate.imageTag" . }}

@@ -81,10 +81,11 @@ flatten_push() {
 build_app_images() {
   export DOCKER_BUILDKIT=1
   export BUILDX_NO_DEFAULT_ATTESTATIONS=1
-  run_docker compose -p docuvate -f docker-compose.yml build api web worker
+  run_docker compose -p docuvate -f docker-compose.yml build api web worker sftp-ingest
   flatten_push docuvate-api "docuvate-api:smoke"
   flatten_push docuvate-web "docuvate-web:smoke"
   flatten_push docuvate-worker "docuvate-worker:smoke"
+  flatten_push docuvate-sftp-ingest "docuvate-sftp-ingest:smoke"
 }
 
 push_infra_images() {
@@ -113,6 +114,7 @@ rewrite_images_for_registry() {
   sed -e "s|ghcr.io/docuvate/docuvate-api:${TAG}|${REG_PULL}/docuvate-api:smoke|g" \
     -e "s|ghcr.io/docuvate/docuvate-web:${TAG}|${REG_PULL}/docuvate-web:smoke|g" \
     -e "s|ghcr.io/docuvate/docuvate-worker:${TAG}|${REG_PULL}/docuvate-worker:smoke|g" \
+    -e "s|ghcr.io/docuvate/docuvate-sftp-ingest:${TAG}|${REG_PULL}/docuvate-sftp-ingest:smoke|g" \
     -e "s|postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873|${REG_PULL}/postgres:18.6-alpine|g" \
     -e "s|valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507|${REG_PULL}/valkey:8-alpine|g" \
     -e "s|axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48|${REG_PULL}/mailpit:v1.31.4|g" \
@@ -159,6 +161,7 @@ wait_rollouts() {
   fi
   kubectl -n docuvate logs "job/docuvate-db-migrate-${JOB_SUFFIX}" >"$ART/migrate-${1:-smoke}.log" 2>&1 || true
   kubectl -n docuvate rollout status deployment/docuvate-valkey --timeout=180s
+  kubectl -n docuvate rollout status deployment/docuvate-sftp-ingest --timeout=300s
   kubectl -n docuvate rollout status statefulset/docuvate-minio --timeout=300s
   recreate_job_from_manifest "$MANIFEST" "docuvate-minio-init-${JOB_SUFFIX}"
   if ! kubectl -n docuvate wait --for=condition=complete "job/docuvate-minio-init-${JOB_SUFFIX}" --timeout=420s; then
@@ -247,6 +250,7 @@ kubectl -n docuvate create secret generic docuvate-secrets \
   --from-literal=MINIO_SECRET_KEY=docuvate-secret \
   --from-literal=WORKER_SECRET=worker-shared-secret \
   --from-literal=DOCUVATE_CONNECTOR_SECRETS_KEY=local-dev-connector-secrets-key!! \
+  --from-literal=DOCUVATE_SFTP_INGEST_SERVICE_KEY="${SFTP_INGEST_SERVICE_KEY:-$(openssl rand -base64 32 | tr -d '/+=' | head -c 43)}" \
   --dry-run=client -o yaml | kubectl apply -f -
 
 MANIFEST="$ART/kind-smoke-kustomize.yaml"
@@ -270,7 +274,8 @@ kubectl -n docuvate create secret generic docuvate-secrets \
   --from-literal=MINIO_ACCESS_KEY=docuvate \
   --from-literal=MINIO_SECRET_KEY=docuvate-secret \
   --from-literal=WORKER_SECRET=worker-shared-secret \
-  --from-literal=DOCUVATE_CONNECTOR_SECRETS_KEY=local-dev-connector-secrets-key!!
+  --from-literal=DOCUVATE_CONNECTOR_SECRETS_KEY=local-dev-connector-secrets-key!! \
+  --from-literal=DOCUVATE_SFTP_INGEST_SERVICE_KEY="${SFTP_INGEST_SERVICE_KEY:-$(openssl rand -base64 32 | tr -d '/+=' | head -c 43)}"
 
 if ! helm upgrade --install docuvate "$ROOT/deploy/helm/docuvate" \
   -f "$ROOT/deploy/helm/docuvate/values-dev.yaml" \
@@ -311,6 +316,7 @@ if kubectl -n docuvate get job "docuvate-db-migrate-${JOB_SUFFIX}" >/dev/null 2>
 else
   echo "migrate job docuvate-db-migrate-${JOB_SUFFIX} already completed (helm hook-delete-policy)" >"$ART/migrate-helm.log"
 fi
+kubectl -n docuvate rollout status deployment/docuvate-sftp-ingest --timeout=300s
 kubectl -n docuvate rollout status deployment/docuvate-api --timeout=300s
 kubectl -n docuvate rollout status deployment/docuvate-web --timeout=240s
 kubectl -n docuvate rollout status deployment/docuvate-worker --timeout=300s

@@ -77,4 +77,12 @@ for (const m of conftest.matchAll(/"(postgres:[^"]+|valkey\/[^"]+|axllent\/mailp
   console.log(`OK worker conftest: ${ref}`);
 }
 
-console.log('Container image digest pins verified (postgres, valkey, minio, mailpit, worker conftest).');
+const alpinePin =
+  /sftp-ingest-data-init:\s*\n\s*image:\s*(alpine:[^\s]+)/m.exec(compose)?.[1];
+if (!alpinePin || !DIGEST_RE.test(alpinePin)) {
+  console.error(`sftp-ingest-data-init: alpine image must be digest-pinned (${alpinePin ?? 'missing'})`);
+  process.exit(1);
+}
+console.log(`OK sftp-ingest-data-init: ${alpinePin}`);
+
+console.log('Container image digest pins verified (postgres, valkey, minio, mailpit, sftp-ingest-data-init, worker conftest).');

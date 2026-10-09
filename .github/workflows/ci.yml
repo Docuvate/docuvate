@@ -134,6 +134,36 @@ jobs:
           DATABASE_URL: postgresql://docuvate:docuvate@localhost:5432/docuvate
         run: bash scripts/db/migration-roundtrip-check.sh
 
+  go-sftp-ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install Go (.tool-versions; go.dev when not yet on actions/go-versions)
+        run: bash scripts/ci/install-go-toolchain.sh
+      - name: Go vet, tests, and govulncheck (sftp-ingest)
+        run: |
+          cd apps/sftp-ingest
+          go vet ./...
+          go test ./... -count=1 -v
+          go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  # End-to-end SFTP ingest against compose (see scripts/testing/run-sftp-integration-e2e.sh).
+  sftp-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Require Docker
+        run: docker info
+      - name: Install Go (.tool-versions; go.dev when not yet on actions/go-versions)
+        run: bash scripts/ci/install-go-toolchain.sh
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: SFTP ingest E2E (compose + Go client)
+        run: bash scripts/testing/run-sftp-integration-e2e.sh
+
   integration-test:
     runs-on: ubuntu-latest
     steps:
@@ -176,7 +206,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - run: docker compose -f docker-compose.yml build web api site
+      - run: docker compose -f docker-compose.yml build web api site sftp-ingest
 
   compose-smoke:
     runs-on: ubuntu-latest

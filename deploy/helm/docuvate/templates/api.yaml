@@ -88,6 +88,15 @@ spec:
                   name: {{ .Values.secrets.existingSecret }}
                   key: DOCUVATE_CONNECTOR_SECRETS_KEY
                   optional: true
+            {{- if .Values.sftpIngest.enabled }}
+            - name: DOCUVATE_SFTP_PULL_GATEWAY_URL
+              value: http://docuvate-sftp-ingest:8080
+            - name: DOCUVATE_SFTP_INGEST_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.existingSecret }}
+                  key: DOCUVATE_SFTP_INGEST_SERVICE_KEY
+            {{- end }}
           startupProbe:
             httpGet:
               path: /health/ready

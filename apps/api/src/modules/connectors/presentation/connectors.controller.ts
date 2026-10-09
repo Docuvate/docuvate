@@ -37,6 +37,8 @@ import {
 } from '../application/connector-sync.use-cases.js';
 import { toConnectorInstallationDto } from './connectors.mapper.js';
 import { toDocumentDto } from '../../documents/presentation/document.mapper.js';
+import type { SftpFetchHostProbeRequest, SftpFetchHostProbeResponse } from '@docuvate/contracts';
+import { probeSftpFetchHost } from '../infrastructure/adapters/sftp/sftp-fetch.connector.js';
 
 import { ApiDocuvateController, ApiDocuvateRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
 
@@ -123,6 +125,25 @@ export class ConnectorsController {
       body.ref
     );
     return { document: toDocumentDto(doc) };
+  }
+
+  @Post('plugins/sftp_fetch/probe-host-key')
+  @ApiDocuvateRoute({
+    operationId: 'probeSftpFetchHostKey',
+    summary: 'Probe remote SFTP host key fingerprint',
+  })
+  async probeSftpHost(@Body() body: SftpFetchHostProbeRequest): Promise<SftpFetchHostProbeResponse> {
+    return probeSftpFetchHost({
+      host: body.host,
+      port: String(body.port ?? 22),
+      username: body.username,
+      password: body.password ?? '',
+      private_key: body.privateKey ?? '',
+      remote_path: '/',
+      host_key_fingerprint: 'probe',
+      poll_interval_seconds: '300',
+      after_import: 'delete',
+    });
   }
 
   @Post('installations/:installationId/export')

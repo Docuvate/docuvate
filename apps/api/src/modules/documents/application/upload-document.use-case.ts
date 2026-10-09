@@ -30,6 +30,8 @@ export interface UploadDocumentInput {
   buffer: Buffer;
   folderId?: string | null;
   mappeId?: string | null;
+  tagIds?: string[];
+  ingestSource?: string | null;
 }
 
 export function isPlainTextUploadMime(mimeType: string): boolean {
@@ -78,7 +80,21 @@ export class UploadDocumentUseCase {
     const storageKey = `users/${input.userId}/${id}/${input.filename}`;
     await this.storage.putObject(storageKey, input.buffer, input.mimeType);
 
-    const inboxTag = await this.taxonomy.ensureInboxTag(input.userId);
+    const skipInbox = input.ingestSource === 'scanner_sftp';
+    const inboxTag = skipInbox ? null : await this.taxonomy.ensureInboxTag(input.userId);
+    const extraTags = [];
+    if (input.tagIds?.length) {
+      for (const tagId of input.tagIds) {
+        const tag = await this.taxonomy.findTagByIdForUser(tagId, input.userId);
+        if (tag) extraTags.push(tag);
+      }
+    }
+    const tags =
+      skipInbox
+        ? extraTags
+        : inboxTag
+          ? [inboxTag, ...extraTags.filter((t) => t.id !== inboxTag.id)]
+          : extraTags;
     const now = this.clock.now();
     const doc: DocumentEntity = {
       id,
@@ -93,7 +109,8 @@ export class UploadDocumentUseCase {
       folderId: placement.folderId,
       mappeId: placement.mappeId,
       correspondent: null,
-      tags: [inboxTag],
+      tags,
+      ingestSource: input.ingestSource ?? null,
       createdAt: now,
       updatedAt: now,
     };

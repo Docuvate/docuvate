@@ -78,8 +78,8 @@ export class PgDocumentRepository implements DocumentRepository {
     await this.pool.query(
       `INSERT INTO documents (
         id, user_id, filename, title, mime_type, storage_key, status,
-        document_date, notes, folder_id, mappe_id, correspondent_id, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+        document_date, notes, folder_id, mappe_id, correspondent_id, ingest_source, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
       [
         doc.id,
         doc.userId,
@@ -93,6 +93,7 @@ export class PgDocumentRepository implements DocumentRepository {
         doc.folderId ?? null,
         doc.mappeId ?? null,
         doc.correspondent?.id ?? null,
+        doc.ingestSource ?? null,
         doc.createdAt,
         doc.updatedAt,
       ]

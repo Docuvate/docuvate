@@ -21,6 +21,7 @@ export 'package:docuvate/src/generated/src/api/models_api.dart';
 export 'package:docuvate/src/generated/src/api/organizer_api.dart';
 export 'package:docuvate/src/generated/src/api/search_api.dart';
 export 'package:docuvate/src/generated/src/api/settings_api.dart';
+export 'package:docuvate/src/generated/src/api/sftp_ingress_api.dart';
 export 'package:docuvate/src/generated/src/api/workspace_api.dart';
 
 export 'package:docuvate/src/generated/src/model/accept_label_recommendation_request_dto.dart';
@@ -116,6 +117,7 @@ export 'package:docuvate/src/generated/src/model/send_document_chat_thread_messa
 export 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/set_admin_user_role_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/set_ml_model_lifecycle_request_dto.dart';
+export 'package:docuvate/src/generated/src/model/sftp_ingress_create_account_body_dto.dart';
 export 'package:docuvate/src/generated/src/model/start_mail_o_auth_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/tag_custom_field_list_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/tag_list_response_dto.dart';

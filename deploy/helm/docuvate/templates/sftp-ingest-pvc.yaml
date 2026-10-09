@@ -1,0 +1,15 @@
+{{- if .Values.sftpIngest.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: docuvate-sftp-ingest-data
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.sftpIngest.storageClassName }}
+  storageClassName: {{ .Values.sftpIngest.storageClassName | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.sftpIngest.storage }}
+{{- end }}

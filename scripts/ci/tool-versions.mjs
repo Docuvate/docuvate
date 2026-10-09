@@ -34,7 +34,7 @@ export function loadToolVersions(root = ROOT) {
     out.asdf[m[1]] = m[2].trim();
   }
 
-  const required = ['nodejs', 'pnpm', 'python', 'uv'];
+  const required = ['nodejs', 'pnpm', 'python', 'uv', 'golang'];
   for (const key of required) {
     if (!out.asdf[key]) {
       throw new Error(`.tool-versions missing required asdf tool: ${key}`);

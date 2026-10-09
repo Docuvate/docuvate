@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type { AuthorizationSubject } from '../../domain/authorization.js';
+import {
+  assertSftpIngestServiceKeyAllowed,
+  resolveSftpIngestServiceKey,
+} from './sftp-ingest-service-key.js';
 
 export interface ServiceApiKeyRecord {
   keyId: string;
@@ -19,7 +23,7 @@ export class ServiceApiKeyRegistry {
   private readonly keys: ServiceApiKeyRecord[];
 
   constructor() {
-    this.keys = parseServiceApiKeys(process.env['DOCUVATE_SERVICE_API_KEYS']);
+    this.keys = mergeSftpIngestServiceKey(parseServiceApiKeys(process.env['DOCUVATE_SERVICE_API_KEYS']));
   }
 
   resolve(rawKey: string | undefined): ResolvedServicePrincipal | null {
@@ -42,6 +46,29 @@ export class ServiceApiKeyRegistry {
       },
     };
   }
+}
+
+function mergeSftpIngestServiceKey(keys: ServiceApiKeyRecord[]): ServiceApiKeyRecord[] {
+  const sftpKey = resolveSftpIngestServiceKey();
+  if (!sftpKey) {
+    return keys;
+  }
+  assertSftpIngestServiceKeyAllowed(sftpKey);
+  const tenantUserId =
+    process.env['DOCUVATE_SFTP_INGEST_SERVICE_TENANT_USER_ID']?.trim() || 'local-dev-owner';
+  if (keys.some((k) => k.keyId === 'sftp-ingest' || timingSafeEqual(k.secret, sftpKey))) {
+    return keys;
+  }
+  return [
+    ...keys,
+    {
+      keyId: 'sftp-ingest',
+      secret: sftpKey,
+      tenantUserId,
+      roles: ['integrator'],
+      claims: ['sftp_ingress:service'],
+    },
+  ];
 }
 
 function parseServiceApiKeys(raw: string | undefined): ServiceApiKeyRecord[] {

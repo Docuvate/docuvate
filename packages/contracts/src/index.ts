@@ -409,6 +409,8 @@ export interface DocumentDto {
   title: string;
   status: DocumentStatus;
   mimeType: string;
+  /** Machine ingest channel (e.g. scanner_sftp). */
+  ingestSource?: string | null;
   documentDate?: string | null;
   notes?: string | null;
   folderId?: string | null;
@@ -839,14 +841,15 @@ export interface ExtractionArenaRatingRequest {
 
 export type ConnectorTier = 'oss' | 'commercial';
 
-export type ConnectorCategoryId = 'mail' | 'dms' | 'home_automation' | 'storage';
+export type ConnectorCategoryId = 'mail' | 'dms' | 'home_automation' | 'storage' | 'scanner_sftp';
 
 export type ConnectorPluginId =
   | 'gmail'
   | 'outlook'
   | 'paperless'
   | 'home_assistant'
-  | 'amazon_s3';
+  | 'amazon_s3'
+  | 'sftp_fetch';
 
 export type ConnectorCapabilityRole = 'source' | 'sink';
 
@@ -1152,3 +1155,14 @@ export type {
   DashboardStatisticsDto,
   InstallationDashboardDefaultResponse,
 } from './workspace.js';
+
+export type {
+  SftpFetchHostProbeRequest,
+  SftpFetchHostProbeResponse,
+  SftpIngressAccountDto,
+  SftpIngressCreateAccountRequest,
+  SftpIngressCreateAccountResponseDto,
+  SftpIngressEventDto,
+  SftpIngressEventStatus,
+  SftpIngressServerInfoDto,
+} from './sftp-ingress.js';

@@ -6,8 +6,10 @@ import type {
 } from '@docuvate/contracts';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../../lib/connectorOAuthSetupDoc';
+import { listFolders, listTags, probeSftpFetchHostKey } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { Select } from '../ui/Select';
 
 interface ConnectorConnectDialogProps {
   open: boolean;
@@ -36,6 +38,10 @@ export function ConnectorConnectDialog({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [displayName, setDisplayName] = useState('');
   const [credentials, setCredentials] = useState<Record<string, string>>({});
+  const [probeMessage, setProbeMessage] = useState<string | null>(null);
+  const [probeBusy, setProbeBusy] = useState(false);
+  const [folders, setFolders] = useState<Array<{ id: string; name: string }>>([]);
+  const [tags, setTags] = useState<Array<{ id: string; name: string }>>([]);
 
   const fields = useMemo(
     () => plugin?.auth.fields ?? [],
@@ -63,8 +69,41 @@ export function ConnectorConnectDialog({
     for (const field of plugin.auth.fields) {
       initial[field.key] = '';
     }
+    if (plugin.id === 'sftp_fetch') {
+      initial['after_import'] = 'delete';
+      initial['poll_interval_seconds'] = '60';
+    }
     setCredentials(initial);
+    setProbeMessage(null);
   }, [plugin, t]);
+
+  useEffect(() => {
+    if (!open || plugin?.id !== 'sftp_fetch') return;
+    void Promise.all([listFolders(), listTags()]).then(([folderRows, tagRows]) => {
+      setFolders(folderRows);
+      setTags(tagRows);
+    });
+  }, [open, plugin?.id]);
+
+  async function handleProbeHostKey() {
+    if (!plugin || plugin.id !== 'sftp_fetch') return;
+    setProbeBusy(true);
+    setProbeMessage(null);
+    try {
+      const result = await probeSftpFetchHostKey({
+        host: credentials['host'] ?? '',
+        port: Number(credentials['port'] ?? 22) || 22,
+        username: credentials['username'] ?? '',
+        password: credentials['password'] || undefined,
+        privateKey: credentials['private_key'] || undefined,
+      });
+      setProbeMessage(t('connectors.sftpProbeSuccess', { fingerprint: result.hostKeyFingerprintSha256 }));
+    } catch {
+      setProbeMessage(t('connectors.sftpProbeFailed'));
+    } finally {
+      setProbeBusy(false);
+    }
+  }
 
   function fieldLabel(field: ConnectorAuthFieldDescriptorDto) {
     return t(field.labelKey);
@@ -138,7 +177,15 @@ export function ConnectorConnectDialog({
               aria-label={t('connectors.displayName')}
             />
           </label>
-          {fields.map((field) => (
+          {fields
+            .filter(
+              (field) =>
+                plugin.id !== 'sftp_fetch' ||
+                !['after_import', 'poll_interval_seconds', 'target_folder_id', 'label_ids'].includes(
+                  field.key
+                )
+            )
+            .map((field) => (
             <label key={field.key} className="settings-field">
               {fieldLabel(field)}
               {field.required ? ' *' : ''}
@@ -157,6 +204,85 @@ export function ConnectorConnectDialog({
               {field.helpKey ? <span className="muted settings-hint">{t(field.helpKey)}</span> : null}
             </label>
           ))}
+          {plugin.id === 'sftp_fetch' ? (
+            <>
+              <label className="settings-field">
+                {t('connectors.auth.fields.afterImport')} *
+                <Select
+                  value={credentials['after_import'] ?? 'delete'}
+                  onChange={(value) =>
+                    setCredentials((prev) => ({ ...prev, after_import: value }))
+                  }
+                  options={[
+                    { value: 'delete', label: t('connectors.plugins.sftpFetch.afterImportDelete') },
+                    { value: 'move', label: t('connectors.plugins.sftpFetch.afterImportMove') },
+                  ]}
+                  aria-label={t('connectors.auth.fields.afterImport')}
+                />
+              </label>
+              <label className="settings-field">
+                {t('connectors.auth.fields.pollIntervalSeconds')} *
+                <Input
+                  type="number"
+                  min={60}
+                  step={60}
+                  required
+                  disabled={busy}
+                  value={credentials['poll_interval_seconds'] ?? '60'}
+                  onChange={(e) =>
+                    setCredentials((prev) => ({ ...prev, poll_interval_seconds: e.target.value }))
+                  }
+                  aria-label={t('connectors.auth.fields.pollIntervalSeconds')}
+                />
+              </label>
+              <label className="settings-field">
+                {t('connectors.auth.fields.targetFolderId')}
+                <Select
+                  value={credentials['target_folder_id'] ?? ''}
+                  onChange={(value) =>
+                    setCredentials((prev) => ({ ...prev, target_folder_id: value }))
+                  }
+                  options={[
+                    { value: '', label: t('sftpIngress.targetFolderInbox') },
+                    ...folders.map((f) => ({ value: f.id, label: f.name })),
+                  ]}
+                  aria-label={t('connectors.auth.fields.targetFolderId')}
+                />
+              </label>
+              <label className="settings-field">
+                {t('connectors.auth.fields.labelIds')}
+                <select
+                  className="input"
+                  multiple
+                  value={(credentials['label_ids'] ?? '').split(',').filter(Boolean)}
+                  disabled={busy}
+                  onChange={(e) => {
+                    const selected = Array.from(e.target.selectedOptions).map((o) => o.value);
+                    setCredentials((prev) => ({
+                      ...prev,
+                      label_ids: selected.join(','),
+                    }));
+                  }}
+                  aria-label={t('connectors.auth.fields.labelIds')}
+                >
+                  {tags.map((tag) => (
+                    <option key={tag.id} value={tag.id}>
+                      {tag.name}
+                    </option>
+                  ))}
+                </select>
+                <span className="muted settings-hint">{t('connectors.plugins.sftpFetch.labelIdsHelp')}</span>
+              </label>
+            </>
+          ) : null}
+          {plugin.id === 'sftp_fetch' ? (
+            <div className="connector-sftp-probe">
+              <Button type="button" variant="secondary" disabled={busy || probeBusy} onClick={() => void handleProbeHostKey()}>
+                {probeBusy ? t('connectors.sftpProbePending') : t('connectors.sftpProbeCta')}
+              </Button>
+              {probeMessage ? <p className="muted settings-hint">{probeMessage}</p> : null}
+            </div>
+          ) : null}
           <div className="confirm-dialog-actions">
             <Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
               {t('common.cancel')}
