@@ -185,6 +185,50 @@ describe('cited chat bench fixtures (quote + source mapping)', () => {
     expect(new Set(verified.map((v) => v.chunkId))).toEqual(new Set(['rechnung', 'hund']));
   });
 
+  it('rebinds IBAN quote from retrieval pool when top chunk omits IBAN line', () => {
+    const docId = 'rechnung-doc';
+    const head =
+      'Rechnung Nordwind GmbH Gesamtsumme: 1.234,56 EUR und weitere Vertragsdetails zum Leistungsumfang.';
+    const tail = 'IBAN DE89370400440532013000';
+    const pool = [
+      row('r-head', 'Rechnung Nordwind GmbH', head, docId),
+      row('r-iban', 'Rechnung Nordwind GmbH', tail, docId),
+    ];
+    const top = [pool[0]];
+    const labels = new Map([['r-head', 'S1'], ['r-iban', 'S2']]);
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: 'Die IBAN des Absenders ist DE89370400440532013000.',
+          source: 'S1',
+          quote: 'IBAN DE89370400440532013000',
+        },
+      ],
+      top,
+      labelByChunk: labels,
+      chunkPool: pool,
+    });
+    expect(rejected).toHaveLength(0);
+    expect(verified).toHaveLength(1);
+    expect(verified[0].chunkId).toBe('r-iban');
+  });
+
+  it('verifies Miete quote on labeled chunk when passage includes title prefix', () => {
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: 'Die Miete ist bis zum 3. Werktag fällig.',
+          source: 'S2',
+          quote: 'bis zum 3. Werktag',
+        },
+      ],
+      top,
+      labelByChunk,
+    });
+    expect(rejected).toHaveLength(0);
+    expect(verified[0]?.chunkId).toBe('miete');
+  });
+
   it('accepts IBAN in claim when the IBAN quote is cited', () => {
     const { verified, rejected } = verifyCitedClaims({
       claims: [

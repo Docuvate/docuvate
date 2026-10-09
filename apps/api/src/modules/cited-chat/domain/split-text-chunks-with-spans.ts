@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock } from '@docuvate/contracts';
+import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
 
 export const CHUNK_SIZE = 320;
 export const CHUNK_OVERLAP = 64;
@@ -13,7 +14,7 @@ export interface TextChunkSpan {
 }
 
 export function normalizeDocumentText(text: string): string {
-  return text.replace(/\s+/g, ' ').trim();
+  return normalizeExtractionSurfaceText(text).replace(/\s+/g, ' ').trim();
 }
 
 export function splitTextChunksWithSpans(text: string): TextChunkSpan[] {

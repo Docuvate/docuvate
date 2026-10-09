@@ -140,7 +140,7 @@ export function LabelRecommendationBlocklist(props: Props) {
           result.setupHint ??
             (result.configured
               ? 'Kein Muster vorgeschlagen.'
-              : 'Kein Chat-Provider — Literale Blockliste funktioniert weiterhin.')
+              : 'Kein Chat-Provider: Literale Blockliste funktioniert weiterhin.')
         );
       }
     } catch (err) {

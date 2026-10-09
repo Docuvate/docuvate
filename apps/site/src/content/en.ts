@@ -64,7 +64,7 @@ export const enContent: SiteContent = {
         {
           question: 'Can an IT service provider install it for me?',
           answer:
-            'Yes, when the software runs on your servers and the provider charges for setup, maintenance, or support — not for offering Docuvate as multi-tenant SaaS to others.',
+            'Yes, when the software runs on your servers and the provider charges for setup, maintenance, or support, not for offering Docuvate as multi-tenant SaaS to others.',
         },
         {
           question: 'What is not allowed?',

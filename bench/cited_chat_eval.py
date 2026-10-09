@@ -172,8 +172,10 @@ class ApiClient:
             citations = final_msg.get("citations") or []
             citation_count = len(citations)
             bench_stats = final_msg.get("citedBenchStats")
+            timing_ms = None
             if isinstance(bench_stats, dict):
                 rejected_claims = int(bench_stats.get("citedRejectedClaims", 0))
+                timing_ms = bench_stats.get("timingMs")
             else:
                 detail = final_msg.get("errorDetail")
                 if isinstance(detail, str) and detail.strip().startswith("{"):
@@ -191,6 +193,7 @@ class ApiClient:
             "final_status": final_status,
             "citation_count": citation_count,
             "rejected_claims": rejected_claims,
+            "timing_ms": timing_ms,
             "content_preview": content[:120],
         }
 

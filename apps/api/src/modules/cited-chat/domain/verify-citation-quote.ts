@@ -5,6 +5,8 @@ import {
   fuzzyWordsMatch,
   numericTokensPresentInText,
 } from './quote-numeric-consistency.js';
+import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
+import { chunkIndexText } from './split-text-chunks-with-spans.js';
 
 const QUOTE_WORD_LIMIT = 10;
 
@@ -53,6 +55,10 @@ export function buildNormalizedBodyMap(chunkBody: string): NormalizedBodyMap {
   let i = 0;
   while (i < chunkBody.length) {
     const ch = chunkBody[i];
+    if (ch === '\u00ad' || ch === '\u200b') {
+      i += 1;
+      continue;
+    }
     if (/[„“"''`´]/.test(ch)) {
       i += 1;
       continue;
@@ -368,12 +374,50 @@ function acceptResolvedMatch(
   return asQuoteSpanMatch(match, method, score);
 }
 
+function mapPassageMatchToBody(
+  title: string,
+  body: string,
+  passageMatch: QuoteSpanMatch
+): QuoteSpanMatch | null {
+  const prefix = title.trim() ? `${title.trim()}: ` : '';
+  if (passageMatch.charStart < prefix.length) {
+    return null;
+  }
+  const bodyStart = passageMatch.charStart - prefix.length;
+  const bodyEnd = passageMatch.charEnd - prefix.length;
+  if (bodyStart < 0 || bodyEnd > body.length) {
+    return null;
+  }
+  const bodyQuote = body.slice(bodyStart, bodyEnd);
+  return {
+    charStart: bodyStart,
+    charEnd: bodyEnd,
+    bodyQuote,
+    method: passageMatch.method,
+    score: passageMatch.score,
+  };
+}
+
 export function resolveQuoteInCandidateChunk(
   candidate: { documentTitle: string; body: string },
   quote: string,
   options?: { claimText?: string }
 ): QuoteSpanMatch | null {
-  return resolveQuoteInChunk(candidate.body, quote, options);
+  const body = normalizeExtractionSurfaceText(candidate.body);
+  const title = normalizeExtractionSurfaceText(candidate.documentTitle);
+  const direct = resolveQuoteInChunk(body, quote, options);
+  if (direct) {
+    return direct;
+  }
+  const passage = chunkIndexText(title, body);
+  if (passage === body) {
+    return null;
+  }
+  const passageHit = resolveQuoteInChunk(passage, quote, { claimText: '' });
+  if (!passageHit) {
+    return null;
+  }
+  return mapPassageMatchToBody(title, body, passageHit);
 }
 
 export function resolveQuoteInChunk(

@@ -6,9 +6,11 @@ import {
   bestQuoteMatchScore,
   findQuoteInChunk,
   fuzzySpanSearchInChunk,
+  normalizeForQuoteMatch,
   resolveQuoteInCandidateChunk,
   validateMatchedSpanNumbers,
 } from './verify-citation-quote.js';
+import { chunkIndexText } from './split-text-chunks-with-spans.js';
 
 export type CitedClaimRejectReason =
   | 'unknown_source'
@@ -99,6 +101,7 @@ function rowsMatchingQuote(top: TopRow[], quote: string): TopRow[] {
 
 function resolveCitationRow(
   top: TopRow[],
+  chunkPool: TopRow[],
   labelByChunk: Map<string, string>,
   sourceLabel: string,
   quote: string
@@ -111,18 +114,42 @@ function resolveCitationRow(
     return { ok: true, row: labeled };
   }
 
-  const hits = rowsMatchingQuote(top, quote);
-  const sameDoc = hits.filter((row) => row.chunk.documentId === labeled.chunk.documentId);
+  const poolHits = rowsMatchingQuote(chunkPool, quote);
+  const sameDoc = poolHits.filter((row) => row.chunk.documentId === labeled.chunk.documentId);
   if (sameDoc.length > 0) {
     return { ok: true, row: sameDoc[0] };
   }
 
-  const otherDoc = hits.filter((row) => row.chunk.documentId !== labeled.chunk.documentId);
+  const topHits = rowsMatchingQuote(top, quote);
+  const otherDoc = topHits.filter((row) => row.chunk.documentId !== labeled.chunk.documentId);
   if (otherDoc.length > 0) {
     return { ok: false, reason: 'quote_in_other_document' };
   }
 
   return { ok: true, row: labeled };
+}
+
+export function buildRejectedClaimBenchLog(input: {
+  rejected: RejectedCitedClaim;
+  citedLabel: string | null;
+  labeledChunkId: string | null;
+  resolvedChunkId: string | null;
+  chunkBody: string | null;
+  passageText: string | null;
+}): Record<string, unknown> {
+  return {
+    reason: input.rejected.reason,
+    claimText: input.rejected.claimText,
+    citedLabel: input.citedLabel,
+    source: input.rejected.source,
+    quote: input.rejected.quote,
+    normalizedQuote: normalizeForQuoteMatch(input.rejected.quote),
+    resolvedChunkId: input.resolvedChunkId,
+    labeledChunkId: input.labeledChunkId,
+    chunkTextPreview: input.chunkBody?.slice(0, 240) ?? null,
+    passageTextPreview: input.passageText?.slice(0, 240) ?? null,
+    bestMatchScore: input.rejected.bestMatchScore,
+  };
 }
 
 function rejectReasonForQuote(
@@ -149,7 +176,10 @@ export function verifyCitedClaims(input: {
   claims: CitedClaimJson[];
   top: TopRow[];
   labelByChunk: Map<string, string>;
+  /** Full hybrid retrieval pool (same-document quote rebind searches here, not only top-k). */
+  chunkPool?: TopRow[];
 }): { verified: VerifiedCitedClaim[]; rejected: RejectedCitedClaim[] } {
+  const chunkPool = input.chunkPool ?? input.top;
   const labels = new Set(input.labelByChunk.values());
   const verified: VerifiedCitedClaim[] = [];
   const rejected: RejectedCitedClaim[] = [];
@@ -218,6 +248,7 @@ export function verifyCitedClaims(input: {
 
       const rowResult = resolveCitationRow(
         input.top,
+        chunkPool,
         input.labelByChunk,
         sourceLabel,
         citation.quote
