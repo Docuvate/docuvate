@@ -86,7 +86,8 @@ import { throwApiRequestError } from './apiErrors';
 
 function resolveApiBaseUrl(): string {
   const configured =
-    import.meta.env.VITE_API_URL ?? (import.meta.env.PROD ? '/api' : 'http://localhost:3001');
+    import.meta.env.VITE_API_URL ??
+    (import.meta.env.PROD ? '/api' : 'http://localhost:3001');
   const normalized = configured.replace(/\/$/, '');
   if (normalized.endsWith('/v1')) {
     return normalized;
@@ -111,7 +112,9 @@ async function request<T>(path: string, init?: RequestInit & { timeoutMs?: numbe
     headers.set('Content-Type', 'application/json');
   }
   const signal =
-    timeoutMs != null && timeoutMs > 0 ? AbortSignal.timeout(timeoutMs) : fetchInit.signal;
+    timeoutMs != null && timeoutMs > 0
+      ? AbortSignal.timeout(timeoutMs)
+      : fetchInit.signal;
   const response = await fetch(`${baseURL}${path}`, {
     ...fetchInit,
     credentials: 'include',
@@ -178,12 +181,23 @@ export async function fetchDocumentLayoutIr(documentId: string): Promise<LayoutI
   return request<LayoutIrDocument>(`/documents/${documentId}/layout-ir`);
 }
 
-export async function fetchDocumentLayoutHtml(documentId: string): Promise<{ html: string }> {
-  return request<{ html: string }>(`/documents/${documentId}/layout-html`);
+export type LayoutRenderResponse = {
+  html?: string;
+  typst?: string;
+  reconstructionReliable: boolean;
+  unreliableReason?: string | null;
+};
+
+export async function fetchDocumentLayoutHtml(
+  documentId: string
+): Promise<{ html: string; reconstructionReliable: boolean; unreliableReason?: string | null }> {
+  return request(`/documents/${documentId}/layout-html`);
 }
 
-export async function fetchDocumentLayoutTypst(documentId: string): Promise<{ typst: string }> {
-  return request<{ typst: string }>(`/documents/${documentId}/layout-typst`);
+export async function fetchDocumentLayoutTypst(
+  documentId: string
+): Promise<{ typst: string; reconstructionReliable: boolean; unreliableReason?: string | null }> {
+  return request(`/documents/${documentId}/layout-typst`);
 }
 
 export async function updateDocument(
@@ -323,13 +337,8 @@ export async function listCorrespondents(): Promise<CorrespondentDto[]> {
   return data.items;
 }
 
-export async function createCorrespondent(
-  body: CreateCorrespondentRequest
-): Promise<CorrespondentDto> {
-  return request<CorrespondentDto>('/correspondents', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
+export async function createCorrespondent(body: CreateCorrespondentRequest): Promise<CorrespondentDto> {
+  return request<CorrespondentDto>('/correspondents', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export async function updateCorrespondent(
@@ -595,16 +604,23 @@ export async function sendLibraryChatThreadMessage(
   threadId: string,
   body: SendDocumentChatThreadMessageRequest
 ): Promise<SendDocumentChatThreadMessageResponse> {
-  return request<SendDocumentChatThreadMessageResponse>(`/chat/threads/${threadId}/messages`, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
+  return request<SendDocumentChatThreadMessageResponse>(
+    `/chat/threads/${threadId}/messages`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }
+  );
 }
 
-export async function cancelLibraryChatMessage(threadId: string, messageId: string): Promise<void> {
-  await request<{ ok: boolean }>(`/chat/threads/${threadId}/messages/${messageId}/cancel`, {
-    method: 'POST',
-  });
+export async function cancelLibraryChatMessage(
+  threadId: string,
+  messageId: string
+): Promise<void> {
+  await request<{ ok: boolean }>(
+    `/chat/threads/${threadId}/messages/${messageId}/cancel`,
+    { method: 'POST' }
+  );
 }
 
 export async function retryLibraryChatMessage(
@@ -686,13 +702,10 @@ export async function deleteConnectorInstallation(installationId: string): Promi
 export async function testPaperlessConnection(
   credentials: Record<string, string>
 ): Promise<{ ok: true; apiVersion: number }> {
-  return request<{ ok: true; apiVersion: number }>(
-    '/connectors/plugins/paperless/test-connection',
-    {
-      method: 'POST',
-      body: JSON.stringify({ credentials }),
-    }
-  );
+  return request<{ ok: true; apiVersion: number }>('/connectors/plugins/paperless/test-connection', {
+    method: 'POST',
+    body: JSON.stringify({ credentials }),
+  });
 }
 
 export async function getPaperlessInstallation(

@@ -49,6 +49,10 @@ class ExtractResponse(BaseModel):
     blocks: list[ExtractionBlockModel] = Field(default_factory=list)
     markdown: str | None = None
     layout_ir: dict[str, object] | None = Field(default=None, alias="layoutIr")
+    layout_reconstruction_reliable: bool | None = Field(
+        default=None, alias="layoutReconstructionReliable"
+    )
+    layout_unreliable_reason: str | None = Field(default=None, alias="layoutUnreliableReason")
     engine: str | None = None
 
 
@@ -266,17 +270,27 @@ class LayoutRenderHtmlRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
+    original_pdf_base64: str | None = Field(default=None, alias="originalPdfBase64")
 
 
 class LayoutRenderHtmlResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     html: str
+    reconstruction_reliable: bool = Field(default=True, alias="reconstructionReliable")
+    unreliable_reason: str | None = Field(default=None, alias="unreliableReason")
 
 
 class LayoutRenderTypstRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
+    original_pdf_base64: str | None = Field(default=None, alias="originalPdfBase64")
 
 
 class LayoutRenderTypstResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     typst: str
+    reconstruction_reliable: bool = Field(default=True, alias="reconstructionReliable")
+    unreliable_reason: str | None = Field(default=None, alias="unreliableReason")

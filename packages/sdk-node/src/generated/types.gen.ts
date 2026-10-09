@@ -415,6 +415,8 @@ export type LabelRecommendationListResponseDto = {
 
 export type LayoutHtmlResponseDto = {
     html: string;
+    reconstructionReliable: boolean;
+    unreliableReason?: string;
 };
 
 export type LayoutIrBlockDto = {
@@ -541,6 +543,8 @@ export type LayoutIrWidgetDto = {
 
 export type LayoutTypstResponseDto = {
     typst: string;
+    reconstructionReliable: boolean;
+    unreliableReason?: string;
 };
 
 export type LibraryTableColumnId = 'title' | 'labels' | 'date' | 'status' | 'folder' | 'updated';

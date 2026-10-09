@@ -450,6 +450,7 @@
     "extractedCopyAsMarkdown": "Copy as Markdown",
     "extractedMarkdownCopied": "Markdown copied",
     "layoutIrLoading": "Loading layout…",
+    "layoutReconstructionUnreliable": "Reconstruction may not match the original reliably. Use the original PDF view for decisions.",
     "layoutIrPreviewTitle": "Layout preview",
     "layoutIrUnavailableTitle": "No layout preview yet",
     "layoutIrUnavailableBody": "Reprocess the document to generate layout data.",

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { toDocumentChatMessageRecordDto } from './document-chat-message.mapper.js';
 
 describe('toDocumentChatMessageRecordDto', () => {
@@ -38,5 +38,27 @@ describe('toDocumentChatMessageRecordDto', () => {
     expect(dto.generationStatus).toBe('failed');
     expect(dto.errorCode).toBe('generation_timeout');
     expect(Object.keys(dto)).not.toContain('errorDetail');
+    expect(dto.citedBenchStats).toBeUndefined();
+  });
+
+  it('exposes citedBenchStats when bench flag is on', () => {
+    process.env['DOCUVATE_CITED_CHAT_BENCH_STATS'] = '1';
+    const dto = toDocumentChatMessageRecordDto({
+      id: 'm3',
+      threadId: 't1',
+      role: 'assistant',
+      content: 'ok',
+      createdAt: new Date('2026-01-01T00:00:00Z'),
+      updatedAt: new Date('2026-01-01T00:03:00Z'),
+      generationStatus: 'done',
+      generationPhase: null,
+      errorCode: null,
+      errorDetail: '{"citedRejectedClaims":2}',
+    });
+    expect(dto.citedBenchStats).toEqual({ citedRejectedClaims: 2 });
+  });
+
+  afterEach(() => {
+    delete process.env['DOCUVATE_CITED_CHAT_BENCH_STATS'];
   });
 });

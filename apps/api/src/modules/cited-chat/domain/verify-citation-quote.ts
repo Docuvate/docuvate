@@ -368,6 +368,14 @@ function acceptResolvedMatch(
   return asQuoteSpanMatch(match, method, score);
 }
 
+export function resolveQuoteInCandidateChunk(
+  candidate: { documentTitle: string; body: string },
+  quote: string,
+  options?: { claimText?: string }
+): QuoteSpanMatch | null {
+  return resolveQuoteInChunk(candidate.body, quote, options);
+}
+
 export function resolveQuoteInChunk(
   chunkBody: string,
   quote: string,

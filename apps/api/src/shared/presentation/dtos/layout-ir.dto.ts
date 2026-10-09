@@ -273,9 +273,21 @@ export class LayoutIrDocumentDto {
 export class LayoutHtmlResponseDto {
   @ApiProperty()
   html!: string;
+
+  @ApiProperty({ default: true })
+  reconstructionReliable!: boolean;
+
+  @ApiProperty({ required: false, nullable: true })
+  unreliableReason?: string | null;
 }
 
 export class LayoutTypstResponseDto {
   @ApiProperty()
   typst!: string;
+
+  @ApiProperty({ default: true })
+  reconstructionReliable!: boolean;
+
+  @ApiProperty({ required: false, nullable: true })
+  unreliableReason?: string | null;
 }

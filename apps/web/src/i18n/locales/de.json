@@ -450,6 +450,7 @@
     "extractedCopyAsMarkdown": "Als Markdown kopieren",
     "extractedMarkdownCopied": "Markdown kopiert",
     "layoutIrLoading": "Layout wird geladen…",
+    "layoutReconstructionUnreliable": "Nachbau nicht verlässlich — bitte die Original-PDF-Ansicht für Entscheidungen nutzen.",
     "layoutIrPreviewTitle": "Layout-Vorschau",
     "layoutIrUnavailableTitle": "Noch keine Layout-Vorschau",
     "layoutIrUnavailableBody": "Verarbeiten Sie das Dokument erneut, um Layout-Daten zu erzeugen.",

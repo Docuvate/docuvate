@@ -9,14 +9,24 @@ part of 'layout_typst_response_dto.dart';
 class _$LayoutTypstResponseDto extends LayoutTypstResponseDto {
   @override
   final String typst;
+  @override
+  final bool reconstructionReliable;
+  @override
+  final String? unreliableReason;
 
   factory _$LayoutTypstResponseDto(
           [void Function(LayoutTypstResponseDtoBuilder)? updates]) =>
       (new LayoutTypstResponseDtoBuilder()..update(updates))._build();
 
-  _$LayoutTypstResponseDto._({required this.typst}) : super._() {
+  _$LayoutTypstResponseDto._(
+      {required this.typst,
+      required this.reconstructionReliable,
+      this.unreliableReason})
+      : super._() {
     BuiltValueNullFieldError.checkNotNull(
         typst, r'LayoutTypstResponseDto', 'typst');
+    BuiltValueNullFieldError.checkNotNull(reconstructionReliable,
+        r'LayoutTypstResponseDto', 'reconstructionReliable');
   }
 
   @override
@@ -31,13 +41,18 @@ class _$LayoutTypstResponseDto extends LayoutTypstResponseDto {
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is LayoutTypstResponseDto && typst == other.typst;
+    return other is LayoutTypstResponseDto &&
+        typst == other.typst &&
+        reconstructionReliable == other.reconstructionReliable &&
+        unreliableReason == other.unreliableReason;
   }
 
   @override
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, typst.hashCode);
+    _$hash = $jc(_$hash, reconstructionReliable.hashCode);
+    _$hash = $jc(_$hash, unreliableReason.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -45,7 +60,9 @@ class _$LayoutTypstResponseDto extends LayoutTypstResponseDto {
   @override
   String toString() {
     return (newBuiltValueToStringHelper(r'LayoutTypstResponseDto')
-          ..add('typst', typst))
+          ..add('typst', typst)
+          ..add('reconstructionReliable', reconstructionReliable)
+          ..add('unreliableReason', unreliableReason))
         .toString();
   }
 }
@@ -58,6 +75,16 @@ class LayoutTypstResponseDtoBuilder
   String? get typst => _$this._typst;
   set typst(String? typst) => _$this._typst = typst;
 
+  bool? _reconstructionReliable;
+  bool? get reconstructionReliable => _$this._reconstructionReliable;
+  set reconstructionReliable(bool? reconstructionReliable) =>
+      _$this._reconstructionReliable = reconstructionReliable;
+
+  String? _unreliableReason;
+  String? get unreliableReason => _$this._unreliableReason;
+  set unreliableReason(String? unreliableReason) =>
+      _$this._unreliableReason = unreliableReason;
+
   LayoutTypstResponseDtoBuilder() {
     LayoutTypstResponseDto._defaults(this);
   }
@@ -66,6 +93,8 @@ class LayoutTypstResponseDtoBuilder
     final $v = _$v;
     if ($v != null) {
       _typst = $v.typst;
+      _reconstructionReliable = $v.reconstructionReliable;
+      _unreliableReason = $v.unreliableReason;
       _$v = null;
     }
     return this;
@@ -89,7 +118,12 @@ class LayoutTypstResponseDtoBuilder
     final _$result = _$v ??
         new _$LayoutTypstResponseDto._(
             typst: BuiltValueNullFieldError.checkNotNull(
-                typst, r'LayoutTypstResponseDto', 'typst'));
+                typst, r'LayoutTypstResponseDto', 'typst'),
+            reconstructionReliable: BuiltValueNullFieldError.checkNotNull(
+                reconstructionReliable,
+                r'LayoutTypstResponseDto',
+                'reconstructionReliable'),
+            unreliableReason: unreliableReason);
     replace(_$result);
     return _$result;
   }

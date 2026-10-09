@@ -7,8 +7,8 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-const AUTH_BASE = process.env.AUTH_BASE ?? 'http://127.0.0.1:3001';
-const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://127.0.0.1:5173';
+const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://localhost:5173';
+const AUTH_BASE = process.env.AUTH_BASE ?? process.env.VITE_API_URL ?? 'http://localhost:3001';
 const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'alex.upload@fixture.docuvate.test';
 const PASSWORD = process.env.E2E_SMOKE_PASSWORD ?? 'E2eSmokeFixture1!';
 const NAME = process.env.E2E_SMOKE_NAME ?? 'Alex Testmann';

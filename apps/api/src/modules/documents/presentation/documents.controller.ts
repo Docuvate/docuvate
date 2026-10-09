@@ -173,9 +173,13 @@ export class DocumentsController {
     @Session() session: AuthSession,
     @AuthSubject() subject: AuthorizationSubject,
     @Param('id') id: string
-  ): Promise<{ html: string }> {
-    const html = await this.getDocumentLayoutHtml.execute(id, session.user.id, subject);
-    return { html };
+  ): Promise<LayoutHtmlResponseDto> {
+    const result = await this.getDocumentLayoutHtml.execute(id, session.user.id, subject);
+    return {
+      html: result.html,
+      reconstructionReliable: result.reconstructionReliable,
+      unreliableReason: result.unreliableReason,
+    };
   }
 
   @Get(':id/layout-typst')
@@ -188,9 +192,13 @@ export class DocumentsController {
     @Session() session: AuthSession,
     @AuthSubject() subject: AuthorizationSubject,
     @Param('id') id: string
-  ): Promise<{ typst: string }> {
-    const typst = await this.getDocumentLayoutTypst.execute(id, session.user.id, subject);
-    return { typst };
+  ): Promise<LayoutTypstResponseDto> {
+    const result = await this.getDocumentLayoutTypst.execute(id, session.user.id, subject);
+    return {
+      typst: result.typst,
+      reconstructionReliable: result.reconstructionReliable,
+      unreliableReason: result.unreliableReason,
+    };
   }
 
   @Get(':id/content')
