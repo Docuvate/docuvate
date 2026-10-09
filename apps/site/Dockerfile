@@ -1,4 +1,5 @@
 FROM node:24.21.0-alpine AS build
+RUN apk add --no-cache python3
 RUN corepack enable && corepack prepare pnpm@10.34.6 --activate
 WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./

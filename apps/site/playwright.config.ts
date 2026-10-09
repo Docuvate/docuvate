@@ -18,11 +18,13 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-  webServer: {
-    command: 'pnpm run preview',
-    cwd: siteRoot,
-    url: siteBase,
-    reuseExistingServer: !process.env['CI'],
-    timeout: 120_000,
-  },
+  webServer: process.env['E2E_SITE_URL']
+    ? undefined
+    : {
+        command: 'pnpm run preview',
+        cwd: siteRoot,
+        url: siteBase,
+        reuseExistingServer: !process.env['CI'],
+        timeout: 120_000,
+      },
 });
