@@ -283,6 +283,7 @@ class LayoutRenderTypstRequest(BaseModel):
 
     layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
     original_pdf_base64: str | None = Field(default=None, alias="originalPdfBase64")
+    mode: str = Field(default="exakt", description="exakt | semantisch")
 
 
 class LayoutRenderTypstResponse(BaseModel):

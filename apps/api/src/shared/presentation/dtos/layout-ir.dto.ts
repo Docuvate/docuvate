@@ -283,6 +283,9 @@ export class LayoutTypstResponseDto {
   @ApiProperty()
   typst!: string;
 
+  @ApiProperty({ enum: ['exakt', 'semantisch'], default: 'exakt' })
+  exportMode!: 'exakt' | 'semantisch';
+
   @ApiProperty({ default: true })
   reconstructionReliable!: boolean;
 

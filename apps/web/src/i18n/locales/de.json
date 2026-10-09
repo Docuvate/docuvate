@@ -459,6 +459,8 @@
     "layoutExportTypstFailed": "Typst-Export fehlgeschlagen. Bitte erneut versuchen.",
     "layoutExportMenu": "Exportieren",
     "layoutExportTypst": "Als Typst-Datei exportieren",
+    "layoutExportTypstSemantisch": "Typst exportieren (lesbar)",
+    "layoutExportTypstExakt": "Typst exportieren (pixelgenau)",
     "extractedTextCopyPlain": "Als Text kopieren",
     "layoutZoomAria": "Layout-Zoom",
     "layoutZoomPercent": "{{value}} %",

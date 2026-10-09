@@ -4,8 +4,11 @@ export interface LayoutHtmlRenderResult {
   unreliableReason: string | null;
 }
 
+export type LayoutTypstExportMode = 'exakt' | 'semantisch';
+
 export interface LayoutTypstRenderResult {
   typst: string;
+  exportMode: LayoutTypstExportMode;
   reconstructionReliable: boolean;
   unreliableReason: string | null;
 }

@@ -3,7 +3,7 @@ import { NotFoundError } from '../../../shared/domain/errors.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { GetDocumentContentUseCase } from './get-document-content.use-case.js';
 import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
-import type { LayoutTypstRenderResult } from './layout-render.types.js';
+import type { LayoutTypstExportMode, LayoutTypstRenderResult } from './layout-render.types.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import {
   fetchWorkerJson,
@@ -24,7 +24,8 @@ export class GetDocumentLayoutTypstUseCase {
   async execute(
     id: string,
     userId: string,
-    subject: AuthorizationSubject
+    subject: AuthorizationSubject,
+    mode: LayoutTypstExportMode = 'exakt'
   ): Promise<LayoutTypstRenderResult> {
     const layoutIr = await this.getLayoutIr.execute(id, userId, subject);
     const { buffer } = await this.getDocumentContent.execute(id, userId, subject);
@@ -41,6 +42,7 @@ export class GetDocumentLayoutTypstUseCase {
         body: JSON.stringify({
           layoutIr,
           originalPdfBase64: buffer.toString('base64'),
+          mode,
         }),
       },
       LAYOUT_WORKER_TIMEOUT_MS,
@@ -54,6 +56,7 @@ export class GetDocumentLayoutTypstUseCase {
     }
     return {
       typst: data.typst,
+      exportMode: mode,
       reconstructionReliable: data.reconstructionReliable ?? true,
       unreliableReason: data.unreliableReason ?? null,
     };
