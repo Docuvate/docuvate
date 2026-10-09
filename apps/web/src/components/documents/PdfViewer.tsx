@@ -16,7 +16,20 @@ type PdfHighlightBlock = {
   height: number;
 };
 
+export type PdfLayoutOverlay = {
+  id: string;
+  page: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  kind: 'heading' | 'field' | 'table' | 'text';
+  label: string;
+  value?: string;
+};
+
 const NO_HIGHLIGHTS: PdfHighlightBlock[] = [];
+const NO_LAYOUT_OVERLAYS: PdfLayoutOverlay[] = [];
 
 interface PdfViewerProps {
   url?: string;
@@ -31,6 +44,11 @@ interface PdfViewerProps {
   onPageChange?: (page: number) => void;
   /** Normalized click position on a page (0–1), for text crosslink. */
   onPageClick?: (page: number, nx: number, ny: number) => void;
+  layoutOverlays?: PdfLayoutOverlay[];
+  layoutOverlayEnabled?: boolean;
+  activeLayoutOverlayId?: string | null;
+  onLayoutOverlaySelect?: (id: string) => void;
+  onLayoutOverlayHover?: (overlay: PdfLayoutOverlay | null) => void;
 }
 
 const DEFAULT_PAGE_SCALE = 1.25;
@@ -79,12 +97,56 @@ function bindPageClick(
   });
 }
 
+function appendLayoutOverlays(
+  wrap: HTMLDivElement,
+  pageNum: number,
+  overlays: PdfLayoutOverlay[],
+  enabled: boolean,
+  activeId: string | null | undefined,
+  onSelect: ((id: string) => void) | undefined,
+  onHover: ((overlay: PdfLayoutOverlay | null) => void) | undefined
+) {
+  if (!enabled) return;
+  const pageOverlays = overlays.filter((o) => o.page === pageNum);
+  for (const overlay of pageOverlays) {
+    const mark = document.createElement('button');
+    mark.type = 'button';
+    mark.className = `pdf-layout-overlay pdf-layout-overlay-${overlay.kind}${
+      overlay.id === activeId ? ' pdf-layout-overlay-active' : ''
+    }`;
+    mark.dataset.overlayId = overlay.id;
+    mark.setAttribute('aria-label', overlay.label);
+    mark.style.left = `${overlay.x * 100}%`;
+    mark.style.top = `${overlay.y * 100}%`;
+    mark.style.width = `${Math.max(overlay.width * 100, 0.4)}%`;
+    mark.style.height = `${Math.max(overlay.height * 100, 0.35)}%`;
+    if (onSelect) {
+      mark.addEventListener('click', (event) => {
+        event.stopPropagation();
+        onSelect(overlay.id);
+      });
+    }
+    if (onHover) {
+      mark.addEventListener('mouseenter', () => onHover(overlay));
+      mark.addEventListener('mouseleave', () => onHover(null));
+      mark.addEventListener('focus', () => onHover(overlay));
+      mark.addEventListener('blur', () => onHover(null));
+    }
+    wrap.appendChild(mark);
+  }
+}
+
 async function renderPdfPage(
   page: pdfjs.PDFPageProxy,
   pageNum: number,
   highlightBlocks: PdfHighlightBlock[],
+  layoutOverlays: PdfLayoutOverlay[],
+  layoutOverlayEnabled: boolean,
+  activeLayoutOverlayId: string | null | undefined,
   scale: number,
-  onPageClick?: (page: number, nx: number, ny: number) => void
+  onPageClick?: (page: number, nx: number, ny: number) => void,
+  onLayoutOverlaySelect?: (id: string) => void,
+  onLayoutOverlayHover?: (overlay: PdfLayoutOverlay | null) => void
 ): Promise<HTMLDivElement> {
   const viewport = page.getViewport({ scale });
   const canvas = document.createElement('canvas');
@@ -124,6 +186,16 @@ async function renderPdfPage(
     wrap.appendChild(mark);
   });
 
+  appendLayoutOverlays(
+    wrap,
+    pageNum,
+    layoutOverlays,
+    layoutOverlayEnabled,
+    activeLayoutOverlayId,
+    onLayoutOverlaySelect,
+    onLayoutOverlayHover
+  );
+
   bindPageClick(wrap, pageNum, onPageClick);
 
   return wrap;
@@ -151,6 +223,11 @@ export function PdfViewer({
   url,
   data,
   highlightBlocks = NO_HIGHLIGHTS,
+  layoutOverlays = NO_LAYOUT_OVERLAYS,
+  layoutOverlayEnabled = false,
+  activeLayoutOverlayId = null,
+  onLayoutOverlaySelect,
+  onLayoutOverlayHover,
   paginated = true,
   fitWidth = false,
   page: controlledPage,
@@ -162,9 +239,17 @@ export function PdfViewer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
   const onPageClickRef = useRef(onPageClick);
+  const onLayoutOverlaySelectRef = useRef(onLayoutOverlaySelect);
+  const onLayoutOverlayHoverRef = useRef(onLayoutOverlayHover);
   useEffect(() => {
     onPageClickRef.current = onPageClick;
   }, [onPageClick]);
+  useEffect(() => {
+    onLayoutOverlaySelectRef.current = onLayoutOverlaySelect;
+  }, [onLayoutOverlaySelect]);
+  useEffect(() => {
+    onLayoutOverlayHoverRef.current = onLayoutOverlayHover;
+  }, [onLayoutOverlayHover]);
   const [containerWidth, setContainerWidth] = useState<number | null>(null);
   const containerWidthRef = useRef<number | null>(null);
   const lastPageRenderKeyRef = useRef<string | null>(null);
@@ -178,6 +263,11 @@ export function PdfViewer({
   const isControlled = controlledPage !== undefined && onPageChange !== undefined;
   const currentPage = isControlled ? controlledPage : internalPage;
   const highlightKey = JSON.stringify(highlightBlocks);
+  const overlayKey = JSON.stringify({
+    overlays: layoutOverlays,
+    enabled: layoutOverlayEnabled,
+    active: activeLayoutOverlayId,
+  });
   const sourceKey = data ? `buf:${data.byteLength}` : (url ?? '');
 
   const setPage = useCallback(
@@ -284,7 +374,7 @@ export function PdfViewer({
           containerWidth
         );
 
-        const renderKey = `${docToken}:${currentPage}:${Math.round(scale * 1000)}:${containerWidth ?? 0}:${highlightKey}:${paginated}`;
+        const renderKey = `${docToken}:${currentPage}:${Math.round(scale * 1000)}:${containerWidth ?? 0}:${highlightKey}:${overlayKey}:${paginated}`;
         if (lastPageRenderKeyRef.current === renderKey && pagesHost.childElementCount > 0) {
           return;
         }
@@ -297,8 +387,17 @@ export function PdfViewer({
         if (paginated) {
           const pdfPage = await pdf.getPage(currentPage);
           if (cancelled) return;
-          const wrap = await renderPdfPage(pdfPage, currentPage, highlights, scale, (p, nx, ny) =>
-            onPageClickRef.current?.(p, nx, ny)
+          const wrap = await renderPdfPage(
+            pdfPage,
+            currentPage,
+            highlights,
+            layoutOverlays,
+            layoutOverlayEnabled,
+            activeLayoutOverlayId,
+            scale,
+            (p, nx, ny) => onPageClickRef.current?.(p, nx, ny),
+            (id) => onLayoutOverlaySelectRef.current?.(id),
+            (o) => onLayoutOverlayHoverRef.current?.(o)
           );
           if (cancelled) return;
           pagesHost.replaceChildren(wrap);
@@ -310,8 +409,17 @@ export function PdfViewer({
 
           const wraps = await Promise.all(
             pages.map((p, index) =>
-              renderPdfPage(p, index + 1, highlights, scale, (pg, nx, ny) =>
-                onPageClickRef.current?.(pg, nx, ny)
+              renderPdfPage(
+                p,
+                index + 1,
+                highlights,
+                layoutOverlays,
+                layoutOverlayEnabled,
+                activeLayoutOverlayId,
+                scale,
+                (pg, nx, ny) => onPageClickRef.current?.(pg, nx, ny),
+                (id) => onLayoutOverlaySelectRef.current?.(id),
+                (o) => onLayoutOverlayHoverRef.current?.(o)
               )
             )
           );
@@ -339,6 +447,10 @@ export function PdfViewer({
     currentPage,
     highlightKey,
     highlightBlocks,
+    overlayKey,
+    layoutOverlays,
+    layoutOverlayEnabled,
+    activeLayoutOverlayId,
     fitWidth,
     containerWidth,
     t,
