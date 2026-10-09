@@ -1,5 +1,6 @@
 import { ArrowRight, Check, Container, Database, FileCode2, Plug } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { CodeBlock } from '../components/CodeBlock';
 import { FaqItem } from '../components/FaqItem';
 import { useLocale } from '../context/LocaleContext';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
@@ -61,7 +62,7 @@ export function LandingPage() {
           </h1>
           <p className="landing-hero-lead">{landing.hero.lead}</p>
           <div className="hero-actions landing-hero-actions landing-hero-actions-centered">
-            <Link className="btn btn-primary btn-lg landing-btn-primary" to={localizePath('/docs#self-hosting')}>
+            <Link className="btn btn-primary btn-lg landing-btn-primary" to={localizePath('/docs#quickstart')}>
               {landing.hero.primaryCta}
             </Link>
             <Link
@@ -188,12 +189,23 @@ export function LandingPage() {
               </Link>
             </div>
           </div>
-          <figure className="landing-code-card">
-            <figcaption className="landing-code-caption">{landing.developers.codeCaption}</figcaption>
-            <pre className="landing-code">
-              <code>{landing.developers.code}</code>
-            </pre>
-          </figure>
+          <div className="landing-code-slot">
+            <CodeBlock
+              code={landing.developers.installSnippet}
+              language="shell"
+              highlightKey={`${locale}.landing.developers.install`}
+              copyLabel={content.sdks.copyCode}
+              copiedLabel={content.sdks.copiedCode}
+            />
+            <CodeBlock
+              code={landing.developers.code}
+              language="typescript"
+              highlightKey={`${locale}.landing.developers`}
+              filename="src/docuvate.ts"
+              copyLabel={content.sdks.copyCode}
+              copiedLabel={content.sdks.copiedCode}
+            />
+          </div>
         </div>
       </section>
 
@@ -238,7 +250,7 @@ export function LandingPage() {
             <p className="landing-closing-note">{landing.closingCta.note}</p>
           ) : null}
           <div className="hero-actions landing-closing-actions">
-            <Link className="btn btn-primary btn-lg landing-btn-primary" to={localizePath('/docs#self-hosting')}>
+            <Link className="btn btn-primary btn-lg landing-btn-primary" to={localizePath('/docs#quickstart')}>
               {landing.closingCta.primaryCta}
             </Link>
             <a className="btn btn-secondary btn-lg landing-btn-on-dark" href={GITHUB_URL} target="_blank" rel="noreferrer">

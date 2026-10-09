@@ -54,3 +54,218 @@
 .scalar-embed-dark .scalar-app .sidebar-heading:hover .sidebar-heading-link-title {
   color: #e96f49 !important;
 }
+
+.scalar-embed .scalar-app a.endpoint {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  gap: 0.35rem 0.75rem;
+  white-space: normal !important;
+  overflow: visible !important;
+  height: auto !important;
+  min-height: 1.55em;
+}
+
+.scalar-embed .scalar-app .endpoint-path {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  flex: 1 1 12rem !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  line-height: 1.45 !important;
+}
+
+.scalar-embed .scalar-app .endpoint-method {
+  flex: 0 0 auto !important;
+}
+
+.scalar-embed .scalar-app .section {
+  scroll-margin-top: 0 !important;
+}
+
+.scalar-embed .scalar-app .sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border-width: 0 !important;
+}
+
+.scalar-embed .scalar-app .badge,
+.scalar-embed .scalar-app .pill,
+.scalar-embed .scalar-app .cm-pill,
+.scalar-embed .scalar-app .schema-properties,
+.scalar-embed .scalar-app label.content-type-select,
+.scalar-embed .scalar-app [class*='badge'],
+.scalar-embed .scalar-app [class*='pill'] {
+  border-radius: 6px !important;
+}
+
+.scalar-embed .scalar-app button.show-more,
+.scalar-embed .scalar-app .show-more,
+.scalar-embed .scalar-app .rounded-full {
+  border-radius: 12px !important;
+}
+
+.scalar-embed .scalar-app button.show-more {
+  min-height: 2.5rem;
+  padding-block: 0.35rem;
+  box-sizing: border-box;
+}
+
+.scalar-embed .scalar-app .references-navigation-list,
+.scalar-embed .scalar-app aside.references-navigation {
+  position: sticky !important;
+  top: var(--docuvate-sidebar-sticky-top, var(--site-header-height)) !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  align-self: flex-start !important;
+  z-index: 2;
+}
+
+.scalar-embed .scalar-app nav.sidebar-pages {
+  overflow: visible !important;
+  max-height: none !important;
+}
+
+.scalar-embed .scalar-app .darklight-reference {
+  display: none !important;
+}
+
+.scalar-embed .scalar-app .sidebar-heading-link,
+.scalar-embed .scalar-app .sidebar-pages > li > .sidebar-heading,
+.scalar-embed .scalar-app .sidebar-pages a.endpoint {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.scalar-embed .scalar-app .sidebar-heading-chevron,
+.scalar-embed .scalar-app button.toggle-nested-icon,
+.scalar-embed .scalar-app p.sidebar-heading-chevron {
+  align-self: center !important;
+}
+
+.scalar-embed .scalar-app .sidebar-search,
+.scalar-embed .scalar-app .sidebar-heading-link,
+.scalar-embed .scalar-app .sidebar-pages a,
+.scalar-embed .scalar-app .sidebar-pages button,
+.scalar-embed .scalar-app .download-button,
+.scalar-embed .scalar-app button[aria-label*='Search'],
+.scalar-embed .scalar-app .scalar-icon-button,
+.scalar-embed .scalar-app button.tab,
+.scalar-embed .scalar-app .copy-button,
+.scalar-embed .scalar-app button.copy-button,
+.scalar-embed .scalar-app button.schema-card-title,
+.scalar-embed .scalar-app button.schema-properties,
+.scalar-embed .scalar-app label.content-type-select,
+.scalar-embed .scalar-app button[aria-label*='Authentifizierung'],
+.scalar-embed .scalar-app button[aria-label*='Authentifizierungstyp'],
+.scalar-embed .scalar-app select,
+.scalar-embed .scalar-app .scalar-card-sticky a.endpoint {
+  min-height: 2.5rem;
+  box-sizing: border-box;
+}
+
+.scalar-embed .scalar-app button.tab {
+  min-width: 2.5rem;
+  padding: 0.5rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scalar-embed .scalar-app .copy-button,
+.scalar-embed .scalar-app button.copy-button {
+  min-width: 2.5rem;
+  padding-inline: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scalar-embed .scalar-app button.schema-card-title,
+.scalar-embed .scalar-app button.schema-properties {
+  padding-block: 0.5rem;
+}
+
+.scalar-embed .scalar-app button.toggle-nested-icon,
+.scalar-embed .scalar-app p.sidebar-heading-chevron {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scalar-embed .scalar-app .scalar-card-sticky a.endpoint {
+  padding-block: 0.35rem;
+}
+
+.scalar-embed .scalar-app .scalar-icon-button {
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scalar-embed .scalar-app label:has(input[type='checkbox']),
+.scalar-embed .scalar-app .authentication-section button,
+.scalar-embed .scalar-app .authentication-section select,
+.scalar-embed .scalar-app .authentication-section label,
+.scalar-embed .scalar-app .authentication-section [role='button'],
+.scalar-embed .scalar-app .introduction-card-item button,
+.scalar-embed .scalar-app .introduction-card-item .scalar-button,
+.scalar-embed .scalar-app .introduction-card-item .scalar-row,
+.scalar-embed .scalar-app .introduction-card-item label {
+  min-height: 2.5rem;
+  min-width: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+  padding-block: 0.35rem;
+  box-sizing: border-box;
+}
+
+.scalar-embed .references-rendered .tag-section-container {
+  isolation: isolate;
+  position: relative;
+}
+
+/* Scalar caps operation cards at half viewport height; endpoints then paint outside the card. */
+.scalar-embed .scalar-app .scalar-card {
+  max-height: none !important;
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+.scalar-embed .scalar-card-sticky {
+  position: relative !important;
+  top: auto !important;
+  overflow: hidden !important;
+  max-width: 100%;
+  background: var(--scalar-background-2, var(--scalar-background-1)) !important;
+  border: 1px solid var(--scalar-border-color);
+  border-radius: var(--scalar-radius-lg);
+  margin-bottom: 0.75rem;
+}
+
+.scalar-embed .scalar-card-sticky > .scalar-card-content.custom-scroll {
+  min-height: min-content !important;
+  max-height: none !important;
+  overflow: visible !important;
+  height: auto !important;
+  background: transparent !important;
+}
+
+.scalar-embed .scalar-card-sticky .endpoints {
+  overflow: visible !important;
+  padding-bottom: 0.35rem;
+}

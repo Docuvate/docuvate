@@ -1,3 +1,4 @@
+import { SDK_FLUTTER_PUBSPEC, SDK_NODE_INSTALL_PNPM } from '../lib/sdkInstallSnippets.ts';
 import type { SiteContent } from './types';
 
 export const enContent: SiteContent = {
@@ -156,15 +157,22 @@ export const enContent: SiteContent = {
       primaryCta: 'API reference',
       secondaryCta: 'SDK guide',
       codeCaption: 'Node.js',
+      installSnippet: SDK_NODE_INSTALL_PNPM,
       code: `import { DocuvateClient } from '@docuvate/sdk';
 
 const client = new DocuvateClient({
-  baseUrl: 'https://your-host',
+  baseUrl: 'https://your-host/v1',
   apiKey: process.env.DOCUVATE_API_KEY,
 });
 
-const { data } = await client.api.listDocuments();
-console.log(data?.items?.[0]?.title);`,
+const { data, error } = await client.api.listDocuments({
+  query: { q: 'lease agreement', status: 'ready' },
+});
+if (error) throw error;
+
+for (const doc of data.items) {
+  console.log(doc.title, doc.documentDate);
+}`,
     },
     closingCta: {
       heading: 'Self-host on infrastructure you control',
@@ -340,6 +348,8 @@ console.log(data?.items?.[0]?.title);`,
       title: 'Docuvate SDKs',
       description: 'Node and Flutter clients for the headless /v1 API.',
     },
+    pageLead:
+      'Official clients for scripts and integrations. The contract and codegen follow the OpenAPI document exported from your instance.',
     previewBadge: 'Preview',
     overviewTable: {
       headings: {
@@ -350,10 +360,10 @@ console.log(data?.items?.[0]?.title);`,
       },
       rows: [
         {
-          sdk: 'Node / TypeScript',
+          sdk: 'Node.js and TypeScript',
           packageName: '@docuvate/sdk',
           sectionId: 'node-sdk',
-          sectionLabel: 'Node / TypeScript',
+          sectionLabel: 'Node.js and TypeScript',
           preview: true,
         },
         {
@@ -368,7 +378,7 @@ console.log(data?.items?.[0]?.title);`,
     introLead:
       'Official Node and Flutter clients for the headless /v1 API. The contract and codegen follow the exported OpenAPI document.',
     introRuntimeSpec:
-      'Runtime: `GET /v1/openapi.json` on your instance returns the same description as the [interactive API reference](/docs/api).',
+      'Your instance serves the OpenAPI description at `GET /v1/openapi.json`, matching the [interactive API reference](/docs/api).',
     introCodegenNote:
       'After API changes in your self-hosted setup: export OpenAPI and regenerate SDKs (`pnpm openapi:export`, `pnpm sdk:codegen`).',
     copyCode: 'Copy',
@@ -385,19 +395,18 @@ console.log(data?.items?.[0]?.title);`,
     },
     node: {
       id: 'node-sdk',
-      heading: 'Node / TypeScript (@docuvate/sdk)',
+      heading: 'Node.js and TypeScript',
       preview: true,
-      previewNote:
-        'Preview: @docuvate/sdk is not published on npm yet. For now, build packages/sdk-node from the monorepo and depend on it via workspace: or file:.',
-      installHeading: 'Install (preview)',
-      installBody: 'npm publication is planned. Until then, add the package from your cloned repository:',
-      installSnippet: 'pnpm add @docuvate/sdk@file:../docuvate/packages/sdk-node',
+      previewNote: '',
+      installHeading: 'Install Node.js SDK',
+      installBody: 'Install `@docuvate/sdk` from the public Git repository:',
+      installSnippet: SDK_NODE_INSTALL_PNPM,
       installSnippetLanguage: 'typescript',
       auth:
-        'DocuvateClient with baseUrl and apiKey (service API key). Configure keys in the Service access section on this page.',
+        '`DocuvateClient` with `baseUrl` and `apiKey` (service API key). Configure keys in the Service access section on this page.',
       examples: [
         {
-          title: 'List documents',
+          title: 'Search documents',
           language: 'typescript',
           code: [
             "import { DocuvateClient } from '@docuvate/sdk';",
@@ -407,7 +416,14 @@ console.log(data?.items?.[0]?.title);`,
             "  apiKey: process.env.DOCUVATE_API_KEY,",
             '});',
             '',
-            "const list = await client.api.listDocuments({ query: { status: 'ready' } });",
+            'const { data, error } = await client.api.listDocuments({',
+            "  query: { q: 'lease agreement', status: 'ready' },",
+            '});',
+            'if (error) throw error;',
+            '',
+            'for (const doc of data.items) {',
+            '  console.log(doc.title, doc.documentDate);',
+            '}',
           ].join('\n'),
         },
         {
@@ -423,26 +439,22 @@ console.log(data?.items?.[0]?.title);`,
             '  path: { id: documentId },',
             "  body: { message: 'What due date is mentioned?' },",
             '});',
-            'console.log(reply.data?.reply?.content);',
+            'if (reply.error) throw reply.error;',
+            'console.log(reply.data.reply.content);',
           ].join('\n'),
         },
       ],
     },
     flutter: {
       id: 'flutter-sdk',
-      heading: 'Flutter (docuvate)',
+      heading: 'Flutter',
       preview: true,
-      previewNote:
-        'Preview: the Flutter package is not on pub.dev yet. Use a path dependency on packages/sdk-flutter in the monorepo.',
-      installHeading: 'Install (preview)',
-      installBody: 'Add the path dependency and run flutter pub get:',
-      installSnippet: [
-        'dependencies:',
-        '  docuvate:',
-        '    path: ../docuvate/packages/sdk-flutter',
-      ].join('\n'),
+      previewNote: '',
+      installHeading: 'Install Flutter SDK',
+      installBody: 'Add the Git dependency in `pubspec.yaml` and run `flutter pub get`:',
+      installSnippet: SDK_FLUTTER_PUBSPEC,
       installSnippetLanguage: 'yaml',
-      auth: 'DocuvateClientConfig with baseUrl and apiKey for headless access.',
+      auth: '`DocuvateClientConfig` with `baseUrl` and `apiKey` for headless access.',
       examples: [
         {
           title: 'Upload a document',

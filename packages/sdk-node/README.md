@@ -18,7 +18,14 @@ const client = new DocuvateClient({
   apiKey: process.env.DOCUVATE_API_KEY,
 });
 
-const { data } = await client.api.listDocuments({ query: { status: 'ready' } });
+const { data, error } = await client.api.listDocuments({
+  query: { q: 'lease agreement', status: 'ready' },
+});
+if (error) throw error;
+
+for (const doc of data.items) {
+  console.log(doc.title, doc.documentDate);
+}
 await client.api.createDocument({ body: formData });
 ```
 

@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import { observeSiteHeaderHeight } from '../lib/siteHeaderHeight';
 import { useLocale } from '../context/LocaleContext';
 import { withLocale, type SiteLocale } from '../lib/routes';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
@@ -67,7 +68,7 @@ function ThemeToggle({ onDarkHero }: { onDarkHero: boolean }) {
   return (
     <button
       type="button"
-      className={`icon-btn theme-toggle${onDarkHero ? ' icon-btn-on-hero' : ''}`}
+      className={`icon-btn icon-btn-touch theme-toggle${onDarkHero ? ' icon-btn-on-hero' : ''}`}
       onClick={toggle}
       aria-label={label}
     >
@@ -77,10 +78,11 @@ function ThemeToggle({ onDarkHero }: { onDarkHero: boolean }) {
 }
 
 export function SiteShell({ children }: { children: ReactNode }) {
+  useEffect(() => observeSiteHeaderHeight(), []);
+
   const { locale, content, localizePath } = useLocale();
   const location = useLocation();
   const path = location.pathname.replace(/^\/en/, '') || '/';
-  const onDocs = path.startsWith('/docs');
   const onLanding = path === '/';
   const onLegal = path === '/impressum' || path === '/datenschutz';
 
@@ -94,16 +96,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
     );
   };
 
-  const headerCta = onDocs ? (
-    <Link className="btn btn-primary header-cta" to={localizePath('/docs#quickstart')}>
-      {content.landing.hero.secondaryCta}
-    </Link>
-  ) : (
+  const quickstartPath = localizePath('/docs#quickstart');
+  const headerCtaLabel = content.landing.hero.primaryCta;
+  const headerCta = (
     <Link
       className={`btn btn-primary header-cta${onLanding ? ' landing-btn-primary' : ''}`}
-      to={localizePath('/docs#self-hosting')}
+      to={quickstartPath}
     >
-      {content.landing.hero.primaryCta}
+      {headerCtaLabel}
     </Link>
   );
 
@@ -126,7 +126,12 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <ThemeToggle onDarkHero={onLanding} />
             <LocaleSwitcher locale={locale} onDarkHero={onLanding} />
             {headerCta}
-            <MobileNav onLanding={onLanding} />
+            <MobileNav
+              onLanding={onLanding}
+              ctaTo={quickstartPath}
+              ctaLabel={headerCtaLabel}
+              ctaLandingPrimary={onLanding}
+            />
           </div>
         </div>
       </header>
@@ -150,7 +155,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
             <div className="site-footer-links site-footer-links-col">
               <Link to={localizePath('/')}>{locale === 'de' ? 'Startseite' : 'Home'}</Link>
               <Link to={localizePath('/docs')}>{content.nav.docs}</Link>
-              <Link to={localizePath('/docs#self-hosting')}>{content.landing.hero.primaryCta}</Link>
+              <Link to={quickstartPath}>{content.landing.hero.primaryCta}</Link>
             </div>
           </div>
           <div>

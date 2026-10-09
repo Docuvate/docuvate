@@ -14,7 +14,7 @@ html {
   --landing-hero-fg-muted: oklch(43% 0.014 85deg);
   --landing-surface-dark: oklch(28% 0.018 75deg);
   --landing-surface-dark-mid: oklch(32% 0.018 75deg);
-  --landing-header-bg: oklch(97% 0.012 85deg / 90%);
+  --landing-header-bg: oklch(97% 0.012 85deg / 97%);
   --landing-header-fg: oklch(17% 0.012 85deg);
   --landing-header-fg-muted: oklch(42% 0.014 85deg);
   --landing-header-border: oklch(17% 0.012 85deg / 12%);
@@ -55,7 +55,7 @@ html[data-docuvate-theme='dark'] {
   --landing-hero-bg: oklch(22% 0.014 75deg);
   --landing-hero-fg: oklch(96% 0.01 85deg);
   --landing-hero-fg-muted: oklch(78% 0.012 85deg);
-  --landing-header-bg: oklch(22% 0.014 75deg / 92%);
+  --landing-header-bg: oklch(22% 0.014 75deg / 97%);
   --landing-header-fg: oklch(96% 0.01 85deg);
   --landing-header-fg-muted: oklch(78% 0.012 85deg);
   --landing-header-border: oklch(96% 0.01 85deg / 12%);
