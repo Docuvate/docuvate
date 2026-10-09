@@ -107,23 +107,24 @@ jobs:
           .venv/bin/pytest tests -q --ignore=tests/integration --maxfail=1
 
   db-migrate-fresh:
+    needs: lint-test
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
-        env:
-          POSTGRES_USER: docuvate
-          POSTGRES_PASSWORD: docuvate
-          POSTGRES_DB: docuvate
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U docuvate -d docuvate"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Start Postgres (digest-pinned; avoid Hub service-container pull limits)
+        run: |
+          set -euo pipefail
+          # shellcheck source=scripts/ci/lib-ephemeral-postgres.sh
+          source scripts/ci/lib-ephemeral-postgres.sh
+          bash scripts/ci/docker-pull-with-retry.sh "$DOCUVATE_PG_IMAGE"
+          docuvate_ci_start_postgres
+          echo "DATABASE_URL=${DATABASE_URL}" >> "$GITHUB_ENV"
+          echo "DOCUVATE_PG_DOCKER_CID=${DOCUVATE_PG_DOCKER_CID}" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
@@ -133,9 +134,13 @@ jobs:
       - run: pnpm --filter @docuvate/contracts build
       - run: pnpm --filter @docuvate/otel build
       - name: TypeORM migration roundtrip + generate-check
-        env:
-          DATABASE_URL: postgresql://docuvate:docuvate@localhost:5432/docuvate
         run: bash scripts/db/migration-roundtrip-check.sh
+      - name: Stop Postgres
+        if: always()
+        run: |
+          # shellcheck source=scripts/ci/lib-ephemeral-postgres.sh
+          source scripts/ci/lib-ephemeral-postgres.sh
+          docuvate_ci_stop_postgres "${DOCUVATE_PG_DOCKER_CID:-}"
 
   go-sftp-ingest:
     runs-on: ubuntu-latest
@@ -152,9 +157,17 @@ jobs:
 
   # End-to-end SFTP ingest against compose (see scripts/testing/run-sftp-integration-e2e.sh).
   sftp-integration:
+    needs: lint-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Require Docker
         run: docker info
       - name: Install Go (.tool-versions; go.dev when not yet on actions/go-versions)
@@ -168,9 +181,17 @@ jobs:
         run: bash scripts/testing/run-sftp-integration-e2e.sh
 
   integration-test:
+    needs: lint-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Require Docker (Testcontainers; fail hard if unavailable)
         run: docker info
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -187,10 +208,11 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/testing/verify-container-images.mjs
-          docker pull postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
-          docker pull valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
-          docker pull cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
-          docker pull axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+          bash scripts/ci/docker-pull-with-retry.sh \
+            postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873 \
+            valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507 \
+            cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0 \
+            axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
       - run: pnpm install
       - run: pnpm --filter @docuvate/contracts build
       - run: pnpm --filter @docuvate/otel build
@@ -241,24 +263,52 @@ jobs:
           E2E_SITE_URL: http://127.0.0.1:8081
 
   docker-build:
+    needs: lint-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - run: docker compose -f docker-compose.yml build web api site sftp-ingest
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Pre-pull Dockerfile base images
+        run: bash scripts/ci/pull-dockerfile-base-images.sh
+      - name: Build service images (retry on registry rate limits)
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            if docker compose -f docker-compose.yml build web api site sftp-ingest; then
+              exit 0
+            fi
+            echo "docker compose build failed (attempt ${attempt}), retrying…"
+            sleep $((attempt * 20))
+          done
+          exit 1
 
   compose-smoke:
+    needs: lint-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Start compose stack (CI override, no Ollama)
         run: |
           set -euo pipefail
-          for attempt in 1 2 3 4; do
+          for attempt in 1 2 3 4 5; do
             if docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build \
               postgres migrate db-storage-guard minio minio-init valkey mailpit ollama-init api worker web; then
               break
             fi
-            if [ "$attempt" -eq 4 ]; then exit 1; fi
+            if [ "$attempt" -eq 5 ]; then exit 1; fi
             echo "compose up failed (attempt $attempt), retrying..."
             sleep $((attempt * 15))
           done
@@ -330,6 +380,7 @@ jobs:
         run: bash tools/k8s-manifest-validate.sh
 
   kind-smoke:
+    needs: lint-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -349,6 +400,15 @@ jobs:
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
           fi
+      - name: Docker Hub mirror (daemon)
+        if: steps.paths.outputs.run == 'true'
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        if: steps.paths.outputs.run == 'true'
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
       - name: Require Docker
         if: steps.paths.outputs.run == 'true'
         run: docker info

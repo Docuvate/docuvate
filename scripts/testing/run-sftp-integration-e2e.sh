@@ -18,9 +18,19 @@ export DATABASE_URL="postgresql://docuvate:docuvate@localhost:5433/docuvate"
 export BETTER_AUTH_SECRET="${BETTER_AUTH_SECRET:-docuvate-ci-compose-better-auth-signing-key-2026}"
 
 echo "Starting SFTP E2E stack (postgres, migrate, worker, api, sftp-ingest)…"
-"${DC[@]}" -f docker-compose.yml -f docker-compose.ci.yml up -d --build \
-  postgres minio minio-init valkey mailpit migrate db-storage-guard worker \
-  sftp-ingest-data-init api sftp-ingest
+for attempt in 1 2 3 4 5; do
+  if "${DC[@]}" -f docker-compose.yml -f docker-compose.ci.yml up -d --build \
+    postgres minio minio-init valkey mailpit migrate db-storage-guard worker \
+    sftp-ingest-data-init api sftp-ingest; then
+    break
+  fi
+  if [ "$attempt" -eq 5 ]; then
+    echo "compose up failed after ${attempt} attempts"
+    exit 1
+  fi
+  echo "compose up failed (attempt ${attempt}, often Docker Hub rate limit), retrying…"
+  sleep $((attempt * 20))
+done
 
 MIGRATE_CID="$("${DC[@]}" -f docker-compose.yml -f docker-compose.ci.yml ps -aq migrate 2>/dev/null | head -1 || true)"
 if [ -n "${MIGRATE_CID}" ]; then

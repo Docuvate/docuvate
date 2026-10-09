@@ -8,6 +8,7 @@ import {
   textFromExtractionBlocks,
 } from '../../lib/extractionLayout';
 import { fetchDocumentLayoutTypst } from '../../lib/api';
+import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu';
@@ -68,7 +69,7 @@ export function ExtractedTextPanel({
   documentTitle,
 }: ExtractedTextPanelProps) {
   const { t } = useTranslation();
-  const { pushError } = useToastNotify();
+  const { pushError, pushSuccess } = useToastNotify();
   const [copyHint, setCopyHint] = useState<string | null>(null);
   const [editingBlockIndex, setEditingBlockIndex] = useState<number | null>(null);
   const [contentMode, setContentMode] = useState<ContentMode>('text');
@@ -145,33 +146,51 @@ export function ExtractedTextPanel({
     setExportMenuOpen(false);
   }, [copyText, markdownSource, t]);
 
-  const downloadTypst = useCallback(async () => {
-    if (!documentId) return;
-    try {
-      const { typst } = await fetchDocumentLayoutTypst(documentId);
-      const blob = new Blob([typst], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      const safeTitle = (documentTitle ?? 'document').replace(/[^\wäöüÄÖÜß.-]+/g, '-').slice(0, 80);
-      a.download = `${safeTitle}-layout.typ`;
-      a.click();
-      window.setTimeout(() => URL.revokeObjectURL(url), 0);
-      setExportMenuOpen(false);
-    } catch {
-      pushError(t('documents.layoutExportTypstFailed'));
-    }
-  }, [documentId, documentTitle, pushError, t]);
+  const downloadTypst = useCallback(
+    async (mode: 'exakt' | 'semantisch') => {
+      if (!documentId) return;
+      try {
+        const { typst, reconstructionReliable, unreliableReason } = await fetchDocumentLayoutTypst(
+          documentId,
+          mode
+        );
+        const blob = new Blob([typst], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const safeTitle = (documentTitle ?? 'document').replace(/[^\wäöüÄÖÜß.-]+/g, '-').slice(0, 80);
+        const suffix = mode === 'semantisch' ? '-semantisch' : '-exakt';
+        a.download = `${safeTitle}-layout${suffix}.typ`;
+        a.click();
+        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+        setExportMenuOpen(false);
+        if (!reconstructionReliable) {
+          pushSuccess(typstExportDegradedMessage(t, unreliableReason));
+        }
+      } catch {
+        pushError(t('documents.layoutExportTypstFailed'));
+      }
+    },
+    [documentId, documentTitle, pushError, pushSuccess, t]
+  );
 
   const exportMenuItems = useMemo((): ContextMenuEntry[] => {
     const items: ContextMenuEntry[] = [];
     if (hasLayoutIr) {
       items.push({
         kind: 'item',
-        id: 'export-typst',
-        label: t('documents.layoutExportTypst'),
+        id: 'export-typst-semantisch',
+        label: t('documents.layoutExportTypstSemantisch'),
         onSelect: () => {
-          void downloadTypst();
+          void downloadTypst('semantisch');
+        },
+      });
+      items.push({
+        kind: 'item',
+        id: 'export-typst-exakt',
+        label: t('documents.layoutExportTypstExakt'),
+        onSelect: () => {
+          void downloadTypst('exakt');
         },
       });
     }

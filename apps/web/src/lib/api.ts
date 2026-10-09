@@ -192,10 +192,19 @@ export async function fetchDocumentLayoutHtml(
   return request(`/documents/${documentId}/layout-html`);
 }
 
+export type LayoutTypstExportMode = 'exakt' | 'semantisch';
+
 export async function fetchDocumentLayoutTypst(
-  documentId: string
-): Promise<{ typst: string; reconstructionReliable: boolean; unreliableReason?: string | null }> {
-  return request(`/documents/${documentId}/layout-typst`);
+  documentId: string,
+  mode: LayoutTypstExportMode = 'exakt'
+): Promise<{
+  typst: string;
+  exportMode: LayoutTypstExportMode;
+  reconstructionReliable: boolean;
+  unreliableReason?: string | null;
+}> {
+  const query = mode === 'exakt' ? '' : `?mode=${encodeURIComponent(mode)}`;
+  return request(`/documents/${documentId}/layout-typst${query}`);
 }
 
 export async function updateDocument(
