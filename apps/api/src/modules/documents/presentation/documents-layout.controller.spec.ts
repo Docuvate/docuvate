@@ -108,11 +108,13 @@ describe('DocumentsController layout routes', () => {
   it('returns layout Typst envelope', async () => {
     getDocumentLayoutTypst.execute.mockResolvedValue({
       typst: '#set page(margin: 0pt)',
+      exportMode: 'semantisch',
       reconstructionReliable: false,
       unreliableReason: 'unsupported_script',
     });
-    await expect(controller.layoutTypst(session, subject, 'doc-1')).resolves.toEqual({
+    await expect(controller.layoutTypst(session, subject, 'doc-1', 'semantisch')).resolves.toEqual({
       typst: '#set page(margin: 0pt)',
+      exportMode: 'semantisch',
       reconstructionReliable: false,
       unreliableReason: 'unsupported_script',
     });

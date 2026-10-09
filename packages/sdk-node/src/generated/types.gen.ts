@@ -543,6 +543,7 @@ export type LayoutIrWidgetDto = {
 
 export type LayoutTypstResponseDto = {
     typst: string;
+    exportMode: 'exakt' | 'semantisch';
     reconstructionReliable: boolean;
     unreliableReason?: string;
 };
@@ -2643,7 +2644,9 @@ export type GetDocumentLayoutTypstData = {
     path: {
         id: string;
     };
-    query?: never;
+    query?: {
+        mode?: unknown;
+    };
     url: '/documents/{id}/layout-typst';
 };
 

@@ -191,11 +191,19 @@ export class DocumentsController {
   async layoutTypst(
     @Session() session: AuthSession,
     @AuthSubject() subject: AuthorizationSubject,
-    @Param('id') id: string
+    @Param('id') id: string,
+    @Query('mode') mode: 'exakt' | 'semantisch' | undefined
   ): Promise<LayoutTypstResponseDto> {
-    const result = await this.getDocumentLayoutTypst.execute(id, session.user.id, subject);
+    const exportMode = mode === 'semantisch' ? 'semantisch' : 'exakt';
+    const result = await this.getDocumentLayoutTypst.execute(
+      id,
+      session.user.id,
+      subject,
+      exportMode
+    );
     return {
       typst: result.typst,
+      exportMode: result.exportMode,
       reconstructionReliable: result.reconstructionReliable,
       unreliableReason: result.unreliableReason,
     };

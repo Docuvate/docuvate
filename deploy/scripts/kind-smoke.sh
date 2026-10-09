@@ -42,6 +42,7 @@ run_kind version | tee "$ART/kind-version.txt"
 
 start_registry() {
   run_docker rm -f "$REG_CONTAINER" 2>/dev/null || true
+  bash "$ROOT/scripts/ci/docker-pull-with-retry.sh" "$REGISTRY_IMAGE"
   run_docker run -d --restart=always -p "127.0.0.1:5001:5000" --name "$REG_CONTAINER" "$REGISTRY_IMAGE"
 }
 
@@ -57,8 +58,15 @@ connect_registry_to_kind() {
 pull_push() {
   local upstream="$1"
   local repo_tag="$2"
-  run_docker pull --platform linux/amd64 "$upstream"
-  run_docker tag "$upstream" "${REG_HOST}/${repo_tag}"
+  bash "$ROOT/scripts/ci/docker-pull-with-retry.sh" "$upstream"
+  local src="$upstream"
+  if [[ "$upstream" == *@sha256:* ]]; then
+    local tag_only="${upstream%%@sha256:*}"
+    if run_docker image inspect "$tag_only" >/dev/null 2>&1; then
+      src="$tag_only"
+    fi
+  fi
+  run_docker tag "$src" "${REG_HOST}/${repo_tag}"
   run_docker push "${REG_HOST}/${repo_tag}"
 }
 

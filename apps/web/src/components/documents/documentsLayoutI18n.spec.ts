@@ -7,6 +7,8 @@ import en from '../../i18n/locales/en.json';
 const LAYOUT_RENDERED_KEYS = [
   'documents.extractedTextCopyPlain',
   'documents.layoutExportTypst',
+  'documents.layoutExportTypstSemantisch',
+  'documents.layoutExportTypstExakt',
   'documents.layoutIrHtmlFailedBody',
 ] as const;
 

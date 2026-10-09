@@ -103,6 +103,7 @@ describe('layout document use cases', () => {
     );
     const result = await typstUc.execute(docId, userId, subject);
     expect(result.typst).toContain('page');
+    expect(result.exportMode).toBe('exakt');
     expect(result.reconstructionReliable).toBe(true);
     vi.unstubAllGlobals();
   });

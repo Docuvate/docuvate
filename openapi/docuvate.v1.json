@@ -6180,6 +6180,12 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "mode",
+            "required": false,
+            "in": "query",
+            "schema": {}
           }
         ],
         "responses": {
@@ -12205,6 +12211,14 @@
           "typst": {
             "type": "string"
           },
+          "exportMode": {
+            "enum": [
+              "exakt",
+              "semantisch"
+            ],
+            "type": "string",
+            "default": "exakt"
+          },
           "reconstructionReliable": {
             "type": "boolean",
             "default": true
@@ -12216,6 +12230,7 @@
         },
         "required": [
           "typst",
+          "exportMode",
           "reconstructionReliable"
         ]
       },

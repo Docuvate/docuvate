@@ -3,6 +3,18 @@
 
 DOCUVATE_PG_IMAGE="${DOCUVATE_PG_IMAGE:-postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873}"
 
+docuvate_ci_pg_run_image() {
+  local img="$DOCUVATE_PG_IMAGE"
+  if [[ "$img" == *@sha256:* ]]; then
+    local tag="${img%%@sha256:*}"
+    if docker image inspect "$tag" >/dev/null 2>&1; then
+      printf '%s' "$tag"
+      return 0
+    fi
+  fi
+  printf '%s' "$img"
+}
+
 docuvate_ci_pick_host_port() {
   python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1", 0)); print(s.getsockname()[1]); s.close()'
 }
@@ -14,6 +26,8 @@ docuvate_ci_start_postgres() {
   host_port="$(docuvate_ci_pick_host_port)"
   local pg_cid
   local label_run="${DOCUVATE_LOCAL_CI_RUN_ID:-unknown}"
+  local run_image
+  run_image="$(docuvate_ci_pg_run_image)"
   pg_cid="$(
     docker run -d --rm \
       --label "docuvate.local-ci.run-id=${label_run}" \
@@ -22,7 +36,7 @@ docuvate_ci_start_postgres() {
       -e POSTGRES_PASSWORD=docuvate \
       -e POSTGRES_DB=docuvate \
       -p "127.0.0.1:${host_port}:5432" \
-      "$DOCUVATE_PG_IMAGE"
+      "$run_image"
   )"
   printf -v "$cid_var" '%s' "$pg_cid"
   export "$cid_var"

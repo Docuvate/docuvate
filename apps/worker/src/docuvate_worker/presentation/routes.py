@@ -381,7 +381,8 @@ def layout_render_typst(
 ) -> LayoutRenderTypstResponse:
     _require_worker_secret(x_worker_secret)
     from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
-    from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typst
+    from docuvate_worker.infrastructure.layout.typst_export import layout_ir_to_typst_for_mode
+    from docuvate_worker.infrastructure.layout.typst_export_mode import parse_typst_export_mode
 
     wire = body.layout_ir.model_dump()
     from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
@@ -391,7 +392,8 @@ def layout_render_typst(
 
     try:
         doc = document_from_dict(wire)
-        typst = layout_ir_to_typst(doc)
+        export_mode = parse_typst_export_mode(body.mode)
+        typst = layout_ir_to_typst_for_mode(doc, export_mode)
         fidelity = assess_layout_reconstruction(
             doc,
             decode_optional_pdf(body.original_pdf_base64),
