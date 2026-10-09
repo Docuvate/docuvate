@@ -19,7 +19,8 @@ You hereby grant to Thomas Faust and Docuvate a perpetual, worldwide, non-exclus
 royalty-free, irrevocable copyright license to reproduce, prepare derivative works of, publicly
 display, publicly perform, sublicense, and distribute Your Contributions and such derivative
 works under any license(s) We use for the project, including the Sustainable Use License,
-the Docuvate Enterprise License, and permissive licenses (such as MIT) for SDK packages.
+licenses for separate commercial Enterprise products, and permissive licenses (such as MIT)
+for SDK packages.
 
 You grant the same patent license as in the Apache Software License Version 2.0, Section 3,
 with respect to any patent claims licensable by You that are necessarily infringed by Your

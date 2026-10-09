@@ -3,5 +3,4 @@ cla:
   message: |
     Thank you for contributing to Docuvate. Please read [CLA.md](https://github.com/Docuvate/docuvate/blob/main/CLA.md) and sign the Contributor License Agreement so we can accept your pull request.
   allowlist:
-    - Docuvate Split Tool
     - tafaust

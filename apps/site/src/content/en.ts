@@ -51,7 +51,8 @@ export const enContent: SiteContent = {
       title: 'License (Community & Enterprise)',
       intro: [
         'Docuvate is source-available (fair-code), not OSI “open source”. The Community Edition uses the Sustainable Use License 1.0 (SUL): free for private and internal business self-hosting on infrastructure you control.',
-        'Enterprise features and Docuvate Cloud require a commercial license (LICENSE_EE.md). SDKs (@docuvate/sdk, Flutter package docuvate) are MIT-licensed.',
+        'Docuvate Enterprise and Docuvate Cloud are separate commercial products (private repository) built on this Community Edition. This repository is the complete CE core for self-hosters.',
+        'SDKs (@docuvate/sdk, Flutter package docuvate) are MIT-licensed.',
         'Versions through commit c3212765 (release 0.1.0) were AGPL-3.0; newer commits on main use the fair-code model.',
       ],
       faqHeading: 'License FAQ',
@@ -78,7 +79,8 @@ export const enContent: SiteContent = {
         },
       ],
       repoLinkLabel: 'LICENSE (Community, SUL 1.0) in the repository',
-      eeLinkLabel: 'LICENSE_EE.md (Enterprise)',
+      commercialLabel: 'Enterprise & Cloud (commercial)',
+      commercialUrl: 'https://docuvate.de',
     },
   },
   landing: {

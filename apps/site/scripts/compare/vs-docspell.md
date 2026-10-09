@@ -17,7 +17,7 @@ Docspell ist ein ausgereifter Dokumenten-Organizer mit klassischem Machine Learn
 | # | Kriterium | Docuvate | Docspell |
 |---|---|---|---|
 | K1 | Zielgruppe | Teams, Selbständige und Entwickler, die Dokumente selbst hosten und per API anbinden wollen [W1] | Persönlicher Dokumenten-Organizer für Haushalte, Familien und kleine Gruppen/Firmen [D1] |
-| K2 | Lizenz | Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes betriebliches Self-Hosting; kein Managed-Service/White-Label/Embedding in verkaufte Produkte. Enterprise/Cloud: LICENSE_EE.md [W1] [R1] | AGPL-3.0 [D1] [D3] |
+| K2 | Lizenz | Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes Self-Hosting (privat/intern). Enterprise/Cloud: separates kommerzielles Produkt auf Basis der CE (docuvate.de), nicht in diesem Repo [W1] [R1] | AGPL-3.0 [D1] [D3] |
 | K3 | Betrieb | Nur self-hosted: Docker Compose; Kubernetes (Kustomize/Helm) laut Repo [W2] [R1] | Self-hosted (Docker Compose, weitere Pakete) [D2] |
 | K4 | Kosten | Kostenlos (Community). Keine Preise für kommerzielle Editionen veröffentlicht [W1] [R1] | Kostenlos [D1] |
 | K5 | Reife & Pflege | Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview [R1] [W3] | Letztes Release v0.43.0 vom 15.03.2025; Nightly-Builds und Commits weiterhin (Oktober 2026) [D3] |

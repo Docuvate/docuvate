@@ -156,11 +156,13 @@ Use Docuvate headless behind your own apps and automations.
 | Edition                     | What you get                                                                            | License                                                                                                  |
 | --------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | **Community (self-hosted)** | Full core product: OCR, labels, search, chat, connectors, API                           | [Sustainable Use License 1.0](./LICENSE) — free private and internal business use on your infrastructure |
-| **Enterprise + Cloud**      | Business features, vendor-hosted SaaS, support (see [docuvate.de](https://docuvate.de)) | [Docuvate Enterprise License](./LICENSE_EE.md)                                                           |
+| **Enterprise + Cloud**      | Business features, vendor-hosted SaaS, support — separate product built on CE ([docuvate.de](https://docuvate.de)) | Commercial license (not in this repository)                                                              |
 
 Docuvate is **source-available** / **fair-code**, not OSI “open source”. Official SDKs ([`packages/sdk-node`](packages/sdk-node), [`packages/sdk-flutter`](packages/sdk-flutter)) are **MIT**.
 
 **Historical:** Commits at or before `c3212765e196269b3c47a5e597897553c17824dd` (release **0.1.0**) were **AGPL-3.0**.
+
+Commercial builds extend CE via optional Nest extension modules (`DOCUVATE_EXTENSION_MODULES` / `DOCUVATE_EXTENSION_PATH` in [`ExtensionHostModule`](apps/api/src/shared/infrastructure/extensions/extension-host.module.ts)); this repository does not ship those modules.
 
 ## Documentation
 
@@ -191,4 +193,4 @@ Report vulnerabilities privately: [SECURITY.md](SECURITY.md).
 
 ## License
 
-Community Edition: [LICENSE](LICENSE) (Sustainable Use License 1.0). Enterprise: [LICENSE_EE.md](LICENSE_EE.md). SDKs: MIT. Trademarks: [TRADEMARKS.md](TRADEMARKS.md).
+Community Edition: [LICENSE](LICENSE) (Sustainable Use License 1.0). Enterprise and Cloud are offered separately under commercial terms ([docuvate.de](https://docuvate.de)). SDKs: MIT. Trademarks: [TRADEMARKS.md](TRADEMARKS.md).

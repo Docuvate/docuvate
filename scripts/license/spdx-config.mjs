@@ -1,4 +1,4 @@
-/** Shared rules for Docuvate SPDX header tooling. */
+/** Shared rules for Docuvate SPDX header tooling (Community Edition repository only). */
 
 export const ROOT = new URL('../..', import.meta.url).pathname;
 
@@ -31,18 +31,14 @@ export const SCAN_ROOTS = [
   'packages/testing/src',
 ];
 
-export const MIT_PATH_PREFIXES = ['packages/sdk-node/', 'packages/sdk-flutter/lib/'];
-
-export function isEePath(relPath) {
-  return relPath.includes('/ee/') || relPath.includes('.ee.');
-}
+export const MIT_PATH_PREFIXES = [
+  'packages/sdk-node/',
+  'packages/sdk-flutter/lib/',
+];
 
 export function licenseIdForPath(relPath) {
   if (MIT_PATH_PREFIXES.some((prefix) => relPath.startsWith(prefix))) {
     return 'MIT';
-  }
-  if (isEePath(relPath)) {
-    return 'LicenseRef-Docuvate-EE';
   }
   return 'LicenseRef-Docuvate-SUL-1.0';
 }

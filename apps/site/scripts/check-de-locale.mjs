@@ -17,6 +17,7 @@ const ALLOW_IDENTICAL = new Set([
   'API',
   'SDKs',
   'Styles',
+  'https://docuvate.de',
 ]);
 
 const FORBIDDEN_IN_DE = [

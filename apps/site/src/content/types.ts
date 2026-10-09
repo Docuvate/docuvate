@@ -184,7 +184,8 @@ export type SiteContent = {
       faqHeading: string;
       faq: FaqItem[];
       repoLinkLabel: string;
-      eeLinkLabel: string;
+      commercialLabel: string;
+      commercialUrl: string;
     };
   };
   landing: LandingContent;

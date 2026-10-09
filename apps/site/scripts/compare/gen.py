@@ -81,7 +81,7 @@ SOURCES = {
 TOOLS = {
 "docuvate": dict(name="Docuvate", short="Docuvate", rows={
  "K1":("i","Teams, Selbständige und Entwickler, die Dokumente selbst hosten und per API anbinden wollen","W1"),
- "K2":("i","Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes betriebliches Self-Hosting; kein Managed-Service/White-Label/Embedding in verkaufte Produkte. Enterprise/Cloud: LICENSE_EE.md","W1,R1"),
+ "K2":("i","Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes Self-Hosting (privat/intern). Enterprise/Cloud: separates kommerzielles Produkt auf Basis der CE (docuvate.de), nicht in diesem Repo","W1,R1"),
  "K3":("i","Nur self-hosted: Docker Compose; Kubernetes (Kustomize/Helm) laut Repo","W2,R1"),
  "K4":("i","Kostenlos (Community). Keine Preise für kommerzielle Editionen veröffentlicht","W1,R1"),
  "K5":("i","Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview","R1,W3"),

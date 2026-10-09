@@ -77,8 +77,8 @@ You must sign the [Contributor License Agreement (CLA)](CLA.md) before we can me
 The CLA Assistant bot will comment on your PR with a link to sign electronically.
 
 The CLA grants Thomas Faust the rights to license your contributions under the Community Edition
-[Sustainable Use License](./LICENSE), the [Enterprise License](./LICENSE_EE.md) where applicable, and
-permissive licenses (such as MIT) for SDK packages. If your employer requires a corporate agreement,
+[Sustainable Use License](./LICENSE), under commercial licenses used for separate Enterprise
+products, and under permissive licenses (such as MIT) for SDK packages. If your employer requires a corporate agreement,
 open a [GitHub issue](https://github.com/Docuvate/docuvate/issues) before large contributions.
 
 ## Secret scanning

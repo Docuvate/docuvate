@@ -26,11 +26,8 @@ import { ExtensionHostModule } from './shared/infrastructure/extensions/extensio
 import { SearchModule } from './modules/search/search.module.js';
 import { SftpIngressModule } from './modules/sftp-ingress/sftp-ingress.module.js';
 import { ChatModule } from './modules/chat/chat.module.js';
-import { EeModule } from './ee/ee.module.js';
-
 @Module({
   imports: [
-    EeModule,
     ExtensionHostModule.register(),
     OpenapiInfrastructureModule,
     DatabaseModule,

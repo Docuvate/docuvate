@@ -22,7 +22,7 @@ describe('ExtensionHostModule', () => {
   });
 
   it('refuses to start when extension env is set in community build', () => {
-    process.env['DOCUVATE_EXTENSION_MODULES'] = 'FakeEeModule';
+    process.env['DOCUVATE_EXTENSION_MODULES'] = 'FakeExtensionModule';
     expect(() => ExtensionHostModule.register()).toThrow(/Community Edition/);
   });
 });

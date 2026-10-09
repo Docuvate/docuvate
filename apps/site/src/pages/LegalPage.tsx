@@ -5,7 +5,6 @@ import { legalConfig } from '../config/legalConfig';
 import { useLocale } from '../context/LocaleContext';
 
 const GITHUB_LICENSE_URL = 'https://github.com/Docuvate/docuvate/blob/main/LICENSE';
-const GITHUB_EE_LICENSE_URL = 'https://github.com/Docuvate/docuvate/blob/main/LICENSE_EE.md';
 
 export function ImprintPage() {
   const { content } = useLocale();
@@ -60,8 +59,8 @@ export function LicensePage() {
               {copy.repoLinkLabel}
             </a>
             {' · '}
-            <a href={GITHUB_EE_LICENSE_URL} target="_blank" rel="noreferrer">
-              {copy.eeLinkLabel}
+            <a href={copy.commercialUrl} target="_blank" rel="noreferrer">
+              {copy.commercialLabel}
             </a>
           </p>
           <h2 className="landing-section-title legal-page-subtitle">{copy.faqHeading}</h2>

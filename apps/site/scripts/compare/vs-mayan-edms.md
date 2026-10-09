@@ -17,7 +17,7 @@ Mayan EDMS ist ein umfangreiches Open-Source-DMS für Organisationen mit Prozess
 | # | Kriterium | Docuvate | Mayan EDMS |
 |---|---|---|---|
 | K1 | Zielgruppe | Teams, Selbständige und Entwickler, die Dokumente selbst hosten und per API anbinden wollen [W1] | Organisationen jeder Größe mit Bedarf an DMS-Prozessen (Behörden, Industrie, Forschung) [M1] |
-| K2 | Lizenz | Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes betriebliches Self-Hosting; kein Managed-Service/White-Label/Embedding in verkaufte Produkte. Enterprise/Cloud: LICENSE_EE.md [W1] [R1] | GPL-2.0; Name/Logo als Marke geschützt [M3] |
+| K2 | Lizenz | Sustainable Use License 1.0 (Community, source-available/fair-code): kostenlos für privates und internes Self-Hosting (privat/intern). Enterprise/Cloud: separates kommerzielles Produkt auf Basis der CE (docuvate.de), nicht in diesem Repo [W1] [R1] | GPL-2.0; Name/Logo als Marke geschützt [M3] |
 | K3 | Betrieb | Nur self-hosted: Docker Compose; Kubernetes (Kustomize/Helm) laut Repo [W2] [R1] | Self-hosted (Docker Compose, VM, Hardware, Cloud); kommerzieller Support durch Mayan EDMS LLC [M1] [M2] |
 | K4 | Kosten | Kostenlos (Community). Keine Preise für kommerzielle Editionen veröffentlicht [W1] [R1] | Software kostenlos; Support-/Service-Pakete kostenpflichtig (Preise auf Anfrage/nicht verifiziert) [M1] |
 | K5 | Reife & Pflege | Version 0.1.0; öffentliches Repo seit 08.10.2026; SDKs im Status Preview [R1] [W3] | Sehr reif (seit 2010); v4.12.2 vom 16.09.2026 [M1] [M4] |

@@ -9,10 +9,11 @@ Portions of the Docuvate software in this repository are licensed as follows:
   were distributed under **GNU Affero General Public License v3.0 (AGPL-3.0)**. That
   license continues to apply to those versions only; it does not apply to newer
   commits unless you remain on an older revision.
-- **Enterprise Edition (EE):** Source under an `ee/` directory segment (for example
-  `apps/api/src/ee/`) or in a path or filename containing `.ee.` is **not** licensed
-  under the Sustainable Use License. Production use requires a valid Docuvate Enterprise
-  License as defined in [LICENSE_EE.md](./LICENSE_EE.md).
+- **Enterprise Edition:** Docuvate Enterprise and Docuvate Cloud are **separate commercial
+  products** (private repository and packages) that **depend on and include** this Community
+  Edition. They are not part of this repository. Production use of Enterprise features or
+  vendor-hosted Cloud requires a commercial agreement with Thomas Faust; see
+  [docuvate.de](https://docuvate.de).
 - **SDKs:** The packages `packages/sdk-node` and `packages/sdk-flutter` (and their
   `LICENSE` files) are under the **MIT License** so you may embed them in your
   applications freely.
