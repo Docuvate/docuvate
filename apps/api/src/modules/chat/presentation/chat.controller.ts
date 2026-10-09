@@ -111,6 +111,7 @@ export class ChatController {
   @ApiDocuvateRoute({ operationId: 'cancelLibraryChatGeneration', summary: 'Cancel library chat generation' })
   async cancel(
     @Session() session: AuthSession,
+    @Param('threadId') _threadId: string,
     @Param('messageId') messageId: string
   ) {
     await this.cancelGeneration.executeForMessage(messageId, session.user.id);
