@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as pdfjs from 'pdfjs-dist';
 import { formatUserFacingError } from '../../lib/apiErrors';
+import { computeVirtualPageWindow, layoutOverlayPercentStyles } from '../../lib/pdfViewerVirtual';
 import { Button } from '../ui/Button';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${import.meta.env.BASE_URL}pdf.worker.min.mjs`;
@@ -49,6 +50,7 @@ interface PdfViewerProps {
   activeLayoutOverlayId?: string | null;
   onLayoutOverlaySelect?: (id: string) => void;
   onLayoutOverlayHover?: (overlay: PdfLayoutOverlay | null) => void;
+  onLayoutOverlayClear?: () => void;
 }
 
 const DEFAULT_PAGE_SCALE = 1.25;
@@ -115,11 +117,13 @@ function appendLayoutOverlays(
       overlay.id === activeId ? ' pdf-layout-overlay-active' : ''
     }`;
     mark.dataset.overlayId = overlay.id;
-    mark.setAttribute('aria-label', overlay.label);
-    mark.style.left = `${overlay.x * 100}%`;
-    mark.style.top = `${overlay.y * 100}%`;
-    mark.style.width = `${Math.max(overlay.width * 100, 0.4)}%`;
-    mark.style.height = `${Math.max(overlay.height * 100, 0.35)}%`;
+    if (overlay.label) mark.setAttribute('aria-label', overlay.label);
+    const box = layoutOverlayPercentStyles(overlay);
+    mark.style.left = box.left;
+    mark.style.top = box.top;
+    mark.style.width = box.width;
+    mark.style.height = box.height;
+    mark.tabIndex = 0;
     if (onSelect) {
       mark.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -228,6 +232,7 @@ export function PdfViewer({
   activeLayoutOverlayId = null,
   onLayoutOverlaySelect,
   onLayoutOverlayHover,
+  onLayoutOverlayClear,
   paginated = true,
   fitWidth = false,
   page: controlledPage,
@@ -259,6 +264,11 @@ export function PdfViewer({
   const [internalPage, setInternalPage] = useState(1);
   const [renderedPages, setRenderedPages] = useState(0);
   const [docToken, setDocToken] = useState(0);
+  const [pageSizes, setPageSizes] = useState<{ width: number; height: number }[]>([]);
+  const [virtualRenderWindow, setVirtualRenderWindow] = useState<Set<number>>(() => new Set([1]));
+  const virtualSlotsBuiltRef = useRef(false);
+  const virtualIoRef = useRef<IntersectionObserver | null>(null);
+  const lastVirtualLayoutKeyRef = useRef<string | null>(null);
 
   const isControlled = controlledPage !== undefined && onPageChange !== undefined;
   const currentPage = isControlled ? controlledPage : internalPage;
@@ -293,6 +303,8 @@ export function PdfViewer({
     setError(null);
     setPageCount(0);
     setRenderedPages(0);
+    setPageSizes([]);
+    virtualSlotsBuiltRef.current = false;
     if (!isControlled) {
       setInternalPage(1);
     }
@@ -307,6 +319,16 @@ export function PdfViewer({
 
         pdfDocRef.current = pdf;
         setPageCount(pdf.numPages);
+        const sizes: { width: number; height: number }[] = [];
+        for (let i = 1; i <= pdf.numPages; i += 1) {
+          const page = await pdf.getPage(i);
+          const vp = page.getViewport({ scale: 1 });
+          sizes.push({ width: vp.width, height: vp.height });
+        }
+        if (cancelled) return;
+        setPageSizes(sizes);
+        setVirtualRenderWindow(computeVirtualPageWindow([1], pdf.numPages));
+        virtualSlotsBuiltRef.current = false;
         setDocToken((t) => t + 1);
       } catch (err) {
         if (!cancelled) {
@@ -356,6 +378,7 @@ export function PdfViewer({
   }, [fitWidth, sourceKey]);
 
   useEffect(() => {
+    if (!paginated) return;
     const pagesHost = pagesRef.current;
     const pdf = pdfDocRef.current;
     if (!pagesHost || !pdf || pageCount < 1 || docToken === 0) return;
@@ -369,12 +392,12 @@ export function PdfViewer({
 
         const scale = await resolveRenderScale(
           pdf,
-          paginated ? currentPage : 1,
+          currentPage,
           fitWidth,
           containerWidth
         );
 
-        const renderKey = `${docToken}:${currentPage}:${Math.round(scale * 1000)}:${containerWidth ?? 0}:${highlightKey}:${overlayKey}:${paginated}`;
+        const renderKey = `${docToken}:${currentPage}:${Math.round(scale * 1000)}:${containerWidth ?? 0}:${highlightKey}:${overlayKey}:paginated`;
         if (lastPageRenderKeyRef.current === renderKey && pagesHost.childElementCount > 0) {
           return;
         }
@@ -382,52 +405,25 @@ export function PdfViewer({
 
         if (cancelled) return;
         const hadPages = pagesHost.childElementCount > 0;
-        if (paginated && !hadPages) setLoading(true);
+        if (!hadPages) setLoading(true);
 
-        if (paginated) {
-          const pdfPage = await pdf.getPage(currentPage);
-          if (cancelled) return;
-          const wrap = await renderPdfPage(
-            pdfPage,
-            currentPage,
-            highlights,
-            layoutOverlays,
-            layoutOverlayEnabled,
-            activeLayoutOverlayId,
-            scale,
-            (p, nx, ny) => onPageClickRef.current?.(p, nx, ny),
-            (id) => onLayoutOverlaySelectRef.current?.(id),
-            (o) => onLayoutOverlayHoverRef.current?.(o)
-          );
-          if (cancelled) return;
-          pagesHost.replaceChildren(wrap);
-          setRenderedPages(1);
-        } else {
-          const pageNums = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
-          const pages = await Promise.all(pageNums.map((num) => pdf.getPage(num)));
-          if (cancelled) return;
-
-          const wraps = await Promise.all(
-            pages.map((p, index) =>
-              renderPdfPage(
-                p,
-                index + 1,
-                highlights,
-                layoutOverlays,
-                layoutOverlayEnabled,
-                activeLayoutOverlayId,
-                scale,
-                (pg, nx, ny) => onPageClickRef.current?.(pg, nx, ny),
-                (id) => onLayoutOverlaySelectRef.current?.(id),
-                (o) => onLayoutOverlayHoverRef.current?.(o)
-              )
-            )
-          );
-          if (cancelled) return;
-
-          pagesHost.replaceChildren(...wraps);
-          setRenderedPages(pdf.numPages);
-        }
+        const pdfPage = await pdf.getPage(currentPage);
+        if (cancelled) return;
+        const wrap = await renderPdfPage(
+          pdfPage,
+          currentPage,
+          highlights,
+          layoutOverlays,
+          layoutOverlayEnabled,
+          activeLayoutOverlayId,
+          scale,
+          (p, nx, ny) => onPageClickRef.current?.(p, nx, ny),
+          (id) => onLayoutOverlaySelectRef.current?.(id),
+          (o) => onLayoutOverlayHoverRef.current?.(o)
+        );
+        if (cancelled) return;
+        pagesHost.replaceChildren(wrap);
+        setRenderedPages(1);
       } catch (err) {
         if (!cancelled) {
           setError(formatUserFacingError(err, 'errors.pdfPageLoadFailed'));
@@ -457,7 +453,185 @@ export function PdfViewer({
   ]);
 
   useEffect(() => {
+    if (paginated) return;
+    const pagesHost = pagesRef.current;
+    const pdf = pdfDocRef.current;
+    if (!pagesHost || !pdf || pageCount < 1 || docToken === 0) return;
+    if (pageSizes.length < pageCount) return;
+    if (fitWidth && containerWidth == null) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth);
+        const layoutKey = `${docToken}:${Math.round(scale * 1000)}:${containerWidth ?? 0}:${pageCount}`;
+        if (lastVirtualLayoutKeyRef.current === layoutKey && virtualSlotsBuiltRef.current) {
+          return;
+        }
+        lastVirtualLayoutKeyRef.current = layoutKey;
+        pagesHost.replaceChildren();
+        for (let pageNum = 1; pageNum <= pageCount; pageNum += 1) {
+          const size = pageSizes[pageNum - 1];
+          const slot = document.createElement('div');
+          slot.className = 'pdf-page-slot';
+          slot.dataset.page = String(pageNum);
+          if (size && size.width > 0) {
+            slot.style.width = `${size.width * scale}px`;
+            slot.style.minHeight = `${size.height * scale}px`;
+          }
+          pagesHost.appendChild(slot);
+        }
+        virtualSlotsBuiltRef.current = true;
+        setVirtualRenderWindow(computeVirtualPageWindow([currentPage], pageCount));
+      } catch (err) {
+        if (!cancelled) {
+          setError(formatUserFacingError(err, 'errors.pdfPageLoadFailed'));
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    paginated,
+    docToken,
+    pageCount,
+    pageSizes,
+    fitWidth,
+    containerWidth,
+    currentPage,
+    t,
+  ]);
+
+  useEffect(() => {
+    if (paginated) return;
+    const pagesHost = pagesRef.current;
+    const pdf = pdfDocRef.current;
+    if (!pagesHost || !pdf || pageCount < 1 || docToken === 0) return;
+    if (!virtualSlotsBuiltRef.current) return;
+    if (fitWidth && containerWidth == null) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const highlights = highlightBlocks ?? NO_HIGHLIGHTS;
+        const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth);
+        const renderStamp = `${Math.round(scale * 1000)}:${overlayKey}:${highlightKey}`;
+
+        for (let pageNum = 1; pageNum <= pageCount; pageNum += 1) {
+          const slot = pagesHost.querySelector<HTMLElement>(
+            `.pdf-page-slot[data-page="${pageNum}"]`
+          );
+          if (!slot) continue;
+          if (!virtualRenderWindow.has(pageNum)) {
+            if (slot.dataset.renderStamp) {
+              slot.replaceChildren();
+              delete slot.dataset.renderStamp;
+            }
+            continue;
+          }
+          if (slot.dataset.renderStamp === renderStamp && slot.childElementCount > 0) {
+            continue;
+          }
+          const pdfPage = await pdf.getPage(pageNum);
+          if (cancelled) return;
+          const wrap = await renderPdfPage(
+            pdfPage,
+            pageNum,
+            highlights,
+            layoutOverlays,
+            layoutOverlayEnabled,
+            activeLayoutOverlayId,
+            scale,
+            (p, nx, ny) => onPageClickRef.current?.(p, nx, ny),
+            (id) => onLayoutOverlaySelectRef.current?.(id),
+            (o) => onLayoutOverlayHoverRef.current?.(o)
+          );
+          if (cancelled) return;
+          slot.replaceChildren(wrap);
+          slot.dataset.renderStamp = renderStamp;
+        }
+        if (!cancelled) {
+          setRenderedPages(virtualRenderWindow.size);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(formatUserFacingError(err, 'errors.pdfPageLoadFailed'));
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    paginated,
+    docToken,
+    pageCount,
+    virtualRenderWindow,
+    highlightKey,
+    highlightBlocks,
+    overlayKey,
+    layoutOverlays,
+    layoutOverlayEnabled,
+    activeLayoutOverlayId,
+    fitWidth,
+    containerWidth,
+    t,
+  ]);
+
+  useEffect(() => {
+    if (paginated || pageCount < 1) return;
+    const root = scrollRef.current;
+    const host = pagesRef.current;
+    if (!root || !host) return;
+
+    virtualIoRef.current?.disconnect();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = new Set<number>();
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const page = Number((entry.target as HTMLElement).dataset.page);
+          if (page > 0) visible.add(page);
+        }
+        if (visible.size === 0) return;
+        setVirtualRenderWindow((prev) => {
+          const next = computeVirtualPageWindow(visible, pageCount);
+          if (next.size === prev.size && [...next].every((p) => prev.has(p))) return prev;
+          return next;
+        });
+      },
+      { root, rootMargin: '120% 0px', threshold: 0.01 }
+    );
+    host.querySelectorAll('.pdf-page-slot').forEach((el) => observer.observe(el));
+    virtualIoRef.current = observer;
+    return () => observer.disconnect();
+  }, [paginated, pageCount, docToken, pageSizes.length]);
+
+  useEffect(() => {
+    if (paginated || pageCount < 1) return;
+    const host = pagesRef.current;
+    if (!host) return;
+    const slot = host.querySelector(`.pdf-page-slot[data-page="${currentPage}"]`);
+    slot?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [paginated, currentPage, pageCount, docToken]);
+
+  useEffect(() => {
+    if (!onLayoutOverlayClear) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onLayoutOverlayClear();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onLayoutOverlayClear]);
+
+  useEffect(() => {
     lastPageRenderKeyRef.current = null;
+    lastVirtualLayoutKeyRef.current = null;
   }, [sourceKey]);
 
   return (
@@ -510,7 +684,10 @@ export function PdfViewer({
         className={`pdf-viewer-scroll${fitWidth ? ' pdf-viewer-scroll-fit-width' : ''}`}
         ref={scrollRef}
       >
-        <div className="pdf-pages pdf-pages-single" ref={pagesRef} />
+        <div
+          className={`pdf-pages${paginated ? ' pdf-pages-single' : ''}`}
+          ref={pagesRef}
+        />
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   ExtractedField,
   LayoutIrBlock,
@@ -36,7 +38,6 @@ export interface LayoutOutlineEntry {
 export interface LayoutTableView {
   tableIndex: number;
   page: number;
-  title: string;
   columnCount: number;
   rows: string[][];
   overlayId: string;
@@ -88,7 +89,7 @@ export function buildLayoutOverlays(doc: LayoutIrDocument): LayoutOverlayRegion[
         width: clamp01(table.width),
         height: clamp01(table.height),
         kind: 'table',
-        label: `Tabelle ${tableIndex + 1}`,
+        label: '',
         tableIndex,
       });
       tableIndex += 1;
@@ -174,7 +175,6 @@ export function buildLayoutTables(
       views.push({
         tableIndex,
         page: table.page,
-        title: `Tabelle ${tableIndex + 1}`,
         columnCount: table.columnCount,
         rows: tableRowsToStrings(table),
         overlayId: overlay?.id ?? `table-${tableIndex}`,

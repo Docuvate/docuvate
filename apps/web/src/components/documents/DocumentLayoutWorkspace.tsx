@@ -1,4 +1,6 @@
-import { useCallback, useMemo, useState } from 'react';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DocumentDto, ExtractedField, ExtractionBlock } from '@docuvate/contracts';
 import { Card } from '../ui/Card';
@@ -103,25 +105,37 @@ export function DocumentLayoutWorkspace({
 
   const pdfOverlays: PdfLayoutOverlay[] = useMemo(
     () =>
-      overlays.map((o) => ({
-        id: o.id,
-        page: o.page,
-        x: o.x,
-        y: o.y,
-        width: o.width,
-        height: o.height,
-        kind: o.kind,
-        label: o.label,
-        value: o.value,
-      })),
-    [overlays]
+      overlays.map((o) => {
+        let label = o.label;
+        if (o.kind === 'table' && o.tableIndex != null) {
+          label = t('documents.layoutTableLabel', { n: o.tableIndex + 1 });
+        } else if (o.kind === 'field' && o.label) {
+          label = fieldLabelForKey(o.label);
+        }
+        return {
+          id: o.id,
+          page: o.page,
+          x: o.x,
+          y: o.y,
+          width: o.width,
+          height: o.height,
+          kind: o.kind,
+          label,
+          value: o.value,
+        };
+      }),
+    [fieldLabelForKey, overlays, t]
   );
 
   const onOverlaySelect = useCallback(
     (overlayId: string, page?: number) => {
       setActiveOverlayId(overlayId);
-      if (page) onViewerPageChange(page);
       const region = overlayRegionById(overlays, overlayId);
+      const targetPage = page ?? region?.page;
+      if (targetPage) onViewerPageChange(targetPage);
+      if (region?.kind === 'table') setSideTab('tables');
+      else if (region?.kind === 'heading') setSideTab('outline');
+      else if (region?.kind === 'field') setSideTab('fields');
       if (region?.blockIndex != null) {
         const block = blocks.find((b) => b.blockIndex === region.blockIndex);
         if (block) {
@@ -133,6 +147,16 @@ export function DocumentLayoutWorkspace({
     },
     [blocks, onActiveBlockIndexChange, onHighlightBlocks, onViewerPageChange, overlays]
   );
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && activeOverlayId) {
+        setActiveOverlayId(null);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeOverlayId]);
 
   const onPdfPageClick = useCallback(
     (page: number, nx: number, ny: number) => {
@@ -259,8 +283,10 @@ export function DocumentLayoutWorkspace({
                     activeLayoutOverlayId={activeOverlayId}
                     onLayoutOverlaySelect={(id) => onOverlaySelect(id)}
                     onLayoutOverlayHover={setHoverOverlay}
+                    onLayoutOverlayClear={() => setActiveOverlayId(null)}
                     page={viewerPage}
                     onPageChange={onViewerPageChange}
+                    paginated={false}
                     fitWidth
                     onPageClick={onPdfPageClick}
                   />

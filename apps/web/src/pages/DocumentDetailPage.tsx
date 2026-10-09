@@ -27,6 +27,7 @@ import {
   updateDocument,
 } from '../lib/api';
 import { buildCustomFieldDefMap, buildGlobalFieldLabelMap } from '../lib/labelFieldDisplay';
+import { humanizeFieldKey } from '../lib/humanizeFieldKey';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import { isExtractionPending } from '../lib/documentExtractionState';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
@@ -404,8 +405,8 @@ export function DocumentDetailPage() {
   }, [tags, globalFieldLabels]);
 
   const fieldLabelForKey = useCallback(
-    (key: string) => globalFieldLabels.get(key) ?? key,
-    [globalFieldLabels]
+    (key: string) => globalFieldLabels.get(key) ?? humanizeFieldKey(key, t),
+    [globalFieldLabels, t]
   );
 
   const onAcceptFieldSuggestion = useCallback((key: string, value: string) => {

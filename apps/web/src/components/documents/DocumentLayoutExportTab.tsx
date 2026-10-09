@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchDocumentLayoutTypst } from '../../lib/api';
@@ -28,6 +30,7 @@ export function DocumentLayoutExportTab({
   const { pushError, pushSuccess } = useToastNotify();
   const [previewTypst, setPreviewTypst] = useState<string | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewExpanded, setPreviewExpanded] = useState(false);
 
   const markdownSource = markdown?.trim() ?? '';
 
@@ -40,6 +43,7 @@ export function DocumentLayoutExportTab({
           mode
         );
         if (previewOnly) {
+          setPreviewExpanded(false);
           setPreviewTypst(typst);
         } else {
           const blob = new Blob([typst], { type: 'text/plain;charset=utf-8' });
@@ -142,7 +146,24 @@ export function DocumentLayoutExportTab({
               {t('documents.layoutExportDownload')}
             </Button>
           </div>
-          <pre className="layout-export-preview-code">{previewTypst}</pre>
+          <pre
+            className={`layout-export-preview-code${
+              previewExpanded ? ' layout-export-preview-code-expanded' : ''
+            }`}
+          >
+            {previewExpanded ? previewTypst : `${previewTypst.slice(0, 480)}${previewTypst.length > 480 ? '…' : ''}`}
+          </pre>
+          {previewTypst.length > 480 ? (
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setPreviewExpanded((open) => !open)}
+            >
+              {previewExpanded
+                ? t('documents.layoutExportPreviewLess')
+                : t('documents.layoutExportPreviewMore')}
+            </Button>
+          ) : null}
         </div>
       ) : null}
     </div>

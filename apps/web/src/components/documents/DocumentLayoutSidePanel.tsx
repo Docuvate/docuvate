@@ -1,4 +1,6 @@
-import { useMemo } from 'react';
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { useCallback, useEffect, useId, useMemo, useRef, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ExtractedField, ExtractionBlock, LayoutIrDocument } from '@docuvate/contracts';
 import {
@@ -50,10 +52,23 @@ export function DocumentLayoutSidePanel({
   dismissedSuggestions,
 }: DocumentLayoutSidePanelProps) {
   const { t } = useTranslation();
+  const tabsBaseId = useId();
+  const tabRefs = useRef<Partial<Record<LayoutSideTab, HTMLButtonElement | null>>>({});
+  const panelBodyRef = useRef<HTMLDivElement>(null);
 
   const overlays = useMemo(() => buildLayoutOverlays(layoutIr), [layoutIr]);
   const tables = useMemo(() => buildLayoutTables(layoutIr, overlays), [layoutIr, overlays]);
   const outline = useMemo(() => buildLayoutOutline(layoutIr, overlays), [layoutIr, overlays]);
+  const fieldOverlayIdByKey = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const overlay of overlays) {
+      if (overlay.kind !== 'field') continue;
+      const key = overlay.label.trim();
+      if (key) map.set(key, overlay.id);
+    }
+    return map;
+  }, [overlays]);
+
   const suggestions = useMemo(() => {
     const widgets = allLayoutWidgets(layoutIr);
     return fieldSuggestionKeys(widgets, knownFieldKeys, fields).filter(
@@ -68,30 +83,98 @@ export function DocumentLayoutSidePanel({
     { id: 'export', label: t('documents.layoutTabExport') },
   ];
 
+  const activeTabMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
+  const activePanelId = `${tabsBaseId}-panel-${activeTabMeta.id}`;
+  const activeTabId = `${tabsBaseId}-tab-${activeTabMeta.id}`;
+
+  const focusTab = useCallback(
+    (tabId: LayoutSideTab) => {
+      tabRefs.current[tabId]?.focus();
+      onTabChange(tabId);
+    },
+    [onTabChange]
+  );
+
+  const onTabListKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      const idx = tabs.findIndex((tab) => tab.id === activeTab);
+      if (idx < 0) return;
+      let nextIdx: number | null = null;
+      switch (event.key) {
+        case 'ArrowRight':
+          nextIdx = (idx + 1) % tabs.length;
+          break;
+        case 'ArrowLeft':
+          nextIdx = (idx - 1 + tabs.length) % tabs.length;
+          break;
+        case 'Home':
+          nextIdx = 0;
+          break;
+        case 'End':
+          nextIdx = tabs.length - 1;
+          break;
+        default:
+          return;
+      }
+      event.preventDefault();
+      focusTab(tabs[nextIdx].id);
+    },
+    [activeTab, focusTab, tabs]
+  );
+
+  useEffect(() => {
+    if (!activeOverlayId) return;
+    const root = panelBodyRef.current;
+    if (!root) return;
+    const target = root.querySelector<HTMLElement>(
+      `[data-layout-overlay-target="${activeOverlayId}"]`
+    );
+    target?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [activeOverlayId, activeTab]);
+
   return (
     <aside className="layout-side-panel" aria-label={t('documents.layoutSidePanelAria')}>
-      <div className="layout-side-tabs" role="tablist">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            className={`layout-side-tab${activeTab === tab.id ? ' layout-side-tab-active' : ''}`}
-            onClick={() => onTabChange(tab.id)}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="layout-side-tabs" role="tablist" onKeyDown={onTabListKeyDown}>
+        {tabs.map((tab) => {
+          const selected = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              ref={(el) => {
+                tabRefs.current[tab.id] = el;
+              }}
+              id={`${tabsBaseId}-tab-${tab.id}`}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              aria-controls={`${tabsBaseId}-panel-${tab.id}`}
+              tabIndex={selected ? 0 : -1}
+              className={`layout-side-tab${selected ? ' layout-side-tab-active' : ''}`}
+              onClick={() => onTabChange(tab.id)}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="layout-side-panel-body" role="tabpanel">
+      <div
+        ref={panelBodyRef}
+        className="layout-side-panel-body"
+        role="tabpanel"
+        id={activePanelId}
+        aria-labelledby={activeTabId}
+      >
         {activeTab === 'fields' ? (
           <div className="layout-side-fields">
             <h3 className="layout-side-section-title">{t('documents.layoutFieldsDetected')}</h3>
             <ul className="layout-field-list">
               {fields.map((field) => (
-                <li key={field.key} className="layout-field-row">
+                <li
+                  key={field.key}
+                  className="layout-field-row"
+                  data-layout-overlay-target={fieldOverlayIdByKey.get(field.key) ?? undefined}
+                >
                   <span className="layout-field-label">{fieldLabelForKey(field.key)}</span>
                   <span className="layout-field-value">{field.value}</span>
                 </li>
@@ -102,7 +185,11 @@ export function DocumentLayoutSidePanel({
                 <h3 className="layout-side-section-title">{t('documents.layoutFieldSuggestions')}</h3>
                 <ul className="layout-field-suggestion-list">
                   {suggestions.map((s) => (
-                    <li key={s.key} className="layout-field-suggestion">
+                    <li
+                      key={s.key}
+                      className="layout-field-suggestion"
+                      data-layout-overlay-target={fieldOverlayIdByKey.get(s.key) ?? undefined}
+                    >
                       <div className="layout-field-suggestion-head">
                         <span className="layout-field-suggestion-tag">{t('documents.layoutSuggestionTag')}</span>
                         <span className="layout-field-label">{fieldLabelForKey(s.key)}</span>
@@ -138,13 +225,14 @@ export function DocumentLayoutSidePanel({
                   className={`layout-table-card${
                     activeOverlayId === table.overlayId ? ' layout-table-card-active' : ''
                   }`}
+                  data-layout-overlay-target={table.overlayId}
                 >
                   <button
                     type="button"
                     className="layout-table-card-head"
                     onClick={() => onOverlaySelect(table.overlayId, table.page)}
                   >
-                    <span>{table.title}</span>
+                    <span>{t('documents.layoutTableLabel', { n: table.tableIndex + 1 })}</span>
                     <span className="muted">
                       {t('documents.layoutTableMeta', {
                         rows: table.rows.length,
@@ -184,6 +272,7 @@ export function DocumentLayoutSidePanel({
                       className={`layout-outline-item layout-outline-level-${entry.level}${
                         activeOverlayId === entry.overlayId ? ' layout-outline-item-active' : ''
                       }`}
+                      data-layout-overlay-target={entry.overlayId}
                       onClick={() => onOverlaySelect(entry.overlayId, entry.page)}
                     >
                       <span className="layout-outline-title">{entry.title}</span>

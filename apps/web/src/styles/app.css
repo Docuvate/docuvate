@@ -2519,13 +2519,17 @@ mark.global-search-mark {
 }
 
 .layout-export-preview-code {
-  max-height: 240px;
-  overflow: auto;
   font-size: 0.75rem;
   padding: var(--dv-space-sm);
   border-radius: var(--dv-radius-sm);
   background: var(--dv-color-bg);
   border: 1px solid var(--dv-color-border);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.layout-export-preview-code-expanded {
+  max-height: none;
 }
 
 .layout-text-edit-panel {
@@ -7719,6 +7723,16 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .pdf-layout-overlay-active {
   outline: 2px solid var(--dv-color-accent);
   outline-offset: 1px;
+}
+
+.pdf-layout-overlay:focus-visible {
+  outline: 2px solid var(--dv-color-accent);
+  outline-offset: 2px;
+}
+
+.pdf-page-slot {
+  margin: 0 auto var(--dv-space-md);
+  position: relative;
 }
 
 .pdf-block-highlight {
