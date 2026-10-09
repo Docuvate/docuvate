@@ -35,8 +35,8 @@ export const deContent: SiteContent = {
     privacy: {
       title: 'Datenschutz',
       contactLabel: 'Kontakt',
+      controllerLabel: 'Verantwortlicher',
       paragraphs: [
-        'Verantwortlicher: Thomas Faust, Berliner Str. 6, 64409 Messel, hello@docuvate.de.',
         'Diese Marketing-Website ist eine statische Seite, die über GitHub Pages (GitHub, Inc., USA) ausgeliefert wird. Beim Aufruf können technische Daten wie IP-Adressen in Server-Logfiles verarbeitet werden. Details: https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement',
         'Rechtsgrundlage für den Betrieb dieser Informationsseite ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an einer erreichbaren Produkt- und Dokumentationspräsenz).',
         'Speicherdauer: Logdaten beim Hosting-Anbieter richten sich nach dessen Richtlinien; wir speichern auf dieser Site keine Besucherprofile.',

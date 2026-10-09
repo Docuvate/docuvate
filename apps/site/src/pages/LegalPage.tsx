@@ -37,12 +37,21 @@ export function PrivacyPage() {
   const { content } = useLocale();
   const { privacy: copy } = content.legal;
   const contact = legalConfig.privacy.contactEmail.trim() || legalConfig.imprint.email;
+  const controller = [legalConfig.privacy.controllerName, legalConfig.privacy.controllerAddress, contact]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .join(', ');
 
   return (
     <div className="legal-page-shell">
       <div className="site-container legal-page">
         <h1 className="landing-section-title landing-section-title-wide legal-page-title">{copy.title}</h1>
         <div className="legal-privacy-block">
+        {controller ? (
+          <p>
+            {copy.controllerLabel}: {controller}.
+          </p>
+        ) : null}
         {copy.paragraphs.map((paragraph) => (
           <p key={paragraph}>{paragraph}</p>
         ))}

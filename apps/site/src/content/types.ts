@@ -169,6 +169,7 @@ export type SiteContent = {
     privacy: {
       title: string;
       contactLabel: string;
+      controllerLabel: string;
       paragraphs: string[];
     };
   };

@@ -35,8 +35,8 @@ export const enContent: SiteContent = {
     privacy: {
       title: 'Privacy',
       contactLabel: 'Contact',
+      controllerLabel: 'Controller',
       paragraphs: [
-        'Controller: Thomas Faust, Berliner Str. 6, 64409 Messel, Germany, hello@docuvate.de.',
         'This marketing site is a static website served via GitHub Pages (GitHub, Inc., USA). When you visit, technical data such as IP addresses may be processed in server logs. See https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement',
         'Legal basis for operating this information site is Art. 6(1)(f) GDPR (legitimate interest in an accessible product and documentation presence).',
         'Retention: log data at the hosting provider follows their policies; we do not store visitor profiles on this site.',
