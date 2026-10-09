@@ -7,6 +7,7 @@ from dataclasses import dataclass, replace
 
 from docuvate_worker.domain.layout_ir import (
     FontWeight,
+    LayoutIrBlock,
     LayoutIrCellRole,
     LayoutIrDocument,
     LayoutIrLine,
@@ -100,9 +101,33 @@ def _expand_table_region(table: LayoutIrTable, page: LayoutIrPage) -> _Region:
     return _Region(y0, y1, x0, x1)
 
 
+def _line_from_block(block: LayoutIrBlock, page_num: int) -> LayoutIrLine:
+    return LayoutIrLine(
+        page=page_num,
+        x=block.x,
+        y=block.y,
+        width=block.width,
+        height=block.height,
+        text=block.text,
+        font_family=block.font_family,
+        font_size_pt=block.font_size_pt,
+        weight=block.weight,
+        align=block.align,
+        block_index=block.block_index,
+    )
+
+
 def _lines_for_page(page: LayoutIrPage) -> tuple[LayoutIrLine, ...]:
     if page.lines:
-        return tuple(page.lines)
+        merged: list[LayoutIrLine] = list(page.lines)
+        seen = {ln.text.strip() for ln in merged if ln.text.strip()}
+        for block in page.blocks:
+            text = block.text.strip()
+            if not text or text in seen:
+                continue
+            merged.append(_line_from_block(block, page.page))
+            seen.add(text)
+        return tuple(merged)
     buckets: dict[int, list] = {}
     for block in page.blocks:
         key = int(round(block.y * 10_000))

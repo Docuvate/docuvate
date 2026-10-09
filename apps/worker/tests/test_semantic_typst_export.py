@@ -21,12 +21,12 @@ from docuvate_worker.infrastructure.layout.semantic_typst_metrics import (
     multiset_token_coverage,
     reading_order_lcs_ratio,
     tokens_from_pdf_sequence,
-    tokens_from_typst_source,
 )
 from docuvate_worker.infrastructure.layout.typst_export import layout_ir_to_typst_for_mode
 from docuvate_worker.infrastructure.layout.typst_export_mode import TypstExportMode
 from tests.layout_ssim_catalog import LAYOUT_SSIM_FIXTURES, LayoutSsimFixture
 from tests.semantic_typst_ground_truth import (
+    assert_reliable_fixtures_have_ground_truth,
     expected_reading_order_tokens,
     interleaved_column_major_tokens,
 )
@@ -59,15 +59,16 @@ def _compile_typst(source: str) -> bytes:
     return compile_typst_to_pdf_bytes(source)
 
 
-def _metrics_from_ground_truth(
-    expected: list[str], pdf_bytes: bytes, typst_source: str
-) -> tuple[float, float]:
+def _metrics_from_ground_truth(expected: list[str], pdf_bytes: bytes) -> tuple[float, float]:
     pdf_tokens = tokens_from_pdf_sequence(pdf_bytes)
-    typst_tokens = tokens_from_typst_source(typst_source)
     return (
         multiset_token_coverage(expected, pdf_tokens),
-        reading_order_lcs_ratio(expected, typst_tokens),
+        reading_order_lcs_ratio(expected, pdf_tokens),
     )
+
+
+def test_reliable_fixtures_have_ground_truth_sequences() -> None:
+    assert_reliable_fixtures_have_ground_truth()
 
 
 @pytest.mark.parametrize("fixture", LAYOUT_SSIM_FIXTURES, ids=lambda f: f.fixture_id)
@@ -90,16 +91,13 @@ def test_semantic_typst_token_coverage(fixture: LayoutSsimFixture) -> None:
     if not fixture.expects_reliable:
         pytest.skip("token coverage only for reliable fixtures")
     expected = expected_reading_order_tokens(fixture.fixture_id)
-    if expected is None:
-        pytest.skip(f"{fixture.fixture_id}: no independent ground-truth token sequence")
-    if len(expected) < 3:
-        pytest.skip(f"{fixture.fixture_id}: too few ground-truth tokens")
+    assert len(expected) >= 3, f"{fixture.fixture_id}: ground-truth token sequence too short"
     pdf = fixture.factory()
     doc = extract_layout_pdf_bytes(pdf)
     assert doc is not None
     typst_src = layout_ir_to_typst_semantic(doc)
     pdf_out = _compile_typst(typst_src)
-    coverage, order = _metrics_from_ground_truth(expected, pdf_out, typst_src)
+    coverage, order = _metrics_from_ground_truth(expected, pdf_out)
     order_floor = _order_floor(fixture)
     assert coverage >= _COVERAGE_FLOOR, (
         f"{fixture.fixture_id}: multiset coverage {coverage:.3f} < {_COVERAGE_FLOOR}"
@@ -120,12 +118,13 @@ def test_multi_column_order_metric_rejects_interleaved(fixture_id: str) -> None:
     fixture = next(f for f in LAYOUT_SSIM_FIXTURES if f.fixture_id == fixture_id)
     expected = expected_reading_order_tokens(fixture_id)
     wrong = interleaved_column_major_tokens(fixture_id)
-    assert expected is not None and wrong is not None
+    assert wrong is not None
     pdf = fixture.factory()
     doc = extract_layout_pdf_bytes(pdf)
     assert doc is not None
     typst_src = layout_ir_to_typst_semantic(doc)
-    actual = tokens_from_typst_source(typst_src)
+    pdf_out = _compile_typst(typst_src)
+    actual = tokens_from_pdf_sequence(pdf_out)
     good = reading_order_lcs_ratio(expected, actual)
     bad = reading_order_lcs_ratio(wrong, actual)
     assert good >= _order_floor(fixture), f"good order {good:.3f}"
@@ -193,7 +192,7 @@ def test_exakt_mode_unchanged() -> None:
 
 
 def test_semantic_typst_report(capsys: pytest.CaptureFixture[str]) -> None:
-    lines = ["Semantic Typst export report (independent order ground truth)", ""]
+    lines = ["Semantic Typst export report (PDF multiset + PDF order vs ground truth)", ""]
     lines.append(
         f"{'fixture':<36} {'compile':<8} {'coverage':<10} {'order':<10} {'leftover':<8}"
     )
@@ -211,9 +210,9 @@ def test_semantic_typst_report(capsys: pytest.CaptureFixture[str]) -> None:
             src = layout_ir_to_typst_semantic(doc)
             out = _compile_typst(src)
             leftover_s = str(semantic_export_leftover_line_count(doc))
-            expected = expected_reading_order_tokens(fixture.fixture_id)
-            if fixture.expects_reliable and expected:
-                cov, ord_ = _metrics_from_ground_truth(expected, out, src)
+            if fixture.expects_reliable:
+                expected = expected_reading_order_tokens(fixture.fixture_id)
+                cov, ord_ = _metrics_from_ground_truth(expected, out)
                 coverage_s = f"{cov:.3f}"
                 order_s = f"{ord_:.3f}"
         except (OSError, subprocess.CalledProcessError, RuntimeError):

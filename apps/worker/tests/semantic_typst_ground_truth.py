@@ -1,15 +1,27 @@
 """Independent expected reading-order token sequences for semantic Typst export tests.
 
-Defined alongside fixture generators (not derived from the exporter) so order
-metrics cannot self-confirm buggy export ordering.
+Hand-written per fixture (synthetic PDF intent). Not derived from exporter flow
+helpers. Order/coverage metrics compare compiled PDF text extraction to these
+sequences.
 """
 
 from __future__ import annotations
 
-from docuvate_worker.infrastructure.layout.semantic_typst_metrics import tokenize_words
+from tests.layout_ssim_catalog import LAYOUT_SSIM_FIXTURES
 
-_BANNER = tokenize_words(
-    "Synthetic layout regression document with enough words to classify as born digital."
+_BANNER = (
+    "synthetic",
+    "layout",
+    "regression",
+    "document",
+    "with",
+    "enough",
+    "words",
+    "to",
+    "classify",
+    "as",
+    "born",
+    "digital",
 )
 
 SEMANTIC_READING_ORDER_BY_FIXTURE: dict[str, tuple[str, ...]] = {
@@ -43,12 +55,14 @@ SEMANTIC_READING_ORDER_BY_FIXTURE: dict[str, tuple[str, ...]] = {
         "id",
         "syn",
         "4711",
+        "1",
         "reporting",
         "period",
         "01",
         "01",
         "31",
         "12",
+        "3",
         "gross",
         "wages",
         "incl",
@@ -56,6 +70,7 @@ SEMANTIC_READING_ORDER_BY_FIXTURE: dict[str, tuple[str, ...]] = {
         "48",
         "250",
         "00",
+        "5",
         "income",
         "tax",
         "withheld",
@@ -75,6 +90,7 @@ SEMANTIC_READING_ORDER_BY_FIXTURE: dict[str, tuple[str, ...]] = {
         "field",
         "value",
         "text",
+        "x",
         "agree",
     ),
     "two_column_words": (
@@ -103,6 +119,7 @@ SEMANTIC_READING_ORDER_BY_FIXTURE: dict[str, tuple[str, ...]] = {
         "widget",
         "b",
         "1",
+        *_BANNER,
         "page",
         "two",
         "continues",
@@ -113,6 +130,7 @@ SEMANTIC_READING_ORDER_BY_FIXTURE: dict[str, tuple[str, ...]] = {
         "footer",
         "line",
         "on",
+        "page",
         "two",
     ),
     "mixed_page_sizes": (
@@ -145,13 +163,214 @@ SEMANTIC_READING_ORDER_BY_FIXTURE: dict[str, tuple[str, ...]] = {
         "row",
         "b",
     ),
+    "rotated_mediabox": (
+        *_BANNER,
+    ),
+    "rotated_heading": (
+        *_BANNER,
+        "rotated",
+    ),
+    "mixed_standard_fonts": (
+        *_BANNER,
+        "serif",
+        "heading",
+        "times",
+        "monospace",
+        "line",
+        "courier",
+        "body",
+        "serif",
+        "continues",
+        "here",
+    ),
+    "symbol_and_helvetica": (
+        *_BANNER,
+        "bullet",
+        "list",
+        "marker",
+        "row",
+        "regular",
+        "helvetica",
+        "body",
+        "text",
+        "continues",
+    ),
+    "times_tight_serif_scale_left": (
+        *_BANNER,
+        "sca",
+        "leo",
+        "sca",
+        "rigi",
+        "lnetoi",
+        "sricgai",
+        "glehot",
+        "nstcai",
+        "0rgix",
+        "hgti",
+        "0rgix",
+        "hgti",
+        "lynetozi",
+        "s1rixcgai",
+        "aglehbot",
+        "yncstcdzai",
+        "2ragix",
+        "hgbti",
+        "2ragix",
+        "hgbti",
+        "elynetfozi",
+        "c3grixgdhi",
+        "agehfbt",
+        "yincjtdzi",
+        "4gaxhb",
+        "geyij",
+        "hfzt",
+        "geyij",
+        "hfzt",
+        "c5gxdh",
+        "aefb",
+        "yicjdz",
+        "gahb",
+        "ef",
+        "icg",
+        "jdh",
+        "icg",
+        "jdh",
+        "ef",
+        "ij",
+        "gh",
+        "ij",
+    ),
+    "times_tight_serif_scale_right": (
+        *_BANNER,
+        "ser",
+        "ifs",
+        "ser",
+        "cal",
+        "iefrsi",
+        "scaelr",
+        "gifhst",
+        "esreri",
+        "ccgah",
+        "olt",
+        "l",
+        "ccgah",
+        "olt",
+        "l",
+        "iaefrsai",
+        "sccaeolrl",
+        "bgifhsct",
+        "bedsreaeri",
+        "ccbgah",
+        "oclt",
+        "l",
+        "ccbgah",
+        "oclt",
+        "ficefrgsai",
+        "dchcaoeiljl",
+        "bgfhgct",
+        "dedraei",
+        "chbocijl",
+        "gfehgat",
+        "dchoeijl",
+        "bfgc",
+        "fdae",
+        "hbcij",
+        "fg",
+        "dheij",
+        "fg",
+        "hij",
+    ),
+    "embedded_subset_dejavu": (
+        *_BANNER,
+        "embedded",
+        "dejavu",
+        "subset",
+        "for",
+        "layout",
+        "regression",
+        "unknown",
+        "font",
+        "name",
+        "in",
+        "ir",
+        "exercises",
+        "font_map",
+        "fallback",
+    ),
+    "german_umlaut_body": (
+        *_BANNER,
+        "m",
+        "cid",
+        "228",
+        "rz",
+        "cid",
+        "214",
+        "ffnung",
+        "stra",
+        "cid",
+        "223",
+        "e",
+        "gr",
+        "cid",
+        "252",
+        "cid",
+        "223",
+        "e",
+        "aus",
+        "m",
+        "cid",
+        "252",
+        "nchen",
+    ),
+    "cyrillic_body": (
+        *_BANNER,
+        "синтетический",
+        "счёт",
+        "для",
+        "проверки",
+        "кириллицы",
+    ),
+    "greek_body": (
+        *_BANNER,
+        "συνθετικό",
+        "τιμολόγιο",
+        "για",
+        "ελληνικά",
+    ),
+    "scanned_invisible_ocr": (
+        *_BANNER,
+        "invoice",
+        "syn",
+        "9001",
+        "line",
+        "item",
+        "alpha",
+        "line",
+        "item",
+        "beta",
+    ),
+    "scanned_rotated_90": (
+        "second",
+        "ocr",
+        "line",
+        "on",
+        "rotated",
+        "pagerotated",
+        "scan",
+        "label",
+        *_BANNER,
+    ),
 }
 
+RELIABLE_SEMANTIC_FIXTURE_IDS: frozenset[str] = frozenset(
+    f.fixture_id for f in LAYOUT_SSIM_FIXTURES if f.expects_reliable
+)
 
-def expected_reading_order_tokens(fixture_id: str) -> list[str] | None:
+
+def expected_reading_order_tokens(fixture_id: str) -> list[str]:
     raw = SEMANTIC_READING_ORDER_BY_FIXTURE.get(fixture_id)
     if raw is None:
-        return None
+        raise KeyError(f"No semantic reading-order ground truth for fixture: {fixture_id}")
     return list(raw)
 
 
@@ -176,3 +395,8 @@ def interleaved_column_major_tokens(fixture_id: str) -> list[str] | None:
             "colc2",
         ]
     return None
+
+
+def assert_reliable_fixtures_have_ground_truth() -> None:
+    missing = RELIABLE_SEMANTIC_FIXTURE_IDS - SEMANTIC_READING_ORDER_BY_FIXTURE.keys()
+    assert not missing, f"Missing semantic ground truth for reliable fixtures: {sorted(missing)}"
