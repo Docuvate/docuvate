@@ -42,6 +42,36 @@ describe('cited chat bench fixtures (quote + source mapping)', () => {
     ['hund', 'S4'],
   ]);
 
+  it('rejects claims without a source label (no unlabeled bind)', () => {
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: 'Die Hundesteuer ist bis zum Werktag des Monats fällig.',
+          quote: 'Werktag des Monats fällig',
+        },
+      ],
+      top,
+      labelByChunk,
+    });
+    expect(verified).toHaveLength(0);
+    expect(rejected[0]?.reason).toBe('unknown_source');
+  });
+
+  it('rejects unlabeled claim even when quote is unique in top', () => {
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: 'Nordwind Rechnung Gesamtsumme der Hundesteuer 1.234,56 EUR.',
+          quote: 'Gesamtsumme: 1.234,56 EUR',
+        },
+      ],
+      top,
+      labelByChunk,
+    });
+    expect(verified).toHaveLength(0);
+    expect(rejected[0]?.reason).toBe('unknown_source');
+  });
+
   it('rejects cross-document rebind when label points at another doc', () => {
     const { verified, rejected } = verifyCitedClaims({
       claims: [

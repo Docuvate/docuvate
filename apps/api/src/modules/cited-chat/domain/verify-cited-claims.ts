@@ -1,15 +1,9 @@
 import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import {
-  extractNumericTokens,
-  numericTokensPresentInText,
-  wordContainsDigit,
-} from './quote-numeric-consistency.js';
-import {
   bestQuoteMatchScore,
   findQuoteInChunk,
   fuzzySpanSearchInChunk,
-  normalizeForQuoteMatch,
   resolveQuoteInCandidateChunk,
   validateMatchedSpanNumbers,
 } from './verify-citation-quote.js';
@@ -101,78 +95,32 @@ function rowsMatchingQuote(top: TopRow[], quote: string): TopRow[] {
   );
 }
 
-function chunkHaystack(chunk: CitedChatChunkCandidate): string {
-  return normalizeForQuoteMatch(`${chunk.documentTitle} ${chunk.body}`);
-}
-
-/** Unlabeled unique quote bind: claim numbers must appear in chunk; half of significant words must align. */
-export function claimTextAlignsWithChunk(
-  claimText: string,
-  chunk: CitedChatChunkCandidate
-): boolean {
-  const haystack = chunkHaystack(chunk);
-  const claimNums = extractNumericTokens(claimText);
-  if (
-    claimNums.length > 0 &&
-    !numericTokensPresentInText(claimNums, `${chunk.documentTitle} ${chunk.body}`)
-  ) {
-    return false;
-  }
-  const words = normalizeForQuoteMatch(claimText)
-    .split(' ')
-    .filter((w) => w.length >= 3 && !wordContainsDigit(w));
-  if (words.length === 0) {
-    return true;
-  }
-  const hits = words.filter((w) => haystack.includes(w));
-  return hits.length >= Math.ceil(words.length / 2);
-}
-
 function resolveCitationRow(
   top: TopRow[],
   labelByChunk: Map<string, string>,
-  sourceLabel: string | null,
-  quote: string,
-  claimText: string
+  sourceLabel: string,
+  quote: string
 ): CitationRowResolve {
-  if (sourceLabel) {
-    const labeled = rowForSourceLabel(top, labelByChunk, sourceLabel);
-    if (!labeled) {
-      return { ok: false, reason: 'unknown_source' };
-    }
-    if (resolveQuoteInCandidateChunk(labeled.chunk, quote, { claimText: '' })) {
-      return { ok: true, row: labeled };
-    }
-
-    const hits = rowsMatchingQuote(top, quote);
-    const sameDoc = hits.filter(
-      (row) => row.chunk.documentId === labeled.chunk.documentId
-    );
-    if (sameDoc.length > 0) {
-      return { ok: true, row: sameDoc[0] };
-    }
-
-    const otherDoc = hits.filter(
-      (row) => row.chunk.documentId !== labeled.chunk.documentId
-    );
-    if (otherDoc.length > 0) {
-      return { ok: false, reason: 'quote_in_other_document' };
-    }
-
+  const labeled = rowForSourceLabel(top, labelByChunk, sourceLabel);
+  if (!labeled) {
+    return { ok: false, reason: 'unknown_source' };
+  }
+  if (resolveQuoteInCandidateChunk(labeled.chunk, quote, { claimText: '' })) {
     return { ok: true, row: labeled };
   }
 
   const hits = rowsMatchingQuote(top, quote);
-  if (hits.length === 1) {
-    if (!claimTextAlignsWithChunk(claimText, hits[0].chunk)) {
-      return { ok: false, reason: 'quote_not_in_chunk' };
-    }
-    return { ok: true, row: hits[0] };
+  const sameDoc = hits.filter((row) => row.chunk.documentId === labeled.chunk.documentId);
+  if (sameDoc.length > 0) {
+    return { ok: true, row: sameDoc[0] };
   }
-  if (hits.length > 1) {
-    return { ok: false, reason: 'quote_not_in_chunk' };
+
+  const otherDoc = hits.filter((row) => row.chunk.documentId !== labeled.chunk.documentId);
+  if (otherDoc.length > 0) {
+    return { ok: false, reason: 'quote_in_other_document' };
   }
-  return { ok: false, reason: 'quote_not_in_chunk' };
+
+  return { ok: true, row: labeled };
 }
 
 function rejectReasonForQuote(
@@ -242,10 +190,19 @@ export function verifyCitedClaims(input: {
     const claimTextForQuoteMatch = citations.length === 1 ? claimText : '';
 
     for (const citation of citations) {
-      const sourceLabel = citation.source
-        ? normalizeCitedSourceLabel(citation.source, labels)
-        : null;
-      if (citation.source && !sourceLabel) {
+      if (!citation.source) {
+        rejected.push({
+          claimText,
+          quote: citation.quote,
+          bestMatchScore: 0,
+          reason: 'unknown_source',
+          source: '',
+        });
+        resolved.length = 0;
+        break;
+      }
+      const sourceLabel = normalizeCitedSourceLabel(citation.source, labels);
+      if (!sourceLabel) {
         rejected.push({
           claimText,
           quote: citation.quote,
@@ -261,8 +218,7 @@ export function verifyCitedClaims(input: {
         input.top,
         input.labelByChunk,
         sourceLabel,
-        citation.quote,
-        claimTextForQuoteMatch || claimText
+        citation.quote
       );
       if (!rowResult.ok) {
         rejected.push({
