@@ -33,46 +33,24 @@ def _line_center_y(block: ExtractionBlock) -> float:
     return block.y + block.height / 2.0
 
 
-def _merge_line_blocks(line: list[ExtractionBlock]) -> ExtractionBlock:
+def _text_with_inter_word_spaces(line: list[ExtractionBlock]) -> list[tuple[ExtractionBlock, str]]:
     if not line:
-        raise ValueError("line must not be empty")
-    if len(line) == 1:
-        return line[0]
-
-    first = line[0]
-    parts: list[str] = []
-    x0, y0 = first.x, first.y
-    x1 = first.x + first.width
-    y1 = first.y + first.height
-    prev = first
+        return []
+    out: list[tuple[ExtractionBlock, str]] = []
+    prev: ExtractionBlock | None = None
     for block in line:
         token = block.text.strip()
         if not token:
-            prev = block
             continue
-        if not parts:
-            parts.append(token)
-        else:
+        text = token
+        if prev is not None:
             gap = block.x - (prev.x + prev.width)
             em = max(prev.height, block.height, 0.01) * 0.25
             if gap > em:
-                parts.append(token)
-            else:
-                parts[-1] = f"{parts[-1]}{token}"
-        x1 = max(x1, block.x + block.width)
-        y1 = max(y1, block.y + block.height)
+                text = f" {token}"
+        out.append((block, text))
         prev = block
-
-    merged_text = " ".join(parts).strip()
-    return ExtractionBlock(
-        page=first.page,
-        x=x0,
-        y=y0,
-        width=max(x1 - x0, first.width),
-        height=max(y1 - y0, first.height),
-        text=merged_text,
-        block_index=first.block_index,
-    )
+    return out
 
 
 def _cluster_blocks_into_lines(blocks: list[ExtractionBlock]) -> list[list[ExtractionBlock]]:
@@ -129,33 +107,32 @@ def layout_ir_from_extraction_blocks(
             page_width, page_height = width_pt, height_pt
         ir_blocks: list[LayoutIrBlock] = []
         for line in _cluster_blocks_into_lines(page_blocks_raw):
-            merged = _merge_line_blocks(line)
-            if total_blocks >= MAX_LAYOUT_BLOCKS:
-                truncated = True
-                break
-            text = merged.text.strip()
-            if not text:
-                continue
-            anchor = merged.block_index
-            if anchor is None:
-                anchor = _index_of_block(blocks, merged)
-            ir_blocks.append(
-                LayoutIrBlock(
-                    page=page_num,
-                    x=merged.x,
-                    y=merged.y,
-                    width=merged.width,
-                    height=merged.height,
-                    text=text,
-                    weight=FontWeight.NORMAL,
-                    align=TextAlign.LEFT,
-                    block_index=anchor,
+            for block, text in _text_with_inter_word_spaces(line):
+                if total_blocks >= MAX_LAYOUT_BLOCKS:
+                    truncated = True
+                    break
+                if not text.strip():
+                    continue
+                anchor = block.block_index
+                if anchor is None:
+                    anchor = _index_of_block(blocks, block)
+                ir_blocks.append(
+                    LayoutIrBlock(
+                        page=page_num,
+                        x=block.x,
+                        y=block.y,
+                        width=block.width,
+                        height=block.height,
+                        text=text,
+                        weight=FontWeight.NORMAL,
+                        align=TextAlign.LEFT,
+                        block_index=anchor,
+                    )
                 )
-            )
-            total_blocks += 1
-            if total_blocks > MAX_LAYOUT_ELEMENTS:
-                truncated = True
-                break
+                total_blocks += 1
+                if total_blocks > MAX_LAYOUT_ELEMENTS:
+                    truncated = True
+                    break
             if truncated:
                 break
         if ir_blocks:
