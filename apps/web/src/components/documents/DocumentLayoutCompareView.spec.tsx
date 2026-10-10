@@ -43,7 +43,7 @@ import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 describe('DocumentLayoutCompareView', () => {
   it('changes page with arrow keys on the compare root', () => {
     const onPageChange = vi.fn();
-    render(
+    const { container } = render(
       <DocumentLayoutCompareView
         documentId="doc-1"
         pageCount={5}
@@ -51,9 +51,11 @@ describe('DocumentLayoutCompareView', () => {
         onPageChange={onPageChange}
       />
     );
-    const root = document.querySelector('.layout-compare');
-    expect(root).toBeTruthy();
-    fireEvent.keyDown(root as Element, { key: 'ArrowRight' });
+    const root = container.querySelector('.layout-compare');
+    if (!(root instanceof HTMLElement)) {
+      throw new Error('layout compare root not found');
+    }
+    fireEvent.keyDown(root, { key: 'ArrowRight' });
     expect(onPageChange).toHaveBeenCalledWith(3);
   });
 });
