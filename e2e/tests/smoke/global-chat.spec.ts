@@ -1,9 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { provisionCitedChatLibraryOnce } from '../../helpers/cited-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
-const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
 test.describe('global chat navigation', () => {
   test.use({ storageState: smokeFixtureStoragePath() });
@@ -17,9 +15,10 @@ test.describe('global chat navigation', () => {
 });
 
 test.describe('global chat retrieval', () => {
+  test.use({ storageState: smokeFixtureStoragePath() });
+
   test('library chat finds Miete quickly via retrieval', async ({ request }) => {
     test.setTimeout(120_000);
-    await provisionCitedChatLibraryOnce(request, { apiBase, webOrigin });
 
     const threadRes = await request.post(`${apiBase}/v1/chat/threads`, {
       data: { title: 'Global Miete' },

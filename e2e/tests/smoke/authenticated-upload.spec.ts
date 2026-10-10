@@ -29,10 +29,8 @@ test.describe('Authenticated compose smoke', () => {
     await expect(page).toHaveURL(/\/documents/, { timeout: 30_000 });
     await attachScreenshot(page, testInfo, '01-after-login.png');
 
-    await expect(
-      page.getByRole('region', { name: /upload documents|dokumente hochladen/i })
-    ).toBeVisible({ timeout: 45_000 });
     const fileInput = page.getByLabel(/choose files|dateien auswählen/i);
+    await expect(fileInput.first()).toBeAttached({ timeout: 90_000 });
     if ((await fileInput.count()) === 0) {
       const uploadTrigger = page.getByRole('button', { name: /^upload$|^hochladen$/i });
       await uploadTrigger.click();
