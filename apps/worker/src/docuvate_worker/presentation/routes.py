@@ -129,10 +129,14 @@ def extract(
 
     result = extract_document(raw, body.mime_type, engine=body.engine)
     active = body.engine or ExtractorRegistry().active_engine
+    suggestions = result.field_suggestions or []
     return ExtractResponse(
         text=result.text,
         fields=[
             ExtractedField(key=f.key, value=f.value, confidence=f.confidence) for f in result.fields
+        ],
+        field_suggestions=[
+            ExtractedField(key=f.key, value=f.value, confidence=f.confidence) for f in suggestions
         ],
         blocks=[
             ExtractionBlockModel(

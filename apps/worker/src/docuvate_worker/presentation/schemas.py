@@ -46,6 +46,7 @@ class ExtractResponse(BaseModel):
 
     text: str
     fields: list[ExtractedField]
+    field_suggestions: list[ExtractedField] = Field(default_factory=list, alias="fieldSuggestions")
     blocks: list[ExtractionBlockModel] = Field(default_factory=list)
     markdown: str | None = None
     layout_ir: dict[str, object] | None = Field(default=None, alias="layoutIr")

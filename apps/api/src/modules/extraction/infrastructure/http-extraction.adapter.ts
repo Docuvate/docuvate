@@ -51,6 +51,7 @@ export class HttpExtractionAdapter implements ExtractionPort {
     return {
       text: data.text ?? '',
       fields: data.fields ?? [],
+      fieldSuggestions: data.fieldSuggestions ?? [],
       blocks: data.blocks ?? [],
       ...(markdown ? { markdown } : {}),
       ...(layoutIr ? { layoutIr } : {}),

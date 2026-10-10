@@ -1257,6 +1257,18 @@
     "validationMissingLabel": "Zeile {{position}}: Bezeichnung fehlt.",
     "validationMissingKey": "„{{label}}“: Schlüssel fehlt oder ist ungültig.",
     "validationLabelsRequired": "„{{label}}“: Mindestens ein Label wählen oder „Immer“ nutzen.",
+    "keys": {
+      "vendor": "Absender",
+      "supplier": "Lieferant",
+      "amount": "Betrag",
+      "total": "Summe",
+      "date": "Datum",
+      "documentDate": "Dokumentdatum",
+      "dueDate": "Fälligkeitsdatum",
+      "iban": "IBAN",
+      "reference": "Verwendungszweck",
+      "invoiceNumber": "Rechnungsnummer"
+    },
     "documentSectionTitle": "Erkannte Felder",
     "correctFieldsSummary": "Felder korrigieren",
     "correctFieldsHint": "Korrekturen werden für späteres Nachtraining der Extraktion gespeichert.",

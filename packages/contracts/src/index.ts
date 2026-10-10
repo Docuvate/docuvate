@@ -209,6 +209,8 @@ export interface LayoutIrDocument {
 export interface ExtractionResult {
   text: string;
   fields: ExtractedField[];
+  /** Worker heuristic hints (also persisted as `suggestion:*` field rows when stored). */
+  fieldSuggestions?: Array<{ key: string; value: string; confidence?: number }>;
   blocks?: ExtractionBlock[];
   /** Layout-aware Markdown when the worker produces it (plain `text` unchanged for search/embeddings). */
   markdown?: string;
@@ -993,6 +995,15 @@ export {
   semanticFieldKey,
   type ExtractedFieldRow,
 } from './extracted-field-dedupe.js';
+export {
+  GLOBAL_HEURISTIC_FIELD_KEYS,
+  catalogDefinesSemanticKey,
+  isPlainGlobalHeuristicField,
+  partitionRecognizedAndHeuristicSuggestions,
+  parseSuggestionStorageKey,
+  suggestionStorageKey,
+  type FieldSuggestionRow,
+} from './global-heuristic-fields.js';
 
 export type MlModelKind = 'ocr' | 'embedding' | 'docqa' | 'field_extractor';
 

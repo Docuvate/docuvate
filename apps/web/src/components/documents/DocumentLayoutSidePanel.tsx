@@ -36,6 +36,7 @@ interface DocumentLayoutSidePanelProps {
   onAcceptSuggestion: (key: string, value: string) => void;
   onDismissSuggestion: (key: string) => void;
   dismissedSuggestions: Set<string>;
+  heuristicSuggestions?: Array<{ key: string; value: string }>;
 }
 
 export function DocumentLayoutSidePanel({
@@ -54,6 +55,7 @@ export function DocumentLayoutSidePanel({
   onAcceptSuggestion,
   onDismissSuggestion,
   dismissedSuggestions,
+  heuristicSuggestions = [],
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -82,10 +84,33 @@ export function DocumentLayoutSidePanel({
 
   const suggestions = useMemo(() => {
     const widgets = allLayoutWidgets(layoutIr);
-    return fieldSuggestionKeys(widgets, knownFieldKeys, fields).filter(
-      (s) => !dismissedSuggestions.has(s.key)
-    );
-  }, [layoutIr, knownFieldKeys, fields, dismissedSuggestions]);
+    const fromWidgets = fieldSuggestionKeys(widgets, knownFieldKeys, fields).map((s) => ({
+      ...s,
+      label: fieldLabelForKey(s.key),
+    }));
+    const fromHeuristics = heuristicSuggestions
+      .filter((s) => !knownFieldKeys.has(s.key) && !fields.some((f) => f.key === s.key))
+      .map((s) => ({
+        key: s.key,
+        label: fieldLabelForKey(s.key),
+        value: s.value,
+      }));
+    const merged = [...fromHeuristics, ...fromWidgets];
+    const seen = new Set<string>();
+    const unique = merged.filter((s) => {
+      if (seen.has(s.key)) return false;
+      seen.add(s.key);
+      return true;
+    });
+    return unique.filter((s) => !dismissedSuggestions.has(s.key));
+  }, [
+    layoutIr,
+    knownFieldKeys,
+    fields,
+    dismissedSuggestions,
+    heuristicSuggestions,
+    fieldLabelForKey,
+  ]);
 
   const tabs = useMemo(
     () =>

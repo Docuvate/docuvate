@@ -3,7 +3,7 @@
 
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
-from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_fields
+from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
 from docuvate_worker.infrastructure.extractors.paddle_engine import ocr_image_bytes, ocr_pdf_bytes
 
 
@@ -25,6 +25,7 @@ class PaddleOnlyExtractor(ExtractorEngine):
 
         return ExtractionResult(
             text=text.strip(),
-            fields=heuristic_fields(text),
+            fields=[],
+            field_suggestions=heuristic_field_suggestions(text),
             blocks=blocks or None,
         )

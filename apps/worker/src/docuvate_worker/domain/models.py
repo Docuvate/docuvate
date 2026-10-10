@@ -26,6 +26,7 @@ class ExtractionBlock:
 class ExtractionResult:
     text: str
     fields: list[ExtractedField]
+    field_suggestions: list[ExtractedField] | None = None
     blocks: list[ExtractionBlock] | None = None
     markdown: str | None = None
     layout_ir: dict[str, object] | None = None

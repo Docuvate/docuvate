@@ -6,6 +6,9 @@ from __future__ import annotations
 import re
 
 from docuvate_worker.domain.models import ExtractedField
+from docuvate_worker.infrastructure.extractors.field_value_multiline import (
+    extract_multiline_value_after_label,
+)
 from docuvate_worker.infrastructure.extractors.field_value_normalize import (
     strip_leading_sender_label_prefixes,
 )
@@ -15,21 +18,45 @@ def _escape_label(label: str) -> str:
     return re.escape(label.strip())
 
 
-def _extract_near_label(text: str, label: str) -> str | None:
+def _label_search_variants(label: str) -> tuple[str, ...]:
+    base = label.strip()
+    if not base:
+        return ()
+    variants = [base]
+    if base.lower() == "absender":
+        variants.append("Kurzer Absender")
+    return tuple(dict.fromkeys(variants))
+
+
+def _extract_near_label(text: str, label: str, stop_labels: tuple[str, ...]) -> str | None:
     if not label.strip():
         return None
-    pattern = rf"(?i){_escape_label(label)}\s*[:\-–—]\s*(.+?)(?:\n|$)"
-    match = re.search(pattern, text)
-    if match:
-        value = strip_leading_sender_label_prefixes(match.group(1).strip(" ."))
+    value: str | None = None
+    for variant in _label_search_variants(label):
+        value = extract_multiline_value_after_label(
+            text,
+            variant,
+            stop_labels=stop_labels,
+            max_lines=8,
+            max_chars=480,
+        )
         if value:
-            return value[:240]
+            break
+    if value:
+        value = strip_leading_sender_label_prefixes(value.strip(" ."))
+        if value:
+            return value[:480]
     return None
 
 
-def _extract_by_type(text: str, field_type: str, label: str) -> tuple[str | None, float]:
+def _extract_by_type(
+    text: str,
+    field_type: str,
+    label: str,
+    stop_labels: tuple[str, ...],
+) -> tuple[str | None, float]:
     field_type = field_type.strip().lower()
-    near = _extract_near_label(text, label)
+    near = _extract_near_label(text, label, stop_labels)
     if near:
         return near, 0.78
 
@@ -64,6 +91,11 @@ def extract_label_custom_fields(
     if not normalized or not fields:
         return []
 
+    stop_labels = tuple(
+        str(spec.get("label", spec.get("key", ""))).strip()
+        for spec in fields
+        if str(spec.get("key", "")).strip()
+    )
     results: list[ExtractedField] = []
     for spec in fields:
         key = str(spec.get("key", "")).strip()
@@ -71,7 +103,7 @@ def extract_label_custom_fields(
         field_type = str(spec.get("field_type", "text"))
         if not key:
             continue
-        value, confidence = _extract_by_type(normalized, field_type, label)
+        value, confidence = _extract_by_type(normalized, field_type, label, stop_labels)
         if not value:
             continue
         normalized_value = strip_leading_sender_label_prefixes(value)

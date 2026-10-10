@@ -32,6 +32,9 @@ import {
   parseGlobalFieldKey,
 } from '../lib/labelFieldDisplay';
 import { humanizeFieldKey } from '../lib/humanizeFieldKey';
+import { extractionFieldLabel } from '../lib/extractionFieldLabels';
+import { splitRecognizedFieldsAndSuggestions } from '../lib/recognizedFieldDisplay';
+import { parseSuggestionStorageKey } from '@docuvate/contracts';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import { isExtractionPending } from '../lib/documentExtractionState';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
@@ -395,34 +398,46 @@ export function DocumentDetailPage() {
     [title, documentDate, notes, folderId, metadataBaseline]
   );
 
+  const catalogFieldKeys = useMemo(() => new Set(globalFieldLabels.keys()), [globalFieldLabels]);
+
   const knownFieldKeys = useMemo(() => {
-    const keys = new Set<string>();
+    const keys = new Set<string>(catalogFieldKeys);
     for (const tag of tags) {
       for (const def of tag.customFields ?? []) {
         keys.add(def.key);
       }
     }
-    for (const key of globalFieldLabels.keys()) {
-      keys.add(key);
-    }
     return keys;
-  }, [tags, globalFieldLabels]);
+  }, [tags, catalogFieldKeys]);
+
+  const { recognizedFields, heuristicSuggestions } = useMemo(
+    () => splitRecognizedFieldsAndSuggestions(fields, catalogFieldKeys),
+    [fields, catalogFieldKeys]
+  );
 
   const fieldLabelForKey = useCallback(
     (key: string) => {
       const globalKey = parseGlobalFieldKey(key);
       if (globalKey) {
-        return globalFieldLabels.get(globalKey) ?? humanizeFieldKey(globalKey, t);
+        return globalFieldLabels.get(globalKey) ?? extractionFieldLabel(globalKey);
       }
-      return globalFieldLabels.get(key) ?? humanizeFieldKey(key, t);
+      const fromCatalog = globalFieldLabels.get(key);
+      if (fromCatalog) return fromCatalog;
+      const localized = extractionFieldLabel(key);
+      if (localized !== key) return localized;
+      return humanizeFieldKey(key, t);
     },
     [globalFieldLabels, t]
   );
 
   const onAcceptFieldSuggestion = useCallback((key: string, value: string) => {
     setFields((prev) => {
-      if (prev.some((f) => f.key === key)) return prev;
-      return [...prev, { key, value, confidence: 0.9 }];
+      const kept = prev.filter((f) => {
+        const suggestionSemantic = parseSuggestionStorageKey(f.key);
+        return suggestionSemantic !== key && f.key !== key;
+      });
+      if (kept.some((f) => f.key === key)) return prev;
+      return [...kept, { key, value, confidence: 0.9 }];
     });
   }, []);
 
@@ -481,7 +496,9 @@ export function DocumentDetailPage() {
               onFolderIdChange={setFolderId}
             />
             <ExtractedFieldsPanel
-              fields={fields}
+              fields={recognizedFields}
+              heuristicSuggestions={heuristicSuggestions}
+              onAcceptSuggestion={onAcceptFieldSuggestion}
               tags={tags}
               customFieldDefs={buildCustomFieldDefMap(tags)}
               globalFieldLabels={globalFieldLabels}
@@ -527,7 +544,8 @@ export function DocumentDetailPage() {
           previewLoading={previewLoading}
           previewUnavailable={previewUnavailable}
           blocks={blocks}
-          fields={fields}
+          fields={recognizedFields}
+          heuristicSuggestions={heuristicSuggestions}
           highlightBlocks={highlightBlocks}
           viewerPage={viewerPage}
           activeBlockIndex={activeBlockIndex}

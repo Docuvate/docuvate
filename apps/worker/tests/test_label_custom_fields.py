@@ -27,6 +27,25 @@ def test_absender_strips_doubled_label_prefix() -> None:
     assert by_key["absender"] == "Demo Nord GmbH"
 
 
+def test_multiline_absender_address_block() -> None:
+    text = "\n".join(
+        [
+            "Rechnung",
+            "Absender: Nordwind GmbH",
+            "Marktplatz 3",
+            "20095 Hamburg",
+            "Betrag: EUR 10,00",
+        ]
+    )
+    fields = extract_label_custom_fields(
+        text,
+        tag_name="Rechnung",
+        fields=[{"key": "absender", "label": "Absender", "field_type": "text"}],
+    )
+    by_key = {f.key: f.value for f in fields}
+    assert by_key["absender"] == "Nordwind GmbH Marktplatz 3 20095 Hamburg"
+
+
 def test_absender_from_kurzer_absender_line() -> None:
     text = "Rechnung Layout-Workspace Demo\nKurzer Absender: Demo Nord GmbH"
     fields = extract_label_custom_fields(

@@ -15,9 +15,12 @@ import { extractionFieldLabel } from '../../lib/extractionFieldLabels';
 import { labelFieldDisplayName } from '../../lib/labelFieldDisplay';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import type { FieldSuggestionRow } from '@docuvate/contracts';
 
 interface ExtractedFieldsPanelProps {
   fields: ExtractedField[];
+  heuristicSuggestions?: FieldSuggestionRow[];
+  onAcceptSuggestion?: (key: string, value: string) => void;
   tags?: TagDto[];
   customFieldDefs?: Map<string, TagCustomFieldDefinitionDto[]>;
   globalFieldLabels?: Map<string, string>;
@@ -33,6 +36,8 @@ export function ExtractedFieldsPanel({
   tags = [],
   customFieldDefs = new Map(),
   globalFieldLabels = new Map(),
+  heuristicSuggestions = [],
+  onAcceptSuggestion,
   saving,
   fieldsDirty,
   feedbackRecordedCount = 0,
@@ -51,7 +56,10 @@ export function ExtractedFieldsPanel({
   }
 
   const visibleFields = omitInvalidDateExtractedFields(dedupeExtractedFields(fields));
-  if (visibleFields.length === 0) return null;
+  const pendingSuggestions = heuristicSuggestions.filter(
+    (s) => !visibleFields.some((f) => f.key === s.key)
+  );
+  if (visibleFields.length === 0 && pendingSuggestions.length === 0) return null;
 
   function rowKey(field: ExtractedField): string {
     return field.tagId ? `${field.tagId}:${semanticFieldKey(field)}` : semanticFieldKey(field);
@@ -65,6 +73,7 @@ export function ExtractedFieldsPanel({
       <h2 id="extracted-fields-heading" className="detail-section-title">
         {t('recognizedFields.documentSectionTitle')}
       </h2>
+      {visibleFields.length > 0 ? (
       <dl className="extracted-fields-dl">
         {visibleFields.map((field) => (
           <div key={rowKey(field)} className="extracted-fields-row">
@@ -73,6 +82,37 @@ export function ExtractedFieldsPanel({
           </div>
         ))}
       </dl>
+      ) : null}
+      {pendingSuggestions.length > 0 ? (
+        <section className="extracted-field-suggestions" aria-label={t('documents.layoutFieldSuggestions')}>
+          <h3 className="detail-section-title">{t('documents.layoutFieldSuggestions')}</h3>
+          <ul className="layout-field-suggestion-list">
+            {pendingSuggestions.map((s) => (
+              <li key={s.key} className="layout-field-suggestion">
+                <div className="layout-field-suggestion-head">
+                  <span className="layout-field-suggestion-tag">{t('documents.layoutSuggestionTag')}</span>
+                  <span className="layout-field-label">{extractionFieldLabel(s.key)}</span>
+                </div>
+                <p className="layout-field-value">
+                  {formatExtractedFieldDisplayValue(s.key, s.value, i18n.language)}
+                </p>
+                {onAcceptSuggestion ? (
+                  <div className="layout-field-suggestion-actions">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => onAcceptSuggestion(s.key, s.value)}
+                    >
+                      {t('documents.layoutSuggestionAccept')}
+                    </Button>
+                  </div>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {visibleFields.length > 0 ? (
       <details
         className="extracted-fields-edit-details"
         open={editOpen}
@@ -114,6 +154,7 @@ export function ExtractedFieldsPanel({
           </p>
         ) : null}
       </details>
+      ) : null}
     </section>
   );
 }

@@ -1245,6 +1245,18 @@
     "validationMissingLabel": "Row {{position}}: name is required.",
     "validationMissingKey": "“{{label}}”: key is missing or invalid.",
     "validationLabelsRequired": "“{{label}}”: pick at least one label or use Always.",
+    "keys": {
+      "vendor": "Sender",
+      "supplier": "Supplier",
+      "amount": "Amount",
+      "total": "Total",
+      "date": "Date",
+      "documentDate": "Document date",
+      "dueDate": "Due date",
+      "iban": "IBAN",
+      "reference": "Payment reference",
+      "invoiceNumber": "Invoice number"
+    },
     "documentSectionTitle": "Recognized fields",
     "correctFieldsSummary": "Correct fields",
     "correctFieldsHint": "Corrections are stored as training feedback for future extraction improvements.",

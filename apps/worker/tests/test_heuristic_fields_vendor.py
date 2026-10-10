@@ -13,6 +13,18 @@ def test_vendor_skips_landscape_heading_line() -> None:
     assert "vendor" not in fields
 
 
+def test_vendor_skips_academic_paper_title_without_sender_evidence() -> None:
+    text = "\n".join(
+        [
+            "Closed-Form Document Layout Classification",
+            "with Certified Coarse-to-Fine Abstention",
+            "Thomas Faust",
+        ]
+    )
+    fields = {f.key: f.value for f in heuristic_fields(text)}
+    assert "vendor" not in fields
+
+
 def test_vendor_uses_company_after_banner_not_banner_itself() -> None:
     text = (
         "Synthetic layout regression document with enough words to classify as born digital.\n"
