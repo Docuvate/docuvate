@@ -275,6 +275,7 @@ services:
     build:
       context: .
       dockerfile: apps/worker/Dockerfile
+      target: cpu
       args:
         WORKER_OPTIONAL_EXTRAS: ${WORKER_OPTIONAL_EXTRAS:-}
     ports:

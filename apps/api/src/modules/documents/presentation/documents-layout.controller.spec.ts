@@ -4,103 +4,70 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import type { AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { DocumentsController } from './documents.controller.js';
-import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
-import { GetDocumentUseCase } from '../application/get-document.use-case.js';
-import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
-import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
-import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
-import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
-import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
-import { DocumentChatUseCase } from '../application/document-chat.use-case.js';
-import { ListDocumentChatThreadsUseCase } from '../application/list-document-chat-threads.use-case.js';
-import { CreateDocumentChatThreadUseCase } from '../application/create-document-chat-thread.use-case.js';
-import { ListDocumentChatThreadMessagesUseCase } from '../application/list-document-chat-thread-messages.use-case.js';
-import { SendDocumentChatThreadMessageUseCase } from '../application/send-document-chat-thread-message.use-case.js';
-import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
-import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
-import { RetryDocumentChatMessageUseCase } from '../application/retry-document-chat-message.use-case.js';
-import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
-import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
-import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
-import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
-import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
-import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
-import { GetDocumentLayoutCompareSummaryUseCase } from '../application/get-document-layout-compare-summary.use-case.js';
-import { GetDocumentLayoutCompareMetricsUseCase } from '../application/get-document-layout-compare-metrics.use-case.js';
-import { GetDocumentLayoutComparePageUseCase } from '../application/get-document-layout-compare-page.use-case.js';
-import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
-import {
-  ConfirmDuplicateVersionUseCase,
-  GetDuplicateStackUseCase,
-  ReleaseDuplicateStackMemberUseCase,
-  SetDuplicateStackPrimaryUseCase,
-} from '../../duplicates/application/duplicate-stack.use-cases.js';
-import {
-  DismissDuplicateCandidateUseCase,
-  ListDuplicateCandidatesUseCase,
-} from '../../duplicates/application/duplicate-query.use-cases.js';
-import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
-import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
+import type { GetDocumentLayoutCompareMetricsUseCase } from '../application/get-document-layout-compare-metrics.use-case.js';
+import type { GetDocumentLayoutComparePageUseCase } from '../application/get-document-layout-compare-page.use-case.js';
+import type { GetDocumentLayoutCompareSummaryUseCase } from '../application/get-document-layout-compare-summary.use-case.js';
+import type { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
+import type { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
+import type { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
 
 const layoutIr: LayoutIrDocument = {
   version: 1,
   pages: [{ page: 1, widthPt: 595, heightPt: 842, blocks: [] }],
 };
 
-type ExecuteStub = { execute: ReturnType<typeof vi.fn> };
+type LayoutUseCaseFake = Pick<GetDocumentLayoutIrUseCase, 'execute'>;
 
-function useCaseStub(): ExecuteStub {
+type ExecuteUseCaseFake = { execute: ReturnType<typeof vi.fn> };
+
+function useCaseFake(): ExecuteUseCaseFake {
   return { execute: vi.fn() };
-}
-
-function asUseCase<T>(stub: ExecuteStub): T {
-  return stub as unknown as T;
 }
 
 /** Wires layout use cases by constructor position (Vitest does not emit decorator metadata). */
 function createDocumentsController(layout: {
-  getDocumentLayoutIr: ExecuteStub;
-  getDocumentLayoutHtml: ExecuteStub;
-  getDocumentLayoutTypst: ExecuteStub;
-  getDocumentLayoutCompareSummary: ExecuteStub;
-  getDocumentLayoutCompareMetrics: ExecuteStub;
-  getDocumentLayoutComparePage: ExecuteStub;
+  getDocumentLayoutIr: LayoutUseCaseFake;
+  getDocumentLayoutHtml: Pick<GetDocumentLayoutHtmlUseCase, 'execute'>;
+  getDocumentLayoutTypst: Pick<GetDocumentLayoutTypstUseCase, 'execute'>;
+  getDocumentLayoutCompareSummary: Pick<GetDocumentLayoutCompareSummaryUseCase, 'execute'>;
+  getDocumentLayoutCompareMetrics: Pick<GetDocumentLayoutCompareMetricsUseCase, 'execute'>;
+  getDocumentLayoutComparePage: Pick<GetDocumentLayoutComparePageUseCase, 'execute'>;
 }): DocumentsController {
-  const filler = (): ExecuteStub => useCaseStub();
+  const filler = (): ExecuteUseCaseFake => useCaseFake();
   return new DocumentsController(
-    asUseCase<UploadDocumentUseCase>(filler()),
-    asUseCase<GetDocumentUseCase>(filler()),
-    asUseCase<ListDocumentsUseCase>(filler()),
-    asUseCase<UpdateDocumentUseCase>(filler()),
-    asUseCase<DeleteDocumentUseCase>(filler()),
-    asUseCase<BulkDocumentsUseCase>(filler()),
-    asUseCase<GetDocumentContentUseCase>(filler()),
-    asUseCase<LoadDocumentLabelSuggestionsUseCase>(filler()),
-    asUseCase<RefreshEmbeddingSuggestionsUseCase>(filler()),
-    asUseCase<DocumentChatUseCase>(filler()),
-    asUseCase<ListDocumentChatThreadsUseCase>(filler()),
-    asUseCase<CreateDocumentChatThreadUseCase>(filler()),
-    asUseCase<ListDocumentChatThreadMessagesUseCase>(filler()),
-    asUseCase<SendDocumentChatThreadMessageUseCase>(filler()),
-    asUseCase<StreamDocumentChatMessageUseCase>(filler()),
-    asUseCase<CancelDocumentChatGenerationUseCase>(filler()),
-    asUseCase<RetryDocumentChatMessageUseCase>(filler()),
-    asUseCase<ListDuplicateCandidatesUseCase>(filler()),
-    asUseCase<DismissDuplicateCandidateUseCase>(filler()),
-    asUseCase<CompareDocumentExtractionUseCase>(filler()),
-    asUseCase<ApplyArenaWinnerExtractionUseCase>(filler()),
-    asUseCase<RequeueDocumentExtractionUseCase>(filler()),
-    asUseCase<GetDocumentLayoutIrUseCase>(layout.getDocumentLayoutIr),
-    asUseCase<GetDocumentLayoutHtmlUseCase>(layout.getDocumentLayoutHtml),
-    asUseCase<GetDocumentLayoutTypstUseCase>(layout.getDocumentLayoutTypst),
-    asUseCase<GetDocumentLayoutCompareSummaryUseCase>(layout.getDocumentLayoutCompareSummary),
-    asUseCase<GetDocumentLayoutCompareMetricsUseCase>(layout.getDocumentLayoutCompareMetrics),
-    asUseCase<GetDocumentLayoutComparePageUseCase>(layout.getDocumentLayoutComparePage),
-    asUseCase<RecordExtractionArenaRatingUseCase>(filler()),
-    asUseCase<GetDuplicateStackUseCase>(filler()),
-    asUseCase<SetDuplicateStackPrimaryUseCase>(filler()),
-    asUseCase<ConfirmDuplicateVersionUseCase>(filler()),
-    asUseCase<ReleaseDuplicateStackMemberUseCase>(filler())
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    layout.getDocumentLayoutIr as never,
+    layout.getDocumentLayoutHtml as never,
+    layout.getDocumentLayoutTypst as never,
+    layout.getDocumentLayoutCompareSummary as never,
+    layout.getDocumentLayoutCompareMetrics as never,
+    layout.getDocumentLayoutComparePage as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never
   );
 }
 
@@ -117,12 +84,12 @@ describe('DocumentsController layout routes', () => {
     claims: ['document:*'],
   };
 
-  const getDocumentLayoutIr = useCaseStub();
-  const getDocumentLayoutHtml = useCaseStub();
-  const getDocumentLayoutTypst = useCaseStub();
-  const getDocumentLayoutCompareSummary = useCaseStub();
-  const getDocumentLayoutCompareMetrics = useCaseStub();
-  const getDocumentLayoutComparePage = useCaseStub();
+  const getDocumentLayoutIr = useCaseFake();
+  const getDocumentLayoutHtml = useCaseFake();
+  const getDocumentLayoutTypst = useCaseFake();
+  const getDocumentLayoutCompareSummary = useCaseFake();
+  const getDocumentLayoutCompareMetrics = useCaseFake();
+  const getDocumentLayoutComparePage = useCaseFake();
 
   let controller: DocumentsController;
 

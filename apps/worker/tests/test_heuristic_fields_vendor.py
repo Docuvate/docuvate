@@ -18,7 +18,7 @@ def test_vendor_skips_academic_paper_title_without_sender_evidence() -> None:
         [
             "Closed-Form Document Layout Classification",
             "with Certified Coarse-to-Fine Abstention",
-            "Thomas Faust",
+            "Jonas Demo",
         ]
     )
     fields = {f.key: f.value for f in heuristic_fields(text)}

@@ -12,6 +12,8 @@ FastAPI service for document extraction and **CPU/ARM embedding** (no GPU requir
 
 The default Docker image **pre-downloads** Paddle det/rec weights at build time (`prewarm_paddle_models`). Cold Arena/compare on a fresh dev install may still download into `~/.paddleocr` until prewarm completes.
 
+**CPU vs GPU images:** default Compose and Kubernetes manifests use the **CPU** image (`docuvate-worker`, multi-arch). For CUDA + Donut, see [DOCKER-IMAGES.md](./DOCKER-IMAGES.md) (`docker-compose.worker-gpu.yml` or Helm/Kustomize GPU component).
+
 | Env                    | Default    | Description                                                                   |
 | ---------------------- | ---------- | ----------------------------------------------------------------------------- |
 | `EXTRACTOR_ENGINE`     | `pipeline` | `pipeline` (native PDF + Paddle), `paddle`, `docling` (extra), or `tesseract` |

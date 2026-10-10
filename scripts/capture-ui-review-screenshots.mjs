@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /**
- * PR #72 review screenshots (1440×900, compose @ localhost:5173).
+ * UI review screenshots (1440×900, compose @ localhost:5173).
  * Evidence: status filter menu, label form, recognized fields, build SHA.
  */
 import { chromium } from 'playwright';
@@ -194,9 +196,15 @@ async function captureHeaderSearch(page, outPath) {
     const style = getComputedStyle(input);
     const ph = style.getPropertyValue('--dv-color-header-input-placeholder') || style.color;
     const bg = style.backgroundColor;
-    return { placeholderToken: ph.trim(), background: bg };
+    const theme = document.documentElement.getAttribute('data-docuvate-theme');
+    return { placeholderToken: ph.trim(), background: bg, theme };
   });
   console.log('header_search_styles:', JSON.stringify(contrast));
+  if (contrast?.theme === 'light' && !contrast.placeholderToken.includes('85deg')) {
+    throw new Error(
+      `light header search placeholder should use stone hue (85deg): ${JSON.stringify(contrast)}`
+    );
+  }
   await clipApp(page, outPath);
 }
 
@@ -217,6 +225,7 @@ async function main() {
   });
   const dePage = await deContext.newPage();
   await login(dePage, 'de');
+  await captureHeaderSearch(dePage, `${OUT}/header-search-de-light-1440.png`);
   report.buildSha = await assertBuildSha(dePage);
   await writeFile(`${OUT}/build-sha.txt`, `${report.buildSha}\n`);
   await seedRecognizedFields(dePage);
@@ -277,7 +286,7 @@ async function main() {
   await enContext.close();
 
   await browser.close();
-  await writeFile(`${OUT}/pr72-screenshot-report.json`, `${JSON.stringify(report, null, 2)}\n`);
+  await writeFile(`${OUT}/ui-review-screenshot-report.json`, `${JSON.stringify(report, null, 2)}\n`);
   console.log('Saved screenshots to', OUT);
   console.log('build_sha:', report.buildSha);
 }
