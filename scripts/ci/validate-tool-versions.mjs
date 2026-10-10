@@ -100,8 +100,11 @@ export function collectToolVersionErrors(root = TOOL_VERSIONS_ROOT, read = defau
   if (!workerDf.includes(`ARG UV_VERSION=${uvPin}`)) {
     fail(`apps/worker/Dockerfile must declare ARG UV_VERSION=${uvPin}`);
   }
-  assertUvInstallsPinned(workerDf, 'apps/worker/Dockerfile', uvPin, fail);
-  assertEveryUvPinMatches(workerDf, 'apps/worker/Dockerfile', uvPin, fail, UV_VAR_PLACEHOLDERS, {
+  const workerInstallSh = read('scripts/ci/worker-docker-install.sh');
+  const workerUvSources = `${workerDf}\n${workerInstallSh}`;
+  const workerUvLabel = 'apps/worker/Dockerfile (+ worker-docker-install.sh)';
+  assertUvInstallsPinned(workerUvSources, workerUvLabel, uvPin, fail);
+  assertEveryUvPinMatches(workerUvSources, workerUvLabel, uvPin, fail, UV_VAR_PLACEHOLDERS, {
     requireAtLeastOne: true,
   });
 

@@ -135,10 +135,9 @@ test('fails stray .nvmrc in fixture tree', () => {
 test('fails unpinned uv in worker Dockerfile', () => {
   const root = mkdtempSync(join(tmpdir(), 'tv-worker-uv-'));
   copyRepoFixture(root, (files) => {
-    files['apps/worker/Dockerfile'] = files['apps/worker/Dockerfile'].replace(
-      'pip install --no-cache-dir "uv==${UV_VERSION}"',
-      'pip install --no-cache-dir uv'
-    );
+    files['scripts/ci/worker-docker-install.sh'] = files[
+      'scripts/ci/worker-docker-install.sh'
+    ].replace('pip install --no-cache-dir "uv==${UV_VERSION}"', 'pip install --no-cache-dir uv');
     return files;
   });
   const errors = collectToolVersionErrors(root);
