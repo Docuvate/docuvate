@@ -1403,6 +1403,12 @@ mark.global-search-mark {
   scroll-padding-bottom: var(--save-bar-reserve-height, 5.5rem);
 }
 
+.app-main:has(.document-detail-page) {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .app-main:has(.dateisystem-page) {
   display: flex;
   flex-direction: column;
@@ -1606,11 +1612,28 @@ mark.global-search-mark {
   --detail-control-size: 0.8125rem;
   --detail-pad: var(--dv-space-sm);
   --detail-gap: var(--dv-space-sm);
+  --document-detail-chrome: 13.5rem;
+  /* c1 Zinnober accent on warm stone (docs/assets/logo/brand-colors.json) */
+  --dv-color-accent: #cb3a00;
+  --dv-color-accent-hover: #b52300;
+  --dv-color-accent-soft: #f3e6dc;
+  --dv-color-focus: #cb3a00;
   max-width: 1600px;
   padding: var(--detail-pad) var(--dv-space-md);
+  padding-inline: max(var(--dv-space-md), var(--dv-space-sm));
   display: flex;
   flex-direction: column;
   gap: var(--detail-gap);
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+}
+
+html[data-docuvate-theme='dark'] .document-detail-page {
+  --dv-color-accent: #e96f49;
+  --dv-color-accent-hover: #cb3a00;
+  --dv-color-accent-soft: oklch(26% 0.018 75deg);
+  --dv-color-focus: #e96f49;
 }
 
 .document-detail-page .card {
@@ -1757,15 +1780,17 @@ mark.global-search-mark {
 
 .document-detail-back {
   margin: 0 0 var(--dv-space-xs);
+  padding-inline: var(--dv-space-2xs);
 }
 
 .document-detail-back-link {
   display: inline-flex;
   align-items: center;
-  gap: var(--dv-space-2xs);
+  gap: var(--dv-space-xs);
   color: var(--dv-color-accent);
   text-decoration: none;
   font-weight: 600;
+  max-width: 100%;
 }
 
 .document-detail-back-link:hover {
@@ -2226,6 +2251,15 @@ mark.global-search-mark {
   min-width: 0;
 }
 
+.document-detail-page .layout-workspace {
+  flex: 1 1 auto;
+  min-height: max(
+    min(74vh, 900px),
+    calc(100dvh - var(--document-detail-chrome) - var(--save-bar-reserve-height, 0px))
+  );
+  max-height: none;
+}
+
 .layout-workspace-main {
   display: flex;
   flex-direction: column;
@@ -2241,6 +2275,16 @@ mark.global-search-mark {
   flex-direction: column;
   gap: var(--dv-space-xs);
   padding: var(--dv-space-sm);
+}
+
+.document-detail-page .layout-viewer-card {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.document-detail-page .layout-side-panel {
+  min-height: 0;
+  max-height: none;
 }
 
 .layout-viewer-toolbar {
@@ -2415,11 +2459,24 @@ mark.global-search-mark {
   border-radius: var(--dv-radius-sm);
 }
 
+.layout-field-suggestion-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--dv-space-xs);
+}
+
 .layout-field-suggestion-tag {
-  font-size: 0.75rem;
-  color: var(--dv-color-accent);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--dv-color-text-muted);
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.layout-field-suggestion-head .layout-field-label {
+  min-width: 0;
 }
 
 .layout-field-suggestion-actions {
@@ -9917,6 +9974,16 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   .layout-workspace {
     grid-template-columns: 1fr;
     min-height: 0;
+  }
+
+  .document-detail-page .layout-workspace {
+    grid-template-rows: minmax(220px, 42vh) minmax(280px, auto);
+    min-height: auto;
+  }
+
+  .document-detail-page .layout-side-panel {
+    min-height: 280px;
+    max-height: min(52vh, 480px);
   }
 
   .detail-rail {

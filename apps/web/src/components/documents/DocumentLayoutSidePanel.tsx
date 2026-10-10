@@ -12,6 +12,7 @@ import {
   type LayoutOverlayRegion,
 } from '../../lib/layoutOverlayModel';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
+import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
 import { Button } from '../ui/Button';
 
 export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'export';
@@ -70,6 +71,8 @@ export function DocumentLayoutSidePanel({
     }
     return map;
   }, [overlays]);
+
+  const panelFields = useMemo(() => fieldsForLayoutPanel(fields), [fields]);
 
   const suggestions = useMemo(() => {
     const widgets = allLayoutWidgets(layoutIr);
@@ -182,7 +185,7 @@ export function DocumentLayoutSidePanel({
           <div className="layout-side-fields">
             <h3 className="layout-side-section-title">{t('documents.layoutFieldsDetected')}</h3>
             <ul className="layout-field-list">
-              {fields.map((field) => (
+              {panelFields.map((field) => (
                 <li
                   key={field.key}
                   className="layout-field-row"

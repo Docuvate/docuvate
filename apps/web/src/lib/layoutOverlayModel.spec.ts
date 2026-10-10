@@ -78,6 +78,35 @@ describe('layoutOverlayModel', () => {
     expect(overlays.some((o) => o.kind === 'heading')).toBe(true);
     expect(overlays.some((o) => o.kind === 'table')).toBe(true);
     expect(overlays.some((o) => o.kind === 'field')).toBe(true);
+    expect(overlays.some((o) => o.kind === 'text')).toBe(false);
+  });
+
+  it('drops unnamed empty widget overlays', () => {
+    const doc: LayoutIrDocument = {
+      version: 1,
+      pages: [
+        {
+          page: 1,
+          widthPt: 595,
+          heightPt: 842,
+          blocks: [],
+          tables: [],
+          widgets: [
+            {
+              kind: 'text',
+              page: 1,
+              x: 0.1,
+              y: 0.7,
+              width: 0.01,
+              height: 0.01,
+              fieldName: '',
+              value: '',
+            },
+          ],
+        },
+      ],
+    };
+    expect(buildLayoutOverlays(doc)).toEqual([]);
   });
 
   it('builds table views and outline entries', () => {
@@ -135,8 +164,9 @@ describe('layoutOverlayModel', () => {
               y: 0.55,
               width: 0.5,
               height: 0.08,
-              text: 'Rotated block',
-              fontSizePt: 10,
+              text: 'Rotated heading',
+              fontSizePt: 12,
+              weight: 'bold',
               blockIndex: 1,
             },
           ],

@@ -44,6 +44,8 @@ export interface LayoutTableView {
 }
 
 const HEADING_MIN_PT = 11;
+const MIN_OVERLAY_NORM_AREA = 0.00006;
+const MIN_OVERLAY_NORM_SIDE = 0.004;
 
 function clamp01(n: number): number {
   if (!Number.isFinite(n)) return 0;
@@ -72,6 +74,23 @@ function classifyBlock(block: LayoutIrBlock): LayoutOverlayKind {
 function widgetLabel(widget: LayoutIrWidget): string {
   if (widget.fieldName?.trim()) return widget.fieldName.trim();
   return widget.kind === 'checkbox' ? 'checkbox' : 'field';
+}
+
+function overlayHasRenderableBox(
+  box: Pick<LayoutOverlayRegion, 'width' | 'height' | 'kind' | 'label' | 'value'>
+): boolean {
+  if (box.width < MIN_OVERLAY_NORM_SIDE || box.height < MIN_OVERLAY_NORM_SIDE) {
+    return false;
+  }
+  if (box.width * box.height < MIN_OVERLAY_NORM_AREA) {
+    return false;
+  }
+  if (box.kind !== 'field') {
+    return true;
+  }
+  const hasValue = Boolean(box.value?.trim());
+  const named = box.label.trim().length > 0 && box.label !== 'field' && box.label !== 'checkbox';
+  return hasValue || named;
 }
 
 export function buildLayoutOverlays(doc: LayoutIrDocument): LayoutOverlayRegion[] {
@@ -111,21 +130,24 @@ export function buildLayoutOverlays(doc: LayoutIrDocument): LayoutOverlayRegion[
     }
 
     for (const block of page.blocks) {
+      const text = block.text.trim();
+      if (!text) continue;
       const kind = classifyBlock(block);
+      if (kind === 'text') continue;
       const id = block.blockIndex != null ? `block-${block.blockIndex}` : `ir-${page.page}-${regions.length}`;
       regions.push({
         id,
         page: block.page,
         ...boxFromBlock(block),
         kind,
-        label: block.text.trim().slice(0, 80),
-        value: kind === 'text' ? block.text.trim() : undefined,
+        label: text.slice(0, 80),
+        value: undefined,
         blockIndex: block.blockIndex,
       });
     }
   }
 
-  return regions;
+  return regions.filter(overlayHasRenderableBox);
 }
 
 export function buildLayoutOutline(
