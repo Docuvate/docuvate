@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { GlobalSearchGroupDto, GlobalSearchHitDto } from '@docuvate/contracts';
+import type {
+  GlobalSearchDocumentHitDto,
+  GlobalSearchGroupDto,
+  GlobalSearchHitDto,
+  SearchHighlightSpan,
+} from '@docuvate/contracts';
 import { FileText, Folder, Search, Settings2, Tag, X, Zap } from 'lucide-react';
 import {
   type KeyboardEvent,
@@ -346,6 +351,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 aria-modal="true"
                 aria-label={t('search.paletteTitle')}
                 tabIndex={-1}
+                onMouseDown={(e) => { e.stopPropagation(); }}
               >
                 <div className="global-search-palette-input-row">
                   <Search size={20} strokeWidth={1.75} aria-hidden />
@@ -573,6 +579,13 @@ function findHitByFlatId(
   return null;
 }
 
+function snippetHighlightSpans(hit: GlobalSearchDocumentHitDto): SearchHighlightSpan[] {
+  if (hit.snippetHighlightSpans.length > 0) {
+    return hit.snippetHighlightSpans;
+  }
+  return hit.highlightSpans;
+}
+
 function GlobalSearchResultRow({ hit }: { hit: GlobalSearchHitDto }) {
   const { t } = useTranslation();
   if (hit.type === 'document') {
@@ -592,13 +605,13 @@ function GlobalSearchResultRow({ hit }: { hit: GlobalSearchHitDto }) {
                 <span>{hit.matchedFieldLabel}: </span>
                 <GlobalSearchHighlight
                   text={hit.snippet}
-                  spans={hit.snippetHighlightSpans}
+                  spans={snippetHighlightSpans(hit)}
                 />
               </>
             ) : (
               <GlobalSearchHighlight
                 text={hit.snippet}
-                spans={hit.snippetHighlightSpans}
+                spans={snippetHighlightSpans(hit)}
               />
             )}
           </span>
