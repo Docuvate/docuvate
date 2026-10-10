@@ -19,6 +19,7 @@ import { EmbeddingDensity20261010120000 } from './migrations/20261010120000-embe
 import { EmbeddingDensityClassNiw20261010131500 } from './migrations/20261010131500-embedding-density-f32.js';
 import { EmbeddingDensityReadinessSplit20261010140000 } from './migrations/20261010140000-embedding-density-readiness-split.js';
 import { HeuristicFieldSuggestions20261010150000 } from './migrations/20261010150000-heuristic-field-suggestions.js';
+import { PurgeHeadingVendorSuggestions20261010153000 } from './migrations/20261010153000-purge-heading-vendor-suggestions.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -61,6 +62,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       EmbeddingDensityClassNiw20261010131500,
       EmbeddingDensityReadinessSplit20261010140000,
       HeuristicFieldSuggestions20261010150000,
+      PurgeHeadingVendorSuggestions20261010153000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,
