@@ -82,9 +82,11 @@ export function DateisystemContentHeader({
             ))}
           </ol>
         </nav>
-        <h1 className="dateisystem-page-title" data-ux="page-title">
-          {pageTitle}
-        </h1>
+        {breadcrumbs.length > 1 ? (
+          <h1 className="dateisystem-page-title" data-ux="page-title">
+            {pageTitle}
+          </h1>
+        ) : null}
       </div>
 
       <DateisystemContentActions

@@ -215,7 +215,10 @@ function DateisystemExplorerLayout({
   const { enqueueFiles, dropTarget } = useDocumentUploadContext();
 
   const breadcrumbs = buildOrdnerBreadcrumbs(data.mappen, data.folders, selection);
-  const pageTitle = breadcrumbs[breadcrumbs.length - 1]?.label ?? t('nav.folders');
+  const pageTitle =
+    browseMode === 'root'
+      ? t('filesystem.allFoldersTitle')
+      : (breadcrumbs[breadcrumbs.length - 1]?.label ?? t('nav.folders'));
   const showDocuments = browseMode !== 'root';
 
   const activeFolderTarget = useMemo((): ActiveFolderContext | null => {

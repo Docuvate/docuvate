@@ -36,7 +36,7 @@ export function mapWorkerCompareHttpStatus(status: number): DomainError {
 
 export type WorkerFetchErrorMapping = {
   onTimeout?: () => GatewayTimeoutError;
-  onHttpError?: (status: number) => DomainError;
+  onHttpError?: (status: number, responseBody?: unknown) => DomainError;
 };
 
 export function workerLayoutTimeoutError(): GatewayTimeoutError {
@@ -54,7 +54,7 @@ export function mapWorkerLayoutHttpStatus(status: number): DomainError {
       'Layout-Worker vorübergehend nicht erreichbar. Bitte später erneut versuchen.'
     );
   }
-  return new ServiceUnavailableError(`Layout-Rendering fehlgeschlagen (${status}).`);
+  return new ServiceUnavailableError('documents.layoutCompareErrors.compareFailed');
 }
 
 export async function fetchWorkerJson<T>(
@@ -77,7 +77,13 @@ export async function fetchWorkerJson<T>(
   }
 
   if (!response.ok) {
-    throw errors.onHttpError?.(response.status) ?? mapWorkerCompareHttpStatus(response.status);
+    let responseBody: unknown;
+    try {
+      responseBody = await response.json();
+    } catch {
+      responseBody = undefined;
+    }
+    throw errors.onHttpError?.(response.status, responseBody) ?? mapWorkerCompareHttpStatus(response.status);
   }
 
   return (await response.json()) as T;

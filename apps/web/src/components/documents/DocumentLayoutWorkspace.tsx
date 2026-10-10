@@ -297,7 +297,7 @@ export function DocumentLayoutWorkspace({
                     onLayoutOverlayClear={() => setActiveOverlayId(null)}
                     page={viewerPage}
                     onPageChange={onViewerPageChange}
-                    paginated={false}
+                    paginated
                     fitWidth
                     onPageClick={onPdfPageClick}
                   />

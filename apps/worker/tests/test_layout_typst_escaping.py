@@ -11,6 +11,32 @@ from docuvate_worker.infrastructure.layout.render_typst import layout_ir_to_typs
 MARKUP_SAMPLE = '`= # $ @ < > / * _ [ ] " + - -- --- ~`'
 
 
+def test_typst_escape_braces_in_output() -> None:
+    doc = LayoutIrDocument(
+        version=1,
+        pages=(
+            LayoutIrPage(
+                page=1,
+                width_pt=200.0,
+                height_pt=200.0,
+                blocks=(
+                    LayoutIrBlock(
+                        page=1,
+                        x=0.05,
+                        y=0.05,
+                        width=0.9,
+                        height=0.1,
+                        text="f(x) = {1, 2}",
+                    ),
+                ),
+            ),
+        ),
+    )
+    typst = layout_ir_to_typst(doc)
+    assert "\\{" in typst
+    assert "\\}" in typst
+
+
 def test_typst_escape_markup_chars_in_output() -> None:
     doc = LayoutIrDocument(
         version=1,

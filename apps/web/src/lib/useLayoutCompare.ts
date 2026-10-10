@@ -13,6 +13,7 @@ import {
   type LayoutComparePagePayload,
   type LayoutCompareSummary,
 } from './layoutCompare';
+import { layoutCompareUserMessage } from './layoutCompareUserError';
 
 type CompareLoadState = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -58,7 +59,7 @@ export function useLayoutCompare(
       .catch((err: unknown) => {
         if (!active) return;
         setSummaryState('error');
-        setSummaryError(err instanceof Error ? err.message : String(err));
+        setSummaryError(layoutCompareUserMessage(err));
       });
     return () => {
       active = false;
@@ -96,7 +97,7 @@ export function useLayoutCompare(
       .catch((err: unknown) => {
         if (!active) return;
         setMetricsState('error');
-        setMetricsError(err instanceof Error ? err.message : String(err));
+        setMetricsError(layoutCompareUserMessage(err));
       });
     return () => {
       active = false;
@@ -122,7 +123,7 @@ export function useLayoutCompare(
         setPageState('ready');
       } catch (err: unknown) {
         setPageState('error');
-        setPageError(err instanceof Error ? err.message : String(err));
+        setPageError(layoutCompareUserMessage(err));
       }
     },
     [documentId]

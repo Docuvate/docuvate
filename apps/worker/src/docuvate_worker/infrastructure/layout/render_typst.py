@@ -40,6 +40,8 @@ def _escape_typst(text: str) -> str:
         .replace("_", "\\_")
         .replace("[", "\\[")
         .replace("]", "\\]")
+        .replace("{", "\\{")
+        .replace("}", "\\}")
         .replace('"', '\\"')
         .replace("`", "\\`")
         .replace("~", "\\~")

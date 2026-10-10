@@ -481,6 +481,17 @@
     "layoutCompareSsimFloor": "Schwelle: {{floor}} %",
     "layoutCompareUnreliablePage": "Seite unter der Schwelle",
     "layoutCompareLoading": "Vergleich wird berechnet…",
+    "layoutCompareRetry": "Erneut versuchen",
+    "layoutCompareErrors": {
+      "compileFailed": "Der Layout-Nachbau konnte nicht erstellt werden. Bitte Extraktion erneut ausführen oder ein anderes Dokument wählen.",
+      "rasterizeFailed": "Die PDF-Seite konnte nicht gerendert werden.",
+      "pageOutOfRange": "Diese Seite ist im Dokument nicht verfügbar.",
+      "pdfTooLarge": "Die PDF ist für den Layout-Vergleich zu groß.",
+      "tooManyPages": "Das Dokument hat zu viele Seiten für den Layout-Vergleich.",
+      "timeout": "Der Layout-Vergleich hat zu lange gedauert. Bitte erneut versuchen.",
+      "compareFailed": "Der Layout-Vergleich ist fehlgeschlagen. Bitte erneut versuchen.",
+      "workerUnavailable": "Der Layout-Worker ist vorübergehend nicht erreichbar. Bitte später erneut versuchen."
+    },
     "layoutComparePageNavAria": "Seitennavigation im Vergleich",
     "layoutComparePageStripAria": "Seitenliste mit SSIM",
     "layoutComparePagePrev": "Zurück",

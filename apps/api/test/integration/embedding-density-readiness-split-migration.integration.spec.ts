@@ -16,6 +16,22 @@ async function userStateColumns(pool: ReturnType<typeof getIntegrationPool>): Pr
   return result.rows.map((row) => row.column_name);
 }
 
+async function undoUntilCalibrationReady(
+  dataSource: DataSource,
+  pool: ReturnType<typeof getIntegrationPool>
+): Promise<string[]> {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const columns = await userStateColumns(pool);
+    if (columns.includes('calibration_ready')) {
+      return columns;
+    }
+    await dataSource.undoLastMigration();
+  }
+  const columns = await userStateColumns(pool);
+  expect(columns).toContain('calibration_ready');
+  return columns;
+}
+
 describe('EmbeddingDensityReadinessSplit migration (Postgres upgrade)', () => {
   const pool = getIntegrationPool();
   let dataSource: DataSource;
@@ -36,8 +52,7 @@ describe('EmbeddingDensityReadinessSplit migration (Postgres upgrade)', () => {
     expect(columnsAfterFullMigrate).toContain('fine_ready_tag_ids');
     expect(columnsAfterFullMigrate).not.toContain('calibration_ready');
 
-    await dataSource.undoLastMigration();
-    const columnsAfterDown = await userStateColumns(pool);
+    const columnsAfterDown = await undoUntilCalibrationReady(dataSource, pool);
     expect(columnsAfterDown).toContain('calibration_ready');
     expect(columnsAfterDown).not.toContain('coarse_ready');
     expect(columnsAfterDown).not.toContain('fine_ready_tag_ids');
@@ -47,7 +62,7 @@ describe('EmbeddingDensityReadinessSplit migration (Postgres upgrade)', () => {
     expect(columnsAfterUp).toContain('coarse_ready');
     expect(columnsAfterUp).toContain('fine_ready_tag_ids');
 
-    await dataSource.undoLastMigration();
+    await undoUntilCalibrationReady(dataSource, pool);
     await dataSource.runMigrations();
     const columnsAfterSecondUp = await userStateColumns(pool);
     expect(columnsAfterSecondUp).toContain('coarse_ready');

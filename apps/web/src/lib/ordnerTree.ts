@@ -64,7 +64,7 @@ export function buildOrdnerBreadcrumbs(
 ): OrdnerBreadcrumbSegment[] {
   const folderFallback = i18n.t('common.folder');
   const root: OrdnerBreadcrumbSegment = {
-    label: i18n.t('nav.folders'),
+    label: i18n.t('filesystem.allFoldersTitle'),
     to: routes.filesystem,
   };
   if (selection.kind === 'root') return [root];

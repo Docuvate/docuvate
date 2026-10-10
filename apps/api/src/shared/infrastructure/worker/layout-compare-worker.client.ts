@@ -10,9 +10,12 @@ import type {
 import { workerApiUrl } from './worker-api-path.js';
 import {
   fetchWorkerJson,
-  mapWorkerLayoutHttpStatus,
   workerLayoutTimeoutError,
 } from './worker-fetch.js';
+import {
+  mapWorkerLayoutCompareHttpError,
+  parseWorkerLayoutCompareErrorCode,
+} from './layout-compare-worker.errors.js';
 import { workerRequestHeaders } from './worker-request-headers.js';
 
 const LAYOUT_COMPARE_TIMEOUT_MS = 180_000;
@@ -33,7 +36,8 @@ async function postLayoutCompareWorker<T>(
     LAYOUT_COMPARE_TIMEOUT_MS,
     {
       onTimeout: workerLayoutTimeoutError,
-      onHttpError: mapWorkerLayoutHttpStatus,
+      onHttpError: (status, body) =>
+        mapWorkerLayoutCompareHttpError(status, parseWorkerLayoutCompareErrorCode(body)),
     }
   );
   const parsed = schema.safeParse(raw);

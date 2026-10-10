@@ -9,6 +9,7 @@ import {
   pngDataUrl,
 } from '../../lib/layoutCompare';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
+import { Button } from '../ui/Button';
 import { LayoutComparePageNav } from './LayoutComparePageNav';
 
 export type LayoutComparePresentation = 'split' | 'slider';
@@ -48,6 +49,8 @@ export function DocumentLayoutCompareView({
 
   const ssimFloor = pagePayload?.ssimFloor ?? metrics?.ssimFloor ?? 0;
   const ssimScore = pagePayload?.ssim ?? metricsByPage.get(activePage)?.ssim;
+  const ssimPending =
+    ssimScore == null && metricsState === 'loading' && pageState !== 'error' && !pageError;
   const pageReliable =
     pagePayload?.pageReliable ?? metricsByPage.get(activePage)?.pageReliable ?? true;
 
@@ -109,9 +112,9 @@ export function DocumentLayoutCompareView({
                 score: formatSsimScore(ssimScore, i18n.language),
               })}
             </span>
-          ) : (
+          ) : ssimPending ? (
             <span className="muted">{t('documents.layoutCompareSsimPending')}</span>
-          )}
+          ) : null}
           <span className="muted layout-compare-ssim-floor">
             {t('documents.layoutCompareSsimFloor', {
               floor: formatSsimScore(ssimFloor, i18n.language),
@@ -130,13 +133,27 @@ export function DocumentLayoutCompareView({
         onPageChange={onPageChange}
       />
 
-      {metricsState === 'error' ? (
-        <p className="error" role="alert">{metricsError}</p>
+      {metricsState === 'error' && metricsError ? (
+        <div className="layout-compare-error" role="alert">
+          <p className="error">{metricsError}</p>
+          <Button type="button" variant="secondary" onClick={() => onPageChange(activePage)}>
+            {t('documents.layoutCompareRetry')}
+          </Button>
+        </div>
       ) : null}
-      {pageState === 'error' ? (
-        <p className="error" role="alert">{pageError}</p>
+      {pageState === 'error' && pageError ? (
+        <div className="layout-compare-error" role="alert">
+          <p className="error">{pageError}</p>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => void loadPage(activePage, heatmapEnabled)}
+          >
+            {t('documents.layoutCompareRetry')}
+          </Button>
+        </div>
       ) : null}
-      {pageState === 'loading' || metricsState === 'loading' ? (
+      {(pageState === 'loading' || metricsState === 'loading') && pageState !== 'error' ? (
         <p className="muted">{t('documents.layoutCompareLoading')}</p>
       ) : null}
 
