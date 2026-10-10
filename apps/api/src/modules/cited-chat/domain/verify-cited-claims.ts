@@ -307,13 +307,14 @@ export function verifyCitedClaims(input: {
       continue;
     }
 
-    const unionQuote = resolved.map((r) => r.match.bodyQuote).join(' ');
+    const unionBodyQuotes = resolved.map((r) => r.match.bodyQuote).join(' ');
+    const unionCitationQuotes = resolved.map((r) => r.quote).join(' ');
     const unionChunkBodies = resolved.map((r) => r.row.chunk.body).join(' ');
     if (
       !validateMatchedSpanNumbers({
-        quote: unionQuote,
+        quote: unionCitationQuotes,
         claimText,
-        bodyQuote: unionQuote,
+        bodyQuote: unionBodyQuotes,
         chunkBody: unionChunkBodies,
       })
     ) {

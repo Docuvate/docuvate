@@ -5,6 +5,7 @@ import {
   fuzzyWordsMatch,
   numericTokensPresentInText,
 } from './quote-numeric-consistency.js';
+import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
 import { chunkIndexText } from './split-text-chunks-with-spans.js';
 
 const QUOTE_WORD_LIMIT = 10;
@@ -349,7 +350,7 @@ export function fuzzySpanSearchInChunk(
       continue;
     }
     const quoteNums = extractNumericTokens(needleText);
-    if (!numericTokensPresentInText(quoteNums, hit.bodyQuote)) {
+    if (!numericTokensPresentInText(quoteNums, textForNumericQuoteCheck(hit.bodyQuote))) {
       continue;
     }
     return hit;
@@ -358,7 +359,7 @@ export function fuzzySpanSearchInChunk(
 }
 
 function textForNumericQuoteCheck(text: string): string {
-  return text.replace(/\u00ad/g, '').replace(/[\u200b-\u200d\ufeff]/g, '');
+  return normalizeExtractionSurfaceText(text);
 }
 
 export function validateMatchedSpanNumbers(input: {
