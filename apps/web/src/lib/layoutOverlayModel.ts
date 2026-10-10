@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { formatLayoutTableCell } from './formatLayoutTableCell.js';
 import type {
   ExtractedField,
   LayoutIrBlock,
@@ -251,7 +252,7 @@ export function buildLayoutTables(
 }
 
 function tableRowsToStrings(table: LayoutIrTable): string[][] {
-  return table.rows.map((row) => row.map((cell) => cell.text.trim()));
+  return table.rows.map((row) => row.map((cell) => formatLayoutTableCell(cell.text)));
 }
 
 export function overlayForExtractionBlock(

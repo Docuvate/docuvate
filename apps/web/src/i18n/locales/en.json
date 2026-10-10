@@ -481,6 +481,17 @@
     "layoutCompareSsimFloor": "Floor: {{floor}}%",
     "layoutCompareUnreliablePage": "Page below threshold",
     "layoutCompareLoading": "Computing compare…",
+    "layoutCompareRetry": "Try again",
+    "layoutCompareErrors": {
+      "compileFailed": "Could not build the layout reconstruction. Re-run extraction or try another document.",
+      "rasterizeFailed": "Could not render the PDF page.",
+      "pageOutOfRange": "This page is not available in the document.",
+      "pdfTooLarge": "The PDF is too large for layout compare.",
+      "tooManyPages": "The document has too many pages for layout compare.",
+      "timeout": "Layout compare timed out. Please try again.",
+      "compareFailed": "Layout compare failed. Please try again.",
+      "workerUnavailable": "The layout worker is temporarily unavailable. Please try again later."
+    },
     "layoutComparePageNavAria": "Compare page navigation",
     "layoutComparePageStripAria": "Page list with SSIM",
     "layoutComparePagePrev": "Previous",

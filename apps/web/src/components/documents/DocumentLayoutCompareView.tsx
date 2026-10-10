@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useState, type KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   formatSsimScore,
@@ -9,6 +9,7 @@ import {
   pngDataUrl,
 } from '../../lib/layoutCompare';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
+import { Button } from '../ui/Button';
 import { LayoutComparePageNav } from './LayoutComparePageNav';
 
 export type LayoutComparePresentation = 'split' | 'slider';
@@ -39,15 +40,20 @@ export function DocumentLayoutCompareView({
     pagePayload,
     pageState,
     pageError,
-    loadPage,
-  } = useLayoutCompare(documentId, true, pageCount, activePage);
-
-  useEffect(() => {
-    void loadPage(activePage, heatmapEnabled);
-  }, [activePage, heatmapEnabled, loadPage]);
+    retryMetrics,
+    retryPage,
+  } = useLayoutCompare(documentId, true, pageCount, activePage, heatmapEnabled);
 
   const ssimFloor = pagePayload?.ssimFloor ?? metrics?.ssimFloor ?? 0;
   const ssimScore = pagePayload?.ssim ?? metricsByPage.get(activePage)?.ssim;
+  const metricsTimedOut = metricsState === 'timeout';
+  const pageTimedOut = pageState === 'timeout';
+  const ssimPending =
+    ssimScore == null &&
+    metricsState === 'loading' &&
+    pageState !== 'error' &&
+    pageState !== 'timeout' &&
+    !pageError;
   const pageReliable =
     pagePayload?.pageReliable ?? metricsByPage.get(activePage)?.pageReliable ?? true;
 
@@ -109,9 +115,9 @@ export function DocumentLayoutCompareView({
                 score: formatSsimScore(ssimScore, i18n.language),
               })}
             </span>
-          ) : (
+          ) : ssimPending ? (
             <span className="muted">{t('documents.layoutCompareSsimPending')}</span>
-          )}
+          ) : null}
           <span className="muted layout-compare-ssim-floor">
             {t('documents.layoutCompareSsimFloor', {
               floor: formatSsimScore(ssimFloor, i18n.language),
@@ -130,13 +136,26 @@ export function DocumentLayoutCompareView({
         onPageChange={onPageChange}
       />
 
-      {metricsState === 'error' ? (
-        <p className="error" role="alert">{metricsError}</p>
+      {(metricsState === 'error' || metricsTimedOut) && metricsError ? (
+        <div className="layout-compare-error" role="alert">
+          <p className="error">{metricsError}</p>
+          <Button type="button" variant="secondary" onClick={() => retryMetrics()}>
+            {t('documents.layoutCompareRetry')}
+          </Button>
+        </div>
       ) : null}
-      {pageState === 'error' ? (
-        <p className="error" role="alert">{pageError}</p>
+      {(pageState === 'error' || pageTimedOut) && pageError ? (
+        <div className="layout-compare-error" role="alert">
+          <p className="error">{pageError}</p>
+          <Button type="button" variant="secondary" onClick={() => retryPage()}>
+            {t('documents.layoutCompareRetry')}
+          </Button>
+        </div>
       ) : null}
-      {pageState === 'loading' || metricsState === 'loading' ? (
+      {(pageState === 'loading' || metricsState === 'loading') &&
+      pageState !== 'error' &&
+      pageState !== 'timeout' &&
+      metricsState !== 'timeout' ? (
         <p className="muted">{t('documents.layoutCompareLoading')}</p>
       ) : null}
 

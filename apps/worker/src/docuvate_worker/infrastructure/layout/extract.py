@@ -8,6 +8,7 @@ from __future__ import annotations
 import io
 import logging
 import re
+from collections import Counter
 from pathlib import Path
 
 from docuvate_worker.domain.layout_ir import (
@@ -43,6 +44,61 @@ from docuvate_worker.infrastructure.layout.widget_dedupe import (
 
 _WHITESPACE_RUN = re.compile(r"\s+")
 _logger = logging.getLogger(__name__)
+
+
+def _join_cell_chars(chars: list[dict]) -> str:
+    """Join chars in reading order; insert spaces or commas when geometry shows token gaps."""
+    if not chars:
+        return ""
+    ordered = sorted(chars, key=lambda c: (c["top"], c["x0"]))
+    parts: list[str] = []
+    prev: dict | None = None
+    for ch in ordered:
+        token = ch.get("text") or ""
+        if not token:
+            continue
+        if prev is not None:
+            gap = float(ch["x0"]) - float(prev["x1"])
+            char_w = max(float(ch["x1"]) - float(ch["x0"]), 0.5)
+            prev_w = max(float(prev["x1"]) - float(prev["x0"]), 0.5)
+            tight = max(1.0, min(char_w, prev_w) * 0.4)
+            wide = max(2.0, (char_w + prev_w) * 0.55)
+            if gap > wide:
+                parts.append(", ")
+            elif gap > tight:
+                parts.append(" ")
+        parts.append(token)
+        prev = ch
+    return _WHITESPACE_RUN.sub(" ", "".join(parts)).strip()
+
+
+def _non_ws_char_multiset(text: str) -> Counter[str]:
+    return Counter(ch for ch in text if not ch.isspace())
+
+
+def _char_multisets_equal_ignore_ws(left: str, right: str) -> bool:
+    return _non_ws_char_multiset(left) == _non_ws_char_multiset(right)
+
+
+def _concat_cell_chars(chars: list[dict]) -> str:
+    ordered = sorted(chars, key=lambda c: (c["top"], c["x0"]))
+    return "".join(ch.get("text") or "" for ch in ordered)
+
+
+def _resolve_cell_text(chars: list[dict], extract_text: str | None) -> str:
+    fallback = (extract_text or "").strip()
+    if not chars:
+        return fallback
+    joined = _join_cell_chars(chars)
+    raw = _concat_cell_chars(chars)
+    if _char_multisets_equal_ignore_ws(joined, raw):
+        return joined
+    if fallback and _char_multisets_equal_ignore_ws(fallback, raw):
+        return fallback
+    if fallback and not _char_multisets_equal_ignore_ws(joined, fallback):
+        return fallback
+    return joined
+
 
 _TABLE_PAD_PT = 1.5
 
@@ -146,13 +202,10 @@ def _extract_tables(
                 cx0, ctop, cx1, cbottom = cell
                 chars = _chars_in_box(page, cx0, ctop, cx1, cbottom)
                 size_pt, weight, _font = _style_from_chars(chars)
-                text = ""
+                extract_cell = None
                 if row_idx < len(extracted) and col_idx < len(extracted[row_idx]):
-                    text = (extracted[row_idx][col_idx] or "").strip()
-                if not text and chars:
-                    ordered = sorted(chars, key=lambda c: (c["top"], c["x0"]))
-                    text = "".join(c.get("text") or "" for c in ordered)
-                    text = _WHITESPACE_RUN.sub(" ", text).strip()
+                    extract_cell = extracted[row_idx][col_idx]
+                text = _resolve_cell_text(chars, extract_cell)
                 if not text:
                     continue
                 col_count = len(row.cells)

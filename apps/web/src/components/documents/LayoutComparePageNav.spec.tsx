@@ -1,7 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+afterEach(() => {
+  cleanup();
+});
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -21,6 +25,20 @@ vi.mock('react-i18next', () => ({
 import { LayoutComparePageNav } from './LayoutComparePageNav';
 
 describe('LayoutComparePageNav', () => {
+  it('virtualizes the page strip for a 16-page paper', () => {
+    render(
+      <LayoutComparePageNav
+        pageCount={16}
+        activePage={8}
+        metricsByPage={new Map()}
+        onPageChange={vi.fn()}
+      />
+    );
+    const chips = document.querySelectorAll('.layout-compare-page-chip');
+    expect(chips.length).toBe(16);
+    expect(screen.getByText('1-16/16')).toBeTruthy();
+  });
+
   it('renders a bounded chip count for 120 pages', () => {
     render(
       <LayoutComparePageNav
@@ -30,7 +48,7 @@ describe('LayoutComparePageNav', () => {
         onPageChange={vi.fn()}
       />
     );
-    const chips = screen.getAllByRole('option');
+    const chips = document.querySelectorAll('.layout-compare-page-chip');
     expect(chips.length).toBe(21);
     expect(chips.length).toBeLessThan(30);
   });

@@ -49,7 +49,7 @@ export function formatSsimScore(ssim: number, locale: string): string {
   }).format(percent);
 }
 
-export const LAYOUT_COMPARE_VIRTUAL_PAGE_THRESHOLD = 50;
+export const LAYOUT_COMPARE_VIRTUAL_PAGE_THRESHOLD = 12;
 export const LAYOUT_COMPARE_PAGE_WINDOW_RADIUS = 10;
 export const LAYOUT_COMPARE_METRICS_BATCH = 25;
 

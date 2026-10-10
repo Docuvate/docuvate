@@ -13,14 +13,24 @@ import {
   type LayoutComparePagePayload,
   type LayoutCompareSummary,
 } from './layoutCompare';
+import { layoutCompareUserMessage } from './layoutCompareUserError';
 
-type CompareLoadState = 'idle' | 'loading' | 'ready' | 'error';
+type CompareLoadState = 'idle' | 'loading' | 'ready' | 'error' | 'timeout';
+
+const SUMMARY_TIMEOUT_MS = 60_000;
+const METRICS_TIMEOUT_MS = 300_000;
+const PAGE_TIMEOUT_MS = 300_000;
+
+function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === 'AbortError';
+}
 
 export function useLayoutCompare(
   documentId: string,
   enabled: boolean,
   pageCountHint: number,
-  activePage: number
+  activePage: number,
+  includeHeatmap: boolean
 ) {
   const [summaryState, setSummaryState] = useState<CompareLoadState>('idle');
   const [summary, setSummary] = useState<LayoutCompareSummary | null>(null);
@@ -36,11 +46,13 @@ export function useLayoutCompare(
   > | null>(null);
   const [metricsError, setMetricsError] = useState<string | null>(null);
   const metricsLoadedRef = useRef<Set<string>>(new Set());
+  const [metricsRetryToken, setMetricsRetryToken] = useState(0);
 
   const [pageState, setPageState] = useState<CompareLoadState>('idle');
   const [pagePayload, setPagePayload] = useState<LayoutComparePagePayload | null>(null);
   const [pageError, setPageError] = useState<string | null>(null);
   const pageCacheRef = useRef<Map<string, LayoutComparePagePayload>>(new Map());
+  const [pageRetryToken, setPageRetryToken] = useState(0);
 
   const effectivePageCount = summary?.pageCount ?? pageCountHint;
 
@@ -49,7 +61,7 @@ export function useLayoutCompare(
     let active = true;
     setSummaryState('loading');
     setSummaryError(null);
-    void fetchDocumentLayoutCompareSummary(documentId)
+    void fetchDocumentLayoutCompareSummary(documentId, { timeoutMs: SUMMARY_TIMEOUT_MS })
       .then((data) => {
         if (!active) return;
         setSummary(data);
@@ -57,8 +69,13 @@ export function useLayoutCompare(
       })
       .catch((err: unknown) => {
         if (!active) return;
+        if (isAbortError(err)) {
+          setSummaryState('timeout');
+          setSummaryError(layoutCompareUserMessage(err));
+          return;
+        }
         setSummaryState('error');
-        setSummaryError(err instanceof Error ? err.message : String(err));
+        setSummaryError(layoutCompareUserMessage(err));
       });
     return () => {
       active = false;
@@ -75,7 +92,9 @@ export function useLayoutCompare(
     let active = true;
     setMetricsState('loading');
     setMetricsError(null);
-    void fetchDocumentLayoutCompareMetrics(documentId, from, to)
+    void fetchDocumentLayoutCompareMetrics(documentId, from, to, {
+      timeoutMs: METRICS_TIMEOUT_MS,
+    })
       .then((data) => {
         if (!active) return;
         metricsLoadedRef.current.add(batchKey);
@@ -95,13 +114,18 @@ export function useLayoutCompare(
       })
       .catch((err: unknown) => {
         if (!active) return;
+        if (isAbortError(err)) {
+          setMetricsState('timeout');
+          setMetricsError(layoutCompareUserMessage(err));
+          return;
+        }
         setMetricsState('error');
-        setMetricsError(err instanceof Error ? err.message : String(err));
+        setMetricsError(layoutCompareUserMessage(err));
       });
     return () => {
       active = false;
     };
-  }, [documentId, enabled, effectivePageCount, activePage]);
+  }, [documentId, enabled, effectivePageCount, activePage, metricsRetryToken]);
 
   const loadPage = useCallback(
     async (pageNumber: number, includeHeatmap: boolean) => {
@@ -116,17 +140,47 @@ export function useLayoutCompare(
       setPageState('loading');
       setPageError(null);
       try {
-        const data = await fetchDocumentLayoutComparePage(documentId, pageNumber, includeHeatmap);
+        const data = await fetchDocumentLayoutComparePage(
+          documentId,
+          pageNumber,
+          includeHeatmap,
+          { timeoutMs: PAGE_TIMEOUT_MS }
+        );
         pageCacheRef.current.set(cacheKey, data);
         setPagePayload(data);
         setPageState('ready');
       } catch (err: unknown) {
+        if (isAbortError(err)) {
+          setPageState('timeout');
+          setPageError(layoutCompareUserMessage(err));
+          return;
+        }
         setPageState('error');
-        setPageError(err instanceof Error ? err.message : String(err));
+        setPageError(layoutCompareUserMessage(err));
       }
     },
     [documentId]
   );
+
+  useEffect(() => {
+    void loadPage(activePage, includeHeatmap);
+  }, [activePage, includeHeatmap, loadPage, pageRetryToken]);
+
+  const retryMetrics = useCallback(() => {
+    metricsLoadedRef.current.clear();
+    setMetricsRetryToken((n) => n + 1);
+  }, []);
+
+  const retryPage = useCallback(() => {
+    const cacheKey = `${activePage}:${includeHeatmap ? '1' : '0'}`;
+    pageCacheRef.current.delete(cacheKey);
+    setPageRetryToken((n) => n + 1);
+  }, [activePage, includeHeatmap]);
+
+  const retryAll = useCallback(() => {
+    retryMetrics();
+    retryPage();
+  }, [retryMetrics, retryPage]);
 
   const metricsPages = Array.from(metricsByPage.values()).sort(
     (a, b) => a.pageNumber - b.pageNumber
@@ -153,5 +207,8 @@ export function useLayoutCompare(
     pageState,
     pageError,
     loadPage,
+    retryMetrics,
+    retryPage,
+    retryAll,
   };
 }

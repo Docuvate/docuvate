@@ -215,32 +215,39 @@ export async function fetchDocumentLayoutTypst(
 }
 
 export async function fetchDocumentLayoutCompareSummary(
-  documentId: string
+  documentId: string,
+  init?: { timeoutMs?: number }
 ): Promise<LayoutCompareSummary> {
-  return request(`/documents/${documentId}/layout-compare/summary`);
+  return request(`/documents/${documentId}/layout-compare/summary`, init);
 }
 
 export async function fetchDocumentLayoutCompareMetrics(
   documentId: string,
   from?: number,
-  to?: number
+  to?: number,
+  init?: { timeoutMs?: number }
 ): Promise<LayoutCompareMetrics> {
   const params = new URLSearchParams();
   if (from !== undefined) params.set('from', String(from));
   if (to !== undefined) params.set('to', String(to));
   const query = params.toString();
   return request(
-    `/documents/${documentId}/layout-compare/metrics${query ? `?${query}` : ''}`
+    `/documents/${documentId}/layout-compare/metrics${query ? `?${query}` : ''}`,
+    init
   );
 }
 
 export async function fetchDocumentLayoutComparePage(
   documentId: string,
   pageNumber: number,
-  includeHeatmap = true
+  includeHeatmap = true,
+  init?: { timeoutMs?: number }
 ): Promise<LayoutComparePagePayload> {
   const heatmapQuery = includeHeatmap ? '' : '?heatmap=0';
-  return request(`/documents/${documentId}/layout-compare/pages/${pageNumber}${heatmapQuery}`);
+  return request(
+    `/documents/${documentId}/layout-compare/pages/${pageNumber}${heatmapQuery}`,
+    init
+  );
 }
 
 export async function updateDocument(

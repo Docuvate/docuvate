@@ -13,12 +13,11 @@ def test_vendor_skips_landscape_heading_line() -> None:
     assert "vendor" not in fields
 
 
-def test_vendor_skips_academic_paper_title_without_sender_evidence() -> None:
+def test_vendor_skips_synthetic_paper_title_without_sender_evidence() -> None:
     text = "\n".join(
         [
-            "Closed-Form Document Layout Classification",
-            "with Certified Coarse-to-Fine Abstention",
-            "Jonas Demo",
+            "Synthetic Nine Word Academic Title Case Example Heading",
+            "Second Line Author Names Only",
         ]
     )
     fields = {f.key: f.value for f in heuristic_fields(text)}

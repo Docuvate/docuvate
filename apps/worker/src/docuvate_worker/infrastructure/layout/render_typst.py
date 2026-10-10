@@ -40,10 +40,13 @@ def _escape_typst(text: str) -> str:
         .replace("_", "\\_")
         .replace("[", "\\[")
         .replace("]", "\\]")
+        .replace("{", "\\{")
+        .replace("}", "\\}")
         .replace('"', '\\"')
         .replace("`", "\\`")
         .replace("~", "\\~")
         .replace("-", "\\-")
+        .replace("+", "\\+")
     )
     if escaped.startswith("="):
         return "\\=" + escaped[1:]
@@ -51,19 +54,9 @@ def _escape_typst(text: str) -> str:
 
 
 def _typst_text_body(text: str) -> str:
-    """Typst text content (`+` must not use math mode)."""
-    if text == "+":
-        return '#raw("+") '
-    if "+" not in text:
-        return _escape_typst(text) + " "
-    parts: list[str] = []
-    for piece in text.split("+"):
-        if piece:
-            parts.append(_escape_typst(piece))
-        parts.append('#raw("+")')
-    if parts and text.endswith("+"):
-        return "".join(parts) + " "
-    return "".join(parts[:-1]) + " " if parts else " "
+    """Typst string literal in text content (preserves Unicode; avoids math/markup parsing)."""
+    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
+    return f'#"{escaped}" '
 
 
 def _x_pt(norm: float, page_width_pt: float) -> float:

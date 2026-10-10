@@ -22,8 +22,7 @@ export function DateisystemRootOverview({
 
   return (
     <div className="dateisystem-root-overview">
-      <h3>{t('filesystem.allFoldersTitle')}</h3>
-      <p className="muted">{t('filesystem.allFoldersHint')}</p>
+      <p className="muted dateisystem-root-overview-lead">{t('filesystem.allFoldersHint')}</p>
       {sorted.length === 0 ? (
         <div className="empty-state dateisystem-root-empty">
           <p className="muted">{t('filesystem.rootEmpty')}</p>
