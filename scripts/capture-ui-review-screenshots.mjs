@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /**
- * PR #72 review screenshots (1440×900, compose @ localhost:5173).
+ * UI review screenshots (1440×900, compose @ localhost:5173).
  * Evidence: status filter menu, label form, recognized fields, build SHA.
  */
 import { chromium } from 'playwright';
@@ -284,7 +286,7 @@ async function main() {
   await enContext.close();
 
   await browser.close();
-  await writeFile(`${OUT}/pr72-screenshot-report.json`, `${JSON.stringify(report, null, 2)}\n`);
+  await writeFile(`${OUT}/ui-review-screenshot-report.json`, `${JSON.stringify(report, null, 2)}\n`);
   console.log('Saved screenshots to', OUT);
   console.log('build_sha:', report.buildSha);
 }
