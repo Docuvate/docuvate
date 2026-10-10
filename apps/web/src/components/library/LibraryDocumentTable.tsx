@@ -81,7 +81,9 @@ export function LibraryDocumentTable({
 }: LibraryDocumentTableProps) {
   const { t } = useTranslation();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [stackMembers, setStackMembers] = useState<Record<string, DuplicateStackMemberDto[]>>({});
+  const [stackMembers, setStackMembers] = useState<
+    Partial<Record<string, DuplicateStackMemberDto[]>>
+  >({});
   const [versionDeleteTarget, setVersionDeleteTarget] = useState<{
     primaryDocId: string;
     member: DuplicateStackMemberDto;
@@ -417,7 +419,7 @@ export function LibraryDocumentTable({
               const stackLabel = duplicateStackVersionLabel(doc, t);
               const hasStack = showDuplicateStackBadge(doc);
               const expanded = expandedIds.has(doc.id);
-              const members = stackMembers[doc.id].filter((m) => m.role === 'version');
+              const members = stackMembers[doc.id]?.filter((m) => m.role === 'version') ?? [];
 
               const rowSelected = selected.has(doc.id);
               const rowContextOpen = contextMenuDocumentId === doc.id;
