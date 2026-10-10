@@ -382,7 +382,7 @@ async function main() {
     'layout-compare-heatmap',
     async (p, width) => {
       await enterCompareMode(p);
-      await p.getByLabel(/heatmap/i).check();
+      await p.getByLabel(/abweichungs-heatmap|heatmap/i).check();
       if (width <= 390) await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
     },
     async (p) => {
