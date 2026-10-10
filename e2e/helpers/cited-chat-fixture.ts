@@ -118,5 +118,26 @@ export async function provisionCitedChatLibrary(
       ),
     },
   });
+  await waitForSearchHit(request, opts.apiBase, 'Miete', leaseDocId);
   return { ...creds, invoiceDocId, taxDocId, leaseDocId, contractDocId };
+}
+
+async function waitForSearchHit(
+  request: APIRequestContext,
+  apiBase: string,
+  query: string,
+  expectedDocumentId: string
+) {
+  const deadline = Date.now() + 90_000;
+  while (Date.now() < deadline) {
+    const res = await request.get(`${apiBase}/v1/search`, { params: { q: query, limit: '8' } });
+    if (res.ok()) {
+      const body = (await res.json()) as { items?: Array<{ documentId: string }> };
+      if (body.items?.some((item) => item.documentId === expectedDocumentId)) {
+        return;
+      }
+    }
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  throw new Error(`search index did not include document ${expectedDocumentId} for "${query}"`);
 }

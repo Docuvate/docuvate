@@ -64,7 +64,10 @@ export function buildDocumentChatProvidersCatalog(input: {
   const donutAvailable = donutWorker?.available === true;
 
   const ragEnvReady = workerConfigured && ollamaConfigured && ollamaHardwareOk && ollamaMemOk;
-  const ragOllamaAvailable = ragEnvReady && input.ollamaModelReady;
+  /** Worker RAG + cited extractive answers without Ollama (compose-smoke, CPU-only). */
+  const ragExtractiveOnlyReady = workerConfigured && !ollamaConfigured;
+  const ragOllamaAvailable =
+    (ragEnvReady && input.ollamaModelReady) || ragExtractiveOnlyReady;
 
   const runsOnCpu = !input.hardware?.gpuAvailable;
 

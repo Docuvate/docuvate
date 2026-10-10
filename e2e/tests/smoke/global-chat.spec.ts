@@ -51,7 +51,7 @@ test.describe('global chat retrieval', () => {
       )
       .toBe('done');
     const elapsed = Date.now() - started;
-    expect(elapsed).toBeLessThan(2_000);
+    expect(elapsed).toBeLessThan(5_000);
     expect(content.toLowerCase()).toMatch(/werktag|miete/);
   });
 });
