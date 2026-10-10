@@ -65,8 +65,8 @@ export async function fetchWorkerRagRerank(
   query: string,
   passages: RagRetrievePassage[]
 ): Promise<RagRetrieveResponse> {
-  const workerUrl = process.env.WORKER_URL ?? 'http://localhost:8000';
-  const secret = process.env.WORKER_SECRET ?? 'worker-shared-secret';
+  const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
+  const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
   if (!passages.length) {
     return { reachable: true, rerankerUsed: true, rerankerModel: null, results: [] };
   }
@@ -78,7 +78,7 @@ export async function fetchWorkerRagRerank(
         'X-Worker-Secret': secret,
       },
       body: JSON.stringify({ query, passages }),
-      signal: AbortSignal.timeout(Number(process.env.WORKER_RAG_TIMEOUT_MS ?? 30_000)),
+      signal: AbortSignal.timeout(Number(process.env['WORKER_RAG_TIMEOUT_MS'] ?? 30_000)),
     });
     if (!response.ok) {
       return { reachable: false, rerankerUsed: false, rerankerModel: null, results: [] };

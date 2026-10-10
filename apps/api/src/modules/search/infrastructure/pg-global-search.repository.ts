@@ -39,7 +39,7 @@ import {
 const TRGM_THRESHOLD = 0.32;
 const WORD_SIM_THRESHOLD = 0.32;
 const PER_GROUP_LIMIT = 8;
-const EMBED_CANDIDATE_CAP = Number(process.env.GLOBAL_SEARCH_EMBED_CANDIDATE_CAP ?? 24);
+const EMBED_CANDIDATE_CAP = Number(process.env['GLOBAL_SEARCH_EMBED_CANDIDATE_CAP'] ?? 24);
 
 const EMPTY_ID_ROWS: { id: string }[] = [];
 const EMPTY_TRGM_ROWS: { id: string; score: number }[] = [];

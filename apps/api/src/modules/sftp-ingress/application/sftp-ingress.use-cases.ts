@@ -30,15 +30,15 @@ import {
 import { resolveFolderFromRemotePath } from './resolve-remote-folder.js';
 
 function readMaxBytes(): number {
-  const raw = process.env.DOCUVATE_SFTP_INGEST_MAX_BYTES;
+  const raw = process.env['DOCUVATE_SFTP_INGEST_MAX_BYTES'];
   const parsed = raw ? Number(raw) : 26_214_400;
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 26_214_400;
 }
 
 function readServerInfo() {
-  const host = process.env.DOCUVATE_SFTP_PUBLIC_HOST?.trim() ?? 'localhost';
-  const port = Number(process.env.DOCUVATE_SFTP_PUBLIC_PORT ?? 2222);
-  const fingerprintRaw = process.env.DOCUVATE_SFTP_HOST_KEY_FINGERPRINT?.trim() ?? '';
+  const host = process.env['DOCUVATE_SFTP_PUBLIC_HOST']?.trim() ?? 'localhost';
+  const port = Number(process.env['DOCUVATE_SFTP_PUBLIC_PORT'] ?? 2222);
+  const fingerprintRaw = process.env['DOCUVATE_SFTP_HOST_KEY_FINGERPRINT']?.trim() ?? '';
   const fingerprint = fingerprintRaw.length > 0 ? fingerprintRaw : null;
   return { host, port: Number.isFinite(port) ? port : 2222, hostKeyFingerprintSha256: fingerprint };
 }

@@ -24,7 +24,7 @@ import {
 import { ConnectorOAuthCallbackGuard } from './connector-oauth-callback.guard.js';
 
 function webConnectorsUrl(query: Record<string, string>): string {
-  const origin = (process.env.WEB_ORIGIN ?? 'http://localhost:5173').replace(/\/$/, '');
+  const origin = (process.env['WEB_ORIGIN'] ?? 'http://localhost:5173').replace(/\/$/, '');
   const params = new URLSearchParams(query);
   return `${origin}/settings/connectors?${params.toString()}`;
 }

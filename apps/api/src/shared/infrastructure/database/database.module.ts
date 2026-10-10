@@ -59,7 +59,7 @@ const typeOrmRootImports =
     {
       provide: PG_POOL,
       useFactory: () => {
-        const url = process.env.DATABASE_URL;
+        const url = process.env['DATABASE_URL'];
         if (!url) throw new Error('DATABASE_URL is required');
         return new pg.Pool({ connectionString: url });
       },

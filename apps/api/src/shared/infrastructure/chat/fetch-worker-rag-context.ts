@@ -23,7 +23,7 @@ export interface WorkerRagContextResult {
 const DEFAULT_RAG_CONTEXT_TIMEOUT_MS = 120_000;
 
 function workerRagContextTimeoutMs(): number {
-  const raw = process.env.WORKER_RAG_CONTEXT_TIMEOUT_MS;
+  const raw = process.env['WORKER_RAG_CONTEXT_TIMEOUT_MS'];
   if (!raw) {
     return DEFAULT_RAG_CONTEXT_TIMEOUT_MS;
   }
@@ -38,8 +38,8 @@ export async function fetchWorkerRagContext(
   message: string,
   context: DocumentChatContext
 ): Promise<WorkerRagContextResult> {
-  const workerUrl = process.env.WORKER_URL ?? 'http://localhost:8000';
-  const secret = process.env.WORKER_SECRET ?? 'worker-shared-secret';
+  const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
+  const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
 
   try {
     const response = await fetch(workerApiUrl(workerUrl, '/document-chat/rag-context'), {

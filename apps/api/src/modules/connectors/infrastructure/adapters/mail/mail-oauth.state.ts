@@ -22,7 +22,7 @@ export interface MailOAuthStatePayload {
 
 function stateSecret(): string {
   return (
-    process.env.DOCUVATE_CONNECTOR_SECRETS_KEY ?? 'dev-insecure-connector-secrets-key-change-me'
+    process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'] ?? 'dev-insecure-connector-secrets-key-change-me'
   );
 }
 

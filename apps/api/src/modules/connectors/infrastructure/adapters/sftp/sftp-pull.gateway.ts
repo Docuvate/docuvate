@@ -8,14 +8,14 @@ const MAX_FETCH_BYTES = 26_214_400;
 const REQUEST_TIMEOUT_MS = 120_000;
 
 function pullBaseUrl(): string {
-  return (process.env.DOCUVATE_SFTP_PULL_GATEWAY_URL ?? 'http://sftp-ingest:8080').replace(
+  return (process.env['DOCUVATE_SFTP_PULL_GATEWAY_URL'] ?? 'http://sftp-ingest:8080').replace(
     /\/$/,
     ''
   );
 }
 
 function serviceKey(): string {
-  return resolveSftpIngestServiceKey() ?? process.env.DOCUVATE_SERVICE_API_KEY ?? '';
+  return resolveSftpIngestServiceKey() ?? process.env['DOCUVATE_SERVICE_API_KEY'] ?? '';
 }
 
 function headers(): Record<string, string> {

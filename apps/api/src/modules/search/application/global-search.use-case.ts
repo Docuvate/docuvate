@@ -39,7 +39,7 @@ export class GlobalSearchUseCase {
     const embedLegEnabled =
       includeDocuments &&
       textQuery.length >= 3 &&
-      process.env.GLOBAL_SEARCH_DISABLE_EMBED !== '1';
+      process.env['GLOBAL_SEARCH_DISABLE_EMBED'] !== '1';
     if (embedLegEnabled && (await this.searchRepo.userHasDocumentEmbeddings(userId))) {
       try {
         const { embeddings } = await this.embedding.embedTexts([textQuery]);
@@ -55,7 +55,7 @@ export class GlobalSearchUseCase {
       includeFolders,
       includeLabels,
       queryVector,
-      embedFullScan: process.env.GLOBAL_SEARCH_EMBED_FULL_SCAN === '1',
+      embedFullScan: process.env['GLOBAL_SEARCH_EMBED_FULL_SCAN'] === '1',
       fieldFilters: resolvedFieldFilters,
     });
 

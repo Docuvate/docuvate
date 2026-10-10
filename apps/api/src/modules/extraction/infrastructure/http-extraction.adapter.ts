@@ -203,7 +203,7 @@ export class HttpExtractionAdapter implements ExtractionPort {
   }
 
   private workerUrl(): string {
-    return process.env.WORKER_URL ?? 'http://localhost:8000';
+    return process.env['WORKER_URL'] ?? 'http://localhost:8000';
   }
 
   async extract(

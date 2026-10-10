@@ -3,5 +3,5 @@
 
 /** Research feature: enabled only when explicitly set to "true". */
 export function embeddingDensityGloballyEnabled(): boolean {
-  return process.env.EMBEDDING_DENSITY_SUGGESTIONS_ENABLED === 'true';
+  return process.env['EMBEDDING_DENSITY_SUGGESTIONS_ENABLED'] === 'true';
 }

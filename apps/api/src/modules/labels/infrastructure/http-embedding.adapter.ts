@@ -27,8 +27,8 @@ function parseEmbeddings(value: unknown): number[][] {
 @Injectable()
 export class HttpEmbeddingAdapter implements EmbeddingPort {
   async embedTexts(texts: string[]): Promise<{ model: string; embeddings: number[][] }> {
-    const workerUrl = process.env.WORKER_URL ?? 'http://localhost:8000';
-    const secret = process.env.WORKER_SECRET ?? 'worker-shared-secret';
+    const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
+    const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
 
     const response = await fetch(workerApiUrl(workerUrl, '/embed'), {
       method: 'POST',

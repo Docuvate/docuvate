@@ -13,7 +13,7 @@ const DEFAULT_STALE_MS = 120_000;
 const RECONCILE_INTERVAL_MS = 60_000;
 
 function staleGenerationMaxAgeMs(): number {
-  const raw = process.env.DOCUMENT_CHAT_GENERATION_STALE_MS;
+  const raw = process.env['DOCUMENT_CHAT_GENERATION_STALE_MS'];
   if (!raw) {
     return DEFAULT_STALE_MS;
   }

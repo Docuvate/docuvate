@@ -9,7 +9,7 @@ async function main(): Promise<void> {
   if (!email) {
     throw new Error('Usage: auth:promote-admin <email>');
   }
-  const url = process.env.DATABASE_URL;
+  const url = process.env['DATABASE_URL'];
   if (!url) {
     throw new Error('DATABASE_URL is required');
   }

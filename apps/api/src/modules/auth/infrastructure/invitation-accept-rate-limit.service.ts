@@ -12,7 +12,7 @@ export class InvitationAcceptRateLimitService implements OnModuleDestroy {
   private readonly redis: IORedis;
 
   constructor() {
-    const valkeyUrl = process.env.VALKEY_URL ?? 'redis://localhost:6379';
+    const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
     this.redis = new IORedis(valkeyUrl, { maxRetriesPerRequest: 1, enableOfflineQueue: false });
   }
 

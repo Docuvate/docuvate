@@ -38,7 +38,7 @@ export class GetDocumentLayoutCompareMetricsUseCase {
       throw new ValidationError('Zu viele Seiten in einer Metrik-Anfrage.');
     }
     const { buffer } = await this.getDocumentContent.execute(id, userId, subject);
-    const workerUrl = process.env.WORKER_URL ?? 'http://localhost:8000';
+    const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     const data = await workerLayoutCompareMetrics(
       workerUrl,
       layoutIr,

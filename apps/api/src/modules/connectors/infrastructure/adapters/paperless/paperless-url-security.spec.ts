@@ -21,7 +21,7 @@ vi.mock('node:dns/promises', () => ({
 describe('paperless-url-security', () => {
   beforeEach(() => {
     vi.mocked(lookup).mockReset();
-    delete process.env.DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS;
+    delete process.env['DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS'];
   });
 
   afterEach(() => {
@@ -57,7 +57,7 @@ describe('paperless-url-security', () => {
   });
 
   it('blocks private IPs when flag is off', async () => {
-    process.env.DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS = '0';
+    process.env['DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS'] = '0';
     mockDnsLookupAll([{ address: '10.0.0.5', family: 4 }]);
     await expect(assertPaperlessHostResolvable('http://paperless.local')).rejects.toThrow(
       'connectors.paperless.errors.urlPrivateBlocked'

@@ -20,7 +20,7 @@ export class PaperlessUrlValidationError extends Error {
 }
 
 function allowPrivateNetworks(): boolean {
-  const raw = process.env.DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS;
+  const raw = process.env['DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS'];
   if (raw === undefined || raw === '') {
     return true;
   }

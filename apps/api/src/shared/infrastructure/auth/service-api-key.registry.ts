@@ -32,7 +32,7 @@ export class ServiceApiKeyRegistry {
 
   constructor() {
     this.keys = mergeSftpIngestServiceKey(
-      parseServiceApiKeys(process.env.DOCUVATE_SERVICE_API_KEYS)
+      parseServiceApiKeys(process.env['DOCUVATE_SERVICE_API_KEYS'])
     );
   }
 
@@ -65,7 +65,7 @@ function mergeSftpIngestServiceKey(keys: ServiceApiKeyRecord[]): ServiceApiKeyRe
   }
   assertSftpIngestServiceKeyAllowed(sftpKey);
   const tenantUserId =
-    process.env.DOCUVATE_SFTP_INGEST_SERVICE_TENANT_USER_ID?.trim() ?? 'local-dev-owner';
+    process.env['DOCUVATE_SFTP_INGEST_SERVICE_TENANT_USER_ID']?.trim() ?? 'local-dev-owner';
   if (keys.some((k) => k.keyId === 'sftp-ingest' || timingSafeEqual(k.secret, sftpKey))) {
     return keys;
   }

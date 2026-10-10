@@ -73,8 +73,8 @@ async function buildService(deps: {
 describe('CitedChatGenerationService abstention', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.RAG_RERANKER_GATE_MIN = '0.21';
-    process.env.RAG_FUSION_GATE_MIN = '0.02';
+    process.env['RAG_RERANKER_GATE_MIN'] = '0.21';
+    process.env['RAG_FUSION_GATE_MIN'] = '0.02';
   });
 
   it('abstains on off-topic reranker score', async () => {

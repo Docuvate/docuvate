@@ -12,7 +12,7 @@ const migrationsDir = join(databaseDir, 'migrations');
 
 describe('TypeORM migrations guard', () => {
   it('registers every migration module from migrations/', () => {
-    process.env.DATABASE_URL ??= 'postgres://docuvate:docuvate@127.0.0.1:5432/docuvate';
+    process.env['DATABASE_URL'] ??= 'postgres://docuvate:docuvate@127.0.0.1:5432/docuvate';
     const migrationFiles = readdirSync(migrationsDir)
       .filter((name) => /^\d{14}-.+\.ts$/.test(name))
       .sort();

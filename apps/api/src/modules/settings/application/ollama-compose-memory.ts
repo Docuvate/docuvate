@@ -32,7 +32,7 @@ export function parseMemLimitToGiB(raw: string | undefined | null): number | nul
 }
 
 export function ollamaMemLimitGiBFromEnv(): number | null {
-  return parseMemLimitToGiB(process.env.OLLAMA_MEM_LIMIT ?? '3g');
+  return parseMemLimitToGiB(process.env['OLLAMA_MEM_LIMIT'] ?? '3g');
 }
 
 export function modelMinGiB(model: string): number {

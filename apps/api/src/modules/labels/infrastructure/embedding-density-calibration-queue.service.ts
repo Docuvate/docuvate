@@ -36,7 +36,7 @@ export class EmbeddingDensityCalibrationQueueService implements OnModuleInit, On
     if (!embeddingDensityGloballyEnabled()) {
       return;
     }
-    const valkeyUrl = process.env.VALKEY_URL ?? 'redis://localhost:6379';
+    const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
     this.connection = new IORedis(valkeyUrl, { maxRetriesPerRequest: null });
     this.queue = new Queue<EmbeddingDensityCalibrationJobData>(QUEUE_NAME, {
       connection: this.connection,

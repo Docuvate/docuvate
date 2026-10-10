@@ -10,33 +10,33 @@ import {
 } from './better-auth-secret.js';
 
 describe('better-auth secret policy', () => {
-  const originalNodeEnv = process.env.NODE_ENV;
-  const originalSecret = process.env.BETTER_AUTH_SECRET;
+  const originalNodeEnv = process.env['NODE_ENV'];
+  const originalSecret = process.env['BETTER_AUTH_SECRET'];
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
+    process.env['NODE_ENV'] = originalNodeEnv;
     if (originalSecret === undefined) {
-      delete process.env.BETTER_AUTH_SECRET;
+      delete process.env['BETTER_AUTH_SECRET'];
     } else {
-      process.env.BETTER_AUTH_SECRET = originalSecret;
+      process.env['BETTER_AUTH_SECRET'] = originalSecret;
     }
   });
 
   it('fails in production when secret is missing', () => {
-    process.env.NODE_ENV = 'production';
-    delete process.env.BETTER_AUTH_SECRET;
+    process.env['NODE_ENV'] = 'production';
+    delete process.env['BETTER_AUTH_SECRET'];
     expect(() => { assertBetterAuthSecretForRuntime(); }).toThrow(/BETTER_AUTH_SECRET/);
   });
 
   it('fails in production when secret is too short', () => {
-    process.env.NODE_ENV = 'production';
-    process.env.BETTER_AUTH_SECRET = 'short';
+    process.env['NODE_ENV'] = 'production';
+    process.env['BETTER_AUTH_SECRET'] = 'short';
     expect(() => { assertBetterAuthSecretForRuntime(); }).toThrow(/32/);
   });
 
   it('allows development without secret', () => {
-    process.env.NODE_ENV = 'development';
-    delete process.env.BETTER_AUTH_SECRET;
+    process.env['NODE_ENV'] = 'development';
+    delete process.env['BETTER_AUTH_SECRET'];
     expect(() => { assertBetterAuthSecretForRuntime(); }).not.toThrow();
   });
 
@@ -50,16 +50,16 @@ describe('better-auth secret policy', () => {
   ];
 
   it.each(documentedPlaceholders)('rejects documented placeholder %s in production', (secret) => {
-    process.env.NODE_ENV = 'production';
-    process.env.BETTER_AUTH_SECRET = secret;
+    process.env['NODE_ENV'] = 'production';
+    process.env['BETTER_AUTH_SECRET'] = secret;
     expect(() => { assertBetterAuthSecretForRuntime(); }).toThrow(/placeholder/i);
     expect(isForbiddenBetterAuthSecret(secret)).toBe(true);
   });
 
   it('accepts a random production secret', () => {
     const secret = randomBytes(32).toString('hex');
-    process.env.NODE_ENV = 'production';
-    process.env.BETTER_AUTH_SECRET = secret;
+    process.env['NODE_ENV'] = 'production';
+    process.env['BETTER_AUTH_SECRET'] = secret;
     expect(isForbiddenBetterAuthSecret(secret)).toBe(false);
     expect(() => { assertBetterAuthSecretForRuntime(); }).not.toThrow();
   });

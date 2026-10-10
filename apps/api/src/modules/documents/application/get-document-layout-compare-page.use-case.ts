@@ -30,7 +30,7 @@ export class GetDocumentLayoutComparePageUseCase {
       throw new ValidationError('Seite liegt außerhalb des Dokuments.');
     }
     const { buffer } = await this.getDocumentContent.execute(id, userId, subject);
-    const workerUrl = process.env.WORKER_URL ?? 'http://localhost:8000';
+    const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     const data = await workerLayoutComparePage(
       workerUrl,
       layoutIr,

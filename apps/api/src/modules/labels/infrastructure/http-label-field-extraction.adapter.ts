@@ -37,7 +37,7 @@ function parseExtractedFields(raw: unknown): ExtractedField[] {
 @Injectable()
 export class HttpLabelFieldExtractionAdapter implements LabelFieldExtractionPort {
   private workerHeaders(): Record<string, string> {
-    const secret = process.env.WORKER_SECRET ?? 'worker-shared-secret';
+    const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
     return {
       'Content-Type': 'application/json',
       'X-Worker-Secret': secret,
@@ -45,7 +45,7 @@ export class HttpLabelFieldExtractionAdapter implements LabelFieldExtractionPort
   }
 
   private workerUrl(): string {
-    return process.env.WORKER_URL ?? 'http://localhost:8000';
+    return process.env['WORKER_URL'] ?? 'http://localhost:8000';
   }
 
   async extractLabelFields(

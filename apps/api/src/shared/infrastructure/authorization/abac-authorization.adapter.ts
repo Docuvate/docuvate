@@ -20,7 +20,7 @@ const ACTION_CLAIM: Record<AuthorizationAction, string> = {
 };
 
 function parseDeniedStatuses(): Set<string> {
-  const raw = process.env.ABAC_DENY_DOCUMENT_STATUSES;
+  const raw = process.env['ABAC_DENY_DOCUMENT_STATUSES'];
   if (!raw?.trim()) return new Set();
   return new Set(
     raw

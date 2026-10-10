@@ -55,7 +55,7 @@ export class ListDocumentChatProvidersUseCase {
   constructor(private readonly hardware: GetHardwareCapabilitiesUseCase) {}
 
   private workerHeaders(): Record<string, string> {
-    const secret = process.env.WORKER_SECRET ?? 'worker-shared-secret';
+    const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
     return {
       'Content-Type': 'application/json',
       'X-Worker-Secret': secret,
@@ -71,7 +71,7 @@ export class ListDocumentChatProvidersUseCase {
       available: boolean;
     }[] | null = null;
 
-    const workerUrl = process.env.WORKER_URL ?? 'http://localhost:8000';
+    const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     try {
       const response = await fetchWorkerDependency(workerUrl, '/document-chat/providers', {
         headers: this.workerHeaders(),
@@ -83,7 +83,7 @@ export class ListDocumentChatProvidersUseCase {
       // Worker offline — catalog uses env + hardware only.
     }
 
-    const ollamaUrl = process.env.OLLAMA_URL;
+    const ollamaUrl = process.env['OLLAMA_URL'];
     const ollamaModelReady =
       ollamaUrl != null && ollamaUrl.length > 0
         ? await isOllamaModelLoaded(ollamaUrl, resolveOllamaModelFromEnv())

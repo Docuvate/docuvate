@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { initOtel } from '@docuvate/otel';
-initOtel({ serviceName: process.env.OTEL_SERVICE_NAME ?? 'docuvate-api' });
+initOtel({ serviceName: process.env['OTEL_SERVICE_NAME'] ?? 'docuvate-api' });
 
 import './shared/infrastructure/http/fastify-raw-body.augmentation.js';
 
@@ -63,7 +63,7 @@ async function bootstrap(): Promise<void> {
   });
 
   app.enableCors({
-    origin: process.env.WEB_ORIGIN ?? 'http://localhost:5173',
+    origin: process.env['WEB_ORIGIN'] ?? 'http://localhost:5173',
     credentials: true,
   });
 
@@ -82,7 +82,7 @@ async function bootstrap(): Promise<void> {
   const { OpenapiDocumentService } = await import('./openapi/openapi-document.service.js');
   app.get(OpenapiDocumentService).setDocument(buildOpenApiDocument(app));
 
-  const port = Number(process.env.PORT ?? 3001);
+  const port = Number(process.env['PORT'] ?? 3001);
   await app.listen(port, '0.0.0.0');
 }
 

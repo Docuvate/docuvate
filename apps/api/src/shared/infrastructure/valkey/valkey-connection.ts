@@ -6,7 +6,7 @@ const DEFAULT_CONNECT_TIMEOUT_MS = 3_000;
 const DEFAULT_READY_DEADLINE_MS = 30_000;
 
 export function valkeyConnectTimeoutMs(): number {
-  const raw = process.env.VALKEY_CONNECT_TIMEOUT_MS;
+  const raw = process.env['VALKEY_CONNECT_TIMEOUT_MS'];
   if (!raw) {
     return DEFAULT_CONNECT_TIMEOUT_MS;
   }
@@ -32,7 +32,7 @@ export function createValkeyConnectionOptions(): RedisOptions {
 }
 
 export function createValkeyConnection(url?: string): IORedis {
-  const valkeyUrl = url ?? process.env.VALKEY_URL ?? 'redis://localhost:6379';
+  const valkeyUrl = url ?? process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
   return new IORedis(valkeyUrl, createValkeyConnectionOptions());
 }
 

@@ -28,14 +28,14 @@ export interface DocumentChatProvidersCatalog {
 }
 
 export function documentChatDevProvidersEnabled(): boolean {
-  if (process.env.DOCUMENT_CHAT_DEV_PROVIDERS === 'true') {
+  if (process.env['DOCUMENT_CHAT_DEV_PROVIDERS'] === 'true') {
     return true;
   }
-  return process.env.NODE_ENV !== 'production';
+  return process.env['NODE_ENV'] !== 'production';
 }
 
 export function resolveOllamaModelFromEnv(): string {
-  return process.env.OLLAMA_MODEL ?? 'qwen2.5:3b';
+  return process.env['OLLAMA_MODEL'] ?? 'qwen2.5:3b';
 }
 
 interface WorkerProviderRow {
@@ -51,9 +51,9 @@ export function buildDocumentChatProvidersCatalog(input: {
   ollamaModelReady: boolean;
 }): DocumentChatProvidersCatalog {
   const ollamaModel = resolveOllamaModelFromEnv();
-  const ollamaUrl = process.env.OLLAMA_URL;
+  const ollamaUrl = process.env['OLLAMA_URL'];
   const ollamaConfigured = Boolean(ollamaUrl);
-  const workerConfigured = Boolean(process.env.WORKER_URL);
+  const workerConfigured = Boolean(process.env['WORKER_URL']);
   const ollamaHardwareOk = ollamaAvailableForHardware(ollamaModel, input.hardware);
   const ollamaMemLimitGiB = ollamaMemLimitGiBFromEnv();
   const ollamaMemOk = modelFitsOllamaMemLimit(ollamaModel, ollamaMemLimitGiB);
@@ -160,7 +160,7 @@ export function runtimeChatProviderAvailability(
     ...catalog.development,
     ...catalog.unavailable.map((u) => ({ id: u.id, available: false as const })),
   ];
-  const workerConfigured = Boolean(process.env.WORKER_URL);
+  const workerConfigured = Boolean(process.env['WORKER_URL']);
   if (workerConfigured && !rows.some((r) => r.id === 'context')) {
     rows.push({ id: 'context', available: true });
   }

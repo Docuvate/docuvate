@@ -29,11 +29,11 @@ export interface EmbeddingDensityClassifyResult {
 @Injectable()
 export class HttpEmbeddingDensityAdapter {
   private workerUrl(): string {
-    return process.env.WORKER_URL ?? 'http://localhost:8000';
+    return process.env['WORKER_URL'] ?? 'http://localhost:8000';
   }
 
   private secret(): string {
-    return process.env.WORKER_SECRET ?? 'worker-shared-secret';
+    return process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
   }
 
   async classify(

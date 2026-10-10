@@ -38,7 +38,7 @@ export class GetDocumentLayoutTypstUseCase {
   ): Promise<LayoutTypstRenderResult> {
     const layoutIr = await this.getLayoutIr.execute(id, userId, subject);
     const { buffer } = await this.getDocumentContent.execute(id, userId, subject);
-    const workerUrl = process.env.WORKER_URL ?? 'http://localhost:8000';
+    const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     const raw = await fetchWorkerJson(
       workerApiUrl(workerUrl, '/layout/render-typst'),
       {

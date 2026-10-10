@@ -16,7 +16,7 @@ export class WorkerDocumentChatProvider implements DocumentChatProvider {
   }
 
   private workerHeaders(): Record<string, string> {
-    const secret = process.env.WORKER_SECRET ?? 'worker-shared-secret';
+    const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
     return {
       'Content-Type': 'application/json',
       'X-Worker-Secret': secret,
@@ -24,7 +24,7 @@ export class WorkerDocumentChatProvider implements DocumentChatProvider {
   }
 
   private workerUrl(): string {
-    return process.env.WORKER_URL ?? 'http://localhost:8000';
+    return process.env['WORKER_URL'] ?? 'http://localhost:8000';
   }
 
   async chat(input: DocumentChatInput): Promise<DocumentChatResult> {

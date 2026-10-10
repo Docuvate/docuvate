@@ -12,7 +12,7 @@ export class MinioObjectStorage implements ObjectStorage {
   private readonly bucket: string;
 
   constructor() {
-    this.bucket = process.env.MINIO_BUCKET ?? 'documents';
+    this.bucket = process.env['MINIO_BUCKET'] ?? 'documents';
     this.client = new Minio.Client(createMinioClientOptionsFromEnv());
   }
 

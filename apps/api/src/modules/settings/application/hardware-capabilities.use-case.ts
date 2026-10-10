@@ -32,7 +32,7 @@ function parseHardwareCapabilitiesDto(value: unknown): HardwareCapabilitiesDto |
 }
 
 function withDockerMemoryHints(base: HardwareCapabilitiesDto): HardwareCapabilitiesDto {
-  const warn = process.env.DOCUVATE_DOCKER_MEMORY_WARNING !== 'false';
+  const warn = process.env['DOCUVATE_DOCKER_MEMORY_WARNING'] !== 'false';
   if (!warn) {
     return base;
   }
@@ -60,7 +60,7 @@ const CPU_FALLBACK: HardwareCapabilitiesDto = withDockerMemoryHints({
 @Injectable()
 export class GetHardwareCapabilitiesUseCase {
   private workerHeaders(): Record<string, string> {
-    const secret = process.env.WORKER_SECRET ?? 'worker-shared-secret';
+    const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
     return {
       'Content-Type': 'application/json',
       'X-Worker-Secret': secret,
@@ -68,7 +68,7 @@ export class GetHardwareCapabilitiesUseCase {
   }
 
   async execute(): Promise<HardwareCapabilitiesDto> {
-    const workerUrl = process.env.WORKER_URL;
+    const workerUrl = process.env['WORKER_URL'];
     if (!workerUrl) {
       return CPU_FALLBACK;
     }

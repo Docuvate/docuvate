@@ -233,7 +233,7 @@ export class RunDocumentChatGenerationUseCase {
       generationPhase: 'generating',
     });
 
-    const model = process.env.OLLAMA_MODEL ?? 'qwen2.5:1.5b';
+    const model = process.env['OLLAMA_MODEL'] ?? 'qwen2.5:1.5b';
     const systemContent =
       providerId === 'rag-ollama'
         ? buildDocumentRagSystemPrompt(context, ragContextText, { ollamaModel: model })

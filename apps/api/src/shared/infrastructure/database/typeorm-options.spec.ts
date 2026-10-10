@@ -44,23 +44,23 @@ const EXPECTED_MIGRATIONS = [
 ];
 
 describe('buildTypeOrmOptions', () => {
-  const prev = process.env.DATABASE_URL;
+  const prev = process.env['DATABASE_URL'];
 
   afterEach(() => {
     if (prev === undefined) {
-      delete process.env.DATABASE_URL;
+      delete process.env['DATABASE_URL'];
     } else {
-      process.env.DATABASE_URL = prev;
+      process.env['DATABASE_URL'] = prev;
     }
   });
 
   it('requires DATABASE_URL', () => {
-    delete process.env.DATABASE_URL;
+    delete process.env['DATABASE_URL'];
     expect(() => buildTypeOrmOptions()).toThrow(/DATABASE_URL/);
   });
 
   it('registers initial schema, global search, 3NF, MFA, IAM, saved views, SFTP ingress, layout IR, and Paperless connector migrations in order', () => {
-    process.env.DATABASE_URL = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
+    process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
     const opts = buildTypeOrmOptions();
     expect(opts.migrations).toEqual(EXPECTED_MIGRATIONS);
     expect(InitialSchema20261008120000.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);

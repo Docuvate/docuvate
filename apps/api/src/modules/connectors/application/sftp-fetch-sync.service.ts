@@ -36,7 +36,7 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
   ) {}
 
   onApplicationBootstrap(): void {
-    const intervalMs = Number(process.env.DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS ?? 60_000);
+    const intervalMs = Number(process.env['DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS'] ?? 60_000);
     if (intervalMs <= 0) return;
     const runTick = () => {
       void this.tick().catch((err: unknown) => {
@@ -125,7 +125,7 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
-    const maxBytes = Number(process.env.DOCUVATE_SFTP_INGEST_MAX_BYTES ?? 26_214_400);
+    const maxBytes = Number(process.env['DOCUVATE_SFTP_INGEST_MAX_BYTES'] ?? 26_214_400);
     const processed = await this.loadProcessedRefs(installationId);
 
     for (const item of importables) {

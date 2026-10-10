@@ -21,7 +21,7 @@ const SCRYPT_SALT = 'docuvate-connector-installations-v1';
 
 function deriveKey(): Buffer {
   const secret =
-    process.env.DOCUVATE_CONNECTOR_SECRETS_KEY ?? 'dev-insecure-connector-secrets-key-change-me';
+    process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'] ?? 'dev-insecure-connector-secrets-key-change-me';
   return scryptSync(secret, SCRYPT_SALT, 32);
 }
 

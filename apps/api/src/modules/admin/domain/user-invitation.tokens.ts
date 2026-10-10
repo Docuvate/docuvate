@@ -13,13 +13,13 @@ export function hashInvitationToken(token: string): string {
 }
 
 export function invitationExpiresAt(now = new Date()): Date {
-  const hours = Number(process.env.DOCUVATE_INVITE_TTL_HOURS ?? 168);
+  const hours = Number(process.env['DOCUVATE_INVITE_TTL_HOURS'] ?? 168);
   const ttlHours = Number.isFinite(hours) && hours > 0 ? hours : 168;
   return new Date(now.getTime() + ttlHours * 60 * 60 * 1000);
 }
 
 export function buildInvitationAcceptUrl(token: string): string {
-  const webOrigin = process.env.WEB_ORIGIN ?? 'http://localhost:5173';
+  const webOrigin = process.env['WEB_ORIGIN'] ?? 'http://localhost:5173';
   const base = webOrigin.replace(/\/$/, '');
   return `${base}/invite?token=${encodeURIComponent(token)}`;
 }

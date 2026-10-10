@@ -33,11 +33,11 @@ function parseMetrics(raw: unknown): Record<string, number> {
 @Injectable()
 export class HttpMlRetrainAdapter {
   private baseUrl(): string {
-    return process.env.WORKER_URL?.replace(/\/$/, '') ?? 'http://localhost:8000';
+    return process.env['WORKER_URL']?.replace(/\/$/, '') ?? 'http://localhost:8000';
   }
 
   private secret(): string {
-    return process.env.WORKER_SECRET ?? 'worker-shared-secret';
+    return process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
   }
 
   async runRetrainStub(input: {

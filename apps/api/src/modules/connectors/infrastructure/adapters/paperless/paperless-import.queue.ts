@@ -26,7 +26,7 @@ export class PaperlessImportQueueService implements OnModuleInit, OnModuleDestro
   ) {}
 
   onModuleInit(): void {
-    const valkeyUrl = process.env.VALKEY_URL ?? 'redis://localhost:6379';
+    const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
     this.connection = new IORedis(valkeyUrl, { maxRetriesPerRequest: null });
     this.queue = new Queue(QUEUE_NAME, { connection: this.connection });
     this.worker = new Worker(
