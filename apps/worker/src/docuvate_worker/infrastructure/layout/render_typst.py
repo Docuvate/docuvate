@@ -55,14 +55,22 @@ def _escape_typst(text: str) -> str:
 
 
 def _typst_raw_literal(text: str) -> str:
-    normalized = unicodedata.normalize("NFKC", text)
-    escaped = normalized.replace("\\", "\\\\").replace('"', '\\"')
+    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
     return f'#raw("{escaped}") '
 
 
+def _needs_typst_raw_literal(text: str) -> bool:
+    if "+" in text:
+        return True
+    return any(0x1D400 <= ord(char) <= 0x1D7FF for char in text)
+
+
 def _typst_text_body(text: str) -> str:
-    """Typst text via #raw so +, parens, and math letters do not open math mode."""
-    return _typst_raw_literal(text)
+    """Typst text; use #raw when + or math alphabets would open math mode after escaping."""
+    normalized = unicodedata.normalize("NFKC", text)
+    if _needs_typst_raw_literal(text) or _needs_typst_raw_literal(normalized):
+        return _typst_raw_literal(normalized)
+    return _escape_typst(normalized) + " "
 
 
 def _x_pt(norm: float, page_width_pt: float) -> float:
