@@ -31,7 +31,7 @@ def run_retrain_stub(*, job_id: str, family_id: str, correction_count: int) -> R
     version_tag = f"stub-{now.strftime('%Y%m%dT%H%M%S')}-{job_id[:8]}"
     metric_key = mlops_canary_required_metric()
 
-    # Stub: pretend retrain always slightly improves the required canary metric.
+    # Synthetic metrics scale with correction_count (no GPU weights are written).
     base = 0.66 if family_id == "heuristic-fields" else 0.7
     bump = min(0.08, correction_count / 5000)
     metrics = {metric_key: round(base + bump, 4)}

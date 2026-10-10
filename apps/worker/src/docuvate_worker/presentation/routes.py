@@ -18,7 +18,7 @@ from docuvate_worker.application.embedding_density import (
     run_calibration,
     train_from_labeled_examples,
 )
-from docuvate_worker.application.extract import compare_engines, extract_document
+from docuvate_worker.application.extract import extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.infrastructure.chat.context_qa import retrieve_document_rag_context
@@ -28,6 +28,7 @@ from docuvate_worker.infrastructure.chat.rag_rerank import (
     rerank_passages,
     reranker_status,
 )
+from docuvate_worker.infrastructure.extractors.compare import run_compare
 from docuvate_worker.infrastructure.extractors.engine_catalog import list_engine_meta
 from docuvate_worker.infrastructure.extractors.label_custom_fields import (
     extract_label_custom_fields,
@@ -232,7 +233,7 @@ def extract_compare(
     _require_worker_secret(x_worker_secret)
     raw = _decode_content(body.content_base64)
 
-    run = compare_engines(raw, body.mime_type, body.engines, max_pages=body.max_pages)
+    run = run_compare(raw, body.mime_type, body.engines, max_pages=body.max_pages)
     return CompareResponse(
         engines=run.engines,
         items=[

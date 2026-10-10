@@ -4,7 +4,6 @@
 import logging
 
 from docuvate_worker.domain.models import ExtractionResult
-from docuvate_worker.infrastructure.extractors.compare import CompareRunResult, run_compare
 from docuvate_worker.infrastructure.extractors.engine_catalog import engine_by_name
 from docuvate_worker.infrastructure.extractors.markdown import extraction_to_markdown
 from docuvate_worker.infrastructure.extractors.registry import ExtractorRegistry
@@ -77,11 +76,3 @@ def extract_document(
     return _with_layout_ir(base, content, mime_type)
 
 
-def compare_engines(
-    content: bytes,
-    mime_type: str,
-    engines: list[str],
-    *,
-    max_pages: int | None = None,
-) -> CompareRunResult:
-    return run_compare(content, mime_type, engines, max_pages=max_pages)
