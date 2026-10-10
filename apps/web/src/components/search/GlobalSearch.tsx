@@ -84,7 +84,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
 
   useEffect(() => {
     void getConnectorCatalog()
-      .then((c) => { setIsAdmin(Boolean(c.viewerIsServerAdmin)); })
+      .then((c) => { setIsAdmin(c.viewerIsServerAdmin); })
       .catch(() => { setIsAdmin(false); });
   }, []);
 
