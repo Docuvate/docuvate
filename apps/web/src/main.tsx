@@ -10,7 +10,6 @@ import { initDocuvateTheme } from './lib/docuvateTheme';
 import './styles/global.css';
 
 initDocuvateTheme();
-window.__DOCUVATE_BUILD_SHA__ = __DOCUVATE_BUILD_SHA__;
 import './components/ui/components.css';
 import './styles/app.css';
 
@@ -20,7 +19,8 @@ declare global {
   }
 }
 
-window.__DOCUVATE_BUILD_SHA__ = import.meta.env.VITE_DOCUVATE_BUILD_SHA;
+const viteBuildSha = import.meta.env.VITE_DOCUVATE_BUILD_SHA?.trim();
+window.__DOCUVATE_BUILD_SHA__ = viteBuildSha || __DOCUVATE_BUILD_SHA__;
 
 const router = createBrowserRouter([
   {
