@@ -40,7 +40,7 @@ def _cluster_blocks_into_lines(blocks: list[ExtractionBlock]) -> list[list[Extra
     median_h = median(heights) if heights else 0.02
     y_tolerance = max(median_h * 0.5, 0.008)
 
-    sorted_blocks = sorted(blocks, key=lambda b: _line_center_y(b))
+    sorted_blocks = sorted(blocks, key=_line_center_y)
     lines: list[list[ExtractionBlock]] = []
     for block in sorted_blocks:
         cy = _line_center_y(block)
@@ -141,8 +141,8 @@ def _index_of_block(blocks: list[ExtractionBlock], target: ExtractionBlock) -> i
         if (
             b.page == target.page
             and b.text == target.text
-            and abs(b.x - target.x) < 1e-6
-            and abs(b.y - target.y) < 1e-6
+            and abs(b.x - target.x) < 1e-6  # noqa: PLR2004
+            and abs(b.y - target.y) < 1e-6  # noqa: PLR2004
         ):
             return i
     return None

@@ -151,9 +151,9 @@ def _infer_cell_role(chars: list[dict], weight: FontWeight) -> LayoutIrCellRole 
         return LayoutIrCellRole.HEADER
     for char in chars:
         color = char.get("non_stroking_color")
-        if isinstance(color, (list, tuple)) and len(color) >= 3:
+        if isinstance(color, (list, tuple)) and len(color) >= 3:  # noqa: PLR2004
             r, g, b = float(color[0]), float(color[1]), float(color[2])
-            if r > 0.85 and g > 0.85 and b > 0.85 and max(r, g, b) - min(r, g, b) < 0.08:
+            if r > 0.85 and g > 0.85 and b > 0.85 and max(r, g, b) - min(r, g, b) < 0.08:  # noqa: PLR2004
                 return LayoutIrCellRole.VALUE
     return LayoutIrCellRole.LABEL
 
@@ -164,9 +164,9 @@ def _cell_role_for(
     role = _infer_cell_role(chars, weight)
     if role == LayoutIrCellRole.HEADER:
         return role
-    if col_count == 2 and col_idx == 1:
+    if col_count == 2 and col_idx == 1:  # noqa: PLR2004
         return LayoutIrCellRole.VALUE
-    if col_count == 2 and col_idx == 0:
+    if col_count == 2 and col_idx == 0:  # noqa: PLR2004
         return LayoutIrCellRole.LABEL
     return role
 
@@ -284,7 +284,7 @@ def _dedupe_overlapping_run_blocks(blocks: list[LayoutIrBlock]) -> list[LayoutIr
         for other in kept:
             if other.text.strip() != text:
                 continue
-            if _block_iou(block, other) >= 0.25:
+            if _block_iou(block, other) >= 0.25:  # noqa: PLR2004
                 duplicate = True
                 break
         if not duplicate:
@@ -331,7 +331,7 @@ def _word_to_span(
 
 
 def extract_layout_pdf_bytes(content: bytes) -> LayoutIrDocument | None:
-    import pdfplumber
+    import pdfplumber  # noqa: PLC0415
 
     pages: list[LayoutIrPage] = []
     block_index = 0
@@ -386,7 +386,7 @@ def extract_layout_pdf_bytes(content: bytes) -> LayoutIrDocument | None:
 
             def _upright(block: LayoutIrBlock) -> bool:
                 if block.matrix is not None:
-                    return abs(block.matrix[1]) < 0.05 and abs(block.matrix[2]) < 0.05
+                    return abs(block.matrix[1]) < 0.05 and abs(block.matrix[2]) < 0.05  # noqa: PLR2004
                 return block.rotation_deg is None
 
             upright_spans = [s for s in spans if _upright(s)]

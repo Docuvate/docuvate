@@ -5,7 +5,8 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Literal
+from types import ModuleType
+from typing import Literal, cast
 
 logger = logging.getLogger(__name__)
 
@@ -22,17 +23,17 @@ def _read_device_override() -> str:
     return ""
 
 
-def _import_torch():
-    import torch
+def _import_torch() -> ModuleType:
+    import torch  # noqa: PLC0415
 
-    return torch
+    return cast(ModuleType, torch)
 
 
-def _cuda_available(torch) -> bool:
+def _cuda_available(torch: ModuleType) -> bool:
     return bool(torch.cuda.is_available())
 
 
-def _mps_available(torch) -> bool:
+def _mps_available(torch: ModuleType) -> bool:
     backend = getattr(torch.backends, "mps", None)
     if backend is None:
         return False

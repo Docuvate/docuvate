@@ -54,19 +54,27 @@ def engine_by_name(name: str) -> ExtractorEngine:
     if key in ("pipeline", "default", ""):
         return PipelineExtractor()
     if key in ("paddle", "paddleocr"):
-        from docuvate_worker.infrastructure.extractors.paddle_only import PaddleOnlyExtractor
+        from docuvate_worker.infrastructure.extractors.paddle_only import (  # noqa: PLC0415
+            PaddleOnlyExtractor,
+        )
 
         return PaddleOnlyExtractor()
     if key == "docling":
-        from docuvate_worker.infrastructure.extractors.docling_engine import DoclingExtractor
+        from docuvate_worker.infrastructure.extractors.docling_engine import (  # noqa: PLC0415
+            DoclingExtractor,
+        )
 
         return DoclingExtractor()
     if key in ("pdf_native", "native", "pdfplumber"):
-        from docuvate_worker.infrastructure.extractors.pdf_native_only import PdfNativeOnlyExtractor
+        from docuvate_worker.infrastructure.extractors.pdf_native_only import (  # noqa: PLC0415
+            PdfNativeOnlyExtractor,
+        )
 
         return PdfNativeOnlyExtractor()
     if key == "tesseract":
-        from docuvate_worker.infrastructure.extractors.tesseract import TesseractExtractor
+        from docuvate_worker.infrastructure.extractors.tesseract import (  # noqa: PLC0415
+            TesseractExtractor,
+        )
 
         return TesseractExtractor()
     raise ValueError(

@@ -118,9 +118,9 @@ def split_embedding_density_documents(
         empty = np.array([], dtype=np.int64)
         return EmbeddingDensityDocumentSplit(empty, empty, empty, empty)
 
-    n_train = max(1, int(np.floor(train_frac * n))) if n >= 4 else 1
-    n_sel = max(1, int(np.floor(selection_frac * n))) if n >= 4 else max(0, n - n_train)
-    n_cert = max(1, int(np.floor(certification_frac * n))) if n >= 4 else 0
+    n_train = max(1, int(np.floor(train_frac * n))) if n >= 4 else 1  # noqa: PLR2004
+    n_sel = max(1, int(np.floor(selection_frac * n))) if n >= 4 else max(0, n - n_train)  # noqa: PLR2004
+    n_cert = max(1, int(np.floor(certification_frac * n))) if n >= 4 else 0  # noqa: PLR2004
     n_test = n - n_train - n_sel - n_cert
     if n_test < 0:
         overflow = -n_test
@@ -202,7 +202,7 @@ def _newton_bias_for_temperature(
         except np.linalg.LinAlgError:
             break
         bias -= step
-        if float(np.linalg.norm(step)) < 1e-6:
+        if float(np.linalg.norm(step)) < 1e-6:  # noqa: PLR2004
             break
     return bias
 

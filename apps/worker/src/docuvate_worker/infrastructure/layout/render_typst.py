@@ -119,7 +119,7 @@ def _run_typst(block: LayoutIrBlock, page: LayoutIrPage, _doc: LayoutIrDocument)
         f"#text(size: {size}pt, weight: \"{weight}\", font: \"{font}\", "
         f"hyphenate: false{style})[{text}]"
     )
-    if abs(sx - 1.0) > 0.015:
+    if abs(sx - 1.0) > 0.015:  # noqa: PLR2004
         inner = f"#scale(x: {sx * 100:.2f}%, origin: left)[{inner}]"
     if block.rotation_deg is not None:
         inner = f"#rotate({block.rotation_deg:.2f}deg, origin: left + top)[{inner}]"

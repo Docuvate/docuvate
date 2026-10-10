@@ -99,7 +99,7 @@ def _compare_page_safe(
         if "typst" in msg.lower():
             return None, ReconstructionUnreliableReason.TYPST_COMPILE_FAILED, msg
         return None, ReconstructionUnreliableReason.RASTERIZE_FAILED, msg
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         msg = str(exc)
         if "ssim" in msg.lower() or "structural" in msg.lower():
             return None, ReconstructionUnreliableReason.SSIM_FAILED, msg
@@ -122,7 +122,7 @@ def evaluate_layout_ir_typst_reconstruction(
         source = typst_source if typst_source is not None else layout_ir_to_typst(doc)
         try:
             reconstruction_pdf = compile_typst_to_pdf_bytes(source)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             return LayoutReconstructionEval(
                 category=category,
                 fixture_id=fixture_id,
@@ -202,7 +202,7 @@ def evaluate_layout_ir_typst_reconstruction(
             unreliable_reason=None,
             detail=None,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return LayoutReconstructionEval(
             category=category,
             fixture_id=fixture_id,
@@ -226,7 +226,7 @@ def evaluate_exact_typst_reconstruction(
     """Extract layout IR, render Typst, measure SSIM; never raises."""
     try:
         doc = extract_layout_pdf_bytes(original_pdf)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return LayoutReconstructionEval(
             category=category,
             fixture_id=fixture_id,
@@ -276,5 +276,5 @@ def compare_original_pdf_to_typst_safe(
             ),
             None,
         )
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return None, str(exc)

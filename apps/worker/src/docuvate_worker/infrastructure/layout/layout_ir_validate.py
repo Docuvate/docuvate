@@ -47,7 +47,7 @@ def _optional_int(value: Any, field: str) -> int | None:
 
 
 def _rgb_triple(value: Any, field: str) -> tuple[float, float, float]:
-    if not isinstance(value, (list, tuple)) or len(value) != 3:
+    if not isinstance(value, (list, tuple)) or len(value) != 3:  # noqa: PLR2004
         raise ValueError(f"{field} must be a 3-element array")
     return (
         _finite_float(value[0], f"{field}[0]"),
@@ -57,7 +57,7 @@ def _rgb_triple(value: Any, field: str) -> tuple[float, float, float]:
 
 
 def _matrix_six(value: Any, field: str) -> tuple[float, float, float, float, float, float]:
-    if not isinstance(value, (list, tuple)) or len(value) != 6:
+    if not isinstance(value, (list, tuple)) or len(value) != 6:  # noqa: PLR2004
         raise ValueError(f"{field} must be a 6-element array")
     return tuple(_finite_float(v, f"{field}[{i}]") for i, v in enumerate(value))
 

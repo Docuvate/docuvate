@@ -33,7 +33,7 @@ def _label_search_variants(label: str) -> tuple[str, ...]:
 
 _DATE_TOKEN = re.compile(r"\b(\d{2}[./-]\d{2}[./-]\d{2,4})\b")
 _AMOUNT_ON_LABEL_LINE = re.compile(
-    r"(?i)(?:betrag|bruttobetrag|nettobetrag|summe|total|amount|gesamtbetrag)\s*[:\-–—]\s*"
+    r"(?i)(?:betrag|bruttobetrag|nettobetrag|summe|total|amount|gesamtbetrag)\s*[:\-\u2013\u2014]\s*"
     r"(?:EUR|€\s*)?([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2}|[0-9]+[.,][0-9]{2})\s*(?:EUR|€)?"
 )
 _CURRENCY_VALUE = re.compile(

@@ -680,7 +680,7 @@ requires-dist = [
     { name = "pyright", marker = "extra == 'dev'", specifier = "==1.1.396" },
     { name = "pytesseract", marker = "extra == 'tesseract'", specifier = ">=0.3.13" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = "==0.16.10" },
     { name = "scikit-image", specifier = ">=0.24.0,<0.26.0" },
     { name = "scipy", specifier = ">=1.11.0,<2" },
     { name = "scipy-stubs", marker = "extra == 'dev'", specifier = ">=1.11.0,<1.18" },

@@ -19,7 +19,7 @@ def pdf_native_min_chars() -> int:
 
 def try_extract_pdf_native(content: bytes) -> tuple[str, list[ExtractionBlock]] | None:
     """Extract text + word boxes from born-digital PDFs (no OCR)."""
-    import pdfplumber
+    import pdfplumber  # noqa: PLC0415
 
     page_texts: list[str] = []
     blocks: list[ExtractionBlock] = []

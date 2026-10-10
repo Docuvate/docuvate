@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 import io
-from typing import Any
+from typing import Any, Protocol, cast
 
 from PIL import Image
 
@@ -22,15 +22,13 @@ _pipeline: Any | None = None
 
 def donut_available() -> bool:
     try:
-        import transformers  # noqa: F401
+        import transformers  # noqa: F401, PLC0415
     except ImportError:
         return False
     if not heavy_vision_capable():
         return False
     # DocVQA on CPU is unsupported for product chat (latency / prefill wall).
-    if resolve_torch_inference_device() == "cpu":
-        return False
-    return True
+    return resolve_torch_inference_device() != "cpu"
 
 
 def donut_inference_device() -> TorchDeviceKind:
@@ -38,11 +36,15 @@ def donut_inference_device() -> TorchDeviceKind:
     return resolve_torch_inference_device()
 
 
-def _load_pipeline() -> Any:
-    global _pipeline
+class _DonutPipeline(Protocol):
+    def __call__(self, *, image: object, question: str) -> object: ...
+
+
+def _load_pipeline() -> _DonutPipeline:
+    global _pipeline  # noqa: PLW0603
     if _pipeline is not None:
-        return _pipeline
-    from transformers import pipeline
+        return cast(_DonutPipeline, cast(object, _pipeline))
+    from transformers import pipeline  # noqa: PLC0415
 
     _, device = resolve_transformers_pipeline_device()
     _pipeline = pipeline(
@@ -50,13 +52,13 @@ def _load_pipeline() -> Any:
         model=DONUT_MODEL,
         device=device,
     )
-    return _pipeline
+    return cast(_DonutPipeline, cast(object, _pipeline))
 
 
 def _image_from_bytes(raw: bytes, mime_type: str) -> Image.Image:
     lowered = mime_type.lower()
     if lowered == "application/pdf" or raw[:4] == b"%PDF":
-        from pdf2image import convert_from_bytes
+        from pdf2image import convert_from_bytes  # noqa: PLC0415
 
         pages = convert_from_bytes(raw, first_page=1, last_page=1, dpi=144)
         if not pages:

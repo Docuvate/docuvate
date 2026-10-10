@@ -50,7 +50,7 @@ def infer_layout_ssim_category(doc: LayoutIrDocument, original_pdf: bytes) -> st
     for page in doc.pages:
         for block in page.blocks:
             rotation = block.rotation_deg
-            if rotation is not None and abs(rotation) > 2.0:
+            if rotation is not None and abs(rotation) > 2.0:  # noqa: PLR2004
                 return "rotated"
     for page in doc.pages:
         if page.tables:

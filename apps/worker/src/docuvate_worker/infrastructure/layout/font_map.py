@@ -69,14 +69,14 @@ def uses_metric_typst_substitute(fontname: str | None) -> bool:
     if not fontname:
         return True
     for pattern, (family, mult) in _PATTERNS:
-        if abs(mult - 1.0) > 0.001:
+        if abs(mult - 1.0) > 0.001:  # noqa: PLR2004
             continue
         if pattern.search(fontname):
             return family in ("Liberation Sans", "Liberation Mono")
     base = fontname.split("-")[0].split("+")[-1]
     if base:
         for pattern, (family, mult) in _PATTERNS:
-            if abs(mult - 1.0) > 0.001:
+            if abs(mult - 1.0) > 0.001:  # noqa: PLR2004
                 continue
             if pattern.search(base):
                 return family in ("Liberation Sans", "Liberation Mono")

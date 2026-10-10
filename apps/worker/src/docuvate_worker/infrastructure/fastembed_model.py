@@ -17,7 +17,7 @@ _model: TextEmbedding | None = None
 
 
 def get_embedding_model() -> TextEmbedding:
-    global _model
+    global _model  # noqa: PLW0603
     if _model is not None:
         return _model
     with _lock:

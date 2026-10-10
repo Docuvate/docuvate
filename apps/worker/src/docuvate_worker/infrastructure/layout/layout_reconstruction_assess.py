@@ -107,7 +107,7 @@ def assess_layout_reconstruction(
         )
 
     if original_pdf is not None and pdf_likely_scanned(original_pdf):
-        if len(combined.strip()) < 20:
+        if len(combined.strip()) < 20:  # noqa: PLR2004
             return LayoutReconstructionEval(
                 category=category,
                 fixture_id=fixture_id,

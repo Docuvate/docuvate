@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 class ExtractRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    mime_type: str = Field(alias="mime_type")
+    mime_type: str = Field(validation_alias="mime_type")
     content_base64: str
     engine: str | None = None
 
@@ -17,10 +17,10 @@ class ExtractRequest(BaseModel):
 class CompareRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    mime_type: str = Field(alias="mime_type")
+    mime_type: str = Field(validation_alias="mime_type")
     content_base64: str
     engines: list[str] = Field(default_factory=list)
-    max_pages: int | None = Field(default=3, alias="max_pages", ge=1, le=50)
+    max_pages: int | None = Field(default=3, validation_alias="max_pages", ge=1, le=50)
 
 
 class ExtractedField(BaseModel):
@@ -38,33 +38,37 @@ class ExtractionBlockModel(BaseModel):
     width: float = Field(ge=0.0, le=1.0)
     height: float = Field(ge=0.0, le=1.0)
     text: str
-    block_index: int | None = Field(default=None, alias="blockIndex")
+    block_index: int | None = Field(default=None, serialization_alias="blockIndex")
 
 
 class ExtractResponse(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, ser_json_by_alias=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     text: str
     fields: list[ExtractedField]
-    field_suggestions: list[ExtractedField] = Field(default_factory=list, alias="fieldSuggestions")
+    field_suggestions: list[ExtractedField] = Field(
+        default_factory=list, serialization_alias="fieldSuggestions"
+    )
     blocks: list[ExtractionBlockModel] = Field(default_factory=list)
     markdown: str | None = None
-    layout_ir: dict[str, object] | None = Field(default=None, alias="layoutIr")
+    layout_ir: dict[str, object] | None = Field(default=None, serialization_alias="layoutIr")
     layout_reconstruction_reliable: bool | None = Field(
-        default=None, alias="layoutReconstructionReliable"
+        default=None, serialization_alias="layoutReconstructionReliable"
     )
-    layout_unreliable_reason: str | None = Field(default=None, alias="layoutUnreliableReason")
+    layout_unreliable_reason: str | None = Field(
+        default=None, serialization_alias="layoutUnreliableReason"
+    )
     engine: str | None = None
 
 
 class EngineInfo(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, ser_json_by_alias=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     id: str
     label: str
     description: str
     available: bool = True
-    arena_eligible: bool = Field(default=True, alias="arenaEligible")
+    arena_eligible: bool = Field(default=True, serialization_alias="arenaEligible")
 
 
 class EngineListResponse(BaseModel):
@@ -72,14 +76,14 @@ class EngineListResponse(BaseModel):
 
 
 class CompareEngineResponse(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, ser_json_by_alias=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     engine: str
-    elapsed_ms: int = Field(alias="elapsedMs", ge=0)
+    elapsed_ms: int = Field(serialization_alias="elapsedMs", ge=0)
     error: str | None = None
     text: str | None = None
-    char_count: int | None = Field(default=None, alias="charCount", ge=0)
-    block_count: int | None = Field(default=None, alias="blockCount", ge=0)
+    char_count: int | None = Field(default=None, serialization_alias="charCount", ge=0)
+    block_count: int | None = Field(default=None, serialization_alias="blockCount", ge=0)
     fields: list[ExtractedField] = Field(default_factory=list)
 
 
@@ -102,11 +106,11 @@ class HealthResponse(BaseModel):
 
 
 class HardwareCapabilitiesResponse(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, ser_json_by_alias=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     device: str
-    vram_mb: int = Field(alias="vramMb", ge=0)
-    gpu_available: bool = Field(alias="gpuAvailable")
+    vram_mb: int = Field(serialization_alias="vramMb", ge=0)
+    gpu_available: bool = Field(serialization_alias="gpuAvailable")
     capabilities: dict[str, bool]
 
 
@@ -147,7 +151,7 @@ class DocumentChatRequest(BaseModel):
     filename: str = ""
     text: str = ""
     fields: list[DocumentChatField] = Field(default_factory=list)
-    mime_type: str | None = Field(default=None, alias="mime_type")
+    mime_type: str | None = Field(default=None, validation_alias="mime_type")
     content_base64: str | None = None
 
 
@@ -168,9 +172,9 @@ class DocumentChatRagContextRequest(BaseModel):
 
 
 class DocumentChatRagContextResponse(BaseModel):
-    model_config = ConfigDict(populate_by_name=True, ser_json_by_alias=True)
+    model_config = ConfigDict(populate_by_name=True)
 
-    context_text: str = Field(alias="contextText")
+    context_text: str = Field(serialization_alias="contextText")
     chunks: list[str] = Field(default_factory=list)
 
 
@@ -214,7 +218,7 @@ class LabelFieldSpec(BaseModel):
 
 class LabelFieldsExtractRequest(BaseModel):
     text: str
-    tag_name: str = Field(alias="tag_name")
+    tag_name: str = Field(validation_alias="tag_name")
     fields: list[LabelFieldSpec] = Field(default_factory=list)
 
 
@@ -230,7 +234,7 @@ class LayoutIrWireModel(BaseModel):
 
     @model_validator(mode="after")
     def _element_bounds(self) -> Self:
-        from docuvate_worker.infrastructure.layout.layout_ir_limits import (
+        from docuvate_worker.infrastructure.layout.layout_ir_limits import (  # noqa: PLC0415
             MAX_LAYOUT_BLOCKS,
             MAX_LAYOUT_ELEMENTS,
             MAX_LAYOUT_LINES,
@@ -241,16 +245,21 @@ class LayoutIrWireModel(BaseModel):
 
         blocks = lines = tables = vectors = widgets = 0
         for p in self.pages:
-            if isinstance(p.get("blocks"), list):
-                blocks += len(p["blocks"])
-            if isinstance(p.get("lines"), list):
-                lines += len(p["lines"])
-            if isinstance(p.get("tables"), list):
-                tables += len(p["tables"])
-            if isinstance(p.get("vectors"), list):
-                vectors += len(p["vectors"])
-            if isinstance(p.get("widgets"), list):
-                widgets += len(p["widgets"])
+            blocks_val = p.get("blocks")
+            if isinstance(blocks_val, list):
+                blocks += len(blocks_val)
+            lines_val = p.get("lines")
+            if isinstance(lines_val, list):
+                lines += len(lines_val)
+            tables_val = p.get("tables")
+            if isinstance(tables_val, list):
+                tables += len(tables_val)
+            vectors_val = p.get("vectors")
+            if isinstance(vectors_val, list):
+                vectors += len(vectors_val)
+            widgets_val = p.get("widgets")
+            if isinstance(widgets_val, list):
+                widgets += len(widgets_val)
         total = blocks + lines + tables + vectors + widgets
         if blocks > MAX_LAYOUT_BLOCKS:
             raise ValueError("Too many layout blocks")
@@ -270,23 +279,27 @@ class LayoutIrWireModel(BaseModel):
 class LayoutRenderHtmlRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
-    original_pdf_base64: str | None = Field(default=None, alias="originalPdfBase64")
+    layout_ir: LayoutIrWireModel = Field(validation_alias="layoutIr")
+    original_pdf_base64: str | None = Field(default=None, validation_alias="originalPdfBase64")
 
 
 class LayoutRenderHtmlResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     html: str
-    reconstruction_reliable: bool = Field(default=True, alias="reconstructionReliable")
-    unreliable_reason: str | None = Field(default=None, alias="unreliableReason")
+    reconstruction_reliable: bool = Field(
+        default=True, serialization_alias="reconstructionReliable"
+    )
+    unreliable_reason: str | None = Field(
+        default=None, serialization_alias="unreliableReason"
+    )
 
 
 class LayoutRenderTypstRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
-    original_pdf_base64: str | None = Field(default=None, alias="originalPdfBase64")
+    layout_ir: LayoutIrWireModel = Field(validation_alias="layoutIr")
+    original_pdf_base64: str | None = Field(default=None, validation_alias="originalPdfBase64")
     mode: str = Field(default="exakt", description="exakt | semantisch")
 
 
@@ -294,77 +307,81 @@ class LayoutRenderTypstResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     typst: str
-    reconstruction_reliable: bool = Field(default=True, alias="reconstructionReliable")
-    unreliable_reason: str | None = Field(default=None, alias="unreliableReason")
+    reconstruction_reliable: bool = Field(
+        default=True, serialization_alias="reconstructionReliable"
+    )
+    unreliable_reason: str | None = Field(
+        default=None, serialization_alias="unreliableReason"
+    )
 
 
 class LayoutCompareSummaryRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
-    original_pdf_base64: str = Field(alias="originalPdfBase64")
+    layout_ir: LayoutIrWireModel = Field(validation_alias="layoutIr")
+    original_pdf_base64: str = Field(validation_alias="originalPdfBase64")
 
 
 class LayoutCompareSummaryResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     category: str
-    ssim_floor: float = Field(alias="ssimFloor")
-    page_count: int = Field(alias="pageCount")
+    ssim_floor: float = Field(serialization_alias="ssimFloor")
+    page_count: int = Field(serialization_alias="pageCount")
 
 
 class LayoutCompareMetricsRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
-    original_pdf_base64: str = Field(alias="originalPdfBase64")
-    page_numbers: list[int] = Field(alias="pageNumbers", min_length=1)
+    layout_ir: LayoutIrWireModel = Field(validation_alias="layoutIr")
+    original_pdf_base64: str = Field(validation_alias="originalPdfBase64")
+    page_numbers: list[int] = Field(validation_alias="pageNumbers", min_length=1)
     dpi: int = Field(default=100, ge=72, le=200)
 
 
 class LayoutComparePageMetricModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    page_number: int = Field(alias="pageNumber")
+    page_number: int = Field(serialization_alias="pageNumber")
     ssim: float | None = None
-    ink_deviation: float | None = Field(default=None, alias="inkDeviation")
-    page_reliable: bool = Field(alias="pageReliable")
-    error_code: str | None = Field(default=None, alias="errorCode")
+    ink_deviation: float | None = Field(default=None, serialization_alias="inkDeviation")
+    page_reliable: bool = Field(serialization_alias="pageReliable")
+    error_code: str | None = Field(default=None, serialization_alias="errorCode")
 
 
 class LayoutCompareMetricsResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     category: str
-    ssim_floor: float = Field(alias="ssimFloor")
-    page_count: int = Field(alias="pageCount")
+    ssim_floor: float = Field(serialization_alias="ssimFloor")
+    page_count: int = Field(serialization_alias="pageCount")
     pages: list[LayoutComparePageMetricModel]
 
 
 class LayoutComparePageRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
-    original_pdf_base64: str = Field(alias="originalPdfBase64")
-    page_number: int = Field(alias="pageNumber", ge=1)
+    layout_ir: LayoutIrWireModel = Field(validation_alias="layoutIr")
+    original_pdf_base64: str = Field(validation_alias="originalPdfBase64")
+    page_number: int = Field(validation_alias="pageNumber", ge=1)
     dpi: int = Field(default=100, ge=72, le=200)
-    include_heatmap: bool = Field(default=False, alias="includeHeatmap")
+    include_heatmap: bool = Field(default=False, validation_alias="includeHeatmap")
 
 
 class LayoutComparePageResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    page_number: int = Field(alias="pageNumber")
+    page_number: int = Field(serialization_alias="pageNumber")
     ssim: float | None = None
-    ink_deviation: float | None = Field(default=None, alias="inkDeviation")
-    ssim_floor: float = Field(alias="ssimFloor")
-    page_reliable: bool = Field(alias="pageReliable")
-    width_px: int = Field(alias="widthPx")
-    height_px: int = Field(alias="heightPx")
-    original_png_base64: str = Field(alias="originalPngBase64")
-    reconstruction_png_base64: str = Field(alias="reconstructionPngBase64")
-    heatmap_png_base64: str | None = Field(default=None, alias="heatmapPngBase64")
-    error_code: str | None = Field(default=None, alias="errorCode")
+    ink_deviation: float | None = Field(default=None, serialization_alias="inkDeviation")
+    ssim_floor: float = Field(serialization_alias="ssimFloor")
+    page_reliable: bool = Field(serialization_alias="pageReliable")
+    width_px: int = Field(serialization_alias="widthPx")
+    height_px: int = Field(serialization_alias="heightPx")
+    original_png_base64: str = Field(serialization_alias="originalPngBase64")
+    reconstruction_png_base64: str = Field(serialization_alias="reconstructionPngBase64")
+    heatmap_png_base64: str | None = Field(default=None, serialization_alias="heatmapPngBase64")
+    error_code: str | None = Field(default=None, serialization_alias="errorCode")
 
 
 class EmbeddingDensityStateModel(BaseModel):
@@ -389,10 +406,10 @@ class EmbeddingDensityStateModel(BaseModel):
     )
     label_to_group: dict[str, str] = Field(default_factory=dict)
     log_priors: dict[str, float] = Field(default_factory=dict)
-    class_stats: dict[str, dict] = Field(default_factory=dict)
-    coarse_thresholds: dict[str, dict] = Field(default_factory=dict)
-    fine_thresholds: dict[str, dict] = Field(default_factory=dict)
-    kernel: dict = Field(default_factory=dict)
+    class_stats: dict[str, dict[str, object]] = Field(default_factory=dict)
+    coarse_thresholds: dict[str, dict[str, object]] = Field(default_factory=dict)
+    fine_thresholds: dict[str, dict[str, object]] = Field(default_factory=dict)
+    kernel: dict[str, object] = Field(default_factory=dict)
 
 
 class EmbeddingDensityClassifyRequest(BaseModel):

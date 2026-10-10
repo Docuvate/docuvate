@@ -20,7 +20,7 @@ def _norm(
 
 
 def _parse_color(raw: object) -> tuple[float, float, float] | None:
-    if isinstance(raw, (list, tuple)) and len(raw) >= 3:
+    if isinstance(raw, (list, tuple)) and len(raw) >= 3:  # noqa: PLR2004
         return float(raw[0]), float(raw[1]), float(raw[2])
     if isinstance(raw, (int, float)):
         g = float(raw)
@@ -87,7 +87,7 @@ def extract_vectors(page, page_width: float, page_height: float) -> list[LayoutI
         bottom = float(rect["bottom"])
         w = x1 - x0
         h = bottom - top
-        if w < 0.25 and h < 0.25:
+        if w < 0.25 and h < 0.25:  # noqa: PLR2004
             continue
         nx, ny, nw, nh = _norm(x0, top, x1, bottom, page_width, page_height)
         fill_rgb = _parse_color(rect.get("non_stroking_color"))
@@ -97,21 +97,20 @@ def extract_vectors(page, page_width: float, page_height: float) -> list[LayoutI
         if fill_rgb is not None:
             r, g, b = fill_rgb
             avg = (r + g + b) / 3.0
-            if r >= 0.97 and g >= 0.97 and b >= 0.97:
+            if r >= 0.97 and g >= 0.97 and b >= 0.97:  # noqa: PLR2004
                 filled = False
-            elif avg >= 0.75:
+            elif avg >= 0.75:  # noqa: PLR2004
                 filled = True
                 fill_gray = avg
-            elif avg <= 0.15 and w * h > page_area * 0.2:
+            elif avg <= 0.15 and w * h > page_area * 0.2:  # noqa: PLR2004
                 continue
         stroke_w = _linewidth_pt(rect.get("linewidth"))
         rect_key = _rect_key(x0, top, x1, bottom, stroke_w, filled)
         if rect_key in seen_rects:
             continue
         seen_rects.add(rect_key)
-        if w * h > page_area * 0.45:
-            if stroke_w < 1.0 or filled:
-                continue
+        if w * h > page_area * 0.45 and (stroke_w < 1.0 or filled):
+            continue
         out.append(
             LayoutIrVector(
                 kind=LayoutIrVectorKind.RECT,
@@ -140,7 +139,7 @@ def extract_vectors(page, page_width: float, page_height: float) -> list[LayoutI
             page_width,
             page_height,
         )
-        if nw < 0.0005 and nh < 0.0005:
+        if nw < 0.0005 and nh < 0.0005:  # noqa: PLR2004
             continue
         stroke_rgb = _parse_color(line.get("stroking_color"))
         out.append(
@@ -206,7 +205,7 @@ def extract_vectors(page, page_width: float, page_height: float) -> list[LayoutI
 
     for curve in page.curves or []:
         pts = curve.get("pts") or []
-        if len(pts) < 2:
+        if len(pts) < 2:  # noqa: PLR2004
             continue
         parts: list[str] = []
         x0, y0 = float(pts[0][0]), float(pts[0][1])

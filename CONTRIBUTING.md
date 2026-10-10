@@ -44,7 +44,7 @@ pnpm --filter @docuvate/api typecheck && pnpm --filter @docuvate/web typecheck
 pnpm --filter @docuvate/web lint
 pnpm --filter @docuvate/api test && pnpm --filter @docuvate/web test
 pnpm format:check
-cd apps/worker && uv venv .venv && uv pip install -e ".[dev]" && .venv/bin/ruff check src
+cd apps/worker && uv venv .venv && uv pip install -e ".[dev]" && .venv/bin/ruff check src && .venv/bin/pyright && .venv/bin/mypy
 ```
 
 ### Cloud Agent VMs only (throwaway hosts)

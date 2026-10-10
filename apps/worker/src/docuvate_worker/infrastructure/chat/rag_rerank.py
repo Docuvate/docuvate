@@ -7,8 +7,13 @@ import logging
 import math
 import os
 import threading
+from typing import Protocol, cast
 
 from pydantic import BaseModel
+
+
+class _TextCrossEncoder(Protocol):
+    def rerank(self, query: str, texts: list[str]) -> list[float]: ...
 
 logger = logging.getLogger(__name__)
 
@@ -79,8 +84,8 @@ def reranker_status() -> dict[str, str | bool]:
     return {"model": RERANKER_MODEL, "available": True, "loaded": False, "reason": ""}
 
 
-def _get_reranker():
-    global _reranker, _reranker_failed, _reranker_failure_reason
+def _get_reranker() -> _TextCrossEncoder | None:
+    global _reranker, _reranker_failed, _reranker_failure_reason  # noqa: PLW0603
     if _reranker_failed:
         return None
     if _reranker is not None:
@@ -98,9 +103,11 @@ def _get_reranker():
             logger.error("Reranker model %s is not on the permissive allowlist", RERANKER_MODEL)
             return None
         try:
-            from fastembed.rerank.cross_encoder import TextCrossEncoder
+            from fastembed.rerank.cross_encoder import TextCrossEncoder  # noqa: PLC0415
 
-            _reranker = TextCrossEncoder(model_name=RERANKER_MODEL)
+            _reranker = cast(
+                _TextCrossEncoder, TextCrossEncoder(model_name=RERANKER_MODEL)
+            )
             logger.info("Loaded reranker model %s", RERANKER_MODEL)
         except Exception as exc:
             _reranker_failed = True

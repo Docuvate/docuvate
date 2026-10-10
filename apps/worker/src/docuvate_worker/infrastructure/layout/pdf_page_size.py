@@ -21,7 +21,7 @@ def _page_size_pt(page) -> tuple[float, float]:
 
 
 def pdf_page_sizes_pt(content: bytes) -> dict[int, tuple[float, float]]:
-    import pdfplumber
+    import pdfplumber  # noqa: PLC0415
 
     sizes: dict[int, tuple[float, float]] = {}
     try:

@@ -51,13 +51,13 @@ def _extract_amount(text: str) -> str | None:
 
 def _is_heading_like_vendor(line: str) -> bool:
     letters = [c for c in line if c.isalpha()]
-    if len(letters) >= 12:
+    if len(letters) >= 12:  # noqa: PLR2004
         upper_ratio = sum(1 for c in letters if c.isupper()) / len(letters)
-        if upper_ratio > 0.82 and not _COMPANY_LINE.search(line):
+        if upper_ratio > 0.82 and not _COMPANY_LINE.search(line):  # noqa: PLR2004
             return True
     words = line.split()
-    if len(words) >= 6 and not _COMPANY_LINE.search(line):
-        title_case = sum(1 for w in words if w[:1].isupper() and len(w) > 2)
+    if len(words) >= 6 and not _COMPANY_LINE.search(line):  # noqa: PLR2004
+        title_case = sum(1 for w in words if w[:1].isupper() and len(w) > 2)  # noqa: PLR2004
         if title_case >= max(4, len(words) - 2):
             return True
     return False
@@ -79,9 +79,7 @@ def _has_sender_evidence(
     window = lines[index : min(index + 4, len(lines))]
     block = " ".join(window)
     has_address = bool(_GERMAN_POSTAL.search(block) or _STREET_HINT.search(block))
-    if has_address and (_COMPANY_LINE.search(cleaned) or len(cleaned) <= 64):
-        return True
-    return False
+    return bool(has_address and (_COMPANY_LINE.search(cleaned) or len(cleaned) <= 64))  # noqa: PLR2004
 
 
 def _extract_vendor(text: str) -> str | None:

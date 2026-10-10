@@ -31,7 +31,7 @@ class DoclingExtractor(ExtractorEngine):
         return mime_type in _MIME_SUFFIX or mime_type.startswith("image/")
 
     def extract(self, content: bytes, mime_type: str) -> ExtractionResult:
-        from docling.document_converter import DocumentConverter
+        from docling.document_converter import DocumentConverter  # noqa: PLC0415
 
         suffix = _MIME_SUFFIX.get(mime_type, ".bin")
         path: Path | None = None

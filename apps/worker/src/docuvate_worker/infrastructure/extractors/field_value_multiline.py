@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 
 _LABEL_LINE = re.compile(
-    r"^\s*(?:[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß./\-]{0,48})\s*[:\-–—]\s*\S",
+    r"^\s*(?:[A-Za-zÄÖÜäöüß][\wÄÖÜäöüß./\-]{0,48})\s*[:\-\u2013\u2014]\s*\S",
     re.UNICODE,
 )
 _AMOUNT_TAIL = re.compile(r"^(?:EUR|€)\s*$", re.IGNORECASE)
@@ -31,7 +31,7 @@ def _line_starts_new_field(line: str, stop_labels: tuple[str, ...]) -> bool:
         if not stop.strip():
             continue
         esc = _escape_label(stop)
-        if re.match(rf"(?i){esc}\s*[:\-–—]", stripped):
+        if re.match(rf"(?i){esc}\s*[:\-\u2013\u2014]", stripped):
             return True
     return True
 
@@ -79,7 +79,7 @@ def extract_multiline_value_after_label(
     if not label.strip():
         return None
     esc = _escape_label(label)
-    pattern = rf"(?im)^{esc}\s*[:\-–—]\s*(.*)$"
+    pattern = rf"(?im)^{esc}\s*[:\-\u2013\u2014]\s*(.*)$"
     match = re.search(pattern, text)
     if not match:
         return None

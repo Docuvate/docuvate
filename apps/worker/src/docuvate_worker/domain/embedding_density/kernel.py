@@ -109,7 +109,7 @@ class KernelCorrector:
             dtype=np.float64,
         )
         schur = (1.0 + lam) - float(k_vec @ inv @ k_vec)
-        if abs(schur) < 1e-12:
+        if abs(schur) < 1e-12:  # noqa: PLR2004
             schur = 1e-12
         inv_new = np.zeros((n + 1, n + 1), dtype=np.float64)
         inv_new[:n, :n] = inv + (inv @ np.outer(k_vec, k_vec) @ inv) / schur

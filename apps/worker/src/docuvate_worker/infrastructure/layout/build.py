@@ -34,9 +34,9 @@ def build_layout_ir(
             width_pt, height_pt = pdf_first_page_size_pt(content)
         elif mime_type.startswith("image/"):
             try:
-                import io as _io
+                import io as _io  # noqa: PLC0415
 
-                from PIL import Image
+                from PIL import Image  # noqa: PLC0415
 
                 with Image.open(_io.BytesIO(content)) as im:
                     dpi = im.info.get("dpi")
@@ -44,7 +44,7 @@ def build_layout_ir(
                         float(dpi[0]) if isinstance(dpi, (tuple, list)) and len(dpi) >= 1 else None
                     )
                     dpi_y = (
-                        float(dpi[1]) if isinstance(dpi, (tuple, list)) and len(dpi) >= 2 else None
+                        float(dpi[1]) if isinstance(dpi, (tuple, list)) and len(dpi) >= 2 else None  # noqa: PLR2004
                     )
                     width_pt, height_pt = image_size_pt_from_pixels(
                         im.width, im.height, dpi_x=dpi_x, dpi_y=dpi_y

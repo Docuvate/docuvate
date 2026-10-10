@@ -22,7 +22,7 @@ def _empty_prototype_list() -> list[NDArray[np.float64]]:
 
 
 def _covariance_from_vectors(vectors: NDArray[np.float64]) -> NDArray[np.float64]:
-    if vectors.shape[0] < 2:
+    if vectors.shape[0] < 2:  # noqa: PLR2004
         return np.eye(vectors.shape[1], dtype=np.float64)
     centered = vectors - np.mean(vectors, axis=0)
     cov = centered.T @ centered / max(vectors.shape[0] - 1, 1)

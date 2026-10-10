@@ -33,7 +33,7 @@ def extract_drawn_checkboxes(
             continue
         w_pt = vector.width * page_width
         h_pt = vector.height * page_height
-        if 2.5 <= w_pt <= 14.0 and 2.5 <= h_pt <= 14.0 and abs(w_pt - h_pt) < 2.5:
+        if 2.5 <= w_pt <= 14.0 and 2.5 <= h_pt <= 14.0 and abs(w_pt - h_pt) < 2.5:  # noqa: PLR2004
             squares.append(vector)
 
     edges = page.edges or []
@@ -52,9 +52,9 @@ def extract_drawn_checkboxes(
                     (float(edge["x1"]) - float(edge["x0"])) ** 2
                     + (float(edge["bottom"]) - float(edge["top"])) ** 2
                 ) ** 0.5
-                if length >= 1.5:
+                if length >= 1.5:  # noqa: PLR2004
                     stroke_inside += 1
-        checked = stroke_inside >= 5
+        checked = stroke_inside >= 5  # noqa: PLR2004
         widgets.append(
             LayoutIrWidget(
                 kind=LayoutIrWidgetKind.CHECKBOX,
