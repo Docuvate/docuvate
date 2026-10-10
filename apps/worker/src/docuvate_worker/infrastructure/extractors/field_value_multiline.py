@@ -26,7 +26,6 @@ def _line_starts_new_field(line: str, stop_labels: tuple[str, ...]) -> bool:
     if not stripped:
         return False
     if _LABEL_LINE.match(stripped):
-        lowered = stripped.lower()
         for stop in stop_labels:
             if not stop.strip():
                 continue
