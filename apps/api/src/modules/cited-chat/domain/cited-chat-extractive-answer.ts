@@ -51,11 +51,7 @@ export function tryExtractiveCitedAnswer(
   }
 
   if (tokens.length > 0 && scoreSentence(quote, tokens) === 0) {
-    const window = body.slice(0, 320).trim();
-    if (!window) {
-      return null;
-    }
-    quote = window;
+    return null;
   }
 
   return {

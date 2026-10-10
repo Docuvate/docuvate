@@ -19,6 +19,7 @@ import {
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
 import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
+import { libraryExtractiveEligible } from '../domain/library-extractive-eligibility.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
@@ -228,10 +229,11 @@ export class CitedChatGenerationService {
     }
 
     const extractiveMinScore = 0.12;
-    const extractive =
-      scope === 'document'
-        ? tryExtractiveCitedAnswer(userMessage, top, extractiveMinScore)
-        : null;
+    const extractiveEligible =
+      scope === 'document' || (scope === 'library' && libraryExtractiveEligible(top));
+    const extractive = extractiveEligible
+      ? tryExtractiveCitedAnswer(userMessage, top, extractiveMinScore)
+      : null;
     if (extractive && /^[0-9a-f-]{36}$/i.test(extractive.chunk.chunkId)) {
       await this.citationsRepo.replaceCitations(messageId, [
         {

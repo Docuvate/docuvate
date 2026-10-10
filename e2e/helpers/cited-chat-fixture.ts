@@ -10,6 +10,8 @@ export type CitedChatFixtureCreds = {
   password: string;
   invoiceDocId: string;
   taxDocId: string;
+  leaseDocId: string;
+  contractDocId: string;
 };
 
 let sharedProvision: Promise<CitedChatFixtureCreds> | null = null;
@@ -98,5 +100,23 @@ export async function provisionCitedChatLibrary(
       extractionBlocks: block('Hundesteuer Stadt Muster. Jahresgebühr: 120,00 EUR.'),
     },
   });
-  return { ...creds, invoiceDocId, taxDocId };
+  const leaseDocId = await uploadPdf(request, opts.apiBase, 'mietvertrag.pdf');
+  await request.patch(`${opts.apiBase}/v1/documents/${leaseDocId}`, {
+    data: {
+      title: 'Mietvertrag Wohnung',
+      extractionBlocks: block(
+        'Mietvertrag Wohnung. Die Miete ist bis zum 3. Werktag des Monats fällig.'
+      ),
+    },
+  });
+  const contractDocId = await uploadPdf(request, opts.apiBase, 'arbeitsvertrag.pdf');
+  await request.patch(`${opts.apiBase}/v1/documents/${contractDocId}`, {
+    data: {
+      title: 'Arbeitsvertrag',
+      extractionBlocks: block(
+        'Arbeitsvertrag. Die Kündigungsfrist beträgt drei Monate zum Quartalsende.'
+      ),
+    },
+  });
+  return { ...creds, invoiceDocId, taxDocId, leaseDocId, contractDocId };
 }

@@ -140,10 +140,7 @@ export class PgCitedChatRetrievalRepository {
       .map(([id]) => id);
 
     if (topIds.length === 0) {
-      if (scopedDocumentIds.length > 0) {
-        return this.lexicalDocumentFallback(userId, scopedDocumentIds, trimmed);
-      }
-      return [];
+      return this.lexicalFallback(userId, scopedDocumentIds, trimmed);
     }
 
     const detail = await this.pool.query<{
@@ -187,7 +184,7 @@ export class PgCitedChatRetrievalRepository {
     return chunkIndexText(candidate.documentTitle, candidate.body);
   }
 
-  private async lexicalDocumentFallback(
+  private async lexicalFallback(
     userId: string,
     documentIds: string[],
     query: string
@@ -196,6 +193,10 @@ export class PgCitedChatRetrievalRepository {
     if (tokens.length === 0) {
       return [];
     }
+
+    const scopedIds = sanitizeChatThreadDocumentIds(documentIds);
+    const docFilter = scopedIds.length > 0 ? 'AND c.document_id = ANY($2::uuid[])' : '';
+    const chunkParams = scopedIds.length > 0 ? [userId, scopedIds] : [userId];
 
     const chunkRows = await this.pool.query<{
       id: string;
@@ -209,14 +210,16 @@ export class PgCitedChatRetrievalRepository {
       `SELECT c.id, c.document_id, d.title, c.body, c.page, c.char_start, c.char_end
        FROM document_text_chunks c
        JOIN documents d ON d.id = c.document_id
-       WHERE d.user_id = $1 AND c.document_id = ANY($2::uuid[])
+       WHERE d.user_id = $1 ${docFilter}
        ORDER BY c.chunk_index ASC
        LIMIT 200`,
-      [userId, documentIds]
+      chunkParams
     );
 
     let bodies = chunkRows.rows;
     if (bodies.length === 0) {
+      const blockFilter = scopedIds.length > 0 ? 'AND b.document_id = ANY($2::uuid[])' : '';
+      const blockParams = scopedIds.length > 0 ? [userId, scopedIds] : [userId];
       const blockRows = await this.pool.query<{
         document_id: string;
         title: string;
@@ -227,9 +230,9 @@ export class PgCitedChatRetrievalRepository {
                 MIN(b.page) AS page
          FROM document_extraction_blocks b
          JOIN documents d ON d.id = b.document_id
-         WHERE d.user_id = $1 AND b.document_id = ANY($2::uuid[])
+         WHERE d.user_id = $1 ${blockFilter}
          GROUP BY b.document_id, d.title`,
-        [userId, documentIds]
+        blockParams
       );
       bodies = blockRows.rows.map((row, index) => ({
         id: `lexical-block-${row.document_id}-${index}`,
