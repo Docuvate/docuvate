@@ -343,6 +343,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 aria-label={t('search.closePalette')}
                 onMouseDown={closePalette}
               />
+              {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- stop backdrop mousedown from closing the palette */}
               <div
                 ref={dialogRef}
                 className="global-search-palette"
@@ -351,7 +352,6 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 aria-modal="true"
                 aria-label={t('search.paletteTitle')}
                 tabIndex={-1}
-                // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- stop backdrop mousedown from closing the palette
                 onMouseDown={(e) => { e.stopPropagation(); }}
               >
                 <div className="global-search-palette-input-row">
