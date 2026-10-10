@@ -28,6 +28,7 @@ const FORWARD_SQL_ORDER = [
   'embedding-density-f32-up.sql',
   'embedding-density-readiness-split-up.sql',
   'heuristic-field-suggestions-up.sql',
+  'purge-heading-vendor-suggestions-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {
