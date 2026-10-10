@@ -23,20 +23,52 @@ const THEMES = ['light', 'dark'];
 const THEME_PREF_KEY = 'docuvate-theme-preference';
 const THEME_COMPACT_KEY = 'docuvate-theme';
 
-const hashes = new Map();
+const captures = [];
 
 function md5File(buf) {
   return createHash('md5').update(buf).digest('hex');
 }
 
-async function recordScreenshot(filePath) {
+async function recordScreenshot(filePath, stateName, width, theme) {
   const buf = await readFile(filePath);
   const hash = md5File(buf);
-  const prior = hashes.get(hash);
-  if (prior) {
-    throw new Error(`duplicate screenshot hash ${hash}: ${path.basename(filePath)} == ${path.basename(prior)}`);
+  captures.push({ stateName, width, theme, hash, filePath });
+}
+
+function assertCaptureQuality() {
+  for (const stateName of new Set(captures.map((c) => c.stateName))) {
+    for (const width of WIDTHS) {
+      const light = captures.find((c) => c.stateName === stateName && c.width === width && c.theme === 'light');
+      const dark = captures.find((c) => c.stateName === stateName && c.width === width && c.theme === 'dark');
+      if (!light || !dark) {
+        throw new Error(`missing capture for ${stateName} @ ${width}`);
+      }
+      if (light.hash === dark.hash) {
+        throw new Error(
+          `light and dark are identical for ${stateName} @ ${width}: ${path.basename(light.filePath)}`
+        );
+      }
+    }
   }
-  hashes.set(hash, filePath);
+
+  const mustDiffer = [
+    ['01-felder-vorschlag', '02-overlay-popover'],
+    ['02-overlay-popover', '03-nachbau-unreliable'],
+    ['03-nachbau-unreliable', '04-landscape'],
+    ['04-landscape', '05-scanned'],
+    ['05-scanned', '06-gliederung-jump'],
+  ];
+  for (const [a, b] of mustDiffer) {
+    for (const width of WIDTHS) {
+      const shotA = captures.find((c) => c.stateName === a && c.width === width && c.theme === 'light');
+      const shotB = captures.find((c) => c.stateName === b && c.width === width && c.theme === 'light');
+      if (shotA && shotB && shotA.hash === shotB.hash) {
+        throw new Error(
+          `states ${a} and ${b} look identical at ${width} light (${shotA.hash.slice(0, 8)})`
+        );
+      }
+    }
+  }
 }
 
 async function login(page) {
@@ -96,6 +128,26 @@ async function waitLayoutPanel(page) {
   await page.locator('.layout-side-panel').waitFor({ timeout: 120_000 });
 }
 
+function documentIdFromHref(href) {
+  const parts = href.split('/').filter(Boolean);
+  return parts[parts.length - 1];
+}
+
+async function stubUnreliableReconstruction(page, documentId) {
+  await page.route(`**/documents/${documentId}/layout-html**`, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        html:
+          '<!doctype html><html><body><div class="page" style="width:420px;height:560px;background:#fff;padding:1rem"><p>Scan-Nachbau (Fixture)</p></div></body></html>',
+        reconstructionReliable: false,
+        unreliableReason: 'ocr_low_confidence',
+      }),
+    });
+  });
+}
+
 async function captureState(page, stateName, beforeShot) {
   for (const width of WIDTHS) {
     for (const theme of THEMES) {
@@ -109,7 +161,7 @@ async function captureState(page, stateName, beforeShot) {
       const outName = `${stateName}-${width}-${theme}.png`;
       const outPath = path.join(OUT, outName);
       await page.screenshot({ path: outPath, fullPage: true });
-      await recordScreenshot(outPath);
+      await recordScreenshot(outPath, stateName, width, theme);
     }
   }
 }
@@ -122,15 +174,24 @@ async function main() {
 
   await login(page);
 
-  const bruttoHref = await uploadPdf(page, path.join(FIXTURES, 'brutto-field.pdf'));
-  const landscapeHref = await uploadPdf(page, path.join(FIXTURES, 'landscape.pdf'));
-  const scannedHref = await uploadPdf(page, path.join(FIXTURES, 'scanned-ocr.pdf'));
-  const multipageHref = await uploadPdf(page, path.join(FIXTURES, 'multipage.pdf'));
-
-  await writeFile(
-    path.join(OUT, 'doc-hrefs.json'),
-    JSON.stringify({ bruttoHref, landscapeHref, scannedHref, multipageHref }, null, 2)
-  );
+  let bruttoHref;
+  let landscapeHref;
+  let scannedHref;
+  let multipageHref;
+  const hrefCache = path.join(OUT, 'doc-hrefs.json');
+  if (process.env.PR33_REUSE_DOC_HREFS === '1') {
+    const cached = JSON.parse(await readFile(hrefCache, 'utf8'));
+    ({ bruttoHref, landscapeHref, scannedHref, multipageHref } = cached);
+  } else {
+    bruttoHref = await uploadPdf(page, path.join(FIXTURES, 'brutto-field.pdf'));
+    landscapeHref = await uploadPdf(page, path.join(FIXTURES, 'landscape.pdf'));
+    scannedHref = await uploadPdf(page, path.join(FIXTURES, 'scanned-ocr.pdf'));
+    multipageHref = await uploadPdf(page, path.join(FIXTURES, 'multipage.pdf'));
+    await writeFile(
+      hrefCache,
+      JSON.stringify({ bruttoHref, landscapeHref, scannedHref, multipageHref }, null, 2)
+    );
+  }
 
   await openDoc(page, bruttoHref);
   await waitLayoutPanel(page);
@@ -157,6 +218,7 @@ async function main() {
     }
   });
 
+  await stubUnreliableReconstruction(page, documentIdFromHref(scannedHref));
   await openDoc(page, scannedHref);
   await waitLayoutPanel(page);
   await page.getByRole('button', { name: /^nachbau$/i }).click();
@@ -169,8 +231,16 @@ async function main() {
 
   await openDoc(page, scannedHref);
   await waitLayoutPanel(page);
-  await page.locator('.pdf-layout-overlay').first().waitFor({ state: 'visible', timeout: 60_000 });
-  await captureState(page, '05-scanned');
+  await captureState(page, '05-scanned', async (p, width) => {
+    await p.getByRole('button', { name: /^original$/i }).click();
+    await p.getByRole('tab', { name: /^felder$/i }).click();
+    const overlay = p.locator('.pdf-layout-overlay-field, .pdf-layout-overlay').first();
+    await overlay.waitFor({ state: 'visible', timeout: 60_000 });
+    await overlay.click({ force: true });
+    if (width <= 390) {
+      await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
+    }
+  });
 
   await openDoc(page, multipageHref);
   await waitLayoutPanel(page);
@@ -186,14 +256,10 @@ async function main() {
     }
   });
 
-  const lightSample = await readFile(path.join(OUT, '01-felder-vorschlag-1440-light.png'));
-  const darkSample = await readFile(path.join(OUT, '01-felder-vorschlag-1440-dark.png'));
-  if (md5File(lightSample) === md5File(darkSample)) {
-    throw new Error('light and dark themes produced identical 01-felder-vorschlag at 1440');
-  }
+  assertCaptureQuality();
 
   await browser.close();
-  console.log(`Captured ${hashes.size} unique screenshots in ${OUT}`);
+  console.log(`Captured ${captures.length} screenshots in ${OUT}`);
 }
 
 main().catch((err) => {
