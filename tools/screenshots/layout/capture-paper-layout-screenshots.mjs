@@ -326,7 +326,11 @@ async function main() {
       if (text.includes('μ;') || text.includes('Σ;')) {
         throw new Error(`math cell fragmented: ${text}`);
       }
-      if (text.includes('μ') && text.includes('Σ') && text.replace(/[\s,]/g, '').includes('μΣ')) {
+      if (
+        text.includes('μ') &&
+        text.includes('Σ') &&
+        !/μ\s*(?:,|\s)\s*Σ/u.test(text)
+      ) {
         throw new Error(`math cell tokens fused: ${text}`);
       }
     }
