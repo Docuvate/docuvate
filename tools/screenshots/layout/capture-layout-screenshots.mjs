@@ -366,7 +366,7 @@ async function main() {
     'layout-compare-slider',
     async (p, width) => {
       await enterCompareMode(p);
-      await p.getByRole('button', { name: /slider/i }).click();
+      await p.getByRole('button', { name: /schieberegler|slider/i }).click();
       if (width <= 390) await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
     },
     async (p) => {
