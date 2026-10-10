@@ -14,3 +14,25 @@ def test_extract_near_label_and_amount():
     by_key = {f.key: f.value for f in fields}
     assert by_key["invoice_date"] == "01.02.2024"
     assert by_key["amount"] == "EUR 12,50"
+
+
+def test_absender_strips_doubled_label_prefix() -> None:
+    text = "Absender: Kurzer Absender: Demo Nord GmbH\nBruttobetrag: 12.500,00 EUR"
+    fields = extract_label_custom_fields(
+        text,
+        tag_name="Rechnung",
+        fields=[{"key": "absender", "label": "Absender", "field_type": "text"}],
+    )
+    by_key = {f.key: f.value for f in fields}
+    assert by_key["absender"] == "Demo Nord GmbH"
+
+
+def test_absender_from_kurzer_absender_line() -> None:
+    text = "Rechnung Layout-Workspace Demo\nKurzer Absender: Demo Nord GmbH"
+    fields = extract_label_custom_fields(
+        text,
+        tag_name="Rechnung",
+        fields=[{"key": "absender", "label": "Absender", "field_type": "text"}],
+    )
+    by_key = {f.key: f.value for f in fields}
+    assert by_key["absender"] == "Demo Nord GmbH"

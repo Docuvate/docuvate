@@ -2476,12 +2476,6 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   letter-spacing: normal;
 }
 
-.layout-field-suggestion-tag::after {
-  content: '·';
-  margin-inline-start: var(--dv-space-2xs);
-  color: var(--dv-color-text-subtle);
-}
-
 .layout-field-suggestion-head .layout-field-label {
   min-width: 0;
 }

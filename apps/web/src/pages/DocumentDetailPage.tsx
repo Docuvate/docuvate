@@ -26,7 +26,11 @@ import {
   requeueDocumentExtraction,
   updateDocument,
 } from '../lib/api';
-import { buildCustomFieldDefMap, buildGlobalFieldLabelMap } from '../lib/labelFieldDisplay';
+import {
+  buildCustomFieldDefMap,
+  buildGlobalFieldLabelMap,
+  parseGlobalFieldKey,
+} from '../lib/labelFieldDisplay';
 import { humanizeFieldKey } from '../lib/humanizeFieldKey';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import { isExtractionPending } from '../lib/documentExtractionState';
@@ -405,7 +409,13 @@ export function DocumentDetailPage() {
   }, [tags, globalFieldLabels]);
 
   const fieldLabelForKey = useCallback(
-    (key: string) => globalFieldLabels.get(key) ?? humanizeFieldKey(key, t),
+    (key: string) => {
+      const globalKey = parseGlobalFieldKey(key);
+      if (globalKey) {
+        return globalFieldLabels.get(globalKey) ?? humanizeFieldKey(globalKey, t);
+      }
+      return globalFieldLabels.get(key) ?? humanizeFieldKey(key, t);
+    },
     [globalFieldLabels, t]
   );
 

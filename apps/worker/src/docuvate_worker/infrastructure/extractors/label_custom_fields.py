@@ -6,6 +6,9 @@ from __future__ import annotations
 import re
 
 from docuvate_worker.domain.models import ExtractedField
+from docuvate_worker.infrastructure.extractors.field_value_normalize import (
+    strip_leading_sender_label_prefixes,
+)
 
 
 def _escape_label(label: str) -> str:
@@ -18,7 +21,7 @@ def _extract_near_label(text: str, label: str) -> str | None:
     pattern = rf"(?i){_escape_label(label)}\s*[:\-–—]\s*(.+?)(?:\n|$)"
     match = re.search(pattern, text)
     if match:
-        value = match.group(1).strip(" .")
+        value = strip_leading_sender_label_prefixes(match.group(1).strip(" ."))
         if value:
             return value[:240]
     return None
@@ -71,7 +74,12 @@ def extract_label_custom_fields(
         value, confidence = _extract_by_type(normalized, field_type, label)
         if not value:
             continue
+        normalized_value = strip_leading_sender_label_prefixes(value)
+        if not normalized_value:
+            continue
         results.append(
-            ExtractedField(key=key, value=value, confidence=round(confidence, 3))
+            ExtractedField(
+                key=key, value=normalized_value, confidence=round(confidence, 3)
+            )
         )
     return results

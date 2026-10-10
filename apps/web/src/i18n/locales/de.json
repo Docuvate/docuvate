@@ -488,6 +488,7 @@
     "layoutTabOutline": "Gliederung",
     "layoutTabExport": "Export",
     "layoutFieldsDetected": "Erkannte Felder",
+    "layoutFieldsEmpty": "Noch keine Felder erkannt. Nach der Extraktion erscheinen Werte hier.",
     "layoutFieldSuggestions": "Vorschläge",
     "layoutSuggestionTag": "Vorschlag",
     "layoutSuggestionNotInSchema": "Nicht im Schema definiert",

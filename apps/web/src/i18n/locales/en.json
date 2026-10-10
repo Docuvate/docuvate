@@ -488,6 +488,7 @@
     "layoutTabOutline": "Outline",
     "layoutTabExport": "Export",
     "layoutFieldsDetected": "Detected fields",
+    "layoutFieldsEmpty": "No fields detected yet. Values appear here after extraction.",
     "layoutFieldSuggestions": "Suggestions",
     "layoutSuggestionTag": "Suggestion",
     "layoutSuggestionNotInSchema": "Not defined in schema",

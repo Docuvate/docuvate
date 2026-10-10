@@ -4,6 +4,9 @@
 import re
 
 from docuvate_worker.domain.models import ExtractedField
+from docuvate_worker.infrastructure.extractors.field_value_normalize import (
+    strip_leading_sender_label_prefixes,
+)
 
 _EUR_SUFFIX_AMOUNT = re.compile(
     r"Betrag\s*:\s*([0-9]{1,3}(?:\.[0-9]{3})*,[0-9]{2}|[0-9]+,[0-9]{2})\s*(?:EUR|€)",
@@ -18,10 +21,6 @@ _COMPANY_LINE = re.compile(
     re.IGNORECASE,
 )
 _INVOICE_HEADER = re.compile(r"^(Rechnung|Invoice)\b", re.IGNORECASE)
-_VENDOR_LABEL_PREFIX = re.compile(
-    r"^(?:(?:kurzer\s+)?absender|vendor|sender|lieferant|from)\s*:\s*",
-    re.IGNORECASE,
-)
 _BANNER_LINE = re.compile(r"synthetic layout regression document", re.IGNORECASE)
 _HEADING_VENDOR_LINE = re.compile(
     r"^(?:QUERFORMAT[\s\-A-Z0-9]*FIXTURE|VERTRAGSUEBERSICHT|ANHANG\s+PREISLISTE)",
@@ -46,16 +45,6 @@ def _extract_amount(text: str) -> str | None:
     return None
 
 
-def _strip_vendor_label_prefix(value: str) -> str:
-    out = value.strip()
-    while True:
-        match = _VENDOR_LABEL_PREFIX.match(out)
-        if not match:
-            break
-        out = out[match.end() :].strip()
-    return out
-
-
 def _is_heading_like_vendor(line: str) -> bool:
     if _BANNER_LINE.search(line):
         return True
@@ -74,7 +63,7 @@ def _extract_vendor(text: str) -> str | None:
     company_hits: list[str] = []
     label_stripped_hits: list[str] = []
     for line in lines:
-        cleaned = _strip_vendor_label_prefix(line)
+        cleaned = strip_leading_sender_label_prefixes(line)
         had_label = cleaned != line
         if not cleaned or _is_heading_like_vendor(cleaned):
             continue

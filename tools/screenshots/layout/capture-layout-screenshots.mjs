@@ -281,6 +281,16 @@ async function main() {
       await p.getByText(/vorschlag/i).first().waitFor({ state: 'visible' });
       const tag = p.locator('.layout-field-suggestion-tag');
       await tag.waitFor({ state: 'visible' });
+      const rows = p.locator('.layout-field-row');
+      const rowCount = await rows.count();
+      for (let i = 0; i < rowCount; i++) {
+        const row = rows.nth(i);
+        const label = (await row.locator('.layout-field-label').textContent()) ?? '';
+        const value = (await row.locator('.layout-field-value').textContent()) ?? '';
+        if (/absender/i.test(label) && /absender\s*:/i.test(value)) {
+          throw new Error(`Absender field value must not repeat label prefix: ${value}`);
+        }
+      }
     }
   );
 

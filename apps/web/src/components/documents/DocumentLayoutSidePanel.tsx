@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useId, useMemo, useRef, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import type { ExtractedField, ExtractionBlock, LayoutIrDocument } from '@docuvate/contracts';
 import {
   buildLayoutOutline,
@@ -54,7 +55,7 @@ export function DocumentLayoutSidePanel({
   onDismissSuggestion,
   dismissedSuggestions,
 }: DocumentLayoutSidePanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
   const tabRefs = useRef<Partial<Record<LayoutSideTab, HTMLButtonElement | null>>>({});
   const panelBodyRef = useRef<HTMLDivElement>(null);
@@ -73,6 +74,10 @@ export function DocumentLayoutSidePanel({
   }, [overlays]);
 
   const panelFields = useMemo(() => fieldsForLayoutPanel(fields), [fields]);
+  const formatFieldValue = useCallback(
+    (key: string, value: string) => formatExtractedFieldDisplayValue(key, value, i18n.language),
+    [i18n.language]
+  );
 
   const suggestions = useMemo(() => {
     const widgets = allLayoutWidgets(layoutIr);
@@ -184,6 +189,9 @@ export function DocumentLayoutSidePanel({
         {activeTab === 'fields' ? (
           <div className="layout-side-fields">
             <h3 className="layout-side-section-title">{t('documents.layoutFieldsDetected')}</h3>
+            {panelFields.length === 0 && suggestions.length === 0 ? (
+              <p className="muted">{t('documents.layoutFieldsEmpty')}</p>
+            ) : null}
             <ul className="layout-field-list">
               {panelFields.map((field) => (
                 <li
@@ -192,7 +200,9 @@ export function DocumentLayoutSidePanel({
                   data-layout-overlay-target={fieldOverlayIdByKey.get(field.key) ?? undefined}
                 >
                   <span className="layout-field-label">{fieldLabelForKey(field.key)}</span>
-                  <span className="layout-field-value">{field.value}</span>
+                  <span className="layout-field-value">
+                    {formatFieldValue(field.key, field.value)}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -210,7 +220,7 @@ export function DocumentLayoutSidePanel({
                         <span className="layout-field-suggestion-tag">{t('documents.layoutSuggestionTag')}</span>
                         <span className="layout-field-label">{fieldLabelForKey(s.key)}</span>
                       </div>
-                      <p className="layout-field-value">{s.value}</p>
+                      <p className="layout-field-value">{formatFieldValue(s.key, s.value)}</p>
                       <p className="muted layout-field-suggestion-note">
                         {t('documents.layoutSuggestionNotInSchema')}
                       </p>
