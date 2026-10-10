@@ -21,17 +21,17 @@ part 'layout_compare_page_response_dto.g.dart';
 /// * [originalPngBase64] 
 /// * [reconstructionPngBase64] 
 /// * [heatmapPngBase64] 
-/// * [error] 
+/// * [errorCode] 
 @BuiltValue()
 abstract class LayoutComparePageResponseDto implements Built<LayoutComparePageResponseDto, LayoutComparePageResponseDtoBuilder> {
   @BuiltValueField(wireName: r'pageNumber')
   num get pageNumber;
 
   @BuiltValueField(wireName: r'ssim')
-  num get ssim;
+  num? get ssim;
 
   @BuiltValueField(wireName: r'inkDeviation')
-  num get inkDeviation;
+  num? get inkDeviation;
 
   @BuiltValueField(wireName: r'ssimFloor')
   num get ssimFloor;
@@ -54,8 +54,8 @@ abstract class LayoutComparePageResponseDto implements Built<LayoutComparePageRe
   @BuiltValueField(wireName: r'heatmapPngBase64')
   String? get heatmapPngBase64;
 
-  @BuiltValueField(wireName: r'error')
-  String? get error;
+  @BuiltValueField(wireName: r'errorCode')
+  String? get errorCode;
 
   LayoutComparePageResponseDto._();
 
@@ -85,16 +85,20 @@ class _$LayoutComparePageResponseDtoSerializer implements PrimitiveSerializer<La
       object.pageNumber,
       specifiedType: const FullType(num),
     );
-    yield r'ssim';
-    yield serializers.serialize(
-      object.ssim,
-      specifiedType: const FullType(num),
-    );
-    yield r'inkDeviation';
-    yield serializers.serialize(
-      object.inkDeviation,
-      specifiedType: const FullType(num),
-    );
+    if (object.ssim != null) {
+      yield r'ssim';
+      yield serializers.serialize(
+        object.ssim,
+        specifiedType: const FullType(num),
+      );
+    }
+    if (object.inkDeviation != null) {
+      yield r'inkDeviation';
+      yield serializers.serialize(
+        object.inkDeviation,
+        specifiedType: const FullType(num),
+      );
+    }
     yield r'ssimFloor';
     yield serializers.serialize(
       object.ssimFloor,
@@ -132,10 +136,10 @@ class _$LayoutComparePageResponseDtoSerializer implements PrimitiveSerializer<La
         specifiedType: const FullType(String),
       );
     }
-    if (object.error != null) {
-      yield r'error';
+    if (object.errorCode != null) {
+      yield r'errorCode';
       yield serializers.serialize(
-        object.error,
+        object.errorCode,
         specifiedType: const FullType(String),
       );
     }
@@ -232,12 +236,12 @@ class _$LayoutComparePageResponseDtoSerializer implements PrimitiveSerializer<La
           ) as String;
           result.heatmapPngBase64 = valueDes;
           break;
-        case r'error':
+        case r'errorCode':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(String),
           ) as String;
-          result.error = valueDes;
+          result.errorCode = valueDes;
           break;
         default:
           unhandled.add(key);

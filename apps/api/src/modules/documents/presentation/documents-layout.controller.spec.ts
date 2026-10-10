@@ -19,6 +19,7 @@ function createDocumentsController(layout: {
   getDocumentLayoutIr: ReturnType<typeof useCaseMock>;
   getDocumentLayoutHtml: ReturnType<typeof useCaseMock>;
   getDocumentLayoutTypst: ReturnType<typeof useCaseMock>;
+  getDocumentLayoutCompareSummary: ReturnType<typeof useCaseMock>;
   getDocumentLayoutCompareMetrics: ReturnType<typeof useCaseMock>;
   getDocumentLayoutComparePage: ReturnType<typeof useCaseMock>;
 }): DocumentsController {
@@ -49,6 +50,7 @@ function createDocumentsController(layout: {
     layout.getDocumentLayoutIr as never,
     layout.getDocumentLayoutHtml as never,
     layout.getDocumentLayoutTypst as never,
+    layout.getDocumentLayoutCompareSummary as never,
     layout.getDocumentLayoutCompareMetrics as never,
     layout.getDocumentLayoutComparePage as never,
     m(),
@@ -75,6 +77,7 @@ describe('DocumentsController layout routes', () => {
   const getDocumentLayoutIr = useCaseMock();
   const getDocumentLayoutHtml = useCaseMock();
   const getDocumentLayoutTypst = useCaseMock();
+  const getDocumentLayoutCompareSummary = useCaseMock();
   const getDocumentLayoutCompareMetrics = useCaseMock();
   const getDocumentLayoutComparePage = useCaseMock();
 
@@ -85,12 +88,14 @@ describe('DocumentsController layout routes', () => {
     getDocumentLayoutIr.execute.mockReset();
     getDocumentLayoutHtml.execute.mockReset();
     getDocumentLayoutTypst.execute.mockReset();
+    getDocumentLayoutCompareSummary.execute.mockReset();
     getDocumentLayoutCompareMetrics.execute.mockReset();
     getDocumentLayoutComparePage.execute.mockReset();
     controller = createDocumentsController({
       getDocumentLayoutIr,
       getDocumentLayoutHtml,
       getDocumentLayoutTypst,
+      getDocumentLayoutCompareSummary,
       getDocumentLayoutCompareMetrics,
       getDocumentLayoutComparePage,
     });
@@ -134,12 +139,30 @@ describe('DocumentsController layout routes', () => {
     getDocumentLayoutCompareMetrics.execute.mockResolvedValue({
       category: 'born_digital_standard',
       ssimFloor: 0.97,
-      pages: [{ pageNumber: 1, ssim: 0.99, inkDeviation: 0.01, pageReliable: true, error: null }],
+      pageCount: 1,
+      pages: [
+        {
+          pageNumber: 1,
+          ssim: 0.99,
+          inkDeviation: 0.01,
+          pageReliable: true,
+          errorCode: null,
+        },
+      ],
     });
     await expect(controller.layoutCompareMetrics(session, subject, 'doc-1')).resolves.toEqual({
       category: 'born_digital_standard',
       ssimFloor: 0.97,
-      pages: [{ pageNumber: 1, ssim: 0.99, inkDeviation: 0.01, pageReliable: true, error: null }],
+      pageCount: 1,
+      pages: [
+        {
+          pageNumber: 1,
+          ssim: 0.99,
+          inkDeviation: 0.01,
+          pageReliable: true,
+          errorCode: null,
+        },
+      ],
     });
   });
 });

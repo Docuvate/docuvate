@@ -54,6 +54,8 @@ from docuvate_worker.presentation.schemas import (
     LayoutComparePageMetricModel,
     LayoutComparePageRequest,
     LayoutComparePageResponse,
+    LayoutCompareSummaryRequest,
+    LayoutCompareSummaryResponse,
     LayoutRenderHtmlRequest,
     LayoutRenderHtmlResponse,
     LayoutRenderTypstRequest,
@@ -416,19 +418,22 @@ def layout_render_typst(
     )
 
 
-@router.post("/layout/compare-metrics", response_model=LayoutCompareMetricsResponse)
-def layout_compare_metrics(
-    body: LayoutCompareMetricsRequest,
+@router.post("/layout/compare-summary", response_model=LayoutCompareSummaryResponse)
+def layout_compare_summary(
+    body: LayoutCompareSummaryRequest,
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
-) -> LayoutCompareMetricsResponse:
+) -> LayoutCompareSummaryResponse:
     _require_worker_secret(x_worker_secret)
+    from docuvate_worker.infrastructure.layout.layout_compare_errors import LayoutCompareError
+    from docuvate_worker.infrastructure.layout.layout_compare_executor import run_layout_compare
     from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
     from docuvate_worker.infrastructure.layout.layout_page_compare import (
-        collect_layout_compare_metrics,
+        layout_compare_summary as summary,
     )
     from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
         decode_optional_pdf,
     )
+    from docuvate_worker.presentation.layout_compare_http import raise_layout_compare_http
 
     original = decode_optional_pdf(body.original_pdf_base64)
     if original is None:
@@ -437,17 +442,63 @@ def layout_compare_metrics(
         doc = document_from_dict(body.layout_ir.model_dump())
     except (KeyError, TypeError, ValueError) as exc:
         raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
-    metrics = collect_layout_compare_metrics(original, doc, dpi=body.dpi)
+    try:
+        result = run_layout_compare(lambda: summary(original, doc))
+    except LayoutCompareError as exc:
+        raise_layout_compare_http(exc)
+    return LayoutCompareSummaryResponse(
+        category=result.category,
+        ssim_floor=result.ssim_floor,
+        page_count=result.page_count,
+    )
+
+
+@router.post("/layout/compare-metrics", response_model=LayoutCompareMetricsResponse)
+def layout_compare_metrics(
+    body: LayoutCompareMetricsRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> LayoutCompareMetricsResponse:
+    _require_worker_secret(x_worker_secret)
+    from docuvate_worker.infrastructure.layout.layout_compare_errors import LayoutCompareError
+    from docuvate_worker.infrastructure.layout.layout_compare_executor import run_layout_compare
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
+    from docuvate_worker.infrastructure.layout.layout_page_compare import (
+        collect_layout_compare_metrics_for_pages,
+    )
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+        decode_optional_pdf,
+    )
+    from docuvate_worker.presentation.layout_compare_http import raise_layout_compare_http
+
+    original = decode_optional_pdf(body.original_pdf_base64)
+    if original is None:
+        raise HTTPException(status_code=422, detail="Invalid original PDF payload")
+    try:
+        doc = document_from_dict(body.layout_ir.model_dump())
+    except (KeyError, TypeError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
+    try:
+        metrics = run_layout_compare(
+            lambda: collect_layout_compare_metrics_for_pages(
+                original,
+                doc,
+                body.page_numbers,
+                dpi=body.dpi,
+            )
+        )
+    except LayoutCompareError as exc:
+        raise_layout_compare_http(exc)
     return LayoutCompareMetricsResponse(
         category=metrics.category,
         ssim_floor=metrics.ssim_floor,
+        page_count=metrics.page_count,
         pages=[
             LayoutComparePageMetricModel(
                 page_number=row.page_number,
                 ssim=row.ssim,
                 ink_deviation=row.ink_deviation,
                 page_reliable=row.page_reliable,
-                error=row.error,
+                error_code=row.error_code,
             )
             for row in metrics.pages
         ],
@@ -460,11 +511,14 @@ def layout_compare_page(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> LayoutComparePageResponse:
     _require_worker_secret(x_worker_secret)
+    from docuvate_worker.infrastructure.layout.layout_compare_errors import LayoutCompareError
+    from docuvate_worker.infrastructure.layout.layout_compare_executor import run_layout_compare
     from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
     from docuvate_worker.infrastructure.layout.layout_page_compare import compare_layout_page
     from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
         decode_optional_pdf,
     )
+    from docuvate_worker.presentation.layout_compare_http import raise_layout_compare_http
 
     original = decode_optional_pdf(body.original_pdf_base64)
     if original is None:
@@ -473,13 +527,18 @@ def layout_compare_page(
         doc = document_from_dict(body.layout_ir.model_dump())
     except (KeyError, TypeError, ValueError) as exc:
         raise HTTPException(status_code=422, detail="Invalid layout IR document") from exc
-    payload = compare_layout_page(
-        original,
-        doc,
-        page_number=body.page_number,
-        dpi=body.dpi,
-        include_heatmap=body.include_heatmap,
-    )
+    try:
+        payload = run_layout_compare(
+            lambda: compare_layout_page(
+                original,
+                doc,
+                page_number=body.page_number,
+                dpi=body.dpi,
+                include_heatmap=body.include_heatmap,
+            )
+        )
+    except LayoutCompareError as exc:
+        raise_layout_compare_http(exc)
     return LayoutComparePageResponse(
         page_number=payload.page_number,
         ssim=payload.ssim,
@@ -491,7 +550,7 @@ def layout_compare_page(
         original_png_base64=payload.original_png_base64,
         reconstruction_png_base64=payload.reconstruction_png_base64,
         heatmap_png_base64=payload.heatmap_png_base64,
-        error=payload.error,
+        error_code=payload.error_code,
     )
 
 

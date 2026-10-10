@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { useEffect, useState, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   formatSsimScore,
+  layoutCompareAdjacentPage,
+  layoutCompareSliderStep,
   pngDataUrl,
-  type LayoutComparePageMetric,
 } from '../../lib/layoutCompare';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { LayoutComparePageNav } from './LayoutComparePageNav';
@@ -30,20 +31,20 @@ export function DocumentLayoutCompareView({
   const [sliderPos, setSliderPos] = useState(50);
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
 
-  const { metrics, metricsState, metricsError, pagePayload, pageState, pageError, loadPage } =
-    useLayoutCompare(documentId, true);
+  const {
+    metrics,
+    metricsState,
+    metricsError,
+    metricsByPage,
+    pagePayload,
+    pageState,
+    pageError,
+    loadPage,
+  } = useLayoutCompare(documentId, true, pageCount, activePage);
 
   useEffect(() => {
     void loadPage(activePage, heatmapEnabled);
   }, [activePage, heatmapEnabled, loadPage]);
-
-  const metricsByPage = useMemo(() => {
-    const map = new Map<number, LayoutComparePageMetric>();
-    for (const row of metrics?.pages ?? []) {
-      map.set(row.pageNumber, row);
-    }
-    return map;
-  }, [metrics]);
 
   const ssimFloor = pagePayload?.ssimFloor ?? metrics?.ssimFloor ?? 0;
   const ssimScore = pagePayload?.ssim ?? metricsByPage.get(activePage)?.ssim;
@@ -56,18 +57,24 @@ export function DocumentLayoutCompareView({
     pagePayload?.heatmapPngBase64 ? pngDataUrl(pagePayload.heatmapPngBase64) : '';
 
   const onSliderKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'ArrowLeft') {
-      event.preventDefault();
-      setSliderPos((value) => Math.max(0, value - 5));
+    const next = layoutCompareSliderStep(event.key, sliderPos);
+    if (next === null) return;
+    event.preventDefault();
+    setSliderPos(next);
+  };
+
+  const onCompareKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.target instanceof HTMLInputElement && event.target.type === 'range') {
+      return;
     }
-    if (event.key === 'ArrowRight') {
-      event.preventDefault();
-      setSliderPos((value) => Math.min(100, value + 5));
-    }
+    const next = layoutCompareAdjacentPage(event.key, activePage, pageCount);
+    if (next === null) return;
+    event.preventDefault();
+    onPageChange(next);
   };
 
   return (
-    <div className="layout-compare">
+    <div className="layout-compare" tabIndex={0} onKeyDown={onCompareKeyDown}>
       <div className="layout-compare-toolbar">
         <div className="layout-compare-mode-switch" role="group" aria-label={t('documents.layoutCompareModeAria')}>
           <button
@@ -185,6 +192,9 @@ export function DocumentLayoutCompareView({
                 min={0}
                 max={100}
                 value={sliderPos}
+                aria-valuenow={sliderPos}
+                aria-valuemin={0}
+                aria-valuemax={100}
                 aria-label={t('documents.layoutCompareSliderAria')}
                 onChange={(event) => setSliderPos(Number(event.target.value))}
                 onKeyDown={onSliderKeyDown}

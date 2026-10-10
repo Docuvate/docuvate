@@ -416,6 +416,7 @@ export type LabelRecommendationListResponseDto = {
 export type LayoutCompareMetricsResponseDto = {
     category: string;
     ssimFloor: number;
+    pageCount: number;
     pages: Array<LayoutComparePageMetricDto>;
 };
 
@@ -424,13 +425,13 @@ export type LayoutComparePageMetricDto = {
     ssim?: number;
     inkDeviation?: number;
     pageReliable: boolean;
-    error?: string;
+    errorCode?: string;
 };
 
 export type LayoutComparePageResponseDto = {
     pageNumber: number;
-    ssim: number;
-    inkDeviation: number;
+    ssim?: number;
+    inkDeviation?: number;
     ssimFloor: number;
     pageReliable: boolean;
     widthPx: number;
@@ -438,7 +439,13 @@ export type LayoutComparePageResponseDto = {
     originalPngBase64: string;
     reconstructionPngBase64: string;
     heatmapPngBase64?: string;
-    error?: string;
+    errorCode?: string;
+};
+
+export type LayoutCompareSummaryResponseDto = {
+    category: string;
+    ssimFloor: number;
+    pageCount: number;
 };
 
 export type LayoutHtmlResponseDto = {
@@ -2624,7 +2631,10 @@ export type GetDocumentLayoutCompareMetricsData = {
     path: {
         id: string;
     };
-    query?: never;
+    query?: {
+        from?: string;
+        to?: string;
+    };
     url: '/documents/{id}/layout-compare/metrics';
 };
 
@@ -2669,6 +2679,30 @@ export type GetDocumentLayoutComparePageResponses = {
 };
 
 export type GetDocumentLayoutComparePageResponse = GetDocumentLayoutComparePageResponses[keyof GetDocumentLayoutComparePageResponses];
+
+export type GetDocumentLayoutCompareSummaryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/layout-compare/summary';
+};
+
+export type GetDocumentLayoutCompareSummaryErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetDocumentLayoutCompareSummaryError = GetDocumentLayoutCompareSummaryErrors[keyof GetDocumentLayoutCompareSummaryErrors];
+
+export type GetDocumentLayoutCompareSummaryResponses = {
+    200: LayoutCompareSummaryResponseDto;
+};
+
+export type GetDocumentLayoutCompareSummaryResponse = GetDocumentLayoutCompareSummaryResponses[keyof GetDocumentLayoutCompareSummaryResponses];
 
 export type GetDocumentLayoutHtmlData = {
     body?: never;

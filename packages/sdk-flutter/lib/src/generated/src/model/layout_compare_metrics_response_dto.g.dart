@@ -13,6 +13,8 @@ class _$LayoutCompareMetricsResponseDto
   @override
   final num ssimFloor;
   @override
+  final num pageCount;
+  @override
   final BuiltList<LayoutComparePageMetricDto> pages;
 
   factory _$LayoutCompareMetricsResponseDto(
@@ -20,12 +22,17 @@ class _$LayoutCompareMetricsResponseDto
       (new LayoutCompareMetricsResponseDtoBuilder()..update(updates))._build();
 
   _$LayoutCompareMetricsResponseDto._(
-      {required this.category, required this.ssimFloor, required this.pages})
+      {required this.category,
+      required this.ssimFloor,
+      required this.pageCount,
+      required this.pages})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(
         category, r'LayoutCompareMetricsResponseDto', 'category');
     BuiltValueNullFieldError.checkNotNull(
         ssimFloor, r'LayoutCompareMetricsResponseDto', 'ssimFloor');
+    BuiltValueNullFieldError.checkNotNull(
+        pageCount, r'LayoutCompareMetricsResponseDto', 'pageCount');
     BuiltValueNullFieldError.checkNotNull(
         pages, r'LayoutCompareMetricsResponseDto', 'pages');
   }
@@ -45,6 +52,7 @@ class _$LayoutCompareMetricsResponseDto
     return other is LayoutCompareMetricsResponseDto &&
         category == other.category &&
         ssimFloor == other.ssimFloor &&
+        pageCount == other.pageCount &&
         pages == other.pages;
   }
 
@@ -53,6 +61,7 @@ class _$LayoutCompareMetricsResponseDto
     var _$hash = 0;
     _$hash = $jc(_$hash, category.hashCode);
     _$hash = $jc(_$hash, ssimFloor.hashCode);
+    _$hash = $jc(_$hash, pageCount.hashCode);
     _$hash = $jc(_$hash, pages.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -63,6 +72,7 @@ class _$LayoutCompareMetricsResponseDto
     return (newBuiltValueToStringHelper(r'LayoutCompareMetricsResponseDto')
           ..add('category', category)
           ..add('ssimFloor', ssimFloor)
+          ..add('pageCount', pageCount)
           ..add('pages', pages))
         .toString();
   }
@@ -82,6 +92,10 @@ class LayoutCompareMetricsResponseDtoBuilder
   num? get ssimFloor => _$this._ssimFloor;
   set ssimFloor(num? ssimFloor) => _$this._ssimFloor = ssimFloor;
 
+  num? _pageCount;
+  num? get pageCount => _$this._pageCount;
+  set pageCount(num? pageCount) => _$this._pageCount = pageCount;
+
   ListBuilder<LayoutComparePageMetricDto>? _pages;
   ListBuilder<LayoutComparePageMetricDto> get pages =>
       _$this._pages ??= new ListBuilder<LayoutComparePageMetricDto>();
@@ -97,6 +111,7 @@ class LayoutCompareMetricsResponseDtoBuilder
     if ($v != null) {
       _category = $v.category;
       _ssimFloor = $v.ssimFloor;
+      _pageCount = $v.pageCount;
       _pages = $v.pages.toBuilder();
       _$v = null;
     }
@@ -126,6 +141,8 @@ class LayoutCompareMetricsResponseDtoBuilder
                   category, r'LayoutCompareMetricsResponseDto', 'category'),
               ssimFloor: BuiltValueNullFieldError.checkNotNull(
                   ssimFloor, r'LayoutCompareMetricsResponseDto', 'ssimFloor'),
+              pageCount: BuiltValueNullFieldError.checkNotNull(
+                  pageCount, r'LayoutCompareMetricsResponseDto', 'pageCount'),
               pages: pages.build());
     } catch (_) {
       late String _$failedField;

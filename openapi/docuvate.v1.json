@@ -6022,6 +6022,22 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6180,6 +6196,85 @@
           }
         ],
         "summary": "Raster compare payload for one layout reconstruction page",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/layout-compare/summary": {
+      "get": {
+        "operationId": "getDocumentLayoutCompareSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutCompareSummaryResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "SSIM category and page count for layout reconstruction compare",
         "tags": [
           "Documents"
         ]
@@ -11978,6 +12073,9 @@
           "ssimFloor": {
             "type": "number"
           },
+          "pageCount": {
+            "type": "number"
+          },
           "pages": {
             "type": "array",
             "items": {
@@ -11988,6 +12086,7 @@
         "required": [
           "category",
           "ssimFloor",
+          "pageCount",
           "pages"
         ]
       },
@@ -12008,7 +12107,7 @@
           "pageReliable": {
             "type": "boolean"
           },
-          "error": {
+          "errorCode": {
             "type": "string",
             "nullable": true
           }
@@ -12025,10 +12124,12 @@
             "type": "number"
           },
           "ssim": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "inkDeviation": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           },
           "ssimFloor": {
             "type": "number"
@@ -12052,21 +12153,38 @@
             "type": "string",
             "nullable": true
           },
-          "error": {
+          "errorCode": {
             "type": "string",
             "nullable": true
           }
         },
         "required": [
           "pageNumber",
-          "ssim",
-          "inkDeviation",
           "ssimFloor",
           "pageReliable",
           "widthPx",
           "heightPx",
           "originalPngBase64",
           "reconstructionPngBase64"
+        ]
+      },
+      "LayoutCompareSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "ssimFloor": {
+            "type": "number"
+          },
+          "pageCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "category",
+          "ssimFloor",
+          "pageCount"
         ]
       },
       "LayoutHtmlResponseDto": {

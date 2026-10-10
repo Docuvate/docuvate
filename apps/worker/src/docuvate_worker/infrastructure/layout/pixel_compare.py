@@ -23,6 +23,8 @@ class PagePixelCompareResult:
     ssim: float
     ink_deviation: float
     heatmap_gray: np.ndarray
+    original_gray: np.ndarray
+    reconstruction_gray: np.ndarray
 
 
 def render_pdf_page_gray(
@@ -99,6 +101,8 @@ def compare_pdf_pages(
         ssim=structural_similarity(orig, recon),
         ink_deviation=ink_deviation_ratio(orig, recon),
         heatmap_gray=heatmap,
+        original_gray=orig,
+        reconstruction_gray=recon,
     )
 
 

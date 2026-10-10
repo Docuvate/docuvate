@@ -15,7 +15,7 @@ part 'layout_compare_page_metric_dto.g.dart';
 /// * [ssim] 
 /// * [inkDeviation] 
 /// * [pageReliable] 
-/// * [error] 
+/// * [errorCode] 
 @BuiltValue()
 abstract class LayoutComparePageMetricDto implements Built<LayoutComparePageMetricDto, LayoutComparePageMetricDtoBuilder> {
   @BuiltValueField(wireName: r'pageNumber')
@@ -30,8 +30,8 @@ abstract class LayoutComparePageMetricDto implements Built<LayoutComparePageMetr
   @BuiltValueField(wireName: r'pageReliable')
   bool get pageReliable;
 
-  @BuiltValueField(wireName: r'error')
-  String? get error;
+  @BuiltValueField(wireName: r'errorCode')
+  String? get errorCode;
 
   LayoutComparePageMetricDto._();
 
@@ -80,10 +80,10 @@ class _$LayoutComparePageMetricDtoSerializer implements PrimitiveSerializer<Layo
       object.pageReliable,
       specifiedType: const FullType(bool),
     );
-    if (object.error != null) {
-      yield r'error';
+    if (object.errorCode != null) {
+      yield r'errorCode';
       yield serializers.serialize(
-        object.error,
+        object.errorCode,
         specifiedType: const FullType(String),
       );
     }
@@ -138,12 +138,12 @@ class _$LayoutComparePageMetricDtoSerializer implements PrimitiveSerializer<Layo
           ) as bool;
           result.pageReliable = valueDes;
           break;
-        case r'error':
+        case r'errorCode':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(String),
           ) as String;
-          result.error = valueDes;
+          result.errorCode = valueDes;
           break;
         default:
           unhandled.add(key);

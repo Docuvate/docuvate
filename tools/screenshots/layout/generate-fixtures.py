@@ -66,6 +66,23 @@ def landscape_fixture_pdf() -> bytes:
     return _single_page_pdf(stream, media=(842.0, 595.0))
 
 
+def many_page_strip_pdf(page_count: int = 55) -> bytes:
+    import io
+
+    from pypdf import PdfReader, PdfWriter
+
+    writer = PdfWriter()
+    for index in range(page_count):
+        label = index + 1
+        stream = f"BT /F1 10 Tf 40 700 Td (Layout strip Seite {label}) Tj ET"
+        page = _single_page_pdf(stream)
+        reader = PdfReader(io.BytesIO(page))
+        writer.append_pages_from_reader(reader)
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
+
+
 def multipage_outline_pdf() -> bytes:
     page1 = _single_page_pdf(
         "\n".join(
@@ -91,6 +108,7 @@ def main() -> None:
     (OUT / "layout-ws-landscape.pdf").write_bytes(landscape_fixture_pdf())
     (OUT / "layout-ws-scanned.pdf").write_bytes(scanned_with_invisible_ocr_text_layer_pdf())
     (OUT / "layout-ws-multipage.pdf").write_bytes(multipage_outline_pdf())
+    (OUT / "layout-ws-many-pages.pdf").write_bytes(many_page_strip_pdf(55))
     print("Wrote fixtures to", OUT)
 
 

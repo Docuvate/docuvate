@@ -297,11 +297,27 @@ class LayoutRenderTypstResponse(BaseModel):
     unreliable_reason: str | None = Field(default=None, alias="unreliableReason")
 
 
+class LayoutCompareSummaryRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
+    original_pdf_base64: str = Field(alias="originalPdfBase64")
+
+
+class LayoutCompareSummaryResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    category: str
+    ssim_floor: float = Field(alias="ssimFloor")
+    page_count: int = Field(alias="pageCount")
+
+
 class LayoutCompareMetricsRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     layout_ir: LayoutIrWireModel = Field(alias="layoutIr")
     original_pdf_base64: str = Field(alias="originalPdfBase64")
+    page_numbers: list[int] = Field(alias="pageNumbers", min_length=1)
     dpi: int = Field(default=100, ge=72, le=200)
 
 
@@ -312,7 +328,7 @@ class LayoutComparePageMetricModel(BaseModel):
     ssim: float | None = None
     ink_deviation: float | None = Field(default=None, alias="inkDeviation")
     page_reliable: bool = Field(alias="pageReliable")
-    error: str | None = None
+    error_code: str | None = Field(default=None, alias="errorCode")
 
 
 class LayoutCompareMetricsResponse(BaseModel):
@@ -320,6 +336,7 @@ class LayoutCompareMetricsResponse(BaseModel):
 
     category: str
     ssim_floor: float = Field(alias="ssimFloor")
+    page_count: int = Field(alias="pageCount")
     pages: list[LayoutComparePageMetricModel]
 
 
@@ -337,8 +354,8 @@ class LayoutComparePageResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     page_number: int = Field(alias="pageNumber")
-    ssim: float
-    ink_deviation: float = Field(alias="inkDeviation")
+    ssim: float | None = None
+    ink_deviation: float | None = Field(default=None, alias="inkDeviation")
     ssim_floor: float = Field(alias="ssimFloor")
     page_reliable: bool = Field(alias="pageReliable")
     width_px: int = Field(alias="widthPx")
@@ -346,4 +363,4 @@ class LayoutComparePageResponse(BaseModel):
     original_png_base64: str = Field(alias="originalPngBase64")
     reconstruction_png_base64: str = Field(alias="reconstructionPngBase64")
     heatmap_png_base64: str | None = Field(default=None, alias="heatmapPngBase64")
-    error: str | None = None
+    error_code: str | None = Field(default=None, alias="errorCode")

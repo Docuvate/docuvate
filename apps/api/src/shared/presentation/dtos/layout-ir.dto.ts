@@ -295,6 +295,17 @@ export class LayoutTypstResponseDto {
   unreliableReason?: string | null;
 }
 
+export class LayoutCompareSummaryResponseDto {
+  @ApiProperty()
+  category!: string;
+
+  @ApiProperty()
+  ssimFloor!: number;
+
+  @ApiProperty()
+  pageCount!: number;
+}
+
 export class LayoutComparePageMetricDto {
   @ApiProperty()
   pageNumber!: number;
@@ -309,7 +320,7 @@ export class LayoutComparePageMetricDto {
   pageReliable!: boolean;
 
   @ApiProperty({ required: false, nullable: true })
-  error!: string | null;
+  errorCode!: string | null;
 }
 
 export class LayoutCompareMetricsResponseDto {
@@ -319,6 +330,9 @@ export class LayoutCompareMetricsResponseDto {
   @ApiProperty()
   ssimFloor!: number;
 
+  @ApiProperty()
+  pageCount!: number;
+
   @ApiProperty({ type: [LayoutComparePageMetricDto] })
   pages!: LayoutComparePageMetricDto[];
 }
@@ -327,11 +341,11 @@ export class LayoutComparePageResponseDto {
   @ApiProperty()
   pageNumber!: number;
 
-  @ApiProperty()
-  ssim!: number;
+  @ApiProperty({ required: false, nullable: true })
+  ssim!: number | null;
 
-  @ApiProperty()
-  inkDeviation!: number;
+  @ApiProperty({ required: false, nullable: true })
+  inkDeviation!: number | null;
 
   @ApiProperty()
   ssimFloor!: number;
@@ -355,5 +369,5 @@ export class LayoutComparePageResponseDto {
   heatmapPngBase64!: string | null;
 
   @ApiProperty({ required: false, nullable: true })
-  error!: string | null;
+  errorCode!: string | null;
 }

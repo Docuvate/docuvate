@@ -89,6 +89,7 @@ export 'package:docuvate/src/generated/src/model/label_recommendation_list_respo
 export 'package:docuvate/src/generated/src/model/layout_compare_metrics_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/layout_compare_page_metric_dto.dart';
 export 'package:docuvate/src/generated/src/model/layout_compare_page_response_dto.dart';
+export 'package:docuvate/src/generated/src/model/layout_compare_summary_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/layout_html_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/layout_ir_block_dto.dart';
 export 'package:docuvate/src/generated/src/model/layout_ir_document_dto.dart';

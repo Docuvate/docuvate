@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { LayoutCompareMetrics, LayoutComparePagePayload } from './layoutCompare';
+import type {
+  LayoutCompareMetrics,
+  LayoutComparePagePayload,
+  LayoutCompareSummary,
+} from './layoutCompare';
 import type {
   CorrespondentDto,
   CreateCorrespondentRequest,
@@ -210,10 +214,24 @@ export async function fetchDocumentLayoutTypst(
   return request(`/documents/${documentId}/layout-typst${query}`);
 }
 
-export async function fetchDocumentLayoutCompareMetrics(
+export async function fetchDocumentLayoutCompareSummary(
   documentId: string
+): Promise<LayoutCompareSummary> {
+  return request(`/documents/${documentId}/layout-compare/summary`);
+}
+
+export async function fetchDocumentLayoutCompareMetrics(
+  documentId: string,
+  from?: number,
+  to?: number
 ): Promise<LayoutCompareMetrics> {
-  return request(`/documents/${documentId}/layout-compare/metrics`);
+  const params = new URLSearchParams();
+  if (from !== undefined) params.set('from', String(from));
+  if (to !== undefined) params.set('to', String(to));
+  const query = params.toString();
+  return request(
+    `/documents/${documentId}/layout-compare/metrics${query ? `?${query}` : ''}`
+  );
 }
 
 export async function fetchDocumentLayoutComparePage(

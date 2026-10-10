@@ -16,7 +16,7 @@ class _$LayoutComparePageMetricDto extends LayoutComparePageMetricDto {
   @override
   final bool pageReliable;
   @override
-  final String? error;
+  final String? errorCode;
 
   factory _$LayoutComparePageMetricDto(
           [void Function(LayoutComparePageMetricDtoBuilder)? updates]) =>
@@ -27,7 +27,7 @@ class _$LayoutComparePageMetricDto extends LayoutComparePageMetricDto {
       this.ssim,
       this.inkDeviation,
       required this.pageReliable,
-      this.error})
+      this.errorCode})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(
         pageNumber, r'LayoutComparePageMetricDto', 'pageNumber');
@@ -52,7 +52,7 @@ class _$LayoutComparePageMetricDto extends LayoutComparePageMetricDto {
         ssim == other.ssim &&
         inkDeviation == other.inkDeviation &&
         pageReliable == other.pageReliable &&
-        error == other.error;
+        errorCode == other.errorCode;
   }
 
   @override
@@ -62,7 +62,7 @@ class _$LayoutComparePageMetricDto extends LayoutComparePageMetricDto {
     _$hash = $jc(_$hash, ssim.hashCode);
     _$hash = $jc(_$hash, inkDeviation.hashCode);
     _$hash = $jc(_$hash, pageReliable.hashCode);
-    _$hash = $jc(_$hash, error.hashCode);
+    _$hash = $jc(_$hash, errorCode.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -74,7 +74,7 @@ class _$LayoutComparePageMetricDto extends LayoutComparePageMetricDto {
           ..add('ssim', ssim)
           ..add('inkDeviation', inkDeviation)
           ..add('pageReliable', pageReliable)
-          ..add('error', error))
+          ..add('errorCode', errorCode))
         .toString();
   }
 }
@@ -100,9 +100,9 @@ class LayoutComparePageMetricDtoBuilder
   bool? get pageReliable => _$this._pageReliable;
   set pageReliable(bool? pageReliable) => _$this._pageReliable = pageReliable;
 
-  String? _error;
-  String? get error => _$this._error;
-  set error(String? error) => _$this._error = error;
+  String? _errorCode;
+  String? get errorCode => _$this._errorCode;
+  set errorCode(String? errorCode) => _$this._errorCode = errorCode;
 
   LayoutComparePageMetricDtoBuilder() {
     LayoutComparePageMetricDto._defaults(this);
@@ -115,7 +115,7 @@ class LayoutComparePageMetricDtoBuilder
       _ssim = $v.ssim;
       _inkDeviation = $v.inkDeviation;
       _pageReliable = $v.pageReliable;
-      _error = $v.error;
+      _errorCode = $v.errorCode;
       _$v = null;
     }
     return this;
@@ -144,7 +144,7 @@ class LayoutComparePageMetricDtoBuilder
             inkDeviation: inkDeviation,
             pageReliable: BuiltValueNullFieldError.checkNotNull(
                 pageReliable, r'LayoutComparePageMetricDto', 'pageReliable'),
-            error: error);
+            errorCode: errorCode);
     replace(_$result);
     return _$result;
   }

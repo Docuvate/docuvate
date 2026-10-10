@@ -3,22 +3,19 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:built_collection/built_collection.dart';
-import 'package:docuvate/src/generated/src/model/layout_compare_page_metric_dto.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
-part 'layout_compare_metrics_response_dto.g.dart';
+part 'layout_compare_summary_response_dto.g.dart';
 
-/// LayoutCompareMetricsResponseDto
+/// LayoutCompareSummaryResponseDto
 ///
 /// Properties:
 /// * [category] 
 /// * [ssimFloor] 
 /// * [pageCount] 
-/// * [pages] 
 @BuiltValue()
-abstract class LayoutCompareMetricsResponseDto implements Built<LayoutCompareMetricsResponseDto, LayoutCompareMetricsResponseDtoBuilder> {
+abstract class LayoutCompareSummaryResponseDto implements Built<LayoutCompareSummaryResponseDto, LayoutCompareSummaryResponseDtoBuilder> {
   @BuiltValueField(wireName: r'category')
   String get category;
 
@@ -28,30 +25,27 @@ abstract class LayoutCompareMetricsResponseDto implements Built<LayoutCompareMet
   @BuiltValueField(wireName: r'pageCount')
   num get pageCount;
 
-  @BuiltValueField(wireName: r'pages')
-  BuiltList<LayoutComparePageMetricDto> get pages;
+  LayoutCompareSummaryResponseDto._();
 
-  LayoutCompareMetricsResponseDto._();
-
-  factory LayoutCompareMetricsResponseDto([void updates(LayoutCompareMetricsResponseDtoBuilder b)]) = _$LayoutCompareMetricsResponseDto;
+  factory LayoutCompareSummaryResponseDto([void updates(LayoutCompareSummaryResponseDtoBuilder b)]) = _$LayoutCompareSummaryResponseDto;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(LayoutCompareMetricsResponseDtoBuilder b) => b;
+  static void _defaults(LayoutCompareSummaryResponseDtoBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<LayoutCompareMetricsResponseDto> get serializer => _$LayoutCompareMetricsResponseDtoSerializer();
+  static Serializer<LayoutCompareSummaryResponseDto> get serializer => _$LayoutCompareSummaryResponseDtoSerializer();
 }
 
-class _$LayoutCompareMetricsResponseDtoSerializer implements PrimitiveSerializer<LayoutCompareMetricsResponseDto> {
+class _$LayoutCompareSummaryResponseDtoSerializer implements PrimitiveSerializer<LayoutCompareSummaryResponseDto> {
   @override
-  final Iterable<Type> types = const [LayoutCompareMetricsResponseDto, _$LayoutCompareMetricsResponseDto];
+  final Iterable<Type> types = const [LayoutCompareSummaryResponseDto, _$LayoutCompareSummaryResponseDto];
 
   @override
-  final String wireName = r'LayoutCompareMetricsResponseDto';
+  final String wireName = r'LayoutCompareSummaryResponseDto';
 
   Iterable<Object?> _serializeProperties(
     Serializers serializers,
-    LayoutCompareMetricsResponseDto object, {
+    LayoutCompareSummaryResponseDto object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'category';
@@ -69,17 +63,12 @@ class _$LayoutCompareMetricsResponseDtoSerializer implements PrimitiveSerializer
       object.pageCount,
       specifiedType: const FullType(num),
     );
-    yield r'pages';
-    yield serializers.serialize(
-      object.pages,
-      specifiedType: const FullType(BuiltList, [FullType(LayoutComparePageMetricDto)]),
-    );
   }
 
   @override
   Object serialize(
     Serializers serializers,
-    LayoutCompareMetricsResponseDto object, {
+    LayoutCompareSummaryResponseDto object, {
     FullType specifiedType = FullType.unspecified,
   }) {
     return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
@@ -90,7 +79,7 @@ class _$LayoutCompareMetricsResponseDtoSerializer implements PrimitiveSerializer
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
     required List<Object?> serializedList,
-    required LayoutCompareMetricsResponseDtoBuilder result,
+    required LayoutCompareSummaryResponseDtoBuilder result,
     required List<Object?> unhandled,
   }) {
     for (var i = 0; i < serializedList.length; i += 2) {
@@ -118,13 +107,6 @@ class _$LayoutCompareMetricsResponseDtoSerializer implements PrimitiveSerializer
           ) as num;
           result.pageCount = valueDes;
           break;
-        case r'pages':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(LayoutComparePageMetricDto)]),
-          ) as BuiltList<LayoutComparePageMetricDto>;
-          result.pages.replace(valueDes);
-          break;
         default:
           unhandled.add(key);
           unhandled.add(value);
@@ -134,12 +116,12 @@ class _$LayoutCompareMetricsResponseDtoSerializer implements PrimitiveSerializer
   }
 
   @override
-  LayoutCompareMetricsResponseDto deserialize(
+  LayoutCompareSummaryResponseDto deserialize(
     Serializers serializers,
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    final result = LayoutCompareMetricsResponseDtoBuilder();
+    final result = LayoutCompareSummaryResponseDtoBuilder();
     final serializedList = (serialized as Iterable<Object?>).toList();
     final unhandled = <Object?>[];
     _deserializeProperties(

@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useMemo } from 'react';
+import { useMemo, type KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   LAYOUT_COMPARE_VIRTUAL_PAGE_THRESHOLD,
+  layoutCompareAdjacentPage,
   layoutCompareVisiblePageRange,
   type LayoutComparePageMetric,
 } from '../../lib/layoutCompare';
@@ -37,6 +38,13 @@ export function LayoutComparePageNav({
   }, [start, end]);
 
   const virtualized = pageCount > LAYOUT_COMPARE_VIRTUAL_PAGE_THRESHOLD;
+
+  const onStripKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const next = layoutCompareAdjacentPage(event.key, activePage, pageCount);
+    if (next === null) return;
+    event.preventDefault();
+    onPageChange(next);
+  };
 
   return (
     <nav className="layout-compare-page-nav" aria-label={t('documents.layoutComparePageNavAria')}>
@@ -80,7 +88,10 @@ export function LayoutComparePageNav({
       <div
         className={`layout-compare-page-strip${virtualized ? ' layout-compare-page-strip-virtual' : ''}`}
         role="listbox"
+        tabIndex={0}
         aria-label={t('documents.layoutComparePageStripAria')}
+        aria-activedescendant={`layout-compare-page-chip-${activePage}`}
+        onKeyDown={onStripKeyDown}
       >
         {virtualized ? (
           <span className="muted layout-compare-page-strip-hint">
@@ -94,6 +105,7 @@ export function LayoutComparePageNav({
           return (
             <button
               key={pageNumber}
+              id={`layout-compare-page-chip-${pageNumber}`}
               type="button"
               role="option"
               aria-selected={selected}
