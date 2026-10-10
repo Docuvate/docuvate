@@ -232,11 +232,35 @@ def _draw_symbol_table(pdf: FPDF) -> None:
                     pdf.set_xy(px + x_off, py + 1.5)
                     pdf.cell(4, 4, ch, border=0)
             elif row_idx == 3 and col_idx == 0:
-                for x_off, ch in ((1.5, "l"), (6, "("), (8, "x"), (11, ")"), (15, "β")):
+                for x_off, ch in (
+                    (1.5, "l"),
+                    (5.5, "("),
+                    (7.5, "x"),
+                    (9.5, ")"),
+                    (12, ";"),
+                    (14, "β"),
+                    (17, ";"),
+                    (19.5, "b"),
+                    (22, "c"),
+                    (24.5, "c"),
+                ):
                     pdf.set_xy(px + x_off, py + 1.5)
                     pdf.cell(3, 4, ch, border=0)
             elif row_idx == 4 and col_idx == 0:
-                for x_off, ch in ((1.5, "g"), (6, "("), (8, "x"), (11, ")"), (15, "λ")):
+                for x_off, ch in (
+                    (1.5, "g"),
+                    (5.5, "("),
+                    (7.5, "x"),
+                    (9.5, ")"),
+                    (12, ";"),
+                    (14, "k"),
+                    (16.5, ";"),
+                    (19, "h"),
+                    (21.5, ";"),
+                    (24, "λ"),
+                    (27, ";"),
+                    (29.5, "s"),
+                ):
                     pdf.set_xy(px + x_off, py + 1.5)
                     pdf.cell(3, 4, ch, border=0)
             elif label:

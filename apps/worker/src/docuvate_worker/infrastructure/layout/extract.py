@@ -8,6 +8,7 @@ from __future__ import annotations
 import io
 import logging
 import re
+from collections import Counter
 from pathlib import Path
 
 from docuvate_worker.domain.layout_ir import (
@@ -69,6 +70,35 @@ def _join_cell_chars(chars: list[dict]) -> str:
         parts.append(token)
         prev = ch
     return _WHITESPACE_RUN.sub(" ", "".join(parts)).strip()
+
+
+def _non_ws_char_multiset(text: str) -> Counter[str]:
+    return Counter(ch for ch in text if not ch.isspace())
+
+
+def _char_multisets_equal_ignore_ws(left: str, right: str) -> bool:
+    return _non_ws_char_multiset(left) == _non_ws_char_multiset(right)
+
+
+def _concat_cell_chars(chars: list[dict]) -> str:
+    ordered = sorted(chars, key=lambda c: (c["top"], c["x0"]))
+    return "".join(ch.get("text") or "" for ch in ordered)
+
+
+def _resolve_cell_text(chars: list[dict], extract_text: str | None) -> str:
+    fallback = (extract_text or "").strip()
+    if not chars:
+        return fallback
+    joined = _join_cell_chars(chars)
+    raw = _concat_cell_chars(chars)
+    if _char_multisets_equal_ignore_ws(joined, raw):
+        return joined
+    if fallback and _char_multisets_equal_ignore_ws(fallback, raw):
+        return fallback
+    if fallback and not _char_multisets_equal_ignore_ws(joined, fallback):
+        return fallback
+    return joined
+
 
 _TABLE_PAD_PT = 1.5
 
@@ -172,11 +202,10 @@ def _extract_tables(
                 cx0, ctop, cx1, cbottom = cell
                 chars = _chars_in_box(page, cx0, ctop, cx1, cbottom)
                 size_pt, weight, _font = _style_from_chars(chars)
-                text = ""
-                if chars:
-                    text = _join_cell_chars(chars)
-                elif row_idx < len(extracted) and col_idx < len(extracted[row_idx]):
-                    text = (extracted[row_idx][col_idx] or "").strip()
+                extract_cell = None
+                if row_idx < len(extracted) and col_idx < len(extracted[row_idx]):
+                    extract_cell = extracted[row_idx][col_idx]
+                text = _resolve_cell_text(chars, extract_cell)
                 if not text:
                     continue
                 col_count = len(row.cells)
