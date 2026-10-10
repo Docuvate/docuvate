@@ -236,8 +236,8 @@ export class CitedChatGenerationService {
           ordinal: 1,
           chunkId: extractive.chunk.chunkId,
           quote: extractive.quote,
-          charStart: extractive.chunk.charStart,
-          charEnd: extractive.chunk.charEnd,
+          charStart: extractive.chunk.charStart ?? 0,
+          charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
         },
       ]);
       const content = formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }]);
