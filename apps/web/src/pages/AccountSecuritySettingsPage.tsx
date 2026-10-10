@@ -10,7 +10,7 @@ import { SettingsSectionCard } from '../components/settings/SettingsSectionCard'
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { authClient } from '../lib/auth-client';
+import { authClient, authSessionUserTwoFactorEnabled } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/authErrors';
 
 const ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true };
@@ -48,9 +48,9 @@ export function AccountSecuritySettingsPage() {
   }, []);
 
   useEffect(() => {
-    setTotpEnabled(session?.user.twoFactorEnabled === true);
+    setTotpEnabled(authSessionUserTwoFactorEnabled(session));
     void refreshPasskeys();
-  }, [session?.user, refreshPasskeys]);
+  }, [session, refreshPasskeys]);
 
   async function startTotpEnrollment(event: FormEvent) {
     event.preventDefault();

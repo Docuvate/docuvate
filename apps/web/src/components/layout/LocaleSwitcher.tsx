@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { LOCALE_STORAGE_KEY } from '../../i18n';
-import { authClient } from '../../lib/auth-client';
+import { authClient, authSessionUserId } from '../../lib/auth-client';
 import { persistUserUiPreference } from '../../lib/persistUserUiPreference';
 import { segmentedPreferenceClass } from '../../lib/segmentedControlClasses';
 import { SegmentedControl } from '../ui/SegmentedControl';
@@ -38,7 +38,7 @@ export function LocaleSwitcher({ placement = 'topbar' }: { placement?: 'topbar' 
     }
     setSaveError(null);
     const previous = current;
-    if (!session?.user.id) {
+    if (!authSessionUserId(session)) {
       void i18n.changeLanguage(code);
       localStorage.setItem(LOCALE_STORAGE_KEY, code);
       return;

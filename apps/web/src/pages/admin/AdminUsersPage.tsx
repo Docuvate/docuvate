@@ -23,7 +23,7 @@ import {
   setAdminUserRole,
   unbanAdminUser,
 } from '../../lib/api';
-import { authClient } from '../../lib/auth-client';
+import { authClient, authSessionUserId } from '../../lib/auth-client';
 import { routes } from '../../lib/routes';
 
 type PendingAction =
@@ -38,7 +38,7 @@ export function AdminUsersPage() {
   const { t } = useTranslation();
   const toast = useToast();
   const { data: session } = authClient.useSession();
-  const currentUserId = session?.user.id ?? null;
+  const currentUserId = authSessionUserId(session) ?? null;
   const [users, setUsers] = useState<AdminUserDto[]>([]);
   const [loadError, setLoadError] = useState(false);
   const [reloadBusy, setReloadBusy] = useState(false);

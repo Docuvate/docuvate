@@ -21,7 +21,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import { getConnectorCatalog, globalSearch, listRecognizedFields } from '../../lib/api';
-import { authClient } from '../../lib/auth-client';
+import { authClient, authSessionUserId } from '../../lib/auth-client';
 import { routes } from '../../lib/routes';
 import { suggestFieldNames } from '../../lib/search/fieldNameSuggestions';
 import {
@@ -70,7 +70,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   const abortRef = useRef<AbortController | null>(null);
 
   const { data: session } = authClient.useSession();
-  const userId = session?.user.id;
+  const userId = authSessionUserId(session);
 
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [triggerFocused, setTriggerFocused] = useState(false);

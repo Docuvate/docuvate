@@ -41,7 +41,7 @@ import {
   updateDocument,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
-import { authClient } from '../lib/auth-client';
+import { authClient, authSessionUserId } from '../lib/auth-client';
 import {
   readCitationPageFromLocationState,
   readHighlightBlocksFromLocationState,
@@ -158,11 +158,11 @@ export function DocumentDetailPage() {
   }, [location.state, blocks]);
 
   useEffect(() => {
-    const userId = session?.user.id;
+    const userId = authSessionUserId(session);
     if (userId && doc) {
       pushRecentDocument(userId, { id: doc.id, title: doc.title || doc.filename });
     }
-  }, [session?.user.id, doc]);
+  }, [session, doc]);
 
   const isPdf = doc?.mimeType === 'application/pdf';
   const isImage = doc?.mimeType.startsWith('image/') ?? false;

@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import { getUserSettings } from '../lib/api';
-import { authClient } from '../lib/auth-client';
+import { authClient, authSessionUserId } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
 import { applyUserSettingsUiPreferences } from '../lib/syncUserUiPreferences';
 import { useNarrowTopbar } from '../lib/useNarrowTopbar';
@@ -30,7 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [session?.session]);
 
   useEffect(() => {
-    const userId = session?.user.id;
+    const userId = authSessionUserId(session);
     if (!userId) {
       return;
     }
@@ -42,7 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       .catch(() => {
         /* keep local cache */
       });
-  }, [session?.user.id]);
+  }, [session]);
 
   useEffect(() => {
     if (!narrowTopbar) {
