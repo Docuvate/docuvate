@@ -5,12 +5,12 @@ import type {
   LibraryTableColumnId,
   SavedViewFilterMode,
   SavedViewListScope,
-  SavedViewVisibility,
   SavedViewViewMode,
+  SavedViewVisibility,
 } from '@docuvate/contracts';
 import type { DocumentSortField, DocumentStatus, SortOrder } from '@docuvate/contracts';
 
-export type SavedDocumentViewEntity = {
+export interface SavedDocumentViewEntity {
   id: string;
   ownerUserId: string;
   name: string;
@@ -35,9 +35,9 @@ export type SavedDocumentViewEntity = {
   visibleColumns: LibraryTableColumnId[];
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
-export type DashboardWidgetEntity = {
+export interface DashboardWidgetEntity {
   id: string;
   userId: string;
   type: DashboardWidgetType;
@@ -48,13 +48,13 @@ export type DashboardWidgetEntity = {
   itemLimit: number | null;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
-export type DashboardWidgetTemplate = {
+export interface DashboardWidgetTemplate {
   type: DashboardWidgetType;
   position: number;
   widthCols: number;
   heightRows: number;
   savedViewId: string | null;
   itemLimit: number | null;
-};
+}

@@ -84,7 +84,7 @@ function isDenyListedProducerOrMetadata(name: string): boolean {
 
 function isLikelyEmailOrUrl(name: string): boolean {
   const trimmed = name.trim();
-  return /@/.test(trimmed) || /https?:\/\//i.test(trimmed) || /^www\./i.test(trimmed);
+  return trimmed.includes('@') || /https?:\/\//i.test(trimmed) || /^www\./i.test(trimmed);
 }
 
 function isPureNumeric(name: string): boolean {
@@ -345,7 +345,7 @@ function pushRenameIfValid(
     fromName: from,
     toName: to,
     score,
-    reason: reason?.trim() || renameReason(from, to),
+    reason: reason?.trim() ?? renameReason(from, to),
   });
 }
 
@@ -365,8 +365,8 @@ export function suggestMergeAndRename(
 
   for (let i = 0; i < tags.length; i++) {
     for (let j = i + 1; j < tags.length; j++) {
-      const a = tags[i]!;
-      const b = tags[j]!;
+      const a = tags[i];
+      const b = tags[j];
       const idPair = [a.tagId, b.tagId].sort();
       const mergeId = `merge:${idPair[0]}:${idPair[1]}`;
       if (dismissedKeys.has(mergeId)) {
@@ -388,7 +388,7 @@ export function suggestMergeAndRename(
           score: Math.min(0.99, nameDup ? 0.88 + sim * 0.1 : sim),
           reason: nameDup
             ? `Sehr ähnliche Namen (${a.name} / ${b.name})`
-            : `Embedding-Zentren sehr nah (${Math.round(sim * 100)} % Ähnlichkeit)`,
+            : `Embedding-Zentren sehr nah (${String(Math.round(sim * 100))} % Ähnlichkeit)`,
         });
       } else if (sim >= 0.85 && a.name !== b.name) {
         const canonical = pickCanonicalName(a.name, b.name);

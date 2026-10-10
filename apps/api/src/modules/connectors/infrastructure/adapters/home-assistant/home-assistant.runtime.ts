@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorRuntimePorts,
   ConnectorSinkPort,
 } from '../../../domain/connector-runtime.ports.js';
-import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorExportInput,
   ConnectorExportResult,
@@ -16,8 +16,11 @@ export function openHomeAssistantRuntime(
 ): ConnectorRuntimePorts {
   const sink: ConnectorSinkPort = {
     async exportDocument(input: ConnectorExportInput): Promise<ConnectorExportResult> {
+      const destinationRef = input.destinationRef?.trim() ?? '';
       const message =
-        input.destinationRef?.trim() || `Docuvate export: ${input.filename} (${input.documentId})`;
+        destinationRef.length > 0
+          ? destinationRef
+          : `Docuvate export: ${input.filename} (${input.documentId})`;
       const response = await homeAssistantApiFetch(credentials, '/api/services/notify/notify', {
         method: 'POST',
         body: JSON.stringify({
@@ -28,8 +31,9 @@ export function openHomeAssistantRuntime(
       if (!response.ok) {
         throw new Error('HA_NOTIFY_FAILED');
       }
-      const data = (await response.json()) as unknown[];
-      return { ref: String(data.length) };
+      const data: unknown = await response.json();
+      const length = Array.isArray(data) ? data.length : 0;
+      return { ref: String(length) };
     },
   };
 

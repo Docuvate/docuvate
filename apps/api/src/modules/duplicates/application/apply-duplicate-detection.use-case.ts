@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
+
 import {
   DOCUMENT_REPOSITORY,
-  DUPLICATE_REPOSITORY,
-  LABEL_EMBEDDING_REPOSITORY,
   type DocumentRepository,
+  DUPLICATE_REPOSITORY,
   type DuplicateRepository,
+  LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
 import { cosineSimilarity } from '../../labels/domain/cosine.js';

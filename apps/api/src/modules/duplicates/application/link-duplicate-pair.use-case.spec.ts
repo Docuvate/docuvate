@@ -1,19 +1,35 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
-import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
-import type {
-  DuplicateRepository,
-  DuplicateStackRepository,
+
+import {
+  DUPLICATE_REPOSITORY,
+  DUPLICATE_STACK_REPOSITORY,
 } from '../../../shared/domain/ports.js';
+import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
+
+async function buildUseCase(
+  stacks: { linkPair: ReturnType<typeof vi.fn> },
+  duplicates: { isPairDismissed: ReturnType<typeof vi.fn> }
+) {
+  const moduleRef = await Test.createTestingModule({
+    providers: [
+      LinkDuplicatePairUseCase,
+      { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
+      { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
+    ],
+  }).compile();
+  return moduleRef.get(LinkDuplicatePairUseCase);
+}
 
 describe('LinkDuplicatePairUseCase', () => {
   it('skips linking when the pair was dismissed as not duplicate', async () => {
-    const stacks = { linkPair: vi.fn() } as unknown as DuplicateStackRepository;
+    const stacks = { linkPair: vi.fn() };
     const duplicates = {
       isPairDismissed: vi.fn().mockResolvedValue(true),
-    } as unknown as DuplicateRepository;
-    const useCase = new LinkDuplicatePairUseCase(stacks, duplicates);
+    };
+    const useCase = await buildUseCase(stacks, duplicates);
 
     await useCase.execute('user-1', 'doc-a', 'doc-b');
 
@@ -22,11 +38,11 @@ describe('LinkDuplicatePairUseCase', () => {
   });
 
   it('links when the pair is not dismissed', async () => {
-    const stacks = { linkPair: vi.fn() } as unknown as DuplicateStackRepository;
+    const stacks = { linkPair: vi.fn() };
     const duplicates = {
       isPairDismissed: vi.fn().mockResolvedValue(false),
-    } as unknown as DuplicateRepository;
-    const useCase = new LinkDuplicatePairUseCase(stacks, duplicates);
+    };
+    const useCase = await buildUseCase(stacks, duplicates);
 
     await useCase.execute('user-1', 'doc-a', 'doc-b');
 

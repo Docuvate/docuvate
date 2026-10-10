@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { lookup } from 'node:dns/promises';
+
+import { mockDnsLookupAll } from '../../../../../test-support/dns-lookup.spec-util.js';
 import {
-  PaperlessApiClient,
   detectPaperlessApiVersion,
+  PaperlessApiClient,
   paperlessApiFetch,
 } from './paperless-api.client.js';
 
@@ -19,7 +20,7 @@ const baseCredentials = {
 
 describe('paperless API client (mocked)', () => {
   beforeEach(() => {
-    vi.mocked(lookup).mockResolvedValue([{ address: '8.8.8.8', family: 4 }] as never);
+    mockDnsLookupAll([{ address: '8.8.8.8', family: 4 }]);
   });
 
   afterEach(() => {
@@ -27,13 +28,15 @@ describe('paperless API client (mocked)', () => {
   });
 
   it('detects API version 3 from Accept header flow', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input, init) => {
       const headers = new Headers(init?.headers);
       const accept = headers.get('Accept');
       if (accept === 'application/json; version=3') {
-        return new Response(JSON.stringify({ count: 0, results: [] }), { status: 200 });
+        return Promise.resolve(
+          new Response(JSON.stringify({ count: 0, results: [] }), { status: 200 })
+        );
       }
-      return new Response('', { status: 406 });
+      return Promise.resolve(new Response('', { status: 406 }));
     });
     await expect(detectPaperlessApiVersion(baseCredentials)).resolves.toBe(3);
   });
@@ -76,12 +79,12 @@ describe('paperless API client (mocked)', () => {
 
   it('retries transient 503 responses from paperlessApiFetch', async () => {
     let calls = 0;
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => {
       calls += 1;
       if (calls < 3) {
-        return new Response('', { status: 503 });
+        return Promise.resolve(new Response('', { status: 503 }));
       }
-      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+      return Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }));
     });
     const response = await paperlessApiFetch(baseCredentials, '/api/status/', {}, 3);
     expect(response.ok).toBe(true);

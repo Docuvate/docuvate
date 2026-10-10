@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
+
+import { resolveDocumentChatProvider } from '../../application/resolve-document-chat-provider.js';
 import type { ChatMessage, DocumentChatContext, DocumentChatPort } from '../../domain/ports.js';
 import type {
   DocumentChatFilePayload,
@@ -12,7 +14,6 @@ import { OllamaChatProvider } from './providers/ollama-chat.provider.js';
 import { RagOllamaChatProvider } from './providers/rag-ollama-chat.provider.js';
 import { WorkerContextChatProvider } from './providers/worker-context-chat.provider.js';
 import { WorkerDonutChatProvider } from './providers/worker-donut-chat.provider.js';
-import { resolveDocumentChatProvider } from '../../application/resolve-document-chat-provider.js';
 
 @Injectable()
 export class DocumentChatRouterAdapter implements DocumentChatPort {

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
+
 import type { EmbeddingDensityWorkerState } from '../domain/embedding-density-worker-state.schema.js';
 import type {
   EmbeddingDensityTrainingExamples,
@@ -20,50 +21,35 @@ export class HeadlessPgEmbeddingDensityRepository implements Pick<
   | 'listUsersWithCalibrationReady'
   | 'activeCalibrationExampleCount'
 > {
-  async isCalibrationReady(_userId: string): Promise<boolean> {
-    return false;
+  isCalibrationReady(): Promise<boolean> {
+    return Promise.resolve(false);
   }
 
-  async loadWorkerState(
-    _userId: string,
-    _tagIds: string[]
-  ): Promise<EmbeddingDensityWorkerState | null> {
-    return null;
+  loadWorkerState(): Promise<EmbeddingDensityWorkerState | null> {
+    return Promise.resolve(null);
   }
 
-  async persistWorkerState(_userId: string, _state: EmbeddingDensityWorkerState): Promise<void> {
-    return undefined;
+  persistWorkerState(): Promise<void> {
+    return Promise.resolve();
   }
 
-  async listTrainingExamples(_userId: string): Promise<EmbeddingDensityTrainingExamples> {
-    return { vectors: [], labelIds: [], documentIds: [], allLabelIds: [] };
+  listTrainingExamples(): Promise<EmbeddingDensityTrainingExamples> {
+    return Promise.resolve({ vectors: [], labelIds: [], documentIds: [], allLabelIds: [] });
   }
 
-  async persistCalibrationBundle(
-    _userId: string,
-    _state: EmbeddingDensityWorkerState,
-    _meta: { nDocuments: number; nExamples: number; delta: number }
-  ): Promise<void> {
-    return undefined;
+  persistCalibrationBundle(): Promise<void> {
+    return Promise.resolve();
   }
 
-  async persistCorrection(
-    _userId: string,
-    _documentId: string,
-    _fromTagId: string | null,
-    _toTagId: string,
-    _createdBy: string,
-    _state: EmbeddingDensityWorkerState,
-    _tagIds: string[]
-  ): Promise<void> {
-    return undefined;
+  persistCorrection(): Promise<void> {
+    return Promise.resolve();
   }
 
-  async listUsersWithCalibrationReady(): Promise<string[]> {
-    return [];
+  listUsersWithCalibrationReady(): Promise<string[]> {
+    return Promise.resolve([]);
   }
 
-  async activeCalibrationExampleCount(_userId: string): Promise<number | null> {
-    return null;
+  activeCalibrationExampleCount(): Promise<number | null> {
+    return Promise.resolve(null);
   }
 }

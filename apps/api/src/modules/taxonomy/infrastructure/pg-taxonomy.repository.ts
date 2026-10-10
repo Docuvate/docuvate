@@ -1,23 +1,33 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { MatchingAlgorithm } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+import type pg from 'pg';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import type { TagWriteOptions, TaxonomyRepository } from '../../../shared/domain/ports.js';
-import type {
-  CorrespondentEntity,
-  TagEntity,
-  TagSuggestionEntity,
-} from '../domain/taxonomy.entity.js';
+import {
+  parseBoolean,
+  parseEnum,
+  parseOptionalString,
+  parseString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   parseTagSuggestionDecisionTier,
   parseTagSuggestionSource,
 } from '../../labels/domain/tag-suggestion-parsing.js';
 import { tagSuggestionJoinRowSchema } from '../../labels/domain/tag-suggestion-row.schema.js';
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
-import type pg from 'pg';
+import type {
+  CorrespondentEntity,
+  TagEntity,
+  TagSuggestionEntity,
+} from '../domain/taxonomy.entity.js';
 
 const INBOX_NAME = 'Posteingang';
+
+const MATCHING_ALGORITHMS: readonly MatchingAlgorithm[] = ['none', 'any', 'all', 'exact', 'regex'];
 
 @Injectable()
 export class PgTaxonomyRepository implements TaxonomyRepository {
@@ -28,7 +38,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       `SELECT * FROM tags WHERE user_id = $1 ORDER BY is_inbox DESC, name ASC`,
       [userId]
     );
-    return result.rows.map((row) => this.mapTag(row));
+    return result.rows.map((raw) => this.mapTag(requireRecord(raw)));
   }
 
   async findTagByIdForUser(id: string, userId: string): Promise<TagEntity | null> {
@@ -36,7 +46,8 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       id,
       userId,
     ]);
-    return result.rows[0] ? this.mapTag(result.rows[0]) : null;
+    const raw: unknown = result.rows[0];
+    return raw ? this.mapTag(requireRecord(raw)) : null;
   }
 
   async createTag(userId: string, name: string, options: TagWriteOptions = {}): Promise<TagEntity> {
@@ -62,7 +73,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
         options.match?.trim() ?? '',
       ]
     );
-    return this.mapTag(result.rows[0]!);
+    return this.mapTag(requireRecord(result.rows[0]));
   }
 
   async updateTag(
@@ -100,7 +111,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
         patch.match?.trim() ?? null,
       ]
     );
-    return this.mapTag(result.rows[0]!);
+    return this.mapTag(requireRecord(result.rows[0]));
   }
 
   async deleteTag(id: string, userId: string): Promise<void> {
@@ -150,7 +161,8 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       `SELECT * FROM tags WHERE user_id = $1 AND is_inbox = true LIMIT 1`,
       [userId]
     );
-    if (existing.rows[0]) return this.mapTag(existing.rows[0]);
+    const raw: unknown = existing.rows[0];
+    if (raw) return this.mapTag(requireRecord(raw));
     return this.createTag(userId, INBOX_NAME, { color: '#2563eb', isInbox: true });
   }
 
@@ -159,7 +171,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       `SELECT * FROM correspondents WHERE user_id = $1 ORDER BY name ASC`,
       [userId]
     );
-    return result.rows.map((row) => this.mapCorrespondent(row));
+    return result.rows.map((raw) => this.mapCorrespondent(requireRecord(raw)));
   }
 
   async findCorrespondentByIdForUser(
@@ -170,7 +182,8 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       `SELECT * FROM correspondents WHERE id = $1 AND user_id = $2`,
       [id, userId]
     );
-    return result.rows[0] ? this.mapCorrespondent(result.rows[0]) : null;
+    const raw: unknown = result.rows[0];
+    return raw ? this.mapCorrespondent(requireRecord(raw)) : null;
   }
 
   async createCorrespondent(
@@ -187,7 +200,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
       [id, userId, trimmed, matchingAlgorithm, match.trim()]
     );
-    return this.mapCorrespondent(result.rows[0]!);
+    return this.mapCorrespondent(requireRecord(result.rows[0]));
   }
 
   async updateCorrespondent(
@@ -211,7 +224,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       ]
     );
     if (!result.rows[0]) throw new NotFoundError('Correspondent');
-    return this.mapCorrespondent(result.rows[0]);
+    return this.mapCorrespondent(requireRecord(result.rows[0]));
   }
 
   async deleteCorrespondent(id: string, userId: string): Promise<void> {
@@ -229,7 +242,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
        WHERE dt.document_id = $1 ORDER BY t.name ASC`,
       [documentId]
     );
-    return result.rows.map((row) => this.mapTag(row));
+    return result.rows.map((raw) => this.mapTag(requireRecord(raw)));
   }
 
   async assignTagToDocument(documentId: string, tagId: string): Promise<void> {
@@ -267,7 +280,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       const parsed = tagSuggestionJoinRowSchema.parse(row);
       return {
         tag: this.mapTagFromJoinRow(parsed),
-        reason: typeof parsed.reason === 'string' ? parsed.reason : String(parsed.reason ?? ''),
+        reason: typeof parsed.reason === 'string' ? parsed.reason : '',
         confidence:
           parsed.confidence === null || parsed.confidence === undefined
             ? undefined
@@ -368,23 +381,23 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
 
   private mapTag(row: Record<string, unknown>): TagEntity {
     return {
-      id: String(row['id']),
-      userId: String(row['user_id']),
-      name: String(row['name']),
-      color: (row['color'] as string | null) ?? null,
-      isInbox: Boolean(row['is_inbox']),
-      matchingAlgorithm: (row['matching_algorithm'] as MatchingAlgorithm) ?? 'none',
-      match: String(row['match_text'] ?? ''),
+      id: parseString(row.id),
+      userId: parseString(row.user_id),
+      name: parseString(row.name),
+      color: parseOptionalString(row.color),
+      isInbox: parseBoolean(row.is_inbox),
+      matchingAlgorithm: parseEnum(row.matching_algorithm, MATCHING_ALGORITHMS, 'none'),
+      match: parseString(row.match_text),
     };
   }
 
   private mapCorrespondent(row: Record<string, unknown>): CorrespondentEntity {
     return {
-      id: String(row['id']),
-      userId: String(row['user_id']),
-      name: String(row['name']),
-      matchingAlgorithm: (row['matching_algorithm'] as MatchingAlgorithm) ?? 'none',
-      match: String(row['match_text'] ?? ''),
+      id: parseString(row.id),
+      userId: parseString(row.user_id),
+      name: parseString(row.name),
+      matchingAlgorithm: parseEnum(row.matching_algorithm, MATCHING_ALGORITHMS, 'none'),
+      match: parseString(row.match_text),
     };
   }
 }

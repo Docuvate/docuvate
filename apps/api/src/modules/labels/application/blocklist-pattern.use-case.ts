@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { ValidationError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_CHAT_PORT,
-  LABEL_EMBEDDING_REPOSITORY,
   type DocumentChatPort,
+  LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
-import { ValidationError } from '../../../shared/domain/errors.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
 import {
   compileBlocklistPattern,

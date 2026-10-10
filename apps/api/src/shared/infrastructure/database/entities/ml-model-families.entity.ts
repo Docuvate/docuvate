@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Column, Entity, Index, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+
 import { MlModelVersionsEntity } from './ml-model-versions.entity.js';
 import { MlRetrainJobsEntity } from './ml-retrain-jobs.entity.js';
 import { MlTrainingDataSnapshotsEntity } from './ml-training-data-snapshots.entity.js';

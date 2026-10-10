@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import {
-  LABEL_CONTENT_SIM_THRESHOLD,
   computeDocumentCoverage,
+  LABEL_CONTENT_SIM_THRESHOLD,
   summarizeCoverage,
 } from './label-coverage.js';
 

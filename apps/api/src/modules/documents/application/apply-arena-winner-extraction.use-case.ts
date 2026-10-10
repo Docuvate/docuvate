@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
-  EXTRACTION_PORT,
-  OBJECT_STORAGE,
   type DocumentRepository,
+  EXTRACTION_PORT,
   type ExtractionPort,
+  OBJECT_STORAGE,
   type ObjectStorage,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 

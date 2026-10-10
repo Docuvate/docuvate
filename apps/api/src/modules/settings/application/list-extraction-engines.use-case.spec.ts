@@ -1,21 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
-import { ListExtractionEnginesUseCase } from './settings.use-cases.js';
+
 import type { ExtractionPort } from '../../../shared/domain/ports.js';
+import { ListExtractionEnginesUseCase } from './settings.use-cases.js';
 
 describe('ListExtractionEnginesUseCase', () => {
   it('returns static fallback when worker engines list fails', async () => {
     const extraction: ExtractionPort = {
-      listEngines: async () => {
-        throw new Error('Worker engines list failed: 503');
-      },
-      extract: async () => {
-        throw new Error('not used');
-      },
-      compare: async () => {
-        throw new Error('not used');
-      },
+      listEngines: () => Promise.reject(new Error('Worker engines list failed: 503')),
+      extract: () => Promise.reject(new Error('not used')),
+      compare: () => Promise.reject(new Error('not used')),
     };
     const useCase = new ListExtractionEnginesUseCase(extraction);
     const engines = await useCase.execute();

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { UserEntity } from './user.entity.js';
+
 import { DocumentsEntity } from './documents.entity.js';
+import { UserEntity } from './user.entity.js';
 
 @Index('correspondents_user_id_name_key', ['name', 'userId'], { unique: true })
 @Entity('correspondents', { schema: 'public' })

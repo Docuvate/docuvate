@@ -25,7 +25,7 @@ export function ollamaChatBaseUrl(): string {
 }
 
 export async function postOllamaChat(
-  messages: Array<{ role: string; content: string }>
+  messages: { role: string; content: string }[]
 ): Promise<Response> {
   const ollamaUrl = ollamaChatBaseUrl();
   const model = ollamaChatModel();

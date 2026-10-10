@@ -1,12 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
-import type pg from 'pg';
 import type {
   CreateSavedDocumentViewRequest,
   UpdateSavedDocumentViewRequest,
 } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+import type pg from 'pg';
+
 import { ValidationError } from '../../../shared/domain/errors.js';
+import {
+  parseNumber,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 type FilterInput = Pick<
@@ -47,7 +52,7 @@ export class SavedViewScopeValidator {
         `SELECT COUNT(*)::int AS c FROM tags WHERE user_id = $1 AND id = ANY($2::uuid[])`,
         [userId, tagIds]
       );
-      const count = Number(result.rows[0]?.['c'] ?? 0);
+      const count = parseNumber(requireRecord(result.rows[0]).c, 0);
       if (count !== tagIds.length) {
         throw new ValidationError('One or more tags are not in your library');
       }

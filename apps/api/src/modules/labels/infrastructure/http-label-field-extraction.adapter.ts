@@ -1,12 +1,38 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Injectable } from '@nestjs/common';
 import type { ExtractedField } from '@docuvate/contracts';
+import { Injectable } from '@nestjs/common';
+
 import type {
   LabelFieldDefinitionInput,
   LabelFieldExtractionPort,
 } from '../../../shared/domain/ports.js';
+import {
+  isRecord,
+  parseOptionalNumber,
+  parseString,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
+
+function parseExtractedFields(raw: unknown): ExtractedField[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const out: ExtractedField[] = [];
+  for (const item of raw) {
+    if (!isRecord(item)) {
+      continue;
+    }
+    const key = parseString(item.key);
+    const value = parseString(item.value);
+    if (!key) {
+      continue;
+    }
+    const confidence = parseOptionalNumber(item.confidence);
+    out.push(confidence === null ? { key, value } : { key, value, confidence });
+  }
+  return out;
+}
 
 @Injectable()
 export class HttpLabelFieldExtractionAdapter implements LabelFieldExtractionPort {
@@ -42,16 +68,13 @@ export class HttpLabelFieldExtractionAdapter implements LabelFieldExtractionPort
     });
 
     if (!response.ok) {
-      throw new Error(`Worker label-field extraction failed: ${response.status}`);
+      throw new Error(`Worker label-field extraction failed: ${String(response.status)}`);
     }
 
-    const data = (await response.json()) as {
-      fields?: Array<{ key: string; value: string; confidence?: number }>;
-    };
-    return (data.fields ?? []).map((row) => ({
-      key: row.key,
-      value: row.value,
-      confidence: row.confidence,
-    }));
+    const raw: unknown = await response.json();
+    if (!isRecord(raw)) {
+      return [];
+    }
+    return parseExtractedFields(raw.fields);
   }
 }

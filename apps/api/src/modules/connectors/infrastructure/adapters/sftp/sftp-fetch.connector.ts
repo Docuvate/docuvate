@@ -5,10 +5,11 @@ import type {
   ConnectorConfigurationInput,
   ConnectorValidationResult,
 } from '../../../domain/connector.types.js';
+import { readConnectorConfigString } from '../shared/connector-config-string.js';
 import { requiredFieldsPresent } from '../shared/required-fields.validation.js';
 import { remoteValidationFailed } from '../shared/validation-message.js';
-import { probeSftpPullHostKey } from './sftp-pull.gateway.js';
 import { openSftpFetchRuntime } from './sftp-fetch.runtime.js';
+import { probeSftpPullHostKey } from './sftp-pull.gateway.js';
 import { listSftpPullFiles } from './sftp-pull.gateway.js';
 
 export class SftpFetchConnector implements ConnectorPlugin {
@@ -129,11 +130,14 @@ export class SftpFetchConnector implements ConnectorPlugin {
       'after_import',
     ]);
     if (!required.ok) return required;
-    const poll = Number(input['poll_interval_seconds']);
+    const poll = Number(input.poll_interval_seconds);
     if (!Number.isFinite(poll) || poll < 60) {
       return remoteValidationFailed('connectors.errors.sftpPollIntervalInvalid');
     }
-    if (!input['password']?.trim() && !input['private_key']?.trim()) {
+    if (
+      !readConnectorConfigString(input, 'password') &&
+      !readConnectorConfigString(input, 'private_key')
+    ) {
       return remoteValidationFailed('connectors.errors.sftpAuthRequired');
     }
     try {

@@ -2,18 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse } from '@nestjs/swagger';
-import {
-  AuthGuard,
-  Session,
-  type AuthSession,
-} from '../../../shared/infrastructure/auth/auth.guard.js';
-import { OCR_PIPELINE_DESCRIPTOR } from '../domain/document-pipeline.types.js';
-import { RunDocumentPostOcrPipelineUseCase } from '../application/run-document-post-ocr-pipeline.use-case.js';
+
+import { AuthGuard } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { DocumentPipelineModulesResponseDto } from '../../../shared/presentation/dtos/document-pipeline.dto.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { RunDocumentPostOcrPipelineUseCase } from '../application/run-document-post-ocr-pipeline.use-case.js';
+import { OCR_PIPELINE_DESCRIPTOR } from '../domain/document-pipeline.types.js';
 
 @ApiDocuvateController('settings')
 @Controller('document-pipeline')
@@ -30,7 +27,7 @@ export class DocumentPipelineController {
       'Read-only module descriptors for OCR and post-OCR steps (order not persisted yet).',
   })
   @ApiOkResponse({ type: DocumentPipelineModulesResponseDto })
-  listModules(@Session() _session: AuthSession): DocumentPipelineModulesResponseDto {
+  listModules(): DocumentPipelineModulesResponseDto {
     const postOcr = this.postOcrPipeline.listModuleDescriptors().map((m) => ({
       id: m.id,
       label: m.labelDe,

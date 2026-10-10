@@ -1,22 +1,22 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { ReplaceRecognizedFieldsRequestDto } from '../../../shared/presentation/dtos/recognized-fields.dto.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   ListRecognizedFieldsUseCase,
   ReplaceRecognizedFieldsUseCase,
 } from '../application/recognized-field.use-cases.js';
 import { toRecognizedFieldDto } from './recognized-fields.mapper.js';
-
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('settings')
 @Controller('recognized-fields')

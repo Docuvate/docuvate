@@ -1,5 +1,6 @@
-import type pg from 'pg';
 import { randomUUID } from 'node:crypto';
+
+import type pg from 'pg';
 
 /**
  * Per-test isolation via dedicated schema + search_path (supports parallel CI workers later).

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SearchHighlightSpan } from '@docuvate/contracts';
+
 import { damerauLevenshtein } from './damerau-levenshtein.js';
 import { normalizeSearchText } from './normalize-search-text.js';
 
@@ -20,10 +21,10 @@ function fuzzyWordMatch(queryWord: string, candidate: string): boolean {
 function mergeSpans(spans: SearchHighlightSpan[]): SearchHighlightSpan[] {
   if (spans.length === 0) return [];
   const sorted = [...spans].sort((a, b) => a.start - b.start);
-  const merged: SearchHighlightSpan[] = [sorted[0]!];
+  const merged: SearchHighlightSpan[] = [sorted[0]];
   for (let i = 1; i < sorted.length; i += 1) {
-    const cur = sorted[i]!;
-    const last = merged[merged.length - 1]!;
+    const cur = sorted[i];
+    const last = merged[merged.length - 1];
     if (cur.start <= last.end) {
       last.end = Math.max(last.end, cur.end);
     } else {
@@ -62,21 +63,14 @@ export function snippetAroundMatch(
   if (spans.length === 0) {
     return text.length <= maxLen ? text : `${text.slice(0, maxLen - 1)}…`;
   }
-  const anchor = spans[0]!.start;
+  const anchor = spans[0].start;
   const half = Math.floor(maxLen / 2);
   let start = Math.max(0, anchor - half);
-  let end = Math.min(text.length, start + maxLen);
+  const end = Math.min(text.length, start + maxLen);
   if (end - start < maxLen) {
     start = Math.max(0, end - maxLen);
   }
-  const slice = text.slice(start, end);
-  const offsetSpans = spans
-    .filter((s) => s.end > start && s.start < end)
-    .map((s) => ({
-      start: Math.max(0, s.start - start),
-      end: Math.min(slice.length, s.end - start),
-    }));
-  return slice;
+  return text.slice(start, end);
 }
 
 /** Tokens used for highlighting (raw query + silent vocabulary expansion). */
@@ -93,4 +87,4 @@ function tokenizeFromQuery(query: string): string[] {
   return matches?.map((t) => t.toLowerCase()) ?? [];
 }
 
-export { fuzzyWordMatch, damerauLevenshtein };
+export { damerauLevenshtein,fuzzyWordMatch };

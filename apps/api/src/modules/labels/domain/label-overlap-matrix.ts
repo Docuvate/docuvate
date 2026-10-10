@@ -2,29 +2,29 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
 
-export type LabelOverlapTagInput = {
+export interface LabelOverlapTagInput {
   tagId: string;
   name: string;
   centroid: number[];
   docEmbeddings: number[][];
-};
+}
 
-export type LabelOverlapHighPair = {
+export interface LabelOverlapHighPair {
   tagIdA: string;
   tagIdB: string;
   tagNameA: string;
   tagNameB: string;
   similarity: number;
   mergeRecommendationId: string;
-};
+}
 
-export type LabelOverlapMatrix = {
+export interface LabelOverlapMatrix {
   tagIds: string[];
   tagNames: string[];
   /** Row-major n×n cosine similarities in embedding space. */
   similarities: number[][];
   highOverlapPairs: LabelOverlapHighPair[];
-};
+}
 
 const HIGH_OVERLAP_THRESHOLD = 0.78;
 
@@ -70,19 +70,19 @@ export function buildLabelOverlapMatrix(tags: LabelOverlapTagInput[]): LabelOver
   const highOverlapPairs: LabelOverlapHighPair[] = [];
 
   for (let i = 0; i < n; i++) {
-    similarities[i]![i] = 1;
+    similarities[i][i] = 1;
     for (let j = i + 1; j < n; j++) {
-      const sim = pairSimilarity(sorted[i]!, sorted[j]!);
-      similarities[i]![j] = sim;
-      similarities[j]![i] = sim;
+      const sim = pairSimilarity(sorted[i], sorted[j]);
+      similarities[i][j] = sim;
+      similarities[j][i] = sim;
       if (sim >= HIGH_OVERLAP_THRESHOLD) {
         highOverlapPairs.push({
-          tagIdA: sorted[i]!.tagId,
-          tagIdB: sorted[j]!.tagId,
-          tagNameA: sorted[i]!.name,
-          tagNameB: sorted[j]!.name,
+          tagIdA: sorted[i].tagId,
+          tagIdB: sorted[j].tagId,
+          tagNameA: sorted[i].name,
+          tagNameB: sorted[j].name,
           similarity: sim,
-          mergeRecommendationId: mergeRecommendationId(sorted[i]!.tagId, sorted[j]!.tagId),
+          mergeRecommendationId: mergeRecommendationId(sorted[i].tagId, sorted[j].tagId),
         });
       }
     }

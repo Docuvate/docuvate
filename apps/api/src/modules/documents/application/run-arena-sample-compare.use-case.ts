@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { pickHeuristicArenaWinner } from '../../../shared/domain/arena-heuristic.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
-  EXTRACTION_PORT,
-  OBJECT_STORAGE,
-  USER_PREFERENCES_REPOSITORY,
   type DocumentRepository,
+  EXTRACTION_PORT,
   type ExtractionPort,
+  OBJECT_STORAGE,
   type ObjectStorage,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import { pickHeuristicArenaWinner } from '../../../shared/domain/arena-heuristic.js';
 
 @Injectable()
 export class RunArenaSampleCompareUseCase {

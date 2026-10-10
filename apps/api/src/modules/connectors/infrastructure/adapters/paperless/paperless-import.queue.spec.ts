@@ -1,7 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { Test } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { ConnectorRuntimeResolver } from '../../../application/connector-runtime.resolver.js';
+import { PaperlessImportExecutor } from './paperless-import.executor.js';
 import { PaperlessImportQueueService } from './paperless-import.queue.js';
+import { PaperlessImportRepository } from './paperless-import.repository.js';
 
 describe('PaperlessImportQueueService', () => {
   beforeEach(() => {
@@ -9,20 +14,24 @@ describe('PaperlessImportQueueService', () => {
   });
 
   it('does not reject when resumePendingRuns fails', async () => {
-    vi.spyOn(global, 'setTimeout').mockImplementation((handler: TimerHandler) => {
-      if (typeof handler === 'function') {
-        handler();
-      }
-      return 0 as unknown as NodeJS.Timeout;
-    });
+    vi.useFakeTimers();
     const imports = {
       resumePendingRuns: vi.fn().mockRejectedValue(new Error('relation does not exist')),
     };
-    const service = new PaperlessImportQueueService(imports as never, {} as never, {} as never);
-    const resume = (
-      service as unknown as { resumeInterruptedRuns: () => Promise<void> }
-    ).resumeInterruptedRuns.bind(service);
-    await expect(resume()).resolves.toBeUndefined();
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        PaperlessImportQueueService,
+        { provide: PaperlessImportRepository, useValue: imports },
+        { provide: PaperlessImportExecutor, useValue: {} },
+        { provide: ConnectorRuntimeResolver, useValue: {} },
+      ],
+    }).compile();
+    const service = moduleRef.get(PaperlessImportQueueService);
+
+    const pending = service.resumeInterruptedRuns();
+    await vi.runAllTimersAsync();
+    await expect(pending).resolves.toBeUndefined();
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 });

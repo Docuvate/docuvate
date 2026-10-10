@@ -18,7 +18,7 @@ export class InvitationAcceptRateLimitService implements OnModuleDestroy {
 
   async onModuleDestroy(): Promise<void> {
     if (this.redis.status === 'ready' || this.redis.status === 'connect') {
-      await this.redis.quit().catch(() => this.redis.disconnect());
+      await this.redis.quit().catch(() => { this.redis.disconnect(); });
       return;
     }
     this.redis.disconnect();

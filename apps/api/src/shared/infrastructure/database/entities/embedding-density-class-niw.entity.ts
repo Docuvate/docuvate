@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { UserEntity } from './user.entity.js';
+
 import { TagsEntity } from './tags.entity.js';
+import { UserEntity } from './user.entity.js';
 
 @Entity('embedding_density_class_niw', { schema: 'public' })
 export class EmbeddingDensityClassNiwEntity {

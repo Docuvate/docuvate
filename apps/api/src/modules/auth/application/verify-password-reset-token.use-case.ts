@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   PASSWORD_RESET_DUMMY_VERIFICATION_IDENTIFIER,
   PASSWORD_RESET_TOKEN_MAX_LENGTH,
 } from '../domain/password-reset-token.constants.js';
 
-export type VerifyPasswordResetTokenResult = {
+export interface VerifyPasswordResetTokenResult {
   valid: boolean;
-};
+}
 
 @Injectable()
 export class VerifyPasswordResetTokenUseCase {
@@ -31,15 +32,19 @@ export class VerifyPasswordResetTokenUseCase {
       [identifier]
     );
 
-    if (result.rowCount === 0) {
+    if (result.rows.length === 0) {
       await this.pool.query(`SELECT "expiresAt" FROM verification WHERE identifier = $1 LIMIT 1`, [
         PASSWORD_RESET_DUMMY_VERIFICATION_IDENTIFIER,
       ]);
       return { valid: false };
     }
 
-    const expiresAt = result.rows[0]?.expiresAt;
-    if (!expiresAt || expiresAt.getTime() < Date.now()) {
+    const row = result.rows.at(0);
+    if (row === undefined) {
+      return { valid: false };
+    }
+    const expiresAt = row.expiresAt;
+    if (expiresAt.getTime() < Date.now()) {
       return { valid: false };
     }
 

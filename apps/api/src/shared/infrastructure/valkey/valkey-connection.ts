@@ -43,10 +43,8 @@ export async function waitForValkeyReady(
   const started = Date.now();
   while (Date.now() - started < deadlineMs) {
     try {
-      const pong = await redis.ping();
-      if (pong === 'PONG') {
-        return;
-      }
+      await redis.ping();
+      return;
     } catch {
       // Valkey still starting or reconnecting.
     }

@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomBytes } from 'node:crypto';
+
 import { afterEach, describe, expect, it } from 'vitest';
+
 import {
   assertBetterAuthSecretForRuntime,
   isForbiddenBetterAuthSecret,
@@ -23,19 +25,19 @@ describe('better-auth secret policy', () => {
   it('fails in production when secret is missing', () => {
     process.env['NODE_ENV'] = 'production';
     delete process.env['BETTER_AUTH_SECRET'];
-    expect(() => assertBetterAuthSecretForRuntime()).toThrow(/BETTER_AUTH_SECRET/);
+    expect(() => { assertBetterAuthSecretForRuntime(); }).toThrow(/BETTER_AUTH_SECRET/);
   });
 
   it('fails in production when secret is too short', () => {
     process.env['NODE_ENV'] = 'production';
     process.env['BETTER_AUTH_SECRET'] = 'short';
-    expect(() => assertBetterAuthSecretForRuntime()).toThrow(/32/);
+    expect(() => { assertBetterAuthSecretForRuntime(); }).toThrow(/32/);
   });
 
   it('allows development without secret', () => {
     process.env['NODE_ENV'] = 'development';
     delete process.env['BETTER_AUTH_SECRET'];
-    expect(() => assertBetterAuthSecretForRuntime()).not.toThrow();
+    expect(() => { assertBetterAuthSecretForRuntime(); }).not.toThrow();
   });
 
   const documentedPlaceholders = [
@@ -50,7 +52,7 @@ describe('better-auth secret policy', () => {
   it.each(documentedPlaceholders)('rejects documented placeholder %s in production', (secret) => {
     process.env['NODE_ENV'] = 'production';
     process.env['BETTER_AUTH_SECRET'] = secret;
-    expect(() => assertBetterAuthSecretForRuntime()).toThrow(/placeholder/i);
+    expect(() => { assertBetterAuthSecretForRuntime(); }).toThrow(/placeholder/i);
     expect(isForbiddenBetterAuthSecret(secret)).toBe(true);
   });
 
@@ -59,6 +61,6 @@ describe('better-auth secret policy', () => {
     process.env['NODE_ENV'] = 'production';
     process.env['BETTER_AUTH_SECRET'] = secret;
     expect(isForbiddenBetterAuthSecret(secret)).toBe(false);
-    expect(() => assertBetterAuthSecretForRuntime()).not.toThrow();
+    expect(() => { assertBetterAuthSecretForRuntime(); }).not.toThrow();
   });
 });

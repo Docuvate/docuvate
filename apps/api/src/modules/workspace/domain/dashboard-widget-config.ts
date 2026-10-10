@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DashboardWidgetType } from '@docuvate/contracts';
+
 import { ValidationError } from '../../../shared/domain/errors.js';
 
 const WIDGET_TYPES: DashboardWidgetType[] = [
@@ -11,10 +12,10 @@ const WIDGET_TYPES: DashboardWidgetType[] = [
   'attention',
 ];
 
-export type ParsedDashboardWidgetFields = {
+export interface ParsedDashboardWidgetFields {
   savedViewId: string | null;
   itemLimit: number | null;
-};
+}
 
 export function parseDashboardWidgetFields(
   type: DashboardWidgetType,
@@ -52,8 +53,10 @@ export function parseDashboardWidgetFields(
 }
 
 export function assertDashboardWidgetType(value: string): DashboardWidgetType {
-  if ((WIDGET_TYPES as readonly string[]).includes(value)) {
-    return value as DashboardWidgetType;
+  for (const widgetType of WIDGET_TYPES) {
+    if (widgetType === value) {
+      return widgetType;
+    }
   }
   throw new ValidationError('Unknown widget type');
 }

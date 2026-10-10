@@ -1,11 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
-import { NotFoundError } from '../../../shared/domain/errors.js';
+
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { GetDocumentContentUseCase } from './get-document-content.use-case.js';
-import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
-import type { LayoutTypstExportMode, LayoutTypstRenderResult } from './layout-render.types.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
+import {
+  isRecord,
+  parseBoolean,
+  parseOptionalString,
+  parseString,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import {
   fetchWorkerJson,
@@ -13,6 +17,9 @@ import {
   workerLayoutTimeoutError,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
+import { GetDocumentContentUseCase } from './get-document-content.use-case.js';
+import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
+import type { LayoutTypstExportMode, LayoutTypstRenderResult } from './layout-render.types.js';
 
 const LAYOUT_WORKER_TIMEOUT_MS = 120_000;
 
@@ -32,11 +39,7 @@ export class GetDocumentLayoutTypstUseCase {
     const layoutIr = await this.getLayoutIr.execute(id, userId, subject);
     const { buffer } = await this.getDocumentContent.execute(id, userId, subject);
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
-    const data = await fetchWorkerJson<{
-      typst?: string;
-      reconstructionReliable?: boolean;
-      unreliableReason?: string | null;
-    }>(
+    const raw = await fetchWorkerJson(
       workerApiUrl(workerUrl, '/layout/render-typst'),
       {
         method: 'POST',
@@ -53,14 +56,20 @@ export class GetDocumentLayoutTypstUseCase {
         onHttpError: mapWorkerLayoutHttpStatus,
       }
     );
-    if (!data.typst?.trim()) {
+    if (!isRecord(raw)) {
+      throw new NotFoundError('LayoutTypst');
+    }
+    const typst = parseString(raw.typst).trim();
+    if (!typst) {
       throw new NotFoundError('LayoutTypst');
     }
     return {
-      typst: data.typst,
+      typst,
       exportMode: mode,
-      reconstructionReliable: data.reconstructionReliable ?? true,
-      unreliableReason: data.unreliableReason ?? null,
+      reconstructionReliable: raw.reconstructionReliable === undefined
+        ? true
+        : parseBoolean(raw.reconstructionReliable),
+      unreliableReason: parseOptionalString(raw.unreliableReason),
     };
   }
 }

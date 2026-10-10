@@ -7,12 +7,12 @@ import {
   resolveInvitationMailLocale,
   resolveInvitationValidityDays,
 } from '../../auth/infrastructure/mail/user-invitation-mailer.factory.js';
-import type { UserInvitationRepository } from '../domain/user-invitation.types.js';
 import {
   buildInvitationAcceptUrl,
   createInvitationToken,
   invitationExpiresAt,
 } from '../domain/user-invitation.tokens.js';
+import type { UserInvitationRepository } from '../domain/user-invitation.types.js';
 
 export async function deliverUserInvitation(input: {
   invitations: UserInvitationRepository;

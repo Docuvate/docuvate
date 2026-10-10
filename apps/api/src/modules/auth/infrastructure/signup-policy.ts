@@ -3,7 +3,7 @@
 import type pg from 'pg';
 
 function explicitSignupFlag(env: NodeJS.ProcessEnv = process.env): 'open' | 'closed' | 'default' {
-  const raw = env['DV_ALLOW_SIGNUP']?.trim().toLowerCase();
+  const raw = env.DV_ALLOW_SIGNUP?.trim().toLowerCase();
   if (raw === 'true' || raw === '1' || raw === 'yes') {
     return 'open';
   }
@@ -17,7 +17,7 @@ export async function hasAnyUser(pool: pg.Pool | pg.PoolClient): Promise<boolean
   const result = await pool.query<{ exists: boolean }>(
     `SELECT EXISTS (SELECT 1 FROM "user" LIMIT 1) AS exists`
   );
-  return result.rows[0]?.exists === true;
+  return result.rows[0]?.exists;
 }
 
 /** Default: invite-only after the first user exists unless DV_ALLOW_SIGNUP=true. */

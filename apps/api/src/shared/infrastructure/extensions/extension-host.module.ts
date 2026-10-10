@@ -8,6 +8,8 @@ import { DynamicModule, Module } from '@nestjs/common';
  * ships with both unset; commercial modules live in a separate repository and image layer.
  */
 @Module({})
+// Nest dynamic module host; static register() only.
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host
 export class ExtensionHostModule {
   static register(): DynamicModule {
     const moduleNames = process.env['DOCUVATE_EXTENSION_MODULES']?.trim();

@@ -1,22 +1,22 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { ChatMessageDto, DocumentChatResponse } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_CHAT_PORT,
   DOCUMENT_REPOSITORY,
-  OBJECT_STORAGE,
-  USER_PREFERENCES_REPOSITORY,
   type DocumentChatPort,
   type DocumentRepository,
+  OBJECT_STORAGE,
   type ObjectStorage,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import type { DocumentChatProviderId } from '../../../shared/infrastructure/chat/chat-provider.types.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 
 @Injectable()
 export class DocumentChatUseCase {
@@ -42,9 +42,7 @@ export class DocumentChatUseCase {
     }
     await this.documentAuthz.assert(subject, 'document:chat', doc);
 
-    const safeHistory = history.filter(
-      (m) => (m.role === 'user' || m.role === 'assistant') && m.content.trim().length > 0
-    );
+    const safeHistory = history.filter((m) => m.content.trim().length > 0);
 
     const preferences = await this.prefs.getForUser(userId);
     const { customerEffective: providerId } =
@@ -81,7 +79,7 @@ export class DocumentChatUseCase {
         text: doc.extraction?.text ?? '',
         fields: doc.extraction?.fields ?? [],
       },
-      { providerId: providerId as DocumentChatProviderId, file }
+      { providerId: providerId, file }
     );
   }
 }

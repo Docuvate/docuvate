@@ -1,25 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
-import { DEFAULT_LABEL_NEAR_SIMILARITY_THRESHOLD } from './label-near-threshold.js';
 import { countCoverageGaps, coveredDocumentPercent } from './label-coverage-score.js';
+import { DEFAULT_LABEL_NEAR_SIMILARITY_THRESHOLD } from './label-near-threshold.js';
 
 /** Same default as embedding auto-suggestions — operational “inside label content space”. */
 export const LABEL_CONTENT_SIM_THRESHOLD = DEFAULT_LABEL_NEAR_SIMILARITY_THRESHOLD;
 
 export type LabelMapCoverageStatus = 'explained' | 'unexplained' | 'outside' | 'unlabeled_near';
 
-export type TagCentroidRef = {
+export interface TagCentroidRef {
   tagId: string;
   centroid: number[];
-};
+}
 
-export type DocumentCoverageResult = {
+export interface DocumentCoverageResult {
   status: LabelMapCoverageStatus;
   bestAnySimilarity: number;
   bestAssignedSimilarity: number | null;
   nearestTagId: string | null;
-};
+}
 
 export function computeDocumentCoverage(
   embedding: number[],
@@ -74,7 +74,7 @@ export function computeDocumentCoverage(
   };
 }
 
-export type LabelMapCoverageSummary = {
+export interface LabelMapCoverageSummary {
   explained: number;
   unexplained: number;
   outside: number;
@@ -82,7 +82,7 @@ export type LabelMapCoverageSummary = {
   threshold: number;
   coveredPercent: number;
   gapCount: number;
-};
+}
 
 export function summarizeCoverage(
   statuses: LabelMapCoverageStatus[],
@@ -111,10 +111,8 @@ export function summarizeCoverage(
       case 'unlabeled_near':
         summary.unlabeledNear += 1;
         break;
-      default: {
-        const _exhaustive: never = status;
-        void _exhaustive;
-      }
+      default:
+        break;
     }
   }
   const total = statuses.length;

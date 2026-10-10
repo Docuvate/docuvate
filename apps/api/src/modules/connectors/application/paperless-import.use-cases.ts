@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
 import { ConflictError, NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   CONNECTOR_INSTALLATION_REPOSITORY,
   type ConnectorInstallationRepository,
 } from '../domain/connector.ports.js';
-import { ConnectorRuntimeResolver } from './connector-runtime.resolver.js';
-import { PaperlessImportExecutor } from '../infrastructure/adapters/paperless/paperless-import.executor.js';
-import { PaperlessImportRepository } from '../infrastructure/adapters/paperless/paperless-import.repository.js';
-import { PaperlessImportQueueService } from '../infrastructure/adapters/paperless/paperless-import.queue.js';
-import type { PaperlessOcrMode } from '../infrastructure/adapters/paperless/paperless-field-mapping.js';
+import type { ConnectorConfigurationInput } from '../domain/connector.types.js';
 import { validatePaperlessConnection } from '../infrastructure/adapters/paperless/paperless-api.client.js';
 import { mapPaperlessClientError } from '../infrastructure/adapters/paperless/paperless-errors.js';
-import type { ConnectorConfigurationInput } from '../domain/connector.types.js';
+import type { PaperlessOcrMode } from '../infrastructure/adapters/paperless/paperless-field-mapping.js';
+import { PaperlessImportExecutor } from '../infrastructure/adapters/paperless/paperless-import.executor.js';
+import { PaperlessImportQueueService } from '../infrastructure/adapters/paperless/paperless-import.queue.js';
+import { PaperlessImportRepository } from '../infrastructure/adapters/paperless/paperless-import.repository.js';
+import { ConnectorRuntimeResolver } from './connector-runtime.resolver.js';
 
 function coerceCredentialPatch(patch: Record<string, unknown>): Record<string, string> {
   const keys = ['base_url', 'api_token', 'username', 'password'] as const;
@@ -31,22 +32,27 @@ function coerceCredentialPatch(patch: Record<string, unknown>): Record<string, s
   return out;
 }
 
+function readCredentialString(credentials: ConnectorConfigurationInput, key: string): string {
+  const value = credentials[key];
+  return typeof value === 'string' ? value : '';
+}
+
 function mergePaperlessCredentials(
   existing: ConnectorConfigurationInput,
   patch: Record<string, string>
 ): ConnectorConfigurationInput {
   const merged: ConnectorConfigurationInput = { ...existing };
-  if (patch['base_url']?.trim()) {
-    merged['base_url'] = patch['base_url'].trim();
+  if ('base_url' in patch && patch.base_url.trim()) {
+    merged.base_url = patch.base_url.trim();
   }
-  if (patch['api_token']?.trim()) {
-    merged['api_token'] = patch['api_token'].trim();
+  if ('api_token' in patch && patch.api_token.trim()) {
+    merged.api_token = patch.api_token.trim();
   }
-  if (patch['username']?.trim()) {
-    merged['username'] = patch['username'].trim();
+  if ('username' in patch && patch.username.trim()) {
+    merged.username = patch.username.trim();
   }
-  if (patch['password']?.trim()) {
-    merged['password'] = patch['password'].trim();
+  if ('password' in patch && patch.password.trim()) {
+    merged.password = patch.password.trim();
   }
   return merged;
 }
@@ -76,7 +82,7 @@ export class TestPaperlessInstallationConnectionUseCase {
     patch: Record<string, unknown>
   ): Promise<{ apiVersion: number }> {
     const row = await this.installations.findByIdForUser(userId, installationId);
-    if (!row || row.pluginId !== 'paperless') {
+    if (row?.pluginId !== 'paperless') {
       throw new NotFoundError('Connector installation');
     }
     const merged = mergePaperlessCredentials(row.credentials, coerceCredentialPatch(patch));
@@ -94,20 +100,20 @@ export class GetPaperlessInstallationUseCase {
 
   async execute(userId: string, installationId: string) {
     const row = await this.installations.findByIdForUser(userId, installationId);
-    if (!row || row.pluginId !== 'paperless') {
+    if (row?.pluginId !== 'paperless') {
       throw new NotFoundError('Connector installation');
     }
     const settings = await this.imports.getInstallationSettings(installationId, userId);
     const creds = row.credentials;
     return {
       displayName: row.displayName,
-      baseUrl: creds['base_url']?.trim() ?? '',
-      hasStoredApiToken: Boolean(creds['api_token']?.trim()),
-      hasStoredUsername: Boolean(creds['username']?.trim()),
-      hasStoredPassword: Boolean(creds['password']?.trim()),
-      keepOcrText: settings?.keepOcrText ?? true,
-      rerunOcr: settings?.rerunOcr ?? false,
-      includeArchivedPdf: settings?.includeArchivedPdf ?? false,
+      baseUrl: readCredentialString(creds, 'base_url').trim(),
+      hasStoredApiToken: readCredentialString(creds, 'api_token').trim().length > 0,
+      hasStoredUsername: readCredentialString(creds, 'username').trim().length > 0,
+      hasStoredPassword: readCredentialString(creds, 'password').trim().length > 0,
+      keepOcrText: settings === null ? true : settings.keepOcrText,
+      rerunOcr: settings === null ? false : settings.rerunOcr,
+      includeArchivedPdf: settings === null ? false : settings.includeArchivedPdf,
       lastSuccessfulModifiedAt:
         (await this.imports.getSyncWatermark(installationId))?.toISOString() ?? null,
     };
@@ -135,7 +141,7 @@ export class UpdatePaperlessInstallationUseCase {
     }
   ): Promise<void> {
     const row = await this.installations.findByIdForUser(userId, installationId);
-    if (!row || row.pluginId !== 'paperless') {
+    if (row?.pluginId !== 'paperless') {
       throw new NotFoundError('Connector installation');
     }
     if (
@@ -210,7 +216,7 @@ export class StartPaperlessImportUseCase {
     const run = await this.imports.createRun({
       installationId,
       ocrMode,
-      includeArchivedPdf: settings?.includeArchivedPdf ?? false,
+      includeArchivedPdf: settings === null ? false : settings.includeArchivedPdf,
       incrementalModifiedGt: watermark,
     });
     await this.queue.enqueue(run.id, userId);
@@ -225,7 +231,7 @@ export class GetPaperlessImportRunUseCase {
   async execute(userId: string, installationId: string, runId?: string) {
     if (runId) {
       const run = await this.imports.findRunForUser(runId, userId);
-      if (!run || run.installationId !== installationId) {
+      if (run?.installationId !== installationId) {
         throw new NotFoundError('Import run');
       }
       const errors = await this.imports.listRunErrors(run.id);

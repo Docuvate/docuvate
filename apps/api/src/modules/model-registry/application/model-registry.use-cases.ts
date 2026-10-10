@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   mlopsCanaryMaxMetricDrop,
@@ -81,10 +82,8 @@ export class SetMlModelVersionLifecycleUseCase {
       case 'registered':
       case 'failed':
         return this.registry.setVersionLifecycle(versionId, lifecycle);
-      default: {
-        const _exhaustive: never = lifecycle;
-        throw new ValidationError(`Unsupported lifecycle ${_exhaustive}`);
-      }
+      default:
+        throw new ValidationError('Unsupported lifecycle');
     }
   }
 
@@ -99,7 +98,7 @@ export class SetMlModelVersionLifecycleUseCase {
     const candidateValue = version.metrics[metricName] ?? null;
 
     let passed = true;
-    if (baselineValue != null && candidateValue != null && baselineValue > 0) {
+    if (typeof baselineValue === 'number' && typeof candidateValue === 'number' && baselineValue > 0) {
       const relativeDrop = (baselineValue - candidateValue) / baselineValue;
       passed = relativeDrop <= maxDrop;
     }
@@ -167,9 +166,11 @@ export class EvaluateMlRetrainThresholdsUseCase {
         continue;
       }
       const running = await this.registry.listRecentJobs(familyId, 1);
-      const latest = running[0];
-      if (latest && (latest.status === 'queued' || latest.status === 'running')) {
-        continue;
+      if (running.length > 0) {
+        const latest = running[0];
+        if (latest.status === 'queued' || latest.status === 'running') {
+          continue;
+        }
       }
       jobs.push(await this.triggerRetrain.execute(familyId, 'threshold'));
     }

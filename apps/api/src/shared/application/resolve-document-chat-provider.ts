@@ -11,6 +11,15 @@ const PROVIDER_IDS: DocumentChatProviderId[] = [
   'off',
 ];
 
+function isDocumentChatProviderId(value: string): value is DocumentChatProviderId {
+  for (const id of PROVIDER_IDS) {
+    if (id === value) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function normalizeProvider(raw: string | undefined | null): DocumentChatProviderId | null {
   if (!raw) {
     return null;
@@ -22,8 +31,8 @@ function normalizeProvider(raw: string | undefined | null): DocumentChatProvider
   if (value === 'worker' || value === 'default') {
     return 'context';
   }
-  if (PROVIDER_IDS.includes(value as DocumentChatProviderId)) {
-    return value as DocumentChatProviderId;
+  if (isDocumentChatProviderId(value)) {
+    return value;
   }
   return null;
 }

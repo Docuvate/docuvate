@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -92,7 +94,7 @@ describe('purge heading vendor suggestions migration (integration)', () => {
       await pool.query(
         `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
          VALUES ($1, $2, $3, 'application/pdf', $4, 'ready')`,
-        [docId, userId, `sender-${i}.pdf`, `k${i + 2}`]
+        [docId, userId, `sender-${String(i)}.pdf`, `k${String(i + 2)}`]
       );
       await pool.query(
         `INSERT INTO document_layout_ir (document_id, version, ir)

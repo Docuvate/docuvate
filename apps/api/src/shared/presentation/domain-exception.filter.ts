@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { FastifyReply } from 'fastify';
+
 import {
+  ConflictError,
   DomainError,
   ForbiddenError,
   GatewayTimeoutError,
   NotFoundError,
   ServiceUnavailableError,
   ValidationError,
-  ConflictError,
 } from '../domain/errors.js';
 
 @Catch(DomainError)

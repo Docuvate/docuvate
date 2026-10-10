@@ -1,10 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
-  GatewayTimeoutError,
+  type DomainError,
   ServiceUnavailableError,
   ValidationError,
-  type DomainError,
 } from '../../domain/errors.js';
 import { workerLayoutTimeoutError } from './worker-fetch.js';
 
@@ -26,14 +25,14 @@ export function parseWorkerLayoutCompareErrorCode(body: unknown): string | undef
   if (!isRecord(body)) {
     return undefined;
   }
-  const detail = body['detail'];
+  const detail = body.detail;
   if (isRecord(detail)) {
-    const code = detail['errorCode'];
+    const code = detail.errorCode;
     if (typeof code === 'string' && code.length > 0) {
       return code;
     }
   }
-  const code = body['errorCode'];
+  const code = body.errorCode;
   if (typeof code === 'string' && code.length > 0) {
     return code;
   }

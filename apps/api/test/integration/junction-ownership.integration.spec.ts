@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
 import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgDuplicateStackRepository } from '../../src/modules/duplicates/infrastructure/pg-duplicate-stack.repository.js';
 import { PgLabelEmbeddingRepository } from '../../src/modules/labels/infrastructure/pg-label-embedding.repository.js';
@@ -55,7 +57,7 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
     );
     await pool.query(
       `INSERT INTO document_stack_members (stack_id, document_id, role) VALUES ($1, $2, 'primary')`,
-      [stack.rows[0]!.id, docA]
+      [stack.rows[0].id, docA]
     );
     await pool.query(
       `INSERT INTO chat_threads (id, user_id, title, scope) VALUES ($1, $2, 'x', 'document')`,

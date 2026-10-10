@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   CONNECTOR_INSTALLATION_REPOSITORY,
@@ -76,7 +77,7 @@ export class CreateConnectorInstallationUseCase {
     if (!displayName) {
       throw new ValidationError('Display name is required');
     }
-    const validation = await plugin.validateConfiguration(body.credentials ?? {});
+    const validation = await plugin.validateConfiguration(body.credentials);
     if (!validation.ok) {
       throw new ValidationError(validation.messageKey ?? 'Invalid connector configuration');
     }
@@ -84,7 +85,7 @@ export class CreateConnectorInstallationUseCase {
       userId,
       pluginId: body.pluginId,
       displayName,
-      credentials: body.credentials ?? {},
+      credentials: body.credentials,
     });
   }
 }

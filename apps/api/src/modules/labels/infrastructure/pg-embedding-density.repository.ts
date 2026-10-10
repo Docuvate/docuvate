@@ -3,29 +3,30 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
+
+import { DocumentEmbeddingsEntity } from '../../../shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from '../../../shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../../shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
-import { EmbeddingDensityLabelGroupEntity } from '../../../shared/infrastructure/database/entities/embedding-density-label-group.entity.js';
-import { EmbeddingDensityLabelGroupMemberEntity } from '../../../shared/infrastructure/database/entities/embedding-density-label-group-member.entity.js';
 import { EmbeddingDensityCorrectionEntity } from '../../../shared/infrastructure/database/entities/embedding-density-correction.entity.js';
 import { EmbeddingDensityCorrectionOffsetEntity } from '../../../shared/infrastructure/database/entities/embedding-density-correction-offset.entity.js';
 import { EmbeddingDensityDecisionThresholdEntity } from '../../../shared/infrastructure/database/entities/embedding-density-decision-threshold.entity.js';
+import { EmbeddingDensityLabelGroupEntity } from '../../../shared/infrastructure/database/entities/embedding-density-label-group.entity.js';
+import { EmbeddingDensityLabelGroupMemberEntity } from '../../../shared/infrastructure/database/entities/embedding-density-label-group-member.entity.js';
 import { EmbeddingDensityUserStateEntity } from '../../../shared/infrastructure/database/entities/embedding-density-user-state.entity.js';
-import { DocumentEmbeddingsEntity } from '../../../shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { TagsEntity } from '../../../shared/infrastructure/database/entities/tags.entity.js';
+import { EMBEDDING_DENSITY_COARSE_TOP_GROUP_TARGET_ID } from '../domain/embedding-density-constants.js';
 import {
   type EmbeddingDensityWorkerState,
   embeddingDensityWorkerStateSchema,
   type KernelStateWire,
   kernelStateWireSchema,
 } from '../domain/embedding-density-worker-state.schema.js';
+import { encodeSumXF32, encodeSumXxF32 } from '../domain/niw-stats.codec.js';
+import { trainingExampleRawRowSchema } from '../domain/training-example-row.schema.js';
 import {
   buildWorkerState,
   parseDocumentEmbedding,
 } from './embedding-density-worker-state.mapper.js';
-import { trainingExampleRawRowSchema } from '../domain/training-example-row.schema.js';
-import { encodeSumXF32, encodeSumXxF32 } from '../domain/niw-stats.codec.js';
-import { EMBEDDING_DENSITY_COARSE_TOP_GROUP_TARGET_ID } from '../domain/embedding-density-constants.js';
 
 export interface EmbeddingDensityTrainingExamples {
   vectors: number[][];
@@ -66,13 +67,13 @@ export class PgEmbeddingDensityRepository {
     if (!row) {
       return false;
     }
-    return row.coarseReady || (row.fineReadyTagIds?.length ?? 0) > 0;
+    return row.coarseReady || row.fineReadyTagIds.length > 0;
   }
 
   async listUsersWithCalibrationReady(): Promise<string[]> {
     const rows = await this.userStateRepo.find({ select: ['userId', 'coarseReady', 'fineReadyTagIds'] });
     return rows
-      .filter((row) => row.coarseReady || (row.fineReadyTagIds?.length ?? 0) > 0)
+      .filter((row) => row.coarseReady || row.fineReadyTagIds.length > 0)
       .map((row) => row.userId);
   }
 
@@ -239,7 +240,7 @@ export class PgEmbeddingDensityRepository {
       const savedRun = await em.save(run);
 
       const groupIdByTag = new Map<string, string>();
-      if (parsed.coarse_thresholds[EMBEDDING_DENSITY_COARSE_TOP_GROUP_TARGET_ID]) {
+      if (EMBEDDING_DENSITY_COARSE_TOP_GROUP_TARGET_ID in parsed.coarse_thresholds) {
         const topGroup = em.create(EmbeddingDensityLabelGroupEntity, {
           userId,
           calibrationRunId: savedRun.id,
@@ -323,7 +324,6 @@ export class PgEmbeddingDensityRepository {
     if (points.length === 0 || offsets.length === 0) {
       return;
     }
-    const point = points[points.length - 1];
     const offsetVec = offsets[offsets.length - 1];
     const correction = this.correctionRepo.create({
       userId,
@@ -353,7 +353,6 @@ export class PgEmbeddingDensityRepository {
       { userId },
       { kernelBandwidth: parsed.kernel.bandwidth, temperature: parsed.temperature }
     );
-    void point;
   }
 
   async listTrainingExamples(userId: string): Promise<EmbeddingDensityTrainingExamples> {

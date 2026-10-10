@@ -35,13 +35,13 @@ export const EXTRACTION_ENGINE_FALLBACK = [
   },
 ] as const;
 
-export function fallbackExtractionEngines(): Array<{
+export function fallbackExtractionEngines(): {
   id: string;
   label: string;
   description: string;
   available?: boolean;
   arenaEligible?: boolean;
-}> {
+}[] {
   return EXTRACTION_ENGINE_FALLBACK.map((engine) => ({
     ...engine,
     available: false,

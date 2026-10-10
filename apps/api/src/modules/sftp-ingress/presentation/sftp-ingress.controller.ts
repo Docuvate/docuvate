@@ -1,5 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  SftpIngressAccountDto,
+  SftpIngressCreateAccountResponseDto,
+  SftpIngressEventDto,
+  SftpIngressServerInfoDto,
+} from '@docuvate/contracts';
 import {
   Body,
   Controller,
@@ -11,16 +17,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import type {
-  SftpIngressAccountDto,
-  SftpIngressCreateAccountResponseDto,
-  SftpIngressEventDto,
-  SftpIngressServerInfoDto,
-} from '@docuvate/contracts';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   ApiDocuvateController,
@@ -33,13 +34,13 @@ import {
   ListSftpIngressEventsUseCase,
   RevokeSftpIngressAccountUseCase,
 } from '../application/sftp-ingress.use-cases.js';
+import { SftpIngressCreateAccountBodyDto } from './dtos/sftp-ingress-user.dto.js';
 import {
   toCreateAccountResponse,
   toSftpIngressAccountDto,
   toSftpIngressEventDto,
   toSftpIngressServerInfoDto,
 } from './sftp-ingress.mapper.js';
-import { SftpIngressCreateAccountBodyDto } from './dtos/sftp-ingress-user.dto.js';
 
 @ApiDocuvateController('sftp-ingress')
 @Controller('sftp-ingress')
@@ -58,8 +59,7 @@ export class SftpIngressController {
     operationId: 'getSftpIngressServer',
     summary: 'SFTP scanner ingress server info',
   })
-  getServer(@Session() session: AuthSession): SftpIngressServerInfoDto {
-    void session;
+  getServer(): SftpIngressServerInfoDto {
     return toSftpIngressServerInfoDto(this.serverInfo.execute());
   }
 

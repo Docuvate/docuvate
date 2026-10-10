@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { InstallationRoleReader } from '../domain/installation-role.port.js';
 

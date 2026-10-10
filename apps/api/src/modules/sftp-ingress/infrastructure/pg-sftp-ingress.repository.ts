@@ -2,6 +2,17 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type { Pool, PoolClient } from 'pg';
+
+import {
+  parseBoolean,
+  parseDate,
+  parseEnum,
+  parseOptionalDate,
+  parseOptionalString,
+  parseString,
+  parseStringArray,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type {
   SftpIngressAccountRepository,
@@ -14,49 +25,54 @@ import type {
   SftpIngressEventStatus,
 } from '../domain/sftp-ingress.types.js';
 
+const SFTP_EVENT_STATUSES: readonly SftpIngressEventStatus[] = ['received', 'processed', 'rejected'];
+
 async function loadLabelIds(client: Pool | PoolClient, accountId: string): Promise<string[]> {
   const { rows } = await client.query(
     `SELECT tag_id::text AS tag_id FROM sftp_ingress_account_labels WHERE account_id = $1 ORDER BY tag_id`,
     [accountId]
   );
-  return rows.map((row) => String(row['tag_id']));
+  return rows.map((raw) => parseString(requireRecord(raw).tag_id));
 }
 
 async function mapAccount(
   client: Pool | PoolClient,
   row: Record<string, unknown>
 ): Promise<SftpIngressAccountEntity> {
-  const id = String(row['id']);
+  const id = parseString(row.id);
+  const labelIdsFromRow = row.label_ids;
   const labelIds =
-    row['label_ids'] != null ? (row['label_ids'] as string[]) : await loadLabelIds(client, id);
+    labelIdsFromRow != null
+      ? parseStringArray(labelIdsFromRow)
+      : await loadLabelIds(client, id);
   return {
     id,
-    userId: String(row['user_id']),
-    displayName: String(row['display_name']),
-    username: String(row['username']),
-    passwordHash: row['password_hash'] != null ? String(row['password_hash']) : null,
-    sshPublicKey: row['ssh_public_key'] != null ? String(row['ssh_public_key']) : null,
-    folderId: row['folder_id'] != null ? String(row['folder_id']) : null,
-    labelIds: Array.isArray(labelIds) ? labelIds.map(String) : [],
-    mapSubfolders: Boolean(row['map_subfolders']),
-    revokedAt: row['revoked_at'] ? new Date(String(row['revoked_at'])) : null,
-    createdAt: new Date(String(row['created_at'])),
-    updatedAt: new Date(String(row['updated_at'])),
+    userId: parseString(row.user_id),
+    displayName: parseString(row.display_name),
+    username: parseString(row.username),
+    passwordHash: parseOptionalString(row.password_hash),
+    sshPublicKey: parseOptionalString(row.ssh_public_key),
+    folderId: parseOptionalString(row.folder_id),
+    labelIds,
+    mapSubfolders: parseBoolean(row.map_subfolders),
+    revokedAt: parseOptionalDate(row.revoked_at),
+    createdAt: parseDate(row.created_at),
+    updatedAt: parseDate(row.updated_at),
   };
 }
 
 function mapEvent(row: Record<string, unknown>, ownerUserId: string): SftpIngressEventEntity {
   return {
-    id: String(row['id']),
-    accountId: String(row['account_id']),
+    id: parseString(row.id),
+    accountId: parseString(row.account_id),
     userId: ownerUserId,
-    filename: String(row['filename']),
-    remotePath: row['remote_path'] != null ? String(row['remote_path']) : null,
-    status: String(row['status']) as SftpIngressEventStatus,
-    reasonKey: row['reason_key'] != null ? String(row['reason_key']) : null,
-    reasonDetail: row['reason_detail'] != null ? String(row['reason_detail']) : null,
-    documentId: row['document_id'] != null ? String(row['document_id']) : null,
-    createdAt: new Date(String(row['created_at'])),
+    filename: parseString(row.filename),
+    remotePath: parseOptionalString(row.remote_path),
+    status: parseEnum(row.status, SFTP_EVENT_STATUSES, 'received'),
+    reasonKey: parseOptionalString(row.reason_key),
+    reasonDetail: parseOptionalString(row.reason_detail),
+    documentId: parseOptionalString(row.document_id),
+    createdAt: parseDate(row.created_at),
   };
 }
 
@@ -92,7 +108,7 @@ export class PgSftpIngressAccountRepository implements SftpIngressAccountReposit
        ORDER BY a.created_at DESC`,
       [userId]
     );
-    return Promise.all(rows.map((row) => mapAccount(this.pool, row as Record<string, unknown>)));
+    return Promise.all(rows.map((raw) => mapAccount(this.pool, requireRecord(raw))));
   }
 
   async findByIdForUser(id: string, userId: string): Promise<SftpIngressAccountEntity | null> {
@@ -108,8 +124,8 @@ export class PgSftpIngressAccountRepository implements SftpIngressAccountReposit
        GROUP BY a.id`,
       [id, userId]
     );
-    const row = rows[0];
-    return row ? mapAccount(this.pool, row as Record<string, unknown>) : null;
+    const raw: unknown = rows[0];
+    return raw ? mapAccount(this.pool, requireRecord(raw)) : null;
   }
 
   async findActiveByUsername(username: string): Promise<SftpIngressAccountEntity | null> {
@@ -126,8 +142,8 @@ export class PgSftpIngressAccountRepository implements SftpIngressAccountReposit
        LIMIT 1`,
       [username.trim()]
     );
-    const row = rows[0];
-    return row ? mapAccount(this.pool, row as Record<string, unknown>) : null;
+    const raw: unknown = rows[0];
+    return raw ? mapAccount(this.pool, requireRecord(raw)) : null;
   }
 
   async findActiveById(id: string): Promise<SftpIngressAccountEntity | null> {
@@ -143,8 +159,8 @@ export class PgSftpIngressAccountRepository implements SftpIngressAccountReposit
        GROUP BY a.id`,
       [id]
     );
-    const row = rows[0];
-    return row ? mapAccount(this.pool, row as Record<string, unknown>) : null;
+    const raw: unknown = rows[0];
+    return raw ? mapAccount(this.pool, requireRecord(raw)) : null;
   }
 
   async create(
@@ -153,6 +169,9 @@ export class PgSftpIngressAccountRepository implements SftpIngressAccountReposit
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      const sshKeyTrimmed = input.sshPublicKey?.trim();
+      const sshPublicKey =
+        sshKeyTrimmed && sshKeyTrimmed.length > 0 ? sshKeyTrimmed : null;
       const { rows } = await client.query(
         `INSERT INTO sftp_ingress_accounts (
            user_id, display_name, username, password_hash, ssh_public_key,
@@ -164,16 +183,16 @@ export class PgSftpIngressAccountRepository implements SftpIngressAccountReposit
           input.displayName.trim(),
           input.username.trim(),
           input.passwordHash,
-          input.sshPublicKey?.trim() || null,
+          sshPublicKey,
           input.folderId,
           input.mapSubfolders,
         ]
       );
-      const accountRow = rows[0] as Record<string, unknown>;
-      const accountId = String(accountRow['id']);
+      const accountRow = requireRecord(rows[0]);
+      const accountId = parseString(accountRow.id);
       await replaceAccountLabels(client, accountId, input.labelIds);
       await client.query('COMMIT');
-      return mapAccount(client, { ...accountRow, label_ids: input.labelIds });
+      return await mapAccount(client, { ...accountRow, label_ids: input.labelIds });
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -210,9 +229,10 @@ export class PgSftpIngressEventRepository implements SftpIngressEventRepository 
        LIMIT $3`,
       [accountId, userId, limit]
     );
-    return rows.map((row) =>
-      mapEvent(row as Record<string, unknown>, String(row['owner_user_id']))
-    );
+    return rows.map((raw) => {
+      const row = requireRecord(raw);
+      return mapEvent(row, parseString(row.owner_user_id));
+    });
   }
 
   async create(input: {
@@ -246,7 +266,7 @@ export class PgSftpIngressEventRepository implements SftpIngressEventRepository 
         input.documentId ?? null,
       ]
     );
-    const row = rows[0] as Record<string, unknown>;
-    return mapEvent(row, String(row['owner_user_id']));
+    const row = requireRecord(rows[0]);
+    return mapEvent(row, parseString(row.owner_user_id));
   }
 }

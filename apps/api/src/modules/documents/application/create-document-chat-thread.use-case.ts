@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import type { DocumentChatThreadEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
@@ -8,10 +12,7 @@ import {
   type DocumentChatThreadRepository,
   type DocumentRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
-import { DEFAULT_CHAT_THREAD_TITLE } from './chat-thread-title.js';
+import { resolveChatThreadTitle } from './chat-thread-title.js';
 
 @Injectable()
 export class CreateDocumentChatThreadUseCase {
@@ -34,7 +35,7 @@ export class CreateDocumentChatThreadUseCase {
     }
     await this.documentAuthz.assert(subject, 'document:chat', doc);
     return this.threads.createThread(userId, [documentId], {
-      title: title?.trim() || DEFAULT_CHAT_THREAD_TITLE,
+      title: resolveChatThreadTitle(title),
       scope: 'document',
     });
   }

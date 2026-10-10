@@ -1,22 +1,31 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CustomFieldType } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
-import type { CustomFieldType } from '@docuvate/contracts';
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
-import type { TagCustomFieldEntity } from '../domain/tag-custom-field.entity.js';
 import type { TagCustomFieldRepository } from '../../../shared/domain/ports.js';
+import {
+  parseEnum,
+  parseNumber,
+  parseString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import type { TagCustomFieldEntity } from '../domain/tag-custom-field.entity.js';
+
+const CUSTOM_FIELD_TYPES: readonly CustomFieldType[] = ['text', 'date', 'number', 'currency'];
 
 function mapRow(row: Record<string, unknown>): TagCustomFieldEntity {
   return {
-    id: String(row['id']),
-    tagId: String(row['tag_id']),
-    userId: String(row['user_id']),
-    key: String(row['field_key']),
-    label: String(row['label']),
-    fieldType: String(row['field_type']) as CustomFieldType,
-    sortOrder: Number(row['sort_order']),
+    id: parseString(row.id),
+    tagId: parseString(row.tag_id),
+    userId: parseString(row.user_id),
+    key: parseString(row.field_key),
+    label: parseString(row.label),
+    fieldType: parseEnum(row.field_type, CUSTOM_FIELD_TYPES, 'text'),
+    sortOrder: parseNumber(row.sort_order, 0),
   };
 }
 
@@ -43,7 +52,7 @@ export class PgTagCustomFieldRepository implements TagCustomFieldRepository {
        ORDER BY sort_order ASC, label ASC`,
       [tagId, userId]
     );
-    return result.rows.map((row) => mapRow(row as Record<string, unknown>));
+    return result.rows.map((raw) => mapRow(requireRecord(raw)));
   }
 
   async listForUser(userId: string): Promise<TagCustomFieldEntity[]> {
@@ -53,13 +62,13 @@ export class PgTagCustomFieldRepository implements TagCustomFieldRepository {
        ORDER BY tag_id, sort_order ASC, label ASC`,
       [userId]
     );
-    return result.rows.map((row) => mapRow(row as Record<string, unknown>));
+    return result.rows.map((raw) => mapRow(requireRecord(raw)));
   }
 
   async replaceForTag(
     tagId: string,
     userId: string,
-    fields: Array<{ key: string; label: string; fieldType: CustomFieldType; sortOrder: number }>
+    fields: { key: string; label: string; fieldType: CustomFieldType; sortOrder: number }[]
   ): Promise<TagCustomFieldEntity[]> {
     const tagCheck = await this.pool.query(`SELECT id FROM tags WHERE id = $1 AND user_id = $2`, [
       tagId,
@@ -85,7 +94,7 @@ export class PgTagCustomFieldRepository implements TagCustomFieldRepository {
         `DELETE FROM tag_custom_field_definitions WHERE tag_id = $1 AND user_id = $2`,
         [tagId, userId]
       );
-      for (const [index, field] of fields.entries()) {
+      for (const field of fields) {
         const key = normalizeKey(field.key);
         const label = field.label.trim();
         if (!label) {
@@ -95,7 +104,7 @@ export class PgTagCustomFieldRepository implements TagCustomFieldRepository {
           `INSERT INTO tag_custom_field_definitions
              (tag_id, user_id, field_key, label, field_type, sort_order)
            VALUES ($1, $2, $3, $4, $5, $6)`,
-          [tagId, userId, key, label, field.fieldType, field.sortOrder ?? index]
+          [tagId, userId, key, label, field.fieldType, field.sortOrder]
         );
       }
       await client.query('COMMIT');

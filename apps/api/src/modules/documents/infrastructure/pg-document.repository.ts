@@ -1,26 +1,34 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   dedupeExtractedFields,
   type DocumentListQuery,
   type ExtractionResult,
 } from '@docuvate/contracts';
-import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type pg from 'pg';
+
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import type { DocumentRepository, DocumentUpdatePatch } from '../../../shared/domain/ports.js';
+import {
+  isRecord,
+  parseJsonString,
+  parseString,
+  recordFromUnknown,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
 import {
   type DocumentExtractionRows,
   loadExtractionForDocument,
   loadExtractionForDocuments,
-  replaceDocumentExtractionBlocks,
   mergeExtractionFieldRows,
+  replaceDocumentExtractionBlocks,
   replaceDocumentExtractionFields,
 } from './document-extraction.persistence.js';
-import { mapDocumentRow, parseTagsJson } from './document-row.mapper.js';
+import { mapDocumentRow, parseLayoutIrPagesJson, parseTagsJson } from './document-row.mapper.js';
 import { textFromExtractionBlocks } from './extraction-text.util.js';
-import type pg from 'pg';
 
 const LIST_SELECT = `
   SELECT d.*,
@@ -63,11 +71,14 @@ export class PgDocumentRepository implements DocumentRepository {
        ORDER BY page`,
       [documentId]
     );
-    return result.rows.map((row) => ({
-      page: Number(row['page']),
-      widthPt: Number(row['width_pt']),
-      heightPt: Number(row['height_pt']),
-    }));
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return {
+        page: Number(row.page),
+        widthPt: Number(row.width_pt),
+        heightPt: Number(row.height_pt),
+      };
+    });
   }
 
   private attachLayoutIrPages(
@@ -121,7 +132,7 @@ export class PgDocumentRepository implements DocumentRepository {
       [id]
     );
     if (!result.rows[0]) return null;
-    const entity = await this.mapListRow(result.rows[0]);
+    const entity = await this.mapListRow(requireRecord(result.rows[0]));
     const pages = await this.loadLayoutIrPageSummaries(id);
     return this.attachLayoutIrPages(entity, pages);
   }
@@ -132,7 +143,7 @@ export class PgDocumentRepository implements DocumentRepository {
       [id, userId]
     );
     if (!result.rows[0]) return null;
-    const entity = await this.mapListRow(result.rows[0]);
+    const entity = await this.mapListRow(requireRecord(result.rows[0]));
     const pages = await this.loadLayoutIrPageSummaries(id);
     return this.attachLayoutIrPages(entity, pages);
   }
@@ -149,19 +160,22 @@ export class PgDocumentRepository implements DocumentRepository {
     let paramIndex = 2;
 
     if (filters.status) {
-      conditions.push(`d.status = $${paramIndex++}`);
+      conditions.push(`d.status = $${String(paramIndex)}`);
+      paramIndex += 1;
       params.push(filters.status);
     }
     if (filters.correspondentId) {
-      conditions.push(`d.correspondent_id = $${paramIndex++}`);
+      conditions.push(`d.correspondent_id = $${String(paramIndex)}`);
+      paramIndex += 1;
       params.push(filters.correspondentId);
     }
     const tagIds = filters.tagIds?.filter(Boolean) ?? (filters.tagId ? [filters.tagId] : undefined);
     if (tagIds?.length) {
       for (const tagId of tagIds) {
         conditions.push(
-          `EXISTS (SELECT 1 FROM document_tags dtf WHERE dtf.document_id = d.id AND dtf.tag_id = $${paramIndex++})`
+          `EXISTS (SELECT 1 FROM document_tags dtf WHERE dtf.document_id = d.id AND dtf.tag_id = $${String(paramIndex)})`
         );
+        paramIndex += 1;
         params.push(tagId);
       }
     }
@@ -184,38 +198,43 @@ export class PgDocumentRepository implements DocumentRepository {
       );
     }
     if (filters.folderId) {
-      conditions.push(`d.folder_id = $${paramIndex++}`);
+      conditions.push(`d.folder_id = $${String(paramIndex)}`);
+      paramIndex += 1;
       params.push(filters.folderId);
     }
     if (filters.mappeId) {
+      const mappeParam = String(paramIndex);
       conditions.push(
-        `(d.mappe_id = $${paramIndex} OR EXISTS (
+        `(d.mappe_id = $${mappeParam} OR EXISTS (
           SELECT 1 FROM folders mf
-          WHERE mf.id = d.folder_id AND mf.mappe_id = $${paramIndex} AND mf.user_id = d.user_id
+          WHERE mf.id = d.folder_id AND mf.mappe_id = $${mappeParam} AND mf.user_id = d.user_id
         ))`
       );
       params.push(filters.mappeId);
-      paramIndex++;
+      paramIndex += 1;
     }
     if (filters.unfiled) {
       conditions.push(`d.folder_id IS NULL`);
     }
     if (filters.q?.trim()) {
       const q = filters.q.trim();
+      const qParam = String(paramIndex);
       conditions.push(
-        `(d.filename ILIKE '%' || $${paramIndex} || '%'
-          OR d.title ILIKE '%' || $${paramIndex} || '%'
-          OR d.search_vector @@ plainto_tsquery('simple', $${paramIndex}))`
+        `(d.filename ILIKE '%' || $${qParam} || '%'
+          OR d.title ILIKE '%' || $${qParam} || '%'
+          OR d.search_vector @@ plainto_tsquery('simple', $${qParam}))`
       );
       params.push(q);
-      paramIndex++;
+      paramIndex += 1;
     }
     if (filters.documentDateFrom) {
-      conditions.push(`d.document_date >= $${paramIndex++}::date`);
+      conditions.push(`d.document_date >= $${String(paramIndex)}::date`);
+      paramIndex += 1;
       params.push(filters.documentDateFrom);
     }
     if (filters.documentDateTo) {
-      conditions.push(`d.document_date <= $${paramIndex++}::date`);
+      conditions.push(`d.document_date <= $${String(paramIndex)}::date`);
+      paramIndex += 1;
       params.push(filters.documentDateTo);
     }
 
@@ -237,11 +256,13 @@ export class PgDocumentRepository implements DocumentRepository {
     const result = await this.pool.query(sql, params);
     const extractions = await loadExtractionForDocuments(
       this.pool,
-      result.rows.map((row) => String(row['id']))
+      result.rows.map((raw) => parseString(requireRecord(raw).id))
     );
-    return result.rows.map((row) =>
-      this.mapRow(row, extractions.get(String(row['id'])) ?? { fields: [], blocks: [] })
-    );
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      const id = parseString(row.id);
+      return this.mapRow(row, extractions.get(id) ?? { fields: [], blocks: [] });
+    });
   }
 
   async updateStatus(id: string, status: DocumentStatus): Promise<void> {
@@ -253,7 +274,8 @@ export class PgDocumentRepository implements DocumentRepository {
 
   async saveExtraction(id: string, result: ExtractionResult): Promise<void> {
     const doc = await this.pool.query(`SELECT user_id FROM documents WHERE id = $1`, [id]);
-    const userId = doc.rows[0] ? String(doc.rows[0]['user_id']) : null;
+    const docRow = recordFromUnknown(doc.rows[0]);
+    const userId = docRow ? parseString(docRow.user_id) : null;
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -262,8 +284,9 @@ export class PgDocumentRepository implements DocumentRepository {
         [id, result.text, result.markdown ?? null]
       );
       await client.query(`DELETE FROM document_layout_ir WHERE document_id = $1`, [id]);
-      if (result.layoutIr != null) {
-        const version = (result.layoutIr as { version?: number }).version;
+      if (result.layoutIr != null && isRecord(result.layoutIr)) {
+        const versionRaw = result.layoutIr.version;
+        const version = typeof versionRaw === 'number' ? versionRaw : Number(versionRaw);
         if (version !== 1) {
           this.logger.warn(`Skipping layout IR for document ${id}: version must be 1`);
         } else {
@@ -271,10 +294,8 @@ export class PgDocumentRepository implements DocumentRepository {
             `INSERT INTO document_layout_ir (document_id, version, ir) VALUES ($1, $2, $3::jsonb)`,
             [id, version, JSON.stringify(result.layoutIr)]
           );
-          const pages = (
-            result.layoutIr as { pages?: { page: number; widthPt: number; heightPt: number }[] }
-          ).pages;
-          if (pages?.length) {
+          const pages = parseLayoutIrPagesJson(result.layoutIr.pages);
+          if (pages.length > 0) {
             const byPage = new Map<number, { page: number; widthPt: number; heightPt: number }>();
             for (const page of pages) {
               if (!byPage.has(page.page)) {
@@ -320,11 +341,13 @@ export class PgDocumentRepository implements DocumentRepository {
        WHERE li.document_id = $1 AND d.user_id = $2`,
       [id, userId]
     );
-    const raw = result.rows[0]?.['ir'];
+    const row = recordFromUnknown(result.rows[0]);
+    const raw = row?.ir;
     if (raw == null) return null;
-    if (typeof raw === 'object') return raw as Record<string, unknown>;
+    const fromObject = recordFromUnknown(raw);
+    if (fromObject) return fromObject;
     if (typeof raw === 'string' && raw.trim()) {
-      return JSON.parse(raw) as Record<string, unknown>;
+      return recordFromUnknown(parseJsonString(raw));
     }
     return null;
   }
@@ -349,27 +372,33 @@ export class PgDocumentRepository implements DocumentRepository {
     let idx = 3;
 
     if (patch.title !== undefined) {
-      fields.push(`title = $${idx++}`);
+      fields.push(`title = $${String(idx)}`);
+      idx += 1;
       params.push(patch.title);
     }
     if (patch.documentDate !== undefined) {
-      fields.push(`document_date = $${idx++}`);
+      fields.push(`document_date = $${String(idx)}`);
+      idx += 1;
       params.push(patch.documentDate);
     }
     if (patch.notes !== undefined) {
-      fields.push(`notes = $${idx++}`);
+      fields.push(`notes = $${String(idx)}`);
+      idx += 1;
       params.push(patch.notes);
     }
     if (patch.folderId !== undefined) {
-      fields.push(`folder_id = $${idx++}`);
+      fields.push(`folder_id = $${String(idx)}`);
+      idx += 1;
       params.push(patch.folderId);
     }
     if (patch.mappeId !== undefined) {
-      fields.push(`mappe_id = $${idx++}`);
+      fields.push(`mappe_id = $${String(idx)}`);
+      idx += 1;
       params.push(patch.mappeId);
     }
     if (patch.correspondentId !== undefined) {
-      fields.push(`correspondent_id = $${idx++}`);
+      fields.push(`correspondent_id = $${String(idx)}`);
+      idx += 1;
       params.push(patch.correspondentId);
     }
     const nextFields =
@@ -391,7 +420,8 @@ export class PgDocumentRepository implements DocumentRepository {
       try {
         await client.query('BEGIN');
         if (nextBlocks !== undefined) {
-          const nextText = textFromExtractionBlocks(nextBlocks) || existing.extraction?.text || '';
+          const blockText = textFromExtractionBlocks(nextBlocks);
+          const nextText = blockText || (existing.extraction?.text ?? '');
           await client.query(
             `UPDATE documents SET extracted_text = $3, updated_at = now() WHERE id = $1 AND user_id = $2`,
             [id, userId, nextText]
@@ -432,7 +462,7 @@ export class PgDocumentRepository implements DocumentRepository {
   async setTagsForDocument(documentId: string, tagIds: string[]): Promise<void> {
     await this.pool.query(`DELETE FROM document_tags WHERE document_id = $1`, [documentId]);
     if (tagIds.length === 0) return;
-    const values = tagIds.map((tagId, i) => `($1, $${i + 2})`).join(', ');
+    const values = tagIds.map((tagId, i) => `($1, $${String(i + 2)})`).join(', ');
     await this.pool.query(`INSERT INTO document_tags (document_id, tag_id) VALUES ${values}`, [
       documentId,
       ...tagIds,
@@ -510,15 +540,19 @@ export class PgDocumentRepository implements DocumentRepository {
   }
 
   private async mapListRow(row: Record<string, unknown>): Promise<DocumentEntity> {
-    return this.mapRow(row, await loadExtractionForDocument(this.pool, String(row['id'])));
+    return this.mapRow(row, await loadExtractionForDocument(this.pool, String(row.id)));
   }
 
   private mapRow(row: Record<string, unknown>, extraction: DocumentExtractionRows): DocumentEntity {
-    const tags = parseTagsJson(row['tags_json']);
-    const corrId = row['corr_id'];
+    const tags = parseTagsJson(row.tags_json);
+    const corrId = row.corr_id;
+    const corrIdStr =
+      corrId === null || corrId === undefined ? null : parseString(corrId);
     return mapDocumentRow(row, {
       tags,
-      correspondent: corrId ? { id: String(corrId), name: String(row['corr_name']) } : null,
+      correspondent: corrIdStr
+        ? { id: corrIdStr, name: parseString(row.corr_name) }
+        : null,
       extraction,
     });
   }

@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
+
 import { ValidationError } from '../../../shared/domain/errors.js';
+import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import type { SftpIngressEventEntity } from '../domain/sftp-ingress.types.js';
 import { IngestSftpScanUseCase } from './sftp-ingress.use-cases.js';
 
@@ -22,16 +24,11 @@ export class IngestSftpMultipartUseCase {
     if (!multipart) {
       throw new ValidationError('No file uploaded');
     }
-    const accountIdField = multipart.fields['accountId'];
-    const remotePathField = multipart.fields['remotePath'];
-    const accountId =
-      typeof accountIdField === 'object' && accountIdField && 'value' in accountIdField
-        ? String(accountIdField.value)
-        : '';
-    const remotePath =
-      typeof remotePathField === 'object' && remotePathField && 'value' in remotePathField
-        ? String(remotePathField.value)
-        : null;
+    const accountIdField = multipart.fields.accountId;
+    const remotePathField = multipart.fields.remotePath;
+    const accountId = isRecord(accountIdField) ? parseString(accountIdField.value) : '';
+    const remotePathRaw = isRecord(remotePathField) ? parseString(remotePathField.value) : '';
+    const remotePath = remotePathRaw.length > 0 ? remotePathRaw : null;
     if (!accountId.trim()) {
       throw new ValidationError('accountId required');
     }

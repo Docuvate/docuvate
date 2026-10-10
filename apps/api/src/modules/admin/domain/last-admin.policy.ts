@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
+
 import { ForbiddenError } from '../../../shared/domain/errors.js';
+import { ValidationError } from '../../../shared/domain/errors.js';
 import { INSTALLATION_DB_ROLE_ADMIN } from '../../auth/domain/installation.constants.js';
 import { INSTANCE_ROLE_ADMIN } from '../../auth/domain/instance-role.constants.js';
-import { ValidationError } from '../../../shared/domain/errors.js';
 
 export function assertRoleChangeAllowed(nextRole: string): void {
   if (nextRole !== INSTANCE_ROLE_ADMIN && nextRole !== 'member') {

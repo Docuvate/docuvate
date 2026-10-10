@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { evaluateFieldExtractionGate } from './field-extraction-gate.js';
 
 describe('evaluateFieldExtractionGate', () => {
   const baseLabels = {
-    assignedTagIds: [] as string[],
-    assignedNonInboxTagIds: [] as string[],
-    suggestions: [] as Array<{ tagId: string; confidence: number; isInbox: boolean }>,
+    assignedTagIds: [] satisfies string[],
+    assignedNonInboxTagIds: [] satisfies string[],
+    suggestions: [] satisfies { tagId: string; confidence: number; isInbox: boolean }[],
   };
 
   it('passes confidence gate when a non-inbox tag is assigned', () => {

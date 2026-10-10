@@ -24,7 +24,8 @@ export function ollamaNumPredict(): number {
 
 export function ollamaKeepAlive(): string {
   const raw = process.env['OLLAMA_KEEP_ALIVE'];
-  return raw?.trim() || DEFAULT_KEEP_ALIVE;
+  const trimmed = raw?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : DEFAULT_KEEP_ALIVE;
 }
 
 export function ollamaChatIdleTimeoutMs(): number {
@@ -44,7 +45,7 @@ function ollamaThinkingDisabled(model: string): boolean {
 
 export function buildOllamaChatBody(
   model: string,
-  messages: Array<{ role: string; content: string }>,
+  messages: { role: string; content: string }[],
   stream: boolean
 ): Record<string, unknown> {
   const body: Record<string, unknown> = {
@@ -60,7 +61,7 @@ export function buildOllamaChatBody(
     },
   };
   if (ollamaThinkingDisabled(model)) {
-    body['think'] = false;
+    body.think = false;
   }
   return body;
 }

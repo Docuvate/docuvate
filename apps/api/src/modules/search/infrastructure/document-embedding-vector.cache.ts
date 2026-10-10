@@ -2,6 +2,21 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
 
+function parseEmbeddingVector(raw: unknown): number[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    return null;
+  }
+  const nums: number[] = [];
+  for (const value of raw) {
+    const n = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(n)) {
+      return null;
+    }
+    nums.push(n);
+  }
+  return nums;
+}
+
 const TTL_MS = 120_000;
 const MAX_USERS = 32;
 
@@ -38,7 +53,7 @@ export class DocumentEmbeddingVectorCache {
       }
     }
 
-    let rows: Array<{ document_id: string; embedding: unknown }>;
+    let rows: { document_id: string; embedding: unknown }[];
     if (documentIds && documentIds.length > 0) {
       const result = await pool.query<{ document_id: string; embedding: unknown }>(
         `SELECT e.document_id, e.embedding
@@ -62,16 +77,18 @@ export class DocumentEmbeddingVectorCache {
 
     const byDocumentId = new Map<string, number[]>();
     for (const row of rows) {
-      const raw = row.embedding;
-      if (Array.isArray(raw) && raw.length > 0) {
-        byDocumentId.set(row.document_id, raw as number[]);
+      const vec = parseEmbeddingVector(row.embedding);
+      if (vec) {
+        byDocumentId.set(row.document_id, vec);
       }
     }
 
     if (!documentIds) {
       if (this.users.size >= MAX_USERS) {
-        const oldest = [...this.users.entries()].sort((a, b) => a[1].loadedAt - b[1].loadedAt)[0];
-        if (oldest) this.users.delete(oldest[0]);
+        const oldestKey = [...this.users.entries()].sort(
+          (a, b) => a[1].loadedAt - b[1].loadedAt
+        )[0][0];
+        this.users.delete(oldestKey);
       }
       this.users.set(userId, { loadedAt: now, byDocumentId });
       return byDocumentId;

@@ -3,10 +3,10 @@
 import { cosineSimilarity } from './cosine.js';
 import type { TagCentroidRef } from './label-coverage.js';
 
-export type LabeledDocumentEmbedding = {
+export interface LabeledDocumentEmbedding {
   embedding: number[];
   nonInboxTagIds: string[];
-};
+}
 
 /**
  * Max cosine similarity to any label centroid or any document that already has labels.
@@ -38,7 +38,7 @@ export function computeCoverageSimilarity(
 }
 
 export function countCoverageGaps(
-  statuses: Array<'explained' | 'unexplained' | 'outside' | 'unlabeled_near'>
+  statuses: ('explained' | 'unexplained' | 'outside' | 'unlabeled_near')[]
 ): number {
   return statuses.filter((s) => s !== 'explained').length;
 }

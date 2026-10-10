@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
-import type pg from 'pg';
+
+import { stubPgPool } from '../../../shared/infrastructure/database/pg-pool.spec-util.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { PgFolderRepository } from './pg-folder.repository.js';
 
 describe('PgFolderRepository.listForUser', () => {
@@ -30,17 +33,23 @@ describe('PgFolderRepository.listForUser', () => {
         },
       ],
     });
-    const pool = { query } as unknown as pg.Pool;
-    const repo = new PgFolderRepository(pool);
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        PgFolderRepository,
+        { provide: PG_POOL, useValue: stubPgPool({ query }) },
+      ],
+    }).compile();
+    const repo = moduleRef.get(PgFolderRepository);
 
     const items = await repo.listForUser('user-1');
 
     expect(query).toHaveBeenCalledOnce();
-    const [sql, params] = query.mock.calls[0]!;
-    expect(String(sql)).toContain('COUNT(d.id)');
-    expect(String(sql)).toContain('GROUP BY f.id');
-    expect(String(sql)).toContain('f.user_id = $1');
-    expect(params).toEqual(['user-1']);
+    expect(query.mock.calls[0]).toBeDefined();
+    const firstCall = query.mock.calls[0];
+    expect(firstCall[0]).toEqual(expect.stringContaining('COUNT(d.id)'));
+    expect(firstCall[0]).toEqual(expect.stringContaining('document_stack_members'));
+    expect(firstCall[0]).toEqual(expect.stringContaining('f.user_id = $1'));
+    expect(firstCall[1]).toEqual(['user-1']);
 
     expect(items).toHaveLength(2);
     expect(items.find((f) => f.id === 'folder-empty')?.documentCount).toBe(0);

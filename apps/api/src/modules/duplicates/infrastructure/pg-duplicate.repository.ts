@@ -1,25 +1,68 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DuplicateCandidateSource } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
-import type { DuplicateCandidateSource } from '@docuvate/contracts';
+
 import type {
-  DuplicateRepository,
   DuplicateCandidateEntity,
+  DuplicateRepository,
 } from '../../../shared/domain/ports.js';
+import {
+  parseBoolean,
+  parseEnum,
+  parseJsonString,
+  parseNumber,
+  parseOptionalDate,
+  parseOptionalString,
+  parseString,
+  parseStringArray,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+
+const DUPLICATE_SOURCES: readonly DuplicateCandidateSource[] = ['hash', 'embedding'];
 
 function parseVector(raw: unknown): number[] {
   if (Array.isArray(raw)) return raw.map((v) => Number(v));
   if (typeof raw === 'string') {
     try {
-      const parsed = JSON.parse(raw) as unknown;
+      const parsed = parseJsonString(raw);
       return Array.isArray(parsed) ? parsed.map((v) => Number(v)) : [];
     } catch {
       return [];
     }
   }
   return [];
+}
+
+function parsePostgresUuidArray(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((id) => parseString(id)).filter((id) => id.length > 0);
+  }
+  if (typeof value === 'string') {
+    const inner = value.replace(/^\{|\}$/g, '');
+    if (!inner) return [];
+    return inner
+      .split(',')
+      .map((id) => id.replace(/^"|"$/g, '').trim())
+      .filter((id) => id.length > 0);
+  }
+  return parseStringArray(value);
+}
+
+function mapCandidateRow(row: Record<string, unknown>): DuplicateCandidateEntity {
+  return {
+    id: parseString(row.id),
+    userId: parseString(row.user_id),
+    documentId: parseString(row.document_id),
+    candidateDocumentId: parseString(row.candidate_document_id),
+    candidateTitle: parseString(row.candidate_title),
+    candidateFilename: parseString(row.candidate_filename),
+    similarity: parseNumber(row.similarity),
+    source: parseEnum(row.source, DUPLICATE_SOURCES, 'embedding'),
+    dismissed: parseBoolean(row.dismissed),
+  };
 }
 
 @Injectable()
@@ -74,7 +117,9 @@ export class PgDuplicateRepository implements DuplicateRepository {
          )`,
       [userId, documentId, candidateDocumentId]
     );
-    return Boolean(result.rows[0]?.['dismissed']);
+    const raw: unknown = result.rows[0];
+    if (!raw) return false;
+    return parseBoolean(requireRecord(raw).dismissed);
   }
 
   async listForDocument(documentId: string, userId: string): Promise<DuplicateCandidateEntity[]> {
@@ -87,17 +132,7 @@ export class PgDuplicateRepository implements DuplicateRepository {
        ORDER BY c.similarity DESC`,
       [documentId, userId]
     );
-    return result.rows.map((row) => ({
-      id: String(row['id']),
-      userId: String(row['user_id']),
-      documentId: String(row['document_id']),
-      candidateDocumentId: String(row['candidate_document_id']),
-      candidateTitle: String(row['candidate_title']),
-      candidateFilename: String(row['candidate_filename']),
-      similarity: Number(row['similarity']),
-      source: row['source'] as DuplicateCandidateSource,
-      dismissed: Boolean(row['dismissed']),
-    }));
+    return result.rows.map((raw) => mapCandidateRow(requireRecord(raw)));
   }
 
   async dismiss(documentId: string, candidateDocumentId: string, userId: string): Promise<void> {
@@ -126,8 +161,9 @@ export class PgDuplicateRepository implements DuplicateRepository {
        GROUP BY document_id`,
       [userId, documentIds]
     );
-    for (const row of result.rows) {
-      counts.set(String(row['document_id']), Number(row['cnt']));
+    for (const raw of result.rows) {
+      const row = requireRecord(raw);
+      counts.set(parseString(row.document_id), parseNumber(row.cnt));
     }
     return counts;
   }
@@ -142,7 +178,7 @@ export class PgDuplicateRepository implements DuplicateRepository {
        WHERE user_id = $1 AND content_hash = $2 AND id <> $3`,
       [userId, hash, excludeDocumentId]
     );
-    return result.rows.map((row) => String(row['id']));
+    return result.rows.map((raw) => parseString(requireRecord(raw).id));
   }
 
   async listDocumentIdsBySharedHash(userId: string): Promise<string[][]> {
@@ -154,18 +190,7 @@ export class PgDuplicateRepository implements DuplicateRepository {
        HAVING COUNT(*) > 1`,
       [userId]
     );
-    return result.rows.map((row) => {
-      const raw = row['ids'];
-      if (Array.isArray(raw)) return raw.map((id) => String(id));
-      if (typeof raw === 'string') {
-        return raw
-          .replace(/^\{|\}$/g, '')
-          .split(',')
-          .filter(Boolean)
-          .map((id) => id.replace(/^"|"$/g, ''));
-      }
-      return [];
-    });
+    return result.rows.map((raw) => parsePostgresUuidArray(requireRecord(raw).ids));
   }
 
   async listPendingPairs(
@@ -177,10 +202,13 @@ export class PgDuplicateRepository implements DuplicateRepository {
        WHERE user_id = $1 AND dismissed = false`,
       [userId]
     );
-    return result.rows.map((row) => ({
-      documentId: String(row['document_id']),
-      candidateDocumentId: String(row['candidate_document_id']),
-    }));
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return {
+        documentId: parseString(row.document_id),
+        candidateDocumentId: parseString(row.candidate_document_id),
+      };
+    });
   }
 
   async listDocumentEmbeddings(
@@ -219,19 +247,16 @@ export class PgDuplicateRepository implements DuplicateRepository {
       [userId, excludeDocumentId]
     );
     return result.rows
-      .map((row) => {
-        const documentDateRaw = row['document_date'];
+      .map((raw) => {
+        const row = requireRecord(raw);
         return {
-          documentId: String(row['document_id']),
-          embedding: parseVector(row['embedding']),
-          filename: String(row['filename']),
-          title: String(row['title'] ?? row['filename']),
-          documentDate:
-            documentDateRaw != null && documentDateRaw !== ''
-              ? new Date(String(documentDateRaw))
-              : null,
-          extractedText: (row['extracted_text'] as string | null) ?? null,
-          extractedFields: row['extraction_payload'],
+          documentId: parseString(row.document_id),
+          embedding: parseVector(row.embedding),
+          filename: parseString(row.filename),
+          title: parseString(row.title ?? row.filename),
+          documentDate: parseOptionalDate(row.document_date),
+          extractedText: parseOptionalString(row.extracted_text),
+          extractedFields: row.extraction_payload,
         };
       })
       .filter((row) => row.embedding.length > 0);

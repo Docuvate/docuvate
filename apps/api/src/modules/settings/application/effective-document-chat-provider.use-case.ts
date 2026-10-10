@@ -1,24 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { resolveCustomerDocumentChatProvider } from '../../../shared/application/resolve-customer-document-chat-provider.js';
+import { resolveDocumentChatProvider } from '../../../shared/application/resolve-document-chat-provider.js';
+import {
+  type ChatProviderAvailability,
+  resolveEffectiveDocumentChatProvider,
+} from '../../../shared/application/resolve-effective-document-chat-provider.js';
 import {
   USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { resolveDocumentChatProvider } from '../../../shared/application/resolve-document-chat-provider.js';
-import { resolveCustomerDocumentChatProvider } from '../../../shared/application/resolve-customer-document-chat-provider.js';
-import {
-  resolveEffectiveDocumentChatProvider,
-  type ChatProviderAvailability,
-} from '../../../shared/application/resolve-effective-document-chat-provider.js';
 import type { DocumentChatProviderId } from '../../../shared/infrastructure/chat/chat-provider.types.js';
 import {
-  runtimeChatProviderAvailability,
   type DocumentChatProvidersCatalog,
+  runtimeChatProviderAvailability,
 } from './document-chat-provider-catalog.js';
-import { ListDocumentChatProvidersUseCase } from './settings.use-cases.js';
+import { ListDocumentChatProvidersUseCase } from './list-document-chat-providers.use-case.js';
 
-export type EffectiveChatProviderResult = {
+export interface EffectiveChatProviderResult {
   preferred: DocumentChatProviderId;
   effective: DocumentChatProviderId;
   customerEffective: DocumentChatProviderId;
@@ -31,7 +32,7 @@ export type EffectiveChatProviderResult = {
   documentChatReadinessReason: string | null;
   documentChatOllamaModel: string | null;
   documentChatRunsOnCpu: boolean;
-};
+}
 
 @Injectable()
 export class EffectiveDocumentChatProviderUseCase {

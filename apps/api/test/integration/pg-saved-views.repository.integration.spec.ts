@@ -1,15 +1,17 @@
 import { randomUUID } from 'node:crypto';
+
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
-import { ForbiddenError } from '../../src/shared/domain/errors.js';
 import { assertCanReadView } from '../../src/modules/workspace/domain/saved-view-access.js';
 import { PgWorkspaceRepository } from '../../src/modules/workspace/infrastructure/pg-workspace.repository.js';
+import { ForbiddenError } from '../../src/shared/domain/errors.js';
+import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
   insertSyntheticUser,
   newIsolationUserId,
 } from './pg-test-isolation.js';
-import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 
 describe('PgWorkspaceRepository saved views (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
@@ -43,7 +45,12 @@ describe('PgWorkspaceRepository saved views (Testcontainers Postgres)', () => {
     expect(otherList.some((v) => v.id === id)).toBe(false);
     const loaded = await repo.findViewById(id);
     expect(loaded).not.toBeNull();
-    expect(() => assertCanReadView(otherId, loaded!)).toThrow(ForbiddenError);
+    if (!loaded) {
+      throw new Error('expected saved view');
+    }
+    expect(() => {
+      assertCanReadView(otherId, loaded);
+    }).toThrow(ForbiddenError);
   });
 
   it('lists shared views for all users', async () => {

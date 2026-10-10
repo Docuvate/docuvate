@@ -1,14 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
 import { ValidationError } from '../../../shared/domain/errors.js';
-import type { ConnectorPluginId } from '../domain/connector.types.js';
+import {
+  parseNumber,
+  parseOptionalString,
+  recordFromUnknown,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import {
   CONNECTOR_INSTALLATION_REPOSITORY,
   CONNECTOR_REGISTRY,
   type ConnectorInstallationRepository,
   type ConnectorRegistryPort,
 } from '../domain/connector.ports.js';
+import type { ConnectorPluginId } from '../domain/connector.types.js';
 import {
   connectorOAuthRedirectUri,
   mailOAuthConfig,
@@ -44,7 +50,7 @@ export class StartMailOAuthUseCase {
       pluginId: input.pluginId,
       userId: input.userId,
       displayName,
-      accountHint: input.accountHint?.trim() || undefined,
+      accountHint: input.accountHint?.trim() ?? undefined,
       nonce: newOAuthNonce(),
       codeVerifier,
       issuedAtMs: Date.now(),
@@ -66,12 +72,23 @@ export class StartMailOAuthUseCase {
   }
 }
 
-interface TokenResponse {
-  access_token?: string;
-  refresh_token?: string;
-  expires_in?: number;
-  token_type?: string;
-  scope?: string;
+function parseTokenResponse(value: unknown): {
+  accessToken: string | null;
+  refreshToken: string | null;
+  expiresIn: number | null;
+} {
+  const row = recordFromUnknown(value);
+  if (!row) {
+    return { accessToken: null, refreshToken: null, expiresIn: null };
+  }
+  const accessToken = parseOptionalString(row.access_token);
+  const refreshToken = parseOptionalString(row.refresh_token);
+  const expiresIn = parseNumber(row.expires_in, Number.NaN);
+  return {
+    accessToken,
+    refreshToken,
+    expiresIn: Number.isFinite(expiresIn) ? expiresIn : null,
+  };
 }
 
 @Injectable()
@@ -111,8 +128,8 @@ export class CompleteMailOAuthUseCase {
     if (!tokenResponse.ok) {
       throw new ValidationError('connectors.errors.oauthTokenExchangeFailed');
     }
-    const tokens = (await tokenResponse.json()) as TokenResponse;
-    const accessToken = tokens.access_token?.trim();
+    const tokens = parseTokenResponse(await tokenResponse.json());
+    const accessToken = tokens.accessToken?.trim() ?? '';
     if (!accessToken) {
       throw new ValidationError('connectors.errors.oauthTokenMissing');
     }
@@ -123,14 +140,15 @@ export class CompleteMailOAuthUseCase {
     const credentials: Record<string, string> = {
       access_token: accessToken,
     };
-    if (tokens.refresh_token?.trim()) {
-      credentials['refresh_token'] = tokens.refresh_token.trim();
+    const refreshToken = tokens.refreshToken?.trim() ?? '';
+    if (refreshToken) {
+      credentials.refresh_token = refreshToken;
     }
-    if (tokens.expires_in != null) {
-      credentials['expires_at'] = String(Date.now() + tokens.expires_in * 1000);
+    if (tokens.expiresIn != null) {
+      credentials.expires_at = String(Date.now() + tokens.expiresIn * 1000);
     }
     if (payload.accountHint) {
-      credentials['account_hint'] = payload.accountHint;
+      credentials.account_hint = payload.accountHint;
     }
     const validation = await plugin.validateConfiguration(credentials);
     if (!validation.ok) {

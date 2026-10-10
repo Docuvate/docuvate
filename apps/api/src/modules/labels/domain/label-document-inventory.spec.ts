@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+
 import { summarizeLabelAssignmentInventory } from '@docuvate/contracts';
+import { describe, expect, it } from 'vitest';
 
 const seedPath = join(process.cwd(), '../../scripts/seed-labels-screenshots.mjs');
 
@@ -23,11 +24,16 @@ describe('seed-labels-screenshots.mjs', () => {
 
   it('assigns distinct tag colors for Steuern and Vertrag', () => {
     const source = readFileSync(seedPath, 'utf8');
-    const steuernMatch = source.match(/tagSteuern, 'Steuern', false, '(#[0-9a-fA-F]{6})'/);
-    const vertragMatch = source.match(/tagVertrag, 'Vertrag', false, '(#[0-9a-fA-F]{6})'/);
-    expect(steuernMatch?.[1]).toBeDefined();
-    expect(vertragMatch?.[1]).toBeDefined();
-    expect(steuernMatch![1]).not.toBe(vertragMatch![1]);
+    const steuernMatch = /tagSteuern, 'Steuern', false, '(#[0-9a-fA-F]{6})'/.exec(source);
+    const vertragMatch = /tagVertrag, 'Vertrag', false, '(#[0-9a-fA-F]{6})'/.exec(source);
+    const steuernColor = steuernMatch?.[1];
+    const vertragColor = vertragMatch?.[1];
+    expect(steuernColor).toBeDefined();
+    expect(vertragColor).toBeDefined();
+    if (steuernColor === undefined || vertragColor === undefined) {
+      throw new Error('expected tag color captures');
+    }
+    expect(steuernColor).not.toBe(vertragColor);
   });
 });
 

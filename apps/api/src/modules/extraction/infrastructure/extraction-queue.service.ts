@@ -3,14 +3,25 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
-import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
-import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
+
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
+import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
 import {
   createValkeyConnection,
   waitForValkeyReady,
 } from '../../../shared/infrastructure/valkey/valkey-connection.js';
+import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
+import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
+
+function parseExtractionJobDocumentId(data: unknown): string {
+  const row = requireRecord(data);
+  const documentId = parseString(row.documentId).trim();
+  if (!documentId) {
+    throw new Error('document-extraction job missing documentId');
+  }
+  return documentId;
+}
 
 const QUEUE_NAME = 'document-extraction';
 const ARENA_COUNTER_KEY = 'arena:sample:counter';
@@ -36,7 +47,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     this.worker = new Worker(
       QUEUE_NAME,
       async (job) => {
-        const documentId = job.data.documentId as string;
+        const documentId = parseExtractionJobDocumentId(job.data);
         if (job.name === 'arena-sample') {
           await this.runArenaSample.execute(documentId);
           return;
@@ -83,8 +94,8 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.worker?.close();
-    await this.queue?.close();
-    await this.connection?.quit();
+    await this.worker.close();
+    await this.queue.close();
+    await this.connection.quit();
   }
 }

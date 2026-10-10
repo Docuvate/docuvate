@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it, afterEach } from 'vitest';
+import { afterEach,describe, expect, it } from 'vitest';
 
 /** Mirrors production default in better-auth.config.ts and main.ts CORS. */
 function defaultWebOrigin(): string {

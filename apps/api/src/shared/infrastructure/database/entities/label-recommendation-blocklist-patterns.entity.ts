@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { UserEntity } from './user.entity.js';
 
 @Index('label_recommendation_blocklist_patterns_user_id_pattern_key', ['pattern', 'userId'], {

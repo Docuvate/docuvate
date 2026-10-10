@@ -1,13 +1,24 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { workerApiUrl } from '../worker/worker-api-path.js';
 import type { DocumentChatContext } from '../../domain/ports.js';
+import { isRecord, parseString, parseStringArray } from '../database/row-parse.js';
+import { workerApiUrl } from '../worker/worker-api-path.js';
 
-export type WorkerRagContextResult = {
+function parseWorkerRagResponse(raw: unknown): { contextText: string; chunks: string[] } {
+  if (!isRecord(raw)) {
+    return { contextText: '', chunks: [] };
+  }
+  return {
+    contextText: parseString(raw.contextText).trim(),
+    chunks: parseStringArray(raw.chunks),
+  };
+}
+
+export interface WorkerRagContextResult {
   contextText: string;
   chunks: string[];
   reachable: boolean;
-};
+}
 
 const DEFAULT_RAG_CONTEXT_TIMEOUT_MS = 120_000;
 
@@ -49,10 +60,11 @@ export async function fetchWorkerRagContext(
     if (!response.ok) {
       return { contextText: '', chunks: [], reachable: true };
     }
-    const data = (await response.json()) as { contextText?: string; chunks?: string[] };
+    const raw: unknown = await response.json();
+    const parsed = parseWorkerRagResponse(raw);
     return {
-      contextText: data.contextText?.trim() ?? '',
-      chunks: data.chunks ?? [],
+      contextText: parsed.contextText,
+      chunks: parsed.chunks,
       reachable: true,
     };
   } catch {

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DashboardWidgetDto, SavedDocumentViewDto } from '@docuvate/contracts';
+
 import type { DashboardWidgetEntity, SavedDocumentViewEntity } from '../domain/workspace.types.js';
 
 export function toSavedDocumentViewDto(entity: SavedDocumentViewEntity): SavedDocumentViewDto {

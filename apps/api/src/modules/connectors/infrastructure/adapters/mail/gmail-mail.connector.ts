@@ -5,11 +5,12 @@ import type {
   ConnectorConfigurationInput,
   ConnectorValidationResult,
 } from '../../../domain/connector.types.js';
+import { readConnectorConfigString } from '../shared/connector-config-string.js';
+import { connectorFetch } from '../shared/connector-http.js';
 import { requiredFieldsPresent } from '../shared/required-fields.validation.js';
 import { remoteValidationFailed } from '../shared/validation-message.js';
-import { connectorFetch } from '../shared/connector-http.js';
-import { mailOAuthConfigured, mailOAuthSetupStatus } from './mail-oauth.config.js';
 import { openGmailRuntime } from './gmail-mail.runtime.js';
+import { mailOAuthConfigured, mailOAuthSetupStatus } from './mail-oauth.config.js';
 
 export class GmailMailConnector implements ConnectorPlugin {
   readonly descriptor = {
@@ -51,7 +52,7 @@ export class GmailMailConnector implements ConnectorPlugin {
     if (!tokenCheck.ok) {
       return remoteValidationFailed('connectors.errors.oauthTokenMissing');
     }
-    const accessToken = input['access_token']?.trim() ?? '';
+    const accessToken = readConnectorConfigString(input, 'access_token');
     const response = await connectorFetch(
       'https://gmail.googleapis.com/gmail/v1/users/me/profile',
       {

@@ -26,7 +26,7 @@ export const kernelStateWireSchema = z.object({
 
 /** Matches worker `float("-inf")` and Postgres `real` default before novelty is fit. */
 export const noveltyThresholdWireSchema = z.union([
-  z.number().finite(),
+  z.number(),
   z.literal(Number.NEGATIVE_INFINITY),
 ]);
 

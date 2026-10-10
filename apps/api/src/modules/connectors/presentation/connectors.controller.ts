@@ -1,5 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  ConnectorCatalogResponse,
+  ConnectorImportableItemDto,
+  ConnectorInstallationDto,
+  ConnectorPluginCatalogEntryDto,
+} from '@docuvate/contracts';
+import type { SftpFetchHostProbeRequest, SftpFetchHostProbeResponse } from '@docuvate/contracts';
 import {
   Body,
   Controller,
@@ -11,30 +18,30 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import type {
-  ConnectorCatalogResponse,
-  ConnectorImportableItemDto,
-  ConnectorInstallationDto,
-  ConnectorPluginCatalogEntryDto,
-} from '@docuvate/contracts';
+
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import {
   AuthGuard,
+  type AuthSession,
   AuthSubject,
   Session,
-  type AuthSession,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { isInstanceAdmin } from '../../../shared/infrastructure/auth/user-authorization-subject.js';
-import {
-  ConnectorPluginIdParamDto,
-  CreateConnectorInstallationRequestDto,
-} from '../../../shared/presentation/dtos/connectors.dto.js';
 import {
   ConnectorInstallationIdParamDto,
   ExportToConnectorRequestDto,
   ImportFromConnectorRequestDto,
   ListConnectorImportablesQueryDto,
 } from '../../../shared/presentation/dtos/connector-actions.dto.js';
+import {
+  ConnectorPluginIdParamDto,
+  CreateConnectorInstallationRequestDto,
+} from '../../../shared/presentation/dtos/connectors.dto.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { toDocumentDto } from '../../documents/presentation/document.mapper.js';
 import {
   CreateConnectorInstallationUseCase,
   DeleteConnectorInstallationUseCase,
@@ -47,15 +54,8 @@ import {
   ImportFromConnectorUseCase,
   ListConnectorImportablesUseCase,
 } from '../application/connector-sync.use-cases.js';
-import { toConnectorInstallationDto } from './connectors.mapper.js';
-import { toDocumentDto } from '../../documents/presentation/document.mapper.js';
-import type { SftpFetchHostProbeRequest, SftpFetchHostProbeResponse } from '@docuvate/contracts';
 import { probeSftpFetchHost } from '../infrastructure/adapters/sftp/sftp-fetch.connector.js';
-
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { toConnectorInstallationDto } from './connectors.mapper.js';
 
 @ApiDocuvateController('connectors')
 @Controller('connectors')

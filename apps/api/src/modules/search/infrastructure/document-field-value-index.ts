@@ -1,17 +1,26 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
-  dedupeExtractedFields,
   type CustomFieldType,
+  dedupeExtractedFields,
   type ExtractedField,
 } from '@docuvate/contracts';
-import { parseGlobalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
+
+import {
+  parseEnum,
+  parseOptionalNumber,
+  parseString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { parseLabelFieldStorageKey } from '../../labels/domain/tag-custom-field.entity.js';
+import { parseGlobalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
 import { normalizeFieldValue } from '../domain/normalize-field-value.js';
+
+const CUSTOM_FIELD_TYPES: readonly CustomFieldType[] = ['text', 'date', 'number', 'currency'];
 
 /** Minimal query surface shared by `pg.Pool`, `pg.PoolClient` and migration adapters. */
 export interface SqlQueryable {
-  query(sql: string, params?: unknown[]): Promise<{ rows: Array<Record<string, unknown>> }>;
+  query(sql: string, params?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
 }
 
 export interface FieldDefinitionLookup {
@@ -43,11 +52,12 @@ export async function loadFieldDefinitionLookup(
     [userId]
   );
   for (const row of global.rows) {
-    const storageKey = `global:${String(row['field_key'])}`;
+    const record = requireRecord(row);
+    const storageKey = `global:${parseString(record.field_key)}`;
     map.set(storageKey, {
       storageKey,
-      label: String(row['label']),
-      fieldType: String(row['field_type']) as CustomFieldType,
+      label: parseString(record.label),
+      fieldType: parseEnum(record.field_type, CUSTOM_FIELD_TYPES, 'text'),
     });
   }
   const labelFields = await db.query(
@@ -58,11 +68,12 @@ export async function loadFieldDefinitionLookup(
     [userId]
   );
   for (const row of labelFields.rows) {
-    const storageKey = `label:${String(row['tag_id'])}:${String(row['field_key'])}`;
+    const record = requireRecord(row);
+    const storageKey = `label:${parseString(record.tag_id)}:${parseString(record.field_key)}`;
     map.set(storageKey, {
       storageKey,
-      label: String(row['label']),
-      fieldType: String(row['field_type']) as CustomFieldType,
+      label: parseString(record.label),
+      fieldType: parseEnum(record.field_type, CUSTOM_FIELD_TYPES, 'text'),
     });
   }
   return map;
@@ -151,16 +162,17 @@ export async function replaceDocumentFieldValues(
     await insertFieldValueRow(
       db,
       documentId,
-      toDocumentFieldValueRow(storageKey, field.value ?? '', field.confidence ?? null, defs)
+      toDocumentFieldValueRow(storageKey, field.value, field.confidence ?? null, defs)
     );
   }
 }
 
 function rowToExtractedField(row: Record<string, unknown>): ExtractedField {
-  const key = String(row['field_storage_key']);
-  const field: ExtractedField = { key, value: String(row['value_text'] ?? '') };
-  if (row['confidence'] != null) {
-    field.confidence = Number(row['confidence']);
+  const key = parseString(row.field_storage_key);
+  const field: ExtractedField = { key, value: parseString(row.value_text) };
+  const confidence = parseOptionalNumber(row.confidence);
+  if (confidence != null) {
+    field.confidence = confidence;
   }
   const label = parseLabelFieldStorageKey(key);
   if (label) {
@@ -184,7 +196,7 @@ export async function loadDocumentFieldValues(
     [documentIds]
   );
   for (const row of result.rows) {
-    const documentId = String(row['document_id']);
+    const documentId = String(row.document_id);
     const list = out.get(documentId) ?? [];
     list.push(rowToExtractedField(row));
     out.set(documentId, list);

@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock } from '@docuvate/contracts';
+
+import {
+  isRecord,
+  parseNumber,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 
 export interface DuplicateDocumentSignals {
@@ -32,13 +37,13 @@ export function pageCountFromBlocks(blocks: ExtractionBlock[] | undefined): numb
 }
 
 export function pageCountFromExtractedFields(raw: unknown): number | null {
-  if (raw == null || typeof raw !== 'object') return null;
-  const blocks = (raw as Record<string, unknown>)['blocks'];
+  if (!isRecord(raw)) return null;
+  const blocks = raw.blocks;
   if (!Array.isArray(blocks)) return null;
   let max = 0;
   for (const item of blocks) {
-    if (!item || typeof item !== 'object') continue;
-    const page = Number((item as Record<string, unknown>)['page']);
+    if (!isRecord(item)) continue;
+    const page = parseNumber(item.page, Number.NaN);
     if (Number.isFinite(page) && page > max) max = page;
   }
   return max > 0 ? max : null;

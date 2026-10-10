@@ -1,17 +1,19 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { assignInstallationRoleAfterSignUp } from '../../src/modules/auth/infrastructure/instance-user-bootstrap.js';
+
 import { INSTALLATION_DB_ROLE_ADMIN } from '../../src/modules/auth/domain/installation.constants.js';
+import { assignInstallationRoleAfterSignUp } from '../../src/modules/auth/infrastructure/instance-user-bootstrap.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 
-const installationIamBackfillSql = readFileSync(
+const installationIamBackfillSql = (/INSERT INTO installation_user_roles[\s\S]+?ON CONFLICT \(user_id\) DO NOTHING;/.exec(readFileSync(
   join(
     __dirname,
     '../../src/shared/infrastructure/database/migrations/sql/installation-iam-up.sql'
   ),
   'utf8'
-).match(/INSERT INTO installation_user_roles[\s\S]+?ON CONFLICT \(user_id\) DO NOTHING;/)?.[0];
+)))?.[0];
 
 describe('installation bootstrap (integration)', () => {
   const pool = getIntegrationPool();

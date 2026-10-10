@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
   type DocumentChatThreadRepository,
@@ -60,7 +61,9 @@ export class StaleChatGenerationReconcileService implements OnModuleInit, OnModu
       }
       const count = await this.threads.failAssistantGenerationsByIds(toFail);
       if (count > 0) {
-        this.logger.warn(`Marked ${count} stale chat assistant message(s) as generation_timeout`);
+        this.logger.warn(
+          `Marked ${String(count)} stale chat assistant message(s) as generation_timeout`
+        );
       }
     } catch (err) {
       this.logger.warn(`Stale chat generation reconcile failed: ${String(err)}`);

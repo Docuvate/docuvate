@@ -1,39 +1,39 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import type { ExtractionBlock } from '@docuvate/contracts';
+
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
-  EMBEDDING_PORT,
   type DocumentChatThreadRepository,
+  EMBEDDING_PORT,
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
+import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
+import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
   CITED_CHAT_ABSTENTION_DE,
-  RAG_RERANK_TOP_K,
   citedChatBenchStatsEnabled,
+  RAG_RERANK_TOP_K,
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
-import { passesFusionGate, passesRerankerGate } from '../domain/verify-citation-quote.js';
-import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
+import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
+import { passesFusionGate, passesRerankerGate } from '../domain/verify-citation-quote.js';
 import {
   buildRejectedClaimBenchLog,
   normalizeCitedSourceLabel,
   verifyCitedClaims,
 } from '../domain/verify-cited-claims.js';
-import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
-import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
+import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import {
   buildCitedChatSystemPrompt,
   requestCitedAnswerFromOllama,
 } from './cited-chat-ollama.js';
-import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 
 const CONTENT_FLUSH_MS = 250;
 const GENERATION_HEARTBEAT_MS = 15_000;
@@ -184,7 +184,7 @@ export class CitedChatGenerationService {
     );
     rerankMs = Date.now() - rerankStarted;
 
-    let ranked: Array<{ chunk: (typeof candidates)[0]; score: number }>;
+    let ranked: { chunk: (typeof candidates)[0]; score: number }[];
     if (rerank.reachable && rerank.rerankerUsed && rerank.results.length > 0) {
       ranked = rerank.results
         .map((r) => {
@@ -234,12 +234,12 @@ export class CitedChatGenerationService {
 
     const labelByChunk = new Map<string, string>();
     top.forEach((row, i) => {
-      labelByChunk.set(row.chunk.chunkId, `S${i + 1}`);
+      labelByChunk.set(row.chunk.chunkId, `S${String(i + 1)}`);
     });
 
     const priorMessages = await this.threads.listMessages(threadId, userId);
     const history = priorMessages
-      .filter((m) => m.role === 'user' || (m.role === 'assistant' && m.generationStatus === 'done'))
+      .filter((m) => m.role === 'user' || m.generationStatus === 'done')
       .slice(-2)
       .map(({ role, content }) => ({ role, content }));
 
@@ -253,7 +253,7 @@ export class CitedChatGenerationService {
     let lastFlush = 0;
     let hasStreamedContent = false;
     let processedClaimCount = 0;
-    const streamedVerified: Array<{ text: string; ordinal: number }> = [];
+    const streamedVerified: { text: string; ordinal: number }[] = [];
     const llmStarted = Date.now();
     const llm = await requestCitedAnswerFromOllama(userMessage, systemPrompt, history, {
       shouldAbort: () => aborted(),
@@ -402,7 +402,7 @@ export class CitedChatGenerationService {
 
     if (citedChatBenchStatsEnabled() && rejected.length > 0) {
       this.logger.log(
-        `Cited chat bench: ${rejected.length} rejected claim(s) for message ${messageId}`
+        `Cited chat bench: ${String(rejected.length)} rejected claim(s) for message ${messageId}`
       );
     }
 

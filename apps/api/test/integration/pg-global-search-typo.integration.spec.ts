@@ -1,17 +1,18 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
-import { GlobalSearchUseCase } from '../../src/modules/search/application/global-search.use-case.js';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
-import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
+import { GlobalSearchUseCase } from '../../src/modules/search/application/global-search.use-case.js';
 import { replaceDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
+import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
-import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 
 const noopEmbedding: EmbeddingPort = {
-  async embedTexts(texts: string[]) {
-    return { embeddings: texts.map(() => []), model: 'noop' };
+  embedTexts(texts: string[]) {
+    return Promise.resolve({ embeddings: texts.map(() => []), model: 'noop' });
   },
 };
 

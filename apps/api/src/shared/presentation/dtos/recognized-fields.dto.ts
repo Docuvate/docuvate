@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CustomFieldType, ReplaceRecognizedFieldsRequest } from '@docuvate/contracts';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -13,7 +14,6 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import type { CustomFieldType, ReplaceRecognizedFieldsRequest } from '@docuvate/contracts';
 
 export class ReplaceRecognizedFieldItemDto {
   @IsString()

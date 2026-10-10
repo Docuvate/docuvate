@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import * as Minio from 'minio';
+
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
+import { readConnectorConfigString } from '../shared/connector-config-string.js';
 
 export interface S3ConnectorConfig {
   bucket: string;
@@ -16,12 +18,12 @@ function parseEndpoint(endpointUrl: string): { host: string; port: number; useSS
 }
 
 export function createS3ClientConfig(credentials: ConnectorConfigurationInput): S3ConnectorConfig {
-  const bucket = credentials['bucket']?.trim() ?? '';
-  const region = credentials['region']?.trim() ?? '';
-  const accessKey = credentials['access_key_id']?.trim() ?? '';
-  const secretKey = credentials['secret_access_key']?.trim() ?? '';
-  const endpoint = credentials['endpoint']?.trim();
-  const pathStyle = credentials['path_style']?.trim().toLowerCase() === 'true';
+  const bucket = readConnectorConfigString(credentials, 'bucket');
+  const region = readConnectorConfigString(credentials, 'region');
+  const accessKey = readConnectorConfigString(credentials, 'access_key_id');
+  const secretKey = readConnectorConfigString(credentials, 'secret_access_key');
+  const endpoint = readConnectorConfigString(credentials, 'endpoint');
+  const pathStyle = readConnectorConfigString(credentials, 'path_style').toLowerCase() === 'true';
 
   let client: Minio.Client;
   if (endpoint) {
@@ -64,8 +66,8 @@ export async function validateS3BucketAccess(client: Minio.Client, bucket: strin
       if (err) reject(err);
       else resolve();
     };
-    stream.on('data', () => finish());
-    stream.on('error', (err: Error) => finish(err));
-    stream.on('end', () => finish());
+    stream.on('data', () => { finish(); });
+    stream.on('error', (err: Error) => { finish(err); });
+    stream.on('end', () => { finish(); });
   });
 }

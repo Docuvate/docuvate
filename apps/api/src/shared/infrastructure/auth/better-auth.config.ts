@@ -4,6 +4,7 @@ import { passkey } from '@better-auth/passkey';
 import { betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins/two-factor';
 import pg from 'pg';
+
 import {
   AUTH_MAX_PASSWORD_LENGTH,
   AUTH_MIN_PASSWORD_LENGTH,
@@ -42,7 +43,7 @@ async function isUserSuspended(userId: string): Promise<boolean> {
      ) AS suspended`,
     [userId]
   );
-  return result.rows[0]?.suspended === true;
+  return result.rows[0]?.suspended;
 }
 
 export const auth = betterAuth({

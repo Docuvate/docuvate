@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import type { DocumentChatMessageEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
@@ -8,9 +12,6 @@ import {
   type DocumentChatThreadRepository,
   type DocumentRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 import { PgChatMessageCitationsRepository } from '../../cited-chat/infrastructure/pg-chat-message-citations.repository.js';
 
 @Injectable()
@@ -40,7 +41,7 @@ export class ListDocumentChatThreadMessagesUseCase {
 
   async executeLibrary(threadId: string, userId: string): Promise<DocumentChatMessageEntity[]> {
     const thread = await this.threads.findThreadForUser(threadId, userId);
-    if (!thread || thread.scope !== 'library') {
+    if (thread?.scope !== 'library') {
       throw new NotFoundError('Chat thread');
     }
     return this.attachCitations(await this.threads.listMessages(threadId, userId));
@@ -67,7 +68,7 @@ export class ListDocumentChatThreadMessagesUseCase {
       const citations = stored.map((c) => {
         const highlighted = withBlocks[highlightIndex];
         highlightIndex += 1;
-        return highlighted ? { ...c, blocks: highlighted.blocks } : c;
+        return { ...c, blocks: highlighted.blocks };
       });
       return { ...message, citations };
     });

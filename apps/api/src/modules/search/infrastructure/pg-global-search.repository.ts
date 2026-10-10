@@ -2,37 +2,48 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
+import {
+  parseDate,
+  parseNumber,
+  parseOptionalString,
+  parseString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import type { TextChunkSpan } from '../../cited-chat/domain/split-text-chunks-with-spans.js';
+import { cosineSimilarity } from '../domain/cosine-similarity.js';
 import { expandQueryTerms } from '../domain/expand-query-terms.js';
+import type { GlobalSearchRepositoryResult } from '../domain/global-search.types.js';
 import {
   buildHighlightTerms,
   highlightFuzzyMatches,
   snippetAroundMatch,
 } from '../domain/highlight-fuzzy.js';
+import { parseQueryScalarProbe } from '../domain/normalize-field-value.js';
 import {
   normalizeSearchText,
   searchTextVariants,
   tokenizeSearchQuery,
 } from '../domain/normalize-search-text.js';
-import type { GlobalSearchRepositoryResult } from '../domain/global-search.types.js';
-import { reciprocalRankFusion, type RankedItem } from '../domain/reciprocal-rank-fusion.js';
-import type { TextChunkSpan } from '../../cited-chat/domain/split-text-chunks-with-spans.js';
-import { cosineSimilarity } from '../domain/cosine-similarity.js';
-import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
+import { type RankedItem,reciprocalRankFusion } from '../domain/reciprocal-rank-fusion.js';
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
-import { parseQueryScalarProbe } from '../domain/normalize-field-value.js';
+import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
+import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
 import {
   defaultFieldLabel,
-  loadFieldDefinitionLookup,
   type FieldDefinitionLookup,
+  loadFieldDefinitionLookup,
 } from './document-field-value-index.js';
-import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
 
 const TRGM_THRESHOLD = 0.32;
 const WORD_SIM_THRESHOLD = 0.32;
 const PER_GROUP_LIMIT = 8;
-const LEXICAL_CANDIDATE_CAP = 64;
 const EMBED_CANDIDATE_CAP = Number(process.env['GLOBAL_SEARCH_EMBED_CANDIDATE_CAP'] ?? 24);
+
+const EMPTY_ID_ROWS: { id: string }[] = [];
+const EMPTY_TRGM_ROWS: { id: string; score: number }[] = [];
+const EMPTY_CHUNK_ROWS: { document_id: string; body: string; score: number }[] = [];
 
 /** pg_advisory_xact_lock class id for document_text_chunks reindex (per document_id). */
 const DOCUMENT_TEXT_CHUNK_INDEX_LOCK_HI = 0x44544348;
@@ -106,7 +117,7 @@ export class PgGlobalSearchRepository {
     userId: string,
     documentId: string,
     chunks: TextChunkSpan[],
-    embeddings?: number[][] | undefined
+    embeddings?: number[][]  
   ): Promise<void> {
     const client = await this.pool.connect();
     const lockKey = documentTextChunkIndexLockKey(documentId);
@@ -115,7 +126,7 @@ export class PgGlobalSearchRepository {
       await client.query(`SELECT pg_advisory_xact_lock($1, $2)`, [lockKey.high, lockKey.low]);
       await client.query(`DELETE FROM document_text_chunks WHERE document_id = $1`, [documentId]);
       for (let i = 0; i < chunks.length; i += 1) {
-        const chunk = chunks[i]!;
+        const chunk = chunks[i];
         const embeddingJson = embeddings?.[i] != null ? JSON.stringify(embeddings[i]) : null;
         await client.query(
           `INSERT INTO document_text_chunks (
@@ -161,7 +172,7 @@ export class PgGlobalSearchRepository {
     userId: string,
     token: string,
     limit: number
-  ): Promise<Array<{ term: string; similarity: number }>> {
+  ): Promise<{ term: string; similarity: number }[]> {
     const variants = searchTextVariants(token);
     const probe = normalizeSearchText(variants[0] ?? token);
     const result = await this.pool.query<{ term: string; sim: number }>(
@@ -209,7 +220,10 @@ export class PgGlobalSearchRepository {
        LIMIT $3`,
       [userId, probe, limit]
     );
-    return result.rows.map((r) => ({ term: r.term, similarity: Number(r.sim) }));
+    return result.rows.map((raw) => {
+      const r = requireRecord(raw);
+      return { term: parseString(r.term), similarity: parseNumber(r.sim) };
+    });
   }
 
   async search(
@@ -316,7 +330,7 @@ export class PgGlobalSearchRepository {
            LIMIT 40`,
           [userId, tsQuery]
         )
-      : Promise.resolve({ rows: [] as { id: string }[] });
+      : Promise.resolve({ rows: EMPTY_ID_ROWS });
 
     const trgmPromise =
       trgmProbes.length > 0
@@ -340,7 +354,7 @@ export class PgGlobalSearchRepository {
              LIMIT 32`,
             [userId, trgmProbes, WORD_SIM_THRESHOLD]
           )
-        : Promise.resolve({ rows: [] as { id: string; score: number }[] });
+        : Promise.resolve({ rows: EMPTY_TRGM_ROWS });
 
     const chunkProbe = queryTokens[0] ?? probe;
     const chunkFtsPromise =
@@ -355,7 +369,7 @@ export class PgGlobalSearchRepository {
              LIMIT 32`,
             [userId, chunkProbe]
           )
-        : Promise.resolve({ rows: [] as { document_id: string; body: string; score: number }[] });
+        : Promise.resolve({ rows: EMPTY_CHUNK_ROWS });
 
     const chunkTrgmPromise =
       trgmProbes.length > 0
@@ -372,7 +386,7 @@ export class PgGlobalSearchRepository {
              LIMIT 32`,
             [userId, trgmProbes, WORD_SIM_THRESHOLD]
           )
-        : Promise.resolve({ rows: [] as { document_id: string; body: string; score: number }[] });
+        : Promise.resolve({ rows: EMPTY_CHUNK_ROWS });
 
     const [fts, trgm, chunks, chunkTrgm] = await Promise.all([
       ftsPromise,
@@ -441,18 +455,22 @@ export class PgGlobalSearchRepository {
       [userId, rankedIds]
     );
 
-    const byId = new Map(details.rows.map((r) => [String(r['id']), r]));
+    const byId = new Map<string, Record<string, unknown>>();
+    for (const raw of details.rows) {
+      const row = requireRecord(raw);
+      byId.set(parseString(row.id), row);
+    }
     const items: GlobalSearchRepositoryResult['documents'] = [];
     for (const id of rankedIds.slice(0, limit)) {
       const row = byId.get(id);
       if (!row) continue;
-      const title = String(row['title'] ?? '');
-      const filename = String(row['filename'] ?? '');
-      const extracted = String(row['extracted_text'] ?? '');
+      const title = parseString(row.title ?? '');
+      const filename = parseString(row.filename ?? '');
+      const extracted = parseString(row.extracted_text ?? '');
       const fieldHit = fieldLeg.snippets.get(id);
       const snippetSource = fieldHit
         ? fieldHit.valueText
-        : (chunkSnippets.get(id) ?? extracted.slice(0, 240) ?? title);
+        : (chunkSnippets.get(id) ?? (extracted.slice(0, 240) || title));
       const titleHighlightSpans = highlightFuzzyMatches(title, highlightTerms);
       const sourceHighlightSpans = highlightFuzzyMatches(snippetSource, highlightTerms);
       const snippet = snippetAroundMatch(snippetSource, sourceHighlightSpans);
@@ -462,10 +480,10 @@ export class PgGlobalSearchRepository {
         title,
         filename,
         extractedText: extracted,
-        folderPath: row['folder_name'] != null ? String(row['folder_name']) : null,
+        folderPath: parseOptionalString(row.folder_name),
         labelNames: [],
-        documentDate: row['document_date'] != null ? String(row['document_date']) : null,
-        updatedAt: new Date(String(row['updated_at'])).toISOString(),
+        documentDate: parseOptionalString(row.document_date),
+        updatedAt: parseDate(row.updated_at).toISOString(),
         snippetText: snippet,
         matchedFieldLabel: fieldHit?.fieldLabel ?? null,
         highlightSpans: titleHighlightSpans,
@@ -506,16 +524,14 @@ export class PgGlobalSearchRepository {
       if (t.length >= 3) textProbes.add(t);
     }
 
-    const textQueries: Array<
-      Promise<{
-        rows: Array<{
+    const textQueries: Promise<{
+        rows: {
           document_id: string;
           field_storage_key: string;
           value_text: string;
           score: number;
-        }>;
-      }>
-    > = [];
+        }[];
+      }>[] = [];
     for (const textProbe of textProbes) {
       textQueries.push(
         this.pool.query(
@@ -627,13 +643,14 @@ export class PgGlobalSearchRepository {
         : Promise.resolve(new Map<string, FieldDefinitionLookup>()),
     ]);
     for (const result of results) {
-      for (const row of result.rows) {
-        const storageKey = String(row.field_storage_key);
+      for (const raw of result.rows) {
+        const row = requireRecord(raw);
+        const storageKey = parseString(row.field_storage_key);
         register(
-          String(row.document_id),
+          parseString(row.document_id),
           definitions.get(storageKey)?.label ?? defaultFieldLabel(storageKey),
-          String(row.value_text),
-          Number(row.score ?? 0)
+          parseString(row.value_text),
+          parseNumber(row.score, 0)
         );
       }
     }
@@ -670,15 +687,16 @@ export class PgGlobalSearchRepository {
       [userId, probe, TRGM_THRESHOLD, limit]
     );
     return {
-      items: result.rows.map((row) => {
-        const name = String(row['name']);
+      items: result.rows.map((raw) => {
+        const row = requireRecord(raw);
+        const name = parseString(row.name);
         return {
-          id: String(row['id']),
+          id: parseString(row.id),
           name,
           path: name,
-          documentCount: Number(row['document_count'] ?? 0),
+          documentCount: parseNumber(row.document_count, 0),
           highlightSpans: highlightFuzzyMatches(name, queryTokens),
-          score: Number(row['score'] ?? 0),
+          score: parseNumber(row.score, 0),
         };
       }),
     };
@@ -709,15 +727,16 @@ export class PgGlobalSearchRepository {
       [userId, probe, TRGM_THRESHOLD, limit]
     );
     return {
-      items: result.rows.map((row) => {
-        const name = String(row['name']);
+      items: result.rows.map((raw) => {
+        const row = requireRecord(raw);
+        const name = parseString(row.name);
         return {
-          id: String(row['id']),
+          id: parseString(row.id),
           name,
-          color: row['color'] != null ? String(row['color']) : null,
-          documentCount: Number(row['document_count'] ?? 0),
+          color: parseOptionalString(row.color),
+          documentCount: parseNumber(row.document_count, 0),
           highlightSpans: highlightFuzzyMatches(name, queryTokens),
-          score: Number(row['score'] ?? 0),
+          score: parseNumber(row.score, 0),
         };
       }),
     };

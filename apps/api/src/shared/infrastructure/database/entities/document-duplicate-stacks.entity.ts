@@ -3,14 +3,14 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity.js';
+
 import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
+import { UserEntity } from './user.entity.js';
 
 @Entity('document_duplicate_stacks', { schema: 'public' })
 export class DocumentDuplicateStacksEntity {

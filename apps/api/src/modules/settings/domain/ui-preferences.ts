@@ -7,11 +7,21 @@ export const UI_LOCALES = ['de', 'en'] as const;
 export type UiLocale = (typeof UI_LOCALES)[number];
 
 export function isThemePreference(value: string): value is ThemePreference {
-  return (THEME_PREFERENCES as readonly string[]).includes(value);
+  for (const item of THEME_PREFERENCES) {
+    if (item === value) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export function isUiLocale(value: string): value is UiLocale {
-  return (UI_LOCALES as readonly string[]).includes(value);
+  for (const item of UI_LOCALES) {
+    if (item === value) {
+      return true;
+    }
+  }
+  return false;
 }
 
 export const DEFAULT_THEME_PREFERENCE: ThemePreference = 'system';

@@ -6,7 +6,6 @@ import type {
   MlModelLifecycle,
   MlModelVersionEntity,
   MlRetrainJobEntity,
-  MlRetrainJobStatus,
   MlRetrainTriggerKind,
 } from './model-registry.types.js';
 

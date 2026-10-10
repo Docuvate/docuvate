@@ -1,9 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Regression guard for ADR 015 (3NF + JSONB allowlist). See docs/adr/015-datenbankschema-mindestens-3nf.md */
-import { readFileSync, readdirSync } from 'node:fs';
+import { readdirSync,readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
+
 import {
   FORBIDDEN_JSONB_ID_ARRAY_COLUMNS,
   SCHEMA_JSONB_ALLOWLIST,
@@ -46,26 +48,26 @@ function liveJsonbColumns(sql: string): Set<Column> {
       statement.trim()
     );
     if (create) {
-      const table = create[1]!;
-      for (const line of create[2]!.split('\n')) {
+      const table = create[1];
+      for (const line of create[2].split('\n')) {
         const col = /^\s*(\w+)\s+JSONB\b/i.exec(line);
-        if (col) live.add(`${table}.${col[1]!}`);
+        if (col) live.add(`${table}.${col[1]}`);
       }
       continue;
     }
     for (const add of statement.matchAll(
       /ALTER TABLE (?:ONLY )?(?:public\.)?(\w+)\s+ADD COLUMN (?:IF NOT EXISTS )?(\w+)\s+JSONB\b/gi
     )) {
-      live.add(`${add[1]!}.${add[2]!}`);
+      live.add(`${add[1]}.${add[2]}`);
     }
     for (const drop of statement.matchAll(
       /ALTER TABLE (?:ONLY )?(?:public\.)?(\w+)\s+DROP COLUMN (?:IF EXISTS )?(\w+)/gi
     )) {
-      live.delete(`${drop[1]!}.${drop[2]!}`);
+      live.delete(`${drop[1]}.${drop[2]}`);
     }
     for (const dropTable of statement.matchAll(/DROP TABLE (?:IF EXISTS )?(?:public\.)?(\w+)/gi)) {
       for (const column of [...live]) {
-        if (column.startsWith(`${dropTable[1]!}.`)) live.delete(column);
+        if (column.startsWith(`${dropTable[1]}.`)) live.delete(column);
       }
     }
   }

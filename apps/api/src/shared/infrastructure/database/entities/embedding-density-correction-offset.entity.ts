@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { TagsEntity } from './tags.entity.js';
+
 import { EmbeddingDensityCorrectionEntity } from './embedding-density-correction.entity.js';
+import { TagsEntity } from './tags.entity.js';
 
 @Entity('embedding_density_correction_offset', { schema: 'public' })
 export class EmbeddingDensityCorrectionOffsetEntity {

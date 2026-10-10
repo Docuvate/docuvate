@@ -3,9 +3,11 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
+
+import { isRecord, parseString } from '../../../../../shared/infrastructure/database/row-parse.js';
+import { ConnectorRuntimeResolver } from '../../../application/connector-runtime.resolver.js';
 import { PaperlessImportExecutor } from './paperless-import.executor.js';
 import { PaperlessImportRepository } from './paperless-import.repository.js';
-import { ConnectorRuntimeResolver } from '../../../application/connector-runtime.resolver.js';
 
 const QUEUE_NAME = 'connector-paperless-import';
 const RESUME_BACKOFF_MS = [5_000, 15_000, 60_000, 120_000];
@@ -30,8 +32,12 @@ export class PaperlessImportQueueService implements OnModuleInit, OnModuleDestro
     this.worker = new Worker(
       QUEUE_NAME,
       async (job) => {
-        const runId = String(job.data.runId);
-        const userId = String(job.data.userId);
+        const jobData = isRecord(job.data) ? job.data : null;
+        const runId = jobData ? parseString(jobData.runId) : '';
+        const userId = jobData ? parseString(jobData.userId) : '';
+        if (!runId || !userId) {
+          return;
+        }
         const claimed = await this.imports.claimRunForProcessing(runId);
         if (!claimed) {
           return;
@@ -82,7 +88,7 @@ export class PaperlessImportQueueService implements OnModuleInit, OnModuleDestro
         const detail = err instanceof Error ? err.message : String(err);
         const delay = RESUME_BACKOFF_MS[attempt] ?? 120_000;
         this.logger.warn(
-          `Paperless import resume skipped (attempt ${attempt + 1}): ${detail}; retry in ${delay}ms`
+          `Paperless import resume skipped (attempt ${String(attempt + 1)}): ${detail}; retry in ${String(delay)}ms`
         );
         attempt += 1;
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -100,8 +106,8 @@ export class PaperlessImportQueueService implements OnModuleInit, OnModuleDestro
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.worker?.close();
-    await this.queue?.close();
-    await this.connection?.quit();
+    await this.worker.close();
+    await this.queue.close();
+    await this.connection.quit();
   }
 }

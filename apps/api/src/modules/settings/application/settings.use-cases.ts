@@ -1,21 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
 import {
   EXTRACTION_PORT,
-  USER_PREFERENCES_REPOSITORY,
   type ExtractionPort,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { fetchWorkerDependency } from '../../../shared/infrastructure/worker/worker-dependency-fetch.js';
-import { fallbackExtractionEngines } from './extraction-engine-fallback.js';
-import { GetHardwareCapabilitiesUseCase } from './hardware-capabilities.use-case.js';
-import {
-  buildDocumentChatProvidersCatalog,
-  resolveOllamaModelFromEnv,
-} from './document-chat-provider-catalog.js';
-import { isOllamaModelLoaded } from './ollama-model-probe.js';
 import type { UpdateUserSettingsRequestDto } from '../../../shared/presentation/dtos/settings.dto.js';
+import { fallbackExtractionEngines } from './extraction-engine-fallback.js';
 
 @Injectable()
 export class GetUserSettingsUseCase {
@@ -41,56 +35,6 @@ export class UpdateUserSettingsUseCase {
 
   async execute(userId: string, patch: UpdateUserSettingsRequestDto) {
     return this.prefs.upsert(userId, patch);
-  }
-}
-
-@Injectable()
-export class ListDocumentChatProvidersUseCase {
-  constructor(private readonly hardware: GetHardwareCapabilitiesUseCase) {}
-
-  private workerHeaders(): Record<string, string> {
-    const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
-    return {
-      'Content-Type': 'application/json',
-      'X-Worker-Secret': secret,
-    };
-  }
-
-  async execute() {
-    const hw = await this.hardware.execute();
-    let workerProviders: Array<{
-      id: string;
-      label: string;
-      description: string;
-      available: boolean;
-    }> | null = null;
-
-    const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
-    try {
-      const response = await fetchWorkerDependency(workerUrl, '/document-chat/providers', {
-        headers: this.workerHeaders(),
-      });
-      if (response?.ok) {
-        const data = (await response.json()) as {
-          providers: Array<{ id: string; label: string; description: string; available: boolean }>;
-        };
-        workerProviders = data.providers;
-      }
-    } catch {
-      // Worker offline — catalog uses env + hardware only.
-    }
-
-    const ollamaUrl = process.env['OLLAMA_URL'];
-    const ollamaModelReady =
-      ollamaUrl != null && ollamaUrl.length > 0
-        ? await isOllamaModelLoaded(ollamaUrl, resolveOllamaModelFromEnv())
-        : false;
-
-    return buildDocumentChatProvidersCatalog({
-      workerProviders,
-      hardware: hw,
-      ollamaModelReady,
-    });
   }
 }
 

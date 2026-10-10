@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
-import { verifyCitedClaims } from './verify-cited-claims.js';
-import { resolveQuoteInChunk } from './verify-citation-quote.js';
+
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import { resolveQuoteInChunk } from './verify-citation-quote.js';
+import { verifyCitedClaims } from './verify-cited-claims.js';
 
 function chunk(body: string): { chunk: CitedChatChunkCandidate } {
   return {
@@ -80,7 +81,10 @@ describe('quote numeric guardrails', () => {
       claimText: 'Miete bis zum 3. Werktag fällig.',
     });
     expect(hit).not.toBeNull();
-    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
-    expect(hit!.bodyQuote).toContain('3. Werktag');
+    if (hit === null) {
+      throw new Error('expected quote hit');
+    }
+    expect(body.slice(hit.charStart, hit.charEnd)).toBe(hit.bodyQuote);
+    expect(hit.bodyQuote).toContain('3. Werktag');
   });
 });

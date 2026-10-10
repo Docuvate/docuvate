@@ -158,21 +158,21 @@ const SavedDocumentViewDtoClassListScopeEnum
     _$savedDocumentViewDtoClassListScopeEnum_all =
     const SavedDocumentViewDtoClassListScopeEnum._('all');
 const SavedDocumentViewDtoClassListScopeEnum
-    _$savedDocumentViewDtoClassListScopeEnum_mappe =
-    const SavedDocumentViewDtoClassListScopeEnum._('mappe');
-const SavedDocumentViewDtoClassListScopeEnum
     _$savedDocumentViewDtoClassListScopeEnum_folder =
     const SavedDocumentViewDtoClassListScopeEnum._('folder');
+const SavedDocumentViewDtoClassListScopeEnum
+    _$savedDocumentViewDtoClassListScopeEnum_mappe =
+    const SavedDocumentViewDtoClassListScopeEnum._('mappe');
 
 SavedDocumentViewDtoClassListScopeEnum
     _$savedDocumentViewDtoClassListScopeEnumValueOf(String name) {
   switch (name) {
     case 'all':
       return _$savedDocumentViewDtoClassListScopeEnum_all;
-    case 'mappe':
-      return _$savedDocumentViewDtoClassListScopeEnum_mappe;
     case 'folder':
       return _$savedDocumentViewDtoClassListScopeEnum_folder;
+    case 'mappe':
+      return _$savedDocumentViewDtoClassListScopeEnum_mappe;
     default:
       throw new ArgumentError(name);
   }
@@ -182,8 +182,8 @@ final BuiltSet<SavedDocumentViewDtoClassListScopeEnum>
     _$savedDocumentViewDtoClassListScopeEnumValues = new BuiltSet<
         SavedDocumentViewDtoClassListScopeEnum>(const <SavedDocumentViewDtoClassListScopeEnum>[
   _$savedDocumentViewDtoClassListScopeEnum_all,
-  _$savedDocumentViewDtoClassListScopeEnum_mappe,
   _$savedDocumentViewDtoClassListScopeEnum_folder,
+  _$savedDocumentViewDtoClassListScopeEnum_mappe,
 ]);
 
 const SavedDocumentViewDtoClassStatusEnum
@@ -418,13 +418,13 @@ class _$SavedDocumentViewDtoClassListScopeEnumSerializer
     implements PrimitiveSerializer<SavedDocumentViewDtoClassListScopeEnum> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'all': 'all',
-    'mappe': 'mappe',
     'folder': 'folder',
+    'mappe': 'mappe',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'all': 'all',
-    'mappe': 'mappe',
     'folder': 'folder',
+    'mappe': 'mappe',
   };
 
   @override

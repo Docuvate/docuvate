@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import { resolveSftpIngestServiceKey } from '../../../../../shared/infrastructure/auth/sftp-ingest-service-key.js';
+import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
+import { parseSftpListResponse, parseSftpProbeResponse } from './sftp-pull-response.js';
 
 const MAX_FETCH_BYTES = 26_214_400;
 const REQUEST_TIMEOUT_MS = 120_000;
@@ -22,32 +23,62 @@ function headers(): Record<string, string> {
   return key ? { 'X-Docuvate-Api-Key': key } : {};
 }
 
+function readConfigString(input: ConnectorConfigurationInput, key: string): string {
+  const value = input[key];
+  return typeof value === 'string' ? value : '';
+}
+
 function bodyFromConfig(input: ConnectorConfigurationInput) {
+  const portRaw = readConfigString(input, 'port');
+  const parsedPort = portRaw ? Number(portRaw) : 22;
+  const port = Number.isFinite(parsedPort) && parsedPort > 0 ? parsedPort : 22;
+  const remotePath = readConfigString(input, 'remote_path').trim();
   return {
-    host: input['host']?.trim() ?? '',
-    port: Number(input['port'] ?? 22) || 22,
-    username: input['username']?.trim() ?? '',
-    password: input['password'] ?? '',
-    privateKey: input['private_key'] ?? '',
-    remotePath: input['remote_path']?.trim() || '/',
-    hostKeyFingerprint: input['host_key_fingerprint']?.trim() ?? '',
+    host: readConfigString(input, 'host').trim(),
+    port,
+    username: readConfigString(input, 'username').trim(),
+    password: readConfigString(input, 'password'),
+    privateKey: readConfigString(input, 'private_key'),
+    remotePath: remotePath || '/',
+    hostKeyFingerprint: readConfigString(input, 'host_key_fingerprint').trim(),
   };
+}
+
+function mergeFetchHeaders(init: RequestInit): Record<string, string> {
+  const merged: Record<string, string> = { ...headers() };
+  const raw = init.headers;
+  if (!raw) {
+    return merged;
+  }
+  if (raw instanceof Headers) {
+    raw.forEach((value, key) => {
+      merged[key] = value;
+    });
+    return merged;
+  }
+  if (Array.isArray(raw)) {
+    for (const [key, value] of raw) {
+      merged[key] = value;
+    }
+    return merged;
+  }
+  return { ...merged, ...raw };
 }
 
 async function gatewayFetch(
   path: string,
   init: RequestInit & { json?: unknown }
 ): Promise<Response> {
-  const { json, ...rest } = init;
+  const { json, body, method, ...rest } = init;
   const res = await fetch(`${pullBaseUrl()}${path}`, {
     ...rest,
+    method,
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     headers: {
-      ...headers(),
+      ...mergeFetchHeaders(init),
       ...(json ? { 'Content-Type': 'application/json' } : {}),
-      ...(rest.headers ?? {}),
     },
-    body: json ? JSON.stringify(json) : rest.body,
+    body: json ? JSON.stringify(json) : body,
   });
   return res;
 }
@@ -62,13 +93,13 @@ export async function probeSftpPullHostKey(
   if (!res.ok) {
     throw new Error('SFTP_PROBE_FAILED');
   }
-  return (await res.json()) as { hostKeyFingerprintSha256: string };
+  return parseSftpProbeResponse(await res.json());
 }
 
 export async function listSftpPullFiles(
   input: ConnectorConfigurationInput,
   limit: number
-): Promise<Array<{ path: string; name: string; sizeBytes: number }>> {
+): Promise<{ path: string; name: string; sizeBytes: number }[]> {
   const res = await gatewayFetch('/pull/list', {
     method: 'POST',
     json: { ...bodyFromConfig(input), limit },
@@ -76,14 +107,7 @@ export async function listSftpPullFiles(
   if (!res.ok) {
     throw new Error('SFTP_LIST_FAILED');
   }
-  const parsed = (await res.json()) as {
-    files: Array<{ Path: string; Name: string; SizeBytes: number }>;
-  };
-  return (parsed.files ?? []).map((f) => ({
-    path: f.Path ?? (f as unknown as { path: string }).path,
-    name: f.Name ?? (f as unknown as { name: string }).name,
-    sizeBytes: f.SizeBytes ?? (f as unknown as { sizeBytes: number }).sizeBytes,
-  }));
+  return parseSftpListResponse(await res.json());
 }
 
 export async function fetchSftpPullFile(
@@ -106,7 +130,6 @@ export async function fetchSftpPullFile(
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
-    if (!value) continue;
     total += value.byteLength;
     if (total > MAX_FETCH_BYTES) {
       throw new Error('SFTP_FETCH_TOO_LARGE');

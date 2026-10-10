@@ -1,10 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { lookup } from 'node:dns/promises';
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import {
-  normalizePaperlessBaseUrl,
+  mockDnsLookupAll,
+  mockDnsLookupByHost,
+} from '../../../../../test-support/dns-lookup.spec-util.js';
+import {
   assertPaperlessHostResolvable,
+  normalizePaperlessBaseUrl,
   paperlessSafeFetch,
 } from './paperless-url-security.js';
 
@@ -15,7 +21,7 @@ vi.mock('node:dns/promises', () => ({
 describe('paperless-url-security', () => {
   beforeEach(() => {
     vi.mocked(lookup).mockReset();
-    delete process.env.DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS;
+    delete process.env['DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS'];
   });
 
   afterEach(() => {
@@ -44,32 +50,31 @@ describe('paperless-url-security', () => {
   });
 
   it('blocks metadata IPs', async () => {
-    vi.mocked(lookup).mockResolvedValue([{ address: '169.254.169.254', family: 4 }] as never);
+    mockDnsLookupAll([{ address: '169.254.169.254', family: 4 }]);
     await expect(assertPaperlessHostResolvable('http://metadata.example')).rejects.toThrow(
       'connectors.paperless.errors.urlMetadataBlocked'
     );
   });
 
   it('blocks private IPs when flag is off', async () => {
-    process.env.DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS = '0';
-    vi.mocked(lookup).mockResolvedValue([{ address: '10.0.0.5', family: 4 }] as never);
+    process.env['DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS'] = '0';
+    mockDnsLookupAll([{ address: '10.0.0.5', family: 4 }]);
     await expect(assertPaperlessHostResolvable('http://paperless.local')).rejects.toThrow(
       'connectors.paperless.errors.urlPrivateBlocked'
     );
   });
 
   it('allows private IPs by default', async () => {
-    vi.mocked(lookup).mockResolvedValue([{ address: '10.0.0.5', family: 4 }] as never);
+    mockDnsLookupAll([{ address: '10.0.0.5', family: 4 }]);
     await expect(assertPaperlessHostResolvable('http://paperless.local')).resolves.toBeUndefined();
   });
 
   it('rejects redirect to blocked host', async () => {
-    vi.mocked(lookup).mockImplementation(async (host) => {
-      if (host === 'public.example') {
-        return [{ address: '8.8.8.8', family: 4 }] as never;
-      }
-      return [{ address: '169.254.1.1', family: 4 }] as never;
-    });
+    mockDnsLookupByHost((host) =>
+      host === 'public.example'
+        ? [{ address: '8.8.8.8', family: 4 }]
+        : [{ address: '169.254.1.1', family: 4 }]
+    );
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
@@ -83,7 +88,7 @@ describe('paperless-url-security', () => {
   });
 
   it('blocks hostname resolving to metadata address', async () => {
-    vi.mocked(lookup).mockResolvedValue([{ address: '169.254.170.2', family: 4 }] as never);
+    mockDnsLookupAll([{ address: '169.254.170.2', family: 4 }]);
     await expect(assertPaperlessHostResolvable('http://evil.example')).rejects.toThrow(
       'connectors.paperless.errors.urlMetadataBlocked'
     );

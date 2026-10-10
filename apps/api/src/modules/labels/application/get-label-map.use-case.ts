@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type {
   LabelMapCoverageStatus,
   LabelMapEmptyReason,
   LabelMapPointDto,
   LabelMapResponseDto,
 } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
 import {
   LABEL_EMBEDDING_REPOSITORY,
-  TAXONOMY_REPOSITORY,
-  USER_PREFERENCES_REPOSITORY,
   type LabelEmbeddingRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import {
@@ -24,8 +25,8 @@ import {
   computeCoverageSimilarity,
   type LabeledDocumentEmbedding,
 } from '../domain/label-coverage-score.js';
-import { buildLabelOverlapMatrix } from '../domain/label-overlap-matrix.js';
 import { projectLabelMap2D } from '../domain/label-map-projection.js';
+import { buildLabelOverlapMatrix } from '../domain/label-overlap-matrix.js';
 import { BackfillDocumentEmbeddingsUseCase } from './backfill-document-embeddings.use-case.js';
 
 @Injectable()
@@ -102,10 +103,9 @@ export class GetLabelMapUseCase {
     const docEmbeddingsByTagId = new Map<string, number[][]>();
     for (const row of rows) {
       for (const tagId of row.nonInboxTagIds) {
-        if (!docEmbeddingsByTagId.has(tagId)) {
-          docEmbeddingsByTagId.set(tagId, []);
-        }
-        docEmbeddingsByTagId.get(tagId)!.push(row.embedding);
+        const bucket = docEmbeddingsByTagId.get(tagId) ?? [];
+        bucket.push(row.embedding);
+        docEmbeddingsByTagId.set(tagId, bucket);
       }
     }
 
@@ -116,8 +116,8 @@ export class GetLabelMapUseCase {
       const [x, y] = docCoords[index] ?? [0.5, 0.5];
       const labelTags = row.nonInboxTagIds
         .map((id) => tagById.get(id))
-        .filter(Boolean)
-        .map((t) => t!.name);
+        .filter((t): t is NonNullable<typeof t> => t != null)
+        .map((t) => t.name);
       const coverage = computeDocumentCoverage(
         row.embedding,
         row.nonInboxTagIds,
@@ -151,7 +151,10 @@ export class GetLabelMapUseCase {
     });
 
     tagCentroids.forEach((centroid, index) => {
-      const tag = tagById.get(centroid.tagId)!;
+      const tag = tagById.get(centroid.tagId);
+      if (!tag) {
+        return;
+      }
       const [x, y] = tagCoords[index] ?? [0.5, 0.5];
       points.push({
         id: `tag:${centroid.tagId}`,

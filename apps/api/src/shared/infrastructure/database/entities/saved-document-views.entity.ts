@@ -9,11 +9,12 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity.js';
-import { SavedDocumentViewTagsEntity } from './saved-document-view-tags.entity.js';
+
+import { CorrespondentsEntity } from './correspondents.entity.js';
 import { FoldersEntity } from './folders.entity.js';
 import { MappenEntity } from './mappen.entity.js';
-import { CorrespondentsEntity } from './correspondents.entity.js';
+import { SavedDocumentViewTagsEntity } from './saved-document-view-tags.entity.js';
+import { UserEntity } from './user.entity.js';
 
 @Index('saved_document_views_owner_idx', ['ownerUserId'], {})
 @Index('saved_document_views_visibility_idx', ['visibility'], {})

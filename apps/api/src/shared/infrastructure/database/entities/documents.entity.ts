@@ -12,20 +12,21 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
+
 import { ChatThreadDocumentsEntity } from './chat-thread-documents.entity.js';
+import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
 import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
+import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
 import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
-import { TagsEntity } from './tags.entity.js';
-import { CorrespondentsEntity } from './correspondents.entity.js';
-import { FoldersEntity } from './folders.entity.js';
-import { MappenEntity } from './mappen.entity.js';
-import { UserEntity } from './user.entity.js';
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
+import { FoldersEntity } from './folders.entity.js';
+import { MappenEntity } from './mappen.entity.js';
 import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
-import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
+import { TagsEntity } from './tags.entity.js';
+import { UserEntity } from './user.entity.js';
 
 @Index('documents_content_hash_idx', ['contentHash', 'userId'], {})
 @Index('documents_folder_id_idx', ['folderId'], {})

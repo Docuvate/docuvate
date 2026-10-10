@@ -1,22 +1,24 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { OpenAPIObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface.js';
+
+import { openApiPathItemOperations } from './openapi-type-guards.js';
 import { isPublicOpenApiExcludedPath } from './public-openapi-paths.js';
 
 /** Strip non-product routes before writing openapi/docuvate.v1.json or serving /v1/openapi.json. */
 export function applyPublicOpenApiFilter(document: OpenAPIObject): OpenAPIObject {
-  const paths = { ...(document.paths ?? {}) };
-  for (const path of Object.keys(paths)) {
+  const filteredPaths: NonNullable<OpenAPIObject['paths']> = {};
+  for (const [path, pathItem] of Object.entries(document.paths)) {
     if (isPublicOpenApiExcludedPath(path)) {
-      delete paths[path];
+      continue;
     }
+    filteredPaths[path] = pathItem;
   }
 
   const usedTagNames = new Set<string>();
-  for (const pathItem of Object.values(paths)) {
-    for (const operation of Object.values(pathItem ?? {})) {
-      if (!operation || typeof operation !== 'object' || !('tags' in operation)) continue;
-      for (const tag of operation.tags as string[]) {
+  for (const pathItem of Object.values(filteredPaths)) {
+    for (const operation of openApiPathItemOperations(pathItem)) {
+      for (const tag of operation.tags ?? []) {
         usedTagNames.add(tag);
       }
     }
@@ -24,5 +26,5 @@ export function applyPublicOpenApiFilter(document: OpenAPIObject): OpenAPIObject
 
   const tags = (document.tags ?? []).filter((tag) => usedTagNames.has(tag.name));
 
-  return { ...document, paths, tags };
+  return { ...document, paths: filteredPaths, tags };
 }

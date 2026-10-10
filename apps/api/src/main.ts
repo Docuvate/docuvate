@@ -3,11 +3,13 @@
 import { initOtel } from '@docuvate/otel';
 initOtel({ serviceName: process.env['OTEL_SERVICE_NAME'] ?? 'docuvate-api' });
 
+import './shared/infrastructure/http/fastify-raw-body.augmentation.js';
+
+import multipart from '@fastify/multipart';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import multipart from '@fastify/multipart';
-import type { FastifyRequest } from 'fastify';
+
 import { API_VERSION_PREFIX } from './shared/presentation/api-version.js';
 import { DomainExceptionFilter } from './shared/presentation/domain-exception.filter.js';
 async function bootstrap(): Promise<void> {
@@ -28,13 +30,18 @@ async function bootstrap(): Promise<void> {
   const adapter = new FastifyAdapter({ logger: true });
   const fastifyPre = adapter.getInstance();
   fastifyPre.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
-    (req as FastifyRequest & { rawBody?: Buffer }).rawBody = body as Buffer;
-    try {
-      const json = JSON.parse((body as Buffer).toString('utf8')) as unknown;
-      done(null, json);
-    } catch (err) {
-      done(err as Error, undefined);
+    if (Buffer.isBuffer(body)) {
+      req.rawBody = body;
+      try {
+        const json: unknown = JSON.parse(body.toString('utf8'));
+        done(null, json);
+      } catch (err: unknown) {
+        const error = err instanceof Error ? err : new Error(String(err));
+        done(error, undefined);
+      }
+      return;
     }
+    done(new Error('Expected JSON body buffer'), undefined);
   });
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {

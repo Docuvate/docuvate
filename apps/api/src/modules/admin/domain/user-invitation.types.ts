@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { InstanceRole } from '../../auth/domain/instance-role.constants.js';
 
-export type UserInvitationRecord = {
+export interface UserInvitationRecord {
   id: string;
   email: string;
   invitedName: string;
@@ -12,7 +12,7 @@ export type UserInvitationRecord = {
   acceptedAt: Date | null;
   revokedAt: Date | null;
   createdAt: Date;
-};
+}
 
 export interface UserInvitationRepository {
   createPending(input: {

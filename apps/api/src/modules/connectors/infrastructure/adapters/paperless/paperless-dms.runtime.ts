@@ -1,17 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorRuntimePorts,
   ConnectorSourcePort,
 } from '../../../domain/connector-runtime.ports.js';
-import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
-import type {
-  ConnectorImportableItem,
-  ConnectorImportedBlob,
-} from '../../../domain/connector-runtime.types.js';
+import type { ConnectorImportedBlob } from '../../../domain/connector-runtime.types.js';
 import {
-  PaperlessApiClient,
   detectPaperlessApiVersion,
+  PaperlessApiClient,
   resolvePaperlessCredentials,
 } from './paperless-api.client.js';
 
@@ -38,7 +35,10 @@ export function openPaperlessRuntime(
       const client = new PaperlessApiClient(resolved, apiVersion);
       const doc = await client.getDocument(Number(ref));
       const fileBuffer = await client.downloadDocument(doc.id, true);
-      const filename = doc.original_file_name?.trim() || `${doc.title || ref}.bin`;
+      const originalName = doc.original_file_name?.trim() ?? '';
+      const title = doc.title.trim();
+      const filename =
+        originalName.length > 0 ? originalName : title.length > 0 ? `${title}.bin` : `${ref}.bin`;
       return {
         ref,
         filename,

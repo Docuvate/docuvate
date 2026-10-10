@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
+
 import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
@@ -74,7 +75,7 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
           await this.taxonomy.upsertSuggestion(
             documentId,
             confirmId,
-            `Density model ${pct}% (${tag.name})`,
+            `Density model ${String(pct)}% (${tag.name})`,
             {
               source: 'embedding_density',
               confidence: confirmConf,

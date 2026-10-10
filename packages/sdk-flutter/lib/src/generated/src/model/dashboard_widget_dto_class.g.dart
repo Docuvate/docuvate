@@ -6,11 +6,11 @@ part of 'dashboard_widget_dto_class.dart';
 // BuiltValueGenerator
 // **************************************************************************
 
-const DashboardWidgetDtoClassTypeEnum _$dashboardWidgetDtoClassTypeEnum_upload =
-    const DashboardWidgetDtoClassTypeEnum._('upload');
 const DashboardWidgetDtoClassTypeEnum
     _$dashboardWidgetDtoClassTypeEnum_savedView =
     const DashboardWidgetDtoClassTypeEnum._('savedView');
+const DashboardWidgetDtoClassTypeEnum _$dashboardWidgetDtoClassTypeEnum_upload =
+    const DashboardWidgetDtoClassTypeEnum._('upload');
 const DashboardWidgetDtoClassTypeEnum
     _$dashboardWidgetDtoClassTypeEnum_statistics =
     const DashboardWidgetDtoClassTypeEnum._('statistics');
@@ -24,10 +24,10 @@ const DashboardWidgetDtoClassTypeEnum
 DashboardWidgetDtoClassTypeEnum _$dashboardWidgetDtoClassTypeEnumValueOf(
     String name) {
   switch (name) {
-    case 'upload':
-      return _$dashboardWidgetDtoClassTypeEnum_upload;
     case 'savedView':
       return _$dashboardWidgetDtoClassTypeEnum_savedView;
+    case 'upload':
+      return _$dashboardWidgetDtoClassTypeEnum_upload;
     case 'statistics':
       return _$dashboardWidgetDtoClassTypeEnum_statistics;
     case 'recentDocuments':
@@ -42,8 +42,8 @@ DashboardWidgetDtoClassTypeEnum _$dashboardWidgetDtoClassTypeEnumValueOf(
 final BuiltSet<DashboardWidgetDtoClassTypeEnum>
     _$dashboardWidgetDtoClassTypeEnumValues = new BuiltSet<
         DashboardWidgetDtoClassTypeEnum>(const <DashboardWidgetDtoClassTypeEnum>[
-  _$dashboardWidgetDtoClassTypeEnum_upload,
   _$dashboardWidgetDtoClassTypeEnum_savedView,
+  _$dashboardWidgetDtoClassTypeEnum_upload,
   _$dashboardWidgetDtoClassTypeEnum_statistics,
   _$dashboardWidgetDtoClassTypeEnum_recentDocuments,
   _$dashboardWidgetDtoClassTypeEnum_attention,
@@ -56,15 +56,15 @@ Serializer<DashboardWidgetDtoClassTypeEnum>
 class _$DashboardWidgetDtoClassTypeEnumSerializer
     implements PrimitiveSerializer<DashboardWidgetDtoClassTypeEnum> {
   static const Map<String, Object> _toWire = const <String, Object>{
-    'upload': 'upload',
     'savedView': 'saved_view',
+    'upload': 'upload',
     'statistics': 'statistics',
     'recentDocuments': 'recent_documents',
     'attention': 'attention',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
-    'upload': 'upload',
     'saved_view': 'savedView',
+    'upload': 'upload',
     'statistics': 'statistics',
     'recent_documents': 'recentDocuments',
     'attention': 'attention',

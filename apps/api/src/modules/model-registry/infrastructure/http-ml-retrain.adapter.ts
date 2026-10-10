@@ -2,6 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
 
+import {
+  isRecord,
+  parseNumber,
+  parseOptionalString,
+  parseString,
+} from '../../../shared/infrastructure/database/row-parse.js';
+
 export interface WorkerRetrainResult {
   versionTag: string;
   metrics: Record<string, number>;
@@ -10,6 +17,17 @@ export interface WorkerRetrainResult {
   artifactUri: string | null;
   externalRunId: string | null;
   notes: string;
+}
+
+function parseMetrics(raw: unknown): Record<string, number> {
+  if (!isRecord(raw)) {
+    return {};
+  }
+  const out: Record<string, number> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    out[key] = parseNumber(value, 0);
+  }
+  return out;
 }
 
 @Injectable()
@@ -41,25 +59,22 @@ export class HttpMlRetrainAdapter {
     });
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`Worker retrain failed (${response.status}): ${text.slice(0, 500)}`);
+      throw new Error(
+        `Worker retrain failed (${String(response.status)}): ${text.slice(0, 500)}`
+      );
     }
-    const body = (await response.json()) as {
-      version_tag: string;
-      metrics: Record<string, number>;
-      row_count: number;
-      dataset_version: string;
-      artifact_uri?: string | null;
-      external_run_id?: string | null;
-      notes: string;
-    };
+    const raw: unknown = await response.json();
+    if (!isRecord(raw)) {
+      throw new Error('Worker retrain returned invalid JSON');
+    }
     return {
-      versionTag: body.version_tag,
-      metrics: body.metrics ?? {},
-      rowCount: body.row_count ?? 0,
-      datasetVersion: body.dataset_version,
-      artifactUri: body.artifact_uri ?? null,
-      externalRunId: body.external_run_id ?? null,
-      notes: body.notes ?? '',
+      versionTag: parseString(raw.version_tag),
+      metrics: parseMetrics(raw.metrics),
+      rowCount: parseNumber(raw.row_count, 0),
+      datasetVersion: parseString(raw.dataset_version),
+      artifactUri: parseOptionalString(raw.artifact_uri),
+      externalRunId: parseOptionalString(raw.external_run_id),
+      notes: parseString(raw.notes),
     };
   }
 }

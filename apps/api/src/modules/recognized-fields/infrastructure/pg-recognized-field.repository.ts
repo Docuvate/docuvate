@@ -1,39 +1,42 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CustomFieldType, RecognizedFieldLabelGateMatch } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
-import type { CustomFieldType, RecognizedFieldLabelGateMatch } from '@docuvate/contracts';
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+
 import { ValidationError } from '../../../shared/domain/errors.js';
 import type { RecognizedFieldRepository } from '../../../shared/domain/ports.js';
+import {
+  parseBoolean,
+  parseEnum,
+  parseNumber,
+  parseOptionalNumber,
+  parseString,
+  parseStringArray,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { RecognizedFieldEntity } from '../domain/recognized-field.entity.js';
 
-function parseGateLabelIds(raw: unknown): string[] {
-  if (!Array.isArray(raw)) {
-    return [];
-  }
-  return raw.filter((id): id is string => typeof id === 'string' && id.length > 0);
-}
-
-function parseGateLabelMatch(raw: unknown): RecognizedFieldLabelGateMatch {
-  return raw === 'any' ? 'any' : 'all';
-}
+const CUSTOM_FIELD_TYPES: readonly CustomFieldType[] = ['text', 'date', 'number', 'currency'];
+const GATE_LABEL_MATCHES: readonly RecognizedFieldLabelGateMatch[] = ['any', 'all'];
 
 function mapRow(row: Record<string, unknown>): RecognizedFieldEntity {
   return {
-    id: String(row['id']),
-    userId: String(row['user_id']),
-    key: String(row['field_key']),
-    label: String(row['label']),
-    fieldType: String(row['field_type']) as CustomFieldType,
-    sortOrder: Number(row['sort_order']),
-    extractForAllDocuments: Boolean(row['extract_for_all_documents']),
-    gateLabelIds: parseGateLabelIds(row['gate_label_ids']),
-    gateLabelMatch: parseGateLabelMatch(row['gate_label_match']),
-    minLabelConfidence:
-      row['min_label_confidence'] != null ? Number(row['min_label_confidence']) : null,
+    id: parseString(row.id),
+    userId: parseString(row.user_id),
+    key: parseString(row.field_key),
+    label: parseString(row.label),
+    fieldType: parseEnum(row.field_type, CUSTOM_FIELD_TYPES, 'text'),
+    sortOrder: parseNumber(row.sort_order, 0),
+    extractForAllDocuments: parseBoolean(row.extract_for_all_documents),
+    gateLabelIds: parseStringArray(row.gate_label_ids),
+    gateLabelMatch: parseEnum(row.gate_label_match, GATE_LABEL_MATCHES, 'all'),
+    minLabelConfidence: parseOptionalNumber(row.min_label_confidence),
     confidenceGateEnabled:
-      row['confidence_gate_enabled'] != null ? Boolean(row['confidence_gate_enabled']) : null,
+      row.confidence_gate_enabled === null || row.confidence_gate_enabled === undefined
+        ? null
+        : parseBoolean(row.confidence_gate_enabled),
   };
 }
 
@@ -69,12 +72,12 @@ export class PgRecognizedFieldRepository implements RecognizedFieldRepository {
        ORDER BY r.sort_order ASC, r.label ASC`,
       [userId]
     );
-    return result.rows.map((row) => mapRow(row as Record<string, unknown>));
+    return result.rows.map((raw) => mapRow(requireRecord(raw)));
   }
 
   async replaceForUser(
     userId: string,
-    fields: Array<{
+    fields: {
       key: string;
       label: string;
       fieldType: CustomFieldType;
@@ -84,7 +87,7 @@ export class PgRecognizedFieldRepository implements RecognizedFieldRepository {
       gateLabelMatch: RecognizedFieldLabelGateMatch;
       minLabelConfidence: number | null;
       confidenceGateEnabled: boolean | null;
-    }>
+    }[]
   ): Promise<RecognizedFieldEntity[]> {
     const seen = new Set<string>();
     for (const field of fields) {
@@ -99,7 +102,7 @@ export class PgRecognizedFieldRepository implements RecognizedFieldRepository {
     try {
       await client.query('BEGIN');
       await client.query(`DELETE FROM recognized_field_definitions WHERE user_id = $1`, [userId]);
-      for (const [index, field] of fields.entries()) {
+      for (const field of fields) {
         const key = normalizeKey(field.key);
         const label = field.label.trim();
         if (!label) {
@@ -117,14 +120,14 @@ export class PgRecognizedFieldRepository implements RecognizedFieldRepository {
             key,
             label,
             field.fieldType,
-            field.sortOrder ?? index,
+            field.sortOrder,
             field.extractForAllDocuments,
-            field.gateLabelMatch === 'any' ? 'any' : 'all',
+            field.gateLabelMatch,
             field.minLabelConfidence,
             field.confidenceGateEnabled,
           ]
         );
-        const definitionId = inserted.rows[0]!.id;
+        const definitionId = parseString(inserted.rows[0]?.id);
         if (gateLabelIds.length > 0) {
           await client.query(
             `INSERT INTO recognized_field_definition_gate_labels (field_definition_id, tag_id)

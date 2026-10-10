@@ -1,28 +1,22 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type {
   LabelRecommendationDocumentPreviewDto,
   LabelRecommendationDto,
 } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
 import {
   DOCUMENT_REPOSITORY,
-  LABEL_EMBEDDING_REPOSITORY,
-  TAXONOMY_REPOSITORY,
-  USER_PREFERENCES_REPOSITORY,
   type DocumentRepository,
+  LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import {
-  collectNewLabelCandidates,
-  namesAreNearDuplicate,
-  normalizeLabelKey,
-  suggestMergeAndRename,
-  type DocumentLabelSignal,
-} from '../domain/label-vocabulary.js';
-import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
+import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
 import {
   MIN_LABEL_SUPPORT_FOR_MERGE,
@@ -30,7 +24,14 @@ import {
   suggestEmbeddingClusterNewLabels,
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
-import type { DocumentEntity } from '../../documents/domain/document.entity.js';
+import {
+  collectNewLabelCandidates,
+  type DocumentLabelSignal,
+  namesAreNearDuplicate,
+  normalizeLabelKey,
+  suggestMergeAndRename,
+} from '../domain/label-vocabulary.js';
+import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 
 function enrichWithSampleDocuments(
   items: LabelRecommendationDto[],
@@ -277,11 +278,7 @@ export class GetLabelRecommendationsUseCase {
         return !isBlockedLabelCandidate(item.proposedName, blockPhrases, patternStrings);
       }
       if (item.kind === 'rename') {
-        if (
-          item.currentName &&
-          item.proposedName &&
-          item.currentName.trim() === item.proposedName.trim()
-        ) {
+        if (item.currentName?.trim() === item.proposedName?.trim()) {
           return false;
         }
         if (item.proposedName) {
@@ -291,13 +288,13 @@ export class GetLabelRecommendationsUseCase {
       if (item.kind === 'merge' && item.tagNames) {
         if (
           item.tagNames.length >= 2 &&
-          !namesAreNearDuplicate(item.tagNames[0]!, item.tagNames[1]!)
+          !namesAreNearDuplicate(item.tagNames[0], item.tagNames[1])
         ) {
           return false;
         }
-        if (item.tagIds && item.tagIds.length === 2) {
-          const aCount = docEmbeddingsByTagId.get(item.tagIds[0]!)?.length ?? 0;
-          const bCount = docEmbeddingsByTagId.get(item.tagIds[1]!)?.length ?? 0;
+        if (item.tagIds?.length === 2) {
+          const aCount = docEmbeddingsByTagId.get(item.tagIds[0])?.length ?? 0;
+          const bCount = docEmbeddingsByTagId.get(item.tagIds[1])?.length ?? 0;
           if (aCount < MIN_LABEL_SUPPORT_FOR_MERGE || bCount < MIN_LABEL_SUPPORT_FOR_MERGE) {
             return false;
           }

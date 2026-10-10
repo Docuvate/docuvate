@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable, Logger } from '@nestjs/common';
+
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
+import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
 import { HttpEmbeddingDensityAdapter } from '../infrastructure/http-embedding-density.adapter.js';
 import { PgEmbeddingDensityRepository } from '../infrastructure/pg-embedding-density.repository.js';
-import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
 
 @Injectable()
 export class RecordEmbeddingDensityCorrectionUseCase {

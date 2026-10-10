@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+
 import { SavedDocumentViewsEntity } from './saved-document-views.entity.js';
 
 @Index('installation_dashboard_widgets_position_idx', ['position'], {})

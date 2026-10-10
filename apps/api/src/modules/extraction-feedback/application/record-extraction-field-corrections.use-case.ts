@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { ExtractedField } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
-  EXTRACTION_FIELD_FEEDBACK_REPOSITORY,
-  TAXONOMY_REPOSITORY,
   type DocumentRepository,
+  EXTRACTION_FIELD_FEEDBACK_REPOSITORY,
   type ExtractionFieldFeedbackRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
 import { diffExtractionFieldCorrections } from '../domain/diff-extraction-field-corrections.js';
 
 @Injectable()

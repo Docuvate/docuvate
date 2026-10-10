@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import type { z } from 'zod';
+
+import {
+  mapWorkerLayoutCompareHttpError,
+  parseWorkerLayoutCompareErrorCode,
+} from './layout-compare-worker.errors.js';
 import type {
   LayoutCompareMetricsWorker,
   LayoutComparePageWorker,
@@ -12,10 +17,6 @@ import {
   fetchWorkerJson,
   workerLayoutTimeoutError,
 } from './worker-fetch.js';
-import {
-  mapWorkerLayoutCompareHttpError,
-  parseWorkerLayoutCompareErrorCode,
-} from './layout-compare-worker.errors.js';
 import { workerRequestHeaders } from './worker-request-headers.js';
 
 const LAYOUT_COMPARE_TIMEOUT_MS = 180_000;
@@ -26,7 +27,7 @@ async function postLayoutCompareWorker<T>(
   body: Record<string, unknown>,
   schema: z.ZodType<T>
 ): Promise<T> {
-  const raw = await fetchWorkerJson<unknown>(
+  const raw = await fetchWorkerJson(
     workerApiUrl(workerUrl, path),
     {
       method: 'POST',

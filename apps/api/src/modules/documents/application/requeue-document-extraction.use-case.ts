@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
-import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
+
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
 import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
 
 @Injectable()

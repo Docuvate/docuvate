@@ -3,23 +3,28 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
-import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
+
+import { RunEmbeddingDensityCalibrationUseCase } from '../application/run-embedding-density-calibration.use-case.js';
 import {
   EMBEDDING_DENSITY_CALIBRATION_DEBOUNCE_MS,
   EMBEDDING_DENSITY_RECALIBRATION_MIN_NEW_EXAMPLES,
   EMBEDDING_DENSITY_RECALIBRATION_SCAN_MS,
 } from '../domain/embedding-density-calibration-config.js';
-import { RunEmbeddingDensityCalibrationUseCase } from '../application/run-embedding-density-calibration.use-case.js';
+import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
 import { PgEmbeddingDensityRepository } from './pg-embedding-density.repository.js';
 
 const QUEUE_NAME = 'embedding-density-calibration';
 
+interface EmbeddingDensityCalibrationJobData {
+  userId: string;
+}
+
 @Injectable()
 export class EmbeddingDensityCalibrationQueueService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(EmbeddingDensityCalibrationQueueService.name);
-  private connection!: IORedis;
-  private queue!: Queue;
-  private worker!: Worker;
+  private connection: IORedis | null = null;
+  private queue: Queue<EmbeddingDensityCalibrationJobData> | null = null;
+  private worker: Worker<EmbeddingDensityCalibrationJobData> | null = null;
   private scanTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
@@ -33,12 +38,13 @@ export class EmbeddingDensityCalibrationQueueService implements OnModuleInit, On
     }
     const valkeyUrl = process.env['VALKEY_URL'] ?? 'redis://localhost:6379';
     this.connection = new IORedis(valkeyUrl, { maxRetriesPerRequest: null });
-    this.queue = new Queue(QUEUE_NAME, { connection: this.connection });
-    this.worker = new Worker(
+    this.queue = new Queue<EmbeddingDensityCalibrationJobData>(QUEUE_NAME, {
+      connection: this.connection,
+    });
+    this.worker = new Worker<EmbeddingDensityCalibrationJobData>(
       QUEUE_NAME,
       async (job) => {
-        const userId = String(job.data.userId);
-        await this.calibrate.execute(userId);
+        await this.calibrate.execute(job.data.userId);
       },
       { connection: this.connection, concurrency: 1 }
     );
@@ -98,8 +104,14 @@ export class EmbeddingDensityCalibrationQueueService implements OnModuleInit, On
     if (this.scanTimer) {
       clearInterval(this.scanTimer);
     }
-    await this.worker?.close();
-    await this.queue?.close();
-    await this.connection?.quit();
+    if (this.worker) {
+      await this.worker.close();
+    }
+    if (this.queue) {
+      await this.queue.close();
+    }
+    if (this.connection) {
+      await this.connection.quit();
+    }
   }
 }

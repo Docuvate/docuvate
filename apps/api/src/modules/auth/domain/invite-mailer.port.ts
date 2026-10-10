@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export type UserInvitationMailLocale = 'de' | 'en';
 
-export type UserInvitationMailPayload = {
+export interface UserInvitationMailPayload {
   to: string;
   invitationId: string;
   installationName: string;
@@ -10,7 +10,7 @@ export type UserInvitationMailPayload = {
   invitedName: string;
   locale: UserInvitationMailLocale;
   validityDays: number;
-};
+}
 
 export interface UserInvitationMailerPort {
   sendInvitation(payload: UserInvitationMailPayload): Promise<void>;

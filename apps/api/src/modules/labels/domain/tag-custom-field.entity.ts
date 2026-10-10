@@ -23,5 +23,5 @@ export function parseLabelFieldStorageKey(
   if (!match) {
     return null;
   }
-  return { tagId: match[1]!, fieldKey: match[2]! };
+  return { tagId: match[1], fieldKey: match[2] };
 }

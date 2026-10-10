@@ -1,16 +1,18 @@
 import { randomUUID } from 'node:crypto';
+
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import {
   buildSyntheticUser,
   syntheticFolderName,
 } from '../../../../packages/testing/src/factories/index.js';
 import { PgFolderRepository } from '../../src/modules/folders/infrastructure/pg-folder.repository.js';
+import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
   insertSyntheticUser,
   newIsolationUserId,
 } from './pg-test-isolation.js';
-import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 
 describe('PgFolderRepository (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();

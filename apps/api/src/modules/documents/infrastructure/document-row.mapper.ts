@@ -2,27 +2,48 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   dedupeExtractedFields,
-  type ExtractionBlock,
   type ExtractedField,
+  type ExtractionBlock,
   type LayoutIrPageSummary,
+  type MatchingAlgorithm,
 } from '@docuvate/contracts';
-import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
+
+import {
+  parseBoolean,
+  parseDate,
+  parseEnum,
+  parseJsonString,
+  parseNumber,
+  parseOptionalDate,
+  parseOptionalNumber,
+  parseOptionalString,
+  parseString,
+  recordFromUnknown,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import type { TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
+import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
+
+const MATCHING_ALGORITHMS: readonly MatchingAlgorithm[] = ['none', 'any', 'all', 'exact', 'regex'];
+const DOCUMENT_STATUSES: readonly DocumentStatus[] = [
+  'uploaded',
+  'queued',
+  'extracting',
+  'ready',
+  'failed',
+];
 
 function normalizeBlock(raw: unknown): ExtractionBlock | null {
-  if (!raw || typeof raw !== 'object') return null;
-  const row = raw as Record<string, unknown>;
-  const page = Number(row['page']);
-  const x = Number(row['x']);
-  const y = Number(row['y']);
-  const width = Number(row['width']);
-  const height = Number(row['height']);
-  const text = String(row['text'] ?? '').trim();
+  const row = recordFromUnknown(raw);
+  if (!row) return null;
+  const page = parseNumber(row.page);
+  const x = parseNumber(row.x);
+  const y = parseNumber(row.y);
+  const width = parseNumber(row.width);
+  const height = parseNumber(row.height);
+  const text = parseString(row.text).trim();
   if (!Number.isFinite(page) || page < 1 || !text) return null;
   if (![x, y, width, height].every(Number.isFinite)) return null;
-  const blockIndexRaw = row['blockIndex'];
-  const blockIndex =
-    blockIndexRaw === undefined || blockIndexRaw === null ? undefined : Number(blockIndexRaw);
+  const blockIndex = parseOptionalNumber(row.blockIndex);
   return {
     page,
     x: Math.min(1, Math.max(0, x)),
@@ -30,7 +51,7 @@ function normalizeBlock(raw: unknown): ExtractionBlock | null {
     width: Math.min(1, Math.max(0, width)),
     height: Math.min(1, Math.max(0, height)),
     text,
-    blockIndex: Number.isFinite(blockIndex) ? blockIndex : undefined,
+    blockIndex: blockIndex ?? undefined,
   };
 }
 
@@ -53,14 +74,17 @@ export interface DocumentRowJoins {
 
 /** Maps tag objects from Postgres `json_agg` / JSON columns (snake_case keys). */
 export function mapTagFromJson(raw: Record<string, unknown>): TagEntity {
+  const userIdRaw = raw.user_id ?? raw.userId;
+  const matchRaw = raw.match_text ?? raw.match;
+  const isInboxRaw = raw.is_inbox ?? raw.isInbox;
   return {
-    id: String(raw['id']),
-    userId: String(raw['user_id'] ?? raw['userId']),
-    name: String(raw['name']),
-    color: (raw['color'] as string | null) ?? null,
-    isInbox: Boolean(raw['is_inbox'] ?? raw['isInbox']),
-    matchingAlgorithm: (raw['matching_algorithm'] as TagEntity['matchingAlgorithm']) ?? 'none',
-    match: String(raw['match_text'] ?? raw['match'] ?? ''),
+    id: parseString(raw.id),
+    userId: parseString(userIdRaw),
+    name: parseString(raw.name),
+    color: parseOptionalString(raw.color),
+    isInbox: parseBoolean(isInboxRaw),
+    matchingAlgorithm: parseEnum(raw.matching_algorithm, MATCHING_ALGORITHMS, 'none'),
+    match: parseString(matchRaw),
   };
 }
 
@@ -68,7 +92,7 @@ export function parseLayoutIrPagesJson(raw: unknown): LayoutIrPageSummary[] {
   let parsed: unknown = raw;
   if (typeof raw === 'string') {
     try {
-      parsed = JSON.parse(raw) as unknown;
+      parsed = parseJsonString(raw);
     } catch {
       return [];
     }
@@ -76,11 +100,11 @@ export function parseLayoutIrPagesJson(raw: unknown): LayoutIrPageSummary[] {
   if (!Array.isArray(parsed)) return [];
   const pages: LayoutIrPageSummary[] = [];
   for (const item of parsed) {
-    if (!item || typeof item !== 'object') continue;
-    const row = item as Record<string, unknown>;
-    const page = Number(row['page']);
-    const widthPt = Number(row['widthPt']);
-    const heightPt = Number(row['heightPt']);
+    const row = recordFromUnknown(item);
+    if (!row) continue;
+    const page = parseNumber(row.page);
+    const widthPt = parseNumber(row.widthPt);
+    const heightPt = parseNumber(row.heightPt);
     if (!Number.isFinite(page) || page < 1) continue;
     if (!Number.isFinite(widthPt) || !Number.isFinite(heightPt)) continue;
     pages.push({ page, widthPt, heightPt });
@@ -90,11 +114,22 @@ export function parseLayoutIrPagesJson(raw: unknown): LayoutIrPageSummary[] {
 
 export function parseTagsJson(tagsRaw: unknown): TagEntity[] {
   if (typeof tagsRaw === 'string') {
-    const parsed = JSON.parse(tagsRaw) as Record<string, unknown>[];
-    return parsed.map((t) => mapTagFromJson(t));
+    try {
+      const parsed = parseJsonString(tagsRaw);
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .map((item) => recordFromUnknown(item))
+        .filter((item): item is Record<string, unknown> => item != null)
+        .map((t) => mapTagFromJson(t));
+    } catch {
+      return [];
+    }
   }
   if (Array.isArray(tagsRaw)) {
-    return tagsRaw.map((raw) => mapTagFromJson(raw as Record<string, unknown>));
+    return tagsRaw
+      .map((item) => recordFromUnknown(item))
+      .filter((item): item is Record<string, unknown> => item != null)
+      .map((raw) => mapTagFromJson(raw));
   }
   return [];
 }
@@ -104,11 +139,11 @@ export function mapDocumentRow(
   joins: DocumentRowJoins = {}
 ): DocumentEntity {
   const { fields, blocks } = normalizeExtraction(joins.extraction);
-  const text = row['extracted_text'] as string | null;
-  const markdownRaw = row['extracted_markdown'] as string | null;
+  const text = parseOptionalString(row.extracted_text);
+  const markdownRaw = parseOptionalString(row.extracted_markdown);
   const markdown = markdownRaw?.trim() ? markdownRaw : undefined;
-  const layoutIrAvailable = Boolean(row['layout_ir_available']);
-  const layoutIrPages = parseLayoutIrPagesJson(row['layout_ir_pages_json']);
+  const layoutIrAvailable = parseBoolean(row.layout_ir_available);
+  const layoutIrPages = parseLayoutIrPagesJson(row.layout_ir_pages_json);
   const extraction =
     text != null
       ? {
@@ -121,49 +156,49 @@ export function mapDocumentRow(
         }
       : undefined;
 
-  const folderIdRaw = row['folder_id'];
-  const folderName = row['folder_name'];
-  const folderMappeIdRaw = row['folder_mappe_id'];
+  const folderId = parseOptionalString(row.folder_id);
+  const folderName = parseOptionalString(row.folder_name);
+  const folderMappeId = parseOptionalString(row.folder_mappe_id);
+  const mappeId = parseOptionalString(row.mappe_id);
 
-  const documentDateRaw = row['document_date'];
+  const documentDate = parseOptionalDate(row.document_date);
   const correspondent = joins.correspondent ?? null;
 
   return {
-    id: String(row['id']),
-    userId: String(row['user_id']),
-    filename: String(row['filename']),
-    title: String(row['title'] ?? row['filename']),
-    mimeType: String(row['mime_type']),
-    storageKey: String(row['storage_key']),
-    archivedStorageKey: (row['archived_storage_key'] as string | null) ?? null,
-    contentHash: (row['content_hash'] as string | null) ?? null,
-    status: row['status'] as DocumentStatus,
-    documentDate:
-      documentDateRaw != null && documentDateRaw !== '' ? new Date(String(documentDateRaw)) : null,
-    notes: (row['notes'] as string | null) ?? null,
-    ingestSource: (row['ingest_source'] as string | null) ?? null,
-    folderId: folderIdRaw != null ? String(folderIdRaw) : null,
-    mappeId: row['mappe_id'] != null ? String(row['mappe_id']) : null,
+    id: parseString(row.id),
+    userId: parseString(row.user_id),
+    filename: parseString(row.filename),
+    title: parseString(row.title ?? row.filename),
+    mimeType: parseString(row.mime_type),
+    storageKey: parseString(row.storage_key),
+    archivedStorageKey: parseOptionalString(row.archived_storage_key),
+    contentHash: parseOptionalString(row.content_hash),
+    status: parseEnum(row.status, DOCUMENT_STATUSES, 'uploaded'),
+    documentDate,
+    notes: parseOptionalString(row.notes),
+    ingestSource: parseOptionalString(row.ingest_source),
+    folderId,
+    mappeId,
     folder:
-      folderIdRaw != null && folderName != null
+      folderId != null && folderName != null
         ? {
-            id: String(folderIdRaw),
-            name: String(folderName),
-            mappeId: folderMappeIdRaw != null ? String(folderMappeIdRaw) : null,
+            id: folderId,
+            name: folderName,
+            mappeId: folderMappeId,
           }
         : null,
     correspondent: correspondent
       ? {
           id: correspondent.id,
-          userId: String(row['user_id']),
+          userId: parseString(row.user_id),
           name: correspondent.name,
           matchingAlgorithm: 'none',
           match: '',
         }
       : null,
     tags: joins.tags ?? [],
-    createdAt: new Date(String(row['created_at'])),
-    updatedAt: new Date(String(row['updated_at'])),
+    createdAt: parseDate(row.created_at),
+    updatedAt: parseDate(row.updated_at),
     extraction,
   };
 }

@@ -2,25 +2,26 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   CanActivate,
+  createParamDecorator,
   ExecutionContext,
   Injectable,
   UnauthorizedException,
-  createParamDecorator,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { IS_PUBLIC_ROUTE_KEY } from './public.decorator.js';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyRequest } from 'fastify';
-import type { AuthorizationSubject } from '../../domain/authorization.js';
+
 import { InstallationMembershipService } from '../../../modules/auth/infrastructure/installation-membership.service.js';
+import type { AuthorizationSubject } from '../../domain/authorization.js';
 import { auth } from './better-auth.config.js';
+import { IS_PUBLIC_ROUTE_KEY } from './public.decorator.js';
 import { ServiceApiKeyRegistry } from './service-api-key.registry.js';
 import { buildUserAuthorizationSubject } from './user-authorization-subject.js';
 
-export type AuthSession = {
+export interface AuthSession {
   user: { id: string; email: string; name: string; role?: string | null };
   session: { id: string; token: string };
-};
+}
 
 export type AuthenticatedRequest = FastifyRequest & {
   authSession?: AuthSession;
@@ -70,7 +71,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const headers = fromNodeHeaders(req.headers as Record<string, string | string[] | undefined>);
+    const headers = fromNodeHeaders(req.headers);
     const session = await auth.api.getSession({ headers });
     if (!session?.user) {
       throw new UnauthorizedException('Not authenticated');
@@ -79,7 +80,7 @@ export class AuthGuard implements CanActivate {
     if (membership.suspended) {
       throw new UnauthorizedException('Account suspended');
     }
-    req.authSession = session as AuthSession;
+    req.authSession = session;
     req.authSubject = buildUserAuthorizationSubject({
       id: session.user.id,
       installationRole: this.installationMembership.instanceRoleFor(membership),

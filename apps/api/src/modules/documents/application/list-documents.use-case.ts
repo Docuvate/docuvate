@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { DocumentListQuery } from '@docuvate/contracts';
 import type { DocumentDuplicateStackSummaryDto } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import {
   DOCUMENT_REPOSITORY,
+  type DocumentRepository,
   DUPLICATE_REPOSITORY,
   DUPLICATE_STACK_REPOSITORY,
-  type DocumentRepository,
   type DuplicateRepository,
   type DuplicateStackRepository,
 } from '../../../shared/domain/ports.js';
 import { SyncDuplicateStacksUseCase } from '../../duplicates/application/duplicate-stack.use-cases.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
 
 export interface ListedDocument {

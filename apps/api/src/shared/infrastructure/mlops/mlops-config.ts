@@ -34,7 +34,7 @@ export function mlopsCanaryMaxMetricDrop(): number {
 }
 
 export function mlopsCanaryRequiredMetric(): string {
-  return process.env['MLOPS_CANARY_REQUIRED_METRIC']?.trim() || 'field_f1';
+  return process.env['MLOPS_CANARY_REQUIRED_METRIC']?.trim() ?? 'field_f1';
 }
 
 /** Families that consume extraction_field_corrections as primary training signal. */

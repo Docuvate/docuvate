@@ -1,4 +1,5 @@
 import { writeFileSync } from 'node:fs';
+
 import { startPostgresContainer } from '../../../../packages/testing/src/containers/index.js';
 
 const ENV_FILE = '/tmp/docuvate-integration-env.json';

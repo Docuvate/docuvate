@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
 import type { HardwareCapabilitiesDto } from '@docuvate/contracts';
+import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   DocumentChatProviderListResponseDto,
@@ -14,18 +15,17 @@ import {
   UserSettingsResponseDto,
 } from '../../../shared/presentation/dtos/settings.dto.js';
 import {
-  GetUserSettingsUseCase,
-  ListDocumentChatProvidersUseCase,
-  ListExtractionEnginesUseCase,
-  UpdateUserSettingsUseCase,
-} from '../application/settings.use-cases.js';
-import { EffectiveDocumentChatProviderUseCase } from '../application/effective-document-chat-provider.use-case.js';
-import { GetHardwareCapabilitiesUseCase } from '../application/hardware-capabilities.use-case.js';
-
-import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { EffectiveDocumentChatProviderUseCase } from '../application/effective-document-chat-provider.use-case.js';
+import { GetHardwareCapabilitiesUseCase } from '../application/hardware-capabilities.use-case.js';
+import { ListDocumentChatProvidersUseCase } from '../application/list-document-chat-providers.use-case.js';
+import {
+  GetUserSettingsUseCase,
+  ListExtractionEnginesUseCase,
+  UpdateUserSettingsUseCase,
+} from '../application/settings.use-cases.js';
 import { toUserSettingsResponseDto } from '../application/user-settings-response.mapper.js';
 
 @ApiDocuvateController('settings')

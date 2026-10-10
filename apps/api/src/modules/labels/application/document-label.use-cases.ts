@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { DismissTagSuggestionRequest } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
-  LABEL_EMBEDDING_REPOSITORY,
-  TAXONOMY_REPOSITORY,
   type DocumentRepository,
+  LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import { RecordEmbeddingFeedbackUseCase } from './embedding-feedback.use-case.js';
 import { ApplyLabelCustomFieldsUseCase } from './apply-label-custom-fields.use-case.js';
+import { RecordEmbeddingFeedbackUseCase } from './embedding-feedback.use-case.js';
 
 @Injectable()
 export class AssignDocumentTagUseCase {

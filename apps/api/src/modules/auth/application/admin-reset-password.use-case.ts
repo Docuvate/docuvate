@@ -5,13 +5,13 @@ import {
   AUTH_MIN_PASSWORD_LENGTH,
 } from '../domain/auth-password.constants.js';
 
-export type AdminResetPasswordInput = {
+export interface AdminResetPasswordInput {
   email: string;
   newPassword: string;
   revokeSessions: boolean;
-};
+}
 
-export type AdminResetPasswordAuthContext = {
+export interface AdminResetPasswordAuthContext {
   internalAdapter: {
     findUserByEmail(
       email: string,
@@ -30,7 +30,7 @@ export type AdminResetPasswordAuthContext = {
   password: {
     hash(password: string): Promise<string>;
   };
-};
+}
 
 export class AdminResetPasswordUseCase {
   constructor(private readonly getContext: () => Promise<AdminResetPasswordAuthContext>) {}
@@ -68,9 +68,9 @@ export class AdminResetPasswordUseCase {
 
 function assertPasswordLength(password: string): void {
   if (password.length < AUTH_MIN_PASSWORD_LENGTH) {
-    throw new Error(`Password must be at least ${AUTH_MIN_PASSWORD_LENGTH} characters`);
+    throw new Error(`Password must be at least ${String(AUTH_MIN_PASSWORD_LENGTH)} characters`);
   }
   if (password.length > AUTH_MAX_PASSWORD_LENGTH) {
-    throw new Error(`Password must be at most ${AUTH_MAX_PASSWORD_LENGTH} characters`);
+    throw new Error(`Password must be at most ${String(AUTH_MAX_PASSWORD_LENGTH)} characters`);
   }
 }

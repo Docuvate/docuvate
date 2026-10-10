@@ -1,12 +1,36 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+
+import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
+import {
+  parseBoolean,
+  parseDate,
+  parseEnum,
+  parseNumber,
+  parseOptionalDate,
+  parseOptionalNumber,
+  parseOptionalString,
+  parseString,
+  recordFromUnknown,
+  requireRecord,
+} from '../../../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../../../shared/infrastructure/database/tokens.js';
 import type { PaperlessOcrMode } from './paperless-field-mapping.js';
 
 export type ConnectorImportRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+const CONNECTOR_IMPORT_RUN_STATUSES: readonly ConnectorImportRunStatus[] = [
+  'pending',
+  'running',
+  'completed',
+  'failed',
+  'cancelled',
+];
+
+const PAPERLESS_OCR_MODES: readonly PaperlessOcrMode[] = ['keep_paperless', 'rerun_docuvate'];
 
 export interface ConnectorImportRunRow {
   id: string;
@@ -59,29 +83,28 @@ const STALE_RUNNING_MINUTES = 15;
 
 function mapRun(row: Record<string, unknown>): ConnectorImportRunRow {
   return {
-    id: String(row['id']),
-    installationId: String(row['installation_id']),
-    userId: String(row['user_id']),
-    status: String(row['status']) as ConnectorImportRunStatus,
-    paperlessApiVersion:
-      row['paperless_api_version'] == null ? null : Number(row['paperless_api_version']),
-    ocrMode: String(row['ocr_mode']) as PaperlessOcrMode,
-    includeArchivedPdf: Boolean(row['include_archived_pdf']),
-    progressProcessed: Number(row['progress_processed'] ?? 0),
-    progressTotal: row['progress_total'] == null ? null : Number(row['progress_total']),
-    resumePage: Number(row['resume_page'] ?? 1),
-    resumeModifiedCursor: row['resume_modified_cursor']
-      ? new Date(String(row['resume_modified_cursor']))
-      : null,
-    incrementalModifiedGt: row['incremental_modified_gt']
-      ? new Date(String(row['incremental_modified_gt']))
-      : null,
-    fatalErrorKey: row['fatal_error_key'] == null ? null : String(row['fatal_error_key']),
-    startedAt: row['started_at'] ? new Date(String(row['started_at'])) : null,
-    completedAt: row['completed_at'] ? new Date(String(row['completed_at'])) : null,
-    createdAt: new Date(String(row['created_at'])),
-    updatedAt: new Date(String(row['updated_at'])),
+    id: parseString(row.id),
+    installationId: parseString(row.installation_id),
+    userId: parseString(row.user_id),
+    status: parseEnum(row.status, CONNECTOR_IMPORT_RUN_STATUSES, 'pending'),
+    paperlessApiVersion: parseOptionalNumber(row.paperless_api_version),
+    ocrMode: parseEnum(row.ocr_mode, PAPERLESS_OCR_MODES, 'keep_paperless'),
+    includeArchivedPdf: parseBoolean(row.include_archived_pdf),
+    progressProcessed: parseNumber(row.progress_processed, 0),
+    progressTotal: parseOptionalNumber(row.progress_total),
+    resumePage: parseNumber(row.resume_page, 1),
+    resumeModifiedCursor: parseOptionalDate(row.resume_modified_cursor),
+    incrementalModifiedGt: parseOptionalDate(row.incremental_modified_gt),
+    fatalErrorKey: parseOptionalString(row.fatal_error_key),
+    startedAt: parseOptionalDate(row.started_at),
+    completedAt: parseOptionalDate(row.completed_at),
+    createdAt: parseDate(row.created_at),
+    updatedAt: parseDate(row.updated_at),
   };
+}
+
+function mapRunFromUnknown(raw: unknown): ConnectorImportRunRow {
+  return mapRun(requireRecord(raw));
 }
 
 @Injectable()
@@ -115,14 +138,14 @@ export class PaperlessImportRepository {
        FROM connector_paperless_settings WHERE installation_id = $1`,
       [installationId]
     );
-    const row = result.rows[0];
+    const row = recordFromUnknown(result.rows[0]);
     if (!row) {
       return null;
     }
     return {
-      keepOcrText: Boolean(row['keep_ocr_text']),
-      rerunOcr: Boolean(row['rerun_ocr']),
-      includeArchivedPdf: Boolean(row['include_archived_pdf']),
+      keepOcrText: parseBoolean(row.keep_ocr_text),
+      rerunOcr: parseBoolean(row.rerun_ocr),
+      includeArchivedPdf: parseBoolean(row.include_archived_pdf),
     };
   }
 
@@ -150,8 +173,8 @@ export class PaperlessImportRepository {
        FROM connector_paperless_settings WHERE installation_id = $1`,
       [installationId]
     );
-    const raw = result.rows[0]?.['last_successful_modified_at'];
-    return raw ? new Date(String(raw)) : null;
+    const row = recordFromUnknown(result.rows[0]);
+    return row ? parseOptionalDate(row.last_successful_modified_at) : null;
   }
 
   async countSourceDocuments(installationId: string): Promise<number> {
@@ -159,7 +182,8 @@ export class PaperlessImportRepository {
       `SELECT COUNT(*)::int AS count FROM connector_source_documents WHERE installation_id = $1`,
       [installationId]
     );
-    return Number(result.rows[0]?.['count'] ?? 0);
+    const row = recordFromUnknown(result.rows[0]);
+    return parseNumber(row?.count, 0);
   }
 
   async findActiveRunByInstallation(installationId: string): Promise<ConnectorImportRunRow | null> {
@@ -170,8 +194,8 @@ export class PaperlessImportRepository {
        LIMIT 1`,
       [installationId]
     );
-    const row = result.rows[0];
-    return row ? mapRun(row) : null;
+    const raw: unknown = result.rows[0];
+    return raw !== undefined ? mapRunFromUnknown(raw) : null;
   }
 
   async findActiveRunForInstallation(
@@ -185,8 +209,8 @@ export class PaperlessImportRepository {
        LIMIT 1`,
       [installationId, userId]
     );
-    const row = result.rows[0];
-    return row ? mapRun(row) : null;
+    const raw: unknown = result.rows[0];
+    return raw !== undefined ? mapRunFromUnknown(raw) : null;
   }
 
   async createRun(input: {
@@ -254,8 +278,8 @@ export class PaperlessImportRepository {
 
   async findRunById(runId: string): Promise<ConnectorImportRunRow | null> {
     const result = await this.pool.query(`${RUN_SELECT} WHERE r.id = $1`, [runId]);
-    const row = result.rows[0];
-    return row ? mapRun(row) : null;
+    const raw: unknown = result.rows[0];
+    return raw !== undefined ? mapRunFromUnknown(raw) : null;
   }
 
   async findRunForUser(runId: string, userId: string): Promise<ConnectorImportRunRow | null> {
@@ -263,8 +287,8 @@ export class PaperlessImportRepository {
       runId,
       userId,
     ]);
-    const row = result.rows[0];
-    return row ? mapRun(row) : null;
+    const raw: unknown = result.rows[0];
+    return raw !== undefined ? mapRunFromUnknown(raw) : null;
   }
 
   async findLatestRunForInstallation(
@@ -278,8 +302,8 @@ export class PaperlessImportRepository {
        LIMIT 1`,
       [installationId, userId]
     );
-    const row = result.rows[0];
-    return row ? mapRun(row) : null;
+    const raw: unknown = result.rows[0];
+    return raw !== undefined ? mapRunFromUnknown(raw) : null;
   }
 
   async markRunRunning(runId: string, apiVersion: number, progressTotal: number): Promise<void> {
@@ -334,7 +358,8 @@ export class PaperlessImportRepository {
         `SELECT COUNT(*)::int AS count FROM connector_import_run_errors WHERE run_id = $1`,
         [runId]
       );
-      const errorCount = Number(errors.rows[0]?.['count'] ?? 0);
+      const errorRow = recordFromUnknown(errors.rows[0]);
+      const errorCount = parseNumber(errorRow?.count, 0);
       if (errorCount === 0) {
         await this.ensurePaperlessSettings(installationId);
         await this.pool.query(
@@ -374,14 +399,17 @@ export class PaperlessImportRepository {
        LIMIT $2`,
       [runId, limit]
     );
-    return result.rows.map((row) => ({
-      id: String(row['id']),
-      runId: String(row['run_id']),
-      sourceDocumentId: String(row['source_document_id']),
-      messageKey: String(row['message_key']),
-      messageDetail: row['message_detail'] == null ? null : String(row['message_detail']),
-      createdAt: new Date(String(row['created_at'])),
-    }));
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return {
+        id: parseString(row.id),
+        runId: parseString(row.run_id),
+        sourceDocumentId: parseString(row.source_document_id),
+        messageKey: parseString(row.message_key),
+        messageDetail: parseOptionalString(row.message_detail),
+        createdAt: parseDate(row.created_at),
+      };
+    });
   }
 
   async findSourceLink(
@@ -394,14 +422,14 @@ export class PaperlessImportRepository {
        WHERE installation_id = $1 AND source_document_id = $2`,
       [installationId, sourceDocumentId]
     );
-    const row = result.rows[0];
+    const row = recordFromUnknown(result.rows[0]);
     if (!row) {
       return null;
     }
     return {
-      documentId: String(row['document_id']),
-      contentChecksum: String(row['content_checksum']),
-      sourceModifiedAt: new Date(String(row['source_modified_at'])),
+      documentId: parseString(row.document_id),
+      contentChecksum: parseString(row.content_checksum),
+      sourceModifiedAt: parseDate(row.source_modified_at),
     };
   }
 
@@ -436,17 +464,17 @@ export class PaperlessImportRepository {
     entityKind: string,
     paperlessId: number
   ): Promise<string | null> {
-    const meta = ENTITY_LINK_META[entityKind];
-    if (!meta) {
+    if (!(entityKind in ENTITY_LINK_META)) {
       return null;
     }
+    const meta = ENTITY_LINK_META[entityKind];
     const result = await this.pool.query(
       `SELECT ${meta.column} AS local_id FROM ${meta.table}
        WHERE installation_id = $1 AND paperless_id = $2`,
       [installationId, paperlessId]
     );
-    const row = result.rows[0];
-    return row ? String(row['local_id']) : null;
+    const row = recordFromUnknown(result.rows[0]);
+    return row ? parseString(row.local_id) : null;
   }
 
   async upsertEntityLink(
@@ -455,10 +483,10 @@ export class PaperlessImportRepository {
     paperlessId: number,
     localId: string
   ): Promise<void> {
-    const meta = ENTITY_LINK_META[entityKind];
-    if (!meta) {
+    if (!(entityKind in ENTITY_LINK_META)) {
       return;
     }
+    const meta = ENTITY_LINK_META[entityKind];
     await this.pool.query(
       `INSERT INTO ${meta.table} (installation_id, paperless_id, ${meta.column})
        VALUES ($1, $2, $3)
@@ -487,8 +515,9 @@ export class PaperlessImportRepository {
       `SELECT id FROM recognized_field_definitions WHERE user_id = $1 AND field_key = $2`,
       [userId, input.key]
     );
-    if (existing.rows[0]) {
-      return String(existing.rows[0]['id']);
+    const existingRow = recordFromUnknown(existing.rows[0]);
+    if (existingRow) {
+      return parseString(existingRow.id);
     }
     const inserted = await this.pool.query(
       `INSERT INTO recognized_field_definitions
@@ -498,7 +527,8 @@ export class PaperlessImportRepository {
        RETURNING id`,
       [userId, input.key, input.label, input.fieldType, input.sortOrder]
     );
-    return String(inserted.rows[0]!['id']);
+    const insertedRow = requireRecord(inserted.rows[0]);
+    return parseString(insertedRow.id);
   }
 
   async resumePendingRuns(): Promise<ConnectorImportRunRow[]> {
@@ -512,6 +542,6 @@ export class PaperlessImportRepository {
        ORDER BY r.created_at ASC`,
       [String(STALE_RUNNING_MINUTES)]
     );
-    return result.rows.map(mapRun);
+    return result.rows.map(mapRunFromUnknown);
   }
 }

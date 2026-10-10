@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
+
+import type { ConnectorPlugin, ConnectorRegistryPort } from '../domain/connector.ports.js';
 import type {
   ConnectorCategoryDescriptor,
   ConnectorCategoryId,
   ConnectorPluginId,
 } from '../domain/connector.types.js';
-import type { ConnectorPlugin, ConnectorRegistryPort } from '../domain/connector.ports.js';
 
 @Injectable()
 export class ConnectorRegistry implements ConnectorRegistryPort {

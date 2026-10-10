@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
+
 import type pg from 'pg';
-import { instanceRoleToDbRole } from '../domain/installation-authorization.js';
-import type { InstanceRole } from '../domain/instance-role.constants.js';
-import { auth } from '../../../shared/infrastructure/auth/better-auth.config.js';
-import type { AdminResetPasswordAuthContext } from './admin-reset-password.use-case.js';
+
+import { ValidationError } from '../../../shared/domain/errors.js';
 import {
   AUTH_MAX_PASSWORD_LENGTH,
   AUTH_MIN_PASSWORD_LENGTH,
 } from '../domain/auth-password.constants.js';
-import { ValidationError } from '../../../shared/domain/errors.js';
+import { instanceRoleToDbRole } from '../domain/installation-authorization.js';
+import type { InstanceRole } from '../domain/instance-role.constants.js';
+import { loadAdminResetPasswordAuthContext } from './auth-context.js';
 
 async function createCredentialPassword(
   pool: pg.Pool | pg.PoolClient,
@@ -20,7 +21,7 @@ async function createCredentialPassword(
   if (password.length < AUTH_MIN_PASSWORD_LENGTH || password.length > AUTH_MAX_PASSWORD_LENGTH) {
     throw new ValidationError('Password length invalid');
   }
-  const ctx = (await auth.$context) as AdminResetPasswordAuthContext;
+  const ctx = await loadAdminResetPasswordAuthContext();
   const hashedPassword = await ctx.password.hash(password);
   const accountId = randomUUID();
   await pool.query(

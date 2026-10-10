@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
-import type { FastifyRequest } from 'fastify';
 import { fromNodeHeaders } from 'better-auth/node';
+import type { FastifyRequest } from 'fastify';
+
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { AdminGuard } from '../../../shared/infrastructure/auth/admin.guard.js';
 import {
   AuthGuard,
+  type AuthSession,
   AuthSubject,
   Session,
-  type AuthSession,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
-import { AdminGuard } from '../../../shared/infrastructure/auth/admin.guard.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import {
   AdminAccessResponseDto,
   AdminUserIdParamDto,
@@ -24,6 +25,7 @@ import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { INSTANCE_ROLE_MEMBER } from '../../auth/domain/instance-role.constants.js';
 import {
   BanAdminUserUseCase,
   GetAdminAccessUseCase,
@@ -35,11 +37,10 @@ import {
   SetAdminUserRoleUseCase,
   UnbanAdminUserUseCase,
 } from '../application/admin.use-cases.js';
-import { INSTANCE_ROLE_MEMBER } from '../../auth/domain/instance-role.constants.js';
 import { toAdminUserDto } from './admin.mapper.js';
 
 function requestHeaders(req: FastifyRequest): Headers {
-  return fromNodeHeaders(req.headers as Record<string, string | string[] | undefined>);
+  return fromNodeHeaders(req.headers);
 }
 
 @ApiDocuvateController('admin')
@@ -179,8 +180,7 @@ export class AdminController {
   })
   async revokeAdminUserInvitation(
     @Session() session: AuthSession,
-    @Param() params: AdminUserIdParamDto,
-    @Req() req: FastifyRequest
+    @Param() params: AdminUserIdParamDto
   ): Promise<{ ok: true }> {
     await this.revokeInvitation.execute({
       actorUserId: session.user.id,

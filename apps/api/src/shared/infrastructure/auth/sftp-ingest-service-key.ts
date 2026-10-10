@@ -15,7 +15,10 @@ export function resolveSftpIngestServiceKey(): string | undefined {
     }
   }
   const raw = process.env['DOCUVATE_SFTP_INGEST_SERVICE_KEY']?.trim();
-  return raw || undefined;
+  if (!raw) {
+    return undefined;
+  }
+  return raw;
 }
 
 export function assertSftpIngestServiceKeyAllowed(key: string): void {

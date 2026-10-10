@@ -2,36 +2,37 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
-import { ForbiddenError, ValidationError } from '../../../shared/domain/errors.js';
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { ForbiddenError, ValidationError } from '../../../shared/domain/errors.js';
 import { subjectIsInstanceAdministrator } from '../../../shared/infrastructure/auth/user-authorization-subject.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { assertInstallationInviteRoleAllowed } from '../../auth/domain/installation-authorization.js';
 import {
   INSTANCE_ROLE_ADMIN,
   INSTANCE_ROLE_MEMBER,
-  normalizeInstanceRole,
   type InstanceRole,
+  normalizeInstanceRole,
 } from '../../auth/domain/instance-role.constants.js';
+import type { UserInvitationMailerPort } from '../../auth/domain/invite-mailer.port.js';
+import { createUserInvitationMailer } from '../../auth/infrastructure/mail/user-invitation-mailer.factory.js';
 import { assertRoleChangeAllowed } from '../domain/last-admin.policy.js';
 import {
-  USER_ADMINISTRATION_PORT,
   type AdminUserListItem,
+  USER_ADMINISTRATION_PORT,
   type UserAdministrationPort,
 } from '../domain/user-administration.port.js';
 import {
   USER_INVITATION_REPOSITORY,
   type UserInvitationRepository,
 } from '../domain/user-invitation.types.js';
-import type { UserInvitationMailerPort } from '../../auth/domain/invite-mailer.port.js';
-import { createUserInvitationMailer } from '../../auth/infrastructure/mail/user-invitation-mailer.factory.js';
 import { deliverUserInvitation } from './send-user-invitation.js';
-import { assertInstallationInviteRoleAllowed } from '../../auth/domain/installation-authorization.js';
 
-export type AdminAccessDto = {
+export interface AdminAccessDto {
   isAdministrator: boolean;
   role: InstanceRole;
-  roleDescriptions: Array<{ role: InstanceRole; summaryKey: string }>;
-};
+  roleDescriptions: { role: InstanceRole; summaryKey: string }[];
+}
 
 @Injectable()
 export class GetAdminAccessUseCase {

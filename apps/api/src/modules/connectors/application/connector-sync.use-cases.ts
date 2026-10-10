@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
-import type { DocumentEntity } from '../../documents/domain/document.entity.js';
-import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
-import { GetDocumentContentUseCase } from '../../documents/application/get-document-content.use-case.js';
+import { Injectable } from '@nestjs/common';
+
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import { GetDocumentContentUseCase } from '../../documents/application/get-document-content.use-case.js';
+import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
+import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { ConnectorImportableItem } from '../domain/connector-runtime.types.js';
 import { ConnectorRuntimeResolver } from './connector-runtime.resolver.js';
 

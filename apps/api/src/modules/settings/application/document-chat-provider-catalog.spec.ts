@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { buildDocumentChatProvidersCatalog } from './document-chat-provider-catalog.js';
 
 describe('buildDocumentChatProvidersCatalog', () => {

@@ -1,11 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
-import { NotFoundError } from '../../../shared/domain/errors.js';
+
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { GetDocumentContentUseCase } from './get-document-content.use-case.js';
-import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
-import type { LayoutHtmlRenderResult } from './layout-render.types.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
+import {
+  isRecord,
+  parseBoolean,
+  parseOptionalString,
+  parseString,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import {
   fetchWorkerJson,
@@ -13,6 +17,9 @@ import {
   workerLayoutTimeoutError,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
+import { GetDocumentContentUseCase } from './get-document-content.use-case.js';
+import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
+import type { LayoutHtmlRenderResult } from './layout-render.types.js';
 
 const LAYOUT_WORKER_TIMEOUT_MS = 120_000;
 
@@ -31,11 +38,7 @@ export class GetDocumentLayoutHtmlUseCase {
     const layoutIr = await this.getLayoutIr.execute(id, userId, subject);
     const { buffer } = await this.getDocumentContent.execute(id, userId, subject);
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
-    const data = await fetchWorkerJson<{
-      html?: string;
-      reconstructionReliable?: boolean;
-      unreliableReason?: string | null;
-    }>(
+    const raw = await fetchWorkerJson(
       workerApiUrl(workerUrl, '/layout/render-html'),
       {
         method: 'POST',
@@ -51,13 +54,19 @@ export class GetDocumentLayoutHtmlUseCase {
         onHttpError: mapWorkerLayoutHttpStatus,
       }
     );
-    if (!data.html) {
+    if (!isRecord(raw)) {
+      throw new NotFoundError('LayoutHtml');
+    }
+    const html = parseString(raw.html);
+    if (!html) {
       throw new NotFoundError('LayoutHtml');
     }
     return {
-      html: data.html,
-      reconstructionReliable: data.reconstructionReliable ?? true,
-      unreliableReason: data.unreliableReason ?? null,
+      html,
+      reconstructionReliable: raw.reconstructionReliable === undefined
+        ? true
+        : parseBoolean(raw.reconstructionReliable),
+      unreliableReason: parseOptionalString(raw.unreliableReason),
     };
   }
 }

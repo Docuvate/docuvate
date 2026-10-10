@@ -1,73 +1,134 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
-import type pg from 'pg';
 import type {
   CreateSavedDocumentViewRequest,
-  DashboardWidgetType,
+  DocumentSortField,
+  DocumentStatus,
   LibraryTableColumnId,
   ReplaceDashboardLayoutRequest,
+  SavedViewFilterMode,
+  SavedViewListScope,
+  SavedViewViewMode,
+  SavedViewVisibility,
+  SortOrder,
   UpdateSavedDocumentViewRequest,
 } from '@docuvate/contracts';
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { Inject, Injectable } from '@nestjs/common';
+import type pg from 'pg';
+
 import { NotFoundError } from '../../../shared/domain/errors.js';
+import {
+  parseBoolean,
+  parseDate,
+  parseEnum,
+  parseNumber,
+  parseOptionalEnum,
+  parseOptionalNumber,
+  parseOptionalString,
+  parseString,
+  recordFromUnknown,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  assertDashboardWidgetType,
+  parseDashboardWidgetFields,
+} from '../domain/dashboard-widget-config.js';
 import type {
   DashboardWidgetEntity,
   DashboardWidgetTemplate,
   SavedDocumentViewEntity,
 } from '../domain/workspace.types.js';
-import {
-  assertDashboardWidgetType,
-  parseDashboardWidgetFields,
-} from '../domain/dashboard-widget-config.js';
+
+const VISIBILITY_VALUES: readonly SavedViewVisibility[] = ['private', 'shared'];
+const SORT_FIELD_VALUES: readonly DocumentSortField[] = [
+  'updatedAt',
+  'createdAt',
+  'title',
+  'documentDate',
+];
+const SORT_ORDER_VALUES: readonly SortOrder[] = ['asc', 'desc'];
+const VIEW_MODE_VALUES: readonly SavedViewViewMode[] = ['klassisch', 'karten', 'fokus'];
+const FILTER_MODE_VALUES: readonly SavedViewFilterMode[] = ['ui', 'query'];
+const LIST_SCOPE_VALUES: readonly SavedViewListScope[] = ['all', 'folder', 'mappe'];
+const DOCUMENT_STATUS_VALUES: readonly DocumentStatus[] = [
+  'uploaded',
+  'queued',
+  'extracting',
+  'ready',
+  'failed',
+];
+const LIBRARY_COLUMN_VALUES: readonly LibraryTableColumnId[] = [
+  'title',
+  'labels',
+  'date',
+  'status',
+  'folder',
+  'updated',
+];
+
+function parseVisibleColumns(value: unknown): LibraryTableColumnId[] {
+  if (!Array.isArray(value)) {
+    return DEFAULT_COLUMNS;
+  }
+  const out: LibraryTableColumnId[] = [];
+  for (const item of value) {
+    const col = parseOptionalEnum(item, LIBRARY_COLUMN_VALUES);
+    if (col) {
+      out.push(col);
+    }
+  }
+  return out.length > 0 ? out : DEFAULT_COLUMNS;
+}
 
 function mapViewRow(row: Record<string, unknown>, tagIds: string[]): SavedDocumentViewEntity {
   return {
-    id: String(row['id']),
-    ownerUserId: String(row['owner_user_id']),
-    name: String(row['name']),
-    visibility: row['visibility'] as SavedDocumentViewEntity['visibility'],
-    searchQuery: String(row['search_query'] ?? ''),
-    sort: row['sort_field'] as SavedDocumentViewEntity['sort'],
-    order: row['sort_order'] as SavedDocumentViewEntity['order'],
-    viewMode: row['view_mode'] as SavedDocumentViewEntity['viewMode'],
-    filterMode: row['filter_mode'] as SavedDocumentViewEntity['filterMode'],
-    listScope: row['list_scope'] as SavedDocumentViewEntity['listScope'],
-    folderId: row['folder_id'] != null ? String(row['folder_id']) : null,
-    mappeId: row['mappe_id'] != null ? String(row['mappe_id']) : null,
-    correspondentId: row['correspondent_id'] != null ? String(row['correspondent_id']) : null,
-    status:
-      row['status_filter'] != null
-        ? (String(row['status_filter']) as SavedDocumentViewEntity['status'])
-        : null,
-    inbox: row['inbox_filter'] != null ? Boolean(row['inbox_filter']) : null,
+    id: parseString(row.id),
+    ownerUserId: parseString(row.owner_user_id),
+    name: parseString(row.name),
+    visibility: parseEnum(row.visibility, VISIBILITY_VALUES, 'private'),
+    searchQuery: parseString(row.search_query ?? ''),
+    sort: parseEnum(row.sort_field, SORT_FIELD_VALUES, 'updatedAt'),
+    order: parseEnum(row.sort_order, SORT_ORDER_VALUES, 'desc'),
+    viewMode: parseEnum(row.view_mode, VIEW_MODE_VALUES, 'klassisch'),
+    filterMode: parseEnum(row.filter_mode, FILTER_MODE_VALUES, 'ui'),
+    listScope: parseEnum(row.list_scope, LIST_SCOPE_VALUES, 'all'),
+    folderId: parseOptionalString(row.folder_id),
+    mappeId: parseOptionalString(row.mappe_id),
+    correspondentId: parseOptionalString(row.correspondent_id),
+    status: parseOptionalEnum(row.status_filter, DOCUMENT_STATUS_VALUES),
+    inbox:
+      row.inbox_filter === null || row.inbox_filter === undefined
+        ? null
+        : parseBoolean(row.inbox_filter),
     withoutNonInboxLabel:
-      row['without_non_inbox_label'] != null ? Boolean(row['without_non_inbox_label']) : null,
-    documentDateFrom: row['document_date_from'] != null ? String(row['document_date_from']) : null,
-    documentDateTo: row['document_date_to'] != null ? String(row['document_date_to']) : null,
+      row.without_non_inbox_label === null || row.without_non_inbox_label === undefined
+        ? null
+        : parseBoolean(row.without_non_inbox_label),
+    documentDateFrom: parseOptionalString(row.document_date_from),
+    documentDateTo: parseOptionalString(row.document_date_to),
     tagIds,
-    pinnedSidebar: Boolean(row['pinned_sidebar']),
-    position: Number(row['position'] ?? 0),
-    visibleColumns: Array.isArray(row['visible_columns'])
-      ? (row['visible_columns'] as LibraryTableColumnId[])
-      : ['title', 'labels', 'date', 'status'],
-    createdAt: new Date(String(row['created_at'])),
-    updatedAt: new Date(String(row['updated_at'])),
+    pinnedSidebar: parseBoolean(row.pinned_sidebar),
+    position: parseNumber(row.position, 0),
+    visibleColumns: parseVisibleColumns(row.visible_columns),
+    createdAt: parseDate(row.created_at),
+    updatedAt: parseDate(row.updated_at),
   };
 }
 
 function mapWidgetRow(row: Record<string, unknown>): DashboardWidgetEntity {
+  const type = assertDashboardWidgetType(parseString(row.widget_type));
   return {
-    id: String(row['id']),
-    userId: String(row['user_id']),
-    type: row['widget_type'] as DashboardWidgetType,
-    position: Number(row['position'] ?? 0),
-    widthCols: Number(row['width_cols'] ?? 6),
-    heightRows: Number(row['height_rows'] ?? 2),
-    savedViewId: row['saved_view_id'] != null ? String(row['saved_view_id']) : null,
-    itemLimit: row['item_limit'] != null ? Number(row['item_limit']) : null,
-    createdAt: new Date(String(row['created_at'])),
-    updatedAt: new Date(String(row['updated_at'])),
+    id: parseString(row.id),
+    userId: parseString(row.user_id),
+    type,
+    position: parseNumber(row.position, 0),
+    widthCols: parseNumber(row.width_cols, 6),
+    heightRows: parseNumber(row.height_rows, 2),
+    savedViewId: parseOptionalString(row.saved_view_id),
+    itemLimit: parseOptionalNumber(row.item_limit),
+    createdAt: parseDate(row.created_at),
+    updatedAt: parseDate(row.updated_at),
   };
 }
 
@@ -84,9 +145,10 @@ export class PgWorkspaceRepository {
       `SELECT view_id, tag_id FROM saved_document_view_tags WHERE view_id = ANY($1::uuid[])`,
       [viewIds]
     );
-    for (const row of result.rows) {
-      const viewId = String(row['view_id']);
-      const tagId = String(row['tag_id']);
+    for (const raw of result.rows) {
+      const row = requireRecord(raw);
+      const viewId = parseString(row.view_id);
+      const tagId = parseString(row.tag_id);
       const list = map.get(viewId) ?? [];
       list.push(tagId);
       map.set(viewId, list);
@@ -101,16 +163,19 @@ export class PgWorkspaceRepository {
        ORDER BY position ASC, name ASC`,
       [userId]
     );
-    const ids = result.rows.map((r) => String(r['id']));
+    const ids = result.rows.map((r) => parseString(requireRecord(r).id));
     const tagMap = await this.loadTagIdsForViews(ids);
-    return result.rows.map((row) => mapViewRow(row, tagMap.get(String(row['id'])) ?? []));
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return mapViewRow(row, tagMap.get(parseString(row.id)) ?? []);
+    });
   }
 
   async findViewById(id: string): Promise<SavedDocumentViewEntity | null> {
     const result = await this.pool.query(`SELECT * FROM saved_document_views WHERE id = $1`, [id]);
     if (!result.rows[0]) return null;
     const tagMap = await this.loadTagIdsForViews([id]);
-    return mapViewRow(result.rows[0], tagMap.get(id) ?? []);
+    return mapViewRow(requireRecord(result.rows[0]), tagMap.get(id) ?? []);
   }
 
   async nextViewPosition(userId: string): Promise<number> {
@@ -118,7 +183,8 @@ export class PgWorkspaceRepository {
       `SELECT COALESCE(MAX(position), -1) + 1 AS next FROM saved_document_views WHERE owner_user_id = $1`,
       [userId]
     );
-    return Number(result.rows[0]?.['next'] ?? 0);
+    const row = recordOrNull(result.rows[0]);
+    return parseNumber(row?.next, 0);
   }
 
   async createView(
@@ -146,7 +212,7 @@ export class PgWorkspaceRepository {
           userId,
           input.name,
           input.visibility ?? 'private',
-          input.searchQuery ?? '',
+          input.searchQuery,
           input.sort ?? 'updatedAt',
           input.order ?? 'desc',
           input.viewMode ?? 'klassisch',
@@ -172,7 +238,7 @@ export class PgWorkspaceRepository {
         );
       }
       await client.query('COMMIT');
-      return mapViewRow(result.rows[0]!, tagIds);
+      return mapViewRow(requireRecord(result.rows[0]), tagIds);
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -193,7 +259,7 @@ export class PgWorkspaceRepository {
     let param = 2;
 
     const assign = (column: string, value: unknown) => {
-      assignments.push(`${column} = $${param}`);
+      assignments.push(`${column} = $${String(param)}`);
       values.push(value);
       param += 1;
     };
@@ -217,7 +283,7 @@ export class PgWorkspaceRepository {
     if ('documentDateTo' in input) assign('document_date_to', input.documentDateTo);
     if (input.pinnedSidebar !== undefined) assign('pinned_sidebar', input.pinnedSidebar);
     if (input.visibleColumns !== undefined) {
-      assignments.push(`visible_columns = $${param}::jsonb`);
+      assignments.push(`visible_columns = $${String(param)}::jsonb`);
       values.push(JSON.stringify(input.visibleColumns));
       param += 1;
     }
@@ -245,8 +311,8 @@ export class PgWorkspaceRepository {
         }
       }
       await client.query('COMMIT');
-      const tagIds = input.tagIds !== undefined ? input.tagIds : existing.tagIds;
-      return mapViewRow(result.rows[0]!, tagIds);
+      const tagIds = input.tagIds ?? existing.tagIds;
+      return mapViewRow(requireRecord(result.rows[0]), tagIds);
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -287,7 +353,7 @@ export class PgWorkspaceRepository {
       `SELECT * FROM dashboard_widgets WHERE user_id = $1 ORDER BY position ASC`,
       [userId]
     );
-    return result.rows.map(mapWidgetRow);
+    return result.rows.map((raw) => mapWidgetRow(requireRecord(raw)));
   }
 
   async replaceWidgetsForUser(
@@ -322,7 +388,7 @@ export class PgWorkspaceRepository {
             fields.itemLimit,
           ]
         );
-        created.push(mapWidgetRow(result.rows[0]!));
+        created.push(mapWidgetRow(requireRecord(result.rows[0])));
       }
       await client.query('COMMIT');
       return created.sort((a, b) => a.position - b.position);
@@ -355,15 +421,16 @@ export class PgWorkspaceRepository {
     const result = await this.pool.query(
       `SELECT * FROM installation_dashboard_widgets ORDER BY position ASC`
     );
-    return result.rows.map((row) => {
-      const type = assertDashboardWidgetType(String(row['widget_type']));
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      const type = assertDashboardWidgetType(parseString(row.widget_type));
       return {
         type,
-        position: Number(row['position'] ?? 0),
-        widthCols: Number(row['width_cols'] ?? 6),
-        heightRows: Number(row['height_rows'] ?? 2),
-        savedViewId: row['saved_view_id'] != null ? String(row['saved_view_id']) : null,
-        itemLimit: row['item_limit'] != null ? Number(row['item_limit']) : null,
+        position: parseNumber(row.position, 0),
+        widthCols: parseNumber(row.width_cols, 6),
+        heightRows: parseNumber(row.height_rows, 2),
+        savedViewId: parseOptionalString(row.saved_view_id),
+        itemLimit: parseOptionalNumber(row.item_limit),
       };
     });
   }
@@ -473,18 +540,29 @@ export class PgWorkspaceRepository {
       ready: 0,
       failed: 0,
     };
-    for (const row of statusResult.rows) {
-      byStatus[String(row['status'])] = Number(row['c'] ?? 0);
+    for (const raw of statusResult.rows) {
+      const row = requireRecord(raw);
+      byStatus[parseString(row.status)] = parseNumber(row.c, 0);
     }
+    const totalRow = recordOrNull(totalResult.rows[0]);
+    const labelsRow = recordOrNull(labelsResult.rows[0]);
+    const unlabeledRow = recordOrNull(unlabeledResult.rows[0]);
     return {
-      documentsTotal: Number(totalResult.rows[0]?.['c'] ?? 0),
+      documentsTotal: parseNumber(totalRow?.c, 0),
       byStatus,
-      labelsAssignedCount: Number(labelsResult.rows[0]?.['c'] ?? 0),
-      unlabeledCount: Number(unlabeledResult.rows[0]?.['c'] ?? 0),
-      topLabels: topLabelsResult.rows.map((row) => ({
-        name: String(row['name']),
-        count: Number(row['c'] ?? 0),
-      })),
+      labelsAssignedCount: parseNumber(labelsRow?.c, 0),
+      unlabeledCount: parseNumber(unlabeledRow?.c, 0),
+      topLabels: topLabelsResult.rows.map((raw) => {
+        const row = requireRecord(raw);
+        return {
+          name: parseString(row.name),
+          count: parseNumber(row.c, 0),
+        };
+      }),
     };
   }
+}
+
+function recordOrNull(value: unknown): Record<string, unknown> | null {
+  return recordFromUnknown(value);
 }

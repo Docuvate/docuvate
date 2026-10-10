@@ -4,7 +4,7 @@ import type { InstanceRole } from '../../auth/domain/instance-role.constants.js'
 
 export type AdminUserAccountStatus = 'active' | 'invited' | 'suspended';
 
-export type AdminUserListItem = {
+export interface AdminUserListItem {
   id: string;
   name: string;
   email: string;
@@ -13,9 +13,9 @@ export type AdminUserListItem = {
   banReason: string | null;
   accountStatus: AdminUserAccountStatus;
   createdAt: Date;
-};
+}
 
-export type UserAdministrationPort = {
+export interface UserAdministrationPort {
   listUsers(input: {
     headers: Headers;
     limit: number;
@@ -38,6 +38,6 @@ export type UserAdministrationPort = {
   unbanUser(input: { headers: Headers; userId: string }): Promise<void>;
 
   revokeSessions(input: { headers: Headers; userId: string }): Promise<void>;
-};
+}
 
 export const USER_ADMINISTRATION_PORT = Symbol('USER_ADMINISTRATION_PORT');

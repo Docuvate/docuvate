@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
-import { AbacAuthorizationAdapter } from './abac-authorization.adapter.js';
-import type { AuthorizationSubject } from '../../domain/authorization.js';
+
 import { INSTALLATION_TENANT_ID } from '../../../modules/auth/domain/installation.constants.js';
+import type { AuthorizationSubject } from '../../domain/authorization.js';
+import { AbacAuthorizationAdapter } from './abac-authorization.adapter.js';
 
 const owner: AuthorizationSubject = {
   kind: 'user',

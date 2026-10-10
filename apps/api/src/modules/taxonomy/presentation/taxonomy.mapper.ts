@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CorrespondentDto, TagDto, TagSuggestionDto } from '@docuvate/contracts';
+
 import type {
   CorrespondentEntity,
   TagEntity,

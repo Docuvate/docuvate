@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { ForbiddenError } from '../../../shared/domain/errors.js';
+import { subjectIsInstanceAdministrator } from '../../../shared/infrastructure/auth/user-authorization-subject.js';
 import {
   INSTALLATION_DB_ROLE_ADMIN,
   INSTALLATION_DB_ROLE_MEMBER,
@@ -12,7 +13,6 @@ import {
   INSTANCE_ROLE_MEMBER,
   type InstanceRole,
 } from './instance-role.constants.js';
-import { subjectIsInstanceAdministrator } from '../../../shared/infrastructure/auth/user-authorization-subject.js';
 
 export type InstallationAuthorizationAction =
   | 'installation:invite'
@@ -37,30 +37,36 @@ export function canPerformInstallationAction(
   if (!subject.tenantId) {
     return false;
   }
-  if (action === 'installation:accept_invitation') {
-    return true;
-  }
-  if (!subjectIsInstanceAdministrator(subject)) {
-    return false;
-  }
-  if (action === 'installation:suspend_member') {
-    return true;
-  }
-  if (action === 'installation:invite') {
-    const target = context.assignedRole ?? INSTANCE_ROLE_MEMBER;
-    if (target === INSTANCE_ROLE_ADMIN) {
+  switch (action) {
+    case 'installation:accept_invitation':
+      return true;
+    case 'installation:suspend_member':
+      return subjectIsInstanceAdministrator(subject);
+    case 'installation:invite': {
+      if (!subjectIsInstanceAdministrator(subject)) {
+        return false;
+      }
+      const target = context.assignedRole ?? INSTANCE_ROLE_MEMBER;
+      if (target === INSTANCE_ROLE_ADMIN) {
+        return subjectIsInstanceAdministrator(subject);
+      }
       return subjectIsInstanceAdministrator(subject);
     }
-    return subjectIsInstanceAdministrator(subject);
-  }
-  if (action === 'installation:change_member_role') {
-    const target = context.assignedRole ?? INSTANCE_ROLE_MEMBER;
-    if (target === INSTANCE_ROLE_MEMBER) {
-      return true;
+    case 'installation:change_member_role': {
+      if (!subjectIsInstanceAdministrator(subject)) {
+        return false;
+      }
+      const target = context.assignedRole ?? INSTANCE_ROLE_MEMBER;
+      if (target === INSTANCE_ROLE_MEMBER) {
+        return true;
+      }
+      return subjectIsInstanceAdministrator(subject);
     }
-    return subjectIsInstanceAdministrator(subject);
+    default: {
+      const _exhaustive: never = action;
+      return _exhaustive;
+    }
   }
-  return false;
 }
 
 export function assertInstallationInviteRoleAllowed(

@@ -1,8 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
+
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { ValidationError } from '../../../shared/domain/errors.js';
+import { workerLayoutCompareMetrics } from '../../../shared/infrastructure/worker/layout-compare-worker.client.js';
+import { layoutCompareMetricsWorkerSchema } from '../../../shared/infrastructure/worker/layout-compare-worker.schema.js';
 import { GetDocumentContentUseCase } from './get-document-content.use-case.js';
 import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
 import {
@@ -10,8 +13,6 @@ import {
   layoutComparePageNumbersInRange,
 } from './layout-compare.constants.js';
 import type { LayoutCompareMetricsResult } from './layout-compare.types.js';
-import { workerLayoutCompareMetrics } from '../../../shared/infrastructure/worker/layout-compare-worker.client.js';
-import { layoutCompareMetricsWorkerSchema } from '../../../shared/infrastructure/worker/layout-compare-worker.schema.js';
 
 @Injectable()
 export class GetDocumentLayoutCompareMetricsUseCase {

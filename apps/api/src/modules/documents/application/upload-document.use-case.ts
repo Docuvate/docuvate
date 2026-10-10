@@ -1,29 +1,31 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash } from 'node:crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
-import type { DocumentEntity } from '../domain/document.entity.js';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   CLOCK,
-  DOCUMENT_REPOSITORY,
-  FOLDER_REPOSITORY,
-  ID_GENERATOR,
-  MAPPE_REPOSITORY,
-  OBJECT_STORAGE,
-  TAXONOMY_REPOSITORY,
   type Clock,
+  DOCUMENT_REPOSITORY,
   type DocumentRepository,
+  FOLDER_REPOSITORY,
   type FolderRepository,
+  ID_GENERATOR,
   type IdGenerator,
+  MAPPE_REPOSITORY,
   type MappeRepository,
+  OBJECT_STORAGE,
   type ObjectStorage,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
+import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
+import type { DocumentEntity } from '../domain/document.entity.js';
 import { resolveDocumentPlacement } from '../domain/document-placement.js';
 import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
-import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 
 export interface UploadDocumentInput {
   userId: string;

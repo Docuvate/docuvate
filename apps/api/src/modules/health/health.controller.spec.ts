@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Test } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { stubPgPool } from '../../shared/infrastructure/database/pg-pool.spec-util.js';
+import { PG_POOL } from '../../shared/infrastructure/database/tokens.js';
 import { HealthController } from './health.controller.js';
 
 vi.mock('ioredis', () => ({
@@ -26,11 +30,16 @@ describe('HealthController ready', () => {
     vi.stubEnv('MINIO_SECRET_KEY', 'secret');
   });
 
+  async function buildController(query: ReturnType<typeof vi.fn>) {
+    const moduleRef = await Test.createTestingModule({
+      controllers: [HealthController],
+      providers: [{ provide: PG_POOL, useValue: stubPgPool({ query }) }],
+    }).compile();
+    return moduleRef.get(HealthController);
+  }
+
   it('returns degraded when postgres check fails', async () => {
-    const pool = {
-      query: vi.fn().mockRejectedValue(new Error('down')),
-    } as unknown as import('pg').Pool;
-    const controller = new HealthController(pool);
+    const controller = await buildController(vi.fn().mockRejectedValue(new Error('down')));
     await expect(controller.ready()).resolves.toMatchObject({
       status: 'degraded',
       checks: { postgres: 'fail' },
@@ -38,10 +47,7 @@ describe('HealthController ready', () => {
   });
 
   it('returns ready when dependencies succeed', async () => {
-    const pool = {
-      query: vi.fn().mockResolvedValue({ rows: [] }),
-    } as unknown as import('pg').Pool;
-    const controller = new HealthController(pool);
+    const controller = await buildController(vi.fn().mockResolvedValue({ rows: [] }));
     await expect(controller.ready()).resolves.toMatchObject({ status: 'ready' });
   });
 });

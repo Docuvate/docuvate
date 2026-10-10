@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorRuntimePorts,
   ConnectorSinkPort,
   ConnectorSourcePort,
 } from '../../../domain/connector-runtime.ports.js';
-import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorExportInput,
   ConnectorExportResult,
@@ -51,7 +51,7 @@ export function openS3Runtime(credentials: ConnectorConfigurationInput): Connect
           });
         });
         stream.on('error', reject);
-        stream.on('end', () => resolve());
+        stream.on('end', () => { resolve(); });
       });
       return items;
     },
@@ -60,7 +60,7 @@ export function openS3Runtime(credentials: ConnectorConfigurationInput): Connect
       const chunks: Buffer[] = [];
       const buffer = await new Promise<Buffer>((resolve, reject) => {
         stream.on('data', (chunk: Buffer) => chunks.push(chunk));
-        stream.on('end', () => resolve(Buffer.concat(chunks)));
+        stream.on('end', () => { resolve(Buffer.concat(chunks)); });
         stream.on('error', reject);
       });
       return {
@@ -75,7 +75,7 @@ export function openS3Runtime(credentials: ConnectorConfigurationInput): Connect
   const sink: ConnectorSinkPort = {
     async exportDocument(input: ConnectorExportInput): Promise<ConnectorExportResult> {
       const key =
-        input.destinationRef?.trim() || `docuvate-export/${input.documentId}/${input.filename}`;
+        input.destinationRef?.trim() ?? `docuvate-export/${input.documentId}/${input.filename}`;
       await client.putObject(bucket, key, input.buffer, input.buffer.length, {
         'Content-Type': input.mimeType,
       });

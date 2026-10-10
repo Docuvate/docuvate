@@ -7,10 +7,10 @@ import {
   ollamaChatTimeoutMs,
 } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
 import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
+import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { type CitedAnswerJson, parseCitedAnswerJson } from '../domain/cited-answer-json.js';
 
-import type { CitedAnswerJson } from '../domain/cited-answer-json.js';
-
-export type { CitedClaimJson, CitedAnswerJson } from '../domain/cited-answer-json.js';
+export type { CitedAnswerJson,CitedClaimJson } from '../domain/cited-answer-json.js';
 
 const ANSWER_JSON_SCHEMA = {
   type: 'object',
@@ -43,7 +43,7 @@ const ANSWER_JSON_SCHEMA = {
 };
 
 export function buildCitedChatSystemPrompt(
-  passages: Array<{ label: string; text: string }>
+  passages: { label: string; text: string }[]
 ): string {
   const blocks = passages.map((p) => `[${p.label}]\n${p.text}`).join('\n\n');
   return [
@@ -62,7 +62,7 @@ export function buildCitedChatSystemPrompt(
 export async function requestCitedAnswerFromOllama(
   userMessage: string,
   systemPrompt: string,
-  history: Array<{ role: string; content: string }>,
+  history: { role: string; content: string }[],
   options?: {
     onToken?: (partialJson: string) => void | Promise<void>;
     shouldAbort?: () => boolean | Promise<boolean>;
@@ -90,11 +90,11 @@ export async function requestCitedAnswerFromOllama(
       }
       const detail =
         streamResult.failure.kind === 'http_error'
-          ? `HTTP ${streamResult.failure.status}`
+          ? `HTTP ${String(streamResult.failure.status)}`
           : streamResult.failure.kind;
       return { ok: false, detail };
     }
-    return parseCitedAnswerJson(streamResult.content);
+    return parseCitedAnswerJsonResponse(streamResult.content);
   }
 
   const body = {
@@ -110,25 +110,29 @@ export async function requestCitedAnswerFromOllama(
       signal: AbortSignal.timeout(ollamaChatTimeoutMs()),
     });
     if (!response.ok) {
-      return { ok: false, detail: `HTTP ${response.status}` };
+      return { ok: false, detail: `HTTP ${String(response.status)}` };
     }
-    const data = (await response.json()) as { message?: { content?: string } };
-    const raw = data.message?.content?.trim() ?? '';
+    const data: unknown = await response.json();
+    const messageContent =
+      isRecord(data) && isRecord(data.message) && typeof data.message.content === 'string'
+        ? data.message.content
+        : '';
+    const raw = messageContent.trim();
     if (!raw) {
       return { ok: false, detail: 'empty model response' };
     }
-    return parseCitedAnswerJson(raw);
+    return parseCitedAnswerJsonResponse(raw);
   } catch (err) {
     return { ok: false, detail: err instanceof Error ? err.message : String(err) };
   }
 }
 
-function parseCitedAnswerJson(
+function parseCitedAnswerJsonResponse(
   raw: string
 ): { ok: true; parsed: CitedAnswerJson } | { ok: false; detail: string } {
   try {
-    const parsed = JSON.parse(raw) as CitedAnswerJson;
-    if (!Array.isArray(parsed.claims)) {
+    const parsed = parseCitedAnswerJson(JSON.parse(raw));
+    if (!parsed) {
       return { ok: false, detail: 'invalid claims array' };
     }
     return { ok: true, parsed };
@@ -136,3 +140,4 @@ function parseCitedAnswerJson(
     return { ok: false, detail: 'invalid json response' };
   }
 }
+

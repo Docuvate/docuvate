@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { MatchingAlgorithm } from '@docuvate/contracts';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -15,8 +17,6 @@ import {
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import type { MatchingAlgorithm } from '@docuvate/contracts';
 
 const MATCHING_ALGORITHMS: MatchingAlgorithm[] = ['none', 'any', 'all', 'exact', 'regex'];
 

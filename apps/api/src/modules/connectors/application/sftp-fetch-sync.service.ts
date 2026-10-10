@@ -8,12 +8,14 @@ import {
   OnModuleDestroy,
 } from '@nestjs/common';
 import type pg from 'pg';
+
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { validateScanFile } from '../../sftp-ingress/domain/scan-file-validation.js';
 import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
-import { ConnectorRuntimeResolver } from './connector-runtime.resolver.js';
-import { decryptConnectorCredentials } from '../infrastructure/connector-secrets.codec.js';
+import { validateScanFile } from '../../sftp-ingress/domain/scan-file-validation.js';
 import { postProcessSftpPullFile } from '../infrastructure/adapters/sftp/sftp-pull.gateway.js';
+import { readConnectorConfigString } from '../infrastructure/adapters/shared/connector-config-string.js';
+import { decryptConnectorCredentials } from '../infrastructure/connector-secrets.codec.js';
+import { ConnectorRuntimeResolver } from './connector-runtime.resolver.js';
 
 interface SftpInstallationRow {
   id: string;
@@ -37,7 +39,7 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
     const intervalMs = Number(process.env['DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS'] ?? 60_000);
     if (intervalMs <= 0) return;
     const runTick = () => {
-      void this.tick().catch((err) => {
+      void this.tick().catch((err: unknown) => {
         this.logger.warn(`SFTP fetch sync tick failed: ${String(err)}`);
       });
     };
@@ -80,7 +82,7 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
     userId: string,
     credentials: Record<string, string>
   ): Promise<void> {
-    const pollSeconds = Number(credentials['poll_interval_seconds'] ?? 60);
+    const pollSeconds = Number(readConnectorConfigString(credentials, 'poll_interval_seconds') || '60');
     const pollMs = Number.isFinite(pollSeconds) && pollSeconds >= 60 ? pollSeconds * 1000 : 60_000;
     const lastRun = await this.pool.query<{ last_run_at: Date | null }>(
       `SELECT last_run_at FROM sftp_pull_sync_state WHERE installation_id = $1`,
@@ -115,11 +117,12 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
     const resolved = await this.runtime.resolve(userId, installationId);
     if (!resolved.ports.source) return;
     const importables = await resolved.ports.source.listImportables({ limit: 20 });
-    const afterImport = credentials['after_import']?.trim() || 'delete';
-    const archiveSubpath = credentials['archive_subpath']?.trim() || 'imported';
-    const folderId = credentials['target_folder_id']?.trim() || null;
-    const labelIds = credentials['label_ids']
-      ?.split(',')
+    const afterImport = readConnectorConfigString(credentials, 'after_import') || 'delete';
+    const archiveSubpath = readConnectorConfigString(credentials, 'archive_subpath') || 'imported';
+    const folderIdRaw = readConnectorConfigString(credentials, 'target_folder_id');
+    const folderId = folderIdRaw.length > 0 ? folderIdRaw : null;
+    const labelIds = readConnectorConfigString(credentials, 'label_ids')
+      .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
     const maxBytes = Number(process.env['DOCUVATE_SFTP_INGEST_MAX_BYTES'] ?? 26_214_400);
@@ -150,7 +153,7 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
           mimeType: validation.mimeType,
           buffer: blob.buffer,
           folderId,
-          tagIds: labelIds?.length ? labelIds : undefined,
+          tagIds: labelIds.length > 0 ? labelIds : undefined,
           ingestSource: 'scanner_sftp',
         });
         try {

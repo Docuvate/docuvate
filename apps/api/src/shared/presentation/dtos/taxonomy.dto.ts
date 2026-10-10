@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
 import type {
   CorrespondentDto,
   CreateCorrespondentRequest,
@@ -9,6 +8,8 @@ import type {
   UpdateCorrespondentRequest,
   UpdateTagRequest,
 } from '@docuvate/contracts';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
+
 import { MatchingAlgorithmFieldsDto } from './common.dto.js';
 
 export class CreateTagRequestDto extends MatchingAlgorithmFieldsDto implements CreateTagRequest {

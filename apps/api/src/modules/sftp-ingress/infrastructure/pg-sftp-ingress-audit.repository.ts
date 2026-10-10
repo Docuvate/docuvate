@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type { Pool } from 'pg';
+
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 @Injectable()

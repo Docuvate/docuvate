@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { RecognizedFieldDefinitionDto } from '@docuvate/contracts';
+
 import type { RecognizedFieldEntity } from '../domain/recognized-field.entity.js';
 
 export function toRecognizedFieldDto(entity: RecognizedFieldEntity): RecognizedFieldDefinitionDto {

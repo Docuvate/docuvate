@@ -15,7 +15,7 @@ export interface FieldExtractionGateConfig {
 export interface FieldExtractionGateDocumentLabels {
   assignedTagIds: string[];
   assignedNonInboxTagIds: string[];
-  suggestions: Array<{ tagId: string; confidence: number; isInbox: boolean }>;
+  suggestions: { tagId: string; confidence: number; isInbox: boolean }[];
 }
 
 /**
@@ -29,7 +29,7 @@ export function evaluateFieldExtractionGate(
   const assigned = new Set(labels.assignedTagIds);
 
   if (config.requiredLabelIds.length > 0) {
-    const match = config.requiredLabelMatch ?? 'all';
+    const match = config.requiredLabelMatch;
     if (match === 'all') {
       for (const tagId of config.requiredLabelIds) {
         if (!assigned.has(tagId)) {
@@ -57,7 +57,7 @@ export function evaluateFieldExtractionGate(
     if (suggestion.isInbox) {
       continue;
     }
-    if ((suggestion.confidence ?? 0) >= threshold) {
+    if (suggestion.confidence >= threshold) {
       return true;
     }
   }

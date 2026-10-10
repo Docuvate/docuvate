@@ -1,8 +1,24 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
-import { BanAdminUserUseCase } from './admin.use-cases.js';
+
 import { ForbiddenError } from '../../../shared/domain/errors.js';
+import { USER_ADMINISTRATION_PORT } from '../domain/user-administration.port.js';
+import { BanAdminUserUseCase } from './admin.use-cases.js';
+
+async function buildUseCase(users: {
+  banUser: ReturnType<typeof vi.fn>;
+  revokeSessions: ReturnType<typeof vi.fn>;
+}) {
+  const moduleRef = await Test.createTestingModule({
+    providers: [
+      BanAdminUserUseCase,
+      { provide: USER_ADMINISTRATION_PORT, useValue: users },
+    ],
+  }).compile();
+  return moduleRef.get(BanAdminUserUseCase);
+}
 
 describe('BanAdminUserUseCase', () => {
   it('rejects self-ban before touching infrastructure', async () => {
@@ -10,7 +26,7 @@ describe('BanAdminUserUseCase', () => {
       banUser: vi.fn(),
       revokeSessions: vi.fn(),
     };
-    const useCase = new BanAdminUserUseCase(users as never);
+    const useCase = await buildUseCase(users);
 
     await expect(
       useCase.execute({
@@ -29,7 +45,7 @@ describe('BanAdminUserUseCase', () => {
       banUser: vi.fn().mockResolvedValue(undefined),
       revokeSessions: vi.fn().mockResolvedValue(undefined),
     };
-    const useCase = new BanAdminUserUseCase(users as never);
+    const useCase = await buildUseCase(users);
 
     await useCase.execute({
       actorUserId: 'admin-1',

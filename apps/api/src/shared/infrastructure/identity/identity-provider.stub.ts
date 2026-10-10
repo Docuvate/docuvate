@@ -2,16 +2,19 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { IdentityProviderPort } from '../../domain/ports.js';
 
+const notConfigured = (): Promise<never> =>
+  Promise.reject(new Error('OIDC not configured in MVP'));
+
 export class IdentityProviderStub implements IdentityProviderPort {
-  async getAuthorizationUrl(): Promise<string> {
-    throw new Error('OIDC not configured in MVP');
+  getAuthorizationUrl(): Promise<string> {
+    return notConfigured();
   }
 
-  async handleCallback(): Promise<never> {
-    throw new Error('OIDC not configured in MVP');
+  handleCallback(): Promise<never> {
+    return notConfigured();
   }
 
-  async linkExternalIdentity(): Promise<never> {
-    throw new Error('OIDC not configured in MVP');
+  linkExternalIdentity(): Promise<never> {
+    return notConfigured();
   }
 }

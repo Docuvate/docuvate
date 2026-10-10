@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { UMAP } from 'umap-js';
+
 import { normalizePlotCoords, projectTo2D } from './pca2.js';
 
 export type LabelMapProjectionMethod = 'pca' | 'umap';
@@ -30,8 +31,8 @@ export function projectLabelMap2D(vectors: number[][]): {
       nNeighbors,
       minDist: 0.12,
     });
-    const raw = umap.fit(vectors) as number[][];
-    const coords = raw.map((row) => [row[0] ?? 0, row[1] ?? 0] as [number, number]);
+    const raw = umap.fit(vectors);
+    const coords = raw.map((row): [number, number] => [row[0] ?? 0, row[1] ?? 0]);
     return {
       coords: normalizePlotCoords(coords),
       method: 'umap',

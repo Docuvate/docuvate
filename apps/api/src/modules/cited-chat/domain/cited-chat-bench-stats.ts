@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { isRecord, parseNumber } from '../../../shared/infrastructure/database/row-parse.js';
 
 export interface CitedChatBenchTimingMs {
   embedMs: number;
@@ -28,14 +29,15 @@ export function parseCitedChatBenchStatsPayload(
     return undefined;
   }
   try {
-    const parsed = JSON.parse(raw) as CitedChatBenchStatsPayload;
-    if (
-      typeof parsed.citedRejectedClaims !== 'number' ||
-      !Number.isFinite(parsed.citedRejectedClaims)
-    ) {
+    const value: unknown = JSON.parse(raw);
+    if (!isRecord(value)) {
       return undefined;
     }
-    return parsed;
+    const citedRejectedClaims = parseNumber(value.citedRejectedClaims, Number.NaN);
+    if (!Number.isFinite(citedRejectedClaims)) {
+      return undefined;
+    }
+    return { citedRejectedClaims };
   } catch {
     return undefined;
   }

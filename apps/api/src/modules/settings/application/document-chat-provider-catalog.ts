@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentChatProviderInfo } from '@docuvate/contracts';
-import type { ChatProviderAvailability } from '../../../shared/application/resolve-effective-document-chat-provider.js';
-import { ollamaAvailableForHardware } from './ollama-hardware-gate.js';
-import { modelFitsOllamaMemLimit, ollamaMemLimitGiBFromEnv } from './ollama-compose-memory.js';
-import type { GetHardwareCapabilitiesUseCase } from './hardware-capabilities.use-case.js';
 
-export type DocumentChatUnavailableBackend = {
+import type { ChatProviderAvailability } from '../../../shared/application/resolve-effective-document-chat-provider.js';
+import type { GetHardwareCapabilitiesUseCase } from './hardware-capabilities.use-case.js';
+import { modelFitsOllamaMemLimit, ollamaMemLimitGiBFromEnv } from './ollama-compose-memory.js';
+import { ollamaAvailableForHardware } from './ollama-hardware-gate.js';
+
+export interface DocumentChatUnavailableBackend {
   id: string;
   label: string;
   reason: string;
   setupHint: string;
   reasonCode: string;
-};
+}
 
-export type DocumentChatProvidersCatalog = {
+export interface DocumentChatProvidersCatalog {
   selectable: DocumentChatProviderInfo[];
   unavailable: DocumentChatUnavailableBackend[];
   development: DocumentChatProviderInfo[];
@@ -24,7 +25,7 @@ export type DocumentChatProvidersCatalog = {
     ollamaModelReady: boolean;
     runsOnCpu: boolean;
   };
-};
+}
 
 export function documentChatDevProvidersEnabled(): boolean {
   if (process.env['DOCUMENT_CHAT_DEV_PROVIDERS'] === 'true') {
@@ -37,12 +38,12 @@ export function resolveOllamaModelFromEnv(): string {
   return process.env['OLLAMA_MODEL'] ?? 'qwen2.5:3b';
 }
 
-type WorkerProviderRow = {
+interface WorkerProviderRow {
   id: string;
   label: string;
   description: string;
   available: boolean;
-};
+}
 
 export function buildDocumentChatProvidersCatalog(input: {
   workerProviders: WorkerProviderRow[] | null;

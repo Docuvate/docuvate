@@ -31,13 +31,13 @@ export function mapWorkerCompareHttpStatus(status: number): DomainError {
       'Extraktions-Worker vorübergehend nicht erreichbar. Bitte später erneut versuchen.'
     );
   }
-  return new ServiceUnavailableError(`Extraktions-Vergleich fehlgeschlagen (${status}).`);
+  return new ServiceUnavailableError(`Extraktions-Vergleich fehlgeschlagen (${String(status)}).`);
 }
 
-export type WorkerFetchErrorMapping = {
+export interface WorkerFetchErrorMapping {
   onTimeout?: () => GatewayTimeoutError;
   onHttpError?: (status: number, responseBody?: unknown) => DomainError;
-};
+}
 
 export function workerLayoutTimeoutError(): GatewayTimeoutError {
   return new GatewayTimeoutError(
@@ -57,12 +57,12 @@ export function mapWorkerLayoutHttpStatus(status: number): DomainError {
   return new ServiceUnavailableError('documents.layoutCompareErrors.compareFailed');
 }
 
-export async function fetchWorkerJson<T>(
+export async function fetchWorkerJson(
   url: string,
   init: RequestInit,
   timeoutMs: number,
   errors: WorkerFetchErrorMapping = {}
-): Promise<T> {
+): Promise<unknown> {
   let response: Response;
   try {
     response = await fetch(url, {
@@ -86,5 +86,5 @@ export async function fetchWorkerJson<T>(
     throw errors.onHttpError?.(response.status, responseBody) ?? mapWorkerCompareHttpStatus(response.status);
   }
 
-  return (await response.json()) as T;
+  return await response.json();
 }

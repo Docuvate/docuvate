@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ExtractionBlock } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
-import type { ExtractionBlock } from '@docuvate/contracts';
+
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { normalizeForQuoteMatch } from '../domain/verify-citation-quote.js';
 
@@ -24,13 +25,13 @@ export class PgChatMessageCitationsRepository {
 
   async replaceCitations(
     messageId: string,
-    citations: Array<{
+    citations: {
       ordinal: number;
       chunkId: string;
       quote: string;
       charStart: number;
       charEnd: number;
-    }>
+    }[]
   ): Promise<void> {
     await this.pool.query(`DELETE FROM chat_message_citations WHERE message_id = $1`, [messageId]);
     for (const c of citations) {
@@ -163,7 +164,7 @@ export class PgChatMessageCitationsRepository {
       if (!needle) {
         return { ...c, blocks: [] };
       }
-      const hit = pageBlocks.find((b) => normalizeForQuoteMatch(b.text ?? '').includes(needle));
+      const hit = pageBlocks.find((b) => normalizeForQuoteMatch(b.text).includes(needle));
       return { ...c, blocks: hit ? [hit] : [] };
     });
   }

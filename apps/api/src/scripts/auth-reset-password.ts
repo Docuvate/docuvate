@@ -1,10 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { AdminResetPasswordUseCase } from '../modules/auth/application/admin-reset-password.use-case.js';
 import { auth } from '../shared/infrastructure/auth/better-auth.config.js';
-import {
-  AdminResetPasswordUseCase,
-  type AdminResetPasswordAuthContext,
-} from '../modules/auth/application/admin-reset-password.use-case.js';
 import { parseAuthResetPasswordArgs } from './auth-reset-password.args.js';
 import { readHiddenPassword } from './read-hidden-password.js';
 
@@ -18,7 +15,7 @@ async function main(): Promise<void> {
   }
 
   const useCase = new AdminResetPasswordUseCase(
-    () => auth.$context as Promise<AdminResetPasswordAuthContext>
+    () => auth.$context
   );
   await useCase.execute({ email, newPassword: password, revokeSessions });
   process.stderr.write(`Password updated for ${email}\n`);

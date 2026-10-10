@@ -1,5 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  parseOptionalString,
+  recordFromUnknown,
+} from '../../../shared/infrastructure/database/row-parse.js';
+
 function normalizeModelTag(name: string): string {
   return name.split(':')[0]?.trim().toLowerCase() ?? name.trim().toLowerCase();
 }
@@ -16,7 +21,7 @@ export async function isOllamaModelLoaded(
   }
   const base = normalizeModelTag(target);
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  const timer = setTimeout(() => { controller.abort(); }, timeoutMs);
   try {
     const response = await fetch(`${ollamaUrl.replace(/\/$/, '')}/api/tags`, {
       signal: controller.signal,
@@ -24,10 +29,18 @@ export async function isOllamaModelLoaded(
     if (!response.ok) {
       return false;
     }
-    const data = (await response.json()) as { models?: Array<{ name?: string }> };
-    const names = (data.models ?? [])
-      .map((m) => m.name?.trim().toLowerCase())
-      .filter((n): n is string => Boolean(n));
+    const dataRow = recordFromUnknown(await response.json());
+    const modelsRaw = dataRow?.models;
+    const names: string[] = [];
+    if (Array.isArray(modelsRaw)) {
+      for (const entry of modelsRaw) {
+        const modelRow = recordFromUnknown(entry);
+        const name = parseOptionalString(modelRow?.name)?.trim().toLowerCase();
+        if (name) {
+          names.push(name);
+        }
+      }
+    }
     return names.some(
       (name) => name === target || name.startsWith(`${base}:`) || normalizeModelTag(name) === base
     );

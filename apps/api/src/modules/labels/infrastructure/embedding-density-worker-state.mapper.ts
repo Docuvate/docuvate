@@ -1,18 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { z } from 'zod';
+
 import type { EmbeddingDensityClassNiwEntity } from '../../../shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
 import type { EmbeddingDensityDecisionThresholdEntity } from '../../../shared/infrastructure/database/entities/embedding-density-decision-threshold.entity.js';
 import type { EmbeddingDensityUserStateEntity } from '../../../shared/infrastructure/database/entities/embedding-density-user-state.entity.js';
 import { EMBEDDING_DENSITY_COARSE_TOP_GROUP_TARGET_ID } from '../domain/embedding-density-constants.js';
 import {
   type CalibrationThresholdWire,
+  calibrationThresholdWireSchema,
   type ClassNiwStatsWire,
+  classNiwStatsWireSchema,
   type EmbeddingDensityWorkerState,
   type KernelStateWire,
-  calibrationThresholdWireSchema,
-  classNiwStatsWireSchema,
-  kernelStateWireSchema,
 } from '../domain/embedding-density-worker-state.schema.js';
 
 const embeddingVectorSchema = z.array(z.number());
@@ -107,7 +107,7 @@ export function buildWorkerState(params: {
     fine_ready: Object.fromEntries(
       params.tagIds.map((tagId) => [
         tagId,
-        (params.userState.fineReadyTagIds ?? []).includes(tagId),
+        params.userState.fineReadyTagIds.includes(tagId),
       ])
     ),
     label_to_group: labelToGroup,

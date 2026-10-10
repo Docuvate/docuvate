@@ -2,14 +2,31 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
 import type {
   DuplicateStackMemberRow,
   DuplicateStackRepository,
   DuplicateStackSummary,
 } from '../../../shared/domain/ports.js';
+import {
+  parseDate,
+  parseEnum,
+  parseNumber,
+  parseOptionalEnum,
+  parseString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import type { DocumentStatus } from '../../documents/domain/document.entity.js';
 
-type Membership = { stackId: string; role: 'primary' | 'version' };
+const STACK_ROLES: readonly ('primary' | 'version')[] = ['primary', 'version'];
+const DOCUMENT_STATUSES: readonly DocumentStatus[] = [
+  'uploaded',
+  'queued',
+  'extracting',
+  'ready',
+  'failed',
+];
 
 @Injectable()
 export class PgDuplicateStackRepository implements DuplicateStackRepository {
@@ -22,8 +39,13 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
        WHERE user_id = $1 AND dismissed = false`,
       [userId]
     );
-    for (const row of result.rows) {
-      await this.linkPair(userId, String(row['document_id']), String(row['candidate_document_id']));
+    for (const raw of result.rows) {
+      const row = requireRecord(raw);
+      await this.linkPair(
+        userId,
+        parseString(row.document_id),
+        parseString(row.candidate_document_id)
+      );
     }
   }
 
@@ -72,11 +94,12 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
        WHERE m.document_id = $1 AND s.user_id = $2`,
       [documentId, userId]
     );
-    const row = result.rows[0];
-    if (!row) return null;
-    const role = String(row['role']);
-    if (role !== 'primary' && role !== 'version') return null;
-    return { stackId: String(row['stack_id']), role };
+    const raw: unknown = result.rows[0];
+    if (!raw) return null;
+    const row = requireRecord(raw);
+    const role = parseOptionalEnum(row.role, STACK_ROLES);
+    if (!role) return null;
+    return { stackId: parseString(row.stack_id), role };
   }
 
   async listMembers(stackId: string, userId: string): Promise<DuplicateStackMemberRow[]> {
@@ -90,16 +113,20 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
        ORDER BY CASE WHEN m.role = 'primary' THEN 0 ELSE 1 END, m.joined_at ASC`,
       [stackId, userId]
     );
-    return result.rows.map((row) => ({
-      stackId: String(row['stack_id']),
-      documentId: String(row['document_id']),
-      role: String(row['role']) as 'primary' | 'version',
-      title: String(row['title']),
-      filename: String(row['filename']),
-      status: row['status'] as DuplicateStackMemberRow['status'],
-      mimeType: String(row['mime_type']),
-      joinedAt: new Date(String(row['joined_at'])),
-    }));
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      const role = parseEnum(row.role, STACK_ROLES, 'version');
+      return {
+        stackId: parseString(row.stack_id),
+        documentId: parseString(row.document_id),
+        role,
+        title: parseString(row.title),
+        filename: parseString(row.filename),
+        status: parseEnum(row.status, DOCUMENT_STATUSES, 'uploaded'),
+        mimeType: parseString(row.mime_type),
+        joinedAt: parseDate(row.joined_at),
+      };
+    });
   }
 
   async summariesForPrimaryDocuments(
@@ -122,10 +149,11 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
       [userId, documentIds]
     );
 
-    for (const row of counts.rows) {
-      const primaryId = String(row['primary_id']);
-      const stackId = String(row['stack_id']);
-      const versionCount = Number(row['version_count']);
+    for (const raw of counts.rows) {
+      const row = requireRecord(raw);
+      const primaryId = parseString(row.primary_id);
+      const stackId = parseString(row.stack_id);
+      const versionCount = parseNumber(row.version_count);
       const pending = await this.stackHasPendingReview(userId, stackId);
       summaries.set(primaryId, { stackId, versionCount, pendingReview: pending });
     }
@@ -134,7 +162,7 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
 
   async setPrimary(userId: string, stackId: string, documentId: string): Promise<void> {
     const member = await this.getMembership(documentId, userId);
-    if (!member || member.stackId !== stackId) {
+    if (member?.stackId !== stackId) {
       throw new Error('Document is not in this stack');
     }
 
@@ -168,7 +196,10 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
          ORDER BY m.joined_at ASC LIMIT 1`,
         [member.stackId, userId]
       );
-      const nextPrimary = versions.rows[0] ? String(versions.rows[0]['document_id']) : null;
+      const nextPrimaryRaw: unknown = versions.rows[0];
+      const nextPrimary = nextPrimaryRaw
+        ? parseString(requireRecord(nextPrimaryRaw).document_id)
+        : null;
 
       await this.pool.query(
         `DELETE FROM document_stack_members m
@@ -248,7 +279,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
        LIMIT 1`,
       [userId, [documentIdA, documentIdB]]
     );
-    return String(result.rows[0]?.['id'] ?? documentIdA);
+    const raw: unknown = result.rows[0];
+    if (!raw) return documentIdA;
+    return parseString(requireRecord(raw).id);
   }
 
   private async createStack(userId: string): Promise<string> {
@@ -256,7 +289,7 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
       `INSERT INTO document_duplicate_stacks (user_id) VALUES ($1) RETURNING id`,
       [userId]
     );
-    return String(result.rows[0]['id']);
+    return parseString(requireRecord(result.rows[0]).id);
   }
 
   private async insertMember(
@@ -347,7 +380,8 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
        WHERE m.stack_id = $1 AND s.user_id = $2 AND m.role = 'primary'`,
       [stackId, userId]
     );
-    return result.rows[0] ? String(result.rows[0]['document_id']) : null;
+    const raw: unknown = result.rows[0];
+    return raw ? parseString(requireRecord(raw).document_id) : null;
   }
 
   private async dissolveStackIfOnlyPrimary(stackId: string, userId: string): Promise<void> {
@@ -360,8 +394,9 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
        WHERE m.stack_id = $1 AND s.user_id = $2`,
       [stackId, userId]
     );
-    const total = Number(result.rows[0]?.['total'] ?? 0);
-    const versionCount = Number(result.rows[0]?.['version_count'] ?? 0);
+    const row = requireRecord(result.rows[0]);
+    const total = parseNumber(row.total);
+    const versionCount = parseNumber(row.version_count);
     if (total === 1 && versionCount === 0) {
       await this.pool.query(
         `DELETE FROM document_stack_members m
