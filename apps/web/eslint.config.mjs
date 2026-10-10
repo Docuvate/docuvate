@@ -19,4 +19,12 @@ export default [
       '@typescript-eslint/no-invalid-void-type': 'off',
     },
   },
+  {
+    files: ['src/components/search/GlobalSearch.tsx'],
+    rules: {
+      // Modal palette: backdrop click-to-close and dialog key handling match main UX.
+      'jsx-a11y/no-static-element-interactions': 'off',
+      'jsx-a11y/no-noninteractive-element-interactions': 'off',
+    },
+  },
 ];

@@ -59,7 +59,9 @@ export function UploadFileTrigger({
         aria-label={t('upload.chooseFilesAria')}
         disabled={disabled && !onDisabledClick}
         onChange={(e) => {
-          if (e.target.files?.length) processFiles(e.target.files);
+          if (e.target.files?.length) {
+            processFiles(e.target.files);
+          }
           e.target.value = '';
         }}
       />

@@ -336,14 +336,9 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
         ? createPortal(
             <div
               className={`global-search-backdrop${narrowTopbar ? ' global-search-backdrop--narrow' : ''}`}
+              onMouseDown={closePalette}
+              role="presentation"
             >
-              <button
-                type="button"
-                className="global-search-backdrop-dismiss"
-                aria-label={t('search.closePalette')}
-                onMouseDown={closePalette}
-              />
-              {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions -- dialog handles palette keyboard and blocks backdrop close */}
               <div
                 ref={dialogRef}
                 className="global-search-palette"
@@ -351,11 +346,9 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 role="dialog"
                 aria-modal="true"
                 aria-label={t('search.paletteTitle')}
-                tabIndex={-1}
                 onMouseDown={(e) => { e.stopPropagation(); }}
                 onKeyDown={onPaletteKeyDown}
               >
-              {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions */}
                 <div className="global-search-palette-input-row">
                   <Search size={20} strokeWidth={1.75} aria-hidden />
                   <input
