@@ -226,7 +226,13 @@ async function warmupLayoutCompare(page, documentId) {
 
 async function enterCompareMode(page) {
   await page.getByRole('button', { name: /^vergleich$/i }).click();
-  await page.getByTestId('layout-compare-stage').waitFor({ state: 'visible', timeout: 300_000 });
+  const stage = page.getByTestId('layout-compare-stage');
+  await stage.waitFor({ state: 'attached', timeout: 300_000 });
+  await stage.scrollIntoViewIfNeeded();
+  await page.locator('[data-testid="layout-compare-stage"] img').first().waitFor({
+    state: 'visible',
+    timeout: 300_000,
+  });
 }
 
 async function stubUnreliableReconstruction(page, documentId) {
@@ -343,7 +349,7 @@ async function main() {
       if ((await compare.getAttribute('aria-pressed')) !== 'true') {
         throw new Error('Compare mode not active');
       }
-      await p.getByTestId('layout-compare-stage').waitFor({ state: 'visible' });
+      await p.locator('[data-testid="layout-compare-stage"] img').first().waitFor({ state: 'visible' });
       const text = await p.locator('.layout-compare-ssim-summary').textContent();
       if (!text?.includes('SSIM')) {
         throw new Error('layout compare SSIM summary missing');
