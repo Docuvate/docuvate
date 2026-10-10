@@ -54,7 +54,7 @@ def test_invoice_vendor_suggestion_fixture_date_and_amount() -> None:
             "Rechnungsdatum: 15.03.2026",
             "Closed-Form Document Layout Classification",
             "with Certified Coarse-to-Fine Abstention",
-            "Thomas Faust",
+            "Jonas Demo",
             "Kurzer Absender: Demo Nord GmbH",
             "Bruttobetrag: 12.500,00 EUR",
         ]

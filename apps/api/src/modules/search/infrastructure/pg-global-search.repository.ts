@@ -34,6 +34,15 @@ const PER_GROUP_LIMIT = 8;
 const LEXICAL_CANDIDATE_CAP = 64;
 const EMBED_CANDIDATE_CAP = Number(process.env['GLOBAL_SEARCH_EMBED_CANDIDATE_CAP'] ?? 24);
 
+/** pg_advisory_xact_lock class id for document_text_chunks reindex (per document_id). */
+const DOCUMENT_TEXT_CHUNK_INDEX_LOCK_HI = 0x44544348;
+
+function documentTextChunkIndexLockKey(documentId: string): { high: number; low: number } {
+  const hex = documentId.replace(/-/g, '');
+  const low = Number.parseInt(hex.slice(0, 8), 16) | 0;
+  return { high: DOCUMENT_TEXT_CHUNK_INDEX_LOCK_HI, low };
+}
+
 function escapeTsToken(term: string): string {
   return term.replace(/[&|!():*'"]/g, ' ').trim();
 }
@@ -99,17 +108,31 @@ export class PgGlobalSearchRepository {
     chunks: TextChunkSpan[],
     embeddings?: number[][] | undefined
   ): Promise<void> {
-    await this.pool.query(`DELETE FROM document_text_chunks WHERE document_id = $1`, [documentId]);
-    for (let i = 0; i < chunks.length; i += 1) {
-      const chunk = chunks[i]!;
-      const embeddingJson = embeddings?.[i] != null ? JSON.stringify(embeddings[i]) : null;
-      await this.pool.query(
-        `INSERT INTO document_text_chunks (
-           document_id, chunk_index, body, page, char_start, char_end, embedding, updated_at
-         )
-         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, now())`,
-        [documentId, i, chunk.body, chunk.page, chunk.charStart, chunk.charEnd, embeddingJson]
-      );
+    const client = await this.pool.connect();
+    const lockKey = documentTextChunkIndexLockKey(documentId);
+    try {
+      await client.query('BEGIN');
+      await client.query(`SELECT pg_advisory_xact_lock($1, $2)`, [lockKey.high, lockKey.low]);
+      await client.query(`DELETE FROM document_text_chunks WHERE document_id = $1`, [documentId]);
+      for (let i = 0; i < chunks.length; i += 1) {
+        const chunk = chunks[i]!;
+        const embeddingJson = embeddings?.[i] != null ? JSON.stringify(embeddings[i]) : null;
+        await client.query(
+          `INSERT INTO document_text_chunks (
+             document_id, chunk_index, body, page, char_start, char_end, embedding, updated_at
+           )
+           VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, now())`,
+          [documentId, i, chunk.body, chunk.page, chunk.charStart, chunk.charEnd, embeddingJson]
+        );
+      }
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+    for (const chunk of chunks) {
       await this.upsertVocabularyTerms(userId, chunk.body, 'chunk');
     }
     const fullText = chunks.map((c) => c.body).join(' ');
