@@ -9,27 +9,25 @@ import type { TagWriteOptions, TaxonomyRepository } from '../../../shared/domain
 import {
   parseBoolean,
   parseEnum,
-  parseOptionalNumber,
   parseOptionalString,
   parseString,
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import type {
-  CorrespondentEntity,
-  TagEntity,
-  TagSuggestionEntity,
-} from '../domain/taxonomy.entity.js';
 import {
   parseTagSuggestionDecisionTier,
   parseTagSuggestionSource,
 } from '../../labels/domain/tag-suggestion-parsing.js';
 import { tagSuggestionJoinRowSchema } from '../../labels/domain/tag-suggestion-row.schema.js';
+import type {
+  CorrespondentEntity,
+  TagEntity,
+  TagSuggestionEntity,
+} from '../domain/taxonomy.entity.js';
 
 const INBOX_NAME = 'Posteingang';
 
 const MATCHING_ALGORITHMS: readonly MatchingAlgorithm[] = ['none', 'any', 'all', 'exact', 'regex'];
-const TAG_SUGGESTION_SOURCES: readonly ('rule' | 'embedding')[] = ['rule', 'embedding'];
 
 @Injectable()
 export class PgTaxonomyRepository implements TaxonomyRepository {
@@ -282,7 +280,7 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       const parsed = tagSuggestionJoinRowSchema.parse(row);
       return {
         tag: this.mapTagFromJoinRow(parsed),
-        reason: typeof parsed.reason === 'string' ? parsed.reason : String(parsed.reason ?? ''),
+        reason: typeof parsed.reason === 'string' ? parsed.reason : '',
         confidence:
           parsed.confidence === null || parsed.confidence === undefined
             ? undefined

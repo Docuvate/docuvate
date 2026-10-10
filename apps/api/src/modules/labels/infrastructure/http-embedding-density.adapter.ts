@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
-import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import { z } from 'zod';
+
+import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 import {
   type EmbeddingDensityWorkerState,
   embeddingDensityWorkerStateSchema,
   parseEmbeddingDensityClassifyWire,
-  parseEmbeddingDensityWorkerState,
 } from '../domain/embedding-density-worker-state.schema.js';
 
 const workerStateEnvelopeSchema = z.object({
@@ -29,11 +29,11 @@ export interface EmbeddingDensityClassifyResult {
 @Injectable()
 export class HttpEmbeddingDensityAdapter {
   private workerUrl(): string {
-    return process.env['WORKER_URL'] ?? 'http://localhost:8000';
+    return process.env.WORKER_URL ?? 'http://localhost:8000';
   }
 
   private secret(): string {
-    return process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
+    return process.env.WORKER_SECRET ?? 'worker-shared-secret';
   }
 
   async classify(
@@ -49,7 +49,7 @@ export class HttpEmbeddingDensityAdapter {
       body: JSON.stringify({ state, vector }),
     });
     if (!response.ok) {
-      throw new Error(`Worker embedding-density classify failed: ${response.status}`);
+      throw new Error(`Worker embedding-density classify failed: ${String(response.status)}`);
     }
     const data: unknown = await response.json();
     const parsed = parseEmbeddingDensityClassifyWire(data);
@@ -88,7 +88,7 @@ export class HttpEmbeddingDensityAdapter {
       }),
     });
     if (!response.ok) {
-      throw new Error(`Worker embedding-density calibrate failed: ${response.status}`);
+      throw new Error(`Worker embedding-density calibrate failed: ${String(response.status)}`);
     }
     const data: unknown = await response.json();
     const envelope = z
@@ -120,7 +120,7 @@ export class HttpEmbeddingDensityAdapter {
       }),
     });
     if (!response.ok) {
-      throw new Error(`Worker embedding-density train failed: ${response.status}`);
+      throw new Error(`Worker embedding-density train failed: ${String(response.status)}`);
     }
     const data: unknown = await response.json();
     const parsed = workerStateEnvelopeSchema.parse(data);
@@ -141,7 +141,7 @@ export class HttpEmbeddingDensityAdapter {
       body: JSON.stringify({ state, vector, target_label_id: targetLabelId }),
     });
     if (!response.ok) {
-      throw new Error(`Worker embedding-density correct failed: ${response.status}`);
+      throw new Error(`Worker embedding-density correct failed: ${String(response.status)}`);
     }
     const data: unknown = await response.json();
     return workerStateEnvelopeSchema.parse(data).state;

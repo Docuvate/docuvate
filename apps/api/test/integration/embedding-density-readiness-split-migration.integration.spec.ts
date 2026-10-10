@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { DataSource } from 'typeorm';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
 import { getIntegrationPool } from './pg-pool.js';
 

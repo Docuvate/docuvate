@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { TagsEntity } from './tags.entity.js';
+
 import { EmbeddingDensityCalibrationRunEntity } from './embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityLabelGroupEntity } from './embedding-density-label-group.entity.js';
+import { TagsEntity } from './tags.entity.js';
 
 @Entity('embedding_density_decision_threshold', { schema: 'public' })
 export class EmbeddingDensityDecisionThresholdEntity {

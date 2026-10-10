@@ -1,33 +1,35 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+
 import { DataSource } from 'typeorm';
-import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { RecordEmbeddingDensityCorrectionUseCase } from '../../src/modules/labels/application/record-embedding-density-correction.use-case.js';
+import type { EmbeddingDensityWorkerState } from '../../src/modules/labels/domain/embedding-density-worker-state.schema.js';
+import { EmbeddingDensityCalibrationQueueService } from '../../src/modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
+import { HttpEmbeddingDensityAdapter } from '../../src/modules/labels/infrastructure/http-embedding-density.adapter.js';
 import { PgEmbeddingDensityRepository } from '../../src/modules/labels/infrastructure/pg-embedding-density.repository.js';
-import { EmbeddingDensityUserStateEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-user-state.entity.js';
+import { DocumentEmbeddingsEntity } from '../../src/shared/infrastructure/database/entities/document-embeddings.entity.js';
+import { EmbeddingDensityCalibrationRunEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
-import { EmbeddingDensityDecisionThresholdEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-decision-threshold.entity.js';
-import { EmbeddingDensityLabelGroupMemberEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-label-group-member.entity.js';
 import { EmbeddingDensityCorrectionEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-correction.entity.js';
 import { EmbeddingDensityCorrectionOffsetEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-correction-offset.entity.js';
-import { EmbeddingDensityCalibrationRunEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
+import { EmbeddingDensityDecisionThresholdEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-decision-threshold.entity.js';
 import { EmbeddingDensityLabelGroupEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-label-group.entity.js';
-import { DocumentEmbeddingsEntity } from '../../src/shared/infrastructure/database/entities/document-embeddings.entity.js';
+import { EmbeddingDensityLabelGroupMemberEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-label-group-member.entity.js';
+import { EmbeddingDensityUserStateEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-user-state.entity.js';
 import { TagsEntity } from '../../src/shared/infrastructure/database/entities/tags.entity.js';
-import type { EmbeddingDensityWorkerState } from '../../src/modules/labels/domain/embedding-density-worker-state.schema.js';
-import { RecordEmbeddingDensityCorrectionUseCase } from '../../src/modules/labels/application/record-embedding-density-correction.use-case.js';
-import { HttpEmbeddingDensityAdapter } from '../../src/modules/labels/infrastructure/http-embedding-density.adapter.js';
-import { EmbeddingDensityCalibrationQueueService } from '../../src/modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
+import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
+import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
   insertSyntheticUser,
   newIsolationUserId,
 } from './pg-test-isolation.js';
-import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 
 class FakeEmbeddingDensityWorker implements Pick<HttpEmbeddingDensityAdapter, 'correct'> {
-  async correct(
+  correct(
     state: EmbeddingDensityWorkerState,
     vector: number[],
     targetLabelId: string
@@ -36,7 +38,7 @@ class FakeEmbeddingDensityWorker implements Pick<HttpEmbeddingDensityAdapter, 'c
     next.kernel.points.push(vector);
     const offset = state.label_ids.map((id) => (id === targetLabelId ? 1 : -1));
     next.kernel.label_offsets.push(offset);
-    return next;
+    return Promise.resolve(next);
   }
 }
 
@@ -44,8 +46,8 @@ class NoOpCalibrationQueue implements Pick<
   EmbeddingDensityCalibrationQueueService,
   'scheduleUserCalibration'
 > {
-  async scheduleUserCalibration(_userId: string): Promise<void> {
-    return undefined;
+  scheduleUserCalibration(): Promise<void> {
+    return Promise.resolve();
   }
 }
 
@@ -170,7 +172,7 @@ describe('PgEmbeddingDensityRepository org isolation (Testcontainers Postgres)',
       new FakeEmbeddingDensityWorker(),
       new NoOpCalibrationQueue()
     );
-    process.env['EMBEDDING_DENSITY_SUGGESTIONS_ENABLED'] = 'true';
+    process.env.EMBEDDING_DENSITY_SUGGESTIONS_ENABLED = 'true';
     await correction.recordLabelCorrection({
       userId: userA,
       documentId: docA,

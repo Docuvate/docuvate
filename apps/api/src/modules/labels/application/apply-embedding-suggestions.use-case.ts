@@ -15,9 +15,9 @@ import {
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import { cosineSimilarity } from '../domain/cosine.js';
-import { ApplyEmbeddingDensitySuggestionsUseCase } from './apply-embedding-density-suggestions.use-case.js';
-import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
+import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
+import { ApplyEmbeddingDensitySuggestionsUseCase } from './apply-embedding-density-suggestions.use-case.js';
 
 const MAX_SUGGESTIONS = 5;
 const REJECT_PENALTY = 0.04;

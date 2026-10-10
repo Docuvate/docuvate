@@ -4,8 +4,8 @@ import { z } from 'zod';
 
 export const trainingExampleRawRowSchema = z.object({
   embedding: z.unknown(),
-  tagId: z.string().uuid(),
-  documentId: z.string().uuid(),
+  tagId: z.uuid(),
+  documentId: z.uuid(),
 });
 
 export type TrainingExampleRawRow = z.infer<typeof trainingExampleRawRowSchema>;

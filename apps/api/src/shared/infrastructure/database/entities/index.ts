@@ -23,6 +23,13 @@ import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidat
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
 import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
 import { DocumentExtractionBlocksEntity } from './document-extraction-blocks.entity.js';
+import { DocumentFieldValuesEntity } from './document-field-values.entity.js';
+import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
+import { DocumentLayoutIrPagesEntity } from './document-layout-ir-pages.entity.js';
+import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
+import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
+import { DocumentTextChunksEntity } from './document-text-chunks.entity.js';
+import { DocumentsEntity } from './documents.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from './embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from './embedding-density-class-niw.entity.js';
 import { EmbeddingDensityCorrectionEntity } from './embedding-density-correction.entity.js';
@@ -31,13 +38,6 @@ import { EmbeddingDensityDecisionThresholdEntity } from './embedding-density-dec
 import { EmbeddingDensityLabelGroupEntity } from './embedding-density-label-group.entity.js';
 import { EmbeddingDensityLabelGroupMemberEntity } from './embedding-density-label-group-member.entity.js';
 import { EmbeddingDensityUserStateEntity } from './embedding-density-user-state.entity.js';
-import { DocumentFieldValuesEntity } from './document-field-values.entity.js';
-import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
-import { DocumentLayoutIrPagesEntity } from './document-layout-ir-pages.entity.js';
-import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
-import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
-import { DocumentTextChunksEntity } from './document-text-chunks.entity.js';
-import { DocumentsEntity } from './documents.entity.js';
 import { ExtractionArenaRatingComparedEnginesEntity } from './extraction-arena-rating-compared-engines.entity.js';
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 import { ExtractionFieldCorrectionLabelsEntity } from './extraction-field-correction-labels.entity.js';
@@ -179,14 +179,6 @@ export {
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
   DocumentEmbeddingsEntity,
-  EmbeddingDensityCalibrationRunEntity,
-  EmbeddingDensityClassNiwEntity,
-  EmbeddingDensityCorrectionEntity,
-  EmbeddingDensityCorrectionOffsetEntity,
-  EmbeddingDensityDecisionThresholdEntity,
-  EmbeddingDensityLabelGroupEntity,
-  EmbeddingDensityLabelGroupMemberEntity,
-  EmbeddingDensityUserStateEntity,
   DocumentExtractionBlocksEntity,
   DocumentFieldValuesEntity,
   DocumentLayoutIrEntity,
@@ -195,6 +187,14 @@ export {
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,
   DocumentTextChunksEntity,
+  EmbeddingDensityCalibrationRunEntity,
+  EmbeddingDensityClassNiwEntity,
+  EmbeddingDensityCorrectionEntity,
+  EmbeddingDensityCorrectionOffsetEntity,
+  EmbeddingDensityDecisionThresholdEntity,
+  EmbeddingDensityLabelGroupEntity,
+  EmbeddingDensityLabelGroupMemberEntity,
+  EmbeddingDensityUserStateEntity,
   ExtractionArenaRatingComparedEnginesEntity,
   ExtractionArenaRatingsEntity,
   ExtractionFieldCorrectionLabelsEntity,

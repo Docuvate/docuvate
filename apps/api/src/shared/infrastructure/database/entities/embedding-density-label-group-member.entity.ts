@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { TagsEntity } from './tags.entity.js';
+
 import { EmbeddingDensityLabelGroupEntity } from './embedding-density-label-group.entity.js';
+import { TagsEntity } from './tags.entity.js';
 
 @Entity('embedding_density_label_group_member', { schema: 'public' })
 export class EmbeddingDensityLabelGroupMemberEntity {
