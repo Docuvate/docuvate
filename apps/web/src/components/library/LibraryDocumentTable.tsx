@@ -100,10 +100,13 @@ export function LibraryDocumentTable({
     });
     setStackMembers((prev) => {
       let changed = false;
-      const next: Record<string, DuplicateStackMemberDto[]> = {};
+      const next: Partial<Record<string, DuplicateStackMemberDto[]>> = {};
       for (const id of Object.keys(prev)) {
         if (stackPrimaryIds.has(id)) {
-          next[id] = prev[id];
+          const members = prev[id];
+          if (members !== undefined) {
+            next[id] = members;
+          }
         } else {
           changed = true;
         }
