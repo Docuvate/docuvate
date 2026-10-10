@@ -18,6 +18,7 @@ import { authClient } from '../../lib/auth-client';
 import { performSignOut } from '../../lib/authSignOut';
 import { persistUserUiPreference } from '../../lib/persistUserUiPreference';
 import { routes } from '../../lib/routes';
+import { trimOptionalString } from '../../lib/trimOptionalString';
 import { useDocuvateTheme } from '../../lib/useDocuvateTheme';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { ThemePreferencePicker } from './ThemePreferencePicker';
@@ -82,8 +83,8 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
     triggerRef.current?.focus();
   }, []);
 
-  const displayName = user?.name.trim();
-  const email = user?.email.trim();
+  const displayName = trimOptionalString(user?.name);
+  const email = trimOptionalString(user?.email);
   const initials = userInitials(user);
 
   useLayoutEffect(() => {

@@ -222,8 +222,8 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
         onKeyDown(event);
       }
     };
-    document.addEventListener('keydown', listener, true);
-    return () => { document.removeEventListener('keydown', listener, true); };
+    window.addEventListener('keydown', listener);
+    return () => { window.removeEventListener('keydown', listener); };
   }, [closePalette, openPalette, paletteOpen]);
 
   useEffect(() => {

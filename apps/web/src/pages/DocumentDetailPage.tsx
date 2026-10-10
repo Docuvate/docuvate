@@ -164,10 +164,11 @@ export function DocumentDetailPage() {
     }
   }, [session, doc]);
 
-  const isPdf = doc?.mimeType === 'application/pdf';
-  const isImage = doc?.mimeType.startsWith('image/') ?? false;
+  const mimeType = doc?.mimeType;
+  const isPdf = mimeType === 'application/pdf';
+  const isImage = mimeType?.startsWith('image/') ?? false;
   const isPlainText =
-    doc?.mimeType === 'text/plain' || (doc?.mimeType.startsWith('text/plain;') ?? false);
+    mimeType === 'text/plain' || (mimeType?.startsWith('text/plain;') ?? false);
 
   const load = useCallback(async () => {
     if (!id) return;
