@@ -2,21 +2,23 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock } from '@docuvate/contracts';
 
+import { isRecord } from './apiErrors';
+
 const LINE_Y_TOLERANCE = 0.014;
 
 export function normalizeExtractionBlock(raw: unknown): ExtractionBlock | null {
-  if (!raw || typeof raw !== 'object') return null;
-  const row = raw as Record<string, unknown>;
-  const page = Number(row.page);
-  const x = Number(row.x);
-  const y = Number(row.y);
-  const width = Number(row.width);
-  const height = Number(row.height);
-  const text = String(row.text ?? '').trim();
+  if (!isRecord(raw)) return null;
+  const page = Number(raw.page);
+  const x = Number(raw.x);
+  const y = Number(raw.y);
+  const width = Number(raw.width);
+  const height = Number(raw.height);
+  const textValue = raw.text;
+  const text = typeof textValue === 'string' ? textValue.trim() : '';
   if (!Number.isFinite(page) || page < 1 || !text) return null;
   if (![x, y, width, height].every(Number.isFinite)) return null;
 
-  const blockIndexRaw = row.blockIndex ?? row.block_index;
+  const blockIndexRaw = raw.blockIndex ?? raw.block_index;
   const blockIndex =
     blockIndexRaw === undefined || blockIndexRaw === null ? undefined : Number(blockIndexRaw);
 
@@ -51,9 +53,9 @@ export function groupBlocksIntoLines(blocks: ExtractionBlock[], page: number): E
 
   const lines: ExtractionBlock[][] = [];
   for (const block of sorted) {
-    const last = lines[lines.length - 1];
-    if (last && Math.abs(last[0].y - block.y) <= LINE_Y_TOLERANCE) {
-      last.push(block);
+    const lastLine = lines.at(-1);
+    if (lastLine && Math.abs(lastLine[0].y - block.y) <= LINE_Y_TOLERANCE) {
+      lastLine.push(block);
     } else {
       lines.push([block]);
     }

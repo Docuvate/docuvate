@@ -4,6 +4,7 @@ import type { CustomFieldType, TagCustomFieldDefinitionDto } from '@docuvate/con
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { parseCustomFieldType } from '../../lib/customFieldType';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
@@ -87,7 +88,7 @@ export function LabelCustomFieldsEditor({
                 {t('labelCustomFields.columnType')}
                 <Select
                   value={row.fieldType}
-                  onChange={(value) => { updateRow(index, { fieldType: value as CustomFieldType }); }}
+                  onChange={(value) => { updateRow(index, { fieldType: parseCustomFieldType(value) }); }}
                   options={fieldTypes.map((opt) => ({ value: opt.value, label: opt.label }))}
                   aria-label={t('labelCustomFields.fieldTypeAria')}
                 />

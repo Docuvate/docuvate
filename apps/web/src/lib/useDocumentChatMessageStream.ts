@@ -1,36 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type {
-  DocumentChatMessageRecordDto,
-  DocumentChatMessageStreamEvent,
-} from '@docuvate/contracts';
+import type { DocumentChatMessageRecordDto } from '@docuvate/contracts';
 import { useCallback, useEffect, useRef } from 'react';
 
 import { apiBaseUrl, authHeaders } from './api';
+import { parseSseChatStreamChunk, readChatMessagesFromListResponse } from './chatStreamParse';
 
 type MessageUpdater = (message: DocumentChatMessageRecordDto) => void;
-
-function parseSseChunk(buffer: string): { events: DocumentChatMessageStreamEvent[]; rest: string } {
-  const events: DocumentChatMessageStreamEvent[] = [];
-  const parts = buffer.split('\n\n');
-  const rest = parts.pop() ?? '';
-  for (const part of parts) {
-    const line = part.split('\n').find((l) => l.startsWith('data:'));
-    if (!line) {
-      continue;
-    }
-    const json = line.slice(5).trim();
-    if (!json) {
-      continue;
-    }
-    try {
-      events.push(JSON.parse(json) as DocumentChatMessageStreamEvent);
-    } catch {
-      /* ignore malformed chunks */
-    }
-  }
-  return { events, rest };
-}
 
 export function useDocumentChatMessageStream(
   documentId: string,
@@ -61,8 +37,8 @@ export function useDocumentChatMessageStream(
           if (!res.ok) {
             return;
           }
-          const data = (await res.json()) as { messages: DocumentChatMessageRecordDto[] };
-          const message = data.messages.find((m) => m.id === messageId);
+          const data: unknown = await res.json();
+          const message = readChatMessagesFromListResponse(data).find((m) => m.id === messageId);
           if (message) {
             onUpdate(message);
             if (message.generationStatus === 'done' || message.generationStatus === 'failed') {
@@ -109,13 +85,13 @@ export function useDocumentChatMessageStream(
           const decoder = new TextDecoder();
           let buffer = '';
 
-          while (true) {
+          for (;;) {
             const { done, value } = await reader.read();
             if (done) {
               break;
             }
             buffer += decoder.decode(value, { stream: true });
-            const parsed = parseSseChunk(buffer);
+            const parsed = parseSseChatStreamChunk(buffer);
             buffer = parsed.rest;
             for (const event of parsed.events) {
               onUpdate(event.message);

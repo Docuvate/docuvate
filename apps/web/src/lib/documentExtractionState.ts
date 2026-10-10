@@ -9,7 +9,7 @@ export function hasExtractedContent(
   doc: Pick<DocumentDto, 'extraction'>,
   blocks: ExtractionBlock[]
 ): boolean {
-  const text = doc.extraction?.text?.trim() ?? '';
+  const text = doc.extraction?.text.trim() ?? '';
   if (text.length > 0) return true;
   const fromBlocks = textFromExtractionBlocks(blocks).trim();
   return fromBlocks.length > 0 || blocks.length > 0;

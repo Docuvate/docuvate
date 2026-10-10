@@ -43,11 +43,11 @@ const STAGE_PERCENT: Record<ExtractionProgressStageId, number> = {
 };
 
 function hasOcrPayload(doc: Pick<DocumentDto, 'extraction'>): boolean {
-  const text = doc.extraction?.text?.trim() ?? '';
+  const text = doc.extraction?.text.trim() ?? '';
   if (text.length > 0) return true;
   const blocks = doc.extraction?.blocks?.length ?? 0;
   if (blocks > 0) return true;
-  const fields = doc.extraction?.fields?.length ?? 0;
+  const fields = doc.extraction?.fields.length ?? 0;
   return fields > 0;
 }
 

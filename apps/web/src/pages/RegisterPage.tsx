@@ -53,7 +53,7 @@ export function RegisterPage() {
       </div>
       <Card className="auth-card">
         <h1>{t('auth.registerTitle')}</h1>
-        <form onSubmit={onSubmit} className="stack" noValidate>
+        <form onSubmit={(e) => void onSubmit(e)} className="stack" noValidate>
           <label>
             {t('auth.name')}
             <Input

@@ -174,7 +174,6 @@ export function DocumentLayoutWorkspace({
       const index = findBlockIndexAtPoint(blocks, page, nx, ny);
       if (index < 0) return;
       const block = blocks[index];
-      if (!block) return;
       onActiveBlockIndexChange(index);
       onHighlightBlocks([block]);
       const irOverlay = overlayForExtractionBlock(overlays, block.blockIndex ?? index);
@@ -270,7 +269,7 @@ export function DocumentLayoutWorkspace({
             </div>
           </div>
 
-          {showRecovery && onRequeueExtraction ? (
+          {showRecovery ? (
             <DocumentExtractionRecovery
               doc={doc}
               requeueBusy={requeueBusy}
@@ -358,7 +357,7 @@ export function DocumentLayoutWorkspace({
               onHighlightBlocks={onHighlightBlocks}
               onBlocksChange={onBlocksChange}
               onActiveBlockIndexChange={onActiveBlockIndexChange}
-              documentTitle={doc.title ?? doc.filename}
+              documentTitle={doc.title || doc.filename}
               textOnly
             />
             {blocksDirty ? (
@@ -375,7 +374,7 @@ export function DocumentLayoutWorkspace({
       {layoutIr ? (
         <DocumentLayoutSidePanel
           documentId={doc.id}
-          documentTitle={doc.title ?? doc.filename}
+          documentTitle={doc.title || doc.filename}
           layoutIr={layoutIr}
           fields={fields}
           blocks={blocks}

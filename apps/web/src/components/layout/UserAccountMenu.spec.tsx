@@ -70,7 +70,8 @@ describe('UserAccountMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: /user menu/i }));
     const panel = document.body.querySelector('.user-account-menu-panel--portal');
     expect(panel).not.toBeNull();
-    fireEvent.mouseDown(panel!);
+    if (!panel) throw new Error('expected portaled menu panel');
+    fireEvent.mouseDown(panel);
     expect(document.body.querySelector('.user-account-menu-panel--portal')).not.toBeNull();
   });
 

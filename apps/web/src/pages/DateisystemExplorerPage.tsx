@@ -1,6 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { type DragEvent,useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  type DragEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useParams } from 'react-router-dom';
 
@@ -16,6 +23,7 @@ import {
 import { UploadQueueList } from '../components/upload/UploadQueueList';
 import { bulkDocuments, createFolder, createMappe, deleteFolder, updateFolder } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
+import { dateisystemSidebarWidthStyle } from '../lib/cssCustomProperties';
 import { isDocumentDrag, readDocumentDragIds } from '../lib/documentDnD';
 import {
   type DocumentUploadAssignment,
@@ -349,7 +357,7 @@ function DateisystemExplorerLayout({
 
   function onContentDrop(event: DragEvent) {
     if (!showDocuments || !dropTarget.enabled) return;
-    if (isFileDrag(event.dataTransfer) && event.dataTransfer?.files.length) {
+    if (isFileDrag(event.dataTransfer) && event.dataTransfer.files.length) {
       event.preventDefault();
       enqueueFiles(event.dataTransfer.files, dropTarget.assignment);
       return;
@@ -377,7 +385,7 @@ function DateisystemExplorerLayout({
       <DateisystemFolderEmptyState
         folderLabel={activeFolderTarget.label}
         onAddExisting={() => {
-          if (!activeFolderTarget?.folderId) return;
+          if (!activeFolderTarget.folderId) return;
           setAddExistingTarget({
             folderId: activeFolderTarget.folderId,
             label: activeFolderTarget.label,
@@ -398,7 +406,7 @@ function DateisystemExplorerLayout({
 
       <div
         className="dateisystem-shell"
-        style={{ ['--dateisystem-sidebar-width' as string]: `${String(sidebarWidth)}px` }}
+        style={dateisystemSidebarWidthStyle(sidebarWidth)}
       >
         <aside className="dateisystem-sidebar" aria-label={t('filesystem.treePanelAria')}>
           <div className="dateisystem-sidebar-head">
@@ -423,12 +431,10 @@ function DateisystemExplorerLayout({
           />
         </aside>
 
-        <div
+        <button
+          type="button"
           className="dateisystem-split-handle"
-          role="separator"
-          aria-orientation="vertical"
           aria-label={t('filesystem.resizeSidebar')}
-          tabIndex={0}
           onMouseDown={onResizeStart}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft') {
@@ -449,10 +455,14 @@ function DateisystemExplorerLayout({
             onCreateFolder={onToolbarCreateFolder}
             onAddExistingDocuments={
               activeFolderTarget?.folderId
-                ? () => { setAddExistingTarget({
-                      folderId: activeFolderTarget.folderId!,
+                ? () => {
+                    const folderId = activeFolderTarget.folderId;
+                    if (!folderId) return;
+                    setAddExistingTarget({
+                      folderId,
                       label: activeFolderTarget.label,
-                    }); }
+                    });
+                  }
                 : undefined
             }
             uploadDisabledTitle={

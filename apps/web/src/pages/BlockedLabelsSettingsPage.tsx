@@ -76,7 +76,7 @@ export function BlockedLabelsSettingsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     void load();
@@ -247,7 +247,7 @@ export function BlockedLabelsSettingsPage() {
       ) : null}
 
       <Card className="blocked-labels-panel">
-        <form className="blocked-labels-add" onSubmit={onAdd}>
+        <form className="blocked-labels-add" onSubmit={(e) => void onAdd(e)}>
           <div className="blocked-labels-add-field">
             <label className="blocked-labels-add-label" htmlFor="blocked-label-phrase-input">
               {t('settings.blockedLabels.addLabel')}

@@ -7,19 +7,15 @@ import {
   duplicateStackVersionLabel,
   showDuplicateStackBadge,
 } from '../components/library/duplicateStackLabel';
+import { minimalDocumentDto } from '../test-utils/minimalDocumentDto';
 
 function docWithVersions(count: number): DocumentDto {
-  return {
+  return minimalDocumentDto({
     id: '1',
     filename: 'x.pdf',
     title: 'X',
-    status: 'ready',
-    mimeType: 'application/pdf',
-    tags: [],
-    createdAt: '',
-    updatedAt: '',
     duplicateStack: count > 0 ? { versionCount: count, pendingReview: false } : null,
-  } as DocumentDto;
+  });
 }
 
 const t = (_key: 'library.stackVersionBadge', { count }: { count: number }) => `${String(count)} Versionen`;

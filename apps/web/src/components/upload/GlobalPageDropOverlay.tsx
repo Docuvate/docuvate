@@ -66,7 +66,7 @@ export function GlobalPageDropOverlay() {
       aria-label={dropTarget.overlayTitle}
       onDragOver={(e) => {
         e.preventDefault();
-        if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+        e.dataTransfer.dropEffect = 'copy';
       }}
     >
       <div className="page-drop-overlay-panel">

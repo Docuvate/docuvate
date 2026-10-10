@@ -12,6 +12,7 @@ import {
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
+import { readNotifySavedDetail,readNotifySaveErrorDetail } from '../../lib/customEventDetail';
 import { ToastItem } from './ToastItem';
 
 type ToastKind = 'success' | 'error';
@@ -120,11 +121,13 @@ export function ToastGlobalBridge() {
 
   useEffect(() => {
     function onSaved(e: Event) {
-      const detail = (e as CustomEvent<{ message?: string }>).detail;
-      pushSuccess(detail?.message);
+      const detail = readNotifySavedDetail(e);
+      if (!detail) return;
+      pushSuccess(detail.message);
     }
     function onError(e: Event) {
-      const detail = (e as CustomEvent<{ message: string; retry?: () => void }>).detail;
+      const detail = readNotifySaveErrorDetail(e);
+      if (!detail) return;
       pushError(detail.message, detail.retry);
     }
     window.addEventListener('docuvate-notify-saved', onSaved);

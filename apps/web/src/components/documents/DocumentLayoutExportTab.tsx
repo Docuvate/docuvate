@@ -69,35 +69,27 @@ export function DocumentLayoutExportTab({
     [documentId, documentTitle, pushError, pushSuccess, t]
   );
 
-  const formats = useMemo(
-    () =>
-      [
-        hasLayoutIr
-          ? {
-              id: 'typst-semantic' as ExportFormat,
-              title: t('documents.layoutExportTypstSemantisch'),
-              description: t('documents.layoutExportSemanticHint'),
-            }
-          : null,
-        hasLayoutIr
-          ? {
-              id: 'typst-exact' as ExportFormat,
-              title: t('documents.layoutExportTypstExakt'),
-              description: t('documents.layoutExportExactHint'),
-            }
-          : null,
-        {
-          id: 'markdown' as ExportFormat,
-          title: t('documents.layoutExportMarkdown'),
-          description: t('documents.layoutExportMarkdownHint'),
-        },
-      ].filter(Boolean) as {
-        id: ExportFormat;
-        title: string;
-        description: string;
-      }[],
-    [hasLayoutIr, t]
-  );
+  const formats = useMemo(() => {
+    const items: { id: ExportFormat; title: string; description: string }[] = [];
+    if (hasLayoutIr) {
+      items.push({
+        id: 'typst-semantic',
+        title: t('documents.layoutExportTypstSemantisch'),
+        description: t('documents.layoutExportSemanticHint'),
+      });
+      items.push({
+        id: 'typst-exact',
+        title: t('documents.layoutExportTypstExakt'),
+        description: t('documents.layoutExportExactHint'),
+      });
+    }
+    items.push({
+      id: 'markdown',
+      title: t('documents.layoutExportMarkdown'),
+      description: t('documents.layoutExportMarkdownHint'),
+    });
+    return items;
+  }, [hasLayoutIr, t]);
 
   async function onSelectFormat(id: ExportFormat) {
     if (id === 'typst-semantic') {

@@ -144,5 +144,5 @@ export function formatAuthClientError(error: unknown, context: AuthErrorContext)
     return i18n.t(mappedKey);
   }
 
-  return i18n.t(CONTEXT_FALLBACK_KEYS[context] ?? 'auth.errors.generic');
+  return i18n.t(CONTEXT_FALLBACK_KEYS[context]);
 }

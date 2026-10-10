@@ -20,10 +20,11 @@ import { defaultLabelColor } from '../../lib/defaultLabelColor';
 import { labelMatchHintKey, labelMatchPlaceholderKey } from '../../lib/labelAssignmentMatchCopy';
 import {
   applyLabelAssignmentMode,
+  isLabelMatchAssignmentMode,
   LABEL_ASSIGNMENT_MODES,
-  type LabelAssignmentMode,
   labelAssignmentModeLabelKey,
   labelAssignmentModeNeedsMatchText,
+  parseLabelAssignmentMode,
   readLabelAssignmentModeFromForm,
 } from '../../lib/labelAssignmentMode';
 import { routes } from '../../lib/routes';
@@ -57,14 +58,14 @@ export function LabelsPage() {
     } finally {
       setLoading(false);
     }
-  }, [t]);
+  }, []);
 
   const insights = useLabelsInsights(loadTags);
 
   useEffect(() => {
     void loadTags();
     void insights.load();
-  }, [loadTags, insights.load]);
+  }, [loadTags, insights]);
 
   function startCreate(name?: string) {
     setEditingId('new');
@@ -107,14 +108,13 @@ export function LabelsPage() {
   }
 
   const error = pageError ?? insights.error;
-  const tagColorById = useMemo(
-    () =>
-      Object.fromEntries(tags.map((tag) => [tag.id, tag.color ?? defaultLabelColor])) as Record<
-        string,
-        string
-      >,
-    [tags]
-  );
+  const tagColorById = useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const tag of tags) {
+      out[tag.id] = tag.color ?? defaultLabelColor;
+    }
+    return out;
+  }, [tags]);
   const showEmptyHint =
     !loading &&
     tags.filter((tag) => !tag.isInbox).length === 0 &&
@@ -122,6 +122,10 @@ export function LabelsPage() {
     insights.queueItems.length === 0;
   const assignmentMode = readLabelAssignmentModeFromForm(form);
   const showMatchText = labelAssignmentModeNeedsMatchText(assignmentMode);
+  const matchHintKey =
+    showMatchText && isLabelMatchAssignmentMode(assignmentMode)
+      ? labelMatchHintKey(assignmentMode)
+      : null;
 
   return (
     <div className="page labels-page" data-ux="page">
@@ -180,7 +184,7 @@ export function LabelsPage() {
       {editingId ? (
         <Card className="ordnung-form-card label-editor-card">
           <h2>{editingId === 'new' ? t('labels.createTitle') : t('labels.editTitle')}</h2>
-          <form onSubmit={onSubmit} className="stack ordnung-form">
+          <form onSubmit={(e) => void onSubmit(e)} className="stack ordnung-form">
             <label className="label-editor-field">
               {t('labels.name')}
               <Input
@@ -201,8 +205,9 @@ export function LabelsPage() {
               {t('labels.matchingAlgorithm')}
               <Select
                 value={assignmentMode}
-                onChange={(value) => { setForm(applyLabelAssignmentMode(value as LabelAssignmentMode, form)); }
-                }
+                onChange={(value) => {
+                  setForm(applyLabelAssignmentMode(parseLabelAssignmentMode(value), form));
+                }}
                 options={LABEL_ASSIGNMENT_MODES.map((mode) => ({
                   value: mode,
                   label: t(labelAssignmentModeLabelKey(mode)),
@@ -221,12 +226,14 @@ export function LabelsPage() {
                   aria-hidden={!showMatchText}
                   tabIndex={showMatchText ? 0 : -1}
                   onChange={(e) => { setForm({ ...form, match: e.target.value }); }}
-                  placeholder={t(labelMatchPlaceholderKey(assignmentMode))}
+                  placeholder={
+                    isLabelMatchAssignmentMode(assignmentMode)
+                      ? t(labelMatchPlaceholderKey(assignmentMode))
+                      : undefined
+                  }
                 />
-                {showMatchText && labelMatchHintKey(assignmentMode) ? (
-                  <span className="muted label-editor-match-hint">
-                    {t(labelMatchHintKey(assignmentMode)!)}
-                  </span>
+                {matchHintKey ? (
+                  <span className="muted label-editor-match-hint">{t(matchHintKey)}</span>
                 ) : null}
               </label>
             </div>

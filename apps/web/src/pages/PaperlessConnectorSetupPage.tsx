@@ -121,7 +121,7 @@ export function PaperlessConnectorSetupPage() {
     try {
       const installations = await listConnectorInstallations();
       const row = installations.find((item) => item.id === installationId) ?? null;
-      if (!row || row.pluginId !== 'paperless') {
+      if (row?.pluginId !== 'paperless') {
         setInstallationMeta(null);
         return;
       }

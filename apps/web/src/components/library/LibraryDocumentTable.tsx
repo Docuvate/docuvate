@@ -101,7 +101,7 @@ export function LibraryDocumentTable({
       const next: Record<string, DuplicateStackMemberDto[]> = {};
       for (const id of Object.keys(prev)) {
         if (stackPrimaryIds.has(id)) {
-          next[id] = prev[id]!;
+          next[id] = prev[id];
         } else {
           changed = true;
         }
@@ -152,11 +152,9 @@ export function LibraryDocumentTable({
       if (stack) {
         setStackMembers((prev) => ({ ...prev, [doc.id]: stack.members }));
       } else {
-        setStackMembers((prev) => {
-          const copy = { ...prev };
-          delete copy[doc.id];
-          return copy;
-        });
+        setStackMembers((prev) =>
+          Object.fromEntries(Object.entries(prev).filter(([key]) => key !== doc.id))
+        );
       }
     },
     [expandedIds]
@@ -178,11 +176,9 @@ export function LibraryDocumentTable({
           next.delete(primaryDocId);
           return next;
         });
-        setStackMembers((prev) => {
-          const copy = { ...prev };
-          delete copy[primaryDocId];
-          return copy;
-        });
+        setStackMembers((prev) =>
+          Object.fromEntries(Object.entries(prev).filter(([key]) => key !== primaryDocId))
+        );
       } else if (stack) {
         setStackMembers((prev) => ({ ...prev, [primaryDocId]: stack.members }));
       }
@@ -243,23 +239,22 @@ export function LibraryDocumentTable({
                 .join(' ');
 
               return (
-                <li key={doc.id} className={rowClassName}>
-                  <article
-                    className="library-doc-stack-item-inner"
-                    tabIndex={0}
-                    aria-current={rowSelected ? 'true' : undefined}
-                    onContextMenu={(event) => { onContextMenu(event, doc.id); }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
-                        onContextMenuKeyboard(event, doc.id);
-                      }
-                    }}
-                  >
+                <li
+                  key={doc.id}
+                  className={rowClassName}
+                  onContextMenu={(event) => { onContextMenu(event, doc.id); }}
+                >
+                  <article className="library-doc-stack-item-inner">
                     <div className="library-doc-stack-primary">
                       <input
                         type="checkbox"
                         checked={selected.has(doc.id)}
                         onChange={() => { onToggleSelect(doc.id); }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+                            onContextMenuKeyboard(event, doc.id);
+                          }
+                        }}
                         aria-label={`${doc.title} auswählen`}
                       />
                       <div className="library-doc-stack-text">
@@ -422,7 +417,7 @@ export function LibraryDocumentTable({
               const stackLabel = duplicateStackVersionLabel(doc, t);
               const hasStack = showDuplicateStackBadge(doc);
               const expanded = expandedIds.has(doc.id);
-              const members = stackMembers[doc.id]?.filter((m) => m.role === 'version') ?? [];
+              const members = stackMembers[doc.id].filter((m) => m.role === 'version');
 
               const rowSelected = selected.has(doc.id);
               const rowContextOpen = contextMenuDocumentId === doc.id;
@@ -444,7 +439,7 @@ export function LibraryDocumentTable({
                     onDragStart={
                       enableDocumentDrag
                         ? (event) => {
-                            if (event.dataTransfer) setDocumentDragData(event.dataTransfer, doc.id);
+                            setDocumentDragData(event.dataTransfer, doc.id);
                           }
                         : undefined
                     }

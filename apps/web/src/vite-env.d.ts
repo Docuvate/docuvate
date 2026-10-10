@@ -7,6 +7,8 @@ declare const __DOCUVATE_BUILD_SHA__: string;
 interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
   readonly VITE_BUILD_SHA?: string;
+  readonly VITE_DOCUVATE_BUILD_SHA?: string;
+  readonly VITE_CONNECTORS_OAUTH_SETUP_DOC_URL?: string;
 }
 
 interface ImportMeta {

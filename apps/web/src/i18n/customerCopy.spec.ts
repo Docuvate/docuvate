@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
+import { isRecord } from '../lib/apiErrors';
 import de from './locales/de.json';
 import en from './locales/en.json';
 
@@ -16,8 +17,8 @@ function collectStrings(value: unknown, out: string[]): void {
     for (const item of value) collectStrings(item, out);
     return;
   }
-  if (value && typeof value === 'object') {
-    for (const v of Object.values(value as Record<string, unknown>)) {
+  if (isRecord(value)) {
+    for (const v of Object.values(value)) {
       collectStrings(v, out);
     }
   }

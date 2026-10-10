@@ -93,7 +93,7 @@ export function useLabelsInsights(onReloadTags: () => Promise<void>) {
         .then((map) => {
           setCoverageSummary(map.coverageSummary ?? null);
           setMapEmptyReason(map.emptyReason ?? null);
-          setExtractedDocumentCount(map.extractedDocumentCount ?? 0);
+          setExtractedDocumentCount(map.extractedDocumentCount);
         })
         .catch((err: unknown) => {
           setCoverageSummary(null);

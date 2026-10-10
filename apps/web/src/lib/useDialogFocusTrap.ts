@@ -25,7 +25,7 @@ export function useDialogFocusTrap(
       }
       const nodes = container.querySelectorAll<HTMLElement>(FOCUSABLE);
       const cancelLike = [...nodes].find((el) => el.dataset.dialogInitialFocus === 'cancel');
-      (cancelLike ?? nodes[0])?.focus();
+      (cancelLike ?? nodes[0]).focus();
     };
 
     const raf = requestAnimationFrame(focusInitial);

@@ -12,9 +12,9 @@ describe('verifyPasswordResetToken', () => {
   it('returns valid when API responds with valid true', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
+      vi.fn(() => ({
         ok: true,
-        json: async () => ({ valid: true }),
+        json: () => ({ valid: true }),
       }))
     );
     await expect(verifyPasswordResetToken('abc')).resolves.toEqual({ valid: true });
@@ -23,9 +23,9 @@ describe('verifyPasswordResetToken', () => {
   it('returns invalid on HTTP errors', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
+      vi.fn(() => ({
         ok: false,
-        json: async () => ({ valid: true }),
+        json: () => ({ valid: true }),
       }))
     );
     await expect(verifyPasswordResetToken('abc')).resolves.toEqual({ valid: false });

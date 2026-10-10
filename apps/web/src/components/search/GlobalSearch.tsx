@@ -65,7 +65,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   const abortRef = useRef<AbortController | null>(null);
 
   const { data: session } = authClient.useSession();
-  const userId = session?.user?.id;
+  const userId = session?.user.id;
 
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [triggerFocused, setTriggerFocused] = useState(false);
@@ -185,11 +185,19 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   }, []);
 
   useEffect(() => {
+    function isTypingTarget(target: EventTarget | null): boolean {
+      if (!(target instanceof HTMLElement)) {
+        return false;
+      }
+      return (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable
+      );
+    }
+
     function onKeyDown(e: globalThis.KeyboardEvent) {
-      const target = e.target as HTMLElement | null;
-      const typing =
-        target &&
-        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      const typing = isTypingTarget(e.target);
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         openPalette();
@@ -204,8 +212,13 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
         closePalette();
       }
     }
-    window.addEventListener('keydown', onKeyDown as unknown as EventListener);
-    return () => { window.removeEventListener('keydown', onKeyDown as unknown as EventListener); };
+    const listener = (event: Event) => {
+      if (event instanceof KeyboardEvent) {
+        onKeyDown(event);
+      }
+    };
+    window.addEventListener('keydown', listener);
+    return () => { window.removeEventListener('keydown', listener); };
   }, [closePalette, openPalette, paletteOpen]);
 
   useEffect(() => {
@@ -256,7 +269,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
     }
   }
 
-  function onPaletteKeyDown(e: KeyboardEvent<HTMLDivElement>) {
+  function onPaletteKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setActiveId((prev) => movePaletteSelection(flatItems, prev, 'next'));
@@ -318,9 +331,13 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
         ? createPortal(
             <div
               className={`global-search-backdrop${narrowTopbar ? ' global-search-backdrop--narrow' : ''}`}
-              onMouseDown={closePalette}
-              role="presentation"
             >
+              <button
+                type="button"
+                className="global-search-backdrop-dismiss"
+                aria-label={t('search.closePalette')}
+                onMouseDown={closePalette}
+              />
               <div
                 ref={dialogRef}
                 className="global-search-palette"
@@ -328,8 +345,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 role="dialog"
                 aria-modal="true"
                 aria-label={t('search.paletteTitle')}
-                onMouseDown={(e) => { e.stopPropagation(); }}
-                onKeyDown={onPaletteKeyDown}
+                tabIndex={-1}
               >
                 <div className="global-search-palette-input-row">
                   <Search size={20} strokeWidth={1.75} aria-hidden />
@@ -344,6 +360,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                     aria-activedescendant={activeId ?? undefined}
                     role="combobox"
                     aria-expanded
+                    onKeyDown={onPaletteKeyDown}
                   />
                   <button
                     type="button"
@@ -501,8 +518,10 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                               type="button"
                               className="global-search-show-all"
                               onClick={() => {
+                                const href = group.showAllHref;
+                                if (!href) return;
                                 closePalette();
-                                navigate(group.showAllHref!);
+                                navigate(href);
                               }}
                             >
                               {t('search.showAll', { count: group.total })}
@@ -573,13 +592,13 @@ function GlobalSearchResultRow({ hit }: { hit: GlobalSearchHitDto }) {
                 <span>{hit.matchedFieldLabel}: </span>
                 <GlobalSearchHighlight
                   text={hit.snippet}
-                  spans={hit.snippetHighlightSpans ?? hit.highlightSpans}
+                  spans={hit.snippetHighlightSpans}
                 />
               </>
             ) : (
               <GlobalSearchHighlight
                 text={hit.snippet}
-                spans={hit.snippetHighlightSpans ?? hit.highlightSpans}
+                spans={hit.snippetHighlightSpans}
               />
             )}
           </span>

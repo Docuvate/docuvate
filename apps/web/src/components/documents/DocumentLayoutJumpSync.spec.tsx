@@ -33,16 +33,21 @@ vi.mock('../../lib/useDocumentLayoutIr', () => ({
   }),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, opts?: Record<string, unknown>) => {
-      if (key === 'documents.layoutTableLabel' && opts && 'n' in opts) {
-        return `Table ${String(opts.n)}`;
-      }
-      return key;
-    },
-  }),
-}));
+vi.mock('react-i18next', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-i18next')>();
+  return {
+    ...actual,
+    useTranslation: () => ({
+      t: (key: string, opts?: Record<string, unknown>) => {
+        if (key === 'documents.layoutTableLabel' && opts && 'n' in opts) {
+          return `Table ${String(opts.n)}`;
+        }
+        return key;
+      },
+      i18n: { language: 'de' },
+    }),
+  };
+});
 
 import { DocumentLayoutSidePanel } from './DocumentLayoutSidePanel';
 
@@ -105,9 +110,7 @@ describe('Document layout jump sync', () => {
     );
     const outlineBtn = screen.getByText('Section');
     fireEvent.click(outlineBtn);
-    expect(onOverlaySelect).toHaveBeenCalled();
-    const [, page] = onOverlaySelect.mock.calls[0];
-    expect(page).toBe(2);
+    expect(onOverlaySelect).toHaveBeenCalledWith(expect.anything(), 2);
   });
 
   it('moves focus across tabs with arrow keys', () => {

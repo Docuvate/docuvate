@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { folderDepth } from '../../lib/folderDepth';
 import { sortByNameDe } from '../../lib/ordnerTree';
+import { useAutofocusOnMount } from '../../lib/useAutofocusOnMount';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 
@@ -50,6 +51,7 @@ export function FolderTargetPickerDialog({
 }: FolderTargetPickerDialogProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
+  const searchInputRef = useAutofocusOnMount<HTMLInputElement>();
   const options = useMemo(() => buildFolderOptions(mappen, folders), [mappen, folders]);
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -70,23 +72,18 @@ export function FolderTargetPickerDialog({
       </h2>
       <p className="muted confirm-dialog-desc">{t('filesystem.pickUploadFolderHint')}</p>
       <Input
+        ref={searchInputRef}
         value={query}
         onChange={(e) => { setQuery(e.target.value); }}
         placeholder={t('filesystem.treeSearchPlaceholder')}
         aria-label={t('filesystem.treeSearchAria')}
-        autoFocus
       />
-      <ul
-        className="folder-picker-list"
-        role="listbox"
-        aria-label={t('filesystem.pickUploadFolderTitle')}
-      >
+      <ul className="folder-picker-list" aria-label={t('filesystem.pickUploadFolderTitle')}>
         {filtered.map((option) => (
           <li key={option.folderId}>
             <button
               type="button"
               className="folder-picker-option"
-              role="option"
               onClick={() => { onPick(option); }}
             >
               {option.label}

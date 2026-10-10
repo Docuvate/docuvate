@@ -30,7 +30,7 @@ interface LibraryContextMenuState {
 }
 
 export function useLibraryDocumentContextMenu(data: LibraryData) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { selectForContextMenu, runBulk, selected, items, tags, folders, mappen, bulkBusy } = data;
   const navigate = useNavigate();
   const contextMenuAnchorRef = useRef<HTMLElement | null>(null);
@@ -85,7 +85,11 @@ export function useLibraryDocumentContextMenu(data: LibraryData) {
       if (!(anchor instanceof HTMLElement)) {
         return;
       }
-      const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+      const action = event.currentTarget;
+      if (!(action instanceof HTMLElement)) {
+        return;
+      }
+      const rect = action.getBoundingClientRect();
       openDocumentContextMenuAt(anchor, documentId, rect.left, rect.bottom);
     },
     [openDocumentContextMenuAt]
@@ -110,7 +114,7 @@ export function useLibraryDocumentContextMenu(data: LibraryData) {
       singleFallback: t('library.contextMenuSingleFallback'),
       multiple: (count) => t('library.contextMenuMultiple', { count }),
     });
-  }, [contextMenu, items, t, i18n.language]);
+  }, [contextMenu, items, t]);
 
   const contextMenuItems = useMemo(() => {
     if (!contextMenu) return [];
@@ -141,18 +145,7 @@ export function useLibraryDocumentContextMenu(data: LibraryData) {
       },
       t
     );
-  }, [
-    contextMenu,
-    items,
-    tags,
-    folders,
-    mappen,
-    runBulk,
-    navigate,
-    closeContextMenu,
-    t,
-    i18n.language,
-  ]);
+  }, [contextMenu, items, tags, folders, mappen, runBulk, navigate, closeContextMenu, t]);
 
   const requestBulkDelete = useCallback((count: number) => {
     setBulkDeleteConfirmCount(count);

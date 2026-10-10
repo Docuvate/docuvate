@@ -105,7 +105,9 @@ function firstEnabledIndex(options: SelectOption[]): number {
 function nextEnabledIndex(options: SelectOption[], from: number, delta: 1 | -1): number {
   if (options.length === 0) return 0;
   let i = from;
-  for (let step = 0; step < options.length; step += 1) {
+  let steps = 0;
+  while (steps < options.length) {
+    steps += 1;
     i = (i + delta + options.length) % options.length;
     if (!options[i]?.disabled) return i;
   }
@@ -166,7 +168,8 @@ export function Select({
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      const target = e.target as Node;
+      const target = e.target;
+      if (!(target instanceof Node)) return;
       if (rootRef.current?.contains(target)) return;
       if (menuRef.current?.contains(target)) return;
       setOpen(false);
@@ -249,6 +252,7 @@ export function Select({
       <button
         ref={triggerRef}
         type="button"
+        role="combobox"
         className="custom-select-trigger input"
         disabled={disabled}
         aria-label={ariaLabel}
@@ -256,7 +260,10 @@ export function Select({
         aria-expanded={open}
         aria-controls={listId}
         aria-activedescendant={activeOptionId}
-        onClick={() => { open ? closeMenu() : openMenu(); }}
+        onClick={() => {
+          if (open) closeMenu();
+          else openMenu();
+        }}
         onKeyDown={onTriggerKeyDown}
       >
         <span className={selected ? '' : 'muted'}>{selected?.label ?? resolvedPlaceholder}</span>

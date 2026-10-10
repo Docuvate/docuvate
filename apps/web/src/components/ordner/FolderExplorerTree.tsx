@@ -7,7 +7,9 @@ import {
   type FormEvent,
   type KeyboardEvent,
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -78,6 +80,12 @@ export function FolderExplorerTree({
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [rootCreateOpen, setRootCreateOpen] = useState(false);
+  const rootCreateInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (rootCreateOpen) {
+      rootCreateInputRef.current?.focus();
+    }
+  }, [rootCreateOpen]);
   const [rootCreateName, setRootCreateName] = useState('');
   const [dropHighlightId, setDropHighlightId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{
@@ -160,7 +168,7 @@ export function FolderExplorerTree({
       ];
       setContextMenu({ x: event.clientX, y: event.clientY, items });
     },
-    [folders, onAddDocuments, onCreateChildFolder, onDeleteFolder, onRenameFolder, t]
+    [folders, onAddDocuments, onCreateChildFolder, onRenameFolder, t]
   );
 
   const openMappeMenu = useCallback(
@@ -201,7 +209,7 @@ export function FolderExplorerTree({
   function handleFolderDrop(folderId: string, event: DragEvent) {
     event.preventDefault();
     setDropHighlightId(null);
-    if (isFileDrag(event.dataTransfer) && event.dataTransfer?.files.length) {
+    if (isFileDrag(event.dataTransfer) && event.dataTransfer.files.length) {
       onUploadFilesToFolder(folderId, event.dataTransfer.files);
       return;
     }
@@ -221,8 +229,11 @@ export function FolderExplorerTree({
   }
 
   function onTreeKeyDown(event: KeyboardEvent<HTMLElement>) {
-    const target = event.target as HTMLElement | null;
-    const item = target?.closest<HTMLElement>('[data-treeitem-id]');
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
+    const item = target.closest<HTMLElement>('[data-treeitem-id]');
     if (!item) return;
     const id = item.dataset.treeitemId;
     if (!id) return;
@@ -260,11 +271,11 @@ export function FolderExplorerTree({
       {rootCreateOpen ? (
         <form className="dateisystem-tree-root-inline" onSubmit={(e) => void submitRootOrdner(e)}>
           <Input
+            ref={rootCreateInputRef}
             placeholder={t('filesystem.newRootPlaceholder')}
             value={rootCreateName}
             onChange={(e) => { setRootCreateName(e.target.value); }}
             aria-label={t('filesystem.newRootAria')}
-            autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Escape') {
                 e.preventDefault();
@@ -276,12 +287,13 @@ export function FolderExplorerTree({
         </form>
       ) : null}
 
-      <nav
-        className="dateisystem-tree-nav"
-        aria-label={t('filesystem.treeNavAria')}
-        onKeyDown={onTreeKeyDown}
-      >
-        <ul className="sidebar-tree-list dateisystem-tree-list" role="tree">
+      <nav className="dateisystem-tree-nav" aria-label={t('filesystem.treeNavAria')}>
+        <ul
+          className="sidebar-tree-list dateisystem-tree-list"
+          role="tree"
+          tabIndex={0}
+          onKeyDown={onTreeKeyDown}
+        >
           {sortedMappen.map((mappe) => {
             const mappeKey = `m:${mappe.id}`;
             const onPath =
@@ -304,7 +316,13 @@ export function FolderExplorerTree({
             const mappeActive = selection.mappeId === mappe.id;
 
             return (
-              <li key={mappe.id} className="sidebar-tree-item" role="treeitem" aria-expanded={open}>
+              <li
+                key={mappe.id}
+                className="sidebar-tree-item"
+                role="treeitem"
+                aria-expanded={open}
+                aria-selected={mappeActive}
+              >
                 <DateisystemTreeRow
                   to={mappeHref(mappe.id)}
                   isActive={mappeActive}
@@ -387,7 +405,7 @@ export function FolderExplorerTree({
           })}
 
           {looseRoots.length > 0 ? (
-            <li className="sidebar-tree-item dateisystem-tree-loose" role="treeitem">
+            <li className="sidebar-tree-item dateisystem-tree-loose" role="treeitem" aria-selected={false}>
               <span className="dateisystem-tree-loose-label">
                 {t('filesystem.looseFoldersSection')}
               </span>
@@ -520,7 +538,7 @@ function FolderTreeNode({
   }
 
   return (
-    <li className="sidebar-tree-item" role="treeitem" aria-expanded={open}>
+    <li className="sidebar-tree-item" role="treeitem" aria-expanded={open} aria-selected={active}>
       <DateisystemTreeRow
         to={folderHref(folder.id)}
         isActive={active}
@@ -564,9 +582,11 @@ function FolderTreeNode({
                 canAddChild ? undefined : t('filesystem.maxDepthInline', { max: MAX_FOLDER_DEPTH })
               }
               disabled={!canAddChild}
-              onCreate={(name) =>
-                onCreateChildFolder({ mappeId: folder.mappeId!, parentId: folder.id, name })
-              }
+              onCreate={async (name) => {
+                const mappeId = folder.mappeId;
+                if (!mappeId) return;
+                await onCreateChildFolder({ mappeId, parentId: folder.id, name });
+              }}
             />
             <IconButton
               icon={MoreHorizontal}
@@ -624,7 +644,7 @@ function LooseFolderRow({
   const folderKey = `f:${folder.id}`;
   const active = selectionFolderId === folder.id;
   return (
-    <li className="sidebar-tree-item" role="treeitem">
+    <li className="sidebar-tree-item" role="treeitem" aria-selected={active}>
       <DateisystemTreeRow
         to={folderHref(folder.id)}
         isActive={active}
@@ -729,6 +749,12 @@ function TreeAddFolderButton({
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [depthError, setDepthError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (open) {
+      inputRef.current?.focus();
+    }
+  }, [open]);
 
   if (!open) {
     return (
@@ -774,12 +800,12 @@ function TreeAddFolderButton({
         }}
       >
         <input
+          ref={inputRef}
           className="sidebar-inline-input"
           value={name}
           onChange={(e) => { setName(e.target.value); }}
           placeholder={t('filesystem.folderNamePlaceholder')}
           aria-label={t('filesystem.folderNameAria')}
-          autoFocus
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
               e.preventDefault();

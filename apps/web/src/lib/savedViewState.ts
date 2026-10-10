@@ -28,7 +28,7 @@ export function buildSavedViewPayload(
   return {
     name,
     visibility: options.visibility ?? 'private',
-    searchQuery: (options.query || options.filters.q || '').trim(),
+    searchQuery: (options.query || (options.filters.q ?? '')).trim(),
     sort: options.filters.sort ?? 'updatedAt',
     order: options.filters.order ?? 'desc',
     viewMode: options.viewMode,
@@ -72,7 +72,7 @@ export function applySavedViewToLibrary(
     documentDateFrom: view.documentDateFrom ?? undefined,
     documentDateTo: view.documentDateTo ?? undefined,
   };
-  const query = view.searchQuery ?? '';
+  const query = view.searchQuery;
   return {
     filters,
     query,
@@ -96,6 +96,6 @@ export function savedViewToListQuery(view: SavedDocumentViewDto): DocumentListQu
     correspondentId: view.correspondentId ?? undefined,
     documentDateFrom: view.documentDateFrom ?? undefined,
     documentDateTo: view.documentDateTo ?? undefined,
-    q: view.searchQuery?.trim() || undefined,
+    q: view.searchQuery.trim() || undefined,
   };
 }

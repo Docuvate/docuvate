@@ -16,6 +16,7 @@ import {
   markAuthenticatedSessionHint,
 } from '../lib/authSessionHint';
 import { awaitAuthenticatedSession } from '../lib/awaitAuthenticatedSession';
+import { readLocationStateBoolean } from '../lib/routerLocationState';
 import { routes } from '../lib/routes';
 
 export function LoginPage() {
@@ -24,8 +25,7 @@ export function LoginPage() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const formErrorId = useId();
-  const passwordResetSuccess =
-    (location.state as { passwordResetSuccess?: boolean } | null)?.passwordResetSuccess === true;
+  const passwordResetSuccess = readLocationStateBoolean(location.state, 'passwordResetSuccess');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -93,7 +93,7 @@ export function LoginPage() {
             {t('auth.passwordResetSuccessHint')}
           </p>
         ) : null}
-        <form onSubmit={onSubmit} className="stack" noValidate>
+        <form onSubmit={(e) => void onSubmit(e)} className="stack" noValidate>
           <label>
             {t('auth.email')}
             <Input

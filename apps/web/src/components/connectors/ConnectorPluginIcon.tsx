@@ -33,7 +33,7 @@ export function ConnectorPluginIcon({ pluginId, className = '' }: PluginIconProp
   }
 
   return (
-    <div className={tileClass} aria-hidden={alt === '' ? true : undefined}>
+    <div className={tileClass} aria-hidden>
       <img className="connector-plugin-logo" src={src} alt={alt} width={28} height={28} />
     </div>
   );

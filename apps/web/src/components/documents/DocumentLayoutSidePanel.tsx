@@ -77,7 +77,7 @@ export function DocumentLayoutSidePanel({
   }, [overlays]);
 
   const panelFields = useMemo(() => fieldsForLayoutPanel(fields), [fields]);
-  const locale = i18n?.language ?? 'de';
+  const locale = i18n.language;
   const formatFieldValue = useCallback(
     (key: string, value: string) => formatExtractedFieldDisplayValue(key, value, locale),
     [locale]
@@ -182,7 +182,12 @@ export function DocumentLayoutSidePanel({
 
   return (
     <aside className="layout-side-panel" aria-label={t('documents.layoutSidePanelAria')}>
-      <div className="layout-side-tabs" role="tablist" onKeyDown={onTabListKeyDown}>
+      <div
+        className="layout-side-tabs"
+        role="tablist"
+        tabIndex={0}
+        onKeyDown={onTabListKeyDown}
+      >
         {tabs.map((tab) => {
           const selected = activeTab === tab.id;
           return (

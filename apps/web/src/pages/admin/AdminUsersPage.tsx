@@ -38,7 +38,7 @@ export function AdminUsersPage() {
   const { t } = useTranslation();
   const toast = useToast();
   const { data: session } = authClient.useSession();
-  const currentUserId = session?.user?.id ?? null;
+  const currentUserId = session?.user.id ?? null;
   const [users, setUsers] = useState<AdminUserDto[]>([]);
   const [loadError, setLoadError] = useState(false);
   const [reloadBusy, setReloadBusy] = useState(false);
@@ -111,13 +111,7 @@ export function AdminUsersPage() {
   }
 
   function openMenuAction(action: AdminUserMenuAction) {
-    if (action.kind === 'ban' || action.kind === 'unban' || action.kind === 'revoke') {
-      setPending(action);
-      return;
-    }
-    if (action.kind === 'resend-invite' || action.kind === 'revoke-invite') {
-      setPending(action);
-    }
+    setPending(action);
   }
 
   async function confirmPending() {

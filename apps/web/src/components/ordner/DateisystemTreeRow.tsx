@@ -3,6 +3,8 @@
 import type { DragEvent, ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
 
+import { treeDepthStyle } from '../../lib/cssCustomProperties';
+
 const TREE_ICON = 16;
 
 export interface DateisystemTreeRowProps {
@@ -45,7 +47,7 @@ export function DateisystemTreeRow({
   return (
     <div
       className={`dateisystem-tree-row${isActive ? ' is-selected' : ''}${dropTarget ? ' drop-target' : ''}`}
-      style={{ ['--tree-depth' as string]: String(depth) }}
+      style={treeDepthStyle(depth)}
       data-treeitem-id={treeItemId}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}

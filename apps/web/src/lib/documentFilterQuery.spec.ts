@@ -53,7 +53,7 @@ describe('serialize and parse roundtrip', () => {
   });
 
   it('adds and removes multiple labels cleanly', () => {
-    let filters = { tagIds: ['t1'] as string[] | undefined };
+    let filters: { tagIds?: string[] } = { tagIds: ['t1'] };
     let text = serializeDocumentFilterQuery(filters, 'rechnung', tags);
     expect(text).toBe('label:Vertrag rechnung');
 

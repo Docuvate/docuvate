@@ -190,7 +190,7 @@ const CHAT_GENERATION_ERROR_KEYS: Record<string, string> = {
 export function toUserFacingChatGenerationError(
   errorCode: string | null | undefined
 ): UserFacingError {
-  const normalized = errorCode?.trim() || 'unknown';
+  const normalized = errorCode?.trim() ?? 'unknown';
   const i18nKey = CHAT_GENERATION_ERROR_KEYS[normalized] ?? CHAT_GENERATION_ERROR_KEYS.unknown;
   console.warn('[api]', 'chatGeneration', { errorCode: normalized, i18nKey });
   return {

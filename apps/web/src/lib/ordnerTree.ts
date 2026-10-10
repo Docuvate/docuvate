@@ -185,10 +185,11 @@ export function folderSubtreeMatchesSearch(
   const q = query.trim().toLowerCase();
   if (!q) return true;
   if (nodeMatchesQuery(folder.name, q)) return true;
-  if (!folder.mappeId) return false;
+  if (folder.mappeId == null) return false;
+  const mappeId = folder.mappeId;
 
   function walk(parentId: string): boolean {
-    const children = childFolders(folders, { mappeId: folder.mappeId!, parentId });
+    const children = childFolders(folders, { mappeId, parentId });
     for (const child of children) {
       if (nodeMatchesQuery(child.name, q)) return true;
       if (walk(child.id)) return true;

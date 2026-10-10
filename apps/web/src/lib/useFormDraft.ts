@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { defaultFormDraftEqual } from './formDraftEqual';
 
-function serializeBaseline<T>(value: T): string {
+function serializeBaseline(value: unknown): string {
   return JSON.stringify(value);
 }
 
@@ -22,7 +22,7 @@ export function useFormDraft<T>(baseline: T, options?: UseFormDraftOptions<T>) {
     setSaved(baseline);
     setDraft(baseline);
     // baselineKey captures semantic changes; baseline is read from the render that changed the key.
-  }, [baselineKey]);
+  }, [baseline, baselineKey]);
 
   const dirty = useMemo(() => !isEqual(draft, saved), [draft, saved, isEqual]);
 

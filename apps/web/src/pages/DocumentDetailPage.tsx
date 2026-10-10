@@ -42,6 +42,10 @@ import {
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { authClient } from '../lib/auth-client';
+import {
+  readCitationPageFromLocationState,
+  readHighlightBlocksFromLocationState,
+} from '../lib/documentDetailLocationState';
 import { isExtractionPending } from '../lib/documentExtractionState';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import { areBlocksDirty, areFieldsDirty } from '../lib/extractionDirty';
@@ -140,30 +144,30 @@ export function DocumentDetailPage() {
   }, [doc]);
 
   useEffect(() => {
-    const state = location.state as {
-      highlightBlocks?: ExtractionBlock[];
-      citationPage?: number;
-    } | null;
-    if (state?.highlightBlocks?.length) {
-      setHighlightBlocks(state.highlightBlocks);
-    } else if (state?.citationPage != null) {
+    const fromState = readHighlightBlocksFromLocationState(location.state);
+    if (fromState) {
+      setHighlightBlocks(fromState);
+      return;
+    }
+    const citationPage = readCitationPageFromLocationState(location.state);
+    if (citationPage != null) {
       setHighlightBlocks((prev) =>
-        prev.length > 0 ? prev : blocks.filter((b) => b.page === state.citationPage)
+        prev.length > 0 ? prev : blocks.filter((b) => b.page === citationPage)
       );
     }
   }, [location.state, blocks]);
 
   useEffect(() => {
-    const userId = session?.user?.id;
+    const userId = session?.user.id;
     if (userId && doc) {
       pushRecentDocument(userId, { id: doc.id, title: doc.title || doc.filename });
     }
-  }, [session?.user?.id, doc]);
+  }, [session?.user.id, doc]);
 
   const isPdf = doc?.mimeType === 'application/pdf';
-  const isImage = doc?.mimeType?.startsWith('image/') ?? false;
+  const isImage = doc?.mimeType.startsWith('image/') ?? false;
   const isPlainText =
-    doc?.mimeType === 'text/plain' || (doc?.mimeType?.startsWith('text/plain;') ?? false);
+    doc?.mimeType === 'text/plain' || (doc?.mimeType.startsWith('text/plain;') ?? false);
 
   const load = useCallback(async () => {
     if (!id) return;
@@ -243,7 +247,7 @@ export function DocumentDetailPage() {
     void fetchDocumentPreviewBuffer(id, () => fetchDocumentContentBlob(id))
       .then((buffer) => {
         if (cancelled) return;
-        if (buffer && buffer.byteLength > 0) {
+        if (buffer.byteLength > 0) {
           setPreviewData(buffer);
           setPreviewFetchState('ready');
         } else {
@@ -271,7 +275,7 @@ export function DocumentDetailPage() {
       void load().catch(() => undefined);
     }, 3000);
     return () => { window.clearInterval(timer); };
-  }, [id, doc?.status, load]);
+  }, [id, doc, load]);
 
   async function persist(patch?: {
     extractionFields?: ExtractedField[];
@@ -382,10 +386,8 @@ export function DocumentDetailPage() {
   function onPdfPageClick(page: number, nx: number, ny: number) {
     const index = findBlockIndexAtPoint(blocks, page, nx, ny);
     if (index < 0) return;
-    const block = blocks[index];
-    if (!block) return;
     setActiveBlockIndex(index);
-    onHighlightBlocks([block]);
+    onHighlightBlocks([blocks[index]]);
   }
 
   const blocksDirty = areBlocksDirty(blocks, baselineBlocks);

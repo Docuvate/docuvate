@@ -14,7 +14,7 @@ export function docTitleAndFilenameEquivalent(title: string, filename: string): 
 }
 
 export function recommendationDocumentTitle(doc: LabelRecommendationDocumentPreviewDto): string {
-  const rawTitle = doc.title?.trim();
+  const rawTitle = doc.title.trim();
   if (rawTitle) {
     return stripPdfExtension(rawTitle);
   }
@@ -24,7 +24,7 @@ export function recommendationDocumentTitle(doc: LabelRecommendationDocumentPrev
 export function shouldShowRecommendationFilename(
   doc: LabelRecommendationDocumentPreviewDto
 ): boolean {
-  const title = doc.title?.trim();
+  const title = doc.title.trim();
   if (!title) {
     return false;
   }

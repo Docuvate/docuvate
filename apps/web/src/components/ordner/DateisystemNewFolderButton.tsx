@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FolderPlus } from 'lucide-react';
-import { type FormEvent,useState } from 'react';
+import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useAutofocusOnMount } from '../../lib/useAutofocusOnMount';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 
@@ -24,6 +25,7 @@ export function DateisystemNewFolderButton({
   const setOpen = onOpenChange ?? setUncontrolledOpen;
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
+  const nameInputRef = useAutofocusOnMount<HTMLInputElement>();
 
   if (!open) {
     return (
@@ -56,11 +58,11 @@ export function DateisystemNewFolderButton({
   return (
     <form className="dateisystem-toolbar-new-folder" onSubmit={(e) => void submitNewFolder(e)}>
       <Input
+        ref={nameInputRef}
         value={name}
         onChange={(e) => { setName(e.target.value); }}
         placeholder={t('filesystem.folderNamePlaceholder')}
         aria-label={t('filesystem.newRootAria')}
-        autoFocus
         onKeyDown={(e) => {
           if (e.key === 'Escape') {
             e.preventDefault();

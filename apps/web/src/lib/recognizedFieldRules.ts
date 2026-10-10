@@ -28,7 +28,7 @@ export function applyExtractionRuleMode(
         gateLabelIds:
           row.gateLabelIds.length > 0 ? row.gateLabelIds : [...defaults.requiredLabelIds],
         confidenceGateEnabled: true,
-        minLabelConfidence: row.minLabelConfidence ?? defaults.labelFieldConfidenceThreshold,
+        minLabelConfidence: row.minLabelConfidence,
       };
     default: {
       const _exhaustive: never = mode;

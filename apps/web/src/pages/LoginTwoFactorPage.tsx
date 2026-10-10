@@ -25,7 +25,7 @@ export function LoginTwoFactorPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const returnTo = searchParams.get('return') || routes.documents;
+  const returnTo = searchParams.get('return') ?? routes.documents;
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();

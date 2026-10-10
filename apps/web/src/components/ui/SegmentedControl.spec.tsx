@@ -38,7 +38,8 @@ describe('SegmentedControl', () => {
     );
     const group = container.querySelector('[role="radiogroup"]');
     expect(group).not.toBeNull();
-    fireEvent.keyDown(group!, { key: 'ArrowRight' });
+    if (!group) throw new Error('expected radiogroup');
+    fireEvent.keyDown(group, { key: 'ArrowRight' });
     expect(onChange).toHaveBeenCalledWith('b');
   });
 });

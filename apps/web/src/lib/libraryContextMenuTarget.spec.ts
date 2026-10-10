@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { minimalDocumentDto } from '../test-utils/minimalDocumentDto';
 import {
   computeRowAnchoredMenuPosition,
   contextMenuTitleForSelection,
@@ -35,7 +36,11 @@ describe('contextMenuTitleForSelection', () => {
 
   it('uses the document title for a single target', () => {
     expect(
-      contextMenuTitleForSelection(['1'], [{ id: '1', title: 'Vertrag Q4' } as never], labels)
+      contextMenuTitleForSelection(
+        ['1'],
+        [minimalDocumentDto({ id: '1', title: 'Vertrag Q4' })],
+        labels
+      )
     ).toBe('Vertrag Q4');
   });
 

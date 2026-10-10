@@ -24,10 +24,8 @@ export function todoWhyLine(
     const count = Math.min(countA, countB) || countA || countB;
     return t('labels.todoWhyMergeNearName', { count });
   }
-  if (item.kind === 'rename') {
-    return item.reason?.trim() || t('labelRecommendations.typeRename');
-  }
-  return item.reason?.trim() ?? '';
+  const trimmedReason = item.reason.trim();
+  return trimmedReason.length > 0 ? trimmedReason : t('labelRecommendations.typeRename');
 }
 
 export function todoBadgeLabel(item: LabelRecommendationDto, t: TFunction): string {
@@ -42,8 +40,7 @@ export function todoBadgeLabel(item: LabelRecommendationDto, t: TFunction): stri
       return t('labelRecommendations.badgeRename');
     default: {
       const _exhaustive: never = item.kind;
-      _exhaustive;
-      return '';
+      return _exhaustive;
     }
   }
 }
@@ -58,8 +55,9 @@ export function recommendationLabelName(item: LabelRecommendationDto): string {
   if (item.kind === 'rename') {
     return item.proposedName ?? item.currentName ?? item.id;
   }
-  if (item.kind === 'merge' && item.tagNames?.length) {
-    return item.tagNames.join(' / ');
+  const names = item.tagNames;
+  if (names && names.length > 0) {
+    return names.join(' / ');
   }
   return item.id;
 }
@@ -76,8 +74,7 @@ export function todoAcceptActionKey(item: LabelRecommendationDto): string {
       return 'labelRecommendations.renameAction';
     default: {
       const _exhaustive: never = item.kind;
-      _exhaustive;
-      return 'labelRecommendations.acceptAction';
+      return _exhaustive;
     }
   }
 }

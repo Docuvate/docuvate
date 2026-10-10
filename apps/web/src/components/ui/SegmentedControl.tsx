@@ -43,7 +43,7 @@ export function SegmentedControl<T extends string>({
       }
       let targetIndex = index;
       if (!enabledIndexes.includes(targetIndex)) {
-        targetIndex = enabledIndexes[0]!;
+        targetIndex = enabledIndexes[0] ?? 0;
       }
       optionRefs.current[targetIndex]?.focus();
     },
@@ -97,6 +97,7 @@ export function SegmentedControl<T extends string>({
       className={`segmented-control ${className}`.trim()}
       role="radiogroup"
       aria-label={ariaLabel}
+      tabIndex={0}
       onKeyDown={onKeyDown}
     >
       {options.map((option, index) => {

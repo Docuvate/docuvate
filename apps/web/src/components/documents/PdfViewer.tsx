@@ -71,8 +71,8 @@ function appendTextLayer(
     const span = document.createElement('span');
     span.textContent = item.str;
     const tx = pdfjs.Util.transform(viewport.transform, item.transform);
-    const angle = Math.atan2(tx[1], tx[0]);
-    const fontHeight = Math.hypot(tx[2], tx[3]);
+    const angle = Math.atan2(Number(tx[1]), Number(tx[0]));
+    const fontHeight = Math.hypot(Number(tx[2]), Number(tx[3]));
     span.style.left = `${String(tx[4])}px`;
     span.style.top = `${String(tx[5] - fontHeight)}px`;
     span.style.fontSize = `${String(fontHeight)}px`;
@@ -270,6 +270,7 @@ export function PdfViewer({
   const virtualSlotsBuiltRef = useRef(false);
   const virtualIoRef = useRef<IntersectionObserver | null>(null);
   const lastVirtualLayoutKeyRef = useRef<string | null>(null);
+  const effectGenerationRef = useRef(0);
 
   const isControlled = controlledPage !== undefined && onPageChange !== undefined;
   const currentPage = isControlled ? controlledPage : internalPage;
@@ -284,7 +285,7 @@ export function PdfViewer({
   const setPage = useCallback(
     (next: number) => {
       const clamped = Math.min(Math.max(1, next), Math.max(1, pageCount));
-      if (isControlled && onPageChange) {
+      if (isControlled) {
         onPageChange(clamped);
       } else {
         setInternalPage(clamped);
@@ -297,7 +298,7 @@ export function PdfViewer({
     const pagesHost = pagesRef.current;
     if (!pagesHost || (!url && !data)) return;
 
-    let cancelled = false;
+    const generation = ++effectGenerationRef.current;
     pdfDocRef.current = null;
     pagesHost.replaceChildren();
     setLoading(true);
@@ -316,7 +317,7 @@ export function PdfViewer({
         if (!docParams) return;
 
         const pdf = await pdfjs.getDocument(docParams).promise;
-        if (cancelled) return;
+        if (generation !== effectGenerationRef.current) return;
 
         pdfDocRef.current = pdf;
         setPageCount(pdf.numPages);
@@ -328,25 +329,25 @@ export function PdfViewer({
             })
           )
         );
-        if (cancelled) return;
+        if (generation !== effectGenerationRef.current) return;
         setPageSizes(sizes);
         setVirtualRenderWindow(computeVirtualPageWindow([1], pdf.numPages));
         virtualSlotsBuiltRef.current = false;
         setDocToken((t) => t + 1);
       } catch (err) {
-        if (!cancelled) {
+        if (generation === effectGenerationRef.current) {
           setError(formatUserFacingError(err, 'errors.pdfLoadFailed'));
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (generation === effectGenerationRef.current) setLoading(false);
       }
     })();
 
     return () => {
-      cancelled = true;
+      effectGenerationRef.current += 1;
       pdfDocRef.current = null;
     };
-  }, [sourceKey, url, isControlled, t]);
+  }, [sourceKey, url, data, isControlled, t]);
 
   useEffect(() => {
     if (!fitWidth) {
@@ -387,11 +388,11 @@ export function PdfViewer({
     if (!pagesHost || !pdf || pageCount < 1 || docToken === 0) return;
     if (fitWidth && containerWidth == null) return;
 
-    let cancelled = false;
+    const generation = ++effectGenerationRef.current;
 
     void (async () => {
       try {
-        const highlights = highlightBlocks ?? NO_HIGHLIGHTS;
+        const highlights = highlightBlocks;
 
         const scale = await resolveRenderScale(
           pdf,
@@ -406,12 +407,12 @@ export function PdfViewer({
         }
         lastPageRenderKeyRef.current = renderKey;
 
-        if (cancelled) return;
+        if (generation !== effectGenerationRef.current) return;
         const hadPages = pagesHost.childElementCount > 0;
         if (!hadPages) setLoading(true);
 
         const pdfPage = await pdf.getPage(currentPage);
-        if (cancelled) return;
+        if (generation !== effectGenerationRef.current) return;
         const wrap = await renderPdfPage(
           pdfPage,
           currentPage,
@@ -424,20 +425,20 @@ export function PdfViewer({
           (id) => onLayoutOverlaySelectRef.current?.(id),
           (o) => onLayoutOverlayHoverRef.current?.(o)
         );
-        if (cancelled) return;
+        if (generation !== effectGenerationRef.current) return;
         pagesHost.replaceChildren(wrap);
         setRenderedPages(1);
       } catch (err) {
-        if (!cancelled) {
+        if (generation === effectGenerationRef.current) {
           setError(formatUserFacingError(err, 'errors.pdfPageLoadFailed'));
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (generation === effectGenerationRef.current) setLoading(false);
       }
     })();
 
     return () => {
-      cancelled = true;
+      effectGenerationRef.current += 1;
     };
   }, [
     docToken,
@@ -463,7 +464,7 @@ export function PdfViewer({
     if (pageSizes.length < pageCount) return;
     if (fitWidth && containerWidth == null) return;
 
-    let cancelled = false;
+    const generation = ++effectGenerationRef.current;
     void (async () => {
       try {
         const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth);
@@ -478,7 +479,7 @@ export function PdfViewer({
           const slot = document.createElement('div');
           slot.className = 'pdf-page-slot';
           slot.dataset.page = String(pageNum);
-          if (size && size.width > 0) {
+          if (size.width > 0) {
             slot.style.width = `${String(size.width * scale)}px`;
             slot.style.minHeight = `${String(size.height * scale)}px`;
           }
@@ -487,16 +488,16 @@ export function PdfViewer({
         virtualSlotsBuiltRef.current = true;
         setVirtualRenderWindow(computeVirtualPageWindow([currentPage], pageCount));
       } catch (err) {
-        if (!cancelled) {
+        if (generation === effectGenerationRef.current) {
           setError(formatUserFacingError(err, 'errors.pdfPageLoadFailed'));
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (generation === effectGenerationRef.current) setLoading(false);
       }
     })();
 
     return () => {
-      cancelled = true;
+      effectGenerationRef.current += 1;
     };
   }, [
     paginated,
@@ -517,10 +518,10 @@ export function PdfViewer({
     if (!virtualSlotsBuiltRef.current) return;
     if (fitWidth && containerWidth == null) return;
 
-    let cancelled = false;
+    const generation = ++effectGenerationRef.current;
     void (async () => {
       try {
-        const highlights = highlightBlocks ?? NO_HIGHLIGHTS;
+        const highlights = highlightBlocks;
         const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth);
         const renderStamp = `${String(Math.round(scale * 1000))}:${overlayKey}:${highlightKey}`;
 
@@ -544,7 +545,7 @@ export function PdfViewer({
               return;
             }
             const pdfPage = await pdf.getPage(pageNum);
-            if (cancelled) return;
+            if (generation !== effectGenerationRef.current) return;
             const wrap = await renderPdfPage(
               pdfPage,
               pageNum,
@@ -557,23 +558,23 @@ export function PdfViewer({
               (id) => onLayoutOverlaySelectRef.current?.(id),
               (o) => onLayoutOverlayHoverRef.current?.(o)
             );
-            if (cancelled) return;
+            if (generation !== effectGenerationRef.current) return;
             slot.replaceChildren(wrap);
             slot.dataset.renderStamp = renderStamp;
           })
         );
-        if (!cancelled) {
+        if (generation === effectGenerationRef.current) {
           setRenderedPages(virtualRenderWindow.size);
         }
       } catch (err) {
-        if (!cancelled) {
+        if (generation === effectGenerationRef.current) {
           setError(formatUserFacingError(err, 'errors.pdfPageLoadFailed'));
         }
       }
     })();
 
     return () => {
-      cancelled = true;
+      effectGenerationRef.current += 1;
     };
   }, [
     paginated,
@@ -603,7 +604,9 @@ export function PdfViewer({
         const visible = new Set<number>();
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
-          const page = Number((entry.target as HTMLElement).dataset.page);
+          const target = entry.target;
+          if (!(target instanceof HTMLElement)) continue;
+          const page = Number(target.dataset.page);
           if (page > 0) visible.add(page);
         }
         if (visible.size === 0) return;

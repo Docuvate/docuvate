@@ -3,6 +3,7 @@
 import type { CustomFieldType, TagDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
+import { parseCustomFieldType } from '../../lib/customFieldType';
 import type { RecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
 import { deriveKeyFromLabel } from '../../lib/recognizedFieldKey';
 import {
@@ -87,7 +88,7 @@ export function RecognizedFieldRowForm({
           {t('recognizedFields.fieldType')}
           <Select
             value={row.fieldType}
-            onChange={(value) => { patch({ fieldType: value as CustomFieldType }); }}
+            onChange={(value) => { patch({ fieldType: parseCustomFieldType(value) }); }}
             options={FIELD_TYPES.map((type) => ({
               value: type.value,
               label: t(type.labelKey),

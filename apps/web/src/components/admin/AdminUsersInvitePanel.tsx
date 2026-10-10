@@ -4,7 +4,6 @@ import type { InstanceRole } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
 import { parseInstanceRole } from '../../lib/instanceRole';
-
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';

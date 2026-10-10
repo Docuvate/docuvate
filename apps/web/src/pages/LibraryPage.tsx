@@ -16,7 +16,7 @@ import { DocumentUploadProvider } from '../components/upload/DocumentUploadProvi
 import { UploadDropzone } from '../components/UploadDropzone';
 import { resolveLibraryDropTarget } from '../lib/documentUploadAssignment';
 import { countLibraryActiveFilters } from '../lib/libraryActiveFilterCount';
-import { librarySortSelectOptions } from '../lib/librarySortOptions';
+import { librarySortSelectOptions, parseLibrarySortSelectValue } from '../lib/librarySortOptions';
 import { routes } from '../lib/routes';
 import { LibraryPageDocumentSection } from './library/LibraryPageDocumentSection';
 import { useLibraryDocumentContextMenu } from './library/useLibraryDocumentContextMenu';
@@ -97,7 +97,7 @@ export function LibraryPage() {
                   void data
                     .updateActiveSavedView()
                     .then(() => { pushSuccess(t('common.saved')); })
-                    .catch((err) => { pushError(err instanceof Error ? err.message : t('errors.generic')); }
+                    .catch((err: unknown) => { pushError(err instanceof Error ? err.message : t('errors.generic')); }
                     );
                 }}
               >
@@ -111,10 +111,7 @@ export function LibraryPage() {
             <Select
               value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
               onChange={(value) => {
-                const [sort, order] = value.split(':') as [
-                  NonNullable<typeof data.filters.sort>,
-                  'asc' | 'desc',
-                ];
+                const { sort, order } = parseLibrarySortSelectValue(value);
                 data.toggleFilter({ sort, order });
               }}
               options={[...sortOptions]}

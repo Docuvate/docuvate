@@ -72,6 +72,8 @@ export function ConnectorConnectDialog({
     if (plugin.id === 'sftp_fetch') {
       initial.after_import = 'delete';
       initial.poll_interval_seconds = '60';
+      initial.target_folder_id = '';
+      initial.label_ids = '';
     }
     setCredentials(initial);
     setProbeMessage(null);
@@ -86,14 +88,14 @@ export function ConnectorConnectDialog({
   }, [open, plugin?.id]);
 
   async function handleProbeHostKey() {
-    if (!plugin || plugin.id !== 'sftp_fetch') return;
+    if (plugin?.id !== 'sftp_fetch') return;
     setProbeBusy(true);
     setProbeMessage(null);
     try {
       const result = await probeSftpFetchHostKey({
-        host: credentials.host ?? '',
-        port: Number(credentials.port ?? 22) || 22,
-        username: credentials.username ?? '',
+        host: credentials.host,
+        port: Number(credentials.port) || 22,
+        username: credentials.username,
         password: credentials.password || undefined,
         privateKey: credentials.private_key || undefined,
       });
@@ -117,7 +119,7 @@ export function ConnectorConnectDialog({
     if (plugin.auth.strategy === 'oauth2') {
       onOAuthStart?.({
         displayName: displayName.trim(),
-        accountHint: credentials.account_hint?.trim() || undefined,
+        accountHint: credentials.account_hint.trim() || undefined,
       });
       return;
     }
@@ -222,7 +224,7 @@ export function ConnectorConnectDialog({
               <label className="settings-field">
                 {t('connectors.auth.fields.afterImport')} *
                 <Select
-                  value={credentials.after_import ?? 'delete'}
+                  value={credentials.after_import}
                   onChange={(value) => { setCredentials((prev) => ({ ...prev, after_import: value })); }}
                   options={[
                     { value: 'delete', label: t('connectors.plugins.sftpFetch.afterImportDelete') },
@@ -239,7 +241,7 @@ export function ConnectorConnectDialog({
                   step={60}
                   required
                   disabled={busy}
-                  value={credentials.poll_interval_seconds ?? '60'}
+                  value={credentials.poll_interval_seconds}
                   onChange={(e) => { setCredentials((prev) => ({ ...prev, poll_interval_seconds: e.target.value })); }
                   }
                   aria-label={t('connectors.auth.fields.pollIntervalSeconds')}
@@ -248,7 +250,7 @@ export function ConnectorConnectDialog({
               <label className="settings-field">
                 {t('connectors.auth.fields.targetFolderId')}
                 <Select
-                  value={credentials.target_folder_id ?? ''}
+                  value={credentials.target_folder_id}
                   onChange={(value) => { setCredentials((prev) => ({ ...prev, target_folder_id: value })); }
                   }
                   options={[
@@ -263,7 +265,7 @@ export function ConnectorConnectDialog({
                 <select
                   className="input"
                   multiple
-                  value={(credentials.label_ids ?? '').split(',').filter(Boolean)}
+                  value={credentials.label_ids.split(',').filter(Boolean)}
                   disabled={busy}
                   onChange={(e) => {
                     const selected = Array.from(e.target.selectedOptions).map((o) => o.value);

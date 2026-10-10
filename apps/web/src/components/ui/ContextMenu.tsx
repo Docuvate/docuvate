@@ -197,7 +197,10 @@ export function ContextMenu({ open, x, y, items, onClose, anchorRef, title }: Co
       }
     };
     const onPointer = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
+      if (
+        !(event.target instanceof Node) ||
+        !rootRef.current?.contains(event.target)
+      ) {
         onClose();
       }
     };

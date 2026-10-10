@@ -390,7 +390,7 @@ export function ConnectorsPage() {
             <div className="connector-catalog-grid">
               {showSftpScannerCard ? (
                 <SftpScannerIngressSection
-                  viewerIsServerAdmin={catalog.viewerIsServerAdmin ?? false}
+                  viewerIsServerAdmin={catalog.viewerIsServerAdmin}
                 />
               ) : null}
               {sortedFilteredPlugins.map(renderPluginCard)}

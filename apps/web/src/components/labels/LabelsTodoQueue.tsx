@@ -147,8 +147,9 @@ export function LabelsTodoQueue(props: Props) {
   }, [props.items]);
 
   useEffect(() => {
+    const timers = exitTimers.current;
     return () => {
-      for (const timer of exitTimers.current.values()) {
+      for (const timer of timers.values()) {
         clearTimeout(timer);
       }
     };

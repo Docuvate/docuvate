@@ -43,6 +43,26 @@ export function labelAssignmentModeNeedsMatchText(mode: LabelAssignmentMode): bo
   return mode === 'any' || mode === 'all' || mode === 'exact' || mode === 'regex';
 }
 
+export type LabelMatchAssignmentMode = Extract<
+  LabelAssignmentMode,
+  'any' | 'all' | 'exact' | 'regex'
+>;
+
+export function isLabelMatchAssignmentMode(
+  mode: LabelAssignmentMode
+): mode is LabelMatchAssignmentMode {
+  return labelAssignmentModeNeedsMatchText(mode);
+}
+
+export function parseLabelAssignmentMode(value: string): LabelAssignmentMode {
+  for (const mode of LABEL_ASSIGNMENT_MODES) {
+    if (mode === value) {
+      return mode;
+    }
+  }
+  return 'recommend';
+}
+
 export function readLabelAssignmentMode(
   tag: Pick<TagDto, 'isInbox' | 'matchingAlgorithm'>
 ): LabelAssignmentMode {

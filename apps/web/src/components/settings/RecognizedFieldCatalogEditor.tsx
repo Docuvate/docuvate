@@ -257,7 +257,7 @@ export function RecognizedFieldCatalogEditor({
         open={pendingDelete !== null}
         title={t('recognizedFields.deleteFieldTitle')}
         description={t('recognizedFields.deleteFieldDescription', {
-          label: pendingDelete?.label || t('recognizedFields.tableLabelEmpty'),
+          label: pendingDelete?.label ?? t('recognizedFields.tableLabelEmpty'),
         })}
         tone="danger"
         busy={catalogBusy}

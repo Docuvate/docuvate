@@ -121,7 +121,7 @@ export function ResetPasswordPage() {
           </div>
         ) : null}
         {showForm ? (
-          <form onSubmit={onSubmit} className="stack">
+          <form onSubmit={(e) => void onSubmit(e)} className="stack">
             <label>
               {t('auth.newPassword')}
               <Input

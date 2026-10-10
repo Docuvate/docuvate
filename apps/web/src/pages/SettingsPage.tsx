@@ -33,6 +33,7 @@ import { authClient } from '../lib/auth-client';
 import { performSignOut } from '../lib/authSignOut';
 import { chatProviderLabel } from '../lib/chatProviderLabels';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
+import { readLocationStateBoolean } from '../lib/routerLocationState';
 import { routes } from '../lib/routes';
 import { settingsChatStatusPresentation } from '../lib/settingsChatStatus';
 import {
@@ -63,8 +64,7 @@ export function SettingsPage() {
   const [blockedLabelCount, setBlockedLabelCount] = useState<number | null>(null);
 
   useEffect(() => {
-    const state = location.state as { adminDenied?: boolean } | null;
-    if (state?.adminDenied) {
+    if (readLocationStateBoolean(location.state, 'adminDenied')) {
       toast.error(t('admin.accessDeniedToast'));
       navigate(location.pathname, { replace: true, state: null });
     }
@@ -316,7 +316,7 @@ export function SettingsPage() {
           footer={
             <div className="settings-section-card-footer settings-section-card-footer--stack">
               <p className="settings-account-email">
-                {data?.user?.email ?? t('settings.accountLeadFallback')}
+                {data?.user.email ?? t('settings.accountLeadFallback')}
               </p>
               <SettingsCardLink to={routes.settingsAccountSecurity}>
                 {t('settings.accountSecurity.linkCta')}

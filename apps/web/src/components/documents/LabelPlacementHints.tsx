@@ -28,7 +28,7 @@ export function LabelPlacementHints({ document }: { document: DocumentDto }) {
 
   const hints = useMemo(() => {
     const labelSet = new Set(
-      (document.tags ?? []).filter((tag) => !tag.isInbox).map((tag) => normalizeName(tag.name))
+      document.tags.filter((tag) => !tag.isInbox).map((tag) => normalizeName(tag.name))
     );
     if (labelSet.size === 0) return [];
 

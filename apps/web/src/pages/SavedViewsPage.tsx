@@ -25,7 +25,7 @@ export function SavedViewsPage() {
   const { pushSuccess, pushError } = useToastNotify();
   const role = useInstallationRole();
   const { data: sessionData } = authClient.useSession();
-  const currentUserId = sessionData?.user?.id;
+  const currentUserId = sessionData?.user.id;
   const [views, setViews] = useState<SavedDocumentViewDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);

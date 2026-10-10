@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import i18n from '../../i18n';
 import { ConfidenceThresholdSlider } from './ConfidenceThresholdSlider';
 
-i18n.changeLanguage('de');
+void i18n.changeLanguage('de');
 
 describe('ConfidenceThresholdSlider', () => {
   it('renders segmented track markers and zone labels', () => {

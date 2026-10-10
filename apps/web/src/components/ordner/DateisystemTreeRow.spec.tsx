@@ -53,8 +53,10 @@ describe('DateisystemTreeRow', () => {
     const link = lead?.querySelector('a.dateisystem-tree-link');
     expect(chevron).not.toBeNull();
     expect(link).not.toBeNull();
-    const leadChildren = Array.from(lead!.children);
-    const chevronIndex = leadChildren.findIndex((el) => el.contains(chevron!));
+    if (!lead) throw new Error('expected tree row lead');
+    const leadChildren = Array.from(lead.children);
+    if (!chevron) throw new Error('expected chevron');
+    const chevronIndex = leadChildren.findIndex((el) => el.contains(chevron));
     const linkIndex = leadChildren.findIndex((el) => el === link);
     expect(chevronIndex).toBeGreaterThanOrEqual(0);
     expect(chevronIndex).toBeLessThan(linkIndex);

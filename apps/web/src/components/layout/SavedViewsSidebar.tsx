@@ -32,14 +32,7 @@ export function SavedViewsSidebar({ collapsed }: { collapsed: boolean }) {
   }, [reload]);
 
   useEffect(() => {
-    const onChanged = (event: Event) => {
-      const detail = (event as CustomEvent<SavedDocumentViewDto | undefined>).detail;
-      if (detail?.pinnedSidebar) {
-        setViews((prev) => {
-          const merged = [...prev.filter((v) => v.id !== detail.id), detail];
-          return merged.filter((v) => v.pinnedSidebar).sort((a, b) => a.position - b.position);
-        });
-      }
+    const onChanged = () => {
       reload();
     };
     window.addEventListener(SAVED_VIEWS_CHANGED, onChanged);

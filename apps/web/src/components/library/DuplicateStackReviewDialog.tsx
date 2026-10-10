@@ -113,7 +113,7 @@ export function DuplicateStackReviewDialog({
     return () => {
       active = false;
     };
-  }, [primary?.documentId]);
+  }, [primary]);
 
   useEffect(() => {
     if (!version) {
@@ -133,7 +133,7 @@ export function DuplicateStackReviewDialog({
     return () => {
       active = false;
     };
-  }, [version?.documentId]);
+  }, [version]);
 
   const versions = stack?.members.filter((m) => m.role === 'version') ?? [];
 
@@ -241,7 +241,6 @@ export function DuplicateStackReviewDialog({
                   disabled={busy || version.role === 'primary'}
                   onClick={() =>
                     void runAction(async () => {
-                      if (!stack) return;
                       await setDuplicateStackPrimary(
                         primaryDocumentId,
                         stack.stackId,

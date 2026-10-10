@@ -83,8 +83,7 @@ export function LibraryFocusView({
       event.preventDefault();
       const next =
         event.key === 'ArrowDown' ? Math.min(index + 1, items.length - 1) : Math.max(index - 1, 0);
-      const doc = items[next];
-      if (doc) setFocusId(doc.id);
+      setFocusId(items[next].id);
     },
     [items]
   );

@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { LabelAssignmentMode } from './labelAssignmentMode';
+import type { LabelMatchAssignmentMode } from './labelAssignmentMode';
 
-export function labelMatchPlaceholderKey(mode: LabelAssignmentMode): string {
+export type { LabelMatchAssignmentMode };
+
+export function labelMatchPlaceholderKey(mode: LabelMatchAssignmentMode): string {
   switch (mode) {
     case 'any':
       return 'labels.matchPlaceholderAny';
@@ -12,12 +14,14 @@ export function labelMatchPlaceholderKey(mode: LabelAssignmentMode): string {
       return 'labels.matchPlaceholderExact';
     case 'regex':
       return 'labels.matchPlaceholderRegex';
-    default:
-      return 'labels.matchPlaceholderAny';
+    default: {
+      const _exhaustive: never = mode;
+      return _exhaustive;
+    }
   }
 }
 
-export function labelMatchHintKey(mode: LabelAssignmentMode): string | null {
+export function labelMatchHintKey(mode: LabelMatchAssignmentMode): string | null {
   switch (mode) {
     case 'any':
       return 'labels.matchHintAny';
@@ -27,7 +31,9 @@ export function labelMatchHintKey(mode: LabelAssignmentMode): string | null {
       return 'labels.matchHintExact';
     case 'regex':
       return 'labels.matchHintRegex';
-    default:
-      return null;
+    default: {
+      const _exhaustive: never = mode;
+      return _exhaustive;
+    }
   }
 }

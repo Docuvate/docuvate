@@ -59,7 +59,7 @@ export function tagCheckedStateForDocuments(
   if (documents.length === 0) return false;
   let withTag = 0;
   for (const doc of documents) {
-    if (doc.tags?.some((t) => t.id === tagId)) withTag += 1;
+    if (doc.tags.some((t) => t.id === tagId)) withTag += 1;
   }
   if (withTag === 0) return false;
   if (withTag === documents.length) return true;

@@ -31,7 +31,7 @@ export function DateisystemFolderEmptyState({
       if (!dropTarget.enabled || !isFileDrag(event.dataTransfer)) return;
       event.preventDefault();
       setDragActive(false);
-      if (event.dataTransfer?.files.length) {
+      if (event.dataTransfer.files.length) {
         enqueueFiles(event.dataTransfer.files, dropTarget.assignment);
       }
     },

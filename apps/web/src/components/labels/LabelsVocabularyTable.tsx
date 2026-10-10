@@ -56,7 +56,7 @@ export function LabelsVocabularyTable(props: Props) {
     } finally {
       setDeleteBusy(false);
     }
-  }, [confirmTag, props.onDelete]);
+  }, [confirmTag, props]);
 
   return (
     <Card className="labels-vocabulary-card">

@@ -43,7 +43,7 @@ import { applySavedViewToLibrary, buildSavedViewPayload } from '../../lib/savedV
 type SortField = NonNullable<DocumentListQuery['sort']>;
 
 export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-root') {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { folderId, mappeId } = useParams<{ folderId?: string; mappeId?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -123,10 +123,10 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
       const merged: DocumentListQuery = {
         ...filtersRef.current,
         tagId: undefined,
-        inbox: fields.inbox || undefined,
+        inbox: fields.inbox ?? undefined,
         tagIds: fields.tagIds,
         status: fields.status,
-        withoutNonInboxLabel: fields.withoutNonInboxLabel || undefined,
+        withoutNonInboxLabel: fields.withoutNonInboxLabel ?? undefined,
       };
       setFilters(merged);
       const applyFreeText = options?.applyFreeText ?? true;
@@ -244,7 +244,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
         }
       }
     },
-    [listFilters, t]
+    [listFilters]
   );
 
   useEffect(() => {
@@ -394,7 +394,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
     }
     if (mode === 'ordner-root') return t('filesystem.title');
     return t('library.titleDocuments');
-  }, [mode, filters.inbox, folderId, mappeId, folders, mappen, t, i18n.language]);
+  }, [mode, filters.inbox, folderId, mappeId, folders, mappen, t]);
 
   const mappeSubtitle = useMemo(() => {
     if (mode !== 'mappe' || !mappeId) return null;
@@ -408,7 +408,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
       parts.push(t('library.mappeFolderCount', { count: m.folderCount }));
     }
     return parts.join(' · ');
-  }, [mode, mappeId, mappen, t, i18n.language]);
+  }, [mode, mappeId, mappen, t]);
 
   const activeLabelNames = (filters.tagIds ?? [])
     .map((id) => tags.find((tag) => tag.id === id)?.name)

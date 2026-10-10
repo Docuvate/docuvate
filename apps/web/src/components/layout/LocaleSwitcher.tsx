@@ -38,7 +38,7 @@ export function LocaleSwitcher({ placement = 'topbar' }: { placement?: 'topbar' 
     }
     setSaveError(null);
     const previous = current;
-    if (!session?.user?.id) {
+    if (!session?.user.id) {
       void i18n.changeLanguage(code);
       localStorage.setItem(LOCALE_STORAGE_KEY, code);
       return;

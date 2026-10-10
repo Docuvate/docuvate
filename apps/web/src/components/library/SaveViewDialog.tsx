@@ -35,8 +35,15 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
   const [visibility, setVisibility] = useState<'private' | 'shared'>('private');
   const [pinned, setPinned] = useState(false);
   const [busy, setBusy] = useState(false);
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   useDialogFocusTrap(dialogRef, open, cancelRef);
+
+  useEffect(() => {
+    if (open) {
+      nameInputRef.current?.focus();
+    }
+  }, [open]);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -101,14 +108,19 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
       <form className="stack-form save-view-dialog-form" onSubmit={(e) => void onSubmit(e)}>
         <label className="field-label">
           {t('savedViews.nameLabel')}
-          <Input value={name} onChange={(e) => { setName(e.target.value); }} autoFocus required />
+          <Input
+            ref={nameInputRef}
+            value={name}
+            onChange={(e) => { setName(e.target.value); }}
+            required
+          />
         </label>
         {role === 'admin' ? (
           <label className="field-label">
             {t('savedViews.visibilityLabel')}
             <Select
               value={visibility}
-              onChange={(v) => { setVisibility(v as 'private' | 'shared'); }}
+              onChange={(v) => { setVisibility(v === 'shared' ? 'shared' : 'private'); }}
               options={[
                 { value: 'private', label: t('savedViews.visibilityPrivate') },
                 { value: 'shared', label: t('savedViews.visibilityShared') },

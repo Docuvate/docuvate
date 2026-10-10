@@ -5,7 +5,7 @@ import { Filter, Inbox } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import type { DocumentFilterParseIssue } from '../../lib/documentFilterQuery';
-import { documentStatusLabel } from '../../lib/documentStatusLabel';
+import { documentStatusLabel, parseDocumentStatusFilterValue } from '../../lib/documentStatusLabel';
 import type { LibraryFilterMode } from '../../lib/libraryFilterMode';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
@@ -170,10 +170,9 @@ export function LibraryFilterPanel({
                     label: documentStatusLabel(status),
                   })),
                 ]}
-                onChange={(next) => { onToggleFilter({
-                    status: next ? (next as DocumentStatus) : undefined,
-                  }); }
-                }
+                onChange={(next) => {
+                  onToggleFilter({ status: parseDocumentStatusFilterValue(next) });
+                }}
               />
             </div>
           </>

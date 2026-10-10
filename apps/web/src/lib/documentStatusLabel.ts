@@ -34,3 +34,15 @@ export const documentStatusValues: DocumentStatus[] = [
   'ready',
   'failed',
 ];
+
+export function parseDocumentStatusFilterValue(value: string): DocumentStatus | undefined {
+  if (!value) {
+    return undefined;
+  }
+  for (const status of documentStatusValues) {
+    if (status === value) {
+      return status;
+    }
+  }
+  return undefined;
+}

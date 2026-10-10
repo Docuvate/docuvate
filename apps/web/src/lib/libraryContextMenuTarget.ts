@@ -19,7 +19,7 @@ export function contextMenuTitleForSelection(
 ): string {
   if (selectedIds.length === 1) {
     const doc = items.find((item) => item.id === selectedIds[0]);
-    return doc?.title?.trim() || labels.singleFallback;
+    return doc?.title.trim() ?? labels.singleFallback;
   }
   return labels.multiple(selectedIds.length);
 }

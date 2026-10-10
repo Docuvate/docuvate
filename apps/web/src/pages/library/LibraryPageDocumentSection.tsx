@@ -16,7 +16,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ContextMenu } from '../../components/ui/ContextMenu';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { librarySortSelectOptions } from '../../lib/librarySortOptions';
+import { librarySortSelectOptions, parseLibrarySortSelectValue } from '../../lib/librarySortOptions';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import type { useLibraryDocumentContextMenu } from './useLibraryDocumentContextMenu';
 import type { useLibraryPageData } from './useLibraryPageData';
@@ -129,10 +129,7 @@ export function LibraryPageDocumentSection({
                 className="library-toolbar-sort-select"
                 value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
                 onChange={(value) => {
-                  const [sort, order] = value.split(':') as [
-                    NonNullable<typeof data.filters.sort>,
-                    'asc' | 'desc',
-                  ];
+                  const { sort, order } = parseLibrarySortSelectValue(value);
                   data.toggleFilter({ sort, order });
                 }}
                 options={[...sortOptions]}

@@ -4,6 +4,11 @@ import { describe, expect, it } from 'vitest';
 
 import de from '../../i18n/locales/de.json';
 import en from '../../i18n/locales/en.json';
+import { isRecord } from '../../lib/apiErrors';
+
+function readObjectField(obj: object, key: string): unknown {
+  return Reflect.get(obj, key);
+}
 
 const LAYOUT_RENDERED_KEYS = [
   'documents.extractedTextCopyPlain',
@@ -18,8 +23,8 @@ const LAYOUT_RENDERED_KEYS = [
 function getNested(obj: Record<string, unknown>, dotted: string): string | undefined {
   let cur: unknown = obj;
   for (const part of dotted.split('.')) {
-    if (!cur || typeof cur !== 'object') return undefined;
-    cur = (cur as Record<string, unknown>)[part];
+    if (!isRecord(cur)) return undefined;
+    cur = readObjectField(cur, part);
   }
   return typeof cur === 'string' ? cur : undefined;
 }

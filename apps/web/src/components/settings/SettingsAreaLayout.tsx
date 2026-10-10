@@ -6,6 +6,7 @@ import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 import { getAdminAccess } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
+import { readLocationStateBoolean } from '../../lib/routerLocationState';
 import { routes } from '../../lib/routes';
 import { useToast } from '../save/ToastProvider';
 import { SettingsTabBar } from './SettingsTabBar';
@@ -32,8 +33,7 @@ export function SettingsAreaLayout() {
   }, []);
 
   useEffect(() => {
-    const state = location.state as { adminDenied?: boolean } | null;
-    if (state?.adminDenied) {
+    if (readLocationStateBoolean(location.state, 'adminDenied')) {
       toast.error(t('admin.accessDeniedToast'));
       navigate(location.pathname, { replace: true, state: null });
     }

@@ -28,7 +28,7 @@ function resolveWidgetTitle(
   t: (k: string) => string
 ): string {
   if (widget.type === 'saved_view') {
-    const viewId = String(widget.savedViewId ?? '');
+    const viewId = widget.savedViewId ?? '';
     const view = savedViews.find((v) => v.id === viewId);
     if (view?.name) return view.name;
   }
@@ -161,7 +161,7 @@ function DashboardWidgetBody({
 
   useEffect(() => {
     if (widget.type === 'recent_documents' || widget.type === 'attention') {
-      const limit = Number(widget.itemLimit ?? 8);
+      const limit = widget.itemLimit ?? 8;
       void listDocuments({
         sort: widget.type === 'recent_documents' ? 'createdAt' : 'updatedAt',
         order: 'desc',
@@ -179,9 +179,9 @@ function DashboardWidgetBody({
 
   useEffect(() => {
     if (widget.type !== 'saved_view') return;
-    const viewId = String(widget.savedViewId ?? '');
+    const viewId = widget.savedViewId ?? '';
     const known = savedViews.find((v) => v.id === viewId);
-    const limit = Number(widget.itemLimit ?? 5);
+    const limit = widget.itemLimit ?? 5;
     const load = async () => {
       const view = known ?? (viewId ? await getSavedDocumentView(viewId) : null);
       if (!view) {
@@ -208,7 +208,7 @@ function DashboardWidgetBody({
             </div>
             <div>
               <dt>{t('dashboard.statReady')}</dt>
-              <dd>{stats.byStatus.ready ?? 0}</dd>
+              <dd>{stats.byStatus.ready}</dd>
             </div>
             <div>
               <dt>{t('dashboard.statUnlabeled')}</dt>

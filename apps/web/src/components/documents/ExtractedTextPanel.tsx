@@ -90,7 +90,7 @@ export function ExtractedTextPanel({
   const hasLayoutIr = (layoutIrPages?.length ?? 0) > 0;
   const layoutIrPending = layoutIrAvailable && !hasLayoutIr;
   const showModeToggle =
-    !textOnly && !editMode && (blocks.length > 0 || (fullText?.trim().length ?? 0) > 0);
+    !textOnly && !editMode && (blocks.length > 0 || fullText.trim().length > 0);
   const showLayoutPane = showModeToggle && contentMode === 'layout';
 
   const pageNumbers = [...new Set(blocks.map((b) => b.page))].sort((a, b) => a - b);
@@ -116,6 +116,13 @@ export function ExtractedTextPanel({
     }
     el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }, [activeBlockIndex, editingBlockIndex, contentMode]);
+
+  useEffect(() => {
+    if (editingBlockIndex === null) {
+      return;
+    }
+    bodyRef.current?.querySelector<HTMLInputElement>('.extracted-text-inline-edit')?.focus();
+  }, [editingBlockIndex]);
 
   useEffect(() => {
     if (narrowViewport && hasLayoutIr) {
@@ -255,7 +262,7 @@ export function ExtractedTextPanel({
   const pageHint = editMode
     ? `${crosslinkHint}${t('documents.extractedTextEditHint')}`
     : crosslinkHint;
-  const hasDisplayContent = blocks.length > 0 || (fullText?.trim().length ?? 0) > 0;
+  const hasDisplayContent = blocks.length > 0 || fullText.trim().length > 0;
   const showToolbar = allowCopy || hasDisplayContent;
 
   const showCopy = allowCopy && canCopy;
@@ -293,7 +300,6 @@ export function ExtractedTextPanel({
                           className="extracted-text-inline-edit"
                           value={block.text}
                           aria-label={t('documents.extractedTextEditBlockAria')}
-                          autoFocus
                           onChange={(e) => {
                             if (index < 0) return;
                             const next = blocks.map((row, i) =>
@@ -315,9 +321,17 @@ export function ExtractedTextPanel({
                         />
                       ) : (
                         <span
+                          role="button"
+                          tabIndex={0}
                           data-block-index={index}
                           className={`extracted-text-segment${isActive ? ' extracted-text-segment-active' : ''}`}
                           onClick={() => { selectBlock(block); }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              selectBlock(block);
+                            }
+                          }}
                           onDoubleClick={(e) => {
                             if (!editMode) return;
                             e.preventDefault();
@@ -348,9 +362,9 @@ export function ExtractedTextPanel({
       ? layoutIrDocumentFromPageSummaries(layoutIrPages)
       : LAYOUT_IR_PLACEHOLDER;
   const canShowLayoutFrame = Boolean(documentId) && (layoutIrPending || hasLayoutIr);
-  const layoutPane = canShowLayoutFrame ? (
+  const layoutPane = canShowLayoutFrame && documentId ? (
     <ExtractedLayoutHtmlFrame
-      documentId={documentId!}
+      documentId={documentId}
       layoutIr={frameLayoutIr}
       activePage={activePage}
       pageSynced={pageSynced}
@@ -415,7 +429,10 @@ export function ExtractedTextPanel({
                   variant="ghost"
                   aria-expanded={exportMenuOpen}
                   aria-haspopup="menu"
-                  onClick={() => { exportMenuOpen ? setExportMenuOpen(false) : openExportMenu(); }}
+                  onClick={() => {
+                    if (exportMenuOpen) setExportMenuOpen(false);
+                    else openExportMenu();
+                  }}
                 >
                   {t('documents.layoutExportMenu')}
                 </Button>

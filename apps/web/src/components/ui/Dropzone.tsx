@@ -38,7 +38,7 @@ export function Dropzone({ disabled, busy, onFile }: DropzoneProps) {
         type="file"
         accept="application/pdf,image/*"
         className="sr-only"
-        disabled={disabled || busy}
+        disabled={disabled ?? busy}
         onChange={onChange}
       />
       <span className="dropzone-title">

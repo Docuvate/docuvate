@@ -82,8 +82,8 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
     triggerRef.current?.focus();
   }, []);
 
-  const displayName = user?.name?.trim();
-  const email = user?.email?.trim();
+  const displayName = user?.name.trim();
+  const email = user?.email.trim();
   const initials = userInitials(user);
 
   useLayoutEffect(() => {
@@ -113,7 +113,10 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
     }
     firstItemRef.current?.focus();
     function onPointerDown(event: MouseEvent) {
-      const target = event.target as Node;
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
       const root = rootRef.current;
       const panel = panelRef.current;
       if (root?.contains(target) || panel?.contains(target)) {

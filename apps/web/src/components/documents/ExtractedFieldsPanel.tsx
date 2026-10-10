@@ -117,7 +117,7 @@ export function ExtractedFieldsPanel({
       <details
         className="extracted-fields-edit-details"
         open={editOpen}
-        onToggle={(e) => { setEditOpen((e.target as HTMLDetailsElement).open); }}
+        onToggle={(e) => { setEditOpen(e.currentTarget.open); }}
       >
         <summary className="extracted-fields-edit-summary">
           {t('recognizedFields.correctFieldsSummary')}

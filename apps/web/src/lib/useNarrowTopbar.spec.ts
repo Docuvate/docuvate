@@ -22,7 +22,7 @@ function mockViewportWidth(widthPx: number) {
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
-      } as MediaQueryList;
+      } satisfies MediaQueryList;
     }),
   });
 }

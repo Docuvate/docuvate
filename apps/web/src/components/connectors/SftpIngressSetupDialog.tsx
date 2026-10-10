@@ -118,7 +118,7 @@ export function SftpIngressSetupDialog({
     const host = server?.host ?? t('sftpIngress.hostNotConfigured');
     const port = server?.port ?? 2222;
     return `${host}:${String(port)}`;
-  }, [server]);
+  }, [server?.host, server?.port, t]);
 
   const folderOptions: SelectOption[] = useMemo(
     () => [

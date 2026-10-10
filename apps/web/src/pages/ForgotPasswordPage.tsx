@@ -58,7 +58,7 @@ export function ForgotPasswordPage() {
         ) : (
           <>
             <p className="muted">{t('auth.forgotPasswordHint')}</p>
-            <form onSubmit={onSubmit} className="stack">
+            <form onSubmit={(e) => void onSubmit(e)} className="stack">
               <label>
                 {t('auth.email')}
                 <Input

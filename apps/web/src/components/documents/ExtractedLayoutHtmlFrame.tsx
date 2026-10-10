@@ -49,8 +49,8 @@ export function ExtractedLayoutHtmlFrame({
   const [hostWidth, setHostWidth] = useState(0);
 
   const firstPage = layoutIr.pages[0];
-  const skeletonWidth = firstPage ? ptToPx(firstPage.widthPt) : 612;
-  const skeletonHeight = firstPage ? ptToPx(firstPage.heightPt) : 792;
+  const skeletonWidth = ptToPx(firstPage.widthPt);
+  const skeletonHeight = ptToPx(firstPage.heightPt);
   const pageGapPx = 16;
   const totalNaturalHeight =
     naturalHeightPx > 0
@@ -87,7 +87,7 @@ export function ExtractedLayoutHtmlFrame({
       .then((payload) => {
         if (active) {
           setHtml(payload.html);
-          setReconstructionReliable(payload.reconstructionReliable ?? true);
+          setReconstructionReliable(payload.reconstructionReliable);
         }
       })
       .catch(() => {
@@ -183,8 +183,7 @@ export function ExtractedLayoutHtmlFrame({
               className="layout-ir-html-frame"
               sandbox="allow-same-origin"
               srcDoc={html}
-              scrolling="no"
-              style={{ height: iframeNaturalHeight }}
+              style={{ height: iframeNaturalHeight, overflow: 'hidden' }}
               onLoad={remeasure}
             />
           </div>

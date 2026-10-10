@@ -261,6 +261,22 @@
   padding: min(12vh, 6rem) var(--dv-space-md) var(--dv-space-md);
 }
 
+.global-search-backdrop-dismiss {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.global-search-backdrop .global-search-palette {
+  position: relative;
+  z-index: 1;
+}
+
 .global-search-backdrop--narrow {
   padding: 0;
   align-items: stretch;

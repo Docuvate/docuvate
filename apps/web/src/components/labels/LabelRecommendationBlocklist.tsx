@@ -175,7 +175,7 @@ export function LabelRecommendationBlocklist(props: Props) {
 
   return (
     <div className="label-rec-blocklist">
-      <form className="label-rec-blocklist-add" onSubmit={onAdd}>
+      <form className="label-rec-blocklist-add" onSubmit={(e) => void onAdd(e)}>
         <Input
           value={phrase}
           onChange={(e) => { setPhrase(e.target.value); }}

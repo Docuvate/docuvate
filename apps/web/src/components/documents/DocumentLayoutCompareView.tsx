@@ -81,8 +81,14 @@ export function DocumentLayoutCompareView({
   };
 
   return (
-    <div className="layout-compare" tabIndex={0} onKeyDown={onCompareKeyDown}>
-      <div className="layout-compare-toolbar">
+    <div className="layout-compare">
+      <div
+        className="layout-compare-toolbar"
+        role="toolbar"
+        tabIndex={0}
+        onKeyDown={onCompareKeyDown}
+        aria-label={t('documents.layoutCompareModeAria')}
+      >
         <div className="layout-compare-mode-switch" role="group" aria-label={t('documents.layoutCompareModeAria')}>
           <button
             type="button"

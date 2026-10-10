@@ -135,7 +135,7 @@ export function DocumentExtractionSection({
           allowCopy={hasContent}
           requeueBusy={requeueBusy}
           onRequeueExtraction={onRequeueExtraction}
-          documentTitle={doc.title ?? doc.filename}
+          documentTitle={doc.title.trim() ? doc.title : doc.filename}
           onActivePageChange={onViewerPageChange}
           onHighlightBlocks={onHighlightBlocks}
           onBlocksChange={onBlocksChange}

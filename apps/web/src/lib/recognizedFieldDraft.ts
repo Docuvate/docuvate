@@ -34,8 +34,8 @@ export function draftsFromRecognizedDefinitions(
     label: d.label,
     fieldType: d.fieldType,
     extractForAllDocuments: d.extractForAllDocuments,
-    gateLabelIds: d.gateLabelIds ?? [],
-    gateLabelMatch: d.gateLabelMatch ?? 'all',
+    gateLabelIds: d.gateLabelIds,
+    gateLabelMatch: d.gateLabelMatch,
     minLabelConfidence: d.minLabelConfidence ?? defaults?.labelFieldConfidenceThreshold ?? 0.62,
     confidenceGateEnabled: d.confidenceGateEnabled ?? defaults?.confidenceGateEnabled ?? true,
   }));

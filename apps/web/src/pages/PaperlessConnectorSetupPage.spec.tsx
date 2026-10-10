@@ -103,8 +103,12 @@ describe('PaperlessConnectorSetupPage', () => {
       expect(screen.getByPlaceholderText('Gespeichert')).toBeTruthy();
     });
     const tokenInput = screen.getByPlaceholderText('Gespeichert');
-    expect((tokenInput as HTMLInputElement).type).toBe('password');
-    expect((tokenInput as HTMLInputElement).value).toBe('');
+    expect(tokenInput).toBeInstanceOf(HTMLInputElement);
+    if (!(tokenInput instanceof HTMLInputElement)) {
+      throw new Error('expected password input');
+    }
+    expect(tokenInput.type).toBe('password');
+    expect(tokenInput.value).toBe('');
   });
 
   it('shows test-connection success message', async () => {

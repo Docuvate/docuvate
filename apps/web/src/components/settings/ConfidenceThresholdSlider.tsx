@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { type CSSProperties,useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { confidenceThresholdTrackStyle } from '../../lib/cssCustomProperties';
 
 /** API scale: 0–1 confidence; slider matches historical preset range. */
 const CONFIDENCE_THRESHOLD_MIN = 0.55;
@@ -157,12 +159,7 @@ export function ConfidenceThresholdSlider({
 
       <div
         className="confidence-threshold-slider__track-wrap"
-        style={
-          {
-            '--confidence-fill': `${String(fillPercent)}%`,
-            '--confidence-thumb': activeColor,
-          } as CSSProperties
-        }
+        style={confidenceThresholdTrackStyle(fillPercent, activeColor)}
       >
         <div className="confidence-threshold-slider__segments" aria-hidden="true">
           {SEGMENT_IDS.map((id, index) => (

@@ -99,7 +99,7 @@ export function resolveFilesystemDropTarget(input: {
   mappen?: MappeDto[];
   assignmentOverride?: DocumentUploadAssignment | null;
 }): LibraryDropTarget {
-  if (input.assignmentOverride && input.assignmentOverride.kind === 'folder') {
+  if (input.assignmentOverride?.kind === 'folder') {
     return folderUploadTarget(
       input.assignmentOverride.folderId,
       input.folders,

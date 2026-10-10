@@ -29,7 +29,7 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const [addError, setAddError] = useState<string | null>(null);
 
   const assignedIds = useMemo(
-    () => new Set((document.tags ?? []).map((tag) => tag.id)),
+    () => new Set(document.tags.map((tag) => tag.id)),
     [document.tags]
   );
 
@@ -117,10 +117,10 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
       </header>
 
       <div className="chip-row">
-        {(document.tags ?? []).length === 0 ? (
+        {document.tags.length === 0 ? (
           <p className="muted">{t('documents.labelPanelNoneAssigned')}</p>
         ) : (
-          (document.tags ?? []).map((tag) => (
+          document.tags.map((tag) => (
             <Chip
               key={tag.id}
               label={tag.name}
@@ -162,7 +162,7 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
           </p>
           {alreadyAssigned ? (
             <p className="muted label-add-hint" role="status">
-              {t('documents.labelAddAlreadyAssigned', { name: exactMatch?.name ?? trimmedQuery })}
+              {t('documents.labelAddAlreadyAssigned', { name: exactMatch.name })}
             </p>
           ) : null}
           {addError ? (

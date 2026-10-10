@@ -19,7 +19,7 @@ describe('authSessionHint', () => {
         store[key] = value;
       },
       removeItem: (key: string) => {
-        delete store[key];
+        Reflect.deleteProperty(store, key);
       },
     };
     vi.stubGlobal('window', { localStorage: localStorageMock });
@@ -32,12 +32,12 @@ describe('authSessionHint', () => {
   });
 
   it('returns false when no hint was stored (httpOnly cookie scenario)', () => {
-    globalThis.document = { cookie: 'better-auth.session_token=secret' } as Document;
+    vi.stubGlobal('document', { cookie: 'better-auth.session_token=secret' });
     expect(hadAuthenticatedSessionHint()).toBe(false);
   });
 
   it('tracks hint in localStorage independently of cookies', () => {
-    globalThis.document = { cookie: '' } as Document;
+    vi.stubGlobal('document', { cookie: '' });
     markAuthenticatedSessionHint();
     expect(hadAuthenticatedSessionHint()).toBe(true);
     clearAuthenticatedSessionHint();

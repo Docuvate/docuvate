@@ -22,6 +22,15 @@ const ADDABLE_WIDGET_TYPES: DashboardWidgetType[] = [
   'saved_view',
 ];
 
+function parseDashboardWidgetType(value: string): DashboardWidgetType {
+  for (const type of ADDABLE_WIDGET_TYPES) {
+    if (type === value) {
+      return type;
+    }
+  }
+  return 'statistics';
+}
+
 export function DashboardPage() {
   const { t } = useTranslation();
   const { pushSuccess, pushError } = useToastNotify();
@@ -149,7 +158,7 @@ export function DashboardPage() {
           <div className="dashboard-add-row">
             <Select
               value={addType}
-              onChange={(v) => { setAddType(v as DashboardWidgetType); }}
+              onChange={(v) => { setAddType(parseDashboardWidgetType(v)); }}
               options={addableWidgetTypes.map((type) => ({
                 value: type,
                 label: t(`dashboard.widgetType.${type}`),

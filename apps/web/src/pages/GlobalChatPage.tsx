@@ -115,7 +115,7 @@ export function GlobalChatPage() {
           setActiveThreadId(list[0].id);
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setError(formatUserFacingError(err, 'common.error'));
         }
@@ -145,7 +145,7 @@ export function GlobalChatPage() {
         setMessages(list);
         attachStreamIfNeeded(list);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) setError(formatUserFacingError(err, 'common.error'));
       })
       .finally(() => {
@@ -346,21 +346,25 @@ export function GlobalChatPage() {
                           key={message.id}
                           message={message}
                           chatScope="library"
-                          onRetry={async (messageId) => {
-                            if (!activeThreadId) return;
-                            setRetryBusy(true);
-                            try {
-                              const next = await retryLibraryChatMessage(activeThreadId, messageId);
-                              upsertMessage(next);
-                              streamTargetRef.current = messageId;
-                              connectStream(activeThreadId, messageId);
-                            } finally {
-                              setRetryBusy(false);
-                            }
+                          onRetry={(messageId) => {
+                            void (async () => {
+                              if (!activeThreadId) return;
+                              setRetryBusy(true);
+                              try {
+                                const next = await retryLibraryChatMessage(activeThreadId, messageId);
+                                upsertMessage(next);
+                                streamTargetRef.current = messageId;
+                                connectStream(activeThreadId, messageId);
+                              } finally {
+                                setRetryBusy(false);
+                              }
+                            })();
                           }}
-                          onCancel={async (messageId) => {
-                            if (!activeThreadId) return;
-                            await cancelLibraryChatMessage(activeThreadId, messageId);
+                          onCancel={(messageId) => {
+                            void (async () => {
+                              if (!activeThreadId) return;
+                              await cancelLibraryChatMessage(activeThreadId, messageId);
+                            })();
                           }}
                           retryBusy={retryBusy}
                           renderCitationLink={(citation) => (

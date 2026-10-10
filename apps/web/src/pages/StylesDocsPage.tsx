@@ -3,7 +3,7 @@
 import '@docuvate/ui-catalog/styles.css';
 
 import { StylesCatalog, type StylesCatalogComponents } from '@docuvate/ui-catalog';
-import type { ComponentProps, ReactNode } from 'react';
+import type { ButtonHTMLAttributes, ComponentProps, ReactNode } from 'react';
 
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -16,12 +16,8 @@ function CatalogButton({
   variant = 'primary',
   children,
   ...props
-}: {
+}: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
-  children: ReactNode;
-  type?: 'button' | 'submit';
-  disabled?: boolean;
-  onClick?: () => void;
 }) {
   return (
     <Button variant={variant} {...props}>
@@ -52,7 +48,7 @@ function CatalogAlert({
   return <div className={className}>{children}</div>;
 }
 
-function CatalogCard({ children, title }: { children: ReactNode; title?: string }) {
+function CatalogCard({ children, title }: { children?: ReactNode; title?: string }) {
   return (
     <Card>
       {title ? <h4 className="card-title">{title}</h4> : null}
@@ -69,7 +65,7 @@ function CatalogSelect(props: ComponentProps<typeof Select>) {
   return <Select {...props} />;
 }
 
-const catalogComponents = {
+const catalogComponents: StylesCatalogComponents = {
   Button: CatalogButton,
   Input,
   Select: CatalogSelect,
@@ -78,7 +74,7 @@ const catalogComponents = {
   Card: CatalogCard,
   Alert: CatalogAlert,
   Tabs: CatalogTabs,
-} as StylesCatalogComponents;
+};
 
 export function StylesDocsPage() {
   const { theme, setTheme } = useDocuvateTheme();

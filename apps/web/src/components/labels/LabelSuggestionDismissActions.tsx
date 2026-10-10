@@ -48,7 +48,7 @@ export function LabelSuggestionDismissActions({ labelName, disabled, onDismiss }
     setMenuOpen(true);
   };
 
-  const blocked = disabled || busy;
+  const blocked = disabled ?? busy;
 
   return (
     <>

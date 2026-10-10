@@ -61,13 +61,7 @@ export function DocumentChatAssistantMessage({
     tick();
     const id = setInterval(tick, 1000);
     return () => { clearInterval(id); };
-  }, [
-    isActive,
-    message.createdAt,
-    message.updatedAt,
-    message.generationPhase,
-    message.generationStatus,
-  ]);
+  }, [isActive, message.createdAt, message.updatedAt, message.generationPhase, message.generationStatus, message]);
 
   useEffect(() => {
     timedOutRef.current = false;

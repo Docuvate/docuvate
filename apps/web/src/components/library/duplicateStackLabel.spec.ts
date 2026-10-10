@@ -3,13 +3,14 @@
 import type { DocumentDto } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 
+import { minimalDocumentDto } from '../../test-utils/minimalDocumentDto';
 import { duplicateStackVersionLabel, showDuplicateStackBadge } from './duplicateStackLabel';
 
 function docWithVersions(count: number): DocumentDto {
-  return {
+  return minimalDocumentDto({
     id: 'd1',
-    duplicateStack: { versionCount: count, pendingReview: false },
-  } as DocumentDto;
+    duplicateStack: count > 0 ? { versionCount: count, pendingReview: false } : null,
+  });
 }
 
 describe('duplicateStackLabel', () => {
