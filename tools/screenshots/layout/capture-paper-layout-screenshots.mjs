@@ -42,6 +42,27 @@ function md5(buf) {
   return createHash('md5').update(buf).digest('hex');
 }
 
+const COMPANY_SUFFIX =
+  /\b(GmbH|AG|UG|e\.?\s?K\.?|KG|OHG|SE|Inc\.|Ltd\.?|GmbH\s*&\s*Co\.?)\b/i;
+
+function isHeadingLikeVendorValue(value) {
+  const line = value.trim();
+  if (!line) return false;
+  const letters = line.replace(/[^A-Za-zÄÖÜäöüß]/gu, '');
+  if (letters.length >= 12) {
+    const upperRatio =
+      letters.split('').filter((c) => c === c.toUpperCase() && c !== c.toLowerCase()).length /
+      letters.length;
+    if (upperRatio > 0.82 && !COMPANY_SUFFIX.test(line)) return true;
+  }
+  const words = line.split(/\s+/u);
+  if (words.length >= 6 && !COMPANY_SUFFIX.test(line)) {
+    const titleCase = words.filter((w) => w.length > 2 && w[0] === w[0]?.toUpperCase()).length;
+    if (titleCase >= Math.max(4, words.length - 2)) return true;
+  }
+  return false;
+}
+
 async function login(page) {
   const origin = new URL(BASE).origin;
   await page.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' });
@@ -305,6 +326,9 @@ async function main() {
       if (text.includes('μ;') || text.includes('Σ;')) {
         throw new Error(`math cell fragmented: ${text}`);
       }
+      if (text.includes('μ') && text.includes('Σ') && text.replace(/[\s,]/g, '').includes('μΣ')) {
+        throw new Error(`math cell tokens fused: ${text}`);
+      }
     }
     if (width <= 390) {
       await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
@@ -322,9 +346,11 @@ async function main() {
     if ((await suggestion.count()) === 0 && (await fieldRow.count()) === 0) {
       throw new Error('felder panel has no field rows');
     }
-    const panelText = await p.locator('.layout-side-fields').textContent();
-    if (panelText?.includes('Closed-Form Document Layout Classification')) {
-      throw new Error('paper title shown as Absender suggestion');
+    const suggestionValues = await p.locator('.layout-field-value').allTextContents();
+    for (const value of suggestionValues) {
+      if (isHeadingLikeVendorValue(value)) {
+        throw new Error(`heading-like vendor suggestion: ${value}`);
+      }
     }
     if (width <= 390) {
       await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();

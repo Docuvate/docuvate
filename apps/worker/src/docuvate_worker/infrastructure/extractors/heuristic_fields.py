@@ -21,11 +21,6 @@ _COMPANY_LINE = re.compile(
     re.IGNORECASE,
 )
 _INVOICE_HEADER = re.compile(r"^(Rechnung|Invoice)\b", re.IGNORECASE)
-_BANNER_LINE = re.compile(r"synthetic layout regression document", re.IGNORECASE)
-_HEADING_VENDOR_LINE = re.compile(
-    r"^(?:QUERFORMAT[\s\-A-Z0-9]*FIXTURE|VERTRAGSUEBERSICHT|ANHANG\s+PREISLISTE)",
-    re.IGNORECASE,
-)
 _GERMAN_POSTAL = re.compile(r"\b\d{5}\s+[A-Za-zÄÖÜäöüß]")
 _STREET_HINT = re.compile(
     r"\b(?:straße|str\.|strasse|weg|platz|allee|gasse|ring|damm)\b",
@@ -55,10 +50,6 @@ def _extract_amount(text: str) -> str | None:
 
 
 def _is_heading_like_vendor(line: str) -> bool:
-    if _BANNER_LINE.search(line):
-        return True
-    if _HEADING_VENDOR_LINE.search(line):
-        return True
     letters = [c for c in line if c.isalpha()]
     if len(letters) >= 12:
         upper_ratio = sum(1 for c in letters if c.isupper()) / len(letters)

@@ -5,8 +5,6 @@
 
 from __future__ import annotations
 
-import unicodedata
-
 from docuvate_worker.domain.layout_ir import (
     FontWeight,
     LayoutIrBlock,
@@ -48,29 +46,17 @@ def _escape_typst(text: str) -> str:
         .replace("`", "\\`")
         .replace("~", "\\~")
         .replace("-", "\\-")
+        .replace("+", "\\+")
     )
     if escaped.startswith("="):
         return "\\=" + escaped[1:]
     return escaped
 
 
-def _typst_raw_literal(text: str) -> str:
-    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
-    return f'#raw("{escaped}") '
-
-
-def _needs_typst_raw_literal(text: str) -> bool:
-    if "+" in text:
-        return True
-    return any(0x1D400 <= ord(char) <= 0x1D7FF for char in text)
-
-
 def _typst_text_body(text: str) -> str:
-    """Typst text; use #raw when + or math alphabets would open math mode after escaping."""
-    normalized = unicodedata.normalize("NFKC", text)
-    if _needs_typst_raw_literal(text) or _needs_typst_raw_literal(normalized):
-        return _typst_raw_literal(normalized)
-    return _escape_typst(normalized) + " "
+    """Typst string literal in text content (preserves Unicode; avoids math/markup parsing)."""
+    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
+    return f'#"{escaped}" '
 
 
 def _x_pt(norm: float, page_width_pt: float) -> float:

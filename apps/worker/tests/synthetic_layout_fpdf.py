@@ -207,10 +207,10 @@ def _draw_symbol_table(pdf: FPDF) -> None:
     col_w, row_h = 42.0, 9.0
     rows = (
         ("Symbol", "Meaning", "Notes"),
-        ("μ Σ c w", "weights", "cell geometry"),
-        ("x y or c K d", "pdfplumber join", "should not appear"),
-        ("l (x); β; b c c", "basis", "synthetic"),
-        ("g(x); k; h; λ; s", "kernel", "synthetic"),
+        ("", "weights", "cell geometry"),
+        ("", "pdfplumber join", "should not appear"),
+        ("", "basis", "synthetic"),
+        ("", "kernel", "synthetic"),
     )
     pdf.set_line_width(0.2)
     for row_idx, row in enumerate(rows):
@@ -227,7 +227,19 @@ def _draw_symbol_table(pdf: FPDF) -> None:
                 pdf.cell(4, 4, "c", border=0)
                 pdf.set_xy(px + 16, py + 1.5)
                 pdf.cell(4, 4, "w", border=0)
-            else:
+            elif row_idx == 2 and col_idx == 0:
+                for x_off, ch in ((1.5, "x"), (7, "y"), (12, "c"), (17, "K"), (22, "d")):
+                    pdf.set_xy(px + x_off, py + 1.5)
+                    pdf.cell(4, 4, ch, border=0)
+            elif row_idx == 3 and col_idx == 0:
+                for x_off, ch in ((1.5, "l"), (6, "("), (8, "x"), (11, ")"), (15, "β")):
+                    pdf.set_xy(px + x_off, py + 1.5)
+                    pdf.cell(3, 4, ch, border=0)
+            elif row_idx == 4 and col_idx == 0:
+                for x_off, ch in ((1.5, "g"), (6, "("), (8, "x"), (11, ")"), (15, "λ")):
+                    pdf.set_xy(px + x_off, py + 1.5)
+                    pdf.cell(3, 4, ch, border=0)
+            elif label:
                 pdf.set_xy(px + 1.5, py + 1.5)
                 pdf.cell(col_w - 2, row_h - 2, label, border=0)
 

@@ -6,12 +6,12 @@ from docuvate_worker.infrastructure.extractors.field_value_multiline import (
 
 def test_join_wrapped_title_lines() -> None:
     value = join_wrapped_value_lines(
-        "Closed-Form Document Layout Classification",
-        ["with Certified Coarse-to-Fine Abstention"],
+        "Synthetic Nine Word Academic Title Case Example",
+        ["Heading Continued On Next Line"],
     )
     assert value == (
-        "Closed-Form Document Layout Classification "
-        "with Certified Coarse-to-Fine Abstention"
+        "Synthetic Nine Word Academic Title Case Example "
+        "Heading Continued On Next Line"
     )
 
 
@@ -26,9 +26,8 @@ def test_rechnungsdatum_does_not_swallow_following_lines() -> None:
             "Rechnung Demo",
             "Rechnungsnummer: INV-2026-0042",
             "Rechnungsdatum: 15.03.2026",
-            "Closed-Form Document Layout Classification",
-            "with Certified Coarse-to-Fine Abstention",
-            "Jonas Demo",
+            "Synthetic Nine Word Academic Title Case Example Heading",
+            "Layout Regression Fixture Notes",
             "Kurzer Absender: Demo Nord GmbH",
             "Bruttobetrag: 12.500,00 EUR",
         ]

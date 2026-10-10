@@ -44,6 +44,32 @@ from docuvate_worker.infrastructure.layout.widget_dedupe import (
 _WHITESPACE_RUN = re.compile(r"\s+")
 _logger = logging.getLogger(__name__)
 
+
+def _join_cell_chars(chars: list[dict]) -> str:
+    """Join chars in reading order; insert spaces or commas when geometry shows token gaps."""
+    if not chars:
+        return ""
+    ordered = sorted(chars, key=lambda c: (c["top"], c["x0"]))
+    parts: list[str] = []
+    prev: dict | None = None
+    for ch in ordered:
+        token = ch.get("text") or ""
+        if not token:
+            continue
+        if prev is not None:
+            gap = float(ch["x0"]) - float(prev["x1"])
+            char_w = max(float(ch["x1"]) - float(ch["x0"]), 0.5)
+            prev_w = max(float(prev["x1"]) - float(prev["x0"]), 0.5)
+            tight = max(1.0, min(char_w, prev_w) * 0.4)
+            wide = max(2.0, (char_w + prev_w) * 0.55)
+            if gap > wide:
+                parts.append(", ")
+            elif gap > tight:
+                parts.append(" ")
+        parts.append(token)
+        prev = ch
+    return _WHITESPACE_RUN.sub(" ", "".join(parts)).strip()
+
 _TABLE_PAD_PT = 1.5
 
 
@@ -148,9 +174,7 @@ def _extract_tables(
                 size_pt, weight, _font = _style_from_chars(chars)
                 text = ""
                 if chars:
-                    ordered = sorted(chars, key=lambda c: (c["top"], c["x0"]))
-                    text = "".join(c.get("text") or "" for c in ordered)
-                    text = _WHITESPACE_RUN.sub(" ", text).strip()
+                    text = _join_cell_chars(chars)
                 elif row_idx < len(extracted) and col_idx < len(extracted[row_idx]):
                     text = (extracted[row_idx][col_idx] or "").strip()
                 if not text:

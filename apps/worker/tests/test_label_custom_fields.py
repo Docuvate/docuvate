@@ -52,9 +52,8 @@ def test_invoice_vendor_suggestion_fixture_date_and_amount() -> None:
             "Rechnung Demo",
             "Rechnungsnummer: INV-2026-0042",
             "Rechnungsdatum: 15.03.2026",
-            "Closed-Form Document Layout Classification",
-            "with Certified Coarse-to-Fine Abstention",
-            "Jonas Demo",
+            "Synthetic Nine Word Academic Title Case Example Heading",
+            "Layout Regression Fixture Notes",
             "Kurzer Absender: Demo Nord GmbH",
             "Bruttobetrag: 12.500,00 EUR",
         ]

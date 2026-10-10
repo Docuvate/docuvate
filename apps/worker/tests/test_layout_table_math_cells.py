@@ -11,5 +11,7 @@ def test_math_table_cells_use_geometry_not_semicolon_fragments() -> None:
     cell_texts = [cell.text for row in page.tables[0].rows for cell in row]
     mu_cells = [t for t in cell_texts if "μ" in t and "Σ" in t]
     assert mu_cells, cell_texts
-    assert ";" not in mu_cells[0]
-    assert "μΣ" in mu_cells[0].replace(" ", "") or "μ Σ" in mu_cells[0]
+    joined = mu_cells[0]
+    assert ";" not in joined
+    assert ", " in joined or " μ" in joined or "μ " in joined
+    assert "μ, Σ" in joined or "μ Σ" in joined

@@ -33,7 +33,7 @@ def test_typst_escape_braces_in_output() -> None:
         ),
     )
     typst = layout_ir_to_typst(doc)
-    assert "\\{" in typst and "\\}" in typst
+    assert '#"f(x) = {1, 2}"' in typst
 
 
 def test_typst_escape_markup_chars_in_output() -> None:
@@ -66,7 +66,7 @@ def test_typst_escape_markup_chars_in_output() -> None:
         ),
     )
     typst = layout_ir_to_typst(doc)
-    assert "#raw(" in typst
+    assert '#"' in typst
     assert "heading" in typst or "\\=" in typst
 
 
