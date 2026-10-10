@@ -7,11 +7,24 @@ export interface RankedChunkRow {
   score: number;
 }
 
-/** Fast extractive answers are safe when retrieval points at a single document. */
-export function libraryExtractiveEligible(top: RankedChunkRow[]): boolean {
-  if (top.length === 0) {
-    return false;
+/**
+ * Library fast path: answer from the single best chunk when it clearly wins.
+ * Multi-document questions (similar top scores across docs) fall through to the LLM.
+ */
+export function libraryExtractiveRows(top: RankedChunkRow[]): RankedChunkRow[] {
+  const best = top[0];
+  if (!best) {
+    return [];
   }
-  const documentIds = new Set(top.map((row) => row.chunk.documentId));
-  return documentIds.size === 1;
+  const runnerUp = top[1];
+  if (!runnerUp) {
+    return [best];
+  }
+  if (runnerUp.chunk.documentId === best.chunk.documentId) {
+    return [best];
+  }
+  if (best.score >= runnerUp.score * 1.12) {
+    return [best];
+  }
+  return [];
 }

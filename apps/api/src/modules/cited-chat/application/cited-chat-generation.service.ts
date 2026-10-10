@@ -19,7 +19,7 @@ import {
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
 import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
-import { libraryExtractiveEligible } from '../domain/library-extractive-eligibility.js';
+import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
@@ -37,6 +37,7 @@ import {
   buildCitedChatSystemPrompt,
   requestCitedAnswerFromOllama,
 } from './cited-chat-ollama.js';
+import { ollamaChatBaseUrl } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
 
 const CONTENT_FLUSH_MS = 250;
 const GENERATION_HEARTBEAT_MS = 15_000;
@@ -232,11 +233,12 @@ export class CitedChatGenerationService {
       rerank.reachable && rerank.rerankerUsed
         ? 0.12
         : ragFusionGateThreshold();
-    const extractiveEligible =
-      scope === 'document' || (scope === 'library' && libraryExtractiveEligible(top));
-    const extractive = extractiveEligible
-      ? tryExtractiveCitedAnswer(userMessage, top, extractiveMinScore)
-      : null;
+    const extractivePool =
+      scope === 'library' ? libraryExtractiveRows(top) : top.slice(0, RAG_RERANK_TOP_K);
+    const extractive =
+      extractivePool.length > 0
+        ? tryExtractiveCitedAnswer(userMessage, extractivePool, extractiveMinScore)
+        : null;
     if (extractive && /^[0-9a-f-]{36}$/i.test(extractive.chunk.chunkId)) {
       await this.citationsRepo.replaceCitations(messageId, [
         {
@@ -338,6 +340,17 @@ export class CitedChatGenerationService {
         await this.citationsRepo.replaceCitations(messageId, []);
         await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
         return { content: '', abstained: true };
+      }
+      if (!ollamaChatBaseUrl()) {
+        await this.citationsRepo.replaceCitations(messageId, []);
+        await this.threads.updateMessageGeneration(messageId, {
+          content: abstentionText,
+          generationStatus: 'done',
+          generationPhase: null,
+          finalizeOnlyIfInFlight: true,
+        });
+        await this.threads.touchThread(threadId);
+        return { content: abstentionText, abstained: true };
       }
       await this.failGeneration(messageId, threadId, userId, 'ollama_error', llm.detail);
       return { content: '', abstained: true };
