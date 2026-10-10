@@ -38,7 +38,7 @@ const FIXTURE_TEXT = `Rechnung Demo
 Rechnungsnummer: INV-2026-0042
 Rechnungsdatum: 15.03.2026
 Closed-Form Document Layout Classification
-Thomas Faust
+Jonas Demo
 Kurzer Absender: Demo Nord GmbH
 Bruttobetrag: 12.500,00 EUR`;
 

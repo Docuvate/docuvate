@@ -63,4 +63,25 @@ describe('DocumentLayoutSidePanel', () => {
     expect(screen.getByRole('tab', { name: 'documents.layoutTabFields' })).toBeTruthy();
     expect(screen.getByText('datum')).toBeTruthy();
   });
+
+  it('shows empty fields hint when no values are present', () => {
+    render(
+      <DocumentLayoutSidePanel
+        documentId="doc-1"
+        layoutIr={layoutIr}
+        fields={[]}
+        blocks={[]}
+        knownFieldKeys={new Set()}
+        fieldLabelForKey={(k) => k}
+        activeTab="fields"
+        onTabChange={() => {}}
+        activeOverlayId={null}
+        onOverlaySelect={() => {}}
+        onAcceptSuggestion={() => {}}
+        onDismissSuggestion={() => {}}
+        dismissedSuggestions={new Set()}
+      />
+    );
+    expect(screen.getByText('documents.layoutFieldsEmpty')).toBeTruthy();
+  });
 });

@@ -194,9 +194,15 @@ async function captureHeaderSearch(page, outPath) {
     const style = getComputedStyle(input);
     const ph = style.getPropertyValue('--dv-color-header-input-placeholder') || style.color;
     const bg = style.backgroundColor;
-    return { placeholderToken: ph.trim(), background: bg };
+    const theme = document.documentElement.getAttribute('data-docuvate-theme');
+    return { placeholderToken: ph.trim(), background: bg, theme };
   });
   console.log('header_search_styles:', JSON.stringify(contrast));
+  if (contrast?.theme === 'light' && !contrast.placeholderToken.includes('85deg')) {
+    throw new Error(
+      `light header search placeholder should use stone hue (85deg): ${JSON.stringify(contrast)}`
+    );
+  }
   await clipApp(page, outPath);
 }
 
@@ -217,6 +223,7 @@ async function main() {
   });
   const dePage = await deContext.newPage();
   await login(dePage, 'de');
+  await captureHeaderSearch(dePage, `${OUT}/header-search-de-light-1440.png`);
   report.buildSha = await assertBuildSha(dePage);
   await writeFile(`${OUT}/build-sha.txt`, `${report.buildSha}\n`);
   await seedRecognizedFields(dePage);

@@ -47,60 +47,58 @@ const layoutIr: LayoutIrDocument = {
   pages: [{ page: 1, widthPt: 595, heightPt: 842, blocks: [] }],
 };
 
-type ExecuteStub = { execute: ReturnType<typeof vi.fn> };
+type LayoutUseCaseFake = Pick<GetDocumentLayoutIrUseCase, 'execute'>;
 
-function useCaseStub(): ExecuteStub {
+type ExecuteUseCaseFake = { execute: ReturnType<typeof vi.fn> };
+
+function useCaseFake(): ExecuteUseCaseFake {
   return { execute: vi.fn() };
-}
-
-function asUseCase<T>(stub: ExecuteStub): T {
-  return stub as unknown as T;
 }
 
 /** Wires layout use cases by constructor position (Vitest does not emit decorator metadata). */
 function createDocumentsController(layout: {
-  getDocumentLayoutIr: ExecuteStub;
-  getDocumentLayoutHtml: ExecuteStub;
-  getDocumentLayoutTypst: ExecuteStub;
-  getDocumentLayoutCompareSummary: ExecuteStub;
-  getDocumentLayoutCompareMetrics: ExecuteStub;
-  getDocumentLayoutComparePage: ExecuteStub;
+  getDocumentLayoutIr: LayoutUseCaseFake;
+  getDocumentLayoutHtml: Pick<GetDocumentLayoutHtmlUseCase, 'execute'>;
+  getDocumentLayoutTypst: Pick<GetDocumentLayoutTypstUseCase, 'execute'>;
+  getDocumentLayoutCompareSummary: Pick<GetDocumentLayoutCompareSummaryUseCase, 'execute'>;
+  getDocumentLayoutCompareMetrics: Pick<GetDocumentLayoutCompareMetricsUseCase, 'execute'>;
+  getDocumentLayoutComparePage: Pick<GetDocumentLayoutComparePageUseCase, 'execute'>;
 }): DocumentsController {
-  const filler = (): ExecuteStub => useCaseStub();
+  const filler = (): ExecuteUseCaseFake => useCaseFake();
   return new DocumentsController(
-    asUseCase<UploadDocumentUseCase>(filler()),
-    asUseCase<GetDocumentUseCase>(filler()),
-    asUseCase<ListDocumentsUseCase>(filler()),
-    asUseCase<UpdateDocumentUseCase>(filler()),
-    asUseCase<DeleteDocumentUseCase>(filler()),
-    asUseCase<BulkDocumentsUseCase>(filler()),
-    asUseCase<GetDocumentContentUseCase>(filler()),
-    asUseCase<LoadDocumentLabelSuggestionsUseCase>(filler()),
-    asUseCase<RefreshEmbeddingSuggestionsUseCase>(filler()),
-    asUseCase<DocumentChatUseCase>(filler()),
-    asUseCase<ListDocumentChatThreadsUseCase>(filler()),
-    asUseCase<CreateDocumentChatThreadUseCase>(filler()),
-    asUseCase<ListDocumentChatThreadMessagesUseCase>(filler()),
-    asUseCase<SendDocumentChatThreadMessageUseCase>(filler()),
-    asUseCase<StreamDocumentChatMessageUseCase>(filler()),
-    asUseCase<CancelDocumentChatGenerationUseCase>(filler()),
-    asUseCase<RetryDocumentChatMessageUseCase>(filler()),
-    asUseCase<ListDuplicateCandidatesUseCase>(filler()),
-    asUseCase<DismissDuplicateCandidateUseCase>(filler()),
-    asUseCase<CompareDocumentExtractionUseCase>(filler()),
-    asUseCase<ApplyArenaWinnerExtractionUseCase>(filler()),
-    asUseCase<RequeueDocumentExtractionUseCase>(filler()),
-    asUseCase<GetDocumentLayoutIrUseCase>(layout.getDocumentLayoutIr),
-    asUseCase<GetDocumentLayoutHtmlUseCase>(layout.getDocumentLayoutHtml),
-    asUseCase<GetDocumentLayoutTypstUseCase>(layout.getDocumentLayoutTypst),
-    asUseCase<GetDocumentLayoutCompareSummaryUseCase>(layout.getDocumentLayoutCompareSummary),
-    asUseCase<GetDocumentLayoutCompareMetricsUseCase>(layout.getDocumentLayoutCompareMetrics),
-    asUseCase<GetDocumentLayoutComparePageUseCase>(layout.getDocumentLayoutComparePage),
-    asUseCase<RecordExtractionArenaRatingUseCase>(filler()),
-    asUseCase<GetDuplicateStackUseCase>(filler()),
-    asUseCase<SetDuplicateStackPrimaryUseCase>(filler()),
-    asUseCase<ConfirmDuplicateVersionUseCase>(filler()),
-    asUseCase<ReleaseDuplicateStackMemberUseCase>(filler())
+    filler() as UploadDocumentUseCase,
+    filler() as GetDocumentUseCase,
+    filler() as ListDocumentsUseCase,
+    filler() as UpdateDocumentUseCase,
+    filler() as DeleteDocumentUseCase,
+    filler() as BulkDocumentsUseCase,
+    filler() as GetDocumentContentUseCase,
+    filler() as LoadDocumentLabelSuggestionsUseCase,
+    filler() as RefreshEmbeddingSuggestionsUseCase,
+    filler() as DocumentChatUseCase,
+    filler() as ListDocumentChatThreadsUseCase,
+    filler() as CreateDocumentChatThreadUseCase,
+    filler() as ListDocumentChatThreadMessagesUseCase,
+    filler() as SendDocumentChatThreadMessageUseCase,
+    filler() as StreamDocumentChatMessageUseCase,
+    filler() as CancelDocumentChatGenerationUseCase,
+    filler() as RetryDocumentChatMessageUseCase,
+    filler() as ListDuplicateCandidatesUseCase,
+    filler() as DismissDuplicateCandidateUseCase,
+    filler() as CompareDocumentExtractionUseCase,
+    filler() as ApplyArenaWinnerExtractionUseCase,
+    filler() as RequeueDocumentExtractionUseCase,
+    layout.getDocumentLayoutIr as GetDocumentLayoutIrUseCase,
+    layout.getDocumentLayoutHtml as GetDocumentLayoutHtmlUseCase,
+    layout.getDocumentLayoutTypst as GetDocumentLayoutTypstUseCase,
+    layout.getDocumentLayoutCompareSummary as GetDocumentLayoutCompareSummaryUseCase,
+    layout.getDocumentLayoutCompareMetrics as GetDocumentLayoutCompareMetricsUseCase,
+    layout.getDocumentLayoutComparePage as GetDocumentLayoutComparePageUseCase,
+    filler() as RecordExtractionArenaRatingUseCase,
+    filler() as GetDuplicateStackUseCase,
+    filler() as SetDuplicateStackPrimaryUseCase,
+    filler() as ConfirmDuplicateVersionUseCase,
+    filler() as ReleaseDuplicateStackMemberUseCase
   );
 }
 
@@ -117,12 +115,12 @@ describe('DocumentsController layout routes', () => {
     claims: ['document:*'],
   };
 
-  const getDocumentLayoutIr = useCaseStub();
-  const getDocumentLayoutHtml = useCaseStub();
-  const getDocumentLayoutTypst = useCaseStub();
-  const getDocumentLayoutCompareSummary = useCaseStub();
-  const getDocumentLayoutCompareMetrics = useCaseStub();
-  const getDocumentLayoutComparePage = useCaseStub();
+  const getDocumentLayoutIr = useCaseFake();
+  const getDocumentLayoutHtml = useCaseFake();
+  const getDocumentLayoutTypst = useCaseFake();
+  const getDocumentLayoutCompareSummary = useCaseFake();
+  const getDocumentLayoutCompareMetrics = useCaseFake();
+  const getDocumentLayoutComparePage = useCaseFake();
 
   let controller: DocumentsController;
 

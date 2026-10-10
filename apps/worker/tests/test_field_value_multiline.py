@@ -28,7 +28,7 @@ def test_rechnungsdatum_does_not_swallow_following_lines() -> None:
             "Rechnungsdatum: 15.03.2026",
             "Closed-Form Document Layout Classification",
             "with Certified Coarse-to-Fine Abstention",
-            "Thomas Faust",
+            "Jonas Demo",
             "Kurzer Absender: Demo Nord GmbH",
             "Bruttobetrag: 12.500,00 EUR",
         ]
