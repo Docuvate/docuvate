@@ -74,9 +74,10 @@ export function DocumentLayoutSidePanel({
   }, [overlays]);
 
   const panelFields = useMemo(() => fieldsForLayoutPanel(fields), [fields]);
+  const locale = i18n?.language ?? 'de';
   const formatFieldValue = useCallback(
-    (key: string, value: string) => formatExtractedFieldDisplayValue(key, value, i18n.language),
-    [i18n.language]
+    (key: string, value: string) => formatExtractedFieldDisplayValue(key, value, locale),
+    [locale]
   );
 
   const suggestions = useMemo(() => {
