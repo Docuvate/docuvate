@@ -413,6 +413,34 @@ export type LabelRecommendationListResponseDto = {
     }>;
 };
 
+export type LayoutCompareMetricsResponseDto = {
+    category: string;
+    ssimFloor: number;
+    pages: Array<LayoutComparePageMetricDto>;
+};
+
+export type LayoutComparePageMetricDto = {
+    pageNumber: number;
+    ssim?: number;
+    inkDeviation?: number;
+    pageReliable: boolean;
+    error?: string;
+};
+
+export type LayoutComparePageResponseDto = {
+    pageNumber: number;
+    ssim: number;
+    inkDeviation: number;
+    ssimFloor: number;
+    pageReliable: boolean;
+    widthPx: number;
+    heightPx: number;
+    originalPngBase64: string;
+    reconstructionPngBase64: string;
+    heatmapPngBase64?: string;
+    error?: string;
+};
+
 export type LayoutHtmlResponseDto = {
     html: string;
     reconstructionReliable: boolean;
@@ -2590,6 +2618,57 @@ export type ExtractionRequeueResponses = {
 };
 
 export type ExtractionRequeueResponse = ExtractionRequeueResponses[keyof ExtractionRequeueResponses];
+
+export type GetDocumentLayoutCompareMetricsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/layout-compare/metrics';
+};
+
+export type GetDocumentLayoutCompareMetricsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetDocumentLayoutCompareMetricsError = GetDocumentLayoutCompareMetricsErrors[keyof GetDocumentLayoutCompareMetricsErrors];
+
+export type GetDocumentLayoutCompareMetricsResponses = {
+    200: LayoutCompareMetricsResponseDto;
+};
+
+export type GetDocumentLayoutCompareMetricsResponse = GetDocumentLayoutCompareMetricsResponses[keyof GetDocumentLayoutCompareMetricsResponses];
+
+export type GetDocumentLayoutComparePageData = {
+    body?: never;
+    path: {
+        id: string;
+        page: string;
+    };
+    query?: {
+        heatmap?: string;
+    };
+    url: '/documents/{id}/layout-compare/pages/{page}';
+};
+
+export type GetDocumentLayoutComparePageErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetDocumentLayoutComparePageError = GetDocumentLayoutComparePageErrors[keyof GetDocumentLayoutComparePageErrors];
+
+export type GetDocumentLayoutComparePageResponses = {
+    200: LayoutComparePageResponseDto;
+};
+
+export type GetDocumentLayoutComparePageResponse = GetDocumentLayoutComparePageResponses[keyof GetDocumentLayoutComparePageResponses];
 
 export type GetDocumentLayoutHtmlData = {
     body?: never;
