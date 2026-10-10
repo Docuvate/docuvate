@@ -4,43 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import type { AuthSession } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { DocumentsController } from './documents.controller.js';
-import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
-import { GetDocumentUseCase } from '../application/get-document.use-case.js';
-import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
-import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
-import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
-import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
-import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
-import { DocumentChatUseCase } from '../application/document-chat.use-case.js';
-import { ListDocumentChatThreadsUseCase } from '../application/list-document-chat-threads.use-case.js';
-import { CreateDocumentChatThreadUseCase } from '../application/create-document-chat-thread.use-case.js';
-import { ListDocumentChatThreadMessagesUseCase } from '../application/list-document-chat-thread-messages.use-case.js';
-import { SendDocumentChatThreadMessageUseCase } from '../application/send-document-chat-thread-message.use-case.js';
-import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
-import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
-import { RetryDocumentChatMessageUseCase } from '../application/retry-document-chat-message.use-case.js';
-import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
-import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
-import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
-import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
-import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
-import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
-import { GetDocumentLayoutCompareSummaryUseCase } from '../application/get-document-layout-compare-summary.use-case.js';
-import { GetDocumentLayoutCompareMetricsUseCase } from '../application/get-document-layout-compare-metrics.use-case.js';
-import { GetDocumentLayoutComparePageUseCase } from '../application/get-document-layout-compare-page.use-case.js';
-import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
-import {
-  ConfirmDuplicateVersionUseCase,
-  GetDuplicateStackUseCase,
-  ReleaseDuplicateStackMemberUseCase,
-  SetDuplicateStackPrimaryUseCase,
-} from '../../duplicates/application/duplicate-stack.use-cases.js';
-import {
-  DismissDuplicateCandidateUseCase,
-  ListDuplicateCandidatesUseCase,
-} from '../../duplicates/application/duplicate-query.use-cases.js';
-import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
-import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
+import type { GetDocumentLayoutCompareMetricsUseCase } from '../application/get-document-layout-compare-metrics.use-case.js';
+import type { GetDocumentLayoutComparePageUseCase } from '../application/get-document-layout-compare-page.use-case.js';
+import type { GetDocumentLayoutCompareSummaryUseCase } from '../application/get-document-layout-compare-summary.use-case.js';
+import type { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
+import type { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
+import type { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
 
 const layoutIr: LayoutIrDocument = {
   version: 1,
@@ -66,39 +35,39 @@ function createDocumentsController(layout: {
 }): DocumentsController {
   const filler = (): ExecuteUseCaseFake => useCaseFake();
   return new DocumentsController(
-    filler() as UploadDocumentUseCase,
-    filler() as GetDocumentUseCase,
-    filler() as ListDocumentsUseCase,
-    filler() as UpdateDocumentUseCase,
-    filler() as DeleteDocumentUseCase,
-    filler() as BulkDocumentsUseCase,
-    filler() as GetDocumentContentUseCase,
-    filler() as LoadDocumentLabelSuggestionsUseCase,
-    filler() as RefreshEmbeddingSuggestionsUseCase,
-    filler() as DocumentChatUseCase,
-    filler() as ListDocumentChatThreadsUseCase,
-    filler() as CreateDocumentChatThreadUseCase,
-    filler() as ListDocumentChatThreadMessagesUseCase,
-    filler() as SendDocumentChatThreadMessageUseCase,
-    filler() as StreamDocumentChatMessageUseCase,
-    filler() as CancelDocumentChatGenerationUseCase,
-    filler() as RetryDocumentChatMessageUseCase,
-    filler() as ListDuplicateCandidatesUseCase,
-    filler() as DismissDuplicateCandidateUseCase,
-    filler() as CompareDocumentExtractionUseCase,
-    filler() as ApplyArenaWinnerExtractionUseCase,
-    filler() as RequeueDocumentExtractionUseCase,
-    layout.getDocumentLayoutIr as GetDocumentLayoutIrUseCase,
-    layout.getDocumentLayoutHtml as GetDocumentLayoutHtmlUseCase,
-    layout.getDocumentLayoutTypst as GetDocumentLayoutTypstUseCase,
-    layout.getDocumentLayoutCompareSummary as GetDocumentLayoutCompareSummaryUseCase,
-    layout.getDocumentLayoutCompareMetrics as GetDocumentLayoutCompareMetricsUseCase,
-    layout.getDocumentLayoutComparePage as GetDocumentLayoutComparePageUseCase,
-    filler() as RecordExtractionArenaRatingUseCase,
-    filler() as GetDuplicateStackUseCase,
-    filler() as SetDuplicateStackPrimaryUseCase,
-    filler() as ConfirmDuplicateVersionUseCase,
-    filler() as ReleaseDuplicateStackMemberUseCase
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    layout.getDocumentLayoutIr as never,
+    layout.getDocumentLayoutHtml as never,
+    layout.getDocumentLayoutTypst as never,
+    layout.getDocumentLayoutCompareSummary as never,
+    layout.getDocumentLayoutCompareMetrics as never,
+    layout.getDocumentLayoutComparePage as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never,
+    filler() as never
   );
 }
 
