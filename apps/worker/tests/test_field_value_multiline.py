@@ -20,6 +20,28 @@ def test_join_wrapped_amount_with_currency_line() -> None:
     assert value == "12.500,00 EUR"
 
 
+def test_rechnungsdatum_does_not_swallow_following_lines() -> None:
+    text = "\n".join(
+        [
+            "Rechnung Demo",
+            "Rechnungsnummer: INV-2026-0042",
+            "Rechnungsdatum: 15.03.2026",
+            "Closed-Form Document Layout Classification",
+            "with Certified Coarse-to-Fine Abstention",
+            "Thomas Faust",
+            "Kurzer Absender: Demo Nord GmbH",
+            "Bruttobetrag: 12.500,00 EUR",
+        ]
+    )
+    value = extract_multiline_value_after_label(
+        text,
+        "Rechnungsdatum",
+        stop_labels=("Rechnungsnummer", "Betrag", "Bruttobetrag"),
+        allow_continuation=False,
+    )
+    assert value == "15.03.2026"
+
+
 def test_multiline_address_stops_at_next_label() -> None:
     text = "\n".join(
         [

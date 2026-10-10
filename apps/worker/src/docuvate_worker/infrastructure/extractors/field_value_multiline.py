@@ -25,24 +25,26 @@ def _line_starts_new_field(line: str, stop_labels: tuple[str, ...]) -> bool:
     stripped = line.strip()
     if not stripped:
         return False
-    if _LABEL_LINE.match(stripped):
-        for stop in stop_labels:
-            if not stop.strip():
-                continue
-            esc = _escape_label(stop)
-            if re.match(rf"(?i){esc}\s*[:\-–—]", stripped):
-                return True
-        if re.match(
-            r"(?i)^(?:betrag|bruttobetrag|summe|total|amount|datum|date|iban|rechnungsnummer)\s*[:\-–—]",
-            stripped,
-        ):
+    if not _LABEL_LINE.match(stripped):
+        return False
+    for stop in stop_labels:
+        if not stop.strip():
+            continue
+        esc = _escape_label(stop)
+        if re.match(rf"(?i){esc}\s*[:\-–—]", stripped):
             return True
-    return False
+    return True
+
+
+_DATE_ONLY = re.compile(r"^\d{2}[./-]\d{2}[./-]\d{2,4}$")
 
 
 def join_wrapped_value_lines(initial: str, continuation_lines: list[str]) -> str:
     """Merge soft-wrapped follow-up lines into one display value."""
-    parts = [initial.strip()] if initial.strip() else []
+    initial_stripped = initial.strip()
+    if _DATE_ONLY.match(initial_stripped):
+        return initial_stripped
+    parts = [initial_stripped] if initial_stripped else []
     for raw in continuation_lines:
         line = raw.strip()
         if not line:
@@ -71,6 +73,7 @@ def extract_multiline_value_after_label(
     stop_labels: tuple[str, ...] = (),
     max_lines: int = 8,
     max_chars: int = 480,
+    allow_continuation: bool = True,
 ) -> str | None:
     """Read value after ``Label:`` including wrapped continuation lines."""
     if not label.strip():
@@ -81,20 +84,23 @@ def extract_multiline_value_after_label(
     if not match:
         return None
     first_line_value = match.group(1).strip()
-    tail = text[match.end() :]
-    continuation: list[str] = []
-    for line in tail.splitlines():
-        if len(continuation) >= max_lines - 1:
-            break
-        stripped = line.strip()
-        if not stripped:
-            if continuation:
+    if not allow_continuation:
+        value = first_line_value
+    else:
+        tail = text[match.end() :]
+        continuation: list[str] = []
+        for line in tail.splitlines():
+            if len(continuation) >= max_lines - 1:
                 break
-            continue
-        if _line_starts_new_field(line, stop_labels):
-            break
-        continuation.append(stripped)
-    value = join_wrapped_value_lines(first_line_value, continuation)
+            stripped = line.strip()
+            if not stripped:
+                if continuation:
+                    break
+                continue
+            if _line_starts_new_field(line, stop_labels):
+                break
+            continuation.append(stripped)
+        value = join_wrapped_value_lines(first_line_value, continuation)
     if not value:
         return None
     return value[:max_chars]

@@ -13,7 +13,7 @@ def test_extract_near_label_and_amount():
     )
     by_key = {f.key: f.value for f in fields}
     assert by_key["invoice_date"] == "01.02.2024"
-    assert by_key["amount"] == "EUR 12,50"
+    assert by_key["amount"] == "12,50"
 
 
 def test_absender_strips_doubled_label_prefix() -> None:
@@ -44,6 +44,32 @@ def test_multiline_absender_address_block() -> None:
     )
     by_key = {f.key: f.value for f in fields}
     assert by_key["absender"] == "Nordwind GmbH Marktplatz 3 20095 Hamburg"
+
+
+def test_invoice_vendor_suggestion_fixture_date_and_amount() -> None:
+    text = "\n".join(
+        [
+            "Rechnung Demo",
+            "Rechnungsnummer: INV-2026-0042",
+            "Rechnungsdatum: 15.03.2026",
+            "Closed-Form Document Layout Classification",
+            "with Certified Coarse-to-Fine Abstention",
+            "Thomas Faust",
+            "Kurzer Absender: Demo Nord GmbH",
+            "Bruttobetrag: 12.500,00 EUR",
+        ]
+    )
+    fields = extract_label_custom_fields(
+        text,
+        tag_name="Rechnung",
+        fields=[
+            {"key": "rechnungsdatum", "label": "Rechnungsdatum", "field_type": "date"},
+            {"key": "betrag", "label": "Betrag", "field_type": "currency"},
+        ],
+    )
+    by_key = {f.key: f.value for f in fields}
+    assert by_key["rechnungsdatum"] == "15.03.2026"
+    assert by_key["betrag"] == "12.500,00"
 
 
 def test_absender_from_kurzer_absender_line() -> None:
