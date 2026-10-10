@@ -8,6 +8,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from concurrent.futures import Future, ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FuturesTimeoutError
+
 from docuvate_worker.infrastructure.layout.layout_compare_errors import (
     CompareErrorCode,
     LayoutCompareError,
