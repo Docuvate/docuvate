@@ -2,7 +2,7 @@
 /**
  * Seeds the E2E smoke user with German cited-chat bench documents (ADR 024).
  * Uses the HTTP API only (no direct chunk SQL). Local / compose helper; Playwright
- * cited-chat tests use provisionCitedChatLibraryOnce instead.
+ * Compose-smoke seeds this after the smoke user (see ci.yml).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
