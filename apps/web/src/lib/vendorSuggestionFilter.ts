@@ -21,7 +21,13 @@ export function isHeadingLikeVendorValue(value: string): boolean {
   }
   const words = line.split(/\s+/u);
   if (words.length >= 6 && !COMPANY_SUFFIX.test(line)) {
-    const titleCase = words.filter((w) => w.length > 2 && w[0] === w[0]?.toUpperCase()).length;
+    const titleCase = words.filter((w) => {
+      if (w.length <= 2) {
+        return false;
+      }
+      const first = w.charAt(0);
+      return first === first.toUpperCase() && first !== first.toLowerCase();
+    }).length;
     if (titleCase >= Math.max(4, words.length - 2)) {
       return true;
     }

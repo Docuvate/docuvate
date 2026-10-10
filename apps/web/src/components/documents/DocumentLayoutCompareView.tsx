@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useState, type KeyboardEvent } from 'react';
+import { type KeyboardEvent,useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -146,7 +146,7 @@ export function DocumentLayoutCompareView({
       {(metricsState === 'error' || metricsTimedOut) && metricsError ? (
         <div className="layout-compare-error" role="alert">
           <p className="error">{metricsError}</p>
-          <Button type="button" variant="secondary" onClick={() => retryMetrics()}>
+          <Button type="button" variant="secondary" onClick={() => { retryMetrics(); }}>
             {t('documents.layoutCompareRetry')}
           </Button>
         </div>
@@ -154,7 +154,7 @@ export function DocumentLayoutCompareView({
       {(pageState === 'error' || pageTimedOut) && pageError ? (
         <div className="layout-compare-error" role="alert">
           <p className="error">{pageError}</p>
-          <Button type="button" variant="secondary" onClick={() => retryPage()}>
+          <Button type="button" variant="secondary" onClick={() => { retryPage(); }}>
             {t('documents.layoutCompareRetry')}
           </Button>
         </div>

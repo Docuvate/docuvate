@@ -26,7 +26,7 @@ import { LayoutComparePageNav } from './LayoutComparePageNav';
 
 describe('LayoutComparePageNav', () => {
   it('virtualizes the page strip for a 16-page paper', () => {
-    render(
+    const { container } = render(
       <LayoutComparePageNav
         pageCount={16}
         activePage={8}
@@ -34,13 +34,13 @@ describe('LayoutComparePageNav', () => {
         onPageChange={vi.fn()}
       />
     );
-    const chips = document.querySelectorAll('.layout-compare-page-chip');
+    const chips = container.querySelectorAll('.layout-compare-page-chip');
     expect(chips.length).toBe(16);
     expect(screen.getByText('1-16/16')).toBeTruthy();
   });
 
   it('renders a bounded chip count for 120 pages', () => {
-    render(
+    const { container } = render(
       <LayoutComparePageNav
         pageCount={120}
         activePage={60}
@@ -48,7 +48,7 @@ describe('LayoutComparePageNav', () => {
         onPageChange={vi.fn()}
       />
     );
-    const chips = document.querySelectorAll('.layout-compare-page-chip');
+    const chips = container.querySelectorAll('.layout-compare-page-chip');
     expect(chips.length).toBe(21);
     expect(chips.length).toBeLessThan(30);
   });

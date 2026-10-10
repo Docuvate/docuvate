@@ -173,7 +173,7 @@ export function useLayoutCompare(
   }, []);
 
   const retryPage = useCallback(() => {
-    const cacheKey = `${activePage}:${includeHeatmap ? '1' : '0'}`;
+    const cacheKey = `${String(activePage)}:${includeHeatmap ? '1' : '0'}`;
     pageCacheRef.current.delete(cacheKey);
     setPageRetryToken((n) => n + 1);
   }, [activePage, includeHeatmap]);

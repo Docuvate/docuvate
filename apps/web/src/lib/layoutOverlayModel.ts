@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { formatLayoutTableCell } from './formatLayoutTableCell.js';
 import type {
   ExtractedField,
   LayoutIrBlock,
@@ -8,6 +7,8 @@ import type {
   LayoutIrTable,
   LayoutIrWidget,
 } from '@docuvate/contracts';
+
+import { formatLayoutTableCell } from './formatLayoutTableCell.js';
 
 export type LayoutOverlayKind = 'heading' | 'field' | 'table' | 'text';
 
