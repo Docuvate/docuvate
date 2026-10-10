@@ -22,7 +22,8 @@ export function useFormDraft<T>(baseline: T, options?: UseFormDraftOptions<T>) {
     setSaved(baseline);
     setDraft(baseline);
     // baselineKey captures semantic changes; baseline is read from the render that changed the key.
-  }, [baseline, baselineKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- including `baseline` re-runs on every new object reference
+  }, [baselineKey]);
 
   const dirty = useMemo(() => !isEqual(draft, saved), [draft, saved, isEqual]);
 
