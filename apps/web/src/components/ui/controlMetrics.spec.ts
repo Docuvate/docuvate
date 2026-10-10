@@ -3,7 +3,9 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
+
 import {
   CONTROL_HEIGHT_PX,
   GEOMETRY_TOLERANCE_PX,
@@ -19,9 +21,9 @@ const componentsCss = readFileSync(
 
 describe('controlMetrics', () => {
   it('matches components.css custom properties', () => {
-    expect(componentsCss).toContain(`--dv-control-height: ${CONTROL_HEIGHT_PX}px`);
-    expect(componentsCss).toContain(`--dv-icon-btn-sm: ${ICON_BUTTON_SM_PX}px`);
-    expect(componentsCss).toContain(`--dv-icon-btn-md: ${ICON_BUTTON_MD_PX}px`);
+    expect(componentsCss).toContain(`--dv-control-height: ${String(CONTROL_HEIGHT_PX)}px`);
+    expect(componentsCss).toContain(`--dv-icon-btn-sm: ${String(ICON_BUTTON_SM_PX)}px`);
+    expect(componentsCss).toContain(`--dv-icon-btn-md: ${String(ICON_BUTTON_MD_PX)}px`);
   });
 
   it('documents geometry tolerance for browser checks', () => {

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Check, Loader2, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
 import { Button } from '../ui/Button';
 import { useDocumentUploadContext } from './DocumentUploadProvider';
 import {
@@ -74,7 +75,7 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
                 >
                   <span
                     className={`upload-queue-progress-fill ${uploadProgressFillClass(item.status)}`}
-                    style={{ width: `${uploadProgressFillWidthPercent(item.status)}%` }}
+                    style={{ width: `${String(uploadProgressFillWidthPercent(item.status))}%` }}
                   />
                 </div>
               ) : null}
@@ -90,7 +91,7 @@ export function UploadQueueList({ className }: UploadQueueListProps) {
                 type="button"
                 className="upload-queue-dismiss"
                 aria-label={t('upload.dismissItem', { name: item.file.name })}
-                onClick={() => removeUploadItem(item.id)}
+                onClick={() => { removeUploadItem(item.id); }}
               >
                 <X size={16} strokeWidth={2} aria-hidden />
               </button>

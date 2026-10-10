@@ -14,10 +14,10 @@ const PLUGIN_LOGO_SRC: Partial<
   sftp_scanner: '/plugin-logos/sftp-scanner.svg',
 };
 
-type PluginIconProps = {
+interface PluginIconProps {
   pluginId: ConnectorPluginCatalogEntryDto['id'] | 'sftp_scanner';
   className?: string;
-};
+}
 
 export function ConnectorPluginIcon({ pluginId, className = '' }: PluginIconProps) {
   const tileClass = `connector-plugin-icon ${className}`.trim();

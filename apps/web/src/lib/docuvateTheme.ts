@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { docuvateThemeAttribute, type DocuvateTheme } from '@docuvate/tokens';
 import type { ThemePreference } from '@docuvate/contracts';
+import { type DocuvateTheme,docuvateThemeAttribute } from '@docuvate/tokens';
+
 import {
   COMPACT_THEME_STORAGE_KEY,
   notifyThemePreferenceChange,
@@ -60,10 +61,10 @@ export function subscribeThemeStore(onStoreChange: () => void): () => void {
     attributes: true,
     attributeFilter: [docuvateThemeAttribute],
   });
-  const onPreferenceEvent = () => onStoreChange();
+  const onPreferenceEvent = () => { onStoreChange(); };
   window.addEventListener(THEME_PREFERENCE_CHANGE_EVENT, onPreferenceEvent);
   const media = window.matchMedia('(prefers-color-scheme: dark)');
-  const onMedia = () => onStoreChange();
+  const onMedia = () => { onStoreChange(); };
   media.addEventListener('change', onMedia);
   return () => {
     observer.disconnect();

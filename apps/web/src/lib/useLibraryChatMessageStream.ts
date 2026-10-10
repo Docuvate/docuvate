@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useRef } from 'react';
 import type {
   DocumentChatMessageRecordDto,
   DocumentChatMessageStreamEvent,
 } from '@docuvate/contracts';
+import { useCallback, useEffect, useRef } from 'react';
+
 import { apiBaseUrl, authHeaders, listLibraryChatThreadMessages } from './api';
 import { CHAT_GENERATION_MAX_WAIT_SEC } from './chatGenerationLimits';
 
@@ -41,7 +42,7 @@ export function useLibraryChatMessageStream(_threadId: string | null, onUpdate: 
     }
   }, []);
 
-  useEffect(() => () => stop(), [stop]);
+  useEffect(() => () => { stop(); }, [stop]);
 
   const connect = useCallback(
     (activeThreadId: string, messageId: string) => {

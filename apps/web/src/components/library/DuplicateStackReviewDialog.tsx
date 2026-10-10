@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DuplicateStackDto, DuplicateStackMemberDto } from '@docuvate/contracts';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DuplicateStackDto, DuplicateStackMemberDto } from '@docuvate/contracts';
-import { formatUserFacingError } from '../../lib/apiErrors';
+
 import {
   deleteDocument,
   fetchDocumentContentBlob,
@@ -12,6 +12,7 @@ import {
   markDuplicateStackNotDuplicate,
   setDuplicateStackPrimary,
 } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import { bufferToDataUrl } from '../../lib/documentPreview';
 import { fetchDocumentPreviewBuffer } from '../../lib/documentPreviewCache';
 import { PdfViewer } from '../documents/PdfViewer';
@@ -27,7 +28,7 @@ interface DuplicateStackReviewDialogProps {
 }
 
 function memberLabel(member: DuplicateStackMemberDto, t: (key: string) => string): string {
-  const pct = member.similarity != null ? `${Math.round(member.similarity * 100)} %` : null;
+  const pct = member.similarity != null ? `${String(Math.round(member.similarity * 100))} %` : null;
   const source =
     member.source === 'hash'
       ? t('library.duplicateStackMemberHash')
@@ -212,7 +213,7 @@ export function DuplicateStackReviewDialog({
                 <select
                   id="dup-version-select"
                   value={versionId ?? ''}
-                  onChange={(e) => setVersionId(e.target.value)}
+                  onChange={(e) => { setVersionId(e.target.value); }}
                 >
                   {versions.map((v) => (
                     <option key={v.documentId} value={v.documentId}>
@@ -280,7 +281,7 @@ export function DuplicateStackReviewDialog({
                   type="button"
                   variant="ghost"
                   disabled={busy}
-                  onClick={() => setDeleteConfirmOpen(true)}
+                  onClick={() => { setDeleteConfirmOpen(true); }}
                 >
                   {t('library.duplicateStackDeleteVersion')}
                 </Button>
@@ -299,7 +300,7 @@ export function DuplicateStackReviewDialog({
         cancelLabel={t('common.cancel')}
         tone="danger"
         busy={busy}
-        onCancel={() => setDeleteConfirmOpen(false)}
+        onCancel={() => { setDeleteConfirmOpen(false); }}
         onConfirm={() => void deleteSelectedVersion()}
       />
     </>

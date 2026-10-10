@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { fetchDocumentContentBlob } from '../../lib/api';
 import { isImageMime, isPdfMime } from './libraryDocumentUtils';
 

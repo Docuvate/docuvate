@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import type { LibraryViewMode } from '../../lib/libraryViewMode';
 import { segmentedPreferenceClass } from '../../lib/segmentedControlClasses';
 import { SegmentedControl } from '../ui/SegmentedControl';

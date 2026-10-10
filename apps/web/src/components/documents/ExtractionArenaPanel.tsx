@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ExtractionCompareItem, ExtractionEngineInfo } from '@docuvate/contracts';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ExtractionCompareItem, ExtractionEngineInfo } from '@docuvate/contracts';
-import { formatUserFacingError } from '../../lib/apiErrors';
+
 import {
   compareDocumentExtraction,
   listExtractionEngines,
   submitExtractionArenaRating,
 } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import { Button } from '../ui/Button';
 
 interface ExtractionArenaPanelProps {
@@ -172,7 +173,7 @@ export function ExtractionArenaPanel({
                 <pre className="extraction-arena-snippet">{item.text?.slice(0, 1200) ?? ''}</pre>
               )}
               {!item.error ? (
-                <Button type="button" variant="ghost" onClick={() => setWinner(item.engine)}>
+                <Button type="button" variant="ghost" onClick={() => { setWinner(item.engine); }}>
                   {t('documents.arenaPickWinner')}
                 </Button>
               ) : null}
@@ -189,7 +190,7 @@ export function ExtractionArenaPanel({
               min={1}
               max={5}
               value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
+              onChange={(e) => { setRating(Number(e.target.value)); }}
             />
             <span>{rating}</span>
           </label>
@@ -197,7 +198,7 @@ export function ExtractionArenaPanel({
             <input
               type="checkbox"
               checked={applyDefault}
-              onChange={(e) => setApplyDefault(e.target.checked)}
+              onChange={(e) => { setApplyDefault(e.target.checked); }}
             />
             {t('documents.arenaApplyDefault')}
           </label>

@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import type {
   DashboardWidgetDto,
   DashboardWidgetType,
   SavedDocumentViewDto,
 } from '@docuvate/contracts';
-import { Button } from '../components/ui/Button';
-import { Select } from '../components/ui/Select';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { DashboardWidgets } from '../components/dashboard/DashboardWidgets';
 import { useToastNotify } from '../components/save/ToastProvider';
+import { Button } from '../components/ui/Button';
+import { Select } from '../components/ui/Select';
 import { getDashboardLayout, listSavedDocumentViews, replaceDashboardLayout } from '../lib/api';
 
 const ADDABLE_WIDGET_TYPES: DashboardWidgetType[] = [
@@ -66,7 +67,7 @@ export function DashboardPage() {
       return;
     }
     if (!addableWidgetTypes.includes(addType)) {
-      setAddType(addableWidgetTypes[0]!);
+      setAddType(addableWidgetTypes[0]);
     }
   }, [addType, addableWidgetTypes]);
 
@@ -104,7 +105,7 @@ export function DashboardPage() {
     const next: DashboardWidgetDto[] = [
       ...widgets,
       {
-        id: `new-${Date.now()}`,
+        id: `new-${String(Date.now())}`,
         type: addType,
         position,
         widthCols: 6,
@@ -135,7 +136,7 @@ export function DashboardPage() {
           <Button
             type="button"
             variant={editMode ? 'primary' : 'secondary'}
-            onClick={() => setEditMode((v) => !v)}
+            onClick={() => { setEditMode((v) => !v); }}
           >
             {editMode ? t('dashboard.doneEditing') : t('dashboard.customize')}
           </Button>
@@ -148,7 +149,7 @@ export function DashboardPage() {
           <div className="dashboard-add-row">
             <Select
               value={addType}
-              onChange={(v) => setAddType(v as DashboardWidgetType)}
+              onChange={(v) => { setAddType(v as DashboardWidgetType); }}
               options={addableWidgetTypes.map((type) => ({
                 value: type,
                 label: t(`dashboard.widgetType.${type}`),

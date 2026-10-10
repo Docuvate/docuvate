@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CustomFieldType, TagDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
+
+import type { RecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
 import { deriveKeyFromLabel } from '../../lib/recognizedFieldKey';
 import {
   applyExtractionRuleMode,
-  getExtractionRuleMode,
   type FieldExtractionRuleMode,
+  getExtractionRuleMode,
 } from '../../lib/recognizedFieldRules';
-import type { RecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
 import { Input } from '../ui/Input';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { Select } from '../ui/Select';
@@ -22,14 +23,14 @@ const FIELD_TYPES: { value: CustomFieldType; labelKey: string }[] = [
   { value: 'currency', labelKey: 'recognizedFields.typeCurrency' },
 ];
 
-export type RecognizedFieldRowFormProps = {
+export interface RecognizedFieldRowFormProps {
   row: RecognizedFieldDraft;
   tags: TagDto[];
   gateDefaults: RecognizedFieldGateDraft;
   keyManual: boolean;
   onChange: (row: RecognizedFieldDraft) => void;
   onKeyManual: () => void;
-};
+}
 
 export function RecognizedFieldRowForm({
   row,
@@ -79,14 +80,14 @@ export function RecognizedFieldRowForm({
           <Input
             value={row.label}
             placeholder={t('recognizedFields.fieldLabelPlaceholder')}
-            onChange={(e) => updateLabel(e.target.value)}
+            onChange={(e) => { updateLabel(e.target.value); }}
           />
         </label>
         <label className="recognized-field-form-label">
           {t('recognizedFields.fieldType')}
           <Select
             value={row.fieldType}
-            onChange={(value) => patch({ fieldType: value as CustomFieldType })}
+            onChange={(value) => { patch({ fieldType: value as CustomFieldType }); }}
             options={FIELD_TYPES.map((type) => ({
               value: type.value,
               label: t(type.labelKey),
@@ -105,7 +106,7 @@ export function RecognizedFieldRowForm({
             { value: 'always', label: t('recognizedFields.ruleModeAlways') },
             { value: 'labels', label: t('recognizedFields.ruleModeLabels') },
           ]}
-          onChange={(next) => setRuleMode(next)}
+          onChange={(next) => { setRuleMode(next); }}
         />
 
         {mode === 'labels' ? (
@@ -122,7 +123,7 @@ export function RecognizedFieldRowForm({
                         <input
                           type="checkbox"
                           checked={row.gateLabelIds.includes(tag.id)}
-                          onChange={(e) => toggleGateLabel(tag.id, e.target.checked)}
+                          onChange={(e) => { toggleGateLabel(tag.id, e.target.checked); }}
                         />
                         <span>{tag.name}</span>
                       </label>
@@ -141,7 +142,7 @@ export function RecognizedFieldRowForm({
                       type="radio"
                       name={`gate-match-${row.localId}`}
                       checked={row.gateLabelMatch === 'any'}
-                      onChange={() => patch({ gateLabelMatch: 'any' })}
+                      onChange={() => { patch({ gateLabelMatch: 'any' }); }}
                     />
                     {t('recognizedFields.gateMatchAny')}
                   </label>
@@ -150,7 +151,7 @@ export function RecognizedFieldRowForm({
                       type="radio"
                       name={`gate-match-${row.localId}`}
                       checked={row.gateLabelMatch === 'all'}
-                      onChange={() => patch({ gateLabelMatch: 'all' })}
+                      onChange={() => { patch({ gateLabelMatch: 'all' }); }}
                     />
                     {t('recognizedFields.gateMatchAll')}
                   </label>
@@ -166,7 +167,7 @@ export function RecognizedFieldRowForm({
                 value={row.minLabelConfidence}
                 labelId={`recognized-field-safety-${row.localId}`}
                 ariaLabel={t('recognizedFields.gateSafetyAria')}
-                onChange={(minLabelConfidence) => patch({ minLabelConfidence })}
+                onChange={(minLabelConfidence) => { patch({ minLabelConfidence }); }}
               />
             </div>
           </div>

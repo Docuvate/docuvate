@@ -1,7 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Fragment } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
 import {
   FileText,
   Folder,
@@ -12,11 +10,14 @@ import {
   Tags,
   X,
 } from 'lucide-react';
-import { SavedViewsSidebar } from './SavedViewsSidebar';
+import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
+import { NavLink, useLocation } from 'react-router-dom';
+
 import { routes } from '../../lib/routes';
 import { usePersistedSidebarCollapsed } from '../../lib/usePersistedSidebarCollapsed';
 import { BorderCollapsibleRail } from '../ui/BorderCollapsibleRail';
+import { SavedViewsSidebar } from './SavedViewsSidebar';
 
 const NAV_ICON_SIZE = 20;
 const NAV_ICON_STROKE = 1.75;
@@ -77,10 +78,10 @@ function documentsNavIsActive(pathname: string, search: string): boolean {
   );
 }
 
-type AppSidebarProps = {
+interface AppSidebarProps {
   mobileDrawerOpen?: boolean;
   onCloseMobileDrawer?: () => void;
-};
+}
 
 export function AppSidebar({ mobileDrawerOpen = false, onCloseMobileDrawer }: AppSidebarProps) {
   const { t } = useTranslation();
@@ -90,7 +91,7 @@ export function AppSidebar({ mobileDrawerOpen = false, onCloseMobileDrawer }: Ap
   return (
     <BorderCollapsibleRail
       collapsed={collapsed}
-      onToggle={() => setCollapsed(!collapsed)}
+      onToggle={() => { setCollapsed(!collapsed); }}
       expandLabel={t('nav.expandSidebar')}
       collapseLabel={t('nav.collapseSidebar')}
       railClassName="app-sidebar-rail"

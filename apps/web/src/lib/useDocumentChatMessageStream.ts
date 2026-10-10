@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useRef } from 'react';
 import type {
   DocumentChatMessageRecordDto,
   DocumentChatMessageStreamEvent,
 } from '@docuvate/contracts';
+import { useCallback, useEffect, useRef } from 'react';
+
 import { apiBaseUrl, authHeaders } from './api';
 
 type MessageUpdater = (message: DocumentChatMessageRecordDto) => void;
@@ -54,7 +55,7 @@ export function useDocumentChatMessageStream(
       const poll = async () => {
         try {
           const res = await fetch(
-            `${apiBaseUrl()}/documents/${documentId}/chat/threads/${threadId}/messages`,
+            `${apiBaseUrl()}/documents/${documentId}/chat/threads/${threadId ?? ''}/messages`,
             { credentials: 'include', headers: authHeaders() }
           );
           if (!res.ok) {

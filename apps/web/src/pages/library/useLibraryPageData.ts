@@ -1,8 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type {
   DocumentDto,
   DocumentListQuery,
@@ -12,31 +9,35 @@ import type {
   MappeDto,
   TagDto,
 } from '@docuvate/contracts';
-import { formatUserFacingError } from '../../lib/apiErrors';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams, useSearchParams } from 'react-router-dom';
+
 import {
   bulkDocuments,
   getSavedDocumentView,
-  updateSavedDocumentView,
   listDocuments,
   listFolders,
   listMappen,
   listTags,
+  updateSavedDocumentView,
 } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import {
+  type DocumentFilterParseIssue,
   parseDocumentFilterQuery,
   resolveDocumentFilterFields,
   serializeDocumentFilterQuery,
-  type DocumentFilterParseIssue,
 } from '../../lib/documentFilterQuery';
 import {
+  type LibraryFilterMode,
   readLibraryFilterMode,
   writeLibraryFilterMode,
-  type LibraryFilterMode,
 } from '../../lib/libraryFilterMode';
 import {
+  type LibraryViewMode,
   readLibraryViewMode,
   writeLibraryViewMode,
-  type LibraryViewMode,
 } from '../../lib/libraryViewMode';
 import { applySavedViewToLibrary, buildSavedViewPayload } from '../../lib/savedViewState';
 type SortField = NonNullable<DocumentListQuery['sort']>;
@@ -278,7 +279,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
     const hasPending = items.some((d) => ['uploaded', 'queued', 'extracting'].includes(d.status));
     if (!hasPending) return;
     const timer = window.setInterval(() => void load({ silent: true }), 4000);
-    return () => window.clearInterval(timer);
+    return () => { window.clearInterval(timer); };
   }, [items, load]);
 
   async function onSearch(event: FormEvent) {

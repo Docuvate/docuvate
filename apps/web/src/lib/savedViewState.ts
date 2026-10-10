@@ -7,9 +7,10 @@ import type {
   SavedDocumentViewDto,
   TagDto,
 } from '@docuvate/contracts';
+
+import { serializeDocumentFilterQuery } from './documentFilterQuery';
 import type { LibraryFilterMode } from './libraryFilterMode';
 import type { LibraryViewMode } from './libraryViewMode';
-import { serializeDocumentFilterQuery } from './documentFilterQuery';
 
 export function buildSavedViewPayload(
   name: string,

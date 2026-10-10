@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Bookmark, Settings2 } from 'lucide-react';
 import type { SavedDocumentViewDto } from '@docuvate/contracts';
+import { Bookmark, Settings2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+
 import { listSavedDocumentViews } from '../../lib/api';
 import { routes } from '../../lib/routes';
-import { savedViewSidebarLinkIsActive } from '../../lib/savedViewSidebarNav';
 import { SAVED_VIEWS_CHANGED } from '../../lib/savedViewsEvents';
+import { savedViewSidebarLinkIsActive } from '../../lib/savedViewSidebarNav';
 
 function sidebarLinkClass(isActive: boolean) {
   return `sidebar-link sidebar-saved-view-link${isActive ? ' active' : ''}`;
@@ -21,10 +22,9 @@ export function SavedViewsSidebar({ collapsed }: { collapsed: boolean }) {
 
   const reload = useCallback(() => {
     void listSavedDocumentViews()
-      .then((items) =>
-        setViews(items.filter((v) => v.pinnedSidebar).sort((a, b) => a.position - b.position))
+      .then((items) => { setViews(items.filter((v) => v.pinnedSidebar).sort((a, b) => a.position - b.position)); }
       )
-      .catch(() => setViews([]));
+      .catch(() => { setViews([]); });
   }, []);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export function SavedViewsSidebar({ collapsed }: { collapsed: boolean }) {
       reload();
     };
     window.addEventListener(SAVED_VIEWS_CHANGED, onChanged);
-    return () => window.removeEventListener(SAVED_VIEWS_CHANGED, onChanged);
+    return () => { window.removeEventListener(SAVED_VIEWS_CHANGED, onChanged); };
   }, [reload]);
 
   if (views.length === 0) {

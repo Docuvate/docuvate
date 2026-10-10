@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useState, type FormEvent } from 'react';
-import { useTranslation } from 'react-i18next';
 import { FolderPlus } from 'lucide-react';
+import { type FormEvent,useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 
@@ -30,7 +31,7 @@ export function DateisystemNewFolderButton({
         type="button"
         variant="secondary"
         data-dateisystem-new-folder-trigger
-        onClick={() => setOpen(true)}
+        onClick={() => { setOpen(true); }}
       >
         <FolderPlus size={16} strokeWidth={2} aria-hidden />
         {t('filesystem.newRootButton')}
@@ -56,7 +57,7 @@ export function DateisystemNewFolderButton({
     <form className="dateisystem-toolbar-new-folder" onSubmit={(e) => void submitNewFolder(e)}>
       <Input
         value={name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={(e) => { setName(e.target.value); }}
         placeholder={t('filesystem.folderNamePlaceholder')}
         aria-label={t('filesystem.newRootAria')}
         autoFocus
@@ -71,7 +72,7 @@ export function DateisystemNewFolderButton({
       <Button type="submit" disabled={busy || !name.trim()}>
         {t('common.create')}
       </Button>
-      <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+      <Button type="button" variant="ghost" onClick={() => { setOpen(false); }}>
         {t('common.cancel')}
       </Button>
     </form>

@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode } from 'react';
+
 import { Card } from '../ui/Card';
 
-type SettingsSectionCardProps = {
+interface SettingsSectionCardProps {
   icon: ReactNode;
   title: string;
   description: string;
@@ -12,7 +13,7 @@ type SettingsSectionCardProps = {
   className?: string;
   id?: string;
   compact?: boolean;
-};
+}
 
 export function SettingsSectionCard({
   icon,

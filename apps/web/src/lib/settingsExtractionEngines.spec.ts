@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ExtractionEngineInfo } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
+
 import i18n from '../i18n';
 import {
   buildExtractionEngineSelectOptions,
   shouldShowExtractionOfflineCallout,
 } from './settingsExtractionEngines';
-import type { ExtractionEngineInfo } from '@docuvate/contracts';
 
 const tDe = i18n.getFixedT('de');
 

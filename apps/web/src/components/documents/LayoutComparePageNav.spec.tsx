@@ -11,10 +11,10 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: { page?: number; total?: number; start?: number; end?: number }) => {
       if (key === 'documents.layoutComparePageOf' && opts) {
-        return `${opts.page}/${opts.total}`;
+        return `${String(opts.page)}/${String(opts.total)}`;
       }
       if (key === 'documents.layoutCompareVirtualHint' && opts) {
-        return `${opts.start}-${opts.end}/${opts.total}`;
+        return `${String(opts.start)}-${String(opts.end)}/${String(opts.total)}`;
       }
       return key;
     },

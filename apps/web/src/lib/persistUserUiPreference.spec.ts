@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { persistUserUiPreference } from './persistUserUiPreference';
+
+import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
 import { updateUserSettings } from './api';
 import { applyThemePreference } from './docuvateTheme';
+import { persistUserUiPreference } from './persistUserUiPreference';
 import { notifySaved } from './saveNotify';
-import i18n, { LOCALE_STORAGE_KEY } from '../i18n';
 
 vi.mock('./api', () => ({
   updateUserSettings: vi.fn(),

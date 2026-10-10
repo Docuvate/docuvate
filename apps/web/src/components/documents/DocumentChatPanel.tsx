@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { formatUserFacingError } from '../../lib/apiErrors';
 import type { DocumentChatMessageRecordDto, DocumentChatThreadDto } from '@docuvate/contracts';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import {
   cancelDocumentChatMessage,
   createDocumentChatThread,
@@ -13,17 +13,18 @@ import {
   retryDocumentChatMessage,
   sendDocumentChatThreadMessage,
 } from '../../lib/api';
-import { useDocumentChatMessageStream } from '../../lib/useDocumentChatMessageStream';
-import { routes } from '../../lib/routes';
-import { mergeThreadMessagesAfterSend } from './documentChatMessages';
-import { DocumentChatAssistantMessage } from './DocumentChatAssistantMessage';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { Spinner } from '../ui/Spinner';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import {
   isChatGenerationInProgress,
   threadListShowsGenerationSpinner,
 } from '../../lib/chatGenerationActive';
+import { routes } from '../../lib/routes';
+import { useDocumentChatMessageStream } from '../../lib/useDocumentChatMessageStream';
+import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
+import { Spinner } from '../ui/Spinner';
+import { DocumentChatAssistantMessage } from './DocumentChatAssistantMessage';
+import { mergeThreadMessagesAfterSend } from './documentChatMessages';
 
 interface DocumentChatPanelProps {
   documentId: string;
@@ -209,7 +210,7 @@ export function DocumentChatPanel({
     const id = setInterval(() => {
       void refreshThreads(activeThreadId ?? undefined);
     }, 2500);
-    return () => clearInterval(id);
+    return () => { clearInterval(id); };
   }, [generationInProgress, refreshThreads, activeThreadId]);
 
   async function onNewThread() {
@@ -255,7 +256,7 @@ export function DocumentChatPanel({
       const response = await sendDocumentChatThreadMessage(documentId, sendThreadId, {
         message: text,
       });
-      if (response.configured === false) {
+      if (!response.configured) {
         setServiceNotice(true);
       } else {
         setServiceNotice(false);
@@ -371,7 +372,7 @@ export function DocumentChatPanel({
                       type="button"
                       className={`doc-chat-thread-item${selected ? ' active' : ''}`}
                       aria-current={selected ? 'true' : undefined}
-                      onClick={() => setActiveThreadId(thread.id)}
+                      onClick={() => { setActiveThreadId(thread.id); }}
                     >
                       <span className="doc-chat-thread-title-row">
                         <span className="doc-chat-thread-title">{thread.title}</span>
@@ -484,7 +485,7 @@ export function DocumentChatPanel({
             >
               <Input
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => { setInput(e.target.value); }}
                 placeholder={inputPlaceholder}
                 aria-label={t('documents.documentChat.inputAria')}
                 disabled={

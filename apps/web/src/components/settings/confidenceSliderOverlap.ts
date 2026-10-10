@@ -25,7 +25,7 @@ export function assertConfidenceLabelLayout(root: ParentNode): void {
   for (let i = 0; i < rects.length; i += 1) {
     for (let j = i + 1; j < rects.length; j += 1) {
       if (rectsOverlap(rects[i], rects[j], 1)) {
-        throw new Error(`confidence slider labels overlap (indices ${i} and ${j})`);
+        throw new Error(`confidence slider labels overlap (indices ${String(i)} and ${String(j)})`);
       }
     }
   }

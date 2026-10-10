@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect } from 'react';
-import { useBlocker, type BlockerFunction } from 'react-router-dom';
+import { type BlockerFunction,useBlocker } from 'react-router-dom';
 
-export type UnsavedChangesGuardState = {
+export interface UnsavedChangesGuardState {
   /** User tried to leave while dirty; show confirmation UI. */
   pendingNavigation: boolean;
   confirmLeave: () => void;
   cancelLeave: () => void;
-};
+}
 
 export function useUnsavedChangesGuard(active: boolean): UnsavedChangesGuardState {
   const shouldBlock = useCallback<BlockerFunction>(
@@ -31,7 +31,7 @@ export function useUnsavedChangesGuard(active: boolean): UnsavedChangesGuardStat
       event.preventDefault();
     }
     window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+    return () => { window.removeEventListener('beforeunload', onBeforeUnload); };
   }, [active]);
 
   const confirmLeave = useCallback(() => {

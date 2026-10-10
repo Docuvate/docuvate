@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { authClient } from './auth-client';
-import { clearAuthenticatedSessionHint } from './authSessionHint';
 import { formatAuthClientError } from './authErrors';
+import { clearAuthenticatedSessionHint } from './authSessionHint';
 import { routes } from './routes';
 
 export async function performSignOut(): Promise<void> {

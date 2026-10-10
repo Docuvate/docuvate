@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { type CSSProperties,useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 /** API scale: 0–1 confidence; slider matches historical preset range. */
@@ -134,7 +134,7 @@ export function ConfidenceThresholdSlider({
     }
     const observer = new ResizeObserver(measure);
     observer.observe(ticksEl);
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); };
   }, []);
 
   const ariaValueText = t('recognizedFields.gateConfidenceAriaValue', {
@@ -159,7 +159,7 @@ export function ConfidenceThresholdSlider({
         className="confidence-threshold-slider__track-wrap"
         style={
           {
-            '--confidence-fill': `${fillPercent}%`,
+            '--confidence-fill': `${String(fillPercent)}%`,
             '--confidence-thumb': activeColor,
           } as CSSProperties
         }
@@ -194,7 +194,7 @@ export function ConfidenceThresholdSlider({
           aria-valuemax={CONFIDENCE_THRESHOLD_MAX}
           aria-valuenow={clamped}
           aria-valuetext={ariaValueText}
-          onChange={(e) => onChange(Number.parseFloat(e.target.value))}
+          onChange={(e) => { onChange(Number.parseFloat(e.target.value)); }}
         />
       </div>
 
@@ -213,7 +213,7 @@ export function ConfidenceThresholdSlider({
                 className={`confidence-threshold-slider__tick${
                   isMid ? ' confidence-threshold-slider__tick--mid' : ''
                 }`}
-                style={{ left: `${valueToPercent(bp)}%` }}
+                style={{ left: `${String(valueToPercent(bp))}%` }}
               >
                 {Math.round(bp * 100)}
               </span>

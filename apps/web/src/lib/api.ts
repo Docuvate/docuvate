@@ -1,93 +1,94 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
-  LayoutCompareMetrics,
-  LayoutComparePagePayload,
-  LayoutCompareSummary,
-} from './layoutCompare';
-import type {
+  AcceptLabelRecommendationRequest,
+  AddLabelRecommendationBlocklistRequest,
+  AdminAccessResponse,
+  AdminUserDto,
+  AdminUserListResponse,
+  BanAdminUserRequest,
+  ConfirmLabelRecommendationBlocklistPatternRequest,
+  ConnectorCatalogResponse,
+  ConnectorInstallationDto,
   CorrespondentDto,
+  CreateConnectorInstallationRequest,
   CreateCorrespondentRequest,
-  CreateTagRequest,
-  DocumentBulkRequest,
   CreateDocumentChatThreadRequest,
+  CreateFolderRequest,
+  CreateMappeRequest,
+  CreateSavedDocumentViewRequest,
+  CreateTagRequest,
+  DashboardLayoutResponse,
+  DashboardStatisticsDto,
+  DismissLabelRecommendationRequest,
+  DocumentBulkRequest,
   DocumentChatMessageRecordDto,
+  DocumentChatProvidersCatalogDto,
   DocumentChatRequest,
   DocumentChatResponse,
   DocumentChatThreadDto,
   DocumentChatThreadListResponse,
   DocumentChatThreadMessagesResponse,
-  SendDocumentChatThreadMessageRequest,
-  SendDocumentChatThreadMessageResponse,
   DocumentDto,
-  LayoutIrDocument,
   DocumentListQuery,
   DuplicateCandidateDto,
   DuplicateStackDto,
-  CreateFolderRequest,
-  CreateMappeRequest,
+  ExtractionArenaRatingRequest,
+  ExtractionCompareResponse,
+  ExtractionEngineInfo,
   FolderDto,
-  MappeDto,
-  UpdateMappeRequest,
+  GlobalSearchResponseDto,
+  HardwareCapabilitiesDto,
+  InviteAdminUserRequest,
   LabelMapResponseDto,
-  LabelRecommendationDto,
   LabelRecommendationBlocklistEntryDto,
   LabelRecommendationBlocklistPatternDto,
   LabelRecommendationBlocklistResponse,
-  AcceptLabelRecommendationRequest,
-  DismissLabelRecommendationRequest,
-  AddLabelRecommendationBlocklistRequest,
+  LabelRecommendationDto,
+  LayoutIrDocument,
+  MappeDto,
+  PaperlessImportDryRunSummaryDto,
+  PaperlessImportRunDto,
+  PaperlessImportRunErrorDto,
+  PaperlessInstallationDto,
   ProposeLabelRecommendationBlocklistPatternRequest,
   ProposeLabelRecommendationBlocklistPatternResponse,
-  ConfirmLabelRecommendationBlocklistPatternRequest,
-  TagDto,
-  UpdateFolderRequest,
-  UpdateCorrespondentRequest,
-  ReplaceTagCustomFieldsRequest,
-  ReplaceRecognizedFieldsRequest,
   RecognizedFieldDefinitionDto,
-  TagCustomFieldDefinitionDto,
-  UpdateDocumentRequest,
-  UpdateDocumentResponse,
-  UpdateTagRequest,
-  DocumentChatProvidersCatalogDto,
-  HardwareCapabilitiesDto,
-  UpdateUserSettingsRequest,
-  UserSettingsDto,
-  ExtractionCompareResponse,
-  ExtractionEngineInfo,
-  ExtractionArenaRatingRequest,
-  ConnectorCatalogResponse,
-  ConnectorInstallationDto,
-  CreateConnectorInstallationRequest,
-  GlobalSearchResponseDto,
-  AdminAccessResponse,
-  AdminUserListResponse,
-  AdminUserDto,
-  BanAdminUserRequest,
-  InviteAdminUserRequest,
-  SetAdminUserRoleRequest,
-  CreateSavedDocumentViewRequest,
-  DashboardLayoutResponse,
-  DashboardStatisticsDto,
-  ReplaceDashboardLayoutRequest,
   ReorderSavedDocumentViewsRequest,
+  ReplaceDashboardLayoutRequest,
+  ReplaceRecognizedFieldsRequest,
+  ReplaceTagCustomFieldsRequest,
   SavedDocumentViewDto,
   SavedDocumentViewListResponse,
-  UpdateSavedDocumentViewRequest,
+  SendDocumentChatThreadMessageRequest,
+  SendDocumentChatThreadMessageResponse,
+  SetAdminUserRoleRequest,
+  SftpFetchHostProbeRequest,
+  SftpFetchHostProbeResponse,
   SftpIngressAccountDto,
   SftpIngressCreateAccountRequest,
   SftpIngressCreateAccountResponseDto,
   SftpIngressEventDto,
   SftpIngressServerInfoDto,
-  SftpFetchHostProbeRequest,
-  SftpFetchHostProbeResponse,
-  PaperlessImportDryRunSummaryDto,
-  PaperlessImportRunDto,
-  PaperlessImportRunErrorDto,
-  PaperlessInstallationDto,
+  TagCustomFieldDefinitionDto,
+  TagDto,
+  UpdateCorrespondentRequest,
+  UpdateDocumentRequest,
+  UpdateDocumentResponse,
+  UpdateFolderRequest,
+  UpdateMappeRequest,
+  UpdateSavedDocumentViewRequest,
+  UpdateTagRequest,
+  UpdateUserSettingsRequest,
+  UserSettingsDto,
 } from '@docuvate/contracts';
-import { throwApiRequestError } from './apiErrors';
+
+import { isRecord, throwApiRequestError } from './apiErrors';
+import type {
+  LayoutCompareMetrics,
+  LayoutComparePagePayload,
+  LayoutCompareSummary,
+} from './layoutCompare';
 
 function resolveApiBaseUrl(): string {
   const configured =
@@ -127,13 +128,40 @@ async function request<T>(path: string, init?: RequestInit & { timeoutMs?: numbe
     signal,
   });
   if (!response.ok) {
-    const body = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+    const bodyUnknown: unknown = await response.json().catch(() => ({}));
+    const body = isRecord(bodyUnknown) ? bodyUnknown : {};
     throwApiRequestError(response.status, body);
   }
   if (response.status === 204) {
     return undefined as T;
   }
   return response.json() as Promise<T>;
+}
+
+async function requestNoContent(
+  path: string,
+  init?: RequestInit & { timeoutMs?: number }
+): Promise<void> {
+  const { timeoutMs, ...fetchInit } = init ?? {};
+  const headers = new Headers(fetchInit.headers);
+  if (fetchInit.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  const signal =
+    timeoutMs != null && timeoutMs > 0
+      ? AbortSignal.timeout(timeoutMs)
+      : fetchInit.signal;
+  const response = await fetch(`${baseURL}${path}`, {
+    ...fetchInit,
+    credentials: 'include',
+    headers,
+    signal,
+  });
+  if (!response.ok) {
+    const bodyUnknown: unknown = await response.json().catch(() => ({}));
+    const body = isRecord(bodyUnknown) ? bodyUnknown : {};
+    throwApiRequestError(response.status, body);
+  }
 }
 
 function queryString(params: Record<string, string | undefined>): string {
@@ -186,12 +214,12 @@ export async function fetchDocumentLayoutIr(documentId: string): Promise<LayoutI
   return request<LayoutIrDocument>(`/documents/${documentId}/layout-ir`);
 }
 
-export type LayoutRenderResponse = {
+export interface LayoutRenderResponse {
   html?: string;
   typst?: string;
   reconstructionReliable: boolean;
   unreliableReason?: string | null;
-};
+}
 
 export async function fetchDocumentLayoutHtml(
   documentId: string
@@ -245,7 +273,7 @@ export async function fetchDocumentLayoutComparePage(
 ): Promise<LayoutComparePagePayload> {
   const heatmapQuery = includeHeatmap ? '' : '?heatmap=0';
   return request(
-    `/documents/${documentId}/layout-compare/pages/${pageNumber}${heatmapQuery}`,
+    `/documents/${documentId}/layout-compare/pages/${String(pageNumber)}${heatmapQuery}`,
     init
   );
 }
@@ -288,7 +316,8 @@ export async function uploadDocument(
     credentials: 'include',
   });
   if (!response.ok) {
-    const errBody = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+    const bodyUnknown: unknown = await response.json().catch(() => ({}));
+    const errBody = isRecord(bodyUnknown) ? bodyUnknown : {};
     throwApiRequestError(response.status, errBody);
   }
   return response.json() as Promise<DocumentDto>;
@@ -436,7 +465,7 @@ async function mutateDocumentTags(
   path: string,
   method: 'POST' | 'DELETE'
 ): Promise<DocumentDto> {
-  await request(`${path}`, { method });
+  await request(path, { method });
   return getDocument(documentId);
 }
 
@@ -744,7 +773,7 @@ export async function createConnectorInstallation(
 }
 
 export async function deleteConnectorInstallation(installationId: string): Promise<void> {
-  await request<void>(`/connectors/installations/${encodeURIComponent(installationId)}`, {
+  await requestNoContent(`/connectors/installations/${encodeURIComponent(installationId)}`, {
     method: 'DELETE',
   });
 }
@@ -958,13 +987,13 @@ export async function updateSavedDocumentView(
 }
 
 export async function deleteSavedDocumentView(id: string): Promise<void> {
-  await request<void>(`/saved-views/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  await requestNoContent(`/saved-views/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
 
 export async function reorderSavedDocumentViews(
   body: ReorderSavedDocumentViewsRequest
 ): Promise<void> {
-  await request<void>('/saved-views/reorder', {
+  await requestNoContent('/saved-views/reorder', {
     method: 'PUT',
     body: JSON.stringify(body),
   });
@@ -1020,7 +1049,7 @@ export async function listSftpIngressEvents(
   limit = 20
 ): Promise<SftpIngressEventDto[]> {
   const res = await request<{ events: SftpIngressEventDto[] }>(
-    `/sftp-ingress/accounts/${encodeURIComponent(accountId)}/events?limit=${limit}`
+    `/sftp-ingress/accounts/${encodeURIComponent(accountId)}/events?limit=${String(limit)}`
   );
   return res.events;
 }

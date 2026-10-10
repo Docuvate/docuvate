@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Trans, useTranslation } from 'react-i18next';
 import { MoreHorizontal } from 'lucide-react';
+import { useCallback, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { routes } from '../../lib/routes';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ContextMenu } from '../ui/ContextMenu';
@@ -11,11 +12,11 @@ import { IconButton } from '../ui/IconButton';
 
 export type LabelSuggestionDismissScope = 'local' | 'global';
 
-type Props = {
+interface Props {
   labelName: string;
   disabled?: boolean;
   onDismiss: (scope: LabelSuggestionDismissScope) => void | Promise<void>;
-};
+}
 
 export function LabelSuggestionDismissActions({ labelName, disabled, onDismiss }: Props) {
   const { t } = useTranslation();
@@ -66,7 +67,7 @@ export function LabelSuggestionDismissActions({ labelName, disabled, onDismiss }
         x={menuPos.x}
         y={menuPos.y}
         anchorRef={menuAnchorRef}
-        onClose={() => setMenuOpen(false)}
+        onClose={() => { setMenuOpen(false); }}
         items={[
           {
             kind: 'item',
@@ -83,7 +84,7 @@ export function LabelSuggestionDismissActions({ labelName, disabled, onDismiss }
             description: t('labelSuggestions.blockGlobalDesc'),
             danger: true,
             disabled: blocked,
-            onSelect: () => setConfirmOpen(true),
+            onSelect: () => { setConfirmOpen(true); },
           },
         ]}
       />
@@ -103,7 +104,7 @@ export function LabelSuggestionDismissActions({ labelName, disabled, onDismiss }
         confirmLabel={t('labelSuggestions.blockGlobal')}
         tone="danger"
         busy={busy}
-        onCancel={() => setConfirmOpen(false)}
+        onCancel={() => { setConfirmOpen(false); }}
         onConfirm={() => void runDismiss('global')}
       />
     </>

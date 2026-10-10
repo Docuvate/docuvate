@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
-import { useTranslation } from 'react-i18next';
 import type {
   ConnectorAuthFieldDescriptorDto,
   ConnectorPluginCatalogEntryDto,
 } from '@docuvate/contracts';
+import { type FormEvent,useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { listFolders, listTags, probeSftpFetchHostKey } from '../../lib/api';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../../lib/connectorOAuthSetupDoc';
-import { listFolders, listTags, probeSftpFetchHostKey } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
@@ -42,8 +43,8 @@ export function ConnectorConnectDialog({
   const [credentials, setCredentials] = useState<Record<string, string>>({});
   const [probeMessage, setProbeMessage] = useState<string | null>(null);
   const [probeBusy, setProbeBusy] = useState(false);
-  const [folders, setFolders] = useState<Array<{ id: string; name: string }>>([]);
-  const [tags, setTags] = useState<Array<{ id: string; name: string }>>([]);
+  const [folders, setFolders] = useState<{ id: string; name: string }[]>([]);
+  const [tags, setTags] = useState<{ id: string; name: string }[]>([]);
 
   const fields = useMemo(() => plugin?.auth.fields ?? [], [plugin]);
 
@@ -69,8 +70,8 @@ export function ConnectorConnectDialog({
       initial[field.key] = '';
     }
     if (plugin.id === 'sftp_fetch') {
-      initial['after_import'] = 'delete';
-      initial['poll_interval_seconds'] = '60';
+      initial.after_import = 'delete';
+      initial.poll_interval_seconds = '60';
     }
     setCredentials(initial);
     setProbeMessage(null);
@@ -90,11 +91,11 @@ export function ConnectorConnectDialog({
     setProbeMessage(null);
     try {
       const result = await probeSftpFetchHostKey({
-        host: credentials['host'] ?? '',
-        port: Number(credentials['port'] ?? 22) || 22,
-        username: credentials['username'] ?? '',
-        password: credentials['password'] || undefined,
-        privateKey: credentials['private_key'] || undefined,
+        host: credentials.host ?? '',
+        port: Number(credentials.port ?? 22) || 22,
+        username: credentials.username ?? '',
+        password: credentials.password || undefined,
+        privateKey: credentials.private_key || undefined,
       });
       setProbeMessage(
         t('connectors.sftpProbeSuccess', { fingerprint: result.hostKeyFingerprintSha256 })
@@ -116,7 +117,7 @@ export function ConnectorConnectDialog({
     if (plugin.auth.strategy === 'oauth2') {
       onOAuthStart?.({
         displayName: displayName.trim(),
-        accountHint: credentials['account_hint']?.trim() || undefined,
+        accountHint: credentials.account_hint?.trim() || undefined,
       });
       return;
     }
@@ -175,7 +176,7 @@ export function ConnectorConnectDialog({
               value={displayName}
               required
               disabled={busy}
-              onChange={(e) => setDisplayName(e.target.value)}
+              onChange={(e) => { setDisplayName(e.target.value); }}
               aria-label={t('connectors.displayName')}
             />
           </label>
@@ -207,8 +208,7 @@ export function ConnectorConnectDialog({
                   disabled={busy}
                   autoComplete={field.secret ? 'off' : undefined}
                   placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
-                  onChange={(e) =>
-                    setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }))
+                  onChange={(e) => { setCredentials((prev) => ({ ...prev, [field.key]: e.target.value })); }
                   }
                   aria-label={fieldLabel(field)}
                 />
@@ -222,8 +222,8 @@ export function ConnectorConnectDialog({
               <label className="settings-field">
                 {t('connectors.auth.fields.afterImport')} *
                 <Select
-                  value={credentials['after_import'] ?? 'delete'}
-                  onChange={(value) => setCredentials((prev) => ({ ...prev, after_import: value }))}
+                  value={credentials.after_import ?? 'delete'}
+                  onChange={(value) => { setCredentials((prev) => ({ ...prev, after_import: value })); }}
                   options={[
                     { value: 'delete', label: t('connectors.plugins.sftpFetch.afterImportDelete') },
                     { value: 'move', label: t('connectors.plugins.sftpFetch.afterImportMove') },
@@ -239,9 +239,8 @@ export function ConnectorConnectDialog({
                   step={60}
                   required
                   disabled={busy}
-                  value={credentials['poll_interval_seconds'] ?? '60'}
-                  onChange={(e) =>
-                    setCredentials((prev) => ({ ...prev, poll_interval_seconds: e.target.value }))
+                  value={credentials.poll_interval_seconds ?? '60'}
+                  onChange={(e) => { setCredentials((prev) => ({ ...prev, poll_interval_seconds: e.target.value })); }
                   }
                   aria-label={t('connectors.auth.fields.pollIntervalSeconds')}
                 />
@@ -249,9 +248,8 @@ export function ConnectorConnectDialog({
               <label className="settings-field">
                 {t('connectors.auth.fields.targetFolderId')}
                 <Select
-                  value={credentials['target_folder_id'] ?? ''}
-                  onChange={(value) =>
-                    setCredentials((prev) => ({ ...prev, target_folder_id: value }))
+                  value={credentials.target_folder_id ?? ''}
+                  onChange={(value) => { setCredentials((prev) => ({ ...prev, target_folder_id: value })); }
                   }
                   options={[
                     { value: '', label: t('sftpIngress.targetFolderInbox') },
@@ -265,7 +263,7 @@ export function ConnectorConnectDialog({
                 <select
                   className="input"
                   multiple
-                  value={(credentials['label_ids'] ?? '').split(',').filter(Boolean)}
+                  value={(credentials.label_ids ?? '').split(',').filter(Boolean)}
                   disabled={busy}
                   onChange={(e) => {
                     const selected = Array.from(e.target.selectedOptions).map((o) => o.value);

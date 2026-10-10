@@ -1,12 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import type {
   LabelRecommendationBlocklistEntryDto,
   LabelRecommendationBlocklistPatternDto,
 } from '@docuvate/contracts';
-import { formatUserFacingError } from '../lib/apiErrors';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { useToast } from '../components/save/ToastProvider';
+import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { useAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import {
   addLabelRecommendationBlocklist,
   confirmLabelRecommendationBlocklistPattern,
@@ -15,25 +21,20 @@ import {
   removeLabelRecommendationBlocklist,
   removeLabelRecommendationBlocklistPattern,
 } from '../lib/api';
+import { formatUserFacingError } from '../lib/apiErrors';
 import { clusterBlocklistPhrases } from '../lib/blocklistClusters';
 import { formatCustomerDate } from '../lib/formatCustomerDate';
-import { useAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
-import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Card } from '../components/ui/Card';
-import { useToast } from '../components/save/ToastProvider';
 
-type PatternProposal = {
+interface PatternProposal {
   pattern: string;
   explanation: string;
   phrases: string[];
-};
+}
 
-type UndoState = {
+interface UndoState {
   phrase: string;
   message: string;
-};
+}
 
 const SEARCH_MIN_ITEMS = 6;
 const UNDO_MS = 8000;
@@ -86,7 +87,7 @@ export function BlockedLabelsSettingsPage() {
       return undefined;
     }
     const timer = window.setTimeout(dismissUndo, UNDO_MS);
-    return () => window.clearTimeout(timer);
+    return () => { window.clearTimeout(timer); };
   }, [undo, dismissUndo]);
 
   const clusters = useMemo(
@@ -255,7 +256,7 @@ export function BlockedLabelsSettingsPage() {
               <Input
                 id="blocked-label-phrase-input"
                 value={phrase}
-                onChange={(e) => setPhrase(e.target.value)}
+                onChange={(e) => { setPhrase(e.target.value); }}
                 placeholder={t('labelBlocklist.phrasePlaceholder')}
                 disabled={busy}
               />
@@ -271,7 +272,7 @@ export function BlockedLabelsSettingsPage() {
             <Input
               type="search"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => { setSearchQuery(e.target.value); }}
               placeholder={t('settings.blockedLabels.searchPlaceholder')}
               aria-label={t('settings.blockedLabels.searchAria')}
             />

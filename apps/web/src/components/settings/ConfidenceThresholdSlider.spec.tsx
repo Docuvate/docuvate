@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+
 import i18n from '../../i18n';
 import { ConfidenceThresholdSlider } from './ConfidenceThresholdSlider';
 

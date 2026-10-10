@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FolderDto, MappeDto } from '@docuvate/contracts';
+
 import i18n from '../i18n';
 import { routes } from './routes';
 
@@ -147,13 +148,13 @@ export function pickDefaultFilesystemHref(mappen: MappeDto[], folders: FolderDto
   for (const mappe of sorted) {
     const roots = childFolders(folders, { mappeId: mappe.id, parentId: null });
     if (roots.length > 0) {
-      return folderHref(roots[0]!.id);
+      return folderHref(roots[0].id);
     }
     return mappeHref(mappe.id);
   }
   const loose = foldersWithoutMappe(folders);
   if (loose.length > 0) {
-    return folderHref(loose[0]!.id);
+    return folderHref(loose[0].id);
   }
   return null;
 }

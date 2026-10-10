@@ -3,6 +3,7 @@
 import type { DashboardWidgetDto } from '@docuvate/contracts';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { Button } from '../ui/Button';
 
 interface DashboardWidgetCardProps {
@@ -36,8 +37,8 @@ export function DashboardWidgetCard({
 
   return (
     <section
-      className={`dashboard-widget-card dashboard-widget-span-${span}`}
-      style={{ gridRowEnd: `span ${widget.heightRows}` }}
+      className={`dashboard-widget-card dashboard-widget-span-${String(span)}`}
+      style={{ gridRowEnd: `span ${String(widget.heightRows)}` }}
       aria-label={title}
       {...(editMode && dragHandleProps
         ? {

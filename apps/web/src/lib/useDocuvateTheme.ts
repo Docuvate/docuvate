@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useSyncExternalStore } from 'react';
-import type { DocuvateTheme } from '@docuvate/tokens';
 import type { ThemePreference } from '@docuvate/contracts';
+import type { DocuvateTheme } from '@docuvate/tokens';
+import { useCallback, useSyncExternalStore } from 'react';
+
 import {
   applyThemePreference,
   getResolvedThemeSnapshot,
@@ -20,12 +21,12 @@ export function useDocuvateTheme(): {
   const themePreference = useSyncExternalStore(
     subscribeThemeStore,
     getThemePreferenceSnapshot,
-    () => 'system' as ThemePreference
+    (): ThemePreference => 'system'
   );
   const theme = useSyncExternalStore(
     subscribeThemeStore,
     getResolvedThemeSnapshot,
-    () => 'light' as DocuvateTheme
+    (): DocuvateTheme => 'light'
   );
 
   const setThemePreference = useCallback((next: ThemePreference) => {

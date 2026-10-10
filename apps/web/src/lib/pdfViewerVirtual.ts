@@ -28,9 +28,9 @@ export function layoutOverlayPercentStyles(
   overlay: { x: number; y: number; width: number; height: number }
 ): { left: string; top: string; width: string; height: string } {
   return {
-    left: `${overlay.x * 100}%`,
-    top: `${overlay.y * 100}%`,
-    width: `${Math.max(overlay.width * 100, 0.4)}%`,
-    height: `${Math.max(overlay.height * 100, 0.35)}%`,
+    left: `${String(overlay.x * 100)}%`,
+    top: `${String(overlay.y * 100)}%`,
+    width: `${String(Math.max(overlay.width * 100, 0.4))}%`,
+    height: `${String(Math.max(overlay.height * 100, 0.35))}%`,
   };
 }

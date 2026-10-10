@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TagDto } from '@docuvate/contracts';
+import { Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
   emptyRecognizedFieldDraft,
   RECOGNIZED_FIELD_STARTER_PRESETS,
   type RecognizedFieldDraft,
 } from '../../lib/recognizedFieldDraft';
-import { Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
-import type { RecognizedFieldGateDraft } from './RecognizedFieldQualityGateEditor';
 import { RecognizedFieldEditDialog } from './RecognizedFieldEditDialog';
+import type { RecognizedFieldGateDraft } from './RecognizedFieldQualityGateEditor';
 
 const FIELD_TYPE_KEYS: Record<string, string> = {
   text: 'recognizedFields.typeText',
@@ -121,7 +122,7 @@ export function RecognizedFieldCatalogEditor({
               type="button"
               variant="secondary"
               disabled={catalogBusy}
-              onClick={() => setStarterConfirmOpen(true)}
+              onClick={() => { setStarterConfirmOpen(true); }}
             >
               {t('recognizedFields.starterPreset')}
             </Button>
@@ -129,7 +130,7 @@ export function RecognizedFieldCatalogEditor({
               type="button"
               variant="secondary"
               disabled={catalogBusy}
-              onClick={() => openCreate()}
+              onClick={() => { openCreate(); }}
             >
               {t('recognizedFields.addField')}
             </Button>
@@ -199,7 +200,7 @@ export function RecognizedFieldCatalogEditor({
                             variant="ghost"
                             className="library-inline-action"
                             disabled={catalogBusy}
-                            onClick={() => openEdit(row)}
+                            onClick={() => { openEdit(row); }}
                           >
                             {t('recognizedFields.editField')}
                           </Button>
@@ -209,7 +210,7 @@ export function RecognizedFieldCatalogEditor({
                             aria-label={t('recognizedFields.removeField')}
                             title={t('recognizedFields.removeField')}
                             disabled={catalogBusy}
-                            onClick={() => setPendingDelete(row)}
+                            onClick={() => { setPendingDelete(row); }}
                           >
                             <Trash2 size={16} strokeWidth={2} aria-hidden />
                           </button>
@@ -227,7 +228,7 @@ export function RecognizedFieldCatalogEditor({
               type="button"
               variant="secondary"
               disabled={catalogBusy}
-              onClick={() => openCreate()}
+              onClick={() => { openCreate(); }}
             >
               {t('recognizedFields.addField')}
             </Button>
@@ -261,7 +262,7 @@ export function RecognizedFieldCatalogEditor({
         tone="danger"
         busy={catalogBusy}
         confirmLabel={t('common.delete')}
-        onCancel={() => setPendingDelete(null)}
+        onCancel={() => { setPendingDelete(null); }}
         onConfirm={() => void confirmDeleteRow()}
       />
 
@@ -271,7 +272,7 @@ export function RecognizedFieldCatalogEditor({
         description={t('recognizedFields.starterPresetConfirmDescription')}
         busy={catalogBusy}
         confirmLabel={t('recognizedFields.starterPreset')}
-        onCancel={() => setStarterConfirmOpen(false)}
+        onCancel={() => { setStarterConfirmOpen(false); }}
         onConfirm={() => void applyStarterPreset()}
       />
     </div>

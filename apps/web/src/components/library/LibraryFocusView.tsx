@@ -1,25 +1,26 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentDto } from '@docuvate/contracts';
 import {
+  type KeyboardEvent,
+  type MouseEvent,
   useCallback,
   useEffect,
   useMemo,
   useState,
-  type KeyboardEvent,
-  type MouseEvent,
 } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { DocumentDto } from '@docuvate/contracts';
+import { Link } from 'react-router-dom';
+
 import { fetchDocumentContentBlob } from '../../lib/api';
+import { isExtractionPending } from '../../lib/documentExtractionState';
 import { fetchDocumentPreviewBuffer } from '../../lib/documentPreviewCache';
 import { DocumentPreviewCard } from '../documents/DocumentPreviewCard';
-import { isExtractionPending } from '../../lib/documentExtractionState';
 import { ExtractionProgressBar } from '../documents/ExtractionProgressBar';
 import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
-import { documentDisplayDate, isImageMime, isPdfMime } from './libraryDocumentUtils';
 import { duplicateStackVersionLabel, showDuplicateStackBadge } from './duplicateStackLabel';
+import { documentDisplayDate, isImageMime, isPdfMime } from './libraryDocumentUtils';
 
 interface LibraryFocusViewProps {
   items: DocumentDto[];
@@ -102,22 +103,22 @@ export function LibraryFocusView({
           <li key={doc.id}>
             <div
               className={`library-focus-row${focused?.id === doc.id ? ' library-focus-row-active' : ''}`}
-              onContextMenu={(event) => onContextMenu(event, doc.id)}
+              onContextMenu={(event) => { onContextMenu(event, doc.id); }}
             >
               <input
                 type="checkbox"
                 checked={selected.has(doc.id)}
-                onChange={() => onToggleSelect(doc.id)}
+                onChange={() => { onToggleSelect(doc.id); }}
                 aria-label={`${doc.title} auswählen`}
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => { e.stopPropagation(); }}
               />
               <button
                 type="button"
                 className="library-focus-row-btn"
                 role="option"
                 aria-selected={focused?.id === doc.id}
-                onClick={() => setFocusId(doc.id)}
-                onKeyDown={(e) => onListKeyDown(e, index)}
+                onClick={() => { setFocusId(doc.id); }}
+                onKeyDown={(e) => { onListKeyDown(e, index); }}
               >
                 <span className="library-focus-row-title" title={doc.title}>
                   {doc.title}

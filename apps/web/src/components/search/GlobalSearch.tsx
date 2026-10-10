@@ -1,37 +1,38 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { GlobalSearchGroupDto, GlobalSearchHitDto } from '@docuvate/contracts';
+import { FileText, Folder, Search, Settings2, Tag, X, Zap } from 'lucide-react';
 import {
+  type KeyboardEvent,
   useCallback,
   useEffect,
   useId,
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { FileText, Folder, Search, Settings2, Tag, X, Zap } from 'lucide-react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import type { GlobalSearchGroupDto, GlobalSearchHitDto } from '@docuvate/contracts';
-import { authClient } from '../../lib/auth-client';
+
 import { getConnectorCatalog, globalSearch, listRecognizedFields } from '../../lib/api';
-import { suggestFieldNames } from '../../lib/search/fieldNameSuggestions';
+import { authClient } from '../../lib/auth-client';
 import { routes } from '../../lib/routes';
-import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
-import { parseClientSearchScope } from '../../lib/search/parseSearchScope';
-import { searchRegistry } from '../../lib/search/searchRegistry';
-import {
-  pushRecentSearch,
-  readRecentDocuments,
-  readRecentSearches,
-} from '../../lib/search/searchRecent';
-import { searchShortcutLabel } from '../../lib/search/platformShortcut';
+import { suggestFieldNames } from '../../lib/search/fieldNameSuggestions';
 import {
   movePaletteGroupTab,
   movePaletteSelection,
   type PaletteItemRef,
 } from '../../lib/search/paletteKeyboard';
+import { parseClientSearchScope } from '../../lib/search/parseSearchScope';
+import { searchShortcutLabel } from '../../lib/search/platformShortcut';
+import {
+  pushRecentSearch,
+  readRecentDocuments,
+  readRecentSearches,
+} from '../../lib/search/searchRecent';
+import { searchRegistry } from '../../lib/search/searchRegistry';
+import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
 import { GlobalSearchHighlight } from './GlobalSearchHighlight';
 
 const DEBOUNCE_MS = 150;
@@ -74,18 +75,18 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeScopes, setActiveScopes] = useState<string[]>([]);
-  const [fieldCatalog, setFieldCatalog] = useState<Array<{ key: string; label: string }>>([]);
+  const [fieldCatalog, setFieldCatalog] = useState<{ key: string; label: string }[]>([]);
 
   useEffect(() => {
     void getConnectorCatalog()
-      .then((c) => setIsAdmin(c.viewerIsServerAdmin === true))
-      .catch(() => setIsAdmin(false));
+      .then((c) => { setIsAdmin(c.viewerIsServerAdmin); })
+      .catch(() => { setIsAdmin(false); });
   }, []);
 
   useEffect(() => {
     void listRecognizedFields()
-      .then((items) => setFieldCatalog(items.map((f) => ({ key: f.key, label: f.label }))))
-      .catch(() => setFieldCatalog([]));
+      .then((items) => { setFieldCatalog(items.map((f) => ({ key: f.key, label: f.label }))); })
+      .catch(() => { setFieldCatalog([]); });
   }, []);
 
   const parsed = useMemo(() => {
@@ -204,7 +205,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
       }
     }
     window.addEventListener('keydown', onKeyDown as unknown as EventListener);
-    return () => window.removeEventListener('keydown', onKeyDown as unknown as EventListener);
+    return () => { window.removeEventListener('keydown', onKeyDown as unknown as EventListener); };
   }, [closePalette, openPalette, paletteOpen]);
 
   useEffect(() => {
@@ -232,14 +233,14 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
           if (!controller.signal.aborted) setLoading(false);
         });
     }, DEBOUNCE_MS);
-    return () => window.clearTimeout(timer);
+    return () => { window.clearTimeout(timer); };
   }, [parsed.apiQuery, parsed.text, paletteOpen]);
 
   const fieldSuggestions = useMemo(() => {
     const tail = query.trim().split(/\s+/).pop() ?? '';
     const m = /^([\p{L}][\p{L}0-9_-]*)$/u.exec(tail);
     if (!m || tail.includes(':')) return [];
-    return suggestFieldNames(m[1]!, fieldCatalog);
+    return suggestFieldNames(m[1], fieldCatalog);
   }, [query, fieldCatalog]);
 
   function activateHit(hit: GlobalSearchHitDto, newTab: boolean) {
@@ -291,9 +292,9 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
           aria-haspopup="dialog"
           aria-expanded={paletteOpen}
           aria-controls={paletteOpen ? listboxId : undefined}
-          onClick={() => openPalette()}
-          onFocus={() => setTriggerFocused(true)}
-          onBlur={() => setTriggerFocused(false)}
+          onClick={() => { openPalette(); }}
+          onFocus={() => { setTriggerFocused(true); }}
+          onBlur={() => { setTriggerFocused(false); }}
         >
           <Search size={18} strokeWidth={1.75} aria-hidden />
           <span className="global-search-trigger-placeholder">{t('search.triggerLabel')}</span>
@@ -307,7 +308,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
           aria-label={t('search.paletteTitle')}
           aria-haspopup="dialog"
           aria-expanded={paletteOpen}
-          onClick={() => openPalette()}
+          onClick={() => { openPalette(); }}
         >
           <Search size={22} strokeWidth={1.75} aria-hidden />
         </button>
@@ -327,7 +328,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 role="dialog"
                 aria-modal="true"
                 aria-label={t('search.paletteTitle')}
-                onMouseDown={(e) => e.stopPropagation()}
+                onMouseDown={(e) => { e.stopPropagation(); }}
                 onKeyDown={onPaletteKeyDown}
               >
                 <div className="global-search-palette-input-row">
@@ -336,7 +337,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                     ref={inputRef}
                     className="global-search-palette-input"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={(e) => { setQuery(e.target.value); }}
                     placeholder={t('shell.searchPlaceholder')}
                     aria-autocomplete="list"
                     aria-controls={listboxId}
@@ -366,12 +367,11 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                         type="button"
                         className={`global-search-scope-chip${activeScopes.includes(scope) ? ' active' : ''}`}
                         aria-pressed={activeScopes.includes(scope)}
-                        onClick={() =>
-                          setActiveScopes((prev) =>
+                        onClick={() => { setActiveScopes((prev) =>
                             prev.includes(scope)
                               ? prev.filter((s) => s !== scope)
                               : [...prev, scope]
-                          )
+                          ); }
                         }
                       >
                         {t(`search.groups.${scope}`)}
@@ -412,7 +412,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                           <ul>
                             {recentSearches.map((s) => (
                               <li key={s}>
-                                <button type="button" onClick={() => setQuery(s)}>
+                                <button type="button" onClick={() => { setQuery(s); }}>
                                   {s}
                                 </button>
                               </li>
@@ -429,7 +429,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                                 <button
                                   type="button"
                                   data-ux="search-recent-document"
-                                  onClick={() => navigate(routes.document(d.id))}
+                                  onClick={() => { navigate(routes.document(d.id)); }}
                                 >
                                   {d.title}
                                 </button>
@@ -445,7 +445,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                             .slice(0, 3)
                             .map((a) => (
                               <li key={a.id}>
-                                <button type="button" onClick={() => navigate(a.route)}>
+                                <button type="button" onClick={() => { navigate(a.route); }}>
                                   {a.title}
                                 </button>
                               </li>
@@ -485,8 +485,8 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                                     id={flatId}
                                     className={`global-search-option${active ? ' active' : ''}`}
                                     data-ux="search-result"
-                                    onMouseEnter={() => setActiveId(flatId)}
-                                    onClick={() => activateHit(hit, false)}
+                                    onMouseEnter={() => { setActiveId(flatId); }}
+                                    onClick={() => { activateHit(hit, false); }}
                                   >
                                     <GlobalSearchResultRow hit={hit} />
                                   </button>

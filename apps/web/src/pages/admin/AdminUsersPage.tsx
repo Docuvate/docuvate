@@ -1,8 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { AdminUserDto, InstanceRole } from '@docuvate/contracts';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { AdminUserDto, InstanceRole } from '@docuvate/contracts';
+
+import { AdminSettingsLayout } from '../../components/admin/AdminSettingsLayout';
+import type { AdminUserMenuAction } from '../../components/admin/AdminUserActionsMenu';
+import { AdminUsersInvitePanel } from '../../components/admin/AdminUsersInvitePanel';
+import { AdminUsersTable } from '../../components/admin/AdminUsersTable';
+import { useToast } from '../../components/save/ToastProvider';
+import { SettingsBreadcrumb } from '../../components/settings/SettingsBreadcrumb';
+import { Button } from '../../components/ui/Button';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { formatAdminUserFacingError } from '../../lib/adminErrors';
 import {
   banAdminUser,
   inviteAdminUser,
@@ -13,17 +23,8 @@ import {
   setAdminUserRole,
   unbanAdminUser,
 } from '../../lib/api';
-import { formatAdminUserFacingError } from '../../lib/adminErrors';
-import { routes } from '../../lib/routes';
 import { authClient } from '../../lib/auth-client';
-import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
-import { SettingsBreadcrumb } from '../../components/settings/SettingsBreadcrumb';
-import { useToast } from '../../components/save/ToastProvider';
-import { AdminSettingsLayout } from '../../components/admin/AdminSettingsLayout';
-import { Button } from '../../components/ui/Button';
-import { AdminUsersInvitePanel } from '../../components/admin/AdminUsersInvitePanel';
-import { AdminUsersTable } from '../../components/admin/AdminUsersTable';
-import type { AdminUserMenuAction } from '../../components/admin/AdminUserActionsMenu';
+import { routes } from '../../lib/routes';
 
 type PendingAction =
   | { kind: 'ban'; user: AdminUserDto }
@@ -290,7 +291,7 @@ export function AdminUsersPage() {
         busy={busy}
         confirmLabel={dialog.confirmLabel}
         onConfirm={() => void confirmPending()}
-        onCancel={() => setPending(null)}
+        onCancel={() => { setPending(null); }}
       />
     </AdminSettingsLayout>
   );

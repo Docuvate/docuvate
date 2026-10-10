@@ -1,23 +1,27 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useState,
-  type KeyboardEvent,
-  type MouseEvent,
-} from 'react';
-import { Link } from 'react-router-dom';
-import { ExternalLink, ScanLine } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import type {
   DocumentDto,
   DuplicateStackMemberDto,
   LibraryTableColumnId,
 } from '@docuvate/contracts';
+import { ExternalLink, ScanLine } from 'lucide-react';
+import {
+  Fragment,
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { deleteDocument, getDuplicateStack } from '../../lib/api';
+import { setDocumentDragData } from '../../lib/documentDnD';
 import { isExtractionPending } from '../../lib/documentExtractionState';
+import { useFilesystemCompactDocs } from '../../lib/useFilesystemCompactDocs';
+import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { ExtractionProgressBar } from '../documents/ExtractionProgressBar';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -28,10 +32,7 @@ import {
   showDuplicateStackBadge,
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
-import { setDocumentDragData } from '../../lib/documentDnD';
 import { documentDisplayDate } from './libraryDocumentUtils';
-import { useFilesystemCompactDocs } from '../../lib/useFilesystemCompactDocs';
-import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 
 type SortField = 'title' | 'documentDate' | 'updatedAt';
 
@@ -207,7 +208,7 @@ export function LibraryDocumentTable({
       cancelLabel="Abbrechen"
       tone="danger"
       busy={deleteBusy}
-      onCancel={() => setVersionDeleteTarget(null)}
+      onCancel={() => { setVersionDeleteTarget(null); }}
       onConfirm={() => void deleteVersionFromRow()}
     />
   );
@@ -247,7 +248,7 @@ export function LibraryDocumentTable({
                     className="library-doc-stack-item-inner"
                     tabIndex={0}
                     aria-current={rowSelected ? 'true' : undefined}
-                    onContextMenu={(event) => onContextMenu(event, doc.id)}
+                    onContextMenu={(event) => { onContextMenu(event, doc.id); }}
                     onKeyDown={(event) => {
                       if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
                         onContextMenuKeyboard(event, doc.id);
@@ -258,7 +259,7 @@ export function LibraryDocumentTable({
                       <input
                         type="checkbox"
                         checked={selected.has(doc.id)}
-                        onChange={() => onToggleSelect(doc.id)}
+                        onChange={() => { onToggleSelect(doc.id); }}
                         aria-label={`${doc.title} auswählen`}
                       />
                       <div className="library-doc-stack-text">
@@ -271,7 +272,7 @@ export function LibraryDocumentTable({
                               type="button"
                               className="stack-badge"
                               title={t('library.stackVersionsTitle')}
-                              onClick={() => onReviewStack(doc.id)}
+                              onClick={() => { onReviewStack(doc.id); }}
                             >
                               {stackLabel}
                             </button>
@@ -321,7 +322,7 @@ export function LibraryDocumentTable({
                             type="button"
                             variant="ghost"
                             className="library-inline-action library-doc-stack-action-btn"
-                            onClick={() => onReviewStack(doc.id)}
+                            onClick={() => { onReviewStack(doc.id); }}
                           >
                             {t('library.stackReviewAction')}
                           </Button>
@@ -340,7 +341,7 @@ export function LibraryDocumentTable({
                           className="library-row-menu-btn library-doc-stack-menu-btn library-doc-stack-action-btn"
                           aria-label={t('library.rowActionsAria', { title: doc.title })}
                           aria-haspopup="menu"
-                          onClick={(event) => onRowMenu(event, doc.id)}
+                          onClick={(event) => { onRowMenu(event, doc.id); }}
                         >
                           ⋯
                         </button>
@@ -385,7 +386,7 @@ export function LibraryDocumentTable({
                 />
               </th>
               <th className="library-col-title">
-                <button type="button" className="sort-btn" onClick={() => onSort('title')}>
+                <button type="button" className="sort-btn" onClick={() => { onSort('title'); }}>
                   {t('library.colTitle')}
                 </button>
               </th>
@@ -406,7 +407,7 @@ export function LibraryDocumentTable({
               ) : null}
               {showColumn(visibleColumns, 'date') ? (
                 <th className="library-col-date">
-                  <button type="button" className="sort-btn" onClick={() => onSort('documentDate')}>
+                  <button type="button" className="sort-btn" onClick={() => { onSort('documentDate'); }}>
                     {t('library.colDate')}
                   </button>
                 </th>
@@ -447,7 +448,7 @@ export function LibraryDocumentTable({
                           }
                         : undefined
                     }
-                    onContextMenu={(event) => onContextMenu(event, doc.id)}
+                    onContextMenu={(event) => { onContextMenu(event, doc.id); }}
                     onKeyDown={(event) => {
                       if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
                         onContextMenuKeyboard(event, doc.id);
@@ -473,7 +474,7 @@ export function LibraryDocumentTable({
                       <input
                         type="checkbox"
                         checked={selected.has(doc.id)}
-                        onChange={() => onToggleSelect(doc.id)}
+                        onChange={() => { onToggleSelect(doc.id); }}
                         aria-label={`${doc.title} auswählen`}
                       />
                     </td>
@@ -491,7 +492,7 @@ export function LibraryDocumentTable({
                             type="button"
                             className="stack-badge"
                             title={t('library.stackVersionsTitle')}
-                            onClick={() => onReviewStack(doc.id)}
+                            onClick={() => { onReviewStack(doc.id); }}
                           >
                             {stackLabel}
                           </button>
@@ -579,7 +580,7 @@ export function LibraryDocumentTable({
                             type="button"
                             variant="ghost"
                             className="library-inline-action"
-                            onClick={() => onReviewStack(doc.id)}
+                            onClick={() => { onReviewStack(doc.id); }}
                           >
                             {t('library.stackReviewAction')}
                           </Button>
@@ -598,7 +599,7 @@ export function LibraryDocumentTable({
                           className="library-row-menu-btn"
                           aria-label={t('library.rowActionsAria', { title: doc.title })}
                           aria-haspopup="menu"
-                          onClick={(event) => onRowMenu(event, doc.id)}
+                          onClick={(event) => { onRowMenu(event, doc.id); }}
                         >
                           ⋯
                         </button>
@@ -623,7 +624,7 @@ export function LibraryDocumentTable({
                                 type="button"
                                 variant="ghost"
                                 className="library-inline-action"
-                                onClick={() => onReviewStack(doc.id, member.documentId)}
+                                onClick={() => { onReviewStack(doc.id, member.documentId); }}
                               >
                                 {t('library.stackCompareAction')}
                               </Button>
@@ -631,8 +632,7 @@ export function LibraryDocumentTable({
                                 type="button"
                                 variant="ghost"
                                 className="library-inline-action library-inline-action-danger"
-                                onClick={() =>
-                                  setVersionDeleteTarget({ primaryDocId: doc.id, member })
+                                onClick={() => { setVersionDeleteTarget({ primaryDocId: doc.id, member }); }
                                 }
                               >
                                 {t('library.stackDeleteAction')}

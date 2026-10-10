@@ -2,13 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { AdminUserDto, InstanceRole } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
+
+import { parseInstanceRole } from '../../lib/instanceRole';
 import { Button } from '../ui/Button';
 import { Select } from '../ui/Select';
-import { AdminUserStatusBadge } from './AdminUserStatusBadge';
-import { AdminUserActionsMenu, type AdminUserMenuAction } from './AdminUserActionsMenu';
 import { getUserRowState, type UserRowState } from './admin-user-row-state';
+import { AdminUserActionsMenu, type AdminUserMenuAction } from './AdminUserActionsMenu';
+import { AdminUserStatusBadge } from './AdminUserStatusBadge';
 
-type Props = {
+interface Props {
   users: AdminUserDto[];
   busy: boolean;
   currentUserId: string | null;
@@ -17,7 +19,7 @@ type Props = {
   onRoleChange: (user: AdminUserDto, role: InstanceRole) => void;
   onMenuAction: (action: AdminUserMenuAction) => void;
   onPrimaryAction: (action: AdminUserMenuAction) => void;
-};
+}
 
 function AdminUserPersonCell({
   user,
@@ -69,7 +71,7 @@ function AdminUserRoleCell({
     <Select
       value={user.role}
       disabled={roleDisabled}
-      onChange={(value) => onRoleChange(user, value as InstanceRole)}
+      onChange={(value) => { onRoleChange(user, parseInstanceRole(value)); }}
       options={[
         { value: 'member', label: t('admin.roles.member') },
         { value: 'admin', label: t('admin.roles.admin') },
@@ -105,7 +107,7 @@ function AdminUserActionsCell({
           type="button"
           variant="secondary"
           disabled={actionsDisabled}
-          onClick={() => onPrimaryAction({ kind: 'resend-invite', user })}
+          onClick={() => { onPrimaryAction({ kind: 'resend-invite', user }); }}
         >
           {t('admin.usersResendInvite')}
         </Button>

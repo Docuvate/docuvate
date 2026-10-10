@@ -5,12 +5,12 @@ import i18n from '../i18n';
 export type AuthErrorContext =
   'signIn' | 'signUp' | 'signOut' | 'session' | 'forgotPassword' | 'resetPassword';
 
-export type AuthClientErrorLike = {
+export interface AuthClientErrorLike {
   code?: string | null;
   message?: string | null;
   status?: number | null;
   statusText?: string | null;
-};
+}
 
 const AUTH_ERROR_CODE_KEYS: Record<string, string> = {
   INVALID_EMAIL_OR_PASSWORD: 'auth.errors.invalidEmailOrPassword',

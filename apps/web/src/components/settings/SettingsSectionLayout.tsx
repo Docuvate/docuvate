@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { SettingsSectionTabs } from './SettingsSectionTabs';
 
-type SettingsSectionLayoutProps = {
+interface SettingsSectionLayoutProps {
   sectionTitle?: string;
   sectionLead?: string;
   sectionBreadcrumb?: ReactNode;
   headerAside?: ReactNode;
   children: ReactNode;
-};
+}
 
 export function SettingsSectionLayout({
   sectionTitle,

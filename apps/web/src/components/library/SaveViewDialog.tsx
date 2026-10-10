@@ -2,16 +2,17 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { createSavedDocumentView } from '../../lib/api';
+import { notifySavedViewsChanged } from '../../lib/savedViewsEvents';
+import { buildSavedViewPayload } from '../../lib/savedViewState';
+import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
+import { useInstallationRole } from '../../lib/useInstallationRole';
+import type { useLibraryPageData } from '../../pages/library/useLibraryPageData';
+import { useToastNotify } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
-import { useToastNotify } from '../save/ToastProvider';
-import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
-import { createSavedDocumentView } from '../../lib/api';
-import { buildSavedViewPayload } from '../../lib/savedViewState';
-import { notifySavedViewsChanged } from '../../lib/savedViewsEvents';
-import { useInstallationRole } from '../../lib/useInstallationRole';
-import type { useLibraryPageData } from '../../pages/library/useLibraryPageData';
 
 type LibraryData = ReturnType<typeof useLibraryPageData>;
 
@@ -100,14 +101,14 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
       <form className="stack-form save-view-dialog-form" onSubmit={(e) => void onSubmit(e)}>
         <label className="field-label">
           {t('savedViews.nameLabel')}
-          <Input value={name} onChange={(e) => setName(e.target.value)} autoFocus required />
+          <Input value={name} onChange={(e) => { setName(e.target.value); }} autoFocus required />
         </label>
         {role === 'admin' ? (
           <label className="field-label">
             {t('savedViews.visibilityLabel')}
             <Select
               value={visibility}
-              onChange={(v) => setVisibility(v as 'private' | 'shared')}
+              onChange={(v) => { setVisibility(v as 'private' | 'shared'); }}
               options={[
                 { value: 'private', label: t('savedViews.visibilityPrivate') },
                 { value: 'shared', label: t('savedViews.visibilityShared') },
@@ -121,7 +122,7 @@ export function SaveViewDialog({ open, onClose, data, onSaved }: SaveViewDialogP
             type="checkbox"
             name="pinnedSidebar"
             checked={pinned}
-            onChange={(e) => setPinned(e.target.checked)}
+            onChange={(e) => { setPinned(e.target.checked); }}
             aria-label={t('savedViews.pinSidebar')}
           />
           <span>{t('savedViews.pinSidebar')}</span>

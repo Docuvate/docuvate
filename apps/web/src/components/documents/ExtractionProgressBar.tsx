@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentDto } from '@docuvate/contracts';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentDto } from '@docuvate/contracts';
+
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { extractionProgressSnapshot } from '../../lib/extractionProgress';
 
@@ -103,7 +104,7 @@ export function ExtractionProgressBar({
       >
         <div
           className="extraction-progress-fill"
-          style={snapshot.indeterminate ? undefined : { width: `${displayPercent}%` }}
+          style={snapshot.indeterminate ? undefined : { width: `${String(displayPercent)}%` }}
         />
       </div>
       {compact ? (

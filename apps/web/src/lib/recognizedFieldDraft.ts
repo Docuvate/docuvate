@@ -5,9 +5,10 @@ import type {
   RecognizedFieldDefinitionDto,
   RecognizedFieldLabelGateMatch,
 } from '@docuvate/contracts';
+
 import type { RecognizedFieldGateDraft } from '../components/settings/RecognizedFieldQualityGateEditor';
 
-export type RecognizedFieldDraft = {
+export interface RecognizedFieldDraft {
   /** Stable React key; not sent to the API. */
   localId: string;
   key: string;
@@ -18,7 +19,7 @@ export type RecognizedFieldDraft = {
   gateLabelMatch: RecognizedFieldLabelGateMatch;
   minLabelConfidence: number;
   confidenceGateEnabled: boolean;
-};
+}
 
 export function draftsFromRecognizedDefinitions(
   defs: RecognizedFieldDefinitionDto[],

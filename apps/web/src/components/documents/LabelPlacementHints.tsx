@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type { DocumentDto, FolderDto, MappeDto } from '@docuvate/contracts';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { listFolders, listMappen } from '../../lib/api';
 import { routes } from '../../lib/routes';
 

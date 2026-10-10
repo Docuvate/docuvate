@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useMemo, useState, type FormEvent } from 'react';
-import { useTranslation } from 'react-i18next';
-import { formatUserFacingError } from '../../lib/apiErrors';
 import type { DocumentDto, TagDto } from '@docuvate/contracts';
+import { type FormEvent,useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { assignDocumentTag, createTag, listTags, removeDocumentTag } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
 import { Input } from '../ui/Input';

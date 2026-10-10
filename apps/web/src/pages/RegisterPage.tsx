@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useId, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { authClient } from '../lib/auth-client';
-import { formatAuthClientError } from '../lib/authErrors';
-import { routes } from '../lib/routes';
+import { Link, useNavigate } from 'react-router-dom';
+
 import { AuthFormError } from '../components/auth/AuthFormError';
+import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { authClient } from '../lib/auth-client';
+import { formatAuthClientError } from '../lib/authErrors';
 import { awaitAuthenticatedSession } from '../lib/awaitAuthenticatedSession';
+import { routes } from '../lib/routes';
 
 export function RegisterPage() {
   const { t } = useTranslation();
@@ -58,7 +59,7 @@ export function RegisterPage() {
             <Input
               required
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => { setName(e.target.value); }}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? formErrorId : undefined}
             />
@@ -69,7 +70,7 @@ export function RegisterPage() {
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); }}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? formErrorId : undefined}
             />
@@ -81,7 +82,7 @@ export function RegisterPage() {
               minLength={8}
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); }}
               aria-invalid={error ? true : undefined}
               aria-describedby={error ? formErrorId : undefined}
             />

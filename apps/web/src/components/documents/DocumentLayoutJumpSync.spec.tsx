@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach } from 'vitest';
 import type { LayoutIrDocument } from '@docuvate/contracts';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { afterEach } from 'vitest';
 
 vi.mock('../../lib/api', () => ({
   fetchDocumentLayoutTypst: vi.fn(),
@@ -37,7 +37,7 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, opts?: Record<string, unknown>) => {
       if (key === 'documents.layoutTableLabel' && opts && 'n' in opts) {
-        return `Table ${opts.n}`;
+        return `Table ${String(opts.n)}`;
       }
       return key;
     },
@@ -83,7 +83,7 @@ const layoutIr: LayoutIrDocument = {
 };
 
 describe('Document layout jump sync', () => {
-  afterEach(() => cleanup());
+  afterEach(() => { cleanup(); });
   it('scrolls PDF page when outline entry is activated', () => {
     const onOverlaySelect = vi.fn();
     render(
@@ -95,11 +95,11 @@ describe('Document layout jump sync', () => {
         knownFieldKeys={new Set()}
         fieldLabelForKey={(k) => k}
         activeTab="outline"
-        onTabChange={() => {}}
+        onTabChange={() => undefined}
         activeOverlayId={null}
         onOverlaySelect={onOverlaySelect}
-        onAcceptSuggestion={() => {}}
-        onDismissSuggestion={() => {}}
+        onAcceptSuggestion={() => undefined}
+        onDismissSuggestion={() => undefined}
         dismissedSuggestions={new Set()}
       />
     );
@@ -123,9 +123,9 @@ describe('Document layout jump sync', () => {
         activeTab="fields"
         onTabChange={onTabChange}
         activeOverlayId={null}
-        onOverlaySelect={() => {}}
-        onAcceptSuggestion={() => {}}
-        onDismissSuggestion={() => {}}
+        onOverlaySelect={() => undefined}
+        onAcceptSuggestion={() => undefined}
+        onDismissSuggestion={() => undefined}
         dismissedSuggestions={new Set()}
       />
     );

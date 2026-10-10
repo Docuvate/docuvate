@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentStatus } from '@docuvate/contracts';
+
 import i18n from '../i18n';
 
 const STATUS_KEYS: Record<DocumentStatus, `library.status.${DocumentStatus}`> = {

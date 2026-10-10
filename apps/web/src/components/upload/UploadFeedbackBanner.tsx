@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import type { UploadItem } from '../../lib/useDocumentUploadQueue';
 import { useDocumentUploadContext } from './DocumentUploadProvider';
 

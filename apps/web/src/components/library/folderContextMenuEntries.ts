@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TFunction } from 'i18next';
 import type { DocumentBulkAction, FolderDto, MappeDto } from '@docuvate/contracts';
-import type { ContextMenuEntry } from '../ui/ContextMenu';
+import type { TFunction } from 'i18next';
+
 import { childFolders, sortByNameDe } from '../../lib/ordnerTree';
+import type { ContextMenuEntry } from '../ui/ContextMenu';
 
 function folderAssignTargetId(mappe: MappeDto, folders: FolderDto[]): string | null {
   const inMappe = folders.filter((folder) => folder.mappeId === mappe.id);
   if (inMappe.length === 1) {
-    return inMappe[0]!.id;
+    return inMappe[0].id;
   }
   const roots = childFolders(folders, { mappeId: mappe.id, parentId: null });
   if (roots.length === 1) {
-    return roots[0]!.id;
+    return roots[0].id;
   }
   const byName = roots.find((folder) => folder.name === mappe.name);
   return byName?.id ?? null;
@@ -28,7 +29,7 @@ function folderNodeToMenuEntry(
       kind: 'item',
       id: `folder-${folder.id}`,
       label: folder.name,
-      onSelect: () => onRunBulk({ action: 'setFolder', folderId: folder.id }),
+      onSelect: () => { onRunBulk({ action: 'setFolder', folderId: folder.id }); },
     };
   }
 
@@ -38,7 +39,7 @@ function folderNodeToMenuEntry(
       kind: 'item',
       id: `folder-${folder.id}`,
       label: folder.name,
-      onSelect: () => onRunBulk({ action: 'setFolder', folderId: folder.id }),
+      onSelect: () => { onRunBulk({ action: 'setFolder', folderId: folder.id }); },
     };
   }
 
@@ -46,7 +47,7 @@ function folderNodeToMenuEntry(
     kind: 'submenu',
     id: `folder-${folder.id}`,
     label: folder.name,
-    onSelectParent: () => onRunBulk({ action: 'setFolder', folderId: folder.id }),
+    onSelectParent: () => { onRunBulk({ action: 'setFolder', folderId: folder.id }); },
     items: children.map((child) => folderNodeToMenuEntry(child, folders, onRunBulk)),
   };
 }
@@ -62,7 +63,7 @@ export function buildFolderContextMenuEntries(
       kind: 'item',
       id: 'folder-none',
       label: t('library.contextNoFolder'),
-      onSelect: () => onRunBulk({ action: 'setFolder', folderId: null }),
+      onSelect: () => { onRunBulk({ action: 'setFolder', folderId: null }); },
     },
   ];
 
@@ -75,8 +76,8 @@ export function buildFolderContextMenuEntries(
     const assignTargetId = folderAssignTargetId(mappe, folders);
     const childItems = roots.map((folder) => folderNodeToMenuEntry(folder, folders, onRunBulk));
 
-    if (roots.length === 1 && roots[0]!.name === mappe.name && childItems.length === 1) {
-      entries.push(childItems[0]!);
+    if (roots.length === 1 && roots[0].name === mappe.name && childItems.length === 1) {
+      entries.push(childItems[0]);
       continue;
     }
 
@@ -85,7 +86,7 @@ export function buildFolderContextMenuEntries(
       id: `mappe-${mappe.id}`,
       label: mappe.name,
       onSelectParent: assignTargetId
-        ? () => onRunBulk({ action: 'setFolder', folderId: assignTargetId })
+        ? () => { onRunBulk({ action: 'setFolder', folderId: assignTargetId }); }
         : undefined,
       items: childItems,
     });

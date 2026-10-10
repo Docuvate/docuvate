@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { FolderDto, MappeDto } from '@docuvate/contracts';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FolderDto, MappeDto } from '@docuvate/contracts';
+
 import { folderDepth } from '../../lib/folderDepth';
 import { sortByNameDe } from '../../lib/ordnerTree';
 import { Button } from '../ui/Button';
@@ -70,7 +71,7 @@ export function FolderTargetPickerDialog({
       <p className="muted confirm-dialog-desc">{t('filesystem.pickUploadFolderHint')}</p>
       <Input
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => { setQuery(e.target.value); }}
         placeholder={t('filesystem.treeSearchPlaceholder')}
         aria-label={t('filesystem.treeSearchAria')}
         autoFocus
@@ -86,7 +87,7 @@ export function FolderTargetPickerDialog({
               type="button"
               className="folder-picker-option"
               role="option"
-              onClick={() => onPick(option)}
+              onClick={() => { onPick(option); }}
             >
               {option.label}
             </button>

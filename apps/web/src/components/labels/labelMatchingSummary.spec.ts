@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it } from 'vitest';
 import type { TFunction } from 'i18next';
+import { describe, expect, it } from 'vitest';
+
 import { describeLabelAutoAssignment } from './labelMatchingSummary';
 
 const t = ((key: string) => key) as TFunction;

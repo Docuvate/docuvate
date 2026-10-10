@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import i18n from '../i18n';
 import { settingsChatStatusMessage, settingsChatStatusPresentation } from './settingsChatStatus';
 

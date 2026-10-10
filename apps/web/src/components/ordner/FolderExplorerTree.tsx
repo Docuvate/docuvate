@@ -1,35 +1,36 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { FolderDto, MappeDto } from '@docuvate/contracts';
+import { ChevronDown, ChevronRight, Folder, FolderOpen, MoreHorizontal, Plus } from 'lucide-react';
 import {
-  useCallback,
-  useMemo,
-  useState,
   type DragEvent,
   type FormEvent,
   type KeyboardEvent,
+  useCallback,
+  useMemo,
+  useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, ChevronRight, Folder, FolderOpen, MoreHorizontal, Plus } from 'lucide-react';
-import type { FolderDto, MappeDto } from '@docuvate/contracts';
-import { isFileDrag } from '../../lib/documentUploadConstants';
+
 import { isDocumentDrag, readDocumentDragIds } from '../../lib/documentDnD';
+import { isFileDrag } from '../../lib/documentUploadConstants';
 import { canCreateChildFolder, MAX_FOLDER_DEPTH } from '../../lib/folderDepth';
 import {
   childFolders,
   folderDirectDocumentCount,
-  mappeDirectDocumentCount,
   folderHref,
   folderSubtreeMatchesSearch,
+  foldersWithoutMappe,
+  mappeDirectDocumentCount,
   mappeHref,
   mappeSubtreeMatchesSearch,
   nodeMatchesQuery,
   orphanNestedFolders,
   sortByNameDe,
-  foldersWithoutMappe,
 } from '../../lib/ordnerTree';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 import type { ContextMenuEntry } from '../ui/ContextMenu';
 import { ContextMenu } from '../ui/ContextMenu';
-import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
 import { DateisystemTreeRow, TREE_ICON } from './DateisystemTreeRow';
@@ -109,7 +110,7 @@ export function FolderExplorerTree({
     });
   }
 
-  const closeMenu = useCallback(() => setContextMenu(null), []);
+  const closeMenu = useCallback(() => { setContextMenu(null); }, []);
 
   const openFolderMenu = useCallback(
     (event: React.MouseEvent, folder: FolderDto) => {
@@ -121,7 +122,7 @@ export function FolderExplorerTree({
           kind: 'item',
           id: 'add-docs',
           label: t('filesystem.contextAddDocuments'),
-          onSelect: () => onAddDocuments({ folderId: folder.id, label: folder.name }),
+          onSelect: () => { onAddDocuments({ folderId: folder.id, label: folder.name }); },
         },
         {
           kind: 'item',
@@ -167,7 +168,7 @@ export function FolderExplorerTree({
       event.preventDefault();
       event.stopPropagation();
       const roots = childFolders(folders, { mappeId: mappe.id, parentId: null });
-      const defaultFolder = roots.length === 1 ? roots[0]! : null;
+      const defaultFolder = roots.length === 1 ? roots[0] : null;
       const items: ContextMenuEntry[] = [
         {
           kind: 'item',
@@ -241,7 +242,7 @@ export function FolderExplorerTree({
         <div className="dateisystem-tree-search">
           <Input
             value={treeQuery}
-            onChange={(e) => onTreeQueryChange(e.target.value)}
+            onChange={(e) => { onTreeQueryChange(e.target.value); }}
             placeholder={t('filesystem.treeSearchPlaceholder')}
             aria-label={t('filesystem.treeSearchAria')}
           />
@@ -252,7 +253,7 @@ export function FolderExplorerTree({
           size="md"
           strokeWidth={2}
           className="dateisystem-tree-head-add"
-          onClick={() => setRootCreateOpen((v) => !v)}
+          onClick={() => { setRootCreateOpen((v) => !v); }}
         />
       </div>
 
@@ -261,7 +262,7 @@ export function FolderExplorerTree({
           <Input
             placeholder={t('filesystem.newRootPlaceholder')}
             value={rootCreateName}
-            onChange={(e) => setRootCreateName(e.target.value)}
+            onChange={(e) => { setRootCreateName(e.target.value); }}
             aria-label={t('filesystem.newRootAria')}
             autoFocus
             onKeyDown={(e) => {
@@ -325,7 +326,7 @@ export function FolderExplorerTree({
                       open={open}
                       collapseLabel={t('filesystem.collapseChildren')}
                       expandLabel={t('filesystem.expandChildren')}
-                      onToggle={() => setExpandedExplicit(mappeKey, !open)}
+                      onToggle={() => { setExpandedExplicit(mappeKey, !open); }}
                     />
                   }
                   icon={
@@ -354,7 +355,7 @@ export function FolderExplorerTree({
                         size="md"
                         strokeWidth={2}
                         className="sidebar-row-action dateisystem-tree-menu-btn"
-                        onClick={(e) => openMappeMenu(e, mappe)}
+                        onClick={(e) => { openMappeMenu(e, mappe); }}
                         hasPopup="menu"
                       />
                     </>
@@ -440,7 +441,7 @@ export function FolderExplorerTree({
         description={t('filesystem.contextDeleteDescription')}
         confirmLabel={t('common.deletePermanently')}
         tone="danger"
-        onCancel={() => setPendingDeleteFolder(null)}
+        onCancel={() => { setPendingDeleteFolder(null); }}
         onConfirm={() => {
           if (pendingDeleteFolder) {
             void onDeleteFolder(pendingDeleteFolder.id);
@@ -537,15 +538,15 @@ function FolderTreeNode({
           e.preventDefault();
           onDragHighlight(folderKey);
         }}
-        onDragLeave={() => onDragHighlight(null)}
-        onDrop={(e) => onDrop(folder.id, e)}
+        onDragLeave={() => { onDragHighlight(null); }}
+        onDrop={(e) => { onDrop(folder.id, e); }}
         chevron={
           <TreeExpandChevron
             hasChildren={children.length > 0}
             open={open}
             collapseLabel={t('filesystem.collapseChildren')}
             expandLabel={t('filesystem.expandChildren')}
-            onToggle={() => onSetExpandedExplicit(folderKey, !open)}
+            onToggle={() => { onSetExpandedExplicit(folderKey, !open); }}
           />
         }
         icon={
@@ -573,7 +574,7 @@ function FolderTreeNode({
               size="md"
               strokeWidth={2}
               className="sidebar-row-action dateisystem-tree-menu-btn"
-              onClick={(e) => onOpenMenu(e, folder)}
+              onClick={(e) => { onOpenMenu(e, folder); }}
               hasPopup="menu"
             />
           </>
@@ -641,8 +642,8 @@ function LooseFolderRow({
           e.preventDefault();
           onDragHighlight(folderKey);
         }}
-        onDragLeave={() => onDragHighlight(null)}
-        onDrop={(e) => onDrop(folder.id, e)}
+        onDragLeave={() => { onDragHighlight(null); }}
+        onDrop={(e) => { onDrop(folder.id, e); }}
         chevron={<span className="dateisystem-tree-chevron-spacer" aria-hidden />}
         icon={<Folder size={TREE_ICON} strokeWidth={TREE_ICON_STROKE} aria-hidden />}
         actions={
@@ -652,7 +653,7 @@ function LooseFolderRow({
             size="md"
             strokeWidth={2}
             className="sidebar-row-action dateisystem-tree-menu-btn"
-            onClick={(e) => onOpenMenu(e, folder)}
+            onClick={(e) => { onOpenMenu(e, folder); }}
             hasPopup="menu"
           />
         }
@@ -775,7 +776,7 @@ function TreeAddFolderButton({
         <input
           className="sidebar-inline-input"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => { setName(e.target.value); }}
           placeholder={t('filesystem.folderNamePlaceholder')}
           aria-label={t('filesystem.folderNameAria')}
           autoFocus
@@ -799,7 +800,7 @@ function TreeAddFolderButton({
           type="button"
           className="sidebar-icon-btn"
           aria-label={t('filesystem.cancelAria')}
-          onClick={() => setOpen(false)}
+          onClick={() => { setOpen(false); }}
         >
           ×
         </button>

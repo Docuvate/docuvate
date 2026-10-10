@@ -1,12 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { routes } from '../lib/routes';
-import { authClient } from '../lib/auth-client';
-import { pushRecentDocument } from '../lib/search/searchRecent';
 import type {
   DocumentDto,
   ExtractedField,
@@ -14,7 +7,28 @@ import type {
   FolderDto,
   TagDto,
 } from '@docuvate/contracts';
-import { formatUserFacingError } from '../lib/apiErrors';
+import { parseSuggestionStorageKey } from '@docuvate/contracts';
+import { ArrowLeft } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+
+import { DocumentChatPanel } from '../components/documents/DocumentChatPanel';
+import { DocumentDetailLoadingShell } from '../components/documents/DocumentDetailLoadingShell';
+import {
+  DocumentDetailMetaBar,
+  DocumentDetailTabStrip,
+} from '../components/documents/DocumentDetailMetaBar';
+import { DocumentExtractionSection } from '../components/documents/DocumentExtractionSection';
+import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
+import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
+import { DocumentPreviewCard } from '../components/documents/DocumentPreviewCard';
+import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
+import { ExtractedFieldsPanel } from '../components/documents/ExtractedFieldsPanel';
+import { LabelPanel } from '../components/documents/LabelPanel';
+import { LabelPlacementHints } from '../components/documents/LabelPlacementHints';
+import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   deleteDocument,
   fetchDocumentContentBlob,
@@ -26,49 +40,36 @@ import {
   requeueDocumentExtraction,
   updateDocument,
 } from '../lib/api';
-import {
-  buildCustomFieldDefMap,
-  buildGlobalFieldLabelMap,
-  parseGlobalFieldKey,
-} from '../lib/labelFieldDisplay';
-import { humanizeFieldKey } from '../lib/humanizeFieldKey';
-import { extractionFieldLabel } from '../lib/extractionFieldLabels';
-import { splitRecognizedFieldsAndSuggestions } from '../lib/recognizedFieldDisplay';
-import { parseSuggestionStorageKey } from '@docuvate/contracts';
-import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
+import { formatUserFacingError } from '../lib/apiErrors';
+import { authClient } from '../lib/auth-client';
 import { isExtractionPending } from '../lib/documentExtractionState';
-import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
-import { DocumentChatPanel } from '../components/documents/DocumentChatPanel';
-import { DocumentExtractionSection } from '../components/documents/DocumentExtractionSection';
-import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
-import { ExtractedFieldsPanel } from '../components/documents/ExtractedFieldsPanel';
-import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
-import {
-  DocumentDetailMetaBar,
-  DocumentDetailTabStrip,
-} from '../components/documents/DocumentDetailMetaBar';
-import { DocumentDetailLoadingShell } from '../components/documents/DocumentDetailLoadingShell';
-import { DocumentPreviewCard } from '../components/documents/DocumentPreviewCard';
-import { LabelPanel } from '../components/documents/LabelPanel';
-import { LabelPlacementHints } from '../components/documents/LabelPlacementHints';
-import { ConfirmDialog } from '../components/ui/ConfirmDialog';
-import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
-import { notifySaved, notifySaveError } from '../lib/saveNotify';
+import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import { areBlocksDirty, areFieldsDirty } from '../lib/extractionDirty';
+import { extractionFieldLabel } from '../lib/extractionFieldLabels';
 import {
   findBlockIndexAtPoint,
   normalizeExtractionBlocks,
   textFromExtractionBlocks,
 } from '../lib/extractionLayout';
+import { humanizeFieldKey } from '../lib/humanizeFieldKey';
+import {
+  buildCustomFieldDefMap,
+  buildGlobalFieldLabelMap,
+  parseGlobalFieldKey,
+} from '../lib/labelFieldDisplay';
+import { splitRecognizedFieldsAndSuggestions } from '../lib/recognizedFieldDisplay';
+import { routes } from '../lib/routes';
+import { notifySaved, notifySaveError } from '../lib/saveNotify';
+import { pushRecentDocument } from '../lib/search/searchRecent';
 
 type DetailTab = 'details' | 'labels' | 'chat';
 
-type DocumentMetadataBaseline = {
+interface DocumentMetadataBaseline {
   title: string;
   documentDate: string;
   notes: string;
   folderId: string;
-};
+}
 
 function metadataFromDocument(doc: DocumentDto): DocumentMetadataBaseline {
   return {
@@ -269,7 +270,7 @@ export function DocumentDetailPage() {
     const timer = window.setInterval(() => {
       void load().catch(() => undefined);
     }, 3000);
-    return () => window.clearInterval(timer);
+    return () => { window.clearInterval(timer); };
   }, [id, doc?.status, load]);
 
   async function persist(patch?: {
@@ -463,7 +464,7 @@ export function DocumentDetailPage() {
         </Link>
       </p>
 
-      <DocumentDetailMetaBar doc={doc} onDelete={() => setDeleteDialogOpen(true)} />
+      <DocumentDetailMetaBar doc={doc} onDelete={() => { setDeleteDialogOpen(true); }} />
 
       {error ? (
         <p className="error" role="alert">
@@ -610,7 +611,7 @@ export function DocumentDetailPage() {
         confirmLabel={t('common.deletePermanently')}
         tone="danger"
         busy={deleteBusy}
-        onCancel={() => setDeleteDialogOpen(false)}
+        onCancel={() => { setDeleteDialogOpen(false); }}
         onConfirm={() => void confirmDelete()}
       />
 

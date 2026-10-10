@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { defaultFormDraftEqual } from './formDraftEqual';
 
 function serializeBaseline<T>(value: T): string {
   return JSON.stringify(value);
 }
 
-export type UseFormDraftOptions<T> = {
+export interface UseFormDraftOptions<T> {
   isEqual?: (a: T, b: T) => boolean;
-};
+}
 
 export function useFormDraft<T>(baseline: T, options?: UseFormDraftOptions<T>) {
   const isEqual = options?.isEqual ?? defaultFormDraftEqual;

@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { AdminUserDto } from '@docuvate/contracts';
 
-export type UserRowState = {
+export interface UserRowState {
   self: boolean;
   soleAdmin: boolean;
   roleDisabled: boolean;
   readonlyHint: string | undefined;
   actionsDisabled: boolean;
-};
+}
 
 export function getUserRowState(
   user: AdminUserDto,

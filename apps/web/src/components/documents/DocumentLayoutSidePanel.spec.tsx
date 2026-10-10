@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
 import type { LayoutIrDocument } from '@docuvate/contracts';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../lib/api', () => ({
   fetchDocumentLayoutTypst: vi.fn(),
@@ -52,11 +52,11 @@ describe('DocumentLayoutSidePanel', () => {
         knownFieldKeys={new Set()}
         fieldLabelForKey={(k) => k}
         activeTab="fields"
-        onTabChange={() => {}}
+        onTabChange={() => undefined}
         activeOverlayId={null}
-        onOverlaySelect={() => {}}
-        onAcceptSuggestion={() => {}}
-        onDismissSuggestion={() => {}}
+        onOverlaySelect={() => undefined}
+        onAcceptSuggestion={() => undefined}
+        onDismissSuggestion={() => undefined}
         dismissedSuggestions={new Set()}
       />
     );
@@ -74,11 +74,11 @@ describe('DocumentLayoutSidePanel', () => {
         knownFieldKeys={new Set()}
         fieldLabelForKey={(k) => k}
         activeTab="fields"
-        onTabChange={() => {}}
+        onTabChange={() => undefined}
         activeOverlayId={null}
-        onOverlaySelect={() => {}}
-        onAcceptSuggestion={() => {}}
-        onDismissSuggestion={() => {}}
+        onOverlaySelect={() => undefined}
+        onAcceptSuggestion={() => undefined}
+        onDismissSuggestion={() => undefined}
         dismissedSuggestions={new Set()}
       />
     );

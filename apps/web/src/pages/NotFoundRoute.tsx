@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useTranslation } from 'react-i18next';
-import { authClient } from '../lib/auth-client';
+
 import { AppShell } from '../components/AppShell';
 import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { authClient } from '../lib/auth-client';
 import { NotFoundPage } from './NotFoundPage';
 
 export function NotFoundRoute() {

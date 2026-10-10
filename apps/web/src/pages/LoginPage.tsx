@@ -1,21 +1,22 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+
+import { AuthFormError } from '../components/auth/AuthFormError';
+import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
 import { authClient } from '../lib/auth-client';
+import { formatAuthClientError } from '../lib/authErrors';
 import {
   clearAuthenticatedSessionHint,
   markAuthenticatedSessionHint,
 } from '../lib/authSessionHint';
-import { formatAuthClientError } from '../lib/authErrors';
-import { routes } from '../lib/routes';
-import { AuthFormError } from '../components/auth/AuthFormError';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
 import { awaitAuthenticatedSession } from '../lib/awaitAuthenticatedSession';
+import { routes } from '../lib/routes';
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -101,7 +102,7 @@ export function LoginPage() {
               autoComplete="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); }}
               aria-invalid={displayedError ? true : undefined}
               aria-describedby={displayedError ? formErrorId : undefined}
             />
@@ -113,7 +114,7 @@ export function LoginPage() {
               autoComplete="current-password"
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); }}
               aria-invalid={displayedError ? true : undefined}
               aria-describedby={displayedError ? formErrorId : undefined}
             />

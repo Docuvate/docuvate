@@ -26,7 +26,7 @@ export function parseClientSearchScope(raw: string): {
   for (const token of raw.trim().split(/\s+/)) {
     const m = /^([\p{L}][\p{L}0-9_-]*):(.*)$/u.exec(token);
     if (m) {
-      const scope = PREFIX[m[1]!.toLowerCase()];
+      const scope = PREFIX[m[1].toLowerCase()];
       if (scope) {
         scopes.add(scope);
         const rest = m[2]?.trim();

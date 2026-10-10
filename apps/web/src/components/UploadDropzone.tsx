@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { UPLOAD_ACCEPT } from '../lib/documentUploadConstants';
+import { Button } from './ui/Button';
 import { useDocumentUploadContext } from './upload/DocumentUploadProvider';
 import { UploadFeedbackBanner } from './upload/UploadFeedbackBanner';
 import { UploadQueueList } from './upload/UploadQueueList';
 import { UploadCompactBar } from './UploadCompactBar';
-import { Button } from './ui/Button';
 
 interface UploadDropzoneProps {
   /** When true, show a compact bar until expanded. */
@@ -34,7 +35,7 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
       e.preventDefault();
       e.stopPropagation();
       setDragOver(false);
-      if (e.dataTransfer.files.length) void processFiles(e.dataTransfer.files);
+      if (e.dataTransfer.files.length) processFiles(e.dataTransfer.files);
     },
     [processFiles]
   );
@@ -46,7 +47,7 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
   return (
     <div className={`upload-section${compact ? ' upload-section-compact' : ''}`}>
       {compact && !showFullDropzone ? (
-        <UploadCompactBar onExpand={() => setExpanded(true)} />
+        <UploadCompactBar onExpand={() => { setExpanded(true); }} />
       ) : null}
       {showFullDropzone ? (
         <div
@@ -56,7 +57,7 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
             e.stopPropagation();
             setDragOver(true);
           }}
-          onDragLeave={() => setDragOver(false)}
+          onDragLeave={() => { setDragOver(false); }}
           onDrop={onDrop}
           role="region"
           aria-label={t('upload.regionAria')}
@@ -80,7 +81,7 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
             className="sr-only"
             aria-label={t('upload.chooseFilesAria')}
             onChange={(e) => {
-              if (e.target.files?.length) void processFiles(e.target.files);
+              if (e.target.files?.length) processFiles(e.target.files);
               e.target.value = '';
             }}
           />
@@ -92,7 +93,7 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
           type="button"
           variant="ghost"
           className="upload-collapse-btn"
-          onClick={() => setExpanded(false)}
+          onClick={() => { setExpanded(false); }}
         >
           {t('upload.collapseBar')}
         </Button>

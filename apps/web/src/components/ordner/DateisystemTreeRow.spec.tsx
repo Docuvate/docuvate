@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ComponentProps } from 'react';
-import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { describe, expect, it } from 'vitest';
+
 import { DateisystemTreeRow } from './DateisystemTreeRow';
 
 function renderRow(props: Partial<ComponentProps<typeof DateisystemTreeRow>> = {}) {

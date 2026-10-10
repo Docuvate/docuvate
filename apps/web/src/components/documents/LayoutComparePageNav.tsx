@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useMemo, type KeyboardEvent } from 'react';
+import { type KeyboardEvent,useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
   LAYOUT_COMPARE_VIRTUAL_PAGE_THRESHOLD,
   layoutCompareAdjacentPage,
-  layoutCompareVisiblePageRange,
   type LayoutComparePageMetric,
+  layoutCompareVisiblePageRange,
 } from '../../lib/layoutCompare';
 import { Button } from '../ui/Button';
 
@@ -53,7 +54,7 @@ export function LayoutComparePageNav({
           type="button"
           variant="ghost"
           disabled={activePage <= 1}
-          onClick={() => onPageChange(activePage - 1)}
+          onClick={() => { onPageChange(activePage - 1); }}
         >
           {t('documents.layoutComparePagePrev')}
         </Button>
@@ -80,7 +81,7 @@ export function LayoutComparePageNav({
           type="button"
           variant="ghost"
           disabled={activePage >= pageCount}
-          onClick={() => onPageChange(activePage + 1)}
+          onClick={() => { onPageChange(activePage + 1); }}
         >
           {t('documents.layoutComparePageNext')}
         </Button>
@@ -90,7 +91,7 @@ export function LayoutComparePageNav({
         role="listbox"
         tabIndex={0}
         aria-label={t('documents.layoutComparePageStripAria')}
-        aria-activedescendant={`layout-compare-page-chip-${activePage}`}
+        aria-activedescendant={`layout-compare-page-chip-${String(activePage)}`}
         onKeyDown={onStripKeyDown}
       >
         {virtualized ? (
@@ -105,14 +106,14 @@ export function LayoutComparePageNav({
           return (
             <button
               key={pageNumber}
-              id={`layout-compare-page-chip-${pageNumber}`}
+              id={`layout-compare-page-chip-${String(pageNumber)}`}
               type="button"
               role="option"
               aria-selected={selected}
               className={`layout-compare-page-chip${selected ? ' layout-compare-page-chip-active' : ''}${
                 metric && reliable === false ? ' layout-compare-page-chip-warn' : ''
               }`}
-              onClick={() => onPageChange(pageNumber)}
+              onClick={() => { onPageChange(pageNumber); }}
             >
               <span>{pageNumber}</span>
               {metric?.ssim != null ? (

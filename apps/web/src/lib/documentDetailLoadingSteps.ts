@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
+
 import { isExtractionPending } from './documentExtractionState';
 
 export type DocumentDetailLoadStepId = 'metadata' | 'preview' | 'pipeline';

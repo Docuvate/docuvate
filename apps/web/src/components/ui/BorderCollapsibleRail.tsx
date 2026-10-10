@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 const ICON_SIZE = 16;
 const ICON_STROKE = 1.75;

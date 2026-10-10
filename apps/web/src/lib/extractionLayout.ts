@@ -7,16 +7,16 @@ const LINE_Y_TOLERANCE = 0.014;
 export function normalizeExtractionBlock(raw: unknown): ExtractionBlock | null {
   if (!raw || typeof raw !== 'object') return null;
   const row = raw as Record<string, unknown>;
-  const page = Number(row['page']);
-  const x = Number(row['x']);
-  const y = Number(row['y']);
-  const width = Number(row['width']);
-  const height = Number(row['height']);
-  const text = String(row['text'] ?? '').trim();
+  const page = Number(row.page);
+  const x = Number(row.x);
+  const y = Number(row.y);
+  const width = Number(row.width);
+  const height = Number(row.height);
+  const text = String(row.text ?? '').trim();
   if (!Number.isFinite(page) || page < 1 || !text) return null;
   if (![x, y, width, height].every(Number.isFinite)) return null;
 
-  const blockIndexRaw = row['blockIndex'] ?? row['block_index'];
+  const blockIndexRaw = row.blockIndex ?? row.block_index;
   const blockIndex =
     blockIndexRaw === undefined || blockIndexRaw === null ? undefined : Number(blockIndexRaw);
 

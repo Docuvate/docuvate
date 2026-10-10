@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import ReactMarkdown from 'react-markdown';
 import { useTranslation } from 'react-i18next';
+import ReactMarkdown from 'react-markdown';
+
 import oauthSetupMarkdown from '../../../../docs/connectors-oauth-setup.md?raw';
 
 export function ConnectorsOAuthSetupDocPage() {

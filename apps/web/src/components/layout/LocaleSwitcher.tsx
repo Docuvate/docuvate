@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { UiLocale } from '@docuvate/contracts';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { UiLocale } from '@docuvate/contracts';
-import { authClient } from '../../lib/auth-client';
+
 import { LOCALE_STORAGE_KEY } from '../../i18n';
+import { authClient } from '../../lib/auth-client';
 import { persistUserUiPreference } from '../../lib/persistUserUiPreference';
 import { segmentedPreferenceClass } from '../../lib/segmentedControlClasses';
 import { SegmentedControl } from '../ui/SegmentedControl';

@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CustomFieldType, TagCustomFieldDefinitionDto } from '@docuvate/contracts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { CustomFieldType, TagCustomFieldDefinitionDto } from '@docuvate/contracts';
+
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 
-export type CustomFieldDraft = {
+export interface CustomFieldDraft {
   key: string;
   label: string;
   fieldType: CustomFieldType;
-};
+}
 
 interface LabelCustomFieldsEditorProps {
   fields: CustomFieldDraft[];
@@ -71,7 +72,7 @@ export function LabelCustomFieldsEditor({
                 <Input
                   value={row.label}
                   placeholder={t('labelCustomFields.labelPlaceholder')}
-                  onChange={(e) => updateRow(index, { label: e.target.value })}
+                  onChange={(e) => { updateRow(index, { label: e.target.value }); }}
                 />
               </label>
               <label>
@@ -79,19 +80,19 @@ export function LabelCustomFieldsEditor({
                 <Input
                   value={row.key}
                   placeholder={t('labelCustomFields.keyPlaceholder')}
-                  onChange={(e) => updateRow(index, { key: e.target.value })}
+                  onChange={(e) => { updateRow(index, { key: e.target.value }); }}
                 />
               </label>
               <label>
                 {t('labelCustomFields.columnType')}
                 <Select
                   value={row.fieldType}
-                  onChange={(value) => updateRow(index, { fieldType: value as CustomFieldType })}
+                  onChange={(value) => { updateRow(index, { fieldType: value as CustomFieldType }); }}
                   options={fieldTypes.map((opt) => ({ value: opt.value, label: opt.label }))}
                   aria-label={t('labelCustomFields.fieldTypeAria')}
                 />
               </label>
-              <Button type="button" variant="ghost" onClick={() => removeRow(index)}>
+              <Button type="button" variant="ghost" onClick={() => { removeRow(index); }}>
                 {t('labelCustomFields.remove')}
               </Button>
             </li>

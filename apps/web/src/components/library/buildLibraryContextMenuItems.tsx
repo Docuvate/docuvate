@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TFunction } from 'i18next';
 import type {
   DocumentBulkAction,
   DocumentDto,
@@ -8,10 +7,12 @@ import type {
   MappeDto,
   TagDto,
 } from '@docuvate/contracts';
-import type { ContextMenuEntry } from '../ui/ContextMenu';
+import type { TFunction } from 'i18next';
+
 import { routes } from '../../lib/routes';
-import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
+import type { ContextMenuEntry } from '../ui/ContextMenu';
 import { showDuplicateStackBadge } from './duplicateStackLabel';
+import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
 
 interface BuildLibraryContextMenuItemsArgs {
   anchorDoc: DocumentDto;
@@ -46,7 +47,7 @@ export function buildLibraryLabelToggleEntries(
           onRunBulk({ action: 'addTag', tagId: tag.id }, keepMenuOpen);
         }
       },
-      onRemove: () => onRunBulk({ action: 'removeTag', tagId: tag.id }, keepMenuOpen),
+      onRemove: () => { onRunBulk({ action: 'removeTag', tagId: tag.id }, keepMenuOpen); },
     };
   });
 }
@@ -97,14 +98,14 @@ export function buildLibraryContextMenuItems(
         kind: 'item',
         id: 'review',
         label: t('library.contextReview'),
-        onSelect: () => onReviewStack(focusDoc.id),
+        onSelect: () => { onReviewStack(focusDoc.id); },
       });
     } else {
       menu.push({
         kind: 'item',
         id: 'open',
         label: t('library.contextOpen'),
-        onSelect: () => onNavigate(routes.document(focusDoc.id)),
+        onSelect: () => { onNavigate(routes.document(focusDoc.id)); },
       });
     }
     menu.push({ kind: 'separator' });
@@ -147,7 +148,7 @@ export function buildLibraryContextMenuItems(
       kind: 'item',
       id: 'review-stack',
       label: t('library.contextReviewStack'),
-      onSelect: () => onReviewStack(focusDoc.id),
+      onSelect: () => { onReviewStack(focusDoc.id); },
     });
   }
 
@@ -157,7 +158,7 @@ export function buildLibraryContextMenuItems(
     id: 'delete',
     label: t('common.delete'),
     danger: true,
-    onSelect: () => onRequestBulkDelete(selectedIds.length),
+    onSelect: () => { onRequestBulkDelete(selectedIds.length); },
   });
 
   return menu;

@@ -1,26 +1,27 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { MoreHorizontal } from 'lucide-react';
 import type { TagDto } from '@docuvate/contracts';
+import { MoreHorizontal } from 'lucide-react';
+import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
-import { Chip } from '../ui/Chip';
-import { IconButton } from '../ui/IconButton';
 import { Card } from '../ui/Card';
+import { Chip } from '../ui/Chip';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ContextMenu } from '../ui/ContextMenu';
+import { IconButton } from '../ui/IconButton';
 import { describeLabelAutoAssignment } from './labelMatchingSummary';
 
-type Props = {
+interface Props {
   tags: TagDto[];
   documentCountByTagId: Record<string, number>;
   loading?: boolean;
   onEdit: (tag: TagDto) => void;
   onDelete: (tagId: string) => void | Promise<void>;
-};
+}
 
 function filterLinkForTag(tag: TagDto): string {
   const needsQuotes = /\s/.test(tag.name);
@@ -101,7 +102,7 @@ export function LabelsVocabularyTable(props: Props) {
                     </td>
                     <td className="labels-vocabulary-col-actions">
                       <div className="labels-vocabulary-actions-inner">
-                        <Button type="button" variant="secondary" onClick={() => props.onEdit(tag)}>
+                        <Button type="button" variant="secondary" onClick={() => { props.onEdit(tag); }}>
                           {t('labels.editAction')}
                         </Button>
                         <IconButton
@@ -110,7 +111,7 @@ export function LabelsVocabularyTable(props: Props) {
                           hasPopup="menu"
                           expanded={menuOpen && menuTagId === tag.id}
                           className="labels-overflow-btn"
-                          onClick={(e) => openMenu(tag.id, e.currentTarget)}
+                          onClick={(e) => { openMenu(tag.id, e.currentTarget); }}
                         />
                       </div>
                     </td>
@@ -126,7 +127,7 @@ export function LabelsVocabularyTable(props: Props) {
         x={menuPos.x}
         y={menuPos.y}
         anchorRef={menuAnchorRef}
-        onClose={() => setMenuOpen(false)}
+        onClose={() => { setMenuOpen(false); }}
         items={[
           {
             kind: 'item',
@@ -150,7 +151,7 @@ export function LabelsVocabularyTable(props: Props) {
         confirmLabel={t('common.delete')}
         tone="danger"
         busy={deleteBusy}
-        onCancel={() => setConfirmTag(null)}
+        onCancel={() => { setConfirmTag(null); }}
         onConfirm={() => void runDelete()}
       />
     </Card>

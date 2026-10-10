@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { RecognizedFieldDraft } from './recognizedFieldDraft';
 import type { RecognizedFieldGateDraft } from '../components/settings/RecognizedFieldQualityGateEditor';
+import type { RecognizedFieldDraft } from './recognizedFieldDraft';
 import { deriveKeyFromLabel } from './recognizedFieldKey';
 
 export type FieldExtractionRuleMode = 'always' | 'labels';
@@ -61,7 +61,7 @@ export function validateRecognizedFieldDrafts(
       return;
     }
     if (!resolvedFieldKey(row)) {
-      errors.push(messages.missingKey(row.label.trim() || `#${position}`));
+      errors.push(messages.missingKey(row.label.trim() || `#${String(position)}`));
     }
     if (!row.extractForAllDocuments && row.gateLabelIds.length === 0) {
       errors.push(messages.labelsRequired(row.label.trim()));

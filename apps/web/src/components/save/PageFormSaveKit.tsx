@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect } from 'react';
+
 import { useSaveKeyboardShortcut } from '../../lib/useSaveKeyboardShortcut';
 import { useUnsavedChangesGuard } from '../../lib/useUnsavedChangesGuard';
 import { SaveBar } from './SaveBar';
-import { UnsavedChangesDialog } from './UnsavedChangesDialog';
 import { useToastNotify } from './ToastProvider';
+import { UnsavedChangesDialog } from './UnsavedChangesDialog';
 
-type PageFormSaveKitProps = {
+interface PageFormSaveKitProps {
   dirty: boolean;
   saving: boolean;
   error?: string | null;
   onSave: () => void;
   onDiscard: () => void;
-};
+}
 
 /** Wires SaveBar, navigation guard, and Cmd/Ctrl+S for one dirty page form. */
 export function PageFormSaveKit({ dirty, saving, error, onSave, onDiscard }: PageFormSaveKitProps) {

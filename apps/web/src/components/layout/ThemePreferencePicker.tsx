@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { MutableRefObject } from 'react';
-import { Monitor, Moon, Sun } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import type { ThemePreference } from '@docuvate/contracts';
+import { Monitor, Moon, Sun } from 'lucide-react';
+import type { MutableRefObject } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { segmentedPreferenceClass } from '../../lib/segmentedControlClasses';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { SegmentedIconLabel } from '../ui/SegmentedIconLabel';

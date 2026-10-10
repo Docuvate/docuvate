@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type { DashboardWidgetDto, DocumentDto, SavedDocumentViewDto } from '@docuvate/contracts';
-import { UploadDropzone } from '../UploadDropzone';
-import { DocumentUploadProvider } from '../upload/DocumentUploadProvider';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { getDashboardStatistics, getSavedDocumentView, listDocuments } from '../../lib/api';
-import { routes } from '../../lib/routes';
 import { resolveLibraryDropTarget } from '../../lib/documentUploadAssignment';
+import { routes } from '../../lib/routes';
 import { savedViewToListQuery } from '../../lib/savedViewState';
-import { DashboardWidgetCard } from './DashboardWidgetCard';
 import { Badge } from '../ui/Badge';
+import { DocumentUploadProvider } from '../upload/DocumentUploadProvider';
+import { UploadDropzone } from '../UploadDropzone';
+import { DashboardWidgetCard } from './DashboardWidgetCard';
 
 interface DashboardWidgetsProps {
   widgets: DashboardWidgetDto[];
@@ -69,7 +70,7 @@ export function DashboardWidgets({
       if (nextIndex < 0 || nextIndex >= sorted.length) return;
       const copy = [...sorted];
       const [item] = copy.splice(index, 1);
-      copy.splice(nextIndex, 0, item!);
+      copy.splice(nextIndex, 0, item);
       onWidgetsChange(copy.map((w, position) => ({ ...w, position })));
     },
     [onWidgetsChange, sorted]
@@ -93,7 +94,7 @@ export function DashboardWidgets({
     if (Number.isNaN(from) || from === targetIndex) return;
     const copy = [...sorted];
     const [item] = copy.splice(from, 1);
-    copy.splice(targetIndex, 0, item!);
+    copy.splice(targetIndex, 0, item);
     onWidgetsChange(copy.map((w, position) => ({ ...w, position })));
   };
 
@@ -115,15 +116,15 @@ export function DashboardWidgets({
             widget={widget}
             editMode={editMode}
             title={resolveWidgetTitle(widget, savedViews, t)}
-            onMoveUp={() => moveWidget(index, -1)}
-            onMoveDown={() => moveWidget(index, 1)}
-            onRemove={() => removeWidget(widget.id)}
+            onMoveUp={() => { moveWidget(index, -1); }}
+            onMoveDown={() => { moveWidget(index, 1); }}
+            onRemove={() => { removeWidget(widget.id); }}
             dragHandleProps={
               editMode
                 ? {
                     draggable: true,
                     onDragStart: onDragStart(index),
-                    onDragOver: (e) => e.preventDefault(),
+                    onDragOver: (e) => { e.preventDefault(); },
                     onDrop: onDrop(index),
                   }
                 : undefined
@@ -154,7 +155,7 @@ function DashboardWidgetBody({
     if (widget.type === 'statistics') {
       void getDashboardStatistics()
         .then(setStats)
-        .catch(() => setStats(null));
+        .catch(() => { setStats(null); });
     }
   }, [widget.type]);
 
@@ -172,7 +173,7 @@ function DashboardWidgetBody({
               : items;
           setDocs(filtered.slice(0, limit));
         })
-        .catch(() => setDocs([]));
+        .catch(() => { setDocs([]); });
     }
   }, [widget]);
 
@@ -190,7 +191,7 @@ function DashboardWidgetBody({
       const items = await listDocuments(savedViewToListQuery(view));
       setDocs(items.slice(0, limit));
     };
-    void load().catch(() => setDocs([]));
+    void load().catch(() => { setDocs([]); });
   }, [widget, savedViews]);
 
   switch (widget.type) {

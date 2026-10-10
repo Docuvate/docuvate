@@ -1,20 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type {
   PaperlessImportDryRunSummaryDto,
   PaperlessImportRunDto,
   PaperlessImportRunErrorDto,
   PaperlessInstallationDto,
 } from '@docuvate/contracts';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useParams } from 'react-router-dom';
+
+import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
-import { formatConnectorError } from '../lib/connectorErrors';
-import { formatUserFacingError } from '../lib/apiErrors';
 import {
   getLatestPaperlessImportRun,
   getPaperlessImportRun,
@@ -25,9 +24,11 @@ import {
   testPaperlessInstallationConnection,
   updatePaperlessInstallation,
 } from '../lib/api';
+import { formatUserFacingError } from '../lib/apiErrors';
+import { formatConnectorError } from '../lib/connectorErrors';
 import { routes } from '../lib/routes';
 
-type FormState = {
+interface FormState {
   displayName: string;
   baseUrl: string;
   apiToken: string;
@@ -36,13 +37,13 @@ type FormState = {
   keepOcrText: boolean;
   rerunOcr: boolean;
   includeArchivedPdf: boolean;
-};
+}
 
-type StoredFlags = {
+interface StoredFlags {
   hasStoredApiToken: boolean;
   hasStoredUsername: boolean;
   hasStoredPassword: boolean;
-};
+}
 
 const emptyForm: FormState = {
   displayName: '',
@@ -180,7 +181,7 @@ export function PaperlessConnectorSetupPage() {
         }
       })();
     }, 2000);
-    return () => window.clearInterval(timer);
+    return () => { window.clearInterval(timer); };
   }, [installationId, run]);
 
   async function handleSave() {
@@ -297,7 +298,7 @@ export function PaperlessConnectorSetupPage() {
         saving={saving}
         error={saveError}
         onSave={() => void handleSave()}
-        onDiscard={() => setForm(savedForm)}
+        onDiscard={() => { setForm(savedForm); }}
       />
 
       {loading ? (
@@ -318,8 +319,7 @@ export function PaperlessConnectorSetupPage() {
                 <Input
                   className="paperless-control"
                   value={form.displayName}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, displayName: event.target.value }))
+                  onChange={(event) => { setForm((prev) => ({ ...prev, displayName: event.target.value })); }
                   }
                 />
               </label>
@@ -330,8 +330,7 @@ export function PaperlessConnectorSetupPage() {
                   type="url"
                   value={form.baseUrl}
                   placeholder={t('connectors.plugins.paperless.baseUrlPlaceholder')}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, baseUrl: event.target.value }))
+                  onChange={(event) => { setForm((prev) => ({ ...prev, baseUrl: event.target.value })); }
                   }
                 />
               </label>
@@ -346,8 +345,7 @@ export function PaperlessConnectorSetupPage() {
                       ? secretPlaceholder
                       : t('connectors.plugins.paperless.apiTokenHelp')
                   }
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, apiToken: event.target.value }))
+                  onChange={(event) => { setForm((prev) => ({ ...prev, apiToken: event.target.value })); }
                   }
                   autoComplete="off"
                 />
@@ -365,8 +363,7 @@ export function PaperlessConnectorSetupPage() {
                   placeholder={
                     storedFlags.hasStoredUsername && !form.username ? secretPlaceholder : undefined
                   }
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, username: event.target.value }))
+                  onChange={(event) => { setForm((prev) => ({ ...prev, username: event.target.value })); }
                   }
                   autoComplete="off"
                 />
@@ -380,8 +377,7 @@ export function PaperlessConnectorSetupPage() {
                   placeholder={
                     storedFlags.hasStoredPassword && !form.password ? secretPlaceholder : undefined
                   }
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, password: event.target.value }))
+                  onChange={(event) => { setForm((prev) => ({ ...prev, password: event.target.value })); }
                   }
                   autoComplete="new-password"
                 />
@@ -411,12 +407,11 @@ export function PaperlessConnectorSetupPage() {
                 <input
                   type="checkbox"
                   checked={form.keepOcrText}
-                  onChange={(event) =>
-                    setForm((prev) => ({
+                  onChange={(event) => { setForm((prev) => ({
                       ...prev,
                       keepOcrText: event.target.checked,
                       rerunOcr: event.target.checked ? false : prev.rerunOcr,
-                    }))
+                    })); }
                   }
                 />
                 <span>{t('connectors.plugins.paperless.keepOcr')}</span>
@@ -425,12 +420,11 @@ export function PaperlessConnectorSetupPage() {
                 <input
                   type="checkbox"
                   checked={form.rerunOcr}
-                  onChange={(event) =>
-                    setForm((prev) => ({
+                  onChange={(event) => { setForm((prev) => ({
                       ...prev,
                       rerunOcr: event.target.checked,
                       keepOcrText: event.target.checked ? false : prev.keepOcrText,
-                    }))
+                    })); }
                   }
                 />
                 <span>{t('connectors.plugins.paperless.rerunOcr')}</span>
@@ -439,8 +433,7 @@ export function PaperlessConnectorSetupPage() {
                 <input
                   type="checkbox"
                   checked={form.includeArchivedPdf}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, includeArchivedPdf: event.target.checked }))
+                  onChange={(event) => { setForm((prev) => ({ ...prev, includeArchivedPdf: event.target.checked })); }
                   }
                 />
                 <span>{t('connectors.plugins.paperless.includeArchived')}</span>

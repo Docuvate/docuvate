@@ -14,6 +14,6 @@ export function useSaveKeyboardShortcut(enabled: boolean, onSave: () => void) {
       }
     }
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    return () => { window.removeEventListener('keydown', onKeyDown); };
   }, [enabled, onSave]);
 }

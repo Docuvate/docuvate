@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it } from 'vitest';
-import i18next from 'i18next';
 import type { LabelRecommendationDto } from '@docuvate/contracts';
-import { todoWhyLine } from './labelsTodoPresentation';
+import i18next from 'i18next';
+import { describe, expect, it } from 'vitest';
+
 import de from '../../i18n/locales/de.json';
 import en from '../../i18n/locales/en.json';
+import { todoWhyLine } from './labelsTodoPresentation';
 
 function rec(
   partial: Partial<LabelRecommendationDto> & Pick<LabelRecommendationDto, 'id' | 'kind' | 'score'>

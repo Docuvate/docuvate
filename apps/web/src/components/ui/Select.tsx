@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type RefObject,
   useCallback,
   useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type KeyboardEvent,
-  type RefObject,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+
 import { computeSelectMenuPlacement, resolveSelectMenuPortalRoot } from './selectMenuPlacement';
 
 export interface SelectOption {
@@ -79,12 +80,12 @@ function useSelectMenuPosition(
     if (!open || !menuPortal) return;
     updatePosition();
     const frame = requestAnimationFrame(updatePosition);
-    return () => cancelAnimationFrame(frame);
+    return () => { cancelAnimationFrame(frame); };
   }, [open, menuPortal, updatePosition]);
 
   useEffect(() => {
     if (!open || !menuPortal) return;
-    const onScrollOrResize = () => updatePosition();
+    const onScrollOrResize = () => { updatePosition(); };
     window.addEventListener('resize', onScrollOrResize);
     window.addEventListener('scroll', onScrollOrResize, true);
     return () => {
@@ -171,7 +172,7 @@ export function Select({
       setOpen(false);
     };
     document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
+    return () => { document.removeEventListener('mousedown', onDoc); };
   }, [open]);
 
   function onTriggerKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
@@ -224,12 +225,12 @@ export function Select({
           <button
             type="button"
             role="option"
-            id={`${listId}-opt-${index}`}
+            id={`${listId}-opt-${String(index)}`}
             aria-selected={opt.value === value}
             disabled={opt.disabled}
             className={`custom-select-option${opt.value === value ? ' custom-select-option-active' : ''}${index === activeIndex ? ' custom-select-option-focus' : ''}${opt.disabled ? ' custom-select-option-disabled' : ''}`}
-            onMouseEnter={() => setActiveIndex(index)}
-            onClick={() => selectOption(opt)}
+            onMouseEnter={() => { setActiveIndex(index); }}
+            onClick={() => { selectOption(opt); }}
           >
             <span className="custom-select-option-label">{opt.label}</span>
             {opt.suffix ? (
@@ -241,7 +242,7 @@ export function Select({
     </ul>
   ) : null;
 
-  const activeOptionId = open ? `${listId}-opt-${activeIndex}` : undefined;
+  const activeOptionId = open ? `${listId}-opt-${String(activeIndex)}` : undefined;
 
   return (
     <div className={`custom-select ${className}`.trim()} ref={rootRef}>
@@ -255,7 +256,7 @@ export function Select({
         aria-expanded={open}
         aria-controls={listId}
         aria-activedescendant={activeOptionId}
-        onClick={() => (open ? closeMenu() : openMenu())}
+        onClick={() => { open ? closeMenu() : openMenu(); }}
         onKeyDown={onTriggerKeyDown}
       >
         <span className={selected ? '' : 'muted'}>{selected?.label ?? resolvedPlaceholder}</span>

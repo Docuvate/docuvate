@@ -1,32 +1,33 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CreateTagRequest, TagDto } from '@docuvate/contracts';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { formatUserFacingError } from '../../lib/apiErrors';
-import type { CreateTagRequest, TagDto, UpdateTagRequest } from '@docuvate/contracts';
-import { createTag, deleteTag, listTags, updateTag } from '../../lib/api';
-import { routes } from '../../lib/routes';
+import { Link } from 'react-router-dom';
+
+import { LabelColorField } from '../../components/labels/LabelColorField';
+import { LabelCoverageHeader } from '../../components/labels/LabelCoverageHeader';
+import { LabelsTodoQueue } from '../../components/labels/LabelsTodoQueue';
+import { LabelsVocabularyTable } from '../../components/labels/LabelsVocabularyTable';
+import { useToastNotify } from '../../components/save/ToastProvider';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { LabelCoverageHeader } from '../../components/labels/LabelCoverageHeader';
-import { LabelsTodoQueue } from '../../components/labels/LabelsTodoQueue';
-import { LabelsVocabularyTable } from '../../components/labels/LabelsVocabularyTable';
-import { useLabelsInsights } from './useLabelsInsights';
+import { createTag, deleteTag, listTags, updateTag } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import { defaultLabelColor } from '../../lib/defaultLabelColor';
-import { LabelColorField } from '../../components/labels/LabelColorField';
+import { labelMatchHintKey, labelMatchPlaceholderKey } from '../../lib/labelAssignmentMatchCopy';
 import {
-  LABEL_ASSIGNMENT_MODES,
   applyLabelAssignmentMode,
+  LABEL_ASSIGNMENT_MODES,
+  type LabelAssignmentMode,
   labelAssignmentModeLabelKey,
   labelAssignmentModeNeedsMatchText,
   readLabelAssignmentModeFromForm,
-  type LabelAssignmentMode,
 } from '../../lib/labelAssignmentMode';
-import { labelMatchHintKey, labelMatchPlaceholderKey } from '../../lib/labelAssignmentMatchCopy';
-import { useToastNotify } from '../../components/save/ToastProvider';
+import { routes } from '../../lib/routes';
+import { useLabelsInsights } from './useLabelsInsights';
 
 const emptyForm: CreateTagRequest = {
   name: '',
@@ -89,7 +90,7 @@ export function LabelsPage() {
       if (editingId === 'new') {
         await createTag(form);
       } else if (editingId) {
-        await updateTag(editingId, form as UpdateTagRequest);
+        await updateTag(editingId, form);
       }
       setEditingId(null);
       setForm(emptyForm);
@@ -133,7 +134,7 @@ export function LabelsPage() {
           type="button"
           className="labels-page-new-label-btn"
           data-ux="primary-action"
-          onClick={() => startCreate()}
+          onClick={() => { startCreate(); }}
         >
           {t('labels.newLabel')}
         </Button>
@@ -185,7 +186,7 @@ export function LabelsPage() {
               <Input
                 required
                 value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                onChange={(e) => { setForm({ ...form, name: e.target.value }); }}
                 placeholder={t('labels.namePlaceholder')}
               />
             </label>
@@ -193,15 +194,14 @@ export function LabelsPage() {
               <span className="label-editor-field-label">{t('labels.color')}</span>
               <LabelColorField
                 value={form.color ?? defaultLabelColor}
-                onChange={(color) => setForm({ ...form, color })}
+                onChange={(color) => { setForm({ ...form, color }); }}
               />
             </div>
             <label className="label-editor-field">
               {t('labels.matchingAlgorithm')}
               <Select
                 value={assignmentMode}
-                onChange={(value) =>
-                  setForm(applyLabelAssignmentMode(value as LabelAssignmentMode, form))
+                onChange={(value) => { setForm(applyLabelAssignmentMode(value as LabelAssignmentMode, form)); }
                 }
                 options={LABEL_ASSIGNMENT_MODES.map((mode) => ({
                   value: mode,
@@ -220,7 +220,7 @@ export function LabelsPage() {
                   disabled={!showMatchText}
                   aria-hidden={!showMatchText}
                   tabIndex={showMatchText ? 0 : -1}
-                  onChange={(e) => setForm({ ...form, match: e.target.value })}
+                  onChange={(e) => { setForm({ ...form, match: e.target.value }); }}
                   placeholder={t(labelMatchPlaceholderKey(assignmentMode))}
                 />
                 {showMatchText && labelMatchHintKey(assignmentMode) ? (
@@ -231,7 +231,7 @@ export function LabelsPage() {
               </label>
             </div>
             <div className="confirm-dialog-actions label-editor-actions">
-              <Button type="button" variant="secondary" onClick={() => setEditingId(null)}>
+              <Button type="button" variant="secondary" onClick={() => { setEditingId(null); }}>
                 {t('common.cancel')}
               </Button>
               <Button type="submit" variant="primary" disabled={saving}>

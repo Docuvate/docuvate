@@ -3,6 +3,7 @@
 import type { TagDto } from '@docuvate/contracts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { ConfidenceThresholdSlider } from './ConfidenceThresholdSlider';
 
 export interface RecognizedFieldGateDraft {
@@ -50,8 +51,7 @@ export function RecognizedFieldQualityGateEditor({
           disabled={disabled}
           labelId="recognized-field-default-confidence-label"
           ariaLabel={t('recognizedFields.gateSafetyAria')}
-          onChange={(labelFieldConfidenceThreshold) =>
-            onChange({ ...gate, labelFieldConfidenceThreshold, confidenceGateEnabled: true })
+          onChange={(labelFieldConfidenceThreshold) => { onChange({ ...gate, labelFieldConfidenceThreshold, confidenceGateEnabled: true }); }
           }
         />
       </div>
@@ -72,7 +72,7 @@ export function RecognizedFieldQualityGateEditor({
                     type="checkbox"
                     checked={requiredLabelIdSet.has(tag.id)}
                     disabled={disabled}
-                    onChange={(e) => toggleRequiredLabel(tag.id, e.target.checked)}
+                    onChange={(e) => { toggleRequiredLabel(tag.id, e.target.checked); }}
                   />
                   <span>{tag.name}</span>
                 </label>

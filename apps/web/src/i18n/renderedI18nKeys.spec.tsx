@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
+import { CopyButton } from '../components/ui/CopyButton';
 import i18n from '../i18n';
 import { LibraryPageDocumentSection } from '../pages/library/LibraryPageDocumentSection';
-import { CopyButton } from '../components/ui/CopyButton';
 
 const RAW_KEY = /^[a-z][a-z0-9]*(\.[a-zA-Z0-9]+)+$/;
 
@@ -48,7 +49,7 @@ describe('rendered i18n keys', () => {
       items: [],
       query: '',
       setQuery: () => undefined,
-      onSearch: async (e: { preventDefault: () => void }) => e.preventDefault(),
+      onSearch: async (e: { preventDefault: () => void }) => { e.preventDefault(); },
       viewMode: 'klassisch' as const,
       onViewModeChange: () => undefined,
       filters: { sort: 'updatedAt' as const, order: 'desc' as const },

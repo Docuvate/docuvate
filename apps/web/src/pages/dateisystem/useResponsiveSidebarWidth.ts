@@ -11,11 +11,11 @@ export function useResponsiveSidebarWidth(storedWidth: number): number {
   );
 
   useEffect(() => {
-    const mq = window.matchMedia(`(max-width: ${NARROW_MAX}px)`);
-    const sync = () => setNarrow(mq.matches);
+    const mq = window.matchMedia(`(max-width: ${String(NARROW_MAX)}px)`);
+    const sync = () => { setNarrow(mq.matches); };
     sync();
     mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
+    return () => { mq.removeEventListener('change', sync); };
   }, []);
 
   return narrow ? NARROW_CAP : storedWidth;

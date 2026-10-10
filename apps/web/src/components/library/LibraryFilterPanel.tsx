@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentListQuery, DocumentStatus, TagDto } from '@docuvate/contracts';
 import { Filter, Inbox } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentListQuery, DocumentStatus, TagDto } from '@docuvate/contracts';
-import { documentStatusLabel } from '../../lib/documentStatusLabel';
+
 import type { DocumentFilterParseIssue } from '../../lib/documentFilterQuery';
+import { documentStatusLabel } from '../../lib/documentStatusLabel';
 import type { LibraryFilterMode } from '../../lib/libraryFilterMode';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
@@ -63,7 +64,7 @@ export function LibraryFilterPanel({
             type="button"
             className={`filter-mode-btn${filterMode === 'ui' ? ' filter-mode-btn-active' : ''}`}
             aria-pressed={filterMode === 'ui'}
-            onClick={() => onFilterModeChange('ui')}
+            onClick={() => { onFilterModeChange('ui'); }}
           >
             {t('library.filter.modeUi')}
           </button>
@@ -71,7 +72,7 @@ export function LibraryFilterPanel({
             type="button"
             className={`filter-mode-btn${filterMode === 'query' ? ' filter-mode-btn-active' : ''}`}
             aria-pressed={filterMode === 'query'}
-            onClick={() => onFilterModeChange('query')}
+            onClick={() => { onFilterModeChange('query'); }}
           >
             {t('library.filter.modeQuery')}
           </button>
@@ -85,8 +86,8 @@ export function LibraryFilterPanel({
             <Input
               id="library-filter-query"
               value={filterQueryText}
-              onChange={(e) => onFilterQueryTextChange(e.target.value)}
-              onBlur={() => onApplyFilterQuery(filterQueryText)}
+              onChange={(e) => { onFilterQueryTextChange(e.target.value); }}
+              onBlur={() => { onApplyFilterQuery(filterQueryText); }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
                   e.preventDefault();
@@ -116,12 +117,11 @@ export function LibraryFilterPanel({
               <button
                 type="button"
                 className={`filter-chip filter-chip-inbox${filters.inbox ? ' filter-chip-active' : ''}`}
-                onClick={() =>
-                  onToggleFilter({
+                onClick={() => { onToggleFilter({
                     inbox: !filters.inbox,
                     tagIds: undefined,
                     withoutNonInboxLabel: undefined,
-                  })
+                  }); }
                 }
               >
                 <Inbox size={ICON_SIZE} strokeWidth={ICON_STROKE} aria-hidden />
@@ -130,12 +130,11 @@ export function LibraryFilterPanel({
               <button
                 type="button"
                 className={`filter-chip filter-chip-label${withoutLabel ? ' filter-chip-active' : ''}`}
-                onClick={() =>
-                  onToggleFilter({
+                onClick={() => { onToggleFilter({
                     withoutNonInboxLabel: withoutLabel ? undefined : true,
                     inbox: undefined,
                     tagIds: undefined,
-                  })
+                  }); }
                 }
               >
                 {t('library.filter.withoutLabel')}
@@ -151,7 +150,7 @@ export function LibraryFilterPanel({
                     key={tag.id}
                     type="button"
                     className={`filter-chip filter-chip-label${activeTagIds.has(tag.id) ? ' filter-chip-active' : ''}`}
-                    onClick={() => onToggleLabelFilter(tag.id)}
+                    onClick={() => { onToggleLabelFilter(tag.id); }}
                   >
                     {tag.name}
                   </button>
@@ -171,10 +170,9 @@ export function LibraryFilterPanel({
                     label: documentStatusLabel(status),
                   })),
                 ]}
-                onChange={(next) =>
-                  onToggleFilter({
+                onChange={(next) => { onToggleFilter({
                     status: next ? (next as DocumentStatus) : undefined,
-                  })
+                  }); }
                 }
               />
             </div>

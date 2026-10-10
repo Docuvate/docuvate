@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { UPLOAD_ACCEPT } from '../../lib/documentUploadConstants';
 import { Button } from '../ui/Button';
 import { useDocumentUploadContext } from './DocumentUploadProvider';
@@ -58,7 +59,7 @@ export function UploadFileTrigger({
         aria-label={t('upload.chooseFilesAria')}
         disabled={disabled && !onDisabledClick}
         onChange={(e) => {
-          if (e.target.files?.length) void processFiles(e.target.files);
+          if (e.target.files?.length) processFiles(e.target.files);
           e.target.value = '';
         }}
       />

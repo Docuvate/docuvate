@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TFunction } from 'i18next';
 import type { DocumentListQuery, DocumentStatus, TagDto } from '@docuvate/contracts';
+import type { TFunction } from 'i18next';
+
 import {
   parseFilterTokenValue,
   quoteFilterValueIfNeeded,
@@ -19,16 +20,16 @@ type ParsedFieldsInternal = Partial<LibraryFilterFields> & {
   labelNames?: string[];
 };
 
-export type DocumentFilterParseIssue = {
+export interface DocumentFilterParseIssue {
   token: string;
   messageKey: 'library.filter.parseUnknownKey' | 'library.filter.parseUnknownValue';
   detail?: string;
-};
+}
 
-export type DocumentFilterParseResult = {
+export interface DocumentFilterParseResult {
   fields: LibraryFilterFields;
   issues: DocumentFilterParseIssue[];
-};
+}
 
 const STATUS_ALIASES: Record<string, DocumentStatus> = {
   ready: 'ready',
@@ -173,7 +174,7 @@ export function resolveDocumentFilterFields(
   }
 
   const { labelNames: _unusedLabelNames, ...rest } = parsed.fields;
-  void _unusedLabelNames;
+  _unusedLabelNames;
   return {
     fields: {
       ...rest,

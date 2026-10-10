@@ -2,15 +2,16 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+
 import { Button } from '../ui/Button';
 
-export type SaveBarProps = {
+export interface SaveBarProps {
   visible: boolean;
   saving: boolean;
   error?: string | null;
   onSave: () => void;
   onDiscard: () => void;
-};
+}
 
 export function SaveBar({ visible, saving, error, onSave, onDiscard }: SaveBarProps) {
   const { t } = useTranslation();

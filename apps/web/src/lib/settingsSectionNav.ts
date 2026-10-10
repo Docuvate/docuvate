@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { routes } from './routes';
 
-export type SettingsSectionNavItem = {
+export interface SettingsSectionNavItem {
   to: string;
   end: boolean;
   labelKey: string;
   /** Reserved for future role-gated entries (e.g. administration). */
   requiredRoles?: readonly string[];
-};
+}
 
 export function getSettingsSectionNavItems(): SettingsSectionNavItem[] {
   return [

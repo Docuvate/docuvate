@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { apiBaseUrl } from './api';
 
-export type PasswordResetTokenVerification = {
+export interface PasswordResetTokenVerification {
   valid: boolean;
-};
+}
 
 function passwordResetVerifyBaseUrl(): string {
   if (typeof window !== 'undefined') {
@@ -27,5 +27,5 @@ export async function verifyPasswordResetToken(
     return { valid: false };
   }
   const body = (await response.json()) as PasswordResetTokenVerification;
-  return { valid: body.valid === true };
+  return { valid: body.valid };
 }

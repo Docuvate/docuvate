@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentBulkAction } from '@docuvate/contracts';
 import {
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent,
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent as ReactKeyboardEvent,
-  type MouseEvent,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { DocumentBulkAction } from '@docuvate/contracts';
+import { useNavigate } from 'react-router-dom';
+
 import { buildLibraryContextMenuItems } from '../../components/library/buildLibraryContextMenuItems';
 import {
   contextMenuTitleForSelection,
@@ -123,7 +124,7 @@ export function useLibraryDocumentContextMenu(data: LibraryData) {
         tags,
         folders,
         mappen,
-        onNavigate: (path) => navigate(path),
+        onNavigate: (path) => { navigate(path); },
         onReviewStack: (primaryId) => {
           setStackReview({ primaryId, versionId: null });
         },
@@ -180,10 +181,10 @@ export function useLibraryDocumentContextMenu(data: LibraryData) {
       setBulkDeleteConfirmCount(selected.size);
     };
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    return () => { window.removeEventListener('keydown', onKeyDown); };
   }, [closeContextMenu, selected.size, bulkBusy]);
 
-  const cancelBulkDeleteConfirm = useCallback(() => setBulkDeleteConfirmCount(null), []);
+  const cancelBulkDeleteConfirm = useCallback(() => { setBulkDeleteConfirmCount(null); }, []);
 
   const confirmBulkDelete = useCallback(async () => {
     setBulkDeleteConfirmCount(null);

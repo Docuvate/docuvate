@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import type {
   LabelRecommendationBlocklistEntryDto,
   LabelRecommendationBlocklistPatternDto,
 } from '@docuvate/contracts';
-import { formatUserFacingError } from '../../lib/apiErrors';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import {
   addLabelRecommendationBlocklist,
   confirmLabelRecommendationBlocklistPattern,
@@ -15,22 +15,23 @@ import {
   removeLabelRecommendationBlocklist,
   removeLabelRecommendationBlocklistPattern,
 } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import { clusterBlocklistPhrases } from '../../lib/blocklistClusters';
+import { useToastNotify } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import { useToastNotify } from '../save/ToastProvider';
 
-type Props = {
+interface Props {
   onChanged?: () => void;
   /** Regex patterns and cluster suggestions (settings: advanced features only). */
   showAdvancedPatterns?: boolean;
-};
+}
 
-type PatternProposal = {
+interface PatternProposal {
   pattern: string;
   explanation: string;
   phrases: string[];
-};
+}
 
 export function LabelRecommendationBlocklist(props: Props) {
   const { t } = useTranslation();
@@ -177,7 +178,7 @@ export function LabelRecommendationBlocklist(props: Props) {
       <form className="label-rec-blocklist-add" onSubmit={onAdd}>
         <Input
           value={phrase}
-          onChange={(e) => setPhrase(e.target.value)}
+          onChange={(e) => { setPhrase(e.target.value); }}
           placeholder={t('labelBlocklist.phrasePlaceholder')}
           aria-label={t('labelBlocklist.blockPhraseAria')}
           disabled={busy}

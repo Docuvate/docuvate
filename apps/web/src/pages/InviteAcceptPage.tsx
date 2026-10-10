@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useEffect, useId, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { acceptUserInvitation } from '../lib/api';
-import { formatUserFacingError } from '../lib/apiErrors';
-import { routes } from '../lib/routes';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+
 import { AuthFormError } from '../components/auth/AuthFormError';
+import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { acceptUserInvitation } from '../lib/api';
+import { formatUserFacingError } from '../lib/apiErrors';
+import { routes } from '../lib/routes';
 
 export function InviteAcceptPage() {
   const { t } = useTranslation();
@@ -95,7 +96,7 @@ export function InviteAcceptPage() {
               type="password"
               autoComplete="new-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => { setPassword(e.target.value); }}
             />
           </label>
           <label>
@@ -104,7 +105,7 @@ export function InviteAcceptPage() {
               type="password"
               autoComplete="new-password"
               value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
+              onChange={(e) => { setConfirm(e.target.value); }}
             />
           </label>
           <Button type="submit" disabled={loading || !token}>

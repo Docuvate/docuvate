@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { FileText } from 'lucide-react';
 import type { LabelRecommendationDocumentPreviewDto } from '@docuvate/contracts';
+import { FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { routes } from '../../lib/routes';
 import {
   recommendationDocumentTitle,
@@ -12,9 +13,9 @@ import {
 
 const MAX_VISIBLE = 3;
 
-type Props = {
+interface Props {
   documents: LabelRecommendationDocumentPreviewDto[];
-};
+}
 
 export function LabelRecommendationDocuments({ documents }: Props) {
   const { t } = useTranslation();

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentDto } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentDto } from '@docuvate/contracts';
+
 import { bulkDocuments, listDocuments } from '../../lib/api';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
@@ -101,7 +102,7 @@ export function AddExistingDocumentsDialog({
       >
         <Input
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => { setQuery(e.target.value); }}
           placeholder={t('library.searchPlaceholder')}
           aria-label={t('library.searchDocsAria')}
         />

@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useId, useRef, useState } from 'react';
 import type { TagDto } from '@docuvate/contracts';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
+
 import type { RecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
 import { emptyRecognizedFieldDraft } from '../../lib/recognizedFieldDraft';
+import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
 import { Button } from '../ui/Button';
 import type { RecognizedFieldGateDraft } from './RecognizedFieldQualityGateEditor';
 import { RecognizedFieldRowForm } from './RecognizedFieldRowForm';
 
-export type RecognizedFieldEditDialogProps = {
+export interface RecognizedFieldEditDialogProps {
   open: boolean;
   mode: 'create' | 'edit';
   initialRow: RecognizedFieldDraft | null;
@@ -19,7 +20,7 @@ export type RecognizedFieldEditDialogProps = {
   busy: boolean;
   onCancel: () => void;
   onSave: (row: RecognizedFieldDraft) => void;
-};
+}
 
 export function RecognizedFieldEditDialog({
   open,
@@ -85,7 +86,7 @@ export function RecognizedFieldEditDialog({
         gateDefaults={gateDefaults}
         keyManual={keyManual}
         onChange={setDraft}
-        onKeyManual={() => setKeyManual(true)}
+        onKeyManual={() => { setKeyManual(true); }}
       />
       <div className="confirm-dialog-actions">
         <Button
@@ -98,7 +99,7 @@ export function RecognizedFieldEditDialog({
         >
           {t('common.cancel')}
         </Button>
-        <Button type="button" variant="primary" disabled={busy} onClick={() => onSave(draft)}>
+        <Button type="button" variant="primary" disabled={busy} onClick={() => { onSave(draft); }}>
           {busy ? t('save.saving') : t('save.save')}
         </Button>
       </div>

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { TagDto } from '@docuvate/contracts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TagDto } from '@docuvate/contracts';
+
 import { Chip } from '../ui/Chip';
 
 const MAX_VISIBLE_LABELS = 2;

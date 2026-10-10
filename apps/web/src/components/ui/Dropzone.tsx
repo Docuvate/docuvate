@@ -31,7 +31,7 @@ export function Dropzone({ disabled, busy, onFile }: DropzoneProps) {
   return (
     <label
       className={`dropzone${busy ? ' dropzone-busy' : ''}`}
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => { e.preventDefault(); }}
       onDrop={onDrop}
     >
       <input

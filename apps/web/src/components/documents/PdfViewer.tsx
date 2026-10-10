@@ -1,23 +1,24 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import * as pdfjs from 'pdfjs-dist';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as pdfjs from 'pdfjs-dist';
+
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { computeVirtualPageWindow, layoutOverlayPercentStyles } from '../../lib/pdfViewerVirtual';
 import { Button } from '../ui/Button';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `${import.meta.env.BASE_URL}pdf.worker.min.mjs`;
 
-type PdfHighlightBlock = {
+interface PdfHighlightBlock {
   page: number;
   x: number;
   y: number;
   width: number;
   height: number;
-};
+}
 
-export type PdfLayoutOverlay = {
+export interface PdfLayoutOverlay {
   id: string;
   page: number;
   x: number;
@@ -27,7 +28,7 @@ export type PdfLayoutOverlay = {
   kind: 'heading' | 'field' | 'table' | 'text';
   label: string;
   value?: string;
-};
+}
 
 const NO_HIGHLIGHTS: PdfHighlightBlock[] = [];
 const NO_LAYOUT_OVERLAYS: PdfLayoutOverlay[] = [];
@@ -72,10 +73,10 @@ function appendTextLayer(
     const tx = pdfjs.Util.transform(viewport.transform, item.transform);
     const angle = Math.atan2(tx[1], tx[0]);
     const fontHeight = Math.hypot(tx[2], tx[3]);
-    span.style.left = `${tx[4]}px`;
-    span.style.top = `${tx[5] - fontHeight}px`;
-    span.style.fontSize = `${fontHeight}px`;
-    span.style.transform = `rotate(${angle}rad)`;
+    span.style.left = `${String(tx[4])}px`;
+    span.style.top = `${String(tx[5] - fontHeight)}px`;
+    span.style.fontSize = `${String(fontHeight)}px`;
+    span.style.transform = `rotate(${String(angle)}rad)`;
     container.appendChild(span);
   }
 }
@@ -131,10 +132,10 @@ function appendLayoutOverlays(
       });
     }
     if (onHover) {
-      mark.addEventListener('mouseenter', () => onHover(overlay));
-      mark.addEventListener('mouseleave', () => onHover(null));
-      mark.addEventListener('focus', () => onHover(overlay));
-      mark.addEventListener('blur', () => onHover(null));
+      mark.addEventListener('mouseenter', () => { onHover(overlay); });
+      mark.addEventListener('mouseleave', () => { onHover(null); });
+      mark.addEventListener('focus', () => { onHover(overlay); });
+      mark.addEventListener('blur', () => { onHover(null); });
     }
     wrap.appendChild(mark);
   }
@@ -165,8 +166,8 @@ async function renderPdfPage(
   const wrap = document.createElement('div');
   wrap.className = 'pdf-page-wrap';
   wrap.dataset.page = String(pageNum);
-  wrap.style.width = `${viewport.width}px`;
-  wrap.style.height = `${viewport.height}px`;
+  wrap.style.width = `${String(viewport.width)}px`;
+  wrap.style.height = `${String(viewport.height)}px`;
   wrap.appendChild(canvas);
 
   const textLayer = document.createElement('div');
@@ -183,10 +184,10 @@ async function renderPdfPage(
       i === 0 && pageHighlights.length > 0
         ? 'pdf-block-highlight pdf-block-highlight-active'
         : 'pdf-block-highlight';
-    mark.style.left = `${block.x * 100}%`;
-    mark.style.top = `${block.y * 100}%`;
-    mark.style.width = `${Math.max(block.width * 100, 0.4)}%`;
-    mark.style.height = `${Math.max(block.height * 100, 0.35)}%`;
+    mark.style.left = `${String(block.x * 100)}%`;
+    mark.style.top = `${String(block.y * 100)}%`;
+    mark.style.width = `${String(Math.max(block.width * 100, 0.4))}%`;
+    mark.style.height = `${String(Math.max(block.height * 100, 0.35))}%`;
     wrap.appendChild(mark);
   });
 
@@ -278,7 +279,7 @@ export function PdfViewer({
     enabled: layoutOverlayEnabled,
     active: activeLayoutOverlayId,
   });
-  const sourceKey = data ? `buf:${data.byteLength}` : (url ?? '');
+  const sourceKey = data ? `buf:${String(data.byteLength)}` : (url ?? '');
 
   const setPage = useCallback(
     (next: number) => {
@@ -370,7 +371,7 @@ export function PdfViewer({
     let rafId = 0;
     const observer = new ResizeObserver(() => {
       cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => updateWidth());
+      rafId = requestAnimationFrame(() => { updateWidth(); });
     });
     observer.observe(scrollEl);
     return () => {
@@ -399,7 +400,7 @@ export function PdfViewer({
           containerWidth
         );
 
-        const renderKey = `${docToken}:${currentPage}:${Math.round(scale * 1000)}:${containerWidth ?? 0}:${highlightKey}:${overlayKey}:paginated`;
+        const renderKey = `${String(docToken)}:${String(currentPage)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${highlightKey}:${overlayKey}:paginated`;
         if (lastPageRenderKeyRef.current === renderKey && pagesHost.childElementCount > 0) {
           return;
         }
@@ -466,7 +467,7 @@ export function PdfViewer({
     void (async () => {
       try {
         const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth);
-        const layoutKey = `${docToken}:${Math.round(scale * 1000)}:${containerWidth ?? 0}:${pageCount}`;
+        const layoutKey = `${String(docToken)}:${String(Math.round(scale * 1000))}:${String(containerWidth ?? 0)}:${String(pageCount)}`;
         if (lastVirtualLayoutKeyRef.current === layoutKey && virtualSlotsBuiltRef.current) {
           return;
         }
@@ -478,8 +479,8 @@ export function PdfViewer({
           slot.className = 'pdf-page-slot';
           slot.dataset.page = String(pageNum);
           if (size && size.width > 0) {
-            slot.style.width = `${size.width * scale}px`;
-            slot.style.minHeight = `${size.height * scale}px`;
+            slot.style.width = `${String(size.width * scale)}px`;
+            slot.style.minHeight = `${String(size.height * scale)}px`;
           }
           pagesHost.appendChild(slot);
         }
@@ -521,12 +522,12 @@ export function PdfViewer({
       try {
         const highlights = highlightBlocks ?? NO_HIGHLIGHTS;
         const scale = await resolveRenderScale(pdf, 1, fitWidth, containerWidth);
-        const renderStamp = `${Math.round(scale * 1000)}:${overlayKey}:${highlightKey}`;
+        const renderStamp = `${String(Math.round(scale * 1000))}:${overlayKey}:${highlightKey}`;
 
         for (let pageNum = 1; pageNum <= pageCount; pageNum += 1) {
           if (virtualRenderWindow.has(pageNum)) continue;
           const slot = pagesHost.querySelector<HTMLElement>(
-            `.pdf-page-slot[data-page="${pageNum}"]`
+            `.pdf-page-slot[data-page="${String(pageNum)}"]`
           );
           if (!slot?.dataset.renderStamp) continue;
           slot.replaceChildren();
@@ -536,7 +537,7 @@ export function PdfViewer({
         await Promise.all(
           [...virtualRenderWindow].map(async (pageNum) => {
             const slot = pagesHost.querySelector<HTMLElement>(
-              `.pdf-page-slot[data-page="${pageNum}"]`
+              `.pdf-page-slot[data-page="${String(pageNum)}"]`
             );
             if (!slot) return;
             if (slot.dataset.renderStamp === renderStamp && slot.childElementCount > 0) {
@@ -614,16 +615,16 @@ export function PdfViewer({
       },
       { root, rootMargin: '120% 0px', threshold: 0.01 }
     );
-    host.querySelectorAll('.pdf-page-slot').forEach((el) => observer.observe(el));
+    host.querySelectorAll('.pdf-page-slot').forEach((el) => { observer.observe(el); });
     virtualIoRef.current = observer;
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); };
   }, [paginated, pageCount, docToken, pageSizes.length]);
 
   useEffect(() => {
     if (paginated || pageCount < 1) return;
     const host = pagesRef.current;
     if (!host) return;
-    const slot = host.querySelector(`.pdf-page-slot[data-page="${currentPage}"]`);
+    const slot = host.querySelector(`.pdf-page-slot[data-page="${String(currentPage)}"]`);
     slot?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [paginated, currentPage, pageCount, docToken]);
 
@@ -633,7 +634,7 @@ export function PdfViewer({
       if (event.key === 'Escape') onLayoutOverlayClear();
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); };
   }, [onLayoutOverlayClear]);
 
   useEffect(() => {
@@ -651,7 +652,7 @@ export function PdfViewer({
               variant="ghost"
               className="pdf-viewer-pager-btn"
               disabled={currentPage <= 1 || loading}
-              onClick={() => setPage(currentPage - 1)}
+              onClick={() => { setPage(currentPage - 1); }}
               aria-label={t('documents.pdfPrevPage')}
             >
               ←
@@ -664,7 +665,7 @@ export function PdfViewer({
               variant="ghost"
               className="pdf-viewer-pager-btn"
               disabled={currentPage >= pageCount || loading}
-              onClick={() => setPage(currentPage + 1)}
+              onClick={() => { setPage(currentPage + 1); }}
               aria-label={t('documents.pdfNextPage')}
             >
               →

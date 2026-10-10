@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { passkeyClient } from '@better-auth/passkey/client';
-import { createAuthClient } from 'better-auth/react';
 import { twoFactorClient } from 'better-auth/client/plugins';
+import { createAuthClient } from 'better-auth/react';
+
 import { routes } from './routes';
 
 /**
@@ -13,7 +14,7 @@ function authBaseURL(): string {
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  const configured = import.meta.env.VITE_API_URL as string | undefined;
+  const configured = import.meta.env.VITE_API_URL;
   if (configured && /^https?:\/\//.test(configured)) {
     return configured;
   }

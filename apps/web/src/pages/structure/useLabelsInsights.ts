@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useMemo, useState } from 'react';
 import {
-  summarizeLabelAssignmentInventory,
   type DocumentDto,
   type LabelAssignmentInventory,
   type LabelMapCoverageSummaryDto,
   type LabelMapEmptyReason,
   type LabelRecommendationDto,
+  summarizeLabelAssignmentInventory,
 } from '@docuvate/contracts';
-import { formatUserFacingError } from '../../lib/apiErrors';
+import { useCallback, useMemo, useState } from 'react';
+
+import { prepareLabelQueue } from '../../components/labels/labelsQueue';
 import {
   acceptLabelRecommendation,
   dismissLabelRecommendation,
@@ -17,7 +18,7 @@ import {
   listDocuments,
   listLabelRecommendations,
 } from '../../lib/api';
-import { prepareLabelQueue } from '../../components/labels/labelsQueue';
+import { formatUserFacingError } from '../../lib/apiErrors';
 
 function dismissPhrase(item: LabelRecommendationDto): string | undefined {
   if (item.kind === 'assign') {
@@ -86,7 +87,7 @@ export function useLabelsInsights(onReloadTags: () => Promise<void>) {
 
       const docsPromise = listDocuments({ status: 'ready' })
         .then(setDocuments)
-        .catch(() => setDocuments([]));
+        .catch(() => { setDocuments([]); });
 
       const mapPromise = getLabelMap()
         .then((map) => {

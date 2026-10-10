@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import './i18n';
+import './styles/global.css';
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
 import { App } from './App';
 import { RouteErrorFallback } from './components/RouteErrorFallback';
-import './i18n';
 import { initDocuvateTheme } from './lib/docuvateTheme';
-import './styles/global.css';
 
 initDocuvateTheme();
 import './components/ui/components.css';

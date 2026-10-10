@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ChatMessageCitationDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { formatChatGenerationError, toUserFacingChatGenerationError } from '../../lib/apiErrors';
 import { CHAT_GENERATION_MAX_WAIT_SEC } from '../../lib/chatGenerationLimits';
 import { chatGenerationWaitStartMs } from '../../lib/chatGenerationWaitStart';
 import {
   extractReadableCitedAnswerPreview,
   looksLikeCitedAnswerJson,
 } from '../../lib/extractCitedStreamPreview';
-import { useTranslation } from 'react-i18next';
-import type { ChatMessageCitationDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
-import { formatChatGenerationError, toUserFacingChatGenerationError } from '../../lib/apiErrors';
 import { Button } from '../ui/Button';
 import { Spinner } from '../ui/Spinner';
 
@@ -26,7 +27,7 @@ interface DocumentChatAssistantMessageProps {
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = seconds % 60;
-  return m > 0 ? `${m}:${String(s).padStart(2, '0')}` : `${s}s`;
+  return m > 0 ? `${String(m)}:${String(s).padStart(2, '0')}` : `${String(s)}s`;
 }
 
 export function DocumentChatAssistantMessage({
@@ -59,7 +60,7 @@ export function DocumentChatAssistantMessage({
     };
     tick();
     const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
+    return () => { clearInterval(id); };
   }, [
     isActive,
     message.createdAt,
@@ -123,7 +124,7 @@ export function DocumentChatAssistantMessage({
             type="button"
             variant="secondary"
             className="doc-chat-cancel-btn"
-            onClick={() => onCancel(message.id)}
+            onClick={() => { onCancel(message.id); }}
           >
             {t('documents.documentChat.cancel')}
           </Button>
@@ -145,7 +146,7 @@ export function DocumentChatAssistantMessage({
                 )}
                 <span className="muted">
                   {citation.documentTitle}
-                  {citation.page != null ? `, S. ${citation.page}` : ''}
+                  {citation.page != null ? `, S. ${String(citation.page)}` : ''}
                 </span>
               </li>
             ))}
@@ -162,7 +163,7 @@ export function DocumentChatAssistantMessage({
               variant="secondary"
               className="doc-chat-retry-btn"
               disabled={retryBusy}
-              onClick={() => onRetry(message.id)}
+              onClick={() => { onRetry(message.id); }}
             >
               {t('documents.documentChat.retry')}
             </Button>

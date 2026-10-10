@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it, vi } from 'vitest';
 import type { AdminUserDto } from '@docuvate/contracts';
+import { describe, expect, it, vi } from 'vitest';
+
 import {
   getUserRowState,
   invitePasswordsMatch,

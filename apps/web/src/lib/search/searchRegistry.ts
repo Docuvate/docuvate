@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TFunction } from 'i18next';
+
 import { routes } from '../routes';
 import { fuzzyMatchScore, highlightFuzzySpans } from './fuzzyScore';
 
@@ -13,7 +14,7 @@ export interface RegistryHit {
   keywords: string[];
   adminOnly?: boolean;
   score: number;
-  highlightSpans: Array<{ start: number; end: number }>;
+  highlightSpans: { start: number; end: number }[];
 }
 
 function buildRegistry(t: TFunction, isAdmin: boolean) {

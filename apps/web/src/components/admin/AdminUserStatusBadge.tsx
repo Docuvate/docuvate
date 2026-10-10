@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { AdminUserDto } from '@docuvate/contracts';
 import { CircleCheck, CircleDashed, CircleOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import type { AdminUserDto } from '@docuvate/contracts';
 
 export function AdminUserStatusBadge({ user }: { user: AdminUserDto }) {
   const { t } = useTranslation();

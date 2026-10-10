@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import i18n from '../i18n';
 import {
   ApiRequestError,
@@ -25,7 +26,7 @@ describe('looksLikeI18nKey', () => {
 describe('toUserFacingError', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('de');
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
   it('translates API message i18n keys directly', () => {
@@ -77,7 +78,7 @@ describe('toUserFacingError', () => {
 describe('toUserFacingChatGenerationError', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('de');
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
   it('maps ollama_error', () => {
@@ -95,7 +96,7 @@ describe('toUserFacingChatGenerationError', () => {
 describe('formatUserFacingError', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('de');
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
   it('returns localized string', () => {

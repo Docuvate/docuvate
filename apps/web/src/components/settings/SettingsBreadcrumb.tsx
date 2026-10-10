@@ -3,10 +3,10 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-type Crumb = {
+interface Crumb {
   label: string;
   to?: string;
-};
+}
 
 export function SettingsBreadcrumb({ items }: { items: Crumb[] }) {
   const { t } = useTranslation();

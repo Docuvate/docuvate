@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
+  type DocuvateLocale,
   isoDateToLocalizedDisplay,
   localizedDatePlaceholder,
   localizedDisplayToIsoDate,
-  type DocuvateLocale,
 } from '../../lib/localizedDate';
 import { Input } from './Input';
 
