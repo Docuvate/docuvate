@@ -13,6 +13,7 @@ sys.path.insert(0, str(WORKER))
 from tests.synthetic_layout_pdfs import (  # noqa: E402
     _merge_two_pages,
     _single_page_pdf,
+    layout_regression_payroll_pdf,
 )
 from tests.synthetic_scan_pdfs import scanned_with_invisible_ocr_text_layer_pdf  # noqa: E402
 
@@ -109,6 +110,7 @@ def main() -> None:
     (OUT / "layout-ws-scanned.pdf").write_bytes(scanned_with_invisible_ocr_text_layer_pdf())
     (OUT / "layout-ws-multipage.pdf").write_bytes(multipage_outline_pdf())
     (OUT / "layout-ws-many-pages.pdf").write_bytes(many_page_strip_pdf(55))
+    (OUT / "layout-ws-compare-unreliable.pdf").write_bytes(layout_regression_payroll_pdf())
     print("Wrote fixtures to", OUT)
 
 

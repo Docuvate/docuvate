@@ -292,11 +292,16 @@ async function main() {
   const scanned = await uploadPdf(page, path.join(FIXTURES, 'layout-ws-scanned.pdf'));
   const multipage = await uploadPdf(page, path.join(FIXTURES, 'layout-ws-multipage.pdf'));
   const manyPages = await uploadPdf(page, path.join(FIXTURES, 'layout-ws-many-pages.pdf'));
+  const compareUnreliable = await uploadPdf(
+    page,
+    path.join(FIXTURES, 'layout-ws-compare-unreliable.pdf')
+  );
 
   const docIds = {
     brutto: brutto.id,
     landscape: landscape.id,
     scanned: scanned.id,
+    compareUnreliable: compareUnreliable.id,
     multipage: multipage.id,
     manyPages: manyPages.id,
   };
@@ -390,8 +395,8 @@ async function main() {
     }
   );
 
-  await warmupLayoutCompare(page, scanned.id);
-  await openDoc(page, scanned.href);
+  await warmupLayoutCompare(page, compareUnreliable.id);
+  await openDoc(page, compareUnreliable.href);
   await captureMatrix(
     page,
     'layout-compare-unreliable',
