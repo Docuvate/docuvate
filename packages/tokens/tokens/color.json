@@ -106,7 +106,7 @@
       "header-border": { "value": "#3d362c" },
       "header-muted": { "value": "#c9bfb0" },
       "header-surface": { "value": "#f5f1ea" },
-      "header-surface-fg": { "value": "#e96f49" },
+      "header-surface-fg": { "value": "#1e1a13" },
       "header-input-bg": { "value": "#1e293b" },
       "header-input-fg": { "value": "#f1f5f9" },
       "header-input-placeholder": { "value": "#94a3b8" },
