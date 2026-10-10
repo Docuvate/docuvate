@@ -26,12 +26,18 @@ import {
   requeueDocumentExtraction,
   updateDocument,
 } from '../lib/api';
-import { buildCustomFieldDefMap, buildGlobalFieldLabelMap } from '../lib/labelFieldDisplay';
+import {
+  buildCustomFieldDefMap,
+  buildGlobalFieldLabelMap,
+  parseGlobalFieldKey,
+} from '../lib/labelFieldDisplay';
+import { humanizeFieldKey } from '../lib/humanizeFieldKey';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
 import { isExtractionPending } from '../lib/documentExtractionState';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
 import { DocumentChatPanel } from '../components/documents/DocumentChatPanel';
 import { DocumentExtractionSection } from '../components/documents/DocumentExtractionSection';
+import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
 import { ExtractedFieldsPanel } from '../components/documents/ExtractedFieldsPanel';
 import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
 import {
@@ -121,6 +127,8 @@ export function DocumentDetailPage() {
     folderId: '',
   });
   const [metadataSaveError, setMetadataSaveError] = useState<string | null>(null);
+  const [layoutTextEditOpen, setLayoutTextEditOpen] = useState(false);
+  const [layoutEditMode, setLayoutEditMode] = useState(false);
   const docRef = useRef<DocumentDto | null>(null);
 
   useEffect(() => {
@@ -387,6 +395,37 @@ export function DocumentDetailPage() {
     [title, documentDate, notes, folderId, metadataBaseline]
   );
 
+  const knownFieldKeys = useMemo(() => {
+    const keys = new Set<string>();
+    for (const tag of tags) {
+      for (const def of tag.customFields ?? []) {
+        keys.add(def.key);
+      }
+    }
+    for (const key of globalFieldLabels.keys()) {
+      keys.add(key);
+    }
+    return keys;
+  }, [tags, globalFieldLabels]);
+
+  const fieldLabelForKey = useCallback(
+    (key: string) => {
+      const globalKey = parseGlobalFieldKey(key);
+      if (globalKey) {
+        return globalFieldLabels.get(globalKey) ?? humanizeFieldKey(globalKey, t);
+      }
+      return globalFieldLabels.get(key) ?? humanizeFieldKey(key, t);
+    },
+    [globalFieldLabels, t]
+  );
+
+  const onAcceptFieldSuggestion = useCallback((key: string, value: string) => {
+    setFields((prev) => {
+      if (prev.some((f) => f.key === key)) return prev;
+      return [...prev, { key, value, confidence: 0.9 }];
+    });
+  }, []);
+
   if (loading) return <DocumentDetailLoadingShell />;
   if (error && !doc)
     return (
@@ -398,6 +437,7 @@ export function DocumentDetailPage() {
 
   const previewLoading = previewFetchState === 'loading';
   const previewUnavailable = previewFetchState === 'missing' && !isExtractionPending(doc.status);
+  const layoutWorkspace = isPdf && doc.extraction?.layoutIrAvailable === true;
 
   return (
     <div className="page document-detail-page page--with-save-bar" data-ux="page">
@@ -480,40 +520,70 @@ export function DocumentDetailPage() {
         ) : null}
       </div>
 
-      <div className="detail-workspace">
-        <DocumentPreviewCard
+      {layoutWorkspace ? (
+        <DocumentLayoutWorkspace
           doc={doc}
           previewData={previewData}
           previewLoading={previewLoading}
           previewUnavailable={previewUnavailable}
-          isPdf={isPdf}
-          isImage={isImage}
-          isPlainText={isPlainText}
-          plainTextPreview={doc.extraction?.text ?? null}
+          blocks={blocks}
+          fields={fields}
           highlightBlocks={highlightBlocks}
           viewerPage={viewerPage}
-          onViewerPageChange={setViewerPage}
-          fitWidth={isPdf}
-          title={t('documents.previewTitle')}
-          onPageClick={isPdf && blocks.length > 0 ? onPdfPageClick : undefined}
-        />
-        <DocumentExtractionSection
-          doc={doc}
-          blocks={blocks}
-          saving={saving}
-          blocksDirty={blocksDirty}
-          viewerPage={viewerPage}
           activeBlockIndex={activeBlockIndex}
-          requeueBusy={requeueBusy}
-          onRequeueExtraction={() => void onRequeueExtraction()}
+          knownFieldKeys={knownFieldKeys}
+          fieldLabelForKey={fieldLabelForKey}
           onViewerPageChange={setViewerPage}
           onActiveBlockIndexChange={setActiveBlockIndex}
-          onBlocksChange={setBlocks}
           onHighlightBlocks={onHighlightBlocks}
+          onBlocksChange={setBlocks}
+          onAcceptFieldSuggestion={onAcceptFieldSuggestion}
+          requeueBusy={requeueBusy}
+          onRequeueExtraction={() => void onRequeueExtraction()}
+          textEditOpen={layoutTextEditOpen}
+          onTextEditOpenChange={setLayoutTextEditOpen}
+          editMode={layoutEditMode}
+          onEditModeChange={setLayoutEditMode}
+          blocksDirty={blocksDirty}
+          saving={saving}
           onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
-          onExtractionRefresh={load}
         />
-      </div>
+      ) : (
+        <div className="detail-workspace">
+          <DocumentPreviewCard
+            doc={doc}
+            previewData={previewData}
+            previewLoading={previewLoading}
+            previewUnavailable={previewUnavailable}
+            isPdf={isPdf}
+            isImage={isImage}
+            isPlainText={isPlainText}
+            plainTextPreview={doc.extraction?.text ?? null}
+            highlightBlocks={highlightBlocks}
+            viewerPage={viewerPage}
+            onViewerPageChange={setViewerPage}
+            fitWidth={isPdf}
+            title={t('documents.previewTitle')}
+            onPageClick={isPdf && blocks.length > 0 ? onPdfPageClick : undefined}
+          />
+          <DocumentExtractionSection
+            doc={doc}
+            blocks={blocks}
+            saving={saving}
+            blocksDirty={blocksDirty}
+            viewerPage={viewerPage}
+            activeBlockIndex={activeBlockIndex}
+            requeueBusy={requeueBusy}
+            onRequeueExtraction={() => void onRequeueExtraction()}
+            onViewerPageChange={setViewerPage}
+            onActiveBlockIndexChange={setActiveBlockIndex}
+            onBlocksChange={setBlocks}
+            onHighlightBlocks={onHighlightBlocks}
+            onSaveBlocks={() => void persist({ extractionBlocks: blocks })}
+            onExtractionRefresh={load}
+          />
+        </div>
+      )}
 
       <ConfirmDialog
         open={deleteDialogOpen}

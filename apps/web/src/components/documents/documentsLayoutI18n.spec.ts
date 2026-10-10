@@ -10,6 +10,8 @@ const LAYOUT_RENDERED_KEYS = [
   'documents.layoutExportTypstSemantisch',
   'documents.layoutExportTypstExakt',
   'documents.layoutIrHtmlFailedBody',
+  'documents.layoutTabFields',
+  'documents.layoutViewOriginal',
 ] as const;
 
 function getNested(obj: Record<string, unknown>, dotted: string): string | undefined {

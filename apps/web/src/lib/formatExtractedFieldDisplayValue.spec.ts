@@ -15,4 +15,8 @@ describe('formatExtractedFieldDisplayValue', () => {
   it('passes through non-amount fields', () => {
     expect(formatExtractedFieldDisplayValue('vendor', 'Acme GmbH', 'de')).toBe('Acme GmbH');
   });
+
+  it('formats brutto amounts in de-DE', () => {
+    expect(formatExtractedFieldDisplayValue('brutto', '12500.00', 'de')).toBe('12.500,00 EUR');
+  });
 });

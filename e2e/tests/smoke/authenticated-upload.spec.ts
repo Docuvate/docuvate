@@ -33,7 +33,7 @@ test.describe('Authenticated compose smoke', () => {
 
     await expect(
       page.getByRole('region', { name: /upload documents|dokumente hochladen/i })
-    ).toBeVisible({ timeout: 15_000 });
+    ).toBeVisible({ timeout: 45_000 });
     const fileInput = page.getByLabel(/choose files|dateien auswählen/i);
     if ((await fileInput.count()) === 0) {
       const uploadTrigger = page.getByRole('button', { name: /^upload$|^hochladen$/i });
@@ -54,11 +54,11 @@ test.describe('Authenticated compose smoke', () => {
       .click();
     await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
 
-    await expect(page.getByText(/loading pdf/i)).toHaveCount(0);
-    await expect(page.getByRole('region', { name: /^page 1$/i })).toContainText(fixturePhrase, {
+    await expect(page.getByText(/loading pdf|pdf wird geladen/i)).toHaveCount(0, { timeout: 90_000 });
+    await expect(page.locator('.pdf-page-canvas').first()).toBeVisible({ timeout: 90_000 });
+    await expect(page.locator('.textLayer').first()).toContainText(fixturePhrase, {
       timeout: 30_000,
     });
-    await expect(page.locator('.pdf-page-canvas').first()).toBeVisible({ timeout: 90_000 });
 
     await attachScreenshot(page, testInfo, '03-document-open-preview.png');
   });

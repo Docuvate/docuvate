@@ -48,6 +48,8 @@ interface ExtractedTextPanelProps {
   requeueBusy?: boolean;
   onRequeueExtraction?: () => void;
   documentTitle?: string;
+  /** Hide Text/Layout toggle (layout workspace uses overlay on PDF). */
+  textOnly?: boolean;
 }
 
 export function ExtractedTextPanel({
@@ -69,6 +71,7 @@ export function ExtractedTextPanel({
   requeueBusy = false,
   onRequeueExtraction,
   documentTitle,
+  textOnly = false,
 }: ExtractedTextPanelProps) {
   const { t } = useTranslation();
   const { pushError, pushSuccess } = useToastNotify();
@@ -85,7 +88,8 @@ export function ExtractedTextPanel({
   const markdownSource = markdown?.trim() ?? '';
   const hasLayoutIr = (layoutIrPages?.length ?? 0) > 0;
   const layoutIrPending = layoutIrAvailable && !hasLayoutIr;
-  const showModeToggle = !editMode && (blocks.length > 0 || (fullText?.trim().length ?? 0) > 0);
+  const showModeToggle =
+    !textOnly && !editMode && (blocks.length > 0 || (fullText?.trim().length ?? 0) > 0);
   const showLayoutPane = showModeToggle && contentMode === 'layout';
 
   const pageNumbers = [...new Set(blocks.map((b) => b.page))].sort((a, b) => a - b);
