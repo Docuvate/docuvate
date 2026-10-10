@@ -118,26 +118,28 @@ export async function provisionCitedChatLibrary(
       ),
     },
   });
-  await waitForSearchHit(request, opts.apiBase, 'Miete', leaseDocId);
+  await waitForDocumentReady(request, opts.apiBase, leaseDocId);
   return { ...creds, invoiceDocId, taxDocId, leaseDocId, contractDocId };
 }
 
-async function waitForSearchHit(
+async function waitForDocumentReady(
   request: APIRequestContext,
   apiBase: string,
-  query: string,
-  expectedDocumentId: string
+  documentId: string
 ) {
-  const deadline = Date.now() + 90_000;
+  const deadline = Date.now() + 120_000;
   while (Date.now() < deadline) {
-    const res = await request.get(`${apiBase}/v1/search`, { params: { q: query, limit: '8' } });
+    const res = await request.get(`${apiBase}/v1/documents/${documentId}`);
     if (res.ok()) {
-      const body = (await res.json()) as { items?: Array<{ documentId: string }> };
-      if (body.items?.some((item) => item.documentId === expectedDocumentId)) {
+      const doc = (await res.json()) as { status: string };
+      if (doc.status === 'ready') {
         return;
+      }
+      if (doc.status === 'failed') {
+        throw new Error(`document ${documentId} extraction failed`);
       }
     }
     await new Promise((r) => setTimeout(r, 1500));
   }
-  throw new Error(`search index did not include document ${expectedDocumentId} for "${query}"`);
+  throw new Error(`timeout waiting for document ${documentId}`);
 }

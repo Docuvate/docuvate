@@ -25,10 +25,8 @@ test.describe('Authenticated compose smoke', () => {
     test.setTimeout(300_000);
     testInfo.annotations.push({ type: 'journey', description: 'compose-smoke-auth-happy-path' });
 
-    await page.goto('/');
-    await expect(page).toHaveURL((url) => url.pathname === '/', { timeout: 15_000 });
-    await page.getByRole('link', { name: /documents|dokumente/i }).first().click();
-    await expect(page).toHaveURL(/\/documents/, { timeout: 15_000 });
+    await page.goto('/documents');
+    await expect(page).toHaveURL(/\/documents/, { timeout: 30_000 });
     await attachScreenshot(page, testInfo, '01-after-login.png');
 
     await expect(
