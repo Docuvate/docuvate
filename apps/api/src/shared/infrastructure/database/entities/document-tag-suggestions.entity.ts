@@ -24,6 +24,9 @@ export class DocumentTagSuggestionsEntity {
   @Column('real', { name: 'confidence', nullable: true, precision: 24 })
   confidence: number | null;
 
+  @Column('text', { name: 'decision_tier', nullable: true })
+  decisionTier: string | null;
+
   @ManyToOne(() => DocumentsEntity, (documents) => documents.documentTagSuggestions, {
     onDelete: 'CASCADE',
   })

@@ -12,8 +12,15 @@ from docuvate_worker.application.document_chat import (
     chat_provider_status,
 )
 from docuvate_worker.application.embedding import embed_texts
+from docuvate_worker.application.embedding_density import (
+    classify_embedding,
+    record_correction,
+    run_calibration,
+    train_from_labeled_examples,
+)
 from docuvate_worker.application.extract import compare_engines, extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
+from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.infrastructure.chat.context_qa import retrieve_document_rag_context
 from docuvate_worker.infrastructure.chat.rag_rerank import (
     RERANKER_MODEL,
@@ -37,6 +44,15 @@ from docuvate_worker.presentation.schemas import (
     DocumentChatRagContextResponse,
     DocumentChatRequest,
     DocumentChatResponse,
+    EmbeddingDensityCalibrateRequest,
+    EmbeddingDensityCalibrateResponse,
+    EmbeddingDensityClassifyRequest,
+    EmbeddingDensityClassifyResponse,
+    EmbeddingDensityCorrectionRequest,
+    EmbeddingDensityCorrectionResponse,
+    EmbeddingDensityStateModel,
+    EmbeddingDensityTrainRequest,
+    EmbeddingDensityTrainResponse,
     EmbedRequest,
     EmbedResponse,
     EngineInfo,
@@ -316,6 +332,93 @@ def document_chat(
         )
 
     return DocumentChatResponse(reply=reply, configured=configured, provider=provider)
+
+
+@router.post("/ml/embedding-density/classify", response_model=EmbeddingDensityClassifyResponse)
+def embedding_density_classify(
+    body: EmbeddingDensityClassifyRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> EmbeddingDensityClassifyResponse:
+    _require_worker_secret(x_worker_secret)
+    state = EmbeddingDensityStatePayload.model_validate(body.state.model_dump())
+    result = classify_embedding(state, body.vector)
+    return EmbeddingDensityClassifyResponse(**result.model_dump())
+
+
+@router.post("/ml/embedding-density/calibrate", response_model=EmbeddingDensityCalibrateResponse)
+def embedding_density_calibrate(
+    body: EmbeddingDensityCalibrateRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> EmbeddingDensityCalibrateResponse:
+    _require_worker_secret(x_worker_secret)
+    state = EmbeddingDensityStatePayload.model_validate(body.state.model_dump())
+    if len(body.document_ids) != len(body.label_ids):
+        raise HTTPException(
+            status_code=400,
+            detail="document_ids must match label_ids length for held-out calibration",
+        )
+    payload = run_calibration(
+        state,
+        body.vectors,
+        body.label_ids,
+        delta=body.delta,
+        document_ids=body.document_ids,
+    )
+    calibration_metrics = payload.metrics
+    metrics = {
+        "coarse_accepted_blocks": (
+            calibration_metrics.coarse_accepted_blocks if calibration_metrics else 0.0
+        ),
+        "fine_labels_calibrated": (
+            calibration_metrics.fine_labels_calibrated if calibration_metrics else 0.0
+        ),
+        "coarse_ready": (
+            calibration_metrics.coarse_ready if calibration_metrics else 0.0
+        ),
+        "fine_ready_labels": (
+            calibration_metrics.fine_ready_labels if calibration_metrics else 0.0
+        ),
+    }
+    state_out = EmbeddingDensityStatePayload.model_validate(
+        payload.model_dump(exclude={"metrics"})
+    )
+    return EmbeddingDensityCalibrateResponse(
+        state=EmbeddingDensityStateModel(**state_out.model_dump()),
+        metrics=metrics,
+    )
+
+
+@router.post("/ml/embedding-density/correct", response_model=EmbeddingDensityCorrectionResponse)
+def embedding_density_correct(
+    body: EmbeddingDensityCorrectionRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> EmbeddingDensityCorrectionResponse:
+    _require_worker_secret(x_worker_secret)
+    state = EmbeddingDensityStatePayload.model_validate(body.state.model_dump())
+    updated = record_correction(
+        state,
+        body.vector,
+        body.target_label_id,
+        strength=body.strength,
+    )
+    return EmbeddingDensityCorrectionResponse(
+        state=EmbeddingDensityStateModel(**updated.model_dump())
+    )
+
+
+@router.post("/ml/embedding-density/train", response_model=EmbeddingDensityTrainResponse)
+def embedding_density_train(
+    body: EmbeddingDensityTrainRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> EmbeddingDensityTrainResponse:
+    _require_worker_secret(x_worker_secret)
+    trained = train_from_labeled_examples(
+        body.label_ids,
+        body.vectors,
+        body.example_label_ids,
+        body.unlabeled_vectors,
+    )
+    return EmbeddingDensityTrainResponse(state=EmbeddingDensityStateModel(**trained.model_dump()))
 
 
 @router.post("/embed", response_model=EmbedResponse)

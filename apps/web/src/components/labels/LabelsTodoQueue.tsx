@@ -200,6 +200,7 @@ export function LabelsTodoQueue(props: Props) {
         <TodoHead />
         <p className="muted labels-todo-empty">{t('labels.todoEmpty')}</p>
         <p className="muted labels-todo-empty-hint">{t('labels.todoEmptyHint')}</p>
+        <p className="muted labels-todo-empty-hint">{t('labels.embeddingDensityReadinessHint')}</p>
       </Card>
     );
   }

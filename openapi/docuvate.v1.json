@@ -12788,8 +12788,8 @@
             "type": "string",
             "enum": [
               "manual",
-              "cron",
-              "threshold"
+              "threshold",
+              "cron"
             ]
           },
           "status": {

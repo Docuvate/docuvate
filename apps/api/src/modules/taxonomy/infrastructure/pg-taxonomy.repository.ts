@@ -8,6 +8,11 @@ import type {
   TagEntity,
   TagSuggestionEntity,
 } from '../domain/taxonomy.entity.js';
+import {
+  parseTagSuggestionDecisionTier,
+  parseTagSuggestionSource,
+} from '../../labels/domain/tag-suggestion-parsing.js';
+import { tagSuggestionJoinRowSchema } from '../../labels/domain/tag-suggestion-row.schema.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import type pg from 'pg';
@@ -252,48 +257,58 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
 
   async listSuggestions(documentId: string, userId: string): Promise<TagSuggestionEntity[]> {
     const result = await this.pool.query(
-      `SELECT s.reason, s.confidence, s.source, t.* FROM document_tag_suggestions s
+      `SELECT s.reason, s.confidence, s.source, s.decision_tier, t.* FROM document_tag_suggestions s
        INNER JOIN tags t ON t.id = s.tag_id
        WHERE s.document_id = $1 AND t.user_id = $2 AND s.dismissed = false
        ORDER BY t.name ASC`,
       [documentId, userId]
     );
-    return result.rows.map((row) => ({
-      tag: this.mapTag(row),
-      reason: String(row['reason'] ?? ''),
-      confidence:
-        row['confidence'] === null || row['confidence'] === undefined
-          ? undefined
-          : Number(row['confidence']),
-      source: (row['source'] as 'rule' | 'embedding' | undefined) ?? 'rule',
-    }));
+    return result.rows.map((row) => {
+      const parsed = tagSuggestionJoinRowSchema.parse(row);
+      return {
+        tag: this.mapTagFromJoinRow(parsed),
+        reason: typeof parsed.reason === 'string' ? parsed.reason : String(parsed.reason ?? ''),
+        confidence:
+          parsed.confidence === null || parsed.confidence === undefined
+            ? undefined
+            : Number(parsed.confidence),
+        source: parseTagSuggestionSource(parsed.source),
+        decisionTier: parseTagSuggestionDecisionTier(parsed.decision_tier),
+      };
+    });
   }
 
   async upsertSuggestion(
     documentId: string,
     tagId: string,
     reason: string,
-    options?: { source?: 'rule' | 'embedding'; confidence?: number }
+    options?: {
+      source?: 'rule' | 'embedding' | 'embedding_density';
+      confidence?: number;
+      decisionTier?: 'auto_apply' | 'confirm' | 'none';
+    }
   ): Promise<void> {
     const source = options?.source ?? 'rule';
     const confidence = options?.confidence ?? null;
+    const decisionTier = options?.decisionTier ?? null;
     await this.pool.query(
-      `INSERT INTO document_tag_suggestions (document_id, tag_id, reason, dismissed, source, confidence)
-       VALUES ($1, $2, $3, false, $4, $5)
+      `INSERT INTO document_tag_suggestions (document_id, tag_id, reason, dismissed, source, confidence, decision_tier)
+       VALUES ($1, $2, $3, false, $4, $5, $6)
        ON CONFLICT (document_id, tag_id) DO UPDATE SET
          reason = CASE
-           WHEN document_tag_suggestions.source = 'rule' AND EXCLUDED.source = 'embedding'
+           WHEN document_tag_suggestions.source = 'rule' AND EXCLUDED.source IN ('embedding', 'embedding_density')
            THEN document_tag_suggestions.reason
            ELSE EXCLUDED.reason
          END,
          source = CASE
-           WHEN document_tag_suggestions.source = 'rule' AND EXCLUDED.source = 'embedding'
+           WHEN document_tag_suggestions.source = 'rule' AND EXCLUDED.source IN ('embedding', 'embedding_density')
            THEN document_tag_suggestions.source
            ELSE EXCLUDED.source
          END,
          confidence = COALESCE(EXCLUDED.confidence, document_tag_suggestions.confidence),
+         decision_tier = COALESCE(EXCLUDED.decision_tier, document_tag_suggestions.decision_tier),
          dismissed = false`,
-      [documentId, tagId, reason, source, confidence]
+      [documentId, tagId, reason, source, confidence, decisionTier]
     );
   }
 
@@ -319,6 +334,36 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       `UPDATE documents SET correspondent_id = $2, updated_at = now() WHERE id = $1`,
       [documentId, correspondentId]
     );
+  }
+
+  private mapTagFromJoinRow(row: {
+    id: string;
+    user_id: string;
+    name: string;
+    color: string | null;
+    is_inbox: boolean;
+    matching_algorithm: string;
+    match_text: string;
+  }): TagEntity {
+    return {
+      id: row.id,
+      userId: row.user_id,
+      name: row.name,
+      color: row.color,
+      isInbox: row.is_inbox,
+      matchingAlgorithm: this.parseMatchingAlgorithm(row.matching_algorithm),
+      match: row.match_text,
+    };
+  }
+
+  private parseMatchingAlgorithm(value: string): MatchingAlgorithm {
+    const allowed: MatchingAlgorithm[] = ['none', 'any', 'all', 'exact', 'regex'];
+    for (const item of allowed) {
+      if (item === value) {
+        return item;
+      }
+    }
+    return 'none';
   }
 
   private mapTag(row: Record<string, unknown>): TagEntity {

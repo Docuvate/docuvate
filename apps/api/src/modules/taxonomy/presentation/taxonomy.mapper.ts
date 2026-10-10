@@ -41,5 +41,6 @@ export function toTagSuggestionDto(entity: TagSuggestionEntity): TagSuggestionDt
     reason: entity.reason,
     confidence: entity.confidence,
     source: entity.source,
+    decisionTier: entity.decisionTier,
   };
 }

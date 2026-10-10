@@ -8,21 +8,21 @@ part of 'ml_retrain_job_dto.dart';
 
 const MlRetrainJobDtoTriggerKindEnum _$mlRetrainJobDtoTriggerKindEnum_manual =
     const MlRetrainJobDtoTriggerKindEnum._('manual');
-const MlRetrainJobDtoTriggerKindEnum _$mlRetrainJobDtoTriggerKindEnum_cron =
-    const MlRetrainJobDtoTriggerKindEnum._('cron');
 const MlRetrainJobDtoTriggerKindEnum
     _$mlRetrainJobDtoTriggerKindEnum_threshold =
     const MlRetrainJobDtoTriggerKindEnum._('threshold');
+const MlRetrainJobDtoTriggerKindEnum _$mlRetrainJobDtoTriggerKindEnum_cron =
+    const MlRetrainJobDtoTriggerKindEnum._('cron');
 
 MlRetrainJobDtoTriggerKindEnum _$mlRetrainJobDtoTriggerKindEnumValueOf(
     String name) {
   switch (name) {
     case 'manual':
       return _$mlRetrainJobDtoTriggerKindEnum_manual;
-    case 'cron':
-      return _$mlRetrainJobDtoTriggerKindEnum_cron;
     case 'threshold':
       return _$mlRetrainJobDtoTriggerKindEnum_threshold;
+    case 'cron':
+      return _$mlRetrainJobDtoTriggerKindEnum_cron;
     default:
       throw new ArgumentError(name);
   }
@@ -32,8 +32,8 @@ final BuiltSet<MlRetrainJobDtoTriggerKindEnum>
     _$mlRetrainJobDtoTriggerKindEnumValues = new BuiltSet<
         MlRetrainJobDtoTriggerKindEnum>(const <MlRetrainJobDtoTriggerKindEnum>[
   _$mlRetrainJobDtoTriggerKindEnum_manual,
-  _$mlRetrainJobDtoTriggerKindEnum_cron,
   _$mlRetrainJobDtoTriggerKindEnum_threshold,
+  _$mlRetrainJobDtoTriggerKindEnum_cron,
 ]);
 
 const MlRetrainJobDtoStatusEnum _$mlRetrainJobDtoStatusEnum_queued =
@@ -83,13 +83,13 @@ class _$MlRetrainJobDtoTriggerKindEnumSerializer
     implements PrimitiveSerializer<MlRetrainJobDtoTriggerKindEnum> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'manual': 'manual',
-    'cron': 'cron',
     'threshold': 'threshold',
+    'cron': 'cron',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'manual': 'manual',
-    'cron': 'cron',
     'threshold': 'threshold',
+    'cron': 'cron',
   };
 
   @override

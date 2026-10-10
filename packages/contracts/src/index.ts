@@ -318,13 +318,16 @@ export interface CorrespondentDto {
   match?: string;
 }
 
-export type TagSuggestionSource = 'rule' | 'embedding';
+export type TagSuggestionSource = 'rule' | 'embedding' | 'embedding_density';
+
+export type TagSuggestionDecisionTier = 'auto_apply' | 'confirm' | 'none';
 
 export interface TagSuggestionDto {
   tag: TagDto;
   reason: string;
   confidence?: number;
   source?: TagSuggestionSource;
+  decisionTier?: TagSuggestionDecisionTier;
 }
 
 export type PaperlessImportRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';

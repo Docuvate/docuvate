@@ -35,6 +35,13 @@ def resolve_active_model(family_id: str) -> ResolvedModel:
             artifact_uri=os.environ.get("PADDLE_OCR_LANG", "german"),
             source="env",
         )
+    if family_id == "layout-niw":
+        return ResolvedModel(
+            family_id=family_id,
+            version_tag=os.environ.get("EMBEDDING_DENSITY_MODEL_VERSION", "bootstrap-1"),
+            artifact_uri=None,
+            source="env",
+        )
     return ResolvedModel(
         family_id=family_id,
         version_tag="bootstrap-1",
