@@ -210,44 +210,48 @@ async function stubCompareBaseline(
   documentId,
   { pageCount = 1, ssim = 0.99, pageReliable = true, includeHeatmap = false } = {}
 ) {
-  await page.route(`**/documents/${documentId}/layout-compare/summary**`, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        category: 'born_digital_standard',
-        ssimFloor: 0.97,
-        pageCount,
-      }),
-    });
-  });
-  await page.route(`**/documents/${documentId}/layout-compare/metrics**`, async (route) => {
-    const url = new URL(route.request().url());
-    const from = Number.parseInt(url.searchParams.get('from') ?? '1', 10);
-    const to = Number.parseInt(url.searchParams.get('to') ?? String(pageCount), 10);
-    const pages = [];
-    for (let pageNumber = from; pageNumber <= to && pageNumber <= pageCount; pageNumber += 1) {
-      pages.push({
-        pageNumber,
-        ssim,
-        inkDeviation: 0.01,
-        pageReliable,
-        errorCode: null,
+  const docSegment = `/documents/${documentId}/layout-compare/`;
+  await page.route((url) => url.href.includes(docSegment), async (route) => {
+    const href = route.request().url();
+    if (href.includes('/summary')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          category: 'born_digital_standard',
+          ssimFloor: 0.97,
+          pageCount,
+        }),
       });
+      return;
     }
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        category: 'born_digital_standard',
-        ssimFloor: 0.97,
-        pageCount,
-        pages,
-      }),
-    });
-  });
-  await page.route(`**/documents/${documentId}/layout-compare/pages/**`, async (route) => {
-    const match = route.request().url().match(/\/pages\/(\d+)/);
+    if (href.includes('/metrics')) {
+      const url = new URL(href);
+      const from = Number.parseInt(url.searchParams.get('from') ?? '1', 10);
+      const to = Number.parseInt(url.searchParams.get('to') ?? String(pageCount), 10);
+      const pages = [];
+      for (let pageNumber = from; pageNumber <= to && pageNumber <= pageCount; pageNumber += 1) {
+        pages.push({
+          pageNumber,
+          ssim,
+          inkDeviation: 0.01,
+          pageReliable,
+          errorCode: null,
+        });
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          category: 'born_digital_standard',
+          ssimFloor: 0.97,
+          pageCount,
+          pages,
+        }),
+      });
+      return;
+    }
+    const match = href.match(/\/pages\/(\d+)/);
     const pageNumber = match ? Number.parseInt(match[1], 10) : 1;
     await route.fulfill({
       status: 200,
