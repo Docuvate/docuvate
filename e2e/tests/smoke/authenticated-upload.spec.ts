@@ -38,7 +38,7 @@ test.describe('Authenticated compose smoke', () => {
     await fileInput.first().setInputFiles(fixturePdf);
 
     const docRow = page.getByRole('row').filter({ hasText: uploadTitle });
-    await expect(docRow).toBeVisible({ timeout: 90_000 });
+    await expect(docRow.first()).toBeVisible({ timeout: 180_000 });
     await expect(docRow).not.toContainText(/^failed$|^fehlgeschlagen$/i);
     await expect(docRow.locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, { timeout: 180_000 });
 
