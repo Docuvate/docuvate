@@ -14,6 +14,7 @@ import {
   type LayoutOverlayRegion,
 } from '../../lib/layoutOverlayModel';
 import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
+import { fieldSuggestionOutsideUserSchema } from '../../lib/fieldSuggestionSchema';
 import { Button } from '../ui/Button';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 
@@ -253,9 +254,16 @@ export function DocumentLayoutSidePanel({
                         <span className="layout-field-label">{fieldLabelForKey(s.key)}</span>
                       </div>
                       <p className="layout-field-value">{formatFieldValue(s.key, s.value)}</p>
-                      <p className="muted layout-field-suggestion-note">
-                        {t('documents.layoutSuggestionNotInSchema')}
-                      </p>
+                      {fieldSuggestionOutsideUserSchema(s.key, knownFieldKeys) ? (
+                        <p className="muted layout-field-suggestion-note">
+                          <span className="layout-field-suggestion-badge">
+                            {t('documents.layoutSuggestionNotInSchema')}
+                          </span>
+                          <span className="layout-field-suggestion-badge-hint">
+                            {t('documents.layoutSuggestionNotInSchemaHint')}
+                          </span>
+                        </p>
+                      ) : null}
                       <div className="layout-field-suggestion-actions">
                         <Button type="button" variant="secondary" onClick={() => { onAcceptSuggestion(s.key, s.value); }}>
                           {t('documents.layoutSuggestionAccept')}

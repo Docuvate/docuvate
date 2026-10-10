@@ -1622,6 +1622,8 @@ mark.global-search-mark {
 }
 
 .document-detail-page {
+  width: 100%;
+  align-self: stretch;
   --detail-title-size: 1rem;
   --detail-section-title-size: 0.875rem;
   --detail-meta-size: 0.8125rem;
@@ -2265,6 +2267,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   align-items: stretch;
   min-height: min(74vh, 900px);
   min-width: 0;
+  width: 100%;
 }
 
 .document-detail-page .layout-workspace {
@@ -2471,6 +2474,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 
 .layout-compare-page-chip-warn {
   border-color: var(--dv-color-warn);
+  box-shadow: inset 0 0 0 2px var(--dv-color-warn);
 }
 
 .layout-compare-page-chip-ssim {
@@ -2494,6 +2498,11 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   position: relative;
   margin: 0;
   min-width: 0;
+}
+
+.layout-compare-pane-media {
+  position: relative;
+  width: 100%;
 }
 
 .layout-compare-pane img {
@@ -2523,9 +2532,55 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 
 .layout-compare-slider-reveal {
   position: absolute;
-  inset: 0 auto 0 0;
+  inset: 0;
   overflow: hidden;
   border-right: 2px solid var(--dv-color-accent);
+  pointer-events: none;
+}
+
+.layout-compare-slider-reveal-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+
+.layout-compare-slider-heatmap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.layout-compare-page-legend {
+  margin: 0 0 var(--dv-space-2xs);
+  font-size: 0.8rem;
+}
+
+.layout-side-panel-chat {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.layout-side-panel-chat .doc-chat {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.layout-field-suggestion-badge {
+  display: inline-block;
+  margin-right: var(--dv-space-xs);
+  padding: 0 var(--dv-space-2xs);
+  border-radius: var(--dv-radius-sm);
+  border: 1px solid var(--dv-color-border);
+  font-size: 0.75rem;
+}
+
+.layout-field-suggestion-badge-hint {
+  display: block;
+  margin-top: var(--dv-space-2xs);
+  font-size: 0.8rem;
 }
 
 .layout-compare-slider-input {
@@ -2541,8 +2596,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   position: absolute;
   inset: 0;
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
   opacity: 0.55;
   pointer-events: none;
   mix-blend-mode: multiply;

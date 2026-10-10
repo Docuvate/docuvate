@@ -23,6 +23,7 @@ import {
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
+import { PLACEHOLDER_CHAT_THREAD_TITLES } from '../application/chat-thread-title.js';
 
 const DEFAULT_THREAD_TITLE = 'Neuer Chat';
 
@@ -365,11 +366,12 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
     if (!trimmed) {
       return;
     }
+    const placeholders = [...PLACEHOLDER_CHAT_THREAD_TITLES, DEFAULT_THREAD_TITLE];
     await this.pool.query(
       `UPDATE chat_threads
        SET title = $2, updated_at = now()
-       WHERE id = $1 AND title = $3`,
-      [threadId, trimmed, DEFAULT_THREAD_TITLE]
+       WHERE id = $1 AND title = ANY($3::text[])`,
+      [threadId, trimmed, placeholders]
     );
   }
 

@@ -32,16 +32,21 @@ export function DuplicateCandidatesPanel({ documentId }: DuplicateCandidatesPane
     void load();
   }, [load]);
 
+  const uniqueItems = items.filter((item, index, list) => {
+    const first = list.findIndex((row) => row.candidateDocumentId === item.candidateDocumentId);
+    return first === index;
+  });
+
   if (loading) return null;
-  if (items.length === 0) return null;
+  if (uniqueItems.length === 0) return null;
 
   return (
     <section className="duplicate-panel" aria-label={t('documents.duplicatesAria')}>
       <h2>{t('library.possibleDuplicates')}</h2>
       <p className="muted">{t('documents.duplicatesLead')}</p>
       <ul className="duplicate-list">
-        {items.map((item) => (
-          <li key={item.id} className="duplicate-row">
+        {uniqueItems.map((item) => (
+          <li key={item.candidateDocumentId} className="duplicate-row">
             <div>
               <Link to={`/documents/${item.candidateDocumentId}`}>{item.candidateTitle}</Link>
               <span className="muted cell-sub">

@@ -12,11 +12,13 @@ import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-threa
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
   CITED_CHAT_ABSTENTION_DE,
+  CITED_CHAT_ABSTENTION_EN,
   citedChatBenchStatsEnabled,
   RAG_RERANK_TOP_K,
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
+import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
@@ -45,6 +47,7 @@ export interface CitedChatGenerationInput {
   userMessage: string;
   documentIds: string[];
   scope: 'document' | 'library';
+  locale?: 'de' | 'en' | null;
   shouldAbort?: () => boolean | Promise<boolean>;
   onHeartbeat?: () => void | Promise<void>;
 }
@@ -78,6 +81,7 @@ export class CitedChatGenerationService {
         userMessage,
         documentIds,
         scope,
+        locale: input.locale ?? 'de',
         shouldAbort: input.shouldAbort,
         onHeartbeat: input.onHeartbeat,
       });
@@ -101,11 +105,13 @@ export class CitedChatGenerationService {
     userMessage: string;
     documentIds: string[];
     scope: 'document' | 'library';
+    locale: 'de' | 'en';
     shouldAbort?: () => boolean | Promise<boolean>;
     onHeartbeat?: () => void | Promise<void>;
   }): Promise<CitedChatGenerationResult> {
-    const { messageId, threadId, userId, userMessage, documentIds, scope, shouldAbort, onHeartbeat } =
+    const { messageId, threadId, userId, userMessage, documentIds, scope, locale, shouldAbort, onHeartbeat } =
       input;
+    const abstentionText = locale === 'en' ? CITED_CHAT_ABSTENTION_EN : CITED_CHAT_ABSTENTION_DE;
 
     let lastHeartbeat = Date.now();
     const heartbeat = async (): Promise<void> => {
@@ -165,13 +171,13 @@ export class CitedChatGenerationService {
     if (candidates.length === 0) {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
-        content: CITED_CHAT_ABSTENTION_DE,
+        content: abstentionText,
         generationStatus: 'done',
         generationPhase: null,
         finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
-      return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
+      return { content: abstentionText, abstained: true };
     }
 
     const rerankStarted = Date.now();
@@ -212,13 +218,37 @@ export class CitedChatGenerationService {
     if (!gateOk) {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
-        content: CITED_CHAT_ABSTENTION_DE,
+        content: abstentionText,
         generationStatus: 'done',
         generationPhase: null,
         finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
-      return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
+      return { content: abstentionText, abstained: true };
+    }
+
+    const extractiveMinScore =
+      scope === 'document' ? 0.12 : rerank.reachable && rerank.rerankerUsed ? 0.32 : 0.04;
+    const extractive = tryExtractiveCitedAnswer(userMessage, top, extractiveMinScore);
+    if (extractive && /^[0-9a-f-]{36}$/i.test(extractive.chunk.chunkId)) {
+      await this.citationsRepo.replaceCitations(messageId, [
+        {
+          ordinal: 1,
+          chunkId: extractive.chunk.chunkId,
+          quote: extractive.quote,
+          charStart: extractive.chunk.charStart,
+          charEnd: extractive.chunk.charEnd,
+        },
+      ]);
+      const content = formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }]);
+      await this.threads.updateMessageGeneration(messageId, {
+        content,
+        generationStatus: 'done',
+        generationPhase: null,
+        finalizeOnlyIfInFlight: true,
+      });
+      await this.threads.touchThread(threadId);
+      return { content, abstained: false };
     }
 
     if (await aborted()) {
@@ -377,14 +407,14 @@ export class CitedChatGenerationService {
     if (verified.length === 0) {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
-        content: CITED_CHAT_ABSTENTION_DE,
+        content: abstentionText,
         generationStatus: 'done',
         generationPhase: null,
         errorDetail: benchStats,
         finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
-      return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
+      return { content: abstentionText, abstained: true };
     }
 
     await this.citationsRepo.replaceCitations(

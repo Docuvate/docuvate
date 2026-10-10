@@ -111,9 +111,6 @@ export function GlobalChatPage() {
       .then((list) => {
         if (cancelled) return;
         setThreads(list);
-        if (list.length > 0) {
-          setActiveThreadId(list[0].id);
-        }
       })
       .catch((err: unknown) => {
         if (!cancelled) {
