@@ -40,7 +40,6 @@ export function DocumentLayoutCompareView({
     pagePayload,
     pageState,
     pageError,
-    loadPage,
     retryMetrics,
     retryPage,
   } = useLayoutCompare(documentId, true, pageCount, activePage, heatmapEnabled);
