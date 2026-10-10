@@ -15,6 +15,7 @@ import { createPortal } from 'react-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
+import { addWindowKeydownListener } from '../../lib/addWindowKeydownListener';
 import { getConnectorCatalog, globalSearch, listRecognizedFields } from '../../lib/api';
 import { authClient, authSessionUserId } from '../../lib/auth-client';
 import { routes } from '../../lib/routes';
@@ -185,32 +186,25 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   }, []);
 
   useEffect(() => {
-    function onWindowKeyDown(event: Event) {
-      if (!(event instanceof KeyboardEvent)) {
-        return;
-      }
-      const target = event.target;
+    return addWindowKeydownListener((e) => {
+      const target = e.target;
       const typing =
         target instanceof HTMLElement &&
-        (target.tagName === 'INPUT' ||
-          target.tagName === 'TEXTAREA' ||
-          target.isContentEditable);
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-        event.preventDefault();
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
         openPalette();
         return;
       }
-      if (event.key === '/' && !typing && !paletteOpen) {
-        event.preventDefault();
+      if (e.key === '/' && !typing && !paletteOpen) {
+        e.preventDefault();
         openPalette();
       }
-      if (event.key === 'Escape' && paletteOpen) {
-        event.preventDefault();
+      if (e.key === 'Escape' && paletteOpen) {
+        e.preventDefault();
         closePalette();
       }
-    }
-    window.addEventListener('keydown', onWindowKeyDown);
-    return () => { window.removeEventListener('keydown', onWindowKeyDown); };
+    });
   }, [closePalette, openPalette, paletteOpen]);
 
   useEffect(() => {

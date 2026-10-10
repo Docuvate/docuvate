@@ -35,7 +35,9 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
       e.preventDefault();
       e.stopPropagation();
       setDragOver(false);
-      if (e.dataTransfer.files.length) processFiles(e.dataTransfer.files);
+      if (e.dataTransfer.files.length) {
+        processFiles(e.dataTransfer.files);
+      }
     },
     [processFiles]
   );
@@ -81,7 +83,9 @@ export function UploadDropzone({ compact = false }: UploadDropzoneProps) {
             className="sr-only"
             aria-label={t('upload.chooseFilesAria')}
             onChange={(e) => {
-              if (e.target.files?.length) processFiles(e.target.files);
+              if (e.target.files?.length) {
+                processFiles(e.target.files);
+              }
               e.target.value = '';
             }}
           />
