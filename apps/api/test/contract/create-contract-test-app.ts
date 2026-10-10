@@ -2,9 +2,8 @@ import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify
 import type { OpenAPIObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface.js';
 import { Test } from '@nestjs/testing';
 
-import { AppModule } from '../../src/app.module.js';
-import { buildOpenApiDocument } from '../../src/openapi/build-openapi-document.js';
-import { applyOpenApiGenerationOverrides } from '../../src/openapi/openapi-generation-overrides.js';
+import { loadCompiledAppModule } from './load-compiled-app-module.js';
+import { loadCompiledOpenApiHelpers } from './load-compiled-openapi.js';
 
 process.env.BETTER_AUTH_SECRET ??= 'openapi-generate-dev-secret-32chars!!';
 process.env.BETTER_AUTH_URL ??= 'http://localhost:3001';
@@ -21,6 +20,10 @@ export async function createContractTestApp(): Promise<{
   app: NestFastifyApplication;
   openApi: OpenAPIObject;
 }> {
+  const AppModule = await loadCompiledAppModule();
+  const { applyOpenApiGenerationOverrides, buildOpenApiDocument } =
+    await loadCompiledOpenApiHelpers();
+
   let builder = Test.createTestingModule({ imports: [AppModule] });
   builder = applyOpenApiGenerationOverrides(builder);
   const moduleFixture = await builder.compile();

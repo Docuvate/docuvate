@@ -20,9 +20,9 @@ import {
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { EffectiveDocumentChatProviderUseCase } from '../application/effective-document-chat-provider.use-case.js';
 import { GetHardwareCapabilitiesUseCase } from '../application/hardware-capabilities.use-case.js';
+import { ListDocumentChatProvidersUseCase } from '../application/list-document-chat-providers.use-case.js';
 import {
   GetUserSettingsUseCase,
-  ListDocumentChatProvidersUseCase,
   ListExtractionEnginesUseCase,
   UpdateUserSettingsUseCase,
 } from '../application/settings.use-cases.js';

@@ -6,9 +6,9 @@ import { USER_PREFERENCES_REPOSITORY } from '../../shared/domain/ports.js';
 import { WorkspaceModule } from '../workspace/workspace.module.js';
 import { EffectiveDocumentChatProviderUseCase } from './application/effective-document-chat-provider.use-case.js';
 import { GetHardwareCapabilitiesUseCase } from './application/hardware-capabilities.use-case.js';
+import { ListDocumentChatProvidersUseCase } from './application/list-document-chat-providers.use-case.js';
 import {
   GetUserSettingsUseCase,
-  ListDocumentChatProvidersUseCase,
   ListExtractionEnginesUseCase,
   RecordExtractionArenaRatingUseCase,
   ResolveUserExtractorEngineUseCase,

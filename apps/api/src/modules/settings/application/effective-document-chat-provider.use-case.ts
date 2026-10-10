@@ -17,7 +17,7 @@ import {
   type DocumentChatProvidersCatalog,
   runtimeChatProviderAvailability,
 } from './document-chat-provider-catalog.js';
-import { ListDocumentChatProvidersUseCase } from './settings.use-cases.js';
+import { ListDocumentChatProvidersUseCase } from './list-document-chat-providers.use-case.js';
 
 export interface EffectiveChatProviderResult {
   preferred: DocumentChatProviderId;

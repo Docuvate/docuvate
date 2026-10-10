@@ -5,7 +5,7 @@ import { DomainError, GatewayTimeoutError, ServiceUnavailableError } from '../..
 const DEFAULT_COMPARE_TIMEOUT_MS = 600_000;
 
 export function workerCompareTimeoutMs(): number {
-  const raw = process.env.WORKER_COMPARE_TIMEOUT_MS;
+  const raw = process.env['WORKER_COMPARE_TIMEOUT_MS'];
   if (!raw) {
     return DEFAULT_COMPARE_TIMEOUT_MS;
   }
@@ -36,13 +36,8 @@ export function mapWorkerCompareHttpStatus(status: number): DomainError {
 
 export interface WorkerFetchErrorMapping {
   onTimeout?: () => GatewayTimeoutError;
-<<<<<<< HEAD
   onHttpError?: (status: number, responseBody?: unknown) => DomainError;
-};
-=======
-  onHttpError?: (status: number) => DomainError;
 }
->>>>>>> 61e4967 (fix(api): satisfy strict ESLint and enable lint in CI)
 
 export function workerLayoutTimeoutError(): GatewayTimeoutError {
   return new GatewayTimeoutError(
@@ -59,11 +54,7 @@ export function mapWorkerLayoutHttpStatus(status: number): DomainError {
       'Layout-Worker vorübergehend nicht erreichbar. Bitte später erneut versuchen.'
     );
   }
-<<<<<<< HEAD
   return new ServiceUnavailableError('documents.layoutCompareErrors.compareFailed');
-=======
-  return new ServiceUnavailableError(`Layout-Rendering fehlgeschlagen (${String(status)}).`);
->>>>>>> 61e4967 (fix(api): satisfy strict ESLint and enable lint in CI)
 }
 
 export async function fetchWorkerJson(
