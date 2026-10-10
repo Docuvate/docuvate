@@ -15,6 +15,7 @@ import {
   loadExtractionForDocument,
   loadExtractionForDocuments,
   replaceDocumentExtractionBlocks,
+  mergeExtractionFieldRows,
   replaceDocumentExtractionFields,
 } from './document-extraction.persistence.js';
 import { mapDocumentRow, parseTagsJson } from './document-row.mapper.js';
@@ -294,7 +295,12 @@ export class PgDocumentRepository implements DocumentRepository {
         }
       }
       if (userId) {
-        await replaceDocumentExtractionFields(client, id, userId, result.fields);
+        await replaceDocumentExtractionFields(
+          client,
+          id,
+          userId,
+          mergeExtractionFieldRows(result.fields, result.fieldSuggestions ?? [])
+        );
         await replaceDocumentExtractionBlocks(client, id, result.blocks ?? []);
       }
       await client.query('COMMIT');

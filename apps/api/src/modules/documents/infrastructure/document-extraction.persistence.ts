@@ -1,13 +1,31 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
-import type { ExtractionBlock, ExtractedField } from '@docuvate/contracts';
+import { suggestionStorageKey, type ExtractionBlock, type ExtractedField } from '@docuvate/contracts';
 import {
   loadDocumentFieldValues,
   replaceDocumentFieldValues,
 } from '../../search/infrastructure/document-field-value-index.js';
 
 type Db = pg.Pool | pg.PoolClient;
+
+export function mergeExtractionFieldRows(
+  fields: ExtractedField[],
+  fieldSuggestions: Array<{ key: string; value: string; confidence?: number }> = []
+): ExtractedField[] {
+  const rows = [...fields];
+  for (const suggestion of fieldSuggestions) {
+    const semantic = suggestion.key.trim().toLowerCase();
+    const value = suggestion.value.trim();
+    if (!semantic || !value) continue;
+    rows.push({
+      key: suggestionStorageKey(semantic),
+      value,
+      confidence: suggestion.confidence ?? 0.45,
+    });
+  }
+  return rows;
+}
 
 /** Replaces all field values of a document (extraction result or user edit). */
 export async function replaceDocumentExtractionFields(

@@ -23,6 +23,7 @@ def _with_markdown(result: ExtractionResult) -> ExtractionResult:
     return ExtractionResult(
         text=result.text,
         fields=result.fields,
+        field_suggestions=result.field_suggestions,
         blocks=result.blocks,
         markdown=markdown,
     )
@@ -54,6 +55,7 @@ def _with_layout_ir(
     return ExtractionResult(
         text=result.text,
         fields=result.fields,
+        field_suggestions=result.field_suggestions,
         blocks=result.blocks,
         markdown=result.markdown,
         layout_ir=layout.to_json(),

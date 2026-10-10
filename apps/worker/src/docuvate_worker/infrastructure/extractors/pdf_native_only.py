@@ -3,7 +3,7 @@
 
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
-from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_fields
+from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
 from docuvate_worker.infrastructure.extractors.pdf_native import try_extract_pdf_native
 
 
@@ -24,6 +24,7 @@ class PdfNativeOnlyExtractor(ExtractorEngine):
         text, blocks = native
         return ExtractionResult(
             text=text,
-            fields=heuristic_fields(text),
+            fields=[],
+            field_suggestions=heuristic_field_suggestions(text),
             blocks=blocks or None,
         )

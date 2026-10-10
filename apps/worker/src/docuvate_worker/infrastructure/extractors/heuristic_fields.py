@@ -17,13 +17,22 @@ _EUR_PREFIX_AMOUNT = re.compile(
     re.IGNORECASE,
 )
 _COMPANY_LINE = re.compile(
-    r"\b(GmbH|AG|UG|e\.?\s?K\.?|KG|OHG|SE|Inc\.|Ltd\.?)\b",
+    r"\b(GmbH|AG|UG|e\.?\s?K\.?|KG|OHG|SE|Inc\.|Ltd\.?|GmbH\s*&\s*Co\.?)\b",
     re.IGNORECASE,
 )
 _INVOICE_HEADER = re.compile(r"^(Rechnung|Invoice)\b", re.IGNORECASE)
 _BANNER_LINE = re.compile(r"synthetic layout regression document", re.IGNORECASE)
 _HEADING_VENDOR_LINE = re.compile(
     r"^(?:QUERFORMAT[\s\-A-Z0-9]*FIXTURE|VERTRAGSUEBERSICHT|ANHANG\s+PREISLISTE)",
+    re.IGNORECASE,
+)
+_GERMAN_POSTAL = re.compile(r"\b\d{5}\s+[A-Za-zÄÖÜäöüß]")
+_STREET_HINT = re.compile(
+    r"\b(?:straße|str\.|strasse|weg|platz|allee|gasse|ring|damm)\b",
+    re.IGNORECASE,
+)
+_EXPLICIT_SENDER_LABEL = re.compile(
+    r"^(?:(?:kurzer\s+)?absender|vendor|sender|lieferant|from|von)\s*:",
     re.IGNORECASE,
 )
 
@@ -55,6 +64,32 @@ def _is_heading_like_vendor(line: str) -> bool:
         upper_ratio = sum(1 for c in letters if c.isupper()) / len(letters)
         if upper_ratio > 0.82 and not _COMPANY_LINE.search(line):
             return True
+    words = line.split()
+    if len(words) >= 6 and not _COMPANY_LINE.search(line):
+        title_case = sum(1 for w in words if w[:1].isupper() and len(w) > 2)
+        if title_case >= max(4, len(words) - 2):
+            return True
+    return False
+
+
+def _has_sender_evidence(
+    lines: list[str],
+    index: int,
+    cleaned: str,
+    *,
+    had_explicit_label: bool,
+) -> bool:
+    if had_explicit_label:
+        return True
+    if _COMPANY_LINE.search(cleaned):
+        return True
+    if _GERMAN_POSTAL.search(cleaned) or _STREET_HINT.search(cleaned):
+        return True
+    window = lines[index : min(index + 4, len(lines))]
+    block = " ".join(window)
+    has_address = bool(_GERMAN_POSTAL.search(block) or _STREET_HINT.search(block))
+    if has_address and (_COMPANY_LINE.search(cleaned) or len(cleaned) <= 64):
+        return True
     return False
 
 
@@ -62,12 +97,14 @@ def _extract_vendor(text: str) -> str | None:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     company_hits: list[str] = []
     label_stripped_hits: list[str] = []
-    for line in lines:
+    for index, line in enumerate(lines):
         cleaned = strip_leading_sender_label_prefixes(line)
-        had_label = cleaned != line
+        had_label = cleaned != line or bool(_EXPLICIT_SENDER_LABEL.match(line))
         if not cleaned or _is_heading_like_vendor(cleaned):
             continue
         if _INVOICE_HEADER.match(cleaned):
+            continue
+        if not _has_sender_evidence(lines, index, cleaned, had_explicit_label=had_label):
             continue
         if _COMPANY_LINE.search(cleaned):
             company_hits.append(cleaned[:120])
@@ -78,19 +115,25 @@ def _extract_vendor(text: str) -> str | None:
     return label_stripped_hits[0] if label_stripped_hits else None
 
 
-def heuristic_fields(text: str) -> list[ExtractedField]:
+def heuristic_field_suggestions(text: str) -> list[ExtractedField]:
+    """Regex-based global field hints; not persisted as recognized until catalog + accept."""
     fields: list[ExtractedField] = []
 
     amount = _extract_amount(text)
     if amount:
-        fields.append(ExtractedField(key="amount", value=amount))
+        fields.append(ExtractedField(key="amount", value=amount, confidence=0.45))
 
     date = re.search(r"\b(\d{2}[./-]\d{2}[./-]\d{2,4})\b", text)
     if date:
-        fields.append(ExtractedField(key="date", value=date.group(1)))
+        fields.append(ExtractedField(key="date", value=date.group(1), confidence=0.45))
 
     vendor = _extract_vendor(text)
     if vendor:
-        fields.append(ExtractedField(key="vendor", value=vendor))
+        fields.append(ExtractedField(key="vendor", value=vendor, confidence=0.45))
 
     return fields
+
+
+def heuristic_fields(text: str) -> list[ExtractedField]:
+    """Backward-compatible alias; heuristics are suggestions only."""
+    return heuristic_field_suggestions(text)

@@ -30,6 +30,7 @@ interface DocumentLayoutWorkspaceProps {
   previewUnavailable: boolean;
   blocks: ExtractionBlock[];
   fields: ExtractedField[];
+  heuristicSuggestions?: Array<{ key: string; value: string }>;
   highlightBlocks: ExtractionBlock[];
   viewerPage: number;
   activeBlockIndex: number | null;
@@ -58,6 +59,7 @@ export function DocumentLayoutWorkspace({
   previewUnavailable,
   blocks,
   fields,
+  heuristicSuggestions = [],
   highlightBlocks,
   viewerPage,
   activeBlockIndex,
@@ -391,6 +393,7 @@ export function DocumentLayoutWorkspace({
             setDismissedSuggestions((prev) => new Set(prev).add(key))
           }
           dismissedSuggestions={dismissedSuggestions}
+          heuristicSuggestions={heuristicSuggestions}
         />
       ) : (
         <aside className="layout-side-panel layout-side-panel-loading">
