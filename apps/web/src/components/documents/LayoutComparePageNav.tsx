@@ -58,9 +58,10 @@ export function LayoutComparePageNav({
             value={activePage}
             onChange={(event) => {
               const next = Number.parseInt(event.target.value, 10);
-              if (Number.isFinite(next) && next >= 1 && next <= pageCount) {
-                onPageChange(next);
-              }
+              if (!Number.isFinite(next)) return;
+              if (next < 1) return;
+              if (next > pageCount) return;
+              onPageChange(next);
             }}
           />
           <span className="muted layout-compare-page-jump-total">
