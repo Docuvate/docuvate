@@ -208,7 +208,7 @@ def _draw_symbol_table(pdf: FPDF) -> None:
     rows = (
         ("Symbol", "Meaning", "Notes"),
         ("μ Σ c w", "weights", "cell geometry"),
-        ("x y or c K d", "legacy extract", "should not appear"),
+        ("x y or c K d", "pdfplumber join", "should not appear"),
         ("l (x); β; b c c", "basis", "synthetic"),
         ("g(x); k; h; λ; s", "kernel", "synthetic"),
     )
