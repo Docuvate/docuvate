@@ -46,6 +46,11 @@ donut = [
   "accelerate>=0.33.0",
 ]
 
+[tool.uv]
+# CPU worker images and local `uv pip install` should resolve PyTorch from the CPU index
+# (see scripts/ci/worker-docker-install.sh and check-worker-cpu-torch-resolution.sh).
+torch-backend = "cpu"
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
