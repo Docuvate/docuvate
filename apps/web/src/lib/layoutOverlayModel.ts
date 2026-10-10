@@ -76,6 +76,49 @@ function widgetLabel(widget: LayoutIrWidget): string {
   return widget.kind === 'checkbox' ? 'checkbox' : 'field';
 }
 
+function intersectionArea(
+  a: Pick<LayoutOverlayRegion, 'x' | 'y' | 'width' | 'height'>,
+  b: Pick<LayoutOverlayRegion, 'x' | 'y' | 'width' | 'height'>
+): number {
+  const x1 = Math.max(a.x, b.x);
+  const y1 = Math.max(a.y, b.y);
+  const x2 = Math.min(a.x + a.width, b.x + b.width);
+  const y2 = Math.min(a.y + a.height, b.y + b.height);
+  if (x2 <= x1 || y2 <= y1) return 0;
+  return (x2 - x1) * (y2 - y1);
+}
+
+function overlayScore(region: LayoutOverlayRegion): number {
+  let score = region.width * region.height;
+  if (region.value?.trim()) score += 0.05;
+  if (region.kind === 'heading') score += 0.02;
+  if (region.kind === 'field' && region.label !== 'field' && region.label !== 'checkbox') {
+    score += 0.02;
+  }
+  return score;
+}
+
+function dedupeOverlappingOverlays(regions: LayoutOverlayRegion[]): LayoutOverlayRegion[] {
+  const kept: LayoutOverlayRegion[] = [];
+  for (const region of regions) {
+    const dupIdx = kept.findIndex((other) => {
+      if (other.page !== region.page) return false;
+      if (other.kind !== region.kind) return false;
+      const overlap = intersectionArea(region, other);
+      const minArea = Math.min(region.width * region.height, other.width * other.height);
+      return minArea > 0 && overlap / minArea > 0.55;
+    });
+    if (dupIdx < 0) {
+      kept.push(region);
+      continue;
+    }
+    if (overlayScore(region) > overlayScore(kept[dupIdx])) {
+      kept[dupIdx] = region;
+    }
+  }
+  return kept;
+}
+
 function overlayHasRenderableBox(
   box: Pick<LayoutOverlayRegion, 'width' | 'height' | 'kind' | 'label' | 'value'>
 ): boolean {
@@ -147,7 +190,7 @@ export function buildLayoutOverlays(doc: LayoutIrDocument): LayoutOverlayRegion[
     }
   }
 
-  return regions.filter(overlayHasRenderableBox);
+  return dedupeOverlappingOverlays(regions.filter(overlayHasRenderableBox));
 }
 
 export function buildLayoutOutline(

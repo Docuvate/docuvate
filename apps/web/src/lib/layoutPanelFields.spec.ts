@@ -20,4 +20,15 @@ describe('fieldsForLayoutPanel', () => {
     const fields = [{ key: 'vendor', value: 'Acme GmbH' }];
     expect(fieldsForLayoutPanel(fields)).toEqual(fields);
   });
+
+  it('drops banner line even when keyed as Absender', () => {
+    const fields = [
+      {
+        key: 'Absender',
+        value:
+          'Synthetic layout regression document with enough words to classify as born digital.',
+      },
+    ];
+    expect(fieldsForLayoutPanel(fields)).toEqual([]);
+  });
 });

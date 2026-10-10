@@ -2468,11 +2468,18 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 
 .layout-field-suggestion-tag {
   flex-shrink: 0;
+  margin-inline-end: var(--dv-space-2xs);
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--dv-color-text-muted);
   text-transform: none;
   letter-spacing: normal;
+}
+
+.layout-field-suggestion-tag::after {
+  content: '·';
+  margin-inline-start: var(--dv-space-2xs);
+  color: var(--dv-color-text-subtle);
 }
 
 .layout-field-suggestion-head .layout-field-label {

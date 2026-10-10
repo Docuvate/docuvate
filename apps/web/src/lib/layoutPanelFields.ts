@@ -11,9 +11,9 @@ export function fieldsForLayoutPanel(fields: ExtractedField[]): ExtractedField[]
   return fields.filter((field) => {
     const key = field.key.trim().toLowerCase();
     const value = field.value.trim();
+    if (BANNER_LINE_RE.test(value)) return false;
     if (!MISASSIGNED_VENDOR_KEYS.has(key)) return true;
     if (value.length > MAX_VENDOR_VALUE_LEN) return false;
-    if (BANNER_LINE_RE.test(value)) return false;
     return true;
   });
 }
