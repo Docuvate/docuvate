@@ -100,6 +100,21 @@ async function api(cookie, method, path, body) {
   return res.json();
 }
 
+async function waitDocumentReady(cookie, id) {
+  const deadline = Date.now() + 300_000;
+  while (Date.now() < deadline) {
+    const doc = await api(cookie, 'GET', `/v1/documents/${id}`);
+    if (doc.status === 'ready') {
+      return;
+    }
+    if (doc.status === 'failed') {
+      throw new Error(`document ${id} extraction failed`);
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  throw new Error(`timeout waiting for document ${id}`);
+}
+
 async function uploadFixture(cookie, fixture) {
   const form = new FormData();
   form.append(
@@ -108,6 +123,7 @@ async function uploadFixture(cookie, fixture) {
     fixture.filename
   );
   const created = await api(cookie, 'POST', '/v1/documents', form);
+  await waitDocumentReady(cookie, created.id);
   await api(cookie, 'PATCH', `/v1/documents/${created.id}`, {
     title: fixture.title,
     extractionBlocks: block(fixture.text),

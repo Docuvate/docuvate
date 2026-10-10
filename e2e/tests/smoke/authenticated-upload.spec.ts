@@ -29,12 +29,12 @@ test.describe('Authenticated compose smoke', () => {
     await expect(page).toHaveURL(/\/documents/, { timeout: 30_000 });
     await attachScreenshot(page, testInfo, '01-after-login.png');
 
-    const fileInput = page.getByLabel(/choose files|dateien auswählen/i);
-    await expect(fileInput.first()).toBeAttached({ timeout: 90_000 });
-    if ((await fileInput.count()) === 0) {
-      const uploadTrigger = page.getByRole('button', { name: /^upload$|^hochladen$/i });
+    const uploadTrigger = page.getByRole('button', { name: /^upload$|^hochladen$/i });
+    if (await uploadTrigger.isVisible().catch(() => false)) {
       await uploadTrigger.click();
     }
+    const fileInput = page.locator('input[type="file"]');
+    await expect(fileInput.first()).toBeAttached({ timeout: 90_000 });
     await fileInput.first().setInputFiles(fixturePdf);
 
     const docRow = page.getByRole('row').filter({ hasText: uploadTitle });
