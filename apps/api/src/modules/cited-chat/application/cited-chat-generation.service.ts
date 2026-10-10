@@ -228,7 +228,10 @@ export class CitedChatGenerationService {
       return { content: abstentionText, abstained: true };
     }
 
-    const extractiveMinScore = 0.12;
+    const extractiveMinScore =
+      rerank.reachable && rerank.rerankerUsed
+        ? 0.12
+        : ragFusionGateThreshold();
     const extractiveEligible =
       scope === 'document' || (scope === 'library' && libraryExtractiveEligible(top));
     const extractive = extractiveEligible
