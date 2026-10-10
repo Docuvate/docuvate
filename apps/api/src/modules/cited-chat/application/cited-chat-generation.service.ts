@@ -227,9 +227,11 @@ export class CitedChatGenerationService {
       return { content: abstentionText, abstained: true };
     }
 
-    const extractiveMinScore =
-      scope === 'document' ? 0.12 : rerank.reachable && rerank.rerankerUsed ? 0.32 : 0.04;
-    const extractive = tryExtractiveCitedAnswer(userMessage, top, extractiveMinScore);
+    const extractiveMinScore = 0.12;
+    const extractive =
+      scope === 'document'
+        ? tryExtractiveCitedAnswer(userMessage, top, extractiveMinScore)
+        : null;
     if (extractive && /^[0-9a-f-]{36}$/i.test(extractive.chunk.chunkId)) {
       await this.citationsRepo.replaceCitations(messageId, [
         {
