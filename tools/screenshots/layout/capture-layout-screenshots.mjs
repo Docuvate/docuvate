@@ -216,6 +216,12 @@ async function warmupLayoutCompare(page, documentId) {
   if (!pageRes.ok()) {
     throw new Error(`compare page warmup failed: ${pageRes.status()} ${await pageRes.text()}`);
   }
+  const pageBody = await pageRes.json();
+  if (pageBody.errorCode || !pageBody.originalPngBase64) {
+    throw new Error(
+      `compare page warmup returned no raster (${pageBody.errorCode ?? 'missing png'})`
+    );
+  }
 }
 
 async function enterCompareMode(page) {
@@ -268,6 +274,7 @@ async function captureMatrix(page, stateName, establishState, assertState) {
 }
 
 async function main() {
+  console.log(`Layout screenshot capture starting (build ${EXPECT_SHA})`);
   await mkdir(OUT, { recursive: true });
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ locale: 'de-DE' });
