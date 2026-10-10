@@ -41,8 +41,8 @@ test.describe('document detail layout tables', () => {
     }
 
     await page.goto(`/documents/${docId}`, { waitUntil: 'domcontentloaded' });
-    await page.getByRole('button', { name: /^Layout$/i }).click();
-    await page.locator('.layout-ir-html-frame').waitFor({ state: 'visible', timeout: 180_000 });
+    await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 300_000 });
+    await page.locator('.pdf-page-canvas').first().waitFor({ state: 'visible', timeout: 180_000 });
 
     await page.getByRole('tab', { name: /Tables|Tabellen/i }).click();
     const dataTable = page.locator('.layout-data-table');

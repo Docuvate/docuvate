@@ -39,21 +39,30 @@ Path(${JSON.stringify(join(dir, 'sample_delivery_note.pdf'))}).write_bytes(deliv
 const FIXTURES = syntheticFixturesDir();
 
 async function apiLogin(context) {
-  let res = await context.request.post(`${AUTH}/sign-in/email`, {
-    headers: authHeaders,
-    data: { email, password },
-  });
-  if (!res.ok()) {
-    await context.request.post(`${AUTH}/sign-up/email`, {
-      headers: authHeaders,
-      data: { email, password, name: 'Alex Testmann' },
-    });
-    res = await context.request.post(`${AUTH}/sign-in/email`, {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    let res = await context.request.post(`${AUTH}/sign-in/email`, {
       headers: authHeaders,
       data: { email, password },
     });
+    if (res.status() === 429) {
+      await new Promise((r) => setTimeout(r, 2500 * (attempt + 1)));
+      continue;
+    }
+    if (!res.ok()) {
+      await context.request.post(`${AUTH}/sign-up/email`, {
+        headers: authHeaders,
+        data: { email, password, name: 'Alex Testmann' },
+      });
+      res = await context.request.post(`${AUTH}/sign-in/email`, {
+        headers: authHeaders,
+        data: { email, password },
+      });
+    }
+    if (res.ok()) return;
+    if (res.status() === 429) continue;
+    throw new Error(`login failed ${res.status()}`);
   }
-  if (!res.ok()) throw new Error(`login failed ${res.status()}`);
+  throw new Error('login rate limited');
 }
 
 async function uploadDeliveryNote(request) {
@@ -85,49 +94,68 @@ async function capture(page, name) {
 
 async function openLayout(page, docId) {
   await page.goto(`${WEB}/documents/${docId}`, { waitUntil: 'domcontentloaded' });
-  await page.getByRole('button', { name: /^Layout$/i }).click();
-  await page.locator('.layout-ir-html-frame').waitFor({ state: 'visible', timeout: 180_000 });
+  await page.locator('.badge-ready, .badge.badge-ready').first().waitFor({
+    state: 'visible',
+    timeout: 300_000,
+  });
+  await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 300_000 });
+  await page.locator('.pdf-page-canvas, .layout-ir-html-frame, .layout-compare-stage').first().waitFor({
+    state: 'visible',
+    timeout: 300_000,
+  });
   await page.waitForTimeout(600);
+}
+
+async function setTheme(page, theme) {
+  await page.locator('.user-account-menu-trigger').click();
+  const panel = page.locator('.user-account-menu-panel');
+  await panel.waitFor({ state: 'visible', timeout: 15_000 });
+  const segment = theme === 'dark' ? /Dark|Dunkel/i : /Light|Hell/i;
+  await panel.getByRole('radio', { name: segment }).click();
+  await page.waitForFunction(
+    (t) => document.documentElement.getAttribute('data-docuvate-theme') === t,
+    theme,
+    { timeout: 15_000 }
+  );
+  await page.keyboard.press('Escape');
 }
 
 async function main() {
   mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch();
   const files = [];
+  const context = await browser.newContext({ locale: 'en-US' });
+  await apiLogin(context);
+  const docId = await uploadDeliveryNote(context.request);
+  const page = await context.newPage();
 
   for (const viewport of [
     { tag: '1440', width: 1440, height: 900 },
     { tag: '390', width: 390, height: 844 },
   ]) {
     for (const theme of ['light', 'dark']) {
-      const context = await browser.newContext({
-        locale: 'en-US',
-        viewport: { width: viewport.width, height: viewport.height },
-        colorScheme: theme,
-      });
-      await apiLogin(context);
-      const docId = await uploadDeliveryNote(context.request);
-      const page = await context.newPage();
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await openLayout(page, docId);
+      await setTheme(page, theme);
 
       await page.getByRole('button', { name: /^Original$/i }).click();
       files.push(await capture(page, `original-${viewport.tag}-${theme}.png`));
 
       await page.getByRole('button', { name: /^Reconstruction$/i }).click();
+      await page.locator('.layout-ir-html-frame').waitFor({ state: 'visible', timeout: 120_000 });
       files.push(await capture(page, `reconstruction-${viewport.tag}-${theme}.png`));
 
       await page.getByRole('button', { name: /^Compare$/i }).click();
-      await page.getByRole('button', { name: /^Split$/i }).click();
+      await page.getByRole('button', { name: /Side by side|Nebeneinander/i }).click();
+      await page.locator('.layout-compare-split').waitFor({ state: 'visible', timeout: 120_000 });
       files.push(await capture(page, `compare-split-${viewport.tag}-${theme}.png`));
 
-      await page.getByRole('button', { name: /^Slider$/i }).click();
+      await page.getByRole('button', { name: /Slider|Schieberegler/i }).click();
       files.push(await capture(page, `compare-slider-${viewport.tag}-${theme}.png`));
 
       await page.getByRole('tab', { name: /^Chat$/i }).click();
       await page.locator('.layout-side-panel-chat').waitFor({ state: 'visible', timeout: 30_000 });
       files.push(await capture(page, `chat-tab-${viewport.tag}-${theme}.png`));
-
-      await context.close();
     }
   }
 
