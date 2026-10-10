@@ -84,7 +84,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
 
   useEffect(() => {
     void getConnectorCatalog()
-      .then((c) => { setIsAdmin(c.viewerIsServerAdmin); })
+      .then((c) => { setIsAdmin(Boolean(c.viewerIsServerAdmin)); })
       .catch(() => { setIsAdmin(false); });
   }, []);
 
@@ -222,8 +222,8 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
         onKeyDown(event);
       }
     };
-    window.addEventListener('keydown', listener);
-    return () => { window.removeEventListener('keydown', listener); };
+    document.addEventListener('keydown', listener, true);
+    return () => { document.removeEventListener('keydown', listener, true); };
   }, [closePalette, openPalette, paletteOpen]);
 
   useEffect(() => {
