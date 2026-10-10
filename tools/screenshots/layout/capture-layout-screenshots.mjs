@@ -56,6 +56,7 @@ function assertCaptureQuality() {
   const pairs = [
     ['felder-vorschlag', 'gliederung-jump'],
     ['felder-vorschlag', 'overlay-popover'],
+    ['layout-compare', 'felder-vorschlag'],
     ['nachbau-unreliable', 'landscape'],
     ['landscape', 'scanned'],
   ];
@@ -290,6 +291,28 @@ async function main() {
         if (/absender/i.test(label) && /absender\s*:/i.test(value)) {
           throw new Error(`Absender field value must not repeat label prefix: ${value}`);
         }
+      }
+    }
+  );
+
+  await openDoc(page, brutto.href);
+  await captureMatrix(
+    page,
+    'layout-compare',
+    async (p, width) => {
+      await p.getByRole('button', { name: /^vergleich$/i }).click();
+      await p.getByTestId('layout-compare-stage').waitFor({ state: 'visible', timeout: 180_000 });
+      if (width <= 390) await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
+    },
+    async (p) => {
+      const compare = p.getByRole('button', { name: /^vergleich$/i });
+      if ((await compare.getAttribute('aria-pressed')) !== 'true') {
+        throw new Error('Compare mode not active');
+      }
+      await p.getByTestId('layout-compare-stage').waitFor({ state: 'visible' });
+      const text = await p.locator('.layout-compare-ssim-summary').textContent();
+      if (!text?.includes('SSIM')) {
+        throw new Error('layout compare SSIM summary missing');
       }
     }
   );

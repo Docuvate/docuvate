@@ -294,3 +294,66 @@ export class LayoutTypstResponseDto {
   @ApiProperty({ required: false, nullable: true })
   unreliableReason?: string | null;
 }
+
+export class LayoutComparePageMetricDto {
+  @ApiProperty()
+  pageNumber!: number;
+
+  @ApiProperty({ required: false, nullable: true })
+  ssim!: number | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  inkDeviation!: number | null;
+
+  @ApiProperty()
+  pageReliable!: boolean;
+
+  @ApiProperty({ required: false, nullable: true })
+  error!: string | null;
+}
+
+export class LayoutCompareMetricsResponseDto {
+  @ApiProperty()
+  category!: string;
+
+  @ApiProperty()
+  ssimFloor!: number;
+
+  @ApiProperty({ type: [LayoutComparePageMetricDto] })
+  pages!: LayoutComparePageMetricDto[];
+}
+
+export class LayoutComparePageResponseDto {
+  @ApiProperty()
+  pageNumber!: number;
+
+  @ApiProperty()
+  ssim!: number;
+
+  @ApiProperty()
+  inkDeviation!: number;
+
+  @ApiProperty()
+  ssimFloor!: number;
+
+  @ApiProperty()
+  pageReliable!: boolean;
+
+  @ApiProperty()
+  widthPx!: number;
+
+  @ApiProperty()
+  heightPx!: number;
+
+  @ApiProperty()
+  originalPngBase64!: string;
+
+  @ApiProperty()
+  reconstructionPngBase64!: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  heatmapPngBase64!: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  error!: string | null;
+}

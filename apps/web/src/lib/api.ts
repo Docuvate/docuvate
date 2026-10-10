@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { LayoutCompareMetrics, LayoutComparePagePayload } from './layoutCompare';
 import type {
   CorrespondentDto,
   CreateCorrespondentRequest,
@@ -207,6 +208,21 @@ export async function fetchDocumentLayoutTypst(
 }> {
   const query = mode === 'exakt' ? '' : `?mode=${encodeURIComponent(mode)}`;
   return request(`/documents/${documentId}/layout-typst${query}`);
+}
+
+export async function fetchDocumentLayoutCompareMetrics(
+  documentId: string
+): Promise<LayoutCompareMetrics> {
+  return request(`/documents/${documentId}/layout-compare/metrics`);
+}
+
+export async function fetchDocumentLayoutComparePage(
+  documentId: string,
+  pageNumber: number,
+  includeHeatmap = true
+): Promise<LayoutComparePagePayload> {
+  const heatmapQuery = includeHeatmap ? '' : '?heatmap=0';
+  return request(`/documents/${documentId}/layout-compare/pages/${pageNumber}${heatmapQuery}`);
 }
 
 export async function updateDocument(
