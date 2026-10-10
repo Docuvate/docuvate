@@ -19,7 +19,7 @@ function resolveBuildSha(): string {
     return process.env.DOCUVATE_BUILD_SHA.trim();
   }
   try {
-    return execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
   } catch {
     return 'dev';
   }

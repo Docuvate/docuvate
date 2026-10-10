@@ -19,8 +19,9 @@ import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
+import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 
-type ViewerMode = 'original' | 'reconstruction';
+type ViewerMode = 'original' | 'reconstruction' | 'compare';
 
 interface DocumentLayoutWorkspaceProps {
   doc: DocumentDto;
@@ -219,6 +220,14 @@ export function DocumentLayoutWorkspace({
               >
                 {t('documents.layoutViewReconstruction')}
               </button>
+              <button
+                type="button"
+                className={`layout-view-mode-btn${viewerMode === 'compare' ? ' layout-view-mode-btn-active' : ''}`}
+                aria-pressed={viewerMode === 'compare'}
+                onClick={() => setViewerMode('compare')}
+              >
+                {t('documents.layoutViewCompare')}
+              </button>
             </div>
             {viewerMode === 'original' ? (
               <label className="layout-overlay-toggle">
@@ -303,6 +312,13 @@ export function DocumentLayoutWorkspace({
                   </div>
                 ) : null}
               </>
+            ) : viewerMode === 'compare' && doc.id ? (
+              <DocumentLayoutCompareView
+                documentId={doc.id}
+                pageCount={layoutPageCount}
+                activePage={viewerPage}
+                onPageChange={onViewerPageChange}
+              />
             ) : frameLayoutIr && doc.id ? (
               <ExtractedLayoutHtmlFrame
                 documentId={doc.id}

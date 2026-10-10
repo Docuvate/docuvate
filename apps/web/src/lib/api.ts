@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  LayoutCompareMetrics,
+  LayoutComparePagePayload,
+  LayoutCompareSummary,
+} from './layoutCompare';
+import type {
   CorrespondentDto,
   CreateCorrespondentRequest,
   CreateTagRequest,
@@ -207,6 +212,35 @@ export async function fetchDocumentLayoutTypst(
 }> {
   const query = mode === 'exakt' ? '' : `?mode=${encodeURIComponent(mode)}`;
   return request(`/documents/${documentId}/layout-typst${query}`);
+}
+
+export async function fetchDocumentLayoutCompareSummary(
+  documentId: string
+): Promise<LayoutCompareSummary> {
+  return request(`/documents/${documentId}/layout-compare/summary`);
+}
+
+export async function fetchDocumentLayoutCompareMetrics(
+  documentId: string,
+  from?: number,
+  to?: number
+): Promise<LayoutCompareMetrics> {
+  const params = new URLSearchParams();
+  if (from !== undefined) params.set('from', String(from));
+  if (to !== undefined) params.set('to', String(to));
+  const query = params.toString();
+  return request(
+    `/documents/${documentId}/layout-compare/metrics${query ? `?${query}` : ''}`
+  );
+}
+
+export async function fetchDocumentLayoutComparePage(
+  documentId: string,
+  pageNumber: number,
+  includeHeatmap = true
+): Promise<LayoutComparePagePayload> {
+  const heatmapQuery = includeHeatmap ? '' : '?heatmap=0';
+  return request(`/documents/${documentId}/layout-compare/pages/${pageNumber}${heatmapQuery}`);
 }
 
 export async function updateDocument(

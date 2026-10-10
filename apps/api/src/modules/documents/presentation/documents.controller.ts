@@ -80,11 +80,17 @@ import { RequeueDocumentExtractionUseCase } from '../application/requeue-documen
 import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
 import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
 import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
+import { GetDocumentLayoutCompareMetricsUseCase } from '../application/get-document-layout-compare-metrics.use-case.js';
+import { GetDocumentLayoutComparePageUseCase } from '../application/get-document-layout-compare-page.use-case.js';
+import { GetDocumentLayoutCompareSummaryUseCase } from '../application/get-document-layout-compare-summary.use-case.js';
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import {
   LayoutHtmlResponseDto,
   LayoutIrDocumentDto,
   LayoutTypstResponseDto,
+  LayoutCompareMetricsResponseDto,
+  LayoutComparePageResponseDto,
+  LayoutCompareSummaryResponseDto,
 } from '../../../shared/presentation/dtos/layout-ir.dto.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
 
@@ -124,6 +130,9 @@ export class DocumentsController {
     private readonly getDocumentLayoutIr: GetDocumentLayoutIrUseCase,
     private readonly getDocumentLayoutHtml: GetDocumentLayoutHtmlUseCase,
     private readonly getDocumentLayoutTypst: GetDocumentLayoutTypstUseCase,
+    private readonly getDocumentLayoutCompareSummary: GetDocumentLayoutCompareSummaryUseCase,
+    private readonly getDocumentLayoutCompareMetrics: GetDocumentLayoutCompareMetricsUseCase,
+    private readonly getDocumentLayoutComparePage: GetDocumentLayoutComparePageUseCase,
     private readonly recordArenaRating: RecordExtractionArenaRatingUseCase,
     private readonly getDuplicateStack: GetDuplicateStackUseCase,
     private readonly setDuplicateStackPrimary: SetDuplicateStackPrimaryUseCase,
@@ -207,6 +216,68 @@ export class DocumentsController {
       reconstructionReliable: result.reconstructionReliable,
       unreliableReason: result.unreliableReason,
     };
+  }
+
+  @Get(':id/layout-compare/summary')
+  @ApiDocuvateRoute({
+    operationId: 'getDocumentLayoutCompareSummary',
+    summary: 'SSIM category and page count for layout reconstruction compare',
+  })
+  @ApiOkResponse({ type: LayoutCompareSummaryResponseDto })
+  async layoutCompareSummary(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string
+  ): Promise<LayoutCompareSummaryResponseDto> {
+    return this.getDocumentLayoutCompareSummary.execute(id, session.user.id, subject);
+  }
+
+  @Get(':id/layout-compare/metrics')
+  @ApiDocuvateRoute({
+    operationId: 'getDocumentLayoutCompareMetrics',
+    summary: 'Per-page SSIM metrics for layout reconstruction compare',
+  })
+  @ApiOkResponse({ type: LayoutCompareMetricsResponseDto })
+  async layoutCompareMetrics(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string
+  ): Promise<LayoutCompareMetricsResponseDto> {
+    const fromPage = from !== undefined ? Number.parseInt(from, 10) : undefined;
+    const toPage = to !== undefined ? Number.parseInt(to, 10) : undefined;
+    return this.getDocumentLayoutCompareMetrics.execute(
+      id,
+      session.user.id,
+      subject,
+      fromPage,
+      toPage
+    );
+  }
+
+  @Get(':id/layout-compare/pages/:page')
+  @ApiDocuvateRoute({
+    operationId: 'getDocumentLayoutComparePage',
+    summary: 'Raster compare payload for one layout reconstruction page',
+  })
+  @ApiOkResponse({ type: LayoutComparePageResponseDto })
+  async layoutComparePage(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string,
+    @Param('page') page: string,
+    @Query('heatmap') heatmap?: string
+  ): Promise<LayoutComparePageResponseDto> {
+    const pageNumber = Number.parseInt(page, 10);
+    const includeHeatmap = heatmap !== '0' && heatmap !== 'false';
+    return this.getDocumentLayoutComparePage.execute(
+      id,
+      session.user.id,
+      subject,
+      pageNumber,
+      includeHeatmap
+    );
   }
 
   @Get(':id/content')

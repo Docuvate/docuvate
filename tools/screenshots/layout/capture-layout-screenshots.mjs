@@ -56,6 +56,11 @@ function assertCaptureQuality() {
   const pairs = [
     ['felder-vorschlag', 'gliederung-jump'],
     ['felder-vorschlag', 'overlay-popover'],
+    ['layout-compare-split', 'felder-vorschlag'],
+    ['layout-compare-slider', 'layout-compare-split'],
+    ['layout-compare-heatmap', 'layout-compare-split'],
+    ['layout-compare-unreliable', 'layout-compare-split'],
+    ['layout-compare-strip', 'layout-compare-split'],
     ['nachbau-unreliable', 'landscape'],
     ['landscape', 'scanned'],
   ];
@@ -197,6 +202,39 @@ async function captureExpandedScreenshot(page, filePath, width) {
   }
 }
 
+async function warmupLayoutCompare(page, documentId) {
+  const origin = new URL(BASE).origin;
+  const summary = await page.request.get(
+    `${origin}/api/v1/documents/${documentId}/layout-compare/summary`
+  );
+  if (!summary.ok()) {
+    throw new Error(`compare summary warmup failed: ${summary.status()} ${await summary.text()}`);
+  }
+  const pageRes = await page.request.get(
+    `${origin}/api/v1/documents/${documentId}/layout-compare/pages/1?heatmap=0`
+  );
+  if (!pageRes.ok()) {
+    throw new Error(`compare page warmup failed: ${pageRes.status()} ${await pageRes.text()}`);
+  }
+  const pageBody = await pageRes.json();
+  if (pageBody.errorCode || !pageBody.originalPngBase64) {
+    throw new Error(
+      `compare page warmup returned no raster (${pageBody.errorCode ?? 'missing png'})`
+    );
+  }
+}
+
+async function enterCompareMode(page) {
+  await page.getByRole('button', { name: /^vergleich$/i }).click();
+  const stage = page.getByTestId('layout-compare-stage');
+  await stage.waitFor({ state: 'attached', timeout: 300_000 });
+  await stage.scrollIntoViewIfNeeded();
+  await page.locator('[data-testid="layout-compare-stage"] img').first().waitFor({
+    state: 'visible',
+    timeout: 300_000,
+  });
+}
+
 async function stubUnreliableReconstruction(page, documentId) {
   await page.route(`**/documents/${documentId}/layout-html**`, async (route) => {
     await route.fulfill({
@@ -242,6 +280,7 @@ async function captureMatrix(page, stateName, establishState, assertState) {
 }
 
 async function main() {
+  console.log(`Layout screenshot capture starting (build ${EXPECT_SHA})`);
   await mkdir(OUT, { recursive: true });
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({ locale: 'de-DE' });
@@ -252,12 +291,19 @@ async function main() {
   const landscape = await uploadPdf(page, path.join(FIXTURES, 'layout-ws-landscape.pdf'));
   const scanned = await uploadPdf(page, path.join(FIXTURES, 'layout-ws-scanned.pdf'));
   const multipage = await uploadPdf(page, path.join(FIXTURES, 'layout-ws-multipage.pdf'));
+  const manyPages = await uploadPdf(page, path.join(FIXTURES, 'layout-ws-many-pages.pdf'));
+  const compareUnreliable = await uploadPdf(
+    page,
+    path.join(FIXTURES, 'layout-ws-compare-unreliable.pdf')
+  );
 
   const docIds = {
     brutto: brutto.id,
     landscape: landscape.id,
     scanned: scanned.id,
+    compareUnreliable: compareUnreliable.id,
     multipage: multipage.id,
+    manyPages: manyPages.id,
   };
   await writeFile(path.join(__dirname, 'doc-ids.json'), JSON.stringify(docIds, null, 2));
   await writeFile(path.join(OUT, 'doc-ids.json'), JSON.stringify(docIds, null, 2));
@@ -291,6 +337,98 @@ async function main() {
           throw new Error(`Absender field value must not repeat label prefix: ${value}`);
         }
       }
+    }
+  );
+
+  await warmupLayoutCompare(page, brutto.id);
+  await openDoc(page, brutto.href);
+  await captureMatrix(
+    page,
+    'layout-compare-split',
+    async (p, width) => {
+      await enterCompareMode(p);
+      if (width <= 390) await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
+    },
+    async (p) => {
+      const compare = p.getByRole('button', { name: /^vergleich$/i });
+      if ((await compare.getAttribute('aria-pressed')) !== 'true') {
+        throw new Error('Compare mode not active');
+      }
+      await p.locator('[data-testid="layout-compare-stage"] img').first().waitFor({ state: 'visible' });
+      const text = await p.locator('.layout-compare-ssim-summary').textContent();
+      if (!text?.includes('SSIM')) {
+        throw new Error('layout compare SSIM summary missing');
+      }
+      if (await p.locator('.layout-compare-split').count() === 0) {
+        throw new Error('split compare stage missing');
+      }
+    }
+  );
+
+  await openDoc(page, brutto.href);
+  await captureMatrix(
+    page,
+    'layout-compare-slider',
+    async (p, width) => {
+      await enterCompareMode(p);
+      await p.getByRole('button', { name: /schieberegler|slider/i }).click();
+      if (width <= 390) await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
+    },
+    async (p) => {
+      if (await p.locator('.layout-compare-slider').count() === 0) {
+        throw new Error('slider compare stage missing');
+      }
+    }
+  );
+
+  await openDoc(page, brutto.href);
+  await captureMatrix(
+    page,
+    'layout-compare-heatmap',
+    async (p, width) => {
+      await enterCompareMode(p);
+      await p.getByLabel(/abweichungs-heatmap|heatmap/i).check();
+      if (width <= 390) await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
+    },
+    async (p) => {
+      await p.locator('.layout-compare-heatmap').first().waitFor({ state: 'visible', timeout: 120_000 });
+    }
+  );
+
+  await warmupLayoutCompare(page, compareUnreliable.id);
+  await openDoc(page, compareUnreliable.href);
+  await captureMatrix(
+    page,
+    'layout-compare-unreliable',
+    async (p, width) => {
+      await enterCompareMode(p);
+      if (width <= 390) await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
+    },
+    async (p) => {
+      await p.locator('.layout-compare-ssim-warn').waitFor({ state: 'visible' });
+    }
+  );
+
+  await warmupLayoutCompare(page, manyPages.id);
+  await openDoc(page, manyPages.href);
+  await captureMatrix(
+    page,
+    'layout-compare-strip',
+    async (p, width) => {
+      await enterCompareMode(p);
+      const jump = p.locator('.layout-compare-page-jump input');
+      await jump.fill('30');
+      await jump.press('Enter');
+      await p.locator('.layout-compare-page-strip-virtual').waitFor({ state: 'visible', timeout: 180_000 });
+      if (width <= 390) await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
+    },
+    async (p) => {
+      const chips = p.locator('.layout-compare-page-chip');
+      const count = await chips.count();
+      if (count > 30) {
+        throw new Error(`page strip not virtualized: ${count} chips`);
+      }
+      await p.locator('.layout-compare-page-strip-hint').waitFor({ state: 'visible' });
     }
   );
 
@@ -394,6 +532,19 @@ async function main() {
   );
 
   assertCaptureQuality();
+  const manifest = {
+    buildSha: EXPECT_SHA,
+    capturedAt: new Date().toISOString(),
+    captures: captures.map(({ stateName, width, theme, kind, hash, filePath }) => ({
+      stateName,
+      width,
+      theme,
+      kind,
+      md5: hash,
+      file: path.basename(filePath),
+    })),
+  };
+  await writeFile(path.join(OUT, 'capture-manifest.json'), JSON.stringify(manifest, null, 2));
   await browser.close();
   console.log(`Captured ${captures.length} images to ${OUT} (build ${EXPECT_SHA})`);
 }

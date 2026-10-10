@@ -1,6 +1,8 @@
 FROM python:3.12.15-slim
 ARG UV_VERSION=0.12.23
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
     poppler-utils \
     libgomp1 \
     libglib2.0-0 \
@@ -8,8 +10,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsm6 \
     libxext6 \
     libxrender1 \
+    xz-utils \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
+COPY .tool-versions .tool-versions
+COPY scripts/ci/install-typst.sh scripts/ci/install-typst.sh
+RUN TYPST_BIN_DIR="$(bash scripts/ci/install-typst.sh | sed -n 's/^typst_bin_dir=//p')" \
+  && install -m 0755 "${TYPST_BIN_DIR}/typst" /usr/local/bin/typst \
+  && typst --version
 COPY apps/worker ./apps/worker
 ARG WORKER_OPTIONAL_EXTRAS=
 ENV FLAGS_use_mkldnn=0

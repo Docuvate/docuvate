@@ -94,6 +94,10 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(LabelRecommendationBlocklistEntryResponseDtoSource_Enum.serializer)
       ..add(LabelRecommendationBlocklistListResponseDto.serializer)
       ..add(LabelRecommendationListResponseDto.serializer)
+      ..add(LayoutCompareMetricsResponseDto.serializer)
+      ..add(LayoutComparePageMetricDto.serializer)
+      ..add(LayoutComparePageResponseDto.serializer)
+      ..add(LayoutCompareSummaryResponseDto.serializer)
       ..add(LayoutHtmlResponseDto.serializer)
       ..add(LayoutIrBlockDto.serializer)
       ..add(LayoutIrDocumentDto.serializer)
@@ -273,6 +277,10 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
           () => new ListBuilder<JsonObject>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(LayoutComparePageMetricDto)]),
+          () => new ListBuilder<LayoutComparePageMetricDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(LayoutIrBlockDto)]),
           () => new ListBuilder<LayoutIrBlockDto>())

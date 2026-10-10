@@ -36,6 +36,9 @@ import { RequeueDocumentExtractionUseCase } from './application/requeue-document
 import { GetDocumentLayoutIrUseCase } from './application/get-document-layout-ir.use-case.js';
 import { GetDocumentLayoutHtmlUseCase } from './application/get-document-layout-html.use-case.js';
 import { GetDocumentLayoutTypstUseCase } from './application/get-document-layout-typst.use-case.js';
+import { GetDocumentLayoutCompareMetricsUseCase } from './application/get-document-layout-compare-metrics.use-case.js';
+import { GetDocumentLayoutComparePageUseCase } from './application/get-document-layout-compare-page.use-case.js';
+import { GetDocumentLayoutCompareSummaryUseCase } from './application/get-document-layout-compare-summary.use-case.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
 import { SearchModule } from '../search/search.module.js';
@@ -86,6 +89,9 @@ import { ChatInfrastructureModule } from '../chat-infrastructure/chat-infrastruc
     GetDocumentLayoutIrUseCase,
     GetDocumentLayoutHtmlUseCase,
     GetDocumentLayoutTypstUseCase,
+    GetDocumentLayoutCompareSummaryUseCase,
+    GetDocumentLayoutCompareMetricsUseCase,
+    GetDocumentLayoutComparePageUseCase,
   ],
   exports: [
     UploadDocumentUseCase,

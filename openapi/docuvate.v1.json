@@ -6011,6 +6011,275 @@
         ]
       }
     },
+    "/documents/{id}/layout-compare/metrics": {
+      "get": {
+        "operationId": "getDocumentLayoutCompareMetrics",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutCompareMetricsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Per-page SSIM metrics for layout reconstruction compare",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/layout-compare/pages/{page}": {
+      "get": {
+        "operationId": "getDocumentLayoutComparePage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "heatmap",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutComparePageResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Raster compare payload for one layout reconstruction page",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/layout-compare/summary": {
+      "get": {
+        "operationId": "getDocumentLayoutCompareSummary",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutCompareSummaryResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "SSIM category and page count for layout reconstruction compare",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{id}/layout-html": {
       "get": {
         "operationId": "getDocumentLayoutHtml",
@@ -11793,6 +12062,129 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "LayoutCompareMetricsResponseDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "ssimFloor": {
+            "type": "number"
+          },
+          "pageCount": {
+            "type": "number"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutComparePageMetricDto"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "ssimFloor",
+          "pageCount",
+          "pages"
+        ]
+      },
+      "LayoutComparePageMetricDto": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "number"
+          },
+          "ssim": {
+            "type": "number",
+            "nullable": true
+          },
+          "inkDeviation": {
+            "type": "number",
+            "nullable": true
+          },
+          "pageReliable": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "pageNumber",
+          "pageReliable"
+        ]
+      },
+      "LayoutComparePageResponseDto": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "number"
+          },
+          "ssim": {
+            "type": "number",
+            "nullable": true
+          },
+          "inkDeviation": {
+            "type": "number",
+            "nullable": true
+          },
+          "ssimFloor": {
+            "type": "number"
+          },
+          "pageReliable": {
+            "type": "boolean"
+          },
+          "widthPx": {
+            "type": "number"
+          },
+          "heightPx": {
+            "type": "number"
+          },
+          "originalPngBase64": {
+            "type": "string"
+          },
+          "reconstructionPngBase64": {
+            "type": "string"
+          },
+          "heatmapPngBase64": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorCode": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "pageNumber",
+          "ssimFloor",
+          "pageReliable",
+          "widthPx",
+          "heightPx",
+          "originalPngBase64",
+          "reconstructionPngBase64"
+        ]
+      },
+      "LayoutCompareSummaryResponseDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "ssimFloor": {
+            "type": "number"
+          },
+          "pageCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "category",
+          "ssimFloor",
+          "pageCount"
         ]
       },
       "LayoutHtmlResponseDto": {
