@@ -52,9 +52,13 @@ def compile_typst_to_pdf_bytes(typst_source: str, typst_bin: str | None = None) 
     result = subprocess.run(
         [binary, "compile", "-", "-", "-f", "pdf"],
         input=typst_source.encode("utf-8"),
-        check=True,
+        check=False,
         capture_output=True,
     )
+    if result.returncode != 0:
+        stderr = (result.stderr or b"").decode("utf-8", errors="replace").strip()
+        detail = stderr[:4000] if stderr else f"typst exit {result.returncode}"
+        raise RuntimeError(f"typst compile failed: {detail}")
     if not result.stdout:
         raise RuntimeError("typst compile produced empty PDF output")
     return result.stdout

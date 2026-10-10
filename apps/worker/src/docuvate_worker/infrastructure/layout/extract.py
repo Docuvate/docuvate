@@ -147,12 +147,12 @@ def _extract_tables(
                 chars = _chars_in_box(page, cx0, ctop, cx1, cbottom)
                 size_pt, weight, _font = _style_from_chars(chars)
                 text = ""
-                if row_idx < len(extracted) and col_idx < len(extracted[row_idx]):
-                    text = (extracted[row_idx][col_idx] or "").strip()
-                if not text and chars:
+                if chars:
                     ordered = sorted(chars, key=lambda c: (c["top"], c["x0"]))
                     text = "".join(c.get("text") or "" for c in ordered)
                     text = _WHITESPACE_RUN.sub(" ", text).strip()
+                elif row_idx < len(extracted) and col_idx < len(extracted[row_idx]):
+                    text = (extracted[row_idx][col_idx] or "").strip()
                 if not text:
                     continue
                 col_count = len(row.cells)

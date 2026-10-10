@@ -33,8 +33,7 @@ def test_typst_escape_braces_in_output() -> None:
         ),
     )
     typst = layout_ir_to_typst(doc)
-    assert "\\{" in typst
-    assert "\\}" in typst
+    assert '#raw("f(x) = {1, 2}")' in typst
 
 
 def test_typst_escape_markup_chars_in_output() -> None:
@@ -67,10 +66,45 @@ def test_typst_escape_markup_chars_in_output() -> None:
         ),
     )
     typst = layout_ir_to_typst(doc)
-    assert "\\`" in typst
-    assert "\\~" in typst
-    assert "\\-" in typst
-    assert "\\=" in typst or "heading" in typst
+    assert "#raw(" in typst
+    assert "heading" in typst or "\\=" in typst
+
+
+def test_typst_plus_and_parens_compile() -> None:
+    if shutil.which("typst") is None:
+        pytest.fail("typst CLI is required in CI")
+    doc = LayoutIrDocument(
+        version=1,
+        pages=(
+            LayoutIrPage(
+                page=1,
+                width_pt=200.0,
+                height_pt=200.0,
+                blocks=(
+                    LayoutIrBlock(
+                        page=1,
+                        x=0.05,
+                        y=0.05,
+                        width=0.9,
+                        height=0.1,
+                        text="μ+(1−𝑎)𝑓",
+                    ),
+                ),
+            ),
+        ),
+    )
+    source = layout_ir_to_typst(doc)
+    with tempfile.TemporaryDirectory() as tmp:
+        src = Path(tmp) / "math.typ"
+        out = Path(tmp) / "math.pdf"
+        src.write_text(source, encoding="utf-8")
+        subprocess.run(
+            ["typst", "compile", str(src), str(out)],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        assert out.is_file()
 
 
 def test_typst_output_compiles() -> None:

@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+import unicodedata
+
 from docuvate_worker.domain.layout_ir import (
     FontWeight,
     LayoutIrBlock,
@@ -52,20 +54,15 @@ def _escape_typst(text: str) -> str:
     return escaped
 
 
+def _typst_raw_literal(text: str) -> str:
+    normalized = unicodedata.normalize("NFKC", text)
+    escaped = normalized.replace("\\", "\\\\").replace('"', '\\"')
+    return f'#raw("{escaped}") '
+
+
 def _typst_text_body(text: str) -> str:
-    """Typst text content (`+` must not use math mode)."""
-    if text == "+":
-        return '#raw("+") '
-    if "+" not in text:
-        return _escape_typst(text) + " "
-    parts: list[str] = []
-    for piece in text.split("+"):
-        if piece:
-            parts.append(_escape_typst(piece))
-        parts.append('#raw("+")')
-    if parts and text.endswith("+"):
-        return "".join(parts) + " "
-    return "".join(parts[:-1]) + " " if parts else " "
+    """Typst text content (literal via #raw so +, parens, and math letters do not open math mode)."""
+    return _typst_raw_literal(text)
 
 
 def _x_pt(norm: float, page_width_pt: float) -> float:

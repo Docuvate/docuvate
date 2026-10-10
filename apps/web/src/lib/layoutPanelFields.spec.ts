@@ -31,4 +31,15 @@ describe('fieldsForLayoutPanel', () => {
     ];
     expect(fieldsForLayoutPanel(fields)).toEqual([]);
   });
+
+  it('drops academic paper title from vendor suggestions', () => {
+    const fields = [
+      {
+        key: 'suggestion:vendor',
+        value: 'Closed-Form Document Layout Classification',
+      },
+      { key: 'date', value: '01.01.2026' },
+    ];
+    expect(fieldsForLayoutPanel(fields)).toEqual([{ key: 'date', value: '01.01.2026' }]);
+  });
 });

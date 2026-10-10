@@ -1,17 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractedField } from '@docuvate/contracts';
+import { isPlausibleVendorSuggestion } from './vendorSuggestionFilter';
 
-const BANNER_LINE_RE = /synthetic layout regression document/i;
-const HEADING_VENDOR_VALUE_RE =
-  /^(?:QUERFORMAT[\s\-A-Z0-9]*FIXTURE|VERTRAGSUEBERSICHT|ANHANG\s+PREISLISTE)/i;
+const VENDOR_KEYS = new Set(['vendor', 'absender', 'global:vendor', 'suggestion:vendor']);
 
 /** Last-resort UI filter when stored extraction predates worker fixes. */
 export function fieldsForLayoutPanel(fields: ExtractedField[]): ExtractedField[] {
   return fields.filter((field) => {
-    const value = field.value.trim();
-    if (BANNER_LINE_RE.test(value)) return false;
-    if (HEADING_VENDOR_VALUE_RE.test(value)) return false;
+    const key = field.key.trim().toLowerCase();
+    if (VENDOR_KEYS.has(key) || key === 'absender') {
+      return isPlausibleVendorSuggestion(field.value);
+    }
     return true;
   });
 }

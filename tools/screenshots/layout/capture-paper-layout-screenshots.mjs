@@ -2,7 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /**
- * PR #42 evidence: 1440 + 390, light/dark, 16-page research paper (main.pdf).
+ * Layout workspace screenshots: 1440 + 390, light/dark, multi-page synthetic paper PDF.
  */
 import { chromium } from 'playwright';
 import { createHash } from 'node:crypto';
@@ -18,7 +18,7 @@ const OUT =
   process.env.SCREENSHOT_DIR ?? '/cursor/stores/self/pr42-screenshots';
 const PAPER_PDF =
   process.env.PAPER_PDF ??
-  path.join(REPO_ROOT, 'tools/screenshots/layout/fixtures/main.pdf');
+  path.join(REPO_ROOT, 'tools/screenshots/layout/fixtures/synthetic-paper.pdf');
 const BASE = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:5173';
 const EMAIL = process.env.SEED_EMAIL ?? 'labels-screenshots@docuvate.local';
 const PASSWORD = process.env.SEED_PASSWORD ?? 'LabelsScreenshot1!';
@@ -96,11 +96,11 @@ async function uploadPdf(page, filePath) {
       return { href: `/documents/${id}`, id };
     }
     if (doc.status === 'failed') {
-      throw new Error('extraction failed for main.pdf');
+      throw new Error(`extraction failed for ${baseName}`);
     }
     await new Promise((r) => setTimeout(r, 3000));
   }
-  throw new Error('timeout waiting for main.pdf');
+  throw new Error(`timeout waiting for ${baseName}`);
 }
 
 async function scrollHeight(page) {
@@ -151,6 +151,10 @@ async function warmupLayoutCompare(page, documentId) {
   if (!pageRes.ok()) {
     throw new Error(`compare page warmup failed: ${pageRes.status()} ${await pageRes.text()}`);
   }
+  const body = await pageRes.json();
+  if (body.errorCode) {
+    throw new Error(`compare page 1 error: ${body.errorCode}`);
+  }
 }
 
 async function enterCompareMode(page) {
@@ -167,13 +171,16 @@ async function enterCompareMode(page) {
     stage.waitFor({ state: 'attached', timeout: 300_000 }),
     errorPanel.waitFor({ state: 'visible', timeout: 300_000 }),
   ]);
-  if (await stage.count()) {
-    await stage.scrollIntoViewIfNeeded();
-    await page.locator('[data-testid="layout-compare-stage"] img').first().waitFor({
-      state: 'visible',
-      timeout: 300_000,
-    });
+  if (await errorPanel.count()) {
+    const msg = await errorPanel.locator('.error').first().textContent();
+    throw new Error(`compare error UI: ${msg ?? 'unknown'}`);
   }
+  await stage.scrollIntoViewIfNeeded();
+  await page.locator('[data-testid="layout-compare-stage"] img').first().waitFor({
+    state: 'visible',
+    timeout: 300_000,
+  });
+  await page.getByText(/SSIM:\s*\d/i).first().waitFor({ timeout: 300_000 });
 }
 
 async function main() {
@@ -260,12 +267,9 @@ async function main() {
     const jump = p.locator('.layout-compare-page-jump input');
     await jump.fill('16');
     await jump.press('Enter');
-    await p.locator('.layout-compare-ssim-summary, .layout-compare-page-error').first().waitFor({
-      timeout: 300_000,
-    });
-    const retry = p.getByRole('button', { name: /erneut|retry/i });
-    if (await retry.count()) {
-      await retry.first().scrollIntoViewIfNeeded();
+    await p.getByText(/SSIM:\s*\d/i).first().waitFor({ timeout: 300_000 });
+    if (await p.locator('.layout-compare-error').count()) {
+      throw new Error('compare page 16 shows error panel');
     }
   });
   }
@@ -298,6 +302,9 @@ async function main() {
       if (text.includes('Seite1') || text.includes('Kostenin') || text.includes('1.234, 56')) {
         throw new Error(`table cell corrupted: ${text}`);
       }
+      if (text.includes('μ;') || text.includes('Σ;')) {
+        throw new Error(`math cell fragmented: ${text}`);
+      }
     }
     if (width <= 390) {
       await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
@@ -315,13 +322,17 @@ async function main() {
     if ((await suggestion.count()) === 0 && (await fieldRow.count()) === 0) {
       throw new Error('felder panel has no field rows');
     }
+    const panelText = await p.locator('.layout-side-fields').textContent();
+    if (panelText?.includes('Closed-Form Document Layout Classification')) {
+      throw new Error('paper title shown as Absender suggestion');
+    }
     if (width <= 390) {
       await p.locator('.layout-side-panel').scrollIntoViewIfNeeded();
     }
   });
   }
 
-  const existingFiles = await import('node:fs/promises').then((fs) => fs.readdir(OUT));
+  const existingFiles = await readdir(OUT);
   for (const file of existingFiles) {
     if (!file.endsWith('.png')) continue;
     const match = /^(.+)-(390|1440)-(light|dark)\.png$/u.exec(file);
