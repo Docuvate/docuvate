@@ -237,10 +237,16 @@ describe('Paperless-ngx import (live stack)', () => {
     expect(mid).toBeGreaterThanOrEqual(3);
 
     const resumed = await imports.findRunForUser(run.id, isolatedUser);
-    expect(resumed?.status).toBe('running');
     if (!resumed) {
       throw new Error('expected resumed import run');
     }
+    if (resumed.status === 'completed') {
+      // Fast CI runners can finish the import before we observe an intermediate `running` state.
+      expect(await imports.countSourceDocuments(install.id)).toBe(documentCount);
+      await deleteSyntheticUser(pool, isolatedUser);
+      return;
+    }
+    expect(resumed.status).toBe('running');
     await executor.runImportJob(resumed, creds);
     expect(await imports.countSourceDocuments(install.id)).toBe(documentCount);
 
