@@ -175,6 +175,12 @@ def academic_layout_regression_paper_pdf() -> bytes:
                 )
                 pdf.set_x(pdf.l_margin)
                 pdf.multi_cell(0, 5, "Keywords: layout, SSIM, regression, x+y, c K d")
+                pdf.set_x(pdf.l_margin)
+                pdf.multi_cell(
+                    0,
+                    5,
+                    "Absender: Muster Layout GmbH, 10115 Berlin, Musterstraße 12",
+                )
             elif page_index == 15:
                 pdf.set_font("Body", size=12)
                 pdf.cell(0, 8, "Appendix A - Symbol table", new_x="LMARGIN", new_y="NEXT")
