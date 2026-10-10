@@ -34,18 +34,29 @@ async function signUpAndIn(
   const email = `e2e-cited-${randomUUID().slice(0, 8)}@fixture.docuvate.test`;
   const password = 'E2eCitedChatFixture1!';
   const headers = { origin: webOrigin };
-  await request.post(`${apiBase}/api/auth/sign-up/email`, {
-    headers,
-    data: { email, password, name: 'E2E Cited Chat' },
-  });
-  const login = await request.post(`${apiBase}/api/auth/sign-in/email`, {
-    headers,
-    data: { email, password },
-  });
-  if (!login.ok()) {
-    throw new Error(`sign-in failed: ${login.status()} ${await login.text()}`);
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const signUp = await request.post(`${apiBase}/api/auth/sign-up/email`, {
+      headers,
+      data: { email, password, name: 'E2E Cited Chat' },
+    });
+    if (signUp.status() === 429) {
+      await new Promise((r) => setTimeout(r, 2500 * (attempt + 1)));
+      continue;
+    }
+    const login = await request.post(`${apiBase}/api/auth/sign-in/email`, {
+      headers,
+      data: { email, password },
+    });
+    if (login.status() === 429) {
+      await new Promise((r) => setTimeout(r, 2500 * (attempt + 1)));
+      continue;
+    }
+    if (!login.ok()) {
+      throw new Error(`sign-in failed: ${login.status()} ${await login.text()}`);
+    }
+    return { email, password };
   }
-  return { email, password };
+  throw new Error('sign-in rate limited');
 }
 
 async function uploadPdf(request: APIRequestContext, apiBase: string, filename: string) {
