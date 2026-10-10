@@ -1614,10 +1614,10 @@ mark.global-search-mark {
   --detail-gap: var(--dv-space-sm);
   --document-detail-chrome: 13.5rem;
   /* c1 Zinnober accent on warm stone (docs/assets/logo/brand-colors.json) */
-  --dv-color-accent: #cb3a00;
-  --dv-color-accent-hover: #b52300;
-  --dv-color-accent-soft: #f3e6dc;
-  --dv-color-focus: #cb3a00;
+  --dv-color-accent: oklch(52% 0.19 38deg);
+  --dv-color-accent-hover: oklch(46% 0.19 38deg);
+  --dv-color-accent-soft: oklch(94% 0.022 85deg);
+  --dv-color-focus: oklch(52% 0.19 38deg);
   max-width: 1600px;
   padding: var(--detail-pad) var(--dv-space-md);
   padding-inline: max(var(--dv-space-md), var(--dv-space-sm));
@@ -1630,10 +1630,10 @@ mark.global-search-mark {
 }
 
 html[data-docuvate-theme='dark'] .document-detail-page {
-  --dv-color-accent: #e96f49;
-  --dv-color-accent-hover: #cb3a00;
+  --dv-color-accent: oklch(68% 0.16 38deg);
+  --dv-color-accent-hover: oklch(52% 0.19 38deg);
   --dv-color-accent-soft: oklch(26% 0.018 75deg);
-  --dv-color-focus: #e96f49;
+  --dv-color-focus: oklch(68% 0.16 38deg);
 }
 
 .document-detail-page .card {
