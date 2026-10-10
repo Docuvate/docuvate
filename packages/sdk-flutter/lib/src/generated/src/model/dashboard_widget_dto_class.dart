@@ -26,7 +26,7 @@ abstract class DashboardWidgetDtoClass implements Built<DashboardWidgetDtoClass,
 
   @BuiltValueField(wireName: r'type')
   DashboardWidgetDtoClassTypeEnum get type;
-  // enum typeEnum {  upload,  saved_view,  statistics,  recent_documents,  attention,  };
+  // enum typeEnum {  saved_view,  upload,  statistics,  recent_documents,  attention,  };
 
   @BuiltValueField(wireName: r'position')
   num get position;
@@ -208,10 +208,10 @@ class _$DashboardWidgetDtoClassSerializer implements PrimitiveSerializer<Dashboa
 
 class DashboardWidgetDtoClassTypeEnum extends EnumClass {
 
-  @BuiltValueEnumConst(wireName: r'upload')
-  static const DashboardWidgetDtoClassTypeEnum upload = _$dashboardWidgetDtoClassTypeEnum_upload;
   @BuiltValueEnumConst(wireName: r'saved_view')
   static const DashboardWidgetDtoClassTypeEnum savedView = _$dashboardWidgetDtoClassTypeEnum_savedView;
+  @BuiltValueEnumConst(wireName: r'upload')
+  static const DashboardWidgetDtoClassTypeEnum upload = _$dashboardWidgetDtoClassTypeEnum_upload;
   @BuiltValueEnumConst(wireName: r'statistics')
   static const DashboardWidgetDtoClassTypeEnum statistics = _$dashboardWidgetDtoClassTypeEnum_statistics;
   @BuiltValueEnumConst(wireName: r'recent_documents')

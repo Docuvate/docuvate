@@ -161,7 +161,7 @@ export type DashboardStatisticsDtoClass = {
 
 export type DashboardWidgetDtoClass = {
     id: string;
-    type: 'upload' | 'saved_view' | 'statistics' | 'recent_documents' | 'attention';
+    type: 'saved_view' | 'upload' | 'statistics' | 'recent_documents' | 'attention';
     position: number;
     widthCols: number;
     heightRows: number;
@@ -693,7 +693,7 @@ export type SavedDocumentViewDtoClass = {
     order: 'asc' | 'desc';
     viewMode: 'klassisch' | 'karten' | 'fokus';
     filterMode: 'query' | 'ui';
-    listScope: 'all' | 'mappe' | 'folder';
+    listScope: 'all' | 'folder' | 'mappe';
     folderId?: string;
     mappeId?: string;
     correspondentId?: string;

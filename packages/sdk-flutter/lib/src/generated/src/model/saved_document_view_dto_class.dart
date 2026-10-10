@@ -74,7 +74,7 @@ abstract class SavedDocumentViewDtoClass implements Built<SavedDocumentViewDtoCl
 
   @BuiltValueField(wireName: r'listScope')
   SavedDocumentViewDtoClassListScopeEnum get listScope;
-  // enum listScopeEnum {  all,  mappe,  folder,  };
+  // enum listScopeEnum {  all,  folder,  mappe,  };
 
   @BuiltValueField(wireName: r'folderId')
   String? get folderId;
@@ -546,10 +546,10 @@ class SavedDocumentViewDtoClassListScopeEnum extends EnumClass {
 
   @BuiltValueEnumConst(wireName: r'all')
   static const SavedDocumentViewDtoClassListScopeEnum all = _$savedDocumentViewDtoClassListScopeEnum_all;
-  @BuiltValueEnumConst(wireName: r'mappe')
-  static const SavedDocumentViewDtoClassListScopeEnum mappe = _$savedDocumentViewDtoClassListScopeEnum_mappe;
   @BuiltValueEnumConst(wireName: r'folder')
   static const SavedDocumentViewDtoClassListScopeEnum folder = _$savedDocumentViewDtoClassListScopeEnum_folder;
+  @BuiltValueEnumConst(wireName: r'mappe')
+  static const SavedDocumentViewDtoClassListScopeEnum mappe = _$savedDocumentViewDtoClassListScopeEnum_mappe;
 
   static Serializer<SavedDocumentViewDtoClassListScopeEnum> get serializer => _$savedDocumentViewDtoClassListScopeEnumSerializer;
 
