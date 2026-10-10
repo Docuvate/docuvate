@@ -29,7 +29,7 @@ import {
   updateUserSettings,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
-import { authClient } from '../lib/auth-client';
+import { authClient, authSessionUserEmail } from '../lib/auth-client';
 import { performSignOut } from '../lib/authSignOut';
 import { chatProviderLabel } from '../lib/chatProviderLabels';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
@@ -55,6 +55,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const { advancedFeaturesEnabled, setAdvancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
   const { data } = authClient.useSession();
+  const accountEmail = authSessionUserEmail(data);
   const [settings, setSettings] = useState<UserSettingsDto | null>(null);
   const [engines, setEngines] = useState<ExtractionEngineInfo[]>([]);
   const [enginesLoadFailed, setEnginesLoadFailed] = useState(false);
@@ -316,7 +317,7 @@ export function SettingsPage() {
           footer={
             <div className="settings-section-card-footer settings-section-card-footer--stack">
               <p className="settings-account-email">
-                {data?.user.email ?? t('settings.accountLeadFallback')}
+                {accountEmail ?? t('settings.accountLeadFallback')}
               </p>
               <SettingsCardLink to={routes.settingsAccountSecurity}>
                 {t('settings.accountSecurity.linkCta')}

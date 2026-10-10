@@ -38,7 +38,7 @@ export const authClient = createAuthClient({
 });
 
 type AuthSessionPayload = {
-  user?: { id: string; twoFactorEnabled?: boolean | null } | null;
+  user?: { id: string; email?: string | null; twoFactorEnabled?: boolean | null } | null;
 } | null | undefined;
 
 /** Session can exist before `user` is populated; `session?.user.id` throws when `user` is missing. */
@@ -48,6 +48,14 @@ export function authSessionUserId(session: AuthSessionPayload): string | undefin
     return undefined;
   }
   return user.id;
+}
+
+export function authSessionUserEmail(session: AuthSessionPayload): string | undefined {
+  const user = session?.user;
+  if (user == null) {
+    return undefined;
+  }
+  return user.email ?? undefined;
 }
 
 export function authSessionUserTwoFactorEnabled(session: AuthSessionPayload): boolean {

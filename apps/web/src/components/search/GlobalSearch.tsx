@@ -598,16 +598,10 @@ function GlobalSearchResultRow({ hit }: { hit: GlobalSearchHitDto }) {
             {hit.matchedFieldLabel ? (
               <>
                 <span>{hit.matchedFieldLabel}: </span>
-                <GlobalSearchHighlight
-                  text={hit.snippet}
-                  spans={snippetHighlightSpans(hit)}
-                />
+                <GlobalSearchHighlight text={hit.snippet} spans={snippetHighlightSpans(hit)} />
               </>
             ) : (
-              <GlobalSearchHighlight
-                text={hit.snippet}
-                spans={snippetHighlightSpans(hit)}
-              />
+              <GlobalSearchHighlight text={hit.snippet} spans={snippetHighlightSpans(hit)} />
             )}
           </span>
           {meta ? <span className="global-search-result-meta muted">{meta}</span> : null}

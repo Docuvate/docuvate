@@ -14,7 +14,7 @@ import {
   reorderSavedDocumentViews,
   updateSavedDocumentView,
 } from '../lib/api';
-import { authClient } from '../lib/auth-client';
+import { authClient, authSessionUserId } from '../lib/auth-client';
 import { routes } from '../lib/routes';
 import { notifySavedViewsChanged } from '../lib/savedViewsEvents';
 import { useInstallationRole } from '../lib/useInstallationRole';
@@ -25,7 +25,7 @@ export function SavedViewsPage() {
   const { pushSuccess, pushError } = useToastNotify();
   const role = useInstallationRole();
   const { data: sessionData } = authClient.useSession();
-  const currentUserId = sessionData?.user.id;
+  const currentUserId = authSessionUserId(sessionData);
   const [views, setViews] = useState<SavedDocumentViewDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
