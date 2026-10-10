@@ -2,28 +2,20 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CitedChatBenchStatsDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
 import type { DocumentChatMessageEntity } from '../../../shared/domain/ports.js';
-import { citedChatBenchStatsEnabled } from '../../cited-chat/domain/cited-chat-constants.js';
+import { parseCitedChatBenchStatsPayload } from '../../cited-chat/domain/cited-chat-bench-stats.js';
 import { normalizeLegacyAssistantStatus } from './document-chat-generation-status.js';
 
 function parseCitedBenchStats(
   errorDetail: string | null | undefined
 ): CitedChatBenchStatsDto | undefined {
-  if (!citedChatBenchStatsEnabled()) {
+  const parsed = parseCitedChatBenchStatsPayload(errorDetail);
+  if (!parsed) {
     return undefined;
   }
-  const raw = errorDetail?.trim();
-  if (!raw?.startsWith('{')) {
-    return undefined;
-  }
-  try {
-    const parsed = JSON.parse(raw) as { citedRejectedClaims?: unknown };
-    if (typeof parsed.citedRejectedClaims === 'number' && Number.isFinite(parsed.citedRejectedClaims)) {
-      return { citedRejectedClaims: parsed.citedRejectedClaims };
-    }
-  } catch {
-    return undefined;
-  }
-  return undefined;
+  return {
+    citedRejectedClaims: parsed.citedRejectedClaims,
+    timingMs: parsed.timingMs,
+  };
 }
 
 export function toDocumentChatMessageRecordDto(

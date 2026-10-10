@@ -18,7 +18,13 @@ import {
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { passesFusionGate, passesRerankerGate } from '../domain/verify-citation-quote.js';
-import { verifyCitedClaims } from '../domain/verify-cited-claims.js';
+import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
+import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
+import {
+  buildRejectedClaimBenchLog,
+  normalizeCitedSourceLabel,
+  verifyCitedClaims,
+} from '../domain/verify-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
@@ -123,21 +129,32 @@ export class CitedChatGenerationService {
     });
     await heartbeat();
 
+    const generationStarted = Date.now();
+    let embedMs = 0;
+    let retrieveMs = 0;
+    let rerankMs = 0;
+    let llmMs = 0;
+
     let queryVector: number[] | undefined;
+    const embedStarted = Date.now();
     try {
       const { embeddings } = await this.embedding.embedTexts([userMessage]);
       queryVector = embeddings[0];
     } catch {
       queryVector = undefined;
     }
+    embedMs = Date.now() - embedStarted;
 
     const filterIds =
       scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
 
+    const retrieveStarted = Date.now();
     const candidates = await this.retrieval.hybridRetrieveChunks(userId, userMessage, {
       documentIds: filterIds,
       queryVector,
     });
+    retrieveMs = Date.now() - retrieveStarted;
+    const chunkPool = candidates.map((chunk) => ({ chunk }));
 
     if (await aborted()) {
       await this.citationsRepo.replaceCitations(messageId, []);
@@ -157,6 +174,7 @@ export class CitedChatGenerationService {
       return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
     }
 
+    const rerankStarted = Date.now();
     const rerank = await fetchWorkerRagRerank(
       userMessage,
       candidates.map((c) => ({
@@ -164,6 +182,7 @@ export class CitedChatGenerationService {
         text: this.retrieval.indexPassageForRerank(c),
       }))
     );
+    rerankMs = Date.now() - rerankStarted;
 
     let ranked: Array<{ chunk: (typeof candidates)[0]; score: number }>;
     if (rerank.reachable && rerank.rerankerUsed && rerank.results.length > 0) {
@@ -235,6 +254,7 @@ export class CitedChatGenerationService {
     let hasStreamedContent = false;
     let processedClaimCount = 0;
     const streamedVerified: Array<{ text: string; ordinal: number }> = [];
+    const llmStarted = Date.now();
     const llm = await requestCitedAnswerFromOllama(userMessage, systemPrompt, history, {
       shouldAbort: () => aborted(),
       onToken: async (partialJson) => {
@@ -250,6 +270,7 @@ export class CitedChatGenerationService {
             claims: [claim],
             top,
             labelByChunk,
+            chunkPool,
           });
           if (verified.length === 0) {
             continue;
@@ -274,6 +295,7 @@ export class CitedChatGenerationService {
         });
       },
     });
+    llmMs = Date.now() - llmStarted;
     if (!llm.ok) {
       if (llm.detail === 'aborted' || llm.detail === 'cancelled') {
         await this.citationsRepo.replaceCitations(messageId, []);
@@ -295,12 +317,37 @@ export class CitedChatGenerationService {
       generationPhase: 'verifying',
     });
 
+    const verifyStarted = Date.now();
     const { verified, rejected } = verifyCitedClaims({
       claims: llm.parsed.claims,
       top,
       labelByChunk,
+      chunkPool,
     });
-    if (!citedChatBenchStatsEnabled()) {
+    const verifyMs = Date.now() - verifyStarted;
+    const labelSet = new Set(labelByChunk.values());
+    if (citedChatBenchStatsEnabled() && rejected.length > 0) {
+      for (const rej of rejected) {
+        const citedLabel = rej.source ? normalizeCitedSourceLabel(rej.source, labelSet) : null;
+        const labeledRow = citedLabel
+          ? top.find((row) => labelByChunk.get(row.chunk.chunkId) === citedLabel)
+          : undefined;
+        this.logger.log(
+          JSON.stringify(
+            buildRejectedClaimBenchLog({
+              rejected: rej,
+              citedLabel,
+              labeledChunkId: labeledRow?.chunk.chunkId ?? null,
+              resolvedChunkId: null,
+              chunkBody: labeledRow?.chunk.body ?? null,
+              passageText: labeledRow
+                ? chunkIndexText(labeledRow.chunk.documentTitle, labeledRow.chunk.body)
+                : null,
+            })
+          )
+        );
+      }
+    } else if (!citedChatBenchStatsEnabled()) {
       for (const rej of rejected) {
         this.logger.debug(
           `Cited claim rejected: ${JSON.stringify({
@@ -313,7 +360,18 @@ export class CitedChatGenerationService {
       }
     }
     const benchStats = citedChatBenchStatsEnabled()
-      ? JSON.stringify({ citedRejectedClaims: rejected.length })
+      ? serializeCitedChatBenchStats({
+          citedRejectedClaims: rejected.length,
+          timingMs: {
+            embedMs,
+            retrieveMs,
+            rerankMs,
+            llmMs,
+            verifyMs,
+            totalMs: Date.now() - generationStarted,
+            promptChars: systemPrompt.length,
+          },
+        })
       : undefined;
 
     if (verified.length === 0) {

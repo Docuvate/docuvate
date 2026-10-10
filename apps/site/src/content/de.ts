@@ -64,7 +64,7 @@ export const deContent: SiteContent = {
         {
           question: 'Darf ein IT-Dienstleister mir Docuvate einrichten?',
           answer:
-            'Ja, wenn die Software auf Ihren Servern läuft und der Dienstleister Installation, Wartung oder Support gegen Entgelt erbringt — nicht Docuvate als SaaS für fremde Mandanten.',
+            'Ja, wenn die Software auf Ihren Servern läuft und der Dienstleister Installation, Wartung oder Support gegen Entgelt erbringt, nicht Docuvate als SaaS für fremde Mandanten.',
         },
         {
           question: 'Was ist nicht erlaubt?',

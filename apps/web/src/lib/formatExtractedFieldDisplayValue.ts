@@ -17,7 +17,7 @@ export function formatExtractedFieldDisplayValue(
   value: string,
   locale: string
 ): string {
-  if (!value.trim()) return '—';
+  if (!value.trim()) return '-';
   const normalizedKey = key.trim().toLowerCase();
   if (!AMOUNT_KEYS.has(normalizedKey)) {
     return value;
