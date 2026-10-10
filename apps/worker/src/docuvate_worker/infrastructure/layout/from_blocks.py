@@ -42,13 +42,22 @@ def _text_with_inter_word_spaces(line: list[ExtractionBlock]) -> list[tuple[Extr
         token = block.text.strip()
         if not token:
             continue
-        text = token
-        if prev is not None:
+        if prev is not None and out:
             gap = block.x - (prev.x + prev.width)
-            em = max(prev.height, block.height, 0.01) * 0.25
-            if gap > em:
-                text = f" {token}"
-        out.append((block, text))
+            tight = max(0.004, min(prev.height, block.height) * 0.4)
+            wide = max(0.008, (prev.height + block.height) * 0.55 * 0.25)
+            if gap > wide:
+                out.append((block, token))
+            elif gap > tight:
+                last_block, last_text = out[-1]
+                out[-1] = (last_block, f"{last_text} ")
+                out.append((block, token))
+            else:
+                last_block, last_text = out[-1]
+                out[-1] = (last_block, f"{last_text}{token}")
+            prev = block
+            continue
+        out.append((block, token))
         prev = block
     return out
 
