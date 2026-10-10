@@ -160,6 +160,11 @@ async function scrollHeightForCapture(page) {
       height = Math.max(height, node.scrollHeight, node.clientHeight);
       width = Math.max(width, node.scrollWidth, node.clientWidth);
     }
+    const panel = document.querySelector('.layout-side-panel');
+    if (panel) {
+      const rect = panel.getBoundingClientRect();
+      height = Math.max(height, rect.bottom + window.scrollY + 24);
+    }
     return { height, width };
   });
 }
@@ -167,16 +172,25 @@ async function scrollHeightForCapture(page) {
 async function captureExpandedScreenshot(page, filePath, width) {
   const { height, width: contentWidth } = await scrollHeightForCapture(page);
   const targetWidth = Math.max(width, contentWidth);
-  const targetHeight = Math.min(Math.max(height + 48, 900), 16000);
-  await page.setViewportSize({ width: targetWidth, height: targetHeight });
-  await page.waitForTimeout(300);
+  let targetHeight = Math.min(Math.max(height + 48, width <= 390 ? 1500 : 900), 16000);
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    await page.setViewportSize({ width: targetWidth, height: targetHeight });
+    await page.waitForTimeout(250);
+    if (width > 390) break;
+    const panel = page.locator('.layout-side-panel');
+    if ((await panel.count()) === 0) break;
+    const box = await panel.boundingBox();
+    const vp = page.viewportSize();
+    if (!box || !vp || box.y + box.height <= vp.height - 12) break;
+    targetHeight = Math.min(targetHeight + 500, 16000);
+  }
   await page.screenshot({ path: filePath, fullPage: false });
   if (width <= 390) {
     const panel = page.locator('.layout-side-panel');
     if (await panel.count()) {
       const box = await panel.boundingBox();
       const vp = page.viewportSize();
-      if (box && vp && box.y + box.height > vp.height - 8) {
+      if (box && vp && box.y + box.height > vp.height - 12) {
         throw new Error(`390px shot clips side panel in ${path.basename(filePath)}`);
       }
     }
