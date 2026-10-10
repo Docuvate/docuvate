@@ -61,7 +61,7 @@ def _typst_raw_literal(text: str) -> str:
 
 
 def _typst_text_body(text: str) -> str:
-    """Typst text content (literal via #raw so +, parens, and math letters do not open math mode)."""
+    """Typst text via #raw so +, parens, and math letters do not open math mode."""
     return _typst_raw_literal(text)
 
 
