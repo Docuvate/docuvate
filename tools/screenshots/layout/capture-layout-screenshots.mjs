@@ -514,6 +514,19 @@ async function main() {
   );
 
   assertCaptureQuality();
+  const manifest = {
+    buildSha: EXPECT_SHA,
+    capturedAt: new Date().toISOString(),
+    captures: captures.map(({ stateName, width, theme, kind, hash, filePath }) => ({
+      stateName,
+      width,
+      theme,
+      kind,
+      md5: hash,
+      file: path.basename(filePath),
+    })),
+  };
+  await writeFile(path.join(OUT, 'capture-manifest.json'), JSON.stringify(manifest, null, 2));
   await browser.close();
   console.log(`Captured ${captures.length} images to ${OUT} (build ${EXPECT_SHA})`);
 }

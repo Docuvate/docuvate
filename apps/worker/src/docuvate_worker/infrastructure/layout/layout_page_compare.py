@@ -56,6 +56,14 @@ def _payload_cache_bytes(payload: LayoutPageComparePayload) -> int:
     return total
 
 
+def _pixel_result_cache_bytes(result: PagePixelCompareResult) -> int:
+    return (
+        int(result.original_gray.nbytes)
+        + int(result.reconstruction_gray.nbytes)
+        + int(result.heatmap_gray.nbytes)
+    )
+
+
 def _pdf_cache_bytes(pdf: bytes) -> int:
     return len(pdf)
 
@@ -65,6 +73,9 @@ _reconstruction_pdf_cache: ByteBoundedLruCache[str, bytes] = ByteBoundedLruCache
 )
 _page_compare_cache: ByteBoundedLruCache[str, LayoutPageComparePayload] = ByteBoundedLruCache(
     CACHE_MAX_BYTES, _payload_cache_bytes
+)
+_page_pixel_result_cache: ByteBoundedLruCache[str, PagePixelCompareResult] = ByteBoundedLruCache(
+    CACHE_MAX_BYTES, _pixel_result_cache_bytes
 )
 
 
@@ -124,6 +135,37 @@ def layout_compare_summary(original_pdf: bytes, doc: LayoutIrDocument) -> Layout
     )
 
 
+def _cached_pixel_compare(
+    original_pdf: bytes,
+    typst: str,
+    reconstruction: bytes,
+    *,
+    page_number: int,
+    dpi: int,
+) -> PagePixelCompareResult:
+    pixel_cache_key = _digest_key(
+        original_pdf,
+        typst.encode("utf-8"),
+        str(page_number).encode("utf-8"),
+        str(dpi).encode("utf-8"),
+    )
+    cached = _page_pixel_result_cache.get(pixel_cache_key)
+    if cached is not None:
+        return cached
+    result = compare_pdf_pages(
+        original_pdf,
+        reconstruction,
+        page_number=page_number,
+        dpi=dpi,
+    )
+    _page_pixel_result_cache.set(
+        pixel_cache_key,
+        result,
+        max_entry_bytes=CACHE_MAX_ENTRY_BYTES,
+    )
+    return result
+
+
 def _metric_from_compare(
     page_number: int,
     result: PagePixelCompareResult,
@@ -153,11 +195,13 @@ def collect_layout_compare_metrics_for_pages(
     category = infer_layout_ssim_category(doc, original_pdf)
     floor = ssim_floor_for_category(category)
     reconstruction = get_reconstruction_pdf(original_pdf, doc)
+    typst = layout_ir_to_typst(doc)
     metrics: list[LayoutPageMetric] = []
     for page_number in pages_to_compute:
         try:
-            result = compare_pdf_pages(
+            result = _cached_pixel_compare(
                 original_pdf,
+                typst,
                 reconstruction,
                 page_number=page_number,
                 dpi=dpi,
@@ -241,26 +285,30 @@ def compare_layout_page(
     category = infer_layout_ssim_category(doc, original_pdf)
     floor = ssim_floor_for_category(category)
     typst = layout_ir_to_typst(doc)
-    cache_key = _digest_key(
+    pixel_cache_key = _digest_key(
         original_pdf,
         typst.encode("utf-8"),
         str(page_number).encode("utf-8"),
         str(dpi).encode("utf-8"),
+    )
+    payload_cache_key = _digest_key(
+        pixel_cache_key.encode("utf-8"),
         b"1" if include_heatmap else b"0",
     )
-    cached = _page_compare_cache.get(cache_key)
-    if cached is not None:
-        return cached
+    cached_payload = _page_compare_cache.get(payload_cache_key)
+    if cached_payload is not None:
+        return cached_payload
 
     try:
         reconstruction = get_reconstruction_pdf(original_pdf, doc)
-        result = compare_pdf_pages(
+        pixel_result = _cached_pixel_compare(
             original_pdf,
+            typst,
             reconstruction,
             page_number=page_number,
             dpi=dpi,
         )
-        payload = _build_success_payload(page_number, result, floor, include_heatmap)
+        payload = _build_success_payload(page_number, pixel_result, floor, include_heatmap)
     except LayoutCompareError as exc:
         if exc.code == CompareErrorCode.PAGE_OUT_OF_RANGE:
             raise
@@ -271,10 +319,11 @@ def compare_layout_page(
         payload = _build_error_payload(page_number, floor, code)
 
     if payload.error_code is None:
-        _page_compare_cache.set(cache_key, payload, max_entry_bytes=CACHE_MAX_ENTRY_BYTES)
+        _page_compare_cache.set(payload_cache_key, payload, max_entry_bytes=CACHE_MAX_ENTRY_BYTES)
     return payload
 
 
 def clear_layout_compare_caches() -> None:
     _reconstruction_pdf_cache.clear()
     _page_compare_cache.clear()
+    _page_pixel_result_cache.clear()

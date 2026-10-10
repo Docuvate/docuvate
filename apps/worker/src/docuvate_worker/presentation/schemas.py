@@ -347,7 +347,7 @@ class LayoutComparePageRequest(BaseModel):
     original_pdf_base64: str = Field(alias="originalPdfBase64")
     page_number: int = Field(alias="pageNumber", ge=1)
     dpi: int = Field(default=100, ge=72, le=200)
-    include_heatmap: bool = Field(default=True, alias="includeHeatmap")
+    include_heatmap: bool = Field(default=False, alias="includeHeatmap")
 
 
 class LayoutComparePageResponse(BaseModel):
