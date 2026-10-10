@@ -6,48 +6,24 @@ set -euo pipefail
 VARIANT="${DOCUVATE_WORKER_TORCH_VARIANT:-cpu}"
 OPTIONAL_EXTRAS="${WORKER_OPTIONAL_EXTRAS:-}"
 UV_VERSION="${UV_VERSION:-0.12.23}"
-TORCH_CPU_INDEX="${TORCH_CPU_INDEX:-https://download.pytorch.org/whl/cpu}"
-TORCH_GPU_INDEX="${TORCH_GPU_INDEX:-https://download.pytorch.org/whl/cu124}"
+TORCH_GPU_BACKEND="${TORCH_GPU_BACKEND:-cu124}"
 
 cd /app
 
 pip install --no-cache-dir "uv==${UV_VERSION}"
 
-extras_flag=()
+extras_ref="./apps/worker"
 if [ -n "${OPTIONAL_EXTRAS}" ]; then
-  extras_flag=(-e "./apps/worker[${OPTIONAL_EXTRAS}]")
-else
-  extras_flag=(-e ./apps/worker)
+  extras_ref="./apps/worker[${OPTIONAL_EXTRAS}]"
 fi
 
-uv pip install --system "${extras_flag[@]}"
-
 if [ "${VARIANT}" = "cpu" ]; then
-  if python -m pip freeze | grep -qiE '^torch(==|@)'; then
-    uv pip install --system --force-reinstall torch torchvision \
-      --index-url "${TORCH_CPU_INDEX}"
-  fi
-  mapfile -t forbidden < <(
-    python - <<'PY'
-import subprocess
-import re
-proc = subprocess.run([__import__("sys").executable, "-m", "pip", "freeze"], check=True, capture_output=True, text=True)
-pat = re.compile(r"(?i)^(nvidia|triton|cuda[-_])")
-for line in proc.stdout.splitlines():
-    name = line.split("==", 1)[0].split("@", 1)[0].strip()
-    if pat.search(name):
-        print(name)
-PY
-  )
-  if ((${#forbidden[@]} > 0)); then
-    uv pip uninstall --system "${forbidden[@]}" || true
-  fi
+  uv pip install --system --torch-backend cpu -e "${extras_ref}"
   python /app/scripts/ci/assert-worker-cpu-pip-freeze.py
 elif [ "${VARIANT}" = "gpu" ]; then
-  uv pip install --system --force-reinstall torch torchvision \
-    --index-url "${TORCH_GPU_INDEX}"
-  if [ "${WORKER_INSTALL_DONUT:-1}" = "1" ]; then
-    uv pip install --system -e "./apps/worker[donut]"
+  uv pip install --system --torch-backend "${TORCH_GPU_BACKEND}" -e "${extras_ref}"
+  if [ "${WORKER_INSTALL_DONUT:-1}" = "1" ] && [[ "${OPTIONAL_EXTRAS}" != *"donut"* ]]; then
+    uv pip install --system --torch-backend "${TORCH_GPU_BACKEND}" -e "./apps/worker[donut]"
   fi
 else
   echo "unknown DOCUVATE_WORKER_TORCH_VARIANT=${VARIANT}" >&2

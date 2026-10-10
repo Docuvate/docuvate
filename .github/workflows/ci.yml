@@ -50,6 +50,10 @@ jobs:
         run: |
           pip install 'uv==0.12.23'
           cd apps/worker && uv lock --check
+      - name: Worker CPU torch resolution (all extras, aarch64 + amd64)
+        run: |
+          pip install 'uv==0.12.23'
+          bash scripts/ci/check-worker-cpu-torch-resolution.sh
       - name: Install Flutter
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq curl

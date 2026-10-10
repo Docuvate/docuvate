@@ -29,15 +29,24 @@ Requires an NVIDIA GPU, the [NVIDIA Container Toolkit](https://docs.nvidia.com/d
 | `WORKER_OPTIONAL_EXTRAS` | empty | `donut` |
 | `DOCUVATE_WORKER_TORCH_VARIANT` | `cpu` | `gpu` |
 
-## Size and build time (amd64, CI runner class `ubuntu-latest`, 2026-10-10)
+## Size and build time (amd64, 2026-10-10)
 
-Measured on branch `cursor/worker-cpu-gpu-split-4ce8` vs previous single-stage `apps/worker/Dockerfile` on `main` (`8a727b2`):
+Default extra (no `WORKER_OPTIONAL_EXTRAS`):
 
-| Metric | Before (`main` single Dockerfile) | After (`cpu` target, no cache) |
-|--------|-----------------------------------|--------------------------------|
+| Metric | Before (`main` single Dockerfile) | After (`cpu` + `--torch-backend cpu`) |
+|--------|-----------------------------------|----------------------------------------|
 | Image size | 5.13 GB | 5.13 GB |
 | `docker build` wall time | ~165 s | ~128 s |
 
-The default worker dependency set already avoided PyTorch on CPU; this split adds an explicit **pip freeze guard** (no `nvidia*`, `triton*`, `cuda-*`) and moves CUDA wheels + `[donut]` to the **gpu** target only. GPU images are larger (CUDA PyTorch) and build only when worker/deploy paths change on PRs (always on `main` publish).
+With **torch-bearing extras** (`WORKER_OPTIONAL_EXTRAS` set at build time):
+
+| Extra | PyPI-first install (old `worker-docker-install.sh`) | `uv pip install --torch-backend cpu` (current) |
+|-------|-----------------------------------------------------|------------------------------------------------|
+| `docling` | Resolves torch 2.14.1 + triton + 18 `nvidia-*` / `cuda-*` wheels on **aarch64 and amd64** (`uv pip compile` without `--torch-backend cpu`); arm64 builds stall on multi-GB downloads | **amd64 image 6.1 GB**, build ~202 s; `torch==2.14.1+cpu`, freeze assert passes |
+| `donut` | Same CUDA resolution on both platforms | **amd64 image 5.94 GB**, build ~279 s; `torch==2.14.1+cpu`, freeze assert passes |
+
+CI runs `scripts/ci/check-worker-cpu-torch-resolution.sh` (`uv pip compile` for `aarch64-unknown-linux-gnu` and `x86_64-unknown-linux-gnu` with extras `""`, `docling`, `donut`) to block CUDA packages from entering the CPU resolution graph.
+
+The default worker dependency set already avoided PyTorch on CPU; extras now use **`--torch-backend cpu` on the first install** (no PyPI CUDA download / reinstall dance). GPU images use `--torch-backend cu124` and build only when worker/deploy paths change on PRs (always on `main` publish).
 
 Reranker (`fastembed` `TextCrossEncoder`) uses **ONNX Runtime CPU** in both images — no separate reranker image.
