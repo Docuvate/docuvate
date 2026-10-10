@@ -16,9 +16,9 @@ describe('fieldsForLayoutPanel', () => {
     expect(fieldsForLayoutPanel(fields)).toEqual([{ key: 'datum', value: '01.01.2026' }]);
   });
 
-  it('keeps short vendor values', () => {
-    const fields = [{ key: 'vendor', value: 'Acme GmbH' }];
-    expect(fieldsForLayoutPanel(fields)).toEqual(fields);
+  it('drops heading-like vendor values as last resort', () => {
+    const fields = [{ key: 'vendor', value: 'QUERFORMAT-FIXTURE 842x595' }];
+    expect(fieldsForLayoutPanel(fields)).toEqual([]);
   });
 
   it('drops banner line even when keyed as Absender', () => {

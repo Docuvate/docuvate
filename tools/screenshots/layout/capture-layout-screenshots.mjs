@@ -149,6 +149,40 @@ async function openDoc(page, href) {
   await page.locator('.pdf-page-canvas').first().waitFor({ state: 'visible', timeout: 120_000 });
 }
 
+async function scrollHeightForCapture(page) {
+  return page.evaluate(() => {
+    const main = document.querySelector('.app-main');
+    const pageRoot = document.querySelector('.document-detail-page');
+    const nodes = [main, pageRoot, document.documentElement, document.body].filter(Boolean);
+    let height = 0;
+    let width = 0;
+    for (const node of nodes) {
+      height = Math.max(height, node.scrollHeight, node.clientHeight);
+      width = Math.max(width, node.scrollWidth, node.clientWidth);
+    }
+    return { height, width };
+  });
+}
+
+async function captureExpandedScreenshot(page, filePath, width) {
+  const { height, width: contentWidth } = await scrollHeightForCapture(page);
+  const targetWidth = Math.max(width, contentWidth);
+  const targetHeight = Math.min(Math.max(height + 48, 900), 16000);
+  await page.setViewportSize({ width: targetWidth, height: targetHeight });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: filePath, fullPage: false });
+  if (width <= 390) {
+    const panel = page.locator('.layout-side-panel');
+    if (await panel.count()) {
+      const box = await panel.boundingBox();
+      const vp = page.viewportSize();
+      if (box && vp && box.y + box.height > vp.height - 8) {
+        throw new Error(`390px shot clips side panel in ${path.basename(filePath)}`);
+      }
+    }
+  }
+}
+
 async function stubUnreliableReconstruction(page, documentId) {
   await page.route(`**/documents/${documentId}/layout-html**`, async (route) => {
     await route.fulfill({
@@ -175,12 +209,19 @@ async function captureMatrix(page, stateName, establishState, assertState) {
       await page.waitForTimeout(300);
       const base = `${stateName}-${width}-${theme}`;
       const fullPath = path.join(OUT, `${base}.png`);
-      await page.screenshot({ path: fullPath, fullPage: true });
+      await captureExpandedScreenshot(page, fullPath, width);
       await recordCapture(fullPath, stateName, width, theme, 'full');
       if (width === 1440 && theme === 'light') {
+        await page.setViewportSize({ width: 1440, height: 900 });
+        await page.waitForTimeout(200);
         const vpPath = path.join(OUT, `${base}-viewport.png`);
         await page.screenshot({ path: vpPath, fullPage: false });
         await recordCapture(vpPath, stateName, width, theme, 'viewport');
+        const fullHash = md5(await readFile(fullPath));
+        const vpHash = md5(await readFile(vpPath));
+        if (fullHash === vpHash) {
+          throw new Error(`full-page shot matches viewport for ${base}`);
+        }
       }
     }
   }

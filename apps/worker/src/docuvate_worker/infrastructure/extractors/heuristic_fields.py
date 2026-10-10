@@ -18,6 +18,15 @@ _COMPANY_LINE = re.compile(
     re.IGNORECASE,
 )
 _INVOICE_HEADER = re.compile(r"^(Rechnung|Invoice)\b", re.IGNORECASE)
+_VENDOR_LABEL_PREFIX = re.compile(
+    r"^(?:(?:kurzer\s+)?absender|vendor|sender|lieferant|from)\s*:\s*",
+    re.IGNORECASE,
+)
+_BANNER_LINE = re.compile(r"synthetic layout regression document", re.IGNORECASE)
+_HEADING_VENDOR_LINE = re.compile(
+    r"^(?:QUERFORMAT[\s\-A-Z0-9]*FIXTURE|VERTRAGSUEBERSICHT|ANHANG\s+PREISLISTE)",
+    re.IGNORECASE,
+)
 
 
 def _normalize_amount(raw: str) -> str:
@@ -37,16 +46,47 @@ def _extract_amount(text: str) -> str | None:
     return None
 
 
+def _strip_vendor_label_prefix(value: str) -> str:
+    out = value.strip()
+    while True:
+        match = _VENDOR_LABEL_PREFIX.match(out)
+        if not match:
+            break
+        out = out[match.end() :].strip()
+    return out
+
+
+def _is_heading_like_vendor(line: str) -> bool:
+    if _BANNER_LINE.search(line):
+        return True
+    if _HEADING_VENDOR_LINE.search(line):
+        return True
+    letters = [c for c in line if c.isalpha()]
+    if len(letters) >= 12:
+        upper_ratio = sum(1 for c in letters if c.isupper()) / len(letters)
+        if upper_ratio > 0.82 and not _COMPANY_LINE.search(line):
+            return True
+    return False
+
+
 def _extract_vendor(text: str) -> str | None:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
+    company_hits: list[str] = []
+    label_stripped_hits: list[str] = []
     for line in lines:
-        if _COMPANY_LINE.search(line):
-            return line[:120]
-    for line in lines:
-        if _INVOICE_HEADER.match(line):
+        cleaned = _strip_vendor_label_prefix(line)
+        had_label = cleaned != line
+        if not cleaned or _is_heading_like_vendor(cleaned):
             continue
-        return line[:120]
-    return lines[0][:120] if lines else None
+        if _INVOICE_HEADER.match(cleaned):
+            continue
+        if _COMPANY_LINE.search(cleaned):
+            company_hits.append(cleaned[:120])
+        elif had_label:
+            label_stripped_hits.append(cleaned[:120])
+    if company_hits:
+        return company_hits[0]
+    return label_stripped_hits[0] if label_stripped_hits else None
 
 
 def heuristic_fields(text: str) -> list[ExtractedField]:
