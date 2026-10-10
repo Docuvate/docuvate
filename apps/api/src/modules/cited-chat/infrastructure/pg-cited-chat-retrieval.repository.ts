@@ -235,7 +235,7 @@ export class PgCitedChatRetrievalRepository {
         blockParams
       );
       bodies = blockRows.rows.map((row, index) => ({
-        id: `lexical-block-${row.document_id}-${index}`,
+        id: `lexical-block-${row.document_id}-${String(index)}`,
         document_id: row.document_id,
         title: row.title,
         body: row.body,

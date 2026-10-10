@@ -19,13 +19,13 @@ function scoreSentence(sentence: string, tokens: string[]): number {
 /** CPU-fast answer from the best passage when rerank/fusion confidence is high. */
 export function tryExtractiveCitedAnswer(
   userMessage: string,
-  ranked: Array<{ chunk: CitedChatChunkCandidate; score: number }>,
+  ranked: { chunk: CitedChatChunkCandidate; score: number }[],
   minScore: number
 ): { text: string; chunk: CitedChatChunkCandidate; quote: string } | null {
-  const best = ranked[0];
-  if (!best || best.score < minScore) {
+  if (ranked.length === 0 || ranked[0].score < minScore) {
     return null;
   }
+  const best = ranked[0];
 
   const tokens = tokenizeSearchQuery(userMessage).filter((t) => t.length >= 3);
   const body = best.chunk.body.trim();

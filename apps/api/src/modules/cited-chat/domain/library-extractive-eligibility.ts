@@ -12,14 +12,14 @@ export interface RankedChunkRow {
  * Multi-document questions (similar top scores across docs) fall through to the LLM.
  */
 export function libraryExtractiveRows(top: RankedChunkRow[]): RankedChunkRow[] {
-  const best = top[0];
-  if (!best) {
+  if (top.length === 0) {
     return [];
   }
-  const runnerUp = top[1];
-  if (!runnerUp) {
+  const best = top[0];
+  if (top.length === 1) {
     return [best];
   }
+  const runnerUp = top[1];
   if (runnerUp.chunk.documentId === best.chunk.documentId) {
     return [best];
   }

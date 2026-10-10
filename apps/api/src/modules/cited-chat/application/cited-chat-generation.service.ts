@@ -8,6 +8,7 @@ import {
   EMBEDDING_PORT,
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
+import { ollamaChatBaseUrl } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
@@ -19,10 +20,10 @@ import {
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
 import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
-import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
+import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 import { passesFusionGate, passesRerankerGate } from '../domain/verify-citation-quote.js';
 import {
@@ -37,7 +38,6 @@ import {
   buildCitedChatSystemPrompt,
   requestCitedAnswerFromOllama,
 } from './cited-chat-ollama.js';
-import { ollamaChatBaseUrl } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
 
 const CONTENT_FLUSH_MS = 250;
 const GENERATION_HEARTBEAT_MS = 15_000;

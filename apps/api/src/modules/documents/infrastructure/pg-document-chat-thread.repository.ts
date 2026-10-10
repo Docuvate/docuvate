@@ -22,8 +22,8 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
 import { PLACEHOLDER_CHAT_THREAD_TITLES } from '../application/chat-thread-title.js';
+import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
 
 const DEFAULT_THREAD_TITLE = 'Neuer Chat';
 
