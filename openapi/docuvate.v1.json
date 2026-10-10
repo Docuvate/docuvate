@@ -6011,6 +6011,180 @@
         ]
       }
     },
+    "/documents/{id}/layout-compare/metrics": {
+      "get": {
+        "operationId": "getDocumentLayoutCompareMetrics",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutCompareMetricsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Per-page SSIM metrics for layout reconstruction compare",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{id}/layout-compare/pages/{page}": {
+      "get": {
+        "operationId": "getDocumentLayoutComparePage",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "heatmap",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutComparePageResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Raster compare payload for one layout reconstruction page",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{id}/layout-html": {
       "get": {
         "operationId": "getDocumentLayoutHtml",
@@ -11793,6 +11967,106 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "LayoutCompareMetricsResponseDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "ssimFloor": {
+            "type": "number"
+          },
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutComparePageMetricDto"
+            }
+          }
+        },
+        "required": [
+          "category",
+          "ssimFloor",
+          "pages"
+        ]
+      },
+      "LayoutComparePageMetricDto": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "number"
+          },
+          "ssim": {
+            "type": "number",
+            "nullable": true
+          },
+          "inkDeviation": {
+            "type": "number",
+            "nullable": true
+          },
+          "pageReliable": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "pageNumber",
+          "pageReliable"
+        ]
+      },
+      "LayoutComparePageResponseDto": {
+        "type": "object",
+        "properties": {
+          "pageNumber": {
+            "type": "number"
+          },
+          "ssim": {
+            "type": "number"
+          },
+          "inkDeviation": {
+            "type": "number"
+          },
+          "ssimFloor": {
+            "type": "number"
+          },
+          "pageReliable": {
+            "type": "boolean"
+          },
+          "widthPx": {
+            "type": "number"
+          },
+          "heightPx": {
+            "type": "number"
+          },
+          "originalPngBase64": {
+            "type": "string"
+          },
+          "reconstructionPngBase64": {
+            "type": "string"
+          },
+          "heatmapPngBase64": {
+            "type": "string",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "pageNumber",
+          "ssim",
+          "inkDeviation",
+          "ssimFloor",
+          "pageReliable",
+          "widthPx",
+          "heightPx",
+          "originalPngBase64",
+          "reconstructionPngBase64"
         ]
       },
       "LayoutHtmlResponseDto": {
