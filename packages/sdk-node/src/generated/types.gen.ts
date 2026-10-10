@@ -625,7 +625,7 @@ export type MlModelVersionListResponseDto = {
 export type MlRetrainJobDto = {
     id: string;
     familyId: string;
-    triggerKind: 'manual' | 'cron' | 'threshold';
+    triggerKind: 'manual' | 'threshold' | 'cron';
     status: 'queued' | 'failed' | 'cancelled' | 'running' | 'succeeded';
     trainingSnapshotId: string;
     resultVersionId: string;

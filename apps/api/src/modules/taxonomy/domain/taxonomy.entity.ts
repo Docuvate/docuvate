@@ -30,9 +30,14 @@ export interface CorrespondentEntity {
   match: string;
 }
 
+export type TagSuggestionSource = 'rule' | 'embedding' | 'embedding_density';
+
+export type TagSuggestionDecisionTier = 'auto_apply' | 'confirm' | 'none';
+
 export interface TagSuggestionEntity {
   tag: TagEntity;
   reason: string;
   confidence?: number;
-  source?: 'rule' | 'embedding';
+  source?: TagSuggestionSource;
+  decisionTier?: TagSuggestionDecisionTier;
 }

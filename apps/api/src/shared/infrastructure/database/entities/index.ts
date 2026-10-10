@@ -21,6 +21,14 @@ import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
 import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
+import { EmbeddingDensityCalibrationRunEntity } from './embedding-density-calibration-run.entity.js';
+import { EmbeddingDensityClassNiwEntity } from './embedding-density-class-niw.entity.js';
+import { EmbeddingDensityCorrectionEntity } from './embedding-density-correction.entity.js';
+import { EmbeddingDensityCorrectionOffsetEntity } from './embedding-density-correction-offset.entity.js';
+import { EmbeddingDensityDecisionThresholdEntity } from './embedding-density-decision-threshold.entity.js';
+import { EmbeddingDensityLabelGroupEntity } from './embedding-density-label-group.entity.js';
+import { EmbeddingDensityLabelGroupMemberEntity } from './embedding-density-label-group-member.entity.js';
+import { EmbeddingDensityUserStateEntity } from './embedding-density-user-state.entity.js';
 import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
 import { DocumentLayoutIrPagesEntity } from './document-layout-ir-pages.entity.js';
 import { DocumentExtractionBlocksEntity } from './document-extraction-blocks.entity.js';
@@ -91,6 +99,14 @@ export const TYPEORM_ENTITIES = [
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
   DocumentEmbeddingsEntity,
+  EmbeddingDensityCalibrationRunEntity,
+  EmbeddingDensityClassNiwEntity,
+  EmbeddingDensityCorrectionEntity,
+  EmbeddingDensityCorrectionOffsetEntity,
+  EmbeddingDensityDecisionThresholdEntity,
+  EmbeddingDensityLabelGroupEntity,
+  EmbeddingDensityLabelGroupMemberEntity,
+  EmbeddingDensityUserStateEntity,
   DocumentExtractionBlocksEntity,
   DocumentFieldValuesEntity,
   DocumentLayoutIrEntity,
@@ -162,6 +178,14 @@ export {
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
   DocumentEmbeddingsEntity,
+  EmbeddingDensityCalibrationRunEntity,
+  EmbeddingDensityClassNiwEntity,
+  EmbeddingDensityCorrectionEntity,
+  EmbeddingDensityCorrectionOffsetEntity,
+  EmbeddingDensityDecisionThresholdEntity,
+  EmbeddingDensityLabelGroupEntity,
+  EmbeddingDensityLabelGroupMemberEntity,
+  EmbeddingDensityUserStateEntity,
   DocumentExtractionBlocksEntity,
   DocumentFieldValuesEntity,
   DocumentLayoutIrEntity,

@@ -23,7 +23,7 @@ describe('buildTypeOrmOptions', () => {
     process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
     const opts = buildTypeOrmOptions();
     const migrations = opts.migrations as Array<{ name: string }>;
-    expect(migrations).toHaveLength(13);
+    expect(migrations).toHaveLength(16);
     expect(migrations[0]?.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);
     expect(migrations[1]?.name).toBe('GlobalSearchSchema20261008130500');
     expect(migrations[2]?.name).toBe('DocumentFieldValuesBackfill20261008130600');
@@ -37,5 +37,8 @@ describe('buildTypeOrmOptions', () => {
     expect(migrations[10]?.name).toBe('ConnectorPaperlessImport20261008234500');
     expect(migrations[11]?.name).toBe('CitedChat20261009120000');
     expect(migrations[12]?.name).toBe('StaleChatGeneration20261009183000');
+    expect(migrations[13]?.name).toBe('EmbeddingDensity20261010120000');
+    expect(migrations[14]?.name).toBe('EmbeddingDensityClassNiw20261010131500');
+    expect(migrations[15]?.name).toBe('EmbeddingDensityReadinessSplit20261010140000');
   });
 });

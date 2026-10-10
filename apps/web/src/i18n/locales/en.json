@@ -1076,6 +1076,7 @@
     "todoTitle": "To do",
     "todoEmpty": "All caught up",
     "todoEmptyHint": "New documents or extraction may create suggestions later.",
+    "embeddingDensityReadinessHint": "Automatic labeling needs about 2112 labeled documents; suggestions start at about 416 per label at the current split.",
     "todoBadgeAssign": "Assign label",
     "todoBadgeNew": "Suggest new label",
     "todoBadgeMerge": "Review merge",

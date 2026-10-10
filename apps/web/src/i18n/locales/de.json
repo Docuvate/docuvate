@@ -1088,6 +1088,7 @@
     "todoTitle": "Zu erledigen",
     "todoEmpty": "Alles erledigt",
     "todoEmptyHint": "Neue Dokumente oder Extraktion können später neue Vorschläge erzeugen.",
+    "embeddingDensityReadinessHint": "Automatische Zuordnung braucht etwa 2112 gelabelte Dokumente; Vorschläge starten bei etwa 416 pro Label bei der aktuellen Aufteilung.",
     "todoBadgeAssign": "Label zuweisen",
     "todoBadgeNew": "Neues Label vorschlagen",
     "todoBadgeMerge": "Zusammenführen prüfen",

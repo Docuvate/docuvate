@@ -24,6 +24,9 @@ const FORWARD_SQL_ORDER = [
   'connector-paperless-import-up.sql',
   'cited-chat-up.sql',
   'stale-chat-generation-up.sql',
+  'embedding-density-up.sql',
+  'embedding-density-f32-up.sql',
+  'embedding-density-readiness-split-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

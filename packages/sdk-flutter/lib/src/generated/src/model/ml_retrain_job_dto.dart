@@ -32,7 +32,7 @@ abstract class MlRetrainJobDto implements Built<MlRetrainJobDto, MlRetrainJobDto
 
   @BuiltValueField(wireName: r'triggerKind')
   MlRetrainJobDtoTriggerKindEnum get triggerKind;
-  // enum triggerKindEnum {  manual,  cron,  threshold,  };
+  // enum triggerKindEnum {  manual,  threshold,  cron,  };
 
   @BuiltValueField(wireName: r'status')
   MlRetrainJobDtoStatusEnum get status;
@@ -255,10 +255,10 @@ class MlRetrainJobDtoTriggerKindEnum extends EnumClass {
 
   @BuiltValueEnumConst(wireName: r'manual')
   static const MlRetrainJobDtoTriggerKindEnum manual = _$mlRetrainJobDtoTriggerKindEnum_manual;
-  @BuiltValueEnumConst(wireName: r'cron')
-  static const MlRetrainJobDtoTriggerKindEnum cron = _$mlRetrainJobDtoTriggerKindEnum_cron;
   @BuiltValueEnumConst(wireName: r'threshold')
   static const MlRetrainJobDtoTriggerKindEnum threshold = _$mlRetrainJobDtoTriggerKindEnum_threshold;
+  @BuiltValueEnumConst(wireName: r'cron')
+  static const MlRetrainJobDtoTriggerKindEnum cron = _$mlRetrainJobDtoTriggerKindEnum_cron;
 
   static Serializer<MlRetrainJobDtoTriggerKindEnum> get serializer => _$mlRetrainJobDtoTriggerKindEnumSerializer;
 

@@ -15,6 +15,9 @@ import { DocumentExtractedLayoutIr20261008213000 } from './migrations/2026100821
 import { ConnectorPaperlessImport20261008234500 } from './migrations/20261008234500-connector-paperless-import.js';
 import { CitedChat20261009120000 } from './migrations/20261009120000-cited-chat.js';
 import { StaleChatGeneration20261009183000 } from './migrations/20261009183000-stale-chat-generation.js';
+import { EmbeddingDensity20261010120000 } from './migrations/20261010120000-embedding-density.js';
+import { EmbeddingDensityClassNiw20261010131500 } from './migrations/20261010131500-embedding-density-f32.js';
+import { EmbeddingDensityReadinessSplit20261010140000 } from './migrations/20261010140000-embedding-density-readiness-split.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -53,6 +56,9 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       ConnectorPaperlessImport20261008234500,
       CitedChat20261009120000,
       StaleChatGeneration20261009183000,
+      EmbeddingDensity20261010120000,
+      EmbeddingDensityClassNiw20261010131500,
+      EmbeddingDensityReadinessSplit20261010140000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

@@ -14,6 +14,7 @@ dependencies = [
   "pdfplumber>=0.11.0",
   "pypdf>=5.0.0",
   "numpy>=1.26.0,<2",
+  "scipy>=1.11.0,<2",
   "paddleocr==2.9.1",
   "paddlepaddle==3.3.1; platform_machine == 'x86_64' or platform_machine == 'AMD64'",
   "paddlepaddle==3.2.2; platform_machine == 'aarch64' or platform_machine == 'arm64'",
@@ -33,6 +34,9 @@ dev = [
   "ruff>=0.8.0",
   "testcontainers>=4.9.0",
   "fpdf2>=2.8.0",
+  "pyright==1.1.396",
+  "mypy==1.14.1",
+  "scipy-stubs>=1.11.0,<1.18",
 ]
 tesseract = [
   "pytesseract>=0.3.13",
@@ -57,6 +61,24 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+venvPath = "."
+venv = ".venv"
+include = ["src/docuvate_worker/domain/embedding_density"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+files = [
+  "src/docuvate_worker/domain/embedding_density",
+  "src/docuvate_worker/application/embedding_density.py",
+]
 
 [build-system]
 requires = ["setuptools>=75.0"]

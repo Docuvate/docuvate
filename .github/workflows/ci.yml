@@ -111,6 +111,8 @@ jobs:
           pip install 'uv==0.12.23'
           cd apps/worker && uv venv .venv && uv pip install -e ".[dev]"
           .venv/bin/ruff check src
+          .venv/bin/pyright
+          .venv/bin/mypy --strict src/docuvate_worker/domain/embedding_density src/docuvate_worker/application/embedding_density.py
           .venv/bin/pytest tests -q --ignore=tests/integration --maxfail=1
 
   db-migrate-fresh:

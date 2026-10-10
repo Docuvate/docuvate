@@ -8,12 +8,14 @@ import {
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { mergeCentroid } from '../domain/cosine.js';
+import { RecordEmbeddingDensityCorrectionUseCase } from './record-embedding-density-correction.use-case.js';
 
 @Injectable()
 export class RecordEmbeddingFeedbackUseCase {
   constructor(
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
-    @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository
+    @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
+    private readonly densityCorrection: RecordEmbeddingDensityCorrectionUseCase
   ) {}
 
   async onAccept(documentId: string, userId: string, tagId: string): Promise<void> {
@@ -28,6 +30,18 @@ export class RecordEmbeddingFeedbackUseCase {
     const tag = await this.taxonomy.findTagByIdForUser(tagId, userId);
     if (!tag || tag.isInbox) {
       return;
+    }
+    const previous = (await this.taxonomy.listTagsForDocument(documentId)).find((t) => !t.isInbox);
+    const vector = await this.labelEmbeddings.getDocumentEmbedding(documentId);
+    if (vector) {
+      await this.densityCorrection.recordLabelCorrection({
+        userId,
+        documentId,
+        vector,
+        fromTagId: previous?.id ?? null,
+        toTagId: tagId,
+        createdBy: userId,
+      });
     }
     await this.boostCentroid(documentId, userId, tagId);
   }

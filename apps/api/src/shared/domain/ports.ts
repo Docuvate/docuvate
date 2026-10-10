@@ -116,7 +116,11 @@ export interface TaxonomyRepository {
     documentId: string,
     tagId: string,
     reason: string,
-    options?: { source?: 'rule' | 'embedding'; confidence?: number }
+    options?: {
+      source?: 'rule' | 'embedding' | 'embedding_density';
+      confidence?: number;
+      decisionTier?: 'auto_apply' | 'confirm' | 'none';
+    }
   ): Promise<void>;
   dismissSuggestion(documentId: string, tagId: string): Promise<void>;
   clearSuggestion(documentId: string, tagId: string): Promise<void>;
