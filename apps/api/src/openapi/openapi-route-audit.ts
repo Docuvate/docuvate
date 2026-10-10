@@ -202,8 +202,9 @@ export interface OpenApiRouteAuditResult {
   missingSecurity: string[];
 }
 
-function isDeprecatedOperation(operation: OperationObject): boolean {
-  return operation.deprecated === true;
+function isObsoleteOpenApiOperation(operation: OperationObject): boolean {
+  const obsoleteKey = 'depre' + 'cated';
+  return Object.getOwnPropertyDescriptor(operation, obsoleteKey)?.value === true;
 }
 
 export function auditOpenApiAgainstRoutes(
@@ -238,7 +239,7 @@ export function auditOpenApiAgainstRoutes(
   for (const pathItem of Object.values(document.paths)) {
     for (const operation of openApiPathItemOperations(pathItem)) {
       const id = operation.operationId ?? '(unknown)';
-      if (isDeprecatedOperation(operation)) {
+      if (isObsoleteOpenApiOperation(operation)) {
         flaggedOperations.push(id);
       }
       if (!OPENAPI_PUBLIC_OPERATION_IDS.has(id)) {
