@@ -3,6 +3,10 @@
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import type { z } from 'zod';
 
+import {
+  mapWorkerLayoutCompareHttpError,
+  parseWorkerLayoutCompareErrorCode,
+} from './layout-compare-worker.errors.js';
 import type {
   LayoutCompareMetricsWorker,
   LayoutComparePageWorker,
@@ -13,10 +17,6 @@ import {
   fetchWorkerJson,
   workerLayoutTimeoutError,
 } from './worker-fetch.js';
-import {
-  mapWorkerLayoutCompareHttpError,
-  parseWorkerLayoutCompareErrorCode,
-} from './layout-compare-worker.errors.js';
 import { workerRequestHeaders } from './worker-request-headers.js';
 
 const LAYOUT_COMPARE_TIMEOUT_MS = 180_000;
