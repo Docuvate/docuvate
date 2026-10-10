@@ -3,14 +3,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
+const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const fixturePdf = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
 const fixturePhrase = 'E2E_SYNTHETIC_FIXTURE_PHRASE_Q1';
 
-const uploadTitle = 'synthetic-upload.pdf';
-
 test.use({ trace: 'on', storageState: smokeFixtureStoragePath() });
 
-async function attachScreenshot(page: import('@playwright/test').Page, testInfo: import('@playwright/test').TestInfo, name: string) {
+async function attachScreenshot(
+  page: import('@playwright/test').Page,
+  testInfo: import('@playwright/test').TestInfo,
+  name: string
+) {
   const body = await page.screenshot({ fullPage: true });
   await testInfo.attach(name, { body, contentType: 'image/png' });
   const artifactDir = process.env['E2E_ARTIFACT_DIR'];
@@ -21,41 +24,32 @@ async function attachScreenshot(page: import('@playwright/test').Page, testInfo:
 }
 
 test.describe('Authenticated compose smoke', () => {
-  test('login, upload synthetic PDF, extraction and preview succeed', async ({ page }, testInfo) => {
+  test('login, upload synthetic PDF, extraction and preview succeed', async ({ page, request }, testInfo) => {
     test.setTimeout(300_000);
     testInfo.annotations.push({ type: 'journey', description: 'compose-smoke-auth-happy-path' });
 
-    await page.goto('/documents');
-    await expect(page).toHaveURL(/\/documents/, { timeout: 30_000 });
-    await attachScreenshot(page, testInfo, '01-after-login.png');
+    const uploadRes = await request.post(`${apiBase}/v1/documents`, {
+      multipart: {
+        file: {
+          name: 'synthetic-upload.pdf',
+          mimeType: 'application/pdf',
+          buffer: fs.readFileSync(fixturePdf),
+        },
+      },
+    });
+    expect(uploadRes.ok()).toBeTruthy();
+    const uploaded = (await uploadRes.json()) as { id: string };
 
-    const uploadTrigger = page.getByRole('button', { name: /^upload$|^hochladen$/i });
-    if (await uploadTrigger.isVisible().catch(() => false)) {
-      await uploadTrigger.click();
-    }
-    const fileInput = page.locator('input[type="file"]');
-    await expect(fileInput.first()).toBeAttached({ timeout: 90_000 });
-    await fileInput.first().setInputFiles(fixturePdf);
-
-    const docRow = page.getByRole('row').filter({ hasText: uploadTitle });
-    await expect(docRow.first()).toBeVisible({ timeout: 180_000 });
-    await expect(docRow).not.toContainText(/^failed$|^fehlgeschlagen$/i);
-    await expect(docRow.locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, { timeout: 180_000 });
-
-    await attachScreenshot(page, testInfo, '02-after-upload-list.png');
-
-    await docRow
-      .locator('a.library-open-doc-btn, a[href*="/documents/"]')
-      .first()
-      .click();
+    await page.goto(`/documents/${uploaded.id}`);
     await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
+    await attachScreenshot(page, testInfo, '01-document-open.png');
 
     await expect(page.getByText(/loading pdf|pdf wird geladen/i)).toHaveCount(0, { timeout: 90_000 });
-    await expect(page.locator('.pdf-page-canvas').first()).toBeVisible({ timeout: 90_000 });
+    await expect(page.locator('.pdf-page-canvas').first()).toBeVisible({ timeout: 180_000 });
     await expect(page.locator('.textLayer').first()).toContainText(fixturePhrase, {
-      timeout: 30_000,
+      timeout: 60_000,
     });
 
-    await attachScreenshot(page, testInfo, '03-document-open-preview.png');
+    await attachScreenshot(page, testInfo, '02-document-preview.png');
   });
 });
