@@ -12,6 +12,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 
 import cv2
+import numpy as np
 
 from docuvate_worker.domain.layout_ir import LayoutIrDocument
 from docuvate_worker.infrastructure.layout.layout_reconstruction_eval import ssim_floor_for_category
