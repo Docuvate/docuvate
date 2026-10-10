@@ -53,8 +53,8 @@ function useCaseStub(): ExecuteStub {
   return { execute: vi.fn() };
 }
 
-function asUseCase<T extends ExecuteStub>(stub: ExecuteStub): T {
-  return stub as T;
+function asUseCase<T>(stub: ExecuteStub): T {
+  return stub as unknown as T;
 }
 
 /** Wires layout use cases by constructor position (Vitest does not emit decorator metadata). */
