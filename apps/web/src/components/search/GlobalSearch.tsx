@@ -274,7 +274,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
     }
   }
 
-  function onPaletteKeyDown(e: KeyboardEvent<HTMLInputElement>) {
+  function onPaletteKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
       setActiveId((prev) => movePaletteSelection(flatItems, prev, 'next'));
@@ -343,7 +343,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 aria-label={t('search.closePalette')}
                 onMouseDown={closePalette}
               />
-              {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- stop backdrop mousedown from closing the palette */}
+              {/* eslint-disable jsx-a11y/no-noninteractive-element-interactions -- dialog handles palette keyboard and blocks backdrop close */}
               <div
                 ref={dialogRef}
                 className="global-search-palette"
@@ -353,7 +353,9 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 aria-label={t('search.paletteTitle')}
                 tabIndex={-1}
                 onMouseDown={(e) => { e.stopPropagation(); }}
+                onKeyDown={onPaletteKeyDown}
               >
+              {/* eslint-enable jsx-a11y/no-noninteractive-element-interactions */}
                 <div className="global-search-palette-input-row">
                   <Search size={20} strokeWidth={1.75} aria-hidden />
                   <input
@@ -367,7 +369,6 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                     aria-activedescendant={activeId ?? undefined}
                     role="combobox"
                     aria-expanded
-                    onKeyDown={onPaletteKeyDown}
                   />
                   <button
                     type="button"
