@@ -202,104 +202,25 @@ async function captureExpandedScreenshot(page, filePath, width) {
   }
 }
 
-const TINY_PNG_BASE64 =
-  'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8z8/AwMDAwMDwP1ZsBQAJCgF+ZIK6YwAAAABJRU5ErkJggg==';
-
-async function stubCompareBaseline(
-  page,
-  documentId,
-  { pageCount = 1, ssim = 0.99, pageReliable = true, includeHeatmap = false } = {}
-) {
-  const docSegment = `/documents/${documentId}/layout-compare/`;
-  await page.route((url) => url.href.includes(docSegment), async (route) => {
-    const href = route.request().url();
-    if (href.includes('/summary')) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          category: 'born_digital_standard',
-          ssimFloor: 0.97,
-          pageCount,
-        }),
-      });
-      return;
-    }
-    if (href.includes('/metrics')) {
-      const url = new URL(href);
-      const from = Number.parseInt(url.searchParams.get('from') ?? '1', 10);
-      const to = Number.parseInt(url.searchParams.get('to') ?? String(pageCount), 10);
-      const pages = [];
-      for (let pageNumber = from; pageNumber <= to && pageNumber <= pageCount; pageNumber += 1) {
-        pages.push({
-          pageNumber,
-          ssim,
-          inkDeviation: 0.01,
-          pageReliable,
-          errorCode: null,
-        });
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          category: 'born_digital_standard',
-          ssimFloor: 0.97,
-          pageCount,
-          pages,
-        }),
-      });
-      return;
-    }
-    const match = href.match(/\/pages\/(\d+)/);
-    const pageNumber = match ? Number.parseInt(match[1], 10) : 1;
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        pageNumber,
-        ssim,
-        inkDeviation: 0.01,
-        ssimFloor: 0.97,
-        pageReliable,
-        widthPx: 420,
-        heightPx: 560,
-        originalPngBase64: TINY_PNG_BASE64,
-        reconstructionPngBase64: TINY_PNG_BASE64,
-        heatmapPngBase64: includeHeatmap ? TINY_PNG_BASE64 : null,
-        errorCode: null,
-      }),
-    });
-  });
+async function warmupLayoutCompare(page, documentId) {
+  const origin = new URL(BASE).origin;
+  const summary = await page.request.get(
+    `${origin}/api/v1/documents/${documentId}/layout-compare/summary`
+  );
+  if (!summary.ok()) {
+    throw new Error(`compare summary warmup failed: ${summary.status()} ${await summary.text()}`);
+  }
+  const pageRes = await page.request.get(
+    `${origin}/api/v1/documents/${documentId}/layout-compare/pages/1?heatmap=0`
+  );
+  if (!pageRes.ok()) {
+    throw new Error(`compare page warmup failed: ${pageRes.status()} ${await pageRes.text()}`);
+  }
 }
 
 async function enterCompareMode(page) {
   await page.getByRole('button', { name: /^vergleich$/i }).click();
-  await page.getByTestId('layout-compare-stage').waitFor({ state: 'visible', timeout: 180_000 });
-}
-
-async function stubComparePageUnreliable(page, documentId, pageNumber = 1) {
-  await page.route(`**/documents/${documentId}/layout-compare/pages/${pageNumber}**`, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        pageNumber,
-        ssim: 0.42,
-        inkDeviation: 0.2,
-        ssimFloor: 0.97,
-        pageReliable: false,
-        widthPx: 420,
-        heightPx: 560,
-        originalPngBase64:
-          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
-        reconstructionPngBase64:
-          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
-        heatmapPngBase64: null,
-        errorCode: null,
-      }),
-    });
-  });
+  await page.getByTestId('layout-compare-stage').waitFor({ state: 'visible', timeout: 300_000 });
 }
 
 async function stubUnreliableReconstruction(page, documentId) {
@@ -401,7 +322,7 @@ async function main() {
     }
   );
 
-  await stubCompareBaseline(page, brutto.id);
+  await warmupLayoutCompare(page, brutto.id);
   await openDoc(page, brutto.href);
   await captureMatrix(
     page,
@@ -426,7 +347,6 @@ async function main() {
     }
   );
 
-  await stubCompareBaseline(page, brutto.id);
   await openDoc(page, brutto.href);
   await captureMatrix(
     page,
@@ -443,7 +363,6 @@ async function main() {
     }
   );
 
-  await stubCompareBaseline(page, brutto.id, { includeHeatmap: true });
   await openDoc(page, brutto.href);
   await captureMatrix(
     page,
@@ -458,9 +377,8 @@ async function main() {
     }
   );
 
-  await stubCompareBaseline(page, brutto.id, { ssim: 0.42, pageReliable: false });
-  await stubComparePageUnreliable(page, brutto.id, 1);
-  await openDoc(page, brutto.href);
+  await warmupLayoutCompare(page, scanned.id);
+  await openDoc(page, scanned.href);
   await captureMatrix(
     page,
     'layout-compare-unreliable',
@@ -473,7 +391,7 @@ async function main() {
     }
   );
 
-  await stubCompareBaseline(page, manyPages.id, { pageCount: 55 });
+  await warmupLayoutCompare(page, manyPages.id);
   await openDoc(page, manyPages.href);
   await captureMatrix(
     page,
