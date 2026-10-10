@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { contentMatchesRule, shouldAutoAssignTag, shouldSuggestTag } from './matching.js';
 
 describe('contentMatchesRule (Regelbasiertes Matching)', () => {

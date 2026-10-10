@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { CreateFolderRequest, UpdateFolderRequest } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   FOLDER_REPOSITORY,
-  ID_GENERATOR,
-  MAPPE_REPOSITORY,
   type FolderRepository,
+  ID_GENERATOR,
   type IdGenerator,
+  MAPPE_REPOSITORY,
   type MappeRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import { assertFolderDepthAllowed } from '../domain/folder-depth.js';
 
 @Injectable()

@@ -14,9 +14,9 @@ function groupBlocksIntoLines(blocks: ExtractionBlock[], page: number): Extracti
 
   const lines: ExtractionBlock[][] = [];
   for (const block of sorted) {
-    const last = lines[lines.length - 1];
-    if (last && Math.abs(last[0].y - block.y) <= LINE_Y_TOLERANCE) {
-      last.push(block);
+    const lastLine = lines.at(-1);
+    if (lastLine && Math.abs(lastLine[0].y - block.y) <= LINE_Y_TOLERANCE) {
+      lastLine.push(block);
     } else {
       lines.push([block]);
     }

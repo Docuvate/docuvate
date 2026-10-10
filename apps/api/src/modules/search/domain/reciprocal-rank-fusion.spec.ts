@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { reciprocalRankFusion } from './reciprocal-rank-fusion.js';
 
 describe('reciprocalRankFusion', () => {
@@ -15,7 +16,16 @@ describe('reciprocalRankFusion', () => {
         { id: 'c', rank: 2 },
       ],
     ]);
-    expect(scores.get('b')!).toBeGreaterThan(scores.get('a')!);
-    expect(scores.get('b')!).toBeGreaterThan(scores.get('c')!);
+    const scoreB = scores.get('b');
+    const scoreA = scores.get('a');
+    const scoreC = scores.get('c');
+    expect(scoreB).toBeDefined();
+    expect(scoreA).toBeDefined();
+    expect(scoreC).toBeDefined();
+    if (scoreB === undefined || scoreA === undefined || scoreC === undefined) {
+      throw new Error('expected fusion scores');
+    }
+    expect(scoreB).toBeGreaterThan(scoreA);
+    expect(scoreB).toBeGreaterThan(scoreC);
   });
 });

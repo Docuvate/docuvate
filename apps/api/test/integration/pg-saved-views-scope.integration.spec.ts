@@ -1,15 +1,17 @@
 import { randomUUID } from 'node:crypto';
+
 import { afterAll, afterEach, beforeEach, describe, expect, it } from 'vitest';
+
 import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
-import { ValidationError } from '../../src/shared/domain/errors.js';
 import { PgWorkspaceRepository } from '../../src/modules/workspace/infrastructure/pg-workspace.repository.js';
 import { SavedViewScopeValidator } from '../../src/modules/workspace/infrastructure/saved-view-scope.validator.js';
+import { ValidationError } from '../../src/shared/domain/errors.js';
+import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
   insertSyntheticUser,
   newIsolationUserId,
 } from './pg-test-isolation.js';
-import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 
 describe('Saved view filter scope (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();

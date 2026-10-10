@@ -1,15 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash, randomBytes } from 'node:crypto';
+
 import { Inject, Injectable } from '@nestjs/common';
+
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   FOLDER_REPOSITORY,
-  TAXONOMY_REPOSITORY,
   type FolderRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
+import { validateScanFile } from '../domain/scan-file-validation.js';
 import {
   SFTP_INGRESS_ACCOUNT_REPOSITORY,
   SFTP_INGRESS_EVENT_REPOSITORY,
@@ -20,7 +23,6 @@ import type {
   SftpIngressAccountEntity,
   SftpIngressEventEntity,
 } from '../domain/sftp-ingress.types.js';
-import { validateScanFile } from '../domain/scan-file-validation.js';
 import {
   hashSftpIngressPassword,
   verifySftpIngressPassword,
@@ -28,15 +30,16 @@ import {
 import { resolveFolderFromRemotePath } from './resolve-remote-folder.js';
 
 function readMaxBytes(): number {
-  const raw = process.env['DOCUVATE_SFTP_INGEST_MAX_BYTES'];
+  const raw = process.env.DOCUVATE_SFTP_INGEST_MAX_BYTES;
   const parsed = raw ? Number(raw) : 26_214_400;
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 26_214_400;
 }
 
 function readServerInfo() {
-  const host = process.env['DOCUVATE_SFTP_PUBLIC_HOST']?.trim() || 'localhost';
-  const port = Number(process.env['DOCUVATE_SFTP_PUBLIC_PORT'] ?? 2222);
-  const fingerprint = process.env['DOCUVATE_SFTP_HOST_KEY_FINGERPRINT']?.trim() || null;
+  const host = process.env.DOCUVATE_SFTP_PUBLIC_HOST?.trim() ?? 'localhost';
+  const port = Number(process.env.DOCUVATE_SFTP_PUBLIC_PORT ?? 2222);
+  const fingerprintRaw = process.env.DOCUVATE_SFTP_HOST_KEY_FINGERPRINT?.trim() ?? '';
+  const fingerprint = fingerprintRaw.length > 0 ? fingerprintRaw : null;
   return { host, port: Number.isFinite(port) ? port : 2222, hostKeyFingerprintSha256: fingerprint };
 }
 
@@ -120,7 +123,8 @@ export class CreateSftpIngressAccountUseCase {
     if (!/^[a-z0-9][a-z0-9._-]{2,63}$/.test(username)) {
       throw new ValidationError('sftpIngress.errors.usernameInvalid');
     }
-    const folderId = input.folderId?.trim() || null;
+    const folderIdRaw = input.folderId?.trim() ?? '';
+    const folderId = folderIdRaw.length > 0 ? folderIdRaw : null;
     if (folderId) {
       const folder = await this.folders.findByIdForUser(folderId, userId);
       if (!folder) throw new NotFoundError('Folder');
@@ -130,14 +134,12 @@ export class CreateSftpIngressAccountUseCase {
       const tag = await this.taxonomy.findTagByIdForUser(tagId, userId);
       if (!tag) throw new NotFoundError('Tag');
     }
-    const passwordPlain =
-      input.passwordPlain === undefined || input.passwordPlain === null
-        ? generatePassword()
-        : input.passwordPlain;
+    const passwordPlain = input.passwordPlain ?? generatePassword();
     if (passwordPlain && passwordPlain.length < 16) {
       throw new ValidationError('sftpIngress.errors.passwordTooShort');
     }
-    const sshPublicKey = input.sshPublicKey?.trim() || null;
+    const sshPublicKeyRaw = input.sshPublicKey?.trim() ?? '';
+    const sshPublicKey = sshPublicKeyRaw.length > 0 ? sshPublicKeyRaw : null;
     if (!passwordPlain && !sshPublicKey) {
       throw new ValidationError('sftpIngress.errors.authRequired');
     }
@@ -153,7 +155,11 @@ export class CreateSftpIngressAccountUseCase {
       mapSubfolders: Boolean(input.mapSubfolders),
       passwordHash,
     });
-    return { account, passwordPlain: passwordPlain || null, server: readServerInfo() };
+    return {
+      account,
+      passwordPlain: passwordPlain.length > 0 ? passwordPlain : null,
+      server: readServerInfo(),
+    };
   }
 
   private async allocateUsername(userId: string, preferred: string | null): Promise<string> {

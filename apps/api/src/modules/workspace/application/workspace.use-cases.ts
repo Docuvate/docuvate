@@ -1,14 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type {
   CreateSavedDocumentViewRequest,
   ReplaceDashboardLayoutRequest,
   UpdateSavedDocumentViewRequest,
 } from '@docuvate/contracts';
-import { ID_GENERATOR } from '../../../shared/domain/ports.js';
-import type { IdGenerator } from '../../../shared/domain/ports.js';
+import { Inject, Injectable } from '@nestjs/common';
+
 import { ForbiddenError, NotFoundError } from '../../../shared/domain/errors.js';
+import type { IdGenerator } from '../../../shared/domain/ports.js';
+import { ID_GENERATOR } from '../../../shared/domain/ports.js';
+import {
+  assertDashboardWidgetType,
+  parseDashboardWidgetFields,
+} from '../domain/dashboard-widget-config.js';
 import {
   INSTALLATION_ROLE_READER,
   type InstallationRoleReader,
@@ -18,13 +23,9 @@ import {
   assertCanReadView,
   assertCanSetVisibility,
 } from '../domain/saved-view-access.js';
-import {
-  parseDashboardWidgetFields,
-  assertDashboardWidgetType,
-} from '../domain/dashboard-widget-config.js';
+import type { SavedDocumentViewEntity } from '../domain/workspace.types.js';
 import { PgWorkspaceRepository } from '../infrastructure/pg-workspace.repository.js';
 import { SavedViewScopeValidator } from '../infrastructure/saved-view-scope.validator.js';
-import type { SavedDocumentViewEntity } from '../domain/workspace.types.js';
 
 @Injectable()
 export class ListSavedViewsUseCase {

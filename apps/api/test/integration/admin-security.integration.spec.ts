@@ -1,19 +1,22 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+
+import { SetAdminUserRoleUseCase } from '../../src/modules/admin/application/admin.use-cases.js';
 import {
   assertTargetIsNotLastAdministrator,
   countActiveInstallationAdministrators,
 } from '../../src/modules/admin/domain/last-admin.policy.js';
-import { SetAdminUserRoleUseCase } from '../../src/modules/admin/application/admin.use-cases.js';
-import { ForbiddenError } from '../../src/shared/domain/errors.js';
+import type { UserAdministrationPort } from '../../src/modules/admin/domain/user-administration.port.js';
+import { PgUserAdministrationAdapter } from '../../src/modules/admin/infrastructure/pg-user-administration.adapter.js';
+import { INSTALLATION_DB_ROLE_ADMIN } from '../../src/modules/auth/domain/installation.constants.js';
+import { INSTALLATION_TENANT_ID } from '../../src/modules/auth/domain/installation.constants.js';
 import {
   INSTANCE_ROLE_ADMIN,
   INSTANCE_ROLE_MEMBER,
 } from '../../src/modules/auth/domain/instance-role.constants.js';
-import { AdminGuard } from '../../src/shared/infrastructure/auth/admin.guard.js';
-import { PgUserAdministrationAdapter } from '../../src/modules/admin/infrastructure/pg-user-administration.adapter.js';
 import type { AuthorizationSubject } from '../../src/shared/domain/authorization.js';
-import { INSTALLATION_DB_ROLE_ADMIN } from '../../src/modules/auth/domain/installation.constants.js';
-import { INSTALLATION_TENANT_ID } from '../../src/modules/auth/domain/installation.constants.js';
+import { ForbiddenError } from '../../src/shared/domain/errors.js';
+import { AdminGuard } from '../../src/shared/infrastructure/auth/admin.guard.js';
+import { httpExecutionContext } from '../../src/shared/infrastructure/auth/nest-execution-context.spec-util.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 
 describe('admin security (integration)', () => {
@@ -40,8 +43,15 @@ describe('admin security (integration)', () => {
       `INSERT INTO installation_user_roles (user_id, role) VALUES ('self-admin', $1)`,
       [INSTALLATION_DB_ROLE_ADMIN]
     );
-    const users = { setRole: vi.fn() };
-    const useCase = new SetAdminUserRoleUseCase(users as never, pool);
+    const users: UserAdministrationPort = {
+      listUsers: vi.fn(),
+      createUser: vi.fn(),
+      setRole: vi.fn(),
+      banUser: vi.fn(),
+      unbanUser: vi.fn(),
+      revokeSessions: vi.fn(),
+    };
+    const useCase = new SetAdminUserRoleUseCase(users, pool);
 
     await expect(
       useCase.execute({
@@ -52,7 +62,7 @@ describe('admin security (integration)', () => {
       })
     ).rejects.toBeInstanceOf(ForbiddenError);
 
-    expect(users.setRole).not.toHaveBeenCalled();
+    expect(users.setRole).not.toHaveBeenCalled(); // eslint-disable-line @typescript-eslint/unbound-method -- vitest mock on port stub
     await pool.query(`DELETE FROM installation_user_roles WHERE user_id = 'self-admin'`);
     await pool.query(`DELETE FROM "user" WHERE id = 'self-admin'`);
   });
@@ -83,12 +93,8 @@ describe('admin security (integration)', () => {
       roles: [INSTANCE_ROLE_MEMBER],
       claims: ['document:*'],
     };
-    const context = {
-      switchToHttp: () => ({
-        getRequest: () => ({ authSubject: memberSubject }),
-      }),
-    };
-    expect(() => guard.canActivate(context as never)).toThrow(ForbiddenError);
+    const context = httpExecutionContext({ authSubject: memberSubject });
+    expect(() => guard.canActivate(context)).toThrow(ForbiddenError);
   });
 
   it('lists pending invitations as invited', async () => {
@@ -184,8 +190,8 @@ describe('admin security (integration)', () => {
     });
     expect(page2.total).toBe(2);
     expect(page2.users).toHaveLength(1);
-    expect(page1.users[0]!.id).not.toBe(page2.users[0]!.id);
-    expect(new Set([page1.users[0]!.email, page2.users[0]!.email]).size).toBe(2);
+    expect(page1.users[0].id).not.toBe(page2.users[0].id);
+    expect(new Set([page1.users[0].email, page2.users[0].email]).size).toBe(2);
 
     const wildcard = await adapter.listUsers({
       headers: new Headers(),
@@ -265,11 +271,7 @@ describe('admin security (integration)', () => {
       roles: [INSTANCE_ROLE_ADMIN, INSTANCE_ROLE_MEMBER],
       claims: ['document:*', 'admin:*'],
     };
-    const context = {
-      switchToHttp: () => ({
-        getRequest: () => ({ authSubject: adminSubject }),
-      }),
-    };
-    expect(guard.canActivate(context as never)).toBe(true);
+    const context = httpExecutionContext({ authSubject: adminSubject });
+    expect(guard.canActivate(context)).toBe(true);
   });
 });

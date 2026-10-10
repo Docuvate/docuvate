@@ -5,9 +5,10 @@ import type {
   ConnectorConfigurationInput,
   ConnectorValidationResult,
 } from '../../../domain/connector.types.js';
+import { readConnectorConfigString } from '../shared/connector-config-string.js';
+import { connectorFetch } from '../shared/connector-http.js';
 import { requiredFieldsPresent } from '../shared/required-fields.validation.js';
 import { remoteValidationFailed } from '../shared/validation-message.js';
-import { connectorFetch } from '../shared/connector-http.js';
 import { mailOAuthConfigured, mailOAuthSetupStatus } from './mail-oauth.config.js';
 import { openOutlookRuntime } from './outlook-mail.runtime.js';
 
@@ -43,7 +44,7 @@ export class OutlookMailConnector implements ConnectorPlugin {
     if (!tokenCheck.ok) {
       return remoteValidationFailed('connectors.errors.oauthTokenMissing');
     }
-    const accessToken = input['access_token']?.trim() ?? '';
+    const accessToken = readConnectorConfigString(input, 'access_token');
     const response = await connectorFetch('https://graph.microsoft.com/v1.0/me', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });

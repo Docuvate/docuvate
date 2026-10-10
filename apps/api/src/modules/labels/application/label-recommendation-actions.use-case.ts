@@ -1,26 +1,27 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type {
   AcceptLabelRecommendationRequest,
   DismissLabelRecommendationRequest,
 } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   LABEL_EMBEDDING_REPOSITORY,
-  TAXONOMY_REPOSITORY,
-  USER_PREFERENCES_REPOSITORY,
   type LabelEmbeddingRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import { assertTagNameNotNearDuplicate } from '../../../shared/domain/tag-name-uniqueness.js';
+import { cosineSimilarity } from '../domain/cosine.js';
+import { adjustLabelNearThresholdFromFeedback } from '../domain/label-near-threshold.js';
+import { parseAssignRecommendationId } from '../domain/label-recommendation-scoring.js';
 import { normalizeLabelKey } from '../domain/label-vocabulary.js';
 import { phraseFromRecommendationKey } from '../domain/recommendation-blocklist.js';
 import { AssignDocumentTagUseCase } from './document-label.use-cases.js';
-import { adjustLabelNearThresholdFromFeedback } from '../domain/label-near-threshold.js';
-import { parseAssignRecommendationId } from '../domain/label-recommendation-scoring.js';
-import { cosineSimilarity } from '../domain/cosine.js';
 
 @Injectable()
 export class DismissLabelRecommendationUseCase {
@@ -41,7 +42,8 @@ export class DismissLabelRecommendationUseCase {
       return;
     }
     const fromList = (options.phrases ?? []).map((p) => p.trim()).filter((p) => p.length >= 2);
-    const single = options.phrase?.trim() || phraseFromRecommendationKey(recommendationId) || '';
+    const fromKey = phraseFromRecommendationKey(recommendationId) ?? '';
+    const single = options.phrase?.trim() ?? (fromKey.length > 0 ? fromKey : '');
     const phrases = [...new Set(single.length >= 2 ? [...fromList, single] : fromList)];
     for (const phrase of phrases) {
       await this.labelEmbeddings.addRecommendationBlocklist(userId, phrase, 'dismiss');

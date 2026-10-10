@@ -1,5 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  DocumentChatProviderInfo,
+  DocumentChatProvidersCatalogDto,
+  DocumentChatUnavailableBackendInfo,
+  ExtractionEngineInfo,
+  UpdateUserSettingsRequest,
+  UserSettingsDto,
+} from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
@@ -12,15 +20,8 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+
 import { THEME_PREFERENCES, UI_LOCALES } from '../../../modules/settings/domain/ui-preferences.js';
-import type {
-  DocumentChatProviderInfo,
-  DocumentChatProvidersCatalogDto,
-  DocumentChatUnavailableBackendInfo,
-  ExtractionEngineInfo,
-  UpdateUserSettingsRequest,
-  UserSettingsDto,
-} from '@docuvate/contracts';
 
 export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
   @IsOptional()

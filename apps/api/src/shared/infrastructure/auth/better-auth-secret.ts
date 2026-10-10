@@ -26,11 +26,11 @@ export function isForbiddenBetterAuthSecret(secret: string): boolean {
 }
 
 export function assertBetterAuthSecretForRuntime(): void {
-  const nodeEnv = process.env['NODE_ENV'] ?? 'development';
+  const nodeEnv = process.env.NODE_ENV ?? 'development';
   if (nodeEnv !== 'production') {
     return;
   }
-  const secret = process.env['BETTER_AUTH_SECRET']?.trim() ?? '';
+  const secret = process.env.BETTER_AUTH_SECRET?.trim() ?? '';
   if (secret.length < 32) {
     throw new Error('BETTER_AUTH_SECRET must be set to at least 32 characters in production');
   }

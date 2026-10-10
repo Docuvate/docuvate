@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionResult } from '@docuvate/contracts';
-import type { CorrespondentEntity, TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
+
 import type { FolderEntity } from '../../../shared/domain/ports.js';
+import type { CorrespondentEntity, TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 
 export type DocumentStatus = 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
 

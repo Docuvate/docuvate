@@ -9,9 +9,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+import { MlModelFamiliesEntity } from './ml-model-families.entity.js';
 import { MlModelVersionsEntity } from './ml-model-versions.entity.js';
 import { MlRetrainJobsEntity } from './ml-retrain-jobs.entity.js';
-import { MlModelFamiliesEntity } from './ml-model-families.entity.js';
 
 @Index('ml_training_data_snapshots_family_id_dataset_version_key', ['datasetVersion', 'familyId'], {
   unique: true,

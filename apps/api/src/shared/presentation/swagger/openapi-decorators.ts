@@ -9,6 +9,7 @@ import {
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+
 import { ApiErrorEnvelopeDto } from '../dtos/common.dto.js';
 import { ApiDocuvateAuth } from './openapi-security.js';
 

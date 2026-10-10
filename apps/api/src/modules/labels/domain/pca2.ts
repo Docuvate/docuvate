@@ -3,7 +3,7 @@
 function dot(a: number[], b: number[]): number {
   let s = 0;
   for (let i = 0; i < a.length; i++) {
-    s += a[i]! * b[i]!;
+    s += a[i] * b[i];
   }
   return s;
 }
@@ -17,11 +17,11 @@ function scale(v: number[], factor: number): number[] {
 }
 
 function add(a: number[], b: number[]): number[] {
-  return a.map((x, i) => x + b[i]!);
+  return a.map((x, i) => x + b[i]);
 }
 
 function subtract(a: number[], b: number[]): number[] {
-  return a.map((x, i) => x - b[i]!);
+  return a.map((x, i) => x - b[i]);
 }
 
 function matVecMul(rows: number[][], v: number[]): number[] {
@@ -41,11 +41,11 @@ function projectToPrincipalComponents(vectors: number[][], componentCount: numbe
   const mean = new Array<number>(d).fill(0);
   for (const v of vectors) {
     for (let i = 0; i < d; i++) {
-      mean[i]! += v[i]!;
+      mean[i] += v[i];
     }
   }
   for (let i = 0; i < d; i++) {
-    mean[i]! /= n;
+    mean[i] /= n;
   }
 
   const centered = vectors.map((v) => subtract(v, mean));
@@ -62,8 +62,8 @@ function projectToPrincipalComponents(vectors: number[][], componentCount: numbe
       const dual = matVecMul(rows, comp);
       let next = new Array<number>(d).fill(0);
       for (let i = 0; i < n; i++) {
-        const row = rows[i]!;
-        const w = dual[i]!;
+        const row = rows[i];
+        const w = dual[i];
         next = add(next, scale(row, w));
       }
       for (const ex of exclude) {
@@ -90,7 +90,7 @@ function projectToPrincipalComponents(vectors: number[][], componentCount: numbe
 /** Top-two PCA components via power iteration on centered rows (CPU-friendly, no deps). */
 export function projectTo2D(vectors: number[][]): [number, number][] {
   return projectToPrincipalComponents(vectors, 2).map(
-    (coords) => [coords[0] ?? 0, coords[1] ?? 0] as [number, number]
+    (coords): [number, number] => [coords[0] ?? 0, coords[1] ?? 0]
   );
 }
 
@@ -98,8 +98,8 @@ function normalizeAxis(values: number[], pad: number): number[] {
   if (values.length === 0) {
     return [];
   }
-  let min = values[0]!;
-  let max = values[0]!;
+  let min = values[0];
+  let max = values[0];
   for (const v of values) {
     min = Math.min(min, v);
     max = Math.max(max, v);
@@ -118,5 +118,5 @@ export function normalizePlotCoords(coords: [number, number][]): [number, number
   const pad = 0.08;
   const nx = normalizeAxis(xs, pad);
   const ny = normalizeAxis(ys, pad);
-  return nx.map((x, i) => [x, ny[i]!] as [number, number]);
+  return nx.map((x, i): [number, number] => [x, ny[i] ?? 0]);
 }

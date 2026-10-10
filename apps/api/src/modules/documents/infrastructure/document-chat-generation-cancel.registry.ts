@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import type IORedis from 'ioredis';
+
 import { createValkeyConnection } from '../../../shared/infrastructure/valkey/valkey-connection.js';
 
 const KEY_PREFIX = 'chat:gen:cancel:';
@@ -12,9 +13,7 @@ export class DocumentChatGenerationCancelRegistry implements OnModuleDestroy {
   private connection: IORedis | null = null;
 
   private getConnection(): IORedis {
-    if (!this.connection) {
-      this.connection = createValkeyConnection();
-    }
+    this.connection ??= createValkeyConnection();
     return this.connection;
   }
 

@@ -1,13 +1,21 @@
 import { randomUUID } from 'node:crypto';
+
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+
 import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
 import { CITED_CHAT_ABSTENTION_DE } from '../../src/modules/cited-chat/domain/cited-chat-constants.js';
-import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
-import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
-import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
+import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
+import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
+import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
+import {
+  parseRequestJsonRecord,
+  readBooleanProperty,
+  readPassageIds,
+  requestUrl,
+} from '../helpers/json.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -16,8 +24,8 @@ import {
 } from './pg-test-isolation.js';
 
 const noopEmbedding: EmbeddingPort = {
-  async embedTexts(texts: string[]) {
-    return { embeddings: texts.map(() => []), model: 'noop' };
+  embedTexts(texts: string[]) {
+    return Promise.resolve({ embeddings: texts.map(() => []), model: 'noop' });
   },
 };
 
@@ -104,43 +112,46 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
   }
 
   function mockRerankAndOllama(
-    ollamaClaims: Array<{ text: string; source: string; quote: string }>
+    ollamaClaims: { text: string; source: string; quote: string }[]
   ) {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = String(input);
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = requestUrl(input);
         if (url.includes('/v1/rag/retrieve')) {
-          const body = JSON.parse(String(init?.body ?? '{}')) as {
-            passages: Array<{ id: string }>;
-          };
-          const results = body.passages.map((p, i) => ({
-            id: p.id,
+          const body = parseRequestJsonRecord(init);
+          const passageIds = readPassageIds(body);
+          const results = passageIds.map((id, i) => ({
+            id,
             score: 0.95 - i * 0.05,
           }));
-          return new Response(
-            JSON.stringify({
-              results,
-              reranker_used: true,
-              reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
-            }),
-            { status: 200 }
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                results,
+                reranker_used: true,
+                reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
+              }),
+              { status: 200 }
+            )
           );
         }
         if (url.includes('/api/chat')) {
           const payload = JSON.stringify({ claims: ollamaClaims });
-          const reqBody = JSON.parse(String(init?.body ?? '{}')) as { stream?: boolean };
-          if (reqBody.stream) {
-            return ollamaStreamResponse(payload);
+          const reqBody = parseRequestJsonRecord(init);
+          if (readBooleanProperty(reqBody, 'stream')) {
+            return Promise.resolve(ollamaStreamResponse(payload));
           }
-          return new Response(
-            JSON.stringify({
-              message: { content: payload },
-            }),
-            { status: 200 }
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                message: { content: payload },
+              }),
+              { status: 200 }
+            )
           );
         }
-        throw new Error(`unexpected fetch ${url}`);
+        return Promise.reject(new Error(`unexpected fetch ${url}`));
       })
     );
   }
@@ -204,19 +215,21 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
   it('abstains on off-topic question when reranker score is low', async () => {
     vi.stubGlobal(
       'fetch',
-      vi.fn(async (input: RequestInfo | URL) => {
-        const url = String(input);
+      vi.fn((input: RequestInfo | URL) => {
+        const url = requestUrl(input);
         if (url.includes('/v1/rag/retrieve')) {
-          return new Response(
-            JSON.stringify({
-              results: [{ id: 'c1', score: 0.02 }],
-              reranker_used: true,
-              reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
-            }),
-            { status: 200 }
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                results: [{ id: 'c1', score: 0.02 }],
+                reranker_used: true,
+                reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
+              }),
+              { status: 200 }
+            )
           );
         }
-        throw new Error(`unexpected fetch ${url}`);
+        return Promise.reject(new Error(`unexpected fetch ${url}`));
       })
     );
     const threadId = await createLibraryThread();
@@ -234,7 +247,7 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     });
     expect(result.abstained).toBe(true);
     expect(result.content).toBe(CITED_CHAT_ABSTENTION_DE);
-    const citations = await pool.query(
+    const citations = await pool.query<{ n: number }>(
       'SELECT COUNT(*)::int AS n FROM chat_message_citations WHERE message_id = $1',
       [assistant.id]
     );
@@ -309,23 +322,24 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
 
     vi.stubGlobal(
       'fetch',
-      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = String(input);
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = requestUrl(input);
         if (url.includes('/v1/rag/retrieve')) {
-          const body = JSON.parse(String(init?.body ?? '{}')) as {
-            passages: Array<{ id: string }>;
-          };
-          const results = body.passages.map((p, i) => ({
-            id: p.id,
+          const body = parseRequestJsonRecord(init);
+          const passageIds = readPassageIds(body);
+          const results = passageIds.map((id, i) => ({
+            id,
             score: 0.9 - i * 0.05,
           }));
-          return new Response(
-            JSON.stringify({
-              results,
-              reranker_used: true,
-              reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
-            }),
-            { status: 200 }
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                results,
+                reranker_used: true,
+                reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
+              }),
+              { status: 200 }
+            )
           );
         }
         if (url.includes('/api/chat')) {
@@ -343,13 +357,15 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
               },
             ],
           });
-          const reqBody = JSON.parse(String(init?.body ?? '{}')) as { stream?: boolean };
-          if (reqBody.stream) {
-            return ollamaStreamResponse(payload);
+          const reqBody = parseRequestJsonRecord(init);
+          if (readBooleanProperty(reqBody, 'stream')) {
+            return Promise.resolve(ollamaStreamResponse(payload));
           }
-          return new Response(JSON.stringify({ message: { content: payload } }), { status: 200 });
+          return Promise.resolve(
+            new Response(JSON.stringify({ message: { content: payload } }), { status: 200 })
+          );
         }
-        throw new Error(`unexpected fetch ${url}`);
+        return Promise.reject(new Error(`unexpected fetch ${url}`));
       })
     );
     const threadId = await createLibraryThread();

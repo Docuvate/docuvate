@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import pg from 'pg';
+
 import { INSTALLATION_DB_ROLE_ADMIN } from '../modules/auth/domain/installation.constants.js';
 
 async function main(): Promise<void> {
@@ -8,7 +9,7 @@ async function main(): Promise<void> {
   if (!email) {
     throw new Error('Usage: auth:promote-admin <email>');
   }
-  const url = process.env['DATABASE_URL'];
+  const url = process.env.DATABASE_URL;
   if (!url) {
     throw new Error('DATABASE_URL is required');
   }

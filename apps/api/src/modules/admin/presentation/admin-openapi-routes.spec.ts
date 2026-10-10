@@ -2,18 +2,52 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
 
 const openApiPath = resolve(process.cwd(), '../../openapi/docuvate.v1.json');
 
-type OpenApiDoc = {
+interface OpenApiDoc {
   paths: Record<string, Record<string, { operationId?: string }>>;
-};
+}
+
+function isOpenApiOperation(value: unknown): value is { operationId?: string } {
+  return typeof value === 'object' && value !== null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function parseOpenApiDoc(raw: string): OpenApiDoc {
+  const parsed: unknown = JSON.parse(raw);
+  if (typeof parsed !== 'object' || parsed === null || !('paths' in parsed)) {
+    throw new Error('Invalid OpenAPI document');
+  }
+  const pathsRaw: unknown = parsed.paths;
+  if (!isRecord(pathsRaw)) {
+    throw new Error('Invalid OpenAPI paths');
+  }
+  const paths: OpenApiDoc['paths'] = {};
+  for (const [path, methods] of Object.entries(pathsRaw)) {
+    if (typeof methods !== 'object' || methods === null) {
+      continue;
+    }
+    const methodMap: Record<string, { operationId?: string }> = {};
+    for (const [method, operation] of Object.entries(methods)) {
+      if (isOpenApiOperation(operation)) {
+        methodMap[method] = operation;
+      }
+    }
+    paths[path] = methodMap;
+  }
+  return { paths };
+}
 
 const PUBLIC_ADMIN_OPERATIONS = new Set(['getAdminAccess']);
 
 describe('admin OpenAPI routes', () => {
-  const doc = JSON.parse(readFileSync(openApiPath, 'utf8')) as OpenApiDoc;
+  const doc = parseOpenApiDoc(readFileSync(openApiPath, 'utf8'));
 
   const adminRoutes = Object.entries(doc.paths)
     .filter(([path]) => path.startsWith('/admin/'))

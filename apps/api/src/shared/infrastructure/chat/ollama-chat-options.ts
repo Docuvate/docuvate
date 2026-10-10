@@ -5,7 +5,7 @@ const DEFAULT_NUM_PREDICT = 256;
 const DEFAULT_KEEP_ALIVE = '30m';
 
 export function ollamaNumCtx(): number {
-  const raw = process.env['OLLAMA_NUM_CTX'];
+  const raw = process.env.OLLAMA_NUM_CTX;
   if (!raw) {
     return DEFAULT_NUM_CTX;
   }
@@ -14,7 +14,7 @@ export function ollamaNumCtx(): number {
 }
 
 export function ollamaNumPredict(): number {
-  const raw = process.env['OLLAMA_NUM_PREDICT'];
+  const raw = process.env.OLLAMA_NUM_PREDICT;
   if (!raw) {
     return DEFAULT_NUM_PREDICT;
   }
@@ -23,12 +23,13 @@ export function ollamaNumPredict(): number {
 }
 
 export function ollamaKeepAlive(): string {
-  const raw = process.env['OLLAMA_KEEP_ALIVE'];
-  return raw?.trim() || DEFAULT_KEEP_ALIVE;
+  const raw = process.env.OLLAMA_KEEP_ALIVE;
+  const trimmed = raw?.trim();
+  return trimmed && trimmed.length > 0 ? trimmed : DEFAULT_KEEP_ALIVE;
 }
 
 export function ollamaChatIdleTimeoutMs(): number {
-  const raw = process.env['OLLAMA_CHAT_IDLE_TIMEOUT_MS'];
+  const raw = process.env.OLLAMA_CHAT_IDLE_TIMEOUT_MS;
   const fallback = 120_000;
   if (!raw) {
     return fallback;
@@ -44,7 +45,7 @@ function ollamaThinkingDisabled(model: string): boolean {
 
 export function buildOllamaChatBody(
   model: string,
-  messages: Array<{ role: string; content: string }>,
+  messages: { role: string; content: string }[],
   stream: boolean
 ): Record<string, unknown> {
   const body: Record<string, unknown> = {
@@ -60,7 +61,7 @@ export function buildOllamaChatBody(
     },
   };
   if (ollamaThinkingDisabled(model)) {
-    body['think'] = false;
+    body.think = false;
   }
   return body;
 }

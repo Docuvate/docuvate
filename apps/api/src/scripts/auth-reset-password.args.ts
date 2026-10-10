@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-export type AuthResetPasswordCliArgs = {
+export interface AuthResetPasswordCliArgs {
   email: string;
   revokeSessions: boolean;
-};
+}
 
 export function parseAuthResetPasswordArgs(argv: string[]): AuthResetPasswordCliArgs {
   const positional: string[] = [];

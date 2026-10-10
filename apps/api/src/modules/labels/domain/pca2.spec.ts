@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { normalizePlotCoords, projectTo2D } from './pca2.js';
 
 describe('projectTo2D', () => {
@@ -13,8 +14,8 @@ describe('projectTo2D', () => {
     ];
     const coords = projectTo2D(vectors);
     expect(coords).toHaveLength(4);
-    const left = coords[0]![0] + coords[1]![0];
-    const right = coords[2]![0] + coords[3]![0];
+    const left = coords[0][0] + coords[1][0];
+    const right = coords[2][0] + coords[3][0];
     expect(Math.sign(left)).not.toBe(Math.sign(right));
   });
 

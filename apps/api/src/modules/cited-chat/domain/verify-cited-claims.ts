@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
 import {
   bestQuoteMatchScore,
   findQuoteInChunk,
@@ -10,7 +10,6 @@ import {
   resolveQuoteInCandidateChunk,
   validateMatchedSpanNumbers,
 } from './verify-citation-quote.js';
-import { chunkIndexText } from './split-text-chunks-with-spans.js';
 
 export type CitedClaimRejectReason =
   | 'unknown_source'
@@ -48,7 +47,7 @@ export function normalizeCitedSourceLabel(
   if (labels.has(upper)) {
     return upper;
   }
-  const fromPattern = trimmed.match(/\bS\s*(\d+)\b/i);
+  const fromPattern = /\bS\s*(\d+)\b/i.exec(trimmed);
   if (fromPattern) {
     const label = `S${fromPattern[1]}`;
     if (labels.has(label)) {
@@ -67,19 +66,19 @@ export function normalizeCitedSourceLabel(
 export function expandClaimCitations(claim: CitedClaimJson): CitedClaimCitationJson[] {
   if (Array.isArray(claim.citations) && claim.citations.length > 0) {
     return claim.citations.map((c) => ({
-      source: String(c.source ?? '').trim(),
-      quote: String(c.quote ?? '').trim(),
+      source: c.source.trim(),
+      quote: c.quote.trim(),
     }));
   }
   return [
     {
-      source: String(claim.source ?? '').trim(),
-      quote: String(claim.quote ?? '').trim(),
+      source: (claim.source ?? '').trim(),
+      quote: (claim.quote ?? '').trim(),
     },
   ];
 }
 
-type TopRow = { chunk: CitedChatChunkCandidate };
+interface TopRow { chunk: CitedChatChunkCandidate }
 
 type CitationRowResolve =
   | { ok: true; row: TopRow }
@@ -188,8 +187,8 @@ export function verifyCitedClaims(input: {
   for (const claim of input.claims) {
     const claimText = claim.text.trim();
     const citations = expandClaimCitations(claim);
-    const primaryQuote = citations[0]?.quote ?? '';
-    const primarySource = citations[0]?.source ?? claim.source ?? '';
+    const primaryQuote = citations[0].quote;
+    const primarySource = citations[0].source || (claim.source ?? '');
 
     if (!claimText) {
       rejected.push({
@@ -213,11 +212,11 @@ export function verifyCitedClaims(input: {
       continue;
     }
 
-    const resolved: Array<{
+    const resolved: {
       row: TopRow;
       match: NonNullable<ReturnType<typeof resolveQuoteInCandidateChunk>>;
       quote: string;
-    }> = [];
+    }[] = [];
 
     const claimTextForQuoteMatch = citations.length === 1 ? claimText : '';
 

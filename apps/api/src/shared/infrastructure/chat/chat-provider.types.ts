@@ -30,7 +30,7 @@ export interface DocumentChatProvider {
 }
 
 export interface ChatProviderCatalogEntry {
-  id: DocumentChatProviderId | string;
+  id: string;
   label: string;
   description: string;
   available: boolean;

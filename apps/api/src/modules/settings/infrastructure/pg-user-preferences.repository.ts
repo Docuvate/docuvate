@@ -2,10 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
 import type {
   UserPreferencesEntity,
   UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
+import {
+  parseOptionalString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 function parseRequiredLabelIds(raw: unknown): string[] {
@@ -17,36 +22,34 @@ function parseRequiredLabelIds(raw: unknown): string[] {
 
 function mapRow(row: Record<string, unknown>): UserPreferencesEntity {
   return {
-    userId: String(row['user_id']),
-    preferredExtractorEngine: String(row['preferred_extractor_engine']),
-    preferredChatProvider:
-      row['preferred_chat_provider'] != null ? String(row['preferred_chat_provider']) : null,
-    useArenaWinnerAsDefault: Boolean(row['use_arena_winner_as_default']),
-    arenaWinnerEngine:
-      row['arena_winner_engine'] != null ? String(row['arena_winner_engine']) : null,
+    userId: String(row.user_id),
+    preferredExtractorEngine: String(row.preferred_extractor_engine),
+    preferredChatProvider: parseOptionalString(row.preferred_chat_provider),
+    useArenaWinnerAsDefault: Boolean(row.use_arena_winner_as_default),
+    arenaWinnerEngine: parseOptionalString(row.arena_winner_engine),
     labelFieldConfidenceThreshold:
-      row['label_field_confidence_threshold'] != null
-        ? Number(row['label_field_confidence_threshold'])
+      row.label_field_confidence_threshold != null
+        ? Number(row.label_field_confidence_threshold)
         : 0.62,
     labelNearSimilarityThreshold:
-      row['label_near_similarity_threshold'] != null
-        ? Number(row['label_near_similarity_threshold'])
+      row.label_near_similarity_threshold != null
+        ? Number(row.label_near_similarity_threshold)
         : 0.62,
     fieldExtractionConfidenceGateEnabled:
-      row['field_extraction_confidence_gate_enabled'] != null
-        ? Boolean(row['field_extraction_confidence_gate_enabled'])
+      row.field_extraction_confidence_gate_enabled != null
+        ? Boolean(row.field_extraction_confidence_gate_enabled)
         : true,
-    fieldExtractionRequiredLabelIds: parseRequiredLabelIds(row['required_label_ids']),
+    fieldExtractionRequiredLabelIds: parseRequiredLabelIds(row.required_label_ids),
     advancedFeaturesEnabled:
-      row['advanced_features_enabled'] != null ? Boolean(row['advanced_features_enabled']) : false,
+      row.advanced_features_enabled != null ? Boolean(row.advanced_features_enabled) : false,
     themePreference:
-      row['theme_preference'] === 'light' ||
-      row['theme_preference'] === 'dark' ||
-      row['theme_preference'] === 'system'
-        ? row['theme_preference']
+      row.theme_preference === 'light' ||
+      row.theme_preference === 'dark' ||
+      row.theme_preference === 'system'
+        ? row.theme_preference
         : 'system',
-    locale: row['locale'] === 'de' || row['locale'] === 'en' ? row['locale'] : null,
-    updatedAt: new Date(String(row['updated_at'])),
+    locale: row.locale === 'de' || row.locale === 'en' ? row.locale : null,
+    updatedAt: new Date(String(row.updated_at)),
   };
 }
 
@@ -104,7 +107,7 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
     if (result.rows.length === 0) {
       return { userId, ...DEFAULTS };
     }
-    return mapRow(result.rows[0] as Record<string, unknown>);
+    return mapRow(requireRecord(result.rows[0]));
   }
 
   async upsert(

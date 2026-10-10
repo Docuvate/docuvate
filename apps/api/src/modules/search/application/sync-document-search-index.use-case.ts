@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { ExtractionBlock } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
 import { EMBEDDING_PORT, type EmbeddingPort } from '../../../shared/domain/ports.js';
 import {
   attachPagesToChunks,

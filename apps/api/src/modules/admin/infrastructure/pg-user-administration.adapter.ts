@@ -2,14 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { instanceRoleToDbRole } from '../../auth/domain/installation-authorization.js';
 import {
   INSTANCE_ROLE_ADMIN,
   INSTANCE_ROLE_MEMBER,
-  normalizeInstanceRole,
   type InstanceRole,
+  normalizeInstanceRole,
 } from '../../auth/domain/instance-role.constants.js';
-import { instanceRoleToDbRole } from '../../auth/domain/installation-authorization.js';
 import { withLastAdministratorGuard } from '../domain/last-admin.policy.js';
 import type {
   AdminUserListItem,
@@ -20,7 +21,7 @@ function escapeLikePattern(raw: string): string {
   return raw.replace(/\\/g, '\\\\').replace(/%/g, '\\%').replace(/_/g, '\\_');
 }
 
-type DirectoryRow = {
+interface DirectoryRow {
   id: string;
   name: string;
   email: string;
@@ -30,7 +31,7 @@ type DirectoryRow = {
   suspended: boolean;
   sort_at: Date;
   row_kind: 'user' | 'invite';
-};
+}
 
 @Injectable()
 export class PgUserAdministrationAdapter implements UserAdministrationPort {
@@ -48,7 +49,7 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
     let searchClauseInvites = '';
     if (searchRaw) {
       params.push(`%${escapeLikePattern(searchRaw)}%`);
-      const idx = params.length;
+      const idx = String(params.length);
       searchClauseUsers = `AND (lower(u.email) LIKE $${idx} ESCAPE '\\' OR lower(u.name) LIKE $${idx} ESCAPE '\\')`;
       searchClauseInvites = `AND (lower(i.invitee_email) LIKE $${idx} ESCAPE '\\' OR lower(i.invitee_name) LIKE $${idx} ESCAPE '\\')`;
     }
@@ -123,14 +124,16 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
     return { users, total: Number(count.rows[0]?.count ?? users.length) };
   }
 
-  async createUser(_input: {
+  createUser(input: {
     headers: Headers;
     email: string;
     name: string;
     password: string;
     role: InstanceRole;
   }): Promise<AdminUserListItem> {
-    throw new Error('Direct user creation is not supported; use invitations');
+    return Promise.reject(
+      new Error(`Direct user creation is not supported; use invitations (${input.email})`)
+    );
   }
 
   async setRole(input: { headers: Headers; userId: string; role: InstanceRole }): Promise<void> {

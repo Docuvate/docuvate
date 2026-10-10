@@ -10,6 +10,7 @@ import {
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
+
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
 import { DocumentsEntity } from './documents.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';

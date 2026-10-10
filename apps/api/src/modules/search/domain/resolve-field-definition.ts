@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CustomFieldType } from '@docuvate/contracts';
+
 import { normalizeSearchText } from './normalize-search-text.js';
 
 export interface SearchFieldDefinitionRow {
@@ -22,7 +23,7 @@ function foldKey(input: string): string {
 
 /** Resolve palette field filter tokens (fuzzy field name → storage keys). */
 export function resolveFieldFilters(
-  filters: Array<{ fieldNameRaw: string; valueRaw: string }>,
+  filters: { fieldNameRaw: string; valueRaw: string }[],
   defs: SearchFieldDefinitionRow[]
 ): ResolvedFieldFilter[] {
   const resolved: ResolvedFieldFilter[] = [];
@@ -46,7 +47,7 @@ export function resolveFieldFilters(
     resolved.push({
       storageKeys: matches.map((m) => m.storageKey),
       valueRaw: filter.valueRaw,
-      fieldLabel: matches[0]!.label,
+      fieldLabel: matches[0].label,
     });
   }
   return resolved;

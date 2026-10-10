@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne, PrimaryColumn } from 'typeorm';
-import { DocumentsEntity } from './documents.entity.js';
+import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
+import { DocumentsEntity } from './documents.entity.js';
 @Index('document_stack_members_one_primary_idx', ['stackId'], { unique: true })
 @Index('document_stack_members_stack_idx', ['stackId'], {})
 @Entity('document_stack_members', { schema: 'public' })

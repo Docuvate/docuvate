@@ -1,14 +1,16 @@
-import Fastify from 'fastify';
+import Fastify, { type FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
 import { auth } from '../../src/shared/infrastructure/auth/better-auth.config.js';
 import { registerBetterAuthHttpRoutes } from '../../src/shared/infrastructure/auth/register-better-auth-http-routes.js';
+import { parseInjectJsonBody } from '../helpers/fastify-inject.js';
 import { getIntegrationPool } from './pg-pool.js';
 
 const WEB_ORIGIN = 'http://localhost:5173';
 
 describe('better-auth suspended user sign-in (integration)', () => {
   const pool = getIntegrationPool();
-  let app: ReturnType<typeof Fastify>;
+  let app: FastifyInstance;
 
   beforeAll(async () => {
     app = Fastify();
@@ -19,12 +21,12 @@ describe('better-auth suspended user sign-in (integration)', () => {
     await pool.query(`DELETE FROM session`);
     await pool.query(`DELETE FROM account`);
     await pool.query(`DELETE FROM "user"`);
-    process.env['DV_ALLOW_SIGNUP'] = 'true';
+    process.env.DV_ALLOW_SIGNUP = 'true';
   });
 
   afterAll(async () => {
     await app.close();
-    delete process.env['DV_ALLOW_SIGNUP'];
+    delete process.env.DV_ALLOW_SIGNUP;
   });
 
   it('rejects sign-in for a suspended user and creates no session', async () => {
@@ -42,7 +44,10 @@ describe('better-auth suspended user sign-in (integration)', () => {
       [email]
     );
     const userId = userRow.rows[0]?.id;
-    expect(userId).toBeTruthy();
+    expect(userId).toBeDefined();
+    if (!userId) {
+      throw new Error('expected user id after sign-up');
+    }
     await pool.query(`INSERT INTO installation_user_suspensions (user_id) VALUES ($1)`, [userId]);
 
     const signIn = await app.inject({
@@ -53,8 +58,8 @@ describe('better-auth suspended user sign-in (integration)', () => {
     });
     expect(signIn.statusCode).toBeGreaterThanOrEqual(400);
     if (signIn.headers['content-type']?.includes('application/json')) {
-      const body = signIn.json() as { token?: string };
-      expect(body.token).toBeUndefined();
+      const body = parseInjectJsonBody(signIn);
+      expect(body?.token).toBeUndefined();
     }
 
     await pool.query(`DELETE FROM installation_user_suspensions WHERE user_id = $1`, [userId]);

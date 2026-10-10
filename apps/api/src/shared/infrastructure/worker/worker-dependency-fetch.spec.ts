@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { fetchWorkerDependency, workerDependencyTimeoutMs } from './worker-dependency-fetch.js';
 
 describe('workerDependencyTimeoutMs', () => {
@@ -29,7 +30,7 @@ describe('fetchWorkerDependency', () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(
       () =>
         new Promise((_resolve, reject) => {
-          setTimeout(() => reject(new Error('aborted')), 500);
+          setTimeout(() => { reject(new Error('aborted')); }, 500);
         })
     );
 

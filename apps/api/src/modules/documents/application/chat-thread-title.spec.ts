@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { chatThreadTitleFromMessage, DEFAULT_CHAT_THREAD_TITLE } from './chat-thread-title.js';
 
 describe('chatThreadTitleFromMessage', () => {

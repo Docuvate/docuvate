@@ -1,17 +1,22 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
+import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   CreateTagRequestDto,
   TagListResponseDto,
   UpdateTagRequestDto,
 } from '../../../shared/presentation/dtos/taxonomy.dto.js';
-import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   CreateTagUseCase,
   DeleteTagUseCase,
@@ -19,10 +24,6 @@ import {
   UpdateTagUseCase,
 } from '../application/taxonomy.use-cases.js';
 import { toTagDto } from './taxonomy.mapper.js';
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('taxonomy')
 @Controller()

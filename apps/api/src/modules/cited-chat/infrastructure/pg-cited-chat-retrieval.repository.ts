@@ -2,22 +2,24 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
+import { cosineSimilarity } from '../../search/domain/cosine-similarity.js';
 import {
   normalizeSearchText,
   searchTextVariants,
   tokenizeSearchQuery,
 } from '../../search/domain/normalize-search-text.js';
 import {
-  reciprocalRankFusion,
   type RankedItem,
+  reciprocalRankFusion,
 } from '../../search/domain/reciprocal-rank-fusion.js';
-import { cosineSimilarity } from '../../search/domain/cosine-similarity.js';
-import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
-import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
+import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;
+const EMPTY_RANKED_ROWS: { id: string; score: number }[] = [];
 
 export interface CitedChatChunkCandidate {
   chunkId: string;
@@ -74,10 +76,10 @@ export class PgCitedChatRetrievalRepository {
                AND c.search_vector @@ plainto_tsquery('simple', $2::text)
                ${docFilter}
              ORDER BY score DESC
-             LIMIT ${RAG_HYBRID_CANDIDATE_LIMIT}`,
+             LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT)}`,
             [userId, probe, ...docParams]
           )
-        : Promise.resolve({ rows: [] as { id: string; score: number }[] });
+        : Promise.resolve({ rows: EMPTY_RANKED_ROWS });
 
     const trgmParams: unknown[] = [userId, trgmProbes, ...docParams, TRGM_THRESHOLD];
     const trgmThresholdIdx = docParams.length > 0 ? 4 : 3;
@@ -92,12 +94,12 @@ export class PgCitedChatRetrievalRepository {
              WHERE d.user_id = $1
                ${docFilter}
              GROUP BY c.id
-             HAVING MAX(GREATEST(word_similarity(p.token, c.body), similarity(c.body, p.token))) >= $${trgmThresholdIdx}
+             HAVING MAX(GREATEST(word_similarity(p.token, c.body), similarity(c.body, p.token))) >= $${String(trgmThresholdIdx)}
              ORDER BY score DESC
-             LIMIT ${RAG_HYBRID_CANDIDATE_LIMIT}`,
+             LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT)}`,
             trgmParams
           )
-        : Promise.resolve({ rows: [] as { id: string; score: number }[] });
+        : Promise.resolve({ rows: EMPTY_RANKED_ROWS });
 
     const [fts, trgm] = await Promise.all([ftsPromise, trgmPromise]);
 

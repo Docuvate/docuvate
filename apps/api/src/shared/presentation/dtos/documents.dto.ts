@@ -25,8 +25,9 @@ import type {
   SortOrder,
   UpdateDocumentRequest,
 } from '@docuvate/contracts';
-import { ExtractionBlockDto, ExtractedFieldDto } from './common.dto.js';
 import type { ExtractedField } from '@docuvate/contracts';
+
+import { ExtractedFieldDto,ExtractionBlockDto } from './common.dto.js';
 
 const DOCUMENT_STATUSES: DocumentStatus[] = ['uploaded', 'queued', 'extracting', 'ready', 'failed'];
 const SORT_FIELDS: DocumentSortField[] = ['updatedAt', 'createdAt', 'title', 'documentDate'];

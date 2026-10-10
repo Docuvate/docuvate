@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
+import { LoggingPasswordResetMailerAdapter } from './logging-password-reset-mailer.adapter.js';
 import {
   createPasswordResetMailer,
   resolvePasswordResetMailMode,
 } from './password-reset-mailer.factory.js';
-import { LoggingPasswordResetMailerAdapter } from './logging-password-reset-mailer.adapter.js';
 import { SmtpPasswordResetMailerAdapter } from './smtp-password-reset-mailer.adapter.js';
 
 describe('resolvePasswordResetMailMode', () => {

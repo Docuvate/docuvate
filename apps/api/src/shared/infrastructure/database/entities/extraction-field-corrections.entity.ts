@@ -9,8 +9,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ExtractionFieldCorrectionLabelsEntity } from './extraction-field-correction-labels.entity.js';
+
 import { DocumentsEntity } from './documents.entity.js';
+import { ExtractionFieldCorrectionLabelsEntity } from './extraction-field-correction-labels.entity.js';
 import { TagsEntity } from './tags.entity.js';
 import { UserEntity } from './user.entity.js';
 

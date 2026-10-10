@@ -5,11 +5,12 @@ import type {
   DocumentBulkAction,
   DocumentListQuery,
   DuplicateCandidateSource,
+  ExtractedField,
   ExtractionBlock,
   ExtractionResult,
-  ExtractedField,
   MatchingAlgorithm,
 } from '@docuvate/contracts';
+
 import type {
   DocumentEntity,
   DocumentStatus,
@@ -156,13 +157,13 @@ export interface ExtractionPort {
     options?: ExtractionExtractOptions
   ): Promise<ExtractionResult>;
   listEngines(): Promise<
-    Array<{
+    {
       id: string;
       label: string;
       description: string;
       available?: boolean;
       arenaEligible?: boolean;
-    }>
+    }[]
   >;
   compare(
     buffer: Buffer,
@@ -238,14 +239,14 @@ export interface ExtractionFieldCorrectionRecord {
 export interface ExtractionFieldFeedbackRepository {
   insertMany(
     userId: string,
-    rows: Array<{
+    rows: {
       documentId: string;
       fieldKey: string;
       oldValue: string;
       newValue: string;
       labelTagIds: string[];
       fieldTagId: string | null;
-    }>
+    }[]
   ): Promise<number>;
   listForUser(
     userId: string,
@@ -271,12 +272,12 @@ export interface TagCustomFieldRepository {
   replaceForTag(
     tagId: string,
     userId: string,
-    fields: Array<{
+    fields: {
       key: string;
       label: string;
       fieldType: CustomFieldType;
       sortOrder: number;
-    }>
+    }[]
   ): Promise<TagCustomFieldRecord[]>;
 }
 
@@ -300,7 +301,7 @@ export interface RecognizedFieldRepository {
   listForUser(userId: string): Promise<RecognizedFieldRecord[]>;
   replaceForUser(
     userId: string,
-    fields: Array<{
+    fields: {
       key: string;
       label: string;
       fieldType: CustomFieldType;
@@ -310,7 +311,7 @@ export interface RecognizedFieldRepository {
       gateLabelMatch: 'any' | 'all';
       minLabelConfidence: number | null;
       confidenceGateEnabled: boolean | null;
-    }>
+    }[]
   ): Promise<RecognizedFieldRecord[]>;
 }
 

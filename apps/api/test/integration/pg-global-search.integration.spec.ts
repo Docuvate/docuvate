@@ -1,11 +1,12 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
+import { recallAtK,TYPO_SEARCH_CORPUS } from '../../src/modules/search/domain/typo-corpus.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
-import { TYPO_SEARCH_CORPUS, recallAtK } from '../../src/modules/search/domain/typo-corpus.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
-import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 
 describe('PgGlobalSearchRepository (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
@@ -57,8 +58,10 @@ describe('PgGlobalSearchRepository (Testcontainers Postgres)', () => {
       if (recallAtK(titles, c.expectedTitleNeedle, 5)) hits += 1;
     }
     const recall = hits / TYPO_SEARCH_CORPUS.length;
-    // eslint-disable-next-line no-console -- benchmark artifact for PR report
-    console.info(`typo_corpus_recall_at_5=${recall.toFixed(3)} n=${TYPO_SEARCH_CORPUS.length}`);
+     
+    console.info(
+      `typo_corpus_recall_at_5=${recall.toFixed(3)} n=${String(TYPO_SEARCH_CORPUS.length)}`
+    );
     expect(recall).toBeGreaterThanOrEqual(0.75);
   });
 

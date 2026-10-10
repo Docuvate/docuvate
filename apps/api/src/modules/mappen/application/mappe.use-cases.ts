@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { CreateMappeRequest, UpdateMappeRequest } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   ID_GENERATOR,
-  MAPPE_REPOSITORY,
   type IdGenerator,
+  MAPPE_REPOSITORY,
   type MappeRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 
 @Injectable()
 export class ListMappenUseCase {
@@ -29,7 +30,8 @@ export class CreateMappeUseCase {
   async execute(userId: string, body: CreateMappeRequest) {
     const name = body.name.trim();
     if (!name) throw new ValidationError('Mappe name is required');
-    const color = body.color?.trim() || null;
+    const colorTrimmed = body.color?.trim();
+    const color = colorTrimmed && colorTrimmed.length > 0 ? colorTrimmed : null;
     return this.mappen.create(this.ids.generate(), userId, name, color);
   }
 }

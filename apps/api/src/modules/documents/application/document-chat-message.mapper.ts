@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CitedChatBenchStatsDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
+
 import type { DocumentChatMessageEntity } from '../../../shared/domain/ports.js';
 import { parseCitedChatBenchStatsPayload } from '../../cited-chat/domain/cited-chat-bench-stats.js';
 import { normalizeLegacyAssistantStatus } from './document-chat-generation-status.js';

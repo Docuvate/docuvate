@@ -51,17 +51,17 @@ function parseGermanDate(text: string): string | null {
     const m = Number(dotted[2]);
     const y = Number(dotted[3]);
     if (m >= 1 && m <= 12 && d >= 1 && d <= 31) {
-      return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      return `${String(y)}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     }
   }
   const named = /^(\d{1,2})\.\s*([\p{L}]+)\s+(\d{4})$/u.exec(trimmed.toLowerCase());
   if (named) {
     const day = Number(named[1]);
-    const monthWord = named[2]!.normalize('NFKC');
+    const monthWord = named[2].normalize('NFKC');
     const year = Number(named[3]);
     const month = MONTH_DE[monthWord] ?? MONTH_EN[monthWord];
     if (month && day >= 1 && day <= 31) {
-      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      return `${String(year)}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
   }
   const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
@@ -70,12 +70,12 @@ function parseGermanDate(text: string): string | null {
   }
   const enNamed = /^([\p{L}]+)\s+(\d{1,2}),?\s+(\d{4})$/u.exec(trimmed.toLowerCase());
   if (enNamed) {
-    const monthWord = enNamed[1]!;
+    const monthWord = enNamed[1];
     const day = Number(enNamed[2]);
     const year = Number(enNamed[3]);
     const month = MONTH_EN[monthWord];
     if (month && day >= 1 && day <= 31) {
-      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      return `${String(year)}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
   }
   return null;
@@ -87,7 +87,7 @@ function parseAmount(text: string): number | null {
   s = s.replace(/\s+/g, ' ').trim();
   const match = /(-?\d[\d.,]*)/.exec(s);
   if (!match) return null;
-  let num = match[1]!;
+  let num = match[1];
   const hasComma = num.includes(',');
   const hasDot = num.includes('.');
   if (hasComma && hasDot) {

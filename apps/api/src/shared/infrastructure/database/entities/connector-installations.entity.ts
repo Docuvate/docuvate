@@ -9,8 +9,9 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserEntity } from './user.entity.js';
+
 import { SftpPullSyncStateEntity } from './sftp-pull-sync-state.entity.js';
+import { UserEntity } from './user.entity.js';
 
 @Index('connector_installations_user_id_plugin_id_key', ['pluginId', 'userId'], { unique: true })
 @Index('connector_installations_user_idx', ['userId'], {})

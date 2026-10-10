@@ -1,7 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { type ExtractedField,type ExtractionBlock, suggestionStorageKey } from '@docuvate/contracts';
 import type pg from 'pg';
-import { suggestionStorageKey, type ExtractionBlock, type ExtractedField } from '@docuvate/contracts';
+
+import {
+  parseNumber,
+  parseOptionalNumber,
+  parseString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import {
   loadDocumentFieldValues,
   replaceDocumentFieldValues,
@@ -11,7 +18,7 @@ type Db = pg.Pool | pg.PoolClient;
 
 export function mergeExtractionFieldRows(
   fields: ExtractedField[],
-  fieldSuggestions: Array<{ key: string; value: string; confidence?: number }> = []
+  fieldSuggestions: { key: string; value: string; confidence?: number }[] = []
 ): ExtractedField[] {
   const rows = [...fields];
   for (const suggestion of fieldSuggestions) {
@@ -58,7 +65,7 @@ export async function replaceDocumentExtractionBlocks(
         block.y,
         block.width,
         block.height,
-        block.text ?? '',
+        block.text,
       ]
     );
   }
@@ -77,18 +84,20 @@ async function loadBlocks(
      ORDER BY document_id, position`,
     [documentIds]
   );
-  for (const row of result.rows) {
-    const documentId = String(row['document_id']);
+  for (const raw of result.rows) {
+    const row = requireRecord(raw);
+    const documentId = parseString(row.document_id);
     const block: ExtractionBlock = {
-      page: Number(row['page']),
-      x: Number(row['x']),
-      y: Number(row['y']),
-      width: Number(row['width']),
-      height: Number(row['height']),
-      text: String(row['text'] ?? ''),
+      page: parseNumber(row.page),
+      x: parseNumber(row.x),
+      y: parseNumber(row.y),
+      width: parseNumber(row.width),
+      height: parseNumber(row.height),
+      text: parseString(row.text),
     };
-    if (row['block_index'] != null) {
-      block.blockIndex = Number(row['block_index']);
+    const blockIndex = parseOptionalNumber(row.block_index);
+    if (blockIndex != null) {
+      block.blockIndex = blockIndex;
     }
     const list = out.get(documentId) ?? [];
     list.push(block);

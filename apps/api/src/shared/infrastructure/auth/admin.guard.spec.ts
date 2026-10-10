@@ -1,40 +1,37 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { ForbiddenError } from '../../domain/errors.js';
 import { AdminGuard } from './admin.guard.js';
-import type { AuthenticatedRequest } from './auth.guard.js';
+import { httpExecutionContext } from './nest-execution-context.spec-util.js';
 
 describe('AdminGuard', () => {
   const guard = new AdminGuard();
 
   it('denies members', () => {
-    const req = {
+    const context = httpExecutionContext({
       authSubject: {
-        kind: 'user' as const,
+        kind: 'user',
         id: 'u1',
         tenantId: 'u1',
         roles: ['member'],
         claims: ['document:*'],
       },
-    } as unknown as AuthenticatedRequest;
-    expect(() =>
-      guard.canActivate({ switchToHttp: () => ({ getRequest: () => req }) } as never)
-    ).toThrow(ForbiddenError);
+    });
+    expect(() => guard.canActivate(context)).toThrow(ForbiddenError);
   });
 
   it('allows administrators', () => {
-    const req = {
+    const context = httpExecutionContext({
       authSubject: {
-        kind: 'user' as const,
+        kind: 'user',
         id: 'u1',
         tenantId: 'u1',
         roles: ['admin', 'member'],
         claims: ['document:*', 'admin:*'],
       },
-    } as unknown as AuthenticatedRequest;
-    expect(guard.canActivate({ switchToHttp: () => ({ getRequest: () => req }) } as never)).toBe(
-      true
-    );
+    });
+    expect(guard.canActivate(context)).toBe(true);
   });
 });

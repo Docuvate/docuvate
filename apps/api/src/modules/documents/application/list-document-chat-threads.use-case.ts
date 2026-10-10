@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import type { DocumentChatThreadEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
@@ -8,9 +12,6 @@ import {
   type DocumentChatThreadRepository,
   type DocumentRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 
 @Injectable()
 export class ListDocumentChatThreadsUseCase {

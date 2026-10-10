@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { ForbiddenError } from '../../../shared/domain/errors.js';
 import {
   assertCanMutateView,
@@ -39,25 +40,24 @@ const baseView = (overrides: Partial<SavedDocumentViewEntity> = {}): SavedDocume
 
 describe('saved view access', () => {
   it('allows owner to read private views', () => {
-    expect(() => assertCanReadView('owner', baseView())).not.toThrow();
+    expect(() => { assertCanReadView('owner', baseView()); }).not.toThrow();
   });
 
   it('denies other users private views', () => {
-    expect(() => assertCanReadView('other', baseView())).toThrow(ForbiddenError);
+    expect(() => { assertCanReadView('other', baseView()); }).toThrow(ForbiddenError);
   });
 
   it('allows any user to read shared views', () => {
-    expect(() => assertCanReadView('other', baseView({ visibility: 'shared' }))).not.toThrow();
+    expect(() => { assertCanReadView('other', baseView({ visibility: 'shared' })); }).not.toThrow();
   });
 
   it('allows admin to mutate shared views they do not own', () => {
-    expect(() =>
-      assertCanMutateView('admin', true, baseView({ visibility: 'shared', ownerUserId: 'owner' }))
+    expect(() => { assertCanMutateView('admin', true, baseView({ visibility: 'shared', ownerUserId: 'owner' })); }
     ).not.toThrow();
   });
 
   it('requires admin to publish shared visibility', () => {
-    expect(() => assertCanSetVisibility(false, 'shared')).toThrow(ForbiddenError);
-    expect(() => assertCanSetVisibility(true, 'shared')).not.toThrow();
+    expect(() => { assertCanSetVisibility(false, 'shared'); }).toThrow(ForbiddenError);
+    expect(() => { assertCanSetVisibility(true, 'shared'); }).not.toThrow();
   });
 });

@@ -1,20 +1,21 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
-import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 import { GlobalSearchUseCase } from '../../src/modules/search/application/global-search.use-case.js';
 import {
   FIELD_TYPO_SEARCH_CORPUS,
   recallFieldAtK,
 } from '../../src/modules/search/domain/field-typo-corpus.js';
 import { replaceDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
+import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
-import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 
 const noopEmbedding: EmbeddingPort = {
-  async embedTexts(texts: string[]) {
-    return { embeddings: texts.map(() => []), model: 'noop' };
+  embedTexts(texts: string[]) {
+    return Promise.resolve({ embeddings: texts.map(() => []), model: 'noop' });
   },
 };
 
@@ -92,9 +93,9 @@ describe('Global search field values (Testcontainers Postgres)', () => {
       }
     }
     const recall = hits / FIELD_TYPO_SEARCH_CORPUS.length;
-    // eslint-disable-next-line no-console -- PR benchmark artifact
+     
     console.info(
-      `field_typo_corpus_recall_at_5=${recall.toFixed(3)} n=${FIELD_TYPO_SEARCH_CORPUS.length}`
+      `field_typo_corpus_recall_at_5=${recall.toFixed(3)} n=${String(FIELD_TYPO_SEARCH_CORPUS.length)}`
     );
     expect(recall).toBeGreaterThanOrEqual(0.75);
   });

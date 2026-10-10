@@ -13,7 +13,7 @@ export const RAG_RERANKER_GATE_MIN_DEFAULT = 0.21;
 export const RAG_FUSION_GATE_MIN_DEFAULT = 0.02;
 
 export function ragRerankerGateThreshold(): number {
-  const raw = process.env['RAG_RERANKER_GATE_MIN'];
+  const raw = process.env.RAG_RERANKER_GATE_MIN;
   if (!raw) {
     return RAG_RERANKER_GATE_MIN_DEFAULT;
   }
@@ -22,11 +22,11 @@ export function ragRerankerGateThreshold(): number {
 }
 
 export function citedChatBenchStatsEnabled(): boolean {
-  return process.env['DOCUVATE_CITED_CHAT_BENCH_STATS']?.toLowerCase() === '1';
+  return process.env.DOCUVATE_CITED_CHAT_BENCH_STATS?.toLowerCase() === '1';
 }
 
 export function ragFusionGateThreshold(): number {
-  const raw = process.env['RAG_FUSION_GATE_MIN'];
+  const raw = process.env.RAG_FUSION_GATE_MIN;
   if (!raw) {
     return RAG_FUSION_GATE_MIN_DEFAULT;
   }

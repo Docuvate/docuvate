@@ -2,23 +2,31 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import type {
-  FolderRepository,
   FolderEntity,
   FolderListItem,
+  FolderRepository,
 } from '../../../shared/domain/ports.js';
+import {
+  parseDate,
+  parseNumber,
+  parseOptionalString,
+  parseString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
 
 function mapRow(row: Record<string, unknown>): FolderEntity {
   return {
-    id: String(row['id']),
-    userId: String(row['user_id']),
-    name: String(row['name']),
-    parentId: row['parent_id'] != null ? String(row['parent_id']) : null,
-    mappeId: row['mappe_id'] != null ? String(row['mappe_id']) : null,
-    createdAt: new Date(String(row['created_at'])),
-    updatedAt: new Date(String(row['updated_at'])),
+    id: parseString(row.id),
+    userId: parseString(row.user_id),
+    name: parseString(row.name),
+    parentId: parseOptionalString(row.parent_id),
+    mappeId: parseOptionalString(row.mappe_id),
+    createdAt: parseDate(row.created_at),
+    updatedAt: parseDate(row.updated_at),
   };
 }
 
@@ -40,10 +48,13 @@ export class PgFolderRepository implements FolderRepository {
        ORDER BY f.name ASC`,
       [userId]
     );
-    return result.rows.map((row) => ({
-      ...mapRow(row),
-      documentCount: Number(row['document_count'] ?? 0),
-    }));
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return {
+        ...mapRow(row),
+        documentCount: parseNumber(row.document_count, 0),
+      };
+    });
   }
 
   async findByIdForUser(id: string, userId: string): Promise<FolderEntity | null> {
@@ -51,7 +62,8 @@ export class PgFolderRepository implements FolderRepository {
       id,
       userId,
     ]);
-    return result.rows[0] ? mapRow(result.rows[0]) : null;
+    const raw: unknown = result.rows[0];
+    return raw ? mapRow(requireRecord(raw)) : null;
   }
 
   async create(
@@ -67,7 +79,7 @@ export class PgFolderRepository implements FolderRepository {
        RETURNING *`,
       [id, userId, name.trim(), parentId, mappeId]
     );
-    return mapRow(result.rows[0]!);
+    return mapRow(requireRecord(result.rows[0]));
   }
 
   async update(
@@ -87,7 +99,7 @@ export class PgFolderRepository implements FolderRepository {
        WHERE id = $1 AND user_id = $2 RETURNING *`,
       [id, userId, name, parentId, mappeId]
     );
-    return mapRow(result.rows[0]!);
+    return mapRow(requireRecord(result.rows[0]));
   }
 
   async delete(id: string, userId: string): Promise<void> {

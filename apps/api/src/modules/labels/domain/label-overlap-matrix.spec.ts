@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { buildLabelOverlapMatrix } from './label-overlap-matrix.js';
 
 describe('buildLabelOverlapMatrix', () => {
@@ -26,10 +27,13 @@ describe('buildLabelOverlapMatrix', () => {
       },
     ]);
     expect(matrix).not.toBeNull();
-    expect(matrix!.similarities.length).toBe(3);
+    if (matrix === null) {
+      throw new Error('expected overlap matrix');
+    }
+    expect(matrix.similarities.length).toBe(3);
     expect(
-      matrix!.highOverlapPairs.some((p) => p.tagNameA === 'Alpha' || p.tagNameB === 'Alpha')
+      matrix.highOverlapPairs.some((p) => p.tagNameA === 'Alpha' || p.tagNameB === 'Alpha')
     ).toBe(true);
-    expect(matrix!.highOverlapPairs[0]?.mergeRecommendationId.startsWith('merge:')).toBe(true);
+    expect(matrix.highOverlapPairs[0]?.mergeRecommendationId.startsWith('merge:')).toBe(true);
   });
 });

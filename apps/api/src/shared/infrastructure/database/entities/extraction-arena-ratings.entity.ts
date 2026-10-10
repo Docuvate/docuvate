@@ -9,8 +9,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ExtractionArenaRatingComparedEnginesEntity } from './extraction-arena-rating-compared-engines.entity.js';
+
 import { DocumentsEntity } from './documents.entity.js';
+import { ExtractionArenaRatingComparedEnginesEntity } from './extraction-arena-rating-compared-engines.entity.js';
 import { UserEntity } from './user.entity.js';
 
 @Index('extraction_arena_ratings_user_idx', ['createdAt', 'userId'], {})

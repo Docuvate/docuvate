@@ -2,15 +2,21 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
 import type { MigrationInterface, QueryRunner } from 'typeorm';
+
+import { normalizeFieldValue } from '../../../../modules/search/domain/normalize-field-value.js';
 import {
   defaultFieldLabel,
-  loadFieldDefinitionLookup,
-  toDocumentFieldValueRow,
   type FieldDefinitionLookup,
+  loadFieldDefinitionLookup,
   type SqlQueryable,
+  toDocumentFieldValueRow,
 } from '../../../../modules/search/infrastructure/document-field-value-index.js';
-import { normalizeFieldValue } from '../../../../modules/search/domain/normalize-field-value.js';
+import {
+  parseString,
+  requireRecord,
+} from '../row-parse.js';
 
 async function loadSql(name: string): Promise<string> {
   return readFile(join(__dirname, 'sql', name), 'utf8');
@@ -18,9 +24,17 @@ async function loadSql(name: string): Promise<string> {
 
 function queryable(queryRunner: QueryRunner): SqlQueryable {
   return {
-    query: async (sql, params) => ({
-      rows: (await queryRunner.query(sql, params)) as Array<Record<string, unknown>>,
-    }),
+    query: async (sql, params) => {
+      const raw: unknown = await queryRunner.query(sql, params);
+      if (!Array.isArray(raw)) {
+        return { rows: [] };
+      }
+      const rows: Record<string, unknown>[] = [];
+      for (const item of raw) {
+        rows.push(requireRecord(item));
+      }
+      return { rows };
+    },
   };
 }
 
@@ -32,18 +46,26 @@ interface StoredFieldValue {
 }
 
 async function readStoredFieldValues(queryRunner: QueryRunner): Promise<StoredFieldValue[]> {
-  const rows: Array<Record<string, unknown>> = await queryRunner.query(
+  const raw: unknown = await queryRunner.query(
     `SELECT v.document_id, d.user_id, v.field_storage_key, v.value_text
      FROM document_field_values v
      JOIN documents d ON d.id = v.document_id
      ORDER BY d.user_id, v.document_id, v.field_storage_key`
   );
-  return rows.map((row) => ({
-    documentId: String(row['document_id']),
-    userId: String(row['user_id']),
-    storageKey: String(row['field_storage_key']),
-    valueText: String(row['value_text'] ?? ''),
-  }));
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const out: StoredFieldValue[] = [];
+  for (const item of raw) {
+    const row = requireRecord(item);
+    out.push({
+      documentId: parseString(row.document_id),
+      userId: parseString(row.user_id),
+      storageKey: parseString(row.field_storage_key),
+      valueText: parseString(row.value_text),
+    });
+  }
+  return out;
 }
 
 async function loadDefinitionsByUser(
@@ -82,7 +104,7 @@ export class SchemaNormalization3nf20261008131000 implements MigrationInterface 
         value.storageKey,
         value.valueText,
         null,
-        defsByUser.get(value.userId) ?? new Map()
+        defsByUser.get(value.userId) ?? new Map<string, FieldDefinitionLookup>()
       );
       await queryRunner.query(
         `UPDATE document_field_values

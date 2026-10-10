@@ -23,5 +23,5 @@ export function globalFieldStorageKey(fieldKey: string): string {
 
 export function parseGlobalFieldStorageKey(storageKey: string): string | null {
   const match = /^global:([a-z0-9_]+)$/i.exec(storageKey);
-  return match ? match[1]! : null;
+  return match ? match[1] : null;
 }

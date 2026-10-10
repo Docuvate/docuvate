@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import type pg from 'pg';
+
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   INSTALLATION_DB_ROLE_MEMBER,
@@ -9,12 +10,12 @@ import {
 } from '../domain/installation.constants.js';
 import { dbRoleToInstanceRole } from '../domain/installation-authorization.js';
 
-export type InstallationMembership = {
+export interface InstallationMembership {
   userId: string;
   dbRole: InstallationDbRole;
   suspended: boolean;
   suspensionReason: string | null;
-};
+}
 
 @Injectable()
 export class InstallationMembershipService {
@@ -40,8 +41,8 @@ export class InstallationMembershipService {
        LIMIT 1`,
       [userId]
     );
-    const row = result.rows[0];
-    if (!row) {
+    const row = result.rows.at(0);
+    if (row === undefined) {
       throw new UnauthorizedException('Not authenticated');
     }
     return {

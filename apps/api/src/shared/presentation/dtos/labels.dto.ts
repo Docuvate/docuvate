@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { IsArray, IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
 import type {
   AddLabelRecommendationBlocklistRequest,
   ConfirmLabelRecommendationBlocklistPatternRequest,
@@ -12,6 +11,7 @@ import type {
   LabelRecommendationDto,
   ProposeLabelRecommendationBlocklistPatternRequest,
 } from '@docuvate/contracts';
+import { IsArray, IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class AcceptLabelRecommendationRequestDto {
   @IsOptional()

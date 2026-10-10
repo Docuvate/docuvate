@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
+
 import type {
   AuthorizationAction,
   AuthorizationDecision,
@@ -19,7 +20,7 @@ const ACTION_CLAIM: Record<AuthorizationAction, string> = {
 };
 
 function parseDeniedStatuses(): Set<string> {
-  const raw = process.env['ABAC_DENY_DOCUMENT_STATUSES'];
+  const raw = process.env.ABAC_DENY_DOCUMENT_STATUSES;
   if (!raw?.trim()) return new Set();
   return new Set(
     raw
@@ -42,18 +43,18 @@ function hasClaim(subject: AuthorizationSubject, claim: string): boolean {
 export class AbacAuthorizationAdapter implements AuthorizationPort {
   private readonly deniedStatuses = parseDeniedStatuses();
 
-  async authorize(request: AuthorizationRequest): Promise<AuthorizationDecision> {
+  authorize(request: AuthorizationRequest): Promise<AuthorizationDecision> {
     const { subject, action, resource } = request;
 
     if (!subject.tenantId) {
-      return 'deny';
+      return Promise.resolve('deny');
     }
 
     if (!resource) {
       if (action === 'document:list') {
-        return this.allowCollectionList(subject) ? 'allow' : 'deny';
+        return Promise.resolve(this.allowCollectionList(subject) ? 'allow' : 'deny');
       }
-      return 'deny';
+      return Promise.resolve('deny');
     }
 
     const ownsResource =
@@ -61,23 +62,19 @@ export class AbacAuthorizationAdapter implements AuthorizationPort {
         ? subject.id === resource.ownerId
         : subject.tenantId === resource.ownerId;
     if (!ownsResource) {
-      return 'deny';
+      return Promise.resolve('deny');
     }
 
     if (this.deniedStatuses.has(resource.status) && this.isReadFamily(action)) {
-      return 'deny';
+      return Promise.resolve('deny');
     }
 
     if (subject.kind === 'user') {
-      return 'allow';
+      return Promise.resolve('allow');
     }
 
-    if (subject.kind === 'service') {
-      const required = ACTION_CLAIM[action];
-      return hasClaim(subject, required) ? 'allow' : 'deny';
-    }
-
-    return 'deny';
+    const required = ACTION_CLAIM[action];
+    return Promise.resolve(hasClaim(subject, required) ? 'allow' : 'deny');
   }
 
   private allowCollectionList(subject: AuthorizationSubject): boolean {

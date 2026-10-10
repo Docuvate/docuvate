@@ -9,10 +9,11 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { MlCanaryEvaluationsEntity } from './ml-canary-evaluations.entity.js';
 import { MlModelFamiliesEntity } from './ml-model-families.entity.js';
-import { MlTrainingDataSnapshotsEntity } from './ml-training-data-snapshots.entity.js';
 import { MlRetrainJobsEntity } from './ml-retrain-jobs.entity.js';
+import { MlTrainingDataSnapshotsEntity } from './ml-training-data-snapshots.entity.js';
 
 @Index('ml_model_versions_family_lifecycle_idx', ['familyId', 'lifecycle'], {})
 @Index('ml_model_versions_family_id_version_tag_key', ['familyId', 'versionTag'], { unique: true })

@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
+
+import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
 import { ValidationError } from '../../../shared/domain/errors.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type {
@@ -10,6 +12,7 @@ import type {
   CreateConnectorInstallationInput,
 } from '../domain/connector.ports.js';
 import type { ConnectorInstallationEntity, ConnectorPluginId } from '../domain/connector.types.js';
+import { parseConnectorPluginId } from './connector-plugin-id.parse.js';
 import {
   decryptConnectorCredentials,
   encryptConnectorCredentials,
@@ -33,7 +36,7 @@ function mapRow(row: InstallationRow): ConnectorInstallationEntity {
   return {
     id: row.id,
     userId: row.user_id,
-    pluginId: row.plugin_id as ConnectorPluginId,
+    pluginId: parseConnectorPluginId(row.plugin_id),
     displayName: row.display_name,
     enabled: row.enabled,
     createdAt: row.created_at,
@@ -55,8 +58,8 @@ export class PgConnectorInstallationRepository implements ConnectorInstallationR
        WHERE id = $1 AND user_id = $2`,
       [installationId, userId]
     );
-    const row = result.rows[0];
-    if (!row) {
+    const row = result.rows.at(0);
+    if (row === undefined) {
       return null;
     }
     return {
@@ -87,7 +90,7 @@ export class PgConnectorInstallationRepository implements ConnectorInstallationR
          RETURNING id, user_id, plugin_id, display_name, enabled, created_at, updated_at`,
         [id, input.userId, input.pluginId, input.displayName, encrypted]
       );
-      const row = mapRow(result.rows[0]!);
+      const row = mapRow(result.rows[0]);
       if (input.pluginId === 'paperless') {
         await this.pool.query(
           `INSERT INTO connector_paperless_settings (installation_id) VALUES ($1)

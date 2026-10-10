@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
-  OBJECT_STORAGE,
   type DocumentRepository,
+  OBJECT_STORAGE,
   type ObjectStorage,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 
 export interface DocumentContentResult {
   buffer: Buffer;

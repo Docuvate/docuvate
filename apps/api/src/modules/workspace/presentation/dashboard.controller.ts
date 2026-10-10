@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   DashboardLayoutResponseDto,

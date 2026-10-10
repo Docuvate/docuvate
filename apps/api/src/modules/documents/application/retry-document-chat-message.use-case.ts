@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import type { DocumentChatMessageEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
   type DocumentChatThreadRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import { DocumentChatGenerationQueueService } from '../infrastructure/document-chat-generation-queue.service.js';
 
 @Injectable()
@@ -25,7 +26,10 @@ export class RetryDocumentChatMessageUseCase {
   ): Promise<DocumentChatMessageEntity> {
     await this.threads.assertThreadLinkedToDocument(threadId, documentId, userId);
     const message = await this.threads.findMessageForUser(messageId, userId);
-    if (!message || message.threadId !== threadId || message.role !== 'assistant') {
+    if (!message) {
+      throw new NotFoundError('Chat message');
+    }
+    if (message.threadId !== threadId || message.role !== 'assistant') {
       throw new NotFoundError('Chat message');
     }
     if (message.generationStatus !== 'failed') {
@@ -35,7 +39,7 @@ export class RetryDocumentChatMessageUseCase {
     const allMessages = await this.threads.listMessages(threadId, userId);
     const index = allMessages.findIndex((m) => m.id === messageId);
     const userMessage = index > 0 ? allMessages[index - 1] : null;
-    if (!userMessage || userMessage.role !== 'user') {
+    if (userMessage?.role !== 'user') {
       throw new ValidationError('Keine zugehörige Nutzerfrage gefunden.');
     }
 
@@ -56,11 +60,14 @@ export class RetryDocumentChatMessageUseCase {
     userId: string
   ): Promise<DocumentChatMessageEntity> {
     const thread = await this.threads.findThreadForUser(threadId, userId);
-    if (!thread || thread.scope !== 'library') {
+    if (thread?.scope !== 'library') {
       throw new NotFoundError('Chat thread');
     }
     const message = await this.threads.findMessageForUser(messageId, userId);
-    if (!message || message.threadId !== threadId || message.role !== 'assistant') {
+    if (!message) {
+      throw new NotFoundError('Chat message');
+    }
+    if (message.threadId !== threadId || message.role !== 'assistant') {
       throw new NotFoundError('Chat message');
     }
     if (message.generationStatus !== 'failed') {
@@ -70,7 +77,7 @@ export class RetryDocumentChatMessageUseCase {
     const allMessages = await this.threads.listMessages(threadId, userId);
     const index = allMessages.findIndex((m) => m.id === messageId);
     const userMessage = index > 0 ? allMessages[index - 1] : null;
-    if (!userMessage || userMessage.role !== 'user') {
+    if (userMessage?.role !== 'user') {
       throw new ValidationError('Keine zugehörige Nutzerfrage gefunden.');
     }
 

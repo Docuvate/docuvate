@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export function formatVerifiedCitedContent(
-  verified: Array<{ text: string; ordinal: number }>
+  verified: { text: string; ordinal: number }[]
 ): string {
   const seenOrdinals = new Set<number>();
   const parts: string[] = [];
@@ -10,7 +10,7 @@ export function formatVerifiedCitedContent(
       continue;
     }
     seenOrdinals.add(row.ordinal);
-    parts.push(`${row.text} [${row.ordinal}]`);
+    parts.push(`${row.text} [${String(row.ordinal)}]`);
   }
   return parts.join(' ');
 }

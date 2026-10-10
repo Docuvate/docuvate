@@ -2,10 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import type { OpenAPIObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface.js';
+import type {
+  OpenAPIObject,
+  OperationObject,
+} from '@nestjs/swagger/dist/interfaces/open-api-spec.interface.js';
+
 import { API_VERSION_PREFIX } from '../shared/presentation/api-version.js';
 import { ApiErrorEnvelopeDto } from '../shared/presentation/dtos/common.dto.js';
 import { applyPublicOpenApiFilter } from './apply-public-openapi-filter.js';
+import { openApiPathItemOperations } from './openapi-type-guards.js';
 
 const STANDARD_ERROR_RESPONSES = {
   '401': {
@@ -100,16 +105,23 @@ function needsSummaryPolish(summary: string, operationId: string | undefined): b
   return false;
 }
 
+function resolveCatalogTagName(tag: string): string {
+  for (const entry of OPENAPI_TAG_CATALOG) {
+    if (entry.key === tag) {
+      return entry.name;
+    }
+  }
+  return tag;
+}
+
 function applyOpenApiTagCatalog(document: OpenAPIObject): void {
-  const byKey = new Map(OPENAPI_TAG_CATALOG.map((entry) => [entry.key, entry]));
   const usedNames = new Set<string>();
 
-  for (const pathItem of Object.values(document.paths ?? {})) {
-    for (const operation of Object.values(pathItem)) {
-      if (!operation || typeof operation !== 'object' || !('tags' in operation)) continue;
-      const tags = operation.tags as string[];
+  for (const pathItem of Object.values(document.paths)) {
+    for (const operation of openApiPathItemOperations(pathItem)) {
+      const tags = operation.tags ?? [];
       operation.tags = tags.map((tag) => {
-        const name = byKey.get(tag as (typeof OPENAPI_TAG_CATALOG)[number]['key'])?.name ?? tag;
+        const name = resolveCatalogTagName(tag);
         usedNames.add(name);
         return name;
       });
@@ -122,15 +134,20 @@ function applyOpenApiTagCatalog(document: OpenAPIObject): void {
 }
 
 function polishOperationSummaries(document: OpenAPIObject): void {
-  for (const pathItem of Object.values(document.paths ?? {})) {
-    for (const operation of Object.values(pathItem)) {
-      if (!operation || typeof operation !== 'object' || !('summary' in operation)) continue;
-      const op = operation as { operationId?: string; summary?: string };
-      if (!op.summary) continue;
-      if (needsSummaryPolish(op.summary, op.operationId)) {
-        op.summary = humanizeOperationId(op.operationId ?? op.summary);
+  for (const pathItem of Object.values(document.paths)) {
+    for (const operation of openApiPathItemOperations(pathItem)) {
+      if (!operation.summary) continue;
+      if (needsSummaryPolish(operation.summary, operation.operationId)) {
+        operation.summary = humanizeOperationId(operation.operationId ?? operation.summary);
       }
     }
+  }
+}
+
+function mergeStandardErrorResponses(operation: OperationObject): void {
+  const responses = operation.responses;
+  for (const [code, response] of Object.entries(STANDARD_ERROR_RESPONSES)) {
+    responses[code] ??= response;
   }
 }
 
@@ -169,15 +186,9 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
 
   document.openapi = '3.1.0';
 
-  for (const pathItem of Object.values(document.paths ?? {})) {
-    for (const operation of Object.values(pathItem)) {
-      if (!operation || typeof operation !== 'object' || !('responses' in operation)) continue;
-      const responses = operation.responses as Record<string, unknown>;
-      for (const [code, response] of Object.entries(STANDARD_ERROR_RESPONSES)) {
-        if (!responses[code]) {
-          responses[code] = response;
-        }
-      }
+  for (const pathItem of Object.values(document.paths)) {
+    for (const operation of openApiPathItemOperations(pathItem)) {
+      mergeStandardErrorResponses(operation);
     }
   }
 
@@ -189,7 +200,7 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
 
 /** Stable key order so `openapi:export` / `sdk:check` diffs are deterministic. */
 function sortOpenApiDocument(document: OpenAPIObject): OpenAPIObject {
-  const paths = document.paths ?? {};
+  const paths = document.paths;
   const sortedPaths = Object.fromEntries(
     Object.keys(paths)
       .sort()
@@ -202,11 +213,12 @@ function sortOpenApiDocument(document: OpenAPIObject): OpenAPIObject {
   }
 
   const sortedComponents: NonNullable<OpenAPIObject['components']> = { ...components };
-  if (components.schemas) {
+  const schemas = components.schemas;
+  if (schemas) {
     sortedComponents.schemas = Object.fromEntries(
-      Object.keys(components.schemas)
+      Object.keys(schemas)
         .sort()
-        .map((key) => [key, components.schemas![key]])
+        .map((key) => [key, schemas[key]])
     );
   }
 

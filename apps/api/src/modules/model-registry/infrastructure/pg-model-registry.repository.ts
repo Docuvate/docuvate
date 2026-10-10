@@ -2,8 +2,21 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+
 import { NotFoundError } from '../../../shared/domain/errors.js';
+import {
+  isRecord,
+  parseBoolean,
+  parseDate,
+  parseEnum,
+  parseNumber,
+  parseOptionalDate,
+  parseOptionalNumber,
+  parseOptionalString,
+  parseString,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { ModelRegistryRepository } from '../domain/model-registry.repository.port.js';
 import type {
   MlCanaryEvaluationEntity,
@@ -16,22 +29,39 @@ import type {
   MlRetrainTriggerKind,
 } from '../domain/model-registry.types.js';
 
+const ML_MODEL_KINDS: readonly MlModelKind[] = ['ocr', 'embedding', 'docqa', 'field_extractor'];
+const ML_MODEL_LIFECYCLES: readonly MlModelLifecycle[] = [
+  'registered',
+  'canary',
+  'active',
+  'archived',
+  'failed',
+];
+const ML_RETRAIN_TRIGGER_KINDS: readonly MlRetrainTriggerKind[] = ['cron', 'threshold', 'manual'];
+const ML_RETRAIN_JOB_STATUSES: readonly MlRetrainJobStatus[] = [
+  'queued',
+  'running',
+  'succeeded',
+  'failed',
+  'cancelled',
+];
+
 function mapFamily(row: Record<string, unknown>): MlModelFamilyEntity {
   return {
-    id: String(row['id']),
-    kind: String(row['kind']) as MlModelKind,
-    displayName: String(row['display_name']),
-    description: row['description'] == null ? null : String(row['description']),
+    id: parseString(row.id),
+    kind: parseEnum(row.kind, ML_MODEL_KINDS, 'ocr'),
+    displayName: parseString(row.display_name),
+    description: parseOptionalString(row.description),
   };
 }
 
 function metricsFromJson(raw: unknown): Record<string, number> {
-  if (!raw || typeof raw !== 'object') {
+  if (!isRecord(raw)) {
     return {};
   }
   const out: Record<string, number> = {};
-  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
-    const num = Number(value);
+  for (const [key, value] of Object.entries(raw)) {
+    const num = parseNumber(value, Number.NaN);
     if (Number.isFinite(num)) {
       out[key] = num;
     }
@@ -41,34 +71,46 @@ function metricsFromJson(raw: unknown): Record<string, number> {
 
 function mapVersion(row: Record<string, unknown>): MlModelVersionEntity {
   return {
-    id: String(row['id']),
-    familyId: String(row['family_id']),
-    versionTag: String(row['version_tag']),
-    artifactUri: row['artifact_uri'] == null ? null : String(row['artifact_uri']),
-    externalRunId: row['external_run_id'] == null ? null : String(row['external_run_id']),
-    metrics: metricsFromJson(row['metrics']),
-    lifecycle: String(row['lifecycle']) as MlModelLifecycle,
-    trainingSnapshotId:
-      row['training_snapshot_id'] == null ? null : String(row['training_snapshot_id']),
-    notes: row['notes'] == null ? null : String(row['notes']),
-    createdAt: new Date(String(row['created_at'])),
-    promotedAt: row['promoted_at'] == null ? null : new Date(String(row['promoted_at'])),
+    id: parseString(row.id),
+    familyId: parseString(row.family_id),
+    versionTag: parseString(row.version_tag),
+    artifactUri: parseOptionalString(row.artifact_uri),
+    externalRunId: parseOptionalString(row.external_run_id),
+    metrics: metricsFromJson(row.metrics),
+    lifecycle: parseEnum(row.lifecycle, ML_MODEL_LIFECYCLES, 'registered'),
+    trainingSnapshotId: parseOptionalString(row.training_snapshot_id),
+    notes: parseOptionalString(row.notes),
+    createdAt: parseDate(row.created_at),
+    promotedAt: parseOptionalDate(row.promoted_at),
   };
 }
 
 function mapJob(row: Record<string, unknown>): MlRetrainJobEntity {
   return {
-    id: String(row['id']),
-    familyId: String(row['family_id']),
-    triggerKind: String(row['trigger_kind']) as MlRetrainTriggerKind,
-    status: String(row['status']) as MlRetrainJobStatus,
-    trainingSnapshotId:
-      row['training_snapshot_id'] == null ? null : String(row['training_snapshot_id']),
-    resultVersionId: row['result_version_id'] == null ? null : String(row['result_version_id']),
-    errorMessage: row['error_message'] == null ? null : String(row['error_message']),
-    createdAt: new Date(String(row['created_at'])),
-    startedAt: row['started_at'] == null ? null : new Date(String(row['started_at'])),
-    finishedAt: row['finished_at'] == null ? null : new Date(String(row['finished_at'])),
+    id: parseString(row.id),
+    familyId: parseString(row.family_id),
+    triggerKind: parseEnum(row.trigger_kind, ML_RETRAIN_TRIGGER_KINDS, 'manual'),
+    status: parseEnum(row.status, ML_RETRAIN_JOB_STATUSES, 'queued'),
+    trainingSnapshotId: parseOptionalString(row.training_snapshot_id),
+    resultVersionId: parseOptionalString(row.result_version_id),
+    errorMessage: parseOptionalString(row.error_message),
+    createdAt: parseDate(row.created_at),
+    startedAt: parseOptionalDate(row.started_at),
+    finishedAt: parseOptionalDate(row.finished_at),
+  };
+}
+
+function mapCanaryEvaluation(row: Record<string, unknown>): MlCanaryEvaluationEntity {
+  return {
+    id: parseString(row.id),
+    versionId: parseString(row.version_id),
+    baselineVersionId: parseOptionalString(row.baseline_version_id),
+    metricName: parseString(row.metric_name),
+    baselineValue: parseOptionalNumber(row.baseline_value),
+    candidateValue: parseOptionalNumber(row.candidate_value),
+    maxAllowedDrop: parseNumber(row.max_allowed_drop),
+    passed: parseBoolean(row.passed),
+    evaluatedAt: parseDate(row.evaluated_at),
   };
 }
 
@@ -80,7 +122,7 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
     const result = await this.pool.query(
       `SELECT id, kind, display_name, description FROM ml_model_families ORDER BY id ASC`
     );
-    return result.rows.map((row) => mapFamily(row as Record<string, unknown>));
+    return result.rows.map((row) => mapFamily(requireRecord(row)));
   }
 
   async findFamilyById(familyId: string): Promise<MlModelFamilyEntity | null> {
@@ -88,8 +130,8 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
       `SELECT id, kind, display_name, description FROM ml_model_families WHERE id = $1`,
       [familyId]
     );
-    const row = result.rows[0];
-    return row ? mapFamily(row as Record<string, unknown>) : null;
+    const raw: unknown = result.rows[0];
+    return raw !== undefined ? mapFamily(requireRecord(raw)) : null;
   }
 
   async listVersionsForFamily(familyId: string): Promise<MlModelVersionEntity[]> {
@@ -99,15 +141,15 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
        ORDER BY created_at DESC`,
       [familyId]
     );
-    return result.rows.map((row) => mapVersion(row as Record<string, unknown>));
+    return result.rows.map((row) => mapVersion(requireRecord(row)));
   }
 
   async findVersionById(versionId: string): Promise<MlModelVersionEntity | null> {
     const result = await this.pool.query(`SELECT * FROM ml_model_versions WHERE id = $1`, [
       versionId,
     ]);
-    const row = result.rows[0];
-    return row ? mapVersion(row as Record<string, unknown>) : null;
+    const raw: unknown = result.rows[0];
+    return raw !== undefined ? mapVersion(requireRecord(raw)) : null;
   }
 
   async getActiveVersionForFamily(familyId: string): Promise<MlModelVersionEntity | null> {
@@ -118,8 +160,8 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
        LIMIT 1`,
       [familyId]
     );
-    const row = result.rows[0];
-    return row ? mapVersion(row as Record<string, unknown>) : null;
+    const raw: unknown = result.rows[0];
+    return raw !== undefined ? mapVersion(requireRecord(raw)) : null;
   }
 
   async setVersionLifecycle(
@@ -135,11 +177,11 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
        RETURNING *`,
       [versionId, lifecycle, promotedAt]
     );
-    const row = result.rows[0];
-    if (!row) {
+    const raw: unknown = result.rows[0];
+    if (raw === undefined) {
       throw new NotFoundError('Model version');
     }
-    return mapVersion(row as Record<string, unknown>);
+    return mapVersion(requireRecord(raw));
   }
 
   async archiveActiveForFamily(familyId: string, exceptVersionId: string): Promise<void> {
@@ -170,19 +212,7 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
         row.passed,
       ]
     );
-    const saved = result.rows[0] as Record<string, unknown>;
-    return {
-      id: String(saved['id']),
-      versionId: String(saved['version_id']),
-      baselineVersionId:
-        saved['baseline_version_id'] == null ? null : String(saved['baseline_version_id']),
-      metricName: String(saved['metric_name']),
-      baselineValue: saved['baseline_value'] == null ? null : Number(saved['baseline_value']),
-      candidateValue: saved['candidate_value'] == null ? null : Number(saved['candidate_value']),
-      maxAllowedDrop: Number(saved['max_allowed_drop']),
-      passed: Boolean(saved['passed']),
-      evaluatedAt: new Date(String(saved['evaluated_at'])),
-    };
+    return mapCanaryEvaluation(requireRecord(result.rows[0]));
   }
 
   async listRecentJobs(familyId: string, limit: number): Promise<MlRetrainJobEntity[]> {
@@ -193,7 +223,7 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
        LIMIT $2`,
       [familyId, limit]
     );
-    return result.rows.map((row) => mapJob(row as Record<string, unknown>));
+    return result.rows.map((row) => mapJob(requireRecord(row)));
   }
 
   async createRetrainJob(
@@ -206,7 +236,7 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
        RETURNING *`,
       [familyId, triggerKind]
     );
-    return mapJob(result.rows[0] as Record<string, unknown>);
+    return mapJob(requireRecord(result.rows[0]));
   }
 
   async updateRetrainJob(
@@ -227,48 +257,54 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
     const params: unknown[] = [jobId];
     let idx = 2;
     if (patch.status !== undefined) {
-      fields.push(`status = $${idx++}`);
+      fields.push(`status = $${String(idx)}`);
+      idx += 1;
       params.push(patch.status);
     }
     if (patch.trainingSnapshotId !== undefined) {
-      fields.push(`training_snapshot_id = $${idx++}`);
+      fields.push(`training_snapshot_id = $${String(idx)}`);
+      idx += 1;
       params.push(patch.trainingSnapshotId);
     }
     if (patch.resultVersionId !== undefined) {
-      fields.push(`result_version_id = $${idx++}`);
+      fields.push(`result_version_id = $${String(idx)}`);
+      idx += 1;
       params.push(patch.resultVersionId);
     }
     if (patch.errorMessage !== undefined) {
-      fields.push(`error_message = $${idx++}`);
+      fields.push(`error_message = $${String(idx)}`);
+      idx += 1;
       params.push(patch.errorMessage);
     }
     if (patch.startedAt !== undefined) {
-      fields.push(`started_at = $${idx++}`);
+      fields.push(`started_at = $${String(idx)}`);
+      idx += 1;
       params.push(patch.startedAt);
     }
     if (patch.finishedAt !== undefined) {
-      fields.push(`finished_at = $${idx++}`);
+      fields.push(`finished_at = $${String(idx)}`);
+      idx += 1;
       params.push(patch.finishedAt);
     }
     if (fields.length === 0) {
       const existing = await this.pool.query(`SELECT * FROM ml_retrain_jobs WHERE id = $1`, [
         jobId,
       ]);
-      const row = existing.rows[0];
-      if (!row) {
+      const existingRaw: unknown = existing.rows[0];
+      if (existingRaw === undefined) {
         throw new NotFoundError('Retrain job');
       }
-      return mapJob(row as Record<string, unknown>);
+      return mapJob(requireRecord(existingRaw));
     }
     const result = await this.pool.query(
       `UPDATE ml_retrain_jobs SET ${fields.join(', ')} WHERE id = $1 RETURNING *`,
       params
     );
-    const row = result.rows[0];
-    if (!row) {
+    const raw: unknown = result.rows[0];
+    if (raw === undefined) {
       throw new NotFoundError('Retrain job');
     }
-    return mapJob(row as Record<string, unknown>);
+    return mapJob(requireRecord(raw));
   }
 
   async countCorrectionsSince(since: Date | null): Promise<number> {
@@ -279,7 +315,8 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
             `SELECT COUNT(*)::int AS c FROM extraction_field_corrections WHERE created_at > $1`,
             [since]
           );
-    return Number((result.rows[0] as Record<string, unknown>)['c'] ?? 0);
+    const row = requireRecord(result.rows[0]);
+    return parseNumber(row.c, 0);
   }
 
   async lastSnapshotWatermarkForFamily(familyId: string): Promise<Date | null> {
@@ -290,8 +327,12 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
        LIMIT 1`,
       [familyId]
     );
-    const raw = (result.rows[0] as Record<string, unknown> | undefined)?.['source_watermark'];
-    return raw == null ? null : new Date(String(raw));
+    const raw: unknown = result.rows[0];
+    if (raw === undefined) {
+      return null;
+    }
+    const row = requireRecord(raw);
+    return parseOptionalDate(row.source_watermark);
   }
 
   async insertTrainingSnapshot(input: {
@@ -316,7 +357,8 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
         JSON.stringify(input.metadata),
       ]
     );
-    return { id: String((result.rows[0] as Record<string, unknown>)['id']) };
+    const row = requireRecord(result.rows[0]);
+    return { id: parseString(row.id) };
   }
 
   async registerModelVersion(input: {
@@ -344,6 +386,6 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
         input.notes,
       ]
     );
-    return mapVersion(result.rows[0] as Record<string, unknown>);
+    return mapVersion(requireRecord(result.rows[0]));
   }
 }

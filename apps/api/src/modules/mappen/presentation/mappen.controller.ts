@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import type { MappeDto } from '@docuvate/contracts';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+
+import type { MappeEntity, MappeListItem } from '../../../shared/domain/ports.js';
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
@@ -13,17 +15,16 @@ import {
   MappeListResponseDto,
   UpdateMappeRequestDto,
 } from '../../../shared/presentation/dtos/mappen.dto.js';
-import type { MappeEntity, MappeListItem } from '../../../shared/domain/ports.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   CreateMappeUseCase,
   DeleteMappeUseCase,
   ListMappenUseCase,
   UpdateMappeUseCase,
 } from '../application/mappe.use-cases.js';
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 function toMappeDto(entity: MappeEntity | MappeListItem): MappeDto {
   const counts =

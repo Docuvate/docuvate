@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+
 import { DocumentsEntity } from './documents.entity.js';
 import { FoldersEntity } from './folders.entity.js';
 import { UserEntity } from './user.entity.js';

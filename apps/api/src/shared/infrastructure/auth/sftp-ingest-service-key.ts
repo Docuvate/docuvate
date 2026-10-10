@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const KNOWN_WEAK_KEYS = new Set(['local-sftp-ingest-service-key', 'changeme', 'test']);
 
 export function resolveSftpIngestServiceKey(): string | undefined {
-  const filePath = process.env['DOCUVATE_SFTP_INGEST_SERVICE_KEY_FILE']?.trim();
+  const filePath = process.env.DOCUVATE_SFTP_INGEST_SERVICE_KEY_FILE?.trim();
   if (filePath) {
     try {
       const fromFile = readFileSync(filePath, 'utf8').trim();
@@ -14,13 +14,16 @@ export function resolveSftpIngestServiceKey(): string | undefined {
       /* fall through */
     }
   }
-  const raw = process.env['DOCUVATE_SFTP_INGEST_SERVICE_KEY']?.trim();
-  return raw || undefined;
+  const raw = process.env.DOCUVATE_SFTP_INGEST_SERVICE_KEY?.trim();
+  if (!raw) {
+    return undefined;
+  }
+  return raw;
 }
 
 export function assertSftpIngestServiceKeyAllowed(key: string): void {
   const isProd =
-    process.env['NODE_ENV'] === 'production' || process.env['DOCUVATE_ENV'] === 'production';
+    process.env.NODE_ENV === 'production' || process.env.DOCUVATE_ENV === 'production';
   if (isProd && KNOWN_WEAK_KEYS.has(key)) {
     throw new Error('Refusing known placeholder DOCUVATE_SFTP_INGEST_SERVICE_KEY in production');
   }

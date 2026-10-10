@@ -1,9 +1,10 @@
-import { describe, expect, it, afterAll } from 'vitest';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { afterAll,describe, expect, it } from 'vitest';
+
 import {
   auditOpenApiAgainstRoutes,
   collectNestHttpRoutes,
-} from '../../dist/openapi/openapi-route-audit.js';
+} from '../../src/openapi/openapi-route-audit.js';
 import { createContractTestApp } from './create-contract-test-app.js';
 
 describe('OpenAPI route coverage', () => {

@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ExtractionCompareResponse, LayoutIrDocument } from '@docuvate/contracts';
 import {
   Body,
   Controller,
@@ -13,23 +14,31 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import type { DocumentBulkRequest, ExtractionCompareResponse } from '@docuvate/contracts';
+
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import {
-  DocumentBulkRequestDto,
+  AuthGuard,
+  type AuthSession,
+  AuthSubject,
+  Session,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
   CreateDocumentChatThreadRequestDto,
+  DocumentBulkRequestDto,
   DocumentChatRequestDto,
   DocumentChatResponseDto,
   DocumentChatThreadListResponseDto,
   DocumentChatThreadMessagesResponseDto,
-  SendDocumentChatThreadMessageRequestDto,
-  SendDocumentChatThreadMessageResponseDto,
   DuplicateStackKeepVersionRequestDto,
   DuplicateStackNotDuplicateRequestDto,
   DuplicateStackSetPrimaryRequestDto,
   ExtractionArenaRatingRequestDto,
   ExtractionCompareRequestDto,
   OkResponseDto,
+  SendDocumentChatThreadMessageRequestDto,
+  SendDocumentChatThreadMessageResponseDto,
 } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   DocumentListQueryDto,
@@ -38,32 +47,17 @@ import {
   UpdateDocumentRequestDto,
 } from '../../../shared/presentation/dtos/documents.dto.js';
 import {
-  AuthGuard,
-  AuthSubject,
-  Session,
-  type AuthSession,
-} from '../../../shared/infrastructure/auth/auth.guard.js';
-import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
-import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
-import { DocumentChatUseCase } from '../application/document-chat.use-case.js';
-import { ListDocumentChatThreadsUseCase } from '../application/list-document-chat-threads.use-case.js';
-import { CreateDocumentChatThreadUseCase } from '../application/create-document-chat-thread.use-case.js';
-import { ListDocumentChatThreadMessagesUseCase } from '../application/list-document-chat-thread-messages.use-case.js';
-import { SendDocumentChatThreadMessageUseCase } from '../application/send-document-chat-thread-message.use-case.js';
-import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
-import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
-import { RetryDocumentChatMessageUseCase } from '../application/retry-document-chat-message.use-case.js';
-import { toDocumentChatMessageRecordDto, toDocumentChatThreadDto } from './document-chat.mapper.js';
-import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
-import { GetDocumentUseCase } from '../application/get-document.use-case.js';
-import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
-import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
-import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
-import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
-import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
-import { parseDocumentListQuery } from './document-list-query.js';
-import { toDocumentDto, toDocumentListResponse } from './document.mapper.js';
+  LayoutCompareMetricsResponseDto,
+  LayoutComparePageResponseDto,
+  LayoutCompareSummaryResponseDto,
+  LayoutHtmlResponseDto,
+  LayoutIrDocumentDto,
+  LayoutTypstResponseDto,
+} from '../../../shared/presentation/dtos/layout-ir.dto.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   DismissDuplicateCandidateUseCase,
   ListDuplicateCandidatesUseCase,
@@ -74,31 +68,36 @@ import {
   ReleaseDuplicateStackMemberUseCase,
   SetDuplicateStackPrimaryUseCase,
 } from '../../duplicates/application/duplicate-stack.use-cases.js';
-import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
+import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
+import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
+import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
-import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
-import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
-import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
-import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
+import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
+import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
+import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
+import { CreateDocumentChatThreadUseCase } from '../application/create-document-chat-thread.use-case.js';
+import { DeleteDocumentUseCase } from '../application/delete-document.use-case.js';
+import { DocumentChatUseCase } from '../application/document-chat.use-case.js';
+import { GetDocumentUseCase } from '../application/get-document.use-case.js';
+import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
 import { GetDocumentLayoutCompareMetricsUseCase } from '../application/get-document-layout-compare-metrics.use-case.js';
 import { GetDocumentLayoutComparePageUseCase } from '../application/get-document-layout-compare-page.use-case.js';
 import { GetDocumentLayoutCompareSummaryUseCase } from '../application/get-document-layout-compare-summary.use-case.js';
-import type { LayoutIrDocument } from '@docuvate/contracts';
-import {
-  LayoutHtmlResponseDto,
-  LayoutIrDocumentDto,
-  LayoutTypstResponseDto,
-  LayoutCompareMetricsResponseDto,
-  LayoutComparePageResponseDto,
-  LayoutCompareSummaryResponseDto,
-} from '../../../shared/presentation/dtos/layout-ir.dto.js';
-import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
-
-import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
+import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
+import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
+import { ListDocumentChatThreadMessagesUseCase } from '../application/list-document-chat-thread-messages.use-case.js';
+import { ListDocumentChatThreadsUseCase } from '../application/list-document-chat-threads.use-case.js';
+import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
+import { RequeueDocumentExtractionUseCase } from '../application/requeue-document-extraction.use-case.js';
+import { RetryDocumentChatMessageUseCase } from '../application/retry-document-chat-message.use-case.js';
+import { SendDocumentChatThreadMessageUseCase } from '../application/send-document-chat-thread-message.use-case.js';
+import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
+import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
+import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
+import { toDocumentBulkRequest, toDocumentDto, toDocumentListResponse } from './document.mapper.js';
+import { toDocumentChatMessageRecordDto, toDocumentChatThreadDto } from './document-chat.mapper.js';
+import { parseDocumentListQuery } from './document-list-query.js';
 
 @ApiDocuvateController('documents')
 @Controller('documents')
@@ -158,7 +157,7 @@ export class DocumentsController {
   @Post('bulk')
   @ApiDocuvateRoute({ operationId: 'bulk', summary: 'bulk' })
   async bulk(@Session() session: AuthSession, @Body() body: DocumentBulkRequestDto) {
-    return this.bulkDocuments.execute(session.user.id, body as DocumentBulkRequest);
+    return this.bulkDocuments.execute(session.user.id, toDocumentBulkRequest(body));
   }
 
   @Get(':id/layout-ir')
@@ -393,14 +392,13 @@ export class DocumentsController {
   })
   async streamChatThreadMessage(
     @Session() session: AuthSession,
-    @AuthSubject() subject: AuthorizationSubject,
+    @AuthSubject() _subject: AuthorizationSubject,
     @Param('id') id: string,
     @Param('threadId') threadId: string,
     @Param('messageId') messageId: string,
     @Req() req: FastifyRequest,
     @Res({ passthrough: false }) reply: FastifyReply
   ): Promise<void> {
-    void subject;
     let closed = false;
     req.raw.on('close', () => {
       closed = true;
@@ -422,12 +420,11 @@ export class DocumentsController {
   })
   async cancelChatThreadMessage(
     @Session() session: AuthSession,
-    @AuthSubject() subject: AuthorizationSubject,
+    @AuthSubject() _subject: AuthorizationSubject,
     @Param('id') id: string,
     @Param('threadId') threadId: string,
     @Param('messageId') messageId: string
   ): Promise<OkResponseDto> {
-    void subject;
     await this.cancelDocumentChatGeneration.execute(id, threadId, messageId, session.user.id);
     return { ok: true };
   }
@@ -439,12 +436,11 @@ export class DocumentsController {
   })
   async retryChatThreadMessage(
     @Session() session: AuthSession,
-    @AuthSubject() subject: AuthorizationSubject,
+    @AuthSubject() _subject: AuthorizationSubject,
     @Param('id') id: string,
     @Param('threadId') threadId: string,
     @Param('messageId') messageId: string
   ) {
-    void subject;
     const message = await this.retryDocumentChatMessage.execute(
       id,
       threadId,

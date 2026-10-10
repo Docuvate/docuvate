@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { DuplicateCandidateDto } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
+  type DocumentRepository,
   DUPLICATE_REPOSITORY,
   DUPLICATE_STACK_REPOSITORY,
-  type DocumentRepository,
   type DuplicateRepository,
   type DuplicateStackRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
 
 @Injectable()
 export class ListDuplicateCandidatesUseCase {

@@ -1,14 +1,27 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
+
+import { isRecord, parseString } from '../../database/row-parse.js';
 import { buildDocumentRagSystemPrompt } from '../build-system-prompt.js';
-import { fetchWorkerRagContext } from '../fetch-worker-rag-context.js';
-import { ollamaChatModel, postOllamaChat } from '../ollama-chat-request.js';
 import type {
   DocumentChatInput,
   DocumentChatProvider,
   DocumentChatResult,
 } from '../chat-provider.types.js';
+import { fetchWorkerRagContext } from '../fetch-worker-rag-context.js';
+import { ollamaChatModel, postOllamaChat } from '../ollama-chat-request.js';
+
+function ollamaReplyContent(raw: unknown): string {
+  if (!isRecord(raw)) {
+    return '';
+  }
+  const message = raw.message;
+  if (!isRecord(message)) {
+    return '';
+  }
+  return parseString(message.content).trim();
+}
 
 @Injectable()
 export class RagOllamaChatProvider implements DocumentChatProvider {
@@ -73,18 +86,19 @@ export class RagOllamaChatProvider implements DocumentChatProvider {
         setupHint: `OLLAMA_URL prüfen und Modell ${model} laden (ollama pull ${model}).`,
         reply: {
           role: 'assistant',
-          content: `Ollama-Anfrage fehlgeschlagen (${response.status}).`,
+          content: `Ollama-Anfrage fehlgeschlagen (${String(response.status)}).`,
         },
       };
     }
 
-    const data = (await response.json()) as { message?: { content?: string } };
+    const raw: unknown = await response.json();
+    const content = ollamaReplyContent(raw);
     return {
       configured: true,
       provider: this.id,
       reply: {
         role: 'assistant',
-        content: data.message?.content?.trim() || 'Keine Antwort vom Modell.',
+        content: content.length > 0 ? content : 'Keine Antwort vom Modell.',
       },
     };
   }

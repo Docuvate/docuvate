@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LayoutIrDocument } from '@docuvate/contracts';
 import type { z } from 'zod';
+
 import type {
   LayoutCompareMetricsWorker,
   LayoutComparePageWorker,
@@ -26,7 +27,7 @@ async function postLayoutCompareWorker<T>(
   body: Record<string, unknown>,
   schema: z.ZodType<T>
 ): Promise<T> {
-  const raw = await fetchWorkerJson<unknown>(
+  const raw = await fetchWorkerJson(
     workerApiUrl(workerUrl, path),
     {
       method: 'POST',

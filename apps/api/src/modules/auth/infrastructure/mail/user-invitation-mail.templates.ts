@@ -27,7 +27,7 @@ export function userInvitationMailText(payload: UserInvitationMailPayload): stri
       `Hello ${invitedName},`,
       '',
       `You have been invited to ${installationName}.`,
-      `Set your password within ${validityDays} days:`,
+      `Set your password within ${String(validityDays)} days:`,
       inviteUrl,
       '',
       'If you did not expect this invitation, you can ignore this message.',
@@ -37,7 +37,7 @@ export function userInvitationMailText(payload: UserInvitationMailPayload): stri
     `Guten Tag ${invitedName},`,
     '',
     `Sie wurden zu ${installationName} eingeladen.`,
-    `Legen Sie Ihr Passwort innerhalb von ${validityDays} Tagen fest:`,
+    `Legen Sie Ihr Passwort innerhalb von ${String(validityDays)} Tagen fest:`,
     inviteUrl,
     '',
     'Wenn Sie diese Einladung nicht erwarten, ignorieren Sie diese Nachricht.',
@@ -52,8 +52,8 @@ export function userInvitationMailHtml(payload: UserInvitationMailPayload): stri
       : `Sie wurden zu <strong>${escapeHtml(installationName)}</strong> eingeladen.`;
   const validity =
     locale === 'en'
-      ? `The link is valid for ${validityDays} days.`
-      : `Der Link ist ${validityDays} Tage gültig.`;
+      ? `The link is valid for ${String(validityDays)} days.`
+      : `Der Link ist ${String(validityDays)} Tage gültig.`;
   const cta = locale === 'en' ? 'Set password' : 'Passwort festlegen';
   const footer =
     locale === 'en'

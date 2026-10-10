@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   CreateDocumentChatThreadRequestDto,
@@ -18,17 +19,17 @@ import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
-import { CreateLibraryChatThreadUseCase } from '../application/create-library-chat-thread.use-case.js';
-import { ListLibraryChatThreadsUseCase } from '../application/list-library-chat-threads.use-case.js';
-import { SendLibraryChatThreadMessageUseCase } from '../application/send-library-chat-thread-message.use-case.js';
-import { ListDocumentChatThreadMessagesUseCase } from '../../documents/application/list-document-chat-thread-messages.use-case.js';
-import { StreamDocumentChatMessageUseCase } from '../../documents/application/stream-document-chat-message.use-case.js';
 import { CancelDocumentChatGenerationUseCase } from '../../documents/application/cancel-document-chat-generation.use-case.js';
+import { ListDocumentChatThreadMessagesUseCase } from '../../documents/application/list-document-chat-thread-messages.use-case.js';
 import { RetryDocumentChatMessageUseCase } from '../../documents/application/retry-document-chat-message.use-case.js';
+import { StreamDocumentChatMessageUseCase } from '../../documents/application/stream-document-chat-message.use-case.js';
 import {
   toDocumentChatMessageRecordDto,
   toDocumentChatThreadDto,
 } from '../../documents/presentation/document-chat.mapper.js';
+import { CreateLibraryChatThreadUseCase } from '../application/create-library-chat-thread.use-case.js';
+import { ListLibraryChatThreadsUseCase } from '../application/list-library-chat-threads.use-case.js';
+import { SendLibraryChatThreadMessageUseCase } from '../application/send-library-chat-thread-message.use-case.js';
 
 @ApiDocuvateController('chat')
 @Controller('chat')

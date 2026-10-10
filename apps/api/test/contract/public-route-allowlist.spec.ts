@@ -1,11 +1,12 @@
-import { describe, expect, it, afterAll } from 'vitest';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
+import { afterAll,describe, expect, it } from 'vitest';
+
 import {
-  PUBLIC_ROUTE_ALLOWLIST,
   auditPublicRoutes,
   collectPublicHttpRoutes,
+  PUBLIC_ROUTE_ALLOWLIST,
   publicRouteKey,
-} from '../../dist/shared/infrastructure/auth/public-route-audit.js';
+} from '../../src/shared/infrastructure/auth/public-route-audit.js';
 import { createContractTestApp } from './create-contract-test-app.js';
 
 describe('Public route allowlist', () => {

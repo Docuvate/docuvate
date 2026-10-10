@@ -4,6 +4,7 @@ import { passkey } from '@better-auth/passkey';
 import { betterAuth } from 'better-auth';
 import { twoFactor } from 'better-auth/plugins/two-factor';
 import pg from 'pg';
+
 import {
   AUTH_MAX_PASSWORD_LENGTH,
   AUTH_MIN_PASSWORD_LENGTH,
@@ -14,14 +15,14 @@ import { isSignupPermitted } from '../../../modules/auth/infrastructure/signup-p
 import { assertBetterAuthSecretForRuntime } from './better-auth-secret.js';
 
 const pool = new pg.Pool({
-  connectionString: process.env['DATABASE_URL'],
+  connectionString: process.env.DATABASE_URL,
 });
 
 assertBetterAuthSecretForRuntime();
 
 const passwordResetMailer = createPasswordResetMailer();
 
-const webOrigin = process.env['WEB_ORIGIN'] ?? 'http://localhost:5173';
+const webOrigin = process.env.WEB_ORIGIN ?? 'http://localhost:5173';
 
 function passkeyRpId(): string {
   try {
@@ -31,7 +32,7 @@ function passkeyRpId(): string {
   }
 }
 
-const authSecret = process.env['BETTER_AUTH_SECRET'] ?? 'dev-secret-change-me-32chars-minimum!!';
+const authSecret = process.env.BETTER_AUTH_SECRET ?? 'dev-secret-change-me-32chars-minimum!!';
 
 async function isUserSuspended(userId: string): Promise<boolean> {
   const result = await pool.query<{ suspended: boolean }>(
@@ -42,7 +43,7 @@ async function isUserSuspended(userId: string): Promise<boolean> {
      ) AS suspended`,
     [userId]
   );
-  return result.rows[0]?.suspended === true;
+  return result.rows[0]?.suspended;
 }
 
 export const auth = betterAuth({
@@ -61,7 +62,7 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: [webOrigin],
-  baseURL: process.env['BETTER_AUTH_URL'] ?? 'http://localhost:3001',
+  baseURL: process.env.BETTER_AUTH_URL ?? 'http://localhost:3001',
   secret: authSecret,
   plugins: [
     twoFactor({

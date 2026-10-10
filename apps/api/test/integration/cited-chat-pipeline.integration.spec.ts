@@ -1,21 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
 import { diversifyLibraryRerank } from '../../src/modules/cited-chat/domain/diversify-reranked-chunks.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { verifyCitedClaims } from '../../src/modules/cited-chat/domain/verify-cited-claims.js';
 import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
-import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
-
-const noopEmbedding: EmbeddingPort = {
-  async embedTexts(texts: string[]) {
-    return { embeddings: texts.map(() => []), model: 'noop' };
-  },
-};
 
 /** Same strings as scripts/seed-cited-chat-bench.mjs (normalized chunk bodies). */
 const FIXTURE_TEXT: Record<string, { title: string; text: string }> = {
@@ -85,7 +80,7 @@ describe('cited chat pipeline (seed fixtures, Testcontainers)', () => {
     const top = diversifyLibraryRerank(ranked, 4);
     const labelByChunk = new Map<string, string>();
     top.forEach((row, i) => {
-      labelByChunk.set(row.chunk.chunkId, `S${i + 1}`);
+      labelByChunk.set(row.chunk.chunkId, `S${String(i + 1)}`);
     });
     const chunkPool = candidates.map((chunk) => ({ chunk }));
     return { top, labelByChunk, chunkPool };
@@ -97,7 +92,10 @@ describe('cited chat pipeline (seed fixtures, Testcontainers)', () => {
       row.chunk.body.includes('Werktag')
     );
     expect(mieteLabel).toBeDefined();
-    const mieteSource = miete.labelByChunk.get(mieteLabel!.chunk.chunkId) ?? 'S1';
+    if (!mieteLabel) {
+      throw new Error('expected miete chunk in rerank top');
+    }
+    const mieteSource = miete.labelByChunk.get(mieteLabel.chunk.chunkId) ?? 'S1';
     const mieteRelabeled = verifyCitedClaims({
       claims: [
         {
@@ -116,7 +114,14 @@ describe('cited chat pipeline (seed fixtures, Testcontainers)', () => {
     const kuend = await buildTopAndPool('Welche Kündigungsfrist gilt im Vertrag?');
     const kuendChunk = kuend.top.find((row) => row.chunk.body.includes('Kündigungsfrist'));
     expect(kuendChunk).toBeDefined();
-    const kuendSource = kuend.labelByChunk.get(kuendChunk!.chunk.chunkId)!;
+    if (!kuendChunk) {
+      throw new Error('expected kuendigung chunk in rerank top');
+    }
+    const kuendSource = kuend.labelByChunk.get(kuendChunk.chunk.chunkId);
+    expect(kuendSource).toBeDefined();
+    if (!kuendSource) {
+      throw new Error('expected kuendigung source label');
+    }
     const kuendVerify = verifyCitedClaims({
       claims: [
         {
@@ -136,7 +141,14 @@ describe('cited chat pipeline (seed fixtures, Testcontainers)', () => {
     const iban = await buildTopAndPool('Welche IBAN hat der Absender?');
     const labeled = iban.top.find((row) => row.chunk.documentTitle.includes('Nordwind'));
     expect(labeled).toBeDefined();
-    const source = iban.labelByChunk.get(labeled!.chunk.chunkId)!;
+    if (!labeled) {
+      throw new Error('expected Nordwind chunk in rerank top');
+    }
+    const source = iban.labelByChunk.get(labeled.chunk.chunkId);
+    expect(source).toBeDefined();
+    if (!source) {
+      throw new Error('expected IBAN source label');
+    }
     const result = verifyCitedClaims({
       claims: [
         {

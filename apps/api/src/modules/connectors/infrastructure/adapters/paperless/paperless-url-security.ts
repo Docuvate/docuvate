@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
+
 import { connectorFetch, trimTrailingSlash } from '../shared/connector-http.js';
 
 const MAX_REDIRECT_HOPS = 3;
@@ -9,7 +10,7 @@ const MAX_DOWNLOAD_BYTES = 25 * 1024 * 1024;
 const MAX_LIST_PAGES = 500;
 const MAX_LIST_ITEMS = 50_000;
 
-export { MAX_DOWNLOAD_BYTES, MAX_LIST_PAGES, MAX_LIST_ITEMS };
+export { MAX_DOWNLOAD_BYTES, MAX_LIST_ITEMS,MAX_LIST_PAGES };
 
 export class PaperlessUrlValidationError extends Error {
   constructor(readonly messageKey: string) {
@@ -19,7 +20,7 @@ export class PaperlessUrlValidationError extends Error {
 }
 
 function allowPrivateNetworks(): boolean {
-  const raw = process.env['DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS'];
+  const raw = process.env.DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS;
   if (raw === undefined || raw === '') {
     return true;
   }
@@ -168,13 +169,10 @@ export async function readResponseWithSizeCap(
   const reader = response.body.getReader();
   const chunks: Buffer[] = [];
   let total = 0;
-  while (true) {
+  for (;;) {
     const { done, value } = await reader.read();
     if (done) {
       break;
-    }
-    if (!value) {
-      continue;
     }
     total += value.byteLength;
     if (total > maxBytes) {

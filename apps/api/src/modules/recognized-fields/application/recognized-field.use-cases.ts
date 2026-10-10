@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { ReplaceRecognizedFieldsRequest } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
 import {
   RECOGNIZED_FIELD_REPOSITORY,
   type RecognizedFieldRepository,

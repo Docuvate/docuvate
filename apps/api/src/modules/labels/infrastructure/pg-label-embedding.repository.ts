@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
+import { ValidationError } from '../../../shared/domain/errors.js';
 import type {
   DocumentEmbeddingReference,
   LabelEmbeddingRepository,
@@ -10,15 +12,42 @@ import type {
   TagCentroidRecord,
   UserDocumentEmbeddingRow,
 } from '../../../shared/domain/ports.js';
-import { normalizeLabelKey } from '../domain/label-vocabulary.js';
+import {
+  parseDate,
+  parseJsonString,
+  parseNumber,
+  parseString,
+  parseStringArray,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { ValidationError } from '../../../shared/domain/errors.js';
+import { normalizeLabelKey } from '../domain/label-vocabulary.js';
+
+function mapBlocklistEntry(row: Record<string, unknown>): LabelRecommendationBlocklistEntry {
+  const sourceRaw = parseString(row.source);
+  const source: LabelRecommendationBlocklistEntry['source'] =
+    sourceRaw === 'dismiss' ? 'dismiss' : 'manual';
+  return {
+    id: parseString(row.id),
+    phrase: parseString(row.phrase),
+    source,
+    createdAt: parseDate(row.created_at),
+  };
+}
+
+function mapBlocklistPattern(row: Record<string, unknown>): LabelRecommendationBlocklistPattern {
+  return {
+    id: parseString(row.id),
+    pattern: parseString(row.pattern),
+    createdAt: parseDate(row.created_at),
+  };
+}
 
 function parseVector(raw: unknown): number[] {
   let value = raw;
   if (typeof value === 'string') {
     try {
-      value = JSON.parse(value) as unknown;
+      value = parseJsonString(value);
     } catch {
       return [];
     }
@@ -61,7 +90,8 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
          )`,
       [userId]
     );
-    return Number(result.rows[0]?.['c'] ?? 0);
+    const countRow = requireRecord(result.rows[0]);
+    return parseNumber(countRow.c, 0);
   }
 
   async listDocumentIdsMissingEmbeddings(userId: string, limit: number): Promise<string[]> {
@@ -77,7 +107,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        LIMIT $2`,
       [userId, limit]
     );
-    return result.rows.map((row) => String(row['id']));
+    return result.rows.map((raw) => parseString(requireRecord(raw).id));
   }
 
   async listDocumentEmbeddingsForUser(userId: string): Promise<UserDocumentEmbeddingRow[]> {
@@ -99,13 +129,16 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
       [userId]
     );
     return result.rows
-      .map((row) => ({
-        documentId: String(row['document_id']),
-        title: String(row['title'] ?? ''),
-        filename: String(row['filename'] ?? ''),
-        embedding: parseVector(row['embedding']),
-        nonInboxTagIds: (row['tag_ids'] as string[] | null)?.filter(Boolean) ?? [],
-      }))
+      .map((raw) => {
+        const row = requireRecord(raw);
+        return {
+          documentId: parseString(row.document_id),
+          title: parseString(row.title ?? ''),
+          filename: parseString(row.filename ?? ''),
+          embedding: parseVector(row.embedding),
+          nonInboxTagIds: parseStringArray(row.tag_ids),
+        };
+      })
       .filter((row) => row.embedding.length > 0);
   }
 
@@ -114,7 +147,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
       `SELECT recommendation_key FROM label_recommendation_dismissals WHERE user_id = $1`,
       [userId]
     );
-    return result.rows.map((row) => String(row['recommendation_key']));
+    return result.rows.map((raw) => parseString(requireRecord(raw).recommendation_key));
   }
 
   async dismissRecommendation(userId: string, recommendationKey: string): Promise<void> {
@@ -132,12 +165,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        WHERE user_id = $1 ORDER BY created_at DESC`,
       [userId]
     );
-    return result.rows.map((row) => ({
-      id: String(row['id']),
-      phrase: String(row['phrase']),
-      source: row['source'] === 'dismiss' ? 'dismiss' : 'manual',
-      createdAt: new Date(String(row['created_at'])),
-    }));
+    return result.rows.map((raw) => mapBlocklistEntry(requireRecord(raw)));
   }
 
   async addRecommendationBlocklist(
@@ -159,13 +187,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        RETURNING id, phrase, source, created_at`,
       [id, userId, trimmed, labelKey, source]
     );
-    const row = result.rows[0]!;
-    return {
-      id: String(row['id']),
-      phrase: String(row['phrase']),
-      source: row['source'] === 'dismiss' ? 'dismiss' : 'manual',
-      createdAt: new Date(String(row['created_at'])),
-    };
+    return mapBlocklistEntry(requireRecord(result.rows[0]));
   }
 
   async removeRecommendationBlocklist(userId: string, entryId: string): Promise<void> {
@@ -183,11 +205,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        WHERE user_id = $1 ORDER BY created_at DESC`,
       [userId]
     );
-    return result.rows.map((row) => ({
-      id: String(row['id']),
-      pattern: String(row['pattern']),
-      createdAt: new Date(String(row['created_at'])),
-    }));
+    return result.rows.map((raw) => mapBlocklistPattern(requireRecord(raw)));
   }
 
   async addRecommendationBlocklistPattern(
@@ -206,12 +224,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        RETURNING id, pattern, created_at`,
       [id, userId, trimmed]
     );
-    const row = result.rows[0]!;
-    return {
-      id: String(row['id']),
-      pattern: String(row['pattern']),
-      createdAt: new Date(String(row['created_at'])),
-    };
+    return mapBlocklistPattern(requireRecord(result.rows[0]));
   }
 
   async removeRecommendationBlocklistPattern(userId: string, patternId: string): Promise<void> {
@@ -229,7 +242,8 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
     if (result.rowCount === 0) {
       return null;
     }
-    const vector = parseVector(result.rows[0]?.['embedding']);
+    const row = requireRecord(result.rows[0]);
+    const vector = parseVector(row.embedding);
     return vector.length > 0 ? vector : null;
   }
 
@@ -251,11 +265,14 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
       [userId, excludeDocumentId]
     );
     return result.rows
-      .map((row) => ({
-        documentId: String(row['document_id']),
-        tagIds: (row['tag_ids'] as string[] | null)?.filter(Boolean) ?? [],
-        embedding: parseVector(row['embedding']),
-      }))
+      .map((raw) => {
+        const row = requireRecord(raw);
+        return {
+          documentId: parseString(row.document_id),
+          tagIds: parseStringArray(row.tag_ids),
+          embedding: parseVector(row.embedding),
+        };
+      })
       .filter((row) => row.embedding.length > 0 && row.tagIds.length > 0);
   }
 
@@ -267,11 +284,14 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        WHERE t.user_id = $1`,
       [userId]
     );
-    return result.rows.map((row) => ({
-      tagId: String(row['tag_id']),
-      sampleCount: Number(row['sample_count'] ?? 0),
-      centroid: parseVector(row['centroid']),
-    }));
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return {
+        tagId: parseString(row.tag_id),
+        sampleCount: parseNumber(row.sample_count, 0),
+        centroid: parseVector(row.centroid),
+      };
+    });
   }
 
   async saveTagCentroid(
@@ -310,6 +330,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        WHERE user_id = $1 AND tag_id = $2 AND action = 'reject'`,
       [userId, tagId]
     );
-    return Number(result.rows[0]?.['c'] ?? 0);
+    const countRow = requireRecord(result.rows[0]);
+    return parseNumber(countRow.c, 0);
   }
 }

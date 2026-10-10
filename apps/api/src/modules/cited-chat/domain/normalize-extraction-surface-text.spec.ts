@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
 import { resolveQuoteInCandidateChunk } from './verify-citation-quote.js';
 
@@ -19,6 +20,9 @@ describe('normalizeExtractionSurfaceText', () => {
       { claimText: '' }
     );
     expect(hit).not.toBeNull();
-    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
+    if (hit === null) {
+      throw new Error('expected quote hit');
+    }
+    expect(body.slice(hit.charStart, hit.charEnd)).toBe(hit.bodyQuote);
   });
 });

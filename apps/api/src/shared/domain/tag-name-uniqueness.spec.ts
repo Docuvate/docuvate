@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { assertTagNameNotNearDuplicate, findNearDuplicateTag } from './tag-name-uniqueness.js';
 
 describe('tag-name-uniqueness', () => {
@@ -22,6 +23,6 @@ describe('tag-name-uniqueness', () => {
   });
 
   it('throws on create conflict', () => {
-    expect(() => assertTagNameNotNearDuplicate('vertrag', tags)).toThrow(/existiert bereits/);
+    expect(() => { assertTagNameNotNearDuplicate('vertrag', tags); }).toThrow(/existiert bereits/);
   });
 });

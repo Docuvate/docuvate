@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { DocumentChatResponse } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import type { DocumentChatMessageEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
-  USER_PREFERENCES_REPOSITORY,
   type DocumentChatThreadRepository,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import { chatThreadTitleFromMessage } from '../../documents/application/chat-thread-title.js';
 import { DocumentChatGenerationQueueService } from '../../documents/infrastructure/document-chat-generation-queue.service.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
@@ -41,7 +42,7 @@ export class SendLibraryChatThreadMessageUseCase {
     }
 
     const thread = await this.threads.findThreadForUser(threadId, userId);
-    if (!thread || thread.scope !== 'library') {
+    if (thread?.scope !== 'library') {
       throw new NotFoundError('Chat thread');
     }
 

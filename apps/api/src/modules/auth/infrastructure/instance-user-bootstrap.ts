@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
+
 import {
   INSTALLATION_DB_ROLE_ADMIN,
   INSTALLATION_DB_ROLE_MEMBER,
@@ -24,7 +25,7 @@ export async function assignInstallationRoleAfterSignUp(
       [INSTALLATION_DB_ROLE_ADMIN]
     );
     const role =
-      adminExists.rows[0]?.exists === true
+      (adminExists.rows[0]?.exists)
         ? INSTALLATION_DB_ROLE_MEMBER
         : INSTALLATION_DB_ROLE_ADMIN;
     await client.query(

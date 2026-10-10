@@ -2,26 +2,33 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
 import type {
   ExtractionFieldCorrectionRecord,
   ExtractionFieldFeedbackRepository,
 } from '../../../shared/domain/ports.js';
+import {
+  parseDate,
+  parseOptionalString,
+  parseString,
+  parseStringArray,
+  requireRecord,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 function mapRow(row: Record<string, unknown>): ExtractionFieldCorrectionRecord {
-  const labelTagIdsRaw = row['label_tag_ids'];
-  const labelTagIds = Array.isArray(labelTagIdsRaw) ? labelTagIdsRaw.map((id) => String(id)) : [];
+  const labelTagIds = parseStringArray(row.label_tag_ids);
   return {
-    id: String(row['id']),
-    userId: String(row['user_id']),
-    documentId: String(row['document_id']),
-    fieldKey: String(row['field_key']),
-    oldValue: String(row['old_value'] ?? ''),
-    newValue: String(row['new_value'] ?? ''),
+    id: parseString(row.id),
+    userId: parseString(row.user_id),
+    documentId: parseString(row.document_id),
+    fieldKey: parseString(row.field_key),
+    oldValue: parseString(row.old_value),
+    newValue: parseString(row.new_value),
     labelTagIds,
-    fieldTagId: row['field_tag_id'] != null ? String(row['field_tag_id']) : null,
+    fieldTagId: parseOptionalString(row.field_tag_id),
     source: 'user_correction',
-    createdAt: new Date(String(row['created_at'])),
+    createdAt: parseDate(row.created_at),
   };
 }
 
@@ -44,14 +51,14 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
 
   async insertMany(
     userId: string,
-    rows: Array<{
+    rows: {
       documentId: string;
       fieldKey: string;
       oldValue: string;
       newValue: string;
       labelTagIds: string[];
       fieldTagId: string | null;
-    }>
+    }[]
   ): Promise<number> {
     if (rows.length === 0) {
       return 0;
@@ -108,9 +115,9 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
       `${LIST_SQL}
        WHERE c.user_id = $1 ${cursorClause}
        ORDER BY c.created_at DESC, c.id DESC
-       LIMIT $${limitParam}`,
+       LIMIT $${String(limitParam)}`,
       params
     );
-    return result.rows.map((row) => mapRow(row as Record<string, unknown>));
+    return result.rows.map((row) => mapRow(requireRecord(row)));
   }
 }

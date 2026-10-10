@@ -5,7 +5,7 @@ import { workerApiUrl } from './worker-api-path.js';
 const DEFAULT_DEPENDENCY_TIMEOUT_MS = 2_500;
 
 export function workerDependencyTimeoutMs(): number {
-  const raw = process.env['WORKER_DEPENDENCY_TIMEOUT_MS'];
+  const raw = process.env.WORKER_DEPENDENCY_TIMEOUT_MS;
   if (!raw) {
     return DEFAULT_DEPENDENCY_TIMEOUT_MS;
   }

@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { ollamaChatBaseUrl, ollamaChatModel } from './ollama-chat-request.js';
+import { isRecord, parseString } from '../database/row-parse.js';
 import { buildOllamaChatBody, ollamaChatIdleTimeoutMs } from './ollama-chat-options.js';
+import { ollamaChatBaseUrl, ollamaChatModel } from './ollama-chat-request.js';
 
 export type OllamaStreamFailure =
   | { kind: 'idle_timeout' }
@@ -10,7 +11,7 @@ export type OllamaStreamFailure =
   | { kind: 'network_error'; detail: string };
 
 export interface StreamOllamaChatParams {
-  messages: Array<{ role: string; content: string }>;
+  messages: { role: string; content: string }[];
   onToken: (token: string, fullText: string) => void | Promise<void>;
   shouldAbort: () => boolean | Promise<boolean>;
   idleTimeoutMs?: number;
@@ -79,7 +80,7 @@ export async function streamOllamaChat(
       const readPromise = reader.read();
       const timeoutPromise = new Promise<{ done: true; value: undefined }>((resolve) => {
         const wait = Math.max(250, idleTimeoutMs - (Date.now() - lastTokenAt));
-        setTimeout(() => resolve({ done: true, value: undefined }), wait);
+        setTimeout(() => { resolve({ done: true, value: undefined }); }, wait);
       });
 
       const raced = await Promise.race([readPromise, timeoutPromise]);
@@ -92,7 +93,10 @@ export async function streamOllamaChat(
         continue;
       }
 
-      const chunk = raced as Awaited<typeof readPromise>;
+      if (!('value' in raced)) {
+        continue;
+      }
+      const chunk = raced;
       if (chunk.done) {
         break;
       }
@@ -106,19 +110,20 @@ export async function streamOllamaChat(
         if (!trimmed) {
           continue;
         }
-        let payload: { message?: { content?: string }; done?: boolean };
+        let payload: unknown;
         try {
-          payload = JSON.parse(trimmed) as { message?: { content?: string }; done?: boolean };
+          payload = JSON.parse(trimmed);
         } catch {
           continue;
         }
-        const token = payload.message?.content ?? '';
+        const message = isRecord(payload) ? payload.message : undefined;
+        const token = isRecord(message) ? parseString(message.content) : '';
         if (token.length > 0) {
           fullText += token;
           lastTokenAt = Date.now();
           await params.onToken(token, fullText);
         }
-        if (payload.done === true) {
+        if (isRecord(payload) && payload.done === true) {
           return { content: fullText.trim() };
         }
       }

@@ -2,28 +2,29 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
-import { ConnectorOAuthCallbackGuard } from './connector-oauth-callback.guard.js';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { Public } from '../../../shared/infrastructure/auth/public.decorator.js';
-import { ConnectorPluginIdParamDto } from '../../../shared/presentation/dtos/connectors.dto.js';
 import { StartMailOAuthRequestDto } from '../../../shared/presentation/dtos/connector-actions.dto.js';
-import {
-  CompleteMailOAuthUseCase,
-  StartMailOAuthUseCase,
-} from '../application/mail-oauth.use-cases.js';
+import { ConnectorPluginIdParamDto } from '../../../shared/presentation/dtos/connectors.dto.js';
 import {
   ApiDocuvatePublicRoute,
   ApiDocuvateRoute,
   ApiDocuvateTaggedController,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { ApiDocuvateAuth } from '../../../shared/presentation/swagger/openapi-security.js';
+import {
+  CompleteMailOAuthUseCase,
+  StartMailOAuthUseCase,
+} from '../application/mail-oauth.use-cases.js';
+import { ConnectorOAuthCallbackGuard } from './connector-oauth-callback.guard.js';
 
 function webConnectorsUrl(query: Record<string, string>): string {
-  const origin = (process.env['WEB_ORIGIN'] ?? 'http://localhost:5173').replace(/\/$/, '');
+  const origin = (process.env.WEB_ORIGIN ?? 'http://localhost:5173').replace(/\/$/, '');
   const params = new URLSearchParams(query);
   return `${origin}/settings/connectors?${params.toString()}`;
 }

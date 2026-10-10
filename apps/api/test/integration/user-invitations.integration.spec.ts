@@ -1,10 +1,11 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { PgUserInvitationRepository } from '../../src/modules/admin/infrastructure/pg-user-invitation.repository.js';
-import { INSTANCE_ROLE_MEMBER } from '../../src/modules/auth/domain/instance-role.constants.js';
+
 import { hashInvitationToken } from '../../src/modules/admin/domain/user-invitation.tokens.js';
+import { PgUserInvitationRepository } from '../../src/modules/admin/infrastructure/pg-user-invitation.repository.js';
 import { AcceptUserInvitationUseCase } from '../../src/modules/auth/application/accept-user-invitation.use-case.js';
 import { provisionInvitedUser } from '../../src/modules/auth/application/provision-invited-user.js';
 import { INSTALLATION_DB_ROLE_ADMIN } from '../../src/modules/auth/domain/installation.constants.js';
+import { INSTANCE_ROLE_MEMBER } from '../../src/modules/auth/domain/instance-role.constants.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 
 describe('user invitations (integration)', () => {

@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
+
+import { ForbiddenError,NotFoundError } from '../../../shared/domain/errors.js';
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
-import { NotFoundError, ForbiddenError } from '../../../shared/domain/errors.js';
 import { ExtractionQueueService } from '../../extraction/infrastructure/extraction-queue.service.js';
 
 @Injectable()

@@ -1,25 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Delete, Param, Post, UseGuards } from '@nestjs/common';
 import type { DismissTagSuggestionRequest } from '@docuvate/contracts';
-import { DismissTagSuggestionRequestDto } from '../../../shared/presentation/dtos/labels.dto.js';
+import { Body, Controller, Delete, Param, Post, UseGuards } from '@nestjs/common';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
+import { DismissTagSuggestionRequestDto } from '../../../shared/presentation/dtos/labels.dto.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   AcceptTagSuggestionUseCase,
   AssignDocumentTagUseCase,
   DismissTagSuggestionUseCase,
   RemoveDocumentTagUseCase,
 } from '../application/document-label.use-cases.js';
-
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('documents')
 @Controller('documents/:documentId')

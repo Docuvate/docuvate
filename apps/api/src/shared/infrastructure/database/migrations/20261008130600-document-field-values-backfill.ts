@@ -9,8 +9,9 @@ import type { MigrationInterface, QueryRunner } from 'typeorm';
 export class DocumentFieldValuesBackfill20261008130600 implements MigrationInterface {
   name = 'DocumentFieldValuesBackfill20261008130600';
 
-  public async up(_queryRunner: QueryRunner): Promise<void> {
-    // Intentionally empty, see class comment.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- no-op migration
+  public up(_queryRunner: QueryRunner): Promise<void> {
+    return Promise.resolve();
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
 import { PgDocumentRepository } from '../../src/modules/documents/infrastructure/pg-document.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
@@ -61,35 +63,39 @@ describe('extraction persistence in normalized tables (Testcontainers Postgres)'
       ],
     });
 
-    const fields = await pool.query(
+    const fields = await pool.query<{
+      field_storage_key: string;
+      value_text: string;
+      value_text_norm: string | null;
+      value_numeric: number | null;
+      value_date: string | null;
+    }>(
       `SELECT field_storage_key, value_text, value_text_norm, value_numeric::float8 AS value_numeric,
               to_char(value_date, 'YYYY-MM-DD') AS value_date
        FROM document_field_values WHERE document_id = $1 ORDER BY field_storage_key`,
       [documentId]
     );
-    expect(fields.rows).toEqual([
-      {
-        field_storage_key: 'global:betrag',
-        value_text: '12,50 €',
-        value_text_norm: null,
-        value_numeric: 12.5,
-        value_date: null,
-      },
-      {
-        field_storage_key: 'global:rechnungsdatum',
-        value_text: '15.03.2024',
-        value_text_norm: null,
-        value_numeric: null,
-        value_date: '2024-03-15',
-      },
-      {
-        field_storage_key: `label:${tagId}:kundennummer`,
-        value_text: 'K-7',
-        value_text_norm: expect.any(String),
-        value_numeric: null,
-        value_date: null,
-      },
-    ]);
+    expect(fields.rows[0]).toEqual({
+      field_storage_key: 'global:betrag',
+      value_text: '12,50 €',
+      value_text_norm: null,
+      value_numeric: 12.5,
+      value_date: null,
+    });
+    expect(fields.rows[1]).toEqual({
+      field_storage_key: 'global:rechnungsdatum',
+      value_text: '15.03.2024',
+      value_text_norm: null,
+      value_numeric: null,
+      value_date: '2024-03-15',
+    });
+    expect(fields.rows[2]).toMatchObject({
+      field_storage_key: `label:${tagId}:kundennummer`,
+      value_text: 'K-7',
+      value_numeric: null,
+      value_date: null,
+    });
+    expect(typeof fields.rows[2]?.value_text_norm).toBe('string');
 
     const loaded = await repo.findByIdForUser(documentId, userId);
     expect(loaded?.extraction?.blocks?.map((b) => b.text)).toEqual(['erster', 'zweiter']);
@@ -111,7 +117,7 @@ describe('extraction persistence in normalized tables (Testcontainers Postgres)'
       [documentId]
     );
     expect(rows.rows).toEqual([{ field_storage_key: 'global:betrag', value_numeric: 99 }]);
-    const blocks = await pool.query(
+    const blocks = await pool.query<{ c: number }>(
       `SELECT count(*)::int AS c FROM document_extraction_blocks WHERE document_id = $1`,
       [documentId]
     );
@@ -131,9 +137,12 @@ describe('extraction persistence in normalized tables (Testcontainers Postgres)'
       blocks: [{ page: 1, blockIndex: 0, x: 0, y: 0, width: 1, height: 1, text: 'a' }],
       layoutIr: { version: 2, pages: [] },
     });
-    const textRow = await pool.query(`SELECT extracted_text FROM documents WHERE id = $1`, [docId]);
+    const textRow = await pool.query<{ extracted_text: string }>(
+      `SELECT extracted_text FROM documents WHERE id = $1`,
+      [docId]
+    );
     expect(textRow.rows[0]?.extracted_text).toBe('body');
-    const layout = await pool.query(
+    const layout = await pool.query<{ c: number }>(
       `SELECT count(*)::int AS c FROM document_layout_ir WHERE document_id = $1`,
       [docId]
     );
@@ -202,7 +211,7 @@ describe('extraction persistence in normalized tables (Testcontainers Postgres)'
       { page: 1, width_pt: 400, height_pt: 500 },
       { page: 2, width_pt: 612, height_pt: 792 },
     ]);
-    const layoutCount = await pool.query(
+    const layoutCount = await pool.query<{ c: number }>(
       `SELECT count(*)::int AS c FROM document_layout_ir WHERE document_id = $1`,
       [docId]
     );

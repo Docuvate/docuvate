@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
+
 import { EMBEDDING_PORT } from '../../shared/domain/ports.js';
 import { HttpEmbeddingAdapter } from '../labels/infrastructure/http-embedding.adapter.js';
 import { GlobalSearchUseCase } from './application/global-search.use-case.js';
@@ -24,4 +25,5 @@ import { SearchController } from './presentation/search.controller.js';
     EMBEDDING_PORT,
   ],
 })
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host
 export class SearchModule {}

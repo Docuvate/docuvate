@@ -2,9 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
+import { parseEnum } from '../../../shared/infrastructure/database/row-parse.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  INSTALLATION_DB_ROLE_ADMIN,
+  INSTALLATION_DB_ROLE_MEMBER,
+} from '../../auth/domain/installation.constants.js';
 import { instanceRoleToDbRole } from '../../auth/domain/installation-authorization.js';
 import { dbRoleToInstanceRole } from '../../auth/domain/installation-authorization.js';
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type {
   UserInvitationRecord,
   UserInvitationRepository,
@@ -58,7 +64,7 @@ export class PgUserInvitationRepository implements UserInvitationRepository {
     if (!id) {
       throw new Error('Failed to create invitation');
     }
-    return this.requireById(String(id));
+    return this.requireById(id);
   }
 
   async findActiveById(id: string): Promise<UserInvitationRecord | null> {
@@ -71,8 +77,8 @@ export class PgUserInvitationRepository implements UserInvitationRepository {
        LIMIT 1`,
       [id]
     );
-    const row = result.rows[0];
-    return row ? mapRow(row) : null;
+    const row = result.rows.at(0);
+    return row === undefined ? null : mapRow(row);
   }
 
   async findActiveByInviteeEmail(email: string): Promise<UserInvitationRecord | null> {
@@ -87,8 +93,8 @@ export class PgUserInvitationRepository implements UserInvitationRepository {
        LIMIT 1`,
       [normalized]
     );
-    const row = result.rows[0];
-    return row ? mapRow(row) : null;
+    const row = result.rows.at(0);
+    return row === undefined ? null : mapRow(row);
   }
 
   async findByTokenHash(tokenHash: string): Promise<UserInvitationRecord | null> {
@@ -96,8 +102,8 @@ export class PgUserInvitationRepository implements UserInvitationRepository {
       `${SELECT_INVITATION} WHERE ui.token_hash = $1 LIMIT 1`,
       [tokenHash]
     );
-    const row = result.rows[0];
-    return row ? mapRow(row) : null;
+    const row = result.rows.at(0);
+    return row === undefined ? null : mapRow(row);
   }
 
   async revokeById(id: string): Promise<void> {
@@ -151,15 +157,15 @@ export class PgUserInvitationRepository implements UserInvitationRepository {
 
   private async requireById(id: string): Promise<UserInvitationRecord> {
     const result = await this.pool.query<Row>(`${SELECT_INVITATION} WHERE ui.id = $1`, [id]);
-    const row = result.rows[0];
-    if (!row) {
+    const row = result.rows.at(0);
+    if (row === undefined) {
       throw new Error('Missing invitation row');
     }
     return mapRow(row);
   }
 }
 
-type Row = {
+interface Row {
   id: string;
   email: string;
   invited_name: string;
@@ -169,7 +175,7 @@ type Row = {
   accepted_at: Date | null;
   revoked_at: Date | null;
   created_at: Date;
-};
+}
 
 function mapRow(row: Row): UserInvitationRecord {
   return {
@@ -177,7 +183,11 @@ function mapRow(row: Row): UserInvitationRecord {
     email: row.email,
     invitedName: row.invited_name,
     assignedRole: dbRoleToInstanceRole(
-      row.assigned_role as 'installation_admin' | 'installation_member'
+      parseEnum(
+        row.assigned_role,
+        [INSTALLATION_DB_ROLE_ADMIN, INSTALLATION_DB_ROLE_MEMBER],
+        INSTALLATION_DB_ROLE_MEMBER
+      )
     ),
     invitedByUserId: row.invited_by_user_id,
     expiresAt: row.expires_at,

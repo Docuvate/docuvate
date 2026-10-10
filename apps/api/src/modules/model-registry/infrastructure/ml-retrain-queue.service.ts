@@ -3,10 +3,11 @@
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
+
 import {
-  createValkeyConnection,
-  waitForValkeyReady,
-} from '../../../shared/infrastructure/valkey/valkey-connection.js';
+  isRecord,
+  parseString,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import {
   CORRECTION_DRIVEN_FAMILY_IDS,
   mlopsEnabled,
@@ -14,19 +15,35 @@ import {
   mlopsRetrainCronIntervalMs,
 } from '../../../shared/infrastructure/mlops/mlops-config.js';
 import {
+  createValkeyConnection,
+  waitForValkeyReady,
+} from '../../../shared/infrastructure/valkey/valkey-connection.js';
+
+function parseRetrainJobData(data: unknown): { jobId: string; familyId: string } | null {
+  if (!isRecord(data)) {
+    return null;
+  }
+  const jobId = parseString(data.jobId);
+  const familyId = parseString(data.familyId);
+  if (!jobId || !familyId) {
+    return null;
+  }
+  return { jobId, familyId };
+}
+import { EvaluateMlRetrainThresholdsUseCase } from '../application/model-registry.use-cases.js';
+import {
   MODEL_REGISTRY_REPOSITORY,
   type ModelRegistryRepository,
 } from '../domain/model-registry.repository.port.js';
-import { EvaluateMlRetrainThresholdsUseCase } from '../application/model-registry.use-cases.js';
 import { HttpMlRetrainAdapter } from './http-ml-retrain.adapter.js';
 
 const QUEUE_NAME = 'ml-retrain';
 
 @Injectable()
 export class MlRetrainQueueService implements OnModuleInit, OnModuleDestroy {
-  private connection!: IORedis;
-  private queue!: Queue;
-  private worker!: Worker;
+  private connection: IORedis | null = null;
+  private queue: Queue | null = null;
+  private worker: Worker | null = null;
   private cronTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
@@ -46,8 +63,11 @@ export class MlRetrainQueueService implements OnModuleInit, OnModuleDestroy {
     this.worker = new Worker(
       QUEUE_NAME,
       async (job) => {
-        const jobId = String(job.data.jobId);
-        const familyId = String(job.data.familyId);
+        const payload = parseRetrainJobData(job.data);
+        if (!payload) {
+          throw new Error('Invalid ML retrain job payload');
+        }
+        const { jobId, familyId } = payload;
         await this.registry.updateRetrainJob(jobId, {
           status: 'running',
           startedAt: new Date(),
@@ -104,10 +124,11 @@ export class MlRetrainQueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   async enqueueJob(jobId: string, familyId: string): Promise<void> {
-    if (!this.queue) {
+    const queue = this.queue;
+    if (!queue) {
       return;
     }
-    await this.queue.add(
+    await queue.add(
       'retrain',
       { jobId, familyId },
       { removeOnComplete: 100, removeOnFail: 50 }
@@ -115,7 +136,7 @@ export class MlRetrainQueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async scanThresholds(): Promise<void> {
-    if (!mlopsEnabled() || !this.queue) {
+    if (!mlopsEnabled() || this.queue === null) {
       return;
     }
     const threshold = mlopsRetrainCorrectionThreshold();
@@ -129,8 +150,14 @@ export class MlRetrainQueueService implements OnModuleInit, OnModuleDestroy {
     if (this.cronTimer) {
       clearInterval(this.cronTimer);
     }
-    await this.worker?.close();
-    await this.queue?.close();
-    await this.connection?.quit();
+    if (this.worker) {
+      await this.worker.close();
+    }
+    if (this.queue) {
+      await this.queue.close();
+    }
+    if (this.connection) {
+      await this.connection.quit();
+    }
   }
 }

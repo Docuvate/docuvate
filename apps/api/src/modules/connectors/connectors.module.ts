@@ -1,7 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
-import { CONNECTOR_INSTALLATION_REPOSITORY, CONNECTOR_REGISTRY } from './domain/connector.ports.js';
+
+import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.module.js';
+import { DocumentsModule } from '../documents/documents.module.js';
+import { DuplicatesModule } from '../duplicates/duplicates.module.js';
+import { SearchModule } from '../search/search.module.js';
 import { ConnectorRegistry } from './application/connector.registry.js';
 import {
   CreateConnectorInstallationUseCase,
@@ -10,34 +14,16 @@ import {
   GetConnectorPluginUseCase,
   ListConnectorInstallationsUseCase,
 } from './application/connector.use-cases.js';
+import { ConnectorRuntimeResolver } from './application/connector-runtime.resolver.js';
 import {
   ExportToConnectorUseCase,
   ImportFromConnectorUseCase,
   ListConnectorImportablesUseCase,
 } from './application/connector-sync.use-cases.js';
-import { ConnectorRuntimeResolver } from './application/connector-runtime.resolver.js';
 import {
   CompleteMailOAuthUseCase,
   StartMailOAuthUseCase,
 } from './application/mail-oauth.use-cases.js';
-import { ConnectorsController } from './presentation/connectors.controller.js';
-import { ConnectorsOAuthController } from './presentation/connectors-oauth.controller.js';
-import { ConnectorOAuthCallbackGuard } from './presentation/connector-oauth-callback.guard.js';
-import { GmailMailConnector } from './infrastructure/adapters/mail/gmail-mail.connector.js';
-import { OutlookMailConnector } from './infrastructure/adapters/mail/outlook-mail.connector.js';
-import { PaperlessDmsConnector } from './infrastructure/adapters/paperless/paperless-dms.connector.js';
-import { HomeAssistantHomeAutomationConnector } from './infrastructure/adapters/home-assistant/home-assistant-home-automation.connector.js';
-import { AmazonS3StorageConnector } from './infrastructure/adapters/s3/amazon-s3-storage.connector.js';
-import { SftpFetchConnector } from './infrastructure/adapters/sftp/sftp-fetch.connector.js';
-import { SftpFetchSyncService } from './application/sftp-fetch-sync.service.js';
-import { PgConnectorInstallationRepository } from './infrastructure/pg-connector-installation.repository.js';
-import { DocumentsModule } from '../documents/documents.module.js';
-import { DuplicatesModule } from '../duplicates/duplicates.module.js';
-import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.module.js';
-import { SearchModule } from '../search/search.module.js';
-import { PaperlessImportExecutor } from './infrastructure/adapters/paperless/paperless-import.executor.js';
-import { PaperlessImportRepository } from './infrastructure/adapters/paperless/paperless-import.repository.js';
-import { PaperlessImportQueueService } from './infrastructure/adapters/paperless/paperless-import.queue.js';
 import {
   GetPaperlessImportRunUseCase,
   GetPaperlessInstallationUseCase,
@@ -47,6 +33,21 @@ import {
   TestPaperlessInstallationConnectionUseCase,
   UpdatePaperlessInstallationUseCase,
 } from './application/paperless-import.use-cases.js';
+import { SftpFetchSyncService } from './application/sftp-fetch-sync.service.js';
+import { CONNECTOR_INSTALLATION_REPOSITORY, CONNECTOR_REGISTRY } from './domain/connector.ports.js';
+import { HomeAssistantHomeAutomationConnector } from './infrastructure/adapters/home-assistant/home-assistant-home-automation.connector.js';
+import { GmailMailConnector } from './infrastructure/adapters/mail/gmail-mail.connector.js';
+import { OutlookMailConnector } from './infrastructure/adapters/mail/outlook-mail.connector.js';
+import { PaperlessDmsConnector } from './infrastructure/adapters/paperless/paperless-dms.connector.js';
+import { PaperlessImportExecutor } from './infrastructure/adapters/paperless/paperless-import.executor.js';
+import { PaperlessImportQueueService } from './infrastructure/adapters/paperless/paperless-import.queue.js';
+import { PaperlessImportRepository } from './infrastructure/adapters/paperless/paperless-import.repository.js';
+import { AmazonS3StorageConnector } from './infrastructure/adapters/s3/amazon-s3-storage.connector.js';
+import { SftpFetchConnector } from './infrastructure/adapters/sftp/sftp-fetch.connector.js';
+import { PgConnectorInstallationRepository } from './infrastructure/pg-connector-installation.repository.js';
+import { ConnectorOAuthCallbackGuard } from './presentation/connector-oauth-callback.guard.js';
+import { ConnectorsController } from './presentation/connectors.controller.js';
+import { ConnectorsOAuthController } from './presentation/connectors-oauth.controller.js';
 import { PaperlessImportController } from './presentation/paperless-import.controller.js';
 
 const MAIL_CATEGORY = {
@@ -132,4 +133,5 @@ const SCANNER_SFTP_CATEGORY = {
     },
   ],
 })
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host
 export class ConnectorsModule {}

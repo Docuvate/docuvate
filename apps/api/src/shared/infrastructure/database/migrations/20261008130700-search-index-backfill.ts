@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { MigrationInterface, QueryRunner } from 'typeorm';
-import { splitTextChunks } from '../../../../modules/search/domain/split-text-chunks.js';
+
 import { tokenizeSearchQuery } from '../../../../modules/search/domain/normalize-search-text.js';
+import { splitTextChunks } from '../../../../modules/search/domain/split-text-chunks.js';
+import { parseOptionalString, parseString, requireRecord } from '../row-parse.js';
 
 const MAX_TERMS_PER_TEXT = 200;
 const DOCUMENT_TEXT_SLICE = 4000;
@@ -35,15 +37,29 @@ export class SearchIndexBackfill20261008130700 implements MigrationInterface {
   name = 'SearchIndexBackfill20261008130700';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const documents: Array<{
+    const rawDocuments: unknown = await queryRunner.query(
+      `SELECT id, user_id, title, filename, extracted_text FROM documents ORDER BY created_at, id`
+    );
+    if (!Array.isArray(rawDocuments)) {
+      return;
+    }
+    const documents: {
       id: string;
       user_id: string;
       title: string | null;
       filename: string | null;
       extracted_text: string | null;
-    }> = await queryRunner.query(
-      `SELECT id, user_id, title, filename, extracted_text FROM documents ORDER BY created_at, id`
-    );
+    }[] = [];
+    for (const row of rawDocuments) {
+      const record = requireRecord(row);
+      documents.push({
+        id: parseString(record.id),
+        user_id: parseString(record.user_id),
+        title: parseOptionalString(record.title),
+        filename: parseOptionalString(record.filename),
+        extracted_text: parseOptionalString(record.extracted_text),
+      });
+    }
     for (const doc of documents) {
       const text = doc.extracted_text ?? '';
       if (text.trim().length > 0) {

@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type {
   GlobalSearchGroupDto,
   GlobalSearchQuery,
   GlobalSearchResponseDto,
 } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
 import { EMBEDDING_PORT, type EmbeddingPort } from '../../../shared/domain/ports.js';
 import { normalizeSearchText } from '../domain/normalize-search-text.js';
 import { parseSearchScope, resolveSearchTypes } from '../domain/parse-search-scope.js';
@@ -22,11 +23,11 @@ export class GlobalSearchUseCase {
   ) {}
 
   async execute(userId: string, query: GlobalSearchQuery): Promise<GlobalSearchResponseDto> {
-    const parsed = parseSearchScope(query.q ?? '');
+    const parsed = parseSearchScope(query.q);
     const types = resolveSearchTypes(parsed.scopes, query.types);
     const perGroup = Math.min(Math.max(query.limit ?? DEFAULT_LIMIT, 1), 20);
     const textQuery =
-      parsed.textQuery || (parsed.fieldFilters.length === 0 ? query.q?.trim() : '') || '';
+      parsed.textQuery || (parsed.fieldFilters.length === 0 ? query.q.trim() : '') || '';
     const fieldDefs = await this.searchRepo.listFieldDefinitions(userId);
     const resolvedFieldFilters = resolveFieldFilters(parsed.fieldFilters, fieldDefs);
 
@@ -38,7 +39,7 @@ export class GlobalSearchUseCase {
     const embedLegEnabled =
       includeDocuments &&
       textQuery.length >= 3 &&
-      process.env['GLOBAL_SEARCH_DISABLE_EMBED'] !== '1';
+      process.env.GLOBAL_SEARCH_DISABLE_EMBED !== '1';
     if (embedLegEnabled && (await this.searchRepo.userHasDocumentEmbeddings(userId))) {
       try {
         const { embeddings } = await this.embedding.embedTexts([textQuery]);
@@ -54,7 +55,7 @@ export class GlobalSearchUseCase {
       includeFolders,
       includeLabels,
       queryVector,
-      embedFullScan: process.env['GLOBAL_SEARCH_EMBED_FULL_SCAN'] === '1',
+      embedFullScan: process.env.GLOBAL_SEARCH_EMBED_FULL_SCAN === '1',
       fieldFilters: resolvedFieldFilters,
     });
 
@@ -120,7 +121,7 @@ export class GlobalSearchUseCase {
     }
 
     return {
-      query: query.q ?? '',
+      query: query.q,
       normalizedQuery: normalizeSearchText(textQuery),
       expandedTerms: result.expandedTerms,
       groups,

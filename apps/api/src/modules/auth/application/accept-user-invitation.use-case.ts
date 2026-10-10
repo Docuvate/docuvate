@@ -2,14 +2,19 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
+
+import { ValidationError } from '../../../shared/domain/errors.js';
+import { parseOptionalEnum } from '../../../shared/infrastructure/database/row-parse.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { hashInvitationToken } from '../../admin/domain/user-invitation.tokens.js';
 import {
   AUTH_MAX_PASSWORD_LENGTH,
   AUTH_MIN_PASSWORD_LENGTH,
 } from '../domain/auth-password.constants.js';
-import { ValidationError } from '../../../shared/domain/errors.js';
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { hashInvitationToken } from '../../admin/domain/user-invitation.tokens.js';
-import { INSTALLATION_DB_ROLE_ADMIN } from '../domain/installation.constants.js';
+import {
+  INSTALLATION_DB_ROLE_ADMIN,
+  INSTALLATION_DB_ROLE_MEMBER,
+} from '../domain/installation.constants.js';
 import { dbRoleToInstanceRole } from '../domain/installation-authorization.js';
 import { INSTANCE_ROLE_ADMIN } from '../domain/instance-role.constants.js';
 import { provisionInvitedUser } from './provision-invited-user.js';
@@ -40,8 +45,8 @@ export class AcceptUserInvitationUseCase {
          FOR UPDATE`,
         [tokenHash]
       );
-      const row = locked.rows[0];
-      if (!row) {
+      const row = locked.rows.at(0);
+      if (row === undefined) {
         throw new ValidationError('admin.errors.invitationInvalid');
       }
       const inviter = await client.query<{ role: string }>(
@@ -59,9 +64,14 @@ export class AcceptUserInvitationUseCase {
       if (!inviterRole) {
         throw new ValidationError('admin.errors.invitationInvalid');
       }
-      const assignedRole = dbRoleToInstanceRole(
-        row.assigned_role as 'installation_admin' | 'installation_member'
-      );
+      const assignedDbRole = parseOptionalEnum(row.assigned_role, [
+        INSTALLATION_DB_ROLE_ADMIN,
+        INSTALLATION_DB_ROLE_MEMBER,
+      ]);
+      if (!assignedDbRole) {
+        throw new ValidationError('admin.errors.invitationInvalid');
+      }
+      const assignedRole = dbRoleToInstanceRole(assignedDbRole);
       if (assignedRole === INSTANCE_ROLE_ADMIN && inviterRole !== INSTALLATION_DB_ROLE_ADMIN) {
         throw new ValidationError('admin.errors.invitationInvalid');
       }

@@ -3,12 +3,12 @@
 import {
   Column,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
 import { ChatMessagesEntity } from './chat-messages.entity.js';
 import { ChatThreadDocumentsEntity } from './chat-thread-documents.entity.js';
 import { UserEntity } from './user.entity.js';

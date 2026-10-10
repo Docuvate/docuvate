@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
+
 import {
   connectorOAuthRedirectUri,
   mailOAuthMissingEnvVars,
@@ -15,8 +16,8 @@ describe('mail oauth config', () => {
   });
 
   it('lists missing Gmail env vars when unset', () => {
-    delete process.env['DOCUVATE_GMAIL_OAUTH_CLIENT_ID'];
-    delete process.env['DOCUVATE_GMAIL_OAUTH_CLIENT_SECRET'];
+    delete process.env.DOCUVATE_GMAIL_OAUTH_CLIENT_ID;
+    delete process.env.DOCUVATE_GMAIL_OAUTH_CLIENT_SECRET;
     expect(mailOAuthMissingEnvVars('gmail')).toEqual([
       'DOCUVATE_GMAIL_OAUTH_CLIENT_ID',
       'DOCUVATE_GMAIL_OAUTH_CLIENT_SECRET',
@@ -25,14 +26,14 @@ describe('mail oauth config', () => {
   });
 
   it('prefers explicit redirect URI', () => {
-    process.env['DOCUVATE_CONNECTOR_OAUTH_REDIRECT_URI'] =
+    process.env.DOCUVATE_CONNECTOR_OAUTH_REDIRECT_URI =
       'http://localhost:3001/v1/connectors/oauth/callback';
     expect(connectorOAuthRedirectUri()).toBe('http://localhost:3001/v1/connectors/oauth/callback');
   });
 
   it('builds redirect from public API URL', () => {
-    delete process.env['DOCUVATE_CONNECTOR_OAUTH_REDIRECT_URI'];
-    process.env['DOCUVATE_API_PUBLIC_URL'] = 'https://app.example.com/api';
+    delete process.env.DOCUVATE_CONNECTOR_OAUTH_REDIRECT_URI;
+    process.env.DOCUVATE_API_PUBLIC_URL = 'https://app.example.com/api';
     expect(connectorOAuthRedirectUri()).toBe(
       'https://app.example.com/api/v1/connectors/oauth/callback'
     );

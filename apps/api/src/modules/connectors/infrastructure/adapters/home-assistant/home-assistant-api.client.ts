@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
+import { readConnectorConfigString } from '../shared/connector-config-string.js';
 import { connectorFetch, joinUrl, trimTrailingSlash } from '../shared/connector-http.js';
 
 export function resolveHomeAssistantBaseUrl(credentials: ConnectorConfigurationInput): string {
-  return trimTrailingSlash(credentials['base_url']?.trim() ?? '');
+  return trimTrailingSlash(readConnectorConfigString(credentials, 'base_url'));
 }
 
 export function homeAssistantToken(credentials: ConnectorConfigurationInput): string {
-  return credentials['access_token']?.trim() ?? '';
+  return readConnectorConfigString(credentials, 'access_token');
 }
 
 export function homeAssistantApiFetch(

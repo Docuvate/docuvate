@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   CONNECTOR_INSTALLATION_REPOSITORY,
@@ -8,8 +9,8 @@ import {
   type ConnectorInstallationRepository,
   type ConnectorRegistryPort,
 } from '../domain/connector.ports.js';
-import type { ConnectorRuntimePorts } from '../domain/connector-runtime.ports.js';
 import type { ConnectorConfigurationInput, ConnectorPluginId } from '../domain/connector.types.js';
+import type { ConnectorRuntimePorts } from '../domain/connector-runtime.ports.js';
 
 export interface ResolvedConnectorRuntime {
   pluginId: ConnectorPluginId;

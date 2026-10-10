@@ -1,12 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
+
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
-import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 
 describe('PgGlobalSearchRepository indexDocumentChunks concurrency (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
@@ -44,7 +46,11 @@ describe('PgGlobalSearchRepository indexDocumentChunks concurrency (Testcontaine
       'Gamma chunk text for concurrent indexing stress.',
     ];
     const runs = bodies.map((body, round) =>
-      repo.indexDocumentChunks(userId, documentId, splitTextChunksWithSpans(`${body} round ${round}.`))
+      repo.indexDocumentChunks(
+        userId,
+        documentId,
+        splitTextChunksWithSpans(`${body} round ${String(round)}.`)
+      )
     );
     await expect(Promise.all(runs)).resolves.toBeDefined();
 
@@ -54,7 +60,7 @@ describe('PgGlobalSearchRepository indexDocumentChunks concurrency (Testcontaine
     );
     expect(rows.rows.length).toBeGreaterThan(0);
     for (let i = 0; i < rows.rows.length; i += 1) {
-      expect(rows.rows[i]!.chunk_index).toBe(i);
+      expect(rows.rows[i].chunk_index).toBe(i);
     }
     const distinctIndexes = new Set(rows.rows.map((r) => r.chunk_index));
     expect(distinctIndexes.size).toBe(rows.rows.length);

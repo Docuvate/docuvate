@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { IsIn, IsObject, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsObject, IsOptional } from 'class-validator';
 
 export class HealthResponseDto {
   @IsIn(['ok'])

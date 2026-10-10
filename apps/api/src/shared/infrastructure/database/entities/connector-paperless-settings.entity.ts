@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
+
 import { ConnectorInstallationsEntity } from './connector-installations.entity.js';
 
 @Entity('connector_paperless_settings', { schema: 'public' })

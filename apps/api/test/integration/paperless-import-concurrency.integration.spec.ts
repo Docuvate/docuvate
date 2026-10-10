@@ -1,17 +1,27 @@
-import { afterAll, describe, expect, it } from 'vitest';
-import { Queue, Worker } from 'bullmq';
+import { type Job, Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
+import { afterAll, describe, expect, it } from 'vitest';
+
 import { startValkeyContainer } from '../../../../packages/testing/src/containers/index.js';
 import { StartPaperlessImportUseCase } from '../../src/modules/connectors/application/paperless-import.use-cases.js';
 import { PaperlessImportRepository } from '../../src/modules/connectors/infrastructure/adapters/paperless/paperless-import.repository.js';
 import { PgConnectorInstallationRepository } from '../../src/modules/connectors/infrastructure/pg-connector-installation.repository.js';
 import { ConflictError } from '../../src/shared/domain/errors.js';
+import {
+  createPaperlessConnectorRuntimeResolver,
+  createPaperlessImportQueueService,
+} from './paperless-import-fixtures.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
   insertSyntheticUser,
   newIsolationUserId,
 } from './pg-test-isolation.js';
+
+interface PaperlessImportJobPayload {
+  runId: string;
+  userId: string;
+}
 
 const QUEUE_NAME = 'connector-paperless-import-test';
 
@@ -62,11 +72,9 @@ describe('Paperless import concurrency (integration)', () => {
   it('rejects a second start while a run is pending (409)', async () => {
     const { userId, installationId } = await createInstallation();
     const imports = new PaperlessImportRepository(pool);
-    const runtime = {
-      resolve: async () => ({ pluginId: 'paperless', credentials: {} }),
-    };
-    const queue = { enqueue: async () => undefined };
-    const useCase = new StartPaperlessImportUseCase(runtime as never, imports, queue as never);
+    const runtime = createPaperlessConnectorRuntimeResolver(pool);
+    const queue = createPaperlessImportQueueService(pool);
+    const useCase = new StartPaperlessImportUseCase(runtime, imports, queue);
 
     await imports.createRun({
       installationId,
@@ -105,8 +113,8 @@ describe('Paperless import concurrency (integration)', () => {
     let processed = 0;
     const worker = new Worker(
       QUEUE_NAME,
-      async (job) => {
-        const claimed = await imports.claimRunForProcessing(String(job.data.runId));
+      async (job: Job<PaperlessImportJobPayload>) => {
+        const claimed = await imports.claimRunForProcessing(job.data.runId);
         if (!claimed) {
           return;
         }

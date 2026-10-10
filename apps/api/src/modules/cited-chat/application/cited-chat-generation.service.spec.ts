@@ -1,7 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { Test } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import {
+  DOCUMENT_CHAT_THREAD_REPOSITORY,
+  type DocumentChatThreadRepository,
+  EMBEDDING_PORT,
+  type EmbeddingPort,
+} from '../../../shared/domain/ports.js';
 import { CITED_CHAT_ABSTENTION_DE } from '../domain/cited-chat-constants.js';
+import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
+import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import { CitedChatGenerationService } from './cited-chat-generation.service.js';
 
 vi.mock('../infrastructure/fetch-worker-rag-rerank.js', () => ({
   fetchWorkerRagRerank: vi.fn(),
@@ -14,17 +25,56 @@ vi.mock('./cited-chat-ollama.js', () => ({
 
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { requestCitedAnswerFromOllama } from './cited-chat-ollama.js';
-import { CitedChatGenerationService } from './cited-chat-generation.service.js';
 
 const messageId = 'msg-1';
 const threadId = 'thread-1';
 const userId = 'user-1';
 
+async function buildService(deps: {
+  threads: Record<string, ReturnType<typeof vi.fn>>;
+  retrieval: {
+    hybridRetrieveChunks: ReturnType<typeof vi.fn>;
+    indexPassageForRerank: (c: { documentTitle: string; body: string }) => string;
+  };
+  citations?: { replaceCitations: ReturnType<typeof vi.fn> };
+}) {
+  const moduleRef = await Test.createTestingModule({
+    providers: [
+      {
+        provide: CitedChatGenerationService,
+        useFactory: (
+          threads: DocumentChatThreadRepository,
+          embedding: EmbeddingPort,
+          retrieval: PgCitedChatRetrievalRepository,
+          citations: PgChatMessageCitationsRepository
+        ) => new CitedChatGenerationService(threads, embedding, retrieval, citations),
+        inject: [
+          DOCUMENT_CHAT_THREAD_REPOSITORY,
+          EMBEDDING_PORT,
+          PgCitedChatRetrievalRepository,
+          PgChatMessageCitationsRepository,
+        ],
+      },
+      { provide: DOCUMENT_CHAT_THREAD_REPOSITORY, useValue: deps.threads },
+      {
+        provide: EMBEDDING_PORT,
+        useValue: { embedTexts: vi.fn().mockResolvedValue({ embeddings: [[0.1]] }) },
+      },
+      { provide: PgCitedChatRetrievalRepository, useValue: deps.retrieval },
+      {
+        provide: PgChatMessageCitationsRepository,
+        useValue: deps.citations ?? { replaceCitations: vi.fn() },
+      },
+    ],
+  }).compile();
+  return moduleRef.get(CitedChatGenerationService);
+}
+
 describe('CitedChatGenerationService abstention', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env['RAG_RERANKER_GATE_MIN'] = '0.21';
-    process.env['RAG_FUSION_GATE_MIN'] = '0.02';
+    process.env.RAG_RERANKER_GATE_MIN = '0.21';
+    process.env.RAG_FUSION_GATE_MIN = '0.02';
   });
 
   it('abstains on off-topic reranker score', async () => {
@@ -39,6 +89,7 @@ describe('CitedChatGenerationService abstention', () => {
       updateMessageGeneration: vi.fn(),
       touchThread: vi.fn(),
       listMessages: vi.fn().mockResolvedValue([]),
+      findMessageForUser: vi.fn().mockResolvedValue({ content: '' }),
     };
     const retrieval = {
       hybridRetrieveChunks: vi.fn().mockResolvedValue([
@@ -56,12 +107,7 @@ describe('CitedChatGenerationService abstention', () => {
       indexPassageForRerank: (c: { documentTitle: string; body: string }) =>
         `${c.documentTitle}\n${c.body}`,
     };
-    const service = new CitedChatGenerationService(
-      threads as never,
-      { embedTexts: vi.fn().mockResolvedValue({ embeddings: [[0.1]] }) } as never,
-      retrieval as never,
-      { replaceCitations: vi.fn() } as never
-    );
+    const service = await buildService({ threads, retrieval });
 
     const result = await service.generate({
       messageId,
@@ -89,6 +135,7 @@ describe('CitedChatGenerationService abstention', () => {
       updateMessageGeneration: vi.fn(),
       touchThread: vi.fn(),
       listMessages: vi.fn().mockResolvedValue([]),
+      findMessageForUser: vi.fn().mockResolvedValue({ content: '' }),
     };
     const retrieval = {
       hybridRetrieveChunks: vi.fn().mockResolvedValue([
@@ -106,12 +153,7 @@ describe('CitedChatGenerationService abstention', () => {
       indexPassageForRerank: (c: { documentTitle: string; body: string }) =>
         `${c.documentTitle}\n${c.body}`,
     };
-    const service = new CitedChatGenerationService(
-      threads as never,
-      { embedTexts: vi.fn().mockResolvedValue({ embeddings: [[0.1]] }) } as never,
-      retrieval as never,
-      { replaceCitations: vi.fn() } as never
-    );
+    const service = await buildService({ threads, retrieval });
 
     const result = await service.generate({
       messageId,
@@ -162,12 +204,7 @@ describe('CitedChatGenerationService abstention', () => {
       indexPassageForRerank: (c: { documentTitle: string; body: string }) =>
         `${c.documentTitle}\n${c.body}`,
     };
-    const service = new CitedChatGenerationService(
-      threads as never,
-      { embedTexts: vi.fn().mockResolvedValue({ embeddings: [[0.1]] }) } as never,
-      retrieval as never,
-      citations as never
-    );
+    const service = await buildService({ threads, retrieval, citations });
 
     const result = await service.generate({
       messageId,

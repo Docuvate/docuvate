@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
+
 import {
   DOCUMENT_REPOSITORY,
-  EMBEDDING_PORT,
-  LABEL_EMBEDDING_REPOSITORY,
-  TAXONOMY_REPOSITORY,
-  USER_PREFERENCES_REPOSITORY,
   type DocumentRepository,
+  EMBEDDING_PORT,
   type EmbeddingPort,
+  LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import { cosineSimilarity } from '../domain/cosine.js';
@@ -46,7 +47,7 @@ export class ApplyEmbeddingSuggestionsUseCase {
 
       const { model, embeddings } = await this.embedding.embedTexts([trimmed]);
       const vector = embeddings[0];
-      if (!vector || vector.length === 0) {
+      if (vector.length === 0) {
         return;
       }
 
@@ -132,7 +133,7 @@ export class ApplyEmbeddingSuggestionsUseCase {
         await this.taxonomy.upsertSuggestion(
           documentId,
           tagId,
-          `Embedding-Ähnlichkeit ${pct}% (${tag.name})`,
+          `Embedding-Ähnlichkeit ${String(pct)}% (${tag.name})`,
           { source: 'embedding', confidence: adjusted }
         );
       }

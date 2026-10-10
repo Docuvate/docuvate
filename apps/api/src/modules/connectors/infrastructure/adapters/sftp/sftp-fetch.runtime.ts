@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorRuntimePorts,
   ConnectorSourcePort,
 } from '../../../domain/connector-runtime.ports.js';
-import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorImportableItem,
   ConnectorImportedBlob,
@@ -30,7 +30,7 @@ export function openSftpFetchRuntime(
         ref: file.path,
         title: file.name,
         mimeType: guessMimeType(file.name),
-        sizeBytes: file.sizeBytes ?? null,
+        sizeBytes: file.sizeBytes,
       }));
     },
     async fetchImportable(ref: string) {

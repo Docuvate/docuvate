@@ -1,28 +1,28 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger } from '@nestjs/common';
+
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_CHAT_PORT,
   DOCUMENT_CHAT_THREAD_REPOSITORY,
   DOCUMENT_REPOSITORY,
-  OBJECT_STORAGE,
-  USER_PREFERENCES_REPOSITORY,
   type DocumentChatPort,
   type DocumentChatThreadRepository,
   type DocumentRepository,
+  OBJECT_STORAGE,
   type ObjectStorage,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import type { DocumentChatProviderId } from '../../../shared/infrastructure/chat/chat-provider.types.js';
-import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
 import { buildDocumentRagSystemPrompt } from '../../../shared/infrastructure/chat/build-system-prompt.js';
 import { fetchWorkerRagContext } from '../../../shared/infrastructure/chat/fetch-worker-rag-context.js';
 import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
-import { DocumentChatGenerationCancelRegistry } from '../infrastructure/document-chat-generation-cancel.registry.js';
-import { DocumentChatGenerationActiveRegistry } from '../infrastructure/document-chat-generation-active.registry.js';
 import { CitedChatGenerationService } from '../../cited-chat/application/cited-chat-generation.service.js';
+import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
 import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
+import { DocumentChatGenerationActiveRegistry } from '../infrastructure/document-chat-generation-active.registry.js';
+import { DocumentChatGenerationCancelRegistry } from '../infrastructure/document-chat-generation-cancel.registry.js';
 
 export interface DocumentChatGenerationJobPayload {
   messageId: string;
@@ -57,7 +57,10 @@ export class RunDocumentChatGenerationUseCase {
     await this.activeRegistry.markActive(messageId);
 
     const message = await this.threads.findMessageForUser(messageId, userId);
-    if (!message || message.threadId !== threadId || message.role !== 'assistant') {
+    if (!message) {
+      throw new NotFoundError('Chat message');
+    }
+    if (message.threadId !== threadId || message.role !== 'assistant') {
       throw new NotFoundError('Chat message');
     }
 
@@ -167,7 +170,7 @@ export class RunDocumentChatGenerationUseCase {
       }
 
       const result = await this.chat.chat(userMessage, history, context, {
-        providerId: providerId as DocumentChatProviderId,
+        providerId: providerId,
         file,
       });
 
@@ -207,12 +210,12 @@ export class RunDocumentChatGenerationUseCase {
     threadId: string,
     providerId: 'rag-ollama' | 'ollama',
     userMessage: string,
-    history: Array<{ role: string; content: string }>,
+    history: { role: string; content: string }[],
     context: {
       title: string;
       filename: string;
       text: string;
-      fields: Array<{ key: string; value: string }>;
+      fields: { key: string; value: string }[];
     }
   ): Promise<void> {
     let ragContextText = '';
@@ -230,7 +233,7 @@ export class RunDocumentChatGenerationUseCase {
       generationPhase: 'generating',
     });
 
-    const model = process.env['OLLAMA_MODEL'] ?? 'qwen2.5:1.5b';
+    const model = process.env.OLLAMA_MODEL ?? 'qwen2.5:1.5b';
     const systemContent =
       providerId === 'rag-ollama'
         ? buildDocumentRagSystemPrompt(context, ragContextText, { ollamaModel: model })
@@ -289,7 +292,7 @@ export class RunDocumentChatGenerationUseCase {
         errorCode: 'ollama_error',
         errorDetail:
           streamResult.failure.kind === 'http_error'
-            ? `HTTP ${streamResult.failure.status}: ${streamResult.failure.detail ?? ''}`
+            ? `HTTP ${String(streamResult.failure.status)}: ${streamResult.failure.detail ?? ''}`
             : streamResult.failure.detail,
         content: partialContent,
       });

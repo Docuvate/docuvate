@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock } from '@docuvate/contracts';
+
 import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
 
 export const CHUNK_SIZE = 320;
@@ -55,9 +56,9 @@ export function attachPagesToChunks(
     return (a.blockIndex ?? 0) - (b.blockIndex ?? 0);
   });
   let cursor = 0;
-  const blockRanges: Array<{ page: number; start: number; end: number }> = [];
+  const blockRanges: { page: number; start: number; end: number }[] = [];
   for (const block of ordered) {
-    const piece = normalizeDocumentText(block.text ?? '');
+    const piece = normalizeDocumentText(block.text);
     if (!piece) {
       continue;
     }
@@ -69,7 +70,8 @@ export function attachPagesToChunks(
   return chunks.map((chunk) => {
     const mid = chunk.charStart + Math.floor((chunk.charEnd - chunk.charStart) / 2);
     const hit = blockRanges.find((r) => mid >= r.start && mid < r.end);
-    return { ...chunk, page: hit?.page ?? blockRanges[0]?.page ?? 1 };
+    const fallbackPage = blockRanges.length > 0 ? blockRanges[0].page : 1;
+    return { ...chunk, page: hit ? hit.page : fallbackPage };
   });
 }
 

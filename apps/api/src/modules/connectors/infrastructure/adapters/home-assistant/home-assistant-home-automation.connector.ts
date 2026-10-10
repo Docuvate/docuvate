@@ -7,8 +7,8 @@ import type {
 } from '../../../domain/connector.types.js';
 import { requiredFieldsPresent } from '../shared/required-fields.validation.js';
 import { remoteValidationFailed } from '../shared/validation-message.js';
-import { validateHomeAssistantConnection } from './home-assistant-api.client.js';
 import { openHomeAssistantRuntime } from './home-assistant.runtime.js';
+import { validateHomeAssistantConnection } from './home-assistant-api.client.js';
 
 export class HomeAssistantHomeAutomationConnector implements ConnectorPlugin {
   readonly descriptor = {

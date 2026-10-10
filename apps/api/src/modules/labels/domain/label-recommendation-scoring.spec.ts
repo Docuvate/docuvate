@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import {
   formatAssignRecommendationReason,
   formatMergeRecommendationReason,
@@ -64,7 +65,7 @@ describe('suggestAssignRecommendations', () => {
       {
         documentId: 'd1',
         embedding: [0.95, 0.05, 0],
-        nonInboxTagIds: [] as string[],
+        nonInboxTagIds: [] satisfies string[],
       },
     ];
     const recs = suggestAssignRecommendations({
@@ -85,7 +86,7 @@ describe('suggestAssignRecommendations', () => {
       {
         documentId: 'd1',
         embedding: [0.95, 0.05, 0],
-        nonInboxTagIds: [] as string[],
+        nonInboxTagIds: [] satisfies string[],
       },
     ];
     const recs = suggestAssignRecommendations({
@@ -128,17 +129,17 @@ describe('suggestAssignRecommendations', () => {
       {
         documentId: 'kontoauszug',
         embedding: vec([0.96, 0.04, 0, 0, 0, 0, 0, 0]),
-        nonInboxTagIds: [] as string[],
+        nonInboxTagIds: [] satisfies string[],
       },
       {
         documentId: 'lohnsteuer',
         embedding: vec([0.04, 0.96, 0, 0, 0, 0, 0, 0]),
-        nonInboxTagIds: [] as string[],
+        nonInboxTagIds: [] satisfies string[],
       },
       {
         documentId: 'mietvertrag-garage',
         embedding: vec([0, 0.04, 0.96, 0, 0, 0, 0, 0]),
-        nonInboxTagIds: [] as string[],
+        nonInboxTagIds: [] satisfies string[],
       },
     ];
     const recs = suggestAssignRecommendations({
@@ -179,7 +180,10 @@ describe('merge scoring', () => {
       }
     );
     expect(scored).not.toBeNull();
-    expect(scored!.similarity).toBeGreaterThan(0.78);
+    if (scored === null) {
+      throw new Error('expected merge score');
+    }
+    expect(scored.similarity).toBeGreaterThan(0.78);
   });
 
   it('does not merge Rechnung and SEPA with one document each', () => {

@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
+
 import {
   DOCUMENT_REPOSITORY,
-  OBJECT_STORAGE,
   type DocumentRepository,
+  OBJECT_STORAGE,
   type ObjectStorage,
 } from '../../../shared/domain/ports.js';
 import { HandleDuplicateStackDocumentDeletedUseCase } from '../../duplicates/application/duplicate-stack.use-cases.js';

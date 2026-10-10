@@ -1,14 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  parseBoolean,
+  parseString,
+  recordFromUnknown,
+} from '../../../../../shared/infrastructure/database/row-parse.js';
+import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import type {
   ConnectorRuntimePorts,
   ConnectorSourcePort,
 } from '../../../domain/connector-runtime.ports.js';
-import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
-import type {
-  ConnectorImportableItem,
-  ConnectorImportedBlob,
-} from '../../../domain/connector-runtime.types.js';
+import type { ConnectorImportedBlob } from '../../../domain/connector-runtime.types.js';
+import { readConnectorConfigString } from '../shared/connector-config-string.js';
 import { connectorFetch } from '../shared/connector-http.js';
 
 interface GraphMessageListResponse {
@@ -19,21 +22,62 @@ interface GraphAttachmentListResponse {
   value: { id: string; name?: string; contentType?: string; size?: number }[];
 }
 
+function parseGraphMessages(value: unknown): GraphMessageListResponse {
+  const row = recordFromUnknown(value);
+  if (!row || !Array.isArray(row.value)) {
+    return { value: [] };
+  }
+  const valueRows: GraphMessageListResponse['value'] = [];
+  for (const entry of row.value) {
+    const messageRow = recordFromUnknown(entry);
+    if (!messageRow) continue;
+    const id = parseString(messageRow.id);
+    if (!id) continue;
+    valueRows.push({
+      id,
+      subject: parseString(messageRow.subject) || undefined,
+      hasAttachments: parseBoolean(messageRow.hasAttachments),
+    });
+  }
+  return { value: valueRows };
+}
+
+function parseGraphAttachments(value: unknown): GraphAttachmentListResponse {
+  const row = recordFromUnknown(value);
+  if (!row || !Array.isArray(row.value)) {
+    return { value: [] };
+  }
+  const valueRows: GraphAttachmentListResponse['value'] = [];
+  for (const entry of row.value) {
+    const attachmentRow = recordFromUnknown(entry);
+    if (!attachmentRow) continue;
+    const id = parseString(attachmentRow.id);
+    if (!id) continue;
+    valueRows.push({
+      id,
+      name: parseString(attachmentRow.name) || undefined,
+      contentType: parseString(attachmentRow.contentType) || undefined,
+    });
+  }
+  return { value: valueRows };
+}
+
 export function openOutlookRuntime(
   credentials: ConnectorConfigurationInput
 ): ConnectorRuntimePorts {
-  const accessToken = credentials['access_token']?.trim() ?? '';
+  const accessToken = readConnectorConfigString(credentials, 'access_token');
 
   const source: ConnectorSourcePort = {
     async listImportables({ limit }) {
+      const top = String(Math.min(limit, 50));
       const response = await connectorFetch(
-        `https://graph.microsoft.com/v1.0/me/messages?$top=${Math.min(limit, 50)}&$filter=hasAttachments eq true&$select=id,subject,hasAttachments`,
+        `https://graph.microsoft.com/v1.0/me/messages?$top=${top}&$filter=hasAttachments eq true&$select=id,subject,hasAttachments`,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       if (!response.ok) {
         throw new Error('OUTLOOK_LIST_FAILED');
       }
-      const body = (await response.json()) as GraphMessageListResponse;
+      const body = parseGraphMessages(await response.json());
       return body.value
         .filter((row) => row.hasAttachments)
         .map((row) => ({
@@ -51,9 +95,12 @@ export function openOutlookRuntime(
       if (!attachmentsResponse.ok) {
         throw new Error('OUTLOOK_ATTACHMENTS_FAILED');
       }
-      const attachments = (await attachmentsResponse.json()) as GraphAttachmentListResponse;
-      const first = attachments.value[0];
-      if (!first?.id) {
+      const attachments = parseGraphAttachments(await attachmentsResponse.json());
+      const first = attachments.value.at(0);
+      if (first === undefined) {
+        throw new Error('OUTLOOK_NO_ATTACHMENT');
+      }
+      if (!first.id) {
         throw new Error('OUTLOOK_NO_ATTACHMENT');
       }
       const attachmentResponse = await connectorFetch(

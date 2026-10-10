@@ -1,19 +1,42 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync, existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { isRecord, parseJsonRecord, parseJsonUnknown, readStringProperty } from '../helpers/json.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../../../..');
 const composeFile = join(root, 'tools/paperless-test/docker-compose.paperless-test.yml');
 const manifestPath = join(root, 'tools/paperless-test/seed-manifest.json');
 
-export type PaperlessSeedManifest = {
+export interface PaperlessSeedManifest {
   baseUrl: string;
   token: string;
   username: string;
   documentCount: number;
   customFieldId: number | null;
-};
+}
+
+function parsePaperlessSeedManifestWithoutToken(
+  raw: string
+): Omit<PaperlessSeedManifest, 'token' | 'baseUrl'> & { baseUrl?: string } {
+  const record = parseJsonRecord(raw);
+  const username = readStringProperty(record, 'username');
+  const documentCount = record.documentCount;
+  const customFieldId = record.customFieldId;
+  if (!username || typeof documentCount !== 'number') {
+    throw new Error('invalid paperless seed manifest');
+  }
+  const customField =
+    customFieldId === null || typeof customFieldId === 'number' ? customFieldId : null;
+  const baseUrl = readStringProperty(record, 'baseUrl');
+  return {
+    username,
+    documentCount,
+    customFieldId: customField,
+    baseUrl,
+  };
+}
 
 async function obtainPaperlessToken(baseUrl: string, attempts = 20): Promise<string> {
   const username = process.env.PAPERLESS_TEST_USER ?? 'docuvate-test';
@@ -28,10 +51,13 @@ async function obtainPaperlessToken(baseUrl: string, attempts = 20): Promise<str
         signal: AbortSignal.timeout(15_000),
       });
       if (!response.ok) {
-        throw new Error(`token status ${response.status}`);
+        throw new Error(`token status ${String(response.status)}`);
       }
-      const body = (await response.json()) as { token?: string };
-      const token = body.token?.trim();
+      const body = parseJsonUnknown(await response.text());
+      if (!isRecord(body)) {
+        throw new Error('token body invalid');
+      }
+      const token = readStringProperty(body, 'token')?.trim();
       if (!token) {
         throw new Error('token missing');
       }
@@ -50,7 +76,8 @@ async function waitForPaperless(baseUrl: string, timeoutMs = 600_000): Promise<v
     try {
       const token = await obtainPaperlessToken(baseUrl);
       for (const version of [3, 2, 0]) {
-        const accept = version === 0 ? 'application/json' : `application/json; version=${version}`;
+        const accept =
+          version === 0 ? 'application/json' : `application/json; version=${String(version)}`;
         const response = await fetch(`${baseUrl}/api/documents/?page=1&page_size=1`, {
           headers: {
             Authorization: `Token ${token}`,
@@ -89,10 +116,7 @@ export async function ensurePaperlessTestStack(): Promise<PaperlessSeedManifest>
     });
     await new Promise((resolve) => setTimeout(resolve, 5000));
   }
-  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Omit<
-    PaperlessSeedManifest,
-    'token'
-  >;
+  const manifest = parsePaperlessSeedManifestWithoutToken(readFileSync(manifestPath, 'utf8'));
   const token = await obtainPaperlessToken(baseUrl);
   return { ...manifest, baseUrl, token };
 }

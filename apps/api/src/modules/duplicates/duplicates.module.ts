@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
+
 import { LabelsModule } from '../labels/labels.module.js';
 import { ApplyDuplicateDetectionUseCase } from './application/apply-duplicate-detection.use-case.js';
-import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-duplicates.use-case.js';
 import {
   DismissDuplicateCandidateUseCase,
   ListDuplicateCandidatesUseCase,
@@ -17,6 +17,7 @@ import {
   SetDuplicateStackPrimaryUseCase,
   SyncDuplicateStacksUseCase,
 } from './application/duplicate-stack.use-cases.js';
+import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-duplicates.use-case.js';
 
 @Module({
   imports: [LabelsModule],
@@ -45,4 +46,6 @@ import {
     HandleDuplicateStackDocumentDeletedUseCase,
   ],
 })
+// Nest requires a module class token; this module has no instance state.
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host
 export class DuplicatesModule {}

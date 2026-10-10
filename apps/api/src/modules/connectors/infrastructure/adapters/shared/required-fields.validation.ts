@@ -4,13 +4,14 @@ import type {
   ConnectorConfigurationInput,
   ConnectorValidationResult,
 } from '../../../domain/connector.types.js';
+import { readConnectorConfigString } from './connector-config-string.js';
 
 export function requiredFieldsPresent(
   input: ConnectorConfigurationInput,
   keys: string[]
 ): ConnectorValidationResult {
   for (const key of keys) {
-    const value = input[key]?.trim();
+    const value = readConnectorConfigString(input, key);
     if (!value) {
       return { ok: false, messageKey: 'connectors.errors.missingRequiredField' };
     }
@@ -29,7 +30,7 @@ export function requireHostAndTokenOrBasicAuth(
   if (!base.ok) {
     return base;
   }
-  const token = input[tokenKey]?.trim();
+  const token = readConnectorConfigString(input, tokenKey);
   if (token) {
     return { ok: true };
   }

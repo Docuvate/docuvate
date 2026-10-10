@@ -99,7 +99,7 @@ export const FIELD_TYPO_SEARCH_CORPUS: FieldTypoCorpusCase[] = [
 ];
 
 export function recallFieldAtK(
-  hits: Array<{ title: string; snippet: string }>,
+  hits: { title: string; snippet: string }[],
   expectedTitleNeedle: string,
   expectedValueNeedle: string,
   k: number

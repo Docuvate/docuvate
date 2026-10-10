@@ -1,9 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
+
+import { DuplicatesModule } from '../duplicates/duplicates.module.js';
+import { LabelsModule } from '../labels/labels.module.js';
+import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.module.js';
 import { DocumentPipelineRegistry } from './application/document-pipeline.registry.js';
 import { RunDocumentPostOcrPipelineUseCase } from './application/run-document-post-ocr-pipeline.use-case.js';
-import { DocumentPipelineController } from './presentation/document-pipeline.controller.js';
 import {
   DuplicateDetectionDocumentPipelineStep,
   EmbeddingSuggestionsDocumentPipelineStep,
@@ -11,9 +14,7 @@ import {
   LabelAttachedFieldsDocumentPipelineStep,
   LabelMatchingDocumentPipelineStep,
 } from './infrastructure/nest-document-pipeline-modules.js';
-import { LabelsModule } from '../labels/labels.module.js';
-import { DuplicatesModule } from '../duplicates/duplicates.module.js';
-import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.module.js';
+import { DocumentPipelineController } from './presentation/document-pipeline.controller.js';
 
 @Module({
   imports: [LabelsModule, DuplicatesModule, RecognizedFieldsModule],
@@ -55,4 +56,6 @@ import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.m
   ],
   exports: [RunDocumentPostOcrPipelineUseCase],
 })
+// Nest requires a module class token; this module has no instance state.
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host
 export class DocumentPipelineModule {}

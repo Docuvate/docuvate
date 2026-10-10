@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 function loadSql(name: string): string {

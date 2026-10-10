@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
-import { DocumentsEntity } from './documents.entity.js';
+
 import { ChatThreadsEntity } from './chat-threads.entity.js';
+import { DocumentsEntity } from './documents.entity.js';
 @Index('chat_thread_documents_document_idx', ['documentId'], {})
 @Entity('chat_thread_documents', { schema: 'public' })
 export class ChatThreadDocumentsEntity {

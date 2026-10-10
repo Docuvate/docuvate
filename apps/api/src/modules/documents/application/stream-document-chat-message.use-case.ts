@@ -1,15 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { ServerResponse } from 'node:http';
+
 import type { DocumentChatMessageStreamEvent } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
   type DocumentChatThreadRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
-import { toDocumentChatMessageRecordDto } from './document-chat-message.mapper.js';
 import { isTerminalGenerationStatus } from './document-chat-generation-status.js';
+import { toDocumentChatMessageRecordDto } from './document-chat-message.mapper.js';
 
 const POLL_MS = 400;
 const MAX_STREAM_MS = 30 * 60 * 1000;
@@ -29,7 +31,7 @@ export class StreamDocumentChatMessageUseCase {
     isClientClosed: () => boolean
   ): Promise<void> {
     const thread = await this.threads.findThreadForUser(threadId, userId);
-    if (!thread || thread.scope !== 'library') {
+    if (thread?.scope !== 'library') {
       throw new NotFoundError('Chat thread');
     }
     await this.runStream(threadId, messageId, userId, rawResponse, isClientClosed);
@@ -69,7 +71,7 @@ export class StreamDocumentChatMessageUseCase {
 
     while (!isClientClosed() && Date.now() - started < MAX_STREAM_MS) {
       const message = await this.threads.findMessageForUser(messageId, userId);
-      if (!message || message.threadId !== threadId) {
+      if (message?.threadId !== threadId) {
         throw new NotFoundError('Chat message');
       }
 

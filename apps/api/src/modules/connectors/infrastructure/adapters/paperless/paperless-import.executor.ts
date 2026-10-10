@@ -1,33 +1,38 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash } from 'node:crypto';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+
 import type { ExtractedField, MatchingAlgorithm } from '@docuvate/contracts';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+
 import {
   CLOCK,
-  DOCUMENT_REPOSITORY,
-  FOLDER_REPOSITORY,
-  ID_GENERATOR,
-  OBJECT_STORAGE,
-  TAXONOMY_REPOSITORY,
   type Clock,
+  DOCUMENT_REPOSITORY,
   type DocumentRepository,
+  FOLDER_REPOSITORY,
   type FolderRepository,
+  ID_GENERATOR,
   type IdGenerator,
+  OBJECT_STORAGE,
   type ObjectStorage,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../../../shared/domain/ports.js';
-import { ApplyDuplicateDetectionUseCase } from '../../../../duplicates/application/apply-duplicate-detection.use-case.js';
-import { QueueExtractionUseCase } from '../../../../documents/application/queue-extraction.use-case.js';
+import {
+  parseNumber,
+} from '../../../../../shared/infrastructure/database/row-parse.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
+import { QueueExtractionUseCase } from '../../../../documents/application/queue-extraction.use-case.js';
+import { ApplyDuplicateDetectionUseCase } from '../../../../duplicates/application/apply-duplicate-detection.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../../../search/application/sync-document-search-index.use-case.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
 import {
-  PaperlessApiClient,
   detectPaperlessApiVersion,
+  PaperlessApiClient,
   resolvePaperlessCredentials,
 } from './paperless-api.client.js';
-import type { PaperlessDocument, PaperlessCustomField } from './paperless-api.types.js';
+import type { PaperlessCustomField, PaperlessDocument } from './paperless-api.types.js';
 import {
   formatPaperlessCustomFieldValue,
   mapPaperlessCustomFieldType,
@@ -57,14 +62,14 @@ function mapMatchingAlgorithm(value: number): MatchingAlgorithm {
 
 function parseCustomFieldEntries(
   doc: PaperlessDocument
-): Array<{ fieldId: number; value: unknown }> {
+): { fieldId: number; value: unknown }[] {
   const raw = doc.custom_fields;
   if (Array.isArray(raw)) {
-    return raw.map((row) => ({ fieldId: Number(row.field), value: row.value }));
+    return raw.map((row) => ({ fieldId: parseNumber(row.field), value: row.value }));
   }
-  if (raw && typeof raw === 'object') {
+  if (typeof raw === 'object') {
     return Object.entries(raw).map(([fieldId, value]) => ({
-      fieldId: Number(fieldId),
+      fieldId: parseNumber(fieldId),
       value,
     }));
   }
@@ -122,7 +127,7 @@ export class PaperlessImportExecutor {
     let modifiedCursor = run.resumeModifiedCursor;
     const modifiedGtFilter = run.incrementalModifiedGt?.toISOString();
 
-    while (true) {
+    for (;;) {
       const pageResult = await client.listDocuments({
         page,
         pageSize: 50,
@@ -180,15 +185,14 @@ export class PaperlessImportExecutor {
     const sourceModified = new Date(doc.modified);
     const existing = await this.imports.findSourceLink(run.installationId, String(doc.id));
     if (
-      existing &&
-      existing.contentChecksum === checksum &&
+      existing?.contentChecksum === checksum &&
       existing.sourceModifiedAt.getTime() === sourceModified.getTime()
     ) {
       return;
     }
 
     const fullDoc = doc.content != null ? doc : await client.getDocument(doc.id);
-    if (existing && existing.contentChecksum === checksum) {
+    if (existing?.contentChecksum === checksum) {
       await this.updateLinkedDocumentMetadata(run, fullDoc, customFieldById);
       await this.imports.upsertSourceLink({
         installationId: run.installationId,
@@ -206,7 +210,9 @@ export class PaperlessImportExecutor {
     }
 
     const contentHash = createHash('sha256').update(fileBuffer).digest('hex');
-    const filename = fullDoc.original_file_name?.trim() || `${fullDoc.title || doc.id}.bin`;
+    const filename =
+      fullDoc.original_file_name?.trim() ??
+      `${fullDoc.title.trim() || String(doc.id)}.bin`;
     const mimeType = fullDoc.mime_type ?? 'application/octet-stream';
     const notes = mergePaperlessNotes(fullDoc.notes);
     const tagIds = await this.resolveTagIds(run, fullDoc);
@@ -226,7 +232,7 @@ export class PaperlessImportExecutor {
         id: documentId,
         userId: run.userId,
         filename,
-        title: fullDoc.title?.trim() || filename,
+        title: fullDoc.title.trim() || filename,
         mimeType,
         storageKey,
         status: 'uploaded',
@@ -253,7 +259,7 @@ export class PaperlessImportExecutor {
       await this.storage.putObject(docEntity.storageKey, fileBuffer, mimeType);
       await this.documents.setContentHash(documentId, contentHash);
       await this.documents.updateForUser(documentId, run.userId, {
-        title: fullDoc.title?.trim() || filename,
+        title: fullDoc.title.trim() || filename,
         documentDate: fullDoc.created ? new Date(fullDoc.created) : null,
         notes,
         folderId,
@@ -308,9 +314,11 @@ export class PaperlessImportExecutor {
     const correspondentId = await this.resolveCorrespondentId(run, fullDoc.correspondent);
     const folderId = await this.resolveFolderId(run, fullDoc.storage_path);
     const customFields = await this.buildCustomFields(run, fullDoc, customFieldById, run.userId);
-    const filename = fullDoc.original_file_name?.trim() || `${fullDoc.title || fullDoc.id}.bin`;
+    const filename =
+      fullDoc.original_file_name?.trim() ??
+      `${fullDoc.title.trim() || String(fullDoc.id)}.bin`;
     await this.documents.updateForUser(documentId, run.userId, {
-      title: fullDoc.title?.trim() || filename,
+      title: fullDoc.title.trim() || filename,
       documentDate: fullDoc.created ? new Date(fullDoc.created) : null,
       notes,
       folderId,
@@ -359,7 +367,7 @@ export class PaperlessImportExecutor {
     doc: PaperlessDocument
   ): Promise<string[]> {
     const ids: string[] = [];
-    for (const tagId of doc.tags ?? []) {
+    for (const tagId of doc.tags) {
       const local = await this.imports.findEntityLink(run.installationId, 'tag', tagId);
       if (local) {
         ids.push(local);
@@ -529,7 +537,7 @@ export class PaperlessImportExecutor {
     row: { id: number; name: string; path: string }
   ): Promise<string> {
     const folders = await this.folders.listForUser(userId);
-    const name = row.name.trim() || row.path.trim() || `Paperless ${row.id}`;
+    const name = row.name.trim() || row.path.trim() || `Paperless ${String(row.id)}`;
     const found = folders.find((f) => f.name === name && f.parentId == null);
     if (found) {
       return found.id;

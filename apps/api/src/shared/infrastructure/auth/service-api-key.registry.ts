@@ -1,7 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable } from '@nestjs/common';
+
 import type { AuthorizationSubject } from '../../domain/authorization.js';
+import {
+  isRecord,
+  parseString,
+  parseStringArray,
+} from '../database/row-parse.js';
 import {
   assertSftpIngestServiceKeyAllowed,
   resolveSftpIngestServiceKey,
@@ -26,7 +32,7 @@ export class ServiceApiKeyRegistry {
 
   constructor() {
     this.keys = mergeSftpIngestServiceKey(
-      parseServiceApiKeys(process.env['DOCUVATE_SERVICE_API_KEYS'])
+      parseServiceApiKeys(process.env.DOCUVATE_SERVICE_API_KEYS)
     );
   }
 
@@ -59,7 +65,7 @@ function mergeSftpIngestServiceKey(keys: ServiceApiKeyRecord[]): ServiceApiKeyRe
   }
   assertSftpIngestServiceKeyAllowed(sftpKey);
   const tenantUserId =
-    process.env['DOCUVATE_SFTP_INGEST_SERVICE_TENANT_USER_ID']?.trim() || 'local-dev-owner';
+    process.env.DOCUVATE_SFTP_INGEST_SERVICE_TENANT_USER_ID?.trim() ?? 'local-dev-owner';
   if (keys.some((k) => k.keyId === 'sftp-ingest' || timingSafeEqual(k.secret, sftpKey))) {
     return keys;
   }
@@ -75,22 +81,34 @@ function mergeSftpIngestServiceKey(keys: ServiceApiKeyRecord[]): ServiceApiKeyRe
   ];
 }
 
+function parseServiceApiKeyEntry(value: unknown): ServiceApiKeyRecord | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const secret = parseString(value.secret) || parseString(value.key);
+  const tenantUserId = parseString(value.tenantUserId) || parseString(value.userId);
+  const keyId = parseString(value.keyId) || parseString(value.id) || 'default';
+  if (!secret || !tenantUserId) {
+    return null;
+  }
+  const roles = Array.isArray(value.roles) ? parseStringArray(value.roles) : ['integrator'];
+  const claims = Array.isArray(value.claims) ? parseStringArray(value.claims) : [];
+  return { keyId, secret, tenantUserId, roles, claims };
+}
+
 function parseServiceApiKeys(raw: string | undefined): ServiceApiKeyRecord[] {
   if (!raw?.trim()) return [];
   try {
-    const parsed = JSON.parse(raw) as unknown;
+    const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.flatMap((entry) => {
-      if (typeof entry !== 'object' || entry == null) return [];
-      const obj = entry as Record<string, unknown>;
-      const secret = String(obj['secret'] ?? obj['key'] ?? '');
-      const tenantUserId = String(obj['tenantUserId'] ?? obj['userId'] ?? '');
-      const keyId = String(obj['keyId'] ?? obj['id'] ?? 'default');
-      if (!secret || !tenantUserId) return [];
-      const roles = Array.isArray(obj['roles']) ? obj['roles'].map(String) : ['integrator'];
-      const claims = Array.isArray(obj['claims']) ? obj['claims'].map(String) : [];
-      return [{ keyId, secret, tenantUserId, roles, claims }];
-    });
+    const out: ServiceApiKeyRecord[] = [];
+    for (const entry of parsed) {
+      const record = parseServiceApiKeyEntry(entry);
+      if (record) {
+        out.push(record);
+      }
+    }
+    return out;
   } catch {
     return [];
   }

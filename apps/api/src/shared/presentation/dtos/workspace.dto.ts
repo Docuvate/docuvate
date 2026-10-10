@@ -1,5 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  CreateSavedDocumentViewRequest,
+  DashboardLayoutResponse,
+  DashboardStatisticsDto,
+  DashboardWidgetDto,
+  DashboardWidgetType,
+  InstallationDashboardDefaultResponse,
+  LibraryTableColumnId,
+  ReorderSavedDocumentViewsRequest,
+  ReplaceDashboardLayoutRequest,
+  SavedDocumentViewDto,
+  SavedDocumentViewListResponse,
+  SavedViewFilterMode,
+  SavedViewListScope,
+  SavedViewViewMode,
+  SavedViewVisibility,
+  UpdateSavedDocumentViewRequest,
+} from '@docuvate/contracts';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -12,26 +32,6 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type {
-  CreateSavedDocumentViewRequest,
-  DashboardLayoutResponse,
-  DashboardStatisticsDto,
-  DashboardWidgetDto,
-  DashboardWidgetType,
-  InstallationDashboardDefaultResponse,
-  LibraryTableColumnId,
-  ReplaceDashboardLayoutRequest,
-  ReorderSavedDocumentViewsRequest,
-  SavedDocumentViewDto,
-  SavedDocumentViewListResponse,
-  SavedViewFilterMode,
-  SavedViewListScope,
-  SavedViewViewMode,
-  SavedViewVisibility,
-  UpdateSavedDocumentViewRequest,
-} from '@docuvate/contracts';
 
 const VISIBILITIES = ['private', 'shared'] as const;
 const LIST_SCOPES = ['all', 'folder', 'mappe'] as const;

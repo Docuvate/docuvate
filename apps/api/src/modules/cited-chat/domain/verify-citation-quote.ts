@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
 import {
   extractNumericTokens,
   fuzzyWordsMatch,
   numericTokensPresentInText,
 } from './quote-numeric-consistency.js';
-import { normalizeExtractionSurfaceText } from './normalize-extraction-surface-text.js';
 import { chunkIndexText } from './split-text-chunks-with-spans.js';
 
 const QUOTE_WORD_LIMIT = 10;
@@ -25,7 +25,7 @@ export function normalizeNumbersForQuoteMatch(text: string): string {
   out = out.replace(
     /\b(\d{1,3}(?:\.\d{3})+|\d+)(?:,(\d{1,2}))?\b/g,
     (_match, intPart: string, frac?: string) => {
-      const digits = String(intPart).replace(/\./g, '');
+      const digits = intPart.replace(/\./g, '');
       return frac != null && frac !== '' ? `${digits}.${frac}` : digits;
     }
   );
@@ -64,13 +64,13 @@ function appendExpandedChar(map: NormalizedBodyMap, bodyIndex: number, ch: strin
     return;
   }
   if (/[:;]/.test(ch)) {
-    if (map.normalized.length > 0 && map.normalized[map.normalized.length - 1] !== ' ') {
+    if (map.normalized.length > 0 && !map.normalized.endsWith(' ')) {
       appendNormalizedChar(map, bodyIndex, ' ');
     }
     return;
   }
   if (/\s/.test(ch)) {
-    if (map.normalized.length > 0 && map.normalized[map.normalized.length - 1] !== ' ') {
+    if (map.normalized.length > 0 && !map.normalized.endsWith(' ')) {
       appendNormalizedChar(map, bodyIndex, ' ');
     }
     return;
@@ -100,7 +100,7 @@ export function buildNormalizedBodyMap(chunkBody: string): NormalizedBodyMap {
 
     const asString = String.fromCodePoint(cp);
     if (/\s/.test(asString)) {
-      if (map.normalized.length > 0 && map.normalized[map.normalized.length - 1] !== ' ') {
+      if (map.normalized.length > 0 && !map.normalized.endsWith(' ')) {
         appendNormalizedChar(map, bodyIndex, ' ');
       }
       i += charLen;
@@ -140,12 +140,17 @@ function sliceFromBodyMap(
   idx: number,
   needleLen: number
 ): { charStart: number; charEnd: number; bodyQuote: string } | null {
-  const startBodyIndex = bodyMap.bodyIndexAt[idx];
   const lastNormIndex = idx + needleLen - 1;
-  const endBodyIndex = bodyMap.bodyIndexAt[lastNormIndex];
-  if (startBodyIndex === undefined || endBodyIndex === undefined) {
+  if (
+    idx < 0 ||
+    lastNormIndex < 0 ||
+    idx >= bodyMap.bodyIndexAt.length ||
+    lastNormIndex >= bodyMap.bodyIndexAt.length
+  ) {
     return null;
   }
+  const startBodyIndex = bodyMap.bodyIndexAt[idx];
+  const endBodyIndex = bodyMap.bodyIndexAt[lastNormIndex];
   const charEnd = endBodyIndex + 1;
   const bodyQuote = chunkBody.slice(startBodyIndex, charEnd);
   return { charStart: startBodyIndex, charEnd, bodyQuote };
@@ -188,20 +193,20 @@ function findQuoteRegexInChunk(
   const pattern = parts.join('[\\s\\n\\r:;]+');
   const re = new RegExp(pattern, 'iu');
   const match = chunkBody.match(re);
-  if (!match || match.index === undefined) {
+  if (match?.index === undefined) {
     return null;
   }
   const bodyQuote = match[0];
   return { charStart: match.index, charEnd: match.index + bodyQuote.length, bodyQuote };
 }
 
-export type QuoteSpanMatch = {
+export interface QuoteSpanMatch {
   charStart: number;
   charEnd: number;
   bodyQuote: string;
   method: 'literal' | 'numeric' | 'regex' | 'fuzzy';
   score: number;
-};
+}
 
 function asQuoteSpanMatch(
   hit: { charStart: number; charEnd: number; bodyQuote: string },
@@ -250,8 +255,8 @@ function significantWords(text: string): string[] {
 
 function tokenizeBodyWords(
   bodyMap: NormalizedBodyMap
-): Array<{ raw: string; normStart: number; normEnd: number }> {
-  const bodyWords: Array<{ raw: string; normStart: number; normEnd: number }> = [];
+): { raw: string; normStart: number; normEnd: number }[] {
+  const bodyWords: { raw: string; normStart: number; normEnd: number }[] = [];
   let i = 0;
   while (i < bodyMap.normalized.length) {
     while (i < bodyMap.normalized.length && bodyMap.normalized[i] === ' ') {
@@ -276,17 +281,23 @@ function tokenizeBodyWords(
 function sliceBodyWordsToQuote(
   chunkBody: string,
   bodyMap: NormalizedBodyMap,
-  bodyWords: Array<{ raw: string; normStart: number; normEnd: number }>,
+  bodyWords: { raw: string; normStart: number; normEnd: number }[],
   firstIdx: number,
   lastIdx: number
 ): QuoteSpanMatch | null {
   const normStart = bodyWords[firstIdx].normStart;
   const normEnd = bodyWords[lastIdx].normEnd;
-  const startBodyIndex = bodyMap.bodyIndexAt[normStart];
-  const endBodyIndex = bodyMap.bodyIndexAt[normEnd - 1];
-  if (startBodyIndex === undefined || endBodyIndex === undefined) {
+  const endNormIndex = normEnd - 1;
+  if (
+    normStart < 0 ||
+    endNormIndex < 0 ||
+    normStart >= bodyMap.bodyIndexAt.length ||
+    endNormIndex >= bodyMap.bodyIndexAt.length
+  ) {
     return null;
   }
+  const startBodyIndex = bodyMap.bodyIndexAt[normStart];
+  const endBodyIndex = bodyMap.bodyIndexAt[endNormIndex];
   const charEnd = endBodyIndex + 1;
   const bodyQuote = chunkBody.slice(startBodyIndex, charEnd);
   return {

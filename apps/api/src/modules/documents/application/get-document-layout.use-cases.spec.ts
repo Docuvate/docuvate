@@ -1,17 +1,23 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { LayoutIrDocument } from '@docuvate/contracts';
+import { Test } from '@nestjs/testing';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 import {
   ForbiddenError,
   NotFoundError,
   ServiceUnavailableError,
 } from '../../../shared/domain/errors.js';
-import { GetDocumentLayoutTypstUseCase } from './get-document-layout-typst.use-case.js';
-import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
+import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
+import { GetDocumentContentUseCase } from './get-document-content.use-case.js';
 import { GetDocumentLayoutHtmlUseCase } from './get-document-layout-html.use-case.js';
-import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
+import { GetDocumentLayoutIrUseCase } from './get-document-layout-ir.use-case.js';
+import { GetDocumentLayoutTypstUseCase } from './get-document-layout-typst.use-case.js';
 
 const layoutIr: LayoutIrDocument = {
   version: 1,
@@ -30,75 +36,152 @@ describe('layout document use cases', () => {
     claims: ['document:*'],
   };
 
-  const documents = {
-    findByIdForUser: vi.fn(),
-    findLayoutIrForUser: vi.fn(),
-  };
-  const documentAuthz = {
-    assert: vi.fn(),
-  } as unknown as DocumentAuthorizationService;
+  const findByIdForUser = vi.fn();
+  const findLayoutIrForUser = vi.fn();
+  const documents = createDocumentRepositoryStub({
+    findByIdForUser,
+    findLayoutIrForUser,
+  });
+  const documentAuthzAssert = vi.fn();
   const getDocumentContent = {
-    execute: vi.fn().mockResolvedValue({
-      buffer: Buffer.from('%PDF-1.4'),
-      mimeType: 'application/pdf',
-      filename: 'doc.pdf',
-    }),
+    execute: vi.fn(),
   };
 
   beforeEach(() => {
-    vi.restoreAllMocks();
-    documents.findByIdForUser.mockReset();
-    documents.findLayoutIrForUser.mockReset();
+    findByIdForUser.mockReset();
+    findLayoutIrForUser.mockReset();
+    documentAuthzAssert.mockReset();
     getDocumentContent.execute.mockReset();
     getDocumentContent.execute.mockResolvedValue({
       buffer: Buffer.from('%PDF-1.4'),
       mimeType: 'application/pdf',
       filename: 'doc.pdf',
     });
-    vi.spyOn(documentAuthz, 'assert').mockResolvedValue(undefined);
+    documentAuthzAssert.mockResolvedValue(undefined);
   });
 
+  async function createLayoutIrUseCase(): Promise<GetDocumentLayoutIrUseCase> {
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        {
+          provide: GetDocumentLayoutIrUseCase,
+          useFactory: (
+            documentRepository: DocumentRepository,
+            authorization: DocumentAuthorizationService
+          ) => new GetDocumentLayoutIrUseCase(documentRepository, authorization),
+          inject: [DOCUMENT_REPOSITORY, DocumentAuthorizationService],
+        },
+        { provide: DOCUMENT_REPOSITORY, useValue: documents },
+        {
+          provide: DocumentAuthorizationService,
+          useValue: { assert: documentAuthzAssert },
+        },
+      ],
+    }).compile();
+    return moduleRef.get(GetDocumentLayoutIrUseCase);
+  }
+
+  async function createLayoutTypstUseCase(): Promise<GetDocumentLayoutTypstUseCase> {
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        {
+          provide: GetDocumentLayoutTypstUseCase,
+          useFactory: (
+            getLayoutIr: GetDocumentLayoutIrUseCase,
+            getContent: GetDocumentContentUseCase
+          ) => new GetDocumentLayoutTypstUseCase(getLayoutIr, getContent),
+          inject: [GetDocumentLayoutIrUseCase, GetDocumentContentUseCase],
+        },
+        {
+          provide: GetDocumentLayoutIrUseCase,
+          useFactory: (
+            documentRepository: DocumentRepository,
+            authorization: DocumentAuthorizationService
+          ) => new GetDocumentLayoutIrUseCase(documentRepository, authorization),
+          inject: [DOCUMENT_REPOSITORY, DocumentAuthorizationService],
+        },
+        { provide: DOCUMENT_REPOSITORY, useValue: documents },
+        {
+          provide: DocumentAuthorizationService,
+          useValue: { assert: documentAuthzAssert },
+        },
+        { provide: GetDocumentContentUseCase, useValue: getDocumentContent },
+      ],
+    }).compile();
+    return moduleRef.get(GetDocumentLayoutTypstUseCase);
+  }
+
+  async function createLayoutHtmlUseCase(): Promise<GetDocumentLayoutHtmlUseCase> {
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        {
+          provide: GetDocumentLayoutHtmlUseCase,
+          useFactory: (
+            getLayoutIr: GetDocumentLayoutIrUseCase,
+            getContent: GetDocumentContentUseCase
+          ) => new GetDocumentLayoutHtmlUseCase(getLayoutIr, getContent),
+          inject: [GetDocumentLayoutIrUseCase, GetDocumentContentUseCase],
+        },
+        {
+          provide: GetDocumentLayoutIrUseCase,
+          useFactory: (
+            documentRepository: DocumentRepository,
+            authorization: DocumentAuthorizationService
+          ) => new GetDocumentLayoutIrUseCase(documentRepository, authorization),
+          inject: [DOCUMENT_REPOSITORY, DocumentAuthorizationService],
+        },
+        { provide: DOCUMENT_REPOSITORY, useValue: documents },
+        {
+          provide: DocumentAuthorizationService,
+          useValue: { assert: documentAuthzAssert },
+        },
+        { provide: GetDocumentContentUseCase, useValue: getDocumentContent },
+      ],
+    }).compile();
+    return moduleRef.get(GetDocumentLayoutHtmlUseCase);
+  }
+
   it('returns layout IR for owner', async () => {
-    documents.findByIdForUser.mockResolvedValue({ id: docId, userId });
-    documents.findLayoutIrForUser.mockResolvedValue(layoutIr);
-    const uc = new GetDocumentLayoutIrUseCase(documents as never, documentAuthz);
+    findByIdForUser.mockResolvedValue({ id: docId, userId });
+    findLayoutIrForUser.mockResolvedValue(layoutIr);
+    const uc = await createLayoutIrUseCase();
     await expect(uc.execute(docId, userId, subject)).resolves.toEqual(layoutIr);
   });
 
   it('404 when another user requests layout IR', async () => {
-    documents.findByIdForUser.mockResolvedValue(null);
-    const uc = new GetDocumentLayoutIrUseCase(documents as never, documentAuthz);
+    findByIdForUser.mockResolvedValue(null);
+    const uc = await createLayoutIrUseCase();
     await expect(uc.execute(docId, otherId, subject)).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it('404 when IR row missing', async () => {
-    documents.findByIdForUser.mockResolvedValue({ id: docId, userId });
-    documents.findLayoutIrForUser.mockResolvedValue(null);
-    const uc = new GetDocumentLayoutIrUseCase(documents as never, documentAuthz);
+    findByIdForUser.mockResolvedValue({ id: docId, userId });
+    findLayoutIrForUser.mockResolvedValue(null);
+    const uc = await createLayoutIrUseCase();
     await expect(uc.execute(docId, userId, subject)).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it('propagates ABAC denial for layout IR', async () => {
-    documents.findByIdForUser.mockResolvedValue({ id: docId, userId });
-    vi.spyOn(documentAuthz, 'assert').mockRejectedValue(new ForbiddenError());
-    const uc = new GetDocumentLayoutIrUseCase(documents as never, documentAuthz);
+    findByIdForUser.mockResolvedValue({ id: docId, userId });
+    documentAuthzAssert.mockRejectedValue(new ForbiddenError());
+    const uc = await createLayoutIrUseCase();
     await expect(uc.execute(docId, userId, subject)).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   it('returns typst for owner', async () => {
-    documents.findByIdForUser.mockResolvedValue({ id: docId, userId });
-    documents.findLayoutIrForUser.mockResolvedValue(layoutIr);
-    const getLayoutIr = new GetDocumentLayoutIrUseCase(documents as never, documentAuthz);
-    const typstUc = new GetDocumentLayoutTypstUseCase(getLayoutIr, getDocumentContent as never);
+    findByIdForUser.mockResolvedValue({ id: docId, userId });
+    findLayoutIrForUser.mockResolvedValue(layoutIr);
+    const typstUc = await createLayoutTypstUseCase();
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () => ({
-          typst: '#set page(margin: 0pt)',
-          reconstructionReliable: true,
-        }),
+        json: () =>
+          Promise.resolve({
+            typst: '#set page(margin: 0pt)',
+            reconstructionReliable: true,
+          }),
       })
     );
     const result = await typstUc.execute(docId, userId, subject);
@@ -109,20 +192,22 @@ describe('layout document use cases', () => {
   });
 
   it('404 when another user requests layout typst', async () => {
-    documents.findByIdForUser.mockResolvedValue(null);
-    const getLayoutIr = new GetDocumentLayoutIrUseCase(documents as never, documentAuthz);
-    const typstUc = new GetDocumentLayoutTypstUseCase(getLayoutIr, getDocumentContent as never);
+    findByIdForUser.mockResolvedValue(null);
+    const typstUc = await createLayoutTypstUseCase();
     await expect(typstUc.execute(docId, otherId, subject)).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it('maps worker failure to service unavailable for layout typst', async () => {
-    documents.findByIdForUser.mockResolvedValue({ id: docId, userId });
-    documents.findLayoutIrForUser.mockResolvedValue(layoutIr);
-    const getLayoutIr = new GetDocumentLayoutIrUseCase(documents as never, documentAuthz);
-    const typstUc = new GetDocumentLayoutTypstUseCase(getLayoutIr, getDocumentContent as never);
+    findByIdForUser.mockResolvedValue({ id: docId, userId });
+    findLayoutIrForUser.mockResolvedValue(layoutIr);
+    const typstUc = await createLayoutTypstUseCase();
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: false, status: 503, json: async () => ({}) })
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: () => Promise.resolve({}),
+      })
     );
     await expect(typstUc.execute(docId, userId, subject)).rejects.toBeInstanceOf(
       ServiceUnavailableError
@@ -131,13 +216,16 @@ describe('layout document use cases', () => {
   });
 
   it('maps worker failure to service unavailable for layout HTML', async () => {
-    documents.findByIdForUser.mockResolvedValue({ id: docId, userId });
-    documents.findLayoutIrForUser.mockResolvedValue(layoutIr);
-    const getLayoutIr = new GetDocumentLayoutIrUseCase(documents as never, documentAuthz);
-    const htmlUc = new GetDocumentLayoutHtmlUseCase(getLayoutIr, getDocumentContent as never);
+    findByIdForUser.mockResolvedValue({ id: docId, userId });
+    findLayoutIrForUser.mockResolvedValue(layoutIr);
+    const htmlUc = await createLayoutHtmlUseCase();
     vi.stubGlobal(
       'fetch',
-      vi.fn().mockResolvedValue({ ok: false, status: 503, json: async () => ({}) })
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 503,
+        json: () => Promise.resolve({}),
+      })
     );
     await expect(htmlUc.execute(docId, userId, subject)).rejects.toBeInstanceOf(
       ServiceUnavailableError

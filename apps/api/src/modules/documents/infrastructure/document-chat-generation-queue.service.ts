@@ -3,20 +3,41 @@
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
+
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
   type DocumentChatThreadRepository,
 } from '../../../shared/domain/ports.js';
 import {
+  isRecord,
+  parseOptionalString,
+  parseString,
+} from '../../../shared/infrastructure/database/row-parse.js';
+import {
   createValkeyConnection,
   waitForValkeyReady,
 } from '../../../shared/infrastructure/valkey/valkey-connection.js';
 import {
-  RunDocumentChatGenerationUseCase,
   type DocumentChatGenerationJobPayload,
+  RunDocumentChatGenerationUseCase,
 } from '../application/run-document-chat-generation.use-case.js';
 
 const QUEUE_NAME = 'document-chat-generation';
+
+function parseJobPayload(data: unknown): DocumentChatGenerationJobPayload | null {
+  if (!isRecord(data)) {
+    return null;
+  }
+  const messageId = parseString(data.messageId);
+  const threadId = parseString(data.threadId);
+  const userId = parseString(data.userId);
+  const userMessage = parseString(data.userMessage);
+  if (!messageId || !threadId || !userId) {
+    return null;
+  }
+  const documentId = parseOptionalString(data.documentId) ?? undefined;
+  return { messageId, threadId, userId, userMessage, documentId };
+}
 
 @Injectable()
 export class DocumentChatGenerationQueueService implements OnModuleInit, OnModuleDestroy {
@@ -42,18 +63,23 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
     this.worker = new Worker(
       QUEUE_NAME,
       async (job) => {
-        await this.runGeneration.execute(job.data as DocumentChatGenerationJobPayload);
+        const payload = parseJobPayload(job.data);
+        if (!payload) {
+          throw new Error('Invalid document chat generation job payload');
+        }
+        await this.runGeneration.execute(payload);
       },
       { connection: this.connection, concurrency }
     );
 
     this.worker.on('failed', (job, err) => {
-      void this.markJobFailed(job?.data as DocumentChatGenerationJobPayload | undefined, err);
+      const payload = job ? parseJobPayload(job.data) : null;
+      void this.markJobFailed(payload, err);
     });
   }
 
   private async markJobFailed(
-    payload: DocumentChatGenerationJobPayload | undefined,
+    payload: DocumentChatGenerationJobPayload | null,
     err: Error
   ): Promise<void> {
     if (!payload?.messageId || !payload.userId) {
@@ -73,7 +99,7 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
         generationPhase: null,
         errorCode: 'generation_failed',
         errorDetail: err.message,
-        content: existing.content ?? '',
+        content: existing.content,
       });
       if (payload.threadId) {
         await this.threads.touchThread(payload.threadId);
@@ -84,9 +110,6 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
   }
 
   async isJobQueuedOrActive(messageId: string): Promise<boolean> {
-    if (!this.queue) {
-      return false;
-    }
     const job = await this.queue.getJob(messageId);
     if (!job) {
       return false;
@@ -108,14 +131,14 @@ export class DocumentChatGenerationQueueService implements OnModuleInit, OnModul
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.worker?.close();
-    await this.queue?.close();
-    await this.connection?.quit();
+    await this.worker.close();
+    await this.queue.close();
+    await this.connection.quit();
   }
 }
 
 function documentChatGenerationConcurrency(): number {
-  const raw = process.env['DOCUMENT_CHAT_GENERATION_CONCURRENCY'];
+  const raw = process.env.DOCUMENT_CHAT_GENERATION_CONCURRENCY;
   if (!raw) {
     return 1;
   }

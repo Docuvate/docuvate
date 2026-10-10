@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MinLength } from 'class-validator';
 import type { AcceptUserInvitationRequest } from '@docuvate/contracts';
+import { IsString, MinLength } from 'class-validator';
 
 export class AcceptUserInvitationRequestDto implements AcceptUserInvitationRequest {
   @IsString()

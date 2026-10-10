@@ -8,8 +8,9 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
-import { ServiceApiKeyRegistry } from '../../../shared/infrastructure/auth/service-api-key.registry.js';
+
 import type { AuthenticatedRequest } from '../../../shared/infrastructure/auth/auth.guard.js';
+import { ServiceApiKeyRegistry } from '../../../shared/infrastructure/auth/service-api-key.registry.js';
 
 const REQUIRED_CLAIM = 'sftp_ingress:service';
 

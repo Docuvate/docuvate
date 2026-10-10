@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import nodemailer from 'nodemailer';
+
 import type {
-  UserInvitationMailPayload,
   UserInvitationMailerPort,
+  UserInvitationMailPayload,
 } from '../../domain/invite-mailer.port.js';
 import {
   userInvitationMailHtml,
@@ -11,10 +12,10 @@ import {
   userInvitationMailText,
 } from './user-invitation-mail.templates.js';
 
-export type SmtpUserInvitationMailerOptions = {
+export interface SmtpUserInvitationMailerOptions {
   smtpUrl: string;
   mailFrom: string;
-};
+}
 
 export class SmtpUserInvitationMailerAdapter implements UserInvitationMailerPort {
   private readonly transport;

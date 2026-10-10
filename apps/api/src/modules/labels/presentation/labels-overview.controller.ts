@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
@@ -19,27 +20,26 @@ import {
   LabelRecommendationListResponseDto,
   ProposeLabelRecommendationBlocklistPatternRequestDto,
 } from '../../../shared/presentation/dtos/labels.dto.js';
-import { GetLabelRecommendationsUseCase } from '../application/get-label-recommendations.use-case.js';
-import { GetLabelMapUseCase } from '../application/get-label-map.use-case.js';
 import {
-  AcceptLabelRecommendationUseCase,
-  DismissLabelRecommendationUseCase,
-} from '../application/label-recommendation-actions.use-case.js';
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   ConfirmBlocklistPatternUseCase,
   ProposeBlocklistPatternUseCase,
   RemoveBlocklistPatternUseCase,
 } from '../application/blocklist-pattern.use-case.js';
+import { GetLabelMapUseCase } from '../application/get-label-map.use-case.js';
+import { GetLabelRecommendationsUseCase } from '../application/get-label-recommendations.use-case.js';
+import {
+  AcceptLabelRecommendationUseCase,
+  DismissLabelRecommendationUseCase,
+} from '../application/label-recommendation-actions.use-case.js';
 import {
   AddRecommendationBlocklistUseCase,
   ListRecommendationBlocklistUseCase,
   RemoveRecommendationBlocklistUseCase,
 } from '../application/recommendation-blocklist.use-case.js';
-
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('taxonomy')
 @Controller('labels')
@@ -84,8 +84,12 @@ export class LabelsOverviewController {
     @Body() body: AcceptLabelRecommendationRequestDto
   ): Promise<AcceptLabelRecommendationResponseDto> {
     return this.acceptRecommendation.execute(session.user.id, {
-      ...body,
       recommendationId: decodeURIComponent(id),
+      proposedName: body.proposedName,
+      tagId: body.tagId,
+      keepTagId: body.keepTagId,
+      removeTagId: body.removeTagId,
+      color: body.color,
     });
   }
 

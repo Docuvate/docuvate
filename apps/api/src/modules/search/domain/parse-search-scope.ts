@@ -17,6 +17,14 @@ const PREFIX_MAP: Record<string, GlobalSearchScopeType> = {
   action: 'actions',
 };
 
+const SEARCH_SCOPE_TYPES: readonly GlobalSearchScopeType[] = [
+  'documents',
+  'folders',
+  'labels',
+  'settings',
+  'actions',
+];
+
 export interface SearchFieldFilter {
   fieldNameRaw: string;
   valueRaw: string;
@@ -28,6 +36,22 @@ export interface ParsedSearchScope {
   fieldFilters: SearchFieldFilter[];
 }
 
+function isGlobalSearchScopeType(value: string): value is GlobalSearchScopeType {
+  for (const scope of SEARCH_SCOPE_TYPES) {
+    if (scope === value) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function scopeFromPrefixKey(key: string): GlobalSearchScopeType | null {
+  if (Object.prototype.hasOwnProperty.call(PREFIX_MAP, key)) {
+    return PREFIX_MAP[key];
+  }
+  return null;
+}
+
 export function parseSearchScope(raw: string): ParsedSearchScope {
   const scopes = new Set<GlobalSearchScopeType>();
   const textParts: string[] = [];
@@ -35,17 +59,17 @@ export function parseSearchScope(raw: string): ParsedSearchScope {
   for (const part of raw.trim().split(/\s+/)) {
     const match = /^([\p{L}][\p{L}0-9_-]*):(.*)$/u.exec(part);
     if (match) {
-      const key = match[1]!.toLowerCase();
-      const mapped = PREFIX_MAP[key];
+      const key = match[1].toLowerCase();
+      const mapped = scopeFromPrefixKey(key);
       if (mapped) {
         scopes.add(mapped);
-        const rest = match[2]?.trim();
+        const rest = match[2].trim();
         if (rest) textParts.push(rest);
         continue;
       }
-      const valueRaw = match[2]?.trim() ?? '';
+      const valueRaw = match[2].trim();
       if (valueRaw) {
-        fieldFilters.push({ fieldNameRaw: match[1]!, valueRaw });
+        fieldFilters.push({ fieldNameRaw: match[1], valueRaw });
       }
       continue;
     }
@@ -67,11 +91,17 @@ export function resolveSearchTypes(
   }
   if (typesParam?.trim()) {
     const parts = typesParam.split(',').map((p) => p.trim().toLowerCase());
-    const mapped = parts
-      .map((p) => PREFIX_MAP[p] ?? (p as GlobalSearchScopeType))
-      .filter((t): t is GlobalSearchScopeType =>
-        ['documents', 'folders', 'labels', 'settings', 'actions'].includes(t)
-      );
+    const mapped: GlobalSearchScopeType[] = [];
+    for (const part of parts) {
+      const fromPrefix = scopeFromPrefixKey(part);
+      if (fromPrefix) {
+        mapped.push(fromPrefix);
+        continue;
+      }
+      if (isGlobalSearchScopeType(part)) {
+        mapped.push(part);
+      }
+    }
     if (mapped.length > 0) return [...new Set(mapped)];
   }
   return ['documents', 'folders', 'labels', 'settings', 'actions'];

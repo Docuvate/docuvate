@@ -1,14 +1,43 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentDto, DocumentDuplicateStackSummaryDto } from '@docuvate/contracts';
+import type {
+  DocumentBulkRequest,
+  DocumentDto,
+  DocumentDuplicateStackSummaryDto,
+} from '@docuvate/contracts';
+
+import type { DocumentBulkRequestDto } from '../../../shared/presentation/dtos/common.dto.js';
+import type { TagSuggestionEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 import {
   toCorrespondentDto,
   toTagDto,
   toTagSuggestionDto,
 } from '../../taxonomy/presentation/taxonomy.mapper.js';
-import type { TagSuggestionEntity } from '../../taxonomy/domain/taxonomy.entity.js';
-import type { DocumentEntity } from '../domain/document.entity.js';
 import type { ListedDocument } from '../application/list-documents.use-case.js';
+import type { DocumentEntity } from '../domain/document.entity.js';
+
+export function toDocumentBulkRequest(dto: DocumentBulkRequestDto): DocumentBulkRequest {
+  const { ids, bulk } = dto;
+  switch (bulk.action) {
+    case 'addTag':
+      return { ids, bulk: { action: 'addTag', tagId: bulk.tagId ?? '' } };
+    case 'removeTag':
+      return { ids, bulk: { action: 'removeTag', tagId: bulk.tagId ?? '' } };
+    case 'setCorrespondent':
+      return {
+        ids,
+        bulk: { action: 'setCorrespondent', correspondentId: bulk.correspondentId ?? null },
+      };
+    case 'setFolder':
+      return { ids, bulk: { action: 'setFolder', folderId: bulk.folderId ?? null } };
+    case 'delete':
+      return { ids, bulk: { action: 'delete' } };
+    default: {
+      const _exhaustive: never = bulk.action;
+      throw new Error(`Unsupported bulk action: ${String(_exhaustive)}`);
+    }
+  }
+}
 
 export function toDocumentListResponse(docs: ListedDocument[]): { items: DocumentDto[] } {
   return {

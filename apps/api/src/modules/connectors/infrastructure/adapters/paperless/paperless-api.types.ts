@@ -22,8 +22,8 @@ export interface PaperlessDocument {
   document_type: number | null;
   storage_path: number | null;
   tags: number[];
-  custom_fields: Array<{ field: number; value: unknown }> | Record<string, unknown>;
-  notes?: Array<{ note: string }> | string | null;
+  custom_fields: { field: number; value: unknown }[] | Record<string, unknown>;
+  notes?: { note: string }[] | string | null;
   owner?: number | null;
 }
 
@@ -72,5 +72,5 @@ export interface PaperlessCustomField {
   id: number;
   name: string;
   data_type: PaperlessCustomFieldDataType;
-  extra_data?: { select_options?: Array<{ id: string; label: string }> } | null;
+  extra_data?: { select_options?: { id: string; label: string }[] } | null;
 }

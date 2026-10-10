@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { DocumentBulkRequest } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
-  FOLDER_REPOSITORY,
-  OBJECT_STORAGE,
-  TAXONOMY_REPOSITORY,
   type DocumentRepository,
+  FOLDER_REPOSITORY,
   type FolderRepository,
+  OBJECT_STORAGE,
   type ObjectStorage,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import { deleteDocumentObjectKeys } from './delete-document-storage.js';
 
 @Injectable()
@@ -67,10 +68,8 @@ export class BulkDocumentsUseCase {
         await Promise.all(deleted.map((d) => deleteDocumentObjectKeys(this.storage, d)));
         return { affected: deleted.length };
       }
-      default: {
-        const unknown: never = bulk;
-        throw new ValidationError(`Unknown bulk action: ${(unknown as { action: string }).action}`);
-      }
+      default:
+        throw new ValidationError('Unknown bulk action');
     }
   }
 }

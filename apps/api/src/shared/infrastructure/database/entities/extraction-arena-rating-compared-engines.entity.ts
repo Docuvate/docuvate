@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 
 @Entity('extraction_arena_rating_compared_engines', { schema: 'public' })

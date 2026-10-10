@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { passesFusionGate, passesRerankerGate } from './verify-citation-quote.js';
 import {
   RAG_FUSION_GATE_MIN_DEFAULT,
   RAG_RERANKER_GATE_MIN_DEFAULT,
 } from './cited-chat-constants.js';
+import { passesFusionGate, passesRerankerGate } from './verify-citation-quote.js';
 
 /**
  * Sigmoid scores from bench/rag_gate_calibrate.py (BAAI/bge-reranker-v2-m3-int8, simulated retrieval sets).

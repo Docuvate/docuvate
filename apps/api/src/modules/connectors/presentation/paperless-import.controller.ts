@@ -1,12 +1,23 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+
 import {
   AuthGuard,
-  Session,
   type AuthSession,
+  Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { ConnectorInstallationIdParamDto } from '../../../shared/presentation/dtos/connector-actions.dto.js';
+import {
+  PaperlessImportRunParamsDto,
+  TestPaperlessConnectionRequestDto,
+  TestPaperlessInstallationConnectionRequestDto,
+  UpdatePaperlessInstallationRequestDto,
+} from '../../../shared/presentation/dtos/paperless-import.dto.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
 import {
   GetPaperlessImportRunUseCase,
   GetPaperlessInstallationUseCase,
@@ -16,17 +27,7 @@ import {
   TestPaperlessInstallationConnectionUseCase,
   UpdatePaperlessInstallationUseCase,
 } from '../application/paperless-import.use-cases.js';
-import {
-  PaperlessImportRunParamsDto,
-  TestPaperlessConnectionRequestDto,
-  TestPaperlessInstallationConnectionRequestDto,
-  UpdatePaperlessInstallationRequestDto,
-} from '../../../shared/presentation/dtos/paperless-import.dto.js';
 import { toPaperlessImportRunDto } from './paperless-import.mapper.js';
-import {
-  ApiDocuvateController,
-  ApiDocuvateRoute,
-} from '../../../shared/presentation/swagger/openapi-decorators.js';
 
 @ApiDocuvateController('connectors')
 @Controller('connectors')

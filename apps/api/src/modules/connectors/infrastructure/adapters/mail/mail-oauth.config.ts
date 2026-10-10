@@ -13,7 +13,10 @@ export interface MailOAuthProviderConfig {
 
 function env(name: string): string | undefined {
   const value = process.env[name]?.trim();
-  return value ? value : undefined;
+  if (!value) {
+    return undefined;
+  }
+  return value;
 }
 
 const GMAIL_OAUTH_ENV_VARS = [

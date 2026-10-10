@@ -1,22 +1,23 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
 import type { UpdateDocumentRequest } from '@docuvate/contracts';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
-  FOLDER_REPOSITORY,
-  MAPPE_REPOSITORY,
-  TAXONOMY_REPOSITORY,
   type DocumentRepository,
+  FOLDER_REPOSITORY,
   type FolderRepository,
+  MAPPE_REPOSITORY,
   type MappeRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
-import { mergeDocumentPlacementPatch } from '../domain/document-placement.js';
-import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
-import type { DocumentEntity } from '../domain/document.entity.js';
 import { RecordExtractionFieldCorrectionsUseCase } from '../../extraction-feedback/application/record-extraction-field-corrections.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
+import type { DocumentEntity } from '../domain/document.entity.js';
+import { mergeDocumentPlacementPatch } from '../domain/document-placement.js';
 
 export interface UpdateDocumentResult {
   document: DocumentEntity;

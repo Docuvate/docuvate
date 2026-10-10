@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
 import { MIN_VECTORS_FOR_UMAP, projectLabelMap2D } from './label-map-projection.js';
 
 describe('projectLabelMap2D', () => {

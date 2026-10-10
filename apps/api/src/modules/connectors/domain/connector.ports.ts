@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ConnectorRuntimePorts } from './connector-runtime.ports.js';
 import type {
   ConnectorAuthDescriptor,
   ConnectorCategoryDescriptor,
@@ -11,6 +10,7 @@ import type {
   ConnectorPluginId,
   ConnectorValidationResult,
 } from './connector.types.js';
+import type { ConnectorRuntimePorts } from './connector-runtime.ports.js';
 
 /** Shared operations for a category (mail fetch, DMS push, …) — implemented by adapters later. */
 export interface MailConnectorCategoryPort {

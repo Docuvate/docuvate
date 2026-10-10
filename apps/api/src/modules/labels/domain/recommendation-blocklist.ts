@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { isRecord, parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { namesAreNearDuplicate, normalizeLabelKey } from './label-vocabulary.js';
 
 const MAX_BLOCKLIST_PATTERN_LENGTH = 200;
@@ -90,12 +91,15 @@ export function parseBlocklistPatternProposal(raw: string): {
   if (!trimmed) {
     return null;
   }
-  const jsonMatch = trimmed.match(/\{[\s\S]*\}/);
+  const jsonMatch = /\{[\s\S]*\}/.exec(trimmed);
   const jsonText = jsonMatch?.[0] ?? trimmed;
   try {
-    const parsed = JSON.parse(jsonText) as { pattern?: unknown; explanation?: unknown };
-    const pattern = typeof parsed.pattern === 'string' ? parsed.pattern.trim() : '';
-    const explanation = typeof parsed.explanation === 'string' ? parsed.explanation.trim() : '';
+    const parsed: unknown = JSON.parse(jsonText);
+    if (!isRecord(parsed)) {
+      return null;
+    }
+    const pattern = parseString(parsed.pattern).trim();
+    const explanation = parseString(parsed.explanation).trim();
     if (!pattern || !compileBlocklistPattern(pattern)) {
       return null;
     }

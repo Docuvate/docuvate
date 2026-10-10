@@ -1,11 +1,38 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { HardwareCapabilitiesDto, InferenceDeviceKind } from '@docuvate/contracts';
 import { Injectable } from '@nestjs/common';
-import type { HardwareCapabilitiesDto } from '@docuvate/contracts';
+
+import {
+  parseBoolean,
+  parseEnum,
+  parseNumber,
+  recordFromUnknown,
+} from '../../../shared/infrastructure/database/row-parse.js';
 import { fetchWorkerDependency } from '../../../shared/infrastructure/worker/worker-dependency-fetch.js';
 
+const INFERENCE_DEVICES: readonly InferenceDeviceKind[] = ['cuda', 'mps', 'rocm', 'cpu'];
+
+function parseHardwareCapabilitiesDto(value: unknown): HardwareCapabilitiesDto | null {
+  const row = recordFromUnknown(value);
+  if (!row) {
+    return null;
+  }
+  const capabilitiesRow = recordFromUnknown(row.capabilities);
+  return {
+    device: parseEnum(row.device, INFERENCE_DEVICES, 'cpu'),
+    vramMb: parseNumber(row.vramMb),
+    gpuAvailable: parseBoolean(row.gpuAvailable),
+    capabilities: {
+      heavyVision: capabilitiesRow ? parseBoolean(capabilitiesRow.heavyVision) : false,
+      largeLocalLlm: capabilitiesRow ? parseBoolean(capabilitiesRow.largeLocalLlm) : false,
+      cpuRag: capabilitiesRow ? parseBoolean(capabilitiesRow.cpuRag) : true,
+    },
+  };
+}
+
 function withDockerMemoryHints(base: HardwareCapabilitiesDto): HardwareCapabilitiesDto {
-  const warn = process.env['DOCUVATE_DOCKER_MEMORY_WARNING'] !== 'false';
+  const warn = process.env.DOCUVATE_DOCKER_MEMORY_WARNING !== 'false';
   if (!warn) {
     return base;
   }
@@ -33,7 +60,7 @@ const CPU_FALLBACK: HardwareCapabilitiesDto = withDockerMemoryHints({
 @Injectable()
 export class GetHardwareCapabilitiesUseCase {
   private workerHeaders(): Record<string, string> {
-    const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
+    const secret = process.env.WORKER_SECRET ?? 'worker-shared-secret';
     return {
       'Content-Type': 'application/json',
       'X-Worker-Secret': secret,
@@ -41,7 +68,7 @@ export class GetHardwareCapabilitiesUseCase {
   }
 
   async execute(): Promise<HardwareCapabilitiesDto> {
-    const workerUrl = process.env['WORKER_URL'];
+    const workerUrl = process.env.WORKER_URL;
     if (!workerUrl) {
       return CPU_FALLBACK;
     }
@@ -52,17 +79,11 @@ export class GetHardwareCapabilitiesUseCase {
       if (!response?.ok) {
         return CPU_FALLBACK;
       }
-      const data = (await response.json()) as HardwareCapabilitiesDto;
-      return withDockerMemoryHints({
-        device: data.device ?? 'cpu',
-        vramMb: data.vramMb ?? 0,
-        gpuAvailable: Boolean(data.gpuAvailable),
-        capabilities: {
-          heavyVision: Boolean(data.capabilities?.heavyVision),
-          largeLocalLlm: Boolean(data.capabilities?.largeLocalLlm),
-          cpuRag: data.capabilities?.cpuRag !== false,
-        },
-      });
+      const data = parseHardwareCapabilitiesDto(await response.json());
+      if (!data) {
+        return CPU_FALLBACK;
+      }
+      return withDockerMemoryHints(data);
     } catch {
       return CPU_FALLBACK;
     }

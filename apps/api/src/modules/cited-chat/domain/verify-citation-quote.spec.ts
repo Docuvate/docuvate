@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
+
+import { reciprocalRankFusion } from '../../search/domain/reciprocal-rank-fusion.js';
 import {
   findQuoteInChunk,
   fuzzySpanSearchInChunk,
@@ -9,7 +11,20 @@ import {
   passesRerankerGate,
   truncateQuoteWords,
 } from './verify-citation-quote.js';
-import { reciprocalRankFusion } from '../../search/domain/reciprocal-rank-fusion.js';
+
+interface QuoteHit {
+  charStart: number;
+  charEnd: number;
+  bodyQuote: string;
+}
+
+function requireHit(hit: QuoteHit | null): QuoteHit {
+  expect(hit).not.toBeNull();
+  if (hit === null) {
+    throw new Error('expected quote hit');
+  }
+  return hit;
+}
 
 describe('verify-citation-quote', () => {
   it('normalizes quotes for matching', () => {
@@ -18,25 +33,22 @@ describe('verify-citation-quote', () => {
 
   it('finds quote in chunk body with body-relative offsets and stored substring', () => {
     const body = 'Die Gesamtsumme beträgt 1.234,56 EUR fällig am 15.03.';
-    const hit = findQuoteInChunk(body, 'Gesamtsumme beträgt 1.234,56');
-    expect(hit).not.toBeNull();
-    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
-    expect(hit!.bodyQuote).toContain('Gesamtsumme');
+    const hit = requireHit(findQuoteInChunk(body, 'Gesamtsumme beträgt 1.234,56'));
+    expect(body.slice(hit.charStart, hit.charEnd)).toBe(hit.bodyQuote);
+    expect(hit.bodyQuote).toContain('Gesamtsumme');
   });
 
   it('maps typographic quotes and double spaces to original body indices', () => {
     const body = 'Summe  „1.234,56“   EUR';
-    const hit = findQuoteInChunk(body, '„1.234,56“');
-    expect(hit).not.toBeNull();
-    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
-    expect(hit!.bodyQuote).toMatch(/1\.234,56/);
+    const hit = requireHit(findQuoteInChunk(body, '„1.234,56“'));
+    expect(body.slice(hit.charStart, hit.charEnd)).toBe(hit.bodyQuote);
+    expect(hit.bodyQuote).toMatch(/1\.234,56/);
   });
 
   it('handles umlauts without normalized-length drift', () => {
     const body = 'Größe der Hundesteuer: 120 EUR';
-    const hit = findQuoteInChunk(body, 'Hundesteuer');
-    expect(hit).not.toBeNull();
-    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
+    const hit = requireHit(findQuoteInChunk(body, 'Hundesteuer'));
+    expect(body.slice(hit.charStart, hit.charEnd)).toBe(hit.bodyQuote);
   });
 
   it('truncates long quotes to ten words', () => {
@@ -45,31 +57,27 @@ describe('verify-citation-quote', () => {
 
   it('matches quotes across line breaks in chunk body', () => {
     const body = 'Die Miete ist\nbis zum 3. Werktag\ndes Monats fällig.';
-    const hit = findQuoteInChunk(body, 'Miete ist bis zum 3. Werktag');
-    expect(hit).not.toBeNull();
-    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
+    const hit = requireHit(findQuoteInChunk(body, 'Miete ist bis zum 3. Werktag'));
+    expect(body.slice(hit.charStart, hit.charEnd)).toBe(hit.bodyQuote);
   });
 
   it('matches German currency formatting variants', () => {
     const body = 'Gesamtsumme: 1.234,56 EUR';
-    const hit = findQuoteInChunk(body, 'Gesamtsumme 1234.56 EUR');
-    expect(hit).not.toBeNull();
-    expect(hit!.bodyQuote).toContain('1.234,56');
-    expect(body.slice(hit!.charStart, hit!.charEnd)).toBe(hit!.bodyQuote);
+    const hit = requireHit(findQuoteInChunk(body, 'Gesamtsumme 1234.56 EUR'));
+    expect(hit.bodyQuote).toContain('1.234,56');
+    expect(body.slice(hit.charStart, hit.charEnd)).toBe(hit.bodyQuote);
   });
 
   it('matches 1.234,56 against 1234,56 variant', () => {
     const body = 'Betrag 1.234,56 EUR';
-    const hit = findQuoteInChunk(body, '1234,56');
-    expect(hit).not.toBeNull();
-    expect(hit!.bodyQuote).toContain('1.234,56');
+    const hit = requireHit(findQuoteInChunk(body, '1234,56'));
+    expect(hit.bodyQuote).toContain('1.234,56');
   });
 
   it('fuzzy re-anchors shortened non-numeric quotes', () => {
     const body = 'Die Kündigungsfrist beträgt drei Monate zum Quartalsende.';
-    const hit = fuzzySpanSearchInChunk(body, 'beträgt drei Monate');
-    expect(hit).not.toBeNull();
-    expect(hit!.bodyQuote).toContain('drei Monate');
+    const hit = requireHit(fuzzySpanSearchInChunk(body, 'beträgt drei Monate'));
+    expect(hit.bodyQuote).toContain('drei Monate');
   });
 
   it('does not match shorter digit runs inside larger amounts', () => {

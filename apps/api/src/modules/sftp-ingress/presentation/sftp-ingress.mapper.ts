@@ -6,6 +6,7 @@ import type {
   SftpIngressEventDto,
   SftpIngressServerInfoDto,
 } from '@docuvate/contracts';
+
 import type {
   SftpIngressAccountEntity,
   SftpIngressEventEntity,

@@ -1,15 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { cosineSimilarity } from './cosine.js';
 import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
-import { cosineSimilarity } from './cosine.js';
 import {
   inferClusterLabelNameFromSnippets,
   normalizeLabelKey,
   type TagPairSignal,
 } from './label-vocabulary.js';
 
-export type AssignRecommendation = {
+export interface AssignRecommendation {
   id: string;
   documentId: string;
   tagId: string;
@@ -17,25 +17,25 @@ export type AssignRecommendation = {
   score: number;
   similarity: number;
   reason: string;
-};
+}
 
-export type EmbeddingClusterNewLabel = {
+export interface EmbeddingClusterNewLabel {
   id: string;
   proposedName: string;
   score: number;
   similarity: number;
   reason: string;
   documentIds: string[];
-};
+}
 
-export type EmbeddingMergeRecommendation = {
+export interface EmbeddingMergeRecommendation {
   id: string;
   tagIds: [string, string];
   names: [string, string];
   score: number;
   similarity: number;
   reason: string;
-};
+}
 
 export const MIN_LABEL_SUPPORT_FOR_MERGE = 3;
 export const MIN_LABEL_SUPPORT_FOR_SIMILARITY_PCT = 3;
@@ -67,7 +67,7 @@ export function formatAssignRecommendationReason(input: {
     return `Labelraum · ${tier} Ähnlichkeit zu „${input.tagName}"`;
   }
   const pct = Math.min(99, Math.round(input.similarity * 100));
-  return `Labelraum · ${pct} % zu „${input.tagName}"`;
+  return `Labelraum · ${String(pct)} % zu „${input.tagName}"`;
 }
 
 export function formatMergeRecommendationReason(input: {
@@ -90,7 +90,7 @@ export function formatMergeRecommendationReason(input: {
     return input.scoredReason;
   }
   const pct = Math.min(99, Math.round(input.similarity * 100));
-  return `Labelraum · ${pct} % Überschneidung (${input.nameA} / ${input.nameB})`;
+  return `Labelraum · ${String(pct)} % Überschneidung (${input.nameA} / ${input.nameB})`;
 }
 
 export function suggestAssignRecommendations(input: {
@@ -175,8 +175,8 @@ export function scoreLabelPairForMerge(
 
   const reason =
     hasDocs && cross != null
-      ? `Labelraum · ${pct} % (Zentren ${centroidPct} %, Dokumente ${Math.round(cross * 100)} %)`
-      : `Labelraum · ${pct} % (Zentren ${centroidPct} %)`;
+      ? `Labelraum · ${String(pct)} % (Zentren ${String(centroidPct)} %, Dokumente ${String(Math.round(cross * 100))} %)`
+      : `Labelraum · ${String(pct)} % (Zentren ${String(centroidPct)} %)`;
 
   return {
     score: Math.min(0.99, combined),
@@ -194,8 +194,8 @@ export function suggestEmbeddingMergeRecommendations(input: {
   const out: EmbeddingMergeRecommendation[] = [];
   for (let i = 0; i < input.tags.length; i++) {
     for (let j = i + 1; j < input.tags.length; j++) {
-      const a = input.tags[i]!;
-      const b = input.tags[j]!;
+      const a = input.tags[i];
+      const b = input.tags[j];
       const idPair = [a.tagId, b.tagId].sort();
       const mergeId = `merge:${idPair[0]}:${idPair[1]}`;
       if (input.dismissedKeys.has(mergeId)) {
@@ -306,7 +306,7 @@ export function suggestEmbeddingClusterNewLabels(input: {
     let pairs = 0;
     for (let i = 0; i < members.length; i++) {
       for (let j = i + 1; j < members.length; j++) {
-        simSum += cosineSimilarity(members[i]!.embedding, members[j]!.embedding);
+        simSum += cosineSimilarity(members[i].embedding, members[j].embedding);
         pairs += 1;
       }
     }
@@ -344,7 +344,7 @@ export function suggestEmbeddingClusterNewLabels(input: {
       proposedName,
       score: Math.min(0.9, 0.55 + cluster.cohesion * 0.35),
       similarity: cluster.cohesion,
-      reason: `${cluster.documentIds.length} ähnliche Dokumente ohne Label · ${pct} % Übereinstimmung`,
+      reason: `${String(cluster.documentIds.length)} ähnliche Dokumente ohne Label · ${String(pct)} % Übereinstimmung`,
       documentIds: cluster.documentIds,
     });
   }

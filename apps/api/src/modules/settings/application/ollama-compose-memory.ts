@@ -15,12 +15,13 @@ export function parseMemLimitToGiB(raw: string | undefined | null): number | nul
     return null;
   }
   const normalized = raw.trim().toLowerCase();
-  const match = normalized.match(/^(\d+(?:\.\d+)?)(g|m|b)?$/);
+  const match = /^(\d+(?:\.\d+)?)(g|m|b)?$/.exec(normalized);
   if (!match) {
     return null;
   }
-  const value = Number.parseFloat(match[1] ?? '0');
-  const unit = match[2] ?? 'b';
+  const value = Number.parseFloat(match[1]);
+  const unitChar = match[2];
+  const unit = unitChar === 'g' || unitChar === 'm' || unitChar === 'b' ? unitChar : 'b';
   if (unit === 'g') {
     return value;
   }
@@ -31,13 +32,13 @@ export function parseMemLimitToGiB(raw: string | undefined | null): number | nul
 }
 
 export function ollamaMemLimitGiBFromEnv(): number | null {
-  return parseMemLimitToGiB(process.env['OLLAMA_MEM_LIMIT'] ?? '3g');
+  return parseMemLimitToGiB(process.env.OLLAMA_MEM_LIMIT ?? '3g');
 }
 
 export function modelMinGiB(model: string): number {
   const tag = model.trim().toLowerCase();
-  if (MODEL_MIN_GIB[tag] != null) {
-    return MODEL_MIN_GIB[tag]!;
+  if (Object.hasOwn(MODEL_MIN_GIB, tag)) {
+    return MODEL_MIN_GIB[tag];
   }
   const base = tag.split(':')[0] ?? tag;
   return MODEL_MIN_GIB[base] ?? 3;

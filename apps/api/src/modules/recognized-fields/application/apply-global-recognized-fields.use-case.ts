@@ -1,22 +1,23 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { ExtractedField } from '@docuvate/contracts';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+
 import {
   DOCUMENT_REPOSITORY,
-  LABEL_FIELD_EXTRACTION_PORT,
-  RECOGNIZED_FIELD_REPOSITORY,
-  TAXONOMY_REPOSITORY,
-  USER_PREFERENCES_REPOSITORY,
   type DocumentRepository,
+  LABEL_FIELD_EXTRACTION_PORT,
   type LabelFieldExtractionPort,
+  RECOGNIZED_FIELD_REPOSITORY,
   type RecognizedFieldRepository,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import { mergeExtractedFields } from '../../document-pipeline/domain/merge-extracted-fields.js';
-import { globalFieldStorageKey } from '../domain/recognized-field.entity.js';
 import { evaluateFieldExtractionGate } from '../domain/field-extraction-gate.js';
+import { globalFieldStorageKey } from '../domain/recognized-field.entity.js';
 import { resolveFieldExtractionGateConfig } from '../domain/resolve-field-extraction-gate.js';
 
 @Injectable()
@@ -33,10 +34,14 @@ export class ApplyGlobalRecognizedFieldsUseCase {
 
   async execute(documentId: string, userId: string): Promise<void> {
     const doc = await this.documents.findByIdForUser(documentId, userId);
-    if (!doc?.extraction?.text?.trim()) {
+    if (!doc) {
       return;
     }
-    const text = doc.extraction.text.trim();
+    const extraction = doc.extraction;
+    if (!extraction?.text.trim()) {
+      return;
+    }
+    const text = extraction.text.trim();
 
     const allDefs = await this.fieldDefs.listForUser(userId);
     if (allDefs.length === 0) {
@@ -81,7 +86,7 @@ export class ApplyGlobalRecognizedFieldsUseCase {
         }))
       );
 
-      const existing = doc.extraction.fields ?? [];
+      const existing = extraction.fields;
       const patches: ExtractedField[] = [];
       for (const row of extracted) {
         if (!row.value.trim()) {
