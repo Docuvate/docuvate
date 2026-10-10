@@ -48,7 +48,8 @@ function hasOcrPayload(doc: Pick<DocumentDto, 'extraction'>): boolean {
   if (text.length > 0) return true;
   const blocks = doc.extraction?.blocks?.length ?? 0;
   if (blocks > 0) return true;
-  const fields = doc.extraction?.fields.length ?? 0;
+  const extractionFields = doc.extraction?.fields;
+  const fields = extractionFields === undefined ? 0 : extractionFields.length;
   return fields > 0;
 }
 

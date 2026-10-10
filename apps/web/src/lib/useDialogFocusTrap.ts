@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { type RefObject,useEffect } from 'react';
+import { type RefObject, useEffect } from 'react';
 
 const FOCUSABLE =
   'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -25,7 +25,11 @@ export function useDialogFocusTrap(
       }
       const nodes = container.querySelectorAll<HTMLElement>(FOCUSABLE);
       const cancelLike = [...nodes].find((el) => el.dataset.dialogInitialFocus === 'cancel');
-      (cancelLike ?? nodes[0]).focus();
+      if (cancelLike) {
+        cancelLike.focus();
+      } else if (nodes.length > 0) {
+        nodes[0].focus();
+      }
     };
 
     const raf = requestAnimationFrame(focusInitial);

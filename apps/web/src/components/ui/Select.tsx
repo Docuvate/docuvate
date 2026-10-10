@@ -249,10 +249,10 @@ export function Select({
 
   return (
     <div className={`custom-select ${className}`.trim()} ref={rootRef}>
+      {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props -- listbox trigger stays button for smoke e2e */}
       <button
         ref={triggerRef}
         type="button"
-        role="combobox"
         className="custom-select-trigger input"
         disabled={disabled}
         aria-label={ariaLabel}

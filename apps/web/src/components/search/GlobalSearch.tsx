@@ -1,11 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type {
-  GlobalSearchDocumentHitDto,
-  GlobalSearchGroupDto,
-  GlobalSearchHitDto,
-  SearchHighlightSpan,
-} from '@docuvate/contracts';
+import type { GlobalSearchGroupDto, GlobalSearchHitDto } from '@docuvate/contracts';
 import { FileText, Folder, Search, Settings2, Tag, X, Zap } from 'lucide-react';
 import {
   type KeyboardEvent,
@@ -190,40 +185,32 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   }, []);
 
   useEffect(() => {
-    function isTypingTarget(target: EventTarget | null): boolean {
-      if (!(target instanceof HTMLElement)) {
-        return false;
+    function onWindowKeyDown(event: Event) {
+      if (!(event instanceof KeyboardEvent)) {
+        return;
       }
-      return (
-        target.tagName === 'INPUT' ||
-        target.tagName === 'TEXTAREA' ||
-        target.isContentEditable
-      );
-    }
-
-    function onKeyDown(e: globalThis.KeyboardEvent) {
-      const typing = isTypingTarget(e.target);
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
+      const target = event.target;
+      const typing =
+        target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.isContentEditable);
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
         openPalette();
         return;
       }
-      if (e.key === '/' && !typing && !paletteOpen) {
-        e.preventDefault();
+      if (event.key === '/' && !typing && !paletteOpen) {
+        event.preventDefault();
         openPalette();
       }
-      if (e.key === 'Escape' && paletteOpen) {
-        e.preventDefault();
+      if (event.key === 'Escape' && paletteOpen) {
+        event.preventDefault();
         closePalette();
       }
     }
-    const listener = (event: Event) => {
-      if (event instanceof KeyboardEvent) {
-        onKeyDown(event);
-      }
-    };
-    window.addEventListener('keydown', listener);
-    return () => { window.removeEventListener('keydown', listener); };
+    window.addEventListener('keydown', onWindowKeyDown);
+    return () => { window.removeEventListener('keydown', onWindowKeyDown); };
   }, [closePalette, openPalette, paletteOpen]);
 
   useEffect(() => {
@@ -519,10 +506,12 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                               type="button"
                               className="global-search-show-all"
                               onClick={() => {
-                                const href = group.showAllHref;
-                                if (!href) return;
+                                const showAllHref = group.showAllHref;
+                                if (!showAllHref) {
+                                  return;
+                                }
                                 closePalette();
-                                navigate(href);
+                                navigate(showAllHref);
                               }}
                             >
                               {t('search.showAll', { count: group.total })}
@@ -574,13 +563,6 @@ function findHitByFlatId(
   return null;
 }
 
-function snippetHighlightSpans(hit: GlobalSearchDocumentHitDto): SearchHighlightSpan[] {
-  if (hit.snippetHighlightSpans.length > 0) {
-    return hit.snippetHighlightSpans;
-  }
-  return hit.highlightSpans;
-}
-
 function GlobalSearchResultRow({ hit }: { hit: GlobalSearchHitDto }) {
   const { t } = useTranslation();
   if (hit.type === 'document') {
@@ -598,10 +580,10 @@ function GlobalSearchResultRow({ hit }: { hit: GlobalSearchHitDto }) {
             {hit.matchedFieldLabel ? (
               <>
                 <span>{hit.matchedFieldLabel}: </span>
-                <GlobalSearchHighlight text={hit.snippet} spans={snippetHighlightSpans(hit)} />
+                <GlobalSearchHighlight text={hit.snippet} spans={hit.snippetHighlightSpans} />
               </>
             ) : (
-              <GlobalSearchHighlight text={hit.snippet} spans={snippetHighlightSpans(hit)} />
+              <GlobalSearchHighlight text={hit.snippet} spans={hit.snippetHighlightSpans} />
             )}
           </span>
           {meta ? <span className="global-search-result-meta muted">{meta}</span> : null}

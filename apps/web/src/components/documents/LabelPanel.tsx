@@ -35,7 +35,9 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
 
   const trimmedQuery = query.trim();
   const exactMatch = trimmedQuery.length > 0 ? findTagByName(allTags, trimmedQuery) : undefined;
-  const alreadyAssigned = exactMatch !== undefined && assignedIds.has(exactMatch.id);
+  const alreadyAssignedTag =
+    exactMatch !== undefined && assignedIds.has(exactMatch.id) ? exactMatch : undefined;
+  const alreadyAssigned = alreadyAssignedTag !== undefined;
 
   async function ensureTagsLoaded() {
     if (allTags.length > 0 || loadingTags) {
@@ -160,9 +162,9 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
           <p id="label-add-hint" className="muted label-add-hint">
             {t('documents.labelAddHint')}
           </p>
-          {alreadyAssigned ? (
+          {alreadyAssignedTag ? (
             <p className="muted label-add-hint" role="status">
-              {t('documents.labelAddAlreadyAssigned', { name: exactMatch.name })}
+              {t('documents.labelAddAlreadyAssigned', { name: alreadyAssignedTag.name })}
             </p>
           ) : null}
           {addError ? (
