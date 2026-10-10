@@ -10,7 +10,7 @@ class DonutStubExtractor(ExtractorEngine):
 
     name = "donut-stub"
 
-    def supports(self, _mime_type: str) -> bool:
+    def supports(self, mime_type: str) -> bool:
         return False
 
     def extract(self, content: bytes, mime_type: str) -> ExtractionResult:

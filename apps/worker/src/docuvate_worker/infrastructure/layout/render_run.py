@@ -21,17 +21,17 @@ from docuvate_worker.infrastructure.layout.text_fit import (
 
 def _is_rotated_block(block: LayoutIrBlock) -> bool:
     if block.matrix is None:
-        return block.rotation_deg is not None and abs(block.rotation_deg) >= 5.0
-    a, b, _, _d, _, _ = block.matrix
-    if abs(b) >= 0.05 or abs(block.matrix[2]) >= 0.05:
+        return block.rotation_deg is not None and abs(block.rotation_deg) >= 5.0  # noqa: PLR2004
+    _a, b, _, _d, _, _ = block.matrix
+    if abs(b) >= 0.05 or abs(block.matrix[2]) >= 0.05:  # noqa: PLR2004
         return True
-    return block.rotation_deg is not None and abs(block.rotation_deg) >= 5.0
+    return block.rotation_deg is not None and abs(block.rotation_deg) >= 5.0  # noqa: PLR2004
 
 
 def _matrix_scale(matrix: tuple[float, float, float, float, float, float]) -> float:
     a, b, _, _, _, _ = matrix
     scale = math.hypot(a, b)
-    return scale if scale > 0.01 else 1.0
+    return scale if scale > 0.01 else 1.0  # noqa: PLR2004
 
 
 def run_font_size_pt(block: LayoutIrBlock) -> float:
@@ -117,9 +117,9 @@ def css_run_transform(block: LayoutIrBlock, scale_x: float) -> str:
         scale = _matrix_scale(block.matrix)
         na, nb, nc, nd = a / scale, b / scale, c / scale, d / scale
         parts.append(f"matrix({na:.6f},{-nb:.6f},{-nc:.6f},{nd:.6f},0,0)")
-    elif block.rotation_deg is not None and abs(block.rotation_deg) >= 0.5:
+    elif block.rotation_deg is not None and abs(block.rotation_deg) >= 0.5:  # noqa: PLR2004
         parts.append(f"rotate({block.rotation_deg:.4f}deg)")
-    if abs(scale_x - 1.0) > 0.008:
+    if abs(scale_x - 1.0) > 0.008:  # noqa: PLR2004
         parts.append(f"scaleX({scale_x:.4f})")
     if not parts:
         return ""

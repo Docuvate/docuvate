@@ -14,8 +14,8 @@ _availability_cache: dict[str, bool] | None = None
 
 def _probe_paddle() -> bool:
     try:
-        import cv2  # noqa: F401
-        import paddleocr  # noqa: F401
+        import cv2  # noqa: F401, PLC0415
+        import paddleocr  # noqa: F401, PLC0415
 
         return True
     except Exception as exc:
@@ -25,7 +25,7 @@ def _probe_paddle() -> bool:
 
 def _probe_tesseract() -> bool:
     try:
-        import pytesseract  # noqa: F401
+        import pytesseract  # noqa: F401, PLC0415
 
         return True
     except Exception:
@@ -34,7 +34,7 @@ def _probe_tesseract() -> bool:
 
 def _probe_docling() -> bool:
     try:
-        import docling  # noqa: F401
+        import docling  # noqa: F401, PLC0415
 
         return True
     except Exception:
@@ -55,14 +55,16 @@ def probe_engine_available(engine_id: str) -> bool:
 
 
 def availability_by_id() -> dict[str, bool]:
-    global _availability_cache
+    global _availability_cache  # noqa: PLW0603
     if _availability_cache is None:
-        from docuvate_worker.infrastructure.extractors.engine_catalog import ENGINE_CATALOG
+        from docuvate_worker.infrastructure.extractors.engine_catalog import (  # noqa: PLC0415
+            ENGINE_CATALOG,
+        )
 
         _availability_cache = {m.id: probe_engine_available(m.id) for m in ENGINE_CATALOG}
     return dict(_availability_cache)
 
 
 def clear_availability_cache() -> None:
-    global _availability_cache
+    global _availability_cache  # noqa: PLW0603
     _availability_cache = None

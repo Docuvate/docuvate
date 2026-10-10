@@ -77,12 +77,12 @@ def _donut_description(*, installed: bool, available: bool) -> str:
 
 
 def chat_provider_status() -> list[dict[str, str | bool]]:
-    from docuvate_worker.infrastructure.chat.rag_rerank import reranker_status
+    from docuvate_worker.infrastructure.chat.rag_rerank import reranker_status  # noqa: PLC0415
 
     rerank = reranker_status()
     donut_installed = False
     try:
-        import transformers  # noqa: F401
+        import transformers  # noqa: F401, PLC0415
 
         donut_installed = True
     except ImportError:

@@ -109,7 +109,9 @@ def health() -> HealthResponse:
 def health_ready() -> HealthResponse:
     status = reranker_status()
     if status.get("available") and not status.get("loaded"):
-        from docuvate_worker.infrastructure.chat.rag_rerank import ensure_reranker_loaded
+        from docuvate_worker.infrastructure.chat.rag_rerank import (  # noqa: PLC0415
+            ensure_reranker_loaded,
+        )
 
         ensure_reranker_loaded()
         status = reranker_status()
@@ -125,11 +127,16 @@ def hardware_capabilities(
     _require_worker_secret(x_worker_secret)
     report = detect_hardware_capabilities()
     payload = report.as_api_dict()
+    capabilities_raw = payload["capabilities"]
+    capabilities: dict[str, bool] = {}
+    if isinstance(capabilities_raw, dict):
+        for key, value in capabilities_raw.items():
+            capabilities[str(key)] = bool(value)
     return HardwareCapabilitiesResponse(
         device=str(payload["device"]),
-        vram_mb=int(payload["vramMb"]),
+        vram_mb=int(payload["vramMb"]) if isinstance(payload["vramMb"], int) else 0,
         gpu_available=bool(payload["gpuAvailable"]),
-        capabilities={k: bool(v) for k, v in dict(payload["capabilities"]).items()},
+        capabilities=capabilities,
     )
 
 
@@ -141,7 +148,9 @@ def extract(
     _require_worker_secret(x_worker_secret)
     raw = _decode_content(body.content_base64)
 
-    from docuvate_worker.infrastructure.extractors.registry import ExtractorRegistry
+    from docuvate_worker.infrastructure.extractors.registry import (  # noqa: PLC0415
+        ExtractorRegistry,
+    )
 
     result = extract_document(raw, body.mime_type, engine=body.engine)
     active = body.engine or ExtractorRegistry().active_engine
@@ -162,7 +171,7 @@ def extract(
                 width=b.width,
                 height=b.height,
                 text=b.text,
-                blockIndex=b.block_index if b.block_index is not None else None,
+                block_index=b.block_index if b.block_index is not None else None,
             )
             for b in (result.blocks or [])
         ],
@@ -208,7 +217,7 @@ def list_extract_engines(
                 label=m.label_de,
                 description=m.description_de,
                 available=m.available,
-                arenaEligible=m.arena_eligible,
+                arena_eligible=m.arena_eligible,
             )
             for m in list_engine_meta()
         ]
@@ -229,11 +238,11 @@ def extract_compare(
         items=[
             CompareEngineResponse(
                 engine=row.engine,
-                elapsedMs=row.elapsed_ms,
+                elapsed_ms=row.elapsed_ms,
                 error=row.error,
                 text=row.result.text if row.result else None,
-                charCount=len(row.result.text) if row.result else None,
-                blockCount=len(row.result.blocks or []) if row.result else None,
+                char_count=len(row.result.text) if row.result else None,
+                block_count=len(row.result.blocks or []) if row.result else None,
                 fields=[
                     ExtractedField(key=f.key, value=f.value, confidence=f.confidence)
                     for f in (row.result.fields if row.result else [])
@@ -459,11 +468,13 @@ def layout_render_html(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> LayoutRenderHtmlResponse:
     _require_worker_secret(x_worker_secret)
-    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
-    from docuvate_worker.infrastructure.layout.render_html import layout_ir_to_html
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import (  # noqa: PLC0415
+        document_from_dict,
+    )
+    from docuvate_worker.infrastructure.layout.render_html import layout_ir_to_html  # noqa: PLC0415
 
     wire = body.layout_ir.model_dump()
-    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (  # noqa: PLC0415
         assess_layout_reconstruction,
         decode_optional_pdf,
     )
@@ -494,12 +505,18 @@ def layout_render_typst(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> LayoutRenderTypstResponse:
     _require_worker_secret(x_worker_secret)
-    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
-    from docuvate_worker.infrastructure.layout.typst_export import layout_ir_to_typst_for_mode
-    from docuvate_worker.infrastructure.layout.typst_export_mode import parse_typst_export_mode
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import (  # noqa: PLC0415
+        document_from_dict,
+    )
+    from docuvate_worker.infrastructure.layout.typst_export import (  # noqa: PLC0415
+        layout_ir_to_typst_for_mode,
+    )
+    from docuvate_worker.infrastructure.layout.typst_export_mode import (  # noqa: PLC0415
+        parse_typst_export_mode,
+    )
 
     wire = body.layout_ir.model_dump()
-    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (  # noqa: PLC0415
         assess_layout_reconstruction,
         decode_optional_pdf,
     )
@@ -531,16 +548,24 @@ def layout_compare_summary(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> LayoutCompareSummaryResponse:
     _require_worker_secret(x_worker_secret)
-    from docuvate_worker.infrastructure.layout.layout_compare_errors import LayoutCompareError
-    from docuvate_worker.infrastructure.layout.layout_compare_executor import run_layout_compare
-    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
-    from docuvate_worker.infrastructure.layout.layout_page_compare import (
+    from docuvate_worker.infrastructure.layout.layout_compare_errors import (  # noqa: PLC0415
+        LayoutCompareError,
+    )
+    from docuvate_worker.infrastructure.layout.layout_compare_executor import (  # noqa: PLC0415
+        run_layout_compare,
+    )
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import (  # noqa: PLC0415
+        document_from_dict,
+    )
+    from docuvate_worker.infrastructure.layout.layout_page_compare import (  # noqa: PLC0415
         layout_compare_summary as summary,
     )
-    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (  # noqa: PLC0415
         decode_optional_pdf,
     )
-    from docuvate_worker.presentation.layout_compare_http import raise_layout_compare_http
+    from docuvate_worker.presentation.layout_compare_http import (  # noqa: PLC0415
+        raise_layout_compare_http,
+    )
 
     original = decode_optional_pdf(body.original_pdf_base64)
     if original is None:
@@ -566,16 +591,24 @@ def layout_compare_metrics(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> LayoutCompareMetricsResponse:
     _require_worker_secret(x_worker_secret)
-    from docuvate_worker.infrastructure.layout.layout_compare_errors import LayoutCompareError
-    from docuvate_worker.infrastructure.layout.layout_compare_executor import run_layout_compare
-    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
-    from docuvate_worker.infrastructure.layout.layout_page_compare import (
+    from docuvate_worker.infrastructure.layout.layout_compare_errors import (  # noqa: PLC0415
+        LayoutCompareError,
+    )
+    from docuvate_worker.infrastructure.layout.layout_compare_executor import (  # noqa: PLC0415
+        run_layout_compare,
+    )
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import (  # noqa: PLC0415
+        document_from_dict,
+    )
+    from docuvate_worker.infrastructure.layout.layout_page_compare import (  # noqa: PLC0415
         collect_layout_compare_metrics_for_pages,
     )
-    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (  # noqa: PLC0415
         decode_optional_pdf,
     )
-    from docuvate_worker.presentation.layout_compare_http import raise_layout_compare_http
+    from docuvate_worker.presentation.layout_compare_http import (  # noqa: PLC0415
+        raise_layout_compare_http,
+    )
 
     original = decode_optional_pdf(body.original_pdf_base64)
     if original is None:
@@ -618,14 +651,24 @@ def layout_compare_page(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> LayoutComparePageResponse:
     _require_worker_secret(x_worker_secret)
-    from docuvate_worker.infrastructure.layout.layout_compare_errors import LayoutCompareError
-    from docuvate_worker.infrastructure.layout.layout_compare_executor import run_layout_compare
-    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
-    from docuvate_worker.infrastructure.layout.layout_page_compare import compare_layout_page
-    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+    from docuvate_worker.infrastructure.layout.layout_compare_errors import (  # noqa: PLC0415
+        LayoutCompareError,
+    )
+    from docuvate_worker.infrastructure.layout.layout_compare_executor import (  # noqa: PLC0415
+        run_layout_compare,
+    )
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import (  # noqa: PLC0415
+        document_from_dict,
+    )
+    from docuvate_worker.infrastructure.layout.layout_page_compare import (  # noqa: PLC0415
+        compare_layout_page,
+    )
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (  # noqa: PLC0415
         decode_optional_pdf,
     )
-    from docuvate_worker.presentation.layout_compare_http import raise_layout_compare_http
+    from docuvate_worker.presentation.layout_compare_http import (  # noqa: PLC0415
+        raise_layout_compare_http,
+    )
 
     original = decode_optional_pdf(body.original_pdf_base64)
     if original is None:

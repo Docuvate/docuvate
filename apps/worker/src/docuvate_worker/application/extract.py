@@ -4,6 +4,7 @@
 import logging
 
 from docuvate_worker.domain.models import ExtractionResult
+from docuvate_worker.infrastructure.extractors.compare import CompareRunResult, run_compare
 from docuvate_worker.infrastructure.extractors.engine_catalog import engine_by_name
 from docuvate_worker.infrastructure.extractors.markdown import extraction_to_markdown
 from docuvate_worker.infrastructure.extractors.registry import ExtractorRegistry
@@ -45,8 +46,10 @@ def _with_layout_ir(
         return result
     if layout is None:
         return result
-    from docuvate_worker.infrastructure.layout.layout_ir_parse import document_from_dict
-    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import (  # noqa: PLC0415
+        document_from_dict,
+    )
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (  # noqa: PLC0415
         assess_layout_reconstruction,
     )
 
@@ -69,10 +72,7 @@ def _with_layout_ir(
 def extract_document(
     content: bytes, mime_type: str, engine: str | None = None
 ) -> ExtractionResult:
-    if engine:
-        resolved = engine_by_name(engine)
-    else:
-        resolved = _registry.resolve(mime_type)
+    resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
     base = _with_markdown(resolved.extract(content, mime_type))
     return _with_layout_ir(base, content, mime_type)
 
@@ -83,7 +83,5 @@ def compare_engines(
     engines: list[str],
     *,
     max_pages: int | None = None,
-):
-    from docuvate_worker.infrastructure.extractors.compare import run_compare
-
+) -> CompareRunResult:
     return run_compare(content, mime_type, engines, max_pages=max_pages)

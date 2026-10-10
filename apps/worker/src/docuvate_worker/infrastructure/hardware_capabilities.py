@@ -6,7 +6,8 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from typing import Literal
+from types import ModuleType
+from typing import Literal, cast
 
 logger = logging.getLogger(__name__)
 
@@ -42,10 +43,10 @@ class HardwareCapabilities:
 _cached: HardwareCapabilities | None = None
 
 
-def _import_torch():
-    import torch
+def _import_torch() -> ModuleType:
+    import torch  # noqa: PLC0415
 
-    return torch
+    return cast(ModuleType, torch)
 
 
 def _read_int_env(name: str) -> int | None:
@@ -58,7 +59,7 @@ def _read_int_env(name: str) -> int | None:
         return None
 
 
-def _cuda_vram_mb(torch) -> int:
+def _cuda_vram_mb(torch: ModuleType) -> int:
     override = _read_int_env("DOCUVATE_CUDA_VRAM_MB")
     if override is not None:
         return max(0, override)
@@ -76,13 +77,13 @@ def _mps_vram_mb() -> int:
     return 8192
 
 
-def _is_rocm(torch) -> bool:
+def _is_rocm(torch: ModuleType) -> bool:
     hip = getattr(torch.version, "hip", None)
     return hip is not None and bool(hip)
 
 
 def detect_hardware_capabilities(*, force_refresh: bool = False) -> HardwareCapabilities:
-    global _cached
+    global _cached  # noqa: PLW0603
     if _cached is not None and not force_refresh:
         return _cached
 

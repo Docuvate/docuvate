@@ -26,9 +26,9 @@ class TesseractExtractor(ExtractorEngine):
         )
 
     def _ocr_with_layout(self, content: bytes, mime_type: str) -> tuple[str, list[ExtractionBlock]]:
-        import pytesseract
-        from pdf2image import convert_from_bytes
-        from PIL import Image
+        import pytesseract  # noqa: PLC0415
+        from pdf2image import convert_from_bytes  # noqa: PLC0415
+        from PIL import Image  # noqa: PLC0415
 
         if mime_type == "application/pdf":
             images = convert_from_bytes(content)
@@ -61,8 +61,10 @@ class TesseractExtractor(ExtractorEngine):
     ) -> tuple[str, list[ExtractionBlock]]:
         width, height = image.size  # type: ignore[attr-defined]
         text = pytesseract.image_to_string(image, lang="deu+eng")  # type: ignore[attr-defined]
+        output_cls = getattr(pytesseract, "Output", None)
+        output_type = getattr(output_cls, "DICT", None) if output_cls is not None else None
         data = pytesseract.image_to_data(  # type: ignore[attr-defined]
-            image, lang="deu+eng", output_type=pytesseract.Output.DICT
+            image, lang="deu+eng", output_type=output_type
         )
         blocks: list[ExtractionBlock] = []
         n = len(data.get("text", []))

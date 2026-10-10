@@ -128,6 +128,8 @@ job_lint_test() {
   UV_VENV_CLEAR=1 UV_PYTHON="$PY_PIN" uv venv .venv
   uv pip install -e ".[dev]"
   ./.venv/bin/ruff check src
+  ./.venv/bin/pyright
+  ./.venv/bin/mypy
   ./.venv/bin/pytest tests -q --ignore=tests/integration --maxfail=1
 }
 

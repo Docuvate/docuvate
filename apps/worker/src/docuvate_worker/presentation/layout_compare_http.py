@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+from typing import NoReturn
+
 from fastapi import HTTPException
 
 from docuvate_worker.infrastructure.layout.layout_compare_errors import (
@@ -13,7 +15,7 @@ from docuvate_worker.infrastructure.layout.layout_compare_errors import (
 )
 
 
-def raise_layout_compare_http(exc: LayoutCompareError) -> None:
+def raise_layout_compare_http(exc: LayoutCompareError) -> NoReturn:
     code = exc.code.value
     if exc.code == CompareErrorCode.PDF_TOO_LARGE:
         raise HTTPException(status_code=413, detail={"errorCode": code}) from exc

@@ -12,7 +12,7 @@ _MIN_WORDS_FOR_BORN_DIGITAL = 8
 
 
 def pdf_likely_scanned(content: bytes, *, sample_pages: int = 3) -> bool:
-    import pdfplumber
+    import pdfplumber  # noqa: PLC0415
 
     try:
         with pdfplumber.open(io.BytesIO(content)) as pdf:

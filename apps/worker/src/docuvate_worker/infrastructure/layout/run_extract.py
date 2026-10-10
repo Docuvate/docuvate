@@ -24,7 +24,7 @@ def _char_center(char: dict) -> tuple[float, float]:
 
 def _matrix_tuple(char: dict) -> tuple[float, float, float, float, float, float]:
     raw = char.get("matrix")
-    if not isinstance(raw, (list, tuple)) or len(raw) < 6:
+    if not isinstance(raw, (list, tuple)) or len(raw) < 6:  # noqa: PLR2004
         return (1.0, 0.0, 0.0, 1.0, float(char["x0"]), float(char["top"]))
     return tuple(float(raw[i]) for i in range(6))
 
@@ -35,7 +35,7 @@ def _matrix_key(matrix: tuple[float, ...]) -> tuple[float, float, float, float]:
 
 def _color_key(char: dict) -> tuple[float, float, float] | None:
     raw = char.get("non_stroking_color")
-    if isinstance(raw, (list, tuple)) and len(raw) >= 3:
+    if isinstance(raw, (list, tuple)) and len(raw) >= 3:  # noqa: PLR2004
         return (round(float(raw[0]), 2), round(float(raw[1]), 2), round(float(raw[2]), 2))
     if isinstance(raw, (int, float)):
         g = round(float(raw), 2)
@@ -123,7 +123,7 @@ def _along_text_axis(char: dict) -> float:
     a, b, _, _, e, f = matrix
     cx, cy = _char_center(char)
     norm = math.hypot(a, b)
-    if norm < 1e-9:
+    if norm < 1e-9:  # noqa: PLR2004
         return cx
     return ((cx - e) * a + (cy - f) * b) / norm
 
@@ -136,7 +136,7 @@ def _center_distance(a: dict, b: dict) -> float:
 
 def _gap_along_reading(prev: dict, char: dict) -> float:
     ma = _matrix_tuple(prev)
-    if abs(ma[1]) < 0.05 and abs(ma[2]) < 0.05:
+    if abs(ma[1]) < 0.05 and abs(ma[2]) < 0.05:  # noqa: PLR2004
         return float(char["x0"]) - float(prev["x1"])
     return _center_distance(prev, char)
 
@@ -144,7 +144,7 @@ def _gap_along_reading(prev: dict, char: dict) -> float:
 def _join_cluster_text(cluster: list[dict]) -> str:
     matrix = _matrix_tuple(cluster[0])
     reverse_reading = (
-        not _matrix_is_upright(cluster[0].get("matrix")) and matrix[1] < -0.05
+        not _matrix_is_upright(cluster[0].get("matrix")) and matrix[1] < -0.05  # noqa: PLR2004
     )
     sort_key = _upright_x0 if _matrix_is_upright(cluster[0].get("matrix")) else _along_text_axis
     ordered = sorted(cluster, key=sort_key, reverse=reverse_reading)

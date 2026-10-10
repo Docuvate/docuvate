@@ -12,7 +12,7 @@ from docuvate_worker.domain.models import ExtractionBlock
 LINE_Y_TOLERANCE = 0.014
 
 _BULLET_RE = re.compile(r"^(\d+[\.\)]\s|[-•*]\s)")
-_HEADING_RE = re.compile(r"^[A-Z0-9][A-Z0-9\s\-–—&.,'\"()/]{2,}$")
+_HEADING_RE = re.compile(r"^[A-Z0-9][A-Z0-9\s\-\u2013\u2014&.,'\"()/]{2,}$")
 
 
 def _group_blocks_into_lines(
@@ -45,7 +45,7 @@ def _format_line_as_markdown(line: str) -> str:
         return ""
     if _BULLET_RE.match(line):
         return line
-    if len(line) <= 72 and _HEADING_RE.match(line) and "  " not in line:
+    if len(line) <= 72 and _HEADING_RE.match(line) and "  " not in line:  # noqa: PLR2004
         return f"## {line}"
     return line
 
@@ -109,9 +109,6 @@ def markdown_to_plain(md: str) -> str:
 
 
 def extraction_to_markdown(text: str, blocks: list[ExtractionBlock] | None) -> str | None:
-    if blocks:
-        md = blocks_to_markdown(blocks)
-    else:
-        md = plain_text_to_markdown(text)
+    md = blocks_to_markdown(blocks) if blocks else plain_text_to_markdown(text)
     md = md.strip()
     return md or None

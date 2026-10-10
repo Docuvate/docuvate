@@ -220,7 +220,7 @@ def retrieve_document_rag_context(
         separator = 3 if context_parts else 0
         if total + separator + len(piece) > MAX_RAG_CONTEXT_CHARS:
             remaining = MAX_RAG_CONTEXT_CHARS - total - separator
-            if remaining > 80:
+            if remaining > 80:  # noqa: PLR2004
                 context_parts.append(piece[:remaining].rstrip() + "…")
             break
         context_parts.append(piece)
@@ -269,7 +269,7 @@ def answer_from_document_context(
         if fallback:
             return (
                 f"Dazu finde ich im Dokument keinen eindeutigen Treffer. "
-                f"Kurzer Kontext: „{fallback}{'…' if len(body) > 400 else ''}“"
+                f"Kurzer Kontext: „{fallback}{'…' if len(body) > 400 else ''}“"  # noqa: PLR2004
             )
         return "Dazu finde ich im Dokument keinen passenden Textabschnitt."
 

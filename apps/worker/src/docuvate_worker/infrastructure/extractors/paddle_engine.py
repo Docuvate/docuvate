@@ -4,7 +4,7 @@
 import io
 import logging
 import os
-from typing import Any
+from typing import Any, Protocol, cast
 
 import numpy as np
 from pdf2image import convert_from_bytes
@@ -29,14 +29,18 @@ def _paddle_lang() -> str:
     return os.environ.get("PADDLE_OCR_LANG", "german")
 
 
-def _get_paddle_ocr() -> Any:
-    global _ocr_instance
+class _PaddleOcr(Protocol):
+    def ocr(self, *args: Any, **kwargs: Any) -> list[object]: ...
+
+
+def _get_paddle_ocr() -> _PaddleOcr:
+    global _ocr_instance  # noqa: PLW0603
     if _ocr_instance is not None:
-        return _ocr_instance
+        return cast(_PaddleOcr, cast(object, _ocr_instance))
 
     _configure_paddle_env()
 
-    from paddleocr import PaddleOCR
+    from paddleocr import PaddleOCR  # noqa: PLC0415
 
     logger.info(
         "Initializing PaddleOCR (PP-OCRv4 mobile, lang=%s). "
@@ -52,7 +56,7 @@ def _get_paddle_ocr() -> Any:
         enable_mkldnn=False,
         use_tensorrt=False,
     )
-    return _ocr_instance
+    return cast(_PaddleOcr, cast(object, _ocr_instance))
 
 
 def prewarm_paddle_models() -> None:
@@ -62,7 +66,7 @@ def prewarm_paddle_models() -> None:
     probe = np.zeros((32, 128, 3), dtype=np.uint8)
     try:
         ocr.ocr(probe, cls=False)
-    except Exception as exc:  # noqa: BLE001 — fail image build if OCR cannot run
+    except Exception as exc:
         raise RuntimeError(map_paddle_exception(exc)) from exc
     logger.info("PaddleOCR prewarm complete (latin det + rec on CPU).")
 
@@ -110,7 +114,7 @@ def _ocr_pil_image(
 
     if lines and isinstance(lines[0], list):
         for entry in lines[0]:
-            if not entry or len(entry) < 2:
+            if not entry or len(entry) < 2:  # noqa: PLR2004
                 continue
             box, rec = entry[0], entry[1]
             if not rec:
@@ -135,8 +139,10 @@ def ocr_pdf_bytes(
     content: bytes, *, max_pages: int | None = None
 ) -> tuple[str, list[ExtractionBlock]]:
     logger.info("Rasterizing PDF for PaddleOCR (poppler); this may take a while on large files.")
-    last_page = max_pages if max_pages and max_pages > 0 else None
-    images = convert_from_bytes(content, last_page=last_page)
+    if max_pages and max_pages > 0:
+        images = convert_from_bytes(content, last_page=max_pages)
+    else:
+        images = convert_from_bytes(content)
     if not images:
         return "", []
 

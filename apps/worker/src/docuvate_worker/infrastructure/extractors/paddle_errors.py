@@ -26,9 +26,9 @@ def map_paddle_exception(exc: Exception) -> str:
             "Worker-Version prüfen oder Administrator kontaktieren."
         )
 
-    if "out of memory" in lower or "memory" in lower and "alloc" in lower:
+    if "out of memory" in lower or ("memory" in lower and "alloc" in lower):
         return "Paddle-OCR: nicht genug Arbeitsspeicher für die Erkennung."
 
-    if len(msg) > 280:
+    if len(msg) > 280:  # noqa: PLR2004
         return "Paddle-OCR-Fehler. Details stehen im Worker-Log."
     return msg

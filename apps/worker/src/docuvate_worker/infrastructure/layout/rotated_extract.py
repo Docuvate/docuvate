@@ -12,11 +12,11 @@ from docuvate_worker.infrastructure.layout.font_map import weight_from_fontname
 
 
 def _matrix_is_upright(matrix: object) -> bool:
-    if not isinstance(matrix, (list, tuple)) or len(matrix) < 4:
+    if not isinstance(matrix, (list, tuple)) or len(matrix) < 4:  # noqa: PLR2004
         return True
     b = float(matrix[1])
     c = float(matrix[2])
-    return abs(b) < 0.05 and abs(c) < 0.05
+    return abs(b) < 0.05 and abs(c) < 0.05  # noqa: PLR2004
 
 
 def _rotation_deg_from_matrix(matrix: tuple[float, ...]) -> float:
@@ -34,24 +34,24 @@ def _char_center(char: dict) -> tuple[float, float]:
 def _baseline_projection(char: dict) -> float:
     matrix = char.get("matrix")
     cx, cy = _char_center(char)
-    if not isinstance(matrix, (list, tuple)) or len(matrix) < 6:
+    if not isinstance(matrix, (list, tuple)) or len(matrix) < 6:  # noqa: PLR2004
         return cx
     a, b, _, _, e, f = (float(matrix[i]) for i in range(6))
     norm = math.hypot(a, b)
-    if norm < 1e-9:
+    if norm < 1e-9:  # noqa: PLR2004
         return cx
     return ((cx - e) * a + (cy - f) * b) / norm
 
 
 def _axis_keys(char: dict) -> tuple[float, float, tuple[float, float, float, float]]:
     matrix = char.get("matrix")
-    if not isinstance(matrix, (list, tuple)) or len(matrix) < 6:
+    if not isinstance(matrix, (list, tuple)) or len(matrix) < 6:  # noqa: PLR2004
         return 0.0, 0.0, (1.0, 0.0, 0.0, 1.0)
     a, b, c, d, _, _ = (float(matrix[i]) for i in range(6))
     along = _baseline_projection(char)
     cx, cy = _char_center(char)
     norm = math.hypot(a, b)
-    perp = (cx * (-b) + cy * a) / norm if norm > 1e-9 else cy
+    perp = (cx * (-b) + cy * a) / norm if norm > 1e-9 else cy  # noqa: PLR2004
     orient = (round(a, 2), round(b, 2), round(c, 2), round(d, 2))
     return along, perp, orient
 
@@ -73,7 +73,7 @@ def _expand_char_cluster(seed: dict, remaining: list[dict]) -> list[dict]:
                 remaining.remove(char)
                 expanded = True
     bucket.sort(key=_baseline_projection)
-    if len(bucket) >= 2 and _baseline_projection(bucket[0]) > _baseline_projection(bucket[-1]):
+    if len(bucket) >= 2 and _baseline_projection(bucket[0]) > _baseline_projection(bucket[-1]):  # noqa: PLR2004
         bucket.reverse()
     return bucket
 
@@ -124,10 +124,10 @@ def extract_rotated_blocks(
         ordered = sorted(cluster, key=_baseline_projection)
         first_proj = _baseline_projection(ordered[0])
         last_proj = _baseline_projection(ordered[-1])
-        if len(ordered) >= 2 and first_proj > last_proj:
+        if len(ordered) >= 2 and first_proj > last_proj:  # noqa: PLR2004
             ordered = list(reversed(ordered))
         text = "".join(str(c.get("text") or "") for c in ordered).strip()
-        if len(text) < 2:
+        if len(text) < 2:  # noqa: PLR2004
             continue
         x0 = min(float(c["x0"]) for c in ordered)
         x1 = max(float(c["x1"]) for c in ordered)
@@ -136,7 +136,7 @@ def extract_rotated_blocks(
         matrix = ordered[0].get("matrix")
         rotation = (
             _rotation_deg_from_matrix(tuple(float(v) for v in matrix))
-            if isinstance(matrix, (list, tuple)) and len(matrix) >= 2
+            if isinstance(matrix, (list, tuple)) and len(matrix) >= 2  # noqa: PLR2004
             else None
         )
         sizes = [float(c["size"]) for c in ordered if c.get("size")]

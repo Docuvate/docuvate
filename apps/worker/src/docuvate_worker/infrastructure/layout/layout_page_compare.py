@@ -115,7 +115,7 @@ def get_reconstruction_pdf(original_pdf: bytes, doc: LayoutIrDocument) -> bytes:
         return cached
     try:
         reconstruction = compile_typst_to_pdf_bytes(typst)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         code = map_exception_to_code(exc)
         log_compare_failure(code, exc)
         raise LayoutCompareError(code, detail=str(exc)) from exc
@@ -207,7 +207,7 @@ def collect_layout_compare_metrics_for_pages(
                 dpi=dpi,
             )
             metrics.append(_metric_from_compare(page_number, result, floor))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             code = map_exception_to_code(exc)
             log_compare_failure(code, exc)
             metrics.append(
@@ -313,7 +313,7 @@ def compare_layout_page(
         if exc.code == CompareErrorCode.PAGE_OUT_OF_RANGE:
             raise
         payload = _build_error_payload(page_number, floor, exc.code)
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         code = map_exception_to_code(exc)
         log_compare_failure(code, exc)
         payload = _build_error_payload(page_number, floor, code)

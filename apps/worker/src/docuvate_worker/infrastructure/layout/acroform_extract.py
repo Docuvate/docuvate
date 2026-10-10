@@ -55,7 +55,7 @@ def _text_align_from_field(field_obj, annot) -> TextAlign:
             continue
         if code == 1:
             return TextAlign.CENTER
-        if code == 2:
+        if code == 2:  # noqa: PLR2004
             return TextAlign.RIGHT
         if code == 0:
             return TextAlign.LEFT
@@ -97,7 +97,7 @@ def _checkbox_check_mark(annot, *, checked: bool) -> str | None:
 
 
 def extract_acroform_widgets(content: bytes) -> list[LayoutIrWidget]:
-    from pypdf import PdfReader
+    from pypdf import PdfReader  # noqa: PLC0415
 
     widgets: list[LayoutIrWidget] = []
     reader = PdfReader(io.BytesIO(content))
@@ -116,16 +116,13 @@ def extract_acroform_widgets(content: bytes) -> list[LayoutIrWidget]:
             if annot.get("/Subtype") != "/Widget":
                 continue
             rect = annot.get("/Rect")
-            if not rect or len(rect) < 4:
+            if not rect or len(rect) < 4:  # noqa: PLR2004
                 continue
             nx, ny, nw, nh = _pdf_rect_to_norm(list(rect), page_width, page_height)
 
             field_type = annot.get("/FT")
             parent = annot.get("/Parent")
-            if parent is not None:
-                field_obj = parent.get_object()
-            else:
-                field_obj = annot
+            field_obj = parent.get_object() if parent is not None else annot
 
             field_name = field_obj.get("/T")
             if isinstance(field_name, bytes):

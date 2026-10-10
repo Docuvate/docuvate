@@ -44,7 +44,7 @@ def _friendly_error(exc: Exception) -> str:
         )
     if "poppler" in lower or "pdftoppm" in lower:
         return "PDF konnte nicht gerastert werden (Poppler fehlt im Worker)."
-    if len(msg) > 320:
+    if len(msg) > 320:  # noqa: PLR2004
         return "Extraktion fehlgeschlagen. Details stehen im Worker-Log."
     return msg
 
@@ -53,7 +53,7 @@ def _slice_pdf(content: bytes, mime_type: str, max_pages: int | None) -> bytes:
     if mime_type != "application/pdf" or not max_pages or max_pages <= 0:
         return content
 
-    from pypdf import PdfReader, PdfWriter
+    from pypdf import PdfReader, PdfWriter  # noqa: PLC0415
 
     reader = PdfReader(io.BytesIO(content))
     if len(reader.pages) <= max_pages:
@@ -100,7 +100,7 @@ def run_compare(
             rows.append(
                 CompareEngineResult(engine=key, elapsed_ms=elapsed_ms, result=result, error=None)
             )
-        except Exception as exc:  # noqa: BLE001 — surface to arena UI
+        except Exception as exc:
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             rows.append(
                 CompareEngineResult(

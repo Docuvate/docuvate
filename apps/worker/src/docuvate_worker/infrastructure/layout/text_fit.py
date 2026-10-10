@@ -62,7 +62,7 @@ def measured_text_width_pt(
     if font_path is None:
         return None
     try:
-        font = ImageFont.truetype(font_path, size=max(1, int(round(font_size_pt))))
+        font = ImageFont.truetype(font_path, size=max(1, round(font_size_pt)))
     except OSError:
         return None
     bbox = font.getbbox(stripped)
