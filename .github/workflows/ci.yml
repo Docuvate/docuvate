@@ -293,8 +293,11 @@ jobs:
       - name: Assert CPU worker image has no CUDA pip packages
         run: |
           set -euo pipefail
-          docker run --rm "$(docker compose -f docker-compose.yml images -q worker | head -1)" \
-            python /app/scripts/ci/assert-worker-cpu-pip-freeze.py
+          img_id="$(docker image ls --format '{{.ID}}' --filter 'label=com.docker.compose.service=worker' | head -1)"
+          if [ -z "$img_id" ]; then
+            img_id="$(docker build -q -f apps/worker/Dockerfile --target cpu .)"
+          fi
+          docker run --rm "$img_id" python /app/scripts/ci/assert-worker-cpu-pip-freeze.py
 
   worker-gpu-docker:
     needs: lint-test
