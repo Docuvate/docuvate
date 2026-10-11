@@ -176,6 +176,41 @@ describe('layout document use cases', () => {
     expect(result.pages[0]?.blocks[0]?.text).toBe('Invoice total');
   });
 
+  it('parses layout IR tables from storage JSON', async () => {
+    findByIdForUser.mockResolvedValue({ id: docId, userId });
+    findLayoutIrForUser.mockResolvedValue({
+      version: 1,
+      pages: [
+        {
+          page: 1,
+          widthPt: 595,
+          heightPt: 842,
+          blocks: [],
+          tables: [
+            {
+              page: 1,
+              x: 0.1,
+              y: 0.3,
+              width: 0.8,
+              height: 0.2,
+              columnCount: 2,
+              rows: [
+                [
+                  { text: 'Qty', x: 0.1, y: 0.3, width: 0.2, height: 0.04 },
+                  { text: 'Item', x: 0.35, y: 0.3, width: 0.5, height: 0.04 },
+                ],
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    const uc = await createLayoutIrUseCase();
+    const result = await uc.execute(docId, userId, subject);
+    expect(result.pages[0]?.tables).toHaveLength(1);
+    expect(result.pages[0]?.tables?.[0]?.rows[0]?.[0]?.text).toBe('Qty');
+  });
+
   it('404 when another user requests layout IR', async () => {
     findByIdForUser.mockResolvedValue(null);
     const uc = await createLayoutIrUseCase();
