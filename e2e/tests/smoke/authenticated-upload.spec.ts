@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
@@ -12,6 +13,13 @@ const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 function uniqueUploadTitle(testId: string): string {
   const slug = testId.replace(/[^a-z0-9]+/gi, '').slice(-10) || 'upload';
   return `e2e-${slug}.pdf`;
+}
+
+/** Distinct bytes so duplicate-stack detection does not hide the doc from the library list. */
+function uniquePdfBuffer(): Buffer {
+  const base = fs.readFileSync(fixturePdf);
+  const stamp = Buffer.from(`\n%%E2E_UPLOAD_RUN=${randomUUID()}\n`, 'utf8');
+  return Buffer.concat([base, stamp]);
 }
 
 test.use({ trace: 'on', storageState: smokeFixtureStoragePath() });
@@ -57,7 +65,7 @@ async function uploadSyntheticPdfViaUi(
     {
       name: uploadTitle,
       mimeType: 'application/pdf',
-      buffer: fs.readFileSync(fixturePdf),
+      buffer: uniquePdfBuffer(),
     },
     { timeout: 120_000 }
   );
