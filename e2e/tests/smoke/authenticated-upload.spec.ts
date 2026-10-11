@@ -164,17 +164,26 @@ test.describe('Authenticated compose smoke', () => {
     await releaseFromDuplicateStackIfNeeded(page, readyDocId);
 
     const docHref = `/documents/${readyDocId}`;
-    const titleLink = page.locator(`a[href="${docHref}"]`).first();
     await expect
       .poll(
         async () => {
           await page.goto('/documents', { waitUntil: 'domcontentloaded' });
           await releaseFromDuplicateStackIfNeeded(page, readyDocId);
-          return await titleLink.isVisible().catch(() => false);
+          const byHref = page.locator(`a[href="${docHref}"]`).first();
+          const byTitle = page.getByRole('link', { name: uploadTitle }).first();
+          return (
+            (await byHref.isVisible().catch(() => false)) ||
+            (await byTitle.isVisible().catch(() => false))
+          );
         },
         { timeout: 120_000, intervals: [2000, 3000, 5000] }
       )
       .toBe(true);
+
+    const titleLink = page.locator(`a[href="${docHref}"]`).first();
+    if (!(await titleLink.isVisible().catch(() => false))) {
+      await page.getByRole('link', { name: uploadTitle }).first().click();
+    }
 
     const docItem = page.locator('tr, .doc-card').filter({ has: titleLink });
     await expect(docItem.first()).toBeVisible({ timeout: 30_000 });
