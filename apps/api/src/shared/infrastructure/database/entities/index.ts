@@ -17,6 +17,9 @@ import { ConnectorPaperlessFolderLinksEntity } from './connector-paperless-folde
 import { ConnectorPaperlessSettingsEntity } from './connector-paperless-settings.entity.js';
 import { ConnectorPaperlessTagLinksEntity } from './connector-paperless-tag-links.entity.js';
 import { ConnectorSourceDocumentsEntity } from './connector-source-documents.entity.js';
+import { CorrectionEntity } from './correction.entity.js';
+import { CorrectionLabelAssignmentEntity } from './correction-label-assignment.entity.js';
+import { CorrectionPropagatedAssignmentEntity } from './correction-propagated-assignment.entity.js';
 import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DashboardWidgetsEntity } from './dashboard-widgets.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
@@ -95,6 +98,9 @@ export const TYPEORM_ENTITIES = [
   ConnectorPaperlessFolderLinksEntity,
   ConnectorPaperlessFieldLinksEntity,
   ConnectorSourceDocumentsEntity,
+  CorrectionEntity,
+  CorrectionLabelAssignmentEntity,
+  CorrectionPropagatedAssignmentEntity,
   CorrespondentsEntity,
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
@@ -174,6 +180,9 @@ export {
   ConnectorPaperlessSettingsEntity,
   ConnectorPaperlessTagLinksEntity,
   ConnectorSourceDocumentsEntity,
+  CorrectionEntity,
+  CorrectionLabelAssignmentEntity,
+  CorrectionPropagatedAssignmentEntity,
   CorrespondentsEntity,
   DashboardWidgetsEntity,
   DocumentDuplicateCandidatesEntity,

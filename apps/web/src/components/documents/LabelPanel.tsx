@@ -1,18 +1,35 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentDto, TagDto } from '@docuvate/contracts';
-import { type FormEvent,useMemo, useState } from 'react';
+import type { DocumentDto, TagDto, TagSuggestionDto } from '@docuvate/contracts';
+import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { assignDocumentTag, createTag, listTags, removeDocumentTag } from '../../lib/api';
+import {
+  applyDocumentLabelCorrection,
+  assignDocumentTag,
+  createTag,
+  getDocument,
+  listTags,
+  removeDocumentTag,
+  withdrawDocumentLabelCorrection,
+} from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
+import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
 import { Input } from '../ui/Input';
 
+const NEST_CANDIDATE_LIMIT = 3;
+const CORRECTION_UNDO_MS = 10_000;
+
 interface LabelPanelProps {
   document: DocumentDto;
   onUpdated: (doc: DocumentDto) => void;
+}
+
+interface UndoState {
+  correctionId: string;
+  previousTagIds: string[];
 }
 
 function findTagByName(tags: TagDto[], name: string): TagDto | undefined {
@@ -20,13 +37,49 @@ function findTagByName(tags: TagDto[], name: string): TagDto | undefined {
   return tags.find((tag) => tag.name.trim().toLowerCase() === normalized);
 }
 
+function nestCandidates(suggestions: TagSuggestionDto[] | undefined): TagSuggestionDto[] {
+  return (suggestions ?? [])
+    .filter((item) => item.source === 'embedding_density')
+    .sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0))
+    .slice(0, NEST_CANDIDATE_LIMIT);
+}
+
 export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const { t } = useTranslation();
+  const toast = useToast();
   const [query, setQuery] = useState('');
   const [allTags, setAllTags] = useState<TagDto[]>([]);
   const [loadingTags, setLoadingTags] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
+  const [selectedNestTagId, setSelectedNestTagId] = useState<string | null>(null);
+  const [undo, setUndo] = useState<UndoState | null>(null);
+
+  const candidates = useMemo(() => nestCandidates(document.tagSuggestions), [document.tagSuggestions]);
+
+  useEffect(() => {
+    if (candidates.length === 0) {
+      setSelectedNestTagId(null);
+      return;
+    }
+    const preferred =
+      candidates.find((item) => item.decisionTier === 'confirm') ?? candidates[0];
+    setSelectedNestTagId(preferred.tag.id);
+  }, [document.id, candidates]);
+
+  const dismissUndo = useCallback(() => {
+    setUndo(null);
+  }, []);
+
+  useEffect(() => {
+    if (!undo) {
+      return;
+    }
+    const timer = window.setTimeout(dismissUndo, CORRECTION_UNDO_MS);
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [undo, dismissUndo]);
 
   const assignedIds = useMemo(
     () => new Set(document.tags.map((tag) => tag.id)),
@@ -38,6 +91,9 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const alreadyAssignedTag =
     exactMatch !== undefined && assignedIds.has(exactMatch.id) ? exactMatch : undefined;
   const alreadyAssigned = alreadyAssignedTag !== undefined;
+
+  const showNestRow =
+    candidates.length > 0 && candidates.every((item) => !assignedIds.has(item.tag.id));
 
   async function ensureTagsLoaded() {
     if (allTags.length > 0 || loadingTags) {
@@ -104,6 +160,44 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
     }
   }
 
+  async function onConfirmNestCandidate() {
+    if (!selectedNestTagId || busy !== null) {
+      return;
+    }
+    const previousTagIds = document.tags.map((tag) => tag.id);
+    setBusy('nest-confirm');
+    try {
+      const result = await applyDocumentLabelCorrection(document.id, selectedNestTagId);
+      const doc = await getDocument(document.id);
+      onUpdated(doc);
+      if (result.correctionId) {
+        setUndo({ correctionId: result.correctionId, previousTagIds });
+      }
+      toast.success(
+        t('documents.labelLearnedToast', { count: result.similarDocumentsUpdated })
+      );
+    } catch (err) {
+      toast.error(formatUserFacingError(err, 'errors.addFailed'));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function onUndoCorrection() {
+    if (!undo || busy !== null) {
+      return;
+    }
+    setBusy('nest-undo');
+    try {
+      onUpdated(await withdrawDocumentLabelCorrection(document.id, undo.correctionId));
+      setUndo(null);
+    } catch (err) {
+      toast.error(formatUserFacingError(err, 'errors.addFailed'));
+    } finally {
+      setBusy(null);
+    }
+  }
+
   const addButtonLabel =
     exactMatch && !alreadyAssigned
       ? t('documents.labelAddSubmitAssign')
@@ -117,6 +211,51 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
         </h2>
         <p className="muted detail-section-lead">{t('documents.labelPanelLead')}</p>
       </header>
+
+      {showNestRow ? (
+        <div className="label-nest-correction" data-ux="label-nest-correction">
+          <p className="muted label-nest-correction-lead">{t('documents.labelNestCandidatesLead')}</p>
+          <div className="chip-row label-nest-chip-row" role="listbox" aria-label={t('documents.labelNestCandidatesLead')}>
+            {candidates.map((item) => (
+              <button
+                key={item.tag.id}
+                type="button"
+                role="option"
+                aria-selected={selectedNestTagId === item.tag.id}
+                className={`label-nest-chip${selectedNestTagId === item.tag.id ? ' label-nest-chip-selected' : ''}`}
+                disabled={busy !== null}
+                onClick={() => { setSelectedNestTagId(item.tag.id); }}
+              >
+                <Chip
+                  label={item.tag.name}
+                  variant={selectedNestTagId === item.tag.id ? 'suggest' : 'outline'}
+                  color={item.tag.color}
+                />
+              </button>
+            ))}
+          </div>
+          <div className="label-nest-actions">
+            <Button
+              type="button"
+              variant="primary"
+              disabled={busy !== null || !selectedNestTagId}
+              onClick={() => void onConfirmNestCandidate()}
+            >
+              {t('documents.labelNestConfirm')}
+            </Button>
+          </div>
+          <div className="label-correction-undo-slot" aria-live="polite">
+            {undo ? (
+              <div className="label-correction-undo" role="status">
+                <span>{t('documents.labelCorrectionUndo')}</span>
+                <Button type="button" variant="ghost" onClick={() => void onUndoCorrection()}>
+                  {t('common.undo')}
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       <div className="chip-row">
         {document.tags.length === 0 ? (

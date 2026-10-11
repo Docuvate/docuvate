@@ -3913,6 +3913,182 @@
         ]
       }
     },
+    "/documents/{documentId}/label-corrections": {
+      "post": {
+        "operationId": "applyDocumentLabelCorrection",
+        "parameters": [
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyLabelCorrectionRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyLabelCorrectionResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "One-click label correction with immediate SPARK propagation",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
+    "/documents/{documentId}/label-corrections/{correctionId}/withdraw": {
+      "post": {
+        "operationId": "withdrawDocumentLabelCorrection",
+        "parameters": [
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "correctionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OkResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Undo a label correction within the grace window",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{documentId}/tag-suggestions/{tagId}/accept": {
       "post": {
         "operationId": "acceptDocumentTagSuggestion",
@@ -10779,6 +10955,38 @@
         "required": [
           "code",
           "message"
+        ]
+      },
+      "ApplyLabelCorrectionRequestDto": {
+        "type": "object",
+        "properties": {
+          "toTagId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "toTagId"
+        ]
+      },
+      "ApplyLabelCorrectionResponseDto": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "correctionId": {
+            "type": "string",
+            "nullable": true
+          },
+          "similarDocumentsUpdated": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "ok",
+          "correctionId",
+          "similarDocumentsUpdated"
         ]
       },
       "BanAdminUserRequestDto": {

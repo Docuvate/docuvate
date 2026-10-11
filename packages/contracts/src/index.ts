@@ -330,6 +330,16 @@ export interface TagSuggestionDto {
   decisionTier?: TagSuggestionDecisionTier;
 }
 
+export interface ApplyLabelCorrectionRequest {
+  toTagId: string;
+}
+
+export interface ApplyLabelCorrectionResponse {
+  ok: true;
+  correctionId: string | null;
+  similarDocumentsUpdated: number;
+}
+
 export type PaperlessImportRunStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
 
 export type PaperlessOcrMode = 'keep_paperless' | 'rerun_docuvate';

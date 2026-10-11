@@ -40,6 +40,9 @@ export class EmbeddingDensityCorrectionEntity {
   @Column('text', { name: 'status' })
   status: string;
 
+  @Column('uuid', { name: 'correction_id', nullable: true })
+  correctionId: string | null;
+
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: UserEntity;

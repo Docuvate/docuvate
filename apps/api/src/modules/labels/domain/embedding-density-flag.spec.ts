@@ -15,9 +15,9 @@ describe('embeddingDensityGloballyEnabled', () => {
     }
   });
 
-  it('is off unless explicitly set to true', () => {
+  it('defaults to on unless explicitly set to false', () => {
     delete process.env['EMBEDDING_DENSITY_SUGGESTIONS_ENABLED'];
-    expect(embeddingDensityGloballyEnabled()).toBe(false);
+    expect(embeddingDensityGloballyEnabled()).toBe(true);
     process.env['EMBEDDING_DENSITY_SUGGESTIONS_ENABLED'] = 'false';
     expect(embeddingDensityGloballyEnabled()).toBe(false);
     process.env['EMBEDDING_DENSITY_SUGGESTIONS_ENABLED'] = 'true';

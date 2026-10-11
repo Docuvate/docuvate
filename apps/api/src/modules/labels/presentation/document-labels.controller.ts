@@ -9,17 +9,23 @@ import {
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
-import { DismissTagSuggestionRequestDto } from '../../../shared/presentation/dtos/labels.dto.js';
+import {
+  ApplyLabelCorrectionRequestDto,
+  ApplyLabelCorrectionResponseDto,
+  DismissTagSuggestionRequestDto,
+} from '../../../shared/presentation/dtos/labels.dto.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { ApplyLabelCorrectionUseCase } from '../application/apply-label-correction.use-case.js';
 import {
   AcceptTagSuggestionUseCase,
   AssignDocumentTagUseCase,
   DismissTagSuggestionUseCase,
   RemoveDocumentTagUseCase,
 } from '../application/document-label.use-cases.js';
+import { WithdrawLabelCorrectionUseCase } from '../application/withdraw-label-correction.use-case.js';
 
 @ApiDocuvateController('documents')
 @Controller('documents/:documentId')
@@ -29,7 +35,9 @@ export class DocumentLabelsController {
     private readonly assignTag: AssignDocumentTagUseCase,
     private readonly removeTag: RemoveDocumentTagUseCase,
     private readonly acceptSuggestion: AcceptTagSuggestionUseCase,
-    private readonly dismissSuggestion: DismissTagSuggestionUseCase
+    private readonly dismissSuggestion: DismissTagSuggestionUseCase,
+    private readonly applyLabelCorrection: ApplyLabelCorrectionUseCase,
+    private readonly withdrawLabelCorrection: WithdrawLabelCorrectionUseCase
   ) {}
 
   @Post('tags/:tagId')
@@ -51,6 +59,42 @@ export class DocumentLabelsController {
     @Param('tagId') tagId: string
   ): Promise<OkResponseDto> {
     await this.removeTag.execute(documentId, session.user.id, tagId);
+    return { ok: true };
+  }
+
+  @Post('label-corrections')
+  @ApiDocuvateRoute({
+    operationId: 'applyDocumentLabelCorrection',
+    summary: 'One-click label correction with immediate SPARK propagation',
+  })
+  async applyCorrection(
+    @Session() session: AuthSession,
+    @Param('documentId') documentId: string,
+    @Body() body: ApplyLabelCorrectionRequestDto
+  ): Promise<ApplyLabelCorrectionResponseDto> {
+    const result = await this.applyLabelCorrection.execute(
+      documentId,
+      session.user.id,
+      body.toTagId
+    );
+    return {
+      ok: true,
+      correctionId: result.correctionId,
+      similarDocumentsUpdated: result.similarDocumentsUpdated,
+    };
+  }
+
+  @Post('label-corrections/:correctionId/withdraw')
+  @ApiDocuvateRoute({
+    operationId: 'withdrawDocumentLabelCorrection',
+    summary: 'Undo a label correction within the grace window',
+  })
+  async withdrawCorrection(
+    @Session() session: AuthSession,
+    @Param('documentId') documentId: string,
+    @Param('correctionId') correctionId: string
+  ): Promise<OkResponseDto> {
+    await this.withdrawLabelCorrection.execute(documentId, session.user.id, correctionId);
     return { ok: true };
   }
 

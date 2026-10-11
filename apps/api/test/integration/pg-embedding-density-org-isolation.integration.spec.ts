@@ -10,6 +10,10 @@ import type { EmbeddingDensityWorkerState } from '../../src/modules/labels/domai
 import { EmbeddingDensityCalibrationQueueService } from '../../src/modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { HttpEmbeddingDensityAdapter } from '../../src/modules/labels/infrastructure/http-embedding-density.adapter.js';
 import { PgEmbeddingDensityRepository } from '../../src/modules/labels/infrastructure/pg-embedding-density.repository.js';
+import type { LabelEmbeddingRepository } from '../../src/shared/domain/ports.js';
+import { CorrectionEntity } from '../../src/shared/infrastructure/database/entities/correction.entity.js';
+import { CorrectionLabelAssignmentEntity } from '../../src/shared/infrastructure/database/entities/correction-label-assignment.entity.js';
+import { CorrectionPropagatedAssignmentEntity } from '../../src/shared/infrastructure/database/entities/correction-propagated-assignment.entity.js';
 import { DocumentEmbeddingsEntity } from '../../src/shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
@@ -51,12 +55,21 @@ class NoOpCalibrationQueue implements Pick<
   }
 }
 
+class StubLabelEmbeddings implements Pick<LabelEmbeddingRepository, 'getDocumentEmbedding'> {
+  getDocumentEmbedding(): Promise<number[] | null> {
+    return Promise.resolve(null);
+  }
+}
+
 function createDensityRepository(dataSource: DataSource): PgEmbeddingDensityRepository {
   return new PgEmbeddingDensityRepository(
     dataSource.getRepository(EmbeddingDensityUserStateEntity),
     dataSource.getRepository(EmbeddingDensityClassNiwEntity),
     dataSource.getRepository(EmbeddingDensityDecisionThresholdEntity),
     dataSource.getRepository(EmbeddingDensityLabelGroupMemberEntity),
+    dataSource.getRepository(CorrectionEntity),
+    dataSource.getRepository(CorrectionLabelAssignmentEntity),
+    dataSource.getRepository(CorrectionPropagatedAssignmentEntity),
     dataSource.getRepository(EmbeddingDensityCorrectionEntity),
     dataSource.getRepository(EmbeddingDensityCorrectionOffsetEntity),
     dataSource.getRepository(DocumentEmbeddingsEntity),
@@ -168,6 +181,7 @@ describe('PgEmbeddingDensityRepository org isolation (Testcontainers Postgres)',
     expect(bBefore).not.toBeNull();
 
     const correction = new RecordEmbeddingDensityCorrectionUseCase(
+      new StubLabelEmbeddings(),
       repo,
       new FakeEmbeddingDensityWorker(),
       new NoOpCalibrationQueue()
