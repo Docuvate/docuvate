@@ -269,8 +269,13 @@ export function DocumentChatPanel({
           response.assistantMessage
         )
       );
-      streamTargetRef.current = response.assistantMessage.id;
-      connectStream(response.assistantMessage.id);
+      if (response.asyncGeneration) {
+        streamTargetRef.current = response.assistantMessage.id;
+        connectStream(response.assistantMessage.id);
+      } else {
+        streamTargetRef.current = null;
+        stopStream();
+      }
       await refreshThreads(sendThreadId);
     } catch (err) {
       setError(formatUserFacingError(err, 'documents.documentChat.errorSend'));

@@ -412,6 +412,12 @@ jobs:
           AUTH_BASE=http://localhost:3001 \
           WEB_ORIGIN=http://localhost:5173 \
           node scripts/seed-e2e-smoke-user.mjs
+      - name: Seed cited-chat bench on smoke user
+        run: |
+          set -euo pipefail
+          AUTH_BASE=http://localhost:3001 \
+          WEB_ORIGIN=http://localhost:5173 \
+          node scripts/seed-cited-chat-bench.mjs
       - name: Install Playwright Chromium
         run: pnpm exec playwright install chromium --with-deps
       - name: Playwright smoke (compose stack)

@@ -124,12 +124,19 @@ export class PgDuplicateRepository implements DuplicateRepository {
 
   async listForDocument(documentId: string, userId: string): Promise<DuplicateCandidateEntity[]> {
     const result = await this.pool.query(
-      `SELECT c.id, c.user_id, c.document_id, c.candidate_document_id, c.similarity, c.source, c.dismissed,
-              d.title AS candidate_title, d.filename AS candidate_filename
-       FROM document_duplicate_candidates c
-       JOIN documents d ON d.id = c.candidate_document_id
-       WHERE c.document_id = $1 AND c.user_id = $2 AND c.dismissed = false
-       ORDER BY c.similarity DESC`,
+      `SELECT ranked.id, ranked.user_id, ranked.document_id, ranked.candidate_document_id,
+              ranked.similarity, ranked.source, ranked.dismissed,
+              ranked.candidate_title, ranked.candidate_filename
+       FROM (
+         SELECT DISTINCT ON (c.candidate_document_id)
+                c.id, c.user_id, c.document_id, c.candidate_document_id, c.similarity, c.source, c.dismissed,
+                d.title AS candidate_title, d.filename AS candidate_filename
+         FROM document_duplicate_candidates c
+         JOIN documents d ON d.id = c.candidate_document_id
+         WHERE c.document_id = $1 AND c.user_id = $2 AND c.dismissed = false
+         ORDER BY c.candidate_document_id, c.similarity DESC
+       ) ranked
+       ORDER BY ranked.similarity DESC`,
       [documentId, userId]
     );
     return result.rows.map((raw) => mapCandidateRow(requireRecord(raw)));

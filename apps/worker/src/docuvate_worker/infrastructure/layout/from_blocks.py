@@ -33,6 +33,35 @@ def _line_center_y(block: ExtractionBlock) -> float:
     return block.y + block.height / 2.0
 
 
+def _text_with_inter_word_spaces(line: list[ExtractionBlock]) -> list[tuple[ExtractionBlock, str]]:
+    if not line:
+        return []
+    out: list[tuple[ExtractionBlock, str]] = []
+    prev: ExtractionBlock | None = None
+    for block in line:
+        token = block.text.strip()
+        if not token:
+            continue
+        if prev is not None and out:
+            gap = block.x - (prev.x + prev.width)
+            tight = max(0.004, min(prev.height, block.height) * 0.4)
+            wide = max(0.008, (prev.height + block.height) * 0.55 * 0.25)
+            if gap > wide:
+                out.append((block, token))
+            elif gap > tight:
+                last_block, last_text = out[-1]
+                out[-1] = (last_block, f"{last_text} ")
+                out.append((block, token))
+            else:
+                last_block, last_text = out[-1]
+                out[-1] = (last_block, f"{last_text}{token}")
+            prev = block
+            continue
+        out.append((block, token))
+        prev = block
+    return out
+
+
 def _cluster_blocks_into_lines(blocks: list[ExtractionBlock]) -> list[list[ExtractionBlock]]:
     if not blocks:
         return []
@@ -87,12 +116,11 @@ def layout_ir_from_extraction_blocks(
             page_width, page_height = width_pt, height_pt
         ir_blocks: list[LayoutIrBlock] = []
         for line in _cluster_blocks_into_lines(page_blocks_raw):
-            for block in line:
+            for block, text in _text_with_inter_word_spaces(line):
                 if total_blocks >= MAX_LAYOUT_BLOCKS:
                     truncated = True
                     break
-                text = block.text.strip()
-                if not text:
+                if not text.strip():
                     continue
                 anchor = block.block_index
                 if anchor is None:

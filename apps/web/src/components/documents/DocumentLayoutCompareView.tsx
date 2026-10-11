@@ -175,15 +175,17 @@ export function DocumentLayoutCompareView({
             <div className="layout-compare-split">
               <figure className="layout-compare-pane">
                 <figcaption>{t('documents.layoutViewOriginal')}</figcaption>
-                <img src={originalSrc} alt={t('documents.layoutCompareOriginalAlt', { page: activePage })} />
-                {heatmapEnabled && heatmapSrc ? (
-                  <img
-                    className="layout-compare-heatmap"
-                    src={heatmapSrc}
-                    alt=""
-                    aria-hidden
-                  />
-                ) : null}
+                <div className="layout-compare-pane-media">
+                  <img src={originalSrc} alt={t('documents.layoutCompareOriginalAlt', { page: activePage })} />
+                  {heatmapEnabled && heatmapSrc ? (
+                    <img
+                      className="layout-compare-heatmap"
+                      src={heatmapSrc}
+                      alt=""
+                      aria-hidden
+                    />
+                  ) : null}
+                </div>
               </figure>
               <figure className="layout-compare-pane">
                 <figcaption>{t('documents.layoutViewReconstruction')}</figcaption>
@@ -202,15 +204,18 @@ export function DocumentLayoutCompareView({
               />
               <div
                 className="layout-compare-slider-reveal"
-                style={{ width: `${String(sliderPos)}%` }}
+                style={{ clipPath: `inset(0 ${String(100 - sliderPos)}% 0 0)` }}
               >
                 <img
+                  className="layout-compare-slider-reveal-img"
                   src={reconstructionSrc}
                   alt={t('documents.layoutCompareReconstructionAlt', { page: activePage })}
                 />
               </div>
               {heatmapEnabled && heatmapSrc ? (
-                <img className="layout-compare-heatmap" src={heatmapSrc} alt="" aria-hidden />
+                <div className="layout-compare-pane-media layout-compare-slider-heatmap">
+                  <img className="layout-compare-heatmap" src={heatmapSrc} alt="" aria-hidden />
+                </div>
               ) : null}
               <input
                 type="range"

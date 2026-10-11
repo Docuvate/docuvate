@@ -523,6 +523,8 @@
     "layoutFieldSuggestions": "Vorschläge",
     "layoutSuggestionTag": "Vorschlag",
     "layoutSuggestionNotInSchema": "Nicht im Schema definiert",
+    "layoutSuggestionNotInSchemaHint": "Feld zum Schema hinzufügen, um es bei künftigen Dokumenten zu erfassen.",
+    "layoutComparePageLegend": "Bernsteinfarben: Seiten-SSIM unter dem Qualitätsboden.",
     "layoutSuggestionAccept": "Als Feld übernehmen",
     "layoutSuggestionDismiss": "Verwerfen",
     "layoutTablesEmpty": "Keine Tabellen erkannt.",

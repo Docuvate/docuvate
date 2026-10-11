@@ -3,10 +3,20 @@
 import type { DocumentChatMessageRecordDto } from '@docuvate/contracts';
 import { useCallback, useEffect, useRef } from 'react';
 
-import { apiBaseUrl, authHeaders } from './api';
-import { parseSseChatStreamChunk, readChatMessagesFromListResponse } from './chatStreamParse';
+import { apiBaseUrl, authHeaders, listDocumentChatThreadMessages } from './api';
+import { CHAT_GENERATION_MAX_WAIT_SEC } from './chatGenerationLimits';
+import { isTerminalGenerationStatus } from './chatGenerationTerminal';
+import { parseSseChatStreamChunk } from './chatStreamParse';
 
 type MessageUpdater = (message: DocumentChatMessageRecordDto) => void;
+
+function isGenerationSettled(message: DocumentChatMessageRecordDto | undefined): boolean {
+  if (!message) {
+    return false;
+  }
+  const status = message.generationStatus ?? 'done';
+  return isTerminalGenerationStatus(status);
+}
 
 export function useDocumentChatMessageStream(
   documentId: string,
@@ -27,21 +37,22 @@ export function useDocumentChatMessageStream(
 
   const startPolling = useCallback(
     (messageId: string) => {
+      if (!threadId) {
+        return;
+      }
       stop();
+      const startedAt = Date.now();
       const poll = async () => {
+        if (Date.now() - startedAt > CHAT_GENERATION_MAX_WAIT_SEC * 1000) {
+          stop();
+          return;
+        }
         try {
-          const res = await fetch(
-            `${apiBaseUrl()}/documents/${documentId}/chat/threads/${threadId ?? ''}/messages`,
-            { credentials: 'include', headers: authHeaders() }
-          );
-          if (!res.ok) {
-            return;
-          }
-          const data: unknown = await res.json();
-          const message = readChatMessagesFromListResponse(data).find((m) => m.id === messageId);
+          const messages = await listDocumentChatThreadMessages(documentId, threadId);
+          const message = messages.find((m) => m.id === messageId);
           if (message) {
             onUpdate(message);
-            if (message.generationStatus === 'done' || message.generationStatus === 'failed') {
+            if (isGenerationSettled(message)) {
               stop();
             }
           }
@@ -50,7 +61,7 @@ export function useDocumentChatMessageStream(
         }
       };
       void poll();
-      pollingRef.current = setInterval(() => void poll(), 1200);
+      pollingRef.current = setInterval(() => void poll(), 800);
     },
     [documentId, onUpdate, stop, threadId]
   );
@@ -63,6 +74,7 @@ export function useDocumentChatMessageStream(
       stop();
       const controller = new AbortController();
       abortRef.current = controller;
+      const startedAt = Date.now();
 
       const url = `${apiBaseUrl()}/documents/${documentId}/chat/threads/${threadId}/messages/${messageId}/stream`;
 
@@ -101,8 +113,21 @@ export function useDocumentChatMessageStream(
               }
             }
           }
+
+          const refreshed = await listDocumentChatThreadMessages(documentId, threadId);
+          const finalMessage = refreshed.find((m) => m.id === messageId);
+          if (finalMessage) {
+            onUpdate(finalMessage);
+          }
+          if (!isGenerationSettled(finalMessage)) {
+            startPolling(messageId);
+          }
         } catch {
           if (!controller.signal.aborted) {
+            if (Date.now() - startedAt > CHAT_GENERATION_MAX_WAIT_SEC * 1000) {
+              stop();
+              return;
+            }
             startPolling(messageId);
           }
         }

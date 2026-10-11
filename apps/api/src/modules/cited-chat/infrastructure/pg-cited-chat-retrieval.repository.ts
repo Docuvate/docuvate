@@ -140,7 +140,7 @@ export class PgCitedChatRetrievalRepository {
       .map(([id]) => id);
 
     if (topIds.length === 0) {
-      return [];
+      return this.lexicalFallback(userId, scopedDocumentIds, trimmed);
     }
 
     const detail = await this.pool.query<{
@@ -182,5 +182,97 @@ export class PgCitedChatRetrievalRepository {
 
   indexPassageForRerank(candidate: CitedChatChunkCandidate): string {
     return chunkIndexText(candidate.documentTitle, candidate.body);
+  }
+
+  private async lexicalFallback(
+    userId: string,
+    documentIds: string[],
+    query: string
+  ): Promise<CitedChatChunkCandidate[]> {
+    const tokens = tokenizeSearchQuery(query).map(normalizeSearchText).filter((t) => t.length >= 2);
+    if (tokens.length === 0) {
+      return [];
+    }
+
+    const scopedIds = sanitizeChatThreadDocumentIds(documentIds);
+    const docFilter = scopedIds.length > 0 ? 'AND c.document_id = ANY($2::uuid[])' : '';
+    const chunkParams = scopedIds.length > 0 ? [userId, scopedIds] : [userId];
+
+    const chunkRows = await this.pool.query<{
+      id: string;
+      document_id: string;
+      title: string;
+      body: string;
+      page: number | null;
+      char_start: number | null;
+      char_end: number | null;
+    }>(
+      `SELECT c.id, c.document_id, d.title, c.body, c.page, c.char_start, c.char_end
+       FROM document_text_chunks c
+       JOIN documents d ON d.id = c.document_id
+       WHERE d.user_id = $1 ${docFilter}
+       ORDER BY c.chunk_index ASC
+       LIMIT 200`,
+      chunkParams
+    );
+
+    let bodies = chunkRows.rows;
+    if (bodies.length === 0) {
+      const blockFilter = scopedIds.length > 0 ? 'AND b.document_id = ANY($2::uuid[])' : '';
+      const blockParams = scopedIds.length > 0 ? [userId, scopedIds] : [userId];
+      const blockRows = await this.pool.query<{
+        document_id: string;
+        title: string;
+        body: string;
+        page: number | null;
+      }>(
+        `SELECT b.document_id, d.title, string_agg(b.text, ' ' ORDER BY b.position) AS body,
+                MIN(b.page) AS page
+         FROM document_extraction_blocks b
+         JOIN documents d ON d.id = b.document_id
+         WHERE d.user_id = $1 ${blockFilter}
+         GROUP BY b.document_id, d.title`,
+        blockParams
+      );
+      bodies = blockRows.rows.map((row, index) => ({
+        id: `lexical-block-${row.document_id}-${String(index)}`,
+        document_id: row.document_id,
+        title: row.title,
+        body: row.body,
+        page: row.page,
+        char_start: null,
+        char_end: null,
+      }));
+    }
+
+    const scored = bodies
+      .map((row) => {
+        const normalizedBody = normalizeSearchText(row.body);
+        let hits = 0;
+        for (const token of tokens) {
+          if (normalizedBody.includes(token)) {
+            hits += 1;
+          }
+        }
+        if (hits === 0) {
+          return null;
+        }
+        const density = hits / tokens.length;
+        return {
+          chunkId: row.id,
+          documentId: row.document_id,
+          documentTitle: row.title,
+          body: row.body,
+          page: row.page,
+          charStart: row.char_start,
+          charEnd: row.char_end,
+          fusionScore: density,
+        };
+      })
+      .filter((row): row is CitedChatChunkCandidate => row != null)
+      .sort((a, b) => b.fusionScore - a.fusionScore)
+      .slice(0, RAG_HYBRID_CANDIDATE_LIMIT);
+
+    return scored;
   }
 }

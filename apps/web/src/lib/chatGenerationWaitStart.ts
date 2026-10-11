@@ -7,6 +7,10 @@ export function chatGenerationWaitStartMs(message: DocumentChatMessageRecordDto)
   const created = Date.parse(message.createdAt);
   const updated = message.updatedAt ? Date.parse(message.updatedAt) : NaN;
 
+  if (message.generationStatus === 'pending') {
+    return Number.isFinite(created) ? created : null;
+  }
+
   if (message.generationStatus === 'streaming') {
     return Number.isFinite(updated) ? updated : created;
   }

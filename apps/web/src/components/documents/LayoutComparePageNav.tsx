@@ -86,6 +86,9 @@ export function LayoutComparePageNav({
           {t('documents.layoutComparePageNext')}
         </Button>
       </div>
+      <p className="layout-compare-page-legend muted" role="note">
+        {t('documents.layoutComparePageLegend')}
+      </p>
       <div
         className={`layout-compare-page-strip${virtualized ? ' layout-compare-page-strip-virtual' : ''}`}
         role="listbox"

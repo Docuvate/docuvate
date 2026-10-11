@@ -2,7 +2,7 @@
 /**
  * Seeds the E2E smoke user with German cited-chat bench documents (ADR 024).
  * Uses the HTTP API only (no direct chunk SQL). Local / compose helper; Playwright
- * cited-chat tests use provisionCitedChatLibraryOnce instead.
+ * Compose-smoke seeds this after the smoke user (see ci.yml).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -26,6 +26,12 @@ const FIXTURES = [
     filename: 'mietvertrag.pdf',
     title: 'Mietvertrag Wohnung',
     text: 'Mietvertrag Wohnung\nDie Miete ist bis zum 3. Werktag des Monats fällig.',
+  },
+  {
+    filename: 'mietvertrag-lindenweg.pdf',
+    title: 'Mietvertrag Lindenweg',
+    text:
+      'Mietvertrag Lindenweg 12\nDie monatliche Kaltmiete beträgt 945,00 EUR.\nDie Miete ist bis zum 3. Werktag fällig.',
   },
   {
     filename: 'arbeitsvertrag.pdf',
@@ -100,6 +106,21 @@ async function api(cookie, method, path, body) {
   return res.json();
 }
 
+async function waitDocumentReady(cookie, id) {
+  const deadline = Date.now() + 300_000;
+  while (Date.now() < deadline) {
+    const doc = await api(cookie, 'GET', `/v1/documents/${id}`);
+    if (doc.status === 'ready') {
+      return;
+    }
+    if (doc.status === 'failed') {
+      throw new Error(`document ${id} extraction failed`);
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  throw new Error(`timeout waiting for document ${id}`);
+}
+
 async function uploadFixture(cookie, fixture) {
   const form = new FormData();
   form.append(
@@ -108,6 +129,7 @@ async function uploadFixture(cookie, fixture) {
     fixture.filename
   );
   const created = await api(cookie, 'POST', '/v1/documents', form);
+  await waitDocumentReady(cookie, created.id);
   await api(cookie, 'PATCH', `/v1/documents/${created.id}`, {
     title: fixture.title,
     extractionBlocks: block(fixture.text),
