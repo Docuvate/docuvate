@@ -43,15 +43,15 @@ test.describe('document detail layout and chat', () => {
     expect(baseline).not.toBeNull();
 
     for (const mode of VIEWER_MODES) {
-      await page.getByRole('button', { name: mode }).click();
+      await page.getByRole('radio', { name: mode }).click();
       await page.waitForTimeout(400);
       const box = await measureWorkspace(page);
       expect(box?.width).toBe(baseline?.width);
       expect(box?.x).toBe(baseline?.x);
     }
 
-    await page.getByRole('button', { name: /Compare|Vergleich/i }).click();
-    await page.getByRole('button', { name: /Slider|Schieberegler/i }).click();
+    await page.getByRole('radio', { name: /Compare|Vergleich/i }).click();
+    await page.getByRole('radio', { name: /Slider|Schieberegler/i }).click();
     await page.waitForTimeout(400);
     const sliderModeBox = await measureWorkspace(page);
     expect(sliderModeBox?.width).toBe(baseline?.width);
@@ -69,12 +69,12 @@ test.describe('document detail layout and chat', () => {
   test('compare heatmap aligns with original pane and slider clips at 50%', async ({ page }) => {
     test.setTimeout(360_000);
 
-    await page.getByRole('button', { name: /Compare|Vergleich/i }).click();
+    await page.getByRole('radio', { name: /Compare|Vergleich/i }).click();
     await page.locator('[data-testid="layout-compare-stage"]').waitFor({
       state: 'visible',
       timeout: 180_000,
     });
-    await page.getByRole('button', { name: /Slider|Schieberegler/i }).click();
+    await page.getByRole('radio', { name: /Slider|Schieberegler/i }).click();
     const sliderInput = page.locator('.layout-compare-slider-input');
     await sliderInput.waitFor({ state: 'visible', timeout: 120_000 });
     await sliderInput.fill('50');
@@ -89,7 +89,7 @@ test.describe('document detail layout and chat', () => {
     });
     expect(Math.abs(revealImgWidth - baseWidth)).toBeLessThan(3);
 
-    await page.getByRole('button', { name: /Side by side|Split|Nebeneinander/i }).click();
+    await page.getByRole('radio', { name: /Side by side|Split|Nebeneinander/i }).click();
     await page.locator('.layout-compare-split').waitFor({ state: 'visible', timeout: 120_000 });
     const heatmapToggle = page.getByRole('checkbox', { name: /heatmap|Heatmap|Abweichungs/i });
     await expect(heatmapToggle).toBeVisible({ timeout: 120_000 });

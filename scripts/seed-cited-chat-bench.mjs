@@ -43,6 +43,12 @@ const FIXTURES = [
     title: 'Bescheid Hundesteuer',
     text: 'Bescheid Hundesteuer Stadt Muster\nJahresgebühr: 120,00 EUR',
   },
+  {
+    filename: 'kfz-versicherung.pdf',
+    title: 'Kfz-Versicherung 2026',
+    text:
+      'Kfz-Haftpflichtversicherung 2026\nJahresbeitrag Kfz: 486,20 EUR\nVersicherungsnehmer: Alex Testmann',
+  },
 ];
 
 function block(text) {

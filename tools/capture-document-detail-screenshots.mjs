@@ -168,26 +168,26 @@ async function main() {
 
   for (const viewport of [
     { tag: '1440', width: 1440, height: 900 },
-    { tag: '390', width: 390, height: 844 },
+    { tag: '1024', width: 1024, height: 768 },
   ]) {
     for (const theme of ['light', 'dark']) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await openLayout(page, docId);
       await setTheme(page, theme);
 
-      await page.getByRole('button', { name: /^Original$/i }).click();
+      await page.getByRole('radio', { name: /^Original$/i }).click();
       files.push(await capture(page, `original-${viewport.tag}-${theme}.png`));
 
-      await page.getByRole('button', { name: /^Reconstruction$/i }).click();
+      await page.getByRole('radio', { name: /^Reconstruction$/i }).click();
       await page.locator('.layout-ir-html-frame').waitFor({ state: 'visible', timeout: 120_000 });
       files.push(await capture(page, `reconstruction-${viewport.tag}-${theme}.png`));
 
-      await page.getByRole('button', { name: /^Compare$/i }).click();
-      await page.getByRole('button', { name: /Side by side|Nebeneinander/i }).click();
+      await page.getByRole('radio', { name: /^Compare$/i }).click();
+      await page.getByRole('radio', { name: /Side by side|Nebeneinander/i }).click();
       await page.locator('.layout-compare-split').waitFor({ state: 'visible', timeout: 120_000 });
       files.push(await capture(page, `compare-split-${viewport.tag}-${theme}.png`));
 
-      await page.getByRole('button', { name: /Slider|Schieberegler/i }).click();
+      await page.getByRole('radio', { name: /Slider|Schieberegler/i }).click();
       files.push(await capture(page, `compare-slider-${viewport.tag}-${theme}.png`));
 
       await page.getByRole('tab', { name: /^Chat$/i }).click();

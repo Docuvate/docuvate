@@ -3933,13 +3933,39 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 }
 
 .segmented-control {
+  --segmented-inset: 2px;
   display: inline-flex;
   flex-wrap: wrap;
   align-items: stretch;
   border: 1px solid var(--dv-color-border);
   border-radius: var(--dv-radius-md);
-  overflow: hidden;
   max-width: 100%;
+}
+
+.segmented-control--shell {
+  padding: var(--segmented-inset);
+  gap: var(--segmented-inset);
+  background: var(--dv-color-bg-raised);
+}
+
+.segmented-control--shell .segmented-control__option {
+  background: transparent;
+  color: var(--dv-color-text-muted);
+}
+
+.segmented-control--shell .segmented-control__option + .segmented-control__option {
+  border-left: none;
+}
+
+.segmented-control--shell .segmented-control__option {
+  border-radius: calc(var(--dv-radius-md) - var(--segmented-inset));
+}
+
+.segmented-control--shell .segmented-control__option--selected {
+  background: var(--dv-color-accent-soft);
+  color: var(--dv-color-accent);
+  font-weight: 600;
+  box-shadow: none;
 }
 
 .segmented-control__option {
@@ -3986,7 +4012,6 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   color: var(--dv-color-text-muted);
   font-weight: 500;
   min-height: 2.5rem;
-  box-shadow: inset 0 0 0 1px transparent;
 }
 
 .segmented-control--preference.segmented-control--shell
@@ -4005,7 +4030,6 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   background: var(--dv-color-accent-soft);
   color: var(--dv-color-accent);
   font-weight: 600;
-  box-shadow: inset 0 0 0 1px var(--dv-color-accent);
 }
 
 .app-topbar .segmented-control--preference.segmented-control--shell {
@@ -4036,7 +4060,32 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   .segmented-control__option--selected {
   background: var(--dv-color-accent-soft);
   color: var(--dv-color-accent);
-  box-shadow: inset 0 0 0 1px var(--dv-color-accent);
+}
+
+.segmented-control--toolbar.segmented-control--shell .segmented-control__option {
+  min-height: var(--dv-header-control-height);
+  font: inherit;
+}
+
+.segmented-control--toolbar.segmented-control--text-wide .segmented-control__option {
+  min-width: 5.5rem;
+  padding-inline: var(--dv-space-md);
+}
+
+.segmented-control--toolbar.segmented-control--zoom .segmented-control__option {
+  min-width: 3rem;
+}
+
+.layout-view-mode-switch.segmented-control,
+.layout-zoom-switch.segmented-control,
+.filter-mode-switch.segmented-control {
+  flex-shrink: 0;
+}
+
+.filter-mode-switch.segmented-control {
+  display: flex;
+  width: 100%;
+  margin-bottom: var(--dv-space-sm);
 }
 
 .segmented-control--text .segmented-control__option {

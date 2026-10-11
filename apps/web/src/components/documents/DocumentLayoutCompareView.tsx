@@ -10,7 +10,9 @@ import {
   pngDataUrl,
 } from '../../lib/layoutCompare';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
+import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { Button } from '../ui/Button';
+import { SegmentedControl } from '../ui/SegmentedControl';
 import { LayoutComparePageNav } from './LayoutComparePageNav';
 
 export type LayoutComparePresentation = 'split' | 'slider';
@@ -89,24 +91,16 @@ export function DocumentLayoutCompareView({
         onKeyDown={onCompareKeyDown}
         aria-label={t('documents.layoutCompareModeAria')}
       >
-        <div className="layout-compare-mode-switch" role="group" aria-label={t('documents.layoutCompareModeAria')}>
-          <button
-            type="button"
-            className={`layout-view-mode-btn${presentation === 'split' ? ' layout-view-mode-btn-active' : ''}`}
-            aria-pressed={presentation === 'split'}
-            onClick={() => { setPresentation('split'); }}
-          >
-            {t('documents.layoutCompareSplit')}
-          </button>
-          <button
-            type="button"
-            className={`layout-view-mode-btn${presentation === 'slider' ? ' layout-view-mode-btn-active' : ''}`}
-            aria-pressed={presentation === 'slider'}
-            onClick={() => { setPresentation('slider'); }}
-          >
-            {t('documents.layoutCompareSlider')}
-          </button>
-        </div>
+        <SegmentedControl<LayoutComparePresentation>
+          ariaLabel={t('documents.layoutCompareModeAria')}
+          className={segmentedToolbarClass('layout-compare-mode-switch', 'segmented-control--text-wide')}
+          value={presentation}
+          options={[
+            { value: 'split', label: t('documents.layoutCompareSplit') },
+            { value: 'slider', label: t('documents.layoutCompareSlider') },
+          ]}
+          onChange={setPresentation}
+        />
         <label className="layout-overlay-toggle">
           <input
             type="checkbox"

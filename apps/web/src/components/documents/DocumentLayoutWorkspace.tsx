@@ -12,9 +12,11 @@ import {
   hitTestLayoutOverlay,
   overlayForExtractionBlock,
 } from '../../lib/layoutOverlayModel';
+import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
+import { SegmentedControl } from '../ui/SegmentedControl';
 import { DocumentChatPanel } from './DocumentChatPanel';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
@@ -207,6 +209,24 @@ export function DocumentLayoutWorkspace({
     [highlightBlocks]
   );
 
+  const viewerModeOptions = useMemo(
+    () => [
+      { value: 'original' as const, label: t('documents.layoutViewOriginal') },
+      { value: 'reconstruction' as const, label: t('documents.layoutViewReconstruction') },
+      { value: 'compare' as const, label: t('documents.layoutViewCompare') },
+    ],
+    [t]
+  );
+
+  const layoutZoomOptions = useMemo(
+    () =>
+      LAYOUT_IR_ZOOM_STEPS.map((step) => ({
+        value: String(step),
+        label: `${String(step)}%`,
+      })),
+    []
+  );
+
   const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
   const pending = layoutIrAvailable && layoutIrState === 'loading';
   const failed = doc.status === 'failed';
@@ -218,32 +238,13 @@ export function DocumentLayoutWorkspace({
       <div className="layout-workspace-main">
         <Card className="preview-card preview-card-pdf layout-viewer-card">
           <div className="layout-viewer-toolbar">
-            <div className="layout-view-mode-switch" role="group" aria-label={t('documents.layoutViewModeAria')}>
-              <button
-                type="button"
-                className={`layout-view-mode-btn${viewerMode === 'original' ? ' layout-view-mode-btn-active' : ''}`}
-                aria-pressed={viewerMode === 'original'}
-                onClick={() => { setViewerMode('original'); }}
-              >
-                {t('documents.layoutViewOriginal')}
-              </button>
-              <button
-                type="button"
-                className={`layout-view-mode-btn${viewerMode === 'reconstruction' ? ' layout-view-mode-btn-active' : ''}`}
-                aria-pressed={viewerMode === 'reconstruction'}
-                onClick={() => { setViewerMode('reconstruction'); }}
-              >
-                {t('documents.layoutViewReconstruction')}
-              </button>
-              <button
-                type="button"
-                className={`layout-view-mode-btn${viewerMode === 'compare' ? ' layout-view-mode-btn-active' : ''}`}
-                aria-pressed={viewerMode === 'compare'}
-                onClick={() => { setViewerMode('compare'); }}
-              >
-                {t('documents.layoutViewCompare')}
-              </button>
-            </div>
+            <SegmentedControl<ViewerMode>
+              ariaLabel={t('documents.layoutViewModeAria')}
+              className={segmentedToolbarClass('layout-view-mode-switch', 'segmented-control--text-wide')}
+              value={viewerMode}
+              options={viewerModeOptions}
+              onChange={setViewerMode}
+            />
             {viewerMode === 'original' ? (
               <label className="layout-overlay-toggle">
                 <input
@@ -254,18 +255,13 @@ export function DocumentLayoutWorkspace({
                 <span>{t('documents.layoutOverlayToggle')}</span>
               </label>
             ) : (
-              <div className="layout-zoom-switch" role="group" aria-label={t('documents.layoutZoomAria')}>
-                {LAYOUT_IR_ZOOM_STEPS.map((step) => (
-                  <button
-                    key={step}
-                    type="button"
-                    className={`layout-zoom-btn${layoutZoom === step ? ' layout-zoom-btn-active' : ''}`}
-                    onClick={() => { setLayoutZoom(step); }}
-                  >
-                    {step}%
-                  </button>
-                ))}
-              </div>
+              <SegmentedControl
+                ariaLabel={t('documents.layoutZoomAria')}
+                className={segmentedToolbarClass('layout-zoom-switch', 'segmented-control--zoom')}
+                value={String(layoutZoom)}
+                options={layoutZoomOptions}
+                onChange={(value) => { setLayoutZoom(Number(value) as LayoutIrZoomStep); }}
+              />
             )}
             {!chatSidePanel ? (
               <div className="layout-viewer-toolbar-actions">

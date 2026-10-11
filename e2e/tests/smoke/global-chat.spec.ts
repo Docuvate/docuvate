@@ -46,6 +46,32 @@ test.describe('global chat retrieval', () => {
     expect(quote.length).toBeGreaterThan(2);
   });
 
+  test('Kfz contribution question returns 486,20 EUR with citation', async ({ request }) => {
+    test.setTimeout(120_000);
+
+    const threadId = await createGlobalChatThread(request, apiBase, webOrigin, 'Kfz Beitrag');
+    const { assistantId, messagesPath, startedAt } = await sendGlobalChatMessage(
+      request,
+      apiBase,
+      webOrigin,
+      threadId,
+      'Wie hoch ist der Jahresbeitrag für die Kfz-Versicherung?'
+    );
+    const msg = await waitForGlobalChatMessage(request, messagesPath, webOrigin, assistantId);
+    const elapsed = Date.now() - startedAt;
+    expect(elapsed).toBeLessThan(5_000);
+    expect(elapsed).toBeLessThan(2_000);
+    const body = msg.content ?? '';
+    expect(body).toMatch(/486[,.]20/);
+    expect((msg.citations?.length ?? 0) >= 1).toBeTruthy();
+    const cited = msg.citations ?? [];
+    const kfzHit = cited.some((c) => {
+      const label = `${c.documentTitle} ${c.quote}`.toLowerCase();
+      return label.includes('kfz') && /486[,.]20/.test(label);
+    });
+    expect(kfzHit).toBeTruthy();
+  });
+
   test('Lindenweg rent question returns amount with citation to mietvertrag-lindenweg', async ({
     request,
   }) => {

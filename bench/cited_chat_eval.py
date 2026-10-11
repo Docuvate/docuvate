@@ -33,6 +33,11 @@ E2E_QUESTIONS: list[dict[str, str]] = [
     {"id": "q2", "question": "Bis wann ist die Miete fällig?", "expect": "answer"},
     {"id": "q3", "question": "Welche Kündigungsfrist gilt im Vertrag?", "expect": "answer"},
     {"id": "q4", "question": "Was kostet die Hundesteuer?", "expect": "answer"},
+    {
+        "id": "q_kfz",
+        "question": "Wie hoch ist der Jahresbeitrag für die Kfz-Versicherung?",
+        "expect": "answer",
+    },
     {"id": "q5", "question": "Welche IBAN hat der Absender?", "expect": "answer"},
     {
         "id": "q_multi",
