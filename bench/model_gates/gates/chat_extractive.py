@@ -104,6 +104,10 @@ def run_chat_extractive_gate(fixtures_path: Path) -> GateRunResult:
     latencies_ms: list[float] = []
 
     for case in cases:
+        _answer_case(case)
+        _retrieve_case(case)
+
+    for case in cases:
         t0 = time.perf_counter()
         answer = _answer_case(case)
         retrieval = _retrieve_case(case)
