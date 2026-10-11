@@ -66,6 +66,10 @@ test.describe('document detail layout and chat', () => {
     test.setTimeout(360_000);
 
     await page.getByRole('button', { name: /Compare|Vergleich/i }).click();
+    await page.locator('[data-testid="layout-compare-stage"]').waitFor({
+      state: 'visible',
+      timeout: 180_000,
+    });
     await page.getByRole('button', { name: /Slider|Schieberegler/i }).click();
     const sliderInput = page.locator('.layout-compare-slider-input');
     await sliderInput.waitFor({ state: 'visible', timeout: 120_000 });
@@ -81,7 +85,7 @@ test.describe('document detail layout and chat', () => {
     });
     expect(Math.abs(revealImgWidth - baseWidth)).toBeLessThan(3);
 
-    await page.getByRole('button', { name: /Split|Nebeneinander/i }).click();
+    await page.getByRole('button', { name: /Side by side|Split|Nebeneinander/i }).click();
     await page.locator('.layout-compare-split').waitFor({ state: 'visible', timeout: 120_000 });
     const heatmapToggle = page.getByRole('checkbox', { name: /heatmap|Heatmap|Abweichungs/i });
     await expect(heatmapToggle).toBeVisible({ timeout: 120_000 });

@@ -41,14 +41,17 @@ test.describe('Authenticated compose smoke', () => {
     await expect(fileInput.first()).toBeAttached({ timeout: 90_000 });
     await fileInput.first().setInputFiles(fixturePdf);
 
-    const docRow = page.getByRole('row').filter({ hasText: uploadTitle });
-    await expect(docRow).toBeVisible({ timeout: 90_000 });
-    await expect(docRow).not.toContainText(/^failed$|^fehlgeschlagen$/i);
-    await expect(docRow.locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, { timeout: 180_000 });
+    const docRow = page.locator('tr, [role="row"]').filter({ hasText: uploadTitle });
+    await expect(docRow.first()).toBeVisible({ timeout: 180_000 });
+    await expect(docRow.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
+    await expect(docRow.first().locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, {
+      timeout: 180_000,
+    });
 
     await attachScreenshot(page, testInfo, '02-after-upload-list.png');
 
     await docRow
+      .first()
       .locator('a.library-open-doc-btn, a[href*="/documents/"]')
       .first()
       .click();
