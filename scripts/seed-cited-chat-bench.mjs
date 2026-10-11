@@ -28,6 +28,12 @@ const FIXTURES = [
     text: 'Mietvertrag Wohnung\nDie Miete ist bis zum 3. Werktag des Monats fällig.',
   },
   {
+    filename: 'mietvertrag-lindenweg.pdf',
+    title: 'Mietvertrag Lindenweg',
+    text:
+      'Mietvertrag Lindenweg 12\nDie monatliche Kaltmiete beträgt 945,00 EUR.\nDie Miete ist bis zum 3. Werktag fällig.',
+  },
+  {
     filename: 'arbeitsvertrag.pdf',
     title: 'Arbeitsvertrag',
     text: 'Arbeitsvertrag\nDie Kündigungsfrist beträgt drei Monate zum Quartalsende.',

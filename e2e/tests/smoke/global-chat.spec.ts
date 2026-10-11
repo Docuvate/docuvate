@@ -1,7 +1,15 @@
 import { expect, test } from '@playwright/test';
+
+import {
+  createGlobalChatThread,
+  GLOBAL_CHAT_ABSTENTION_SNIPPET,
+  sendGlobalChatMessage,
+  waitForGlobalChatMessage,
+} from '../../helpers/global-chat-api';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
+const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
 test.describe('global chat navigation', () => {
   test.use({ storageState: smokeFixtureStoragePath() });
@@ -16,41 +24,69 @@ test.describe('global chat navigation', () => {
 
 test.describe('global chat retrieval', () => {
   test.use({ storageState: smokeFixtureStoragePath() });
+  test.describe.configure({ mode: 'serial' });
 
-  test('library chat finds Miete quickly via retrieval', async ({ request }) => {
+  test('library chat finds Miete with citation via retrieval', async ({ request }) => {
     test.setTimeout(120_000);
 
-    const threadRes = await request.post(`${apiBase}/v1/chat/threads`, {
-      data: { title: 'Global Miete' },
-    });
-    expect(threadRes.ok()).toBeTruthy();
-    const threadId = String(((await threadRes.json()) as { thread: { id: string } }).thread.id);
-    const started = Date.now();
-    const msgRes = await request.post(`${apiBase}/v1/chat/threads/${threadId}/messages`, {
-      data: { message: 'Bis wann ist die Miete fällig?' },
-    });
-    expect(msgRes.ok()).toBeTruthy();
-    const assistantId = String(
-      ((await msgRes.json()) as { assistantMessage: { id: string } }).assistantMessage.id
+    const threadId = await createGlobalChatThread(request, apiBase, webOrigin, 'Global Miete');
+    const { assistantId, messagesPath, startedAt } = await sendGlobalChatMessage(
+      request,
+      apiBase,
+      webOrigin,
+      threadId,
+      'Bis wann ist die Miete fällig?'
     );
-    const messagesPath = `${apiBase}/v1/chat/threads/${threadId}/messages`;
-    let content = '';
-    await expect
-      .poll(
-        async () => {
-          const list = await request.get(messagesPath);
-          const messages = ((await list.json()) as {
-            messages: Array<{ id: string; generationStatus?: string; content?: string }>;
-          }).messages;
-          const msg = messages.find((m) => m.id === assistantId);
-          content = msg?.content ?? '';
-          return msg?.generationStatus ?? 'pending';
-        },
-        { timeout: 90_000 }
-      )
-      .toBe('done');
-    const elapsed = Date.now() - started;
+    const msg = await waitForGlobalChatMessage(request, messagesPath, webOrigin, assistantId);
+    const elapsed = Date.now() - startedAt;
     expect(elapsed).toBeLessThan(5_000);
-    expect(content.toLowerCase()).toMatch(/werktag|miete/);
+    expect((msg.content ?? '').toLowerCase()).toMatch(/werktag|miete/);
+    expect((msg.citations?.length ?? 0) >= 1).toBeTruthy();
+    const quote = msg.citations?.[0]?.quote ?? '';
+    expect(quote.length).toBeGreaterThan(2);
+  });
+
+  test('Lindenweg rent question returns amount with citation to mietvertrag-lindenweg', async ({
+    request,
+  }) => {
+    test.setTimeout(120_000);
+
+    const threadId = await createGlobalChatThread(request, apiBase, webOrigin, 'Lindenweg Miete');
+    const { assistantId, messagesPath, startedAt } = await sendGlobalChatMessage(
+      request,
+      apiBase,
+      webOrigin,
+      threadId,
+      'Wie hoch ist die Miete im Mietvertrag Lindenweg?'
+    );
+    const msg = await waitForGlobalChatMessage(request, messagesPath, webOrigin, assistantId);
+    const elapsed = Date.now() - startedAt;
+    expect(elapsed).toBeLessThan(5_000);
+    expect(elapsed).toBeLessThan(2_000);
+    const body = (msg.content ?? '').toLowerCase();
+    expect(body).toMatch(/945|945,00/);
+    expect((msg.citations?.length ?? 0) >= 1).toBeTruthy();
+    const cited = msg.citations ?? [];
+    const lindenwegHit = cited.some((c) => {
+      const label = `${c.documentTitle} ${c.quote}`.toLowerCase();
+      return label.includes('lindenweg') || label.includes('mietvertrag-lindenweg');
+    });
+    expect(lindenwegHit).toBeTruthy();
+  });
+
+  test('unknown topic abstains without citations', async ({ request }) => {
+    test.setTimeout(120_000);
+
+    const threadId = await createGlobalChatThread(request, apiBase, webOrigin, 'Off-topic');
+    const { assistantId, messagesPath } = await sendGlobalChatMessage(
+      request,
+      apiBase,
+      webOrigin,
+      threadId,
+      'Wie wird das Wetter morgen in Berlin?'
+    );
+    const msg = await waitForGlobalChatMessage(request, messagesPath, webOrigin, assistantId);
+    expect((msg.content ?? '').toLowerCase()).toContain(GLOBAL_CHAT_ABSTENTION_SNIPPET);
+    expect(msg.citations?.length ?? 0).toBe(0);
   });
 });

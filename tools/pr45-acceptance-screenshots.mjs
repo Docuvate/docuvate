@@ -106,6 +106,41 @@ async function openLayout(page, docId) {
   await page.waitForTimeout(600);
 }
 
+async function seedSmokeLibrary() {
+  const env = {
+    ...process.env,
+    WEB_ORIGIN: WEB,
+    AUTH_BASE: process.env.AUTH_BASE ?? 'http://127.0.0.1:3001',
+    DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://docuvate:docuvate@127.0.0.1:5433/docuvate',
+  };
+  const smoke = spawnSync('node', ['scripts/seed-e2e-smoke-user.mjs'], {
+    cwd: process.cwd(),
+    env,
+    encoding: 'utf8',
+  });
+  if (smoke.status !== 0) {
+    throw new Error(smoke.stderr || smoke.stdout || 'seed-e2e-smoke-user failed');
+  }
+  const bench = spawnSync('node', ['scripts/seed-cited-chat-bench.mjs'], {
+    cwd: process.cwd(),
+    env,
+    encoding: 'utf8',
+  });
+  if (bench.status !== 0) {
+    throw new Error(bench.stderr || bench.stdout || 'seed-cited-chat-bench failed');
+  }
+}
+
+async function waitForDocChatAnswer(panel) {
+  const input = panel.locator('.doc-chat-composer input');
+  await input.waitFor({ state: 'visible', timeout: 120_000 });
+  await panel.locator('.doc-chat-threads-loading').waitFor({ state: 'hidden', timeout: 120_000 }).catch(() => undefined);
+  await input.fill('Welche Tabellen enthält dieser Lieferschein?');
+  await panel.locator('button.doc-chat-submit').click();
+  await panel.locator('.doc-chat-assistant-content').first().waitFor({ state: 'visible', timeout: 120_000 });
+  await panel.locator('.doc-chat-assistant-pending').waitFor({ state: 'hidden', timeout: 120_000 }).catch(() => undefined);
+}
+
 async function setTheme(page, theme) {
   await page.locator('.user-account-menu-trigger').click();
   const panel = page.locator('.user-account-menu-panel');
@@ -125,6 +160,7 @@ async function main() {
   const browser = await chromium.launch();
   const files = [];
   const context = await browser.newContext({ locale: 'en-US' });
+  await seedSmokeLibrary();
   await apiLogin(context);
   const docId = await uploadDeliveryNote(context.request);
   const page = await context.newPage();
@@ -154,10 +190,21 @@ async function main() {
       files.push(await capture(page, `compare-slider-${viewport.tag}-${theme}.png`));
 
       await page.getByRole('tab', { name: /^Chat$/i }).click();
-      await page.locator('.layout-side-panel-chat').waitFor({ state: 'visible', timeout: 30_000 });
+      const chatPanel = page.locator('.layout-side-panel-chat');
+      await chatPanel.waitFor({ state: 'visible', timeout: 30_000 });
+      await waitForDocChatAnswer(chatPanel);
       files.push(await capture(page, `chat-tab-${viewport.tag}-${theme}.png`));
     }
   }
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(`${WEB}/chat`, { waitUntil: 'domcontentloaded' });
+  const globalComposer = page.locator('.doc-chat-composer input');
+  await globalComposer.waitFor({ state: 'visible', timeout: 60_000 });
+  await globalComposer.fill('Wie hoch ist die Miete im Mietvertrag Lindenweg?');
+  await page.locator('button.doc-chat-submit').click();
+  await page.locator('.doc-chat-assistant-content').first().waitFor({ state: 'visible', timeout: 120_000 });
+  files.push(await capture(page, 'global-chat-answer-1440-light.png'));
 
   writeFileSync(
     join(OUT, 'manifest.json'),
