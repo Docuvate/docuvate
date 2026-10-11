@@ -92,7 +92,9 @@ export function DocumentChatAssistantMessage({
     }
   }
 
-  const generationError = toUserFacingChatGenerationError(message.errorCode);
+  const generationError = isFailed
+    ? toUserFacingChatGenerationError(message.errorCode, { log: true })
+    : null;
 
   const displayContent =
     message.content && looksLikeCitedAnswerJson(message.content)
@@ -151,7 +153,7 @@ export function DocumentChatAssistantMessage({
       {isFailed ? (
         <div className="doc-chat-error-block" role="alert">
           <p>{formatChatGenerationError(message.errorCode)}</p>
-          {generationError.retryable ? (
+          {generationError?.retryable ? (
             <Button
               type="button"
               variant="secondary"

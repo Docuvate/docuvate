@@ -16,10 +16,11 @@ import {
 import { formatUserFacingError } from '../../lib/apiErrors';
 import {
   isChatGenerationInProgress,
-  threadListShowsGenerationSpinner,
 } from '../../lib/chatGenerationActive';
+import { showThreadListSpinner } from '../../lib/chatThreadSpinner';
 import { routes } from '../../lib/routes';
 import { useDocumentChatMessageStream } from '../../lib/useDocumentChatMessageStream';
+import { useStackedDocChatLayout } from '../../lib/useStackedDocChatLayout';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Spinner } from '../ui/Spinner';
@@ -82,6 +83,8 @@ export function DocumentChatPanel({
     () => isChatGenerationInProgress(messages, loadingMessages),
     [messages, loadingMessages]
   );
+
+  const { stacked, threadsOpen, toggleThreads, closeThreads } = useStackedDocChatLayout(compact);
 
   const upsertMessage = useCallback((next: DocumentChatMessageRecordDto) => {
     setMessages((prev) => {
@@ -212,6 +215,12 @@ export function DocumentChatPanel({
     }, 2500);
     return () => { clearInterval(id); };
   }, [generationInProgress, refreshThreads, activeThreadId]);
+
+  useEffect(() => {
+    if (!generationInProgress && activeThreadId) {
+      void refreshThreads(activeThreadId);
+    }
+  }, [generationInProgress, activeThreadId, refreshThreads]);
 
   async function onNewThread() {
     setError(null);
@@ -345,8 +354,15 @@ export function DocumentChatPanel({
       </header>
 
       <div
-        className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}`}
+        className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}${stacked && hasThreads ? ' doc-chat-layout-stacked' : ''}${stacked && threadsOpen ? ' doc-chat-threads-visible' : ''}`}
       >
+        {stacked && hasThreads ? (
+          <div className="doc-chat-threads-toolbar">
+            <Button type="button" variant="secondary" className="doc-chat-threads-toggle" onClick={toggleThreads}>
+              {t('documents.documentChat.threadsToggle')}
+            </Button>
+          </div>
+        ) : null}
         {hasThreads ? (
           <aside className="doc-chat-threads" aria-label={t('documents.documentChat.threadsAria')}>
             <div className="doc-chat-threads-head">
@@ -370,14 +386,21 @@ export function DocumentChatPanel({
             <ul className="doc-chat-thread-list">
               {threads.map((thread) => {
                 const selected = thread.id === activeThreadId;
-                const threadBusy = threadListShowsGenerationSpinner(thread);
+                const threadBusy = showThreadListSpinner(
+                  thread,
+                  activeThreadId,
+                  generationInProgress
+                );
                 return (
                   <li key={thread.id}>
                     <button
                       type="button"
                       className={`doc-chat-thread-item${selected ? ' active' : ''}`}
                       aria-current={selected ? 'true' : undefined}
-                      onClick={() => { setActiveThreadId(thread.id); }}
+                      onClick={() => {
+                        setActiveThreadId(thread.id);
+                        if (stacked) closeThreads();
+                      }}
                     >
                       <span className="doc-chat-thread-title-row">
                         <span className="doc-chat-thread-title">{thread.title}</span>
