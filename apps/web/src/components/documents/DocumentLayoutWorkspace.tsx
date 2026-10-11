@@ -15,12 +15,13 @@ import {
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
+import { DocumentChatPanel } from './DocumentChatPanel';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
 import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
-import { type PdfLayoutOverlay,PdfViewer } from './PdfViewer';
+import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
 
 type ViewerMode = 'original' | 'reconstruction' | 'compare';
 
@@ -51,6 +52,8 @@ interface DocumentLayoutWorkspaceProps {
   onRequeueExtraction?: () => void;
   textEditOpen: boolean;
   onTextEditOpenChange: (open: boolean) => void;
+  chatSidePanel?: boolean;
+  documentChatAvailable?: boolean;
 }
 
 export function DocumentLayoutWorkspace({
@@ -80,6 +83,8 @@ export function DocumentLayoutWorkspace({
   onRequeueExtraction,
   textEditOpen,
   onTextEditOpenChange,
+  chatSidePanel = false,
+  documentChatAvailable = false,
 }: DocumentLayoutWorkspaceProps) {
   const { t } = useTranslation();
   const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;
@@ -97,6 +102,14 @@ export function DocumentLayoutWorkspace({
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
   const [layoutZoom, setLayoutZoom] = useState<LayoutIrZoomStep>(100);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!chatSidePanel) {
+      return;
+    }
+    onTextEditOpenChange(false);
+    onEditModeChange(false);
+  }, [chatSidePanel, onEditModeChange, onTextEditOpenChange]);
 
   const frameLayoutIr =
     layoutIr ??
@@ -254,19 +267,21 @@ export function DocumentLayoutWorkspace({
                 ))}
               </div>
             )}
-            <div className="layout-viewer-toolbar-actions">
-              <Button
-                type="button"
-                variant={textEditOpen ? 'secondary' : 'ghost'}
-                aria-pressed={textEditOpen}
-                onClick={() => {
-                  onTextEditOpenChange(!textEditOpen);
-                  onEditModeChange(!textEditOpen);
-                }}
-              >
-                {textEditOpen ? t('documents.layoutTextEditDone') : t('documents.layoutTextEdit')}
-              </Button>
-            </div>
+            {!chatSidePanel ? (
+              <div className="layout-viewer-toolbar-actions">
+                <Button
+                  type="button"
+                  variant={textEditOpen ? 'secondary' : 'ghost'}
+                  aria-pressed={textEditOpen}
+                  onClick={() => {
+                    onTextEditOpenChange(!textEditOpen);
+                    onEditModeChange(!textEditOpen);
+                  }}
+                >
+                  {textEditOpen ? t('documents.layoutTextEditDone') : t('documents.layoutTextEdit')}
+                </Button>
+              </div>
+            ) : null}
           </div>
 
           {showRecovery ? (
@@ -371,7 +386,15 @@ export function DocumentLayoutWorkspace({
         ) : null}
       </div>
 
-      {layoutIr ? (
+      {chatSidePanel ? (
+        <aside className="layout-side-panel layout-side-panel-chat" aria-label={t('documents.tabChat')}>
+          <DocumentChatPanel
+            documentId={doc.id}
+            compact
+            chatAvailable={documentChatAvailable}
+          />
+        </aside>
+      ) : layoutIr ? (
         <DocumentLayoutSidePanel
           documentId={doc.id}
           documentTitle={doc.title || doc.filename}

@@ -1,6 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { LayoutIrBlock, LayoutIrDocument, LayoutIrPage } from '@docuvate/contracts';
+import type {
+  LayoutIrBlock,
+  LayoutIrDocument,
+  LayoutIrPage,
+  LayoutIrTable,
+  LayoutIrTableCell,
+} from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
@@ -14,13 +20,83 @@ function isLayoutIrBlock(value: unknown): value is LayoutIrBlock {
     return false;
   }
   return (
-    typeof value.type === 'string' &&
+    typeof value.page === 'number' &&
     typeof value.x === 'number' &&
     typeof value.y === 'number' &&
     typeof value.width === 'number' &&
     typeof value.height === 'number' &&
     typeof value.text === 'string'
   );
+}
+
+function isLayoutIrTableCell(value: unknown): value is LayoutIrTableCell {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.text === 'string' &&
+    typeof value.x === 'number' &&
+    typeof value.y === 'number' &&
+    typeof value.width === 'number' &&
+    typeof value.height === 'number'
+  );
+}
+
+function parseLayoutIrTableRows(value: unknown): LayoutIrTableCell[][] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const rows: LayoutIrTableCell[][] = [];
+  for (const row of value) {
+    if (!Array.isArray(row)) {
+      continue;
+    }
+    const cells: LayoutIrTableCell[] = [];
+    for (const cell of row) {
+      if (isLayoutIrTableCell(cell)) {
+        cells.push(cell);
+      }
+    }
+    if (cells.length > 0) {
+      rows.push(cells);
+    }
+  }
+  return rows;
+}
+
+function parseLayoutIrTables(value: unknown): LayoutIrTable[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const tables: LayoutIrTable[] = [];
+  for (const item of value) {
+    if (!isRecord(item)) {
+      continue;
+    }
+    const rows = parseLayoutIrTableRows(item.rows);
+    if (rows.length === 0) {
+      continue;
+    }
+    const page = parseNumber(item.page, -1);
+    const x = parseNumber(item.x, -1);
+    const y = parseNumber(item.y, -1);
+    const width = parseNumber(item.width, -1);
+    const height = parseNumber(item.height, -1);
+    const columnCount = parseNumber(item.columnCount, -1);
+    if (page < 0 || x < 0 || y < 0 || width <= 0 || height <= 0 || columnCount <= 0) {
+      continue;
+    }
+    tables.push({
+      page,
+      x,
+      y,
+      width,
+      height,
+      columnCount,
+      rows,
+    });
+  }
+  return tables;
 }
 
 function parseLayoutIrBlocks(value: unknown): LayoutIrBlock[] {
@@ -50,12 +126,17 @@ function parseLayoutIrPage(raw: unknown): LayoutIrPage | null {
   if (blocks.length === 0 && Array.isArray(raw.blocks) && raw.blocks.length > 0) {
     return null;
   }
-  return {
+  const tables = parseLayoutIrTables(raw.tables);
+  const parsed: LayoutIrPage = {
     page,
     widthPt,
     heightPt,
     blocks,
   };
+  if (tables.length > 0) {
+    parsed.tables = tables;
+  }
+  return parsed;
 }
 
 function parseLayoutIr(raw: Record<string, unknown>): LayoutIrDocument | null {

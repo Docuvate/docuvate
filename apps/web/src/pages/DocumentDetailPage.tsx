@@ -530,7 +530,7 @@ export function DocumentDetailPage() {
           </div>
         ) : null}
 
-        {activeTab === 'chat' ? (
+        {activeTab === 'chat' && !layoutWorkspace ? (
           <div
             className="detail-tab-panel-surface"
             role="tabpanel"
@@ -543,6 +543,8 @@ export function DocumentDetailPage() {
 
       {layoutWorkspace ? (
         <DocumentLayoutWorkspace
+          chatSidePanel={activeTab === 'chat'}
+          documentChatAvailable={documentChatAvailable}
           doc={doc}
           previewData={previewData}
           previewLoading={previewLoading}

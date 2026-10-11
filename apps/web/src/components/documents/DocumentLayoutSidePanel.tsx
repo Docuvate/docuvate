@@ -4,6 +4,7 @@ import type { ExtractedField, ExtractionBlock, LayoutIrDocument } from '@docuvat
 import { type KeyboardEvent,useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { fieldSuggestionOutsideUserSchema } from '../../lib/fieldSuggestionSchema';
 import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import {
   allLayoutWidgets,
@@ -253,9 +254,16 @@ export function DocumentLayoutSidePanel({
                         <span className="layout-field-label">{fieldLabelForKey(s.key)}</span>
                       </div>
                       <p className="layout-field-value">{formatFieldValue(s.key, s.value)}</p>
-                      <p className="muted layout-field-suggestion-note">
-                        {t('documents.layoutSuggestionNotInSchema')}
-                      </p>
+                      {fieldSuggestionOutsideUserSchema(s.key, knownFieldKeys) ? (
+                        <p className="muted layout-field-suggestion-note">
+                          <span className="layout-field-suggestion-badge">
+                            {t('documents.layoutSuggestionNotInSchema')}
+                          </span>
+                          <span className="layout-field-suggestion-badge-hint">
+                            {t('documents.layoutSuggestionNotInSchemaHint')}
+                          </span>
+                        </p>
+                      ) : null}
                       <div className="layout-field-suggestion-actions">
                         <Button type="button" variant="secondary" onClick={() => { onAcceptSuggestion(s.key, s.value); }}>
                           {t('documents.layoutSuggestionAccept')}

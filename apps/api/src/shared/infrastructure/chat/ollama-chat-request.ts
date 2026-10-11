@@ -24,6 +24,15 @@ export function ollamaChatBaseUrl(): string {
   return process.env['OLLAMA_URL'] ?? 'http://127.0.0.1:11434';
 }
 
+/** False when OLLAMA_URL is set to empty (compose-smoke); true when unset (local default) or non-empty. */
+export function ollamaChatConfigured(): boolean {
+  const raw = process.env['OLLAMA_URL'];
+  if (raw === undefined) {
+    return true;
+  }
+  return raw.trim().length > 0;
+}
+
 export async function postOllamaChat(
   messages: { role: string; content: string }[]
 ): Promise<Response> {

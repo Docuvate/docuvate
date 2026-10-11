@@ -126,6 +126,7 @@ export class RunDocumentChatGenerationUseCase {
           threadId,
           userId,
           userMessage,
+          locale: preferences.locale === 'en' ? 'en' : 'de',
           documentIds:
             thread.scope === 'library'
               ? threadDocumentIds

@@ -8,18 +8,22 @@ import {
   EMBEDDING_PORT,
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
+import { ollamaChatConfigured } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
   CITED_CHAT_ABSTENTION_DE,
+  CITED_CHAT_ABSTENTION_EN,
   citedChatBenchStatsEnabled,
   RAG_RERANK_TOP_K,
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
+import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
+import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 import { passesFusionGate, passesRerankerGate } from '../domain/verify-citation-quote.js';
 import {
@@ -45,6 +49,7 @@ export interface CitedChatGenerationInput {
   userMessage: string;
   documentIds: string[];
   scope: 'document' | 'library';
+  locale?: 'de' | 'en' | null;
   shouldAbort?: () => boolean | Promise<boolean>;
   onHeartbeat?: () => void | Promise<void>;
 }
@@ -78,6 +83,7 @@ export class CitedChatGenerationService {
         userMessage,
         documentIds,
         scope,
+        locale: input.locale ?? 'de',
         shouldAbort: input.shouldAbort,
         onHeartbeat: input.onHeartbeat,
       });
@@ -101,11 +107,13 @@ export class CitedChatGenerationService {
     userMessage: string;
     documentIds: string[];
     scope: 'document' | 'library';
+    locale: 'de' | 'en';
     shouldAbort?: () => boolean | Promise<boolean>;
     onHeartbeat?: () => void | Promise<void>;
   }): Promise<CitedChatGenerationResult> {
-    const { messageId, threadId, userId, userMessage, documentIds, scope, shouldAbort, onHeartbeat } =
+    const { messageId, threadId, userId, userMessage, documentIds, scope, locale, shouldAbort, onHeartbeat } =
       input;
+    const abstentionText = locale === 'en' ? CITED_CHAT_ABSTENTION_EN : CITED_CHAT_ABSTENTION_DE;
 
     let lastHeartbeat = Date.now();
     const heartbeat = async (): Promise<void> => {
@@ -165,13 +173,13 @@ export class CitedChatGenerationService {
     if (candidates.length === 0) {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
-        content: CITED_CHAT_ABSTENTION_DE,
+        content: abstentionText,
         generationStatus: 'done',
         generationPhase: null,
         finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
-      return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
+      return { content: abstentionText, abstained: true };
     }
 
     const rerankStarted = Date.now();
@@ -212,13 +220,67 @@ export class CitedChatGenerationService {
     if (!gateOk) {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
-        content: CITED_CHAT_ABSTENTION_DE,
+        content: abstentionText,
         generationStatus: 'done',
         generationPhase: null,
         finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
-      return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
+      return { content: abstentionText, abstained: true };
+    }
+
+    const extractiveMinScore =
+      rerank.reachable && rerank.rerankerUsed
+        ? 0.12
+        : ragFusionGateThreshold();
+    const extractivePool =
+      scope === 'library' ? libraryExtractiveRows(top) : top.slice(0, RAG_RERANK_TOP_K);
+    const extractive =
+      extractivePool.length > 0
+        ? tryExtractiveCitedAnswer(userMessage, extractivePool, extractiveMinScore)
+        : null;
+    const extractiveChunkId = extractive?.chunk.chunkId ?? '';
+    const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+    if (
+      extractive &&
+      (extractiveChunkIsUuid || !ollamaChatConfigured())
+    ) {
+      if (extractiveChunkIsUuid) {
+        await this.citationsRepo.replaceCitations(messageId, [
+          {
+            ordinal: 1,
+            chunkId: extractive.chunk.chunkId,
+            quote: extractive.quote,
+            charStart: extractive.chunk.charStart ?? 0,
+            charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
+          },
+        ]);
+      } else {
+        await this.citationsRepo.replaceCitations(messageId, []);
+      }
+      const content = extractiveChunkIsUuid
+        ? formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }])
+        : extractive.text;
+      await this.threads.updateMessageGeneration(messageId, {
+        content,
+        generationStatus: 'done',
+        generationPhase: null,
+        finalizeOnlyIfInFlight: true,
+      });
+      await this.threads.touchThread(threadId);
+      return { content, abstained: false };
+    }
+
+    if (!ollamaChatConfigured()) {
+      await this.citationsRepo.replaceCitations(messageId, []);
+      await this.threads.updateMessageGeneration(messageId, {
+        content: abstentionText,
+        generationStatus: 'done',
+        generationPhase: null,
+        finalizeOnlyIfInFlight: true,
+      });
+      await this.threads.touchThread(threadId);
+      return { content: abstentionText, abstained: true };
     }
 
     if (await aborted()) {
@@ -302,6 +364,17 @@ export class CitedChatGenerationService {
         await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
         return { content: '', abstained: true };
       }
+      if (!ollamaChatConfigured()) {
+        await this.citationsRepo.replaceCitations(messageId, []);
+        await this.threads.updateMessageGeneration(messageId, {
+          content: abstentionText,
+          generationStatus: 'done',
+          generationPhase: null,
+          finalizeOnlyIfInFlight: true,
+        });
+        await this.threads.touchThread(threadId);
+        return { content: abstentionText, abstained: true };
+      }
       await this.failGeneration(messageId, threadId, userId, 'ollama_error', llm.detail);
       return { content: '', abstained: true };
     }
@@ -377,14 +450,14 @@ export class CitedChatGenerationService {
     if (verified.length === 0) {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
-        content: CITED_CHAT_ABSTENTION_DE,
+        content: abstentionText,
         generationStatus: 'done',
         generationPhase: null,
         errorDetail: benchStats,
         finalizeOnlyIfInFlight: true,
       });
       await this.threads.touchThread(threadId);
-      return { content: CITED_CHAT_ABSTENTION_DE, abstained: true };
+      return { content: abstentionText, abstained: true };
     }
 
     await this.citationsRepo.replaceCitations(

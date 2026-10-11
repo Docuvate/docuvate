@@ -45,6 +45,21 @@ describe('buildDocumentChatProvidersCatalog', () => {
     expect(catalog.development).toHaveLength(0);
   });
 
+  it('exposes rag-ollama when only worker is configured (extractive cited chat)', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('WORKER_URL', 'http://worker:8000');
+    vi.stubEnv('OLLAMA_URL', '');
+
+    const catalog = buildDocumentChatProvidersCatalog({
+      workerProviders: null,
+      hardware: null,
+      ollamaModelReady: false,
+    });
+
+    expect(catalog.selectable.map((p) => p.id)).toEqual(['rag-ollama']);
+    expect(catalog.meta.ollamaConfigured).toBe(false);
+  });
+
   it('includes mock when NODE_ENV is development', () => {
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('OLLAMA_URL', 'http://ollama:11434');
