@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "sender-field",
+      "question": "Wer ist Absender?",
+      "title": "SEPA Mandat",
+      "filename": "mandat.pdf",
+      "text": "Erteilung eines SEPA-Lastschriftmandats",
+      "fields": [{ "key": "vendor", "value": "Gemeinde Messel" }],
+      "answer_must_contain": ["Gemeinde Messel"],
+      "evidence_in_retrieval": ["SEPA Mandat"]
+    },
+    {
+      "id": "ocr-line-sender",
+      "question": "Wer ist der Zahlungsempfänger?",
+      "title": "",
+      "filename": "x.pdf",
+      "text": "Name des Zahlungsempfängers: Landkreis Darmstadt-Dieburg",
+      "fields": [],
+      "answer_must_contain": ["Landkreis Darmstadt-Dieburg"],
+      "evidence_in_retrieval": ["Landkreis Darmstadt-Dieburg"]
+    },
+    {
+      "id": "invoice-amount",
+      "question": "Wie hoch ist der Rechnungsbetrag?",
+      "title": "Rechnung",
+      "filename": "inv.pdf",
+      "text": "Rechnung Nr. 1001\nPosition A 10 EUR\nGesamtbetrag: 119,00 EUR inkl. MwSt.\nZahlbar innerhalb 14 Tagen.",
+      "fields": [{ "key": "amount", "value": "119,00 EUR" }],
+      "answer_must_contain": ["Gesamtbetrag"],
+      "evidence_in_retrieval": ["Gesamtbetrag"]
+    },
+    {
+      "id": "rent-due",
+      "question": "Bis wann ist die Miete fällig?",
+      "title": "Mietvertrag",
+      "filename": "miete.pdf",
+      "text": "Mietvertrag Wohnung Lindenweg 4\nDie Miete ist bis zum 3. Werktag des Monats fällig.",
+      "fields": [],
+      "answer_must_contain": ["3. Werktag"],
+      "evidence_in_retrieval": ["3. Werktag"]
+    },
+    {
+      "id": "notice-period",
+      "question": "Welche Kündigungsfrist gilt?",
+      "title": "Arbeitsvertrag",
+      "filename": "arbeit.pdf",
+      "text": "Arbeitsvertrag\nDie Kündigungsfrist beträgt drei Monate zum Quartalsende.",
+      "fields": [],
+      "answer_must_contain": ["drei Monate"],
+      "evidence_in_retrieval": ["Kündigungsfrist"]
+    },
+    {
+      "id": "tax-fee",
+      "question": "Was kostet die Hundesteuer?",
+      "title": "Bescheid",
+      "filename": "hund.pdf",
+      "text": "Bescheid Hundesteuer Stadt Muster\nJahresgebühr: 120,00 EUR",
+      "fields": [],
+      "answer_must_contain": ["120,00"],
+      "evidence_in_retrieval": ["120,00"]
+    },
+    {
+      "id": "invoice-total-nordwind",
+      "question": "Welche Gesamtsumme steht auf der Rechnung?",
+      "title": "Rechnung Nordwind",
+      "filename": "nordwind.pdf",
+      "text": "Rechnung Nordwind GmbH\nGesamtsumme: 1.234,56 EUR\nIBAN DE89370400440532013000",
+      "fields": [],
+      "answer_must_contain": ["1.234,56"],
+      "evidence_in_retrieval": ["Gesamtsumme"]
+    },
+    {
+      "id": "off-topic-no-weather",
+      "question": "Wie wird das Wetter morgen in Berlin?",
+      "title": "Rechnung",
+      "filename": "inv.pdf",
+      "text": "Rechnung Nr. 1001\nGesamtbetrag: 119,00 EUR",
+      "fields": [],
+      "answer_must_contain": ["Rechnung"],
+      "evidence_in_retrieval": ["Rechnung"],
+      "expect_abstain": false
+    }
+  ]
+}
