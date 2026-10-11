@@ -38,7 +38,6 @@ async function uploadSyntheticPdfViaUi(page: import('@playwright/test').Page): P
     .getByRole('button', { name: /choose files|dateien auswählen/i })
     .first();
   await expect(chooseFiles).toBeVisible({ timeout: 30_000 });
-  const fileInput = uploadSection.locator('input[type="file"]').first();
   const [fileChooser] = await Promise.all([
     page.waitForEvent('filechooser', { timeout: 90_000 }),
     chooseFiles.click(),
