@@ -55,4 +55,4 @@ def test_measure_stage_records_positive_wall_time() -> None:
 
     value, metrics = measure_stage(work)
     assert value == 42
-    assert metrics.wall_time_ms >= 0.0
+    assert metrics.wall_time_ms > 0.0
