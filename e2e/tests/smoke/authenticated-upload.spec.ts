@@ -83,10 +83,9 @@ async function uploadSyntheticPdfViaUi(
 
 async function listContainsDocument(
   request: import('@playwright/test').APIRequestContext,
-  documentId: string,
-  uploadTitle: string
+  documentId: string
 ): Promise<boolean> {
-  const res = await request.get(`${apiBase}/v1/documents?q=${encodeURIComponent(uploadTitle)}`, {
+  const res = await request.get(`${apiBase}/v1/documents`, {
     headers: { origin: webOrigin },
   });
   if (!res.ok()) {
@@ -98,34 +97,54 @@ async function listContainsDocument(
 
 async function ensureDocumentVisibleInLibrary(
   request: import('@playwright/test').APIRequestContext,
-  documentId: string,
-  uploadTitle: string
+  documentId: string
 ): Promise<void> {
   await expect
     .poll(
       async () => {
-        if (await listContainsDocument(request, documentId, uploadTitle)) {
+        if (await listContainsDocument(request, documentId)) {
           return true;
         }
         const stackRes = await request.get(`${apiBase}/v1/documents/${documentId}/duplicate-stack`, {
           headers: { origin: webOrigin },
         });
-        if (stackRes.ok()) {
-          const payload = (await stackRes.json()) as {
-            stack?: { primaryDocumentId: string } | null;
-          };
-          const primaryId = payload.stack?.primaryDocumentId;
-          if (primaryId && primaryId !== documentId) {
-            await request.post(
-              `${apiBase}/v1/documents/${primaryId}/duplicate-stack/not-duplicate`,
+        if (!stackRes.ok()) {
+          return false;
+        }
+        const payload = (await stackRes.json()) as {
+          stack?: {
+            stackId: string;
+            primaryDocumentId: string;
+            members: Array<{ documentId: string; role: string }>;
+          } | null;
+        };
+        const stack = payload.stack;
+        if (!stack) {
+          return false;
+        }
+        const membership = stack.members.find((member) => member.documentId === documentId);
+        if (membership?.role === 'version') {
+          const release = await request.post(
+            `${apiBase}/v1/documents/${stack.primaryDocumentId}/duplicate-stack/not-duplicate`,
+            {
+              headers: { origin: webOrigin },
+              data: { otherDocumentId: documentId },
+            }
+          );
+          if (!release.ok()) {
+            const promote = await request.post(
+              `${apiBase}/v1/documents/${stack.primaryDocumentId}/duplicate-stack/set-primary`,
               {
                 headers: { origin: webOrigin },
-                data: { otherDocumentId: documentId },
+                data: { stackId: stack.stackId, documentId },
               }
             );
+            if (!promote.ok()) {
+              return false;
+            }
           }
         }
-        return await listContainsDocument(request, documentId, uploadTitle);
+        return await listContainsDocument(request, documentId);
       },
       { timeout: 120_000, intervals: [2000, 3000, 5000] }
     )
@@ -162,8 +181,8 @@ async function waitForDocumentReadyById(
 test.describe('Authenticated compose smoke', () => {
   test('login, upload synthetic PDF, extraction and preview succeed', async ({
     page,
-    request,
   }, testInfo) => {
+    const request = page.request;
     test.setTimeout(300_000);
     testInfo.annotations.push({ type: 'journey', description: 'compose-smoke-auth-happy-path' });
 
@@ -174,7 +193,7 @@ test.describe('Authenticated compose smoke', () => {
     const uploadTitle = uniqueUploadTitle(testInfo.testId);
     const readyDocId = await uploadSyntheticPdfViaUi(page, uploadTitle);
     await waitForDocumentReadyById(request, readyDocId);
-    await ensureDocumentVisibleInLibrary(request, readyDocId, uploadTitle);
+    await ensureDocumentVisibleInLibrary(request, readyDocId);
 
     await page.goto('/documents', { waitUntil: 'domcontentloaded' });
     const searchInput = page.getByRole('textbox', { name: /search|suchen|dokumente/i });
