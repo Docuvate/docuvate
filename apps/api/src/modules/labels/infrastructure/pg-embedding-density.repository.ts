@@ -4,11 +4,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
+import { CorrectionEntity } from '../../../shared/infrastructure/database/entities/correction.entity.js';
+import { CorrectionLabelAssignmentEntity } from '../../../shared/infrastructure/database/entities/correction-label-assignment.entity.js';
 import { DocumentEmbeddingsEntity } from '../../../shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from '../../../shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../../shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
-import { CorrectionEntity } from '../../../shared/infrastructure/database/entities/correction.entity.js';
-import { CorrectionLabelAssignmentEntity } from '../../../shared/infrastructure/database/entities/correction-label-assignment.entity.js';
 import { EmbeddingDensityCorrectionEntity } from '../../../shared/infrastructure/database/entities/embedding-density-correction.entity.js';
 import { EmbeddingDensityCorrectionOffsetEntity } from '../../../shared/infrastructure/database/entities/embedding-density-correction-offset.entity.js';
 import { EmbeddingDensityDecisionThresholdEntity } from '../../../shared/infrastructure/database/entities/embedding-density-decision-threshold.entity.js';

@@ -74,7 +74,7 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
 
       const rankedCandidates = [
         confirmId,
-        ...Object.entries(result.posterior ?? {})
+        ...Object.entries(result.posterior)
           .sort((a, b) => b[1] - a[1])
           .map(([tagId]) => tagId),
       ].filter((tagId): tagId is string => typeof tagId === 'string' && tagId.length > 0);
@@ -88,7 +88,7 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
           continue;
         }
         const confidence =
-          tagId === confirmId ? confirmConf : (result.posterior?.[tagId] ?? result.confidence);
+          tagId === confirmId ? confirmConf : (result.posterior[tagId] ?? result.confidence);
         const tier =
           tagId === confirmId && confirmId
             ? 'confirm'

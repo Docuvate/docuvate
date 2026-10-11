@@ -5,11 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { EMBEDDING_PORT, LABEL_EMBEDDING_REPOSITORY } from '../../shared/domain/ports.js';
 import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
+import { CorrectionEntity } from '../../shared/infrastructure/database/entities/correction.entity.js';
+import { CorrectionLabelAssignmentEntity } from '../../shared/infrastructure/database/entities/correction-label-assignment.entity.js';
 import { DocumentEmbeddingsEntity } from '../../shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from '../../shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
-import { CorrectionEntity } from '../../shared/infrastructure/database/entities/correction.entity.js';
-import { CorrectionLabelAssignmentEntity } from '../../shared/infrastructure/database/entities/correction-label-assignment.entity.js';
 import { EmbeddingDensityCorrectionEntity } from '../../shared/infrastructure/database/entities/embedding-density-correction.entity.js';
 import { EmbeddingDensityCorrectionOffsetEntity } from '../../shared/infrastructure/database/entities/embedding-density-correction-offset.entity.js';
 import { EmbeddingDensityDecisionThresholdEntity } from '../../shared/infrastructure/database/entities/embedding-density-decision-threshold.entity.js';
@@ -24,11 +24,11 @@ import {
 import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './application/apply-embedding-density-suggestions.use-case.js';
-import { ApplyLabelCorrectionUseCase } from './application/apply-label-correction.use-case.js';
-import { ApplySparkLabelPropagationUseCase } from './application/apply-spark-label-propagation.use-case.js';
 import { ApplyEmbeddingSuggestionsUseCase } from './application/apply-embedding-suggestions.use-case.js';
+import { ApplyLabelCorrectionUseCase } from './application/apply-label-correction.use-case.js';
 import { ApplyLabelCustomFieldsUseCase } from './application/apply-label-custom-fields.use-case.js';
 import { ApplyLabelMatchingUseCase } from './application/apply-label-matching.use-case.js';
+import { ApplySparkLabelPropagationUseCase } from './application/apply-spark-label-propagation.use-case.js';
 import { BackfillDocumentEmbeddingsUseCase } from './application/backfill-document-embeddings.use-case.js';
 import {
   ConfirmBlocklistPatternUseCase,
@@ -55,13 +55,13 @@ import {
   RemoveRecommendationBlocklistUseCase,
 } from './application/recommendation-blocklist.use-case.js';
 import { RecordEmbeddingDensityCorrectionUseCase } from './application/record-embedding-density-correction.use-case.js';
-import { WithdrawLabelCorrectionUseCase } from './application/withdraw-label-correction.use-case.js';
 import { RefreshEmbeddingSuggestionsUseCase } from './application/refresh-embedding-suggestions.use-case.js';
 import { RunEmbeddingDensityCalibrationUseCase } from './application/run-embedding-density-calibration.use-case.js';
 import {
   ListTagCustomFieldsUseCase,
   ReplaceTagCustomFieldsUseCase,
 } from './application/tag-custom-field.use-cases.js';
+import { WithdrawLabelCorrectionUseCase } from './application/withdraw-label-correction.use-case.js';
 import { EmbeddingDensityCalibrationQueueService } from './infrastructure/embedding-density-calibration-queue.service.js';
 import { HeadlessPgEmbeddingDensityRepository } from './infrastructure/headless-pg-embedding-density.repository.js';
 import { HttpEmbeddingAdapter } from './infrastructure/http-embedding.adapter.js';
