@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-assertions -- vitest partial mocks */
 import { describe, expect, it, vi } from 'vitest';
 
-import type { TagEntity } from '../../../shared/domain/ports.js';
+import type { TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 import { ApplyLabelCorrectionUseCase } from './apply-label-correction.use-case.js';
 import { ApplySparkLabelPropagationUseCase } from './apply-spark-label-propagation.use-case.js';
 import { WithdrawLabelCorrectionUseCase } from './withdraw-label-correction.use-case.js';
