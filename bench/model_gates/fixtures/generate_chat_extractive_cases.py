@@ -238,35 +238,36 @@ def generate() -> ChatFixturesFile:
             )
         )
 
-    unanswerable_templates = (
-        (
-            "Welche Kündigungsfrist gilt für diesen Rechnungsfall?",
-            lambda d: d,
-        ),
-        (
-            "Wie hoch ist die Jahresmiete für die Wohnung?",
-            lambda d: _invoice_doc(
-                rng,
-                vendor=vendors[0],
-                total="500,00",
-                net="420,00",
-                invoice_no=f"U-{rng.randint(1, 99)}",
-                due_date="01.01.2026",
-            ),
-        ),
-        (
-            "An welchem Datum endet die Gewährleistung für die gelieferte Maschine?",
-            lambda d: _lease_doc(
-                rng,
-                cold_rent="800,00",
-                due_day="3",
-                notice="ohne Einzelangabe der Frist im Vertragstext",
-                slug="gewaehr",
-            ),
-        ),
-        (
+    def _on_topic_unanswerable_pair(index: int, base: ChatDocumentModel) -> tuple[str, ChatDocumentModel]:
+        slot = index % 4
+        if slot == 0:
+            return ("Welche Kündigungsfrist gilt für diesen Rechnungsfall?", base)
+        if slot == 1:
+            return (
+                "Wie hoch ist die Jahresmiete für die Wohnung?",
+                _invoice_doc(
+                    rng,
+                    vendor=vendors[0],
+                    total="500,00",
+                    net="420,00",
+                    invoice_no=f"U-{rng.randint(1, 99)}",
+                    due_date="01.01.2026",
+                ),
+            )
+        if slot == 2:
+            return (
+                "An welchem Datum endet die Gewährleistung für die gelieferte Maschine?",
+                _lease_doc(
+                    rng,
+                    cold_rent="800,00",
+                    due_day="3",
+                    notice="ohne Einzelangabe der Frist im Vertragstext",
+                    slug="gewaehr",
+                ),
+            )
+        return (
             "Welche IBAN soll für die Überweisung verwendet werden?",
-            lambda d: _invoice_doc(
+            _invoice_doc(
                 rng,
                 vendor=vendors[1],
                 total="333,33",
@@ -274,8 +275,7 @@ def generate() -> ChatFixturesFile:
                 invoice_no=f"IB-{rng.randint(1, 99)}",
                 due_date="15.06.2026",
             ),
-        ),
-    )
+        )
 
     off_topic_questions = (
         "Wie wird das Wetter am Wochenende in Reykjavik?",
@@ -296,7 +296,6 @@ def generate() -> ChatFixturesFile:
             q = off_topic_questions[i % len(off_topic_questions)]
             doc = _minimal_invoice(vendors[i % len(vendors)], f"OFF-{i}")
         else:
-            q, doc_fn = unanswerable_templates[i % len(unanswerable_templates)]
             base = _invoice_doc(
                 rng,
                 vendor=vendors[i % len(vendors)],
@@ -305,7 +304,7 @@ def generate() -> ChatFixturesFile:
                 invoice_no=f"X-{i}",
                 due_date="10.10.2026",
             )
-            doc = doc_fn(base)
+            q, doc = _on_topic_unanswerable_pair(i, base)
         cases.append(
             ChatCaseModel(
                 id=f"unans-{i:03d}",
