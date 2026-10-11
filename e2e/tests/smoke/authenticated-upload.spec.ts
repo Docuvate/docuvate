@@ -78,7 +78,10 @@ test.describe('Authenticated compose smoke', () => {
           if (!res.ok()) {
             return '';
           }
-          const docs = (await res.json()) as Array<{ id: string; filename: string; status: string }>;
+          const body = (await res.json()) as
+            | Array<{ id: string; filename: string; status: string }>
+            | { items?: Array<{ id: string; filename: string; status: string }> };
+          const docs = Array.isArray(body) ? body : (body.items ?? []);
           const match = docs.find((d) => d.filename === uploadTitle && d.status === 'ready');
           readyDocId = match?.id ?? '';
           return readyDocId;
