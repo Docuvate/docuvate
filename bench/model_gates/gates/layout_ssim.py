@@ -5,11 +5,9 @@
 
 from __future__ import annotations
 
-import json
 import shutil
 import subprocess
 from pathlib import Path
-from typing import cast
 
 from docuvate_worker.infrastructure.layout.layout_reconstruction_eval import (
     evaluate_exact_typst_reconstruction,
@@ -17,6 +15,7 @@ from docuvate_worker.infrastructure.layout.layout_reconstruction_eval import (
 from docuvate_worker.infrastructure.layout.pixel_compare import DEFAULT_COMPARE_DPI
 from tests.layout_ssim_catalog import LAYOUT_SSIM_FIXTURES
 
+from bench.model_gates.json_models import LayoutSsimBaselineFile
 from bench.model_gates.schema import GateRunResult, MetricValue
 
 GATE_ID = "layout_ssim"
@@ -46,20 +45,10 @@ def _load_frozen_baseline(repo_root: Path) -> dict[str, float]:
         / "fixtures"
         / "layout_ssim_baseline_main.json"
     )
-    payload_obj: object = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload_obj, dict):
-        raise ValueError("layout SSIM baseline root must be an object")
-    payload = cast(dict[str, object], payload_obj)
-    fixtures = payload.get("fixtures")
-    if not isinstance(fixtures, dict):
-        raise ValueError("layout SSIM baseline fixtures must be an object")
-    fixtures_map = cast(dict[str, object], fixtures)
+    payload = LayoutSsimBaselineFile.model_validate_json(path.read_text(encoding="utf-8"))
     out: dict[str, float] = {}
-    for fixture_id, entry_obj in fixtures_map.items():
-        if isinstance(entry_obj, dict) and "before_ssim" in entry_obj:
-            entry = cast(dict[str, object], entry_obj)
-            before = entry["before_ssim"]
-            out[str(fixture_id)] = float(before) if isinstance(before, (int, float)) else 0.0
+    for fixture_id, entry in payload.fixtures.items():
+        out[fixture_id] = entry.before_ssim
     return out
 
 

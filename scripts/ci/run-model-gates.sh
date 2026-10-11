@@ -28,4 +28,5 @@ cd "$ROOT/bench"
 "$PY" -m mypy --config-file mypy.ini
 
 cd "$ROOT"
+bash scripts/ci/check-model-gates-baseline.sh
 "$PY" bench/run_model_gates.py --check

@@ -9,6 +9,9 @@ from dataclasses import dataclass
 
 from docuvate_worker.infrastructure.fastembed_model import embed_passages, embed_query
 
+EXTRACTIVE_ABSTAIN_NO_MATCH = "Dazu finde ich im Dokument keinen eindeutigen Treffer"
+EXTRACTIVE_ABSTAIN_NO_PASSAGE = "Dazu finde ich im Dokument keinen passenden Textabschnitt"
+
 CHUNK_SIZE = 320
 CHUNK_OVERLAP = 64
 TOP_K = 5
@@ -165,6 +168,99 @@ class RagRetrievalResult:
     context_text: str
 
 
+@dataclass(frozen=True)
+class DocumentContextInput:
+    title: str
+    filename: str
+    text: str
+    fields: list[dict[str, str]]
+
+
+def extractive_answer_abstained(reply: str) -> bool:
+    """True when the extractive QA path declined to answer from retrieved evidence."""
+    trimmed = reply.strip()
+    if trimmed.startswith(EXTRACTIVE_ABSTAIN_NO_MATCH):
+        return True
+    if trimmed.startswith(EXTRACTIVE_ABSTAIN_NO_PASSAGE):
+        return True
+    if trimmed.startswith("Für dieses Dokument liegt noch kein extrahierter Text"):
+        return True
+    return False
+
+
+_QUERY_STOPWORDS = frozenset(
+    {
+        "welche",
+        "welcher",
+        "welches",
+        "wie",
+        "hoch",
+        "ist",
+        "die",
+        "der",
+        "das",
+        "den",
+        "dem",
+        "des",
+        "ein",
+        "eine",
+        "einer",
+        "einem",
+        "einen",
+        "für",
+        "auf",
+        "im",
+        "in",
+        "zu",
+        "von",
+        "mit",
+        "und",
+        "oder",
+        "nicht",
+        "nur",
+        "gilt",
+        "diesem",
+        "dieser",
+        "dieses",
+        "dokument",
+        "hat",
+        "nenne",
+        "was",
+        "wann",
+        "wer",
+        "wo",
+        "bitte",
+        "steht",
+        "kostet",
+        "wichtigsten",
+        "kurz",
+        "fasse",
+        "laut",
+        "bzw",
+        "zahlungsempfänger",
+        "absender",
+    }
+)
+
+
+def _looks_like_summary_question(question: str) -> bool:
+    lower = question.lower()
+    return any(token in lower for token in ("fasse", "zusammenfass", "überblick", "zusammen"))
+
+
+def _extractive_lacks_evidence_for_question(question: str, chunks: list[str]) -> bool:
+    """True when retrieved passages do not substantively cover the question (on-topic abstain)."""
+    if _looks_like_summary_question(question) or _looks_like_sender_question(question):
+        return False
+    tokens = [t for t in _tokenize(question) if t not in _QUERY_STOPWORDS and len(t) >= 4]
+    if not tokens:
+        return False
+    joined = " ".join(chunks).lower()
+    hits = sum(1 for token in tokens if token in joined)
+    required = max(1, (len(tokens) + 1) // 2)
+    return hits < required
+
+
 def retrieve_document_rag_context(
     question: str,
     *,
@@ -232,6 +328,109 @@ def retrieve_document_rag_context(
     return RagRetrievalResult(chunks=selected, context_text=context_text)
 
 
+def retrieve_library_rag_context(
+    question: str,
+    documents: list[DocumentContextInput],
+    *,
+    top_k: int = TOP_K,
+) -> RagRetrievalResult:
+    """Retrieve across multiple documents (global-chat style corpus union)."""
+    trimmed = question.strip()
+    if not trimmed or not documents:
+        return RagRetrievalResult(chunks=[], context_text="")
+
+    tagged_chunks: list[str] = []
+    for doc in documents:
+        corpus = _build_chunk_corpus(title=doc.title, text=doc.text, fields=doc.fields)
+        for piece in corpus:
+            tag = doc.filename.strip() or doc.title.strip() or "Dokument"
+            tagged_chunks.append(f"[{tag}] {piece}")
+
+    if not tagged_chunks:
+        return RagRetrievalResult(chunks=[], context_text="")
+
+    query_vec = embed_query(trimmed)
+    chunk_vecs = embed_passages(tagged_chunks)
+    dense_scores = [_cosine(query_vec, vec) for vec in chunk_vecs]
+
+    corpus_size = len(tagged_chunks)
+    df: dict[str, int] = {}
+    for chunk in tagged_chunks:
+        for tok in set(_tokenize(chunk)):
+            df[tok] = df.get(tok, 0) + 1
+    avgdl = sum(len(_tokenize(c)) for c in tagged_chunks) / max(corpus_size, 1)
+    sparse_scores = [
+        _bm25_score(trimmed, chunk, avgdl=avgdl, df=df, corpus_size=corpus_size)
+        for chunk in tagged_chunks
+    ]
+
+    norm_dense = _normalize_scores(dense_scores)
+    norm_sparse = _normalize_scores(sparse_scores)
+    hybrid = [
+        HYBRID_DENSE_WEIGHT * d + HYBRID_SPARSE_WEIGHT * s
+        for d, s in zip(norm_dense, norm_sparse, strict=True)
+    ]
+    ranked = sorted(range(len(tagged_chunks)), key=lambda i: hybrid[i], reverse=True)
+
+    selected: list[str] = []
+    for idx in ranked:
+        if len(selected) >= top_k:
+            break
+        if dense_scores[idx] < MIN_DENSE_SCORE and sparse_scores[idx] <= 0:
+            continue
+        piece = tagged_chunks[idx]
+        if piece not in selected:
+            selected.append(piece)
+
+    if not selected and ranked:
+        selected = [tagged_chunks[ranked[0]]]
+
+    context_parts: list[str] = []
+    total = 0
+    for piece in selected:
+        separator = 3 if context_parts else 0
+        if total + separator + len(piece) > MAX_RAG_CONTEXT_CHARS:
+            remaining = MAX_RAG_CONTEXT_CHARS - total - separator
+            if remaining > 80:  # noqa: PLR2004
+                context_parts.append(piece[:remaining].rstrip() + "…")
+            break
+        context_parts.append(piece)
+        total += separator + len(piece)
+
+    context_text = "\n---\n".join(context_parts)
+    return RagRetrievalResult(chunks=selected, context_text=context_text)
+
+
+def answer_from_library_context(
+    question: str,
+    documents: list[DocumentContextInput],
+) -> str:
+    trimmed = question.strip()
+    if not trimmed:
+        return "Bitte eine Frage zum Dokument stellen."
+    if len(documents) == 1:
+        doc = documents[0]
+        return answer_from_document_context(
+            trimmed,
+            title=doc.title,
+            filename=doc.filename,
+            text=doc.text,
+            fields=doc.fields,
+        )
+
+    retrieval = retrieve_library_rag_context(trimmed, documents)
+    if not retrieval.chunks:
+        return EXTRACTIVE_ABSTAIN_NO_PASSAGE + "."
+
+    if _extractive_lacks_evidence_for_question(trimmed, retrieval.chunks):
+        return f"{EXTRACTIVE_ABSTAIN_NO_MATCH}."
+
+    excerpts = " ".join(f"„{chunk}“" for chunk in retrieval.chunks)
+    lead = f"Zu „{trimmed}“: "
+    sources = ", ".join(sorted({doc.filename or doc.title or "Dokument" for doc in documents}))
+    return f"{lead}{excerpts} (Quellen: {sources})."
+
+
 def answer_from_document_context(
     question: str,
     *,
@@ -268,10 +467,13 @@ def answer_from_document_context(
         fallback = body[:400] or (field_lines[0] if field_lines else title)
         if fallback:
             return (
-                f"Dazu finde ich im Dokument keinen eindeutigen Treffer. "
+                f"{EXTRACTIVE_ABSTAIN_NO_MATCH}. "
                 f"Kurzer Kontext: „{fallback}{'…' if len(body) > 400 else ''}“"  # noqa: PLR2004
             )
-        return "Dazu finde ich im Dokument keinen passenden Textabschnitt."
+        return f"{EXTRACTIVE_ABSTAIN_NO_PASSAGE}."
+
+    if _extractive_lacks_evidence_for_question(trimmed, retrieval.chunks):
+        return f"{EXTRACTIVE_ABSTAIN_NO_MATCH}."
 
     excerpts = " ".join(f"„{chunk}“" for chunk in retrieval.chunks)
     lead = f"Zu „{trimmed}“: "

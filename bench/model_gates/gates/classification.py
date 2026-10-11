@@ -1,12 +1,13 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-"""Embedding-density classification gate on a frozen synthetic split."""
+"""Embedding-density gate on fastembed vectors (8 labels, imbalanced, overlapping text)."""
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
-from numpy.typing import NDArray
 
 from docuvate_worker.application.embedding_density import (
     classify_embedding,
@@ -16,89 +17,90 @@ from docuvate_worker.application.embedding_density import (
     train_from_labeled_examples,
 )
 from docuvate_worker.domain.embedding_density.calibration import split_embedding_density_documents
-from docuvate_worker.domain.embedding_density.schemas import (
-    EmbeddingDensityStatePayload,
-    EmbeddingDensityStateWithMetricsPayload,
-)
+from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStateWithMetricsPayload
+from docuvate_worker.infrastructure.fastembed_model import embed_passages
 
+from bench.model_gates.json_models import ClassificationFixturesFile, ClassificationTextExample
 from bench.model_gates.schema import GateRunResult, MetricValue
 
 GATE_ID = "classification"
-
-# Frozen synthetic eval (seed + hyperparameters); no personal data.
-_EVAL_SEED = 20261011
-_TRAIN_PER_CLASS = 900
-_DIM = 8
-_SEPARATION = 6.5
+_FIXTURES = Path(__file__).resolve().parent.parent / "fixtures" / "classification_texts.json"
+_HOLDOUT_LABEL = "werkstattbericht"
+_EVAL_SEED = 20261012
+_EMBED_BATCH = 64
 
 
-def _separated_clusters(
-    rng: np.random.Generator,
-    *,
-    dim: int,
-    per_class: int,
-    separation: float,
-    doc_prefix: str,
-) -> tuple[NDArray[np.float64], list[str], list[str], list[str]]:
-    labels = ["a", "b", "c"]
-    vectors: list[NDArray[np.float64]] = []
-    y: list[str] = []
-    doc_ids: list[str] = []
-    for i, label in enumerate(labels):
-        center = np.zeros(dim, dtype=np.float64)
-        center[i % dim] = separation * (i + 1)
-        for j in range(per_class):
-            doc = f"{doc_prefix}-{label}-{j}"
-            vectors.append(center + rng.normal(0, 0.12, size=dim))
-            y.append(label)
-            doc_ids.append(doc)
-    return np.stack(vectors), y, labels, doc_ids
+def _load_fixtures() -> ClassificationFixturesFile:
+    return ClassificationFixturesFile.model_validate_json(_FIXTURES.read_text(encoding="utf-8"))
+
+
+def _embed_texts(texts: list[str]) -> list[list[float]]:
+    vectors: list[list[float]] = []
+    for start in range(0, len(texts), _EMBED_BATCH):
+        batch = texts[start : start + _EMBED_BATCH]
+        vectors.extend(embed_passages(batch))
+    return vectors
+
+
+def _vectors_for_examples(examples: list[ClassificationTextExample]) -> list[list[float]]:
+    return _embed_texts([ex.text for ex in examples])
 
 
 def run_classification_gate() -> GateRunResult:
-    rng = np.random.default_rng(_EVAL_SEED)
-    train_x, train_y, label_ids, train_docs = _separated_clusters(
-        rng,
-        dim=_DIM,
-        per_class=_TRAIN_PER_CLASS,
-        separation=_SEPARATION,
-        doc_prefix="mg-eval",
-    )
-    state = train_from_labeled_examples(label_ids, train_x.tolist(), train_y)
+    fixtures = _load_fixtures()
+    train_examples = [ex for ex in fixtures.examples if ex.label_id in fixtures.label_ids]
+    holdout_examples = [ex for ex in fixtures.examples if ex.label_id == _HOLDOUT_LABEL]
+    if not train_examples:
+        return GateRunResult(gate_id=GATE_ID, status="error", metrics=(), detail="no train examples")
+
+    vectors = _vectors_for_examples(train_examples)
+    train_y = [ex.label_id for ex in train_examples]
+    train_docs = [ex.document_id for ex in train_examples]
+
+    state = train_from_labeled_examples(fixtures.label_ids, vectors, train_y)
     model = model_from_state(state)
     calibrated: EmbeddingDensityStateWithMetricsPayload = run_calibration(
         model_to_state(model),
-        train_x.tolist(),
+        vectors,
         train_y,
-        delta=0.05,
+        delta=0.08,
         document_ids=train_docs,
     )
-    state_payload: EmbeddingDensityStatePayload = calibrated
+    state_payload = calibrated
 
-    doc_split = split_embedding_density_documents(train_docs, rng=np.random.default_rng(_EVAL_SEED))
+    doc_split = split_embedding_density_documents(
+        train_docs,
+        rng=np.random.default_rng(_EVAL_SEED),
+    )
     if doc_split.test_indices.size == 0:
-        return GateRunResult(
-            gate_id=GATE_ID,
-            status="error",
-            metrics=(),
-            detail="empty held-out split",
-        )
+        return GateRunResult(gate_id=GATE_ID, status="error", metrics=(), detail="empty held-out split")
 
-    coarse_correct = 0
-    coarse_total = 0
+    scored_correct = 0
+    scored_total = 0
+    covered = 0
+    test_count = int(doc_split.test_indices.size)
     for idx in doc_split.test_indices:
-        row = train_x[idx]
-        label: str = train_y[int(idx)]
-        result = classify_embedding(state_payload, row.tolist())
-        if result.decision_tier == "auto_apply":
-            coarse_total += 1
-            if result.label_id == label:
-                coarse_correct += 1
+        row = vectors[idx]
+        label = train_y[int(idx)]
+        result = classify_embedding(state_payload, row)
+        if result.decision_tier in ("auto_apply", "confirm"):
+            covered += 1
+            predicted = result.label_id or result.confirm_label_id
+            if predicted:
+                scored_total += 1
+                if predicted == label:
+                    scored_correct += 1
 
-    if coarse_total == 0:
-        precision = 0.0
-    else:
-        precision = coarse_correct / coarse_total
+    precision = 0.0 if scored_total == 0 else scored_correct / scored_total
+    coverage_rate = covered / max(test_count, 1)
+
+    novel_vectors = _vectors_for_examples(holdout_examples)
+    novel_abstain = 0
+    for vec in novel_vectors:
+        result = classify_embedding(state_payload, vec)
+        if result.decision_tier != "auto_apply":
+            novel_abstain += 1
+    novel_abstain_rate = novel_abstain / max(len(holdout_examples), 1)
 
     metrics = (
         MetricValue(
@@ -107,8 +109,13 @@ def run_classification_gate() -> GateRunResult:
             direction="higher_is_better",
         ),
         MetricValue(
-            name=f"{GATE_ID}.coarse_coverage_count",
-            value=float(coarse_total),
+            name=f"{GATE_ID}.coarse_coverage_rate",
+            value=coverage_rate,
+            direction="higher_is_better",
+        ),
+        MetricValue(
+            name=f"{GATE_ID}.novel_abstain_rate",
+            value=novel_abstain_rate,
             direction="higher_is_better",
         ),
     )
@@ -116,5 +123,5 @@ def run_classification_gate() -> GateRunResult:
         gate_id=GATE_ID,
         status="ok",
         metrics=metrics,
-        detail=f"held_out={doc_split.test_indices.size} auto_apply={coarse_total}",
+        detail=f"train={len(train_examples)} holdout={doc_split.test_indices.size} novel={len(holdout_examples)}",
     )

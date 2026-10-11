@@ -5,11 +5,11 @@
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, cast
+from typing import Literal
 
+from bench.model_gates.json_models import BaselineDirectionModel
 from bench.model_gates.schema import CommittedBaseline, GateRunResult, HarnessResult
 
 TOLERANCE = 1e-6
@@ -30,42 +30,13 @@ def metric_direction_for(name: str) -> Literal["higher_is_better", "lower_is_bet
 
 
 def load_baseline(path: Path) -> CommittedBaseline:
-    payload_obj: object = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(payload_obj, dict):
-        raise ValueError("baseline root must be an object")
-    payload = cast(dict[str, object], payload_obj)
-    version_raw = payload["version"]
-    if not isinstance(version_raw, int):
-        raise ValueError("baseline.version must be an integer")
-    version = version_raw
-    metrics_raw = payload.get("metrics")
-    if not isinstance(metrics_raw, dict):
-        raise ValueError("baseline.metrics must be an object")
-    metrics_map = cast(dict[str, object], metrics_raw)
-    metrics: dict[str, float] = {}
-    for key_obj, raw_obj in metrics_map.items():
-        key = str(key_obj)
-        if isinstance(raw_obj, (int, float)):
-            metrics[key] = float(raw_obj)
-        else:
-            raise ValueError(f"baseline metric {key} must be numeric")
-    directions_raw = payload.get("metric_direction")
-    metric_direction: dict[str, Literal["higher_is_better", "lower_is_better"]] = {}
-    if isinstance(directions_raw, dict):
-        directions_map = cast(dict[str, object], directions_raw)
-        for key_obj, raw_obj in directions_map.items():
-            key = str(key_obj)
-            direction: Literal["higher_is_better", "lower_is_better"]
-            if raw_obj == "higher_is_better":
-                direction = "higher_is_better"
-            elif raw_obj == "lower_is_better":
-                direction = "lower_is_better"
-            else:
-                raise ValueError(f"invalid direction for {key}")
-            metric_direction[key] = direction
-    for key in metrics:
-        metric_direction.setdefault(key, metric_direction_for(key))
-    return CommittedBaseline(version=version, metrics=metrics, metric_direction=metric_direction)
+    model = BaselineDirectionModel.model_validate_json(path.read_text(encoding="utf-8"))
+    directions: dict[str, Literal["higher_is_better", "lower_is_better"]] = dict(
+        model.metric_direction
+    )
+    for key in model.metrics:
+        directions.setdefault(key, metric_direction_for(key))
+    return CommittedBaseline(version=model.version, metrics=dict(model.metrics), metric_direction=directions)
 
 
 def flatten_metrics(gates: tuple[GateRunResult, ...]) -> dict[str, float]:
@@ -149,12 +120,9 @@ def merge_baseline_with_measured(
 
 
 def write_baseline(path: Path, baseline: CommittedBaseline) -> None:
-    payload = {
-        "version": baseline.version,
-        "metrics": baseline.metrics,
-        "metric_direction": baseline.metric_direction,
-    }
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-
-
-_metric_direction = metric_direction_for
+    model = BaselineDirectionModel(
+        version=baseline.version,
+        metrics=baseline.metrics,
+        metric_direction=baseline.metric_direction,
+    )
+    path.write_text(model.model_dump_json(indent=2) + "\n", encoding="utf-8")
