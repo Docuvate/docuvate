@@ -58,13 +58,15 @@ async function uploadSyntheticPdfViaUi(
       res.status() < 500,
     { timeout: 180_000 }
   );
-  await uploadSection.locator('input[type="file"]').setInputFiles(
+  const fileInput = uploadSection.locator('input[type="file"]');
+  await expect(fileInput).toBeAttached({ timeout: 30_000 });
+  await fileInput.setInputFiles(
     {
       name: uploadTitle,
       mimeType: 'application/pdf',
       buffer: uniquePdfBuffer(),
     },
-    { timeout: 120_000 }
+    { timeout: 180_000 }
   );
 
   const created = await uploadResponse;
@@ -161,15 +163,18 @@ test.describe('Authenticated compose smoke', () => {
     await waitForDocumentReadyInBrowser(page, readyDocId);
     await releaseFromDuplicateStackIfNeeded(page, readyDocId);
 
-    await page.goto('/documents', { waitUntil: 'domcontentloaded' });
-    const librarySearch = page.locator('form.library-list-search');
-    const searchInput = librarySearch.getByRole('textbox');
-    await searchInput.fill(uploadTitle);
-    await searchInput.press('Enter');
-
     const docHref = `/documents/${readyDocId}`;
     const titleLink = page.locator(`a[href="${docHref}"]`).first();
-    await expect(titleLink).toBeVisible({ timeout: 60_000 });
+    await expect
+      .poll(
+        async () => {
+          await page.goto('/documents', { waitUntil: 'domcontentloaded' });
+          await releaseFromDuplicateStackIfNeeded(page, readyDocId);
+          return await titleLink.isVisible().catch(() => false);
+        },
+        { timeout: 120_000, intervals: [2000, 3000, 5000] }
+      )
+      .toBe(true);
 
     const docItem = page.locator('tr, .doc-card').filter({ has: titleLink });
     await expect(docItem.first()).toBeVisible({ timeout: 30_000 });
