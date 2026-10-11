@@ -78,10 +78,11 @@ def run_classification_gate() -> GateRunResult:
     scored_correct = 0
     scored_total = 0
     covered = 0
-    test_count = int(doc_split.test_indices.size)
-    for idx in doc_split.test_indices:
-        row = vectors[idx]
-        label = train_y[int(idx)]
+    test_indices: list[int] = [int(i) for i in doc_split.test_indices.tolist()]
+    test_count = len(test_indices)
+    for index in test_indices:
+        row: list[float] = vectors[index]
+        label = train_y[index]
         result = classify_embedding(state_payload, row)
         if result.decision_tier in ("auto_apply", "confirm"):
             covered += 1

@@ -183,10 +183,10 @@ def extractive_answer_abstained(reply: str) -> bool:
         return True
     if trimmed.startswith(EXTRACTIVE_ABSTAIN_NO_PASSAGE):
         return True
-    if trimmed.startswith("Für dieses Dokument liegt noch kein extrahierter Text"):
-        return True
-    return False
+    return trimmed.startswith("Für dieses Dokument liegt noch kein extrahierter Text")
 
+
+_MIN_QUERY_TOKEN_LEN = 4
 
 _QUERY_STOPWORDS = frozenset(
     {
@@ -252,7 +252,11 @@ def _extractive_lacks_evidence_for_question(question: str, chunks: list[str]) ->
     """True when retrieved passages do not substantively cover the question (on-topic abstain)."""
     if _looks_like_summary_question(question) or _looks_like_sender_question(question):
         return False
-    tokens = [t for t in _tokenize(question) if t not in _QUERY_STOPWORDS and len(t) >= 4]
+    tokens = [
+        t
+        for t in _tokenize(question)
+        if t not in _QUERY_STOPWORDS and len(t) >= _MIN_QUERY_TOKEN_LEN
+    ]
     if not tokens:
         return False
     joined = " ".join(chunks).lower()
