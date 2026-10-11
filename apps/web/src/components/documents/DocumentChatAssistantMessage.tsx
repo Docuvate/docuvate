@@ -100,6 +100,7 @@ export function DocumentChatAssistantMessage({
     message.content && looksLikeCitedAnswerJson(message.content)
       ? extractReadableCitedAnswerPreview(message.content)
       : message.content;
+  const hasStreamingText = Boolean(displayContent && displayContent.trim().length > 0);
 
   return (
     <li
@@ -107,7 +108,7 @@ export function DocumentChatAssistantMessage({
     >
       <span className="doc-chat-role">{t('documents.documentChat.roleAssistant')}</span>
 
-      {isActive ? (
+      {isActive && !hasStreamingText ? (
         <div className="doc-chat-status-block" role="status" aria-live="polite">
           <div className="doc-chat-typing-body">
             <Spinner size="sm" label={statusLine ?? t('documents.documentChat.typing')} />
@@ -127,7 +128,20 @@ export function DocumentChatAssistantMessage({
         </div>
       ) : null}
 
-      {displayContent ? <p className="doc-chat-assistant-content">{displayContent}</p> : null}
+      {isActive && hasStreamingText ? (
+        <div className="doc-chat-status-block doc-chat-status-block-compact" role="status" aria-live="polite">
+          <span className="muted doc-chat-streaming-phase">{statusLine}</span>
+          <span className="muted doc-chat-elapsed">{formatElapsed(elapsed)}</span>
+        </div>
+      ) : null}
+
+      {displayContent ? (
+        <p
+          className={`doc-chat-assistant-content${isActive ? ' doc-chat-assistant-content-streaming' : ''}`}
+        >
+          {displayContent}
+        </p>
+      ) : null}
 
       {message.citations && message.citations.length > 0 ? (
         <div className="doc-chat-sources">
