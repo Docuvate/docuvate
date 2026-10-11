@@ -52,32 +52,17 @@ test.describe('Authenticated compose smoke', () => {
 
     await uploadSyntheticPdfViaUi(page);
 
-    const docRow = page.locator('tr').filter({ hasText: uploadTitle });
-    await expect
-      .poll(
-        async () => {
-          const visible = await docRow.first().isVisible().catch(() => false);
-          if (visible) {
-            return true;
-          }
-          await page.reload({ waitUntil: 'domcontentloaded' });
-          return docRow.first().isVisible().catch(() => false);
-        },
-        { timeout: 180_000, intervals: [3000, 5000, 8000] }
-      )
-      .toBe(true);
-    await expect(docRow.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
-    await expect(docRow.first().locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, {
+    const docLink = page.getByRole('link', { name: uploadTitle }).first();
+    await expect(docLink).toBeVisible({ timeout: 180_000 });
+    const docRow = page.getByRole('row').filter({ has: docLink });
+    await expect(docRow).not.toContainText(/^failed$|^fehlgeschlagen$/i);
+    await expect(docRow.locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, {
       timeout: 180_000,
     });
 
     await attachScreenshot(page, testInfo, '02-after-upload-list.png');
 
-    await docRow
-      .first()
-      .locator('a.library-open-doc-btn, a[href*="/documents/"]')
-      .first()
-      .click();
+    await docRow.locator('a.library-open-doc-btn, a[href*="/documents/"]').first().click();
     await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
 
     await expect(page.getByText(/loading pdf|pdf wird geladen/i)).toHaveCount(0, { timeout: 90_000 });
