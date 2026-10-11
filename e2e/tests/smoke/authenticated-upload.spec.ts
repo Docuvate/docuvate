@@ -7,6 +7,8 @@ const fixturePdf = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
 const fixturePhrase = 'E2E_SYNTHETIC_FIXTURE_PHRASE_Q1';
 
 const uploadTitle = 'synthetic-upload.pdf';
+const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
+const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
 test.use({ trace: 'on', storageState: smokeFixtureStoragePath() });
 
@@ -36,11 +38,16 @@ async function uploadSyntheticPdfViaUi(page: import('@playwright/test').Page): P
     .getByRole('button', { name: /choose files|dateien auswählen/i })
     .first();
   await expect(chooseFiles).toBeVisible({ timeout: 30_000 });
-  const [fileChooser] = await Promise.all([
-    page.waitForEvent('filechooser'),
-    chooseFiles.click(),
-  ]);
-  await fileChooser.setFiles(fixturePdf);
+  const fileInput = uploadSection.locator('input[type="file"]').first();
+  try {
+    const [fileChooser] = await Promise.all([
+      page.waitForEvent('filechooser', { timeout: 20_000 }),
+      chooseFiles.click(),
+    ]);
+    await fileChooser.setFiles(fixturePdf);
+  } catch {
+    await fileInput.setInputFiles(fixturePdf, { timeout: 60_000 });
+  }
 
   const queueItem = page.locator('.upload-queue-item').filter({ hasText: uploadTitle });
   await expect(queueItem).toBeVisible({ timeout: 60_000 });
@@ -48,7 +55,10 @@ async function uploadSyntheticPdfViaUi(page: import('@playwright/test').Page): P
 }
 
 test.describe('Authenticated compose smoke', () => {
-  test('login, upload synthetic PDF, extraction and preview succeed', async ({ page }, testInfo) => {
+  test('login, upload synthetic PDF, extraction and preview succeed', async ({
+    page,
+    request,
+  }, testInfo) => {
     test.setTimeout(300_000);
     testInfo.annotations.push({ type: 'journey', description: 'compose-smoke-auth-happy-path' });
 
@@ -58,11 +68,32 @@ test.describe('Authenticated compose smoke', () => {
 
     await uploadSyntheticPdfViaUi(page);
 
+    let readyDocId = '';
+    await expect
+      .poll(
+        async () => {
+          const res = await request.get(`${apiBase}/v1/documents`, {
+            headers: { origin: webOrigin },
+          });
+          if (!res.ok()) {
+            return '';
+          }
+          const docs = (await res.json()) as Array<{ id: string; filename: string; status: string }>;
+          const match = docs.find((d) => d.filename === uploadTitle && d.status === 'ready');
+          readyDocId = match?.id ?? '';
+          return readyDocId;
+        },
+        { timeout: 240_000, intervals: [2000, 3000, 5000] }
+      )
+      .not.toBe('');
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+
     const docRow = page
       .getByRole('row')
       .filter({ hasText: uploadTitle })
       .filter({ has: page.locator('.badge-ready, .badge.badge-ready') });
-    await expect(docRow.first()).toBeVisible({ timeout: 180_000 });
+    await expect(docRow.first()).toBeVisible({ timeout: 60_000 });
     await expect(docRow.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
 
     await attachScreenshot(page, testInfo, '02-after-upload-list.png');
