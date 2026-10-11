@@ -5,6 +5,12 @@ from docuvate_worker.infrastructure.chat.context_qa import (
     retrieve_document_rag_context,
 )
 
+_LEASE_EXCERPT = (
+    "Mietvertrag Lindenweg 5. Die Kaltmiete beträgt 945 EUR monatlich. "
+    "Kündigung mit drei Monaten Frist zum Monatsende. "
+    "Miete zahlbar bis zum 3. Werktag eines Monats."
+)
+
 
 def test_sender_question_uses_structured_field() -> None:
     reply = answer_from_document_context(
@@ -50,18 +56,29 @@ def test_extractive_abstain_helper_detects_no_passage() -> None:
     assert extractive_answer_abstained(f"{EXTRACTIVE_ABSTAIN_NO_PASSAGE}.")
 
 
-def test_on_topic_missing_field_abstains() -> None:
-    text = (
-        "Dokumenttyp: Rechnung.\n"
-        "Rechnungsnummer: RN-1\n"
-        "Gesamtsumme: 500,00 EUR\n"
-        "Lieferant: Beispiel GmbH\n"
-    )
+def test_paraphrased_lease_questions_are_answered() -> None:
+    for question in (
+        "Wie lange ist die Kündigungsfrist?",
+        "Wann kann ich den Vertrag kündigen?",
+        "Wie viel muss ich monatlich zahlen?",
+    ):
+        reply = answer_from_document_context(
+            question,
+            title="Mietvertrag",
+            filename="miete.pdf",
+            text=_LEASE_EXCERPT,
+            fields=[],
+        )
+        assert not extractive_answer_abstained(reply)
+        assert "Zu „" in reply
+
+
+def test_weak_retrieval_abstains_via_threshold() -> None:
     reply = answer_from_document_context(
-        "Welche Kündigungsfrist gilt in diesem Vertrag?",
+        "Wie wird das Wetter am Wochenende in Reykjavík?",
         title="Rechnung",
         filename="inv.pdf",
-        text=text,
-        fields=[{"key": "vendor", "value": "Beispiel GmbH"}],
+        text="Rechnungsnummer RN-9. Gesamtsumme 12,00 EUR.",
+        fields=[],
     )
     assert extractive_answer_abstained(reply)

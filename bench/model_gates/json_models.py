@@ -31,7 +31,9 @@ class ChatCaseModel(BaseModel):
     question: str
     documents: list[ChatDocumentModel]
     answer_must_contain: list[str] = Field(default_factory=list)
+    answer_must_not_contain: list[str] = Field(default_factory=list)
     acceptable_answers: list[str] = Field(default_factory=list)
+    open_min_token_hits: int = 1
     evidence_in_retrieval: list[str] = Field(default_factory=list)
     required_source_tags: list[str] = Field(default_factory=list)
 

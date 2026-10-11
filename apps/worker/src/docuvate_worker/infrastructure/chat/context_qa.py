@@ -186,83 +186,45 @@ def extractive_answer_abstained(reply: str) -> bool:
     return trimmed.startswith("Für dieses Dokument liegt noch kein extrahierter Text")
 
 
-_MIN_QUERY_TOKEN_LEN = 4
-
-_QUERY_STOPWORDS = frozenset(
-    {
-        "welche",
-        "welcher",
-        "welches",
-        "wie",
-        "hoch",
-        "ist",
-        "die",
-        "der",
-        "das",
-        "den",
-        "dem",
-        "des",
-        "ein",
-        "eine",
-        "einer",
-        "einem",
-        "einen",
-        "für",
-        "auf",
-        "im",
-        "in",
-        "zu",
-        "von",
-        "mit",
-        "und",
-        "oder",
-        "nicht",
-        "nur",
-        "gilt",
-        "diesem",
-        "dieser",
-        "dieses",
-        "dokument",
-        "hat",
-        "nenne",
-        "was",
-        "wann",
-        "wer",
-        "wo",
-        "bitte",
-        "steht",
-        "kostet",
-        "wichtigsten",
-        "kurz",
-        "fasse",
-        "laut",
-        "bzw",
-        "zahlungsempfänger",
-        "absender",
-    }
-)
+_CHUNK_TAG_RE = re.compile(r"^\[([^\]]+)\]\s*")
 
 
-def _looks_like_summary_question(question: str) -> bool:
-    lower = question.lower()
-    return any(token in lower for token in ("fasse", "zusammenfass", "überblick", "zusammen"))
+def _chunk_passes_retrieval_threshold(
+    dense_score: float,
+    sparse_score: float,
+) -> bool:
+    return dense_score >= MIN_DENSE_SCORE or sparse_score > 0
 
 
-def _extractive_lacks_evidence_for_question(question: str, chunks: list[str]) -> bool:
-    """True when retrieved passages do not substantively cover the question (on-topic abstain)."""
-    if _looks_like_summary_question(question) or _looks_like_sender_question(question):
-        return False
-    tokens = [
-        t
-        for t in _tokenize(question)
-        if t not in _QUERY_STOPWORDS and len(t) >= _MIN_QUERY_TOKEN_LEN
-    ]
-    if not tokens:
-        return False
-    joined = " ".join(chunks).lower()
-    hits = sum(1 for token in tokens if token in joined)
-    required = max(1, (len(tokens) + 1) // 2)
-    return hits < required
+def _select_ranked_chunks(
+    chunks: list[str],
+    ranked: list[int],
+    dense_scores: list[float],
+    sparse_scores: list[float],
+    *,
+    top_k: int,
+) -> list[str]:
+    selected: list[str] = []
+    for idx in ranked:
+        if len(selected) >= top_k:
+            break
+        if not _chunk_passes_retrieval_threshold(dense_scores[idx], sparse_scores[idx]):
+            continue
+        piece = chunks[idx]
+        if piece not in selected:
+            selected.append(piece)
+    return selected
+
+
+def _source_tags_from_chunks(chunks: list[str]) -> list[str]:
+    tags: list[str] = []
+    for chunk in chunks:
+        match = _CHUNK_TAG_RE.match(chunk)
+        if match:
+            tag = match.group(1).strip()
+            if tag and tag not in tags:
+                tags.append(tag)
+    return tags
 
 
 def retrieve_document_rag_context(
@@ -301,18 +263,13 @@ def retrieve_document_rag_context(
     ]
     ranked = sorted(range(len(chunks)), key=lambda i: hybrid[i], reverse=True)
 
-    selected: list[str] = []
-    for idx in ranked:
-        if len(selected) >= top_k:
-            break
-        if dense_scores[idx] < MIN_DENSE_SCORE and sparse_scores[idx] <= 0:
-            continue
-        piece = chunks[idx]
-        if piece not in selected:
-            selected.append(piece)
-
-    if not selected and ranked:
-        selected = [chunks[ranked[0]]]
+    selected = _select_ranked_chunks(
+        chunks,
+        ranked,
+        dense_scores,
+        sparse_scores,
+        top_k=top_k,
+    )
 
     context_parts: list[str] = []
     total = 0
@@ -376,18 +333,13 @@ def retrieve_library_rag_context(
     ]
     ranked = sorted(range(len(tagged_chunks)), key=lambda i: hybrid[i], reverse=True)
 
-    selected: list[str] = []
-    for idx in ranked:
-        if len(selected) >= top_k:
-            break
-        if dense_scores[idx] < MIN_DENSE_SCORE and sparse_scores[idx] <= 0:
-            continue
-        piece = tagged_chunks[idx]
-        if piece not in selected:
-            selected.append(piece)
-
-    if not selected and ranked:
-        selected = [tagged_chunks[ranked[0]]]
+    selected = _select_ranked_chunks(
+        tagged_chunks,
+        ranked,
+        dense_scores,
+        sparse_scores,
+        top_k=top_k,
+    )
 
     context_parts: list[str] = []
     total = 0
@@ -426,12 +378,13 @@ def answer_from_library_context(
     if not retrieval.chunks:
         return EXTRACTIVE_ABSTAIN_NO_PASSAGE + "."
 
-    if _extractive_lacks_evidence_for_question(trimmed, retrieval.chunks):
-        return f"{EXTRACTIVE_ABSTAIN_NO_MATCH}."
-
     excerpts = " ".join(f"„{chunk}“" for chunk in retrieval.chunks)
     lead = f"Zu „{trimmed}“: "
-    sources = ", ".join(sorted({doc.filename or doc.title or "Dokument" for doc in documents}))
+    cited = _source_tags_from_chunks(retrieval.chunks)
+    if cited:
+        sources = ", ".join(sorted(cited))
+    else:
+        sources = ", ".join(sorted({doc.filename or doc.title or "Dokument" for doc in documents}))
     return f"{lead}{excerpts} (Quellen: {sources})."
 
 
@@ -475,9 +428,6 @@ def answer_from_document_context(
                 f"Kurzer Kontext: „{fallback}{'…' if len(body) > 400 else ''}“"  # noqa: PLR2004
             )
         return f"{EXTRACTIVE_ABSTAIN_NO_PASSAGE}."
-
-    if _extractive_lacks_evidence_for_question(trimmed, retrieval.chunks):
-        return f"{EXTRACTIVE_ABSTAIN_NO_MATCH}."
 
     excerpts = " ".join(f"„{chunk}“" for chunk in retrieval.chunks)
     lead = f"Zu „{trimmed}“: "

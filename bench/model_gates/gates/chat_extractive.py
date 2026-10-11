@@ -123,7 +123,10 @@ def run_chat_extractive_gate(fixtures_path: Path) -> GateRunResult:
 
         if case.kind == "answerable":
             answerable_total += 1
-            if all(fragment.lower() in answer.lower() for fragment in case.answer_must_contain):
+            lower_ans = answer.lower()
+            must_ok = all(fragment.lower() in lower_ans for fragment in case.answer_must_contain)
+            forbid_ok = all(fragment.lower() not in lower_ans for fragment in case.answer_must_not_contain)
+            if must_ok and forbid_ok:
                 answerable_hits += 1
             if case.evidence_in_retrieval:
                 citation_total += 1
@@ -140,14 +143,16 @@ def run_chat_extractive_gate(fixtures_path: Path) -> GateRunResult:
                 if case.required_source_tags
                 else True
             )
+            forbid_ok = all(fragment.lower() not in lower for fragment in case.answer_must_not_contain)
             text_ok = all(fragment.lower() in lower for fragment in case.answer_must_contain)
-            if tags_ok and text_ok:
+            if tags_ok and text_ok and forbid_ok:
                 multi_hits += 1
 
         if case.kind == "open":
             open_total += 1
             lower = answer.lower()
-            if any(token.lower() in lower for token in case.acceptable_answers):
+            hits = sum(1 for token in case.acceptable_answers if token.lower() in lower)
+            if hits >= case.open_min_token_hits:
                 open_hits += 1
 
     answer_accuracy = 0.0 if answerable_total == 0 else answerable_hits / answerable_total

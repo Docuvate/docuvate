@@ -10,7 +10,12 @@ ROOT = Path(__file__).resolve().parents[3]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from bench.model_gates.baseline_guard import check_baseline_not_weakened, compare_baselines
+from bench.model_gates.baseline_guard import (
+    JUSTIFICATION_REL_PATH,
+    baseline_lower_allowed,
+    check_baseline_not_weakened,
+    compare_baselines,
+)
 from bench.model_gates.json_models import BaselineDirectionModel
 
 
@@ -28,6 +33,25 @@ def test_compare_baselines_detects_lowered_floor() -> None:
     violations = compare_baselines(parent, current)
     assert len(violations) == 1
     assert violations[0].reason == "floor lowered"
+
+
+def test_baseline_lower_not_allowed_without_label_or_justification_diff() -> None:
+    assert not baseline_lower_allowed(allow_lower_label=False, changed_paths=frozenset())
+    assert not baseline_lower_allowed(
+        allow_lower_label=False,
+        changed_paths=frozenset(["bench/model_gates/baseline.json"]),
+    )
+
+
+def test_baseline_lower_allowed_when_justification_changes_in_pr() -> None:
+    assert baseline_lower_allowed(
+        allow_lower_label=False,
+        changed_paths=frozenset([JUSTIFICATION_REL_PATH]),
+    )
+
+
+def test_baseline_lower_allowed_with_pr_label() -> None:
+    assert baseline_lower_allowed(allow_lower_label=True, changed_paths=frozenset())
 
 
 def test_check_allows_lower_with_flag() -> None:

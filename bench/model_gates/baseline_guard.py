@@ -11,7 +11,7 @@ from pathlib import Path
 from bench.model_gates.json_models import BaselineDirectionModel
 from bench.model_gates.ratchet import metric_direction_for
 
-JUSTIFICATION_PATH = Path(__file__).resolve().parent / "BASELINE_LOWER_JUSTIFICATION.md"
+JUSTIFICATION_REL_PATH = "bench/model_gates/BASELINE_LOWER_JUSTIFICATION.md"
 
 
 @dataclass(frozen=True)
@@ -61,6 +61,17 @@ def compare_baselines(parent: BaselineDirectionModel, current: BaselineDirection
                 )
             )
     return violations
+
+
+def baseline_lower_allowed(
+    *,
+    allow_lower_label: bool,
+    changed_paths: frozenset[str],
+) -> bool:
+    """Lowering floors is allowed only with an explicit label or a justification change in this PR."""
+    if allow_lower_label:
+        return True
+    return JUSTIFICATION_REL_PATH in changed_paths
 
 
 def check_baseline_not_weakened(
