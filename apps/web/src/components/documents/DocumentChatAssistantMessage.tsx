@@ -92,12 +92,15 @@ export function DocumentChatAssistantMessage({
     }
   }
 
-  const generationError = toUserFacingChatGenerationError(message.errorCode);
+  const generationError = isFailed
+    ? toUserFacingChatGenerationError(message.errorCode, { log: true })
+    : null;
 
   const displayContent =
     message.content && looksLikeCitedAnswerJson(message.content)
       ? extractReadableCitedAnswerPreview(message.content)
       : message.content;
+  const hasStreamingText = Boolean(displayContent && displayContent.trim().length > 0);
 
   return (
     <li
@@ -105,7 +108,7 @@ export function DocumentChatAssistantMessage({
     >
       <span className="doc-chat-role">{t('documents.documentChat.roleAssistant')}</span>
 
-      {isActive ? (
+      {isActive && !hasStreamingText ? (
         <div className="doc-chat-status-block" role="status" aria-live="polite">
           <div className="doc-chat-typing-body">
             <Spinner size="sm" label={statusLine ?? t('documents.documentChat.typing')} />
@@ -125,7 +128,20 @@ export function DocumentChatAssistantMessage({
         </div>
       ) : null}
 
-      {displayContent ? <p className="doc-chat-assistant-content">{displayContent}</p> : null}
+      {isActive && hasStreamingText ? (
+        <div className="doc-chat-status-block doc-chat-status-block-compact" role="status" aria-live="polite">
+          <span className="muted doc-chat-streaming-phase">{statusLine}</span>
+          <span className="muted doc-chat-elapsed">{formatElapsed(elapsed)}</span>
+        </div>
+      ) : null}
+
+      {displayContent ? (
+        <p
+          className={`doc-chat-assistant-content${isActive ? ' doc-chat-assistant-content-streaming' : ''}`}
+        >
+          {displayContent}
+        </p>
+      ) : null}
 
       {message.citations && message.citations.length > 0 ? (
         <div className="doc-chat-sources">
@@ -151,7 +167,7 @@ export function DocumentChatAssistantMessage({
       {isFailed ? (
         <div className="doc-chat-error-block" role="alert">
           <p>{formatChatGenerationError(message.errorCode)}</p>
-          {generationError.retryable ? (
+          {generationError?.retryable ? (
             <Button
               type="button"
               variant="secondary"

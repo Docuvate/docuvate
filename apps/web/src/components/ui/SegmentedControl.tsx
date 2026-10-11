@@ -94,7 +94,7 @@ export function SegmentedControl<T extends string>({
 
   return (
     <div
-      className={`segmented-control ${className}`.trim()}
+      className={`segmented-control segmented-control--shell ${className}`.trim()}
       role="radiogroup"
       aria-label={ariaLabel}
       tabIndex={0}

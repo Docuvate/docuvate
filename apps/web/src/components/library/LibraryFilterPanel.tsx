@@ -8,6 +8,7 @@ import type { DocumentFilterParseIssue } from '../../lib/documentFilterQuery';
 import { documentStatusLabel, parseDocumentStatusFilterValue } from '../../lib/documentStatusLabel';
 import type { LibraryFilterMode } from '../../lib/libraryFilterMode';
 import { Input } from '../ui/Input';
+import { SegmentedControl } from '../ui/SegmentedControl';
 import { Select } from '../ui/Select';
 
 const ICON_SIZE = 18;
@@ -59,24 +60,16 @@ export function LibraryFilterPanel({
       </div>
 
       <div className="filter-panel-body">
-        <div className="filter-mode-switch" role="group" aria-label={t('library.filter.modeAria')}>
-          <button
-            type="button"
-            className={`filter-mode-btn${filterMode === 'ui' ? ' filter-mode-btn-active' : ''}`}
-            aria-pressed={filterMode === 'ui'}
-            onClick={() => { onFilterModeChange('ui'); }}
-          >
-            {t('library.filter.modeUi')}
-          </button>
-          <button
-            type="button"
-            className={`filter-mode-btn${filterMode === 'query' ? ' filter-mode-btn-active' : ''}`}
-            aria-pressed={filterMode === 'query'}
-            onClick={() => { onFilterModeChange('query'); }}
-          >
-            {t('library.filter.modeQuery')}
-          </button>
-        </div>
+        <SegmentedControl<LibraryFilterMode>
+          ariaLabel={t('library.filter.modeAria')}
+          className="filter-mode-switch segmented-control--text segmented-control--menu-block"
+          value={filterMode}
+          options={[
+            { value: 'ui', label: t('library.filter.modeUi') },
+            { value: 'query', label: t('library.filter.modeQuery') },
+          ]}
+          onChange={onFilterModeChange}
+        />
 
         {filterMode === 'query' ? (
           <div className="filter-query-block">

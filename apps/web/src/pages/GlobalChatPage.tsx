@@ -19,12 +19,11 @@ import {
   sendLibraryChatThreadMessage,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
-import {
-  isChatGenerationInProgress,
-  threadListShowsGenerationSpinner,
-} from '../lib/chatGenerationActive';
+import { isChatGenerationInProgress } from '../lib/chatGenerationActive';
+import { showThreadListSpinner } from '../lib/chatThreadSpinner';
 import { routes } from '../lib/routes';
 import { useLibraryChatMessageStream } from '../lib/useLibraryChatMessageStream';
+import { useStackedDocChatLayout } from '../lib/useStackedDocChatLayout';
 
 function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string {
   const date = new Date(thread.updatedAt);
@@ -56,6 +55,7 @@ export function GlobalChatPage() {
     () => isChatGenerationInProgress(messages, loadingMessages),
     [messages, loadingMessages]
   );
+  const { stacked, threadsOpen, toggleThreads, closeThreads } = useStackedDocChatLayout(false);
   const hasThreads = threads.length > 0;
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
 
@@ -165,6 +165,12 @@ export function GlobalChatPage() {
   }, [generationInProgress, refreshThreads, activeThreadId]);
 
   useEffect(() => {
+    if (!generationInProgress && activeThreadId) {
+      void refreshThreads(activeThreadId);
+    }
+  }, [generationInProgress, activeThreadId, refreshThreads]);
+
+  useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages]);
 
@@ -224,6 +230,8 @@ export function GlobalChatPage() {
     messages.length === 0 &&
     !generationInProgress &&
     activeThreadId != null;
+  const showPanePickThread =
+    hasThreads && !loadingThreads && activeThreadId == null && messages.length === 0;
 
   return (
     <div className="page global-chat-page" data-ux="page">
@@ -244,8 +252,20 @@ export function GlobalChatPage() {
 
       <section className="doc-chat global-chat-doc-chat" aria-labelledby="global-chat-heading">
         <div
-          className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}`}
+          className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}${stacked && hasThreads ? ' doc-chat-layout-stacked' : ''}${stacked && threadsOpen ? ' doc-chat-threads-visible' : ''}`}
         >
+          {stacked && hasThreads ? (
+            <div className="doc-chat-threads-toolbar">
+              <Button
+                type="button"
+                variant="secondary"
+                className="doc-chat-threads-toggle"
+                onClick={toggleThreads}
+              >
+                {t('globalChat.threadsToggle')}
+              </Button>
+            </div>
+          ) : null}
           {hasThreads ? (
             <aside className="doc-chat-threads" aria-label={t('globalChat.threads')}>
               <div className="doc-chat-threads-head">
@@ -268,14 +288,21 @@ export function GlobalChatPage() {
               <ul className="doc-chat-thread-list">
                 {threads.map((thread) => {
                   const selected = thread.id === activeThreadId;
-                  const threadBusy = threadListShowsGenerationSpinner(thread);
+                  const threadBusy = showThreadListSpinner(
+                    thread,
+                    activeThreadId,
+                    generationInProgress
+                  );
                   return (
                     <li key={thread.id}>
                       <button
                         type="button"
                         className={`doc-chat-thread-item${selected ? ' active' : ''}`}
                         aria-current={selected ? 'true' : undefined}
-                        onClick={() => { setActiveThreadId(thread.id); }}
+                        onClick={() => {
+                          setActiveThreadId(thread.id);
+                          if (stacked) closeThreads();
+                        }}
                       >
                         <span className="doc-chat-thread-title-row">
                           <span className="doc-chat-thread-title">{thread.title}</span>
@@ -320,10 +347,18 @@ export function GlobalChatPage() {
                   </p>
                 ) : null}
 
-                {showBootstrapEmpty ? (
+                {showBootstrapEmpty || showPanePickThread ? (
                   <div className="doc-chat-empty-state doc-chat-empty-state-bootstrap">
-                    <p className="muted doc-chat-empty-lead">{t('globalChat.bootstrapLead')}</p>
+                    <h2 className="doc-chat-empty-title">{t('globalChat.emptyPaneTitle')}</h2>
+                    <p className="muted doc-chat-empty-lead">
+                      {showPanePickThread ? t('globalChat.pickThreadLead') : t('globalChat.bootstrapLead')}
+                    </p>
                     <p className="muted doc-chat-empty-hint">{t('globalChat.placeholder')}</p>
+                    <ul className="doc-chat-empty-examples">
+                      <li>{t('globalChat.exampleHundesteuer')}</li>
+                      <li>{t('globalChat.exampleMiete')}</li>
+                      <li>{t('globalChat.exampleKuendigung')}</li>
+                    </ul>
                   </div>
                 ) : null}
 

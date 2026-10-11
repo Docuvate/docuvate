@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import { AdminRouteGuard } from './components/admin/AdminRouteGuard';
 import { AppBootLoading } from './components/AppBootLoading';
 import { AppShell } from './components/AppShell';
 import { authClient } from './lib/auth-client';
@@ -205,7 +206,9 @@ export function App() {
         path={routes.settingsAdmin}
         element={
           <ShellRoute>
-            <AdminSettingsPage />
+            <AdminRouteGuard>
+              <AdminSettingsPage />
+            </AdminRouteGuard>
           </ShellRoute>
         }
       />
@@ -213,7 +216,9 @@ export function App() {
         path={routes.settingsAdminUsers}
         element={
           <ShellRoute>
-            <AdminUsersPage />
+            <AdminRouteGuard>
+              <AdminUsersPage />
+            </AdminRouteGuard>
           </ShellRoute>
         }
       />

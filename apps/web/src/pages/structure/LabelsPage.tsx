@@ -61,11 +61,12 @@ export function LabelsPage() {
   }, []);
 
   const insights = useLabelsInsights(loadTags);
+  const loadInsights = insights.load;
 
   useEffect(() => {
     void loadTags();
-    void insights.load();
-  }, [loadTags, insights]);
+    void loadInsights();
+  }, [loadTags, loadInsights]);
 
   function startCreate(name?: string) {
     setEditingId('new');

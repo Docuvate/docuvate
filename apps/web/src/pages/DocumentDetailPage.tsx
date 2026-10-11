@@ -19,6 +19,7 @@ import {
   DocumentDetailMetaBar,
   DocumentDetailTabStrip,
 } from '../components/documents/DocumentDetailMetaBar';
+import { DocumentDetailNotFound } from '../components/documents/DocumentDetailNotFound';
 import { DocumentExtractionSection } from '../components/documents/DocumentExtractionSection';
 import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
 import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
@@ -446,13 +447,12 @@ export function DocumentDetailPage() {
   }, []);
 
   if (loading) return <DocumentDetailLoadingShell />;
-  if (error && !doc)
-    return (
-      <p className="error" role="alert">
-        {error}
-      </p>
-    );
-  if (!doc) return <p className="error">{t('documents.notFound')}</p>;
+  if (error && !doc) {
+    return <DocumentDetailNotFound message={error} />;
+  }
+  if (!doc) {
+    return <DocumentDetailNotFound />;
+  }
 
   const previewLoading = previewFetchState === 'loading';
   const previewUnavailable = previewFetchState === 'missing' && !isExtractionPending(doc.status);
@@ -528,6 +528,13 @@ export function DocumentDetailPage() {
             <LabelPanel document={doc} onUpdated={setDoc} />
             <LabelPlacementHints document={doc} />
           </div>
+        ) : null}
+
+        {layoutWorkspace && activeTab !== 'details' && activeTab !== 'labels' ? (
+          <div
+            className="detail-tab-panel-surface detail-tab-panel-surface--workspace-spacer"
+            aria-hidden="true"
+          />
         ) : null}
 
         {activeTab === 'chat' && !layoutWorkspace ? (

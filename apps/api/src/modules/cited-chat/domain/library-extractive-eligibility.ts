@@ -23,7 +23,7 @@ export function libraryExtractiveRows(top: RankedChunkRow[]): RankedChunkRow[] {
   if (runnerUp.chunk.documentId === best.chunk.documentId) {
     return [best];
   }
-  if (best.score >= runnerUp.score * 1.12) {
+  if (best.score >= runnerUp.score * 1.06) {
     return [best];
   }
   return [];

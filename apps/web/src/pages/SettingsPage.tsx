@@ -176,7 +176,11 @@ export function SettingsPage() {
       ? 'off'
       : preferredChat && preferredChat.length > 0
         ? preferredChat
-        : 'default';
+        : selectable.length === 1
+          ? selectable[0].id
+          : selectable.length > 0
+            ? 'default'
+            : 'off';
   const showProviderSelect = chatCatalog !== null;
   const chatProviderOptions = [
     { value: 'off', label: chatProviderLabel('off') },
