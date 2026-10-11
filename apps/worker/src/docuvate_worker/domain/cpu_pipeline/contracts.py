@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractedField, ExtractionBlock
 
 
@@ -58,7 +59,6 @@ class LunaBlockLabel:
 
 @dataclass(frozen=True)
 class LunaStageData:
-    blocks: tuple[ExtractionBlock, ...]
     labels: tuple[LunaBlockLabel, ...]
 
 
@@ -141,6 +141,7 @@ class PipelineRunInput:
     content: bytes
     mime_type: str
     document_id: str | None = None
+    embedding_density_state: EmbeddingDensityStatePayload | None = None
 
 
 @dataclass
@@ -150,3 +151,14 @@ class PipelineMutableState:
     document_id: str | None
     text: str = ""
     blocks: list[ExtractionBlock] = field(default_factory=list)
+    embedding_density_state: EmbeddingDensityStatePayload | None = None
+
+
+@dataclass(frozen=True)
+class CpuPipelineExtractionArtifacts:
+    taco_availability: StageAvailability
+    taco: TacoStageData
+    nest_availability: StageAvailability
+    nest: NestStageData
+    kite_index_availability: StageAvailability
+    kite_index: KiteIndexStageData

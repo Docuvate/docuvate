@@ -19,6 +19,7 @@ from docuvate_worker.application.embedding_density import (
     train_from_labeled_examples,
 )
 from docuvate_worker.application.extract import extract_document
+from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
 from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.infrastructure.chat.context_qa import retrieve_document_rag_context
@@ -153,7 +154,14 @@ def extract(
         ExtractorRegistry,
     )
 
-    result = extract_document(raw, body.mime_type, engine=body.engine)
+    density_state = None
+    if body.embedding_density_state is not None:
+        density_state = EmbeddingDensityStatePayload.model_validate(
+            body.embedding_density_state.model_dump()
+        )
+    result = extract_document(
+        raw, body.mime_type, engine=body.engine, embedding_density_state=density_state
+    )
     active = body.engine or ExtractorRegistry().active_engine
     suggestions = result.field_suggestions or []
     return ExtractResponse(
@@ -181,6 +189,7 @@ def extract(
         layout_reconstruction_reliable=result.layout_reconstruction_reliable,
         layout_unreliable_reason=result.layout_unreliable_reason,
         engine=active,
+        cpu_pipeline=cpu_pipeline_to_response(result.cpu_pipeline),
     )
 
 

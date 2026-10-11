@@ -21,15 +21,20 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
     PipelineMutableState,
     PipelineRunInput,
 )
+from docuvate_worker.domain.cpu_pipeline.embedding_density_port import (
+    StaticEmbeddingDensityStatePort,
+)
 
 
 def run_integrated_cpu_document_pipeline(
     run_input: PipelineRunInput,
 ) -> IntegratedPipelineResult:
+    density_port = StaticEmbeddingDensityStatePort(run_input.embedding_density_state)
     state = PipelineMutableState(
         content=run_input.content,
         mime_type=run_input.mime_type,
         document_id=run_input.document_id,
+        embedding_density_state=density_port.resolve(run_input.document_id),
     )
     ocr = run_ocr_stage(state)
     rotation = run_rotation_stage(state)

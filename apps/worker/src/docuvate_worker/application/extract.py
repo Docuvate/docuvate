@@ -3,8 +3,10 @@
 
 import logging
 
+from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.infrastructure.extractors.engine_catalog import engine_by_name
+from docuvate_worker.infrastructure.extractors.pipeline import extract_with_cpu_pipeline
 from docuvate_worker.infrastructure.extractors.markdown import extraction_to_markdown
 from docuvate_worker.infrastructure.extractors.registry import ExtractorRegistry
 from docuvate_worker.infrastructure.layout.build import build_layout_ir
@@ -26,6 +28,7 @@ def _with_markdown(result: ExtractionResult) -> ExtractionResult:
         field_suggestions=result.field_suggestions,
         blocks=result.blocks,
         markdown=markdown,
+        cpu_pipeline=result.cpu_pipeline,
     )
 
 
@@ -65,14 +68,29 @@ def _with_layout_ir(
         layout_unreliable_reason=(
             fidelity.unreliable_reason.value if fidelity.unreliable_reason else None
         ),
+        cpu_pipeline=result.cpu_pipeline,
     )
 
 
 def extract_document(
-    content: bytes, mime_type: str, engine: str | None = None
+    content: bytes,
+    mime_type: str,
+    engine: str | None = None,
+    *,
+    embedding_density_state: EmbeddingDensityStatePayload | None = None,
 ) -> ExtractionResult:
     resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
-    base = _with_markdown(resolved.extract(content, mime_type))
+    if resolved.name == "pipeline" and embedding_density_state is not None:
+        state = (
+            embedding_density_state
+            if isinstance(embedding_density_state, EmbeddingDensityStatePayload)
+            else EmbeddingDensityStatePayload.model_validate(embedding_density_state)
+        )
+        base = _with_markdown(
+            extract_with_cpu_pipeline(content, mime_type, embedding_density_state=state)
+        )
+    else:
+        base = _with_markdown(resolved.extract(content, mime_type))
     return _with_layout_ir(base, content, mime_type)
 
 

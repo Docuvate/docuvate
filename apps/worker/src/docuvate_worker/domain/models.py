@@ -1,7 +1,13 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
+from __future__ import annotations
+
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from docuvate_worker.domain.cpu_pipeline.contracts import CpuPipelineExtractionArtifacts
 
 
 @dataclass(frozen=True)
@@ -32,3 +38,4 @@ class ExtractionResult:
     layout_ir: dict[str, object] | None = None
     layout_reconstruction_reliable: bool | None = None
     layout_unreliable_reason: str | None = None
+    cpu_pipeline: CpuPipelineExtractionArtifacts | None = None
