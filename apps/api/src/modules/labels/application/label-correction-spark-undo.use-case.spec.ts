@@ -23,7 +23,7 @@ function tag(id: string, isInbox = false): TagEntity {
     name: id,
     color: '#000',
     isInbox,
-    matchingAlgorithm: 'literal',
+    matchingAlgorithm: 'none',
     match: '',
   };
 }
