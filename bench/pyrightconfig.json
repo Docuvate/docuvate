@@ -5,5 +5,7 @@
   "typeCheckingMode": "strict",
   "reportMissingTypeStubs": false,
   "reportMissingImports": "error",
-  "extraPaths": ["..", "../apps/worker/src", "../apps/worker"]
+  "extraPaths": ["..", "../apps/worker/src", "../apps/worker"],
+  "venvPath": "../apps/worker",
+  "venv": ".venv"
 }
