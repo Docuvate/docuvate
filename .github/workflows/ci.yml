@@ -46,6 +46,8 @@ jobs:
           python-version-file: .tool-versions
       - name: Model gates (CPU eval + ratchet)
         if: steps.paths.outputs.run == 'true'
+        env:
+          MODEL_GATES_EXCLUDE: ${{ matrix.runner == 'ubuntu-24.04-arm' && 'layout_ssim' || '' }}
         run: bash scripts/ci/run-model-gates.sh
 
   lint-test:

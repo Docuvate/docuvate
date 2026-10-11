@@ -81,9 +81,13 @@ def flatten_metrics(gates: tuple[GateRunResult, ...]) -> dict[str, float]:
 def compare_to_baseline(
     measured: dict[str, float],
     baseline: CommittedBaseline,
+    *,
+    only_keys: frozenset[str] | None = None,
 ) -> list[RatchetViolation]:
     violations: list[RatchetViolation] = []
     for key, floor_or_ceiling in baseline.metrics.items():
+        if only_keys is not None and key not in only_keys:
+            continue
         if key not in measured:
             violations.append(
                 RatchetViolation(

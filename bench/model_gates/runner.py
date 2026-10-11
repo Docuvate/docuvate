@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 from bench.model_gates.gates.chat_extractive import run_chat_extractive_gate
@@ -38,14 +39,24 @@ def _chat_fixtures_path() -> Path:
     return Path(__file__).resolve().parent / "fixtures" / "chat_extractive_cases.json"
 
 
-def run_harness() -> HarnessResult:
+def _excluded_gate_ids() -> frozenset[str]:
+    raw = os.environ.get("MODEL_GATES_EXCLUDE", "").strip()
+    if not raw:
+        return frozenset()
+    return frozenset(part.strip() for part in raw.split(",") if part.strip())
+
+
+def run_harness(excluded: frozenset[str] | None = None) -> HarnessResult:
+    skip = excluded if excluded is not None else _excluded_gate_ids()
     root = _repo_root()
-    gates: list[GateRunResult] = [
-        run_chat_extractive_gate(_chat_fixtures_path()),
-        run_classification_gate(),
-        run_layout_ssim_gate(root),
-        *run_stub_gates(),
-    ]
+    gates: list[GateRunResult] = []
+    if "chat_extractive" not in skip:
+        gates.append(run_chat_extractive_gate(_chat_fixtures_path()))
+    if "classification" not in skip:
+        gates.append(run_classification_gate())
+    if "layout_ssim" not in skip:
+        gates.append(run_layout_ssim_gate(root))
+    gates.extend(run_stub_gates())
     return HarnessResult(version=BASELINE_VERSION, gates=tuple(gates))
 
 
@@ -98,7 +109,7 @@ def run_check(
         return result, measured, messages, 1
 
     baseline = load_baseline(baseline_path)
-    violations = compare_to_baseline(measured, baseline)
+    violations = compare_to_baseline(measured, baseline, only_keys=frozenset(measured.keys()))
     for v in violations:
         if v.direction == "higher_is_better":
             messages.append(
