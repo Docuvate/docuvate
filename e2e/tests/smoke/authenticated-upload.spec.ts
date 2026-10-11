@@ -10,8 +10,8 @@ const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
 function uniqueUploadTitle(testId: string): string {
-  const slug = testId.replace(/[^a-z0-9-]+/gi, '-').slice(0, 40);
-  return `e2e-synthetic-${slug}.pdf`;
+  const slug = testId.replace(/[^a-z0-9]+/gi, '').slice(-10) || 'upload';
+  return `e2e-${slug}.pdf`;
 }
 
 test.use({ trace: 'on', storageState: smokeFixtureStoragePath() });
@@ -116,18 +116,28 @@ test.describe('Authenticated compose smoke', () => {
     const readyDocId = await uploadSyntheticPdfViaUi(page, uploadTitle);
     await waitForDocumentReadyById(request, readyDocId);
 
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    const docHref = `/documents/${readyDocId}`;
+    const titleLink = page.locator(`a[href="${docHref}"]`).first();
+    await expect
+      .poll(
+        async () => {
+          await page.reload({ waitUntil: 'domcontentloaded' });
+          return await titleLink.isVisible().catch(() => false);
+        },
+        { timeout: 120_000, intervals: [2000, 3000, 5000] }
+      )
+      .toBe(true);
 
-    const docRow = page
-      .getByRole('row')
-      .filter({ hasText: uploadTitle })
-      .filter({ has: page.locator('.badge-ready, .badge.badge-ready') });
-    await expect(docRow.first()).toBeVisible({ timeout: 60_000 });
-    await expect(docRow.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
+    const docItem = page.locator('tr, .doc-card').filter({ has: titleLink });
+    await expect(docItem.first()).toBeVisible({ timeout: 30_000 });
+    await expect(docItem.first().locator('.badge-ready, .badge.badge-ready')).toBeVisible({
+      timeout: 30_000,
+    });
+    await expect(docItem.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
 
     await attachScreenshot(page, testInfo, '02-after-upload-list.png');
 
-    await docRow.first().locator('a.library-open-doc-btn, a[href*="/documents/"]').first().click();
+    await titleLink.click();
     await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
 
     await expect(page.getByText(/loading pdf|pdf wird geladen/i)).toHaveCount(0, { timeout: 180_000 });
