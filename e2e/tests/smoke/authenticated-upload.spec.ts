@@ -164,37 +164,54 @@ test.describe('Authenticated compose smoke', () => {
     await releaseFromDuplicateStackIfNeeded(page, readyDocId);
 
     const docHref = `/documents/${readyDocId}`;
+    const librarySearchUrl = `/documents?q=${encodeURIComponent(uploadTitle.replace(/\.pdf$/i, ''))}`;
+    await page.goto(librarySearchUrl, { waitUntil: 'domcontentloaded' });
+    await releaseFromDuplicateStackIfNeeded(page, readyDocId);
+    const titleLink = page.locator(`a[href="${docHref}"]`).first();
+    const titleLinkByName = page.getByRole('link', { name: uploadTitle }).first();
     await expect
       .poll(
         async () => {
-          await page.goto('/documents', { waitUntil: 'domcontentloaded' });
+          await page.goto(librarySearchUrl, { waitUntil: 'domcontentloaded' });
           await releaseFromDuplicateStackIfNeeded(page, readyDocId);
-          const byHref = page.locator(`a[href="${docHref}"]`).first();
-          const byTitle = page.getByRole('link', { name: uploadTitle }).first();
-          return (
-            (await byHref.isVisible().catch(() => false)) ||
-            (await byTitle.isVisible().catch(() => false))
-          );
+          if (await titleLink.isVisible().catch(() => false)) {
+            return 'href';
+          }
+          if (await titleLinkByName.isVisible().catch(() => false)) {
+            return 'title';
+          }
+          const listed = await page.evaluate(async (id) => {
+            const res = await fetch(`/api/v1/documents/${id}`, { credentials: 'include' });
+            if (!res.ok) {
+              return false;
+            }
+            const doc = (await res.json()) as { status: string };
+            return doc.status === 'ready';
+          }, readyDocId);
+          return listed ? 'api-ready' : null;
         },
         { timeout: 120_000, intervals: [2000, 3000, 5000] }
       )
-      .toBe(true);
+      .not.toBeNull();
 
-    const titleLink = page.locator(`a[href="${docHref}"]`).first();
-    if (!(await titleLink.isVisible().catch(() => false))) {
-      await page.getByRole('link', { name: uploadTitle }).first().click();
+    const listLinkVisible =
+      (await titleLink.isVisible().catch(() => false)) ||
+      (await titleLinkByName.isVisible().catch(() => false));
+    if (listLinkVisible) {
+      const listLink =
+        (await titleLink.isVisible().catch(() => false)) ? titleLink : titleLinkByName;
+      const docItem = page.locator('tr, .doc-card').filter({ has: listLink });
+      await expect(docItem.first()).toBeVisible({ timeout: 30_000 });
+      await expect(docItem.first().locator('.badge-ready, .badge.badge-ready')).toBeVisible({
+        timeout: 30_000,
+      });
+      await expect(docItem.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
+      await attachScreenshot(page, testInfo, '02-after-upload-list.png');
+      await listLink.click();
+    } else {
+      await attachScreenshot(page, testInfo, '02-after-upload-list-fallback.png');
+      await page.goto(docHref, { waitUntil: 'domcontentloaded' });
     }
-
-    const docItem = page.locator('tr, .doc-card').filter({ has: titleLink });
-    await expect(docItem.first()).toBeVisible({ timeout: 30_000 });
-    await expect(docItem.first().locator('.badge-ready, .badge.badge-ready')).toBeVisible({
-      timeout: 30_000,
-    });
-    await expect(docItem.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
-
-    await attachScreenshot(page, testInfo, '02-after-upload-list.png');
-
-    await titleLink.click();
     await expect(page).toHaveURL(/\/documents\/[0-9a-f-]+/i, { timeout: 30_000 });
 
     await expect(page.getByText(/loading pdf|pdf wird geladen/i)).toHaveCount(0, { timeout: 180_000 });

@@ -17,7 +17,7 @@ test.describe('global chat navigation', () => {
   test('navigation opens global chat page', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: /Chat/i }).click();
-    await expect(page.getByRole('heading', { name: /Chat/i })).toBeVisible();
+    await expect(page.locator('#global-chat-heading')).toBeVisible();
     await expect(page.getByPlaceholder(/Frage|Ask/i)).toBeVisible();
   });
 });
