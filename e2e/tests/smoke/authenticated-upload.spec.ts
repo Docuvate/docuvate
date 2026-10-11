@@ -7,9 +7,6 @@ import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 const fixturePdf = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
 const fixturePhrase = 'E2E_SYNTHETIC_FIXTURE_PHRASE_Q1';
 
-const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
-const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
-
 function uniqueUploadTitle(testId: string): string {
   const slug = testId.replace(/[^a-z0-9]+/gi, '').slice(-10) || 'upload';
   return `e2e-${slug}.pdf`;
@@ -81,108 +78,77 @@ async function uploadSyntheticPdfViaUi(
   return body.id;
 }
 
-async function listContainsDocument(
-  request: import('@playwright/test').APIRequestContext,
-  documentId: string
-): Promise<boolean> {
-  const res = await request.get(`${apiBase}/v1/documents`, {
-    headers: { origin: webOrigin },
-  });
-  if (!res.ok()) {
-    return false;
-  }
-  const body = (await res.json()) as { items?: Array<{ id: string }> };
-  return (body.items ?? []).some((doc) => doc.id === documentId);
-}
-
-async function ensureDocumentVisibleInLibrary(
-  request: import('@playwright/test').APIRequestContext,
+async function waitForDocumentReadyInBrowser(
+  page: import('@playwright/test').Page,
   documentId: string
 ): Promise<void> {
   await expect
     .poll(
-      async () => {
-        if (await listContainsDocument(request, documentId)) {
-          return true;
-        }
-        const stackRes = await request.get(`${apiBase}/v1/documents/${documentId}/duplicate-stack`, {
-          headers: { origin: webOrigin },
-        });
-        if (!stackRes.ok()) {
-          return false;
-        }
-        const payload = (await stackRes.json()) as {
-          stack?: {
-            stackId: string;
-            primaryDocumentId: string;
-            members: Array<{ documentId: string; role: string }>;
-          } | null;
-        };
-        const stack = payload.stack;
-        if (!stack) {
-          return false;
-        }
-        const membership = stack.members.find((member) => member.documentId === documentId);
-        if (membership?.role === 'version') {
-          const release = await request.post(
-            `${apiBase}/v1/documents/${stack.primaryDocumentId}/duplicate-stack/not-duplicate`,
-            {
-              headers: { origin: webOrigin },
-              data: { otherDocumentId: documentId },
-            }
-          );
-          if (!release.ok()) {
-            const promote = await request.post(
-              `${apiBase}/v1/documents/${stack.primaryDocumentId}/duplicate-stack/set-primary`,
-              {
-                headers: { origin: webOrigin },
-                data: { stackId: stack.stackId, documentId },
-              }
-            );
-            if (!promote.ok()) {
-              return false;
-            }
+      async () =>
+        page.evaluate(async (docId) => {
+          const res = await fetch(`/api/v1/documents/${docId}`, { credentials: 'include' });
+          if (!res.ok) {
+            return `document-${String(res.status)}`;
           }
-        }
-        return await listContainsDocument(request, documentId);
-      },
-      { timeout: 120_000, intervals: [2000, 3000, 5000] }
-    )
-    .toBe(true);
-}
-
-async function waitForDocumentReadyById(
-  request: import('@playwright/test').APIRequestContext,
-  documentId: string
-): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        const res = await request.get(`${apiBase}/v1/documents/${documentId}`, {
-          headers: { origin: webOrigin },
-        });
-        if (!res.ok()) {
-          return `document-${res.status()}`;
-        }
-        const doc = (await res.json()) as { status: string };
-        if (doc.status === 'failed') {
-          throw new Error(`document ${documentId} extraction failed`);
-        }
-        if (doc.status !== 'ready') {
-          return `status-${doc.status}`;
-        }
-        return 'ready';
-      },
+          const doc = (await res.json()) as { status: string };
+          return doc.status;
+        }, documentId),
       { timeout: 280_000, intervals: [2000, 3000, 5000] }
     )
     .toBe('ready');
+}
+
+async function releaseFromDuplicateStackIfNeeded(
+  page: import('@playwright/test').Page,
+  documentId: string
+): Promise<void> {
+  await page.evaluate(async (docId) => {
+    const stackRes = await fetch(`/api/v1/documents/${docId}/duplicate-stack`, {
+      credentials: 'include',
+    });
+    if (!stackRes.ok) {
+      return;
+    }
+    const payload = (await stackRes.json()) as {
+      stack?: {
+        stackId: string;
+        primaryDocumentId: string;
+        members: Array<{ documentId: string; role: string }>;
+      } | null;
+    };
+    const stack = payload.stack;
+    if (!stack) {
+      return;
+    }
+    const membership = stack.members.find((member) => member.documentId === docId);
+    if (membership?.role !== 'version') {
+      return;
+    }
+    const release = await fetch(
+      `/api/v1/documents/${stack.primaryDocumentId}/duplicate-stack/not-duplicate`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ otherDocumentId: docId }),
+      }
+    );
+    if (release.ok) {
+      return;
+    }
+    await fetch(`/api/v1/documents/${stack.primaryDocumentId}/duplicate-stack/set-primary`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ stackId: stack.stackId, documentId: docId }),
+    });
+  }, documentId);
 }
 
 test.describe('Authenticated compose smoke', () => {
   test('login, upload synthetic PDF, extraction and preview succeed', async ({
     page,
   }, testInfo) => {
-    const request = page.request;
     test.setTimeout(300_000);
     testInfo.annotations.push({ type: 'journey', description: 'compose-smoke-auth-happy-path' });
 
@@ -192,8 +158,8 @@ test.describe('Authenticated compose smoke', () => {
 
     const uploadTitle = uniqueUploadTitle(testInfo.testId);
     const readyDocId = await uploadSyntheticPdfViaUi(page, uploadTitle);
-    await waitForDocumentReadyById(request, readyDocId);
-    await ensureDocumentVisibleInLibrary(request, readyDocId);
+    await waitForDocumentReadyInBrowser(page, readyDocId);
+    await releaseFromDuplicateStackIfNeeded(page, readyDocId);
 
     await page.goto('/documents', { waitUntil: 'domcontentloaded' });
     const searchInput = page.getByRole('textbox', { name: /search|suchen|dokumente/i });
