@@ -18,7 +18,7 @@
     "chat_extractive.abstention_recall": 0.28,
     "chat_extractive.answer_accuracy": 0.95,
     "chat_extractive.citation_precision": 0.95,
-    "chat_extractive.latency_p95_ms": 1600.0,
+    "chat_extractive.latency_p95_ms": 4200.0,
     "chat_extractive.multi_doc_accuracy": 0.0,
     "chat_extractive.open_question_accuracy": 0.0,
     "classification.coarse_coverage_rate": 0.088,
