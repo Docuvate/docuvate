@@ -39,7 +39,7 @@ describe('label correction SPARK undo', () => {
     const taxonomy = {
       listTagsForDocument: vi.fn((documentId: string) => {
         const ids = docTags.get(documentId) ?? [];
-        return Promise.resolve(ids.map((id) => tag(id, id === INBOX)));
+        return Promise.resolve(ids.map((id): TagEntity => tag(id, id === INBOX)));
       }),
       assignTagToDocument: vi.fn((documentId: string, tagId: string) => {
         const ids = docTags.get(documentId) ?? [];
