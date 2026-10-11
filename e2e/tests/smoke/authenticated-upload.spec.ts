@@ -81,6 +81,57 @@ async function uploadSyntheticPdfViaUi(
   return body.id;
 }
 
+async function listContainsDocument(
+  request: import('@playwright/test').APIRequestContext,
+  documentId: string,
+  uploadTitle: string
+): Promise<boolean> {
+  const res = await request.get(`${apiBase}/v1/documents?q=${encodeURIComponent(uploadTitle)}`, {
+    headers: { origin: webOrigin },
+  });
+  if (!res.ok()) {
+    return false;
+  }
+  const body = (await res.json()) as { items?: Array<{ id: string }> };
+  return (body.items ?? []).some((doc) => doc.id === documentId);
+}
+
+async function ensureDocumentVisibleInLibrary(
+  request: import('@playwright/test').APIRequestContext,
+  documentId: string,
+  uploadTitle: string
+): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        if (await listContainsDocument(request, documentId, uploadTitle)) {
+          return true;
+        }
+        const stackRes = await request.get(`${apiBase}/v1/documents/${documentId}/duplicate-stack`, {
+          headers: { origin: webOrigin },
+        });
+        if (stackRes.ok()) {
+          const payload = (await stackRes.json()) as {
+            stack?: { primaryDocumentId: string } | null;
+          };
+          const primaryId = payload.stack?.primaryDocumentId;
+          if (primaryId && primaryId !== documentId) {
+            await request.post(
+              `${apiBase}/v1/documents/${primaryId}/duplicate-stack/not-duplicate`,
+              {
+                headers: { origin: webOrigin },
+                data: { otherDocumentId: documentId },
+              }
+            );
+          }
+        }
+        return await listContainsDocument(request, documentId, uploadTitle);
+      },
+      { timeout: 120_000, intervals: [2000, 3000, 5000] }
+    )
+    .toBe(true);
+}
+
 async function waitForDocumentReadyById(
   request: import('@playwright/test').APIRequestContext,
   documentId: string
@@ -123,18 +174,16 @@ test.describe('Authenticated compose smoke', () => {
     const uploadTitle = uniqueUploadTitle(testInfo.testId);
     const readyDocId = await uploadSyntheticPdfViaUi(page, uploadTitle);
     await waitForDocumentReadyById(request, readyDocId);
+    await ensureDocumentVisibleInLibrary(request, readyDocId, uploadTitle);
+
+    await page.goto('/documents', { waitUntil: 'domcontentloaded' });
+    const searchInput = page.getByRole('textbox', { name: /search|suchen|dokumente/i });
+    await searchInput.fill(uploadTitle);
+    await page.getByRole('button', { name: /search|suchen/i }).click();
 
     const docHref = `/documents/${readyDocId}`;
     const titleLink = page.locator(`a[href="${docHref}"]`).first();
-    await expect
-      .poll(
-        async () => {
-          await page.reload({ waitUntil: 'domcontentloaded' });
-          return await titleLink.isVisible().catch(() => false);
-        },
-        { timeout: 120_000, intervals: [2000, 3000, 5000] }
-      )
-      .toBe(true);
+    await expect(titleLink).toBeVisible({ timeout: 60_000 });
 
     const docItem = page.locator('tr, .doc-card').filter({ has: titleLink });
     await expect(docItem.first()).toBeVisible({ timeout: 30_000 });
