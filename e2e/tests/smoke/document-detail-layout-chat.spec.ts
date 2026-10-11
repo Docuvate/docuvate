@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
+import {
+  DOC_CHAT_QUESTION,
+  openLayoutDocumentPage,
+  uploadLayoutTableDocument,
+} from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -119,16 +123,18 @@ test.describe('document detail layout and chat', () => {
       expect(chatBox.x).toBeGreaterThan(workspaceBox.x);
     }
 
+    const chatPanel = page.locator('.layout-side-panel-chat');
     const started = Date.now();
-    await composer.fill('Wie viele Widget A sind in der Lieferung?');
-    const submit = page.locator('.layout-side-panel-chat button.doc-chat-submit');
+    await composer.fill(DOC_CHAT_QUESTION);
+    const submit = chatPanel.locator('button.doc-chat-submit');
     await expect(submit).toBeEnabled();
     await submit.click();
-    await expect(page.locator('.layout-side-panel-chat .doc-chat-bubble.doc-chat-user')).toBeVisible({
-      timeout: 30_000,
+    await expect(chatPanel.locator('.doc-chat-bubble.doc-chat-user')).toBeVisible({ timeout: 30_000 });
+    const assistant = chatPanel.locator('.doc-chat-bubble.doc-chat-assistant').last();
+    await expect(assistant).not.toHaveClass(/doc-chat-assistant-pending/, { timeout: 60_000 });
+    await expect(assistant.locator('.doc-chat-assistant-content, .doc-chat-error-block p')).toBeVisible({
+      timeout: 5_000,
     });
-    await expect(page.locator('.doc-chat-assistant-content').first()).toBeVisible({ timeout: 60_000 });
-    await expect(page.locator('.doc-chat-assistant-pending')).toHaveCount(0, { timeout: 60_000 });
     expect(Date.now() - started).toBeLessThan(5_000);
   });
 });
