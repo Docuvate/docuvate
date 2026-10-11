@@ -5,13 +5,26 @@ import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-re
 
 const SENTENCE_SPLIT = /(?<=[.!?])\s+/;
 
-function scoreSentence(sentence: string, tokens: string[]): number {
+function questionWantsNumericFact(question: string): boolean {
+  const lower = question.toLowerCase();
+  return /(wie hoch|wie viel|wieviel|betrag|summe|kosten|preis|beitrag|gebühr|miete|fällig)/.test(
+    lower
+  );
+}
+
+function scoreSentence(sentence: string, tokens: string[], question: string): number {
   const lower = sentence.toLowerCase();
   let hits = 0;
   for (const token of tokens) {
     if (lower.includes(token)) {
       hits += 1;
     }
+  }
+  if (questionWantsNumericFact(question) && /\d/.test(sentence)) {
+    hits += 2;
+  }
+  if (/absender|vermieter|mieter|kunde/i.test(question) && /[A-ZÄÖÜ][a-zäöüß]+/.test(sentence)) {
+    hits += 1;
   }
   return hits;
 }
@@ -37,9 +50,9 @@ export function tryExtractiveCitedAnswer(
   let quote = sentences[0] ?? body;
   if (tokens.length > 0 && sentences.length > 1) {
     let bestSentence = quote;
-    let bestHits = scoreSentence(quote, tokens);
+    let bestHits = scoreSentence(quote, tokens, userMessage);
     for (const sentence of sentences) {
-      const hits = scoreSentence(sentence, tokens);
+      const hits = scoreSentence(sentence, tokens, userMessage);
       if (hits > bestHits) {
         bestHits = hits;
         bestSentence = sentence;
@@ -50,7 +63,7 @@ export function tryExtractiveCitedAnswer(
     }
   }
 
-  if (tokens.length > 0 && scoreSentence(quote, tokens) === 0) {
+  if (tokens.length > 0 && scoreSentence(quote, tokens, userMessage) === 0) {
     return null;
   }
 

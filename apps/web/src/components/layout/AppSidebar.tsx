@@ -161,12 +161,7 @@ export function AppSidebar({ mobileDrawerOpen = false, onCloseMobileDrawer }: Ap
                 <span className="sidebar-link-label">{t(labelKey)}</span>
               </NavLink>
               {to === routes.documents ? (
-                <>
-                  <SavedViewsSidebar key={`${to}-saved`} collapsed={collapsed} />
-                  {!collapsed ? (
-                    <div className="sidebar-nav-separator" role="presentation" />
-                  ) : null}
-                </>
+                <SavedViewsSidebar key={`${to}-saved`} collapsed={collapsed} />
               ) : null}
             </Fragment>
           ))}

@@ -1098,7 +1098,7 @@ async function captureLibraryFilterSidebar(locale, filename) {
   if (!panelVisible) {
     throw new Error(`${filename}: filter panel not visible at 1440`);
   }
-  await page.locator('.filter-mode-btn').first().click();
+  await page.locator('.filter-mode-switch .segmented-control__option').first().click();
   await page.waitForTimeout(250);
   await shot(filename, 1440);
 }
