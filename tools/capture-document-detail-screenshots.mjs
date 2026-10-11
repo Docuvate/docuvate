@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * PR #45 acceptance captures: layout viewer modes + chat tab at repo HEAD.
+ * Document detail acceptance captures: layout viewer modes + chat tab at repo HEAD.
  * Prereq: stack up, seed-e2e-smoke-user.mjs. Set LAYOUT_SCREENSHOT_OUT (Agent Store path).
  */
 import { chromium } from 'playwright';
@@ -11,7 +11,8 @@ import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 const WEB = process.env.WEB_ORIGIN ?? 'http://localhost:5173';
-const OUT = process.env.LAYOUT_SCREENSHOT_OUT ?? join(process.cwd(), 'artifacts/screenshots/pr45');
+const OUT =
+  process.env.LAYOUT_SCREENSHOT_OUT ?? join(process.cwd(), 'artifacts/screenshots/document-detail');
 const AUTH = `${WEB}/api/auth`;
 const API = `${WEB}/api/v1`;
 const ORIGIN = new URL(WEB).origin;
@@ -21,7 +22,7 @@ const email = process.env.E2E_SMOKE_EMAIL ?? 'alex.upload@fixture.docuvate.test'
 const password = process.env.E2E_SMOKE_PASSWORD ?? 'E2eSmokeFixture1!';
 
 function syntheticFixturesDir() {
-  const dir = mkdtempSync(join(tmpdir(), 'docuvate-pr45-fixtures-'));
+  const dir = mkdtempSync(join(tmpdir(), 'docuvate-document-detail-fixtures-'));
   const script = `
 import sys
 from pathlib import Path
