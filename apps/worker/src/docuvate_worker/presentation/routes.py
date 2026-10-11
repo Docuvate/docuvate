@@ -35,6 +35,7 @@ from docuvate_worker.infrastructure.extractors.label_custom_fields import (
 )
 from docuvate_worker.infrastructure.hardware_capabilities import detect_hardware_capabilities
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
+from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
 from docuvate_worker.presentation.schemas import (
     CompareEngineResponse,
     CompareRequest,
@@ -153,7 +154,14 @@ def extract(
         ExtractorRegistry,
     )
 
-    result = extract_document(raw, body.mime_type, engine=body.engine)
+    density_state = None
+    if body.embedding_density_state is not None:
+        density_state = EmbeddingDensityStatePayload.model_validate(
+            body.embedding_density_state.model_dump()
+        )
+    result = extract_document(
+        raw, body.mime_type, engine=body.engine, embedding_density_state=density_state
+    )
     active = body.engine or ExtractorRegistry().active_engine
     suggestions = result.field_suggestions or []
     return ExtractResponse(
@@ -181,6 +189,7 @@ def extract(
         layout_reconstruction_reliable=result.layout_reconstruction_reliable,
         layout_unreliable_reason=result.layout_unreliable_reason,
         engine=active,
+        cpu_pipeline=cpu_pipeline_to_response(result.cpu_pipeline),
     )
 
 

@@ -3,17 +3,62 @@
 
 import logging
 
+from docuvate_worker.application.cpu_document_pipeline.orchestrator import (
+    run_integrated_cpu_document_pipeline,
+)
+from docuvate_worker.domain.cpu_pipeline.contracts import (
+    CpuPipelineExtractionArtifacts,
+    PipelineRunInput,
+)
+from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
-from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
-from docuvate_worker.infrastructure.extractors.paddle_engine import ocr_image_bytes, ocr_pdf_bytes
-from docuvate_worker.infrastructure.extractors.pdf_native import try_extract_pdf_native
 
 logger = logging.getLogger(__name__)
 
 
+def extract_with_cpu_pipeline(
+    content: bytes,
+    mime_type: str,
+    *,
+    document_id: str | None = None,
+    embedding_density_state: EmbeddingDensityStatePayload | None = None,
+) -> ExtractionResult:
+    integrated = run_integrated_cpu_document_pipeline(
+        PipelineRunInput(
+            content=content,
+            mime_type=mime_type,
+            document_id=document_id,
+            embedding_density_state=embedding_density_state,
+        )
+    )
+    ocr = integrated.ocr.data
+    logger.info(
+        "CPU pipeline OCR source=%s chars=%d blocks=%d latencies_ms=%s",
+        ocr.source,
+        len(ocr.text),
+        len(ocr.blocks),
+        integrated.latency_report_ms(),
+    )
+    blocks = list(ocr.blocks) or None
+    return ExtractionResult(
+        text=ocr.text,
+        fields=[],
+        field_suggestions=list(integrated.fields.data.suggestions),
+        blocks=blocks,
+        cpu_pipeline=CpuPipelineExtractionArtifacts(
+            taco_availability=integrated.taco.availability,
+            taco=integrated.taco.data,
+            nest_availability=integrated.nest.availability,
+            nest=integrated.nest.data,
+            kite_index_availability=integrated.kite_index.availability,
+            kite_index=integrated.kite_index.data,
+        ),
+    )
+
+
 class PipelineExtractor(ExtractorEngine):
-    """Born-digital PDF text first, then PaddleOCR for scans/images."""
+    """Born-digital PDF text first, then PaddleOCR; runs the integrated CPU analysis chain."""
 
     name = "pipeline"
 
@@ -21,27 +66,4 @@ class PipelineExtractor(ExtractorEngine):
         return mime_type.startswith("image/") or mime_type == "application/pdf"
 
     def extract(self, content: bytes, mime_type: str) -> ExtractionResult:
-        if mime_type == "application/pdf":
-            native = try_extract_pdf_native(content)
-            if native is not None:
-                text, blocks = native
-                logger.info("PDF native text path (%d chars, %d blocks)", len(text), len(blocks))
-                return ExtractionResult(
-                    text=text,
-                    fields=[],
-                    field_suggestions=heuristic_field_suggestions(text),
-                    blocks=blocks or None,
-                )
-            logger.info("PDF has little/no text layer — falling back to PaddleOCR.")
-            text, blocks = ocr_pdf_bytes(content)
-        elif mime_type.startswith("image/"):
-            text, blocks = ocr_image_bytes(content)
-        else:
-            text, blocks = "", []
-
-        return ExtractionResult(
-            text=text.strip(),
-            fields=[],
-            field_suggestions=heuristic_field_suggestions(text),
-            blocks=blocks or None,
-        )
+        return extract_with_cpu_pipeline(content, mime_type)

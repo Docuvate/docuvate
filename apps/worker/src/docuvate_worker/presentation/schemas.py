@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
+from __future__ import annotations
+
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -12,6 +14,9 @@ class ExtractRequest(BaseModel):
     mime_type: str = Field(validation_alias="mime_type")
     content_base64: str
     engine: str | None = None
+    embedding_density_state: EmbeddingDensityStateModel | None = Field(
+        default=None, validation_alias="embeddingDensityState"
+    )
 
 
 class CompareRequest(BaseModel):
@@ -41,6 +46,62 @@ class ExtractionBlockModel(BaseModel):
     block_index: int | None = Field(default=None, serialization_alias="blockIndex")
 
 
+class TacoSpanSuggestionModel(BaseModel):
+    row: int
+    col: int
+    row_span: int = Field(serialization_alias="rowSpan")
+    col_span: int = Field(serialization_alias="colSpan")
+    confidence: float
+
+
+class TacoTableModel(BaseModel):
+    table_index: int = Field(serialization_alias="tableIndex")
+    column_count: int = Field(serialization_alias="columnCount")
+    header_row_count: int = Field(serialization_alias="headerRowCount")
+    header_method: str = Field(serialization_alias="headerMethod")
+    span_suggestions: list[TacoSpanSuggestionModel] = Field(
+        default_factory=list, serialization_alias="spanSuggestions"
+    )
+
+
+class TacoStageModel(BaseModel):
+    availability: str
+    tables: list[TacoTableModel] = Field(default_factory=list)
+
+
+class NestStageModel(BaseModel):
+    availability: str
+    label_id: str | None = Field(default=None, serialization_alias="labelId")
+    group_id: str | None = Field(default=None, serialization_alias="groupId")
+    confidence: float = 0.0
+    novel: bool = False
+    coarse_auto_apply: bool = Field(default=False, serialization_alias="coarseAutoApply")
+    fine_suggest: bool = Field(default=False, serialization_alias="fineSuggest")
+
+
+class KiteIndexChunkModel(BaseModel):
+    chunk_id: str = Field(serialization_alias="chunkId")
+    level: str
+    text: str
+    embedding_dim: int = Field(serialization_alias="embeddingDim")
+
+
+class KiteIndexStageModel(BaseModel):
+    availability: str
+    chunks: list[KiteIndexChunkModel] = Field(default_factory=list)
+    candidate_reader_available: bool = Field(
+        default=False, serialization_alias="candidateReaderAvailable"
+    )
+
+
+class CpuPipelineExtractModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    taco: TacoStageModel
+    nest: NestStageModel
+    kite_index: KiteIndexStageModel = Field(serialization_alias="kiteIndex")
+
+
 class ExtractResponse(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
@@ -59,6 +120,9 @@ class ExtractResponse(BaseModel):
         default=None, serialization_alias="layoutUnreliableReason"
     )
     engine: str | None = None
+    cpu_pipeline: CpuPipelineExtractModel | None = Field(
+        default=None, serialization_alias="cpuPipeline"
+    )
 
 
 class EngineInfo(BaseModel):
@@ -462,3 +526,6 @@ class EmbeddingDensityTrainRequest(BaseModel):
 
 class EmbeddingDensityTrainResponse(BaseModel):
     state: EmbeddingDensityStateModel
+
+
+ExtractRequest.model_rebuild()
