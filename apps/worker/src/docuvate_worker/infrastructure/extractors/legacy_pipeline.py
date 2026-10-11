@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-"""Pre–integrated-CPU-pipeline extraction path (OCR + heuristic fields only)."""
+"""Pre-integrated-CPU-pipeline extraction path (OCR + heuristic fields only)."""
 
 from __future__ import annotations
 

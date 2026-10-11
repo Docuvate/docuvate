@@ -6,8 +6,8 @@ import logging
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.infrastructure.extractors.engine_catalog import engine_by_name
-from docuvate_worker.infrastructure.extractors.pipeline import extract_with_cpu_pipeline
 from docuvate_worker.infrastructure.extractors.markdown import extraction_to_markdown
+from docuvate_worker.infrastructure.extractors.pipeline import extract_with_cpu_pipeline
 from docuvate_worker.infrastructure.extractors.registry import ExtractorRegistry
 from docuvate_worker.infrastructure.layout.build import build_layout_ir
 
