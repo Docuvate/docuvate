@@ -57,8 +57,8 @@ export class ApplyEmbeddingSuggestionsUseCase {
         void this.densityCalibrationQueue.scheduleUserCalibration(userId);
       }
 
-      const usedDensity = await this.embeddingDensity.tryApply(documentId, userId, vector);
-      if (usedDensity) {
+      const densityOutcome = await this.embeddingDensity.tryApply(documentId, userId, vector);
+      if (densityOutcome === 'handled') {
         return;
       }
 

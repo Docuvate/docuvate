@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   AcceptLabelRecommendationRequest,
+  ApplyLabelCorrectionResponse,
   AddLabelRecommendationBlocklistRequest,
   AdminAccessResponse,
   AdminUserDto,
@@ -471,6 +472,27 @@ async function mutateDocumentTags(
 
 export function assignDocumentTag(documentId: string, tagId: string): Promise<DocumentDto> {
   return mutateDocumentTags(documentId, `/documents/${documentId}/tags/${tagId}`, 'POST');
+}
+
+export async function applyDocumentLabelCorrection(
+  documentId: string,
+  toTagId: string
+): Promise<ApplyLabelCorrectionResponse> {
+  const result = await request<ApplyLabelCorrectionResponse>(
+    `/documents/${documentId}/label-corrections`,
+    { method: 'POST', body: JSON.stringify({ toTagId }) }
+  );
+  return result;
+}
+
+export async function withdrawDocumentLabelCorrection(
+  documentId: string,
+  correctionId: string
+): Promise<DocumentDto> {
+  await request(`/documents/${documentId}/label-corrections/${correctionId}/withdraw`, {
+    method: 'POST',
+  });
+  return getDocument(documentId);
 }
 
 export function removeDocumentTag(documentId: string, tagId: string): Promise<DocumentDto> {

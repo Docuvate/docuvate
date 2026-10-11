@@ -7,6 +7,8 @@ import { In, Repository } from 'typeorm';
 import { DocumentEmbeddingsEntity } from '../../../shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from '../../../shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../../shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
+import { CorrectionEntity } from '../../../shared/infrastructure/database/entities/correction.entity.js';
+import { CorrectionLabelAssignmentEntity } from '../../../shared/infrastructure/database/entities/correction-label-assignment.entity.js';
 import { EmbeddingDensityCorrectionEntity } from '../../../shared/infrastructure/database/entities/embedding-density-correction.entity.js';
 import { EmbeddingDensityCorrectionOffsetEntity } from '../../../shared/infrastructure/database/entities/embedding-density-correction-offset.entity.js';
 import { EmbeddingDensityDecisionThresholdEntity } from '../../../shared/infrastructure/database/entities/embedding-density-decision-threshold.entity.js';
@@ -46,6 +48,10 @@ export class PgEmbeddingDensityRepository {
     private readonly thresholdRepo: Repository<EmbeddingDensityDecisionThresholdEntity>,
     @InjectRepository(EmbeddingDensityLabelGroupMemberEntity)
     private readonly groupMemberRepo: Repository<EmbeddingDensityLabelGroupMemberEntity>,
+    @InjectRepository(CorrectionEntity)
+    private readonly correctionsRepo: Repository<CorrectionEntity>,
+    @InjectRepository(CorrectionLabelAssignmentEntity)
+    private readonly correctionLabelRepo: Repository<CorrectionLabelAssignmentEntity>,
     @InjectRepository(EmbeddingDensityCorrectionEntity)
     private readonly correctionRepo: Repository<EmbeddingDensityCorrectionEntity>,
     @InjectRepository(EmbeddingDensityCorrectionOffsetEntity)
@@ -317,14 +323,29 @@ export class PgEmbeddingDensityRepository {
     createdBy: string,
     state: EmbeddingDensityWorkerState,
     tagIds: string[]
-  ): Promise<void> {
+  ): Promise<string | null> {
     const parsed = embeddingDensityWorkerStateSchema.parse(state);
     const points = parsed.kernel.points;
     const offsets = parsed.kernel.label_offsets;
     if (points.length === 0 || offsets.length === 0) {
-      return;
+      return null;
     }
     const offsetVec = offsets[offsets.length - 1];
+    const canonical = this.correctionsRepo.create({
+      userId,
+      documentId,
+      kind: 'label',
+      createdBy,
+      status: 'active',
+    });
+    const savedCanonical = await this.correctionsRepo.save(canonical);
+    await this.correctionLabelRepo.save(
+      this.correctionLabelRepo.create({
+        correctionId: savedCanonical.id,
+        fromTagId,
+        toTagId,
+      })
+    );
     const correction = this.correctionRepo.create({
       userId,
       documentId,
@@ -333,6 +354,7 @@ export class PgEmbeddingDensityRepository {
       modelVersionId: null,
       createdBy,
       status: 'active',
+      correctionId: savedCanonical.id,
     });
     const saved = await this.correctionRepo.save(correction);
     for (let i = 0; i < tagIds.length; i++) {
@@ -353,6 +375,45 @@ export class PgEmbeddingDensityRepository {
       { userId },
       { kernelBandwidth: parsed.kernel.bandwidth, temperature: parsed.temperature }
     );
+    return savedCanonical.id;
+  }
+
+  async findLabelCorrectionAssignment(
+    userId: string,
+    documentId: string,
+    correctionId: string
+  ): Promise<{ fromTagId: string | null; toTagId: string } | null> {
+    const canonical = await this.correctionsRepo.findOne({
+      where: { id: correctionId, userId, documentId, kind: 'label' },
+      relations: ['labelAssignment'],
+    });
+    if (!canonical?.labelAssignment) {
+      return null;
+    }
+    return {
+      fromTagId: canonical.labelAssignment.fromTagId,
+      toTagId: canonical.labelAssignment.toTagId,
+    };
+  }
+
+  async withdrawLabelCorrection(userId: string, correctionId: string): Promise<boolean> {
+    const canonical = await this.correctionsRepo.findOne({
+      where: { id: correctionId, userId, kind: 'label' },
+      relations: ['labelAssignment'],
+    });
+    if (!canonical || canonical.status === 'withdrawn') {
+      return false;
+    }
+    const withdrawnAt = new Date();
+    await this.correctionsRepo.update(
+      { id: correctionId },
+      { status: 'withdrawn', withdrawnAt }
+    );
+    await this.correctionRepo.update(
+      { correctionId },
+      { status: 'withdrawn' }
+    );
+    return true;
   }
 
   async listTrainingExamples(userId: string): Promise<EmbeddingDensityTrainingExamples> {

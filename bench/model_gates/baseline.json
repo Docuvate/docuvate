@@ -11,21 +11,27 @@
     "classification.coarse_precision_at_threshold": "higher_is_better",
     "classification.novel_abstain_rate": "higher_is_better",
     "layout_ssim.min_after_ssim": "higher_is_better",
-    "layout_ssim.worst_margin": "higher_is_better"
+    "layout_ssim.worst_margin": "higher_is_better",
+    "spark.cross_org_regression": "lower_is_better",
+    "spark.learning_curve_lift_after_3": "higher_is_better",
+    "spark.learning_curve_accuracy_after_3": "higher_is_better"
   },
   "metrics": {
-    "chat_extractive.abstention_precision": 0.95,
-    "chat_extractive.abstention_recall": 0.28,
-    "chat_extractive.answer_accuracy": 0.95,
-    "chat_extractive.citation_precision": 0.95,
-    "chat_extractive.latency_p95_ms": 4200.0,
+    "chat_extractive.abstention_precision": 1.0,
+    "chat_extractive.abstention_recall": 0.3333333333333333,
+    "chat_extractive.answer_accuracy": 1.0,
+    "chat_extractive.citation_precision": 1.0,
+    "chat_extractive.latency_p95_ms": 777.6266559999385,
     "chat_extractive.multi_doc_accuracy": 0.0,
     "chat_extractive.open_question_accuracy": 0.0,
-    "classification.coarse_coverage_rate": 0.088,
-    "classification.coarse_precision_at_threshold": 0.97,
-    "classification.novel_abstain_rate": 0.95,
+    "classification.coarse_coverage_rate": 0.9629629629629629,
+    "classification.coarse_precision_at_threshold": 1.0,
+    "classification.novel_abstain_rate": 1.0,
     "layout_ssim.min_after_ssim": 0.9800459412020653,
-    "layout_ssim.worst_margin": -0.0010943126847698936
+    "layout_ssim.worst_margin": -0.0010943126847698936,
+    "spark.cross_org_regression": 0.0,
+    "spark.learning_curve_lift_after_3": 0.0,
+    "spark.learning_curve_accuracy_after_3": 1.0
   },
   "version": 1
 }

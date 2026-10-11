@@ -13,6 +13,7 @@ from pathlib import Path
 from bench.model_gates.gates.chat_extractive import run_chat_extractive_gate
 from bench.model_gates.gates.classification import run_classification_gate
 from bench.model_gates.gates.layout_ssim import run_layout_ssim_gate
+from bench.model_gates.gates.spark import run_spark_gates
 from bench.model_gates.gates.stubs import run_stub_gates
 from bench.model_gates.ratchet import (
     compare_to_baseline,
@@ -56,6 +57,8 @@ def run_harness(excluded: frozenset[str] | None = None) -> HarnessResult:
         gates.append(run_classification_gate())
     if "layout_ssim" not in skip:
         gates.append(run_layout_ssim_gate(root))
+    if "spark" not in skip:
+        gates.extend(run_spark_gates())
     gates.extend(run_stub_gates())
     return HarnessResult(version=BASELINE_VERSION, gates=tuple(gates))
 

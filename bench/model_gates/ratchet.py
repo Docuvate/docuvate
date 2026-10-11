@@ -26,6 +26,8 @@ class RatchetViolation:
 def metric_direction_for(name: str) -> Literal["higher_is_better", "lower_is_better"]:
     if "latency" in name or name.endswith("_ms_max"):
         return "lower_is_better"
+    if name.endswith("_regression") or "cross_org_regression" in name:
+        return "lower_is_better"
     return "higher_is_better"
 
 

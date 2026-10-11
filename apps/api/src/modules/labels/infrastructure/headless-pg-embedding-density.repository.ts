@@ -18,6 +18,8 @@ export class HeadlessPgEmbeddingDensityRepository implements Pick<
   | 'listTrainingExamples'
   | 'persistCalibrationBundle'
   | 'persistCorrection'
+  | 'withdrawLabelCorrection'
+  | 'findLabelCorrectionAssignment'
   | 'listUsersWithCalibrationReady'
   | 'activeCalibrationExampleCount'
 > {
@@ -41,8 +43,16 @@ export class HeadlessPgEmbeddingDensityRepository implements Pick<
     return Promise.resolve();
   }
 
-  persistCorrection(): Promise<void> {
-    return Promise.resolve();
+  persistCorrection(): Promise<string | null> {
+    return Promise.resolve(null);
+  }
+
+  withdrawLabelCorrection(): Promise<boolean> {
+    return Promise.resolve(false);
+  }
+
+  findLabelCorrectionAssignment(): Promise<{ fromTagId: string | null; toTagId: string } | null> {
+    return Promise.resolve(null);
   }
 
   listUsersWithCalibrationReady(): Promise<string[]> {

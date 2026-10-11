@@ -31,6 +31,7 @@ const FORWARD_SQL_ORDER = [
   'embedding-density-readiness-split-up.sql',
   'heuristic-field-suggestions-up.sql',
   'purge-heading-vendor-suggestions-up.sql',
+  'corrections-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {
@@ -107,5 +108,6 @@ describe('schema normalization guard (ADR 015)', () => {
     expect(sql).toContain('CREATE TABLE user_preference_required_labels');
     expect(sql).toContain('CREATE TABLE extraction_field_correction_labels');
     expect(sql).toContain('CREATE TABLE extraction_arena_rating_compared_engines');
+    expect(sql).toContain('correction_label_assignments');
   });
 });

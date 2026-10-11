@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   AddLabelRecommendationBlocklistRequest,
+  ApplyLabelCorrectionRequest,
+  ApplyLabelCorrectionResponse,
   ConfirmLabelRecommendationBlocklistPatternRequest,
   DismissLabelRecommendationRequest,
   DismissTagSuggestionRequest,
@@ -60,6 +62,17 @@ export class DismissTagSuggestionRequestDto implements DismissTagSuggestionReque
   @IsOptional()
   @IsBoolean()
   blockFuture?: boolean;
+}
+
+export class ApplyLabelCorrectionRequestDto implements ApplyLabelCorrectionRequest {
+  @IsUUID('4')
+  toTagId!: string;
+}
+
+export class ApplyLabelCorrectionResponseDto implements ApplyLabelCorrectionResponse {
+  ok!: true;
+  correctionId!: string | null;
+  similarDocumentsUpdated!: number;
 }
 
 export class DismissLabelRecommendationRequestDto implements DismissLabelRecommendationRequest {
