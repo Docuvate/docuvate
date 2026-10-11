@@ -162,9 +162,10 @@ test.describe('Authenticated compose smoke', () => {
     await releaseFromDuplicateStackIfNeeded(page, readyDocId);
 
     await page.goto('/documents', { waitUntil: 'domcontentloaded' });
-    const searchInput = page.getByRole('textbox', { name: /search|suchen|dokumente/i });
+    const librarySearch = page.locator('form.library-list-search');
+    const searchInput = librarySearch.getByRole('textbox');
     await searchInput.fill(uploadTitle);
-    await page.getByRole('button', { name: /search|suchen/i }).click();
+    await searchInput.press('Enter');
 
     const docHref = `/documents/${readyDocId}`;
     const titleLink = page.locator(`a[href="${docHref}"]`).first();
