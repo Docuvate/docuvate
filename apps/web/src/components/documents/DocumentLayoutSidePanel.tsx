@@ -4,6 +4,7 @@ import type { ExtractedField, ExtractionBlock, LayoutIrDocument } from '@docuvat
 import { type KeyboardEvent,useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { fieldSuggestionOutsideUserSchema } from '../../lib/fieldSuggestionSchema';
 import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import {
   allLayoutWidgets,
@@ -14,7 +15,6 @@ import {
   type LayoutOverlayRegion,
 } from '../../lib/layoutOverlayModel';
 import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
-import { fieldSuggestionOutsideUserSchema } from '../../lib/fieldSuggestionSchema';
 import { Button } from '../ui/Button';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 

@@ -15,8 +15,8 @@ import {
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { DocumentChatPanel } from './DocumentChatPanel';
+import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
 import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';

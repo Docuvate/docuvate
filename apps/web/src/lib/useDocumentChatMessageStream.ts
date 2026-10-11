@@ -96,7 +96,6 @@ export function useDocumentChatMessageStream(
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
-          let sawTerminal = false;
 
           for (;;) {
             const { done, value } = await reader.read();
@@ -109,7 +108,6 @@ export function useDocumentChatMessageStream(
             for (const event of parsed.events) {
               onUpdate(event.message);
               if (event.type === 'done' || event.type === 'failed' || event.type === 'cancelled') {
-                sawTerminal = true;
                 stop();
                 return;
               }
@@ -121,7 +119,7 @@ export function useDocumentChatMessageStream(
           if (finalMessage) {
             onUpdate(finalMessage);
           }
-          if (!sawTerminal && !isGenerationSettled(finalMessage)) {
+          if (!isGenerationSettled(finalMessage)) {
             startPolling(messageId);
           }
         } catch {
