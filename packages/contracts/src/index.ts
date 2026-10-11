@@ -1243,3 +1243,21 @@ export type {
   SftpIngressEventStatus,
   SftpIngressServerInfoDto,
 } from './sftp-ingress.js';
+
+export {
+  collectKeyEuroAmounts,
+  collectReportingYears,
+  collectTaxReferenceIds,
+  duplicatePairDifferenceRows,
+  evaluateEmbeddingDuplicateCandidate,
+  formatReportingYearsForDisplay,
+  keyEuroAmountsConflict,
+  reportingYearsConflict,
+  taxReferenceIdsConflict,
+} from './duplicate-detection-gates.js';
+export type {
+  DuplicateDetectionGateConfig,
+  DuplicateDocumentSignals,
+  DuplicateGateRejectionReason,
+  EmbeddingDuplicateGateResult,
+} from './duplicate-detection-gates.js';

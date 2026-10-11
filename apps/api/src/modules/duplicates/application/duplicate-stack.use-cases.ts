@@ -161,6 +161,24 @@ export class ReleaseDuplicateStackMemberUseCase {
 }
 
 @Injectable()
+export class RestoreDuplicateStackPairUseCase {
+  constructor(
+    @Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository,
+    @Inject(DUPLICATE_REPOSITORY) private readonly duplicates: DuplicateRepository,
+    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
+  ) {}
+
+  async execute(primaryDocumentId: string, otherDocumentId: string, userId: string): Promise<void> {
+    const primary = await this.documents.findByIdForUser(primaryDocumentId, userId);
+    const other = await this.documents.findByIdForUser(otherDocumentId, userId);
+    if (!primary || !other) throw new NotFoundException('Document not found');
+
+    await this.duplicates.undismiss(primaryDocumentId, otherDocumentId, userId);
+    await this.stacks.linkPair(userId, primaryDocumentId, otherDocumentId);
+  }
+}
+
+@Injectable()
 export class HandleDuplicateStackDocumentDeletedUseCase {
   constructor(
     @Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository

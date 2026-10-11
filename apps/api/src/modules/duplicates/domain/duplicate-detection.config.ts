@@ -3,6 +3,8 @@
 export interface DuplicateDetectionConfig {
   /** Minimum cosine similarity for embedding-based duplicate candidates. */
   embeddingThreshold: number;
+  /** Minimum similarity to auto-stack (link) embedding matches; below this only suggests. */
+  autoStackMinSimilarity: number;
   maxEmbeddingCandidates: number;
   /**
    * When both documents have a known page count from extraction blocks, reject embedding
@@ -30,6 +32,7 @@ function parseIntEnv(name: string, fallback: number): number {
 export function readDuplicateDetectionConfig(): DuplicateDetectionConfig {
   return {
     embeddingThreshold: parseFloatEnv('DUPLICATE_EMBEDDING_THRESHOLD', 0.88),
+    autoStackMinSimilarity: parseFloatEnv('DUPLICATE_AUTO_STACK_MIN_SIMILARITY', 0.95),
     maxEmbeddingCandidates: parseIntEnv('DUPLICATE_MAX_EMBEDDING_CANDIDATES', 8),
     pageCountMinDifference: parseIntEnv('DUPLICATE_PAGE_COUNT_MIN_DIFF', 3),
     pageCountGateMaxSimilarity: parseFloatEnv('DUPLICATE_PAGE_COUNT_GATE_MAX_SIMILARITY', 0.95),

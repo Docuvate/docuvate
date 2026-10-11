@@ -14,14 +14,17 @@ function docWithVersions(count: number): DocumentDto {
 }
 
 describe('duplicateStackLabel', () => {
-  const t = (key: string, opts?: { count?: number }) =>
-    key === 'library.stackVersionBadge' ? `${String(opts?.count)} Versionen` : key;
+  const t = (key: string, opts?: { count?: number }) => {
+    if (key === 'library.stackVersionBadge') return `${String(opts?.count)} Versionen`;
+    if (key === 'library.duplicateHintBadge') return 'Duplikat?';
+    return key;
+  };
 
-  it('shows badge only from two versions', () => {
+  it('shows badge from a single stacked version upward', () => {
     expect(showDuplicateStackBadge(docWithVersions(0))).toBe(false);
-    expect(showDuplicateStackBadge(docWithVersions(1))).toBe(false);
+    expect(showDuplicateStackBadge(docWithVersions(1))).toBe(true);
     expect(showDuplicateStackBadge(docWithVersions(2))).toBe(true);
-    expect(duplicateStackVersionLabel(docWithVersions(1), t)).toBeNull();
+    expect(duplicateStackVersionLabel(docWithVersions(1), t)).toBe('Duplikat?');
     expect(duplicateStackVersionLabel(docWithVersions(2), t)).toBe('2 Versionen');
   });
 });

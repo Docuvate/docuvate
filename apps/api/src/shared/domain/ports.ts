@@ -643,6 +643,7 @@ export interface DuplicateRepository {
   ): Promise<void>;
   listForDocument(documentId: string, userId: string): Promise<DuplicateCandidateEntity[]>;
   dismiss(documentId: string, candidateDocumentId: string, userId: string): Promise<void>;
+  undismiss(documentId: string, candidateDocumentId: string, userId: string): Promise<void>;
   isPairDismissed(
     userId: string,
     documentId: string,

@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
 import { DocumentThumb } from './DocumentThumb';
+import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import {
   duplicateStackVersionLabel,
   showDuplicateStackBadge,
@@ -21,6 +22,8 @@ interface LibraryDocumentGridProps {
   selected: Set<string>;
   onToggleSelect: (id: string) => void;
   onContextMenu: (event: MouseEvent, documentId: string) => void;
+  onRefresh?: () => void;
+  onReviewStack?: (primaryId: string, versionId?: string | null) => void;
 }
 
 export function LibraryDocumentGrid({
@@ -28,6 +31,8 @@ export function LibraryDocumentGrid({
   selected,
   onToggleSelect,
   onContextMenu,
+  onRefresh,
+  onReviewStack,
 }: LibraryDocumentGridProps) {
   const { t } = useTranslation();
   if (items.length === 0) {
@@ -55,17 +60,18 @@ export function LibraryDocumentGrid({
             <div className="doc-card-body">
               <div className="doc-card-title-row">
                 <h3 className="doc-card-title">{doc.title}</h3>
-                {showDuplicateStackBadge(doc) ? (
-                  <span
+                {showDuplicateStackBadge(doc) && duplicateStackVersionLabel(doc, t) ? (
+                  <DuplicateStackQuickReview
+                    primaryDocumentId={doc.id}
+                    label={duplicateStackVersionLabel(doc, t) ?? ''}
                     className="stack-badge stack-badge-compact"
-                    title={t('library.stackVersionsTitle')}
-                  >
-                    {duplicateStackVersionLabel(doc, t)}
-                  </span>
+                    onChanged={() => { onRefresh?.(); }}
+                    onOpenFullReview={onReviewStack}
+                  />
                 ) : null}
                 {showLegacyDuplicateHint(doc) ? (
                   <span className="dup-badge" title={t('library.duplicateHintTitle')}>
-                    Duplikat?
+                    {t('library.duplicateHintBadge')}
                   </span>
                 ) : null}
               </div>

@@ -13,6 +13,7 @@ import {
   ConfirmDuplicateVersionUseCase,
   GetDuplicateStackUseCase,
   ReleaseDuplicateStackMemberUseCase,
+  RestoreDuplicateStackPairUseCase,
   SetDuplicateStackPrimaryUseCase,
 } from '../../duplicates/application/duplicate-stack.use-cases.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
@@ -125,7 +126,8 @@ describe('DocumentsController layout routes', () => {
             getDuplicateStack: GetDuplicateStackUseCase,
             setDuplicateStackPrimary: SetDuplicateStackPrimaryUseCase,
             confirmDuplicateVersion: ConfirmDuplicateVersionUseCase,
-            releaseDuplicateStackMember: ReleaseDuplicateStackMemberUseCase
+            releaseDuplicateStackMember: ReleaseDuplicateStackMemberUseCase,
+            restoreDuplicateStackPair: RestoreDuplicateStackPairUseCase
           ) =>
             new DocumentsController(
               uploadDocument,
@@ -160,7 +162,8 @@ describe('DocumentsController layout routes', () => {
               getDuplicateStack,
               setDuplicateStackPrimary,
               confirmDuplicateVersion,
-              releaseDuplicateStackMember
+              releaseDuplicateStackMember,
+              restoreDuplicateStackPair
             ),
           inject: [
             UploadDocumentUseCase,
@@ -196,6 +199,7 @@ describe('DocumentsController layout routes', () => {
             SetDuplicateStackPrimaryUseCase,
             ConfirmDuplicateVersionUseCase,
             ReleaseDuplicateStackMemberUseCase,
+            RestoreDuplicateStackPairUseCase,
           ],
         },
         { provide: UploadDocumentUseCase, useValue: useCaseExecuteMock() },
@@ -231,6 +235,7 @@ describe('DocumentsController layout routes', () => {
         { provide: SetDuplicateStackPrimaryUseCase, useValue: useCaseExecuteMock() },
         { provide: ConfirmDuplicateVersionUseCase, useValue: useCaseExecuteMock() },
         { provide: ReleaseDuplicateStackMemberUseCase, useValue: useCaseExecuteMock() },
+        { provide: RestoreDuplicateStackPairUseCase, useValue: useCaseExecuteMock() },
       ],
     }).compile();
 

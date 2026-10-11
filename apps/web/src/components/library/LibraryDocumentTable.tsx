@@ -27,6 +27,7 @@ import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DocumentLabelsCell } from './DocumentLabelsCell';
+import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import {
   duplicateStackVersionLabel,
   showDuplicateStackBadge,
@@ -268,14 +269,13 @@ export function LibraryDocumentTable({
                             {doc.title}
                           </Link>
                           {stackLabel ? (
-                            <button
-                              type="button"
+                            <DuplicateStackQuickReview
+                              primaryDocumentId={doc.id}
+                              label={stackLabel}
                               className="stack-badge"
-                              title={t('library.stackVersionsTitle')}
-                              onClick={() => { onReviewStack(doc.id); }}
-                            >
-                              {stackLabel}
-                            </button>
+                              onChanged={onRefresh}
+                              onOpenFullReview={onReviewStack}
+                            />
                           ) : null}
                           {showLegacyDuplicateHint(doc) ? (
                             <span className="dup-badge" title={t('library.duplicateHintTitle')}>
@@ -480,28 +480,31 @@ export function LibraryDocumentTable({
                     </td>
                     <td className="library-col-title">
                       <div className="cell-title">
-                        <Link
-                          to={`/documents/${doc.id}`}
-                          className="library-title-link"
-                          title={doc.title}
-                        >
-                          {doc.title}
-                        </Link>
-                        {stackLabel ? (
-                          <button
-                            type="button"
-                            className="stack-badge"
-                            title={t('library.stackVersionsTitle')}
-                            onClick={() => { onReviewStack(doc.id); }}
+                        <div className="cell-title-row">
+                          <Link
+                            to={`/documents/${doc.id}`}
+                            className="library-title-link cell-title-text"
+                            title={doc.title}
                           >
-                            {stackLabel}
-                          </button>
-                        ) : null}
-                        {showLegacyDuplicateHint(doc) ? (
-                          <span className="dup-badge" title={t('library.duplicateHintTitle')}>
-                            {t('library.duplicateHintBadge')}
-                          </span>
-                        ) : null}
+                            {doc.title}
+                          </Link>
+                          <div className="cell-title-badges">
+                            {stackLabel ? (
+                              <DuplicateStackQuickReview
+                                primaryDocumentId={doc.id}
+                                label={stackLabel}
+                                className="stack-badge"
+                                onChanged={onRefresh}
+                                onOpenFullReview={onReviewStack}
+                              />
+                            ) : null}
+                            {showLegacyDuplicateHint(doc) ? (
+                              <span className="dup-badge" title={t('library.duplicateHintTitle')}>
+                                {t('library.duplicateHintBadge')}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
                         {doc.ingestSource === 'scanner_sftp' ? (
                           <span className="library-title-ingest-meta">
                             <ScanLine

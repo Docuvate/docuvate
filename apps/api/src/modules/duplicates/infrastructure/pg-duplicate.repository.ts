@@ -155,6 +155,23 @@ export class PgDuplicateRepository implements DuplicateRepository {
     );
   }
 
+  async undismiss(
+    documentId: string,
+    candidateDocumentId: string,
+    userId: string
+  ): Promise<void> {
+    await this.pool.query(
+      `UPDATE document_duplicate_candidates SET dismissed = false
+       WHERE user_id = $1 AND document_id = $2 AND candidate_document_id = $3`,
+      [userId, documentId, candidateDocumentId]
+    );
+    await this.pool.query(
+      `UPDATE document_duplicate_candidates SET dismissed = false
+       WHERE user_id = $1 AND document_id = $2 AND candidate_document_id = $3`,
+      [userId, candidateDocumentId, documentId]
+    );
+  }
+
   async countPendingByDocumentIds(
     userId: string,
     documentIds: string[]

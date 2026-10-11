@@ -85,7 +85,9 @@ export class ApplyDuplicateDetectionUseCase {
           hit.similarity,
           'embedding'
         );
-        await this.linkDuplicatePair.execute(userId, documentId, hit.row.documentId);
+        if (hit.similarity >= config.autoStackMinSimilarity) {
+          await this.linkDuplicatePair.execute(userId, documentId, hit.row.documentId);
+        }
       }
     } catch (error: unknown) {
       this.logger.warn(

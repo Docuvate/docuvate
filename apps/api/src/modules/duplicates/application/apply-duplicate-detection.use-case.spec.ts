@@ -178,4 +178,89 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     expect(duplicates.upsertCandidate).not.toHaveBeenCalled();
     expect(linkPair).not.toHaveBeenCalled();
   });
+
+  it('suggests embedding matches below auto-stack threshold without linking', async () => {
+    const documents = createDocumentRepositoryStub({
+      findByIdForUser: vi.fn().mockResolvedValue({
+        id: 'doc-new',
+        filename: 'Rechnung-2024.pdf',
+        title: 'Rechnung 2024',
+        extraction: {
+          text: 'Rechnung 2024 Kestrel Auto 199,00 EUR',
+          fields: [],
+          blocks: [{ page: 2, x: 0, y: 0, width: 1, height: 1, text: 'x' }],
+        },
+      }),
+    });
+    const duplicates = {
+      findDocumentIdsByHash: vi.fn().mockResolvedValue([]),
+      upsertCandidate: vi.fn(),
+      listDocumentEmbeddings: vi.fn().mockResolvedValue([
+        {
+          documentId: 'doc-old',
+          embedding: [0.9, Math.sqrt(1 - 0.9 * 0.9)],
+          filename: 'Rechnung-2024 (1).pdf',
+          title: 'Rechnung 2024',
+          documentDate: null,
+          extractedText: 'Rechnung 2024 Kestrel Auto 199,00 EUR',
+          extractedFields: {
+            blocks: [{ page: 2, x: 0, y: 0, width: 1, height: 1, text: 'y' }],
+          },
+        },
+      ]),
+      isPairDismissed: vi.fn().mockResolvedValue(false),
+    };
+    const embeddings = {
+      getDocumentEmbedding: vi.fn().mockResolvedValue([1, 0]),
+    };
+    const linkPair = vi.fn();
+    const stacks = createDuplicateStackRepositoryStub({ linkPair });
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        {
+          provide: LinkDuplicatePairUseCase,
+          useFactory: (
+            stackRepository: DuplicateStackRepository,
+            duplicateRepository: DuplicateRepository
+          ) => new LinkDuplicatePairUseCase(stackRepository, duplicateRepository),
+          inject: [DUPLICATE_STACK_REPOSITORY, DUPLICATE_REPOSITORY],
+        },
+        {
+          provide: ApplyDuplicateDetectionUseCase,
+          useFactory: (
+            documentRepository: DocumentRepository,
+            duplicateRepository: DuplicateRepository,
+            embeddingRepository: LabelEmbeddingRepository,
+            linkDuplicatePair: LinkDuplicatePairUseCase
+          ) =>
+            new ApplyDuplicateDetectionUseCase(
+              documentRepository,
+              duplicateRepository,
+              embeddingRepository,
+              linkDuplicatePair
+            ),
+          inject: [
+            DOCUMENT_REPOSITORY,
+            DUPLICATE_REPOSITORY,
+            LABEL_EMBEDDING_REPOSITORY,
+            LinkDuplicatePairUseCase,
+          ],
+        },
+        { provide: DOCUMENT_REPOSITORY, useValue: documents },
+        { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
+        {
+          provide: LABEL_EMBEDDING_REPOSITORY,
+          useValue: embeddings,
+        },
+        { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
+      ],
+    }).compile();
+    const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
+
+    await useCase.execute('doc-new', 'user-1', null);
+
+    expect(duplicates.upsertCandidate).toHaveBeenCalled();
+    expect(linkPair).not.toHaveBeenCalled();
+  });
 });

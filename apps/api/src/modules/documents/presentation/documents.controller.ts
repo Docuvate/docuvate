@@ -66,6 +66,7 @@ import {
   ConfirmDuplicateVersionUseCase,
   GetDuplicateStackUseCase,
   ReleaseDuplicateStackMemberUseCase,
+  RestoreDuplicateStackPairUseCase,
   SetDuplicateStackPrimaryUseCase,
 } from '../../duplicates/application/duplicate-stack.use-cases.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
@@ -136,7 +137,8 @@ export class DocumentsController {
     private readonly getDuplicateStack: GetDuplicateStackUseCase,
     private readonly setDuplicateStackPrimary: SetDuplicateStackPrimaryUseCase,
     private readonly confirmDuplicateVersion: ConfirmDuplicateVersionUseCase,
-    private readonly releaseDuplicateStackMember: ReleaseDuplicateStackMemberUseCase
+    private readonly releaseDuplicateStackMember: ReleaseDuplicateStackMemberUseCase,
+    private readonly restoreDuplicateStackPair: RestoreDuplicateStackPairUseCase
   ) {}
 
   @Get()
@@ -578,6 +580,20 @@ export class DocumentsController {
     @Body() body: DuplicateStackNotDuplicateRequestDto
   ): Promise<OkResponseDto> {
     await this.releaseDuplicateStackMember.execute(id, body.otherDocumentId, session.user.id);
+    return { ok: true };
+  }
+
+  @Post(':id/duplicate-stack/restore-pair')
+  @ApiDocuvateRoute({
+    operationId: 'duplicateStackRestorePair',
+    summary: 'duplicateStackRestorePair',
+  })
+  async duplicateStackRestorePair(
+    @Session() session: AuthSession,
+    @Param('id') id: string,
+    @Body() body: DuplicateStackNotDuplicateRequestDto
+  ): Promise<OkResponseDto> {
+    await this.restoreDuplicateStackPair.execute(id, body.otherDocumentId, session.user.id);
     return { ok: true };
   }
 

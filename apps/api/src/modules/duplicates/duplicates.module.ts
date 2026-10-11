@@ -14,6 +14,7 @@ import {
   HandleDuplicateStackDocumentDeletedUseCase,
   LinkDuplicatePairUseCase,
   ReleaseDuplicateStackMemberUseCase,
+  RestoreDuplicateStackPairUseCase,
   SetDuplicateStackPrimaryUseCase,
   SyncDuplicateStacksUseCase,
 } from './application/duplicate-stack.use-cases.js';
@@ -32,6 +33,7 @@ import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-dupl
     SetDuplicateStackPrimaryUseCase,
     ConfirmDuplicateVersionUseCase,
     ReleaseDuplicateStackMemberUseCase,
+    RestoreDuplicateStackPairUseCase,
     HandleDuplicateStackDocumentDeletedUseCase,
   ],
   exports: [
@@ -43,6 +45,7 @@ import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-dupl
     SetDuplicateStackPrimaryUseCase,
     ConfirmDuplicateVersionUseCase,
     ReleaseDuplicateStackMemberUseCase,
+    RestoreDuplicateStackPairUseCase,
     HandleDuplicateStackDocumentDeletedUseCase,
   ],
 })

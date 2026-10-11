@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ExtractionBlock } from '@docuvate/contracts';
+import type { DuplicateDocumentSignals, ExtractionBlock } from '@docuvate/contracts';
 
 import {
   isRecord,
@@ -8,14 +8,7 @@ import {
 } from '../../../shared/infrastructure/database/row-parse.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 
-export interface DuplicateDocumentSignals {
-  documentId: string;
-  filename: string;
-  title: string;
-  documentDateYear: number | null;
-  extractedTextSample: string;
-  pageCount: number | null;
-}
+export type { DuplicateDocumentSignals };
 
 export interface DuplicateEmbeddingPeerRow {
   documentId: string;
