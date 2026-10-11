@@ -39,15 +39,11 @@ async function uploadSyntheticPdfViaUi(page: import('@playwright/test').Page): P
     .first();
   await expect(chooseFiles).toBeVisible({ timeout: 30_000 });
   const fileInput = uploadSection.locator('input[type="file"]').first();
-  try {
-    const [fileChooser] = await Promise.all([
-      page.waitForEvent('filechooser', { timeout: 20_000 }),
-      chooseFiles.click(),
-    ]);
-    await fileChooser.setFiles(fixturePdf);
-  } catch {
-    await fileInput.setInputFiles(fixturePdf, { timeout: 60_000 });
-  }
+  const [fileChooser] = await Promise.all([
+    page.waitForEvent('filechooser', { timeout: 90_000 }),
+    chooseFiles.click(),
+  ]);
+  await fileChooser.setFiles(fixturePdf);
 
   const queueItem = page.locator('.upload-queue-item').filter({ hasText: uploadTitle });
   await expect(queueItem).toBeVisible({ timeout: 60_000 });
@@ -72,9 +68,12 @@ test.describe('Authenticated compose smoke', () => {
     await expect
       .poll(
         async () => {
-          const res = await request.get(`${apiBase}/v1/documents`, {
-            headers: { origin: webOrigin },
-          });
+          const res = await request.get(
+            `${apiBase}/v1/documents?q=${encodeURIComponent(uploadTitle)}`,
+            {
+              headers: { origin: webOrigin },
+            }
+          );
           if (!res.ok()) {
             return '';
           }
