@@ -14,7 +14,7 @@ function isLayoutIrBlock(value: unknown): value is LayoutIrBlock {
     return false;
   }
   return (
-    typeof value.type === 'string' &&
+    typeof value.page === 'number' &&
     typeof value.x === 'number' &&
     typeof value.y === 'number' &&
     typeof value.width === 'number' &&
