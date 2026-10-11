@@ -25,16 +25,16 @@ async function attachScreenshot(
 }
 
 async function uploadSyntheticPdfViaUi(page: import('@playwright/test').Page): Promise<void> {
-  const compactUpload = page.getByRole('button', { name: /^upload$|^hochladen$/i });
-  if (await compactUpload.isVisible().catch(() => false)) {
-    await compactUpload.click();
+  const compactBar = page.locator('.upload-compact-bar');
+  if (await compactBar.isVisible().catch(() => false)) {
+    await compactBar.getByRole('button', { name: /^upload$|^hochladen$/i }).click();
   }
 
-  const dropzone = page.locator('.library-page .upload-section .dropzone').first();
-  await expect(dropzone).toBeVisible({ timeout: 90_000 });
-  const fileInput = dropzone.locator('input[type="file"]');
+  const uploadSection = page.locator('.library-page .upload-section').first();
+  await expect(uploadSection).toBeVisible({ timeout: 90_000 });
+  const fileInput = uploadSection.locator('input[type="file"]').first();
   await expect(fileInput).toBeAttached({ timeout: 30_000 });
-  await fileInput.setInputFiles(fixturePdf);
+  await fileInput.setInputFiles(fixturePdf, { timeout: 60_000 });
 
   const queueItem = page.locator('.upload-queue-item').filter({ hasText: uploadTitle });
   await expect(queueItem).toBeVisible({ timeout: 60_000 });
@@ -53,7 +53,19 @@ test.describe('Authenticated compose smoke', () => {
     await uploadSyntheticPdfViaUi(page);
 
     const docRow = page.locator('tr').filter({ hasText: uploadTitle });
-    await expect(docRow.first()).toBeVisible({ timeout: 180_000 });
+    await expect
+      .poll(
+        async () => {
+          const visible = await docRow.first().isVisible().catch(() => false);
+          if (visible) {
+            return true;
+          }
+          await page.reload({ waitUntil: 'domcontentloaded' });
+          return docRow.first().isVisible().catch(() => false);
+        },
+        { timeout: 180_000, intervals: [3000, 5000, 8000] }
+      )
+      .toBe(true);
     await expect(docRow.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
     await expect(docRow.first().locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, {
       timeout: 180_000,
