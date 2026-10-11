@@ -69,6 +69,8 @@ suppress-dummy-args = true
 
 [tool.ruff.lint.per-file-ignores]
 "src/docuvate_worker/infrastructure/layout/**/*.py" = ["ANN", "PLR0915", "SIM102", "SIM110"]
+"src/docuvate_worker/domain/cpu_pipeline/**/*.py" = ["PLR2004"]
+"src/docuvate_worker/application/cpu_document_pipeline/**/*.py" = ["PLR2004", "E501"]
 
 [tool.ruff.lint.pylint]
 max-args = 12
