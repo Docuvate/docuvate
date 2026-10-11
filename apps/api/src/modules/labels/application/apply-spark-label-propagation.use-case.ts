@@ -28,7 +28,8 @@ export class ApplySparkLabelPropagationUseCase {
   async propagateAfterLabelCorrection(
     userId: string,
     toTagId: string,
-    sourceDocumentId: string
+    sourceDocumentId: string,
+    correctionId: string | null
   ): Promise<number> {
     if (!embeddingDensityGloballyEnabled()) {
       return 0;
@@ -58,8 +59,18 @@ export class ApplySparkLabelPropagationUseCase {
         if (result.decisionTier !== 'auto_apply' || result.labelId !== toTagId) {
           continue;
         }
+        const tagsBefore = await this.taxonomy.listTagsForDocument(ref.documentId);
+        const inboxCleared = tagsBefore.some((tag) => tag.isInbox);
         await this.taxonomy.assignTagToDocument(ref.documentId, toTagId);
         await this.taxonomy.clearInboxTagForDocument(ref.documentId, userId);
+        if (correctionId) {
+          await this.densityRepo.recordPropagatedAssignment(
+            correctionId,
+            ref.documentId,
+            toTagId,
+            inboxCleared
+          );
+        }
         updated += 1;
       }
       return updated;

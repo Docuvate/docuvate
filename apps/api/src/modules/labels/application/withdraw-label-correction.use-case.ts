@@ -32,9 +32,17 @@ export class WithdrawLabelCorrectionUseCase {
     if (!assignment) {
       throw new NotFoundError('Correction');
     }
+    const propagated = await this.densityRepo.listPropagatedAssignments(correctionId);
     const withdrawn = await this.densityRepo.withdrawLabelCorrection(userId, correctionId);
     if (!withdrawn) {
       return;
+    }
+    for (const row of propagated) {
+      await this.taxonomy.removeTagFromDocument(row.documentId, row.tagId);
+      if (row.inboxCleared) {
+        const inbox = await this.taxonomy.ensureInboxTag(userId);
+        await this.taxonomy.assignTagToDocument(row.documentId, inbox.id);
+      }
     }
     const assigned = await this.taxonomy.listTagsForDocument(documentId);
     if (assigned.some((tag) => tag.id === assignment.toTagId)) {

@@ -7,6 +7,7 @@ import { EMBEDDING_PORT, LABEL_EMBEDDING_REPOSITORY } from '../../shared/domain/
 import { DocumentChatModule } from '../../shared/infrastructure/chat/document-chat.module.js';
 import { CorrectionEntity } from '../../shared/infrastructure/database/entities/correction.entity.js';
 import { CorrectionLabelAssignmentEntity } from '../../shared/infrastructure/database/entities/correction-label-assignment.entity.js';
+import { CorrectionPropagatedAssignmentEntity } from '../../shared/infrastructure/database/entities/correction-propagated-assignment.entity.js';
 import { DocumentEmbeddingsEntity } from '../../shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from '../../shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
@@ -87,6 +88,7 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
         EmbeddingDensityLabelGroupMemberEntity,
         CorrectionEntity,
         CorrectionLabelAssignmentEntity,
+        CorrectionPropagatedAssignmentEntity,
         EmbeddingDensityCorrectionEntity,
         EmbeddingDensityCorrectionOffsetEntity,
         DocumentEmbeddingsEntity,

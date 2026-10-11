@@ -19,6 +19,7 @@ import { ConnectorPaperlessTagLinksEntity } from './connector-paperless-tag-link
 import { ConnectorSourceDocumentsEntity } from './connector-source-documents.entity.js';
 import { CorrectionEntity } from './correction.entity.js';
 import { CorrectionLabelAssignmentEntity } from './correction-label-assignment.entity.js';
+import { CorrectionPropagatedAssignmentEntity } from './correction-propagated-assignment.entity.js';
 import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DashboardWidgetsEntity } from './dashboard-widgets.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
@@ -99,6 +100,7 @@ export const TYPEORM_ENTITIES = [
   ConnectorSourceDocumentsEntity,
   CorrectionEntity,
   CorrectionLabelAssignmentEntity,
+  CorrectionPropagatedAssignmentEntity,
   CorrespondentsEntity,
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
@@ -180,6 +182,7 @@ export {
   ConnectorSourceDocumentsEntity,
   CorrectionEntity,
   CorrectionLabelAssignmentEntity,
+  CorrectionPropagatedAssignmentEntity,
   CorrespondentsEntity,
   DashboardWidgetsEntity,
   DocumentDuplicateCandidatesEntity,

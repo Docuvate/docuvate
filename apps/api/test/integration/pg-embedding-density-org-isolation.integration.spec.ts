@@ -13,6 +13,7 @@ import { PgEmbeddingDensityRepository } from '../../src/modules/labels/infrastru
 import type { LabelEmbeddingRepository } from '../../src/shared/domain/ports.js';
 import { CorrectionEntity } from '../../src/shared/infrastructure/database/entities/correction.entity.js';
 import { CorrectionLabelAssignmentEntity } from '../../src/shared/infrastructure/database/entities/correction-label-assignment.entity.js';
+import { CorrectionPropagatedAssignmentEntity } from '../../src/shared/infrastructure/database/entities/correction-propagated-assignment.entity.js';
 import { DocumentEmbeddingsEntity } from '../../src/shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../src/shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
@@ -68,6 +69,7 @@ function createDensityRepository(dataSource: DataSource): PgEmbeddingDensityRepo
     dataSource.getRepository(EmbeddingDensityLabelGroupMemberEntity),
     dataSource.getRepository(CorrectionEntity),
     dataSource.getRepository(CorrectionLabelAssignmentEntity),
+    dataSource.getRepository(CorrectionPropagatedAssignmentEntity),
     dataSource.getRepository(EmbeddingDensityCorrectionEntity),
     dataSource.getRepository(EmbeddingDensityCorrectionOffsetEntity),
     dataSource.getRepository(DocumentEmbeddingsEntity),

@@ -53,7 +53,8 @@ export class ApplyLabelCorrectionUseCase {
     const similarDocumentsUpdated = await this.sparkPropagation.propagateAfterLabelCorrection(
       userId,
       toTagId,
-      documentId
+      documentId,
+      correctionId
     );
     return { correctionId, similarDocumentsUpdated };
   }

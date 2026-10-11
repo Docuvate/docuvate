@@ -6,6 +6,7 @@ import { In, Repository } from 'typeorm';
 
 import { CorrectionEntity } from '../../../shared/infrastructure/database/entities/correction.entity.js';
 import { CorrectionLabelAssignmentEntity } from '../../../shared/infrastructure/database/entities/correction-label-assignment.entity.js';
+import { CorrectionPropagatedAssignmentEntity } from '../../../shared/infrastructure/database/entities/correction-propagated-assignment.entity.js';
 import { DocumentEmbeddingsEntity } from '../../../shared/infrastructure/database/entities/document-embeddings.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from '../../../shared/infrastructure/database/entities/embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from '../../../shared/infrastructure/database/entities/embedding-density-class-niw.entity.js';
@@ -37,6 +38,12 @@ export interface EmbeddingDensityTrainingExamples {
   allLabelIds: string[];
 }
 
+export interface CorrectionPropagatedAssignmentRow {
+  documentId: string;
+  tagId: string;
+  inboxCleared: boolean;
+}
+
 @Injectable()
 export class PgEmbeddingDensityRepository {
   constructor(
@@ -52,6 +59,8 @@ export class PgEmbeddingDensityRepository {
     private readonly correctionsRepo: Repository<CorrectionEntity>,
     @InjectRepository(CorrectionLabelAssignmentEntity)
     private readonly correctionLabelRepo: Repository<CorrectionLabelAssignmentEntity>,
+    @InjectRepository(CorrectionPropagatedAssignmentEntity)
+    private readonly propagatedAssignmentRepo: Repository<CorrectionPropagatedAssignmentEntity>,
     @InjectRepository(EmbeddingDensityCorrectionEntity)
     private readonly correctionRepo: Repository<EmbeddingDensityCorrectionEntity>,
     @InjectRepository(EmbeddingDensityCorrectionOffsetEntity)
@@ -394,6 +403,33 @@ export class PgEmbeddingDensityRepository {
       fromTagId: canonical.labelAssignment.fromTagId,
       toTagId: canonical.labelAssignment.toTagId,
     };
+  }
+
+  async recordPropagatedAssignment(
+    correctionId: string,
+    documentId: string,
+    tagId: string,
+    inboxCleared: boolean
+  ): Promise<void> {
+    await this.propagatedAssignmentRepo.save(
+      this.propagatedAssignmentRepo.create({
+        correctionId,
+        documentId,
+        tagId,
+        inboxCleared,
+      })
+    );
+  }
+
+  async listPropagatedAssignments(
+    correctionId: string
+  ): Promise<CorrectionPropagatedAssignmentRow[]> {
+    const rows = await this.propagatedAssignmentRepo.find({ where: { correctionId } });
+    return rows.map((row) => ({
+      documentId: row.documentId,
+      tagId: row.tagId,
+      inboxCleared: row.inboxCleared,
+    }));
   }
 
   async withdrawLabelCorrection(userId: string, correctionId: string): Promise<boolean> {

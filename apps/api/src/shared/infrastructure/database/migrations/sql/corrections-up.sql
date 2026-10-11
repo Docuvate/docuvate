@@ -56,3 +56,17 @@ FROM public.embedding_density_correction edc;
 UPDATE public.embedding_density_correction edc
 SET correction_id = edc.id
 WHERE correction_id IS NULL;
+
+CREATE TABLE public.correction_propagated_assignments (
+    correction_id uuid NOT NULL,
+    document_id uuid NOT NULL,
+    tag_id uuid NOT NULL,
+    inbox_cleared boolean NOT NULL,
+    CONSTRAINT correction_propagated_assignments_pkey PRIMARY KEY (correction_id, document_id),
+    CONSTRAINT correction_propagated_assignments_correction_id_fkey FOREIGN KEY (correction_id) REFERENCES public.corrections(id) ON DELETE CASCADE,
+    CONSTRAINT correction_propagated_assignments_document_id_fkey FOREIGN KEY (document_id) REFERENCES public.documents(id) ON DELETE CASCADE,
+    CONSTRAINT correction_propagated_assignments_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON DELETE CASCADE
+);
+
+CREATE INDEX correction_propagated_assignments_correction_idx
+    ON public.correction_propagated_assignments USING btree (correction_id);
