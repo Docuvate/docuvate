@@ -81,13 +81,10 @@ def extract_document(
 ) -> ExtractionResult:
     resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
     if resolved.name == "pipeline" and embedding_density_state is not None:
-        state = (
-            embedding_density_state
-            if isinstance(embedding_density_state, EmbeddingDensityStatePayload)
-            else EmbeddingDensityStatePayload.model_validate(embedding_density_state)
-        )
         base = _with_markdown(
-            extract_with_cpu_pipeline(content, mime_type, embedding_density_state=state)
+            extract_with_cpu_pipeline(
+                content, mime_type, embedding_density_state=embedding_density_state
+            )
         )
     else:
         base = _with_markdown(resolved.extract(content, mime_type))

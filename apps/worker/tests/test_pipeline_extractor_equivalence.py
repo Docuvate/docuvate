@@ -7,7 +7,7 @@ import pytest
 from PIL import Image, ImageDraw
 
 from docuvate_worker.domain.models import ExtractionBlock, ExtractedField
-from docuvate_worker.infrastructure.extractors.legacy_pipeline import extract_legacy_pipeline
+from docuvate_worker.infrastructure.extractors.baseline_pipeline import extract_baseline_pipeline
 from docuvate_worker.infrastructure.extractors.pipeline import PipelineExtractor
 from tests.synthetic_layout_pdfs import delivery_note_table_pdf
 from tests.synthetic_scan_pdfs import scanned_with_invisible_ocr_text_layer_pdf
@@ -48,24 +48,24 @@ def _blocks_equal(
 
 
 def _assert_equivalent(content: bytes, mime_type: str) -> None:
-    legacy = extract_legacy_pipeline(content, mime_type)
+    baseline = extract_baseline_pipeline(content, mime_type)
     current = PipelineExtractor().extract(content, mime_type)
-    assert current.text == legacy.text
-    assert _fields_equal(current.field_suggestions, legacy.field_suggestions)
-    assert _blocks_equal(current.blocks, legacy.blocks)
+    assert current.text == baseline.text
+    assert _fields_equal(current.field_suggestions, baseline.field_suggestions)
+    assert _blocks_equal(current.blocks, baseline.blocks)
     assert current.cpu_pipeline is not None
     assert current.cpu_pipeline.taco is not None
 
 
-def test_pipeline_extractor_matches_legacy_native_pdf() -> None:
+def test_pipeline_extractor_matches_baseline_native_pdf() -> None:
     _assert_equivalent(delivery_note_table_pdf(), "application/pdf")
 
 
-def test_pipeline_extractor_matches_legacy_scanned_pdf() -> None:
+def test_pipeline_extractor_matches_baseline_scanned_pdf() -> None:
     _assert_equivalent(scanned_with_invisible_ocr_text_layer_pdf(), "application/pdf")
 
 
-def test_pipeline_extractor_matches_legacy_png_image() -> None:
+def test_pipeline_extractor_matches_baseline_png_image() -> None:
     img = Image.new("RGB", (240, 80), color=(255, 255, 255))
     draw = ImageDraw.Draw(img)
     draw.text((12, 28), "PNG fixture line", fill=(0, 0, 0))

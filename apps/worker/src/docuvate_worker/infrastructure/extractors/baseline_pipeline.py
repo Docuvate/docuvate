@@ -15,7 +15,7 @@ from docuvate_worker.infrastructure.extractors.pdf_native import try_extract_pdf
 logger = logging.getLogger(__name__)
 
 
-def extract_legacy_pipeline(content: bytes, mime_type: str) -> ExtractionResult:
+def extract_baseline_pipeline(content: bytes, mime_type: str) -> ExtractionResult:
     if mime_type == "application/pdf":
         native = try_extract_pdf_native(content)
         if native is not None:
