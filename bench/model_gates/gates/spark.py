@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import numpy as np
+from numpy.typing import NDArray
 
 from docuvate_worker.application.embedding_density import (
     classify_embedding,
@@ -30,7 +31,7 @@ def _synthetic_clusters(
     per_class: int,
     separation: float,
     prefix: str,
-) -> tuple[np.ndarray, list[str], list[str], list[str]]:
+) -> tuple[NDArray[np.float64], list[str], list[str], list[str]]:
     label_ids = ['alpha', 'beta', 'gamma', 'novel']
     vectors: list[list[float]] = []
     labels: list[str] = []
@@ -58,7 +59,6 @@ def _run_cross_org_gate() -> GateRunResult:
     offsets = np.array([1.0, -1.0])
     kernel.add_correction(point, offsets, organization_id='org-a')
     delta_other = kernel.log_odds_delta(point, 2, organization_id='org-b')
-    delta_same = kernel.log_odds_delta(point, 2, organization_id='org-a')
     regression = float(np.max(np.abs(delta_other)))
     return GateRunResult(
         gate_id=GATE_ID,
@@ -74,6 +74,16 @@ def _run_cross_org_gate() -> GateRunResult:
     )
 
 
+def _top_posterior_label(posterior: dict[str, float]) -> str:
+    best_label = ''
+    best_score = -1.0
+    for label_id, score in posterior.items():
+        if score > best_score:
+            best_score = score
+            best_label = label_id
+    return best_label
+
+
 def _mean_novel_top1_accuracy(
     state: EmbeddingDensityStatePayload,
     vectors: list[list[float]],
@@ -83,8 +93,7 @@ def _mean_novel_top1_accuracy(
     hits = 0
     for vec in vectors:
         result = classify_embedding(state, vec)
-        top = max(result.posterior, key=result.posterior.get)
-        if top == 'novel':
+        if _top_posterior_label(result.posterior) == 'novel':
             hits += 1
     return hits / len(vectors)
 

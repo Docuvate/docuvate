@@ -52,6 +52,16 @@ export type ApiErrorEnvelopeDto = {
     message: string;
 };
 
+export type ApplyLabelCorrectionRequestDto = {
+    toTagId: string;
+};
+
+export type ApplyLabelCorrectionResponseDto = {
+    ok: boolean;
+    correctionId: string;
+    similarDocumentsUpdated: number;
+};
+
 export type BanAdminUserRequestDto = {
     reason?: string;
 };
@@ -2030,6 +2040,55 @@ export type BulkError = BulkErrors[keyof BulkErrors];
 export type BulkResponses = {
     201: unknown;
 };
+
+export type ApplyDocumentLabelCorrectionData = {
+    body: ApplyLabelCorrectionRequestDto;
+    path: {
+        documentId: string;
+    };
+    query?: never;
+    url: '/documents/{documentId}/label-corrections';
+};
+
+export type ApplyDocumentLabelCorrectionErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ApplyDocumentLabelCorrectionError = ApplyDocumentLabelCorrectionErrors[keyof ApplyDocumentLabelCorrectionErrors];
+
+export type ApplyDocumentLabelCorrectionResponses = {
+    201: ApplyLabelCorrectionResponseDto;
+};
+
+export type ApplyDocumentLabelCorrectionResponse = ApplyDocumentLabelCorrectionResponses[keyof ApplyDocumentLabelCorrectionResponses];
+
+export type WithdrawDocumentLabelCorrectionData = {
+    body?: never;
+    path: {
+        documentId: string;
+        correctionId: string;
+    };
+    query?: never;
+    url: '/documents/{documentId}/label-corrections/{correctionId}/withdraw';
+};
+
+export type WithdrawDocumentLabelCorrectionErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type WithdrawDocumentLabelCorrectionError = WithdrawDocumentLabelCorrectionErrors[keyof WithdrawDocumentLabelCorrectionErrors];
+
+export type WithdrawDocumentLabelCorrectionResponses = {
+    201: OkResponseDto;
+};
+
+export type WithdrawDocumentLabelCorrectionResponse = WithdrawDocumentLabelCorrectionResponses[keyof WithdrawDocumentLabelCorrectionResponses];
 
 export type AcceptDocumentTagSuggestionData = {
     body?: never;

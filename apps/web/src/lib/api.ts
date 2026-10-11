@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   AcceptLabelRecommendationRequest,
-  ApplyLabelCorrectionResponse,
   AddLabelRecommendationBlocklistRequest,
   AdminAccessResponse,
   AdminUserDto,
   AdminUserListResponse,
+  ApplyLabelCorrectionResponse,
   BanAdminUserRequest,
   ConfirmLabelRecommendationBlocklistPatternRequest,
   ConnectorCatalogResponse,
