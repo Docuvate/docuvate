@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   collectReportingYears,
+  type DuplicateDocumentSignals,
   evaluateEmbeddingDuplicateCandidate,
   reportingYearsConflict,
-  type DuplicateDocumentSignals,
 } from '@docuvate/contracts';
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
@@ -20,7 +20,19 @@ const GATE_CONFIG = {
   pageCountGateMaxSimilarity: 0.95,
 };
 
-function signalsFromRow(row: Record<string, unknown>, documentId: string): DuplicateDocumentSignals {
+async function queryRows(
+  queryRunner: QueryRunner,
+  sql: string,
+  params?: unknown[]
+): Promise<unknown[]> {
+  const rows: unknown = await queryRunner.query(sql, params);
+  return Array.isArray(rows) ? rows.map((row: unknown) => row) : [];
+}
+
+function signalsFromRow(
+  row: Record<string, unknown>,
+  documentId: string
+): DuplicateDocumentSignals {
   const documentDate = parseOptionalDate(row.document_date);
   return {
     documentId,
@@ -32,7 +44,10 @@ function signalsFromRow(row: Record<string, unknown>, documentId: string): Dupli
   };
 }
 
-function pairShouldNotBeStacked(left: DuplicateDocumentSignals, right: DuplicateDocumentSignals): boolean {
+function pairShouldNotBeStacked(
+  left: DuplicateDocumentSignals,
+  right: DuplicateDocumentSignals
+): boolean {
   const leftYears = collectReportingYears(left);
   const rightYears = collectReportingYears(right);
   if (reportingYearsConflict(leftYears, rightYears)) {
@@ -46,7 +61,8 @@ export class RepairPeriodDuplicateStacks20261011200000 implements MigrationInter
   name = 'RepairPeriodDuplicateStacks20261011200000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const result = await queryRunner.query(
+    const result = await queryRows(
+      queryRunner,
       `SELECT c.user_id,
               c.document_id,
               c.candidate_document_id,
@@ -113,7 +129,8 @@ export class RepairPeriodDuplicateStacks20261011200000 implements MigrationInter
       );
 
       for (const documentId of [docA, docB]) {
-        const membership = await queryRunner.query(
+        const membership = await queryRows(
+          queryRunner,
           `SELECT m.stack_id, m.role
            FROM document_stack_members m
            INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
@@ -144,7 +161,8 @@ export class RepairPeriodDuplicateStacks20261011200000 implements MigrationInter
     }
   }
 
-  public async down(_queryRunner: QueryRunner): Promise<void> {
-    // Irreversible data repair.
+  public down(): Promise<void> {
+    // Irreversible data repair: split stacks are not re-created.
+    return Promise.resolve();
   }
 }

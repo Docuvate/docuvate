@@ -27,12 +27,12 @@ import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { DocumentLabelsCell } from './DocumentLabelsCell';
-import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import {
   duplicateStackVersionLabel,
   showDuplicateStackBadge,
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
+import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import { documentDisplayDate } from './libraryDocumentUtils';
 
 type SortField = 'title' | 'documentDate' | 'updatedAt';

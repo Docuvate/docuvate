@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   collectReportingYears,
+  type DuplicateDocumentSignals,
   evaluateEmbeddingDuplicateCandidate,
   reportingYearsConflict,
-  type DuplicateDocumentSignals,
 } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 

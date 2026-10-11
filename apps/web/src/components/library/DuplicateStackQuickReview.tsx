@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
-  duplicatePairDifferenceRows,
   type DuplicateDocumentSignals,
+  duplicatePairDifferenceRows,
   type DuplicateStackMemberDto,
 } from '@docuvate/contracts';
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
@@ -98,7 +98,8 @@ export function DuplicateStackQuickReview({
   useEffect(() => {
     if (!open) return;
     const onPointerDown = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
+      const target = event.target;
+      if (!(target instanceof Node) || !rootRef.current?.contains(target)) {
         setOpen(false);
       }
     };

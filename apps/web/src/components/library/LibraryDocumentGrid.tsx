@@ -9,12 +9,12 @@ import { Link } from 'react-router-dom';
 import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
 import { DocumentThumb } from './DocumentThumb';
-import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import {
   duplicateStackVersionLabel,
   showDuplicateStackBadge,
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
+import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import { documentDisplayDate } from './libraryDocumentUtils';
 
 interface LibraryDocumentGridProps {
