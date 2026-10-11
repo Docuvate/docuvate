@@ -42,7 +42,7 @@ def _png_ocr_fixture_bytes() -> bytes:
         font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", size=48)
     except OSError:
         font = ImageFont.load_default()
-    draw.text((40, 80), "WAREHOUSE SHIPMENT DOC 47", fill=(0, 0, 0), font=font)
+    draw.text((40, 80), "WAREHOUSE SHIPMENT DOC 1024", fill=(0, 0, 0), font=font)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return buf.getvalue()
@@ -98,7 +98,7 @@ def _assert_equivalent(
     assert _blocks_equal(current.blocks, baseline.blocks), case_id
     assert current.cpu_pipeline is not None, case_id
     assert current.cpu_pipeline.taco is not None, case_id
-    logger.info("pr47_equivalence_passed case=%s blocks=%d", case_id, len(baseline.blocks or []))
+    logger.info("pipeline_equivalence_passed case=%s blocks=%d", case_id, len(baseline.blocks or []))
 
 
 @pytest.mark.parametrize(
