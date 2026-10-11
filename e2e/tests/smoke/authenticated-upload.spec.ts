@@ -30,9 +30,11 @@ async function uploadSyntheticPdfViaUi(page: import('@playwright/test').Page): P
     await compactUpload.click();
   }
 
-  const dropzone = page.locator('.library-page .upload-section .dropzone');
+  const dropzone = page.locator('.library-page .upload-section .dropzone').first();
   await expect(dropzone).toBeVisible({ timeout: 90_000 });
-  const chooseFiles = dropzone.getByRole('button', { name: /choose files|dateien auswählen/i });
+  const chooseFiles = dropzone
+    .getByRole('button', { name: /choose files|dateien auswählen/i })
+    .first();
   const fileChooserPromise = page.waitForEvent('filechooser');
   await chooseFiles.click();
   const fileChooser = await fileChooserPromise;
