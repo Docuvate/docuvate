@@ -168,6 +168,56 @@ describe('CitedChatGenerationService abstention', () => {
     expect(result.content).toBe(CITED_CHAT_ABSTENTION_DE);
   });
 
+  it('returns extractive text without Ollama when chunk id is lexical-only', async () => {
+    process.env['OLLAMA_URL'] = '';
+    vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
+      reachable: true,
+      rerankerUsed: true,
+      rerankerModel: 'BAAI/bge-reranker-base',
+      results: [{ id: 'lexical-block-doc-0', score: 0.9 }],
+    });
+
+    const threads = {
+      updateMessageGeneration: vi.fn(),
+      touchThread: vi.fn(),
+      listMessages: vi.fn().mockResolvedValue([]),
+      findMessageForUser: vi.fn().mockResolvedValue({ content: '' }),
+    };
+    const citations = { replaceCitations: vi.fn() };
+    const retrieval = {
+      hybridRetrieveChunks: vi.fn().mockResolvedValue([
+        {
+          chunkId: 'lexical-block-doc-0',
+          documentId: 'd1',
+          documentTitle: 'Lieferschein',
+          body: 'Widget A Menge 2 Stück.',
+          page: 1,
+          charStart: 0,
+          charEnd: 24,
+          fusionScore: 0.9,
+        },
+      ]),
+      indexPassageForRerank: (c: { documentTitle: string; body: string }) =>
+        `${c.documentTitle}\n${c.body}`,
+    };
+    const service = await buildService({ threads, retrieval, citations });
+
+    const result = await service.generate({
+      messageId,
+      threadId,
+      userId,
+      userMessage: 'Wie viele Widget A?',
+      documentIds: ['d1'],
+      scope: 'document',
+    });
+
+    expect(requestCitedAnswerFromOllama).not.toHaveBeenCalled();
+    expect(result.abstained).toBe(false);
+    expect(result.content).toMatch(/Widget A/i);
+    expect(citations.replaceCitations).toHaveBeenCalledWith(messageId, []);
+    delete process.env['OLLAMA_URL'];
+  });
+
   it('stops when shouldAbort is set during streaming', async () => {
     vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
       reachable: true,

@@ -8,7 +8,7 @@ import {
   EMBEDDING_PORT,
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
-import { ollamaChatBaseUrl } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
+import { ollamaChatConfigured } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
@@ -239,17 +239,28 @@ export class CitedChatGenerationService {
       extractivePool.length > 0
         ? tryExtractiveCitedAnswer(userMessage, extractivePool, extractiveMinScore)
         : null;
-    if (extractive && /^[0-9a-f-]{36}$/i.test(extractive.chunk.chunkId)) {
-      await this.citationsRepo.replaceCitations(messageId, [
-        {
-          ordinal: 1,
-          chunkId: extractive.chunk.chunkId,
-          quote: extractive.quote,
-          charStart: extractive.chunk.charStart ?? 0,
-          charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
-        },
-      ]);
-      const content = formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }]);
+    const extractiveChunkId = extractive?.chunk.chunkId ?? '';
+    const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+    if (
+      extractive &&
+      (extractiveChunkIsUuid || !ollamaChatConfigured())
+    ) {
+      if (extractiveChunkIsUuid) {
+        await this.citationsRepo.replaceCitations(messageId, [
+          {
+            ordinal: 1,
+            chunkId: extractive.chunk.chunkId,
+            quote: extractive.quote,
+            charStart: extractive.chunk.charStart ?? 0,
+            charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
+          },
+        ]);
+      } else {
+        await this.citationsRepo.replaceCitations(messageId, []);
+      }
+      const content = extractiveChunkIsUuid
+        ? formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }])
+        : extractive.text;
       await this.threads.updateMessageGeneration(messageId, {
         content,
         generationStatus: 'done',
@@ -258,6 +269,18 @@ export class CitedChatGenerationService {
       });
       await this.threads.touchThread(threadId);
       return { content, abstained: false };
+    }
+
+    if (!ollamaChatConfigured()) {
+      await this.citationsRepo.replaceCitations(messageId, []);
+      await this.threads.updateMessageGeneration(messageId, {
+        content: abstentionText,
+        generationStatus: 'done',
+        generationPhase: null,
+        finalizeOnlyIfInFlight: true,
+      });
+      await this.threads.touchThread(threadId);
+      return { content: abstentionText, abstained: true };
     }
 
     if (await aborted()) {
@@ -341,7 +364,7 @@ export class CitedChatGenerationService {
         await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
         return { content: '', abstained: true };
       }
-      if (!ollamaChatBaseUrl()) {
+      if (!ollamaChatConfigured()) {
         await this.citationsRepo.replaceCitations(messageId, []);
         await this.threads.updateMessageGeneration(messageId, {
           content: abstentionText,

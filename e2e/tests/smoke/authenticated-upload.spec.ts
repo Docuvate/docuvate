@@ -24,6 +24,24 @@ async function attachScreenshot(
   }
 }
 
+async function uploadSyntheticPdfViaUi(page: import('@playwright/test').Page): Promise<void> {
+  const compactUpload = page.getByRole('button', { name: /^upload$|^hochladen$/i });
+  if (await compactUpload.isVisible().catch(() => false)) {
+    await compactUpload.click();
+  }
+
+  const chooseFiles = page.getByRole('button', { name: /choose files|dateien auswählen/i });
+  await expect(chooseFiles).toBeVisible({ timeout: 90_000 });
+  const fileChooserPromise = page.waitForEvent('filechooser');
+  await chooseFiles.click();
+  const fileChooser = await fileChooserPromise;
+  await fileChooser.setFiles(fixturePdf);
+
+  const queueItem = page.locator('.upload-queue-item').filter({ hasText: uploadTitle });
+  await expect(queueItem).toBeVisible({ timeout: 60_000 });
+  await expect(queueItem).toHaveClass(/upload-done/, { timeout: 180_000 });
+}
+
 test.describe('Authenticated compose smoke', () => {
   test('login, upload synthetic PDF, extraction and preview succeed', async ({ page }, testInfo) => {
     test.setTimeout(300_000);
@@ -33,15 +51,9 @@ test.describe('Authenticated compose smoke', () => {
     await expect(page).toHaveURL(/\/documents/, { timeout: 30_000 });
     await attachScreenshot(page, testInfo, '01-after-login.png');
 
-    const uploadTrigger = page.getByRole('button', { name: /^upload$|^hochladen$/i });
-    if (await uploadTrigger.isVisible().catch(() => false)) {
-      await uploadTrigger.click();
-    }
-    const fileInput = page.locator('input[type="file"]');
-    await expect(fileInput.first()).toBeAttached({ timeout: 90_000 });
-    await fileInput.first().setInputFiles(fixturePdf);
+    await uploadSyntheticPdfViaUi(page);
 
-    const docRow = page.locator('tr, [role="row"]').filter({ hasText: uploadTitle });
+    const docRow = page.locator('tr').filter({ hasText: uploadTitle });
     await expect(docRow.first()).toBeVisible({ timeout: 180_000 });
     await expect(docRow.first()).not.toContainText(/^failed$|^fehlgeschlagen$/i);
     await expect(docRow.first().locator('.badge-ready, .badge.badge-ready')).toHaveCount(1, {

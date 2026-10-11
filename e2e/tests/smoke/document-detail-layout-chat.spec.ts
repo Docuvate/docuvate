@@ -120,8 +120,13 @@ test.describe('document detail layout and chat', () => {
     }
 
     const started = Date.now();
-    await composer.fill('Welche Tabellen erkennst du in diesem Dokument?');
-    await page.locator('.layout-side-panel-chat button.doc-chat-submit').click();
+    await composer.fill('Wie viele Widget A sind in der Lieferung?');
+    const submit = page.locator('.layout-side-panel-chat button.doc-chat-submit');
+    await expect(submit).toBeEnabled();
+    await submit.click();
+    await expect(page.locator('.layout-side-panel-chat .doc-chat-bubble.doc-chat-user')).toBeVisible({
+      timeout: 30_000,
+    });
     await expect(page.locator('.doc-chat-assistant-content').first()).toBeVisible({ timeout: 60_000 });
     await expect(page.locator('.doc-chat-assistant-pending')).toHaveCount(0, { timeout: 60_000 });
     expect(Date.now() - started).toBeLessThan(5_000);
