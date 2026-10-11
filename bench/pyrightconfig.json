@@ -1,0 +1,11 @@
+{
+  "include": ["model_gates", "run_model_gates.py"],
+  "exclude": ["**/__pycache__"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "strict",
+  "reportMissingTypeStubs": false,
+  "reportMissingImports": "error",
+  "extraPaths": ["..", "../apps/worker/src", "../apps/worker"],
+  "venvPath": "../apps/worker",
+  "venv": ".venv"
+}
