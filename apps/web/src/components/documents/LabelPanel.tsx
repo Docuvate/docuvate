@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useMemo, useState, type FormEvent } from 'react';
-import { useTranslation } from 'react-i18next';
-import { formatUserFacingError } from '../../lib/apiErrors';
 import type { DocumentDto, TagDto } from '@docuvate/contracts';
+import { type FormEvent,useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { assignDocumentTag, createTag, listTags, removeDocumentTag } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
 import { Input } from '../ui/Input';
@@ -28,13 +29,15 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const [addError, setAddError] = useState<string | null>(null);
 
   const assignedIds = useMemo(
-    () => new Set((document.tags ?? []).map((tag) => tag.id)),
+    () => new Set(document.tags.map((tag) => tag.id)),
     [document.tags]
   );
 
   const trimmedQuery = query.trim();
   const exactMatch = trimmedQuery.length > 0 ? findTagByName(allTags, trimmedQuery) : undefined;
-  const alreadyAssigned = exactMatch !== undefined && assignedIds.has(exactMatch.id);
+  const alreadyAssignedTag =
+    exactMatch !== undefined && assignedIds.has(exactMatch.id) ? exactMatch : undefined;
+  const alreadyAssigned = alreadyAssignedTag !== undefined;
 
   async function ensureTagsLoaded() {
     if (allTags.length > 0 || loadingTags) {
@@ -116,10 +119,10 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
       </header>
 
       <div className="chip-row">
-        {(document.tags ?? []).length === 0 ? (
+        {document.tags.length === 0 ? (
           <p className="muted">{t('documents.labelPanelNoneAssigned')}</p>
         ) : (
-          (document.tags ?? []).map((tag) => (
+          document.tags.map((tag) => (
             <Chip
               key={tag.id}
               label={tag.name}
@@ -159,9 +162,9 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
           <p id="label-add-hint" className="muted label-add-hint">
             {t('documents.labelAddHint')}
           </p>
-          {alreadyAssigned ? (
+          {alreadyAssignedTag ? (
             <p className="muted label-add-hint" role="status">
-              {t('documents.labelAddAlreadyAssigned', { name: exactMatch?.name ?? trimmedQuery })}
+              {t('documents.labelAddAlreadyAssigned', { name: alreadyAssignedTag.name })}
             </p>
           ) : null}
           {addError ? (

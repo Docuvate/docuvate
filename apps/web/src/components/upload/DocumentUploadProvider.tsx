@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, type ReactNode,useContext, useMemo } from 'react';
+
 import type { LibraryDropTarget } from '../../lib/documentUploadAssignment';
 import { useDocumentUploadQueue } from '../../lib/useDocumentUploadQueue';
 import { GlobalPageDropOverlay } from './GlobalPageDropOverlay';

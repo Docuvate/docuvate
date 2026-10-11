@@ -3,9 +3,9 @@
 import type { SettingsChatStatusPresentation } from '../../lib/settingsChatStatus';
 import { SettingsCallout } from './SettingsCallout';
 
-type SettingsChatStatusProps = {
+interface SettingsChatStatusProps {
   status: SettingsChatStatusPresentation;
-};
+}
 
 export function SettingsChatStatus({ status }: SettingsChatStatusProps) {
   if (status.variant === 'success') {

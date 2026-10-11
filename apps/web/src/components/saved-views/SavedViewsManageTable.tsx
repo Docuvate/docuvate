@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { GripVertical, MoreHorizontal } from 'lucide-react';
 import type { SavedDocumentViewDto } from '@docuvate/contracts';
+import { GripVertical, MoreHorizontal } from 'lucide-react';
+import { useCallback, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
+import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { ContextMenu } from '../ui/ContextMenu';
 import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
-import { routes } from '../../lib/routes';
 
-type Props = {
+interface Props {
   views: SavedDocumentViewDto[];
   currentUserId: string | undefined;
   canManageShared: boolean;
@@ -21,7 +22,7 @@ type Props = {
   onTogglePin: (view: SavedDocumentViewDto) => Promise<void>;
   onDelete: (view: SavedDocumentViewDto) => Promise<void>;
   onReorder: (orderedIds: string[]) => Promise<void>;
-};
+}
 
 export function SavedViewsManageTable({
   views,
@@ -59,7 +60,7 @@ export function SavedViewsManageTable({
       if (from === to || from < 0 || to < 0 || from >= owned.length || to >= owned.length) return;
       const copy = [...owned];
       const [item] = copy.splice(from, 1);
-      copy.splice(to, 0, item!);
+      copy.splice(to, 0, item);
       await onReorder(copy.map((v) => v.id));
     },
     [owned, onReorder]
@@ -125,7 +126,7 @@ export function SavedViewsManageTable({
           className="saved-views-row-menu-btn"
           label={t('savedViews.rowMenuAria', { name: view.name })}
           expanded={menuOpen && menuView?.id === view.id}
-          onClick={(e) => openMenu(view, e.currentTarget)}
+          onClick={(e) => { openMenu(view, e.currentTarget); }}
         />
       </div>
     );
@@ -198,8 +199,8 @@ export function SavedViewsManageTable({
                         className="saved-views-drag-handle"
                         draggable
                         aria-label={t('savedViews.reorderHandle', { name: view.name })}
-                        onDragStart={() => onDragStart(ownedIndex)}
-                        onKeyDown={(e) => onHandleKeyDown(ownedIndex, e)}
+                        onDragStart={() => { onDragStart(ownedIndex); }}
+                        onKeyDown={(e) => { onHandleKeyDown(ownedIndex, e); }}
                       >
                         <GripVertical size={20} strokeWidth={1.75} aria-hidden />
                       </button>
@@ -211,18 +212,18 @@ export function SavedViewsManageTable({
                         className="saved-views-rename-form"
                         onSubmit={(e) => {
                           e.preventDefault();
-                          void onRename(view.id, renameValue).then(() => setRenameId(null));
+                          void onRename(view.id, renameValue).then(() => { setRenameId(null); });
                         }}
                       >
                         <Input
                           value={renameValue}
-                          onChange={(e) => setRenameValue(e.target.value)}
+                          onChange={(e) => { setRenameValue(e.target.value); }}
                           aria-label={t('savedViews.nameLabel')}
                         />
                         <Button type="submit" disabled={busy}>
                           {t('savedViews.saveConfirm')}
                         </Button>
-                        <Button type="button" variant="secondary" onClick={() => setRenameId(null)}>
+                        <Button type="button" variant="secondary" onClick={() => { setRenameId(null); }}>
                           {t('common.cancel')}
                         </Button>
                       </form>
@@ -256,7 +257,7 @@ export function SavedViewsManageTable({
         x={menuPos.x}
         y={menuPos.y}
         anchorRef={menuAnchorRef}
-        onClose={() => setMenuOpen(false)}
+        onClose={() => { setMenuOpen(false); }}
         items={[
           {
             kind: 'item',
@@ -291,9 +292,9 @@ export function SavedViewsManageTable({
         busy={busy}
         onConfirm={() => {
           if (!deleteTarget) return;
-          void onDelete(deleteTarget).then(() => setDeleteTarget(null));
+          void onDelete(deleteTarget).then(() => { setDeleteTarget(null); });
         }}
-        onCancel={() => setDeleteTarget(null)}
+        onCancel={() => { setDeleteTarget(null); }}
       />
     </>
   );

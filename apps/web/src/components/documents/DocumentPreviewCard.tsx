@@ -1,16 +1,17 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentDto, ExtractionBlock } from '@docuvate/contracts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentDto, ExtractionBlock } from '@docuvate/contracts';
-import { Card } from '../ui/Card';
-import { bufferToDataUrl } from '../../lib/documentPreview';
+
 import {
   isDocumentPipelinePending,
   isDocumentPreviewPending,
 } from '../../lib/documentDetailLoadingSteps';
-import { PdfViewer } from './PdfViewer';
+import { bufferToDataUrl } from '../../lib/documentPreview';
+import { Card } from '../ui/Card';
 import { DocumentPreviewPlaceholder } from './DocumentPreviewPlaceholder';
+import { PdfViewer } from './PdfViewer';
 
 const NO_HIGHLIGHTS: ExtractionBlock[] = [];
 

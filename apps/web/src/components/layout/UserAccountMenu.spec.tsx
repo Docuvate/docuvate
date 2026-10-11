@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import i18n from '../../i18n';
 import { UserAccountMenu } from './UserAccountMenu';
 
@@ -69,7 +70,8 @@ describe('UserAccountMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: /user menu/i }));
     const panel = document.body.querySelector('.user-account-menu-panel--portal');
     expect(panel).not.toBeNull();
-    fireEvent.mouseDown(panel!);
+    if (!panel) throw new Error('expected portaled menu panel');
+    fireEvent.mouseDown(panel);
     expect(document.body.querySelector('.user-account-menu-panel--portal')).not.toBeNull();
   });
 

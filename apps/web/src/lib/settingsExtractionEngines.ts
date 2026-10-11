@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TFunction } from 'i18next';
 import type { ExtractionEngineInfo } from '@docuvate/contracts';
+import type { TFunction } from 'i18next';
+
 import type { SelectOption } from '../components/ui/Select';
 import { extractionEngineLabel } from './extractionEngineI18n';
 

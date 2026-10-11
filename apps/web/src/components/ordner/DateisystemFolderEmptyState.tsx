@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useState, type DragEvent } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Upload } from 'lucide-react';
+import { type DragEvent,useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { isFileDrag } from '../../lib/documentUploadConstants';
-import { UploadFileTrigger } from '../upload/UploadFileTrigger';
-import { useDocumentUploadContext } from '../upload/DocumentUploadProvider';
 import { Button } from '../ui/Button';
+import { useDocumentUploadContext } from '../upload/DocumentUploadProvider';
+import { UploadFileTrigger } from '../upload/UploadFileTrigger';
 
 interface DateisystemFolderEmptyStateProps {
   folderLabel: string;
@@ -30,7 +31,7 @@ export function DateisystemFolderEmptyState({
       if (!dropTarget.enabled || !isFileDrag(event.dataTransfer)) return;
       event.preventDefault();
       setDragActive(false);
-      if (event.dataTransfer?.files.length) {
+      if (event.dataTransfer.files.length) {
         enqueueFiles(event.dataTransfer.files, dropTarget.assignment);
       }
     },
@@ -50,7 +51,7 @@ export function DateisystemFolderEmptyState({
         e.preventDefault();
         setDragActive(true);
       }}
-      onDragLeave={() => setDragActive(false)}
+      onDragLeave={() => { setDragActive(false); }}
       onDrop={onDrop}
     >
       <Upload className="dateisystem-empty-icon" size={32} strokeWidth={1.5} aria-hidden />

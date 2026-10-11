@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
+  type ReactNode,
+  type RefObject,
   useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
-  type ReactNode,
-  type RefObject,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -71,7 +71,7 @@ export function ContextMenuPanel({
     >
       {items.map((entry, index) => {
         if (entry.kind === 'separator') {
-          return <li key={`sep-${index}`} className="context-menu-separator" role="separator" />;
+          return <li key={`sep-${String(index)}`} className="context-menu-separator" role="separator" />;
         }
         if (entry.kind === 'submenu') {
           const canSelectParent = entry.onSelectParent != null;
@@ -80,8 +80,8 @@ export function ContextMenuPanel({
               key={entry.id}
               className="context-menu-item context-menu-item-submenu"
               role="none"
-              onMouseEnter={() => setOpenSubmenu(entry.id)}
-              onMouseLeave={() => setOpenSubmenu((prev) => (prev === entry.id ? null : prev))}
+              onMouseEnter={() => { setOpenSubmenu(entry.id); }}
+              onMouseLeave={() => { setOpenSubmenu((prev) => (prev === entry.id ? null : prev)); }}
             >
               <button
                 type="button"
@@ -197,7 +197,10 @@ export function ContextMenu({ open, x, y, items, onClose, anchorRef, title }: Co
       }
     };
     const onPointer = (event: MouseEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) {
+      if (
+        !(event.target instanceof Node) ||
+        !rootRef.current?.contains(event.target)
+      ) {
         onClose();
       }
     };
@@ -251,8 +254,8 @@ export function ContextMenu({ open, x, y, items, onClose, anchorRef, title }: Co
       }
     }
 
-    menuEl.style.left = `${left}px`;
-    menuEl.style.top = `${top}px`;
+    menuEl.style.left = `${String(left)}px`;
+    menuEl.style.top = `${String(top)}px`;
     const rect = menuEl.getBoundingClientRect();
     if (top + rect.height > window.innerHeight - pad) {
       top = Math.max(pad, window.innerHeight - rect.height - pad);
@@ -261,8 +264,8 @@ export function ContextMenu({ open, x, y, items, onClose, anchorRef, title }: Co
       top = pad;
     }
 
-    menuEl.style.left = `${left}px`;
-    menuEl.style.top = `${top}px`;
+    menuEl.style.left = `${String(left)}px`;
+    menuEl.style.top = `${String(top)}px`;
     menuEl.style.visibility = '';
   }, [open, x, y, items, anchorRef, title]);
 

@@ -6,14 +6,14 @@ export function typstExportDegradedMessage(
   t: TFunction,
   unreliableReason?: string | null
 ): string {
-  switch (unreliableReason) {
-    case 'unsupported_script':
-      return t('documents.layoutExportTypstDegradedUnsupportedScript');
-    case 'scan_without_text_layer':
-      return t('documents.layoutExportTypstDegradedScanWithoutTextLayer');
-    case 'extraction_failed':
-      return t('documents.layoutExportTypstDegradedExtractionFailed');
-    default:
-      return t('documents.layoutExportTypstDegradedDefault');
+  if (unreliableReason === 'unsupported_script') {
+    return t('documents.layoutExportTypstDegradedUnsupportedScript');
   }
+  if (unreliableReason === 'scan_without_text_layer') {
+    return t('documents.layoutExportTypstDegradedScanWithoutTextLayer');
+  }
+  if (unreliableReason === 'extraction_failed') {
+    return t('documents.layoutExportTypstDegradedExtractionFailed');
+  }
+  return t('documents.layoutExportTypstDegradedDefault');
 }

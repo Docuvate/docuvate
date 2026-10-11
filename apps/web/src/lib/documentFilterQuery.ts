@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TFunction } from 'i18next';
 import type { DocumentListQuery, DocumentStatus, TagDto } from '@docuvate/contracts';
+import type { TFunction } from 'i18next';
+
 import {
   parseFilterTokenValue,
   quoteFilterValueIfNeeded,
@@ -19,16 +20,16 @@ type ParsedFieldsInternal = Partial<LibraryFilterFields> & {
   labelNames?: string[];
 };
 
-export type DocumentFilterParseIssue = {
+export interface DocumentFilterParseIssue {
   token: string;
   messageKey: 'library.filter.parseUnknownKey' | 'library.filter.parseUnknownValue';
   detail?: string;
-};
+}
 
-export type DocumentFilterParseResult = {
+export interface DocumentFilterParseResult {
   fields: LibraryFilterFields;
   issues: DocumentFilterParseIssue[];
-};
+}
 
 const STATUS_ALIASES: Record<string, DocumentStatus> = {
   ready: 'ready',
@@ -105,15 +106,15 @@ export function parseDocumentFilterQuery(input: string): {
         }
         break;
       case 'status': {
-        const status = STATUS_ALIASES[value.toLowerCase()];
-        if (!status) {
+        const statusKey = value.toLowerCase();
+        if (!(statusKey in STATUS_ALIASES)) {
           issues.push({
             token,
             messageKey: 'library.filter.parseUnknownValue',
             detail: value,
           });
         } else {
-          fields.status = status;
+          fields.status = STATUS_ALIASES[statusKey];
         }
         break;
       }
@@ -144,6 +145,12 @@ export function parseDocumentFilterQuery(input: string): {
   return { fields, issues };
 }
 
+function omitLabelNamesFromFilterFields(fields: ParsedFieldsInternal): LibraryFilterFields {
+  const result = { ...fields };
+  Reflect.deleteProperty(result, 'labelNames');
+  return result;
+}
+
 function tagNameIndex(tags: TagDto[]): Map<string, TagDto> {
   const map = new Map<string, TagDto>();
   for (const tag of tags) {
@@ -172,8 +179,7 @@ export function resolveDocumentFilterFields(
     }
   }
 
-  const { labelNames: _unusedLabelNames, ...rest } = parsed.fields;
-  void _unusedLabelNames;
+  const rest = omitLabelNamesFromFilterFields(parsed.fields);
   return {
     fields: {
       ...rest,
@@ -216,7 +222,7 @@ export function serializeDocumentFilterQuery(
     parts.push(`status:${filters.status === 'failed' ? 'error' : filters.status}`);
   }
 
-  const q = (query || filters.q || '').trim();
+  const q = (query || (filters.q ?? '')).trim();
   if (q) {
     parts.push(quoteFilterValueIfNeeded(q));
   }

@@ -31,14 +31,14 @@ export function Dropzone({ disabled, busy, onFile }: DropzoneProps) {
   return (
     <label
       className={`dropzone${busy ? ' dropzone-busy' : ''}`}
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => { e.preventDefault(); }}
       onDrop={onDrop}
     >
       <input
         type="file"
         accept="application/pdf,image/*"
         className="sr-only"
-        disabled={disabled || busy}
+        disabled={disabled ?? busy}
         onChange={onChange}
       />
       <span className="dropzone-title">

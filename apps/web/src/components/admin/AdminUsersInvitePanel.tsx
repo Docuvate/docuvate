@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { InstanceRole } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
+
+import { parseInstanceRole } from '../../lib/instanceRole';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 
-type Props = {
+interface Props {
   busy: boolean;
   inviteEmail: string;
   inviteName: string;
@@ -15,7 +17,7 @@ type Props = {
   onNameChange: (value: string) => void;
   onRoleChange: (role: InstanceRole) => void;
   onSubmit: () => void;
-};
+}
 
 export function AdminUsersInvitePanel({
   busy,
@@ -37,7 +39,7 @@ export function AdminUsersInvitePanel({
           {t('auth.email')}
           <Input
             value={inviteEmail}
-            onChange={(e) => onEmailChange(e.target.value)}
+            onChange={(e) => { onEmailChange(e.target.value); }}
             autoComplete="off"
           />
         </label>
@@ -45,7 +47,7 @@ export function AdminUsersInvitePanel({
           {t('auth.name')}
           <Input
             value={inviteName}
-            onChange={(e) => onNameChange(e.target.value)}
+            onChange={(e) => { onNameChange(e.target.value); }}
             autoComplete="off"
           />
         </label>
@@ -54,7 +56,7 @@ export function AdminUsersInvitePanel({
           <Select
             value={inviteRole}
             disabled={busy}
-            onChange={(value) => onRoleChange(value as InstanceRole)}
+            onChange={(value) => { onRoleChange(parseInstanceRole(value)); }}
             options={[
               { value: 'member', label: t('admin.roles.member') },
               { value: 'admin', label: t('admin.roles.admin') },

@@ -7,5 +7,5 @@ export const CONNECTORS_OAUTH_SETUP_DOC_PATH = 'docs/connectors-oauth-setup.md';
 
 export function connectorsOAuthSetupDocUrl(): string {
   const configured = import.meta.env.VITE_CONNECTORS_OAUTH_SETUP_DOC_URL?.trim();
-  return configured || routes.docsConnectorsOAuthSetup;
+  return configured ?? routes.docsConnectorsOAuthSetup;
 }

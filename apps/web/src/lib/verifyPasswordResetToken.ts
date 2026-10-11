@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { apiBaseUrl } from './api';
+import { isRecord } from './apiErrors';
 
-export type PasswordResetTokenVerification = {
+export interface PasswordResetTokenVerification {
   valid: boolean;
-};
+}
 
 function passwordResetVerifyBaseUrl(): string {
   if (typeof window !== 'undefined') {
@@ -26,6 +27,9 @@ export async function verifyPasswordResetToken(
   if (!response.ok) {
     return { valid: false };
   }
-  const body = (await response.json()) as PasswordResetTokenVerification;
-  return { valid: body.valid === true };
+  const body: unknown = await response.json();
+  if (isRecord(body) && typeof body.valid === 'boolean') {
+    return { valid: body.valid };
+  }
+  return { valid: false };
 }

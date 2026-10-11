@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useState } from 'react';
 import { Copy } from 'lucide-react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { Button } from './Button';
 
 interface CopyButtonProps {
@@ -22,7 +23,7 @@ export function CopyButton({ value, label, className = '', disabled = false }: C
     try {
       await navigator.clipboard.writeText(value);
       setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
+      window.setTimeout(() => { setCopied(false); }, 2000);
     } catch {
       setCopied(false);
     }

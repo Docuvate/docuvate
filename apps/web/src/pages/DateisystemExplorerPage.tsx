@@ -1,33 +1,42 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import {
+  type DragEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatUserFacingError } from '../lib/apiErrors';
-import { FolderExplorerTree } from '../components/ordner/FolderExplorerTree';
-import { DateisystemRootOverview } from '../components/ordner/DateisystemRootOverview';
+import { Navigate, useParams } from 'react-router-dom';
+
 import { AddExistingDocumentsDialog } from '../components/ordner/AddExistingDocumentsDialog';
-import { FolderTargetPickerDialog } from '../components/ordner/FolderTargetPickerDialog';
 import { DateisystemFolderEmptyState } from '../components/ordner/DateisystemFolderEmptyState';
+import { DateisystemRootOverview } from '../components/ordner/DateisystemRootOverview';
+import { FolderExplorerTree } from '../components/ordner/FolderExplorerTree';
+import { FolderTargetPickerDialog } from '../components/ordner/FolderTargetPickerDialog';
 import {
   DocumentUploadProvider,
   useDocumentUploadContext,
 } from '../components/upload/DocumentUploadProvider';
 import { UploadQueueList } from '../components/upload/UploadQueueList';
 import { bulkDocuments, createFolder, createMappe, deleteFolder, updateFolder } from '../lib/api';
-import { isFileDrag } from '../lib/documentUploadConstants';
+import { formatUserFacingError } from '../lib/apiErrors';
+import { dateisystemSidebarWidthStyle } from '../lib/cssCustomProperties';
 import { isDocumentDrag, readDocumentDragIds } from '../lib/documentDnD';
 import {
-  resolveFilesystemDropTarget,
   type DocumentUploadAssignment,
+  resolveFilesystemDropTarget,
 } from '../lib/documentUploadAssignment';
+import { isFileDrag } from '../lib/documentUploadConstants';
 import {
   buildOrdnerBreadcrumbs,
   childFolders,
   findFolder,
   findMappe,
-  pickDefaultFilesystemHref,
   type OrdnerSelection,
+  pickDefaultFilesystemHref,
 } from '../lib/ordnerTree';
 import { DateisystemContentHeader } from './dateisystem/DateisystemContentHeader';
 import { useResponsiveSidebarWidth } from './dateisystem/useResponsiveSidebarWidth';
@@ -163,10 +172,10 @@ export function DateisystemExplorerPage({ browseMode }: DateisystemExplorerPageP
   );
 }
 
-type ActiveFolderContext = {
+interface ActiveFolderContext {
   label: string;
   folderId?: string;
-};
+}
 
 interface LayoutProps {
   browseMode: 'root' | 'mappe' | 'folder';
@@ -233,7 +242,7 @@ function DateisystemExplorerLayout({
       const mappeLabel = mappe?.name ?? t('common.folder');
       const roots = childFolders(data.folders, { mappeId: routeMappeId, parentId: null });
       if (roots.length === 1) {
-        return { folderId: roots[0]!.id, label: mappeLabel };
+        return { folderId: roots[0].id, label: mappeLabel };
       }
       return { label: mappeLabel };
     }
@@ -348,7 +357,7 @@ function DateisystemExplorerLayout({
 
   function onContentDrop(event: DragEvent) {
     if (!showDocuments || !dropTarget.enabled) return;
-    if (isFileDrag(event.dataTransfer) && event.dataTransfer?.files.length) {
+    if (isFileDrag(event.dataTransfer) && event.dataTransfer.files.length) {
       event.preventDefault();
       enqueueFiles(event.dataTransfer.files, dropTarget.assignment);
       return;
@@ -376,14 +385,14 @@ function DateisystemExplorerLayout({
       <DateisystemFolderEmptyState
         folderLabel={activeFolderTarget.label}
         onAddExisting={() => {
-          if (!activeFolderTarget?.folderId) return;
+          if (!activeFolderTarget.folderId) return;
           setAddExistingTarget({
             folderId: activeFolderTarget.folderId,
             label: activeFolderTarget.label,
           });
         }}
         uploadDisabledTitle={dropTarget.enabled ? undefined : t('filesystem.uploadPickFolderFirst')}
-        onRequestUploadTarget={() => setFolderPickerOpen(true)}
+        onRequestUploadTarget={() => { setFolderPickerOpen(true); }}
       />
     ) : null;
 
@@ -397,7 +406,7 @@ function DateisystemExplorerLayout({
 
       <div
         className="dateisystem-shell"
-        style={{ ['--dateisystem-sidebar-width' as string]: `${sidebarWidth}px` }}
+        style={dateisystemSidebarWidthStyle(sidebarWidth)}
       >
         <aside className="dateisystem-sidebar" aria-label={t('filesystem.treePanelAria')}>
           <div className="dateisystem-sidebar-head">
@@ -416,18 +425,16 @@ function DateisystemExplorerLayout({
             onCreateChildFolder={onCreateChildFolder}
             onRenameFolder={onRenameFolder}
             onDeleteFolder={onDeleteFolder}
-            onAddDocuments={(target) => setAddExistingTarget(target)}
+            onAddDocuments={(target) => { setAddExistingTarget(target); }}
             onMoveDocumentsToFolder={onMoveDocumentsToFolder}
             onUploadFilesToFolder={onUploadFilesToFolder}
           />
         </aside>
 
-        <div
+        <button
+          type="button"
           className="dateisystem-split-handle"
-          role="separator"
-          aria-orientation="vertical"
           aria-label={t('filesystem.resizeSidebar')}
-          tabIndex={0}
           onMouseDown={onResizeStart}
           onKeyDown={(event) => {
             if (event.key === 'ArrowLeft') {
@@ -448,17 +455,20 @@ function DateisystemExplorerLayout({
             onCreateFolder={onToolbarCreateFolder}
             onAddExistingDocuments={
               activeFolderTarget?.folderId
-                ? () =>
+                ? () => {
+                    const folderId = activeFolderTarget.folderId;
+                    if (!folderId) return;
                     setAddExistingTarget({
-                      folderId: activeFolderTarget.folderId!,
+                      folderId,
                       label: activeFolderTarget.label,
-                    })
+                    });
+                  }
                 : undefined
             }
             uploadDisabledTitle={
               dropTarget.enabled ? undefined : t('filesystem.uploadPickFolderFirst')
             }
-            onRequestUploadTarget={() => setFolderPickerOpen(true)}
+            onRequestUploadTarget={() => { setFolderPickerOpen(true); }}
           />
 
           <div
@@ -491,7 +501,7 @@ function DateisystemExplorerLayout({
         open={folderPickerOpen}
         mappen={data.mappen}
         folders={data.folders}
-        onCancel={() => setFolderPickerOpen(false)}
+        onCancel={() => { setFolderPickerOpen(false); }}
         onPick={(target) => {
           setUploadOverride({
             kind: 'folder',
@@ -507,7 +517,7 @@ function DateisystemExplorerLayout({
           open
           folderId={addExistingTarget.folderId}
           folderLabel={addExistingTarget.label}
-          onClose={() => setAddExistingTarget(null)}
+          onClose={() => { setAddExistingTarget(null); }}
           onAssigned={() => {
             void data.load();
             void refreshTree();

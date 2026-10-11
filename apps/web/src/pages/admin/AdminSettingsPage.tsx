@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { AdminAccessResponse } from '@docuvate/contracts';
+import { Shield, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { Shield, Users } from 'lucide-react';
-import type { AdminAccessResponse } from '@docuvate/contracts';
+
+import { AdminSettingsLayout } from '../../components/admin/AdminSettingsLayout';
+import { SettingsSectionCard } from '../../components/settings/SettingsSectionCard';
 import { getAdminAccess } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { routes } from '../../lib/routes';
-import { SettingsSectionCard } from '../../components/settings/SettingsSectionCard';
-import { AdminSettingsLayout } from '../../components/admin/AdminSettingsLayout';
 
 const ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true as const };
 

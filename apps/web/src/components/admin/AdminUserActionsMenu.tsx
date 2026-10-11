@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useRef, useState } from 'react';
-import { MoreHorizontal } from 'lucide-react';
 import type { AdminUserDto } from '@docuvate/contracts';
+import { MoreHorizontal } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu';
 import { IconButton } from '../ui/IconButton';
 
@@ -14,12 +15,12 @@ export type AdminUserMenuAction =
   | { kind: 'resend-invite'; user: AdminUserDto }
   | { kind: 'revoke-invite'; user: AdminUserDto };
 
-type Props = {
+interface Props {
   user: AdminUserDto;
   busy: boolean;
   disabled: boolean;
   onSelect: (action: AdminUserMenuAction) => void;
-};
+}
 
 export function AdminUserActionsMenu({ user, busy, disabled, onSelect }: Props) {
   const { t } = useTranslation();
@@ -34,29 +35,29 @@ export function AdminUserActionsMenu({ user, busy, disabled, onSelect }: Props) 
       id: 'revoke-invite',
       label: t('admin.usersRevokeInvite'),
       danger: true,
-      onSelect: () => onSelect({ kind: 'revoke-invite', user }),
+      onSelect: () => { onSelect({ kind: 'revoke-invite', user }); },
     });
   } else if (user.accountStatus === 'suspended') {
     items.push({
       kind: 'item',
       id: 'unban',
       label: t('admin.usersUnban'),
-      onSelect: () => onSelect({ kind: 'unban', user }),
+      onSelect: () => { onSelect({ kind: 'unban', user }); },
     });
-  } else if (user.accountStatus === 'active') {
+  } else {
     items.push(
       {
         kind: 'item',
         id: 'ban',
         label: t('admin.usersBan'),
         danger: true,
-        onSelect: () => onSelect({ kind: 'ban', user }),
+        onSelect: () => { onSelect({ kind: 'ban', user }); },
       },
       {
         kind: 'item',
         id: 'revoke',
         label: t('admin.usersRevokeSessions'),
-        onSelect: () => onSelect({ kind: 'revoke', user }),
+        onSelect: () => { onSelect({ kind: 'revoke', user }); },
       }
     );
   }
@@ -84,7 +85,7 @@ export function AdminUserActionsMenu({ user, busy, disabled, onSelect }: Props) 
         y={point.y}
         anchorRef={anchorRef}
         items={items}
-        onClose={() => setOpen(false)}
+        onClose={() => { setOpen(false); }}
       />
     </>
   );

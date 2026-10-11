@@ -51,11 +51,12 @@ describe('DocumentLayoutCompareView', () => {
         onPageChange={onPageChange}
       />
     );
-    const root = container.querySelector('.layout-compare');
-    if (!(root instanceof HTMLElement)) {
-      throw new Error('layout compare root not found');
+    const toolbar = container.querySelector('.layout-compare-toolbar');
+    if (!(toolbar instanceof HTMLElement)) {
+      throw new Error('layout compare toolbar not found');
     }
-    fireEvent.keyDown(root, { key: 'ArrowRight' });
+    toolbar.focus();
+    fireEvent.keyDown(toolbar, { key: 'ArrowRight' });
     expect(onPageChange).toHaveBeenCalledWith(3);
   });
 });

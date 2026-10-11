@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-type AuthFormErrorProps = {
+interface AuthFormErrorProps {
   id: string;
   message: string;
-};
+}
 
 export function AuthFormError({ id, message }: AuthFormErrorProps) {
   if (!message) {

@@ -1,25 +1,26 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentDto, ExtractedField, ExtractionBlock } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentDto, ExtractedField, ExtractionBlock } from '@docuvate/contracts';
-import { Card } from '../ui/Card';
-import { Button } from '../ui/Button';
-import { PdfViewer, type PdfLayoutOverlay } from './PdfViewer';
-import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
-import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
+
+import { isExtractionPending } from '../../lib/documentExtractionState';
+import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
+import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
 import {
   buildLayoutOverlays,
   hitTestLayoutOverlay,
   overlayForExtractionBlock,
 } from '../../lib/layoutOverlayModel';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
-import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
-import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
+import { Button } from '../ui/Button';
+import { Card } from '../ui/Card';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
-import { isExtractionPending } from '../../lib/documentExtractionState';
-import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
+import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
+import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
+import { ExtractedTextPanel } from './ExtractedTextPanel';
+import { type PdfLayoutOverlay,PdfViewer } from './PdfViewer';
 
 type ViewerMode = 'original' | 'reconstruction' | 'compare';
 
@@ -30,7 +31,7 @@ interface DocumentLayoutWorkspaceProps {
   previewUnavailable: boolean;
   blocks: ExtractionBlock[];
   fields: ExtractedField[];
-  heuristicSuggestions?: Array<{ key: string; value: string }>;
+  heuristicSuggestions?: { key: string; value: string }[];
   highlightBlocks: ExtractionBlock[];
   viewerPage: number;
   activeBlockIndex: number | null;
@@ -158,7 +159,7 @@ export function DocumentLayoutWorkspace({
       }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => { window.removeEventListener('keydown', onKey); };
   }, [activeOverlayId]);
 
   const onPdfPageClick = useCallback(
@@ -173,7 +174,6 @@ export function DocumentLayoutWorkspace({
       const index = findBlockIndexAtPoint(blocks, page, nx, ny);
       if (index < 0) return;
       const block = blocks[index];
-      if (!block) return;
       onActiveBlockIndexChange(index);
       onHighlightBlocks([block]);
       const irOverlay = overlayForExtractionBlock(overlays, block.blockIndex ?? index);
@@ -210,7 +210,7 @@ export function DocumentLayoutWorkspace({
                 type="button"
                 className={`layout-view-mode-btn${viewerMode === 'original' ? ' layout-view-mode-btn-active' : ''}`}
                 aria-pressed={viewerMode === 'original'}
-                onClick={() => setViewerMode('original')}
+                onClick={() => { setViewerMode('original'); }}
               >
                 {t('documents.layoutViewOriginal')}
               </button>
@@ -218,7 +218,7 @@ export function DocumentLayoutWorkspace({
                 type="button"
                 className={`layout-view-mode-btn${viewerMode === 'reconstruction' ? ' layout-view-mode-btn-active' : ''}`}
                 aria-pressed={viewerMode === 'reconstruction'}
-                onClick={() => setViewerMode('reconstruction')}
+                onClick={() => { setViewerMode('reconstruction'); }}
               >
                 {t('documents.layoutViewReconstruction')}
               </button>
@@ -226,7 +226,7 @@ export function DocumentLayoutWorkspace({
                 type="button"
                 className={`layout-view-mode-btn${viewerMode === 'compare' ? ' layout-view-mode-btn-active' : ''}`}
                 aria-pressed={viewerMode === 'compare'}
-                onClick={() => setViewerMode('compare')}
+                onClick={() => { setViewerMode('compare'); }}
               >
                 {t('documents.layoutViewCompare')}
               </button>
@@ -236,7 +236,7 @@ export function DocumentLayoutWorkspace({
                 <input
                   type="checkbox"
                   checked={overlayEnabled}
-                  onChange={(e) => setOverlayEnabled(e.target.checked)}
+                  onChange={(e) => { setOverlayEnabled(e.target.checked); }}
                 />
                 <span>{t('documents.layoutOverlayToggle')}</span>
               </label>
@@ -247,7 +247,7 @@ export function DocumentLayoutWorkspace({
                     key={step}
                     type="button"
                     className={`layout-zoom-btn${layoutZoom === step ? ' layout-zoom-btn-active' : ''}`}
-                    onClick={() => setLayoutZoom(step)}
+                    onClick={() => { setLayoutZoom(step); }}
                   >
                     {step}%
                   </button>
@@ -269,7 +269,7 @@ export function DocumentLayoutWorkspace({
             </div>
           </div>
 
-          {showRecovery && onRequeueExtraction ? (
+          {showRecovery ? (
             <DocumentExtractionRecovery
               doc={doc}
               requeueBusy={requeueBusy}
@@ -292,9 +292,9 @@ export function DocumentLayoutWorkspace({
                     layoutOverlays={pdfOverlays}
                     layoutOverlayEnabled={overlayEnabled && overlays.length > 0}
                     activeLayoutOverlayId={activeOverlayId}
-                    onLayoutOverlaySelect={(id) => onOverlaySelect(id)}
+                    onLayoutOverlaySelect={(id) => { onOverlaySelect(id); }}
                     onLayoutOverlayHover={setHoverOverlay}
-                    onLayoutOverlayClear={() => setActiveOverlayId(null)}
+                    onLayoutOverlayClear={() => { setActiveOverlayId(null); }}
                     page={viewerPage}
                     onPageChange={onViewerPageChange}
                     paginated
@@ -357,7 +357,7 @@ export function DocumentLayoutWorkspace({
               onHighlightBlocks={onHighlightBlocks}
               onBlocksChange={onBlocksChange}
               onActiveBlockIndexChange={onActiveBlockIndexChange}
-              documentTitle={doc.title ?? doc.filename}
+              documentTitle={doc.title || doc.filename}
               textOnly
             />
             {blocksDirty ? (
@@ -374,7 +374,7 @@ export function DocumentLayoutWorkspace({
       {layoutIr ? (
         <DocumentLayoutSidePanel
           documentId={doc.id}
-          documentTitle={doc.title ?? doc.filename}
+          documentTitle={doc.title || doc.filename}
           layoutIr={layoutIr}
           fields={fields}
           blocks={blocks}
@@ -389,8 +389,7 @@ export function DocumentLayoutWorkspace({
             onAcceptFieldSuggestion(key, value);
             setDismissedSuggestions((prev) => new Set(prev).add(key));
           }}
-          onDismissSuggestion={(key) =>
-            setDismissedSuggestions((prev) => new Set(prev).add(key))
+          onDismissSuggestion={(key) => { setDismissedSuggestions((prev) => new Set(prev).add(key)); }
           }
           dismissedSuggestions={dismissedSuggestions}
           heuristicSuggestions={heuristicSuggestions}

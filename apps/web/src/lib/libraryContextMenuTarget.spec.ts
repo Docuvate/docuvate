@@ -3,11 +3,14 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
+
+import { minimalDocumentDto } from '../test-utils/minimalDocumentDto';
 import {
-  LIBRARY_BULK_BAR_SLOT_MIN_HEIGHT,
   computeRowAnchoredMenuPosition,
   contextMenuTitleForSelection,
+  LIBRARY_BULK_BAR_SLOT_MIN_HEIGHT,
   resolveContextMenuSelectedIds,
 } from './libraryContextMenuTarget.js';
 
@@ -28,12 +31,16 @@ describe('resolveContextMenuSelectedIds', () => {
 describe('contextMenuTitleForSelection', () => {
   const labels = {
     singleFallback: 'Dokument',
-    multiple: (count: number) => `${count} Dokumente`,
+    multiple: (count: number) => `${String(count)} Dokumente`,
   };
 
   it('uses the document title for a single target', () => {
     expect(
-      contextMenuTitleForSelection(['1'], [{ id: '1', title: 'Vertrag Q4' } as never], labels)
+      contextMenuTitleForSelection(
+        ['1'],
+        [minimalDocumentDto({ id: '1', title: 'Vertrag Q4' })],
+        labels
+      )
     ).toBe('Vertrag Q4');
   });
 

@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useTranslation } from 'react-i18next';
 import type { FolderDto } from '@docuvate/contracts';
+import { useTranslation } from 'react-i18next';
+
 import { Input } from '../ui/Input';
 import { LocalizedDateInput } from '../ui/LocalizedDateInput';
 import { Select } from '../ui/Select';
@@ -36,7 +37,7 @@ export function DocumentMetadataForm(props: DocumentMetadataFormProps) {
           {t('documents.metadataTitle')}
           <Input
             value={props.title}
-            onChange={(e) => props.onTitleChange(e.target.value)}
+            onChange={(e) => { props.onTitleChange(e.target.value); }}
             required
           />
         </label>
@@ -50,7 +51,7 @@ export function DocumentMetadataForm(props: DocumentMetadataFormProps) {
             className="textarea"
             rows={3}
             value={props.notes}
-            onChange={(e) => props.onNotesChange(e.target.value)}
+            onChange={(e) => { props.onNotesChange(e.target.value); }}
           />
         </label>
         <label>

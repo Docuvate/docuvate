@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useTranslation } from 'react-i18next';
+
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 
-type UnsavedChangesDialogProps = {
+interface UnsavedChangesDialogProps {
   open: boolean;
   onStay: () => void;
   onLeave: () => void;
-};
+}
 
 export function UnsavedChangesDialog({ open, onStay, onLeave }: UnsavedChangesDialogProps) {
   const { t } = useTranslation();

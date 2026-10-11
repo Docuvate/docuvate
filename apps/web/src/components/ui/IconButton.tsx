@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { forwardRef } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import type { ButtonHTMLAttributes } from 'react';
+import { forwardRef } from 'react';
+
 import { ICON_GLYPH_PX } from './controlMetrics';
 
 type IconButtonSize = 'sm' | 'md';

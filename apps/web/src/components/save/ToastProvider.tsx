@@ -2,37 +2,39 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
-  type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+
+import { readNotifySavedDetail,readNotifySaveErrorDetail } from '../../lib/customEventDetail';
 import { ToastItem } from './ToastItem';
 
 type ToastKind = 'success' | 'error';
 
-type ToastRecord = {
+interface ToastRecord {
   id: string;
   kind: ToastKind;
   message: string;
   retry?: () => void;
-};
+}
 
-type ToastContextValue = {
+interface ToastContextValue {
   pushSuccess: (message?: string) => void;
   pushError: (message: string, retry?: () => void) => void;
   dismissSuccessToasts: () => void;
   dismissAllToasts: () => void;
-};
+}
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
 function nextToastId(): string {
-  return `toast-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `toast-${String(Date.now())}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -107,8 +109,8 @@ export function useToast() {
   const { pushSuccess, pushError } = useToastNotify();
   return useMemo(
     () => ({
-      success: (message?: string) => pushSuccess(message),
-      error: (message: string, retry?: () => void) => pushError(message, retry),
+      success: (message?: string) => { pushSuccess(message); },
+      error: (message: string, retry?: () => void) => { pushError(message, retry); },
     }),
     [pushSuccess, pushError]
   );
@@ -119,11 +121,13 @@ export function ToastGlobalBridge() {
 
   useEffect(() => {
     function onSaved(e: Event) {
-      const detail = (e as CustomEvent<{ message?: string }>).detail;
-      pushSuccess(detail?.message);
+      const detail = readNotifySavedDetail(e);
+      if (!detail) return;
+      pushSuccess(detail.message);
     }
     function onError(e: Event) {
-      const detail = (e as CustomEvent<{ message: string; retry?: () => void }>).detail;
+      const detail = readNotifySaveErrorDetail(e);
+      if (!detail) return;
       pushError(detail.message, detail.retry);
     }
     window.addEventListener('docuvate-notify-saved', onSaved);

@@ -1,21 +1,22 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
+import type { FieldSuggestionRow } from '@docuvate/contracts';
 import {
   dedupeExtractedFields,
+  type ExtractedField,
   omitInvalidDateExtractedFields,
   semanticFieldKey,
-  type ExtractedField,
   type TagCustomFieldDefinitionDto,
   type TagDto,
 } from '@docuvate/contracts';
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { extractionFieldLabel } from '../../lib/extractionFieldLabels';
+import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import { labelFieldDisplayName } from '../../lib/labelFieldDisplay';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
-import type { FieldSuggestionRow } from '@docuvate/contracts';
 
 interface ExtractedFieldsPanelProps {
   fields: ExtractedField[];
@@ -101,7 +102,7 @@ export function ExtractedFieldsPanel({
                     <Button
                       type="button"
                       variant="secondary"
-                      onClick={() => onAcceptSuggestion(s.key, s.value)}
+                      onClick={() => { onAcceptSuggestion(s.key, s.value); }}
                     >
                       {t('documents.layoutSuggestionAccept')}
                     </Button>
@@ -116,7 +117,7 @@ export function ExtractedFieldsPanel({
       <details
         className="extracted-fields-edit-details"
         open={editOpen}
-        onToggle={(e) => setEditOpen((e.target as HTMLDetailsElement).open)}
+        onToggle={(e) => { setEditOpen(e.currentTarget.open); }}
       >
         <summary className="extracted-fields-edit-summary">
           {t('recognizedFields.correctFieldsSummary')}

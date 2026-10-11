@@ -1,16 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { formatUserFacingError } from '../../lib/apiErrors';
 import type { TagDto } from '@docuvate/contracts';
-import { getUserSettings, listRecognizedFields, listTags, updateUserSettings } from '../../lib/api';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
+import { PageFormSaveKit } from '../../components/save/PageFormSaveKit';
+import { useToastNotify } from '../../components/save/ToastProvider';
 import { RecognizedFieldCatalogEditor } from '../../components/settings/RecognizedFieldCatalogEditor';
 import {
-  RecognizedFieldQualityGateEditor,
   type RecognizedFieldGateDraft,
+  RecognizedFieldQualityGateEditor,
 } from '../../components/settings/RecognizedFieldQualityGateEditor';
+import { Card } from '../../components/ui/Card';
+import { getUserSettings, listRecognizedFields, listTags, updateUserSettings } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import {
   draftsFromRecognizedDefinitions,
   type RecognizedFieldDraft,
@@ -18,11 +22,8 @@ import {
 import { validateRecognizedFieldDrafts } from '../../lib/recognizedFieldRules';
 import { persistRecognizedFieldCatalog } from '../../lib/recognizedFieldsPersist';
 import { routes } from '../../lib/routes';
-import { Card } from '../../components/ui/Card';
-import { useFormDraft } from '../../lib/useFormDraft';
-import { PageFormSaveKit } from '../../components/save/PageFormSaveKit';
-import { useToastNotify } from '../../components/save/ToastProvider';
 import { notifySaved, notifySaveError } from '../../lib/saveNotify';
+import { useFormDraft } from '../../lib/useFormDraft';
 
 export function RecognizedFieldsPage() {
   const { t } = useTranslation();
@@ -58,7 +59,7 @@ export function RecognizedFieldsPage() {
       .catch((err: unknown) => {
         setLoadError(formatUserFacingError(err, 'recognizedFields.loadFailed'));
       })
-      .finally(() => setLoading(false));
+      .finally(() => { setLoading(false); });
   }, []);
 
   const validationMessages = useMemo(

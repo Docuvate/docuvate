@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useState } from 'react';
 import type { LayoutIrDocument, LayoutIrPageSummary } from '@docuvate/contracts';
+import { useEffect, useState } from 'react';
+
 import { fetchDocumentLayoutIr } from './api';
 import { layoutIrDocumentFromPageSummaries } from './layoutIrPages';
 
@@ -61,6 +62,6 @@ export function useDocumentLayoutIr(
   return {
     layoutIr,
     state,
-    reload: () => setReloadToken((n) => n + 1),
+    reload: () => { setReloadToken((n) => n + 1); },
   };
 }

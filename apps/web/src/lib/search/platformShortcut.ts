@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export function isMacPlatform(): boolean {
   if (typeof navigator === 'undefined') return false;
-  return /Mac|iPhone|iPad/i.test(navigator.platform);
+  return /Mac|iPhone|iPad/i.test(navigator.userAgent);
 }
 
 /** Compact header shortcut label (single chip). */

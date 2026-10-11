@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Plus } from 'lucide-react';
-import { IconButton } from './IconButton';
+import { describe, expect, it } from 'vitest';
+
 import { ICON_BUTTON_SM_PX, ICON_GLYPH_PX } from './controlMetrics';
+import { IconButton } from './IconButton';
 
 describe('IconButton', () => {
   it('renders sm hit target with centered 16px icon', () => {

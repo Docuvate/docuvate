@@ -1,16 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TFunction } from 'i18next';
 import type { UserSettingsDto } from '@docuvate/contracts';
+import type { TFunction } from 'i18next';
 
 const CUSTOMER_REASON_PREFIX = 'settings.chatUnavailableReason.';
 
 export type SettingsChatStatusVariant = 'success' | 'info' | 'plain';
 
-export type SettingsChatStatusPresentation = {
+export interface SettingsChatStatusPresentation {
   variant: SettingsChatStatusVariant;
   message: string;
-};
+}
 
 function resolveChatStatusMessage(
   t: TFunction,

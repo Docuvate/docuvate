@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it } from 'vitest';
 import fs from 'node:fs';
 import path from 'node:path';
+
+import { describe, expect, it } from 'vitest';
 
 describe('Labels page i18n', () => {
   it('does not reference removed labelSpace keys in source', () => {

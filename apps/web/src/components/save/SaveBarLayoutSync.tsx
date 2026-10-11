@@ -13,8 +13,8 @@ export function SaveBarLayoutSync() {
 
     function update() {
       const rect = main.getBoundingClientRect();
-      document.documentElement.style.setProperty('--save-bar-left', `${rect.left}px`);
-      document.documentElement.style.setProperty('--save-bar-width', `${rect.width}px`);
+      document.documentElement.style.setProperty('--save-bar-left', `${String(rect.left)}px`);
+      document.documentElement.style.setProperty('--save-bar-width', `${String(rect.width)}px`);
     }
 
     update();

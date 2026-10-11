@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useTranslation } from 'react-i18next';
-import { DocumentDetailLoadStepList } from './DocumentDetailLoadStepList';
+
 import { Skeleton } from '../ui/Skeleton';
+import { DocumentDetailLoadStepList } from './DocumentDetailLoadStepList';
 
 interface DocumentPreviewPlaceholderProps {
   pipelinePending: boolean;

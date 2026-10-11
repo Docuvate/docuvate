@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useRef, useState } from 'react';
+
 import { isFileDrag } from '../../lib/documentUploadConstants';
 import { useDocumentUploadContext } from './DocumentUploadProvider';
 
@@ -65,7 +66,7 @@ export function GlobalPageDropOverlay() {
       aria-label={dropTarget.overlayTitle}
       onDragOver={(e) => {
         e.preventDefault();
-        if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+        e.dataTransfer.dropEffect = 'copy';
       }}
     >
       <div className="page-drop-overlay-panel">

@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CorrespondentDto } from '@docuvate/contracts';
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { formatUserFacingError } from '../../lib/apiErrors';
-import type { CorrespondentDto } from '@docuvate/contracts';
-import { createCorrespondent, deleteCorrespondent, listCorrespondents } from '../../lib/api';
+
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
-import { Input } from '../../components/ui/Input';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Input } from '../../components/ui/Input';
+import { createCorrespondent, deleteCorrespondent, listCorrespondents } from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 
 export function CorrespondentsPage() {
   const { t } = useTranslation();
@@ -58,7 +59,7 @@ export function CorrespondentsPage() {
       <div className="search-row">
         <Input
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => { setQuery(e.target.value); }}
           placeholder={t('structure.correspondentsSearchPlaceholder')}
           aria-label={t('structure.correspondentsSearchAria')}
         />
@@ -71,7 +72,7 @@ export function CorrespondentsPage() {
           {filteredItems.map((c) => (
             <li key={c.id}>
               <span>{c.name}</span>
-              <Button type="button" variant="ghost" onClick={() => setPendingDelete(c)}>
+              <Button type="button" variant="ghost" onClick={() => { setPendingDelete(c); }}>
                 {t('common.delete')}
               </Button>
             </li>
@@ -81,7 +82,7 @@ export function CorrespondentsPage() {
           <Input
             placeholder={t('structure.correspondentsNewPlaceholder')}
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => { setName(e.target.value); }}
           />
           <Button type="submit">{t('common.create')}</Button>
         </form>
@@ -97,7 +98,7 @@ export function CorrespondentsPage() {
         description={t('structure.correspondentsDeleteDescription')}
         confirmLabel={t('common.deletePermanently')}
         tone="danger"
-        onCancel={() => setPendingDelete(null)}
+        onCancel={() => { setPendingDelete(null); }}
         onConfirm={() => {
           if (pendingDelete) {
             void deleteCorrespondent(pendingDelete.id).then(load);

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useState } from 'react';
+
 import i18n from '../i18n';
 import { uploadDocument } from './api';
 import { formatUserFacingError } from './apiErrors';
@@ -8,8 +9,8 @@ import {
   applyDocumentUploadAssignment,
   type DocumentUploadAssignment,
 } from './documentUploadAssignment';
-import { uploadPlacementFromAssignment } from './uploadPlacementFromAssignment';
 import { isAllowedUploadMime, UPLOAD_MAX_BYTES } from './documentUploadConstants';
+import { uploadPlacementFromAssignment } from './uploadPlacementFromAssignment';
 
 export type UploadItemStatus = 'pending' | 'uploading' | 'done' | 'error';
 
@@ -47,7 +48,7 @@ export function useDocumentUploadQueue(onUploaded?: () => void) {
       if (list.length === 0) return;
 
       const items: UploadItem[] = list.map((file) => ({
-        id: `${file.name}-${file.size}-${file.lastModified}-${Math.random()}`,
+        id: `${file.name}-${String(file.size)}-${String(file.lastModified)}-${String(Math.random())}`,
         file,
         status: 'pending',
       }));

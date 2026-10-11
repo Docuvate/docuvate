@@ -59,7 +59,7 @@ export function computeSelectMenuPlacement(input: SelectMenuPlacementInput): Sel
     scrollable = contentHeight > maxHeight;
   }
 
-  const layoutHeight = scrollable ? maxHeight! : contentHeight;
+  const layoutHeight = scrollable && maxHeight !== undefined ? maxHeight : contentHeight;
 
   let top = openUp
     ? triggerRect.top - SELECT_MENU_GAP_PX - layoutHeight

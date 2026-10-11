@@ -1,21 +1,22 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ExtractionBlock, LayoutIrPageSummary } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { ExtractionBlock, LayoutIrPageSummary } from '@docuvate/contracts';
-import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
+
+import { fetchDocumentLayoutTypst } from '../../lib/api';
 import {
   findBlockIndex,
   groupBlocksIntoLines,
   textFromExtractionBlocks,
 } from '../../lib/extractionLayout';
-import { fetchDocumentLayoutTypst } from '../../lib/api';
 import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
-import { Button } from '../ui/Button';
-import { Input } from '../ui/Input';
-import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu';
+import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { useToastNotify } from '../save/ToastProvider';
+import { Button } from '../ui/Button';
+import { ContextMenu, type ContextMenuEntry } from '../ui/ContextMenu';
+import { Input } from '../ui/Input';
 import { ExtractedLayoutFallback } from './ExtractedLayoutFallback';
 import {
   ExtractedLayoutHtmlFrame,
@@ -89,7 +90,7 @@ export function ExtractedTextPanel({
   const hasLayoutIr = (layoutIrPages?.length ?? 0) > 0;
   const layoutIrPending = layoutIrAvailable && !hasLayoutIr;
   const showModeToggle =
-    !textOnly && !editMode && (blocks.length > 0 || (fullText?.trim().length ?? 0) > 0);
+    !textOnly && !editMode && (blocks.length > 0 || fullText.trim().length > 0);
   const showLayoutPane = showModeToggle && contentMode === 'layout';
 
   const pageNumbers = [...new Set(blocks.map((b) => b.page))].sort((a, b) => a - b);
@@ -105,16 +106,23 @@ export function ExtractedTextPanel({
     if (activeBlockIndex == null || editingBlockIndex != null) return;
     const host = bodyRef.current;
     if (!host) return;
-    let el = host.querySelector<HTMLElement>(`[data-block-index="${activeBlockIndex}"]`);
+    let el = host.querySelector<HTMLElement>(`[data-block-index="${String(activeBlockIndex)}"]`);
     if (!el && contentMode === 'layout') {
       const iframe = host.querySelector<HTMLIFrameElement>('.layout-ir-html-frame');
       el =
         iframe?.contentDocument?.querySelector<HTMLElement>(
-          `[data-block-index="${activeBlockIndex}"]`
+          `[data-block-index="${String(activeBlockIndex)}"]`
         ) ?? null;
     }
     el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }, [activeBlockIndex, editingBlockIndex, contentMode]);
+
+  useEffect(() => {
+    if (editingBlockIndex === null) {
+      return;
+    }
+    bodyRef.current?.querySelector<HTMLInputElement>('.extracted-text-inline-edit')?.focus();
+  }, [editingBlockIndex]);
 
   useEffect(() => {
     if (narrowViewport && hasLayoutIr) {
@@ -127,7 +135,7 @@ export function ExtractedTextPanel({
       try {
         await navigator.clipboard.writeText(text);
         setCopyHint(hint);
-        window.setTimeout(() => setCopyHint(null), 2000);
+        window.setTimeout(() => { setCopyHint(null); }, 2000);
       } catch {
         setCopyHint(t('documents.extractedTextCopyFailed'));
       }
@@ -168,7 +176,7 @@ export function ExtractedTextPanel({
         const suffix = mode === 'semantisch' ? '-semantisch' : '-exakt';
         a.download = `${safeTitle}-layout${suffix}.typ`;
         a.click();
-        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+        window.setTimeout(() => { URL.revokeObjectURL(url); }, 0);
         setExportMenuOpen(false);
         if (!reconstructionReliable) {
           pushSuccess(typstExportDegradedMessage(t, unreliableReason));
@@ -254,7 +262,7 @@ export function ExtractedTextPanel({
   const pageHint = editMode
     ? `${crosslinkHint}${t('documents.extractedTextEditHint')}`
     : crosslinkHint;
-  const hasDisplayContent = blocks.length > 0 || (fullText?.trim().length ?? 0) > 0;
+  const hasDisplayContent = blocks.length > 0 || fullText.trim().length > 0;
   const showToolbar = allowCopy || hasDisplayContent;
 
   const showCopy = allowCopy && canCopy;
@@ -274,7 +282,7 @@ export function ExtractedTextPanel({
             </h3>
           ) : null}
           {groupBlocksIntoLines(blocks, page).map((line) => {
-            const lineKey = line.map((b) => `${b.x}-${b.y}-${b.text}`).join('|');
+            const lineKey = line.map((b) => `${String(b.x)}-${String(b.y)}-${b.text}`).join('|');
             return (
               <p key={lineKey} className="extracted-text-line">
                 {line.map((block, wordIdx) => {
@@ -283,7 +291,7 @@ export function ExtractedTextPanel({
                   const isEditing = editingBlockIndex === index;
                   return (
                     <span
-                      key={`${block.page}-${block.blockIndex ?? index}-${block.x}-${block.text}`}
+                      key={`${String(block.page)}-${String(block.blockIndex ?? index)}-${String(block.x)}-${block.text}`}
                       className="extracted-text-word-wrap"
                     >
                       {wordIdx > 0 ? ' ' : null}
@@ -292,7 +300,6 @@ export function ExtractedTextPanel({
                           className="extracted-text-inline-edit"
                           value={block.text}
                           aria-label={t('documents.extractedTextEditBlockAria')}
-                          autoFocus
                           onChange={(e) => {
                             if (index < 0) return;
                             const next = blocks.map((row, i) =>
@@ -314,9 +321,17 @@ export function ExtractedTextPanel({
                         />
                       ) : (
                         <span
+                          role="button"
+                          tabIndex={0}
                           data-block-index={index}
                           className={`extracted-text-segment${isActive ? ' extracted-text-segment-active' : ''}`}
-                          onClick={() => selectBlock(block)}
+                          onClick={() => { selectBlock(block); }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              selectBlock(block);
+                            }
+                          }}
                           onDoubleClick={(e) => {
                             if (!editMode) return;
                             e.preventDefault();
@@ -347,9 +362,9 @@ export function ExtractedTextPanel({
       ? layoutIrDocumentFromPageSummaries(layoutIrPages)
       : LAYOUT_IR_PLACEHOLDER;
   const canShowLayoutFrame = Boolean(documentId) && (layoutIrPending || hasLayoutIr);
-  const layoutPane = canShowLayoutFrame ? (
+  const layoutPane = canShowLayoutFrame && documentId ? (
     <ExtractedLayoutHtmlFrame
-      documentId={documentId!}
+      documentId={documentId}
       layoutIr={frameLayoutIr}
       activePage={activePage}
       pageSynced={pageSynced}
@@ -386,7 +401,7 @@ export function ExtractedTextPanel({
                   type="button"
                   variant={contentMode === 'text' ? 'secondary' : 'ghost'}
                   aria-pressed={contentMode === 'text'}
-                  onClick={() => setContentMode('text')}
+                  onClick={() => { setContentMode('text'); }}
                 >
                   {t('documents.extractedContentModeText')}
                 </Button>
@@ -394,7 +409,7 @@ export function ExtractedTextPanel({
                   type="button"
                   variant={contentMode === 'layout' ? 'secondary' : 'ghost'}
                   aria-pressed={contentMode === 'layout'}
-                  onClick={() => setContentMode('layout')}
+                  onClick={() => { setContentMode('layout'); }}
                 >
                   {t('documents.extractedContentModeLayout')}
                 </Button>
@@ -414,7 +429,10 @@ export function ExtractedTextPanel({
                   variant="ghost"
                   aria-expanded={exportMenuOpen}
                   aria-haspopup="menu"
-                  onClick={() => (exportMenuOpen ? setExportMenuOpen(false) : openExportMenu())}
+                  onClick={() => {
+                    if (exportMenuOpen) setExportMenuOpen(false);
+                    else openExportMenu();
+                  }}
                 >
                   {t('documents.layoutExportMenu')}
                 </Button>
@@ -448,7 +466,7 @@ export function ExtractedTextPanel({
               variant={layoutZoom === step ? 'secondary' : 'ghost'}
               className="layout-ir-zoom-btn"
               aria-pressed={layoutZoom === step}
-              onClick={() => setLayoutZoom(step)}
+              onClick={() => { setLayoutZoom(step); }}
             >
               {t('documents.layoutZoomPercent', { value: step })}
             </Button>

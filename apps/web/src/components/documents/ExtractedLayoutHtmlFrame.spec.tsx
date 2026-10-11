@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { LayoutIrDocument } from '@docuvate/contracts';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { LayoutIrDocument } from '@docuvate/contracts';
+
 import { ExtractedLayoutHtmlFrame } from './ExtractedLayoutHtmlFrame';
 
 vi.mock('../../lib/api', () => ({
@@ -29,8 +30,12 @@ describe('ExtractedLayoutHtmlFrame', () => {
   beforeEach(() => {
     vi.mocked(fetchDocumentLayoutHtml).mockReset();
     class ResizeObserverMock {
-      observe() {}
-      disconnect() {}
+      observe() {
+        return undefined;
+      }
+      disconnect() {
+        return undefined;
+      }
     }
     vi.stubGlobal('ResizeObserver', ResizeObserverMock);
   });

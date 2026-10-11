@@ -1,15 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Info } from 'lucide-react';
 import type {
   ConnectorCatalogResponse,
   ConnectorCategoryId,
   ConnectorInstallationDto,
   ConnectorPluginCatalogEntryDto,
 } from '@docuvate/contracts';
+import { Info } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link, useSearchParams } from 'react-router-dom';
+
+import { ConnectorConnectDialog } from '../components/connectors/ConnectorConnectDialog';
+import { ConnectorPluginIcon } from '../components/connectors/ConnectorPluginIcon';
+import { SftpScannerIngressSection } from '../components/connectors/SftpScannerIngressSection';
+import { useToastNotify } from '../components/save/ToastProvider';
+import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
+import { AlertDialog } from '../components/ui/AlertDialog';
+import { Button } from '../components/ui/Button';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { Input } from '../components/ui/Input';
 import {
   createConnectorInstallation,
   deleteConnectorInstallation,
@@ -19,17 +29,8 @@ import {
 } from '../lib/api';
 import { formatConnectorError } from '../lib/connectorErrors';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../lib/connectorOAuth';
-import { AlertDialog } from '../components/ui/AlertDialog';
-import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { connectorsOAuthSetupDocUrl } from '../lib/connectorOAuthSetupDoc';
-import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { ConnectorConnectDialog } from '../components/connectors/ConnectorConnectDialog';
-import { ConnectorPluginIcon } from '../components/connectors/ConnectorPluginIcon';
-import { useToastNotify } from '../components/save/ToastProvider';
 import { routes } from '../lib/routes';
-import { SftpScannerIngressSection } from '../components/connectors/SftpScannerIngressSection';
 
 function capabilityLabel(t: (key: string) => string, role: 'source' | 'sink') {
   return t(`connectors.capabilities.${role}`);
@@ -313,7 +314,7 @@ export function ConnectorsPage() {
                   type="button"
                   variant="secondary"
                   disabled={disconnectingId === installed.id}
-                  onClick={() => void disconnectInstallation(installed)}
+                  onClick={() => { disconnectInstallation(installed); }}
                 >
                   {disconnectingId === installed.id
                     ? t('connectors.disconnectPending')
@@ -326,7 +327,7 @@ export function ConnectorsPage() {
                 variant="secondary"
                 disabled={!oauthReady}
                 title={connectDisabledHint(plugin, oauthReady)}
-                onClick={() => setConnectPlugin(plugin)}
+                onClick={() => { setConnectPlugin(plugin); }}
               >
                 {t('connectors.connectCta')}
               </Button>
@@ -353,7 +354,7 @@ export function ConnectorsPage() {
             <Input
               type="search"
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => { setSearchQuery(event.target.value); }}
               placeholder={t('connectors.searchPlaceholder')}
               aria-label={t('connectors.searchAria')}
               className="connector-catalog-search"
@@ -366,7 +367,7 @@ export function ConnectorsPage() {
               <button
                 type="button"
                 className={`connector-category-chip${categoryFilter === 'all' ? ' active' : ''}`}
-                onClick={() => setCategoryFilter('all')}
+                onClick={() => { setCategoryFilter('all'); }}
               >
                 {t('connectors.filterAll')}
               </button>
@@ -375,7 +376,7 @@ export function ConnectorsPage() {
                   key={category.id}
                   type="button"
                   className={`connector-category-chip${categoryFilter === category.id ? ' active' : ''}`}
-                  onClick={() => setCategoryFilter(category.id)}
+                  onClick={() => { setCategoryFilter(category.id); }}
                 >
                   {t(category.labelKey)}
                 </button>
@@ -389,7 +390,7 @@ export function ConnectorsPage() {
             <div className="connector-catalog-grid">
               {showSftpScannerCard ? (
                 <SftpScannerIngressSection
-                  viewerIsServerAdmin={catalog.viewerIsServerAdmin ?? false}
+                  viewerIsServerAdmin={catalog.viewerIsServerAdmin}
                 />
               ) : null}
               {sortedFilteredPlugins.map(renderPluginCard)}
@@ -414,7 +415,7 @@ export function ConnectorsPage() {
         open={oauthAlertOpen}
         title={t('connectors.oauthSuccessTitle')}
         description={t('connectors.oauthSuccess')}
-        onClose={() => setOauthAlertOpen(false)}
+        onClose={() => { setOauthAlertOpen(false); }}
       />
 
       <ConfirmDialog
@@ -428,7 +429,7 @@ export function ConnectorsPage() {
         confirmLabel={t('common.confirm')}
         tone="danger"
         busy={disconnectingId != null}
-        onCancel={() => setPendingDisconnect(null)}
+        onCancel={() => { setPendingDisconnect(null); }}
         onConfirm={() => void confirmDisconnect()}
       />
     </SettingsSectionLayout>

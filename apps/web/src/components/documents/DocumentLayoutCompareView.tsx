@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useState, type KeyboardEvent } from 'react';
+import { type KeyboardEvent,useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import {
   formatSsimScore,
   layoutCompareAdjacentPage,
@@ -80,14 +81,20 @@ export function DocumentLayoutCompareView({
   };
 
   return (
-    <div className="layout-compare" tabIndex={0} onKeyDown={onCompareKeyDown}>
-      <div className="layout-compare-toolbar">
+    <div className="layout-compare">
+      <div
+        className="layout-compare-toolbar"
+        role="toolbar"
+        tabIndex={0}
+        onKeyDown={onCompareKeyDown}
+        aria-label={t('documents.layoutCompareModeAria')}
+      >
         <div className="layout-compare-mode-switch" role="group" aria-label={t('documents.layoutCompareModeAria')}>
           <button
             type="button"
             className={`layout-view-mode-btn${presentation === 'split' ? ' layout-view-mode-btn-active' : ''}`}
             aria-pressed={presentation === 'split'}
-            onClick={() => setPresentation('split')}
+            onClick={() => { setPresentation('split'); }}
           >
             {t('documents.layoutCompareSplit')}
           </button>
@@ -95,7 +102,7 @@ export function DocumentLayoutCompareView({
             type="button"
             className={`layout-view-mode-btn${presentation === 'slider' ? ' layout-view-mode-btn-active' : ''}`}
             aria-pressed={presentation === 'slider'}
-            onClick={() => setPresentation('slider')}
+            onClick={() => { setPresentation('slider'); }}
           >
             {t('documents.layoutCompareSlider')}
           </button>
@@ -104,7 +111,7 @@ export function DocumentLayoutCompareView({
           <input
             type="checkbox"
             checked={heatmapEnabled}
-            onChange={(event) => setHeatmapEnabled(event.target.checked)}
+            onChange={(event) => { setHeatmapEnabled(event.target.checked); }}
           />
           <span>{t('documents.layoutCompareHeatmap')}</span>
         </label>
@@ -139,7 +146,7 @@ export function DocumentLayoutCompareView({
       {(metricsState === 'error' || metricsTimedOut) && metricsError ? (
         <div className="layout-compare-error" role="alert">
           <p className="error">{metricsError}</p>
-          <Button type="button" variant="secondary" onClick={() => retryMetrics()}>
+          <Button type="button" variant="secondary" onClick={() => { retryMetrics(); }}>
             {t('documents.layoutCompareRetry')}
           </Button>
         </div>
@@ -147,7 +154,7 @@ export function DocumentLayoutCompareView({
       {(pageState === 'error' || pageTimedOut) && pageError ? (
         <div className="layout-compare-error" role="alert">
           <p className="error">{pageError}</p>
-          <Button type="button" variant="secondary" onClick={() => retryPage()}>
+          <Button type="button" variant="secondary" onClick={() => { retryPage(); }}>
             {t('documents.layoutCompareRetry')}
           </Button>
         </div>
@@ -195,7 +202,7 @@ export function DocumentLayoutCompareView({
               />
               <div
                 className="layout-compare-slider-reveal"
-                style={{ width: `${sliderPos}%` }}
+                style={{ width: `${String(sliderPos)}%` }}
               >
                 <img
                   src={reconstructionSrc}
@@ -215,7 +222,7 @@ export function DocumentLayoutCompareView({
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={t('documents.layoutCompareSliderAria')}
-                onChange={(event) => setSliderPos(Number(event.target.value))}
+                onChange={(event) => { setSliderPos(Number(event.target.value)); }}
                 onKeyDown={onSliderKeyDown}
               />
             </div>

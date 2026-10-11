@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode, RefObject } from 'react';
 import { useMemo } from 'react';
-import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { useTranslation } from 'react-i18next';
+
 import { DuplicateStackReviewDialog } from '../../components/library/DuplicateStackReviewDialog';
 import { LibraryBulkBar } from '../../components/library/LibraryBulkBar';
 import { LibraryDocumentGrid } from '../../components/library/LibraryDocumentGrid';
@@ -16,7 +16,8 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 import { ContextMenu } from '../../components/ui/ContextMenu';
 import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { librarySortSelectOptions } from '../../lib/librarySortOptions';
+import { librarySortSelectOptions, parseLibrarySortSelectValue } from '../../lib/librarySortOptions';
+import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import type { useLibraryDocumentContextMenu } from './useLibraryDocumentContextMenu';
 import type { useLibraryPageData } from './useLibraryPageData';
 
@@ -96,7 +97,7 @@ export function LibraryPageDocumentSection({
             <Input
               placeholder={t(searchPlaceholderKey)}
               value={data.query}
-              onChange={(e) => data.setQuery(e.target.value)}
+              onChange={(e) => { data.setQuery(e.target.value); }}
               aria-label={t('library.searchDocsAria')}
             />
             <div className="library-list-search-actions">
@@ -128,10 +129,7 @@ export function LibraryPageDocumentSection({
                 className="library-toolbar-sort-select"
                 value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
                 onChange={(value) => {
-                  const [sort, order] = value.split(':') as [
-                    NonNullable<typeof data.filters.sort>,
-                    'asc' | 'desc',
-                  ];
+                  const { sort, order } = parseLibrarySortSelectValue(value);
                   data.toggleFilter({ sort, order });
                 }}
                 options={[...sortOptions]}
@@ -195,8 +193,7 @@ export function LibraryPageDocumentSection({
                 onRowMenu={ctx.openDocumentContextMenuFromRowAction}
                 onContextMenuKeyboard={ctx.openDocumentContextMenuFromKeyboard}
                 contextMenuDocumentId={ctx.contextMenu?.documentId ?? null}
-                onReviewStack={(primaryId, versionId) =>
-                  ctx.setStackReview({ primaryId, versionId: versionId ?? null })
+                onReviewStack={(primaryId, versionId) => { ctx.setStackReview({ primaryId, versionId: versionId ?? null }); }
                 }
                 enableDocumentDrag={enableDocumentDrag}
                 hideFolderColumn={filesystemLayout}
@@ -239,7 +236,7 @@ export function LibraryPageDocumentSection({
           key={`${ctx.stackReview.primaryId}:${ctx.stackReview.versionId ?? ''}`}
           primaryDocumentId={ctx.stackReview.primaryId}
           initialVersionId={ctx.stackReview.versionId}
-          onClose={() => ctx.setStackReview(null)}
+          onClose={() => { ctx.setStackReview(null); }}
           onChanged={() => {
             void data.load();
           }}

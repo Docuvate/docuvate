@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useId, type InputHTMLAttributes } from 'react';
+import { type InputHTMLAttributes,useId } from 'react';
 
 type SwitchProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'role' | 'onChange'> & {
   label: string;
@@ -32,7 +32,7 @@ export function Switch({
           className="switch-input"
           checked={checked}
           disabled={disabled}
-          onChange={(event) => onCheckedChange(event.target.checked)}
+          onChange={(event) => { onCheckedChange(event.target.checked); }}
         />
         <span className="switch-track" aria-hidden />
       </span>

@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useRef, type KeyboardEvent } from 'react';
 import { AlertCircle, CircleCheck } from 'lucide-react';
+import { type KeyboardEvent,useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { Button } from '../ui/Button';
 
 export const TOAST_AUTO_DISMISS_MS = 3000;
 
-type ToastItemProps = {
+interface ToastItemProps {
   id: string;
   kind: 'success' | 'error';
   message: string;
   retry?: () => void;
   onDismiss: (id: string) => void;
-};
+}
 
 export function ToastItem({ id, kind, message, retry, onDismiss }: ToastItemProps) {
   const { t } = useTranslation();
@@ -36,7 +37,7 @@ export function ToastItem({ id, kind, message, retry, onDismiss }: ToastItemProp
       onDismiss(id);
       return;
     }
-    timerRef.current = setTimeout(() => onDismiss(id), ms);
+    timerRef.current = setTimeout(() => { onDismiss(id); }, ms);
   }, [clearTimer, id, onDismiss]);
 
   useEffect(() => {

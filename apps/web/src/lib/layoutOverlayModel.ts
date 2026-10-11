@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { formatLayoutTableCell } from './formatLayoutTableCell.js';
 import type {
   ExtractedField,
   LayoutIrBlock,
@@ -8,6 +7,8 @@ import type {
   LayoutIrTable,
   LayoutIrWidget,
 } from '@docuvate/contracts';
+
+import { formatLayoutTableCell } from './formatLayoutTableCell.js';
 
 export type LayoutOverlayKind = 'heading' | 'field' | 'table' | 'text';
 
@@ -143,7 +144,7 @@ export function buildLayoutOverlays(doc: LayoutIrDocument): LayoutOverlayRegion[
 
   for (const page of doc.pages) {
     for (const table of page.tables ?? []) {
-      const id = `table-${tableIndex}`;
+      const id = `table-${String(tableIndex)}`;
       regions.push({
         id,
         page: table.page,
@@ -159,7 +160,7 @@ export function buildLayoutOverlays(doc: LayoutIrDocument): LayoutOverlayRegion[
     }
 
     for (const widget of page.widgets ?? []) {
-      const id = `widget-${widget.page}-${regions.length}`;
+      const id = `widget-${String(widget.page)}-${String(regions.length)}`;
       regions.push({
         id,
         page: widget.page,
@@ -178,7 +179,7 @@ export function buildLayoutOverlays(doc: LayoutIrDocument): LayoutOverlayRegion[
       if (!text) continue;
       const kind = classifyBlock(block);
       if (kind === 'text') continue;
-      const id = block.blockIndex != null ? `block-${block.blockIndex}` : `ir-${page.page}-${regions.length}`;
+      const id = block.blockIndex != null ? `block-${String(block.blockIndex)}` : `ir-${String(page.page)}-${String(regions.length)}`;
       regions.push({
         id,
         page: block.page,
@@ -217,11 +218,11 @@ export function buildLayoutOutline(
       const overlay =
         block.blockIndex != null ? overlayByBlock.get(block.blockIndex) : undefined;
       entries.push({
-        id: `outline-${entries.length}`,
+        id: `outline-${String(entries.length)}`,
         page: block.page,
         title: text,
         level,
-        overlayId: overlay?.id ?? `ir-${page.page}-${block.y}`,
+        overlayId: overlay?.id ?? `ir-${String(page.page)}-${String(block.y)}`,
         y: block.y,
       });
     }
@@ -243,7 +244,7 @@ export function buildLayoutTables(
         page: table.page,
         columnCount: table.columnCount,
         rows: tableRowsToStrings(table),
-        overlayId: overlay?.id ?? `table-${tableIndex}`,
+        overlayId: overlay?.id ?? `table-${String(tableIndex)}`,
       });
       tableIndex += 1;
     }

@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
+  type KeyboardEvent,
+  type MutableRefObject,
+  type ReactNode,
   useCallback,
   useRef,
-  type KeyboardEvent,
-  type ReactNode,
-  type MutableRefObject,
 } from 'react';
 
 export interface SegmentedOption<T extends string> {
@@ -31,7 +31,7 @@ export function SegmentedControl<T extends string>({
   className = '',
   firstOptionRef,
 }: SegmentedControlProps<T>) {
-  const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const focusOption = useCallback(
     (index: number) => {
@@ -43,7 +43,7 @@ export function SegmentedControl<T extends string>({
       }
       let targetIndex = index;
       if (!enabledIndexes.includes(targetIndex)) {
-        targetIndex = enabledIndexes[0]!;
+        targetIndex = enabledIndexes[0] ?? 0;
       }
       optionRefs.current[targetIndex]?.focus();
     },
@@ -65,29 +65,29 @@ export function SegmentedControl<T extends string>({
 
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
       event.preventDefault();
-      const next = enabledIndexes[(position + 1) % enabledIndexes.length]!;
-      onChange(options[next]!.value);
+      const next = enabledIndexes[(position + 1) % enabledIndexes.length];
+      onChange(options[next].value);
       focusOption(next);
       return;
     }
     if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
       event.preventDefault();
-      const next = enabledIndexes[(position - 1 + enabledIndexes.length) % enabledIndexes.length]!;
-      onChange(options[next]!.value);
+      const next = enabledIndexes[(position - 1 + enabledIndexes.length) % enabledIndexes.length];
+      onChange(options[next].value);
       focusOption(next);
       return;
     }
     if (event.key === 'Home') {
       event.preventDefault();
-      const next = enabledIndexes[0]!;
-      onChange(options[next]!.value);
+      const next = enabledIndexes[0];
+      onChange(options[next].value);
       focusOption(next);
       return;
     }
     if (event.key === 'End') {
       event.preventDefault();
-      const next = enabledIndexes[enabledIndexes.length - 1]!;
-      onChange(options[next]!.value);
+      const next = enabledIndexes[enabledIndexes.length - 1];
+      onChange(options[next].value);
       focusOption(next);
     }
   }
@@ -97,6 +97,7 @@ export function SegmentedControl<T extends string>({
       className={`segmented-control ${className}`.trim()}
       role="radiogroup"
       aria-label={ariaLabel}
+      tabIndex={0}
       onKeyDown={onKeyDown}
     >
       {options.map((option, index) => {
@@ -117,7 +118,7 @@ export function SegmentedControl<T extends string>({
             disabled={option.disabled}
             tabIndex={selected ? 0 : -1}
             className={`segmented-control__option${selected ? ' segmented-control__option--selected' : ''}`}
-            onClick={() => onChange(option.value)}
+            onClick={() => { onChange(option.value); }}
           >
             {option.label}
           </button>

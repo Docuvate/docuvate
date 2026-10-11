@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { authClient } from '../lib/auth-client';
-import { formatAuthClientError } from '../lib/format-auth-client-error';
-import { routes } from '../lib/routes';
+import { Link } from 'react-router-dom';
+
+import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { authClient } from '../lib/auth-client';
+import { formatAuthClientError } from '../lib/format-auth-client-error';
+import { routes } from '../lib/routes';
 
 export function ForgotPasswordPage() {
   const { t } = useTranslation();
@@ -57,7 +58,7 @@ export function ForgotPasswordPage() {
         ) : (
           <>
             <p className="muted">{t('auth.forgotPasswordHint')}</p>
-            <form onSubmit={onSubmit} className="stack">
+            <form onSubmit={(e) => void onSubmit(e)} className="stack">
               <label>
                 {t('auth.email')}
                 <Input
@@ -65,7 +66,7 @@ export function ForgotPasswordPage() {
                   autoComplete="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); }}
                 />
               </label>
               {error ? (

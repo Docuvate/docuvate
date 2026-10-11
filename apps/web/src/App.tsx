@@ -1,36 +1,37 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { authClient } from './lib/auth-client';
-import { formatAuthClientError } from './lib/authErrors';
+
 import { AppBootLoading } from './components/AppBootLoading';
 import { AppShell } from './components/AppShell';
-import { DocumentDetailPage } from './pages/DocumentDetailPage';
-import { LibraryPage } from './pages/LibraryPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { SavedViewsPage } from './pages/SavedViewsPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { LoginPage } from './pages/LoginPage';
-import { LoginTwoFactorPage } from './pages/LoginTwoFactorPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { ResetPasswordPage } from './pages/ResetPasswordPage';
-import { InviteAcceptPage } from './pages/InviteAcceptPage';
+import { authClient } from './lib/auth-client';
+import { formatAuthClientError } from './lib/authErrors';
+import { hadAuthenticatedSessionHint } from './lib/authSessionHint';
+import { routes } from './lib/routes';
 import { AccountSecuritySettingsPage } from './pages/AccountSecuritySettingsPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
 import { AdminUsersPage } from './pages/admin/AdminUsersPage';
-import { NotFoundRoute } from './pages/NotFoundRoute';
-import { SettingsPage } from './pages/SettingsPage';
-import { ConnectorsPage } from './pages/ConnectorsPage';
-import { PaperlessConnectorSetupPage } from './pages/PaperlessConnectorSetupPage';
 import { BlockedLabelsSettingsPage } from './pages/BlockedLabelsSettingsPage';
+import { ConnectorsOAuthSetupDocPage } from './pages/ConnectorsOAuthSetupDocPage';
+import { ConnectorsPage } from './pages/ConnectorsPage';
+import { DashboardPage } from './pages/DashboardPage';
+import { DateisystemExplorerPage } from './pages/DateisystemExplorerPage';
+import { DocumentDetailPage } from './pages/DocumentDetailPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { GlobalChatPage } from './pages/GlobalChatPage';
+import { InviteAcceptPage } from './pages/InviteAcceptPage';
+import { LibraryPage } from './pages/LibraryPage';
+import { LoginPage } from './pages/LoginPage';
+import { LoginTwoFactorPage } from './pages/LoginTwoFactorPage';
+import { NotFoundRoute } from './pages/NotFoundRoute';
+import { PaperlessConnectorSetupPage } from './pages/PaperlessConnectorSetupPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { SavedViewsPage } from './pages/SavedViewsPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { LabelsPage } from './pages/structure/LabelsPage';
 import { RecognizedFieldsPage } from './pages/structure/RecognizedFieldsPage';
-import { DateisystemExplorerPage } from './pages/DateisystemExplorerPage';
 import { StylesDocsPage } from './pages/StylesDocsPage';
-import { hadAuthenticatedSessionHint } from './lib/authSessionHint';
-import { ConnectorsOAuthSetupDocPage } from './pages/ConnectorsOAuthSetupDocPage';
-import { routes } from './lib/routes';
-import { GlobalChatPage } from './pages/GlobalChatPage';
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { data, isPending, error } = authClient.useSession();

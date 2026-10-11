@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { formatAuthClientError as mapAuthClientError, type AuthErrorContext } from './authErrors';
+import { type AuthErrorContext,formatAuthClientError as mapAuthClientError } from './authErrors';
 
 type AuthErrorShape =
   | {

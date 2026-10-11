@@ -1,10 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type { DocumentChatMessageRecordDto, DocumentChatThreadDto } from '@docuvate/contracts';
-import { formatUserFacingError } from '../lib/apiErrors';
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
+import { DocumentChatAssistantMessage } from '../components/documents/DocumentChatAssistantMessage';
+import { mergeThreadMessagesAfterSend } from '../components/documents/documentChatMessages';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Spinner } from '../components/ui/Spinner';
 import {
   cancelLibraryChatMessage,
   createLibraryChatThread,
@@ -13,17 +18,13 @@ import {
   retryLibraryChatMessage,
   sendLibraryChatThreadMessage,
 } from '../lib/api';
-import { routes } from '../lib/routes';
-import { DocumentChatAssistantMessage } from '../components/documents/DocumentChatAssistantMessage';
-import { mergeThreadMessagesAfterSend } from '../components/documents/documentChatMessages';
-import { useLibraryChatMessageStream } from '../lib/useLibraryChatMessageStream';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Spinner } from '../components/ui/Spinner';
+import { formatUserFacingError } from '../lib/apiErrors';
 import {
   isChatGenerationInProgress,
   threadListShowsGenerationSpinner,
 } from '../lib/chatGenerationActive';
+import { routes } from '../lib/routes';
+import { useLibraryChatMessageStream } from '../lib/useLibraryChatMessageStream';
 
 function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string {
   const date = new Date(thread.updatedAt);
@@ -114,7 +115,7 @@ export function GlobalChatPage() {
           setActiveThreadId(list[0].id);
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) {
           setError(formatUserFacingError(err, 'common.error'));
         }
@@ -144,7 +145,7 @@ export function GlobalChatPage() {
         setMessages(list);
         attachStreamIfNeeded(list);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (!cancelled) setError(formatUserFacingError(err, 'common.error'));
       })
       .finally(() => {
@@ -163,7 +164,7 @@ export function GlobalChatPage() {
     const id = setInterval(() => {
       void refreshThreads(activeThreadId ?? undefined);
     }, 2500);
-    return () => clearInterval(id);
+    return () => { clearInterval(id); };
   }, [generationInProgress, refreshThreads, activeThreadId]);
 
   useEffect(() => {
@@ -277,7 +278,7 @@ export function GlobalChatPage() {
                         type="button"
                         className={`doc-chat-thread-item${selected ? ' active' : ''}`}
                         aria-current={selected ? 'true' : undefined}
-                        onClick={() => setActiveThreadId(thread.id)}
+                        onClick={() => { setActiveThreadId(thread.id); }}
                       >
                         <span className="doc-chat-thread-title-row">
                           <span className="doc-chat-thread-title">{thread.title}</span>
@@ -345,21 +346,25 @@ export function GlobalChatPage() {
                           key={message.id}
                           message={message}
                           chatScope="library"
-                          onRetry={async (messageId) => {
-                            if (!activeThreadId) return;
-                            setRetryBusy(true);
-                            try {
-                              const next = await retryLibraryChatMessage(activeThreadId, messageId);
-                              upsertMessage(next);
-                              streamTargetRef.current = messageId;
-                              connectStream(activeThreadId, messageId);
-                            } finally {
-                              setRetryBusy(false);
-                            }
+                          onRetry={(messageId) => {
+                            void (async () => {
+                              if (!activeThreadId) return;
+                              setRetryBusy(true);
+                              try {
+                                const next = await retryLibraryChatMessage(activeThreadId, messageId);
+                                upsertMessage(next);
+                                streamTargetRef.current = messageId;
+                                connectStream(activeThreadId, messageId);
+                              } finally {
+                                setRetryBusy(false);
+                              }
+                            })();
                           }}
-                          onCancel={async (messageId) => {
-                            if (!activeThreadId) return;
-                            await cancelLibraryChatMessage(activeThreadId, messageId);
+                          onCancel={(messageId) => {
+                            void (async () => {
+                              if (!activeThreadId) return;
+                              await cancelLibraryChatMessage(activeThreadId, messageId);
+                            })();
                           }}
                           retryBusy={retryBusy}
                           renderCitationLink={(citation) => (
@@ -394,7 +399,7 @@ export function GlobalChatPage() {
               <form className="doc-chat-composer" onSubmit={(e) => void onSubmit(e)}>
                 <Input
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(e) => { setInput(e.target.value); }}
                   placeholder={t('globalChat.placeholder')}
                   disabled={generationInProgress || loadingMessages}
                   aria-label={t('globalChat.placeholder')}

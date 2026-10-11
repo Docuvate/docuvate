@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { NavLink, useLocation } from 'react-router-dom';
+
 import { getAdminAccess } from '../../lib/api';
-import { getSettingsSectionNavItems } from '../../lib/settingsSectionNav';
 import { routes } from '../../lib/routes';
+import { getSettingsSectionNavItems } from '../../lib/settingsSectionNav';
 
 function isAdministrationSectionPath(pathname: string): boolean {
   return pathname === routes.settingsAdmin || pathname.startsWith(`${routes.settingsAdmin}/`);
@@ -18,8 +19,8 @@ export function SettingsSectionTabs() {
 
   useEffect(() => {
     void getAdminAccess()
-      .then((access) => setIsAdministrator(access.isAdministrator))
-      .catch(() => setIsAdministrator(false));
+      .then((access) => { setIsAdministrator(access.isAdministrator); })
+      .catch(() => { setIsAdministrator(false); });
   }, []);
 
   const items = useMemo(() => {

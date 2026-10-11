@@ -1,10 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
-import type { TFunction } from 'i18next';
-import { describeLabelAutoAssignment } from './labelMatchingSummary';
 
-const t = ((key: string) => key) as TFunction;
+import i18n from '../../i18n';
+import { describeLabelAutoAssignment } from './labelMatchingSummary';
 
 describe('describeLabelAutoAssignment', () => {
   it('uses assignment mode label keys', () => {
@@ -18,9 +17,9 @@ describe('describeLabelAutoAssignment', () => {
           matchingAlgorithm: 'any',
           match: 'Strom',
         },
-        t
+        i18n.t
       )
-    ).toBe('labels.matchAny');
+    ).toBe(i18n.t('labels.matchAny'));
   });
 
   it('maps inbox to assignInbox key', () => {
@@ -34,8 +33,8 @@ describe('describeLabelAutoAssignment', () => {
           matchingAlgorithm: 'none',
           match: '',
         },
-        t
+        i18n.t
       )
-    ).toBe('labels.assignInbox');
+    ).toBe(i18n.t('labels.assignInbox'));
   });
 });

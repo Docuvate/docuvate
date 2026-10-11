@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { type MouseEvent } from 'react';
-import { ScanLine } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type { DocumentDto } from '@docuvate/contracts';
+import { ScanLine } from 'lucide-react';
+import { type MouseEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
 import { DocumentThumb } from './DocumentThumb';
-import { documentDisplayDate } from './libraryDocumentUtils';
 import {
   duplicateStackVersionLabel,
   showDuplicateStackBadge,
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
+import { documentDisplayDate } from './libraryDocumentUtils';
 
 interface LibraryDocumentGridProps {
   items: DocumentDto[];
@@ -39,13 +40,13 @@ export function LibraryDocumentGrid({
         <li
           key={doc.id}
           className={`doc-card${selected.has(doc.id) ? ' doc-card-selected' : ''}`}
-          onContextMenu={(event) => onContextMenu(event, doc.id)}
+          onContextMenu={(event) => { onContextMenu(event, doc.id); }}
         >
           <div className="doc-card-check">
             <input
               type="checkbox"
               checked={selected.has(doc.id)}
-              onChange={() => onToggleSelect(doc.id)}
+              onChange={() => { onToggleSelect(doc.id); }}
               aria-label={`${doc.title} auswählen`}
             />
           </div>

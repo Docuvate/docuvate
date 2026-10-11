@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import i18n from '../i18n';
 import { authErrorI18nKeyForCode, formatAuthClientError } from './authErrors';
 
@@ -20,7 +21,7 @@ describe('authErrorI18nKeyForCode', () => {
 describe('formatAuthClientError', () => {
   beforeEach(async () => {
     await i18n.changeLanguage('de');
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
   });
 
   it('localizes invalid credentials by code', () => {

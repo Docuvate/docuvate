@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import i18n from '../i18n';
 
-export type UserFacingError = {
+export interface UserFacingError {
   i18nKey: string;
   params?: Record<string, string | number>;
   retryable: boolean;
-};
+}
 
 export class ApiRequestError extends Error {
   readonly status: number;
@@ -29,7 +29,7 @@ const CODE_TO_I18N_KEY: Record<string, string> = {
   SERVICE_UNAVAILABLE: 'errors.serverError',
 };
 
-function isRecord(value: unknown): value is Record<string, unknown> {
+export function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
@@ -174,7 +174,7 @@ export function formatUserFacingError(err: unknown, fallbackKey: string): string
 
 export function throwApiRequestError(status: number, body: Record<string, unknown>): never {
   const code = typeof body.code === 'string' ? body.code : undefined;
-  const message = typeof body.message === 'string' ? body.message : `Request failed (${status})`;
+  const message = typeof body.message === 'string' ? body.message : `Request failed (${String(status)})`;
   throw new ApiRequestError(status, code, message);
 }
 
@@ -190,7 +190,7 @@ const CHAT_GENERATION_ERROR_KEYS: Record<string, string> = {
 export function toUserFacingChatGenerationError(
   errorCode: string | null | undefined
 ): UserFacingError {
-  const normalized = errorCode?.trim() || 'unknown';
+  const normalized = errorCode?.trim() ?? 'unknown';
   const i18nKey = CHAT_GENERATION_ERROR_KEYS[normalized] ?? CHAT_GENERATION_ERROR_KEYS.unknown;
   console.warn('[api]', 'chatGeneration', { errorCode: normalized, i18nKey });
   return {

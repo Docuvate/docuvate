@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Trash2 } from 'lucide-react';
 import type { DocumentDto } from '@docuvate/contracts';
+import { Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
+import { documentContentUrl } from '../../lib/api';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
-import { documentContentUrl } from '../../lib/api';
 
 type DetailTab = 'details' | 'labels' | 'chat';
 
@@ -39,7 +40,7 @@ export function DocumentDetailTabStrip({
           role="tab"
           aria-selected={activeTab === tab}
           className={`detail-tab${activeTab === tab ? ' active' : ''}`}
-          onClick={() => onTabChange(activeTab === tab ? null : tab)}
+          onClick={() => { onTabChange(activeTab === tab ? null : tab); }}
         >
           {label}
           {tab === 'labels' && labelCount > 0 ? (

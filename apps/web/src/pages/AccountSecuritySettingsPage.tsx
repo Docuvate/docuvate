@@ -1,24 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { KeyRound, ShieldCheck } from 'lucide-react';
+import QRCode from 'qrcode';
 import { FormEvent, useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { KeyRound, ShieldCheck } from 'lucide-react';
-import { authClient } from '../lib/auth-client';
-import { formatAuthClientError } from '../lib/authErrors';
+
+import { useToast } from '../components/save/ToastProvider';
 import { SettingsSectionCard } from '../components/settings/SettingsSectionCard';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
-import QRCode from 'qrcode';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { useToast } from '../components/save/ToastProvider';
+import { authClient, authSessionUserTwoFactorEnabled } from '../lib/auth-client';
+import { formatAuthClientError } from '../lib/authErrors';
 
-const ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true as const };
+const ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true };
 
-type PasskeyRow = {
+interface PasskeyRow {
   id: string;
   name?: string | null;
   createdAt?: string | Date | null;
-};
+}
 
 export function AccountSecuritySettingsPage() {
   const { t } = useTranslation();
@@ -40,46 +41,35 @@ export function AccountSecuritySettingsPage() {
   const [error, setError] = useState<string | null>(null);
 
   const refreshPasskeys = useCallback(async () => {
-    const list = authClient.passkey?.listUserPasskeys;
-    if (!list) {
-      setPasskeys([]);
-      return;
-    }
-    const result = await list();
+    const result = await authClient.passkey.listUserPasskeys();
     if (result.data) {
-      setPasskeys(result.data as PasskeyRow[]);
+      setPasskeys(result.data);
     }
   }, []);
 
   useEffect(() => {
-    const user = session?.user as { twoFactorEnabled?: boolean } | undefined;
-    setTotpEnabled(user?.twoFactorEnabled === true);
+    setTotpEnabled(authSessionUserTwoFactorEnabled(session));
     void refreshPasskeys();
-  }, [session?.user, refreshPasskeys]);
+  }, [session, refreshPasskeys]);
 
   async function startTotpEnrollment(event: FormEvent) {
     event.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const enable = authClient.twoFactor?.enable;
-      if (!enable) {
-        setError(t('settings.accountSecurity.unavailable'));
-        return;
-      }
-      const enabled = await enable({ password });
+      const enabled = await authClient.twoFactor.enable({ password });
       if (enabled.error) {
         setError(formatAuthClientError(enabled.error, 'signIn'));
         return;
       }
       const payload = enabled.data;
-      if (!payload || payload.method !== 'totp') {
+      if (payload.method !== 'totp') {
         setError(t('settings.accountSecurity.unavailable'));
         return;
       }
-      const uri = payload.totpURI ?? null;
+      const uri = payload.totpURI;
       setTotpUri(uri);
-      setBackupCodes(payload.backupCodes ?? null);
+      setBackupCodes(payload.backupCodes);
       setShowTotpSecret(false);
       if (uri) {
         const dataUrl = await QRCode.toDataURL(uri, { margin: 1, width: 200 });
@@ -99,12 +89,7 @@ export function AccountSecuritySettingsPage() {
     setBusy(true);
     setError(null);
     try {
-      const verify = authClient.twoFactor?.verifyTotp;
-      if (!verify) {
-        setError(t('settings.accountSecurity.unavailable'));
-        return;
-      }
-      const result = await verify({ code: totpCode });
+      const result = await authClient.twoFactor.verifyTotp({ code: totpCode });
       if (result.error) {
         setError(formatAuthClientError(result.error, 'signIn'));
         return;
@@ -127,12 +112,7 @@ export function AccountSecuritySettingsPage() {
     setBusy(true);
     setError(null);
     try {
-      const disable = authClient.twoFactor?.disable;
-      if (!disable) {
-        setError(t('settings.accountSecurity.unavailable'));
-        return;
-      }
-      const result = await disable({ password });
+      const result = await authClient.twoFactor.disable({ password });
       if (result.error) {
         setError(formatAuthClientError(result.error, 'signIn'));
         return;
@@ -151,12 +131,9 @@ export function AccountSecuritySettingsPage() {
     setBusy(true);
     setError(null);
     try {
-      const add = authClient.passkey?.addPasskey;
-      if (!add) {
-        setError(t('settings.accountSecurity.unavailable'));
-        return;
-      }
-      const result = await add({ name: passkeyName.trim() || undefined });
+      const result = await authClient.passkey.addPasskey({
+        name: passkeyName.trim() ? passkeyName.trim() : undefined,
+      });
       if (result.error) {
         setError(formatAuthClientError(result.error, 'signIn'));
         return;
@@ -175,12 +152,7 @@ export function AccountSecuritySettingsPage() {
     setBusy(true);
     setError(null);
     try {
-      const del = authClient.passkey?.deletePasskey;
-      if (!del) {
-        setError(t('settings.accountSecurity.unavailable'));
-        return;
-      }
-      const result = await del({ id });
+      const result = await authClient.passkey.deletePasskey({ id });
       if (result.error) {
         setError(formatAuthClientError(result.error, 'signIn'));
         return;
@@ -222,7 +194,7 @@ export function AccountSecuritySettingsPage() {
                   autoComplete="current-password"
                   value={password}
                   disabled={busy}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); }}
                 />
               </label>
               <Button
@@ -248,7 +220,7 @@ export function AccountSecuritySettingsPage() {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => setShowTotpSecret((v) => !v)}
+                onClick={() => { setShowTotpSecret((v) => !v); }}
               >
                 {showTotpSecret
                   ? t('settings.accountSecurity.totpHideKey')
@@ -282,7 +254,7 @@ export function AccountSecuritySettingsPage() {
                   autoComplete="one-time-code"
                   value={totpCode}
                   disabled={busy}
-                  onChange={(e) => setTotpCode(e.target.value)}
+                  onChange={(e) => { setTotpCode(e.target.value); }}
                 />
               </label>
               <Button type="submit" disabled={busy || !totpCode || !password}>
@@ -299,7 +271,7 @@ export function AccountSecuritySettingsPage() {
                   autoComplete="current-password"
                   value={password}
                   disabled={busy}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => { setPassword(e.target.value); }}
                 />
               </label>
               <Button type="submit" disabled={busy || !password}>
@@ -321,7 +293,11 @@ export function AccountSecuritySettingsPage() {
               <ul className="account-passkey-list">
                 {passkeys.map((pk) => (
                   <li key={pk.id} className="account-passkey-row">
-                    <span>{pk.name?.trim() || t('settings.accountSecurity.passkeyUnnamed')}</span>
+                    <span>
+                      {pk.name?.trim()
+                        ? pk.name.trim()
+                        : t('settings.accountSecurity.passkeyUnnamed')}
+                    </span>
                     <Button
                       type="button"
                       variant="secondary"
@@ -340,7 +316,7 @@ export function AccountSecuritySettingsPage() {
                 id={passkeyNameId}
                 value={passkeyName}
                 disabled={busy}
-                onChange={(e) => setPasskeyName(e.target.value)}
+                onChange={(e) => { setPasskeyName(e.target.value); }}
               />
             </label>
             <Button type="button" disabled={busy} onClick={() => void addPasskey()}>

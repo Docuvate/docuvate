@@ -1,17 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { FormEvent, useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+
+import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
+import { Spinner } from '../components/ui/Spinner';
 import { authClient } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/format-auth-client-error';
 import { routes } from '../lib/routes';
 import { verifyPasswordResetToken } from '../lib/verifyPasswordResetToken';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
-import { Spinner } from '../components/ui/Spinner';
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -120,7 +121,7 @@ export function ResetPasswordPage() {
           </div>
         ) : null}
         {showForm ? (
-          <form onSubmit={onSubmit} className="stack">
+          <form onSubmit={(e) => void onSubmit(e)} className="stack">
             <label>
               {t('auth.newPassword')}
               <Input
@@ -129,7 +130,7 @@ export function ResetPasswordPage() {
                 minLength={MIN_PASSWORD_LENGTH}
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); }}
               />
             </label>
             <label>
@@ -140,7 +141,7 @@ export function ResetPasswordPage() {
                 minLength={MIN_PASSWORD_LENGTH}
                 required
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                onChange={(e) => { setConfirmPassword(e.target.value); }}
               />
             </label>
             {error ? (

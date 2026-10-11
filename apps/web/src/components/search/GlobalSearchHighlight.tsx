@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ReactNode } from 'react';
 import type { SearchHighlightSpan } from '@docuvate/contracts';
+import type { ReactNode } from 'react';
 
 export function GlobalSearchHighlight({
   text,
@@ -19,7 +19,7 @@ export function GlobalSearchHighlight({
       nodes.push(text.slice(cursor, span.start));
     }
     nodes.push(
-      <mark key={`${span.start}-${i}`} className="global-search-mark">
+      <mark key={`${String(span.start)}-${String(i)}`} className="global-search-mark">
         {text.slice(span.start, span.end)}
       </mark>
     );

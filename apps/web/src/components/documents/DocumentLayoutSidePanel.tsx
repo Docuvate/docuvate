@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useId, useMemo, useRef, type KeyboardEvent } from 'react';
-import { useTranslation } from 'react-i18next';
-import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import type { ExtractedField, ExtractionBlock, LayoutIrDocument } from '@docuvate/contracts';
+import { type KeyboardEvent,useCallback, useEffect, useId, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import {
+  allLayoutWidgets,
   buildLayoutOutline,
   buildLayoutOverlays,
   buildLayoutTables,
   fieldSuggestionKeys,
-  allLayoutWidgets,
   type LayoutOverlayRegion,
 } from '../../lib/layoutOverlayModel';
-import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
 import { Button } from '../ui/Button';
+import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 
 export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'export';
 
@@ -36,7 +37,7 @@ interface DocumentLayoutSidePanelProps {
   onAcceptSuggestion: (key: string, value: string) => void;
   onDismissSuggestion: (key: string) => void;
   dismissedSuggestions: Set<string>;
-  heuristicSuggestions?: Array<{ key: string; value: string }>;
+  heuristicSuggestions?: { key: string; value: string }[];
 }
 
 export function DocumentLayoutSidePanel({
@@ -76,7 +77,7 @@ export function DocumentLayoutSidePanel({
   }, [overlays]);
 
   const panelFields = useMemo(() => fieldsForLayoutPanel(fields), [fields]);
-  const locale = i18n?.language ?? 'de';
+  const locale = i18n.language;
   const formatFieldValue = useCallback(
     (key: string, value: string) => formatExtractedFieldDisplayValue(key, value, locale),
     [locale]
@@ -181,7 +182,12 @@ export function DocumentLayoutSidePanel({
 
   return (
     <aside className="layout-side-panel" aria-label={t('documents.layoutSidePanelAria')}>
-      <div className="layout-side-tabs" role="tablist" onKeyDown={onTabListKeyDown}>
+      <div
+        className="layout-side-tabs"
+        role="tablist"
+        tabIndex={0}
+        onKeyDown={onTabListKeyDown}
+      >
         {tabs.map((tab) => {
           const selected = activeTab === tab.id;
           return (
@@ -197,7 +203,7 @@ export function DocumentLayoutSidePanel({
               aria-controls={`${tabsBaseId}-panel-${tab.id}`}
               tabIndex={selected ? 0 : -1}
               className={`layout-side-tab${selected ? ' layout-side-tab-active' : ''}`}
-              onClick={() => onTabChange(tab.id)}
+              onClick={() => { onTabChange(tab.id); }}
             >
               {tab.label}
             </button>
@@ -251,10 +257,10 @@ export function DocumentLayoutSidePanel({
                         {t('documents.layoutSuggestionNotInSchema')}
                       </p>
                       <div className="layout-field-suggestion-actions">
-                        <Button type="button" variant="secondary" onClick={() => onAcceptSuggestion(s.key, s.value)}>
+                        <Button type="button" variant="secondary" onClick={() => { onAcceptSuggestion(s.key, s.value); }}>
                           {t('documents.layoutSuggestionAccept')}
                         </Button>
-                        <Button type="button" variant="ghost" onClick={() => onDismissSuggestion(s.key)}>
+                        <Button type="button" variant="ghost" onClick={() => { onDismissSuggestion(s.key); }}>
                           {t('documents.layoutSuggestionDismiss')}
                         </Button>
                       </div>
@@ -282,7 +288,7 @@ export function DocumentLayoutSidePanel({
                   <button
                     type="button"
                     className="layout-table-card-head"
-                    onClick={() => onOverlaySelect(table.overlayId, table.page)}
+                    onClick={() => { onOverlaySelect(table.overlayId, table.page); }}
                   >
                     <span>{t('documents.layoutTableLabel', { n: table.tableIndex + 1 })}</span>
                     <span className="muted">
@@ -321,11 +327,11 @@ export function DocumentLayoutSidePanel({
                   <li key={entry.id}>
                     <button
                       type="button"
-                      className={`layout-outline-item layout-outline-level-${entry.level}${
+                      className={`layout-outline-item layout-outline-level-${String(entry.level)}${
                         activeOverlayId === entry.overlayId ? ' layout-outline-item-active' : ''
                       }`}
                       data-layout-overlay-target={entry.overlayId}
-                      onClick={() => onOverlaySelect(entry.overlayId, entry.page)}
+                      onClick={() => { onOverlaySelect(entry.overlayId, entry.page); }}
                     >
                       <span className="layout-outline-title">{entry.title}</span>
                       <span className="muted layout-outline-page">

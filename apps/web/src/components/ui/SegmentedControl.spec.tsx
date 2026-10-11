@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
 import { SegmentedControl } from './SegmentedControl';
 
 describe('SegmentedControl', () => {
@@ -37,7 +38,8 @@ describe('SegmentedControl', () => {
     );
     const group = container.querySelector('[role="radiogroup"]');
     expect(group).not.toBeNull();
-    fireEvent.keyDown(group!, { key: 'ArrowRight' });
+    if (!group) throw new Error('expected radiogroup');
+    fireEvent.keyDown(group, { key: 'ArrowRight' });
     expect(onChange).toHaveBeenCalledWith('b');
   });
 });

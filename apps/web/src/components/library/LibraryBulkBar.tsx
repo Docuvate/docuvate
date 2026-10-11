@@ -1,7 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import type {
   DocumentBulkAction,
   DocumentDto,
@@ -9,10 +7,13 @@ import type {
   MappeDto,
   TagDto,
 } from '@docuvate/contracts';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { Button } from '../ui/Button';
 import { ContextMenuPanel } from '../ui/ContextMenu';
-import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
 import { buildLibraryLabelToggleEntries } from './buildLibraryContextMenuItems';
+import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
 
 function closeBulkBarMenus() {
   document.querySelectorAll('.bulk-bar-menu[open]').forEach((node) => {
@@ -99,7 +100,7 @@ export function LibraryBulkBar(props: LibraryBulkBarProps) {
               variant="ghost"
               className="bulk-bar-action-btn bulk-bar-action-danger"
               disabled={props.bulkBusy}
-              onClick={() => props.onRequestBulkDelete(props.selectedCount)}
+              onClick={() => { props.onRequestBulkDelete(props.selectedCount); }}
             >
               {t('common.delete')}
             </Button>

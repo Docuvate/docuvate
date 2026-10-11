@@ -1,23 +1,27 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  Fragment,
-  useCallback,
-  useEffect,
-  useState,
-  type KeyboardEvent,
-  type MouseEvent,
-} from 'react';
-import { Link } from 'react-router-dom';
-import { ExternalLink, ScanLine } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import type {
   DocumentDto,
   DuplicateStackMemberDto,
   LibraryTableColumnId,
 } from '@docuvate/contracts';
+import { ExternalLink, ScanLine } from 'lucide-react';
+import {
+  Fragment,
+  type KeyboardEvent,
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { deleteDocument, getDuplicateStack } from '../../lib/api';
+import { setDocumentDragData } from '../../lib/documentDnD';
 import { isExtractionPending } from '../../lib/documentExtractionState';
+import { useFilesystemCompactDocs } from '../../lib/useFilesystemCompactDocs';
+import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { ExtractionProgressBar } from '../documents/ExtractionProgressBar';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
@@ -28,10 +32,7 @@ import {
   showDuplicateStackBadge,
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
-import { setDocumentDragData } from '../../lib/documentDnD';
 import { documentDisplayDate } from './libraryDocumentUtils';
-import { useFilesystemCompactDocs } from '../../lib/useFilesystemCompactDocs';
-import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 
 type SortField = 'title' | 'documentDate' | 'updatedAt';
 
@@ -80,7 +81,9 @@ export function LibraryDocumentTable({
 }: LibraryDocumentTableProps) {
   const { t } = useTranslation();
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [stackMembers, setStackMembers] = useState<Record<string, DuplicateStackMemberDto[]>>({});
+  const [stackMembers, setStackMembers] = useState<
+    Partial<Record<string, DuplicateStackMemberDto[]>>
+  >({});
   const [versionDeleteTarget, setVersionDeleteTarget] = useState<{
     primaryDocId: string;
     member: DuplicateStackMemberDto;
@@ -97,10 +100,13 @@ export function LibraryDocumentTable({
     });
     setStackMembers((prev) => {
       let changed = false;
-      const next: Record<string, DuplicateStackMemberDto[]> = {};
+      const next: Partial<Record<string, DuplicateStackMemberDto[]>> = {};
       for (const id of Object.keys(prev)) {
         if (stackPrimaryIds.has(id)) {
-          next[id] = prev[id]!;
+          const members = prev[id];
+          if (members !== undefined) {
+            next[id] = members;
+          }
         } else {
           changed = true;
         }
@@ -151,11 +157,9 @@ export function LibraryDocumentTable({
       if (stack) {
         setStackMembers((prev) => ({ ...prev, [doc.id]: stack.members }));
       } else {
-        setStackMembers((prev) => {
-          const copy = { ...prev };
-          delete copy[doc.id];
-          return copy;
-        });
+        setStackMembers((prev) =>
+          Object.fromEntries(Object.entries(prev).filter(([key]) => key !== doc.id))
+        );
       }
     },
     [expandedIds]
@@ -177,11 +181,9 @@ export function LibraryDocumentTable({
           next.delete(primaryDocId);
           return next;
         });
-        setStackMembers((prev) => {
-          const copy = { ...prev };
-          delete copy[primaryDocId];
-          return copy;
-        });
+        setStackMembers((prev) =>
+          Object.fromEntries(Object.entries(prev).filter(([key]) => key !== primaryDocId))
+        );
       } else if (stack) {
         setStackMembers((prev) => ({ ...prev, [primaryDocId]: stack.members }));
       }
@@ -207,7 +209,7 @@ export function LibraryDocumentTable({
       cancelLabel="Abbrechen"
       tone="danger"
       busy={deleteBusy}
-      onCancel={() => setVersionDeleteTarget(null)}
+      onCancel={() => { setVersionDeleteTarget(null); }}
       onConfirm={() => void deleteVersionFromRow()}
     />
   );
@@ -242,23 +244,22 @@ export function LibraryDocumentTable({
                 .join(' ');
 
               return (
-                <li key={doc.id} className={rowClassName}>
-                  <article
-                    className="library-doc-stack-item-inner"
-                    tabIndex={0}
-                    aria-current={rowSelected ? 'true' : undefined}
-                    onContextMenu={(event) => onContextMenu(event, doc.id)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
-                        onContextMenuKeyboard(event, doc.id);
-                      }
-                    }}
-                  >
+                <li
+                  key={doc.id}
+                  className={rowClassName}
+                  onContextMenu={(event) => { onContextMenu(event, doc.id); }}
+                >
+                  <article className="library-doc-stack-item-inner">
                     <div className="library-doc-stack-primary">
                       <input
                         type="checkbox"
                         checked={selected.has(doc.id)}
-                        onChange={() => onToggleSelect(doc.id)}
+                        onChange={() => { onToggleSelect(doc.id); }}
+                        onKeyDown={(event) => {
+                          if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+                            onContextMenuKeyboard(event, doc.id);
+                          }
+                        }}
                         aria-label={`${doc.title} auswählen`}
                       />
                       <div className="library-doc-stack-text">
@@ -271,7 +272,7 @@ export function LibraryDocumentTable({
                               type="button"
                               className="stack-badge"
                               title={t('library.stackVersionsTitle')}
-                              onClick={() => onReviewStack(doc.id)}
+                              onClick={() => { onReviewStack(doc.id); }}
                             >
                               {stackLabel}
                             </button>
@@ -321,7 +322,7 @@ export function LibraryDocumentTable({
                             type="button"
                             variant="ghost"
                             className="library-inline-action library-doc-stack-action-btn"
-                            onClick={() => onReviewStack(doc.id)}
+                            onClick={() => { onReviewStack(doc.id); }}
                           >
                             {t('library.stackReviewAction')}
                           </Button>
@@ -340,7 +341,7 @@ export function LibraryDocumentTable({
                           className="library-row-menu-btn library-doc-stack-menu-btn library-doc-stack-action-btn"
                           aria-label={t('library.rowActionsAria', { title: doc.title })}
                           aria-haspopup="menu"
-                          onClick={(event) => onRowMenu(event, doc.id)}
+                          onClick={(event) => { onRowMenu(event, doc.id); }}
                         >
                           ⋯
                         </button>
@@ -385,7 +386,7 @@ export function LibraryDocumentTable({
                 />
               </th>
               <th className="library-col-title">
-                <button type="button" className="sort-btn" onClick={() => onSort('title')}>
+                <button type="button" className="sort-btn" onClick={() => { onSort('title'); }}>
                   {t('library.colTitle')}
                 </button>
               </th>
@@ -406,7 +407,7 @@ export function LibraryDocumentTable({
               ) : null}
               {showColumn(visibleColumns, 'date') ? (
                 <th className="library-col-date">
-                  <button type="button" className="sort-btn" onClick={() => onSort('documentDate')}>
+                  <button type="button" className="sort-btn" onClick={() => { onSort('documentDate'); }}>
                     {t('library.colDate')}
                   </button>
                 </th>
@@ -443,11 +444,11 @@ export function LibraryDocumentTable({
                     onDragStart={
                       enableDocumentDrag
                         ? (event) => {
-                            if (event.dataTransfer) setDocumentDragData(event.dataTransfer, doc.id);
+                            setDocumentDragData(event.dataTransfer, doc.id);
                           }
                         : undefined
                     }
-                    onContextMenu={(event) => onContextMenu(event, doc.id)}
+                    onContextMenu={(event) => { onContextMenu(event, doc.id); }}
                     onKeyDown={(event) => {
                       if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
                         onContextMenuKeyboard(event, doc.id);
@@ -473,7 +474,7 @@ export function LibraryDocumentTable({
                       <input
                         type="checkbox"
                         checked={selected.has(doc.id)}
-                        onChange={() => onToggleSelect(doc.id)}
+                        onChange={() => { onToggleSelect(doc.id); }}
                         aria-label={`${doc.title} auswählen`}
                       />
                     </td>
@@ -491,7 +492,7 @@ export function LibraryDocumentTable({
                             type="button"
                             className="stack-badge"
                             title={t('library.stackVersionsTitle')}
-                            onClick={() => onReviewStack(doc.id)}
+                            onClick={() => { onReviewStack(doc.id); }}
                           >
                             {stackLabel}
                           </button>
@@ -579,7 +580,7 @@ export function LibraryDocumentTable({
                             type="button"
                             variant="ghost"
                             className="library-inline-action"
-                            onClick={() => onReviewStack(doc.id)}
+                            onClick={() => { onReviewStack(doc.id); }}
                           >
                             {t('library.stackReviewAction')}
                           </Button>
@@ -598,7 +599,7 @@ export function LibraryDocumentTable({
                           className="library-row-menu-btn"
                           aria-label={t('library.rowActionsAria', { title: doc.title })}
                           aria-haspopup="menu"
-                          onClick={(event) => onRowMenu(event, doc.id)}
+                          onClick={(event) => { onRowMenu(event, doc.id); }}
                         >
                           ⋯
                         </button>
@@ -623,7 +624,7 @@ export function LibraryDocumentTable({
                                 type="button"
                                 variant="ghost"
                                 className="library-inline-action"
-                                onClick={() => onReviewStack(doc.id, member.documentId)}
+                                onClick={() => { onReviewStack(doc.id, member.documentId); }}
                               >
                                 {t('library.stackCompareAction')}
                               </Button>
@@ -631,8 +632,7 @@ export function LibraryDocumentTable({
                                 type="button"
                                 variant="ghost"
                                 className="library-inline-action library-inline-action-danger"
-                                onClick={() =>
-                                  setVersionDeleteTarget({ primaryDocId: doc.id, member })
+                                onClick={() => { setVersionDeleteTarget({ primaryDocId: doc.id, member }); }
                                 }
                               >
                                 {t('library.stackDeleteAction')}

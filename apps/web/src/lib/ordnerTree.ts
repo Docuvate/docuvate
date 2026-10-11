@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FolderDto, MappeDto } from '@docuvate/contracts';
+
 import i18n from '../i18n';
 import { routes } from './routes';
 
@@ -147,13 +148,13 @@ export function pickDefaultFilesystemHref(mappen: MappeDto[], folders: FolderDto
   for (const mappe of sorted) {
     const roots = childFolders(folders, { mappeId: mappe.id, parentId: null });
     if (roots.length > 0) {
-      return folderHref(roots[0]!.id);
+      return folderHref(roots[0].id);
     }
     return mappeHref(mappe.id);
   }
   const loose = foldersWithoutMappe(folders);
   if (loose.length > 0) {
-    return folderHref(loose[0]!.id);
+    return folderHref(loose[0].id);
   }
   return null;
 }
@@ -184,10 +185,11 @@ export function folderSubtreeMatchesSearch(
   const q = query.trim().toLowerCase();
   if (!q) return true;
   if (nodeMatchesQuery(folder.name, q)) return true;
-  if (!folder.mappeId) return false;
+  if (folder.mappeId == null) return false;
+  const mappeId = folder.mappeId;
 
   function walk(parentId: string): boolean {
-    const children = childFolders(folders, { mappeId: folder.mappeId!, parentId });
+    const children = childFolders(folders, { mappeId, parentId });
     for (const child of children) {
       if (nodeMatchesQuery(child.name, q)) return true;
       if (walk(child.id)) return true;

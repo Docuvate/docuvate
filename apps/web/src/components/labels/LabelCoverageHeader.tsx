@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { LabelMapCoverageSummaryDto, LabelMapEmptyReason } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import type { LabelMapCoverageSummaryDto, LabelMapEmptyReason } from '@docuvate/contracts';
+
 import { routes } from '../../lib/routes';
 
-type Props = {
+interface Props {
   loading: boolean;
   labeledCount: number;
   totalCount: number;
   unlabeledCount: number;
   coverageSummary: LabelMapCoverageSummaryDto | null;
   emptyReason: LabelMapEmptyReason | null;
-};
+}
 
 export function LabelCoverageHeader(props: Props) {
   const { t } = useTranslation();

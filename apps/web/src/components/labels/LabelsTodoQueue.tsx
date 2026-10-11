@@ -1,17 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type { LabelRecommendationDto } from '@docuvate/contracts';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
+
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Chip } from '../ui/Chip';
-import {
-  LabelSuggestionDismissActions,
-  type LabelSuggestionDismissScope,
-} from './LabelSuggestionDismissActions';
 import { recommendationDocumentTitle } from './labelRecDocumentDisplay';
 import {
   mergeLabelPairNames,
@@ -20,8 +17,12 @@ import {
   todoAcceptActionKey,
   todoWhyLine,
 } from './labelsTodoPresentation';
+import {
+  LabelSuggestionDismissActions,
+  type LabelSuggestionDismissScope,
+} from './LabelSuggestionDismissActions';
 
-type Props = {
+interface Props {
   items: LabelRecommendationDto[];
   documentCountByTagId: Record<string, number>;
   tagColorById: Record<string, string>;
@@ -33,7 +34,7 @@ type Props = {
     item: LabelRecommendationDto,
     scope: LabelSuggestionDismissScope
   ) => void | Promise<void>;
-};
+}
 
 function TodoHead() {
   const { t } = useTranslation();
@@ -44,11 +45,11 @@ function TodoHead() {
   );
 }
 
-type TodoRowMainProps = {
+interface TodoRowMainProps {
   item: LabelRecommendationDto;
   tagColorById: Record<string, string>;
   documentCountByTagId: Record<string, number>;
-};
+}
 
 function TodoRowMain(props: TodoRowMainProps) {
   const { item, tagColorById, documentCountByTagId } = props;
@@ -111,7 +112,7 @@ function TodoRowMain(props: TodoRowMainProps) {
                 key={name}
                 label={name}
                 variant="assigned"
-                color={item.tagIds?.[tagIndex] ? tagColorById[item.tagIds[tagIndex]!] : undefined}
+                color={item.tagIds?.[tagIndex] ? tagColorById[item.tagIds[tagIndex]] : undefined}
               />
             ))}
           </div>
@@ -146,8 +147,9 @@ export function LabelsTodoQueue(props: Props) {
   }, [props.items]);
 
   useEffect(() => {
+    const timers = exitTimers.current;
     return () => {
-      for (const timer of exitTimers.current.values()) {
+      for (const timer of timers.values()) {
         clearTimeout(timer);
       }
     };
@@ -230,7 +232,7 @@ export function LabelsTodoQueue(props: Props) {
                   type="button"
                   variant="secondary"
                   disabled={props.busyId === item.id || exitingIds.has(item.id)}
-                  onClick={() => props.onRename(item)}
+                  onClick={() => { props.onRename(item); }}
                 >
                   {t('labelRecommendations.renameAction')}
                 </Button>
@@ -239,7 +241,7 @@ export function LabelsTodoQueue(props: Props) {
                   type="button"
                   variant="secondary"
                   disabled={props.busyId === item.id || exitingIds.has(item.id)}
-                  onClick={() => wrapAccept(item)}
+                  onClick={() => { wrapAccept(item); }}
                 >
                   {t(todoAcceptActionKey(item))}
                 </Button>
@@ -247,7 +249,7 @@ export function LabelsTodoQueue(props: Props) {
               <LabelSuggestionDismissActions
                 labelName={recommendationLabelName(item)}
                 disabled={props.busyId === item.id || exitingIds.has(item.id)}
-                onDismiss={(scope) => wrapDismiss(item, scope)}
+                onDismiss={(scope) => { wrapDismiss(item, scope); }}
               />
             </div>
           </li>

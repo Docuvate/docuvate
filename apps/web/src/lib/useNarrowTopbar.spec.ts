@@ -3,6 +3,7 @@
 /** @vitest-environment jsdom */
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import { NARROW_VIEWPORT_MEDIA_QUERY } from './narrowViewport';
 import { useNarrowTopbar } from './useNarrowTopbar';
 
@@ -11,7 +12,7 @@ function mockViewportWidth(widthPx: number) {
     writable: true,
     configurable: true,
     value: vi.fn((query: string) => {
-      const maxMatch = query.match(/\(max-width:\s*(\d+)px\)/);
+      const maxMatch = /\(max-width:\s*(\d+)px\)/.exec(query);
       const matches =
         maxMatch !== null ? widthPx <= Number(maxMatch[1]) : query === NARROW_VIEWPORT_MEDIA_QUERY;
       return {
@@ -21,7 +22,7 @@ function mockViewportWidth(widthPx: number) {
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
-      } as MediaQueryList;
+      } satisfies MediaQueryList;
     }),
   });
 }

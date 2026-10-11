@@ -1,17 +1,26 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Ban, Cable, MessageSquareText, FlaskConical, ScanText, UserRound } from 'lucide-react';
 import type {
   DocumentChatProviderInfo,
   DocumentChatProvidersCatalogDto,
   ExtractionEngineInfo,
   UserSettingsDto,
 } from '@docuvate/contracts';
-import { authClient } from '../lib/auth-client';
-import { performSignOut } from '../lib/authSignOut';
+import { Ban, Cable, FlaskConical, MessageSquareText, ScanText, UserRound } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useToast } from '../components/save/ToastProvider';
+import { SettingsCallout } from '../components/settings/SettingsCallout';
+import { SettingsCardLink } from '../components/settings/SettingsCardLink';
+import { SettingsChatStatus } from '../components/settings/SettingsChatStatus';
+import { SettingsSectionCard } from '../components/settings/SettingsSectionCard';
+import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
+import { Button } from '../components/ui/Button';
+import { Select } from '../components/ui/Select';
+import { Switch } from '../components/ui/Switch';
+import { useAdvancedFeaturesEnabled, writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import {
   getDocumentChatProvidersCatalog,
   getUserSettings,
@@ -20,20 +29,13 @@ import {
   updateUserSettings,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
-import { routes } from '../lib/routes';
-import { Button } from '../components/ui/Button';
-import { Select } from '../components/ui/Select';
-import { Switch } from '../components/ui/Switch';
-import { SettingsSectionCard } from '../components/settings/SettingsSectionCard';
-import { SettingsCardLink } from '../components/settings/SettingsCardLink';
-import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
+import { authClient, authSessionUserEmail } from '../lib/auth-client';
+import { performSignOut } from '../lib/authSignOut';
 import { chatProviderLabel } from '../lib/chatProviderLabels';
-import { useAdvancedFeaturesEnabled, writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
+import { readLocationStateBoolean } from '../lib/routerLocationState';
+import { routes } from '../lib/routes';
 import { settingsChatStatusPresentation } from '../lib/settingsChatStatus';
-import { SettingsCallout } from '../components/settings/SettingsCallout';
-import { SettingsChatStatus } from '../components/settings/SettingsChatStatus';
-import { useToast } from '../components/save/ToastProvider';
 import {
   buildExtractionEngineSelectOptions,
   shouldShowExtractionOfflineCallout,
@@ -53,6 +55,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const { advancedFeaturesEnabled, setAdvancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
   const { data } = authClient.useSession();
+  const accountEmail = authSessionUserEmail(data);
   const [settings, setSettings] = useState<UserSettingsDto | null>(null);
   const [engines, setEngines] = useState<ExtractionEngineInfo[]>([]);
   const [enginesLoadFailed, setEnginesLoadFailed] = useState(false);
@@ -62,8 +65,7 @@ export function SettingsPage() {
   const [blockedLabelCount, setBlockedLabelCount] = useState<number | null>(null);
 
   useEffect(() => {
-    const state = location.state as { adminDenied?: boolean } | null;
-    if (state?.adminDenied) {
+    if (readLocationStateBoolean(location.state, 'adminDenied')) {
       toast.error(t('admin.accessDeniedToast'));
       navigate(location.pathname, { replace: true, state: null });
     }
@@ -315,7 +317,7 @@ export function SettingsPage() {
           footer={
             <div className="settings-section-card-footer settings-section-card-footer--stack">
               <p className="settings-account-email">
-                {data?.user?.email ?? t('settings.accountLeadFallback')}
+                {accountEmail ?? t('settings.accountLeadFallback')}
               </p>
               <SettingsCardLink to={routes.settingsAccountSecurity}>
                 {t('settings.accountSecurity.linkCta')}

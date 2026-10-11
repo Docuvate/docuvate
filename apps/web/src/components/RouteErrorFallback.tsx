@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useTranslation } from 'react-i18next';
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
+
 import { Button } from './ui/Button';
 
 export function RouteErrorFallback() {
@@ -19,7 +20,7 @@ export function RouteErrorFallback() {
       <p className="error" role="alert">
         {message}
       </p>
-      <Button type="button" variant="secondary" onClick={() => window.location.assign('/')}>
+      <Button type="button" variant="secondary" onClick={() => { window.location.assign('/'); }}>
         {t('nav.documents')}
       </Button>
     </div>

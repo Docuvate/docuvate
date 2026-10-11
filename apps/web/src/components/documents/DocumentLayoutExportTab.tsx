@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ExtractionBlock } from '@docuvate/contracts';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { fetchDocumentLayoutTypst } from '../../lib/api';
-import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
 import { textFromExtractionBlocks } from '../../lib/extractionLayout';
-import type { ExtractionBlock } from '@docuvate/contracts';
-import { Button } from '../ui/Button';
+import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
 import { useToastNotify } from '../save/ToastProvider';
+import { Button } from '../ui/Button';
 
 type ExportFormat = 'typst-semantic' | 'typst-exact' | 'markdown';
 
@@ -54,7 +55,7 @@ export function DocumentLayoutExportTab({
           const suffix = mode === 'semantisch' ? '-semantisch' : '-exakt';
           a.download = `${safeTitle}-layout${suffix}.typ`;
           a.click();
-          window.setTimeout(() => URL.revokeObjectURL(url), 0);
+          window.setTimeout(() => { URL.revokeObjectURL(url); }, 0);
         }
         if (!reconstructionReliable) {
           pushSuccess(typstExportDegradedMessage(t, unreliableReason));
@@ -68,35 +69,27 @@ export function DocumentLayoutExportTab({
     [documentId, documentTitle, pushError, pushSuccess, t]
   );
 
-  const formats = useMemo(
-    () =>
-      [
-        hasLayoutIr
-          ? {
-              id: 'typst-semantic' as ExportFormat,
-              title: t('documents.layoutExportTypstSemantisch'),
-              description: t('documents.layoutExportSemanticHint'),
-            }
-          : null,
-        hasLayoutIr
-          ? {
-              id: 'typst-exact' as ExportFormat,
-              title: t('documents.layoutExportTypstExakt'),
-              description: t('documents.layoutExportExactHint'),
-            }
-          : null,
-        {
-          id: 'markdown' as ExportFormat,
-          title: t('documents.layoutExportMarkdown'),
-          description: t('documents.layoutExportMarkdownHint'),
-        },
-      ].filter(Boolean) as {
-        id: ExportFormat;
-        title: string;
-        description: string;
-      }[],
-    [hasLayoutIr, t]
-  );
+  const formats = useMemo(() => {
+    const items: { id: ExportFormat; title: string; description: string }[] = [];
+    if (hasLayoutIr) {
+      items.push({
+        id: 'typst-semantic',
+        title: t('documents.layoutExportTypstSemantisch'),
+        description: t('documents.layoutExportSemanticHint'),
+      });
+      items.push({
+        id: 'typst-exact',
+        title: t('documents.layoutExportTypstExakt'),
+        description: t('documents.layoutExportExactHint'),
+      });
+    }
+    items.push({
+      id: 'markdown',
+      title: t('documents.layoutExportMarkdown'),
+      description: t('documents.layoutExportMarkdownHint'),
+    });
+    return items;
+  }, [hasLayoutIr, t]);
 
   async function onSelectFormat(id: ExportFormat) {
     if (id === 'typst-semantic') {
@@ -114,7 +107,7 @@ export function DocumentLayoutExportTab({
     a.href = url;
     a.download = `${(documentTitle ?? 'document').replace(/[^\w.-]+/g, '-')}.md`;
     a.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+    window.setTimeout(() => { URL.revokeObjectURL(url); }, 0);
   }
 
   return (
@@ -157,7 +150,7 @@ export function DocumentLayoutExportTab({
             <Button
               type="button"
               variant="ghost"
-              onClick={() => setPreviewExpanded((open) => !open)}
+              onClick={() => { setPreviewExpanded((open) => !open); }}
             >
               {previewExpanded
                 ? t('documents.layoutExportPreviewLess')

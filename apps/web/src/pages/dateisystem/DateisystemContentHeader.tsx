@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { OrdnerBreadcrumbSegment } from '../../lib/ordnerTree';
+import { Link } from 'react-router-dom';
+
 import { DateisystemNewFolderButton } from '../../components/ordner/DateisystemNewFolderButton';
-import { UploadFileTrigger } from '../../components/upload/UploadFileTrigger';
 import { Button } from '../../components/ui/Button';
+import { UploadFileTrigger } from '../../components/upload/UploadFileTrigger';
+import type { OrdnerBreadcrumbSegment } from '../../lib/ordnerTree';
 import { DateisystemContentActions } from './DateisystemContentActions';
 
 interface DateisystemContentHeaderProps {
@@ -35,7 +36,7 @@ export function DateisystemContentHeader({
     {
       id: 'new-folder',
       menuLabel: t('filesystem.newRootButton'),
-      onMenuSelect: () => setNewFolderOpen(true),
+      onMenuSelect: () => { setNewFolderOpen(true); },
       forceVisible: newFolderOpen,
       node: (
         <DateisystemNewFolderButton
@@ -50,7 +51,7 @@ export function DateisystemContentHeader({
           {
             id: 'add-existing',
             menuLabel: t('filesystem.addExistingButton'),
-            onMenuSelect: () => onAddExistingDocuments(),
+            onMenuSelect: () => { onAddExistingDocuments(); },
             node: (
               <Button type="button" variant="secondary" onClick={onAddExistingDocuments}>
                 {t('filesystem.addExistingButton')}

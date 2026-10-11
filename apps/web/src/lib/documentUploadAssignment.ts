@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentListQuery, FolderDto, MappeDto } from '@docuvate/contracts';
+
 import i18n from '../i18n';
 import { updateDocument } from './api';
 
@@ -44,7 +45,7 @@ export function resolveLibraryDropTarget(input: {
     if (inMappe.length !== 1) {
       return disabledTarget();
     }
-    const folder = inMappe[0]!;
+    const folder = inMappe[0];
     return {
       enabled: true,
       assignment: { kind: 'folder', folderId: folder.id, label: folder.name },
@@ -98,7 +99,7 @@ export function resolveFilesystemDropTarget(input: {
   mappen?: MappeDto[];
   assignmentOverride?: DocumentUploadAssignment | null;
 }): LibraryDropTarget {
-  if (input.assignmentOverride && input.assignmentOverride.kind === 'folder') {
+  if (input.assignmentOverride?.kind === 'folder') {
     return folderUploadTarget(
       input.assignmentOverride.folderId,
       input.folders,

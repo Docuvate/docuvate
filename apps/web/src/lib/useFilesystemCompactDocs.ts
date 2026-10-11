@@ -5,7 +5,7 @@ import { useLayoutEffect, useState } from 'react';
 /** Ordner/filesystem doc list: stack rows when viewport is narrow (tree + table). */
 export const FILESYSTEM_COMPACT_DOCS_MAX_WIDTH_PX = 1280;
 
-export const FILESYSTEM_COMPACT_DOCS_MEDIA_QUERY = `(max-width: ${FILESYSTEM_COMPACT_DOCS_MAX_WIDTH_PX}px)`;
+export const FILESYSTEM_COMPACT_DOCS_MEDIA_QUERY = `(max-width: ${String(FILESYSTEM_COMPACT_DOCS_MAX_WIDTH_PX)}px)`;
 
 export function readFilesystemCompactDocs(): boolean {
   if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
@@ -23,10 +23,10 @@ export function useFilesystemCompactDocs(enabled: boolean): boolean {
       return;
     }
     const mq = window.matchMedia(FILESYSTEM_COMPACT_DOCS_MEDIA_QUERY);
-    const sync = () => setMatches(mq.matches);
+    const sync = () => { setMatches(mq.matches); };
     sync();
     mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
+    return () => { mq.removeEventListener('change', sync); };
   }, [enabled]);
 
   return enabled && matches;

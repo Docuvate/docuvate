@@ -1,22 +1,23 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import type { SavedDocumentViewDto } from '@docuvate/contracts';
-import { Button } from '../components/ui/Button';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+
 import { useToastNotify } from '../components/save/ToastProvider';
+import { SavedViewsManageTable } from '../components/saved-views/SavedViewsManageTable';
+import { Button } from '../components/ui/Button';
 import {
   deleteSavedDocumentView,
   listSavedDocumentViews,
   reorderSavedDocumentViews,
   updateSavedDocumentView,
 } from '../lib/api';
+import { authClient, authSessionUserId } from '../lib/auth-client';
 import { routes } from '../lib/routes';
-import { useInstallationRole } from '../lib/useInstallationRole';
-import { authClient } from '../lib/auth-client';
 import { notifySavedViewsChanged } from '../lib/savedViewsEvents';
-import { SavedViewsManageTable } from '../components/saved-views/SavedViewsManageTable';
+import { useInstallationRole } from '../lib/useInstallationRole';
 
 export function SavedViewsPage() {
   const { t } = useTranslation();
@@ -24,7 +25,7 @@ export function SavedViewsPage() {
   const { pushSuccess, pushError } = useToastNotify();
   const role = useInstallationRole();
   const { data: sessionData } = authClient.useSession();
-  const currentUserId = sessionData?.user?.id;
+  const currentUserId = authSessionUserId(sessionData);
   const [views, setViews] = useState<SavedDocumentViewDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -110,7 +111,7 @@ export function SavedViewsPage() {
           type="button"
           variant="secondary"
           className="saved-views-open-library-btn"
-          onClick={() => navigate(routes.documents)}
+          onClick={() => { navigate(routes.documents); }}
         >
           {t('savedViews.openLibrary')}
         </Button>

@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentDto, ExtractedField, ExtractionBlock } from '@docuvate/contracts';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { DocumentDto, ExtractedField, ExtractionBlock } from '@docuvate/contracts';
-import { hasExtractedContent, isExtractionPending } from '../../lib/documentExtractionState';
+
 import { useAdvancedFeaturesEnabled } from '../../lib/advancedFeatures';
+import { hasExtractedContent, isExtractionPending } from '../../lib/documentExtractionState';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
@@ -84,7 +85,7 @@ export function DocumentExtractionSection({
                 type="button"
                 variant={editMode ? 'secondary' : 'ghost'}
                 aria-pressed={editMode}
-                onClick={() => setEditMode((on) => !on)}
+                onClick={() => { setEditMode((on) => !on); }}
               >
                 {editMode
                   ? t('documents.doneEditingExtractedText')
@@ -134,7 +135,7 @@ export function DocumentExtractionSection({
           allowCopy={hasContent}
           requeueBusy={requeueBusy}
           onRequeueExtraction={onRequeueExtraction}
-          documentTitle={doc.title ?? doc.filename}
+          documentTitle={doc.title.trim() ? doc.title : doc.filename}
           onActivePageChange={onViewerPageChange}
           onHighlightBlocks={onHighlightBlocks}
           onBlocksChange={onBlocksChange}
@@ -147,7 +148,7 @@ export function DocumentExtractionSection({
           className="extraction-arena-details"
           ref={arenaDetailsRef}
           open={arenaOpen}
-          onToggle={(e) => setArenaOpenOverride(e.currentTarget.open)}
+          onToggle={(e) => { setArenaOpenOverride(e.currentTarget.open); }}
         >
           <summary className="extraction-arena-summary">{t('documents.arenaSummary')}</summary>
           <ExtractionArenaPanel

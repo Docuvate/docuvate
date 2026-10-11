@@ -4,10 +4,11 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach } from 'vitest';
 import { describe, expect, it, vi } from 'vitest';
+
 import i18n from '../../i18n';
 import { SaveBar } from './SaveBar';
 
-i18n.changeLanguage('en');
+void i18n.changeLanguage('en');
 
 afterEach(() => {
   cleanup();

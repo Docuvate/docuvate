@@ -13,7 +13,7 @@ function fold(input: string): string {
 
 export function suggestFieldNames(
   partial: string,
-  defs: Array<{ key: string; label: string }>,
+  defs: { key: string; label: string }[],
   limit = 8
 ): string[] {
   const probe = fold(partial);

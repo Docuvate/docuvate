@@ -1,7 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { confidenceThresholdTrackStyle } from '../../lib/cssCustomProperties';
 
 /** API scale: 0–1 confidence; slider matches historical preset range. */
 const CONFIDENCE_THRESHOLD_MIN = 0.55;
@@ -134,7 +136,7 @@ export function ConfidenceThresholdSlider({
     }
     const observer = new ResizeObserver(measure);
     observer.observe(ticksEl);
-    return () => observer.disconnect();
+    return () => { observer.disconnect(); };
   }, []);
 
   const ariaValueText = t('recognizedFields.gateConfidenceAriaValue', {
@@ -157,12 +159,7 @@ export function ConfidenceThresholdSlider({
 
       <div
         className="confidence-threshold-slider__track-wrap"
-        style={
-          {
-            '--confidence-fill': `${fillPercent}%`,
-            '--confidence-thumb': activeColor,
-          } as CSSProperties
-        }
+        style={confidenceThresholdTrackStyle(fillPercent, activeColor)}
       >
         <div className="confidence-threshold-slider__segments" aria-hidden="true">
           {SEGMENT_IDS.map((id, index) => (
@@ -194,7 +191,7 @@ export function ConfidenceThresholdSlider({
           aria-valuemax={CONFIDENCE_THRESHOLD_MAX}
           aria-valuenow={clamped}
           aria-valuetext={ariaValueText}
-          onChange={(e) => onChange(Number.parseFloat(e.target.value))}
+          onChange={(e) => { onChange(Number.parseFloat(e.target.value)); }}
         />
       </div>
 
@@ -213,7 +210,7 @@ export function ConfidenceThresholdSlider({
                 className={`confidence-threshold-slider__tick${
                   isMid ? ' confidence-threshold-slider__tick--mid' : ''
                 }`}
-                style={{ left: `${valueToPercent(bp)}%` }}
+                style={{ left: `${String(valueToPercent(bp))}%` }}
               >
                 {Math.round(bp * 100)}
               </span>

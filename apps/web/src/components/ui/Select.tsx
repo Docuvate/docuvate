@@ -1,18 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type RefObject,
   useCallback,
   useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
-  type CSSProperties,
-  type KeyboardEvent,
-  type RefObject,
 } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+
 import { computeSelectMenuPlacement, resolveSelectMenuPortalRoot } from './selectMenuPlacement';
 
 export interface SelectOption {
@@ -79,12 +80,12 @@ function useSelectMenuPosition(
     if (!open || !menuPortal) return;
     updatePosition();
     const frame = requestAnimationFrame(updatePosition);
-    return () => cancelAnimationFrame(frame);
+    return () => { cancelAnimationFrame(frame); };
   }, [open, menuPortal, updatePosition]);
 
   useEffect(() => {
     if (!open || !menuPortal) return;
-    const onScrollOrResize = () => updatePosition();
+    const onScrollOrResize = () => { updatePosition(); };
     window.addEventListener('resize', onScrollOrResize);
     window.addEventListener('scroll', onScrollOrResize, true);
     return () => {
@@ -104,7 +105,9 @@ function firstEnabledIndex(options: SelectOption[]): number {
 function nextEnabledIndex(options: SelectOption[], from: number, delta: 1 | -1): number {
   if (options.length === 0) return 0;
   let i = from;
-  for (let step = 0; step < options.length; step += 1) {
+  let steps = 0;
+  while (steps < options.length) {
+    steps += 1;
     i = (i + delta + options.length) % options.length;
     if (!options[i]?.disabled) return i;
   }
@@ -165,13 +168,14 @@ export function Select({
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      const target = e.target as Node;
+      const target = e.target;
+      if (!(target instanceof Node)) return;
       if (rootRef.current?.contains(target)) return;
       if (menuRef.current?.contains(target)) return;
       setOpen(false);
     };
     document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
+    return () => { document.removeEventListener('mousedown', onDoc); };
   }, [open]);
 
   function onTriggerKeyDown(e: KeyboardEvent<HTMLButtonElement>) {
@@ -224,12 +228,12 @@ export function Select({
           <button
             type="button"
             role="option"
-            id={`${listId}-opt-${index}`}
+            id={`${listId}-opt-${String(index)}`}
             aria-selected={opt.value === value}
             disabled={opt.disabled}
             className={`custom-select-option${opt.value === value ? ' custom-select-option-active' : ''}${index === activeIndex ? ' custom-select-option-focus' : ''}${opt.disabled ? ' custom-select-option-disabled' : ''}`}
-            onMouseEnter={() => setActiveIndex(index)}
-            onClick={() => selectOption(opt)}
+            onMouseEnter={() => { setActiveIndex(index); }}
+            onClick={() => { selectOption(opt); }}
           >
             <span className="custom-select-option-label">{opt.label}</span>
             {opt.suffix ? (
@@ -241,10 +245,11 @@ export function Select({
     </ul>
   ) : null;
 
-  const activeOptionId = open ? `${listId}-opt-${activeIndex}` : undefined;
+  const activeOptionId = open ? `${listId}-opt-${String(activeIndex)}` : undefined;
 
   return (
     <div className={`custom-select ${className}`.trim()} ref={rootRef}>
+      {/* eslint-disable-next-line jsx-a11y/role-supports-aria-props -- listbox trigger stays button for smoke e2e */}
       <button
         ref={triggerRef}
         type="button"
@@ -255,7 +260,10 @@ export function Select({
         aria-expanded={open}
         aria-controls={listId}
         aria-activedescendant={activeOptionId}
-        onClick={() => (open ? closeMenu() : openMenu())}
+        onClick={() => {
+          if (open) closeMenu();
+          else openMenu();
+        }}
         onKeyDown={onTriggerKeyDown}
       >
         <span className={selected ? '' : 'muted'}>{selected?.label ?? resolvedPlaceholder}</span>

@@ -25,5 +25,10 @@ export function extractionEngineDescription(t: TFunction, id: string): string | 
 }
 
 export function isKnownExtractionEngineId(id: string): boolean {
-  return (ENGINE_IDS as readonly string[]).includes(id);
+  for (const engineId of ENGINE_IDS) {
+    if (engineId === id) {
+      return true;
+    }
+  }
+  return false;
 }

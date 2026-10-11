@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it } from 'vitest';
 import type { TagDto } from '@docuvate/contracts';
+import { describe, expect, it } from 'vitest';
+
 import {
   parseDocumentFilterQuery,
   resolveDocumentFilterFields,
@@ -52,7 +53,7 @@ describe('serialize and parse roundtrip', () => {
   });
 
   it('adds and removes multiple labels cleanly', () => {
-    let filters = { tagIds: ['t1'] as string[] | undefined };
+    let filters: { tagIds?: string[] } = { tagIds: ['t1'] };
     let text = serializeDocumentFilterQuery(filters, 'rechnung', tags);
     expect(text).toBe('label:Vertrag rechnung');
 

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode } from 'react';
+
 import { chipColorStyle } from '../../lib/chipColorStyle';
 
 export type ChipVariant = 'assigned' | 'suggest' | 'inbox' | 'outline';

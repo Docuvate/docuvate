@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useCallback, useMemo, type RefObject } from 'react';
-import { useTranslation } from 'react-i18next';
 import type { FolderDto, SftpIngressAccountDto, SftpIngressEventDto } from '@docuvate/contracts';
-import { SftpIngressManageDrawerShell } from './SftpIngressManageDrawerShell';
+import { type RefObject,useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { SettingsCallout } from '../settings/SettingsCallout';
 import { Button } from '../ui/Button';
 import { CopyButton } from '../ui/CopyButton';
-import { SettingsCallout } from '../settings/SettingsCallout';
+import { SftpIngressManageDrawerShell } from './SftpIngressManageDrawerShell';
 
 function lastReceivedAt(events: SftpIngressEventDto[]): string | null {
   const ok = events.filter((e) => e.status === 'processed' || e.status === 'received');
   if (!ok.length) return null;
   return ok.reduce(
     (latest, row) => (row.createdAt > latest ? row.createdAt : latest),
-    ok[0]!.createdAt
+    ok[0].createdAt
   );
 }
 
@@ -156,7 +157,7 @@ export function SftpScannerIngressManageDrawer({
                   type="button"
                   variant="secondary"
                   className="connector-sftp-revoke-btn"
-                  onClick={() => onRevoke(account)}
+                  onClick={() => { onRevoke(account); }}
                 >
                   {t('sftpIngress.revokeCta')}
                 </Button>

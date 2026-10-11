@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Check } from 'lucide-react';
 import { useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react';
+
 import {
-  LABEL_COLOR_PRESET_IDS,
   isLabelPresetColor,
+  LABEL_COLOR_PRESET_IDS,
   labelColorPresetHex,
   labelColorPresetLabelKey,
   normalizeLabelColorHex,
 } from '../../lib/labelColorPresets';
 
-type LabelColorFieldProps = {
+interface LabelColorFieldProps {
   value: string;
   onChange: (color: string) => void;
-};
+}
 
 export function LabelColorField({ value, onChange }: LabelColorFieldProps) {
   const { t } = useTranslation();
@@ -39,7 +40,7 @@ export function LabelColorField({ value, onChange }: LabelColorFieldProps) {
             style={{ backgroundColor: hex }}
             aria-label={t(labelColorPresetLabelKey(id))}
             aria-pressed={active}
-            onClick={() => onChange(hex)}
+            onClick={() => { onChange(hex); }}
           >
             {active ? <Check size={14} strokeWidth={2.5} aria-hidden /> : null}
           </button>
@@ -63,7 +64,7 @@ export function LabelColorField({ value, onChange }: LabelColorFieldProps) {
         value={resolved}
         tabIndex={-1}
         aria-hidden
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => { onChange(e.target.value); }}
       />
     </div>
   );

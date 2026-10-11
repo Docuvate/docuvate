@@ -1,12 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  parseJsonRecentDocuments,
+  parseJsonStringArray,
+  type RecentDocumentEntry,
+} from '../jsonStorage';
+
 const RECENT_SEARCHES_KEY = 'docuvate.recentSearches';
 const RECENT_DOCS_KEY = 'docuvate.recentDocuments';
+
+export type { RecentDocumentEntry };
 
 export function readRecentSearches(userId: string): string[] {
   try {
     const raw = localStorage.getItem(`${RECENT_SEARCHES_KEY}:${userId}`);
-    return raw ? (JSON.parse(raw) as string[]) : [];
+    return raw ? parseJsonStringArray(raw) : [];
   } catch {
     return [];
   }
@@ -20,16 +28,10 @@ export function pushRecentSearch(userId: string, query: string): void {
   localStorage.setItem(`${RECENT_SEARCHES_KEY}:${userId}`, JSON.stringify(next));
 }
 
-export interface RecentDocumentEntry {
-  id: string;
-  title: string;
-  openedAt: string;
-}
-
 export function readRecentDocuments(userId: string): RecentDocumentEntry[] {
   try {
     const raw = localStorage.getItem(`${RECENT_DOCS_KEY}:${userId}`);
-    return raw ? (JSON.parse(raw) as RecentDocumentEntry[]) : [];
+    return raw ? parseJsonRecentDocuments(raw) : [];
   } catch {
     return [];
   }

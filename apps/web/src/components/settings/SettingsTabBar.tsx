@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
+
 import { getAdminAccess } from '../../lib/api';
 import { routes } from '../../lib/routes';
 
@@ -12,8 +13,8 @@ export function SettingsTabBar() {
 
   useEffect(() => {
     void getAdminAccess()
-      .then((access) => setIsAdministrator(access.isAdministrator))
-      .catch(() => setIsAdministrator(false));
+      .then((access) => { setIsAdministrator(access.isAdministrator); })
+      .catch(() => { setIsAdministrator(false); });
   }, []);
 
   return (

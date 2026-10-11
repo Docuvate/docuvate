@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
+
 import i18n from '../i18n';
 import { isExtractionPending } from './documentExtractionState';
 
@@ -42,11 +43,13 @@ const STAGE_PERCENT: Record<ExtractionProgressStageId, number> = {
 };
 
 function hasOcrPayload(doc: Pick<DocumentDto, 'extraction'>): boolean {
-  const text = doc.extraction?.text?.trim() ?? '';
+  const rawText = doc.extraction?.text;
+  const text = rawText != null ? rawText.trim() : '';
   if (text.length > 0) return true;
   const blocks = doc.extraction?.blocks?.length ?? 0;
   if (blocks > 0) return true;
-  const fields = doc.extraction?.fields?.length ?? 0;
+  const extractionFields = doc.extraction?.fields;
+  const fields = extractionFields === undefined ? 0 : extractionFields.length;
   return fields > 0;
 }
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import {
   NARROW_VIEWPORT_MAX_WIDTH_PX,
   NARROW_VIEWPORT_MEDIA_QUERY,
@@ -13,17 +14,20 @@ function mockViewportWidth(widthPx: number) {
     writable: true,
     configurable: true,
     value: vi.fn((query: string) => {
-      const maxMatch = query.match(/\(max-width:\s*(\d+)px\)/);
+      const maxMatch = /\(max-width:\s*(\d+)px\)/.exec(query);
       const matches =
         maxMatch !== null ? widthPx <= Number(maxMatch[1]) : query === NARROW_VIEWPORT_MEDIA_QUERY;
-      return {
+      const list: MediaQueryList = {
         matches,
         media: query,
         onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
         addEventListener: vi.fn(),
         removeEventListener: vi.fn(),
         dispatchEvent: vi.fn(),
-      } as MediaQueryList;
+      };
+      return list;
     }),
   });
 }
@@ -34,7 +38,7 @@ describe('readNarrowViewport', () => {
   });
 
   it('uses the 768px narrow breakpoint constant', () => {
-    expect(NARROW_VIEWPORT_MEDIA_QUERY).toBe(`(max-width: ${NARROW_VIEWPORT_MAX_WIDTH_PX}px)`);
+    expect(NARROW_VIEWPORT_MEDIA_QUERY).toBe(`(max-width: ${String(NARROW_VIEWPORT_MAX_WIDTH_PX)}px)`);
   });
 
   it('is narrow at 430px and 768px', () => {

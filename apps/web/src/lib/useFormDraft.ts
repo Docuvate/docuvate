@@ -1,15 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useMemo, useState } from 'react';
+
 import { defaultFormDraftEqual } from './formDraftEqual';
 
-function serializeBaseline<T>(value: T): string {
+function serializeBaseline(value: unknown): string {
   return JSON.stringify(value);
 }
 
-export type UseFormDraftOptions<T> = {
+export interface UseFormDraftOptions<T> {
   isEqual?: (a: T, b: T) => boolean;
-};
+}
 
 export function useFormDraft<T>(baseline: T, options?: UseFormDraftOptions<T>) {
   const isEqual = options?.isEqual ?? defaultFormDraftEqual;
@@ -21,6 +22,7 @@ export function useFormDraft<T>(baseline: T, options?: UseFormDraftOptions<T>) {
     setSaved(baseline);
     setDraft(baseline);
     // baselineKey captures semantic changes; baseline is read from the render that changed the key.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- including `baseline` re-runs on every new object reference
   }, [baselineKey]);
 
   const dirty = useMemo(() => !isEqual(draft, saved), [draft, saved, isEqual]);

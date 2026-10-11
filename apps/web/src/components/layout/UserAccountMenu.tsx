@@ -1,26 +1,28 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ThemePreference } from '@docuvate/contracts';
 import {
+  type ReactNode,
   useCallback,
   useEffect,
   useId,
   useLayoutEffect,
   useRef,
   useState,
-  type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { ThemePreference } from '@docuvate/contracts';
+import { Link } from 'react-router-dom';
+
 import { authClient } from '../../lib/auth-client';
 import { performSignOut } from '../../lib/authSignOut';
 import { persistUserUiPreference } from '../../lib/persistUserUiPreference';
 import { routes } from '../../lib/routes';
-import { userInitials } from './userInitials';
+import { trimOptionalString } from '../../lib/trimOptionalString';
 import { useDocuvateTheme } from '../../lib/useDocuvateTheme';
-import { ThemePreferencePicker } from './ThemePreferencePicker';
 import { LocaleSwitcher } from './LocaleSwitcher';
+import { ThemePreferencePicker } from './ThemePreferencePicker';
+import { userInitials } from './userInitials';
 
 function positionAccountMenuPanel(
   trigger: HTMLElement,
@@ -58,8 +60,8 @@ function positionAccountMenuPanel(
     top = pad;
   }
 
-  panel.style.left = `${left}px`;
-  panel.style.top = `${top}px`;
+  panel.style.left = `${String(left)}px`;
+  panel.style.top = `${String(top)}px`;
   panel.style.visibility = '';
 }
 
@@ -81,8 +83,8 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
     triggerRef.current?.focus();
   }, []);
 
-  const displayName = user?.name?.trim();
-  const email = user?.email?.trim();
+  const displayName = trimOptionalString(user?.name);
+  const email = trimOptionalString(user?.email);
   const initials = userInitials(user);
 
   useLayoutEffect(() => {
@@ -112,7 +114,10 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
     }
     firstItemRef.current?.focus();
     function onPointerDown(event: MouseEvent) {
-      const target = event.target as Node;
+      const target = event.target;
+      if (!(target instanceof Node)) {
+        return;
+      }
       const root = rootRef.current;
       const panel = panelRef.current;
       if (root?.contains(target) || panel?.contains(target)) {
@@ -196,7 +201,7 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
         to={routes.settings}
         role="menuitem"
         className="user-account-menu-item"
-        onClick={() => setOpen(false)}
+        onClick={() => { setOpen(false); }}
       >
         {t('shell.account')}
       </Link>
@@ -216,7 +221,7 @@ export function UserAccountMenu({ showLocaleSwitcher = false }: { showLocaleSwit
         aria-expanded={open}
         aria-controls={menuId}
         aria-label={t('shell.userMenuLabel')}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => { setOpen((prev) => !prev); }}
       >
         <span className="user-account-menu-avatar" aria-hidden="true">
           {initials}

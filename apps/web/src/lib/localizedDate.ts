@@ -29,16 +29,16 @@ export function localizedDisplayToIsoDate(input: string, locale: DocuvateLocale)
   if (locale === 'de') {
     const deMatch = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(trimmed);
     if (!deMatch) return null;
-    const day = deMatch[1]!.padStart(2, '0');
-    const month = deMatch[2]!.padStart(2, '0');
-    const year = deMatch[3]!;
+    const day = deMatch[1].padStart(2, '0');
+    const month = deMatch[2].padStart(2, '0');
+    const year = deMatch[3];
     return `${year}-${month}-${day}`;
   }
 
   const enMatch = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmed);
   if (!enMatch) return null;
-  const month = enMatch[1]!.padStart(2, '0');
-  const day = enMatch[2]!.padStart(2, '0');
-  const year = enMatch[3]!;
+  const month = enMatch[1].padStart(2, '0');
+  const day = enMatch[2].padStart(2, '0');
+  const year = enMatch[3];
   return `${year}-${month}-${day}`;
 }

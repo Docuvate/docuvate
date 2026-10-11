@@ -1,20 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useState } from 'react';
 import { Menu } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { authClient } from '../lib/auth-client';
+
+import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
+import { getUserSettings } from '../lib/api';
+import { authClient, authSessionUserId } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
+import { applyUserSettingsUiPreferences } from '../lib/syncUserUiPreferences';
+import { useNarrowTopbar } from '../lib/useNarrowTopbar';
 import { AppSidebar } from './layout/AppSidebar';
 import { LocaleSwitcher } from './layout/LocaleSwitcher';
 import { UserAccountMenu } from './layout/UserAccountMenu';
-import { GlobalSearch } from './search/GlobalSearch';
-import { getUserSettings } from '../lib/api';
-import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import { SaveBarLayoutSync } from './save/SaveBarLayoutSync';
 import { ToastGlobalBridge, ToastProvider } from './save/ToastProvider';
-import { applyUserSettingsUiPreferences } from '../lib/syncUserUiPreferences';
-import { useNarrowTopbar } from '../lib/useNarrowTopbar';
+import { GlobalSearch } from './search/GlobalSearch';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation();
@@ -29,7 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [session?.session]);
 
   useEffect(() => {
-    const userId = session?.user?.id;
+    const userId = authSessionUserId(session);
     if (!userId) {
       return;
     }
@@ -41,7 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       .catch(() => {
         /* keep local cache */
       });
-  }, [session?.user?.id]);
+  }, [session]);
 
   useEffect(() => {
     if (!narrowTopbar) {
@@ -59,7 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       }
     }
     document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+    return () => { document.removeEventListener('keydown', onKeyDown); };
   }, [mobileNavOpen]);
 
   return (
@@ -75,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className="topbar-icon-btn topbar-menu-trigger"
                 aria-expanded={mobileNavOpen}
                 aria-label={t('nav.main')}
-                onClick={() => setMobileNavOpen((open) => !open)}
+                onClick={() => { setMobileNavOpen((open) => !open); }}
               >
                 <Menu size={20} strokeWidth={2} aria-hidden />
               </button>
@@ -101,13 +102,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             type="button"
             className="app-sidebar-backdrop"
             aria-label={t('common.close')}
-            onClick={() => setMobileNavOpen(false)}
+            onClick={() => { setMobileNavOpen(false); }}
           />
         ) : null}
         <div className="app-body">
           <AppSidebar
             mobileDrawerOpen={narrowTopbar && mobileNavOpen}
-            onCloseMobileDrawer={() => setMobileNavOpen(false)}
+            onCloseMobileDrawer={() => { setMobileNavOpen(false); }}
           />
           <main className="app-main">{children}</main>
         </div>

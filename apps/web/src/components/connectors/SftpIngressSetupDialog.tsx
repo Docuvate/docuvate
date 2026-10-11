@@ -1,19 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import type {
   FolderDto,
   SftpIngressCreateAccountResponseDto,
   SftpIngressServerInfoDto,
 } from '@docuvate/contracts';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
 import { SettingsCallout } from '../settings/SettingsCallout';
 import { Button } from '../ui/Button';
 import { CopyButton } from '../ui/CopyButton';
 import { Input } from '../ui/Input';
-import { Select, type SelectOption } from '../ui/Select';
 import { SegmentedControl } from '../ui/SegmentedControl';
+import { Select, type SelectOption } from '../ui/Select';
 
 type AuthMode = 'password' | 'sshKey';
 
@@ -116,8 +117,8 @@ export function SftpIngressSetupDialog({
   const endpointLine = useMemo(() => {
     const host = server?.host ?? t('sftpIngress.hostNotConfigured');
     const port = server?.port ?? 2222;
-    return `${host}:${port}`;
-  }, [server]);
+    return `${host}:${String(port)}`;
+  }, [server?.host, server?.port, t]);
 
   const folderOptions: SelectOption[] = useMemo(
     () => [
@@ -211,8 +212,8 @@ export function SftpIngressSetupDialog({
             <Input
               ref={displayNameRef}
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              onBlur={() => setNameBlurred(true)}
+              onChange={(e) => { setDisplayName(e.target.value); }}
+              onBlur={() => { setNameBlurred(true); }}
               autoComplete="off"
               aria-invalid={showNameError || undefined}
               aria-describedby={showNameError ? nameErrorId : undefined}
@@ -246,8 +247,8 @@ export function SftpIngressSetupDialog({
                 className={`input connector-sftp-textarea${showSshKeyError ? ' input-invalid' : ''}`}
                 rows={4}
                 value={sshPublicKey}
-                onChange={(e) => setSshPublicKey(e.target.value)}
-                onBlur={() => setSshBlurred(true)}
+                onChange={(e) => { setSshPublicKey(e.target.value); }}
+                onBlur={() => { setSshBlurred(true); }}
                 aria-invalid={showSshKeyError || undefined}
                 aria-describedby={showSshKeyError ? sshErrorId : undefined}
               />
@@ -329,7 +330,7 @@ export function SftpIngressSetupDialog({
         ) : null}
         {step === 1 ? (
           <>
-            <Button type="button" variant="secondary" disabled={busy} onClick={() => setStep(0)}>
+            <Button type="button" variant="secondary" disabled={busy} onClick={() => { setStep(0); }}>
               {t('sftpIngress.setupBack')}
             </Button>
             <Button

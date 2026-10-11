@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useCallback, useEffect, useRef, useState } from 'react';
+
 import {
   fetchDocumentLayoutCompareMetrics,
   fetchDocumentLayoutComparePage,
   fetchDocumentLayoutCompareSummary,
 } from './api';
 import {
-  layoutCompareMetricsRange,
   type LayoutCompareMetrics,
+  layoutCompareMetricsRange,
   type LayoutComparePageMetric,
   type LayoutComparePagePayload,
   type LayoutCompareSummary,
@@ -85,7 +86,7 @@ export function useLayoutCompare(
   useEffect(() => {
     if (!enabled || effectivePageCount < 1) return;
     const { from, to } = layoutCompareMetricsRange(effectivePageCount, activePage);
-    const batchKey = `${from}:${to}`;
+    const batchKey = `${String(from)}:${String(to)}`;
     if (metricsLoadedRef.current.has(batchKey)) {
       return;
     }
@@ -129,7 +130,7 @@ export function useLayoutCompare(
 
   const loadPage = useCallback(
     async (pageNumber: number, includeHeatmap: boolean) => {
-      const cacheKey = `${pageNumber}:${includeHeatmap ? '1' : '0'}`;
+      const cacheKey = `${String(pageNumber)}:${includeHeatmap ? '1' : '0'}`;
       const cached = pageCacheRef.current.get(cacheKey);
       if (cached) {
         setPagePayload(cached);
@@ -172,7 +173,7 @@ export function useLayoutCompare(
   }, []);
 
   const retryPage = useCallback(() => {
-    const cacheKey = `${activePage}:${includeHeatmap ? '1' : '0'}`;
+    const cacheKey = `${String(activePage)}:${includeHeatmap ? '1' : '0'}`;
     pageCacheRef.current.delete(cacheKey);
     setPageRetryToken((n) => n + 1);
   }, [activePage, includeHeatmap]);

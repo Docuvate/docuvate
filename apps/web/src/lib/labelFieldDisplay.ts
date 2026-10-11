@@ -10,19 +10,19 @@ export function parseLabelFieldKey(key: string): { tagId: string; fieldKey: stri
   if (!match) {
     return null;
   }
-  return { tagId: match[1]!, fieldKey: match[2]! };
+  return { tagId: match[1], fieldKey: match[2] };
 }
 
 export function parseGlobalFieldKey(key: string): string | null {
   const match = GLOBAL_STORAGE_PREFIX.exec(key);
-  return match ? match[1]! : null;
+  return match ? match[1] : null;
 }
 
 export function labelFieldDisplayName(
   field: ExtractedField,
   tags: TagDto[],
   defsByTagId: Map<string, TagCustomFieldDefinitionDto[]>,
-  globalDefs: Map<string, string> = new Map()
+  globalDefs = new Map<string, string>()
 ): string {
   const globalKey = parseGlobalFieldKey(field.key);
   if (globalKey) {
@@ -44,7 +44,7 @@ export function labelFieldDisplayName(
 }
 
 export function buildGlobalFieldLabelMap(
-  defs: Array<{ key: string; label: string }>
+  defs: { key: string; label: string }[]
 ): Map<string, string> {
   return new Map(defs.map((d) => [d.key, d.label]));
 }

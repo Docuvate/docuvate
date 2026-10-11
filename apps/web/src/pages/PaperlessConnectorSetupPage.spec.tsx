@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import i18n from '../i18n';
 import { PaperlessConnectorSetupPage } from './PaperlessConnectorSetupPage';
 
@@ -102,8 +103,12 @@ describe('PaperlessConnectorSetupPage', () => {
       expect(screen.getByPlaceholderText('Gespeichert')).toBeTruthy();
     });
     const tokenInput = screen.getByPlaceholderText('Gespeichert');
-    expect((tokenInput as HTMLInputElement).type).toBe('password');
-    expect((tokenInput as HTMLInputElement).value).toBe('');
+    expect(tokenInput).toBeInstanceOf(HTMLInputElement);
+    if (!(tokenInput instanceof HTMLInputElement)) {
+      throw new Error('expected password input');
+    }
+    expect(tokenInput.type).toBe('password');
+    expect(tokenInput.value).toBe('');
   });
 
   it('shows test-connection success message', async () => {

@@ -1,25 +1,26 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UploadDropzone } from '../components/UploadDropzone';
-import { DocumentUploadProvider } from '../components/upload/DocumentUploadProvider';
+import { useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
 import { LibraryFilterDrawer } from '../components/library/LibraryFilterDrawer';
 import { LibraryFilterPanel } from '../components/library/LibraryFilterPanel';
 import { LibraryViewSwitcher } from '../components/library/LibraryViewSwitcher';
+import { SaveViewDialog } from '../components/library/SaveViewDialog';
+import { useToastNotify } from '../components/save/ToastProvider';
+import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
+import { DocumentUploadProvider } from '../components/upload/DocumentUploadProvider';
+import { UploadDropzone } from '../components/UploadDropzone';
 import { resolveLibraryDropTarget } from '../lib/documentUploadAssignment';
-import { librarySortSelectOptions } from '../lib/librarySortOptions';
+import { countLibraryActiveFilters } from '../lib/libraryActiveFilterCount';
+import { librarySortSelectOptions, parseLibrarySortSelectValue } from '../lib/librarySortOptions';
+import { routes } from '../lib/routes';
 import { LibraryPageDocumentSection } from './library/LibraryPageDocumentSection';
 import { useLibraryDocumentContextMenu } from './library/useLibraryDocumentContextMenu';
-import { countLibraryActiveFilters } from '../lib/libraryActiveFilterCount';
 import { useLibraryPageData } from './library/useLibraryPageData';
-import { SaveViewDialog } from '../components/library/SaveViewDialog';
-import { Button } from '../components/ui/Button';
-import { useToastNotify } from '../components/save/ToastProvider';
-import { Link } from 'react-router-dom';
-import { routes } from '../lib/routes';
 
 export function LibraryPage() {
   const mode = 'all' as const;
@@ -39,10 +40,10 @@ export function LibraryPage() {
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 1279px)');
-    const sync = () => setNarrowFilters(mq.matches);
+    const sync = () => { setNarrowFilters(mq.matches); };
     sync();
     mq.addEventListener('change', sync);
-    return () => mq.removeEventListener('change', sync);
+    return () => { mq.removeEventListener('change', sync); };
   }, []);
   const sortOptions = useMemo(() => librarySortSelectOptions(t), [t]);
   const activeFilterCount = useMemo(() => countLibraryActiveFilters(data.filters), [data.filters]);
@@ -85,7 +86,7 @@ export function LibraryPage() {
             ) : null}
           </div>
           <div className="library-toolbar">
-            <Button type="button" variant="secondary" onClick={() => setSaveViewOpen(true)}>
+            <Button type="button" variant="secondary" onClick={() => { setSaveViewOpen(true); }}>
               {t('savedViews.saveAction')}
             </Button>
             {data.activeViewId ? (
@@ -95,9 +96,8 @@ export function LibraryPage() {
                 onClick={() => {
                   void data
                     .updateActiveSavedView()
-                    .then(() => pushSuccess(t('common.saved')))
-                    .catch((err) =>
-                      pushError(err instanceof Error ? err.message : t('errors.generic'))
+                    .then(() => { pushSuccess(t('common.saved')); })
+                    .catch((err: unknown) => { pushError(err instanceof Error ? err.message : t('errors.generic')); }
                     );
                 }}
               >
@@ -111,10 +111,7 @@ export function LibraryPage() {
             <Select
               value={`${data.filters.sort ?? 'updatedAt'}:${data.filters.order ?? 'desc'}`}
               onChange={(value) => {
-                const [sort, order] = value.split(':') as [
-                  NonNullable<typeof data.filters.sort>,
-                  'asc' | 'desc',
-                ];
+                const { sort, order } = parseLibrarySortSelectValue(value);
                 data.toggleFilter({ sort, order });
               }}
               options={[...sortOptions]}
@@ -149,7 +146,7 @@ export function LibraryPage() {
               filterToggle={{
                 expanded: filtersOpen,
                 activeCount: activeFilterCount,
-                onToggle: () => setFiltersOpen((open) => !open),
+                onToggle: () => { setFiltersOpen((open) => !open); },
                 buttonRef: filterToggleRef,
               }}
             />
@@ -159,8 +156,8 @@ export function LibraryPage() {
         {narrowFilters ? (
           <LibraryFilterDrawer
             open={filtersOpen}
-            onClose={() => setFiltersOpen(false)}
-            returnFocusRef={filterToggleRef as RefObject<HTMLElement>}
+            onClose={() => { setFiltersOpen(false); }}
+            returnFocusRef={filterToggleRef}
           >
             <LibraryFilterPanel
               filters={data.filters}
@@ -178,7 +175,7 @@ export function LibraryPage() {
           </LibraryFilterDrawer>
         ) : null}
 
-        <SaveViewDialog open={saveViewOpen} onClose={() => setSaveViewOpen(false)} data={data} />
+        <SaveViewDialog open={saveViewOpen} onClose={() => { setSaveViewOpen(false); }} data={data} />
       </div>
     </DocumentUploadProvider>
   );

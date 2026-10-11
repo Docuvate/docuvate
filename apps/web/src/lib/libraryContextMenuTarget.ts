@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
 
+import { trimOptionalString } from './trimOptionalString';
+
 export function resolveContextMenuSelectedIds(
   documentId: string,
   selected: ReadonlySet<string>
@@ -19,7 +21,7 @@ export function contextMenuTitleForSelection(
 ): string {
   if (selectedIds.length === 1) {
     const doc = items.find((item) => item.id === selectedIds[0]);
-    return doc?.title?.trim() || labels.singleFallback;
+    return trimOptionalString(doc?.title) ?? labels.singleFallback;
   }
   return labels.multiple(selectedIds.length);
 }

@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ReactNode } from 'react';
 import { CircleCheck, Info, TriangleAlert } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 type SettingsCalloutVariant = 'warn' | 'info' | 'success';
 
-type SettingsCalloutProps = {
+interface SettingsCalloutProps {
   variant: SettingsCalloutVariant;
   children: ReactNode;
-};
+}
 
 const ICON_SIZE = 18;
 
