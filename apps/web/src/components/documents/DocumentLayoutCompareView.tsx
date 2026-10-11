@@ -9,8 +9,8 @@ import {
   layoutCompareSliderStep,
   pngDataUrl,
 } from '../../lib/layoutCompare';
-import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
+import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { Button } from '../ui/Button';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { LayoutComparePageNav } from './LayoutComparePageNav';

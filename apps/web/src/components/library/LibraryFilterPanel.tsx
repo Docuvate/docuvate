@@ -8,8 +8,8 @@ import type { DocumentFilterParseIssue } from '../../lib/documentFilterQuery';
 import { documentStatusLabel, parseDocumentStatusFilterValue } from '../../lib/documentStatusLabel';
 import type { LibraryFilterMode } from '../../lib/libraryFilterMode';
 import { Input } from '../ui/Input';
-import { Select } from '../ui/Select';
 import { SegmentedControl } from '../ui/SegmentedControl';
+import { Select } from '../ui/Select';
 
 const ICON_SIZE = 18;
 const ICON_STROKE = 1.75;

@@ -260,7 +260,12 @@ export function DocumentLayoutWorkspace({
                 className={segmentedToolbarClass('layout-zoom-switch', 'segmented-control--zoom')}
                 value={String(layoutZoom)}
                 options={layoutZoomOptions}
-                onChange={(value) => { setLayoutZoom(Number(value) as LayoutIrZoomStep); }}
+                onChange={(value) => {
+                  const next = LAYOUT_IR_ZOOM_STEPS.find((step) => String(step) === value);
+                  if (next !== undefined) {
+                    setLayoutZoom(next);
+                  }
+                }}
               />
             )}
             {!chatSidePanel ? (
