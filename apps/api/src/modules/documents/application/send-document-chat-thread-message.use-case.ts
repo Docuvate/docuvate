@@ -6,13 +6,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import type { DocumentChatMessageEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
   DOCUMENT_REPOSITORY,
-  USER_PREFERENCES_REPOSITORY,
-  type DocumentChatMessageEntity,
   type DocumentChatThreadRepository,
   type DocumentRepository,
+  USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import { assertChatEnabled } from '../../settings/application/assert-chat-enabled.js';
