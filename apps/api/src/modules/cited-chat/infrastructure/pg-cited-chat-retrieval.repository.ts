@@ -52,8 +52,11 @@ export class PgCitedChatRetrievalRepository {
     ].filter((t) => t.length >= 3);
 
     const scopedDocumentIds = sanitizeChatThreadDocumentIds(options?.documentIds ?? []);
-    const docFilter = scopedDocumentIds.length > 0 ? `AND c.document_id = ANY($3::uuid[])` : '';
     const docParams = scopedDocumentIds.length > 0 ? [scopedDocumentIds] : [];
+    const docFilterAt = (paramIndex: number) =>
+      scopedDocumentIds.length > 0
+        ? `AND c.document_id = ANY($${String(paramIndex)}::uuid[])`
+        : '';
 
     const ftsPromise =
       probe.length >= 2
@@ -63,7 +66,7 @@ export class PgCitedChatRetrievalRepository {
              JOIN documents d ON d.id = c.document_id
              WHERE d.user_id = $1
                AND c.search_vector @@ plainto_tsquery('simple', $2::text)
-               ${docFilter}
+               ${docFilterAt(3)}
              ORDER BY score DESC
              LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT)}`,
             [userId, probe, ...docParams]
@@ -81,7 +84,7 @@ export class PgCitedChatRetrievalRepository {
              JOIN documents d ON d.id = c.document_id
              CROSS JOIN unnest($2::text[]) AS p(token)
              WHERE d.user_id = $1
-               ${docFilter}
+               ${docFilterAt(3)}
              GROUP BY c.id
              HAVING MAX(GREATEST(word_similarity(p.token, c.body), similarity(c.body, p.token))) >= $${String(trgmThresholdIdx)}
              ORDER BY score DESC
@@ -109,7 +112,7 @@ export class PgCitedChatRetrievalRepository {
          JOIN documents d ON d.id = c.document_id
          WHERE d.user_id = $1
            AND c.vector_int8 IS NOT NULL
-           ${docFilter}`,
+           ${docFilterAt(2)}`,
         [userId, ...docParams]
       );
       const queryInt8 = quantizeQueryVector(queryVector);
