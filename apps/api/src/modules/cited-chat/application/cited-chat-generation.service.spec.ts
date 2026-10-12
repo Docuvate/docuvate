@@ -70,10 +70,12 @@ async function buildService(deps: {
       {
         provide: ChatQueryRouterService,
         useValue: {
-          route: vi.fn(async ({ userMessage }: { userMessage: string }) => ({
-            kind: 'document_qa',
-            resolvedQuery: userMessage,
-          })),
+          route: vi.fn(({ userMessage }: { userMessage: string }) =>
+            Promise.resolve({
+              kind: 'document_qa',
+              resolvedQuery: userMessage,
+            })
+          ),
         },
       },
       { provide: DOCUMENT_CHAT_THREAD_REPOSITORY, useValue: deps.threads },

@@ -38,11 +38,11 @@ import {
   type CitedChatChunkCandidate,
   PgCitedChatRetrievalRepository,
 } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import { ChatQueryRouterService } from './chat-query-router.service.js';
 import {
   buildCitedChatSystemPrompt,
   requestCitedAnswerFromOllama,
 } from './cited-chat-ollama.js';
-import { ChatQueryRouterService } from './chat-query-router.service.js';
 
 const CONTENT_FLUSH_MS = 250;
 const GENERATION_HEARTBEAT_MS = 15_000;
@@ -568,7 +568,7 @@ export class CitedChatGenerationService {
     if (worker.reachable && worker.passageId && worker.answer) {
       const match = ranked.find((row) => row.chunk.chunkId === worker.passageId);
       const chunk = match?.chunk ?? ranked[0].chunk;
-      const quote = worker.quote?.trim() || worker.answer.trim();
+      const quote = worker.quote?.trim() ?? worker.answer.trim();
       return { text: worker.answer.trim(), chunk, quote };
     }
     return tryExtractiveCitedAnswer(query, ranked, minScore);

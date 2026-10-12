@@ -4,8 +4,8 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { EMBEDDING_PORT, type EmbeddingPort } from '../../../shared/domain/ports.js';
 import { classifyStatsOperation } from '../domain/chat-intent-prototypes.schema.js';
-import { pickBestTag } from '../domain/pick-tag-by-embedding.js';
 import { formatStatsAnswer } from '../domain/format-stats-answer.js';
+import { pickBestTag } from '../domain/pick-tag-by-embedding.js';
 import { PgChatLibraryStatsRepository } from '../infrastructure/pg-chat-library-stats.repository.js';
 
 const TAG_MIN_SCORE = 0.68;
@@ -23,8 +23,8 @@ export class ChatLibraryStatsService {
     locale: 'de' | 'en'
   ): Promise<string | null> {
     const { embeddings } = await this.embedding.embedTexts([resolvedQuery], { inputType: 'query' });
-    const queryVector = embeddings[0];
-    if (!queryVector || queryVector.length === 0) {
+    const queryVector = embeddings[0] ?? [];
+    if (queryVector.length === 0) {
       return null;
     }
 

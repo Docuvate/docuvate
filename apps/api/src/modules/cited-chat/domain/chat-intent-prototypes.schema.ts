@@ -29,13 +29,50 @@ interface StatsOperationPrototypeFile {
   default_operation: ChatStatsOperation;
 }
 
-function loadJson<T>(name: string): T {
-  const raw = readFileSync(join(__dirname, name), 'utf8');
-  return JSON.parse(raw) as T;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
 }
 
-const intentFile = loadJson<IntentPrototypeFile>('chat-intent-prototypes.json');
-const statsFile = loadJson<StatsOperationPrototypeFile>('chat-stats-operation-prototypes.json');
+function isIntentPrototypeFile(value: unknown): value is IntentPrototypeFile {
+  return (
+    isRecord(value) &&
+    isRecord(value.intents) &&
+    typeof value.min_score === 'number' &&
+    typeof value.min_margin === 'number' &&
+    typeof value.default_intent === 'string'
+  );
+}
+
+function isStatsOperationPrototypeFile(value: unknown): value is StatsOperationPrototypeFile {
+  return (
+    isRecord(value) &&
+    isRecord(value.operations) &&
+    typeof value.min_score === 'number' &&
+    typeof value.min_margin === 'number' &&
+    typeof value.default_operation === 'string'
+  );
+}
+
+function loadIntentFile(): IntentPrototypeFile {
+  const raw = readFileSync(join(__dirname, 'chat-intent-prototypes.json'), 'utf8');
+  const parsed: unknown = JSON.parse(raw);
+  if (!isIntentPrototypeFile(parsed)) {
+    throw new Error('Invalid chat-intent-prototypes.json');
+  }
+  return parsed;
+}
+
+function loadStatsFile(): StatsOperationPrototypeFile {
+  const raw = readFileSync(join(__dirname, 'chat-stats-operation-prototypes.json'), 'utf8');
+  const parsed: unknown = JSON.parse(raw);
+  if (!isStatsOperationPrototypeFile(parsed)) {
+    throw new Error('Invalid chat-stats-operation-prototypes.json');
+  }
+  return parsed;
+}
+
+const intentFile = loadIntentFile();
+const statsFile = loadStatsFile();
 
 function classifyPrototype(
   queryVector: number[],

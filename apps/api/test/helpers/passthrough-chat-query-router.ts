@@ -3,10 +3,13 @@
 import type { ChatQueryRouterService } from '../../src/modules/cited-chat/application/chat-query-router.service.js';
 
 export function passthroughChatQueryRouter(): ChatQueryRouterService {
-  return {
-    route: async ({ userMessage }) => ({
-      kind: 'document_qa',
-      resolvedQuery: userMessage,
-    }),
-  } as ChatQueryRouterService;
+  const router: ChatQueryRouterService = {
+    route({ userMessage }) {
+      return Promise.resolve({
+        kind: 'document_qa',
+        resolvedQuery: userMessage,
+      });
+    },
+  };
+  return router;
 }
