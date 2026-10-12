@@ -11,12 +11,12 @@ import {
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
 import { cosineSimilarity } from '../../labels/domain/cosine.js';
-import { evaluateEmbeddingDuplicateCandidate } from '../domain/duplicate-candidate-gates.js';
-import { readDuplicateDetectionConfig } from '../domain/duplicate-detection.config.js';
 import {
-  signalsFromDocument,
-  signalsFromEmbeddingPeer,
-} from '../domain/duplicate-document-signals.js';
+  compareInputFromDocument,
+  compareInputFromEmbeddingPeer,
+} from '../domain/duplicate-compare-input.js';
+import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
+import { readDuplicateDetectionConfig } from '../domain/duplicate-detection.config.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
 
 @Injectable()
@@ -27,6 +27,7 @@ export class ApplyDuplicateDetectionUseCase {
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(DUPLICATE_REPOSITORY) private readonly duplicates: DuplicateRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly embeddings: LabelEmbeddingRepository,
+    private readonly classifier: DuplicateClassifierService,
     private readonly linkDuplicatePair: LinkDuplicatePairUseCase
   ) {}
 
@@ -48,7 +49,7 @@ export class ApplyDuplicateDetectionUseCase {
 
       const sourceDoc = await this.documents.findByIdForUser(documentId, userId);
       if (!sourceDoc) return;
-      const sourceSignals = signalsFromDocument(sourceDoc);
+      const left = compareInputFromDocument(sourceDoc);
 
       const vector = await this.embeddings.getDocumentEmbedding(documentId);
       if (!vector || vector.length === 0) return;
@@ -64,16 +65,17 @@ export class ApplyDuplicateDetectionUseCase {
         .slice(0, config.maxEmbeddingCandidates);
 
       for (const hit of scored) {
-        const candidateSignals = signalsFromEmbeddingPeer(hit.row);
-        const gate = evaluateEmbeddingDuplicateCandidate(
-          sourceSignals,
-          candidateSignals,
-          hit.similarity,
-          config
-        );
-        if (!gate.accept) {
+        const right = compareInputFromEmbeddingPeer(hit.row);
+        const evaluation = await this.classifier.evaluate(userId, {
+          left,
+          right,
+          embeddingSimilarity: hit.similarity,
+          perceptualPageHashDistance: null,
+        });
+
+        if (evaluation.decision === 'ignore') {
           this.logger.debug(
-            `Embedding duplicate skipped ${documentId} ↔ ${hit.row.documentId}: ${gate.reason ?? 'rejected'} (sim=${hit.similarity.toFixed(3)})`
+            `Duplicate candidate skipped ${documentId} ↔ ${hit.row.documentId}: p=${evaluation.probability.toFixed(3)}`
           );
           continue;
         }
@@ -85,7 +87,8 @@ export class ApplyDuplicateDetectionUseCase {
           hit.similarity,
           'embedding'
         );
-        if (hit.similarity >= config.autoStackMinSimilarity) {
+
+        if (evaluation.decision === 'auto_stack') {
           await this.linkDuplicatePair.execute(userId, documentId, hit.row.documentId);
         }
       }

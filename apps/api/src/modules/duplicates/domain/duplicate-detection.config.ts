@@ -1,18 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export interface DuplicateDetectionConfig {
-  /** Minimum cosine similarity for embedding-based duplicate candidates. */
+  /** Minimum cosine similarity to retrieve embedding neighbors for classifier scoring. */
   embeddingThreshold: number;
-  /** Minimum similarity to auto-stack (link) embedding matches; below this only suggests. */
-  autoStackMinSimilarity: number;
   maxEmbeddingCandidates: number;
-  /**
-   * When both documents have a known page count from extraction blocks, reject embedding
-   * matches if the counts differ by at least this amount (unless similarity is very high).
-   */
-  pageCountMinDifference: number;
-  /** Embedding similarity at or above this value bypasses the page-count gate. */
-  pageCountGateMaxSimilarity: number;
 }
 
 function parseFloatEnv(name: string, fallback: number): number {
@@ -31,10 +22,7 @@ function parseIntEnv(name: string, fallback: number): number {
 
 export function readDuplicateDetectionConfig(): DuplicateDetectionConfig {
   return {
-    embeddingThreshold: parseFloatEnv('DUPLICATE_EMBEDDING_THRESHOLD', 0.88),
-    autoStackMinSimilarity: parseFloatEnv('DUPLICATE_AUTO_STACK_MIN_SIMILARITY', 0.95),
+    embeddingThreshold: parseFloatEnv('DUPLICATE_EMBEDDING_THRESHOLD', 0.82),
     maxEmbeddingCandidates: parseIntEnv('DUPLICATE_MAX_EMBEDDING_CANDIDATES', 8),
-    pageCountMinDifference: parseIntEnv('DUPLICATE_PAGE_COUNT_MIN_DIFF', 3),
-    pageCountGateMaxSimilarity: parseFloatEnv('DUPLICATE_PAGE_COUNT_GATE_MAX_SIMILARITY', 0.95),
   };
 }

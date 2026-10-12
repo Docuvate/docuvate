@@ -5,6 +5,7 @@ import type {
   DocumentBulkAction,
   DocumentListQuery,
   DuplicateCandidateSource,
+  DuplicateFeatureVector,
   ExtractedField,
   ExtractionBlock,
   ExtractionResult,
@@ -633,6 +634,18 @@ export interface DuplicateCandidateEntity {
   dismissed: boolean;
 }
 
+export interface DuplicatePairLabelRepository {
+  getLogitInterceptDelta(userId: string): Promise<number>;
+  upsertLabel(
+    userId: string,
+    documentIdA: string,
+    documentIdB: string,
+    label: 'duplicate' | 'not_duplicate',
+    features: DuplicateFeatureVector
+  ): Promise<void>;
+  refitUserCalibration(userId: string): Promise<void>;
+}
+
 export interface DuplicateRepository {
   upsertCandidate(
     userId: string,
@@ -720,3 +733,4 @@ export const MAPPE_REPOSITORY = Symbol('MAPPE_REPOSITORY');
 export const FOLDER_REPOSITORY = Symbol('FOLDER_REPOSITORY');
 export const DUPLICATE_REPOSITORY = Symbol('DUPLICATE_REPOSITORY');
 export const DUPLICATE_STACK_REPOSITORY = Symbol('DUPLICATE_STACK_REPOSITORY');
+export const DUPLICATE_PAIR_LABEL_REPOSITORY = Symbol('DUPLICATE_PAIR_LABEL_REPOSITORY');

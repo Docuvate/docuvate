@@ -11,6 +11,8 @@ import {
   type DuplicateRepository,
   type DuplicateStackRepository,
 } from '../../../shared/domain/ports.js';
+import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
+import { buildPairEvaluationInput } from '../domain/duplicate-pair-evaluation.js';
 import { SyncUserHashDuplicatesUseCase } from './sync-user-hash-duplicates.use-case.js';
 
 @Injectable()
@@ -125,7 +127,8 @@ export class ConfirmDuplicateVersionUseCase {
   constructor(
     @Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository,
     @Inject(DUPLICATE_REPOSITORY) private readonly duplicates: DuplicateRepository,
-    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
+    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
+    private readonly classifier: DuplicateClassifierService
   ) {}
 
   async execute(
@@ -139,6 +142,19 @@ export class ConfirmDuplicateVersionUseCase {
 
     await this.stacks.linkPair(userId, primaryDocumentId, versionDocumentId);
     await this.duplicates.dismiss(primaryDocumentId, versionDocumentId, userId);
+    const evaluation = await buildPairEvaluationInput(
+      this.duplicates,
+      primary,
+      version,
+      userId
+    );
+    await this.classifier.recordUserLabel(
+      userId,
+      primaryDocumentId,
+      versionDocumentId,
+      'duplicate',
+      evaluation
+    );
   }
 }
 
@@ -147,7 +163,8 @@ export class ReleaseDuplicateStackMemberUseCase {
   constructor(
     @Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository,
     @Inject(DUPLICATE_REPOSITORY) private readonly duplicates: DuplicateRepository,
-    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
+    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
+    private readonly classifier: DuplicateClassifierService
   ) {}
 
   async execute(primaryDocumentId: string, otherDocumentId: string, userId: string): Promise<void> {
@@ -157,6 +174,19 @@ export class ReleaseDuplicateStackMemberUseCase {
 
     await this.duplicates.dismiss(primaryDocumentId, otherDocumentId, userId);
     await this.stacks.removeMember(userId, otherDocumentId);
+    const evaluation = await buildPairEvaluationInput(
+      this.duplicates,
+      primary,
+      other,
+      userId
+    );
+    await this.classifier.recordUserLabel(
+      userId,
+      primaryDocumentId,
+      otherDocumentId,
+      'not_duplicate',
+      evaluation
+    );
   }
 }
 

@@ -1,24 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
-  collectReportingYears,
-  type DuplicateDocumentSignals,
-  evaluateEmbeddingDuplicateCandidate,
-  reportingYearsConflict,
+  buildDuplicateFeatureVector,
+  decideDuplicatePair,
+  DEFAULT_DUPLICATE_CLASSIFIER_MODEL,
+  type DuplicateCompareDocumentInput,
 } from '@docuvate/contracts';
 import type { MigrationInterface, QueryRunner } from 'typeorm';
 
 import {
-  parseOptionalDate,
   parseOptionalString,
   parseString,
   requireRecord,
 } from '../row-parse.js';
-
-const GATE_CONFIG = {
-  pageCountMinDifference: 3,
-  pageCountGateMaxSimilarity: 0.95,
-};
 
 async function queryRows(
   queryRunner: QueryRunner,
@@ -29,32 +23,19 @@ async function queryRows(
   return Array.isArray(rows) ? rows.map((row: unknown) => row) : [];
 }
 
-function signalsFromRow(
-  row: Record<string, unknown>,
-  documentId: string
-): DuplicateDocumentSignals {
-  const documentDate = parseOptionalDate(row.document_date);
-  return {
-    documentId,
-    filename: parseString(row.filename),
-    title: parseString(row.title),
-    documentDateYear: documentDate ? documentDate.getUTCFullYear() : null,
-    extractedTextSample: (parseOptionalString(row.extracted_text) ?? '').slice(0, 8000),
-    pageCount: null,
-  };
-}
-
-function pairShouldNotBeStacked(
-  left: DuplicateDocumentSignals,
-  right: DuplicateDocumentSignals
+function pairShouldBeUnstacked(
+  left: DuplicateCompareDocumentInput,
+  right: DuplicateCompareDocumentInput,
+  embeddingSimilarity: number
 ): boolean {
-  const leftYears = collectReportingYears(left);
-  const rightYears = collectReportingYears(right);
-  if (reportingYearsConflict(leftYears, rightYears)) {
-    return true;
-  }
-  const gate = evaluateEmbeddingDuplicateCandidate(left, right, 0.99, GATE_CONFIG);
-  return !gate.accept;
+  const features = buildDuplicateFeatureVector({
+    left,
+    right,
+    embeddingSimilarity,
+    perceptualPageHashDistance: null,
+  });
+  const decision = decideDuplicatePair(DEFAULT_DUPLICATE_CLASSIFIER_MODEL, features, 0);
+  return decision.decision !== 'auto_stack';
 }
 
 export class RepairPeriodDuplicateStacks20261011200000 implements MigrationInterface {
@@ -66,13 +47,12 @@ export class RepairPeriodDuplicateStacks20261011200000 implements MigrationInter
       `SELECT c.user_id,
               c.document_id,
               c.candidate_document_id,
+              c.similarity,
               da.filename AS filename_a,
               da.title AS title_a,
-              da.document_date AS date_a,
               da.extracted_text AS text_a,
               db.filename AS filename_b,
               db.title AS title_b,
-              db.document_date AS date_b,
               db.extracted_text AS text_b
        FROM document_duplicate_candidates c
        JOIN documents da ON da.id = c.document_id
@@ -95,26 +75,23 @@ export class RepairPeriodDuplicateStacks20261011200000 implements MigrationInter
       const userId = parseString(row.user_id);
       const docA = parseString(row.document_id);
       const docB = parseString(row.candidate_document_id);
-      const left = signalsFromRow(
-        {
-          filename: row.filename_a,
-          title: row.title_a,
-          document_date: row.date_a,
-          extracted_text: row.text_a,
-        },
-        docA
-      );
-      const right = signalsFromRow(
-        {
-          filename: row.filename_b,
-          title: row.title_b,
-          document_date: row.date_b,
-          extracted_text: row.text_b,
-        },
-        docB
-      );
+      const similarity = Number(row.similarity);
+      const left: DuplicateCompareDocumentInput = {
+        documentId: docA,
+        filename: parseString(row.filename_a),
+        title: parseString(row.title_a),
+        extractedTextSample: (parseOptionalString(row.text_a) ?? '').slice(0, 8000),
+        pageCount: null,
+      };
+      const right: DuplicateCompareDocumentInput = {
+        documentId: docB,
+        filename: parseString(row.filename_b),
+        title: parseString(row.title_b),
+        extractedTextSample: (parseOptionalString(row.text_b) ?? '').slice(0, 8000),
+        pageCount: null,
+      };
 
-      if (!pairShouldNotBeStacked(left, right)) {
+      if (!pairShouldBeUnstacked(left, right, similarity)) {
         continue;
       }
 
@@ -161,8 +138,7 @@ export class RepairPeriodDuplicateStacks20261011200000 implements MigrationInter
     }
   }
 
-  public down(): Promise<void> {
-    // Irreversible data repair: split stacks are not re-created.
-    return Promise.resolve();
+  public async down(_queryRunner: QueryRunner): Promise<void> {
+    // Irreversible data repair.
   }
 }

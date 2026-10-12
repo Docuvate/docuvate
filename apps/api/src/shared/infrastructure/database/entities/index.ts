@@ -24,6 +24,8 @@ import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DashboardWidgetsEntity } from './dashboard-widgets.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
+import { DuplicatePairLabelsEntity } from './duplicate-pair-labels.entity.js';
+import { DuplicateUserCalibrationEntity } from './duplicate-user-calibration.entity.js';
 import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
 import { DocumentExtractionBlocksEntity } from './document-extraction-blocks.entity.js';
 import { DocumentFieldValuesEntity } from './document-field-values.entity.js';
@@ -187,6 +189,8 @@ export {
   DashboardWidgetsEntity,
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
+  DuplicatePairLabelsEntity,
+  DuplicateUserCalibrationEntity,
   DocumentEmbeddingsEntity,
   DocumentExtractionBlocksEntity,
   DocumentFieldValuesEntity,

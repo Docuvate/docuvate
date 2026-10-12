@@ -23,6 +23,7 @@ import { HeuristicFieldSuggestions20261010150000 } from './migrations/2026101015
 import { PurgeHeadingVendorSuggestions20261010153000 } from './migrations/20261010153000-purge-heading-vendor-suggestions.js';
 import { Corrections20261011180000 } from './migrations/20261011180000-corrections.js';
 import { RepairPeriodDuplicateStacks20261011200000 } from './migrations/20261011200000-repair-period-duplicate-stacks.js';
+import { DuplicatePairLabels20261011210000 } from './migrations/20261011210000-duplicate-pair-labels.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -68,6 +69,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       PurgeHeadingVendorSuggestions20261010153000,
       Corrections20261011180000,
       RepairPeriodDuplicateStacks20261011200000,
+      DuplicatePairLabels20261011210000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

@@ -1245,19 +1245,40 @@ export type {
 } from './sftp-ingress.js';
 
 export {
-  collectKeyEuroAmounts,
-  collectReportingYears,
-  collectTaxReferenceIds,
+  buildDuplicateFeatureVector,
+  compareDocumentTexts,
   duplicatePairDifferenceRows,
-  evaluateEmbeddingDuplicateCandidate,
-  formatReportingYearsForDisplay,
-  keyEuroAmountsConflict,
-  reportingYearsConflict,
-  taxReferenceIdsConflict,
-} from './duplicate-detection-gates.js';
+  isValueToken,
+  normalizeDocumentText,
+  tokenizeDocumentText,
+} from './duplicate-content-compare.js';
 export type {
-  DuplicateDetectionGateConfig,
-  DuplicateDocumentSignals,
-  DuplicateGateRejectionReason,
-  EmbeddingDuplicateGateResult,
-} from './duplicate-detection-gates.js';
+  ContentAlignmentStats,
+  DuplicateCompareDocumentInput,
+  DuplicateFeatureVector,
+  DuplicatePairContext,
+  DuplicatePairDifferenceRow,
+} from './duplicate-content-compare.js';
+export {
+  decideDuplicatePair,
+  evaluateModelOnSamples,
+  trainDefaultDuplicateClassifierModel,
+} from './duplicate-classifier.js';
+export type { DuplicatePairDecision } from './duplicate-classifier.js';
+export {
+  DUPLICATE_FEATURE_ORDER,
+  binaryMetricsAtThreshold,
+  calibrateThresholdForPrecision,
+  featureVectorToArray,
+  fitUserLogitInterceptDelta,
+  predictProbability,
+  trainLogisticRegression,
+} from './duplicate-logistic-regression.js';
+export type {
+  BinaryMetrics,
+  DuplicateClassifierModel,
+  DuplicateTrainingSample,
+} from './duplicate-logistic-regression.js';
+export { DEFAULT_DUPLICATE_CLASSIFIER_MODEL } from './duplicate-default-model.js';
+export { generateSyntheticDuplicateDataset } from './duplicate-synthetic-data.js';
+export type { SyntheticDatasetSplit } from './duplicate-synthetic-data.js';

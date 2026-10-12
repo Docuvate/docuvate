@@ -6,6 +6,7 @@ import pg from 'pg';
 
 import { PgDocumentRepository } from '../../../modules/documents/infrastructure/pg-document.repository.js';
 import { PostgresSearchAdapter } from '../../../modules/documents/infrastructure/postgres-search.adapter.js';
+import { PgDuplicatePairLabelRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate-pair-label.repository.js';
 import { PgDuplicateRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate.repository.js';
 import { PgDuplicateStackRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate-stack.repository.js';
 import { HttpExtractionAdapter } from '../../../modules/extraction/infrastructure/http-extraction.adapter.js';
@@ -18,9 +19,11 @@ import { PgTaxonomyRepository } from '../../../modules/taxonomy/infrastructure/p
 import {
   CLOCK,
   DOCUMENT_REPOSITORY,
-  DUPLICATE_REPOSITORY,
-  DUPLICATE_STACK_REPOSITORY,
-  EXTRACTION_PORT,
+  DUPLICATE_PAIR_LABEL_REPOSITORY,
+    DUPLICATE_PAIR_LABEL_REPOSITORY,
+    DUPLICATE_REPOSITORY,
+    DUPLICATE_STACK_REPOSITORY,
+    EXTRACTION_PORT,
   FOLDER_REPOSITORY,
   ID_GENERATOR,
   LABEL_FIELD_EXTRACTION_PORT,
@@ -74,6 +77,7 @@ const typeOrmRootImports =
     { provide: FOLDER_REPOSITORY, useClass: PgFolderRepository },
     { provide: MAPPE_REPOSITORY, useClass: PgMappeRepository },
     { provide: DUPLICATE_REPOSITORY, useClass: PgDuplicateRepository },
+    { provide: DUPLICATE_PAIR_LABEL_REPOSITORY, useClass: PgDuplicatePairLabelRepository },
     { provide: DUPLICATE_STACK_REPOSITORY, useClass: PgDuplicateStackRepository },
     { provide: TAG_CUSTOM_FIELD_REPOSITORY, useClass: PgTagCustomFieldRepository },
     { provide: LABEL_FIELD_EXTRACTION_PORT, useClass: HttpLabelFieldExtractionAdapter },

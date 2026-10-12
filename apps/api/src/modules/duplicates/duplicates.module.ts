@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 
 import { LabelsModule } from '../labels/labels.module.js';
 import { ApplyDuplicateDetectionUseCase } from './application/apply-duplicate-detection.use-case.js';
+import { DuplicateClassifierService } from './domain/duplicate-classifier.service.js';
 import {
   DismissDuplicateCandidateUseCase,
   ListDuplicateCandidatesUseCase,
@@ -24,6 +25,7 @@ import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-dupl
   imports: [LabelsModule],
   providers: [
     SyncUserHashDuplicatesUseCase,
+    DuplicateClassifierService,
     ApplyDuplicateDetectionUseCase,
     ListDuplicateCandidatesUseCase,
     DismissDuplicateCandidateUseCase,

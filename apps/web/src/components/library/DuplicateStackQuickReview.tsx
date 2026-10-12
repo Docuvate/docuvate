@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
-  type DuplicateDocumentSignals,
+  type DuplicateCompareDocumentInput,
   duplicatePairDifferenceRows,
   type DuplicateStackMemberDto,
 } from '@docuvate/contracts';
@@ -18,23 +18,22 @@ import { formatUserFacingError } from '../../lib/apiErrors';
 import { Button } from '../ui/Button';
 
 const DIFF_LABEL_KEYS: Record<string, string> = {
-  period: 'library.duplicateStackDiffPeriod',
+  contentDiff: 'library.duplicateStackDiffContent',
+  valueDiff: 'library.duplicateStackDiffValues',
   filename: 'library.duplicateStackDiffFilename',
   title: 'library.duplicateStackDiffTitle',
-  amounts: 'library.duplicateStackDiffAmounts',
-  taxId: 'library.duplicateStackDiffTaxId',
+  embedding: 'library.duplicateStackDiffEmbedding',
 };
 
 type UndoState =
   | { kind: 'separated'; primaryId: string; otherId: string }
   | { kind: 'confirmed'; primaryId: string; otherId: string };
 
-function signalsFromMember(member: DuplicateStackMemberDto): DuplicateDocumentSignals {
+function inputFromMember(member: DuplicateStackMemberDto): DuplicateCompareDocumentInput {
   return {
     documentId: member.documentId,
     filename: member.filename,
     title: member.title,
-    documentDateYear: null,
     extractedTextSample: '',
     pageCount: null,
   };
@@ -122,9 +121,15 @@ export function DuplicateStackQuickReview({
     }
   };
 
+  const similarity =
+    version?.similarity ?? primary?.similarity ?? null;
   const diffRows =
     primary && version
-      ? duplicatePairDifferenceRows(signalsFromMember(primary), signalsFromMember(version))
+      ? duplicatePairDifferenceRows(
+          inputFromMember(primary),
+          inputFromMember(version),
+          similarity
+        )
       : [];
 
   return (
