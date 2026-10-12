@@ -9,9 +9,9 @@ import {
   USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
+import { resolveChatThreadTitle } from '../../documents/application/chat-thread-title.js';
 import { assertChatEnabled } from '../../settings/application/assert-chat-enabled.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
-import { resolveChatThreadTitle } from '../../documents/application/chat-thread-title.js';
 
 @Injectable()
 export class CreateLibraryChatThreadUseCase {

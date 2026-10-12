@@ -83,21 +83,17 @@ export class SendDocumentChatThreadMessageUseCase {
       userMessage: trimmed,
     });
 
-    const configured = true;
-
     return {
-      configured,
+      configured: true,
       provider: providerId,
-      setupHint: configured
-        ? null
-        : 'Dokument-Chat benötigt Ollama (kleines Modell) + Worker für RAG oder Donut DocVQA mit GPU.',
+      setupHint: null,
       reply: { role: 'assistant', content: '' },
       userMessage,
       assistantMessage: {
         ...assistantMessage,
         generationStatus: 'pending',
       },
-      asyncGeneration: configured,
+      asyncGeneration: true,
     };
   }
 }
