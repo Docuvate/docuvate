@@ -11404,17 +11404,6 @@
           }
         }
       },
-      "UpdateDocumentChatThreadRequestDto": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "title"
-        ]
-      },
       "CreateFolderRequestDto": {
         "type": "object",
         "properties": {
@@ -13852,6 +13841,17 @@
             "type": "string"
           }
         }
+      },
+      "UpdateDocumentChatThreadRequestDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ]
       },
       "UpdateDocumentRequestDto": {
         "type": "object",
