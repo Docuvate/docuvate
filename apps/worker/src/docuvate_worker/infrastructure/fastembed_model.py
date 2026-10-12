@@ -29,8 +29,8 @@ _model: object | None = None
 _backend: str | None = None
 
 
-def _load_sentence_transformers():
-    from sentence_transformers import SentenceTransformer
+def _load_sentence_transformers() -> object:
+    from sentence_transformers import SentenceTransformer  # noqa: PLC0415
 
     revision = os.environ.get("DOCUVATE_ENCODER_REVISION")
     if revision:
@@ -67,13 +67,11 @@ def get_embedding_model() -> object:
 def _embed_with_backend(model: object, texts: list[str]) -> list[list[float]]:
     backend = _backend or "fastembed"
     if backend == "sentence_transformers":
-        from sentence_transformers import SentenceTransformer
-
-        st_model = model
-        if not isinstance(st_model, SentenceTransformer):
+        encode = getattr(model, "encode", None)
+        if encode is None:
             msg = "invalid sentence_transformers model handle"
             raise TypeError(msg)
-        matrix = st_model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
+        matrix = encode(texts, normalize_embeddings=True, show_progress_bar=False)
         return [[float(x) for x in row] for row in matrix]
     fe_model = model
     if not isinstance(fe_model, TextEmbedding):
