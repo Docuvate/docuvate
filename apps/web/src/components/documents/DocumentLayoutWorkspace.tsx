@@ -186,9 +186,9 @@ export function DocumentLayoutWorkspace({
       const region = overlayRegionById(overlays, overlayId);
       const targetPage = page ?? region?.page;
       if (targetPage) onViewerPageChange(targetPage);
-      if (region?.kind === 'table') setSideTab('tables');
-      else if (region?.kind === 'heading') setSideTab('outline');
-      else if (region?.kind === 'field') setSideTab('fields');
+      if (region?.kind === 'table') onLayoutSideTabChange('tables');
+      else if (region?.kind === 'heading') onLayoutSideTabChange('outline');
+      else if (region?.kind === 'field') onLayoutSideTabChange('fields');
       if (region?.blockIndex != null) {
         const block = blocks.find((b) => b.blockIndex === region.blockIndex);
         if (block) {
@@ -198,7 +198,14 @@ export function DocumentLayoutWorkspace({
         }
       }
     },
-    [blocks, onActiveBlockIndexChange, onHighlightBlocks, onViewerPageChange, overlays]
+    [
+      blocks,
+      onActiveBlockIndexChange,
+      onHighlightBlocks,
+      onLayoutSideTabChange,
+      onViewerPageChange,
+      overlays,
+    ]
   );
 
   useEffect(() => {
