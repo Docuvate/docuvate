@@ -88,9 +88,12 @@ export async function openLayoutDocumentPage(page: Page, docId: string): Promise
   await page.goto(`/documents/${docId}`, { waitUntil: 'domcontentloaded' });
   await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 300_000 });
   await page.locator('.pdf-page-canvas').first().waitFor({ state: 'visible', timeout: 180_000 });
-  const chatDetailTab = page.getByRole('tab', { name: /^Chat$/i });
-  if ((await chatDetailTab.getAttribute('aria-selected')) === 'true') {
-    await chatDetailTab.click();
+  const chatSideTab = page.locator('.layout-side-tabs').getByRole('tab', { name: /^Chat$/i });
+  if (
+    (await chatSideTab.count()) > 0 &&
+    (await chatSideTab.getAttribute('aria-selected')) === 'true'
+  ) {
+    await chatSideTab.click();
   }
   await page.locator('.layout-side-tabs').waitFor({ state: 'visible', timeout: 120_000 });
 }
