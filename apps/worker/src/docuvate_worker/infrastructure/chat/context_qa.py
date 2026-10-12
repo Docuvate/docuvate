@@ -23,6 +23,7 @@ MAX_RAG_CONTEXT_CHARS = 2400
 
 _TOKEN_RE = re.compile(r"[\wäöüß]+", flags=re.UNICODE)
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
+_MIN_CANDIDATE_LINE_LEN = 12
 _EU_AMOUNT_RE = re.compile(r"\d[\d.]*,\d{2}")
 _DUE_DAY_RE = re.compile(r"\d+\.\s*Werktag", flags=re.IGNORECASE)
 _TOTAL_HINT_VEC: list[float] | None = None
@@ -355,7 +356,7 @@ def retrieve_library_rag_context(
 
 
 def _candidate_lines(context: str) -> list[str]:
-    primary = context.split("\n---\n")[0]
+    primary = context.split("\n---\n", maxsplit=1)[0]
     parts: list[str] = []
     for line in primary.split("\n"):
         stripped = line.strip()
@@ -363,9 +364,9 @@ def _candidate_lines(context: str) -> list[str]:
             continue
         for piece in _SENTENCE_SPLIT.split(stripped):
             candidate = piece.strip()
-            if len(candidate) >= 12 and not candidate.startswith("(Quelle:"):
+            if len(candidate) >= _MIN_CANDIDATE_LINE_LEN and not candidate.startswith("(Quelle:"):
                 parts.append(candidate)
-        if len(stripped) >= 12 and stripped not in parts:
+        if len(stripped) >= _MIN_CANDIDATE_LINE_LEN and stripped not in parts:
             parts.append(stripped)
     return parts
 

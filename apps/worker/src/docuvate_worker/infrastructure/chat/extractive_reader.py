@@ -50,7 +50,7 @@ def _load_pipeline() -> object | None:
                 device=-1,
             )
             return _pipeline
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("extractive reader unavailable: %s", exc)
             _pipeline_failed = True
             return None
@@ -66,7 +66,7 @@ def read_span(question: str, context: str) -> ExtractiveSpan | None:
         return None
     try:
         out = pipe(question=trimmed_q, context=trimmed_c[:4000])
-    except Exception:  # noqa: BLE001
+    except Exception:
         return None
     if not isinstance(out, dict):
         return None
