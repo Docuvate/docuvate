@@ -16,10 +16,10 @@ import {
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
-import { chatThreadTitleFromMessage } from './chat-thread-title.js';
-import { DocumentChatGenerationQueueService } from '../infrastructure/document-chat-generation-queue.service.js';
 import { assertChatEnabled } from '../../settings/application/assert-chat-enabled.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
+import { DocumentChatGenerationQueueService } from '../infrastructure/document-chat-generation-queue.service.js';
+import { chatThreadTitleFromMessage } from './chat-thread-title.js';
 
 export interface SendDocumentChatThreadMessageResult extends DocumentChatResponse {
   userMessage: DocumentChatMessageEntity;
