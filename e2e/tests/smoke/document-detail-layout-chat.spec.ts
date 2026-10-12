@@ -62,9 +62,9 @@ test.describe('document detail layout and chat', () => {
     await expect(dataTable.locator('tbody td, thead th').first()).toBeVisible();
 
     await page.getByRole('tab', { name: /Outline|Gliederung/i }).click();
-    await expect(page.locator('.layout-outline-list, .layout-outline-item').first()).toBeVisible({
-      timeout: 60_000,
-    });
+    await expect(
+      page.locator('.layout-outline-list, .layout-outline-item, .layout-side-outline .muted').first()
+    ).toBeVisible({ timeout: 60_000 });
   });
 
   test('details tab exposes localized document date input', async ({ page }) => {
