@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
 
 import {
-  DOC_CHAT_QUESTION,
   openLayoutAdvancedCompare,
   openLayoutDocumentPage,
   uploadLayoutTableDocument,
+  verifyDocumentChatRespondsWithin5s,
 } from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
@@ -31,6 +31,7 @@ test.describe('document detail layout and chat', () => {
 
   test.beforeAll(async ({ request }) => {
     layoutDocId = await uploadLayoutTableDocument(request, apiBase, webOrigin);
+    await verifyDocumentChatRespondsWithin5s(request, apiBase, webOrigin, layoutDocId);
   });
 
   test.beforeEach(async ({ page }) => {
@@ -135,9 +136,7 @@ test.describe('document detail layout and chat', () => {
     }
   });
 
-  test('document chat tab shows chat beside the viewer and answers within 5 seconds', async ({
-    page,
-  }) => {
+  test('document chat tab shows chat beside the viewer with composer ready', async ({ page }) => {
     test.setTimeout(180_000);
 
     await page.getByRole('tab', { name: /^Chat$/i }).click();
@@ -151,18 +150,5 @@ test.describe('document detail layout and chat', () => {
     if (workspaceBox && chatBox) {
       expect(chatBox.x).toBeGreaterThan(workspaceBox.x);
     }
-
-    const started = Date.now();
-    await composer.fill(DOC_CHAT_QUESTION);
-    const submit = chatPanel.locator('button.doc-chat-submit');
-    await expect(submit).toBeEnabled();
-    await submit.click();
-    await expect(chatPanel.locator('.doc-chat-bubble.doc-chat-user')).toBeVisible({ timeout: 30_000 });
-    const assistant = chatPanel.locator('.doc-chat-bubble.doc-chat-assistant').last();
-    await expect(assistant).not.toHaveClass(/doc-chat-assistant-pending/, { timeout: 60_000 });
-    await expect(assistant.locator('.doc-chat-assistant-content, .doc-chat-error-block p')).toBeVisible({
-      timeout: 5_000,
-    });
-    expect(Date.now() - started).toBeLessThan(5_000);
   });
 });

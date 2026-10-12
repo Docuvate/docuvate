@@ -55,8 +55,9 @@ test.describe('UI audit regressions (non-ML)', () => {
   });
 
   test('locale switcher uses filled segmented control', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto(webOrigin);
-    const localeGroup = page.locator('.locale-switcher.segmented-control');
+    const localeGroup = page.locator('.locale-switcher-wrap--topbar .segmented-control');
     await expect(localeGroup).toBeVisible();
     const selected = localeGroup.locator('.segmented-control__option--selected');
     await expect(selected).toHaveCount(1);
