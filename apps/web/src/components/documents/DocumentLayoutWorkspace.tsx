@@ -275,6 +275,15 @@ export function DocumentLayoutWorkspace({
     <div className="layout-workspace">
       <div className="layout-workspace-main">
         <Card className="preview-card preview-card-pdf layout-viewer-card">
+          {showRecovery ? (
+            <DocumentExtractionRecovery
+              doc={doc}
+              requeueBusy={requeueBusy}
+              onRequeue={onRequeueExtraction}
+              compact
+            />
+          ) : null}
+
           <div className="layout-viewer-toolbar">
             <SegmentedControl<LeftDocumentMode>
               ariaLabel={t('documents.layoutViewModeAria')}
@@ -332,15 +341,6 @@ export function DocumentLayoutWorkspace({
               </div>
             ) : null}
           </div>
-
-          {showRecovery ? (
-            <DocumentExtractionRecovery
-              doc={doc}
-              requeueBusy={requeueBusy}
-              onRequeue={onRequeueExtraction}
-              compact
-            />
-          ) : null}
 
           <div className="layout-viewer-stage">
             {leftMode === 'text' ? (
