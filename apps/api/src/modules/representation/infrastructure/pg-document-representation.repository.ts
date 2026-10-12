@@ -121,6 +121,15 @@ export class PgDocumentRepresentationRepository {
     });
   }
 
+  async deleteForDocument(tenantId: string, documentId: string): Promise<void> {
+    await withTenantPgClient(this.pool, tenantId, async (client) => {
+      await client.query(`DELETE FROM document_representation_unit WHERE document_id = $1`, [
+        documentId,
+      ]);
+      await client.query(`DELETE FROM document_representation WHERE document_id = $1`, [documentId]);
+    });
+  }
+
   async listUnitVectorsForDocument(
     tenantId: string,
     documentId: string

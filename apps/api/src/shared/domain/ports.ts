@@ -336,7 +336,10 @@ export interface LabelFieldExtractionPort {
 export const LABEL_FIELD_EXTRACTION_PORT = Symbol('LABEL_FIELD_EXTRACTION_PORT');
 
 export interface EmbeddingPort {
-  embedTexts(texts: string[]): Promise<{ model: string; embeddings: number[][] }>;
+  embedTexts(
+    texts: string[],
+    options?: { inputType?: 'query' | 'passage' }
+  ): Promise<{ model: string; embeddings: number[][] }>;
 }
 
 export interface DocumentEmbeddingReference {

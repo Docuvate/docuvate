@@ -113,6 +113,7 @@ export class UpdateDocumentUseCase {
         text: document.extraction?.text ?? '',
         title: document.title,
         filename: document.filename,
+        blocks: document.extraction?.blocks,
       });
     }
 

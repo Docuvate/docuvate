@@ -455,7 +455,7 @@ def embed(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> EmbedResponse:
     _require_worker_secret(x_worker_secret)
-    model, vectors = embed_texts(body.texts)
+    model, vectors = embed_texts(body.texts, input_type=body.input_type)
     return EmbedResponse(model=model, embeddings=vectors)
 
 

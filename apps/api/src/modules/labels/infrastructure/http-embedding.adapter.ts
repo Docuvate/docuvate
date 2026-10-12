@@ -26,9 +26,13 @@ function parseEmbeddings(value: unknown): number[][] {
 
 @Injectable()
 export class HttpEmbeddingAdapter implements EmbeddingPort {
-  async embedTexts(texts: string[]): Promise<{ model: string; embeddings: number[][] }> {
+  async embedTexts(
+    texts: string[],
+    options?: { inputType?: 'query' | 'passage' }
+  ): Promise<{ model: string; embeddings: number[][] }> {
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
+    const inputType = options?.inputType ?? 'passage';
 
     const response = await fetch(workerApiUrl(workerUrl, '/embed'), {
       method: 'POST',
@@ -36,7 +40,7 @@ export class HttpEmbeddingAdapter implements EmbeddingPort {
         'Content-Type': 'application/json',
         'X-Worker-Secret': secret,
       },
-      body: JSON.stringify({ texts }),
+      body: JSON.stringify({ texts, input_type: inputType }),
     });
 
     if (!response.ok) {

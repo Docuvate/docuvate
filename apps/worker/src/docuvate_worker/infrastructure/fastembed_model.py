@@ -8,7 +8,6 @@ import os
 import threading
 
 from fastembed import TextEmbedding
-from sentence_transformers import SentenceTransformer
 
 from docuvate_worker.domain.representation.constants import (
     ENCODER_ID,
@@ -30,7 +29,9 @@ _model: object | None = None
 _backend: str | None = None
 
 
-def _load_sentence_transformers() -> SentenceTransformer:
+def _load_sentence_transformers():
+    from sentence_transformers import SentenceTransformer
+
     revision = os.environ.get("DOCUVATE_ENCODER_REVISION")
     if revision:
         return SentenceTransformer(MODEL_NAME, device="cpu", revision=revision)
@@ -66,6 +67,8 @@ def get_embedding_model() -> object:
 def _embed_with_backend(model: object, texts: list[str]) -> list[list[float]]:
     backend = _backend or "fastembed"
     if backend == "sentence_transformers":
+        from sentence_transformers import SentenceTransformer
+
         st_model = model
         if not isinstance(st_model, SentenceTransformer):
             msg = "invalid sentence_transformers model handle"

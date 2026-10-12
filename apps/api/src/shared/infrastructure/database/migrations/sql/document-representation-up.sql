@@ -157,6 +157,7 @@ END
 $$;
 
 GRANT USAGE ON SCHEMA public TO docuvate_rls_enforcer;
+GRANT SELECT ON public.documents TO docuvate_rls_enforcer;
 GRANT SELECT, INSERT, UPDATE, DELETE ON
   public.document_representation,
   public.document_representation_unit,

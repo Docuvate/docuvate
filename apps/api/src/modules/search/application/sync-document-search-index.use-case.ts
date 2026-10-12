@@ -18,6 +18,40 @@ export interface SyncDocumentSearchIndexInput {
   blocks?: ExtractionBlock[];
 }
 
+function aggregateBlocksText(blocks?: ExtractionBlock[]): string {
+  if (!blocks?.length) {
+    return '';
+  }
+  return blocks
+    .map((block) => block.text?.trim() ?? '')
+    .filter((part) => part.length > 0)
+    .join('\n')
+    .trim();
+}
+
+function resolveSearchIndexText(input: SyncDocumentSearchIndexInput): string {
+  const fromField = input.text.trim();
+  const fromBlocks = aggregateBlocksText(input.blocks);
+  if (fromBlocks.length === 0) {
+    return fromField;
+  }
+  if (fromField.length === 0) {
+    return fromBlocks;
+  }
+  return fromBlocks.length >= fromField.length ? fromBlocks : fromField;
+}
+
+function unitsMatchIndexText(
+  units: { body: string }[],
+  indexText: string
+): boolean {
+  if (units.length === 0) {
+    return false;
+  }
+  const bodies = units.map((unit) => unit.body.trim()).join('\n').trim();
+  return bodies === indexText.trim();
+}
+
 /** Persists chunk FTS index and vocabulary terms when document text/metadata changes. */
 @Injectable()
 export class SyncDocumentSearchIndexUseCase {
@@ -32,11 +66,15 @@ export class SyncDocumentSearchIndexUseCase {
     documentId: string,
     input: SyncDocumentSearchIndexInput
   ): Promise<void> {
-    const text = input.text.trim();
-    if (text.length > 0) {
+    const indexText = resolveSearchIndexText(input);
+    if (indexText.length > 0) {
       let units = await this.documentRepresentation.listUnitVectorsForDocument(userId, documentId);
-      if (units.length === 0 && text.length > 0) {
-        await this.ensureRepresentation.execute(userId, documentId, text);
+      if (units.length > 0 && !unitsMatchIndexText(units, indexText)) {
+        await this.documentRepresentation.deleteForDocument(userId, documentId);
+        units = [];
+      }
+      if (units.length === 0) {
+        await this.ensureRepresentation.execute(userId, documentId, indexText);
         units = await this.documentRepresentation.listUnitVectorsForDocument(userId, documentId);
       }
       if (units.length > 0) {
@@ -61,7 +99,7 @@ export class SyncDocumentSearchIndexUseCase {
           })),
         });
       } else {
-        const spans = attachPagesToChunks(splitTextChunksWithSpans(text), input.blocks);
+        const spans = attachPagesToChunks(splitTextChunksWithSpans(indexText), input.blocks);
         await this.searchRepo.indexDocumentChunks(userId, documentId, spans, undefined);
       }
     }

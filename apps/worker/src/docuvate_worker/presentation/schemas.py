@@ -196,6 +196,7 @@ class CompareResponse(BaseModel):
 
 class EmbedRequest(BaseModel):
     texts: list[str] = Field(min_length=1, max_length=32)
+    input_type: str = Field(default="passage", pattern="^(passage|query)$")
 
 
 class EmbedResponse(BaseModel):
