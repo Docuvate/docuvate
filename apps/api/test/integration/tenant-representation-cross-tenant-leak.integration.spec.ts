@@ -184,15 +184,13 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
     const chat = await retrievalRepo.hybridRetrieveChunks(userA, 'Gesamtsumme Nordwind', {});
     const suggestions = await taxonomyRepo.listSuggestions(docA, userA);
     const duplicates = await duplicateRepo.listForDocument(docA, userA);
-    const sqlScoped = await withTenantPgClient(pool, userA, async (client) => {
+    const sqlScoped = await withRlsEnforcedPgClient(pool, userA, async (client) => {
       const rep = await client.query(`SELECT document_id::text FROM document_representation ORDER BY document_id`);
       const units = await client.query(
         `SELECT document_id::text FROM document_representation_unit ORDER BY document_id`
       );
       const chunks = await client.query(
-        `SELECT c.id::text FROM document_text_chunks c
-         JOIN documents d ON d.id = c.document_id WHERE d.user_id = $1 ORDER BY c.id`,
-        [userA]
+        `SELECT c.id::text FROM document_text_chunks c ORDER BY c.id`
       );
       return {
         representationIds: rep.rows.map((r) => parseString(requireRecord(r).document_id)),
