@@ -51,8 +51,7 @@ test.describe('UI audit regressions (non-ML)', () => {
     });
 
     await openLayoutAdvancedCompare(page);
-    const bodyText = await page.locator('.layout-compare').innerText();
-    expect(bodyText).not.toMatch(/SSIM/i);
+    await expect(page.locator('.layout-compare-ssim-summary')).toHaveCount(0);
   });
 
   test('locale switcher uses filled segmented control', async ({ page }) => {
