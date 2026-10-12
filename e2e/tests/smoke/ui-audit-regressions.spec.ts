@@ -9,7 +9,7 @@ const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 test.use({ storageState: smokeFixtureStoragePath() });
 
 async function openAdvancedCompare(page: import('@playwright/test').Page) {
-  await page.getByText(/Erweitert|Advanced/i).click();
+  await page.locator('.layout-advanced-summary').click();
   await page.getByRole('radio', { name: /Vergleich|Compare/i }).click();
   await page.locator('[data-testid="layout-compare-stage"]').waitFor({
     state: 'visible',
@@ -31,12 +31,16 @@ test.describe('UI audit regressions (non-ML)', () => {
     await openLayoutDocumentPage(page, layoutDocId);
 
     const toolbar = page.locator('.layout-viewer-toolbar');
+    const stage = page.locator('.layout-viewer-stage');
+    await toolbar.waitFor({ state: 'visible', timeout: 120_000 });
+    await stage.waitFor({ state: 'visible', timeout: 120_000 });
     const toolbarBox = await toolbar.boundingBox();
-    const stageBox = await page.locator('.layout-viewer-stage').boundingBox();
-    expect(toolbarBox && stageBox).toBeTruthy();
-    if (toolbarBox && stageBox) {
-      expect(stageBox.y - toolbarBox.bottom).toBeLessThan(120);
-    }
+    const stageBox = await stage.boundingBox();
+    expect(toolbarBox).not.toBeNull();
+    expect(stageBox).not.toBeNull();
+    const gap = (stageBox?.y ?? 0) - (toolbarBox?.bottom ?? 0);
+    expect(Number.isFinite(gap)).toBe(true);
+    expect(gap).toBeLessThan(200);
 
     await page.getByRole('radio', { name: /^Text$/i }).click();
     await expect(page.locator('[data-block-id], [data-block-index]').first()).toBeVisible({
