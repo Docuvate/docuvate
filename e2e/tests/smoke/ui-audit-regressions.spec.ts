@@ -9,6 +9,10 @@ const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 test.use({ storageState: smokeFixtureStoragePath() });
 
 async function openAdvancedCompare(page: import('@playwright/test').Page) {
+  await page
+    .locator('.layout-ir-skeleton')
+    .waitFor({ state: 'hidden', timeout: 180_000 })
+    .catch(() => undefined);
   await page.locator('.layout-advanced-summary').click();
   await page.getByRole('radio', { name: /Vergleich|Compare/i }).click();
   await page.locator('[data-testid="layout-compare-stage"]').waitFor({
@@ -48,7 +52,8 @@ test.describe('UI audit regressions (non-ML)', () => {
     expect(adjacent).toBe(true);
 
     await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
-    await expect(page.locator('.extracted-text-segment, [data-block-id], [data-block-index]').first()).toBeVisible({
+    await expect(page.locator('.extracted-text-panel')).toBeVisible({ timeout: 120_000 });
+    await expect(page.locator('.extracted-text-line, .extracted-text-segment').first()).toBeVisible({
       timeout: 120_000,
     });
 

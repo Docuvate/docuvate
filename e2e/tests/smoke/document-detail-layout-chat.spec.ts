@@ -20,6 +20,10 @@ const VIEWER_MODES = [/Original/i, /^Text$/i] as const;
 const SIDE_TABS = [/Overview|Übersicht/i, /Tables|Tabellen/i, /Outline|Gliederung/i, /^Chat$/i] as const;
 
 async function openAdvancedCompare(page: import('@playwright/test').Page) {
+  await page
+    .locator('.layout-ir-skeleton')
+    .waitFor({ state: 'hidden', timeout: 180_000 })
+    .catch(() => undefined);
   await page.locator('.layout-advanced-summary').click();
   await page.getByRole('radio', { name: /Compare|Vergleich/i }).click();
 }
