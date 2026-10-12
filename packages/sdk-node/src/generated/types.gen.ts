@@ -2589,6 +2589,30 @@ export type DuplicateStackNotDuplicateResponses = {
 
 export type DuplicateStackNotDuplicateResponse = DuplicateStackNotDuplicateResponses[keyof DuplicateStackNotDuplicateResponses];
 
+export type DuplicateStackRestorePairData = {
+    body: DuplicateStackNotDuplicateRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/duplicate-stack/restore-pair';
+};
+
+export type DuplicateStackRestorePairErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type DuplicateStackRestorePairError = DuplicateStackRestorePairErrors[keyof DuplicateStackRestorePairErrors];
+
+export type DuplicateStackRestorePairResponses = {
+    201: OkResponseDto;
+};
+
+export type DuplicateStackRestorePairResponse = DuplicateStackRestorePairResponses[keyof DuplicateStackRestorePairResponses];
+
 export type DuplicateStackSetPrimaryData = {
     body: DuplicateStackSetPrimaryRequestDto;
     path: {

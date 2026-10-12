@@ -207,6 +207,12 @@ export function LibraryPageDocumentSection({
                 selected={data.selected}
                 onToggleSelect={data.toggleSelect}
                 onContextMenu={ctx.openDocumentContextMenu}
+                onRefresh={() => {
+                  void data.load();
+                }}
+                onReviewStack={(primaryId, versionId) => {
+                  ctx.setStackReview({ primaryId, versionId: versionId ?? null });
+                }}
               />
             ) : null}
             {data.viewMode === 'fokus' ? (

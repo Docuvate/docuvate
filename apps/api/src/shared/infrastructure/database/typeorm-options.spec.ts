@@ -21,6 +21,8 @@ import { EmbeddingDensityReadinessSplit20261010140000 } from './migrations/20261
 import { HeuristicFieldSuggestions20261010150000 } from './migrations/20261010150000-heuristic-field-suggestions.js';
 import { PurgeHeadingVendorSuggestions20261010153000 } from './migrations/20261010153000-purge-heading-vendor-suggestions.js';
 import { Corrections20261011180000 } from './migrations/20261011180000-corrections.js';
+import { RepairPeriodDuplicateStacks20261011200000 } from './migrations/20261011200000-repair-period-duplicate-stacks.js';
+import { DuplicatePairLabels20261011210000 } from './migrations/20261011210000-duplicate-pair-labels.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -43,6 +45,8 @@ const EXPECTED_MIGRATIONS = [
   HeuristicFieldSuggestions20261010150000,
   PurgeHeadingVendorSuggestions20261010153000,
   Corrections20261011180000,
+  RepairPeriodDuplicateStacks20261011200000,
+  DuplicatePairLabels20261011210000,
 ];
 
 describe('buildTypeOrmOptions', () => {

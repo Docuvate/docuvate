@@ -15,17 +15,18 @@ import {
 } from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { createDuplicateStackRepositoryStub } from '../../../test-support/duplicate-stack-repository.stub.js';
+import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
 import { ApplyDuplicateDetectionUseCase } from './apply-duplicate-detection.use-case.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
 
 describe('ApplyDuplicateDetectionUseCase', () => {
-  it('still links hash-identical documents regardless of year metadata', async () => {
+  it('still links hash-identical documents regardless of classifier', async () => {
     const documents = createDocumentRepositoryStub({
       findByIdForUser: vi.fn().mockResolvedValue({
         id: 'doc-new',
-        filename: 'JA 2025.pdf',
-        title: 'JA 2025',
-        extraction: { text: 'Jahresabschluss 2025', fields: [] },
+        filename: 'file.pdf',
+        title: 'file',
+        extraction: { text: 'content', fields: [] },
       }),
     });
     const duplicates = {
@@ -39,6 +40,7 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     };
     const linkPair = vi.fn();
     const stacks = createDuplicateStackRepositoryStub({ linkPair });
+    const classifier = { evaluate: vi.fn() };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -56,28 +58,29 @@ describe('ApplyDuplicateDetectionUseCase', () => {
             documentRepository: DocumentRepository,
             duplicateRepository: DuplicateRepository,
             embeddingRepository: LabelEmbeddingRepository,
+            duplicateClassifier: DuplicateClassifierService,
             linkDuplicatePair: LinkDuplicatePairUseCase
           ) =>
             new ApplyDuplicateDetectionUseCase(
               documentRepository,
               duplicateRepository,
               embeddingRepository,
+              duplicateClassifier,
               linkDuplicatePair
             ),
           inject: [
             DOCUMENT_REPOSITORY,
             DUPLICATE_REPOSITORY,
             LABEL_EMBEDDING_REPOSITORY,
+            DuplicateClassifierService,
             LinkDuplicatePairUseCase,
           ],
         },
         { provide: DOCUMENT_REPOSITORY, useValue: documents },
         { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
-        {
-          provide: LABEL_EMBEDDING_REPOSITORY,
-          useValue: embeddings,
-        },
+        { provide: LABEL_EMBEDDING_REPOSITORY, useValue: embeddings },
         { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
+        { provide: DuplicateClassifierService, useValue: classifier },
       ],
     }).compile();
     const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
@@ -94,17 +97,13 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     expect(linkPair).toHaveBeenCalledWith('user-1', 'doc-new', 'doc-old');
   });
 
-  it('does not upsert embedding candidates blocked by reporting-year gates', async () => {
+  it('suggests without linking when classifier returns suggest', async () => {
     const documents = createDocumentRepositoryStub({
       findByIdForUser: vi.fn().mockResolvedValue({
         id: 'doc-new',
-        filename: '774128 - JA Auswertungen 2025.pdf',
-        title: 'JA Auswertungen 2025',
-        extraction: {
-          text: 'JAHRESABSCHLUSS zum 31. Dezember 2025',
-          fields: [],
-          blocks: [{ page: 12, x: 0, y: 0, width: 1, height: 1, text: 'x' }],
-        },
+        filename: 'a.pdf',
+        title: 'a',
+        extraction: { text: 'Invoice 1 total 10.00', fields: [] },
       }),
     });
     const duplicates = {
@@ -112,24 +111,25 @@ describe('ApplyDuplicateDetectionUseCase', () => {
       upsertCandidate: vi.fn(),
       listDocumentEmbeddings: vi.fn().mockResolvedValue([
         {
-          documentId: 'doc-2024',
+          documentId: 'doc-old',
           embedding: [1, 0],
-          filename: '655536 - JA Auswertungen HR 2024.pdf',
-          title: 'JA Auswertungen HR 2024',
+          filename: 'b.pdf',
+          title: 'b',
           documentDate: null,
-          extractedText: 'Bilanz zum 31.12.2024',
-          extractedFields: {
-            blocks: [{ page: 11, x: 0, y: 0, width: 1, height: 1, text: 'y' }],
-          },
+          extractedText: 'Invoice 2 total 20.00',
+          extractedFields: null,
         },
       ]),
       isPairDismissed: vi.fn().mockResolvedValue(false),
     };
     const embeddings = {
-      getDocumentEmbedding: vi.fn().mockResolvedValue([0.99, 0.01]),
+      getDocumentEmbedding: vi.fn().mockResolvedValue([1, 0]),
     };
     const linkPair = vi.fn();
     const stacks = createDuplicateStackRepositoryStub({ linkPair });
+    const classifier = {
+      evaluate: vi.fn().mockResolvedValue({ decision: 'suggest', probability: 0.6 }),
+    };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -147,35 +147,36 @@ describe('ApplyDuplicateDetectionUseCase', () => {
             documentRepository: DocumentRepository,
             duplicateRepository: DuplicateRepository,
             embeddingRepository: LabelEmbeddingRepository,
+            duplicateClassifier: DuplicateClassifierService,
             linkDuplicatePair: LinkDuplicatePairUseCase
           ) =>
             new ApplyDuplicateDetectionUseCase(
               documentRepository,
               duplicateRepository,
               embeddingRepository,
+              duplicateClassifier,
               linkDuplicatePair
             ),
           inject: [
             DOCUMENT_REPOSITORY,
             DUPLICATE_REPOSITORY,
             LABEL_EMBEDDING_REPOSITORY,
+            DuplicateClassifierService,
             LinkDuplicatePairUseCase,
           ],
         },
         { provide: DOCUMENT_REPOSITORY, useValue: documents },
         { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
-        {
-          provide: LABEL_EMBEDDING_REPOSITORY,
-          useValue: embeddings,
-        },
+        { provide: LABEL_EMBEDDING_REPOSITORY, useValue: embeddings },
         { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
+        { provide: DuplicateClassifierService, useValue: classifier },
       ],
     }).compile();
     const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
 
     await useCase.execute('doc-new', 'user-1', null);
 
-    expect(duplicates.upsertCandidate).not.toHaveBeenCalled();
+    expect(duplicates.upsertCandidate).toHaveBeenCalled();
     expect(linkPair).not.toHaveBeenCalled();
   });
 });

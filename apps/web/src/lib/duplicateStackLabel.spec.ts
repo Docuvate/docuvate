@@ -21,9 +21,11 @@ function docWithVersions(count: number): DocumentDto {
 const t = (_key: 'library.stackVersionBadge', { count }: { count: number }) => `${String(count)} Versionen`;
 
 describe('duplicateStackVersionLabel', () => {
-  it('hides badge label for a single version', () => {
-    expect(duplicateStackVersionLabel(docWithVersions(1), t)).toBeNull();
-    expect(showDuplicateStackBadge(docWithVersions(1))).toBe(false);
+  it('shows duplicate hint label for a single stacked version', () => {
+    const hintT = (key: 'library.stackVersionBadge' | 'library.duplicateHintBadge') =>
+      key === 'library.duplicateHintBadge' ? 'Duplikat?' : '';
+    expect(duplicateStackVersionLabel(docWithVersions(1), hintT)).toBe('Duplikat?');
+    expect(showDuplicateStackBadge(docWithVersions(1))).toBe(true);
   });
 
   it('shows label from two versions upward', () => {

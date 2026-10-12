@@ -597,6 +597,16 @@ export async function markDuplicateStackNotDuplicate(
   });
 }
 
+export async function restoreDuplicateStackPair(
+  primaryDocumentId: string,
+  otherDocumentId: string
+): Promise<void> {
+  await request(`/documents/${primaryDocumentId}/duplicate-stack/restore-pair`, {
+    method: 'POST',
+    body: JSON.stringify({ otherDocumentId }),
+  });
+}
+
 export async function sendDocumentChat(
   documentId: string,
   body: DocumentChatRequest

@@ -33,6 +33,8 @@ import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
 import { DocumentTextChunksEntity } from './document-text-chunks.entity.js';
 import { DocumentsEntity } from './documents.entity.js';
+import { DuplicatePairLabelsEntity } from './duplicate-pair-labels.entity.js';
+import { DuplicateUserCalibrationEntity } from './duplicate-user-calibration.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from './embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from './embedding-density-class-niw.entity.js';
 import { EmbeddingDensityCorrectionEntity } from './embedding-density-correction.entity.js';
@@ -196,6 +198,8 @@ export {
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,
   DocumentTextChunksEntity,
+  DuplicatePairLabelsEntity,
+  DuplicateUserCalibrationEntity,
   EmbeddingDensityCalibrationRunEntity,
   EmbeddingDensityClassNiwEntity,
   EmbeddingDensityCorrectionEntity,

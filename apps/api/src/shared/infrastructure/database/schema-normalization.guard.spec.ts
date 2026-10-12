@@ -32,6 +32,7 @@ const FORWARD_SQL_ORDER = [
   'heuristic-field-suggestions-up.sql',
   'purge-heading-vendor-suggestions-up.sql',
   'corrections-up.sql',
+  'duplicate-pair-labels-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

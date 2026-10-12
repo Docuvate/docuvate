@@ -6625,11 +6625,104 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   white-space: normal;
 }
 
-.library-table .library-col-title .cell-title,
 .library-table .library-col-title .cell-sub {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.cell-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  min-width: 0;
+}
+
+.cell-title-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-title-badges {
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+}
+
+.duplicate-stack-quick-review {
+  position: relative;
+  display: inline-flex;
+}
+
+.duplicate-stack-quick-review-panel {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + var(--dv-space-2xs));
+  left: 0;
+  width: min(28rem, 92vw);
+  padding: var(--dv-space-sm);
+  border-radius: 10px;
+  border: 1px solid var(--dv-color-border);
+  background: var(--dv-color-bg-elevated);
+  box-shadow: var(--dv-shadow-popover);
+}
+
+.duplicate-stack-quick-review-lead {
+  margin: 0 0 var(--dv-space-xs);
+  font-size: 0.85rem;
+  color: var(--dv-color-text-muted);
+}
+
+.duplicate-stack-quick-review-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--dv-space-xs);
+  margin-bottom: var(--dv-space-xs);
+}
+
+.duplicate-stack-quick-review-doc {
+  font-size: 0.85rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.duplicate-stack-quick-review-diff {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin-bottom: var(--dv-space-xs);
+}
+
+.duplicate-stack-quick-review-diff th,
+.duplicate-stack-quick-review-diff td {
+  border-top: 1px solid var(--dv-color-border-subtle);
+  padding: 0.25rem 0.35rem;
+  vertical-align: top;
+  text-align: left;
+}
+
+.duplicate-stack-diff-row-warn td,
+.duplicate-stack-diff-row-warn th {
+  color: var(--dv-color-warn);
+}
+
+.duplicate-stack-quick-review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs);
+}
+
+.duplicate-stack-quick-review-undo {
+  display: flex;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  margin-top: var(--dv-space-xs);
+  font-size: 0.82rem;
 }
 
 .library-table col.library-col-labels {
@@ -7276,6 +7369,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .dup-badge {
   margin-left: var(--dv-space-xs);
+  flex-shrink: 0;
+  white-space: nowrap;
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--dv-color-suggest);
@@ -7286,6 +7381,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .stack-badge {
   margin-left: var(--dv-space-xs);
+  flex-shrink: 0;
+  white-space: nowrap;
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--dv-color-text);
