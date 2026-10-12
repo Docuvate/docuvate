@@ -214,3 +214,4 @@ class _$AcceptLabelRecommendationRequestDtoSerializer implements PrimitiveSerial
     return result.build();
   }
 }
+
