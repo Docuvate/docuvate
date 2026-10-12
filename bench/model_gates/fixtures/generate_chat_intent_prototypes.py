@@ -13,7 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "apps" / "worker" / "src"))
 
-from docuvate_worker.infrastructure.fastembed_model import embed_passages, embed_query
+from docuvate_worker.infrastructure.fastembed_model import embed_query
 
 OUT_API = (
     ROOT / "apps/api/src/modules/cited-chat/domain/chat-intent-prototypes.json"

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any, cast
 
 from docuvate_worker.infrastructure.fastembed_model import embed_query
 
@@ -29,15 +30,37 @@ def _cosine(a: list[float], b: list[float]) -> float:
     return dot / (na * nb)
 
 
-def _classify(query_vec: list[float], proto: dict[str, object]) -> str:
-    intents = proto.get("intents", {})
-    if not isinstance(intents, dict):
+def _proto_float(proto: dict[str, Any], key: str, default: float) -> float:
+    val = proto.get(key, default)
+    if isinstance(val, (int, float)):
+        return float(val)
+    if isinstance(val, str):
+        try:
+            return float(val)
+        except ValueError:
+            return default
+    return default
+
+
+def _intent_vectors(intents_raw: dict[str, Any]) -> dict[str, list[float]]:
+    out: dict[str, list[float]] = {}
+    for name, vec in intents_raw.items():
+        if not isinstance(name, str) or not isinstance(vec, list):
+            continue
+        out[name] = [float(x) for x in vec]
+    return out
+
+
+def _classify(query_vec: list[float], proto: dict[str, Any]) -> str:
+    intents_raw = proto.get("intents", {})
+    if not isinstance(intents_raw, dict):
         return str(proto.get("default_intent", "document_qa"))
-    min_score = float(proto.get("min_score", 0.74))
-    min_margin = float(proto.get("min_margin", 0.04))
+    min_score = _proto_float(proto, "min_score", 0.74)
+    min_margin = _proto_float(proto, "min_margin", 0.04)
     default = str(proto.get("default_intent", "document_qa"))
+    intents = _intent_vectors(intents_raw)
     scored = sorted(
-        ((name, _cosine(query_vec, vec)) for name, vec in intents.items() if isinstance(vec, list)),
+        ((name, _cosine(query_vec, vec)) for name, vec in intents.items()),
         key=lambda row: row[1],
         reverse=True,
     )
@@ -68,15 +91,15 @@ def run_chat_routing_gate() -> GateRunResult:
             metrics=(),
             detail="missing eval or prototype fixtures",
         )
-    eval_data = json.loads(EVAL_PATH.read_text(encoding="utf-8"))
-    proto = json.loads(INTENT_PATH.read_text(encoding="utf-8"))
-    cases = eval_data.get("cases", [])
-    if not isinstance(cases, list) or len(cases) < 150:
+    eval_data = cast(dict[str, Any], json.loads(EVAL_PATH.read_text(encoding="utf-8")))
+    proto = cast(dict[str, Any], json.loads(INTENT_PATH.read_text(encoding="utf-8")))
+    cases_raw = eval_data.get("cases", [])
+    if not isinstance(cases_raw, list) or len(cases_raw) < 150:
         return GateRunResult(
             gate_id=GATE_ID,
             status="error",
             metrics=(),
-            detail=f"expected >=150 cases, got {len(cases) if isinstance(cases, list) else 0}",
+            detail=f"expected >=150 cases, got {len(cases_raw) if isinstance(cases_raw, list) else 0}",
         )
 
     embed_query("warmup")
@@ -85,9 +108,10 @@ def run_chat_routing_gate() -> GateRunResult:
     follow_hits = 0
     follow_total = 0
 
-    for case in cases:
-        if not isinstance(case, dict):
+    for case_raw in cases_raw:
+        if not isinstance(case_raw, dict):
             continue
+        case = cast(dict[str, Any], case_raw)
         question = str(case.get("question", ""))
         prior = case.get("prior_user")
         prior_s = str(prior) if prior else None

@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 import { cosineSimilarity } from './embedding-cosine.js';
 
@@ -30,10 +29,8 @@ interface StatsOperationPrototypeFile {
   default_operation: ChatStatsOperation;
 }
 
-const moduleDir = dirname(fileURLToPath(import.meta.url));
-
 function loadJson<T>(name: string): T {
-  const raw = readFileSync(join(moduleDir, name), 'utf8');
+  const raw = readFileSync(join(__dirname, name), 'utf8');
   return JSON.parse(raw) as T;
 }
 

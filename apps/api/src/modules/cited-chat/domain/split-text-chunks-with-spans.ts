@@ -41,7 +41,7 @@ export function splitTextChunksWithSpans(text: string): TextChunkSpan[] {
   return chunks;
 }
 
-function pageForChunkFromBlocks(chunkBody: string, blocks: ExtractionBlock[]): number {
+function pageForChunkFromBlocks(chunkBody: string, blocks: ExtractionBlock[]): number | null {
   const chunkNorm = chunkBody.toLowerCase();
   const probe = chunkNorm.slice(0, Math.min(64, chunkNorm.length)).trim();
   if (!probe) {
