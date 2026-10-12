@@ -30,6 +30,8 @@ import { mergeThreadMessagesAfterSend } from './documentChatMessages';
 interface DocumentChatPanelProps {
   documentId: string;
   compact?: boolean;
+  /** Chat embedded in the layout document side panel (no duplicate header, stacked threads). */
+  sidePanel?: boolean;
   chatAvailable?: boolean;
   /** False when user turned chat off in settings (distinct from provider unavailable). */
   chatUiEnabled?: boolean;
@@ -66,6 +68,7 @@ function DocumentChatEmptyIcon() {
 export function DocumentChatPanel({
   documentId,
   compact = false,
+  sidePanel = false,
   chatAvailable = false,
   chatUiEnabled = true,
 }: DocumentChatPanelProps) {
@@ -87,7 +90,9 @@ export function DocumentChatPanel({
     [messages, loadingMessages]
   );
 
-  const { stacked, threadsOpen, toggleThreads, closeThreads } = useStackedDocChatLayout(compact);
+  const { stacked, threadsOpen, toggleThreads, closeThreads } = useStackedDocChatLayout(
+    compact || sidePanel
+  );
 
   const upsertMessage = useCallback((next: DocumentChatMessageRecordDto) => {
     setMessages((prev) => {
@@ -343,26 +348,38 @@ export function DocumentChatPanel({
     ? t('documents.documentChat.inputPlaceholder')
     : t('documents.documentChat.inputPlaceholderBootstrap');
 
+  const chatHeadingId = sidePanel ? undefined : 'doc-chat-heading';
+
   return (
     <section
-      className={`doc-chat${compact ? ' doc-chat-compact' : ''}`}
-      aria-labelledby="doc-chat-heading"
+      className={`doc-chat${compact ? ' doc-chat-compact' : ''}${sidePanel ? ' doc-chat-side-panel' : ''}`}
+      aria-labelledby={chatHeadingId}
       aria-busy={panelBusy || generationInProgress}
     >
-      <header className="doc-chat-header detail-section-head">
-        <h2 id="doc-chat-heading" className="detail-section-title">
-          {t('documents.documentChat.title')}
-        </h2>
-        <p className="muted detail-section-lead">{t('documents.documentChat.lead')}</p>
-        {serviceNotice ? (
-          <div className="doc-chat-notice" role="status">
-            <p>{t('documents.documentChat.serviceNoticeBody')}</p>
-            <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
-              {t('documents.documentChat.serviceNoticeSettings')}
-            </Link>
-          </div>
-        ) : null}
-      </header>
+      {sidePanel ? null : (
+        <header className="doc-chat-header detail-section-head">
+          <h2 id="doc-chat-heading" className="detail-section-title">
+            {t('documents.documentChat.title')}
+          </h2>
+          <p className="muted detail-section-lead">{t('documents.documentChat.lead')}</p>
+          {serviceNotice ? (
+            <div className="doc-chat-notice" role="status">
+              <p>{t('documents.documentChat.serviceNoticeBody')}</p>
+              <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
+                {t('documents.documentChat.serviceNoticeSettings')}
+              </Link>
+            </div>
+          ) : null}
+        </header>
+      )}
+      {sidePanel && serviceNotice ? (
+        <div className="doc-chat-notice" role="status">
+          <p>{t('documents.documentChat.serviceNoticeBody')}</p>
+          <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
+            {t('documents.documentChat.serviceNoticeSettings')}
+          </Link>
+        </div>
+      ) : null}
 
       <div
         className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}${stacked && hasThreads ? ' doc-chat-layout-stacked' : ''}${stacked && threadsOpen ? ' doc-chat-threads-visible' : ''}`}

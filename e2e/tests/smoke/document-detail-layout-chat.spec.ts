@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test';
 
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
+import {
+  DOC_CHAT_QUESTION,
+  openLayoutAdvancedCompare,
+  openLayoutDocumentPage,
+  uploadLayoutTableDocument,
+} from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -19,17 +24,6 @@ const VIEWER_MODES = [/Original/i, /^Text$/i] as const;
 
 const SIDE_TABS = [/Overview|Übersicht/i, /Tables|Tabellen/i, /Outline|Gliederung/i, /^Chat$/i] as const;
 
-async function openAdvancedCompare(page: import('@playwright/test').Page) {
-  await page
-    .locator('.layout-ir-skeleton')
-    .waitFor({ state: 'hidden', timeout: 180_000 })
-    .catch(() => undefined);
-  await page.locator('.layout-advanced-summary').click();
-  const compareRadio = page.getByRole('radio', { name: /Compare|Vergleich/i });
-  await expect(compareRadio).toBeEnabled({ timeout: 180_000 });
-  await compareRadio.click();
-}
-
 test.describe('document detail layout and chat', () => {
   test.describe.configure({ mode: 'serial' });
 
@@ -41,6 +35,10 @@ test.describe('document detail layout and chat', () => {
 
   test.beforeEach(async ({ page }) => {
     await openLayoutDocumentPage(page, layoutDocId);
+    await page
+      .locator('.layout-ir-skeleton')
+      .waitFor({ state: 'hidden', timeout: 180_000 })
+      .catch(() => undefined);
   });
 
   test('layout workspace keeps stable width across viewer modes and side tabs', async ({ page }) => {
@@ -73,7 +71,7 @@ test.describe('document detail layout and chat', () => {
   test('compare heatmap aligns with original pane and slider clips at 50%', async ({ page }) => {
     test.setTimeout(360_000);
 
-    await openAdvancedCompare(page);
+    await openLayoutAdvancedCompare(page);
     await page.locator('[data-testid="layout-compare-stage"]').waitFor({
       state: 'visible',
       timeout: 180_000,
@@ -111,7 +109,35 @@ test.describe('document detail layout and chat', () => {
     }
   });
 
-  test('document chat tab shows chat beside the viewer with composer ready', async ({ page }) => {
+  test('layout chat tab fills the side panel without a duplicate top chat region', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    await expect(page.locator('.document-detail-tab-region .doc-chat')).toHaveCount(0);
+
+    await page.getByRole('tab', { name: /^Chat$/i }).click();
+    const sidePanel = page.locator('.layout-side-panel--chat');
+    await expect(sidePanel).toBeVisible();
+
+    const panelBox = await sidePanel.boundingBox();
+    const chatLayout = sidePanel.locator('.doc-chat-layout');
+    await expect(chatLayout).toBeVisible();
+    const layoutBox = await chatLayout.boundingBox();
+    expect(panelBox && layoutBox).toBeTruthy();
+    if (panelBox && layoutBox) {
+      expect(layoutBox.width).toBeGreaterThan(panelBox.width * 0.82);
+    }
+
+    const metaBox = await page.locator('.document-detail-meta').boundingBox();
+    const workspaceBox = await page.locator('.layout-workspace').boundingBox();
+    expect(metaBox && workspaceBox).toBeTruthy();
+    if (metaBox && workspaceBox) {
+      expect(workspaceBox.y - metaBox.y - metaBox.height).toBeLessThan(140);
+    }
+  });
+
+  test('document chat tab shows chat beside the viewer and answers within 5 seconds', async ({
+    page,
+  }) => {
     test.setTimeout(180_000);
 
     await page.getByRole('tab', { name: /^Chat$/i }).click();
@@ -125,8 +151,6 @@ test.describe('document detail layout and chat', () => {
     if (workspaceBox && chatBox) {
       expect(chatBox.x).toBeGreaterThan(workspaceBox.x);
     }
-<<<<<<< HEAD
-=======
 
     const started = Date.now();
     await composer.fill(DOC_CHAT_QUESTION);
@@ -140,6 +164,5 @@ test.describe('document detail layout and chat', () => {
       timeout: 5_000,
     });
     expect(Date.now() - started).toBeLessThan(5_000);
->>>>>>> 384791d (feat(web): document detail IA, library/settings polish, audit e2e)
   });
 });

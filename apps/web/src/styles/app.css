@@ -2776,6 +2776,23 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   overflow: hidden;
 }
 
+.layout-side-panel--chat {
+  min-height: 0;
+}
+
+.layout-side-panel--chat .layout-side-panel-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.layout-side-panel--chat .layout-side-chat {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--dv-space-sm);
+}
+
 .layout-side-tabs {
   display: flex;
   border-bottom: 1px solid var(--dv-color-border);
@@ -3447,6 +3464,33 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 .doc-chat-header h2 {
   margin: 0;
   font-size: 1.05rem;
+}
+
+.doc-chat-side-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: var(--dv-space-xs);
+}
+
+.doc-chat-side-panel .doc-chat-layout {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.doc-chat-side-panel .doc-chat-conversation,
+.doc-chat-side-panel .doc-chat-pane {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.doc-chat-side-panel .doc-chat-messages {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
 }
 
 .doc-chat-compact {

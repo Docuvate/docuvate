@@ -210,7 +210,10 @@ export function DocumentLayoutSidePanel({
   }, [activeOverlayId, activeTab]);
 
   return (
-    <aside className="layout-side-panel" aria-label={t('documents.layoutSidePanelAria')}>
+    <aside
+      className={`layout-side-panel${activeTab === 'chat' ? ' layout-side-panel--chat' : ''}`}
+      aria-label={t('documents.layoutSidePanelAria')}
+    >
       <div
         className="layout-side-tabs"
         role="tablist"
@@ -386,6 +389,7 @@ export function DocumentLayoutSidePanel({
             <DocumentChatPanel
               documentId={documentId}
               compact
+              sidePanel
               chatAvailable={documentChatAvailable}
               chatUiEnabled={documentChatUiEnabled}
             />

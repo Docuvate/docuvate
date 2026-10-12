@@ -63,6 +63,8 @@ interface DocumentLayoutWorkspaceProps {
   documentChatAvailable?: boolean;
   documentChatUiEnabled?: boolean;
   showTechnicalDetails?: boolean;
+  layoutSideTab: LayoutSideTab;
+  onLayoutSideTabChange: (tab: LayoutSideTab) => void;
 }
 
 export function DocumentLayoutWorkspace({
@@ -95,6 +97,8 @@ export function DocumentLayoutWorkspace({
   documentChatAvailable = false,
   documentChatUiEnabled = true,
   showTechnicalDetails = false,
+  layoutSideTab,
+  onLayoutSideTabChange,
 }: DocumentLayoutWorkspaceProps) {
   const { t } = useTranslation();
   const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;
@@ -109,7 +113,6 @@ export function DocumentLayoutWorkspace({
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [advancedView, setAdvancedView] = useState<AdvancedViewerMode>('reconstruction');
   const [overlayEnabled, setOverlayEnabled] = useState(true);
-  const [sideTab, setSideTab] = useState<LayoutSideTab>('fields');
   const [activeOverlayId, setActiveOverlayId] = useState<string | null>(null);
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
   const [layoutZoom, setLayoutZoom] = useState<LayoutIrZoomStep>(100);
@@ -471,8 +474,8 @@ export function DocumentLayoutWorkspace({
           fields={fields}
           knownFieldKeys={knownFieldKeys}
           fieldLabelForKey={fieldLabelForKey}
-          activeTab={sideTab}
-          onTabChange={setSideTab}
+          activeTab={layoutSideTab}
+          onTabChange={onLayoutSideTabChange}
           activeOverlayId={activeOverlayId}
           onOverlaySelect={onOverlaySelect}
           onAcceptSuggestion={(key, value) => {

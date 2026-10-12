@@ -21,7 +21,10 @@ import {
 } from '../components/documents/DocumentDetailMetaBar';
 import { DocumentDetailNotFound } from '../components/documents/DocumentDetailNotFound';
 import { DocumentExtractionSection } from '../components/documents/DocumentExtractionSection';
-import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
+import {
+  DocumentLayoutWorkspace,
+} from '../components/documents/DocumentLayoutWorkspace';
+import type { LayoutSideTab } from '../components/documents/DocumentLayoutSidePanel';
 import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
 import { DocumentPreviewCard } from '../components/documents/DocumentPreviewCard';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
@@ -113,6 +116,7 @@ export function DocumentDetailPage() {
     'idle' | 'loading' | 'ready' | 'missing'
   >('idle');
   const [activeTab, setActiveTab] = useState<DetailTab | null>(null);
+  const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
   const [viewerPage, setViewerPage] = useState(1);
   const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
   const [title, setTitle] = useState('');
@@ -196,10 +200,24 @@ export function DocumentDetailPage() {
 
   useEffect(() => {
     const tabParam = new URLSearchParams(window.location.search).get('tab');
-    if (tabParam === 'details' || tabParam === 'labels' || tabParam === 'chat') {
+    if (tabParam === 'chat') {
+      setLayoutSideTab('chat');
+      setActiveTab(null);
+      return;
+    }
+    if (tabParam === 'details' || tabParam === 'labels') {
       setActiveTab(tabParam);
     }
   }, [id]);
+
+  useEffect(() => {
+    const usesLayoutWorkspace =
+      doc?.mimeType === 'application/pdf' && doc.extraction?.layoutIrAvailable === true;
+    if (usesLayoutWorkspace && activeTab === 'chat') {
+      setLayoutSideTab('chat');
+      setActiveTab(null);
+    }
+  }, [doc?.mimeType, doc?.extraction?.layoutIrAvailable, activeTab]);
 
   useEffect(() => {
     if (!id) return;
@@ -562,6 +580,8 @@ export function DocumentDetailPage() {
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
           showTechnicalDetails={showTechnicalDetails}
+          layoutSideTab={layoutSideTab}
+          onLayoutSideTabChange={setLayoutSideTab}
           doc={doc}
           previewData={previewData}
           previewLoading={previewLoading}
