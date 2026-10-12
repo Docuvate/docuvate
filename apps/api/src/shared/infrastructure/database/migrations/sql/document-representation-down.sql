@@ -19,6 +19,9 @@ ALTER TABLE public.document_embeddings DISABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tenant_label_prototype_tenant_isolation ON public.tenant_label_prototype;
 DROP POLICY IF EXISTS tenant_label_calibration_tenant_isolation ON public.tenant_label_calibration;
 DROP POLICY IF EXISTS document_representation_unit_tenant_isolation ON public.document_representation_unit;
+REVOKE docuvate_rls_enforcer FROM docuvate;
+DROP ROLE IF EXISTS docuvate_rls_enforcer;
+
 DROP POLICY IF EXISTS document_representation_tenant_isolation ON public.document_representation;
 
 DROP TABLE IF EXISTS public.tenant_label_prototype;

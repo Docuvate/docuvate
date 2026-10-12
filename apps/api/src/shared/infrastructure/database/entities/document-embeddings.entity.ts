@@ -11,8 +11,8 @@ export class DocumentEmbeddingsEntity {
   @Column('text', { name: 'model' })
   model: string;
 
-  @Column('jsonb', { name: 'embedding' })
-  embedding: object;
+  @Column('jsonb', { name: 'embedding', nullable: true })
+  embedding: object | null;
 
   @Column('timestamp with time zone', {
     name: 'updated_at',

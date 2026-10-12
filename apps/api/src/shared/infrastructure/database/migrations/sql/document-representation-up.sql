@@ -146,3 +146,28 @@ CREATE POLICY document_tag_suggestions_tenant_isolation ON public.document_tag_s
 ALTER TABLE public.document_duplicate_candidates ENABLE ROW LEVEL SECURITY;
 CREATE POLICY document_duplicate_candidates_tenant_isolation ON public.document_duplicate_candidates
     USING (user_id = current_setting('app.tenant_id', true));
+
+-- Role for integration tests and defense-in-depth: enforce RLS even when the session user bypasses RLS.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'docuvate_rls_enforcer') THEN
+    CREATE ROLE docuvate_rls_enforcer NOLOGIN NOBYPASSRLS;
+  END IF;
+END
+$$;
+
+GRANT USAGE ON SCHEMA public TO docuvate_rls_enforcer;
+GRANT SELECT, INSERT, UPDATE, DELETE ON
+  public.document_representation,
+  public.document_representation_unit,
+  public.tenant_label_calibration,
+  public.tenant_label_prototype,
+  public.document_embeddings,
+  public.document_text_chunks,
+  public.embedding_density_class_niw,
+  public.embedding_density_correction,
+  public.document_tag_suggestions,
+  public.document_duplicate_candidates
+TO docuvate_rls_enforcer;
+
+GRANT docuvate_rls_enforcer TO docuvate;

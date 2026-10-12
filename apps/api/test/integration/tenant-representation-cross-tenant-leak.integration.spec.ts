@@ -13,6 +13,30 @@ import { withTenantPgClient } from '../../src/shared/infrastructure/database/ten
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
 
+/** Exercise RLS policies (superuser test DB otherwise bypasses row security). */
+async function withRlsEnforcedPgClient<T>(
+  pool: ReturnType<typeof getIntegrationPool>,
+  tenantId: string | null,
+  run: (client: import('pg').PoolClient) => Promise<T>
+): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('SET LOCAL ROLE docuvate_rls_enforcer');
+    if (tenantId) {
+      await client.query(`SELECT set_config('app.tenant_id', $1, true)`, [tenantId]);
+    }
+    const value = await run(client);
+    await client.query('COMMIT');
+    return value;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
 const SHARED_LABEL = 'Rechnung';
 const TEXT_A =
   'Rechnung Nordwind GmbH Gesamtsumme 1.234,56 EUR IBAN DE89370400440532013000 marker-tenant-a-only';
@@ -176,7 +200,9 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
         chunkIds: chunks.rows.map((r) => parseString(requireRecord(r).id)),
       };
     });
-    const sqlUnscoped = await pool.query(`SELECT COUNT(*)::int AS c FROM document_representation`);
+    const sqlUnscoped = await withRlsEnforcedPgClient(pool, null, async (client) =>
+      client.query(`SELECT COUNT(*)::int AS c FROM document_representation`)
+    );
     return {
       searchDocIds: search.documents.map((d) => d.id).sort(),
       chatChunkIds: chat.map((c) => c.chunkId).sort(),
@@ -223,7 +249,7 @@ describe('tenant representation cross-tenant leak (blocking, Testcontainers Post
   });
 
   it('tenant B cannot read tenant A rows via RLS-scoped SQL', async () => {
-    const scopedB = await withTenantPgClient(pool, userB, async (client) => {
+    const scopedB = await withRlsEnforcedPgClient(pool, userB, async (client) => {
       const reps = await client.query(`SELECT document_id::text FROM document_representation`);
       return reps.rows.map((r) => parseString(requireRecord(r).document_id));
     });
