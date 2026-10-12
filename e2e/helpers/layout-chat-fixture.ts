@@ -122,7 +122,9 @@ export async function openLayoutAdvancedCompare(page: Page): Promise<void> {
   await compareBtn.scrollIntoViewIfNeeded();
   await expect(compareBtn).toBeEnabled({ timeout: 180_000 });
   if ((await compareBtn.getAttribute('aria-checked')) !== 'true') {
-    await compareBtn.click({ timeout: 60_000 });
+    await compareBtn.evaluate((node) => {
+      (node as HTMLButtonElement).click();
+    });
   }
 
   await page.locator('[data-testid="layout-compare-stage"]').waitFor({
