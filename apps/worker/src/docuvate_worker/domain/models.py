@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from docuvate_worker.domain.cpu_pipeline.contracts import CpuPipelineExtractionArtifacts
+    from docuvate_worker.domain.representation.encode import DocumentRepresentation
 
 
 @dataclass(frozen=True)
@@ -39,3 +40,4 @@ class ExtractionResult:
     layout_reconstruction_reliable: bool | None = None
     layout_unreliable_reason: str | None = None
     cpu_pipeline: CpuPipelineExtractionArtifacts | None = None
+    document_representation: DocumentRepresentation | None = None

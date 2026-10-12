@@ -12,7 +12,7 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
 from docuvate_worker.domain.embedding_density.decision import DecisionTier, ReasonCode
-from docuvate_worker.infrastructure.fastembed_model import embed_passages
+from docuvate_worker.domain.representation.quantize import dequantize_vector
 
 STAGE_ID = "nest_classification"
 
@@ -54,17 +54,14 @@ def run_nest_stage(state: PipelineMutableState) -> StageEnvelope[NestStageData]:
                 StageAvailability.NOT_AVAILABLE,
                 "no per-org calibrated embedding-density state supplied",
             )
-        try:
-            vectors = embed_passages([state.text[:4000]])
-        except Exception as exc:
+        rep = state.document_representation
+        if rep is None or not rep.document_mean_int8:
             return (
                 empty,
                 StageAvailability.NOT_AVAILABLE,
-                f"document embedding unavailable: {type(exc).__name__}",
+                "document representation not available for classification",
             )
-        if not vectors:
-            return empty, StageAvailability.UNCERTAIN, "embedding produced empty vector"
-        vector = vectors[0]
+        vector = dequantize_vector(rep.document_mean_scale, rep.document_mean_int8).tolist()
         if calibrated.dim > 0 and len(vector) != calibrated.dim:
             return (
                 empty,

@@ -24,6 +24,7 @@ import { PurgeHeadingVendorSuggestions20261010153000 } from './migrations/202610
 import { Corrections20261011180000 } from './migrations/20261011180000-corrections.js';
 import { RepairPeriodDuplicateStacks20261011200000 } from './migrations/20261011200000-repair-period-duplicate-stacks.js';
 import { DuplicatePairLabels20261011210000 } from './migrations/20261011210000-duplicate-pair-labels.js';
+import { DocumentRepresentation20261012120000 } from './migrations/20261012120000-document-representation.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -70,6 +71,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       Corrections20261011180000,
       RepairPeriodDuplicateStacks20261011200000,
       DuplicatePairLabels20261011210000,
+      DocumentRepresentation20261012120000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

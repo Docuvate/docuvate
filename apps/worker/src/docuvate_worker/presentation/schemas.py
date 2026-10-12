@@ -94,6 +94,41 @@ class KiteIndexStageModel(BaseModel):
     )
 
 
+class RepresentationUnitModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    unit_index: int = Field(serialization_alias="unitIndex")
+    kind: str
+    text: str
+    page: int | None = None
+    x: float | None = None
+    y: float | None = None
+    width: float | None = Field(default=None, serialization_alias="width")
+    height: float | None = None
+    char_start: int | None = Field(default=None, serialization_alias="charStart")
+    char_end: int | None = Field(default=None, serialization_alias="charEnd")
+    vector_scale: float = Field(serialization_alias="vectorScale")
+    vector_int8_base64: str = Field(serialization_alias="vectorInt8Base64")
+    binary_code_base64: str = Field(serialization_alias="binaryCodeBase64")
+
+
+class DocumentRepresentationModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    encoder_id: str = Field(serialization_alias="encoderId")
+    encoder_revision: str = Field(serialization_alias="encoderRevision")
+    representation_version: int = Field(serialization_alias="representationVersion")
+    units: list[RepresentationUnitModel] = Field(default_factory=list)
+    document_mean_scale: float = Field(serialization_alias="documentMeanScale")
+    document_mean_int8_base64: str = Field(serialization_alias="documentMeanInt8Base64")
+    document_max_scale: float = Field(serialization_alias="documentMaxScale")
+    document_max_int8_base64: str = Field(serialization_alias="documentMaxInt8Base64")
+
+
+class RepresentationFromTextRequest(BaseModel):
+    text: str = Field(min_length=1)
+
+
 class CpuPipelineExtractModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
@@ -122,6 +157,9 @@ class ExtractResponse(BaseModel):
     engine: str | None = None
     cpu_pipeline: CpuPipelineExtractModel | None = Field(
         default=None, serialization_alias="cpuPipeline"
+    )
+    document_representation: DocumentRepresentationModel | None = Field(
+        default=None, serialization_alias="documentRepresentation"
     )
 
 
@@ -158,6 +196,7 @@ class CompareResponse(BaseModel):
 
 class EmbedRequest(BaseModel):
     texts: list[str] = Field(min_length=1, max_length=32)
+    input_type: str = Field(default="passage", pattern="^(passage|query)$")
 
 
 class EmbedResponse(BaseModel):

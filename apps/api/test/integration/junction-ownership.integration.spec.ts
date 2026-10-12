@@ -5,7 +5,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgDuplicateStackRepository } from '../../src/modules/duplicates/infrastructure/pg-duplicate-stack.repository.js';
 import { PgLabelEmbeddingRepository } from '../../src/modules/labels/infrastructure/pg-label-embedding.repository.js';
+import { EnsureDocumentRepresentationUseCase } from '../../src/modules/representation/application/ensure-document-representation.use-case.js';
+import { PgDocumentRepresentationRepository } from '../../src/modules/representation/infrastructure/pg-document-representation.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
+import { withTenantPgClient } from '../../src/shared/infrastructure/database/tenant-pg.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -34,14 +37,24 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
     }
     await pool.query(`INSERT INTO tags (id, user_id, name) VALUES ($1, $2, 'T')`, [tagA, userA]);
     await pool.query(
-      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status)
-       VALUES ($1, $2, 'a.pdf', 'application/pdf', 'k', 'ready')`,
-      [docA, userA]
+      `INSERT INTO documents (id, user_id, filename, mime_type, storage_key, status, extracted_text)
+       VALUES ($1, $2, 'a.pdf', 'application/pdf', 'k', 'ready', $3)`,
+      [docA, userA, 'Vertrauliche Vereinbarung zwischen den Parteien.']
     );
     await pool.query(
-      `INSERT INTO document_embeddings (document_id, model, embedding) VALUES ($1, 'm', $2::jsonb)`,
-      [docA, JSON.stringify([0.1, 0.2])]
+      `INSERT INTO document_embeddings (document_id, model, embedding) VALUES ($1, 'm', NULL)`,
+      [docA]
     );
+    const meanBytes = Buffer.from([10, 20, 30, 40]);
+    await withTenantPgClient(pool, userA, async (client) => {
+      await client.query(
+        `INSERT INTO document_representation (
+          document_id, tenant_id, encoder_id, encoder_revision, representation_version,
+          document_mean_scale, document_mean_int8, document_max_scale, document_max_int8
+        ) VALUES ($1,$2,'intfloat/multilingual-e5-small','rev',1,0.1,$3,0.1,$3)`,
+        [docA, userA, meanBytes]
+      );
+    });
     await pool.query(`INSERT INTO document_tags (document_id, tag_id) VALUES ($1, $2)`, [
       docA,
       tagA,
@@ -83,7 +96,11 @@ describe('junction ownership via parent joins (Testcontainers Postgres)', () => 
   });
 
   it('hides embeddings, stacks, chat links and centroids from other users', async () => {
-    const embeddings = new PgLabelEmbeddingRepository(pool);
+    const representationRepo = new PgDocumentRepresentationRepository(pool);
+    const ensureStub: EnsureDocumentRepresentationUseCase = {
+      execute: () => Promise.resolve(true),
+    };
+    const embeddings = new PgLabelEmbeddingRepository(pool, representationRepo, ensureStub);
     const stacks = new PgDuplicateStackRepository(pool);
     const chat = new PgDocumentChatThreadRepository(pool);
 

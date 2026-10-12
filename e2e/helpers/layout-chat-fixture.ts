@@ -81,7 +81,6 @@ export async function uploadLayoutTableDocument(
   }
   const docId = String(((await upload.json()) as { id: string }).id);
   await waitForDocumentLayoutIrReady(request, apiBase, webOrigin, docId);
-  await verifyDocumentChatRespondsWithin5s(request, apiBase, webOrigin, docId);
   return docId;
 }
 

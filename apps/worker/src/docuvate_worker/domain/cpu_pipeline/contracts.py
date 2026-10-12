@@ -7,9 +7,13 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractedField, ExtractionBlock
+
+if TYPE_CHECKING:
+    from docuvate_worker.domain.representation.encode import DocumentRepresentation
 
 
 class StageAvailability(StrEnum):
@@ -115,6 +119,11 @@ class KiteIndexStageData:
 
 
 @dataclass(frozen=True)
+class RepresentationStageData:
+    representation: DocumentRepresentation | None
+
+
+@dataclass(frozen=True)
 class IntegratedPipelineResult:
     ocr: StageEnvelope[OcrStageData]
     rotation: StageEnvelope[RotationStageData]
@@ -123,6 +132,7 @@ class IntegratedPipelineResult:
     nest: StageEnvelope[NestStageData]
     fields: StageEnvelope[FieldSuggestionsStageData]
     kite_index: StageEnvelope[KiteIndexStageData]
+    representation: StageEnvelope[RepresentationStageData]
 
     def latency_report_ms(self) -> dict[str, float]:
         return {
@@ -130,6 +140,7 @@ class IntegratedPipelineResult:
             self.rotation.stage_id: self.rotation.metrics.wall_time_ms,
             self.luna.stage_id: self.luna.metrics.wall_time_ms,
             self.taco.stage_id: self.taco.metrics.wall_time_ms,
+            self.representation.stage_id: self.representation.metrics.wall_time_ms,
             self.nest.stage_id: self.nest.metrics.wall_time_ms,
             self.fields.stage_id: self.fields.metrics.wall_time_ms,
             self.kite_index.stage_id: self.kite_index.metrics.wall_time_ms,
@@ -152,6 +163,9 @@ class PipelineMutableState:
     text: str = ""
     blocks: list[ExtractionBlock] = field(default_factory=list)
     embedding_density_state: EmbeddingDensityStatePayload | None = None
+    luna_data: LunaStageData = field(default_factory=lambda: LunaStageData(labels=()))
+    taco_data: TacoStageData = field(default_factory=lambda: TacoStageData(tables=()))
+    document_representation: DocumentRepresentation | None = None
 
 
 @dataclass(frozen=True)
@@ -162,3 +176,5 @@ class CpuPipelineExtractionArtifacts:
     nest: NestStageData
     kite_index_availability: StageAvailability
     kite_index: KiteIndexStageData
+    representation_availability: StageAvailability
+    representation: RepresentationStageData

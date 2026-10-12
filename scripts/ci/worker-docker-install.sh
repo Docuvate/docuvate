@@ -35,5 +35,7 @@ uv pip install --system --reinstall "opencv-python-headless>=4.8.0,<5.0.0" "nump
 
 python -c "import cv2; from paddleocr import PaddleOCR; print('opencv', cv2.__version__)"
 python -c "from docuvate_worker.infrastructure.extractors.paddle_engine import prewarm_paddle_models; prewarm_paddle_models()"
-python -c "from docuvate_worker.infrastructure.fastembed_model import get_embedding_model; get_embedding_model()"
+if [ "${VARIANT}" != "gpu" ]; then
+  python -c "from docuvate_worker.infrastructure.fastembed_model import get_embedding_model; get_embedding_model()"
+fi
 python -c "from docuvate_worker.infrastructure.chat.rag_rerank import rerank_passages; from docuvate_worker.infrastructure.chat.rag_rerank import RagPassage; rerank_passages('ping', [RagPassage(id='1', text='ping response')], top_k=1)"

@@ -35,6 +35,15 @@ export class DocumentTextChunksEntity {
   @Column('jsonb', { name: 'embedding', nullable: true })
   embedding: object | null;
 
+  @Column('real', { name: 'vector_scale', nullable: true })
+  vectorScale: number | null;
+
+  @Column('bytea', { name: 'vector_int8', nullable: true })
+  vectorInt8: Buffer | null;
+
+  @Column('bytea', { name: 'binary_code', nullable: true })
+  binaryCode: Buffer | null;
+
   @Column('timestamp with time zone', { name: 'updated_at', default: () => 'now()' })
   updatedAt: Date;
 

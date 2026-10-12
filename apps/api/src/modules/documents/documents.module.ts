@@ -10,6 +10,7 @@ import { DuplicatesModule } from '../duplicates/duplicates.module.js';
 import { ExtractionQueueService } from '../extraction/infrastructure/extraction-queue.service.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { LabelsModule } from '../labels/labels.module.js';
+import { RepresentationModule } from '../representation/representation.module.js';
 import { SearchModule } from '../search/search.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { ApplyArenaWinnerExtractionUseCase } from './application/apply-arena-winner-extraction.use-case.js';
@@ -55,6 +56,7 @@ import { DocumentsController } from './presentation/documents.controller.js';
     DocumentPipelineModule,
     ExtractionFeedbackModule,
     SearchModule,
+    RepresentationModule,
     CitedChatModule,
     ChatInfrastructureModule,
   ],

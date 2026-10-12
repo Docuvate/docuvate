@@ -8,11 +8,13 @@ from docuvate_worker.application.cpu_document_pipeline.orchestrator import (
 )
 from docuvate_worker.domain.cpu_pipeline.contracts import (
     CpuPipelineExtractionArtifacts,
+    IntegratedPipelineResult,
     PipelineRunInput,
 )
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
+from docuvate_worker.domain.representation.encode import DocumentRepresentation
 
 logger = logging.getLogger(__name__)
 
@@ -53,8 +55,15 @@ def extract_with_cpu_pipeline(
             nest=integrated.nest.data,
             kite_index_availability=integrated.kite_index.availability,
             kite_index=integrated.kite_index.data,
+            representation_availability=integrated.representation.availability,
+            representation=integrated.representation.data,
         ),
+        document_representation=state_representation(integrated),
     )
+
+
+def state_representation(integrated: IntegratedPipelineResult) -> DocumentRepresentation | None:
+    return integrated.representation.data.representation
 
 
 class PipelineExtractor(ExtractorEngine):

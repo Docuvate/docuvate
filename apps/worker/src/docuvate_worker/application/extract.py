@@ -29,6 +29,7 @@ def _with_markdown(result: ExtractionResult) -> ExtractionResult:
         blocks=result.blocks,
         markdown=markdown,
         cpu_pipeline=result.cpu_pipeline,
+        document_representation=result.document_representation,
     )
 
 
@@ -69,6 +70,7 @@ def _with_layout_ir(
             fidelity.unreliable_reason.value if fidelity.unreliable_reason else None
         ),
         cpu_pipeline=result.cpu_pipeline,
+        document_representation=result.document_representation,
     )
 
 
@@ -80,7 +82,7 @@ def extract_document(
     embedding_density_state: EmbeddingDensityStatePayload | None = None,
 ) -> ExtractionResult:
     resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
-    if resolved.name == "pipeline" and embedding_density_state is not None:
+    if resolved.name == "pipeline":
         base = _with_markdown(
             extract_with_cpu_pipeline(
                 content, mime_type, embedding_density_state=embedding_density_state

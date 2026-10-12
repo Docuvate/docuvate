@@ -146,7 +146,7 @@ export class CitedChatGenerationService {
     let queryVector: number[] | undefined;
     const embedStarted = Date.now();
     try {
-      const { embeddings } = await this.embedding.embedTexts([userMessage]);
+      const { embeddings } = await this.embedding.embedTexts([userMessage], { inputType: 'query' });
       queryVector = embeddings[0];
     } catch {
       queryVector = undefined;
@@ -217,17 +217,6 @@ export class CitedChatGenerationService {
       rerank.reachable && rerank.rerankerUsed
         ? passesRerankerGate(bestScore, ragRerankerGateThreshold())
         : passesFusionGate(bestScore, ragFusionGateThreshold());
-    if (!gateOk) {
-      await this.citationsRepo.replaceCitations(messageId, []);
-      await this.threads.updateMessageGeneration(messageId, {
-        content: abstentionText,
-        generationStatus: 'done',
-        generationPhase: null,
-        finalizeOnlyIfInFlight: true,
-      });
-      await this.threads.touchThread(threadId);
-      return { content: abstentionText, abstained: true };
-    }
 
     const extractiveMinScore =
       rerank.reachable && rerank.rerankerUsed
@@ -239,6 +228,40 @@ export class CitedChatGenerationService {
       extractivePool.length > 0
         ? tryExtractiveCitedAnswer(userMessage, extractivePool, extractiveMinScore)
         : null;
+
+    if (!gateOk) {
+      const extractiveChunkId = extractive?.chunk.chunkId ?? '';
+      const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+      if (extractive && extractiveChunkIsUuid) {
+        await this.citationsRepo.replaceCitations(messageId, [
+          {
+            ordinal: 1,
+            chunkId: extractive.chunk.chunkId,
+            quote: extractive.quote,
+            charStart: extractive.chunk.charStart ?? 0,
+            charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
+          },
+        ]);
+        const content = formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }]);
+        await this.threads.updateMessageGeneration(messageId, {
+          content,
+          generationStatus: 'done',
+          generationPhase: null,
+          finalizeOnlyIfInFlight: true,
+        });
+        await this.threads.touchThread(threadId);
+        return { content, abstained: false };
+      }
+      await this.citationsRepo.replaceCitations(messageId, []);
+      await this.threads.updateMessageGeneration(messageId, {
+        content: abstentionText,
+        generationStatus: 'done',
+        generationPhase: null,
+        finalizeOnlyIfInFlight: true,
+      });
+      await this.threads.touchThread(threadId);
+      return { content: abstentionText, abstained: true };
+    }
     const extractiveChunkId = extractive?.chunk.chunkId ?? '';
     const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
     if (

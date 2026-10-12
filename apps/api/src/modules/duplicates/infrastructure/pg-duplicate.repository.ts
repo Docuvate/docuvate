@@ -11,7 +11,6 @@ import type {
 import {
   parseBoolean,
   parseEnum,
-  parseJsonString,
   parseNumber,
   parseOptionalDate,
   parseOptionalString,
@@ -19,22 +18,10 @@ import {
   parseStringArray,
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
+import { withTenantPgClient } from '../../../shared/infrastructure/database/tenant-pg.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
 const DUPLICATE_SOURCES: readonly DuplicateCandidateSource[] = ['hash', 'embedding'];
-
-function parseVector(raw: unknown): number[] {
-  if (Array.isArray(raw)) return raw.map((v) => Number(v));
-  if (typeof raw === 'string') {
-    try {
-      const parsed = parseJsonString(raw);
-      return Array.isArray(parsed) ? parsed.map((v) => Number(v)) : [];
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
 
 function parsePostgresUuidArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -249,40 +236,52 @@ export class PgDuplicateRepository implements DuplicateRepository {
       extractedFields: unknown;
     }[]
   > {
-    const result = await this.pool.query(
-      `SELECT e.document_id, e.embedding,
-              d.filename, d.title, d.document_date, d.extracted_text,
-              (
-                SELECT jsonb_build_object(
-                  'blocks',
-                  COALESCE(
-                    (
-                      SELECT jsonb_agg(jsonb_build_object('page', b.page) ORDER BY b.page)
-                      FROM document_extraction_blocks b
-                      WHERE b.document_id = d.id
-                    ),
-                    '[]'::jsonb
+    return withTenantPgClient(this.pool, userId, async (client) => {
+      const result = await client.query(
+        `SELECT dr.document_id,
+                dr.document_mean_scale,
+                dr.document_mean_int8,
+                d.filename, d.title, d.document_date, d.extracted_text,
+                (
+                  SELECT jsonb_build_object(
+                    'blocks',
+                    COALESCE(
+                      (
+                        SELECT jsonb_agg(jsonb_build_object('page', b.page) ORDER BY b.page)
+                        FROM document_extraction_blocks b
+                        WHERE b.document_id = d.id
+                      ),
+                      '[]'::jsonb
+                    )
                   )
-                )
-              ) AS extraction_payload
-       FROM document_embeddings e
-       JOIN documents d ON d.id = e.document_id
-       WHERE d.user_id = $1 AND e.document_id <> $2`,
-      [userId, excludeDocumentId]
-    );
-    return result.rows
-      .map((raw) => {
-        const row = requireRecord(raw);
-        return {
-          documentId: parseString(row.document_id),
-          embedding: parseVector(row.embedding),
-          filename: parseString(row.filename),
-          title: parseString(row.title ?? row.filename),
-          documentDate: parseOptionalDate(row.document_date),
-          extractedText: parseOptionalString(row.extracted_text),
-          extractedFields: row.extraction_payload,
-        };
-      })
-      .filter((row) => row.embedding.length > 0);
+                ) AS extraction_payload
+         FROM document_representation dr
+         JOIN documents d ON d.id = dr.document_id
+         WHERE d.user_id = $1 AND dr.document_id <> $2`,
+        [userId, excludeDocumentId]
+      );
+      return result.rows
+        .map((raw) => {
+          const row = requireRecord(raw);
+          const scale = parseNumber(row.document_mean_scale, 0);
+          const buffer = row.document_mean_int8;
+          const embedding: number[] = [];
+          if (Buffer.isBuffer(buffer)) {
+            for (let i = 0; i < buffer.length; i += 1) {
+              embedding.push(buffer.readInt8(i) * scale);
+            }
+          }
+          return {
+            documentId: parseString(row.document_id),
+            embedding,
+            filename: parseString(row.filename),
+            title: parseString(row.title ?? row.filename),
+            documentDate: parseOptionalDate(row.document_date),
+            extractedText: parseOptionalString(row.extracted_text),
+            extractedFields: row.extraction_payload,
+          };
+        })
+        .filter((row) => row.embedding.length > 0);
+    });
   }
 }

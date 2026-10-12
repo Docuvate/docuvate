@@ -109,7 +109,7 @@ def test_integrated_pipeline_nest_with_calibrated_fixture() -> None:
     assert nested.nest.data.confidence > 0.4
 
 
-def test_kite_index_builds_sentence_chunks_when_embeddings_available() -> None:
+def test_kite_index_builds_representation_unit_chunks_when_embeddings_available() -> None:
     content = delivery_note_table_pdf()
     result = run_integrated_cpu_document_pipeline(
         PipelineRunInput(content=content, mime_type="application/pdf")
@@ -119,6 +119,6 @@ def test_kite_index_builds_sentence_chunks_when_embeddings_available() -> None:
     chunks = result.kite_index.data.chunks
     assert len(chunks) >= 2
     levels = {c.level for c in chunks}
-    assert "sentence" in levels
     assert "document" in levels
+    assert levels & {"paragraph", "table_row"}
     assert result.kite_index.data.candidate_reader_available is False
