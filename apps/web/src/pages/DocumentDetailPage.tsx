@@ -21,10 +21,10 @@ import {
 } from '../components/documents/DocumentDetailMetaBar';
 import { DocumentDetailNotFound } from '../components/documents/DocumentDetailNotFound';
 import { DocumentExtractionSection } from '../components/documents/DocumentExtractionSection';
+import type { LayoutSideTab } from '../components/documents/DocumentLayoutSidePanel';
 import {
   DocumentLayoutWorkspace,
 } from '../components/documents/DocumentLayoutWorkspace';
-import type { LayoutSideTab } from '../components/documents/DocumentLayoutSidePanel';
 import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
 import { DocumentPreviewCard } from '../components/documents/DocumentPreviewCard';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
