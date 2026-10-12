@@ -1,0 +1,957 @@
+{
+  "version": 1,
+  "seed": 20261012,
+  "provenance": "synthetic routing phrases (no customer documents)",
+  "cases": [
+    {
+      "id": "route-0",
+      "question": "Wie hoch ist die Rechnungssumme?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-1",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-2",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-3",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-4",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-5",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-6",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-7",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-8",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-9",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-10",
+      "question": "Wie hoch ist die Rechnungssumme?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-11",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-12",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-13",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-14",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-15",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-16",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-17",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-18",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-19",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-20",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-21",
+      "question": "Wie hoch ist die Rechnungssumme?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-22",
+      "question": "Wie hoch ist die Rechnungssumme?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-23",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-24",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-25",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-26",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-27",
+      "question": "Was steht im Vertrag zur Kündigung?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-28",
+      "question": "Wie hoch ist die Rechnungssumme?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-29",
+      "question": "Wie hoch ist die Rechnungssumme?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-30",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-31",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-32",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-33",
+      "question": "Nenne die IBAN aus dem Schreiben.",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-34",
+      "question": "Wie hoch ist die Rechnungssumme?",
+      "prior_user": null,
+      "expected_route": "document_qa"
+    },
+    {
+      "id": "route-35",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-36",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-37",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-38",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-39",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-40",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-41",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-42",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-43",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-44",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-45",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-46",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-47",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-48",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-49",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-50",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-51",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-52",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-53",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-54",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-55",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-56",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-57",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-58",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-59",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-60",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-61",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-62",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-63",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-64",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-65",
+      "question": "Wie viele Dokumente habe ich?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-66",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-67",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-68",
+      "question": "Wie viele Entgeltnachweise sind vorhanden?",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-69",
+      "question": "Liste alle Verträge in meiner Bibliothek.",
+      "prior_user": null,
+      "expected_route": "stats"
+    },
+    {
+      "id": "route-70",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-71",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-72",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-73",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-74",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-75",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-76",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-77",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-78",
+      "question": "Guten Tag.",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-79",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-80",
+      "question": "Guten Tag.",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-81",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-82",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-83",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-84",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-85",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-86",
+      "question": "Guten Tag.",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-87",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-88",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-89",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-90",
+      "question": "Guten Tag.",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-91",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-92",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-93",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-94",
+      "question": "Guten Tag.",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-95",
+      "question": "Guten Tag.",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-96",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-97",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-98",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-99",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-100",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-101",
+      "question": "Hallo!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-102",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-103",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-104",
+      "question": "Danke!",
+      "prior_user": null,
+      "expected_route": "smalltalk"
+    },
+    {
+      "id": "route-105",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-106",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-107",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-108",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-109",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-110",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-111",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-112",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-113",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-114",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-115",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-116",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-117",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-118",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-119",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-120",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-121",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-122",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-123",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-124",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-125",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-126",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-127",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-128",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-129",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-130",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-131",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-132",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-133",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-134",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-135",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-136",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-137",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-138",
+      "question": "Wie wird das Wetter?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "route-139",
+      "question": "Wer gewann die Fußball-WM?",
+      "prior_user": null,
+      "expected_route": "out_of_scope"
+    },
+    {
+      "id": "follow-140",
+      "question": "Und aus dem Jahr 2024?",
+      "prior_user": "Wie viele Rechnungen habe ich?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Wie",
+        "viele",
+        "Rechnungen"
+      ]
+    },
+    {
+      "id": "follow-141",
+      "question": "Und aus dem Jahr 2024?",
+      "prior_user": "Wie viele Rechnungen habe ich?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Wie",
+        "viele",
+        "Rechnungen"
+      ]
+    },
+    {
+      "id": "follow-142",
+      "question": "Und aus dem Jahr 2024?",
+      "prior_user": "Wie viele Rechnungen habe ich?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Wie",
+        "viele",
+        "Rechnungen"
+      ]
+    },
+    {
+      "id": "follow-143",
+      "question": "Und aus dem Jahr 2024?",
+      "prior_user": "Wie viele Rechnungen habe ich?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Wie",
+        "viele",
+        "Rechnungen"
+      ]
+    },
+    {
+      "id": "follow-144",
+      "question": "Und aus dem Jahr 2024?",
+      "prior_user": "Wie viele Rechnungen habe ich?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Wie",
+        "viele",
+        "Rechnungen"
+      ]
+    },
+    {
+      "id": "follow-145",
+      "question": "Gilt das auch für Mieter?",
+      "prior_user": "Welche Kündigungsfrist gilt?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Welche",
+        "Kündigungsfrist",
+        "gilt?"
+      ]
+    },
+    {
+      "id": "follow-146",
+      "question": "Gilt das auch für Mieter?",
+      "prior_user": "Welche Kündigungsfrist gilt?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Welche",
+        "Kündigungsfrist",
+        "gilt?"
+      ]
+    },
+    {
+      "id": "follow-147",
+      "question": "Gilt das auch für Mieter?",
+      "prior_user": "Welche Kündigungsfrist gilt?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Welche",
+        "Kündigungsfrist",
+        "gilt?"
+      ]
+    },
+    {
+      "id": "follow-148",
+      "question": "Gilt das auch für Mieter?",
+      "prior_user": "Welche Kündigungsfrist gilt?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Welche",
+        "Kündigungsfrist",
+        "gilt?"
+      ]
+    },
+    {
+      "id": "follow-149",
+      "question": "Gilt das auch für Mieter?",
+      "prior_user": "Welche Kündigungsfrist gilt?",
+      "expected_route": "document_qa",
+      "expect_resolved_contains": [
+        "Welche",
+        "Kündigungsfrist",
+        "gilt?"
+      ]
+    }
+  ]
+}

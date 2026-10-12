@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import math
+import os
 import re
 from dataclasses import dataclass
 
+from docuvate_worker.infrastructure.chat.extractive_reader import read_span
 from docuvate_worker.infrastructure.fastembed_model import embed_passages, embed_query
 
 EXTRACTIVE_ABSTAIN_NO_MATCH = "Dazu finde ich im Dokument keinen eindeutigen Treffer"
@@ -15,25 +17,12 @@ EXTRACTIVE_ABSTAIN_NO_PASSAGE = "Dazu finde ich im Dokument keinen passenden Tex
 CHUNK_SIZE = 320
 CHUNK_OVERLAP = 64
 TOP_K = 6
-# e5-small dense cosine on DE pairs is ~0.72-0.88 (prior encoder used ~0.38).
-MIN_DENSE_SCORE = 0.75
 HYBRID_DENSE_WEIGHT = 0.55
 HYBRID_SPARSE_WEIGHT = 0.45
 MAX_RAG_CONTEXT_CHARS = 2400
 
-SENDER_HINTS = (
-    "absender",
-    "sender",
-    "von",
-    "zahlungsempfänger",
-    "empfänger",
-    "firma",
-    "unternehmen",
-    "vendor",
-    "correspondent",
-)
-
 _TOKEN_RE = re.compile(r"[\wäöüß]+", flags=re.UNICODE)
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
 
 
 def _split_chunks(text: str) -> list[str]:
@@ -110,41 +99,45 @@ def _field_lines(fields: list[dict[str, str]]) -> list[str]:
     return lines
 
 
-def _looks_like_sender_question(question: str) -> bool:
-    lower = question.lower()
-    return any(h in lower for h in SENDER_HINTS)
+def _min_field_score() -> float:
+    raw = os.environ.get("DOCUVATE_FIELD_ANSWER_GATE_MIN")
+    if raw:
+        try:
+            return float(raw)
+        except ValueError:
+            pass
+    return 0.55
 
 
-def _sender_from_fields(fields: list[dict[str, str]]) -> str | None:
-    for field in fields:
-        key = str(field.get("key", "")).lower()
-        value = str(field.get("value", "")).strip()
-        if not value:
-            continue
-        if any(h in key for h in ("vendor", "correspondent", "sender", "absender", "firma")):
-            return value
-    for field in fields:
-        key = str(field.get("key", "")).lower()
-        value = str(field.get("value", "")).strip()
-        if "name" in key and value:
-            return value
-    return None
+def _answer_from_fields_embedding(question: str, fields: list[dict[str, str]]) -> str | None:
+    lines = _field_lines(fields)
+    if not lines:
+        return None
+    query_vec = embed_query(question)
+    line_vecs = embed_passages(lines)
+    best_idx = 0
+    best_score = -1.0
+    for idx, vec in enumerate(line_vecs):
+        score = _cosine(query_vec, vec)
+        if score > best_score:
+            best_score = score
+            best_idx = idx
+    if best_score < _min_field_score():
+        return None
+    value = str(fields[best_idx].get("value", "")).strip()
+    if value:
+        return f"{value}."
+    return f"{lines[best_idx]}."
 
 
-def _sender_from_text(text: str) -> str | None:
-    patterns = (
-        r"(?i)name des zahlungsempfängers:\s*(.+?)(?:\n|$)",
-        r"(?i)zahlungsempfänger:\s*(.+?)(?:\n|$)",
-        r"(?i)absender:\s*(.+?)(?:\n|$)",
-        r"(?i)von:\s*(.+?)(?:\n|$)",
-    )
-    for pattern in patterns:
-        match = re.search(pattern, text)
-        if match:
-            candidate = match.group(1).strip(" .")
-            if candidate:
-                return candidate
-    return None
+def _min_dense_score() -> float:
+    raw = os.environ.get("DOCUVATE_DENSE_RETRIEVAL_GATE_MIN")
+    if raw:
+        try:
+            return float(raw)
+        except ValueError:
+            pass
+    return 0.75
 
 
 def _build_chunk_corpus(
@@ -194,7 +187,7 @@ def _chunk_passes_retrieval_threshold(
     dense_score: float,
     _sparse_score: float,
 ) -> bool:
-    return dense_score >= MIN_DENSE_SCORE
+    return dense_score >= _min_dense_score()
 
 
 def _select_ranked_chunks(
@@ -358,6 +351,28 @@ def retrieve_library_rag_context(
     return RagRetrievalResult(chunks=selected, context_text=context_text)
 
 
+def _sentence_from_context(question: str, context: str) -> str | None:
+    span = read_span(question, context)
+    if span is not None:
+        return span.text
+    tokens = _tokenize(question)
+    tokens = [t for t in tokens if len(t) >= 3]
+    sentences = [s.strip() for s in _SENTENCE_SPLIT.split(context) if s.strip()]
+    if not sentences:
+        return None
+    best = sentences[0]
+    best_hits = 0
+    for sentence in sentences:
+        lower = sentence.lower()
+        hits = sum(1 for tok in tokens if tok in lower)
+        if hits > best_hits:
+            best_hits = hits
+            best = sentence
+    if tokens and best_hits == 0:
+        return None
+    return best
+
+
 def answer_from_library_context(
     question: str,
     documents: list[DocumentContextInput],
@@ -379,14 +394,12 @@ def answer_from_library_context(
     if not retrieval.chunks:
         return EXTRACTIVE_ABSTAIN_NO_PASSAGE + "."
 
-    excerpts = " ".join(f"„{chunk}“" for chunk in retrieval.chunks)
-    lead = f"Zu „{trimmed}“: "
-    cited = _source_tags_from_chunks(retrieval.chunks)
-    if cited:
-        sources = ", ".join(sorted(cited))
-    else:
-        sources = ", ".join(sorted({doc.filename or doc.title or "Dokument" for doc in documents}))
-    return f"{lead}{excerpts} (Quellen: {sources})."
+    sentence = _sentence_from_context(trimmed, retrieval.context_text)
+    if sentence:
+        cited = _source_tags_from_chunks(retrieval.chunks)
+        sources = ", ".join(sorted(cited)) if cited else "Dokumente"
+        return f"{sentence} (Quellen: {sources})."
+    return EXTRACTIVE_ABSTAIN_NO_MATCH + "."
 
 
 def answer_from_document_context(
@@ -401,10 +414,9 @@ def answer_from_document_context(
     if not trimmed:
         return "Bitte eine Frage zum Dokument stellen."
 
-    if _looks_like_sender_question(trimmed):
-        sender = _sender_from_fields(fields) or _sender_from_text(text)
-        if sender:
-            return f"Absender bzw. Zahlungsempfänger laut Dokument: {sender}."
+    field_answer = _answer_from_fields_embedding(trimmed, fields)
+    if field_answer:
+        return field_answer
 
     body = text.strip()
     field_lines = _field_lines(fields)
@@ -422,14 +434,9 @@ def answer_from_document_context(
         fields=fields,
     )
     if not retrieval.chunks:
-        fallback = body[:400] or (field_lines[0] if field_lines else title)
-        if fallback:
-            return (
-                f"{EXTRACTIVE_ABSTAIN_NO_MATCH}. "
-                f"Kurzer Kontext: „{fallback}{'…' if len(body) > 400 else ''}“"  # noqa: PLR2004
-            )
         return f"{EXTRACTIVE_ABSTAIN_NO_PASSAGE}."
 
-    excerpts = " ".join(f"„{chunk}“" for chunk in retrieval.chunks)
-    lead = f"Zu „{trimmed}“: "
-    return f"{lead}{excerpts} (Quelle: {filename or 'Dokument'})."
+    sentence = _sentence_from_context(trimmed, retrieval.context_text)
+    if sentence:
+        return f"{sentence} (Quelle: {filename or 'Dokument'})."
+    return EXTRACTIVE_ABSTAIN_NO_MATCH + "."

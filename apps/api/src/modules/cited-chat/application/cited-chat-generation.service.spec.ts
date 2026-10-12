@@ -12,6 +12,7 @@ import {
 import { CITED_CHAT_ABSTENTION_DE } from '../domain/cited-chat-constants.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import { ChatQueryRouterService } from './chat-query-router.service.js';
 import { CitedChatGenerationService } from './cited-chat-generation.service.js';
 
 vi.mock('../infrastructure/fetch-worker-rag-rerank.js', () => ({
@@ -46,14 +47,25 @@ async function buildService(deps: {
           threads: DocumentChatThreadRepository,
           embedding: EmbeddingPort,
           retrieval: PgCitedChatRetrievalRepository,
-          citations: PgChatMessageCitationsRepository
-        ) => new CitedChatGenerationService(threads, embedding, retrieval, citations),
+          citations: PgChatMessageCitationsRepository,
+          queryRouter: ChatQueryRouterService
+        ) => new CitedChatGenerationService(threads, embedding, retrieval, citations, queryRouter),
         inject: [
           DOCUMENT_CHAT_THREAD_REPOSITORY,
           EMBEDDING_PORT,
           PgCitedChatRetrievalRepository,
           PgChatMessageCitationsRepository,
+          ChatQueryRouterService,
         ],
+      },
+      {
+        provide: ChatQueryRouterService,
+        useValue: {
+          route: vi.fn(async ({ userMessage }: { userMessage: string }) => ({
+            kind: 'document_qa',
+            resolvedQuery: userMessage,
+          })),
+        },
       },
       { provide: DOCUMENT_CHAT_THREAD_REPOSITORY, useValue: deps.threads },
       {

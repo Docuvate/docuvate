@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
+import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { CITED_CHAT_ABSTENTION_DE } from '../../src/modules/cited-chat/domain/cited-chat-constants.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
@@ -86,7 +87,8 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       threads,
       noopEmbedding,
       retrieval,
-      new PgChatMessageCitationsRepository(pool)
+      new PgChatMessageCitationsRepository(pool),
+      passthroughChatQueryRouter()
     );
   }, 60_000);
 

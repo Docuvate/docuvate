@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
+import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
@@ -97,7 +98,8 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
       threads,
       queryEmbeddingPort,
       retrieval,
-      new PgChatMessageCitationsRepository(pool)
+      new PgChatMessageCitationsRepository(pool),
+      passthroughChatQueryRouter()
     );
   }, 60_000);
 
