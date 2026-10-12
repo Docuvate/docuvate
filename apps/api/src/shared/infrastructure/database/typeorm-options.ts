@@ -22,12 +22,9 @@ import { EmbeddingDensityReadinessSplit20261010140000 } from './migrations/20261
 import { HeuristicFieldSuggestions20261010150000 } from './migrations/20261010150000-heuristic-field-suggestions.js';
 import { PurgeHeadingVendorSuggestions20261010153000 } from './migrations/20261010153000-purge-heading-vendor-suggestions.js';
 import { Corrections20261011180000 } from './migrations/20261011180000-corrections.js';
-<<<<<<< HEAD
 import { RepairPeriodDuplicateStacks20261011200000 } from './migrations/20261011200000-repair-period-duplicate-stacks.js';
 import { DuplicatePairLabels20261011210000 } from './migrations/20261011210000-duplicate-pair-labels.js';
-=======
 import { DocumentRepresentation20261012120000 } from './migrations/20261012120000-document-representation.js';
->>>>>>> 0c1e6ba (feat(representation): central e5 document encoding with tenant RLS)
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -72,12 +69,9 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       HeuristicFieldSuggestions20261010150000,
       PurgeHeadingVendorSuggestions20261010153000,
       Corrections20261011180000,
-<<<<<<< HEAD
       RepairPeriodDuplicateStacks20261011200000,
       DuplicatePairLabels20261011210000,
-=======
       DocumentRepresentation20261012120000,
->>>>>>> 0c1e6ba (feat(representation): central e5 document encoding with tenant RLS)
     ],
     migrationsTableName: 'migrations',
     synchronize: false,
