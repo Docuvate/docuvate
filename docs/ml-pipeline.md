@@ -38,7 +38,7 @@ flowchart TB
 | Revision | `614241f622f53c4eeff9890bdc4f31cfecc418b3` (pinned in worker constants) |
 | Prefixes | `passage: ` for document units, `query: ` for questions |
 | Runtime | ONNX/int8 via fastembed when available; otherwise `sentence-transformers` on CPU |
-| Units | LUNA sections/paragraphs and TACO table rows (row text prefixed with header) when layout is available; otherwise paragraph splits of OCR text. Legacy 320/64 character windows are fallback-only. |
+| Units | LUNA sections/paragraphs and TACO table rows (row text prefixed with header) when layout is available; otherwise paragraph splits of OCR text. Fixed 320/64 character windows are used only when layout units are unavailable. |
 | Spans | Each unit stores `page`, bounding box, `char_start`, `char_end`. |
 
 ## Storage format
@@ -49,7 +49,7 @@ flowchart TB
 | Per document | int8 mean and int8 elementwise max over unit float vectors (no extra encoder call) |
 | Metadata | `encoder_id`, `encoder_revision`, `representation_version` |
 | Tables | `document_representation`, `document_representation_unit` (tenant-scoped, RLS) |
-| Legacy JSONB embeddings | No longer written; `document_embeddings.embedding` and `document_text_chunks.embedding` are nullable |
+| Retired JSONB embeddings | No longer written; `document_embeddings.embedding` and `document_text_chunks.embedding` are nullable |
 
 ## Label heads
 

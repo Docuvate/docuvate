@@ -14,8 +14,9 @@ EXTRACTIVE_ABSTAIN_NO_PASSAGE = "Dazu finde ich im Dokument keinen passenden Tex
 
 CHUNK_SIZE = 320
 CHUNK_OVERLAP = 64
-TOP_K = 5
-MIN_DENSE_SCORE = 0.38
+TOP_K = 6
+# multilingual-e5-small cosine scores are ~0.72-0.88 on in-domain DE pairs (0.38 was the prior encoder).
+MIN_DENSE_SCORE = 0.75
 HYBRID_DENSE_WEIGHT = 0.55
 HYBRID_SPARSE_WEIGHT = 0.45
 MAX_RAG_CONTEXT_CHARS = 2400
@@ -191,9 +192,9 @@ _CHUNK_TAG_RE = re.compile(r"^\[([^\]]+)\]\s*")
 
 def _chunk_passes_retrieval_threshold(
     dense_score: float,
-    sparse_score: float,
+    _sparse_score: float,
 ) -> bool:
-    return dense_score >= MIN_DENSE_SCORE or sparse_score > 0
+    return dense_score >= MIN_DENSE_SCORE
 
 
 def _select_ranked_chunks(
