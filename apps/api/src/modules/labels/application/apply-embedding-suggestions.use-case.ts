@@ -14,9 +14,10 @@ import {
   USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
+import { EnsureDocumentRepresentationUseCase } from '../../representation/application/ensure-document-representation.use-case.js';
+import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import { cosineSimilarity } from '../domain/cosine.js';
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
-import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './apply-embedding-density-suggestions.use-case.js';
 
@@ -35,7 +36,8 @@ export class ApplyEmbeddingSuggestionsUseCase {
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     private readonly embeddingDensity: ApplyEmbeddingDensitySuggestionsUseCase,
     private readonly densityCalibrationQueue: EmbeddingDensityCalibrationQueueService,
-    private readonly documentRepresentation: PgDocumentRepresentationRepository
+    private readonly documentRepresentation: PgDocumentRepresentationRepository,
+    private readonly ensureRepresentation: EnsureDocumentRepresentationUseCase
   ) {}
 
   async execute(documentId: string, userId: string, content: string): Promise<void> {
@@ -47,7 +49,11 @@ export class ApplyEmbeddingSuggestionsUseCase {
     try {
       const minConfidence = (await this.prefs.getForUser(userId)).labelNearSimilarityThreshold;
 
-      const stored = await this.documentRepresentation.loadDocumentMeanVector(userId, documentId);
+      let stored = await this.documentRepresentation.loadDocumentMeanVector(userId, documentId);
+      if (!stored?.vector.length) {
+        await this.ensureRepresentation.execute(userId, documentId, trimmed);
+        stored = await this.documentRepresentation.loadDocumentMeanVector(userId, documentId);
+      }
       let model: string;
       let vector: number[];
       if (stored && stored.vector.length > 0) {

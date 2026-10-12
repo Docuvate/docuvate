@@ -104,8 +104,8 @@ export class PgGlobalSearchRepository {
   async userHasDocumentEmbeddings(userId: string): Promise<boolean> {
     const row = await this.pool.query<{ ok: number }>(
       `SELECT 1 AS ok
-       FROM document_embeddings e
-       JOIN documents d ON d.id = e.document_id
+       FROM document_representation dr
+       JOIN documents d ON d.id = dr.document_id
        WHERE d.user_id = $1
        LIMIT 1`,
       [userId]
@@ -119,7 +119,7 @@ export class PgGlobalSearchRepository {
     chunks: TextChunkSpan[],
     embeddings?: number[][],
     options?: {
-      int8Vectors?: Array<{ scale: number; bytes: Buffer; binaryCode: Buffer }>;
+      int8Vectors?: { scale: number; bytes: Buffer; binaryCode: Buffer }[];
     }
   ): Promise<void> {
     const client = await this.pool.connect();

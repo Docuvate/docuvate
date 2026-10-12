@@ -22,8 +22,8 @@ import {
   isOpenApiContractTestMode,
   isOpenApiHeadlessMode,
 } from '../../shared/infrastructure/database/typeorm-options.js';
-import { RepresentationModule } from '../representation/representation.module.js';
 import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.module.js';
+import { RepresentationModule } from '../representation/representation.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './application/apply-embedding-density-suggestions.use-case.js';
 import { ApplyEmbeddingSuggestionsUseCase } from './application/apply-embedding-suggestions.use-case.js';

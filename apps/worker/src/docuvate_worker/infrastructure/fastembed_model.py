@@ -7,6 +7,9 @@ import logging
 import os
 import threading
 
+from fastembed import TextEmbedding
+from sentence_transformers import SentenceTransformer
+
 from docuvate_worker.domain.representation.constants import (
     ENCODER_ID,
     PASSAGE_PREFIX,
@@ -27,9 +30,7 @@ _model: object | None = None
 _backend: str | None = None
 
 
-def _load_sentence_transformers() -> object:
-    from sentence_transformers import SentenceTransformer
-
+def _load_sentence_transformers() -> SentenceTransformer:
     revision = os.environ.get("DOCUVATE_ENCODER_REVISION")
     kwargs: dict[str, str] = {}
     if revision:
@@ -37,11 +38,7 @@ def _load_sentence_transformers() -> object:
     return SentenceTransformer(MODEL_NAME, device="cpu", **kwargs)
 
 
-def _load_fastembed() -> object | None:
-    try:
-        from fastembed import TextEmbedding
-    except ImportError:
-        return None
+def _load_fastembed() -> TextEmbedding | None:
     for candidate in _E5_ONNX_CANDIDATES:
         try:
             return TextEmbedding(model_name=candidate)
@@ -70,16 +67,12 @@ def get_embedding_model() -> object:
 def _embed_with_backend(model: object, texts: list[str]) -> list[list[float]]:
     backend = _backend or "fastembed"
     if backend == "sentence_transformers":
-        from sentence_transformers import SentenceTransformer
-
         st_model = model
         if not isinstance(st_model, SentenceTransformer):
             msg = "invalid sentence_transformers model handle"
             raise TypeError(msg)
         matrix = st_model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
         return [[float(x) for x in row] for row in matrix]
-    from fastembed import TextEmbedding
-
     fe_model = model
     if not isinstance(fe_model, TextEmbedding):
         msg = "invalid fastembed model handle"

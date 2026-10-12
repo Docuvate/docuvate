@@ -3,11 +3,12 @@
 import type { ExtractionBlock } from '@docuvate/contracts';
 import { Injectable } from '@nestjs/common';
 
-import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import {
   attachPagesToChunks,
   splitTextChunksWithSpans,
 } from '../../cited-chat/domain/split-text-chunks-with-spans.js';
+import { EnsureDocumentRepresentationUseCase } from '../../representation/application/ensure-document-representation.use-case.js';
+import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import { PgGlobalSearchRepository } from '../infrastructure/pg-global-search.repository.js';
 
 export interface SyncDocumentSearchIndexInput {
@@ -22,7 +23,8 @@ export interface SyncDocumentSearchIndexInput {
 export class SyncDocumentSearchIndexUseCase {
   constructor(
     private readonly searchRepo: PgGlobalSearchRepository,
-    private readonly documentRepresentation: PgDocumentRepresentationRepository
+    private readonly documentRepresentation: PgDocumentRepresentationRepository,
+    private readonly ensureRepresentation: EnsureDocumentRepresentationUseCase
   ) {}
 
   async execute(
@@ -32,10 +34,11 @@ export class SyncDocumentSearchIndexUseCase {
   ): Promise<void> {
     const text = input.text.trim();
     if (text.length > 0) {
-      const units = await this.documentRepresentation.listUnitVectorsForDocument(
-        userId,
-        documentId
-      );
+      let units = await this.documentRepresentation.listUnitVectorsForDocument(userId, documentId);
+      if (units.length === 0 && text.length > 0) {
+        await this.ensureRepresentation.execute(userId, documentId, text);
+        units = await this.documentRepresentation.listUnitVectorsForDocument(userId, documentId);
+      }
       if (units.length > 0) {
         const spans = units.map((unit) => ({
           body: unit.body,

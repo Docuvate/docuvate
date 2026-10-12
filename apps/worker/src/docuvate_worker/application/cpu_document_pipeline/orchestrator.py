@@ -11,10 +11,10 @@ from docuvate_worker.application.cpu_document_pipeline.stages.kite_index_stage i
 )
 from docuvate_worker.application.cpu_document_pipeline.stages.luna_stage import run_luna_stage
 from docuvate_worker.application.cpu_document_pipeline.stages.nest_stage import run_nest_stage
+from docuvate_worker.application.cpu_document_pipeline.stages.ocr_stage import run_ocr_stage
 from docuvate_worker.application.cpu_document_pipeline.stages.representation_stage import (
     run_representation_stage,
 )
-from docuvate_worker.application.cpu_document_pipeline.stages.ocr_stage import run_ocr_stage
 from docuvate_worker.application.cpu_document_pipeline.stages.rotation_stage import (
     run_rotation_stage,
 )

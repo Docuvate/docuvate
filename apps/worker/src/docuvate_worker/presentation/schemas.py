@@ -125,6 +125,10 @@ class DocumentRepresentationModel(BaseModel):
     document_max_int8_base64: str = Field(serialization_alias="documentMaxInt8Base64")
 
 
+class RepresentationFromTextRequest(BaseModel):
+    text: str = Field(min_length=1)
+
+
 class CpuPipelineExtractModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 

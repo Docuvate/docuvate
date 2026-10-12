@@ -25,7 +25,7 @@ class RepresentationUnit:
     char_end: int | None
 
 
-def _paragraph_units_from_text(text: str) -> list[tuple[str, int | None, int | None]]:
+def paragraph_units_from_text(text: str) -> list[tuple[str, int | None, int | None]]:
     normalized = text.replace("\r\n", "\n").replace("\r", "\n")
     if not normalized.strip():
         return []
@@ -160,7 +160,7 @@ def build_representation_units(
             )
             for idx, unit in enumerate(merged)
         ]
-    paragraphs = _paragraph_units_from_text(text)
+    paragraphs = paragraph_units_from_text(text)
     return [
         RepresentationUnit(
             unit_index=idx,

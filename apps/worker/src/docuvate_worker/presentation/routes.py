@@ -21,6 +21,11 @@ from docuvate_worker.application.embedding_density import (
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
+from docuvate_worker.domain.representation.encode import encode_units
+from docuvate_worker.domain.representation.units import (
+    RepresentationUnit,
+    paragraph_units_from_text,
+)
 from docuvate_worker.infrastructure.chat.context_qa import retrieve_document_rag_context
 from docuvate_worker.infrastructure.chat.rag_rerank import (
     RERANKER_MODEL,
@@ -47,6 +52,7 @@ from docuvate_worker.presentation.schemas import (
     DocumentChatRagContextResponse,
     DocumentChatRequest,
     DocumentChatResponse,
+    DocumentRepresentationModel,
     EmbeddingDensityCalibrateRequest,
     EmbeddingDensityCalibrateResponse,
     EmbeddingDensityClassifyRequest,
@@ -85,6 +91,7 @@ from docuvate_worker.presentation.schemas import (
     RagRetrieveRequest,
     RagRetrieveResponse,
     RagRetrieveResultItem,
+    RepresentationFromTextRequest,
 )
 
 router = APIRouter(prefix="/v1")
@@ -450,6 +457,50 @@ def embed(
     _require_worker_secret(x_worker_secret)
     model, vectors = embed_texts(body.texts)
     return EmbedResponse(model=model, embeddings=vectors)
+
+
+@router.post("/representation/from-text", response_model=DocumentRepresentationModel)
+def representation_from_text(
+    body: RepresentationFromTextRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> DocumentRepresentationModel:
+    _require_worker_secret(x_worker_secret)
+    paragraphs = paragraph_units_from_text(body.text)
+    units = [
+        RepresentationUnit(
+            unit_index=idx,
+            kind="paragraph",
+            text=part,
+            page=None,
+            x=None,
+            y=None,
+            width=None,
+            height=None,
+            char_start=start,
+            char_end=end,
+        )
+        for idx, (part, start, end) in enumerate(paragraphs)
+    ]
+    if not units:
+        units = [
+            RepresentationUnit(
+                unit_index=0,
+                kind="paragraph",
+                text=" ",
+                page=None,
+                x=None,
+                y=None,
+                width=None,
+                height=None,
+                char_start=0,
+                char_end=1,
+            )
+        ]
+    encoded = encode_units(units)
+    model = document_representation_to_response(encoded)
+    if model is None:
+        raise HTTPException(status_code=500, detail="representation encode failed")
+    return model
 
 
 @router.post("/ml/retrain/run", response_model=MlRetrainRunResponse)

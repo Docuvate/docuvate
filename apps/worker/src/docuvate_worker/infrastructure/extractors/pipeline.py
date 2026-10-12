@@ -8,13 +8,13 @@ from docuvate_worker.application.cpu_document_pipeline.orchestrator import (
 )
 from docuvate_worker.domain.cpu_pipeline.contracts import (
     CpuPipelineExtractionArtifacts,
+    IntegratedPipelineResult,
     PipelineRunInput,
 )
-from docuvate_worker.domain.cpu_pipeline.contracts import IntegratedPipelineResult
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractionResult
-from docuvate_worker.domain.representation.encode import DocumentRepresentation
 from docuvate_worker.domain.ports import ExtractorEngine
+from docuvate_worker.domain.representation.encode import DocumentRepresentation
 
 logger = logging.getLogger(__name__)
 

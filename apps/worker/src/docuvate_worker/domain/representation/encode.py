@@ -6,9 +6,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from docuvate_worker.domain.representation.constants import (
+    EMBEDDING_DIM,
     ENCODER_ID,
     ENCODER_REVISION,
-    EMBEDDING_DIM,
     REPRESENTATION_VERSION,
 )
 from docuvate_worker.domain.representation.quantize import (

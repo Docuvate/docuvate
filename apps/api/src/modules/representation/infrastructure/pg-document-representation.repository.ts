@@ -107,10 +107,10 @@ export class PgDocumentRepresentationRepository {
          FROM document_representation WHERE document_id = $1`,
         [documentId]
       );
-      const row = result.rows[0];
-      if (!row) {
+      if (result.rowCount === 0) {
         return null;
       }
+      const row = result.rows[0];
       const raw = row.document_mean_int8;
       const scale = row.document_mean_scale;
       const vector: number[] = [];
@@ -125,7 +125,7 @@ export class PgDocumentRepresentationRepository {
     tenantId: string,
     documentId: string
   ): Promise<
-    Array<{
+    {
       unitIndex: number;
       body: string;
       page: number | null;
@@ -134,7 +134,7 @@ export class PgDocumentRepresentationRepository {
       vectorScale: number;
       vectorInt8: Buffer;
       binaryCode: Buffer;
-    }>
+    }[]
   > {
     return withTenantPgClient(this.pool, tenantId, async (client) => {
       const result = await client.query<{

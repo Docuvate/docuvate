@@ -20,7 +20,10 @@ import {
   parseStringArray,
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
+import { withTenantPgClient } from '../../../shared/infrastructure/database/tenant-pg.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { EnsureDocumentRepresentationUseCase } from '../../representation/application/ensure-document-representation.use-case.js';
+import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import { normalizeLabelKey } from '../domain/label-vocabulary.js';
 
 function mapBlocklistEntry(row: Record<string, unknown>): LabelRecommendationBlocklistEntry {
@@ -60,14 +63,22 @@ function parseVector(raw: unknown): number[] {
 
 @Injectable()
 export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
-  constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
+  constructor(
+    @Inject(PG_POOL) private readonly pool: pg.Pool,
+    private readonly documentRepresentation: PgDocumentRepresentationRepository,
+    private readonly ensureRepresentation: EnsureDocumentRepresentationUseCase
+  ) {}
 
   async saveDocumentEmbedding(
     documentId: string,
     userId: string,
     model: string,
+    // Vector is persisted in document_representation; model id kept for compatibility.
     embedding: number[]
   ): Promise<void> {
+    if (embedding.length < 0) {
+      return;
+    }
     await this.pool.query(
       `INSERT INTO document_embeddings (document_id, model, embedding, updated_at)
        VALUES ($1, $2, NULL, now())
@@ -111,47 +122,49 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
   }
 
   async listDocumentEmbeddingsForUser(userId: string): Promise<UserDocumentEmbeddingRow[]> {
-    const result = await this.pool.query(
-      `SELECT dr.document_id,
-              dr.document_mean_scale,
-              dr.document_mean_int8,
-              d.title,
-              d.filename,
-              COALESCE(array_agg(dt.tag_id) FILTER (WHERE t.is_inbox = false), '{}') AS tag_ids
-       FROM document_representation dr
-       INNER JOIN documents d ON d.id = dr.document_id
-       LEFT JOIN document_tags dt ON dt.document_id = dr.document_id
-       LEFT JOIN tags t ON t.id = dt.tag_id
-       WHERE d.user_id = $1
-         AND d.status = 'ready'
-         AND NOT EXISTS (
-           SELECT 1 FROM document_stack_members m
-           WHERE m.document_id = d.id AND m.role = 'version'
-         )
-       GROUP BY dr.document_id, dr.document_mean_scale, dr.document_mean_int8, d.title, d.filename, d.updated_at
-       ORDER BY d.updated_at DESC`,
-      [userId]
-    );
-    return result.rows
-      .map((raw) => {
-        const row = requireRecord(raw);
-        const scale = parseNumber(row.document_mean_scale, 0);
-        const buffer = row.document_mean_int8;
-        const embedding: number[] = [];
-        if (Buffer.isBuffer(buffer)) {
-          for (let i = 0; i < buffer.length; i += 1) {
-            embedding.push(buffer.readInt8(i) * scale);
+    return withTenantPgClient(this.pool, userId, async (client) => {
+      const result = await client.query(
+        `SELECT dr.document_id,
+                dr.document_mean_scale,
+                dr.document_mean_int8,
+                d.title,
+                d.filename,
+                COALESCE(array_agg(dt.tag_id) FILTER (WHERE t.is_inbox = false), '{}') AS tag_ids
+         FROM document_representation dr
+         INNER JOIN documents d ON d.id = dr.document_id
+         LEFT JOIN document_tags dt ON dt.document_id = dr.document_id
+         LEFT JOIN tags t ON t.id = dt.tag_id
+         WHERE d.user_id = $1
+           AND d.status = 'ready'
+           AND NOT EXISTS (
+             SELECT 1 FROM document_stack_members m
+             WHERE m.document_id = d.id AND m.role = 'version'
+           )
+         GROUP BY dr.document_id, dr.document_mean_scale, dr.document_mean_int8, d.title, d.filename, d.updated_at
+         ORDER BY d.updated_at DESC`,
+        [userId]
+      );
+      return result.rows
+        .map((raw) => {
+          const row = requireRecord(raw);
+          const scale = parseNumber(row.document_mean_scale, 0);
+          const buffer = row.document_mean_int8;
+          const embedding: number[] = [];
+          if (Buffer.isBuffer(buffer)) {
+            for (let i = 0; i < buffer.length; i += 1) {
+              embedding.push(buffer.readInt8(i) * scale);
+            }
           }
-        }
-        return {
-          documentId: parseString(row.document_id),
-          title: parseString(row.title ?? ''),
-          filename: parseString(row.filename ?? ''),
-          embedding,
-          nonInboxTagIds: parseStringArray(row.tag_ids),
-        };
-      })
-      .filter((row) => row.embedding.length > 0);
+          return {
+            documentId: parseString(row.document_id),
+            title: parseString(row.title ?? ''),
+            filename: parseString(row.filename ?? ''),
+            embedding,
+            nonInboxTagIds: parseStringArray(row.tag_ids),
+          };
+        })
+        .filter((row) => row.embedding.length > 0);
+    });
   }
 
   async listDismissedRecommendationKeys(userId: string): Promise<string[]> {
@@ -247,16 +260,24 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
   }
 
   async getDocumentEmbedding(documentId: string): Promise<number[] | null> {
-    const result = await this.pool.query(
-      `SELECT embedding FROM document_embeddings WHERE document_id = $1`,
+    const ownerRow = await this.pool.query<{ user_id: string; extracted_text: string | null }>(
+      `SELECT user_id, extracted_text FROM documents WHERE id = $1`,
       [documentId]
     );
-    if (result.rowCount === 0) {
+    const owner = ownerRow.rows[0];
+    if (ownerRow.rowCount === 0) {
       return null;
     }
-    const row = requireRecord(result.rows[0]);
-    const vector = parseVector(row.embedding);
-    return vector.length > 0 ? vector : null;
+    const userId = parseString(owner.user_id);
+    let loaded = await this.documentRepresentation.loadDocumentMeanVector(userId, documentId);
+    if (!loaded?.vector.length) {
+      const text = parseString(owner.extracted_text ?? '');
+      if (text.trim().length >= 20) {
+        await this.ensureRepresentation.execute(userId, documentId, text);
+        loaded = await this.documentRepresentation.loadDocumentMeanVector(userId, documentId);
+      }
+    }
+    return loaded?.vector.length ? loaded.vector : null;
   }
 
   async listLabeledDocumentEmbeddings(

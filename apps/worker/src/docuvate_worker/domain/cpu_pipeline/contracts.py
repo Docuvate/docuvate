@@ -165,7 +165,7 @@ class PipelineMutableState:
     embedding_density_state: EmbeddingDensityStatePayload | None = None
     luna_data: LunaStageData = field(default_factory=lambda: LunaStageData(labels=()))
     taco_data: TacoStageData = field(default_factory=lambda: TacoStageData(tables=()))
-    document_representation: DocumentRepresentation | None = None  # noqa: UP037
+    document_representation: DocumentRepresentation | None = None
 
 
 @dataclass(frozen=True)

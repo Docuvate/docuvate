@@ -5,7 +5,6 @@ import type pg from 'pg';
 
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
-import { cosineSimilarity } from '../../search/domain/cosine-similarity.js';
 import {
   normalizeSearchText,
   searchTextVariants,
@@ -31,17 +30,6 @@ export interface CitedChatChunkCandidate {
   charStart: number | null;
   charEnd: number | null;
   fusionScore: number;
-}
-
-function parseEmbedding(raw: unknown): number[] | null {
-  if (!Array.isArray(raw)) {
-    return null;
-  }
-  const nums = raw.map((v) => Number(v));
-  if (nums.some((n) => !Number.isFinite(n))) {
-    return null;
-  }
-  return nums;
 }
 
 @Injectable()
@@ -139,8 +127,8 @@ export class PgCitedChatRetrievalRepository {
           id: row.id,
           hamming:
             row.binary_code != null ? hammingDistance(row.binary_code, queryPacked) : 9999,
-          scale: row.vector_scale as number,
-          bytes: row.vector_int8 as Buffer,
+          scale: row.vector_scale ?? 1,
+          bytes: row.vector_int8 ?? Buffer.alloc(0),
         }))
         .sort((a, b) => a.hamming - b.hamming)
         .slice(0, 256);
