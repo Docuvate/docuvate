@@ -128,7 +128,7 @@ export class ConfirmDuplicateVersionUseCase {
     @Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository,
     @Inject(DUPLICATE_REPOSITORY) private readonly duplicates: DuplicateRepository,
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    private readonly classifier: DuplicateClassifierService
+    @Inject(DuplicateClassifierService) private readonly classifier: DuplicateClassifierService
   ) {}
 
   async execute(
@@ -164,7 +164,7 @@ export class ReleaseDuplicateStackMemberUseCase {
     @Inject(DUPLICATE_STACK_REPOSITORY) private readonly stacks: DuplicateStackRepository,
     @Inject(DUPLICATE_REPOSITORY) private readonly duplicates: DuplicateRepository,
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    private readonly classifier: DuplicateClassifierService
+    @Inject(DuplicateClassifierService) private readonly classifier: DuplicateClassifierService
   ) {}
 
   async execute(primaryDocumentId: string, otherDocumentId: string, userId: string): Promise<void> {
