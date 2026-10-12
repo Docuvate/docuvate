@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ExtractedField, ExtractionBlock, LayoutIrDocument } from '@docuvate/contracts';
+import type { ExtractedField, LayoutIrDocument } from '@docuvate/contracts';
 import { type KeyboardEvent,useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -26,7 +26,6 @@ interface DocumentLayoutSidePanelProps {
   documentId: string;
   layoutIr: LayoutIrDocument;
   fields: ExtractedField[];
-  blocks: ExtractionBlock[];
   knownFieldKeys: Set<string>;
   fieldLabelForKey: (key: string) => string;
   activeTab: LayoutSideTab;
@@ -46,7 +45,6 @@ export function DocumentLayoutSidePanel({
   documentId,
   layoutIr,
   fields,
-  blocks: _blocks,
   knownFieldKeys,
   fieldLabelForKey,
   activeTab,

@@ -30,11 +30,16 @@ export function DocumentDetailTabStrip({
   showChatTab?: boolean;
 }) {
   const { t } = useTranslation();
-  const tabs: [DetailTab, string][] = [
-    ['details', t('documents.tabDetails')],
-    ['labels', t('documents.tabLabels')],
-    ...(showChatTab ? [['chat', t('documents.tabChat')] as [DetailTab, string]] : []),
-  ];
+  const tabs: [DetailTab, string][] = showChatTab
+    ? [
+        ['details', t('documents.tabDetails')],
+        ['labels', t('documents.tabLabels')],
+        ['chat', t('documents.tabChat')],
+      ]
+    : [
+        ['details', t('documents.tabDetails')],
+        ['labels', t('documents.tabLabels')],
+      ];
 
   return (
     <div className="detail-tabs-bar" role="tablist" aria-label={t('documents.tabsAria')}>
@@ -115,8 +120,8 @@ export function DocumentDetailMetaBar({
                 <button
                   type="button"
                   className="document-detail-overflow-item"
-                  role="menuitem"
-                  aria-pressed={showTechnicalDetails}
+                  role="menuitemcheckbox"
+                  aria-checked={showTechnicalDetails}
                   onClick={() => { onShowTechnicalDetailsChange(!showTechnicalDetails); }}
                 >
                   {showTechnicalDetails

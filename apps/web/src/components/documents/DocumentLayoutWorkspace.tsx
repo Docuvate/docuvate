@@ -469,7 +469,6 @@ export function DocumentLayoutWorkspace({
           documentId={doc.id}
           layoutIr={layoutIr}
           fields={fields}
-          blocks={blocks}
           knownFieldKeys={knownFieldKeys}
           fieldLabelForKey={fieldLabelForKey}
           activeTab={sideTab}
