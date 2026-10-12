@@ -30,8 +30,8 @@ test.describe('UI audit regressions (non-ML)', () => {
     test.setTimeout(360_000);
     await openLayoutDocumentPage(page, layoutDocId);
 
-    const toolbar = page.locator('.layout-viewer-toolbar');
-    const stage = page.locator('.layout-viewer-stage');
+    const toolbar = page.getByTestId('layout-viewer-toolbar');
+    const stage = page.getByTestId('layout-viewer-stage');
     await toolbar.waitFor({ state: 'visible', timeout: 120_000 });
     await stage.waitFor({ state: 'visible', timeout: 120_000 });
     const toolbarBox = await toolbar.boundingBox();
@@ -40,7 +40,7 @@ test.describe('UI audit regressions (non-ML)', () => {
     expect(stageBox).not.toBeNull();
     const gap = (stageBox?.y ?? 0) - (toolbarBox?.bottom ?? 0);
     expect(Number.isFinite(gap)).toBe(true);
-    expect(gap).toBeLessThan(120);
+    expect(gap).toBeLessThan(48);
 
     await page.getByRole('radio', { name: /^Text$/i }).click();
     await expect(page.locator('[data-block-id], [data-block-index]').first()).toBeVisible({

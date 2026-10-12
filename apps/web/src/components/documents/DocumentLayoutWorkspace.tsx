@@ -284,7 +284,7 @@ export function DocumentLayoutWorkspace({
             />
           ) : null}
 
-          <div className="layout-viewer-toolbar">
+          <div className="layout-viewer-toolbar" data-testid="layout-viewer-toolbar">
             <SegmentedControl<LeftDocumentMode>
               ariaLabel={t('documents.layoutViewModeAria')}
               className={segmentedToolbarClass('layout-view-mode-switch', 'segmented-control--text-wide')}
@@ -342,7 +342,7 @@ export function DocumentLayoutWorkspace({
             ) : null}
           </div>
 
-          <div className="layout-viewer-stage">
+          <div className="layout-viewer-stage" data-testid="layout-viewer-stage">
             {leftMode === 'text' ? (
               <div className="layout-text-stage">
                 <ExtractedTextPanel

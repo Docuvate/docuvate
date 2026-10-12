@@ -44,7 +44,7 @@ test.describe('document detail layout and chat', () => {
     expect(baseline).not.toBeNull();
 
     for (const mode of VIEWER_MODES) {
-      await page.getByRole('radio', { name: mode }).click();
+      await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: mode }).click();
       await page.waitForTimeout(400);
       const box = await measureWorkspace(page);
       expect(box?.width).toBe(baseline?.width);
