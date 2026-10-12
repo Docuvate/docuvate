@@ -429,6 +429,38 @@ export function DocumentLayoutWorkspace({
               </>
             )}
           </div>
+
+          <details
+            className="layout-advanced-panel"
+            open={advancedOpen}
+            onToggle={(event) => {
+              const open = event.currentTarget.open;
+              setAdvancedOpen(open);
+              if (open) {
+                setLeftMode('original');
+              }
+            }}
+          >
+            <summary className="layout-advanced-summary">{t('documents.layoutAdvancedSummary')}</summary>
+            <div className="layout-advanced-body">
+              <SegmentedControl<AdvancedViewerMode>
+                ariaLabel={t('documents.layoutAdvancedViewAria')}
+                className={segmentedToolbarClass('layout-advanced-view-switch', 'segmented-control--text-wide')}
+                value={advancedView}
+                options={advancedViewOptions}
+                onChange={setAdvancedView}
+              />
+              <div className="layout-advanced-export">
+                <DocumentLayoutExportTab
+                  documentId={doc.id}
+                  documentTitle={doc.title || doc.filename}
+                  hasLayoutIr={Boolean(layoutIr?.pages.length)}
+                  markdown={doc.extraction?.markdown}
+                  blocks={blocks}
+                />
+              </div>
+            </div>
+          </details>
         </Card>
       </div>
 
