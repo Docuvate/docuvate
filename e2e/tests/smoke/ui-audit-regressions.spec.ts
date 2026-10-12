@@ -14,7 +14,9 @@ async function openAdvancedCompare(page: import('@playwright/test').Page) {
     .waitFor({ state: 'hidden', timeout: 180_000 })
     .catch(() => undefined);
   await page.locator('.layout-advanced-summary').click();
-  await page.getByRole('radio', { name: /Vergleich|Compare/i }).click();
+  const compareRadio = page.getByRole('radio', { name: /Vergleich|Compare/i });
+  await expect(compareRadio).toBeEnabled({ timeout: 180_000 });
+  await compareRadio.click();
   await page.locator('[data-testid="layout-compare-stage"]').waitFor({
     state: 'visible',
     timeout: 180_000,
