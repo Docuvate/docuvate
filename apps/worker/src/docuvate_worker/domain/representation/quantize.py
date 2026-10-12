@@ -6,8 +6,10 @@
 from __future__ import annotations
 
 import struct
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 
 from docuvate_worker.domain.representation.constants import BINARY_CODE_BYTES, EMBEDDING_DIM
 
@@ -16,7 +18,7 @@ _RNG = np.random.default_rng(20261012 + 1)
 _R_MATRIX = np.linalg.qr(_RNG.standard_normal((EMBEDDING_DIM, EMBEDDING_DIM)))[0].astype(np.float32)
 
 
-def quantize_vector(vector: list[float] | np.ndarray) -> tuple[float, bytes]:
+def quantize_vector(vector: list[float] | NDArray[np.floating[Any]]) -> tuple[float, bytes]:
     arr = np.asarray(vector, dtype=np.float32).reshape(-1)
     if arr.shape[0] != EMBEDDING_DIM:
         msg = f"expected dim {EMBEDDING_DIM}, got {arr.shape[0]}"
@@ -27,7 +29,7 @@ def quantize_vector(vector: list[float] | np.ndarray) -> tuple[float, bytes]:
     return scale, quantized.tobytes()
 
 
-def binary_code(vector: list[float] | np.ndarray) -> bytes:
+def binary_code(vector: list[float] | NDArray[np.floating[Any]]) -> bytes:
     arr = np.asarray(vector, dtype=np.float32).reshape(-1)
     if arr.shape[0] != EMBEDDING_DIM:
         msg = f"expected dim {EMBEDDING_DIM}, got {arr.shape[0]}"
@@ -41,7 +43,7 @@ def binary_code(vector: list[float] | np.ndarray) -> bytes:
     return packed.tobytes()
 
 
-def dequantize_vector(scale: float, data: bytes) -> np.ndarray:
+def dequantize_vector(scale: float, data: bytes) -> NDArray[np.float32]:
     raw = np.frombuffer(data, dtype=np.int8)
     return raw.astype(np.float32) * scale
 

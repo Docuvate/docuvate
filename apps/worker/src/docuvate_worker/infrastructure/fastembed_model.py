@@ -32,10 +32,9 @@ _backend: str | None = None
 
 def _load_sentence_transformers() -> SentenceTransformer:
     revision = os.environ.get("DOCUVATE_ENCODER_REVISION")
-    kwargs: dict[str, str] = {}
     if revision:
-        kwargs["revision"] = revision
-    return SentenceTransformer(MODEL_NAME, device="cpu", **kwargs)
+        return SentenceTransformer(MODEL_NAME, device="cpu", revision=revision)
+    return SentenceTransformer(MODEL_NAME, device="cpu")
 
 
 def _load_fastembed() -> TextEmbedding | None:
