@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ExtractionBlock, LayoutIrPageSummary } from '@docuvate/contracts';
+import type { ExtractionBlock, LayoutIrDocument, LayoutIrPageSummary } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +12,7 @@ import {
 } from '../../lib/extractionLayout';
 import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
+import { buildLayoutReadingBlocks } from '../../lib/layoutIrReadingContent';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { useToastNotify } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
@@ -35,6 +36,7 @@ interface ExtractedTextPanelProps {
   fullText: string;
   markdown?: string | null;
   layoutIrAvailable?: boolean;
+  layoutIrDocument?: LayoutIrDocument | null;
   layoutIrPages?: LayoutIrPageSummary[];
   blocks: ExtractionBlock[];
   activePage: number;
@@ -58,6 +60,7 @@ export function ExtractedTextPanel({
   fullText,
   markdown,
   layoutIrAvailable = false,
+  layoutIrDocument = null,
   layoutIrPages,
   blocks,
   activePage,
@@ -278,8 +281,39 @@ export function ExtractedTextPanel({
 
   const showCopy = allowCopy && canCopy;
 
+  const readingBlocks = useMemo(
+    () => (layoutIrDocument ? buildLayoutReadingBlocks(layoutIrDocument) : []),
+    [layoutIrDocument]
+  );
+
   const textPane =
-    blocks.length > 0 ? (
+    textOnly && readingBlocks.length > 0 ? (
+      displayPages.map((page) => (
+        <section
+          key={page}
+          className="extracted-text-page extracted-text-reading-page"
+          data-page={page}
+          aria-label={t('documents.extractedTextPageAria', { page })}
+        >
+          {readingBlocks
+            .filter((block) => block.page === page)
+            .map((block) =>
+              block.kind === 'heading' ? (
+                <h3
+                  key={block.id}
+                  className={`extracted-text-reading-heading extracted-text-reading-heading-${String(block.level ?? 2)}`}
+                >
+                  {block.text}
+                </h3>
+              ) : (
+                <p key={block.id} className="extracted-text-reading-paragraph">
+                  {block.text}
+                </p>
+              )
+            )}
+        </section>
+      ))
+    ) : blocks.length > 0 ? (
       displayPages.map((page) => (
         <section
           key={page}

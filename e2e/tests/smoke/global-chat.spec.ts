@@ -15,6 +15,25 @@ const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 test.describe('global chat navigation', () => {
   test.use({ storageState: smokeFixtureStoragePath() });
 
+  test('thread search rename and delete', async ({ page, request }) => {
+    const thread = await createGlobalChatThread(request, apiBase, webOrigin, 'E2E Thread Alpha');
+    await page.goto(`${webOrigin}/chat`);
+    await page.getByPlaceholder(/durchsuchen|Search conversations/i).fill('Alpha');
+    await expect(page.getByRole('button', { name: /E2E Thread Alpha/i })).toBeVisible();
+    await page.getByRole('button', { name: /Umbenennen|Rename/i }).first().click();
+    await page.getByLabel(/Titel der Unterhaltung|Conversation title/i).fill('E2E Thread Beta');
+    await page.getByRole('button', { name: /Speichern|Save/i }).click();
+    await page.getByPlaceholder(/durchsuchen|Search conversations/i).fill('Beta');
+    await expect(page.locator('.doc-chat-thread-title', { hasText: 'E2E Thread Beta' })).toBeVisible({
+      timeout: 30_000,
+    });
+    await page.getByRole('button', { name: /Löschen|Delete/i }).first().click();
+    await expect(page.locator('.doc-chat-thread-title', { hasText: 'E2E Thread Beta' })).toHaveCount(0);
+    await request.delete(`${apiBase}/v1/chat/threads/${thread.id}`, {
+      headers: { origin: webOrigin },
+    }).catch(() => undefined);
+  });
+
   test('navigation opens global chat page', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: /Chat/i }).click();

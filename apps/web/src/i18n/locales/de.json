@@ -26,7 +26,11 @@
     "pickThreadLead": "Wählen Sie eine Unterhaltung oder starten Sie einen neuen Chat.",
     "exampleHundesteuer": "Was kostet die Hundesteuer?",
     "exampleMiete": "Bis wann ist die Miete fällig?",
-    "exampleKuendigung": "Welche Kündigungsfrist gilt im Vertrag?"
+    "exampleKuendigung": "Welche Kündigungsfrist gilt im Vertrag?",
+    "threadSearchPlaceholder": "Unterhaltungen durchsuchen…",
+    "renameThread": "Umbenennen",
+    "renameThreadAria": "Titel der Unterhaltung",
+    "deleteThread": "Löschen"
   },
   "shell": {
     "globalSearch": "Globale Suche",
@@ -496,7 +500,10 @@
     "layoutAdvancedViewAria": "Technische Ansicht",
     "layoutQualityGood": "Nachbau-Qualität: gut",
     "layoutQualityReview": "Nachbau-Qualität: prüfen (Seite {{page}})",
+    "layoutQualityReviewPlain": "Layout-Nachbau auf Seite {{page}} weicht vom Original ab. Details unter „Technische Details“.",
     "layoutQualityTooltip": "Wir vergleichen den Nachbau Pixel für Pixel mit dem Original (SSIM). Details finden Sie unter „Technische Details“.",
+    "metadataDocumentDateAuto": "Automatisch aus erkanntem Datum übernommen.",
+    "metadataDocumentDateAutoUndo": "Rückgängig",
     "moreActionsAria": "Weitere Aktionen",
     "technicalDetailsShow": "Technische Details anzeigen",
     "technicalDetailsHide": "Technische Details ausblenden",

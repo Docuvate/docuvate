@@ -62,8 +62,21 @@ test.describe('labels page accept recommendation', () => {
     const acceptButton = todoRow.getByRole('button', {
       name: /Create label|Label anlegen|Assign|Zuweisen|Merge|Rename|Umbenennen/i,
     });
+    const coverage = page.locator('.label-coverage-header');
+    const coverageBox = await coverage.boundingBox();
+    const navTypeBefore = await page.evaluate(() => performance.getEntriesByType('navigation').length);
+
     await acceptButton.click();
+    await page.waitForTimeout(400);
 
     await expect(page.getByRole('alert').filter({ hasText: /fehlgeschlagen|failed/i })).toHaveCount(0);
+    await expect(page).toHaveURL(/\/structure\/labels/);
+    const navTypeAfter = await page.evaluate(() => performance.getEntriesByType('navigation').length);
+    expect(navTypeAfter).toBe(navTypeBefore);
+    if (coverageBox) {
+      const afterBox = await coverage.boundingBox();
+      expect(afterBox?.y).toBe(coverageBox.y);
+      expect(afterBox?.width).toBe(coverageBox.width);
+    }
   });
 });

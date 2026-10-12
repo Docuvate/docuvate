@@ -69,7 +69,10 @@ export class EffectiveDocumentChatProviderUseCase {
     const customerEffective = resolveCustomerDocumentChatProvider(preferred, providers);
 
     const shouldClear =
-      options?.persistForUserId && preferredChatProvider?.trim() && effective !== preferred;
+      options?.persistForUserId &&
+      preferredChatProvider?.trim() &&
+      preferred !== 'off' &&
+      effective !== preferred;
 
     if (shouldClear && options.persistForUserId) {
       await this.prefs.upsert(options.persistForUserId, {

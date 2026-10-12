@@ -41,6 +41,39 @@ test.describe('document detail layout and chat', () => {
       .catch(() => undefined);
   });
 
+  test('hides reconstruction quality badge until technical details are enabled', async ({ page }) => {
+    await expect(page.locator('.layout-quality-badge')).toHaveCount(0);
+    await expect(page.getByText(/Nachbau-Qualität:\s*prüfen/i)).toHaveCount(0);
+  });
+
+  test('text mode and side panel render reading blocks, HTML tables, and nested outline', async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+
+    await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
+    await expect(page.locator('.layout-text-stage .extracted-text-panel')).toBeVisible({
+      timeout: 120_000,
+    });
+
+    await page.getByRole('tab', { name: /Tables|Tabellen/i }).click();
+    const dataTable = page.locator('table.layout-data-table').first();
+    await expect(dataTable).toBeVisible({ timeout: 60_000 });
+    await expect(dataTable.locator('tbody td, thead th').first()).toBeVisible();
+
+    await page.getByRole('tab', { name: /Outline|Gliederung/i }).click();
+    await expect(
+      page.locator('.layout-outline-list, .layout-outline-item, .layout-side-outline .muted').first()
+    ).toBeVisible({ timeout: 60_000 });
+  });
+
+  test('details tab exposes localized document date input', async ({ page }) => {
+    await page.getByRole('tab', { name: /Details|Einzelheiten/i }).click();
+    const dateInput = page.getByRole('textbox', { name: /Dokumentdatum|Document date/i });
+    await expect(dateInput).toBeVisible();
+    await expect(dateInput).toHaveAttribute('inputmode', 'numeric');
+  });
+
   test('layout workspace keeps stable width across viewer modes and side tabs', async ({ page }) => {
     test.setTimeout(360_000);
 

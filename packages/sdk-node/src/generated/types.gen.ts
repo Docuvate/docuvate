@@ -793,6 +793,10 @@ export type UpdateCorrespondentRequestDto = {
     match?: string;
 };
 
+export type UpdateDocumentChatThreadRequestDto = {
+    title: string;
+};
+
 export type UpdateDocumentRequestDto = {
     title?: string;
     documentDate?: string;
@@ -1133,6 +1137,50 @@ export type CreateLibraryChatThreadError = CreateLibraryChatThreadErrors[keyof C
 
 export type CreateLibraryChatThreadResponses = {
     201: unknown;
+};
+
+export type DeleteLibraryChatThreadData = {
+    body?: never;
+    path: {
+        threadId: string;
+    };
+    query?: never;
+    url: '/chat/threads/{threadId}';
+};
+
+export type DeleteLibraryChatThreadErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type DeleteLibraryChatThreadError = DeleteLibraryChatThreadErrors[keyof DeleteLibraryChatThreadErrors];
+
+export type DeleteLibraryChatThreadResponses = {
+    200: unknown;
+};
+
+export type UpdateLibraryChatThreadData = {
+    body: UpdateDocumentChatThreadRequestDto;
+    path: {
+        threadId: string;
+    };
+    query?: never;
+    url: '/chat/threads/{threadId}';
+};
+
+export type UpdateLibraryChatThreadErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type UpdateLibraryChatThreadError = UpdateLibraryChatThreadErrors[keyof UpdateLibraryChatThreadErrors];
+
+export type UpdateLibraryChatThreadResponses = {
+    200: unknown;
 };
 
 export type ListLibraryChatThreadMessagesData = {

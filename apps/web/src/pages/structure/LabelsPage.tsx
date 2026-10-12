@@ -48,15 +48,19 @@ export function LabelsPage() {
   const [form, setForm] = useState<CreateTagRequest>(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  const loadTags = useCallback(async () => {
-    setLoading(true);
+  const loadTags = useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) {
+      setLoading(true);
+    }
     setPageError(null);
     try {
       setTags(await listTags());
     } catch (err) {
       setPageError(formatUserFacingError(err, 'errors.loadFailed'));
     } finally {
-      setLoading(false);
+      if (!options?.silent) {
+        setLoading(false);
+      }
     }
   }, []);
 

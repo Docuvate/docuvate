@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { mappeHref, sortByNameDe } from '../../lib/ordnerTree';
-import { Button } from '../ui/Button';
+import { DateisystemRootEmptyState } from './DateisystemRootEmptyState';
 
 interface DateisystemRootOverviewProps {
   mappen: MappeDto[];
@@ -25,12 +25,7 @@ export function DateisystemRootOverview({
     <div className="dateisystem-root-overview">
       <p className="muted dateisystem-root-overview-lead">{t('filesystem.allFoldersHint')}</p>
       {sorted.length === 0 ? (
-        <div className="empty-state dateisystem-root-empty">
-          <p className="muted">{t('filesystem.rootEmpty')}</p>
-          <Button type="button" variant="primary" onClick={onCreateRoot}>
-            {t('filesystem.newRootButton')}
-          </Button>
-        </div>
+        <DateisystemRootEmptyState onCreateRoot={onCreateRoot} />
       ) : (
         <ul className="dateisystem-root-mappen-list">
           {sorted.map((mappe) => {

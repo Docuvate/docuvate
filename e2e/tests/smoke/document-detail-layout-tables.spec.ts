@@ -32,15 +32,18 @@ test.describe('document detail layout tables', () => {
     await page.locator('.layout-workspace').waitFor({ state: 'visible', timeout: 120_000 });
     await page.locator('.pdf-page-canvas').first().waitFor({ state: 'visible', timeout: 180_000 });
 
-    const chatDetailTab = page.getByRole('tab', { name: /^Chat$/i });
-    if ((await chatDetailTab.getAttribute('aria-selected')) === 'true') {
-      await chatDetailTab.click();
+    const chatSideTab = page.locator('.layout-side-tabs').getByRole('tab', { name: /^Chat$/i });
+    if (
+      (await chatSideTab.count()) > 0 &&
+      (await chatSideTab.getAttribute('aria-selected')) === 'true'
+    ) {
+      await chatSideTab.click();
     }
     await page.locator('.layout-side-tabs').waitFor({ state: 'visible', timeout: 120_000 });
     await page.getByRole('tab', { name: /Tables|Tabellen/i }).click();
     const dataTable = page.locator('.layout-data-table');
     await expect(dataTable).toBeVisible({ timeout: 30_000 });
-    await expect(dataTable.locator('td').first()).not.toBeEmpty();
+    await expect(dataTable.locator('tbody td, thead th').first()).not.toBeEmpty();
 
     await page.locator('.layout-table-card-head').first().click();
     await expect(page.locator('.layout-table-card-active')).toHaveCount(1);

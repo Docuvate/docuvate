@@ -171,9 +171,8 @@ export function LabelsTodoQueue(props: Props) {
   }, []);
 
   const wrapAccept = (item: LabelRecommendationDto) => {
-    beginExit(item.id, () => {
-      void props.onAccept(item);
-    });
+    void props.onAccept(item);
+    beginExit(item.id, () => undefined);
   };
 
   const wrapDismiss = (item: LabelRecommendationDto, scope: LabelSuggestionDismissScope) => {

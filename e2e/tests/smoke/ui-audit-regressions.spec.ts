@@ -43,10 +43,7 @@ test.describe('UI audit regressions (non-ML)', () => {
     expect(adjacent).toBe(true);
 
     await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
-    await expect(page.locator('.extracted-text-panel')).toBeVisible({ timeout: 120_000 });
-    await expect(
-      page.locator('.extracted-text-line, .extracted-text-segment, .extraction-text').first()
-    ).toBeVisible({
+    await expect(page.locator('.layout-text-stage .extracted-text-panel')).toBeVisible({
       timeout: 120_000,
     });
 

@@ -556,6 +556,8 @@ export interface DocumentChatThreadRepository {
   resetMessageForRetry(messageId: string): Promise<DocumentChatMessageEntity>;
   touchThread(threadId: string): Promise<void>;
   updateTitleIfDefault(threadId: string, title: string): Promise<void>;
+  renameThread(threadId: string, userId: string, title: string): Promise<DocumentChatThreadEntity>;
+  deleteThread(threadId: string, userId: string): Promise<void>;
   /** Mark pending/streaming assistant messages older than maxAgeMs as failed (generation_timeout). */
   listInFlightAssistantMessageIdsOlderThan(maxAgeMs: number): Promise<string[]>;
   failAssistantGenerationsByIds(messageIds: string[]): Promise<number>;

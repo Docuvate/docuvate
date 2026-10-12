@@ -1046,6 +1046,12 @@ export {
   suggestionStorageKey,
   type FieldSuggestionRow,
 } from './global-heuristic-fields.js';
+export {
+  evaluateFieldExtractionGate,
+  type FieldExtractionGateConfig,
+  type FieldExtractionGateDocumentLabels,
+  type FieldExtractionLabelMatch,
+} from './field-extraction-gate.js';
 
 export type MlModelKind = 'ocr' | 'embedding' | 'docqa' | 'field_extractor';
 

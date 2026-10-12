@@ -132,6 +132,7 @@ export 'package:docuvate/src/generated/src/model/test_paperless_connection_reque
 export 'package:docuvate/src/generated/src/model/test_paperless_installation_connection_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/trigger_ml_retrain_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_correspondent_request_dto.dart';
+export 'package:docuvate/src/generated/src/model/update_document_chat_thread_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_document_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_folder_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_mappe_request_dto.dart';

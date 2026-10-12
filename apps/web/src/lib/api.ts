@@ -702,6 +702,24 @@ export async function createLibraryChatThread(
   return data.thread;
 }
 
+export async function updateLibraryChatThread(
+  threadId: string,
+  title: string
+): Promise<DocumentChatThreadDto> {
+  const data = await request<{ thread: DocumentChatThreadDto }>(
+    `/chat/threads/${threadId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ title }),
+    }
+  );
+  return data.thread;
+}
+
+export async function deleteLibraryChatThread(threadId: string): Promise<void> {
+  await request<{ ok: boolean }>(`/chat/threads/${threadId}`, { method: 'DELETE' });
+}
+
 export async function listLibraryChatThreadMessages(
   threadId: string
 ): Promise<DocumentChatMessageRecordDto[]> {

@@ -13,11 +13,13 @@ import { Spinner } from '../components/ui/Spinner';
 import {
   cancelLibraryChatMessage,
   createLibraryChatThread,
+  deleteLibraryChatThread,
   getUserSettings,
   listLibraryChatThreadMessages,
   listLibraryChatThreads,
   retryLibraryChatMessage,
   sendLibraryChatThreadMessage,
+  updateLibraryChatThread,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { isChatGenerationInProgress } from '../lib/chatGenerationActive';
@@ -50,6 +52,9 @@ export function GlobalChatPage() {
   const [error, setError] = useState<string | null>(null);
   const [retryBusy, setRetryBusy] = useState(false);
   const [chatUiEnabled, setChatUiEnabled] = useState(true);
+  const [threadSearch, setThreadSearch] = useState('');
+  const [renamingThreadId, setRenamingThreadId] = useState<string | null>(null);
+  const [renameDraft, setRenameDraft] = useState('');
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const streamTargetRef = useRef<string | null>(null);
 
@@ -59,6 +64,16 @@ export function GlobalChatPage() {
   );
   const { stacked, threadsOpen, toggleThreads, closeThreads } = useStackedDocChatLayout(false);
   const hasThreads = threads.length > 0;
+  const filteredThreads = useMemo(() => {
+    const q = threadSearch.trim().toLowerCase();
+    if (!q) {
+      return threads;
+    }
+    return threads.filter((thread) => {
+      const haystack = `${thread.title} ${thread.lastMessagePreview ?? ''}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [threadSearch, threads]);
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
 
   const upsertMessage = useCallback((next: DocumentChatMessageRecordDto) => {
@@ -183,6 +198,36 @@ export function GlobalChatPage() {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages]);
 
+  async function onDeleteThread(threadId: string) {
+    setError(null);
+    try {
+      await deleteLibraryChatThread(threadId);
+      setThreads((prev) => prev.filter((thread) => thread.id !== threadId));
+      if (activeThreadId === threadId) {
+        setActiveThreadId(null);
+        setMessages([]);
+      }
+    } catch (err) {
+      setError(formatUserFacingError(err, 'common.error'));
+    }
+  }
+
+  async function onSaveThreadRename(threadId: string) {
+    const trimmed = renameDraft.trim();
+    if (!trimmed) {
+      setRenamingThreadId(null);
+      return;
+    }
+    setError(null);
+    try {
+      const updated = await updateLibraryChatThread(threadId, trimmed);
+      setThreads((prev) => prev.map((thread) => (thread.id === threadId ? updated : thread)));
+      setRenamingThreadId(null);
+    } catch (err) {
+      setError(formatUserFacingError(err, 'common.error'));
+    }
+  }
+
   async function onNewThread() {
     setError(null);
     try {
@@ -298,6 +343,13 @@ export function GlobalChatPage() {
                   {t('globalChat.newThread')}
                 </Button>
               </div>
+              <Input
+                className="doc-chat-thread-search"
+                value={threadSearch}
+                onChange={(e) => { setThreadSearch(e.target.value); }}
+                placeholder={t('globalChat.threadSearchPlaceholder')}
+                aria-label={t('globalChat.threadSearchPlaceholder')}
+              />
               {loadingThreads ? (
                 <p className="muted doc-chat-threads-loading" role="status">
                   <Spinner size="sm" label={t('common.loading')} />
@@ -305,43 +357,93 @@ export function GlobalChatPage() {
                 </p>
               ) : null}
               <ul className="doc-chat-thread-list">
-                {threads.map((thread) => {
+                {filteredThreads.map((thread) => {
                   const selected = thread.id === activeThreadId;
                   const threadBusy = showThreadListSpinner(
                     thread,
                     activeThreadId,
                     generationInProgress
                   );
+                  const renaming = renamingThreadId === thread.id;
                   return (
-                    <li key={thread.id}>
-                      <button
-                        type="button"
-                        className={`doc-chat-thread-item${selected ? ' active' : ''}`}
-                        aria-current={selected ? 'true' : undefined}
-                        onClick={() => {
-                          setActiveThreadId(thread.id);
-                          if (stacked) closeThreads();
-                        }}
-                      >
-                        <span className="doc-chat-thread-title-row">
-                          <span className="doc-chat-thread-title">{thread.title}</span>
-                          {threadBusy ? (
-                            <Spinner
-                              size="sm"
-                              className="doc-chat-thread-status"
-                              label={t('documents.documentChat.threadGenerating')}
-                            />
-                          ) : null}
-                        </span>
-                        {thread.lastMessagePreview ? (
-                          <span className="doc-chat-thread-preview">
-                            {thread.lastMessagePreview}
-                          </span>
-                        ) : null}
-                        <span className="doc-chat-thread-meta">
-                          {formatThreadMeta(thread, dateLocale)}
-                        </span>
-                      </button>
+                    <li key={thread.id} className="doc-chat-thread-row">
+                      {renaming ? (
+                        <form
+                          className="doc-chat-thread-rename-form"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            void onSaveThreadRename(thread.id);
+                          }}
+                        >
+                          <Input
+                            value={renameDraft}
+                            onChange={(e) => { setRenameDraft(e.target.value); }}
+                            aria-label={t('globalChat.renameThreadAria')}
+                          />
+                          <Button type="submit" variant="secondary">
+                            {t('common.save')}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => { setRenamingThreadId(null); }}
+                          >
+                            {t('common.cancel')}
+                          </Button>
+                        </form>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            className={`doc-chat-thread-item${selected ? ' active' : ''}`}
+                            aria-current={selected ? 'true' : undefined}
+                            onClick={() => {
+                              setActiveThreadId(thread.id);
+                              if (stacked) closeThreads();
+                            }}
+                          >
+                            <span className="doc-chat-thread-title-row">
+                              <span className="doc-chat-thread-title">{thread.title}</span>
+                              {threadBusy ? (
+                                <Spinner
+                                  size="sm"
+                                  className="doc-chat-thread-status"
+                                  label={t('documents.documentChat.threadGenerating')}
+                                />
+                              ) : null}
+                            </span>
+                            {thread.lastMessagePreview ? (
+                              <span className="doc-chat-thread-preview">
+                                {thread.lastMessagePreview}
+                              </span>
+                            ) : null}
+                            <span className="doc-chat-thread-meta">
+                              {formatThreadMeta(thread, dateLocale)}
+                            </span>
+                          </button>
+                          <div className="doc-chat-thread-actions">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="doc-chat-thread-action"
+                              onClick={() => {
+                                setRenamingThreadId(thread.id);
+                                setRenameDraft(thread.title);
+                              }}
+                            >
+                              {t('globalChat.renameThread')}
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="doc-chat-thread-action"
+                              onClick={() => { void onDeleteThread(thread.id); }}
+                            >
+                              {t('globalChat.deleteThread')}
+                            </Button>
+                          </div>
+                        </>
+                      )}
                     </li>
                   );
                 })}
