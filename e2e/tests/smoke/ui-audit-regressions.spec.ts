@@ -56,9 +56,11 @@ test.describe('UI audit regressions (non-ML)', () => {
 
   test('locale switcher uses filled segmented control', async ({ page }) => {
     await page.goto(webOrigin);
-    const de = page.getByRole('radio', { name: /DE|Deutsch/i }).first();
-    await expect(de).toBeVisible();
-    await expect(de).toHaveAttribute('aria-checked', 'true');
+    const localeGroup = page.locator('.locale-switcher.segmented-control');
+    await expect(localeGroup).toBeVisible();
+    const selected = localeGroup.locator('.segmented-control__option--selected');
+    await expect(selected).toHaveCount(1);
+    await expect(selected).toHaveAttribute('aria-checked', 'true');
   });
 
   test('settings extraction shows offline callout copy when engines fail', async ({ page }) => {
