@@ -23,7 +23,7 @@ function aggregateBlocksText(blocks?: ExtractionBlock[]): string {
     return '';
   }
   return blocks
-    .map((block) => block.text?.trim() ?? '')
+    .map((block) => block.text.trim())
     .filter((part) => part.length > 0)
     .join('\n')
     .trim();
