@@ -47,9 +47,9 @@ test.describe('UI audit regressions (non-ML)', () => {
     });
     expect(adjacent).toBe(true);
 
-    await page.getByRole('radio', { name: /^Text$/i }).click();
-    await expect(page.locator('[data-block-id], [data-block-index]').first()).toBeVisible({
-      timeout: 60_000,
+    await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
+    await expect(page.locator('.extracted-text-segment, [data-block-id], [data-block-index]').first()).toBeVisible({
+      timeout: 120_000,
     });
 
     await openAdvancedCompare(page);

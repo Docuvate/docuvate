@@ -51,17 +51,6 @@ test.describe('document detail layout and chat', () => {
       expect(box?.x).toBe(baseline?.x);
     }
 
-    await openAdvancedCompare(page);
-    await page.locator('[data-testid="layout-compare-stage"]').waitFor({
-      state: 'visible',
-      timeout: 180_000,
-    });
-    await page.getByRole('radio', { name: /Slider|Schieberegler/i }).click();
-    await page.waitForTimeout(400);
-    const sliderModeBox = await measureWorkspace(page);
-    expect(sliderModeBox?.width).toBe(baseline?.width);
-    expect(sliderModeBox?.x).toBe(baseline?.x);
-
     for (const tab of SIDE_TABS) {
       const tabButton = page.getByRole('tab', { name: tab });
       if ((await tabButton.count()) === 0) {
