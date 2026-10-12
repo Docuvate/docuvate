@@ -1263,6 +1263,7 @@ export {
   decideDuplicatePair,
   evaluateModelOnSamples,
   trainDefaultDuplicateClassifierModel,
+  VALUE_TOKEN_DIFF_AUTO_STACK_CEILING,
 } from './duplicate-classifier.js';
 export type { DuplicatePairDecision } from './duplicate-classifier.js';
 export {

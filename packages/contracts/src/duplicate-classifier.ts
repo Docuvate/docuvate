@@ -14,6 +14,12 @@ import { generateSyntheticDuplicateDataset } from './duplicate-synthetic-data.js
 
 export type DuplicatePairDecision = 'auto_stack' | 'suggest' | 'ignore';
 
+/**
+ * Differing value-token mass above this level is treated as a material content change
+ * (beyond OCR noise), so same-instance auto-stack is never applied.
+ */
+export const VALUE_TOKEN_DIFF_AUTO_STACK_CEILING = 0.055;
+
 export function trainDefaultDuplicateClassifierModel(seed = 42_026): DuplicateClassifierModel {
   const { train, holdout } = generateSyntheticDuplicateDataset(seed, 2400, 0.2);
   const weights = trainLogisticRegression(train);
@@ -43,6 +49,13 @@ export function decideDuplicatePair(
 ): { decision: DuplicatePairDecision; probability: number } {
   const z = predictLogit(model.weights, featureVectorToArray(features));
   const probability = 1 / (1 + Math.exp(-(z + userLogitInterceptDelta)));
+
+  if (features.fractionDifferingValueTokens > VALUE_TOKEN_DIFF_AUTO_STACK_CEILING) {
+    if (probability >= model.suggestThreshold) {
+      return { decision: 'suggest', probability };
+    }
+    return { decision: 'ignore', probability };
+  }
 
   if (probability >= model.autoStackThreshold) {
     return { decision: 'auto_stack', probability };
