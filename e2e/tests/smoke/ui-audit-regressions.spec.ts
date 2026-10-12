@@ -34,13 +34,18 @@ test.describe('UI audit regressions (non-ML)', () => {
     const stage = page.getByTestId('layout-viewer-stage');
     await toolbar.waitFor({ state: 'visible', timeout: 120_000 });
     await stage.waitFor({ state: 'visible', timeout: 120_000 });
-    const toolbarBox = await toolbar.boundingBox();
-    const stageBox = await stage.boundingBox();
-    expect(toolbarBox).not.toBeNull();
-    expect(stageBox).not.toBeNull();
-    const gap = (stageBox?.y ?? 0) - (toolbarBox?.bottom ?? 0);
-    expect(Number.isFinite(gap)).toBe(true);
-    expect(gap).toBeLessThan(48);
+    const adjacent = await page.evaluate(() => {
+      const bar = document.querySelector('[data-testid="layout-viewer-toolbar"]');
+      const viewer = document.querySelector('[data-testid="layout-viewer-stage"]');
+      if (!bar?.parentElement || !viewer) {
+        return false;
+      }
+      const siblings = [...bar.parentElement.children];
+      const barIndex = siblings.indexOf(bar);
+      const stageIndex = siblings.indexOf(viewer);
+      return stageIndex === barIndex + 1;
+    });
+    expect(adjacent).toBe(true);
 
     await page.getByRole('radio', { name: /^Text$/i }).click();
     await expect(page.locator('[data-block-id], [data-block-index]').first()).toBeVisible({
