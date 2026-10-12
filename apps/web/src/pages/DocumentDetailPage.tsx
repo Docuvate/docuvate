@@ -139,6 +139,7 @@ export function DocumentDetailPage() {
   const [metadataSaveError, setMetadataSaveError] = useState<string | null>(null);
   const [layoutTextEditOpen, setLayoutTextEditOpen] = useState(false);
   const [layoutEditMode, setLayoutEditMode] = useState(false);
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const docRef = useRef<DocumentDto | null>(null);
 
   useEffect(() => {
@@ -469,7 +470,14 @@ export function DocumentDetailPage() {
         </Link>
       </p>
 
-      <DocumentDetailMetaBar doc={doc} onDelete={() => { setDeleteDialogOpen(true); }} />
+      <DocumentDetailMetaBar
+        doc={doc}
+        onDelete={() => { setDeleteDialogOpen(true); }}
+        onRequeueExtraction={layoutWorkspace ? () => void onRequeueExtraction() : undefined}
+        requeueBusy={requeueBusy}
+        showTechnicalDetails={showTechnicalDetails}
+        onShowTechnicalDetailsChange={layoutWorkspace ? setShowTechnicalDetails : undefined}
+      />
 
       {error ? (
         <p className="error" role="alert">
@@ -481,7 +489,7 @@ export function DocumentDetailPage() {
         <DocumentDetailTabStrip
           activeTab={activeTab}
           labelCount={doc.tags.length}
-          showChatTab={documentChatUiEnabled}
+          showChatTab={documentChatUiEnabled && !layoutWorkspace}
           onTabChange={setActiveTab}
         />
         {activeTab === 'details' ? (
@@ -551,9 +559,9 @@ export function DocumentDetailPage() {
 
       {layoutWorkspace ? (
         <DocumentLayoutWorkspace
-          chatSidePanel={activeTab === 'chat' && documentChatUiEnabled}
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
+          showTechnicalDetails={showTechnicalDetails}
           doc={doc}
           previewData={previewData}
           previewLoading={previewLoading}

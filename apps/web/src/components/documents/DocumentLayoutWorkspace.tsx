@@ -12,20 +12,26 @@ import {
   hitTestLayoutOverlay,
   overlayForExtractionBlock,
 } from '../../lib/layoutOverlayModel';
+import {
+  firstPageBelowSsimFloor,
+  reconstructionQualityTone,
+} from '../../lib/layoutReconstructionQuality';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
+import { useLayoutCompare } from '../../lib/useLayoutCompare';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SegmentedControl } from '../ui/SegmentedControl';
-import { DocumentChatPanel } from './DocumentChatPanel';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
+import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
 import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
 
-type ViewerMode = 'original' | 'reconstruction' | 'compare';
+type LeftDocumentMode = 'original' | 'text';
+type AdvancedViewerMode = 'reconstruction' | 'compare';
 
 interface DocumentLayoutWorkspaceProps {
   doc: DocumentDto;
@@ -54,9 +60,9 @@ interface DocumentLayoutWorkspaceProps {
   onRequeueExtraction?: () => void;
   textEditOpen: boolean;
   onTextEditOpenChange: (open: boolean) => void;
-  chatSidePanel?: boolean;
   documentChatAvailable?: boolean;
   documentChatUiEnabled?: boolean;
+  showTechnicalDetails?: boolean;
 }
 
 export function DocumentLayoutWorkspace({
@@ -86,9 +92,9 @@ export function DocumentLayoutWorkspace({
   onRequeueExtraction,
   textEditOpen,
   onTextEditOpenChange,
-  chatSidePanel = false,
   documentChatAvailable = false,
   documentChatUiEnabled = true,
+  showTechnicalDetails = false,
 }: DocumentLayoutWorkspaceProps) {
   const { t } = useTranslation();
   const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;
@@ -99,7 +105,9 @@ export function DocumentLayoutWorkspace({
     layoutIrPages
   );
 
-  const [viewerMode, setViewerMode] = useState<ViewerMode>('original');
+  const [leftMode, setLeftMode] = useState<LeftDocumentMode>('original');
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [advancedView, setAdvancedView] = useState<AdvancedViewerMode>('reconstruction');
   const [overlayEnabled, setOverlayEnabled] = useState(true);
   const [sideTab, setSideTab] = useState<LayoutSideTab>('fields');
   const [activeOverlayId, setActiveOverlayId] = useState<string | null>(null);
@@ -107,13 +115,34 @@ export function DocumentLayoutWorkspace({
   const [layoutZoom, setLayoutZoom] = useState<LayoutIrZoomStep>(100);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(() => new Set());
 
+  const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
+  const { metricsByPage, metrics: compareMetrics } = useLayoutCompare(
+    doc.id,
+    layoutIrAvailable && Boolean(doc.id),
+    layoutPageCount,
+    viewerPage,
+    false
+  );
+  const ssimFloor = compareMetrics?.ssimFloor ?? 0.96;
+  const qualityTone = reconstructionQualityTone(metricsByPage, ssimFloor);
+  const qualityReviewPage = firstPageBelowSsimFloor(metricsByPage, ssimFloor);
+
   useEffect(() => {
-    if (!chatSidePanel) {
-      return;
+    const nextTextOpen = leftMode === 'text';
+    if (textEditOpen !== nextTextOpen) {
+      onTextEditOpenChange(nextTextOpen);
     }
-    onTextEditOpenChange(false);
-    onEditModeChange(false);
-  }, [chatSidePanel, onEditModeChange, onTextEditOpenChange]);
+  }, [leftMode, onTextEditOpenChange, textEditOpen]);
+
+  const setLeftDocumentMode = useCallback(
+    (mode: LeftDocumentMode) => {
+      setLeftMode(mode);
+      if (mode === 'text') {
+        setAdvancedOpen(false);
+      }
+    },
+    []
+  );
 
   const frameLayoutIr =
     layoutIr ??
@@ -211,9 +240,16 @@ export function DocumentLayoutWorkspace({
     [highlightBlocks]
   );
 
-  const viewerModeOptions = useMemo(
+  const leftModeOptions = useMemo(
     () => [
       { value: 'original' as const, label: t('documents.layoutViewOriginal') },
+      { value: 'text' as const, label: t('documents.layoutViewText') },
+    ],
+    [t]
+  );
+
+  const advancedViewOptions = useMemo(
+    () => [
       { value: 'reconstruction' as const, label: t('documents.layoutViewReconstruction') },
       { value: 'compare' as const, label: t('documents.layoutViewCompare') },
     ],
@@ -229,8 +265,8 @@ export function DocumentLayoutWorkspace({
     []
   );
 
-  const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
   const pending = layoutIrAvailable && layoutIrState === 'loading';
+  const showAdvancedStage = advancedOpen && leftMode === 'original';
   const failed = doc.status === 'failed';
   const showRecovery =
     (failed || isExtractionPending(doc.status)) && onRequeueExtraction != null;
@@ -240,14 +276,14 @@ export function DocumentLayoutWorkspace({
       <div className="layout-workspace-main">
         <Card className="preview-card preview-card-pdf layout-viewer-card">
           <div className="layout-viewer-toolbar">
-            <SegmentedControl<ViewerMode>
+            <SegmentedControl<LeftDocumentMode>
               ariaLabel={t('documents.layoutViewModeAria')}
               className={segmentedToolbarClass('layout-view-mode-switch', 'segmented-control--text-wide')}
-              value={viewerMode}
-              options={viewerModeOptions}
-              onChange={setViewerMode}
+              value={leftMode}
+              options={leftModeOptions}
+              onChange={setLeftDocumentMode}
             />
-            {viewerMode === 'original' ? (
+            {leftMode === 'original' && !showAdvancedStage ? (
               <label className="layout-overlay-toggle">
                 <input
                   type="checkbox"
@@ -256,7 +292,8 @@ export function DocumentLayoutWorkspace({
                 />
                 <span>{t('documents.layoutOverlayToggle')}</span>
               </label>
-            ) : (
+            ) : null}
+            {showAdvancedStage || leftMode === 'text' ? (
               <SegmentedControl
                 ariaLabel={t('documents.layoutZoomAria')}
                 className={segmentedToolbarClass('layout-zoom-switch', 'segmented-control--zoom')}
@@ -269,23 +306,64 @@ export function DocumentLayoutWorkspace({
                   }
                 }}
               />
-            )}
-            {!chatSidePanel ? (
+            ) : null}
+            {qualityTone !== 'unknown' ? (
+              <span
+                className={`layout-quality-badge layout-quality-badge-${qualityTone}${
+                  showTechnicalDetails ? ' layout-quality-badge-technical' : ''
+                }`}
+                title={t('documents.layoutQualityTooltip')}
+              >
+                {qualityTone === 'good'
+                  ? t('documents.layoutQualityGood')
+                  : t('documents.layoutQualityReview', { page: qualityReviewPage ?? viewerPage })}
+              </span>
+            ) : null}
+            {leftMode === 'text' ? (
               <div className="layout-viewer-toolbar-actions">
                 <Button
                   type="button"
-                  variant={textEditOpen ? 'secondary' : 'ghost'}
-                  aria-pressed={textEditOpen}
-                  onClick={() => {
-                    onTextEditOpenChange(!textEditOpen);
-                    onEditModeChange(!textEditOpen);
-                  }}
+                  variant={editMode ? 'secondary' : 'ghost'}
+                  aria-pressed={editMode}
+                  onClick={() => { onEditModeChange(!editMode); }}
                 >
-                  {textEditOpen ? t('documents.layoutTextEditDone') : t('documents.layoutTextEdit')}
+                  {editMode ? t('documents.layoutTextEditDone') : t('documents.layoutTextEdit')}
                 </Button>
               </div>
             ) : null}
           </div>
+
+          <details
+            className="layout-advanced-panel"
+            open={advancedOpen}
+            onToggle={(event) => {
+              const open = event.currentTarget.open;
+              setAdvancedOpen(open);
+              if (open) {
+                setLeftMode('original');
+              }
+            }}
+          >
+            <summary className="layout-advanced-summary">{t('documents.layoutAdvancedSummary')}</summary>
+            <div className="layout-advanced-body">
+              <SegmentedControl<AdvancedViewerMode>
+                ariaLabel={t('documents.layoutAdvancedViewAria')}
+                className={segmentedToolbarClass('layout-advanced-view-switch', 'segmented-control--text-wide')}
+                value={advancedView}
+                options={advancedViewOptions}
+                onChange={setAdvancedView}
+              />
+              <div className="layout-advanced-export">
+                <DocumentLayoutExportTab
+                  documentId={doc.id}
+                  documentTitle={doc.title || doc.filename}
+                  hasLayoutIr={Boolean(layoutIr?.pages.length)}
+                  markdown={doc.extraction?.markdown}
+                  blocks={blocks}
+                />
+              </div>
+            </div>
+          </details>
 
           {showRecovery ? (
             <DocumentExtractionRecovery
@@ -297,7 +375,56 @@ export function DocumentLayoutWorkspace({
           ) : null}
 
           <div className="layout-viewer-stage">
-            {viewerMode === 'original' ? (
+            {leftMode === 'text' ? (
+              <div className="layout-text-stage">
+                <ExtractedTextPanel
+                  documentId={doc.id}
+                  fullText={doc.extraction?.text ?? ''}
+                  markdown={doc.extraction?.markdown}
+                  layoutIrAvailable={layoutIrAvailable}
+                  layoutIrPages={layoutIrPages}
+                  blocks={blocks}
+                  activePage={viewerPage}
+                  activeBlockIndex={activeBlockIndex}
+                  pageSynced
+                  editMode={editMode}
+                  allowCopy
+                  onActivePageChange={onViewerPageChange}
+                  onHighlightBlocks={onHighlightBlocks}
+                  onBlocksChange={onBlocksChange}
+                  onActiveBlockIndexChange={onActiveBlockIndexChange}
+                  documentTitle={doc.title || doc.filename}
+                  textOnly
+                />
+                {blocksDirty ? (
+                  <div className="layout-text-edit-save">
+                    <Button type="button" variant="secondary" disabled={saving} onClick={onSaveBlocks}>
+                      {saving ? t('documents.saving') : t('documents.save')}
+                    </Button>
+                  </div>
+                ) : null}
+              </div>
+            ) : showAdvancedStage && advancedView === 'compare' && doc.id ? (
+              <DocumentLayoutCompareView
+                documentId={doc.id}
+                pageCount={layoutPageCount}
+                activePage={viewerPage}
+                onPageChange={onViewerPageChange}
+                showTechnicalDetails={showTechnicalDetails}
+              />
+            ) : showAdvancedStage && advancedView === 'reconstruction' && frameLayoutIr && doc.id ? (
+              <ExtractedLayoutHtmlFrame
+                documentId={doc.id}
+                layoutIr={frameLayoutIr}
+                activePage={viewerPage}
+                pageSynced
+                pageCount={layoutPageCount}
+                zoom={layoutZoom}
+                requeueBusy={requeueBusy}
+                onRequeueExtraction={onRequeueExtraction}
+                suspendHtmlFetch={pending}
+              />
+            ) : (
               <>
                 {previewUnavailable ? (
                   <p className="muted">{t('documents.previewUnavailable')}</p>
@@ -332,80 +459,17 @@ export function DocumentLayoutWorkspace({
                   </div>
                 ) : null}
               </>
-            ) : viewerMode === 'compare' && doc.id ? (
-              <DocumentLayoutCompareView
-                documentId={doc.id}
-                pageCount={layoutPageCount}
-                activePage={viewerPage}
-                onPageChange={onViewerPageChange}
-              />
-            ) : frameLayoutIr && doc.id ? (
-              <ExtractedLayoutHtmlFrame
-                documentId={doc.id}
-                layoutIr={frameLayoutIr}
-                activePage={viewerPage}
-                pageSynced
-                pageCount={layoutPageCount}
-                zoom={layoutZoom}
-                requeueBusy={requeueBusy}
-                onRequeueExtraction={onRequeueExtraction}
-                suspendHtmlFetch={pending}
-              />
-            ) : (
-              <p className="muted">{t('documents.layoutIrLoading')}</p>
             )}
           </div>
         </Card>
-
-        {textEditOpen ? (
-          <Card className="layout-text-edit-panel">
-            <ExtractedTextPanel
-              documentId={doc.id}
-              fullText={doc.extraction?.text ?? ''}
-              markdown={doc.extraction?.markdown}
-              layoutIrAvailable={layoutIrAvailable}
-              layoutIrPages={layoutIrPages}
-              blocks={blocks}
-              activePage={viewerPage}
-              activeBlockIndex={activeBlockIndex}
-              pageSynced
-              editMode={editMode}
-              allowCopy
-              onActivePageChange={onViewerPageChange}
-              onHighlightBlocks={onHighlightBlocks}
-              onBlocksChange={onBlocksChange}
-              onActiveBlockIndexChange={onActiveBlockIndexChange}
-              documentTitle={doc.title || doc.filename}
-              textOnly
-            />
-            {blocksDirty ? (
-              <div className="layout-text-edit-save">
-                <Button type="button" variant="secondary" disabled={saving} onClick={onSaveBlocks}>
-                  {saving ? t('documents.saving') : t('documents.save')}
-                </Button>
-              </div>
-            ) : null}
-          </Card>
-        ) : null}
       </div>
 
-      {chatSidePanel ? (
-        <aside className="layout-side-panel layout-side-panel-chat" aria-label={t('documents.tabChat')}>
-          <DocumentChatPanel
-            documentId={doc.id}
-            compact
-            chatAvailable={documentChatAvailable}
-            chatUiEnabled={documentChatUiEnabled}
-          />
-        </aside>
-      ) : layoutIr ? (
+      {layoutIr ? (
         <DocumentLayoutSidePanel
           documentId={doc.id}
-          documentTitle={doc.title || doc.filename}
           layoutIr={layoutIr}
           fields={fields}
           blocks={blocks}
-          markdown={doc.extraction?.markdown}
           knownFieldKeys={knownFieldKeys}
           fieldLabelForKey={fieldLabelForKey}
           activeTab={sideTab}
@@ -420,6 +484,8 @@ export function DocumentLayoutWorkspace({
           }
           dismissedSuggestions={dismissedSuggestions}
           heuristicSuggestions={heuristicSuggestions}
+          documentChatAvailable={documentChatAvailable}
+          documentChatUiEnabled={documentChatUiEnabled}
         />
       ) : (
         <aside className="layout-side-panel layout-side-panel-loading">

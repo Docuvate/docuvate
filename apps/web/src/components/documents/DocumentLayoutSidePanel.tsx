@@ -16,19 +16,17 @@ import {
 } from '../../lib/layoutOverlayModel';
 import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
 import { Button } from '../ui/Button';
-import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
+import { DocumentChatPanel } from './DocumentChatPanel';
 
-export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'export';
+export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'chat';
 
-const LAYOUT_SIDE_TAB_ORDER: LayoutSideTab[] = ['fields', 'tables', 'outline', 'export'];
+const LAYOUT_SIDE_TAB_ORDER: LayoutSideTab[] = ['fields', 'tables', 'outline', 'chat'];
 
 interface DocumentLayoutSidePanelProps {
   documentId: string;
-  documentTitle?: string;
   layoutIr: LayoutIrDocument;
   fields: ExtractedField[];
   blocks: ExtractionBlock[];
-  markdown?: string | null;
   knownFieldKeys: Set<string>;
   fieldLabelForKey: (key: string) => string;
   activeTab: LayoutSideTab;
@@ -39,15 +37,16 @@ interface DocumentLayoutSidePanelProps {
   onDismissSuggestion: (key: string) => void;
   dismissedSuggestions: Set<string>;
   heuristicSuggestions?: { key: string; value: string }[];
+  documentChatAvailable?: boolean;
+  documentChatUiEnabled?: boolean;
+  showChatTab?: boolean;
 }
 
 export function DocumentLayoutSidePanel({
   documentId,
-  documentTitle,
   layoutIr,
   fields,
-  blocks,
-  markdown,
+  blocks: _blocks,
   knownFieldKeys,
   fieldLabelForKey,
   activeTab,
@@ -58,6 +57,9 @@ export function DocumentLayoutSidePanel({
   onDismissSuggestion,
   dismissedSuggestions,
   heuristicSuggestions = [],
+  documentChatAvailable = false,
+  documentChatUiEnabled = true,
+  showChatTab = true,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -84,6 +86,16 @@ export function DocumentLayoutSidePanel({
     [locale]
   );
 
+  const acceptedFieldValues = useMemo(
+    () => new Set(fields.map((field) => `${field.key}\u0000${field.value}`)),
+    [fields]
+  );
+
+  const isDuplicateSuggestion = useCallback(
+    (key: string, value: string) => acceptedFieldValues.has(`${key}\u0000${value}`),
+    [acceptedFieldValues]
+  );
+
   const suggestions = useMemo(() => {
     const widgets = allLayoutWidgets(layoutIr);
     const fromWidgets = fieldSuggestionKeys(widgets, knownFieldKeys, fields).map((s) => ({
@@ -100,11 +112,14 @@ export function DocumentLayoutSidePanel({
     const merged = [...fromHeuristics, ...fromWidgets];
     const seen = new Set<string>();
     const unique = merged.filter((s) => {
-      if (seen.has(s.key)) return false;
-      seen.add(s.key);
+      const dedupeKey = `${s.key}\u0000${s.value}`;
+      if (seen.has(dedupeKey)) return false;
+      seen.add(dedupeKey);
       return true;
     });
-    return unique.filter((s) => !dismissedSuggestions.has(s.key));
+    return unique.filter(
+      (s) => !dismissedSuggestions.has(s.key) && !isDuplicateSuggestion(s.key, s.value)
+    );
   }, [
     layoutIr,
     knownFieldKeys,
@@ -112,23 +127,32 @@ export function DocumentLayoutSidePanel({
     dismissedSuggestions,
     heuristicSuggestions,
     fieldLabelForKey,
+    isDuplicateSuggestion,
   ]);
+
+  const tabOrder = useMemo(
+    () =>
+      showChatTab && documentChatUiEnabled
+        ? LAYOUT_SIDE_TAB_ORDER
+        : LAYOUT_SIDE_TAB_ORDER.filter((id) => id !== 'chat'),
+    [documentChatUiEnabled, showChatTab]
+  );
 
   const tabs = useMemo(
     () =>
-      LAYOUT_SIDE_TAB_ORDER.map((id) => ({
+      tabOrder.map((id) => ({
         id,
         label: t(
           id === 'fields'
-            ? 'documents.layoutTabFields'
+            ? 'documents.layoutTabOverview'
             : id === 'tables'
               ? 'documents.layoutTabTables'
               : id === 'outline'
                 ? 'documents.layoutTabOutline'
-                : 'documents.layoutTabExport'
+                : 'documents.tabChat'
         ),
       })),
-    [t]
+    [t, tabOrder]
   );
 
   const activeTabMeta = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
@@ -145,10 +169,10 @@ export function DocumentLayoutSidePanel({
 
   const onTabListKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
-      const idx = LAYOUT_SIDE_TAB_ORDER.indexOf(activeTab);
+      const idx = tabOrder.indexOf(activeTab);
       if (idx < 0) return;
       let nextIdx: number | null = null;
-      const tabCount = LAYOUT_SIDE_TAB_ORDER.length;
+      const tabCount = tabOrder.length;
       switch (event.key) {
         case 'ArrowRight':
           nextIdx = (idx + 1) % tabCount;
@@ -166,10 +190,16 @@ export function DocumentLayoutSidePanel({
           return;
       }
       event.preventDefault();
-      focusTab(LAYOUT_SIDE_TAB_ORDER[nextIdx]);
+      focusTab(tabOrder[nextIdx]);
     },
-    [activeTab, focusTab]
+    [activeTab, focusTab, tabOrder]
   );
+
+  useEffect(() => {
+    if (!tabOrder.includes(activeTab)) {
+      onTabChange(tabOrder[0] ?? 'fields');
+    }
+  }, [activeTab, onTabChange, tabOrder]);
 
   useEffect(() => {
     if (!activeOverlayId) return;
@@ -353,14 +383,15 @@ export function DocumentLayoutSidePanel({
           </div>
         ) : null}
 
-        {activeTab === 'export' ? (
-          <DocumentLayoutExportTab
-            documentId={documentId}
-            documentTitle={documentTitle}
-            hasLayoutIr={layoutIr.pages.length > 0}
-            markdown={markdown}
-            blocks={blocks}
-          />
+        {activeTab === 'chat' ? (
+          <div className="layout-side-chat">
+            <DocumentChatPanel
+              documentId={documentId}
+              compact
+              chatAvailable={documentChatAvailable}
+              chatUiEnabled={documentChatUiEnabled}
+            />
+          </div>
         ) : null}
       </div>
     </aside>

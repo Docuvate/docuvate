@@ -16,7 +16,8 @@ const LAYOUT_RENDERED_KEYS = [
   'documents.layoutExportTypstSemantisch',
   'documents.layoutExportTypstExakt',
   'documents.layoutIrHtmlFailedBody',
-  'documents.layoutTabFields',
+  'documents.layoutTabOverview',
+  'documents.layoutViewText',
   'documents.layoutViewOriginal',
 ] as const;
 

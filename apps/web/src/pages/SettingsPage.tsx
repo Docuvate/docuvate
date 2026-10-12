@@ -198,7 +198,10 @@ export function SettingsPage() {
     selectedEngine
   );
   const chatStatus = settingsChatStatusPresentation(t, settings);
-  const engineOptions = buildExtractionEngineSelectOptions(t, engines);
+  const engineOptions =
+    advancedFeaturesEnabled || engines.length === 0
+      ? buildExtractionEngineSelectOptions(t, engines, { hideUnavailableSuffix: showExtractionOfflineCallout })
+      : [{ value: 'pipeline', label: t('settings.engineDefaultAutomatic') }];
 
   return (
     <SettingsSectionLayout>
@@ -228,6 +231,7 @@ export function SettingsPage() {
           {showExtractionOfflineCallout ? (
             <SettingsCallout variant="warn">
               <p>{t('settings.extractionOfflineCallout')}</p>
+              <p className="muted settings-hint">{t('settings.extractionOfflineCalloutDetails')}</p>
             </SettingsCallout>
           ) : null}
           {advancedFeaturesEnabled && settings?.arenaWinnerEngine ? (

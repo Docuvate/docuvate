@@ -8,10 +8,12 @@ import { isFileDrag } from '../../lib/documentUploadConstants';
 import { Button } from '../ui/Button';
 import { useDocumentUploadContext } from '../upload/DocumentUploadProvider';
 import { UploadFileTrigger } from '../upload/UploadFileTrigger';
+import { DateisystemNewFolderButton } from './DateisystemNewFolderButton';
 
 interface DateisystemFolderEmptyStateProps {
   folderLabel: string;
   onAddExisting: () => void;
+  onCreateFolder?: (name: string) => Promise<void>;
   uploadDisabledTitle?: string;
   onRequestUploadTarget?: () => void;
 }
@@ -19,12 +21,14 @@ interface DateisystemFolderEmptyStateProps {
 export function DateisystemFolderEmptyState({
   folderLabel,
   onAddExisting,
+  onCreateFolder,
   uploadDisabledTitle,
   onRequestUploadTarget,
 }: DateisystemFolderEmptyStateProps) {
   const { t } = useTranslation();
   const { dropTarget, enqueueFiles } = useDocumentUploadContext();
   const [dragActive, setDragActive] = useState(false);
+  const [newFolderOpen, setNewFolderOpen] = useState(false);
 
   const onDrop = useCallback(
     (event: DragEvent) => {
@@ -66,6 +70,18 @@ export function DateisystemFolderEmptyState({
         <Button type="button" variant="secondary" onClick={onAddExisting}>
           {t('filesystem.addExistingButton')}
         </Button>
+        {onCreateFolder ? (
+          <>
+            <DateisystemNewFolderButton
+              onCreate={onCreateFolder}
+              open={newFolderOpen}
+              onOpenChange={setNewFolderOpen}
+            />
+            <Button type="button" variant="ghost" onClick={() => { setNewFolderOpen(true); }}>
+              {t('filesystem.newRootButton')}
+            </Button>
+          </>
+        ) : null}
       </div>
     </div>
   );

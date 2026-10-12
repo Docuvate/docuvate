@@ -1,18 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
-import { Trash2 } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { documentContentUrl } from '../../lib/api';
 import { Badge } from '../ui/Badge';
-import { Button } from '../ui/Button';
 
 type DetailTab = 'details' | 'labels' | 'chat';
 
 interface DocumentDetailMetaBarProps {
   doc: DocumentDto;
   onDelete: () => void;
+  onRequeueExtraction?: () => void;
+  requeueBusy?: boolean;
+  showTechnicalDetails?: boolean;
+  onShowTechnicalDetailsChange?: (open: boolean) => void;
 }
 
 export function DocumentDetailTabStrip({
@@ -56,7 +59,14 @@ export function DocumentDetailTabStrip({
   );
 }
 
-export function DocumentDetailMetaBar({ doc, onDelete }: DocumentDetailMetaBarProps) {
+export function DocumentDetailMetaBar({
+  doc,
+  onDelete,
+  onRequeueExtraction,
+  requeueBusy = false,
+  showTechnicalDetails = false,
+  onShowTechnicalDetailsChange,
+}: DocumentDetailMetaBarProps) {
   const { t } = useTranslation();
   const title = doc.title.trim() || doc.filename;
 
@@ -82,15 +92,48 @@ export function DocumentDetailMetaBar({ doc, onDelete }: DocumentDetailMetaBarPr
           >
             {t('documents.download')}
           </a>
-          <Button
-            type="button"
-            variant="ghost"
-            className="document-detail-delete"
-            onClick={onDelete}
-          >
-            <Trash2 size={16} strokeWidth={2} aria-hidden />
-            {t('common.delete')}
-          </Button>
+          <details className="document-detail-overflow-menu">
+            <summary
+              className="document-detail-overflow-trigger btn btn-ghost"
+              aria-label={t('documents.moreActionsAria')}
+            >
+              <MoreVertical size={18} strokeWidth={2} aria-hidden />
+            </summary>
+            <div className="document-detail-overflow-panel" role="menu">
+              {onRequeueExtraction ? (
+                <button
+                  type="button"
+                  className="document-detail-overflow-item"
+                  role="menuitem"
+                  disabled={requeueBusy}
+                  onClick={onRequeueExtraction}
+                >
+                  {t('documents.reprocess')}
+                </button>
+              ) : null}
+              {onShowTechnicalDetailsChange ? (
+                <button
+                  type="button"
+                  className="document-detail-overflow-item"
+                  role="menuitem"
+                  aria-pressed={showTechnicalDetails}
+                  onClick={() => { onShowTechnicalDetailsChange(!showTechnicalDetails); }}
+                >
+                  {showTechnicalDetails
+                    ? t('documents.technicalDetailsHide')
+                    : t('documents.technicalDetailsShow')}
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="document-detail-overflow-item document-detail-overflow-item-danger"
+                role="menuitem"
+                onClick={onDelete}
+              >
+                {t('common.delete')}
+              </button>
+            </div>
+          </details>
         </div>
       </div>
     </header>

@@ -15,9 +15,14 @@ async function measureWorkspace(page: import('@playwright/test').Page): Promise<
   return box ? { x: Math.round(box.x), width: Math.round(box.width) } : null;
 }
 
-const VIEWER_MODES = [/Original/i, /Reconstruction|Nachbau/i, /Compare|Vergleich/i] as const;
+const VIEWER_MODES = [/Original/i, /^Text$/i] as const;
 
-const SIDE_TABS = [/Fields|Felder/i, /Tables|Tabellen/i, /Outline|Gliederung/i, /Export/i] as const;
+const SIDE_TABS = [/Overview|Übersicht/i, /Tables|Tabellen/i, /Outline|Gliederung/i, /^Chat$/i] as const;
+
+async function openAdvancedCompare(page: import('@playwright/test').Page) {
+  await page.getByText(/Erweitert|Advanced/i).click();
+  await page.getByRole('radio', { name: /Compare|Vergleich/i }).click();
+}
 
 test.describe('document detail layout and chat', () => {
   test.describe.configure({ mode: 'serial' });
@@ -46,7 +51,11 @@ test.describe('document detail layout and chat', () => {
       expect(box?.x).toBe(baseline?.x);
     }
 
-    await page.getByRole('radio', { name: /Compare|Vergleich/i }).click();
+    await openAdvancedCompare(page);
+    await page.locator('[data-testid="layout-compare-stage"]').waitFor({
+      state: 'visible',
+      timeout: 180_000,
+    });
     await page.getByRole('radio', { name: /Slider|Schieberegler/i }).click();
     await page.waitForTimeout(400);
     const sliderModeBox = await measureWorkspace(page);
@@ -65,7 +74,7 @@ test.describe('document detail layout and chat', () => {
   test('compare heatmap aligns with original pane and slider clips at 50%', async ({ page }) => {
     test.setTimeout(360_000);
 
-    await page.getByRole('radio', { name: /Compare|Vergleich/i }).click();
+    await openAdvancedCompare(page);
     await page.locator('[data-testid="layout-compare-stage"]').waitFor({
       state: 'visible',
       timeout: 180_000,
@@ -107,14 +116,31 @@ test.describe('document detail layout and chat', () => {
     test.setTimeout(180_000);
 
     await page.getByRole('tab', { name: /^Chat$/i }).click();
-    await expect(page.locator('.layout-side-panel-chat')).toBeVisible();
-    const composer = page.locator('.layout-side-panel-chat .doc-chat-composer input');
+    const chatPanel = page.locator('.layout-side-chat');
+    await expect(chatPanel).toBeVisible();
+    const composer = chatPanel.locator('.doc-chat-composer input');
     await expect(composer).toBeEnabled({ timeout: 60_000 });
     const workspaceBox = await page.locator('.layout-workspace').boundingBox();
-    const chatBox = await page.locator('.layout-side-panel-chat').boundingBox();
+    const chatBox = await chatPanel.boundingBox();
     expect(workspaceBox && chatBox).toBeTruthy();
     if (workspaceBox && chatBox) {
       expect(chatBox.x).toBeGreaterThan(workspaceBox.x);
     }
+<<<<<<< HEAD
+=======
+
+    const started = Date.now();
+    await composer.fill(DOC_CHAT_QUESTION);
+    const submit = chatPanel.locator('button.doc-chat-submit');
+    await expect(submit).toBeEnabled();
+    await submit.click();
+    await expect(chatPanel.locator('.doc-chat-bubble.doc-chat-user')).toBeVisible({ timeout: 30_000 });
+    const assistant = chatPanel.locator('.doc-chat-bubble.doc-chat-assistant').last();
+    await expect(assistant).not.toHaveClass(/doc-chat-assistant-pending/, { timeout: 60_000 });
+    await expect(assistant.locator('.doc-chat-assistant-content, .doc-chat-error-block p')).toBeVisible({
+      timeout: 5_000,
+    });
+    expect(Date.now() - started).toBeLessThan(5_000);
+>>>>>>> 384791d (feat(web): document detail IA, library/settings polish, audit e2e)
   });
 });

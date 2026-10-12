@@ -235,10 +235,25 @@ function DashboardWidgetBody({
         </>
       );
     case 'recent_documents':
-    case 'attention':
     case 'saved_view':
       if (docs.length === 0) {
         return <p className="muted">{t('dashboard.widgetEmpty')}</p>;
+      }
+      return (
+        <ul className="dashboard-doc-list">
+          {docs.map((doc) => (
+            <li key={doc.id}>
+              <Link to={routes.document(doc.id)} className="dashboard-doc-link">
+                <span className="dashboard-doc-title">{doc.title || doc.filename}</span>
+                <Badge status={doc.status} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      );
+    case 'attention':
+      if (docs.length === 0) {
+        return <p className="muted">{t('dashboard.widgetAttentionEmpty')}</p>;
       }
       return (
         <ul className="dashboard-doc-list">
