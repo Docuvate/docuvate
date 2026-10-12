@@ -53,7 +53,6 @@ describe('DocumentLayoutSidePanel', () => {
         documentId="doc-1"
         layoutIr={layoutIr}
         fields={[{ key: 'datum', value: '01.01.2026' }]}
-        blocks={[]}
         knownFieldKeys={new Set()}
         fieldLabelForKey={(k) => k}
         activeTab="fields"
@@ -65,7 +64,7 @@ describe('DocumentLayoutSidePanel', () => {
         dismissedSuggestions={new Set()}
       />
     );
-    expect(screen.getByRole('tab', { name: 'documents.layoutTabFields' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'documents.layoutTabOverview' })).toBeTruthy();
     expect(screen.getByText('datum')).toBeTruthy();
   });
 
@@ -75,7 +74,6 @@ describe('DocumentLayoutSidePanel', () => {
         documentId="doc-1"
         layoutIr={layoutIr}
         fields={[]}
-        blocks={[]}
         knownFieldKeys={new Set()}
         fieldLabelForKey={(k) => k}
         activeTab="fields"
