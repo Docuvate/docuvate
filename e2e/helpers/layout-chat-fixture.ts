@@ -94,3 +94,39 @@ export async function openLayoutDocumentPage(page: Page, docId: string): Promise
   }
   await page.locator('.layout-side-tabs').waitFor({ state: 'visible', timeout: 120_000 });
 }
+
+/** Open Erweitert → Vergleich and wait until the compare stage is visible (Original mode). */
+export async function openLayoutAdvancedCompare(page: Page): Promise<void> {
+  await page
+    .locator('.layout-ir-skeleton')
+    .waitFor({ state: 'hidden', timeout: 180_000 })
+    .catch(() => undefined);
+
+  const toolbar = page.getByTestId('layout-viewer-toolbar');
+  const originalMode = toolbar.getByRole('radio', { name: /Original/i });
+  if ((await originalMode.getAttribute('aria-checked')) !== 'true') {
+    await originalMode.click();
+  }
+
+  const panel = page.locator('.layout-advanced-panel');
+  const isOpen = await panel.evaluate((el) => (el as HTMLDetailsElement).open);
+  if (!isOpen) {
+    await page.locator('.layout-advanced-summary').scrollIntoViewIfNeeded();
+    await page.locator('.layout-advanced-summary').click();
+  }
+  await expect(page.locator('.layout-advanced-body')).toBeVisible({ timeout: 60_000 });
+
+  const compareBtn = page.locator('.layout-advanced-view-switch').getByRole('radio', {
+    name: /Compare|Vergleich/i,
+  });
+  await compareBtn.scrollIntoViewIfNeeded();
+  await expect(compareBtn).toBeEnabled({ timeout: 180_000 });
+  if ((await compareBtn.getAttribute('aria-checked')) !== 'true') {
+    await compareBtn.click({ timeout: 60_000 });
+  }
+
+  await page.locator('[data-testid="layout-compare-stage"]').waitFor({
+    state: 'visible',
+    timeout: 180_000,
+  });
+}

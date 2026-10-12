@@ -1,27 +1,16 @@
 import { expect, test } from '@playwright/test';
 
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
+import {
+  openLayoutAdvancedCompare,
+  openLayoutDocumentPage,
+  uploadLayoutTableDocument,
+} from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
 test.use({ storageState: smokeFixtureStoragePath() });
-
-async function openAdvancedCompare(page: import('@playwright/test').Page) {
-  await page
-    .locator('.layout-ir-skeleton')
-    .waitFor({ state: 'hidden', timeout: 180_000 })
-    .catch(() => undefined);
-  await page.locator('.layout-advanced-summary').click();
-  const compareRadio = page.getByRole('radio', { name: /Vergleich|Compare/i });
-  await expect(compareRadio).toBeEnabled({ timeout: 180_000 });
-  await compareRadio.click();
-  await page.locator('[data-testid="layout-compare-stage"]').waitFor({
-    state: 'visible',
-    timeout: 180_000,
-  });
-}
 
 test.describe('UI audit regressions (non-ML)', () => {
   test.describe.configure({ mode: 'serial' });
@@ -61,7 +50,7 @@ test.describe('UI audit regressions (non-ML)', () => {
       timeout: 120_000,
     });
 
-    await openAdvancedCompare(page);
+    await openLayoutAdvancedCompare(page);
     const bodyText = await page.locator('.layout-compare').innerText();
     expect(bodyText).not.toMatch(/SSIM/i);
   });
