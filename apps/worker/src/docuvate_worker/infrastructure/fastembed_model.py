@@ -57,6 +57,9 @@ def get_embedding_model() -> object:
             if fast is not None:
                 _model = fast
                 _backend = "fastembed"
+            elif os.environ.get("DOCUVATE_EMBEDDING_NO_SENTENCE_TRANSFORMERS_FALLBACK") == "1":
+                msg = "fastembed unavailable and sentence_transformers fallback disabled"
+                raise RuntimeError(msg)
             else:
                 _model = _load_sentence_transformers()
                 _backend = "sentence_transformers"
