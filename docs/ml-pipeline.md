@@ -90,11 +90,30 @@ Non-permissive or research-only models are not used in the CE pipeline.
 
 ## Search and chat
 
+### Retrieval (document and library cited chat)
+
 1. BM25 / trigram candidates (unchanged).
 2. Binary Hamming prefilter on chunk `binary_code` (top k₁).
 3. int8 inner-product rerank on survivors.
 4. RRF fusion with lexical ranks.
 5. Cross-encoder rerank in worker (`/rag/retrieve`) for cited chat.
+6. Index units are LUNA sections / TACO table rows from the central representation when available (not fixed 128-token windows).
+
+### Chat query pipeline (API)
+
+| Stage | Contract | Model / rule | Metric (CI) |
+|-------|-----------|--------------|-------------|
+| Understand | `ResolvedQuery` + route | e5-small query embeddings vs committed intent centroids (`chat-intent-prototypes.json`); follow-up merge when consecutive user turns have cosine ≥ 0.55 | `chat_routing.intent_accuracy` ≥ 0.95, `chat_routing.follow_up_resolution` ≥ 0.90 |
+| Stats | `StatsAnswer` | Operation centroids (`chat-stats-operation-prototypes.json`); label slot = best cosine to tenant tag names (passage embeddings) | Integration + eval `eval/chat_de/` |
+| Small talk / OOS | `Answer` | Same intent head; deterministic locale templates | Routing eval |
+| Retrieve | `Candidates` | Hybrid + rerank; gates from `bench/rag_gate_calibrate.py` | `chat_extractive.citation_precision` |
+| Read | `Span` | Worker `extractive_reader.py`: `deepset/xlm-roberta-base-squad2-distilled` (MIT), fallback token–sentence overlap | `chat_extractive.answer_accuracy` |
+| Compose | `Answer` | Ollama OpenAI-compatible (`qwen2.5:1.5b` default) or verified cited JSON; extractive path without LLM | E2E bench |
+| Verify | `VerifiedAnswer` | Quote must appear in cited chunk body | Citation tests |
+
+Calibrated thresholds: `RAG_RERANKER_GATE_MIN` / `RAG_FUSION_GATE_MIN` from `bench/rag-gate-calibration-scores.json`; dense retrieval floor `DOCUVATE_DENSE_RETRIEVAL_GATE_MIN` (default 0.75 on e5-small cosine).
+
+German eval: `eval/chat_de/test.json` (≥150 routing cases); extractive corpus cases in `bench/model_gates/fixtures/chat_extractive_cases.json`.
 
 ## Feedback
 

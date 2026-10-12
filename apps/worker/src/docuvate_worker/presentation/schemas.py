@@ -302,6 +302,17 @@ class RagRetrieveResponse(BaseModel):
     reranker_model: str | None = None
 
 
+class RagExtractiveAnswerRequest(BaseModel):
+    query: str
+    passages: list[RagRetrievePassage] = Field(default_factory=list)
+
+
+class RagExtractiveAnswerResponse(BaseModel):
+    passage_id: str | None = None
+    answer: str | None = None
+    quote: str | None = None
+
+
 class DocumentChatProviderInfo(BaseModel):
     id: str
     label: str

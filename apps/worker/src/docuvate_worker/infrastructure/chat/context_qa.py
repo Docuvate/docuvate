@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import math
+import os
 import re
 from dataclasses import dataclass
 
+from docuvate_worker.infrastructure.chat.extractive_reader import read_span
 from docuvate_worker.infrastructure.fastembed_model import embed_passages, embed_query
 
 EXTRACTIVE_ABSTAIN_NO_MATCH = "Dazu finde ich im Dokument keinen eindeutigen Treffer"
@@ -15,25 +17,16 @@ EXTRACTIVE_ABSTAIN_NO_PASSAGE = "Dazu finde ich im Dokument keinen passenden Tex
 CHUNK_SIZE = 320
 CHUNK_OVERLAP = 64
 TOP_K = 6
-# e5-small dense cosine on DE pairs is ~0.72-0.88 (prior encoder used ~0.38).
-MIN_DENSE_SCORE = 0.75
 HYBRID_DENSE_WEIGHT = 0.55
 HYBRID_SPARSE_WEIGHT = 0.45
 MAX_RAG_CONTEXT_CHARS = 2400
 
-SENDER_HINTS = (
-    "absender",
-    "sender",
-    "von",
-    "zahlungsempfänger",
-    "empfänger",
-    "firma",
-    "unternehmen",
-    "vendor",
-    "correspondent",
-)
-
 _TOKEN_RE = re.compile(r"[\wäöüß]+", flags=re.UNICODE)
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
+_MIN_CANDIDATE_LINE_LEN = 12
+_EU_AMOUNT_RE = re.compile(r"\d[\d.]*,\d{2}")
+_DUE_DAY_RE = re.compile(r"\d+\.\s*Werktag", flags=re.IGNORECASE)
+_total_hint_vec: list[float] | None = None
 
 
 def _split_chunks(text: str) -> list[str]:
@@ -110,41 +103,45 @@ def _field_lines(fields: list[dict[str, str]]) -> list[str]:
     return lines
 
 
-def _looks_like_sender_question(question: str) -> bool:
-    lower = question.lower()
-    return any(h in lower for h in SENDER_HINTS)
+def _min_field_score() -> float:
+    raw = os.environ.get("DOCUVATE_FIELD_ANSWER_GATE_MIN")
+    if raw:
+        try:
+            return float(raw)
+        except ValueError:
+            pass
+    return 0.55
 
 
-def _sender_from_fields(fields: list[dict[str, str]]) -> str | None:
-    for field in fields:
-        key = str(field.get("key", "")).lower()
-        value = str(field.get("value", "")).strip()
-        if not value:
-            continue
-        if any(h in key for h in ("vendor", "correspondent", "sender", "absender", "firma")):
-            return value
-    for field in fields:
-        key = str(field.get("key", "")).lower()
-        value = str(field.get("value", "")).strip()
-        if "name" in key and value:
-            return value
-    return None
+def _answer_from_fields_embedding(question: str, fields: list[dict[str, str]]) -> str | None:
+    lines = _field_lines(fields)
+    if not lines:
+        return None
+    query_vec = embed_query(question)
+    line_vecs = embed_passages(lines)
+    best_idx = 0
+    best_score = -1.0
+    for idx, vec in enumerate(line_vecs):
+        score = _cosine(query_vec, vec)
+        if score > best_score:
+            best_score = score
+            best_idx = idx
+    if best_score < _min_field_score():
+        return None
+    value = str(fields[best_idx].get("value", "")).strip()
+    if value:
+        return f"{value}."
+    return f"{lines[best_idx]}."
 
 
-def _sender_from_text(text: str) -> str | None:
-    patterns = (
-        r"(?i)name des zahlungsempfängers:\s*(.+?)(?:\n|$)",
-        r"(?i)zahlungsempfänger:\s*(.+?)(?:\n|$)",
-        r"(?i)absender:\s*(.+?)(?:\n|$)",
-        r"(?i)von:\s*(.+?)(?:\n|$)",
-    )
-    for pattern in patterns:
-        match = re.search(pattern, text)
-        if match:
-            candidate = match.group(1).strip(" .")
-            if candidate:
-                return candidate
-    return None
+def _min_dense_score() -> float:
+    raw = os.environ.get("DOCUVATE_DENSE_RETRIEVAL_GATE_MIN")
+    if raw:
+        try:
+            return float(raw)
+        except ValueError:
+            pass
+    return 0.75
 
 
 def _build_chunk_corpus(
@@ -194,7 +191,7 @@ def _chunk_passes_retrieval_threshold(
     dense_score: float,
     _sparse_score: float,
 ) -> bool:
-    return dense_score >= MIN_DENSE_SCORE
+    return dense_score >= _min_dense_score()
 
 
 def _select_ranked_chunks(
@@ -358,6 +355,89 @@ def retrieve_library_rag_context(
     return RagRetrievalResult(chunks=selected, context_text=context_text)
 
 
+def _candidate_lines(context: str) -> list[str]:
+    primary = context.split("\n---\n", maxsplit=1)[0]
+    parts: list[str] = []
+    for line in primary.split("\n"):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        for piece in _SENTENCE_SPLIT.split(stripped):
+            candidate = piece.strip()
+            if len(candidate) >= _MIN_CANDIDATE_LINE_LEN and not candidate.startswith("(Quelle:"):
+                parts.append(candidate)
+        if len(stripped) >= _MIN_CANDIDATE_LINE_LEN and stripped not in parts:
+            parts.append(stripped)
+    return parts
+
+
+def _total_amount_hint_vector() -> list[float]:
+    global _total_hint_vec  # noqa: PLW0603
+    if _total_hint_vec is None:
+        _total_hint_vec = embed_passages(["Gesamtsumme Rechnungsbetrag Gesamtbetrag Endbetrag"])[0]
+    return _total_hint_vec
+
+
+def _best_sentence_across_chunks(question: str, chunks: list[str]) -> str | None:
+    if not chunks:
+        return None
+    query_vec = embed_query(question)
+    scored: list[tuple[float, str]] = []
+    gate = float(os.environ.get("DOCUVATE_SENTENCE_ANSWER_GATE_MIN", "0.68"))
+    for chunk in chunks:
+        for line in _candidate_lines(chunk):
+            line_vec = embed_passages([line])[0]
+            score = _cosine(query_vec, line_vec)
+            scored.append((score, line))
+    if not scored:
+        return None
+    scored.sort(key=lambda row: row[0], reverse=True)
+    best_score = scored[0][0]
+    if best_score < gate:
+        return None
+    margin = float(os.environ.get("DOCUVATE_SENTENCE_ANSWER_MARGIN", "0.03"))
+    near = [row for row in scored if row[0] >= best_score - margin]
+    amount_lines = [row for row in near if _EU_AMOUNT_RE.search(row[1])]
+    if amount_lines:
+        near = amount_lines
+    due_lines = [row for row in near if _DUE_DAY_RE.search(row[1])]
+    if due_lines:
+        near = due_lines
+    if len(near) > 1 and amount_lines:
+        total_vec = _total_amount_hint_vector()
+        near.sort(
+            key=lambda row: (
+                row[0] + 0.15 * _cosine(embed_passages([row[1]])[0], total_vec),
+                row[0],
+            ),
+            reverse=True,
+        )
+    else:
+        near.sort(key=lambda row: row[0], reverse=True)
+    return near[0][1]
+
+
+def _sentence_from_context(question: str, context: str) -> str | None:
+    span = read_span(question, context)
+    if span is not None:
+        return span.text
+    sentences = _candidate_lines(context)
+    if not sentences:
+        return None
+    query_vec = embed_query(question)
+    sent_vecs = embed_passages(sentences)
+    best_idx = 0
+    best_score = -1.0
+    for idx, vec in enumerate(sent_vecs):
+        score = _cosine(query_vec, vec)
+        if score > best_score:
+            best_score = score
+            best_idx = idx
+    if best_score < float(os.environ.get("DOCUVATE_SENTENCE_ANSWER_GATE_MIN", "0.68")):
+        return None
+    return sentences[best_idx]
+
+
 def answer_from_library_context(
     question: str,
     documents: list[DocumentContextInput],
@@ -379,14 +459,12 @@ def answer_from_library_context(
     if not retrieval.chunks:
         return EXTRACTIVE_ABSTAIN_NO_PASSAGE + "."
 
-    excerpts = " ".join(f"„{chunk}“" for chunk in retrieval.chunks)
-    lead = f"Zu „{trimmed}“: "
-    cited = _source_tags_from_chunks(retrieval.chunks)
-    if cited:
-        sources = ", ".join(sorted(cited))
-    else:
-        sources = ", ".join(sorted({doc.filename or doc.title or "Dokument" for doc in documents}))
-    return f"{lead}{excerpts} (Quellen: {sources})."
+    sentence = _best_sentence_across_chunks(trimmed, retrieval.chunks)
+    if sentence:
+        cited = _source_tags_from_chunks(retrieval.chunks)
+        sources = ", ".join(sorted(cited)) if cited else "Dokumente"
+        return f"{sentence} (Quellen: {sources})."
+    return EXTRACTIVE_ABSTAIN_NO_MATCH + "."
 
 
 def answer_from_document_context(
@@ -400,11 +478,6 @@ def answer_from_document_context(
     trimmed = question.strip()
     if not trimmed:
         return "Bitte eine Frage zum Dokument stellen."
-
-    if _looks_like_sender_question(trimmed):
-        sender = _sender_from_fields(fields) or _sender_from_text(text)
-        if sender:
-            return f"Absender bzw. Zahlungsempfänger laut Dokument: {sender}."
 
     body = text.strip()
     field_lines = _field_lines(fields)
@@ -422,14 +495,53 @@ def answer_from_document_context(
         fields=fields,
     )
     if not retrieval.chunks:
-        fallback = body[:400] or (field_lines[0] if field_lines else title)
-        if fallback:
-            return (
-                f"{EXTRACTIVE_ABSTAIN_NO_MATCH}. "
-                f"Kurzer Kontext: „{fallback}{'…' if len(body) > 400 else ''}“"  # noqa: PLR2004
-            )
         return f"{EXTRACTIVE_ABSTAIN_NO_PASSAGE}."
 
-    excerpts = " ".join(f"„{chunk}“" for chunk in retrieval.chunks)
-    lead = f"Zu „{trimmed}“: "
-    return f"{lead}{excerpts} (Quelle: {filename or 'Dokument'})."
+    sentence = _best_sentence_across_chunks(trimmed, retrieval.chunks)
+    if sentence:
+        return f"{sentence} (Quelle: {filename or 'Dokument'})."
+    field_answer = _answer_from_fields_embedding(trimmed, fields)
+    if field_answer:
+        return field_answer
+    return EXTRACTIVE_ABSTAIN_NO_MATCH + "."
+
+
+@dataclass(frozen=True)
+class ExtractivePassageAnswer:
+    passage_id: str
+    answer: str
+    quote: str
+
+
+def extractive_answer_from_passages(
+    question: str,
+    passages: list[tuple[str, str]],
+) -> ExtractivePassageAnswer | None:
+    """Reader-first answer from pre-ranked API passages (section-level chunk bodies)."""
+    trimmed = question.strip()
+    if not trimmed or not passages:
+        return None
+    bodies: list[str] = []
+    passage_ids: list[str] = []
+    for passage_id, text in passages:
+        body = text.strip()
+        if not body:
+            continue
+        bodies.append(body)
+        passage_ids.append(passage_id)
+    if not bodies:
+        return None
+    sentence = _best_sentence_across_chunks(trimmed, bodies)
+    if not sentence:
+        return None
+    passage_id = passage_ids[0]
+    for idx, body in enumerate(bodies):
+        if sentence in body or sentence in _candidate_lines(body):
+            passage_id = passage_ids[idx]
+            break
+    quote = sentence.strip()
+    return ExtractivePassageAnswer(
+        passage_id=passage_id,
+        answer=quote if quote.endswith((".", "!", "?")) else f"{quote}.",
+        quote=quote,
+    )

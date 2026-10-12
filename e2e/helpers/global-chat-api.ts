@@ -9,6 +9,9 @@ export type GlobalChatMessage = {
 
 export const GLOBAL_CHAT_ABSTENTION_SNIPPET = 'nichts gefunden';
 
+/** Routed off-topic reply (intent classifier), distinct from retrieval abstention. */
+export const GLOBAL_CHAT_OUT_OF_SCOPE_SNIPPET = 'hochgeladenen dokumenten';
+
 export async function createGlobalChatThread(
   request: APIRequestContext,
   apiBase: string,

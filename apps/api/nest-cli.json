@@ -9,6 +9,10 @@
       {
         "include": "shared/infrastructure/database/migrations/sql/**/*",
         "outDir": "dist"
+      },
+      {
+        "include": "modules/cited-chat/domain/*.json",
+        "outDir": "dist"
       }
     ],
     "plugins": [

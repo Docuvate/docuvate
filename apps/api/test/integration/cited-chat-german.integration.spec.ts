@@ -16,6 +16,7 @@ import {
   readPassageIds,
   requestUrl,
 } from '../helpers/json.js';
+import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -86,7 +87,8 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       threads,
       noopEmbedding,
       retrieval,
-      new PgChatMessageCitationsRepository(pool)
+      new PgChatMessageCitationsRepository(pool),
+      passthroughChatQueryRouter()
     );
   }, 60_000);
 
@@ -118,6 +120,9 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
         const url = requestUrl(input);
+        if (url.includes('/v1/rag/extractive-answer')) {
+          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
+        }
         if (url.includes('/v1/rag/retrieve')) {
           const body = parseRequestJsonRecord(init);
           const passageIds = readPassageIds(body);
@@ -217,6 +222,9 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       'fetch',
       vi.fn((input: RequestInfo | URL) => {
         const url = requestUrl(input);
+        if (url.includes('/v1/rag/extractive-answer')) {
+          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
+        }
         if (url.includes('/v1/rag/retrieve')) {
           return Promise.resolve(
             new Response(
@@ -324,6 +332,9 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
         const url = requestUrl(input);
+        if (url.includes('/v1/rag/extractive-answer')) {
+          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
+        }
         if (url.includes('/v1/rag/retrieve')) {
           const body = parseRequestJsonRecord(init);
           const passageIds = readPassageIds(body);

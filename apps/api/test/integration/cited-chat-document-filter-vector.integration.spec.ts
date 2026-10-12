@@ -17,6 +17,7 @@ import {
   readPassageIds,
   requestUrl,
 } from '../helpers/json.js';
+import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -97,7 +98,8 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
       threads,
       queryEmbeddingPort,
       retrieval,
-      new PgChatMessageCitationsRepository(pool)
+      new PgChatMessageCitationsRepository(pool),
+      passthroughChatQueryRouter()
     );
   }, 60_000);
 

@@ -12,10 +12,20 @@ import {
 import { CITED_CHAT_ABSTENTION_DE } from '../domain/cited-chat-constants.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import { ChatQueryRouterService } from './chat-query-router.service.js';
 import { CitedChatGenerationService } from './cited-chat-generation.service.js';
 
 vi.mock('../infrastructure/fetch-worker-rag-rerank.js', () => ({
   fetchWorkerRagRerank: vi.fn(),
+}));
+
+vi.mock('../infrastructure/fetch-worker-extractive-answer.js', () => ({
+  fetchWorkerExtractiveAnswer: vi.fn().mockResolvedValue({
+    reachable: false,
+    passageId: null,
+    answer: null,
+    quote: null,
+  }),
 }));
 
 vi.mock('./cited-chat-ollama.js', () => ({
@@ -23,6 +33,7 @@ vi.mock('./cited-chat-ollama.js', () => ({
   requestCitedAnswerFromOllama: vi.fn(),
 }));
 
+import { fetchWorkerExtractiveAnswer } from '../infrastructure/fetch-worker-extractive-answer.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { requestCitedAnswerFromOllama } from './cited-chat-ollama.js';
 
@@ -46,14 +57,27 @@ async function buildService(deps: {
           threads: DocumentChatThreadRepository,
           embedding: EmbeddingPort,
           retrieval: PgCitedChatRetrievalRepository,
-          citations: PgChatMessageCitationsRepository
-        ) => new CitedChatGenerationService(threads, embedding, retrieval, citations),
+          citations: PgChatMessageCitationsRepository,
+          queryRouter: ChatQueryRouterService
+        ) => new CitedChatGenerationService(threads, embedding, retrieval, citations, queryRouter),
         inject: [
           DOCUMENT_CHAT_THREAD_REPOSITORY,
           EMBEDDING_PORT,
           PgCitedChatRetrievalRepository,
           PgChatMessageCitationsRepository,
+          ChatQueryRouterService,
         ],
+      },
+      {
+        provide: ChatQueryRouterService,
+        useValue: {
+          route: vi.fn(({ userMessage }: { userMessage: string }) =>
+            Promise.resolve({
+              kind: 'document_qa',
+              resolvedQuery: userMessage,
+            })
+          ),
+        },
       },
       { provide: DOCUMENT_CHAT_THREAD_REPOSITORY, useValue: deps.threads },
       {
@@ -170,6 +194,12 @@ describe('CitedChatGenerationService abstention', () => {
 
   it('returns extractive text without Ollama when chunk id is lexical-only', async () => {
     process.env['OLLAMA_URL'] = '';
+    vi.mocked(fetchWorkerExtractiveAnswer).mockResolvedValue({
+      reachable: true,
+      passageId: 'lexical-block-doc-0',
+      answer: 'Widget A Menge 2 Stück.',
+      quote: 'Widget A Menge 2 Stück.',
+    });
     vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
       reachable: true,
       rerankerUsed: true,

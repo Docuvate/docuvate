@@ -19,7 +19,6 @@ import {
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
-import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
@@ -31,9 +30,14 @@ import {
   normalizeCitedSourceLabel,
   verifyCitedClaims,
 } from '../domain/verify-cited-claims.js';
+import { fetchWorkerExtractiveAnswer } from '../infrastructure/fetch-worker-extractive-answer.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
-import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import {
+  type CitedChatChunkCandidate,
+  PgCitedChatRetrievalRepository,
+} from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import { ChatQueryRouterService } from './chat-query-router.service.js';
 import {
   buildCitedChatSystemPrompt,
   requestCitedAnswerFromOllama,
@@ -68,7 +72,8 @@ export class CitedChatGenerationService {
     private readonly threads: DocumentChatThreadRepository,
     @Inject(EMBEDDING_PORT) private readonly embedding: EmbeddingPort,
     private readonly retrieval: PgCitedChatRetrievalRepository,
-    private readonly citationsRepo: PgChatMessageCitationsRepository
+    private readonly citationsRepo: PgChatMessageCitationsRepository,
+    private readonly queryRouter: ChatQueryRouterService
   ) {}
 
   async generate(input: CitedChatGenerationInput): Promise<CitedChatGenerationResult> {
@@ -137,6 +142,31 @@ export class CitedChatGenerationService {
     });
     await heartbeat();
 
+    const priorMessages = await this.threads.listMessages(threadId, userId);
+    const priorUserTurns = priorMessages.filter((m) => m.role === 'user').slice(-2);
+    const priorUserMessage =
+      priorUserTurns.length >= 2 ? priorUserTurns[priorUserTurns.length - 2].content : null;
+
+    const routed = await this.queryRouter.route({
+      userId,
+      userMessage,
+      priorUserMessage,
+      scope,
+      locale,
+    });
+    if (routed.kind === 'answered') {
+      await this.citationsRepo.replaceCitations(messageId, []);
+      await this.threads.updateMessageGeneration(messageId, {
+        content: routed.content,
+        generationStatus: 'done',
+        generationPhase: null,
+        finalizeOnlyIfInFlight: true,
+      });
+      await this.threads.touchThread(threadId);
+      return { content: routed.content, abstained: false };
+    }
+    const retrievalQuery = routed.resolvedQuery;
+
     const generationStarted = Date.now();
     let embedMs = 0;
     let retrieveMs = 0;
@@ -146,7 +176,9 @@ export class CitedChatGenerationService {
     let queryVector: number[] | undefined;
     const embedStarted = Date.now();
     try {
-      const { embeddings } = await this.embedding.embedTexts([userMessage], { inputType: 'query' });
+      const { embeddings } = await this.embedding.embedTexts([retrievalQuery], {
+        inputType: 'query',
+      });
       queryVector = embeddings[0];
     } catch {
       queryVector = undefined;
@@ -157,7 +189,7 @@ export class CitedChatGenerationService {
       scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
 
     const retrieveStarted = Date.now();
-    const candidates = await this.retrieval.hybridRetrieveChunks(userId, userMessage, {
+    const candidates = await this.retrieval.hybridRetrieveChunks(userId, retrievalQuery, {
       documentIds: filterIds,
       queryVector,
     });
@@ -184,7 +216,7 @@ export class CitedChatGenerationService {
 
     const rerankStarted = Date.now();
     const rerank = await fetchWorkerRagRerank(
-      userMessage,
+      retrievalQuery,
       candidates.map((c) => ({
         id: c.chunkId,
         text: this.retrieval.indexPassageForRerank(c),
@@ -220,13 +252,15 @@ export class CitedChatGenerationService {
 
     const extractiveMinScore =
       rerank.reachable && rerank.rerankerUsed
-        ? 0.12
+        ? ragRerankerGateThreshold()
         : ragFusionGateThreshold();
     const extractivePool =
-      scope === 'library' ? libraryExtractiveRows(top) : top.slice(0, RAG_RERANK_TOP_K);
+      scope === 'library'
+        ? libraryExtractiveRows(top, retrievalQuery)
+        : top.slice(0, RAG_RERANK_TOP_K);
     const extractive =
       extractivePool.length > 0
-        ? tryExtractiveCitedAnswer(userMessage, extractivePool, extractiveMinScore)
+        ? await this.resolveExtractiveAnswer(retrievalQuery, extractivePool, extractiveMinScore)
         : null;
 
     if (!gateOk) {
@@ -242,7 +276,9 @@ export class CitedChatGenerationService {
             charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
           },
         ]);
-        const content = formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }]);
+        const content = formatVerifiedCitedContent([
+          { text: extractive.text, ordinal: 1 },
+        ]);
         await this.threads.updateMessageGeneration(messageId, {
           content,
           generationStatus: 'done',
@@ -322,7 +358,6 @@ export class CitedChatGenerationService {
       labelByChunk.set(row.chunk.chunkId, `S${String(i + 1)}`);
     });
 
-    const priorMessages = await this.threads.listMessages(threadId, userId);
     const history = priorMessages
       .filter((m) => m.role === 'user' || m.generationStatus === 'done')
       .slice(-2)
@@ -340,7 +375,7 @@ export class CitedChatGenerationService {
     let processedClaimCount = 0;
     const streamedVerified: { text: string; ordinal: number }[] = [];
     const llmStarted = Date.now();
-    const llm = await requestCitedAnswerFromOllama(userMessage, systemPrompt, history, {
+    const llm = await requestCitedAnswerFromOllama(retrievalQuery, systemPrompt, history, {
       shouldAbort: () => aborted(),
       onToken: async (partialJson) => {
         await heartbeat();
@@ -361,7 +396,10 @@ export class CitedChatGenerationService {
             continue;
           }
           const streamOrdinal = streamedVerified.length + 1;
-          streamedVerified.push({ text: verified[0].text, ordinal: streamOrdinal });
+          streamedVerified.push({
+            text: verified[0].text,
+            ordinal: streamOrdinal,
+          });
         }
         if (streamedVerified.length === 0) {
           return;
@@ -471,6 +509,36 @@ export class CitedChatGenerationService {
       : undefined;
 
     if (verified.length === 0) {
+      const extractiveFallback = await this.resolveExtractiveAnswer(
+        retrievalQuery,
+        extractivePool,
+        extractiveMinScore
+      );
+      const fallbackChunkId = extractiveFallback?.chunk.chunkId ?? '';
+      const fallbackChunkIsUuid = /^[0-9a-f-]{36}$/i.test(fallbackChunkId);
+      if (extractiveFallback && fallbackChunkIsUuid) {
+        await this.citationsRepo.replaceCitations(messageId, [
+          {
+            ordinal: 1,
+            chunkId: extractiveFallback.chunk.chunkId,
+            quote: extractiveFallback.quote,
+            charStart: extractiveFallback.chunk.charStart ?? 0,
+            charEnd: extractiveFallback.chunk.charEnd ?? extractiveFallback.quote.length,
+          },
+        ]);
+        const content = formatVerifiedCitedContent([
+          { text: extractiveFallback.text, ordinal: 1 },
+        ]);
+        await this.threads.updateMessageGeneration(messageId, {
+          content,
+          generationStatus: 'done',
+          generationPhase: null,
+          errorDetail: benchStats,
+          finalizeOnlyIfInFlight: true,
+        });
+        await this.threads.touchThread(threadId);
+        return { content, abstained: false };
+      }
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
         content: abstentionText,
@@ -494,7 +562,9 @@ export class CitedChatGenerationService {
       }))
     );
 
-    const content = formatVerifiedCitedContent(verified);
+    const content = formatVerifiedCitedContent(
+      verified.map((v) => ({ text: v.text, ordinal: v.ordinal }))
+    );
 
     if (citedChatBenchStatsEnabled() && rejected.length > 0) {
       this.logger.log(
@@ -511,6 +581,28 @@ export class CitedChatGenerationService {
     });
     await this.threads.touchThread(threadId);
     return { content, abstained: false };
+  }
+
+  private async resolveExtractiveAnswer(
+    query: string,
+    ranked: { chunk: CitedChatChunkCandidate; score: number }[],
+    minScore: number
+  ): Promise<{ text: string; chunk: CitedChatChunkCandidate; quote: string } | null> {
+    if (ranked.length === 0 || ranked[0].score < minScore) {
+      return null;
+    }
+    const passages = ranked.map((row) => ({
+      id: row.chunk.chunkId,
+      text: row.chunk.body,
+    }));
+    const worker = await fetchWorkerExtractiveAnswer(query, passages);
+    if (!worker.reachable || !worker.passageId || !worker.answer) {
+      return null;
+    }
+    const match = ranked.find((row) => row.chunk.chunkId === worker.passageId);
+    const chunk = match?.chunk ?? ranked[0].chunk;
+    const quote = worker.quote?.trim() ?? worker.answer.trim();
+    return { text: worker.answer.trim(), chunk, quote };
   }
 
   private async failGeneration(
