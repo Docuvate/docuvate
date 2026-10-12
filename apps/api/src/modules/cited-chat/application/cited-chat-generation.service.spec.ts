@@ -33,6 +33,7 @@ vi.mock('./cited-chat-ollama.js', () => ({
   requestCitedAnswerFromOllama: vi.fn(),
 }));
 
+import { fetchWorkerExtractiveAnswer } from '../infrastructure/fetch-worker-extractive-answer.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { requestCitedAnswerFromOllama } from './cited-chat-ollama.js';
 
@@ -193,6 +194,12 @@ describe('CitedChatGenerationService abstention', () => {
 
   it('returns extractive text without Ollama when chunk id is lexical-only', async () => {
     process.env['OLLAMA_URL'] = '';
+    vi.mocked(fetchWorkerExtractiveAnswer).mockResolvedValue({
+      reachable: true,
+      passageId: 'lexical-block-doc-0',
+      answer: 'Widget A Menge 2 Stück.',
+      quote: 'Widget A Menge 2 Stück.',
+    });
     vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
       reachable: true,
       rerankerUsed: true,
