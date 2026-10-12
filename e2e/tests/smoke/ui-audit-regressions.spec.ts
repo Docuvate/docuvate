@@ -40,7 +40,7 @@ test.describe('UI audit regressions (non-ML)', () => {
     expect(stageBox).not.toBeNull();
     const gap = (stageBox?.y ?? 0) - (toolbarBox?.bottom ?? 0);
     expect(Number.isFinite(gap)).toBe(true);
-    expect(gap).toBeLessThan(200);
+    expect(gap).toBeLessThan(120);
 
     await page.getByRole('radio', { name: /^Text$/i }).click();
     await expect(page.locator('[data-block-id], [data-block-index]').first()).toBeVisible({
