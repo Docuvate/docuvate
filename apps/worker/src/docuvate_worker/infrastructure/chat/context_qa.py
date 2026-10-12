@@ -26,7 +26,7 @@ _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
 _MIN_CANDIDATE_LINE_LEN = 12
 _EU_AMOUNT_RE = re.compile(r"\d[\d.]*,\d{2}")
 _DUE_DAY_RE = re.compile(r"\d+\.\s*Werktag", flags=re.IGNORECASE)
-_TOTAL_HINT_VEC: list[float] | None = None
+_total_hint_vec: list[float] | None = None
 
 
 def _split_chunks(text: str) -> list[str]:
@@ -372,10 +372,10 @@ def _candidate_lines(context: str) -> list[str]:
 
 
 def _total_amount_hint_vector() -> list[float]:
-    global _TOTAL_HINT_VEC  # noqa: PLW0603
-    if _TOTAL_HINT_VEC is None:
-        _TOTAL_HINT_VEC = embed_passages(["Gesamtsumme Rechnungsbetrag Gesamtbetrag Endbetrag"])[0]
-    return _TOTAL_HINT_VEC
+    global _total_hint_vec  # noqa: PLW0603
+    if _total_hint_vec is None:
+        _total_hint_vec = embed_passages(["Gesamtsumme Rechnungsbetrag Gesamtbetrag Endbetrag"])[0]
+    return _total_hint_vec
 
 
 def _best_sentence_across_chunks(question: str, chunks: list[str]) -> str | None:

@@ -8,7 +8,9 @@ from __future__ import annotations
 import logging
 import os
 import threading
+from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ READER_MODEL = os.environ.get(
     "deepset/xlm-roberta-base-squad2-distilled",
 )
 _lock = threading.Lock()
-_pipeline = None
+_pipeline: Callable[..., Any] | None = None
 _pipeline_failed = False
 
 
@@ -27,7 +29,7 @@ class ExtractiveSpan:
     score: float
 
 
-def _load_pipeline() -> object | None:
+def _load_pipeline() -> Callable[..., Any] | None:
     global _pipeline, _pipeline_failed  # noqa: PLW0603
     if _pipeline_failed:
         return None
