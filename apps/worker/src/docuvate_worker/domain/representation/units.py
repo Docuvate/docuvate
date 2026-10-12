@@ -86,7 +86,9 @@ def _table_row_units(
     if mime_type != "application/pdf" or not taco.tables:
         return []
     try:
-        from docuvate_worker.infrastructure.layout.extract import extract_layout_pdf_bytes
+        from docuvate_worker.infrastructure.layout.extract import (  # noqa: PLC0415
+            extract_layout_pdf_bytes,
+        )
     except Exception:
         return []
     layout = extract_layout_pdf_bytes(content)

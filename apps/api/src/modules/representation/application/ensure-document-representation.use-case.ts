@@ -104,15 +104,20 @@ export class EnsureDocumentRepresentationUseCase {
       return true;
     }
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
-    const payload: unknown = await fetchWorkerJson(
-      workerApiUrl(workerUrl, '/representation/from-text'),
-      {
-        method: 'POST',
-        headers: workerRequestHeaders(),
-        body: JSON.stringify({ text: trimmed }),
-      },
-      workerCompareTimeoutMs()
-    );
+    let payload: unknown;
+    try {
+      payload = await fetchWorkerJson(
+        workerApiUrl(workerUrl, '/representation/from-text'),
+        {
+          method: 'POST',
+          headers: workerRequestHeaders(),
+          body: JSON.stringify({ text: trimmed }),
+        },
+        workerCompareTimeoutMs()
+      );
+    } catch {
+      return false;
+    }
     const representation = parseWorkerRepresentation(payload);
     if (!representation) {
       return false;

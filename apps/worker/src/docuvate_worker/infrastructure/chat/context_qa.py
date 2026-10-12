@@ -15,7 +15,7 @@ EXTRACTIVE_ABSTAIN_NO_PASSAGE = "Dazu finde ich im Dokument keinen passenden Tex
 CHUNK_SIZE = 320
 CHUNK_OVERLAP = 64
 TOP_K = 6
-# multilingual-e5-small cosine scores are ~0.72-0.88 on in-domain DE pairs (0.38 was the prior encoder).
+# e5-small dense cosine on DE pairs is ~0.72-0.88 (prior encoder used ~0.38).
 MIN_DENSE_SCORE = 0.75
 HYBRID_DENSE_WEIGHT = 0.55
 HYBRID_SPARSE_WEIGHT = 0.45

@@ -284,29 +284,41 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
     userId: string,
     excludeDocumentId: string
   ): Promise<DocumentEmbeddingReference[]> {
-    const result = await this.pool.query(
-      `SELECT de.document_id, de.embedding,
-              COALESCE(array_agg(dt.tag_id) FILTER (WHERE t.is_inbox = false), '{}') AS tag_ids
-       FROM document_embeddings de
-       INNER JOIN documents d ON d.id = de.document_id
-       INNER JOIN document_tags dt ON dt.document_id = de.document_id
-       INNER JOIN tags t ON t.id = dt.tag_id
-       WHERE d.user_id = $1
-         AND de.document_id <> $2
-       GROUP BY de.document_id, de.embedding
-       HAVING bool_or(t.is_inbox = false)`,
-      [userId, excludeDocumentId]
-    );
-    return result.rows
-      .map((raw) => {
-        const row = requireRecord(raw);
-        return {
-          documentId: parseString(row.document_id),
-          tagIds: parseStringArray(row.tag_ids),
-          embedding: parseVector(row.embedding),
-        };
-      })
-      .filter((row) => row.embedding.length > 0 && row.tagIds.length > 0);
+    return withTenantPgClient(this.pool, userId, async (client) => {
+      const result = await client.query(
+        `SELECT dr.document_id,
+                dr.document_mean_scale,
+                dr.document_mean_int8,
+                COALESCE(array_agg(dt.tag_id) FILTER (WHERE t.is_inbox = false), '{}') AS tag_ids
+         FROM document_representation dr
+         INNER JOIN documents d ON d.id = dr.document_id
+         INNER JOIN document_tags dt ON dt.document_id = dr.document_id
+         INNER JOIN tags t ON t.id = dt.tag_id
+         WHERE d.user_id = $1
+           AND dr.document_id <> $2
+         GROUP BY dr.document_id, dr.document_mean_scale, dr.document_mean_int8
+         HAVING bool_or(t.is_inbox = false)`,
+        [userId, excludeDocumentId]
+      );
+      return result.rows
+        .map((raw) => {
+          const row = requireRecord(raw);
+          const scale = parseNumber(row.document_mean_scale, 0);
+          const buffer = row.document_mean_int8;
+          const embedding: number[] = [];
+          if (Buffer.isBuffer(buffer)) {
+            for (let i = 0; i < buffer.length; i += 1) {
+              embedding.push(buffer.readInt8(i) * scale);
+            }
+          }
+          return {
+            documentId: parseString(row.document_id),
+            tagIds: parseStringArray(row.tag_ids),
+            embedding,
+          };
+        })
+        .filter((row) => row.embedding.length > 0 && row.tagIds.length > 0);
+    });
   }
 
   async getTagCentroids(userId: string): Promise<TagCentroidRecord[]> {
