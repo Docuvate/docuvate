@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
-import { isChunkDumpClaim } from './claim-chunk-dump.js';
+import { isChunkDumpClaim, isIndexPassageClaim } from './claim-chunk-dump.js';
 import {
   bestQuoteMatchScore,
   findQuoteInChunk,
@@ -18,7 +18,8 @@ export type CitedClaimRejectReason =
   | 'quote_not_in_chunk'
   | 'claim_number_not_in_quote'
   | 'quote_in_other_document'
-  | 'claim_is_chunk_dump';
+  | 'claim_is_chunk_dump'
+  | 'claim_is_index_passage';
 
 export interface RejectedCitedClaim {
   claimText: string;
@@ -335,6 +336,17 @@ export function verifyCitedClaims(input: {
         quote: primaryQuote,
         bestMatchScore: bestQuoteMatchScore(resolved[0].row.chunk.body, primaryQuote),
         reason: 'claim_is_chunk_dump',
+        source: primarySource,
+      });
+      continue;
+    }
+
+    if (isIndexPassageClaim(claimText)) {
+      rejected.push({
+        claimText,
+        quote: primaryQuote,
+        bestMatchScore: bestQuoteMatchScore(resolved[0].row.chunk.body, primaryQuote),
+        reason: 'claim_is_index_passage',
         source: primarySource,
       });
       continue;

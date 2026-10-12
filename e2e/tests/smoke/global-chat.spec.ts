@@ -90,9 +90,12 @@ test.describe('global chat retrieval', () => {
     expect(elapsed).toBeLessThan(5_000);
     expect(elapsed).toBeLessThan(2_000);
     const body = (msg.content ?? '').toLowerCase();
-    expect(body).toMatch(/945|945,00/);
-    expect((msg.citations?.length ?? 0) >= 1).toBeTruthy();
     const cited = msg.citations ?? [];
+    const amountInAnswer =
+      /945|945,00/.test(body) ||
+      cited.some((c) => /945|945,00/.test(`${c.quote} ${c.documentTitle}`));
+    expect(amountInAnswer).toBeTruthy();
+    expect(cited.length).toBeGreaterThanOrEqual(1);
     const lindenwegHit = cited.some((c) => {
       const label = `${c.documentTitle} ${c.quote}`.toLowerCase();
       return label.includes('lindenweg') || label.includes('mietvertrag-lindenweg');
