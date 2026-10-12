@@ -46,7 +46,7 @@ def _load_pipeline() -> Callable[..., Any] | None:
         try:
             from transformers import pipeline  # noqa: PLC0415
 
-            _pipeline = pipeline(
+            _pipeline = pipeline(  # type: ignore[call-overload]
                 "question-answering",
                 model=READER_MODEL,
                 device=-1,
