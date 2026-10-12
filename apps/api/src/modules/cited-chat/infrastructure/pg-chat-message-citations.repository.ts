@@ -5,6 +5,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { resolveCitationPageFromBlocks } from '../domain/resolve-citation-page.js';
 import { normalizeForQuoteMatch } from '../domain/verify-citation-quote.js';
 
 export interface StoredChatCitation {
@@ -83,7 +84,7 @@ export class PgChatMessageCitationsRepository {
       });
       byMessage.set(row.message_id, list);
     }
-    return byMessage;
+    return this.enrichCitationPages(byMessage);
   }
 
   async listForMessage(messageId: string): Promise<StoredChatCitation[]> {
@@ -106,7 +107,7 @@ export class PgChatMessageCitationsRepository {
        ORDER BY c.ordinal ASC`,
       [messageId]
     );
-    return result.rows.map((row) => ({
+    const mapped = result.rows.map((row) => ({
       ordinal: row.ordinal,
       chunkId: row.chunk_id,
       quote: row.quote,
@@ -117,6 +118,75 @@ export class PgChatMessageCitationsRepository {
       page: row.page,
       blocks: [],
     }));
+    const enriched = await this.enrichCitationPages(
+      new Map([['single', mapped]])
+    );
+    return enriched.get('single') ?? mapped;
+  }
+
+  private async loadBlocksForDocuments(
+    documentIds: string[]
+  ): Promise<Map<string, ExtractionBlock[]>> {
+    if (documentIds.length === 0) {
+      return new Map();
+    }
+    const blocksResult = await this.pool.query<{
+      document_id: string;
+      page: number;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+      text: string | null;
+      block_index: number | null;
+    }>(
+      `SELECT document_id, page, x, y, width, height, text, block_index
+       FROM document_extraction_blocks
+       WHERE document_id = ANY($1::uuid[])
+       ORDER BY document_id, page, block_index`,
+      [documentIds]
+    );
+    const byDoc = new Map<string, ExtractionBlock[]>();
+    for (const row of blocksResult.rows) {
+      const list = byDoc.get(row.document_id) ?? [];
+      list.push({
+        page: row.page,
+        x: row.x,
+        y: row.y,
+        width: row.width,
+        height: row.height,
+        text: row.text ?? '',
+        blockIndex: row.block_index ?? undefined,
+      });
+      byDoc.set(row.document_id, list);
+    }
+    return byDoc;
+  }
+
+  private async enrichCitationPages(
+    byMessage: Map<string, StoredChatCitation[]>
+  ): Promise<Map<string, StoredChatCitation[]>> {
+    const all = [...byMessage.values()].flat();
+    if (all.length === 0) {
+      return byMessage;
+    }
+    const docIds = [...new Set(all.map((c) => c.documentId))];
+    const blocksByDoc = await this.loadBlocksForDocuments(docIds);
+    const out = new Map<string, StoredChatCitation[]>();
+    for (const [messageId, citations] of byMessage) {
+      out.set(
+        messageId,
+        citations.map((c) => ({
+          ...c,
+          page: resolveCitationPageFromBlocks(
+            c.quote,
+            blocksByDoc.get(c.documentId) ?? [],
+            c.page
+          ),
+        }))
+      );
+    }
+    return out;
   }
 
   async loadHighlightBlocksForCitations(
@@ -126,7 +196,9 @@ export class PgChatMessageCitationsRepository {
       return citations;
     }
     const docIds = [...new Set(citations.map((c) => c.documentId))];
-    const pages = [...new Set(citations.map((c) => c.page ?? 1))];
+    const resolved = await this.enrichCitationPages(new Map([['batch', citations]]));
+    const enriched = resolved.get('batch') ?? citations;
+    const pages = [...new Set(enriched.map((c) => c.page ?? 1))];
     const blocksResult = await this.pool.query<{
       document_id: string;
       page: number;
@@ -157,7 +229,7 @@ export class PgChatMessageCitationsRepository {
       });
       byDoc.set(row.document_id, list);
     }
-    return citations.map((c) => {
+    return enriched.map((c) => {
       const blocks = byDoc.get(c.documentId) ?? [];
       const pageBlocks = blocks.filter((b) => b.page === (c.page ?? 1));
       const needle = normalizeForQuoteMatch(c.quote);

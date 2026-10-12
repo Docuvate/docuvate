@@ -47,7 +47,7 @@ function pageForChunkFromBlocks(chunkBody: string, blocks: ExtractionBlock[]): n
   if (!probe) {
     return blocks[0]?.page ?? 1;
   }
-  let bestPage = blocks[0]?.page ?? 1;
+  let bestPage: number | null = null;
   let bestScore = 0;
   for (const block of blocks) {
     const piece = normalizeDocumentText(block.text);
@@ -74,6 +74,9 @@ function pageForChunkFromBlocks(chunkBody: string, blocks: ExtractionBlock[]): n
       bestPage = block.page;
     }
   }
+  if (bestScore === 0) {
+    return null;
+  }
   return bestPage;
 }
 
@@ -83,7 +86,7 @@ export function attachPagesToChunks(
   blocks: ExtractionBlock[] | undefined
 ): TextChunkSpan[] {
   if (!blocks?.length) {
-    return chunks.map((c) => ({ ...c, page: c.page ?? 1 }));
+    return chunks;
   }
   const ordered = [...blocks].sort((a, b) => {
     if (a.page !== b.page) {

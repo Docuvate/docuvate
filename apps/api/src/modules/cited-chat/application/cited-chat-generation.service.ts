@@ -19,6 +19,7 @@ import {
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
+import { composeCitedClaimText } from '../domain/compose-cited-claim-text.js';
 import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
@@ -42,6 +43,18 @@ import { ChatQueryRouterService } from './chat-query-router.service.js';
 
 const CONTENT_FLUSH_MS = 250;
 const GENERATION_HEARTBEAT_MS = 15_000;
+
+function formatComposedCitedContent(
+  verified: { text: string; ordinal: number; quote: string }[],
+  question: string
+): string {
+  return formatVerifiedCitedContent(
+    verified.map((row) => ({
+      ordinal: row.ordinal,
+      text: composeCitedClaimText(row.text, row.quote, { question }),
+    }))
+  );
+}
 
 export interface CitedChatGenerationInput {
   messageId: string;
@@ -271,7 +284,10 @@ export class CitedChatGenerationService {
             charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
           },
         ]);
-        const content = formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }]);
+        const content = formatComposedCitedContent(
+          [{ text: extractive.text, ordinal: 1, quote: extractive.quote }],
+          retrievalQuery
+        );
         await this.threads.updateMessageGeneration(messageId, {
           content,
           generationStatus: 'done',
@@ -311,7 +327,10 @@ export class CitedChatGenerationService {
         await this.citationsRepo.replaceCitations(messageId, []);
       }
       const content = extractiveChunkIsUuid
-        ? formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }])
+        ? formatComposedCitedContent(
+            [{ text: extractive.text, ordinal: 1, quote: extractive.quote }],
+            retrievalQuery
+          )
         : extractive.text;
       await this.threads.updateMessageGeneration(messageId, {
         content,
@@ -389,7 +408,12 @@ export class CitedChatGenerationService {
             continue;
           }
           const streamOrdinal = streamedVerified.length + 1;
-          streamedVerified.push({ text: verified[0].text, ordinal: streamOrdinal });
+          streamedVerified.push({
+            text: composeCitedClaimText(verified[0].text, verified[0].quote, {
+              question: retrievalQuery,
+            }),
+            ordinal: streamOrdinal,
+          });
         }
         if (streamedVerified.length === 0) {
           return;
@@ -522,7 +546,10 @@ export class CitedChatGenerationService {
       }))
     );
 
-    const content = formatVerifiedCitedContent(verified);
+    const content = formatComposedCitedContent(
+      verified.map((v) => ({ text: v.text, ordinal: v.ordinal, quote: v.quote })),
+      retrievalQuery
+    );
 
     if (citedChatBenchStatsEnabled() && rejected.length > 0) {
       this.logger.log(

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { tokenizeSearchQuery } from '../../search/domain/normalize-search-text.js';
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import { composeCitedClaimText } from './compose-cited-claim-text.js';
 
 const SENTENCE_SPLIT = /(?<=[.!?])\s+/;
 
@@ -57,13 +58,8 @@ export function tryExtractiveCitedAnswer(
     return null;
   }
 
-  const text =
-    tokens.length > 0
-      ? quote
-      : quote;
-
   return {
-    text,
+    text: composeCitedClaimText(quote, quote, { question: userMessage }),
     chunk: best.chunk,
     quote,
   };
