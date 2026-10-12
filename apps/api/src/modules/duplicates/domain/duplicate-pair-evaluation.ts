@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DuplicateRepository } from '../../../shared/domain/ports.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
-import { compareInputFromDocument } from './duplicate-compare-input.js';
 import type { DuplicatePairEvaluationInput } from './duplicate-classifier.service.js';
+import { compareInputFromDocument } from './duplicate-compare-input.js';
 
 export async function buildPairEvaluationInput(
   duplicates: DuplicateRepository,

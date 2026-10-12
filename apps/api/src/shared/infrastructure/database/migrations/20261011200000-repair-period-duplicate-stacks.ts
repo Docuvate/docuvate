@@ -138,6 +138,7 @@ export class RepairPeriodDuplicateStacks20261011200000 implements MigrationInter
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- irreversible data repair
   public async down(_queryRunner: QueryRunner): Promise<void> {
     // Irreversible data repair.
   }

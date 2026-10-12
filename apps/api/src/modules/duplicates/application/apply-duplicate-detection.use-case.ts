@@ -11,11 +11,11 @@ import {
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
 import { cosineSimilarity } from '../../labels/domain/cosine.js';
+import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
 import {
   compareInputFromDocument,
   compareInputFromEmbeddingPeer,
 } from '../domain/duplicate-compare-input.js';
-import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
 import { readDuplicateDetectionConfig } from '../domain/duplicate-detection.config.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
 

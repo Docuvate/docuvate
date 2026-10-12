@@ -24,8 +24,6 @@ import { CorrespondentsEntity } from './correspondents.entity.js';
 import { DashboardWidgetsEntity } from './dashboard-widgets.entity.js';
 import { DocumentDuplicateCandidatesEntity } from './document-duplicate-candidates.entity.js';
 import { DocumentDuplicateStacksEntity } from './document-duplicate-stacks.entity.js';
-import { DuplicatePairLabelsEntity } from './duplicate-pair-labels.entity.js';
-import { DuplicateUserCalibrationEntity } from './duplicate-user-calibration.entity.js';
 import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
 import { DocumentExtractionBlocksEntity } from './document-extraction-blocks.entity.js';
 import { DocumentFieldValuesEntity } from './document-field-values.entity.js';
@@ -35,6 +33,8 @@ import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
 import { DocumentTextChunksEntity } from './document-text-chunks.entity.js';
 import { DocumentsEntity } from './documents.entity.js';
+import { DuplicatePairLabelsEntity } from './duplicate-pair-labels.entity.js';
+import { DuplicateUserCalibrationEntity } from './duplicate-user-calibration.entity.js';
 import { EmbeddingDensityCalibrationRunEntity } from './embedding-density-calibration-run.entity.js';
 import { EmbeddingDensityClassNiwEntity } from './embedding-density-class-niw.entity.js';
 import { EmbeddingDensityCorrectionEntity } from './embedding-density-correction.entity.js';
@@ -189,8 +189,6 @@ export {
   DashboardWidgetsEntity,
   DocumentDuplicateCandidatesEntity,
   DocumentDuplicateStacksEntity,
-  DuplicatePairLabelsEntity,
-  DuplicateUserCalibrationEntity,
   DocumentEmbeddingsEntity,
   DocumentExtractionBlocksEntity,
   DocumentFieldValuesEntity,
@@ -200,6 +198,8 @@ export {
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,
   DocumentTextChunksEntity,
+  DuplicatePairLabelsEntity,
+  DuplicateUserCalibrationEntity,
   EmbeddingDensityCalibrationRunEntity,
   EmbeddingDensityClassNiwEntity,
   EmbeddingDensityCorrectionEntity,

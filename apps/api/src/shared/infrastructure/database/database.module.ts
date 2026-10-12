@@ -6,8 +6,8 @@ import pg from 'pg';
 
 import { PgDocumentRepository } from '../../../modules/documents/infrastructure/pg-document.repository.js';
 import { PostgresSearchAdapter } from '../../../modules/documents/infrastructure/postgres-search.adapter.js';
-import { PgDuplicatePairLabelRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate-pair-label.repository.js';
 import { PgDuplicateRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate.repository.js';
+import { PgDuplicatePairLabelRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate-pair-label.repository.js';
 import { PgDuplicateStackRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate-stack.repository.js';
 import { HttpExtractionAdapter } from '../../../modules/extraction/infrastructure/http-extraction.adapter.js';
 import { PgFolderRepository } from '../../../modules/folders/infrastructure/pg-folder.repository.js';

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   DEFAULT_DUPLICATE_CLASSIFIER_MODEL,
-  fitUserLogitInterceptDelta,
   type DuplicateFeatureVector,
   type DuplicateTrainingSample,
+  fitUserLogitInterceptDelta,
 } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
