@@ -19,7 +19,6 @@ import {
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
-import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
@@ -565,13 +564,13 @@ export class CitedChatGenerationService {
       text: this.retrieval.indexPassageForRerank(row.chunk),
     }));
     const worker = await fetchWorkerExtractiveAnswer(query, passages);
-    if (worker.reachable && worker.passageId && worker.answer) {
-      const match = ranked.find((row) => row.chunk.chunkId === worker.passageId);
-      const chunk = match?.chunk ?? ranked[0].chunk;
-      const quote = worker.quote?.trim() ?? worker.answer.trim();
-      return { text: worker.answer.trim(), chunk, quote };
+    if (!worker.reachable || !worker.passageId || !worker.answer) {
+      return null;
     }
-    return tryExtractiveCitedAnswer(query, ranked, minScore);
+    const match = ranked.find((row) => row.chunk.chunkId === worker.passageId);
+    const chunk = match?.chunk ?? ranked[0].chunk;
+    const quote = worker.quote?.trim() ?? worker.answer.trim();
+    return { text: worker.answer.trim(), chunk, quote };
   }
 
   private async failGeneration(
