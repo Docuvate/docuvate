@@ -20,6 +20,8 @@ class _$AcceptLabelRecommendationRequestDto
   final String? removeTagId;
   @override
   final String? color;
+  @override
+  final BuiltList<String>? documentIds;
 
   factory _$AcceptLabelRecommendationRequestDto(
           [void Function(AcceptLabelRecommendationRequestDtoBuilder)?
@@ -33,7 +35,8 @@ class _$AcceptLabelRecommendationRequestDto
       this.tagId,
       this.keepTagId,
       this.removeTagId,
-      this.color})
+      this.color,
+      this.documentIds})
       : super._();
 
   @override
@@ -54,7 +57,8 @@ class _$AcceptLabelRecommendationRequestDto
         tagId == other.tagId &&
         keepTagId == other.keepTagId &&
         removeTagId == other.removeTagId &&
-        color == other.color;
+        color == other.color &&
+        documentIds == other.documentIds;
   }
 
   @override
@@ -66,6 +70,7 @@ class _$AcceptLabelRecommendationRequestDto
     _$hash = $jc(_$hash, keepTagId.hashCode);
     _$hash = $jc(_$hash, removeTagId.hashCode);
     _$hash = $jc(_$hash, color.hashCode);
+    _$hash = $jc(_$hash, documentIds.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -78,7 +83,8 @@ class _$AcceptLabelRecommendationRequestDto
           ..add('tagId', tagId)
           ..add('keepTagId', keepTagId)
           ..add('removeTagId', removeTagId)
-          ..add('color', color))
+          ..add('color', color)
+          ..add('documentIds', documentIds))
         .toString();
   }
 }
@@ -114,6 +120,12 @@ class AcceptLabelRecommendationRequestDtoBuilder
   String? get color => _$this._color;
   set color(String? color) => _$this._color = color;
 
+  ListBuilder<String>? _documentIds;
+  ListBuilder<String> get documentIds =>
+      _$this._documentIds ??= new ListBuilder<String>();
+  set documentIds(ListBuilder<String>? documentIds) =>
+      _$this._documentIds = documentIds;
+
   AcceptLabelRecommendationRequestDtoBuilder() {
     AcceptLabelRecommendationRequestDto._defaults(this);
   }
@@ -127,6 +139,7 @@ class AcceptLabelRecommendationRequestDtoBuilder
       _keepTagId = $v.keepTagId;
       _removeTagId = $v.removeTagId;
       _color = $v.color;
+      _documentIds = $v.documentIds?.toBuilder();
       _$v = null;
     }
     return this;
@@ -148,14 +161,30 @@ class AcceptLabelRecommendationRequestDtoBuilder
   AcceptLabelRecommendationRequestDto build() => _build();
 
   _$AcceptLabelRecommendationRequestDto _build() {
-    final _$result = _$v ??
-        new _$AcceptLabelRecommendationRequestDto._(
-            recommendationId: recommendationId,
-            proposedName: proposedName,
-            tagId: tagId,
-            keepTagId: keepTagId,
-            removeTagId: removeTagId,
-            color: color);
+    _$AcceptLabelRecommendationRequestDto _$result;
+    try {
+      _$result = _$v ??
+          new _$AcceptLabelRecommendationRequestDto._(
+              recommendationId: recommendationId,
+              proposedName: proposedName,
+              tagId: tagId,
+              keepTagId: keepTagId,
+              removeTagId: removeTagId,
+              color: color,
+              documentIds: _documentIds?.build());
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'documentIds';
+        _documentIds?.build();
+      } catch (e) {
+        throw new BuiltValueNestedFieldError(
+            r'AcceptLabelRecommendationRequestDto',
+            _$failedField,
+            e.toString());
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }
