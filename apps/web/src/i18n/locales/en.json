@@ -500,7 +500,7 @@
     "layoutAdvancedViewAria": "Technical view",
     "layoutQualityGood": "Reconstruction quality: good",
     "layoutQualityReview": "Reconstruction quality: review (page {{page}})",
-    "layoutQualityReviewPlain": "Layout reconstruction on page {{page}} differs from the original — see Technical details.",
+    "layoutQualityReviewPlain": "Layout reconstruction on page {{page}} differs from the original. See Technical details.",
     "layoutQualityTooltip": "We compare the reconstruction pixel by pixel with the original (SSIM). See Technical details for scores.",
     "metadataDocumentDateAuto": "Filled automatically from a recognized date field.",
     "metadataDocumentDateAutoUndo": "Undo",

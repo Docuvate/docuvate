@@ -500,7 +500,7 @@
     "layoutAdvancedViewAria": "Technische Ansicht",
     "layoutQualityGood": "Nachbau-Qualität: gut",
     "layoutQualityReview": "Nachbau-Qualität: prüfen (Seite {{page}})",
-    "layoutQualityReviewPlain": "Layout-Nachbau auf Seite {{page}} weicht vom Original ab — Details unter „Technische Details“.",
+    "layoutQualityReviewPlain": "Layout-Nachbau auf Seite {{page}} weicht vom Original ab. Details unter „Technische Details“.",
     "layoutQualityTooltip": "Wir vergleichen den Nachbau Pixel für Pixel mit dem Original (SSIM). Details finden Sie unter „Technische Details“.",
     "metadataDocumentDateAuto": "Automatisch aus erkanntem Datum übernommen.",
     "metadataDocumentDateAutoUndo": "Rückgängig",
