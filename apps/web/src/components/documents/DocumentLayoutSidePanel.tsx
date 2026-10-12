@@ -377,7 +377,7 @@ export function DocumentLayoutSidePanel({
                     <span>{t('documents.layoutTableLabel', { n: table.tableIndex + 1 })}</span>
                     <span className="muted">
                       {t('documents.layoutTableMeta', {
-                        rows: table.rows.length,
+                        rows: (table.headerRow ? 1 : 0) + table.bodyRows.length,
                         cols: table.columnCount,
                       })}
                     </span>

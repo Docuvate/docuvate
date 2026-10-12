@@ -8,7 +8,7 @@ import {
   type RecognizedFieldDefinitionDto,
   semanticFieldKey,
   type TagDto,
-  type UserSettingsResponseDto,
+  type UserSettingsDto,
 } from '@docuvate/contracts';
 
 import { definitionIdForFieldKey } from './recognizedFieldDefinitionIndex';
@@ -38,7 +38,7 @@ export function catalogFieldGateContextFromDocument(
 function gateConfigForDefinition(
   def: RecognizedFieldDefinitionDto,
   settings: Pick<
-    UserSettingsResponseDto,
+    UserSettingsDto,
     | 'fieldExtractionConfidenceGateEnabled'
     | 'labelFieldConfidenceThreshold'
     | 'fieldExtractionRequiredLabelIds'
@@ -73,7 +73,7 @@ export function mergeCatalogFieldsForDocument(
   catalog: readonly RecognizedFieldDefinitionDto[],
   gateContext: CatalogFieldGateContext,
   settings: Pick<
-    UserSettingsResponseDto,
+    UserSettingsDto,
     | 'fieldExtractionConfidenceGateEnabled'
     | 'labelFieldConfidenceThreshold'
     | 'fieldExtractionRequiredLabelIds'
