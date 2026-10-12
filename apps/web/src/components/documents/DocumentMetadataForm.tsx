@@ -10,6 +10,8 @@ import { Select } from '../ui/Select';
 interface DocumentMetadataFormProps {
   title: string;
   documentDate: string;
+  documentDateAutoFilled?: boolean;
+  onClearAutoDocumentDate?: () => void;
   notes: string;
   folderId: string;
   folders: FolderDto[];
@@ -44,6 +46,20 @@ export function DocumentMetadataForm(props: DocumentMetadataFormProps) {
         <label>
           {t('documents.metadataDocumentDate')}
           <LocalizedDateInput value={props.documentDate} onChange={props.onDocumentDateChange} />
+          {props.documentDateAutoFilled ? (
+            <span className="metadata-auto-date-hint">
+              {t('documents.metadataDocumentDateAuto')}
+              {props.onClearAutoDocumentDate ? (
+                <button
+                  type="button"
+                  className="metadata-auto-date-undo"
+                  onClick={props.onClearAutoDocumentDate}
+                >
+                  {t('documents.metadataDocumentDateAutoUndo')}
+                </button>
+              ) : null}
+            </span>
+          ) : null}
         </label>
         <label>
           {t('documents.metadataNotes')}

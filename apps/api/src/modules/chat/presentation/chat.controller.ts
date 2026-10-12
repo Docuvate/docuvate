@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import {
@@ -14,6 +14,7 @@ import {
   DocumentChatThreadMessagesResponseDto,
   SendDocumentChatThreadMessageRequestDto,
   SendDocumentChatThreadMessageResponseDto,
+  UpdateDocumentChatThreadRequestDto,
 } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   ApiDocuvateController,
@@ -28,8 +29,10 @@ import {
   toDocumentChatThreadDto,
 } from '../../documents/presentation/document-chat.mapper.js';
 import { CreateLibraryChatThreadUseCase } from '../application/create-library-chat-thread.use-case.js';
+import { DeleteLibraryChatThreadUseCase } from '../application/delete-library-chat-thread.use-case.js';
 import { ListLibraryChatThreadsUseCase } from '../application/list-library-chat-threads.use-case.js';
 import { SendLibraryChatThreadMessageUseCase } from '../application/send-library-chat-thread-message.use-case.js';
+import { UpdateLibraryChatThreadUseCase } from '../application/update-library-chat-thread.use-case.js';
 
 @ApiDocuvateController('chat')
 @Controller('chat')
@@ -39,6 +42,8 @@ export class ChatController {
     private readonly listLibraryThreads: ListLibraryChatThreadsUseCase,
     private readonly createLibraryThread: CreateLibraryChatThreadUseCase,
     private readonly sendLibraryMessage: SendLibraryChatThreadMessageUseCase,
+    private readonly updateLibraryThread: UpdateLibraryChatThreadUseCase,
+    private readonly deleteLibraryThread: DeleteLibraryChatThreadUseCase,
     private readonly listThreadMessages: ListDocumentChatThreadMessagesUseCase,
     private readonly streamMessage: StreamDocumentChatMessageUseCase,
     private readonly cancelGeneration: CancelDocumentChatGenerationUseCase,
@@ -66,6 +71,30 @@ export class ChatController {
   ) {
     const thread = await this.createLibraryThread.execute(session.user.id, body.title);
     return { thread: toDocumentChatThreadDto(thread) };
+  }
+
+  @Patch('threads/:threadId')
+  @ApiDocuvateRoute({
+    operationId: 'updateLibraryChatThread',
+    summary: 'Rename library-scoped chat thread',
+  })
+  async updateThread(
+    @Session() session: AuthSession,
+    @Param('threadId') threadId: string,
+    @Body() body: UpdateDocumentChatThreadRequestDto
+  ) {
+    const thread = await this.updateLibraryThread.execute(session.user.id, threadId, body.title);
+    return { thread: toDocumentChatThreadDto(thread) };
+  }
+
+  @Delete('threads/:threadId')
+  @ApiDocuvateRoute({
+    operationId: 'deleteLibraryChatThread',
+    summary: 'Delete library-scoped chat thread',
+  })
+  async deleteThread(@Session() session: AuthSession, @Param('threadId') threadId: string) {
+    await this.deleteLibraryThread.execute(session.user.id, threadId);
+    return { ok: true };
   }
 
   @Get('threads/:threadId/messages')

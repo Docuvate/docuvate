@@ -3243,6 +3243,72 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   flex: 0 0 auto;
 }
 
+.doc-chat-thread-search {
+  margin: var(--dv-space-xs) 0;
+}
+
+.doc-chat-thread-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-3xs);
+}
+
+.doc-chat-thread-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-3xs);
+  padding: 0 var(--dv-space-3xs) var(--dv-space-3xs);
+}
+
+.doc-chat-thread-rename-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs);
+  align-items: center;
+}
+
+.layout-outline-list-nested {
+  margin-left: var(--dv-space-sm);
+  padding-left: var(--dv-space-xs);
+  border-left: 1px solid var(--dv-color-border);
+}
+
+.layout-field-input {
+  width: 100%;
+}
+
+.extracted-text-reading-paragraph {
+  margin: 0 0 var(--dv-space-sm);
+  line-height: 1.55;
+}
+
+.extracted-text-reading-heading {
+  margin: var(--dv-space-md) 0 var(--dv-space-xs);
+  line-height: 1.3;
+}
+
+.metadata-auto-date-hint {
+  display: block;
+  margin-top: var(--dv-space-3xs);
+  font-size: 0.85rem;
+  color: var(--dv-color-text-muted);
+}
+
+.metadata-auto-date-undo {
+  margin-left: var(--dv-space-xs);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--dv-color-link);
+  cursor: pointer;
+}
+
+.dateisystem-root-empty-cta {
+  margin-top: var(--dv-space-md);
+}
+
 .doc-chat-thread-item {
   width: 100%;
   text-align: left;

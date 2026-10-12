@@ -5,7 +5,9 @@ import type {
   ExtractedField,
   ExtractionBlock,
   FolderDto,
+  RecognizedFieldDefinitionDto,
   TagDto,
+  UserSettingsDto,
 } from '@docuvate/contracts';
 import { parseSuggestionStorageKey } from '@docuvate/contracts';
 import { ArrowLeft } from 'lucide-react';
@@ -65,6 +67,11 @@ import {
   buildGlobalFieldLabelMap,
   parseGlobalFieldKey,
 } from '../lib/labelFieldDisplay';
+import { pickAutoDocumentDateFromFields } from '../lib/documentAutoDocumentDate';
+import {
+  catalogFieldGateContextFromDocument,
+  mergeCatalogFieldsForDocument,
+} from '../lib/documentRecognizedCatalogFields';
 import { splitRecognizedFieldsAndSuggestions } from '../lib/recognizedFieldDisplay';
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';
@@ -144,6 +151,20 @@ export function DocumentDetailPage() {
   const [layoutTextEditOpen, setLayoutTextEditOpen] = useState(false);
   const [layoutEditMode, setLayoutEditMode] = useState(false);
   const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
+  const [recognizedCatalog, setRecognizedCatalog] = useState<RecognizedFieldDefinitionDto[]>([]);
+  const [fieldGateSettings, setFieldGateSettings] = useState<
+    Pick<
+      UserSettingsDto,
+      | 'fieldExtractionConfidenceGateEnabled'
+      | 'labelFieldConfidenceThreshold'
+      | 'fieldExtractionRequiredLabelIds'
+    >
+  >({
+    fieldExtractionConfidenceGateEnabled: true,
+    labelFieldConfidenceThreshold: 0.62,
+    fieldExtractionRequiredLabelIds: [],
+  });
+  const [documentDateAuto, setDocumentDateAuto] = useState(false);
   const docRef = useRef<DocumentDto | null>(null);
 
   useEffect(() => {
@@ -228,10 +249,16 @@ export function DocumentDetailPage() {
       .then(([, tagList, recognized, f, settings]) => {
         if (!active) return;
         setTags(tagList);
+        setRecognizedCatalog(recognized);
         setGlobalFieldLabels(buildGlobalFieldLabelMap(recognized));
         setFolders(f);
         setDocumentChatAvailable(settings.documentChatAvailable === true);
         setDocumentChatUiEnabled(settings.documentChatUiEnabled !== false);
+        setFieldGateSettings({
+          fieldExtractionConfidenceGateEnabled: settings.fieldExtractionConfidenceGateEnabled !== false,
+          labelFieldConfidenceThreshold: settings.labelFieldConfidenceThreshold ?? 0.62,
+          fieldExtractionRequiredLabelIds: settings.fieldExtractionRequiredLabelIds ?? [],
+        });
       })
       .catch((err: unknown) => {
         if (active) setError(formatUserFacingError(err, 'errors.loadFailed'));
@@ -424,7 +451,27 @@ export function DocumentDetailPage() {
     [title, documentDate, notes, folderId, metadataBaseline]
   );
 
-  const catalogFieldKeys = useMemo(() => new Set(globalFieldLabels.keys()), [globalFieldLabels]);
+  const catalogFieldKeys = useMemo(
+    () => new Set(recognizedCatalog.map((def) => def.key)),
+    [recognizedCatalog]
+  );
+
+  const fieldGateContext = useMemo(
+    () => (doc ? catalogFieldGateContextFromDocument(doc, tags) : null),
+    [doc, tags]
+  );
+
+  const mergedFields = useMemo(() => {
+    if (!doc || !fieldGateContext) {
+      return fields;
+    }
+    return mergeCatalogFieldsForDocument(
+      fields,
+      recognizedCatalog,
+      fieldGateContext,
+      fieldGateSettings
+    );
+  }, [doc, fieldGateContext, fieldGateSettings, fields, recognizedCatalog]);
 
   const knownFieldKeys = useMemo(() => {
     const keys = new Set<string>(catalogFieldKeys);
@@ -437,9 +484,21 @@ export function DocumentDetailPage() {
   }, [tags, catalogFieldKeys]);
 
   const { recognizedFields, heuristicSuggestions } = useMemo(
-    () => splitRecognizedFieldsAndSuggestions(fields, catalogFieldKeys),
-    [fields, catalogFieldKeys]
+    () => splitRecognizedFieldsAndSuggestions(mergedFields, catalogFieldKeys),
+    [mergedFields, catalogFieldKeys]
   );
+
+  useEffect(() => {
+    if (documentDate.trim() || documentDateAuto) {
+      return;
+    }
+    const pick = pickAutoDocumentDateFromFields(recognizedFields);
+    if (!pick) {
+      return;
+    }
+    setDocumentDate(pick.isoDate);
+    setDocumentDateAuto(true);
+  }, [documentDate, documentDateAuto, recognizedFields]);
 
   const fieldLabelForKey = useCallback(
     (key: string) => {
@@ -455,6 +514,19 @@ export function DocumentDetailPage() {
     },
     [globalFieldLabels, t]
   );
+
+  const onFieldValueChange = useCallback((key: string, value: string) => {
+    setFieldFeedbackRecorded(0);
+    setFields((prev) => {
+      const idx = prev.findIndex((field) => field.key === key);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = { ...copy[idx], value };
+        return copy;
+      }
+      return [...prev, { key, value }];
+    });
+  }, []);
 
   const onAcceptFieldSuggestion = useCallback((key: string, value: string) => {
     setFields((prev) => {
@@ -519,12 +591,20 @@ export function DocumentDetailPage() {
             <DocumentMetadataForm
               title={title}
               documentDate={documentDate}
+              documentDateAutoFilled={documentDateAuto}
               notes={notes}
               folderId={folderId}
               folders={folders}
               saving={saving}
               onTitleChange={setTitle}
-              onDocumentDateChange={setDocumentDate}
+              onDocumentDateChange={(value) => {
+                setDocumentDate(value);
+                setDocumentDateAuto(false);
+              }}
+              onClearAutoDocumentDate={() => {
+                setDocumentDate('');
+                setDocumentDateAuto(false);
+              }}
               onNotesChange={setNotes}
               onFolderIdChange={setFolderId}
             />
@@ -588,6 +668,8 @@ export function DocumentDetailPage() {
           previewUnavailable={previewUnavailable}
           blocks={blocks}
           fields={recognizedFields}
+          recognizedCatalog={recognizedCatalog}
+          onFieldValueChange={onFieldValueChange}
           heuristicSuggestions={heuristicSuggestions}
           highlightBlocks={highlightBlocks}
           viewerPage={viewerPage}

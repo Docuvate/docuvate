@@ -26,7 +26,11 @@
     "pickThreadLead": "Pick a conversation or start a new chat.",
     "exampleHundesteuer": "What is the dog tax fee?",
     "exampleMiete": "When is the rent due?",
-    "exampleKuendigung": "What notice period applies in the contract?"
+    "exampleKuendigung": "What notice period applies in the contract?",
+    "threadSearchPlaceholder": "Search conversations…",
+    "renameThread": "Rename",
+    "renameThreadAria": "Conversation title",
+    "deleteThread": "Delete"
   },
   "shell": {
     "globalSearch": "Global search",
@@ -496,7 +500,10 @@
     "layoutAdvancedViewAria": "Technical view",
     "layoutQualityGood": "Reconstruction quality: good",
     "layoutQualityReview": "Reconstruction quality: review (page {{page}})",
+    "layoutQualityReviewPlain": "Layout reconstruction on page {{page}} differs from the original — see Technical details.",
     "layoutQualityTooltip": "We compare the reconstruction pixel by pixel with the original (SSIM). See Technical details for scores.",
+    "metadataDocumentDateAuto": "Filled automatically from a recognized date field.",
+    "metadataDocumentDateAutoUndo": "Undo",
     "moreActionsAria": "More actions",
     "technicalDetailsShow": "Show technical details",
     "technicalDetailsHide": "Hide technical details",

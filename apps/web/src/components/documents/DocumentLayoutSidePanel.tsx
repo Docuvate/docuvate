@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ExtractedField, LayoutIrDocument } from '@docuvate/contracts';
-import { type KeyboardEvent,useCallback, useEffect, useId, useMemo, useRef } from 'react';
+import type { ExtractedField, LayoutIrDocument, RecognizedFieldDefinitionDto } from '@docuvate/contracts';
+import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { fieldSuggestionOutsideUserSchema } from '../../lib/fieldSuggestionSchema';
@@ -9,13 +9,22 @@ import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedField
 import {
   allLayoutWidgets,
   buildLayoutOutline,
+  buildLayoutOutlineTree,
   buildLayoutOverlays,
   buildLayoutTables,
   fieldSuggestionKeys,
+  type LayoutOutlineNode,
   type LayoutOverlayRegion,
 } from '../../lib/layoutOverlayModel';
 import { fieldsForLayoutPanel } from '../../lib/layoutPanelFields';
+import {
+  buildRecognizedFieldDefinitionIndex,
+  definitionIdForFieldKey,
+  persistedRecognizedDefinitionIds,
+  suggestionMatchesPersistedDefinition,
+} from '../../lib/recognizedFieldDefinitionIndex';
 import { Button } from '../ui/Button';
+import { Input } from '../ui/Input';
 import { DocumentChatPanel } from './DocumentChatPanel';
 
 export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'chat';
@@ -33,9 +42,11 @@ interface DocumentLayoutSidePanelProps {
   activeOverlayId: string | null;
   onOverlaySelect: (overlayId: string, page: number) => void;
   onAcceptSuggestion: (key: string, value: string) => void;
+  onFieldValueChange?: (key: string, value: string) => void;
   onDismissSuggestion: (key: string) => void;
   dismissedSuggestions: Set<string>;
   heuristicSuggestions?: { key: string; value: string }[];
+  recognizedCatalog?: RecognizedFieldDefinitionDto[];
   documentChatAvailable?: boolean;
   documentChatUiEnabled?: boolean;
   showChatTab?: boolean;
@@ -52,9 +63,11 @@ export function DocumentLayoutSidePanel({
   activeOverlayId,
   onOverlaySelect,
   onAcceptSuggestion,
+  onFieldValueChange,
   onDismissSuggestion,
   dismissedSuggestions,
   heuristicSuggestions = [],
+  recognizedCatalog = [],
   documentChatAvailable = false,
   documentChatUiEnabled = true,
   showChatTab = true,
@@ -67,6 +80,15 @@ export function DocumentLayoutSidePanel({
   const overlays = useMemo(() => buildLayoutOverlays(layoutIr), [layoutIr]);
   const tables = useMemo(() => buildLayoutTables(layoutIr, overlays), [layoutIr, overlays]);
   const outline = useMemo(() => buildLayoutOutline(layoutIr, overlays), [layoutIr, overlays]);
+  const outlineTree = useMemo(() => buildLayoutOutlineTree(outline), [outline]);
+  const definitionIndex = useMemo(
+    () => buildRecognizedFieldDefinitionIndex(recognizedCatalog),
+    [recognizedCatalog]
+  );
+  const persistedDefinitionIds = useMemo(
+    () => persistedRecognizedDefinitionIds(fields, definitionIndex),
+    [definitionIndex, fields]
+  );
   const fieldOverlayIdByKey = useMemo(() => {
     const map = new Map<string, string>();
     for (const overlay of overlays) {
@@ -96,12 +118,24 @@ export function DocumentLayoutSidePanel({
 
   const suggestions = useMemo(() => {
     const widgets = allLayoutWidgets(layoutIr);
-    const fromWidgets = fieldSuggestionKeys(widgets, knownFieldKeys, fields).map((s) => ({
+    const definitionIdForKey = (key: string) => definitionIdForFieldKey(key, definitionIndex);
+    const fromWidgets = fieldSuggestionKeys(
+      widgets,
+      knownFieldKeys,
+      fields,
+      persistedDefinitionIds,
+      definitionIdForKey
+    ).map((s) => ({
       ...s,
       label: fieldLabelForKey(s.key),
     }));
     const fromHeuristics = heuristicSuggestions
-      .filter((s) => !knownFieldKeys.has(s.key) && !fields.some((f) => f.key === s.key))
+      .filter(
+        (s) =>
+          !knownFieldKeys.has(s.key) &&
+          !fields.some((f) => f.key === s.key) &&
+          !suggestionMatchesPersistedDefinition(s.key, persistedDefinitionIds, definitionIndex)
+      )
       .map((s) => ({
         key: s.key,
         label: fieldLabelForKey(s.key),
@@ -126,6 +160,8 @@ export function DocumentLayoutSidePanel({
     heuristicSuggestions,
     fieldLabelForKey,
     isDuplicateSuggestion,
+    definitionIndex,
+    persistedDefinitionIds,
   ]);
 
   const tabOrder = useMemo(
@@ -264,9 +300,18 @@ export function DocumentLayoutSidePanel({
                   data-layout-overlay-target={fieldOverlayIdByKey.get(field.key) ?? undefined}
                 >
                   <span className="layout-field-label">{fieldLabelForKey(field.key)}</span>
-                  <span className="layout-field-value">
-                    {formatFieldValue(field.key, field.value)}
-                  </span>
+                  {onFieldValueChange ? (
+                    <Input
+                      className="layout-field-input"
+                      value={field.value}
+                      aria-label={fieldLabelForKey(field.key)}
+                      onChange={(e) => { onFieldValueChange(field.key, e.target.value); }}
+                    />
+                  ) : (
+                    <span className="layout-field-value">
+                      {formatFieldValue(field.key, field.value)}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
@@ -339,8 +384,17 @@ export function DocumentLayoutSidePanel({
                   </button>
                   <div className="layout-table-scroll">
                     <table className="layout-data-table">
+                      {table.headerRow ? (
+                        <thead>
+                          <tr>
+                            {table.headerRow.map((cell, colIdx) => (
+                              <th key={colIdx} scope="col">{cell}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                      ) : null}
                       <tbody>
-                        {table.rows.map((row, rowIdx) => (
+                        {table.bodyRows.map((row, rowIdx) => (
                           <tr key={rowIdx}>
                             {row.map((cell, colIdx) => (
                               <td key={colIdx}>{cell}</td>
@@ -361,23 +415,15 @@ export function DocumentLayoutSidePanel({
             {outline.length === 0 ? (
               <p className="muted">{t('documents.layoutOutlineEmpty')}</p>
             ) : (
-              <ul className="layout-outline-list">
-                {outline.map((entry) => (
-                  <li key={entry.id}>
-                    <button
-                      type="button"
-                      className={`layout-outline-item layout-outline-level-${String(entry.level)}${
-                        activeOverlayId === entry.overlayId ? ' layout-outline-item-active' : ''
-                      }`}
-                      data-layout-overlay-target={entry.overlayId}
-                      onClick={() => { onOverlaySelect(entry.overlayId, entry.page); }}
-                    >
-                      <span className="layout-outline-title">{entry.title}</span>
-                      <span className="muted layout-outline-page">
-                        {t('documents.layoutOutlinePage', { page: entry.page })}
-                      </span>
-                    </button>
-                  </li>
+              <ul className="layout-outline-list layout-outline-list-nested">
+                {outlineTree.map((node) => (
+                  <OutlineTreeNode
+                    key={node.entry.id}
+                    node={node}
+                    activeOverlayId={activeOverlayId}
+                    onOverlaySelect={onOverlaySelect}
+                    t={t}
+                  />
                 ))}
               </ul>
             )}
@@ -397,6 +443,50 @@ export function DocumentLayoutSidePanel({
         ) : null}
       </div>
     </aside>
+  );
+}
+
+function OutlineTreeNode({
+  node,
+  activeOverlayId,
+  onOverlaySelect,
+  t,
+}: {
+  node: LayoutOutlineNode;
+  activeOverlayId: string | null;
+  onOverlaySelect: (overlayId: string, page: number) => void;
+  t: (key: string, options?: Record<string, unknown>) => string;
+}) {
+  const entry = node.entry;
+  return (
+    <li className="layout-outline-node">
+      <button
+        type="button"
+        className={`layout-outline-item layout-outline-level-${String(entry.level)}${
+          activeOverlayId === entry.overlayId ? ' layout-outline-item-active' : ''
+        }`}
+        data-layout-overlay-target={entry.overlayId}
+        onClick={() => { onOverlaySelect(entry.overlayId, entry.page); }}
+      >
+        <span className="layout-outline-title">{entry.title}</span>
+        <span className="muted layout-outline-page">
+          {t('documents.layoutOutlinePage', { page: entry.page })}
+        </span>
+      </button>
+      {node.children.length > 0 ? (
+        <ul className="layout-outline-list layout-outline-list-nested">
+          {node.children.map((child) => (
+            <OutlineTreeNode
+              key={child.entry.id}
+              node={child}
+              activeOverlayId={activeOverlayId}
+              onOverlaySelect={onOverlaySelect}
+              t={t}
+            />
+          ))}
+        </ul>
+      ) : null}
+    </li>
   );
 }
 

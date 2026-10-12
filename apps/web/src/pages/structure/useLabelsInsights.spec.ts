@@ -1,41 +1,41 @@
+// @vitest-environment jsdom
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-// @vitest-environment jsdom
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import * as api from '../../lib/api';
 import { useLabelsInsights } from './useLabelsInsights';
 
-describe('useLabelsInsights', () => {
-  it('load does not retrigger in a loop when called from a stable effect', async () => {
-    const listLabelRecommendations = vi.spyOn(api, 'listLabelRecommendations').mockResolvedValue([]);
-    const listDocuments = vi.spyOn(api, 'listDocuments').mockResolvedValue([]);
-    const getLabelMap = vi.spyOn(api, 'getLabelMap').mockResolvedValue({
-      coverageSummary: null,
-      emptyReason: null,
-      extractedDocumentCount: 0,
-      nodes: [],
-      edges: [],
-    });
+vi.mock('../../lib/api', () => ({
+  listLabelRecommendations: vi.fn(async () => []),
+  listDocuments: vi.fn(async () => []),
+  getLabelMap: vi.fn(async () => ({ coverageSummary: null, emptyReason: null, extractedDocumentCount: 0 })),
+  acceptLabelRecommendation: vi.fn(async () => ({ tagId: 't1', action: 'assigned' })),
+  dismissLabelRecommendation: vi.fn(async () => undefined),
+}));
 
-    const onReloadTags = vi.fn().mockResolvedValue(undefined);
+describe('useLabelsInsights', () => {
+  it('accept refreshes silently without toggling loading', async () => {
+    const onReloadTags = vi.fn(async () => undefined);
     const { result } = renderHook(() => useLabelsInsights(onReloadTags));
 
-    await result.current.load();
-    await waitFor(() => { expect(result.current.loading).toBe(false); });
+    await act(async () => {
+      await result.current.load();
+    });
+    expect(result.current.loading).toBe(false);
 
-    expect(listLabelRecommendations).toHaveBeenCalledTimes(1);
-    expect(listDocuments).toHaveBeenCalledTimes(1);
-    expect(getLabelMap).toHaveBeenCalledTimes(1);
+    const item = {
+      id: 'assign:1',
+      kind: 'assign' as const,
+      tagId: 'tag-1',
+      tagNames: ['Tax'],
+    };
 
-    listLabelRecommendations.mockClear();
-    listDocuments.mockClear();
-    getLabelMap.mockClear();
+    await act(async () => {
+      await result.current.accept(item);
+    });
 
-    await result.current.load();
-    expect(listLabelRecommendations).toHaveBeenCalledTimes(1);
-    expect(listDocuments).toHaveBeenCalledTimes(1);
-    expect(getLabelMap).toHaveBeenCalledTimes(1);
+    expect(onReloadTags).toHaveBeenCalledWith({ silent: true });
+    expect(result.current.loading).toBe(false);
   });
 });

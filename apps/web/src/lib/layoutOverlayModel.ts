@@ -41,8 +41,14 @@ export interface LayoutTableView {
   tableIndex: number;
   page: number;
   columnCount: number;
-  rows: string[][];
+  headerRow: string[] | null;
+  bodyRows: string[][];
   overlayId: string;
+}
+
+export interface LayoutOutlineNode {
+  entry: LayoutOutlineEntry;
+  children: LayoutOutlineNode[];
 }
 
 const HEADING_MIN_PT = 11;
@@ -230,6 +236,25 @@ export function buildLayoutOutline(
   return entries.sort((a, b) => a.page - b.page || a.y - b.y);
 }
 
+export function buildLayoutOutlineTree(entries: LayoutOutlineEntry[]): LayoutOutlineNode[] {
+  const roots: LayoutOutlineNode[] = [];
+  const stack: LayoutOutlineNode[] = [];
+
+  for (const entry of entries) {
+    const node: LayoutOutlineNode = { entry, children: [] };
+    while (stack.length > 0 && stack[stack.length - 1].entry.level >= entry.level) {
+      stack.pop();
+    }
+    if (stack.length === 0) {
+      roots.push(node);
+    } else {
+      stack[stack.length - 1].children.push(node);
+    }
+    stack.push(node);
+  }
+  return roots;
+}
+
 export function buildLayoutTables(
   doc: LayoutIrDocument,
   overlays: LayoutOverlayRegion[]
@@ -239,11 +264,13 @@ export function buildLayoutTables(
   for (const page of doc.pages) {
     for (const table of page.tables ?? []) {
       const overlay = overlays.find((o) => o.tableIndex === tableIndex);
+      const { headerRow, bodyRows } = tableRowsWithHeader(table);
       views.push({
         tableIndex,
         page: table.page,
         columnCount: table.columnCount,
-        rows: tableRowsToStrings(table),
+        headerRow,
+        bodyRows,
         overlayId: overlay?.id ?? `table-${String(tableIndex)}`,
       });
       tableIndex += 1;
@@ -252,8 +279,22 @@ export function buildLayoutTables(
   return views;
 }
 
-function tableRowsToStrings(table: LayoutIrTable): string[][] {
-  return table.rows.map((row) => row.map((cell) => formatLayoutTableCell(cell.text)));
+function tableRowsWithHeader(table: LayoutIrTable): {
+  headerRow: string[] | null;
+  bodyRows: string[][];
+} {
+  const stringRows = table.rows.map((row) =>
+    row.map((cell) => formatLayoutTableCell(cell.text))
+  );
+  if (stringRows.length === 0) {
+    return { headerRow: null, bodyRows: [] };
+  }
+  const firstIrRow = table.rows[0];
+  const headerByRole = firstIrRow?.some((cell) => cell.cellRole === 'header') ?? false;
+  if (headerByRole) {
+    return { headerRow: stringRows[0], bodyRows: stringRows.slice(1) };
+  }
+  return { headerRow: null, bodyRows: stringRows };
 }
 
 export function overlayForExtractionBlock(
@@ -282,7 +323,9 @@ export function hitTestLayoutOverlay(
 export function fieldSuggestionKeys(
   widgets: LayoutIrWidget[],
   knownFieldKeys: Set<string>,
-  persistedFields: ExtractedField[]
+  persistedFields: ExtractedField[],
+  persistedDefinitionIds?: ReadonlySet<string>,
+  definitionIdForKey?: (key: string) => string | null
 ): { key: string; label: string; value: string }[] {
   const persistedKeys = new Set(persistedFields.map((f) => f.key));
   const out: { key: string; label: string; value: string }[] = [];
@@ -292,6 +335,12 @@ export function fieldSuggestionKeys(
     if (!key || seen.has(key)) continue;
     seen.add(key);
     if (knownFieldKeys.has(key) || persistedKeys.has(key)) continue;
+    if (persistedDefinitionIds && definitionIdForKey) {
+      const defId = definitionIdForKey(key);
+      if (defId && persistedDefinitionIds.has(defId)) {
+        continue;
+      }
+    }
     const value = w.value?.trim() ?? '';
     if (!value) continue;
     out.push({ key, label: key, value });

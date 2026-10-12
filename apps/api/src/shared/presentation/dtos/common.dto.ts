@@ -151,6 +151,11 @@ export class CreateDocumentChatThreadRequestDto {
   title?: string;
 }
 
+export class UpdateDocumentChatThreadRequestDto {
+  @IsString()
+  title!: string;
+}
+
 export class DocumentChatThreadMessagesResponseDto {
   messages!: ChatMessageRecordDto[];
 }

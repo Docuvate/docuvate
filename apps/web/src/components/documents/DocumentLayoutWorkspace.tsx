@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentDto, ExtractedField, ExtractionBlock } from '@docuvate/contracts';
+import type {
+  DocumentDto,
+  ExtractedField,
+  ExtractionBlock,
+  RecognizedFieldDefinitionDto,
+} from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -51,6 +56,8 @@ interface DocumentLayoutWorkspaceProps {
   onHighlightBlocks: (blocks: ExtractionBlock[]) => void;
   onBlocksChange: (blocks: ExtractionBlock[]) => void;
   onAcceptFieldSuggestion: (key: string, value: string) => void;
+  onFieldValueChange?: (key: string, value: string) => void;
+  recognizedCatalog?: RecognizedFieldDefinitionDto[];
   editMode: boolean;
   onEditModeChange: (edit: boolean) => void;
   blocksDirty: boolean;
@@ -85,6 +92,8 @@ export function DocumentLayoutWorkspace({
   onHighlightBlocks,
   onBlocksChange,
   onAcceptFieldSuggestion,
+  onFieldValueChange,
+  recognizedCatalog = [],
   editMode,
   onEditModeChange,
   blocksDirty,
@@ -326,16 +335,16 @@ export function DocumentLayoutWorkspace({
                 }}
               />
             ) : null}
-            {qualityTone !== 'unknown' ? (
+            {showTechnicalDetails && qualityTone !== 'unknown' ? (
               <span
-                className={`layout-quality-badge layout-quality-badge-${qualityTone}${
-                  showTechnicalDetails ? ' layout-quality-badge-technical' : ''
-                }`}
+                className={`layout-quality-badge layout-quality-badge-technical layout-quality-badge-${qualityTone}`}
                 title={t('documents.layoutQualityTooltip')}
               >
                 {qualityTone === 'good'
                   ? t('documents.layoutQualityGood')
-                  : t('documents.layoutQualityReview', { page: qualityReviewPage ?? viewerPage })}
+                  : t('documents.layoutQualityReviewPlain', {
+                      page: qualityReviewPage ?? viewerPage,
+                    })}
               </span>
             ) : null}
             {leftMode === 'text' ? (
@@ -360,6 +369,7 @@ export function DocumentLayoutWorkspace({
                   fullText={doc.extraction?.text ?? ''}
                   markdown={doc.extraction?.markdown}
                   layoutIrAvailable={layoutIrAvailable}
+                  layoutIrDocument={layoutIr}
                   layoutIrPages={layoutIrPages}
                   blocks={blocks}
                   activePage={viewerPage}
@@ -493,6 +503,8 @@ export function DocumentLayoutWorkspace({
           }
           dismissedSuggestions={dismissedSuggestions}
           heuristicSuggestions={heuristicSuggestions}
+          recognizedCatalog={recognizedCatalog}
+          onFieldValueChange={onFieldValueChange}
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
         />

@@ -51,7 +51,11 @@ function countDocumentsByTag(documents: DocumentDto[]): Record<string, number> {
   return counts;
 }
 
-export function useLabelsInsights(onReloadTags: () => Promise<void>) {
+type LoadOptions = { silent?: boolean };
+
+export function useLabelsInsights(
+  onReloadTags: (options?: LoadOptions) => Promise<void>
+) {
   const [recommendations, setRecommendations] = useState<LabelRecommendationDto[]>([]);
   const [documents, setDocuments] = useState<DocumentDto[]>([]);
   const [coverageSummary, setCoverageSummary] = useState<LabelMapCoverageSummaryDto | null>(null);
@@ -73,8 +77,10 @@ export function useLabelsInsights(onReloadTags: () => Promise<void>) {
     [recommendations, documents]
   );
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (options?: LoadOptions) => {
+    if (!options?.silent) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const recsPromise = listLabelRecommendations()
@@ -104,7 +110,9 @@ export function useLabelsInsights(onReloadTags: () => Promise<void>) {
 
       await Promise.all([recsPromise, docsPromise, mapPromise]);
     } finally {
-      setLoading(false);
+      if (!options?.silent) {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -112,6 +120,7 @@ export function useLabelsInsights(onReloadTags: () => Promise<void>) {
     async (item: LabelRecommendationDto) => {
       setBusyId(item.id);
       setError(null);
+      setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
       try {
         if (item.kind === 'assign' && item.tagId) {
           await acceptLabelRecommendation(item.id, { tagId: item.tagId });
@@ -131,10 +140,10 @@ export function useLabelsInsights(onReloadTags: () => Promise<void>) {
             proposedName: item.proposedName,
           });
         }
-        setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
-        await Promise.all([onReloadTags(), load()]);
+        await Promise.all([onReloadTags({ silent: true }), load({ silent: true })]);
       } catch (err) {
         setError(formatUserFacingError(err, 'errors.actionFailed'));
+        void load({ silent: true });
       } finally {
         setBusyId(null);
       }
@@ -144,19 +153,20 @@ export function useLabelsInsights(onReloadTags: () => Promise<void>) {
 
   const dismiss = useCallback(async (item: LabelRecommendationDto, scope: 'local' | 'global') => {
     setBusyId(item.id);
+    setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
     try {
       await dismissLabelRecommendation(item.id, {
         blockFuture: scope === 'global',
         phrase: dismissPhrase(item),
         phrases: dismissPhrases(item),
       });
-      setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
     } catch (err) {
       setError(formatUserFacingError(err, 'errors.dismissFailed'));
+      void load({ silent: true });
     } finally {
       setBusyId(null);
     }
-  }, []);
+  }, [load]);
 
   return {
     queueItems,

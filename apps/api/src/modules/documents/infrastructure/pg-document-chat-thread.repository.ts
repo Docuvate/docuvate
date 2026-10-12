@@ -361,6 +361,42 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
     await this.pool.query(`UPDATE chat_threads SET updated_at = now() WHERE id = $1`, [threadId]);
   }
 
+  async renameThread(
+    threadId: string,
+    userId: string,
+    title: string
+  ): Promise<DocumentChatThreadEntity> {
+    const trimmed = title.trim();
+    if (!trimmed) {
+      throw new NotFoundError('Chat thread');
+    }
+    const result = await this.pool.query(
+      `UPDATE chat_threads
+       SET title = $3, updated_at = now()
+       WHERE id = $1 AND user_id = $2
+       RETURNING id`,
+      [threadId, userId, trimmed]
+    );
+    if (result.rowCount === 0) {
+      throw new NotFoundError('Chat thread');
+    }
+    const thread = await this.findThreadForUser(threadId, userId);
+    if (!thread) {
+      throw new NotFoundError('Chat thread');
+    }
+    return thread;
+  }
+
+  async deleteThread(threadId: string, userId: string): Promise<void> {
+    const result = await this.pool.query(
+      `DELETE FROM chat_threads WHERE id = $1 AND user_id = $2`,
+      [threadId, userId]
+    );
+    if (result.rowCount === 0) {
+      throw new NotFoundError('Chat thread');
+    }
+  }
+
   async updateTitleIfDefault(threadId: string, title: string): Promise<void> {
     const trimmed = title.trim();
     if (!trimmed) {

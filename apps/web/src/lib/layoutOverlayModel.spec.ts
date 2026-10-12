@@ -114,7 +114,7 @@ describe('layoutOverlayModel', () => {
     const overlays = buildLayoutOverlays(sampleDoc);
     const tables = buildLayoutTables(sampleDoc, overlays);
     expect(tables).toHaveLength(1);
-    expect(tables[0].rows[0][1]).toBe('Amount');
+    expect(tables[0].bodyRows[0][1]).toBe('Amount');
     const outline = buildLayoutOutline(sampleDoc, overlays);
     expect(outline.length).toBeGreaterThan(0);
   });

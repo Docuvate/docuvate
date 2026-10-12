@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { useTranslation } from 'react-i18next';
 
-export function DateisystemRootEmptyState() {
+interface DateisystemRootEmptyStateProps {
+  onCreateRoot?: () => void;
+}
+
+export function DateisystemRootEmptyState({ onCreateRoot }: DateisystemRootEmptyStateProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="empty-state dateisystem-root-empty">
+    <div className="empty-state dateisystem-root-empty" data-testid="filesystem-root-empty">
       <div className="dateisystem-empty-icon" aria-hidden>
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
           <path
@@ -20,6 +24,11 @@ export function DateisystemRootEmptyState() {
       <h3>{t('filesystem.chooseFolderTitle')}</h3>
       <p className="muted">{t('filesystem.rootEmptyLead')}</p>
       <p className="muted dateisystem-root-empty-hint">{t('filesystem.rootEmptyHint')}</p>
+      {onCreateRoot ? (
+        <button type="button" className="btn btn-primary dateisystem-root-empty-cta" onClick={onCreateRoot}>
+          {t('filesystem.newRootButton')}
+        </button>
+      ) : null}
     </div>
   );
 }
