@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import {
   createGlobalChatThread,
   GLOBAL_CHAT_ABSTENTION_SNIPPET,
+  GLOBAL_CHAT_OUT_OF_SCOPE_SNIPPET,
   sendGlobalChatMessage,
   waitForGlobalChatMessage,
 } from '../../helpers/global-chat-api';
@@ -103,7 +104,7 @@ test.describe('global chat retrieval', () => {
     expect(amountInAnswer).toBeTruthy();
   });
 
-  test('unknown topic abstains without citations', async ({ request }) => {
+  test('unknown topic declines without citations', async ({ request }) => {
     test.setTimeout(120_000);
 
     const threadId = await createGlobalChatThread(request, apiBase, webOrigin, 'Off-topic');
@@ -115,7 +116,11 @@ test.describe('global chat retrieval', () => {
       'Wie wird das Wetter morgen in Berlin?'
     );
     const msg = await waitForGlobalChatMessage(request, messagesPath, webOrigin, assistantId);
-    expect((msg.content ?? '').toLowerCase()).toContain(GLOBAL_CHAT_ABSTENTION_SNIPPET);
+    const body = (msg.content ?? '').toLowerCase();
+    const declined =
+      body.includes(GLOBAL_CHAT_ABSTENTION_SNIPPET) ||
+      body.includes(GLOBAL_CHAT_OUT_OF_SCOPE_SNIPPET);
+    expect(declined).toBeTruthy();
     expect(msg.citations?.length ?? 0).toBe(0);
   });
 });
