@@ -17,6 +17,13 @@ from docuvate_worker.domain.embedding_density.schemas import (
     EmbeddingDensityStatePayload,
 )
 from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.domain.representation.constants import (
+    ENCODER_ID,
+    ENCODER_REVISION,
+    REPRESENTATION_VERSION,
+)
+from docuvate_worker.domain.representation.encode import DocumentRepresentation
+from docuvate_worker.domain.representation.quantize import quantize_vector
 from docuvate_worker.infrastructure.fastembed_model import embed_passages
 
 
@@ -97,6 +104,20 @@ def test_nest_stage_classifies_with_calibrated_state() -> None:
         coverage=0.5,
     )
 
+    mean_scale, mean_int8 = quantize_vector(anchor)
+    max_scale, max_int8 = quantize_vector(anchor)
+    document_representation = DocumentRepresentation(
+        encoder_id=ENCODER_ID,
+        encoder_revision=ENCODER_REVISION,
+        representation_version=REPRESENTATION_VERSION,
+        units=(),
+        document_mean_scale=mean_scale,
+        document_mean_int8=mean_int8,
+        document_max_scale=max_scale,
+        document_max_int8=max_int8,
+        document_mean_float=tuple(anchor),
+    )
+
     state = PipelineMutableState(
         content=b"",
         mime_type="application/pdf",
@@ -104,6 +125,7 @@ def test_nest_stage_classifies_with_calibrated_state() -> None:
         text=doc_text,
         blocks=[],
         embedding_density_state=state_payload,
+        document_representation=document_representation,
     )
     envelope = run_nest_stage(state)
     assert envelope.availability == StageAvailability.OK
