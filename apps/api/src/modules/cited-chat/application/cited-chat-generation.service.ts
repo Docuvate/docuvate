@@ -561,7 +561,7 @@ export class CitedChatGenerationService {
     }
     const passages = ranked.map((row) => ({
       id: row.chunk.chunkId,
-      text: this.retrieval.indexPassageForRerank(row.chunk),
+      text: row.chunk.body,
     }));
     const worker = await fetchWorkerExtractiveAnswer(query, passages);
     if (!worker.reachable || !worker.passageId || !worker.answer) {
