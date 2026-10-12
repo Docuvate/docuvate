@@ -1,6 +1,6 @@
 CREATE TABLE duplicate_pair_labels (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES public."user"(id) ON DELETE CASCADE,
+  user_id text NOT NULL REFERENCES public."user"(id) ON DELETE CASCADE,
   document_id_a uuid NOT NULL,
   document_id_b uuid NOT NULL,
   label text NOT NULL CHECK (label IN ('duplicate', 'not_duplicate')),
@@ -16,7 +16,7 @@ CREATE TABLE duplicate_pair_labels (
 );
 
 CREATE TABLE duplicate_user_calibration (
-  user_id uuid PRIMARY KEY REFERENCES public."user"(id) ON DELETE CASCADE,
+  user_id text PRIMARY KEY REFERENCES public."user"(id) ON DELETE CASCADE,
   logit_intercept_delta real NOT NULL DEFAULT 0,
   updated_at timestamptz NOT NULL DEFAULT now()
 );

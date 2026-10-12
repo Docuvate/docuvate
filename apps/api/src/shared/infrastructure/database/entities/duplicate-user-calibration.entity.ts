@@ -6,7 +6,7 @@ import { UserEntity } from './user.entity.js';
 
 @Entity('duplicate_user_calibration', { schema: 'public' })
 export class DuplicateUserCalibrationEntity {
-  @PrimaryColumn('uuid', { name: 'user_id' })
+  @PrimaryColumn('text', { name: 'user_id' })
   userId: string;
 
   @Column('real', { name: 'logit_intercept_delta', default: () => '0' })

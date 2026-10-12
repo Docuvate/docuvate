@@ -13,7 +13,7 @@ export class DuplicatePairLabelsEntity {
   @PrimaryGeneratedColumn('uuid', { name: 'id' })
   id: string;
 
-  @Column('uuid', { name: 'user_id' })
+  @Column('text', { name: 'user_id' })
   userId: string;
 
   @Column('uuid', { name: 'document_id_a' })
