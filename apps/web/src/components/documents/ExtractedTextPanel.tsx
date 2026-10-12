@@ -11,8 +11,8 @@ import {
   textFromExtractionBlocks,
 } from '../../lib/extractionLayout';
 import { typstExportDegradedMessage } from '../../lib/layoutExportTypst';
-import { buildLayoutReadingBlocks } from '../../lib/layoutIrReadingContent';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
+import { buildLayoutReadingBlocks } from '../../lib/layoutIrReadingContent';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { useToastNotify } from '../save/ToastProvider';
 import { Button } from '../ui/Button';

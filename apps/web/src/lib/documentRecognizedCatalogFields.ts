@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   type DocumentDto,
-  type ExtractedField,
   evaluateFieldExtractionGate,
+  type ExtractedField,
   type FieldExtractionGateConfig,
   type RecognizedFieldDefinitionDto,
   semanticFieldKey,

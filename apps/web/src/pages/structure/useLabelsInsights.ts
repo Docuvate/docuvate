@@ -51,7 +51,9 @@ function countDocumentsByTag(documents: DocumentDto[]): Record<string, number> {
   return counts;
 }
 
-type LoadOptions = { silent?: boolean };
+interface LoadOptions {
+  silent?: boolean;
+}
 
 export function useLabelsInsights(
   onReloadTags: (options?: LoadOptions) => Promise<void>

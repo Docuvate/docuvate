@@ -290,7 +290,7 @@ function tableRowsWithHeader(table: LayoutIrTable): {
     return { headerRow: null, bodyRows: [] };
   }
   const firstIrRow = table.rows[0];
-  const headerByRole = firstIrRow?.some((cell) => cell.cellRole === 'header') ?? false;
+  const headerByRole = firstIrRow.some((cell) => cell.cellRole === 'header');
   if (headerByRole) {
     return { headerRow: stringRows[0], bodyRows: stringRows.slice(1) };
   }

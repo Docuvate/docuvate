@@ -48,12 +48,17 @@ import {
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { authClient, authSessionUserId } from '../lib/auth-client';
+import { pickAutoDocumentDateFromFields } from '../lib/documentAutoDocumentDate';
 import {
   readCitationPageFromLocationState,
   readHighlightBlocksFromLocationState,
 } from '../lib/documentDetailLocationState';
 import { isExtractionPending } from '../lib/documentExtractionState';
 import { fetchDocumentPreviewBuffer } from '../lib/documentPreviewCache';
+import {
+  catalogFieldGateContextFromDocument,
+  mergeCatalogFieldsForDocument,
+} from '../lib/documentRecognizedCatalogFields';
 import { areBlocksDirty, areFieldsDirty } from '../lib/extractionDirty';
 import { extractionFieldLabel } from '../lib/extractionFieldLabels';
 import {
@@ -67,11 +72,6 @@ import {
   buildGlobalFieldLabelMap,
   parseGlobalFieldKey,
 } from '../lib/labelFieldDisplay';
-import { pickAutoDocumentDateFromFields } from '../lib/documentAutoDocumentDate';
-import {
-  catalogFieldGateContextFromDocument,
-  mergeCatalogFieldsForDocument,
-} from '../lib/documentRecognizedCatalogFields';
 import { splitRecognizedFieldsAndSuggestions } from '../lib/recognizedFieldDisplay';
 import { routes } from '../lib/routes';
 import { notifySaved, notifySaveError } from '../lib/saveNotify';

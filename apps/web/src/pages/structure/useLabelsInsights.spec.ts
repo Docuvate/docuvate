@@ -1,22 +1,24 @@
 // @vitest-environment jsdom
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { renderHook, act } from '@testing-library/react';
+import { act,renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { useLabelsInsights } from './useLabelsInsights';
 
 vi.mock('../../lib/api', () => ({
-  listLabelRecommendations: vi.fn(async () => []),
-  listDocuments: vi.fn(async () => []),
-  getLabelMap: vi.fn(async () => ({ coverageSummary: null, emptyReason: null, extractedDocumentCount: 0 })),
-  acceptLabelRecommendation: vi.fn(async () => ({ tagId: 't1', action: 'assigned' })),
-  dismissLabelRecommendation: vi.fn(async () => undefined),
+  listLabelRecommendations: vi.fn(() => Promise.resolve([])),
+  listDocuments: vi.fn(() => Promise.resolve([])),
+  getLabelMap: vi.fn(() =>
+    Promise.resolve({ coverageSummary: null, emptyReason: null, extractedDocumentCount: 0 })
+  ),
+  acceptLabelRecommendation: vi.fn(() => Promise.resolve({ tagId: 't1', action: 'assigned' })),
+  dismissLabelRecommendation: vi.fn(() => Promise.resolve(undefined)),
 }));
 
 describe('useLabelsInsights', () => {
   it('accept refreshes silently without toggling loading', async () => {
-    const onReloadTags = vi.fn(async () => undefined);
+    const onReloadTags = vi.fn(() => Promise.resolve());
     const { result } = renderHook(() => useLabelsInsights(onReloadTags));
 
     await act(async () => {

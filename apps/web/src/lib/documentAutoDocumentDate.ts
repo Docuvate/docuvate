@@ -15,9 +15,15 @@ export function isoDateFromExtractedValue(raw: string): string | null {
   }
   const deFull = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(value);
   if (deFull) {
-    const day = deFull[1]!.padStart(2, '0');
-    const month = deFull[2]!.padStart(2, '0');
-    return `${deFull[3]}-${month}-${day}`;
+    const dayPart = deFull[1];
+    const monthPart = deFull[2];
+    const yearPart = deFull[3];
+    if (!dayPart || !monthPart || !yearPart) {
+      return null;
+    }
+    const day = dayPart.padStart(2, '0');
+    const month = monthPart.padStart(2, '0');
+    return `${yearPart}-${month}-${day}`;
   }
   const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   if (iso) {
