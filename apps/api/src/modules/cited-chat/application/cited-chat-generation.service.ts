@@ -507,6 +507,36 @@ export class CitedChatGenerationService {
       : undefined;
 
     if (verified.length === 0) {
+      const extractiveFallback = await this.resolveExtractiveAnswer(
+        retrievalQuery,
+        extractivePool,
+        extractiveMinScore
+      );
+      const fallbackChunkId = extractiveFallback?.chunk.chunkId ?? '';
+      const fallbackChunkIsUuid = /^[0-9a-f-]{36}$/i.test(fallbackChunkId);
+      if (extractiveFallback && fallbackChunkIsUuid) {
+        await this.citationsRepo.replaceCitations(messageId, [
+          {
+            ordinal: 1,
+            chunkId: extractiveFallback.chunk.chunkId,
+            quote: extractiveFallback.quote,
+            charStart: extractiveFallback.chunk.charStart ?? 0,
+            charEnd: extractiveFallback.chunk.charEnd ?? extractiveFallback.quote.length,
+          },
+        ]);
+        const content = formatVerifiedCitedContent([
+          { text: extractiveFallback.text, ordinal: 1 },
+        ]);
+        await this.threads.updateMessageGeneration(messageId, {
+          content,
+          generationStatus: 'done',
+          generationPhase: null,
+          errorDetail: benchStats,
+          finalizeOnlyIfInFlight: true,
+        });
+        await this.threads.touchThread(threadId);
+        return { content, abstained: false };
+      }
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
         content: abstentionText,
