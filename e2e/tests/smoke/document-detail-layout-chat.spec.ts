@@ -4,6 +4,7 @@ import {
   openLayoutAdvancedCompare,
   openLayoutDocumentPage,
   uploadLayoutTableDocument,
+  verifyDocumentChatRespondsWithin5s,
 } from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
@@ -132,6 +133,11 @@ test.describe('document detail layout and chat', () => {
     if (metaBox && workspaceBox) {
       expect(workspaceBox.y - metaBox.y - metaBox.height).toBeLessThan(140);
     }
+  });
+
+  test('document chat thread generation succeeds on layout fixture', async ({ request }) => {
+    test.setTimeout(180_000);
+    await verifyDocumentChatRespondsWithin5s(request, apiBase, webOrigin, layoutDocId);
   });
 
   test('document chat tab shows chat beside the viewer with composer ready', async ({ page }) => {
