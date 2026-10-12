@@ -9,13 +9,13 @@ import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js
 import type { DocumentChatMessageEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
+  DOCUMENT_REPOSITORY,
   type DocumentChatThreadRepository,
-} from '../../../shared/domain/ports.js';
-import {
+  type DocumentRepository,
   USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
+import { assertChatEnabled } from '../../settings/application/assert-chat-enabled.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
 import { DocumentChatGenerationQueueService } from '../infrastructure/document-chat-generation-queue.service.js';
 import { chatThreadTitleFromMessage } from './chat-thread-title.js';
@@ -63,6 +63,7 @@ export class SendDocumentChatThreadMessageUseCase {
       await this.effectiveChatProvider.resolveFromPreference(preferences.preferredChatProvider, {
         persistForUserId: userId,
       });
+    assertChatEnabled(providerId);
 
     const userMessage = await this.threads.appendMessage(threadId, 'user', trimmed);
     await this.threads.updateTitleIfDefault(threadId, chatThreadTitleFromMessage(trimmed));
@@ -73,39 +74,25 @@ export class SendDocumentChatThreadMessageUseCase {
     });
     await this.threads.touchThread(threadId);
 
-    if (providerId !== 'off') {
-      await this.generationQueue.enqueue({
-        messageId: assistantMessage.id,
-        threadId,
-        documentId,
-        userId,
-        userMessage: trimmed,
-      });
-    } else {
-      await this.threads.updateMessageGeneration(assistantMessage.id, {
-        generationStatus: 'failed',
-        generationPhase: null,
-        errorCode: 'provider_unavailable',
-        errorDetail: 'Chat provider off',
-        content: '',
-      });
-    }
-
-    const configured = providerId !== 'off';
+    await this.generationQueue.enqueue({
+      messageId: assistantMessage.id,
+      threadId,
+      documentId,
+      userId,
+      userMessage: trimmed,
+    });
 
     return {
-      configured,
+      configured: true,
       provider: providerId,
-      setupHint: configured
-        ? null
-        : 'Dokument-Chat benötigt Ollama (kleines Modell) + Worker für RAG oder Donut DocVQA mit GPU.',
+      setupHint: null,
       reply: { role: 'assistant', content: '' },
       userMessage,
       assistantMessage: {
         ...assistantMessage,
-        generationStatus: providerId === 'off' ? 'failed' : 'pending',
+        generationStatus: 'pending',
       },
-      asyncGeneration: configured,
+      asyncGeneration: true,
     };
   }
 }

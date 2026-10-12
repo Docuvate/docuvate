@@ -106,16 +106,27 @@ export function ExtractedTextPanel({
     if (activeBlockIndex == null || editingBlockIndex != null) return;
     const host = bodyRef.current;
     if (!host) return;
-    let el = host.querySelector<HTMLElement>(`[data-block-index="${String(activeBlockIndex)}"]`);
+    const activeBlock = blocks.at(activeBlockIndex);
+    if (activeBlock === undefined) {
+      return;
+    }
+    const blockId = activeBlock.blockIndex ?? activeBlockIndex;
+    let el =
+      host.querySelector<HTMLElement>(`[data-block-id="${String(blockId)}"]`) ??
+      host.querySelector<HTMLElement>(`[data-block-index="${String(activeBlockIndex)}"]`);
     if (!el && contentMode === 'layout') {
       const iframe = host.querySelector<HTMLIFrameElement>('.layout-ir-html-frame');
       el =
         iframe?.contentDocument?.querySelector<HTMLElement>(
+          `[data-block-id="${String(blockId)}"]`
+        ) ??
+        iframe?.contentDocument?.querySelector<HTMLElement>(
           `[data-block-index="${String(activeBlockIndex)}"]`
-        ) ?? null;
+        ) ??
+        null;
     }
     el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, [activeBlockIndex, editingBlockIndex, contentMode]);
+  }, [activeBlockIndex, blocks, editingBlockIndex, contentMode]);
 
   useEffect(() => {
     if (editingBlockIndex === null) {
@@ -324,6 +335,7 @@ export function ExtractedTextPanel({
                           role="button"
                           tabIndex={0}
                           data-block-index={index}
+                          data-block-id={block.blockIndex ?? index}
                           className={`extracted-text-segment${isActive ? ' extracted-text-segment-active' : ''}`}
                           onClick={() => { selectBlock(block); }}
                           onKeyDown={(e) => {

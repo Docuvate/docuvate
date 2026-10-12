@@ -23,8 +23,10 @@ export function shouldShowExtractionOfflineCallout(
 
 export function buildExtractionEngineSelectOptions(
   t: TFunction,
-  engines: ExtractionEngineInfo[]
+  engines: ExtractionEngineInfo[],
+  options?: { hideUnavailableSuffix?: boolean }
 ): SelectOption[] {
+  const hideUnavailableSuffix = options?.hideUnavailableSuffix === true;
   if (engines.length === 0) {
     return [
       {
@@ -40,8 +42,8 @@ export function buildExtractionEngineSelectOptions(
     return {
       value: engine.id,
       label: baseLabel,
-      suffix: unavailable ? t('settings.engineUnavailableShort') : undefined,
-      disabled: unavailable,
+      suffix: unavailable && !hideUnavailableSuffix ? t('settings.engineUnavailableShort') : undefined,
+      disabled: unavailable && !hideUnavailableSuffix,
     };
   });
 }

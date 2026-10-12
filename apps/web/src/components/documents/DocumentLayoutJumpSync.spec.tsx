@@ -96,7 +96,6 @@ describe('Document layout jump sync', () => {
         documentId="doc-1"
         layoutIr={layoutIr}
         fields={[]}
-        blocks={[]}
         knownFieldKeys={new Set()}
         fieldLabelForKey={(k) => k}
         activeTab="outline"
@@ -120,7 +119,6 @@ describe('Document layout jump sync', () => {
         documentId="doc-1"
         layoutIr={layoutIr}
         fields={[]}
-        blocks={[]}
         knownFieldKeys={new Set()}
         fieldLabelForKey={(k) => k}
         activeTab="fields"

@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -17,6 +18,7 @@ part 'accept_label_recommendation_request_dto.g.dart';
 /// * [keepTagId] 
 /// * [removeTagId] 
 /// * [color] 
+/// * [documentIds] 
 @BuiltValue()
 abstract class AcceptLabelRecommendationRequestDto implements Built<AcceptLabelRecommendationRequestDto, AcceptLabelRecommendationRequestDtoBuilder> {
   @BuiltValueField(wireName: r'recommendationId')
@@ -36,6 +38,9 @@ abstract class AcceptLabelRecommendationRequestDto implements Built<AcceptLabelR
 
   @BuiltValueField(wireName: r'color')
   String? get color;
+
+  @BuiltValueField(wireName: r'documentIds')
+  BuiltList<String>? get documentIds;
 
   AcceptLabelRecommendationRequestDto._();
 
@@ -102,6 +107,13 @@ class _$AcceptLabelRecommendationRequestDtoSerializer implements PrimitiveSerial
         specifiedType: const FullType(String),
       );
     }
+    if (object.documentIds != null) {
+      yield r'documentIds';
+      yield serializers.serialize(
+        object.documentIds,
+        specifiedType: const FullType(BuiltList, [FullType(String)]),
+      );
+    }
   }
 
   @override
@@ -166,6 +178,13 @@ class _$AcceptLabelRecommendationRequestDtoSerializer implements PrimitiveSerial
             specifiedType: const FullType(String),
           ) as String;
           result.color = valueDes;
+          break;
+        case r'documentIds':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(String)]),
+          ) as BuiltList<String>;
+          result.documentIds.replace(valueDes);
           break;
         default:
           unhandled.add(key);

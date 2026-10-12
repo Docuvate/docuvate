@@ -11,7 +11,11 @@ import {
   DOCUMENT_REPOSITORY,
   type DocumentChatThreadRepository,
   type DocumentRepository,
+  USER_PREFERENCES_REPOSITORY,
+  type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
+import { assertChatEnabled } from '../../settings/application/assert-chat-enabled.js';
+import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
 import { resolveChatThreadTitle } from './chat-thread-title.js';
 
 @Injectable()
@@ -20,6 +24,8 @@ export class CreateDocumentChatThreadUseCase {
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(DOCUMENT_CHAT_THREAD_REPOSITORY)
     private readonly threads: DocumentChatThreadRepository,
+    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    private readonly effectiveChatProvider: EffectiveDocumentChatProviderUseCase,
     private readonly documentAuthz: DocumentAuthorizationService
   ) {}
 
@@ -34,6 +40,12 @@ export class CreateDocumentChatThreadUseCase {
       throw new NotFoundError('Document');
     }
     await this.documentAuthz.assert(subject, 'document:chat', doc);
+    const preferences = await this.prefs.getForUser(userId);
+    const { customerEffective } = await this.effectiveChatProvider.resolveFromPreference(
+      preferences.preferredChatProvider,
+      { persistForUserId: userId }
+    );
+    assertChatEnabled(customerEffective);
     return this.threads.createThread(userId, [documentId], {
       title: resolveChatThreadTitle(title),
       scope: 'document',

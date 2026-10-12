@@ -22,6 +22,7 @@ interface DocumentLayoutCompareViewProps {
   pageCount: number;
   activePage: number;
   onPageChange: (page: number) => void;
+  showTechnicalDetails?: boolean;
 }
 
 export function DocumentLayoutCompareView({
@@ -29,6 +30,7 @@ export function DocumentLayoutCompareView({
   pageCount,
   activePage,
   onPageChange,
+  showTechnicalDetails = false,
 }: DocumentLayoutCompareViewProps) {
   const { t, i18n } = useTranslation();
   const [presentation, setPresentation] = useState<LayoutComparePresentation>('split');
@@ -109,25 +111,27 @@ export function DocumentLayoutCompareView({
           />
           <span>{t('documents.layoutCompareHeatmap')}</span>
         </label>
-        <div className="layout-compare-ssim-summary" role="status">
-          {ssimScore != null ? (
-            <span>
-              {t('documents.layoutCompareSsim', {
-                score: formatSsimScore(ssimScore, i18n.language),
+        {showTechnicalDetails ? (
+          <div className="layout-compare-ssim-summary" role="status">
+            {ssimScore != null ? (
+              <span>
+                {t('documents.layoutCompareSsim', {
+                  score: formatSsimScore(ssimScore, i18n.language),
+                })}
+              </span>
+            ) : ssimPending ? (
+              <span className="muted">{t('documents.layoutCompareSsimPending')}</span>
+            ) : null}
+            <span className="muted layout-compare-ssim-floor">
+              {t('documents.layoutCompareSsimFloor', {
+                floor: formatSsimScore(ssimFloor, i18n.language),
               })}
             </span>
-          ) : ssimPending ? (
-            <span className="muted">{t('documents.layoutCompareSsimPending')}</span>
-          ) : null}
-          <span className="muted layout-compare-ssim-floor">
-            {t('documents.layoutCompareSsimFloor', {
-              floor: formatSsimScore(ssimFloor, i18n.language),
-            })}
-          </span>
-          {!pageReliable ? (
-            <span className="layout-compare-ssim-warn">{t('documents.layoutCompareUnreliablePage')}</span>
-          ) : null}
-        </div>
+            {!pageReliable ? (
+              <span className="layout-compare-ssim-warn">{t('documents.layoutCompareUnreliablePage')}</span>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <LayoutComparePageNav
@@ -135,6 +139,7 @@ export function DocumentLayoutCompareView({
         activePage={activePage}
         metricsByPage={metricsByPage}
         onPageChange={onPageChange}
+        showPageSsim={showTechnicalDetails}
       />
 
       {(metricsState === 'error' || metricsTimedOut) && metricsError ? (

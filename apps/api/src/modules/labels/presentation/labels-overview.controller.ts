@@ -90,6 +90,7 @@ export class LabelsOverviewController {
       keepTagId: body.keepTagId,
       removeTagId: body.removeTagId,
       color: body.color,
+      documentIds: body.documentIds,
     });
   }
 

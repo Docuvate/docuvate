@@ -21,7 +21,10 @@ import {
 } from '../components/documents/DocumentDetailMetaBar';
 import { DocumentDetailNotFound } from '../components/documents/DocumentDetailNotFound';
 import { DocumentExtractionSection } from '../components/documents/DocumentExtractionSection';
-import { DocumentLayoutWorkspace } from '../components/documents/DocumentLayoutWorkspace';
+import type { LayoutSideTab } from '../components/documents/DocumentLayoutSidePanel';
+import {
+  DocumentLayoutWorkspace,
+} from '../components/documents/DocumentLayoutWorkspace';
 import { DocumentMetadataForm } from '../components/documents/DocumentMetadataForm';
 import { DocumentPreviewCard } from '../components/documents/DocumentPreviewCard';
 import { DuplicateCandidatesPanel } from '../components/documents/DuplicateCandidatesPanel';
@@ -113,6 +116,7 @@ export function DocumentDetailPage() {
     'idle' | 'loading' | 'ready' | 'missing'
   >('idle');
   const [activeTab, setActiveTab] = useState<DetailTab | null>(null);
+  const [layoutSideTab, setLayoutSideTab] = useState<LayoutSideTab>('fields');
   const [viewerPage, setViewerPage] = useState(1);
   const [activeBlockIndex, setActiveBlockIndex] = useState<number | null>(null);
   const [title, setTitle] = useState('');
@@ -126,6 +130,7 @@ export function DocumentDetailPage() {
   const [folderId, setFolderId] = useState('');
   const [requeueBusy, setRequeueBusy] = useState(false);
   const [documentChatAvailable, setDocumentChatAvailable] = useState(false);
+  const [documentChatUiEnabled, setDocumentChatUiEnabled] = useState(true);
   const [fieldFeedbackRecorded, setFieldFeedbackRecorded] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -138,6 +143,7 @@ export function DocumentDetailPage() {
   const [metadataSaveError, setMetadataSaveError] = useState<string | null>(null);
   const [layoutTextEditOpen, setLayoutTextEditOpen] = useState(false);
   const [layoutEditMode, setLayoutEditMode] = useState(false);
+  const [showTechnicalDetails, setShowTechnicalDetails] = useState(false);
   const docRef = useRef<DocumentDto | null>(null);
 
   useEffect(() => {
@@ -194,10 +200,24 @@ export function DocumentDetailPage() {
 
   useEffect(() => {
     const tabParam = new URLSearchParams(window.location.search).get('tab');
-    if (tabParam === 'details' || tabParam === 'labels' || tabParam === 'chat') {
+    if (tabParam === 'chat') {
+      setLayoutSideTab('chat');
+      setActiveTab(null);
+      return;
+    }
+    if (tabParam === 'details' || tabParam === 'labels') {
       setActiveTab(tabParam);
     }
   }, [id]);
+
+  useEffect(() => {
+    const usesLayoutWorkspace =
+      doc?.mimeType === 'application/pdf' && doc.extraction?.layoutIrAvailable === true;
+    if (usesLayoutWorkspace && activeTab === 'chat') {
+      setLayoutSideTab('chat');
+      setActiveTab(null);
+    }
+  }, [doc?.mimeType, doc?.extraction?.layoutIrAvailable, activeTab]);
 
   useEffect(() => {
     if (!id) return;
@@ -211,6 +231,7 @@ export function DocumentDetailPage() {
         setGlobalFieldLabels(buildGlobalFieldLabelMap(recognized));
         setFolders(f);
         setDocumentChatAvailable(settings.documentChatAvailable === true);
+        setDocumentChatUiEnabled(settings.documentChatUiEnabled !== false);
       })
       .catch((err: unknown) => {
         if (active) setError(formatUserFacingError(err, 'errors.loadFailed'));
@@ -467,7 +488,14 @@ export function DocumentDetailPage() {
         </Link>
       </p>
 
-      <DocumentDetailMetaBar doc={doc} onDelete={() => { setDeleteDialogOpen(true); }} />
+      <DocumentDetailMetaBar
+        doc={doc}
+        onDelete={() => { setDeleteDialogOpen(true); }}
+        onRequeueExtraction={layoutWorkspace ? () => void onRequeueExtraction() : undefined}
+        requeueBusy={requeueBusy}
+        showTechnicalDetails={showTechnicalDetails}
+        onShowTechnicalDetailsChange={layoutWorkspace ? setShowTechnicalDetails : undefined}
+      />
 
       {error ? (
         <p className="error" role="alert">
@@ -479,6 +507,7 @@ export function DocumentDetailPage() {
         <DocumentDetailTabStrip
           activeTab={activeTab}
           labelCount={doc.tags.length}
+          showChatTab={documentChatUiEnabled && !layoutWorkspace}
           onTabChange={setActiveTab}
         />
         {activeTab === 'details' ? (
@@ -530,28 +559,29 @@ export function DocumentDetailPage() {
           </div>
         ) : null}
 
-        {layoutWorkspace && activeTab !== 'details' && activeTab !== 'labels' ? (
-          <div
-            className="detail-tab-panel-surface detail-tab-panel-surface--workspace-spacer"
-            aria-hidden="true"
-          />
-        ) : null}
-
         {activeTab === 'chat' && !layoutWorkspace ? (
           <div
             className="detail-tab-panel-surface"
             role="tabpanel"
             aria-label={t('documents.tabChat')}
           >
-            <DocumentChatPanel documentId={doc.id} compact chatAvailable={documentChatAvailable} />
+            <DocumentChatPanel
+              documentId={doc.id}
+              compact
+              chatAvailable={documentChatAvailable}
+              chatUiEnabled={documentChatUiEnabled}
+            />
           </div>
         ) : null}
       </div>
 
       {layoutWorkspace ? (
         <DocumentLayoutWorkspace
-          chatSidePanel={activeTab === 'chat'}
           documentChatAvailable={documentChatAvailable}
+          documentChatUiEnabled={documentChatUiEnabled}
+          showTechnicalDetails={showTechnicalDetails}
+          layoutSideTab={layoutSideTab}
+          onLayoutSideTabChange={setLayoutSideTab}
           doc={doc}
           previewData={previewData}
           previewLoading={previewLoading}

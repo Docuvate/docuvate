@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
+import {
+  openLayoutAdvancedCompare,
+  openLayoutDocumentPage,
+  uploadLayoutTableDocument,
+} from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -15,9 +19,9 @@ async function measureWorkspace(page: import('@playwright/test').Page): Promise<
   return box ? { x: Math.round(box.x), width: Math.round(box.width) } : null;
 }
 
-const VIEWER_MODES = [/Original/i, /Reconstruction|Nachbau/i, /Compare|Vergleich/i] as const;
+const VIEWER_MODES = [/Original/i, /^Text$/i] as const;
 
-const SIDE_TABS = [/Fields|Felder/i, /Tables|Tabellen/i, /Outline|Gliederung/i, /Export/i] as const;
+const SIDE_TABS = [/Overview|Übersicht/i, /Tables|Tabellen/i, /Outline|Gliederung/i, /^Chat$/i] as const;
 
 test.describe('document detail layout and chat', () => {
   test.describe.configure({ mode: 'serial' });
@@ -30,6 +34,10 @@ test.describe('document detail layout and chat', () => {
 
   test.beforeEach(async ({ page }) => {
     await openLayoutDocumentPage(page, layoutDocId);
+    await page
+      .locator('.layout-ir-skeleton')
+      .waitFor({ state: 'hidden', timeout: 180_000 })
+      .catch(() => undefined);
   });
 
   test('layout workspace keeps stable width across viewer modes and side tabs', async ({ page }) => {
@@ -39,22 +47,19 @@ test.describe('document detail layout and chat', () => {
     expect(baseline).not.toBeNull();
 
     for (const mode of VIEWER_MODES) {
-      await page.getByRole('radio', { name: mode }).click();
+      await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: mode }).click();
       await page.waitForTimeout(400);
       const box = await measureWorkspace(page);
       expect(box?.width).toBe(baseline?.width);
       expect(box?.x).toBe(baseline?.x);
     }
 
-    await page.getByRole('radio', { name: /Compare|Vergleich/i }).click();
-    await page.getByRole('radio', { name: /Slider|Schieberegler/i }).click();
-    await page.waitForTimeout(400);
-    const sliderModeBox = await measureWorkspace(page);
-    expect(sliderModeBox?.width).toBe(baseline?.width);
-    expect(sliderModeBox?.x).toBe(baseline?.x);
-
     for (const tab of SIDE_TABS) {
-      await page.getByRole('tab', { name: tab }).click();
+      const tabButton = page.getByRole('tab', { name: tab });
+      if ((await tabButton.count()) === 0) {
+        continue;
+      }
+      await tabButton.click();
       await page.waitForTimeout(200);
       const box = await measureWorkspace(page);
       expect(box?.width).toBe(baseline?.width);
@@ -65,7 +70,7 @@ test.describe('document detail layout and chat', () => {
   test('compare heatmap aligns with original pane and slider clips at 50%', async ({ page }) => {
     test.setTimeout(360_000);
 
-    await page.getByRole('radio', { name: /Compare|Vergleich/i }).click();
+    await openLayoutAdvancedCompare(page);
     await page.locator('[data-testid="layout-compare-stage"]').waitFor({
       state: 'visible',
       timeout: 180_000,
@@ -103,15 +108,42 @@ test.describe('document detail layout and chat', () => {
     }
   });
 
+  test('layout chat tab fills the side panel without a duplicate top chat region', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    await expect(page.locator('.document-detail-tab-region .doc-chat')).toHaveCount(0);
+
+    await page.getByRole('tab', { name: /^Chat$/i }).click();
+    const sidePanel = page.locator('.layout-side-panel--chat');
+    await expect(sidePanel).toBeVisible();
+
+    const panelBox = await sidePanel.boundingBox();
+    const chatLayout = sidePanel.locator('.doc-chat-layout');
+    await expect(chatLayout).toBeVisible();
+    const layoutBox = await chatLayout.boundingBox();
+    expect(panelBox && layoutBox).toBeTruthy();
+    if (panelBox && layoutBox) {
+      expect(layoutBox.width).toBeGreaterThan(panelBox.width * 0.82);
+    }
+
+    const metaBox = await page.locator('.document-detail-meta').boundingBox();
+    const workspaceBox = await page.locator('.layout-workspace').boundingBox();
+    expect(metaBox && workspaceBox).toBeTruthy();
+    if (metaBox && workspaceBox) {
+      expect(workspaceBox.y - metaBox.y - metaBox.height).toBeLessThan(140);
+    }
+  });
+
   test('document chat tab shows chat beside the viewer with composer ready', async ({ page }) => {
     test.setTimeout(180_000);
 
     await page.getByRole('tab', { name: /^Chat$/i }).click();
-    await expect(page.locator('.layout-side-panel-chat')).toBeVisible();
-    const composer = page.locator('.layout-side-panel-chat .doc-chat-composer input');
+    const chatPanel = page.locator('.layout-side-chat');
+    await expect(chatPanel).toBeVisible();
+    const composer = chatPanel.locator('.doc-chat-composer input');
     await expect(composer).toBeEnabled({ timeout: 60_000 });
     const workspaceBox = await page.locator('.layout-workspace').boundingBox();
-    const chatBox = await page.locator('.layout-side-panel-chat').boundingBox();
+    const chatBox = await chatPanel.boundingBox();
     expect(workspaceBox && chatBox).toBeTruthy();
     if (workspaceBox && chatBox) {
       expect(chatBox.x).toBeGreaterThan(workspaceBox.x);

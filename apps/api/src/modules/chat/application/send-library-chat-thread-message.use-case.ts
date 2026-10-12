@@ -13,6 +13,7 @@ import {
 } from '../../../shared/domain/ports.js';
 import { chatThreadTitleFromMessage } from '../../documents/application/chat-thread-title.js';
 import { DocumentChatGenerationQueueService } from '../../documents/infrastructure/document-chat-generation-queue.service.js';
+import { assertChatEnabled } from '../../settings/application/assert-chat-enabled.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
 
 export interface SendLibraryChatThreadMessageResult extends DocumentChatResponse {
@@ -51,6 +52,7 @@ export class SendLibraryChatThreadMessageUseCase {
       await this.effectiveChatProvider.resolveFromPreference(preferences.preferredChatProvider, {
         persistForUserId: userId,
       });
+    assertChatEnabled(providerId);
 
     const userMessage = await this.threads.appendMessage(threadId, 'user', trimmed);
     await this.threads.updateTitleIfDefault(threadId, chatThreadTitleFromMessage(trimmed));
@@ -61,38 +63,24 @@ export class SendLibraryChatThreadMessageUseCase {
     });
     await this.threads.touchThread(threadId);
 
-    if (providerId !== 'off') {
-      await this.generationQueue.enqueue({
-        messageId: assistantMessage.id,
-        threadId,
-        userId,
-        userMessage: trimmed,
-      });
-    } else {
-      await this.threads.updateMessageGeneration(assistantMessage.id, {
-        generationStatus: 'failed',
-        generationPhase: null,
-        errorCode: 'provider_unavailable',
-        errorDetail: 'Chat provider off',
-        content: '',
-      });
-    }
-
-    const configured = providerId !== 'off';
+    await this.generationQueue.enqueue({
+      messageId: assistantMessage.id,
+      threadId,
+      userId,
+      userMessage: trimmed,
+    });
 
     return {
-      configured,
+      configured: true,
       provider: providerId,
-      setupHint: configured
-        ? null
-        : 'Dokument-Chat benötigt Ollama (kleines Modell) und Worker für RAG.',
+      setupHint: null,
       reply: { role: 'assistant', content: '' },
       userMessage,
       assistantMessage: {
         ...assistantMessage,
-        generationStatus: providerId === 'off' ? 'failed' : 'pending',
+        generationStatus: 'pending',
       },
-      asyncGeneration: configured,
+      asyncGeneration: true,
     };
   }
 }

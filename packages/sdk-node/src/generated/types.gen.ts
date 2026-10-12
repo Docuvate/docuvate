@@ -7,6 +7,7 @@ export type AcceptLabelRecommendationRequestDto = {
     keepTagId?: string;
     removeTagId?: string;
     color?: string;
+    documentIds?: Array<string>;
 };
 
 export type AcceptLabelRecommendationResponseDto = {

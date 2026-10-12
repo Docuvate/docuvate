@@ -10891,6 +10891,13 @@
           },
           "color": {
             "type": "string"
+          },
+          "documentIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },

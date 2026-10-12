@@ -16,6 +16,7 @@ interface LayoutComparePageNavProps {
   activePage: number;
   metricsByPage: Map<number, LayoutComparePageMetric>;
   onPageChange: (page: number) => void;
+  showPageSsim?: boolean;
 }
 
 export function LayoutComparePageNav({
@@ -23,6 +24,7 @@ export function LayoutComparePageNav({
   activePage,
   metricsByPage,
   onPageChange,
+  showPageSsim = false,
 }: LayoutComparePageNavProps) {
   const { t, i18n } = useTranslation();
   const { start, end } = useMemo(
@@ -119,7 +121,7 @@ export function LayoutComparePageNav({
               onClick={() => { onPageChange(pageNumber); }}
             >
               <span>{pageNumber}</span>
-              {metric?.ssim != null ? (
+              {showPageSsim && metric?.ssim != null ? (
                 <span className="layout-compare-page-chip-ssim">
                   {new Intl.NumberFormat(i18n.language, {
                     minimumFractionDigits: 0,

@@ -30,7 +30,11 @@ import { mergeThreadMessagesAfterSend } from './documentChatMessages';
 interface DocumentChatPanelProps {
   documentId: string;
   compact?: boolean;
+  /** Chat embedded in the layout document side panel (no duplicate header, stacked threads). */
+  sidePanel?: boolean;
   chatAvailable?: boolean;
+  /** False when user turned chat off in settings (distinct from provider unavailable). */
+  chatUiEnabled?: boolean;
 }
 
 function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string {
@@ -64,7 +68,9 @@ function DocumentChatEmptyIcon() {
 export function DocumentChatPanel({
   documentId,
   compact = false,
+  sidePanel = false,
   chatAvailable = false,
+  chatUiEnabled = true,
 }: DocumentChatPanelProps) {
   const { t, i18n } = useTranslation();
   const [threads, setThreads] = useState<DocumentChatThreadDto[]>([]);
@@ -84,7 +90,9 @@ export function DocumentChatPanel({
     [messages, loadingMessages]
   );
 
-  const { stacked, threadsOpen, toggleThreads, closeThreads } = useStackedDocChatLayout(compact);
+  const { stacked, threadsOpen, toggleThreads, closeThreads } = useStackedDocChatLayout(
+    compact || sidePanel
+  );
 
   const upsertMessage = useCallback((next: DocumentChatMessageRecordDto) => {
     setMessages((prev) => {
@@ -143,6 +151,13 @@ export function DocumentChatPanel({
   }, [chatAvailable]);
 
   useEffect(() => {
+    if (!chatUiEnabled) {
+      setThreads([]);
+      setActiveThreadId(null);
+      setMessages([]);
+      setLoadingThreads(false);
+      return undefined;
+    }
     let active = true;
     setLoadingThreads(true);
     setError(null);
@@ -165,7 +180,7 @@ export function DocumentChatPanel({
     return () => {
       active = false;
     };
-  }, [documentId, t]);
+  }, [chatUiEnabled, documentId, t]);
 
   useEffect(() => {
     if (!activeThreadId) {
@@ -326,32 +341,45 @@ export function DocumentChatPanel({
     !generationInProgress &&
     activeThreadId != null;
   const panelBusy = loadingThreads || loadingMessages;
-  const interactionBlocked = !chatAvailable;
+  const interactionBlocked = !chatUiEnabled || !chatAvailable;
+  const blockedBySettings = !chatUiEnabled;
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
   const inputPlaceholder = hasThreads
     ? t('documents.documentChat.inputPlaceholder')
     : t('documents.documentChat.inputPlaceholderBootstrap');
 
+  const chatHeadingId = sidePanel ? undefined : 'doc-chat-heading';
+
   return (
     <section
-      className={`doc-chat${compact ? ' doc-chat-compact' : ''}`}
-      aria-labelledby="doc-chat-heading"
+      className={`doc-chat${compact ? ' doc-chat-compact' : ''}${sidePanel ? ' doc-chat-side-panel' : ''}`}
+      aria-labelledby={chatHeadingId}
       aria-busy={panelBusy || generationInProgress}
     >
-      <header className="doc-chat-header detail-section-head">
-        <h2 id="doc-chat-heading" className="detail-section-title">
-          {t('documents.documentChat.title')}
-        </h2>
-        <p className="muted detail-section-lead">{t('documents.documentChat.lead')}</p>
-        {serviceNotice ? (
-          <div className="doc-chat-notice" role="status">
-            <p>{t('documents.documentChat.serviceNoticeBody')}</p>
-            <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
-              {t('documents.documentChat.serviceNoticeSettings')}
-            </Link>
-          </div>
-        ) : null}
-      </header>
+      {sidePanel ? null : (
+        <header className="doc-chat-header detail-section-head">
+          <h2 id="doc-chat-heading" className="detail-section-title">
+            {t('documents.documentChat.title')}
+          </h2>
+          <p className="muted detail-section-lead">{t('documents.documentChat.lead')}</p>
+          {serviceNotice ? (
+            <div className="doc-chat-notice" role="status">
+              <p>{t('documents.documentChat.serviceNoticeBody')}</p>
+              <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
+                {t('documents.documentChat.serviceNoticeSettings')}
+              </Link>
+            </div>
+          ) : null}
+        </header>
+      )}
+      {sidePanel && serviceNotice ? (
+        <div className="doc-chat-notice" role="status">
+          <p>{t('documents.documentChat.serviceNoticeBody')}</p>
+          <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
+            {t('documents.documentChat.serviceNoticeSettings')}
+          </Link>
+        </div>
+      ) : null}
 
       <div
         className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}${stacked && hasThreads ? ' doc-chat-layout-stacked' : ''}${stacked && threadsOpen ? ' doc-chat-threads-visible' : ''}`}
@@ -431,18 +459,24 @@ export function DocumentChatPanel({
             {interactionBlocked ? (
               <div className="doc-chat-disabled-overlay" role="status">
                 <h3 className="doc-chat-disabled-title">
-                  {t('documents.documentChat.disabledOverlayTitle')}
+                  {blockedBySettings
+                    ? t('documents.documentChat.disabledSettingsTitle')
+                    : t('documents.documentChat.disabledOverlayTitle')}
                 </h3>
                 <p className="muted doc-chat-disabled-lead">
-                  {t('documents.documentChat.disabledOverlayBody')}
+                  {blockedBySettings
+                    ? t('documents.documentChat.disabledSettingsBody')
+                    : t('documents.documentChat.disabledOverlayBody')}
                 </p>
                 <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
                   {t('documents.documentChat.disabledOverlaySettings')}
                 </Link>
-                <details className="doc-chat-admin-details">
-                  <summary>{t('documents.documentChat.disabledOverlayAdminSummary')}</summary>
-                  <p className="muted">{t('documents.documentChat.disabledOverlayAdminBody')}</p>
-                </details>
+                {!blockedBySettings ? (
+                  <details className="doc-chat-admin-details">
+                    <summary>{t('documents.documentChat.disabledOverlayAdminSummary')}</summary>
+                    <p className="muted">{t('documents.documentChat.disabledOverlayAdminBody')}</p>
+                  </details>
+                ) : null}
               </div>
             ) : null}
             <div className="doc-chat-messages" aria-hidden={interactionBlocked}>

@@ -271,6 +271,7 @@ services:
         condition: service_healthy
 
   worker:
+    restart: unless-stopped
     mem_limit: 3g
     build:
       context: .

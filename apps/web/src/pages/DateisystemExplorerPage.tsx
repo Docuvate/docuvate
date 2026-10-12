@@ -384,6 +384,7 @@ function DateisystemExplorerLayout({
     activeFolderTarget ? (
       <DateisystemFolderEmptyState
         folderLabel={activeFolderTarget.label}
+        onCreateFolder={onToolbarCreateFolder}
         onAddExisting={() => {
           if (!activeFolderTarget.folderId) return;
           setAddExistingTarget({
@@ -469,6 +470,7 @@ function DateisystemExplorerLayout({
               dropTarget.enabled ? undefined : t('filesystem.uploadPickFolderFirst')
             }
             onRequestUploadTarget={() => { setFolderPickerOpen(true); }}
+            hideNewFolderWhenEmpty={showDocuments && data.items.length === 0 && Boolean(activeFolderTarget)}
           />
 
           <div

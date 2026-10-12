@@ -18,6 +18,7 @@ interface DateisystemContentHeaderProps {
   onAddExistingDocuments?: () => void;
   uploadDisabledTitle?: string;
   onRequestUploadTarget?: () => void;
+  hideNewFolderWhenEmpty?: boolean;
 }
 
 export function DateisystemContentHeader({
@@ -28,24 +29,29 @@ export function DateisystemContentHeader({
   onAddExistingDocuments,
   uploadDisabledTitle,
   onRequestUploadTarget,
+  hideNewFolderWhenEmpty = false,
 }: DateisystemContentHeaderProps) {
   const { t } = useTranslation();
   const [newFolderOpen, setNewFolderOpen] = useState(false);
 
   const secondary = [
-    {
-      id: 'new-folder',
-      menuLabel: t('filesystem.newRootButton'),
-      onMenuSelect: () => { setNewFolderOpen(true); },
-      forceVisible: newFolderOpen,
-      node: (
-        <DateisystemNewFolderButton
-          onCreate={onCreateFolder}
-          open={newFolderOpen}
-          onOpenChange={setNewFolderOpen}
-        />
-      ),
-    },
+    ...(!hideNewFolderWhenEmpty
+      ? [
+          {
+            id: 'new-folder',
+            menuLabel: t('filesystem.newRootButton'),
+            onMenuSelect: () => { setNewFolderOpen(true); },
+            forceVisible: newFolderOpen,
+            node: (
+              <DateisystemNewFolderButton
+                onCreate={onCreateFolder}
+                open={newFolderOpen}
+                onOpenChange={setNewFolderOpen}
+              />
+            ),
+          },
+        ]
+      : []),
     ...(showDocuments && onAddExistingDocuments
       ? [
           {
