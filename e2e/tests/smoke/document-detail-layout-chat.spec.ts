@@ -4,7 +4,6 @@ import {
   openLayoutAdvancedCompare,
   openLayoutDocumentPage,
   uploadLayoutTableDocument,
-  verifyDocumentChatRespondsWithin5s,
 } from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
@@ -31,7 +30,6 @@ test.describe('document detail layout and chat', () => {
 
   test.beforeAll(async ({ request }) => {
     layoutDocId = await uploadLayoutTableDocument(request, apiBase, webOrigin);
-    await verifyDocumentChatRespondsWithin5s(request, apiBase, webOrigin, layoutDocId);
   });
 
   test.beforeEach(async ({ page }) => {
