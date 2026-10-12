@@ -3,6 +3,8 @@
 
 """Chat query routing gate (intent prototypes + follow-up merge)."""
 
+# pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnnecessaryIsInstance=false
+
 from __future__ import annotations
 
 import json
