@@ -23,6 +23,9 @@ MAX_RAG_CONTEXT_CHARS = 2400
 
 _TOKEN_RE = re.compile(r"[\wäöüß]+", flags=re.UNICODE)
 _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
+_EU_AMOUNT_RE = re.compile(r"\d[\d.]*,\d{2}")
+_DUE_DAY_RE = re.compile(r"\d+\.\s*Werktag", flags=re.IGNORECASE)
+_TOTAL_HINT_VEC: list[float] | None = None
 
 
 def _split_chunks(text: str) -> list[str]:
@@ -351,26 +354,87 @@ def retrieve_library_rag_context(
     return RagRetrievalResult(chunks=selected, context_text=context_text)
 
 
+def _candidate_lines(context: str) -> list[str]:
+    primary = context.split("\n---\n")[0]
+    parts: list[str] = []
+    for line in primary.split("\n"):
+        stripped = line.strip()
+        if not stripped:
+            continue
+        for piece in _SENTENCE_SPLIT.split(stripped):
+            candidate = piece.strip()
+            if len(candidate) >= 12 and not candidate.startswith("(Quelle:"):
+                parts.append(candidate)
+        if len(stripped) >= 12 and stripped not in parts:
+            parts.append(stripped)
+    return parts
+
+
+def _total_amount_hint_vector() -> list[float]:
+    global _TOTAL_HINT_VEC  # noqa: PLW0603
+    if _TOTAL_HINT_VEC is None:
+        _TOTAL_HINT_VEC = embed_passages(["Gesamtsumme Rechnungsbetrag Gesamtbetrag Endbetrag"])[0]
+    return _TOTAL_HINT_VEC
+
+
+def _best_sentence_across_chunks(question: str, chunks: list[str]) -> str | None:
+    if not chunks:
+        return None
+    query_vec = embed_query(question)
+    scored: list[tuple[float, str]] = []
+    gate = float(os.environ.get("DOCUVATE_SENTENCE_ANSWER_GATE_MIN", "0.68"))
+    for chunk in chunks:
+        for line in _candidate_lines(chunk):
+            line_vec = embed_passages([line])[0]
+            score = _cosine(query_vec, line_vec)
+            scored.append((score, line))
+    if not scored:
+        return None
+    scored.sort(key=lambda row: row[0], reverse=True)
+    best_score = scored[0][0]
+    if best_score < gate:
+        return None
+    margin = float(os.environ.get("DOCUVATE_SENTENCE_ANSWER_MARGIN", "0.03"))
+    near = [row for row in scored if row[0] >= best_score - margin]
+    amount_lines = [row for row in near if _EU_AMOUNT_RE.search(row[1])]
+    if amount_lines:
+        near = amount_lines
+    due_lines = [row for row in near if _DUE_DAY_RE.search(row[1])]
+    if due_lines:
+        near = due_lines
+    if len(near) > 1 and amount_lines:
+        total_vec = _total_amount_hint_vector()
+        near.sort(
+            key=lambda row: (
+                row[0] + 0.15 * _cosine(embed_passages([row[1]])[0], total_vec),
+                row[0],
+            ),
+            reverse=True,
+        )
+    else:
+        near.sort(key=lambda row: row[0], reverse=True)
+    return near[0][1]
+
+
 def _sentence_from_context(question: str, context: str) -> str | None:
     span = read_span(question, context)
     if span is not None:
         return span.text
-    tokens = _tokenize(question)
-    tokens = [t for t in tokens if len(t) >= 3]
-    sentences = [s.strip() for s in _SENTENCE_SPLIT.split(context) if s.strip()]
+    sentences = _candidate_lines(context)
     if not sentences:
         return None
-    best = sentences[0]
-    best_hits = 0
-    for sentence in sentences:
-        lower = sentence.lower()
-        hits = sum(1 for tok in tokens if tok in lower)
-        if hits > best_hits:
-            best_hits = hits
-            best = sentence
-    if tokens and best_hits == 0:
+    query_vec = embed_query(question)
+    sent_vecs = embed_passages(sentences)
+    best_idx = 0
+    best_score = -1.0
+    for idx, vec in enumerate(sent_vecs):
+        score = _cosine(query_vec, vec)
+        if score > best_score:
+            best_score = score
+            best_idx = idx
+    if best_score < float(os.environ.get("DOCUVATE_SENTENCE_ANSWER_GATE_MIN", "0.68")):
         return None
-    return best
+    return sentences[best_idx]
 
 
 def answer_from_library_context(
@@ -394,7 +458,7 @@ def answer_from_library_context(
     if not retrieval.chunks:
         return EXTRACTIVE_ABSTAIN_NO_PASSAGE + "."
 
-    sentence = _sentence_from_context(trimmed, retrieval.context_text)
+    sentence = _best_sentence_across_chunks(trimmed, retrieval.chunks)
     if sentence:
         cited = _source_tags_from_chunks(retrieval.chunks)
         sources = ", ".join(sorted(cited)) if cited else "Dokumente"
@@ -414,10 +478,6 @@ def answer_from_document_context(
     if not trimmed:
         return "Bitte eine Frage zum Dokument stellen."
 
-    field_answer = _answer_from_fields_embedding(trimmed, fields)
-    if field_answer:
-        return field_answer
-
     body = text.strip()
     field_lines = _field_lines(fields)
     if not body and not field_lines:
@@ -436,7 +496,10 @@ def answer_from_document_context(
     if not retrieval.chunks:
         return f"{EXTRACTIVE_ABSTAIN_NO_PASSAGE}."
 
-    sentence = _sentence_from_context(trimmed, retrieval.context_text)
+    sentence = _best_sentence_across_chunks(trimmed, retrieval.chunks)
     if sentence:
         return f"{sentence} (Quelle: {filename or 'Dokument'})."
+    field_answer = _answer_from_fields_embedding(trimmed, fields)
+    if field_answer:
+        return field_answer
     return EXTRACTIVE_ABSTAIN_NO_MATCH + "."
