@@ -206,6 +206,33 @@ export interface LayoutIrDocument {
   pages: LayoutIrPage[];
 }
 
+export interface RepresentationUnitDto {
+  unitIndex: number;
+  kind: string;
+  text: string;
+  page?: number | null;
+  x?: number | null;
+  y?: number | null;
+  width?: number | null;
+  height?: number | null;
+  charStart?: number | null;
+  charEnd?: number | null;
+  vectorScale: number;
+  vectorInt8Base64: string;
+  binaryCodeBase64: string;
+}
+
+export interface DocumentRepresentationDto {
+  encoderId: string;
+  encoderRevision: string;
+  representationVersion: number;
+  units: RepresentationUnitDto[];
+  documentMeanScale: number;
+  documentMeanInt8Base64: string;
+  documentMaxScale: number;
+  documentMaxInt8Base64: string;
+}
+
 export interface ExtractionResult {
   text: string;
   fields: ExtractedField[];
@@ -220,6 +247,8 @@ export interface ExtractionResult {
   layoutIrAvailable?: boolean;
   /** Page dimensions from persisted layout IR (no block payload). */
   layoutIrPages?: LayoutIrPageSummary[];
+  /** Central document representation from worker `/extract` (persisted separately). */
+  documentRepresentation?: DocumentRepresentationDto;
 }
 
 export interface MappeDto {

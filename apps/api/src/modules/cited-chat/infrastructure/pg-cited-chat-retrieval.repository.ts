@@ -16,6 +16,7 @@ import {
   reciprocalRankFusion,
 } from '../../search/domain/reciprocal-rank-fusion.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
+import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;
@@ -109,27 +110,50 @@ export class PgCitedChatRetrievalRepository {
 
     const queryVector = options?.queryVector;
     if (queryVector && queryVector.length > 0) {
-      const candidateIds = [...fused.keys()];
-      if (candidateIds.length > 0) {
-        const embedRows = await this.pool.query<{ id: string; embedding: unknown; body: string }>(
-          `SELECT c.id, c.embedding, c.body
-           FROM document_text_chunks c
-           JOIN documents d ON d.id = c.document_id
-           WHERE d.user_id = $1 AND c.id = ANY($2::uuid[])`,
-          [userId, candidateIds]
-        );
-        const denseList: RankedItem[] = embedRows.rows
-          .map((row) => {
-            const vec = parseEmbedding(row.embedding);
-            if (!vec) {
-              return null;
-            }
-            const score = cosineSimilarity(queryVector, vec);
-            return { id: row.id, score };
-          })
-          .filter((row): row is { id: string; score: number } => row != null)
-          .sort((a, b) => b.score - a.score)
-          .map((row, i) => ({ id: row.id, rank: i + 1 }));
+      const corpus = await this.pool.query<{
+        id: string;
+        vector_scale: number | null;
+        vector_int8: Buffer | null;
+        binary_code: Buffer | null;
+      }>(
+        `SELECT c.id, c.vector_scale, c.vector_int8, c.binary_code
+         FROM document_text_chunks c
+         JOIN documents d ON d.id = c.document_id
+         WHERE d.user_id = $1
+           AND c.vector_int8 IS NOT NULL
+           ${docFilter}`,
+        [userId, ...docParams]
+      );
+      const queryInt8 = quantizeQueryVector(queryVector);
+      const queryBits = queryInt8.bytes;
+      const queryPacked = Buffer.alloc(48);
+      for (let i = 0; i < queryBits.length; i += 1) {
+        const bit = queryBits.readInt8(i) >= 0 ? 1 : 0;
+        const byteIndex = Math.floor(i / 8);
+        const bitIndex = 7 - (i % 8);
+        queryPacked[byteIndex] |= bit << bitIndex;
+      }
+      const prefiltered = corpus.rows
+        .filter((row) => row.vector_int8 && row.vector_scale != null)
+        .map((row) => ({
+          id: row.id,
+          hamming:
+            row.binary_code != null ? hammingDistance(row.binary_code, queryPacked) : 9999,
+          scale: row.vector_scale as number,
+          bytes: row.vector_int8 as Buffer,
+        }))
+        .sort((a, b) => a.hamming - b.hamming)
+        .slice(0, 256);
+      const candidateIds = new Set([...fused.keys()]);
+      const denseList: RankedItem[] = prefiltered
+        .filter((row) => candidateIds.has(row.id) || prefiltered.length <= 64)
+        .map((row) => ({
+          id: row.id,
+          score: int8Dot(row.scale, row.bytes, queryInt8.scale, queryInt8.bytes),
+        }))
+        .sort((a, b) => b.score - a.score)
+        .map((row, i) => ({ id: row.id, rank: i + 1 }));
+      if (denseList.length > 0) {
         fused = reciprocalRankFusion([ftsList, trgmList, denseList]);
       }
     }

@@ -70,10 +70,10 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
   ): Promise<void> {
     await this.pool.query(
       `INSERT INTO document_embeddings (document_id, model, embedding, updated_at)
-       VALUES ($1, $2, $3::jsonb, now())
+       VALUES ($1, $2, NULL, now())
        ON CONFLICT (document_id) DO UPDATE
-       SET model = $2, embedding = $3::jsonb, updated_at = now()`,
-      [documentId, model, JSON.stringify(embedding)]
+       SET model = $2, embedding = NULL, updated_at = now()`,
+      [documentId, model]
     );
   }
 
@@ -98,11 +98,11 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
     const result = await this.pool.query(
       `SELECT d.id
        FROM documents d
-       LEFT JOIN document_embeddings de ON de.document_id = d.id
+       LEFT JOIN document_representation dr ON dr.document_id = d.id
        WHERE d.user_id = $1
          AND d.status = 'ready'
          AND length(trim(coalesce(d.extracted_text, ''))) >= 20
-         AND de.document_id IS NULL
+         AND dr.document_id IS NULL
        ORDER BY d.updated_at DESC
        LIMIT $2`,
       [userId, limit]
@@ -112,11 +112,15 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
 
   async listDocumentEmbeddingsForUser(userId: string): Promise<UserDocumentEmbeddingRow[]> {
     const result = await this.pool.query(
-      `SELECT de.document_id, de.embedding, d.title, d.filename,
+      `SELECT dr.document_id,
+              dr.document_mean_scale,
+              dr.document_mean_int8,
+              d.title,
+              d.filename,
               COALESCE(array_agg(dt.tag_id) FILTER (WHERE t.is_inbox = false), '{}') AS tag_ids
-       FROM document_embeddings de
-       INNER JOIN documents d ON d.id = de.document_id
-       LEFT JOIN document_tags dt ON dt.document_id = de.document_id
+       FROM document_representation dr
+       INNER JOIN documents d ON d.id = dr.document_id
+       LEFT JOIN document_tags dt ON dt.document_id = dr.document_id
        LEFT JOIN tags t ON t.id = dt.tag_id
        WHERE d.user_id = $1
          AND d.status = 'ready'
@@ -124,18 +128,26 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
            SELECT 1 FROM document_stack_members m
            WHERE m.document_id = d.id AND m.role = 'version'
          )
-       GROUP BY de.document_id, de.embedding, d.title, d.filename, d.updated_at
+       GROUP BY dr.document_id, dr.document_mean_scale, dr.document_mean_int8, d.title, d.filename, d.updated_at
        ORDER BY d.updated_at DESC`,
       [userId]
     );
     return result.rows
       .map((raw) => {
         const row = requireRecord(raw);
+        const scale = parseNumber(row.document_mean_scale, 0);
+        const buffer = row.document_mean_int8;
+        const embedding: number[] = [];
+        if (Buffer.isBuffer(buffer)) {
+          for (let i = 0; i < buffer.length; i += 1) {
+            embedding.push(buffer.readInt8(i) * scale);
+          }
+        }
         return {
           documentId: parseString(row.document_id),
           title: parseString(row.title ?? ''),
           filename: parseString(row.filename ?? ''),
-          embedding: parseVector(row.embedding),
+          embedding,
           nonInboxTagIds: parseStringArray(row.tag_ids),
         };
       })

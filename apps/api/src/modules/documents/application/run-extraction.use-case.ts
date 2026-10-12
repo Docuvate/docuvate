@@ -10,9 +10,13 @@ import {
   type ExtractionPort,
   OBJECT_STORAGE,
   type ObjectStorage,
+  TAXONOMY_REPOSITORY,
+  type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
+import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
+import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 import { ResolveUserExtractorEngineUseCase } from '../../settings/application/settings.use-cases.js';
 
@@ -25,7 +29,10 @@ export class RunExtractionUseCase {
     private readonly postOcrPipeline: RunDocumentPostOcrPipelineUseCase,
     private readonly applyDuplicateDetection: ApplyDuplicateDetectionUseCase,
     private readonly resolveExtractorEngine: ResolveUserExtractorEngineUseCase,
-    private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
+    private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase,
+    private readonly persistRepresentation: PersistDocumentRepresentationUseCase,
+    private readonly densityRepo: PgEmbeddingDensityRepository,
+    @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository
   ) {}
 
   async execute(documentId: string): Promise<void> {
@@ -38,8 +45,19 @@ export class RunExtractionUseCase {
     try {
       const buffer = await this.storage.getObject(doc.storageKey);
       const engine = await this.resolveExtractorEngine.execute(doc.userId);
-      const result = await this.extraction.extract(buffer, doc.mimeType, { engine });
+      const tags = await this.taxonomy.listTags(doc.userId);
+      const tagIds = tags.map((tag) => tag.id);
+      const densityState = await this.densityRepo.loadWorkerState(doc.userId, tagIds);
+      const result = await this.extraction.extract(buffer, doc.mimeType, {
+        engine,
+        embeddingDensityState: densityState ?? undefined,
+      });
       await this.documents.saveExtraction(documentId, result);
+      await this.persistRepresentation.execute(
+        doc.userId,
+        documentId,
+        result.documentRepresentation
+      );
       await this.syncSearchIndex.execute(doc.userId, documentId, {
         text: result.text,
         title: doc.title,

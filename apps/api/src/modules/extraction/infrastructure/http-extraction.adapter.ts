@@ -1,11 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  DocumentRepresentationDto,
   ExtractedField,
   ExtractionResult,
   LayoutIrBlock,
   LayoutIrDocument,
   LayoutIrPage,
+  RepresentationUnitDto,
 } from '@docuvate/contracts';
 import { Injectable } from '@nestjs/common';
 
@@ -118,12 +120,93 @@ function parseWorkerLayoutIr(value: unknown): LayoutIrDocument | undefined {
   return { version: 1, pages };
 }
 
+function parseRepresentationUnit(value: unknown): RepresentationUnitDto | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const unitIndex = Number(value.unitIndex);
+  const kind = parseString(value.kind);
+  const text = parseString(value.text);
+  const vectorScale = Number(value.vectorScale);
+  const vectorInt8Base64 = parseString(value.vectorInt8Base64);
+  const binaryCodeBase64 = parseString(value.binaryCodeBase64);
+  if (
+    !Number.isFinite(unitIndex) ||
+    !kind ||
+    !text ||
+    !Number.isFinite(vectorScale) ||
+    !vectorInt8Base64 ||
+    !binaryCodeBase64
+  ) {
+    return null;
+  }
+  return {
+    unitIndex,
+    kind,
+    text,
+    page: typeof value.page === 'number' ? value.page : null,
+    x: typeof value.x === 'number' ? value.x : null,
+    y: typeof value.y === 'number' ? value.y : null,
+    width: typeof value.width === 'number' ? value.width : null,
+    height: typeof value.height === 'number' ? value.height : null,
+    charStart: typeof value.charStart === 'number' ? value.charStart : null,
+    charEnd: typeof value.charEnd === 'number' ? value.charEnd : null,
+    vectorScale,
+    vectorInt8Base64,
+    binaryCodeBase64,
+  };
+}
+
+function parseDocumentRepresentation(value: unknown): DocumentRepresentationDto | undefined {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+  const encoderId = parseString(value.encoderId);
+  const encoderRevision = parseString(value.encoderRevision);
+  const representationVersion = Number(value.representationVersion);
+  const documentMeanScale = Number(value.documentMeanScale);
+  const documentMeanInt8Base64 = parseString(value.documentMeanInt8Base64);
+  const documentMaxScale = Number(value.documentMaxScale);
+  const documentMaxInt8Base64 = parseString(value.documentMaxInt8Base64);
+  if (
+    !encoderId ||
+    !encoderRevision ||
+    !Number.isFinite(representationVersion) ||
+    !Number.isFinite(documentMeanScale) ||
+    !documentMeanInt8Base64 ||
+    !Number.isFinite(documentMaxScale) ||
+    !documentMaxInt8Base64
+  ) {
+    return undefined;
+  }
+  const units: RepresentationUnitDto[] = [];
+  if (Array.isArray(value.units)) {
+    for (const item of value.units) {
+      const parsed = parseRepresentationUnit(item);
+      if (parsed) {
+        units.push(parsed);
+      }
+    }
+  }
+  return {
+    encoderId,
+    encoderRevision,
+    representationVersion,
+    units,
+    documentMeanScale,
+    documentMeanInt8Base64,
+    documentMaxScale,
+    documentMaxInt8Base64,
+  };
+}
+
 function parseExtractionResultBody(value: unknown): ExtractionResult {
   const row = isRecord(value) ? value : {};
   const text = parseString(row.text);
   const markdown = parseOptionalString(row.markdown)?.trim();
   const layoutIr = parseWorkerLayoutIr(row.layoutIr);
   const fieldSuggestions = parseFieldSuggestions(row.fieldSuggestions);
+  const documentRepresentation = parseDocumentRepresentation(row.documentRepresentation);
   const result: ExtractionResult = {
     text,
     fields: parseExtractedFields(row.fields),
@@ -134,6 +217,9 @@ function parseExtractionResultBody(value: unknown): ExtractionResult {
   }
   if (layoutIr) {
     result.layoutIr = layoutIr;
+  }
+  if (documentRepresentation) {
+    result.documentRepresentation = documentRepresentation;
   }
   return result;
 }
@@ -218,6 +304,7 @@ export class HttpExtractionAdapter implements ExtractionPort {
         mime_type: mimeType,
         content_base64: buffer.toString('base64'),
         engine: options?.engine,
+        embeddingDensityState: options?.embeddingDensityState,
       }),
     });
 

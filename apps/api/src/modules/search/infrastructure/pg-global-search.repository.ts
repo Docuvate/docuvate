@@ -117,7 +117,10 @@ export class PgGlobalSearchRepository {
     userId: string,
     documentId: string,
     chunks: TextChunkSpan[],
-    embeddings?: number[][]  
+    embeddings?: number[][],
+    options?: {
+      int8Vectors?: Array<{ scale: number; bytes: Buffer; binaryCode: Buffer }>;
+    }
   ): Promise<void> {
     const client = await this.pool.connect();
     const lockKey = documentTextChunkIndexLockKey(documentId);
@@ -127,13 +130,24 @@ export class PgGlobalSearchRepository {
       await client.query(`DELETE FROM document_text_chunks WHERE document_id = $1`, [documentId]);
       for (let i = 0; i < chunks.length; i += 1) {
         const chunk = chunks[i];
-        const embeddingJson = embeddings?.[i] != null ? JSON.stringify(embeddings[i]) : null;
+        const int8 = options?.int8Vectors?.[i];
         await client.query(
           `INSERT INTO document_text_chunks (
-             document_id, chunk_index, body, page, char_start, char_end, embedding, updated_at
+             document_id, chunk_index, body, page, char_start, char_end,
+             embedding, vector_scale, vector_int8, binary_code, updated_at
            )
-           VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, now())`,
-          [documentId, i, chunk.body, chunk.page, chunk.charStart, chunk.charEnd, embeddingJson]
+           VALUES ($1, $2, $3, $4, $5, $6, NULL, $7, $8, $9, now())`,
+          [
+            documentId,
+            i,
+            chunk.body,
+            chunk.page,
+            chunk.charStart,
+            chunk.charEnd,
+            int8?.scale ?? null,
+            int8?.bytes ?? null,
+            int8?.binaryCode ?? null,
+          ]
         );
       }
       await client.query('COMMIT');

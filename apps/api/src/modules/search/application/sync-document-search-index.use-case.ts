@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractionBlock } from '@docuvate/contracts';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { EMBEDDING_PORT, type EmbeddingPort } from '../../../shared/domain/ports.js';
+import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import {
   attachPagesToChunks,
-  chunkIndexText,
   splitTextChunksWithSpans,
 } from '../../cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgGlobalSearchRepository } from '../infrastructure/pg-global-search.repository.js';
@@ -23,7 +22,7 @@ export interface SyncDocumentSearchIndexInput {
 export class SyncDocumentSearchIndexUseCase {
   constructor(
     private readonly searchRepo: PgGlobalSearchRepository,
-    @Inject(EMBEDDING_PORT) private readonly embedding: EmbeddingPort
+    private readonly documentRepresentation: PgDocumentRepresentationRepository
   ) {}
 
   async execute(
@@ -33,16 +32,35 @@ export class SyncDocumentSearchIndexUseCase {
   ): Promise<void> {
     const text = input.text.trim();
     if (text.length > 0) {
-      const spans = attachPagesToChunks(splitTextChunksWithSpans(text), input.blocks);
-      let vectors: number[][] | undefined;
-      try {
-        const indexTexts = spans.map((s) => chunkIndexText(input.title, s.body));
-        const result = await this.embedding.embedTexts(indexTexts);
-        vectors = result.embeddings;
-      } catch {
-        vectors = undefined;
+      const units = await this.documentRepresentation.listUnitVectorsForDocument(
+        userId,
+        documentId
+      );
+      if (units.length > 0) {
+        const spans = units.map((unit) => ({
+          body: unit.body,
+          page: unit.page,
+          charStart: unit.charStart ?? 0,
+          charEnd: unit.charEnd ?? unit.body.length,
+        }));
+        const vectors = units.map((unit) => {
+          const vector: number[] = [];
+          for (let i = 0; i < unit.vectorInt8.length; i += 1) {
+            vector.push(unit.vectorInt8.readInt8(i) * unit.vectorScale);
+          }
+          return vector;
+        });
+        await this.searchRepo.indexDocumentChunks(userId, documentId, spans, vectors, {
+          int8Vectors: units.map((unit) => ({
+            scale: unit.vectorScale,
+            bytes: unit.vectorInt8,
+            binaryCode: unit.binaryCode,
+          })),
+        });
+      } else {
+        const spans = attachPagesToChunks(splitTextChunksWithSpans(text), input.blocks);
+        await this.searchRepo.indexDocumentChunks(userId, documentId, spans, undefined);
       }
-      await this.searchRepo.indexDocumentChunks(userId, documentId, spans, vectors);
     }
     await this.searchRepo.upsertVocabularyTerms(userId, input.title, 'document');
     await this.searchRepo.upsertVocabularyTerms(userId, input.filename, 'document');

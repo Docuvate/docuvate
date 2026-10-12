@@ -21,11 +21,14 @@ class ResolvedModel:
 
 def resolve_active_model(family_id: str) -> ResolvedModel:
     """Return env-backed defaults until registry-backed weights are wired."""
-    if family_id == "fastembed-minilm":
+    if family_id in ("fastembed-minilm", "fastembed-e5-small", "document-encoder"):
         return ResolvedModel(
             family_id=family_id,
-            version_tag=os.environ.get("FASTEMBED_MODEL_VERSION", "bootstrap-1"),
-            artifact_uri=os.environ.get("FASTEMBED_MODEL_NAME"),
+            version_tag=os.environ.get(
+                "FASTEMBED_MODEL_VERSION",
+                os.environ.get("DOCUVATE_ENCODER_REVISION", "bootstrap-1"),
+            ),
+            artifact_uri=os.environ.get("FASTEMBED_MODEL_NAME", "intfloat/multilingual-e5-small"),
             source="env",
         )
     if family_id == "paddle-ocr":

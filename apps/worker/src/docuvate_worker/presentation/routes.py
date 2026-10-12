@@ -36,6 +36,7 @@ from docuvate_worker.infrastructure.extractors.label_custom_fields import (
 from docuvate_worker.infrastructure.hardware_capabilities import detect_hardware_capabilities
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.representation_response import document_representation_to_response
 from docuvate_worker.presentation.schemas import (
     CompareEngineResponse,
     CompareRequest,
@@ -190,6 +191,7 @@ def extract(
         layout_unreliable_reason=result.layout_unreliable_reason,
         engine=active,
         cpu_pipeline=cpu_pipeline_to_response(result.cpu_pipeline),
+        document_representation=document_representation_to_response(result.document_representation),
     )
 
 
