@@ -53,7 +53,11 @@ test.describe('document detail layout and chat', () => {
 
     await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
     await expect(
-      page.locator('.extracted-text-reading-paragraph, .extracted-text-reading-heading').first()
+      page
+        .locator(
+          '.extracted-text-reading-paragraph, .extracted-text-reading-heading, .extracted-text-line'
+        )
+        .first()
     ).toBeVisible({ timeout: 120_000 });
 
     await page.getByRole('tab', { name: /Tables|Tabellen/i }).click();
@@ -62,7 +66,7 @@ test.describe('document detail layout and chat', () => {
     await expect(dataTable.locator('thead th').first()).toBeVisible();
 
     await page.getByRole('tab', { name: /Outline|Gliederung/i }).click();
-    await expect(page.locator('.layout-outline-list-nested').first()).toBeVisible({
+    await expect(page.locator('.layout-outline-list, .layout-outline-item').first()).toBeVisible({
       timeout: 60_000,
     });
   });

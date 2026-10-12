@@ -49,7 +49,10 @@ export function resolveDocumentChatProvider(
   userPreference?: string | null
 ): DocumentChatProviderId {
   const fromUser = normalizeProvider(userPreference);
-  if (fromUser && fromUser !== 'off') {
+  if (fromUser === 'off') {
+    return 'off';
+  }
+  if (fromUser) {
     return fromUser;
   }
 

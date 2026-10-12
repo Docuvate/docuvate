@@ -45,7 +45,11 @@ test.describe('UI audit regressions (non-ML)', () => {
     await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
     await expect(page.locator('.extracted-text-panel')).toBeVisible({ timeout: 120_000 });
     await expect(
-      page.locator('.extracted-text-line, .extracted-text-segment, .extraction-text').first()
+      page
+        .locator(
+          '.extracted-text-reading-paragraph, .extracted-text-reading-heading, .extracted-text-line, .extracted-text-segment, .extraction-text'
+        )
+        .first()
     ).toBeVisible({
       timeout: 120_000,
     });

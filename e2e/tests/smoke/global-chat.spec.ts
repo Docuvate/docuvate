@@ -22,9 +22,9 @@ test.describe('global chat navigation', () => {
     await page.getByRole('button', { name: /Umbenennen|Rename/i }).first().click();
     await page.getByLabel(/Titel der Unterhaltung|Conversation title/i).fill('E2E Thread Beta');
     await page.getByRole('button', { name: /Speichern|Save/i }).click();
-    await expect(page.getByRole('button', { name: /E2E Thread Beta/i })).toBeVisible();
+    await expect(page.locator('.doc-chat-thread-title', { hasText: 'E2E Thread Beta' })).toBeVisible();
     await page.getByRole('button', { name: /Löschen|Delete/i }).first().click();
-    await expect(page.getByRole('button', { name: /E2E Thread Beta/i })).toHaveCount(0);
+    await expect(page.locator('.doc-chat-thread-title', { hasText: 'E2E Thread Beta' })).toHaveCount(0);
     await request.delete(`${apiBase}/v1/chat/threads/${thread.id}`, {
       headers: { origin: webOrigin },
     }).catch(() => undefined);
