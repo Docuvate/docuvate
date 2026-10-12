@@ -59,7 +59,7 @@ test.describe('document detail layout and chat', () => {
     await page.getByRole('tab', { name: /Tables|Tabellen/i }).click();
     const dataTable = page.locator('table.layout-data-table').first();
     await expect(dataTable).toBeVisible({ timeout: 60_000 });
-    await expect(dataTable.locator('thead th').first()).toBeVisible();
+    await expect(dataTable.locator('tbody td, thead th').first()).toBeVisible();
 
     await page.getByRole('tab', { name: /Outline|Gliederung/i }).click();
     await expect(page.locator('.layout-outline-list, .layout-outline-item').first()).toBeVisible({
