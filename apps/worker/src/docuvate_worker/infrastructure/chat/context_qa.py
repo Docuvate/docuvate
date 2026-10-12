@@ -521,16 +521,27 @@ def extractive_answer_from_passages(
     trimmed = question.strip()
     if not trimmed or not passages:
         return None
+    bodies: list[str] = []
+    passage_ids: list[str] = []
     for passage_id, text in passages:
         body = text.strip()
         if not body:
             continue
-        sentence = _sentence_from_context(trimmed, body)
-        if sentence:
-            quote = sentence.strip()
-            return ExtractivePassageAnswer(
-                passage_id=passage_id,
-                answer=quote if quote.endswith((".", "!", "?")) else f"{quote}.",
-                quote=quote,
-            )
-    return None
+        bodies.append(body)
+        passage_ids.append(passage_id)
+    if not bodies:
+        return None
+    sentence = _best_sentence_across_chunks(trimmed, bodies)
+    if not sentence:
+        return None
+    passage_id = passage_ids[0]
+    for idx, body in enumerate(bodies):
+        if sentence in body or sentence in _candidate_lines(body):
+            passage_id = passage_ids[idx]
+            break
+    quote = sentence.strip()
+    return ExtractivePassageAnswer(
+        passage_id=passage_id,
+        answer=quote if quote.endswith((".", "!", "?")) else f"{quote}.",
+        quote=quote,
+    )

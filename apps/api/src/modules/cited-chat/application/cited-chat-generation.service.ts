@@ -255,7 +255,9 @@ export class CitedChatGenerationService {
         ? ragRerankerGateThreshold()
         : ragFusionGateThreshold();
     const extractivePool =
-      scope === 'library' ? libraryExtractiveRows(top) : top.slice(0, RAG_RERANK_TOP_K);
+      scope === 'library'
+        ? libraryExtractiveRows(top, retrievalQuery)
+        : top.slice(0, RAG_RERANK_TOP_K);
     const extractive =
       extractivePool.length > 0
         ? await this.resolveExtractiveAnswer(retrievalQuery, extractivePool, extractiveMinScore)
