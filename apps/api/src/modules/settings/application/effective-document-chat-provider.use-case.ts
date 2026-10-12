@@ -115,7 +115,7 @@ export class EffectiveDocumentChatProviderUseCase {
       preferred,
       effective,
       customerEffective,
-      documentChatUiEnabled: true,
+      documentChatUiEnabled: customerEffective !== 'off',
       documentChatAvailable,
       documentChatReadiness,
       documentChatReadinessReason,

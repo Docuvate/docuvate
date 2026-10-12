@@ -31,6 +31,8 @@ interface DocumentChatPanelProps {
   documentId: string;
   compact?: boolean;
   chatAvailable?: boolean;
+  /** False when user turned chat off in settings (distinct from provider unavailable). */
+  chatUiEnabled?: boolean;
 }
 
 function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string {
@@ -65,6 +67,7 @@ export function DocumentChatPanel({
   documentId,
   compact = false,
   chatAvailable = false,
+  chatUiEnabled = true,
 }: DocumentChatPanelProps) {
   const { t, i18n } = useTranslation();
   const [threads, setThreads] = useState<DocumentChatThreadDto[]>([]);
@@ -143,6 +146,13 @@ export function DocumentChatPanel({
   }, [chatAvailable]);
 
   useEffect(() => {
+    if (!chatUiEnabled) {
+      setThreads([]);
+      setActiveThreadId(null);
+      setMessages([]);
+      setLoadingThreads(false);
+      return undefined;
+    }
     let active = true;
     setLoadingThreads(true);
     setError(null);
@@ -165,7 +175,7 @@ export function DocumentChatPanel({
     return () => {
       active = false;
     };
-  }, [documentId, t]);
+  }, [chatUiEnabled, documentId, t]);
 
   useEffect(() => {
     if (!activeThreadId) {
@@ -326,7 +336,8 @@ export function DocumentChatPanel({
     !generationInProgress &&
     activeThreadId != null;
   const panelBusy = loadingThreads || loadingMessages;
-  const interactionBlocked = !chatAvailable;
+  const interactionBlocked = !chatUiEnabled || !chatAvailable;
+  const blockedBySettings = !chatUiEnabled;
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
   const inputPlaceholder = hasThreads
     ? t('documents.documentChat.inputPlaceholder')
@@ -431,18 +442,24 @@ export function DocumentChatPanel({
             {interactionBlocked ? (
               <div className="doc-chat-disabled-overlay" role="status">
                 <h3 className="doc-chat-disabled-title">
-                  {t('documents.documentChat.disabledOverlayTitle')}
+                  {blockedBySettings
+                    ? t('documents.documentChat.disabledSettingsTitle')
+                    : t('documents.documentChat.disabledOverlayTitle')}
                 </h3>
                 <p className="muted doc-chat-disabled-lead">
-                  {t('documents.documentChat.disabledOverlayBody')}
+                  {blockedBySettings
+                    ? t('documents.documentChat.disabledSettingsBody')
+                    : t('documents.documentChat.disabledOverlayBody')}
                 </p>
                 <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
                   {t('documents.documentChat.disabledOverlaySettings')}
                 </Link>
-                <details className="doc-chat-admin-details">
-                  <summary>{t('documents.documentChat.disabledOverlayAdminSummary')}</summary>
-                  <p className="muted">{t('documents.documentChat.disabledOverlayAdminBody')}</p>
-                </details>
+                {!blockedBySettings ? (
+                  <details className="doc-chat-admin-details">
+                    <summary>{t('documents.documentChat.disabledOverlayAdminSummary')}</summary>
+                    <p className="muted">{t('documents.documentChat.disabledOverlayAdminBody')}</p>
+                  </details>
+                ) : null}
               </div>
             ) : null}
             <div className="doc-chat-messages" aria-hidden={interactionBlocked}>

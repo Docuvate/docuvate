@@ -3,6 +3,7 @@
 import type { ChatMessageCitationDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ReactMarkdown from 'react-markdown';
 
 import { formatChatGenerationError, toUserFacingChatGenerationError } from '../../lib/apiErrors';
 import { CHAT_GENERATION_MAX_WAIT_SEC } from '../../lib/chatGenerationLimits';
@@ -136,11 +137,11 @@ export function DocumentChatAssistantMessage({
       ) : null}
 
       {displayContent ? (
-        <p
-          className={`doc-chat-assistant-content${isActive ? ' doc-chat-assistant-content-streaming' : ''}`}
+        <div
+          className={`doc-chat-assistant-content doc-chat-assistant-markdown${isActive ? ' doc-chat-assistant-content-streaming' : ''}`}
         >
-          {displayContent}
-        </p>
+          <ReactMarkdown>{displayContent}</ReactMarkdown>
+        </div>
       ) : null}
 
       {message.citations && message.citations.length > 0 ? (

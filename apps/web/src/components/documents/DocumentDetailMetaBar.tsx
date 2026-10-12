@@ -19,16 +19,18 @@ export function DocumentDetailTabStrip({
   activeTab,
   labelCount,
   onTabChange,
+  showChatTab = true,
 }: {
   activeTab: DetailTab | null;
   labelCount: number;
   onTabChange: (tab: DetailTab | null) => void;
+  showChatTab?: boolean;
 }) {
   const { t } = useTranslation();
   const tabs: [DetailTab, string][] = [
     ['details', t('documents.tabDetails')],
     ['labels', t('documents.tabLabels')],
-    ['chat', t('documents.tabChat')],
+    ...(showChatTab ? [['chat', t('documents.tabChat')] as [DetailTab, string]] : []),
   ];
 
   return (
@@ -44,7 +46,9 @@ export function DocumentDetailTabStrip({
         >
           {label}
           {tab === 'labels' && labelCount > 0 ? (
-            <span className="document-detail-tab-count">{labelCount}</span>
+            <span className="document-detail-tab-count" aria-label={`(${String(labelCount)})`}>
+              {' '}({labelCount})
+            </span>
           ) : null}
         </button>
       ))}

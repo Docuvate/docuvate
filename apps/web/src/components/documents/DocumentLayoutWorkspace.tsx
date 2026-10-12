@@ -56,6 +56,7 @@ interface DocumentLayoutWorkspaceProps {
   onTextEditOpenChange: (open: boolean) => void;
   chatSidePanel?: boolean;
   documentChatAvailable?: boolean;
+  documentChatUiEnabled?: boolean;
 }
 
 export function DocumentLayoutWorkspace({
@@ -87,6 +88,7 @@ export function DocumentLayoutWorkspace({
   onTextEditOpenChange,
   chatSidePanel = false,
   documentChatAvailable = false,
+  documentChatUiEnabled = true,
 }: DocumentLayoutWorkspaceProps) {
   const { t } = useTranslation();
   const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;
@@ -393,6 +395,7 @@ export function DocumentLayoutWorkspace({
             documentId={doc.id}
             compact
             chatAvailable={documentChatAvailable}
+            chatUiEnabled={documentChatUiEnabled}
           />
         </aside>
       ) : layoutIr ? (

@@ -646,6 +646,8 @@
       "serviceNoticeBody": "AI replies aren’t available right now. Your questions stay in this history. please try again later.",
       "serviceNoticeSettings": "Document chat in Settings",
       "disabledOverlayTitle": "Document chat not configured",
+      "disabledSettingsTitle": "Chat is turned off",
+      "disabledSettingsBody": "You turned off document chat in Settings. Turn it back on there if you want to ask questions about your documents.",
       "disabledOverlayBody": "Document chat is not available on this system yet. An administrator can set it up in Settings.",
       "disabledOverlaySettings": "Open settings",
       "disabledOverlayAdminSummary": "Notes for administrators",

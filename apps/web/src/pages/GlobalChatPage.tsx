@@ -13,6 +13,7 @@ import { Spinner } from '../components/ui/Spinner';
 import {
   cancelLibraryChatMessage,
   createLibraryChatThread,
+  getUserSettings,
   listLibraryChatThreadMessages,
   listLibraryChatThreads,
   retryLibraryChatMessage,
@@ -48,6 +49,7 @@ export function GlobalChatPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryBusy, setRetryBusy] = useState(false);
+  const [chatUiEnabled, setChatUiEnabled] = useState(true);
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const streamTargetRef = useRef<string | null>(null);
 
@@ -105,6 +107,23 @@ export function GlobalChatPage() {
   );
 
   useEffect(() => {
+    void getUserSettings()
+      .then((settings) => {
+        setChatUiEnabled(settings.documentChatUiEnabled !== false);
+      })
+      .catch(() => {
+        setChatUiEnabled(true);
+      });
+  }, []);
+
+  useEffect(() => {
+    if (!chatUiEnabled) {
+      setThreads([]);
+      setActiveThreadId(null);
+      setMessages([]);
+      setLoadingThreads(false);
+      return undefined;
+    }
     let cancelled = false;
     setLoadingThreads(true);
     void listLibraryChatThreads()
@@ -123,7 +142,7 @@ export function GlobalChatPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [chatUiEnabled]);
 
   useEffect(() => {
     if (!activeThreadId) {
@@ -153,16 +172,6 @@ export function GlobalChatPage() {
       stopStream();
     };
   }, [activeThreadId, attachStreamIfNeeded, stopStream]);
-
-  useEffect(() => {
-    if (!generationInProgress) {
-      return undefined;
-    }
-    const id = setInterval(() => {
-      void refreshThreads(activeThreadId ?? undefined);
-    }, 2500);
-    return () => { clearInterval(id); };
-  }, [generationInProgress, refreshThreads, activeThreadId]);
 
   useEffect(() => {
     if (!generationInProgress && activeThreadId) {
@@ -251,8 +260,18 @@ export function GlobalChatPage() {
       ) : null}
 
       <section className="doc-chat global-chat-doc-chat" aria-labelledby="global-chat-heading">
+        {!chatUiEnabled ? (
+          <div className="doc-chat-disabled-overlay global-chat-disabled" role="status">
+            <h2 className="doc-chat-disabled-title">{t('documents.documentChat.disabledSettingsTitle')}</h2>
+            <p className="muted">{t('documents.documentChat.disabledSettingsBody')}</p>
+            <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
+              {t('documents.documentChat.disabledOverlaySettings')}
+            </Link>
+          </div>
+        ) : null}
         <div
-          className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}${stacked && hasThreads ? ' doc-chat-layout-stacked' : ''}${stacked && threadsOpen ? ' doc-chat-threads-visible' : ''}`}
+          className={`doc-chat-layout${hasThreads ? ' doc-chat-layout-split' : ' doc-chat-layout-bootstrap'}${stacked && hasThreads ? ' doc-chat-layout-stacked' : ''}${stacked && threadsOpen ? ' doc-chat-threads-visible' : ''}${!chatUiEnabled ? ' doc-chat-layout-disabled' : ''}`}
+          aria-hidden={!chatUiEnabled}
         >
           {stacked && hasThreads ? (
             <div className="doc-chat-threads-toolbar">
@@ -433,13 +452,15 @@ export function GlobalChatPage() {
                   value={input}
                   onChange={(e) => { setInput(e.target.value); }}
                   placeholder={t('globalChat.placeholder')}
-                  disabled={generationInProgress || loadingMessages}
+                  disabled={!chatUiEnabled || generationInProgress || loadingMessages}
                   aria-label={t('globalChat.placeholder')}
                 />
                 <Button
                   type="submit"
                   className="doc-chat-submit"
-                  disabled={generationInProgress || loadingMessages || !input.trim()}
+                  disabled={
+                    !chatUiEnabled || generationInProgress || loadingMessages || !input.trim()
+                  }
                   aria-busy={generationInProgress}
                 >
                   {generationInProgress ? (

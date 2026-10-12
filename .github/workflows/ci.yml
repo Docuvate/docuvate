@@ -77,6 +77,8 @@ jobs:
         run: node scripts/license/check-spdx-headers.mjs
       - name: Runtime pins match .tool-versions
         run: node scripts/ci/check-tool-versions.mjs
+      - name: Worker compose restart and memory bound
+        run: bash scripts/ci/check-docker-compose-worker-restart.sh
       - name: Tool-versions drift guard tests
         run: node --test scripts/ci/check-tool-versions.test.mjs
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0

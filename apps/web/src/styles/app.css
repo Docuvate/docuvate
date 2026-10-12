@@ -3455,7 +3455,37 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 
 .doc-chat-assistant-content {
   margin: 0;
-  white-space: pre-wrap;
+}
+
+.doc-chat-assistant-markdown {
+  font-size: inherit;
+  line-height: 1.45;
+}
+
+.doc-chat-assistant-markdown p {
+  margin: 0 0 0.5em;
+}
+
+.doc-chat-assistant-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.doc-chat-assistant-markdown ul,
+.doc-chat-assistant-markdown ol {
+  margin: 0.25em 0 0.5em 1.1em;
+  padding: 0;
+}
+
+.doc-chat-assistant-markdown table {
+  border-collapse: collapse;
+  font-size: 0.9em;
+  margin: 0.35em 0;
+}
+
+.doc-chat-assistant-markdown th,
+.doc-chat-assistant-markdown td {
+  border: 1px solid var(--dv-color-border, #ccc);
+  padding: 0.2em 0.45em;
 }
 
 .doc-chat-error {

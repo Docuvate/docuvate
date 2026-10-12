@@ -41,7 +41,43 @@ export function splitTextChunksWithSpans(text: string): TextChunkSpan[] {
   return chunks;
 }
 
-/** Map normalized char offsets to a page using extraction blocks (best effort). */
+function pageForChunkFromBlocks(chunkBody: string, blocks: ExtractionBlock[]): number {
+  const chunkNorm = chunkBody.toLowerCase();
+  const probe = chunkNorm.slice(0, Math.min(64, chunkNorm.length)).trim();
+  if (!probe) {
+    return blocks[0]?.page ?? 1;
+  }
+  let bestPage = blocks[0]?.page ?? 1;
+  let bestScore = 0;
+  for (const block of blocks) {
+    const piece = normalizeDocumentText(block.text);
+    if (piece.length < 3) {
+      continue;
+    }
+    const pieceNorm = piece.toLowerCase();
+    const key = pieceNorm.slice(0, Math.min(48, pieceNorm.length));
+    let score = 0;
+    if (chunkNorm.includes(key)) {
+      score = key.length;
+    } else if (key.includes(probe.slice(0, Math.min(32, probe.length)))) {
+      score = probe.length;
+    } else {
+      const words = probe.split(/\s+/).filter((w) => w.length >= 4);
+      for (const word of words) {
+        if (pieceNorm.includes(word)) {
+          score += word.length;
+        }
+      }
+    }
+    if (score > bestScore) {
+      bestScore = score;
+      bestPage = block.page;
+    }
+  }
+  return bestPage;
+}
+
+/** Map chunks to pages using extraction blocks (overlap match; offsets alone often drift from full text). */
 export function attachPagesToChunks(
   chunks: TextChunkSpan[],
   blocks: ExtractionBlock[] | undefined
@@ -55,24 +91,10 @@ export function attachPagesToChunks(
     }
     return (a.blockIndex ?? 0) - (b.blockIndex ?? 0);
   });
-  let cursor = 0;
-  const blockRanges: { page: number; start: number; end: number }[] = [];
-  for (const block of ordered) {
-    const piece = normalizeDocumentText(block.text);
-    if (!piece) {
-      continue;
-    }
-    const start = cursor;
-    const end = start + piece.length;
-    blockRanges.push({ page: block.page, start, end });
-    cursor = end + 1;
-  }
-  return chunks.map((chunk) => {
-    const mid = chunk.charStart + Math.floor((chunk.charEnd - chunk.charStart) / 2);
-    const hit = blockRanges.find((r) => mid >= r.start && mid < r.end);
-    const fallbackPage = blockRanges.length > 0 ? blockRanges[0].page : 1;
-    return { ...chunk, page: hit ? hit.page : fallbackPage };
-  });
+  return chunks.map((chunk) => ({
+    ...chunk,
+    page: pageForChunkFromBlocks(chunk.body, ordered),
+  }));
 }
 
 export function chunkIndexText(title: string, body: string): string {

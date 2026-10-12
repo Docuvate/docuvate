@@ -646,6 +646,8 @@
       "serviceNoticeBody": "KI-Antworten sind gerade nicht verfügbar. Ihre Fragen bleiben im Verlauf gespeichert. Bitte später erneut versuchen.",
       "serviceNoticeSettings": "Dokument-Chat in Einstellungen",
       "disabledOverlayTitle": "Dokument-Chat nicht eingerichtet",
+      "disabledSettingsTitle": "Chat ist ausgeschaltet",
+      "disabledSettingsBody": "Sie haben den Dokument-Chat in den Einstellungen deaktiviert. Aktivieren Sie ihn dort wieder, wenn Sie Fragen zu Dokumenten stellen möchten.",
       "disabledOverlayBody": "Der Dokument-Chat ist auf diesem System noch nicht verfügbar. Ein Administrator kann ihn in den Einstellungen einrichten.",
       "disabledOverlaySettings": "Einstellungen öffnen",
       "disabledOverlayAdminSummary": "Hinweise für Administratoren",

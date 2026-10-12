@@ -126,6 +126,7 @@ export function DocumentDetailPage() {
   const [folderId, setFolderId] = useState('');
   const [requeueBusy, setRequeueBusy] = useState(false);
   const [documentChatAvailable, setDocumentChatAvailable] = useState(false);
+  const [documentChatUiEnabled, setDocumentChatUiEnabled] = useState(true);
   const [fieldFeedbackRecorded, setFieldFeedbackRecorded] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -211,6 +212,7 @@ export function DocumentDetailPage() {
         setGlobalFieldLabels(buildGlobalFieldLabelMap(recognized));
         setFolders(f);
         setDocumentChatAvailable(settings.documentChatAvailable === true);
+        setDocumentChatUiEnabled(settings.documentChatUiEnabled !== false);
       })
       .catch((err: unknown) => {
         if (active) setError(formatUserFacingError(err, 'errors.loadFailed'));
@@ -479,6 +481,7 @@ export function DocumentDetailPage() {
         <DocumentDetailTabStrip
           activeTab={activeTab}
           labelCount={doc.tags.length}
+          showChatTab={documentChatUiEnabled}
           onTabChange={setActiveTab}
         />
         {activeTab === 'details' ? (
@@ -530,28 +533,27 @@ export function DocumentDetailPage() {
           </div>
         ) : null}
 
-        {layoutWorkspace && activeTab !== 'details' && activeTab !== 'labels' ? (
-          <div
-            className="detail-tab-panel-surface detail-tab-panel-surface--workspace-spacer"
-            aria-hidden="true"
-          />
-        ) : null}
-
         {activeTab === 'chat' && !layoutWorkspace ? (
           <div
             className="detail-tab-panel-surface"
             role="tabpanel"
             aria-label={t('documents.tabChat')}
           >
-            <DocumentChatPanel documentId={doc.id} compact chatAvailable={documentChatAvailable} />
+            <DocumentChatPanel
+              documentId={doc.id}
+              compact
+              chatAvailable={documentChatAvailable}
+              chatUiEnabled={documentChatUiEnabled}
+            />
           </div>
         ) : null}
       </div>
 
       {layoutWorkspace ? (
         <DocumentLayoutWorkspace
-          chatSidePanel={activeTab === 'chat'}
+          chatSidePanel={activeTab === 'chat' && documentChatUiEnabled}
           documentChatAvailable={documentChatAvailable}
+          documentChatUiEnabled={documentChatUiEnabled}
           doc={doc}
           previewData={previewData}
           previewLoading={previewLoading}
