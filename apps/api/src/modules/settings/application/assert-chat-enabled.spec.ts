@@ -2,12 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { ConflictError } from '../../../shared/domain/errors.js';
+import { ForbiddenError } from '../../../shared/domain/errors.js';
 import { assertChatEnabled } from './assert-chat-enabled.js';
 
 describe('assertChatEnabled', () => {
-  it('throws ConflictError when chat is off', () => {
-    expect(() => { assertChatEnabled('off'); }).toThrow(ConflictError);
+  it('throws ForbiddenError when chat is off', () => {
+    expect(() => { assertChatEnabled('off'); }).toThrow(ForbiddenError);
   });
 
   it('allows rag-ollama', () => {

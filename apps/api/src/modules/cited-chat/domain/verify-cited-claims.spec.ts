@@ -28,6 +28,26 @@ describe('verifyCitedClaims', () => {
     expect(normalizeCitedSourceLabel('2', labels)).toBe('S2');
   });
 
+  it('rejects chunk-dump claims that echo long passages', () => {
+    const body = 'Die Miete ist bis zum 3. Werktag des Monats fällig.';
+    const top = [chunk(body)];
+    const labelByChunk = new Map([[top[0].chunk.chunkId, 'S1']]);
+    const junk = 'Randnotiz '.repeat(30);
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: `${junk} bis zum 3. Werktag ${junk}`,
+          source: 'S1',
+          quote: 'bis zum 3. Werktag',
+        },
+      ],
+      top,
+      labelByChunk,
+    });
+    expect(verified).toHaveLength(0);
+    expect(rejected[0]?.reason).toBe('claim_is_chunk_dump');
+  });
+
   it('verifies quote with fuzzy re-anchor when model shortens quote', () => {
     const body = 'Die Miete ist bis zum 3. Werktag des Monats fällig.';
     const top = [chunk(body)];

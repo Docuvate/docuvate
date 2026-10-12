@@ -137,6 +137,11 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
         const url = requestUrl(input);
+        if (url.includes('/v1/rag/extractive-answer')) {
+          return Promise.resolve(
+            new Response(JSON.stringify({}), { status: 200 })
+          );
+        }
         if (url.includes('/v1/rag/retrieve')) {
           const body = parseRequestJsonRecord(init);
           const passageIds = readPassageIds(body);
@@ -170,7 +175,38 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
     );
   }
 
-  it('composes prose from chunk-like LLM text and resolves citation page from blocks', async () => {
+  it('streams LLM prose and resolves citation page from blocks', async () => {
+    mockRerankAndOllama([
+      {
+        text: 'Der Jahresüberschuss beträgt 26.870,52 EUR.',
+        source: 'S1',
+        quote: '26.870,52',
+      },
+    ]);
+
+    const thread = await threads.createThread(userId, [docId], { scope: 'document' });
+    const assistant = await threads.appendMessage(thread.id, 'assistant', '', {
+      generationStatus: 'pending',
+      generationPhase: 'retrieving',
+    });
+
+    const result = await service.generate({
+      messageId: assistant.id,
+      threadId: thread.id,
+      userId,
+      userMessage: 'Wie hoch ist der Jahresüberschuss?',
+      documentIds: [docId],
+      scope: 'document',
+      locale: 'de',
+    });
+
+    expect(result.abstained).toBe(false);
+    expect(result.content).toContain('26.870,52');
+    const listed = await citationsRepo.listForMessage(assistant.id);
+    expect(listed[0]?.page).toBe(7);
+  });
+
+  it('abstains when the LLM returns a chunk dump claim', async () => {
     const junk =
       'Deckblatt und OCR Randnotiz Randnotiz Randnotiz Randnotiz Randnotiz Randnotiz Randnotiz Randnotiz Randnotiz Randnotiz Randnotiz';
     mockRerankAndOllama([
@@ -197,12 +233,7 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
       locale: 'de',
     });
 
-    expect(result.abstained).toBe(false);
-    expect(result.content).toContain('26.870,52');
-    expect(result.content).not.toContain('Randnotiz');
-    expect(result.content.length).toBeLessThan(80);
-
-    const listed = await citationsRepo.listForMessage(assistant.id);
-    expect(listed[0]?.page).toBe(7);
+    expect(result.abstained).toBe(true);
+    expect(result.content).toContain('nichts gefunden');
   });
 });

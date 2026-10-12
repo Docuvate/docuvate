@@ -19,7 +19,6 @@ import {
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
-import { composeCitedClaimText } from '../domain/compose-cited-claim-text.js';
 import { tryExtractiveCitedAnswer } from '../domain/cited-chat-extractive-answer.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
@@ -32,9 +31,13 @@ import {
   normalizeCitedSourceLabel,
   verifyCitedClaims,
 } from '../domain/verify-cited-claims.js';
+import { fetchWorkerExtractiveAnswer } from '../infrastructure/fetch-worker-extractive-answer.js';
 import { fetchWorkerRagRerank } from '../infrastructure/fetch-worker-rag-rerank.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
-import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import {
+  type CitedChatChunkCandidate,
+  PgCitedChatRetrievalRepository,
+} from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import {
   buildCitedChatSystemPrompt,
   requestCitedAnswerFromOllama,
@@ -43,18 +46,6 @@ import { ChatQueryRouterService } from './chat-query-router.service.js';
 
 const CONTENT_FLUSH_MS = 250;
 const GENERATION_HEARTBEAT_MS = 15_000;
-
-function formatComposedCitedContent(
-  verified: { text: string; ordinal: number; quote: string }[],
-  question: string
-): string {
-  return formatVerifiedCitedContent(
-    verified.map((row) => ({
-      ordinal: row.ordinal,
-      text: composeCitedClaimText(row.text, row.quote, { question }),
-    }))
-  );
-}
 
 export interface CitedChatGenerationInput {
   messageId: string;
@@ -262,13 +253,13 @@ export class CitedChatGenerationService {
 
     const extractiveMinScore =
       rerank.reachable && rerank.rerankerUsed
-        ? 0.12
+        ? ragRerankerGateThreshold()
         : ragFusionGateThreshold();
     const extractivePool =
       scope === 'library' ? libraryExtractiveRows(top) : top.slice(0, RAG_RERANK_TOP_K);
     const extractive =
       extractivePool.length > 0
-        ? tryExtractiveCitedAnswer(retrievalQuery, extractivePool, extractiveMinScore)
+        ? await this.resolveExtractiveAnswer(retrievalQuery, extractivePool, extractiveMinScore)
         : null;
 
     if (!gateOk) {
@@ -284,10 +275,9 @@ export class CitedChatGenerationService {
             charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
           },
         ]);
-        const content = formatComposedCitedContent(
-          [{ text: extractive.text, ordinal: 1, quote: extractive.quote }],
-          retrievalQuery
-        );
+        const content = formatVerifiedCitedContent([
+          { text: extractive.text, ordinal: 1 },
+        ]);
         await this.threads.updateMessageGeneration(messageId, {
           content,
           generationStatus: 'done',
@@ -327,10 +317,7 @@ export class CitedChatGenerationService {
         await this.citationsRepo.replaceCitations(messageId, []);
       }
       const content = extractiveChunkIsUuid
-        ? formatComposedCitedContent(
-            [{ text: extractive.text, ordinal: 1, quote: extractive.quote }],
-            retrievalQuery
-          )
+        ? formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }])
         : extractive.text;
       await this.threads.updateMessageGeneration(messageId, {
         content,
@@ -409,9 +396,7 @@ export class CitedChatGenerationService {
           }
           const streamOrdinal = streamedVerified.length + 1;
           streamedVerified.push({
-            text: composeCitedClaimText(verified[0].text, verified[0].quote, {
-              question: retrievalQuery,
-            }),
+            text: verified[0].text,
             ordinal: streamOrdinal,
           });
         }
@@ -546,9 +531,8 @@ export class CitedChatGenerationService {
       }))
     );
 
-    const content = formatComposedCitedContent(
-      verified.map((v) => ({ text: v.text, ordinal: v.ordinal, quote: v.quote })),
-      retrievalQuery
+    const content = formatVerifiedCitedContent(
+      verified.map((v) => ({ text: v.text, ordinal: v.ordinal }))
     );
 
     if (citedChatBenchStatsEnabled() && rejected.length > 0) {
@@ -566,6 +550,28 @@ export class CitedChatGenerationService {
     });
     await this.threads.touchThread(threadId);
     return { content, abstained: false };
+  }
+
+  private async resolveExtractiveAnswer(
+    query: string,
+    ranked: { chunk: CitedChatChunkCandidate; score: number }[],
+    minScore: number
+  ): Promise<{ text: string; chunk: CitedChatChunkCandidate; quote: string } | null> {
+    if (ranked.length === 0 || ranked[0].score < minScore) {
+      return null;
+    }
+    const passages = ranked.map((row) => ({
+      id: row.chunk.chunkId,
+      text: this.retrieval.indexPassageForRerank(row.chunk),
+    }));
+    const worker = await fetchWorkerExtractiveAnswer(query, passages);
+    if (worker.reachable && worker.passageId && worker.answer) {
+      const match = ranked.find((row) => row.chunk.chunkId === worker.passageId);
+      const chunk = match?.chunk ?? ranked[0].chunk;
+      const quote = worker.quote?.trim() || worker.answer.trim();
+      return { text: worker.answer.trim(), chunk, quote };
+    }
+    return tryExtractiveCitedAnswer(query, ranked, minScore);
   }
 
   private async failGeneration(

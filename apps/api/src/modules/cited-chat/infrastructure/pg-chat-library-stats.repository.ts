@@ -98,7 +98,7 @@ export class PgChatLibraryStatsRepository {
         }
         return {
           count: await this.countDocuments(userId, { tagId: labelTagId }),
-          documents: [],
+          documents: await this.listDocumentsByTag(userId, labelTagId, 20),
         };
       case 'list_by_label':
         if (!labelTagId) {

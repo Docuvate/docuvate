@@ -120,6 +120,9 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
         const url = requestUrl(input);
+        if (url.includes('/v1/rag/extractive-answer')) {
+          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
+        }
         if (url.includes('/v1/rag/retrieve')) {
           const body = parseRequestJsonRecord(init);
           const passageIds = readPassageIds(body);
@@ -219,6 +222,9 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       'fetch',
       vi.fn((input: RequestInfo | URL) => {
         const url = requestUrl(input);
+        if (url.includes('/v1/rag/extractive-answer')) {
+          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
+        }
         if (url.includes('/v1/rag/retrieve')) {
           return Promise.resolve(
             new Response(
@@ -326,6 +332,9 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
         const url = requestUrl(input);
+        if (url.includes('/v1/rag/extractive-answer')) {
+          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
+        }
         if (url.includes('/v1/rag/retrieve')) {
           const body = parseRequestJsonRecord(init);
           const passageIds = readPassageIds(body);

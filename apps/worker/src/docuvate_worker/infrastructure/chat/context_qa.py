@@ -503,3 +503,33 @@ def answer_from_document_context(
     if field_answer:
         return field_answer
     return EXTRACTIVE_ABSTAIN_NO_MATCH + "."
+
+
+@dataclass(frozen=True)
+class ExtractivePassageAnswer:
+    passage_id: str
+    answer: str
+    quote: str
+
+
+def extractive_answer_from_passages(
+    question: str,
+    passages: list[tuple[str, str]],
+) -> ExtractivePassageAnswer | None:
+    """Reader-first answer from pre-ranked API passages (section-level chunk bodies)."""
+    trimmed = question.strip()
+    if not trimmed or not passages:
+        return None
+    for passage_id, text in passages:
+        body = text.strip()
+        if not body:
+            continue
+        sentence = _sentence_from_context(trimmed, body)
+        if sentence:
+            quote = sentence.strip()
+            return ExtractivePassageAnswer(
+                passage_id=passage_id,
+                answer=quote if quote.endswith((".", "!", "?")) else f"{quote}.",
+                quote=quote,
+            )
+    return None

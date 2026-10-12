@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { tokenizeSearchQuery } from '../../search/domain/normalize-search-text.js';
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
-import { composeCitedClaimText } from './compose-cited-claim-text.js';
-
 const SENTENCE_SPLIT = /(?<=[.!?])\s+/;
 
 function scoreSentence(sentence: string, tokens: string[]): number {
@@ -58,8 +56,10 @@ export function tryExtractiveCitedAnswer(
     return null;
   }
 
+  const sentence = quote.trim();
+  const text = /[.!?]$/.test(sentence) ? sentence : `${sentence}.`;
   return {
-    text: composeCitedClaimText(quote, quote, { question: userMessage }),
+    text,
     chunk: best.chunk,
     quote,
   };

@@ -26,7 +26,10 @@ from docuvate_worker.domain.representation.units import (
     RepresentationUnit,
     paragraph_units_from_text,
 )
-from docuvate_worker.infrastructure.chat.context_qa import retrieve_document_rag_context
+from docuvate_worker.infrastructure.chat.context_qa import (
+    extractive_answer_from_passages,
+    retrieve_document_rag_context,
+)
 from docuvate_worker.infrastructure.chat.rag_rerank import (
     RERANKER_MODEL,
     RagPassage,
@@ -88,6 +91,8 @@ from docuvate_worker.presentation.schemas import (
     MlResolvedModelResponse,
     MlRetrainRunRequest,
     MlRetrainRunResponse,
+    RagExtractiveAnswerRequest,
+    RagExtractiveAnswerResponse,
     RagRetrieveRequest,
     RagRetrieveResponse,
     RagRetrieveResultItem,
@@ -302,6 +307,23 @@ def rag_retrieve(
         results=[RagRetrieveResultItem(id=r.id, score=r.score) for r in ranked],
         reranker_used=reranker_used,
         reranker_model=RERANKER_MODEL if reranker_used else None,
+    )
+
+
+@router.post("/rag/extractive-answer", response_model=RagExtractiveAnswerResponse)
+def rag_extractive_answer(
+    body: RagExtractiveAnswerRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> RagExtractiveAnswerResponse:
+    _require_worker_secret(x_worker_secret)
+    pairs = [(p.id, p.text) for p in body.passages]
+    result = extractive_answer_from_passages(body.query, pairs)
+    if result is None:
+        return RagExtractiveAnswerResponse()
+    return RagExtractiveAnswerResponse(
+        passage_id=result.passage_id,
+        answer=result.answer,
+        quote=result.quote,
     )
 
 

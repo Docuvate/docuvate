@@ -19,6 +19,15 @@ vi.mock('../infrastructure/fetch-worker-rag-rerank.js', () => ({
   fetchWorkerRagRerank: vi.fn(),
 }));
 
+vi.mock('../infrastructure/fetch-worker-extractive-answer.js', () => ({
+  fetchWorkerExtractiveAnswer: vi.fn().mockResolvedValue({
+    reachable: false,
+    passageId: null,
+    answer: null,
+    quote: null,
+  }),
+}));
+
 vi.mock('./cited-chat-ollama.js', () => ({
   buildCitedChatSystemPrompt: vi.fn(() => 'system'),
   requestCitedAnswerFromOllama: vi.fn(),

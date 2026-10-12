@@ -24,7 +24,10 @@ export function formatStatsAnswer(input: FormatStatsAnswerInput): string {
       case 'count_ready':
         return `**${String(count ?? 0)}** documents are ready.`;
       case 'count_by_label':
-        return `You have **${String(count ?? 0)}** documents with label “${labelName ?? '?'}”.`;
+        if (documents.length === 0) {
+          return `You have **${String(count ?? 0)}** documents with label “${labelName ?? '?'}”.`;
+        }
+        return `You have **${String(count ?? 0)}** documents with label “${labelName ?? '?'}”:\n\n${documents.map((d) => `- ${docLink(d)}`).join('\n')}`;
       case 'list_by_label':
         if (documents.length === 0) {
           return `No documents with label “${labelName ?? '?'}”.`;
@@ -43,7 +46,10 @@ export function formatStatsAnswer(input: FormatStatsAnswerInput): string {
     case 'count_ready':
       return `**${String(count ?? 0)}** Dokumente sind fertig verarbeitet.`;
     case 'count_by_label':
-      return `Sie haben **${String(count ?? 0)}** Dokumente mit dem Label „${labelName ?? '?'}“.`;
+      if (documents.length === 0) {
+        return `Sie haben **${String(count ?? 0)}** Dokumente mit dem Label „${labelName ?? '?'}“.`;
+      }
+      return `Sie haben **${String(count ?? 0)}** Dokumente mit dem Label „${labelName ?? '?'}“:\n\n${documents.map((d) => `- ${docLink(d)}`).join('\n')}`;
     case 'list_by_label':
       if (documents.length === 0) {
         return `Keine Dokumente mit dem Label „${labelName ?? '?'}“.`;
