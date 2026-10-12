@@ -5,11 +5,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { NotFoundError } from '../../../shared/domain/errors.js';
-import type { DocumentChatThreadEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
   DOCUMENT_REPOSITORY,
   USER_PREFERENCES_REPOSITORY,
+  type DocumentChatThreadEntity,
   type DocumentChatThreadRepository,
   type DocumentRepository,
   type UserPreferencesRepository,

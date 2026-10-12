@@ -6,16 +6,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
-import type { DocumentChatMessageEntity } from '../../../shared/domain/ports.js';
 import {
   DOCUMENT_CHAT_THREAD_REPOSITORY,
-  type DocumentChatThreadRepository,
-} from '../../../shared/domain/ports.js';
-import {
+  DOCUMENT_REPOSITORY,
   USER_PREFERENCES_REPOSITORY,
+  type DocumentChatMessageEntity,
+  type DocumentChatThreadRepository,
+  type DocumentRepository,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
 import { assertChatEnabled } from '../../settings/application/assert-chat-enabled.js';
 import { EffectiveDocumentChatProviderUseCase } from '../../settings/application/effective-document-chat-provider.use-case.js';
 import { DocumentChatGenerationQueueService } from '../infrastructure/document-chat-generation-queue.service.js';
