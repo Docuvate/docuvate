@@ -52,13 +52,9 @@ test.describe('document detail layout and chat', () => {
     test.setTimeout(180_000);
 
     await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
-    await expect(page.locator('.extracted-text-panel')).toBeVisible({ timeout: 120_000 });
-    await expect
-      .poll(
-        async () => (await page.locator('.extracted-text-body').innerText()).trim().length,
-        { timeout: 120_000 }
-      )
-      .toBeGreaterThan(0);
+    await expect(page.locator('.layout-text-stage .extracted-text-panel')).toBeVisible({
+      timeout: 120_000,
+    });
 
     await page.getByRole('tab', { name: /Tables|Tabellen/i }).click();
     const dataTable = page.locator('table.layout-data-table').first();

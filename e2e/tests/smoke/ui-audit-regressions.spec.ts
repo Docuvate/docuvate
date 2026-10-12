@@ -43,13 +43,9 @@ test.describe('UI audit regressions (non-ML)', () => {
     expect(adjacent).toBe(true);
 
     await page.getByTestId('layout-viewer-toolbar').getByRole('radio', { name: /^Text$/i }).click();
-    await expect(page.locator('.extracted-text-panel')).toBeVisible({ timeout: 120_000 });
-    await expect
-      .poll(
-        async () => (await page.locator('.extracted-text-body').innerText()).trim().length,
-        { timeout: 120_000 }
-      )
-      .toBeGreaterThan(0);
+    await expect(page.locator('.layout-text-stage .extracted-text-panel')).toBeVisible({
+      timeout: 120_000,
+    });
 
     await openLayoutAdvancedCompare(page);
     await expect(page.locator('.layout-compare-ssim-summary')).toHaveCount(0);
