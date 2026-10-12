@@ -106,7 +106,11 @@ export function ExtractedTextPanel({
     if (activeBlockIndex == null || editingBlockIndex != null) return;
     const host = bodyRef.current;
     if (!host) return;
-    const blockId = blocks[activeBlockIndex].blockIndex ?? activeBlockIndex;
+    const activeBlock = blocks.at(activeBlockIndex);
+    if (activeBlock === undefined) {
+      return;
+    }
+    const blockId = activeBlock.blockIndex ?? activeBlockIndex;
     let el =
       host.querySelector<HTMLElement>(`[data-block-id="${String(blockId)}"]`) ??
       host.querySelector<HTMLElement>(`[data-block-index="${String(activeBlockIndex)}"]`);

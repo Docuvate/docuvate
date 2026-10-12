@@ -3599,7 +3599,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 
 .doc-chat-assistant-markdown th,
 .doc-chat-assistant-markdown td {
-  border: 1px solid var(--dv-color-border, #ccc);
+  border: 1px solid var(--dv-color-border);
   padding: 0.2em 0.45em;
 }
 
