@@ -264,6 +264,72 @@ describe('CitedChatGenerationService abstention', () => {
     delete process.env['OLLAMA_URL'];
   });
 
+  it('falls back to extractive answer when Ollama is unreachable', async () => {
+    process.env['OLLAMA_URL'] = 'http://127.0.0.1:11434';
+    vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
+      reachable: true,
+      rerankerUsed: true,
+      rerankerModel: 'BAAI/bge-reranker-base',
+      results: [{ id: 'c1', score: 0.9 }],
+    });
+    vi.mocked(requestCitedAnswerFromOllama).mockResolvedValue({
+      ok: false,
+      detail: 'network_error',
+    });
+    vi.mocked(fetchWorkerExtractiveAnswer).mockResolvedValue({
+      reachable: true,
+      passageId: 'c1',
+      answer: 'Gesamtsumme 1.234,56 EUR',
+      quote: 'Gesamtsumme 1.234,56 EUR',
+    });
+
+    const threads = {
+      updateMessageGeneration: vi.fn(),
+      touchThread: vi.fn(),
+      listMessages: vi.fn().mockResolvedValue([]),
+      findMessageForUser: vi.fn().mockResolvedValue({ content: '' }),
+    };
+    const citations = { replaceCitations: vi.fn() };
+    const retrieval = {
+      hybridRetrieveChunks: vi.fn().mockResolvedValue([
+        {
+          chunkId: 'c1',
+          documentId: 'd1',
+          documentTitle: 'Doc',
+          body: 'Gesamtsumme 1.234,56 EUR',
+          page: 1,
+          charStart: 0,
+          charEnd: 24,
+          fusionScore: 0.9,
+        },
+      ]),
+      indexPassageForRerank: (c: { documentTitle: string; body: string }) =>
+        `${c.documentTitle}\n${c.body}`,
+    };
+    const service = await buildService({ threads, retrieval, citations });
+
+    const result = await service.generate({
+      messageId,
+      threadId,
+      userId,
+      userMessage: 'Summe?',
+      documentIds: ['d1'],
+      scope: 'document',
+    });
+
+    expect(result.abstained).toBe(false);
+    expect(result.content).toMatch(/1\.234,56/);
+    expect(threads.updateMessageGeneration).toHaveBeenCalledWith(
+      messageId,
+      expect.objectContaining({ generationStatus: 'done' })
+    );
+    expect(threads.updateMessageGeneration).not.toHaveBeenCalledWith(
+      messageId,
+      expect.objectContaining({ generationStatus: 'failed' })
+    );
+    delete process.env['OLLAMA_URL'];
+  });
+
   it('stops when shouldAbort is set during streaming', async () => {
     vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
       reachable: true,

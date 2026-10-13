@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { ForbiddenError } from '../../../shared/domain/errors.js';
 import {
@@ -9,6 +9,10 @@ import {
   USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
+import {
+  DocumentChatCloudUrlError,
+  validateDocumentChatCloudBaseUrl,
+} from '../../../shared/infrastructure/chat/document-chat-cloud-url-security.js';
 import type { UpdateUserSettingsRequestDto } from '../../../shared/presentation/dtos/settings.dto.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { fallbackExtractionEngines } from './extraction-engine-fallback.js';
@@ -38,10 +42,22 @@ export class UpdateUserSettingsUseCase {
   ) {}
 
   async execute(userId: string, patch: UpdateUserSettingsRequestDto) {
+<<<<<<< HEAD
     if (patch.advancedFeaturesEnabled === true) {
       const flags = await this.resolveFeatureFlags.execute(userId);
       if (!flags.experimentalResearchModels) {
         throw new ForbiddenError('Feature disabled: experimentalResearchModels');
+=======
+    if (patch.documentChatCloudBaseUrl) {
+      try {
+        patch.documentChatCloudBaseUrl = await validateDocumentChatCloudBaseUrl(
+          patch.documentChatCloudBaseUrl
+        );
+      } catch (err) {
+        const message =
+          err instanceof DocumentChatCloudUrlError ? err.code : 'document_chat_cloud_url_invalid';
+        throw new BadRequestException(message);
+>>>>>>> 897f5b6 (fix(chat): LLM failure extractive fallback and cloud URL SSRF guards)
       }
     }
     return this.prefs.upsert(userId, patch);

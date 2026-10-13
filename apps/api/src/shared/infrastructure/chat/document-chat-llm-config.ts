@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { normalizeDocumentChatCloudBaseUrl } from './document-chat-cloud-url-security.js';
 
 export interface DocumentChatLlmRuntimeConfig {
   kind: 'ollama' | 'openai_compatible';
@@ -42,6 +43,12 @@ export function resolveDocumentChatCloudOverride(input?: {
   if (!baseUrl || !apiKey) {
     return null;
   }
+  let normalizedBaseUrl: string;
+  try {
+    normalizedBaseUrl = normalizeDocumentChatCloudBaseUrl(baseUrl);
+  } catch {
+    return null;
+  }
   const model =
     (input?.model?.trim() ? input.model.trim() : null) ??
     documentChatCloudModelFromEnv() ??
@@ -50,7 +57,7 @@ export function resolveDocumentChatCloudOverride(input?: {
   return {
     kind: 'openai_compatible',
     model,
-    baseUrl: baseUrl.replace(/\/$/, ''),
+    baseUrl: normalizedBaseUrl,
     apiKey,
   };
 }

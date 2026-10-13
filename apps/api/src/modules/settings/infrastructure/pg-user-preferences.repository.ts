@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import type pg from 'pg';
 
 import type {
@@ -16,6 +16,21 @@ import {
   decryptChatCloudApiKey,
   encryptChatCloudApiKey,
 } from './chat-cloud-api-key.codec.js';
+
+const preferencesLogger = new Logger('PgUserPreferencesRepository');
+
+function safeDecryptChatCloudApiKey(blob: Buffer): string | null {
+  try {
+    return decryptChatCloudApiKey(blob);
+  } catch (err) {
+    preferencesLogger.warn(
+      `Failed to decrypt document chat cloud API key: ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return null;
+  }
+}
 
 function parseRequiredLabelIds(raw: unknown): string[] {
   if (Array.isArray(raw)) {
@@ -56,7 +71,7 @@ function mapRow(row: Record<string, unknown>): UserPreferencesEntity {
     documentChatCloudBaseUrl: parseOptionalString(row.document_chat_cloud_base_url),
     documentChatCloudApiKey:
       row.document_chat_cloud_api_key_encrypted instanceof Buffer
-        ? decryptChatCloudApiKey(row.document_chat_cloud_api_key_encrypted)
+        ? safeDecryptChatCloudApiKey(row.document_chat_cloud_api_key_encrypted)
         : null,
     updatedAt: new Date(String(row.updated_at)),
   };

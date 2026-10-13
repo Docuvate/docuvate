@@ -22,6 +22,7 @@ import {
 } from 'class-validator';
 
 import { THEME_PREFERENCES, UI_LOCALES } from '../../../modules/settings/domain/ui-preferences.js';
+import { IsDocumentChatCloudBaseUrl } from '../validators/document-chat-cloud-base-url.validator.js';
 
 export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
   @IsOptional()
@@ -66,7 +67,7 @@ export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
 
   @IsOptional()
   @ValidateIf((_obj, value) => value !== null)
-  @IsString()
+  @IsDocumentChatCloudBaseUrl()
   documentChatCloudBaseUrl?: string | null;
 
   @IsOptional()

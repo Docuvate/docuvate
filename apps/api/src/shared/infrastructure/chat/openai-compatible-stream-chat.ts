@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { isRecord, parseString } from '../database/row-parse.js';
 import type { DocumentChatLlmRuntimeConfig } from './document-chat-llm-config.js';
+import { openAiCompatibleChatCompletionsUrl } from './document-chat-cloud-url-security.js';
 import { ollamaChatIdleTimeoutMs } from './ollama-chat-options.js';
 
 export type OpenAiStreamFailure =
@@ -23,7 +24,7 @@ export async function streamOpenAiCompatibleChat(
   params: StreamOpenAiCompatibleChatParams
 ): Promise<{ content: string } | { failure: OpenAiStreamFailure }> {
   const idleTimeoutMs = params.idleTimeoutMs ?? ollamaChatIdleTimeoutMs();
-  const url = `${params.config.baseUrl}/v1/chat/completions`;
+  const url = openAiCompatibleChatCompletionsUrl(params.config.baseUrl);
   const body: Record<string, unknown> = {
     model: params.config.model,
     messages: params.messages,
@@ -54,8 +55,8 @@ export async function streamOpenAiCompatibleChat(
   }
 
   if (!response.ok) {
-    const detail = await response.text().catch(() => '');
-    return { failure: { kind: 'http_error', status: response.status, detail } };
+    await response.body?.cancel().catch(() => undefined);
+    return { failure: { kind: 'http_error', status: response.status } };
   }
   if (!response.body) {
     return { failure: { kind: 'network_error', detail: 'empty response body' } };
@@ -147,7 +148,7 @@ export async function postOpenAiCompatibleChat(
   messages: { role: string; content: string }[],
   responseFormat?: Record<string, unknown>
 ): Promise<Response> {
-  const url = `${config.baseUrl}/v1/chat/completions`;
+  const url = openAiCompatibleChatCompletionsUrl(config.baseUrl);
   const body: Record<string, unknown> = {
     model: config.model,
     messages,

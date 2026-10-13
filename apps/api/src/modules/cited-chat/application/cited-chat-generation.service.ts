@@ -462,8 +462,47 @@ export class CitedChatGenerationService {
         await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
         return { content: '', abstained: true };
       }
-      await this.failGeneration(messageId, threadId, userId, 'ollama_error', llm.detail);
-      return { content: '', abstained: true };
+      const llmFallbackExtractive =
+        gateOk && extractivePool.length > 0
+          ? await this.resolveExtractiveAnswer(retrievalQuery, extractivePool, extractiveMinScore)
+          : null;
+      if (llmFallbackExtractive) {
+        const extractiveChunkId = llmFallbackExtractive.chunk.chunkId;
+        const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+        if (extractiveChunkIsUuid) {
+          await this.citationsRepo.replaceCitations(messageId, [
+            {
+              ordinal: 1,
+              chunkId: llmFallbackExtractive.chunk.chunkId,
+              quote: llmFallbackExtractive.quote,
+              charStart: llmFallbackExtractive.chunk.charStart ?? 0,
+              charEnd: llmFallbackExtractive.chunk.charEnd ?? llmFallbackExtractive.quote.length,
+            },
+          ]);
+        } else {
+          await this.citationsRepo.replaceCitations(messageId, []);
+        }
+        const content = extractiveChunkIsUuid
+          ? formatVerifiedCitedContent([{ text: llmFallbackExtractive.text, ordinal: 1 }])
+          : llmFallbackExtractive.text;
+        await this.threads.updateMessageGeneration(messageId, {
+          content,
+          generationStatus: 'done',
+          generationPhase: null,
+          finalizeOnlyIfInFlight: true,
+        });
+        await this.threads.touchThread(threadId);
+        return { content, abstained: false };
+      }
+      await this.citationsRepo.replaceCitations(messageId, []);
+      await this.threads.updateMessageGeneration(messageId, {
+        content: abstentionText,
+        generationStatus: 'done',
+        generationPhase: null,
+        finalizeOnlyIfInFlight: true,
+      });
+      await this.threads.touchThread(threadId);
+      return { content: abstentionText, abstained: true };
     }
 
     if (await aborted()) {

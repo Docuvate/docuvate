@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
+  DocumentChatCloudUrlError,
+  validateDocumentChatCloudBaseUrl,
+} from '../../../shared/infrastructure/chat/document-chat-cloud-url-security.js';
+import {
   type DocumentChatLlmRuntimeConfig,
   resolveDocumentChatCloudOverride,
 } from '../../../shared/infrastructure/chat/document-chat-llm-config.js';
@@ -42,6 +46,21 @@ export function resolveCitedChatLlmConfig(input?: {
   };
 }
 
+async function ensureOpenAiCompatibleBaseUrlSafe(
+  config: DocumentChatLlmRuntimeConfig
+): Promise<{ ok: true } | { ok: false; detail: string }> {
+  if (config.kind !== 'openai_compatible') {
+    return { ok: true };
+  }
+  try {
+    await validateDocumentChatCloudBaseUrl(config.baseUrl);
+    return { ok: true };
+  } catch (err) {
+    const code = err instanceof DocumentChatCloudUrlError ? err.code : 'document_chat_cloud_url_invalid';
+    return { ok: false, detail: code };
+  }
+}
+
 export async function streamDocumentChatLlm(params: {
   config: DocumentChatLlmRuntimeConfig;
   messages: { role: string; content: string }[];
@@ -50,6 +69,10 @@ export async function streamDocumentChatLlm(params: {
   responseFormat?: Record<string, unknown>;
 }): Promise<{ content: string } | { failure: { kind: string; detail?: string } }> {
   if (params.config.kind === 'openai_compatible') {
+    const safe = await ensureOpenAiCompatibleBaseUrlSafe(params.config);
+    if (!safe.ok) {
+      return { failure: { kind: 'network_error', detail: safe.detail } };
+    }
     const result = await streamOpenAiCompatibleChat({
       config: params.config,
       messages: params.messages,
@@ -59,9 +82,11 @@ export async function streamDocumentChatLlm(params: {
     });
     if ('failure' in result) {
       const detail =
-        result.failure.kind === 'http_error' || result.failure.kind === 'network_error'
-          ? result.failure.detail
-          : undefined;
+        result.failure.kind === 'http_error'
+          ? `HTTP ${String(result.failure.status)}`
+          : result.failure.kind === 'network_error'
+            ? result.failure.detail
+            : undefined;
       return { failure: { kind: result.failure.kind, detail } };
     }
     return { content: result.content };
@@ -87,6 +112,10 @@ export async function postDocumentChatLlm(
   responseFormat?: Record<string, unknown>
 ): Promise<{ ok: true; content: string } | { ok: false; detail: string }> {
   if (config.kind === 'openai_compatible') {
+    const safe = await ensureOpenAiCompatibleBaseUrlSafe(config);
+    if (!safe.ok) {
+      return { ok: false, detail: safe.detail };
+    }
     try {
       const response = await postOpenAiCompatibleChat(config, messages, responseFormat);
       if (!response.ok) {
