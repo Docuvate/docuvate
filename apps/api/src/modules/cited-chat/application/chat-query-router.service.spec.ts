@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Test } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { EmbeddingPort } from '../../../shared/domain/ports.js';
+import { EMBEDDING_PORT, type EmbeddingPort } from '../../../shared/domain/ports.js';
 import * as intentSchema from '../domain/chat-intent-prototypes.schema.js';
-import type { ChatLibraryStatsService } from './chat-library-stats.service.js';
+import { ChatLibraryStatsService } from './chat-library-stats.service.js';
 import { ChatQueryRouterService } from './chat-query-router.service.js';
 
 describe('ChatQueryRouterService', () => {
@@ -12,17 +13,23 @@ describe('ChatQueryRouterService', () => {
   const embedTexts = vi.fn<EmbeddingPort['embedTexts']>();
   const tryAnswer = vi.fn<ChatLibraryStatsService['tryAnswer']>();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     embedTexts.mockReset();
     tryAnswer.mockReset();
     vi.spyOn(intentSchema, 'classifyChatRouteIntent').mockReset();
 
-    const libraryStats: ChatLibraryStatsService = { tryAnswer };
-    router = new ChatQueryRouterService({ embedTexts }, libraryStats);
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        ChatQueryRouterService,
+        { provide: EMBEDDING_PORT, useValue: { embedTexts } },
+        { provide: ChatLibraryStatsService, useValue: { tryAnswer } },
+      ],
+    }).compile();
+    router = moduleRef.get(ChatQueryRouterService);
   });
 
   it('answers smalltalk on the current turn before retrieval routing', async () => {
-    embedTexts.mockResolvedValue({ embeddings: [[0.1, 0.2]] });
+    embedTexts.mockResolvedValue({ model: 'test', embeddings: [[0.1, 0.2]] });
     vi.spyOn(intentSchema, 'classifyChatRouteIntent').mockReturnValue('smalltalk');
 
     const result = await router.route({
@@ -41,7 +48,13 @@ describe('ChatQueryRouterService', () => {
   });
 
   it('uses stats on the current turn when merged routing would stay document_qa', async () => {
-    embedTexts.mockResolvedValue({ embeddings: [[0.3, 0.4], [0.5, 0.6]] });
+    embedTexts.mockResolvedValue({
+      model: 'test',
+      embeddings: [
+        [0.3, 0.4],
+        [0.5, 0.6],
+      ],
+    });
     vi.spyOn(intentSchema, 'classifyChatRouteIntent')
       .mockReturnValueOnce('stats')
       .mockReturnValueOnce('document_qa');

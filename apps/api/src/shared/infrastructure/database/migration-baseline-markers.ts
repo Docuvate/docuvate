@@ -99,7 +99,7 @@ export async function migrationSchemaPresent(
     case 'CitedChat20261009120000':
       return regClassExists(runner, 'public.chat_message_citations');
     case 'StaleChatGeneration20261009183000':
-      return false;
+      return migrationSchemaPresent(runner, 'EmbeddingDensity20261010120000');
     case 'EmbeddingDensity20261010120000':
       return regClassExists(runner, 'public.embedding_density_calibration_run');
     case 'EmbeddingDensityClassNiw20261010131500':
@@ -107,13 +107,13 @@ export async function migrationSchemaPresent(
     case 'EmbeddingDensityReadinessSplit20261010140000':
       return columnExists(runner, 'embedding_density_user_state', 'fine_ready_tag_ids');
     case 'HeuristicFieldSuggestions20261010150000':
-      return false;
+      return migrationSchemaPresent(runner, 'Corrections20261011180000');
     case 'PurgeHeadingVendorSuggestions20261010153000':
-      return false;
+      return migrationSchemaPresent(runner, 'Corrections20261011180000');
     case 'Corrections20261011180000':
       return regClassExists(runner, 'public.corrections');
     case 'RepairPeriodDuplicateStacks20261011200000':
-      return false;
+      return migrationSchemaPresent(runner, 'DuplicatePairLabels20261011210000');
     case 'DuplicatePairLabels20261011210000':
       return regClassExists(runner, 'public.duplicate_pair_labels');
     case 'DocumentRepresentation20261012120000':
