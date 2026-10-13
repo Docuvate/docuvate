@@ -340,14 +340,18 @@ export function SettingsPage() {
                   ? t('settings.chatCloudApiKeyConfigured')
                   : t('settings.chatCloudApiKeyPlaceholder')
               }
-              onChange={(e) => setChatCloudApiKeyDraft(e.target.value)}
+              onChange={(e) => {
+                setChatCloudApiKeyDraft(e.target.value);
+              }}
             />
           </label>
           <Button
             type="button"
             variant="secondary"
             disabled={saving || !settings}
-            onClick={() => void saveChatCloudSettings(chatCloudBaseUrl, chatCloudApiKeyDraft)}
+            onClick={() => {
+              void saveChatCloudSettings(chatCloudBaseUrl, chatCloudApiKeyDraft);
+            }}
           >
             {t('settings.chatCloudSave')}
           </Button>
