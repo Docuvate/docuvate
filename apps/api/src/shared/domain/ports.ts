@@ -140,6 +140,7 @@ export interface ObjectStorage {
 export interface ExtractionExtractOptions {
   engine?: string;
   embeddingDensityState?: Record<string, unknown>;
+  learnedValueTypes?: boolean;
 }
 
 export interface ExtractionCompareItem {

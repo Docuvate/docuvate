@@ -2,6 +2,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
+bash ../../scripts/ci/check-third-party-models-manifest.sh
 pip install 'uv==0.12.23' >/dev/null
 # Must match [tool.pyright].venv in pyproject.toml (pyright resolves types from this venv).
 VENV="${DOCUVATE_WORKER_VENV:-.venv}"

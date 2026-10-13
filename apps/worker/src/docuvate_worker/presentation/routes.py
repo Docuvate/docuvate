@@ -195,7 +195,11 @@ def extract(
             body.embedding_density_state.model_dump()
         )
     result = extract_document(
-        raw, body.mime_type, engine=body.engine, embedding_density_state=density_state
+        raw,
+        body.mime_type,
+        engine=body.engine,
+        embedding_density_state=density_state,
+        learned_value_types=body.learned_value_types,
     )
     active = body.engine or ExtractorRegistry().active_engine
     suggestions = result.field_suggestions or []
