@@ -248,6 +248,10 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
   final UserSettingsResponseDtoThemePreferenceEnum? themePreference;
   @override
   final UserSettingsResponseDtoLocaleEnum? locale;
+  @override
+  final String? documentChatCloudBaseUrl;
+  @override
+  final bool? documentChatCloudApiKeyConfigured;
 
   factory _$UserSettingsResponseDto(
           [void Function(UserSettingsResponseDtoBuilder)? updates]) =>
@@ -271,7 +275,9 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
       this.fieldExtractionConfidenceGateEnabled,
       this.fieldExtractionRequiredLabelIds,
       this.themePreference,
-      this.locale})
+      this.locale,
+      this.documentChatCloudBaseUrl,
+      this.documentChatCloudApiKeyConfigured})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(preferredExtractorEngine,
         r'UserSettingsResponseDto', 'preferredExtractorEngine');
@@ -311,7 +317,10 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
         fieldExtractionRequiredLabelIds ==
             other.fieldExtractionRequiredLabelIds &&
         themePreference == other.themePreference &&
-        locale == other.locale;
+        locale == other.locale &&
+        documentChatCloudBaseUrl == other.documentChatCloudBaseUrl &&
+        documentChatCloudApiKeyConfigured ==
+            other.documentChatCloudApiKeyConfigured;
   }
 
   @override
@@ -335,6 +344,8 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
     _$hash = $jc(_$hash, fieldExtractionRequiredLabelIds.hashCode);
     _$hash = $jc(_$hash, themePreference.hashCode);
     _$hash = $jc(_$hash, locale.hashCode);
+    _$hash = $jc(_$hash, documentChatCloudBaseUrl.hashCode);
+    _$hash = $jc(_$hash, documentChatCloudApiKeyConfigured.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -361,7 +372,10 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
           ..add('fieldExtractionRequiredLabelIds',
               fieldExtractionRequiredLabelIds)
           ..add('themePreference', themePreference)
-          ..add('locale', locale))
+          ..add('locale', locale)
+          ..add('documentChatCloudBaseUrl', documentChatCloudBaseUrl)
+          ..add('documentChatCloudApiKeyConfigured',
+              documentChatCloudApiKeyConfigured))
         .toString();
   }
 }
@@ -473,6 +487,19 @@ class UserSettingsResponseDtoBuilder
   set locale(UserSettingsResponseDtoLocaleEnum? locale) =>
       _$this._locale = locale;
 
+  String? _documentChatCloudBaseUrl;
+  String? get documentChatCloudBaseUrl => _$this._documentChatCloudBaseUrl;
+  set documentChatCloudBaseUrl(String? documentChatCloudBaseUrl) =>
+      _$this._documentChatCloudBaseUrl = documentChatCloudBaseUrl;
+
+  bool? _documentChatCloudApiKeyConfigured;
+  bool? get documentChatCloudApiKeyConfigured =>
+      _$this._documentChatCloudApiKeyConfigured;
+  set documentChatCloudApiKeyConfigured(
+          bool? documentChatCloudApiKeyConfigured) =>
+      _$this._documentChatCloudApiKeyConfigured =
+          documentChatCloudApiKeyConfigured;
+
   UserSettingsResponseDtoBuilder() {
     UserSettingsResponseDto._defaults(this);
   }
@@ -500,6 +527,8 @@ class UserSettingsResponseDtoBuilder
           $v.fieldExtractionRequiredLabelIds?.toBuilder();
       _themePreference = $v.themePreference;
       _locale = $v.locale;
+      _documentChatCloudBaseUrl = $v.documentChatCloudBaseUrl;
+      _documentChatCloudApiKeyConfigured = $v.documentChatCloudApiKeyConfigured;
       _$v = null;
     }
     return this;
@@ -549,7 +578,10 @@ class UserSettingsResponseDtoBuilder
               fieldExtractionRequiredLabelIds:
                   _fieldExtractionRequiredLabelIds?.build(),
               themePreference: themePreference,
-              locale: locale);
+              locale: locale,
+              documentChatCloudBaseUrl: documentChatCloudBaseUrl,
+              documentChatCloudApiKeyConfigured:
+                  documentChatCloudApiKeyConfigured);
     } catch (_) {
       late String _$failedField;
       try {

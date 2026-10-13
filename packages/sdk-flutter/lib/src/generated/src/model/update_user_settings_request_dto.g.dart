@@ -157,6 +157,10 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
   final UpdateUserSettingsRequestDtoThemePreferenceEnum? themePreference;
   @override
   final UpdateUserSettingsRequestDtoLocaleEnum? locale;
+  @override
+  final String? documentChatCloudBaseUrl;
+  @override
+  final String? documentChatCloudApiKey;
 
   factory _$UpdateUserSettingsRequestDto(
           [void Function(UpdateUserSettingsRequestDtoBuilder)? updates]) =>
@@ -171,7 +175,9 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
       this.fieldExtractionRequiredLabelIds,
       this.advancedFeaturesEnabled,
       this.themePreference,
-      this.locale})
+      this.locale,
+      this.documentChatCloudBaseUrl,
+      this.documentChatCloudApiKey})
       : super._();
 
   @override
@@ -197,7 +203,9 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
             other.fieldExtractionRequiredLabelIds &&
         advancedFeaturesEnabled == other.advancedFeaturesEnabled &&
         themePreference == other.themePreference &&
-        locale == other.locale;
+        locale == other.locale &&
+        documentChatCloudBaseUrl == other.documentChatCloudBaseUrl &&
+        documentChatCloudApiKey == other.documentChatCloudApiKey;
   }
 
   @override
@@ -212,6 +220,8 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
     _$hash = $jc(_$hash, advancedFeaturesEnabled.hashCode);
     _$hash = $jc(_$hash, themePreference.hashCode);
     _$hash = $jc(_$hash, locale.hashCode);
+    _$hash = $jc(_$hash, documentChatCloudBaseUrl.hashCode);
+    _$hash = $jc(_$hash, documentChatCloudApiKey.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -229,7 +239,9 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
               fieldExtractionRequiredLabelIds)
           ..add('advancedFeaturesEnabled', advancedFeaturesEnabled)
           ..add('themePreference', themePreference)
-          ..add('locale', locale))
+          ..add('locale', locale)
+          ..add('documentChatCloudBaseUrl', documentChatCloudBaseUrl)
+          ..add('documentChatCloudApiKey', documentChatCloudApiKey))
         .toString();
   }
 }
@@ -293,6 +305,16 @@ class UpdateUserSettingsRequestDtoBuilder
   set locale(UpdateUserSettingsRequestDtoLocaleEnum? locale) =>
       _$this._locale = locale;
 
+  String? _documentChatCloudBaseUrl;
+  String? get documentChatCloudBaseUrl => _$this._documentChatCloudBaseUrl;
+  set documentChatCloudBaseUrl(String? documentChatCloudBaseUrl) =>
+      _$this._documentChatCloudBaseUrl = documentChatCloudBaseUrl;
+
+  String? _documentChatCloudApiKey;
+  String? get documentChatCloudApiKey => _$this._documentChatCloudApiKey;
+  set documentChatCloudApiKey(String? documentChatCloudApiKey) =>
+      _$this._documentChatCloudApiKey = documentChatCloudApiKey;
+
   UpdateUserSettingsRequestDtoBuilder() {
     UpdateUserSettingsRequestDto._defaults(this);
   }
@@ -311,6 +333,8 @@ class UpdateUserSettingsRequestDtoBuilder
       _advancedFeaturesEnabled = $v.advancedFeaturesEnabled;
       _themePreference = $v.themePreference;
       _locale = $v.locale;
+      _documentChatCloudBaseUrl = $v.documentChatCloudBaseUrl;
+      _documentChatCloudApiKey = $v.documentChatCloudApiKey;
       _$v = null;
     }
     return this;
@@ -345,7 +369,9 @@ class UpdateUserSettingsRequestDtoBuilder
                   _fieldExtractionRequiredLabelIds?.build(),
               advancedFeaturesEnabled: advancedFeaturesEnabled,
               themePreference: themePreference,
-              locale: locale);
+              locale: locale,
+              documentChatCloudBaseUrl: documentChatCloudBaseUrl,
+              documentChatCloudApiKey: documentChatCloudApiKey);
     } catch (_) {
       late String _$failedField;
       try {

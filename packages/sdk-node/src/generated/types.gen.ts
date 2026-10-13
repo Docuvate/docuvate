@@ -880,6 +880,8 @@ export type UpdateUserSettingsRequestDto = {
     advancedFeaturesEnabled?: boolean;
     themePreference?: 'light' | 'dark' | 'system';
     locale?: 'de' | 'en';
+    documentChatCloudBaseUrl?: string;
+    documentChatCloudApiKey?: string;
 };
 
 export type UserSettingsResponseDto = {
@@ -901,6 +903,8 @@ export type UserSettingsResponseDto = {
     fieldExtractionRequiredLabelIds?: Array<string>;
     themePreference?: 'light' | 'dark' | 'system';
     locale?: 'de' | 'en';
+    documentChatCloudBaseUrl?: string;
+    documentChatCloudApiKeyConfigured?: boolean;
 };
 
 export type GetAdminAccessData = {

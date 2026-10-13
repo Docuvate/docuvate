@@ -14245,6 +14245,14 @@
               "de",
               "en"
             ]
+          },
+          "documentChatCloudBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentChatCloudApiKey": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -14327,6 +14335,13 @@
               "en"
             ],
             "type": "string"
+          },
+          "documentChatCloudBaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentChatCloudApiKeyConfigured": {
+            "type": "boolean"
           }
         },
         "required": [
