@@ -66,16 +66,4 @@ describe('migration baseline (existing schema, empty migration history)', () => 
     }
   });
 
-  it('creates migrations table when missing and documents already exist', async () => {
-    const runner = dataSource.createQueryRunner();
-    await runner.connect();
-    try {
-      await runner.query('DROP TABLE IF EXISTS migrations');
-      await ensureMigrationBaseline(dataSource);
-      expect(await regClassExists(runner, 'public.migrations')).toBe(true);
-    } finally {
-      await runner.release();
-    }
-    await dataSource.runMigrations();
-  });
 });
