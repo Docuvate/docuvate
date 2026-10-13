@@ -12,15 +12,19 @@ Trains the linear layout key/value role + linking head shipped in the worker ima
 
 ## Reproduce the artifact
 
+Eval tooling uses Hugging Face `datasets` (not a worker runtime dependency). Use a compatible
+`pyarrow`/`datasets` pair with the worker’s NumPy 1.x pin, e.g. `pyarrow==15.0.2 datasets==2.19.0`.
+
 ```bash
 cd apps/worker
 uv venv .venv && uv pip install -e ".[dev]"
-uv pip install scikit-learn datasets
-../../.venv/bin/python ../../eval/layout_kv_roles/train.py \
-  --seed 42 \
-  --output src/docuvate_worker/infrastructure/ml/artifacts/layout-kv-role-head.v1.json
+uv pip install scikit-learn "pyarrow==15.0.2" "datasets==2.19.0"
+.venv/bin/python ../../eval/layout_kv_roles/train.py --seed 42
 bash ../../scripts/ci/update-third-party-models-manifest.sh
 ```
+
+Training pulls **CORD** (`naver-clova-ix/cord-v2`, CC-BY-4.0) from the Hub and merges the bundled
+synthetic corpus. Data is cached under `~/.cache/huggingface`, not committed.
 
 ## Offline evaluation (not shipped weights)
 

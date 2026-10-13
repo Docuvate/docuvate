@@ -35,9 +35,9 @@ from docuvate_worker.infrastructure.ml.layout_kv_roles.features import (  # noqa
     link_feature_vector,
 )
 from docuvate_worker.infrastructure.ml.layout_kv_roles.model import ROLE_INDEX  # noqa: E402
+from layout_kv_roles.corpus import load_cord_train_documents  # noqa: E402
 from layout_kv_roles.synthetic_corpus import (  # noqa: E402
     SyntheticDocument,
-    SyntheticEntity,
     build_synthetic_documents,
 )
 
@@ -63,40 +63,56 @@ class LinkSample:
     label: int
 
 
-def _entities_for_document(doc: SyntheticDocument) -> list[LayoutEntity]:
-    texts = [entity.text for entity in doc.entities]
-    vectors = embed_passages(texts)
-    entities: list[LayoutEntity] = []
-    for idx, (entity, vector) in enumerate(zip(doc.entities, vectors, strict=True)):
-        entities.append(
-            LayoutEntity(
-                index=idx,
-                page=entity.page,
-                x=entity.x,
-                y=entity.y,
-                width=entity.width,
-                height=entity.height,
-                text=entity.text,
-                embedding=tuple(float(v) for v in vector),
-            )
-        )
-    return entities
-
-
-def _build_role_samples(documents: list[SyntheticDocument]) -> list[TrainSample]:
-    samples: list[TrainSample] = []
+def _embed_documents(documents: list[SyntheticDocument]) -> list[list[LayoutEntity]]:
+    texts: list[str] = []
+    spans: list[tuple[int, int]] = []
     for doc in documents:
-        entities = _entities_for_document(doc)
+        start = len(texts)
+        texts.extend(entity.text for entity in doc.entities)
+        spans.append((start, len(texts)))
+    vectors: list[list[float]] = []
+    batch_size = 64
+    for start in range(0, len(texts), batch_size):
+        chunk = texts[start : start + batch_size]
+        vectors.extend(embed_passages(chunk))
+    per_doc: list[list[LayoutEntity]] = []
+    for doc, (start, end) in zip(documents, spans, strict=True):
+        entities: list[LayoutEntity] = []
+        for idx, (spec, vector) in enumerate(
+            zip(doc.entities, vectors[start:end], strict=True)
+        ):
+            entities.append(
+                LayoutEntity(
+                    index=idx,
+                    page=spec.page,
+                    x=spec.x,
+                    y=spec.y,
+                    width=spec.width,
+                    height=spec.height,
+                    text=spec.text,
+                    embedding=tuple(float(v) for v in vector),
+                )
+            )
+        per_doc.append(entities)
+    return per_doc
+
+
+def _build_role_samples(
+    documents: list[SyntheticDocument], embedded: list[list[LayoutEntity]]
+) -> list[TrainSample]:
+    samples: list[TrainSample] = []
+    for doc, entities in zip(documents, embedded, strict=True):
         for entity, spec in zip(entities, doc.entities, strict=True):
             features = entity_feature_vector(entity, entities)
             samples.append(TrainSample(features=features, label=ROLE_INDEX[spec.role]))
     return samples
 
 
-def _build_link_samples(documents: list[SyntheticDocument]) -> list[LinkSample]:
+def _build_link_samples(
+    documents: list[SyntheticDocument], embedded: list[list[LayoutEntity]]
+) -> list[LinkSample]:
     samples: list[LinkSample] = []
-    for doc in documents:
-        entities = _entities_for_document(doc)
+    for doc, entities in zip(documents, embedded, strict=True):
         positive_pairs = {pair for pair in doc.links}
         for key_idx in range(len(entities)):
             for value_idx in range(len(entities)):
@@ -148,84 +164,31 @@ def _fit_binary_logistic(samples: list[LinkSample], *, seed: int) -> np.ndarray:
     return row.astype(np.float32).reshape(1, -1)
 
 
-def _load_cord_documents(max_docs: int) -> list[SyntheticDocument]:
-    cord_dir = os.environ.get("CORD_DATA_DIR", "").strip()
-    if not cord_dir:
-        return []
-    root = Path(cord_dir)
-    if not root.is_dir():
-        return []
-    docs: list[SyntheticDocument] = []
-    for path in sorted(root.glob("*.jsonl")):
-        for line in path.read_text(encoding="utf-8").splitlines():
-            if len(docs) >= max_docs:
-                return docs
-            payload = json.loads(line)
-            if not isinstance(payload, dict):
-                continue
-            entities_raw = payload.get("entities")
-            links_raw = payload.get("links")
-            if not isinstance(entities_raw, list):
-                continue
-            entities: list[SyntheticEntity] = []
-            for item in entities_raw:
-                if not isinstance(item, dict):
-                    continue
-                role = item.get("role")
-                text = item.get("text")
-                if role not in ("other", "key", "value") or not isinstance(text, str):
-                    continue
-                entities.append(
-                    SyntheticEntity(
-                        page=int(item.get("page", 1)),
-                        x=float(item.get("x", 0.1)),
-                        y=float(item.get("y", 0.1)),
-                        width=float(item.get("width", 0.2)),
-                        height=float(item.get("height", 0.02)),
-                        text=text,
-                        role=role,
-                    )
-                )
-            links: list[tuple[int, int]] = []
-            if isinstance(links_raw, list):
-                for pair in links_raw:
-                    if (
-                        isinstance(pair, list)
-                        and len(pair) == 2
-                        and isinstance(pair[0], int)
-                        and isinstance(pair[1], int)
-                    ):
-                        links.append((pair[0], pair[1]))
-            if entities:
-                docs.append(
-                    SyntheticDocument(
-                        document_id=str(payload.get("document_id", f"cord-{len(docs)}")),
-                        entities=tuple(entities),
-                        links=tuple(links),
-                    )
-                )
-    return docs
-
-
-def _data_manifest(documents: list[SyntheticDocument]) -> list[str]:
+def _data_manifest(
+    *,
+    synthetic_count: int,
+    cord_count: int,
+) -> list[str]:
     manifest = [
         "synthetic-forms:Docuvate CE generator (eval/layout_kv_roles/synthetic_corpus.py)",
+        "CORD:CC-BY-4.0 (naver-clova-ix/cord-v2 train split)",
     ]
-    if os.environ.get("CORD_DATA_DIR"):
-        manifest.append("CORD:CC-BY-4.0 (optional export via CORD_DATA_DIR)")
     if os.environ.get("ACROFORM_PDF_DIR"):
         manifest.append("acroform-pdfs:operator-verified license (ACROFORM_PDF_DIR)")
-    manifest.append(f"synthetic_documents:{len(documents)}")
+    manifest.append(f"synthetic_documents:{synthetic_count}")
+    manifest.append(f"cord_documents:{cord_count}")
     return manifest
 
 
-def train_and_write(*, seed: int, output: Path) -> None:
+def train_and_write(*, seed: int, output: Path, cord_max_docs: int | None) -> None:
     random.seed(seed)
     np.random.seed(seed)
-    documents = build_synthetic_documents()
-    documents.extend(_load_cord_documents(max_docs=200))
-    role_samples = _build_role_samples(documents)
-    link_samples = _build_link_samples(documents)
+    synthetic_docs = build_synthetic_documents()
+    cord_docs = load_cord_train_documents(max_docs=cord_max_docs)
+    documents = synthetic_docs + cord_docs
+    embedded = _embed_documents(documents)
+    role_samples = _build_role_samples(documents, embedded)
+    link_samples = _build_link_samples(documents, embedded)
     role_weights = _fit_multiclass_logistic(role_samples, seed=seed, classes=3)
     link_weights = _fit_binary_logistic(link_samples, seed=seed)
     artifact = {
@@ -242,7 +205,10 @@ def train_and_write(*, seed: int, output: Path) -> None:
             "seed": seed,
             "role_train_samples": len(role_samples),
             "link_train_samples": len(link_samples),
-            "data_manifest": _data_manifest(documents),
+            "data_manifest": _data_manifest(
+                synthetic_count=len(synthetic_docs),
+                cord_count=len(cord_docs),
+            ),
         },
     }
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -255,8 +221,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument(
+        "--cord-max-docs",
+        type=int,
+        default=None,
+        help="Limit CORD train documents (default: full train split)",
+    )
     args = parser.parse_args()
-    train_and_write(seed=args.seed, output=args.output)
+    train_and_write(seed=args.seed, output=args.output, cord_max_docs=args.cord_max_docs)
 
 
 if __name__ == "__main__":
