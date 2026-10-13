@@ -19,6 +19,9 @@ describe('migration baseline (existing schema, empty migration history)', () => 
   afterAll(async () => {
     await dataSource.runMigrations();
     await dataSource.destroy();
+    const { runDatabaseMigrations } =
+      await import('../../src/shared/infrastructure/database/run-database-migrations.js');
+    await runDatabaseMigrations();
   });
 
   it('stamps only through existing schema then applies newer migrations', async () => {
