@@ -11,7 +11,9 @@ import { ExactFactQueryRouterService } from '../../src/modules/exact-facts/appli
 import { PersistDocumentFactsUseCase } from '../../src/modules/exact-facts/application/persist-document-facts.use-case.js';
 import { TryExactFactChatAnswerUseCase } from '../../src/modules/exact-facts/application/try-exact-fact-chat-answer.use-case.js';
 import { PgDocumentExtractedFactRepository } from '../../src/modules/exact-facts/infrastructure/pg-document-extracted-fact.repository.js';
+import { EXACT_FACT_ABSTENTION_DE } from '../../src/modules/exact-facts/domain/exact-fact-abstention-messages.js';
 import { PgExactFactQueryRepository } from '../../src/modules/exact-facts/infrastructure/pg-exact-fact-query.repository.js';
+import { PgTenantExactFactChatSettingsRepository } from '../../src/modules/exact-facts/infrastructure/pg-tenant-exact-fact-chat-settings.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import { disabledExactFactChatDeps } from '../helpers/disabled-exact-fact-chat-deps.js';
@@ -94,8 +96,10 @@ describe('exact fact chat (Testcontainers Postgres)', () => {
       sourceConnectors: false,
       experimentalResearchModels: false,
       exactAnswers: true,
+      answerAbstention: true,
     });
     const factQuery = new PgExactFactQueryRepository(pool);
+    const chatSettings = new PgTenantExactFactChatSettingsRepository(pool);
     generation = new CitedChatGenerationService(
       threads,
       noopEmbedding,
@@ -104,7 +108,7 @@ describe('exact fact chat (Testcontainers Postgres)', () => {
       passthroughChatQueryRouter(),
       exactFactDeps.resolveFeatureFlags,
       new ExactFactQueryRouterService(),
-      new TryExactFactChatAnswerUseCase(factQuery)
+      new TryExactFactChatAnswerUseCase(factQuery, chatSettings)
     );
   }, 60_000);
 
@@ -140,5 +144,27 @@ describe('exact fact chat (Testcontainers Postgres)', () => {
       [assistant.id]
     );
     expect(citations.rows[0]?.count).toBe('1');
+  });
+
+  it('abstains on decoy predicate overlap when answerAbstention is enabled', async () => {
+    const thread = await threads.createThread(userId, [documentId], { scope: 'document' });
+    await threads.appendMessage(thread.id, 'user', 'Gewinn 2025');
+    const assistant = await threads.appendMessage(thread.id, 'assistant', '', {
+      generationStatus: 'pending',
+      generationPhase: 'retrieving',
+    });
+
+    const result = await generation.generate({
+      messageId: assistant.id,
+      threadId: thread.id,
+      userId,
+      userMessage: 'Gewinn 2025',
+      documentIds: [documentId],
+      scope: 'document',
+      locale: 'de',
+    });
+
+    expect(result.abstained).toBe(true);
+    expect(result.content).toBe(EXACT_FACT_ABSTENTION_DE);
   });
 });

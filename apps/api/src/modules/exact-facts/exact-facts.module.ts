@@ -10,12 +10,14 @@ import { TryExactFactChatAnswerUseCase } from './application/try-exact-fact-chat
 import { DocumentFactIndexQueueService } from './infrastructure/document-fact-index-queue.service.js';
 import { PgDocumentExtractedFactRepository } from './infrastructure/pg-document-extracted-fact.repository.js';
 import { PgExactFactQueryRepository } from './infrastructure/pg-exact-fact-query.repository.js';
+import { PgTenantExactFactChatSettingsRepository } from './infrastructure/pg-tenant-exact-fact-chat-settings.repository.js';
 
 @Module({
   imports: [FeatureFlagsModule],
   providers: [
     PgDocumentExtractedFactRepository,
     PgExactFactQueryRepository,
+    PgTenantExactFactChatSettingsRepository,
     PersistDocumentFactsUseCase,
     RebuildDocumentFactIndexUseCase,
     DocumentFactIndexQueueService,

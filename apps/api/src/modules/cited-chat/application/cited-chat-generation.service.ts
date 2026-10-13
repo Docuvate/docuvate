@@ -11,6 +11,10 @@ import {
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 import { ExactFactQueryRouterService } from '../../exact-facts/application/exact-fact-query-router.service.js';
 import { TryExactFactChatAnswerUseCase } from '../../exact-facts/application/try-exact-fact-chat-answer.use-case.js';
+import {
+  EXACT_FACT_ABSTENTION_DE,
+  EXACT_FACT_ABSTENTION_EN,
+} from '../../exact-facts/domain/exact-fact-abstention-messages.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
@@ -200,6 +204,7 @@ export class CitedChatGenerationService {
           locale,
           scope,
           documentIds,
+          answerAbstention: featureFlags.answerAbstention,
         });
         if (exactAnswer) {
           await this.citationsRepo.replaceCitations(
@@ -219,7 +224,19 @@ export class CitedChatGenerationService {
             finalizeOnlyIfInFlight: true,
           });
           await this.threads.touchThread(threadId);
-          return { content: exactAnswer.content, abstained: false };
+          return { content: exactAnswer.content, abstained: exactAnswer.abstained };
+        }
+        if (featureFlags.answerAbstention) {
+          const exactAbstention = locale === 'en' ? EXACT_FACT_ABSTENTION_EN : EXACT_FACT_ABSTENTION_DE;
+          await this.citationsRepo.replaceCitations(messageId, []);
+          await this.threads.updateMessageGeneration(messageId, {
+            content: exactAbstention,
+            generationStatus: 'done',
+            generationPhase: null,
+            finalizeOnlyIfInFlight: true,
+          });
+          await this.threads.touchThread(threadId);
+          return { content: exactAbstention, abstained: true };
         }
       }
     }

@@ -1341,3 +1341,28 @@ export type {
 export { DEFAULT_DUPLICATE_CLASSIFIER_MODEL } from './duplicate-default-model.js';
 export { generateSyntheticDuplicateDataset } from './duplicate-synthetic-data.js';
 export type { SyntheticDatasetSplit } from './duplicate-synthetic-data.js';
+export {
+  EXACT_FACT_MATCH_C5_SAMPLES,
+  EXACT_FACT_MATCH_LEGACY_THRESHOLD,
+} from './exact-fact-match-c5.fixture.js';
+export {
+  EXACT_FACT_MATCH_CALIBRATION,
+  EXACT_FACT_MATCH_C5_CALIBRATION_AUDIT,
+  EXACT_FACT_MATCH_DEFAULT_THRESHOLD,
+} from './exact-fact-match-calibration.js';
+export {
+  calibrateExactFactMatchThreshold,
+  estimateFellegiSunterWeights,
+  exactFactFullPredicateMatch,
+  exactFactMatchScoreTokens,
+  exactFactTokenCoverage,
+  fellegiSunterExactFactMatchScore,
+  normalizeExactFactMatchText,
+  sigmoidMatchScore,
+} from './exact-fact-match.js';
+export type {
+  ExactFactFellegiSunterWeights,
+  ExactFactMatchCalibration,
+  ExactFactMatchLabeledSample,
+  ExactFactThresholdCalibrationResult,
+} from './exact-fact-match.js';
