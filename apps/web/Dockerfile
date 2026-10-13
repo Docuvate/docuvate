@@ -19,6 +19,7 @@ COPY docs/connectors-oauth-setup.md docs/connectors-oauth-setup.md
 RUN pnpm --filter "@docuvate/web..." build
 
 FROM nginx:alpine
+RUN apk add --no-cache wget
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 80

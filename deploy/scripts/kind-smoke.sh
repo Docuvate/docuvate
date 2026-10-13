@@ -89,6 +89,8 @@ flatten_push() {
 build_app_images() {
   export DOCKER_BUILDKIT=1
   export BUILDX_NO_DEFAULT_ATTESTATIONS=1
+  # shellcheck source=../../scripts/ci/compose-local-image-names.sh
+  source "$ROOT/scripts/ci/compose-local-image-names.sh"
   run_docker compose -p docuvate -f docker-compose.yml build api web worker sftp-ingest
   flatten_push docuvate-api "docuvate-api:smoke"
   flatten_push docuvate-web "docuvate-web:smoke"

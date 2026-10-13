@@ -4,6 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
+# Local tags for compose build (avoid ghcr.io/:edge when building in CI).
+source "$ROOT/scripts/ci/compose-local-image-names.sh"
+
 COMPOSE=(docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.smoke.yml)
 
 bash scripts/ci/github-actions-docker-mirror.sh
