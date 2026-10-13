@@ -29,7 +29,7 @@ function row(predicateKey: string): ExactFactRow {
 }
 
 describe('exact fact match gate', () => {
-  it('uses recalibrated default 0.55 (below legacy 0.72 C5 gate)', () => {
+  it('uses recalibrated default 0.55 (below prior strict 0.72 C5 gate)', () => {
     expect(EXACT_FACT_MATCH_DEFAULT_THRESHOLD).toBe(0.55);
   });
 

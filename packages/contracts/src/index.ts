@@ -1343,7 +1343,7 @@ export { generateSyntheticDuplicateDataset } from './duplicate-synthetic-data.js
 export type { SyntheticDatasetSplit } from './duplicate-synthetic-data.js';
 export {
   EXACT_FACT_MATCH_C5_SAMPLES,
-  EXACT_FACT_MATCH_LEGACY_THRESHOLD,
+  EXACT_FACT_MATCH_PRIOR_STRICT_THRESHOLD,
 } from './exact-fact-match-c5.fixture.js';
 export {
   EXACT_FACT_MATCH_CALIBRATION,
