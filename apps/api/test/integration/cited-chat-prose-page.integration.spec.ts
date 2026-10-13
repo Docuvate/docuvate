@@ -14,11 +14,7 @@ import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/inf
 import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
-import {
-  createIntegrationResolveFeatureFlags,
-  enableLocalChatModelForIntegration,
-  enableLocalChatModelForIntegrationTenant,
-} from '../helpers/cited-chat-integration-feature-flags.js';
+import { disabledExactFactChatDeps } from '../helpers/disabled-exact-fact-chat-deps.js';
 import {
   parseRequestJsonRecord,
   readBooleanProperty,
@@ -46,10 +42,8 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
   let threads: PgDocumentChatThreadRepository;
   let citationsRepo: PgChatMessageCitationsRepository;
   let service: CitedChatGenerationService;
-  let restoreLocalChatFlag: () => void;
 
   beforeAll(async () => {
-    restoreLocalChatFlag = enableLocalChatModelForIntegration();
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
@@ -61,7 +55,6 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
     } finally {
       client.release();
     }
-    await enableLocalChatModelForIntegrationTenant(pool, userId);
 
     docId = randomUUID();
     const filler = 'X'.repeat(500);
@@ -108,13 +101,16 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
 
     threads = new PgDocumentChatThreadRepository(pool);
     citationsRepo = new PgChatMessageCitationsRepository(pool);
+    const exactFactDeps = disabledExactFactChatDeps();
     service = new CitedChatGenerationService(
       threads,
       noopEmbedding,
       new PgCitedChatRetrievalRepository(pool),
       citationsRepo,
       passthroughChatQueryRouter(),
-      createIntegrationResolveFeatureFlags(pool)
+      exactFactDeps.resolveFeatureFlags,
+      exactFactDeps.exactFactQueryRouter,
+      exactFactDeps.exactFactChat
     );
   }, 60_000);
 
@@ -124,7 +120,6 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
   });
 
   afterAll(async () => {
-    restoreLocalChatFlag();
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
   });
