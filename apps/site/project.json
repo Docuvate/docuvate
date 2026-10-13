@@ -7,6 +7,9 @@
     "build": { "command": "pnpm run build", "options": { "cwd": "apps/site" } },
     "dev": { "command": "pnpm run dev", "options": { "cwd": "apps/site" } },
     "lint": { "command": "pnpm run lint", "options": { "cwd": "apps/site" } },
-    "typecheck": { "command": "pnpm run typecheck", "options": { "cwd": "apps/site" } }
+    "typecheck": {
+      "command": "node scripts/materialize-compare.mjs && node scripts/enhance-openapi.mjs && node scripts/materialize-code-highlights.mjs && pnpm run typecheck",
+      "options": { "cwd": "apps/site" }
+    }
   }
 }

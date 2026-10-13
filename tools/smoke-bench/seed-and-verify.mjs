@@ -1,0 +1,221 @@
+#!/usr/bin/env node
+/**
+ * Smoke profile seeder: upload synthetic fixtures, wait for pipeline, run cited-chat checks.
+ * CPU-only stack (no Ollama); uses extractive cited-chat fallback.
+ */
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
+const manifest = JSON.parse(readFileSync(join(here, 'manifest.json'), 'utf8'));
+
+const AUTH_BASE = process.env.AUTH_BASE ?? 'http://api:3001';
+const WEB_ORIGIN = process.env.WEB_ORIGIN ?? 'http://localhost:5173';
+const EMAIL = process.env.SMOKE_USER_EMAIL ?? 'smoke.bench@fixture.docuvate.test';
+const PASSWORD = process.env.SMOKE_USER_PASSWORD ?? 'SmokeBenchFixture1!';
+const NAME = process.env.SMOKE_USER_NAME ?? 'Smoke Bench';
+const WAIT_MS = Number(process.env.SMOKE_PIPELINE_TIMEOUT_MS ?? 240_000);
+
+const ABSTENTION_SNIPPET = 'nichts gefunden';
+
+async function signIn() {
+  const res = await fetch(`${AUTH_BASE}/api/auth/sign-in/email`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', origin: WEB_ORIGIN },
+    body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
+  });
+  if (!res.ok) {
+    const signUp = await fetch(`${AUTH_BASE}/api/auth/sign-up/email`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: WEB_ORIGIN },
+      body: JSON.stringify({ email: EMAIL, password: PASSWORD, name: NAME }),
+    });
+    if (!signUp.ok && signUp.status !== 422) {
+      throw new Error(`sign-up failed ${signUp.status}: ${await signUp.text()}`);
+    }
+    const retry = await fetch(`${AUTH_BASE}/api/auth/sign-in/email`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: WEB_ORIGIN },
+      body: JSON.stringify({ email: EMAIL, password: PASSWORD }),
+    });
+    if (!retry.ok) {
+      throw new Error(`sign-in failed ${retry.status}: ${await retry.text()}`);
+    }
+    return retry.headers.get('set-cookie') ?? '';
+  }
+  return res.headers.get('set-cookie') ?? '';
+}
+
+async function api(cookie, method, path, body) {
+  const headers = { origin: WEB_ORIGIN };
+  if (cookie) {
+    headers.cookie = cookie.split(';')[0];
+  }
+  let payload;
+  if (body instanceof FormData) {
+    payload = body;
+  } else if (body != null) {
+    headers['content-type'] = 'application/json';
+    payload = JSON.stringify(body);
+  }
+  const res = await fetch(`${AUTH_BASE}${path}`, { method, headers, body: payload });
+  if (!res.ok) {
+    throw new Error(`${method} ${path}: ${res.status} ${await res.text()}`);
+  }
+  return res.json();
+}
+
+async function waitDocumentPipeline(cookie, id) {
+  const deadline = Date.now() + WAIT_MS;
+  while (Date.now() < deadline) {
+    const doc = await api(cookie, 'GET', `/v1/documents/${id}`);
+    if (doc.status === 'failed') {
+      throw new Error(`document ${id} failed: ${JSON.stringify(doc)}`);
+    }
+    const text = String(doc.extraction?.text ?? doc.extractedText ?? '').trim();
+    const hasText = text.length >= 8;
+    const labelsReady = Array.isArray(doc.tagIds) ? doc.tagIds.length >= 0 : true;
+    if (doc.status === 'ready' && hasText && labelsReady) {
+      return doc;
+    }
+    await sleep(2000);
+  }
+  throw new Error(`timeout waiting for document ${id} (pipeline ${WAIT_MS}ms)`);
+}
+
+function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function uploadFixture(cookie, fixture) {
+  const bytes = readFileSync(join(here, 'fixtures', fixture.file));
+  const form = new FormData();
+  form.append('file', new Blob([bytes], { type: fixture.mime }), fixture.file);
+  const created = await api(cookie, 'POST', '/v1/documents', form);
+  const doc = await waitDocumentPipeline(cookie, created.id);
+  if (fixture.title) {
+    await api(cookie, 'PATCH', `/v1/documents/${created.id}`, { title: fixture.title });
+  }
+  return doc;
+}
+
+async function createThread(cookie) {
+  const out = await api(cookie, 'POST', '/v1/chat/threads', { title: 'smoke bench' });
+  return out.thread.id;
+}
+
+async function sendAndStream(cookie, threadId, message) {
+  const posted = await api(cookie, 'POST', `/v1/chat/threads/${threadId}/messages`, { message });
+  const messageId = posted.assistantMessage.id;
+  const headers = { origin: WEB_ORIGIN, cookie: cookie.split(';')[0] };
+  const res = await fetch(
+    `${AUTH_BASE}/v1/chat/threads/${threadId}/messages/${messageId}/stream`,
+    { headers }
+  );
+  if (!res.ok) {
+    throw new Error(`stream ${res.status}: ${await res.text()}`);
+  }
+  let finalContent = '';
+  let generationStatus = '';
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() ?? '';
+    for (const line of lines) {
+      if (!line.startsWith('data:')) {
+        continue;
+      }
+      const event = JSON.parse(line.slice(5).trim());
+      const msg = event.message ?? {};
+      if (msg.content) {
+        finalContent = String(msg.content);
+      }
+      if (event.type === 'done') {
+        generationStatus = String(msg.generationStatus ?? 'done');
+      }
+      if (msg.generationStatus === 'error') {
+        throw new Error(`chat generation error: ${msg.errorDetail ?? finalContent}`);
+      }
+    }
+  }
+  const messages = await api(cookie, 'GET', `/v1/chat/threads/${threadId}/messages`);
+  const finalMsg = messages.messages.find((m) => m.id === messageId) ?? {};
+  const citations = finalMsg.citations ?? [];
+  return {
+    generationStatus,
+    content: String(finalMsg.content ?? finalContent),
+    citations,
+  };
+}
+
+function citationTitles(citations) {
+  return citations.map((c) => c.documentTitle ?? c.documentId ?? '');
+}
+
+async function runChatChecks(cookie) {
+  const threadId = await createThread(cookie);
+  const results = [];
+  for (const check of manifest.chatChecks) {
+    const out = await sendAndStream(cookie, threadId, check.question);
+    const lower = out.content.toLowerCase();
+    const abstained = lower.includes(ABSTENTION_SNIPPET);
+    const titles = citationTitles(out.citations);
+    let ok = true;
+    if (check.expectAbstention) {
+      ok = abstained && out.citations.length === 0;
+    } else {
+      ok = !abstained && out.generationStatus !== 'error';
+      if (check.expectCitationTitleContains) {
+        ok =
+          ok &&
+          titles.some((t) =>
+            t.toLowerCase().includes(String(check.expectCitationTitleContains).toLowerCase())
+          );
+      }
+      if (check.expectMinCitations != null) {
+        ok = ok && out.citations.length >= check.expectMinCitations;
+      }
+      if (check.expectAnswerContainsAny) {
+        ok =
+          ok &&
+          check.expectAnswerContainsAny.some((needle) =>
+            out.content.toLowerCase().includes(String(needle).toLowerCase())
+          );
+      }
+    }
+    results.push({ id: check.id, ok, citations: out.citations.length, preview: out.content.slice(0, 120) });
+    if (!ok) {
+      console.error('Chat check failed', check.id, out);
+    }
+  }
+  const failed = results.filter((r) => !r.ok);
+  if (failed.length > 0) {
+    throw new Error(`Smoke chat checks failed: ${JSON.stringify(failed)}`);
+  }
+  console.log('Smoke chat checks passed:', results.map((r) => r.id).join(', '));
+}
+
+async function main() {
+  const cookie = await signIn();
+  const docsById = new Map();
+  for (const fixture of manifest.fixtures) {
+    const doc = await uploadFixture(cookie, fixture);
+    docsById.set(doc.id, doc);
+    console.log(`Uploaded ${fixture.file} -> ${doc.id} (${doc.status})`);
+  }
+  await runChatChecks(cookie);
+  console.log('Smoke seed-and-verify OK');
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

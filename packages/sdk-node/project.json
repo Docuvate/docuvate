@@ -1,0 +1,12 @@
+{
+  "name": "sdk",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/sdk-node",
+  "projectType": "library",
+  "targets": {
+    "build": { "command": "pnpm run build", "options": { "cwd": "packages/sdk-node" } },
+    "typecheck": { "command": "pnpm run typecheck", "options": { "cwd": "packages/sdk-node" } },
+    "test": { "command": "pnpm run test", "options": { "cwd": "packages/sdk-node" } },
+    "test-ci": { "command": "pnpm run test", "options": { "cwd": "packages/sdk-node" } }
+  }
+}

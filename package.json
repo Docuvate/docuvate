@@ -32,6 +32,7 @@
     "db:status": "bash scripts/db/typeorm-cli.sh status",
     "db:new": "bash scripts/db/typeorm-cli.sh new",
     "db:generate": "bash scripts/db/typeorm-cli.sh generate",
+    "smoke": "bash scripts/ci/smoke.sh",
     "docs:check-mermaid": "bash scripts/ci/check-mermaid-markdown.sh",
     "ux:metrics": "node tools/ux-metrics/run.mjs"
   },

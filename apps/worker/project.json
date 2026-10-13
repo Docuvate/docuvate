@@ -1,0 +1,12 @@
+{
+  "name": "worker",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/worker/src",
+  "projectType": "application",
+  "targets": {
+    "test-ci": {
+      "command": "bash scripts/ci/worker-ci.sh",
+      "options": { "cwd": "apps/worker" }
+    }
+  }
+}

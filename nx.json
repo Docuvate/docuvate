@@ -29,22 +29,14 @@
       "inputs": ["default", "^production"],
       "cache": true
     },
+    "test-ci": {
+      "dependsOn": ["^build", "build"],
+      "inputs": ["default", "^production"],
+      "cache": true
+    },
     "typecheck": {
       "inputs": ["default", "^production"],
       "cache": true
     }
   },
-  "plugins": [
-    {
-      "plugin": "@nx/vite/plugin",
-      "options": {
-        "buildTargetName": "build",
-        "testTargetName": "test",
-        "serveTargetName": "dev",
-        "previewTargetName": "preview",
-        "serveStaticTargetName": "serve-static",
-        "typecheckTargetName": "typecheck"
-      }
-    }
-  ]
 }

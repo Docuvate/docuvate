@@ -22,9 +22,8 @@ done
 rm -rf "$OUT/doc" "$OUT/test" "$OUT/README.md" "$OUT/pubspec.yaml" "$OUT/analysis_options.yaml" "$OUT/.gitignore" 2>/dev/null || true
 
 FLUTTER_BIN="${FLUTTER_BIN:-flutter}"
-if ! command -v "$FLUTTER_BIN" >/dev/null 2>&1; then
-  echo "generate-flutter-sdk: $FLUTTER_BIN not found; run build_runner in packages/sdk-flutter before dart analyze" >&2
-  exit 1
+if command -v "$FLUTTER_BIN" >/dev/null 2>&1; then
+  (cd "$ROOT/packages/sdk-flutter" && "$FLUTTER_BIN" pub get && dart run build_runner build --delete-conflicting-outputs)
+else
+  echo "generate-flutter-sdk: $FLUTTER_BIN not found; skipping build_runner (nightly runs full Flutter SDK checks)"
 fi
-
-(cd "$ROOT/packages/sdk-flutter" && "$FLUTTER_BIN" pub get && dart run build_runner build --delete-conflicting-outputs)
