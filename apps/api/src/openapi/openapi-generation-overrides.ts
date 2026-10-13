@@ -3,11 +3,11 @@
 import type { TestingModuleBuilder } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
-import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { PaperlessImportQueueService } from '../modules/connectors/infrastructure/adapters/paperless/paperless-import.queue.js';
 import { DocumentChatGenerationCancelRegistry } from '../modules/documents/infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from '../modules/documents/infrastructure/document-chat-generation-queue.service.js';
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
+import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { MlRetrainQueueService } from '../modules/model-registry/infrastructure/ml-retrain-queue.service.js';
 import { PG_POOL } from '../shared/infrastructure/database/tokens.js';
 
