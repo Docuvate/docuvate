@@ -6,11 +6,18 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+if [[ -f "$ROOT/.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source "$ROOT/.env"
+  set +a
+fi
+
 COMPOSE=(docker compose -f docker-compose.yml)
 WEB_URL="${DOCUVATE_DOCTOR_WEB_URL:-http://localhost:5173}"
 API_READY_URL="${DOCUVATE_DOCTOR_API_READY_URL:-http://localhost:3001/health/ready}"
 WORKER_HEALTH_URL="${DOCUVATE_DOCTOR_WORKER_URL:-http://localhost:8000/v1/health}"
-OLLAMA_MODEL="${OLLAMA_MODEL:-qwen2.5:1.5b}"
+OLLAMA_MODEL="${OLLAMA_MODEL:-qwen2.5:3b}"
 
 failures=0
 warn() { echo "WARN: $*"; }

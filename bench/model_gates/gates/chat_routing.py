@@ -22,7 +22,6 @@ INTENT_PATH = (
     ROOT / "apps" / "api" / "src" / "modules" / "cited-chat" / "domain" / "chat-intent-prototypes.json"
 )
 
-
 def _cosine(a: list[float], b: list[float]) -> float:
     dot = sum(x * y for x, y in zip(a, b, strict=True))
     na = sum(x * x for x in a) ** 0.5
@@ -75,14 +74,31 @@ def _classify(query_vec: list[float], proto: dict[str, Any]) -> str:
     return best_name
 
 
-def _resolve_follow_up(current: str, prior: str | None, cur_vec: list[float], prior_vec: list[float] | None) -> str:
-    if not prior or not prior_vec:
-        return current.strip()
-    if len(current.strip()) > 120:
-        return current.strip()
+def _resolve_follow_up(
+    current: str,
+    prior: str | None,
+    cur_vec: list[float],
+    prior_vec: list[float] | None,
+    proto: dict[str, Any],
+) -> str:
+    current = current.strip()
+    prior_s = prior.strip() if prior else ""
+    if not prior_s or not prior_vec:
+        return current
+    if len(current) > 120:
+        return current
+    standalone = _classify(cur_vec, proto)
+    if standalone in ("smalltalk", "out_of_scope", "stats"):
+        return current
     if _cosine(cur_vec, prior_vec) >= 0.55:
-        return f"{prior.strip()} {current.strip()}".strip()
-    return current.strip()
+        return f"{prior_s} {current}".strip()
+    if (
+        len(current) <= 80
+        and standalone == "document_qa"
+        and _classify(prior_vec, proto) == "document_qa"
+    ):
+        return f"{prior_s} {current}".strip()
+    return current
 
 
 def run_chat_routing_gate() -> GateRunResult:
@@ -120,9 +136,16 @@ def run_chat_routing_gate() -> GateRunResult:
         expected = str(case.get("expected_route", "document_qa"))
         cur_vec = embed_query(question)
         prior_vec = embed_query(prior_s) if prior_s else None
-        resolved = _resolve_follow_up(question, prior_s, cur_vec, prior_vec)
-        route_vec = embed_query(resolved) if resolved != question.strip() else cur_vec
-        predicted = _classify(route_vec, proto)
+        intent_on_current = _classify(cur_vec, proto)
+        if intent_on_current in ("smalltalk", "out_of_scope"):
+            predicted = intent_on_current
+            resolved = question.strip()
+        else:
+            resolved = _resolve_follow_up(question, prior_s, cur_vec, prior_vec, proto)
+            route_vec = embed_query(resolved) if resolved != question.strip() else cur_vec
+            predicted = _classify(route_vec, proto)
+            if predicted == "document_qa" and intent_on_current == "stats":
+                predicted = "stats"
         intent_total += 1
         if predicted == expected:
             intent_hits += 1

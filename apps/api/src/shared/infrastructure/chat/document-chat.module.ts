@@ -4,6 +4,7 @@ import { Module } from '@nestjs/common';
 
 import { DOCUMENT_CHAT_PORT } from '../../domain/ports.js';
 import { DocumentChatRouterAdapter } from './document-chat.router.adapter.js';
+import { OllamaWarmupService } from './ollama-warmup.service.js';
 import { MockChatProvider } from './providers/mock-chat.provider.js';
 import { OllamaChatProvider } from './providers/ollama-chat.provider.js';
 import { RagOllamaChatProvider } from './providers/rag-ollama-chat.provider.js';
@@ -18,6 +19,7 @@ import { WorkerDonutChatProvider } from './providers/worker-donut-chat.provider.
     WorkerContextChatProvider,
     WorkerDonutChatProvider,
     DocumentChatRouterAdapter,
+    OllamaWarmupService,
     { provide: DOCUMENT_CHAT_PORT, useExisting: DocumentChatRouterAdapter },
   ],
   exports: [DOCUMENT_CHAT_PORT, DocumentChatRouterAdapter],

@@ -20,6 +20,17 @@ Application images default to `ghcr.io/docuvate/docuvate-{api,web,worker}:edge`.
 3. `docker compose up -d` — the `migrate` one-shot applies schema changes before API and worker start.
 4. Run `bash scripts/doctor.sh` and fix any reported failures before handing users the stack.
 
+### PostgreSQL 18 data directory (Compose volume mount)
+
+PostgreSQL **18** images expect the cluster under **`/var/lib/postgresql`** (not the older `/var/lib/postgresql/data` path). Compose mounts the named volume **`pgdata`** there (`docker-compose.yml`). Docker names that volume **`docuvate_pgdata`** when the Compose project name is `docuvate`.
+
+If you upgraded from an earlier Compose file that mounted `pgdata` at `/var/lib/postgresql/data`, Postgres may have written data into a **different** directory inside the volume. Before `docker compose up` on PG 18:
+
+- Inspect the volume (`docker volume inspect docuvate_pgdata`) and confirm data lives under the path the new mount uses, or
+- Migrate data with `pg_dump` / `pg_restore` into a fresh volume mounted at `/var/lib/postgresql`.
+
+When the database already contains Docuvate tables but the TypeORM **`migrations`** table is empty (legacy installs), the migrate job **records a baseline** (marks known migrations as applied) instead of re-running `InitialSchema` (which would fail on extensions such as `pgcrypto`). New migrations after that baseline still apply normally.
+
 Never use `docker compose down -v` on production data: it deletes Postgres and orphan policies only protect MinIO when the DB is empty.
 
 ## Feature flags

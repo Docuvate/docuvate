@@ -12,6 +12,8 @@ TypeORM owns **all DDL** in the API repo. See [ADR 017](../adr/017-typeorm-migra
 
 **Compose / CI:** Postgres **18.6** → one-shot **`migrate`** job → `db-storage-guard` → api/worker. Local CLI: `pnpm db:*` (wraps `scripts/db/typeorm-cli.sh`).
 
+**Legacy baseline:** If `documents` exists but **`migrations`** is empty, `run-database-migrations.ts` stamps the registered migration chain before running pending steps (avoids re-applying `InitialSchema` on existing clusters). `initial-schema-up.sql` uses `CREATE EXTENSION IF NOT EXISTS pgcrypto`.
+
 ## Add a schema change
 
 1. **Entity** — Update or add under `entities/`. Regenerate from DB only when intentionally syncing: `node scripts/db/sync-typeorm-entities.mjs` (prefer hand-editing for small deltas).

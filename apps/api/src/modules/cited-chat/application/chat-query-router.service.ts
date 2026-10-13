@@ -39,6 +39,14 @@ export class ChatQueryRouterService {
     const currentVec = embeddings[0] ?? [];
     const priorVec = input.priorUserMessage ? embeddings[1] ?? null : null;
 
+    const intentOnCurrent = classifyChatRouteIntent(currentVec);
+    if (intentOnCurrent === 'smalltalk') {
+      return { kind: 'answered', content: smallTalkReply(input.locale) };
+    }
+    if (intentOnCurrent === 'out_of_scope') {
+      return { kind: 'answered', content: outOfScopeReply(input.locale) };
+    }
+
     const resolvedQuery = resolveFollowUpQuery(input.userMessage, input.priorUserMessage, {
       current: currentVec,
       prior: priorVec,
@@ -50,14 +58,11 @@ export class ChatQueryRouterService {
       routeVector = resolvedEmbed.embeddings[0] ?? currentVec;
     }
 
-    const intent = classifyChatRouteIntent(routeVector);
+    let intent = classifyChatRouteIntent(routeVector);
+    if (intent === 'document_qa' && intentOnCurrent === 'stats') {
+      intent = 'stats';
+    }
 
-    if (intent === 'smalltalk') {
-      return { kind: 'answered', content: smallTalkReply(input.locale) };
-    }
-    if (intent === 'out_of_scope') {
-      return { kind: 'answered', content: outOfScopeReply(input.locale) };
-    }
     if (intent === 'stats' && input.scope === 'library') {
       const statsAnswer = await this.libraryStats.tryAnswer(
         input.userId,
