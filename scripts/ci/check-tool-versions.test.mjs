@@ -42,6 +42,7 @@ const FIXTURE_COPY = [
   'docker-compose.yml',
   'docker-compose.ci.yml',
   '.github/workflows/ci.yml',
+  '.github/workflows/nightly.yml',
   'scripts/ci/mermaid-chrome-setup.sh',
   'scripts/ci/run-local-ci-jobs.sh',
   'scripts/ci/lib-ephemeral-postgres.sh',
@@ -100,11 +101,10 @@ test('detects unpinned pip install uv', () => {
 test('fails when a single uv pin drifts in ci.yml', () => {
   const root = mkdtempSync(join(tmpdir(), 'tv-ci-one-'));
   copyRepoFixture(root, (files) => {
-    files['.github/workflows/ci.yml'] = replaceFirst(
-      files['.github/workflows/ci.yml'],
-      uvNeedle,
-      wrongUv
-    );
+    const combined = `${files['.github/workflows/ci.yml'] ?? ''}\n${files['.github/workflows/nightly.yml'] ?? ''}`;
+    const drifted = replaceFirst(combined, uvNeedle, wrongUv);
+    files['.github/workflows/ci.yml'] = drifted;
+    files['.github/workflows/nightly.yml'] = '';
     return files;
   });
   const errors = collectToolVersionErrors(root);
@@ -114,10 +114,9 @@ test('fails when a single uv pin drifts in ci.yml', () => {
 test('fails uv drift in all ci.yml occurrences', () => {
   const root = mkdtempSync(join(tmpdir(), 'tv-ci-'));
   copyRepoFixture(root, (files) => {
-    files['.github/workflows/ci.yml'] = files['.github/workflows/ci.yml'].replaceAll(
-      uvNeedle,
-      wrongUv
-    );
+    const drift = (text) => (text ?? '').replaceAll(uvNeedle, wrongUv);
+    files['.github/workflows/ci.yml'] = drift(files['.github/workflows/ci.yml']);
+    files['.github/workflows/nightly.yml'] = drift(files['.github/workflows/nightly.yml']);
     return files;
   });
   const errors = collectToolVersionErrors(root);
