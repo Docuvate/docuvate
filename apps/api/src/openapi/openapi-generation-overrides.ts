@@ -6,6 +6,7 @@ import { getDataSourceToken } from '@nestjs/typeorm';
 import { PaperlessImportQueueService } from '../modules/connectors/infrastructure/adapters/paperless/paperless-import.queue.js';
 import { DocumentChatGenerationCancelRegistry } from '../modules/documents/infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from '../modules/documents/infrastructure/document-chat-generation-queue.service.js';
+import { DocumentFactIndexQueueService } from '../modules/exact-facts/infrastructure/document-fact-index-queue.service.js';
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
 import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { MlRetrainQueueService } from '../modules/model-registry/infrastructure/ml-retrain-queue.service.js';
@@ -72,6 +73,8 @@ export function applyOpenApiGenerationOverrides(
     .overrideProvider(PaperlessImportQueueService)
     .useValue(noopQueue)
     .overrideProvider(EmbeddingDensityCalibrationQueueService)
+    .useValue(noopQueue)
+    .overrideProvider(DocumentFactIndexQueueService)
     .useValue(noopQueue)
     .overrideProvider(DocumentChatGenerationCancelRegistry)
     .useValue(noopCancelRegistry);
