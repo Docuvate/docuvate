@@ -13,7 +13,7 @@ const FEATURE_FLAGS_DEFAULT: FeatureFlagsDto = {
   exactAnswers: false,
   smartDuplicates: false,
   answerAbstention: false,
-  learnedValueTypes: false,
+  learnedValueTypes: true,
   layoutKeyValueRoles: false,
   localChatModel: false,
 };
