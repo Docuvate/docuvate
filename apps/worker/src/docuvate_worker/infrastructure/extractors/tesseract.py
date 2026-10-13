@@ -11,6 +11,9 @@ from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic
 class TesseractExtractor(ExtractorEngine):
     """Optional last-resort OCR — set EXTRACTOR_ENGINE=tesseract and install [tesseract] extra."""
 
+    # Registered in third-party-models.manifest.json (CI-enforced).
+    TESSERACT_LANG_PACK_ID = "tesseract:deu+eng"
+
     name = "tesseract"
 
     def supports(self, mime_type: str) -> bool:

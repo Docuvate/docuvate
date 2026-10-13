@@ -15,6 +15,9 @@ from docuvate_worker.infrastructure.extractors.paddle_errors import map_paddle_e
 
 logger = logging.getLogger(__name__)
 
+# Registered in third-party-models.manifest.json (CI-enforced).
+PADDLE_OCR_BUNDLE_ID = "paddleocr:PP-OCRv4-mobile-latin"
+
 _ocr_instance: Any | None = None
 
 

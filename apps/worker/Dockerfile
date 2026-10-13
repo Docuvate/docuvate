@@ -28,6 +28,7 @@ COPY scripts/ci/assert-worker-cpu-pip-freeze.py scripts/ci/assert-worker-cpu-pip
 RUN TYPST_BIN_DIR="$(bash scripts/ci/install-typst.sh | sed -n 's/^typst_bin_dir=//p')" \
   && install -m 0755 "${TYPST_BIN_DIR}/typst" /usr/local/bin/typst \
   && typst --version
+COPY THIRD_PARTY_MODELS.md THIRD_PARTY_NOTICES.md third-party-models.manifest.json ./
 COPY apps/worker ./apps/worker
 ENV FLAGS_use_mkldnn=0
 ENV PYTHONPATH=/app/apps/worker/src

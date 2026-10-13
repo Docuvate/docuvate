@@ -1,0 +1,178 @@
+{
+  "version": 1,
+  "policy": {
+    "forbidden_training_datasets": ["FUNSD", "XFUND", "DocVQA", "DocILE"],
+    "forbidden_load_key_substrings": ["funsd", "xfund", "docile", "lilt-roberta", "lilt-gottbert"],
+    "forbidden_substring_exceptions": ["donut-base-finetuned-docvqa"]
+  },
+  "models": [
+    {
+      "id": "multilingual-e5-small",
+      "display_name": "intfloat/multilingual-e5-small",
+      "load_keys": [
+        "intfloat/multilingual-e5-small",
+        "Qdrant/multilingual-e5-small-onnx"
+      ],
+      "source": "https://huggingface.co/intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "content_sha256": null,
+      "license_spdx": "MIT",
+      "size_bytes_approx": 134217728,
+      "purpose": "Central document and query embeddings (384 dimensions) for representation, retrieval, and tag suggestions.",
+      "shipped_in_default_cpu_image": true,
+      "training_data_summary": "Microsoft E5 contrastive pre-training on public web data; not fine-tuned on FUNSD, XFUND, or DocVQA."
+    },
+    {
+      "id": "bge-reranker-v2-m3-int8",
+      "display_name": "BAAI/bge-reranker-v2-m3-int8",
+      "load_keys": [
+        "BAAI/bge-reranker-v2-m3-int8",
+        "BAAI/bge-reranker-v2-m3",
+        "BAAI/bge-reranker-base",
+        "Xenova/ms-marco-MiniLM-L-6-v2",
+        "Xenova/ms-marco-MiniLM-L-12-v2"
+      ],
+      "source": "https://huggingface.co/BAAI/bge-reranker-v2-m3",
+      "revision": "default",
+      "content_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "size_bytes_approx": 230686720,
+      "purpose": "Multilingual cross-encoder reranking for cited document chat RAG retrieval.",
+      "shipped_in_default_cpu_image": true,
+      "training_data_summary": "BGE reranker family; permissive-license variants only are allowlisted in worker code."
+    },
+    {
+      "id": "paddle-pp-ocrv4-mobile-latin",
+      "display_name": "PaddleOCR PP-OCRv4 mobile (Latin / German)",
+      "load_keys": ["paddleocr:PP-OCRv4-mobile-latin"],
+      "source": "https://github.com/PaddlePaddle/PaddleOCR",
+      "revision": "PP-OCRv4",
+      "content_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "size_bytes_approx": 16777216,
+      "purpose": "OCR detection and recognition for scanned documents when the pipeline engine uses PaddleOCR.",
+      "shipped_in_default_cpu_image": true,
+      "training_data_summary": "PaddleOCR PP-OCRv4 mobile weights; Latin script pack covers German and English receipts."
+    },
+    {
+      "id": "ollama-qwen2.5-3b",
+      "display_name": "Qwen2.5 3B Instruct (GGUF via Ollama)",
+      "load_keys": ["qwen2.5:3b"],
+      "source": "https://ollama.com/library/qwen2.5",
+      "revision": "qwen2.5:3b",
+      "content_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "size_bytes_approx": 2013265920,
+      "purpose": "Default local LLM for RAG document chat when Ollama is enabled in Compose.",
+      "shipped_in_default_cpu_image": false,
+      "training_data_summary": "Alibaba Qwen2.5 instruct tuning; pulled at deploy time via Ollama, not baked into the worker image."
+    },
+    {
+      "id": "ollama-eval-candidates",
+      "display_name": "Optional Ollama chat models (memory catalog)",
+      "load_keys": [
+        "llama3.2:3b",
+        "gemma3:4b",
+        "qwen3:4b",
+        "phi4-mini:3.8b-q4_K_M",
+        "qwen2.5:7b"
+      ],
+      "source": "https://ollama.com/library",
+      "revision": "tags-vary",
+      "content_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "size_bytes_approx": 3221225472,
+      "purpose": "Documented Ollama tags for compose memory guidance; not pulled unless configured.",
+      "shipped_in_default_cpu_image": false,
+      "training_data_summary": "Third-party GGUF artifacts; see each model card on ollama.com."
+    },
+    {
+      "id": "ollama-qwen2.5-1.5b",
+      "display_name": "Qwen2.5 1.5B Instruct (GGUF via Ollama)",
+      "load_keys": ["qwen2.5:1.5b"],
+      "source": "https://ollama.com/library/qwen2.5",
+      "revision": "qwen2.5:1.5b",
+      "content_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "size_bytes_approx": 1006632960,
+      "purpose": "Alternate small local LLM default in some API generation paths and RAM-constrained profiles.",
+      "shipped_in_default_cpu_image": false,
+      "training_data_summary": "Alibaba Qwen2.5 instruct tuning; pulled at deploy time via Ollama."
+    },
+    {
+      "id": "xlm-roberta-extractive-reader",
+      "display_name": "deepset/xlm-roberta-base-squad2-distilled",
+      "load_keys": ["deepset/xlm-roberta-base-squad2-distilled"],
+      "source": "https://huggingface.co/deepset/xlm-roberta-base-squad2-distilled",
+      "revision": "default",
+      "content_sha256": null,
+      "license_spdx": "MIT",
+      "size_bytes_approx": 1124073472,
+      "purpose": "Optional extractive QA reader span selection before generative chat (lazy-loaded transformers pipeline).",
+      "shipped_in_default_cpu_image": false,
+      "training_data_summary": "Distilled XLM-RoBERTa on SQuAD 2.0; not DocVQA."
+    },
+    {
+      "id": "donut-docvqa-optional",
+      "display_name": "naver-clova-ix/donut-base-finetuned-docvqa",
+      "load_keys": ["naver-clova-ix/donut-base-finetuned-docvqa"],
+      "source": "https://huggingface.co/naver-clova-ix/donut-base-finetuned-docvqa",
+      "revision": "default",
+      "content_sha256": null,
+      "license_spdx": "MIT",
+      "size_bytes_approx": 838860800,
+      "purpose": "Optional GPU-only visual document QA when the worker is built with the donut extra.",
+      "shipped_in_default_cpu_image": false,
+      "allow_forbidden_substrings": true,
+      "training_data_summary": "Fine-tuned on DocVQA. Not downloaded in the default CPU worker image; GPU optional extra only."
+    },
+    {
+      "id": "docling-layout-optional",
+      "display_name": "Docling layout pipeline (bundled models)",
+      "load_keys": ["docling:layout-default"],
+      "source": "https://github.com/docling-project/docling",
+      "revision": "package-default",
+      "content_sha256": null,
+      "license_spdx": "MIT",
+      "size_bytes_approx": 524288000,
+      "purpose": "Optional layout PDF extraction when EXTRACTOR_ENGINE=docling and the docling worker extra is installed.",
+      "shipped_in_default_cpu_image": false,
+      "training_data_summary": "Docling default layout models resolved by the docling package at runtime."
+    },
+    {
+      "id": "tesseract-ocr-optional",
+      "display_name": "Tesseract OCR (system language packs)",
+      "load_keys": ["tesseract:deu+eng"],
+      "source": "https://github.com/tesseract-ocr/tesseract",
+      "revision": "system-pack",
+      "content_sha256": null,
+      "license_spdx": "Apache-2.0",
+      "size_bytes_approx": 52428800,
+      "purpose": "Optional last-resort OCR when EXTRACTOR_ENGINE=tesseract and pytesseract is installed.",
+      "shipped_in_default_cpu_image": false,
+      "training_data_summary": "Classic OCR engine; language data installed separately on the host or image."
+    }
+  ],
+  "scan": {
+    "python_globs": ["apps/worker/src/docuvate_worker/**/*.py"],
+    "typescript_paths": [
+      "apps/api/src/shared/infrastructure/chat/ollama-chat-request.ts",
+      "apps/api/src/shared/infrastructure/chat/document-chat-llm-config.ts",
+      "apps/api/src/modules/settings/application/document-chat-provider-catalog.ts",
+      "apps/api/src/modules/documents/application/run-document-chat-generation.use-case.ts",
+      "apps/api/src/modules/settings/application/ollama-compose-memory.ts"
+    ],
+    "yaml_paths": [
+      "docker-compose.yml",
+      "deploy/kustomize/base/configmap-docuvate.yaml",
+      "deploy/helm/docuvate/templates/configmap.yaml"
+    ],
+    "exclude_path_substrings": [
+      "/tests/",
+      ".spec.ts",
+      ".integration.spec.ts",
+      "/bench/",
+      "/experiments/"
+    ]
+  }
+}

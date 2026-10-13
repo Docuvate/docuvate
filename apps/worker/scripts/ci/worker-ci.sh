@@ -10,4 +10,5 @@ uv pip install --python "$VENV/bin/python" -e ".[dev]" >/dev/null
 "$VENV/bin/ruff" check src
 "$VENV/bin/pyright"
 "$VENV/bin/mypy"
+"$VENV/bin/python" -m docuvate_worker.infrastructure.ml.third_party_models
 "$VENV/bin/pytest" tests -q --ignore=tests/integration --ignore=tests/test_pipeline_extractor_equivalence.py --maxfail=1

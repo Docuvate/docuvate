@@ -16,6 +16,7 @@ FROM node:24.21.0-alpine AS runner
 RUN apk add --no-cache bash postgresql-client
 WORKDIR /app
 ENV NODE_ENV=production
+COPY THIRD_PARTY_MODELS.md THIRD_PARTY_NOTICES.md third-party-models.manifest.json /opt/docuvate/
 COPY --from=build /app /app
 WORKDIR /app/apps/api
 EXPOSE 3001

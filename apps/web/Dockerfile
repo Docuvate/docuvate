@@ -21,5 +21,6 @@ RUN pnpm --filter "@docuvate/web..." build
 FROM nginx:alpine
 RUN apk add --no-cache wget
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY THIRD_PARTY_MODELS.md THIRD_PARTY_NOTICES.md third-party-models.manifest.json /opt/docuvate/
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 80
