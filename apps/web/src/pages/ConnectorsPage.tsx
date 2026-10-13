@@ -27,10 +27,10 @@ import {
   listConnectorInstallations,
   startConnectorOAuth,
 } from '../lib/api';
-import { isSourceConnectorPlugin, useFeatureFlags } from '../lib/remoteConfig';
 import { formatConnectorError } from '../lib/connectorErrors';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../lib/connectorOAuthSetupDoc';
+import { isSourceConnectorPlugin, useFeatureFlags } from '../lib/remoteConfig';
 import { routes } from '../lib/routes';
 
 function capabilityLabel(t: (key: string) => string, role: 'source' | 'sink') {

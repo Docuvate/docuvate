@@ -31,9 +31,9 @@ import {
 import { formatUserFacingError } from '../lib/apiErrors';
 import { authClient, authSessionUserEmail } from '../lib/auth-client';
 import { performSignOut } from '../lib/authSignOut';
-import { useFeatureFlags } from '../lib/remoteConfig';
 import { chatProviderLabel } from '../lib/chatProviderLabels';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
+import { useFeatureFlags } from '../lib/remoteConfig';
 import { readLocationStateBoolean } from '../lib/routerLocationState';
 import { routes } from '../lib/routes';
 import { settingsChatStatusPresentation } from '../lib/settingsChatStatus';

@@ -9,7 +9,6 @@ import type {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useFeatureFlags } from '../../lib/remoteConfig';
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
@@ -22,6 +21,7 @@ import {
   firstPageBelowSsimFloor,
   reconstructionQualityTone,
 } from '../../lib/layoutReconstructionQuality';
+import { useFeatureFlags } from '../../lib/remoteConfig';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';

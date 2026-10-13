@@ -5,8 +5,8 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAdvancedFeaturesEnabled } from '../../lib/advancedFeatures';
-import { useFeatureFlags } from '../../lib/remoteConfig';
 import { hasExtractedContent, isExtractionPending } from '../../lib/documentExtractionState';
+import { useFeatureFlags } from '../../lib/remoteConfig';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
