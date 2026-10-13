@@ -10,6 +10,8 @@ import {
   type ExtractionPort,
   OBJECT_STORAGE,
   type ObjectStorage,
+  RECOGNIZED_FIELD_REPOSITORY,
+  type RecognizedFieldRepository,
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
@@ -34,7 +36,9 @@ export class RunExtractionUseCase {
     private readonly persistRepresentation: PersistDocumentRepresentationUseCase,
     private readonly densityRepo: PgEmbeddingDensityRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
-    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
+    @Inject(RECOGNIZED_FIELD_REPOSITORY)
+    private readonly recognizedFields: RecognizedFieldRepository
   ) {}
 
   async execute(documentId: string): Promise<void> {
@@ -51,10 +55,13 @@ export class RunExtractionUseCase {
       const tagIds = tags.map((tag) => tag.id);
       const densityState = await this.densityRepo.loadWorkerState(doc.userId, tagIds);
       const flags = await this.resolveFeatureFlags.execute(doc.userId);
+      const recognized = await this.recognizedFields.listForUser(doc.userId);
+      const recognizedFieldKeys = recognized.map((field) => field.key);
       const result = await this.extraction.extract(buffer, doc.mimeType, {
         engine,
         embeddingDensityState: densityState ?? undefined,
-        learnedValueTypes: flags.learnedValueTypes,
+        layoutKeyValueRoles: flags.layoutKeyValueRoles,
+        recognizedFieldKeys,
       });
       await this.documents.saveExtraction(documentId, result);
       await this.persistRepresentation.execute(

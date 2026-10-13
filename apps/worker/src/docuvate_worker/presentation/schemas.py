@@ -17,7 +17,12 @@ class ExtractRequest(BaseModel):
     embedding_density_state: EmbeddingDensityStateModel | None = Field(
         default=None, validation_alias="embeddingDensityState"
     )
-    learned_value_types: bool | None = Field(default=None, validation_alias="learnedValueTypes")
+    layout_key_value_roles: bool = Field(
+        default=False, validation_alias="layoutKeyValueRoles"
+    )
+    recognized_field_keys: list[str] = Field(
+        default_factory=list, validation_alias="recognizedFieldKeys"
+    )
 
 
 class CompareRequest(BaseModel):
@@ -205,20 +210,8 @@ class EmbedResponse(BaseModel):
     embeddings: list[list[float]]
 
 
-class EncoderRuntimeResponse(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    backend: str
-    encoder_id: str = Field(serialization_alias="encoderId")
-    encoder_hf_revision: str = Field(serialization_alias="encoderHfRevision")
-    encoder_revision: str = Field(serialization_alias="encoderRevision")
-    onnx_file: str = Field(serialization_alias="onnxFile")
-    intra_op_threads: int = Field(serialization_alias="intraOpThreads", ge=1)
-
-
 class HealthResponse(BaseModel):
     status: str
-    encoder: EncoderRuntimeResponse | None = None
 
 
 class HardwareCapabilitiesResponse(BaseModel):
@@ -589,43 +582,6 @@ class EmbeddingDensityTrainRequest(BaseModel):
 
 class EmbeddingDensityTrainResponse(BaseModel):
     state: EmbeddingDensityStateModel
-
-
-class SmartDuplicateConfigModel(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    alpha: float = Field(default=0.5, ge=0.0, le=1.0)
-    delta: float = Field(default=0.05, gt=0.0, le=1.0)
-    threshold: float = Field(default=0.55, ge=0.0, le=1.0)
-    shingle_size: int = Field(default=4, ge=2, le=8, serialization_alias="shingleSize")
-    minhash_perm: int = Field(default=128, ge=16, le=512, serialization_alias="minhashPerm")
-
-
-class SmartDuplicatePeerModel(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    document_id: str = Field(serialization_alias="documentId")
-    lines: list[str] = Field(min_length=1)
-
-
-class SmartDuplicateDetectRequest(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    focus_document_id: str = Field(serialization_alias="focusDocumentId")
-    focus_lines: list[str] = Field(min_length=1, serialization_alias="focusLines")
-    peers: list[SmartDuplicatePeerModel] = Field(default_factory=list)
-    config: SmartDuplicateConfigModel | None = None
-
-
-class SmartDuplicateHitModel(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    document_id: str = Field(serialization_alias="documentId")
-    similarity: float = Field(ge=0.0, le=1.0)
-
-
-class SmartDuplicateDetectResponse(BaseModel):
-    candidates: list[SmartDuplicateHitModel] = Field(default_factory=list)
 
 
 ExtractRequest.model_rebuild()
