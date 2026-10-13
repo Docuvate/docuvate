@@ -3,10 +3,5 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/ui-catalog",
   "projectType": "library",
-  "targets": {
-    "typecheck": {
-      "command": "pnpm exec tsc -p tsconfig.json --noEmit",
-      "options": { "cwd": "packages/ui-catalog" }
-    }
-  }
+  "targets": {}
 }

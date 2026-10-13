@@ -152,8 +152,8 @@ export function collectToolVersionErrors(root = TOOL_VERSIONS_ROOT, read = defau
       `.github/workflows/ci.yml or nightly.yml Puppeteer cache key must include puppeteer-${puppeteerVer}`
     );
   }
-  assertUvInstallsPinned(ciWorkflows, '.github/workflows (ci + nightly)', uvPin, fail);
-  assertEveryUvPinMatches(ciWorkflows, '.github/workflows (ci + nightly)', uvPin, fail);
+  assertUvInstallsPinned(ciWorkflows, '.github/workflows/ci.yml', uvPin, fail);
+  assertEveryUvPinMatches(ciWorkflows, '.github/workflows/ci.yml', uvPin, fail);
 
   const localCi = read('scripts/ci/run-local-ci-jobs.sh');
   assertUvInstallsPinned(localCi, 'scripts/ci/run-local-ci-jobs.sh', uvPin, fail);

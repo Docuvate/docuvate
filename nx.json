@@ -29,6 +29,11 @@
       "inputs": ["default", "^production"],
       "cache": true
     },
+    "test-ci": {
+      "dependsOn": ["^build", "build"],
+      "inputs": ["default", "^production"],
+      "cache": true
+    },
     "typecheck": {
       "inputs": ["default", "^production"],
       "cache": true

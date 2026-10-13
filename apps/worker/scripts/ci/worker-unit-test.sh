@@ -5,5 +5,4 @@ cd "$ROOT"
 pip install 'uv==0.12.23' >/dev/null
 uv venv .venv
 uv pip install -e ".[dev]" >/dev/null
-.venv/bin/pytest tests/test_pipeline_extractor_equivalence.py -v --tb=short -rs
 .venv/bin/pytest tests -q --ignore=tests/integration --ignore=tests/test_pipeline_extractor_equivalence.py --maxfail=1

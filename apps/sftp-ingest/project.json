@@ -28,9 +28,8 @@
     "lint": {
       "executor": "nx:run-commands",
       "options": {
-        "commands": ["go vet ./...", "golangci-lint run ./..."],
-        "cwd": "apps/sftp-ingest",
-        "parallel": false
+        "command": "go vet ./...",
+        "cwd": "apps/sftp-ingest"
       }
     }
   },

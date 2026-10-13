@@ -101,10 +101,11 @@ test('detects unpinned pip install uv', () => {
 test('fails when a single uv pin drifts in ci.yml', () => {
   const root = mkdtempSync(join(tmpdir(), 'tv-ci-one-'));
   copyRepoFixture(root, (files) => {
-    const combined = `${files['.github/workflows/ci.yml'] ?? ''}\n${files['.github/workflows/nightly.yml'] ?? ''}`;
-    const drifted = replaceFirst(combined, uvNeedle, wrongUv);
-    files['.github/workflows/ci.yml'] = drifted;
-    files['.github/workflows/nightly.yml'] = '';
+    files['.github/workflows/nightly.yml'] = replaceFirst(
+      files['.github/workflows/nightly.yml'] ?? '',
+      uvNeedle,
+      wrongUv
+    );
     return files;
   });
   const errors = collectToolVersionErrors(root);
