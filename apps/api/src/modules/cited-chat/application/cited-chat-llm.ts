@@ -58,7 +58,11 @@ export async function streamDocumentChatLlm(params: {
       responseFormat: params.responseFormat,
     });
     if ('failure' in result) {
-      return { failure: { kind: result.failure.kind, detail: result.failure.detail } };
+      const detail =
+        result.failure.kind === 'http_error' || result.failure.kind === 'network_error'
+          ? result.failure.detail
+          : undefined;
+      return { failure: { kind: result.failure.kind, detail } };
     }
     return { content: result.content };
   }

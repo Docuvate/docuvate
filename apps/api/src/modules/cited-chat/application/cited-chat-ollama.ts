@@ -173,5 +173,3 @@ function parseCitedAnswerJsonResponse(
   }
 }
 
-// re-export for tests
-export type { DocumentChatLlmRuntimeConfig };
