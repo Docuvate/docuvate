@@ -17,7 +17,7 @@ describe('filterExtractionEngines', () => {
         sourceConnectors: false,
         experimentalResearchModels: false,
       })
-    ).toEqual([{ id: 'pipeline', label: 'Pipeline' }]);
+    ).toEqual([{ id: 'pipeline', label: 'Pipeline', description: 'Default pipeline' }]);
   });
 
   it('returns all engines when experimental research models are on', () => {
