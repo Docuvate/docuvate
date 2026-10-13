@@ -5,8 +5,8 @@ import { describe, expect, it } from 'vitest';
 import { filterExtractionEngines } from './filter-extraction-engines.js';
 
 const engines = [
-  { id: 'pipeline', label: 'Pipeline' },
-  { id: 'arena', label: 'Arena' },
+  { id: 'pipeline', label: 'Pipeline', description: 'Default pipeline' },
+  { id: 'arena', label: 'Arena', description: 'Arena compare' },
 ];
 
 describe('filterExtractionEngines', () => {

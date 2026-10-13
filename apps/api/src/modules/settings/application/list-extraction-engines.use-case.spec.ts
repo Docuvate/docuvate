@@ -1,9 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import type { ExtractionPort } from '../../../shared/domain/ports.js';
-import type { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { ListExtractionEnginesUseCase } from './settings.use-cases.js';
 
 describe('ListExtractionEnginesUseCase', () => {
@@ -14,17 +13,20 @@ describe('ListExtractionEnginesUseCase', () => {
       compare: () => Promise.reject(new Error('not used')),
     };
     const resolveFeatureFlags = {
-      execute: () =>
+      execute: vi.fn(() =>
         Promise.resolve({
           layoutReconstructionCompare: false,
           sourceConnectors: false,
           experimentalResearchModels: false,
-        }),
-      assertEnabled: () => Promise.resolve(),
-    } satisfies Pick<ResolveFeatureFlagsUseCase, 'execute' | 'assertEnabled'>;
-    const useCase = new ListExtractionEnginesUseCase(extraction, {
-      ...resolveFeatureFlags,
-    });
+        })
+      ),
+      assertEnabled: vi.fn(() => Promise.resolve()),
+    };
+    const useCase = new ListExtractionEnginesUseCase(
+      extraction,
+      // @ts-expect-error test double without repository
+      resolveFeatureFlags
+    );
     const engines = await useCase.execute('tenant-1');
     expect(engines.length).toBeGreaterThan(0);
     expect(engines.some((e) => e.id === 'pipeline')).toBe(true);
