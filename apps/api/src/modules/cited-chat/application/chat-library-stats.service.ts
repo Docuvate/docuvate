@@ -7,6 +7,7 @@ import { classifyStatsOperation } from '../domain/chat-intent-prototypes.schema.
 import { formatStatsAnswer } from '../domain/format-stats-answer.js';
 import { pickBestTag } from '../domain/pick-tag-by-embedding.js';
 import { PgChatLibraryStatsRepository } from '../infrastructure/pg-chat-library-stats.repository.js';
+import { phraseLibraryStatsWithLlm } from './cited-chat-ollama.js';
 
 const TAG_MIN_SCORE = 0.68;
 
@@ -20,7 +21,12 @@ export class ChatLibraryStatsService {
   async tryAnswer(
     userId: string,
     resolvedQuery: string,
-    locale: 'de' | 'en'
+    locale: 'de' | 'en',
+    cloudLlm?: {
+      baseUrl?: string | null;
+      apiKey?: string | null;
+      model?: string | null;
+    }
   ): Promise<string | null> {
     const { embeddings } = await this.embedding.embedTexts([resolvedQuery], { inputType: 'query' });
     const queryVector = embeddings[0] ?? [];
@@ -58,12 +64,30 @@ export class ChatLibraryStatsService {
     }
 
     const result = await this.statsRepo.resolveStatsQuery(userId, operation, labelTagId);
-    return formatStatsAnswer({
+    const fallback = formatStatsAnswer({
       locale,
       operation,
       labelName,
       count: result.count,
       documents: result.documents,
     });
+    const phrased = await phraseLibraryStatsWithLlm({
+      locale,
+      userQuestion: resolvedQuery,
+      statsPayload: {
+        operation,
+        labelName,
+        count: result.count,
+        documents: result.documents.map((d) => ({
+          id: d.id,
+          title: d.title,
+          filename: d.filename,
+        })),
+      },
+      cloudBaseUrl: cloudLlm?.baseUrl,
+      cloudApiKey: cloudLlm?.apiKey,
+      cloudModel: cloudLlm?.model,
+    });
+    return phrased ?? fallback;
   }
 }

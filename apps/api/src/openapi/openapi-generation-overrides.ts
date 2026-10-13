@@ -7,6 +7,7 @@ import { PaperlessImportQueueService } from '../modules/connectors/infrastructur
 import { DocumentChatGenerationCancelRegistry } from '../modules/documents/infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from '../modules/documents/infrastructure/document-chat-generation-queue.service.js';
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
+import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { MlRetrainQueueService } from '../modules/model-registry/infrastructure/ml-retrain-queue.service.js';
 import { PG_POOL } from '../shared/infrastructure/database/tokens.js';
 
@@ -69,6 +70,8 @@ export function applyOpenApiGenerationOverrides(
     .overrideProvider(DocumentChatGenerationQueueService)
     .useValue(noopQueue)
     .overrideProvider(PaperlessImportQueueService)
+    .useValue(noopQueue)
+    .overrideProvider(EmbeddingDensityCalibrationQueueService)
     .useValue(noopQueue)
     .overrideProvider(DocumentChatGenerationCancelRegistry)
     .useValue(noopCancelRegistry);

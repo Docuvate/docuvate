@@ -69,6 +69,12 @@ export class UserPreferencesEntity {
   @Column('text', { name: 'locale', nullable: true })
   locale: string | null;
 
+  @Column('text', { name: 'document_chat_cloud_base_url', nullable: true })
+  documentChatCloudBaseUrl: string | null;
+
+  @Column('bytea', { name: 'document_chat_cloud_api_key_encrypted', nullable: true })
+  documentChatCloudApiKeyEncrypted: Buffer | null;
+
   @OneToMany(
     () => UserPreferenceRequiredLabelsEntity,
     (requiredLabels) => requiredLabels.userPreferences

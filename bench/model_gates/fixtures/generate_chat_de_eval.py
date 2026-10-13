@@ -40,7 +40,7 @@ def main() -> None:
     cases: list[dict[str, object]] = []
     idx = 0
     for route, phrases in ROUTE_SEEDS.items():
-        for _ in range(35):
+        for _ in range(58):
             q = rng.choice(phrases)
             cases.append(
                 {
@@ -52,7 +52,7 @@ def main() -> None:
             )
             idx += 1
     for prior, follow in FOLLOW_UPS:
-        for _ in range(5):
+        for _ in range(9):
             cases.append(
                 {
                     "id": f"follow-{idx}",

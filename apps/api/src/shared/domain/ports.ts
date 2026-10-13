@@ -191,6 +191,9 @@ export interface UserPreferencesEntity {
   advancedFeaturesEnabled: boolean;
   themePreference: 'light' | 'dark' | 'system';
   locale: 'de' | 'en' | null;
+  documentChatCloudBaseUrl: string | null;
+  /** Decrypted API key for server-side LLM calls; never expose to clients. */
+  documentChatCloudApiKey: string | null;
   updatedAt: Date;
 }
 
@@ -210,6 +213,8 @@ export interface UserPreferencesRepository {
       advancedFeaturesEnabled?: boolean;
       themePreference?: 'light' | 'dark' | 'system';
       locale?: 'de' | 'en' | null;
+      documentChatCloudBaseUrl?: string | null;
+      documentChatCloudApiKey?: string | null;
     }
   ): Promise<UserPreferencesEntity>;
   recordArenaRating(input: {

@@ -43,6 +43,7 @@ async function main(): Promise<void> {
   const pathCount = Object.keys(document.paths ?? {}).length;
   console.log(`Wrote ${outPath} (${pathCount} paths)`);
   await app.close();
+  process.exit(0);
 }
 
 main().catch((err: unknown) => {

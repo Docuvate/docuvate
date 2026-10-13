@@ -21,6 +21,8 @@ part 'update_user_settings_request_dto.g.dart';
 /// * [advancedFeaturesEnabled] 
 /// * [themePreference] 
 /// * [locale] 
+/// * [documentChatCloudBaseUrl] 
+/// * [documentChatCloudApiKey] 
 @BuiltValue()
 abstract class UpdateUserSettingsRequestDto implements Built<UpdateUserSettingsRequestDto, UpdateUserSettingsRequestDtoBuilder> {
   @BuiltValueField(wireName: r'preferredExtractorEngine')
@@ -51,6 +53,12 @@ abstract class UpdateUserSettingsRequestDto implements Built<UpdateUserSettingsR
   @BuiltValueField(wireName: r'locale')
   UpdateUserSettingsRequestDtoLocaleEnum? get locale;
   // enum localeEnum {  de,  en,  };
+
+  @BuiltValueField(wireName: r'documentChatCloudBaseUrl')
+  String? get documentChatCloudBaseUrl;
+
+  @BuiltValueField(wireName: r'documentChatCloudApiKey')
+  String? get documentChatCloudApiKey;
 
   UpdateUserSettingsRequestDto._();
 
@@ -138,6 +146,20 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
         specifiedType: const FullType(UpdateUserSettingsRequestDtoLocaleEnum),
       );
     }
+    if (object.documentChatCloudBaseUrl != null) {
+      yield r'documentChatCloudBaseUrl';
+      yield serializers.serialize(
+        object.documentChatCloudBaseUrl,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.documentChatCloudApiKey != null) {
+      yield r'documentChatCloudApiKey';
+      yield serializers.serialize(
+        object.documentChatCloudApiKey,
+        specifiedType: const FullType(String),
+      );
+    }
   }
 
   @override
@@ -223,6 +245,20 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
             specifiedType: const FullType(UpdateUserSettingsRequestDtoLocaleEnum),
           ) as UpdateUserSettingsRequestDtoLocaleEnum;
           result.locale = valueDes;
+          break;
+        case r'documentChatCloudBaseUrl':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.documentChatCloudBaseUrl = valueDes;
+          break;
+        case r'documentChatCloudApiKey':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.documentChatCloudApiKey = valueDes;
           break;
         default:
           unhandled.add(key);

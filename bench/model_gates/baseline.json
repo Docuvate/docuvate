@@ -20,7 +20,7 @@
   },
   "metrics": {
     "chat_extractive.abstention_precision": 0.95,
-    "chat_extractive.abstention_recall": 0.28,
+    "chat_extractive.abstention_recall": 0.33,
     "chat_extractive.answer_accuracy": 0.95,
     "chat_extractive.citation_precision": 0.95,
     "chat_extractive.latency_p95_ms": 3500.0,

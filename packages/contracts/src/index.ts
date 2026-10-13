@@ -908,6 +908,9 @@ export interface UserSettingsDto {
   fieldExtractionRequiredLabelIds?: string[];
   themePreference?: ThemePreference;
   locale?: UiLocale | null;
+  /** Optional OpenAI-compatible chat endpoint (Ollama remains default when unset). */
+  documentChatCloudBaseUrl?: string | null;
+  documentChatCloudApiKeyConfigured?: boolean;
 }
 
 export interface UpdateUserSettingsRequest {
@@ -920,6 +923,9 @@ export interface UpdateUserSettingsRequest {
   advancedFeaturesEnabled?: boolean;
   themePreference?: ThemePreference;
   locale?: UiLocale | null;
+  documentChatCloudBaseUrl?: string | null;
+  /** Set to empty string to clear a stored key. */
+  documentChatCloudApiKey?: string | null;
 }
 
 export interface ReplaceTagCustomFieldsRequest {

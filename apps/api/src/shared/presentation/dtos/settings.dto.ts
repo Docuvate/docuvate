@@ -22,6 +22,7 @@ import {
 } from 'class-validator';
 
 import { THEME_PREFERENCES, UI_LOCALES } from '../../../modules/settings/domain/ui-preferences.js';
+import { IsDocumentChatCloudBaseUrl } from '../validators/document-chat-cloud-base-url.validator.js';
 
 export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
   @IsOptional()
@@ -63,6 +64,16 @@ export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
   @ValidateIf((_obj, value) => value !== null)
   @IsIn(UI_LOCALES)
   locale?: (typeof UI_LOCALES)[number] | null;
+
+  @IsOptional()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsDocumentChatCloudBaseUrl()
+  documentChatCloudBaseUrl?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsString()
+  documentChatCloudApiKey?: string | null;
 }
 
 export class UserSettingsResponseDto implements UserSettingsDto {
@@ -84,6 +95,8 @@ export class UserSettingsResponseDto implements UserSettingsDto {
   fieldExtractionRequiredLabelIds?: string[];
   themePreference?: (typeof THEME_PREFERENCES)[number];
   locale?: (typeof UI_LOCALES)[number] | null;
+  documentChatCloudBaseUrl?: string | null;
+  documentChatCloudApiKeyConfigured?: boolean;
 }
 
 export class ExtractionEngineListResponseDto {

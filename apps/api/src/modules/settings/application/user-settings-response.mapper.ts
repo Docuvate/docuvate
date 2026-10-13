@@ -27,5 +27,7 @@ export function toUserSettingsResponseDto(
     fieldExtractionRequiredLabelIds: row.fieldExtractionRequiredLabelIds,
     themePreference: row.themePreference,
     locale: row.locale,
+    documentChatCloudBaseUrl: row.documentChatCloudBaseUrl,
+    documentChatCloudApiKeyConfigured: Boolean(row.documentChatCloudApiKey),
   };
 }

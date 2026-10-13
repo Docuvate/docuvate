@@ -9,7 +9,56 @@ import {
   stubPgPoolWithQueryMock,
 } from '../../../shared/infrastructure/database/pg-pool.spec-util.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { encryptChatCloudApiKey } from './chat-cloud-api-key.codec.js';
 import { PgUserPreferencesRepository } from './pg-user-preferences.repository.js';
+
+describe('PgUserPreferencesRepository.getForUser', () => {
+  it('returns null API key when decrypt fails after secrets key rotation', async () => {
+    process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'] = 'encrypt-key-aaaaaaaaaaaaaaaa';
+    const encrypted = encryptChatCloudApiKey('sk-test');
+    process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'] = 'decrypt-key-bbbbbbbbbbbbbbbb';
+
+    const emptyResult = { rows: [], rowCount: 0, command: '', oid: 0, fields: [] };
+    const { queryMock } = createStubPoolClientWithQueryMock(
+      vi.fn(() =>
+        Promise.resolve({
+          ...emptyResult,
+          rows: [
+            {
+              user_id: 'user-1',
+              preferred_extractor_engine: 'pipeline',
+              preferred_chat_provider: null,
+              use_arena_winner_as_default: false,
+              arena_winner_engine: null,
+              label_field_confidence_threshold: 0.62,
+              label_near_similarity_threshold: 0.62,
+              field_extraction_confidence_gate_enabled: true,
+              required_label_ids: [],
+              advanced_features_enabled: false,
+              theme_preference: 'system',
+              locale: null,
+              document_chat_cloud_base_url: null,
+              document_chat_cloud_api_key_encrypted: encrypted,
+              updated_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+        })
+      )
+    );
+    const pool = stubPgPoolWithQueryMock(queryMock);
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        PgUserPreferencesRepository,
+        { provide: PG_POOL, useValue: pool },
+      ],
+    }).compile();
+    const repo = moduleRef.get(PgUserPreferencesRepository);
+
+    const row = await repo.getForUser('user-1');
+    expect(row.documentChatCloudApiKey).toBeNull();
+    delete process.env['DOCUVATE_CONNECTOR_SECRETS_KEY'];
+  });
+});
 
 describe('PgUserPreferencesRepository.upsert', () => {
   it('persists themePreference and locale on insert', async () => {

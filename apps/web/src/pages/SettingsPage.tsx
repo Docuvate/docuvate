@@ -65,6 +65,8 @@ export function SettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [blockedLabelCount, setBlockedLabelCount] = useState<number | null>(null);
+  const [chatCloudBaseUrl, setChatCloudBaseUrl] = useState('');
+  const [chatCloudApiKeyDraft, setChatCloudApiKeyDraft] = useState('');
 
   useEffect(() => {
     if (readLocationStateBoolean(location.state, 'adminDenied')) {
@@ -81,6 +83,7 @@ export function SettingsPage() {
     ])
       .then(([s, chat, blocklist]) => {
         setSettings(s);
+        setChatCloudBaseUrl(s.documentChatCloudBaseUrl ?? '');
         setChatCatalog(chat);
         setBlockedLabelCount(blocklist.items.length);
         writeAdvancedFeaturesEnabled(s.advancedFeaturesEnabled === true);
@@ -99,6 +102,31 @@ export function SettingsPage() {
         setEnginesLoadFailed(true);
       });
   }, []);
+
+  async function saveChatCloudSettings(baseUrl: string, apiKey: string) {
+    setSaving(true);
+    setError(null);
+    try {
+      const patch: {
+        documentChatCloudBaseUrl: string | null;
+        documentChatCloudApiKey?: string | null;
+      } = {
+        documentChatCloudBaseUrl: baseUrl.trim().length > 0 ? baseUrl.trim() : null,
+      };
+      if (apiKey.trim().length > 0) {
+        patch.documentChatCloudApiKey = apiKey.trim();
+      }
+      const updated = await updateUserSettings(patch);
+      setSettings(updated);
+      toast.success(t('settings.saved'));
+    } catch (err) {
+      const message = formatUserFacingError(err, 'errors.saveFailed');
+      setError(message);
+      toast.error(message);
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function saveChatProvider(nextProvider: string) {
     setSaving(true);
@@ -287,6 +315,47 @@ export function SettingsPage() {
               />
             </label>
           ) : null}
+          <label className="settings-field">
+            {t('settings.chatCloudBaseUrl')}
+            <input
+              type="url"
+              className="settings-input"
+              disabled={saving || !settings}
+              value={chatCloudBaseUrl}
+              placeholder={t('settings.chatCloudBaseUrlPlaceholder')}
+              onChange={(e) => {
+                setChatCloudBaseUrl(e.target.value);
+              }}
+            />
+          </label>
+          <label className="settings-field">
+            {t('settings.chatCloudApiKey')}
+            <input
+              type="password"
+              className="settings-input"
+              disabled={saving || !settings}
+              value={chatCloudApiKeyDraft}
+              placeholder={
+                settings?.documentChatCloudApiKeyConfigured
+                  ? t('settings.chatCloudApiKeyConfigured')
+                  : t('settings.chatCloudApiKeyPlaceholder')
+              }
+              onChange={(e) => {
+                setChatCloudApiKeyDraft(e.target.value);
+              }}
+            />
+          </label>
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={saving || !settings}
+            onClick={() => {
+              void saveChatCloudSettings(chatCloudBaseUrl, chatCloudApiKeyDraft);
+            }}
+          >
+            {t('settings.chatCloudSave')}
+          </Button>
+          <p className="muted settings-hint">{t('settings.chatCloudHint')}</p>
         </SettingsSectionCard>
 
         <SettingsSectionCard

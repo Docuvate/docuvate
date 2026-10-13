@@ -26,24 +26,21 @@ function row(
 }
 
 describe('libraryExtractiveRows', () => {
-  it('anchors on a distinctive title token when top scores are ambiguous', () => {
+  it('picks the leading document when rerank scores separate clearly', () => {
     const top = [
       row('doc-a', 'Mietvertrag Wohnung', 0.9),
-      row('doc-b', 'Mietvertrag Lindenweg', 0.89),
+      row('doc-b', 'Mietvertrag Lindenweg', 0.5),
     ];
-    const picked = libraryExtractiveRows(
-      top,
-      'Wie hoch ist die Miete im Mietvertrag Lindenweg?'
-    );
+    const picked = libraryExtractiveRows(top);
     expect(picked).toHaveLength(1);
-    expect(picked[0].chunk.documentId).toBe('doc-b');
+    expect(picked[0].chunk.documentId).toBe('doc-a');
   });
 
-  it('returns empty when multi-doc scores are close and query has no anchor', () => {
+  it('returns empty when multi-doc scores are close', () => {
     const top = [
       row('doc-a', 'Mietvertrag Wohnung', 0.9),
       row('doc-b', 'Kfz-Versicherung 2026', 0.88),
     ];
-    expect(libraryExtractiveRows(top, 'Wie hoch ist die Miete?')).toEqual([]);
+    expect(libraryExtractiveRows(top)).toEqual([]);
   });
 });
