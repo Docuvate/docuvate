@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Test } from '@nestjs/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EMBEDDING_PORT, type EmbeddingPort } from '../../../shared/domain/ports.js';
+import type { EmbeddingPort } from '../../../shared/domain/ports.js';
 import * as intentSchema from '../domain/chat-intent-prototypes.schema.js';
-import { ChatLibraryStatsService } from './chat-library-stats.service.js';
+import type { ChatLibraryStatsService } from './chat-library-stats.service.js';
 import { ChatQueryRouterService } from './chat-query-router.service.js';
 
 describe('ChatQueryRouterService', () => {
@@ -13,19 +12,14 @@ describe('ChatQueryRouterService', () => {
   const embedTexts = vi.fn<EmbeddingPort['embedTexts']>();
   const tryAnswer = vi.fn<ChatLibraryStatsService['tryAnswer']>();
 
-  beforeEach(async () => {
+  beforeEach(() => {
     embedTexts.mockReset();
     tryAnswer.mockReset();
     vi.spyOn(intentSchema, 'classifyChatRouteIntent').mockReset();
 
-    const moduleRef = await Test.createTestingModule({
-      providers: [
-        ChatQueryRouterService,
-        { provide: EMBEDDING_PORT, useValue: { embedTexts } },
-        { provide: ChatLibraryStatsService, useValue: { tryAnswer } },
-      ],
-    }).compile();
-    router = moduleRef.get(ChatQueryRouterService);
+    const embedding: EmbeddingPort = { embedTexts };
+    // @ts-expect-error test double — router only calls tryAnswer on this stub
+    router = new ChatQueryRouterService(embedding, { tryAnswer });
   });
 
   it('answers smalltalk on the current turn before retrieval routing', async () => {

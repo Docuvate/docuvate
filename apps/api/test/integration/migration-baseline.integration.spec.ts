@@ -22,27 +22,13 @@ describe('migration baseline (existing schema, empty migration history)', () => 
   });
 
   it('stamps only through existing schema then applies newer migrations', async () => {
-    for (;;) {
-      const probe = dataSource.createQueryRunner();
-      await probe.connect();
-      let hasFeatureFlag = false;
-      try {
-        hasFeatureFlag = await regClassExists(probe, 'public.feature_flag');
-      } finally {
-        await probe.release();
-      }
-      if (!hasFeatureFlag) {
-        break;
-      }
-      await dataSource.undoLastMigration();
-    }
-
     const runner = dataSource.createQueryRunner();
     await runner.connect();
     try {
       expect(await regClassExists(runner, 'public.documents')).toBe(true);
-      expect(await regClassExists(runner, 'public.feature_flag')).toBe(false);
+      expect(await regClassExists(runner, 'public.document_representation')).toBe(true);
 
+      await runner.query('DROP TABLE IF EXISTS feature_flag CASCADE');
       await runner.query('DROP TABLE IF EXISTS migrations');
 
       await ensureMigrationBaseline(dataSource);
@@ -62,6 +48,7 @@ describe('migration baseline (existing schema, empty migration history)', () => 
         })
         .filter((name): name is string => name != null);
       expect(names.includes('FeatureFlags20261013120000')).toBe(false);
+      expect(names.includes('DocumentRepresentation20261012120000')).toBe(true);
 
       await dataSource.runMigrations();
 
