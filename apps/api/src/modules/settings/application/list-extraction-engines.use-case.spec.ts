@@ -21,7 +21,7 @@ describe('ListExtractionEnginesUseCase', () => {
           exactAnswers: false,
           smartDuplicates: false,
           answerAbstention: false,
-          learnedValueTypes: false,
+          learnedValueTypes: true,
           layoutKeyValueRoles: false,
           localChatModel: false,
         })
