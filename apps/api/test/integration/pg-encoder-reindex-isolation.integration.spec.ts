@@ -15,14 +15,29 @@ import { deleteSyntheticUser, insertSyntheticUser, newIsolationUserId } from './
 
 describe('encoder reindex repository (tenant isolation)', () => {
   const pool = getIntegrationPool();
-  const tenantA = newIsolationUserId('encoder-reindex-a');
-  const tenantB = newIsolationUserId('encoder-reindex-b');
+  let tenantA: string;
+  let tenantB: string;
   let repo: PgEncoderReindexRepository;
 
   beforeAll(async () => {
+    tenantA = newIsolationUserId();
+    tenantB = newIsolationUserId();
     repo = new PgEncoderReindexRepository(pool);
-    await insertSyntheticUser(pool, tenantA);
-    await insertSyntheticUser(pool, tenantB);
+    const client = await pool.connect();
+    try {
+      await insertSyntheticUser(client, {
+        id: tenantA,
+        name: 'Tenant A',
+        email: `${tenantA}@example.test`,
+      });
+      await insertSyntheticUser(client, {
+        id: tenantB,
+        name: 'Tenant B',
+        email: `${tenantB}@example.test`,
+      });
+    } finally {
+      client.release();
+    }
   });
 
   afterAll(async () => {
