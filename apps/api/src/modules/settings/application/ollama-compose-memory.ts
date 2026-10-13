@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** Rough minimum container mem_limit for loaded inference (GiB). */
 const MODEL_MIN_GIB: Record<string, number> = {
+  'qwen2.5:1.5b': 1.5,
   'qwen2.5:3b': 2.5,
   'llama3.2:3b': 2.5,
   'gemma3:4b': 4.5,
@@ -32,7 +33,7 @@ export function parseMemLimitToGiB(raw: string | undefined | null): number | nul
 }
 
 export function ollamaMemLimitGiBFromEnv(): number | null {
-  return parseMemLimitToGiB(process.env['OLLAMA_MEM_LIMIT'] ?? '3g');
+  return parseMemLimitToGiB(process.env['OLLAMA_MEM_LIMIT'] ?? '2g');
 }
 
 export function modelMinGiB(model: string): number {

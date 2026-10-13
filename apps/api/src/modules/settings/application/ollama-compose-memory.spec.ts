@@ -20,6 +20,10 @@ describe('ollama-compose-memory', () => {
     expect(modelFitsOllamaMemLimit('qwen3:4b', 5)).toBe(true);
   });
 
+  it('qwen2.5:1.5b fits 2g limit', () => {
+    expect(modelFitsOllamaMemLimit('qwen2.5:1.5b', 2)).toBe(true);
+  });
+
   it('qwen2.5:3b fits 3g limit', () => {
     expect(modelFitsOllamaMemLimit('qwen2.5:3b', 3)).toBe(true);
   });

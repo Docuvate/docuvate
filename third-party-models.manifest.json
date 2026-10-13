@@ -79,7 +79,7 @@
       "content_sha256": null,
       "license_spdx": "Apache-2.0",
       "size_bytes_approx": 2013265920,
-      "purpose": "Default local LLM for RAG document chat when Ollama is enabled in Compose.",
+      "purpose": "Optional larger local LLM when Ollama is enabled and OLLAMA_MODEL is set to qwen2.5:3b.",
       "shipped_in_default_cpu_image": false,
       "training_data_summary": "Alibaba Qwen2.5 instruct tuning; pulled at deploy time via Ollama, not baked into the worker image."
     },
@@ -113,7 +113,7 @@
       "content_sha256": null,
       "license_spdx": "Apache-2.0",
       "size_bytes_approx": 1006632960,
-      "purpose": "Alternate small local LLM default in some API generation paths and RAM-constrained profiles.",
+      "purpose": "Default local LLM for the Compose chat-local profile (Qwen2.5-1.5B Q4 via Ollama).",
       "shipped_in_default_cpu_image": false,
       "training_data_summary": "Alibaba Qwen2.5 instruct tuning; pulled at deploy time via Ollama."
     },

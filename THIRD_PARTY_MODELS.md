@@ -20,8 +20,8 @@ Permissive reranker alternates allowlisted in code (same manifest entry): `BAAI/
 
 | Model | Load key | Source | License | Approx. size | Purpose |
 | --- | --- | --- | --- | ---: | --- |
-| Qwen2.5 3B Instruct | `qwen2.5:3b` | [Ollama library](https://ollama.com/library/qwen2.5) | Apache-2.0 | ~1.9 GiB | Default RAG chat LLM |
-| Qwen2.5 1.5B Instruct | `qwen2.5:1.5b` | [Ollama library](https://ollama.com/library/qwen2.5) | Apache-2.0 | ~960 MiB | Lower-RAM LLM default in some API paths |
+| Qwen2.5 1.5B Instruct | `qwen2.5:1.5b` | [Ollama library](https://ollama.com/library/qwen2.5) | Apache-2.0 | ~960 MiB | Default for Compose **`chat-local`** profile |
+| Qwen2.5 3B Instruct | `qwen2.5:3b` | [Ollama library](https://ollama.com/library/qwen2.5) | Apache-2.0 | ~1.9 GiB | Optional when `OLLAMA_MODEL` is set to 3b |
 
 Models are pulled by the Ollama sidecar at deploy time (`OLLAMA_MODEL`), not embedded in the worker image.
 

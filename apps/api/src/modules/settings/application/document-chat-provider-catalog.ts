@@ -35,7 +35,7 @@ export function documentChatDevProvidersEnabled(): boolean {
 }
 
 export function resolveOllamaModelFromEnv(): string {
-  return process.env['OLLAMA_MODEL'] ?? 'qwen2.5:3b';
+  return process.env['OLLAMA_MODEL'] ?? 'qwen2.5:1.5b';
 }
 
 interface WorkerProviderRow {
@@ -64,10 +64,10 @@ export function buildDocumentChatProvidersCatalog(input: {
   const donutAvailable = donutWorker?.available === true;
 
   const ragEnvReady = workerConfigured && ollamaConfigured && ollamaHardwareOk && ollamaMemOk;
-  /** Worker RAG + cited extractive answers without Ollama (compose-smoke, CPU-only). */
+  /** Worker RAG + cited extractive answers without Ollama (default Compose profile, compose-smoke). */
   const ragExtractiveOnlyReady = workerConfigured && !ollamaConfigured;
-  const ragOllamaAvailable =
-    (ragEnvReady && input.ollamaModelReady) || ragExtractiveOnlyReady;
+  /** Chat stays available while Ollama pulls; open questions use extractive/lookup until the model is ready. */
+  const ragOllamaAvailable = ragExtractiveOnlyReady || ragEnvReady;
 
   const runsOnCpu = !input.hardware?.gpuAvailable;
 
@@ -93,9 +93,7 @@ export function buildDocumentChatProvidersCatalog(input: {
 
   if (!ragOllamaAvailable) {
     let reasonCode = 'not_configured';
-    if (ragEnvReady && !input.ollamaModelReady) {
-      reasonCode = 'model_loading';
-    } else if (!workerConfigured) {
+    if (!workerConfigured) {
       reasonCode = 'worker_offline';
     } else if (!ollamaConfigured) {
       reasonCode = 'ollama_not_configured';
