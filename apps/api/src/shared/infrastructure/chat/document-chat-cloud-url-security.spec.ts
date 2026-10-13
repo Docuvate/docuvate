@@ -49,13 +49,15 @@ describe('document-chat-cloud-url-security', () => {
   });
 
   it('blocks loopback and IPv4-mapped private addresses', () => {
-    expect(() => assertDocumentChatCloudIpAllowed('127.0.0.2')).toThrow(
-      'document_chat_cloud_url_private_blocked'
-    );
-    expect(() => assertDocumentChatCloudIpAllowed('::ffff:10.0.0.1')).toThrow(
-      'document_chat_cloud_url_private_blocked'
-    );
-    expect(() => assertDocumentChatCloudIpAllowed('8.8.8.8')).not.toThrow();
+    expect(() => {
+      assertDocumentChatCloudIpAllowed('127.0.0.2');
+    }).toThrow('document_chat_cloud_url_private_blocked');
+    expect(() => {
+      assertDocumentChatCloudIpAllowed('::ffff:10.0.0.1');
+    }).toThrow('document_chat_cloud_url_private_blocked');
+    expect(() => {
+      assertDocumentChatCloudIpAllowed('8.8.8.8');
+    }).not.toThrow();
   });
 
   it('blocks private resolved addresses unless host is allowlisted', async () => {

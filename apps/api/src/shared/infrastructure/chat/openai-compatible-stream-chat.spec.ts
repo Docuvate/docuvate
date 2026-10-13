@@ -25,12 +25,14 @@ describe('openai-compatible-stream-chat SSRF', () => {
   });
 
   it('rejects HTTP redirects in streamOpenAiCompatibleChat', async () => {
-    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+    const fetchMock = vi.fn((_url: string, init?: RequestInit) => {
       expect(init?.redirect).toBe('error');
-      return new Response('', {
-        status: 302,
-        headers: { Location: 'http://127.0.0.1/internal' },
-      });
+      return Promise.resolve(
+        new Response('', {
+          status: 302,
+          headers: { Location: 'http://127.0.0.1/internal' },
+        })
+      );
     });
     vi.stubGlobal('fetch', fetchMock);
 
@@ -51,9 +53,9 @@ describe('openai-compatible-stream-chat SSRF', () => {
   });
 
   it('uses redirect error mode in postOpenAiCompatibleChat', async () => {
-    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+    const fetchMock = vi.fn((_url: string, init?: RequestInit) => {
       expect(init?.redirect).toBe('error');
-      return new Response('{}', { status: 200 });
+      return Promise.resolve(new Response('{}', { status: 200 }));
     });
     vi.stubGlobal('fetch', fetchMock);
 
