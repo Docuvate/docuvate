@@ -29,6 +29,11 @@ describe('migration baseline (existing schema, empty migration history)', () => 
       expect(await regClassExists(runner, 'public.document_representation')).toBe(true);
 
       await runner.query('DROP TABLE IF EXISTS feature_flag CASCADE');
+      await runner.query(`
+        ALTER TABLE user_preferences
+          DROP COLUMN IF EXISTS document_chat_cloud_base_url,
+          DROP COLUMN IF EXISTS document_chat_cloud_api_key_encrypted
+      `);
       await runner.query('DROP TABLE IF EXISTS migrations');
 
       await ensureMigrationBaseline(dataSource);
