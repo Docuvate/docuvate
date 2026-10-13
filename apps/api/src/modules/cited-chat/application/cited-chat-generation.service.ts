@@ -9,6 +9,8 @@ import {
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
+import { ExactFactQueryRouterService } from '../../exact-facts/application/exact-fact-query-router.service.js';
+import { TryExactFactChatAnswerUseCase } from '../../exact-facts/application/try-exact-fact-chat-answer.use-case.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
@@ -85,7 +87,9 @@ export class CitedChatGenerationService {
     private readonly retrieval: PgCitedChatRetrievalRepository,
     private readonly citationsRepo: PgChatMessageCitationsRepository,
     private readonly queryRouter: ChatQueryRouterService,
-    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
+    private readonly exactFactQueryRouter: ExactFactQueryRouterService,
+    private readonly exactFactChat: TryExactFactChatAnswerUseCase
   ) {}
 
   async generate(input: CitedChatGenerationInput): Promise<CitedChatGenerationResult> {
@@ -154,9 +158,6 @@ export class CitedChatGenerationService {
       return { content: '', abstained: true };
     }
 
-    const featureFlags = await this.resolveFeatureFlags.execute(userId);
-    const allowLocalOllama = featureFlags.localChatModel;
-
     await this.threads.updateMessageGeneration(messageId, {
       generationStatus: 'pending',
       generationPhase: 'retrieving',
@@ -188,6 +189,40 @@ export class CitedChatGenerationService {
       return { content: routed.content, abstained: false };
     }
     const retrievalQuery = routed.resolvedQuery;
+
+    const featureFlags = await this.resolveFeatureFlags.execute(userId);
+    if (featureFlags.exactAnswers) {
+      const parsedExact = this.exactFactQueryRouter.parse(userMessage);
+      if (parsedExact) {
+        const exactAnswer = await this.exactFactChat.execute({
+          tenantId: userId,
+          query: parsedExact,
+          locale,
+          scope,
+          documentIds,
+        });
+        if (exactAnswer) {
+          await this.citationsRepo.replaceCitations(
+            messageId,
+            exactAnswer.citations.map((citation) => ({
+              ordinal: citation.ordinal,
+              chunkId: citation.chunkId,
+              quote: citation.quote,
+              charStart: citation.charStart,
+              charEnd: citation.charEnd,
+            }))
+          );
+          await this.threads.updateMessageGeneration(messageId, {
+            content: exactAnswer.content,
+            generationStatus: 'done',
+            generationPhase: null,
+            finalizeOnlyIfInFlight: true,
+          });
+          await this.threads.touchThread(threadId);
+          return { content: exactAnswer.content, abstained: false };
+        }
+      }
+    }
 
     const generationStarted = Date.now();
     let embedMs = 0;
@@ -287,7 +322,6 @@ export class CitedChatGenerationService {
         cloudBaseUrl: input.cloudLlm?.baseUrl,
         cloudApiKey: input.cloudLlm?.apiKey,
         cloudModel: input.cloudLlm?.model,
-        allowLocalOllama,
       }) != null;
 
     const extractiveMinScore = rerankerUsed

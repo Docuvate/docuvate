@@ -11,11 +11,7 @@ import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/inf
 import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
-import {
-  createIntegrationResolveFeatureFlags,
-  enableLocalChatModelForIntegration,
-  enableLocalChatModelForIntegrationTenant,
-} from '../helpers/cited-chat-integration-feature-flags.js';
+import { disabledExactFactChatDeps } from '../helpers/disabled-exact-fact-chat-deps.js';
 import {
   parseRequestJsonRecord,
   readBooleanProperty,
@@ -60,10 +56,8 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
   let retrieval: PgCitedChatRetrievalRepository;
   let threads: PgDocumentChatThreadRepository;
   let generation: CitedChatGenerationService;
-  let restoreLocalChatFlag: () => void;
 
   beforeAll(async () => {
-    restoreLocalChatFlag = enableLocalChatModelForIntegration();
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
@@ -75,7 +69,6 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
     } finally {
       client.release();
     }
-    await enableLocalChatModelForIntegrationTenant(pool, userId);
 
     targetDocId = randomUUID();
     otherDocId = randomUUID();
@@ -102,13 +95,16 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
 
     retrieval = new PgCitedChatRetrievalRepository(pool);
     threads = new PgDocumentChatThreadRepository(pool);
+    const exactFactDeps = disabledExactFactChatDeps();
     generation = new CitedChatGenerationService(
       threads,
       queryEmbeddingPort,
       retrieval,
       new PgChatMessageCitationsRepository(pool),
       passthroughChatQueryRouter(),
-      createIntegrationResolveFeatureFlags(pool)
+      exactFactDeps.resolveFeatureFlags,
+      exactFactDeps.exactFactQueryRouter,
+      exactFactDeps.exactFactChat
     );
   }, 60_000);
 
@@ -118,7 +114,6 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
   });
 
   afterAll(async () => {
-    restoreLocalChatFlag();
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
   });
