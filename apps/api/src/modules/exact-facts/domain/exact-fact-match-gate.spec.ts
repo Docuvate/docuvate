@@ -3,8 +3,8 @@
 import { EXACT_FACT_MATCH_DEFAULT_THRESHOLD } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 
-import type { ExactFactRow } from './exact-fact-row.js';
 import { bestExactFactMatchScore, passesExactFactMatchGate } from './exact-fact-match-gate.js';
+import type { ExactFactRow } from './exact-fact-row.js';
 
 function row(predicateKey: string): ExactFactRow {
   return {

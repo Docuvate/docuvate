@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-"""Fellegi–Sunter predicate match score (mirrors @docuvate/contracts exact-fact-match)."""
+"""Fellegi-Sunter predicate match score (mirrors @docuvate/contracts exact-fact-match)."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import re
 from dataclasses import dataclass
 
 _YEAR_TOKEN = re.compile(r"^(19|20)\d{2}$")
+_MIN_QUERY_TOKEN_LEN = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,7 +53,7 @@ def _word_set(text: str) -> set[str]:
 
 
 def _token_matches(token: str, words: set[str]) -> bool:
-    return len(token) >= 2 and token in words
+    return len(token) >= _MIN_QUERY_TOKEN_LEN and token in words
 
 
 def token_coverage(

@@ -10,8 +10,8 @@ import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infr
 import { ExactFactQueryRouterService } from '../../src/modules/exact-facts/application/exact-fact-query-router.service.js';
 import { PersistDocumentFactsUseCase } from '../../src/modules/exact-facts/application/persist-document-facts.use-case.js';
 import { TryExactFactChatAnswerUseCase } from '../../src/modules/exact-facts/application/try-exact-fact-chat-answer.use-case.js';
-import { PgDocumentExtractedFactRepository } from '../../src/modules/exact-facts/infrastructure/pg-document-extracted-fact.repository.js';
 import { EXACT_FACT_ABSTENTION_DE } from '../../src/modules/exact-facts/domain/exact-fact-abstention-messages.js';
+import { PgDocumentExtractedFactRepository } from '../../src/modules/exact-facts/infrastructure/pg-document-extracted-fact.repository.js';
 import { PgExactFactQueryRepository } from '../../src/modules/exact-facts/infrastructure/pg-exact-fact-query.repository.js';
 import { PgTenantExactFactChatSettingsRepository } from '../../src/modules/exact-facts/infrastructure/pg-tenant-exact-fact-chat-settings.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
