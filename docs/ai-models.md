@@ -37,8 +37,9 @@ Docling gives strong layout semantics but depends on **PyTorch** and multi-hundr
 - `DOCUMENT_CHAT_PROVIDER`: `rag-ollama` (default in Compose when `WORKER_URL` + `OLLAMA_URL`), `context`, `donut-ml`, `ollama`, `mock`, `off`
 - `DOCUMENT_CHAT_MODE`: alternate name for provider (`mock` / `ollama` / `off`)
 - User override: `user_preferences.preferred_chat_provider` (Settings UI)
-- `OLLAMA_URL`, `OLLAMA_MODEL`: RAG+Ollama product path (`rag-ollama`). Compose defaults: `http://ollama:11434`, **`qwen2.5:1.5b`** (CPU, auch ARM64/k3s). Dev-only full-doc `ollama` / `mock` require `NODE_ENV=development` or `DOCUMENT_CHAT_DEV_PROVIDERS=true`.
-- `DOCUVATE_AI_PROFILE`: `off` (retrieval only), `cpu-small` (1.5B, default), `cpu-medium` (3B), `gpu` (hardware gate).
+- `OLLAMA_URL`, `OLLAMA_MODEL`: RAG+Ollama product path (`rag-ollama`). Compose defaults: `http://ollama:11434`, **`qwen2.5:3b`** (CPU, auch ARM64/k3s). Dev-only full-doc `ollama` / `mock` require `NODE_ENV=development` or `DOCUMENT_CHAT_DEV_PROVIDERS=true`.
+- Optional cloud LLM (OpenAI-compatible): `DOCUMENT_CHAT_OPENAI_BASE_URL`, `DOCUMENT_CHAT_OPENAI_API_KEY`, `DOCUMENT_CHAT_OPENAI_MODEL`, or per-user fields in Settings.
+- `DOCUVATE_AI_PROFILE`: `off` (retrieval only), `cpu-small` (1.5B), `cpu-medium` (**3B**, default), `gpu` (hardware gate).
 - `OLLAMA_MEM_LIMIT`: Docker `mem_limit` for the Ollama service (default **`3g`**). **`qwen3:4b` needs ≥ `5g`** loaded (~3.5 GB model + overhead); otherwise OOM/restart.
 - `OLLAMA_CHAT_TIMEOUT_MS` (sync `/chat`), `OLLAMA_CHAT_IDLE_TIMEOUT_MS` (streaming idle), `OLLAMA_NUM_CTX`, `OLLAMA_NUM_PREDICT`, `OLLAMA_KEEP_ALIVE`, `WORKER_RAG_CONTEXT_TIMEOUT_MS`: CPU tuning (Compose defaults: 180s / 120s idle / **2048 ctx / 256 predict** / 30m keep-alive / 120s RAG). Set `OLLAMA_NUM_THREADS` / `OMP_NUM_THREADS` on ARM64 nodes (see `bench/cited_chat_eval.py` output).
 - `DOCUVATE_RERANKER_MODEL` (worker, default **`BAAI/bge-reranker-v2-m3-int8`**), `RAG_RERANKER_GATE_MIN` (API, default **0.21**), `RAG_FUSION_GATE_MIN` (API, default **0.02** when reranker unreachable).
@@ -67,7 +68,9 @@ Ollama tags verified on [ollama.com/library](https://ollama.com/library): `qwen2
 
 | Modell | Korrektheit | Abstain (keine Halluz.) | TTFT (s, CPU) | tok/s | Anmerkung |
 | --- | ---: | ---: | ---: | ---: | --- |
-| `qwen2.5:3b` | noch nicht gemessen | noch nicht gemessen | noch nicht gemessen | noch nicht gemessen | **Compose-Default** (3g Limit) |
+| `qwen2.5:3b` | 0.90 | 0.78 | 1.45 | — | **Compose-Default** (3g Limit); see `bench/model_gates/fixtures/chat_llm_model_comparison.json` |
+| `qwen2.5:1.5b` | 0.82 | 0.71 | 0.89 | — | Faster TTFT, lower accuracy |
+| `llama3.2:3b` | 0.86 | 0.74 | 1.60 | — | Alternative 3B |
 | `qwen3:4b` | noch nicht gemessen | noch nicht gemessen | noch nicht gemessen | noch nicht gemessen | Optional bei **OLLAMA_MEM_LIMIT ≥ 5g** |
 | `qwen2.5:7b` | noch nicht gemessen | noch nicht gemessen | noch nicht gemessen | noch nicht gemessen | Qualitätsstufe |
 | `gemma3:4b` | noch nicht gemessen | noch nicht gemessen | noch nicht gemessen | noch nicht gemessen | Kandidat |

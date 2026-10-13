@@ -25,6 +25,11 @@ export class ChatQueryRouterService {
     priorUserMessage: string | null;
     scope: 'document' | 'library';
     locale: 'de' | 'en';
+    cloudLlm?: {
+      baseUrl?: string | null;
+      apiKey?: string | null;
+      model?: string | null;
+    };
   }): Promise<ChatQueryRouteResult> {
     const texts = [input.userMessage];
     if (input.priorUserMessage) {
@@ -57,7 +62,8 @@ export class ChatQueryRouterService {
       const statsAnswer = await this.libraryStats.tryAnswer(
         input.userId,
         resolvedQuery,
-        input.locale
+        input.locale,
+        input.cloudLlm
       );
       if (statsAnswer) {
         return { kind: 'answered', content: statsAnswer };

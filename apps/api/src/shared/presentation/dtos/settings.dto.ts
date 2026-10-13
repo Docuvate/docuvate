@@ -63,6 +63,16 @@ export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
   @ValidateIf((_obj, value) => value !== null)
   @IsIn(UI_LOCALES)
   locale?: (typeof UI_LOCALES)[number] | null;
+
+  @IsOptional()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsString()
+  documentChatCloudBaseUrl?: string | null;
+
+  @IsOptional()
+  @ValidateIf((_obj, value) => value !== null)
+  @IsString()
+  documentChatCloudApiKey?: string | null;
 }
 
 export class UserSettingsResponseDto implements UserSettingsDto {
@@ -84,6 +94,8 @@ export class UserSettingsResponseDto implements UserSettingsDto {
   fieldExtractionRequiredLabelIds?: string[];
   themePreference?: (typeof THEME_PREFERENCES)[number];
   locale?: (typeof UI_LOCALES)[number] | null;
+  documentChatCloudBaseUrl?: string | null;
+  documentChatCloudApiKeyConfigured?: boolean;
 }
 
 export class ExtractionEngineListResponseDto {

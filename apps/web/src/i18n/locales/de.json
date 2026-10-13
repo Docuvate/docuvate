@@ -753,6 +753,12 @@
     "engineDefaultAutomatic": "Automatisch (empfohlen)",
     "chatProvider": "Chat-Modus",
     "chatProviderAria": "Chat-Modus",
+    "chatCloudBaseUrl": "Cloud-LLM (OpenAI-kompatibel) – Basis-URL",
+    "chatCloudApiKey": "Cloud-LLM API-Schlüssel",
+    "chatCloudApiKeyPlaceholder": "Optional – leer lassen für lokalen Ollama-Chat",
+    "chatCloudApiKeyConfigured": "Schlüssel ist gespeichert (neu eingeben zum Ersetzen)",
+    "chatCloudSave": "Cloud-LLM speichern",
+    "chatCloudHint": "Optional: OpenAI-kompatibler Endpunkt für den Dokument-Chat. Ohne Angabe nutzt Docuvate den lokalen Ollama-Dienst.",
     "chatDefaultAutomatic": "Automatisch (empfohlen)",
     "chatDevSuffix": "Entwicklung",
     "chatProviderIds": {

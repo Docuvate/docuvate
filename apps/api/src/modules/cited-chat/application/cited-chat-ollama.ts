@@ -1,16 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { buildOllamaChatBody } from '../../../shared/infrastructure/chat/ollama-chat-options.js';
-import {
-  ollamaChatBaseUrl,
-  ollamaChatModel,
-  ollamaChatTimeoutMs,
-} from '../../../shared/infrastructure/chat/ollama-chat-request.js';
-import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
-import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { type CitedAnswerJson, parseCitedAnswerJson } from '../domain/cited-answer-json.js';
+import {
+  postDocumentChatLlm,
+  resolveCitedChatLlmConfig,
+  streamDocumentChatLlm,
+  type DocumentChatLlmRuntimeConfig,
+} from './cited-chat-llm.js';
 
-export type { CitedAnswerJson,CitedClaimJson } from '../domain/cited-answer-json.js';
+export type { CitedAnswerJson, CitedClaimJson } from '../domain/cited-answer-json.js';
 
 const ANSWER_JSON_SCHEMA = {
   type: 'object',
@@ -42,21 +40,35 @@ const ANSWER_JSON_SCHEMA = {
   required: ['claims'],
 };
 
+const CITED_CHAT_INSTRUCTIONS_DE = [
+  'Du bist Docuvate-Assistent. Antworte nur mit gültigem JSON (kein Markdown).',
+  'Format: {"claims":[{"text":"...","source":"S1","quote":"..."}]}',
+  'Antwortsätze in der Sprache des Nutzers (Deutsch oder Englisch). Ein Claim pro Dokument oder Fakt.',
+  'Zitat: source = exakt das Quellenlabel; quote = wörtlich aus der Quelle, höchstens 10 Wörter.',
+  'Prüfe Selbstständig: Wenn die Quellen die Frage nicht beantworten, gib "claims":[] zurück.',
+  'Erfinde nichts. Zahlen/IBAN im text müssen in einem quote vorkommen.',
+].join(' ');
+
+const CITED_CHAT_INSTRUCTIONS_EN = [
+  'You are the Docuvate assistant. Reply with valid JSON only (no Markdown).',
+  'Format: {"claims":[{"text":"...","source":"S1","quote":"..."}]}',
+  'Answer in the user language. One claim per document or fact.',
+  'Citations: source must match the passage label; quote is verbatim, at most 10 words.',
+  'Self-check: if passages do not answer the question, return "claims":[]',
+  'Do not invent facts. Numbers in text must appear in a quote.',
+].join(' ');
+
 export function buildCitedChatSystemPrompt(
-  passages: { label: string; text: string }[]
+  passages: { label: string; text: string }[],
+  locale: 'de' | 'en' = 'de'
 ): string {
   const blocks = passages.map((p) => `[${p.label}]\n${p.text}`).join('\n\n');
-  return [
-    'Du bist ein Assistent für Docuvate. Antworte nur mit gültigem JSON (kein Markdown).',
-    'Format: {"claims":[{"text":"...","source":"S1","quote":"..."}]}',
-    'Jeder claim: text = kurzer Antwortsatz auf Deutsch. Pro dokument oder pro Fakt ein eigener claim (nicht mehrere Dokumente in einem Satz mischen).',
-    'Zitat: source = exakt das Quellenlabel (z. B. S1); quote = wörtlich aus dieser Quelle, höchstens 10 Wörter. Mehrere Zitate: citations:[{source,quote},...] und jede Zahl/IBAN im text muss in einem der quotes vorkommen.',
-    'Erfinde nichts. Fehlen passende Quellen, gib "claims":[] zurück.',
-    'Beispiel:',
-    '{"claims":[{"text":"Die Miete ist bis zum 3. Werktag fällig.","source":"S1","quote":"bis zum 3. Werktag"}]}',
-    'Quellen:',
-    blocks || '(keine)',
-  ].join('\n');
+  const instructions = locale === 'en' ? CITED_CHAT_INSTRUCTIONS_EN : CITED_CHAT_INSTRUCTIONS_DE;
+  const example =
+    locale === 'en'
+      ? '{"claims":[{"text":"Rent is due by the 3rd business day.","source":"S1","quote":"by the 3rd business day"}]}'
+      : '{"claims":[{"text":"Die Miete ist bis zum 3. Werktag fällig.","source":"S1","quote":"bis zum 3. Werktag"}]}';
+  return [instructions, `Example: ${example}`, 'Sources:', blocks || '(none)'].join('\n');
 }
 
 export async function requestCitedAnswerFromOllama(
@@ -64,11 +76,23 @@ export async function requestCitedAnswerFromOllama(
   systemPrompt: string,
   history: { role: string; content: string }[],
   options?: {
+    locale?: 'de' | 'en';
+    cloudBaseUrl?: string | null;
+    cloudApiKey?: string | null;
+    cloudModel?: string | null;
     onToken?: (partialJson: string) => void | Promise<void>;
     shouldAbort?: () => boolean | Promise<boolean>;
   }
 ): Promise<{ ok: true; parsed: CitedAnswerJson } | { ok: false; detail: string }> {
-  const model = ollamaChatModel();
+  const config = resolveCitedChatLlmConfig({
+    cloudBaseUrl: options?.cloudBaseUrl,
+    cloudApiKey: options?.cloudApiKey,
+    cloudModel: options?.cloudModel,
+  });
+  if (!config) {
+    return { ok: false, detail: 'llm_not_configured' };
+  }
+
   const messages = [
     { role: 'system', content: systemPrompt },
     ...history.slice(-2),
@@ -76,9 +100,10 @@ export async function requestCitedAnswerFromOllama(
   ];
 
   if (options?.onToken) {
-    const streamResult = await streamOllamaChat({
+    const streamResult = await streamDocumentChatLlm({
+      config,
       messages,
-      extraBody: { format: ANSWER_JSON_SCHEMA, think: false },
+      responseFormat: ANSWER_JSON_SCHEMA,
       onToken: async (_token, fullText) => {
         await options.onToken?.(fullText);
       },
@@ -88,43 +113,50 @@ export async function requestCitedAnswerFromOllama(
       if (streamResult.failure.kind === 'aborted') {
         return { ok: false, detail: 'cancelled' };
       }
-      const detail =
-        streamResult.failure.kind === 'http_error'
-          ? `HTTP ${String(streamResult.failure.status)}`
-          : streamResult.failure.kind;
-      return { ok: false, detail };
+      return { ok: false, detail: streamResult.failure.kind };
     }
     return parseCitedAnswerJsonResponse(streamResult.content);
   }
 
-  const body = {
-    ...buildOllamaChatBody(model, messages, false),
-    format: ANSWER_JSON_SCHEMA,
-    think: false,
-  };
-  try {
-    const response = await fetch(`${ollamaChatBaseUrl()}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(ollamaChatTimeoutMs()),
-    });
-    if (!response.ok) {
-      return { ok: false, detail: `HTTP ${String(response.status)}` };
-    }
-    const data: unknown = await response.json();
-    const messageContent =
-      isRecord(data) && isRecord(data.message) && typeof data.message.content === 'string'
-        ? data.message.content
-        : '';
-    const raw = messageContent.trim();
-    if (!raw) {
-      return { ok: false, detail: 'empty model response' };
-    }
-    return parseCitedAnswerJsonResponse(raw);
-  } catch (err) {
-    return { ok: false, detail: err instanceof Error ? err.message : String(err) };
+  const posted = await postDocumentChatLlm(config, messages, ANSWER_JSON_SCHEMA);
+  if (!posted.ok) {
+    return posted;
   }
+  return parseCitedAnswerJsonResponse(posted.content);
+}
+
+export async function phraseLibraryStatsWithLlm(input: {
+  locale: 'de' | 'en';
+  userQuestion: string;
+  statsPayload: Record<string, unknown>;
+  cloudBaseUrl?: string | null;
+  cloudApiKey?: string | null;
+  cloudModel?: string | null;
+}): Promise<string | null> {
+  const config = resolveCitedChatLlmConfig({
+    cloudBaseUrl: input.cloudBaseUrl,
+    cloudApiKey: input.cloudApiKey,
+    cloudModel: input.cloudModel,
+  });
+  if (!config) {
+    return null;
+  }
+  const system =
+    input.locale === 'en'
+      ? 'You phrase library statistics for the user. Use the JSON facts only. Short sentences or a bullet list. No invented numbers.'
+      : 'Du formulierst Bibliotheks-Statistiken für den Nutzer. Nutze nur die JSON-Fakten. Kurze Sätze oder Aufzählung. Keine erfundenen Zahlen.';
+  const user = JSON.stringify({
+    question: input.userQuestion,
+    facts: input.statsPayload,
+  });
+  const posted = await postDocumentChatLlm(config, [
+    { role: 'system', content: system },
+    { role: 'user', content: user },
+  ]);
+  if (!posted.ok) {
+    return null;
+  }
+  return posted.content.trim();
 }
 
 function parseCitedAnswerJsonResponse(
@@ -141,3 +173,5 @@ function parseCitedAnswerJsonResponse(
   }
 }
 
+// re-export for tests
+export type { DocumentChatLlmRuntimeConfig };

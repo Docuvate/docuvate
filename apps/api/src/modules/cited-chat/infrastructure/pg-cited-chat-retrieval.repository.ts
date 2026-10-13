@@ -16,6 +16,7 @@ import {
 } from '../../search/domain/reciprocal-rank-fusion.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
 import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
+import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;
@@ -197,6 +198,81 @@ export class PgCitedChatRetrievalRepository {
 
   indexPassageForRerank(candidate: CitedChatChunkCandidate): string {
     return chunkIndexText(candidate.documentTitle, candidate.body);
+  }
+
+  async loadDocumentContextMeta(
+    userId: string,
+    documentIds: string[]
+  ): Promise<Map<string, CitedChatDocumentContextMeta>> {
+    const unique = [...new Set(documentIds)].filter((id) => id.length > 0);
+    const out = new Map<string, CitedChatDocumentContextMeta>();
+    if (unique.length === 0) {
+      return out;
+    }
+
+    const docs = await this.pool.query<{
+      id: string;
+      title: string;
+      document_date: string | null;
+    }>(
+      `SELECT d.id, d.title, d.document_date::text AS document_date
+       FROM documents d
+       WHERE d.user_id = $1 AND d.id = ANY($2::uuid[])`,
+      [userId, unique]
+    );
+
+    const tags = await this.pool.query<{ document_id: string; name: string }>(
+      `SELECT dt.document_id, t.name
+       FROM document_tags dt
+       JOIN tags t ON t.id = dt.tag_id
+       JOIN documents d ON d.id = dt.document_id
+       WHERE d.user_id = $1 AND dt.document_id = ANY($2::uuid[])
+       ORDER BY t.name ASC`,
+      [userId, unique]
+    );
+
+    const fields = await this.pool.query<{
+      document_id: string;
+      field_storage_key: string;
+      value_text: string;
+      confidence: number | null;
+    }>(
+      `SELECT v.document_id, v.field_storage_key, v.value_text, v.confidence
+       FROM document_field_values v
+       JOIN documents d ON d.id = v.document_id
+       WHERE d.user_id = $1 AND v.document_id = ANY($2::uuid[])
+       ORDER BY v.document_id, v.field_storage_key`,
+      [userId, unique]
+    );
+
+    const labelsByDoc = new Map<string, string[]>();
+    for (const row of tags.rows) {
+      const list = labelsByDoc.get(row.document_id) ?? [];
+      list.push(row.name);
+      labelsByDoc.set(row.document_id, list);
+    }
+
+    const fieldsByDoc = new Map<string, CitedChatDocumentContextMeta['fields']>();
+    for (const row of fields.rows) {
+      const list = fieldsByDoc.get(row.document_id) ?? [];
+      list.push({
+        key: row.field_storage_key,
+        value: row.value_text,
+        confidence: row.confidence,
+      });
+      fieldsByDoc.set(row.document_id, list);
+    }
+
+    for (const row of docs.rows) {
+      out.set(row.id, {
+        documentId: row.id,
+        title: row.title,
+        documentDate: row.document_date,
+        labels: labelsByDoc.get(row.id) ?? [],
+        fields: fieldsByDoc.get(row.id) ?? [],
+      });
+    }
+    return out;
   }
 
   private async lexicalFallback(

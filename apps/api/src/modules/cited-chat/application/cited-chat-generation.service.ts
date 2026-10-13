@@ -8,7 +8,7 @@ import {
   EMBEDDING_PORT,
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
-import { ollamaChatConfigured } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
+import { resolveCitedChatLlmConfig } from './cited-chat-llm.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
@@ -22,9 +22,13 @@ import {
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
+import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
+import {
+  passesCalibratedRetrievalGate,
+  shouldAttemptCitedLlm,
+} from '../domain/rag-llm-eligibility.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
-import { passesFusionGate, passesRerankerGate } from '../domain/verify-citation-quote.js';
 import {
   buildRejectedClaimBenchLog,
   normalizeCitedSourceLabel,
@@ -54,6 +58,11 @@ export interface CitedChatGenerationInput {
   documentIds: string[];
   scope: 'document' | 'library';
   locale?: 'de' | 'en' | null;
+  cloudLlm?: {
+    baseUrl?: string | null;
+    apiKey?: string | null;
+    model?: string | null;
+  };
   shouldAbort?: () => boolean | Promise<boolean>;
   onHeartbeat?: () => void | Promise<void>;
 }
@@ -89,6 +98,7 @@ export class CitedChatGenerationService {
         documentIds,
         scope,
         locale: input.locale ?? 'de',
+        cloudLlm: input.cloudLlm,
         shouldAbort: input.shouldAbort,
         onHeartbeat: input.onHeartbeat,
       });
@@ -113,6 +123,11 @@ export class CitedChatGenerationService {
     documentIds: string[];
     scope: 'document' | 'library';
     locale: 'de' | 'en';
+    cloudLlm?: {
+      baseUrl?: string | null;
+      apiKey?: string | null;
+      model?: string | null;
+    };
     shouldAbort?: () => boolean | Promise<boolean>;
     onHeartbeat?: () => void | Promise<void>;
   }): Promise<CitedChatGenerationResult> {
@@ -153,6 +168,7 @@ export class CitedChatGenerationService {
       priorUserMessage,
       scope,
       locale,
+      cloudLlm: input.cloudLlm,
     });
     if (routed.kind === 'answered') {
       await this.citationsRepo.replaceCitations(messageId, []);
@@ -244,41 +260,85 @@ export class CitedChatGenerationService {
       scope === 'library'
         ? diversifyLibraryRerank(ranked, RAG_RERANK_TOP_K)
         : ranked.slice(0, RAG_RERANK_TOP_K);
+    const rerankerUsed = rerank.reachable && rerank.rerankerUsed;
     const bestScore = top[0]?.score ?? -1;
-    const gateOk =
-      rerank.reachable && rerank.rerankerUsed
-        ? passesRerankerGate(bestScore, ragRerankerGateThreshold())
-        : passesFusionGate(bestScore, ragFusionGateThreshold());
+    const gateOk = passesCalibratedRetrievalGate({ bestScore, rerankerUsed });
+    const llmAttempt = shouldAttemptCitedLlm({ bestScore, rerankerUsed });
+    const llmConfigured =
+      resolveCitedChatLlmConfig({
+        cloudBaseUrl: input.cloudLlm?.baseUrl,
+        cloudApiKey: input.cloudLlm?.apiKey,
+        cloudModel: input.cloudLlm?.model,
+      }) != null;
 
-    const extractiveMinScore =
-      rerank.reachable && rerank.rerankerUsed
-        ? ragRerankerGateThreshold()
-        : ragFusionGateThreshold();
+    const extractiveMinScore = rerankerUsed
+      ? ragRerankerGateThreshold()
+      : ragFusionGateThreshold();
     const extractivePool =
-      scope === 'library'
-        ? libraryExtractiveRows(top, retrievalQuery)
-        : top.slice(0, RAG_RERANK_TOP_K);
-    const extractive =
-      extractivePool.length > 0
-        ? await this.resolveExtractiveAnswer(retrievalQuery, extractivePool, extractiveMinScore)
-        : null;
+      scope === 'library' ? libraryExtractiveRows(top) : top.slice(0, RAG_RERANK_TOP_K);
 
-    if (!gateOk) {
-      const extractiveChunkId = extractive?.chunk.chunkId ?? '';
-      const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
-      if (extractive && extractiveChunkIsUuid) {
-        await this.citationsRepo.replaceCitations(messageId, [
-          {
-            ordinal: 1,
-            chunkId: extractive.chunk.chunkId,
-            quote: extractive.quote,
-            charStart: extractive.chunk.charStart ?? 0,
-            charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
-          },
-        ]);
-        const content = formatVerifiedCitedContent([
-          { text: extractive.text, ordinal: 1 },
-        ]);
+    const documentMeta = await this.retrieval.loadDocumentContextMeta(
+      userId,
+      top.map((row) => row.chunk.documentId)
+    );
+
+    if (!llmConfigured) {
+      const extractive =
+        extractivePool.length > 0 && gateOk
+          ? await this.resolveExtractiveAnswer(retrievalQuery, extractivePool, extractiveMinScore)
+          : null;
+      if (!gateOk) {
+        const extractiveChunkId = extractive?.chunk.chunkId ?? '';
+        const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+        if (extractive && extractiveChunkIsUuid) {
+          await this.citationsRepo.replaceCitations(messageId, [
+            {
+              ordinal: 1,
+              chunkId: extractive.chunk.chunkId,
+              quote: extractive.quote,
+              charStart: extractive.chunk.charStart ?? 0,
+              charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
+            },
+          ]);
+          const content = formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }]);
+          await this.threads.updateMessageGeneration(messageId, {
+            content,
+            generationStatus: 'done',
+            generationPhase: null,
+            finalizeOnlyIfInFlight: true,
+          });
+          await this.threads.touchThread(threadId);
+          return { content, abstained: false };
+        }
+        await this.citationsRepo.replaceCitations(messageId, []);
+        await this.threads.updateMessageGeneration(messageId, {
+          content: abstentionText,
+          generationStatus: 'done',
+          generationPhase: null,
+          finalizeOnlyIfInFlight: true,
+        });
+        await this.threads.touchThread(threadId);
+        return { content: abstentionText, abstained: true };
+      }
+      if (extractive) {
+        const extractiveChunkId = extractive.chunk.chunkId;
+        const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+        if (extractiveChunkIsUuid) {
+          await this.citationsRepo.replaceCitations(messageId, [
+            {
+              ordinal: 1,
+              chunkId: extractive.chunk.chunkId,
+              quote: extractive.quote,
+              charStart: extractive.chunk.charStart ?? 0,
+              charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
+            },
+          ]);
+        } else {
+          await this.citationsRepo.replaceCitations(messageId, []);
+        }
+        const content = extractiveChunkIsUuid
+          ? formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }])
+          : extractive.text;
         await this.threads.updateMessageGeneration(messageId, {
           content,
           generationStatus: 'done',
@@ -298,39 +358,8 @@ export class CitedChatGenerationService {
       await this.threads.touchThread(threadId);
       return { content: abstentionText, abstained: true };
     }
-    const extractiveChunkId = extractive?.chunk.chunkId ?? '';
-    const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
-    if (
-      extractive &&
-      (extractiveChunkIsUuid || !ollamaChatConfigured())
-    ) {
-      if (extractiveChunkIsUuid) {
-        await this.citationsRepo.replaceCitations(messageId, [
-          {
-            ordinal: 1,
-            chunkId: extractive.chunk.chunkId,
-            quote: extractive.quote,
-            charStart: extractive.chunk.charStart ?? 0,
-            charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
-          },
-        ]);
-      } else {
-        await this.citationsRepo.replaceCitations(messageId, []);
-      }
-      const content = extractiveChunkIsUuid
-        ? formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }])
-        : extractive.text;
-      await this.threads.updateMessageGeneration(messageId, {
-        content,
-        generationStatus: 'done',
-        generationPhase: null,
-        finalizeOnlyIfInFlight: true,
-      });
-      await this.threads.touchThread(threadId);
-      return { content, abstained: false };
-    }
 
-    if (!ollamaChatConfigured()) {
+    if (!llmAttempt) {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
         content: abstentionText,
@@ -366,8 +395,12 @@ export class CitedChatGenerationService {
     const systemPrompt = buildCitedChatSystemPrompt(
       top.map((row) => ({
         label: labelByChunk.get(row.chunk.chunkId) ?? 'S?',
-        text: this.retrieval.indexPassageForRerank(row.chunk),
-      }))
+        text: buildPassageWithStructuredContext(
+          documentMeta.get(row.chunk.documentId),
+          this.retrieval.indexPassageForRerank(row.chunk)
+        ),
+      })),
+      locale
     );
 
     let lastFlush = 0;
@@ -376,6 +409,10 @@ export class CitedChatGenerationService {
     const streamedVerified: { text: string; ordinal: number }[] = [];
     const llmStarted = Date.now();
     const llm = await requestCitedAnswerFromOllama(retrievalQuery, systemPrompt, history, {
+      locale,
+      cloudBaseUrl: input.cloudLlm?.baseUrl,
+      cloudApiKey: input.cloudLlm?.apiKey,
+      cloudModel: input.cloudLlm?.model,
       shouldAbort: () => aborted(),
       onToken: async (partialJson) => {
         await heartbeat();
@@ -424,17 +461,6 @@ export class CitedChatGenerationService {
         await this.citationsRepo.replaceCitations(messageId, []);
         await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
         return { content: '', abstained: true };
-      }
-      if (!ollamaChatConfigured()) {
-        await this.citationsRepo.replaceCitations(messageId, []);
-        await this.threads.updateMessageGeneration(messageId, {
-          content: abstentionText,
-          generationStatus: 'done',
-          generationPhase: null,
-          finalizeOnlyIfInFlight: true,
-        });
-        await this.threads.touchThread(threadId);
-        return { content: abstentionText, abstained: true };
       }
       await this.failGeneration(messageId, threadId, userId, 'ollama_error', llm.detail);
       return { content: '', abstained: true };
@@ -509,11 +535,13 @@ export class CitedChatGenerationService {
       : undefined;
 
     if (verified.length === 0) {
-      const extractiveFallback = await this.resolveExtractiveAnswer(
-        retrievalQuery,
-        extractivePool,
-        extractiveMinScore
-      );
+      const extractiveFallback = llmConfigured
+        ? null
+        : await this.resolveExtractiveAnswer(
+            retrievalQuery,
+            extractivePool,
+            extractiveMinScore
+          );
       const fallbackChunkId = extractiveFallback?.chunk.chunkId ?? '';
       const fallbackChunkIsUuid = /^[0-9a-f-]{36}$/i.test(fallbackChunkId);
       if (extractiveFallback && fallbackChunkIsUuid) {

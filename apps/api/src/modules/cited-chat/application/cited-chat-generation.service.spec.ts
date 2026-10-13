@@ -45,7 +45,8 @@ async function buildService(deps: {
   threads: Record<string, ReturnType<typeof vi.fn>>;
   retrieval: {
     hybridRetrieveChunks: ReturnType<typeof vi.fn>;
-    indexPassageForRerank: (c: { documentTitle: string; body: string }) => string;
+      indexPassageForRerank: (c: { documentTitle: string; body: string }) => string;
+      loadDocumentContextMeta?: ReturnType<typeof vi.fn>;
   };
   citations?: { replaceCitations: ReturnType<typeof vi.fn> };
 }) {
@@ -84,7 +85,15 @@ async function buildService(deps: {
         provide: EMBEDDING_PORT,
         useValue: { embedTexts: vi.fn().mockResolvedValue({ embeddings: [[0.1]] }) },
       },
-      { provide: PgCitedChatRetrievalRepository, useValue: deps.retrieval },
+      {
+        provide: PgCitedChatRetrievalRepository,
+        useValue: {
+          loadDocumentContextMeta:
+            deps.retrieval.loadDocumentContextMeta ??
+            vi.fn().mockResolvedValue(new Map()),
+          ...deps.retrieval,
+        },
+      },
       {
         provide: PgChatMessageCitationsRepository,
         useValue: deps.citations ?? { replaceCitations: vi.fn() },
@@ -99,6 +108,13 @@ describe('CitedChatGenerationService abstention', () => {
     vi.clearAllMocks();
     process.env['RAG_RERANKER_GATE_MIN'] = '0.21';
     process.env['RAG_FUSION_GATE_MIN'] = '0.02';
+    delete process.env['OLLAMA_URL'];
+    vi.mocked(fetchWorkerExtractiveAnswer).mockResolvedValue({
+      reachable: false,
+      passageId: null,
+      answer: null,
+      quote: null,
+    });
   });
 
   it('abstains on off-topic reranker score', async () => {

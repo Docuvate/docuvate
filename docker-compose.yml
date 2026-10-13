@@ -142,7 +142,7 @@ services:
     entrypoint: >
       /bin/sh -c "
       set -e;
-      ollama pull ${OLLAMA_MODEL:-qwen2.5:1.5b};
+      ollama pull ${OLLAMA_MODEL:-qwen2.5:3b};
       "
     environment:
       OLLAMA_HOST: http://ollama:11434
@@ -229,7 +229,7 @@ services:
       WORKER_COMPARE_TIMEOUT_MS: '600000'
       DOCUMENT_CHAT_PROVIDER: rag-ollama
       OLLAMA_URL: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:1.5b}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5:3b}
       OLLAMA_CHAT_TIMEOUT_MS: '180000'
       OLLAMA_CHAT_IDLE_TIMEOUT_MS: '120000'
       OLLAMA_NUM_CTX: '2048'

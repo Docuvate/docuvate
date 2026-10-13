@@ -12,6 +12,10 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  decryptChatCloudApiKey,
+  encryptChatCloudApiKey,
+} from './chat-cloud-api-key.codec.js';
 
 function parseRequiredLabelIds(raw: unknown): string[] {
   if (Array.isArray(raw)) {
@@ -49,6 +53,11 @@ function mapRow(row: Record<string, unknown>): UserPreferencesEntity {
         ? row.theme_preference
         : 'system',
     locale: row.locale === 'de' || row.locale === 'en' ? row.locale : null,
+    documentChatCloudBaseUrl: parseOptionalString(row.document_chat_cloud_base_url),
+    documentChatCloudApiKey:
+      row.document_chat_cloud_api_key_encrypted instanceof Buffer
+        ? decryptChatCloudApiKey(row.document_chat_cloud_api_key_encrypted)
+        : null,
     updatedAt: new Date(String(row.updated_at)),
   };
 }
@@ -65,6 +74,8 @@ const DEFAULTS: Omit<UserPreferencesEntity, 'userId'> = {
   advancedFeaturesEnabled: false,
   themePreference: 'system',
   locale: null,
+  documentChatCloudBaseUrl: null,
+  documentChatCloudApiKey: null,
   updatedAt: new Date(0),
 };
 
@@ -124,6 +135,8 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
       advancedFeaturesEnabled?: boolean;
       themePreference?: 'light' | 'dark' | 'system';
       locale?: 'de' | 'en' | null;
+      documentChatCloudBaseUrl?: string | null;
+      documentChatCloudApiKey?: string | null;
     }
   ): Promise<UserPreferencesEntity> {
     const existing = await this.getForUser(userId);
@@ -149,11 +162,33 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
       advancedFeaturesEnabled: patch.advancedFeaturesEnabled ?? existing.advancedFeaturesEnabled,
       themePreference: patch.themePreference ?? existing.themePreference,
       locale: patch.locale !== undefined ? patch.locale : existing.locale,
+      documentChatCloudBaseUrl:
+        patch.documentChatCloudBaseUrl !== undefined
+          ? patch.documentChatCloudBaseUrl
+          : existing.documentChatCloudBaseUrl,
+      documentChatCloudApiKey:
+        patch.documentChatCloudApiKey !== undefined
+          ? patch.documentChatCloudApiKey
+          : existing.documentChatCloudApiKey,
     };
 
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      let encryptedApiKey: Buffer | null = null;
+      if (patch.documentChatCloudApiKey !== undefined) {
+        encryptedApiKey =
+          patch.documentChatCloudApiKey && patch.documentChatCloudApiKey.trim().length > 0
+            ? encryptChatCloudApiKey(patch.documentChatCloudApiKey.trim())
+            : null;
+      } else {
+        const prior = await client.query<{ document_chat_cloud_api_key_encrypted: Buffer | null }>(
+          `SELECT document_chat_cloud_api_key_encrypted
+           FROM user_preferences WHERE user_id = $1`,
+          [userId]
+        );
+        encryptedApiKey = prior.rows[0]?.document_chat_cloud_api_key_encrypted ?? null;
+      }
       await client.query(
         `INSERT INTO user_preferences (
            user_id, preferred_extractor_engine, preferred_chat_provider,
@@ -164,8 +199,10 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
            advanced_features_enabled,
            theme_preference,
            locale,
+           document_chat_cloud_base_url,
+           document_chat_cloud_api_key_encrypted,
            updated_at
-         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, now())
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now())
          ON CONFLICT (user_id) DO UPDATE SET
            preferred_extractor_engine = EXCLUDED.preferred_extractor_engine,
            preferred_chat_provider = EXCLUDED.preferred_chat_provider,
@@ -177,6 +214,8 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
            advanced_features_enabled = EXCLUDED.advanced_features_enabled,
            theme_preference = EXCLUDED.theme_preference,
            locale = EXCLUDED.locale,
+           document_chat_cloud_base_url = EXCLUDED.document_chat_cloud_base_url,
+           document_chat_cloud_api_key_encrypted = EXCLUDED.document_chat_cloud_api_key_encrypted,
            updated_at = now()`,
         [
           userId,
@@ -190,6 +229,8 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
           next.advancedFeaturesEnabled,
           next.themePreference,
           next.locale,
+          next.documentChatCloudBaseUrl,
+          encryptedApiKey,
         ]
       );
       await syncRequiredLabels(client, userId, next.fieldExtractionRequiredLabelIds);

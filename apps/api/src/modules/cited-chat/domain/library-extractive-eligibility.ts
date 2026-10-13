@@ -7,117 +7,49 @@ export interface RankedChunkRow {
   score: number;
 }
 
-const QUERY_HINT_STOPWORDS = new Set([
-  'auch',
-  'bis',
-  'das',
-  'dem',
-  'den',
-  'der',
-  'die',
-  'ein',
-  'eine',
-  'einer',
-  'eines',
-  'für',
-  'haben',
-  'hat',
-  'hoch',
-  'ich',
-  'im',
-  'in',
-  'ist',
-  'mein',
-  'meine',
-  'meinen',
-  'mich',
-  'mit',
-  'nicht',
-  'noch',
-  'nur',
-  'oder',
-  'sehr',
-  'sind',
-  'und',
-  'viel',
-  'viele',
-  'von',
-  'warum',
-  'was',
-  'welche',
-  'welcher',
-  'welches',
-  'wann',
-  'wer',
-  'wie',
-  'wo',
-  'zu',
-]);
+/** Clear winner when the leading document's best rerank score beats the runner-up by this ratio. */
+const LIBRARY_EXTRACTIVE_DOC_MARGIN = 1.06;
+const LIBRARY_EXTRACTIVE_CHUNK_MARGIN = 1.06;
 
-function queryHintTokens(query: string): string[] {
-  return query
-    .toLowerCase()
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter((token) => token.length >= 4 && !QUERY_HINT_STOPWORDS.has(token));
-}
-
-/** Prefer a title token that matches few ranked documents (e.g. "lindenweg" vs "mietvertrag"). */
-function pickDocumentAnchorToken(top: RankedChunkRow[], query: string): string | null {
-  const tokens = queryHintTokens(query);
-  if (tokens.length === 0) {
-    return null;
-  }
-  let bestToken: string | null = null;
-  let bestMatchCount = Number.POSITIVE_INFINITY;
-  for (const token of tokens) {
-    const matchCount = top.filter((row) =>
-      row.chunk.documentTitle.toLowerCase().includes(token)
-    ).length;
-    if (matchCount === 0) {
-      continue;
-    }
-    if (matchCount < bestMatchCount) {
-      bestMatchCount = matchCount;
-      bestToken = token;
+function bestRowPerDocument(top: RankedChunkRow[]): RankedChunkRow[] {
+  const byDoc = new Map<string, RankedChunkRow>();
+  for (const row of top) {
+    const existing = byDoc.get(row.chunk.documentId);
+    if (!existing || row.score > existing.score) {
+      byDoc.set(row.chunk.documentId, row);
     }
   }
-  return bestToken;
-}
-
-function rowsAnchoredByQuery(top: RankedChunkRow[], query: string): RankedChunkRow[] {
-  const anchor = pickDocumentAnchorToken(top, query);
-  if (!anchor) {
-    return [];
-  }
-  const matched = top.filter((row) => row.chunk.documentTitle.toLowerCase().includes(anchor));
-  return matched.length > 0 ? [matched[0]] : [];
+  return [...byDoc.values()].sort((a, b) => b.score - a.score);
 }
 
 /**
- * Library fast path: answer from the single best chunk when it clearly wins.
- * Multi-document questions (similar top scores across docs) fall through to the LLM,
- * unless the query names a document (title token) present in the rerank list.
+ * Rows eligible for extractive fallback (LLM off or post-LLM failure only).
+ * Disambiguates multi-document libraries via per-document rerank scores, not title-token heuristics.
  */
-export function libraryExtractiveRows(top: RankedChunkRow[], query?: string): RankedChunkRow[] {
+export function libraryExtractiveRows(top: RankedChunkRow[]): RankedChunkRow[] {
   if (top.length === 0) {
     return [];
-  }
-  const trimmedQuery = query?.trim();
-  if (trimmedQuery) {
-    const anchored = rowsAnchoredByQuery(top, trimmedQuery);
-    if (anchored.length > 0) {
-      return anchored;
-    }
   }
   const best = top[0];
   if (top.length === 1) {
     return [best];
   }
+
+  const perDoc = bestRowPerDocument(top);
+  if (perDoc.length >= 2) {
+    const leader = perDoc[0];
+    const runnerUp = perDoc[1];
+    if (leader.score >= runnerUp.score * LIBRARY_EXTRACTIVE_DOC_MARGIN) {
+      return [leader];
+    }
+    return [];
+  }
+
   const runnerUp = top[1];
   if (runnerUp.chunk.documentId === best.chunk.documentId) {
     return [best];
   }
-  if (best.score >= runnerUp.score * 1.06) {
+  if (best.score >= runnerUp.score * LIBRARY_EXTRACTIVE_CHUNK_MARGIN) {
     return [best];
   }
   return [];

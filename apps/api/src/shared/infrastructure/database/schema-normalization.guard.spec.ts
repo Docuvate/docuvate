@@ -34,7 +34,11 @@ const FORWARD_SQL_ORDER = [
   'corrections-up.sql',
   'duplicate-pair-labels-up.sql',
   'document-representation-up.sql',
+<<<<<<< HEAD
   'feature-flag-up.sql',
+=======
+  'user-chat-cloud-llm-up.sql',
+>>>>>>> 6654e1b (feat(chat): LLM-first cited chat with structured context and CPU 3B default)
 ];
 
 function loadForwardMigrationSql(): string {

@@ -127,6 +127,10 @@ export class RunDocumentChatGenerationUseCase {
           userId,
           userMessage,
           locale: preferences.locale === 'en' ? 'en' : 'de',
+          cloudLlm: {
+            baseUrl: preferences.documentChatCloudBaseUrl,
+            apiKey: preferences.documentChatCloudApiKey,
+          },
           documentIds:
             thread.scope === 'library'
               ? threadDocumentIds
