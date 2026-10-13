@@ -35,6 +35,7 @@ const FORWARD_SQL_ORDER = [
   'duplicate-pair-labels-up.sql',
   'document-representation-up.sql',
   'feature-flag-up.sql',
+  'feature-flag-ml-keys-up.sql',
   'user-chat-cloud-llm-up.sql',
 ];
 

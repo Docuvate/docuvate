@@ -21,11 +21,14 @@ import {
   ListAdminUsersQueryDto,
   SetAdminUserRoleRequestDto,
 } from '../../../shared/presentation/dtos/admin.dto.js';
+import { SetAdminUserFeatureFlagRequestDto } from '../../../shared/presentation/dtos/admin-feature-flag.dto.js';
+import { FeatureFlagsResponseDto } from '../../../shared/presentation/dtos/remote-config.dto.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { INSTANCE_ROLE_MEMBER } from '../../auth/domain/instance-role.constants.js';
+import { SetTenantFeatureFlagOverrideUseCase } from '../../feature-flags/application/set-tenant-feature-flag-override.use-case.js';
 import {
   BanAdminUserUseCase,
   GetAdminAccessUseCase,
@@ -56,7 +59,8 @@ export class AdminController {
     private readonly unbanUser: UnbanAdminUserUseCase,
     private readonly revokeSessions: RevokeAdminUserSessionsUseCase,
     private readonly resendInvitation: ResendAdminUserInvitationUseCase,
-    private readonly revokeInvitation: RevokeAdminUserInvitationUseCase
+    private readonly revokeInvitation: RevokeAdminUserInvitationUseCase,
+    private readonly setFeatureFlagOverride: SetTenantFeatureFlagOverrideUseCase
   ) {}
 
   @Get('access')
@@ -206,5 +210,22 @@ export class AdminController {
       userId: params.userId,
     });
     return { ok: true };
+  }
+
+  @Patch('users/:userId/feature-flags')
+  @UseGuards(AdminGuard)
+  @ApiDocuvateRoute({
+    operationId: 'setAdminUserFeatureFlag',
+    summary: 'Set a per-tenant feature flag override',
+  })
+  async setAdminUserFeatureFlag(
+    @Param() params: AdminUserIdParamDto,
+    @Body() body: SetAdminUserFeatureFlagRequestDto
+  ): Promise<FeatureFlagsResponseDto> {
+    return await this.setFeatureFlagOverride.execute({
+      tenantId: params.userId,
+      flag: body.flag,
+      enabled: body.enabled,
+    });
   }
 }

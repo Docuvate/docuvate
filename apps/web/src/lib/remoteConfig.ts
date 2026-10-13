@@ -10,6 +10,12 @@ const FEATURE_FLAGS_DEFAULT: FeatureFlagsDto = {
   layoutReconstructionCompare: false,
   sourceConnectors: false,
   experimentalResearchModels: false,
+  exactAnswers: false,
+  smartDuplicates: false,
+  answerAbstention: false,
+  learnedValueTypes: false,
+  layoutKeyValueRoles: false,
+  localChatModel: false,
 };
 
 let cachedFlags: FeatureFlagsDto = FEATURE_FLAGS_DEFAULT;

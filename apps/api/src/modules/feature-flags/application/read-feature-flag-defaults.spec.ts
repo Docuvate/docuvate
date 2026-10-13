@@ -4,48 +4,74 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { readFeatureFlagDefaultsFromEnv } from './read-feature-flag-defaults.js';
 
+const ALL_FALSE = {
+  layoutReconstructionCompare: false,
+  sourceConnectors: false,
+  experimentalResearchModels: false,
+  exactAnswers: false,
+  smartDuplicates: false,
+  answerAbstention: false,
+  learnedValueTypes: false,
+  layoutKeyValueRoles: false,
+  localChatModel: false,
+} as const;
+
+const ENV_KEYS = [
+  'DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE',
+  'DOCUVATE_FEATURE_SOURCE_CONNECTORS',
+  'DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS',
+  'DOCUVATE_FEATURE_EXACT_ANSWERS',
+  'DOCUVATE_FEATURE_SMART_DUPLICATES',
+  'DOCUVATE_FEATURE_ANSWER_ABSTENTION',
+  'DOCUVATE_FEATURE_LEARNED_VALUE_TYPES',
+  'DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES',
+  'DOCUVATE_FEATURE_LOCAL_CHAT_MODEL',
+] as const;
+
 describe('readFeatureFlagDefaultsFromEnv', () => {
-  const originalLayout = process.env['DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE'];
-  const originalSource = process.env['DOCUVATE_FEATURE_SOURCE_CONNECTORS'];
-  const originalResearch = process.env['DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS'];
+  const original: Record<string, string | undefined> = {};
 
   afterEach(() => {
-    if (originalLayout === undefined) {
-      process.env['DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE'] = undefined;
-    } else {
-      process.env['DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE'] = originalLayout;
-    }
-    if (originalSource === undefined) {
-      process.env['DOCUVATE_FEATURE_SOURCE_CONNECTORS'] = undefined;
-    } else {
-      process.env['DOCUVATE_FEATURE_SOURCE_CONNECTORS'] = originalSource;
-    }
-    if (originalResearch === undefined) {
-      process.env['DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS'] = undefined;
-    } else {
-      process.env['DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS'] = originalResearch;
+    for (const key of ENV_KEYS) {
+      if (original[key] === undefined) {
+        process.env[key] = undefined;
+      } else {
+        process.env[key] = original[key];
+      }
     }
   });
 
   it('defaults all flags to false when env is unset', () => {
-    process.env['DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE'] = undefined;
-    process.env['DOCUVATE_FEATURE_SOURCE_CONNECTORS'] = undefined;
-    process.env['DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS'] = undefined;
-    expect(readFeatureFlagDefaultsFromEnv()).toEqual({
-      layoutReconstructionCompare: false,
-      sourceConnectors: false,
-      experimentalResearchModels: false,
-    });
+    for (const key of ENV_KEYS) {
+      original[key] ??= process.env[key];
+      process.env[key] = undefined;
+    }
+    expect(readFeatureFlagDefaultsFromEnv()).toEqual(ALL_FALSE);
   });
 
   it('parses true-like env values', () => {
+    for (const key of ENV_KEYS) {
+      original[key] ??= process.env[key];
+    }
     process.env['DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE'] = 'true';
     process.env['DOCUVATE_FEATURE_SOURCE_CONNECTORS'] = '1';
     process.env['DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS'] = 'yes';
+    process.env['DOCUVATE_FEATURE_EXACT_ANSWERS'] = 'true';
+    process.env['DOCUVATE_FEATURE_SMART_DUPLICATES'] = '1';
+    process.env['DOCUVATE_FEATURE_ANSWER_ABSTENTION'] = 'yes';
+    process.env['DOCUVATE_FEATURE_LEARNED_VALUE_TYPES'] = 'true';
+    process.env['DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES'] = '1';
+    process.env['DOCUVATE_FEATURE_LOCAL_CHAT_MODEL'] = 'yes';
     expect(readFeatureFlagDefaultsFromEnv()).toEqual({
       layoutReconstructionCompare: true,
       sourceConnectors: true,
       experimentalResearchModels: true,
+      exactAnswers: true,
+      smartDuplicates: true,
+      answerAbstention: true,
+      learnedValueTypes: true,
+      layoutKeyValueRoles: true,
+      localChatModel: true,
     });
   });
 });

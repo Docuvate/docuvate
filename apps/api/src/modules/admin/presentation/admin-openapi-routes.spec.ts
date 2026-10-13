@@ -70,6 +70,7 @@ describe('admin OpenAPI routes', () => {
     const labels = privileged.map((route) => `${route.method} ${route.path}`).sort();
     expect(labels).toEqual([
       'GET /admin/users',
+      'PATCH /admin/users/{userId}/feature-flags',
       'PATCH /admin/users/{userId}/role',
       'POST /admin/users',
       'POST /admin/users/{userId}/ban',
