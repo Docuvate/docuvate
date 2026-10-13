@@ -19,6 +19,7 @@ services:
       # Ollama is not started in compose-smoke; avoid ~4s DNS/connect stalls on settings.
       OLLAMA_URL: ''
       WORKER_DEPENDENCY_TIMEOUT_MS: '2500'
+      # Smoke profile may exercise layout compare UI (tenant resolves via env default).
       DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE: 'true'
 
   worker:
