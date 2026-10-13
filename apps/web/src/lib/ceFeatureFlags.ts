@@ -24,19 +24,17 @@ export function readCeFeatureFlags(): CeFeatureFlagsDto {
 }
 
 export async function ensureCeFeatureFlagsLoaded(): Promise<CeFeatureFlagsDto> {
-  if (!loadPromise) {
-    loadPromise = getCeFeatureFlags()
-      .then((flags) => {
-        cachedFlags = flags;
-        emitCeFlagsChange();
-        return flags;
-      })
-      .catch(() => {
-        cachedFlags = CE_FLAGS_DEFAULT;
-        emitCeFlagsChange();
-        return CE_FLAGS_DEFAULT;
-      });
-  }
+  loadPromise ??= getCeFeatureFlags()
+    .then((flags) => {
+      cachedFlags = flags;
+      emitCeFlagsChange();
+      return flags;
+    })
+    .catch(() => {
+      cachedFlags = CE_FLAGS_DEFAULT;
+      emitCeFlagsChange();
+      return CE_FLAGS_DEFAULT;
+    });
   return loadPromise;
 }
 

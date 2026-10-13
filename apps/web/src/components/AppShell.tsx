@@ -5,10 +5,10 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
-import { ensureCeFeatureFlagsLoaded } from '../lib/ceFeatureFlags';
 import { getUserSettings } from '../lib/api';
 import { authClient, authSessionUserId } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
+import { ensureCeFeatureFlagsLoaded } from '../lib/ceFeatureFlags';
 import { applyUserSettingsUiPreferences } from '../lib/syncUserUiPreferences';
 import { useNarrowTopbar } from '../lib/useNarrowTopbar';
 import { AppSidebar } from './layout/AppSidebar';

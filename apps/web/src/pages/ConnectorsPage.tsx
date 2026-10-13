@@ -27,10 +27,10 @@ import {
   listConnectorInstallations,
   startConnectorOAuth,
 } from '../lib/api';
+import { isCeSourceConnectorPlugin, useCeFeatureFlags } from '../lib/ceFeatureFlags';
 import { formatConnectorError } from '../lib/connectorErrors';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../lib/connectorOAuthSetupDoc';
-import { isCeSourceConnectorPlugin, useCeFeatureFlags } from '../lib/ceFeatureFlags';
 import { routes } from '../lib/routes';
 
 function capabilityLabel(t: (key: string) => string, role: 'source' | 'sink') {

@@ -21,7 +21,6 @@ import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import { useAdvancedFeaturesEnabled, writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
-import { useCeFeatureFlags } from '../lib/ceFeatureFlags';
 import {
   getDocumentChatProvidersCatalog,
   getUserSettings,
@@ -32,6 +31,7 @@ import {
 import { formatUserFacingError } from '../lib/apiErrors';
 import { authClient, authSessionUserEmail } from '../lib/auth-client';
 import { performSignOut } from '../lib/authSignOut';
+import { useCeFeatureFlags } from '../lib/ceFeatureFlags';
 import { chatProviderLabel } from '../lib/chatProviderLabels';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
 import { readLocationStateBoolean } from '../lib/routerLocationState';
