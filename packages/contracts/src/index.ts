@@ -897,6 +897,10 @@ export interface UserSettingsDto {
   documentChatReadinessReason?: string | null;
   documentChatOllamaModel?: string | null;
   documentChatRunsOnCpu?: boolean;
+  /** Tenant flag: local Ollama LLM allowed (requires Compose chat-local or external Ollama). */
+  documentChatLocalModelEnabled?: boolean;
+  /** Local model loaded and ready for open-ended LLM answers. */
+  documentChatLocalModelReady?: boolean;
   advancedFeaturesEnabled?: boolean;
   useArenaWinnerAsDefault: boolean;
   arenaWinnerEngine?: string | null;

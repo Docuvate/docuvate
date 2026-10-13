@@ -12,7 +12,8 @@ describe('buildDocumentChatProvidersCatalog', () => {
   it('exposes only available rag-ollama in selectable when configured', () => {
     vi.stubEnv('WORKER_URL', 'http://worker:8000');
     vi.stubEnv('OLLAMA_URL', 'http://ollama:11434');
-    vi.stubEnv('OLLAMA_MODEL', 'qwen2.5:3b');
+    vi.stubEnv('OLLAMA_MODEL', 'qwen2.5:1.5b');
+    vi.stubEnv('OLLAMA_MEM_LIMIT', '2g');
     vi.stubEnv('NODE_ENV', 'production');
 
     const catalog = buildDocumentChatProvidersCatalog({
@@ -29,7 +30,7 @@ describe('buildDocumentChatProvidersCatalog', () => {
     expect(catalog.selectable.map((p) => p.id)).toEqual(['rag-ollama']);
     expect(catalog.unavailable.some((u) => u.id === 'rag-ollama')).toBe(false);
     expect(catalog.development).toHaveLength(0);
-    expect(catalog.meta.ollamaModel).toBe('qwen2.5:3b');
+    expect(catalog.meta.ollamaModel).toBe('qwen2.5:1.5b');
   });
 
   it('hides dev providers in production', () => {
@@ -43,6 +44,26 @@ describe('buildDocumentChatProvidersCatalog', () => {
       ollamaModelReady: false,
     });
     expect(catalog.development).toHaveLength(0);
+  });
+
+  it('keeps rag-ollama selectable while Ollama model is still pulling', () => {
+    vi.stubEnv('NODE_ENV', 'production');
+    vi.stubEnv('WORKER_URL', 'http://worker:8000');
+    vi.stubEnv('OLLAMA_URL', 'http://ollama:11434');
+
+    const catalog = buildDocumentChatProvidersCatalog({
+      workerProviders: null,
+      hardware: {
+        device: 'cpu',
+        vramMb: 0,
+        gpuAvailable: false,
+        capabilities: { heavyVision: false, largeLocalLlm: false, cpuRag: true },
+      },
+      ollamaModelReady: false,
+    });
+
+    expect(catalog.selectable.map((p) => p.id)).toEqual(['rag-ollama']);
+    expect(catalog.meta.ollamaModelReady).toBe(false);
   });
 
   it('exposes rag-ollama when only worker is configured (extractive cited chat)', () => {

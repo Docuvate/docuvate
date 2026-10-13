@@ -13,6 +13,7 @@ import {
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import type { DocumentChatProviderId } from '../../../shared/infrastructure/chat/chat-provider.types.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
   type DocumentChatProvidersCatalog,
   runtimeChatProviderAvailability,
@@ -32,13 +33,18 @@ export interface EffectiveChatProviderResult {
   documentChatReadinessReason: string | null;
   documentChatOllamaModel: string | null;
   documentChatRunsOnCpu: boolean;
+  /** Tenant feature flag: local Ollama LLM may be used when configured. */
+  documentChatLocalModelEnabled: boolean;
+  /** Local Ollama is configured, flagged on, and the model is loaded. */
+  documentChatLocalModelReady: boolean;
 }
 
 @Injectable()
 export class EffectiveDocumentChatProviderUseCase {
   constructor(
     private readonly listChatProviders: ListDocumentChatProvidersUseCase,
-    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository
+    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   async executeForUser(
@@ -46,11 +52,13 @@ export class EffectiveDocumentChatProviderUseCase {
     options?: { persistUnavailablePreferenceClear?: boolean }
   ): Promise<EffectiveChatProviderResult> {
     const row = await this.prefs.getForUser(userId);
+    const featureFlags = await this.resolveFeatureFlags.execute(userId);
     return this.resolveFromPreference(row.preferredChatProvider, {
       persistForUserId:
         options?.persistUnavailablePreferenceClear && row.preferredChatProvider
           ? userId
           : undefined,
+      localChatModelEnabled: featureFlags.localChatModel,
     });
   }
 
@@ -60,6 +68,7 @@ export class EffectiveDocumentChatProviderUseCase {
       persistForUserId?: string;
       providers?: ChatProviderAvailability[];
       catalog?: DocumentChatProvidersCatalog;
+      localChatModelEnabled?: boolean;
     }
   ): Promise<EffectiveChatProviderResult> {
     const catalog = options?.catalog ?? (await this.listChatProviders.execute());
@@ -114,6 +123,10 @@ export class EffectiveDocumentChatProviderUseCase {
       documentChatReadinessReason = 'not_configured';
     }
 
+    const localChatModelEnabled = options?.localChatModelEnabled ?? false;
+    const localChatModelReady =
+      localChatModelEnabled && catalog.meta.ollamaConfigured && catalog.meta.ollamaModelReady;
+
     return {
       preferred,
       effective,
@@ -124,6 +137,8 @@ export class EffectiveDocumentChatProviderUseCase {
       documentChatReadinessReason,
       documentChatOllamaModel: catalog.meta.ollamaModel,
       documentChatRunsOnCpu: catalog.meta.runsOnCpu,
+      documentChatLocalModelEnabled: localChatModelEnabled,
+      documentChatLocalModelReady: localChatModelReady,
     };
   }
 }

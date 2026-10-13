@@ -49,6 +49,8 @@ interface DocumentLayoutSidePanelProps {
   recognizedCatalog?: RecognizedFieldDefinitionDto[];
   documentChatAvailable?: boolean;
   documentChatUiEnabled?: boolean;
+  documentChatLocalModelEnabled?: boolean;
+  documentChatLocalModelReady?: boolean;
   showChatTab?: boolean;
 }
 
@@ -70,6 +72,8 @@ export function DocumentLayoutSidePanel({
   recognizedCatalog = [],
   documentChatAvailable = false,
   documentChatUiEnabled = true,
+  documentChatLocalModelEnabled = false,
+  documentChatLocalModelReady = false,
   showChatTab = true,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
@@ -438,6 +442,8 @@ export function DocumentLayoutSidePanel({
               sidePanel
               chatAvailable={documentChatAvailable}
               chatUiEnabled={documentChatUiEnabled}
+              localChatModelEnabled={documentChatLocalModelEnabled}
+              localChatModelReady={documentChatLocalModelReady}
             />
           </div>
         ) : null}

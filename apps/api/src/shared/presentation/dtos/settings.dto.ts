@@ -87,6 +87,8 @@ export class UserSettingsResponseDto implements UserSettingsDto {
   documentChatReadinessReason?: string | null;
   documentChatOllamaModel?: string | null;
   documentChatRunsOnCpu?: boolean;
+  documentChatLocalModelEnabled?: boolean;
+  documentChatLocalModelReady?: boolean;
   advancedFeaturesEnabled?: boolean;
   useArenaWinnerAsDefault!: boolean;
   arenaWinnerEngine?: string | null;

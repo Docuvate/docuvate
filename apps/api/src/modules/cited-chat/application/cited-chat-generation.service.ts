@@ -9,6 +9,7 @@ import {
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
@@ -83,7 +84,8 @@ export class CitedChatGenerationService {
     @Inject(EMBEDDING_PORT) private readonly embedding: EmbeddingPort,
     private readonly retrieval: PgCitedChatRetrievalRepository,
     private readonly citationsRepo: PgChatMessageCitationsRepository,
-    private readonly queryRouter: ChatQueryRouterService
+    private readonly queryRouter: ChatQueryRouterService,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   async generate(input: CitedChatGenerationInput): Promise<CitedChatGenerationResult> {
@@ -151,6 +153,9 @@ export class CitedChatGenerationService {
       await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
       return { content: '', abstained: true };
     }
+
+    const featureFlags = await this.resolveFeatureFlags.execute(userId);
+    const allowLocalOllama = featureFlags.localChatModel;
 
     await this.threads.updateMessageGeneration(messageId, {
       generationStatus: 'pending',
@@ -282,6 +287,7 @@ export class CitedChatGenerationService {
         cloudBaseUrl: input.cloudLlm?.baseUrl,
         cloudApiKey: input.cloudLlm?.apiKey,
         cloudModel: input.cloudLlm?.model,
+        allowLocalOllama,
       }) != null;
 
     const extractiveMinScore = rerankerUsed

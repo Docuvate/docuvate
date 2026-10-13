@@ -72,7 +72,7 @@ From the repository root:
 bash scripts/quickstart.sh
 ```
 
-The script checks Docker and host RAM (minimum **12 GiB** recommended), writes `.env` from `.env.example` with generated secrets when missing, pulls `ghcr.io/docuvate/docuvate-{api,web,worker}:edge`, starts Compose, waits for health, and prints the web URL.
+The script checks Docker and host RAM (minimum **6 GiB** recommended for the default CPU-only stack), writes `.env` from `.env.example` with generated secrets when missing, pulls `ghcr.io/docuvate/docuvate-{api,web,worker}:edge`, starts Compose, waits for health, and prints the web URL.
 
 Diagnostics after startup:
 
@@ -95,7 +95,22 @@ DOCUVATE_QUICKSTART_BUILD=1 bash scripts/quickstart.sh
 # or: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 ```
 
-Wait until **web**, **api**, **worker**, and **ollama** report healthy (PostgreSQL 18 and Valkey healthchecks pass first).
+Wait until **web**, **api**, and **worker** report healthy (PostgreSQL 18 and Valkey healthchecks pass first).
+
+#### Compose profiles and RAM (CPU-only)
+
+| Profile | What runs | Document chat | Host RAM (guidance) |
+| --- | --- | --- | --- |
+| **Default** (`docker compose up`) | API, worker, Postgres, MinIO, Valkey — **no Ollama** | Cited extractive answers and lookups (no local LLM) | **~6 GiB** stack `mem_limit` + OS |
+| **`chat-local`** | Default stack + Ollama with **`qwen2.5:1.5b`** (Q4) | Open-ended LLM answers when tenant flag `localChatModel` is on | **≥ 8 GiB** recommended |
+
+Optional local LLM:
+
+```bash
+docker compose --profile chat-local -f docker-compose.yml -f docker-compose.chat-local.yml up -d
+```
+
+Set `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL=true` (default in `docker-compose.chat-local.yml`) and enable the flag per tenant via remote config / admin overrides. Without the flag, chat still works on the extractive path.
 
 | Service              | URL                                   |
 | -------------------- | ------------------------------------- |
@@ -107,9 +122,9 @@ Wait until **web**, **api**, **worker**, and **ollama** report healthy (PostgreS
 
 **First login:** open the web URL, register, open **Library**, upload PDFs or images, then open a document for preview and fields.
 
-Host port overrides (see `docker-compose.yml`): PostgreSQL 18 on host port **5433**, MinIO **9010** / console **9011**, Ollama **127.0.0.1:11434**.
+Host port overrides (see `docker-compose.yml`): PostgreSQL 18 on host port **5433**, MinIO **9010** / console **9011**. With **`chat-local`**, Ollama listens on **127.0.0.1:11434**.
 
-Document chat uses Ollama (default model `qwen2.5:3b`). Increase `OLLAMA_MEM_LIMIT` in `.env` for larger models (see `.env.example`).
+The optional local model defaults to **`qwen2.5:1.5b`**. Increase `OLLAMA_MEM_LIMIT` in `.env` for larger models (see `.env.example`).
 
 ### CPU RAM budget (measured baseline profile)
 

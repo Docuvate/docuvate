@@ -17,7 +17,7 @@ COMPOSE=(docker compose -f docker-compose.yml)
 WEB_URL="${DOCUVATE_DOCTOR_WEB_URL:-http://localhost:5173}"
 API_READY_URL="${DOCUVATE_DOCTOR_API_READY_URL:-http://localhost:3001/health/ready}"
 WORKER_HEALTH_URL="${DOCUVATE_DOCTOR_WORKER_URL:-http://localhost:8000/v1/health}"
-OLLAMA_MODEL="${OLLAMA_MODEL:-qwen2.5:3b}"
+OLLAMA_MODEL="${OLLAMA_MODEL:-qwen2.5:1.5b}"
 
 failures=0
 warn() { echo "WARN: $*"; }
