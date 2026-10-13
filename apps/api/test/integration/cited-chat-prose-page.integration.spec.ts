@@ -20,6 +20,10 @@ import {
   readPassageIds,
   requestUrl,
 } from '../helpers/json.js';
+import {
+  createIntegrationResolveFeatureFlags,
+  enableLocalChatModelForIntegration,
+} from '../helpers/cited-chat-integration-feature-flags.js';
 import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
@@ -41,8 +45,10 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
   let threads: PgDocumentChatThreadRepository;
   let citationsRepo: PgChatMessageCitationsRepository;
   let service: CitedChatGenerationService;
+  let restoreLocalChatFlag: () => void;
 
   beforeAll(async () => {
+    restoreLocalChatFlag = enableLocalChatModelForIntegration();
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
@@ -105,7 +111,8 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
       noopEmbedding,
       new PgCitedChatRetrievalRepository(pool),
       citationsRepo,
-      passthroughChatQueryRouter()
+      passthroughChatQueryRouter(),
+      createIntegrationResolveFeatureFlags(pool)
     );
   }, 60_000);
 
@@ -115,6 +122,7 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
   });
 
   afterAll(async () => {
+    restoreLocalChatFlag();
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
   });
