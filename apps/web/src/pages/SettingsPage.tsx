@@ -322,7 +322,7 @@ export function SettingsPage() {
               className="settings-input"
               disabled={saving || !settings}
               value={chatCloudBaseUrl}
-              placeholder="https://api.openai.com/v1"
+              placeholder={t('settings.chatCloudBaseUrlPlaceholder')}
               onChange={(e) => {
                 setChatCloudBaseUrl(e.target.value);
               }}

@@ -754,6 +754,7 @@
     "chatProvider": "Chat-Modus",
     "chatProviderAria": "Chat-Modus",
     "chatCloudBaseUrl": "Cloud-LLM (OpenAI-kompatibel), Basis-URL",
+    "chatCloudBaseUrlPlaceholder": "https://api.openai.com/v1",
     "chatCloudApiKey": "Cloud-LLM API-Schlüssel",
     "chatCloudApiKeyPlaceholder": "Optional, leer lassen für lokalen Ollama-Chat",
     "chatCloudApiKeyConfigured": "Schlüssel ist gespeichert (neu eingeben zum Ersetzen)",
