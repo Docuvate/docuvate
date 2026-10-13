@@ -17,7 +17,7 @@ function queryTextCell(rows: unknown, key: string): string | null {
   if (!Array.isArray(rows) || rows.length === 0) {
     return null;
   }
-  const row = rows[0];
+  const row: unknown = rows[0];
   if (!isRecord(row)) {
     return null;
   }
