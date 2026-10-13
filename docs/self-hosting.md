@@ -29,7 +29,7 @@ If you upgraded from an earlier Compose file that mounted `pgdata` at `/var/lib/
 - Inspect the volume (`docker volume inspect docuvate_pgdata`) and confirm data lives under the path the new mount uses, or
 - Migrate data with `pg_dump` / `pg_restore` into a fresh volume mounted at `/var/lib/postgresql`.
 
-When the database already contains Docuvate tables but the TypeORM **`migrations`** table is empty (legacy installs), the migrate job **records a baseline** (marks known migrations as applied) instead of re-running `InitialSchema` (which would fail on extensions such as `pgcrypto`). New migrations after that baseline still apply normally.
+When the database already contains Docuvate tables but the TypeORM **`migrations`** table is empty (installs from before migration tracking), the migrate job **records a baseline** (marks known migrations as applied) instead of re-running `InitialSchema` (which would fail on extensions such as `pgcrypto`). New migrations after that baseline still apply normally.
 
 Never use `docker compose down -v` on production data: it deletes Postgres and orphan policies only protect MinIO when the DB is empty.
 

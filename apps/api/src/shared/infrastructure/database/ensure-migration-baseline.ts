@@ -12,7 +12,7 @@ function migrationTimestampFromName(name: string): number {
   return Number.parseInt(match[1], 10);
 }
 
-/** Stamp applied migrations when an existing DB has schema but an empty `migrations` table. */
+/** Stamp applied migrations when the DB has schema but an empty `migrations` table. */
 export async function ensureMigrationBaseline(dataSource: DataSource): Promise<void> {
   const runner = dataSource.createQueryRunner();
   await runner.connect();
