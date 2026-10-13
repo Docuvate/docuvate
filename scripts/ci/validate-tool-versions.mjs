@@ -109,6 +109,10 @@ export function collectToolVersionErrors(root = TOOL_VERSIONS_ROOT, read = defau
   });
 
   const ci = read('.github/workflows/ci.yml');
+  const nightly = existsSync(resolve(root, '.github/workflows/nightly.yml'))
+    ? read('.github/workflows/nightly.yml')
+    : '';
+  const ciWorkflows = `${ci}\n${nightly}`;
   const compose = read('docker-compose.yml');
   const goVer = versions.asdf.golang;
   const goModPath = join(root, 'apps/sftp-ingest/go.mod');
@@ -139,15 +143,17 @@ export function collectToolVersionErrors(root = TOOL_VERSIONS_ROOT, read = defau
   if (!ci.includes('node-version-file: .tool-versions')) {
     fail('.github/workflows/ci.yml must use node-version-file: .tool-versions');
   }
-  if (!ci.includes('python-version-file: .tool-versions')) {
-    fail('.github/workflows/ci.yml must use python-version-file: .tool-versions for worker steps');
+  if (!ciWorkflows.includes('python-version-file: .tool-versions')) {
+    fail('.github/workflows/ci.yml or nightly.yml must use python-version-file: .tool-versions for worker steps');
   }
   const puppeteerVer = versions.tools.puppeteer;
-  if (!ci.includes(`puppeteer-${puppeteerVer}-chrome-headless-shell`)) {
-    fail(`.github/workflows/ci.yml Puppeteer cache key must include puppeteer-${puppeteerVer}`);
+  if (!ciWorkflows.includes(`puppeteer-${puppeteerVer}-chrome-headless-shell`)) {
+    fail(
+      `.github/workflows/ci.yml or nightly.yml Puppeteer cache key must include puppeteer-${puppeteerVer}`
+    );
   }
-  assertUvInstallsPinned(ci, '.github/workflows/ci.yml', uvPin, fail);
-  assertEveryUvPinMatches(ci, '.github/workflows/ci.yml', uvPin, fail);
+  assertUvInstallsPinned(ciWorkflows, '.github/workflows (ci + nightly)', uvPin, fail);
+  assertEveryUvPinMatches(ciWorkflows, '.github/workflows (ci + nightly)', uvPin, fail);
 
   const localCi = read('scripts/ci/run-local-ci-jobs.sh');
   assertUvInstallsPinned(localCi, 'scripts/ci/run-local-ci-jobs.sh', uvPin, fail);
@@ -168,8 +174,8 @@ export function collectToolVersionErrors(root = TOOL_VERSIONS_ROOT, read = defau
 
   const typstVer = versions.tools.typst;
   if (typstVer) {
-    if (!ci.includes('bash scripts/ci/install-typst.sh')) {
-      fail('.github/workflows/ci.yml must install typst via scripts/ci/install-typst.sh');
+    if (!ciWorkflows.includes('bash scripts/ci/install-typst.sh')) {
+      fail('.github/workflows/ci.yml or nightly.yml must install typst via scripts/ci/install-typst.sh');
     }
     const typstSh = read('scripts/ci/install-typst.sh');
     if (!typstSh.includes('.tool-versions')) {
