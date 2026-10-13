@@ -153,6 +153,8 @@ class PipelineRunInput:
     mime_type: str
     document_id: str | None = None
     embedding_density_state: EmbeddingDensityStatePayload | None = None
+    layout_key_value_roles: bool = False
+    recognized_field_keys: frozenset[str] = frozenset()
 
 
 @dataclass
@@ -163,6 +165,8 @@ class PipelineMutableState:
     text: str = ""
     blocks: list[ExtractionBlock] = field(default_factory=list)
     embedding_density_state: EmbeddingDensityStatePayload | None = None
+    layout_key_value_roles: bool = False
+    recognized_field_keys: frozenset[str] = field(default_factory=frozenset)
     luna_data: LunaStageData = field(default_factory=lambda: LunaStageData(labels=()))
     taco_data: TacoStageData = field(default_factory=lambda: TacoStageData(tables=()))
     document_representation: DocumentRepresentation | None = None

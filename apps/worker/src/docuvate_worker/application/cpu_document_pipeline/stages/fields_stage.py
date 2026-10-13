@@ -10,15 +10,51 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
     StageEnvelope,
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
+from docuvate_worker.domain.models import ExtractedField
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
 
 STAGE_ID = "field_suggestions"
 
 
+def _merge_suggestions(
+    heuristic: tuple[ExtractedField, ...],
+    layout_kv: list[ExtractedField],
+) -> tuple[ExtractedField, ...]:
+    merged: dict[str, ExtractedField] = {
+        row.key.strip().lower(): row for row in heuristic if row.key.strip()
+    }
+    for row in layout_kv:
+        key = row.key.strip().lower()
+        if not key:
+            continue
+        existing = merged.get(key)
+        if existing is None or (row.confidence or 0.0) >= (existing.confidence or 0.0):
+            merged[key] = row
+    return tuple(merged.values())
+
+
 def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggestionsStageData]:
     def _run() -> FieldSuggestionsStageData:
         suggestions = heuristic_field_suggestions(state.text)
-        return FieldSuggestionsStageData(suggestions=tuple(suggestions))
+        layout_rows: list[ExtractedField] = []
+        if state.layout_key_value_roles and state.blocks:
+            try:
+                from docuvate_worker.infrastructure.ml.layout_kv_roles import (  # noqa: PLC0415
+                    layout_kv_field_suggestions,
+                )
+
+                layout_rows = layout_kv_field_suggestions(
+                    state.blocks,
+                    state.document_representation,
+                    recognized_field_keys=state.recognized_field_keys,
+                    existing_field_keys=frozenset(
+                        row.key for row in suggestions if row.key.strip()
+                    ),
+                )
+            except Exception:
+                layout_rows = []
+        merged = _merge_suggestions(tuple(suggestions), layout_rows)
+        return FieldSuggestionsStageData(suggestions=merged)
 
     data, metrics = measure_stage(_run)
     return StageEnvelope(

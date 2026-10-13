@@ -25,6 +25,8 @@ def extract_with_cpu_pipeline(
     *,
     document_id: str | None = None,
     embedding_density_state: EmbeddingDensityStatePayload | None = None,
+    layout_key_value_roles: bool = False,
+    recognized_field_keys: frozenset[str] | None = None,
 ) -> ExtractionResult:
     integrated = run_integrated_cpu_document_pipeline(
         PipelineRunInput(
@@ -32,6 +34,8 @@ def extract_with_cpu_pipeline(
             mime_type=mime_type,
             document_id=document_id,
             embedding_density_state=embedding_density_state,
+            layout_key_value_roles=layout_key_value_roles,
+            recognized_field_keys=recognized_field_keys or frozenset(),
         )
     )
     ocr = integrated.ocr.data
