@@ -9,8 +9,8 @@ import {
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
-import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
+import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
   CITED_CHAT_ABSTENTION_DE,
   CITED_CHAT_ABSTENTION_EN,
