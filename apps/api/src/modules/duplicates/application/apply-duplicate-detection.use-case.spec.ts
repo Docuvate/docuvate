@@ -43,8 +43,8 @@ function buildApplyDuplicateDetectionUseCase(deps: {
         experimentalResearchModels: false,
         smartDuplicates: false,
       }),
-    }) as ResolveFeatureFlagsUseCase,
-    (deps.smartDuplicates ?? { detectCandidates: vi.fn() }) as HttpSmartDuplicatesAdapter
+    }) as unknown as ResolveFeatureFlagsUseCase,
+    (deps.smartDuplicates ?? { detectCandidates: vi.fn() }) as unknown as HttpSmartDuplicatesAdapter
   );
 }
 
@@ -253,15 +253,50 @@ describe('ApplyDuplicateDetectionUseCase', () => {
       }),
     };
 
-    const useCase = buildApplyDuplicateDetectionUseCase({
-      documents,
-      duplicates,
-      embeddings,
-      classifier,
-      linkDuplicatePair: new LinkDuplicatePairUseCase(stacks, duplicates),
-      resolveFeatureFlags,
-      smartDuplicates,
-    });
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        {
+          provide: LinkDuplicatePairUseCase,
+          useFactory: (
+            stackRepository: DuplicateStackRepository,
+            duplicateRepository: DuplicateRepository
+          ) => new LinkDuplicatePairUseCase(stackRepository, duplicateRepository),
+          inject: [DUPLICATE_STACK_REPOSITORY, DUPLICATE_REPOSITORY],
+        },
+        {
+          provide: ApplyDuplicateDetectionUseCase,
+          useFactory: (
+            documentRepository: DocumentRepository,
+            duplicateRepository: DuplicateRepository,
+            embeddingRepository: LabelEmbeddingRepository,
+            duplicateClassifier: DuplicateClassifierService,
+            linkDuplicatePair: LinkDuplicatePairUseCase
+          ) =>
+            buildApplyDuplicateDetectionUseCase({
+              documents: documentRepository,
+              duplicates: duplicateRepository,
+              embeddings: embeddingRepository,
+              classifier: duplicateClassifier,
+              linkDuplicatePair,
+              resolveFeatureFlags,
+              smartDuplicates,
+            }),
+          inject: [
+            DOCUMENT_REPOSITORY,
+            DUPLICATE_REPOSITORY,
+            LABEL_EMBEDDING_REPOSITORY,
+            DuplicateClassifierService,
+            LinkDuplicatePairUseCase,
+          ],
+        },
+        { provide: DOCUMENT_REPOSITORY, useValue: documents },
+        { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
+        { provide: LABEL_EMBEDDING_REPOSITORY, useValue: embeddings },
+        { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
+        { provide: DuplicateClassifierService, useValue: classifier },
+      ],
+    }).compile();
+    const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
 
     await useCase.execute('doc-new', 'user-1', null);
 
