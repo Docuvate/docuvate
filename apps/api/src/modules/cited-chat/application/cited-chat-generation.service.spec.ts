@@ -9,7 +9,6 @@ import {
   EMBEDDING_PORT,
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
-import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { CITED_CHAT_ABSTENTION_DE } from '../domain/cited-chat-constants.js';
 import { PgChatMessageCitationsRepository } from '../infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
@@ -60,41 +59,32 @@ async function buildService(deps: {
           embedding: EmbeddingPort,
           retrieval: PgCitedChatRetrievalRepository,
           citations: PgChatMessageCitationsRepository,
-          queryRouter: ChatQueryRouterService,
-          resolveFeatureFlags: ResolveFeatureFlagsUseCase
-        ) =>
-          new CitedChatGenerationService(
+          queryRouter: ChatQueryRouterService
+        ) => {
+          const resolveFeatureFlags = {
+            execute: vi.fn().mockResolvedValue({ exactAnswers: false }),
+          };
+          const exactFactQueryRouter = { parse: vi.fn().mockReturnValue(null) };
+          const exactFactChat = { execute: vi.fn().mockResolvedValue(null) };
+          return new CitedChatGenerationService(
             threads,
             embedding,
             retrieval,
             citations,
             queryRouter,
-            resolveFeatureFlags
-          ),
+            // @ts-expect-error test doubles — generation only calls execute/parse
+            resolveFeatureFlags,
+            exactFactQueryRouter,
+            exactFactChat
+          );
+        },
         inject: [
           DOCUMENT_CHAT_THREAD_REPOSITORY,
           EMBEDDING_PORT,
           PgCitedChatRetrievalRepository,
           PgChatMessageCitationsRepository,
           ChatQueryRouterService,
-          ResolveFeatureFlagsUseCase,
         ],
-      },
-      {
-        provide: ResolveFeatureFlagsUseCase,
-        useValue: {
-          execute: vi.fn().mockResolvedValue({
-            layoutReconstructionCompare: false,
-            sourceConnectors: false,
-            experimentalResearchModels: false,
-            exactAnswers: false,
-            smartDuplicates: false,
-            answerAbstention: false,
-            learnedValueTypes: false,
-            layoutKeyValueRoles: false,
-            localChatModel: true,
-          }),
-        },
       },
       {
         provide: ChatQueryRouterService,

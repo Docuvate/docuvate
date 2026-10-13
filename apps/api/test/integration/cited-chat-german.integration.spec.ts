@@ -10,11 +10,7 @@ import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/inf
 import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
-import {
-  createIntegrationResolveFeatureFlags,
-  enableLocalChatModelForIntegration,
-  enableLocalChatModelForIntegrationTenant,
-} from '../helpers/cited-chat-integration-feature-flags.js';
+import { disabledExactFactChatDeps } from '../helpers/disabled-exact-fact-chat-deps.js';
 import {
   parseRequestJsonRecord,
   readBooleanProperty,
@@ -43,10 +39,8 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
   let threads: PgDocumentChatThreadRepository;
   let retrieval: PgCitedChatRetrievalRepository;
   let service: CitedChatGenerationService;
-  let restoreLocalChatFlag: () => void;
 
   beforeAll(async () => {
-    restoreLocalChatFlag = enableLocalChatModelForIntegration();
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
@@ -58,7 +52,6 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     } finally {
       client.release();
     }
-    await enableLocalChatModelForIntegrationTenant(pool, userId);
 
     invoiceDocId = randomUUID();
     taxDocId = randomUUID();
@@ -91,13 +84,16 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
 
     threads = new PgDocumentChatThreadRepository(pool);
     retrieval = new PgCitedChatRetrievalRepository(pool);
+    const exactFactDeps = disabledExactFactChatDeps();
     service = new CitedChatGenerationService(
       threads,
       noopEmbedding,
       retrieval,
       new PgChatMessageCitationsRepository(pool),
       passthroughChatQueryRouter(),
-      createIntegrationResolveFeatureFlags(pool)
+      exactFactDeps.resolveFeatureFlags,
+      exactFactDeps.exactFactQueryRouter,
+      exactFactDeps.exactFactChat
     );
   }, 60_000);
 
@@ -107,7 +103,6 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
   });
 
   afterAll(async () => {
-    restoreLocalChatFlag();
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
   });
