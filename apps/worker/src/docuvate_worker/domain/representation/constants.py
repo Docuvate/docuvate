@@ -8,7 +8,7 @@ from __future__ import annotations
 ENCODER_ID = "intfloat/multilingual-e5-small"
 # Pinned Hugging Face weights revision (MIT).
 ENCODER_HF_REVISION = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
-# Stored on each document; bumps when the runtime artifact changes (ONNX int8 vs legacy backends).
+# Stored on each document; bumps when the ONNX runtime artifact generation changes.
 ENCODER_REVISION = f"{ENCODER_HF_REVISION}-onnx-int8"
 ENCODER_ONNX_DIR = "onnx"
 ENCODER_ONNX_FILE = "model_qint8_avx512_vnni.onnx"
