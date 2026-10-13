@@ -323,7 +323,9 @@ export function SettingsPage() {
               disabled={saving || !settings}
               value={chatCloudBaseUrl}
               placeholder="https://api.openai.com/v1"
-              onChange={(e) => setChatCloudBaseUrl(e.target.value)}
+              onChange={(e) => {
+                setChatCloudBaseUrl(e.target.value);
+              }}
             />
           </label>
           <label className="settings-field">
