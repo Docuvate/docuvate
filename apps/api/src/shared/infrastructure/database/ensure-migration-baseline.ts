@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DataSource, MigrationInterface } from 'typeorm';
 
+import { isRecord } from './row-parse.js';
 import { buildTypeOrmOptions } from './typeorm-options.js';
 
 function migrationTimestampFromName(name: string): number {
@@ -12,35 +13,44 @@ function migrationTimestampFromName(name: string): number {
   return Number.parseInt(match[1], 10);
 }
 
+function queryTextCell(rows: unknown, key: string): string | null {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return null;
+  }
+  const row = rows[0];
+  if (!isRecord(row)) {
+    return null;
+  }
+  const value = row[key];
+  return typeof value === 'string' ? value : null;
+}
+
 /** Stamp applied migrations when the DB has schema but an empty `migrations` table. */
 export async function ensureMigrationBaseline(dataSource: DataSource): Promise<void> {
   const runner = dataSource.createQueryRunner();
   await runner.connect();
   try {
-    const migrationsTable = await runner.query<{ reg: string | null }[]>(
+    const migrationsTable = await runner.query(
       `SELECT to_regclass('public.migrations')::text AS reg`
     );
-    if (!migrationsTable[0]?.reg) {
+    if (!queryTextCell(migrationsTable, 'reg')) {
       return;
     }
 
-    const applied = await runner.query<{ c: string }[]>(
-      `SELECT COUNT(*)::text AS c FROM migrations`
-    );
-    const appliedCount = Number.parseInt(applied[0]?.c ?? '0', 10);
+    const applied = await runner.query(`SELECT COUNT(*)::text AS c FROM migrations`);
+    const appliedCount = Number.parseInt(queryTextCell(applied, 'c') ?? '0', 10);
     if (appliedCount > 0) {
       return;
     }
 
-    const core = await runner.query<{ reg: string | null }[]>(
-      `SELECT to_regclass('public.documents')::text AS reg`
-    );
-    if (!core[0]?.reg) {
+    const core = await runner.query(`SELECT to_regclass('public.documents')::text AS reg`);
+    if (!queryTextCell(core, 'reg')) {
       return;
     }
 
     const opts = buildTypeOrmOptions();
-    const migrations = opts.migrations ?? [];
+    const migrationsRaw = opts.migrations;
+    const migrations = Array.isArray(migrationsRaw) ? migrationsRaw : [];
     for (const migrationCtor of migrations) {
       const Ctor = migrationCtor as new () => MigrationInterface;
       const instance = new Ctor();
