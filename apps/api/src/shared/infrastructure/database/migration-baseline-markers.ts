@@ -33,6 +33,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'UserChatCloudLlm20261013120000',
   'SmartDuplicates20261013180000',
   'FeatureFlagMlKeys20261013200000',
+  'DocumentExtractedFact20261013210000',
   'FeatureFlagLearnedValueTypes20261013220000',
 ] as const;
 
@@ -143,6 +144,8 @@ export async function migrationSchemaPresent(
       return migrationSchemaPresent(runner, 'UserChatCloudLlm20261013120000');
     case 'FeatureFlagMlKeys20261013200000':
       return featureFlagMlKeysConstraintPresent(runner);
+    case 'DocumentExtractedFact20261013210000':
+      return regClassExists(runner, 'public.document_extracted_fact');
     case 'FeatureFlagLearnedValueTypes20261013220000':
       return migrationSchemaPresent(runner, 'FeatureFlags20261013120000');
     default:

@@ -25,8 +25,7 @@ def extract_with_cpu_pipeline(
     *,
     document_id: str | None = None,
     embedding_density_state: EmbeddingDensityStatePayload | None = None,
-    layout_key_value_roles: bool = False,
-    recognized_field_keys: frozenset[str] | None = None,
+    build_exact_fact_index: bool = False,
 ) -> ExtractionResult:
     integrated = run_integrated_cpu_document_pipeline(
         PipelineRunInput(
@@ -34,8 +33,7 @@ def extract_with_cpu_pipeline(
             mime_type=mime_type,
             document_id=document_id,
             embedding_density_state=embedding_density_state,
-            layout_key_value_roles=layout_key_value_roles,
-            recognized_field_keys=recognized_field_keys or frozenset(),
+            build_exact_fact_index=build_exact_fact_index,
         )
     )
     ocr = integrated.ocr.data
@@ -63,6 +61,9 @@ def extract_with_cpu_pipeline(
             representation=integrated.representation.data,
         ),
         document_representation=state_representation(integrated),
+        extracted_facts=integrated.exact_fact_index.data.facts
+        if build_exact_fact_index
+        else None,
     )
 
 

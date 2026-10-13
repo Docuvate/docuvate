@@ -20,7 +20,10 @@ from docuvate_worker.application.embedding_density import (
 )
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
+from docuvate_worker.domain.cpu_pipeline.contracts import TacoStageData
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
+from docuvate_worker.domain.exact_fact_index.build import build_exact_fact_index
+from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.domain.representation.encode import encode_units
 from docuvate_worker.domain.representation.units import (
     RepresentationUnit,
@@ -44,8 +47,11 @@ from docuvate_worker.infrastructure.extractors.label_custom_fields import (
 from docuvate_worker.infrastructure.hardware_capabilities import detect_hardware_capabilities
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
 from docuvate_worker.presentation.representation_response import document_representation_to_response
 from docuvate_worker.presentation.schemas import (
+    BuildFactsFromTextRequest,
+    BuildFactsFromTextResponse,
     CompareEngineResponse,
     CompareRequest,
     CompareResponse,
@@ -177,8 +183,7 @@ def extract(
         body.mime_type,
         engine=body.engine,
         embedding_density_state=density_state,
-        layout_key_value_roles=body.layout_key_value_roles,
-        recognized_field_keys=frozenset(body.recognized_field_keys),
+        build_exact_fact_index=body.build_exact_fact_index,
     )
     active = body.engine or ExtractorRegistry().active_engine
     suggestions = result.field_suggestions or []
@@ -209,7 +214,44 @@ def extract(
         engine=active,
         cpu_pipeline=cpu_pipeline_to_response(result.cpu_pipeline),
         document_representation=document_representation_to_response(result.document_representation),
+        extracted_facts=(
+            extracted_facts_to_response(result.extracted_facts)
+            if result.extracted_facts is not None
+            else None
+        ),
     )
+
+
+@router.post("/facts/build-from-text", response_model=BuildFactsFromTextResponse)
+def build_facts_from_text_route(
+    body: BuildFactsFromTextRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> BuildFactsFromTextResponse:
+    _require_worker_secret(x_worker_secret)
+    content = b""
+    if body.content_base64:
+        content = _decode_content(body.content_base64)
+    blocks = tuple(
+        ExtractionBlock(
+            page=b.page,
+            x=b.x,
+            y=b.y,
+            width=b.width,
+            height=b.height,
+            text=b.text,
+            block_index=b.block_index,
+        )
+        for b in body.blocks
+    )
+    built = build_exact_fact_index(
+        text=body.text,
+        blocks=blocks,
+        content=content,
+        mime_type=body.mime_type,
+        taco=TacoStageData(tables=()),
+    )
+    facts = extracted_facts_to_response(built.facts) or []
+    return BuildFactsFromTextResponse(extracted_facts=facts, wall_time_ms=built.wall_time_ms)
 
 
 @router.post("/extract/label-fields", response_model=LabelFieldsExtractResponse)

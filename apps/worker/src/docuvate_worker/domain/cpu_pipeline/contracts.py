@@ -10,6 +10,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING
 
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
+from docuvate_worker.domain.exact_fact_index.types import ExtractedFact
 from docuvate_worker.domain.models import ExtractedField, ExtractionBlock
 
 if TYPE_CHECKING:
@@ -124,6 +125,12 @@ class RepresentationStageData:
 
 
 @dataclass(frozen=True)
+class ExactFactIndexStageData:
+    facts: tuple[ExtractedFact, ...]
+    wall_time_ms: float
+
+
+@dataclass(frozen=True)
 class IntegratedPipelineResult:
     ocr: StageEnvelope[OcrStageData]
     rotation: StageEnvelope[RotationStageData]
@@ -133,6 +140,7 @@ class IntegratedPipelineResult:
     fields: StageEnvelope[FieldSuggestionsStageData]
     kite_index: StageEnvelope[KiteIndexStageData]
     representation: StageEnvelope[RepresentationStageData]
+    exact_fact_index: StageEnvelope[ExactFactIndexStageData]
 
     def latency_report_ms(self) -> dict[str, float]:
         return {
@@ -144,6 +152,7 @@ class IntegratedPipelineResult:
             self.nest.stage_id: self.nest.metrics.wall_time_ms,
             self.fields.stage_id: self.fields.metrics.wall_time_ms,
             self.kite_index.stage_id: self.kite_index.metrics.wall_time_ms,
+            self.exact_fact_index.stage_id: self.exact_fact_index.metrics.wall_time_ms,
         }
 
 
@@ -153,8 +162,7 @@ class PipelineRunInput:
     mime_type: str
     document_id: str | None = None
     embedding_density_state: EmbeddingDensityStatePayload | None = None
-    layout_key_value_roles: bool = False
-    recognized_field_keys: frozenset[str] = frozenset()
+    build_exact_fact_index: bool = False
 
 
 @dataclass
@@ -165,8 +173,6 @@ class PipelineMutableState:
     text: str = ""
     blocks: list[ExtractionBlock] = field(default_factory=list)
     embedding_density_state: EmbeddingDensityStatePayload | None = None
-    layout_key_value_roles: bool = False
-    recognized_field_keys: frozenset[str] = field(default_factory=frozenset)
     luna_data: LunaStageData = field(default_factory=lambda: LunaStageData(labels=()))
     taco_data: TacoStageData = field(default_factory=lambda: TacoStageData(tables=()))
     document_representation: DocumentRepresentation | None = None

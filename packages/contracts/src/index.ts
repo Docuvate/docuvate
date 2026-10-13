@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ExtractedFactDto } from './extracted-facts.js';
+
 export type DocumentStatus = 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
 
 export type MatchingAlgorithm = 'none' | 'any' | 'all' | 'exact' | 'regex';
@@ -233,6 +235,12 @@ export interface DocumentRepresentationDto {
   documentMaxInt8Base64: string;
 }
 
+export type {
+  ExtractedFactDto,
+  ExtractedFactKind,
+  ExtractedFactProvenanceDto,
+} from './extracted-facts.js';
+
 export interface ExtractionResult {
   text: string;
   fields: ExtractedField[];
@@ -249,6 +257,8 @@ export interface ExtractionResult {
   layoutIrPages?: LayoutIrPageSummary[];
   /** Central document representation from worker `/extract` (persisted separately). */
   documentRepresentation?: DocumentRepresentationDto;
+  /** Exact fact index from worker when `exactAnswers` is enabled (persisted separately). */
+  extractedFacts?: ExtractedFactDto[];
 }
 
 export interface MappeDto {
