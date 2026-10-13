@@ -12,7 +12,7 @@ TypeORM owns **all DDL** in the API repo. See [ADR 017](../adr/017-typeorm-migra
 
 **Compose / CI:** Postgres **18.6** → one-shot **`migrate`** job → `db-storage-guard` → api/worker. Local CLI: `pnpm db:*` (wraps `scripts/db/typeorm-cli.sh`).
 
-**Existing-schema baseline:** If `documents` exists but **`migrations`** is empty, `run-database-migrations.ts` stamps the registered migration chain before running pending steps (avoids re-applying `InitialSchema` on existing clusters). `initial-schema-up.sql` uses `CREATE EXTENSION IF NOT EXISTS pgcrypto`.
+**Existing-schema baseline:** If `documents` exists but **`migrations`** is missing or empty, `ensureMigrationBaseline` creates the table when needed and stamps only consecutive migrations whose schema markers match (tables/columns), stopping before the first gap so newer migrations still run. `initial-schema-up.sql` uses `CREATE EXTENSION IF NOT EXISTS pgcrypto`.
 
 ## Add a schema change
 

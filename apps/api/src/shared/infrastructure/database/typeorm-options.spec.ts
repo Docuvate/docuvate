@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { BASELINE_MARKER_MIGRATION_NAMES } from './migration-baseline-markers.js';
 import { InitialSchema20261008120000 } from './migrations/20261008120000-initial-schema.js';
 import { GlobalSearchSchema20261008130500 } from './migrations/20261008130500-global-search-schema.js';
 import { DocumentFieldValuesBackfill20261008130600 } from './migrations/20261008130600-document-field-values-backfill.js';
@@ -76,5 +77,11 @@ describe('buildTypeOrmOptions', () => {
     const opts = buildTypeOrmOptions();
     expect(opts.migrations).toEqual(EXPECTED_MIGRATIONS);
     expect(InitialSchema20261008120000.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);
+  });
+
+  it('keeps baseline schema markers aligned with registered migrations', () => {
+    process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
+    const registeredNames = EXPECTED_MIGRATIONS.map((ctor) => new ctor().name);
+    expect([...BASELINE_MARKER_MIGRATION_NAMES]).toEqual(registeredNames);
   });
 });

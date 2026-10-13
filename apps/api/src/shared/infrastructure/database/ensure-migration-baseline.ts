@@ -2,8 +2,27 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DataSource, MigrationInterface } from 'typeorm';
 
+import { migrationSchemaPresent, regClassExists } from './migration-baseline-markers.js';
 import { isRecord } from './row-parse.js';
 import { buildTypeOrmOptions } from './typeorm-options.js';
+
+function migrationCount(rows: unknown): number {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return 0;
+  }
+  const row: unknown = rows[0];
+  if (!isRecord(row)) {
+    return 0;
+  }
+  const raw = row.c;
+  if (typeof raw === 'string') {
+    return Number.parseInt(raw, 10);
+  }
+  if (typeof raw === 'number') {
+    return raw;
+  }
+  return 0;
+}
 
 function migrationTimestampFromName(name: string): number {
   const match = /(\d{14})$/.exec(name);
@@ -13,48 +32,41 @@ function migrationTimestampFromName(name: string): number {
   return Number.parseInt(match[1], 10);
 }
 
-function queryTextCell(rows: unknown, key: string): string | null {
-  if (!Array.isArray(rows) || rows.length === 0) {
-    return null;
-  }
-  const row: unknown = rows[0];
-  if (!isRecord(row)) {
-    return null;
-  }
-  const value = row[key];
-  return typeof value === 'string' ? value : null;
-}
-
 function isMigrationCtor(value: unknown): value is new () => MigrationInterface {
   return typeof value === 'function';
 }
 
-/** Stamp applied migrations when the DB has schema but an empty `migrations` table. */
+async function ensureMigrationsTable(runner: ReturnType<DataSource['createQueryRunner']>): Promise<void> {
+  await runner.query(`
+    CREATE TABLE IF NOT EXISTS migrations (
+      id SERIAL PRIMARY KEY,
+      timestamp bigint NOT NULL,
+      name character varying NOT NULL
+    )
+  `);
+}
+
+/** Stamp only migrations whose schema is already present (legacy DBs with empty/missing migration history). */
 export async function ensureMigrationBaseline(dataSource: DataSource): Promise<void> {
   const runner = dataSource.createQueryRunner();
   await runner.connect();
   try {
-    const migrationsTable: unknown = await runner.query(
-      `SELECT to_regclass('public.migrations')::text AS reg`
-    );
-    if (!queryTextCell(migrationsTable, 'reg')) {
+    if (!(await regClassExists(runner, 'public.documents'))) {
       return;
     }
+
+    await ensureMigrationsTable(runner);
 
     const applied: unknown = await runner.query(`SELECT COUNT(*)::text AS c FROM migrations`);
-    const appliedCount = Number.parseInt(queryTextCell(applied, 'c') ?? '0', 10);
+    const appliedCount = migrationCount(applied);
     if (appliedCount > 0) {
-      return;
-    }
-
-    const core: unknown = await runner.query(`SELECT to_regclass('public.documents')::text AS reg`);
-    if (!queryTextCell(core, 'reg')) {
       return;
     }
 
     const opts = buildTypeOrmOptions();
     const migrationsRaw = opts.migrations;
     const migrations = Array.isArray(migrationsRaw) ? migrationsRaw : [];
+
     for (const migrationCtor of migrations) {
       if (!isMigrationCtor(migrationCtor)) {
         continue;
@@ -63,6 +75,10 @@ export async function ensureMigrationBaseline(dataSource: DataSource): Promise<v
       const name = instance.name;
       if (!name) {
         continue;
+      }
+      const present = await migrationSchemaPresent(runner, name);
+      if (!present) {
+        break;
       }
       const timestamp = migrationTimestampFromName(name);
       await runner.query(`INSERT INTO migrations (timestamp, name) VALUES ($1, $2)`, [
