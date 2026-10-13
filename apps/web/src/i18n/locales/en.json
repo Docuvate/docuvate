@@ -755,7 +755,7 @@
     "chatProviderAria": "Chat mode",
     "chatCloudBaseUrl": "Cloud LLM (OpenAI-compatible) base URL",
     "chatCloudApiKey": "Cloud LLM API key",
-    "chatCloudApiKeyPlaceholder": "Optional — leave empty for local Ollama chat",
+    "chatCloudApiKeyPlaceholder": "Optional. Leave empty for local Ollama chat",
     "chatCloudApiKeyConfigured": "Key stored (enter a new key to replace)",
     "chatCloudSave": "Save cloud LLM",
     "chatCloudHint": "Optional OpenAI-compatible endpoint for document chat. When unset, Docuvate uses the local Ollama service.",
