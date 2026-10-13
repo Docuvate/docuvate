@@ -36,7 +36,7 @@ emit_if_match() {
   fi
 }
 
-emit_if_match docker '^(apps/[^/]+/Dockerfile|docker-compose|pnpm-lock\.yaml|apps/worker/(pyproject\.toml|uv\.lock))'
+emit_if_match docker '^(apps/[^/]+/Dockerfile|docker-compose[^/]*\.yml|pnpm-lock\.yaml|apps/worker/(pyproject\.toml|uv\.lock))'
 emit_if_match k8s '^(deploy/|tools/k8s-|charts/)'
 emit_if_match sftp '^apps/sftp-ingest/'
 emit_if_match site '^(apps/site/|packages/tokens/)'
