@@ -5,7 +5,6 @@ import {
   postDocumentChatLlm,
   resolveCitedChatLlmConfig,
   streamDocumentChatLlm,
-  type DocumentChatLlmRuntimeConfig,
 } from './cited-chat-llm.js';
 
 export type { CitedAnswerJson, CitedClaimJson } from '../domain/cited-answer-json.js';
