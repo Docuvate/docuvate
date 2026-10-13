@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mockDnsLookupAll } from '../../../test-support/dns-lookup.spec-util.js';
 import {
   assertDocumentChatCloudHostResolvable,
+  assertDocumentChatCloudIpAllowed,
   normalizeDocumentChatCloudBaseUrl,
   openAiCompatibleChatCompletionsUrl,
 } from './document-chat-cloud-url-security.js';
@@ -45,6 +46,16 @@ describe('document-chat-cloud-url-security', () => {
     expect(openAiCompatibleChatCompletionsUrl('https://api.example.com/v1')).toBe(
       'https://api.example.com/v1/chat/completions'
     );
+  });
+
+  it('blocks loopback and IPv4-mapped private addresses', () => {
+    expect(() => assertDocumentChatCloudIpAllowed('127.0.0.2')).toThrow(
+      'document_chat_cloud_url_private_blocked'
+    );
+    expect(() => assertDocumentChatCloudIpAllowed('::ffff:10.0.0.1')).toThrow(
+      'document_chat_cloud_url_private_blocked'
+    );
+    expect(() => assertDocumentChatCloudIpAllowed('8.8.8.8')).not.toThrow();
   });
 
   it('blocks private resolved addresses unless host is allowlisted', async () => {

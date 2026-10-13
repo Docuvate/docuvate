@@ -3,6 +3,8 @@
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 
+import { isDocumentChatCloudBlockedIp } from './document-chat-cloud-ip-blocklist.js';
+
 export class DocumentChatCloudUrlError extends Error {
   constructor(readonly code: string) {
     super(code);
@@ -54,33 +56,20 @@ function isMetadataAddress(ip: string): boolean {
   return false;
 }
 
-function isPrivateOrLoopbackAddress(ip: string): boolean {
-  if (ip === '127.0.0.1' || ip === '::1') {
-    return true;
-  }
-  if (ip.startsWith('10.')) {
-    return true;
-  }
-  if (ip.startsWith('192.168.')) {
-    return true;
-  }
-  const parts = ip.split('.').map((p) => Number(p));
-  if (parts.length === 4 && parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) {
-    return true;
-  }
-  if (ip.startsWith('fc') || ip.startsWith('fd')) {
-    return true;
-  }
-  return false;
-}
-
 function assertIpAllowed(ip: string, hostname: string): void {
   const allowedHosts = documentChatCloudAllowedHostnames();
   const hostAllowed = allowedHosts.has(hostname.toLowerCase());
   if (hostAllowed) {
     return;
   }
-  if (isMetadataAddress(ip) || isPrivateOrLoopbackAddress(ip)) {
+  if (isMetadataAddress(ip) || isDocumentChatCloudBlockedIp(ip)) {
+    throw new DocumentChatCloudUrlError('document_chat_cloud_url_private_blocked');
+  }
+}
+
+/** Exported for unit tests (SSRF blocklist coverage). */
+export function assertDocumentChatCloudIpAllowed(ip: string): void {
+  if (isMetadataAddress(ip) || isDocumentChatCloudBlockedIp(ip)) {
     throw new DocumentChatCloudUrlError('document_chat_cloud_url_private_blocked');
   }
 }

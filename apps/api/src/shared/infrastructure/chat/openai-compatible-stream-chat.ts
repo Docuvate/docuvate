@@ -39,6 +39,7 @@ export async function streamOpenAiCompatibleChat(
   try {
     response = await fetch(url, {
       method: 'POST',
+      redirect: 'error',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${params.config.apiKey ?? ''}`,
@@ -54,6 +55,10 @@ export async function streamOpenAiCompatibleChat(
     };
   }
 
+  if (response.status >= 300 && response.status < 400) {
+    await response.body?.cancel().catch(() => undefined);
+    return { failure: { kind: 'network_error', detail: 'redirect_not_allowed' } };
+  }
   if (!response.ok) {
     await response.body?.cancel().catch(() => undefined);
     return { failure: { kind: 'http_error', status: response.status } };
@@ -160,6 +165,7 @@ export async function postOpenAiCompatibleChat(
   }
   return fetch(url, {
     method: 'POST',
+    redirect: 'error',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${config.apiKey ?? ''}`,
