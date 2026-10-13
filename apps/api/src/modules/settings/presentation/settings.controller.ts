@@ -75,8 +75,8 @@ export class SettingsController {
 
   @Get('extraction-engines')
   @ApiDocuvateRoute({ operationId: 'listExtractionEngines', summary: 'List extraction engines' })
-  async engines(): Promise<ExtractionEngineListResponseDto> {
-    const engines = await this.listEngines.execute();
+  async engines(@Session() session: AuthSession): Promise<ExtractionEngineListResponseDto> {
+    const engines = await this.listEngines.execute(session.user.id);
     return { engines };
   }
 

@@ -55,6 +55,7 @@ import type {
   ProposeLabelRecommendationBlocklistPatternRequest,
   ProposeLabelRecommendationBlocklistPatternResponse,
   RecognizedFieldDefinitionDto,
+  RemoteConfigDto,
   ReorderSavedDocumentViewsRequest,
   ReplaceDashboardLayoutRequest,
   ReplaceRecognizedFieldsRequest,
@@ -765,6 +766,10 @@ export async function retryLibraryChatMessage(
 
 export async function getUserSettings(): Promise<UserSettingsDto> {
   return request<UserSettingsDto>('/settings');
+}
+
+export async function getRemoteConfig(): Promise<RemoteConfigDto> {
+  return request<RemoteConfigDto>('/remote-config');
 }
 
 export async function globalSearch(

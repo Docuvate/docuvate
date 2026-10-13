@@ -1,3 +1,6 @@
+# Docuvate CE Compose — default images: ghcr.io/docuvate/docuvate-{api,web,worker}:edge
+# Minimum host RAM: 12 GiB (sum of mem_limit below + OS; see README#quickstart).
+# Local source builds: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
 name: docuvate
 
 services:
@@ -33,6 +36,8 @@ services:
 
   postgres:
     image: postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+    restart: unless-stopped
+    mem_limit: 1g
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-docuvate}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docuvate}
@@ -48,6 +53,7 @@ services:
       retries: 10
 
   migrate:
+    image: ${DOCUVATE_API_IMAGE:-ghcr.io/docuvate/docuvate-api:edge}
     build:
       context: .
       dockerfile: apps/api/Dockerfile
@@ -64,6 +70,8 @@ services:
 
   minio:
     image: cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
+    restart: unless-stopped
+    mem_limit: 768m
     user: '0:0'
     command: ['server', '/data', '--console-address', ':9001']
     environment:
@@ -101,6 +109,8 @@ services:
 
   valkey:
     image: valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
+    restart: unless-stopped
+    mem_limit: 256m
     ports:
       - '6379:6379'
     healthcheck:
@@ -159,6 +169,8 @@ services:
     build:
       context: .
       dockerfile: apps/sftp-ingest/Dockerfile
+    restart: unless-stopped
+    mem_limit: 256m
     ports:
       - '${SFTP_INGEST_PORT:-2222}:2222'
     environment:
@@ -184,6 +196,8 @@ services:
       start_period: 15s
 
   api:
+    restart: unless-stopped
+    image: ${DOCUVATE_API_IMAGE:-ghcr.io/docuvate/docuvate-api:edge}
     mem_limit: 2g
     volumes:
       - sftpingestdata:/var/lib/docuvate/sftp-ingest:ro
@@ -238,6 +252,9 @@ services:
       DOCUVATE_SFTP_PULL_GATEWAY_URL: http://sftp-ingest:8080
       DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS: ${DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS:-60000}
       DOCUVATE_SERVICE_API_KEYS: ${DOCUVATE_SERVICE_API_KEYS:-}
+      DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE: ${DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE:-false}
+      DOCUVATE_FEATURE_SOURCE_CONNECTORS: ${DOCUVATE_FEATURE_SOURCE_CONNECTORS:-false}
+      DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS: ${DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS:-false}
     healthcheck:
       test:
         [
@@ -272,6 +289,7 @@ services:
 
   worker:
     restart: unless-stopped
+    image: ${DOCUVATE_WORKER_IMAGE:-ghcr.io/docuvate/docuvate-worker:edge}
     mem_limit: 3g
     build:
       context: .
@@ -313,10 +331,15 @@ services:
 
   mailpit:
     image: axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+    restart: unless-stopped
+    mem_limit: 128m
     ports:
       - '127.0.0.1:8025:8025'
 
   web:
+    restart: unless-stopped
+    image: ${DOCUVATE_WEB_IMAGE:-ghcr.io/docuvate/docuvate-web:edge}
+    mem_limit: 512m
     build:
       context: .
       dockerfile: apps/web/Dockerfile
@@ -325,13 +348,22 @@ services:
         VITE_DOCUVATE_BUILD_SHA: ${VITE_DOCUVATE_BUILD_SHA:-unknown}
     ports:
       - '5173:80'
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q --spider http://127.0.0.1/ || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
   site:
     build:
       context: .
       dockerfile: apps/site/Dockerfile
+    restart: unless-stopped
+    mem_limit: 256m
     ports:
       - '8081:80'
 

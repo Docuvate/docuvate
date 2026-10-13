@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 
+import { SourceConnectorsFeatureGuard } from '../../shared/infrastructure/auth/feature-flag.guard.js';
 import { DocumentsModule } from '../documents/documents.module.js';
+import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { IngestSftpMultipartUseCase } from './application/ingest-sftp-multipart.use-case.js';
 import { RecordSftpAuditUseCase } from './application/record-sftp-audit.use-case.js';
 import {
@@ -29,7 +31,7 @@ import { SftpIngressController } from './presentation/sftp-ingress.controller.js
 import { SftpIngressServiceController } from './presentation/sftp-ingress-service.controller.js';
 
 @Module({
-  imports: [DocumentsModule],
+  imports: [DocumentsModule, FeatureFlagsModule],
   controllers: [SftpIngressController, SftpIngressServiceController],
   providers: [
     { provide: SFTP_INGRESS_ACCOUNT_REPOSITORY, useClass: PgSftpIngressAccountRepository },
@@ -46,6 +48,7 @@ import { SftpIngressServiceController } from './presentation/sftp-ingress-servic
     PgSftpIngressAuditRepository,
     RecordSftpAuditUseCase,
     SftpAuthenticateRateLimiter,
+    SourceConnectorsFeatureGuard,
   ],
   exports: [IngestSftpScanUseCase, AuthenticateSftpIngressAccountUseCase],
 })

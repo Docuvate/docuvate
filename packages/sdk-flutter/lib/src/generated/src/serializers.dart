@@ -69,6 +69,7 @@ import 'package:docuvate/src/generated/src/model/extraction_arena_rating_request
 import 'package:docuvate/src/generated/src/model/extraction_block_dto.dart';
 import 'package:docuvate/src/generated/src/model/extraction_compare_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/extraction_engine_list_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/feature_flags_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/folder_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/import_from_connector_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/installation_dashboard_default_response_dto.dart';
@@ -101,6 +102,7 @@ import 'package:docuvate/src/generated/src/model/ml_retrain_job_dto.dart';
 import 'package:docuvate/src/generated/src/model/ml_retrain_job_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/ok_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/propose_label_recommendation_blocklist_pattern_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/remote_config_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/reorder_saved_document_views_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_dashboard_layout_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_recognized_field_item_dto.dart';
@@ -189,6 +191,7 @@ part 'serializers.g.dart';
   ExtractionBlockDto,
   ExtractionCompareRequestDto,
   ExtractionEngineListResponseDto,
+  FeatureFlagsResponseDto,
   FolderListResponseDto,
   ImportFromConnectorRequestDto,
   InstallationDashboardDefaultResponseDto,
@@ -221,6 +224,7 @@ part 'serializers.g.dart';
   MlRetrainJobListResponseDto,
   OkResponseDto,
   ProposeLabelRecommendationBlocklistPatternRequestDto,
+  RemoteConfigResponseDto,
   ReorderSavedDocumentViewsRequestDto,
   ReplaceDashboardLayoutRequestDto,
   ReplaceRecognizedFieldItemDto,

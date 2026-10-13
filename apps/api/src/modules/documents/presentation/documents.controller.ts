@@ -69,6 +69,7 @@ import {
   RestoreDuplicateStackPairUseCase,
   SetDuplicateStackPrimaryUseCase,
 } from '../../duplicates/application/duplicate-stack.use-cases.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
 import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
@@ -138,7 +139,8 @@ export class DocumentsController {
     private readonly setDuplicateStackPrimary: SetDuplicateStackPrimaryUseCase,
     private readonly confirmDuplicateVersion: ConfirmDuplicateVersionUseCase,
     private readonly releaseDuplicateStackMember: ReleaseDuplicateStackMemberUseCase,
-    private readonly restoreDuplicateStackPair: RestoreDuplicateStackPairUseCase
+    private readonly restoreDuplicateStackPair: RestoreDuplicateStackPairUseCase,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   @Get()
@@ -230,6 +232,7 @@ export class DocumentsController {
     @AuthSubject() subject: AuthorizationSubject,
     @Param('id') id: string
   ): Promise<LayoutCompareSummaryResponseDto> {
+    await this.resolveFeatureFlags.assertEnabled(session.user.id, 'layoutReconstructionCompare');
     return this.getDocumentLayoutCompareSummary.execute(id, session.user.id, subject);
   }
 
@@ -246,6 +249,7 @@ export class DocumentsController {
     @Query('from') from?: string,
     @Query('to') to?: string
   ): Promise<LayoutCompareMetricsResponseDto> {
+    await this.resolveFeatureFlags.assertEnabled(session.user.id, 'layoutReconstructionCompare');
     const fromPage = from !== undefined ? Number.parseInt(from, 10) : undefined;
     const toPage = to !== undefined ? Number.parseInt(to, 10) : undefined;
     return this.getDocumentLayoutCompareMetrics.execute(
@@ -270,6 +274,7 @@ export class DocumentsController {
     @Param('page') page: string,
     @Query('heatmap') heatmap?: string
   ): Promise<LayoutComparePageResponseDto> {
+    await this.resolveFeatureFlags.assertEnabled(session.user.id, 'layoutReconstructionCompare');
     const pageNumber = Number.parseInt(page, 10);
     const includeHeatmap = heatmap !== '0' && heatmap !== 'false';
     return this.getDocumentLayoutComparePage.execute(
@@ -510,6 +515,7 @@ export class DocumentsController {
     @Param('id') id: string,
     @Body() body: ExtractionCompareRequestDto
   ): Promise<ExtractionCompareResponse> {
+    await this.resolveFeatureFlags.assertEnabled(session.user.id, 'experimentalResearchModels');
     const engines = body.engines?.length ? body.engines : [];
     return this.compareExtraction.execute(id, session.user.id, engines, body.maxPages ?? 3);
   }
@@ -521,6 +527,7 @@ export class DocumentsController {
     @Param('id') id: string,
     @Body() body: ExtractionArenaRatingRequestDto
   ): Promise<OkResponseDto> {
+    await this.resolveFeatureFlags.assertEnabled(session.user.id, 'experimentalResearchModels');
     await this.applyArenaWinner.execute(id, session.user.id, body.winnerEngine);
     await this.recordArenaRating.execute(session.user.id, {
       documentId: id,

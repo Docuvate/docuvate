@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 
+import { SourceConnectorsFeatureGuard } from '../../shared/infrastructure/auth/feature-flag.guard.js';
 import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.module.js';
 import { DocumentsModule } from '../documents/documents.module.js';
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
+import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { SearchModule } from '../search/search.module.js';
 import { ConnectorRegistry } from './application/connector.registry.js';
 import {
@@ -81,7 +83,7 @@ const SCANNER_SFTP_CATEGORY = {
 };
 
 @Module({
-  imports: [DocumentsModule, DuplicatesModule, DocumentPipelineModule, SearchModule],
+  imports: [DocumentsModule, DuplicatesModule, DocumentPipelineModule, SearchModule, FeatureFlagsModule],
   controllers: [ConnectorsController, ConnectorsOAuthController, PaperlessImportController],
   providers: [
     ConnectorRegistry,
@@ -113,6 +115,7 @@ const SCANNER_SFTP_CATEGORY = {
     StartMailOAuthUseCase,
     CompleteMailOAuthUseCase,
     ConnectorOAuthCallbackGuard,
+    SourceConnectorsFeatureGuard,
     {
       provide: 'CONNECTOR_REGISTRY_BOOTSTRAP',
       useFactory: (registry: ConnectorRegistry) => {

@@ -23,6 +23,7 @@ import {
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
+import { SourceConnectorsFeatureGuard } from '../../../shared/infrastructure/auth/feature-flag.guard.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
@@ -44,7 +45,7 @@ import {
 
 @ApiDocuvateController('sftp-ingress')
 @Controller('sftp-ingress')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, SourceConnectorsFeatureGuard)
 export class SftpIngressController {
   constructor(
     private readonly serverInfo: GetSftpIngressServerInfoUseCase,

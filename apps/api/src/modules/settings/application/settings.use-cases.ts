@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 
+import { ForbiddenError } from '../../../shared/domain/errors.js';
 import {
   EXTRACTION_PORT,
   type ExtractionPort,
@@ -9,7 +10,9 @@ import {
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import type { UpdateUserSettingsRequestDto } from '../../../shared/presentation/dtos/settings.dto.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { fallbackExtractionEngines } from './extraction-engine-fallback.js';
+import { filterExtractionEngines } from './filter-extraction-engines.js';
 
 @Injectable()
 export class GetUserSettingsUseCase {
@@ -30,23 +33,35 @@ export class GetUserSettingsUseCase {
 @Injectable()
 export class UpdateUserSettingsUseCase {
   constructor(
-    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository
+    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   async execute(userId: string, patch: UpdateUserSettingsRequestDto) {
+    if (patch.advancedFeaturesEnabled === true) {
+      const flags = await this.resolveFeatureFlags.execute(userId);
+      if (!flags.experimentalResearchModels) {
+        throw new ForbiddenError('Feature disabled: experimentalResearchModels');
+      }
+    }
     return this.prefs.upsert(userId, patch);
   }
 }
 
 @Injectable()
 export class ListExtractionEnginesUseCase {
-  constructor(@Inject(EXTRACTION_PORT) private readonly extraction: ExtractionPort) {}
+  constructor(
+    @Inject(EXTRACTION_PORT) private readonly extraction: ExtractionPort,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
+  ) {}
 
-  async execute() {
+  async execute(tenantId: string) {
+    const flags = await this.resolveFeatureFlags.execute(tenantId);
     try {
-      return await this.extraction.listEngines();
+      const engines = await this.extraction.listEngines();
+      return filterExtractionEngines(engines, flags);
     } catch {
-      return fallbackExtractionEngines();
+      return filterExtractionEngines(fallbackExtractionEngines(), flags);
     }
   }
 }

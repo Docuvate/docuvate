@@ -33,6 +33,7 @@ import { authClient, authSessionUserEmail } from '../lib/auth-client';
 import { performSignOut } from '../lib/authSignOut';
 import { chatProviderLabel } from '../lib/chatProviderLabels';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
+import { useFeatureFlags } from '../lib/remoteConfig';
 import { readLocationStateBoolean } from '../lib/routerLocationState';
 import { routes } from '../lib/routes';
 import { settingsChatStatusPresentation } from '../lib/settingsChatStatus';
@@ -54,6 +55,7 @@ export function SettingsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { advancedFeaturesEnabled, setAdvancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
+  const featureFlags = useFeatureFlags();
   const { data } = authClient.useSession();
   const accountEmail = authSessionUserEmail(data);
   const [settings, setSettings] = useState<UserSettingsDto | null>(null);
@@ -249,19 +251,21 @@ export function SettingsPage() {
           ) : null}
         </SettingsSectionCard>
 
-        <SettingsSectionCard
-          compact
-          icon={<FlaskConical {...settingsIconProps} />}
-          title={t('settings.advancedFeaturesTitle')}
-          description={t('settings.advancedFeaturesLead')}
-        >
-          <Switch
-            label={t('settings.advancedFeaturesEnable')}
-            checked={advancedFeaturesEnabled}
-            disabled={saving || !settings}
-            onCheckedChange={(checked) => void toggleAdvancedFeatures(checked)}
-          />
-        </SettingsSectionCard>
+        {featureFlags.experimentalResearchModels ? (
+          <SettingsSectionCard
+            compact
+            icon={<FlaskConical {...settingsIconProps} />}
+            title={t('settings.advancedFeaturesTitle')}
+            description={t('settings.advancedFeaturesLead')}
+          >
+            <Switch
+              label={t('settings.advancedFeaturesEnable')}
+              checked={advancedFeaturesEnabled}
+              disabled={saving || !settings}
+              onCheckedChange={(checked) => void toggleAdvancedFeatures(checked)}
+            />
+          </SettingsSectionCard>
+        ) : null}
 
         <SettingsSectionCard
           compact

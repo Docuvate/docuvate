@@ -10,6 +10,7 @@ import { ConnectorsModule } from './modules/connectors/connectors.module.js';
 import { DocumentPipelineModule } from './modules/document-pipeline/document-pipeline.module.js';
 import { DocumentsModule } from './modules/documents/documents.module.js';
 import { DuplicatesModule } from './modules/duplicates/duplicates.module.js';
+import { FeatureFlagsModule } from './modules/feature-flags/feature-flags.module.js';
 import { FoldersModule } from './modules/folders/folders.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { LabelsModule } from './modules/labels/labels.module.js';
@@ -42,6 +43,7 @@ import { ExtensionHostModule } from './shared/infrastructure/extensions/extensio
     FoldersModule,
     MappenModule,
     DuplicatesModule,
+    FeatureFlagsModule,
     SettingsModule,
     RecognizedFieldsModule,
     DocumentPipelineModule,

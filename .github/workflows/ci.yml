@@ -127,6 +127,10 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: bash scripts/ci/docker-login-hub.sh
       - name: Compose smoke profile (CPU extractive cited-chat)
+        env:
+          DOCUVATE_API_IMAGE: docuvate-api
+          DOCUVATE_WEB_IMAGE: docuvate-web
+          DOCUVATE_WORKER_IMAGE: docuvate-worker
         run: bash scripts/ci/smoke.sh
 
   db-migrate-fresh:

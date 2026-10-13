@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAdvancedFeaturesEnabled } from '../../lib/advancedFeatures';
 import { hasExtractedContent, isExtractionPending } from '../../lib/documentExtractionState';
+import { useFeatureFlags } from '../../lib/remoteConfig';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
@@ -51,6 +52,9 @@ export function DocumentExtractionSection({
 }: DocumentExtractionSectionProps) {
   const { t } = useTranslation();
   const { advancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
+  const featureFlags = useFeatureFlags();
+  const researchToolsEnabled =
+    featureFlags.experimentalResearchModels && advancedFeaturesEnabled;
   const fullText = doc.extraction?.text ?? '';
   const extractionMarkdown = doc.extraction?.markdown ?? null;
   const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;
@@ -65,7 +69,8 @@ export function DocumentExtractionSection({
     !hasContent && !pending && !failed && doc.status === 'ready' && onRequeueExtraction;
   const [arenaOpenOverride, setArenaOpenOverride] = useState<boolean | null>(null);
   const arenaOpen =
-    arenaOpenOverride ?? (advancedFeaturesEnabled && (failed || !hasExtractedContent(doc, blocks)));
+    arenaOpenOverride ??
+    (researchToolsEnabled && (failed || !hasExtractedContent(doc, blocks)));
 
   function openArena() {
     const details = arenaDetailsRef.current;
@@ -106,7 +111,7 @@ export function DocumentExtractionSection({
           doc={doc}
           requeueBusy={requeueBusy}
           onRequeue={onRequeueExtraction}
-          onOpenArena={advancedFeaturesEnabled ? openArena : undefined}
+          onOpenArena={researchToolsEnabled ? openArena : undefined}
           compact
         />
       ) : null}
@@ -143,7 +148,7 @@ export function DocumentExtractionSection({
         />
       ) : null}
 
-      {advancedFeaturesEnabled ? (
+      {researchToolsEnabled ? (
         <details
           className="extraction-arena-details"
           ref={arenaDetailsRef}

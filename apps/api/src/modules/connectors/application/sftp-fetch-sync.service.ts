@@ -11,6 +11,7 @@ import type pg from 'pg';
 
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { validateScanFile } from '../../sftp-ingress/domain/scan-file-validation.js';
 import { postProcessSftpPullFile } from '../infrastructure/adapters/sftp/sftp-pull.gateway.js';
 import { readConnectorConfigString } from '../infrastructure/adapters/shared/connector-config-string.js';
@@ -32,7 +33,8 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
   constructor(
     @Inject(PG_POOL) private readonly pool: pg.Pool,
     private readonly runtime: ConnectorRuntimeResolver,
-    private readonly uploadDocument: UploadDocumentUseCase
+    private readonly uploadDocument: UploadDocumentUseCase,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   onApplicationBootstrap(): void {
@@ -82,6 +84,10 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
     userId: string,
     credentials: Record<string, string>
   ): Promise<void> {
+    const flags = await this.resolveFeatureFlags.execute(userId);
+    if (!flags.sourceConnectors) {
+      return;
+    }
     const pollSeconds = Number(readConnectorConfigString(credentials, 'poll_interval_seconds') || '60');
     const pollMs = Number.isFinite(pollSeconds) && pollSeconds >= 60 ? pollSeconds * 1000 : 60_000;
     const lastRun = await this.pool.query<{ last_run_at: Date | null }>(

@@ -8,6 +8,7 @@ import { AppShell } from './components/AppShell';
 import { authClient } from './lib/auth-client';
 import { formatAuthClientError } from './lib/authErrors';
 import { hadAuthenticatedSessionHint } from './lib/authSessionHint';
+import { useFeatureFlags } from './lib/remoteConfig';
 import { routes } from './lib/routes';
 import { AccountSecuritySettingsPage } from './pages/AccountSecuritySettingsPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
@@ -59,6 +60,14 @@ function ShellRoute({ children }: { children: React.ReactNode }) {
       <AppShell>{children}</AppShell>
     </Protected>
   );
+}
+
+function SourceConnectorsRoute({ children }: { children: React.ReactNode }) {
+  const featureFlags = useFeatureFlags();
+  if (!featureFlags.sourceConnectors) {
+    return <Navigate to={routes.settingsConnectors} replace />;
+  }
+  return <>{children}</>;
 }
 
 export function App() {
@@ -182,7 +191,9 @@ export function App() {
         path="/settings/connectors/paperless/:installationId"
         element={
           <ShellRoute>
-            <PaperlessConnectorSetupPage />
+            <SourceConnectorsRoute>
+              <PaperlessConnectorSetupPage />
+            </SourceConnectorsRoute>
           </ShellRoute>
         }
       />

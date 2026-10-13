@@ -2,6 +2,38 @@
 
 Docuvate pins **PostgreSQL 18.6** (`postgres:18.6-alpine`) for **StackGres 1.19** compatibility.
 
+## Quickstart and doctor
+
+```bash
+bash scripts/quickstart.sh   # checks Docker + RAM, writes .env secrets, pulls GHCR :edge, starts stack
+bash scripts/doctor.sh       # containers, health, migrations, worker, embedding coverage, Ollama model, disk/RAM
+```
+
+Recommended host RAM: **12 GiB** minimum for the default Compose limits (worker 3g, API 2g, Ollama 3g, plus Postgres/MinIO). Increase `OLLAMA_MEM_LIMIT` only when you have headroom.
+
+Application images default to `ghcr.io/docuvate/docuvate-{api,web,worker}:edge`. Build from source with `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build`.
+
+## Upgrades
+
+1. **Backup** the `pgdata` volume and MinIO `documents` bucket before changing versions.
+2. Set image tags in `.env` (`DOCUVATE_API_IMAGE`, `DOCUVATE_WEB_IMAGE`, `DOCUVATE_WORKER_IMAGE`) or run `docker compose pull api web worker migrate`.
+3. `docker compose up -d` — the `migrate` one-shot applies schema changes before API and worker start.
+4. Run `bash scripts/doctor.sh` and fix any reported failures before handing users the stack.
+
+Never use `docker compose down -v` on production data: it deletes Postgres and orphan policies only protect MinIO when the DB is empty.
+
+## Feature flags
+
+Installation-wide **defaults** (when a tenant has no override row) are set in `.env` on the API container:
+
+| Variable | When `true` |
+|----------|-------------|
+| `DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE` | Layout reconstruction / SSIM compare (Nachbau/Vergleich) |
+| `DOCUVATE_FEATURE_SOURCE_CONNECTORS` | SFTP scanner ingress, SFTP fetch, Paperless-ngx connectors |
+| `DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS` | Arena engine compare and non-default extractors |
+
+Per-tenant overrides are stored in `feature_flag` (tenant id + flag key + enabled). Authenticated clients resolve flags via `GET /v1/remote-config` (override wins over env default).
+
 ## Volumes
 
 | Volume | Role |

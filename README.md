@@ -64,16 +64,38 @@ asdf install
 
 See [CONTRIBUTING.md](CONTRIBUTING.md#development-setup) for the full development setup.
 
-### Docker Compose
+### Docker Compose (one command)
 
 From the repository root:
 
 ```bash
-cp .env.example .env   # optional for Compose defaults; useful for local overrides
-docker compose up -d --build
+bash scripts/quickstart.sh
 ```
 
-Wait until **web**, **api**, and **worker** are healthy (PostgreSQL 18 and Valkey healthchecks pass first).
+The script checks Docker and host RAM (minimum **12 GiB** recommended), writes `.env` from `.env.example` with generated secrets when missing, pulls `ghcr.io/docuvate/docuvate-{api,web,worker}:edge`, starts Compose, waits for health, and prints the web URL.
+
+Diagnostics after startup:
+
+```bash
+bash scripts/doctor.sh
+```
+
+Manual equivalent:
+
+```bash
+cp .env.example .env   # set BETTER_AUTH_SECRET (≥32 chars)
+docker compose pull api web worker migrate
+docker compose up -d
+```
+
+Build from source instead of GHCR:
+
+```bash
+DOCUVATE_QUICKSTART_BUILD=1 bash scripts/quickstart.sh
+# or: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+```
+
+Wait until **web**, **api**, **worker**, and **ollama** report healthy (PostgreSQL 18 and Valkey healthchecks pass first).
 
 | Service              | URL                                   |
 | -------------------- | ------------------------------------- |
@@ -93,7 +115,15 @@ Document chat uses Ollama (default model `qwen2.5:3b`). Increase `OLLAMA_MEM_LIM
 
 Docker Compose runs **PostgreSQL 18.6** (`postgres:18.6-alpine`). Fresh installs use the `pgdata` Docker volume.
 
-**Back up your database and MinIO `documents` bucket before upgrading production data.** Never use `docker compose down -v` to reset a stack: that **deletes all documents and the database**. See [Self-hosting](docs/self-hosting.md) for volumes and recovery.
+**Back up your database and MinIO `documents` bucket before upgrading production data.** Never use `docker compose down -v` to reset a stack: that **deletes all documents and the database**. See [Self-hosting](docs/self-hosting.md) for volumes, upgrades, backups, and recovery.
+
+### Upgrades and backups
+
+1. Back up the `pgdata` volume (PostgreSQL 18) and the MinIO `documents` bucket.
+2. Pull new images: `docker compose pull api web worker migrate` (or set `DOCUVATE_*_IMAGE` to a release tag).
+3. Run `docker compose up -d` (migrate runs as a one-shot before API/worker).
+
+Non-core features (layout compare, SFTP/Paperless sources, experimental research models) default **off** via `DOCUVATE_FEATURE_*` in `.env` (see `.env.example`). Tenants can override flags in the database; the web app loads resolved values from `GET /v1/remote-config` after sign-in.
 
 Local development without Docker also expects **PostgreSQL 18.6** (or compatible 18.x), plus MinIO, Valkey, and the Node / Python / uv versions from `.tool-versions` for API, web, and worker.
 

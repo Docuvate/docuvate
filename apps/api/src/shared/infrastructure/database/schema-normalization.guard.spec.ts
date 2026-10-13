@@ -34,6 +34,7 @@ const FORWARD_SQL_ORDER = [
   'corrections-up.sql',
   'duplicate-pair-labels-up.sql',
   'document-representation-up.sql',
+  'feature-flag-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { isSourceConnectorPluginId } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
   CONNECTOR_INSTALLATION_REPOSITORY,
   CONNECTOR_REGISTRY,
@@ -13,23 +15,41 @@ import type { ConnectorPluginId } from '../domain/connector.types.js';
 
 @Injectable()
 export class GetConnectorCatalogUseCase {
-  constructor(@Inject(CONNECTOR_REGISTRY) private readonly registry: ConnectorRegistryPort) {}
+  constructor(
+    @Inject(CONNECTOR_REGISTRY) private readonly registry: ConnectorRegistryPort,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
+  ) {}
 
-  execute(input: { viewerIsServerAdmin: boolean }) {
+  async execute(input: { viewerIsServerAdmin: boolean; tenantId: string }) {
+    const flags = await this.resolveFeatureFlags.execute(input.tenantId);
     const categories = this.registry.listCategories();
-    const plugins = this.registry.listPlugins().map((plugin) => ({
-      ...plugin.descriptor,
-      auth: plugin.authDescriptor(),
-    }));
+    const plugins = this.registry
+      .listPlugins()
+      .map((plugin) => ({
+        ...plugin.descriptor,
+        auth: plugin.authDescriptor(),
+      }))
+      .filter((plugin) => {
+        if (!isSourceConnectorPluginId(plugin.id)) {
+          return true;
+        }
+        return flags.sourceConnectors;
+      });
     return { categories, plugins, viewerIsServerAdmin: input.viewerIsServerAdmin };
   }
 }
 
 @Injectable()
 export class GetConnectorPluginUseCase {
-  constructor(@Inject(CONNECTOR_REGISTRY) private readonly registry: ConnectorRegistryPort) {}
+  constructor(
+    @Inject(CONNECTOR_REGISTRY) private readonly registry: ConnectorRegistryPort,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
+  ) {}
 
-  execute(pluginId: ConnectorPluginId) {
+  async execute(tenantId: string, pluginId: ConnectorPluginId) {
+    if (isSourceConnectorPluginId(pluginId)) {
+      await this.resolveFeatureFlags.assertEnabled(tenantId, 'sourceConnectors');
+    }
     const plugin = this.registry.getPlugin(pluginId);
     if (!plugin) {
       throw new NotFoundError('Connector plugin');
@@ -58,7 +78,8 @@ export class CreateConnectorInstallationUseCase {
   constructor(
     @Inject(CONNECTOR_REGISTRY) private readonly registry: ConnectorRegistryPort,
     @Inject(CONNECTOR_INSTALLATION_REPOSITORY)
-    private readonly installations: ConnectorInstallationRepository
+    private readonly installations: ConnectorInstallationRepository,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   async execute(
@@ -69,6 +90,9 @@ export class CreateConnectorInstallationUseCase {
       credentials: Record<string, string>;
     }
   ) {
+    if (isSourceConnectorPluginId(body.pluginId)) {
+      await this.resolveFeatureFlags.assertEnabled(userId, 'sourceConnectors');
+    }
     const plugin = this.registry.getPlugin(body.pluginId);
     if (!plugin) {
       throw new NotFoundError('Connector plugin');
