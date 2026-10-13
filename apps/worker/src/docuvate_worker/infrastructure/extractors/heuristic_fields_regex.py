@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-"""Legacy regex field hints (used when learnedValueTypes is disabled)."""
+"""Regex field hints (used when learnedValueTypes is disabled)."""
 
 from __future__ import annotations
 
@@ -108,7 +108,7 @@ def _extract_vendor(text: str) -> str | None:
     return label_stripped_hits[0] if label_stripped_hits else None
 
 
-def legacy_heuristic_field_suggestions(text: str) -> list[ExtractedField]:
+def regex_heuristic_field_suggestions(text: str) -> list[ExtractedField]:
     fields: list[ExtractedField] = []
 
     amount = _extract_amount(text)
