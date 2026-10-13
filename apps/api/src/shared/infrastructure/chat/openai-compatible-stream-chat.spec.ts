@@ -43,8 +43,10 @@ describe('openai-compatible-stream-chat SSRF', () => {
 
     expect('failure' in result).toBe(true);
     if ('failure' in result) {
-      expect(result.failure.kind).toBe('network_error');
-      expect(result.failure.detail).toBe('redirect_not_allowed');
+      expect(result.failure).toEqual({
+        kind: 'network_error',
+        detail: 'redirect_not_allowed',
+      });
     }
   });
 
