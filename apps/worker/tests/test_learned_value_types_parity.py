@@ -5,8 +5,8 @@ from docuvate_worker.infrastructure.extractors.field_extraction_context import (
     set_learned_value_types_enabled,
 )
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
-from docuvate_worker.infrastructure.extractors.heuristic_fields_legacy import (
-    legacy_heuristic_field_suggestions,
+from docuvate_worker.infrastructure.extractors.heuristic_fields_regex import (
+    regex_heuristic_field_suggestions,
 )
 
 _SMOKE = (
@@ -17,10 +17,10 @@ _SMOKE = (
 )
 
 
-def test_learned_matches_legacy_on_smoke_receipt() -> None:
+def test_learned_matches_regex_on_smoke_receipt() -> None:
     set_learned_value_types_enabled(False)
-    legacy = {f.key: f.value for f in legacy_heuristic_field_suggestions(_SMOKE)}
+    regex_fields = {f.key: f.value for f in regex_heuristic_field_suggestions(_SMOKE)}
     set_learned_value_types_enabled(True)
     learned = {f.key: f.value for f in heuristic_field_suggestions(_SMOKE)}
     set_learned_value_types_enabled(None)
-    assert learned == legacy
+    assert learned == regex_fields

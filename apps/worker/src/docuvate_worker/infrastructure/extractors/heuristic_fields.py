@@ -7,8 +7,8 @@ from docuvate_worker.domain.models import ExtractedField
 from docuvate_worker.infrastructure.extractors.field_extraction_context import (
     learned_value_types_enabled,
 )
-from docuvate_worker.infrastructure.extractors.heuristic_fields_legacy import (
-    legacy_heuristic_field_suggestions,
+from docuvate_worker.infrastructure.extractors.heuristic_fields_regex import (
+    regex_heuristic_field_suggestions,
 )
 from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (
     learned_field_suggestions,
@@ -16,10 +16,10 @@ from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (
 
 
 def heuristic_field_suggestions(text: str) -> list[ExtractedField]:
-    """Global field hints; learned value types by default, legacy regex when flag is off."""
+    """Global field hints; learned value types by default, regex heuristics when flag is off."""
     if learned_value_types_enabled():
         return learned_field_suggestions(text)
-    return legacy_heuristic_field_suggestions(text)
+    return regex_heuristic_field_suggestions(text)
 
 
 def heuristic_fields(text: str) -> list[ExtractedField]:
