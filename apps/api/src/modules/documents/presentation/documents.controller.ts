@@ -18,7 +18,6 @@ import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
   AuthGuard,
   type AuthSession,
@@ -70,6 +69,7 @@ import {
   RestoreDuplicateStackPairUseCase,
   SetDuplicateStackPrimaryUseCase,
 } from '../../duplicates/application/duplicate-stack.use-cases.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
 import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';

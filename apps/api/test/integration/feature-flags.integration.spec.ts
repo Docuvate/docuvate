@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { PgFeatureFlagRepository } from '../../src/modules/feature-flags/infrastructure/pg-feature-flag.repository.js';
 import { ResolveFeatureFlagsUseCase } from '../../src/modules/feature-flags/application/resolve-feature-flags.use-case.js';
 import { FEATURE_FLAG_DB_KEYS } from '../../src/modules/feature-flags/domain/feature-flag-keys.js';
+import { PgFeatureFlagRepository } from '../../src/modules/feature-flags/infrastructure/pg-feature-flag.repository.js';
 import { withTenantPgClient } from '../../src/shared/infrastructure/database/tenant-pg.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {

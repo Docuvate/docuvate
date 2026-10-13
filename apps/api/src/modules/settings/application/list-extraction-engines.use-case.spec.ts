@@ -22,10 +22,9 @@ describe('ListExtractionEnginesUseCase', () => {
         }),
       assertEnabled: () => Promise.resolve(),
     } satisfies Pick<ResolveFeatureFlagsUseCase, 'execute' | 'assertEnabled'>;
-    const useCase = new ListExtractionEnginesUseCase(
-      extraction,
-      resolveFeatureFlags as ResolveFeatureFlagsUseCase
-    );
+    const useCase = new ListExtractionEnginesUseCase(extraction, {
+      ...resolveFeatureFlags,
+    });
     const engines = await useCase.execute('tenant-1');
     expect(engines.length).toBeGreaterThan(0);
     expect(engines.some((e) => e.id === 'pipeline')).toBe(true);

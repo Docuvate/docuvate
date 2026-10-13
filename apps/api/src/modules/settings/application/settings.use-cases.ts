@@ -3,7 +3,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ForbiddenError } from '../../../shared/domain/errors.js';
-import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
   EXTRACTION_PORT,
   type ExtractionPort,
@@ -11,6 +10,7 @@ import {
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import type { UpdateUserSettingsRequestDto } from '../../../shared/presentation/dtos/settings.dto.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { fallbackExtractionEngines } from './extraction-engine-fallback.js';
 import { filterExtractionEngines } from './filter-extraction-engines.js';
 

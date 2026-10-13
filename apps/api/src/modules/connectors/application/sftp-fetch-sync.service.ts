@@ -9,9 +9,9 @@ import {
 } from '@nestjs/common';
 import type pg from 'pg';
 
-import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { validateScanFile } from '../../sftp-ingress/domain/scan-file-validation.js';
 import { postProcessSftpPullFile } from '../infrastructure/adapters/sftp/sftp-pull.gateway.js';
 import { readConnectorConfigString } from '../infrastructure/adapters/shared/connector-config-string.js';

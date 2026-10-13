@@ -5,8 +5,8 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  UnauthorizedException,
   type Type,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 import { ResolveFeatureFlagsUseCase } from '../../../modules/feature-flags/application/resolve-feature-flags.use-case.js';
@@ -19,10 +19,11 @@ export function FeatureFlagGuard(feature: FeatureFlagKey): Type<CanActivate> {
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
       const req = context.switchToHttp().getRequest<AuthenticatedRequest>();
-      const tenantId = req.authSession?.user?.id;
-      if (!tenantId) {
+      const authSession = req.authSession;
+      if (!authSession) {
         throw new UnauthorizedException('Not authenticated');
       }
+      const tenantId = authSession.user.id;
       await this.resolveFeatureFlags.assertEnabled(tenantId, feature);
       return true;
     }

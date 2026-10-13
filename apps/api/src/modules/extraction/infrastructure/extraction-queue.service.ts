@@ -4,7 +4,6 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
-import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
 import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
@@ -14,6 +13,7 @@ import {
 } from '../../../shared/infrastructure/valkey/valkey-connection.js';
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 
 function parseExtractionJobDocumentId(data: unknown): string {
   const row = requireRecord(data);

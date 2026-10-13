@@ -20,7 +20,6 @@ import {
 } from '@nestjs/common';
 
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
-import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
   AuthGuard,
   type AuthSession,
@@ -43,6 +42,7 @@ import {
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { toDocumentDto } from '../../documents/presentation/document.mapper.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
   CreateConnectorInstallationUseCase,
   DeleteConnectorInstallationUseCase,
