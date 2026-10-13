@@ -18,6 +18,13 @@
         "cwd": "apps/sftp-ingest"
       }
     },
+    "test-ci": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go test ./... -count=1",
+        "cwd": "apps/sftp-ingest"
+      }
+    },
     "lint": {
       "executor": "nx:run-commands",
       "options": {

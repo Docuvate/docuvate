@@ -13,6 +13,7 @@
     "test:contract": "vitest run -c vitest.contract.config.ts",
     "test:integration": "vitest run -c vitest.integration.config.ts",
     "test:coverage": "vitest run -c vitest.config.ts --coverage",
+    "test:ci": "vitest run -c vitest.config.ts --coverage && vitest run -c vitest.contract.config.ts",
     "db:migrate": "node scripts/run-migrations.mjs",
     "auth:reset-password": "node dist/scripts/auth-reset-password.js",
     "auth:promote-admin": "node dist/scripts/auth-promote-admin.js",

@@ -1,0 +1,38 @@
+{
+  "fixtures": [
+    { "file": "01-mietvertrag-synthetic.pdf", "title": "Mietvertrag synthetic", "mime": "application/pdf" },
+    { "file": "02-arbeitszeugnis-synthetic.pdf", "title": "Arbeitszeugnis synthetic", "mime": "application/pdf" },
+    { "file": "03-rechnung-nordwind.pdf", "title": "Rechnung Nordwind GmbH", "mime": "application/pdf" },
+    { "file": "04-kontoauszug-synthetic.pdf", "title": "Kontoauszug synthetic", "mime": "application/pdf" },
+    { "file": "05-bescheid-hundesteuer.pdf", "title": "Bescheid Hundesteuer", "mime": "application/pdf" },
+    { "file": "06-formular-antrag.pdf", "title": "Antragsformular", "mime": "application/pdf" },
+    { "file": "07-memo-english.pdf", "title": "Memo English", "mime": "application/pdf" },
+    { "file": "08-scanned-letter.pdf", "title": "Scanned letter", "mime": "application/pdf" },
+    {
+      "file": "09-memo-synthetic.docx",
+      "title": "Memo DOCX synthetic",
+      "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    }
+  ],
+  "chatChecks": [
+    {
+      "id": "fact",
+      "question": "Welche Gesamtsumme steht auf der Rechnung Nordwind?",
+      "expectCitationTitleContains": "Rechnung Nordwind",
+      "expectAbstention": false
+    },
+    {
+      "id": "count",
+      "question": "In wie vielen meiner Dokumente wird eine Jahresgebuehr fuer die Hundesteuer genannt?",
+      "expectMinCitations": 1,
+      "expectAnswerContainsAny": ["1", "ein", "eine", "einem"],
+      "expectAbstention": false
+    },
+    {
+      "id": "out-of-scope",
+      "question": "Wie wird das Wetter morgen in Berlin?",
+      "expectAbstention": true,
+      "expectMinCitations": 0
+    }
+  ]
+}

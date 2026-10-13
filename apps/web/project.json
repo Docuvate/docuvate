@@ -8,6 +8,7 @@
     "dev": { "command": "pnpm run dev", "options": { "cwd": "apps/web" } },
     "lint": { "command": "pnpm run lint", "options": { "cwd": "apps/web" } },
     "typecheck": { "command": "pnpm run typecheck", "options": { "cwd": "apps/web" } },
-    "test": { "command": "pnpm run test", "options": { "cwd": "apps/web" } }
+    "test": { "command": "pnpm run test", "options": { "cwd": "apps/web" } },
+    "test-ci": { "command": "pnpm run test:ci", "options": { "cwd": "apps/web" } }
   }
 }
