@@ -13,8 +13,8 @@ export interface ExactFactMatchCalibration {
   weights: ExactFactFellegiSunterWeights;
   /** Default gate: reject matches with score strictly below this value. */
   defaultMatchScoreThreshold: number;
-  /** Prior research gate (C5): 0% hallucination, ~0.60 count accuracy. */
-  legacyMatchScoreThreshold: number;
+  /** Prior C5 strict gate: 0% hallucination, ~0.60 count accuracy. */
+  priorStrictMatchScoreThreshold: number;
 }
 
 const YEAR_TOKEN = /^(19|20)\d{2}$/;
@@ -188,7 +188,7 @@ export interface ExactFactThresholdCalibrationResult {
 
 /**
  * Pick the lowest threshold with perfect decoy precision (no decoy at/above threshold),
- * maximizing match recall — recalibrated from legacy strict gates that hurt count accuracy.
+ * maximizing match recall — recalibrated from prior strict gates that hurt count accuracy.
  */
 export function calibrateExactFactMatchThreshold(
   samples: readonly ExactFactMatchLabeledSample[],

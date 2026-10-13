@@ -129,5 +129,5 @@ export const EXACT_FACT_MATCH_C5_SAMPLES: readonly ExactFactMatchLabeledSample[]
   },
 ];
 
-/** C5 legacy gate (strict): 0% decoy accepts in fixture replay, ~60% match recall on count-style tokens. */
-export const EXACT_FACT_MATCH_LEGACY_THRESHOLD = 0.72;
+/** C5 strict gate: 0% decoy accepts in fixture replay, ~60% match recall on count-style tokens. */
+export const EXACT_FACT_MATCH_PRIOR_STRICT_THRESHOLD = 0.72;

@@ -9,7 +9,7 @@ import {
 } from './exact-fact-match.js';
 import {
   EXACT_FACT_MATCH_C5_SAMPLES,
-  EXACT_FACT_MATCH_LEGACY_THRESHOLD,
+  EXACT_FACT_MATCH_PRIOR_STRICT_THRESHOLD,
 } from './exact-fact-match-c5.fixture.js';
 
 const calibrationSamples = EXACT_FACT_MATCH_C5_SAMPLES.map((sample) => ({
@@ -20,15 +20,15 @@ const weights = estimateFellegiSunterWeights(calibrationSamples);
 const calibrated = calibrateExactFactMatchThreshold(calibrationSamples, weights);
 
 /**
- * Operational default (recalibrated from C5 legacy 0.72 substring gate).
- * 0.55 keeps 100% C5 match recall with 0% decoy accepts; legacy 0.72 accepted decoy partials.
+ * Operational default (recalibrated from C5 strict 0.72 substring scoring).
+ * 0.55 keeps 100% C5 match recall with 0% decoy accepts; 0.72 accepted decoy partials.
  */
 export const EXACT_FACT_MATCH_DEFAULT_THRESHOLD = 0.55;
 
 export const EXACT_FACT_MATCH_CALIBRATION: ExactFactMatchCalibration = {
   weights,
   defaultMatchScoreThreshold: EXACT_FACT_MATCH_DEFAULT_THRESHOLD,
-  legacyMatchScoreThreshold: EXACT_FACT_MATCH_LEGACY_THRESHOLD,
+  priorStrictMatchScoreThreshold: EXACT_FACT_MATCH_PRIOR_STRICT_THRESHOLD,
 };
 
 export const EXACT_FACT_MATCH_C5_CALIBRATION_AUDIT = {

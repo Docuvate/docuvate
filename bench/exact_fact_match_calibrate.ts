@@ -9,7 +9,7 @@
 import {
   EXACT_FACT_MATCH_C5_SAMPLES,
   EXACT_FACT_MATCH_CALIBRATION,
-  EXACT_FACT_MATCH_LEGACY_THRESHOLD,
+  EXACT_FACT_MATCH_PRIOR_STRICT_THRESHOLD,
   calibrateExactFactMatchThreshold,
   estimateFellegiSunterWeights,
   exactFactMatchScoreTokens,
@@ -42,7 +42,7 @@ console.log(
   JSON.stringify(
     {
       weights,
-      legacyThreshold: EXACT_FACT_MATCH_LEGACY_THRESHOLD,
+      priorStrictThreshold: EXACT_FACT_MATCH_PRIOR_STRICT_THRESHOLD,
       calibratedThreshold: calibrated.threshold,
       matchRecall: calibrated.matchRecall,
       decoyPrecision: calibrated.decoyPrecision,
