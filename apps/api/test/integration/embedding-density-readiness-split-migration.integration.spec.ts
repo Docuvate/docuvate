@@ -21,19 +21,14 @@ async function userStateColumns(pool: ReturnType<typeof getIntegrationPool>): Pr
   return result.rows.map((row) => row.column_name);
 }
 
-async function latestMigrationName(dataSource: DataSource): Promise<string | null> {
-  const rows: unknown = await dataSource.query(
-    `SELECT name FROM migrations ORDER BY timestamp DESC LIMIT 1`
+async function peelMigrationsAfterReadinessSplit(dataSource: DataSource): Promise<void> {
+  await dataSource.query(
+    `DELETE FROM migrations
+     WHERE timestamp > (
+       SELECT timestamp FROM migrations WHERE name = $1
+     )`,
+    [READINESS_SPLIT_MIGRATION_NAME]
   );
-  if (!Array.isArray(rows) || rows.length === 0) {
-    return null;
-  }
-  const row: unknown = rows[0];
-  if (!isRecord(row)) {
-    return null;
-  }
-  const name = row.name;
-  return typeof name === 'string' ? name : null;
 }
 
 async function revertReadinessSplitMigration(dataSource: DataSource): Promise<void> {
@@ -47,29 +42,19 @@ async function revertReadinessSplitMigration(dataSource: DataSource): Promise<vo
   }
 }
 
+/** Simulate a DB upgraded through readiness-split but not later migrations. */
 async function undoUntilCalibrationReady(
   dataSource: DataSource,
   pool: ReturnType<typeof getIntegrationPool>
 ): Promise<string[]> {
-  for (let attempt = 0; attempt < 32; attempt += 1) {
-    const columns = await userStateColumns(pool);
-    if (columns.includes('calibration_ready')) {
-      return columns;
-    }
-    if (!columns.includes('coarse_ready')) {
-      break;
-    }
-    const latest = await latestMigrationName(dataSource);
-    if (latest === READINESS_SPLIT_MIGRATION_NAME) {
-      await revertReadinessSplitMigration(dataSource);
-      break;
-    }
-    if (latest == null) {
-      break;
-    }
-    await dataSource.undoLastMigration();
+  let columns = await userStateColumns(pool);
+  if (columns.includes('calibration_ready')) {
+    return columns;
   }
-  const columns = await userStateColumns(pool);
+  expect(columns.includes('coarse_ready')).toBe(true);
+  await peelMigrationsAfterReadinessSplit(dataSource);
+  await revertReadinessSplitMigration(dataSource);
+  columns = await userStateColumns(pool);
   expect(columns).toContain('calibration_ready');
   return columns;
 }
