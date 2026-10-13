@@ -3,12 +3,8 @@
 import { DataSource } from 'typeorm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { EmbeddingDensityReadinessSplit20261010140000 } from '../../src/shared/infrastructure/database/migrations/20261010140000-embedding-density-readiness-split.js';
-import { isRecord } from '../../src/shared/infrastructure/database/row-parse.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
 import { getIntegrationPool } from './pg-pool.js';
-
-const READINESS_SPLIT_MIGRATION_NAME = 'EmbeddingDensityReadinessSplit20261010140000';
 
 async function userStateColumns(pool: ReturnType<typeof getIntegrationPool>): Promise<string[]> {
   const result = await pool.query<{ column_name: string }>(
@@ -21,40 +17,18 @@ async function userStateColumns(pool: ReturnType<typeof getIntegrationPool>): Pr
   return result.rows.map((row) => row.column_name);
 }
 
-async function peelMigrationsAfterReadinessSplit(dataSource: DataSource): Promise<void> {
-  await dataSource.query(
-    `DELETE FROM migrations
-     WHERE timestamp > (
-       SELECT timestamp FROM migrations WHERE name = $1
-     )`,
-    [READINESS_SPLIT_MIGRATION_NAME]
-  );
-}
-
-async function revertReadinessSplitMigration(dataSource: DataSource): Promise<void> {
-  const runner = dataSource.createQueryRunner();
-  await runner.connect();
-  try {
-    await new EmbeddingDensityReadinessSplit20261010140000().down(runner);
-    await runner.query(`DELETE FROM migrations WHERE name = $1`, [READINESS_SPLIT_MIGRATION_NAME]);
-  } finally {
-    await runner.release();
-  }
-}
-
-/** Simulate a DB upgraded through readiness-split but not later migrations. */
 async function undoUntilCalibrationReady(
   dataSource: DataSource,
   pool: ReturnType<typeof getIntegrationPool>
 ): Promise<string[]> {
-  let columns = await userStateColumns(pool);
-  if (columns.includes('calibration_ready')) {
-    return columns;
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    const columns = await userStateColumns(pool);
+    if (columns.includes('calibration_ready')) {
+      return columns;
+    }
+    await dataSource.undoLastMigration();
   }
-  expect(columns.includes('coarse_ready')).toBe(true);
-  await peelMigrationsAfterReadinessSplit(dataSource);
-  await revertReadinessSplitMigration(dataSource);
-  columns = await userStateColumns(pool);
+  const columns = await userStateColumns(pool);
   expect(columns).toContain('calibration_ready');
   return columns;
 }
