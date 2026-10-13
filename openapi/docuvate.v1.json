@@ -14537,6 +14537,12 @@
           "documentChatRunsOnCpu": {
             "type": "boolean"
           },
+          "documentChatLocalModelEnabled": {
+            "type": "boolean"
+          },
+          "documentChatLocalModelReady": {
+            "type": "boolean"
+          },
           "advancedFeaturesEnabled": {
             "type": "boolean"
           },

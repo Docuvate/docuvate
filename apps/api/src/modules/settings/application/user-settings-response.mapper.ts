@@ -19,6 +19,8 @@ export function toUserSettingsResponseDto(
     documentChatReadinessReason: resolved.documentChatReadinessReason,
     documentChatOllamaModel: resolved.documentChatOllamaModel,
     documentChatRunsOnCpu: resolved.documentChatRunsOnCpu,
+    documentChatLocalModelEnabled: resolved.documentChatLocalModelEnabled,
+    documentChatLocalModelReady: resolved.documentChatLocalModelReady,
     advancedFeaturesEnabled: row.advancedFeaturesEnabled,
     useArenaWinnerAsDefault: row.useArenaWinnerAsDefault,
     arenaWinnerEngine: row.arenaWinnerEngine,

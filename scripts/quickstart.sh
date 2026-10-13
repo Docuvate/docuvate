@@ -6,7 +6,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-MIN_HOST_RAM_MIB="${DOCUVATE_QUICKSTART_MIN_RAM_MIB:-12288}"
+MIN_HOST_RAM_MIB="${DOCUVATE_QUICKSTART_MIN_RAM_MIB:-6144}"
 WEB_URL="${DOCUVATE_QUICKSTART_WEB_URL:-http://localhost:5173}"
 API_READY_URL="${DOCUVATE_QUICKSTART_API_READY_URL:-http://localhost:3001/health/ready}"
 COMPOSE_FILES=(-f docker-compose.yml)
@@ -112,7 +112,7 @@ Docuvate is up.
 First login:
   1. Open the web URL and register the first account (becomes installation admin).
   2. Upload PDFs or images under Library.
-  3. Open a document for OCR text, labels, and chat (Ollama pulls on first start).
+  3. Open a document for OCR text, labels, and chat (extractive by default; optional local LLM: see README#quickstart).
 
 Diagnostics: bash scripts/doctor.sh
 Upgrade/backup: docs/self-hosting.md

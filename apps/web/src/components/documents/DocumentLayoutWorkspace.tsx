@@ -70,6 +70,8 @@ interface DocumentLayoutWorkspaceProps {
   onTextEditOpenChange: (open: boolean) => void;
   documentChatAvailable?: boolean;
   documentChatUiEnabled?: boolean;
+  documentChatLocalModelEnabled?: boolean;
+  documentChatLocalModelReady?: boolean;
   showTechnicalDetails?: boolean;
   layoutSideTab: LayoutSideTab;
   onLayoutSideTabChange: (tab: LayoutSideTab) => void;
@@ -106,6 +108,8 @@ export function DocumentLayoutWorkspace({
   onTextEditOpenChange,
   documentChatAvailable = false,
   documentChatUiEnabled = true,
+  documentChatLocalModelEnabled = false,
+  documentChatLocalModelReady = false,
   showTechnicalDetails = false,
   layoutSideTab,
   onLayoutSideTabChange,
@@ -514,6 +518,8 @@ export function DocumentLayoutWorkspace({
           onFieldValueChange={onFieldValueChange}
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
+          documentChatLocalModelEnabled={documentChatLocalModelEnabled}
+          documentChatLocalModelReady={documentChatLocalModelReady}
         />
       ) : (
         <aside className="layout-side-panel layout-side-panel-loading">

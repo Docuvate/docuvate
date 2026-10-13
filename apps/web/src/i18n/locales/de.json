@@ -663,6 +663,8 @@
       "messagesLoading": "Verlauf wird geladen…",
       "serviceNoticeBody": "KI-Antworten sind gerade nicht verfügbar. Ihre Fragen bleiben im Verlauf gespeichert. Bitte später erneut versuchen.",
       "serviceNoticeSettings": "Dokument-Chat in Einstellungen",
+      "localModelDisabledBody": "Nachschlage- und zitierte Extraktiv-Antworten funktionieren ohne lokales Sprachmodell. Für offene Fragen kann Ihr Administrator das lokale Chat-Modell freischalten.",
+      "localModelPendingBody": "Das lokale Sprachmodell ist noch nicht bereit. Nachschlage- und Extraktiv-Antworten funktionieren weiter; offene Fragen können warten, bis das Modell geladen ist.",
       "disabledOverlayTitle": "Dokument-Chat nicht eingerichtet",
       "disabledSettingsTitle": "Chat ist ausgeschaltet",
       "disabledSettingsBody": "Sie haben den Dokument-Chat in den Einstellungen deaktiviert. Aktivieren Sie ihn dort wieder, wenn Sie Fragen zu Dokumenten stellen möchten.",

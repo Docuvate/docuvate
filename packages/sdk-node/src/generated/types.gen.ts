@@ -923,6 +923,8 @@ export type UserSettingsResponseDto = {
     documentChatReadinessReason?: string;
     documentChatOllamaModel?: string;
     documentChatRunsOnCpu?: boolean;
+    documentChatLocalModelEnabled?: boolean;
+    documentChatLocalModelReady?: boolean;
     advancedFeaturesEnabled?: boolean;
     useArenaWinnerAsDefault: boolean;
     arenaWinnerEngine?: string;

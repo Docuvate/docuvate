@@ -138,6 +138,8 @@ export function DocumentDetailPage() {
   const [requeueBusy, setRequeueBusy] = useState(false);
   const [documentChatAvailable, setDocumentChatAvailable] = useState(false);
   const [documentChatUiEnabled, setDocumentChatUiEnabled] = useState(true);
+  const [documentChatLocalModelEnabled, setDocumentChatLocalModelEnabled] = useState(false);
+  const [documentChatLocalModelReady, setDocumentChatLocalModelReady] = useState(false);
   const [fieldFeedbackRecorded, setFieldFeedbackRecorded] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
@@ -254,6 +256,8 @@ export function DocumentDetailPage() {
         setFolders(f);
         setDocumentChatAvailable(settings.documentChatAvailable === true);
         setDocumentChatUiEnabled(settings.documentChatUiEnabled !== false);
+        setDocumentChatLocalModelEnabled(settings.documentChatLocalModelEnabled === true);
+        setDocumentChatLocalModelReady(settings.documentChatLocalModelReady === true);
         setFieldGateSettings({
           fieldExtractionConfidenceGateEnabled: settings.fieldExtractionConfidenceGateEnabled !== false,
           labelFieldConfidenceThreshold: settings.labelFieldConfidenceThreshold ?? 0.62,
@@ -650,6 +654,8 @@ export function DocumentDetailPage() {
               compact
               chatAvailable={documentChatAvailable}
               chatUiEnabled={documentChatUiEnabled}
+              localChatModelEnabled={documentChatLocalModelEnabled}
+              localChatModelReady={documentChatLocalModelReady}
             />
           </div>
         ) : null}
@@ -659,6 +665,8 @@ export function DocumentDetailPage() {
         <DocumentLayoutWorkspace
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
+          documentChatLocalModelEnabled={documentChatLocalModelEnabled}
+          documentChatLocalModelReady={documentChatLocalModelReady}
           showTechnicalDetails={showTechnicalDetails}
           layoutSideTab={layoutSideTab}
           onLayoutSideTabChange={setLayoutSideTab}

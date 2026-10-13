@@ -35,6 +35,10 @@ interface DocumentChatPanelProps {
   chatAvailable?: boolean;
   /** False when user turned chat off in settings (distinct from provider unavailable). */
   chatUiEnabled?: boolean;
+  /** Tenant flag: local Ollama LLM may be used when configured. */
+  localChatModelEnabled?: boolean;
+  /** Local Ollama model loaded (open-ended LLM answers). */
+  localChatModelReady?: boolean;
 }
 
 function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string {
@@ -71,6 +75,8 @@ export function DocumentChatPanel({
   sidePanel = false,
   chatAvailable = false,
   chatUiEnabled = true,
+  localChatModelEnabled = false,
+  localChatModelReady = false,
 }: DocumentChatPanelProps) {
   const { t, i18n } = useTranslation();
   const [threads, setThreads] = useState<DocumentChatThreadDto[]>([]);
@@ -343,6 +349,11 @@ export function DocumentChatPanel({
   const panelBusy = loadingThreads || loadingMessages;
   const interactionBlocked = !chatUiEnabled || !chatAvailable;
   const blockedBySettings = !chatUiEnabled;
+  const showLocalModelNotice =
+    chatUiEnabled &&
+    chatAvailable &&
+    !localChatModelReady &&
+    !serviceNotice;
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
   const inputPlaceholder = hasThreads
     ? t('documents.documentChat.inputPlaceholder')
@@ -370,6 +381,15 @@ export function DocumentChatPanel({
               </Link>
             </div>
           ) : null}
+          {showLocalModelNotice ? (
+            <div className="doc-chat-notice doc-chat-notice-info" role="status">
+              <p>
+                {localChatModelEnabled
+                  ? t('documents.documentChat.localModelPendingBody')
+                  : t('documents.documentChat.localModelDisabledBody')}
+              </p>
+            </div>
+          ) : null}
         </header>
       )}
       {sidePanel && serviceNotice ? (
@@ -378,6 +398,15 @@ export function DocumentChatPanel({
           <Link className="doc-chat-notice-link" to={`${routes.settings}#settings-document-chat`}>
             {t('documents.documentChat.serviceNoticeSettings')}
           </Link>
+        </div>
+      ) : null}
+      {sidePanel && showLocalModelNotice ? (
+        <div className="doc-chat-notice doc-chat-notice-info" role="status">
+          <p>
+            {localChatModelEnabled
+              ? t('documents.documentChat.localModelPendingBody')
+              : t('documents.documentChat.localModelDisabledBody')}
+          </p>
         </div>
       ) : null}
 
