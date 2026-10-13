@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 
-import { resolveOllamaModelFromEnv } from '../../../modules/settings/application/document-chat-provider-catalog.js';
 import { buildOllamaChatBody } from './ollama-chat-options.js';
-import { ollamaChatBaseUrl, ollamaChatConfigured } from './ollama-chat-request.js';
+import { ollamaChatBaseUrl, ollamaChatConfigured, ollamaChatModel } from './ollama-chat-request.js';
 
 @Injectable()
 export class OllamaWarmupService implements OnModuleInit {
@@ -18,7 +17,7 @@ export class OllamaWarmupService implements OnModuleInit {
     if (!ollamaChatConfigured()) {
       return;
     }
-    const model = resolveOllamaModelFromEnv();
+    const model = ollamaChatModel();
     const url = `${ollamaChatBaseUrl()}/api/chat`;
     const body = buildOllamaChatBody(
       model,
