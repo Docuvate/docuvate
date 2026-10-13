@@ -17,6 +17,7 @@ class ExtractRequest(BaseModel):
     embedding_density_state: EmbeddingDensityStateModel | None = Field(
         default=None, validation_alias="embeddingDensityState"
     )
+    learned_value_types: bool | None = Field(default=None, validation_alias="learnedValueTypes")
 
 
 class CompareRequest(BaseModel):

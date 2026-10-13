@@ -10,7 +10,6 @@ from bench.model_gates.schema import GateRunResult
 _STUBS: tuple[tuple[str, str], ...] = (
     ("layout_blocks", "Macro-F1 on annotated pages (FUNSD slice) — PR 6"),
     ("tables", "Row/column F1 on balance-sheet fixture — PR 7"),
-    ("fields", "Per-field precision on CORD/SROIE slice — PR 5"),
     ("ocr", "German scan CER gate — PR 8"),
     ("embeddings", "Recall@k on DE document retrieval — PR 3"),
     ("reranker", "Recall@10 and MRR gate — PR 3"),

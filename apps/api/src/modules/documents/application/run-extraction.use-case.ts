@@ -13,6 +13,7 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
 import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
@@ -32,7 +33,8 @@ export class RunExtractionUseCase {
     private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase,
     private readonly persistRepresentation: PersistDocumentRepresentationUseCase,
     private readonly densityRepo: PgEmbeddingDensityRepository,
-    @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository
+    @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   async execute(documentId: string): Promise<void> {
@@ -48,9 +50,11 @@ export class RunExtractionUseCase {
       const tags = await this.taxonomy.listTags(doc.userId);
       const tagIds = tags.map((tag) => tag.id);
       const densityState = await this.densityRepo.loadWorkerState(doc.userId, tagIds);
+      const flags = await this.resolveFeatureFlags.execute(doc.userId);
       const result = await this.extraction.extract(buffer, doc.mimeType, {
         engine,
         embeddingDensityState: densityState ?? undefined,
+        learnedValueTypes: flags.learnedValueTypes,
       });
       await this.documents.saveExtraction(documentId, result);
       await this.persistRepresentation.execute(

@@ -4,18 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { readFeatureFlagDefaultsFromEnv } from './read-feature-flag-defaults.js';
 
-const ALL_FALSE = {
-  layoutReconstructionCompare: false,
-  sourceConnectors: false,
-  experimentalResearchModels: false,
-  exactAnswers: false,
-  smartDuplicates: false,
-  answerAbstention: false,
-  learnedValueTypes: false,
-  layoutKeyValueRoles: false,
-  localChatModel: false,
-} as const;
-
 const ENV_KEYS = [
   'DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE',
   'DOCUVATE_FEATURE_SOURCE_CONNECTORS',
@@ -41,12 +29,22 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
     }
   });
 
-  it('defaults all flags to false when env is unset', () => {
+  it('defaults conservative flags off and learned value types on when env is unset', () => {
     for (const key of ENV_KEYS) {
       original[key] ??= process.env[key];
       process.env[key] = undefined;
     }
-    expect(readFeatureFlagDefaultsFromEnv()).toEqual(ALL_FALSE);
+    expect(readFeatureFlagDefaultsFromEnv()).toEqual({
+      layoutReconstructionCompare: false,
+      sourceConnectors: false,
+      experimentalResearchModels: false,
+      exactAnswers: false,
+      smartDuplicates: false,
+      answerAbstention: false,
+      learnedValueTypes: true,
+      layoutKeyValueRoles: false,
+      localChatModel: false,
+    });
   });
 
   it('parses true-like env values', () => {
@@ -73,5 +71,14 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
       layoutKeyValueRoles: true,
       localChatModel: true,
     });
+  });
+
+  it('allows disabling learned value types via env', () => {
+    for (const key of ENV_KEYS) {
+      original[key] ??= process.env[key];
+      process.env[key] = undefined;
+    }
+    process.env['DOCUVATE_FEATURE_LEARNED_VALUE_TYPES'] = 'false';
+    expect(readFeatureFlagDefaultsFromEnv().learnedValueTypes).toBe(false);
   });
 });

@@ -33,6 +33,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'UserChatCloudLlm20261013120000',
   'SmartDuplicates20261013180000',
   'FeatureFlagMlKeys20261013200000',
+  'FeatureFlagLearnedValueTypes20261013220000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -136,12 +137,14 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.document_representation');
     case 'FeatureFlags20261013120000':
       return regClassExists(runner, 'public.feature_flag');
-    case 'FeatureFlagMlKeys20261013200000':
-      return featureFlagMlKeysConstraintPresent(runner);
     case 'UserChatCloudLlm20261013120000':
       return columnExists(runner, 'user_preferences', 'document_chat_cloud_base_url');
     case 'SmartDuplicates20261013180000':
       return migrationSchemaPresent(runner, 'UserChatCloudLlm20261013120000');
+    case 'FeatureFlagMlKeys20261013200000':
+      return featureFlagMlKeysConstraintPresent(runner);
+    case 'FeatureFlagLearnedValueTypes20261013220000':
+      return migrationSchemaPresent(runner, 'FeatureFlags20261013120000');
     default:
       return false;
   }
