@@ -28,7 +28,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-      - uses: dorny/paths-filter@de90cc6fb38fc0961780d7cc1121f161f0facbfe # v3.0.2
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: filter
         with:
           filters: |
@@ -93,7 +93,7 @@ jobs:
         with:
           node-version-file: .tool-versions
           cache: pnpm
-      - uses: nrwl/nx-set-shas@15514ee4353489ef5a1644bcdae44f0ae2ea45f3 # v4.4.0
+      - uses: nrwl/nx-set-shas@3e9ad7370203c1e93d109be57f3b72eb0eb511b1 # v4
       - run: pnpm install --frozen-lockfile
       - name: Cache Nx
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
