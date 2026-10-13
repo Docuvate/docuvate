@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import type pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { PersistDocumentFactsUseCase } from '../../src/modules/exact-facts/application/persist-document-facts.use-case.js';
@@ -11,6 +12,27 @@ import {
   insertSyntheticUser,
   newIsolationUserId,
 } from './pg-test-isolation.js';
+
+async function withRlsEnforcedPgClient<T>(
+  pool: pg.Pool,
+  tenantId: string,
+  run: (client: pg.PoolClient) => Promise<T>
+): Promise<T> {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query('SET LOCAL ROLE docuvate_rls_enforcer');
+    await client.query(`SELECT set_config('app.tenant_id', $1, true)`, [tenantId]);
+    const value = await run(client);
+    await client.query('COMMIT');
+    return value;
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 
 describe('exact fact index (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
@@ -86,7 +108,7 @@ describe('exact fact index (Testcontainers Postgres)', () => {
     });
     expect(rowsB).toEqual([]);
 
-    const crossTenantPeek = await withTenantPgClient(pool, userB, async (client) => {
+    const crossTenantPeek = await withRlsEnforcedPgClient(pool, userB, async (client) => {
       const result = await client.query<{ count: string }>(
         `SELECT COUNT(*)::text AS count FROM document_extracted_fact WHERE document_id = $1`,
         [documentA]
