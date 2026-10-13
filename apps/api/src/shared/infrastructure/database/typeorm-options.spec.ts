@@ -26,8 +26,8 @@ import { RepairPeriodDuplicateStacks20261011200000 } from './migrations/20261011
 import { DuplicatePairLabels20261011210000 } from './migrations/20261011210000-duplicate-pair-labels.js';
 import { DocumentRepresentation20261012120000 } from './migrations/20261012120000-document-representation.js';
 import { FeatureFlags20261013120000 } from './migrations/20261013120000-feature-flags.js';
-import { FeatureFlagMlKeys20261013200000 } from './migrations/20261013200000-feature-flag-ml-keys.js';
 import { UserChatCloudLlm20261013120000 } from './migrations/20261013120000-user-chat-cloud-llm.js';
+import { FeatureFlagMlKeys20261013200000 } from './migrations/20261013200000-feature-flag-ml-keys.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [

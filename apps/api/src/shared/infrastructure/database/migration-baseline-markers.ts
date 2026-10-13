@@ -45,7 +45,7 @@ async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<
        AND c.conname = 'feature_flag_key_check'`
   );
   const def = queryTextCell(rows, 'def');
-  return def != null && def.includes('exact_answers');
+  return def?.includes('exact_answers') ?? false;
 }
 
 function queryTextCell(rows: unknown, key: string): string | null {
