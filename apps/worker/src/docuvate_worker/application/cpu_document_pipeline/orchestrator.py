@@ -38,6 +38,8 @@ def run_integrated_cpu_document_pipeline(
         mime_type=run_input.mime_type,
         document_id=run_input.document_id,
         embedding_density_state=density_port.resolve(run_input.document_id),
+        layout_key_value_roles=run_input.layout_key_value_roles,
+        recognized_field_keys=run_input.recognized_field_keys,
     )
     ocr = run_ocr_stage(state)
     rotation = run_rotation_stage(state)

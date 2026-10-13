@@ -8,7 +8,6 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
-from docuvate_worker.domain.representation.constants import ENCODER_ID, ENCODER_REVISION
 from docuvate_worker.infrastructure.ml.config import mlops_registry_enabled
 
 
@@ -25,8 +24,11 @@ def resolve_active_model(family_id: str) -> ResolvedModel:
     if family_id in ("fastembed-minilm", "fastembed-e5-small", "document-encoder"):
         return ResolvedModel(
             family_id=family_id,
-            version_tag=os.environ.get("DOCUVATE_ENCODER_REVISION", ENCODER_REVISION),
-            artifact_uri=os.environ.get("FASTEMBED_MODEL_NAME", ENCODER_ID),
+            version_tag=os.environ.get(
+                "FASTEMBED_MODEL_VERSION",
+                os.environ.get("DOCUVATE_ENCODER_REVISION", "bootstrap-1"),
+            ),
+            artifact_uri=os.environ.get("FASTEMBED_MODEL_NAME", "intfloat/multilingual-e5-small"),
             source="env",
         )
     if family_id == "paddle-ocr":
@@ -43,15 +45,14 @@ def resolve_active_model(family_id: str) -> ResolvedModel:
             artifact_uri=None,
             source="env",
         )
-    if family_id == "value-types-vgram":
-        from docuvate_worker.infrastructure.ml.value_types.registry import (  # noqa: PLC0415
-            artifact_path,
-        )
-
+    if family_id == "layout-kv-role-head":
         return ResolvedModel(
             family_id=family_id,
-            version_tag=os.environ.get("DOCUVATE_VALUE_TYPES_VERSION", "cord-synth-v1"),
-            artifact_uri=str(artifact_path()),
+            version_tag=os.environ.get("LAYOUT_KV_ROLE_HEAD_VERSION", "v1"),
+            artifact_uri=os.environ.get(
+                "LAYOUT_KV_ROLE_HEAD_PATH",
+                "apps/worker/src/docuvate_worker/infrastructure/ml/artifacts/layout-kv-role-head.v1.json",
+            ),
             source="bundled",
         )
     return ResolvedModel(

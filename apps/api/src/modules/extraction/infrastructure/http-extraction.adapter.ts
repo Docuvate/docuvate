@@ -305,7 +305,8 @@ export class HttpExtractionAdapter implements ExtractionPort {
         content_base64: buffer.toString('base64'),
         engine: options?.engine,
         embeddingDensityState: options?.embeddingDensityState,
-        learnedValueTypes: options?.learnedValueTypes,
+        layoutKeyValueRoles: options?.layoutKeyValueRoles ?? false,
+        recognizedFieldKeys: options?.recognizedFieldKeys ?? [],
       }),
     });
 

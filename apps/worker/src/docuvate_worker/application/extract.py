@@ -6,9 +6,6 @@ import logging
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.infrastructure.extractors.engine_catalog import engine_by_name
-from docuvate_worker.infrastructure.extractors.field_extraction_context import (
-    set_learned_value_types_enabled,
-)
 from docuvate_worker.infrastructure.extractors.markdown import extraction_to_markdown
 from docuvate_worker.infrastructure.extractors.pipeline import extract_with_cpu_pipeline
 from docuvate_worker.infrastructure.extractors.registry import ExtractorRegistry
@@ -83,21 +80,22 @@ def extract_document(
     engine: str | None = None,
     *,
     embedding_density_state: EmbeddingDensityStatePayload | None = None,
-    learned_value_types: bool | None = None,
+    layout_key_value_roles: bool = False,
+    recognized_field_keys: frozenset[str] | None = None,
 ) -> ExtractionResult:
-    set_learned_value_types_enabled(learned_value_types)
     resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
     if resolved.name == "pipeline":
         base = _with_markdown(
             extract_with_cpu_pipeline(
-                content, mime_type, embedding_density_state=embedding_density_state
+                content,
+                mime_type,
+                embedding_density_state=embedding_density_state,
+                layout_key_value_roles=layout_key_value_roles,
+                recognized_field_keys=recognized_field_keys,
             )
         )
     else:
         base = _with_markdown(resolved.extract(content, mime_type))
-    try:
-        return _with_layout_ir(base, content, mime_type)
-    finally:
-        set_learned_value_types_enabled(None)
+    return _with_layout_ir(base, content, mime_type)
 
 
