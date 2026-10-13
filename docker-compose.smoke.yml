@@ -7,6 +7,7 @@ services:
       DOCUMENT_CHAT_PROVIDER: rag-ollama
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-docuvate-smoke-better-auth-signing-key-2026}
       DV_ALLOW_SIGNUP: 'true'
+      DOCUVATE_FEATURE_SMART_DUPLICATES: 'true'
 
   smoke-seed:
     profiles: [smoke]

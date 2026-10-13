@@ -12,8 +12,25 @@
       "file": "09-memo-synthetic.docx",
       "title": "Memo DOCX synthetic",
       "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "file": "10-smart-dup-a.pdf",
+      "title": "Smart duplicate receipt A",
+      "mime": "application/pdf",
+      "documentDate": "2024-06-01",
+      "duplicateSmokeAnchor": true
+    },
+    {
+      "file": "11-smart-dup-b.pdf",
+      "title": "Smart duplicate receipt B",
+      "mime": "application/pdf",
+      "documentDate": "2024-06-01"
     }
   ],
+  "duplicateSmoke": {
+    "anchorTitle": "Smart duplicate receipt A",
+    "expectPairTitle": "Smart duplicate receipt B"
+  },
   "chatChecks": [
     {
       "id": "fact",

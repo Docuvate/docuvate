@@ -691,6 +691,19 @@ export interface DuplicateRepository {
   >;
   listPendingPairs(userId: string): Promise<{ documentId: string; candidateDocumentId: string }[]>;
   listDocumentIdsBySharedHash(userId: string): Promise<string[][]>;
+  listSmartDuplicatePeers(
+    userId: string,
+    excludeDocumentId: string,
+    correspondentId: string | null,
+    documentDate: Date | null
+  ): Promise<
+    {
+      documentId: string;
+      filename: string;
+      title: string;
+      extractedText: string | null;
+    }[]
+  >;
 }
 
 export interface DuplicateStackSummary {

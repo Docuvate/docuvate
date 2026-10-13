@@ -93,11 +93,18 @@ async function uploadFixture(cookie, fixture) {
   const form = new FormData();
   form.append('file', new Blob([bytes], { type: fixture.mime }), fixture.file);
   const created = await api(cookie, 'POST', '/v1/documents', form);
-  const doc = await waitDocumentPipeline(cookie, created.id);
+  const patch = {};
   if (fixture.title) {
-    await api(cookie, 'PATCH', `/v1/documents/${created.id}`, { title: fixture.title });
+    patch.title = fixture.title;
   }
-  return doc;
+  if (fixture.documentDate) {
+    patch.documentDate = fixture.documentDate;
+  }
+  if (Object.keys(patch).length > 0) {
+    await api(cookie, 'PATCH', `/v1/documents/${created.id}`, patch);
+  }
+  const doc = await waitDocumentPipeline(cookie, created.id);
+  return { ...doc, ...patch, id: created.id };
 }
 
 async function createThread(cookie) {
@@ -203,14 +210,48 @@ async function runChatChecks(cookie) {
   console.log('Smoke chat checks passed:', results.map((r) => r.id).join(', '));
 }
 
+async function runDuplicateSmokeCheck(cookie, docsByTitle) {
+  const spec = manifest.duplicateSmoke;
+  if (!spec) {
+    return;
+  }
+  const anchor = docsByTitle.get(spec.anchorTitle);
+  const expectTitle = spec.expectPairTitle;
+  if (!anchor) {
+    throw new Error(`Duplicate smoke anchor not uploaded: ${spec.anchorTitle}`);
+  }
+  const deadline = Date.now() + WAIT_MS;
+  while (Date.now() < deadline) {
+    const candidates = await api(cookie, 'GET', `/v1/documents/${anchor.id}/duplicate-candidates`);
+    const hit = candidates.items.find(
+      (row) =>
+        row.source === 'smart' &&
+        String(row.candidateTitle).toLowerCase().includes(String(expectTitle).toLowerCase())
+    );
+    if (hit) {
+      console.log(
+        `Smart duplicate smoke OK: ${anchor.id} -> ${hit.candidateDocumentId} (${Math.round(hit.similarity * 100)}%)`
+      );
+      return;
+    }
+    await sleep(2000);
+  }
+  throw new Error(`Smart duplicate smoke: no smart candidate for anchor ${anchor.id}`);
+}
+
 async function main() {
   const cookie = await signIn();
   const docsById = new Map();
+  const docsByTitle = new Map();
   for (const fixture of manifest.fixtures) {
     const doc = await uploadFixture(cookie, fixture);
     docsById.set(doc.id, doc);
+    if (doc.title) {
+      docsByTitle.set(doc.title, doc);
+    }
     console.log(`Uploaded ${fixture.file} -> ${doc.id} (${doc.status})`);
   }
+  await runDuplicateSmokeCheck(cookie, docsByTitle);
   await runChatChecks(cookie);
   console.log('Smoke seed-and-verify OK');
 }

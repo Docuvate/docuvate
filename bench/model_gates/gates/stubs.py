@@ -15,7 +15,6 @@ _STUBS: tuple[tuple[str, str], ...] = (
     ("embeddings", "Recall@k on DE document retrieval — PR 3"),
     ("reranker", "Recall@10 and MRR gate — PR 3"),
     ("chat_llm", "Cited LLM chat accuracy/latency — PR 2"),
-    ("duplicates", "Duplicate-pair precision — PR 9"),
 )
 
 

@@ -53,7 +53,9 @@ export function DuplicateCandidatesPanel({ documentId }: DuplicateCandidatesPane
                 {item.candidateFilename} · {Math.round(item.similarity * 100)} % ·{' '}
                 {item.source === 'hash'
                   ? t('documents.duplicateSourceHash')
-                  : t('documents.duplicateSourceEmbedding')}
+                  : item.source === 'smart'
+                    ? t('documents.duplicateSourceSmart')
+                    : t('documents.duplicateSourceEmbedding')}
               </span>
             </div>
             <Button

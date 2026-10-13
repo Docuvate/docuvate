@@ -15,9 +15,38 @@ import {
 } from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { createDuplicateStackRepositoryStub } from '../../../test-support/duplicate-stack-repository.stub.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
+import { HttpSmartDuplicatesAdapter } from '../infrastructure/http-smart-duplicates.adapter.js';
 import { ApplyDuplicateDetectionUseCase } from './apply-duplicate-detection.use-case.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
+
+function buildApplyDuplicateDetectionUseCase(deps: {
+  documents: DocumentRepository;
+  duplicates: DuplicateRepository;
+  embeddings: LabelEmbeddingRepository;
+  classifier: DuplicateClassifierService;
+  linkDuplicatePair: LinkDuplicatePairUseCase;
+  resolveFeatureFlags?: { execute: ReturnType<typeof vi.fn> };
+  smartDuplicates?: { detectCandidates: ReturnType<typeof vi.fn> };
+}): ApplyDuplicateDetectionUseCase {
+  return new ApplyDuplicateDetectionUseCase(
+    deps.documents,
+    deps.duplicates,
+    deps.embeddings,
+    deps.classifier,
+    deps.linkDuplicatePair,
+    (deps.resolveFeatureFlags ?? {
+      execute: vi.fn().mockResolvedValue({
+        layoutReconstructionCompare: false,
+        sourceConnectors: false,
+        experimentalResearchModels: false,
+        smartDuplicates: false,
+      }),
+    }) as ResolveFeatureFlagsUseCase,
+    (deps.smartDuplicates ?? { detectCandidates: vi.fn() }) as HttpSmartDuplicatesAdapter
+  );
+}
 
 describe('ApplyDuplicateDetectionUseCase', () => {
   it('still links hash-identical documents regardless of classifier', async () => {
@@ -61,13 +90,13 @@ describe('ApplyDuplicateDetectionUseCase', () => {
             duplicateClassifier: DuplicateClassifierService,
             linkDuplicatePair: LinkDuplicatePairUseCase
           ) =>
-            new ApplyDuplicateDetectionUseCase(
-              documentRepository,
-              duplicateRepository,
-              embeddingRepository,
-              duplicateClassifier,
-              linkDuplicatePair
-            ),
+            buildApplyDuplicateDetectionUseCase({
+              documents: documentRepository,
+              duplicates: duplicateRepository,
+              embeddings: embeddingRepository,
+              classifier: duplicateClassifier,
+              linkDuplicatePair,
+            }),
           inject: [
             DOCUMENT_REPOSITORY,
             DUPLICATE_REPOSITORY,
@@ -150,13 +179,13 @@ describe('ApplyDuplicateDetectionUseCase', () => {
             duplicateClassifier: DuplicateClassifierService,
             linkDuplicatePair: LinkDuplicatePairUseCase
           ) =>
-            new ApplyDuplicateDetectionUseCase(
-              documentRepository,
-              duplicateRepository,
-              embeddingRepository,
-              duplicateClassifier,
-              linkDuplicatePair
-            ),
+            buildApplyDuplicateDetectionUseCase({
+              documents: documentRepository,
+              duplicates: duplicateRepository,
+              embeddings: embeddingRepository,
+              classifier: duplicateClassifier,
+              linkDuplicatePair,
+            }),
           inject: [
             DOCUMENT_REPOSITORY,
             DUPLICATE_REPOSITORY,
@@ -178,5 +207,73 @@ describe('ApplyDuplicateDetectionUseCase', () => {
 
     expect(duplicates.upsertCandidate).toHaveBeenCalled();
     expect(linkPair).not.toHaveBeenCalled();
+  });
+
+  it('records smart duplicate hints without auto-stacking when flag is enabled', async () => {
+    const documents = createDocumentRepositoryStub({
+      findByIdForUser: vi.fn().mockResolvedValue({
+        id: 'doc-new',
+        filename: 'a.pdf',
+        title: 'Receipt A',
+        documentDate: new Date('2024-03-15'),
+        correspondent: null,
+        extraction: {
+          text: 'NORDWIND ENERGIE GMBH\nRechnung\nGesamtbetrag EUR 199.00',
+          fields: [],
+        },
+      }),
+    });
+    const duplicates = {
+      findDocumentIdsByHash: vi.fn().mockResolvedValue([]),
+      upsertCandidate: vi.fn(),
+      listDocumentEmbeddings: vi.fn(),
+      listSmartDuplicatePeers: vi.fn().mockResolvedValue([
+        {
+          documentId: 'doc-old',
+          filename: 'b.pdf',
+          title: 'Receipt B',
+          extractedText: 'NORDWIND ENERGIE GMBH\nRechnung\nGesamtbetrag EUR 199.OO',
+        },
+      ]),
+      isPairDismissed: vi.fn().mockResolvedValue(false),
+    };
+    const embeddings = { getDocumentEmbedding: vi.fn() };
+    const linkPair = vi.fn();
+    const stacks = createDuplicateStackRepositoryStub({ linkPair });
+    const classifier = { evaluate: vi.fn() };
+    const smartDuplicates = {
+      detectCandidates: vi.fn().mockResolvedValue([{ documentId: 'doc-old', similarity: 0.91 }]),
+    };
+    const resolveFeatureFlags = {
+      execute: vi.fn().mockResolvedValue({
+        layoutReconstructionCompare: false,
+        sourceConnectors: false,
+        experimentalResearchModels: false,
+        smartDuplicates: true,
+      }),
+    };
+
+    const useCase = buildApplyDuplicateDetectionUseCase({
+      documents,
+      duplicates,
+      embeddings,
+      classifier,
+      linkDuplicatePair: new LinkDuplicatePairUseCase(stacks, duplicates),
+      resolveFeatureFlags,
+      smartDuplicates,
+    });
+
+    await useCase.execute('doc-new', 'user-1', null);
+
+    expect(smartDuplicates.detectCandidates).toHaveBeenCalled();
+    expect(duplicates.upsertCandidate).toHaveBeenCalledWith(
+      'user-1',
+      'doc-new',
+      'doc-old',
+      0.91,
+      'smart'
+    );
+    expect(linkPair).not.toHaveBeenCalled();
+    expect(embeddings.getDocumentEmbedding).not.toHaveBeenCalled();
   });
 });

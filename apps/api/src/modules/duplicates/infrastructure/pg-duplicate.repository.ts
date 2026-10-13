@@ -21,7 +21,7 @@ import {
 import { withTenantPgClient } from '../../../shared/infrastructure/database/tenant-pg.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 
-const DUPLICATE_SOURCES: readonly DuplicateCandidateSource[] = ['hash', 'embedding'];
+const DUPLICATE_SOURCES: readonly DuplicateCandidateSource[] = ['hash', 'embedding', 'smart'];
 
 function parsePostgresUuidArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -282,6 +282,53 @@ export class PgDuplicateRepository implements DuplicateRepository {
           };
         })
         .filter((row) => row.embedding.length > 0);
+    });
+  }
+
+  async listSmartDuplicatePeers(
+    userId: string,
+    excludeDocumentId: string,
+    correspondentId: string | null,
+    documentDate: Date | null
+  ): Promise<
+    {
+      documentId: string;
+      filename: string;
+      title: string;
+      extractedText: string | null;
+    }[]
+  > {
+    if (!correspondentId && !documentDate) {
+      return [];
+    }
+    const params: unknown[] = [userId, excludeDocumentId, correspondentId, documentDate];
+    const result = await this.pool.query(
+      `SELECT d.id, d.filename, d.title, d.extracted_text
+       FROM documents d
+       WHERE d.user_id = $1
+         AND d.id <> $2
+         AND d.status = 'ready'
+         AND COALESCE(LENGTH(TRIM(d.extracted_text)), 0) >= 8
+         AND (
+           ($3::uuid IS NOT NULL AND d.correspondent_id = $3)
+           OR (
+             $4::date IS NOT NULL
+             AND d.document_date IS NOT NULL
+             AND d.document_date BETWEEN ($4::date - INTERVAL '45 days') AND ($4::date + INTERVAL '45 days')
+           )
+         )
+       ORDER BY d.updated_at DESC
+       LIMIT 120`,
+      params
+    );
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return {
+        documentId: parseString(row.id),
+        filename: parseString(row.filename),
+        title: parseString(row.title ?? row.filename),
+        extractedText: parseOptionalString(row.extracted_text),
+      };
     });
   }
 }

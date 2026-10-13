@@ -590,4 +590,41 @@ class EmbeddingDensityTrainResponse(BaseModel):
     state: EmbeddingDensityStateModel
 
 
+class SmartDuplicateConfigModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    alpha: float = Field(default=0.5, ge=0.0, le=1.0)
+    delta: float = Field(default=0.05, gt=0.0, le=1.0)
+    threshold: float = Field(default=0.55, ge=0.0, le=1.0)
+    shingle_size: int = Field(default=4, ge=2, le=8, serialization_alias="shingleSize")
+    minhash_perm: int = Field(default=128, ge=16, le=512, serialization_alias="minhashPerm")
+
+
+class SmartDuplicatePeerModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    document_id: str = Field(serialization_alias="documentId")
+    lines: list[str] = Field(min_length=1)
+
+
+class SmartDuplicateDetectRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    focus_document_id: str = Field(serialization_alias="focusDocumentId")
+    focus_lines: list[str] = Field(min_length=1, serialization_alias="focusLines")
+    peers: list[SmartDuplicatePeerModel] = Field(default_factory=list)
+    config: SmartDuplicateConfigModel | None = None
+
+
+class SmartDuplicateHitModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    document_id: str = Field(serialization_alias="documentId")
+    similarity: float = Field(ge=0.0, le=1.0)
+
+
+class SmartDuplicateDetectResponse(BaseModel):
+    candidates: list[SmartDuplicateHitModel] = Field(default_factory=list)
+
+
 ExtractRequest.model_rebuild()
