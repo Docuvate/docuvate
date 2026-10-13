@@ -6,12 +6,12 @@ import {
   EXACT_FACT_ABSTENTION_DE,
   EXACT_FACT_ABSTENTION_EN,
 } from '../domain/exact-fact-abstention-messages.js';
-import type { ParsedExactFactQuery } from '../domain/exact-fact-query.types.js';
-import type { ExactFactRow } from '../domain/exact-fact-row.js';
 import {
   passesExactFactMatchGate,
   resolveExactFactMatchScoreThreshold,
 } from '../domain/exact-fact-match-gate.js';
+import type { ParsedExactFactQuery } from '../domain/exact-fact-query.types.js';
+import type { ExactFactRow } from '../domain/exact-fact-row.js';
 import { formatExactFactAnswer } from '../domain/format-exact-fact-answer.js';
 import { PgExactFactQueryRepository } from '../infrastructure/pg-exact-fact-query.repository.js';
 import { PgTenantExactFactChatSettingsRepository } from '../infrastructure/pg-tenant-exact-fact-chat-settings.repository.js';

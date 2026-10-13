@@ -11,7 +11,7 @@ ALTER TABLE public.feature_flag ADD CONSTRAINT feature_flag_key_check CHECK (
     )
 );
 
-CREATE TABLE public.tenant_exact_fact_chat_settings (
+CREATE TABLE IF NOT EXISTS public.tenant_exact_fact_chat_settings (
     tenant_id text NOT NULL,
     match_score_threshold real,
     updated_at timestamptz NOT NULL DEFAULT now(),
@@ -25,6 +25,7 @@ CREATE TABLE public.tenant_exact_fact_chat_settings (
 ALTER TABLE public.tenant_exact_fact_chat_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tenant_exact_fact_chat_settings FORCE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS tenant_exact_fact_chat_settings_isolation ON public.tenant_exact_fact_chat_settings;
 CREATE POLICY tenant_exact_fact_chat_settings_isolation ON public.tenant_exact_fact_chat_settings
     USING (tenant_id = current_setting('app.tenant_id', true));
 

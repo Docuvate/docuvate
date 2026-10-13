@@ -43,6 +43,7 @@ describe('migration baseline (existing schema, empty migration history)', () => 
       await runner.query('DROP TABLE IF EXISTS document_extracted_fact_provenance CASCADE');
       await runner.query('DROP TABLE IF EXISTS document_extracted_fact CASCADE');
       await runner.query('DROP TABLE IF EXISTS document_exact_fact_index CASCADE');
+      await runner.query('DROP TABLE IF EXISTS tenant_exact_fact_chat_settings CASCADE');
       await runner.query('DROP TABLE IF EXISTS migrations');
 
       await ensureMigrationBaseline(dataSource);
