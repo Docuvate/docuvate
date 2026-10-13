@@ -25,25 +25,29 @@ function queryTextCell(rows: unknown, key: string): string | null {
   return typeof value === 'string' ? value : null;
 }
 
+function isMigrationCtor(value: unknown): value is new () => MigrationInterface {
+  return typeof value === 'function';
+}
+
 /** Stamp applied migrations when the DB has schema but an empty `migrations` table. */
 export async function ensureMigrationBaseline(dataSource: DataSource): Promise<void> {
   const runner = dataSource.createQueryRunner();
   await runner.connect();
   try {
-    const migrationsTable = await runner.query(
+    const migrationsTable: unknown = await runner.query(
       `SELECT to_regclass('public.migrations')::text AS reg`
     );
     if (!queryTextCell(migrationsTable, 'reg')) {
       return;
     }
 
-    const applied = await runner.query(`SELECT COUNT(*)::text AS c FROM migrations`);
+    const applied: unknown = await runner.query(`SELECT COUNT(*)::text AS c FROM migrations`);
     const appliedCount = Number.parseInt(queryTextCell(applied, 'c') ?? '0', 10);
     if (appliedCount > 0) {
       return;
     }
 
-    const core = await runner.query(`SELECT to_regclass('public.documents')::text AS reg`);
+    const core: unknown = await runner.query(`SELECT to_regclass('public.documents')::text AS reg`);
     if (!queryTextCell(core, 'reg')) {
       return;
     }
@@ -52,8 +56,10 @@ export async function ensureMigrationBaseline(dataSource: DataSource): Promise<v
     const migrationsRaw = opts.migrations;
     const migrations = Array.isArray(migrationsRaw) ? migrationsRaw : [];
     for (const migrationCtor of migrations) {
-      const Ctor = migrationCtor as new () => MigrationInterface;
-      const instance = new Ctor();
+      if (!isMigrationCtor(migrationCtor)) {
+        continue;
+      }
+      const instance = new migrationCtor();
       const name = instance.name;
       if (!name) {
         continue;

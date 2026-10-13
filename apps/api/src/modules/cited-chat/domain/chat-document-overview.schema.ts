@@ -11,12 +11,15 @@ interface OverviewPrototypeFile {
   min_score: number;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 function isOverviewPrototypeFile(value: unknown): value is OverviewPrototypeFile {
   return (
-    typeof value === 'object' &&
-    value !== null &&
-    Array.isArray((value as OverviewPrototypeFile).positive) &&
-    typeof (value as OverviewPrototypeFile).min_score === 'number'
+    isRecord(value) &&
+    Array.isArray(value.positive) &&
+    typeof value.min_score === 'number'
   );
 }
 

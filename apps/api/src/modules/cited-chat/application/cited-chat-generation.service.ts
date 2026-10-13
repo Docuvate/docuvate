@@ -10,6 +10,7 @@ import {
 } from '../../../shared/domain/ports.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
+import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
 import {
   CITED_CHAT_ABSTENTION_DE,
   CITED_CHAT_ABSTENTION_EN,
@@ -18,7 +19,6 @@ import {
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
-import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
 import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';

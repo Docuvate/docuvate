@@ -37,7 +37,6 @@ export function resolveFollowUpQuery(
 
   if (
     current.length <= SHORT_FOLLOW_UP_MAX_LEN &&
-    standaloneIntent === 'document_qa' &&
     classifyChatRouteIntent(embeddings.prior) === 'document_qa'
   ) {
     return `${prior} ${current}`.trim();
