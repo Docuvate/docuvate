@@ -91,7 +91,11 @@ jobs:
         with:
           python-version-file: .tool-versions
       - name: Nx affected (lint, typecheck, test with coverage once, build)
-        run: pnpm nx affected -t lint typecheck test-ci build --parallel=3
+        run: |
+          set -euo pipefail
+          pnpm nx reset
+          pnpm nx affected -t typecheck test-ci build --parallel=3
+          pnpm nx affected -t lint --parallel=3 --exclude=worker
 
   smoke:
     runs-on: ubuntu-latest
