@@ -21,7 +21,7 @@ async function undoUntilCalibrationReady(
   dataSource: DataSource,
   pool: ReturnType<typeof getIntegrationPool>
 ): Promise<string[]> {
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  for (let attempt = 0; attempt < 32; attempt += 1) {
     const columns = await userStateColumns(pool);
     if (columns.includes('calibration_ready')) {
       return columns;
