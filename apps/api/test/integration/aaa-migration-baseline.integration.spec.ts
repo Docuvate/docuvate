@@ -37,6 +37,12 @@ describe('migration baseline (existing schema, empty migration history)', () => 
           DROP COLUMN IF EXISTS document_chat_cloud_base_url,
           DROP COLUMN IF EXISTS document_chat_cloud_api_key_encrypted
       `);
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact_value_date CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact_value_amount CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact_value_text CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact_provenance CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_exact_fact_index CASCADE');
       await runner.query('DROP TABLE IF EXISTS migrations');
 
       await ensureMigrationBaseline(dataSource);
