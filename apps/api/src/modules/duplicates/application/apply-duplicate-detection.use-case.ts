@@ -10,8 +10,8 @@ import {
   LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
-import { cosineSimilarity } from '../../labels/domain/cosine.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import { cosineSimilarity } from '../../labels/domain/cosine.js';
 import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
 import {
   compareInputFromDocument,

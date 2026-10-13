@@ -5,13 +5,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   DOCUMENT_REPOSITORY,
-  type DocumentRepository,
   DUPLICATE_REPOSITORY,
   DUPLICATE_STACK_REPOSITORY,
   type DuplicateRepository,
   type DuplicateStackRepository,
   LABEL_EMBEDDING_REPOSITORY,
-  type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { createDuplicateStackRepositoryStub } from '../../../test-support/duplicate-stack-repository.stub.js';
@@ -21,32 +19,12 @@ import { HttpSmartDuplicatesAdapter } from '../infrastructure/http-smart-duplica
 import { ApplyDuplicateDetectionUseCase } from './apply-duplicate-detection.use-case.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
 
-function buildApplyDuplicateDetectionUseCase(deps: {
-  documents: DocumentRepository;
-  duplicates: DuplicateRepository;
-  embeddings: LabelEmbeddingRepository;
-  classifier: DuplicateClassifierService;
-  linkDuplicatePair: LinkDuplicatePairUseCase;
-  resolveFeatureFlags?: { execute: ReturnType<typeof vi.fn> };
-  smartDuplicates?: { detectCandidates: ReturnType<typeof vi.fn> };
-}): ApplyDuplicateDetectionUseCase {
-  return new ApplyDuplicateDetectionUseCase(
-    deps.documents,
-    deps.duplicates,
-    deps.embeddings,
-    deps.classifier,
-    deps.linkDuplicatePair,
-    (deps.resolveFeatureFlags ?? {
-      execute: vi.fn().mockResolvedValue({
-        layoutReconstructionCompare: false,
-        sourceConnectors: false,
-        experimentalResearchModels: false,
-        smartDuplicates: false,
-      }),
-    }) as unknown as ResolveFeatureFlagsUseCase,
-    (deps.smartDuplicates ?? { detectCandidates: vi.fn() }) as unknown as HttpSmartDuplicatesAdapter
-  );
-}
+const defaultFlags = {
+  layoutReconstructionCompare: false,
+  sourceConnectors: false,
+  experimentalResearchModels: false,
+  smartDuplicates: false,
+};
 
 describe('ApplyDuplicateDetectionUseCase', () => {
   it('still links hash-identical documents regardless of classifier', async () => {
@@ -70,9 +48,12 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     const linkPair = vi.fn();
     const stacks = createDuplicateStackRepositoryStub({ linkPair });
     const classifier = { evaluate: vi.fn() };
+    const resolveFeatureFlags = { execute: vi.fn().mockResolvedValue(defaultFlags) };
+    const smartDuplicates = { detectCandidates: vi.fn() };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
+        ApplyDuplicateDetectionUseCase,
         {
           provide: LinkDuplicatePairUseCase,
           useFactory: (
@@ -81,35 +62,13 @@ describe('ApplyDuplicateDetectionUseCase', () => {
           ) => new LinkDuplicatePairUseCase(stackRepository, duplicateRepository),
           inject: [DUPLICATE_STACK_REPOSITORY, DUPLICATE_REPOSITORY],
         },
-        {
-          provide: ApplyDuplicateDetectionUseCase,
-          useFactory: (
-            documentRepository: DocumentRepository,
-            duplicateRepository: DuplicateRepository,
-            embeddingRepository: LabelEmbeddingRepository,
-            duplicateClassifier: DuplicateClassifierService,
-            linkDuplicatePair: LinkDuplicatePairUseCase
-          ) =>
-            buildApplyDuplicateDetectionUseCase({
-              documents: documentRepository,
-              duplicates: duplicateRepository,
-              embeddings: embeddingRepository,
-              classifier: duplicateClassifier,
-              linkDuplicatePair,
-            }),
-          inject: [
-            DOCUMENT_REPOSITORY,
-            DUPLICATE_REPOSITORY,
-            LABEL_EMBEDDING_REPOSITORY,
-            DuplicateClassifierService,
-            LinkDuplicatePairUseCase,
-          ],
-        },
         { provide: DOCUMENT_REPOSITORY, useValue: documents },
         { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
         { provide: LABEL_EMBEDDING_REPOSITORY, useValue: embeddings },
         { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
         { provide: DuplicateClassifierService, useValue: classifier },
+        { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
+        { provide: HttpSmartDuplicatesAdapter, useValue: smartDuplicates },
       ],
     }).compile();
     const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
@@ -159,9 +118,12 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     const classifier = {
       evaluate: vi.fn().mockResolvedValue({ decision: 'suggest', probability: 0.6 }),
     };
+    const resolveFeatureFlags = { execute: vi.fn().mockResolvedValue(defaultFlags) };
+    const smartDuplicates = { detectCandidates: vi.fn() };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
+        ApplyDuplicateDetectionUseCase,
         {
           provide: LinkDuplicatePairUseCase,
           useFactory: (
@@ -170,35 +132,13 @@ describe('ApplyDuplicateDetectionUseCase', () => {
           ) => new LinkDuplicatePairUseCase(stackRepository, duplicateRepository),
           inject: [DUPLICATE_STACK_REPOSITORY, DUPLICATE_REPOSITORY],
         },
-        {
-          provide: ApplyDuplicateDetectionUseCase,
-          useFactory: (
-            documentRepository: DocumentRepository,
-            duplicateRepository: DuplicateRepository,
-            embeddingRepository: LabelEmbeddingRepository,
-            duplicateClassifier: DuplicateClassifierService,
-            linkDuplicatePair: LinkDuplicatePairUseCase
-          ) =>
-            buildApplyDuplicateDetectionUseCase({
-              documents: documentRepository,
-              duplicates: duplicateRepository,
-              embeddings: embeddingRepository,
-              classifier: duplicateClassifier,
-              linkDuplicatePair,
-            }),
-          inject: [
-            DOCUMENT_REPOSITORY,
-            DUPLICATE_REPOSITORY,
-            LABEL_EMBEDDING_REPOSITORY,
-            DuplicateClassifierService,
-            LinkDuplicatePairUseCase,
-          ],
-        },
         { provide: DOCUMENT_REPOSITORY, useValue: documents },
         { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
         { provide: LABEL_EMBEDDING_REPOSITORY, useValue: embeddings },
         { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
         { provide: DuplicateClassifierService, useValue: classifier },
+        { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
+        { provide: HttpSmartDuplicatesAdapter, useValue: smartDuplicates },
       ],
     }).compile();
     const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
@@ -245,16 +185,12 @@ describe('ApplyDuplicateDetectionUseCase', () => {
       detectCandidates: vi.fn().mockResolvedValue([{ documentId: 'doc-old', similarity: 0.91 }]),
     };
     const resolveFeatureFlags = {
-      execute: vi.fn().mockResolvedValue({
-        layoutReconstructionCompare: false,
-        sourceConnectors: false,
-        experimentalResearchModels: false,
-        smartDuplicates: true,
-      }),
+      execute: vi.fn().mockResolvedValue({ ...defaultFlags, smartDuplicates: true }),
     };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
+        ApplyDuplicateDetectionUseCase,
         {
           provide: LinkDuplicatePairUseCase,
           useFactory: (
@@ -263,37 +199,13 @@ describe('ApplyDuplicateDetectionUseCase', () => {
           ) => new LinkDuplicatePairUseCase(stackRepository, duplicateRepository),
           inject: [DUPLICATE_STACK_REPOSITORY, DUPLICATE_REPOSITORY],
         },
-        {
-          provide: ApplyDuplicateDetectionUseCase,
-          useFactory: (
-            documentRepository: DocumentRepository,
-            duplicateRepository: DuplicateRepository,
-            embeddingRepository: LabelEmbeddingRepository,
-            duplicateClassifier: DuplicateClassifierService,
-            linkDuplicatePair: LinkDuplicatePairUseCase
-          ) =>
-            buildApplyDuplicateDetectionUseCase({
-              documents: documentRepository,
-              duplicates: duplicateRepository,
-              embeddings: embeddingRepository,
-              classifier: duplicateClassifier,
-              linkDuplicatePair,
-              resolveFeatureFlags,
-              smartDuplicates,
-            }),
-          inject: [
-            DOCUMENT_REPOSITORY,
-            DUPLICATE_REPOSITORY,
-            LABEL_EMBEDDING_REPOSITORY,
-            DuplicateClassifierService,
-            LinkDuplicatePairUseCase,
-          ],
-        },
         { provide: DOCUMENT_REPOSITORY, useValue: documents },
         { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
         { provide: LABEL_EMBEDDING_REPOSITORY, useValue: embeddings },
         { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
         { provide: DuplicateClassifierService, useValue: classifier },
+        { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
+        { provide: HttpSmartDuplicatesAdapter, useValue: smartDuplicates },
       ],
     }).compile();
     const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
