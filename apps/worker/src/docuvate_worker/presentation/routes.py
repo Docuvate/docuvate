@@ -21,6 +21,7 @@ from docuvate_worker.application.embedding_density import (
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
+from docuvate_worker.domain.representation.constants import ENCODER_REVISION
 from docuvate_worker.domain.representation.encode import encode_units
 from docuvate_worker.domain.representation.units import (
     RepresentationUnit,
@@ -41,8 +42,10 @@ from docuvate_worker.infrastructure.extractors.engine_catalog import list_engine
 from docuvate_worker.infrastructure.extractors.label_custom_fields import (
     extract_label_custom_fields,
 )
+from docuvate_worker.infrastructure.fastembed_model import get_embedding_model
 from docuvate_worker.infrastructure.hardware_capabilities import detect_hardware_capabilities
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
+from docuvate_worker.infrastructure.onnx_e5_encoder import encoder_runtime_info
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
 from docuvate_worker.presentation.representation_response import document_representation_to_response
 from docuvate_worker.presentation.schemas import (
@@ -67,6 +70,7 @@ from docuvate_worker.presentation.schemas import (
     EmbeddingDensityTrainResponse,
     EmbedRequest,
     EmbedResponse,
+    EncoderRuntimeResponse,
     EngineInfo,
     EngineListResponse,
     ExtractedField,
@@ -115,6 +119,19 @@ def _decode_content(content_base64: str) -> bytes:
         raise HTTPException(status_code=400, detail="Invalid base64") from None
 
 
+def _encoder_health_payload() -> EncoderRuntimeResponse:
+    get_embedding_model()
+    info = encoder_runtime_info()
+    return EncoderRuntimeResponse(
+        backend=str(info["backend"]),
+        encoder_id=str(info["encoder_id"]),
+        encoder_hf_revision=str(info["encoder_hf_revision"]),
+        encoder_revision=ENCODER_REVISION,
+        onnx_file=str(info["onnx_file"]),
+        intra_op_threads=int(info["intra_op_threads"]),
+    )
+
+
 @router.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(status="ok")
@@ -131,8 +148,8 @@ def health_ready() -> HealthResponse:
         ensure_reranker_loaded()
         status = reranker_status()
     if not status.get("available"):
-        return HealthResponse(status="degraded")
-    return HealthResponse(status="ok")
+        return HealthResponse(status="degraded", encoder=_encoder_health_payload())
+    return HealthResponse(status="ok", encoder=_encoder_health_payload())
 
 
 @router.get("/settings/hardware", response_model=HardwareCapabilitiesResponse)

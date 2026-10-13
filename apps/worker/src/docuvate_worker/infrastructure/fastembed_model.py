@@ -4,10 +4,6 @@
 from __future__ import annotations
 
 import logging
-import os
-import threading
-
-from fastembed import TextEmbedding
 
 from docuvate_worker.domain.representation.constants import (
     ENCODER_ID,
@@ -15,88 +11,28 @@ from docuvate_worker.domain.representation.constants import (
     QUERY_PREFIX,
 )
 from docuvate_worker.infrastructure.embedding_encoder_stats import record_passage_batch
+from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx, encoder_runtime_info
 
 logger = logging.getLogger(__name__)
 
 MODEL_NAME = ENCODER_ID
-_E5_ONNX_CANDIDATES = (
-    "intfloat/multilingual-e5-small",
-    "Qdrant/multilingual-e5-small-onnx",
-)
-
-_lock = threading.Lock()
-_model: object | None = None
-_backend: str | None = None
 
 
-def _load_sentence_transformers() -> object:
-    from sentence_transformers import SentenceTransformer  # noqa: PLC0415
-
-    revision = os.environ.get("DOCUVATE_ENCODER_REVISION")
-    if revision:
-        return SentenceTransformer(MODEL_NAME, device="cpu", revision=revision)
-    return SentenceTransformer(MODEL_NAME, device="cpu")
-
-
-def _load_fastembed() -> TextEmbedding | None:
-    for candidate in _E5_ONNX_CANDIDATES:
-        try:
-            return TextEmbedding(model_name=candidate)
-        except Exception:
-            continue
-    return None
-
-
-def get_embedding_model() -> object:
-    global _model, _backend  # noqa: PLW0603
-    if _model is not None:
-        return _model
-    with _lock:
-        if _model is None:
-            fast = _load_fastembed()
-            if fast is not None:
-                _model = fast
-                _backend = "fastembed"
-            elif os.environ.get("DOCUVATE_EMBEDDING_NO_SENTENCE_TRANSFORMERS_FALLBACK") == "1":
-                msg = "fastembed unavailable and sentence_transformers fallback disabled"
-                raise RuntimeError(msg)
-            else:
-                _model = _load_sentence_transformers()
-                _backend = "sentence_transformers"
-                logger.info("embedding_backend=%s model=%s", _backend, MODEL_NAME)
-        return _model
-
-
-def _embed_with_backend(model: object, texts: list[str]) -> list[list[float]]:
-    backend = _backend or "fastembed"
-    if backend == "sentence_transformers":
-        encode = getattr(model, "encode", None)
-        if encode is None:
-            msg = "invalid sentence_transformers model handle"
-            raise TypeError(msg)
-        matrix = encode(texts, normalize_embeddings=True, show_progress_bar=False)
-        return [[float(x) for x in row] for row in matrix]
-    fe_model = model
-    if not isinstance(fe_model, TextEmbedding):
-        msg = "invalid fastembed model handle"
-        raise TypeError(msg)
-    vectors: list[list[float]] = []
-    for batch in fe_model.embed(texts):
-        vectors.append([float(x) for x in batch])
-    return vectors
+def get_embedding_model() -> str:
+    """Load ONNX weights once and return the logical model id."""
+    encoder_runtime_info()
+    return MODEL_NAME
 
 
 def embed_passages(texts: list[str]) -> list[list[float]]:
     if not texts:
         return []
     record_passage_batch(len(texts))
-    model = get_embedding_model()
     prefixed = [PASSAGE_PREFIX + (t.strip() or " ") for t in texts]
-    return _embed_with_backend(model, prefixed)
+    return embed_texts_onnx(prefixed)
 
 
 def embed_query(text: str) -> list[float]:
-    model = get_embedding_model()
     prefixed = QUERY_PREFIX + (text.strip() or " ")
-    vectors = _embed_with_backend(model, [prefixed])
+    vectors = embed_texts_onnx([prefixed])
     return vectors[0] if vectors else []

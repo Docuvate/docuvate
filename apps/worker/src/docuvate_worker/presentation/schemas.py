@@ -204,8 +204,20 @@ class EmbedResponse(BaseModel):
     embeddings: list[list[float]]
 
 
+class EncoderRuntimeResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    backend: str
+    encoder_id: str = Field(serialization_alias="encoderId")
+    encoder_hf_revision: str = Field(serialization_alias="encoderHfRevision")
+    encoder_revision: str = Field(serialization_alias="encoderRevision")
+    onnx_file: str = Field(serialization_alias="onnxFile")
+    intra_op_threads: int = Field(serialization_alias="intraOpThreads", ge=1)
+
+
 class HealthResponse(BaseModel):
     status: str
+    encoder: EncoderRuntimeResponse | None = None
 
 
 class HardwareCapabilitiesResponse(BaseModel):

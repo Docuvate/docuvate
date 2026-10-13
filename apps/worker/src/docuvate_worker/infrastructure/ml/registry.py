@@ -8,6 +8,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from docuvate_worker.domain.representation.constants import ENCODER_ID, ENCODER_REVISION
 from docuvate_worker.infrastructure.ml.config import mlops_registry_enabled
 
 
@@ -24,11 +25,8 @@ def resolve_active_model(family_id: str) -> ResolvedModel:
     if family_id in ("fastembed-minilm", "fastembed-e5-small", "document-encoder"):
         return ResolvedModel(
             family_id=family_id,
-            version_tag=os.environ.get(
-                "FASTEMBED_MODEL_VERSION",
-                os.environ.get("DOCUVATE_ENCODER_REVISION", "bootstrap-1"),
-            ),
-            artifact_uri=os.environ.get("FASTEMBED_MODEL_NAME", "intfloat/multilingual-e5-small"),
+            version_tag=os.environ.get("DOCUVATE_ENCODER_REVISION", ENCODER_REVISION),
+            artifact_uri=os.environ.get("FASTEMBED_MODEL_NAME", ENCODER_ID),
             source="env",
         )
     if family_id == "paddle-ocr":

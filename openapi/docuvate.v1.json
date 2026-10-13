@@ -10133,6 +10133,76 @@
         ]
       }
     },
+    "/settings/encoder-reindex": {
+      "get": {
+        "operationId": "getEncoderReindexProgress",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncoderReindexProgressDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Background document encoder re-index progress for the signed-in tenant",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
     "/settings/extraction-engines": {
       "get": {
         "operationId": "listExtractionEngines",
@@ -12384,6 +12454,36 @@
         "required": [
           "documentId",
           "stackId"
+        ]
+      },
+      "EncoderReindexProgressDto": {
+        "type": "object",
+        "properties": {
+          "targetEncoderId": {
+            "type": "string"
+          },
+          "targetEncoderRevision": {
+            "type": "string"
+          },
+          "progressProcessed": {
+            "type": "number",
+            "description": "Documents already at the target encoder revision."
+          },
+          "progressTotal": {
+            "type": "number",
+            "description": "Extracted ready documents in this tenant."
+          },
+          "progressPending": {
+            "type": "number",
+            "description": "Documents still queued for background re-embedding."
+          }
+        },
+        "required": [
+          "targetEncoderId",
+          "targetEncoderRevision",
+          "progressProcessed",
+          "progressTotal",
+          "progressPending"
         ]
       },
       "ExportToConnectorRequestDto": {

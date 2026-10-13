@@ -111,6 +111,16 @@ Host port overrides (see `docker-compose.yml`): PostgreSQL 18 on host port **543
 
 Document chat uses Ollama (default model `qwen2.5:3b`). Increase `OLLAMA_MEM_LIMIT` in `.env` for larger models (see `.env.example`).
 
+### CPU RAM budget (measured baseline profile)
+
+| Component | Typical RSS |
+| --- | ---: |
+| Worker with ONNX int8 `multilingual-e5-small` + OCR/reranker headroom | **~0.9–1.2 GiB** |
+| API + web + Postgres + Valkey + MinIO (idle stack) | ~1.5–2.5 GiB |
+| Ollama with `qwen2.5:3b` (optional chat) | ~3 GiB (`OLLAMA_MEM_LIMIT`) |
+
+Plan **≥ 6 GiB** host RAM for the default stack without Ollama, or **≥ 10–12 GiB** when Ollama chat is enabled (matches `scripts/quickstart.sh`). After an encoder upgrade, the API re-embeds existing documents in the background; track progress at `GET /v1/settings/encoder-reindex` (per signed-in tenant).
+
 ### PostgreSQL 18
 
 Docker Compose runs **PostgreSQL 18.6** (`postgres:18.6-alpine`). Fresh installs use the `pgdata` Docker volume.

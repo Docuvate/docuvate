@@ -14,6 +14,8 @@ import {
   UpdateUserSettingsRequestDto,
   UserSettingsResponseDto,
 } from '../../../shared/presentation/dtos/settings.dto.js';
+import { EncoderReindexProgressDto } from '../../../shared/presentation/dtos/encoder-reindex.dto.js';
+import { GetEncoderReindexProgressUseCase } from '../../representation/application/get-encoder-reindex-progress.use-case.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
@@ -38,7 +40,8 @@ export class SettingsController {
     private readonly listEngines: ListExtractionEnginesUseCase,
     private readonly listChatProviders: ListDocumentChatProvidersUseCase,
     private readonly effectiveChatProvider: EffectiveDocumentChatProviderUseCase,
-    private readonly hardwareCapabilities: GetHardwareCapabilitiesUseCase
+    private readonly hardwareCapabilities: GetHardwareCapabilitiesUseCase,
+    private readonly encoderReindexProgress: GetEncoderReindexProgressUseCase
   ) {}
 
   @Get()
@@ -87,5 +90,14 @@ export class SettingsController {
   })
   async hardware(): Promise<HardwareCapabilitiesDto> {
     return this.hardwareCapabilities.execute();
+  }
+
+  @Get('encoder-reindex')
+  @ApiDocuvateRoute({
+    operationId: 'getEncoderReindexProgress',
+    summary: 'Background document encoder re-index progress for the signed-in tenant',
+  })
+  async encoderReindex(@Session() session: AuthSession): Promise<EncoderReindexProgressDto> {
+    return this.encoderReindexProgress.execute(session.user.id);
   }
 }
