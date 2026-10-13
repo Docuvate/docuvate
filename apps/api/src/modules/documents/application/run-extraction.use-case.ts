@@ -13,9 +13,9 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
-import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
 import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
