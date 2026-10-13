@@ -5,11 +5,13 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   DOCUMENT_REPOSITORY,
+  type DocumentRepository,
   DUPLICATE_REPOSITORY,
   DUPLICATE_STACK_REPOSITORY,
   type DuplicateRepository,
   type DuplicateStackRepository,
   LABEL_EMBEDDING_REPOSITORY,
+  type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { createDuplicateStackRepositoryStub } from '../../../test-support/duplicate-stack-repository.stub.js';
@@ -53,7 +55,36 @@ describe('ApplyDuplicateDetectionUseCase', () => {
 
     const moduleRef = await Test.createTestingModule({
       providers: [
-        ApplyDuplicateDetectionUseCase,
+        {
+          provide: ApplyDuplicateDetectionUseCase,
+          useFactory: (
+            documentRepository: DocumentRepository,
+            duplicateRepository: DuplicateRepository,
+            embeddingRepository: LabelEmbeddingRepository,
+            duplicateClassifier: DuplicateClassifierService,
+            linkDuplicatePair: LinkDuplicatePairUseCase,
+            featureFlags: ResolveFeatureFlagsUseCase,
+            smartDuplicateAdapter: HttpSmartDuplicatesAdapter
+          ) =>
+            new ApplyDuplicateDetectionUseCase(
+              documentRepository,
+              duplicateRepository,
+              embeddingRepository,
+              duplicateClassifier,
+              linkDuplicatePair,
+              featureFlags,
+              smartDuplicateAdapter
+            ),
+          inject: [
+            DOCUMENT_REPOSITORY,
+            DUPLICATE_REPOSITORY,
+            LABEL_EMBEDDING_REPOSITORY,
+            DuplicateClassifierService,
+            LinkDuplicatePairUseCase,
+            ResolveFeatureFlagsUseCase,
+            HttpSmartDuplicatesAdapter,
+          ],
+        },
         {
           provide: LinkDuplicatePairUseCase,
           useFactory: (
@@ -123,7 +154,36 @@ describe('ApplyDuplicateDetectionUseCase', () => {
 
     const moduleRef = await Test.createTestingModule({
       providers: [
-        ApplyDuplicateDetectionUseCase,
+        {
+          provide: ApplyDuplicateDetectionUseCase,
+          useFactory: (
+            documentRepository: DocumentRepository,
+            duplicateRepository: DuplicateRepository,
+            embeddingRepository: LabelEmbeddingRepository,
+            duplicateClassifier: DuplicateClassifierService,
+            linkDuplicatePair: LinkDuplicatePairUseCase,
+            featureFlags: ResolveFeatureFlagsUseCase,
+            smartDuplicateAdapter: HttpSmartDuplicatesAdapter
+          ) =>
+            new ApplyDuplicateDetectionUseCase(
+              documentRepository,
+              duplicateRepository,
+              embeddingRepository,
+              duplicateClassifier,
+              linkDuplicatePair,
+              featureFlags,
+              smartDuplicateAdapter
+            ),
+          inject: [
+            DOCUMENT_REPOSITORY,
+            DUPLICATE_REPOSITORY,
+            LABEL_EMBEDDING_REPOSITORY,
+            DuplicateClassifierService,
+            LinkDuplicatePairUseCase,
+            ResolveFeatureFlagsUseCase,
+            HttpSmartDuplicatesAdapter,
+          ],
+        },
         {
           provide: LinkDuplicatePairUseCase,
           useFactory: (
@@ -190,7 +250,36 @@ describe('ApplyDuplicateDetectionUseCase', () => {
 
     const moduleRef = await Test.createTestingModule({
       providers: [
-        ApplyDuplicateDetectionUseCase,
+        {
+          provide: ApplyDuplicateDetectionUseCase,
+          useFactory: (
+            documentRepository: DocumentRepository,
+            duplicateRepository: DuplicateRepository,
+            embeddingRepository: LabelEmbeddingRepository,
+            duplicateClassifier: DuplicateClassifierService,
+            linkDuplicatePair: LinkDuplicatePairUseCase,
+            featureFlags: ResolveFeatureFlagsUseCase,
+            smartDuplicateAdapter: HttpSmartDuplicatesAdapter
+          ) =>
+            new ApplyDuplicateDetectionUseCase(
+              documentRepository,
+              duplicateRepository,
+              embeddingRepository,
+              duplicateClassifier,
+              linkDuplicatePair,
+              featureFlags,
+              smartDuplicateAdapter
+            ),
+          inject: [
+            DOCUMENT_REPOSITORY,
+            DUPLICATE_REPOSITORY,
+            LABEL_EMBEDDING_REPOSITORY,
+            DuplicateClassifierService,
+            LinkDuplicatePairUseCase,
+            ResolveFeatureFlagsUseCase,
+            HttpSmartDuplicatesAdapter,
+          ],
+        },
         {
           provide: LinkDuplicatePairUseCase,
           useFactory: (
