@@ -42,12 +42,12 @@ export class UpdateUserSettingsUseCase {
   ) {}
 
   async execute(userId: string, patch: UpdateUserSettingsRequestDto) {
-<<<<<<< HEAD
     if (patch.advancedFeaturesEnabled === true) {
       const flags = await this.resolveFeatureFlags.execute(userId);
       if (!flags.experimentalResearchModels) {
         throw new ForbiddenError('Feature disabled: experimentalResearchModels');
-=======
+      }
+    }
     if (patch.documentChatCloudBaseUrl) {
       try {
         patch.documentChatCloudBaseUrl = await validateDocumentChatCloudBaseUrl(
@@ -57,7 +57,6 @@ export class UpdateUserSettingsUseCase {
         const message =
           err instanceof DocumentChatCloudUrlError ? err.code : 'document_chat_cloud_url_invalid';
         throw new BadRequestException(message);
->>>>>>> 897f5b6 (fix(chat): LLM failure extractive fallback and cloud URL SSRF guards)
       }
     }
     return this.prefs.upsert(userId, patch);
