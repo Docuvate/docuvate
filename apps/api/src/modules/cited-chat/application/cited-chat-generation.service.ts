@@ -8,7 +8,6 @@ import {
   EMBEDDING_PORT,
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
-import { resolveCitedChatLlmConfig } from './cited-chat-llm.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
@@ -19,10 +18,10 @@ import {
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
+import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
-import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
 import {
   passesCalibratedRetrievalGate,
@@ -42,6 +41,7 @@ import {
   PgCitedChatRetrievalRepository,
 } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import { ChatQueryRouterService } from './chat-query-router.service.js';
+import { resolveCitedChatLlmConfig } from './cited-chat-llm.js';
 import {
   buildCitedChatSystemPrompt,
   requestCitedAnswerFromOllama,
@@ -535,38 +535,6 @@ export class CitedChatGenerationService {
       : undefined;
 
     if (verified.length === 0) {
-      const extractiveFallback = llmConfigured
-        ? null
-        : await this.resolveExtractiveAnswer(
-            retrievalQuery,
-            extractivePool,
-            extractiveMinScore
-          );
-      const fallbackChunkId = extractiveFallback?.chunk.chunkId ?? '';
-      const fallbackChunkIsUuid = /^[0-9a-f-]{36}$/i.test(fallbackChunkId);
-      if (extractiveFallback && fallbackChunkIsUuid) {
-        await this.citationsRepo.replaceCitations(messageId, [
-          {
-            ordinal: 1,
-            chunkId: extractiveFallback.chunk.chunkId,
-            quote: extractiveFallback.quote,
-            charStart: extractiveFallback.chunk.charStart ?? 0,
-            charEnd: extractiveFallback.chunk.charEnd ?? extractiveFallback.quote.length,
-          },
-        ]);
-        const content = formatVerifiedCitedContent([
-          { text: extractiveFallback.text, ordinal: 1 },
-        ]);
-        await this.threads.updateMessageGeneration(messageId, {
-          content,
-          generationStatus: 'done',
-          generationPhase: null,
-          errorDetail: benchStats,
-          finalizeOnlyIfInFlight: true,
-        });
-        await this.threads.touchThread(threadId);
-        return { content, abstained: false };
-      }
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
         content: abstentionText,

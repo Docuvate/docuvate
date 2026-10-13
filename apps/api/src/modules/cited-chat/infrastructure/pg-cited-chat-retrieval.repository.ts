@@ -15,8 +15,8 @@ import {
   reciprocalRankFusion,
 } from '../../search/domain/reciprocal-rank-fusion.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
-import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
 import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
+import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;

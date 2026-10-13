@@ -5,9 +5,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { EMBEDDING_PORT, type EmbeddingPort } from '../../../shared/domain/ports.js';
 import { classifyStatsOperation } from '../domain/chat-intent-prototypes.schema.js';
 import { formatStatsAnswer } from '../domain/format-stats-answer.js';
-import { phraseLibraryStatsWithLlm } from './cited-chat-ollama.js';
 import { pickBestTag } from '../domain/pick-tag-by-embedding.js';
 import { PgChatLibraryStatsRepository } from '../infrastructure/pg-chat-library-stats.repository.js';
+import { phraseLibraryStatsWithLlm } from './cited-chat-ollama.js';
 
 const TAG_MIN_SCORE = 0.68;
 

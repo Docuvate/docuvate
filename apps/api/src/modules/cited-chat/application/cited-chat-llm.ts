@@ -11,11 +11,11 @@ import {
   ollamaChatModel,
   ollamaChatTimeoutMs,
 } from '../../../shared/infrastructure/chat/ollama-chat-request.js';
+import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
 import {
   postOpenAiCompatibleChat,
   streamOpenAiCompatibleChat,
 } from '../../../shared/infrastructure/chat/openai-compatible-stream-chat.js';
-import { streamOllamaChat } from '../../../shared/infrastructure/chat/ollama-stream-chat.js';
 import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
 
 export function resolveCitedChatLlmConfig(input?: {

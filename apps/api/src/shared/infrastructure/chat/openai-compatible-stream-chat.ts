@@ -114,15 +114,15 @@ export async function streamOpenAiCompatibleChat(
         if (!Array.isArray(choices) || choices.length === 0) {
           continue;
         }
-        const choice = choices[0];
-        if (!isRecord(choice)) {
+        const choiceUnknown: unknown = choices[0];
+        if (!isRecord(choiceUnknown)) {
           continue;
         }
-        const delta = choice.delta;
+        const delta = choiceUnknown.delta;
         if (!isRecord(delta)) {
           continue;
         }
-        const token = parseString(delta.content) ?? '';
+        const token = parseString(delta.content);
         if (!token) {
           continue;
         }

@@ -35,15 +35,17 @@ export function resolveDocumentChatCloudOverride(input?: {
   apiKey?: string | null;
   model?: string | null;
 }): DocumentChatLlmRuntimeConfig | null {
-  const baseUrl = input?.baseUrl?.trim() || documentChatCloudBaseUrlFromEnv();
-  const apiKey = input?.apiKey?.trim() || documentChatCloudApiKeyFromEnv();
+  const baseUrl =
+    (input?.baseUrl?.trim() ? input.baseUrl.trim() : null) ?? documentChatCloudBaseUrlFromEnv();
+  const apiKey =
+    (input?.apiKey?.trim() ? input.apiKey.trim() : null) ?? documentChatCloudApiKeyFromEnv();
   if (!baseUrl || !apiKey) {
     return null;
   }
   const model =
-    input?.model?.trim() ||
-    documentChatCloudModelFromEnv() ||
-    process.env['OLLAMA_MODEL'] ||
+    (input?.model?.trim() ? input.model.trim() : null) ??
+    documentChatCloudModelFromEnv() ??
+    process.env['OLLAMA_MODEL'] ??
     'qwen2.5:3b';
   return {
     kind: 'openai_compatible',
