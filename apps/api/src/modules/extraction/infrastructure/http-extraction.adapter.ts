@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   DocumentRepresentationDto,
+  ExtractedFactDto,
   ExtractedField,
   ExtractionResult,
   LayoutIrBlock,
@@ -23,6 +24,7 @@ import {
   workerCompareTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
+import { parseExtractedFacts } from '../../exact-facts/infrastructure/parse-extracted-facts.js';
 
 function isExtractedField(value: unknown): value is ExtractedField {
   if (!isRecord(value)) {
@@ -207,6 +209,8 @@ function parseExtractionResultBody(value: unknown): ExtractionResult {
   const layoutIr = parseWorkerLayoutIr(row.layoutIr);
   const fieldSuggestions = parseFieldSuggestions(row.fieldSuggestions);
   const documentRepresentation = parseDocumentRepresentation(row.documentRepresentation);
+  const extractedFacts: ExtractedFactDto[] | undefined =
+    row.extractedFacts !== undefined ? parseExtractedFacts(row.extractedFacts) : undefined;
   const result: ExtractionResult = {
     text,
     fields: parseExtractedFields(row.fields),
@@ -220,6 +224,9 @@ function parseExtractionResultBody(value: unknown): ExtractionResult {
   }
   if (documentRepresentation) {
     result.documentRepresentation = documentRepresentation;
+  }
+  if (extractedFacts) {
+    result.extractedFacts = extractedFacts;
   }
   return result;
 }
@@ -305,8 +312,7 @@ export class HttpExtractionAdapter implements ExtractionPort {
         content_base64: buffer.toString('base64'),
         engine: options?.engine,
         embeddingDensityState: options?.embeddingDensityState,
-        layoutKeyValueRoles: options?.layoutKeyValueRoles ?? false,
-        recognizedFieldKeys: options?.recognizedFieldKeys ?? [],
+        buildExactFactIndex: options?.buildExactFactIndex === true,
       }),
     });
 

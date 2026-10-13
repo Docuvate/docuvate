@@ -38,6 +38,7 @@ const FORWARD_SQL_ORDER = [
   'user-chat-cloud-llm-up.sql',
   'smart-duplicates-up.sql',
   'feature-flag-ml-keys-up.sql',
+  'document-extracted-fact-up.sql',
   'feature-flag-learned-value-types-up.sql',
 ];
 

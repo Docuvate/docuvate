@@ -30,6 +30,7 @@ def _with_markdown(result: ExtractionResult) -> ExtractionResult:
         markdown=markdown,
         cpu_pipeline=result.cpu_pipeline,
         document_representation=result.document_representation,
+        extracted_facts=result.extracted_facts,
     )
 
 
@@ -71,6 +72,7 @@ def _with_layout_ir(
         ),
         cpu_pipeline=result.cpu_pipeline,
         document_representation=result.document_representation,
+        extracted_facts=result.extracted_facts,
     )
 
 
@@ -80,8 +82,7 @@ def extract_document(
     engine: str | None = None,
     *,
     embedding_density_state: EmbeddingDensityStatePayload | None = None,
-    layout_key_value_roles: bool = False,
-    recognized_field_keys: frozenset[str] | None = None,
+    build_exact_fact_index: bool = False,
 ) -> ExtractionResult:
     resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
     if resolved.name == "pipeline":
@@ -90,8 +91,7 @@ def extract_document(
                 content,
                 mime_type,
                 embedding_density_state=embedding_density_state,
-                layout_key_value_roles=layout_key_value_roles,
-                recognized_field_keys=recognized_field_keys,
+                build_exact_fact_index=build_exact_fact_index,
             )
         )
     else:

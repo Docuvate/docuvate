@@ -7,6 +7,7 @@ import { ChatInfrastructureModule } from '../chat-infrastructure/chat-infrastruc
 import { CitedChatModule } from '../cited-chat/cited-chat.module.js';
 import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.module.js';
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
+import { ExactFactsModule } from '../exact-facts/exact-facts.module.js';
 import { ExtractionQueueService } from '../extraction/infrastructure/extraction-queue.service.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
@@ -61,6 +62,7 @@ import { DocumentsController } from './presentation/documents.controller.js';
     CitedChatModule,
     ChatInfrastructureModule,
     FeatureFlagsModule,
+    ExactFactsModule,
   ],
   controllers: [DocumentsController],
   providers: [
