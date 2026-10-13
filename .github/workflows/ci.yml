@@ -326,6 +326,7 @@ jobs:
     steps:
       - name: Aggregate required checks (skipped jobs are OK)
         env:
+          CHANGES: ${{ needs.changes.result }}
           QUICK: ${{ needs.quick-checks.result }}
           AFFECTED: ${{ needs.affected.result }}
           SMOKE: ${{ needs.smoke.result }}
@@ -339,8 +340,14 @@ jobs:
         run: |
           set -euo pipefail
           fail=0
-          for r in "$QUICK" "$AFFECTED" "$SMOKE" "$DB" "$INTEGRATION" "$GO_SFTP" "$SFTP" "$K8S" "$SITE" "$WORKER"; do
-            if [ "$r" = "failure" ] || [ "$r" = "cancelled" ]; then
+          for r in "$CHANGES" "$QUICK" "$AFFECTED" "$SMOKE"; do
+            if [ "$r" != "success" ]; then
+              echo "Required job must succeed (got: $r)"
+              fail=1
+            fi
+          done
+          for r in "$DB" "$INTEGRATION" "$GO_SFTP" "$SFTP" "$K8S" "$SITE" "$WORKER"; do
+            if [ "$r" != "success" ] && [ "$r" != "skipped" ]; then
               echo "Job failed with result: $r"
               fail=1
             fi
