@@ -11,15 +11,16 @@ import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infr
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import {
+  createIntegrationResolveFeatureFlags,
+  enableLocalChatModelForIntegration,
+  enableLocalChatModelForIntegrationTenant,
+} from '../helpers/cited-chat-integration-feature-flags.js';
+import {
   parseRequestJsonRecord,
   readBooleanProperty,
   readPassageIds,
   requestUrl,
 } from '../helpers/json.js';
-import {
-  createIntegrationResolveFeatureFlags,
-  enableLocalChatModelForIntegration,
-} from '../helpers/cited-chat-integration-feature-flags.js';
 import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
@@ -57,6 +58,7 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
     } finally {
       client.release();
     }
+    await enableLocalChatModelForIntegrationTenant(pool, userId);
 
     invoiceDocId = randomUUID();
     taxDocId = randomUUID();
