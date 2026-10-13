@@ -5,15 +5,15 @@
   "projectType": "application",
   "targets": {
     "lint": {
-      "command": "bash scripts/ci/worker-lint.sh",
+      "command": "bash scripts/ci/worker-ci.sh",
       "options": { "cwd": "apps/worker" }
     },
     "test": {
-      "command": "bash scripts/ci/worker-unit-test.sh",
+      "command": "bash scripts/ci/worker-ci.sh",
       "options": { "cwd": "apps/worker" }
     },
     "test-ci": {
-      "command": "bash scripts/ci/worker-unit-test.sh",
+      "command": "bash scripts/ci/worker-ci.sh",
       "options": { "cwd": "apps/worker" }
     }
   }
