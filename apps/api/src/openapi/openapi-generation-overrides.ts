@@ -3,6 +3,7 @@
 import type { TestingModuleBuilder } from '@nestjs/testing';
 import { getDataSourceToken } from '@nestjs/typeorm';
 
+import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { PaperlessImportQueueService } from '../modules/connectors/infrastructure/adapters/paperless/paperless-import.queue.js';
 import { DocumentChatGenerationCancelRegistry } from '../modules/documents/infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from '../modules/documents/infrastructure/document-chat-generation-queue.service.js';
@@ -69,6 +70,8 @@ export function applyOpenApiGenerationOverrides(
     .overrideProvider(DocumentChatGenerationQueueService)
     .useValue(noopQueue)
     .overrideProvider(PaperlessImportQueueService)
+    .useValue(noopQueue)
+    .overrideProvider(EmbeddingDensityCalibrationQueueService)
     .useValue(noopQueue)
     .overrideProvider(DocumentChatGenerationCancelRegistry)
     .useValue(noopCancelRegistry);
