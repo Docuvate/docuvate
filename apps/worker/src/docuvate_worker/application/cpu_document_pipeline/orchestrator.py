@@ -5,6 +5,9 @@
 
 from __future__ import annotations
 
+from docuvate_worker.application.cpu_document_pipeline.stages.exact_fact_index_stage import (
+    run_exact_fact_index_stage,
+)
 from docuvate_worker.application.cpu_document_pipeline.stages.fields_stage import run_fields_stage
 from docuvate_worker.application.cpu_document_pipeline.stages.kite_index_stage import (
     run_kite_index_stage,
@@ -51,6 +54,9 @@ def run_integrated_cpu_document_pipeline(
     nest = run_nest_stage(state)
     fields = run_fields_stage(state)
     kite_index = run_kite_index_stage(state)
+    exact_fact_index = run_exact_fact_index_stage(
+        state, enabled=run_input.build_exact_fact_index
+    )
     return IntegratedPipelineResult(
         ocr=ocr,
         rotation=rotation,
@@ -60,4 +66,5 @@ def run_integrated_cpu_document_pipeline(
         nest=nest,
         fields=fields,
         kite_index=kite_index,
+        exact_fact_index=exact_fact_index,
     )

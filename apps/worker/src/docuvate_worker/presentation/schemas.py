@@ -17,11 +17,8 @@ class ExtractRequest(BaseModel):
     embedding_density_state: EmbeddingDensityStateModel | None = Field(
         default=None, validation_alias="embeddingDensityState"
     )
-    layout_key_value_roles: bool = Field(
-        default=False, validation_alias="layoutKeyValueRoles"
-    )
-    recognized_field_keys: list[str] = Field(
-        default_factory=list, validation_alias="recognizedFieldKeys"
+    build_exact_fact_index: bool = Field(
+        default=False, validation_alias="buildExactFactIndex"
     )
 
 
@@ -118,6 +115,34 @@ class RepresentationUnitModel(BaseModel):
     binary_code_base64: str = Field(serialization_alias="binaryCodeBase64")
 
 
+class FactProvenanceModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    page: int | None = None
+    x: float | None = None
+    y: float | None = None
+    width: float | None = None
+    height: float | None = None
+    char_start: int | None = Field(default=None, serialization_alias="charStart")
+    char_end: int | None = Field(default=None, serialization_alias="charEnd")
+
+
+class ExtractedFactModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    kind: str
+    predicate_key: str = Field(serialization_alias="predicateKey")
+    confidence: float = Field(ge=0.0, le=1.0)
+    provenance: FactProvenanceModel
+    value_text: str | None = Field(default=None, serialization_alias="valueText")
+    amount_numeric: float | None = Field(default=None, serialization_alias="amountNumeric")
+    currency_code: str | None = Field(default=None, serialization_alias="currencyCode")
+    value_date_iso: str | None = Field(default=None, serialization_alias="valueDateIso")
+    table_index: int | None = Field(default=None, serialization_alias="tableIndex")
+    row_index: int | None = Field(default=None, serialization_alias="rowIndex")
+    col_index: int | None = Field(default=None, serialization_alias="colIndex")
+
+
 class DocumentRepresentationModel(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
@@ -167,6 +192,27 @@ class ExtractResponse(BaseModel):
     document_representation: DocumentRepresentationModel | None = Field(
         default=None, serialization_alias="documentRepresentation"
     )
+    extracted_facts: list[ExtractedFactModel] | None = Field(
+        default=None, serialization_alias="extractedFacts"
+    )
+
+
+class BuildFactsFromTextRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    mime_type: str = Field(validation_alias="mime_type")
+    text: str = Field(min_length=0)
+    content_base64: str | None = None
+    blocks: list[ExtractionBlockModel] = Field(default_factory=list)
+
+
+class BuildFactsFromTextResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    extracted_facts: list[ExtractedFactModel] = Field(
+        default_factory=list, serialization_alias="extractedFacts"
+    )
+    wall_time_ms: float = Field(serialization_alias="wallTimeMs")
 
 
 class EngineInfo(BaseModel):

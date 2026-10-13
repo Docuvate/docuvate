@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from docuvate_worker.domain.cpu_pipeline.contracts import CpuPipelineExtractionArtifacts
+    from docuvate_worker.domain.exact_fact_index.types import ExtractedFact
     from docuvate_worker.domain.representation.encode import DocumentRepresentation
 
 
@@ -41,3 +42,4 @@ class ExtractionResult:
     layout_unreliable_reason: str | None = None
     cpu_pipeline: CpuPipelineExtractionArtifacts | None = None
     document_representation: DocumentRepresentation | None = None
+    extracted_facts: tuple[ExtractedFact, ...] | None = None

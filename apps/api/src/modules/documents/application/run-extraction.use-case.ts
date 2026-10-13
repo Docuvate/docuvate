@@ -10,13 +10,12 @@ import {
   type ExtractionPort,
   OBJECT_STORAGE,
   type ObjectStorage,
-  RECOGNIZED_FIELD_REPOSITORY,
-  type RecognizedFieldRepository,
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
+import { PersistDocumentFactsUseCase } from '../../exact-facts/application/persist-document-facts.use-case.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
 import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
@@ -37,8 +36,7 @@ export class RunExtractionUseCase {
     private readonly densityRepo: PgEmbeddingDensityRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
-    @Inject(RECOGNIZED_FIELD_REPOSITORY)
-    private readonly recognizedFields: RecognizedFieldRepository
+    private readonly persistFacts: PersistDocumentFactsUseCase
   ) {}
 
   async execute(documentId: string): Promise<void> {
@@ -55,13 +53,10 @@ export class RunExtractionUseCase {
       const tagIds = tags.map((tag) => tag.id);
       const densityState = await this.densityRepo.loadWorkerState(doc.userId, tagIds);
       const flags = await this.resolveFeatureFlags.execute(doc.userId);
-      const recognized = await this.recognizedFields.listForUser(doc.userId);
-      const recognizedFieldKeys = recognized.map((field) => field.key);
       const result = await this.extraction.extract(buffer, doc.mimeType, {
         engine,
         embeddingDensityState: densityState ?? undefined,
-        layoutKeyValueRoles: flags.layoutKeyValueRoles,
-        recognizedFieldKeys,
+        buildExactFactIndex: flags.exactAnswers,
       });
       await this.documents.saveExtraction(documentId, result);
       await this.persistRepresentation.execute(
@@ -75,6 +70,14 @@ export class RunExtractionUseCase {
         filename: doc.filename,
         blocks: result.blocks,
       });
+      if (flags.exactAnswers) {
+        await this.persistFacts.execute(
+          doc.userId,
+          documentId,
+          result.extractedFacts ?? [],
+          null
+        );
+      }
       const content = `${doc.filename}\n${doc.title}\n${result.text}`;
       await this.postOcrPipeline.execute(documentId, doc.userId, content);
       await this.documents.updateStatus(documentId, 'ready');
