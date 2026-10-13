@@ -9,6 +9,7 @@ import {
   type EmbeddingPort,
 } from '../../../shared/domain/ports.js';
 import { sanitizeChatThreadDocumentIds } from '../../documents/domain/chat-thread-document-ids.js';
+import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
   CITED_CHAT_ABSTENTION_DE,
@@ -204,11 +205,21 @@ export class CitedChatGenerationService {
     const filterIds =
       scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
 
+    const documentOverview =
+      scope === 'document' &&
+      filterIds != null &&
+      filterIds.length > 0 &&
+      queryVector != null &&
+      queryVector.length > 0 &&
+      isDocumentOverviewQuestion(queryVector);
+
     const retrieveStarted = Date.now();
-    const candidates = await this.retrieval.hybridRetrieveChunks(userId, retrievalQuery, {
-      documentIds: filterIds,
-      queryVector,
-    });
+    const candidates = documentOverview
+      ? await this.retrieval.loadScopedDocumentChunks(userId, filterIds)
+      : await this.retrieval.hybridRetrieveChunks(userId, retrievalQuery, {
+          documentIds: filterIds,
+          queryVector,
+        });
     retrieveMs = Date.now() - retrieveStarted;
     const chunkPool = candidates.map((chunk) => ({ chunk }));
 
@@ -262,8 +273,10 @@ export class CitedChatGenerationService {
         : ranked.slice(0, RAG_RERANK_TOP_K);
     const rerankerUsed = rerank.reachable && rerank.rerankerUsed;
     const bestScore = top[0]?.score ?? -1;
-    const gateOk = passesCalibratedRetrievalGate({ bestScore, rerankerUsed });
-    const llmAttempt = shouldAttemptCitedLlm({ bestScore, rerankerUsed });
+    const gateOk =
+      documentOverview || passesCalibratedRetrievalGate({ bestScore, rerankerUsed });
+    const llmAttempt =
+      documentOverview || shouldAttemptCitedLlm({ bestScore, rerankerUsed });
     const llmConfigured =
       resolveCitedChatLlmConfig({
         cloudBaseUrl: input.cloudLlm?.baseUrl,

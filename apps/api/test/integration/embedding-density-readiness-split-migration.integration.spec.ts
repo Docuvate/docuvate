@@ -3,8 +3,11 @@
 import { DataSource } from 'typeorm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
+import { EmbeddingDensityReadinessSplit20261010140000 } from '../../src/shared/infrastructure/database/migrations/20261010140000-embedding-density-readiness-split.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
 import { getIntegrationPool } from './pg-pool.js';
+
+const READINESS_SPLIT_MIGRATION_TIMESTAMP = 20261010140000;
 
 async function userStateColumns(pool: ReturnType<typeof getIntegrationPool>): Promise<string[]> {
   const result = await pool.query<{ column_name: string }>(
@@ -21,14 +24,27 @@ async function undoUntilCalibrationReady(
   dataSource: DataSource,
   pool: ReturnType<typeof getIntegrationPool>
 ): Promise<string[]> {
-  for (let attempt = 0; attempt < 12; attempt += 1) {
+  for (let attempt = 0; attempt < 24; attempt += 1) {
     const columns = await userStateColumns(pool);
     if (columns.includes('calibration_ready')) {
       return columns;
     }
     await dataSource.undoLastMigration();
   }
-  const columns = await userStateColumns(pool);
+  let columns = await userStateColumns(pool);
+  if (!columns.includes('calibration_ready') && columns.includes('coarse_ready')) {
+    const runner = dataSource.createQueryRunner();
+    await runner.connect();
+    try {
+      await new EmbeddingDensityReadinessSplit20261010140000().down(runner);
+      await runner.query(`DELETE FROM migrations WHERE timestamp >= $1`, [
+        READINESS_SPLIT_MIGRATION_TIMESTAMP,
+      ]);
+    } finally {
+      await runner.release();
+    }
+    columns = await userStateColumns(pool);
+  }
   expect(columns).toContain('calibration_ready');
   return columns;
 }

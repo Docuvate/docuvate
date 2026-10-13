@@ -1,4 +1,4 @@
-CREATE EXTENSION pgcrypto WITH SCHEMA public;
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 CREATE FUNCTION public.documents_search_vector_update() RETURNS trigger
     LANGUAGE plpgsql
     AS $$

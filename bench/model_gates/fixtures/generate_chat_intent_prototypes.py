@@ -46,6 +46,9 @@ SEED_PHRASES: dict[str, list[str]] = {
         "Hallo, wie geht es dir?",
         "Danke für die Hilfe!",
         "Guten Morgen.",
+        "hi",
+        "Hello",
+        "hey",
         "Hello, nice to meet you.",
         "Thanks a lot!",
     ],
@@ -117,7 +120,7 @@ def main() -> None:
         "operations": stats_ops,
         "min_score": 0.72,
         "min_margin": 0.03,
-        "default_operation": "count_by_label",
+        "default_operation": "count_total",
     }
     OUT_API.write_text(json.dumps(intent_payload, ensure_ascii=False), encoding="utf-8")
     OUT_STATS.write_text(json.dumps(stats_payload, ensure_ascii=False), encoding="utf-8")

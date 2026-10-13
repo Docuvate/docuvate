@@ -25,13 +25,20 @@ ROUTE_SEEDS: dict[str, list[str]] = {
         "Wie viele Entgeltnachweise sind vorhanden?",
         "Liste alle Verträge in meiner Bibliothek.",
     ],
-    "smalltalk": ["Hallo!", "Danke!", "Guten Tag."],
+    "smalltalk": ["Hallo!", "hi", "Danke!", "Guten Tag."],
     "out_of_scope": ["Wie wird das Wetter?", "Wer gewann die Fußball-WM?"],
 }
+
+DOCUMENT_OVERVIEW_PHRASES = [
+    "Worum geht es in diesem Dokument?",
+    "Was ist der Inhalt dieses Dokuments?",
+    "Fasse dieses Dokument kurz zusammen.",
+]
 
 FOLLOW_UPS = [
     ("Wie viele Rechnungen habe ich?", "Und aus dem Jahr 2024?"),
     ("Welche Kündigungsfrist gilt?", "Gilt das auch für Mieter?"),
+    ("Wie hoch ist die Rechnung?", "und wann ist sie fällig?"),
 ]
 
 
@@ -39,8 +46,9 @@ def main() -> None:
     rng = random.Random(SEED)
     cases: list[dict[str, object]] = []
     idx = 0
+    per_route = 55
     for route, phrases in ROUTE_SEEDS.items():
-        for _ in range(58):
+        for _ in range(per_route):
             q = rng.choice(phrases)
             cases.append(
                 {
@@ -51,6 +59,17 @@ def main() -> None:
                 }
             )
             idx += 1
+    for phrase in DOCUMENT_OVERVIEW_PHRASES:
+        cases.append(
+            {
+                "id": f"overview-{idx}",
+                "question": phrase,
+                "prior_user": None,
+                "expected_route": "document_qa",
+                "expect_document_overview": True,
+            }
+        )
+        idx += 1
     for prior, follow in FOLLOW_UPS:
         for _ in range(9):
             cases.append(

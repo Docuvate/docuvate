@@ -37,6 +37,73 @@ export interface CitedChatChunkCandidate {
 export class PgCitedChatRetrievalRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
+  async loadScopedDocumentChunks(
+    userId: string,
+    documentIds: string[]
+  ): Promise<CitedChatChunkCandidate[]> {
+    const scopedDocumentIds = sanitizeChatThreadDocumentIds(documentIds);
+    if (scopedDocumentIds.length === 0) {
+      return [];
+    }
+
+    const chunkRows = await this.pool.query<{
+      id: string;
+      document_id: string;
+      title: string;
+      body: string;
+      page: number | null;
+      char_start: number | null;
+      char_end: number | null;
+    }>(
+      `SELECT c.id, c.document_id, d.title, c.body, c.page, c.char_start, c.char_end
+       FROM document_text_chunks c
+       JOIN documents d ON d.id = c.document_id
+       WHERE d.user_id = $1 AND c.document_id = ANY($2::uuid[])
+       ORDER BY c.document_id, c.chunk_index ASC`,
+      [userId, scopedDocumentIds]
+    );
+
+    if (chunkRows.rows.length > 0) {
+      return chunkRows.rows.map((row, index) => ({
+        chunkId: row.id,
+        documentId: row.document_id,
+        documentTitle: row.title,
+        body: row.body,
+        page: row.page,
+        charStart: row.char_start,
+        charEnd: row.char_end,
+        fusionScore: 1 - index * 0.001,
+      }));
+    }
+
+    const blockRows = await this.pool.query<{
+      document_id: string;
+      title: string;
+      body: string;
+      page: number | null;
+    }>(
+      `SELECT b.document_id, d.title, string_agg(b.text, ' ' ORDER BY b.position) AS body,
+              MIN(b.page) AS page
+       FROM document_extraction_blocks b
+       JOIN documents d ON d.id = b.document_id
+       WHERE d.user_id = $1 AND b.document_id = ANY($2::uuid[])
+       GROUP BY b.document_id, d.title
+       ORDER BY b.document_id`,
+      [userId, scopedDocumentIds]
+    );
+
+    return blockRows.rows.map((row, index) => ({
+      chunkId: `scoped-block-${row.document_id}`,
+      documentId: row.document_id,
+      documentTitle: row.title,
+      body: row.body,
+      page: row.page,
+      charStart: null,
+      charEnd: null,
+      fusionScore: 1 - index * 0.001,
+    }));
+  }
+
   async hybridRetrieveChunks(
     userId: string,
     query: string,
