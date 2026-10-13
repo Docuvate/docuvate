@@ -8,7 +8,7 @@ import { regClassExists } from '../../src/shared/infrastructure/database/migrati
 import { isRecord } from '../../src/shared/infrastructure/database/row-parse.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
 
-describe('migration baseline (legacy schema, empty migration history)', () => {
+describe('migration baseline (existing schema, empty migration history)', () => {
   let dataSource: DataSource;
 
   beforeAll(async () => {

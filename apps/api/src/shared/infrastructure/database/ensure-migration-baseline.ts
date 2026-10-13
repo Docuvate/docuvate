@@ -46,7 +46,7 @@ async function ensureMigrationsTable(runner: ReturnType<DataSource['createQueryR
   `);
 }
 
-/** Stamp only migrations whose schema is already present (legacy DBs with empty/missing migration history). */
+/** Stamp only migrations whose schema is already present (existing DBs with empty/missing migration history). */
 export async function ensureMigrationBaseline(dataSource: DataSource): Promise<void> {
   const runner = dataSource.createQueryRunner();
   await runner.connect();
