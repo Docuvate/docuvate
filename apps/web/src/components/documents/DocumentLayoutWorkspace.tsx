@@ -21,6 +21,7 @@ import {
   firstPageBelowSsimFloor,
   reconstructionQualityTone,
 } from '../../lib/layoutReconstructionQuality';
+import { useCeFeatureFlags } from '../../lib/ceFeatureFlags';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
@@ -118,6 +119,9 @@ export function DocumentLayoutWorkspace({
     layoutIrPages
   );
 
+  const ceFlags = useCeFeatureFlags();
+  const layoutAdvancedEnabled = ceFlags.layoutReconstructionCompare;
+
   const [leftMode, setLeftMode] = useState<LeftDocumentMode>('original');
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [advancedView, setAdvancedView] = useState<AdvancedViewerMode>('reconstruction');
@@ -130,7 +134,7 @@ export function DocumentLayoutWorkspace({
   const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
   const { metricsByPage, metrics: compareMetrics } = useLayoutCompare(
     doc.id,
-    layoutIrAvailable && Boolean(doc.id),
+    layoutAdvancedEnabled && layoutIrAvailable && Boolean(doc.id),
     layoutPageCount,
     viewerPage,
     false
@@ -285,7 +289,8 @@ export function DocumentLayoutWorkspace({
   );
 
   const pending = layoutIrAvailable && layoutIrState === 'loading';
-  const showAdvancedStage = advancedOpen && leftMode === 'original';
+  const showAdvancedStage =
+    layoutAdvancedEnabled && advancedOpen && leftMode === 'original';
   const failed = doc.status === 'failed';
   const showRecovery =
     (failed || isExtractionPending(doc.status)) && onRequeueExtraction != null;
@@ -450,37 +455,39 @@ export function DocumentLayoutWorkspace({
             )}
           </div>
 
-          <details
-            className="layout-advanced-panel"
-            open={advancedOpen}
-            onToggle={(event) => {
-              const open = event.currentTarget.open;
-              setAdvancedOpen(open);
-              if (open) {
-                setLeftMode('original');
-              }
-            }}
-          >
-            <summary className="layout-advanced-summary">{t('documents.layoutAdvancedSummary')}</summary>
-            <div className="layout-advanced-body">
-              <SegmentedControl<AdvancedViewerMode>
-                ariaLabel={t('documents.layoutAdvancedViewAria')}
-                className={segmentedToolbarClass('layout-advanced-view-switch', 'segmented-control--text-wide')}
-                value={advancedView}
-                options={advancedViewOptions}
-                onChange={setAdvancedView}
-              />
-              <div className="layout-advanced-export">
-                <DocumentLayoutExportTab
-                  documentId={doc.id}
-                  documentTitle={doc.title || doc.filename}
-                  hasLayoutIr={Boolean(layoutIr?.pages.length)}
-                  markdown={doc.extraction?.markdown}
-                  blocks={blocks}
+          {layoutAdvancedEnabled ? (
+            <details
+              className="layout-advanced-panel"
+              open={advancedOpen}
+              onToggle={(event) => {
+                const open = event.currentTarget.open;
+                setAdvancedOpen(open);
+                if (open) {
+                  setLeftMode('original');
+                }
+              }}
+            >
+              <summary className="layout-advanced-summary">{t('documents.layoutAdvancedSummary')}</summary>
+              <div className="layout-advanced-body">
+                <SegmentedControl<AdvancedViewerMode>
+                  ariaLabel={t('documents.layoutAdvancedViewAria')}
+                  className={segmentedToolbarClass('layout-advanced-view-switch', 'segmented-control--text-wide')}
+                  value={advancedView}
+                  options={advancedViewOptions}
+                  onChange={setAdvancedView}
                 />
+                <div className="layout-advanced-export">
+                  <DocumentLayoutExportTab
+                    documentId={doc.id}
+                    documentTitle={doc.title || doc.filename}
+                    hasLayoutIr={Boolean(layoutIr?.pages.length)}
+                    markdown={doc.extraction?.markdown}
+                    blocks={blocks}
+                  />
+                </div>
               </div>
-            </div>
-          </details>
+            </details>
+          ) : null}
         </Card>
       </div>
 

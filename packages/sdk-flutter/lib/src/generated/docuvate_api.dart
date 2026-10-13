@@ -36,6 +36,7 @@ export 'package:docuvate/src/generated/src/model/api_error_envelope_dto.dart';
 export 'package:docuvate/src/generated/src/model/apply_label_correction_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/apply_label_correction_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/ban_admin_user_request_dto.dart';
+export 'package:docuvate/src/generated/src/model/ce_feature_flags_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/chat_message_dto.dart';
 export 'package:docuvate/src/generated/src/model/chat_message_record_dto.dart';
 export 'package:docuvate/src/generated/src/model/confirm_label_recommendation_blocklist_pattern_request_dto.dart';

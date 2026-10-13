@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import type pg from 'pg';
 
+import { ceFeatureFlags } from '../../../shared/application/assert-ce-feature.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
 import { validateScanFile } from '../../sftp-ingress/domain/scan-file-validation.js';
@@ -36,6 +37,9 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
   ) {}
 
   onApplicationBootstrap(): void {
+    if (!ceFeatureFlags().sourceConnectors) {
+      return;
+    }
     const intervalMs = Number(process.env['DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS'] ?? 60_000);
     if (intervalMs <= 0) return;
     const runTick = () => {

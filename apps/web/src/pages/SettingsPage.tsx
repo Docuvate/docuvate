@@ -21,6 +21,7 @@ import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import { useAdvancedFeaturesEnabled, writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
+import { useCeFeatureFlags } from '../lib/ceFeatureFlags';
 import {
   getDocumentChatProvidersCatalog,
   getUserSettings,
@@ -54,6 +55,7 @@ export function SettingsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { advancedFeaturesEnabled, setAdvancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
+  const ceFlags = useCeFeatureFlags();
   const { data } = authClient.useSession();
   const accountEmail = authSessionUserEmail(data);
   const [settings, setSettings] = useState<UserSettingsDto | null>(null);
@@ -249,19 +251,21 @@ export function SettingsPage() {
           ) : null}
         </SettingsSectionCard>
 
-        <SettingsSectionCard
-          compact
-          icon={<FlaskConical {...settingsIconProps} />}
-          title={t('settings.advancedFeaturesTitle')}
-          description={t('settings.advancedFeaturesLead')}
-        >
-          <Switch
-            label={t('settings.advancedFeaturesEnable')}
-            checked={advancedFeaturesEnabled}
-            disabled={saving || !settings}
-            onCheckedChange={(checked) => void toggleAdvancedFeatures(checked)}
-          />
-        </SettingsSectionCard>
+        {ceFlags.experimentalResearchModels ? (
+          <SettingsSectionCard
+            compact
+            icon={<FlaskConical {...settingsIconProps} />}
+            title={t('settings.advancedFeaturesTitle')}
+            description={t('settings.advancedFeaturesLead')}
+          >
+            <Switch
+              label={t('settings.advancedFeaturesEnable')}
+              checked={advancedFeaturesEnabled}
+              disabled={saving || !settings}
+              onCheckedChange={(checked) => void toggleAdvancedFeatures(checked)}
+            />
+          </SettingsSectionCard>
+        ) : null}
 
         <SettingsSectionCard
           compact

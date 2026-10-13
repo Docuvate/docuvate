@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable } from '@nestjs/common';
 
+import { ceFeatureFlags } from '../../../shared/application/assert-ce-feature.js';
+import { ForbiddenError } from '../../../shared/domain/errors.js';
 import {
   EXTRACTION_PORT,
   type ExtractionPort,
@@ -10,6 +12,7 @@ import {
 } from '../../../shared/domain/ports.js';
 import type { UpdateUserSettingsRequestDto } from '../../../shared/presentation/dtos/settings.dto.js';
 import { fallbackExtractionEngines } from './extraction-engine-fallback.js';
+import { filterExtractionEnginesForCe } from './filter-extraction-engines-for-ce.js';
 
 @Injectable()
 export class GetUserSettingsUseCase {
@@ -34,6 +37,12 @@ export class UpdateUserSettingsUseCase {
   ) {}
 
   async execute(userId: string, patch: UpdateUserSettingsRequestDto) {
+    if (
+      patch.advancedFeaturesEnabled === true &&
+      !ceFeatureFlags().experimentalResearchModels
+    ) {
+      throw new ForbiddenError('CE feature disabled: experimentalResearchModels');
+    }
     return this.prefs.upsert(userId, patch);
   }
 }
@@ -44,9 +53,10 @@ export class ListExtractionEnginesUseCase {
 
   async execute() {
     try {
-      return await this.extraction.listEngines();
+      const engines = await this.extraction.listEngines();
+      return filterExtractionEnginesForCe(engines);
     } catch {
-      return fallbackExtractionEngines();
+      return filterExtractionEnginesForCe(fallbackExtractionEngines());
     }
   }
 }

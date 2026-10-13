@@ -4,6 +4,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
+import { ceFeatureFlags } from '../../../shared/application/assert-ce-feature.js';
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
 import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
@@ -78,6 +79,9 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   async maybeEnqueueArenaSample(documentId: string): Promise<void> {
+    if (!ceFeatureFlags().experimentalResearchModels) {
+      return;
+    }
     const rate = arenaSampleRate();
     if (rate <= 0) {
       return;

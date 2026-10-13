@@ -17,6 +17,7 @@ import {
 import { ApiBody, ApiConsumes, ApiOkResponse } from '@nestjs/swagger';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
+import { assertCeFeatureEnabled } from '../../../shared/application/assert-ce-feature.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import {
   AuthGuard,
@@ -230,6 +231,7 @@ export class DocumentsController {
     @AuthSubject() subject: AuthorizationSubject,
     @Param('id') id: string
   ): Promise<LayoutCompareSummaryResponseDto> {
+    assertCeFeatureEnabled('layoutReconstructionCompare');
     return this.getDocumentLayoutCompareSummary.execute(id, session.user.id, subject);
   }
 
@@ -246,6 +248,7 @@ export class DocumentsController {
     @Query('from') from?: string,
     @Query('to') to?: string
   ): Promise<LayoutCompareMetricsResponseDto> {
+    assertCeFeatureEnabled('layoutReconstructionCompare');
     const fromPage = from !== undefined ? Number.parseInt(from, 10) : undefined;
     const toPage = to !== undefined ? Number.parseInt(to, 10) : undefined;
     return this.getDocumentLayoutCompareMetrics.execute(
@@ -270,6 +273,7 @@ export class DocumentsController {
     @Param('page') page: string,
     @Query('heatmap') heatmap?: string
   ): Promise<LayoutComparePageResponseDto> {
+    assertCeFeatureEnabled('layoutReconstructionCompare');
     const pageNumber = Number.parseInt(page, 10);
     const includeHeatmap = heatmap !== '0' && heatmap !== 'false';
     return this.getDocumentLayoutComparePage.execute(
@@ -510,6 +514,7 @@ export class DocumentsController {
     @Param('id') id: string,
     @Body() body: ExtractionCompareRequestDto
   ): Promise<ExtractionCompareResponse> {
+    assertCeFeatureEnabled('experimentalResearchModels');
     const engines = body.engines?.length ? body.engines : [];
     return this.compareExtraction.execute(id, session.user.id, engines, body.maxPages ?? 3);
   }
@@ -521,6 +526,7 @@ export class DocumentsController {
     @Param('id') id: string,
     @Body() body: ExtractionArenaRatingRequestDto
   ): Promise<OkResponseDto> {
+    assertCeFeatureEnabled('experimentalResearchModels');
     await this.applyArenaWinner.execute(id, session.user.id, body.winnerEngine);
     await this.recordArenaRating.execute(session.user.id, {
       documentId: id,

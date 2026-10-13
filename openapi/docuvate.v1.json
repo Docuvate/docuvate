@@ -9904,6 +9904,76 @@
         ]
       }
     },
+    "/settings/ce": {
+      "get": {
+        "operationId": "getCeFeatureFlags",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CeFeatureFlagsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Community Edition installation feature flags",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
     "/settings/chat-providers": {
       "get": {
         "operationId": "listChatProviders",
@@ -11244,6 +11314,25 @@
             "type": "string"
           }
         }
+      },
+      "CeFeatureFlagsResponseDto": {
+        "type": "object",
+        "properties": {
+          "layoutReconstructionCompare": {
+            "type": "boolean"
+          },
+          "sourceConnectors": {
+            "type": "boolean"
+          },
+          "experimentalResearchModels": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "layoutReconstructionCompare",
+          "sourceConnectors",
+          "experimentalResearchModels"
+        ]
       },
       "ChatMessageDto": {
         "type": "object",

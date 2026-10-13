@@ -7,6 +7,7 @@ import {
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
+import { CeFeatureGuard } from '../../../shared/infrastructure/auth/ce-feature.guard.js';
 import { ConnectorInstallationIdParamDto } from '../../../shared/presentation/dtos/connector-actions.dto.js';
 import {
   PaperlessImportRunParamsDto,
@@ -31,7 +32,7 @@ import { toPaperlessImportRunDto } from './paperless-import.mapper.js';
 
 @ApiDocuvateController('connectors')
 @Controller('connectors')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, CeFeatureGuard('sourceConnectors'))
 export class PaperlessImportController {
   constructor(
     private readonly testConnection: TestPaperlessConnectionUseCase,

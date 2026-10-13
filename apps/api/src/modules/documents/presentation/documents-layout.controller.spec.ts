@@ -81,6 +81,7 @@ describe('DocumentsController layout routes', () => {
   let controller: DocumentsController;
 
   beforeEach(async () => {
+    process.env.DOCUVATE_CE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE = 'true';
     vi.restoreAllMocks();
     getDocumentLayoutIr.execute.mockReset();
     getDocumentLayoutHtml.execute.mockReset();

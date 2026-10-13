@@ -67,6 +67,12 @@ export type BanAdminUserRequestDto = {
     reason?: string;
 };
 
+export type CeFeatureFlagsResponseDto = {
+    layoutReconstructionCompare: boolean;
+    sourceConnectors: boolean;
+    experimentalResearchModels: boolean;
+};
+
 export type ChatMessageDto = {
     role: 'user' | 'assistant';
     content: string;
@@ -3802,6 +3808,28 @@ export type UpdateUserSettingsResponses = {
 };
 
 export type UpdateUserSettingsResponse = UpdateUserSettingsResponses[keyof UpdateUserSettingsResponses];
+
+export type GetCeFeatureFlagsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/settings/ce';
+};
+
+export type GetCeFeatureFlagsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetCeFeatureFlagsError = GetCeFeatureFlagsErrors[keyof GetCeFeatureFlagsErrors];
+
+export type GetCeFeatureFlagsResponses = {
+    200: CeFeatureFlagsResponseDto;
+};
+
+export type GetCeFeatureFlagsResponse = GetCeFeatureFlagsResponses[keyof GetCeFeatureFlagsResponses];
 
 export type ListChatProvidersData = {
     body?: never;

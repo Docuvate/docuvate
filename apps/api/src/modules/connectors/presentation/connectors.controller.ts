@@ -19,6 +19,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
+import { assertCeFeatureEnabled } from '../../../shared/application/assert-ce-feature.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import {
   AuthGuard,
@@ -161,6 +162,7 @@ export class ConnectorsController {
   async probeSftpHost(
     @Body() body: SftpFetchHostProbeRequest
   ): Promise<SftpFetchHostProbeResponse> {
+    assertCeFeatureEnabled('sourceConnectors');
     return probeSftpFetchHost({
       host: body.host,
       port: String(body.port ?? 22),

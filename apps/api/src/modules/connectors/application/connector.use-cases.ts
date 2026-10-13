@@ -1,7 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { isCeSourceConnectorPluginId } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
+import {
+  assertCeFeatureEnabled,
+  ceFeatureFlags,
+} from '../../../shared/application/assert-ce-feature.js';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
   CONNECTOR_INSTALLATION_REPOSITORY,
@@ -17,10 +22,18 @@ export class GetConnectorCatalogUseCase {
 
   execute(input: { viewerIsServerAdmin: boolean }) {
     const categories = this.registry.listCategories();
-    const plugins = this.registry.listPlugins().map((plugin) => ({
-      ...plugin.descriptor,
-      auth: plugin.authDescriptor(),
-    }));
+    const plugins = this.registry
+      .listPlugins()
+      .map((plugin) => ({
+        ...plugin.descriptor,
+        auth: plugin.authDescriptor(),
+      }))
+      .filter((plugin) => {
+        if (!isCeSourceConnectorPluginId(plugin.id)) {
+          return true;
+        }
+        return ceFeatureFlags().sourceConnectors;
+      });
     return { categories, plugins, viewerIsServerAdmin: input.viewerIsServerAdmin };
   }
 }
@@ -30,6 +43,9 @@ export class GetConnectorPluginUseCase {
   constructor(@Inject(CONNECTOR_REGISTRY) private readonly registry: ConnectorRegistryPort) {}
 
   execute(pluginId: ConnectorPluginId) {
+    if (isCeSourceConnectorPluginId(pluginId)) {
+      assertCeFeatureEnabled('sourceConnectors');
+    }
     const plugin = this.registry.getPlugin(pluginId);
     if (!plugin) {
       throw new NotFoundError('Connector plugin');
@@ -69,6 +85,9 @@ export class CreateConnectorInstallationUseCase {
       credentials: Record<string, string>;
     }
   ) {
+    if (isCeSourceConnectorPluginId(body.pluginId)) {
+      assertCeFeatureEnabled('sourceConnectors');
+    }
     const plugin = this.registry.getPlugin(body.pluginId);
     if (!plugin) {
       throw new NotFoundError('Connector plugin');

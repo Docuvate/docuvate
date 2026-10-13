@@ -876,6 +876,9 @@ export interface HardwareCapabilitiesDto {
   dockerMemoryHintEn?: string | null;
 }
 
+export type { CeFeatureFlagsDto, CeSourceConnectorPluginId } from './ce-feature-flags.js';
+export { CE_SOURCE_CONNECTOR_PLUGIN_IDS, isCeSourceConnectorPluginId } from './ce-feature-flags.js';
+
 export type ThemePreference = 'light' | 'dark' | 'system';
 export type UiLocale = 'de' | 'en';
 

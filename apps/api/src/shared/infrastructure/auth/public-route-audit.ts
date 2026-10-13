@@ -23,6 +23,7 @@ export const PUBLIC_ROUTE_ALLOWLIST: PublicRouteEntry[] = [
   { method: 'GET', path: '/health' },
   { method: 'GET', path: '/health/ready' },
   { method: 'GET', path: '/openapi.json' },
+  { method: 'GET', path: '/settings/ce' },
 ];
 
 const HTTP_METHODS = new Set<HttpMethod>(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);

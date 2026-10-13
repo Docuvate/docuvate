@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
+import { ensureCeFeatureFlagsLoaded } from '../lib/ceFeatureFlags';
 import { getUserSettings } from '../lib/api';
 import { authClient, authSessionUserId } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
@@ -22,6 +23,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const narrowTopbar = useNarrowTopbar();
   const { data: session } = authClient.useSession();
+
+  useEffect(() => {
+    void ensureCeFeatureFlagsLoaded();
+  }, []);
 
   useEffect(() => {
     if (session?.session) {

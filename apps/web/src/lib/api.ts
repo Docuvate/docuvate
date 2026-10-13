@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  CeFeatureFlagsDto,
   AcceptLabelRecommendationRequest,
   AddLabelRecommendationBlocklistRequest,
   AdminAccessResponse,
@@ -765,6 +766,10 @@ export async function retryLibraryChatMessage(
 
 export async function getUserSettings(): Promise<UserSettingsDto> {
   return request<UserSettingsDto>('/settings');
+}
+
+export async function getCeFeatureFlags(): Promise<CeFeatureFlagsDto> {
+  return request<CeFeatureFlagsDto>('/settings/ce');
 }
 
 export async function globalSearch(

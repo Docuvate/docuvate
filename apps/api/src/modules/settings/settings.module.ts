@@ -15,11 +15,12 @@ import {
   UpdateUserSettingsUseCase,
 } from './application/settings.use-cases.js';
 import { PgUserPreferencesRepository } from './infrastructure/pg-user-preferences.repository.js';
+import { CeSettingsController } from './presentation/ce-settings.controller.js';
 import { SettingsController } from './presentation/settings.controller.js';
 
 @Module({
   imports: [WorkspaceModule],
-  controllers: [SettingsController],
+  controllers: [SettingsController, CeSettingsController],
   providers: [
     { provide: USER_PREFERENCES_REPOSITORY, useClass: PgUserPreferencesRepository },
     GetUserSettingsUseCase,

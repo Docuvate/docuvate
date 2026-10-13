@@ -30,6 +30,7 @@ import {
 import { formatConnectorError } from '../lib/connectorErrors';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../lib/connectorOAuthSetupDoc';
+import { isCeSourceConnectorPlugin, useCeFeatureFlags } from '../lib/ceFeatureFlags';
 import { routes } from '../lib/routes';
 
 function capabilityLabel(t: (key: string) => string, role: 'source' | 'sink') {
@@ -40,6 +41,7 @@ type CategoryFilter = 'all' | ConnectorCategoryId;
 
 export function ConnectorsPage() {
   const { t } = useTranslation();
+  const ceFlags = useCeFeatureFlags();
   const { pushSuccess, pushError } = useToastNotify();
   const [catalog, setCatalog] = useState<ConnectorCatalogResponse | null>(null);
   const [installations, setInstallations] = useState<ConnectorInstallationDto[]>([]);
@@ -88,6 +90,9 @@ export function ConnectorsPage() {
     if (!catalog) return [];
     const query = searchQuery.trim().toLowerCase();
     return catalog.plugins.filter((plugin) => {
+      if (!ceFlags.sourceConnectors && isCeSourceConnectorPlugin(plugin.id)) {
+        return false;
+      }
       if (categoryFilter !== 'all' && plugin.categoryId !== categoryFilter) {
         return false;
       }
@@ -96,7 +101,7 @@ export function ConnectorsPage() {
       const description = t(plugin.descriptionKey).toLowerCase();
       return label.includes(query) || description.includes(query);
     });
-  }, [catalog, categoryFilter, searchQuery, t]);
+  }, [catalog, categoryFilter, ceFlags.sourceConnectors, searchQuery, t]);
 
   const categoryOrder = useMemo(
     () => new Map(catalog?.categories.map((category, index) => [category.id, index]) ?? []),
@@ -119,6 +124,9 @@ export function ConnectorsPage() {
     return category ? t(category.labelKey) : plugin.categoryId;
   }
   const showSftpScannerCard = useMemo(() => {
+    if (!ceFlags.sourceConnectors) {
+      return false;
+    }
     if (categoryFilter !== 'all' && categoryFilter !== 'scanner_sftp') {
       return false;
     }
@@ -134,7 +142,7 @@ export function ConnectorsPage() {
       .join(' ')
       .toLowerCase();
     return haystack.includes(query);
-  }, [categoryFilter, searchQuery, t]);
+  }, [categoryFilter, ceFlags.sourceConnectors, searchQuery, t]);
 
   async function submitConnect(payload: {
     displayName: string;
