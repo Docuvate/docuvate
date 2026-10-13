@@ -17,45 +17,20 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      docker: ${{ steps.filter.outputs.docker }}
-      k8s: ${{ steps.filter.outputs.k8s }}
-      sftp: ${{ steps.filter.outputs.sftp }}
-      site: ${{ steps.filter.outputs.site }}
-      worker: ${{ steps.filter.outputs.worker }}
-      migrations: ${{ steps.filter.outputs.migrations }}
-      api: ${{ steps.filter.outputs.api }}
+      docker: ${{ steps.paths.outputs.docker }}
+      k8s: ${{ steps.paths.outputs.k8s }}
+      sftp: ${{ steps.paths.outputs.sftp }}
+      site: ${{ steps.paths.outputs.site }}
+      worker: ${{ steps.paths.outputs.worker }}
+      migrations: ${{ steps.paths.outputs.migrations }}
+      api: ${{ steps.paths.outputs.api }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
-        id: filter
-        with:
-          filters: |
-            docker:
-              - 'apps/**/Dockerfile'
-              - 'docker-compose*.yml'
-              - 'apps/worker/pyproject.toml'
-              - 'apps/worker/uv.lock'
-              - 'pnpm-lock.yaml'
-            k8s:
-              - 'deploy/**'
-              - 'tools/k8s-*'
-              - 'charts/**'
-            sftp:
-              - 'apps/sftp-ingest/**'
-            site:
-              - 'apps/site/**'
-              - 'packages/tokens/**'
-            worker:
-              - 'apps/worker/**'
-              - 'bench/**'
-            migrations:
-              - 'apps/api/**/migrations/**'
-            api:
-              - 'apps/api/**'
-              - 'packages/contracts/**'
-              - 'packages/otel/**'
+      - name: Path filters (git diff)
+        id: paths
+        run: bash scripts/ci/ci-path-filters.sh
 
   quick-checks:
     runs-on: ubuntu-latest
@@ -93,7 +68,8 @@ jobs:
         with:
           node-version-file: .tool-versions
           cache: pnpm
-      - uses: nrwl/nx-set-shas@3e9ad7370203c1e93d109be57f3b72eb0eb511b1 # v4
+      - name: Set NX_BASE / NX_HEAD for affected
+        run: bash scripts/ci/nx-set-shas.sh
       - run: pnpm install --frozen-lockfile
       - name: Cache Nx
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
