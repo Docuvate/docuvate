@@ -17,6 +17,10 @@ import {
   readPassageIds,
   requestUrl,
 } from '../helpers/json.js';
+import {
+  createIntegrationResolveFeatureFlags,
+  enableLocalChatModelForIntegration,
+} from '../helpers/cited-chat-integration-feature-flags.js';
 import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
@@ -55,8 +59,10 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
   let retrieval: PgCitedChatRetrievalRepository;
   let threads: PgDocumentChatThreadRepository;
   let generation: CitedChatGenerationService;
+  let restoreLocalChatFlag: () => void;
 
   beforeAll(async () => {
+    restoreLocalChatFlag = enableLocalChatModelForIntegration();
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {

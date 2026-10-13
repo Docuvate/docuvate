@@ -16,6 +16,10 @@ import {
   readPassageIds,
   requestUrl,
 } from '../helpers/json.js';
+import {
+  createIntegrationResolveFeatureFlags,
+  enableLocalChatModelForIntegration,
+} from '../helpers/cited-chat-integration-feature-flags.js';
 import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
@@ -38,8 +42,10 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
   let threads: PgDocumentChatThreadRepository;
   let retrieval: PgCitedChatRetrievalRepository;
   let service: CitedChatGenerationService;
+  let restoreLocalChatFlag: () => void;
 
   beforeAll(async () => {
+    restoreLocalChatFlag = enableLocalChatModelForIntegration();
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
@@ -88,7 +94,8 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
       noopEmbedding,
       retrieval,
       new PgChatMessageCitationsRepository(pool),
-      passthroughChatQueryRouter()
+      passthroughChatQueryRouter(),
+      createIntegrationResolveFeatureFlags(pool)
     );
   }, 60_000);
 
@@ -98,6 +105,7 @@ describe('cited chat German fixtures (Testcontainers Postgres)', () => {
   });
 
   afterAll(async () => {
+    restoreLocalChatFlag();
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
   });
