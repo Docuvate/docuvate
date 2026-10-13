@@ -8,18 +8,18 @@ import {
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
+import { EncoderReindexProgressDto } from '../../../shared/presentation/dtos/encoder-reindex.dto.js';
 import {
   DocumentChatProviderListResponseDto,
   ExtractionEngineListResponseDto,
   UpdateUserSettingsRequestDto,
   UserSettingsResponseDto,
 } from '../../../shared/presentation/dtos/settings.dto.js';
-import { EncoderReindexProgressDto } from '../../../shared/presentation/dtos/encoder-reindex.dto.js';
-import { GetEncoderReindexProgressUseCase } from '../../representation/application/get-encoder-reindex-progress.use-case.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { GetEncoderReindexProgressUseCase } from '../../representation/application/get-encoder-reindex-progress.use-case.js';
 import { EffectiveDocumentChatProviderUseCase } from '../application/effective-document-chat-provider.use-case.js';
 import { GetHardwareCapabilitiesUseCase } from '../application/hardware-capabilities.use-case.js';
 import { ListDocumentChatProvidersUseCase } from '../application/list-document-chat-providers.use-case.js';
