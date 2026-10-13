@@ -62,7 +62,7 @@ async function buildService(deps: {
           queryRouter: ChatQueryRouterService
         ) => {
           const resolveFeatureFlags = {
-            execute: vi.fn().mockResolvedValue({ exactAnswers: false }),
+            execute: vi.fn().mockResolvedValue({ exactAnswers: false, answerAbstention: false }),
           };
           const exactFactQueryRouter = { parse: vi.fn().mockReturnValue(null) };
           const exactFactChat = { execute: vi.fn().mockResolvedValue(null) };

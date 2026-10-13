@@ -6,12 +6,15 @@ import type { ExactFactQueryRouterService } from '../../src/modules/exact-facts/
 import type { TryExactFactChatAnswerUseCase } from '../../src/modules/exact-facts/application/try-exact-fact-chat-answer.use-case.js';
 import type { ResolveFeatureFlagsUseCase } from '../../src/modules/feature-flags/application/resolve-feature-flags.use-case.js';
 
-export function disabledExactFactChatDeps(flags: FeatureFlagsDto = {
+const DEFAULT_DISABLED_FLAGS: FeatureFlagsDto = {
   layoutReconstructionCompare: false,
   sourceConnectors: false,
   experimentalResearchModels: false,
   exactAnswers: false,
-}): {
+  answerAbstention: false,
+};
+
+export function disabledExactFactChatDeps(flags: FeatureFlagsDto = DEFAULT_DISABLED_FLAGS): {
   resolveFeatureFlags: Pick<ResolveFeatureFlagsUseCase, 'execute'>;
   exactFactQueryRouter: Pick<ExactFactQueryRouterService, 'parse'>;
   exactFactChat: Pick<TryExactFactChatAnswerUseCase, 'execute'>;
