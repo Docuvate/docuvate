@@ -19,6 +19,7 @@ import 'package:docuvate/src/generated/src/api/invitations_api.dart';
 import 'package:docuvate/src/generated/src/api/labels_api.dart';
 import 'package:docuvate/src/generated/src/api/models_api.dart';
 import 'package:docuvate/src/generated/src/api/organizer_api.dart';
+import 'package:docuvate/src/generated/src/api/remote_config_api.dart';
 import 'package:docuvate/src/generated/src/api/search_api.dart';
 import 'package:docuvate/src/generated/src/api/settings_api.dart';
 import 'package:docuvate/src/generated/src/api/sftp_ingress_api.dart';
@@ -136,6 +137,12 @@ class DocuvateApi {
   /// by doing that all interceptors will not be executed
   OrganizerApi getOrganizerApi() {
     return OrganizerApi(dio, serializers);
+  }
+
+  /// Get RemoteConfigApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  RemoteConfigApi getRemoteConfigApi() {
+    return RemoteConfigApi(dio, serializers);
   }
 
   /// Get SearchApi instance, base route and serializer can be overridden by a given but be careful,

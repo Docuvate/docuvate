@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAdvancedFeaturesEnabled } from '../../lib/advancedFeatures';
-import { useCeFeatureFlags } from '../../lib/ceFeatureFlags';
+import { useFeatureFlags } from '../../lib/remoteConfig';
 import { hasExtractedContent, isExtractionPending } from '../../lib/documentExtractionState';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
@@ -52,9 +52,9 @@ export function DocumentExtractionSection({
 }: DocumentExtractionSectionProps) {
   const { t } = useTranslation();
   const { advancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
-  const ceFlags = useCeFeatureFlags();
+  const featureFlags = useFeatureFlags();
   const researchToolsEnabled =
-    ceFlags.experimentalResearchModels && advancedFeaturesEnabled;
+    featureFlags.experimentalResearchModels && advancedFeaturesEnabled;
   const fullText = doc.extraction?.text ?? '';
   const extractionMarkdown = doc.extraction?.markdown ?? null;
   const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;

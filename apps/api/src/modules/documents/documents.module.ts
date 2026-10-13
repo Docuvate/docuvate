@@ -9,6 +9,7 @@ import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.m
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
 import { ExtractionQueueService } from '../extraction/infrastructure/extraction-queue.service.js';
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
+import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { LabelsModule } from '../labels/labels.module.js';
 import { RepresentationModule } from '../representation/representation.module.js';
 import { SearchModule } from '../search/search.module.js';
@@ -59,6 +60,7 @@ import { DocumentsController } from './presentation/documents.controller.js';
     RepresentationModule,
     CitedChatModule,
     ChatInfrastructureModule,
+    FeatureFlagsModule,
   ],
   controllers: [DocumentsController],
   providers: [

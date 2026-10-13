@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { CeFeatureFlagsDto } from '@docuvate/contracts';
+import type { RemoteConfigDto } from '@docuvate/contracts';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CeFeatureFlagsResponseDto implements CeFeatureFlagsDto {
+export class FeatureFlagsResponseDto {
   @ApiProperty()
   layoutReconstructionCompare!: boolean;
 
@@ -12,4 +12,9 @@ export class CeFeatureFlagsResponseDto implements CeFeatureFlagsDto {
 
   @ApiProperty()
   experimentalResearchModels!: boolean;
+}
+
+export class RemoteConfigResponseDto implements RemoteConfigDto {
+  @ApiProperty({ type: FeatureFlagsResponseDto })
+  featureFlags!: FeatureFlagsResponseDto;
 }

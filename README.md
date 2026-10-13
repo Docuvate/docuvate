@@ -123,7 +123,7 @@ Docker Compose runs **PostgreSQL 18.6** (`postgres:18.6-alpine`). Fresh installs
 2. Pull new images: `docker compose pull api web worker migrate` (or set `DOCUVATE_*_IMAGE` to a release tag).
 3. Run `docker compose up -d` (migrate runs as a one-shot before API/worker).
 
-CE non-core features (layout compare, SFTP/Paperless sources, experimental research models) stay **off** unless you set the `DOCUVATE_CE_FEATURE_*` variables in `.env` (see `.env.example`).
+Non-core features (layout compare, SFTP/Paperless sources, experimental research models) default **off** via `DOCUVATE_FEATURE_*` in `.env` (see `.env.example`). Tenants can override flags in the database; the web app loads resolved values from `GET /v1/remote-config` after sign-in.
 
 Local development without Docker also expects **PostgreSQL 18.6** (or compatible 18.x), plus MinIO, Valkey, and the Node / Python / uv versions from `.tool-versions` for API, web, and worker.
 

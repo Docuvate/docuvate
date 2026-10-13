@@ -9187,6 +9187,76 @@
         ]
       }
     },
+    "/remote-config": {
+      "get": {
+        "operationId": "getRemoteConfig",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoteConfigResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Resolved feature flags for the current tenant",
+        "tags": [
+          "remote-config"
+        ]
+      }
+    },
     "/saved-views": {
       "get": {
         "operationId": "listSavedDocumentViews",
@@ -9899,76 +9969,6 @@
           }
         ],
         "summary": "Update user settings",
-        "tags": [
-          "Settings"
-        ]
-      }
-    },
-    "/settings/ce": {
-      "get": {
-        "operationId": "getCeFeatureFlags",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CeFeatureFlagsResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "apiKeyAuth": []
-          },
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Community Edition installation feature flags",
         "tags": [
           "Settings"
         ]
@@ -11315,25 +11315,6 @@
           }
         }
       },
-      "CeFeatureFlagsResponseDto": {
-        "type": "object",
-        "properties": {
-          "layoutReconstructionCompare": {
-            "type": "boolean"
-          },
-          "sourceConnectors": {
-            "type": "boolean"
-          },
-          "experimentalResearchModels": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "layoutReconstructionCompare",
-          "sourceConnectors",
-          "experimentalResearchModels"
-        ]
-      },
       "ChatMessageDto": {
         "type": "object",
         "properties": {
@@ -12450,6 +12431,25 @@
           "engines"
         ]
       },
+      "FeatureFlagsResponseDto": {
+        "type": "object",
+        "properties": {
+          "layoutReconstructionCompare": {
+            "type": "boolean"
+          },
+          "sourceConnectors": {
+            "type": "boolean"
+          },
+          "experimentalResearchModels": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "layoutReconstructionCompare",
+          "sourceConnectors",
+          "experimentalResearchModels"
+        ]
+      },
       "FolderListResponseDto": {
         "type": "object",
         "properties": {
@@ -13421,6 +13421,17 @@
         },
         "required": [
           "phrases"
+        ]
+      },
+      "RemoteConfigResponseDto": {
+        "type": "object",
+        "properties": {
+          "featureFlags": {
+            "$ref": "#/components/schemas/FeatureFlagsResponseDto"
+          }
+        },
+        "required": [
+          "featureFlags"
         ]
       },
       "ReorderSavedDocumentViewsRequestDto": {

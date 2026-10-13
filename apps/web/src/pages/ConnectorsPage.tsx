@@ -27,7 +27,7 @@ import {
   listConnectorInstallations,
   startConnectorOAuth,
 } from '../lib/api';
-import { isCeSourceConnectorPlugin, useCeFeatureFlags } from '../lib/ceFeatureFlags';
+import { isSourceConnectorPlugin, useFeatureFlags } from '../lib/remoteConfig';
 import { formatConnectorError } from '../lib/connectorErrors';
 import { connectorOAuthConfigured, connectorOAuthMissingEnvVars } from '../lib/connectorOAuth';
 import { connectorsOAuthSetupDocUrl } from '../lib/connectorOAuthSetupDoc';
@@ -41,7 +41,7 @@ type CategoryFilter = 'all' | ConnectorCategoryId;
 
 export function ConnectorsPage() {
   const { t } = useTranslation();
-  const ceFlags = useCeFeatureFlags();
+  const featureFlags = useFeatureFlags();
   const { pushSuccess, pushError } = useToastNotify();
   const [catalog, setCatalog] = useState<ConnectorCatalogResponse | null>(null);
   const [installations, setInstallations] = useState<ConnectorInstallationDto[]>([]);
@@ -90,7 +90,7 @@ export function ConnectorsPage() {
     if (!catalog) return [];
     const query = searchQuery.trim().toLowerCase();
     return catalog.plugins.filter((plugin) => {
-      if (!ceFlags.sourceConnectors && isCeSourceConnectorPlugin(plugin.id)) {
+      if (!featureFlags.sourceConnectors && isSourceConnectorPlugin(plugin.id)) {
         return false;
       }
       if (categoryFilter !== 'all' && plugin.categoryId !== categoryFilter) {
@@ -101,7 +101,7 @@ export function ConnectorsPage() {
       const description = t(plugin.descriptionKey).toLowerCase();
       return label.includes(query) || description.includes(query);
     });
-  }, [catalog, categoryFilter, ceFlags.sourceConnectors, searchQuery, t]);
+  }, [catalog, categoryFilter, featureFlags.sourceConnectors, searchQuery, t]);
 
   const categoryOrder = useMemo(
     () => new Map(catalog?.categories.map((category, index) => [category.id, index]) ?? []),
@@ -124,7 +124,7 @@ export function ConnectorsPage() {
     return category ? t(category.labelKey) : plugin.categoryId;
   }
   const showSftpScannerCard = useMemo(() => {
-    if (!ceFlags.sourceConnectors) {
+    if (!featureFlags.sourceConnectors) {
       return false;
     }
     if (categoryFilter !== 'all' && categoryFilter !== 'scanner_sftp') {
@@ -142,7 +142,7 @@ export function ConnectorsPage() {
       .join(' ')
       .toLowerCase();
     return haystack.includes(query);
-  }, [categoryFilter, ceFlags.sourceConnectors, searchQuery, t]);
+  }, [categoryFilter, featureFlags.sourceConnectors, searchQuery, t]);
 
   async function submitConnect(payload: {
     displayName: string;

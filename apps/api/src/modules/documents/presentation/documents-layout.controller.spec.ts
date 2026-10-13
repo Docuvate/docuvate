@@ -18,6 +18,7 @@ import {
 } from '../../duplicates/application/duplicate-stack.use-cases.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
 import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
@@ -80,9 +81,14 @@ describe('DocumentsController layout routes', () => {
 
   let controller: DocumentsController;
 
+  const resolveFeatureFlags = {
+    execute: vi.fn(),
+    assertEnabled: vi.fn().mockResolvedValue(undefined),
+  };
+
   beforeEach(async () => {
-    process.env.DOCUVATE_CE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE = 'true';
     vi.restoreAllMocks();
+    resolveFeatureFlags.assertEnabled.mockResolvedValue(undefined);
     getDocumentLayoutIr.execute.mockReset();
     getDocumentLayoutHtml.execute.mockReset();
     getDocumentLayoutTypst.execute.mockReset();
@@ -128,7 +134,8 @@ describe('DocumentsController layout routes', () => {
             setDuplicateStackPrimary: SetDuplicateStackPrimaryUseCase,
             confirmDuplicateVersion: ConfirmDuplicateVersionUseCase,
             releaseDuplicateStackMember: ReleaseDuplicateStackMemberUseCase,
-            restoreDuplicateStackPair: RestoreDuplicateStackPairUseCase
+            restoreDuplicateStackPair: RestoreDuplicateStackPairUseCase,
+            resolveFeatureFlagsUseCase: ResolveFeatureFlagsUseCase
           ) =>
             new DocumentsController(
               uploadDocument,
@@ -164,7 +171,8 @@ describe('DocumentsController layout routes', () => {
               setDuplicateStackPrimary,
               confirmDuplicateVersion,
               releaseDuplicateStackMember,
-              restoreDuplicateStackPair
+              restoreDuplicateStackPair,
+              resolveFeatureFlagsUseCase
             ),
           inject: [
             UploadDocumentUseCase,
@@ -201,8 +209,10 @@ describe('DocumentsController layout routes', () => {
             ConfirmDuplicateVersionUseCase,
             ReleaseDuplicateStackMemberUseCase,
             RestoreDuplicateStackPairUseCase,
+            ResolveFeatureFlagsUseCase,
           ],
         },
+        { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
         { provide: UploadDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: GetDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: ListDocumentsUseCase, useValue: useCaseExecuteMock() },

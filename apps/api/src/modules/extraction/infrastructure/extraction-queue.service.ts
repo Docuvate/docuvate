@@ -4,7 +4,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
-import { ceFeatureFlags } from '../../../shared/application/assert-ce-feature.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
 import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
@@ -36,7 +36,8 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private readonly runExtraction: RunExtractionUseCase,
-    private readonly runArenaSample: RunArenaSampleCompareUseCase
+    private readonly runArenaSample: RunArenaSampleCompareUseCase,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -53,8 +54,9 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           await this.runArenaSample.execute(documentId);
           return;
         }
+        const userId = parseString(requireRecord(job.data).userId).trim();
         await this.runExtraction.execute(documentId);
-        await this.maybeEnqueueArenaSample(documentId);
+        await this.maybeEnqueueArenaSample(documentId, userId);
       },
       { connection: this.connection }
     );
@@ -78,8 +80,9 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     this.logger.debug(`Enqueued extraction for document ${documentId}`);
   }
 
-  async maybeEnqueueArenaSample(documentId: string): Promise<void> {
-    if (!ceFeatureFlags().experimentalResearchModels) {
+  async maybeEnqueueArenaSample(documentId: string, tenantId: string): Promise<void> {
+    const flags = await this.resolveFeatureFlags.execute(tenantId);
+    if (!flags.experimentalResearchModels) {
       return;
     }
     const rate = arenaSampleRate();

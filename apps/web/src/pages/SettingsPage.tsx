@@ -31,7 +31,7 @@ import {
 import { formatUserFacingError } from '../lib/apiErrors';
 import { authClient, authSessionUserEmail } from '../lib/auth-client';
 import { performSignOut } from '../lib/authSignOut';
-import { useCeFeatureFlags } from '../lib/ceFeatureFlags';
+import { useFeatureFlags } from '../lib/remoteConfig';
 import { chatProviderLabel } from '../lib/chatProviderLabels';
 import { extractionEngineDescription } from '../lib/extractionEngineI18n';
 import { readLocationStateBoolean } from '../lib/routerLocationState';
@@ -55,7 +55,7 @@ export function SettingsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { advancedFeaturesEnabled, setAdvancedFeaturesEnabled } = useAdvancedFeaturesEnabled();
-  const ceFlags = useCeFeatureFlags();
+  const featureFlags = useFeatureFlags();
   const { data } = authClient.useSession();
   const accountEmail = authSessionUserEmail(data);
   const [settings, setSettings] = useState<UserSettingsDto | null>(null);
@@ -251,7 +251,7 @@ export function SettingsPage() {
           ) : null}
         </SettingsSectionCard>
 
-        {ceFlags.experimentalResearchModels ? (
+        {featureFlags.experimentalResearchModels ? (
           <SettingsSectionCard
             compact
             icon={<FlaskConical {...settingsIconProps} />}

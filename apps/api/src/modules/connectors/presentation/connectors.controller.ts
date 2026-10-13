@@ -19,8 +19,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { assertCeFeatureEnabled } from '../../../shared/application/assert-ce-feature.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
   AuthGuard,
   type AuthSession,
@@ -70,20 +70,27 @@ export class ConnectorsController {
     private readonly deleteInstallation: DeleteConnectorInstallationUseCase,
     private readonly listImportables: ListConnectorImportablesUseCase,
     private readonly importFromConnector: ImportFromConnectorUseCase,
-    private readonly exportToConnector: ExportToConnectorUseCase
+    private readonly exportToConnector: ExportToConnectorUseCase,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   @Get('catalog')
   @ApiDocuvateRoute({ operationId: 'getConnectorCatalog', summary: 'Connector plugin catalog' })
-  getCatalog(@AuthSubject() subject: AuthorizationSubject): ConnectorCatalogResponse {
+  async getCatalog(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject
+  ): Promise<ConnectorCatalogResponse> {
     const viewerIsServerAdmin = isInstanceAdmin(subject);
-    return this.catalog.execute({ viewerIsServerAdmin });
+    return this.catalog.execute({ viewerIsServerAdmin, tenantId: session.user.id });
   }
 
   @Get('plugins/:pluginId')
   @ApiDocuvateRoute({ operationId: 'getConnectorPlugin', summary: 'Connector plugin descriptor' })
-  getPluginSchema(@Param() params: ConnectorPluginIdParamDto): ConnectorPluginCatalogEntryDto {
-    return this.getPlugin.execute(params.pluginId);
+  async getPluginSchema(
+    @Session() session: AuthSession,
+    @Param() params: ConnectorPluginIdParamDto
+  ): Promise<ConnectorPluginCatalogEntryDto> {
+    return this.getPlugin.execute(session.user.id, params.pluginId);
   }
 
   @Get('installations')
@@ -160,9 +167,10 @@ export class ConnectorsController {
     summary: 'Probe remote SFTP host key fingerprint',
   })
   async probeSftpHost(
+    @Session() session: AuthSession,
     @Body() body: SftpFetchHostProbeRequest
   ): Promise<SftpFetchHostProbeResponse> {
-    assertCeFeatureEnabled('sourceConnectors');
+    await this.resolveFeatureFlags.assertEnabled(session.user.id, 'sourceConnectors');
     return probeSftpFetchHost({
       host: body.host,
       port: String(body.port ?? 22),

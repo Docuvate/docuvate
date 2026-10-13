@@ -107,11 +107,15 @@ if command -v free >/dev/null 2>&1; then
   free -h | awk '/^Mem:/ {print "RAM: " $3 " used / " $2 " total (" $7 " available)"}'
 fi
 
-section "CE feature flags (API)"
-if flags="$(curl -fsS http://localhost:3001/v1/settings/ce 2>/dev/null)"; then
-  ok "GET /v1/settings/ce → $flags"
+section "Feature flag defaults (API env)"
+if docker compose ps api --status running -q 2>/dev/null | grep -q .; then
+  for key in DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE DOCUVATE_FEATURE_SOURCE_CONNECTORS DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS; do
+    val="$(docker compose exec -T api printenv "$key" 2>/dev/null || true)"
+    ok "${key}=${val:-<unset>}"
+  done
+  echo "NOTE: Resolved per-tenant flags: GET /v1/remote-config (authenticated)"
 else
-  warn "could not read CE flags from API"
+  warn "API not running; skip feature flag env check"
 fi
 
 echo ""

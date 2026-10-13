@@ -24,6 +24,7 @@ import { Corrections20261011180000 } from './migrations/20261011180000-correctio
 import { RepairPeriodDuplicateStacks20261011200000 } from './migrations/20261011200000-repair-period-duplicate-stacks.js';
 import { DuplicatePairLabels20261011210000 } from './migrations/20261011210000-duplicate-pair-labels.js';
 import { DocumentRepresentation20261012120000 } from './migrations/20261012120000-document-representation.js';
+import { FeatureFlags20261013120000 } from './migrations/20261013120000-feature-flags.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -49,6 +50,7 @@ const EXPECTED_MIGRATIONS = [
   RepairPeriodDuplicateStacks20261011200000,
   DuplicatePairLabels20261011210000,
   DocumentRepresentation20261012120000,
+  FeatureFlags20261013120000,
 ];
 
 describe('buildTypeOrmOptions', () => {

@@ -22,17 +22,17 @@ Application images default to `ghcr.io/docuvate/docuvate-{api,web,worker}:edge`.
 
 Never use `docker compose down -v` on production data: it deletes Postgres and orphan policies only protect MinIO when the DB is empty.
 
-## CE feature flags
+## Feature flags
 
-Non-core capabilities default **off** in Community Edition. Set in `.env` (API container):
+Installation-wide **defaults** (when a tenant has no override row) are set in `.env` on the API container:
 
 | Variable | When `true` |
 |----------|-------------|
-| `DOCUVATE_CE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE` | Layout reconstruction / SSIM compare (Nachbau/Vergleich) |
-| `DOCUVATE_CE_FEATURE_SOURCE_CONNECTORS` | SFTP scanner ingress, SFTP fetch, Paperless-ngx connectors |
-| `DOCUVATE_CE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS` | Arena engine compare and non-default extractors |
+| `DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE` | Layout reconstruction / SSIM compare (Nachbau/Vergleich) |
+| `DOCUVATE_FEATURE_SOURCE_CONNECTORS` | SFTP scanner ingress, SFTP fetch, Paperless-ngx connectors |
+| `DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS` | Arena engine compare and non-default extractors |
 
-`GET /v1/settings/ce` returns the effective flags (no auth).
+Per-tenant overrides are stored in `feature_flag` (tenant id + flag key + enabled). Authenticated clients resolve flags via `GET /v1/remote-config` (override wins over env default).
 
 ## Volumes
 

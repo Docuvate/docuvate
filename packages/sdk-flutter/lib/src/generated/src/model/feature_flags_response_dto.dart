@@ -6,16 +6,16 @@
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
-part 'ce_feature_flags_response_dto.g.dart';
+part 'feature_flags_response_dto.g.dart';
 
-/// CeFeatureFlagsResponseDto
+/// FeatureFlagsResponseDto
 ///
 /// Properties:
 /// * [layoutReconstructionCompare] 
 /// * [sourceConnectors] 
 /// * [experimentalResearchModels] 
 @BuiltValue()
-abstract class CeFeatureFlagsResponseDto implements Built<CeFeatureFlagsResponseDto, CeFeatureFlagsResponseDtoBuilder> {
+abstract class FeatureFlagsResponseDto implements Built<FeatureFlagsResponseDto, FeatureFlagsResponseDtoBuilder> {
   @BuiltValueField(wireName: r'layoutReconstructionCompare')
   bool get layoutReconstructionCompare;
 
@@ -25,27 +25,27 @@ abstract class CeFeatureFlagsResponseDto implements Built<CeFeatureFlagsResponse
   @BuiltValueField(wireName: r'experimentalResearchModels')
   bool get experimentalResearchModels;
 
-  CeFeatureFlagsResponseDto._();
+  FeatureFlagsResponseDto._();
 
-  factory CeFeatureFlagsResponseDto([void updates(CeFeatureFlagsResponseDtoBuilder b)]) = _$CeFeatureFlagsResponseDto;
+  factory FeatureFlagsResponseDto([void updates(FeatureFlagsResponseDtoBuilder b)]) = _$FeatureFlagsResponseDto;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(CeFeatureFlagsResponseDtoBuilder b) => b;
+  static void _defaults(FeatureFlagsResponseDtoBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<CeFeatureFlagsResponseDto> get serializer => _$CeFeatureFlagsResponseDtoSerializer();
+  static Serializer<FeatureFlagsResponseDto> get serializer => _$FeatureFlagsResponseDtoSerializer();
 }
 
-class _$CeFeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<CeFeatureFlagsResponseDto> {
+class _$FeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<FeatureFlagsResponseDto> {
   @override
-  final Iterable<Type> types = const [CeFeatureFlagsResponseDto, _$CeFeatureFlagsResponseDto];
+  final Iterable<Type> types = const [FeatureFlagsResponseDto, _$FeatureFlagsResponseDto];
 
   @override
-  final String wireName = r'CeFeatureFlagsResponseDto';
+  final String wireName = r'FeatureFlagsResponseDto';
 
   Iterable<Object?> _serializeProperties(
     Serializers serializers,
-    CeFeatureFlagsResponseDto object, {
+    FeatureFlagsResponseDto object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'layoutReconstructionCompare';
@@ -68,7 +68,7 @@ class _$CeFeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<CeFea
   @override
   Object serialize(
     Serializers serializers,
-    CeFeatureFlagsResponseDto object, {
+    FeatureFlagsResponseDto object, {
     FullType specifiedType = FullType.unspecified,
   }) {
     return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
@@ -79,7 +79,7 @@ class _$CeFeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<CeFea
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
     required List<Object?> serializedList,
-    required CeFeatureFlagsResponseDtoBuilder result,
+    required FeatureFlagsResponseDtoBuilder result,
     required List<Object?> unhandled,
   }) {
     for (var i = 0; i < serializedList.length; i += 2) {
@@ -116,12 +116,12 @@ class _$CeFeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<CeFea
   }
 
   @override
-  CeFeatureFlagsResponseDto deserialize(
+  FeatureFlagsResponseDto deserialize(
     Serializers serializers,
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    final result = CeFeatureFlagsResponseDtoBuilder();
+    final result = FeatureFlagsResponseDtoBuilder();
     final serializedList = (serialized as Iterable<Object?>).toList();
     final unhandled = <Object?>[];
     _deserializeProperties(

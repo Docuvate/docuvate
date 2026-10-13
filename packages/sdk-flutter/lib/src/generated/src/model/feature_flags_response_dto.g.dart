@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'ce_feature_flags_response_dto.dart';
+part of 'feature_flags_response_dto.dart';
 
 // **************************************************************************
 // BuiltValueGenerator
 // **************************************************************************
 
-class _$CeFeatureFlagsResponseDto extends CeFeatureFlagsResponseDto {
+class _$FeatureFlagsResponseDto extends FeatureFlagsResponseDto {
   @override
   final bool layoutReconstructionCompare;
   @override
@@ -14,36 +14,36 @@ class _$CeFeatureFlagsResponseDto extends CeFeatureFlagsResponseDto {
   @override
   final bool experimentalResearchModels;
 
-  factory _$CeFeatureFlagsResponseDto(
-          [void Function(CeFeatureFlagsResponseDtoBuilder)? updates]) =>
-      (new CeFeatureFlagsResponseDtoBuilder()..update(updates))._build();
+  factory _$FeatureFlagsResponseDto(
+          [void Function(FeatureFlagsResponseDtoBuilder)? updates]) =>
+      (new FeatureFlagsResponseDtoBuilder()..update(updates))._build();
 
-  _$CeFeatureFlagsResponseDto._(
+  _$FeatureFlagsResponseDto._(
       {required this.layoutReconstructionCompare,
       required this.sourceConnectors,
       required this.experimentalResearchModels})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(layoutReconstructionCompare,
-        r'CeFeatureFlagsResponseDto', 'layoutReconstructionCompare');
+        r'FeatureFlagsResponseDto', 'layoutReconstructionCompare');
     BuiltValueNullFieldError.checkNotNull(
-        sourceConnectors, r'CeFeatureFlagsResponseDto', 'sourceConnectors');
+        sourceConnectors, r'FeatureFlagsResponseDto', 'sourceConnectors');
     BuiltValueNullFieldError.checkNotNull(experimentalResearchModels,
-        r'CeFeatureFlagsResponseDto', 'experimentalResearchModels');
+        r'FeatureFlagsResponseDto', 'experimentalResearchModels');
   }
 
   @override
-  CeFeatureFlagsResponseDto rebuild(
-          void Function(CeFeatureFlagsResponseDtoBuilder) updates) =>
+  FeatureFlagsResponseDto rebuild(
+          void Function(FeatureFlagsResponseDtoBuilder) updates) =>
       (toBuilder()..update(updates)).build();
 
   @override
-  CeFeatureFlagsResponseDtoBuilder toBuilder() =>
-      new CeFeatureFlagsResponseDtoBuilder()..replace(this);
+  FeatureFlagsResponseDtoBuilder toBuilder() =>
+      new FeatureFlagsResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is CeFeatureFlagsResponseDto &&
+    return other is FeatureFlagsResponseDto &&
         layoutReconstructionCompare == other.layoutReconstructionCompare &&
         sourceConnectors == other.sourceConnectors &&
         experimentalResearchModels == other.experimentalResearchModels;
@@ -61,7 +61,7 @@ class _$CeFeatureFlagsResponseDto extends CeFeatureFlagsResponseDto {
 
   @override
   String toString() {
-    return (newBuiltValueToStringHelper(r'CeFeatureFlagsResponseDto')
+    return (newBuiltValueToStringHelper(r'FeatureFlagsResponseDto')
           ..add('layoutReconstructionCompare', layoutReconstructionCompare)
           ..add('sourceConnectors', sourceConnectors)
           ..add('experimentalResearchModels', experimentalResearchModels))
@@ -69,10 +69,10 @@ class _$CeFeatureFlagsResponseDto extends CeFeatureFlagsResponseDto {
   }
 }
 
-class CeFeatureFlagsResponseDtoBuilder
+class FeatureFlagsResponseDtoBuilder
     implements
-        Builder<CeFeatureFlagsResponseDto, CeFeatureFlagsResponseDtoBuilder> {
-  _$CeFeatureFlagsResponseDto? _$v;
+        Builder<FeatureFlagsResponseDto, FeatureFlagsResponseDtoBuilder> {
+  _$FeatureFlagsResponseDto? _$v;
 
   bool? _layoutReconstructionCompare;
   bool? get layoutReconstructionCompare => _$this._layoutReconstructionCompare;
@@ -89,11 +89,11 @@ class CeFeatureFlagsResponseDtoBuilder
   set experimentalResearchModels(bool? experimentalResearchModels) =>
       _$this._experimentalResearchModels = experimentalResearchModels;
 
-  CeFeatureFlagsResponseDtoBuilder() {
-    CeFeatureFlagsResponseDto._defaults(this);
+  FeatureFlagsResponseDtoBuilder() {
+    FeatureFlagsResponseDto._defaults(this);
   }
 
-  CeFeatureFlagsResponseDtoBuilder get _$this {
+  FeatureFlagsResponseDtoBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
       _layoutReconstructionCompare = $v.layoutReconstructionCompare;
@@ -105,33 +105,33 @@ class CeFeatureFlagsResponseDtoBuilder
   }
 
   @override
-  void replace(CeFeatureFlagsResponseDto other) {
+  void replace(FeatureFlagsResponseDto other) {
     ArgumentError.checkNotNull(other, 'other');
-    _$v = other as _$CeFeatureFlagsResponseDto;
+    _$v = other as _$FeatureFlagsResponseDto;
   }
 
   @override
-  void update(void Function(CeFeatureFlagsResponseDtoBuilder)? updates) {
+  void update(void Function(FeatureFlagsResponseDtoBuilder)? updates) {
     if (updates != null) updates(this);
   }
 
   @override
-  CeFeatureFlagsResponseDto build() => _build();
+  FeatureFlagsResponseDto build() => _build();
 
-  _$CeFeatureFlagsResponseDto _build() {
+  _$FeatureFlagsResponseDto _build() {
     final _$result = _$v ??
-        new _$CeFeatureFlagsResponseDto._(
+        new _$FeatureFlagsResponseDto._(
             layoutReconstructionCompare: BuiltValueNullFieldError.checkNotNull(
                 layoutReconstructionCompare,
-                r'CeFeatureFlagsResponseDto',
+                r'FeatureFlagsResponseDto',
                 'layoutReconstructionCompare'),
             sourceConnectors: BuiltValueNullFieldError.checkNotNull(
                 sourceConnectors,
-                r'CeFeatureFlagsResponseDto',
+                r'FeatureFlagsResponseDto',
                 'sourceConnectors'),
             experimentalResearchModels: BuiltValueNullFieldError.checkNotNull(
                 experimentalResearchModels,
-                r'CeFeatureFlagsResponseDto',
+                r'FeatureFlagsResponseDto',
                 'experimentalResearchModels'));
     replace(_$result);
     return _$result;

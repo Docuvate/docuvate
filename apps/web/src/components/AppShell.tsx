@@ -8,7 +8,7 @@ import { writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
 import { getUserSettings } from '../lib/api';
 import { authClient, authSessionUserId } from '../lib/auth-client';
 import { markAuthenticatedSessionHint } from '../lib/authSessionHint';
-import { ensureCeFeatureFlagsLoaded } from '../lib/ceFeatureFlags';
+import { ensureRemoteConfigLoaded } from '../lib/remoteConfig';
 import { applyUserSettingsUiPreferences } from '../lib/syncUserUiPreferences';
 import { useNarrowTopbar } from '../lib/useNarrowTopbar';
 import { AppSidebar } from './layout/AppSidebar';
@@ -25,14 +25,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const { data: session } = authClient.useSession();
 
   useEffect(() => {
-    void ensureCeFeatureFlagsLoaded();
-  }, []);
-
-  useEffect(() => {
     if (session?.session) {
       markAuthenticatedSessionHint();
     }
   }, [session?.session]);
+
+  useEffect(() => {
+    const userId = authSessionUserId(session);
+    if (!userId) {
+      return;
+    }
+    void ensureRemoteConfigLoaded();
+  }, [session]);
 
   useEffect(() => {
     const userId = authSessionUserId(session);

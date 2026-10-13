@@ -9,7 +9,7 @@ import type {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useCeFeatureFlags } from '../../lib/ceFeatureFlags';
+import { useFeatureFlags } from '../../lib/remoteConfig';
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
@@ -119,8 +119,8 @@ export function DocumentLayoutWorkspace({
     layoutIrPages
   );
 
-  const ceFlags = useCeFeatureFlags();
-  const layoutAdvancedEnabled = ceFlags.layoutReconstructionCompare;
+  const featureFlags = useFeatureFlags();
+  const layoutAdvancedEnabled = featureFlags.layoutReconstructionCompare;
 
   const [leftMode, setLeftMode] = useState<LeftDocumentMode>('original');
   const [advancedOpen, setAdvancedOpen] = useState(false);

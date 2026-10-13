@@ -8,7 +8,7 @@ import type {
   AdminUserListResponse,
   ApplyLabelCorrectionResponse,
   BanAdminUserRequest,
-  CeFeatureFlagsDto,
+  RemoteConfigDto,
   ConfirmLabelRecommendationBlocklistPatternRequest,
   ConnectorCatalogResponse,
   ConnectorInstallationDto,
@@ -768,8 +768,8 @@ export async function getUserSettings(): Promise<UserSettingsDto> {
   return request<UserSettingsDto>('/settings');
 }
 
-export async function getCeFeatureFlags(): Promise<CeFeatureFlagsDto> {
-  return request<CeFeatureFlagsDto>('/settings/ce');
+export async function getRemoteConfig(): Promise<RemoteConfigDto> {
+  return request<RemoteConfigDto>('/remote-config');
 }
 
 export async function globalSearch(

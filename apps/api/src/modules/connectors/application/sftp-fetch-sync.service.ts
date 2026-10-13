@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import type pg from 'pg';
 
-import { ceFeatureFlags } from '../../../shared/application/assert-ce-feature.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { UploadDocumentUseCase } from '../../documents/application/upload-document.use-case.js';
 import { validateScanFile } from '../../sftp-ingress/domain/scan-file-validation.js';
@@ -33,13 +33,11 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
   constructor(
     @Inject(PG_POOL) private readonly pool: pg.Pool,
     private readonly runtime: ConnectorRuntimeResolver,
-    private readonly uploadDocument: UploadDocumentUseCase
+    private readonly uploadDocument: UploadDocumentUseCase,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
   ) {}
 
   onApplicationBootstrap(): void {
-    if (!ceFeatureFlags().sourceConnectors) {
-      return;
-    }
     const intervalMs = Number(process.env['DOCUVATE_SFTP_FETCH_SYNC_INTERVAL_MS'] ?? 60_000);
     if (intervalMs <= 0) return;
     const runTick = () => {
@@ -86,6 +84,10 @@ export class SftpFetchSyncService implements OnApplicationBootstrap, OnModuleDes
     userId: string,
     credentials: Record<string, string>
   ): Promise<void> {
+    const flags = await this.resolveFeatureFlags.execute(userId);
+    if (!flags.sourceConnectors) {
+      return;
+    }
     const pollSeconds = Number(readConnectorConfigString(credentials, 'poll_interval_seconds') || '60');
     const pollMs = Number.isFinite(pollSeconds) && pollSeconds >= 60 ? pollSeconds * 1000 : 60_000;
     const lastRun = await this.pool.query<{ last_run_at: Date | null }>(

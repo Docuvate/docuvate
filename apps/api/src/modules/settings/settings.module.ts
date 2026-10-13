@@ -3,6 +3,7 @@
 import { Module } from '@nestjs/common';
 
 import { USER_PREFERENCES_REPOSITORY } from '../../shared/domain/ports.js';
+import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { WorkspaceModule } from '../workspace/workspace.module.js';
 import { EffectiveDocumentChatProviderUseCase } from './application/effective-document-chat-provider.use-case.js';
 import { GetHardwareCapabilitiesUseCase } from './application/hardware-capabilities.use-case.js';
@@ -15,12 +16,11 @@ import {
   UpdateUserSettingsUseCase,
 } from './application/settings.use-cases.js';
 import { PgUserPreferencesRepository } from './infrastructure/pg-user-preferences.repository.js';
-import { CeSettingsController } from './presentation/ce-settings.controller.js';
 import { SettingsController } from './presentation/settings.controller.js';
 
 @Module({
-  imports: [WorkspaceModule],
-  controllers: [SettingsController, CeSettingsController],
+  imports: [WorkspaceModule, FeatureFlagsModule],
+  controllers: [SettingsController],
   providers: [
     { provide: USER_PREFERENCES_REPOSITORY, useClass: PgUserPreferencesRepository },
     GetUserSettingsUseCase,

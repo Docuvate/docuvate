@@ -3,6 +3,7 @@
 import { Module } from '@nestjs/common';
 
 import { DocumentPipelineModule } from '../document-pipeline/document-pipeline.module.js';
+import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { DocumentsModule } from '../documents/documents.module.js';
 import { DuplicatesModule } from '../duplicates/duplicates.module.js';
 import { SearchModule } from '../search/search.module.js';
@@ -48,6 +49,7 @@ import { PgConnectorInstallationRepository } from './infrastructure/pg-connector
 import { ConnectorOAuthCallbackGuard } from './presentation/connector-oauth-callback.guard.js';
 import { ConnectorsController } from './presentation/connectors.controller.js';
 import { ConnectorsOAuthController } from './presentation/connectors-oauth.controller.js';
+import { SourceConnectorsFeatureGuard } from '../../shared/infrastructure/auth/feature-flag.guard.js';
 import { PaperlessImportController } from './presentation/paperless-import.controller.js';
 
 const MAIL_CATEGORY = {
@@ -81,7 +83,7 @@ const SCANNER_SFTP_CATEGORY = {
 };
 
 @Module({
-  imports: [DocumentsModule, DuplicatesModule, DocumentPipelineModule, SearchModule],
+  imports: [DocumentsModule, DuplicatesModule, DocumentPipelineModule, SearchModule, FeatureFlagsModule],
   controllers: [ConnectorsController, ConnectorsOAuthController, PaperlessImportController],
   providers: [
     ConnectorRegistry,
@@ -113,6 +115,7 @@ const SCANNER_SFTP_CATEGORY = {
     StartMailOAuthUseCase,
     CompleteMailOAuthUseCase,
     ConnectorOAuthCallbackGuard,
+    SourceConnectorsFeatureGuard,
     {
       provide: 'CONNECTOR_REGISTRY_BOOTSTRAP',
       useFactory: (registry: ConnectorRegistry) => {
