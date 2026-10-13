@@ -78,12 +78,21 @@ describe('exact fact index (Testcontainers Postgres)', () => {
     expect(rowsA[0]?.char_start).toBe(10);
 
     const rowsB = await withTenantPgClient(pool, userB, async (client) => {
-      const result = await client.query<{ id: string }>(
-        `SELECT id FROM document_extracted_fact WHERE document_id = $1`,
-        [documentA]
+      const result = await client.query<{ predicate_key: string }>(
+        `SELECT predicate_key FROM document_extracted_fact WHERE tenant_id = $1`,
+        [userB]
       );
       return result.rows;
     });
     expect(rowsB).toEqual([]);
+
+    const crossTenantPeek = await withTenantPgClient(pool, userB, async (client) => {
+      const result = await client.query<{ count: string }>(
+        `SELECT COUNT(*)::text AS count FROM document_extracted_fact WHERE document_id = $1`,
+        [documentA]
+      );
+      return result.rows[0]?.count ?? '0';
+    });
+    expect(crossTenantPeek).toBe('0');
   });
 });
