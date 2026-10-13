@@ -106,6 +106,10 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version-file: .tool-versions
+      - name: Install typst and poppler (layout unit tests)
+        run: |
+          bash scripts/ci/install-typst.sh
+          sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils fonts-dejavu-core fonts-noto-cjk
       - name: Worker lint and unit tests
         working-directory: apps/worker
         run: bash scripts/ci/worker-ci.sh
