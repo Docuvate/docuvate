@@ -3,8 +3,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 pip install 'uv==0.12.23' >/dev/null
-uv venv .venv
+VENV="${DOCUVATE_WORKER_VENV:-.venv-ci-lint}"
+uv venv "$VENV"
 uv pip install -e ".[dev]" >/dev/null
-.venv/bin/ruff check src
-.venv/bin/pyright
-.venv/bin/mypy
+"$VENV/bin/ruff" check src
+"$VENV/bin/pyright"
+"$VENV/bin/mypy"
