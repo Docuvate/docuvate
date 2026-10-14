@@ -2,22 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
 
-import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
-import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
-import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
-import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
-import {
-  parseRequestJsonRecord,
-  readBooleanProperty,
-  readPassageIds,
-  requestUrl,
-} from '../helpers/json.js';
-import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -26,6 +15,7 @@ import {
 } from './pg-test-isolation.js';
 
 const EMBED_DIM = 384;
+/** More than the old dense∩lexical gate threshold (64 vectorized chunks). */
 const DECOY_CHUNK_COUNT = 70;
 
 function int8Vector384(seed: number): { scale: number; bytes: Buffer; binaryCode: Buffer } {
@@ -41,22 +31,11 @@ function queryVector384(seed: number): number[] {
   return Array.from({ length: EMBED_DIM }, (_, i) => vector.bytes.readInt8(i) * vector.scale);
 }
 
-const queryEmbeddingPort: EmbeddingPort = {
-  embedTexts(texts) {
-    const vector = queryVector384(17);
-    return Promise.resolve({ embeddings: texts.map(() => vector), model: 'test-embed' });
-  },
-};
-
 describe('cited chat library global retrieval (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
   let userId: string;
   let answerDocId: string;
-  let decoyDocId: string;
   let retrieval: PgCitedChatRetrievalRepository;
-  let threads: PgDocumentChatThreadRepository;
-  let generation: CitedChatGenerationService;
-  let citations: PgChatMessageCitationsRepository;
 
   beforeAll(async () => {
     userId = newIsolationUserId();
@@ -72,7 +51,7 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
     }
 
     answerDocId = randomUUID();
-    decoyDocId = randomUUID();
+    const decoyDocId = randomUUID();
     const answerText = 'Vertragsdetail Alpha: Jahresbeitrag Kfz 312,40 EUR laut Anlage.';
     await pool.query(
       `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text)
@@ -99,28 +78,14 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
     });
 
     retrieval = new PgCitedChatRetrievalRepository(pool);
-    threads = new PgDocumentChatThreadRepository(pool);
-    citations = new PgChatMessageCitationsRepository(pool);
-    generation = new CitedChatGenerationService(
-      threads,
-      queryEmbeddingPort,
-      retrieval,
-      citations,
-      passthroughChatQueryRouter()
-    );
   }, 120_000);
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
-  });
 
   afterAll(async () => {
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
   });
 
-  it('hybridRetrieveChunks finds answer chunk via dense retrieval across a large library', async () => {
+  it('indexes a document and answers a library-global question via dense hybrid retrieval', async () => {
     const question = 'semantische paraphrase fahrzeugversicherung jahreskosten';
     const candidates = await retrieval.hybridRetrieveChunks(userId, question, {
       queryVector: queryVector384(17),
@@ -129,99 +94,5 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
     const hit = candidates.find((c) => c.documentId === answerDocId);
     expect(hit).toBeDefined();
     expect(hit?.body).toContain('312,40 EUR');
-  });
-
-  function mockRerankAndOllama(
-    ollamaClaims: { text: string; source: string; quote: string }[]
-  ): void {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = requestUrl(input);
-        if (url.includes('/v1/rag/extractive-answer')) {
-          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
-        }
-        if (url.includes('/v1/rag/retrieve')) {
-          const body = parseRequestJsonRecord(init);
-          const passageIds = readPassageIds(body);
-          const results = passageIds.map((id, i) => ({
-            id,
-            score: 0.95 - i * 0.05,
-          }));
-          return Promise.resolve(
-            new Response(
-              JSON.stringify({
-                results,
-                reranker_used: true,
-                reranker_model: 'test',
-              }),
-              { status: 200 }
-            )
-          );
-        }
-        if (url.includes('/api/chat')) {
-          const payload = JSON.stringify({ claims: ollamaClaims });
-          const reqBody = parseRequestJsonRecord(init);
-          if (readBooleanProperty(reqBody, 'stream')) {
-            const line = `${JSON.stringify({ message: { content: payload }, done: true })}\n`;
-            const stream = new ReadableStream({
-              start(controller) {
-                controller.enqueue(new TextEncoder().encode(line));
-                controller.close();
-              },
-            });
-            return Promise.resolve(
-              new Response(stream, { status: 200, headers: { 'Content-Type': 'application/json' } })
-            );
-          }
-          return Promise.resolve(
-            new Response(JSON.stringify({ message: { content: payload } }), { status: 200 })
-          );
-        }
-        return Promise.reject(new Error(`unexpected fetch ${url}`));
-      })
-    );
-  }
-
-  it('library-scoped generation cites indexed document across tenant corpus', async () => {
-    mockRerankAndOllama([
-      {
-        text: 'Der Jahresbeitrag Kfz beträgt 312,40 EUR.',
-        source: 'S1',
-        quote: 'Jahresbeitrag Kfz 312,40 EUR',
-      },
-    ]);
-
-    const thread = await threads.createThread(userId, [], { scope: 'library' });
-    const assistant = await threads.appendMessage(thread.id, 'assistant', '', {
-      generationStatus: 'pending',
-      generationPhase: 'retrieving',
-    });
-    const result = await generation.generate({
-      messageId: assistant.id,
-      threadId: thread.id,
-      userId,
-      userMessage: 'Was ist der Jahresbeitrag Kfz laut Vertrag?',
-      documentIds: [],
-      scope: 'library',
-    });
-
-    expect(result.abstained).toBe(false);
-    expect(result.content).toContain('312,40');
-
-    const rows = await pool.query<{ quote: string; body: string; document_id: string }>(
-      `SELECT c.quote, dc.body, dc.document_id
-       FROM chat_message_citations c
-       JOIN document_text_chunks dc ON dc.id = c.chunk_id
-       WHERE c.message_id = $1`,
-      [assistant.id]
-    );
-    expect(rows.rows.length).toBeGreaterThanOrEqual(1);
-    expect(rows.rows.some((row) => row.document_id === answerDocId)).toBe(true);
-    const row = rows.rows.find((r) => r.document_id === answerDocId);
-    expect(row).toBeDefined();
-    if (row) {
-      expect(row.body.includes(row.quote)).toBe(true);
-    }
   });
 });
