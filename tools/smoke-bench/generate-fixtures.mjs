@@ -73,6 +73,30 @@ const docs = [
       'Budget cap for Q2: USD 18,500.',
     ],
   },
+  {
+    file: '10-smart-dup-a.pdf',
+    lines: [
+      'NORDWIND ENERGIE GMBH',
+      'Musterstrasse 12 80331 Muenchen',
+      'Rechnung Nr. 2024-1001',
+      'Datum: 01.06.2024',
+      'Position Beschreibung Betrag',
+      '1 Beratungsleistung',
+      'Gesamtbetrag EUR 199.00',
+    ],
+  },
+  {
+    file: '11-smart-dup-b.pdf',
+    lines: [
+      'NORDWIND ENERGIE GMBH',
+      'Musterstrasse 12 80331 Muenchen',
+      'Rechnung Nr. 2024-1001',
+      'Datum: 01.06.2024',
+      'Position Beschreibung Betrag',
+      '1 Beratungsleistung',
+      'Gesamtbetrag EUR 199.OO',
+    ],
+  },
 ];
 
 for (const doc of docs) {

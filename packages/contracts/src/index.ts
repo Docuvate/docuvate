@@ -293,7 +293,7 @@ export interface UpdateFolderRequest {
   mappeId?: string | null;
 }
 
-export type DuplicateCandidateSource = 'hash' | 'embedding';
+export type DuplicateCandidateSource = 'hash' | 'embedding' | 'smart';
 
 export interface DuplicateCandidateDto {
   id: string;

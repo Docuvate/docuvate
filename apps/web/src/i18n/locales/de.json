@@ -446,6 +446,7 @@
     "duplicateDismiss": "Verwerfen",
     "duplicateSourceHash": "identische Datei",
     "duplicateSourceEmbedding": "Inhalt ähnlich",
+    "duplicateSourceSmart": "Wahrscheinlich erneuter Scan",
     "pdfPageOf": "Seite {{current}} von {{total}}",
     "pdfPagesProgress": "Seite {{loaded}} von {{total}} …",
     "pdfPageCount_one": "{{count}} Seite",

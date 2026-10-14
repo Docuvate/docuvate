@@ -20,6 +20,7 @@ from docuvate_worker.application.embedding_density import (
 )
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
+from docuvate_worker.application.smart_duplicates_service import find_smart_duplicate_candidates
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.representation.constants import ENCODER_REVISION
 from docuvate_worker.domain.representation.encode import encode_units
@@ -27,6 +28,7 @@ from docuvate_worker.domain.representation.units import (
     RepresentationUnit,
     paragraph_units_from_text,
 )
+from docuvate_worker.domain.smart_duplicates.config import SmartDuplicateConfig
 from docuvate_worker.infrastructure.chat.context_qa import (
     extractive_answer_from_passages,
     retrieve_document_rag_context,
@@ -101,6 +103,9 @@ from docuvate_worker.presentation.schemas import (
     RagRetrieveResponse,
     RagRetrieveResultItem,
     RepresentationFromTextRequest,
+    SmartDuplicateDetectRequest,
+    SmartDuplicateDetectResponse,
+    SmartDuplicateHitModel,
 )
 
 router = APIRouter(prefix="/v1")
@@ -486,6 +491,38 @@ def embedding_density_train(
         body.unlabeled_vectors,
     )
     return EmbeddingDensityTrainResponse(state=EmbeddingDensityStateModel(**trained.model_dump()))
+
+
+@router.post("/ml/smart-duplicates/detect", response_model=SmartDuplicateDetectResponse)
+def smart_duplicates_detect(
+    body: SmartDuplicateDetectRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> SmartDuplicateDetectResponse:
+    _require_worker_secret(x_worker_secret)
+    cfg_model = body.config
+    config = (
+        SmartDuplicateConfig(
+            alpha=cfg_model.alpha,
+            delta=cfg_model.delta,
+            threshold=cfg_model.threshold,
+            shingle_size=cfg_model.shingle_size,
+            minhash_perm=cfg_model.minhash_perm,
+        )
+        if cfg_model is not None
+        else None
+    )
+    hits = find_smart_duplicate_candidates(
+        focus_document_id=body.focus_document_id,
+        focus_lines=body.focus_lines,
+        peer_documents=[(peer.document_id, peer.lines) for peer in body.peers],
+        config=config,
+    )
+    return SmartDuplicateDetectResponse(
+        candidates=[
+            SmartDuplicateHitModel(document_id=hit.document_id, similarity=hit.similarity)
+            for hit in hits
+        ]
+    )
 
 
 @router.post("/embed", response_model=EmbedResponse)

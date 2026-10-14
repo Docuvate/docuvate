@@ -10,6 +10,7 @@ import {
   LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { cosineSimilarity } from '../../labels/domain/cosine.js';
 import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
 import {
@@ -17,6 +18,8 @@ import {
   compareInputFromEmbeddingPeer,
 } from '../domain/duplicate-compare-input.js';
 import { readDuplicateDetectionConfig } from '../domain/duplicate-detection.config.js';
+import { extractionTextToLines } from '../domain/extraction-lines.js';
+import { HttpSmartDuplicatesAdapter } from '../infrastructure/http-smart-duplicates.adapter.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
 
 @Injectable()
@@ -28,11 +31,14 @@ export class ApplyDuplicateDetectionUseCase {
     @Inject(DUPLICATE_REPOSITORY) private readonly duplicates: DuplicateRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly embeddings: LabelEmbeddingRepository,
     private readonly classifier: DuplicateClassifierService,
-    private readonly linkDuplicatePair: LinkDuplicatePairUseCase
+    private readonly linkDuplicatePair: LinkDuplicatePairUseCase,
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
+    private readonly smartDuplicates: HttpSmartDuplicatesAdapter
   ) {}
 
   async execute(documentId: string, userId: string, contentHash: string | null): Promise<void> {
     const config = readDuplicateDetectionConfig();
+    const flags = await this.resolveFeatureFlags.execute(userId);
 
     try {
       if (contentHash) {
@@ -49,6 +55,12 @@ export class ApplyDuplicateDetectionUseCase {
 
       const sourceDoc = await this.documents.findByIdForUser(documentId, userId);
       if (!sourceDoc) return;
+
+      if (flags.smartDuplicates) {
+        await this.applySmartDuplicateHints(documentId, userId, sourceDoc);
+        return;
+      }
+
       const left = compareInputFromDocument(sourceDoc);
 
       const vector = await this.embeddings.getDocumentEmbedding(documentId);
@@ -95,6 +107,48 @@ export class ApplyDuplicateDetectionUseCase {
     } catch (error: unknown) {
       this.logger.warn(
         `Duplicate detection skipped for ${documentId}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  private async applySmartDuplicateHints(
+    documentId: string,
+    userId: string,
+    sourceDoc: NonNullable<Awaited<ReturnType<DocumentRepository['findByIdForUser']>>>
+  ): Promise<void> {
+    const focusLines = extractionTextToLines(sourceDoc.extraction?.text ?? null);
+    if (focusLines.length === 0) return;
+
+    const correspondentId = sourceDoc.correspondent?.id ?? null;
+    const documentDate = sourceDoc.documentDate ?? null;
+    const peers = await this.duplicates.listSmartDuplicatePeers(
+      userId,
+      documentId,
+      correspondentId,
+      documentDate
+    );
+    if (peers.length === 0) return;
+
+    const peerInputs = peers
+      .map((peer) => ({
+        documentId: peer.documentId,
+        lines: extractionTextToLines(peer.extractedText),
+      }))
+      .filter((peer) => peer.lines.length > 0);
+
+    if (peerInputs.length === 0) return;
+
+    const hits = await this.smartDuplicates.detectCandidates(documentId, focusLines, peerInputs);
+    for (const hit of hits) {
+      if (await this.duplicates.isPairDismissed(userId, documentId, hit.documentId)) {
+        continue;
+      }
+      await this.duplicates.upsertCandidate(
+        userId,
+        documentId,
+        hit.documentId,
+        hit.similarity,
+        'smart'
       );
     }
   }

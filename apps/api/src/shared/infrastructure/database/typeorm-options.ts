@@ -27,6 +27,7 @@ import { DuplicatePairLabels20261011210000 } from './migrations/20261011210000-d
 import { DocumentRepresentation20261012120000 } from './migrations/20261012120000-document-representation.js';
 import { FeatureFlags20261013120000 } from './migrations/20261013120000-feature-flags.js';
 import { UserChatCloudLlm20261013120000 } from './migrations/20261013120000-user-chat-cloud-llm.js';
+import { SmartDuplicates20261013180000 } from './migrations/20261013180000-smart-duplicates.js';
 import { FeatureFlagMlKeys20261013200000 } from './migrations/20261013200000-feature-flag-ml-keys.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
@@ -76,8 +77,9 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DuplicatePairLabels20261011210000,
       DocumentRepresentation20261012120000,
       FeatureFlags20261013120000,
-      FeatureFlagMlKeys20261013200000,
       UserChatCloudLlm20261013120000,
+      SmartDuplicates20261013180000,
+      FeatureFlagMlKeys20261013200000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

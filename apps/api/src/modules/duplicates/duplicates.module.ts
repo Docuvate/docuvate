@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 
+import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { LabelsModule } from '../labels/labels.module.js';
 import { ApplyDuplicateDetectionUseCase } from './application/apply-duplicate-detection.use-case.js';
 import {
@@ -20,10 +21,12 @@ import {
 } from './application/duplicate-stack.use-cases.js';
 import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-duplicates.use-case.js';
 import { DuplicateClassifierService } from './domain/duplicate-classifier.service.js';
+import { HttpSmartDuplicatesAdapter } from './infrastructure/http-smart-duplicates.adapter.js';
 
 @Module({
-  imports: [LabelsModule],
+  imports: [LabelsModule, FeatureFlagsModule],
   providers: [
+    HttpSmartDuplicatesAdapter,
     SyncUserHashDuplicatesUseCase,
     DuplicateClassifierService,
     ApplyDuplicateDetectionUseCase,
