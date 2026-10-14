@@ -25,5 +25,6 @@ export function parseDocumentListQuery(params: DocumentListQueryDto): DocumentLi
     documentDateTo: params.documentDateTo,
     sort: params.sort,
     order: params.order,
+    includeTagSuggestions: params.includeTagSuggestions ?? undefined,
   };
 }

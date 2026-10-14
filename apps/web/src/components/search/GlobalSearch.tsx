@@ -385,18 +385,18 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                     role="listbox"
                     aria-label={t('search.fieldSuggestions')}
                   >
-                    {fieldSuggestions.map((name) => (
+                    {fieldSuggestions.map((field) => (
                       <button
-                        key={name}
+                        key={field.key}
                         type="button"
                         className="global-search-field-suggestion"
                         onClick={() => {
                           const parts = query.trim().split(/\s+/);
-                          parts[parts.length - 1] = `${name}:`;
+                          parts[parts.length - 1] = `${field.key}:`;
                           setQuery(`${parts.join(' ')} `);
                         }}
                       >
-                        {name}:
+                        {field.label}:
                       </button>
                     ))}
                   </div>

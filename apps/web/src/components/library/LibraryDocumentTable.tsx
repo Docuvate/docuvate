@@ -33,7 +33,7 @@ import {
   showLegacyDuplicateHint,
 } from './duplicateStackLabel';
 import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
-import { documentDisplayDate } from './libraryDocumentUtils';
+import { documentDisplayDateParts } from './libraryDocumentUtils';
 
 type SortField = 'title' | 'documentDate' | 'updatedAt';
 
@@ -80,7 +80,22 @@ export function LibraryDocumentTable({
   suppressFolderFallbackForId,
   visibleColumns,
 }: LibraryDocumentTableProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
+  const renderDocumentDate = (doc: DocumentDto) => {
+    const parts = documentDisplayDateParts(doc, dateLocale);
+    return (
+      <>
+        {parts.text}
+        {parts.isUploadFallback ? (
+          <span className="library-date-fallback muted" title={t('library.dateUploadFallback')}>
+            {' '}
+            *
+          </span>
+        ) : null}
+      </>
+    );
+  };
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [stackMembers, setStackMembers] = useState<
     Partial<Record<string, DuplicateStackMemberDto[]>>
@@ -302,7 +317,7 @@ export function LibraryDocumentTable({
                     </div>
                     <div className="library-doc-stack-meta">
                       <div className="library-doc-stack-meta-main">
-                        <DocumentLabelsCell tags={doc.tags} />
+                        <DocumentLabelsCell document={doc} onRefresh={onRefresh} />
                         {doc.duplicateStack?.pendingReview ? (
                           <span className="badge badge-warn">{t('library.reviewPending')}</span>
                         ) : isExtractionPending(doc.status) ? (
@@ -314,7 +329,7 @@ export function LibraryDocumentTable({
                         ) : (
                           <Badge status={doc.status} />
                         )}
-                        <span className="library-doc-stack-date">{documentDisplayDate(doc)}</span>
+                        <span className="library-doc-stack-date">{renderDocumentDate(doc)}</span>
                       </div>
                       <div className="library-doc-stack-meta-actions">
                         {hasStack ? (
@@ -555,7 +570,7 @@ export function LibraryDocumentTable({
                     ) : null}
                     {showLabelsCol ? (
                       <td className="library-col-labels">
-                        <DocumentLabelsCell tags={doc.tags} />
+                        <DocumentLabelsCell document={doc} onRefresh={onRefresh} />
                       </td>
                     ) : null}
                     {showStatusCol ? (
@@ -579,7 +594,7 @@ export function LibraryDocumentTable({
                       </td>
                     ) : null}
                     {showDateCol ? (
-                      <td className="library-col-date">{documentDisplayDate(doc)}</td>
+                      <td className="library-col-date">{renderDocumentDate(doc)}</td>
                     ) : null}
                     <td className="library-col-action">
                       <div className="library-row-actions">

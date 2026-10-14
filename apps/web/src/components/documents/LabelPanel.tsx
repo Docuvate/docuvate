@@ -13,6 +13,7 @@ import {
   removeDocumentTag,
   withdrawDocumentLabelCorrection,
 } from '../../lib/api';
+import { DocumentLabelSuggestionChips } from './DocumentLabelSuggestionChips';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
@@ -211,6 +212,16 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
         </h2>
         <p className="muted detail-section-lead">{t('documents.labelPanelLead')}</p>
       </header>
+
+      <DocumentLabelSuggestionChips
+        documentId={document.id}
+        suggestions={document.tagSuggestions ?? []}
+        assignedTagIds={assignedIds}
+        disabled={busy !== null}
+        onUpdated={async () => {
+          onUpdated(await getDocument(document.id));
+        }}
+      />
 
       {showNestRow ? (
         <div className="label-nest-correction" data-ux="label-nest-correction">

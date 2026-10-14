@@ -105,6 +105,15 @@ export class DocumentListQueryDto {
   @IsOptional()
   @IsIn(SORT_ORDERS)
   order?: SortOrder;
+
+  @ApiPropertyOptional({
+    type: Boolean,
+    description: 'When true, include open tag suggestions on each document.',
+  })
+  @IsOptional()
+  @Transform(({ value }) => parseOptionalQueryBoolean(value))
+  @IsBoolean()
+  includeTagSuggestions?: boolean;
 }
 
 export class UpdateDocumentRequestDto implements UpdateDocumentRequest {

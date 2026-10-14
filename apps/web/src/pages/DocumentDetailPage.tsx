@@ -9,7 +9,7 @@ import type {
   TagDto,
   UserSettingsDto,
 } from '@docuvate/contracts';
-import { parseSuggestionStorageKey } from '@docuvate/contracts';
+import { parseSuggestionStorageKey, semanticFieldKey } from '@docuvate/contracts';
 import { ArrowLeft } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,7 +48,10 @@ import {
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { authClient, authSessionUserId } from '../lib/auth-client';
-import { pickAutoDocumentDateFromFields } from '../lib/documentAutoDocumentDate';
+import {
+  isoDateFromExtractedValue,
+  pickAutoDocumentDateFromFields,
+} from '../lib/documentAutoDocumentDate';
 import {
   readCitationPageFromLocationState,
   readHighlightBlocksFromLocationState,
@@ -543,6 +546,13 @@ export function DocumentDetailPage() {
       if (kept.some((f) => f.key === key)) return prev;
       return [...kept, { key, value, confidence: 0.9 }];
     });
+    if (key === 'date' || semanticFieldKey({ key, value }) === 'date') {
+      const iso = isoDateFromExtractedValue(value);
+      if (iso) {
+        setDocumentDate(iso);
+        setDocumentDateAuto(false);
+      }
+    }
   }, []);
 
   if (loading) return <DocumentDetailLoadingShell />;

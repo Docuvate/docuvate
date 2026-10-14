@@ -28,6 +28,7 @@ interface Props {
   tagColorById: Record<string, string>;
   loading?: boolean;
   busyId: string | null;
+  documentReviewPendingCount?: number;
   onAccept: (item: LabelRecommendationDto) => void | Promise<void>;
   onRename: (item: LabelRecommendationDto) => void;
   onDismiss: (
@@ -196,12 +197,23 @@ export function LabelsTodoQueue(props: Props) {
   }
 
   if (props.items.length === 0) {
+    const openDocumentSuggestions = (props.documentReviewPendingCount ?? 0) > 0;
     return (
       <Card className="label-rec-panel labels-todo-panel">
         <TodoHead />
-        <p className="muted labels-todo-empty">{t('labels.todoEmpty')}</p>
-        <p className="muted labels-todo-empty-hint">{t('labels.todoEmptyHint')}</p>
-        <p className="muted labels-todo-empty-hint">{t('labels.embeddingDensityReadinessHint')}</p>
+        {openDocumentSuggestions ? (
+          <>
+            <p className="muted labels-todo-empty-hint">{t('labels.todoDocumentReviewOpen')}</p>
+            <Link to={routes.reviewQueue} className="labels-todo-review-link">
+              {t('labels.todoDocumentReviewLink', { count: props.documentReviewPendingCount ?? 0 })}
+            </Link>
+          </>
+        ) : (
+          <>
+            <p className="muted labels-todo-empty">{t('labels.todoEmpty')}</p>
+            <p className="muted labels-todo-empty-hint">{t('labels.todoEmptyHint')}</p>
+          </>
+        )}
       </Card>
     );
   }

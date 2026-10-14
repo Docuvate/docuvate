@@ -48,7 +48,13 @@ import { DocumentChatGenerationActiveRegistry } from './infrastructure/document-
 import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from './infrastructure/document-chat-generation-queue.service.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
+import { AcceptDocumentReviewBatchUseCase } from './application/document-review/accept-document-review-batch.use-case.js';
+import { AcceptDocumentReviewUseCase } from './application/document-review/accept-document-review.use-case.js';
+import { ListDocumentReviewQueueUseCase } from './application/document-review/list-document-review-queue.use-case.js';
+import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
+import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
 import { DocumentsController } from './presentation/documents.controller.js';
+import { ReviewQueueController } from './presentation/review-queue.controller.js';
 
 @Module({
   imports: [
@@ -66,8 +72,13 @@ import { DocumentsController } from './presentation/documents.controller.js';
     ExactFactsModule,
     RecognizedFieldsModule,
   ],
-  controllers: [DocumentsController],
+  controllers: [DocumentsController, ReviewQueueController],
   providers: [
+    PgDocumentReviewQueueRepository,
+    ListDocumentReviewQueueUseCase,
+    AcceptDocumentReviewUseCase,
+    AcceptDocumentReviewBatchUseCase,
+    PromoteHighConfidenceExtractionSuggestionsUseCase,
     UploadDocumentUseCase,
     GetDocumentUseCase,
     ListDocumentsUseCase,

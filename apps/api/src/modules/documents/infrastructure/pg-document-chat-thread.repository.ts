@@ -110,6 +110,7 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
        FROM chat_threads t
        LEFT JOIN chat_thread_documents ctd ON ctd.thread_id = t.id
        WHERE t.user_id = $1 AND t.scope = 'library'
+         AND EXISTS (SELECT 1 FROM chat_messages m WHERE m.thread_id = t.id)
        GROUP BY t.id
        ORDER BY t.updated_at DESC`,
       [userId]

@@ -154,6 +154,7 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     ApplyEmbeddingSuggestionsUseCase,
     RefreshEmbeddingSuggestionsUseCase,
     LoadDocumentLabelSuggestionsUseCase,
+    AcceptTagSuggestionUseCase,
     LABEL_EMBEDDING_REPOSITORY,
     EMBEDDING_PORT,
     PgEmbeddingDensityRepository,

@@ -218,6 +218,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'mappe' | 'ordner-ro
       folderId: mode === 'folder' ? folderId : undefined,
       mappeId: mode === 'mappe' ? mappeId : undefined,
       tagId: undefined,
+      includeTagSuggestions: true,
     };
   }, [filters, query, mode, folderId, mappeId]);
 

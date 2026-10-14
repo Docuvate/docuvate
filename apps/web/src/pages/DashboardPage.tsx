@@ -7,12 +7,19 @@ import type {
 } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 
 import { DashboardWidgets } from '../components/dashboard/DashboardWidgets';
 import { useToastNotify } from '../components/save/ToastProvider';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
-import { getDashboardLayout, listSavedDocumentViews, replaceDashboardLayout } from '../lib/api';
+import {
+  getDashboardLayout,
+  getDocumentReviewQueueSummary,
+  listSavedDocumentViews,
+  replaceDashboardLayout,
+} from '../lib/api';
+import { routes } from '../lib/routes';
 
 const ADDABLE_WIDGET_TYPES: DashboardWidgetType[] = [
   'upload',
@@ -40,6 +47,7 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [addType, setAddType] = useState<DashboardWidgetType>('statistics');
   const [addViewId, setAddViewId] = useState('');
+  const [reviewPendingCount, setReviewPendingCount] = useState(0);
 
   const addableWidgetTypes = useMemo(
     () =>
@@ -70,6 +78,12 @@ export function DashboardPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    void getDocumentReviewQueueSummary()
+      .then((summary) => { setReviewPendingCount(summary.pendingCount); })
+      .catch(() => { setReviewPendingCount(0); });
+  }, [widgets]);
 
   useEffect(() => {
     if (addableWidgetTypes.length === 0) {
@@ -140,6 +154,13 @@ export function DashboardPage() {
         <div>
           <h1>{t('dashboard.title')}</h1>
           <p className="muted">{t('dashboard.lead')}</p>
+          {reviewPendingCount > 0 ? (
+            <p className="dashboard-review-cta">
+              <Link to={routes.reviewQueue} className="dashboard-review-link">
+                {t('dashboard.reviewQueueLink', { count: reviewPendingCount })}
+              </Link>
+            </p>
+          ) : null}
         </div>
         <div className="dashboard-header-actions">
           <Button

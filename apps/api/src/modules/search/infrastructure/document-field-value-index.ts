@@ -4,6 +4,7 @@ import {
   type CustomFieldType,
   dedupeExtractedFields,
   type ExtractedField,
+  parseSuggestionStorageKey,
 } from '@docuvate/contracts';
 
 import {
@@ -31,6 +32,10 @@ export interface FieldDefinitionLookup {
 
 /** Display label for a storage key without a catalog entry (`global:due_date` -> `Due Date`). */
 export function defaultFieldLabel(storageKey: string): string {
+  const suggestionSemantic = parseSuggestionStorageKey(storageKey);
+  if (suggestionSemantic) {
+    return defaultFieldLabel(`global:${suggestionSemantic}`);
+  }
   const global = parseGlobalFieldStorageKey(storageKey);
   if (global) {
     return global.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());

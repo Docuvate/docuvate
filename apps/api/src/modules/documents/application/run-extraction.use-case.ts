@@ -21,6 +21,7 @@ import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-emb
 import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 import { ResolveUserExtractorEngineUseCase } from '../../settings/application/settings.use-cases.js';
+import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './document-review/promote-extraction-suggestions.use-case.js';
 
 @Injectable()
 export class RunExtractionUseCase {
@@ -36,7 +37,8 @@ export class RunExtractionUseCase {
     private readonly densityRepo: PgEmbeddingDensityRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
-    private readonly persistFacts: PersistDocumentFactsUseCase
+    private readonly persistFacts: PersistDocumentFactsUseCase,
+    private readonly promoteHighConfidenceSuggestions: PromoteHighConfidenceExtractionSuggestionsUseCase
   ) {}
 
   async execute(documentId: string): Promise<void> {
@@ -80,6 +82,7 @@ export class RunExtractionUseCase {
       }
       const content = `${doc.filename}\n${doc.title}\n${result.text}`;
       await this.postOcrPipeline.execute(documentId, doc.userId, content);
+      await this.promoteHighConfidenceSuggestions.execute(documentId, doc.userId);
       await this.documents.updateStatus(documentId, 'ready');
     } catch (error: unknown) {
       const contentHash =

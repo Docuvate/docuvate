@@ -55,6 +55,7 @@ export function GlobalChatPage() {
   const [threadSearch, setThreadSearch] = useState('');
   const [renamingThreadId, setRenamingThreadId] = useState<string | null>(null);
   const [renameDraft, setRenameDraft] = useState('');
+  const [composerDraftActive, setComposerDraftActive] = useState(false);
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const streamTargetRef = useRef<string | null>(null);
 
@@ -228,23 +229,23 @@ export function GlobalChatPage() {
     }
   }
 
-  async function onNewThread() {
+  function onNewThread() {
     setError(null);
-    try {
-      const thread = await createLibraryChatThread({});
-      setThreads((prev) => [thread, ...prev]);
-      setActiveThreadId(thread.id);
-      setMessages([]);
-      streamTargetRef.current = null;
-    } catch (err) {
-      setError(formatUserFacingError(err, 'documents.documentChat.errorNewThread'));
-    }
+    setActiveThreadId(null);
+    setMessages([]);
+    setInput('');
+    setComposerDraftActive(true);
+    streamTargetRef.current = null;
+    stopStream();
   }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     const trimmed = input.trim();
-    if (!trimmed || generationInProgress || loadingMessages) {
+    if (!trimmed || generationInProgress) {
+      return;
+    }
+    if (loadingMessages && activeThreadId) {
       return;
     }
 
@@ -256,6 +257,7 @@ export function GlobalChatPage() {
         threadId = thread.id;
         setThreads((prev) => [thread, ...prev]);
         setActiveThreadId(threadId);
+        setComposerDraftActive(false);
       }
       const sendThreadId = threadId;
       if (!sendThreadId) {
@@ -277,7 +279,11 @@ export function GlobalChatPage() {
   }
 
   const showBootstrapEmpty =
-    !loadingThreads && !hasThreads && !loadingMessages && messages.length === 0;
+    !loadingThreads &&
+    !hasThreads &&
+    !loadingMessages &&
+    messages.length === 0 &&
+    !composerDraftActive;
   const showThreadEmpty =
     hasThreads &&
     !loadingMessages &&
@@ -285,7 +291,13 @@ export function GlobalChatPage() {
     !generationInProgress &&
     activeThreadId != null;
   const showPanePickThread =
-    hasThreads && !loadingThreads && activeThreadId == null && messages.length === 0;
+    hasThreads &&
+    !loadingThreads &&
+    activeThreadId == null &&
+    messages.length === 0 &&
+    !composerDraftActive;
+  const showComposerDraft =
+    composerDraftActive && activeThreadId == null && messages.length === 0;
 
   return (
     <div className="page global-chat-page" data-ux="page">
@@ -491,6 +503,12 @@ export function GlobalChatPage() {
                   </div>
                 ) : null}
 
+                {showComposerDraft ? (
+                  <div className="doc-chat-empty-state doc-chat-empty-state-thread">
+                    <p className="muted doc-chat-empty-lead">{t('globalChat.bootstrapLead')}</p>
+                  </div>
+                ) : null}
+
                 {messages.length > 0 ? (
                   <ul className="doc-chat-log" aria-live="polite">
                     {messages.map((message) =>
@@ -554,14 +572,17 @@ export function GlobalChatPage() {
                   value={input}
                   onChange={(e) => { setInput(e.target.value); }}
                   placeholder={t('globalChat.placeholder')}
-                  disabled={!chatUiEnabled || generationInProgress || loadingMessages}
+                  disabled={!chatUiEnabled || generationInProgress || (loadingMessages && !!activeThreadId)}
                   aria-label={t('globalChat.placeholder')}
                 />
                 <Button
                   type="submit"
                   className="doc-chat-submit"
                   disabled={
-                    !chatUiEnabled || generationInProgress || loadingMessages || !input.trim()
+                    !chatUiEnabled ||
+                    generationInProgress ||
+                    (loadingMessages && !!activeThreadId) ||
+                    !input.trim()
                   }
                   aria-busy={generationInProgress}
                 >

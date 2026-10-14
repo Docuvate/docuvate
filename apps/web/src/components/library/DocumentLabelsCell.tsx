@@ -1,32 +1,41 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TagDto } from '@docuvate/contracts';
+import type { DocumentDto } from '@docuvate/contracts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { DocumentLabelSuggestionChips } from '../documents/DocumentLabelSuggestionChips';
 import { Chip } from '../ui/Chip';
 
 const MAX_VISIBLE_LABELS = 2;
 const LONG_LABEL_CHARS = 18;
 
 interface DocumentLabelsCellProps {
-  tags: TagDto[];
+  document: Pick<DocumentDto, 'id' | 'tags' | 'tagSuggestions'>;
+  onRefresh?: () => void | Promise<void>;
 }
 
-export function DocumentLabelsCell({ tags }: DocumentLabelsCellProps) {
+export function DocumentLabelsCell({ document, onRefresh }: DocumentLabelsCellProps) {
+  const tags = document.tags;
   const { t } = useTranslation();
   const labelTags = useMemo(() => tags.filter((tag) => !tag.isInbox), [tags]);
   const visible = labelTags.slice(0, MAX_VISIBLE_LABELS);
   const overflow = labelTags.slice(MAX_VISIBLE_LABELS);
 
-  if (labelTags.length === 0) {
-    return null;
-  }
-
   const overflowNames = overflow.map((tag) => tag.name).join(', ');
+  const assignedIds = new Set(tags.map((tag) => tag.id));
 
   return (
     <div className="document-labels-cell">
+      <DocumentLabelSuggestionChips
+        documentId={document.id}
+        suggestions={document.tagSuggestions ?? []}
+        assignedTagIds={assignedIds}
+        onUpdated={async () => {
+          await onRefresh?.();
+        }}
+      />
+      {labelTags.length === 0 ? null : (
       <div className="document-labels-cell-row">
         {visible.map((tag) => (
           <Chip
@@ -57,6 +66,7 @@ export function DocumentLabelsCell({ tags }: DocumentLabelsCellProps) {
           </details>
         ) : null}
       </div>
+      )}
     </div>
   );
 }

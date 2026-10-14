@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  AcceptDocumentReviewBatchResponseDto,
+  AcceptDocumentReviewResponseDto,
   AcceptLabelRecommendationRequest,
   AddLabelRecommendationBlocklistRequest,
   AdminAccessResponse,
@@ -32,6 +34,8 @@ import type {
   DocumentChatThreadMessagesResponse,
   DocumentDto,
   DocumentListQuery,
+  DocumentReviewQueueResponseDto,
+  DocumentReviewQueueSummaryDto,
   DuplicateCandidateDto,
   DuplicateSetDto,
   DuplicateStackDto,
@@ -204,6 +208,7 @@ export async function listDocuments(filters: DocumentListQuery = {}): Promise<Do
     documentDateTo: filters.documentDateTo,
     sort: filters.sort,
     order: filters.order,
+    includeTagSuggestions: filters.includeTagSuggestions ? 'true' : undefined,
   });
   const data = await request<{ items: DocumentDto[] }>(`/documents${qs}`);
   return data.items;
@@ -474,6 +479,61 @@ async function mutateDocumentTags(
 
 export function assignDocumentTag(documentId: string, tagId: string): Promise<DocumentDto> {
   return mutateDocumentTags(documentId, `/documents/${documentId}/tags/${tagId}`, 'POST');
+}
+
+export function acceptDocumentTagSuggestion(
+  documentId: string,
+  tagId: string
+): Promise<DocumentDto> {
+  return mutateDocumentTags(
+    documentId,
+    `/documents/${documentId}/tag-suggestions/${tagId}/accept`,
+    'POST'
+  );
+}
+
+export async function dismissDocumentTagSuggestion(
+  documentId: string,
+  tagId: string
+): Promise<DocumentDto> {
+  await request(`/documents/${documentId}/tag-suggestions/${tagId}/dismiss`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return getDocument(documentId);
+}
+
+export async function getDocumentReviewQueueSummary(): Promise<DocumentReviewQueueSummaryDto> {
+  return request<DocumentReviewQueueSummaryDto>('/review-queue/summary');
+}
+
+export async function listDocumentReviewQueue(options?: {
+  limit?: number;
+  offset?: number;
+}): Promise<DocumentReviewQueueResponseDto> {
+  const qs = queryString({
+    limit: options?.limit != null ? String(options.limit) : undefined,
+    offset: options?.offset != null ? String(options.offset) : undefined,
+  });
+  return request<DocumentReviewQueueResponseDto>(`/review-queue${qs}`);
+}
+
+export async function acceptDocumentReviewAll(
+  documentId: string
+): Promise<AcceptDocumentReviewResponseDto> {
+  return request<AcceptDocumentReviewResponseDto>(
+    `/review-queue/documents/${documentId}/accept-all`,
+    { method: 'POST' }
+  );
+}
+
+export async function acceptDocumentReviewHighConfidenceBatch(
+  minConfidence = 0.9
+): Promise<AcceptDocumentReviewBatchResponseDto> {
+  return request<AcceptDocumentReviewBatchResponseDto>('/review-queue/accept-high-confidence', {
+    method: 'POST',
+    body: JSON.stringify({ minConfidence }),
+  });
 }
 
 export async function applyDocumentLabelCorrection(

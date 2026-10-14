@@ -3802,6 +3802,15 @@
             }
           },
           {
+            "name": "includeTagSuggestions",
+            "required": false,
+            "in": "query",
+            "description": "When true, include open tag suggestions on each document.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "name": "q",
             "required": false,
             "in": "query",
@@ -9576,6 +9585,327 @@
         ]
       }
     },
+    "/review-queue": {
+      "get": {
+        "operationId": "listDocumentReviewQueue",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 40,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 0,
+              "default": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentReviewQueueResponseDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List documents pending label, field, or duplicate review",
+        "tags": [
+          "review-queue"
+        ]
+      }
+    },
+    "/review-queue/accept-high-confidence": {
+      "post": {
+        "operationId": "acceptDocumentReviewHighConfidenceBatch",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptDocumentReviewBatchRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptDocumentReviewBatchResponseDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Accept suggestions at or above a confidence threshold across the queue",
+        "tags": [
+          "review-queue"
+        ]
+      }
+    },
+    "/review-queue/documents/{documentId}/accept-all": {
+      "post": {
+        "operationId": "acceptDocumentReviewAll",
+        "parameters": [
+          {
+            "name": "documentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptDocumentReviewResponseDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Accept all open suggestions on one document",
+        "tags": [
+          "review-queue"
+        ]
+      }
+    },
+    "/review-queue/summary": {
+      "get": {
+        "operationId": "getDocumentReviewQueueSummary",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentReviewQueueSummaryDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Count documents with open review suggestions",
+        "tags": [
+          "review-queue"
+        ]
+      }
+    },
     "/saved-views": {
       "get": {
         "operationId": "listSavedDocumentViews",
@@ -11479,6 +11809,55 @@
       }
     },
     "schemas": {
+      "AcceptDocumentReviewBatchRequestDto": {
+        "type": "object",
+        "properties": {
+          "minConfidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.9
+          }
+        }
+      },
+      "AcceptDocumentReviewBatchResponseDtoClass": {
+        "type": "object",
+        "properties": {
+          "documentsProcessed": {
+            "type": "number"
+          },
+          "acceptedLabels": {
+            "type": "number"
+          },
+          "acceptedFields": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "documentsProcessed",
+          "acceptedLabels",
+          "acceptedFields"
+        ]
+      },
+      "AcceptDocumentReviewResponseDtoClass": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "acceptedLabels": {
+            "type": "number"
+          },
+          "acceptedFields": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "documentId",
+          "acceptedLabels",
+          "acceptedFields"
+        ]
+      },
       "AcceptLabelRecommendationRequestDto": {
         "type": "object",
         "properties": {
@@ -12495,6 +12874,25 @@
           "setupHint"
         ]
       },
+      "DocumentDuplicateStackSummaryDtoClass": {
+        "type": "object",
+        "properties": {
+          "stackId": {
+            "type": "string"
+          },
+          "versionCount": {
+            "type": "number"
+          },
+          "pendingReview": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "stackId",
+          "versionCount",
+          "pendingReview"
+        ]
+      },
       "DocumentExtractionSummaryDto": {
         "type": "object",
         "properties": {
@@ -12643,6 +13041,111 @@
           "tags",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "DocumentReviewFieldSuggestionDtoClass": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "displayLabel": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "key",
+          "displayLabel",
+          "value"
+        ]
+      },
+      "DocumentReviewQueueItemDtoClass": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "filename": {
+            "type": "string"
+          },
+          "documentDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "suggestedDocumentDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "uploadDate": {
+            "type": "string"
+          },
+          "labelSuggestions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "fieldSuggestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentReviewFieldSuggestionDtoClass"
+            }
+          },
+          "duplicateStack": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DocumentDuplicateStackSummaryDtoClass"
+              }
+            ]
+          }
+        },
+        "required": [
+          "documentId",
+          "title",
+          "filename",
+          "uploadDate",
+          "labelSuggestions",
+          "fieldSuggestions"
+        ]
+      },
+      "DocumentReviewQueueResponseDtoClass": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentReviewQueueItemDtoClass"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "items"
+        ]
+      },
+      "DocumentReviewQueueSummaryDtoClass": {
+        "type": "object",
+        "properties": {
+          "pendingCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "pendingCount"
         ]
       },
       "DuplicateStackKeepVersionRequestDto": {

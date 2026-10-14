@@ -29,6 +29,7 @@ import { LoginTwoFactorPage } from './pages/LoginTwoFactorPage';
 import { NotFoundRoute } from './pages/NotFoundRoute';
 import { PaperlessConnectorSetupPage } from './pages/PaperlessConnectorSetupPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { ReviewQueuePage } from './pages/ReviewQueuePage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { SavedViewsPage } from './pages/SavedViewsPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -89,6 +90,14 @@ export function App() {
         element={
           <ShellRoute>
             <DashboardPage />
+          </ShellRoute>
+        }
+      />
+      <Route
+        path={routes.reviewQueue}
+        element={
+          <ShellRoute>
+            <ReviewQueuePage />
           </ShellRoute>
         }
       />
