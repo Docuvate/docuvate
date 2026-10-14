@@ -323,6 +323,46 @@ export interface DocumentDuplicateStackSummaryDto {
   pendingReview: boolean;
 }
 
+export interface DocumentReviewFieldSuggestionDto {
+  key: string;
+  displayLabel: string;
+  value: string;
+  confidence?: number;
+}
+
+export interface DocumentReviewQueueItemDto {
+  documentId: string;
+  title: string;
+  filename: string;
+  documentDate: string | null;
+  suggestedDocumentDate: string | null;
+  uploadDate: string;
+  labelSuggestions: TagSuggestionDto[];
+  fieldSuggestions: DocumentReviewFieldSuggestionDto[];
+  duplicateStack: DocumentDuplicateStackSummaryDto | null;
+}
+
+export interface DocumentReviewQueueResponseDto {
+  total: number;
+  items: DocumentReviewQueueItemDto[];
+}
+
+export interface DocumentReviewQueueSummaryDto {
+  pendingCount: number;
+}
+
+export interface AcceptDocumentReviewResponseDto {
+  documentId: string;
+  acceptedLabels: number;
+  acceptedFields: number;
+}
+
+export interface AcceptDocumentReviewBatchResponseDto {
+  documentsProcessed: number;
+  acceptedLabels: number;
+  acceptedFields: number;
+}
+
 export interface DuplicateStackMemberDto {
   documentId: string;
   role: 'primary' | 'version';
@@ -845,6 +885,8 @@ export interface DocumentListQuery {
   documentDateTo?: string;
   sort?: DocumentSortField;
   order?: SortOrder;
+  /** Include open tag suggestions on each list item (library label chips). */
+  includeTagSuggestions?: boolean;
 }
 
 export type ExtractorEngineId = 'pipeline' | 'paddle' | 'docling' | 'pdf_native' | 'tesseract';

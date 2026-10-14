@@ -524,9 +524,10 @@ export class PgGlobalSearchRepository {
     const scored = new Map<string, number>();
 
     const register = (documentId: string, fieldLabel: string, valueText: string, score: number) => {
+      const boosted = score >= 0.999 ? Math.max(score, 4) : score;
       const prev = scored.get(documentId) ?? 0;
-      if (score >= prev) {
-        scored.set(documentId, score);
+      if (boosted >= prev) {
+        scored.set(documentId, boosted);
         snippets.set(documentId, { fieldLabel, valueText });
       }
     };

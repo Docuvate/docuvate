@@ -62,7 +62,16 @@ export class GlobalSearchUseCase {
     const groups: GlobalSearchGroupDto[] = [];
 
     if (includeDocuments && result.documents.length > 0) {
-      const items = result.documents.map((d) => ({
+      const dedupedDocuments = [...result.documents].sort((a, b) => b.score - a.score);
+      const seenDocumentIds = new Set<string>();
+      const uniqueDocuments = dedupedDocuments.filter((doc) => {
+        if (seenDocumentIds.has(doc.id)) {
+          return false;
+        }
+        seenDocumentIds.add(doc.id);
+        return true;
+      });
+      const items = uniqueDocuments.map((d) => ({
         type: 'document' as const,
         id: d.id,
         title: d.title,

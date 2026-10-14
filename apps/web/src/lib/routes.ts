@@ -3,6 +3,7 @@
 /** Customer-facing URL paths (English). */
 export const routes = {
   home: '/',
+  reviewQueue: '/review',
   login: '/login',
   loginTwoFactor: '/login/two-factor',
   register: '/register',

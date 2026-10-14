@@ -18,6 +18,7 @@ import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
 import { Input } from '../ui/Input';
+import { DocumentLabelSuggestionChips } from './DocumentLabelSuggestionChips';
 
 const NEST_CANDIDATE_LIMIT = 3;
 const CORRECTION_UNDO_MS = 10_000;
@@ -211,6 +212,16 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
         </h2>
         <p className="muted detail-section-lead">{t('documents.labelPanelLead')}</p>
       </header>
+
+      <DocumentLabelSuggestionChips
+        documentId={document.id}
+        suggestions={document.tagSuggestions ?? []}
+        assignedTagIds={assignedIds}
+        disabled={busy !== null}
+        onUpdated={async () => {
+          onUpdated(await getDocument(document.id));
+        }}
+      />
 
       {showNestRow ? (
         <div className="label-nest-correction" data-ux="label-nest-correction">

@@ -11,11 +11,16 @@ function fold(input: string): string {
     .replace(/[^a-z0-9]+/g, '');
 }
 
+export interface FieldNameSuggestion {
+  key: string;
+  label: string;
+}
+
 export function suggestFieldNames(
   partial: string,
   defs: { key: string; label: string }[],
   limit = 8
-): string[] {
+): FieldNameSuggestion[] {
   const probe = fold(partial);
   if (!probe) return [];
   return defs
@@ -25,10 +30,10 @@ export function suggestFieldNames(
       let score = 0;
       if (keyFold.startsWith(probe) || labelFold.startsWith(probe)) score += 3;
       if (keyFold.includes(probe) || labelFold.includes(probe)) score += 1;
-      return { key: def.key, score };
+      return { key: def.key, label: def.label, score };
     })
     .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, limit)
-    .map((r) => r.key);
+    .map(({ key, label }) => ({ key, label }));
 }

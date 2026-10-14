@@ -170,6 +170,7 @@ export function LabelsPage() {
         tagColorById={tagColorById}
         loading={insights.loading}
         busyId={insights.busyId}
+        documentReviewPendingCount={insights.documentReviewPendingCount}
         onAccept={(item) => void insights.accept(item)}
         onRename={(item) => {
           if (item.tagId) {

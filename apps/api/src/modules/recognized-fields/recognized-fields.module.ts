@@ -32,7 +32,11 @@ import { RecognizedFieldsController } from './presentation/recognized-fields.con
     RecognizedFieldReextractQueueService,
     RecognizedFieldReextractBackfillService,
   ],
-  exports: [ApplyGlobalRecognizedFieldsUseCase, ListRecognizedFieldAttemptsUseCase],
+  exports: [
+    ApplyGlobalRecognizedFieldsUseCase,
+    ListRecognizedFieldAttemptsUseCase,
+    ListRecognizedFieldsUseCase,
+  ],
 })
 // Nest requires a module class token; this module has no instance state.
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host

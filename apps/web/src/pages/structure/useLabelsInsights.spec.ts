@@ -14,6 +14,7 @@ vi.mock('../../lib/api', () => ({
   ),
   acceptLabelRecommendation: vi.fn(() => Promise.resolve({ tagId: 't1', action: 'assigned' })),
   dismissLabelRecommendation: vi.fn(() => Promise.resolve(undefined)),
+  getDocumentReviewQueueSummary: vi.fn(() => Promise.resolve({ pendingCount: 0 })),
 }));
 
 describe('useLabelsInsights', () => {

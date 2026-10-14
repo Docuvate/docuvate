@@ -30,6 +30,7 @@ import { NotFoundRoute } from './pages/NotFoundRoute';
 import { PaperlessConnectorSetupPage } from './pages/PaperlessConnectorSetupPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
+import { ReviewQueuePage } from './pages/ReviewQueuePage';
 import { SavedViewsPage } from './pages/SavedViewsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LabelsPage } from './pages/structure/LabelsPage';
@@ -89,6 +90,14 @@ export function App() {
         element={
           <ShellRoute>
             <DashboardPage />
+          </ShellRoute>
+        }
+      />
+      <Route
+        path={routes.reviewQueue}
+        element={
+          <ShellRoute>
+            <ReviewQueuePage />
           </ShellRoute>
         }
       />

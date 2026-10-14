@@ -14,6 +14,7 @@ import { prepareLabelQueue } from '../../components/labels/labelsQueue';
 import {
   acceptLabelRecommendation,
   dismissLabelRecommendation,
+  getDocumentReviewQueueSummary,
   getLabelMap,
   listDocuments,
   listLabelRecommendations,
@@ -66,6 +67,7 @@ export function useLabelsInsights(
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [documentReviewPendingCount, setDocumentReviewPendingCount] = useState(0);
 
   const documentCountByTagId = useMemo(() => countDocumentsByTag(documents), [documents]);
 
@@ -110,7 +112,15 @@ export function useLabelsInsights(
           setError((prev) => prev ?? formatUserFacingError(err, 'errors.labelsInsightsLoadFailed'));
         });
 
-      await Promise.all([recsPromise, docsPromise, mapPromise]);
+      const reviewPromise = getDocumentReviewQueueSummary()
+        .then((summary) => {
+          setDocumentReviewPendingCount(summary.pendingCount);
+        })
+        .catch(() => {
+          setDocumentReviewPendingCount(0);
+        });
+
+      await Promise.all([recsPromise, docsPromise, mapPromise, reviewPromise]);
     } finally {
       if (!options?.silent) {
         setLoading(false);
@@ -180,6 +190,7 @@ export function useLabelsInsights(
     loading,
     busyId,
     error,
+    documentReviewPendingCount,
     load,
     accept,
     dismiss,
