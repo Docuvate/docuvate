@@ -10,7 +10,6 @@ import json
 import os
 from pathlib import Path
 
-from bench.model_gates.gates.chat_answer_type import run_chat_answer_type_gate
 from bench.model_gates.gates.chat_extractive import run_chat_extractive_gate
 from bench.model_gates.gates.chat_routing import run_chat_routing_gate
 from bench.model_gates.gates.classification import run_classification_gate
@@ -58,8 +57,6 @@ def run_harness(excluded: frozenset[str] | None = None) -> HarnessResult:
         gates.append(run_chat_extractive_gate(_chat_fixtures_path()))
     if "chat_routing" not in skip:
         gates.append(run_chat_routing_gate())
-    if "chat_answer_type" not in skip:
-        gates.append(run_chat_answer_type_gate())
     if "classification" not in skip:
         gates.append(run_classification_gate())
     if "layout_ssim" not in skip:

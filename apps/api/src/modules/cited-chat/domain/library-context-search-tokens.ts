@@ -1,52 +1,118 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { de as chronoDe, en as chronoEn } from 'chrono-node';
+import { isValid,parse as parseDate } from 'date-fns';
+import { de as localeDe, enUS as localeEnUS } from 'date-fns/locale';
+
 import { tokenizeSearchQuery } from '../../search/domain/normalize-search-text.js';
 
-const MONTH_TO_PADDED: Readonly<Record<string, string>> = {
-  january: '01',
-  januar: '01',
-  february: '02',
-  februar: '02',
-  march: '03',
-  maerz: '03',
-  märz: '03',
-  april: '04',
-  may: '05',
-  mai: '05',
-  june: '06',
-  juni: '06',
-  july: '07',
-  juli: '07',
-  august: '08',
-  september: '09',
-  october: '10',
-  oktober: '10',
-  november: '11',
-  december: '12',
-  dezember: '12',
-};
+const MONTH_YEAR_FORMATS = ['MMMM yyyy', 'MMM yyyy', 'MM/yyyy', 'M/yyyy'] as const;
 
-/** Tokens for ILIKE library supplement (month names → numeric forms on payslips/invoices). */
+interface YearMonth {
+  month: string;
+  year: string;
+}
+
+function paddedMonth(date: Date): string {
+  return String(date.getMonth() + 1).padStart(2, '0');
+}
+
+function paddedYear(date: Date): string {
+  return String(date.getFullYear());
+}
+
+function periodKey(month: string, year: string): string {
+  return `${year}-${month}`;
+}
+
+function parsePeriodKey(key: string): YearMonth {
+  const [year, month] = key.split('-');
+  return { month, year };
+}
+
+function addYearMonth(out: Set<string>, month: string, year: string): void {
+  if (!/^20\d{2}$/.test(year) || !/^(0[1-9]|1[0-2])$/.test(month)) {
+    return;
+  }
+  out.add(periodKey(month, year));
+}
+
+function periodsFromChrono(query: string): Set<string> {
+  const out = new Set<string>();
+  const ref = new Date();
+  for (const parsed of [...chronoDe.parse(query, ref), ...chronoEn.parse(query, ref)]) {
+    const start = parsed.start;
+    if (!start.isCertain('month') || !start.isCertain('year')) {
+      continue;
+    }
+    const month = String(start.get('month')).padStart(2, '0');
+    const year = String(start.get('year'));
+    addYearMonth(out, month, year);
+  }
+  return out;
+}
+
+/** date-fns + ICU month names (de/en) for phrases like "Oktober 2024" adjacent to a year token. */
+function periodsFromLocalizedMonthYear(query: string): Set<string> {
+  const out = new Set<string>();
+  const raw = tokenizeSearchQuery(query);
+  for (let i = 0; i < raw.length; i += 1) {
+    const yearToken = raw[i];
+    if (!/^20\d{2}$/.test(yearToken)) {
+      continue;
+    }
+    const yearNum = Number(yearToken);
+    for (let width = 1; width <= 3; width += 1) {
+      const start = i - width;
+      if (start < 0) {
+        continue;
+      }
+      const phrase = [...raw.slice(start, i), yearToken].join(' ');
+      for (const locale of [localeDe, localeEnUS] as const) {
+        for (const fmt of MONTH_YEAR_FORMATS) {
+          const parsed = parseDate(phrase, fmt, new Date(), { locale });
+          if (!isValid(parsed) || parsed.getFullYear() !== yearNum) {
+            continue;
+          }
+          addYearMonth(out, paddedMonth(parsed), paddedYear(parsed));
+        }
+      }
+    }
+  }
+  return out;
+}
+
+function collectYearMonths(query: string): YearMonth[] {
+  const merged = new Set<string>();
+  for (const key of periodsFromChrono(query)) {
+    merged.add(key);
+  }
+  for (const key of periodsFromLocalizedMonthYear(query)) {
+    merged.add(key);
+  }
+  return [...merged].map(parsePeriodKey);
+}
+
+function yearMonthSearchTokens(periods: readonly YearMonth[]): string[] {
+  const tokens: string[] = [];
+  for (const { month, year } of periods) {
+    tokens.push(`${month}/${year}`, `${year}-${month}`);
+  }
+  return tokens;
+}
+
+/** Tokens for ILIKE library supplement (includes parsed month/year period forms). */
 export function libraryContextSearchTokens(query: string): string[] {
   const raw = tokenizeSearchQuery(query);
   const tokens = raw.filter((token) => token.length >= 3 || /^20\d{2}$/.test(token));
   const expanded = new Set(tokens);
-  const year = raw.find((token) => /^20\d{2}$/.test(token));
-  for (const token of raw) {
-    const month = MONTH_TO_PADDED[token];
-    if (!month) {
-      continue;
-    }
-    expanded.add(month);
-    if (year) {
-      expanded.add(`${month}/${year}`);
-      expanded.add(`${year}-${month}`);
-    }
+  for (const token of yearMonthSearchTokens(collectYearMonths(query))) {
+    expanded.add(token);
   }
   return [...expanded];
 }
 
-/** Month/year tokens like 10/2024 from {@link libraryContextSearchTokens}. */
+/** Month/year ILIKE patterns when the query resolves to a calendar period. */
 export function libraryContextPeriodPatterns(tokens: readonly string[]): string[] {
   return tokens
     .filter((token) => /^\d{2}\/20\d{2}$/.test(token) || /^20\d{2}-\d{2}$/.test(token))
