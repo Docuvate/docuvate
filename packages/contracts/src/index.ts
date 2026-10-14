@@ -352,6 +352,8 @@ export interface DuplicateSetDto {
   setId: string;
   documents: DuplicateSetDocumentDto[];
   maxSimilarity: number;
+  similarityPercent: number;
+  bulkArchiveEligible: boolean;
   sources: DuplicateCandidateSource[];
 }
 
@@ -1389,8 +1391,11 @@ export type {
   ExactFactThresholdCalibrationResult,
 } from './exact-fact-match.js';
 export {
+  duplicateSetBulkArchiveEligible,
+  duplicateSetDisplaySimilarityPercent,
   duplicateSetIdFromDocumentIds,
+  duplicateSetMaxSimilarityForDisplay,
   groupDuplicatePairsIntoSets,
   parseDuplicateSetId,
 } from './duplicate-set-groups.js';
-export type { DuplicatePairEdge } from './duplicate-set-groups.js';
+export type { DuplicatePairEdge, DuplicatePairMetaEdge } from './duplicate-set-groups.js';

@@ -17,6 +17,10 @@ import {
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
 import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
 import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
+import {
+  extractGermanPeriodHints,
+  GERMAN_MONTH_BY_NAME,
+} from '../domain/library-temporal-match.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;
@@ -266,6 +270,76 @@ export class PgCitedChatRetrievalRepository {
     return chunkIndexText(candidate.documentTitle, candidate.body);
   }
 
+  /** Ensures period-specific library questions can reach the right document when generic tokens collide. */
+  async supplementTemporalLibraryCandidates(
+    userId: string,
+    query: string
+  ): Promise<CitedChatChunkCandidate[]> {
+    const hints = extractGermanPeriodHints(query).filter(
+      (hint) => hint.month != null && hint.year != null
+    );
+    if (hints.length === 0) {
+      return [];
+    }
+
+    const filenamePatterns: string[] = [];
+    const titlePatterns: string[] = [];
+
+    for (const hint of hints) {
+      const month = hint.month;
+      const year = hint.year;
+      if (month == null || year == null) {
+        continue;
+      }
+      const padded = String(month).padStart(2, '0');
+      filenamePatterns.push(`${String(year)}_${padded}.%`);
+      filenamePatterns.push(`${String(year)}-${padded}-%`);
+      for (const [name, value] of Object.entries(GERMAN_MONTH_BY_NAME)) {
+        if (value === month) {
+          titlePatterns.push(`%${name}%${String(year)}%`);
+          titlePatterns.push(`%${padded}/${String(year)}%`);
+        }
+      }
+    }
+
+    if (filenamePatterns.length === 0 && titlePatterns.length === 0) {
+      return [];
+    }
+
+    const rows = await this.pool.query<{
+      id: string;
+      document_id: string;
+      title: string;
+      body: string;
+      page: number | null;
+      char_start: number | null;
+      char_end: number | null;
+    }>(
+      `SELECT c.id, c.document_id, d.title, c.body, c.page, c.char_start, c.char_end
+       FROM document_text_chunks c
+       JOIN documents d ON d.id = c.document_id
+       WHERE d.user_id = $1
+         AND (
+           d.filename ILIKE ANY($2::text[])
+           OR d.title ILIKE ANY($3::text[])
+         )
+       ORDER BY c.document_id, c.chunk_index ASC
+       LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT)}`,
+      [userId, filenamePatterns, titlePatterns]
+    );
+
+    return rows.rows.map((row, index) => ({
+      chunkId: row.id,
+      documentId: row.document_id,
+      documentTitle: row.title,
+      body: row.body,
+      page: row.page,
+      charStart: row.char_start,
+      charEnd: row.char_end,
+      fusionScore: 0.5 - index * 0.001,
+    }));
+  }
+
   async loadDocumentContextMeta(
     userId: string,
     documentIds: string[]
@@ -279,9 +353,10 @@ export class PgCitedChatRetrievalRepository {
     const docs = await this.pool.query<{
       id: string;
       title: string;
+      filename: string;
       document_date: string | null;
     }>(
-      `SELECT d.id, d.title, d.document_date::text AS document_date
+      `SELECT d.id, d.title, d.filename, d.document_date::text AS document_date
        FROM documents d
        WHERE d.user_id = $1 AND d.id = ANY($2::uuid[])`,
       [userId, unique]
@@ -333,6 +408,7 @@ export class PgCitedChatRetrievalRepository {
       out.set(row.id, {
         documentId: row.id,
         title: row.title,
+        filename: row.filename,
         documentDate: row.document_date,
         labels: labelsByDoc.get(row.id) ?? [],
         fields: fieldsByDoc.get(row.id) ?? [],

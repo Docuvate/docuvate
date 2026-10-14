@@ -6,6 +6,7 @@ import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feed
 import { SearchModule } from '../search/search.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { ApplyGlobalRecognizedFieldsUseCase } from './application/apply-global-recognized-fields.use-case.js';
+import { BackfillRecognizedFieldReextractionUseCase } from './application/backfill-recognized-field-reextraction.use-case.js';
 import { ListRecognizedFieldAttemptsUseCase } from './application/list-recognized-field-attempts.use-case.js';
 import {
   ListRecognizedFieldsUseCase,
@@ -13,6 +14,7 @@ import {
 } from './application/recognized-field.use-cases.js';
 import { ScheduleRecognizedFieldReextractionUseCase } from './application/schedule-recognized-field-reextraction.use-case.js';
 import { PgRecognizedFieldExtractionAttemptRepository } from './infrastructure/pg-recognized-field-extraction-attempt.repository.js';
+import { RecognizedFieldReextractBackfillService } from './infrastructure/recognized-field-reextract-backfill.service.js';
 import { RecognizedFieldReextractQueueService } from './infrastructure/recognized-field-reextract-queue.service.js';
 import { RecognizedFieldsController } from './presentation/recognized-fields.controller.js';
 
@@ -25,8 +27,10 @@ import { RecognizedFieldsController } from './presentation/recognized-fields.con
     ApplyGlobalRecognizedFieldsUseCase,
     ListRecognizedFieldAttemptsUseCase,
     ScheduleRecognizedFieldReextractionUseCase,
+    BackfillRecognizedFieldReextractionUseCase,
     PgRecognizedFieldExtractionAttemptRepository,
     RecognizedFieldReextractQueueService,
+    RecognizedFieldReextractBackfillService,
   ],
   exports: [ApplyGlobalRecognizedFieldsUseCase, ListRecognizedFieldAttemptsUseCase],
 })

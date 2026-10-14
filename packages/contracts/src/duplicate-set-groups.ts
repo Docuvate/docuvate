@@ -6,6 +6,17 @@ export interface DuplicatePairEdge {
   candidateDocumentId: string;
 }
 
+export interface DuplicatePairMetaEdge extends DuplicatePairEdge {
+  source: 'hash' | 'embedding' | 'smart';
+  similarity: number;
+}
+
+export interface DuplicateSetDisplayInput {
+  bulkArchiveEligible: boolean;
+  maxSimilarity: number;
+  sources: readonly ('hash' | 'embedding' | 'smart')[];
+}
+
 /** Stable id for a duplicate set from its member document ids. */
 export function duplicateSetIdFromDocumentIds(documentIds: readonly string[]): string {
   return [...documentIds].sort().join('--');
@@ -68,4 +79,44 @@ export function groupDuplicatePairsIntoSets(pairs: readonly DuplicatePairEdge[])
   return [...buckets.values()]
     .map((ids) => [...ids].sort())
     .filter((ids) => ids.length >= 2);
+}
+
+/** Bulk “keep newest” is only safe when every edge in the set is byte-identical (hash). */
+export function duplicateSetBulkArchiveEligible(
+  documentIds: readonly string[],
+  pairMeta: readonly DuplicatePairMetaEdge[]
+): boolean {
+  if (documentIds.length < 2 || pairMeta.length === 0) {
+    return false;
+  }
+  const idSet = new Set(documentIds);
+  const edgesInSet = pairMeta.filter(
+    (edge) => idSet.has(edge.documentId) && idSet.has(edge.candidateDocumentId)
+  );
+  if (edgesInSet.length === 0) {
+    return false;
+  }
+  return edgesInSet.every((edge) => edge.source === 'hash');
+}
+
+export function duplicateSetMaxSimilarityForDisplay(
+  pairMeta: readonly DuplicatePairMetaEdge[],
+  bulkArchiveEligible: boolean
+): number {
+  if (bulkArchiveEligible) {
+    return 1;
+  }
+  const nonHash = pairMeta.filter((edge) => edge.source !== 'hash');
+  if (nonHash.length === 0) {
+    return Math.max(...pairMeta.map((edge) => edge.similarity), 0);
+  }
+  return Math.max(...nonHash.map((edge) => edge.similarity), 0);
+}
+
+export function duplicateSetDisplaySimilarityPercent(input: DuplicateSetDisplayInput): number {
+  if (input.bulkArchiveEligible) {
+    return 100;
+  }
+  const raw = input.maxSimilarity * 100;
+  return Math.min(99, Math.floor(raw));
 }

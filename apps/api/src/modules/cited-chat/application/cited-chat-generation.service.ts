@@ -31,6 +31,7 @@ import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
+import { libraryTemporalMatchBoost } from '../domain/library-temporal-match.js';
 import {
   passesCalibratedRetrievalGate,
   shouldAttemptCitedLlm,
@@ -271,12 +272,46 @@ export class CitedChatGenerationService {
       isDocumentOverviewQuestion(queryVector);
 
     const retrieveStarted = Date.now();
-    const candidates = documentOverview
+    let candidates = documentOverview
       ? await this.retrieval.loadScopedDocumentChunks(userId, filterIds)
       : await this.retrieval.hybridRetrieveChunks(userId, retrievalQuery, {
           documentIds: filterIds,
           queryVector,
         });
+    if (scope === 'library') {
+      const temporalExtra = await this.retrieval.supplementTemporalLibraryCandidates(
+        userId,
+        retrievalQuery
+      );
+      if (temporalExtra.length > 0) {
+        const seen = new Set(candidates.map((chunk) => chunk.chunkId));
+        for (const extra of temporalExtra) {
+          if (!seen.has(extra.chunkId)) {
+            candidates.push(extra);
+            seen.add(extra.chunkId);
+          }
+        }
+      }
+      if (candidates.length > 0) {
+        const boostMeta = await this.retrieval.loadDocumentContextMeta(
+          userId,
+          candidates.map((chunk) => chunk.documentId)
+        );
+        candidates = candidates
+          .map((chunk) => {
+            const meta = boostMeta.get(chunk.documentId);
+            const boost = libraryTemporalMatchBoost({
+              query: retrievalQuery,
+              filename: meta?.filename ?? chunk.documentTitle,
+              title: meta?.title ?? chunk.documentTitle,
+              body: chunk.body,
+              documentDate: meta?.documentDate ?? null,
+            });
+            return { ...chunk, fusionScore: chunk.fusionScore + boost };
+          })
+          .sort((a, b) => b.fusionScore - a.fusionScore);
+      }
+    }
     retrieveMs = Date.now() - retrieveStarted;
     const chunkPool = candidates.map((chunk) => ({ chunk }));
 

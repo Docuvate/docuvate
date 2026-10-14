@@ -20,7 +20,9 @@ export function DuplicateSetCard({ set, onResolved }: DuplicateSetCardProps) {
       <header className="duplicate-set-card-header">
         <h3>{t('documents.duplicateSetTitle', { count: set.documents.length })}</h3>
         <span className="muted">
-          {t('documents.duplicateSetSimilarity', { percent: Math.round(set.maxSimilarity * 100) })}
+          {set.bulkArchiveEligible
+            ? t('documents.duplicateSetHashIdentical')
+            : t('documents.duplicateSetSimilarity', { percent: set.similarityPercent })}
         </span>
       </header>
       <ul className="duplicate-set-doc-list">
@@ -36,16 +38,21 @@ export function DuplicateSetCard({ set, onResolved }: DuplicateSetCardProps) {
           </li>
         ))}
       </ul>
+      {!set.bulkArchiveEligible ? (
+        <p className="muted settings-hint">{t('documents.duplicateSetReviewPairsHint')}</p>
+      ) : null}
       <div className="duplicate-set-actions">
-        <Button
-          type="button"
-          variant="primary"
-          onClick={() => {
-            void archiveDuplicateSet(set.setId).then(onResolved);
-          }}
-        >
-          {t('documents.duplicateSetArchiveRest')}
-        </Button>
+        {set.bulkArchiveEligible ? (
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => {
+              void archiveDuplicateSet(set.setId).then(onResolved);
+            }}
+          >
+            {t('documents.duplicateSetArchiveRest')}
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="secondary"

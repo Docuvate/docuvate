@@ -91,6 +91,43 @@ export class PgRecognizedFieldExtractionAttemptRepository {
     }
   }
 
+  async listDocumentIdsMissingAttempts(
+    userId: string,
+    field: {
+      id: string;
+      extractForAllDocuments: boolean;
+      gateLabelIds: string[];
+      gateLabelMatch: 'any' | 'all';
+      minLabelConfidence: number | null;
+      confidenceGateEnabled: boolean | null;
+    },
+    prefs: {
+      fieldExtractionConfidenceGateEnabled: boolean;
+      labelFieldConfidenceThreshold: number;
+    },
+    limit: number
+  ): Promise<string[]> {
+    const ids = await this.listDocumentIdsForFieldReextraction(userId, field, prefs, limit);
+    if (ids.length === 0) {
+      return [];
+    }
+    const result = await this.pool.query<{ id: string }>(
+      `SELECT d.id
+       FROM documents d
+       WHERE d.user_id = $1
+         AND d.id = ANY($2::uuid[])
+         AND NOT EXISTS (
+           SELECT 1
+           FROM document_recognized_field_extraction_attempt a
+           WHERE a.document_id = d.id
+             AND a.field_definition_id = $3
+             AND a.tenant_id = $1
+         )`,
+      [userId, ids, field.id]
+    );
+    return result.rows.map((row) => parseString(requireRecord(row).id));
+  }
+
   async listDocumentIdsForFieldReextraction(
     userId: string,
     field: {

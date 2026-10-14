@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DuplicateCandidateSource, DuplicateSetDto } from '@docuvate/contracts';
 import {
+  duplicateSetBulkArchiveEligible,
+  duplicateSetDisplaySimilarityPercent,
   duplicateSetIdFromDocumentIds,
+  duplicateSetMaxSimilarityForDisplay,
   groupDuplicatePairsIntoSets,
   parseDuplicateSetId,
 } from '@docuvate/contracts';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import {
   DOCUMENT_REPOSITORY,
@@ -71,7 +74,12 @@ export class ListDuplicateSetsUseCase {
       const present = documents.filter((doc) => doc != null);
       if (present.length < 2) continue;
 
-      let maxSimilarity = 0;
+      const pairMetaEdges: {
+        documentId: string;
+        candidateDocumentId: string;
+        similarity: number;
+        source: DuplicateCandidateSource;
+      }[] = [];
       const sources = new Set<DuplicateCandidateSource>();
       for (let i = 0; i < documentIds.length; i += 1) {
         for (let j = i + 1; j < documentIds.length; j += 1) {
@@ -80,10 +88,23 @@ export class ListDuplicateSetsUseCase {
           if (!left || !right) continue;
           const meta = pairMeta.get(pairKey(left, right));
           if (!meta) continue;
-          maxSimilarity = Math.max(maxSimilarity, meta.similarity);
+          pairMetaEdges.push({
+            documentId: left,
+            candidateDocumentId: right,
+            similarity: meta.similarity,
+            source: meta.source,
+          });
           sources.add(meta.source);
         }
       }
+
+      const bulkArchiveEligible = duplicateSetBulkArchiveEligible(documentIds, pairMetaEdges);
+      const maxSimilarity = duplicateSetMaxSimilarityForDisplay(pairMetaEdges, bulkArchiveEligible);
+      const similarityPercent = duplicateSetDisplaySimilarityPercent({
+        bulkArchiveEligible,
+        maxSimilarity,
+        sources: [...sources],
+      });
 
       sets.push({
         setId: duplicateSetIdFromDocumentIds(documentIds),
@@ -91,6 +112,8 @@ export class ListDuplicateSetsUseCase {
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         ),
         maxSimilarity,
+        similarityPercent,
+        bulkArchiveEligible,
         sources: [...sources],
       });
     }
@@ -142,6 +165,24 @@ export class ArchiveDuplicateSetUseCase {
     const documentIds = parseDuplicateSetId(setId);
     if (documentIds.length < 2) {
       throw new NotFoundException('Duplicate set not found');
+    }
+
+    const rows = await this.duplicates.listActiveCandidates(userId);
+    const pairMetaEdges = rows
+      .filter(
+        (row) =>
+          documentIds.includes(row.documentId) && documentIds.includes(row.candidateDocumentId)
+      )
+      .map((row) => ({
+        documentId: row.documentId,
+        candidateDocumentId: row.candidateDocumentId,
+        similarity: row.similarity,
+        source: row.source,
+      }));
+    if (!duplicateSetBulkArchiveEligible(documentIds, pairMetaEdges)) {
+      throw new BadRequestException(
+        'Bulk-Archivierung ist nur für byte-identische Duplikatgruppen verfügbar.'
+      );
     }
 
     const loaded = await Promise.all(

@@ -10,6 +10,7 @@ import { DocumentFactIndexQueueService } from '../modules/exact-facts/infrastruc
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
 import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { MlRetrainQueueService } from '../modules/model-registry/infrastructure/ml-retrain-queue.service.js';
+import { RecognizedFieldReextractBackfillService } from '../modules/recognized-fields/infrastructure/recognized-field-reextract-backfill.service.js';
 import { RecognizedFieldReextractQueueService } from '../modules/recognized-fields/infrastructure/recognized-field-reextract-queue.service.js';
 import { PG_POOL } from '../shared/infrastructure/database/tokens.js';
 
@@ -79,6 +80,8 @@ export function applyOpenApiGenerationOverrides(
     .useValue(noopQueue)
     .overrideProvider(RecognizedFieldReextractQueueService)
     .useValue(noopQueue)
+    .overrideProvider(RecognizedFieldReextractBackfillService)
+    .useValue({ onApplicationBootstrap: (): Promise<void> => Promise.resolve() })
     .overrideProvider(DocumentChatGenerationCancelRegistry)
     .useValue(noopCancelRegistry);
 }
