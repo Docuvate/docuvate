@@ -223,6 +223,7 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
       },
     });
 
+    vi.spyOn(retrieval, 'supplementTemporalLibraryCandidates').mockResolvedValue([]);
     vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([
       {
         chunkId: octoberChunkId,
