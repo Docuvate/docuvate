@@ -11,7 +11,8 @@ function rejected(reason: RejectedCitedClaim['reason']): RejectedCitedClaim {
     reason,
     claimText: 'x',
     quote: 'y',
-    sourceId: 's1',
+    bestMatchScore: 0,
+    source: 's1',
   };
 }
 
