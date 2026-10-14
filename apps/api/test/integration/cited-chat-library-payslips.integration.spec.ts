@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
+import { requestCitedAnswerFromOllama } from '../../src/modules/cited-chat/application/cited-chat-ollama.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
@@ -42,6 +43,14 @@ function queryVector384(seed: number): number[] {
   const vector = int8Vector384(seed);
   return Array.from({ length: EMBED_DIM }, (_, i) => vector.bytes.readInt8(i) * vector.scale);
 }
+
+vi.mock('../../src/modules/cited-chat/application/cited-chat-ollama.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/modules/cited-chat/application/cited-chat-ollama.js')>();
+  return {
+    ...actual,
+    requestCitedAnswerFromOllama: vi.fn(),
+  };
+});
 
 const embeddingPort: EmbeddingPort = {
   embedTexts(texts: string[]) {
@@ -199,13 +208,20 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
   }
 
   it('answers October Gesamtbrutto after temporal supplement and rerank', async () => {
-    mockRerankAndOllama([
-      {
-        text: `Das Gesamtbrutto im Entgeltnachweis Oktober 2024 beträgt ${OCTOBER_GROSS} EUR.`,
-        source: 'S1',
-        quote: `Gesamtbrutto ${OCTOBER_GROSS} EUR`,
+    mockRerankAndOllama([]);
+
+    vi.mocked(requestCitedAnswerFromOllama).mockResolvedValue({
+      ok: true,
+      parsed: {
+        claims: [
+          {
+            text: `Das Gesamtbrutto im Entgeltnachweis Oktober 2024 beträgt ${OCTOBER_GROSS} EUR.`,
+            source: 'S1',
+            quote: `Gesamtbrutto ${OCTOBER_GROSS} EUR`,
+          },
+        ],
       },
-    ]);
+    });
 
     vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([
       {
