@@ -208,6 +208,11 @@
       "id": "value_types_v1",
       "path": "apps/worker/models/value_types_v1.json",
       "sha256": "58e0270dbb2fb94463a9df4d4fe7929533a3328bcc447b08dc722e8a8d073c77"
+    },
+    {
+      "id": "layout-kv-role-head",
+      "path": "apps/worker/src/docuvate_worker/infrastructure/ml/artifacts/layout-kv-role-head.v1.json",
+      "sha256": "630483711f5732801498c42b616162c48ff7c5a6b417693b80cfe6c815f3d951"
     }
   ]
 }
