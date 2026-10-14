@@ -125,7 +125,7 @@ for (let month = 1; month <= 12; month += 1) {
     headerDate: `${monthPad(month)}.${monthPad(month)}.2023`,
   });
 }
-for (let month = 1; month <= 8; month += 1) {
+for (let month = 1; month <= 10; month += 1) {
   const monthGross =
     month === 10 ? '4.859,67' : month === 6 ? '6.550,00' : `${String(4100 + month * 55)},00`;
   const ytdGross = month === 10 ? '56.706,65' : `${String(12000 + month * 1100)},00`;
