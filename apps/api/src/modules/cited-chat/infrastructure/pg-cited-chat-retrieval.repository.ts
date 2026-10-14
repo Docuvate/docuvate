@@ -16,10 +16,13 @@ import {
 } from '../../search/domain/reciprocal-rank-fusion.js';
 import type { ChatAnswerType } from '../domain/chat-answer-type-prototypes.schema.js';
 import { libraryAnswerTypeWantsContextualSupplement } from '../domain/chat-answer-type-prototypes.schema.js';
-import { libraryContextSearchTokens } from '../domain/library-context-search-tokens.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
 import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
 import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
+import {
+  libraryContextPeriodPatterns,
+  libraryContextSearchTokens,
+} from '../domain/library-context-search-tokens.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;
@@ -294,6 +297,7 @@ export class PgCitedChatRetrievalRepository {
       return [];
     }
     const patterns = tokens.map((token) => `%${token}%`);
+    const periodPatterns = libraryContextPeriodPatterns(tokens);
 
     const rows = await this.pool.query<{
       id: string;
@@ -314,9 +318,18 @@ export class PgCitedChatRetrievalRepository {
            OR d.title ILIKE ANY($2::text[])
            OR c.body ILIKE ANY($2::text[])
          )
+         ${
+           periodPatterns.length > 0
+             ? `AND (
+           d.filename ILIKE ANY($3::text[])
+           OR d.title ILIKE ANY($3::text[])
+           OR c.body ILIKE ANY($3::text[])
+         )`
+             : ''
+         }
        ORDER BY c.document_id, c.chunk_index ASC
        LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT * 2)}`,
-      [userId, patterns]
+      periodPatterns.length > 0 ? [userId, patterns, periodPatterns] : [userId, patterns]
     );
 
     return rows.rows.slice(0, RAG_HYBRID_CANDIDATE_LIMIT).map((row, index) => ({

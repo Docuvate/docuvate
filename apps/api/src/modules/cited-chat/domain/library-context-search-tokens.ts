@@ -45,3 +45,10 @@ export function libraryContextSearchTokens(query: string): string[] {
   }
   return [...expanded];
 }
+
+/** Month/year tokens like 10/2024 from {@link libraryContextSearchTokens}. */
+export function libraryContextPeriodPatterns(tokens: readonly string[]): string[] {
+  return tokens
+    .filter((token) => /^\d{2}\/20\d{2}$/.test(token) || /^20\d{2}-\d{2}$/.test(token))
+    .map((token) => `%${token}%`);
+}
