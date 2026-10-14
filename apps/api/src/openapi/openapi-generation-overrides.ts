@@ -10,6 +10,7 @@ import { DocumentFactIndexQueueService } from '../modules/exact-facts/infrastruc
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
 import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { MlRetrainQueueService } from '../modules/model-registry/infrastructure/ml-retrain-queue.service.js';
+import { RecognizedFieldReextractQueueService } from '../modules/recognized-fields/infrastructure/recognized-field-reextract-queue.service.js';
 import { PG_POOL } from '../shared/infrastructure/database/tokens.js';
 
 const noopQueue = {
@@ -75,6 +76,8 @@ export function applyOpenApiGenerationOverrides(
     .overrideProvider(EmbeddingDensityCalibrationQueueService)
     .useValue(noopQueue)
     .overrideProvider(DocumentFactIndexQueueService)
+    .useValue(noopQueue)
+    .overrideProvider(RecognizedFieldReextractQueueService)
     .useValue(noopQueue)
     .overrideProvider(DocumentChatGenerationCancelRegistry)
     .useValue(noopCancelRegistry);

@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 
 import type {
   LabelFieldDefinitionInput,
+  LabelFieldExtractionExample,
   LabelFieldExtractionPort,
 } from '../../../shared/domain/ports.js';
 import {
@@ -51,8 +52,10 @@ export class HttpLabelFieldExtractionAdapter implements LabelFieldExtractionPort
   async extractLabelFields(
     text: string,
     tagName: string,
-    fields: LabelFieldDefinitionInput[]
+    fields: LabelFieldDefinitionInput[],
+    options?: { examples?: LabelFieldExtractionExample[] }
   ): Promise<ExtractedField[]> {
+    const examples = options?.examples ?? [];
     const response = await fetch(workerApiUrl(this.workerUrl(), '/extract/label-fields'), {
       method: 'POST',
       headers: this.workerHeaders(),
@@ -63,6 +66,11 @@ export class HttpLabelFieldExtractionAdapter implements LabelFieldExtractionPort
           key: f.key,
           label: f.label,
           field_type: f.fieldType,
+        })),
+        examples: examples.map((example) => ({
+          field_key: example.fieldKey,
+          value: example.value,
+          label_tag_ids: example.labelTagIds,
         })),
       }),
     });

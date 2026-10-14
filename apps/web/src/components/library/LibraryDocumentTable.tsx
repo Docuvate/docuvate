@@ -358,6 +358,11 @@ export function LibraryDocumentTable({
     );
   }
 
+  const showFolderCol = !hideFolderColumn && showColumn(visibleColumns, 'folder');
+  const showLabelsCol = showColumn(visibleColumns, 'labels');
+  const showStatusCol = showColumn(visibleColumns, 'status');
+  const showDateCol = showColumn(visibleColumns, 'date');
+
   return (
     <>
       <div
@@ -368,10 +373,10 @@ export function LibraryDocumentTable({
             <col className="library-col-expand" />
             <col className="library-col-check" />
             <col className="library-col-title" />
-            {hideFolderColumn ? null : <col className="library-col-meta" />}
-            <col className="library-col-labels" />
-            <col className="library-col-status" />
-            <col className="library-col-date" />
+            {showFolderCol ? <col className="library-col-meta" /> : null}
+            {showLabelsCol ? <col className="library-col-labels" /> : null}
+            {showStatusCol ? <col className="library-col-status" /> : null}
+            {showDateCol ? <col className="library-col-date" /> : null}
             <col className="library-col-action" />
           </colgroup>
           <thead>
@@ -390,22 +395,22 @@ export function LibraryDocumentTable({
                   {t('library.colTitle')}
                 </button>
               </th>
-              {hideFolderColumn || !showColumn(visibleColumns, 'folder') ? null : (
+              {showFolderCol ? (
                 <th className="library-col-meta">
                   <span className="library-th-label">{t('library.colFolder')}</span>
                 </th>
-              )}
-              {showColumn(visibleColumns, 'labels') ? (
+              ) : null}
+              {showLabelsCol ? (
                 <th className="library-col-labels">
                   <span className="library-th-label">{t('library.colLabels')}</span>
                 </th>
               ) : null}
-              {showColumn(visibleColumns, 'status') ? (
+              {showStatusCol ? (
                 <th className="library-col-status">
                   <span className="library-th-label">{t('library.colStatus')}</span>
                 </th>
               ) : null}
-              {showColumn(visibleColumns, 'date') ? (
+              {showDateCol ? (
                 <th className="library-col-date">
                   <button type="button" className="sort-btn" onClick={() => { onSort('documentDate'); }}>
                     {t('library.colDate')}
@@ -543,17 +548,17 @@ export function LibraryDocumentTable({
                         </div>
                       ) : null}
                     </td>
-                    {hideFolderColumn || !showColumn(visibleColumns, 'folder') ? null : (
+                    {showFolderCol ? (
                       <td className="library-col-meta" title={doc.folder?.name ?? ''}>
                         {doc.folder?.name ?? ''}
                       </td>
-                    )}
-                    {showColumn(visibleColumns, 'labels') ? (
+                    ) : null}
+                    {showLabelsCol ? (
                       <td className="library-col-labels">
                         <DocumentLabelsCell tags={doc.tags} />
                       </td>
                     ) : null}
-                    {showColumn(visibleColumns, 'status') ? (
+                    {showStatusCol ? (
                       <td className="library-col-status">
                         {doc.duplicateStack?.pendingReview ? (
                           <span
@@ -573,7 +578,7 @@ export function LibraryDocumentTable({
                         )}
                       </td>
                     ) : null}
-                    {showColumn(visibleColumns, 'date') ? (
+                    {showDateCol ? (
                       <td className="library-col-date">{documentDisplayDate(doc)}</td>
                     ) : null}
                     <td className="library-col-action">

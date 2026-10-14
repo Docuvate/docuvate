@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractedFactDto } from './extracted-facts.js';
+import type { RecognizedFieldExtractionAttemptDto } from './field-extraction-attempt.js';
 
 export type DocumentStatus = 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
 
@@ -558,6 +559,8 @@ export interface DocumentDto {
   createdAt: string;
   updatedAt: string;
   extraction?: ExtractionResult;
+  /** Per catalog field: latest extraction attempt for this document (tenant-scoped). */
+  recognizedFieldAttempts?: RecognizedFieldExtractionAttemptDto[];
 }
 
 export interface UpdateDocumentRequest {
@@ -1075,6 +1078,11 @@ export {
   type FieldExtractionGateDocumentLabels,
   type FieldExtractionLabelMatch,
 } from './field-extraction-gate.js';
+export {
+  RECOGNIZED_FIELD_EXTRACTION_OUTCOMES,
+  type RecognizedFieldExtractionAttemptDto,
+  type RecognizedFieldExtractionOutcome,
+} from './field-extraction-attempt.js';
 
 export type MlModelKind = 'ocr' | 'embedding' | 'docqa' | 'field_extractor';
 

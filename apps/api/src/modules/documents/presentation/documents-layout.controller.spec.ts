@@ -19,6 +19,7 @@ import {
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
 import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
+import { ListRecognizedFieldAttemptsUseCase } from '../../recognized-fields/application/list-recognized-field-attempts.use-case.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
@@ -135,7 +136,8 @@ describe('DocumentsController layout routes', () => {
             confirmDuplicateVersion: ConfirmDuplicateVersionUseCase,
             releaseDuplicateStackMember: ReleaseDuplicateStackMemberUseCase,
             restoreDuplicateStackPair: RestoreDuplicateStackPairUseCase,
-            resolveFeatureFlagsUseCase: ResolveFeatureFlagsUseCase
+            resolveFeatureFlagsUseCase: ResolveFeatureFlagsUseCase,
+            listRecognizedFieldAttempts: ListRecognizedFieldAttemptsUseCase
           ) =>
             new DocumentsController(
               uploadDocument,
@@ -172,7 +174,8 @@ describe('DocumentsController layout routes', () => {
               confirmDuplicateVersion,
               releaseDuplicateStackMember,
               restoreDuplicateStackPair,
-              resolveFeatureFlagsUseCase
+              resolveFeatureFlagsUseCase,
+              listRecognizedFieldAttempts
             ),
           inject: [
             UploadDocumentUseCase,
@@ -210,9 +213,14 @@ describe('DocumentsController layout routes', () => {
             ReleaseDuplicateStackMemberUseCase,
             RestoreDuplicateStackPairUseCase,
             ResolveFeatureFlagsUseCase,
+            ListRecognizedFieldAttemptsUseCase,
           ],
         },
         { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
+        {
+          provide: ListRecognizedFieldAttemptsUseCase,
+          useValue: { execute: vi.fn(() => Promise.resolve([])) },
+        },
         { provide: UploadDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: GetDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: ListDocumentsUseCase, useValue: useCaseExecuteMock() },

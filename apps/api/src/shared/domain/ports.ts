@@ -260,6 +260,11 @@ export interface ExtractionFieldFeedbackRepository {
     userId: string,
     options?: { limit?: number; afterCreatedAt?: Date; afterId?: string }
   ): Promise<ExtractionFieldCorrectionRecord[]>;
+  listRecentForFieldKeys(
+    userId: string,
+    fieldKeys: readonly string[],
+    options?: { limitPerField?: number }
+  ): Promise<LabelFieldExtractionExample[]>;
 }
 
 export const EXTRACTION_FIELD_FEEDBACK_REPOSITORY = Symbol('EXTRACTION_FIELD_FEEDBACK_REPOSITORY');
@@ -331,11 +336,18 @@ export interface LabelFieldDefinitionInput {
   fieldType: CustomFieldType;
 }
 
+export interface LabelFieldExtractionExample {
+  fieldKey: string;
+  value: string;
+  labelTagIds: string[];
+}
+
 export interface LabelFieldExtractionPort {
   extractLabelFields(
     text: string,
     tagName: string,
-    fields: LabelFieldDefinitionInput[]
+    fields: LabelFieldDefinitionInput[],
+    options?: { examples?: LabelFieldExtractionExample[] }
   ): Promise<ExtractedField[]>;
 }
 

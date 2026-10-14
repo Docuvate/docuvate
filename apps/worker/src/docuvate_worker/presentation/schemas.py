@@ -382,10 +382,17 @@ class LabelFieldSpec(BaseModel):
     field_type: str = Field(default="text", alias="field_type")
 
 
+class LabelFieldCorrectionExample(BaseModel):
+    field_key: str = Field(validation_alias="field_key")
+    value: str
+    label_tag_ids: list[str] = Field(default_factory=list, validation_alias="label_tag_ids")
+
+
 class LabelFieldsExtractRequest(BaseModel):
     text: str
     tag_name: str = Field(validation_alias="tag_name")
     fields: list[LabelFieldSpec] = Field(default_factory=list)
+    examples: list[LabelFieldCorrectionExample] = Field(default_factory=list)
 
 
 class LabelFieldsExtractResponse(BaseModel):

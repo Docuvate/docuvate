@@ -29,6 +29,7 @@ import { DocumentExtractionBlocksEntity } from './document-extraction-blocks.ent
 import { DocumentFieldValuesEntity } from './document-field-values.entity.js';
 import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
 import { DocumentLayoutIrPagesEntity } from './document-layout-ir-pages.entity.js';
+import { DocumentRecognizedFieldExtractionAttemptEntity } from './document-recognized-field-extraction-attempt.entity.js';
 import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
 import { DocumentTextChunksEntity } from './document-text-chunks.entity.js';
@@ -119,6 +120,7 @@ export const TYPEORM_ENTITIES = [
   DocumentFieldValuesEntity,
   DocumentLayoutIrEntity,
   DocumentLayoutIrPagesEntity,
+  DocumentRecognizedFieldExtractionAttemptEntity,
   DocumentTextChunksEntity,
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,
@@ -194,6 +196,7 @@ export {
   DocumentFieldValuesEntity,
   DocumentLayoutIrEntity,
   DocumentLayoutIrPagesEntity,
+  DocumentRecognizedFieldExtractionAttemptEntity,
   DocumentsEntity,
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,

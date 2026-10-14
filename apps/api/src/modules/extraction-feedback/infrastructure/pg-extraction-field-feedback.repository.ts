@@ -6,6 +6,7 @@ import type pg from 'pg';
 import type {
   ExtractionFieldCorrectionRecord,
   ExtractionFieldFeedbackRepository,
+  LabelFieldExtractionExample,
 } from '../../../shared/domain/ports.js';
 import {
   parseDate,
@@ -119,5 +120,46 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
       params
     );
     return result.rows.map((row) => mapRow(requireRecord(row)));
+  }
+
+  async listRecentForFieldKeys(
+    userId: string,
+    fieldKeys: readonly string[],
+    options?: { limitPerField?: number }
+  ): Promise<LabelFieldExtractionExample[]> {
+    const keys = [...new Set(fieldKeys.map((key) => key.trim()).filter(Boolean))];
+    if (keys.length === 0) {
+      return [];
+    }
+    const limitPerField = Math.min(Math.max(options?.limitPerField ?? 5, 1), 20);
+    const fetchLimit = Math.min(keys.length * limitPerField * 4, 500);
+    const result = await this.pool.query(
+      `${LIST_SQL}
+       WHERE c.user_id = $1 AND c.field_key = ANY($2::text[])
+       ORDER BY c.created_at DESC, c.id DESC
+       LIMIT $3`,
+      [userId, keys, fetchLimit]
+    );
+    const rows = result.rows.map((row) => mapRow(requireRecord(row)));
+    const perField = new Map<string, LabelFieldExtractionExample[]>();
+    for (const row of rows) {
+      if (!row.newValue.trim()) {
+        continue;
+      }
+      const bucket = perField.get(row.fieldKey) ?? [];
+      if (bucket.some((item) => item.value === row.newValue)) {
+        continue;
+      }
+      if (bucket.length >= limitPerField) {
+        continue;
+      }
+      bucket.push({
+        fieldKey: row.fieldKey,
+        value: row.newValue.trim(),
+        labelTagIds: row.labelTagIds,
+      });
+      perField.set(row.fieldKey, bucket);
+    }
+    return [...perField.values()].flat();
   }
 }

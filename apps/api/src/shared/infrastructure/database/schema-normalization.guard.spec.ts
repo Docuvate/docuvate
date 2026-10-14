@@ -41,6 +41,7 @@ const FORWARD_SQL_ORDER = [
   'document-extracted-fact-up.sql',
   'feature-flag-learned-value-types-up.sql',
   'exact-fact-answer-abstention-up.sql',
+  'document-recognized-field-extraction-attempt-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

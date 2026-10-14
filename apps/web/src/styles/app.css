@@ -6986,14 +6986,20 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .library-table th.library-col-labels,
 .library-table td.library-col-labels {
-  width: 1%;
-  min-width: 5.5rem;
+  width: 12%;
+  min-width: 7rem;
+  max-width: 22rem;
   white-space: nowrap;
 }
 
 .library-table th.library-col-labels {
-  overflow: visible;
-  text-overflow: clip;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.library-table th.library-col-date {
+  min-width: 6.25rem;
+  padding-inline-start: var(--dv-space-xs);
 }
 
 .library-table td.library-col-labels {

@@ -35,4 +35,35 @@ describe('mergeCatalogFieldsForDocument', () => {
     );
     expect(merged).toEqual([{ key: 'global:monat', value: '' }]);
   });
+
+  it('drops persisted catalog field when label gate is closed', () => {
+    const merged = mergeCatalogFieldsForDocument(
+      [{ key: 'global:bruttoentgelt', value: '1.234,56' }],
+      [
+        {
+          id: 'f-brutto',
+          key: 'global:bruttoentgelt',
+          label: 'Bruttoentgelt',
+          fieldType: 'currency',
+          sortOrder: 0,
+          extractForAllDocuments: false,
+          gateLabelIds: ['tag-payroll'],
+          gateLabelMatch: 'any',
+          minLabelConfidence: 0.62,
+          confidenceGateEnabled: true,
+        },
+      ],
+      {
+        assignedTagIds: [],
+        assignedNonInboxTagIds: [],
+        suggestions: [],
+      },
+      {
+        fieldExtractionConfidenceGateEnabled: true,
+        labelFieldConfidenceThreshold: 0.62,
+        fieldExtractionRequiredLabelIds: [],
+      }
+    );
+    expect(merged).toEqual([]);
+  });
 });
