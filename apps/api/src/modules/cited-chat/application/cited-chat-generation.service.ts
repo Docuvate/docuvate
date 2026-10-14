@@ -27,6 +27,7 @@ import {
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
 import { preferExtractiveChatAnswer } from '../domain/cited-chat-extractive-first.js';
+import { rejectedClaimsAllowRetrievalFallback } from '../domain/cited-chat-retrieval-fallback-eligibility.js';
 import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
@@ -725,7 +726,8 @@ export class CitedChatGenerationService {
       : undefined;
 
     if (verified.length === 0) {
-      if (gateOk && extractivePool.length > 0) {
+      const allowRetrievalFallback = rejectedClaimsAllowRetrievalFallback(rejected);
+      if (allowRetrievalFallback && gateOk && extractivePool.length > 0) {
         const postVerifyExtractive = await this.resolveExtractiveAnswer(
           userMessage,
           extractivePool,
@@ -745,7 +747,7 @@ export class CitedChatGenerationService {
         }
       }
       const primaryClaim = llm.parsed.claims[0]?.text?.trim() ?? '';
-      if (gateOk && top.length > 0) {
+      if (allowRetrievalFallback && gateOk && top.length > 0) {
         const topRow = top[0];
         const fallback = buildRetrievalFallbackCitation({
           chunk: topRow.chunk,
