@@ -23,6 +23,10 @@ import { CompareDocumentExtractionUseCase } from './application/compare-extracti
 import { CreateDocumentChatThreadUseCase } from './application/create-document-chat-thread.use-case.js';
 import { DeleteDocumentUseCase } from './application/delete-document.use-case.js';
 import { DocumentChatUseCase } from './application/document-chat.use-case.js';
+import { AcceptDocumentReviewUseCase } from './application/document-review/accept-document-review.use-case.js';
+import { AcceptDocumentReviewBatchUseCase } from './application/document-review/accept-document-review-batch.use-case.js';
+import { ListDocumentReviewQueueUseCase } from './application/document-review/list-document-review-queue.use-case.js';
+import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from './application/get-document-content.use-case.js';
 import { GetDocumentLayoutCompareMetricsUseCase } from './application/get-document-layout-compare-metrics.use-case.js';
@@ -47,12 +51,8 @@ import { UploadDocumentUseCase } from './application/upload-document.use-case.js
 import { DocumentChatGenerationActiveRegistry } from './infrastructure/document-chat-generation-active.registry.js';
 import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from './infrastructure/document-chat-generation-queue.service.js';
-import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
-import { AcceptDocumentReviewBatchUseCase } from './application/document-review/accept-document-review-batch.use-case.js';
-import { AcceptDocumentReviewUseCase } from './application/document-review/accept-document-review.use-case.js';
-import { ListDocumentReviewQueueUseCase } from './application/document-review/list-document-review-queue.use-case.js';
-import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
 import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
+import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
 import { DocumentsController } from './presentation/documents.controller.js';
 import { ReviewQueueController } from './presentation/review-queue.controller.js';
 

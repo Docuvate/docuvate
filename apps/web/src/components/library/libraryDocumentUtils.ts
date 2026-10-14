@@ -12,7 +12,7 @@ export function documentDisplayDateParts(
   locale = 'de-DE'
 ): { text: string; isUploadFallback: boolean } {
   const isUploadFallback = !doc.documentDate;
-  const raw = doc.documentDate ?? doc.createdAt ?? doc.updatedAt;
+  const raw = doc.documentDate ?? doc.createdAt;
   return {
     text: new Date(raw).toLocaleDateString(locale, {
       day: '2-digit',

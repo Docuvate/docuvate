@@ -14,8 +14,8 @@ import { prepareLabelQueue } from '../../components/labels/labelsQueue';
 import {
   acceptLabelRecommendation,
   dismissLabelRecommendation,
-  getLabelMap,
   getDocumentReviewQueueSummary,
+  getLabelMap,
   listDocuments,
   listLabelRecommendations,
 } from '../../lib/api';

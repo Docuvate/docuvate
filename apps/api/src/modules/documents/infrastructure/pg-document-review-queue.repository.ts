@@ -5,6 +5,7 @@ import type pg from 'pg';
 
 import {
   parseDate,
+  parseNumber,
   parseString,
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
@@ -29,7 +30,7 @@ export class PgDocumentReviewQueueRepository {
       [userId]
     );
     const row = requireRecord(result.rows[0] ?? {});
-    return Number.parseInt(String(row.count ?? '0'), 10) || 0;
+    return parseNumber(row.count, 0);
   }
 
   async listPendingDocumentIds(

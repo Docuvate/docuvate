@@ -1,8 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 import type {
   AcceptDocumentReviewBatchResponseDto,
   AcceptDocumentReviewResponseDto,
@@ -10,6 +7,9 @@ import type {
   DocumentReviewQueueSummaryDto,
   TagSuggestionDto,
 } from '@docuvate/contracts';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class DocumentReviewFieldSuggestionDtoClass {
   @ApiProperty()

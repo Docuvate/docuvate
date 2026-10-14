@@ -350,7 +350,7 @@ export function GlobalChatPage() {
                   type="button"
                   variant="secondary"
                   className="doc-chat-new-thread"
-                  onClick={() => void onNewThread()}
+                  onClick={() => { onNewThread(); }}
                 >
                   {t('globalChat.newThread')}
                 </Button>

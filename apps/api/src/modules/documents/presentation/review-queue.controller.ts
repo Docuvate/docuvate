@@ -21,8 +21,8 @@ import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
-import { AcceptDocumentReviewBatchUseCase } from '../application/document-review/accept-document-review-batch.use-case.js';
 import { AcceptDocumentReviewUseCase } from '../application/document-review/accept-document-review.use-case.js';
+import { AcceptDocumentReviewBatchUseCase } from '../application/document-review/accept-document-review-batch.use-case.js';
 import { ListDocumentReviewQueueUseCase } from '../application/document-review/list-document-review-queue.use-case.js';
 
 @ApiDocuvateController('review-queue')

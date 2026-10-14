@@ -5,10 +5,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import { documentDisplayDateParts } from '../components/library/libraryDocumentUtils';
 import { useToastNotify } from '../components/save/ToastProvider';
 import { Button } from '../components/ui/Button';
-import { Chip } from '../components/ui/Chip';
 import { Card } from '../components/ui/Card';
+import { Chip } from '../components/ui/Chip';
 import {
   acceptDocumentReviewAll,
   acceptDocumentReviewHighConfidenceBatch,
@@ -17,7 +18,6 @@ import {
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { routes } from '../lib/routes';
-import { documentDisplayDateParts } from '../components/library/libraryDocumentUtils';
 
 export function ReviewQueuePage() {
   const { t, i18n } = useTranslation();
@@ -27,7 +27,7 @@ export function ReviewQueuePage() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [batchBusy, setBatchBusy] = useState(false);
   const [focusIndex, setFocusIndex] = useState(0);
-  const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const cardRefs = useRef<(HTMLLIElement | null)[]>([]);
 
   const locale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
 
@@ -123,7 +123,7 @@ export function ReviewQueuePage() {
     }
   }
 
-  const activeItem = items[focusIndex];
+  const showKeyboardHint = !loading && items.length > 0;
 
   return (
     <div className="page review-queue-page" data-ux="page">
@@ -150,7 +150,7 @@ export function ReviewQueuePage() {
       ) : null}
 
       {!loading && items.length > 0 ? (
-        <ul className="review-queue-list">
+        <ul className="review-queue-list" role="listbox" aria-label={t('reviewQueue.title')}>
           {items.map((item, index) => {
             const dateParts = documentDisplayDateParts(
               {
@@ -167,22 +167,27 @@ export function ReviewQueuePage() {
                   year: 'numeric',
                 })
               : null;
-            const cardBusy = busyId === item.documentId || busyId?.startsWith(`${item.documentId}:`);
+            const cardBusy =
+              busyId === item.documentId || Boolean(busyId?.startsWith(`${item.documentId}:`));
+            const actionsDisabled = cardBusy ? true : batchBusy;
+            const displayTitle = item.title.trim().length > 0 ? item.title : item.filename;
             return (
-              <li key={item.documentId}>
-                <div
-                  className={`review-queue-card-wrap${index === focusIndex ? ' review-queue-card-focused' : ''}`}
-                  tabIndex={0}
-                  ref={(el: HTMLDivElement | null) => {
-                    cardRefs.current[index] = el;
-                  }}
-                  onFocus={() => { setFocusIndex(index); }}
-                  onKeyDown={(e) => { onCardKeyDown(e, item); }}
-                >
+              <li
+                key={item.documentId}
+                role="option"
+                aria-selected={index === focusIndex}
+                className={`review-queue-card-wrap${index === focusIndex ? ' review-queue-card-focused' : ''}`}
+                tabIndex={index === focusIndex ? 0 : -1}
+                ref={(el: HTMLLIElement | null) => {
+                  cardRefs.current[index] = el;
+                }}
+                onFocus={() => { setFocusIndex(index); }}
+                onKeyDown={(e) => { onCardKeyDown(e, item); }}
+              >
                 <Card className="review-queue-card">
                   <div className="review-queue-card-head">
                     <Link to={routes.document(item.documentId)} className="review-queue-doc-link">
-                      {item.title || item.filename}
+                      {displayTitle}
                     </Link>
                     <span className="muted review-queue-date">
                       {t('reviewQueue.documentDate')}: {dateParts.text}
@@ -235,7 +240,7 @@ export function ReviewQueuePage() {
                     <Button
                       type="button"
                       variant="primary"
-                      disabled={cardBusy || batchBusy}
+                      disabled={actionsDisabled}
                       onClick={() => void onAcceptAll(item)}
                     >
                       {t('reviewQueue.acceptAll')}
@@ -245,7 +250,7 @@ export function ReviewQueuePage() {
                         key={`dismiss-${s.tag.id}`}
                         type="button"
                         variant="ghost"
-                        disabled={cardBusy || batchBusy}
+                        disabled={actionsDisabled}
                         onClick={() => void onDismissLabel(item, s.tag.id)}
                       >
                         {t('reviewQueue.rejectLabel', { name: s.tag.name })}
@@ -253,14 +258,13 @@ export function ReviewQueuePage() {
                     ))}
                   </div>
                 </Card>
-                </div>
               </li>
             );
           })}
         </ul>
       ) : null}
 
-      {activeItem ? (
+      {showKeyboardHint ? (
         <p className="muted review-queue-keyboard-hint">{t('reviewQueue.keyboardHint')}</p>
       ) : null}
     </div>

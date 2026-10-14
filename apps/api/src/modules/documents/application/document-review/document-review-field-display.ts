@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentReviewFieldSuggestionDto, ExtractedField } from '@docuvate/contracts';
 import {
-  partitionRecognizedAndHeuristicSuggestions,
   parseSuggestionStorageKey,
+  partitionRecognizedAndHeuristicSuggestions,
   semanticFieldKey,
 } from '@docuvate/contracts';
 

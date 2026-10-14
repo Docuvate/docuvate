@@ -7,20 +7,20 @@ import type {
 } from '@docuvate/contracts';
 import { partitionRecognizedAndHeuristicSuggestions } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
+import type pg from 'pg';
 
-import type { AuthorizationSubject } from '../../../../shared/domain/authorization.js';
 import { DocumentAuthorizationService } from '../../../../shared/application/document-authorization.service.js';
+import type { AuthorizationSubject } from '../../../../shared/domain/authorization.js';
 import {
   DOCUMENT_REPOSITORY,
   type DocumentRepository,
   DUPLICATE_STACK_REPOSITORY,
   type DuplicateStackRepository,
 } from '../../../../shared/domain/ports.js';
+import { PG_POOL } from '../../../../shared/infrastructure/database/tokens.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../../labels/application/load-document-labels.use-case.js';
 import { ListRecognizedFieldsUseCase } from '../../../recognized-fields/application/recognized-field.use-cases.js';
 import { loadFieldDefinitionLookup } from '../../../search/infrastructure/document-field-value-index.js';
-import { PG_POOL } from '../../../../shared/infrastructure/database/tokens.js';
-import type pg from 'pg';
 import { toTagSuggestionDto } from '../../../taxonomy/presentation/taxonomy.mapper.js';
 import { PgDocumentReviewQueueRepository } from '../../infrastructure/pg-document-review-queue.repository.js';
 import {

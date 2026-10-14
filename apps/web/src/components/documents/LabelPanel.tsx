@@ -13,12 +13,12 @@ import {
   removeDocumentTag,
   withdrawDocumentLabelCorrection,
 } from '../../lib/api';
-import { DocumentLabelSuggestionChips } from './DocumentLabelSuggestionChips';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
 import { Input } from '../ui/Input';
+import { DocumentLabelSuggestionChips } from './DocumentLabelSuggestionChips';
 
 const NEST_CANDIDATE_LIMIT = 3;
 const CORRECTION_UNDO_MS = 10_000;

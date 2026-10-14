@@ -18,11 +18,11 @@ import {
   type TaxonomyRepository,
 } from '../../../../shared/domain/ports.js';
 import { AcceptTagSuggestionUseCase } from '../../../labels/application/document-label.use-cases.js';
+import { LoadDocumentLabelSuggestionsUseCase } from '../../../labels/application/load-document-labels.use-case.js';
 import { ListRecognizedFieldsUseCase } from '../../../recognized-fields/application/recognized-field.use-cases.js';
 import { SyncDocumentSearchIndexUseCase } from '../../../search/application/sync-document-search-index.use-case.js';
 import { GetDocumentUseCase } from '../get-document.use-case.js';
 import { UpdateDocumentUseCase } from '../update-document.use-case.js';
-import { LoadDocumentLabelSuggestionsUseCase } from '../../../labels/application/load-document-labels.use-case.js';
 import { isoDateFromFieldValue } from './document-review-field-display.js';
 
 @Injectable()

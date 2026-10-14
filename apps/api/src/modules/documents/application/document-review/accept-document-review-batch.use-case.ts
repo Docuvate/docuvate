@@ -4,8 +4,8 @@ import type { AcceptDocumentReviewBatchResponseDto } from '@docuvate/contracts';
 import { Injectable } from '@nestjs/common';
 
 import type { AuthorizationSubject } from '../../../../shared/domain/authorization.js';
-import { AcceptDocumentReviewUseCase } from './accept-document-review.use-case.js';
 import { PgDocumentReviewQueueRepository } from '../../infrastructure/pg-document-review-queue.repository.js';
+import { AcceptDocumentReviewUseCase } from './accept-document-review.use-case.js';
 
 @Injectable()
 export class AcceptDocumentReviewBatchUseCase {
