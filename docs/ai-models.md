@@ -9,7 +9,7 @@ Docuvate keeps model choices behind **ports** so CPU-first self-hosting stays th
 | PDF text (born-digital) | Worker `PipelineExtractor` → `pdfplumber` | No ML | Text layer + word boxes normalized 0–1 in `ExtractionBlock` |
 | OCR and layout blocks (scans) | Worker `PipelineExtractor` → PaddleOCR | PP-OCRv4 mobile (`german` → latin multilingual) | DE Belege-first; Latin script covers German + English on receipts |
 | Structured fields (heuristic) | Worker extract pipeline | Regex on extracted text | amount, date, vendor line |
-| Document embeddings | Worker `/extract` (central representation) | `intfloat/multilingual-e5-small` (MIT; fastembed ONNX or sentence-transformers CPU) | int8 units in `document_representation_*`; see `docs/ml-pipeline.md` |
+| Document embeddings | Worker `/extract` (central representation) | `intfloat/multilingual-e5-small` (MIT; ONNX Runtime int8 CPU, pinned HF revision) | int8 units in `document_representation_*`; see `docs/ml-pipeline.md` |
 | Tag suggestions (semantic) | `ApplyEmbeddingSuggestionsUseCase` | Document mean vector from representation | NEST + centroid fallback; no `/embed` on upload |
 | Label vocabulary (structure) | `GET /labels/recommendations` | Heuristics on extraction + centroid/name similarity | New labels, merge/rename hints; dismiss/accept; user `label_recommendation_blocklist` |
 | Label map (structure) | `GET /labels/map` | PCA 3D on stored `document_embeddings` + tag centroids; web renders convex hulls / spheres per label | CPU-only projection in API |

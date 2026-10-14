@@ -8,7 +8,7 @@ License attributions are collected in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_N
 
 | Model | Load key(s) | Source | Revision | License | Approx. size | Purpose |
 | --- | --- | --- | --- | --- | ---: | --- |
-| multilingual-e5-small | `intfloat/multilingual-e5-small`, `Qdrant/multilingual-e5-small-onnx` | [Hugging Face](https://huggingface.co/intfloat/multilingual-e5-small) | `614241f622f53c4eeff9890bdc4f31cfecc418b3` | MIT | ~128 MiB | Document/query embeddings |
+| multilingual-e5-small | `intfloat/multilingual-e5-small` | [Hugging Face](https://huggingface.co/intfloat/multilingual-e5-small) | `614241f622f53c4eeff9890bdc4f31cfecc418b3` (ONNX int8 CPU) | MIT | ~118 MiB | Document/query embeddings |
 | bge-reranker-v2-m3-int8 | `BAAI/bge-reranker-v2-m3-int8` (default) | [Hugging Face](https://huggingface.co/BAAI/bge-reranker-v2-m3) | package default | Apache-2.0 | ~220 MiB | RAG reranking for cited chat |
 | PaddleOCR PP-OCRv4 mobile | `paddleocr:PP-OCRv4-mobile-latin` | [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) | PP-OCRv4 | Apache-2.0 | ~16 MiB | OCR for scans |
 

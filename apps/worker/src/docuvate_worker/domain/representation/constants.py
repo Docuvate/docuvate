@@ -6,8 +6,14 @@
 from __future__ import annotations
 
 ENCODER_ID = "intfloat/multilingual-e5-small"
-# Pinned Hugging Face revision (MIT).
-ENCODER_REVISION = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+# Pinned Hugging Face weights revision (MIT).
+ENCODER_HF_REVISION = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+# Stored on each document; bumps when the ONNX runtime artifact generation changes.
+ENCODER_REVISION = f"{ENCODER_HF_REVISION}-onnx-int8"
+ENCODER_ONNX_DIR = "onnx"
+ENCODER_ONNX_FILE = "model_qint8_avx512_vnni.onnx"
+# ARM64 lacks AVX512 VNNI; use a smaller dynamic-quantized graph (higher RAM than int8 VNNI).
+ENCODER_ONNX_FILE_ARM_FALLBACK = "model_O4.onnx"
 REPRESENTATION_VERSION = 1
 EMBEDDING_DIM = 384
 BINARY_CODE_BYTES = 48

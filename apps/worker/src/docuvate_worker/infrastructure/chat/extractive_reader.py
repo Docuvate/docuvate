@@ -10,7 +10,7 @@ import os
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +46,14 @@ def _load_pipeline() -> Callable[..., Any] | None:
         try:
             from transformers import pipeline  # noqa: PLC0415
 
-            _pipeline = pipeline(  # type: ignore[call-overload]
-                "question-answering",
-                model=READER_MODEL,
-                device=-1,
+            pipe_factory: Any = pipeline
+            _pipeline = cast(
+                Callable[..., Any],
+                pipe_factory(
+                    "question-answering",
+                    model=READER_MODEL,
+                    device=-1,
+                ),
             )
             return _pipeline
         except Exception as exc:

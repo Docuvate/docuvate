@@ -10,15 +10,14 @@
       "id": "multilingual-e5-small",
       "display_name": "intfloat/multilingual-e5-small",
       "load_keys": [
-        "intfloat/multilingual-e5-small",
-        "Qdrant/multilingual-e5-small-onnx"
+        "intfloat/multilingual-e5-small"
       ],
       "source": "https://huggingface.co/intfloat/multilingual-e5-small",
       "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
       "content_sha256": null,
       "license_spdx": "MIT",
-      "size_bytes_approx": 134217728,
-      "purpose": "Central document and query embeddings (384 dimensions) for representation, retrieval, and tag suggestions.",
+      "size_bytes_approx": 118346824,
+      "purpose": "Central document and query embeddings (384 dimensions) via ONNX Runtime int8 CPU (onnx/model_qint8_avx512_vnni.onnx at the pinned revision) for representation, retrieval, and tag suggestions.",
       "shipped_in_default_cpu_image": true,
       "training_data_summary": "Microsoft E5 contrastive pre-training on public web data; not fine-tuned on FUNSD, XFUND, or DocVQA."
     },

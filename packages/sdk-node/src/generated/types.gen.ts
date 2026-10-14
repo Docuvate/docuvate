@@ -333,6 +333,23 @@ export type DuplicateStackSetPrimaryRequestDto = {
     stackId: string;
 };
 
+export type EncoderReindexProgressDto = {
+    targetEncoderId: string;
+    targetEncoderRevision: string;
+    /**
+     * Documents already at the target encoder revision.
+     */
+    progressProcessed: number;
+    /**
+     * Extracted ready documents in this tenant.
+     */
+    progressTotal: number;
+    /**
+     * Documents still queued for background re-embedding.
+     */
+    progressPending: number;
+};
+
 export type ExportToConnectorRequestDto = {
     documentId: string;
     destinationRef?: string;
@@ -3895,6 +3912,28 @@ export type ListChatProvidersResponses = {
 };
 
 export type ListChatProvidersResponse = ListChatProvidersResponses[keyof ListChatProvidersResponses];
+
+export type GetEncoderReindexProgressData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/settings/encoder-reindex';
+};
+
+export type GetEncoderReindexProgressErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type GetEncoderReindexProgressError = GetEncoderReindexProgressErrors[keyof GetEncoderReindexProgressErrors];
+
+export type GetEncoderReindexProgressResponses = {
+    200: EncoderReindexProgressDto;
+};
+
+export type GetEncoderReindexProgressResponse = GetEncoderReindexProgressResponses[keyof GetEncoderReindexProgressResponses];
 
 export type ListExtractionEnginesData = {
     body?: never;

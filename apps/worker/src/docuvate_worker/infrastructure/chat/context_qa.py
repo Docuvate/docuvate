@@ -26,6 +26,10 @@ _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
 _MIN_CANDIDATE_LINE_LEN = 12
 _EU_AMOUNT_RE = re.compile(r"\d[\d.]*,\d{2}")
 _DUE_DAY_RE = re.compile(r"\d+\.\s*Werktag", flags=re.IGNORECASE)
+_AMOUNT_QUESTION_RE = re.compile(
+    r"\b(wie hoch|betrag|summe|miete|kaltmiete|kosten|preis)\b",
+    flags=re.IGNORECASE,
+)
 _total_hint_vec: list[float] | None = None
 
 
@@ -395,6 +399,10 @@ def _best_sentence_across_chunks(question: str, chunks: list[str]) -> str | None
     best_score = scored[0][0]
     if best_score < gate:
         return None
+    if _AMOUNT_QUESTION_RE.search(question):
+        amount_scored = [row for row in scored if _EU_AMOUNT_RE.search(row[1])]
+        if amount_scored and amount_scored[0][0] >= gate:
+            return amount_scored[0][1]
     margin = float(os.environ.get("DOCUVATE_SENTENCE_ANSWER_MARGIN", "0.03"))
     near = [row for row in scored if row[0] >= best_score - margin]
     amount_lines = [row for row in near if _EU_AMOUNT_RE.search(row[1])]

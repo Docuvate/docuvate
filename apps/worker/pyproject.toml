@@ -25,7 +25,9 @@ dependencies = [
   "opentelemetry-exporter-otlp-proto-http>=1.28.0",
   "opentelemetry-instrumentation-fastapi>=0.49b0",
   "fastembed>=0.4.2",
-  "sentence-transformers>=3.0.0",
+  "huggingface-hub>=0.26.0",
+  "onnxruntime>=1.19.0",
+  "tokenizers>=0.20.0",
 ]
 
 [project.optional-dependencies]
@@ -108,8 +110,14 @@ module = [
   "accelerate.*",
   "docling.*",
   "pytesseract.*",
+  "onnxruntime.*",
+  "tokenizers.*",
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "docuvate_worker.infrastructure.onnx_e5_encoder"
+disable_error_code = ["no-any-return"]
 
 [tool.pydantic-mypy]
 init_forbid_extra = true

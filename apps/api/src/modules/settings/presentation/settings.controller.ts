@@ -8,6 +8,7 @@ import {
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
+import { EncoderReindexProgressDto } from '../../../shared/presentation/dtos/encoder-reindex.dto.js';
 import {
   DocumentChatProviderListResponseDto,
   ExtractionEngineListResponseDto,
@@ -18,6 +19,7 @@ import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { GetEncoderReindexProgressUseCase } from '../../representation/application/get-encoder-reindex-progress.use-case.js';
 import { EffectiveDocumentChatProviderUseCase } from '../application/effective-document-chat-provider.use-case.js';
 import { GetHardwareCapabilitiesUseCase } from '../application/hardware-capabilities.use-case.js';
 import { ListDocumentChatProvidersUseCase } from '../application/list-document-chat-providers.use-case.js';
@@ -38,7 +40,8 @@ export class SettingsController {
     private readonly listEngines: ListExtractionEnginesUseCase,
     private readonly listChatProviders: ListDocumentChatProvidersUseCase,
     private readonly effectiveChatProvider: EffectiveDocumentChatProviderUseCase,
-    private readonly hardwareCapabilities: GetHardwareCapabilitiesUseCase
+    private readonly hardwareCapabilities: GetHardwareCapabilitiesUseCase,
+    private readonly encoderReindexProgress: GetEncoderReindexProgressUseCase
   ) {}
 
   @Get()
@@ -87,5 +90,14 @@ export class SettingsController {
   })
   async hardware(): Promise<HardwareCapabilitiesDto> {
     return this.hardwareCapabilities.execute();
+  }
+
+  @Get('encoder-reindex')
+  @ApiDocuvateRoute({
+    operationId: 'getEncoderReindexProgress',
+    summary: 'Background document encoder re-index progress for the signed-in tenant',
+  })
+  async encoderReindex(@Session() session: AuthSession): Promise<EncoderReindexProgressDto> {
+    return this.encoderReindexProgress.execute(session.user.id);
   }
 }

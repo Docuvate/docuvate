@@ -108,7 +108,7 @@ def main() -> None:
     intent_payload = {
         "version": 1,
         "encoder": "intfloat/multilingual-e5-small",
-        "encoder_revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+        "encoder_revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3-onnx-int8",
         "intents": intents,
         "min_score": 0.74,
         "min_margin": 0.04,

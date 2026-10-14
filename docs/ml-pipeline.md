@@ -35,9 +35,9 @@ flowchart TB
 | Item | Choice |
 |------|--------|
 | Model | `intfloat/multilingual-e5-small` (MIT, 384 dimensions, 512 tokens) |
-| Revision | `614241f622f53c4eeff9890bdc4f31cfecc418b3` (pinned in worker constants) |
+| Revision | `614241f622f53c4eeff9890bdc4f31cfecc418b3-onnx-int8` (HF weights @ `614241f622f53c4eeff9890bdc4f31cfecc418b3`, ONNX int8 graph) |
 | Prefixes | `passage: ` for document units, `query: ` for questions |
-| Runtime | ONNX/int8 via fastembed when available; otherwise `sentence-transformers` on CPU |
+| Runtime | ONNX Runtime CPU (`onnx/model_qint8_avx512_vnni.onnx`, ~118 MB); `DOCUVATE_ENCODER_INTRA_OP_THREADS` / `OMP_NUM_THREADS` tune `intra_op` threads |
 | Units | LUNA sections/paragraphs and TACO table rows (row text prefixed with header) when layout is available; otherwise paragraph splits of OCR text. Fixed 320/64 character windows are used only when layout units are unavailable. |
 | Spans | Each unit stores `page`, bounding box, `char_start`, `char_end`. |
 
@@ -73,7 +73,7 @@ Tenant statistics live in `tenant_label_prototype` and existing `embedding_densi
 
 | Component | Model | License |
 |-----------|--------|---------|
-| Document encoder | `intfloat/multilingual-e5-small` @ `614241f622f53c4eeff9890bdc4f31cfecc418b3` | MIT |
+| Document encoder | `intfloat/multilingual-e5-small` @ `614241f622f53c4eeff9890bdc4f31cfecc418b3` (ONNX int8 CPU) | MIT |
 | RAG reranker | `BAAI/bge-reranker-v2-m3-int8` | Apache-2.0 |
 | Chat LLM (default) | Ollama `qwen2.5:1.5b` | Apache-2.0 |
 | OCR (default) | PaddleOCR `german` | Apache-2.0 |
