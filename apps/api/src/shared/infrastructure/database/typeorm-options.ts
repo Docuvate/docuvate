@@ -29,6 +29,7 @@ import { FeatureFlags20261013120000 } from './migrations/20261013120000-feature-
 import { UserChatCloudLlm20261013120000 } from './migrations/20261013120000-user-chat-cloud-llm.js';
 import { SmartDuplicates20261013180000 } from './migrations/20261013180000-smart-duplicates.js';
 import { FeatureFlagMlKeys20261013200000 } from './migrations/20261013200000-feature-flag-ml-keys.js';
+import { FeatureFlagLearnedValueTypes20261013220000 } from './migrations/20261013220000-feature-flag-learned-value-types.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -80,6 +81,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       UserChatCloudLlm20261013120000,
       SmartDuplicates20261013180000,
       FeatureFlagMlKeys20261013200000,
+      FeatureFlagLearnedValueTypes20261013220000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

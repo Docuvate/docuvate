@@ -16,6 +16,7 @@ from bench.model_gates.gates.classification import run_classification_gate
 from bench.model_gates.gates.layout_ssim import run_layout_ssim_gate
 from bench.model_gates.gates.spark import run_spark_gates
 from bench.model_gates.gates.stubs import run_stub_gates
+from bench.model_gates.gates.value_types import run_value_types_smoke_gate
 from bench.model_gates.ratchet import (
     compare_to_baseline,
     metric_direction_for,
@@ -62,6 +63,8 @@ def run_harness(excluded: frozenset[str] | None = None) -> HarnessResult:
         gates.append(run_layout_ssim_gate(root))
     if "spark" not in skip:
         gates.extend(run_spark_gates())
+    if "fields" not in skip:
+        gates.append(run_value_types_smoke_gate())
     gates.extend(run_stub_gates())
     return HarnessResult(version=BASELINE_VERSION, gates=tuple(gates))
 

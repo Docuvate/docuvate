@@ -1,0 +1,12 @@
+# Optional local LLM (Ollama + Qwen2.5-1.5B Q4). Requires the chat-local Compose profile.
+# Usage:
+#   docker compose --profile chat-local -f docker-compose.yml -f docker-compose.chat-local.yml up -d
+# Recommended host RAM: >= 8 GiB (see README#quickstart).
+services:
+  api:
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      DOCUVATE_FEATURE_LOCAL_CHAT_MODEL: ${DOCUVATE_FEATURE_LOCAL_CHAT_MODEL:-true}
+    depends_on:
+      ollama-init:
+        condition: service_completed_successfully

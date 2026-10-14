@@ -15,6 +15,11 @@ import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infr
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import {
+  createIntegrationResolveFeatureFlags,
+  enableLocalChatModelForIntegration,
+  enableLocalChatModelForIntegrationTenant,
+} from '../helpers/cited-chat-integration-feature-flags.js';
+import {
   parseRequestJsonRecord,
   readBooleanProperty,
   readPassageIds,
@@ -41,8 +46,10 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
   let threads: PgDocumentChatThreadRepository;
   let citationsRepo: PgChatMessageCitationsRepository;
   let service: CitedChatGenerationService;
+  let restoreLocalChatFlag: () => void;
 
   beforeAll(async () => {
+    restoreLocalChatFlag = enableLocalChatModelForIntegration();
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
@@ -54,6 +61,7 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
     } finally {
       client.release();
     }
+    await enableLocalChatModelForIntegrationTenant(pool, userId);
 
     docId = randomUUID();
     const filler = 'X'.repeat(500);
@@ -105,7 +113,8 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
       noopEmbedding,
       new PgCitedChatRetrievalRepository(pool),
       citationsRepo,
-      passthroughChatQueryRouter()
+      passthroughChatQueryRouter(),
+      createIntegrationResolveFeatureFlags(pool)
     );
   }, 60_000);
 
@@ -115,6 +124,7 @@ describe('cited chat composed prose and citation page (Testcontainers)', () => {
   });
 
   afterAll(async () => {
+    restoreLocalChatFlag();
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
   });

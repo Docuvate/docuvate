@@ -3,6 +3,7 @@
 import { Module } from '@nestjs/common';
 
 import { ChatInfrastructureModule } from '../chat-infrastructure/chat-infrastructure.module.js';
+import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { SearchModule } from '../search/search.module.js';
 import { ChatLibraryStatsService } from './application/chat-library-stats.service.js';
 import { ChatQueryRouterService } from './application/chat-query-router.service.js';
@@ -10,7 +11,7 @@ import { CitedChatGenerationService } from './application/cited-chat-generation.
 import { PgChatLibraryStatsRepository } from './infrastructure/pg-chat-library-stats.repository.js';
 
 @Module({
-  imports: [SearchModule, ChatInfrastructureModule],
+  imports: [SearchModule, ChatInfrastructureModule, FeatureFlagsModule],
   providers: [
     PgChatLibraryStatsRepository,
     ChatLibraryStatsService,

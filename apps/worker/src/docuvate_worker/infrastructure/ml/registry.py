@@ -43,6 +43,17 @@ def resolve_active_model(family_id: str) -> ResolvedModel:
             artifact_uri=None,
             source="env",
         )
+    if family_id == "value-types-vgram":
+        from docuvate_worker.infrastructure.ml.value_types.registry import (  # noqa: PLC0415
+            artifact_path,
+        )
+
+        return ResolvedModel(
+            family_id=family_id,
+            version_tag=os.environ.get("DOCUVATE_VALUE_TYPES_VERSION", "cord-synth-v1"),
+            artifact_uri=str(artifact_path()),
+            source="bundled",
+        )
     return ResolvedModel(
         family_id=family_id,
         version_tag="bootstrap-1",

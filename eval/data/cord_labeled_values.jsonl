@@ -1,0 +1,3625 @@
+{"text": "REAL GANACHE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16,500", "type_name": "money"}
+{"text": "EGG TART", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,000", "type_name": "money"}
+{"text": "PIZZA TOAST", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16,000", "type_name": "money"}
+{"text": "45,500", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "4,500", "type_name": "money"}
+{"text": "Kopi Susu Kolonel", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "23.000", "type_name": "money"}
+{"text": "23.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "27.000", "type_name": "money"}
+{"text": "S-Ovaltine 50%", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "10% Tax Included", "type_name": "free_text"}
+{"text": "18,181", "type_name": "money"}
+{"text": "1,818", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "80,000", "type_name": "money"}
+{"text": "M-Caramel Black Tea", "type_name": "free_text"}
+{"text": "@28,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "28,000", "type_name": "money"}
+{"text": "70%", "type_name": "free_text"}
+{"text": "Less Ice", "type_name": "free_text"}
+{"text": "28,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "BBQ Chicken", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "41,000", "type_name": "money"}
+{"text": "Sedang", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "41,000", "type_name": "money"}
+{"text": "41,000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": ":9,000", "type_name": "money"}
+{"text": "LE MINERAL", "type_name": "free_text"}
+{"text": "1.00", "type_name": "identifier"}
+{"text": "8,000", "type_name": "money"}
+{"text": "7,273", "type_name": "money"}
+{"text": "727", "type_name": "money"}
+{"text": "8,000", "type_name": "money"}
+{"text": "8,000", "type_name": "money"}
+{"text": "POTATO SAUSAGE BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "19,000", "type_name": "money"}
+{"text": "OREO GREEN TEA SPREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "52,000", "type_name": "money"}
+{"text": "WHITE CHOCO BANANA SPREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "52,000", "type_name": "money"}
+{"text": "123,000", "type_name": "money"}
+{"text": "123,000", "type_name": "money"}
+{"text": "Choco Devil", "type_name": "free_text"}
+{"text": "4", "type_name": "identifier"}
+{"text": "63,636", "type_name": "money"}
+{"text": "63,636", "type_name": "money"}
+{"text": "-9,545", "type_name": "money"}
+{"text": "5,409", "type_name": "money"}
+{"text": "59,500", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "40,500", "type_name": "money"}
+{"text": "TALAM UNGU", "type_name": "free_text"}
+{"text": "@6500", "type_name": "money"}
+{"text": "3X", "type_name": "identifier"}
+{"text": "19,500", "type_name": "money"}
+{"text": "MIKA KECIL", "type_name": "free_text"}
+{"text": "@0", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "11,700", "type_name": "money"}
+{"text": "11,700", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "8,300", "type_name": "money"}
+{"text": "Tahu Ikan Oma Giok", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Serbu 1", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "40.000", "type_name": "money"}
+{"text": "Choco Peanut Bread", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "60.000", "type_name": "money"}
+{"text": "60.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Se'I Sapi Sambal Matah ( R )", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "Se'I Sapi Lada Hitam (J)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "35.000", "type_name": "money"}
+{"text": "Nasi Putih", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "10.000", "type_name": "money"}
+{"text": "Milk Shake Coklat", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16.000", "type_name": "money"}
+{"text": "81.000", "type_name": "money"}
+{"text": "8.100", "type_name": "money"}
+{"text": "89.100", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "89.100", "type_name": "money"}
+{"text": "ES KOPI SUSU", "type_name": "free_text"}
+{"text": "4", "type_name": "identifier"}
+{"text": "72.000", "type_name": "money"}
+{"text": "72.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "MINERAL 600 ML", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "7,727", "type_name": "money"}
+{"text": "BULGOGI RICE R", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "33,636", "type_name": "money"}
+{"text": "41,364", "type_name": "money"}
+{"text": "4,136", "type_name": "money"}
+{"text": "45,500", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "-4,500", "type_name": "money"}
+{"text": "Arem Arem", "type_name": "free_text"}
+{"text": "@ 12.000", "type_name": "money"}
+{"text": "2 x", "type_name": "identifier"}
+{"text": "24.000", "type_name": "money"}
+{"text": "Kroket", "type_name": "free_text"}
+{"text": "@ 12.000", "type_name": "money"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "12.000", "type_name": "money"}
+{"text": "Rp 36.000", "type_name": "money"}
+{"text": "Rp 3.600", "type_name": "money"}
+{"text": "Rp 39.600", "type_name": "money"}
+{"text": "Arem Arem", "type_name": "free_text"}
+{"text": "12.000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "24.000", "type_name": "money"}
+{"text": "Pepenero Pastel", "type_name": "free_text"}
+{"text": "15.000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "30.000", "type_name": "money"}
+{"text": "Rp 54.000", "type_name": "money"}
+{"text": "Rp 5.400", "type_name": "money"}
+{"text": "Rp 59.400", "type_name": "money"}
+{"text": "Rp 100.000", "type_name": "money"}
+{"text": "Rp 40.600", "type_name": "money"}
+{"text": "TT", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "80,000", "type_name": "money"}
+{"text": "LEMONADE 16OZ", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "80.000", "type_name": "money"}
+{"text": "beef C roll 3pcs", "type_name": "free_text"}
+{"text": "10,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "kaya bred", "type_name": "free_text"}
+{"text": "15,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15,000", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "75,000", "type_name": "money"}
+{"text": "FUTAMI 17 GREEN TEA (CLAS", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,500", "type_name": "money"}
+{"text": "EGG TART", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,000", "type_name": "money"}
+{"text": "GRAIN CROQUE MONSIEUR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "42,500", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "7,500", "type_name": "money"}
+{"text": "JAMUR", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "TAHU", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "5,000", "type_name": "money"}
+{"text": "15,000", "type_name": "money"}
+{"text": "1,500", "type_name": "money"}
+{"text": "16,500", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "3,500", "type_name": "money"}
+{"text": "Mango Lemon Tea", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "Rp 29,090", "type_name": "money"}
+{"text": "Sliders Set", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "Rp 113,636", "type_name": "money"}
+{"text": "Chicken Vege Rice Bowl", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "Rp 86,363", "type_name": "money"}
+{"text": "Discount BCA 15%", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "-Rp 34,363", "type_name": "money"}
+{"text": "Rp 194,726", "type_name": "money"}
+{"text": "Rp 9,736", "type_name": "money"}
+{"text": "Rp 20,446", "type_name": "money"}
+{"text": "Rp 224,908", "type_name": "money"}
+{"text": "Rp 224,908", "type_name": "money"}
+{"text": "RedVelvet Nutella", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "280,000", "type_name": "money"}
+{"text": "Free Mini Candle", "type_name": "free_text"}
+{"text": ".5", "type_name": "identifier"}
+{"text": "Large Box", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "280,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "308,000", "type_name": "money"}
+{"text": "308,000", "type_name": "money"}
+{"text": "BUBBLE GUM", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "18,182", "type_name": "money"}
+{"text": "18,182", "type_name": "money"}
+{"text": "1,818", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "PAIN AU CHOCOLATE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "11,000", "type_name": "money"}
+{"text": "CHOCO CUSTARD PASTRY", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "MILK PASTRY ROLL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "REAL CHEESE INSIDE BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,500", "type_name": "money"}
+{"text": "SAUSAGE BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15,000", "type_name": "money"}
+{"text": "HAM CHEESE FLAT BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "80,500", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "19,500", "type_name": "money"}
+{"text": "Sop Sui Jiao", "type_name": "free_text"}
+{"text": "1Prs", "type_name": "identifier"}
+{"text": "33,000", "type_name": "money"}
+{"text": "Ha Kaou Udng", "type_name": "free_text"}
+{"text": "1Prs", "type_name": "identifier"}
+{"text": "28,000", "type_name": "money"}
+{"text": "Sio May Kpting", "type_name": "free_text"}
+{"text": "1Prs", "type_name": "identifier"}
+{"text": "23,500", "type_name": "money"}
+{"text": "Siomay Kmbinasi", "type_name": "free_text"}
+{"text": "1Prs", "type_name": "identifier"}
+{"text": "23,000", "type_name": "money"}
+{"text": "Leng Hong Kien", "type_name": "free_text"}
+{"text": "1Prs", "type_name": "identifier"}
+{"text": "30,000", "type_name": "money"}
+{"text": "Mie Trsi Kgkung", "type_name": "free_text"}
+{"text": "1Prs", "type_name": "identifier"}
+{"text": "35,500", "type_name": "money"}
+{"text": "Es Teh Tawar", "type_name": "free_text"}
+{"text": "1Gls", "type_name": "identifier"}
+{"text": "7,000", "type_name": "money"}
+{"text": "180,000", "type_name": "money"}
+{"text": "9,000", "type_name": "money"}
+{"text": "18,900", "type_name": "money"}
+{"text": "207,900", "type_name": "money"}
+{"text": "NASI MERAH/PUTIH", "type_name": "free_text"}
+{"text": "5.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "5.000", "type_name": "money"}
+{"text": "SAYUR", "type_name": "free_text"}
+{"text": "4.000", "type_name": "money"}
+{"text": "2x", "type_name": "identifier"}
+{"text": "8.000", "type_name": "money"}
+{"text": "KERUPUK/SAMBEL", "type_name": "free_text"}
+{"text": "2.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "2.000", "type_name": "money"}
+{"text": "AYAM", "type_name": "free_text"}
+{"text": "14.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "14.000", "type_name": "money"}
+{"text": "MINUMAN KEMASAN/REFILL", "type_name": "free_text"}
+{"text": "6.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "6.000", "type_name": "money"}
+{"text": "Rp. 35.000", "type_name": "money"}
+{"text": "THAI ICED TEA (L)", "type_name": "free_text"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16.363", "type_name": "money"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1,636", "type_name": "money"}
+{"text": "17,999", "type_name": "money"}
+{"text": "ELEPHANT READ BEAN", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "chapsal twister donnut", "type_name": "free_text"}
+{"text": "10,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Sabun Beras", "type_name": "free_text"}
+{"text": "30000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "30000", "type_name": "money"}
+{"text": "30000", "type_name": "money"}
+{"text": "Discount(0%)", "type_name": "money"}
+{"text": "50000", "type_name": "money"}
+{"text": "20000", "type_name": "money"}
+{"text": "REDBEAN BRE/D", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "FRANKFRUT S/USAGE ROLL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "21,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "29,000", "type_name": "money"}
+{"text": "PREMIUM TOAST PAN BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "24,000", "type_name": "money"}
+{"text": "24,000", "type_name": "money"}
+{"text": "24,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Nasi (MLY)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "6.000", "type_name": "money"}
+{"text": "6.000", "type_name": "money"}
+{"text": "6.000", "type_name": "money"}
+{"text": "GRAINS PAN BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,500", "type_name": "money"}
+{"text": "ICED HIBISCUS LYCHEE TEA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "37,000", "type_name": "money"}
+{"text": "57,500", "type_name": "money"}
+{"text": "7,500", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "GRILLED BABY POTATO (R", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "50,500", "type_name": "money"}
+{"text": "TRUFFLE CREAM", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "76,000", "type_name": "money"}
+{"text": "CARBONARA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "70,500", "type_name": "money"}
+{"text": "ORIGINAL BREWED TEA", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "46,000", "type_name": "money"}
+{"text": "243,000", "type_name": "money"}
+{"text": "14,580", "type_name": "money"}
+{"text": "25,758", "type_name": "money"}
+{"text": "283,338", "type_name": "money"}
+{"text": "BLACK PEPPER MEATBALL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "76,500", "type_name": "money"}
+{"text": "QUARTO FORMANGGI PASTA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "82,500", "type_name": "money"}
+{"text": "GREEN TEA WITH CRUMBLE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "56,000", "type_name": "money"}
+{"text": "ORIGINAL BREWED TEA", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "46,000", "type_name": "money"}
+{"text": "261,000", "type_name": "money"}
+{"text": "15,660", "type_name": "money"}
+{"text": "27,666", "type_name": "money"}
+{"text": "304,326", "type_name": "money"}
+{"text": "Soft Ori 3 Top", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,272", "type_name": "money"}
+{"text": "Top Oreo", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "Top Oreo", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "Top Banana", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "17,272", "type_name": "money"}
+{"text": "1,727", "type_name": "money"}
+{"text": "18,999", "type_name": "money"}
+{"text": "18,999", "type_name": "money"}
+{"text": "Ice Lemon Tea", "type_name": "free_text"}
+{"text": "13,636", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "63,636", "type_name": "money"}
+{"text": "6,364", "type_name": "money"}
+{"text": "70,000", "type_name": "money"}
+{"text": "70,000", "type_name": "money"}
+{"text": "TT", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "80,000", "type_name": "money"}
+{"text": "PKT TELOR/PERKEDEL", "type_name": "free_text"}
+{"text": "26,000", "type_name": "money"}
+{"text": "TERONG", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "PARU", "type_name": "free_text"}
+{"text": "23,000", "type_name": "money"}
+{"text": "SBL GR ATI/AMPLA", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "NESTLE 330 ML", "type_name": "free_text"}
+{"text": "8,000", "type_name": "money"}
+{"text": "89,000", "type_name": "money"}
+{"text": "8,900", "type_name": "money"}
+{"text": "97,900", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "2,100", "type_name": "money"}
+{"text": "Gojek Chicken Chilli Sauce H", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "95,000", "type_name": "money"}
+{"text": "Gojek Chicken Soy Sauce F", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "180,000", "type_name": "money"}
+{"text": "Gojek French Fries", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "70,000", "type_name": "money"}
+{"text": "345,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "34,500", "type_name": "money"}
+{"text": "379,500", "type_name": "money"}
+{"text": "SOGOGI JAPCHAE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "150,000", "type_name": "money"}
+{"text": "GONG GIBAB", "type_name": "free_text"}
+{"text": "7", "type_name": "identifier"}
+{"text": "105,000", "type_name": "money"}
+{"text": "CHULPAN CHEESE DAK GALBI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "230,000", "type_name": "money"}
+{"text": "CREAM TEOK PO KI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "95,000", "type_name": "money"}
+{"text": "EL KEUN HWANGTAE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "120,000", "type_name": "money"}
+{"text": "SUNDUBU(TUKBEGI) CHAM KKOT SAL", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "620,000", "type_name": "money"}
+{"text": "U SAM GYEOP", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "290,000", "type_name": "money"}
+{"text": "U SEOL", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "390,000", "type_name": "money"}
+{"text": "U SAM GYEOP", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "ICE COFFE MIX", "type_name": "free_text"}
+{"text": "3", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "ICE BLACK COFFE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "2,000,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "140,000", "type_name": "money"}
+{"text": "212,460", "type_name": "money"}
+{"text": "2,352,460", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "2,352,460", "type_name": "money"}
+{"text": "STIX CINNAMON", "type_name": "free_text"}
+{"text": "19,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "19,000", "type_name": "money"}
+{"text": "CINNAMON SUGAR", "type_name": "free_text"}
+{"text": "17,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "TRIPPLE CHEESE", "type_name": "free_text"}
+{"text": "17,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "53,000", "type_name": "money"}
+{"text": "53,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "53,000", "type_name": "money"}
+{"text": "ROTI UNYIL", "type_name": "free_text"}
+{"text": "170", "type_name": "identifier"}
+{"text": "272.000", "type_name": "money"}
+{"text": "PAPER BAG BESAR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "6.000", "type_name": "money"}
+{"text": "278.000", "type_name": "money"}
+{"text": "300.000", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "THAI ICED TEA (L)", "type_name": "free_text"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16.363", "type_name": "money"}
+{"text": "16.363", "type_name": "money"}
+{"text": "1,636", "type_name": "money"}
+{"text": "17,999", "type_name": "money"}
+{"text": "AOP Seafood", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "85,000", "type_name": "money"}
+{"text": "Omurice Katsu Curry", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "95,000", "type_name": "money"}
+{"text": "Earl Gray Tea", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "35,000", "type_name": "money"}
+{"text": "Hot Tea", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25,000", "type_name": "money"}
+{"text": "240,000", "type_name": "money"}
+{"text": "21,600", "type_name": "money"}
+{"text": "26,160", "type_name": "money"}
+{"text": "287,760", "type_name": "money"}
+{"text": "MARBLE CASTELA", "type_name": "free_text"}
+{"text": "22,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "22,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Seaweed Chicken", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "42,000", "type_name": "money"}
+{"text": "- Sedang", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "42,000", "type_name": "money"}
+{"text": "42,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "8,000", "type_name": "money"}
+{"text": "SB 1 OR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "28,636", "type_name": "money"}
+{"text": "Chokocha Flt", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "Bbq Bento", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "55,908", "type_name": "money"}
+{"text": "5,592", "type_name": "money"}
+{"text": "61,500", "type_name": "money"}
+{"text": "70,000", "type_name": "money"}
+{"text": "8,500", "type_name": "money"}
+{"text": "Nasi CampurBali", "type_name": "free_text"}
+{"text": "52.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "52.000", "type_name": "money"}
+{"text": "Lemon", "type_name": "free_text"}
+{"text": "22.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "22.000", "type_name": "money"}
+{"text": "74.000", "type_name": "money"}
+{"text": "7.400", "type_name": "money"}
+{"text": "81.400", "type_name": "money"}
+{"text": "CHOCOLATE ECLAIR", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "26,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Round Wagyu (1gr)", "type_name": "free_text"}
+{"text": "118", "type_name": "identifier"}
+{"text": "47.200", "type_name": "money"}
+{"text": "Wagyu Rice Box", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10.000", "type_name": "money"}
+{"text": "57.200", "type_name": "money"}
+{"text": "57.200", "type_name": "money"}
+{"text": "57.200", "type_name": "money"}
+{"text": "KENTHIR 2", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "42.000", "type_name": "money"}
+{"text": "KOL GORENG", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "6.000", "type_name": "money"}
+{"text": "TEH MANIS", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "8.000", "type_name": "money"}
+{"text": "56.000", "type_name": "money"}
+{"text": "56.000", "type_name": "money"}
+{"text": "56.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Large 1", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "11.000", "type_name": "money"}
+{"text": "*Rhum", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "Pastry Keju", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "*Plastik kcl", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "31.000", "type_name": "money"}
+{"text": "40.000", "type_name": "money"}
+{"text": "9.000", "type_name": "money"}
+{"text": "4003-Blueberry Fuji", "type_name": "free_text"}
+{"text": "40.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "40.000", "type_name": "money"}
+{"text": "6001-Plastic Bag Small", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "40.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "10.000", "type_name": "money"}
+{"text": "Cha Keaw L...", "type_name": "free_text"}
+{"text": "x2", "type_name": "identifier"}
+{"text": "60.000", "type_name": "money"}
+{"text": "Cha Keaw L...", "type_name": "free_text"}
+{"text": "x2", "type_name": "identifier"}
+{"text": "60.000", "type_name": "money"}
+{"text": "60.000", "type_name": "money"}
+{"text": "60.000", "type_name": "money"}
+{"text": "Thai Iced T. .x1", "type_name": "free_text"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "SEAFOOD MARINARA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "85,000", "type_name": "money"}
+{"text": "CREAMY MARINARA SALMON", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "85.500", "type_name": "money"}
+{"text": "LYCHEE ICE TEA", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "77,000", "type_name": "money"}
+{"text": "247,500", "type_name": "money"}
+{"text": "14,850", "type_name": "money"}
+{"text": "26,235", "type_name": "money"}
+{"text": "288,585", "type_name": "money"}
+{"text": "Viet Milk Coffee", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25.000", "type_name": "money"}
+{"text": "+Hot", "type_name": "free_text"}
+{"text": "+M", "type_name": "free_text"}
+{"text": "25.000", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "XLB Org Pork 10x", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "78,000", "type_name": "money"}
+{"text": "Sicito Babi", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "65,000", "type_name": "money"}
+{"text": "Hotplate Tahu", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "58,000", "type_name": "money"}
+{"text": "DF Fish Fillet Garlc", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "108,000", "type_name": "money"}
+{"text": "LM Pork Belly", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "88,000", "type_name": "money"}
+{"text": "Siew Mai", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "38,800", "type_name": "money"}
+{"text": "Kwan Yin Cup", "type_name": "free_text"}
+{"text": "5", "type_name": "identifier"}
+{"text": "50,000", "type_name": "money"}
+{"text": "Herbal Jelly", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "38,000", "type_name": "money"}
+{"text": "Onde-Onde", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "38,000", "type_name": "money"}
+{"text": "561,800", "type_name": "money"}
+{"text": "42,135", "type_name": "money"}
+{"text": "60,394", "type_name": "money"}
+{"text": "664,329", "type_name": "money"}
+{"text": "VANILLA CHOCO HEART CAKE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "180,000", "type_name": "money"}
+{"text": "180,000", "type_name": "money"}
+{"text": "180,000", "type_name": "money"}
+{"text": "Populaire Chocolate", "type_name": "free_text"}
+{"text": "4,500", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "4,500", "type_name": "money"}
+{"text": "Paddle Pop Choco Magma", "type_name": "free_text"}
+{"text": "3,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "3,000", "type_name": "money"}
+{"text": "7,500", "type_name": "money"}
+{"text": "750", "type_name": "money"}
+{"text": "8,250", "type_name": "money"}
+{"text": "10,000", "type_name": "money"}
+{"text": "1,800", "type_name": "money"}
+{"text": "French Fries", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,909", "type_name": "money"}
+{"text": "Cheese Burger", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "36,364", "type_name": "money"}
+{"text": "Milo", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9.091", "type_name": "money"}
+{"text": "56,364", "type_name": "money"}
+{"text": "5,636", "type_name": "money"}
+{"text": "62,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "38,000", "type_name": "money"}
+{"text": "ISI CAMPUR", "type_name": "free_text"}
+{"text": "43,636", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "43.636", "type_name": "money"}
+{"text": "A.MINERAL BOTOL", "type_name": "free_text"}
+{"text": "8.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8.000", "type_name": "money"}
+{"text": "51,636", "type_name": "money"}
+{"text": "5,164", "type_name": "money"}
+{"text": "56,800", "type_name": "money"}
+{"text": "110,000", "type_name": "money"}
+{"text": "53.200", "type_name": "money"}
+{"text": "WHOLE WHEAT PAN BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "80,000", "type_name": "money"}
+{"text": "BASO TAHU", "type_name": "free_text"}
+{"text": "43.636", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "43.636", "type_name": "money"}
+{"text": "NASI PUTIH", "type_name": "free_text"}
+{"text": "6.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "6.000", "type_name": "money"}
+{"text": "49.636", "type_name": "money"}
+{"text": "4.964", "type_name": "money"}
+{"text": "54.600", "type_name": "money"}
+{"text": "60.100", "type_name": "money"}
+{"text": "5.500", "type_name": "money"}
+{"text": "AIR MINERAL", "type_name": "free_text"}
+{"text": "7,000", "type_name": "money"}
+{"text": "7,000", "type_name": "money"}
+{"text": "7,000", "type_name": "money"}
+{"text": "PAKET BER2", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "69,091", "type_name": "money"}
+{"text": "BREAD N CHEESE DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "MAC N CHEESE DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "PEPSI DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "P/P THUOSAND ISL DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "LIPTON ICE TEA DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "69,091", "type_name": "money"}
+{"text": "6,909", "type_name": "money"}
+{"text": "76,000", "type_name": "money"}
+{"text": "Honey Mandarin", "type_name": "free_text"}
+{"text": "13,000", "type_name": "money"}
+{"text": "2 X", "type_name": "identifier"}
+{"text": "26,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "4,000", "type_name": "money"}
+{"text": "SOTO MEDAN+NASI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "59.500", "type_name": "money"}
+{"text": "GADO-GADO", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "34.500", "type_name": "money"}
+{"text": "SOTO BETAWI + NASI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "57.500", "type_name": "money"}
+{"text": "151.500", "type_name": "money"}
+{"text": "7.575", "type_name": "money"}
+{"text": "15.908", "type_name": "money"}
+{"text": "174.983", "type_name": "money"}
+{"text": "KaraageCurryTeishoku", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "69,000", "type_name": "money"}
+{"text": "Lemon Plate", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "19,000", "type_name": "money"}
+{"text": "Ocha Hot", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15,000", "type_name": "money"}
+{"text": "103,000", "type_name": "money"}
+{"text": "7,725", "type_name": "money"}
+{"text": "11,073", "type_name": "money"}
+{"text": "121,798", "type_name": "money"}
+{"text": "Dum Dum Thai Coffee", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "19.000", "type_name": "money"}
+{"text": "Ice", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "1.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "STIX CINNAMON", "type_name": "free_text"}
+{"text": "19,000", "type_name": "money"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "19,000", "type_name": "money"}
+{"text": "TRIPPLE CHEESE", "type_name": "free_text"}
+{"text": "17,000", "type_name": "money"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "36,000", "type_name": "money"}
+{"text": "36,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "36,000", "type_name": "money"}
+{"text": "ICED TT", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "THAI ICED TEA", "type_name": "free_text"}
+{"text": "@20.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "KFC Winger HC", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "40,000", "type_name": "money"}
+{"text": "Ori Bento", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "Mango Float", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "5,909", "type_name": "money"}
+{"text": "F.Wngr GES-HC", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "CHARGE TA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "909", "type_name": "money"}
+{"text": "60,454", "type_name": "money"}
+{"text": "6,046", "type_name": "money"}
+{"text": "66,500", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "33,500", "type_name": "money"}
+{"text": "Enting2 Dua Bandeng Ori", "type_name": "free_text"}
+{"text": "01069", "type_name": "identifier"}
+{"text": "31.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "31.000", "type_name": "money"}
+{"text": "TAHU BAKSO Grg Ayam VC [biji", "type_name": "free_text"}
+{"text": "07165", "type_name": "identifier"}
+{"text": "6.800", "type_name": "money"}
+{"text": "10", "type_name": "identifier"}
+{"text": "68.000", "type_name": "money"}
+{"text": "99.000", "type_name": "money"}
+{"text": "99.000", "type_name": "money"}
+{"text": "Cheese Tart", "type_name": "free_text"}
+{"text": "*2", "type_name": "identifier"}
+{"text": "Rp 58000.00", "type_name": "money"}
+{"text": "Bag-S", "type_name": "free_text"}
+{"text": "PS Carrier", "type_name": "free_text"}
+{"text": "Rp 58000.00", "type_name": "money"}
+{"text": "Rp 5272.73", "type_name": "money"}
+{"text": "Rp 58000.00", "type_name": "money"}
+{"text": "Rp 100000.00", "type_name": "money"}
+{"text": "Rp 42000.00", "type_name": "money"}
+{"text": "Mineral Water", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "18 000", "type_name": "money"}
+{"text": "Teh Tawar Dingin", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "11.000", "type_name": "money"}
+{"text": "Soto Betawi", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "116.000", "type_name": "money"}
+{"text": "NASI PUTIH", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9.000", "type_name": "money"}
+{"text": "154 000", "type_name": "money"}
+{"text": "7 700", "type_name": "money"}
+{"text": "16 170", "type_name": "money"}
+{"text": "177.870", "type_name": "money"}
+{"text": "Crab Stick", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9.000", "type_name": "money"}
+{"text": "Bakso Lobster", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10.000", "type_name": "money"}
+{"text": "Sawi Putih", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "7.000", "type_name": "money"}
+{"text": "Jamur Enoki", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8.000", "type_name": "money"}
+{"text": "Jamur Kuping", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8.000", "type_name": "money"}
+{"text": "Maling", "type_name": "free_text"}
+{"text": "12000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "24.000", "type_name": "money"}
+{"text": "Nasi (MLY)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "6.000", "type_name": "money"}
+{"text": "72.000", "type_name": "money"}
+{"text": "72.000", "type_name": "money"}
+{"text": "72.000", "type_name": "money"}
+{"text": "Sate Padang", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25.000", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "SURIMI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,091", "type_name": "money"}
+{"text": "CREAMY CHK CLS FTC", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "42,727", "type_name": "money"}
+{"text": "MIX 4FUN CHOCOLATE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "19,091", "type_name": "money"}
+{"text": "GREEN ITSODA PITCHER", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "60,909", "type_name": "money"}
+{"text": "SC/R GRILLED STEAK", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "99,091", "type_name": "money"}
+{"text": "250,909", "type_name": "money"}
+{"text": "25,091", "type_name": "money"}
+{"text": "276,000", "type_name": "money"}
+{"text": "PEARL CHOCO TEA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17.000", "type_name": "money"}
+{"text": "GREEN TEA LYCHEE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "18.000", "type_name": "money"}
+{"text": "TUTUP SEAL", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "CUP 14 OZ", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "35.000", "type_name": "money"}
+{"text": "35.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "65.000", "type_name": "money"}
+{"text": "S-Milk tea", "type_name": "free_text"}
+{"text": "@17,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "100%", "type_name": "free_text"}
+{"text": "17,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "HAZELNUT CHOCO MT (R)", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "24,000", "type_name": "money"}
+{"text": "PEARL (R)", "type_name": "free_text"}
+{"text": "4,000", "type_name": "money"}
+{"text": "HAZELNUT CHOCO MT (R)", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "24,000", "type_name": "money"}
+{"text": "52,000", "type_name": "money"}
+{"text": "52,000", "type_name": "money"}
+{"text": "52,000", "type_name": "money"}
+{"text": "Peanut & Cheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "13,636", "type_name": "money"}
+{"text": "1,364", "type_name": "money"}
+{"text": "15,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "5,000", "type_name": "money"}
+{"text": "LEMONADE22OZ", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "26,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "M-Passion Fruit Mac", "type_name": "free_text"}
+{"text": "@29,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "29,000", "type_name": "money"}
+{"text": "25%", "type_name": "free_text"}
+{"text": "Less Ice", "type_name": "free_text"}
+{"text": "29,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "29,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "1,000", "type_name": "money"}
+{"text": "PAKET BER4 UP3", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "154,545", "type_name": "money"}
+{"text": "BREAD N CHEESE DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "TUNA DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "CRABSTICK FUSILLI DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "LEMON TEA HANGAT DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "BLACKCURRANT DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "SC/P THOUSAND IS DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "SCSC/P BBQ BEEF DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "CR/P BEEF MAYO DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "SUNRISE ITALIAN SODA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "SUNRISE ITALIAN SODA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "154,545", "type_name": "money"}
+{"text": "15,455", "type_name": "money"}
+{"text": "170,000", "type_name": "money"}
+{"text": "Chocochip & Walnut", "type_name": "free_text"}
+{"text": "1023-", "type_name": "identifier"}
+{"text": "29.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "29.000", "type_name": "money"}
+{"text": "Plastic Bag Small", "type_name": "free_text"}
+{"text": "6001-", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "29.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "71.000", "type_name": "money"}
+{"text": "REGULAR", "type_name": "free_text"}
+{"text": "35000.00", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "70000.00", "type_name": "money"}
+{"text": "70000.00", "type_name": "money"}
+{"text": "0.00", "type_name": "money"}
+{"text": "K7 1217", "type_name": "free_text"}
+{"text": "39,091", "type_name": "money"}
+{"text": "ADD CHICKEN BOX", "type_name": "free_text"}
+{"text": "909", "type_name": "money"}
+{"text": "40,000", "type_name": "money"}
+{"text": "4,000", "type_name": "money"}
+{"text": "44,000", "type_name": "money"}
+{"text": "Rp. 50,000", "type_name": "money"}
+{"text": "Rp. 6,000", "type_name": "money"}
+{"text": "<FC Winger HC", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "CHARGE TA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "909", "type_name": "money"}
+{"text": "20,909", "type_name": "money"}
+{"text": "2,091", "type_name": "money"}
+{"text": "23,000", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "2,000", "type_name": "money"}
+{"text": "PAKET BER4", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "138,182", "type_name": "money"}
+{"text": "BREAD N CHEESE DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "BREAD N CHEESE DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "CRABSTICK FUSILLI DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "LIME SQUASH DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "LIME SQUASH DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "P/P SPICY TUNA DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "P/P THUOSAND ISL DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "P/P BEEF CORN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "SUNRISE ITALIAN SODA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "LIPTON ICE TEA DEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "50% CHICKEN ROYAL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "18,182", "type_name": "money"}
+{"text": "156,364", "type_name": "money"}
+{"text": "15,636", "type_name": "money"}
+{"text": "172,000", "type_name": "money"}
+{"text": "Emily's Shrimp Scampi Fettucine", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "69.000", "type_name": "money"}
+{"text": "69.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "3.795", "type_name": "money"}
+{"text": "80.100", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "SAYAP", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "PAHA BAWAH", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "27,272", "type_name": "money"}
+{"text": "2,700", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "Choco Cheese", "type_name": "free_text"}
+{"text": "13,636", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "-2,045", "type_name": "money"}
+{"text": "1,159", "type_name": "money"}
+{"text": "12,750", "type_name": "money"}
+{"text": "12,750", "type_name": "money"}
+{"text": "Lemon Tea (L)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25.000", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "5.000", "type_name": "money"}
+{"text": "Hulk Topper Package", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "100.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Giant Squid", "type_name": "free_text"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "Rp. 39.000", "type_name": "money"}
+{"text": "C.Finishing - Cut", "type_name": "free_text"}
+{"text": "Rp. 0", "type_name": "money"}
+{"text": "B.Spicy Level - Extreme Hot", "type_name": "free_text"}
+{"text": "Rp. 0", "type_name": "money"}
+{"text": "A.Flavour- Salt & Pepper", "type_name": "free_text"}
+{"text": "Rp. 0", "type_name": "money"}
+{"text": "Rp. 39.000", "type_name": "money"}
+{"text": "Rp. 39.000", "type_name": "money"}
+{"text": "Rp. 50.000", "type_name": "money"}
+{"text": "Rp. 11.000", "type_name": "money"}
+{"text": "Nasi Campur Bali", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "75,000", "type_name": "money"}
+{"text": "Bbk Bengil Nasi", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "125,000", "type_name": "money"}
+{"text": "MilkShake Starwb", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "37,000", "type_name": "money"}
+{"text": "Ice Lemon Tea", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "24,000", "type_name": "money"}
+{"text": "Nasi Ayam Dewata", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "70,000", "type_name": "money"}
+{"text": "Free Ice Tea", "type_name": "free_text"}
+{"text": "3 x", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "Organic Green Sa", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "65,000", "type_name": "money"}
+{"text": "Ice Tea", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "18,000", "type_name": "money"}
+{"text": "Ice Orange", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "29,000", "type_name": "money"}
+{"text": "Ayam Suir Bali", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "85,000", "type_name": "money"}
+{"text": "Tahu Goreng", "type_name": "free_text"}
+{"text": "2 x", "type_name": "identifier"}
+{"text": "36,000", "type_name": "money"}
+{"text": "Tempe Goreng", "type_name": "free_text"}
+{"text": "2 x", "type_name": "identifier"}
+{"text": "36,000", "type_name": "money"}
+{"text": "Tahu Telor Asin", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "40,000.", "type_name": "money"}
+{"text": "Nasi Goreng Samb", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "70,000", "type_name": "money"}
+{"text": "Bbk Panggang Sam", "type_name": "free_text"}
+{"text": "3 x", "type_name": "identifier"}
+{"text": "366,000", "type_name": "money"}
+{"text": "Ayam Sambal Hija", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "92,000", "type_name": "money"}
+{"text": "Hot Tea", "type_name": "free_text"}
+{"text": "2 x", "type_name": "identifier"}
+{"text": "44,000", "type_name": "money"}
+{"text": "Ice Kopi", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "32,000", "type_name": "money"}
+{"text": "Tahu Telor Asin", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "40,000", "type_name": "money"}
+{"text": "Free Ice Tea", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "Bebek Street", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "44,000", "type_name": "money"}
+{"text": "Ice Tea Tawar", "type_name": "free_text"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "18,000", "type_name": "money"}
+{"text": "1,346,000", "type_name": "money"}
+{"text": "100,950", "type_name": "money"}
+{"text": "144,695", "type_name": "money"}
+{"text": "1,591,600", "type_name": "money"}
+{"text": "SPGTHY BOLOGNASE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "58,000", "type_name": "money"}
+{"text": "PEPPER AUS", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "165,000", "type_name": "money"}
+{"text": "WELL DONE", "type_name": "free_text"}
+{"text": "WAGYU RIBEYE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "195,000", "type_name": "money"}
+{"text": "MEDIUM WELL", "type_name": "free_text"}
+{"text": "ICED LEMON TEA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "22,000", "type_name": "money"}
+{"text": "FUSION TEA LYCHE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "28,000", "type_name": "money"}
+{"text": "NUTTELA BROWNIES", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "35,000", "type_name": "money"}
+{"text": "503,000", "type_name": "money"}
+{"text": "25,150", "type_name": "money"}
+{"text": "52,815", "type_name": "money"}
+{"text": "580,965", "type_name": "money"}
+{"text": "HAKAU UDANG", "type_name": "free_text"}
+{"text": "4", "type_name": "identifier"}
+{"text": "92,000", "type_name": "money"}
+{"text": "SIAO MAI BABI", "type_name": "free_text"}
+{"text": "4", "type_name": "identifier"}
+{"text": "80,000", "type_name": "money"}
+{"text": "CEKER AYAM", "type_name": "free_text"}
+{"text": "3", "type_name": "identifier"}
+{"text": "60,000", "type_name": "money"}
+{"text": "BAKPAO BKR C CRISPY", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "42,000", "type_name": "money"}
+{"text": "TAHU GORENG CRISPY", "type_name": "free_text"}
+{"text": "3", "type_name": "identifier"}
+{"text": "60,000", "type_name": "money"}
+{"text": "334,000", "type_name": "money"}
+{"text": "334,000", "type_name": "money"}
+{"text": "350,000", "type_name": "money"}
+{"text": "-16,000", "type_name": "money"}
+{"text": "Bintang Bremer", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "59,000", "type_name": "money"}
+{"text": "Chicken H-H", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "190,000", "type_name": "money"}
+{"text": "Ades", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "259,000", "type_name": "money"}
+{"text": "19,000", "type_name": "money"}
+{"text": "9,600", "type_name": "money"}
+{"text": "52,416", "type_name": "money"}
+{"text": "302,016", "type_name": "money"}
+{"text": "BASO BIHUN", "type_name": "free_text"}
+{"text": "43.636", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "43.636", "type_name": "money"}
+{"text": "43.636", "type_name": "money"}
+{"text": "4.364", "type_name": "money"}
+{"text": "48.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "2.000", "type_name": "money"}
+{"text": "Lasagna", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "45,000", "type_name": "money"}
+{"text": "Spaghetti ChickPesto", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "55,000", "type_name": "money"}
+{"text": "BangBang Chick Wings", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "49,000", "type_name": "money"}
+{"text": "Iced Cappuccino", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "33,000", "type_name": "money"}
+{"text": "Gypsy Gelato Ice Tea", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "39,000", "type_name": "money"}
+{"text": "221,000", "type_name": "money"}
+{"text": "16,575", "type_name": "money"}
+{"text": "23,758", "type_name": "money"}
+{"text": "261,333", "type_name": "money"}
+{"text": "161,333", "type_name": "money"}
+{"text": "BASO TAHU", "type_name": "free_text"}
+{"text": "43,181", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "43,181", "type_name": "money"}
+{"text": "ES JERUK", "type_name": "free_text"}
+{"text": "13.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,000", "type_name": "money"}
+{"text": "56,181", "type_name": "money"}
+{"text": "5,618", "type_name": "money"}
+{"text": "61,799", "type_name": "money"}
+{"text": "62,000", "type_name": "money"}
+{"text": "201", "type_name": "money"}
+{"text": "PKT AYAM", "type_name": "free_text"}
+{"text": "33,000", "type_name": "money"}
+{"text": "33,000", "type_name": "money"}
+{"text": "3,300", "type_name": "money"}
+{"text": "36,300", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "13,700", "type_name": "money"}
+{"text": "Kimchi P", "type_name": "free_text"}
+{"text": "36.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "36.000", "type_name": "money"}
+{"text": "Fre ice grentea", "type_name": "free_text"}
+{"text": "0.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "Rp 0.000", "type_name": "money"}
+{"text": "36.000", "type_name": "money"}
+{"text": "Rp 51.000", "type_name": "money"}
+{"text": "15.000", "type_name": "money"}
+{"text": "THAI ICED TEA", "type_name": "free_text"}
+{"text": "@20.000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "40.000", "type_name": "money"}
+{"text": "40.000", "type_name": "money"}
+{"text": "40.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "60.000", "type_name": "money"}
+{"text": "Viet Milk Coffee", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25.000", "type_name": "money"}
+{"text": "+Hot", "type_name": "free_text"}
+{"text": "+M", "type_name": "free_text"}
+{"text": "25.000", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "5.000", "type_name": "money"}
+{"text": "Ayam Bakar", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "55.000", "type_name": "money"}
+{"text": "Nasi Putih", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "Nila Bakar/Goreng", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "27,500", "type_name": "money"}
+{"text": "Sop Gurame", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "87.000", "type_name": "money"}
+{"text": "Teh Poci", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25.000", "type_name": "money"}
+{"text": "214.500", "type_name": "money"}
+{"text": "12.870", "type_name": "money"}
+{"text": "22.737", "type_name": "money"}
+{"text": "250,107", "type_name": "money"}
+{"text": "NASI + AYAM KATSU TER...", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "31,819", "type_name": "money"}
+{"text": "TEH PANAS", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "5,455", "type_name": "money"}
+{"text": "ES TEH MANIS", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "7,273", "type_name": "money"}
+{"text": "CH CORDON BLEU NASI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "42,728", "type_name": "money"}
+{"text": "87,275", "type_name": "money"}
+{"text": "8,728", "type_name": "money"}
+{"text": "96,000", "type_name": "money"}
+{"text": "96,000", "type_name": "money"}
+{"text": "BLACK PEPPER MEATBALL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "76,500", "type_name": "money"}
+{"text": "GREEN TEA WITH CRUMBLE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "56,000", "type_name": "money"}
+{"text": "EARL GREY MILK TEA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "57,000", "type_name": "money"}
+{"text": "ORIGINAL BREWED TEA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "23,000", "type_name": "money"}
+{"text": "212,500", "type_name": "money"}
+{"text": "12,750", "type_name": "money"}
+{"text": "22,525", "type_name": "money"}
+{"text": "247,775", "type_name": "money"}
+{"text": "4005-Maple glazed", "type_name": "free_text"}
+{"text": "25.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "25.000", "type_name": "money"}
+{"text": "6001-Plastic Bag Small", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "BLACK PEPPER MEATBALL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "76,500", "type_name": "money"}
+{"text": "QUARTO FORMANGGI PASTA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "82,500", "type_name": "money"}
+{"text": "GREEN TEA WITH CRUMBLE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "56,000", "type_name": "money"}
+{"text": "ORIGINAL BREWED TEA", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "46,000", "type_name": "money"}
+{"text": "261,000", "type_name": "money"}
+{"text": "15,660", "type_name": "money"}
+{"text": "27,666", "type_name": "money"}
+{"text": "304,326", "type_name": "money"}
+{"text": "- TICKET CP", "type_name": "free_text"}
+{"text": "901016", "type_name": "identifier"}
+{"text": "30,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "RB. COKLAT BAR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8,000", "type_name": "money"}
+{"text": "RB. CREPES TUNA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "RB. SISIR PANDAN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "7,500", "type_name": "money"}
+{"text": "24,500", "type_name": "money"}
+{"text": "24,500", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "25,500", "type_name": "money"}
+{"text": "KING DEAL FISH", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25000", "type_name": "money"}
+{"text": "25000", "type_name": "money"}
+{"text": "2500", "type_name": "money"}
+{"text": "27500", "type_name": "money"}
+{"text": "100000", "type_name": "money"}
+{"text": "72500", "type_name": "money"}
+{"text": "UDANG RE", "type_name": "free_text"}
+{"text": "216,000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "432,000", "type_name": "money"}
+{"text": "=*LARGE*==", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "AYM GR JUN NJAN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "108,000", "type_name": "money"}
+{"text": "=*MEDIUM*=", "type_name": "free_text"}
+{"text": "SAPO TH SEAFOOD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "172,000", "type_name": "money"}
+{"text": "=*LARGE*==", "type_name": "free_text"}
+{"text": "POCAI 3", "type_name": "free_text"}
+{"text": "111,000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "222,000", "type_name": "money"}
+{"text": "=*MEDIUM*=", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "GURAME FILLET M ASAM MANIS", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "163,000", "type_name": "money"}
+{"text": "BIHUN GORENG JJ", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "116,000", "type_name": "money"}
+{"text": "=*LARGE*==", "type_name": "free_text"}
+{"text": "ICED TEA", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "5", "type_name": "identifier"}
+{"text": "60,000", "type_name": "money"}
+{"text": "NASI PUTIH", "type_name": "free_text"}
+{"text": "10,000", "type_name": "money"}
+{"text": "7", "type_name": "identifier"}
+{"text": "70,000", "type_name": "money"}
+{"text": "1,343,000", "type_name": "money"}
+{"text": "80,580", "type_name": "money"}
+{"text": "142,358", "type_name": "money"}
+{"text": "1,565,938", "type_name": "money"}
+{"text": "BUBUR UNGU", "type_name": "free_text"}
+{"text": "26,000", "type_name": "money"}
+{"text": "SENDOK BEBEK", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "WAJIK", "type_name": "free_text"}
+{"text": "7,000", "type_name": "money"}
+{"text": "CENTIK MANIS", "type_name": "free_text"}
+{"text": "5,500", "type_name": "money"}
+{"text": "PLASTIK SEDANG", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "26,950", "type_name": "money"}
+{"text": "26,950", "type_name": "money"}
+{"text": "26,950", "type_name": "money"}
+{"text": "1001-Choco Bun", "type_name": "free_text"}
+{"text": "22.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "22.000", "type_name": "money"}
+{"text": "2001-Hokkaido Milk Toast", "type_name": "free_text"}
+{"text": "22.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "22.000", "type_name": "money"}
+{"text": "6002-Plastic Bag Medium", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "44.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "6.000", "type_name": "money"}
+{"text": "Ice t grentea", "type_name": "free_text"}
+{"text": "22.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "22.000", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "78.000", "type_name": "money"}
+{"text": "S-Lemon Macchiato", "type_name": "free_text"}
+{"text": "@21,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "21,000", "type_name": "money"}
+{"text": "Less Ice", "type_name": "free_text"}
+{"text": "50%", "type_name": "free_text"}
+{"text": "21,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "21,000", "type_name": "money"}
+{"text": "21,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "1001-Choco Bun", "type_name": "free_text"}
+{"text": "22.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "22.000", "type_name": "money"}
+{"text": "1032-Double Cheddar", "type_name": "free_text"}
+{"text": "26.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "26.000", "type_name": "money"}
+{"text": "6002-Plastic Bag Medium", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "48.000", "type_name": "money"}
+{"text": "48.000", "type_name": "money"}
+{"text": "CRISPY CHOCO", "type_name": "free_text"}
+{"text": "14,000", "type_name": "money"}
+{"text": "14,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "6,000", "type_name": "money"}
+{"text": "Pepenero Pastel", "type_name": "free_text"}
+{"text": "15.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "15.000", "type_name": "money"}
+{"text": "Rp 15.000", "type_name": "money"}
+{"text": "Rp 1.500", "type_name": "money"}
+{"text": "Rp 16.500", "type_name": "money"}
+{"text": "Rp 50.500", "type_name": "money"}
+{"text": "Rp 34.000", "type_name": "money"}
+{"text": "MEGA", "type_name": "free_text"}
+{"text": "Rp 30,000", "type_name": "money"}
+{"text": "CUP MEGA", "type_name": "free_text"}
+{"text": "BBQ", "type_name": "free_text"}
+{"text": "Rp 30,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "Rp 70,000", "type_name": "money"}
+{"text": "A.MINERAL BOTOL", "type_name": "free_text"}
+{"text": "8.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8,000", "type_name": "money"}
+{"text": "8.000", "type_name": "money"}
+{"text": "800", "type_name": "money"}
+{"text": "8,800", "type_name": "money"}
+{"text": "10,000", "type_name": "money"}
+{"text": "1,200", "type_name": "money"}
+{"text": "AMBUSH DBL CHS BURG", "type_name": "free_text"}
+{"text": "11", "type_name": "identifier"}
+{"text": "181,500.00", "type_name": "money"}
+{"text": "AMBUSH CHS BURGER", "type_name": "free_text"}
+{"text": "4", "type_name": "identifier"}
+{"text": "44,000.00", "type_name": "money"}
+{"text": "TAKE AWAY CHARGE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "1,000.00", "type_name": "money"}
+{"text": "226,500.00", "type_name": "money"}
+{"text": "226,500.00", "type_name": "money"}
+{"text": "250,000.00", "type_name": "money"}
+{"text": "23,500.00", "type_name": "money"}
+{"text": "VANDOOLEN", "type_name": "free_text"}
+{"text": "8,182", "type_name": "money"}
+{"text": "PLASTIK 25", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "8,182", "type_name": "money"}
+{"text": "818", "type_name": "money"}
+{"text": "9,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "91,000", "type_name": "money"}
+{"text": "Chicken HCC, 1Pcs", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15,000", "type_name": "money"}
+{"text": "Colonel Burger", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "28,636", "type_name": "money"}
+{"text": "2,864", "type_name": "money"}
+{"text": "31,500", "type_name": "money"}
+{"text": "40,000", "type_name": "money"}
+{"text": "8,500", "type_name": "money"}
+{"text": "Ketoprak", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "36,000", "type_name": "money"}
+{"text": "36,000", "type_name": "money"}
+{"text": "36,000", "type_name": "money"}
+{"text": "36,000", "type_name": "money"}
+{"text": "AREM - AREM", "type_name": "free_text"}
+{"text": "@8000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "8,000", "type_name": "money"}
+{"text": "LEMPER", "type_name": "free_text"}
+{"text": "@9000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "PLASTIK KECIL", "type_name": "free_text"}
+{"text": "@0", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "10,200", "type_name": "money"}
+{"text": "10,200", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "9,800", "type_name": "money"}
+{"text": "OMA NASI KUNING CAKALANG MANI", "type_name": "free_text"}
+{"text": "30.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "30.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "70.000", "type_name": "money"}
+{"text": "Cuka Apel Moringa", "type_name": "free_text"}
+{"text": "289000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "289000", "type_name": "money"}
+{"text": "289000", "type_name": "money"}
+{"text": "300000", "type_name": "money"}
+{"text": "11000", "type_name": "money"}
+{"text": "GONG GIBAB", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "BO SSAM", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "320,000", "type_name": "money"}
+{"text": "HAEMUL DENJANG JJIGAE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "85,000", "type_name": "money"}
+{"text": "MULNAENGMYO N", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "85,000", "type_name": "money"}
+{"text": "510,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "35,700", "type_name": "money"}
+{"text": "54,255", "type_name": "money"}
+{"text": "599,955", "type_name": "money"}
+{"text": "MINI CHOCO", "type_name": "free_text"}
+{"text": "13,500", "type_name": "money"}
+{"text": "12,273", "type_name": "money"}
+{"text": "1,227", "type_name": "money"}
+{"text": "13,500", "type_name": "money"}
+{"text": "14,000", "type_name": "money"}
+{"text": "500", "type_name": "money"}
+{"text": "DumDum Thai Iced Green Tea", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "24.000", "type_name": "money"}
+{"text": "24.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "26.000", "type_name": "money"}
+{"text": "H COUPLE SEA", "type_name": "free_text"}
+{"text": "70,000", "type_name": "money"}
+{"text": "70,000", "type_name": "money"}
+{"text": "70,000", "type_name": "money"}
+{"text": "BURGER CHIC DECKER", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "68,000", "type_name": "money"}
+{"text": "Home Made Lemonade", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "40,000", "type_name": "money"}
+{"text": "108,000", "type_name": "money"}
+{"text": "5,940", "type_name": "money"}
+{"text": "11,394", "type_name": "money"}
+{"text": "125,334", "type_name": "money"}
+{"text": "125,334", "type_name": "money"}
+{"text": "KOREAN CURRY M", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "40,909", "type_name": "money"}
+{"text": "40,909", "type_name": "money"}
+{"text": "4,090", "type_name": "money"}
+{"text": "44,999", "type_name": "money"}
+{"text": "45,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "ALMOND CHOCO CREAMCHEESE", "type_name": "free_text"}
+{"text": "28,000", "type_name": "money"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "28,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Nutella Cheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "27,272", "type_name": "money"}
+{"text": "Toblerone BanCheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "28,182", "type_name": "money"}
+{"text": "55,454", "type_name": "money"}
+{"text": "5,545", "type_name": "money"}
+{"text": "60,999", "type_name": "money"}
+{"text": "60,999", "type_name": "money"}
+{"text": "CHOCO PUFF", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,091", "type_name": "money"}
+{"text": "CREAMY BEEF CLS FTC", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "42,727", "type_name": "money"}
+{"text": "NEW ORIENTAL CHK RICE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "34,545", "type_name": "money"}
+{"text": "LIPTON PITCHER", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "54,545", "type_name": "money"}
+{"text": "SC/P SUPER SUPREME", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "47,273", "type_name": "money"}
+{"text": "CB/P BLACK PEPP BEEF", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "48,182", "type_name": "money"}
+{"text": "256,363", "type_name": "money"}
+{"text": "25,637", "type_name": "money"}
+{"text": "282,000", "type_name": "money"}
+{"text": "1", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "22.000", "type_name": "money"}
+{"text": "Large *Plastik Kcl", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "52.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "BASO TAHU BIHUN", "type_name": "free_text"}
+{"text": "43.636", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "43.636", "type_name": "money"}
+{"text": "43.636", "type_name": "money"}
+{"text": "4.364", "type_name": "money"}
+{"text": "48.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "52.000", "type_name": "money"}
+{"text": "ICED TT", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "Jamur Crispy", "type_name": "free_text"}
+{"text": "13.500", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "27.000", "type_name": "money"}
+{"text": "Nasi Putih", "type_name": "free_text"}
+{"text": "7.000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "14.000", "type_name": "money"}
+{"text": "Sambel Kecap", "type_name": "free_text"}
+{"text": "4.500", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "9.000", "type_name": "money"}
+{"text": "Es Teh", "type_name": "free_text"}
+{"text": "7.500", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "15.000", "type_name": "money"}
+{"text": "Rp 65.000", "type_name": "money"}
+{"text": "Rp 1.950", "type_name": "money"}
+{"text": "Rp 6.500", "type_name": "money"}
+{"text": "Rp 73.450", "type_name": "money"}
+{"text": "Rp 100.000", "type_name": "money"}
+{"text": "Rp 26.550", "type_name": "money"}
+{"text": "Sweet Plum Potato", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,000", "type_name": "money"}
+{"text": "29,000", "type_name": "money"}
+{"text": "29,000", "type_name": "money"}
+{"text": "29,000", "type_name": "money"}
+{"text": ":0", "type_name": "money"}
+{"text": "CHO MOUSSE", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "GRAPE JELLY", "type_name": "free_text"}
+{"text": "13,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "3,000", "type_name": "money"}
+{"text": "33,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "Kopi Susu Sudirman", "type_name": "free_text"}
+{"text": "18.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "18.000", "type_name": "money"}
+{"text": "Ice", "type_name": "free_text"}
+{"text": "Chocolate Twist", "type_name": "free_text"}
+{"text": "12.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "12.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "3.000", "type_name": "money"}
+{"text": "33.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "17.000", "type_name": "money"}
+{"text": "RTD Kunyit", "type_name": "free_text"}
+{"text": "15000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15000", "type_name": "money"}
+{"text": "Tepung Jagung", "type_name": "free_text"}
+{"text": "15000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15000", "type_name": "money"}
+{"text": "30000", "type_name": "money"}
+{"text": "30000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "12.000", "type_name": "money"}
+{"text": "3", "type_name": "identifier"}
+{"text": "36.000", "type_name": "money"}
+{"text": "SHOPPING BAG ROTI'O' 370/M", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "36.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "36.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "36.000", "type_name": "money"}
+{"text": "KFC Winger HC", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "Rice", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "6,364", "type_name": "money"}
+{"text": "26,364", "type_name": "money"}
+{"text": "2,636", "type_name": "money"}
+{"text": "29,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "1,000", "type_name": "money"}
+{"text": "THAI ICED TEA (L)", "type_name": "free_text"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1 X", "type_name": "identifier"}
+{"text": "16,363", "type_name": "money"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1,636", "type_name": "money"}
+{"text": "17,999", "type_name": "money"}
+{"text": "BASO TAHU", "type_name": "free_text"}
+{"text": "43.636", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "43.636", "type_name": "money"}
+{"text": "NASI PUTIH", "type_name": "free_text"}
+{"text": "6.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "6.000", "type_name": "money"}
+{"text": "4.964", "type_name": "money"}
+{"text": "54.600", "type_name": "money"}
+{"text": "60.100", "type_name": "money"}
+{"text": "5.500", "type_name": "money"}
+{"text": "PL. MUFFIN BLUEBERRY", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "14,000", "type_name": "money"}
+{"text": "RB. ABON AYAM", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "RB. COKLAT COFFEE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8,000", "type_name": "money"}
+{"text": "RB. RED BEAN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8,000", "type_name": "money"}
+{"text": "39,000", "type_name": "money"}
+{"text": "39,000", "type_name": "money"}
+{"text": "39,000", "type_name": "money"}
+{"text": "ROTI KEJU COKLAT", "type_name": "free_text"}
+{"text": "1069-", "type_name": "identifier"}
+{"text": "8.500,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "8.500,00", "type_name": "money"}
+{"text": "ROTI MAHKOTA/RING", "type_name": "free_text"}
+{"text": "1037-", "type_name": "identifier"}
+{"text": "10.500,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "10.500,00", "type_name": "money"}
+{"text": "ROTI KACANG MERAH", "type_name": "free_text"}
+{"text": "1022-", "type_name": "identifier"}
+{"text": "8.000,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "8.000,00", "type_name": "money"}
+{"text": "ROTI COKLAT", "type_name": "free_text"}
+{"text": "1001-", "type_name": "identifier"}
+{"text": "8.000,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "8.000,00", "type_name": "money"}
+{"text": "35.000,00", "type_name": "money"}
+{"text": "50.000,00", "type_name": "money"}
+{"text": "15.000,00", "type_name": "money"}
+{"text": "CHICKEN KATSU", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,727", "type_name": "money"}
+{"text": "TORI NASU HASAMI AGE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "22,727", "type_name": "money"}
+{"text": "2,273", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "[25,000]", "type_name": "money"}
+{"text": "Mineral Water (S)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15.000", "type_name": "money"}
+{"text": "Pocky Chocolate", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "Nerds Strw Grape", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "42.000", "type_name": "money"}
+{"text": "Nerds Trop Punch", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "42.000", "type_name": "money"}
+{"text": "Nerds Watermelon", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "42.000", "type_name": "money"}
+{"text": "161.000", "type_name": "money"}
+{"text": "161.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "TRIPPLE CHEESE", "type_name": "free_text"}
+{"text": "17,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "33,000", "type_name": "money"}
+{"text": "RALPH BREAKS THE INTERNET : WR", "type_name": "free_text"}
+{"text": "60.000", "type_name": "money"}
+{"text": "60", "type_name": "identifier"}
+{"text": "3.600.000", "type_name": "money"}
+{"text": "-TIKET", "type_name": "free_text"}
+{"text": "3.600.000", "type_name": "money"}
+{"text": "3.600.000", "type_name": "money"}
+{"text": "PIS COK KEJU", "type_name": "free_text"}
+{"text": "11,500", "type_name": "money"}
+{"text": "COKLAT KEJU", "type_name": "free_text"}
+{"text": "11,000", "type_name": "money"}
+{"text": "BANANA KISMIS", "type_name": "free_text"}
+{"text": "8,000", "type_name": "money"}
+{"text": "23,600", "type_name": "money"}
+{"text": "23,600", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "26,400", "type_name": "money"}
+{"text": "BOTOL(MOMOGI BOTOL KACA ASI)", "type_name": "free_text"}
+{"text": "804700027", "type_name": "identifier"}
+{"text": "44,000", "type_name": "money"}
+{"text": "SPECTRA BREAST DISPOSABLE PADS (IRIS) / BP-0001 (BREASTPADS)", "type_name": "free_text"}
+{"text": "SP200031", "type_name": "identifier"}
+{"text": "58,000", "type_name": "money"}
+{"text": "MUSTELA BABY OIL 100ML", "type_name": "free_text"}
+{"text": "MU240036", "type_name": "identifier"}
+{"text": "160,000", "type_name": "money"}
+{"text": "262,000", "type_name": "money"}
+{"text": "NASI PUTIH", "type_name": "free_text"}
+{"text": "6", "type_name": "identifier"}
+{"text": "54,000", "type_name": "money"}
+{"text": "SATE PADANG", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "35,000", "type_name": "money"}
+{"text": "GULAI CUMI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25,000", "type_name": "money"}
+{"text": "DENDENG BALADO", "type_name": "free_text"}
+{"text": "4", "type_name": "identifier"}
+{"text": "80,000", "type_name": "money"}
+{"text": "KERUPUK KULIT", "type_name": "free_text"}
+{"text": "3", "type_name": "identifier"}
+{"text": "18,000", "type_name": "money"}
+{"text": "RENDANG DAGING", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "GULAI HATI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "MUJAIR BAKAR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "23,000", "type_name": "money"}
+{"text": "GULAI OTAK", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "AYAM BAKAR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "SAMBAL TRI BELAH", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "18,000", "type_name": "money"}
+{"text": "LALAP SEGAR", "type_name": "free_text"}
+{"text": "3", "type_name": "identifier"}
+{"text": "24,000", "type_name": "money"}
+{"text": "AYAM PENYET", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "21,000", "type_name": "money"}
+{"text": "AYAM GORENG", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "40,000", "type_name": "money"}
+{"text": "AYAM POP", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "42,000", "type_name": "money"}
+{"text": "GULAI TUNJANG", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "40,000", "type_name": "money"}
+{"text": "TEH", "type_name": "free_text"}
+{"text": "6", "type_name": "identifier"}
+{"text": "30,000", "type_name": "money"}
+{"text": "TERONG BELANDA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "TEH TELUR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25,000", "type_name": "money"}
+{"text": "PUDING", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "16,000", "type_name": "money"}
+{"text": "591,000", "type_name": "money"}
+{"text": "59,100", "type_name": "money"}
+{"text": "650,100", "type_name": "money"}
+{"text": "650,100", "type_name": "money"}
+{"text": "ISI CAMPUR", "type_name": "free_text"}
+{"text": "43.636", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "43.636", "type_name": "money"}
+{"text": "AQUA BOTOL", "type_name": "free_text"}
+{"text": "9.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9.000", "type_name": "money"}
+{"text": "52.636", "type_name": "money"}
+{"text": "5.264", "type_name": "money"}
+{"text": "57.900", "type_name": "money"}
+{"text": "60.000", "type_name": "money"}
+{"text": "2.100", "type_name": "money"}
+{"text": "Popcorn Salt Bucket", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "65.000", "type_name": "money"}
+{"text": "65.000", "type_name": "money"}
+{"text": "65.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Berry Many-Low (P)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "37,500.00", "type_name": "money"}
+{"text": "500 days of summer (P)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "37,500.00", "type_name": "money"}
+{"text": "sun kissed (P)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "37,500.00", "type_name": "money"}
+{"text": "PLASTIC BAG", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "500.00", "type_name": "money"}
+{"text": "113,000.00", "type_name": "money"}
+{"text": "0.00", "type_name": "money"}
+{"text": "113,000.00", "type_name": "money"}
+{"text": "0.00", "type_name": "money"}
+{"text": "113,000.00", "type_name": "money"}
+{"text": "SAUSAGE DONUT", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "14,000", "type_name": "money"}
+{"text": "CHOCO DONUT PRETZEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "23,000", "type_name": "money"}
+{"text": "23,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "CAPTAIN HOOK", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "75,000", "type_name": "money"}
+{"text": "IZZY PINK ZIGZAG", "type_name": "free_text"}
+{"text": "PIRATES TREASURE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "75,000", "type_name": "money"}
+{"text": "BILLY BROWN SMALL", "type_name": "free_text"}
+{"text": "150,000", "type_name": "money"}
+{"text": "12,000", "type_name": "money"}
+{"text": "16,200", "type_name": "money"}
+{"text": "178,200", "type_name": "money"}
+{"text": "GREEN TEA LATTE (L)", "type_name": "free_text"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16,363", "type_name": "money"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1,636", "type_name": "money"}
+{"text": "17,999", "type_name": "money"}
+{"text": "2011-Whole wheat Katamari", "type_name": "free_text"}
+{"text": "28.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "28.000", "type_name": "money"}
+{"text": "6001-Plastic Bag Small", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "28.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "CHEESE JOHN", "type_name": "free_text"}
+{"text": "2005-", "type_name": "identifier"}
+{"text": "9.500,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "9.500,00", "type_name": "money"}
+{"text": "9.500,00", "type_name": "money"}
+{"text": "10.000,00", "type_name": "money"}
+{"text": "500,00", "type_name": "money"}
+{"text": "APPLE CREAMCHEESE PASTRY", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "26,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "74,000", "type_name": "money"}
+{"text": "PAKET DOSIRAK 3", "type_name": "free_text"}
+{"text": "25,975", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25,975", "type_name": "money"}
+{"text": "PAKET DOSIRAK 3", "type_name": "free_text"}
+{"text": "ICE SWEET JASMINE GREENTEA", "type_name": "free_text"}
+{"text": "PAKET CHICKEN 3", "type_name": "free_text"}
+{"text": "35,000", "type_name": "money"}
+{"text": "3", "type_name": "identifier"}
+{"text": "105,000", "type_name": "money"}
+{"text": "JAPCHE", "type_name": "free_text"}
+{"text": "25,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25,000", "type_name": "money"}
+{"text": "KOREAN LEMONADE", "type_name": "free_text"}
+{"text": "15,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15,000", "type_name": "money"}
+{"text": "KOREAN COLD TEA", "type_name": "free_text"}
+{"text": "9,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "PAKET BULGOGI 3", "type_name": "free_text"}
+{"text": "45,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "45,000", "type_name": "money"}
+{"text": "BANANA MLK+MATCHA PU", "type_name": "free_text"}
+{"text": "21,000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "42,000", "type_name": "money"}
+{"text": "KRN FRIED CHICKN HNY", "type_name": "free_text"}
+{"text": "25,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25,000", "type_name": "money"}
+{"text": "291,975", "type_name": "money"}
+{"text": "14,598", "type_name": "money"}
+{"text": "30,657", "type_name": "money"}
+{"text": "337,230", "type_name": "money"}
+{"text": "350,000", "type_name": "money"}
+{"text": "12,770", "type_name": "money"}
+{"text": "TAKOYAKI 12PCS", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "30,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "3,000", "type_name": "money"}
+{"text": "33,000", "type_name": "money"}
+{"text": "40,000", "type_name": "money"}
+{"text": "7,000", "type_name": "money"}
+{"text": "KP BRANDING L", "type_name": "free_text"}
+{"text": "1", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "1", "type_name": "money"}
+{"text": "M/POKO STD XXL5", "type_name": "free_text"}
+{"text": "17,100", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,100", "type_name": "money"}
+{"text": "FOOT 6", "type_name": "free_text"}
+{"text": "11,200", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "22,400", "type_name": "money"}
+{"text": "CIPAIN PATCH 4S", "type_name": "free_text"}
+{"text": "26,200", "type_name": "money"}
+{"text": "3", "type_name": "identifier"}
+{"text": "78,600", "type_name": "money"}
+{"text": "118,101", "type_name": "money"}
+{"text": "1", "type_name": "money"}
+{"text": "10,736", "type_name": "money"}
+{"text": "118,100", "type_name": "money"}
+{"text": "120,000", "type_name": "money"}
+{"text": "1,900", "type_name": "money"}
+{"text": "ALMOND CREAM CHEESE", "type_name": "free_text"}
+{"text": "28,000", "type_name": "money"}
+{"text": "2 x", "type_name": "identifier"}
+{"text": "56,000", "type_name": "money"}
+{"text": "56,000", "type_name": "money"}
+{"text": "56,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "44,000", "type_name": "money"}
+{"text": "Silky Green Tea", "type_name": "free_text"}
+{"text": "12,500", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "12,500", "type_name": "money"}
+{"text": "Silky Hazelnut", "type_name": "free_text"}
+{"text": "12,500", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "12.500", "type_name": "money"}
+{"text": "25.000", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "THAI ICED TEA (L)", "type_name": "free_text"}
+{"text": "16.363", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16,363", "type_name": "money"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1.636", "type_name": "money"}
+{"text": "17.999", "type_name": "money"}
+{"text": "REDBEAN BREAD", "type_name": "free_text"}
+{"text": "4", "type_name": "identifier"}
+{"text": "36,000", "type_name": "money"}
+{"text": "36,000", "type_name": "money"}
+{"text": "35,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "YOGURT STRAWBERRY", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.909", "type_name": "money"}
+{"text": "20.909", "type_name": "money"}
+{"text": "2,091", "type_name": "money"}
+{"text": "23.000", "type_name": "money"}
+{"text": "ICED White", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "43.000", "type_name": "money"}
+{"text": "Mexican Baked Rice", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "58.000", "type_name": "money"}
+{"text": "101.000", "type_name": "money"}
+{"text": "101.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "101.000", "type_name": "money"}
+{"text": "Large 1", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "11.000", "type_name": "money"}
+{"text": "*Rhum", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "Pastry Keju", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "*Plastik kcl", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "31.000", "type_name": "money"}
+{"text": "40.000", "type_name": "money"}
+{"text": "9.000", "type_name": "money"}
+{"text": "Round Wagyu (1gr)", "type_name": "free_text"}
+{"text": "118", "type_name": "identifier"}
+{"text": "47.200", "type_name": "money"}
+{"text": "Wagyu Rice Box", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10.000", "type_name": "money"}
+{"text": "57.200", "type_name": "money"}
+{"text": "57.200", "type_name": "money"}
+{"text": "57.200", "type_name": "money"}
+{"text": "BUNCIS MUDA TE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "600", "type_name": "money"}
+{"text": "2.060", "type_name": "money"}
+{"text": "22.660", "type_name": "money"}
+{"text": "DEPT02", "type_name": "free_text"}
+{"text": "24,000", "type_name": "money"}
+{"text": "24,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "KUE PILUS ASIN", "type_name": "free_text"}
+{"text": "210.00 x", "type_name": "money"}
+{"text": "80", "type_name": "identifier"}
+{"text": "16,800", "type_name": "money"}
+{"text": "KACANG MEDAN", "type_name": "free_text"}
+{"text": "302.00 x", "type_name": "money"}
+{"text": "95", "type_name": "identifier"}
+{"text": "28,690", "type_name": "money"}
+{"text": "45,490", "type_name": "money"}
+{"text": "4,549", "type_name": "money"}
+{"text": "50,039", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "50,039", "type_name": "money"}
+{"text": "Mineral Water", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "5.000", "type_name": "money"}
+{"text": "Rp 5.000", "type_name": "money"}
+{"text": "Rp 5.000", "type_name": "money"}
+{"text": "Rp 5.000", "type_name": "money"}
+{"text": "Rp 0", "type_name": "money"}
+{"text": "ALMOND CHOCO CREAM CHEESE", "type_name": "free_text"}
+{"text": "28,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "28,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "CHOCO CUSTARD PASTRY", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "CARAMEL PASTRY", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "24,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "6,000", "type_name": "money"}
+{"text": "ORIGINAL", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "APPLE CINN", "type_name": "free_text"}
+{"text": "13,000", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "NUMER CANDLE NO.1", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "NUMER CANDLE NO.2", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "GANACHE MOUSSE PIECE", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "65,000", "type_name": "money"}
+{"text": "85,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "15,000", "type_name": "money"}
+{"text": "4002-Chocolate Orange Peel", "type_name": "free_text"}
+{"text": "19.000", "type_name": "money"}
+{"text": "x2", "type_name": "identifier"}
+{"text": "38.000", "type_name": "money"}
+{"text": "6001-Plastic Bag Small", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "38.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "12.000", "type_name": "money"}
+{"text": "ORIGINAL NO SALT", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "12,000", "type_name": "money"}
+{"text": "12,000", "type_name": "money"}
+{"text": "52,000", "type_name": "money"}
+{"text": "40,000", "type_name": "money"}
+{"text": "THAI ICED TEA", "type_name": "free_text"}
+{"text": "@22.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "22.000", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "52.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "ORIGINAL NO SALT", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "12,000", "type_name": "money"}
+{"text": "12,000", "type_name": "money"}
+{"text": "52,000", "type_name": "money"}
+{"text": "40,000", "type_name": "money"}
+{"text": "WALL'S FEAST CKLT.65", "type_name": "free_text"}
+{"text": "5400", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "5,400", "type_name": "money"}
+{"text": "CMPN TROPICANA.CHO75", "type_name": "free_text"}
+{"text": "5500", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "5,500", "type_name": "money"}
+{"text": "MAGNUM WHT ALMND 80", "type_name": "free_text"}
+{"text": "15000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15,000", "type_name": "money"}
+{"text": "25,900", "type_name": "money"}
+{"text": "2,355", "type_name": "money"}
+{"text": "25,900", "type_name": "money"}
+{"text": "25,900", "type_name": "money"}
+{"text": "S-Ovaltine Macchiat", "type_name": "free_text"}
+{"text": "@22,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "22,000", "type_name": "money"}
+{"text": "50%", "type_name": "free_text"}
+{"text": "No Ice", "type_name": "free_text"}
+{"text": "S-Hazelnut Milk Tea", "type_name": "free_text"}
+{"text": "@20,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "23,000", "type_name": "money"}
+{"text": "Bubbles", "type_name": "free_text"}
+{"text": "3,000", "type_name": "money"}
+{"text": "50%", "type_name": "free_text"}
+{"text": "No Ice", "type_name": "free_text"}
+{"text": "40,910", "type_name": "money"}
+{"text": "4,090", "type_name": "money"}
+{"text": "45,000", "type_name": "money"}
+{"text": "105,000", "type_name": "money"}
+{"text": "60,000", "type_name": "money"}
+{"text": "SAM DA SOO MINERAL WATER", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "32,000", "type_name": "money"}
+{"text": "32,000", "type_name": "money"}
+{"text": "42,000", "type_name": "money"}
+{"text": "10,000", "type_name": "money"}
+{"text": "ES CHOCO GREEN TEA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13.000", "type_name": "money"}
+{"text": "13.000", "type_name": "money"}
+{"text": "1.300", "type_name": "money"}
+{"text": "14.300", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "85.700", "type_name": "money"}
+{"text": "Nutella Cheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "27,272", "type_name": "money"}
+{"text": "27,272", "type_name": "money"}
+{"text": "2,727", "type_name": "money"}
+{"text": "29,999", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "20,001", "type_name": "money"}
+{"text": "IKAN GURAME MED SOP IKAN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "158,000", "type_name": "money"}
+{"text": "CUMI GR JUNJAN =*MEDIUM*=", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "129,000", "type_name": "money"}
+{"text": "CUMI GR TEPUNG =*MEDIUM*=", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "129,000", "type_name": "money"}
+{"text": "AGSIO TH PC JMR =*MEDIUM*=", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "147,000", "type_name": "money"}
+{"text": "POCAI BWG PUTIH =*MEDIUM*=", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "90,000", "type_name": "money"}
+{"text": "LUMPIA UDG PREM =*MEDIUM*=", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "144,000", "type_name": "money"}
+{"text": "NASI PUTIH", "type_name": "free_text"}
+{"text": "10,000", "type_name": "money"}
+{"text": "6", "type_name": "identifier"}
+{"text": "60,000", "type_name": "money"}
+{"text": "HOT TEA", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "3", "type_name": "identifier"}
+{"text": "36,000", "type_name": "money"}
+{"text": "AQUA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "11,000", "type_name": "money"}
+{"text": "ICED TEA", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "24,000", "type_name": "money"}
+{"text": "ICED TEA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "940,000", "type_name": "money"}
+{"text": "56,400", "type_name": "money"}
+{"text": "99,640", "type_name": "money"}
+{"text": "1,096,040", "type_name": "money"}
+{"text": "KOPI SUSU", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17.500", "type_name": "money"}
+{"text": "+DINGIN", "type_name": "free_text"}
+{"text": "KOPI SUSU", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17.500", "type_name": "money"}
+{"text": "+DINGIN", "type_name": "free_text"}
+{"text": "NASI GORENG", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "22.500", "type_name": "money"}
+{"text": "+SPESIAL", "type_name": "free_text"}
+{"text": "BAKPIA KACANG H", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "4.000", "type_name": "money"}
+{"text": "61.500", "type_name": "money"}
+{"text": "61.500", "type_name": "money"}
+{"text": "70.000", "type_name": "money"}
+{"text": "8.500", "type_name": "money"}
+{"text": "Gado-Gado", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,090", "type_name": "money"}
+{"text": "29,090", "type_name": "money"}
+{"text": "2,909", "type_name": "money"}
+{"text": "32,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "68,000", "type_name": "money"}
+{"text": "Toblerone BanCheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "28,182", "type_name": "money"}
+{"text": "Roast Beef Crepes", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15,455", "type_name": "money"}
+{"text": "43,637", "type_name": "money"}
+{"text": "4,364", "type_name": "money"}
+{"text": "48,001", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "51,999", "type_name": "money"}
+{"text": "Cheezemania", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,500", "type_name": "money"}
+{"text": "Mamamia", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,500", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "52,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "M-Ice Cream Milk Te", "type_name": "free_text"}
+{"text": "@30,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "30,000", "type_name": "money"}
+{"text": "Fr Konjac", "type_name": "free_text"}
+{"text": "70%", "type_name": "free_text"}
+{"text": "Less Ice", "type_name": "free_text"}
+{"text": "30,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "1069-ROTI KEJU COKLAT", "type_name": "free_text"}
+{"text": "8.500,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "8.500,00", "type_name": "money"}
+{"text": "1037-ROTI MAHKOTA/RING", "type_name": "free_text"}
+{"text": "10.500,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "10.500,00", "type_name": "money"}
+{"text": "1022-ROTI KACANG MERAH", "type_name": "free_text"}
+{"text": "8.000,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "8.000,00", "type_name": "money"}
+{"text": "1001-ROTI COKLAT", "type_name": "free_text"}
+{"text": "8.000,00", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "8.000,00", "type_name": "money"}
+{"text": "35.000,00", "type_name": "money"}
+{"text": "50.000,00", "type_name": "money"}
+{"text": "15.000,00", "type_name": "money"}
+{"text": "Nutella Cheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "27,272", "type_name": "money"}
+{"text": "27,272", "type_name": "money"}
+{"text": "2,727", "type_name": "money"}
+{"text": "29,999", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "20,001", "type_name": "money"}
+{"text": "OCHA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8,000", "type_name": "money"}
+{"text": "CHIC NAMBAN BENTO", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "58,000", "type_name": "money"}
+{"text": "66,000", "type_name": "money"}
+{"text": "6,600", "type_name": "money"}
+{"text": "72,600", "type_name": "money"}
+{"text": "72,600", "type_name": "money"}
+{"text": "Fish Ball", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "Fried Siomay", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "(0)", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "ICED CM", "type_name": "free_text"}
+{"text": "22,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "Puyo 6 (Package)", "type_name": "free_text"}
+{"text": "70,000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "70,000", "type_name": "money"}
+{"text": "Si1ky Lychee", "type_name": "free_text"}
+{"text": "2x", "type_name": "identifier"}
+{"text": "Si1ky Mango", "type_name": "free_text"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "Si1ky Cotton Candy", "type_name": "free_text"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "Si1ky Green Tea", "type_name": "free_text"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "Si1ky Chocolate", "type_name": "free_text"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "70,000", "type_name": "money"}
+{"text": "70,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "70,000", "type_name": "money"}
+{"text": "Kupon 9", "type_name": "free_text"}
+{"text": "8,182", "type_name": "money"}
+{"text": "Kupon 1", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "LARGE ICED LEMON TEA", "type_name": "free_text"}
+{"text": "12,273", "type_name": "money"}
+{"text": "40,455", "type_name": "money"}
+{"text": "4,046", "type_name": "money"}
+{"text": "44,500", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "5.500", "type_name": "money"}
+{"text": "Nutella Cheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "27,272", "type_name": "money"}
+{"text": "27,272", "type_name": "money"}
+{"text": "2,727", "type_name": "money"}
+{"text": "29,999", "type_name": "money"}
+{"text": "29,999", "type_name": "money"}
+{"text": "RTD Relaxing Drink", "type_name": "free_text"}
+{"text": "15000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15000", "type_name": "money"}
+{"text": "RTD Rosella Aloevera", "type_name": "free_text"}
+{"text": "15000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15000", "type_name": "money"}
+{"text": "RTD Madu Aloevera", "type_name": "free_text"}
+{"text": "15000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15000", "type_name": "money"}
+{"text": "RTD Lemongrass Aloe", "type_name": "free_text"}
+{"text": "15000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15000", "type_name": "money"}
+{"text": "60000", "type_name": "money"}
+{"text": "60000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Pdg Madness", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,000", "type_name": "money"}
+{"text": "BCT", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "28,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "CINNAMON SUGAR", "type_name": "free_text"}
+{"text": "17,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "5,000", "type_name": "money"}
+{"text": "SAM DA S00 MINERAL WATER", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16,000", "type_name": "money"}
+{"text": "TWIST DONUT", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "18,000", "type_name": "money"}
+{"text": "34,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "16,000", "type_name": "money"}
+{"text": "1001-Choco Bun", "type_name": "free_text"}
+{"text": "22.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "22,000", "type_name": "money"}
+{"text": "6001-Plastic Bag Small", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "78.000", "type_name": "money"}
+{"text": "Common Law", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,900", "type_name": "money"}
+{"text": "Tigger Roll", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "14,900", "type_name": "money"}
+{"text": "24,800", "type_name": "money"}
+{"text": "-300", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "75,500", "type_name": "money"}
+{"text": "Ketoprak SPC", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,090", "type_name": "money"}
+{"text": "29,090", "type_name": "money"}
+{"text": "2,909", "type_name": "money"}
+{"text": "32,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "18,000", "type_name": "money"}
+{"text": "UDG GR TLUR ASIN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "165,000", "type_name": "money"}
+{"text": "=*MEDIUM*=", "type_name": "free_text"}
+{"text": "SAPO TH SEAFOOD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "129,000", "type_name": "money"}
+{"text": "=*MEDIUM*=", "type_name": "free_text"}
+{"text": "CUMI GR JUNJAN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "129,000", "type_name": "money"}
+{"text": "=*MEDIUM*=", "type_name": "free_text"}
+{"text": "BIHUN GORENG JJ", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "87,000", "type_name": "money"}
+{"text": "=*MEDIUM*=", "type_name": "free_text"}
+{"text": "OYONG 3 TELOR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "84,000", "type_name": "money"}
+{"text": "=*MEDIUM*=", "type_name": "free_text"}
+{"text": "GURAME FILLET M", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "163,000", "type_name": "money"}
+{"text": "ASAM MANIS", "type_name": "free_text"}
+{"text": "CHINESE TE", "type_name": "free_text"}
+{"text": "14,000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "28,000", "type_name": "money"}
+{"text": "CRYSANTNUM", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "NASI PUTIH", "type_name": "free_text"}
+{"text": "10,000", "type_name": "money"}
+{"text": "8", "type_name": "identifier"}
+{"text": "80,000", "type_name": "money"}
+{"text": "HOT TEA", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "3", "type_name": "identifier"}
+{"text": "36,000", "type_name": "money"}
+{"text": "ICED TEA", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "3", "type_name": "identifier"}
+{"text": "36,000", "type_name": "money"}
+{"text": "937,000", "type_name": "money"}
+{"text": "56,220", "type_name": "money"}
+{"text": "99,322", "type_name": "money"}
+{"text": "1,092,542", "type_name": "money"}
+{"text": "TRIPPLE CHEESE", "type_name": "free_text"}
+{"text": "17,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "17,000", "type_name": "money"}
+{"text": "18,000", "type_name": "money"}
+{"text": "1,000", "type_name": "money"}
+{"text": "Round Wagyu ( 1gr )", "type_name": "free_text"}
+{"text": "133", "type_name": "identifier"}
+{"text": "53.200", "type_name": "money"}
+{"text": "53.200", "type_name": "money"}
+{"text": "53.200", "type_name": "money"}
+{"text": "TT", "type_name": "free_text"}
+{"text": "20,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "CHEEZY DOG BITES", "type_name": "free_text"}
+{"text": "33,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "33,000", "type_name": "money"}
+{"text": "33,000", "type_name": "money"}
+{"text": "33,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "67,000", "type_name": "money"}
+{"text": "Cheese Tart", "type_name": "free_text"}
+{"text": "*4 Pcs", "type_name": "identifier"}
+{"text": "Rp 116000.00", "type_name": "money"}
+{"text": "Box of 4", "type_name": "free_text"}
+{"text": "PP Carrier", "type_name": "free_text"}
+{"text": "Rp 116000.00", "type_name": "money"}
+{"text": "Rp 116000.00", "type_name": "money"}
+{"text": "Rp 116000.00", "type_name": "money"}
+{"text": "Rp 0.00", "type_name": "money"}
+{"text": "EGG TART", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,000", "type_name": "money"}
+{"text": "13,000", "type_name": "money"}
+{"text": "13,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "1001-Choco Bun", "type_name": "free_text"}
+{"text": "22.000", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "22.000", "type_name": "money"}
+{"text": "6001-Plastic Bag Small", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "x1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "28.000", "type_name": "money"}
+{"text": "ZAI.Milk Choco Egg Avenger60gr", "type_name": "free_text"}
+{"text": "53,636.00", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "53,636.00", "type_name": "money"}
+{"text": "ZAI.Milk Choco Egg Frozen 60gr", "type_name": "free_text"}
+{"text": "53,636.00", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "53,636.00", "type_name": "money"}
+{"text": "107,272.00", "type_name": "money"}
+{"text": "0.00", "type_name": "money"}
+{"text": "10,727.00", "type_name": "money"}
+{"text": "117,999.00", "type_name": "money"}
+{"text": "0.00", "type_name": "money"}
+{"text": "117,999.00", "type_name": "money"}
+{"text": "TWIST STRAWBERRY DONUT", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "TLJ CROQUETTE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "17,000", "type_name": "money"}
+{"text": "POTATO PEPPER BAGEL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16,000", "type_name": "money"}
+{"text": "43,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "7,000", "type_name": "money"}
+{"text": "Viet Milk Coffee", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29.000", "type_name": "money"}
+{"text": "+L", "type_name": "free_text"}
+{"text": "+Ice", "type_name": "free_text"}
+{"text": "Viet Milk Coffee", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25.000", "type_name": "money"}
+{"text": "+lce", "type_name": "free_text"}
+{"text": "+M", "type_name": "free_text"}
+{"text": "54.000", "type_name": "money"}
+{"text": "54.000", "type_name": "money"}
+{"text": "56.000", "type_name": "money"}
+{"text": "2.000", "type_name": "money"}
+{"text": "IKAN GABUS FRESH", "type_name": "free_text"}
+{"text": "98,500", "type_name": "money"}
+{"text": "0.264X", "type_name": "identifier"}
+{"text": "26,004", "type_name": "money"}
+{"text": "IKAN BUMBU KUNING", "type_name": "free_text"}
+{"text": "72,500", "type_name": "money"}
+{"text": "0.308X", "type_name": "identifier"}
+{"text": "22,330", "type_name": "money"}
+{"text": "OCTOPUS SATAY", "type_name": "free_text"}
+{"text": "7,500", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "7,500", "type_name": "money"}
+{"text": "55,834", "type_name": "money"}
+{"text": "60,000", "type_name": "money"}
+{"text": "4,200", "type_name": "money"}
+{"text": "SATE PADANG", "type_name": "free_text"}
+{"text": "60,000", "type_name": "money"}
+{"text": "60,000", "type_name": "money"}
+{"text": "6,000", "type_name": "money"}
+{"text": "66,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "34,000", "type_name": "money"}
+{"text": "FA-Cookies Mix 200 gr", "type_name": "free_text"}
+{"text": "80,000.00", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "80,000.00", "type_name": "money"}
+{"text": "FA-Polycello Bag 200 gr", "type_name": "free_text"}
+{"text": "0.00", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0.00", "type_name": "money"}
+{"text": "80,000.00", "type_name": "money"}
+{"text": "0.00", "type_name": "money"}
+{"text": "8,000.00", "type_name": "money"}
+{"text": "88,000.00", "type_name": "money"}
+{"text": "0.00", "type_name": "money"}
+{"text": "88,000.00", "type_name": "money"}
+{"text": "BACON SHIMEJI SPAGHE", "type_name": "free_text"}
+{"text": "48000", "type_name": "money"}
+{"text": "1.00", "type_name": "identifier"}
+{"text": "48000", "type_name": "money"}
+{"text": "CHICKEN KATSUDON", "type_name": "free_text"}
+{"text": "48000", "type_name": "money"}
+{"text": "1.00", "type_name": "identifier"}
+{"text": "48000", "type_name": "money"}
+{"text": "WELL TORI KARAAGE MU", "type_name": "free_text"}
+{"text": "58000", "type_name": "money"}
+{"text": "1.00.", "type_name": "identifier"}
+{"text": "58000", "type_name": "money"}
+{"text": "WELL CHICKEN KATSU C", "type_name": "free_text"}
+{"text": "58000", "type_name": "money"}
+{"text": "1.00", "type_name": "identifier"}
+{"text": "58000", "type_name": "money"}
+{"text": "CLASSIC TOMATO", "type_name": "free_text"}
+{"text": "48000", "type_name": "money"}
+{"text": "1.00", "type_name": "identifier"}
+{"text": ".48000", "type_name": "money"}
+{"text": "RENDANG OMURICE", "type_name": "free_text"}
+{"text": "48000", "type_name": "money"}
+{"text": "1.00", "type_name": "identifier"}
+{"text": "48000", "type_name": "money"}
+{"text": "#F11 CREAM HAMBURG 0", "type_name": "free_text"}
+{"text": "58000", "type_name": "money"}
+{"text": "1.00", "type_name": "identifier"}
+{"text": "58000", "type_name": "money"}
+{"text": "366.000", "type_name": "money"}
+{"text": "18.300", "type_name": "money"}
+{"text": "38.430", "type_name": "money"}
+{"text": "422,730", "type_name": "money"}
+{"text": "Sesame Toast", "type_name": "free_text"}
+{"text": "22,500", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "22,500", "type_name": "money"}
+{"text": "22,500", "type_name": "money"}
+{"text": "22,500", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "27,500", "type_name": "money"}
+{"text": "Seafood Tempura BBQ", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "40,000", "type_name": "money"}
+{"text": "- Pedas sedikit", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "Sweet Plum Potato*", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,000", "type_name": "money"}
+{"text": "69,000", "type_name": "money"}
+{"text": "69,000", "type_name": "money"}
+{"text": "80,000", "type_name": "money"}
+{"text": "11,000", "type_name": "money"}
+{"text": "HOME CHARGER+KABEL 138 IP5 TS C", "type_name": "free_text"}
+{"text": "0613800221", "type_name": "identifier"}
+{"text": "130.000,00", "type_name": "money"}
+{"text": "1,000", "type_name": "identifier"}
+{"text": "130.000,00", "type_name": "money"}
+{"text": "130.000,00", "type_name": "money"}
+{"text": "130.000,00", "type_name": "money"}
+{"text": "0,00", "type_name": "money"}
+{"text": "Pillow Choco", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "18,000", "type_name": "money"}
+{"text": "Pillow Cheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "18,000", "type_name": "money"}
+{"text": "Pillow Kombi", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "19,500", "type_name": "money"}
+{"text": "55,500", "type_name": "money"}
+{"text": "55,500", "type_name": "money"}
+{"text": "55,500", "type_name": "money"}
+{"text": "Iced Mochaccino", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "38.000", "type_name": "money"}
+{"text": "38.000", "type_name": "money"}
+{"text": "3.800", "type_name": "money"}
+{"text": "41.800", "type_name": "money"}
+{"text": "102.000", "type_name": "money"}
+{"text": "60.200", "type_name": "money"}
+{"text": "Rice Organik", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "6.818", "type_name": "money"}
+{"text": "1pc Chicken OR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "15.909", "type_name": "money"}
+{"text": "22,727", "type_name": "money"}
+{"text": "2.273", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "ALMOND CHOCO CREAM CHEESE", "type_name": "free_text"}
+{"text": "28,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "28.000", "type_name": "money"}
+{"text": "28.000", "type_name": "money"}
+{"text": "28.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "YANG YUM GUI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "97,000", "type_name": "money"}
+{"text": "SOONDUBU CHIGE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "75,000", "type_name": "money"}
+{"text": "JAP CHAE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "105,000", "type_name": "money"}
+{"text": "MAKOLI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "120,000", "type_name": "money"}
+{"text": "GOCHUJANG", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "85,000", "type_name": "money"}
+{"text": "BIBIMBAB", "type_name": "free_text"}
+{"text": "482,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "33,740", "type_name": "money"}
+{"text": "48,685", "type_name": "money"}
+{"text": "564,425", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "564,425", "type_name": "money"}
+{"text": "CHOCO ALMOND", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "18,182", "type_name": "money"}
+{"text": "*Gula Murni 100%", "type_name": "free_text"}
+{"text": "18,182", "type_name": "money"}
+{"text": "-2,727", "type_name": "money"}
+{"text": "1,546", "type_name": "money"}
+{"text": "17,001", "type_name": "money"}
+{"text": "OMA NASI KUNING CAKALANG MANI", "type_name": "free_text"}
+{"text": "30.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "30.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "70.000", "type_name": "money"}
+{"text": "#PKTPOLSBTSPON2S", "type_name": "free_text"}
+{"text": "8,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "8,000", "type_name": "money"}
+{"text": "BENECOL LYCHEE 2S", "type_name": "free_text"}
+{"text": "14,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "14,000", "type_name": "money"}
+{"text": "REGAL MARIE 125 GR", "type_name": "free_text"}
+{"text": "12,200", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "12,200", "type_name": "money"}
+{"text": "7 UP CAN 330 ML", "type_name": "free_text"}
+{"text": "6,000", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "6,000", "type_name": "money"}
+{"text": "SAKATONIK LVR 10S", "type_name": "free_text"}
+{"text": "6,400", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "6,400", "type_name": "money"}
+{"text": "DUA BELIBIS SBL135", "type_name": "free_text"}
+{"text": "9,300", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "9,300", "type_name": "money"}
+{"text": "DAUN SEREH", "type_name": "free_text"}
+{"text": "19,900", "type_name": "money"}
+{"text": "0,292X", "type_name": "identifier"}
+{"text": "5,811", "type_name": "money"}
+{"text": "53,020", "type_name": "money"}
+{"text": "53,020", "type_name": "money"}
+{"text": "53,020", "type_name": "money"}
+{"text": "KFC Winger HC", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "2,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "22,000", "type_name": "money"}
+{"text": "Ice t grentea", "type_name": "free_text"}
+{"text": "22.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "Rp. 22.000", "type_name": "money"}
+{"text": "22.000", "type_name": "money"}
+{"text": "Rp. 52.000", "type_name": "money"}
+{"text": "30.000", "type_name": "money"}
+{"text": "WACOM BAMBOO PEN", "type_name": "free_text"}
+{"text": "043026001", "type_name": "identifier"}
+{"text": "975,000.00", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "975,000.00", "type_name": "money"}
+{"text": "975,000.00", "type_name": "money"}
+{"text": "GIGA", "type_name": "free_text"}
+{"text": "Rp 57,000", "type_name": "money"}
+{"text": "CUP GIGA", "type_name": "free_text"}
+{"text": "CHEESE", "type_name": "free_text"}
+{"text": "S. CREAM", "type_name": "free_text"}
+{"text": "Rp 57,0000", "type_name": "money"}
+{"text": "Rp 57,000", "type_name": "money"}
+{"text": "4-Chunks", "type_name": "free_text"}
+{"text": "20.000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "BBQ Chicken", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "41,000", "type_name": "money"}
+{"text": "Tidak Pedas", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "41,000", "type_name": "money"}
+{"text": "41,000", "type_name": "money"}
+{"text": "41,000", "type_name": "money"}
+{"text": "BOLU KUKUS PX", "type_name": "free_text"}
+{"text": "@13000", "type_name": "money"}
+{"text": "3X", "type_name": "identifier"}
+{"text": "39,000", "type_name": "money"}
+{"text": "PLASTIK SEDANG", "type_name": "free_text"}
+{"text": "@0", "type_name": "money"}
+{"text": "1X", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "27,300", "type_name": "money"}
+{"text": "27,300", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "22,700", "type_name": "money"}
+{"text": "S-Matcha Macchiato", "type_name": "free_text"}
+{"text": "@25,000", "type_name": "money"}
+{"text": "2X", "type_name": "identifier"}
+{"text": "50,000", "type_name": "money"}
+{"text": "100%, Less Ice", "type_name": "free_text"}
+{"text": "S-Ovaltine Macchiat", "type_name": "free_text"}
+{"text": "@22,000", "type_name": "money"}
+{"text": "2X", "type_name": "identifier"}
+{"text": "44,000", "type_name": "money"}
+{"text": "Less Ice", "type_name": "free_text"}
+{"text": "100%", "type_name": "free_text"}
+{"text": "94,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "6,000", "type_name": "money"}
+{"text": "KFC DAY", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "34,545", "type_name": "money"}
+{"text": "CHARGE TA", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "909", "type_name": "money"}
+{"text": "35,454", "type_name": "money"}
+{"text": "3,546", "type_name": "money"}
+{"text": "39,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "61,000", "type_name": "money"}
+{"text": "DEPT04", "type_name": "free_text"}
+{"text": "24,000", "type_name": "money"}
+{"text": "DEPT01", "type_name": "free_text"}
+{"text": "22,000", "type_name": "money"}
+{"text": "46,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "4,000", "type_name": "money"}
+{"text": "PAKET CHICKEN 4", "type_name": "free_text"}
+{"text": "29,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,000", "type_name": "money"}
+{"text": "KOREAN COLD TEA", "type_name": "free_text"}
+{"text": "9,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "38,000", "type_name": "money"}
+{"text": "1,900", "type_name": "money"}
+{"text": "3,990", "type_name": "money"}
+{"text": "43,890", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "6,110", "type_name": "money"}
+{"text": "PR ORIGINAL 150gr", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "75,000", "type_name": "money"}
+{"text": "F.FRIES (M)", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "ES TEH MANIS", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "10,000", "type_name": "money"}
+{"text": "MUSHROOM SAUCE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "85,000", "type_name": "money"}
+{"text": "4,250", "type_name": "money"}
+{"text": "8,925", "type_name": "money"}
+{"text": "98,175", "type_name": "money"}
+{"text": "Butter croissant", "type_name": "free_text"}
+{"text": "14.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "14.000", "type_name": "money"}
+{"text": "Almond Croissant", "type_name": "free_text"}
+{"text": "28.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "28.000", "type_name": "money"}
+{"text": "Mini Chocolate Donut", "type_name": "free_text"}
+{"text": "12.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "12.000", "type_name": "money"}
+{"text": "Rp 37.800", "type_name": "money"}
+{"text": "Rp 3.780", "type_name": "money"}
+{"text": "Rp 41.580", "type_name": "money"}
+{"text": "Arem Arem", "type_name": "free_text"}
+{"text": "12.000", "type_name": "money"}
+{"text": "1x", "type_name": "identifier"}
+{"text": "12.000", "type_name": "money"}
+{"text": "12.000", "type_name": "money"}
+{"text": "1.200", "type_name": "money"}
+{"text": "13.200", "type_name": "money"}
+{"text": "THAI ICED TEA (L)", "type_name": "free_text"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "16,363", "type_name": "money"}
+{"text": "16,363", "type_name": "money"}
+{"text": "1,636", "type_name": "money"}
+{"text": "17,999", "type_name": "money"}
+{"text": "A Chicken", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "21.000", "type_name": "money"}
+{"text": "+Monster", "type_name": "free_text"}
+{"text": "+A +Cheese", "type_name": "free_text"}
+{"text": "21.000", "type_name": "money"}
+{"text": "21.000", "type_name": "money"}
+{"text": "21.000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "TT", "type_name": "free_text"}
+{"text": "@20,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "RISOL ROGUT", "type_name": "free_text"}
+{"text": "@9,000", "type_name": "money"}
+{"text": "2X", "type_name": "identifier"}
+{"text": "18,000", "type_name": "money"}
+{"text": "MIKA KCL", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "PLASTIK 25", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "12,600", "type_name": "money"}
+{"text": "12,600", "type_name": "money"}
+{"text": "100,700", "type_name": "money"}
+{"text": "88,100", "type_name": "money"}
+{"text": "Choco Cheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "13,636", "type_name": "money"}
+{"text": "-2,045", "type_name": "money"}
+{"text": "1,159", "type_name": "money"}
+{"text": "12,750", "type_name": "money"}
+{"text": "12,750", "type_name": "money"}
+{"text": "CARAMELALMOND", "type_name": "free_text"}
+{"text": "23,000", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "23,000", "type_name": "money"}
+{"text": "*CARAMEL DIP*", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "23,000", "type_name": "money"}
+{"text": "23,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "27,000", "type_name": "money"}
+{"text": "TRIPPLE CHEESE", "type_name": "free_text"}
+{"text": "17,000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "34,000", "type_name": "money"}
+{"text": "34,000", "type_name": "money"}
+{"text": "34,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "16,000", "type_name": "money"}
+{"text": "Coffee Rocksalt [R]", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "28,000", "type_name": "money"}
+{"text": "PEARL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "4,000", "type_name": "money"}
+{"text": "ICED NUTELLA LATTE [R]", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "30,000", "type_name": "money"}
+{"text": "PEARL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "4,000", "type_name": "money"}
+{"text": "ICED MOCHA LATTE [R]", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "30,000", "type_name": "money"}
+{"text": "PEARL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "4,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "XXL Crspy Chicken", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "40,000", "type_name": "money"}
+{"text": "- Pedas", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "40,000", "type_name": "money"}
+{"text": "40,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "10,000", "type_name": "money"}
+{"text": "MANUKA HONEY", "type_name": "free_text"}
+{"text": "385,000", "type_name": "money"}
+{"text": "346,500", "type_name": "money"}
+{"text": "346,500", "type_name": "money"}
+{"text": "Ice Kokofie", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "20.000", "type_name": "money"}
+{"text": "100.000", "type_name": "money"}
+{"text": "80.000", "type_name": "money"}
+{"text": "HAZELNUT ALM", "type_name": "free_text"}
+{"text": "15,000", "type_name": "money"}
+{"text": "CAPPUCINO CI", "type_name": "free_text"}
+{"text": "14,000", "type_name": "money"}
+{"text": "TIRAMISU CIN", "type_name": "free_text"}
+{"text": "14,000", "type_name": "money"}
+{"text": "18,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "32,000", "type_name": "money"}
+{"text": "Spaghetti Bini Muda (Bol ognese) - DINE IN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "19.000", "type_name": "money"}
+{"text": "French Fries - DINE IN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12.000", "type_name": "money"}
+{"text": "Mineral Water - DINE IN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "7.000", "type_name": "money"}
+{"text": "38.000", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "12.000", "type_name": "money"}
+{"text": "KUPAT TAHU", "type_name": "free_text"}
+{"text": "0512100", "type_name": "identifier"}
+{"text": "19,000", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "38,000", "type_name": "money"}
+{"text": "MIE KOCOK", "type_name": "free_text"}
+{"text": "0515103", "type_name": "identifier"}
+{"text": "29,000", "type_name": "money"}
+{"text": "3", "type_name": "identifier"}
+{"text": "87,000", "type_name": "money"}
+{"text": "125,000", "type_name": "money"}
+{"text": "12,500", "type_name": "money"}
+{"text": "137,500", "type_name": "money"}
+{"text": "150,000", "type_name": "money"}
+{"text": "12,500", "type_name": "money"}
+{"text": "GARISH PC", "type_name": "free_text"}
+{"text": "LA12392NVS", "type_name": "identifier"}
+{"text": "259.000", "type_name": "money"}
+{"text": "PLASTIK BAG;: 000 PC", "type_name": "free_text"}
+{"text": "HP66000", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "259.000", "type_name": "money"}
+{"text": "-259,000", "type_name": "money"}
+{"text": "109.NG NANAS", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "49,800", "type_name": "money"}
+{"text": "DE13.PSANG IJO MDM", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,800", "type_name": "money"}
+{"text": "CT12.BLK JELY KPI IC", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "29,800", "type_name": "money"}
+{"text": "109,400", "type_name": "money"}
+{"text": "7,658", "type_name": "money"}
+{"text": "11,706", "type_name": "money"}
+{"text": "128,764", "type_name": "money"}
+{"text": "CHOCO CHIP", "type_name": "free_text"}
+{"text": "13,000", "type_name": "money"}
+{"text": "2 X", "type_name": "identifier"}
+{"text": "26,000", "type_name": "money"}
+{"text": "CHOCO BANANA", "type_name": "free_text"}
+{"text": "14,000", "type_name": "money"}
+{"text": "3 X", "type_name": "identifier"}
+{"text": "42,000", "type_name": "money"}
+{"text": "CRISPY CHOCO", "type_name": "free_text"}
+{"text": "14,000", "type_name": "money"}
+{"text": "CRISPY CHOCO", "type_name": "free_text"}
+{"text": "14,000", "type_name": "money"}
+{"text": "CHOCBAN CUP", "type_name": "free_text"}
+{"text": "12,000", "type_name": "money"}
+{"text": "3 X", "type_name": "identifier"}
+{"text": "36,000", "type_name": "money"}
+{"text": "RED VELVET", "type_name": "free_text"}
+{"text": "16,000", "type_name": "money"}
+{"text": "2X", "type_name": "identifier"}
+{"text": "32,000", "type_name": "money"}
+{"text": "164,000", "type_name": "money"}
+{"text": "16,400", "type_name": "money"}
+{"text": "147,600", "type_name": "money"}
+{"text": "147,600", "type_name": "money"}
+{"text": "SAUSAGE AND SALAMI", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "62,000", "type_name": "money"}
+{"text": "GREEN MONSIEUR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "57,000", "type_name": "money"}
+{"text": "ADD 1 W. ORIGINAL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "12,000", "type_name": "money"}
+{"text": "131,000", "type_name": "money"}
+{"text": "7,860", "type_name": "money"}
+{"text": "13,886", "type_name": "money"}
+{"text": "152,746", "type_name": "money"}
+{"text": "ROASTED MT ( R )", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "21,000", "type_name": "money"}
+{"text": "GRASS JELLY ( R )", "type_name": "free_text"}
+{"text": "4,000", "type_name": "money"}
+{"text": "ICE NO", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "SUGAR HALF", "type_name": "free_text"}
+{"text": "0", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "-2,500", "type_name": "money"}
+{"text": "22,500", "type_name": "money"}
+{"text": "Peanut & Cheese", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,636", "type_name": "money"}
+{"text": "13,636", "type_name": "money"}
+{"text": "1,364", "type_name": "money"}
+{"text": "15,000", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "5,000", "type_name": "money"}
+{"text": "PAIN AU CHOCOLATE", "type_name": "free_text"}
+{"text": "2", "type_name": "identifier"}
+{"text": "22,000", "type_name": "money"}
+{"text": "APPLE PIE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "11,000", "type_name": "money"}
+{"text": "REDBEAN BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "42,000", "type_name": "money"}
+{"text": "100,000", "type_name": "money"}
+{"text": "58,000", "type_name": "money"}
+{"text": "[RICHE] WHITE SKIMM", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "52,727", "type_name": "money"}
+{"text": "PEACH", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "LYCHEE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "LONGAN", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "ROASTED ALMOND", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "YELLOW VELVET", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "YELLOW VELVET", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "0", "type_name": "money"}
+{"text": "52,727", "type_name": "money"}
+{"text": "5,273", "type_name": "money"}
+{"text": "58,000", "type_name": "money"}
+{"text": "58,000", "type_name": "money"}
+{"text": "ALMOND CROSSIANT", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "13,500", "type_name": "money"}
+{"text": "13,500", "type_name": "money"}
+{"text": "13,500", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "Double Choco Crispy", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "14,091", "type_name": "money"}
+{"text": "14,091", "type_name": "money"}
+{"text": "1,409", "type_name": "money"}
+{"text": "15,500", "type_name": "money"}
+{"text": "Smoke Beef + Aqua", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "21,818", "type_name": "money"}
+{"text": "21,818", "type_name": "money"}
+{"text": "2,182", "type_name": "money"}
+{"text": "24,000", "type_name": "money"}
+{"text": "25,000", "type_name": "money"}
+{"text": "1,000", "type_name": "money"}
+{"text": "PREMIUM TOAST PAN BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "24,000", "type_name": "money"}
+{"text": "24,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "SOONDUBU CHIGE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "75,000", "type_name": "money"}
+{"text": "JAP CHAE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "105,000", "type_name": "money"}
+{"text": "GOCHUJANG SAMGYEOPSAL", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "120,000", "type_name": "money"}
+{"text": "300,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "21,000", "type_name": "money"}
+{"text": "30,000", "type_name": "money"}
+{"text": "351,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "351,000", "type_name": "money"}
+{"text": "LAY'S NORI SEAWD 55G", "type_name": "free_text"}
+{"text": "8800", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "8.800", "type_name": "money"}
+{"text": "QTELA KRP/TMPE ORI55", "type_name": "free_text"}
+{"text": "6900", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "6.900", "type_name": "money"}
+{"text": "SOSRO TEH BOTOL 350", "type_name": "free_text"}
+{"text": "3500", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "7.000", "type_name": "money"}
+{"text": "PUCUK/H TEH L/SGR350", "type_name": "free_text"}
+{"text": "3600", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "3.600", "type_name": "money"}
+{"text": "AQUA AIR MINERAL 600", "type_name": "free_text"}
+{"text": "3500", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "7.000", "type_name": "money"}
+{"text": "PEDULI DISABILITAS", "type_name": "free_text"}
+{"text": "200", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "200", "type_name": "money"}
+{"text": "33.500", "type_name": "money"}
+{"text": "33.500", "type_name": "money"}
+{"text": "50.000", "type_name": "money"}
+{"text": "16.500", "type_name": "money"}
+{"text": "Kupon 7", "type_name": "free_text"}
+{"text": "42,727", "type_name": "money"}
+{"text": "MINERAL WATER", "type_name": "free_text"}
+{"text": "8,182", "type_name": "money"}
+{"text": "50,909", "type_name": "money"}
+{"text": "5,091", "type_name": "money"}
+{"text": "56,000", "type_name": "money"}
+{"text": "56,000", "type_name": "money"}
+{"text": "BAK MANDI (BAK MANDI TAIWAN BESAR)", "type_name": "free_text"}
+{"text": "500900014", "type_name": "identifier"}
+{"text": "125,000", "type_name": "money"}
+{"text": "TATAKAN MANDI (JARING MANDI JALA) -", "type_name": "free_text"}
+{"text": "502100007", "type_name": "identifier"}
+{"text": "50,000", "type_name": "money"}
+{"text": "BAJU ATASAN(PETITE MIMI ROMPER 3D FOREST / RM0003)", "type_name": "free_text"}
+{"text": "1000600098", "type_name": "identifier"}
+{"text": "53,000", "type_name": "money"}
+{"text": "ACCESORIES(SUN BABES PENUTUP MATA)", "type_name": "free_text"}
+{"text": "804100017", "type_name": "identifier"}
+{"text": "27,500", "type_name": "money"}
+{"text": "KAPAS (KAPAS MEDISOFT COTTON BALL 120)", "type_name": "free_text"}
+{"text": "8991038772194", "type_name": "identifier"}
+{"text": "7,000", "type_name": "money"}
+{"text": "3", "type_name": "identifier"}
+{"text": "21,000", "type_name": "money"}
+{"text": "JOIE KUBBIE(BABY BOX)", "type_name": "free_text"}
+{"text": "901800109", "type_name": "identifier"}
+{"text": "1,100,000", "type_name": "money"}
+{"text": "1,376,500", "type_name": "money"}
+{"text": "BUDS CALMING TUMMY RUB CREAM 30ML(TOILETRIES)", "type_name": "free_text"}
+{"text": "BU350003", "type_name": "identifier"}
+{"text": "200,000", "type_name": "money"}
+{"text": "BUDS PRECIOUS NEWBORN CREAM 75ML(TOILETRIES)", "type_name": "free_text"}
+{"text": "BU350012", "type_name": "identifier"}
+{"text": "235,000", "type_name": "money"}
+{"text": "BUDS PRECIOUS NEWBORN HEAD TO TOE CLEANSER 250ML(TOILETRIES)", "type_name": "free_text"}
+{"text": "BU350009", "type_name": "identifier"}
+{"text": "270,000", "type_name": "money"}
+{"text": "705,000", "type_name": "money"}
+{"text": "CRISPY APPLE RAISIN PASTR", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "11,500", "type_name": "money"}
+{"text": "PAIN AU CHOCOLATE", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "11,000", "type_name": "money"}
+{"text": "REDBEAN BREAD", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "9,000", "type_name": "money"}
+{"text": "31,500", "type_name": "money"}
+{"text": "52,000", "type_name": "money"}
+{"text": "20,500", "type_name": "money"}
+{"text": "PEPPERONI", "type_name": "free_text"}
+{"text": "23,000", "type_name": "money"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "23,000", "type_name": "money"}
+{"text": "ALMOND CREAM CHEESE", "type_name": "free_text"}
+{"text": "28,000", "type_name": "money"}
+{"text": "1 x", "type_name": "identifier"}
+{"text": "28,000", "type_name": "money"}
+{"text": "51,000", "type_name": "money"}
+{"text": "51,000", "type_name": "money"}
+{"text": "0", "type_name": "money"}
+{"text": "51,000", "type_name": "money"}
+{"text": "CK.MANTAP A", "type_name": "free_text"}
+{"text": "25,455", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "25,455", "type_name": "money"}
+{"text": "CHEESE B", "type_name": "free_text"}
+{"text": "20,455", "type_name": "money"}
+{"text": "2", "type_name": "identifier"}
+{"text": "40,909", "type_name": "money"}
+{"text": "TAKE AWAY", "type_name": "free_text"}
+{"text": "909", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "909", "type_name": "money"}
+{"text": "67,273", "type_name": "money"}
+{"text": "6,727", "type_name": "money"}
+{"text": "74,000", "type_name": "money"}
+{"text": "26,000", "type_name": "money"}
+{"text": "TARO", "type_name": "free_text"}
+{"text": "1", "type_name": "identifier"}
+{"text": "18,182", "type_name": "money"}
+{"text": "18,182", "type_name": "money"}
+{"text": "1,818", "type_name": "money"}
+{"text": "20,000", "type_name": "money"}
+{"text": "50,000", "type_name": "money"}
+{"text": "-30,000", "type_name": "money"}
+{"text": "1216 DPR BATB SD ENCHANTED ROS", "type_name": "free_text"}
+{"text": "DPHB9169", "type_name": "identifier"}
+{"text": "164700.00", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "164700.00", "type_name": "money"}
+{"text": "1216 GGM 12\" TTN HERO YONDU", "type_name": "free_text"}
+{"text": "AVSC0312", "type_name": "identifier"}
+{"text": "74700.00", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "74700.00", "type_name": "money"}
+{"text": "0217 GGM 12\" TITAN HERO GAMORA", "type_name": "free_text"}
+{"text": "AVSC2769", "type_name": "identifier"}
+{"text": "74700.00", "type_name": "money"}
+{"text": "1", "type_name": "identifier"}
+{"text": "74700.00", "type_name": "money"}
+{"text": "314100.00", "type_name": "money"}
+{"text": "314100.00", "type_name": "money"}

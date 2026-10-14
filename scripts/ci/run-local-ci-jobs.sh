@@ -191,7 +191,7 @@ job_compose_smoke() {
   smoke_down
   for attempt in 1 2 3 4; do
     if docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" up -d --build \
-      postgres migrate db-storage-guard minio minio-init valkey mailpit ollama-init api worker web; then
+      postgres migrate db-storage-guard minio minio-init valkey mailpit api worker web; then
       break
     fi
     if [[ "$attempt" -eq 4 ]]; then exit 1; fi
@@ -248,7 +248,7 @@ if [[ "$RUN_UX" -eq 1 ]]; then
     trap ux_down RETURN
     ux_down
     docuvate_ci_compose_cmd "$project" "${DOCUVATE_CI_COMPOSE_FILES[@]}" up -d --build \
-      postgres migrate db-storage-guard minio minio-init valkey mailpit ollama-init api worker web
+      postgres migrate db-storage-guard minio minio-init valkey mailpit api worker web
     for i in $(seq 1 90); do
       if curl -sf http://localhost:3001/health/ready | jq -e '.status == "ready"' >/dev/null; then break; fi
       if [[ "$i" -eq 90 ]]; then

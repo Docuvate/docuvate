@@ -9,7 +9,7 @@ bash scripts/quickstart.sh   # checks Docker + RAM, writes .env secrets, pulls G
 bash scripts/doctor.sh       # containers, health, migrations, worker, embedding coverage, Ollama model, disk/RAM
 ```
 
-Recommended host RAM: **12 GiB** minimum for the default Compose limits (worker 3g, API 2g, Ollama 3g, plus Postgres/MinIO). Increase `OLLAMA_MEM_LIMIT` only when you have headroom.
+Recommended host RAM: **6 GiB** minimum for the default Compose profile (no Ollama: worker 2g, API 1536m, plus Postgres/MinIO). For the optional **`chat-local`** profile (Ollama + `qwen2.5:1.5b`), use **≥ 8 GiB** and increase `OLLAMA_MEM_LIMIT` only when you run larger models.
 
 Application images default to `ghcr.io/docuvate/docuvate-{api,web,worker}:edge`. Build from source with `docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build`.
 
@@ -42,14 +42,19 @@ Installation-wide **defaults** (when a tenant has no override row) are set in `.
 | `DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE` | Layout reconstruction / SSIM compare (Nachbau/Vergleich) |
 | `DOCUVATE_FEATURE_SOURCE_CONNECTORS` | SFTP scanner ingress, SFTP fetch, Paperless-ngx connectors |
 | `DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS` | Arena engine compare and non-default extractors |
-| `DOCUVATE_FEATURE_EXACT_ANSWERS` | FAKTUM index and cited exact answers in document chat |
-| `DOCUVATE_FEATURE_SMART_DUPLICATES` | Template-subtracted duplicate detection |
-| `DOCUVATE_FEATURE_ANSWER_ABSTENTION` | Abstention gate against unknown entities in chat |
-| `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Learned value types instead of heuristic field regexes |
-| `DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES` | Layout key-value role head on embeddings |
-| `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL` | Optional local chat model profile |
+| `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Learned value-type field hints (default **on**; set `false` for regex heuristics) |
 
-Per-tenant overrides are stored in `feature_flag` (tenant id + flag key + enabled). Authenticated clients resolve flags via `GET /v1/remote-config` (override wins over env default). Installation admins can set overrides with `PATCH /v1/admin/users/{userId}/feature-flags`.
+Per-tenant overrides are stored in `feature_flag` (tenant id + flag key + enabled). Authenticated clients resolve flags via `GET /v1/remote-config` (override wins over env default).
+
+### Optional local LLM (`chat-local`)
+
+Default `docker compose up` does **not** start Ollama. Document chat uses worker RAG and cited extractive answers until you opt in:
+
+```bash
+docker compose --profile chat-local -f docker-compose.yml -f docker-compose.chat-local.yml up -d
+```
+
+This pulls **`qwen2.5:1.5b`** (Q4) and sets `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL=true` on the API. Tenants still need the `localChatModel` flag (or a per-tenant override) before open-ended LLM answers use Ollama.
 
 ## Volumes
 

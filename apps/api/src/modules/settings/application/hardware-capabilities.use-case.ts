@@ -40,9 +40,9 @@ function withDockerMemoryHints(base: HardwareCapabilitiesDto): HardwareCapabilit
     ...base,
     dockerMemoryWarning: true,
     dockerMemoryHintDe:
-      'Docker Desktop: mindestens 10–12 GB RAM gesamt. Ollama-Container-Limit (OLLAMA_MEM_LIMIT) ist standardmäßig 3g — passt zu qwen2.5:3b; qwen3:4b braucht ≥ 5g.',
+      'Docker Desktop: mindestens 6 GB RAM für den Basis-Stack; mit Profil chat-local (Ollama + qwen2.5:1.5b) ≥ 8 GB. OLLAMA_MEM_LIMIT standardmäßig 2g; qwen2.5:3b braucht ~3g+.',
     dockerMemoryHintEn:
-      'Docker Desktop: allocate at least 10–12 GB RAM total. Ollama container limit (OLLAMA_MEM_LIMIT) defaults to 3g for qwen2.5:3b; qwen3:4b needs ≥ 5g.',
+      'Docker Desktop: at least 6 GB RAM for the default stack; with chat-local profile (Ollama + qwen2.5:1.5b) use ≥ 8 GB. OLLAMA_MEM_LIMIT defaults to 2g; qwen2.5:3b needs ~3g+.',
   };
 }
 

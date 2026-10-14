@@ -12,6 +12,11 @@ import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infr
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
 import {
+  createIntegrationResolveFeatureFlags,
+  enableLocalChatModelForIntegration,
+  enableLocalChatModelForIntegrationTenant,
+} from '../helpers/cited-chat-integration-feature-flags.js';
+import {
   parseRequestJsonRecord,
   readBooleanProperty,
   readPassageIds,
@@ -55,8 +60,10 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
   let retrieval: PgCitedChatRetrievalRepository;
   let threads: PgDocumentChatThreadRepository;
   let generation: CitedChatGenerationService;
+  let restoreLocalChatFlag: () => void;
 
   beforeAll(async () => {
+    restoreLocalChatFlag = enableLocalChatModelForIntegration();
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
@@ -68,6 +75,7 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
     } finally {
       client.release();
     }
+    await enableLocalChatModelForIntegrationTenant(pool, userId);
 
     targetDocId = randomUUID();
     otherDocId = randomUUID();
@@ -99,7 +107,8 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
       queryEmbeddingPort,
       retrieval,
       new PgChatMessageCitationsRepository(pool),
-      passthroughChatQueryRouter()
+      passthroughChatQueryRouter(),
+      createIntegrationResolveFeatureFlags(pool)
     );
   }, 60_000);
 
@@ -109,6 +118,7 @@ describe('cited chat document filter + query vector (Testcontainers Postgres)', 
   });
 
   afterAll(async () => {
+    restoreLocalChatFlag();
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
   });

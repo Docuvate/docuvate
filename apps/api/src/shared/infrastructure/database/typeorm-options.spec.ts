@@ -29,6 +29,7 @@ import { FeatureFlags20261013120000 } from './migrations/20261013120000-feature-
 import { UserChatCloudLlm20261013120000 } from './migrations/20261013120000-user-chat-cloud-llm.js';
 import { SmartDuplicates20261013180000 } from './migrations/20261013180000-smart-duplicates.js';
 import { FeatureFlagMlKeys20261013200000 } from './migrations/20261013200000-feature-flag-ml-keys.js';
+import { FeatureFlagLearnedValueTypes20261013220000 } from './migrations/20261013220000-feature-flag-learned-value-types.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -58,6 +59,7 @@ const EXPECTED_MIGRATIONS = [
   UserChatCloudLlm20261013120000,
   SmartDuplicates20261013180000,
   FeatureFlagMlKeys20261013200000,
+  FeatureFlagLearnedValueTypes20261013220000,
 ];
 
 describe('buildTypeOrmOptions', () => {

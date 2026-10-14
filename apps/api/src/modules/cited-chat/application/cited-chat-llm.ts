@@ -26,6 +26,8 @@ export function resolveCitedChatLlmConfig(input?: {
   cloudBaseUrl?: string | null;
   cloudApiKey?: string | null;
   cloudModel?: string | null;
+  /** When false, skip local Ollama even if OLLAMA_URL is set (tenant localChatModel flag). */
+  allowLocalOllama?: boolean;
 }): DocumentChatLlmRuntimeConfig | null {
   const cloud = resolveDocumentChatCloudOverride({
     baseUrl: input?.cloudBaseUrl,
@@ -34,6 +36,9 @@ export function resolveCitedChatLlmConfig(input?: {
   });
   if (cloud) {
     return cloud;
+  }
+  if (input?.allowLocalOllama === false) {
+    return null;
   }
   if (!ollamaChatConfigured()) {
     return null;
