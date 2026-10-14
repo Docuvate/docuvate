@@ -16,11 +16,22 @@ import {
 
 describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
-  let userId: string;
   let dataSource: DataSource;
 
   beforeAll(async () => {
-    userId = newIsolationUserId();
+    dataSource = new DataSource(buildTypeOrmOptions());
+    await dataSource.initialize();
+  }, 120_000);
+
+  afterAll(async () => {
+    if (dataSource.isInitialized) {
+      await dataSource.destroy();
+    }
+    await closeIntegrationPool();
+  });
+
+  async function withIsolatedUser(run: (userId: string) => Promise<void>): Promise<void> {
+    const userId = newIsolationUserId();
     const client = await pool.connect();
     try {
       await insertSyntheticUser(client, {
@@ -31,18 +42,12 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
     } finally {
       client.release();
     }
-
-    dataSource = new DataSource(buildTypeOrmOptions());
-    await dataSource.initialize();
-  }, 120_000);
-
-  afterAll(async () => {
-    await deleteSyntheticUser(pool, userId);
-    if (dataSource.isInitialized) {
-      await dataSource.destroy();
+    try {
+      await run(userId);
+    } finally {
+      await deleteSyntheticUser(pool, userId);
     }
-    await closeIntegrationPool();
-  });
+  }
 
   async function runMigration(): Promise<void> {
     const runner = dataSource.createQueryRunner();
@@ -55,6 +60,7 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
   }
 
   it('splits mixed-hash stacks and un-stacks singletons without deleting documents', async () => {
+    await withIsolatedUser(async (userId) => {
     const stackId = randomUUID();
     const hashA = 'hash-a';
     const hashB = 'hash-b';
@@ -108,9 +114,11 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
       [userId]
     );
     expect(docCount.rows[0]?.n).toBe(4);
+    });
   });
 
   it('re-elects primary when the current primary is not the newest member (same hash)', async () => {
+    await withIsolatedUser(async (userId) => {
     const stackId = randomUUID();
     const hash = 'hash-same';
     const olderId = randomUUID();
@@ -145,9 +153,11 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
     const byId = new Map(roles.rows.map((row) => [row.document_id, row.role]));
     expect(byId.get(newerId)).toBe('primary');
     expect(byId.get(olderId)).toBe('version');
+    });
   });
 
   it('elects a primary when the stack has no primary row', async () => {
+    await withIsolatedUser(async (userId) => {
     const stackId = randomUUID();
     const hash = 'hash-no-primary';
     const docA = randomUUID();
@@ -180,9 +190,11 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
     );
     expect(roles.rows.filter((row) => row.role === 'primary')).toHaveLength(1);
     expect(roles.rows.find((row) => row.role === 'primary')?.document_id).toBe(docB);
+    });
   });
 
   it('un-stacks 30 members with distinct content hashes without constraint errors', async () => {
+    await withIsolatedUser(async (userId) => {
     const stackId = randomUUID();
     await pool.query(
       `INSERT INTO document_duplicate_stacks (id, user_id, updated_at) VALUES ($1,$2,now())`,
@@ -218,6 +230,7 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
       `SELECT COUNT(*)::int AS n FROM documents WHERE user_id = $1`,
       [userId]
     );
-    expect(docCount.rows[0]?.n).toBeGreaterThanOrEqual(30);
+    expect(docCount.rows[0]?.n).toBe(30);
+    });
   });
 });
