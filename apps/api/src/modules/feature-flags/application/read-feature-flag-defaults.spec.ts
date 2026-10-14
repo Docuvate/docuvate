@@ -22,7 +22,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
   afterEach(() => {
     for (const key of ENV_KEYS) {
       if (original[key] === undefined) {
-        process.env[key] = undefined;
+        delete process.env[key];
       } else {
         process.env[key] = original[key];
       }
@@ -32,7 +32,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
   it('defaults conservative flags off and learned value types on when env is unset', () => {
     for (const key of ENV_KEYS) {
       original[key] ??= process.env[key];
-      process.env[key] = undefined;
+      delete process.env[key];
     }
     expect(readFeatureFlagDefaultsFromEnv()).toEqual({
       layoutReconstructionCompare: false,
@@ -76,7 +76,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
   it('allows disabling learned value types via env', () => {
     for (const key of ENV_KEYS) {
       original[key] ??= process.env[key];
-      process.env[key] = undefined;
+      delete process.env[key];
     }
     process.env['DOCUVATE_FEATURE_LEARNED_VALUE_TYPES'] = 'false';
     expect(readFeatureFlagDefaultsFromEnv().learnedValueTypes).toBe(false);

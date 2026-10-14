@@ -38,6 +38,7 @@ const FORWARD_SQL_ORDER = [
   'feature-flag-ml-keys-up.sql',
   'user-chat-cloud-llm-up.sql',
   'smart-duplicates-up.sql',
+  'feature-flag-learned-value-types-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {
