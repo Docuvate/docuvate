@@ -446,6 +446,8 @@
     "duplicateDismiss": "Verwerfen",
     "duplicateSetTitle": "{{count}} ähnliche Dokumente",
     "duplicateSetSimilarity": "bis zu {{percent}} % Übereinstimmung",
+    "duplicateSetHashIdentical": "Byte-identisch (Hash)",
+    "duplicateSetReviewPairsHint": "Ähnliche Monatsdokumente bitte paarweise im Dokument prüfen — Sammelarchivierung ist nur bei identischen Dateien möglich.",
     "duplicateSetNewest": "neueste Datei",
     "duplicateSetArchiveRest": "Neueste behalten, Rest archivieren",
     "duplicateSetNotDuplicate": "Kein Duplikat",

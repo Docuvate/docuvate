@@ -35,6 +35,7 @@ import { ExactFactAnswerAbstention20261013230000 } from './migrations/2026101323
 import { DocumentRecognizedFieldExtractionAttempt20261014120000 } from './migrations/20261014120000-document-recognized-field-extraction-attempt.js';
 import { RepairHashOnlyDuplicateStacks20261014140000 } from './migrations/20261014140000-repair-hash-only-duplicate-stacks.js';
 import { MappeDefaultRootFolders20261014150000 } from './migrations/20261014150000-mappe-default-root-folders.js';
+import { SplitDuplicateStacksByContentHash20261014160000 } from './migrations/20261014160000-split-duplicate-stacks-by-content-hash.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -92,6 +93,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DocumentRecognizedFieldExtractionAttempt20261014120000,
       RepairHashOnlyDuplicateStacks20261014140000,
       MappeDefaultRootFolders20261014150000,
+      SplitDuplicateStacksByContentHash20261014160000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

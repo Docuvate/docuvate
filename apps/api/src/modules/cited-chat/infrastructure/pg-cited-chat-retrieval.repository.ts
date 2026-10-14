@@ -279,9 +279,10 @@ export class PgCitedChatRetrievalRepository {
     const docs = await this.pool.query<{
       id: string;
       title: string;
+      filename: string;
       document_date: string | null;
     }>(
-      `SELECT d.id, d.title, d.document_date::text AS document_date
+      `SELECT d.id, d.title, d.filename, d.document_date::text AS document_date
        FROM documents d
        WHERE d.user_id = $1 AND d.id = ANY($2::uuid[])`,
       [userId, unique]
@@ -333,6 +334,7 @@ export class PgCitedChatRetrievalRepository {
       out.set(row.id, {
         documentId: row.id,
         title: row.title,
+        filename: row.filename,
         documentDate: row.document_date,
         labels: labelsByDoc.get(row.id) ?? [],
         fields: fieldsByDoc.get(row.id) ?? [],

@@ -31,6 +31,7 @@ import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
+import { libraryTemporalMatchBoost } from '../domain/library-temporal-match.js';
 import {
   passesCalibratedRetrievalGate,
   shouldAttemptCitedLlm,
@@ -322,6 +323,26 @@ export class CitedChatGenerationService {
         .sort((a, b) => b.fusionScore - a.fusionScore)
         .slice(0, RAG_RERANK_TOP_K)
         .map((chunk) => ({ chunk, score: chunk.fusionScore }));
+    }
+
+    if (scope === 'library' && ranked.length > 0) {
+      const boostMeta = await this.retrieval.loadDocumentContextMeta(
+        userId,
+        ranked.map((row) => row.chunk.documentId)
+      );
+      ranked = ranked
+        .map((row) => {
+          const meta = boostMeta.get(row.chunk.documentId);
+          const boost = libraryTemporalMatchBoost({
+            query: retrievalQuery,
+            filename: meta?.filename ?? row.chunk.documentTitle,
+            title: meta?.title ?? row.chunk.documentTitle,
+            body: row.chunk.body,
+            documentDate: meta?.documentDate ?? null,
+          });
+          return { chunk: row.chunk, score: row.score + boost };
+        })
+        .sort((a, b) => b.score - a.score);
     }
 
     const top =

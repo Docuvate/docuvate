@@ -10,6 +10,7 @@ export interface CitedChatDocumentContextField {
 export interface CitedChatDocumentContextMeta {
   documentId: string;
   title: string;
+  filename: string;
   documentDate: string | null;
   labels: string[];
   fields: CitedChatDocumentContextField[];

@@ -11,8 +11,10 @@ import {
   ListRecognizedFieldsUseCase,
   ReplaceRecognizedFieldsUseCase,
 } from './application/recognized-field.use-cases.js';
+import { BackfillRecognizedFieldReextractionUseCase } from './application/backfill-recognized-field-reextraction.use-case.js';
 import { ScheduleRecognizedFieldReextractionUseCase } from './application/schedule-recognized-field-reextraction.use-case.js';
 import { PgRecognizedFieldExtractionAttemptRepository } from './infrastructure/pg-recognized-field-extraction-attempt.repository.js';
+import { RecognizedFieldReextractBackfillService } from './infrastructure/recognized-field-reextract-backfill.service.js';
 import { RecognizedFieldReextractQueueService } from './infrastructure/recognized-field-reextract-queue.service.js';
 import { RecognizedFieldsController } from './presentation/recognized-fields.controller.js';
 
@@ -25,8 +27,10 @@ import { RecognizedFieldsController } from './presentation/recognized-fields.con
     ApplyGlobalRecognizedFieldsUseCase,
     ListRecognizedFieldAttemptsUseCase,
     ScheduleRecognizedFieldReextractionUseCase,
+    BackfillRecognizedFieldReextractionUseCase,
     PgRecognizedFieldExtractionAttemptRepository,
     RecognizedFieldReextractQueueService,
+    RecognizedFieldReextractBackfillService,
   ],
   exports: [ApplyGlobalRecognizedFieldsUseCase, ListRecognizedFieldAttemptsUseCase],
 })
