@@ -54,7 +54,6 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
   let userId: string;
   let answerDocId: string;
   let decoyDocId: string;
-  let answerChunkId: string;
   let retrieval: PgCitedChatRetrievalRepository;
   let threads: PgDocumentChatThreadRepository;
   let generation: CitedChatGenerationService;
@@ -140,6 +139,37 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
   });
 
   it('library-scoped generation cites indexed document across tenant corpus', async () => {
+    const answerRow = await pool.query<{
+      id: string;
+      body: string;
+      char_start: number | null;
+      char_end: number | null;
+    }>(
+      `SELECT id, body, char_start, char_end
+       FROM document_text_chunks
+       WHERE document_id = $1
+       ORDER BY chunk_index ASC
+       LIMIT 1`,
+      [answerDocId]
+    );
+    const answerRowData = answerRow.rows[0];
+    expect(answerRowData).toBeDefined();
+    if (!answerRowData) {
+      throw new Error('expected answer chunk row');
+    }
+    vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([
+      {
+        chunkId: answerRowData.id,
+        documentId: answerDocId,
+        documentTitle: 'Versicherung Kfz',
+        body: answerRowData.body,
+        page: null,
+        charStart: answerRowData.char_start,
+        charEnd: answerRowData.char_end,
+        fusionScore: 0.9,
+      },
+    ]);
+
     vi.stubGlobal(
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -153,7 +183,7 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
           const results = passageIds
             .map((id) => ({
               id,
-              score: id === answerChunkId ? 0.99 : 0.12,
+              score: id === answerRowData.id ? 0.99 : 0.12,
             }))
             .sort((a, b) => b.score - a.score);
           return Promise.resolve(
@@ -218,6 +248,6 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
 
     const stored = await citations.listForMessage(assistant.id);
     expect(stored.length).toBeGreaterThan(0);
-    expect(stored.some((c) => c.chunkId === answerChunkId)).toBe(true);
+    expect(stored.some((c) => c.chunkId === answerRowData.id)).toBe(true);
   });
 });
