@@ -4,6 +4,7 @@ import type {
   DocumentBulkRequest,
   DocumentDto,
   DocumentDuplicateStackSummaryDto,
+  RecognizedFieldExtractionAttemptDto,
 } from '@docuvate/contracts';
 
 import type { DocumentBulkRequestDto } from '../../../shared/presentation/dtos/common.dto.js';
@@ -51,7 +52,8 @@ export function toDocumentDto(
   entity: DocumentEntity,
   suggestions: TagSuggestionEntity[] = [],
   duplicateCandidateCount?: number,
-  duplicateStack?: DocumentDuplicateStackSummaryDto | null
+  duplicateStack?: DocumentDuplicateStackSummaryDto | null,
+  recognizedFieldAttempts?: RecognizedFieldExtractionAttemptDto[]
 ): DocumentDto {
   return {
     id: entity.id,
@@ -73,5 +75,9 @@ export function toDocumentDto(
     createdAt: entity.createdAt.toISOString(),
     updatedAt: entity.updatedAt.toISOString(),
     extraction: entity.extraction,
+    recognizedFieldAttempts:
+      recognizedFieldAttempts && recognizedFieldAttempts.length > 0
+        ? recognizedFieldAttempts
+        : undefined,
   };
 }

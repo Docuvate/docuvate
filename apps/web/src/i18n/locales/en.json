@@ -1329,6 +1329,11 @@
       "invoiceNumber": "Invoice number"
     },
     "documentSectionTitle": "Recognized fields",
+    "attemptPending": "Extracting…",
+    "attemptNotFound": "Not found",
+    "attemptBelowThreshold": "Below threshold",
+    "attemptNotApplicable": "Rule not met",
+    "attemptFound": "Recognized",
     "correctFieldsSummary": "Correct fields",
     "correctFieldsHint": "Corrections are stored as training feedback for future extraction improvements.",
     "saveCorrections": "Save corrections",

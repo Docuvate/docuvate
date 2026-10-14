@@ -267,6 +267,14 @@ def extract_label_fields_route(
             {"key": f.key, "label": f.label, "field_type": f.field_type}
             for f in body.fields
         ],
+        examples=[
+            {
+                "field_key": example.field_key,
+                "value": example.value,
+                "label_tag_ids": example.label_tag_ids,
+            }
+            for example in body.examples
+        ],
     )
     return LabelFieldsExtractResponse(
         fields=[

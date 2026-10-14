@@ -137,11 +137,38 @@ def _extract_by_type(
     return None, 0.0
 
 
+def _extract_from_correction_examples(
+    text: str,
+    field_key: str,
+    field_type: str,
+    examples: list[dict[str, str | list[str]]],
+) -> tuple[str | None, float]:
+    for example in examples:
+        if str(example.get("field_key", "")).strip() != field_key:
+            continue
+        raw_value = str(example.get("value", "")).strip()
+        if not raw_value:
+            continue
+        if raw_value in text:
+            if field_type == "date":
+                parsed = _parse_date_field_value(raw_value)
+                if parsed:
+                    return parsed, 0.88
+            elif field_type in ("currency", "number"):
+                parsed = _parse_currency_field_value(raw_value)
+                if parsed:
+                    return parsed, 0.88
+            else:
+                return raw_value[:480], 0.88
+    return None, 0.0
+
+
 def extract_label_custom_fields(
     text: str,
     *,
     tag_name: str,
     fields: list[dict[str, str]],
+    examples: list[dict[str, str | list[str]]] | None = None,
 ) -> list[ExtractedField]:
     normalized = text.strip()
     if not normalized or not fields:
@@ -152,6 +179,7 @@ def extract_label_custom_fields(
         for spec in fields
         if str(spec.get("key", "")).strip()
     )
+    correction_examples = examples or []
     results: list[ExtractedField] = []
     for spec in fields:
         key = str(spec.get("key", "")).strip()
@@ -160,6 +188,10 @@ def extract_label_custom_fields(
         if not key:
             continue
         value, confidence = _extract_by_type(normalized, field_type, label, stop_labels)
+        if not value:
+            value, confidence = _extract_from_correction_examples(
+                normalized, key, field_type, correction_examples
+            )
         if not value:
             continue
         normalized_value = strip_leading_sender_label_prefixes(value)

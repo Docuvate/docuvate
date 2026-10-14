@@ -1341,6 +1341,11 @@
       "invoiceNumber": "Rechnungsnummer"
     },
     "documentSectionTitle": "Erkannte Felder",
+    "attemptPending": "wird extrahiert…",
+    "attemptNotFound": "nicht gefunden",
+    "attemptBelowThreshold": "unter Schwelle",
+    "attemptNotApplicable": "Regel nicht erfüllt",
+    "attemptFound": "erkannt",
     "correctFieldsSummary": "Felder korrigieren",
     "correctFieldsHint": "Korrekturen werden für späteres Nachtraining der Extraktion gespeichert.",
     "saveCorrections": "Korrekturen speichern",

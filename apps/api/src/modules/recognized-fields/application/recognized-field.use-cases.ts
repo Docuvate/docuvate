@@ -7,6 +7,8 @@ import {
   RECOGNIZED_FIELD_REPOSITORY,
   type RecognizedFieldRepository,
 } from '../../../shared/domain/ports.js';
+import { recognizedFieldKeysNeedingReextraction } from '../domain/recognized-field-config-signature.js';
+import { ScheduleRecognizedFieldReextractionUseCase } from './schedule-recognized-field-reextraction.use-case.js';
 
 @Injectable()
 export class ListRecognizedFieldsUseCase {
@@ -22,11 +24,13 @@ export class ListRecognizedFieldsUseCase {
 @Injectable()
 export class ReplaceRecognizedFieldsUseCase {
   constructor(
-    @Inject(RECOGNIZED_FIELD_REPOSITORY) private readonly fields: RecognizedFieldRepository
+    @Inject(RECOGNIZED_FIELD_REPOSITORY) private readonly fields: RecognizedFieldRepository,
+    private readonly scheduleReextraction: ScheduleRecognizedFieldReextractionUseCase
   ) {}
 
-  execute(userId: string, body: ReplaceRecognizedFieldsRequest) {
-    return this.fields.replaceForUser(
+  async execute(userId: string, body: ReplaceRecognizedFieldsRequest) {
+    const previous = await this.fields.listForUser(userId);
+    const items = await this.fields.replaceForUser(
       userId,
       body.fields.map((field, index) => ({
         key: field.key,
@@ -40,5 +44,8 @@ export class ReplaceRecognizedFieldsUseCase {
         confidenceGateEnabled: field.confidenceGateEnabled ?? null,
       }))
     );
+    const changedKeys = recognizedFieldKeysNeedingReextraction(previous, items);
+    await this.scheduleReextraction.execute(userId, changedKeys);
+    return items;
   }
 }

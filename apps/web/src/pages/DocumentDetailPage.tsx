@@ -323,7 +323,9 @@ export function DocumentDetailPage() {
 
   useEffect(() => {
     if (!id || !doc) return undefined;
-    const pending = ['uploaded', 'queued', 'extracting'].includes(doc.status);
+    const pending =
+      ['uploaded', 'queued', 'extracting'].includes(doc.status) ||
+      (doc.recognizedFieldAttempts?.some((row) => row.outcome === 'pending') ?? false);
     if (!pending) return undefined;
     const timer = window.setInterval(() => {
       void load().catch(() => undefined);
@@ -619,6 +621,8 @@ export function DocumentDetailPage() {
               tags={tags}
               customFieldDefs={buildCustomFieldDefMap(tags)}
               globalFieldLabels={globalFieldLabels}
+              recognizedCatalog={recognizedCatalog}
+              fieldAttempts={doc.recognizedFieldAttempts ?? []}
               saving={saving}
               fieldsDirty={fieldsDirty}
               feedbackRecordedCount={fieldFeedbackRecorded}

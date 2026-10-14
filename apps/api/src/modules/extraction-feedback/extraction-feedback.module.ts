@@ -18,7 +18,7 @@ import { ExtractionFeedbackController } from './presentation/extraction-feedback
     RecordExtractionFieldCorrectionsUseCase,
     ListExtractionFieldCorrectionsUseCase,
   ],
-  exports: [RecordExtractionFieldCorrectionsUseCase],
+  exports: [RecordExtractionFieldCorrectionsUseCase, EXTRACTION_FIELD_FEEDBACK_REPOSITORY],
 })
 // Nest requires a module class token; this module has no instance state.
 // eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host

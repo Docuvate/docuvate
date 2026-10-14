@@ -80,3 +80,14 @@ def test_absender_from_kurzer_absender_line() -> None:
     )
     by_key = {f.key: f.value for f in fields}
     assert by_key["absender"] == "Demo Nord GmbH"
+
+
+def test_correction_example_fills_missing_currency_field() -> None:
+    text = "Entgeltnachweis\nBruttoentgelt\n3.500,00 EUR"
+    fields = extract_label_custom_fields(
+        text,
+        tag_name="Dokument",
+        fields=[{"key": "bruttoentgelt", "label": "Bruttoentgelt", "field_type": "currency"}],
+        examples=[{"field_key": "bruttoentgelt", "value": "3.500,00", "label_tag_ids": []}],
+    )
+    assert any(row.key == "bruttoentgelt" and row.value == "3.500,00" for row in fields)

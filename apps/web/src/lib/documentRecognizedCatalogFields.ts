@@ -89,8 +89,32 @@ export function mergeCatalogFieldsForDocument(
     }
   }
 
-  const merged: ExtractedField[] = [...persisted];
-  const seenKeys = new Set(persisted.map((f) => f.key));
+  const merged: ExtractedField[] = [];
+  const seenKeys = new Set<string>();
+
+  for (const field of persisted) {
+    let matchedDef: RecognizedFieldDefinitionDto | undefined;
+    for (const def of catalog) {
+      if (
+        def.key === field.key ||
+        semanticFieldKey({ key: def.key, value: '' }) === semanticFieldKey(field)
+      ) {
+        matchedDef = def;
+        break;
+      }
+    }
+    if (matchedDef && !matchedDef.extractForAllDocuments) {
+      const open = evaluateFieldExtractionGate(
+        gateContext,
+        gateConfigForDefinition(matchedDef, settings)
+      );
+      if (!open) {
+        continue;
+      }
+    }
+    merged.push(field);
+    seenKeys.add(field.key);
+  }
 
   for (const def of catalog) {
     if (byDefinitionId.has(def.id)) {

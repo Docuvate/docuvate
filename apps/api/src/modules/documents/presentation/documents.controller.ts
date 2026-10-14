@@ -72,6 +72,7 @@ import {
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
 import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
+import { ListRecognizedFieldAttemptsUseCase } from '../../recognized-fields/application/list-recognized-field-attempts.use-case.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
@@ -140,8 +141,20 @@ export class DocumentsController {
     private readonly confirmDuplicateVersion: ConfirmDuplicateVersionUseCase,
     private readonly releaseDuplicateStackMember: ReleaseDuplicateStackMemberUseCase,
     private readonly restoreDuplicateStackPair: RestoreDuplicateStackPairUseCase,
-    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
+    private readonly listRecognizedFieldAttempts: ListRecognizedFieldAttemptsUseCase
   ) {}
+
+  private async documentResponse(
+    id: string,
+    userId: string,
+    doc: Awaited<ReturnType<GetDocumentUseCase['execute']>>,
+    suggestions: Awaited<ReturnType<LoadDocumentLabelSuggestionsUseCase['execute']>>,
+    duplicateCandidateCount?: number
+  ) {
+    const attempts = await this.listRecognizedFieldAttempts.execute(id, userId);
+    return toDocumentDto(doc, suggestions, duplicateCandidateCount, undefined, attempts);
+  }
 
   @Get()
   @ApiDocuvateRoute({
@@ -615,7 +628,7 @@ export class DocumentsController {
     const doc = await this.getDocument.execute(id, session.user.id, subject);
     const suggestions = await this.loadSuggestions.execute(id, session.user.id);
     const duplicateCandidates = await this.listDuplicateCandidates.execute(id, session.user.id);
-    return toDocumentDto(doc, suggestions, duplicateCandidates.length);
+    return this.documentResponse(id, session.user.id, doc, suggestions, duplicateCandidates.length);
   }
 
   @Patch(':id')
@@ -632,7 +645,7 @@ export class DocumentsController {
     );
     const suggestions = await this.loadSuggestions.execute(id, session.user.id);
     return {
-      document: toDocumentDto(document, suggestions),
+      document: await this.documentResponse(id, session.user.id, document, suggestions),
       fieldCorrectionsRecorded,
     };
   }

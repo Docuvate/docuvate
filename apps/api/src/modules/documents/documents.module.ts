@@ -12,6 +12,7 @@ import { ExtractionQueueService } from '../extraction/infrastructure/extraction-
 import { ExtractionFeedbackModule } from '../extraction-feedback/extraction-feedback.module.js';
 import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { LabelsModule } from '../labels/labels.module.js';
+import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.module.js';
 import { RepresentationModule } from '../representation/representation.module.js';
 import { SearchModule } from '../search/search.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
@@ -63,6 +64,7 @@ import { DocumentsController } from './presentation/documents.controller.js';
     ChatInfrastructureModule,
     FeatureFlagsModule,
     ExactFactsModule,
+    RecognizedFieldsModule,
   ],
   controllers: [DocumentsController],
   providers: [
