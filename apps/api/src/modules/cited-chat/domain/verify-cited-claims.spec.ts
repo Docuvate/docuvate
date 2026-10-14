@@ -68,11 +68,24 @@ describe('verifyCitedClaims', () => {
     expect(body).toContain(verified[0].quote);
   });
 
-  it('rejects unknown source with reason', () => {
+  it('maps unknown source to the best quote-matching chunk', () => {
     const top = [chunk('text')];
     const labelByChunk = new Map([[top[0].chunk.chunkId, 'S1']]);
     const { verified, rejected } = verifyCitedClaims({
       claims: [{ text: 'x', source: 'S9', quote: 'text' }],
+      top,
+      labelByChunk,
+    });
+    expect(rejected).toHaveLength(0);
+    expect(verified).toHaveLength(1);
+    expect(verified[0]?.chunkId).toBe(top[0].chunk.chunkId);
+  });
+
+  it('rejects unknown source when quote does not match any chunk', () => {
+    const top = [chunk('text')];
+    const labelByChunk = new Map([[top[0].chunk.chunkId, 'S1']]);
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [{ text: 'x', source: 'S9', quote: 'missing snippet' }],
       top,
       labelByChunk,
     });

@@ -602,6 +602,7 @@
     "labelAddInputAria": "Label-Name für Zuweisung oder Neuanlage",
     "labelAddHint": "Eingeben und mit Enter oder „Hinzufügen“ bestätigen. Bestehende Labels können Sie darunter anklicken.",
     "labelSuggestionAcceptHint": "Klicken, um Label „{{name}}“ zu übernehmen. Rechtsklick zum Verwerfen.",
+    "labelSuggestionChipPrefix": "Vorschlag",
     "labelAddSubmitAssign": "Hinzufügen",
     "labelAddSubmitCreate": "Anlegen & hinzufügen",
     "labelAddAlreadyAssigned": "„{{name}}“ ist diesem Dokument bereits zugewiesen.",

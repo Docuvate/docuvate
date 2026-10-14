@@ -41,7 +41,15 @@ export class BackfillRecognizedFieldReextractionUseCase {
     for (const def of defs) {
       const ids = await this.attempts.listDocumentIdsMissingAttempts(
         userId,
-        def,
+        {
+          id: def.id,
+          key: def.key,
+          extractForAllDocuments: def.extractForAllDocuments,
+          gateLabelIds: def.gateLabelIds,
+          gateLabelMatch: def.gateLabelMatch,
+          minLabelConfidence: def.minLabelConfidence,
+          confidenceGateEnabled: def.confidenceGateEnabled,
+        },
         {
           fieldExtractionConfidenceGateEnabled: preferences.fieldExtractionConfidenceGateEnabled,
           labelFieldConfidenceThreshold: preferences.labelFieldConfidenceThreshold,

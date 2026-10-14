@@ -93,6 +93,30 @@ def test_correction_example_fills_missing_currency_field() -> None:
     assert any(row.key == "bruttoentgelt" and row.value == "3.500,00" for row in fields)
 
 
+def test_correction_teaches_ebeschv_gesamtbrutto_first_amount() -> None:
+    examples = [
+        {
+            "field_key": "bruttoentgelt",
+            "value": "6.400,00",
+            "label": "Gesamtbrutto (EBeschV)",
+            "label_tag_ids": [],
+        },
+    ] * 3
+    texts = [
+        "ENTGELTNACHWEIS 01.03.2024\n/03 Gesamtbrutto (EBeschV) 6.550,00 12.000,00",
+        "ENTGELTNACHWEIS 01.04.2024\n/04 Gesamtbrutto (EBeschV) 4.100,00 16.100,00",
+        "ENTGELTNACHWEIS 01.05.2024\n/05 Gesamtbrutto (EBeschV) 11.000,00 27.100,00",
+    ]
+    spec = [{"key": "bruttoentgelt", "label": "Bruttoentgelt", "field_type": "currency"}]
+    values = []
+    for text in texts:
+        rows = extract_label_custom_fields(
+            text, tag_name="Entgeltnachweis", fields=spec, examples=examples
+        )
+        values.extend(row.value for row in rows if row.key == "bruttoentgelt")
+    assert values == ["6.550,00", "4.100,00", "11.000,00"]
+
+
 def test_correction_teaches_catalog_label_anchor_for_different_amounts() -> None:
     examples = [
         {"field_key": "bruttoentgelt", "value": "6.400,00", "label": "Bruttoentgelt", "label_tag_ids": []},

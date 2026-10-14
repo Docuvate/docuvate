@@ -99,7 +99,11 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
   it('supplements retrieval with the October 2024 payslip among ~57 documents', async () => {
     const question =
       'Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?';
-    const temporal = await retrieval.supplementTemporalLibraryCandidates(userId, question);
+    const temporal = await retrieval.supplementContextualLibraryCandidates(
+      userId,
+      question,
+      'amount'
+    );
     expect(temporal.some((row) => row.documentId === octoberDocId)).toBe(true);
     expect(temporal.some((row) => row.body.includes(OCTOBER_GROSS))).toBe(true);
   });
@@ -110,7 +114,11 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
     const hybrid = await retrieval.hybridRetrieveChunks(userId, question, {
       queryVector: queryVector384(42),
     });
-    const temporal = await retrieval.supplementTemporalLibraryCandidates(userId, question);
+    const temporal = await retrieval.supplementContextualLibraryCandidates(
+      userId,
+      question,
+      'amount'
+    );
     const mergedIds = new Set([
       ...hybrid.map((row) => row.documentId),
       ...temporal.map((row) => row.documentId),

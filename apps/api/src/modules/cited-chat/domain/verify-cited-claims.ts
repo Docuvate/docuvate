@@ -102,6 +102,32 @@ function rowsMatchingQuote(top: TopRow[], quote: string): TopRow[] {
   );
 }
 
+function bestSourceLabelForQuote(
+  chunkPool: TopRow[],
+  labelByChunk: Map<string, string>,
+  quote: string
+): string | null {
+  if (!quote.trim()) {
+    return null;
+  }
+  let best: { label: string; score: number } | null = null;
+  for (const row of chunkPool) {
+    const label = labelByChunk.get(row.chunk.chunkId);
+    if (!label) {
+      continue;
+    }
+    const match = resolveQuoteInCandidateChunk(row.chunk, quote, { claimText: '' });
+    if (!match) {
+      continue;
+    }
+    const score = bestQuoteMatchScore(row.chunk.body, quote);
+    if (!best || score > best.score) {
+      best = { label, score };
+    }
+  }
+  return best?.label ?? null;
+}
+
 function resolveCitationRow(
   top: TopRow[],
   chunkPool: TopRow[],
@@ -235,7 +261,8 @@ export function verifyCitedClaims(input: {
         resolved.length = 0;
         break;
       }
-      const sourceLabel = normalizeCitedSourceLabel(citation.source, labels);
+      let sourceLabel = normalizeCitedSourceLabel(citation.source, labels);
+      sourceLabel ??= bestSourceLabelForQuote(chunkPool, input.labelByChunk, citation.quote);
       if (!sourceLabel) {
         rejected.push({
           claimText,

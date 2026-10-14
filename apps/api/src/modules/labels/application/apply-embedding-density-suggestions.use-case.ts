@@ -53,7 +53,18 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
       const assigned = new Set(
         (await this.taxonomy.listTagsForDocument(documentId)).map((t) => t.id)
       );
+      const assignedGroups = new Set(
+        [...assigned].map((tagId) => state.label_to_group[tagId] ?? tagId)
+      );
       const tagById = new Map(tags.map((t) => [t.id, t]));
+
+      const tagAllowedWithAssigned = (tagId: string): boolean => {
+        if (assigned.size === 0) {
+          return true;
+        }
+        const groupId = state.label_to_group[tagId] ?? tagId;
+        return assignedGroups.has(groupId);
+      };
 
       if (result.decisionTier === 'auto_apply' && result.labelId && !assigned.has(result.labelId)) {
         const tag = tagById.get(result.labelId);
@@ -79,7 +90,7 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
           .map(([tagId]) => tagId),
       ].filter((tagId): tagId is string => typeof tagId === 'string' && tagId.length > 0);
       const rankedIds = [...new Set(rankedCandidates)]
-        .filter((tagId) => !assigned.has(tagId))
+        .filter((tagId) => !assigned.has(tagId) && tagAllowedWithAssigned(tagId))
         .slice(0, TOP_CANDIDATE_COUNT);
 
       for (const tagId of rankedIds) {
@@ -87,8 +98,11 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
         if (!tag || tag.isInbox) {
           continue;
         }
-        const confidence =
+        let confidence =
           tagId === confirmId ? confirmConf : (result.posterior[tagId] ?? result.confidence);
+        if (assigned.size > 0 && confidence >= 0.9) {
+          confidence = Math.min(confidence, 0.89);
+        }
         const tier =
           tagId === confirmId && confirmId
             ? 'confirm'

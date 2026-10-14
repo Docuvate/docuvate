@@ -36,6 +36,7 @@ import { RecognizedFieldsController } from './presentation/recognized-fields.con
     ApplyGlobalRecognizedFieldsUseCase,
     ListRecognizedFieldAttemptsUseCase,
     ListRecognizedFieldsUseCase,
+    ScheduleRecognizedFieldReextractionUseCase,
   ],
 })
 // Nest requires a module class token; this module has no instance state.

@@ -602,6 +602,7 @@
     "labelAddInputAria": "Label name to assign or create",
     "labelAddHint": "Type a name, then press Enter or Add. You can also click an existing label below.",
     "labelSuggestionAcceptHint": "Click to accept label “{{name}}”. Right-click to dismiss.",
+    "labelSuggestionChipPrefix": "Suggested",
     "labelAddSubmitAssign": "Add",
     "labelAddSubmitCreate": "Create & add",
     "labelAddAlreadyAssigned": "“{{name}}” is already assigned to this document.",

@@ -16,6 +16,11 @@ import {
   EXACT_FACT_ABSTENTION_EN,
 } from '../../exact-facts/domain/exact-fact-abstention-messages.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import {
+  type ChatAnswerType,
+  classifyChatAnswerType,
+  prefersAmountExtractiveAnswer,
+} from '../domain/chat-answer-type-prototypes.schema.js';
 import { isDocumentOverviewQuestion } from '../domain/chat-document-overview.schema.js';
 import { serializeCitedChatBenchStats } from '../domain/cited-chat-bench-stats.js';
 import {
@@ -34,8 +39,15 @@ import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-cla
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
-import { libraryTemporalMatchBoost } from '../domain/library-temporal-match.js';
-import { libraryTenantLabelMatchBoost } from '../domain/library-tenant-label-match.js';
+import {
+  buildLibraryMetadataEmbedText,
+  libraryMetadataEmbeddingBoost,
+} from '../domain/library-query-metadata-boost.js';
+import {
+  libraryTenantLabelEmbeddingBoost,
+  type TenantLabelEmbeddingRow,
+  tenantLabelsAlignedWithQuery,
+} from '../domain/library-tenant-label-embedding-boost.js';
 import {
   passesCalibratedRetrievalGate,
   shouldAttemptCitedLlm,
@@ -266,6 +278,11 @@ export class CitedChatGenerationService {
     }
     embedMs = Date.now() - embedStarted;
 
+    const answerType: ChatAnswerType =
+      queryVector != null && queryVector.length > 0
+        ? classifyChatAnswerType(queryVector)
+        : 'free_text';
+
     const filterIds =
       scope === 'document' && documentIds.length > 0 ? documentIds : undefined;
 
@@ -285,39 +302,53 @@ export class CitedChatGenerationService {
           queryVector,
         });
     if (scope === 'library') {
-      const tenantLabelNames = await this.retrieval.listTenantLabelNames(userId);
-      const temporalExtra = await this.retrieval.supplementTemporalLibraryCandidates(
+      const contextualExtra = await this.retrieval.supplementContextualLibraryCandidates(
         userId,
-        userMessage
+        userMessage,
+        answerType
       );
-      if (temporalExtra.length > 0) {
+      if (contextualExtra.length > 0) {
         const seen = new Set(candidates.map((chunk) => chunk.chunkId));
-        for (const extra of temporalExtra) {
+        for (const extra of contextualExtra) {
           if (!seen.has(extra.chunkId)) {
             candidates.push(extra);
             seen.add(extra.chunkId);
           }
         }
       }
-      if (candidates.length > 0) {
+      if (candidates.length > 0 && queryVector != null && queryVector.length > 0) {
         const boostMeta = await this.retrieval.loadDocumentContextMeta(
           userId,
           candidates.map((chunk) => chunk.documentId)
         );
+        const tenantLabelEmbeds = await this.loadTenantLabelEmbeddings(userId);
+        const alignedLabels = tenantLabelsAlignedWithQuery(queryVector, tenantLabelEmbeds);
+        const metaTexts = [...boostMeta.entries()].map(([documentId, meta]) => ({
+          documentId,
+          text: buildLibraryMetadataEmbedText({
+            title: meta.title,
+            filename: meta.filename,
+            documentDate: meta.documentDate,
+          }),
+        }));
+        const metaEmbedResult = await this.embedding.embedTexts(
+          metaTexts.map((row) => row.text),
+          { inputType: 'passage' }
+        );
+        const metaVectorByDoc = new Map<string, number[]>();
+        metaTexts.forEach((row, index) => {
+          const vector = metaEmbedResult.embeddings.at(index);
+          if (vector !== undefined && vector.length > 0) {
+            metaVectorByDoc.set(row.documentId, vector);
+          }
+        });
         candidates = candidates
           .map((chunk) => {
             const meta = boostMeta.get(chunk.documentId);
             const boost =
-              libraryTemporalMatchBoost({
-                query: userMessage,
-                filename: meta?.filename ?? chunk.documentTitle,
-                title: meta?.title ?? chunk.documentTitle,
-                body: chunk.body,
-                documentDate: meta?.documentDate ?? null,
-              }) +
-              libraryTenantLabelMatchBoost({
-                query: userMessage,
-                tenantLabelNames,
+              libraryMetadataEmbeddingBoost(queryVector, metaVectorByDoc.get(chunk.documentId)) +
+              libraryTenantLabelEmbeddingBoost({
+                alignedLabels,
                 filename: meta?.filename ?? chunk.documentTitle,
                 title: meta?.title ?? chunk.documentTitle,
                 body: chunk.body,
@@ -403,6 +434,30 @@ export class CitedChatGenerationService {
       top.map((row) => row.chunk.documentId)
     );
 
+    const libraryAmountExtractive =
+      llmConfigured &&
+      scope === 'library' &&
+      gateOk &&
+      prefersAmountExtractiveAnswer(queryVector)
+        ? await this.resolveExtractiveAnswer(
+            userMessage,
+            extractivePool,
+            extractiveMinScore,
+            scope,
+            locale,
+            answerType
+          )
+        : null;
+    if (libraryAmountExtractive) {
+      return this.publishExtractiveResult({
+        messageId,
+        threadId,
+        text: libraryAmountExtractive.text,
+        chunk: libraryAmountExtractive.chunk,
+        quote: libraryAmountExtractive.quote,
+      });
+    }
+
     if (!llmConfigured) {
       const extractive =
         extractivePool.length > 0 && gateOk
@@ -411,7 +466,8 @@ export class CitedChatGenerationService {
               extractivePool,
               extractiveMinScore,
               scope,
-              locale
+              locale,
+              answerType
             )
           : null;
       if (!gateOk) {
@@ -448,32 +504,13 @@ export class CitedChatGenerationService {
         return { content: abstentionText, abstained: true };
       }
       if (extractive) {
-        const extractiveChunkId = extractive.chunk.chunkId;
-        const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
-        if (extractiveChunkIsUuid) {
-          await this.citationsRepo.replaceCitations(messageId, [
-            {
-              ordinal: 1,
-              chunkId: extractive.chunk.chunkId,
-              quote: extractive.quote,
-              charStart: extractive.chunk.charStart ?? 0,
-              charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
-            },
-          ]);
-        } else {
-          await this.citationsRepo.replaceCitations(messageId, []);
-        }
-        const content = extractiveChunkIsUuid
-          ? formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }])
-          : extractive.text;
-        await this.threads.updateMessageGeneration(messageId, {
-          content,
-          generationStatus: 'done',
-          generationPhase: null,
-          finalizeOnlyIfInFlight: true,
+        return this.publishExtractiveResult({
+          messageId,
+          threadId,
+          text: extractive.text,
+          chunk: extractive.chunk,
+          quote: extractive.quote,
         });
-        await this.threads.touchThread(threadId);
-        return { content, abstained: false };
       }
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
@@ -504,13 +541,14 @@ export class CitedChatGenerationService {
       return { content: '', abstained: true };
     }
 
-    if (preferExtractiveChatAnswer(userMessage) && gateOk && extractivePool.length > 0) {
+    if (preferExtractiveChatAnswer(queryVector) && gateOk && extractivePool.length > 0) {
       const earlyExtractive = await this.resolveExtractiveAnswer(
         userMessage,
         extractivePool,
         extractiveMinScore,
         scope,
-        locale
+        locale,
+        answerType
       );
       if (earlyExtractive) {
         return this.publishExtractiveResult({
@@ -615,7 +653,8 @@ export class CitedChatGenerationService {
               extractivePool,
               extractiveMinScore,
               scope,
-              locale
+              locale,
+              answerType
             )
           : null;
       if (llmFallbackExtractive) {
@@ -727,13 +766,20 @@ export class CitedChatGenerationService {
 
     if (verified.length === 0) {
       const allowRetrievalFallback = rejectedClaimsAllowRetrievalFallback(rejected);
-      if (allowRetrievalFallback && gateOk && extractivePool.length > 0) {
+      const libraryAmountExtractiveFallback =
+        scope === 'library' && prefersAmountExtractiveAnswer(queryVector);
+      if (
+        gateOk &&
+        extractivePool.length > 0 &&
+        (allowRetrievalFallback || libraryAmountExtractiveFallback)
+      ) {
         const postVerifyExtractive = await this.resolveExtractiveAnswer(
           userMessage,
           extractivePool,
           extractiveMinScore,
           scope,
-          locale
+          locale,
+          answerType
         );
         if (postVerifyExtractive) {
           return this.publishExtractiveResult({
@@ -762,6 +808,7 @@ export class CitedChatGenerationService {
               quote: fallback.quote,
               documentTitle: topRow.chunk.documentTitle,
               locale,
+              answerType,
             });
           }
           return this.publishExtractiveResult({
@@ -861,12 +908,28 @@ export class CitedChatGenerationService {
     return { content, abstained: false };
   }
 
+  private async loadTenantLabelEmbeddings(userId: string): Promise<TenantLabelEmbeddingRow[]> {
+    const names = await this.retrieval.listTenantLabelNames(userId);
+    if (names.length === 0) {
+      return [];
+    }
+    const embedResult = await this.embedding.embedTexts(names, { inputType: 'passage' });
+    return names.flatMap((name, index) => {
+      const vector = embedResult.embeddings.at(index);
+      if (vector === undefined || vector.length === 0) {
+        return [];
+      }
+      return [{ name, vector }];
+    });
+  }
+
   private async resolveExtractiveAnswer(
     query: string,
     ranked: { chunk: CitedChatChunkCandidate; score: number }[],
     minScore: number,
     scope: 'document' | 'library',
-    locale: 'de' | 'en'
+    locale: 'de' | 'en',
+    answerType: ChatAnswerType
   ): Promise<{ text: string; chunk: CitedChatChunkCandidate; quote: string } | null> {
     if (ranked.length === 0 || ranked[0].score < minScore) {
       return null;
@@ -889,6 +952,7 @@ export class CitedChatGenerationService {
             quote,
             documentTitle: chunk.documentTitle,
             locale,
+            answerType,
           })
         : worker.answer.trim();
     return { text, chunk, quote };

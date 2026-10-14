@@ -1,9 +1,21 @@
 # Smoke profile: CPU cited-chat (extractive fallback), synthetic fixture seeder.
 # Use: docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.smoke.yml --profile smoke up --wait --build
 services:
+  ollama-stub:
+    profiles: [smoke]
+    image: node:24-bookworm-slim
+    working_dir: /workspace
+    volumes:
+      - .:/workspace:ro
+    command: ['node', 'tools/smoke-bench/bad-ollama-stub.mjs']
+    restart: unless-stopped
+
   api:
+    depends_on:
+      ollama-stub:
+        condition: service_started
     environment:
-      OLLAMA_URL: ''
+      OLLAMA_URL: http://ollama-stub:11434
       DOCUMENT_CHAT_PROVIDER: rag-ollama
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-docuvate-smoke-better-auth-signing-key-2026}
       DV_ALLOW_SIGNUP: 'true'
@@ -19,7 +31,7 @@ services:
       DOCUVATE_SMOKE_SEED: ${DOCUVATE_SMOKE_SEED:-1}
       AUTH_BASE: http://api:3001
       WEB_ORIGIN: http://localhost:5173
-      SMOKE_PIPELINE_TIMEOUT_MS: '240000'
+      SMOKE_PIPELINE_TIMEOUT_MS: '360000'
       NODE_ENV: production
     depends_on:
       api:

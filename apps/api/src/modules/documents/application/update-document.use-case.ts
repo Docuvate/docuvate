@@ -15,6 +15,8 @@ import {
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { RecordExtractionFieldCorrectionsUseCase } from '../../extraction-feedback/application/record-extraction-field-corrections.use-case.js';
+import { ScheduleRecognizedFieldReextractionUseCase } from '../../recognized-fields/application/schedule-recognized-field-reextraction.use-case.js';
+import { parseGlobalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
 import { mergeDocumentPlacementPatch } from '../domain/document-placement.js';
@@ -32,6 +34,7 @@ export class UpdateDocumentUseCase {
     @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
     @Inject(MAPPE_REPOSITORY) private readonly mappen: MappeRepository,
     private readonly recordFieldCorrections: RecordExtractionFieldCorrectionsUseCase,
+    private readonly scheduleFieldReextraction: ScheduleRecognizedFieldReextractionUseCase,
     private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
   ) {}
 
@@ -90,6 +93,19 @@ export class UpdateDocumentUseCase {
         previousFields,
         body.extractionFields
       );
+      if (fieldCorrectionsRecorded > 0) {
+        const changedKeys = [
+          ...new Set(
+            body.extractionFields.map((field) => {
+              const bare = parseGlobalFieldStorageKey(field.key) ?? field.key;
+              return bare.trim();
+            })
+          ),
+        ].filter(Boolean);
+        if (changedKeys.length > 0) {
+          await this.scheduleFieldReextraction.execute(userId, changedKeys);
+        }
+      }
     }
 
     const document = await this.documents.updateForUser(id, userId, {

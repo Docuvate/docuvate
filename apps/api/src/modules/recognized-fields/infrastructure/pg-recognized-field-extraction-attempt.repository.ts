@@ -12,7 +12,7 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-extractor-version.js';
+import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-reextract-config.js';
 
 const OUTCOMES: readonly RecognizedFieldExtractionOutcome[] = [
   'not_applicable',

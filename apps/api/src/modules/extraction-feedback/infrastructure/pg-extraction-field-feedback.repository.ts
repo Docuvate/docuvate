@@ -16,6 +16,7 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { inferFieldCorrectionAnchorLabel } from '../domain/infer-field-correction-anchor.js';
 
 function mapRow(row: Record<string, unknown>): ExtractionFieldCorrectionRecord {
   const labelTagIds = parseStringArray(row.label_tag_ids);
@@ -35,6 +36,7 @@ function mapRow(row: Record<string, unknown>): ExtractionFieldCorrectionRecord {
 
 const LIST_SQL = `
   SELECT c.*,
+    d.extracted_text AS document_extracted_text,
     COALESCE(
       (
         SELECT array_agg(l.tag_id::text ORDER BY l.tag_id)
@@ -44,6 +46,7 @@ const LIST_SQL = `
       ARRAY[]::text[]
     ) AS label_tag_ids
   FROM extraction_field_corrections c
+  JOIN documents d ON d.id = c.document_id
 `;
 
 @Injectable()
@@ -140,9 +143,10 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
        LIMIT $3`,
       [userId, keys, fetchLimit]
     );
-    const rows = result.rows.map((row) => mapRow(requireRecord(row)));
     const perField = new Map<string, LabelFieldExtractionExample[]>();
-    for (const row of rows) {
+    for (const raw of result.rows) {
+      const record = requireRecord(raw);
+      const row = mapRow(record);
       if (!row.newValue.trim()) {
         continue;
       }
@@ -153,10 +157,13 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
       if (bucket.length >= limitPerField) {
         continue;
       }
+      const documentText = parseOptionalString(record.document_extracted_text) ?? '';
+      const anchor = inferFieldCorrectionAnchorLabel(documentText, row.newValue.trim());
       bucket.push({
         fieldKey: row.fieldKey,
         value: row.newValue.trim(),
         labelTagIds: row.labelTagIds,
+        ...(anchor ? { label: anchor } : {}),
       });
       perField.set(row.fieldKey, bucket);
     }

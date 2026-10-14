@@ -47,7 +47,7 @@ async function buildService(deps: {
     hybridRetrieveChunks: ReturnType<typeof vi.fn>;
       indexPassageForRerank: (c: { documentTitle: string; body: string }) => string;
       loadDocumentContextMeta?: ReturnType<typeof vi.fn>;
-      supplementTemporalLibraryCandidates?: ReturnType<typeof vi.fn>;
+      supplementContextualLibraryCandidates?: ReturnType<typeof vi.fn>;
       listTenantLabelNames?: ReturnType<typeof vi.fn>;
   };
   citations?: { replaceCitations: ReturnType<typeof vi.fn> };
@@ -110,8 +110,8 @@ async function buildService(deps: {
           loadDocumentContextMeta:
             deps.retrieval.loadDocumentContextMeta ??
             vi.fn().mockResolvedValue(new Map()),
-          supplementTemporalLibraryCandidates:
-            deps.retrieval.supplementTemporalLibraryCandidates ??
+          supplementContextualLibraryCandidates:
+            deps.retrieval.supplementContextualLibraryCandidates ??
             vi.fn().mockResolvedValue([]),
           listTenantLabelNames:
             deps.retrieval.listTenantLabelNames ?? vi.fn().mockResolvedValue([]),
