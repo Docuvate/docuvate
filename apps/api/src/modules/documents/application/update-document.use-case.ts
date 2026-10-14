@@ -15,8 +15,8 @@ import {
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { RecordExtractionFieldCorrectionsUseCase } from '../../extraction-feedback/application/record-extraction-field-corrections.use-case.js';
-import { parseGlobalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
 import { ScheduleRecognizedFieldReextractionUseCase } from '../../recognized-fields/application/schedule-recognized-field-reextraction.use-case.js';
+import { parseGlobalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
 import { mergeDocumentPlacementPatch } from '../domain/document-placement.js';

@@ -262,9 +262,7 @@ export function verifyCitedClaims(input: {
         break;
       }
       let sourceLabel = normalizeCitedSourceLabel(citation.source, labels);
-      if (!sourceLabel) {
-        sourceLabel = bestSourceLabelForQuote(chunkPool, input.labelByChunk, citation.quote);
-      }
+      sourceLabel ??= bestSourceLabelForQuote(chunkPool, input.labelByChunk, citation.quote);
       if (!sourceLabel) {
         rejected.push({
           claimText,

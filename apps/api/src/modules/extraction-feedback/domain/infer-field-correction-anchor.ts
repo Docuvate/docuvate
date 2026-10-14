@@ -26,7 +26,7 @@ function lineContainsValue(line: string, value: string): number {
     return -1;
   }
   if (normalizeAmountToken(match[0]) === target) {
-    return match.index ?? -1;
+    return match.index;
   }
   return -1;
 }
