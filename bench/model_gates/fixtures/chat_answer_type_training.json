@@ -1,17 +1,31 @@
 {
   "version": 1,
-  "description": "Labeled library chat questions for answer-type prototype centroids (not used at runtime).",
+  "description": "Labeled library chat questions for answer-type prototype centroids (not used at runtime). Must not contain tools/smoke-bench/manifest.json chatChecks questions.",
   "answer_types": {
     "amount": [
-      "Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?",
-      "Wie viel Lohnsteuer wurde mir laut Lohnsteuerbescheinigung 2024 insgesamt einbehalten?",
-      "Welche Gesamtsumme steht auf der Rechnung Nordwind?",
       "What is the total gross amount on this payslip?",
       "How much tax was withheld in total?",
       "What amount is listed for the invoice total?",
       "Wie hoch ist der Rechnungsbetrag?",
       "Summe der Nettozahlung bitte.",
-      "Total amount due on the document?"
+      "Total amount due on the document?",
+      "Wie hoch ist die Nachzahlung laut Bescheid?",
+      "What is the premium due this year?",
+      "How many milliliters of milk does the recipe require?",
+      "Nenn den Endbetrag auf dem Lieferantenbeleg.",
+      "Net amount payable on the vendor bill?",
+      "Bruttoentgelt laut Gehaltsabrechnung vom März 2023?",
+      "Einbehaltene Lohnsteuer laut Jahresbescheinigung 2023?",
+      "Welche Jahresprämie fordert die Krankenversicherung?",
+      "How much VAT is assessed on this notice?",
+      "Wie viel Gramm Zucker steht im Rezept?",
+      "How many servings does this dish make?",
+      "At what oven temperature in Celsius should I preheat?",
+      "What annual premium is due on the policy?",
+      "Wie viel Euro sind laut Rechnung zu zahlen?",
+      "What is the invoice total for Example GmbH?",
+      "Wie hoch war das Gesamtbrutto im Entgeltnachweis Mai 2023?",
+      "Bruttoentgelt laut Entgeltnachweis vom November 2022?"
     ],
     "date": [
       "Wann ist die Kündigungsfrist?",
@@ -19,20 +33,41 @@
       "Bis wann muss ich zahlen?",
       "When is the payment due?",
       "Welches Datum steht auf dem Schreiben?",
-      "What date appears in the header?"
+      "What date appears in the header?",
+      "Bis wann gilt die Versicherungspolice?",
+      "When was this invoice issued?",
+      "Wann wurde die Rechnung ausgestellt?",
+      "When does the lease agreement start?",
+      "Bis wann kann Einspruch eingelegt werden?",
+      "What is the appeal deadline on the tax letter?",
+      "When does insurance coverage end?",
+      "Bis wann läuft der Versicherungsschutz?",
+      "Welches Datum steht auf der Rezeptkarte?"
     ],
     "entity": [
       "Welche IBAN ist angegeben?",
       "Who is the employer on this form?",
       "Wer ist der Absender?",
       "What company name is on the invoice?",
-      "Nenne die Kundennummer."
+      "Nenne die Kundennummer.",
+      "Who is the policyholder on this certificate?",
+      "Name of the contractor in section 1?",
+      "Who is party B in this contract?",
+      "Wer ist der Vermieter laut Mietvertrag?",
+      "Welche Steuernummer steht im Bescheid?",
+      "Bei welcher Versicherungsgesellschaft besteht der Vertrag?",
+      "Policy number on the insurance certificate?"
     ],
     "free_text": [
       "Was steht in Abschnitt 3?",
       "Summarize the main points of this letter.",
       "Was bedeutet Klausel 4?",
-      "Explain the notice period rules in plain language."
+      "Explain the notice period rules in plain language.",
+      "How do I prepare the dough according to this recipe?",
+      "Beschreibe die Leistungen der Police in eigenen Worten.",
+      "Was steht in der Haftungsklausel?",
+      "Describe how to prepare the sauce step by step.",
+      "Welche Zutaten stehen in Schritt 2?"
     ]
   }
 }
