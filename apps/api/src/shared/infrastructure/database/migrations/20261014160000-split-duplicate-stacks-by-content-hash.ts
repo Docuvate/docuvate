@@ -39,27 +39,49 @@ function electPrimary(members: readonly StackMemberRow[]): string {
   return sorted[0].documentId;
 }
 
-async function ensureRolesForGroup(
+async function demoteAllStackMembers(
   queryRunner: QueryRunner,
   stackId: string,
-  userId: string,
-  members: StackMemberRow[]
+  userId: string
 ): Promise<void> {
-  if (members.length === 0) {
-    return;
-  }
-  const primaryId = electPrimary(members);
-  const documentIds = members.map((member) => member.documentId);
   await queryRunner.query(
     `UPDATE document_stack_members m
      SET role = 'version'
      FROM document_duplicate_stacks s
      WHERE m.stack_id = s.id
        AND s.id = $1
-       AND s.user_id = $2
-       AND m.document_id = ANY($3::uuid[])`,
-    [stackId, userId, documentIds]
+       AND s.user_id = $2`,
+    [stackId, userId]
   );
+}
+
+async function promotePrimaryForStack(
+  queryRunner: QueryRunner,
+  stackId: string,
+  userId: string
+): Promise<void> {
+  const memberRows = await queryRows(
+    queryRunner,
+    `SELECT m.document_id, d.content_hash, d.created_at, m.role
+     FROM document_stack_members m
+     JOIN documents d ON d.id = m.document_id
+     JOIN document_duplicate_stacks s ON s.id = m.stack_id
+     WHERE m.stack_id = $1 AND s.user_id = $2`,
+    [stackId, userId]
+  );
+  const members: StackMemberRow[] = memberRows.map((raw) => {
+    const row = requireRecord(raw);
+    return {
+      documentId: parseString(row.document_id),
+      contentHash: parseOptionalString(row.content_hash),
+      createdAt: parseDate(row.created_at),
+      role: parseString(row.role) === 'primary' ? 'primary' : 'version',
+    };
+  });
+  if (members.length === 0) {
+    return;
+  }
+  const primaryId = electPrimary(members);
   await queryRunner.query(
     `UPDATE document_stack_members m
      SET role = 'primary'
@@ -143,6 +165,8 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
         continue;
       }
 
+      await demoteAllStackMembers(queryRunner, stackId, userId);
+
       const groups = new Map<string, StackMemberRow[]>();
       for (const member of members) {
         const bucket = hashBucket(member.contentHash, member.documentId);
@@ -154,7 +178,7 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
       if (groups.size === 1) {
         const onlyGroup = [...groups.values()][0] ?? [];
         if (onlyGroup.length > 1) {
-          await ensureRolesForGroup(queryRunner, stackId, userId, onlyGroup);
+          await promotePrimaryForStack(queryRunner, stackId, userId);
         } else if (onlyGroup.length === 1) {
           await queryRunner.query(
             `DELETE FROM document_stack_members m
@@ -176,9 +200,7 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
       const keepBucket = sortedMulti.at(0)?.[0] ?? fallbackBucket;
       const keepGroup = groups.get(keepBucket) ?? [];
 
-      if (keepGroup.length > 1) {
-        await ensureRolesForGroup(queryRunner, stackId, userId, keepGroup);
-      } else {
+      if (keepGroup.length <= 1) {
         await queryRunner.query(
           `DELETE FROM document_stack_members m
            USING document_duplicate_stacks s
@@ -187,11 +209,13 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
         );
       }
 
+      const newStackIds: string[] = [];
       for (const [bucket, group] of groups.entries()) {
         if (bucket === keepBucket || group.length <= 1) {
           continue;
         }
         const newStackId = await createStack(queryRunner, userId);
+        newStackIds.push(newStackId);
         for (const member of group) {
           await moveMemberToStack(
             queryRunner,
@@ -201,7 +225,6 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
             member.documentId
           );
         }
-        await ensureRolesForGroup(queryRunner, newStackId, userId, group);
       }
 
       for (const documentId of singletonDocumentIds) {
@@ -214,6 +237,13 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
              AND m.document_id = $3`,
           [stackId, userId, documentId]
         );
+      }
+
+      if (keepGroup.length > 1) {
+        await promotePrimaryForStack(queryRunner, stackId, userId);
+      }
+      for (const newStackId of newStackIds) {
+        await promotePrimaryForStack(queryRunner, newStackId, userId);
       }
 
       await queryRunner.query(
