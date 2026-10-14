@@ -10,6 +10,10 @@ from docuvate_worker.infrastructure.extractors.field_value_normalize import (
 from docuvate_worker.infrastructure.ml.value_types.model import ValueTypeModelBundle
 from docuvate_worker.infrastructure.ml.value_types.registry import get_value_type_models
 
+_HEADER_DATE_STRONG_TOP_LINE = 2
+_HEADER_DATE_WEAK_TOP_LINE = 5
+_MIN_HEADER_TITLE_TOKEN_LEN = 2
+
 
 def _normalize_amount(raw: str) -> str:
     cleaned = raw.strip()
@@ -143,11 +147,15 @@ def _pick_best_money(text: str, bundle: ValueTypeModelBundle) -> tuple[str, floa
 
 def _header_date_boost(line_index: int, line: str, title_line: str) -> float:
     boost = 0.0
-    if line_index <= 2:
+    if line_index <= _HEADER_DATE_STRONG_TOP_LINE:
         boost += 12.0
-    elif line_index <= 5:
+    elif line_index <= _HEADER_DATE_WEAK_TOP_LINE:
         boost += 6.0
-    title_tokens = {part.lower() for part in title_line.split() if len(part) > 2}
+    title_tokens = {
+        part.lower()
+        for part in title_line.split()
+        if len(part) > _MIN_HEADER_TITLE_TOKEN_LEN
+    }
     if title_tokens:
         overlap = sum(1 for part in line.split() if part.lower() in title_tokens)
         boost += min(8.0, overlap * 2.5)
