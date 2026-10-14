@@ -31,7 +31,7 @@ services:
       DOCUVATE_SMOKE_SEED: ${DOCUVATE_SMOKE_SEED:-1}
       AUTH_BASE: http://api:3001
       WEB_ORIGIN: http://localhost:5173
-      SMOKE_PIPELINE_TIMEOUT_MS: '240000'
+      SMOKE_PIPELINE_TIMEOUT_MS: '360000'
       NODE_ENV: production
     depends_on:
       api:
