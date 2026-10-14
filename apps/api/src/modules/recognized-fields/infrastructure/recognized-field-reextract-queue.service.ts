@@ -4,7 +4,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { Queue, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
-import { parseStringArray, parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { parseString, parseStringArray, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
 import {
   createValkeyConnection,

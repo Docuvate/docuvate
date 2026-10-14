@@ -45,7 +45,7 @@ const LIST_SELECT = `
           'color', t.color,
           'is_inbox', t.is_inbox,
           'matching_algorithm', t.matching_algorithm,
-          'match_text', t.match
+          'match_text', t.match_text
         )
       ) FILTER (WHERE t.id IS NOT NULL),
       '[]'

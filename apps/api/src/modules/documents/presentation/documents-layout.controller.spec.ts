@@ -219,7 +219,7 @@ describe('DocumentsController layout routes', () => {
         { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
         {
           provide: ListRecognizedFieldAttemptsUseCase,
-          useValue: { execute: vi.fn(async () => []) },
+          useValue: { execute: vi.fn(() => Promise.resolve([])) },
         },
         { provide: UploadDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: GetDocumentUseCase, useValue: useCaseExecuteMock() },

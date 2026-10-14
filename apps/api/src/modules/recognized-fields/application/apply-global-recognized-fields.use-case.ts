@@ -19,11 +19,11 @@ import {
 } from '../../../shared/domain/ports.js';
 import { mergeExtractedFields } from '../../document-pipeline/domain/merge-extracted-fields.js';
 import { evaluateFieldExtractionGate } from '../domain/field-extraction-gate.js';
+import type { RecognizedFieldEntity } from '../domain/recognized-field.entity.js';
 import {
   globalFieldStorageKey,
   parseGlobalFieldStorageKey,
 } from '../domain/recognized-field.entity.js';
-import type { RecognizedFieldEntity } from '../domain/recognized-field.entity.js';
 import { resolveFieldExtractionGateConfig } from '../domain/resolve-field-extraction-gate.js';
 import { PgRecognizedFieldExtractionAttemptRepository } from '../infrastructure/pg-recognized-field-extraction-attempt.repository.js';
 
