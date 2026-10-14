@@ -6,6 +6,7 @@ import { DataSource } from 'typeorm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { SplitDuplicateStacksByContentHash20261014160000 } from '../../src/shared/infrastructure/database/migrations/20261014160000-split-duplicate-stacks-by-content-hash.js';
+import { parseNumber, parseString, requireRecord } from '../../src/shared/infrastructure/database/row-parse.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
@@ -57,6 +58,52 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
     } finally {
       await runner.release();
     }
+  }
+
+  async function assertExactlyOnePrimaryPerNonEmptyStack(userId: string): Promise<void> {
+    const result = await pool.query(
+      `SELECT m.stack_id,
+              COUNT(*)::int AS member_count,
+              COUNT(*) FILTER (WHERE m.role = 'primary')::int AS primary_count
+       FROM document_stack_members m
+       JOIN document_duplicate_stacks s ON s.id = m.stack_id
+       WHERE s.user_id = $1
+       GROUP BY m.stack_id
+       HAVING COUNT(*) FILTER (WHERE m.role = 'primary') <> 1`,
+      [userId]
+    );
+    expect(result.rows).toHaveLength(0);
+  }
+
+  async function assertEveryDocumentVisibleInLibraryList(userId: string): Promise<void> {
+    const total = await pool.query(
+      `SELECT COUNT(*)::int AS n FROM documents WHERE user_id = $1`,
+      [userId]
+    );
+    const visible = await pool.query(
+      `SELECT COUNT(*)::int AS n
+       FROM documents d
+       WHERE d.user_id = $1
+         AND NOT EXISTS (
+           SELECT 1 FROM document_stack_members m
+           WHERE m.document_id = d.id AND m.role = 'version'
+         )`,
+      [userId]
+    );
+    const totalRow = requireRecord(total.rows[0]);
+    const visibleRow = requireRecord(visible.rows[0]);
+    expect(parseNumber(totalRow.n, 0)).toBe(parseNumber(visibleRow.n, 0));
+  }
+
+  async function insertReadyDocument(
+    userId: string,
+    doc: { id: string; hash: string; file: string; createdAt: string }
+  ): Promise<void> {
+    await pool.query(
+      `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, content_hash, created_at)
+       VALUES ($1,$2,$3,$3,'application/pdf',$4,'ready',$5,$6::timestamptz)`,
+      [doc.id, userId, doc.file, `k/${doc.file}`, doc.hash, doc.createdAt]
+    );
   }
 
   it('splits mixed-hash stacks and un-stacks singletons without deleting documents', async () => {
@@ -190,6 +237,141 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
     );
     expect(roles.rows.filter((row) => row.role === 'primary')).toHaveLength(1);
     expect(roles.rows.find((row) => row.role === 'primary')?.document_id).toBe(docB);
+    });
+  });
+
+  it('succeeds on production-shaped stacks when primary sits outside the kept hash group', async () => {
+    await withIsolatedUser(async (userId) => {
+      const megaStackId = randomUUID();
+      const twoHashStackId = randomUUID();
+      const allDocumentIds: string[] = [];
+
+      await pool.query(
+        `INSERT INTO document_duplicate_stacks (id, user_id, updated_at) VALUES ($1,$2,now()), ($3,$2,now())`,
+        [megaStackId, userId, twoHashStackId]
+      );
+
+      let primaryOnMegaStack: string | null = null;
+      for (let pair = 0; pair < 15; pair += 1) {
+        const hash = `prod-hash-pair-${String(pair)}`;
+        const olderId = randomUUID();
+        const newerId = randomUUID();
+        allDocumentIds.push(olderId, newerId);
+        await insertReadyDocument(userId, {
+          id: olderId,
+          hash,
+          file: `pair-${String(pair)}-a.pdf`,
+          createdAt: '2024-01-01',
+        });
+        await insertReadyDocument(userId, {
+          id: newerId,
+          hash,
+          file: `pair-${String(pair)}-b.pdf`,
+          createdAt: '2025-01-01',
+        });
+        await pool.query(
+          `INSERT INTO document_stack_members (stack_id, document_id, role)
+           VALUES ($1,$2,'version'), ($1,$3,'version')`,
+          [megaStackId, olderId, newerId]
+        );
+      }
+
+      for (let s = 0; s < 8; s += 1) {
+        const singletonId = randomUUID();
+        allDocumentIds.push(singletonId);
+        const hash = `prod-hash-singleton-${String(s)}`;
+        await insertReadyDocument(userId, {
+          id: singletonId,
+          hash,
+          file: `singleton-${String(s)}.pdf`,
+          createdAt: '2023-06-01',
+        });
+        const role = s === 0 ? 'primary' : 'version';
+        if (s === 0) {
+          primaryOnMegaStack = singletonId;
+        }
+        await pool.query(
+          `INSERT INTO document_stack_members (stack_id, document_id, role)
+           VALUES ($1,$2,$3)`,
+          [megaStackId, singletonId, role]
+        );
+      }
+
+      const hashKeptA = 'prod-two-hash-kept';
+      const hashOtherB = 'prod-two-hash-other';
+      const keptOlder = randomUUID();
+      const keptNewer = randomUUID();
+      const otherOnly = randomUUID();
+      allDocumentIds.push(keptOlder, keptNewer, otherOnly);
+
+      await insertReadyDocument(userId, {
+        id: keptOlder,
+        hash: hashKeptA,
+        file: 'kept-a-old.pdf',
+        createdAt: '2024-03-01',
+      });
+      await insertReadyDocument(userId, {
+        id: keptNewer,
+        hash: hashKeptA,
+        file: 'kept-a-new.pdf',
+        createdAt: '2026-03-01',
+      });
+      await insertReadyDocument(userId, {
+        id: otherOnly,
+        hash: hashOtherB,
+        file: 'other-b.pdf',
+        createdAt: '2024-04-01',
+      });
+
+      await pool.query(
+        `INSERT INTO document_stack_members (stack_id, document_id, role)
+         VALUES ($1,$2,'version'), ($1,$3,'version'), ($1,$4,'primary')`,
+        [twoHashStackId, keptOlder, keptNewer, otherOnly]
+      );
+
+      await runMigration();
+
+      await assertExactlyOnePrimaryPerNonEmptyStack(userId);
+      await assertEveryDocumentVisibleInLibraryList(userId);
+
+      const megaMembers = await pool.query(
+        `SELECT COUNT(*)::int AS n
+         FROM document_stack_members m
+         WHERE m.stack_id = $1`,
+        [megaStackId]
+      );
+      const megaMemberRow = requireRecord(megaMembers.rows[0]);
+      expect(parseNumber(megaMemberRow.n, 0)).toBe(2);
+
+      const twoHashMembers = await pool.query(
+        `SELECT m.document_id, m.role
+         FROM document_stack_members m
+         WHERE m.stack_id = $1`,
+        [twoHashStackId]
+      );
+      expect(twoHashMembers.rows).toHaveLength(2);
+      const twoHashByDoc = new Map<string, string>();
+      for (const raw of twoHashMembers.rows) {
+        const row = requireRecord(raw);
+        twoHashByDoc.set(parseString(row.document_id), parseString(row.role));
+      }
+      expect(twoHashByDoc.get(keptNewer)).toBe('primary');
+      expect(twoHashByDoc.get(keptOlder)).toBe('version');
+      expect(twoHashByDoc.has(otherOnly)).toBe(false);
+
+      expect(primaryOnMegaStack).not.toBeNull();
+      const primaryStillStacked = await pool.query(
+        `SELECT 1 FROM document_stack_members WHERE document_id = $1`,
+        [primaryOnMegaStack]
+      );
+      expect(primaryStillStacked.rows).toHaveLength(0);
+
+      const docCount = await pool.query(
+        `SELECT COUNT(*)::int AS n FROM documents WHERE user_id = $1`,
+        [userId]
+      );
+      const docCountRow = requireRecord(docCount.rows[0]);
+      expect(parseNumber(docCountRow.n, 0)).toBe(allDocumentIds.length);
     });
   });
 
