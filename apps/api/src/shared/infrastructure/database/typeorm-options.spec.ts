@@ -31,6 +31,7 @@ import { SmartDuplicates20261013180000 } from './migrations/20261013180000-smart
 import { FeatureFlagMlKeys20261013200000 } from './migrations/20261013200000-feature-flag-ml-keys.js';
 import { DocumentExtractedFact20261013210000 } from './migrations/20261013210000-document-extracted-fact.js';
 import { FeatureFlagLearnedValueTypes20261013220000 } from './migrations/20261013220000-feature-flag-learned-value-types.js';
+import { ExactFactAnswerAbstention20261013230000 } from './migrations/20261013230000-exact-fact-answer-abstention.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -62,6 +63,7 @@ const EXPECTED_MIGRATIONS = [
   FeatureFlagMlKeys20261013200000,
   DocumentExtractedFact20261013210000,
   FeatureFlagLearnedValueTypes20261013220000,
+  ExactFactAnswerAbstention20261013230000,
 ];
 
 describe('buildTypeOrmOptions', () => {

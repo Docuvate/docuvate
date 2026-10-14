@@ -35,6 +35,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'FeatureFlagMlKeys20261013200000',
   'DocumentExtractedFact20261013210000',
   'FeatureFlagLearnedValueTypes20261013220000',
+  'ExactFactAnswerAbstention20261013230000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -148,6 +149,8 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.document_extracted_fact');
     case 'FeatureFlagLearnedValueTypes20261013220000':
       return migrationSchemaPresent(runner, 'FeatureFlags20261013120000');
+    case 'ExactFactAnswerAbstention20261013230000':
+      return regClassExists(runner, 'public.tenant_exact_fact_chat_settings');
     default:
       return false;
   }
