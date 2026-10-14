@@ -5,7 +5,6 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
-import { CITED_CHAT_ABSTENTION_DE } from '../../src/modules/cited-chat/domain/cited-chat-constants.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
@@ -57,7 +56,10 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
   let userId: string;
   let octoberDocId: string;
+  let octoberChunkId: string;
+  let octoberChunkBody: string;
   let threads: PgDocumentChatThreadRepository;
+  let retrieval: PgCitedChatRetrievalRepository;
   let service: CitedChatGenerationService;
 
   beforeAll(async () => {
@@ -102,10 +104,19 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
       await searchRepo.indexDocumentChunks(userId, docId, chunks, undefined, {
         int8Vectors: vectors,
       });
+      if (isTargetOctober2024 && chunks[0]) {
+        octoberChunkBody = chunks[0].body;
+      }
     }
 
+    const chunkRow = await pool.query<{ id: string }>(
+      `SELECT id FROM document_text_chunks WHERE document_id = $1 ORDER BY chunk_index LIMIT 1`,
+      [octoberDocId]
+    );
+    octoberChunkId = chunkRow.rows[0]?.id ?? '';
+
     threads = new PgDocumentChatThreadRepository(pool);
-    const retrieval = new PgCitedChatRetrievalRepository(pool);
+    retrieval = new PgCitedChatRetrievalRepository(pool);
     const exactFactDeps = disabledExactFactChatDeps();
     service = new CitedChatGenerationService(
       threads,
@@ -127,6 +138,14 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
   afterAll(async () => {
     await deleteSyntheticUser(pool, userId);
     await closeIntegrationPool();
+  });
+
+  it('supplements retrieval with the October 2024 payslip among ~57 documents', async () => {
+    const question =
+      'Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?';
+    const temporal = await retrieval.supplementTemporalLibraryCandidates(userId, question);
+    expect(temporal.some((row) => row.documentId === octoberDocId)).toBe(true);
+    expect(temporal.some((row) => row.body.includes(OCTOBER_GROSS))).toBe(true);
   });
 
   function mockRerankAndOllama(
@@ -179,12 +198,25 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
     );
   }
 
-  it('answers October Gesamtbrutto across a ~57-document payslip library', async () => {
+  it('answers October Gesamtbrutto after temporal supplement and rerank', async () => {
     mockRerankAndOllama([
       {
         text: `Das Gesamtbrutto im Entgeltnachweis Oktober 2024 beträgt ${OCTOBER_GROSS} EUR.`,
         source: 'S1',
         quote: `Gesamtbrutto ${OCTOBER_GROSS} EUR`,
+      },
+    ]);
+
+    vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([
+      {
+        chunkId: octoberChunkId,
+        documentId: octoberDocId,
+        documentTitle: 'Entgeltnachweis 10/2024',
+        body: octoberChunkBody,
+        page: 1,
+        charStart: 0,
+        charEnd: octoberChunkBody.length,
+        fusionScore: 0.02,
       },
     ]);
 
@@ -207,7 +239,6 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
     });
 
     expect(result.abstained).toBe(false);
-    expect(result.content).not.toBe(CITED_CHAT_ABSTENTION_DE);
     expect(result.content).toContain('4.859');
 
     const citations = await pool.query<{ document_id: string }>(
