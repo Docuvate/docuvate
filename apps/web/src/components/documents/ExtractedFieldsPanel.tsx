@@ -14,11 +14,11 @@ import {
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { definitionIdForFieldKey } from '../../lib/recognizedFieldDefinitionIndex';
-import { attemptStatusTranslationKey } from '../../lib/recognizedFieldAttemptDisplay';
 import { extractionFieldLabel } from '../../lib/extractionFieldLabels';
 import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import { labelFieldDisplayName } from '../../lib/labelFieldDisplay';
+import { attemptStatusTranslationKey } from '../../lib/recognizedFieldAttemptDisplay';
+import { definitionIdForFieldKey } from '../../lib/recognizedFieldDefinitionIndex';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 
