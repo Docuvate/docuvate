@@ -447,7 +447,7 @@
     "duplicateSetTitle": "{{count}} similar documents",
     "duplicateSetSimilarity": "up to {{percent}}% match",
     "duplicateSetHashIdentical": "Byte-identical (hash)",
-    "duplicateSetReviewPairsHint": "Review similar monthly documents in pairs on the document page — bulk archive is only available for identical files.",
+    "duplicateSetReviewPairsHint": "Review similar monthly documents in pairs on the document page. Bulk archive is only available for identical files.",
     "duplicateSetNewest": "newest file",
     "duplicateSetArchiveRest": "Keep newest, archive rest",
     "duplicateSetNotDuplicate": "Not a duplicate",

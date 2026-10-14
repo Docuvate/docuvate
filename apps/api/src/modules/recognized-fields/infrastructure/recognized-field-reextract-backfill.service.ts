@@ -3,8 +3,8 @@
 import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import type pg from 'pg';
 
-import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { BackfillRecognizedFieldReextractionUseCase } from '../application/backfill-recognized-field-reextraction.use-case.js';
 
 @Injectable()

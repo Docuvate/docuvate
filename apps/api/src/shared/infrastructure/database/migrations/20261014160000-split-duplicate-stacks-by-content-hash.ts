@@ -34,13 +34,9 @@ function hashBucket(contentHash: string | null, documentId: string): string {
   return `__missing_hash__:${documentId}`;
 }
 
-function electPrimary(members: StackMemberRow[]): string {
+function electPrimary(members: readonly StackMemberRow[]): string {
   const sorted = [...members].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-  const newest = sorted[0];
-  if (!newest) {
-    throw new Error('empty member group');
-  }
-  return newest.documentId;
+  return sorted[0].documentId;
 }
 
 async function ensureRolesForGroup(
@@ -149,10 +145,10 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
       }
 
       if (groups.size === 1) {
-        const onlyGroup = [...groups.values()][0];
-        if (onlyGroup && onlyGroup.length > 1) {
+        const onlyGroup = [...groups.values()][0] ?? [];
+        if (onlyGroup.length > 1) {
           await ensureRolesForGroup(queryRunner, stackId, userId, onlyGroup);
-        } else if (onlyGroup && onlyGroup.length === 1) {
+        } else if (onlyGroup.length === 1) {
           await queryRunner.query(
             `DELETE FROM document_stack_members m
              USING document_duplicate_stacks s
@@ -168,10 +164,10 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
         .filter(([, group]) => group.length === 1)
         .flatMap(([, group]) => group.map((member) => member.documentId));
 
-      const keepBucket =
-        multiGroups.sort((a, b) => b[1].length - a[1].length)[0]?.[0] ??
-        [...groups.keys()][0];
-      const keepGroup = groups.get(keepBucket ?? '') ?? [];
+      const sortedMulti = multiGroups.sort((a, b) => b[1].length - a[1].length);
+      const fallbackBucket = [...groups.keys()][0];
+      const keepBucket = sortedMulti.at(0)?.[0] ?? fallbackBucket;
+      const keepGroup = groups.get(keepBucket) ?? [];
 
       if (keepGroup.length > 1) {
         await ensureRolesForGroup(queryRunner, stackId, userId, keepGroup);

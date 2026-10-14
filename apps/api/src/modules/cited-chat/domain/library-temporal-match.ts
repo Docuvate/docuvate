@@ -77,7 +77,7 @@ function monthYearInText(text: string, hint: GermanPeriodHint): boolean {
     return normalized.includes(String(hint.year));
   }
   if (hint.year != null) {
-    const yearPatterns = [String(hint.year), `${String(hint.year).slice(2)}`];
+    const yearPatterns = [String(hint.year), String(hint.year).slice(2)];
     const hasYear = yearPatterns.some((part) => normalized.includes(part));
     if (!hasYear) {
       return false;

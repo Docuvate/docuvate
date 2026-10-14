@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { randomUUID } from 'node:crypto';
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { DataSource } from 'typeorm';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { SplitDuplicateStacksByContentHash20261014160000 } from '../../src/shared/infrastructure/database/migrations/20261014160000-split-duplicate-stacks-by-content-hash.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';

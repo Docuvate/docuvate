@@ -1,14 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { duplicateSetIdFromDocumentIds } from '@docuvate/contracts';
+import { BadRequestException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { createDuplicateRepositoryStub } from '../../../test-support/duplicate-repository.stub.js';
 import { createDuplicateStackRepositoryStub } from '../../../test-support/duplicate-stack-repository.stub.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
-import { BadRequestException } from '@nestjs/common';
-
 import {
   ArchiveDuplicateSetUseCase,
   DismissDuplicateSetUseCase,
@@ -121,7 +120,7 @@ describe('Duplicate set use cases', () => {
           title: id,
           mimeType: 'application/pdf',
           storageKey: `k/${id}`,
-          status: 'ready',
+          status: 'ready' as const,
           tags: [],
           createdAt: newest,
           updatedAt: newest,
