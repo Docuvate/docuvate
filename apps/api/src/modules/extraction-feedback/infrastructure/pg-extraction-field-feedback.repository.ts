@@ -8,7 +8,6 @@ import type {
   ExtractionFieldFeedbackRepository,
   LabelFieldExtractionExample,
 } from '../../../shared/domain/ports.js';
-import { inferFieldCorrectionAnchorLabel } from '../domain/infer-field-correction-anchor.js';
 import {
   parseDate,
   parseOptionalString,
@@ -17,6 +16,7 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { inferFieldCorrectionAnchorLabel } from '../domain/infer-field-correction-anchor.js';
 
 function mapRow(row: Record<string, unknown>): ExtractionFieldCorrectionRecord {
   const labelTagIds = parseStringArray(row.label_tag_ids);
@@ -157,7 +157,7 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
       if (bucket.length >= limitPerField) {
         continue;
       }
-      const documentText = parseOptionalString(record['document_extracted_text']) ?? '';
+      const documentText = parseOptionalString(record.document_extracted_text) ?? '';
       const anchor = inferFieldCorrectionAnchorLabel(documentText, row.newValue.trim());
       bucket.push({
         fieldKey: row.fieldKey,

@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { RecognizedFieldExtractionOutcome } from '@docuvate/contracts';
-
-import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-reextract-config.js';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
@@ -14,6 +12,7 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-reextract-config.js';
 
 const OUTCOMES: readonly RecognizedFieldExtractionOutcome[] = [
   'not_applicable',
