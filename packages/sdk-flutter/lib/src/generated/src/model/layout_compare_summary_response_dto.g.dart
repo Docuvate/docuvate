@@ -17,21 +17,13 @@ class _$LayoutCompareSummaryResponseDto
 
   factory _$LayoutCompareSummaryResponseDto(
           [void Function(LayoutCompareSummaryResponseDtoBuilder)? updates]) =>
-      (new LayoutCompareSummaryResponseDtoBuilder()..update(updates))._build();
+      (LayoutCompareSummaryResponseDtoBuilder()..update(updates))._build();
 
   _$LayoutCompareSummaryResponseDto._(
       {required this.category,
       required this.ssimFloor,
       required this.pageCount})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        category, r'LayoutCompareSummaryResponseDto', 'category');
-    BuiltValueNullFieldError.checkNotNull(
-        ssimFloor, r'LayoutCompareSummaryResponseDto', 'ssimFloor');
-    BuiltValueNullFieldError.checkNotNull(
-        pageCount, r'LayoutCompareSummaryResponseDto', 'pageCount');
-  }
-
+      : super._();
   @override
   LayoutCompareSummaryResponseDto rebuild(
           void Function(LayoutCompareSummaryResponseDtoBuilder) updates) =>
@@ -39,7 +31,7 @@ class _$LayoutCompareSummaryResponseDto
 
   @override
   LayoutCompareSummaryResponseDtoBuilder toBuilder() =>
-      new LayoutCompareSummaryResponseDtoBuilder()..replace(this);
+      LayoutCompareSummaryResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -105,7 +97,6 @@ class LayoutCompareSummaryResponseDtoBuilder
 
   @override
   void replace(LayoutCompareSummaryResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutCompareSummaryResponseDto;
   }
 
@@ -119,13 +110,14 @@ class LayoutCompareSummaryResponseDtoBuilder
 
   _$LayoutCompareSummaryResponseDto _build() {
     final _$result = _$v ??
-        new _$LayoutCompareSummaryResponseDto._(
-            category: BuiltValueNullFieldError.checkNotNull(
-                category, r'LayoutCompareSummaryResponseDto', 'category'),
-            ssimFloor: BuiltValueNullFieldError.checkNotNull(
-                ssimFloor, r'LayoutCompareSummaryResponseDto', 'ssimFloor'),
-            pageCount: BuiltValueNullFieldError.checkNotNull(
-                pageCount, r'LayoutCompareSummaryResponseDto', 'pageCount'));
+        _$LayoutCompareSummaryResponseDto._(
+          category: BuiltValueNullFieldError.checkNotNull(
+              category, r'LayoutCompareSummaryResponseDto', 'category'),
+          ssimFloor: BuiltValueNullFieldError.checkNotNull(
+              ssimFloor, r'LayoutCompareSummaryResponseDto', 'ssimFloor'),
+          pageCount: BuiltValueNullFieldError.checkNotNull(
+              pageCount, r'LayoutCompareSummaryResponseDto', 'pageCount'),
+        );
     replace(_$result);
     return _$result;
   }

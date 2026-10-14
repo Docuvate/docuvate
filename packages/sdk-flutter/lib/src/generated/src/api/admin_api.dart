@@ -14,7 +14,9 @@ import 'package:docuvate/src/generated/src/model/admin_access_response_dto.dart'
 import 'package:docuvate/src/generated/src/model/admin_user_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/api_error_envelope_dto.dart';
 import 'package:docuvate/src/generated/src/model/ban_admin_user_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/feature_flags_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/invite_admin_user_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/set_admin_user_feature_flag_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/set_admin_user_role_request_dto.dart';
 
 class AdminApi {
@@ -564,6 +566,114 @@ class AdminApi {
     );
 
     return _response;
+  }
+
+  /// Set a per-tenant feature flag override
+  /// 
+  ///
+  /// Parameters:
+  /// * [userId] 
+  /// * [setAdminUserFeatureFlagRequestDto] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [FeatureFlagsResponseDto] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<FeatureFlagsResponseDto>> setAdminUserFeatureFlag({ 
+    required String userId,
+    required SetAdminUserFeatureFlagRequestDto setAdminUserFeatureFlagRequestDto,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/admin/users/{userId}/feature-flags'.replaceAll('{' r'userId' '}', encodeQueryParameter(_serializers, userId, const FullType(String)).toString());
+    final _options = Options(
+      method: r'PATCH',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'apiKeyAuth',
+            'keyName': 'X-Docuvate-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(SetAdminUserFeatureFlagRequestDto);
+      _bodyData = _serializers.serialize(setAdminUserFeatureFlagRequestDto, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    FeatureFlagsResponseDto? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(FeatureFlagsResponseDto),
+      ) as FeatureFlagsResponseDto;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<FeatureFlagsResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// Change a user role

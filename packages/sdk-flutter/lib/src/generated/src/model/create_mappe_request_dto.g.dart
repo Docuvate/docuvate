@@ -14,13 +14,9 @@ class _$CreateMappeRequestDto extends CreateMappeRequestDto {
 
   factory _$CreateMappeRequestDto(
           [void Function(CreateMappeRequestDtoBuilder)? updates]) =>
-      (new CreateMappeRequestDtoBuilder()..update(updates))._build();
+      (CreateMappeRequestDtoBuilder()..update(updates))._build();
 
-  _$CreateMappeRequestDto._({required this.name, this.color}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        name, r'CreateMappeRequestDto', 'name');
-  }
-
+  _$CreateMappeRequestDto._({required this.name, this.color}) : super._();
   @override
   CreateMappeRequestDto rebuild(
           void Function(CreateMappeRequestDtoBuilder) updates) =>
@@ -28,7 +24,7 @@ class _$CreateMappeRequestDto extends CreateMappeRequestDto {
 
   @override
   CreateMappeRequestDtoBuilder toBuilder() =>
-      new CreateMappeRequestDtoBuilder()..replace(this);
+      CreateMappeRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -84,7 +80,6 @@ class CreateMappeRequestDtoBuilder
 
   @override
   void replace(CreateMappeRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CreateMappeRequestDto;
   }
 
@@ -98,10 +93,11 @@ class CreateMappeRequestDtoBuilder
 
   _$CreateMappeRequestDto _build() {
     final _$result = _$v ??
-        new _$CreateMappeRequestDto._(
-            name: BuiltValueNullFieldError.checkNotNull(
-                name, r'CreateMappeRequestDto', 'name'),
-            color: color);
+        _$CreateMappeRequestDto._(
+          name: BuiltValueNullFieldError.checkNotNull(
+              name, r'CreateMappeRequestDto', 'name'),
+          color: color,
+        );
     replace(_$result);
     return _$result;
   }

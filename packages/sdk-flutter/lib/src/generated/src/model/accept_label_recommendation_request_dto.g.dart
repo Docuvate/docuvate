@@ -26,8 +26,7 @@ class _$AcceptLabelRecommendationRequestDto
   factory _$AcceptLabelRecommendationRequestDto(
           [void Function(AcceptLabelRecommendationRequestDtoBuilder)?
               updates]) =>
-      (new AcceptLabelRecommendationRequestDtoBuilder()..update(updates))
-          ._build();
+      (AcceptLabelRecommendationRequestDtoBuilder()..update(updates))._build();
 
   _$AcceptLabelRecommendationRequestDto._(
       {this.recommendationId,
@@ -38,7 +37,6 @@ class _$AcceptLabelRecommendationRequestDto
       this.color,
       this.documentIds})
       : super._();
-
   @override
   AcceptLabelRecommendationRequestDto rebuild(
           void Function(AcceptLabelRecommendationRequestDtoBuilder) updates) =>
@@ -46,7 +44,7 @@ class _$AcceptLabelRecommendationRequestDto
 
   @override
   AcceptLabelRecommendationRequestDtoBuilder toBuilder() =>
-      new AcceptLabelRecommendationRequestDtoBuilder()..replace(this);
+      AcceptLabelRecommendationRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -122,7 +120,7 @@ class AcceptLabelRecommendationRequestDtoBuilder
 
   ListBuilder<String>? _documentIds;
   ListBuilder<String> get documentIds =>
-      _$this._documentIds ??= new ListBuilder<String>();
+      _$this._documentIds ??= ListBuilder<String>();
   set documentIds(ListBuilder<String>? documentIds) =>
       _$this._documentIds = documentIds;
 
@@ -147,7 +145,6 @@ class AcceptLabelRecommendationRequestDtoBuilder
 
   @override
   void replace(AcceptLabelRecommendationRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$AcceptLabelRecommendationRequestDto;
   }
 
@@ -164,24 +161,23 @@ class AcceptLabelRecommendationRequestDtoBuilder
     _$AcceptLabelRecommendationRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$AcceptLabelRecommendationRequestDto._(
-              recommendationId: recommendationId,
-              proposedName: proposedName,
-              tagId: tagId,
-              keepTagId: keepTagId,
-              removeTagId: removeTagId,
-              color: color,
-              documentIds: _documentIds?.build());
+          _$AcceptLabelRecommendationRequestDto._(
+            recommendationId: recommendationId,
+            proposedName: proposedName,
+            tagId: tagId,
+            keepTagId: keepTagId,
+            removeTagId: removeTagId,
+            color: color,
+            documentIds: _documentIds?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'documentIds';
         _documentIds?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'AcceptLabelRecommendationRequestDto',
-            _$failedField,
-            e.toString());
+        throw BuiltValueNestedFieldError(r'AcceptLabelRecommendationRequestDto',
+            _$failedField, e.toString());
       }
       rethrow;
     }

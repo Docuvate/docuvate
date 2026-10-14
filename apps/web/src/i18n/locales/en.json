@@ -1589,6 +1589,10 @@
     "documentDate": "Date",
     "suggestedDate": "Suggested: {{date}}",
     "confidenceHint": "{{percent}}% confidence",
+    "archiveHashIdenticalDuplicates": "All identical duplicates: keep newest",
+    "archiveHashIdenticalConfirmTitle": "Archive hash-identical duplicates?",
+    "archiveHashIdenticalConfirmBody": "For each byte-identical group the newest document is kept; other copies are archived.",
+    "archiveHashIdenticalSuccess": "Cleaned up {{count}} duplicate group(s).",
     "rejectLabel": "Dismiss “{{name}}”",
     "keyboardHint": "Enter: accept all · Arrow keys: next document"
   },

@@ -15,11 +15,13 @@ import 'package:docuvate/src/generated/src/api/chat_api.dart';
 import 'package:docuvate/src/generated/src/api/connectors_api.dart';
 import 'package:docuvate/src/generated/src/api/correspondents_api.dart';
 import 'package:docuvate/src/generated/src/api/documents_api.dart';
+import 'package:docuvate/src/generated/src/api/duplicates_api.dart';
 import 'package:docuvate/src/generated/src/api/invitations_api.dart';
 import 'package:docuvate/src/generated/src/api/labels_api.dart';
 import 'package:docuvate/src/generated/src/api/models_api.dart';
 import 'package:docuvate/src/generated/src/api/organizer_api.dart';
 import 'package:docuvate/src/generated/src/api/remote_config_api.dart';
+import 'package:docuvate/src/generated/src/api/review_queue_api.dart';
 import 'package:docuvate/src/generated/src/api/search_api.dart';
 import 'package:docuvate/src/generated/src/api/settings_api.dart';
 import 'package:docuvate/src/generated/src/api/sftp_ingress_api.dart';
@@ -115,6 +117,12 @@ class DocuvateApi {
     return DocumentsApi(dio, serializers);
   }
 
+  /// Get DuplicatesApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  DuplicatesApi getDuplicatesApi() {
+    return DuplicatesApi(dio, serializers);
+  }
+
   /// Get InvitationsApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   InvitationsApi getInvitationsApi() {
@@ -143,6 +151,12 @@ class DocuvateApi {
   /// by doing that all interceptors will not be executed
   RemoteConfigApi getRemoteConfigApi() {
     return RemoteConfigApi(dio, serializers);
+  }
+
+  /// Get ReviewQueueApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  ReviewQueueApi getReviewQueueApi() {
+    return ReviewQueueApi(dio, serializers);
   }
 
   /// Get SearchApi instance, base route and serializer can be overridden by a given but be careful,

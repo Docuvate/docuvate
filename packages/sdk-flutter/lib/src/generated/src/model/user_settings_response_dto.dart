@@ -22,6 +22,8 @@ part 'user_settings_response_dto.g.dart';
 /// * [documentChatReadinessReason] 
 /// * [documentChatOllamaModel] 
 /// * [documentChatRunsOnCpu] 
+/// * [documentChatLocalModelEnabled] 
+/// * [documentChatLocalModelReady] 
 /// * [advancedFeaturesEnabled] 
 /// * [useArenaWinnerAsDefault] 
 /// * [arenaWinnerEngine] 
@@ -64,6 +66,12 @@ abstract class UserSettingsResponseDto implements Built<UserSettingsResponseDto,
 
   @BuiltValueField(wireName: r'documentChatRunsOnCpu')
   bool? get documentChatRunsOnCpu;
+
+  @BuiltValueField(wireName: r'documentChatLocalModelEnabled')
+  bool? get documentChatLocalModelEnabled;
+
+  @BuiltValueField(wireName: r'documentChatLocalModelReady')
+  bool? get documentChatLocalModelReady;
 
   @BuiltValueField(wireName: r'advancedFeaturesEnabled')
   bool? get advancedFeaturesEnabled;
@@ -185,6 +193,20 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
       yield r'documentChatRunsOnCpu';
       yield serializers.serialize(
         object.documentChatRunsOnCpu,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.documentChatLocalModelEnabled != null) {
+      yield r'documentChatLocalModelEnabled';
+      yield serializers.serialize(
+        object.documentChatLocalModelEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.documentChatLocalModelReady != null) {
+      yield r'documentChatLocalModelReady';
+      yield serializers.serialize(
+        object.documentChatLocalModelReady,
         specifiedType: const FullType(bool),
       );
     }
@@ -348,6 +370,20 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
             specifiedType: const FullType(bool),
           ) as bool;
           result.documentChatRunsOnCpu = valueDes;
+          break;
+        case r'documentChatLocalModelEnabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.documentChatLocalModelEnabled = valueDes;
+          break;
+        case r'documentChatLocalModelReady':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.documentChatLocalModelReady = valueDes;
           break;
         case r'advancedFeaturesEnabled':
           final valueDes = serializers.deserialize(

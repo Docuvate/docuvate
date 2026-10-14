@@ -22,13 +22,12 @@ LabelRecommendationBlocklistEntryResponseDtoSource_Enum
     case 'dismiss':
       return _$labelRecommendationBlocklistEntryResponseDtoSourceEnum_dismiss;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<LabelRecommendationBlocklistEntryResponseDtoSource_Enum>
-    _$labelRecommendationBlocklistEntryResponseDtoSourceEnumValues =
-    new BuiltSet<
+    _$labelRecommendationBlocklistEntryResponseDtoSourceEnumValues = BuiltSet<
         LabelRecommendationBlocklistEntryResponseDtoSource_Enum>(const <LabelRecommendationBlocklistEntryResponseDtoSource_Enum>[
   _$labelRecommendationBlocklistEntryResponseDtoSourceEnum_manual,
   _$labelRecommendationBlocklistEntryResponseDtoSourceEnum_dismiss,
@@ -36,7 +35,7 @@ final BuiltSet<LabelRecommendationBlocklistEntryResponseDtoSource_Enum>
 
 Serializer<LabelRecommendationBlocklistEntryResponseDtoSource_Enum>
     _$labelRecommendationBlocklistEntryResponseDtoSourceEnumSerializer =
-    new _$LabelRecommendationBlocklistEntryResponseDtoSource_EnumSerializer();
+    _$LabelRecommendationBlocklistEntryResponseDtoSource_EnumSerializer();
 
 class _$LabelRecommendationBlocklistEntryResponseDtoSource_EnumSerializer
     implements
@@ -87,8 +86,7 @@ class _$LabelRecommendationBlocklistEntryResponseDto
   factory _$LabelRecommendationBlocklistEntryResponseDto(
           [void Function(LabelRecommendationBlocklistEntryResponseDtoBuilder)?
               updates]) =>
-      (new LabelRecommendationBlocklistEntryResponseDtoBuilder()
-            ..update(updates))
+      (LabelRecommendationBlocklistEntryResponseDtoBuilder()..update(updates))
           ._build();
 
   _$LabelRecommendationBlocklistEntryResponseDto._(
@@ -96,17 +94,7 @@ class _$LabelRecommendationBlocklistEntryResponseDto
       required this.phrase,
       required this.source_,
       required this.createdAt})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        id, r'LabelRecommendationBlocklistEntryResponseDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        phrase, r'LabelRecommendationBlocklistEntryResponseDto', 'phrase');
-    BuiltValueNullFieldError.checkNotNull(
-        source_, r'LabelRecommendationBlocklistEntryResponseDto', 'source_');
-    BuiltValueNullFieldError.checkNotNull(createdAt,
-        r'LabelRecommendationBlocklistEntryResponseDto', 'createdAt');
-  }
-
+      : super._();
   @override
   LabelRecommendationBlocklistEntryResponseDto rebuild(
           void Function(LabelRecommendationBlocklistEntryResponseDtoBuilder)
@@ -115,7 +103,7 @@ class _$LabelRecommendationBlocklistEntryResponseDto
 
   @override
   LabelRecommendationBlocklistEntryResponseDtoBuilder toBuilder() =>
-      new LabelRecommendationBlocklistEntryResponseDtoBuilder()..replace(this);
+      LabelRecommendationBlocklistEntryResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -193,7 +181,6 @@ class LabelRecommendationBlocklistEntryResponseDtoBuilder
 
   @override
   void replace(LabelRecommendationBlocklistEntryResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LabelRecommendationBlocklistEntryResponseDto;
   }
 
@@ -209,15 +196,16 @@ class LabelRecommendationBlocklistEntryResponseDtoBuilder
 
   _$LabelRecommendationBlocklistEntryResponseDto _build() {
     final _$result = _$v ??
-        new _$LabelRecommendationBlocklistEntryResponseDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'LabelRecommendationBlocklistEntryResponseDto', 'id'),
-            phrase: BuiltValueNullFieldError.checkNotNull(phrase,
-                r'LabelRecommendationBlocklistEntryResponseDto', 'phrase'),
-            source_: BuiltValueNullFieldError.checkNotNull(source_,
-                r'LabelRecommendationBlocklistEntryResponseDto', 'source_'),
-            createdAt: BuiltValueNullFieldError.checkNotNull(createdAt,
-                r'LabelRecommendationBlocklistEntryResponseDto', 'createdAt'));
+        _$LabelRecommendationBlocklistEntryResponseDto._(
+          id: BuiltValueNullFieldError.checkNotNull(
+              id, r'LabelRecommendationBlocklistEntryResponseDto', 'id'),
+          phrase: BuiltValueNullFieldError.checkNotNull(phrase,
+              r'LabelRecommendationBlocklistEntryResponseDto', 'phrase'),
+          source_: BuiltValueNullFieldError.checkNotNull(source_,
+              r'LabelRecommendationBlocklistEntryResponseDto', 'source_'),
+          createdAt: BuiltValueNullFieldError.checkNotNull(createdAt,
+              r'LabelRecommendationBlocklistEntryResponseDto', 'createdAt'),
+        );
     replace(_$result);
     return _$result;
   }

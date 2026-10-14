@@ -12,13 +12,9 @@ class _$MlModelVersionListResponseDto extends MlModelVersionListResponseDto {
 
   factory _$MlModelVersionListResponseDto(
           [void Function(MlModelVersionListResponseDtoBuilder)? updates]) =>
-      (new MlModelVersionListResponseDtoBuilder()..update(updates))._build();
+      (MlModelVersionListResponseDtoBuilder()..update(updates))._build();
 
-  _$MlModelVersionListResponseDto._({required this.versions}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        versions, r'MlModelVersionListResponseDto', 'versions');
-  }
-
+  _$MlModelVersionListResponseDto._({required this.versions}) : super._();
   @override
   MlModelVersionListResponseDto rebuild(
           void Function(MlModelVersionListResponseDtoBuilder) updates) =>
@@ -26,7 +22,7 @@ class _$MlModelVersionListResponseDto extends MlModelVersionListResponseDto {
 
   @override
   MlModelVersionListResponseDtoBuilder toBuilder() =>
-      new MlModelVersionListResponseDtoBuilder()..replace(this);
+      MlModelVersionListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -58,7 +54,7 @@ class MlModelVersionListResponseDtoBuilder
 
   ListBuilder<MlModelVersionDto>? _versions;
   ListBuilder<MlModelVersionDto> get versions =>
-      _$this._versions ??= new ListBuilder<MlModelVersionDto>();
+      _$this._versions ??= ListBuilder<MlModelVersionDto>();
   set versions(ListBuilder<MlModelVersionDto>? versions) =>
       _$this._versions = versions;
 
@@ -77,7 +73,6 @@ class MlModelVersionListResponseDtoBuilder
 
   @override
   void replace(MlModelVersionListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$MlModelVersionListResponseDto;
   }
 
@@ -93,14 +88,16 @@ class MlModelVersionListResponseDtoBuilder
     _$MlModelVersionListResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$MlModelVersionListResponseDto._(versions: versions.build());
+          _$MlModelVersionListResponseDto._(
+            versions: versions.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'versions';
         versions.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'MlModelVersionListResponseDto', _$failedField, e.toString());
       }
       rethrow;

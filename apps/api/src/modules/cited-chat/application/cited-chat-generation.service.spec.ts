@@ -354,6 +354,73 @@ describe('CitedChatGenerationService abstention', () => {
     delete process.env['OLLAMA_URL'];
   });
 
+  it('answers when the local model returns empty quotes but a grounded claim', async () => {
+    process.env['OLLAMA_URL'] = 'http://127.0.0.1:11434';
+    vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
+      reachable: true,
+      rerankerUsed: true,
+      rerankerModel: 'BAAI/bge-reranker-base',
+      results: [{ id: 'c1', score: 0.92 }],
+    });
+    vi.mocked(requestCitedAnswerFromOllama).mockResolvedValue({
+      ok: true,
+      parsed: {
+        claims: [
+          {
+            text: 'Gesamtbrutto 4.321,00 EUR',
+            source: 'S1',
+            quote: '',
+          },
+        ],
+      },
+    });
+    vi.mocked(fetchWorkerExtractiveAnswer).mockResolvedValue({
+      reachable: false,
+      passageId: null,
+      answer: null,
+      quote: null,
+    });
+
+    const threads = {
+      updateMessageGeneration: vi.fn(),
+      touchThread: vi.fn(),
+      listMessages: vi.fn().mockResolvedValue([]),
+      findMessageForUser: vi.fn().mockResolvedValue({ content: '' }),
+    };
+    const citations = { replaceCitations: vi.fn() };
+    const retrieval = {
+      hybridRetrieveChunks: vi.fn().mockResolvedValue([
+        {
+          chunkId: 'c1',
+          documentId: 'd1',
+          documentTitle: 'Entgelt',
+          body: 'Gesamtbrutto 4.321,00 EUR',
+          page: 1,
+          charStart: 0,
+          charEnd: 26,
+          fusionScore: 0.9,
+        },
+      ]),
+      indexPassageForRerank: (c: { documentTitle: string; body: string }) =>
+        `${c.documentTitle}\n${c.body}`,
+    };
+    const service = await buildService({ threads, retrieval, citations });
+
+    const result = await service.generate({
+      messageId,
+      threadId,
+      userId,
+      userMessage: 'Wie hoch ist das Gesamtbrutto?',
+      documentIds: [],
+      scope: 'library',
+    });
+
+    expect(result.abstained).toBe(false);
+    expect(result.content).toMatch(/4\.321,00/);
+    expect(citations.replaceCitations).toHaveBeenCalled();
+    delete process.env['OLLAMA_URL'];
+  });
+
   it('stops when shouldAbort is set during streaming', async () => {
     vi.mocked(fetchWorkerRagRerank).mockResolvedValue({
       reachable: true,

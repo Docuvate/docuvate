@@ -132,14 +132,28 @@ export class ApplyGlobalRecognizedFieldsUseCase {
       }))
     );
 
-    const lookupKeys = defsToExtract.flatMap((def) => [globalFieldStorageKey(def.key), def.key]);
+    const correctedFieldKeys = new Set(
+      await this.fieldFeedback.listCorrectedFieldKeysForDocument(userId, documentId)
+    );
+    const defsEligibleForExtract = defsToExtract.filter((def) => {
+      const storageKey = globalFieldStorageKey(def.key);
+      return !correctedFieldKeys.has(storageKey) && !correctedFieldKeys.has(def.key);
+    });
+    if (defsEligibleForExtract.length === 0) {
+      return;
+    }
+
+    const lookupKeys = defsEligibleForExtract.flatMap((def) => [
+      globalFieldStorageKey(def.key),
+      def.key,
+    ]);
     const correctionExamples = await this.fieldFeedback.listRecentForFieldKeys(userId, lookupKeys, {
       limitPerField: 5,
     });
     const workerExamples = correctionExamples
       .map((example) => {
         const bareKey = parseGlobalFieldStorageKey(example.fieldKey) ?? example.fieldKey;
-        const def = defsToExtract.find((row) => row.key === bareKey);
+        const def = defsEligibleForExtract.find((row) => row.key === bareKey);
         return {
           ...example,
           fieldKey: bareKey,
@@ -147,13 +161,13 @@ export class ApplyGlobalRecognizedFieldsUseCase {
           fieldType: def?.fieldType ?? example.fieldType,
         };
       })
-      .filter((example) => defsToExtract.some((def) => def.key === example.fieldKey));
+      .filter((example) => defsEligibleForExtract.some((def) => def.key === example.fieldKey));
 
     try {
       const extracted = await this.extraction.extractLabelFields(
         text,
         'Dokument',
-        defsToExtract.map((d) => ({
+        defsEligibleForExtract.map((d) => ({
           key: d.key,
           label: d.label,
           fieldType: d.fieldType,
@@ -175,7 +189,7 @@ export class ApplyGlobalRecognizedFieldsUseCase {
         confidence: number | null;
       }[] = [];
 
-      for (const def of defsToExtract) {
+      for (const def of defsEligibleForExtract) {
         const row = extractedByKey.get(def.key);
         if (!row?.value.trim()) {
           finalAttempts.push({
@@ -196,8 +210,12 @@ export class ApplyGlobalRecognizedFieldsUseCase {
           });
           continue;
         }
+        const storageKey = globalFieldStorageKey(row.key);
+        if (correctedFieldKeys.has(storageKey) || correctedFieldKeys.has(row.key)) {
+          continue;
+        }
         patches.push({
-          key: globalFieldStorageKey(row.key),
+          key: storageKey,
           value: row.value.trim(),
           confidence,
         });

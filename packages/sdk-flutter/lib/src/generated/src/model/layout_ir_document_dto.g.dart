@@ -15,19 +15,19 @@ LayoutIrDocumentDtoVersionEnum _$layoutIrDocumentDtoVersionEnumValueOf(
     case 'n1':
       return _$layoutIrDocumentDtoVersionEnum_n1;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<LayoutIrDocumentDtoVersionEnum>
-    _$layoutIrDocumentDtoVersionEnumValues = new BuiltSet<
+    _$layoutIrDocumentDtoVersionEnumValues = BuiltSet<
         LayoutIrDocumentDtoVersionEnum>(const <LayoutIrDocumentDtoVersionEnum>[
   _$layoutIrDocumentDtoVersionEnum_n1,
 ]);
 
 Serializer<LayoutIrDocumentDtoVersionEnum>
     _$layoutIrDocumentDtoVersionEnumSerializer =
-    new _$LayoutIrDocumentDtoVersionEnumSerializer();
+    _$LayoutIrDocumentDtoVersionEnumSerializer();
 
 class _$LayoutIrDocumentDtoVersionEnumSerializer
     implements PrimitiveSerializer<LayoutIrDocumentDtoVersionEnum> {
@@ -65,16 +65,10 @@ class _$LayoutIrDocumentDto extends LayoutIrDocumentDto {
 
   factory _$LayoutIrDocumentDto(
           [void Function(LayoutIrDocumentDtoBuilder)? updates]) =>
-      (new LayoutIrDocumentDtoBuilder()..update(updates))._build();
+      (LayoutIrDocumentDtoBuilder()..update(updates))._build();
 
   _$LayoutIrDocumentDto._({required this.version, required this.pages})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        version, r'LayoutIrDocumentDto', 'version');
-    BuiltValueNullFieldError.checkNotNull(
-        pages, r'LayoutIrDocumentDto', 'pages');
-  }
-
+      : super._();
   @override
   LayoutIrDocumentDto rebuild(
           void Function(LayoutIrDocumentDtoBuilder) updates) =>
@@ -82,7 +76,7 @@ class _$LayoutIrDocumentDto extends LayoutIrDocumentDto {
 
   @override
   LayoutIrDocumentDtoBuilder toBuilder() =>
-      new LayoutIrDocumentDtoBuilder()..replace(this);
+      LayoutIrDocumentDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -121,7 +115,7 @@ class LayoutIrDocumentDtoBuilder
 
   ListBuilder<LayoutIrPageDto>? _pages;
   ListBuilder<LayoutIrPageDto> get pages =>
-      _$this._pages ??= new ListBuilder<LayoutIrPageDto>();
+      _$this._pages ??= ListBuilder<LayoutIrPageDto>();
   set pages(ListBuilder<LayoutIrPageDto>? pages) => _$this._pages = pages;
 
   LayoutIrDocumentDtoBuilder() {
@@ -140,7 +134,6 @@ class LayoutIrDocumentDtoBuilder
 
   @override
   void replace(LayoutIrDocumentDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutIrDocumentDto;
   }
 
@@ -156,17 +149,18 @@ class LayoutIrDocumentDtoBuilder
     _$LayoutIrDocumentDto _$result;
     try {
       _$result = _$v ??
-          new _$LayoutIrDocumentDto._(
-              version: BuiltValueNullFieldError.checkNotNull(
-                  version, r'LayoutIrDocumentDto', 'version'),
-              pages: pages.build());
+          _$LayoutIrDocumentDto._(
+            version: BuiltValueNullFieldError.checkNotNull(
+                version, r'LayoutIrDocumentDto', 'version'),
+            pages: pages.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'pages';
         pages.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'LayoutIrDocumentDto', _$failedField, e.toString());
       }
       rethrow;

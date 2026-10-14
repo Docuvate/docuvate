@@ -16,14 +16,10 @@ class _$CreateFolderRequestDto extends CreateFolderRequestDto {
 
   factory _$CreateFolderRequestDto(
           [void Function(CreateFolderRequestDtoBuilder)? updates]) =>
-      (new CreateFolderRequestDtoBuilder()..update(updates))._build();
+      (CreateFolderRequestDtoBuilder()..update(updates))._build();
 
   _$CreateFolderRequestDto._({required this.name, this.parentId, this.mappeId})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        name, r'CreateFolderRequestDto', 'name');
-  }
-
+      : super._();
   @override
   CreateFolderRequestDto rebuild(
           void Function(CreateFolderRequestDtoBuilder) updates) =>
@@ -31,7 +27,7 @@ class _$CreateFolderRequestDto extends CreateFolderRequestDto {
 
   @override
   CreateFolderRequestDtoBuilder toBuilder() =>
-      new CreateFolderRequestDtoBuilder()..replace(this);
+      CreateFolderRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -95,7 +91,6 @@ class CreateFolderRequestDtoBuilder
 
   @override
   void replace(CreateFolderRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CreateFolderRequestDto;
   }
 
@@ -109,11 +104,12 @@ class CreateFolderRequestDtoBuilder
 
   _$CreateFolderRequestDto _build() {
     final _$result = _$v ??
-        new _$CreateFolderRequestDto._(
-            name: BuiltValueNullFieldError.checkNotNull(
-                name, r'CreateFolderRequestDto', 'name'),
-            parentId: parentId,
-            mappeId: mappeId);
+        _$CreateFolderRequestDto._(
+          name: BuiltValueNullFieldError.checkNotNull(
+              name, r'CreateFolderRequestDto', 'name'),
+          parentId: parentId,
+          mappeId: mappeId,
+        );
     replace(_$result);
     return _$result;
   }

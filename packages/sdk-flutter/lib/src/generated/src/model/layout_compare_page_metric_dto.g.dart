@@ -20,7 +20,7 @@ class _$LayoutComparePageMetricDto extends LayoutComparePageMetricDto {
 
   factory _$LayoutComparePageMetricDto(
           [void Function(LayoutComparePageMetricDtoBuilder)? updates]) =>
-      (new LayoutComparePageMetricDtoBuilder()..update(updates))._build();
+      (LayoutComparePageMetricDtoBuilder()..update(updates))._build();
 
   _$LayoutComparePageMetricDto._(
       {required this.pageNumber,
@@ -28,13 +28,7 @@ class _$LayoutComparePageMetricDto extends LayoutComparePageMetricDto {
       this.inkDeviation,
       required this.pageReliable,
       this.errorCode})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        pageNumber, r'LayoutComparePageMetricDto', 'pageNumber');
-    BuiltValueNullFieldError.checkNotNull(
-        pageReliable, r'LayoutComparePageMetricDto', 'pageReliable');
-  }
-
+      : super._();
   @override
   LayoutComparePageMetricDto rebuild(
           void Function(LayoutComparePageMetricDtoBuilder) updates) =>
@@ -42,7 +36,7 @@ class _$LayoutComparePageMetricDto extends LayoutComparePageMetricDto {
 
   @override
   LayoutComparePageMetricDtoBuilder toBuilder() =>
-      new LayoutComparePageMetricDtoBuilder()..replace(this);
+      LayoutComparePageMetricDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -123,7 +117,6 @@ class LayoutComparePageMetricDtoBuilder
 
   @override
   void replace(LayoutComparePageMetricDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$LayoutComparePageMetricDto;
   }
 
@@ -137,14 +130,15 @@ class LayoutComparePageMetricDtoBuilder
 
   _$LayoutComparePageMetricDto _build() {
     final _$result = _$v ??
-        new _$LayoutComparePageMetricDto._(
-            pageNumber: BuiltValueNullFieldError.checkNotNull(
-                pageNumber, r'LayoutComparePageMetricDto', 'pageNumber'),
-            ssim: ssim,
-            inkDeviation: inkDeviation,
-            pageReliable: BuiltValueNullFieldError.checkNotNull(
-                pageReliable, r'LayoutComparePageMetricDto', 'pageReliable'),
-            errorCode: errorCode);
+        _$LayoutComparePageMetricDto._(
+          pageNumber: BuiltValueNullFieldError.checkNotNull(
+              pageNumber, r'LayoutComparePageMetricDto', 'pageNumber'),
+          ssim: ssim,
+          inkDeviation: inkDeviation,
+          pageReliable: BuiltValueNullFieldError.checkNotNull(
+              pageReliable, r'LayoutComparePageMetricDto', 'pageReliable'),
+          errorCode: errorCode,
+        );
     replace(_$result);
     return _$result;
   }

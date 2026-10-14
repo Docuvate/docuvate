@@ -1601,6 +1601,10 @@
     "documentDate": "Datum",
     "suggestedDate": "Vorschlag: {{date}}",
     "confidenceHint": "Sicherheit {{percent}} %",
+    "archiveHashIdenticalDuplicates": "Alle identischen Duplikate: neueste behalten",
+    "archiveHashIdenticalConfirmTitle": "Hash-identische Duplikate archivieren?",
+    "archiveHashIdenticalConfirmBody": "In jeder byte-identischen Gruppe bleibt das neueste Dokument erhalten; alle anderen Versionen werden archiviert.",
+    "archiveHashIdenticalSuccess": "{{count}} Duplikatgruppe(n) bereinigt.",
     "rejectLabel": "„{{name}}“ verwerfen",
     "keyboardHint": "Enter: Alle übernehmen · Pfeiltasten: nächstes Dokument"
   },

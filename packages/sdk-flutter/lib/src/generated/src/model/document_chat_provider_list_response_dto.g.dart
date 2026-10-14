@@ -20,23 +20,14 @@ class _$DocumentChatProviderListResponseDto
   factory _$DocumentChatProviderListResponseDto(
           [void Function(DocumentChatProviderListResponseDtoBuilder)?
               updates]) =>
-      (new DocumentChatProviderListResponseDtoBuilder()..update(updates))
-          ._build();
+      (DocumentChatProviderListResponseDtoBuilder()..update(updates))._build();
 
   _$DocumentChatProviderListResponseDto._(
       {required this.selectable,
       required this.unavailable,
       this.development,
       required this.meta})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        selectable, r'DocumentChatProviderListResponseDto', 'selectable');
-    BuiltValueNullFieldError.checkNotNull(
-        unavailable, r'DocumentChatProviderListResponseDto', 'unavailable');
-    BuiltValueNullFieldError.checkNotNull(
-        meta, r'DocumentChatProviderListResponseDto', 'meta');
-  }
-
+      : super._();
   @override
   DocumentChatProviderListResponseDto rebuild(
           void Function(DocumentChatProviderListResponseDtoBuilder) updates) =>
@@ -44,7 +35,7 @@ class _$DocumentChatProviderListResponseDto
 
   @override
   DocumentChatProviderListResponseDtoBuilder toBuilder() =>
-      new DocumentChatProviderListResponseDtoBuilder()..replace(this);
+      DocumentChatProviderListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -86,27 +77,27 @@ class DocumentChatProviderListResponseDtoBuilder
 
   ListBuilder<DocumentChatProviderInfoDto>? _selectable;
   ListBuilder<DocumentChatProviderInfoDto> get selectable =>
-      _$this._selectable ??= new ListBuilder<DocumentChatProviderInfoDto>();
+      _$this._selectable ??= ListBuilder<DocumentChatProviderInfoDto>();
   set selectable(ListBuilder<DocumentChatProviderInfoDto>? selectable) =>
       _$this._selectable = selectable;
 
   ListBuilder<DocumentChatUnavailableBackendInfoDto>? _unavailable;
   ListBuilder<DocumentChatUnavailableBackendInfoDto> get unavailable =>
       _$this._unavailable ??=
-          new ListBuilder<DocumentChatUnavailableBackendInfoDto>();
+          ListBuilder<DocumentChatUnavailableBackendInfoDto>();
   set unavailable(
           ListBuilder<DocumentChatUnavailableBackendInfoDto>? unavailable) =>
       _$this._unavailable = unavailable;
 
   ListBuilder<DocumentChatProviderInfoDto>? _development;
   ListBuilder<DocumentChatProviderInfoDto> get development =>
-      _$this._development ??= new ListBuilder<DocumentChatProviderInfoDto>();
+      _$this._development ??= ListBuilder<DocumentChatProviderInfoDto>();
   set development(ListBuilder<DocumentChatProviderInfoDto>? development) =>
       _$this._development = development;
 
   DocumentChatProvidersCatalogMetaDtoBuilder? _meta;
   DocumentChatProvidersCatalogMetaDtoBuilder get meta =>
-      _$this._meta ??= new DocumentChatProvidersCatalogMetaDtoBuilder();
+      _$this._meta ??= DocumentChatProvidersCatalogMetaDtoBuilder();
   set meta(DocumentChatProvidersCatalogMetaDtoBuilder? meta) =>
       _$this._meta = meta;
 
@@ -128,7 +119,6 @@ class DocumentChatProviderListResponseDtoBuilder
 
   @override
   void replace(DocumentChatProviderListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatProviderListResponseDto;
   }
 
@@ -145,11 +135,12 @@ class DocumentChatProviderListResponseDtoBuilder
     _$DocumentChatProviderListResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentChatProviderListResponseDto._(
-              selectable: selectable.build(),
-              unavailable: unavailable.build(),
-              development: _development?.build(),
-              meta: meta.build());
+          _$DocumentChatProviderListResponseDto._(
+            selectable: selectable.build(),
+            unavailable: unavailable.build(),
+            development: _development?.build(),
+            meta: meta.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -162,10 +153,8 @@ class DocumentChatProviderListResponseDtoBuilder
         _$failedField = 'meta';
         meta.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
-            r'DocumentChatProviderListResponseDto',
-            _$failedField,
-            e.toString());
+        throw BuiltValueNestedFieldError(r'DocumentChatProviderListResponseDto',
+            _$failedField, e.toString());
       }
       rethrow;
     }

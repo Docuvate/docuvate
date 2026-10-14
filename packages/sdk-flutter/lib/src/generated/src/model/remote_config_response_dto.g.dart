@@ -12,13 +12,9 @@ class _$RemoteConfigResponseDto extends RemoteConfigResponseDto {
 
   factory _$RemoteConfigResponseDto(
           [void Function(RemoteConfigResponseDtoBuilder)? updates]) =>
-      (new RemoteConfigResponseDtoBuilder()..update(updates))._build();
+      (RemoteConfigResponseDtoBuilder()..update(updates))._build();
 
-  _$RemoteConfigResponseDto._({required this.featureFlags}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        featureFlags, r'RemoteConfigResponseDto', 'featureFlags');
-  }
-
+  _$RemoteConfigResponseDto._({required this.featureFlags}) : super._();
   @override
   RemoteConfigResponseDto rebuild(
           void Function(RemoteConfigResponseDtoBuilder) updates) =>
@@ -26,7 +22,7 @@ class _$RemoteConfigResponseDto extends RemoteConfigResponseDto {
 
   @override
   RemoteConfigResponseDtoBuilder toBuilder() =>
-      new RemoteConfigResponseDtoBuilder()..replace(this);
+      RemoteConfigResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -58,7 +54,7 @@ class RemoteConfigResponseDtoBuilder
 
   FeatureFlagsResponseDtoBuilder? _featureFlags;
   FeatureFlagsResponseDtoBuilder get featureFlags =>
-      _$this._featureFlags ??= new FeatureFlagsResponseDtoBuilder();
+      _$this._featureFlags ??= FeatureFlagsResponseDtoBuilder();
   set featureFlags(FeatureFlagsResponseDtoBuilder? featureFlags) =>
       _$this._featureFlags = featureFlags;
 
@@ -77,7 +73,6 @@ class RemoteConfigResponseDtoBuilder
 
   @override
   void replace(RemoteConfigResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$RemoteConfigResponseDto;
   }
 
@@ -93,14 +88,16 @@ class RemoteConfigResponseDtoBuilder
     _$RemoteConfigResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$RemoteConfigResponseDto._(featureFlags: featureFlags.build());
+          _$RemoteConfigResponseDto._(
+            featureFlags: featureFlags.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'featureFlags';
         featureFlags.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'RemoteConfigResponseDto', _$failedField, e.toString());
       }
       rethrow;

@@ -14,14 +14,9 @@ class _$DocumentChatRequestDto extends DocumentChatRequestDto {
 
   factory _$DocumentChatRequestDto(
           [void Function(DocumentChatRequestDtoBuilder)? updates]) =>
-      (new DocumentChatRequestDtoBuilder()..update(updates))._build();
+      (DocumentChatRequestDtoBuilder()..update(updates))._build();
 
-  _$DocumentChatRequestDto._({required this.message, this.history})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        message, r'DocumentChatRequestDto', 'message');
-  }
-
+  _$DocumentChatRequestDto._({required this.message, this.history}) : super._();
   @override
   DocumentChatRequestDto rebuild(
           void Function(DocumentChatRequestDtoBuilder) updates) =>
@@ -29,7 +24,7 @@ class _$DocumentChatRequestDto extends DocumentChatRequestDto {
 
   @override
   DocumentChatRequestDtoBuilder toBuilder() =>
-      new DocumentChatRequestDtoBuilder()..replace(this);
+      DocumentChatRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -67,7 +62,7 @@ class DocumentChatRequestDtoBuilder
 
   ListBuilder<ChatMessageDto>? _history;
   ListBuilder<ChatMessageDto> get history =>
-      _$this._history ??= new ListBuilder<ChatMessageDto>();
+      _$this._history ??= ListBuilder<ChatMessageDto>();
   set history(ListBuilder<ChatMessageDto>? history) =>
       _$this._history = history;
 
@@ -87,7 +82,6 @@ class DocumentChatRequestDtoBuilder
 
   @override
   void replace(DocumentChatRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatRequestDto;
   }
 
@@ -103,17 +97,18 @@ class DocumentChatRequestDtoBuilder
     _$DocumentChatRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentChatRequestDto._(
-              message: BuiltValueNullFieldError.checkNotNull(
-                  message, r'DocumentChatRequestDto', 'message'),
-              history: _history?.build());
+          _$DocumentChatRequestDto._(
+            message: BuiltValueNullFieldError.checkNotNull(
+                message, r'DocumentChatRequestDto', 'message'),
+            history: _history?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'history';
         _history?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentChatRequestDto', _$failedField, e.toString());
       }
       rethrow;

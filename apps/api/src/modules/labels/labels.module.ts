@@ -69,6 +69,7 @@ import { HeadlessPgEmbeddingDensityRepository } from './infrastructure/headless-
 import { HttpEmbeddingAdapter } from './infrastructure/http-embedding.adapter.js';
 import { HttpEmbeddingDensityAdapter } from './infrastructure/http-embedding-density.adapter.js';
 import { PgEmbeddingDensityRepository } from './infrastructure/pg-embedding-density.repository.js';
+import { PgLabelCoOccurrenceRepository } from './infrastructure/pg-label-co-occurrence.repository.js';
 import { PgLabelEmbeddingRepository } from './infrastructure/pg-label-embedding.repository.js';
 import { DocumentLabelsController } from './presentation/document-labels.controller.js';
 import { LabelsOverviewController } from './presentation/labels-overview.controller.js';
@@ -142,6 +143,7 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
       : [PgEmbeddingDensityRepository]),
     RecordEmbeddingFeedbackUseCase,
     LoadDocumentLabelSuggestionsUseCase,
+    PgLabelCoOccurrenceRepository,
     AssignDocumentTagUseCase,
     RemoveDocumentTagUseCase,
     AcceptTagSuggestionUseCase,
@@ -154,6 +156,7 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     ApplyEmbeddingSuggestionsUseCase,
     RefreshEmbeddingSuggestionsUseCase,
     LoadDocumentLabelSuggestionsUseCase,
+    PgLabelCoOccurrenceRepository,
     AcceptTagSuggestionUseCase,
     LABEL_EMBEDDING_REPOSITORY,
     EMBEDDING_PORT,

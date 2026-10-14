@@ -26,6 +26,8 @@ import {
   ragFusionGateThreshold,
   ragRerankerGateThreshold,
 } from '../domain/cited-chat-constants.js';
+import { preferExtractiveChatAnswer } from '../domain/cited-chat-extractive-first.js';
+import { rejectedClaimsAllowRetrievalFallback } from '../domain/cited-chat-retrieval-fallback-eligibility.js';
 import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
@@ -39,6 +41,7 @@ import {
   passesCalibratedRetrievalGate,
   shouldAttemptCitedLlm,
 } from '../domain/rag-llm-eligibility.js';
+import { buildRetrievalFallbackCitation } from '../domain/retrieval-span-citation.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 import {
   buildRejectedClaimBenchLog,
@@ -412,10 +415,12 @@ export class CitedChatGenerationService {
           )
         : null;
     if (libraryAmountExtractive) {
-      return this.finalizeExtractiveGeneration({
+      return this.publishExtractiveResult({
         messageId,
         threadId,
-        extractive: libraryAmountExtractive,
+        text: libraryAmountExtractive.text,
+        chunk: libraryAmountExtractive.chunk,
+        quote: libraryAmountExtractive.quote,
       });
     }
 
@@ -464,7 +469,13 @@ export class CitedChatGenerationService {
         return { content: abstentionText, abstained: true };
       }
       if (extractive) {
-        return this.finalizeExtractiveGeneration({ messageId, threadId, extractive });
+        return this.publishExtractiveResult({
+          messageId,
+          threadId,
+          text: extractive.text,
+          chunk: extractive.chunk,
+          quote: extractive.quote,
+        });
       }
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
@@ -493,6 +504,25 @@ export class CitedChatGenerationService {
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.failGeneration(messageId, threadId, userId, 'cancelled', 'User cancelled generation');
       return { content: '', abstained: true };
+    }
+
+    if (preferExtractiveChatAnswer(userMessage) && gateOk && extractivePool.length > 0) {
+      const earlyExtractive = await this.resolveExtractiveAnswer(
+        userMessage,
+        extractivePool,
+        extractiveMinScore,
+        scope,
+        locale
+      );
+      if (earlyExtractive) {
+        return this.publishExtractiveResult({
+          messageId,
+          threadId,
+          text: earlyExtractive.text,
+          chunk: earlyExtractive.chunk,
+          quote: earlyExtractive.quote,
+        });
+      }
     }
 
     await this.threads.updateMessageGeneration(messageId, {
@@ -698,26 +728,61 @@ export class CitedChatGenerationService {
       : undefined;
 
     if (verified.length === 0) {
-      const llmRejectedExtractive =
-        scope === 'library' &&
+      const allowRetrievalFallback = rejectedClaimsAllowRetrievalFallback(rejected);
+      const libraryAmountExtractiveFallback =
+        scope === 'library' && isLibraryAmountLookupQuestion(userMessage);
+      if (
         gateOk &&
-        isLibraryAmountLookupQuestion(userMessage) &&
-        extractivePool.length > 0
-          ? await this.resolveExtractiveAnswer(
-              userMessage,
-              extractivePool,
-              extractiveMinScore,
-              scope,
-              locale
-            )
-          : null;
-      if (llmRejectedExtractive) {
-        return this.finalizeExtractiveGeneration({
-          messageId,
-          threadId,
-          extractive: llmRejectedExtractive,
-          errorDetail: benchStats,
+        extractivePool.length > 0 &&
+        (allowRetrievalFallback || libraryAmountExtractiveFallback)
+      ) {
+        const postVerifyExtractive = await this.resolveExtractiveAnswer(
+          userMessage,
+          extractivePool,
+          extractiveMinScore,
+          scope,
+          locale
+        );
+        if (postVerifyExtractive) {
+          return this.publishExtractiveResult({
+            messageId,
+            threadId,
+            text: postVerifyExtractive.text,
+            chunk: postVerifyExtractive.chunk,
+            quote: postVerifyExtractive.quote,
+            errorDetail: benchStats,
+          });
+        }
+      }
+      const primaryClaim = llm.parsed.claims[0]?.text?.trim() ?? '';
+      if (allowRetrievalFallback && gateOk && top.length > 0) {
+        const topRow = top[0];
+        const fallback = buildRetrievalFallbackCitation({
+          chunk: topRow.chunk,
+          query: retrievalQuery,
+          claimText: primaryClaim,
         });
+        if (fallback) {
+          let fallbackText = fallback.text;
+          if (scope === 'library') {
+            fallbackText = formatLibraryExtractiveAnswer({
+              userMessage,
+              quote: fallback.quote,
+              documentTitle: topRow.chunk.documentTitle,
+              locale,
+            });
+          }
+          return this.publishExtractiveResult({
+            messageId,
+            threadId,
+            text: fallbackText,
+            chunk: topRow.chunk,
+            quote: fallback.quote,
+            charStart: fallback.charStart,
+            charEnd: fallback.charEnd,
+            errorDetail: benchStats,
+          });
+        }
       }
       await this.citationsRepo.replaceCitations(messageId, []);
       await this.threads.updateMessageGeneration(messageId, {
@@ -763,39 +828,44 @@ export class CitedChatGenerationService {
     return { content, abstained: false };
   }
 
-  private async finalizeExtractiveGeneration(input: {
+  private async publishExtractiveResult(input: {
     messageId: string;
     threadId: string;
-    extractive: { text: string; chunk: CitedChatChunkCandidate; quote: string };
+    text: string;
+    chunk: CitedChatChunkCandidate;
+    quote: string;
+    charStart?: number;
+    charEnd?: number;
     errorDetail?: string;
   }): Promise<CitedChatGenerationResult> {
-    const { messageId, threadId, extractive, errorDetail } = input;
-    const extractiveChunkId = extractive.chunk.chunkId;
+    const extractiveChunkId = input.chunk.chunkId;
     const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+    const charStart = input.charStart ?? input.chunk.charStart ?? 0;
+    const charEnd = input.charEnd ?? input.chunk.charEnd ?? input.quote.length;
     if (extractiveChunkIsUuid) {
-      await this.citationsRepo.replaceCitations(messageId, [
+      await this.citationsRepo.replaceCitations(input.messageId, [
         {
           ordinal: 1,
-          chunkId: extractive.chunk.chunkId,
-          quote: extractive.quote,
-          charStart: extractive.chunk.charStart ?? 0,
-          charEnd: extractive.chunk.charEnd ?? extractive.quote.length,
+          chunkId: input.chunk.chunkId,
+          quote: input.quote,
+          charStart,
+          charEnd,
         },
       ]);
     } else {
-      await this.citationsRepo.replaceCitations(messageId, []);
+      await this.citationsRepo.replaceCitations(input.messageId, []);
     }
     const content = extractiveChunkIsUuid
-      ? formatVerifiedCitedContent([{ text: extractive.text, ordinal: 1 }])
-      : extractive.text;
-    await this.threads.updateMessageGeneration(messageId, {
+      ? formatVerifiedCitedContent([{ text: input.text, ordinal: 1 }])
+      : input.text;
+    await this.threads.updateMessageGeneration(input.messageId, {
       content,
       generationStatus: 'done',
       generationPhase: null,
-      errorDetail,
+      errorDetail: input.errorDetail,
       finalizeOnlyIfInFlight: true,
     });
-    await this.threads.touchThread(threadId);
+    await this.threads.touchThread(input.threadId);
     return { content, abstained: false };
   }
 

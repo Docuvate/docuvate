@@ -64,6 +64,14 @@ describe('duplicate-set-groups', () => {
     expect(sets.some((ids) => ids.length >= 4)).toBe(true);
   });
 
+  it('dedupes identical set ids from hash subset expansion', () => {
+    const hashPairs = [{ documentId: 'a1', candidateDocumentId: 'a2' }];
+    const allPairs = [...hashPairs, { documentId: 'a1', candidateDocumentId: 'a2' }];
+    const sets = groupDuplicateSetsWithHashSubsets(allPairs, hashPairs);
+    const setIds = sets.map((ids) => duplicateSetIdFromDocumentIds(ids));
+    expect(new Set(setIds).size).toBe(setIds.length);
+  });
+
   it('floors embedding similarity display below 100 %', () => {
     expect(
       duplicateSetDisplaySimilarityPercent({

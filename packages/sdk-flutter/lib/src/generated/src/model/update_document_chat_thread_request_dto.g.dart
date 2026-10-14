@@ -14,14 +14,9 @@ class _$UpdateDocumentChatThreadRequestDto
   factory _$UpdateDocumentChatThreadRequestDto(
           [void Function(UpdateDocumentChatThreadRequestDtoBuilder)?
               updates]) =>
-      (new UpdateDocumentChatThreadRequestDtoBuilder()..update(updates))
-          ._build();
+      (UpdateDocumentChatThreadRequestDtoBuilder()..update(updates))._build();
 
-  _$UpdateDocumentChatThreadRequestDto._({required this.title}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        title, r'UpdateDocumentChatThreadRequestDto', 'title');
-  }
-
+  _$UpdateDocumentChatThreadRequestDto._({required this.title}) : super._();
   @override
   UpdateDocumentChatThreadRequestDto rebuild(
           void Function(UpdateDocumentChatThreadRequestDtoBuilder) updates) =>
@@ -29,7 +24,7 @@ class _$UpdateDocumentChatThreadRequestDto
 
   @override
   UpdateDocumentChatThreadRequestDtoBuilder toBuilder() =>
-      new UpdateDocumentChatThreadRequestDtoBuilder()..replace(this);
+      UpdateDocumentChatThreadRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -78,7 +73,6 @@ class UpdateDocumentChatThreadRequestDtoBuilder
 
   @override
   void replace(UpdateDocumentChatThreadRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdateDocumentChatThreadRequestDto;
   }
 
@@ -93,9 +87,10 @@ class UpdateDocumentChatThreadRequestDtoBuilder
 
   _$UpdateDocumentChatThreadRequestDto _build() {
     final _$result = _$v ??
-        new _$UpdateDocumentChatThreadRequestDto._(
-            title: BuiltValueNullFieldError.checkNotNull(
-                title, r'UpdateDocumentChatThreadRequestDto', 'title'));
+        _$UpdateDocumentChatThreadRequestDto._(
+          title: BuiltValueNullFieldError.checkNotNull(
+              title, r'UpdateDocumentChatThreadRequestDto', 'title'),
+        );
     replace(_$result);
     return _$result;
   }

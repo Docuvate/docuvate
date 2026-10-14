@@ -22,7 +22,7 @@ class _$UpdatePaperlessInstallationRequestDto
   factory _$UpdatePaperlessInstallationRequestDto(
           [void Function(UpdatePaperlessInstallationRequestDtoBuilder)?
               updates]) =>
-      (new UpdatePaperlessInstallationRequestDtoBuilder()..update(updates))
+      (UpdatePaperlessInstallationRequestDtoBuilder()..update(updates))
           ._build();
 
   _$UpdatePaperlessInstallationRequestDto._(
@@ -32,7 +32,6 @@ class _$UpdatePaperlessInstallationRequestDto
       this.rerunOcr,
       this.includeArchivedPdf})
       : super._();
-
   @override
   UpdatePaperlessInstallationRequestDto rebuild(
           void Function(UpdatePaperlessInstallationRequestDtoBuilder)
@@ -41,7 +40,7 @@ class _$UpdatePaperlessInstallationRequestDto
 
   @override
   UpdatePaperlessInstallationRequestDtoBuilder toBuilder() =>
-      new UpdatePaperlessInstallationRequestDtoBuilder()..replace(this);
+      UpdatePaperlessInstallationRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -91,7 +90,7 @@ class UpdatePaperlessInstallationRequestDtoBuilder
 
   MapBuilder<String, String>? _credentials;
   MapBuilder<String, String> get credentials =>
-      _$this._credentials ??= new MapBuilder<String, String>();
+      _$this._credentials ??= MapBuilder<String, String>();
   set credentials(MapBuilder<String, String>? credentials) =>
       _$this._credentials = credentials;
 
@@ -127,7 +126,6 @@ class UpdatePaperlessInstallationRequestDtoBuilder
 
   @override
   void replace(UpdatePaperlessInstallationRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$UpdatePaperlessInstallationRequestDto;
   }
 
@@ -144,19 +142,20 @@ class UpdatePaperlessInstallationRequestDtoBuilder
     _$UpdatePaperlessInstallationRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$UpdatePaperlessInstallationRequestDto._(
-              displayName: displayName,
-              credentials: _credentials?.build(),
-              keepOcrText: keepOcrText,
-              rerunOcr: rerunOcr,
-              includeArchivedPdf: includeArchivedPdf);
+          _$UpdatePaperlessInstallationRequestDto._(
+            displayName: displayName,
+            credentials: _credentials?.build(),
+            keepOcrText: keepOcrText,
+            rerunOcr: rerunOcr,
+            includeArchivedPdf: includeArchivedPdf,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'credentials';
         _credentials?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'UpdatePaperlessInstallationRequestDto',
             _$failedField,
             e.toString());

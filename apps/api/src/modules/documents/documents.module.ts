@@ -25,6 +25,7 @@ import { DeleteDocumentUseCase } from './application/delete-document.use-case.js
 import { DocumentChatUseCase } from './application/document-chat.use-case.js';
 import { AcceptDocumentReviewUseCase } from './application/document-review/accept-document-review.use-case.js';
 import { AcceptDocumentReviewBatchUseCase } from './application/document-review/accept-document-review-batch.use-case.js';
+import { ArchiveHashIdenticalDuplicateSetsUseCase } from './application/document-review/archive-hash-identical-duplicate-sets.use-case.js';
 import { ListDocumentReviewQueueUseCase } from './application/document-review/list-document-review-queue.use-case.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
@@ -79,6 +80,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     AcceptDocumentReviewUseCase,
     AcceptDocumentReviewBatchUseCase,
     PromoteHighConfidenceExtractionSuggestionsUseCase,
+    ArchiveHashIdenticalDuplicateSetsUseCase,
     UploadDocumentUseCase,
     GetDocumentUseCase,
     ListDocumentsUseCase,

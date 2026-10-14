@@ -21,12 +21,12 @@ InviteAdminUserRequestDtoRoleEnum _$inviteAdminUserRequestDtoRoleEnumValueOf(
     case 'member':
       return _$inviteAdminUserRequestDtoRoleEnum_member;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<InviteAdminUserRequestDtoRoleEnum>
-    _$inviteAdminUserRequestDtoRoleEnumValues = new BuiltSet<
+    _$inviteAdminUserRequestDtoRoleEnumValues = BuiltSet<
         InviteAdminUserRequestDtoRoleEnum>(const <InviteAdminUserRequestDtoRoleEnum>[
   _$inviteAdminUserRequestDtoRoleEnum_admin,
   _$inviteAdminUserRequestDtoRoleEnum_member,
@@ -34,7 +34,7 @@ final BuiltSet<InviteAdminUserRequestDtoRoleEnum>
 
 Serializer<InviteAdminUserRequestDtoRoleEnum>
     _$inviteAdminUserRequestDtoRoleEnumSerializer =
-    new _$InviteAdminUserRequestDtoRoleEnumSerializer();
+    _$InviteAdminUserRequestDtoRoleEnumSerializer();
 
 class _$InviteAdminUserRequestDtoRoleEnumSerializer
     implements PrimitiveSerializer<InviteAdminUserRequestDtoRoleEnum> {
@@ -76,17 +76,11 @@ class _$InviteAdminUserRequestDto extends InviteAdminUserRequestDto {
 
   factory _$InviteAdminUserRequestDto(
           [void Function(InviteAdminUserRequestDtoBuilder)? updates]) =>
-      (new InviteAdminUserRequestDtoBuilder()..update(updates))._build();
+      (InviteAdminUserRequestDtoBuilder()..update(updates))._build();
 
   _$InviteAdminUserRequestDto._(
       {required this.email, required this.name, this.role})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        email, r'InviteAdminUserRequestDto', 'email');
-    BuiltValueNullFieldError.checkNotNull(
-        name, r'InviteAdminUserRequestDto', 'name');
-  }
-
+      : super._();
   @override
   InviteAdminUserRequestDto rebuild(
           void Function(InviteAdminUserRequestDtoBuilder) updates) =>
@@ -94,7 +88,7 @@ class _$InviteAdminUserRequestDto extends InviteAdminUserRequestDto {
 
   @override
   InviteAdminUserRequestDtoBuilder toBuilder() =>
-      new InviteAdminUserRequestDtoBuilder()..replace(this);
+      InviteAdminUserRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -159,7 +153,6 @@ class InviteAdminUserRequestDtoBuilder
 
   @override
   void replace(InviteAdminUserRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$InviteAdminUserRequestDto;
   }
 
@@ -173,12 +166,13 @@ class InviteAdminUserRequestDtoBuilder
 
   _$InviteAdminUserRequestDto _build() {
     final _$result = _$v ??
-        new _$InviteAdminUserRequestDto._(
-            email: BuiltValueNullFieldError.checkNotNull(
-                email, r'InviteAdminUserRequestDto', 'email'),
-            name: BuiltValueNullFieldError.checkNotNull(
-                name, r'InviteAdminUserRequestDto', 'name'),
-            role: role);
+        _$InviteAdminUserRequestDto._(
+          email: BuiltValueNullFieldError.checkNotNull(
+              email, r'InviteAdminUserRequestDto', 'email'),
+          name: BuiltValueNullFieldError.checkNotNull(
+              name, r'InviteAdminUserRequestDto', 'name'),
+          role: role,
+        );
     replace(_$result);
     return _$result;
   }

@@ -3,7 +3,6 @@
 import type { RecognizedFieldExtractionOutcome } from '@docuvate/contracts';
 
 import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-reextract-config.js';
-import { globalFieldStorageKey } from '../domain/recognized-field.entity.js';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
@@ -29,6 +28,7 @@ export interface RecognizedFieldExtractionAttemptRow {
   fieldKey: string;
   outcome: RecognizedFieldExtractionOutcome;
   confidence: number | null;
+  extractorVersion: number;
   updatedAt: Date;
 }
 
@@ -38,6 +38,7 @@ function mapRow(row: Record<string, unknown>): RecognizedFieldExtractionAttemptR
     fieldKey: parseString(row.field_key),
     outcome: parseEnum(row.outcome, OUTCOMES, 'not_found'),
     confidence: parseOptionalNumber(row.confidence),
+    extractorVersion: parseOptionalNumber(row.extractor_version) ?? 0,
     updatedAt: parseDate(row.updated_at),
   };
 }
@@ -48,7 +49,7 @@ export class PgRecognizedFieldExtractionAttemptRepository {
 
   async listForDocument(documentId: string, userId: string): Promise<RecognizedFieldExtractionAttemptRow[]> {
     const result = await this.pool.query(
-      `SELECT a.field_definition_id, a.outcome, a.confidence, a.updated_at, r.field_key
+      `SELECT a.field_definition_id, a.outcome, a.confidence, a.extractor_version, a.updated_at, r.field_key
        FROM document_recognized_field_extraction_attempt a
        JOIN recognized_field_definitions r ON r.id = a.field_definition_id
        WHERE a.document_id = $1 AND a.tenant_id = $2
@@ -123,11 +124,19 @@ export class PgRecognizedFieldExtractionAttemptRepository {
     if (ids.length === 0) {
       return [];
     }
+    const globalKey = `global:${field.key}`;
     const result = await this.pool.query<{ id: string }>(
       `SELECT d.id
        FROM documents d
        WHERE d.user_id = $1
          AND d.id = ANY($2::uuid[])
+         AND NOT EXISTS (
+           SELECT 1
+           FROM extraction_field_corrections c
+           WHERE c.user_id = $1
+             AND c.document_id = d.id
+             AND c.field_key IN ($4, $5)
+         )
          AND (
            NOT EXISTS (
              SELECT 1
@@ -142,23 +151,11 @@ export class PgRecognizedFieldExtractionAttemptRepository {
              WHERE a.document_id = d.id
                AND a.field_definition_id = $3
                AND a.tenant_id = $1
-               AND coalesce(a.extractor_version, 0) < $4
+               AND a.outcome IN ('not_found', 'below_threshold')
+               AND coalesce(a.extractor_version, 0) < $6
            )
-         )
-         AND NOT EXISTS (
-           SELECT 1
-           FROM extraction_field_corrections c
-           WHERE c.document_id = d.id
-             AND c.user_id = $1
-             AND c.field_key = ANY($5::text[])
          )`,
-      [
-        userId,
-        ids,
-        field.id,
-        RECOGNIZED_FIELD_EXTRACTOR_VERSION,
-        [field.key, globalFieldStorageKey(field.key)],
-      ]
+      [userId, ids, field.id, globalKey, field.key, RECOGNIZED_FIELD_EXTRACTOR_VERSION]
     );
     return result.rows.map((row) => parseString(requireRecord(row).id));
   }

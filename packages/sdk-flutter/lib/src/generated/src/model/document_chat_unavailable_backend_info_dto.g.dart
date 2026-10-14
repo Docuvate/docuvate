@@ -20,7 +20,7 @@ class _$DocumentChatUnavailableBackendInfoDto
   factory _$DocumentChatUnavailableBackendInfoDto(
           [void Function(DocumentChatUnavailableBackendInfoDtoBuilder)?
               updates]) =>
-      (new DocumentChatUnavailableBackendInfoDtoBuilder()..update(updates))
+      (DocumentChatUnavailableBackendInfoDtoBuilder()..update(updates))
           ._build();
 
   _$DocumentChatUnavailableBackendInfoDto._(
@@ -28,17 +28,7 @@ class _$DocumentChatUnavailableBackendInfoDto
       required this.label,
       required this.reason,
       required this.setupHint})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        id, r'DocumentChatUnavailableBackendInfoDto', 'id');
-    BuiltValueNullFieldError.checkNotNull(
-        label, r'DocumentChatUnavailableBackendInfoDto', 'label');
-    BuiltValueNullFieldError.checkNotNull(
-        reason, r'DocumentChatUnavailableBackendInfoDto', 'reason');
-    BuiltValueNullFieldError.checkNotNull(
-        setupHint, r'DocumentChatUnavailableBackendInfoDto', 'setupHint');
-  }
-
+      : super._();
   @override
   DocumentChatUnavailableBackendInfoDto rebuild(
           void Function(DocumentChatUnavailableBackendInfoDtoBuilder)
@@ -47,7 +37,7 @@ class _$DocumentChatUnavailableBackendInfoDto
 
   @override
   DocumentChatUnavailableBackendInfoDtoBuilder toBuilder() =>
-      new DocumentChatUnavailableBackendInfoDtoBuilder()..replace(this);
+      DocumentChatUnavailableBackendInfoDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -122,7 +112,6 @@ class DocumentChatUnavailableBackendInfoDtoBuilder
 
   @override
   void replace(DocumentChatUnavailableBackendInfoDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatUnavailableBackendInfoDto;
   }
 
@@ -137,15 +126,16 @@ class DocumentChatUnavailableBackendInfoDtoBuilder
 
   _$DocumentChatUnavailableBackendInfoDto _build() {
     final _$result = _$v ??
-        new _$DocumentChatUnavailableBackendInfoDto._(
-            id: BuiltValueNullFieldError.checkNotNull(
-                id, r'DocumentChatUnavailableBackendInfoDto', 'id'),
-            label: BuiltValueNullFieldError.checkNotNull(
-                label, r'DocumentChatUnavailableBackendInfoDto', 'label'),
-            reason: BuiltValueNullFieldError.checkNotNull(
-                reason, r'DocumentChatUnavailableBackendInfoDto', 'reason'),
-            setupHint: BuiltValueNullFieldError.checkNotNull(setupHint,
-                r'DocumentChatUnavailableBackendInfoDto', 'setupHint'));
+        _$DocumentChatUnavailableBackendInfoDto._(
+          id: BuiltValueNullFieldError.checkNotNull(
+              id, r'DocumentChatUnavailableBackendInfoDto', 'id'),
+          label: BuiltValueNullFieldError.checkNotNull(
+              label, r'DocumentChatUnavailableBackendInfoDto', 'label'),
+          reason: BuiltValueNullFieldError.checkNotNull(
+              reason, r'DocumentChatUnavailableBackendInfoDto', 'reason'),
+          setupHint: BuiltValueNullFieldError.checkNotNull(
+              setupHint, r'DocumentChatUnavailableBackendInfoDto', 'setupHint'),
+        );
     replace(_$result);
     return _$result;
   }

@@ -21,7 +21,7 @@ class _$DocumentExtractionSummaryDto extends DocumentExtractionSummaryDto {
 
   factory _$DocumentExtractionSummaryDto(
           [void Function(DocumentExtractionSummaryDtoBuilder)? updates]) =>
-      (new DocumentExtractionSummaryDtoBuilder()..update(updates))._build();
+      (DocumentExtractionSummaryDtoBuilder()..update(updates))._build();
 
   _$DocumentExtractionSummaryDto._(
       {required this.text,
@@ -29,13 +29,7 @@ class _$DocumentExtractionSummaryDto extends DocumentExtractionSummaryDto {
       this.markdown,
       this.layoutIrAvailable,
       this.layoutIrPages})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        text, r'DocumentExtractionSummaryDto', 'text');
-    BuiltValueNullFieldError.checkNotNull(
-        fields, r'DocumentExtractionSummaryDto', 'fields');
-  }
-
+      : super._();
   @override
   DocumentExtractionSummaryDto rebuild(
           void Function(DocumentExtractionSummaryDtoBuilder) updates) =>
@@ -43,7 +37,7 @@ class _$DocumentExtractionSummaryDto extends DocumentExtractionSummaryDto {
 
   @override
   DocumentExtractionSummaryDtoBuilder toBuilder() =>
-      new DocumentExtractionSummaryDtoBuilder()..replace(this);
+      DocumentExtractionSummaryDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -92,7 +86,7 @@ class DocumentExtractionSummaryDtoBuilder
 
   ListBuilder<ExtractedFieldDto>? _fields;
   ListBuilder<ExtractedFieldDto> get fields =>
-      _$this._fields ??= new ListBuilder<ExtractedFieldDto>();
+      _$this._fields ??= ListBuilder<ExtractedFieldDto>();
   set fields(ListBuilder<ExtractedFieldDto>? fields) => _$this._fields = fields;
 
   String? _markdown;
@@ -107,7 +101,7 @@ class DocumentExtractionSummaryDtoBuilder
   ListBuilder<DocumentExtractionSummaryDtoLayoutIrPagesInner>? _layoutIrPages;
   ListBuilder<DocumentExtractionSummaryDtoLayoutIrPagesInner>
       get layoutIrPages => _$this._layoutIrPages ??=
-          new ListBuilder<DocumentExtractionSummaryDtoLayoutIrPagesInner>();
+          ListBuilder<DocumentExtractionSummaryDtoLayoutIrPagesInner>();
   set layoutIrPages(
           ListBuilder<DocumentExtractionSummaryDtoLayoutIrPagesInner>?
               layoutIrPages) =>
@@ -132,7 +126,6 @@ class DocumentExtractionSummaryDtoBuilder
 
   @override
   void replace(DocumentExtractionSummaryDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentExtractionSummaryDto;
   }
 
@@ -148,13 +141,14 @@ class DocumentExtractionSummaryDtoBuilder
     _$DocumentExtractionSummaryDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentExtractionSummaryDto._(
-              text: BuiltValueNullFieldError.checkNotNull(
-                  text, r'DocumentExtractionSummaryDto', 'text'),
-              fields: fields.build(),
-              markdown: markdown,
-              layoutIrAvailable: layoutIrAvailable,
-              layoutIrPages: _layoutIrPages?.build());
+          _$DocumentExtractionSummaryDto._(
+            text: BuiltValueNullFieldError.checkNotNull(
+                text, r'DocumentExtractionSummaryDto', 'text'),
+            fields: fields.build(),
+            markdown: markdown,
+            layoutIrAvailable: layoutIrAvailable,
+            layoutIrPages: _layoutIrPages?.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -164,7 +158,7 @@ class DocumentExtractionSummaryDtoBuilder
         _$failedField = 'layoutIrPages';
         _layoutIrPages?.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentExtractionSummaryDto', _$failedField, e.toString());
       }
       rethrow;

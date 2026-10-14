@@ -23,6 +23,7 @@ import {
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { AcceptDocumentReviewUseCase } from '../application/document-review/accept-document-review.use-case.js';
 import { AcceptDocumentReviewBatchUseCase } from '../application/document-review/accept-document-review-batch.use-case.js';
+import { ArchiveHashIdenticalDuplicateSetsUseCase } from '../application/document-review/archive-hash-identical-duplicate-sets.use-case.js';
 import { ListDocumentReviewQueueUseCase } from '../application/document-review/list-document-review-queue.use-case.js';
 
 @ApiDocuvateController('review-queue')
@@ -32,7 +33,8 @@ export class ReviewQueueController {
   constructor(
     private readonly listQueue: ListDocumentReviewQueueUseCase,
     private readonly acceptReview: AcceptDocumentReviewUseCase,
-    private readonly acceptBatch: AcceptDocumentReviewBatchUseCase
+    private readonly acceptBatch: AcceptDocumentReviewBatchUseCase,
+    private readonly archiveHashIdenticalSets: ArchiveHashIdenticalDuplicateSetsUseCase
   ) {}
 
   @Get('summary')
@@ -88,5 +90,18 @@ export class ReviewQueueController {
   ): Promise<AcceptDocumentReviewBatchResponseDtoClass> {
     const minConfidence = body.minConfidence ?? 0.9;
     return this.acceptBatch.execute(session.user.id, subject, minConfidence);
+  }
+
+  @Post('archive-hash-identical-duplicates')
+  @ApiDocuvateRoute({
+    operationId: 'archiveHashIdenticalDuplicateSets',
+    summary: 'Archive all hash-identical duplicate sets (keep newest in each set)',
+  })
+  async archiveHashIdenticalDuplicates(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject
+  ): Promise<{ setsArchived: number }> {
+    await this.listQueue.summary(session.user.id, subject);
+    return this.archiveHashIdenticalSets.execute(session.user.id);
   }
 }

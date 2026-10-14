@@ -169,4 +169,14 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
     }
     return [...perField.values()].flat();
   }
+
+  async listCorrectedFieldKeysForDocument(userId: string, documentId: string): Promise<string[]> {
+    const result = await this.pool.query<{ field_key: string }>(
+      `SELECT DISTINCT field_key
+       FROM extraction_field_corrections
+       WHERE user_id = $1 AND document_id = $2`,
+      [userId, documentId]
+    );
+    return result.rows.map((row) => parseString(requireRecord(row).field_key));
+  }
 }

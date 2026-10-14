@@ -14,16 +14,10 @@ class _$DocumentBulkRequestDto extends DocumentBulkRequestDto {
 
   factory _$DocumentBulkRequestDto(
           [void Function(DocumentBulkRequestDtoBuilder)? updates]) =>
-      (new DocumentBulkRequestDtoBuilder()..update(updates))._build();
+      (DocumentBulkRequestDtoBuilder()..update(updates))._build();
 
   _$DocumentBulkRequestDto._({required this.ids, required this.bulk})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        ids, r'DocumentBulkRequestDto', 'ids');
-    BuiltValueNullFieldError.checkNotNull(
-        bulk, r'DocumentBulkRequestDto', 'bulk');
-  }
-
+      : super._();
   @override
   DocumentBulkRequestDto rebuild(
           void Function(DocumentBulkRequestDtoBuilder) updates) =>
@@ -31,7 +25,7 @@ class _$DocumentBulkRequestDto extends DocumentBulkRequestDto {
 
   @override
   DocumentBulkRequestDtoBuilder toBuilder() =>
-      new DocumentBulkRequestDtoBuilder()..replace(this);
+      DocumentBulkRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -64,12 +58,12 @@ class DocumentBulkRequestDtoBuilder
   _$DocumentBulkRequestDto? _$v;
 
   ListBuilder<String>? _ids;
-  ListBuilder<String> get ids => _$this._ids ??= new ListBuilder<String>();
+  ListBuilder<String> get ids => _$this._ids ??= ListBuilder<String>();
   set ids(ListBuilder<String>? ids) => _$this._ids = ids;
 
   DocumentBulkActionDtoBuilder? _bulk;
   DocumentBulkActionDtoBuilder get bulk =>
-      _$this._bulk ??= new DocumentBulkActionDtoBuilder();
+      _$this._bulk ??= DocumentBulkActionDtoBuilder();
   set bulk(DocumentBulkActionDtoBuilder? bulk) => _$this._bulk = bulk;
 
   DocumentBulkRequestDtoBuilder() {
@@ -88,7 +82,6 @@ class DocumentBulkRequestDtoBuilder
 
   @override
   void replace(DocumentBulkRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentBulkRequestDto;
   }
 
@@ -104,7 +97,10 @@ class DocumentBulkRequestDtoBuilder
     _$DocumentBulkRequestDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentBulkRequestDto._(ids: ids.build(), bulk: bulk.build());
+          _$DocumentBulkRequestDto._(
+            ids: ids.build(),
+            bulk: bulk.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
@@ -113,7 +109,7 @@ class DocumentBulkRequestDtoBuilder
         _$failedField = 'bulk';
         bulk.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentBulkRequestDto', _$failedField, e.toString());
       }
       rethrow;

@@ -536,6 +536,12 @@ export async function acceptDocumentReviewHighConfidenceBatch(
   });
 }
 
+export async function archiveHashIdenticalDuplicateSets(): Promise<{ setsArchived: number }> {
+  return request<{ setsArchived: number }>('/review-queue/archive-hash-identical-duplicates', {
+    method: 'POST',
+  });
+}
+
 export async function applyDocumentLabelCorrection(
   documentId: string,
   toTagId: string

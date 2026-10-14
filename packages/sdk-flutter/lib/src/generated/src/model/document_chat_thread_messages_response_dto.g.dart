@@ -14,15 +14,11 @@ class _$DocumentChatThreadMessagesResponseDto
   factory _$DocumentChatThreadMessagesResponseDto(
           [void Function(DocumentChatThreadMessagesResponseDtoBuilder)?
               updates]) =>
-      (new DocumentChatThreadMessagesResponseDtoBuilder()..update(updates))
+      (DocumentChatThreadMessagesResponseDtoBuilder()..update(updates))
           ._build();
 
   _$DocumentChatThreadMessagesResponseDto._({required this.messages})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        messages, r'DocumentChatThreadMessagesResponseDto', 'messages');
-  }
-
+      : super._();
   @override
   DocumentChatThreadMessagesResponseDto rebuild(
           void Function(DocumentChatThreadMessagesResponseDtoBuilder)
@@ -31,7 +27,7 @@ class _$DocumentChatThreadMessagesResponseDto
 
   @override
   DocumentChatThreadMessagesResponseDtoBuilder toBuilder() =>
-      new DocumentChatThreadMessagesResponseDtoBuilder()..replace(this);
+      DocumentChatThreadMessagesResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -65,7 +61,7 @@ class DocumentChatThreadMessagesResponseDtoBuilder
 
   ListBuilder<ChatMessageRecordDto>? _messages;
   ListBuilder<ChatMessageRecordDto> get messages =>
-      _$this._messages ??= new ListBuilder<ChatMessageRecordDto>();
+      _$this._messages ??= ListBuilder<ChatMessageRecordDto>();
   set messages(ListBuilder<ChatMessageRecordDto>? messages) =>
       _$this._messages = messages;
 
@@ -84,7 +80,6 @@ class DocumentChatThreadMessagesResponseDtoBuilder
 
   @override
   void replace(DocumentChatThreadMessagesResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatThreadMessagesResponseDto;
   }
 
@@ -101,15 +96,16 @@ class DocumentChatThreadMessagesResponseDtoBuilder
     _$DocumentChatThreadMessagesResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentChatThreadMessagesResponseDto._(
-              messages: messages.build());
+          _$DocumentChatThreadMessagesResponseDto._(
+            messages: messages.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'messages';
         messages.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentChatThreadMessagesResponseDto',
             _$failedField,
             e.toString());
