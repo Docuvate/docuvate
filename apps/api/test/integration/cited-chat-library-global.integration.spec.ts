@@ -99,12 +99,6 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
       int8Vectors: decoyVectors,
     });
 
-    const chunkRow = await pool.query<{ id: string }>(
-      `SELECT id FROM document_text_chunks WHERE document_id = $1 LIMIT 1`,
-      [answerDocId]
-    );
-    answerChunkId = chunkRow.rows[0]?.id ?? '';
-
     retrieval = new PgCitedChatRetrievalRepository(pool);
     threads = new PgDocumentChatThreadRepository(pool);
     citations = new PgChatMessageCitationsRepository(pool);
@@ -152,9 +146,9 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
        LIMIT 1`,
       [answerDocId]
     );
+    expect(answerRow.rows.length).toBeGreaterThan(0);
     const answerRowData = answerRow.rows[0];
-    expect(answerRowData).toBeDefined();
-    if (!answerRowData) {
+    if (answerRowData === undefined) {
       throw new Error('expected answer chunk row');
     }
     vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([
