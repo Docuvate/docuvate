@@ -203,14 +203,13 @@ export class PgCitedChatRetrievalRepository {
         }))
         .sort((a, b) => a.hamming - b.hamming)
         .slice(0, 256);
-      const candidateIds = new Set([...fused.keys()]);
       const denseList: RankedItem[] = prefiltered
-        .filter((row) => candidateIds.has(row.id) || prefiltered.length <= 64)
         .map((row) => ({
           id: row.id,
           score: int8Dot(row.scale, row.bytes, queryInt8.scale, queryInt8.bytes),
         }))
         .sort((a, b) => b.score - a.score)
+        .slice(0, RAG_HYBRID_CANDIDATE_LIMIT)
         .map((row, i) => ({ id: row.id, rank: i + 1 }));
       if (denseList.length > 0) {
         fused = reciprocalRankFusion([ftsList, trgmList, denseList]);
