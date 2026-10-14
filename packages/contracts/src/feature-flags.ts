@@ -9,6 +9,18 @@ export interface FeatureFlagsDto {
   sourceConnectors: boolean;
   /** Arena engine compare, non-default extractors, and related research tooling. */
   experimentalResearchModels: boolean;
+  /** FAKTUM index, DSL lookups, and cited exact answers in document chat. */
+  exactAnswers: boolean;
+  /** Template-subtracted duplicate detection beyond content-hash matching. */
+  smartDuplicates: boolean;
+  /** Abstention gate against unknown entities before FAKTUM and LLM answers. */
+  answerAbstention: boolean;
+  /** Learned value types replacing heuristic field regexes in extraction. */
+  learnedValueTypes: boolean;
+  /** Layout key-value role head on document embeddings. */
+  layoutKeyValueRoles: boolean;
+  /** Optional local chat model (e.g. Qwen2.5-1.5B) instead of the default remote path. */
+  localChatModel: boolean;
 }
 
 export type FeatureFlagKey = keyof FeatureFlagsDto;

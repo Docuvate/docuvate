@@ -12,6 +12,24 @@ export class FeatureFlagsResponseDto {
 
   @ApiProperty()
   experimentalResearchModels!: boolean;
+
+  @ApiProperty()
+  exactAnswers!: boolean;
+
+  @ApiProperty()
+  smartDuplicates!: boolean;
+
+  @ApiProperty()
+  answerAbstention!: boolean;
+
+  @ApiProperty()
+  learnedValueTypes!: boolean;
+
+  @ApiProperty()
+  layoutKeyValueRoles!: boolean;
+
+  @ApiProperty()
+  localChatModel!: boolean;
 }
 
 export class RemoteConfigResponseDto implements RemoteConfigDto {

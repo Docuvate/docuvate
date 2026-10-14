@@ -30,8 +30,23 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'DuplicatePairLabels20261011210000',
   'DocumentRepresentation20261012120000',
   'FeatureFlags20261013120000',
+  'FeatureFlagMlKeys20261013200000',
   'UserChatCloudLlm20261013120000',
 ] as const;
+
+async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
+  const rows: unknown = await runner.query(
+    `SELECT pg_get_constraintdef(c.oid) AS def
+     FROM pg_constraint c
+     JOIN pg_class t ON c.conrelid = t.oid
+     JOIN pg_namespace n ON t.relnamespace = n.oid
+     WHERE n.nspname = 'public'
+       AND t.relname = 'feature_flag'
+       AND c.conname = 'feature_flag_key_check'`
+  );
+  const def = queryTextCell(rows, 'def');
+  return def?.includes('exact_answers') ?? false;
+}
 
 function queryTextCell(rows: unknown, key: string): string | null {
   if (!Array.isArray(rows) || rows.length === 0) {
@@ -120,6 +135,8 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.document_representation');
     case 'FeatureFlags20261013120000':
       return regClassExists(runner, 'public.feature_flag');
+    case 'FeatureFlagMlKeys20261013200000':
+      return featureFlagMlKeysConstraintPresent(runner);
     case 'UserChatCloudLlm20261013120000':
       return columnExists(runner, 'user_preferences', 'document_chat_cloud_base_url');
     default:

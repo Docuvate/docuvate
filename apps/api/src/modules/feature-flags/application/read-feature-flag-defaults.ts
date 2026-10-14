@@ -13,5 +13,11 @@ export function readFeatureFlagDefaultsFromEnv(): FeatureFlagsDto {
     layoutReconstructionCompare: envFlagEnabled('DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE'),
     sourceConnectors: envFlagEnabled('DOCUVATE_FEATURE_SOURCE_CONNECTORS'),
     experimentalResearchModels: envFlagEnabled('DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS'),
+    exactAnswers: envFlagEnabled('DOCUVATE_FEATURE_EXACT_ANSWERS'),
+    smartDuplicates: envFlagEnabled('DOCUVATE_FEATURE_SMART_DUPLICATES'),
+    answerAbstention: envFlagEnabled('DOCUVATE_FEATURE_ANSWER_ABSTENTION'),
+    learnedValueTypes: envFlagEnabled('DOCUVATE_FEATURE_LEARNED_VALUE_TYPES'),
+    layoutKeyValueRoles: envFlagEnabled('DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES'),
+    localChatModel: envFlagEnabled('DOCUVATE_FEATURE_LOCAL_CHAT_MODEL'),
   };
 }

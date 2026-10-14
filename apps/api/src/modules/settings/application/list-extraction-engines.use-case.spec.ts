@@ -18,6 +18,12 @@ describe('ListExtractionEnginesUseCase', () => {
           layoutReconstructionCompare: false,
           sourceConnectors: false,
           experimentalResearchModels: false,
+          exactAnswers: false,
+          smartDuplicates: false,
+          answerAbstention: false,
+          learnedValueTypes: false,
+          layoutKeyValueRoles: false,
+          localChatModel: false,
         })
       ),
       assertEnabled: vi.fn(() => Promise.resolve()),

@@ -16,6 +16,12 @@ describe('filterExtractionEngines', () => {
         layoutReconstructionCompare: false,
         sourceConnectors: false,
         experimentalResearchModels: false,
+        exactAnswers: false,
+        smartDuplicates: false,
+        answerAbstention: false,
+        learnedValueTypes: false,
+        layoutKeyValueRoles: false,
+        localChatModel: false,
       })
     ).toEqual([{ id: 'pipeline', label: 'Pipeline', description: 'Default pipeline' }]);
   });
@@ -26,6 +32,12 @@ describe('filterExtractionEngines', () => {
         layoutReconstructionCompare: false,
         sourceConnectors: false,
         experimentalResearchModels: true,
+        exactAnswers: false,
+        smartDuplicates: false,
+        answerAbstention: false,
+        learnedValueTypes: false,
+        layoutKeyValueRoles: false,
+        localChatModel: false,
       })
     ).toEqual(engines);
   });

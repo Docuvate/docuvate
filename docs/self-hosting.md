@@ -42,8 +42,14 @@ Installation-wide **defaults** (when a tenant has no override row) are set in `.
 | `DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE` | Layout reconstruction / SSIM compare (Nachbau/Vergleich) |
 | `DOCUVATE_FEATURE_SOURCE_CONNECTORS` | SFTP scanner ingress, SFTP fetch, Paperless-ngx connectors |
 | `DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS` | Arena engine compare and non-default extractors |
+| `DOCUVATE_FEATURE_EXACT_ANSWERS` | FAKTUM index and cited exact answers in document chat |
+| `DOCUVATE_FEATURE_SMART_DUPLICATES` | Template-subtracted duplicate detection |
+| `DOCUVATE_FEATURE_ANSWER_ABSTENTION` | Abstention gate against unknown entities in chat |
+| `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Learned value types instead of heuristic field regexes |
+| `DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES` | Layout key-value role head on embeddings |
+| `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL` | Optional local chat model profile |
 
-Per-tenant overrides are stored in `feature_flag` (tenant id + flag key + enabled). Authenticated clients resolve flags via `GET /v1/remote-config` (override wins over env default).
+Per-tenant overrides are stored in `feature_flag` (tenant id + flag key + enabled). Authenticated clients resolve flags via `GET /v1/remote-config` (override wins over env default). Installation admins can set overrides with `PATCH /v1/admin/users/{userId}/feature-flags`.
 
 ## Volumes
 

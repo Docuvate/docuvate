@@ -3,6 +3,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../../shared/infrastructure/auth/auth.module.js';
+import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import {
   BanAdminUserUseCase,
   GetAdminAccessUseCase,
@@ -21,7 +22,7 @@ import { PgUserInvitationRepository } from './infrastructure/pg-user-invitation.
 import { AdminController } from './presentation/admin.controller.js';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, FeatureFlagsModule],
   controllers: [AdminController],
   providers: [
     { provide: USER_INVITATION_REPOSITORY, useClass: PgUserInvitationRepository },

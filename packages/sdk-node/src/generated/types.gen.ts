@@ -376,6 +376,12 @@ export type FeatureFlagsResponseDto = {
     layoutReconstructionCompare: boolean;
     sourceConnectors: boolean;
     experimentalResearchModels: boolean;
+    exactAnswers: boolean;
+    smartDuplicates: boolean;
+    answerAbstention: boolean;
+    learnedValueTypes: boolean;
+    layoutKeyValueRoles: boolean;
+    localChatModel: boolean;
 };
 
 export type FolderListResponseDto = {
@@ -746,6 +752,11 @@ export type SendDocumentChatThreadMessageResponseDto = {
     setupHint?: string;
 };
 
+export type SetAdminUserFeatureFlagRequestDto = {
+    flag: 'layoutReconstructionCompare' | 'sourceConnectors' | 'experimentalResearchModels' | 'exactAnswers' | 'smartDuplicates' | 'answerAbstention' | 'learnedValueTypes' | 'layoutKeyValueRoles' | 'localChatModel';
+    enabled: boolean;
+};
+
 export type SetAdminUserRoleRequestDto = {
     role: 'admin' | 'member';
 };
@@ -1000,6 +1011,30 @@ export type BanAdminUserError = BanAdminUserErrors[keyof BanAdminUserErrors];
 export type BanAdminUserResponses = {
     201: unknown;
 };
+
+export type SetAdminUserFeatureFlagData = {
+    body: SetAdminUserFeatureFlagRequestDto;
+    path: {
+        userId: string;
+    };
+    query?: never;
+    url: '/admin/users/{userId}/feature-flags';
+};
+
+export type SetAdminUserFeatureFlagErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type SetAdminUserFeatureFlagError = SetAdminUserFeatureFlagErrors[keyof SetAdminUserFeatureFlagErrors];
+
+export type SetAdminUserFeatureFlagResponses = {
+    200: FeatureFlagsResponseDto;
+};
+
+export type SetAdminUserFeatureFlagResponse = SetAdminUserFeatureFlagResponses[keyof SetAdminUserFeatureFlagResponses];
 
 export type ResendAdminUserInvitationData = {
     body?: never;
