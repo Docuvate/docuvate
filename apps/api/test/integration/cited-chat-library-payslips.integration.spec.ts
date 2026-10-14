@@ -76,23 +76,25 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
     octoberDocId = randomUUID();
     const searchRepo = new PgGlobalSearchRepository(pool);
 
-    for (let month = 1; month <= PAYSLIP_COUNT; month += 1) {
-      const docId = month === 10 ? octoberDocId : randomUUID();
+    for (let index = 0; index < PAYSLIP_COUNT; index += 1) {
+      const month = (index % 12) + 1;
+      const year = 2024 - Math.floor(index / 12);
+      const isTargetOctober2024 = year === 2024 && month === 10;
+      const docId = isTargetOctober2024 ? octoberDocId : randomUUID();
       const monthPadded = String(month).padStart(2, '0');
-      const gross =
-        month === 10 ? OCTOBER_GROSS : `${String(4000 + month)},00`;
-      const body = `Entgeltnachweis ${monthPadded}/2024\nGesamtbrutto ${gross} EUR\nNettoentgelt ${String(3000 + month)},00 EUR`;
+      const gross = isTargetOctober2024 ? OCTOBER_GROSS : `${String(4000 + month)},00`;
+      const body = `Entgeltnachweis ${monthPadded}/${String(year)}\nGesamtbrutto ${gross} EUR\nNettoentgelt ${String(3000 + month)},00 EUR`;
       await pool.query(
         `INSERT INTO documents (id, user_id, filename, title, mime_type, storage_key, status, extracted_text, document_date)
          VALUES ($1,$2,$3,$4,'application/pdf',$5,'ready',$6,$7)`,
         [
           docId,
           userId,
-          `2024_${monthPadded}.pdf`,
-          `Entgeltnachweis ${monthPadded}/2024`,
-          `k/payslip-${monthPadded}`,
+          `${String(year)}_${monthPadded}.pdf`,
+          `Entgeltnachweis ${monthPadded}/${String(year)}`,
+          `k/payslip-${String(year)}-${monthPadded}-${String(index)}`,
           body,
-          `2024-${monthPadded}-28`,
+          `${String(year)}-${monthPadded}-28`,
         ]
       );
       const chunks = splitTextChunksWithSpans(body);
