@@ -75,7 +75,7 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
     expect(result.rows).toHaveLength(0);
   }
 
-  async function assertEveryDocumentVisibleInLibraryList(userId: string): Promise<void> {
+  async function assertLibraryListMatchesStackRoles(userId: string): Promise<void> {
     const total = await pool.query(
       `SELECT COUNT(*)::int AS n FROM documents WHERE user_id = $1`,
       [userId]
@@ -90,9 +90,20 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
          )`,
       [userId]
     );
+    const hiddenVersions = await pool.query(
+      `SELECT COUNT(*)::int AS n
+       FROM document_stack_members m
+       JOIN document_duplicate_stacks s ON s.id = m.stack_id
+       WHERE s.user_id = $1 AND m.role = 'version'`,
+      [userId]
+    );
     const totalRow = requireRecord(total.rows[0]);
     const visibleRow = requireRecord(visible.rows[0]);
-    expect(parseNumber(totalRow.n, 0)).toBe(parseNumber(visibleRow.n, 0));
+    const hiddenRow = requireRecord(hiddenVersions.rows[0]);
+    const totalDocs = parseNumber(totalRow.n, 0);
+    const visibleDocs = parseNumber(visibleRow.n, 0);
+    const versionMembers = parseNumber(hiddenRow.n, 0);
+    expect(visibleDocs + versionMembers).toBe(totalDocs);
   }
 
   async function insertReadyDocument(
@@ -332,7 +343,7 @@ describe('SplitDuplicateStacksByContentHash migration (Testcontainers Postgres)'
       await runMigration();
 
       await assertExactlyOnePrimaryPerNonEmptyStack(userId);
-      await assertEveryDocumentVisibleInLibraryList(userId);
+      await assertLibraryListMatchesStackRoles(userId);
 
       const megaMembers = await pool.query(
         `SELECT COUNT(*)::int AS n
