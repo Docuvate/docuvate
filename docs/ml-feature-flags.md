@@ -19,7 +19,7 @@ Remote-config keys use **camelCase** (for example `exactAnswers`). Database over
 | `layoutKeyValueRoles` | off (**experimental**) | `DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES` | Layout key/value role head on passage embeddings (key vs value linking on OCR boxes). Experimental; default stays off until you enable it per installation or tenant. |
 | `localChatModel` | off | `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL` | Open-ended LLM answers in cited document chat via a **local** Ollama model when the stack runs the optional **`chat-local`** Compose profile. Without this flag, chat still works on the cited extractive / retrieval path. |
 
-Legacy non-ML flags (`layoutReconstructionCompare`, `sourceConnectors`, `experimentalResearchModels`) remain documented in [Self-hosting](./self-hosting.md).
+Other installation flags (`layoutReconstructionCompare`, `sourceConnectors`, `experimentalResearchModels`) remain documented in [Self-hosting](./self-hosting.md).
 
 ### Enabling flags
 
