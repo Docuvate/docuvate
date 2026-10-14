@@ -16,6 +16,7 @@ import {
 } from '../../search/domain/reciprocal-rank-fusion.js';
 import type { ChatAnswerType } from '../domain/chat-answer-type-prototypes.schema.js';
 import { libraryAnswerTypeWantsContextualSupplement } from '../domain/chat-answer-type-prototypes.schema.js';
+import { libraryContextSearchTokens } from '../domain/library-context-search-tokens.js';
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
 import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
 import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
@@ -288,9 +289,7 @@ export class PgCitedChatRetrievalRepository {
     if (!libraryAnswerTypeWantsContextualSupplement(answerType)) {
       return [];
     }
-    const tokens = tokenizeSearchQuery(query).filter(
-      (token) => token.length >= 3 || /^20\d{2}$/.test(token)
-    );
+    const tokens = libraryContextSearchTokens(query);
     if (tokens.length === 0) {
       return [];
     }
