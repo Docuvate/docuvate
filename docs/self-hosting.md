@@ -42,9 +42,14 @@ Installation-wide **defaults** (when a tenant has no override row) are set in `.
 | `DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE` | Layout reconstruction / SSIM compare (Nachbau/Vergleich) |
 | `DOCUVATE_FEATURE_SOURCE_CONNECTORS` | SFTP scanner ingress, SFTP fetch, Paperless-ngx connectors |
 | `DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS` | Arena engine compare and non-default extractors |
-| `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Learned value-type field hints (default **on**; set `false` for regex heuristics) |
+| `DOCUVATE_FEATURE_EXACT_ANSWERS` | Structured fact index and exact answers in document chat |
+| `DOCUVATE_FEATURE_ANSWER_ABSTENTION` | Abstention when fact match confidence is too low (with `exactAnswers`) |
+| `DOCUVATE_FEATURE_SMART_DUPLICATES` | Template-subtracted duplicate hints (UI only) |
+| `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Learned value types instead of regex field heuristics (**default on** when unset — see [ML feature flags](./ml-feature-flags.md)) |
+| `DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES` | Experimental layout key/value role head |
+| `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL` | Local Ollama LLM path when `chat-local` profile is enabled |
 
-Per-tenant overrides are stored in `feature_flag` (tenant id + flag key + enabled). Authenticated clients resolve flags via `GET /v1/remote-config` (override wins over env default).
+Per-tenant overrides are stored in `feature_flag` (tenant id + flag key + enabled). Authenticated clients resolve flags via `GET /v1/remote-config` (override wins over env default). Installation admins can set overrides with `PATCH /v1/admin/users/{userId}/feature-flags`. Full reference: [ML feature flags](./ml-feature-flags.md) (English) and [ML-Feature-Flags (DE)](./ml-feature-flags.de.md).
 
 ### Optional local LLM (`chat-local`)
 
@@ -54,7 +59,7 @@ Default `docker compose up` does **not** start Ollama. Document chat uses worker
 docker compose --profile chat-local -f docker-compose.yml -f docker-compose.chat-local.yml up -d
 ```
 
-This pulls **`qwen2.5:1.5b`** (Q4) and sets `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL=true` on the API. Tenants still need the `localChatModel` flag (or a per-tenant override) before open-ended LLM answers use Ollama.
+This pulls **`qwen2.5:1.5b`** (Q4) and sets `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL=true` on the API. Tenants still need the **`localChatModel`** flag (or a per-tenant override) before open-ended LLM answers use Ollama. See [ML feature flags](./ml-feature-flags.md) for all ML flags, RAM tables, and encoder re-index progress (`GET /v1/settings/encoder-reindex`).
 
 ## Volumes
 

@@ -42,6 +42,15 @@ Lokal: Mailpit http://localhost:8025
 
 Administratoren können Mitglieder und andere Administratoren **sperren** (Suspend) und wieder **entsperren**. Gesperrte Nutzer können sich nicht anmelden; die Sperre liegt in `installation_user_suspensions`.
 
+## ML-Feature-Flags pro Mandant (0.1.0 Beta)
+
+Installations-Administratoren können ML-Funktionen **pro Mandant** aktivieren oder deaktivieren, unabhängig vom installationsweiten Standard in `.env`:
+
+- API: `PATCH /v1/admin/users/{userId}/feature-flags` (OpenAPI unter `/v1/openapi.json`)
+- Aufgelöste Werte für die Web-App: `GET /v1/remote-config` nach Anmeldung
+
+Beschreibung der Flags (`exactAnswers`, `answerAbstention`, `smartDuplicates`, `learnedValueTypes`, `layoutKeyValueRoles`, `localChatModel`), Env-Variablen `DOCUVATE_FEATURE_*`, Compose-Profil **`chat-local`** und Encoder-Re-Index: **[ML-Feature-Flags (DE)](./ml-feature-flags.de.md)** bzw. [English](./ml-feature-flags.md).
+
 ## Demo-Daten für Screenshots
 
 ```bash

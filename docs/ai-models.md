@@ -4,12 +4,14 @@ For the shipped third-party model inventory (revision, license, size, purpose), 
 
 Docuvate keeps model choices behind **ports** so CPU-first self-hosting stays the default.
 
+Per-tenant **ML feature flags** (exact answers, smart duplicates, learned value types, optional local chat, and related env vars) are documented in [ML feature flags](./ml-feature-flags.md) ([DE](./ml-feature-flags.de.md)). Community Edition **0.1.0 beta** ships ONNX int8 **`multilingual-e5-small`** as the central encoder and optional **`chat-local`** Compose profile with **`qwen2.5:1.5b`** instead of a mandatory Ollama service in the base stack.
+
 | Capability | Port / adapter | Default model or backend | Notes |
 | --- | --- | --- | --- |
 | PDF text (born-digital) | Worker `PipelineExtractor` → `pdfplumber` | No ML | Text layer + word boxes normalized 0–1 in `ExtractionBlock` |
 | OCR and layout blocks (scans) | Worker `PipelineExtractor` → PaddleOCR | PP-OCRv4 mobile (`german` → latin multilingual) | DE Belege-first; Latin script covers German + English on receipts |
 | Structured fields (heuristic) | Worker extract pipeline | Regex on extracted text | amount, date, vendor line |
-| Document embeddings | Worker `/extract` (central representation) | `intfloat/multilingual-e5-small` (MIT; ONNX Runtime int8 CPU, pinned HF revision) | int8 units in `document_representation_*`; see `docs/ml-pipeline.md` |
+| Document embeddings | Worker `/extract` (central representation) | `intfloat/multilingual-e5-small` (MIT; ONNX Runtime int8 CPU, pinned HF revision) | int8 units in `document_representation_*`; tune `DOCUVATE_ENCODER_INTRA_OP_THREADS` / `OMP_NUM_THREADS`; background re-index via `GET /v1/settings/encoder-reindex`; see `docs/ml-pipeline.md` |
 | Tag suggestions (semantic) | `ApplyEmbeddingSuggestionsUseCase` | Document mean vector from representation | NEST + centroid fallback; no `/embed` on upload |
 | Label vocabulary (structure) | `GET /labels/recommendations` | Heuristics on extraction + centroid/name similarity | New labels, merge/rename hints; dismiss/accept; user `label_recommendation_blocklist` |
 | Label map (structure) | `GET /labels/map` | PCA 3D on stored `document_embeddings` + tag centroids; web renders convex hulls / spheres per label | CPU-only projection in API |
@@ -39,13 +41,13 @@ Docling gives strong layout semantics but depends on **PyTorch** and multi-hundr
 - `DOCUMENT_CHAT_PROVIDER`: `rag-ollama` (default in Compose when `WORKER_URL` + `OLLAMA_URL`), `context`, `donut-ml`, `ollama`, `mock`, `off`
 - `DOCUMENT_CHAT_MODE`: alternate name for provider (`mock` / `ollama` / `off`)
 - User override: `user_preferences.preferred_chat_provider` (Settings UI)
-- `OLLAMA_URL`, `OLLAMA_MODEL`: RAG+Ollama product path (`rag-ollama`). Compose defaults: `http://ollama:11434`, **`qwen2.5:3b`** (CPU, auch ARM64/k3s). Dev-only full-doc `ollama` / `mock` require `NODE_ENV=development` or `DOCUMENT_CHAT_DEV_PROVIDERS=true`.
+- `OLLAMA_URL`, `OLLAMA_MODEL`: RAG+Ollama product path (`rag-ollama`). Base Compose **does not** start Ollama; optional **`chat-local`** profile sets `http://ollama:11434` and default **`qwen2.5:1.5b`**. Dev-only full-doc `ollama` / `mock` require `NODE_ENV=development` or `DOCUMENT_CHAT_DEV_PROVIDERS=true`.
 - Optional cloud LLM (OpenAI-compatible): `DOCUMENT_CHAT_OPENAI_BASE_URL`, `DOCUMENT_CHAT_OPENAI_API_KEY`, `DOCUMENT_CHAT_OPENAI_MODEL`, or per-user fields in Settings.
 - `DOCUVATE_AI_PROFILE`: `off` (retrieval only), `cpu-small` (1.5B), `cpu-medium` (**3B**, default), `gpu` (hardware gate).
 - `OLLAMA_MEM_LIMIT`: Docker `mem_limit` for the Ollama service (default **`3g`**). **`qwen3:4b` needs ≥ `5g`** loaded (~3.5 GB model + overhead); otherwise OOM/restart.
 - `OLLAMA_CHAT_TIMEOUT_MS` (sync `/chat`), `OLLAMA_CHAT_IDLE_TIMEOUT_MS` (streaming idle), `OLLAMA_NUM_CTX`, `OLLAMA_NUM_PREDICT`, `OLLAMA_KEEP_ALIVE`, `WORKER_RAG_CONTEXT_TIMEOUT_MS`: CPU tuning (Compose defaults: 180s / 120s idle / **2048 ctx / 256 predict** / 30m keep-alive / 120s RAG). Set `OLLAMA_NUM_THREADS` / `OMP_NUM_THREADS` on ARM64 nodes (see `bench/cited_chat_eval.py` output).
 - `DOCUVATE_RERANKER_MODEL` (worker, default **`BAAI/bge-reranker-v2-m3-int8`**), `RAG_RERANKER_GATE_MIN` (API, default **0.21**), `RAG_FUSION_GATE_MIN` (API, default **0.02** when reranker unreachable).
-- Docker Desktop: allocate **10–12 GB** RAM total for worker + Ollama + API; see `OLLAMA_MEM_LIMIT` in `docker-compose.yml`.
+- Docker Desktop: allocate **~6 GiB** RAM for the default stack without Ollama, or **≥ 8 GiB** with **`chat-local`**; see `OLLAMA_MEM_LIMIT` when Ollama is enabled.
 - **Donut DocVQA** (optional): large worker image (transformers + torch). **Product UI gates Donut** unless the worker reports a GPU with sufficient VRAM (`GET /settings/hardware`). CPU inference is not offered for chat even if `[donut]` is installed.
   - **Docker Compose:** set `WORKER_OPTIONAL_EXTRAS=donut`, **rebuild** worker, and reserve a GPU (see `docker-compose.yml` comments). Without Donut or RAG+Ollama, the document **Chat tab stays visible but disabled** (overlay + Settings hint).
   - **Local dev (Mac etc.):** `uv sync --extra donut` in `apps/worker` (handled on the host; not required in default compose).

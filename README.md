@@ -132,9 +132,9 @@ The optional local model defaults to **`qwen2.5:1.5b`**. Increase `OLLAMA_MEM_LI
 | --- | ---: |
 | Worker with ONNX int8 `multilingual-e5-small` + OCR/reranker headroom | **~0.9–1.2 GiB** |
 | API + web + Postgres + Valkey + MinIO (idle stack) | ~1.5–2.5 GiB |
-| Ollama with `qwen2.5:3b` (optional chat) | ~3 GiB (`OLLAMA_MEM_LIMIT`) |
+| Ollama with `qwen2.5:1.5b` (`chat-local` profile) | ~2 GiB (`OLLAMA_MEM_LIMIT`) |
 
-Plan **≥ 6 GiB** host RAM for the default stack without Ollama, or **≥ 10–12 GiB** when Ollama chat is enabled (matches `scripts/quickstart.sh`). After an encoder upgrade, the API re-embeds existing documents in the background; track progress at `GET /v1/settings/encoder-reindex` (per signed-in tenant).
+Plan **≥ 6 GiB** host RAM for the default stack without Ollama, or **≥ 8 GiB** with **`chat-local`**. After an encoder upgrade, the API re-embeds existing documents in the background; track progress at `GET /v1/settings/encoder-reindex` (per signed-in tenant).
 
 ### PostgreSQL 18
 
@@ -148,7 +148,7 @@ Docker Compose runs **PostgreSQL 18.6** (`postgres:18.6-alpine`). Fresh installs
 2. Pull new images: `docker compose pull api web worker migrate` (or set `DOCUVATE_*_IMAGE` to a release tag).
 3. Run `docker compose up -d` (migrate runs as a one-shot before API/worker).
 
-Non-core features (layout compare, SFTP/Paperless sources, experimental research models) default **off** via `DOCUVATE_FEATURE_*` in `.env` (see `.env.example`). Tenants can override flags in the database; the web app loads resolved values from `GET /v1/remote-config` after sign-in.
+Non-core and ML features default via `DOCUVATE_FEATURE_*` in `.env` (see `.env.example` and [ML feature flags](docs/ml-feature-flags.md)). **`learnedValueTypes` defaults on** in 0.1.0 beta; other ML flags default off unless you enable them. Tenants can override flags in the database; the web app loads resolved values from `GET /v1/remote-config` after sign-in.
 
 Local development without Docker also expects **PostgreSQL 18.6** (or compatible 18.x), plus MinIO, Valkey, and the Node / Python / uv versions from `.tool-versions` for API, web, and worker.
 
