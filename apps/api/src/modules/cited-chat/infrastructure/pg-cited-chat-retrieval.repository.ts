@@ -18,9 +18,9 @@ import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
 import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
 import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
 import {
-  documentMatchesLibraryKindHints,
-  extractLibraryDocumentKindHints,
-} from '../domain/library-document-kind-match.js';
+  documentMatchesTenantLabelsInQuery,
+  tenantLabelsMentionedInQuery,
+} from '../domain/library-tenant-label-match.js';
 import { extractGermanPeriodHints, GERMAN_MONTH_BY_NAME } from '../domain/library-temporal-match.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
@@ -271,16 +271,28 @@ export class PgCitedChatRetrievalRepository {
     return chunkIndexText(candidate.documentTitle, candidate.body);
   }
 
-  /** Ensures period- and document-kind-specific library questions reach the right document. */
+  async listTenantLabelNames(userId: string): Promise<string[]> {
+    const result = await this.pool.query<{ name: string }>(
+      `SELECT t.name
+       FROM tags t
+       WHERE t.user_id = $1 AND t.is_inbox = false
+       ORDER BY t.name ASC`,
+      [userId]
+    );
+    return result.rows.map((row) => row.name);
+  }
+
+  /** Ensures period- and tenant-label-specific library questions reach the right document. */
   async supplementTemporalLibraryCandidates(
     userId: string,
     query: string
   ): Promise<CitedChatChunkCandidate[]> {
+    const tenantLabelNames = await this.listTenantLabelNames(userId);
+    const labelsInQuery = tenantLabelsMentionedInQuery(query, tenantLabelNames);
     const periodHints = extractGermanPeriodHints(query);
     const monthYearHints = periodHints.filter((hint) => hint.month != null && hint.year != null);
     const yearHints = periodHints.filter((hint) => hint.month == null && hint.year != null);
-    const kindHints = extractLibraryDocumentKindHints(query);
-    if (monthYearHints.length === 0 && yearHints.length === 0 && kindHints.length === 0) {
+    if (monthYearHints.length === 0 && yearHints.length === 0 && labelsInQuery.length === 0) {
       return [];
     }
 
@@ -317,11 +329,9 @@ export class PgCitedChatRetrievalRepository {
       titlePatterns.push(`%${year}%`);
     }
 
-    for (const hint of kindHints) {
-      for (const token of hint.tokens) {
-        titlePatterns.push(`%${token}%`);
-        filenamePatterns.push(`%${token}%`);
-      }
+    for (const label of labelsInQuery) {
+      titlePatterns.push(`%${label}%`);
+      filenamePatterns.push(`%${label}%`);
     }
 
     const rows = await this.pool.query<{
@@ -334,9 +344,19 @@ export class PgCitedChatRetrievalRepository {
       char_start: number | null;
       char_end: number | null;
       document_date: string | null;
+      document_labels: string[];
     }>(
       `SELECT c.id, c.document_id, d.title, d.filename, c.body, c.page, c.char_start, c.char_end,
-              d.document_date::text AS document_date
+              d.document_date::text AS document_date,
+              COALESCE(
+                (
+                  SELECT array_agg(t.name ORDER BY t.name)
+                  FROM document_tags dt
+                  JOIN tags t ON t.id = dt.tag_id
+                  WHERE dt.document_id = d.id AND t.user_id = $1
+                ),
+                ARRAY[]::text[]
+              ) AS document_labels
        FROM document_text_chunks c
        JOIN documents d ON d.id = c.document_id
        WHERE d.user_id = $1
@@ -391,11 +411,13 @@ export class PgCitedChatRetrievalRepository {
       if (!periodOk) {
         return false;
       }
-      return documentMatchesLibraryKindHints({
+      return documentMatchesTenantLabelsInQuery({
+        query,
+        tenantLabelNames,
         filename: row.filename,
         title: row.title,
         body: row.body,
-        hints: kindHints,
+        documentLabelNames: row.document_labels,
       });
     });
 

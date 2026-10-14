@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { formatLibraryExtractiveAnswer } from './format-library-extractive-answer.js';
 
 describe('formatLibraryExtractiveAnswer', () => {
-  it('formats Gesamtbrutto payslip answers with period and amount', () => {
+  it('formats amount answers with period from the question (fixture: payroll-shaped doc)', () => {
     const text = formatLibraryExtractiveAnswer({
       userMessage: 'Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?',
       quote: '/10E Gesamtbrutto (EBeschV) 4.859,67 56.706,65',
@@ -17,15 +17,15 @@ describe('formatLibraryExtractiveAnswer', () => {
     expect(text).not.toContain('/10E');
   });
 
-  it('formats Lohnsteuer totals for year-only questions', () => {
+  it('formats amount answers for a generic invoice field label (Rechnungsbetrag)', () => {
     const text = formatLibraryExtractiveAnswer({
-      userMessage:
-        'Wie viel Lohnsteuer wurde mir laut Lohnsteuerbescheinigung 2024 insgesamt einbehalten?',
-      quote: 'Einbehaltene Lohnsteuer 12.345,67 EUR',
-      documentTitle: 'Lohnsteuerbescheinigung 2024',
+      userMessage: 'Wie hoch war der Rechnungsbetrag auf der Rechnung März 2026?',
+      quote: 'Rechnungsbetrag: 1.234,56 EUR',
+      documentTitle: 'Rechnung INV-2026-0042',
       locale: 'de',
     });
-    expect(text).toContain('12.345,67');
-    expect(text).toContain('2024');
+    expect(text).toContain('1.234,56');
+    expect(text).toContain('März 2026');
+    expect(text).toContain('Rechnung INV-2026-0042');
   });
 });

@@ -34,7 +34,7 @@ function periodPhraseDe(query: string): string | null {
   return null;
 }
 
-/** Turn a raw payslip line into a short cited answer sentence (value stays verbatim). */
+/** Turn a raw passage line into a short cited answer sentence (value stays verbatim). */
 export function formatLibraryExtractiveAnswer(input: {
   userMessage: string;
   quote: string;
@@ -48,28 +48,27 @@ export function formatLibraryExtractiveAnswer(input: {
   const amountMatch = EU_AMOUNT.exec(quote);
   const amount = amountMatch?.[1] ?? null;
   const normalizedQuery = normalizeSearchText(input.userMessage);
+  const period = periodPhraseDe(input.userMessage);
+  const title = input.documentTitle.trim();
 
   if (input.locale === 'en') {
     if (amount) {
-      return `The amount is ${amount} EUR.`;
+      const suffix = period ? ` (${period})` : title ? ` (${title})` : '';
+      return `The amount is ${amount} EUR${suffix}.`;
     }
     return quote.endsWith('.') ? quote : `${quote}.`;
   }
 
-  const period = periodPhraseDe(input.userMessage);
-  if (amount && normalizedQuery.includes('gesamtbrutto')) {
-    if (period) {
-      return `Das Gesamtbrutto im Entgeltnachweis ${period} beträgt ${amount} EUR.`;
+  if (amount && /(wie hoch|betrag|summe|wieviel|wie viel|insgesamt)/.test(normalizedQuery)) {
+    if (period && title) {
+      return `Laut „${title}“ (${period}) beträgt der Betrag ${amount} EUR.`;
     }
-    return `Das Gesamtbrutto beträgt ${amount} EUR.`;
-  }
-  if (amount && normalizedQuery.includes('lohnsteuer')) {
     if (period) {
-      return `Die einbehaltene Lohnsteuer laut Lohnsteuerbescheinigung ${period} beträgt insgesamt ${amount} EUR.`;
+      return `Für ${period} beträgt der Betrag ${amount} EUR.`;
     }
-    return `Die einbehaltene Lohnsteuer beträgt insgesamt ${amount} EUR.`;
-  }
-  if (amount && /(wie hoch|betrag|summe|wieviel|wie viel)/.test(normalizedQuery)) {
+    if (title) {
+      return `Laut „${title}“ beträgt der Betrag ${amount} EUR.`;
+    }
     return `Der Betrag beträgt ${amount} EUR.`;
   }
   return quote.endsWith('.') ? quote : `${quote}.`;

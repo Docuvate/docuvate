@@ -22,15 +22,7 @@ def _label_search_variants(label: str) -> tuple[str, ...]:
     base = label.strip()
     if not base:
         return ()
-    variants = [base]
-    lower = base.lower()
-    if lower == "absender":
-        variants.append("Kurzer Absender")
-    if lower in ("betrag", "amount"):
-        variants.extend(["Bruttobetrag", "Nettobetrag", "Summe", "Gesamtbetrag"])
-    if lower == "bruttoentgelt":
-        variants.extend(["Gesamtbrutto (EBeschV)", "Gesamtbrutto", "Bruttoentgelt"])
-    return tuple(dict.fromkeys(variants))
+    return (base,)
 
 
 _DATE_TOKEN = re.compile(r"\b(\d{2}[./-]\d{2}[./-]\d{2,4})\b")

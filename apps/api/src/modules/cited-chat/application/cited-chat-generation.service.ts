@@ -31,9 +31,9 @@ import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
-import { libraryDocumentKindMatchBoost } from '../domain/library-document-kind-match.js';
 import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
 import { libraryTemporalMatchBoost } from '../domain/library-temporal-match.js';
+import { libraryTenantLabelMatchBoost } from '../domain/library-tenant-label-match.js';
 import {
   passesCalibratedRetrievalGate,
   shouldAttemptCitedLlm,
@@ -282,6 +282,7 @@ export class CitedChatGenerationService {
           queryVector,
         });
     if (scope === 'library') {
+      const tenantLabelNames = await this.retrieval.listTenantLabelNames(userId);
       const temporalExtra = await this.retrieval.supplementTemporalLibraryCandidates(
         userId,
         userMessage
@@ -311,11 +312,13 @@ export class CitedChatGenerationService {
                 body: chunk.body,
                 documentDate: meta?.documentDate ?? null,
               }) +
-              libraryDocumentKindMatchBoost({
+              libraryTenantLabelMatchBoost({
                 query: userMessage,
+                tenantLabelNames,
                 filename: meta?.filename ?? chunk.documentTitle,
                 title: meta?.title ?? chunk.documentTitle,
                 body: chunk.body,
+                documentLabelNames: meta?.labels ?? [],
               });
             return { ...chunk, fusionScore: chunk.fusionScore + boost };
           })
