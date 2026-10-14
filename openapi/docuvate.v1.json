@@ -329,6 +329,95 @@
         ]
       }
     },
+    "/admin/users/{userId}/feature-flags": {
+      "patch": {
+        "operationId": "setAdminUserFeatureFlag",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAdminUserFeatureFlagRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureFlagsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Set a per-tenant feature flag override",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/users/{userId}/resend-invitation": {
       "post": {
         "operationId": "resendAdminUserInvitation",
@@ -10044,6 +10133,76 @@
         ]
       }
     },
+    "/settings/encoder-reindex": {
+      "get": {
+        "operationId": "getEncoderReindexProgress",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncoderReindexProgressDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorEnvelopeDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Background document encoder re-index progress for the signed-in tenant",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
     "/settings/extraction-engines": {
       "get": {
         "operationId": "listExtractionEngines",
@@ -12297,6 +12456,36 @@
           "stackId"
         ]
       },
+      "EncoderReindexProgressDto": {
+        "type": "object",
+        "properties": {
+          "targetEncoderId": {
+            "type": "string"
+          },
+          "targetEncoderRevision": {
+            "type": "string"
+          },
+          "progressProcessed": {
+            "type": "number",
+            "description": "Documents already at the target encoder revision."
+          },
+          "progressTotal": {
+            "type": "number",
+            "description": "Extracted ready documents in this tenant."
+          },
+          "progressPending": {
+            "type": "number",
+            "description": "Documents still queued for background re-embedding."
+          }
+        },
+        "required": [
+          "targetEncoderId",
+          "targetEncoderRevision",
+          "progressProcessed",
+          "progressTotal",
+          "progressPending"
+        ]
+      },
       "ExportToConnectorRequestDto": {
         "type": "object",
         "properties": {
@@ -12443,7 +12632,22 @@
           "experimentalResearchModels": {
             "type": "boolean"
           },
+          "exactAnswers": {
+            "type": "boolean"
+          },
+          "smartDuplicates": {
+            "type": "boolean"
+          },
+          "answerAbstention": {
+            "type": "boolean"
+          },
+          "learnedValueTypes": {
+            "type": "boolean"
+          },
           "layoutKeyValueRoles": {
+            "type": "boolean"
+          },
+          "localChatModel": {
             "type": "boolean"
           }
         },
@@ -12451,7 +12655,12 @@
           "layoutReconstructionCompare",
           "sourceConnectors",
           "experimentalResearchModels",
-          "layoutKeyValueRoles"
+          "exactAnswers",
+          "smartDuplicates",
+          "answerAbstention",
+          "learnedValueTypes",
+          "layoutKeyValueRoles",
+          "localChatModel"
         ]
       },
       "FolderListResponseDto": {
@@ -13771,6 +13980,32 @@
           "configured"
         ]
       },
+      "SetAdminUserFeatureFlagRequestDto": {
+        "type": "object",
+        "properties": {
+          "flag": {
+            "enum": [
+              "layoutReconstructionCompare",
+              "sourceConnectors",
+              "experimentalResearchModels",
+              "exactAnswers",
+              "smartDuplicates",
+              "answerAbstention",
+              "learnedValueTypes",
+              "layoutKeyValueRoles",
+              "localChatModel"
+            ],
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "flag",
+          "enabled"
+        ]
+      },
       "SetAdminUserRoleRequestDto": {
         "type": "object",
         "properties": {
@@ -14300,6 +14535,12 @@
             "nullable": true
           },
           "documentChatRunsOnCpu": {
+            "type": "boolean"
+          },
+          "documentChatLocalModelEnabled": {
+            "type": "boolean"
+          },
+          "documentChatLocalModelReady": {
             "type": "boolean"
           },
           "advancedFeaturesEnabled": {
