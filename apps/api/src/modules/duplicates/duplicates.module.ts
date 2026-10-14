@@ -10,6 +10,11 @@ import {
   ListDuplicateCandidatesUseCase,
 } from './application/duplicate-query.use-cases.js';
 import {
+  ArchiveDuplicateSetUseCase,
+  DismissDuplicateSetUseCase,
+  ListDuplicateSetsUseCase,
+} from './application/duplicate-set.use-cases.js';
+import {
   ConfirmDuplicateVersionUseCase,
   GetDuplicateStackUseCase,
   HandleDuplicateStackDocumentDeletedUseCase,
@@ -19,11 +24,6 @@ import {
   SetDuplicateStackPrimaryUseCase,
   SyncDuplicateStacksUseCase,
 } from './application/duplicate-stack.use-cases.js';
-import {
-  ArchiveDuplicateSetUseCase,
-  DismissDuplicateSetUseCase,
-  ListDuplicateSetsUseCase,
-} from './application/duplicate-set.use-cases.js';
 import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-duplicates.use-case.js';
 import { DuplicateClassifierService } from './domain/duplicate-classifier.service.js';
 import { HttpSmartDuplicatesAdapter } from './infrastructure/http-smart-duplicates.adapter.js';

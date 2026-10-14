@@ -155,10 +155,11 @@ export class ArchiveDuplicateSetUseCase {
       throw new NotFoundException('Duplicate set not found');
     }
 
-    const keeper = [...present].sort(
+    const sortedByNewest = [...present].sort(
       (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    )[0];
-    if (!keeper) {
+    );
+    const keeper = sortedByNewest.at(0);
+    if (keeper === undefined) {
       throw new NotFoundException('Duplicate set not found');
     }
 

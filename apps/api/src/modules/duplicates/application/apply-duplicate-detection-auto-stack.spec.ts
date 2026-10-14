@@ -5,11 +5,12 @@ import { describe, expect, it, vi } from 'vitest';
 
 import {
   DOCUMENT_REPOSITORY,
+  type DocumentRepository,
   DUPLICATE_REPOSITORY,
   DUPLICATE_STACK_REPOSITORY,
-  LABEL_EMBEDDING_REPOSITORY,
-  type DocumentRepository,
   type DuplicateRepository,
+  type DuplicateStackRepository,
+  LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
@@ -99,8 +100,10 @@ describe('ApplyDuplicateDetectionUseCase auto_stack', () => {
         },
         {
           provide: LinkDuplicatePairUseCase,
-          useFactory: (stackRepository, duplicateRepository) =>
-            new LinkDuplicatePairUseCase(stackRepository, duplicateRepository),
+          useFactory: (
+            stackRepository: DuplicateStackRepository,
+            duplicateRepository: DuplicateRepository
+          ) => new LinkDuplicatePairUseCase(stackRepository, duplicateRepository),
           inject: [DUPLICATE_STACK_REPOSITORY, DUPLICATE_REPOSITORY],
         },
         { provide: DOCUMENT_REPOSITORY, useValue: documents },
@@ -116,7 +119,7 @@ describe('ApplyDuplicateDetectionUseCase auto_stack', () => {
 
     await useCase.execute('doc-new', 'user-1', null);
 
-    expect(duplicates.upsertCandidate).toHaveBeenCalled();
+    expect(duplicates.upsertCandidate).toHaveBeenCalled(); // eslint-disable-line @typescript-eslint/unbound-method -- vitest mock
     expect(linkPair).not.toHaveBeenCalled();
   });
 });

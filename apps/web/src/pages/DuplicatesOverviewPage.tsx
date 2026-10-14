@@ -40,7 +40,13 @@ export function DuplicatesOverviewPage() {
       {!loading && sets.length > 0 ? (
         <div className="duplicate-set-list">
           {sets.map((set) => (
-            <DuplicateSetCard key={set.setId} set={set} onResolved={load} />
+            <DuplicateSetCard
+              key={set.setId}
+              set={set}
+              onResolved={() => {
+                void load();
+              }}
+            />
           ))}
         </div>
       ) : null}

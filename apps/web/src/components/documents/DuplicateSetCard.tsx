@@ -15,8 +15,6 @@ interface DuplicateSetCardProps {
 
 export function DuplicateSetCard({ set, onResolved }: DuplicateSetCardProps) {
   const { t } = useTranslation();
-  const newest = set.documents[0];
-
   return (
     <article className="duplicate-set-card">
       <header className="duplicate-set-card-header">
@@ -26,16 +24,14 @@ export function DuplicateSetCard({ set, onResolved }: DuplicateSetCardProps) {
         </span>
       </header>
       <ul className="duplicate-set-doc-list">
-        {set.documents.map((doc) => (
+        {set.documents.map((doc, index) => (
           <li key={doc.documentId}>
             <Link to={routes.document(doc.documentId)}>
               {doc.title || doc.filename}
             </Link>
             <span className="muted cell-sub">
               {doc.filename}
-              {newest?.documentId === doc.documentId
-                ? ` · ${t('documents.duplicateSetNewest')}`
-                : ''}
+              {index === 0 ? ` · ${t('documents.duplicateSetNewest')}` : ''}
             </span>
           </li>
         ))}

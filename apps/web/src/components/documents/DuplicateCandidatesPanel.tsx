@@ -47,7 +47,13 @@ export function DuplicateCandidatesPanel({ documentId }: DuplicateCandidatesPane
       <p className="muted">{t('documents.duplicatesLead')}</p>
       <div className="duplicate-set-list">
         {sets.map((set) => (
-          <DuplicateSetCard key={set.setId} set={set} onResolved={load} />
+          <DuplicateSetCard
+            key={set.setId}
+            set={set}
+            onResolved={() => {
+              void load();
+            }}
+          />
         ))}
       </div>
     </section>

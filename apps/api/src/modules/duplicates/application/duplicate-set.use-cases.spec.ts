@@ -3,10 +3,10 @@
 import { duplicateSetIdFromDocumentIds } from '@docuvate/contracts';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { createDuplicateRepositoryStub } from '../../../test-support/duplicate-repository.stub.js';
 import { createDuplicateStackRepositoryStub } from '../../../test-support/duplicate-stack-repository.stub.js';
+import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import { ArchiveDuplicateSetUseCase, DismissDuplicateSetUseCase } from './duplicate-set.use-cases.js';
 
 describe('Duplicate set use cases', () => {
@@ -21,8 +21,8 @@ describe('Duplicate set use cases', () => {
 
     await useCase.execute('user-1', setId);
 
-    expect(duplicates.dismiss).toHaveBeenCalledTimes(3);
-    expect(stacks.removeMember).toHaveBeenCalledTimes(3);
+    expect(duplicates.dismiss).toHaveBeenCalledTimes(3); // eslint-disable-line @typescript-eslint/unbound-method -- vitest mock
+    expect(stacks.removeMember).toHaveBeenCalledTimes(3); // eslint-disable-line @typescript-eslint/unbound-method -- vitest mock
   });
 
   it('archives older members under the newest document', async () => {
@@ -41,11 +41,11 @@ describe('Duplicate set use cases', () => {
       updatedAt: createdAt,
     });
     const documents = createDocumentRepositoryStub({
-      findByIdForUser: vi.fn(async (id: string) => {
+      findByIdForUser: vi.fn((id: string) => {
         if (id === 'new') {
-          return docStub('new', newest);
+          return Promise.resolve(docStub('new', newest));
         }
-        return docStub(id, older);
+        return Promise.resolve(docStub(id, older));
       }),
     });
     const duplicates = createDuplicateRepositoryStub({ dismiss: vi.fn() });
@@ -59,7 +59,7 @@ describe('Duplicate set use cases', () => {
 
     await useCase.execute('user-1', setId);
 
-    expect(stacks.linkPair).toHaveBeenCalledWith('user-1', 'new', 'old');
-    expect(duplicates.dismiss).toHaveBeenCalledWith('new', 'old', 'user-1');
+    expect(stacks.linkPair).toHaveBeenCalledWith('user-1', 'new', 'old'); // eslint-disable-line @typescript-eslint/unbound-method -- vitest mock
+    expect(duplicates.dismiss).toHaveBeenCalledWith('new', 'old', 'user-1'); // eslint-disable-line @typescript-eslint/unbound-method -- vitest mock
   });
 });
