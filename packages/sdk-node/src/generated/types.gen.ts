@@ -3856,6 +3856,26 @@ export type AcceptDocumentReviewHighConfidenceBatchResponses = {
 
 export type AcceptDocumentReviewHighConfidenceBatchResponse = AcceptDocumentReviewHighConfidenceBatchResponses[keyof AcceptDocumentReviewHighConfidenceBatchResponses];
 
+export type ArchiveHashIdenticalDuplicateSetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/review-queue/archive-hash-identical-duplicates';
+};
+
+export type ArchiveHashIdenticalDuplicateSetsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ArchiveHashIdenticalDuplicateSetsError = ArchiveHashIdenticalDuplicateSetsErrors[keyof ArchiveHashIdenticalDuplicateSetsErrors];
+
+export type ArchiveHashIdenticalDuplicateSetsResponses = {
+    201: unknown;
+};
+
 export type AcceptDocumentReviewAllData = {
     body?: never;
     path: {

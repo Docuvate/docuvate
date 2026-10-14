@@ -18,20 +18,14 @@ class _$DocumentChatResponseDto extends DocumentChatResponseDto {
 
   factory _$DocumentChatResponseDto(
           [void Function(DocumentChatResponseDtoBuilder)? updates]) =>
-      (new DocumentChatResponseDtoBuilder()..update(updates))._build();
+      (DocumentChatResponseDtoBuilder()..update(updates))._build();
 
   _$DocumentChatResponseDto._(
       {required this.reply,
       required this.configured,
       this.provider,
       this.setupHint})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        reply, r'DocumentChatResponseDto', 'reply');
-    BuiltValueNullFieldError.checkNotNull(
-        configured, r'DocumentChatResponseDto', 'configured');
-  }
-
+      : super._();
   @override
   DocumentChatResponseDto rebuild(
           void Function(DocumentChatResponseDtoBuilder) updates) =>
@@ -39,7 +33,7 @@ class _$DocumentChatResponseDto extends DocumentChatResponseDto {
 
   @override
   DocumentChatResponseDtoBuilder toBuilder() =>
-      new DocumentChatResponseDtoBuilder()..replace(this);
+      DocumentChatResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -79,8 +73,7 @@ class DocumentChatResponseDtoBuilder
   _$DocumentChatResponseDto? _$v;
 
   ChatMessageDtoBuilder? _reply;
-  ChatMessageDtoBuilder get reply =>
-      _$this._reply ??= new ChatMessageDtoBuilder();
+  ChatMessageDtoBuilder get reply => _$this._reply ??= ChatMessageDtoBuilder();
   set reply(ChatMessageDtoBuilder? reply) => _$this._reply = reply;
 
   bool? _configured;
@@ -113,7 +106,6 @@ class DocumentChatResponseDtoBuilder
 
   @override
   void replace(DocumentChatResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentChatResponseDto;
   }
 
@@ -129,19 +121,20 @@ class DocumentChatResponseDtoBuilder
     _$DocumentChatResponseDto _$result;
     try {
       _$result = _$v ??
-          new _$DocumentChatResponseDto._(
-              reply: reply.build(),
-              configured: BuiltValueNullFieldError.checkNotNull(
-                  configured, r'DocumentChatResponseDto', 'configured'),
-              provider: provider,
-              setupHint: setupHint);
+          _$DocumentChatResponseDto._(
+            reply: reply.build(),
+            configured: BuiltValueNullFieldError.checkNotNull(
+                configured, r'DocumentChatResponseDto', 'configured'),
+            provider: provider,
+            setupHint: setupHint,
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'reply';
         reply.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentChatResponseDto', _$failedField, e.toString());
       }
       rethrow;

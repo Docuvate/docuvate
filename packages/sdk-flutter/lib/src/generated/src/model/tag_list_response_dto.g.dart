@@ -12,13 +12,9 @@ class _$TagListResponseDto extends TagListResponseDto {
 
   factory _$TagListResponseDto(
           [void Function(TagListResponseDtoBuilder)? updates]) =>
-      (new TagListResponseDtoBuilder()..update(updates))._build();
+      (TagListResponseDtoBuilder()..update(updates))._build();
 
-  _$TagListResponseDto._({required this.items}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'TagListResponseDto', 'items');
-  }
-
+  _$TagListResponseDto._({required this.items}) : super._();
   @override
   TagListResponseDto rebuild(
           void Function(TagListResponseDtoBuilder) updates) =>
@@ -26,7 +22,7 @@ class _$TagListResponseDto extends TagListResponseDto {
 
   @override
   TagListResponseDtoBuilder toBuilder() =>
-      new TagListResponseDtoBuilder()..replace(this);
+      TagListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -56,7 +52,7 @@ class TagListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   TagListResponseDtoBuilder() {
@@ -74,7 +70,6 @@ class TagListResponseDtoBuilder
 
   @override
   void replace(TagListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$TagListResponseDto;
   }
 
@@ -89,14 +84,17 @@ class TagListResponseDtoBuilder
   _$TagListResponseDto _build() {
     _$TagListResponseDto _$result;
     try {
-      _$result = _$v ?? new _$TagListResponseDto._(items: items.build());
+      _$result = _$v ??
+          _$TagListResponseDto._(
+            items: items.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'TagListResponseDto', _$failedField, e.toString());
       }
       rethrow;

@@ -12,13 +12,9 @@ class _$TagCustomFieldListResponseDto extends TagCustomFieldListResponseDto {
 
   factory _$TagCustomFieldListResponseDto(
           [void Function(TagCustomFieldListResponseDtoBuilder)? updates]) =>
-      (new TagCustomFieldListResponseDtoBuilder()..update(updates))._build();
+      (TagCustomFieldListResponseDtoBuilder()..update(updates))._build();
 
-  _$TagCustomFieldListResponseDto._({required this.items}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'TagCustomFieldListResponseDto', 'items');
-  }
-
+  _$TagCustomFieldListResponseDto._({required this.items}) : super._();
   @override
   TagCustomFieldListResponseDto rebuild(
           void Function(TagCustomFieldListResponseDtoBuilder) updates) =>
@@ -26,7 +22,7 @@ class _$TagCustomFieldListResponseDto extends TagCustomFieldListResponseDto {
 
   @override
   TagCustomFieldListResponseDtoBuilder toBuilder() =>
-      new TagCustomFieldListResponseDtoBuilder()..replace(this);
+      TagCustomFieldListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -58,7 +54,7 @@ class TagCustomFieldListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   TagCustomFieldListResponseDtoBuilder() {
@@ -76,7 +72,6 @@ class TagCustomFieldListResponseDtoBuilder
 
   @override
   void replace(TagCustomFieldListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$TagCustomFieldListResponseDto;
   }
 
@@ -91,15 +86,17 @@ class TagCustomFieldListResponseDtoBuilder
   _$TagCustomFieldListResponseDto _build() {
     _$TagCustomFieldListResponseDto _$result;
     try {
-      _$result =
-          _$v ?? new _$TagCustomFieldListResponseDto._(items: items.build());
+      _$result = _$v ??
+          _$TagCustomFieldListResponseDto._(
+            items: items.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'TagCustomFieldListResponseDto', _$failedField, e.toString());
       }
       rethrow;

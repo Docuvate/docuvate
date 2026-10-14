@@ -2780,6 +2780,7 @@ class DocumentsApi {
   /// * [withoutNonInboxLabel] - When true, only documents without a non-inbox label are returned.
   /// * [unfiled] - When true, only documents without a folder assignment are returned.
   /// * [inbox] - When true, only documents in the inbox label are returned.
+  /// * [includeTagSuggestions] - When true, include open tag suggestions on each document.
   /// * [q] 
   /// * [status] 
   /// * [tagId] 
@@ -2804,6 +2805,7 @@ class DocumentsApi {
     bool? withoutNonInboxLabel,
     bool? unfiled,
     bool? inbox,
+    bool? includeTagSuggestions,
     String? q,
     String? status,
     String? tagId,
@@ -2850,6 +2852,7 @@ class DocumentsApi {
       if (withoutNonInboxLabel != null) r'withoutNonInboxLabel': encodeQueryParameter(_serializers, withoutNonInboxLabel, const FullType(bool)),
       if (unfiled != null) r'unfiled': encodeQueryParameter(_serializers, unfiled, const FullType(bool)),
       if (inbox != null) r'inbox': encodeQueryParameter(_serializers, inbox, const FullType(bool)),
+      if (includeTagSuggestions != null) r'includeTagSuggestions': encodeQueryParameter(_serializers, includeTagSuggestions, const FullType(bool)),
       if (q != null) r'q': encodeQueryParameter(_serializers, q, const FullType(String)),
       if (status != null) r'status': encodeQueryParameter(_serializers, status, const FullType(String)),
       if (tagId != null) r'tagId': encodeQueryParameter(_serializers, tagId, const FullType(String)),

@@ -12,13 +12,9 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
 
   factory _$DocumentListResponseDto(
           [void Function(DocumentListResponseDtoBuilder)? updates]) =>
-      (new DocumentListResponseDtoBuilder()..update(updates))._build();
+      (DocumentListResponseDtoBuilder()..update(updates))._build();
 
-  _$DocumentListResponseDto._({required this.items}) : super._() {
-    BuiltValueNullFieldError.checkNotNull(
-        items, r'DocumentListResponseDto', 'items');
-  }
-
+  _$DocumentListResponseDto._({required this.items}) : super._();
   @override
   DocumentListResponseDto rebuild(
           void Function(DocumentListResponseDtoBuilder) updates) =>
@@ -26,7 +22,7 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
 
   @override
   DocumentListResponseDtoBuilder toBuilder() =>
-      new DocumentListResponseDtoBuilder()..replace(this);
+      DocumentListResponseDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -57,7 +53,7 @@ class DocumentListResponseDtoBuilder
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
-      _$this._items ??= new ListBuilder<JsonObject>();
+      _$this._items ??= ListBuilder<JsonObject>();
   set items(ListBuilder<JsonObject>? items) => _$this._items = items;
 
   DocumentListResponseDtoBuilder() {
@@ -75,7 +71,6 @@ class DocumentListResponseDtoBuilder
 
   @override
   void replace(DocumentListResponseDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$DocumentListResponseDto;
   }
 
@@ -90,14 +85,17 @@ class DocumentListResponseDtoBuilder
   _$DocumentListResponseDto _build() {
     _$DocumentListResponseDto _$result;
     try {
-      _$result = _$v ?? new _$DocumentListResponseDto._(items: items.build());
+      _$result = _$v ??
+          _$DocumentListResponseDto._(
+            items: items.build(),
+          );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'items';
         items.build();
       } catch (e) {
-        throw new BuiltValueNestedFieldError(
+        throw BuiltValueNestedFieldError(
             r'DocumentListResponseDto', _$failedField, e.toString());
       }
       rethrow;

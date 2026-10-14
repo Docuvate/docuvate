@@ -3,6 +3,7 @@
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
 import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
 import { isChunkDumpClaim, isIndexPassageClaim } from './claim-chunk-dump.js';
+import { bestEvidenceSpanInChunk } from './retrieval-span-citation.js';
 import {
   bestQuoteMatchScore,
   findQuoteInChunk,
@@ -204,17 +205,6 @@ export function verifyCitedClaims(input: {
       continue;
     }
 
-    if (citations.some((c) => !c.quote)) {
-      rejected.push({
-        claimText,
-        quote: primaryQuote,
-        bestMatchScore: 0,
-        reason: 'quote_not_in_chunk',
-        source: primarySource,
-      });
-      continue;
-    }
-
     const resolved: {
       row: TopRow;
       match: NonNullable<ReturnType<typeof resolveQuoteInCandidateChunk>>;
@@ -224,10 +214,20 @@ export function verifyCitedClaims(input: {
     const claimTextForQuoteMatch = citations.length === 1 ? claimText : '';
 
     for (const citation of citations) {
+      const groundedFromEmptyQuote =
+        citation.quote.trim().length === 0 && claimText.trim().length > 0;
+      const groundedQuote =
+        citation.quote.trim().length > 0
+          ? citation.quote.trim()
+          : claimText.trim().length > 0
+            ? claimText.trim()
+            : '';
+      const quoteMatchClaimText = groundedFromEmptyQuote ? '' : claimTextForQuoteMatch;
+
       if (!citation.source) {
         rejected.push({
           claimText,
-          quote: citation.quote,
+          quote: groundedQuote,
           bestMatchScore: 0,
           reason: 'unknown_source',
           source: '',
@@ -239,10 +239,22 @@ export function verifyCitedClaims(input: {
       if (!sourceLabel) {
         rejected.push({
           claimText,
-          quote: citation.quote,
+          quote: groundedQuote,
           bestMatchScore: 0,
           reason: 'unknown_source',
           source: citation.source,
+        });
+        resolved.length = 0;
+        break;
+      }
+
+      if (!groundedQuote) {
+        rejected.push({
+          claimText,
+          quote: primaryQuote,
+          bestMatchScore: 0,
+          reason: 'quote_not_in_chunk',
+          source: citation.source || sourceLabel || '',
         });
         resolved.length = 0;
         break;
@@ -253,12 +265,12 @@ export function verifyCitedClaims(input: {
         chunkPool,
         input.labelByChunk,
         sourceLabel,
-        citation.quote
+        groundedQuote
       );
       if (!rowResult.ok) {
         rejected.push({
           claimText,
-          quote: citation.quote,
+          quote: groundedQuote,
           bestMatchScore: 0,
           reason: rowResult.reason,
           source: citation.source || sourceLabel || '',
@@ -268,15 +280,36 @@ export function verifyCitedClaims(input: {
       }
       const row = rowResult.row;
 
-      const match = resolveQuoteInCandidateChunk(row.chunk, citation.quote, {
-        claimText: claimTextForQuoteMatch,
+      let match = resolveQuoteInCandidateChunk(row.chunk, groundedQuote, {
+        claimText: quoteMatchClaimText,
       });
+      if (
+        !match &&
+        quoteMatchClaimText.length > 0 &&
+        groundedQuote !== quoteMatchClaimText
+      ) {
+        match = resolveQuoteInCandidateChunk(row.chunk, quoteMatchClaimText, {
+          claimText: quoteMatchClaimText,
+        });
+      }
+      if (!match && groundedFromEmptyQuote) {
+        const spanHit = bestEvidenceSpanInChunk(row.chunk.body, claimText);
+        if (spanHit) {
+          match = {
+            charStart: spanHit.charStart,
+            charEnd: spanHit.charEnd,
+            bodyQuote: spanHit.bodyQuote,
+            method: spanHit.method,
+            score: spanHit.score,
+          };
+        }
+      }
       if (!match) {
         rejected.push({
           claimText,
-          quote: citation.quote,
-          bestMatchScore: bestQuoteMatchScore(row.chunk.body, citation.quote),
-          reason: rejectReasonForQuote(row.chunk.body, citation.quote, claimText),
+          quote: groundedQuote,
+          bestMatchScore: bestQuoteMatchScore(row.chunk.body, groundedQuote),
+          reason: rejectReasonForQuote(row.chunk.body, groundedQuote, claimText),
           source: citation.source || sourceLabel || '',
         });
         resolved.length = 0;
@@ -302,7 +335,11 @@ export function verifyCitedClaims(input: {
         break;
       }
 
-      resolved.push({ row, match, quote: citation.quote });
+      resolved.push({
+        row,
+        match,
+        quote: citation.quote.trim().length > 0 ? citation.quote.trim() : match.bodyQuote,
+      });
     }
 
     if (resolved.length === 0) {

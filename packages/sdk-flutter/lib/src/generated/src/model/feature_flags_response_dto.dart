@@ -14,6 +14,12 @@ part 'feature_flags_response_dto.g.dart';
 /// * [layoutReconstructionCompare] 
 /// * [sourceConnectors] 
 /// * [experimentalResearchModels] 
+/// * [exactAnswers] 
+/// * [smartDuplicates] 
+/// * [answerAbstention] 
+/// * [learnedValueTypes] 
+/// * [layoutKeyValueRoles] 
+/// * [localChatModel] 
 @BuiltValue()
 abstract class FeatureFlagsResponseDto implements Built<FeatureFlagsResponseDto, FeatureFlagsResponseDtoBuilder> {
   @BuiltValueField(wireName: r'layoutReconstructionCompare')
@@ -24,6 +30,24 @@ abstract class FeatureFlagsResponseDto implements Built<FeatureFlagsResponseDto,
 
   @BuiltValueField(wireName: r'experimentalResearchModels')
   bool get experimentalResearchModels;
+
+  @BuiltValueField(wireName: r'exactAnswers')
+  bool get exactAnswers;
+
+  @BuiltValueField(wireName: r'smartDuplicates')
+  bool get smartDuplicates;
+
+  @BuiltValueField(wireName: r'answerAbstention')
+  bool get answerAbstention;
+
+  @BuiltValueField(wireName: r'learnedValueTypes')
+  bool get learnedValueTypes;
+
+  @BuiltValueField(wireName: r'layoutKeyValueRoles')
+  bool get layoutKeyValueRoles;
+
+  @BuiltValueField(wireName: r'localChatModel')
+  bool get localChatModel;
 
   FeatureFlagsResponseDto._();
 
@@ -61,6 +85,36 @@ class _$FeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<Feature
     yield r'experimentalResearchModels';
     yield serializers.serialize(
       object.experimentalResearchModels,
+      specifiedType: const FullType(bool),
+    );
+    yield r'exactAnswers';
+    yield serializers.serialize(
+      object.exactAnswers,
+      specifiedType: const FullType(bool),
+    );
+    yield r'smartDuplicates';
+    yield serializers.serialize(
+      object.smartDuplicates,
+      specifiedType: const FullType(bool),
+    );
+    yield r'answerAbstention';
+    yield serializers.serialize(
+      object.answerAbstention,
+      specifiedType: const FullType(bool),
+    );
+    yield r'learnedValueTypes';
+    yield serializers.serialize(
+      object.learnedValueTypes,
+      specifiedType: const FullType(bool),
+    );
+    yield r'layoutKeyValueRoles';
+    yield serializers.serialize(
+      object.layoutKeyValueRoles,
+      specifiedType: const FullType(bool),
+    );
+    yield r'localChatModel';
+    yield serializers.serialize(
+      object.localChatModel,
       specifiedType: const FullType(bool),
     );
   }
@@ -106,6 +160,48 @@ class _$FeatureFlagsResponseDtoSerializer implements PrimitiveSerializer<Feature
             specifiedType: const FullType(bool),
           ) as bool;
           result.experimentalResearchModels = valueDes;
+          break;
+        case r'exactAnswers':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.exactAnswers = valueDes;
+          break;
+        case r'smartDuplicates':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.smartDuplicates = valueDes;
+          break;
+        case r'answerAbstention':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.answerAbstention = valueDes;
+          break;
+        case r'learnedValueTypes':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.learnedValueTypes = valueDes;
+          break;
+        case r'layoutKeyValueRoles':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.layoutKeyValueRoles = valueDes;
+          break;
+        case r'localChatModel':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.localChatModel = valueDes;
           break;
         default:
           unhandled.add(key);

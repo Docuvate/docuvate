@@ -265,6 +265,7 @@ export interface ExtractionFieldFeedbackRepository {
     fieldKeys: readonly string[],
     options?: { limitPerField?: number }
   ): Promise<LabelFieldExtractionExample[]>;
+  listCorrectedFieldKeysForDocument(userId: string, documentId: string): Promise<string[]>;
 }
 
 export const EXTRACTION_FIELD_FEEDBACK_REPOSITORY = Symbol('EXTRACTION_FIELD_FEEDBACK_REPOSITORY');

@@ -26,6 +26,12 @@ export class PgDocumentReviewQueueRepository {
        FROM documents d
        WHERE d.user_id = $1
          AND d.status = 'ready'
+         AND NOT EXISTS (
+           SELECT 1
+           FROM document_stack_members m_version
+           WHERE m_version.document_id = d.id
+             AND m_version.role = 'version'
+         )
          AND (${this.pendingConditionSql('d')})`,
       [userId]
     );
@@ -44,6 +50,12 @@ export class PgDocumentReviewQueueRepository {
        FROM documents d
        WHERE d.user_id = $1
          AND d.status = 'ready'
+         AND NOT EXISTS (
+           SELECT 1
+           FROM document_stack_members m_version
+           WHERE m_version.document_id = d.id
+             AND m_version.role = 'version'
+         )
          AND (${this.pendingConditionSql('d')})
        ORDER BY d.created_at DESC
        LIMIT $2 OFFSET $3`,

@@ -36,12 +36,12 @@ CreateTagRequestDtoMatchingAlgorithmEnum
     case 'regex':
       return _$createTagRequestDtoMatchingAlgorithmEnum_regex;
     default:
-      throw new ArgumentError(name);
+      throw ArgumentError(name);
   }
 }
 
 final BuiltSet<CreateTagRequestDtoMatchingAlgorithmEnum>
-    _$createTagRequestDtoMatchingAlgorithmEnumValues = new BuiltSet<
+    _$createTagRequestDtoMatchingAlgorithmEnumValues = BuiltSet<
         CreateTagRequestDtoMatchingAlgorithmEnum>(const <CreateTagRequestDtoMatchingAlgorithmEnum>[
   _$createTagRequestDtoMatchingAlgorithmEnum_none,
   _$createTagRequestDtoMatchingAlgorithmEnum_any,
@@ -52,7 +52,7 @@ final BuiltSet<CreateTagRequestDtoMatchingAlgorithmEnum>
 
 Serializer<CreateTagRequestDtoMatchingAlgorithmEnum>
     _$createTagRequestDtoMatchingAlgorithmEnumSerializer =
-    new _$CreateTagRequestDtoMatchingAlgorithmEnumSerializer();
+    _$CreateTagRequestDtoMatchingAlgorithmEnumSerializer();
 
 class _$CreateTagRequestDtoMatchingAlgorithmEnumSerializer
     implements PrimitiveSerializer<CreateTagRequestDtoMatchingAlgorithmEnum> {
@@ -106,7 +106,7 @@ class _$CreateTagRequestDto extends CreateTagRequestDto {
 
   factory _$CreateTagRequestDto(
           [void Function(CreateTagRequestDtoBuilder)? updates]) =>
-      (new CreateTagRequestDtoBuilder()..update(updates))._build();
+      (CreateTagRequestDtoBuilder()..update(updates))._build();
 
   _$CreateTagRequestDto._(
       {required this.name,
@@ -114,10 +114,7 @@ class _$CreateTagRequestDto extends CreateTagRequestDto {
       this.isInbox,
       this.matchingAlgorithm,
       this.match})
-      : super._() {
-    BuiltValueNullFieldError.checkNotNull(name, r'CreateTagRequestDto', 'name');
-  }
-
+      : super._();
   @override
   CreateTagRequestDto rebuild(
           void Function(CreateTagRequestDtoBuilder) updates) =>
@@ -125,7 +122,7 @@ class _$CreateTagRequestDto extends CreateTagRequestDto {
 
   @override
   CreateTagRequestDtoBuilder toBuilder() =>
-      new CreateTagRequestDtoBuilder()..replace(this);
+      CreateTagRequestDtoBuilder()..replace(this);
 
   @override
   bool operator ==(Object other) {
@@ -208,7 +205,6 @@ class CreateTagRequestDtoBuilder
 
   @override
   void replace(CreateTagRequestDto other) {
-    ArgumentError.checkNotNull(other, 'other');
     _$v = other as _$CreateTagRequestDto;
   }
 
@@ -222,13 +218,14 @@ class CreateTagRequestDtoBuilder
 
   _$CreateTagRequestDto _build() {
     final _$result = _$v ??
-        new _$CreateTagRequestDto._(
-            name: BuiltValueNullFieldError.checkNotNull(
-                name, r'CreateTagRequestDto', 'name'),
-            color: color,
-            isInbox: isInbox,
-            matchingAlgorithm: matchingAlgorithm,
-            match: match);
+        _$CreateTagRequestDto._(
+          name: BuiltValueNullFieldError.checkNotNull(
+              name, r'CreateTagRequestDto', 'name'),
+          color: color,
+          isInbox: isInbox,
+          matchingAlgorithm: matchingAlgorithm,
+          match: match,
+        );
     replace(_$result);
     return _$result;
   }
