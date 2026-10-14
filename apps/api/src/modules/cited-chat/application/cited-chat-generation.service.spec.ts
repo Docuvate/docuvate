@@ -48,6 +48,7 @@ async function buildService(deps: {
       indexPassageForRerank: (c: { documentTitle: string; body: string }) => string;
       loadDocumentContextMeta?: ReturnType<typeof vi.fn>;
       supplementTemporalLibraryCandidates?: ReturnType<typeof vi.fn>;
+      listTenantLabelNames?: ReturnType<typeof vi.fn>;
   };
   citations?: { replaceCitations: ReturnType<typeof vi.fn> };
 }) {
@@ -112,6 +113,8 @@ async function buildService(deps: {
           supplementTemporalLibraryCandidates:
             deps.retrieval.supplementTemporalLibraryCandidates ??
             vi.fn().mockResolvedValue([]),
+          listTenantLabelNames:
+            deps.retrieval.listTenantLabelNames ?? vi.fn().mockResolvedValue([]),
           ...deps.retrieval,
         },
       },
