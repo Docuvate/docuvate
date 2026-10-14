@@ -49,19 +49,27 @@ async function ensureRolesForGroup(
     return;
   }
   const primaryId = electPrimary(members);
-  for (const member of members) {
-    const role = member.documentId === primaryId ? 'primary' : 'version';
-    await queryRunner.query(
-      `UPDATE document_stack_members m
-       SET role = $4
-       FROM document_duplicate_stacks s
-       WHERE m.stack_id = s.id
-         AND s.id = $1
-         AND s.user_id = $2
-         AND m.document_id = $3`,
-      [stackId, userId, member.documentId, role]
-    );
-  }
+  const documentIds = members.map((member) => member.documentId);
+  await queryRunner.query(
+    `UPDATE document_stack_members m
+     SET role = 'version'
+     FROM document_duplicate_stacks s
+     WHERE m.stack_id = s.id
+       AND s.id = $1
+       AND s.user_id = $2
+       AND m.document_id = ANY($3::uuid[])`,
+    [stackId, userId, documentIds]
+  );
+  await queryRunner.query(
+    `UPDATE document_stack_members m
+     SET role = 'primary'
+     FROM document_duplicate_stacks s
+     WHERE m.stack_id = s.id
+       AND s.id = $1
+       AND s.user_id = $2
+       AND m.document_id = $3`,
+    [stackId, userId, primaryId]
+  );
 }
 
 async function createStack(queryRunner: QueryRunner, userId: string): Promise<string> {
@@ -79,18 +87,17 @@ async function moveMemberToStack(
   userId: string,
   fromStackId: string,
   toStackId: string,
-  documentId: string,
-  role: 'primary' | 'version'
+  documentId: string
 ): Promise<void> {
   await queryRunner.query(
     `UPDATE document_stack_members m
-     SET stack_id = $4, role = $5
+     SET stack_id = $4, role = 'version'
      FROM document_duplicate_stacks s
      WHERE m.stack_id = s.id
        AND s.id = $1
        AND s.user_id = $2
        AND m.document_id = $3`,
-    [fromStackId, userId, documentId, toStackId, role]
+    [fromStackId, userId, documentId, toStackId]
   );
 }
 
@@ -185,18 +192,16 @@ export class SplitDuplicateStacksByContentHash20261014160000 implements Migratio
           continue;
         }
         const newStackId = await createStack(queryRunner, userId);
-        const primaryId = electPrimary(group);
         for (const member of group) {
-          const role = member.documentId === primaryId ? 'primary' : 'version';
           await moveMemberToStack(
             queryRunner,
             userId,
             stackId,
             newStackId,
-            member.documentId,
-            role
+            member.documentId
           );
         }
+        await ensureRolesForGroup(queryRunner, newStackId, userId, group);
       }
 
       for (const documentId of singletonDocumentIds) {
