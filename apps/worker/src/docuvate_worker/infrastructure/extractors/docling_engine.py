@@ -12,6 +12,9 @@ from docuvate_worker.infrastructure.extractors.markdown import markdown_to_plain
 
 logger = logging.getLogger(__name__)
 
+# Registered in third-party-models.manifest.json (CI-enforced).
+DOCLING_LAYOUT_PIPELINE_ID = "docling:layout-default"
+
 _MIME_SUFFIX: dict[str, str] = {
     "application/pdf": ".pdf",
     "image/png": ".png",

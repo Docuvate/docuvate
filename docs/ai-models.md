@@ -1,5 +1,7 @@
 # AI models and ports
 
+For the shipped third-party model inventory (revision, license, size, purpose), see [`THIRD_PARTY_MODELS.md`](../THIRD_PARTY_MODELS.md) and [`third-party-models.manifest.json`](../third-party-models.manifest.json).
+
 Docuvate keeps model choices behind **ports** so CPU-first self-hosting stays the default.
 
 | Capability | Port / adapter | Default model or backend | Notes |

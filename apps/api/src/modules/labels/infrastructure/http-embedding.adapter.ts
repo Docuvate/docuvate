@@ -49,14 +49,14 @@ export class HttpEmbeddingAdapter implements EmbeddingPort {
 
     const raw: unknown = await response.json();
     if (!isRecord(raw)) {
-      return { model: 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2', embeddings: [] };
+      return { model: 'intfloat/multilingual-e5-small', embeddings: [] };
     }
     const model = parseString(raw.model);
     return {
       model:
         model.length > 0
           ? model
-          : 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
+          : 'intfloat/multilingual-e5-small',
       embeddings: parseEmbeddings(raw.embeddings),
     };
   }

@@ -70,7 +70,7 @@ export class RecordEmbeddingFeedbackUseCase {
     await this.labelEmbeddings.saveTagCentroid(
       tagId,
       userId,
-      'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2',
+      'intfloat/multilingual-e5-small',
       merged.sampleCount,
       merged.centroid
     );
