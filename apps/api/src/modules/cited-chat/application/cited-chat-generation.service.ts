@@ -29,10 +29,10 @@ import {
 import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
-import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
-import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
+import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { libraryDocumentKindMatchBoost } from '../domain/library-document-kind-match.js';
+import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
 import { libraryTemporalMatchBoost } from '../domain/library-temporal-match.js';
 import {
   passesCalibratedRetrievalGate,
