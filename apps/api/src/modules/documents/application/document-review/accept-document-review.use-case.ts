@@ -101,8 +101,9 @@ export class AcceptDocumentReviewUseCase {
     );
     const fieldDefinitions = await loadFieldDefinitionLookup(this.pool, userId);
     const fields = doc.extraction?.fields ?? [];
+    const extractedText = doc.extraction?.text ?? '';
     const firstLine =
-      doc.extraction.text.split('\n').find((line) => line.trim().length > 0) ?? null;
+      extractedText.split('\n').find((line) => line.trim().length > 0) ?? null;
     const reviewableFields = buildReviewFieldSuggestions(fields, catalogKeys, fieldDefinitions, {
       title: doc.title,
       filename: doc.filename,
