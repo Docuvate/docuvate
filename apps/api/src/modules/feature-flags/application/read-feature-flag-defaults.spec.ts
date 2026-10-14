@@ -22,6 +22,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
   afterEach(() => {
     for (const key of ENV_KEYS) {
       if (original[key] === undefined) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- restore env after each case
         delete process.env[key];
       } else {
         process.env[key] = original[key];
@@ -32,6 +33,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
   it('defaults conservative flags off and learned value types on when env is unset', () => {
     for (const key of ENV_KEYS) {
       original[key] ??= process.env[key];
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- simulate unset env
       delete process.env[key];
     }
     expect(readFeatureFlagDefaultsFromEnv()).toEqual({
@@ -76,6 +78,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
   it('allows disabling learned value types via env', () => {
     for (const key of ENV_KEYS) {
       original[key] ??= process.env[key];
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- simulate unset env
       delete process.env[key];
     }
     process.env['DOCUVATE_FEATURE_LEARNED_VALUE_TYPES'] = 'false';
