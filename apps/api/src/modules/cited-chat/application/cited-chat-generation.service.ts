@@ -272,12 +272,31 @@ export class CitedChatGenerationService {
       isDocumentOverviewQuestion(queryVector);
 
     const retrieveStarted = Date.now();
-    const candidates = documentOverview
+    let candidates = documentOverview
       ? await this.retrieval.loadScopedDocumentChunks(userId, filterIds)
       : await this.retrieval.hybridRetrieveChunks(userId, retrievalQuery, {
           documentIds: filterIds,
           queryVector,
         });
+    if (scope === 'library' && candidates.length > 0) {
+      const boostMeta = await this.retrieval.loadDocumentContextMeta(
+        userId,
+        candidates.map((chunk) => chunk.documentId)
+      );
+      candidates = candidates
+        .map((chunk) => {
+          const meta = boostMeta.get(chunk.documentId);
+          const boost = libraryTemporalMatchBoost({
+            query: retrievalQuery,
+            filename: meta?.filename ?? chunk.documentTitle,
+            title: meta?.title ?? chunk.documentTitle,
+            body: chunk.body,
+            documentDate: meta?.documentDate ?? null,
+          });
+          return { ...chunk, fusionScore: chunk.fusionScore + boost };
+        })
+        .sort((a, b) => b.fusionScore - a.fusionScore);
+    }
     retrieveMs = Date.now() - retrieveStarted;
     const chunkPool = candidates.map((chunk) => ({ chunk }));
 

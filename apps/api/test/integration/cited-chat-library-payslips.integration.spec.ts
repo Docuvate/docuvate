@@ -98,7 +98,7 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
         ]
       );
       const chunks = splitTextChunksWithSpans(body);
-      const vectors = chunks.map((_, chunkIndex) => int8Vector384(month * 10 + chunkIndex));
+      const vectors = chunks.map((_, chunkIndex) => int8Vector384(index * 10 + chunkIndex));
       await searchRepo.indexDocumentChunks(userId, docId, chunks, undefined, {
         int8Vectors: vectors,
       });
