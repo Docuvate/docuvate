@@ -13,9 +13,11 @@ import { Chip } from '../components/ui/Chip';
 import {
   acceptDocumentReviewAll,
   acceptDocumentReviewHighConfidenceBatch,
+  archiveHashIdenticalDuplicateSets,
   dismissDocumentTagSuggestion,
   listDocumentReviewQueue,
 } from '../lib/api';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { routes } from '../lib/routes';
 
@@ -26,6 +28,7 @@ export function ReviewQueuePage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [batchBusy, setBatchBusy] = useState(false);
+  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
   const [focusIndex, setFocusIndex] = useState(0);
   const cardRefs = useRef<(HTMLLIElement | null)[]>([]);
 
@@ -136,6 +139,14 @@ export function ReviewQueuePage() {
           <Button
             type="button"
             variant="secondary"
+            disabled={batchBusy || loading}
+            onClick={() => { setArchiveConfirmOpen(true); }}
+          >
+            {t('reviewQueue.archiveHashIdenticalDuplicates')}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
             disabled={batchBusy || loading || items.length === 0}
             onClick={() => void onBatchHighConfidence()}
           >
@@ -200,14 +211,22 @@ export function ReviewQueuePage() {
                     <section className="review-queue-section">
                       <h2 className="review-queue-section-title">{t('reviewQueue.labelsSection')}</h2>
                       <div className="chip-row">
-                        {item.labelSuggestions.map((s) => (
-                          <Chip
-                            key={s.tag.id}
-                            label={s.tag.name}
-                            variant="suggest"
-                            color={s.tag.color}
-                          />
-                        ))}
+                        {item.labelSuggestions.map((s) => {
+                          const pct =
+                            s.confidence != null ? Math.round(s.confidence * 100) : null;
+                          const label =
+                            pct != null
+                              ? `${s.tag.name} (${t('reviewQueue.confidenceHint', { percent: pct })})`
+                              : s.tag.name;
+                          return (
+                            <Chip
+                              key={s.tag.id}
+                              label={label}
+                              variant="suggest"
+                              color={s.tag.color}
+                            />
+                          );
+                        })}
                       </div>
                     </section>
                   ) : null}
@@ -218,7 +237,17 @@ export function ReviewQueuePage() {
                       <dl className="review-queue-fields">
                         {item.fieldSuggestions.map((field) => (
                           <div key={field.key} className="review-queue-field-row">
-                            <dt>{field.displayLabel}</dt>
+                            <dt>
+                              {field.displayLabel}
+                              {field.confidence != null ? (
+                                <span className="muted review-queue-field-confidence">
+                                  {' '}
+                                  ({t('reviewQueue.confidenceHint', {
+                                    percent: Math.round(field.confidence * 100),
+                                  })})
+                                </span>
+                              ) : null}
+                            </dt>
                             <dd>{field.value}</dd>
                           </div>
                         ))}
@@ -267,6 +296,31 @@ export function ReviewQueuePage() {
       {showKeyboardHint ? (
         <p className="muted review-queue-keyboard-hint">{t('reviewQueue.keyboardHint')}</p>
       ) : null}
+
+      <ConfirmDialog
+        open={archiveConfirmOpen}
+        title={t('reviewQueue.archiveHashIdenticalConfirmTitle')}
+        description={t('reviewQueue.archiveHashIdenticalConfirmBody')}
+        confirmLabel={t('reviewQueue.archiveHashIdenticalDuplicates')}
+        onCancel={() => { setArchiveConfirmOpen(false); }}
+        onConfirm={() => {
+          setArchiveConfirmOpen(false);
+          setBatchBusy(true);
+          void archiveHashIdenticalDuplicateSets()
+            .then((result) => {
+              pushSuccess(
+                t('reviewQueue.archiveHashIdenticalSuccess', { count: result.setsArchived })
+              );
+              return load();
+            })
+            .catch((err) => {
+              pushError(formatUserFacingError(err, 'errors.generic'));
+            })
+            .finally(() => {
+              setBatchBusy(false);
+            });
+        }}
+      />
     </div>
   );
 }

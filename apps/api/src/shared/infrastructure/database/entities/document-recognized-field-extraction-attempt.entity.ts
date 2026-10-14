@@ -31,6 +31,9 @@ export class DocumentRecognizedFieldExtractionAttemptEntity {
   @Column('real', { name: 'confidence', nullable: true, precision: 24 })
   confidence: number | null;
 
+  @Column('integer', { name: 'extractor_version', default: () => '0' })
+  extractorVersion: number;
+
   @Column('timestamp with time zone', {
     name: 'updated_at',
     default: () => 'now()',

@@ -104,6 +104,26 @@ export class PgEmbeddingDensityRepository {
     return run?.nExamples ?? null;
   }
 
+  async loadFineConfirmThresholdMap(userId: string): Promise<Map<string, number>> {
+    const userState = await this.userStateRepo.findOne({ where: { userId } });
+    if (!userState?.activeCalibrationRunId) {
+      return new Map();
+    }
+    const rows = await this.thresholdRepo.find({
+      where: {
+        calibrationRunId: userState.activeCalibrationRunId,
+        scope: 'fine',
+      },
+    });
+    const map = new Map<string, number>();
+    for (const row of rows) {
+      if (row.tagId) {
+        map.set(row.tagId, row.threshold);
+      }
+    }
+    return map;
+  }
+
   async loadWorkerState(userId: string, tagIds: string[]): Promise<EmbeddingDensityWorkerState | null> {
     const userState = await this.userStateRepo.findOne({ where: { userId } });
     if (!userState) {

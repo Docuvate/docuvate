@@ -12,6 +12,7 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-extractor-version.js';
 
 const OUTCOMES: readonly RecognizedFieldExtractionOutcome[] = [
   'not_applicable',
@@ -26,6 +27,7 @@ export interface RecognizedFieldExtractionAttemptRow {
   fieldKey: string;
   outcome: RecognizedFieldExtractionOutcome;
   confidence: number | null;
+  extractorVersion: number;
   updatedAt: Date;
 }
 
@@ -35,6 +37,7 @@ function mapRow(row: Record<string, unknown>): RecognizedFieldExtractionAttemptR
     fieldKey: parseString(row.field_key),
     outcome: parseEnum(row.outcome, OUTCOMES, 'not_found'),
     confidence: parseOptionalNumber(row.confidence),
+    extractorVersion: parseOptionalNumber(row.extractor_version) ?? 0,
     updatedAt: parseDate(row.updated_at),
   };
 }
@@ -45,7 +48,7 @@ export class PgRecognizedFieldExtractionAttemptRepository {
 
   async listForDocument(documentId: string, userId: string): Promise<RecognizedFieldExtractionAttemptRow[]> {
     const result = await this.pool.query(
-      `SELECT a.field_definition_id, a.outcome, a.confidence, a.updated_at, r.field_key
+      `SELECT a.field_definition_id, a.outcome, a.confidence, a.extractor_version, a.updated_at, r.field_key
        FROM document_recognized_field_extraction_attempt a
        JOIN recognized_field_definitions r ON r.id = a.field_definition_id
        WHERE a.document_id = $1 AND a.tenant_id = $2
@@ -73,13 +76,21 @@ export class PgRecognizedFieldExtractionAttemptRepository {
       for (const row of rows) {
         await client.query(
           `INSERT INTO document_recognized_field_extraction_attempt
-             (document_id, field_definition_id, tenant_id, outcome, confidence, updated_at)
-           VALUES ($1, $2, $3, $4, $5, now())
+             (document_id, field_definition_id, tenant_id, outcome, confidence, extractor_version, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, now())
            ON CONFLICT (document_id, field_definition_id) DO UPDATE SET
              outcome = EXCLUDED.outcome,
              confidence = EXCLUDED.confidence,
+             extractor_version = EXCLUDED.extractor_version,
              updated_at = now()`,
-          [row.documentId, row.fieldDefinitionId, userId, row.outcome, row.confidence]
+          [
+            row.documentId,
+            row.fieldDefinitionId,
+            userId,
+            row.outcome,
+            row.confidence,
+            RECOGNIZED_FIELD_EXTRACTOR_VERSION,
+          ]
         );
       }
       await client.query('COMMIT');
@@ -95,6 +106,7 @@ export class PgRecognizedFieldExtractionAttemptRepository {
     userId: string,
     field: {
       id: string;
+      key: string;
       extractForAllDocuments: boolean;
       gateLabelIds: string[];
       gateLabelMatch: 'any' | 'all';
@@ -111,6 +123,7 @@ export class PgRecognizedFieldExtractionAttemptRepository {
     if (ids.length === 0) {
       return [];
     }
+    const globalKey = `global:${field.key}`;
     const result = await this.pool.query<{ id: string }>(
       `SELECT d.id
        FROM documents d
@@ -118,12 +131,30 @@ export class PgRecognizedFieldExtractionAttemptRepository {
          AND d.id = ANY($2::uuid[])
          AND NOT EXISTS (
            SELECT 1
-           FROM document_recognized_field_extraction_attempt a
-           WHERE a.document_id = d.id
-             AND a.field_definition_id = $3
-             AND a.tenant_id = $1
+           FROM extraction_field_corrections c
+           WHERE c.user_id = $1
+             AND c.document_id = d.id
+             AND c.field_key IN ($4, $5)
+         )
+         AND (
+           NOT EXISTS (
+             SELECT 1
+             FROM document_recognized_field_extraction_attempt a
+             WHERE a.document_id = d.id
+               AND a.field_definition_id = $3
+               AND a.tenant_id = $1
+           )
+           OR EXISTS (
+             SELECT 1
+             FROM document_recognized_field_extraction_attempt a
+             WHERE a.document_id = d.id
+               AND a.field_definition_id = $3
+               AND a.tenant_id = $1
+               AND a.outcome IN ('not_found', 'below_threshold')
+               AND coalesce(a.extractor_version, 0) < $6
+           )
          )`,
-      [userId, ids, field.id]
+      [userId, ids, field.id, globalKey, field.key, RECOGNIZED_FIELD_EXTRACTOR_VERSION]
     );
     return result.rows.map((row) => parseString(requireRecord(row).id));
   }

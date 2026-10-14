@@ -8,6 +8,7 @@ import {
   semanticFieldKey,
 } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
+import type pg from 'pg';
 
 import type { AuthorizationSubject } from '../../../../shared/domain/authorization.js';
 import { NotFoundError } from '../../../../shared/domain/errors.js';
@@ -17,25 +18,37 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../../shared/domain/ports.js';
+import { PG_POOL } from '../../../../shared/infrastructure/database/tokens.js';
 import { AcceptTagSuggestionUseCase } from '../../../labels/application/document-label.use-cases.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../../labels/application/load-document-labels.use-case.js';
+import { PgEmbeddingDensityRepository } from '../../../labels/infrastructure/pg-embedding-density.repository.js';
+import { PgLabelCoOccurrenceRepository } from '../../../labels/infrastructure/pg-label-co-occurrence.repository.js';
 import { ListRecognizedFieldsUseCase } from '../../../recognized-fields/application/recognized-field.use-cases.js';
+import { loadFieldDefinitionLookup } from '../../../search/infrastructure/document-field-value-index.js';
 import { SyncDocumentSearchIndexUseCase } from '../../../search/application/sync-document-search-index.use-case.js';
 import { GetDocumentUseCase } from '../get-document.use-case.js';
 import { UpdateDocumentUseCase } from '../update-document.use-case.js';
-import { isoDateFromFieldValue } from './document-review-field-display.js';
+import {
+  buildReviewFieldSuggestions,
+  isoDateFromFieldValue,
+} from './document-review-field-display.js';
+import { isJunkReviewFieldSuggestion } from './review-field-junk-filter.js';
+import { selectAcceptableLabelSuggestions } from './select-review-label-suggestions.js';
 
 @Injectable()
 export class AcceptDocumentReviewUseCase {
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
+    @Inject(PG_POOL) private readonly pool: pg.Pool,
     private readonly getDocument: GetDocumentUseCase,
     private readonly loadSuggestions: LoadDocumentLabelSuggestionsUseCase,
     private readonly acceptTagSuggestion: AcceptTagSuggestionUseCase,
     private readonly updateDocument: UpdateDocumentUseCase,
     private readonly listRecognizedFields: ListRecognizedFieldsUseCase,
-    private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
+    private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase,
+    private readonly densityRepo: PgEmbeddingDensityRepository,
+    private readonly coOccurrence: PgLabelCoOccurrenceRepository
   ) {}
 
   async execute(
@@ -51,15 +64,28 @@ export class AcceptDocumentReviewUseCase {
       (await this.taxonomy.listTagsForDocument(documentId)).map((tag) => tag.id)
     );
     const tagSuggestions = await this.loadSuggestions.execute(documentId, userId);
+    const fineThresholds = await this.densityRepo.loadFineConfirmThresholdMap(userId);
+    const exclusivePairs = await this.coOccurrence.listMutuallyExclusiveTagPairs(userId);
+    const openSuggestions = tagSuggestions.filter((s) => !assignedTagIds.has(s.tag.id));
+    const labelsToAccept =
+      minConfidence > 0
+        ? selectAcceptableLabelSuggestions({
+            suggestions: openSuggestions,
+            assignedTagIds,
+            exclusivePairs,
+            fineThresholds,
+            minConfidence,
+          })
+        : selectAcceptableLabelSuggestions({
+            suggestions: openSuggestions,
+            assignedTagIds,
+            exclusivePairs,
+            fineThresholds,
+            minConfidence: 0,
+          });
+
     let acceptedLabels = 0;
-    for (const suggestion of tagSuggestions) {
-      if (assignedTagIds.has(suggestion.tag.id)) {
-        continue;
-      }
-      const confidence = suggestion.confidence ?? 0;
-      if (confidence < minConfidence) {
-        continue;
-      }
+    for (const suggestion of labelsToAccept) {
       await this.acceptTagSuggestion.execute(documentId, userId, suggestion.tag.id);
       acceptedLabels += 1;
       assignedTagIds.add(suggestion.tag.id);
@@ -73,18 +99,40 @@ export class AcceptDocumentReviewUseCase {
     const catalogKeys: ReadonlySet<string> = new Set(
       catalog.map((def: { key: string }) => def.key)
     );
+    const fieldDefinitions = await loadFieldDefinitionLookup(this.pool, userId);
     const fields = doc.extraction?.fields ?? [];
+    const firstLine =
+      doc.extraction?.text?.split('\n').find((line) => line.trim().length > 0) ?? null;
+    const reviewableFields = buildReviewFieldSuggestions(fields, catalogKeys, fieldDefinitions, {
+      title: doc.title,
+      filename: doc.filename,
+      firstLine,
+      minConfidence,
+    });
+    const reviewableKeys = new Set(reviewableFields.map((field) => field.key));
+
     const { suggestions } = partitionRecognizedAndHeuristicSuggestions(fields, catalogKeys);
     let acceptedFields = 0;
     let nextFields = [...fields];
     let documentDatePatch: string | null | undefined;
 
     for (const suggestion of suggestions) {
-      if ((suggestion.confidence ?? 0) < minConfidence) {
+      if (!reviewableKeys.has(suggestion.key)) {
         continue;
       }
       const value = suggestion.value.trim();
       if (!value) {
+        continue;
+      }
+      if (
+        isJunkReviewFieldSuggestion({
+          key: suggestion.key,
+          value,
+          title: doc.title,
+          filename: doc.filename,
+          firstLine,
+        })
+      ) {
         continue;
       }
       const semantic = suggestion.key;

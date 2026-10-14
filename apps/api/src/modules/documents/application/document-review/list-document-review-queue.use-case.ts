@@ -19,6 +19,8 @@ import {
 } from '../../../../shared/domain/ports.js';
 import { PG_POOL } from '../../../../shared/infrastructure/database/tokens.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../../labels/application/load-document-labels.use-case.js';
+import { calibratedLabelSuggestionConfidence } from '../../../labels/domain/label-suggestion-calibrated-confidence.js';
+import { PgEmbeddingDensityRepository } from '../../../labels/infrastructure/pg-embedding-density.repository.js';
 import { ListRecognizedFieldsUseCase } from '../../../recognized-fields/application/recognized-field.use-cases.js';
 import { loadFieldDefinitionLookup } from '../../../search/infrastructure/document-field-value-index.js';
 import { toTagSuggestionDto } from '../../../taxonomy/presentation/taxonomy.mapper.js';
@@ -27,6 +29,7 @@ import {
   buildReviewFieldSuggestions,
   isoDateFromFieldValue,
 } from './document-review-field-display.js';
+import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './promote-extraction-suggestions.use-case.js';
 
 @Injectable()
 export class ListDocumentReviewQueueUseCase {
@@ -37,7 +40,9 @@ export class ListDocumentReviewQueueUseCase {
     @Inject(PG_POOL) private readonly pool: pg.Pool,
     private readonly loadSuggestions: LoadDocumentLabelSuggestionsUseCase,
     private readonly listRecognizedFields: ListRecognizedFieldsUseCase,
-    private readonly documentAuthz: DocumentAuthorizationService
+    private readonly documentAuthz: DocumentAuthorizationService,
+    private readonly promoteHighConfidence: PromoteHighConfidenceExtractionSuggestionsUseCase,
+    private readonly densityRepo: PgEmbeddingDensityRepository
   ) {}
 
   async summary(userId: string, subject: AuthorizationSubject): Promise<DocumentReviewQueueSummaryDto> {
@@ -60,9 +65,11 @@ export class ListDocumentReviewQueueUseCase {
       catalog.map((def: { key: string }) => def.key)
     );
     const fieldDefinitions = await loadFieldDefinitionLookup(this.pool, userId);
+    const fineThresholds = await this.densityRepo.loadFineConfirmThresholdMap(userId);
 
     const items: DocumentReviewQueueItemDto[] = [];
     for (const row of rows) {
+      await this.promoteHighConfidence.execute(row.id, userId);
       const entity = await this.documents.findByIdForUser(row.id, userId);
       if (!entity) {
         continue;
@@ -71,11 +78,22 @@ export class ListDocumentReviewQueueUseCase {
       const tagSuggestions = await this.loadSuggestions.execute(row.id, userId);
       const assignedIds = new Set(entity.tags.map((tag) => tag.id));
       const openLabelSuggestions = tagSuggestions.filter((s) => !assignedIds.has(s.tag.id));
+      const rankedScores = openLabelSuggestions.map((s) => ({
+        tagId: s.tag.id,
+        rawConfidence: s.confidence ?? 0,
+      }));
       const fields = entity.extraction?.fields ?? [];
+      const firstLine =
+        entity.extraction?.text?.split('\n').find((line) => line.trim().length > 0) ?? null;
       const fieldSuggestions = buildReviewFieldSuggestions(
         fields,
         catalogKeys,
-        fieldDefinitions
+        fieldDefinitions,
+        {
+          title: entity.title,
+          filename: entity.filename,
+          firstLine,
+        }
       );
       const stackSummaries = await this.stacks.summariesForPrimaryDocuments(userId, [row.id]);
       const duplicateStack = stackSummaries.get(row.id) ?? null;
@@ -116,7 +134,19 @@ export class ListDocumentReviewQueueUseCase {
           : null,
         suggestedDocumentDate,
         uploadDate: entity.createdAt.toISOString(),
-        labelSuggestions: openLabelSuggestions.map((s) => toTagSuggestionDto(s)),
+        labelSuggestions: openLabelSuggestions.map((s) => {
+          const dto = toTagSuggestionDto(s);
+          const raw = s.confidence ?? 0;
+          return {
+            ...dto,
+            confidence: calibratedLabelSuggestionConfidence({
+              tagId: s.tag.id,
+              rawConfidence: raw,
+              ranked: rankedScores,
+              fineThresholds,
+            }),
+          };
+        }),
         fieldSuggestions,
         duplicateStack,
       });

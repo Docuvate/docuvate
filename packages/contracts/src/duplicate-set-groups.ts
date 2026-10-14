@@ -51,7 +51,17 @@ export function groupDuplicateSetsWithHashSubsets(
       combined.push(ids);
     }
   }
-  return combined;
+  const seenSetIds = new Set<string>();
+  const unique: string[][] = [];
+  for (const ids of combined) {
+    const setId = duplicateSetIdFromDocumentIds(ids);
+    if (seenSetIds.has(setId)) {
+      continue;
+    }
+    seenSetIds.add(setId);
+    unique.push(ids);
+  }
+  return unique;
 }
 
 /** Union-find grouping of pending duplicate pairs into connected sets (≥2 documents). */

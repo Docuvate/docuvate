@@ -11,6 +11,7 @@ import {
   defaultFieldLabel,
   type FieldDefinitionLookup,
 } from '../../../search/infrastructure/document-field-value-index.js';
+import { isJunkReviewFieldSuggestion } from './review-field-junk-filter.js';
 
 export function fieldDisplayLabel(
   fieldKey: string,
@@ -33,11 +34,27 @@ export function buildReviewFieldSuggestions(
   fields: ExtractedField[],
   catalogKeys: ReadonlySet<string>,
   definitions: Map<string, FieldDefinitionLookup>,
-  minConfidence = 0
+  context: {
+    minConfidence?: number;
+    title: string;
+    filename: string;
+    firstLine?: string | null;
+  }
 ): DocumentReviewFieldSuggestionDto[] {
+  const minConfidence = context.minConfidence ?? 0;
   const { suggestions } = partitionRecognizedAndHeuristicSuggestions(fields, catalogKeys);
   return suggestions
     .filter((s) => s.value.trim().length > 0 && (s.confidence ?? 0) >= minConfidence)
+    .filter(
+      (s) =>
+        !isJunkReviewFieldSuggestion({
+          key: s.key,
+          value: s.value,
+          title: context.title,
+          filename: context.filename,
+          firstLine: context.firstLine,
+        })
+    )
     .map((s) => ({
       key: s.key,
       displayLabel: fieldDisplayLabel(s.key, definitions),
