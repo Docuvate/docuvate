@@ -5,5 +5,6 @@ Synthetic routing eval for the cited-chat pipeline (no customer document text in
 - **Test split:** `test.json` (frozen for CI via `chat_routing` model gate).
 - **Regenerate:** `python bench/model_gates/fixtures/generate_chat_de_eval.py`
 - **Intent prototypes:** `python bench/model_gates/fixtures/generate_chat_intent_prototypes.py` (requires worker embeddings).
+- **Answer-type prototypes:** `python bench/model_gates/fixtures/generate_chat_answer_type_prototypes.py` (reads `bench/model_gates/fixtures/chat_answer_type_training.json`).
 
 Extractive QA over document bodies is gated separately in `bench/model_gates/fixtures/chat_extractive_cases.json`.

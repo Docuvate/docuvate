@@ -5,15 +5,16 @@ import { describe, expect, it } from 'vitest';
 import { formatLibraryExtractiveAnswer } from './format-library-extractive-answer.js';
 
 describe('formatLibraryExtractiveAnswer', () => {
-  it('formats amount answers with period from the question (fixture: payroll-shaped doc)', () => {
+  it('formats amount answers using document title context (amount answer type)', () => {
     const text = formatLibraryExtractiveAnswer({
       userMessage: 'Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?',
       quote: '/10E Gesamtbrutto (EBeschV) 4.859,67 56.706,65',
       documentTitle: 'Entgeltnachweis 10/2024',
       locale: 'de',
+      answerType: 'amount',
     });
     expect(text).toContain('4.859,67');
-    expect(text).toContain('Oktober 2024');
+    expect(text).toContain('Entgeltnachweis 10/2024');
     expect(text).not.toContain('/10E');
   });
 
@@ -23,9 +24,9 @@ describe('formatLibraryExtractiveAnswer', () => {
       quote: 'Rechnungsbetrag: 1.234,56 EUR',
       documentTitle: 'Rechnung INV-2026-0042',
       locale: 'de',
+      answerType: 'amount',
     });
     expect(text).toContain('1.234,56');
-    expect(text).toContain('März 2026');
     expect(text).toContain('Rechnung INV-2026-0042');
   });
 });

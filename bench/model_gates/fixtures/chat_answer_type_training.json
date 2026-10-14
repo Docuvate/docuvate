@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "description": "Labeled library chat questions for answer-type prototype centroids (not used at runtime).",
+  "answer_types": {
+    "amount": [
+      "Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?",
+      "Wie viel Lohnsteuer wurde mir laut Lohnsteuerbescheinigung 2024 insgesamt einbehalten?",
+      "Welche Gesamtsumme steht auf der Rechnung Nordwind?",
+      "What is the total gross amount on this payslip?",
+      "How much tax was withheld in total?",
+      "What amount is listed for the invoice total?",
+      "Wie hoch ist der Rechnungsbetrag?",
+      "Summe der Nettozahlung bitte.",
+      "Total amount due on the document?"
+    ],
+    "date": [
+      "Wann ist die Kündigungsfrist?",
+      "What is the document date on the contract?",
+      "Bis wann muss ich zahlen?",
+      "When is the payment due?",
+      "Welches Datum steht auf dem Schreiben?",
+      "What date appears in the header?"
+    ],
+    "entity": [
+      "Welche IBAN ist angegeben?",
+      "Who is the employer on this form?",
+      "Wer ist der Absender?",
+      "What company name is on the invoice?",
+      "Nenne die Kundennummer."
+    ],
+    "free_text": [
+      "Was steht in Abschnitt 3?",
+      "Summarize the main points of this letter.",
+      "Was bedeutet Klausel 4?",
+      "Explain the notice period rules in plain language."
+    ]
+  }
+}

@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { cosineSimilarity } from './embedding-cosine.js';
+import { classifyByEmbeddingPrototypes } from './chat-prototype-classifier.js';
 
 export type ChatRouteIntent = 'document_qa' | 'stats' | 'smalltalk' | 'out_of_scope';
 
@@ -74,35 +74,13 @@ function loadStatsFile(): StatsOperationPrototypeFile {
 const intentFile = loadIntentFile();
 const statsFile = loadStatsFile();
 
-function classifyPrototype(
-  queryVector: number[],
-  prototypes: Record<string, number[]>,
-  minScore: number,
-  minMargin: number,
-  fallback: string
-): string {
-  const scored = Object.entries(prototypes)
-    .map(([key, vec]) => ({ key, score: cosineSimilarity(queryVector, vec) }))
-    .sort((a, b) => b.score - a.score);
-  if (scored.length === 0) {
-    return fallback;
-  }
-  const best = scored[0];
-  const second = scored[1]?.score ?? 0;
-  if (best.score < minScore || best.score - second < minMargin) {
-    return fallback;
-  }
-  return best.key;
-}
-
 export function classifyChatRouteIntent(queryVector: number[]): ChatRouteIntent {
-  const key = classifyPrototype(
-    queryVector,
-    intentFile.intents,
-    intentFile.min_score,
-    intentFile.min_margin,
-    intentFile.default_intent
-  );
+  const key = classifyByEmbeddingPrototypes(queryVector, {
+    prototypes: intentFile.intents,
+    minScore: intentFile.min_score,
+    minMargin: intentFile.min_margin,
+    defaultKey: intentFile.default_intent,
+  });
   if (key === 'document_qa' || key === 'stats' || key === 'smalltalk' || key === 'out_of_scope') {
     return key;
   }
@@ -110,13 +88,12 @@ export function classifyChatRouteIntent(queryVector: number[]): ChatRouteIntent 
 }
 
 export function classifyStatsOperation(queryVector: number[]): ChatStatsOperation {
-  const key = classifyPrototype(
-    queryVector,
-    statsFile.operations,
-    statsFile.min_score,
-    statsFile.min_margin,
-    statsFile.default_operation
-  );
+  const key = classifyByEmbeddingPrototypes(queryVector, {
+    prototypes: statsFile.operations,
+    minScore: statsFile.min_score,
+    minMargin: statsFile.min_margin,
+    defaultKey: statsFile.default_operation,
+  });
   if (
     key === 'count_total' ||
     key === 'count_ready' ||
