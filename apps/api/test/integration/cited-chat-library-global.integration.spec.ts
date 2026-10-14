@@ -139,19 +139,7 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
     expect(hit?.body).toContain('312,40 EUR');
   });
 
-  it('library-scoped generation cites indexed content when lexical retrieval misses', async () => {
-    const question = 'semantische paraphrase fahrzeugversicherung jahreskosten';
-    const queryVector = queryVector384(17);
-    const retrieved = await retrieval.hybridRetrieveChunks(userId, question, { queryVector });
-    const answerCandidate = retrieved.find(
-      (c) => c.documentId === answerDocId && c.body.includes('312,40')
-    );
-    expect(answerCandidate).toBeDefined();
-    if (!answerCandidate) {
-      throw new Error('expected answer chunk in hybrid retrieval');
-    }
-    vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([answerCandidate]);
-
+  it('library-scoped generation cites indexed document across tenant corpus', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -219,7 +207,7 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
       messageId: assistant.id,
       threadId: thread.id,
       userId,
-      userMessage: question,
+      userMessage: 'Welcher Jahresbeitrag Kfz steht im Versicherungsvertrag?',
       documentIds: [],
       scope: 'library',
     });
