@@ -17,11 +17,11 @@ import {
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
 import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
 import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
+import { extractGermanPeriodHints, GERMAN_MONTH_BY_NAME } from '../domain/library-temporal-match.js';
 import {
   documentMatchesTenantLabelsInQuery,
   tenantLabelsMentionedInQuery,
 } from '../domain/library-tenant-label-match.js';
-import { extractGermanPeriodHints, GERMAN_MONTH_BY_NAME } from '../domain/library-temporal-match.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;
