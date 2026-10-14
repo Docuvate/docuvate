@@ -19,12 +19,19 @@ import {
   SetDuplicateStackPrimaryUseCase,
   SyncDuplicateStacksUseCase,
 } from './application/duplicate-stack.use-cases.js';
+import {
+  ArchiveDuplicateSetUseCase,
+  DismissDuplicateSetUseCase,
+  ListDuplicateSetsUseCase,
+} from './application/duplicate-set.use-cases.js';
 import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-duplicates.use-case.js';
 import { DuplicateClassifierService } from './domain/duplicate-classifier.service.js';
 import { HttpSmartDuplicatesAdapter } from './infrastructure/http-smart-duplicates.adapter.js';
+import { DuplicatesController } from './presentation/duplicates.controller.js';
 
 @Module({
   imports: [LabelsModule, FeatureFlagsModule],
+  controllers: [DuplicatesController],
   providers: [
     HttpSmartDuplicatesAdapter,
     SyncUserHashDuplicatesUseCase,
@@ -40,6 +47,9 @@ import { HttpSmartDuplicatesAdapter } from './infrastructure/http-smart-duplicat
     ReleaseDuplicateStackMemberUseCase,
     RestoreDuplicateStackPairUseCase,
     HandleDuplicateStackDocumentDeletedUseCase,
+    ListDuplicateSetsUseCase,
+    ArchiveDuplicateSetUseCase,
+    DismissDuplicateSetUseCase,
   ],
   exports: [
     ApplyDuplicateDetectionUseCase,
@@ -52,6 +62,9 @@ import { HttpSmartDuplicatesAdapter } from './infrastructure/http-smart-duplicat
     ReleaseDuplicateStackMemberUseCase,
     RestoreDuplicateStackPairUseCase,
     HandleDuplicateStackDocumentDeletedUseCase,
+    ListDuplicateSetsUseCase,
+    ArchiveDuplicateSetUseCase,
+    DismissDuplicateSetUseCase,
   ],
 })
 // Nest requires a module class token; this module has no instance state.

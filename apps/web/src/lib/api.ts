@@ -33,6 +33,7 @@ import type {
   DocumentDto,
   DocumentListQuery,
   DuplicateCandidateDto,
+  DuplicateSetDto,
   DuplicateStackDto,
   ExtractionArenaRatingRequest,
   ExtractionCompareResponse,
@@ -532,6 +533,20 @@ export async function updateFolder(id: string, body: UpdateFolderRequest): Promi
 
 export async function deleteFolder(id: string): Promise<void> {
   await request(`/folders/${id}`, { method: 'DELETE' });
+}
+
+export async function listDuplicateSets(documentId?: string): Promise<DuplicateSetDto[]> {
+  const query = documentId ? `?documentId=${encodeURIComponent(documentId)}` : '';
+  const data = await request<{ items: DuplicateSetDto[] }>(`/duplicate-sets${query}`);
+  return data.items;
+}
+
+export async function archiveDuplicateSet(setId: string): Promise<void> {
+  await request(`/duplicate-sets/${encodeURIComponent(setId)}/archive`, { method: 'POST' });
+}
+
+export async function dismissDuplicateSet(setId: string): Promise<void> {
+  await request(`/duplicate-sets/${encodeURIComponent(setId)}/dismiss`, { method: 'POST' });
 }
 
 export async function listDuplicateCandidates(

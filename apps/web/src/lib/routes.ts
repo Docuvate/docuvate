@@ -11,6 +11,7 @@ export const routes = {
   inviteAccept: '/invite',
   inbox: '/inbox',
   documents: '/documents',
+  duplicates: '/documents/duplicates',
   globalChat: '/chat',
   savedViews: '/documents/views',
   document: (id: string) => `/documents/${id}`,

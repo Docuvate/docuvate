@@ -74,6 +74,7 @@ function documentsNavIsActive(pathname: string, search: string): boolean {
   return (
     pathname === routes.documents ||
     pathname === routes.inbox ||
+    pathname === routes.duplicates ||
     (pathname.startsWith('/documents/') && !pathname.startsWith('/documents/views'))
   );
 }

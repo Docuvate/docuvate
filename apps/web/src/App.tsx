@@ -19,6 +19,7 @@ import { ConnectorsPage } from './pages/ConnectorsPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { DateisystemExplorerPage } from './pages/DateisystemExplorerPage';
 import { DocumentDetailPage } from './pages/DocumentDetailPage';
+import { DuplicatesOverviewPage } from './pages/DuplicatesOverviewPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { GlobalChatPage } from './pages/GlobalChatPage';
 import { InviteAcceptPage } from './pages/InviteAcceptPage';
@@ -96,6 +97,14 @@ export function App() {
         element={
           <ShellRoute>
             <LibraryPage />
+          </ShellRoute>
+        }
+      />
+      <Route
+        path={routes.duplicates}
+        element={
+          <ShellRoute>
+            <DuplicatesOverviewPage />
           </ShellRoute>
         }
       />

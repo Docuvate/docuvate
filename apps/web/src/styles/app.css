@@ -7898,6 +7898,60 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   padding: var(--dv-space-xs) var(--dv-space-sm);
 }
 
+.duplicate-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dv-space-sm);
+}
+
+.duplicate-panel-queue-link {
+  font-size: var(--dv-font-size-sm);
+}
+
+.duplicate-set-list {
+  display: grid;
+  gap: var(--dv-space-sm);
+}
+
+.duplicate-set-card {
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+  padding: var(--dv-space-sm);
+  display: grid;
+  gap: var(--dv-space-xs);
+}
+
+.duplicate-set-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--dv-space-sm);
+}
+
+.duplicate-set-card-header h3 {
+  margin: 0;
+  font-size: var(--dv-font-size-md);
+}
+
+.duplicate-set-doc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dv-space-2xs);
+}
+
+.duplicate-set-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-xs);
+}
+
+.duplicates-overview-page .page-header {
+  margin-bottom: var(--dv-space-md);
+}
+
 .pdf-viewer {
   display: flex;
   flex-direction: column;

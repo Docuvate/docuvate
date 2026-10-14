@@ -37,6 +37,8 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'FeatureFlagLearnedValueTypes20261013220000',
   'ExactFactAnswerAbstention20261013230000',
   'DocumentRecognizedFieldExtractionAttempt20261014120000',
+  'RepairHashOnlyDuplicateStacks20261014140000',
+  'MappeDefaultRootFolders20261014150000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -154,6 +156,10 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.tenant_exact_fact_chat_settings');
     case 'DocumentRecognizedFieldExtractionAttempt20261014120000':
       return regClassExists(runner, 'public.document_recognized_field_extraction_attempt');
+    case 'RepairHashOnlyDuplicateStacks20261014140000':
+      return migrationSchemaPresent(runner, 'DocumentRecognizedFieldExtractionAttempt20261014120000');
+    case 'MappeDefaultRootFolders20261014150000':
+      return migrationSchemaPresent(runner, 'RepairHashOnlyDuplicateStacks20261014140000');
     default:
       return false;
   }
