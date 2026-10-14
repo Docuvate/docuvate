@@ -140,6 +140,13 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
   });
 
   it('library-scoped generation cites indexed content when lexical retrieval misses', async () => {
+    const question = 'semantische paraphrase fahrzeugversicherung jahreskosten';
+    const queryVector = queryVector384(17);
+    const retrieved = await retrieval.hybridRetrieveChunks(userId, question, { queryVector });
+    expect(retrieved.some((c) => c.documentId === answerDocId && c.body.includes('312,40'))).toBe(
+      true
+    );
+
     vi.stubGlobal(
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -173,7 +180,7 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
               {
                 text: 'Der Jahresbeitrag Kfz beträgt 312,40 EUR.',
                 source: 'S1',
-                quote: 'Jahresbeitrag Kfz 312,40 EUR',
+                quote: '312,40 EUR',
               },
             ],
           });
@@ -207,7 +214,7 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
       messageId: assistant.id,
       threadId: thread.id,
       userId,
-      userMessage: 'semantische paraphrase fahrzeugversicherung jahreskosten',
+      userMessage: question,
       documentIds: [],
       scope: 'library',
     });
