@@ -143,9 +143,10 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
        LIMIT $3`,
       [userId, keys, fetchLimit]
     );
-    const rows = result.rows.map((row) => mapRow(requireRecord(row)));
     const perField = new Map<string, LabelFieldExtractionExample[]>();
-    for (const row of rows) {
+    for (const raw of result.rows) {
+      const record = requireRecord(raw);
+      const row = mapRow(record);
       if (!row.newValue.trim()) {
         continue;
       }
@@ -156,7 +157,7 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
       if (bucket.length >= limitPerField) {
         continue;
       }
-      const documentText = parseOptionalString(row.document_extracted_text) ?? '';
+      const documentText = parseOptionalString(record['document_extracted_text']) ?? '';
       const anchor = inferFieldCorrectionAnchorLabel(documentText, row.newValue.trim());
       bucket.push({
         fieldKey: row.fieldKey,

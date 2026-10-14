@@ -321,6 +321,7 @@ async function runLabelExclusivityCheck(cookie, docsByTitle) {
       throw new Error(`Label exclusivity training doc missing: ${title}`);
     }
     await api(cookie, 'POST', `/v1/documents/${doc.id}/tags/${primaryTag.id}`);
+    await api(cookie, 'POST', `/v1/documents/${doc.id}/tag-suggestions/refresh`);
   }
   for (const title of spec.conflictingLabelTitles ?? []) {
     const doc = docsByTitle.get(title);
@@ -328,6 +329,7 @@ async function runLabelExclusivityCheck(cookie, docsByTitle) {
       throw new Error(`Label exclusivity training doc missing: ${title}`);
     }
     await api(cookie, 'POST', `/v1/documents/${doc.id}/tags/${conflictingTag.id}`);
+    await api(cookie, 'POST', `/v1/documents/${doc.id}/tag-suggestions/refresh`);
   }
 
   const probe = docsByTitle.get(spec.probeTitle);
