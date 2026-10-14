@@ -23,6 +23,17 @@ describe('libraryTemporalMatch', () => {
     expect(boost).toBeGreaterThan(0.3);
   });
 
+  it('boosts prefixed payslip filenames with embedded YYYY_MM', () => {
+    const boost = libraryTemporalMatchBoost({
+      query: 'Gesamtbrutto Entgeltnachweis Oktober 2024',
+      filename: 'Entgeltnachweis 2024_10.pdf',
+      title: 'Entgeltnachweis',
+      body: '/10E Gesamtbrutto (EBeschV) 4.859,67',
+      documentDate: '2024-10-31',
+    });
+    expect(boost).toBeGreaterThan(0.3);
+  });
+
   it('does not boost unrelated months', () => {
     const boost = libraryTemporalMatchBoost({
       query: 'Gesamtbrutto Entgeltnachweis Oktober 2024',

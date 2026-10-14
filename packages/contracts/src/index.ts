@@ -1438,6 +1438,7 @@ export {
   duplicateSetIdFromDocumentIds,
   duplicateSetMaxSimilarityForDisplay,
   groupDuplicatePairsIntoSets,
+  groupDuplicateSetsWithHashSubsets,
   parseDuplicateSetId,
 } from './duplicate-set-groups.js';
 export type { DuplicatePairEdge, DuplicatePairMetaEdge } from './duplicate-set-groups.js';

@@ -33,6 +33,27 @@ function canonicalPairKey(documentIdA: string, documentIdB: string): string {
     : `${documentIdB}:${documentIdA}`;
 }
 
+/**
+ * Hash-only connected components plus larger similarity groups.
+ * Byte-identical pairs stay visible even when embedded in a broader similarity cluster.
+ */
+export function groupDuplicateSetsWithHashSubsets(
+  allPairs: readonly DuplicatePairEdge[],
+  hashPairs: readonly DuplicatePairEdge[]
+): string[][] {
+  const hashSets = groupDuplicatePairsIntoSets(hashPairs);
+  const allSets = groupDuplicatePairsIntoSets(allPairs);
+  const hashSetIds = new Set(hashSets.map((ids) => duplicateSetIdFromDocumentIds(ids)));
+  const combined: string[][] = [...hashSets];
+  for (const ids of allSets) {
+    const setId = duplicateSetIdFromDocumentIds(ids);
+    if (ids.length >= 3 || !hashSetIds.has(setId)) {
+      combined.push(ids);
+    }
+  }
+  return combined;
+}
+
 /** Union-find grouping of pending duplicate pairs into connected sets (≥2 documents). */
 export function groupDuplicatePairsIntoSets(pairs: readonly DuplicatePairEdge[]): string[][] {
   const parent = new Map<string, string>();

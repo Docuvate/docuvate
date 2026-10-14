@@ -67,7 +67,9 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
         [
           docId,
           userId,
-          `${String(year)}_${monthPadded}.pdf`,
+          isTargetOctober2024
+            ? `Entgeltnachweis ${String(year)}_${monthPadded}.pdf`
+            : `${String(year)}_${monthPadded}.pdf`,
           `Entgeltnachweis ${monthPadded}/${String(year)}`,
           `k/payslip-${String(year)}-${monthPadded}-${String(index)}`,
           body,

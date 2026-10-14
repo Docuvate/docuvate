@@ -71,8 +71,8 @@ def test_invoice_vendor_suggestion_fixture_date_and_amount() -> None:
     assert by_key["betrag"] == "12.500,00"
 
 
-def test_absender_from_kurzer_absender_line() -> None:
-    text = "Rechnung Layout-Workspace Demo\nKurzer Absender: Demo Nord GmbH"
+def test_absender_from_catalog_label_line() -> None:
+    text = "Rechnung Layout-Workspace Demo\nAbsender: Demo Nord GmbH"
     fields = extract_label_custom_fields(
         text,
         tag_name="Rechnung",
@@ -91,3 +91,40 @@ def test_correction_example_fills_missing_currency_field() -> None:
         examples=[{"field_key": "bruttoentgelt", "value": "3.500,00", "label_tag_ids": []}],
     )
     assert any(row.key == "bruttoentgelt" and row.value == "3.500,00" for row in fields)
+
+
+def test_correction_teaches_catalog_label_anchor_for_different_amounts() -> None:
+    examples = [
+        {"field_key": "bruttoentgelt", "value": "6.400,00", "label": "Bruttoentgelt", "label_tag_ids": []},
+        {"field_key": "bruttoentgelt", "value": "4.859,67", "label": "Bruttoentgelt", "label_tag_ids": []},
+    ]
+    text_a = "Entgeltnachweis\nBruttoentgelt 6.550,00"
+    text_b = "Entgeltnachweis\nBruttoentgelt 4.100,00"
+    spec = [{"key": "bruttoentgelt", "label": "Bruttoentgelt", "field_type": "currency"}]
+    rows_a = extract_label_custom_fields(text_a, tag_name="Entgeltnachweis", fields=spec, examples=examples)
+    rows_b = extract_label_custom_fields(text_b, tag_name="Entgeltnachweis", fields=spec, examples=examples)
+    assert {row.value for row in rows_a} == {"6.550,00"}
+    assert {row.value for row in rows_b} == {"4.100,00"}
+
+
+def test_correction_generalizes_rechnungsbetrag_from_catalog_label() -> None:
+    examples = [
+        {
+            "field_key": "rechnungsbetrag",
+            "value": "100,00",
+            "label": "Rechnungsbetrag",
+            "label_tag_ids": [],
+        },
+        {
+            "field_key": "rechnungsbetrag",
+            "value": "200,00",
+            "label": "Rechnungsbetrag",
+            "label_tag_ids": [],
+        },
+    ]
+    text = "Rechnung\nRechnungsbetrag 250,00 EUR"
+    spec = [{"key": "rechnungsbetrag", "label": "Rechnungsbetrag", "field_type": "currency"}]
+    rows = extract_label_custom_fields(
+        text, tag_name="Rechnung", fields=spec, examples=examples
+    )
+    assert {row.value for row in rows} == {"250,00"}

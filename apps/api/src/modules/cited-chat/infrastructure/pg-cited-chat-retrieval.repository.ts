@@ -17,10 +17,11 @@ import {
 import { RAG_HYBRID_CANDIDATE_LIMIT } from '../domain/cited-chat-constants.js';
 import type { CitedChatDocumentContextMeta } from '../domain/cited-chat-structured-context.js';
 import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-retrieval.js';
+import { extractGermanPeriodHints, GERMAN_MONTH_BY_NAME } from '../domain/library-temporal-match.js';
 import {
-  extractGermanPeriodHints,
-  GERMAN_MONTH_BY_NAME,
-} from '../domain/library-temporal-match.js';
+  documentMatchesTenantLabelsInQuery,
+  tenantLabelsMentionedInQuery,
+} from '../domain/library-tenant-label-match.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
 const TRGM_THRESHOLD = 0.32;
@@ -270,65 +271,157 @@ export class PgCitedChatRetrievalRepository {
     return chunkIndexText(candidate.documentTitle, candidate.body);
   }
 
-  /** Ensures period-specific library questions can reach the right document when generic tokens collide. */
+  async listTenantLabelNames(userId: string): Promise<string[]> {
+    const result = await this.pool.query<{ name: string }>(
+      `SELECT t.name
+       FROM tags t
+       WHERE t.user_id = $1 AND t.is_inbox = false
+       ORDER BY t.name ASC`,
+      [userId]
+    );
+    return result.rows.map((row) => row.name);
+  }
+
+  /** Ensures period- and tenant-label-specific library questions reach the right document. */
   async supplementTemporalLibraryCandidates(
     userId: string,
     query: string
   ): Promise<CitedChatChunkCandidate[]> {
-    const hints = extractGermanPeriodHints(query).filter(
-      (hint) => hint.month != null && hint.year != null
-    );
-    if (hints.length === 0) {
+    const tenantLabelNames = await this.listTenantLabelNames(userId);
+    const labelsInQuery = tenantLabelsMentionedInQuery(query, tenantLabelNames);
+    const periodHints = extractGermanPeriodHints(query);
+    const monthYearHints = periodHints.filter((hint) => hint.month != null && hint.year != null);
+    const yearHints = periodHints.filter((hint) => hint.month == null && hint.year != null);
+    if (monthYearHints.length === 0 && yearHints.length === 0 && labelsInQuery.length === 0) {
       return [];
     }
 
     const filenamePatterns: string[] = [];
     const titlePatterns: string[] = [];
+    const documentDates: string[] = [];
 
-    for (const hint of hints) {
+    for (const hint of monthYearHints) {
       const month = hint.month;
       const year = hint.year;
       if (month == null || year == null) {
         continue;
       }
       const padded = String(month).padStart(2, '0');
-      filenamePatterns.push(`${String(year)}_${padded}.%`);
-      filenamePatterns.push(`${String(year)}-${padded}-%`);
+      filenamePatterns.push(`%${String(year)}_${padded}%`);
+      filenamePatterns.push(`%${String(year)}-${padded}%`);
+      filenamePatterns.push(`%${padded}_${String(year)}%`);
+      documentDates.push(`${String(year)}-${padded}-01`);
       for (const [name, value] of Object.entries(GERMAN_MONTH_BY_NAME)) {
         if (value === month) {
           titlePatterns.push(`%${name}%${String(year)}%`);
           titlePatterns.push(`%${padded}/${String(year)}%`);
+          titlePatterns.push(`%${padded}.${String(year)}%`);
         }
       }
     }
 
-    if (filenamePatterns.length === 0 && titlePatterns.length === 0) {
-      return [];
+    for (const hint of yearHints) {
+      if (hint.year == null) {
+        continue;
+      }
+      const year = String(hint.year);
+      filenamePatterns.push(`%${year}%`);
+      titlePatterns.push(`%${year}%`);
+    }
+
+    for (const label of labelsInQuery) {
+      titlePatterns.push(`%${label}%`);
+      filenamePatterns.push(`%${label}%`);
     }
 
     const rows = await this.pool.query<{
       id: string;
       document_id: string;
       title: string;
+      filename: string;
       body: string;
       page: number | null;
       char_start: number | null;
       char_end: number | null;
+      document_date: string | null;
+      document_labels: string[];
     }>(
-      `SELECT c.id, c.document_id, d.title, c.body, c.page, c.char_start, c.char_end
+      `SELECT c.id, c.document_id, d.title, d.filename, c.body, c.page, c.char_start, c.char_end,
+              d.document_date::text AS document_date,
+              COALESCE(
+                (
+                  SELECT array_agg(t.name ORDER BY t.name)
+                  FROM document_tags dt
+                  JOIN tags t ON t.id = dt.tag_id
+                  WHERE dt.document_id = d.id AND t.user_id = $1
+                ),
+                ARRAY[]::text[]
+              ) AS document_labels
        FROM document_text_chunks c
        JOIN documents d ON d.id = c.document_id
        WHERE d.user_id = $1
          AND (
-           d.filename ILIKE ANY($2::text[])
+           cardinality($2::text[]) = 0
+           OR d.filename ILIKE ANY($2::text[])
            OR d.title ILIKE ANY($3::text[])
+           OR (d.document_date IS NOT NULL AND to_char(d.document_date, 'YYYY-MM') = ANY(
+             SELECT to_char(dt::date, 'YYYY-MM')
+             FROM unnest($4::date[]) AS dt
+           ))
          )
        ORDER BY c.document_id, c.chunk_index ASC
-       LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT)}`,
-      [userId, filenamePatterns, titlePatterns]
+       LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT * 4)}`,
+      [
+        userId,
+        filenamePatterns,
+        titlePatterns,
+        documentDates.length > 0 ? documentDates : [],
+      ]
     );
 
-    return rows.rows.map((row, index) => ({
+    const filtered = rows.rows.filter((row) => {
+      const periodOk =
+        monthYearHints.length === 0 && yearHints.length === 0
+          ? true
+          : monthYearHints.some((hint) => {
+              if (hint.month == null || hint.year == null) {
+                return false;
+              }
+              const padded = String(hint.month).padStart(2, '0');
+              const corpus = normalizeSearchText(
+                [row.filename, row.title, row.body, row.document_date ?? ''].join('\n')
+              );
+              return (
+                corpus.includes(`${String(hint.year)}_${padded}`) ||
+                corpus.includes(`${String(hint.year)}-${padded}`) ||
+                corpus.includes(`${padded}/${String(hint.year)}`) ||
+                (row.document_date?.startsWith(`${String(hint.year)}-${padded}`) ?? false)
+              );
+            }) ||
+            yearHints.some((hint) => {
+              if (hint.year == null) {
+                return false;
+              }
+              const year = String(hint.year);
+              const corpus = normalizeSearchText(
+                [row.filename, row.title, row.body, row.document_date ?? ''].join('\n')
+              );
+              return corpus.includes(year);
+            });
+      if (!periodOk) {
+        return false;
+      }
+      return documentMatchesTenantLabelsInQuery({
+        query,
+        tenantLabelNames,
+        filename: row.filename,
+        title: row.title,
+        body: row.body,
+        documentLabelNames: row.document_labels,
+      });
+    });
+
+    return filtered.slice(0, RAG_HYBRID_CANDIDATE_LIMIT).map((row, index) => ({
       chunkId: row.id,
       documentId: row.document_id,
       documentTitle: row.title,
