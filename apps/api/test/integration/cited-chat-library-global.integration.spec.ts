@@ -144,13 +144,18 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
         const url = requestUrl(input);
+        if (url.includes('/v1/rag/extractive-answer')) {
+          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
+        }
         if (url.includes('/v1/rag/retrieve')) {
           const body = parseRequestJsonRecord(init);
           const passageIds = readPassageIds(body);
-          const results = passageIds.map((id, i) => ({
-            id,
-            score: 0.92 - i * 0.03,
-          }));
+          const results = passageIds
+            .map((id) => ({
+              id,
+              score: id === answerChunkId ? 0.99 : 0.12,
+            }))
+            .sort((a, b) => b.score - a.score);
           return Promise.resolve(
             new Response(
               JSON.stringify({
