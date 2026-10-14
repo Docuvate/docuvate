@@ -24,8 +24,8 @@ import { LoadDocumentLabelSuggestionsUseCase } from '../../../labels/application
 import { PgEmbeddingDensityRepository } from '../../../labels/infrastructure/pg-embedding-density.repository.js';
 import { PgLabelCoOccurrenceRepository } from '../../../labels/infrastructure/pg-label-co-occurrence.repository.js';
 import { ListRecognizedFieldsUseCase } from '../../../recognized-fields/application/recognized-field.use-cases.js';
-import { loadFieldDefinitionLookup } from '../../../search/infrastructure/document-field-value-index.js';
 import { SyncDocumentSearchIndexUseCase } from '../../../search/application/sync-document-search-index.use-case.js';
+import { loadFieldDefinitionLookup } from '../../../search/infrastructure/document-field-value-index.js';
 import { GetDocumentUseCase } from '../get-document.use-case.js';
 import { UpdateDocumentUseCase } from '../update-document.use-case.js';
 import {
@@ -102,7 +102,7 @@ export class AcceptDocumentReviewUseCase {
     const fieldDefinitions = await loadFieldDefinitionLookup(this.pool, userId);
     const fields = doc.extraction?.fields ?? [];
     const firstLine =
-      doc.extraction?.text?.split('\n').find((line) => line.trim().length > 0) ?? null;
+      doc.extraction.text.split('\n').find((line) => line.trim().length > 0) ?? null;
     const reviewableFields = buildReviewFieldSuggestions(fields, catalogKeys, fieldDefinitions, {
       title: doc.title,
       filename: doc.filename,

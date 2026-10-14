@@ -27,7 +27,7 @@ export class HeadlessPgEmbeddingDensityRepository implements Pick<
   | 'loadFineConfirmThresholdMap'
 > {
   loadFineConfirmThresholdMap(): Promise<Map<string, number>> {
-    return Promise.resolve(new Map());
+    return Promise.resolve(new Map<string, number>());
   }
 
   isCalibrationReady(): Promise<boolean> {

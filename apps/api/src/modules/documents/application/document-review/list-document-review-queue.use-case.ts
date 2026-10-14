@@ -84,7 +84,7 @@ export class ListDocumentReviewQueueUseCase {
       }));
       const fields = entity.extraction?.fields ?? [];
       const firstLine =
-        entity.extraction?.text?.split('\n').find((line) => line.trim().length > 0) ?? null;
+        entity.extraction.text.split('\n').find((line) => line.trim().length > 0) ?? null;
       const fieldSuggestions = buildReviewFieldSuggestions(
         fields,
         catalogKeys,

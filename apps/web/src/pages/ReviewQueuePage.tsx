@@ -10,6 +10,7 @@ import { useToastNotify } from '../components/save/ToastProvider';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Chip } from '../components/ui/Chip';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   acceptDocumentReviewAll,
   acceptDocumentReviewHighConfidenceBatch,
@@ -17,7 +18,6 @@ import {
   dismissDocumentTagSuggestion,
   listDocumentReviewQueue,
 } from '../lib/api';
-import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { routes } from '../lib/routes';
 
@@ -313,7 +313,7 @@ export function ReviewQueuePage() {
               );
               return load();
             })
-            .catch((err) => {
+            .catch((err: unknown) => {
               pushError(formatUserFacingError(err, 'errors.generic'));
             })
             .finally(() => {

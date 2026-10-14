@@ -28,7 +28,6 @@ import {
 } from '../domain/cited-chat-constants.js';
 import { preferExtractiveChatAnswer } from '../domain/cited-chat-extractive-first.js';
 import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
-import { buildRetrievalFallbackCitation } from '../domain/retrieval-span-citation.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
@@ -40,6 +39,7 @@ import {
   passesCalibratedRetrievalGate,
   shouldAttemptCitedLlm,
 } from '../domain/rag-llm-eligibility.js';
+import { buildRetrievalFallbackCitation } from '../domain/retrieval-span-citation.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 import {
   buildRejectedClaimBenchLog,
@@ -745,10 +745,10 @@ export class CitedChatGenerationService {
         }
       }
       const primaryClaim = llm.parsed.claims[0]?.text?.trim() ?? '';
-      const topChunk = top[0]?.chunk;
-      if (gateOk && topChunk) {
+      if (gateOk && top.length > 0) {
+        const topRow = top[0];
         const fallback = buildRetrievalFallbackCitation({
-          chunk: topChunk,
+          chunk: topRow.chunk,
           query: retrievalQuery,
           claimText: primaryClaim,
         });
@@ -758,7 +758,7 @@ export class CitedChatGenerationService {
             fallbackText = formatLibraryExtractiveAnswer({
               userMessage,
               quote: fallback.quote,
-              documentTitle: topChunk.documentTitle,
+              documentTitle: topRow.chunk.documentTitle,
               locale,
             });
           }
@@ -766,7 +766,7 @@ export class CitedChatGenerationService {
             messageId,
             threadId,
             text: fallbackText,
-            chunk: topChunk,
+            chunk: topRow.chunk,
             quote: fallback.quote,
             charStart: fallback.charStart,
             charEnd: fallback.charEnd,

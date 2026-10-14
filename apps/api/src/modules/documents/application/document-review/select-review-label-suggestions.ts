@@ -1,6 +1,5 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { TagSuggestionEntity } from '../../../taxonomy/domain/taxonomy.entity.js';
 import {
   calibratedLabelSuggestionConfidence,
   labelSuggestionMeetsBatchThreshold,
@@ -9,6 +8,7 @@ import {
 import {
   tagPairConflicts,
 } from '../../../labels/infrastructure/pg-label-co-occurrence.repository.js';
+import type { TagSuggestionEntity } from '../../../taxonomy/domain/taxonomy.entity.js';
 
 export function rankLabelSuggestionsForReview(
   suggestions: TagSuggestionEntity[],

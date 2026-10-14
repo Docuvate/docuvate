@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
-import { bestEvidenceSpanInChunk } from './retrieval-span-citation.js';
 import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
 import { isChunkDumpClaim, isIndexPassageClaim } from './claim-chunk-dump.js';
+import { bestEvidenceSpanInChunk } from './retrieval-span-citation.js';
 import {
   bestQuoteMatchScore,
   findQuoteInChunk,

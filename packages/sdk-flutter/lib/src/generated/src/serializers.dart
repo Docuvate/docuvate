@@ -14,6 +14,9 @@ import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:docuvate/src/generated/src/date_serializer.dart';
 import 'package:docuvate/src/generated/src/model/date.dart';
 
+import 'package:docuvate/src/generated/src/model/accept_document_review_batch_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/accept_document_review_batch_response_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/accept_document_review_response_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/accept_label_recommendation_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/accept_label_recommendation_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/accept_user_invitation_request_dto.dart';
@@ -54,15 +57,21 @@ import 'package:docuvate/src/generated/src/model/document_chat_thread_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_chat_thread_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_chat_thread_messages_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_chat_unavailable_backend_info_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_duplicate_stack_summary_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/document_extraction_summary_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_extraction_summary_dto_layout_ir_pages_inner.dart';
 import 'package:docuvate/src/generated/src/model/document_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_module_descriptor_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_modules_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_review_field_suggestion_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/document_review_queue_item_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/document_review_queue_response_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/document_review_queue_summary_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_keep_version_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_not_duplicate_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_set_primary_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/encoder_reindex_progress_dto.dart';
 import 'package:docuvate/src/generated/src/model/export_to_connector_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/extracted_field_dto.dart';
 import 'package:docuvate/src/generated/src/model/extraction_arena_rating_request_dto.dart';
@@ -113,6 +122,7 @@ import 'package:docuvate/src/generated/src/model/saved_document_view_dto_class.d
 import 'package:docuvate/src/generated/src/model/saved_document_view_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/set_admin_user_feature_flag_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/set_admin_user_role_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/set_ml_model_lifecycle_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/sftp_ingress_create_account_body_dto.dart';
@@ -136,6 +146,9 @@ import 'package:docuvate/src/generated/src/model/user_settings_response_dto.dart
 part 'serializers.g.dart';
 
 @SerializersFor([
+  AcceptDocumentReviewBatchRequestDto,
+  AcceptDocumentReviewBatchResponseDtoClass,
+  AcceptDocumentReviewResponseDtoClass,
   AcceptLabelRecommendationRequestDto,
   AcceptLabelRecommendationResponseDto,
   AcceptUserInvitationRequestDto,
@@ -176,15 +189,21 @@ part 'serializers.g.dart';
   DocumentChatThreadListResponseDto,
   DocumentChatThreadMessagesResponseDto,
   DocumentChatUnavailableBackendInfoDto,
+  DocumentDuplicateStackSummaryDtoClass,
   DocumentExtractionSummaryDto,
   DocumentExtractionSummaryDtoLayoutIrPagesInner,
   DocumentListResponseDto,
   DocumentPipelineModuleDescriptorDto,
   DocumentPipelineModulesResponseDto,
   DocumentResponseDto,
+  DocumentReviewFieldSuggestionDtoClass,
+  DocumentReviewQueueItemDtoClass,
+  DocumentReviewQueueResponseDtoClass,
+  DocumentReviewQueueSummaryDtoClass,
   DuplicateStackKeepVersionRequestDto,
   DuplicateStackNotDuplicateRequestDto,
   DuplicateStackSetPrimaryRequestDto,
+  EncoderReindexProgressDto,
   ExportToConnectorRequestDto,
   ExtractedFieldDto,
   ExtractionArenaRatingRequestDto,
@@ -235,6 +254,7 @@ part 'serializers.g.dart';
   SavedDocumentViewListResponseDto,
   SendDocumentChatThreadMessageRequestDto,
   SendDocumentChatThreadMessageResponseDto,
+  SetAdminUserFeatureFlagRequestDto,
   SetAdminUserRoleRequestDto,
   SetMlModelLifecycleRequestDto,
   SftpIngressCreateAccountBodyDto,
