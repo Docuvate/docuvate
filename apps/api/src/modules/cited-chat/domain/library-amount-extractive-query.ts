@@ -9,7 +9,7 @@ export function isLibraryAmountLookupQuestion(userMessage: string): boolean {
     return false;
   }
   const asksAmount =
-    /(wie hoch|wie viel|wieviel|betrag|summe|gesamtbrutto|gesamt brutto|nettoentgelt|netto|lohnsteuer|steuer|insgesamt|entgelt)/.test(
+    /(wie hoch|wie viel|wieviel|betrag|summe|gesamtbrutto|gesamt brutto|nettoentgelt|netto|lohnsteuer|insgesamt|eur\b|€)/.test(
       normalized
     );
   const asksWhen = /(wann|datum|bis wann)/.test(normalized);

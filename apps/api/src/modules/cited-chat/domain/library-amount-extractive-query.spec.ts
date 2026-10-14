@@ -13,11 +13,9 @@ describe('isLibraryAmountLookupQuestion', () => {
     ).toBe(true);
   });
 
-  it('detects Lohnsteuer total questions', () => {
+  it('detects tax amount questions without matching document-type titles', () => {
     expect(
-      isLibraryAmountLookupQuestion(
-        'Wie viel Lohnsteuer wurde mir laut Lohnsteuerbescheinigung 2024 insgesamt einbehalten?'
-      )
+      isLibraryAmountLookupQuestion('Wie viel Lohnsteuer wurde insgesamt einbehalten?')
     ).toBe(true);
   });
 

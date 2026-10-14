@@ -271,6 +271,98 @@ function syntheticPayrollFixtures() {
   return out;
 }
 
+async function ensureTag(cookie, name) {
+  const listed = await api(cookie, 'GET', '/v1/tags');
+  const existing = (listed.items ?? []).find(
+    (row) => String(row.name).toLowerCase() === name.toLowerCase()
+  );
+  if (existing) {
+    return existing;
+  }
+  return api(cookie, 'POST', '/v1/tags', { name, color: '#64748b' });
+}
+
+async function runHeaderDateAdoptionCheck(_cookie, docsByTitle) {
+  const spec = manifest.headerDateAdoption;
+  if (!spec) {
+    return;
+  }
+  const doc = docsByTitle.get(spec.documentTitle);
+  if (!doc) {
+    throw new Error(`Header date doc missing: ${spec.documentTitle}`);
+  }
+  const deadline = Date.now() + WAIT_MS;
+  while (Date.now() < deadline) {
+    const fresh = await api(_cookie, 'GET', `/v1/documents/${doc.id}`);
+    if (fresh.documentDate === spec.expectDocumentDate) {
+      console.log(
+        `Header date adoption OK: ${spec.documentTitle} documentDate=${fresh.documentDate}`
+      );
+      return;
+    }
+    await sleep(2000);
+  }
+  throw new Error(
+    `Header date adoption failed for ${spec.documentTitle}: expected ${spec.expectDocumentDate}`
+  );
+}
+
+async function runLabelExclusivityCheck(cookie, docsByTitle) {
+  const spec = manifest.labelExclusivity;
+  if (!spec) {
+    return;
+  }
+  const primaryTag = await ensureTag(cookie, spec.primaryTagName);
+  const conflictingTag = await ensureTag(cookie, spec.conflictingTagName);
+
+  for (const title of spec.primaryLabelTitles ?? []) {
+    const doc = docsByTitle.get(title);
+    if (!doc) {
+      throw new Error(`Label exclusivity training doc missing: ${title}`);
+    }
+    await api(cookie, 'POST', `/v1/documents/${doc.id}/tags/${primaryTag.id}`);
+  }
+  for (const title of spec.conflictingLabelTitles ?? []) {
+    const doc = docsByTitle.get(title);
+    if (!doc) {
+      throw new Error(`Label exclusivity training doc missing: ${title}`);
+    }
+    await api(cookie, 'POST', `/v1/documents/${doc.id}/tags/${conflictingTag.id}`);
+  }
+
+  const probe = docsByTitle.get(spec.probeTitle);
+  if (!probe) {
+    throw new Error(`Label exclusivity probe missing: ${spec.probeTitle}`);
+  }
+  await api(cookie, 'POST', `/v1/documents/${probe.id}/tags/${primaryTag.id}`);
+
+  const deadline = Date.now() + WAIT_MS;
+  const maxConf = spec.maxConflictingSuggestionConfidence ?? 0.899;
+  while (Date.now() < deadline) {
+    await api(cookie, 'POST', `/v1/documents/${probe.id}/tag-suggestions/refresh`);
+    const fresh = await api(cookie, 'GET', `/v1/documents/${probe.id}`);
+    const bad = (fresh.tagSuggestions ?? []).find(
+      (row) =>
+        row.tag?.id === conflictingTag.id &&
+        (row.confidence ?? 0) >= maxConf + 1e-6
+    );
+    if (!bad) {
+      const top = (fresh.tagSuggestions ?? [])
+        .filter((row) => row.tag?.id === conflictingTag.id)
+        .map((row) => row.confidence ?? 0);
+      const topConf = top.length > 0 ? Math.max(...top) : 0;
+      console.log(
+        `Label exclusivity OK: probe ${spec.probeTitle} conflicting suggestion max confidence ${String(topConf)} (<=${String(maxConf)})`
+      );
+      return;
+    }
+    await sleep(4000);
+  }
+  throw new Error(
+    `Label exclusivity failed: ${spec.conflictingTagName} suggestion >= ${String(maxConf)} on labeled probe`
+  );
+}
+
 async function runPayrollFieldLearning(cookie, docsByTitle) {
   const spec = manifest.payrollFieldLearning;
   if (!spec) {
@@ -335,6 +427,8 @@ async function main() {
     console.log(`Uploaded ${fixture.file} -> ${doc.id} (${doc.status})`);
   }
   await runDuplicateSmokeCheck(cookie, docsByTitle);
+  await runHeaderDateAdoptionCheck(cookie, docsByTitle);
+  await runLabelExclusivityCheck(cookie, docsByTitle);
   await runPayrollFieldLearning(cookie, docsByTitle);
   await runChatChecks(cookie);
   console.log('Smoke seed-and-verify OK');

@@ -78,5 +78,24 @@
     "fieldKey": "bruttoentgelt",
     "correctionValue": "6.400,00",
     "expectedProbeValue": "6.550,00"
+  },
+  "headerDateAdoption": {
+    "documentTitle": "Entgeltnachweis 01/2023",
+    "expectDocumentDate": "2023-01-01"
+  },
+  "labelExclusivity": {
+    "primaryTagName": "SmokePayPrimaryA",
+    "conflictingTagName": "SmokePayConflictingB",
+    "primaryLabelTitles": [
+      "Entgeltnachweis 01/2023",
+      "Entgeltnachweis 02/2023",
+      "Entgeltnachweis 03/2023"
+    ],
+    "conflictingLabelTitles": [
+      "Lohnsteuerbescheinigung 2023",
+      "Lohnsteuerbescheinigung 2024"
+    ],
+    "probeTitle": "Entgeltnachweis 04/2023",
+    "maxConflictingSuggestionConfidence": 0.899
   }
 }
