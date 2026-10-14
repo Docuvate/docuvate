@@ -37,7 +37,7 @@ flowchart TB
 | Model | `intfloat/multilingual-e5-small` (MIT, 384 dimensions, 512 tokens) |
 | Revision | `614241f622f53c4eeff9890bdc4f31cfecc418b3-onnx-int8` (HF weights @ `614241f622f53c4eeff9890bdc4f31cfecc418b3`, ONNX int8 graph) |
 | Prefixes | `passage: ` for document units, `query: ` for questions |
-| Runtime | ONNX Runtime CPU (`onnx/model_qint8_avx512_vnni.onnx`, ~118 MB); `DOCUVATE_ENCODER_INTRA_OP_THREADS` / `OMP_NUM_THREADS` tune `intra_op` threads |
+| Runtime | ONNX Runtime CPU (`onnx/model_qint8_avx512_vnni.onnx`, ~118 MB); `DOCUVATE_ENCODER_INTRA_OP_THREADS` / `OMP_NUM_THREADS` tune `intra_op` threads; see [ML feature flags](./ml-feature-flags.md) |
 | Units | LUNA sections/paragraphs and TACO table rows (row text prefixed with header) when layout is available; otherwise paragraph splits of OCR text. Fixed 320/64 character windows are used only when layout units are unavailable. |
 | Spans | Each unit stores `page`, bounding box, `char_start`, `char_end`. |
 
@@ -50,6 +50,10 @@ flowchart TB
 | Metadata | `encoder_id`, `encoder_revision`, `representation_version` |
 | Tables | `document_representation`, `document_representation_unit` (tenant-scoped, RLS) |
 | Retired JSONB embeddings | No longer written; `document_embeddings.embedding` and `document_text_chunks.embedding` are nullable |
+
+## Encoder revision upgrades
+
+When `encoder_revision` on stored representations no longer matches the worker’s active revision (for example after upgrading to ONNX int8 weights), the API enqueues **background re-index jobs** per tenant and document. Uploads are not blocked. Signed-in users monitor `GET /v1/settings/encoder-reindex`. Details: [ML feature flags](./ml-feature-flags.md).
 
 ## Label heads
 
