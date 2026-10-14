@@ -45,6 +45,22 @@ describe('cited chat bench fixtures (quote + source mapping)', () => {
     ['hund', 'S4'],
   ]);
 
+  it('maps unknown source labels to the best quote-matching chunk', () => {
+    const { verified, rejected } = verifyCitedClaims({
+      claims: [
+        {
+          text: 'Die Gesamtsumme beträgt 1.234,56 EUR.',
+          source: 'S999',
+          quote: 'Gesamtsumme: 1.234,56 EUR',
+        },
+      ],
+      top,
+      labelByChunk,
+    });
+    expect(rejected).toHaveLength(0);
+    expect(verified[0]?.chunkId).toBe('rechnung');
+  });
+
   it('rejects claims without a source label (no unlabeled bind)', () => {
     const { verified, rejected } = verifyCitedClaims({
       claims: [

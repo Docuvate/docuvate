@@ -103,6 +103,80 @@ for (const doc of docs) {
   writeFileSync(join(fixturesDir, doc.file), minimalTextPdf(doc.lines));
 }
 
+function payslipLines({ headerDate, periodCode, monthGross, ytdGross }) {
+  return [
+    `ENTGELTNACHWEIS ${headerDate} Muster Nord AG`,
+    'Personal-Nr. 4711  Kostenstelle 1200',
+    'Bruttoentgelt / Gesamtbrutto (EBeschV)',
+    `${periodCode} Gesamtbrutto (EBeschV) ${monthGross} ${ytdGross}`,
+    `Nettoentgelt ${monthGross.replace(/00$/, '50')}`,
+  ];
+}
+
+const monthPad = (month) => String(month).padStart(2, '0');
+
+const payslipSpecs = [];
+for (let month = 1; month <= 12; month += 1) {
+  payslipSpecs.push({
+    year: 2023,
+    month,
+    monthGross: `${String(3200 + month * 37)},00`,
+    ytdGross: `${String(3200 + month * 900)},00`,
+    headerDate: `${monthPad(month)}.${monthPad(month)}.2023`,
+  });
+}
+for (let month = 1; month <= 8; month += 1) {
+  const monthGross =
+    month === 10 ? '4.859,67' : month === 6 ? '6.550,00' : `${String(4100 + month * 55)},00`;
+  const ytdGross = month === 10 ? '56.706,65' : `${String(12000 + month * 1100)},00`;
+  payslipSpecs.push({
+    year: 2024,
+    month,
+    monthGross,
+    ytdGross,
+    headerDate: month === 10 ? '13.01.2025' : `${monthPad(month)}.${monthPad(month)}.2024`,
+  });
+}
+
+for (const spec of payslipSpecs) {
+  const file = `payslip-${String(spec.year)}-${monthPad(spec.month)}.pdf`;
+  const periodCode = `/${monthPad(spec.month)}E`;
+  writeFileSync(
+    join(fixturesDir, file),
+    minimalTextPdf(
+      payslipLines({
+        headerDate: spec.headerDate,
+        periodCode,
+        monthGross: spec.monthGross,
+        ytdGross: spec.ytdGross,
+      })
+    )
+  );
+}
+
+const taxCerts = [
+  {
+    file: 'lohnsteuerbescheinigung-2023.pdf',
+    lines: [
+      'Ausdruck der elektronischen Lohnsteuerbescheinigung 2023',
+      'Arbeitnehmer Alex Beispiel',
+      'Einbehaltene Lohnsteuer 9.876,54 EUR',
+    ],
+  },
+  {
+    file: 'lohnsteuerbescheinigung-2024.pdf',
+    lines: [
+      'Ausdruck der elektronischen Lohnsteuerbescheinigung 2024',
+      'Arbeitnehmer Alex Beispiel',
+      'Einbehaltene Lohnsteuer 12.345,67 EUR',
+    ],
+  },
+];
+
+for (const doc of taxCerts) {
+  writeFileSync(join(fixturesDir, doc.file), minimalTextPdf(doc.lines));
+}
+
 const scannedSrc = join(here, '../../tools/screenshots/layout/fixtures/layout-ws-scanned.pdf');
 copyFileSync(scannedSrc, join(fixturesDir, '08-scanned-letter.pdf'));
 

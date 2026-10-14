@@ -1,6 +1,9 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { RecognizedFieldExtractionOutcome } from '@docuvate/contracts';
+
+import { RECOGNIZED_FIELD_EXTRACTOR_VERSION } from '../domain/recognized-field-reextract-config.js';
+import { globalFieldStorageKey } from '../domain/recognized-field.entity.js';
 import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
@@ -73,13 +76,21 @@ export class PgRecognizedFieldExtractionAttemptRepository {
       for (const row of rows) {
         await client.query(
           `INSERT INTO document_recognized_field_extraction_attempt
-             (document_id, field_definition_id, tenant_id, outcome, confidence, updated_at)
-           VALUES ($1, $2, $3, $4, $5, now())
+             (document_id, field_definition_id, tenant_id, outcome, confidence, extractor_version, updated_at)
+           VALUES ($1, $2, $3, $4, $5, $6, now())
            ON CONFLICT (document_id, field_definition_id) DO UPDATE SET
              outcome = EXCLUDED.outcome,
              confidence = EXCLUDED.confidence,
+             extractor_version = EXCLUDED.extractor_version,
              updated_at = now()`,
-          [row.documentId, row.fieldDefinitionId, userId, row.outcome, row.confidence]
+          [
+            row.documentId,
+            row.fieldDefinitionId,
+            userId,
+            row.outcome,
+            row.confidence,
+            RECOGNIZED_FIELD_EXTRACTOR_VERSION,
+          ]
         );
       }
       await client.query('COMMIT');
@@ -95,6 +106,7 @@ export class PgRecognizedFieldExtractionAttemptRepository {
     userId: string,
     field: {
       id: string;
+      key: string;
       extractForAllDocuments: boolean;
       gateLabelIds: string[];
       gateLabelMatch: 'any' | 'all';
@@ -116,14 +128,37 @@ export class PgRecognizedFieldExtractionAttemptRepository {
        FROM documents d
        WHERE d.user_id = $1
          AND d.id = ANY($2::uuid[])
+         AND (
+           NOT EXISTS (
+             SELECT 1
+             FROM document_recognized_field_extraction_attempt a
+             WHERE a.document_id = d.id
+               AND a.field_definition_id = $3
+               AND a.tenant_id = $1
+           )
+           OR EXISTS (
+             SELECT 1
+             FROM document_recognized_field_extraction_attempt a
+             WHERE a.document_id = d.id
+               AND a.field_definition_id = $3
+               AND a.tenant_id = $1
+               AND coalesce(a.extractor_version, 0) < $4
+           )
+         )
          AND NOT EXISTS (
            SELECT 1
-           FROM document_recognized_field_extraction_attempt a
-           WHERE a.document_id = d.id
-             AND a.field_definition_id = $3
-             AND a.tenant_id = $1
+           FROM extraction_field_corrections c
+           WHERE c.document_id = d.id
+             AND c.user_id = $1
+             AND c.field_key = ANY($5::text[])
          )`,
-      [userId, ids, field.id]
+      [
+        userId,
+        ids,
+        field.id,
+        RECOGNIZED_FIELD_EXTRACTOR_VERSION,
+        [field.key, globalFieldStorageKey(field.key)],
+      ]
     );
     return result.rows.map((row) => parseString(requireRecord(row).id));
   }

@@ -40,6 +40,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'RepairHashOnlyDuplicateStacks20261014140000',
   'MappeDefaultRootFolders20261014150000',
   'SplitDuplicateStacksByContentHash20261014160000',
+  'RecognizedFieldExtractorVersion20261014170000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -163,6 +164,8 @@ export async function migrationSchemaPresent(
       return migrationSchemaPresent(runner, 'RepairHashOnlyDuplicateStacks20261014140000');
     case 'SplitDuplicateStacksByContentHash20261014160000':
       return migrationSchemaPresent(runner, 'MappeDefaultRootFolders20261014150000');
+    case 'RecognizedFieldExtractorVersion20261014170000':
+      return columnExists(runner, 'public.document_recognized_field_extraction_attempt', 'extractor_version');
     default:
       return false;
   }

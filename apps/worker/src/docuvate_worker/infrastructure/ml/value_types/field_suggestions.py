@@ -141,19 +141,45 @@ def _pick_best_money(text: str, bundle: ValueTypeModelBundle) -> tuple[str, floa
     return best
 
 
+def _header_date_boost(line_index: int, line: str, title_line: str) -> float:
+    boost = 0.0
+    if line_index <= 2:
+        boost += 12.0
+    elif line_index <= 5:
+        boost += 6.0
+    title_tokens = {part.lower() for part in title_line.split() if len(part) > 2}
+    if title_tokens:
+        overlap = sum(1 for part in line.split() if part.lower() in title_tokens)
+        boost += min(8.0, overlap * 2.5)
+    return boost
+
+
 def _pick_best_date(text: str, bundle: ValueTypeModelBundle) -> tuple[str, float] | None:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    title_line = lines[0] if lines else ""
     best: tuple[str, float, int] | None = None
-    for token in _iter_date_candidates(text):
-        date_score = bundle.log_likelihood(token, "date")
-        money_score = bundle.log_likelihood(token, "money")
-        if date_score <= money_score:
-            continue
-        length = len(token)
-        if best is None or date_score > best[1] or (date_score == best[1] and length > best[2]):
-            best = (token, date_score, length)
+    for line_index, line in enumerate(lines):
+        for token in _tokenize_value_candidates(line):
+            if len(token) < 8 or _separator_count(token) < 2:  # noqa: PLR2004
+                continue
+            if _digits_ratio(token) < 0.3:  # noqa: PLR2004
+                continue
+            date_score = bundle.log_likelihood(token, "date") + _header_date_boost(
+                line_index, line, title_line
+            )
+            money_score = bundle.log_likelihood(token, "money")
+            if date_score <= money_score:
+                continue
+            length = len(token)
+            if best is None or date_score > best[1] or (date_score == best[1] and length > best[2]):
+                best = (token, date_score, length)
     if best is None:
         return None
-    return best[0], best[1]
+    raw_score = best[1]
+    confidence = min(0.95, max(0.45, 0.45 + raw_score * 0.02))
+    if raw_score >= 55:  # noqa: PLR2004
+        confidence = max(confidence, 0.92)
+    return best[0], confidence
 
 
 def _has_sender_evidence(
@@ -236,12 +262,12 @@ def learned_field_suggestions(
 
     date = _pick_best_date(text, models)
     if date is not None:
-        date_raw, score = date
+        date_raw, confidence = date
         fields.append(
             ExtractedField(
                 key="date",
                 value=date_raw,
-                confidence=min(0.95, max(0.45, 0.45 + score * 0.02)),
+                confidence=confidence,
             )
         )
 

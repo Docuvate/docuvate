@@ -3,7 +3,7 @@
  * Smoke profile seeder: upload synthetic fixtures, wait for pipeline, run cited-chat checks.
  * CPU-only stack (no Ollama); uses extractive cited-chat fallback.
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -168,9 +168,12 @@ function citationTitles(citations) {
 }
 
 async function runChatChecks(cookie) {
-  const threadId = await createThread(cookie);
+  let threadId = await createThread(cookie);
   const results = [];
   for (const check of manifest.chatChecks) {
+    if (check.newThread) {
+      threadId = await createThread(cookie);
+    }
     const out = await sendAndStream(cookie, threadId, check.question);
     const lower = out.content.toLowerCase();
     const abstained = lower.includes(ABSTENTION_SNIPPET);
@@ -239,11 +242,91 @@ async function runDuplicateSmokeCheck(cookie, docsByTitle) {
   throw new Error(`Smart duplicate smoke: no smart candidate for anchor ${anchor.id}`);
 }
 
+function syntheticPayrollFixtures() {
+  const fixturesDir = join(here, 'fixtures');
+  const out = [];
+  for (const file of readdirSync(fixturesDir).sort()) {
+    if (file.startsWith('payslip-') && file.endsWith('.pdf')) {
+      const match = /^payslip-(\d{4})-(\d{2})\.pdf$/.exec(file);
+      if (!match) {
+        continue;
+      }
+      const year = match[1];
+      const month = match[2];
+      out.push({
+        file,
+        title: `Entgeltnachweis ${month}/${year}`,
+        mime: 'application/pdf',
+      });
+    }
+    if (file.startsWith('lohnsteuerbescheinigung-') && file.endsWith('.pdf')) {
+      const year = file.replace('lohnsteuerbescheinigung-', '').replace('.pdf', '');
+      out.push({
+        file,
+        title: `Lohnsteuerbescheinigung ${year}`,
+        mime: 'application/pdf',
+      });
+    }
+  }
+  return out;
+}
+
+async function runPayrollFieldLearning(cookie, docsByTitle) {
+  const spec = manifest.payrollFieldLearning;
+  if (!spec) {
+    return;
+  }
+  await api(cookie, 'PUT', '/v1/recognized-fields', {
+    items: [
+      {
+        key: spec.fieldKey,
+        label: 'Bruttoentgelt',
+        fieldType: 'currency',
+        sortOrder: 0,
+        extractForAllDocuments: true,
+        gateLabelIds: [],
+        gateLabelMatch: 'any',
+        minLabelConfidence: null,
+        confidenceGateEnabled: null,
+      },
+    ],
+  });
+  for (const title of spec.correctionTitles) {
+    const doc = docsByTitle.get(title);
+    if (!doc) {
+      throw new Error(`Field learning correction doc missing: ${title}`);
+    }
+    const fields = [
+      ...(doc.extraction?.fields ?? []).filter((row) => row.key !== spec.fieldKey),
+      { key: spec.fieldKey, value: spec.correctionValue, confidence: 1 },
+    ];
+    await api(cookie, 'PATCH', `/v1/documents/${doc.id}`, { extractionFields: fields });
+  }
+  const probe = docsByTitle.get(spec.probeTitle);
+  if (!probe) {
+    throw new Error(`Field learning probe doc missing: ${spec.probeTitle}`);
+  }
+  const deadline = Date.now() + WAIT_MS;
+  while (Date.now() < deadline) {
+    const fresh = await api(cookie, 'GET', `/v1/documents/${probe.id}`);
+    const hit = (fresh.extraction?.fields ?? []).find(
+      (row) => row.key === spec.fieldKey || row.key === `global:${spec.fieldKey}`
+    );
+    if (hit?.value === spec.expectedProbeValue) {
+      console.log(`Payroll field learning OK on ${spec.probeTitle}: ${hit.value}`);
+      return;
+    }
+    await sleep(3000);
+  }
+  throw new Error(`Field learning timeout: expected ${spec.expectedProbeValue} on ${spec.probeTitle}`);
+}
+
 async function main() {
   const cookie = await signIn();
   const docsById = new Map();
   const docsByTitle = new Map();
-  for (const fixture of manifest.fixtures) {
+  const allFixtures = [...manifest.fixtures, ...syntheticPayrollFixtures()];
+  for (const fixture of allFixtures) {
     const doc = await uploadFixture(cookie, fixture);
     docsById.set(doc.id, doc);
     if (doc.title) {
@@ -252,6 +335,7 @@ async function main() {
     console.log(`Uploaded ${fixture.file} -> ${doc.id} (${doc.status})`);
   }
   await runDuplicateSmokeCheck(cookie, docsByTitle);
+  await runPayrollFieldLearning(cookie, docsByTitle);
   await runChatChecks(cookie);
   console.log('Smoke seed-and-verify OK');
 }

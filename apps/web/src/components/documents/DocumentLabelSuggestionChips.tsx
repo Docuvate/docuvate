@@ -64,7 +64,11 @@ export function DocumentLabelSuggestionChips({
             void dismiss(item.tag.id);
           }}
         >
-          <Chip label={item.tag.name} variant="suggest" color={item.tag.color} />
+          <Chip
+            label={`${t('documents.labelSuggestionChipPrefix')} ${item.tag.name}`}
+            variant="suggest"
+            color={item.tag.color}
+          />
         </button>
       ))}
     </div>
