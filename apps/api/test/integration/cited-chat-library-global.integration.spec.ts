@@ -5,7 +5,6 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
-import { CITED_CHAT_ABSTENTION_DE } from '../../src/modules/cited-chat/domain/cited-chat-constants.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
 import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
@@ -132,38 +131,9 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
     expect(hit?.body).toContain('312,40 EUR');
   });
 
-  it('library-scoped generation cites indexed document across tenant corpus', async () => {
-    const answerRow = await pool.query<{
-      id: string;
-      body: string;
-      char_start: number | null;
-      char_end: number | null;
-    }>(
-      `SELECT id, body, char_start, char_end
-       FROM document_text_chunks
-       WHERE document_id = $1
-       ORDER BY chunk_index ASC
-       LIMIT 1`,
-      [answerDocId]
-    );
-    expect(answerRow.rows.length).toBeGreaterThan(0);
-    const answerRowData = answerRow.rows[0];
-    if (answerRowData === undefined) {
-      throw new Error('expected answer chunk row');
-    }
-    vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([
-      {
-        chunkId: answerRowData.id,
-        documentId: answerDocId,
-        documentTitle: 'Versicherung Kfz',
-        body: answerRowData.body,
-        page: null,
-        charStart: answerRowData.char_start,
-        charEnd: answerRowData.char_end,
-        fusionScore: 0.9,
-      },
-    ]);
-
+  function mockRerankAndOllama(
+    ollamaClaims: { text: string; source: string; quote: string }[]
+  ): void {
     vi.stubGlobal(
       'fetch',
       vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -174,12 +144,10 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
         if (url.includes('/v1/rag/retrieve')) {
           const body = parseRequestJsonRecord(init);
           const passageIds = readPassageIds(body);
-          const results = passageIds
-            .map((id) => ({
-              id,
-              score: id === answerRowData.id ? 0.99 : 0.12,
-            }))
-            .sort((a, b) => b.score - a.score);
+          const results = passageIds.map((id, i) => ({
+            id,
+            score: 0.95 - i * 0.05,
+          }));
           return Promise.resolve(
             new Response(
               JSON.stringify({
@@ -192,15 +160,7 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
           );
         }
         if (url.includes('/api/chat')) {
-          const payload = JSON.stringify({
-            claims: [
-              {
-                text: 'Der Jahresbeitrag Kfz beträgt 312,40 EUR.',
-                source: 'S1',
-                quote: '312,40 EUR',
-              },
-            ],
-          });
+          const payload = JSON.stringify({ claims: ollamaClaims });
           const reqBody = parseRequestJsonRecord(init);
           if (readBooleanProperty(reqBody, 'stream')) {
             const line = `${JSON.stringify({ message: { content: payload }, done: true })}\n`;
@@ -221,6 +181,16 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
         return Promise.reject(new Error(`unexpected fetch ${url}`));
       })
     );
+  }
+
+  it('library-scoped generation cites indexed document across tenant corpus', async () => {
+    mockRerankAndOllama([
+      {
+        text: 'Der Jahresbeitrag Kfz beträgt 312,40 EUR.',
+        source: 'S1',
+        quote: 'Jahresbeitrag Kfz 312,40 EUR',
+      },
+    ]);
 
     const thread = await threads.createThread(userId, [], { scope: 'library' });
     const assistant = await threads.appendMessage(thread.id, 'assistant', '', {
@@ -231,17 +201,27 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
       messageId: assistant.id,
       threadId: thread.id,
       userId,
-      userMessage: 'Welcher Jahresbeitrag Kfz steht im Versicherungsvertrag?',
+      userMessage: 'Was ist der Jahresbeitrag Kfz laut Vertrag?',
       documentIds: [],
       scope: 'library',
     });
 
     expect(result.abstained).toBe(false);
-    expect(result.content).not.toBe(CITED_CHAT_ABSTENTION_DE);
     expect(result.content).toContain('312,40');
 
-    const stored = await citations.listForMessage(assistant.id);
-    expect(stored.length).toBeGreaterThan(0);
-    expect(stored.some((c) => c.chunkId === answerRowData.id)).toBe(true);
+    const rows = await pool.query<{ quote: string; body: string; document_id: string }>(
+      `SELECT c.quote, dc.body, dc.document_id
+       FROM chat_message_citations c
+       JOIN document_text_chunks dc ON dc.id = c.chunk_id
+       WHERE c.message_id = $1`,
+      [assistant.id]
+    );
+    expect(rows.rows.length).toBeGreaterThanOrEqual(1);
+    expect(rows.rows.some((row) => row.document_id === answerDocId)).toBe(true);
+    const row = rows.rows.find((r) => r.document_id === answerDocId);
+    expect(row).toBeDefined();
+    if (row) {
+      expect(row.body.includes(row.quote)).toBe(true);
+    }
   });
 });
