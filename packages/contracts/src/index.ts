@@ -341,6 +341,20 @@ export interface DuplicateStackDto {
   members: DuplicateStackMemberDto[];
 }
 
+export interface DuplicateSetDocumentDto {
+  documentId: string;
+  title: string;
+  filename: string;
+  createdAt: string;
+}
+
+export interface DuplicateSetDto {
+  setId: string;
+  documents: DuplicateSetDocumentDto[];
+  maxSimilarity: number;
+  sources: DuplicateCandidateSource[];
+}
+
 export interface TagDto {
   id: string;
   name: string;
@@ -1374,3 +1388,9 @@ export type {
   ExactFactMatchLabeledSample,
   ExactFactThresholdCalibrationResult,
 } from './exact-fact-match.js';
+export {
+  duplicateSetIdFromDocumentIds,
+  groupDuplicatePairsIntoSets,
+  parseDuplicateSetId,
+} from './duplicate-set-groups.js';
+export type { DuplicatePairEdge } from './duplicate-set-groups.js';

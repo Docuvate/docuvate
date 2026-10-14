@@ -36,7 +36,7 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
     const result = await this.pool.query(
       `SELECT document_id, candidate_document_id
        FROM document_duplicate_candidates
-       WHERE user_id = $1 AND dismissed = false`,
+       WHERE user_id = $1 AND dismissed = false AND source = 'hash'`,
       [userId]
     );
     for (const raw of result.rows) {
@@ -80,6 +80,13 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
 
     if (memberA && memberB && memberA.stackId !== memberB.stackId) {
       await this.mergeStacks(userId, memberA.stackId, memberB.stackId);
+    }
+
+    const stackId =
+      (await this.getMembership(documentIdA, userId))?.stackId ??
+      (await this.getMembership(documentIdB, userId))?.stackId;
+    if (stackId) {
+      await this.ensureStackHasPrimary(stackId, userId);
     }
   }
 
@@ -266,7 +273,7 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
     const result = await this.pool.query(
       `SELECT id FROM documents
        WHERE user_id = $1 AND id = ANY($2::uuid[])
-       ORDER BY
+       ORDER BY created_at DESC,
          CASE status
            WHEN 'ready' THEN 0
            WHEN 'extracting' THEN 1
@@ -274,8 +281,7 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
            WHEN 'uploaded' THEN 3
            WHEN 'failed' THEN 4
            ELSE 5
-         END,
-         created_at ASC
+         END
        LIMIT 1`,
       [userId, [documentIdA, documentIdB]]
     );
@@ -409,6 +415,38 @@ export class PgDuplicateStackRepository implements DuplicateStackRepository {
         [stackId, userId]
       );
     }
+  }
+
+  private async ensureStackHasPrimary(stackId: string, userId: string): Promise<void> {
+    const primaryId = await this.findPrimaryId(stackId, userId);
+    if (primaryId) return;
+
+    const result = await this.pool.query(
+      `SELECT m.document_id
+       FROM document_stack_members m
+       INNER JOIN document_duplicate_stacks s ON s.id = m.stack_id
+       JOIN documents d ON d.id = m.document_id
+       WHERE m.stack_id = $1 AND s.user_id = $2
+       ORDER BY d.created_at DESC
+       LIMIT 1`,
+      [stackId, userId]
+    );
+    const raw: unknown = result.rows[0];
+    if (!raw) return;
+    const nextPrimary = parseString(requireRecord(raw).document_id);
+
+    await this.pool.query(
+      `UPDATE document_stack_members m SET role = 'version'
+       FROM document_duplicate_stacks s
+       WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1`,
+      [stackId, userId]
+    );
+    await this.pool.query(
+      `UPDATE document_stack_members m SET role = 'primary'
+       FROM document_duplicate_stacks s
+       WHERE m.stack_id = s.id AND s.user_id = $2 AND m.stack_id = $1 AND m.document_id = $3`,
+      [stackId, userId, nextPrimary]
+    );
   }
 
   private async cleanupEmptyStack(stackId: string, userId: string): Promise<void> {

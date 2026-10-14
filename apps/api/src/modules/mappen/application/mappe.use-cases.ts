@@ -5,6 +5,8 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import {
+  FOLDER_REPOSITORY,
+  type FolderRepository,
   ID_GENERATOR,
   type IdGenerator,
   MAPPE_REPOSITORY,
@@ -24,6 +26,7 @@ export class ListMappenUseCase {
 export class CreateMappeUseCase {
   constructor(
     @Inject(MAPPE_REPOSITORY) private readonly mappen: MappeRepository,
+    @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
     @Inject(ID_GENERATOR) private readonly ids: IdGenerator
   ) {}
 
@@ -32,7 +35,24 @@ export class CreateMappeUseCase {
     if (!name) throw new ValidationError('Mappe name is required');
     const colorTrimmed = body.color?.trim();
     const color = colorTrimmed && colorTrimmed.length > 0 ? colorTrimmed : null;
-    return this.mappen.create(this.ids.generate(), userId, name, color);
+    const mappeId = this.ids.generate();
+    const mappe = await this.mappen.create(mappeId, userId, name, color);
+    const rootFolderName = await this.uniqueRootFolderName(userId, name);
+    await this.folders.create(this.ids.generate(), userId, rootFolderName, null, mappeId);
+    return mappe;
+  }
+
+  private async uniqueRootFolderName(userId: string, preferred: string): Promise<string> {
+    const existing = await this.folders.listForUser(userId);
+    const taken = new Set(
+      existing.filter((folder) => folder.parentId == null).map((folder) => folder.name)
+    );
+    if (!taken.has(preferred)) return preferred;
+    let suffix = 2;
+    while (taken.has(`${preferred} (${String(suffix)})`)) {
+      suffix += 1;
+    }
+    return `${preferred} (${String(suffix)})`;
   }
 }
 

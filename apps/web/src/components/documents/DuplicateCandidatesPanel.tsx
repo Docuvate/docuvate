@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DuplicateCandidateDto } from '@docuvate/contracts';
+import type { DuplicateSetDto } from '@docuvate/contracts';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { dismissDuplicateCandidate, listDuplicateCandidates } from '../../lib/api';
-import { Button } from '../ui/Button';
+import { listDuplicateSets } from '../../lib/api';
+import { routes } from '../../lib/routes';
+import { DuplicateSetCard } from './DuplicateSetCard';
 
 interface DuplicateCandidatesPanelProps {
   documentId: string;
@@ -14,15 +15,15 @@ interface DuplicateCandidatesPanelProps {
 
 export function DuplicateCandidatesPanel({ documentId }: DuplicateCandidatesPanelProps) {
   const { t } = useTranslation();
-  const [items, setItems] = useState<DuplicateCandidateDto[]>([]);
+  const [sets, setSets] = useState<DuplicateSetDto[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setItems(await listDuplicateCandidates(documentId));
+      setSets(await listDuplicateSets(documentId));
     } catch {
-      setItems([]);
+      setSets([]);
     } finally {
       setLoading(false);
     }
@@ -32,44 +33,29 @@ export function DuplicateCandidatesPanel({ documentId }: DuplicateCandidatesPane
     void load();
   }, [load]);
 
-  const uniqueItems = items.filter((item, index, list) => {
-    const first = list.findIndex((row) => row.candidateDocumentId === item.candidateDocumentId);
-    return first === index;
-  });
-
   if (loading) return null;
-  if (uniqueItems.length === 0) return null;
+  if (sets.length === 0) return null;
 
   return (
     <section className="duplicate-panel" aria-label={t('documents.duplicatesAria')}>
-      <h2>{t('library.possibleDuplicates')}</h2>
+      <div className="duplicate-panel-head">
+        <h2>{t('library.possibleDuplicates')}</h2>
+        <Link className="duplicate-panel-queue-link" to={routes.duplicates}>
+          {t('documents.duplicateQueueLink')}
+        </Link>
+      </div>
       <p className="muted">{t('documents.duplicatesLead')}</p>
-      <ul className="duplicate-list">
-        {uniqueItems.map((item) => (
-          <li key={item.candidateDocumentId} className="duplicate-row">
-            <div>
-              <Link to={`/documents/${item.candidateDocumentId}`}>{item.candidateTitle}</Link>
-              <span className="muted cell-sub">
-                {item.candidateFilename} · {Math.round(item.similarity * 100)} % ·{' '}
-                {item.source === 'hash'
-                  ? t('documents.duplicateSourceHash')
-                  : item.source === 'smart'
-                    ? t('documents.duplicateSourceSmart')
-                    : t('documents.duplicateSourceEmbedding')}
-              </span>
-            </div>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => {
-                void dismissDuplicateCandidate(documentId, item.candidateDocumentId).then(load);
-              }}
-            >
-              {t('documents.duplicateDismiss')}
-            </Button>
-          </li>
+      <div className="duplicate-set-list">
+        {sets.map((set) => (
+          <DuplicateSetCard
+            key={set.setId}
+            set={set}
+            onResolved={() => {
+              void load();
+            }}
+          />
         ))}
-      </ul>
+      </div>
     </section>
   );
 }

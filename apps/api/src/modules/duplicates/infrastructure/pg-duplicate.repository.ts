@@ -204,6 +204,20 @@ export class PgDuplicateRepository implements DuplicateRepository {
     return result.rows.map((raw) => parsePostgresUuidArray(requireRecord(raw).ids));
   }
 
+  async listActiveCandidates(userId: string): Promise<DuplicateCandidateEntity[]> {
+    const result = await this.pool.query(
+      `SELECT c.id, c.user_id, c.document_id, c.candidate_document_id,
+              c.similarity, c.source, c.dismissed,
+              d.title AS candidate_title, d.filename AS candidate_filename
+       FROM document_duplicate_candidates c
+       JOIN documents d ON d.id = c.candidate_document_id
+       WHERE c.user_id = $1 AND c.dismissed = false
+       ORDER BY c.similarity DESC`,
+      [userId]
+    );
+    return result.rows.map((raw) => mapCandidateRow(requireRecord(raw)));
+  }
+
   async listPendingPairs(
     userId: string
   ): Promise<{ documentId: string; candidateDocumentId: string }[]> {

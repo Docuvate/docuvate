@@ -703,6 +703,7 @@ export interface DuplicateRepository {
     }[]
   >;
   listPendingPairs(userId: string): Promise<{ documentId: string; candidateDocumentId: string }[]>;
+  listActiveCandidates(userId: string): Promise<DuplicateCandidateEntity[]>;
   listDocumentIdsBySharedHash(userId: string): Promise<string[][]>;
   listSmartDuplicatePeers(
     userId: string,

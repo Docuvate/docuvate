@@ -99,10 +99,6 @@ export class ApplyDuplicateDetectionUseCase {
           hit.similarity,
           'embedding'
         );
-
-        if (evaluation.decision === 'auto_stack') {
-          await this.linkDuplicatePair.execute(userId, documentId, hit.row.documentId);
-        }
       }
     } catch (error: unknown) {
       this.logger.warn(

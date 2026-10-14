@@ -33,6 +33,8 @@ import { DocumentExtractedFact20261013210000 } from './migrations/20261013210000
 import { FeatureFlagLearnedValueTypes20261013220000 } from './migrations/20261013220000-feature-flag-learned-value-types.js';
 import { ExactFactAnswerAbstention20261013230000 } from './migrations/20261013230000-exact-fact-answer-abstention.js';
 import { DocumentRecognizedFieldExtractionAttempt20261014120000 } from './migrations/20261014120000-document-recognized-field-extraction-attempt.js';
+import { RepairHashOnlyDuplicateStacks20261014140000 } from './migrations/20261014140000-repair-hash-only-duplicate-stacks.js';
+import { MappeDefaultRootFolders20261014150000 } from './migrations/20261014150000-mappe-default-root-folders.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -88,6 +90,8 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       FeatureFlagLearnedValueTypes20261013220000,
       ExactFactAnswerAbstention20261013230000,
       DocumentRecognizedFieldExtractionAttempt20261014120000,
+      RepairHashOnlyDuplicateStacks20261014140000,
+      MappeDefaultRootFolders20261014150000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

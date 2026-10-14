@@ -3004,6 +3004,76 @@ export type RefreshSuggestionsResponses = {
 
 export type RefreshSuggestionsResponse = RefreshSuggestionsResponses[keyof RefreshSuggestionsResponses];
 
+export type ListDuplicateSetsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        documentId?: string;
+    };
+    url: '/duplicate-sets';
+};
+
+export type ListDuplicateSetsErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ListDuplicateSetsError = ListDuplicateSetsErrors[keyof ListDuplicateSetsErrors];
+
+export type ListDuplicateSetsResponses = {
+    200: unknown;
+};
+
+export type ArchiveDuplicateSetData = {
+    body?: never;
+    path: {
+        setId: string;
+    };
+    query?: never;
+    url: '/duplicate-sets/{setId}/archive';
+};
+
+export type ArchiveDuplicateSetErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type ArchiveDuplicateSetError = ArchiveDuplicateSetErrors[keyof ArchiveDuplicateSetErrors];
+
+export type ArchiveDuplicateSetResponses = {
+    201: OkResponseDto;
+};
+
+export type ArchiveDuplicateSetResponse = ArchiveDuplicateSetResponses[keyof ArchiveDuplicateSetResponses];
+
+export type DismissDuplicateSetData = {
+    body?: never;
+    path: {
+        setId: string;
+    };
+    query?: never;
+    url: '/duplicate-sets/{setId}/dismiss';
+};
+
+export type DismissDuplicateSetErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type DismissDuplicateSetError = DismissDuplicateSetErrors[keyof DismissDuplicateSetErrors];
+
+export type DismissDuplicateSetResponses = {
+    201: OkResponseDto;
+};
+
+export type DismissDuplicateSetResponse = DismissDuplicateSetResponses[keyof DismissDuplicateSetResponses];
+
 export type ListFieldCorrectionsData = {
     body?: never;
     path?: never;
