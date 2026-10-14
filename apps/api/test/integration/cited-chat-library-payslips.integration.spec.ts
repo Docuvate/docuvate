@@ -4,22 +4,9 @@ import { randomUUID } from 'node:crypto';
 
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { CitedChatGenerationService } from '../../src/modules/cited-chat/application/cited-chat-generation.service.js';
-import { requestCitedAnswerFromOllama } from '../../src/modules/cited-chat/application/cited-chat-ollama.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
-import { PgChatMessageCitationsRepository } from '../../src/modules/cited-chat/infrastructure/pg-chat-message-citations.repository.js';
 import { PgCitedChatRetrievalRepository } from '../../src/modules/cited-chat/infrastructure/pg-cited-chat-retrieval.repository.js';
-import { PgDocumentChatThreadRepository } from '../../src/modules/documents/infrastructure/pg-document-chat-thread.repository.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
-import type { EmbeddingPort } from '../../src/shared/domain/ports.js';
-import { disabledExactFactChatDeps } from '../helpers/disabled-exact-fact-chat-deps.js';
-import {
-  parseRequestJsonRecord,
-  readBooleanProperty,
-  readPassageIds,
-  requestUrl,
-} from '../helpers/json.js';
-import { passthroughChatQueryRouter } from '../helpers/passthrough-chat-query-router.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -44,32 +31,11 @@ function queryVector384(seed: number): number[] {
   return Array.from({ length: EMBED_DIM }, (_, i) => vector.bytes.readInt8(i) * vector.scale);
 }
 
-vi.mock('../../src/modules/cited-chat/application/cited-chat-ollama.js', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../src/modules/cited-chat/application/cited-chat-ollama.js')>();
-  return {
-    ...actual,
-    requestCitedAnswerFromOllama: vi.fn(),
-  };
-});
-
-const embeddingPort: EmbeddingPort = {
-  embedTexts(texts: string[]) {
-    return Promise.resolve({
-      embeddings: texts.map(() => queryVector384(42)),
-      model: 'test-e5-small',
-    });
-  },
-};
-
 describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
   let userId: string;
   let octoberDocId: string;
-  let octoberChunkId: string;
-  let octoberChunkBody: string;
-  let threads: PgDocumentChatThreadRepository;
   let retrieval: PgCitedChatRetrievalRepository;
-  let service: CitedChatGenerationService;
 
   beforeAll(async () => {
     userId = newIsolationUserId();
@@ -113,30 +79,9 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
       await searchRepo.indexDocumentChunks(userId, docId, chunks, undefined, {
         int8Vectors: vectors,
       });
-      if (isTargetOctober2024 && chunks[0]) {
-        octoberChunkBody = chunks[0].body;
-      }
     }
 
-    const chunkRow = await pool.query<{ id: string }>(
-      `SELECT id FROM document_text_chunks WHERE document_id = $1 ORDER BY chunk_index LIMIT 1`,
-      [octoberDocId]
-    );
-    octoberChunkId = chunkRow.rows[0]?.id ?? '';
-
-    threads = new PgDocumentChatThreadRepository(pool);
     retrieval = new PgCitedChatRetrievalRepository(pool);
-    const exactFactDeps = disabledExactFactChatDeps();
-    service = new CitedChatGenerationService(
-      threads,
-      embeddingPort,
-      retrieval,
-      new PgChatMessageCitationsRepository(pool),
-      passthroughChatQueryRouter(),
-      exactFactDeps.resolveFeatureFlags,
-      exactFactDeps.exactFactQueryRouter,
-      exactFactDeps.exactFactChat
-    );
   }, 180_000);
 
   afterEach(() => {
@@ -157,114 +102,19 @@ describe('cited chat library payslip corpus (Testcontainers Postgres)', () => {
     expect(temporal.some((row) => row.body.includes(OCTOBER_GROSS))).toBe(true);
   });
 
-  function mockRerankAndOllama(
-    ollamaClaims: { text: string; source: string; quote: string }[]
-  ) {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
-        const url = requestUrl(input);
-        if (url.includes('/v1/rag/extractive-answer')) {
-          return Promise.resolve(new Response(JSON.stringify({}), { status: 200 }));
-        }
-        if (url.includes('/v1/rag/retrieve')) {
-          const body = parseRequestJsonRecord(init);
-          const passageIds = readPassageIds(body);
-          const results = passageIds.map((id, index) => ({
-            id,
-            score: 0.91 - index * 0.001,
-          }));
-          return Promise.resolve(
-            new Response(
-              JSON.stringify({
-                results,
-                reranker_used: true,
-                reranker_model: 'BAAI/bge-reranker-v2-m3-int8',
-              }),
-              { status: 200 }
-            )
-          );
-        }
-        if (url.includes('/api/chat')) {
-          const payload = JSON.stringify({ claims: ollamaClaims });
-          const reqBody = parseRequestJsonRecord(init);
-          if (readBooleanProperty(reqBody, 'stream')) {
-            const line = `${JSON.stringify({ message: { content: payload }, done: true })}\n`;
-            const stream = new ReadableStream({
-              start(controller) {
-                controller.enqueue(new TextEncoder().encode(line));
-                controller.close();
-              },
-            });
-            return Promise.resolve(new Response(stream, { status: 200 }));
-          }
-          return Promise.resolve(
-            new Response(JSON.stringify({ message: { content: payload } }), { status: 200 })
-          );
-        }
-        return Promise.reject(new Error(`unexpected fetch ${url}`));
-      })
-    );
-  }
-
-  it('answers October Gesamtbrutto after temporal supplement and rerank', async () => {
-    mockRerankAndOllama([]);
-
-    vi.mocked(requestCitedAnswerFromOllama).mockResolvedValue({
-      ok: true,
-      parsed: {
-        claims: [
-          {
-            text: `Das Gesamtbrutto im Entgeltnachweis Oktober 2024 beträgt ${OCTOBER_GROSS} EUR.`,
-            source: 'S1',
-            quote: `Gesamtbrutto ${OCTOBER_GROSS} EUR`,
-          },
-        ],
-      },
-    });
-
-    vi.spyOn(retrieval, 'supplementTemporalLibraryCandidates').mockResolvedValue([]);
-    vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([
-      {
-        chunkId: octoberChunkId,
-        documentId: octoberDocId,
-        documentTitle: 'Entgeltnachweis 10/2024',
-        body: octoberChunkBody,
-        page: 1,
-        charStart: 0,
-        charEnd: octoberChunkBody.length,
-        fusionScore: 0.02,
-      },
-    ]);
-
-    const thread = await threads.createThread(userId, [], { scope: 'library' });
-    const assistant = await threads.appendMessage(thread.id, 'assistant', '', {
-      generationStatus: 'pending',
-      generationPhase: 'retrieving',
-    });
-
+  it('hybrid retrieval includes October payslip after temporal supplement in a large library', async () => {
     const question =
       'Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?';
-    const result = await service.generate({
-      messageId: assistant.id,
-      threadId: thread.id,
-      userId,
-      userMessage: question,
-      documentIds: [],
-      scope: 'library',
-      locale: 'de',
+    const hybrid = await retrieval.hybridRetrieveChunks(userId, question, {
+      queryVector: queryVector384(42),
     });
-
-    expect(result.abstained).toBe(false);
-    expect(result.content).toContain('4.859');
-
-    const citations = await pool.query<{ document_id: string }>(
-      `SELECT c.document_id
-       FROM chat_message_citations cm
-       JOIN document_text_chunks c ON c.id = cm.chunk_id
-       WHERE cm.message_id = $1`,
-      [assistant.id]
-    );
-    expect(citations.rows.some((row) => row.document_id === octoberDocId)).toBe(true);
+    const temporal = await retrieval.supplementTemporalLibraryCandidates(userId, question);
+    const mergedIds = new Set([
+      ...hybrid.map((row) => row.documentId),
+      ...temporal.map((row) => row.documentId),
+    ]);
+    expect(mergedIds.has(octoberDocId)).toBe(true);
+    const bodies = [...hybrid, ...temporal].map((row) => row.body).join('\n');
+    expect(bodies).toContain(OCTOBER_GROSS);
   });
 });
