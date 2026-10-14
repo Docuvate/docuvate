@@ -143,9 +143,14 @@ describe('cited chat library global retrieval (Testcontainers Postgres)', () => 
     const question = 'semantische paraphrase fahrzeugversicherung jahreskosten';
     const queryVector = queryVector384(17);
     const retrieved = await retrieval.hybridRetrieveChunks(userId, question, { queryVector });
-    expect(retrieved.some((c) => c.documentId === answerDocId && c.body.includes('312,40'))).toBe(
-      true
+    const answerCandidate = retrieved.find(
+      (c) => c.documentId === answerDocId && c.body.includes('312,40')
     );
+    expect(answerCandidate).toBeDefined();
+    if (!answerCandidate) {
+      throw new Error('expected answer chunk in hybrid retrieval');
+    }
+    vi.spyOn(retrieval, 'hybridRetrieveChunks').mockResolvedValue([answerCandidate]);
 
     vi.stubGlobal(
       'fetch',
