@@ -91,3 +91,17 @@ def test_correction_example_fills_missing_currency_field() -> None:
         examples=[{"field_key": "bruttoentgelt", "value": "3.500,00", "label_tag_ids": []}],
     )
     assert any(row.key == "bruttoentgelt" and row.value == "3.500,00" for row in fields)
+
+
+def test_correction_teaches_label_anchor_for_different_amounts() -> None:
+    examples = [
+        {"field_key": "bruttoentgelt", "value": "6.400,00", "label": "Bruttoentgelt", "label_tag_ids": []},
+        {"field_key": "bruttoentgelt", "value": "4.859,67", "label": "Bruttoentgelt", "label_tag_ids": []},
+    ]
+    text_a = "Entgeltnachweis\nBruttoentgelt / Gesamtbrutto (EBeschV) 6.550,00"
+    text_b = "Entgeltnachweis\n/10E Gesamtbrutto (EBeschV) 4.100,00 50.000,00"
+    spec = [{"key": "bruttoentgelt", "label": "Bruttoentgelt", "field_type": "currency"}]
+    rows_a = extract_label_custom_fields(text_a, tag_name="Entgeltnachweis", fields=spec, examples=examples)
+    rows_b = extract_label_custom_fields(text_b, tag_name="Entgeltnachweis", fields=spec, examples=examples)
+    assert {row.value for row in rows_a} == {"6.550,00"}
+    assert {row.value for row in rows_b} == {"4.100,00"}

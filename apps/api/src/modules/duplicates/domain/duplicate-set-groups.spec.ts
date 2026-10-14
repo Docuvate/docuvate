@@ -5,6 +5,7 @@ import {
   duplicateSetDisplaySimilarityPercent,
   duplicateSetIdFromDocumentIds,
   groupDuplicatePairsIntoSets,
+  groupDuplicateSetsWithHashSubsets,
   parseDuplicateSetId,
 } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
@@ -45,6 +46,22 @@ describe('duplicate-set-groups', () => {
         { documentId: 'a', candidateDocumentId: 'b', source: 'embedding', similarity: 0.99 },
       ])
     ).toBe(false);
+  });
+
+  it('lists hash-identical pairs separately inside a larger similarity cluster', () => {
+    const hashPairs = [
+      { documentId: 'a1', candidateDocumentId: 'a2' },
+      { documentId: 'b1', candidateDocumentId: 'b2' },
+    ];
+    const allPairs = [
+      ...hashPairs,
+      { documentId: 'a1', candidateDocumentId: 'b1' },
+      { documentId: 'a2', candidateDocumentId: 'b2' },
+    ];
+    const sets = groupDuplicateSetsWithHashSubsets(allPairs, hashPairs);
+    expect(sets).toContainEqual(['a1', 'a2']);
+    expect(sets).toContainEqual(['b1', 'b2']);
+    expect(sets.some((ids) => ids.length >= 4)).toBe(true);
   });
 
   it('floors embedding similarity display below 100 %', () => {

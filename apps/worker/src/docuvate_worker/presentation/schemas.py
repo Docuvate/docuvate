@@ -386,6 +386,8 @@ class LabelFieldCorrectionExample(BaseModel):
     field_key: str = Field(validation_alias="field_key")
     value: str
     label_tag_ids: list[str] = Field(default_factory=list, validation_alias="label_tag_ids")
+    label: str = ""
+    field_type: str = Field(default="text", validation_alias="field_type")
 
 
 class LabelFieldsExtractRequest(BaseModel):

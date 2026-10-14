@@ -28,6 +28,8 @@ def _label_search_variants(label: str) -> tuple[str, ...]:
         variants.append("Kurzer Absender")
     if lower in ("betrag", "amount"):
         variants.extend(["Bruttobetrag", "Nettobetrag", "Summe", "Gesamtbetrag"])
+    if lower == "bruttoentgelt":
+        variants.extend(["Gesamtbrutto (EBeschV)", "Gesamtbrutto", "Bruttoentgelt"])
     return tuple(dict.fromkeys(variants))
 
 
@@ -74,6 +76,21 @@ def _is_single_line_field_type(field_type: str) -> bool:
     return field_type.strip().lower() in ("date", "currency", "number")
 
 
+def _extract_inline_currency_after_label(text: str, label: str) -> str | None:
+    if not label.strip():
+        return None
+    for variant in _label_search_variants(label):
+        esc = _escape_label(variant)
+        pattern = rf"(?i){esc}\s*(?:\([^)]+\))?\s+([0-9]{{1,3}}(?:\.[0-9]{{3}})*,[0-9]{{2}})"
+        match = re.search(pattern, text)
+        if not match:
+            continue
+        parsed = _parse_currency_field_value(match.group(1))
+        if parsed:
+            return parsed
+    return None
+
+
 def _extract_near_label(
     text: str,
     label: str,
@@ -96,6 +113,8 @@ def _extract_near_label(
         )
         if value:
             break
+    if not value and field_type.strip().lower() in ("currency", "number"):
+        value = _extract_inline_currency_after_label(text, label)
     if value:
         value = strip_leading_sender_label_prefixes(value.strip(" ."))
         if value:
@@ -137,29 +156,55 @@ def _extract_by_type(
     return None, 0.0
 
 
+def _correction_anchor_labels(
+    example: dict[str, str | list[str]], fallback_label: str
+) -> tuple[str, ...]:
+    labels: list[str] = []
+    raw_label = str(example.get("label", "")).strip()
+    if raw_label:
+        labels.append(raw_label)
+    if fallback_label.strip():
+        labels.append(fallback_label.strip())
+    if not labels:
+        return ()
+    variants: list[str] = []
+    for label in labels:
+        variants.extend(_label_search_variants(label))
+    return tuple(dict.fromkeys(variants))
+
+
 def _extract_from_correction_examples(
     text: str,
     field_key: str,
     field_type: str,
     examples: list[dict[str, str | list[str]]],
+    *,
+    fallback_label: str,
+    stop_labels: tuple[str, ...],
 ) -> tuple[str | None, float]:
     for example in examples:
         if str(example.get("field_key", "")).strip() != field_key:
             continue
-        raw_value = str(example.get("value", "")).strip()
-        if not raw_value:
-            continue
-        if raw_value in text:
-            if field_type == "date":
-                parsed = _parse_date_field_value(raw_value)
+        example_type = str(example.get("field_type", field_type)).strip().lower() or field_type
+        for anchor in _correction_anchor_labels(example, fallback_label):
+            value = _extract_near_label(
+                text,
+                anchor,
+                stop_labels,
+                field_type=example_type,
+            )
+            if not value:
+                continue
+            if example_type == "date":
+                parsed = _parse_date_field_value(value)
                 if parsed:
                     return parsed, 0.88
-            elif field_type in ("currency", "number"):
-                parsed = _parse_currency_field_value(raw_value)
+            elif example_type in ("currency", "number"):
+                parsed = _parse_currency_field_value(value)
                 if parsed:
                     return parsed, 0.88
             else:
-                return raw_value[:480], 0.88
+                return value[:480], 0.88
     return None, 0.0
 
 
@@ -190,7 +235,12 @@ def extract_label_custom_fields(
         value, confidence = _extract_by_type(normalized, field_type, label, stop_labels)
         if not value:
             value, confidence = _extract_from_correction_examples(
-                normalized, key, field_type, correction_examples
+                normalized,
+                key,
+                field_type,
+                correction_examples,
+                fallback_label=label,
+                stop_labels=stop_labels,
             )
         if not value:
             continue

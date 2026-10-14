@@ -31,6 +31,8 @@ import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
+import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
+import { libraryDocumentKindMatchBoost } from '../domain/library-document-kind-match.js';
 import { libraryTemporalMatchBoost } from '../domain/library-temporal-match.js';
 import {
   passesCalibratedRetrievalGate,
@@ -170,9 +172,10 @@ export class CitedChatGenerationService {
     await heartbeat();
 
     const priorMessages = await this.threads.listMessages(threadId, userId);
-    const priorUserTurns = priorMessages.filter((m) => m.role === 'user').slice(-2);
     const priorUserMessage =
-      priorUserTurns.length >= 2 ? priorUserTurns[priorUserTurns.length - 2].content : null;
+      priorMessages
+        .filter((m) => m.role === 'user' && m.id !== messageId)
+        .at(-1)?.content ?? null;
 
     const routed = await this.queryRouter.route({
       userId,
@@ -281,7 +284,7 @@ export class CitedChatGenerationService {
     if (scope === 'library') {
       const temporalExtra = await this.retrieval.supplementTemporalLibraryCandidates(
         userId,
-        retrievalQuery
+        userMessage
       );
       if (temporalExtra.length > 0) {
         const seen = new Set(candidates.map((chunk) => chunk.chunkId));
@@ -300,13 +303,20 @@ export class CitedChatGenerationService {
         candidates = candidates
           .map((chunk) => {
             const meta = boostMeta.get(chunk.documentId);
-            const boost = libraryTemporalMatchBoost({
-              query: retrievalQuery,
-              filename: meta?.filename ?? chunk.documentTitle,
-              title: meta?.title ?? chunk.documentTitle,
-              body: chunk.body,
-              documentDate: meta?.documentDate ?? null,
-            });
+            const boost =
+              libraryTemporalMatchBoost({
+                query: userMessage,
+                filename: meta?.filename ?? chunk.documentTitle,
+                title: meta?.title ?? chunk.documentTitle,
+                body: chunk.body,
+                documentDate: meta?.documentDate ?? null,
+              }) +
+              libraryDocumentKindMatchBoost({
+                query: userMessage,
+                filename: meta?.filename ?? chunk.documentTitle,
+                title: meta?.title ?? chunk.documentTitle,
+                body: chunk.body,
+              });
             return { ...chunk, fusionScore: chunk.fusionScore + boost };
           })
           .sort((a, b) => b.fusionScore - a.fusionScore);
@@ -390,7 +400,13 @@ export class CitedChatGenerationService {
     if (!llmConfigured) {
       const extractive =
         extractivePool.length > 0 && gateOk
-          ? await this.resolveExtractiveAnswer(retrievalQuery, extractivePool, extractiveMinScore)
+          ? await this.resolveExtractiveAnswer(
+              userMessage,
+              extractivePool,
+              extractiveMinScore,
+              scope,
+              locale
+            )
           : null;
       if (!gateOk) {
         const extractiveChunkId = extractive?.chunk.chunkId ?? '';
@@ -569,7 +585,13 @@ export class CitedChatGenerationService {
       }
       const llmFallbackExtractive =
         gateOk && extractivePool.length > 0
-          ? await this.resolveExtractiveAnswer(retrievalQuery, extractivePool, extractiveMinScore)
+          ? await this.resolveExtractiveAnswer(
+              userMessage,
+              extractivePool,
+              extractiveMinScore,
+              scope,
+              locale
+            )
           : null;
       if (llmFallbackExtractive) {
         const extractiveChunkId = llmFallbackExtractive.chunk.chunkId;
@@ -726,7 +748,9 @@ export class CitedChatGenerationService {
   private async resolveExtractiveAnswer(
     query: string,
     ranked: { chunk: CitedChatChunkCandidate; score: number }[],
-    minScore: number
+    minScore: number,
+    scope: 'document' | 'library',
+    locale: 'de' | 'en'
   ): Promise<{ text: string; chunk: CitedChatChunkCandidate; quote: string } | null> {
     if (ranked.length === 0 || ranked[0].score < minScore) {
       return null;
@@ -742,7 +766,16 @@ export class CitedChatGenerationService {
     const match = ranked.find((row) => row.chunk.chunkId === worker.passageId);
     const chunk = match?.chunk ?? ranked[0].chunk;
     const quote = worker.quote?.trim() ?? worker.answer.trim();
-    return { text: worker.answer.trim(), chunk, quote };
+    const text =
+      scope === 'library'
+        ? formatLibraryExtractiveAnswer({
+            userMessage: query,
+            quote,
+            documentTitle: chunk.documentTitle,
+            locale,
+          })
+        : worker.answer.trim();
+    return { text, chunk, quote };
   }
 
   private async failGeneration(

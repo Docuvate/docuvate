@@ -340,6 +340,9 @@ export interface LabelFieldExtractionExample {
   fieldKey: string;
   value: string;
   labelTagIds: string[];
+  /** Field label from the catalog — teaches anchor text, not only corrected values. */
+  label?: string;
+  fieldType?: CustomFieldType;
 }
 
 export interface LabelFieldExtractionPort {

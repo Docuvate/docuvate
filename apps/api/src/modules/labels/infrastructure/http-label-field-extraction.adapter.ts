@@ -71,6 +71,8 @@ export class HttpLabelFieldExtractionAdapter implements LabelFieldExtractionPort
           field_key: example.fieldKey,
           value: example.value,
           label_tag_ids: example.labelTagIds,
+          label: example.label ?? '',
+          field_type: example.fieldType ?? 'text',
         })),
       }),
     });

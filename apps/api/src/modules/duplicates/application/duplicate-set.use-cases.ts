@@ -6,7 +6,7 @@ import {
   duplicateSetDisplaySimilarityPercent,
   duplicateSetIdFromDocumentIds,
   duplicateSetMaxSimilarityForDisplay,
-  groupDuplicatePairsIntoSets,
+  groupDuplicateSetsWithHashSubsets,
   parseDuplicateSetId,
 } from '@docuvate/contracts';
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
@@ -39,7 +39,13 @@ export class ListDuplicateSetsUseCase {
       documentId: row.documentId,
       candidateDocumentId: row.candidateDocumentId,
     }));
-    const grouped = groupDuplicatePairsIntoSets(pairs);
+    const hashPairs = rows
+      .filter((row) => row.source === 'hash')
+      .map((row) => ({
+        documentId: row.documentId,
+        candidateDocumentId: row.candidateDocumentId,
+      }));
+    const grouped = groupDuplicateSetsWithHashSubsets(pairs, hashPairs);
     const filtered =
       focusDocumentId != null
         ? grouped.filter((ids) => ids.includes(focusDocumentId))

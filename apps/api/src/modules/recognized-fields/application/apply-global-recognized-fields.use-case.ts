@@ -139,7 +139,13 @@ export class ApplyGlobalRecognizedFieldsUseCase {
     const workerExamples = correctionExamples
       .map((example) => {
         const bareKey = parseGlobalFieldStorageKey(example.fieldKey) ?? example.fieldKey;
-        return { ...example, fieldKey: bareKey };
+        const def = defsToExtract.find((row) => row.key === bareKey);
+        return {
+          ...example,
+          fieldKey: bareKey,
+          label: def?.label ?? example.label,
+          fieldType: def?.fieldType ?? example.fieldType,
+        };
       })
       .filter((example) => defsToExtract.some((def) => def.key === example.fieldKey));
 
