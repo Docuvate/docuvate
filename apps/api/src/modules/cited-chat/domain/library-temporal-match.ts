@@ -7,7 +7,7 @@ export interface GermanPeriodHint {
   year: number | null;
 }
 
-const MONTH_BY_NAME: Readonly<Record<string, number>> = {
+export const GERMAN_MONTH_BY_NAME: Readonly<Record<string, number>> = {
   januar: 1,
   februar: 2,
   maerz: 3,
@@ -33,7 +33,7 @@ export function extractGermanPeriodHints(query: string): GermanPeriodHint[] {
     const monthToken = match[1];
     const yearToken = match[2];
     if (!monthToken || !yearToken) continue;
-    const month = MONTH_BY_NAME[monthToken] ?? null;
+    const month = GERMAN_MONTH_BY_NAME[monthToken] ?? null;
     const year = Number.parseInt(yearToken, 10);
     hints.push({ month, year: Number.isFinite(year) ? year : null });
   }
@@ -84,7 +84,7 @@ function monthYearInText(text: string, hint: GermanPeriodHint): boolean {
     }
   }
   const monthPadded = String(hint.month).padStart(2, '0');
-  const monthNames = Object.entries(MONTH_BY_NAME)
+  const monthNames = Object.entries(GERMAN_MONTH_BY_NAME)
     .filter(([, value]) => value === hint.month)
     .map(([name]) => name);
   if (monthNames.some((name) => normalized.includes(name))) {
