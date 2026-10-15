@@ -52,7 +52,9 @@ export MINIO_PORT="${MINIO_PORT:-19010}"
 export WORKER_URL="http://127.0.0.1:18000"
 export OLLAMA_URL="http://127.0.0.1:11434"
 
-CHAT_JSON="$(cd "${ROOT}" && pnpm exec tsx "${ROOT}/scripts/testing/lab-ce-acceptance-internal.ts" 2>/dev/null || echo '{}')"
+CHAT_JSON="$(
+  cd "${ROOT}" && pnpm --filter @docuvate/api build >/dev/null 2>&1 && pnpm exec tsx "${ROOT}/scripts/testing/lab-ce-acceptance-internal.ts" 2>/dev/null || echo '{}'
+)"
 API_PID=""
 if API_PID="$(pgrep -f 'apps/api/dist/main.js' 2>/dev/null | head -1)" && [[ -n "${API_PID}" ]]; then
   kill "${API_PID}" 2>/dev/null || true
