@@ -50,6 +50,9 @@ export class DocumentsEntity {
   @Column('text', { name: 'storage_key' })
   storageKey: string;
 
+  @Column('text', { name: 'preview_storage_key', nullable: true })
+  previewStorageKey: string | null;
+
   @Column('text', { name: 'status' })
   status: string;
 
