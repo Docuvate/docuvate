@@ -98,10 +98,16 @@ EXTENDED_JSON_FILE="$(mktemp)"
   cd "${ROOT}" && pnpm exec tsx "${ROOT}/scripts/testing/lab-ce-acceptance-extended.ts" 2>/dev/null || echo '{}'
 ) >"${EXTENDED_JSON_FILE}"
 
+LABEL_JSON_FILE="$(mktemp)"
+(
+  cd "${ROOT}" && pnpm exec tsx "${ROOT}/scripts/testing/lab-label-suggestion-acceptance.ts" 2>/dev/null || echo '{}'
+) >"${LABEL_JSON_FILE}"
+
 python3 - <<PY
 import json
 from pathlib import Path
 extended = json.loads(Path("${EXTENDED_JSON_FILE}").read_text(encoding="utf-8") or "{}")
+labels = json.loads(Path("${LABEL_JSON_FILE}").read_text(encoding="utf-8") or "{}")
 print(json.dumps({
   "chat_oktober_gesamtbrutto": int("${CHAT_OCT}"),
   "chat_lohnsteuer_2024": int("${CHAT_TAX}"),
@@ -116,6 +122,7 @@ print(json.dumps({
   "failed_pdf_image_with_extracted_text": int("${FAILED_PDF}"),
   "clicks_to_library_sort": 3,
   "review_queue_clicks_estimate": int("${REVIEW_OPEN}") * 2,
+  "label_suggestion_metrics": labels,
 }, indent=2))
 PY
-rm -f "${EXTENDED_JSON_FILE}"
+rm -f "${EXTENDED_JSON_FILE}" "${LABEL_JSON_FILE}"

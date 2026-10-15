@@ -24,6 +24,7 @@ import {
   suggestEmbeddingClusterNewLabels,
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
+import { trainUserLabelHybridModel, type LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
 import {
   collectNewLabelCandidates,
   type DocumentLabelSignal,
@@ -126,13 +127,28 @@ export class GetLabelRecommendationsUseCase {
       labelSupportCountByTagId.set(tagId, embeddings.length);
     }
 
+    const hybridTrainingRows: LabelHybridDocumentRow[] = embeddingRows.map((row) => {
+      const doc = docs.find((d) => d.id === row.documentId);
+      const text = doc
+        ? `${doc.title}\n${doc.filename}\n${doc.extraction?.text ?? ''}`.slice(0, 12000)
+        : `${row.title}\n${row.filename}`;
+      return {
+        documentId: row.documentId,
+        embedding: row.embedding,
+        nonInboxTagIds: row.nonInboxTagIds,
+        text,
+      };
+    });
+    const hybridModel = trainUserLabelHybridModel(hybridTrainingRows);
+
     const assignRows = suggestAssignRecommendations({
-      rows: embeddingRows,
+      rows: hybridTrainingRows,
       centroids: centroidRefs,
       tagNameById,
       labelSupportCountByTagId,
       threshold,
       dismissedKeys,
+      hybridModel,
     });
     const assignDocIds = new Set(assignRows.map((r) => r.documentId));
 

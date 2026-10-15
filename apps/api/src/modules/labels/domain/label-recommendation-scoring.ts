@@ -3,6 +3,7 @@
 import { cosineSimilarity } from './cosine.js';
 import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
+import { predictLabelHybrid, type LabelHybridModel } from './label-hybrid-auto-match.js';
 import {
   inferClusterLabelNameFromSnippets,
   normalizeLabelKey,
@@ -94,28 +95,46 @@ export function formatMergeRecommendationReason(input: {
 }
 
 export function suggestAssignRecommendations(input: {
-  rows: { documentId: string; embedding: number[]; nonInboxTagIds: string[] }[];
+  rows: {
+    documentId: string;
+    embedding: number[];
+    nonInboxTagIds: string[];
+    text: string;
+  }[];
   centroids: TagCentroidRef[];
   tagNameById: ReadonlyMap<string, string>;
   labelSupportCountByTagId: ReadonlyMap<string, number>;
   threshold: number;
   dismissedKeys: ReadonlySet<string>;
+  hybridModel?: LabelHybridModel | null;
 }): AssignRecommendation[] {
   const out: AssignRecommendation[] = [];
   for (const row of input.rows) {
     if (row.nonInboxTagIds.length > 0 || row.embedding.length === 0) {
       continue;
     }
-    const coverage = computeDocumentCoverage(
-      row.embedding,
-      row.nonInboxTagIds,
-      input.centroids,
-      input.threshold
-    );
-    if (coverage.status !== 'unlabeled_near' || !coverage.nearestTagId) {
+    let tagId: string | null = null;
+    let similarity = 0;
+    if (input.hybridModel) {
+      const prediction = predictLabelHybrid(input.hybridModel, row.embedding, row.text);
+      tagId = prediction.tagId;
+      similarity = prediction.confidence;
+    } else {
+      const coverage = computeDocumentCoverage(
+        row.embedding,
+        row.nonInboxTagIds,
+        input.centroids,
+        input.threshold
+      );
+      if (coverage.status !== 'unlabeled_near' || !coverage.nearestTagId) {
+        continue;
+      }
+      tagId = coverage.nearestTagId;
+      similarity = coverage.bestAnySimilarity;
+    }
+    if (!tagId) {
       continue;
     }
-    const tagId = coverage.nearestTagId;
     const tagName = input.tagNameById.get(tagId);
     if (!tagName) {
       continue;
@@ -124,7 +143,6 @@ export function suggestAssignRecommendations(input: {
     if (input.dismissedKeys.has(id)) {
       continue;
     }
-    const similarity = coverage.bestAnySimilarity;
     const labelSupportCount = input.labelSupportCountByTagId.get(tagId) ?? 0;
     out.push({
       id,
