@@ -44,6 +44,22 @@ export interface CitedChatChunkCandidate {
 export class PgCitedChatRetrievalRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
+  async listReadyLibraryDocumentIds(userId: string): Promise<string[]> {
+    const result = await this.pool.query<{ id: string }>(
+      `SELECT d.id
+       FROM documents d
+       WHERE d.user_id = $1
+         AND d.status = 'ready'
+         AND NOT EXISTS (
+           SELECT 1 FROM document_stack_members m
+           WHERE m.document_id = d.id AND m.role = 'version'
+         )
+       ORDER BY d.updated_at DESC`,
+      [userId]
+    );
+    return result.rows.map((row) => row.id);
+  }
+
   async loadScopedDocumentChunks(
     userId: string,
     documentIds: string[]

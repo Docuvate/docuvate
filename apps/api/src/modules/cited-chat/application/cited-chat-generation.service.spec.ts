@@ -51,6 +51,8 @@ async function buildService(deps: {
       supplementLabelAlignedLibraryCandidates?: ReturnType<typeof vi.fn>;
       listTenantLabelNames?: ReturnType<typeof vi.fn>;
       resolvePrimaryTextChunkId?: ReturnType<typeof vi.fn>;
+      listReadyLibraryDocumentIds?: ReturnType<typeof vi.fn>;
+      loadScopedDocumentChunks?: ReturnType<typeof vi.fn>;
   };
   citations?: { replaceCitations: ReturnType<typeof vi.fn> };
 }) {
@@ -122,6 +124,10 @@ async function buildService(deps: {
             deps.retrieval.listTenantLabelNames ?? vi.fn().mockResolvedValue([]),
           resolvePrimaryTextChunkId:
             deps.retrieval.resolvePrimaryTextChunkId ?? vi.fn().mockResolvedValue(null),
+          listReadyLibraryDocumentIds:
+            deps.retrieval.listReadyLibraryDocumentIds ?? vi.fn().mockResolvedValue([]),
+          loadScopedDocumentChunks:
+            deps.retrieval.loadScopedDocumentChunks ?? vi.fn().mockResolvedValue([]),
           ...deps.retrieval,
         },
       },

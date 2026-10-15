@@ -45,6 +45,7 @@ const FORWARD_SQL_ORDER = [
   'document-recognized-field-extractor-version-up.sql',
   'document-extraction-failure-heuristic-version-up.sql',
   'document-preview-storage-up.sql',
+  'purge-centroid-label-suggestions-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

@@ -132,26 +132,22 @@ async function main(): Promise<void> {
     );
 
     console.log(
-      JSON.stringify(
-        {
-          label_hybrid_loo_precision: loo.precision,
-          label_hybrid_loo_coverage: loo.coverage,
-          label_hybrid_loo_evaluated: loo.evaluated,
-          label_hybrid_loo_precision_ok: loo.precision >= LOO_PRECISION_MIN ? 1 : 0,
-          label_unlabeled_probe_count: unlabeledProbeDocs.length,
-          label_unlabeled_assign_recommendations_wrong: wrongUnlabeledSuggestions,
-          label_unlabeled_persisted_suggestions_wrong: Number(
-            persistedWrong.rows[0]?.count ?? 0
-          ),
-          label_unlabeled_zero_wrong_ok:
-            wrongUnlabeledSuggestions === 0 &&
-            Number(persistedWrong.rows[0]?.count ?? 0) === 0
-              ? 1
-              : 0,
-        },
-        null,
-        2
-      )
+      JSON.stringify({
+        label_hybrid_loo_precision: loo.precision,
+        label_hybrid_loo_coverage: loo.coverage,
+        label_hybrid_loo_evaluated: loo.evaluated,
+        label_hybrid_loo_precision_ok: loo.precision >= LOO_PRECISION_MIN ? 1 : 0,
+        label_unlabeled_probe_count: unlabeledProbeDocs.length,
+        label_unlabeled_assign_recommendations_wrong: wrongUnlabeledSuggestions,
+        label_unlabeled_persisted_suggestions_wrong: Number(
+          persistedWrong.rows[0]?.count ?? 0
+        ),
+        label_unlabeled_zero_wrong_ok:
+          wrongUnlabeledSuggestions === 0 &&
+          Number(persistedWrong.rows[0]?.count ?? 0) === 0
+            ? 1
+            : 0,
+      })
     );
   } finally {
     await app.close();

@@ -62,33 +62,9 @@ export OLLAMA_URL="http://127.0.0.1:11434"
 CHAT_JSON="$(
   cd "${ROOT}" && pnpm --filter @docuvate/api build >/dev/null 2>&1 && pnpm exec tsx "${ROOT}/scripts/testing/lab-ce-acceptance-internal.ts" 2>/dev/null || echo '{}'
 )"
-API_PID=""
 if API_PID="$(pgrep -f 'apps/api/dist/main.js' 2>/dev/null | head -1)" && [[ -n "${API_PID}" ]]; then
   kill "${API_PID}" 2>/dev/null || true
   sleep 2
-fi
-if [[ -n "${API_PID}" ]]; then
-  (
-    cd "${ROOT}"
-    set -a
-    # shellcheck disable=SC1091
-    source "${ROOT}/.env" 2>/dev/null || true
-    set +a
-    export DATABASE_URL="${PG}"
-    export VALKEY_URL="${VALKEY_URL:-redis://127.0.0.1:16379}"
-    export MINIO_ENDPOINT="${MINIO_ENDPOINT:-127.0.0.1}"
-    export MINIO_PORT="${MINIO_PORT:-19010}"
-    export PORT="${DOCUVATE_LAB_API_PORT:-13001}"
-    export DOCUVATE_API_PUBLIC_URL="http://127.0.0.1:${PORT}"
-    export WEB_ORIGIN="${WEB_ORIGIN:-http://127.0.0.1:15173}"
-    export BETTER_AUTH_URL="http://127.0.0.1:${PORT}"
-    export OLLAMA_URL="http://127.0.0.1:11434"
-    export PASSWORD_RESET_MAIL_MODE=smtp
-    export SMTP_URL="${SMTP_URL:-smtp://127.0.0.1:18025}"
-    export MAIL_FROM="${MAIL_FROM:-Docuvate <no-reply@docuvate.local>}"
-    nohup node apps/api/dist/main.js >/tmp/docuvate-lab-api.log 2>&1 &
-  )
-  sleep 5
 fi
 CHAT_OCT="$(echo "${CHAT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('chat_oktober_gesamtbrutto',0))" 2>/dev/null || echo 0)"
 CHAT_TAX="$(echo "${CHAT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('chat_lohnsteuer_2024',0))" 2>/dev/null || echo 0)"
@@ -100,8 +76,17 @@ EXTENDED_JSON_FILE="$(mktemp)"
 
 LABEL_JSON_FILE="$(mktemp)"
 (
-  cd "${ROOT}" && pnpm exec tsx "${ROOT}/scripts/testing/lab-label-suggestion-acceptance.ts" 2>/dev/null || echo '{}'
-) >"${LABEL_JSON_FILE}"
+  cd "${ROOT}"
+  export DATABASE_URL="${PG}"
+  export VALKEY_URL="${VALKEY_URL:-redis://127.0.0.1:16379}"
+  export MINIO_ENDPOINT="${MINIO_ENDPOINT:-127.0.0.1}"
+  export MINIO_PORT="${MINIO_PORT:-19010}"
+  export WORKER_URL="${WORKER_URL}"
+  pnpm exec tsx "${ROOT}/scripts/testing/lab-label-suggestion-acceptance.ts" >"${LABEL_JSON_FILE}" 2>/tmp/docuvate-lab-label-metrics.log
+) || echo '{}' >"${LABEL_JSON_FILE}"
+if ! python3 -c "import json; json.load(open('${LABEL_JSON_FILE}'))" 2>/dev/null; then
+  echo '{}' >"${LABEL_JSON_FILE}"
+fi
 
 python3 - <<PY
 import json
