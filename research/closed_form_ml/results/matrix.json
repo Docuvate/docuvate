@@ -1,0 +1,229 @@
+{
+  "seed": 42,
+  "environment": {
+    "peak_rss_mb_start": 33.19921875,
+    "peak_rss_mb_end": 907.953125
+  },
+  "classification": {
+    "task": "document_type_classification",
+    "methods": {
+      "ridge_e5": {
+        "open_set_holdout": {
+          "closed_accuracy": 0.0,
+          "open_rejection_recall": 0.20833333333333334
+        },
+        "learning_curve": {
+          "train_size_last": 2400.0,
+          "score_last": 1.0,
+          "score_prev": 1.0,
+          "score_delta": 0.0
+        },
+        "train_time_s": 0.1401197250002042,
+        "latency_ms": {
+          "mean": 3.338518499977757,
+          "low": 3.20743512599743,
+          "high": 3.485530726064686,
+          "n": 24
+        },
+        "peak_rss_mb": 555.6875,
+        "cv_closed_set_accuracy": {
+          "mean": 0.9988235294117647,
+          "low": 0.9964705882352941,
+          "high": 1.0,
+          "n": 850
+        }
+      },
+      "deep_stack_e5": {
+        "open_set_holdout": {
+          "closed_accuracy": 0.0,
+          "open_rejection_recall": 0.2916666666666667
+        },
+        "learning_curve": {
+          "train_size_last": 2400.0,
+          "score_last": 1.0,
+          "score_prev": 1.0,
+          "score_delta": 0.0
+        },
+        "train_time_s": 0.9392893049998747,
+        "latency_ms": {
+          "mean": 3.3808673333245074,
+          "low": 3.224322610379223,
+          "high": 3.574036810384011,
+          "n": 24
+        },
+        "peak_rss_mb": 565.58203125,
+        "cv_closed_set_accuracy": {
+          "mean": 0.9976470588235294,
+          "low": 0.9941176470588236,
+          "high": 1.0,
+          "n": 850
+        }
+      },
+      "nest_ce": {
+        "open_set_holdout": {
+          "closed_accuracy": 0.0,
+          "open_rejection_recall": 1.0
+        },
+        "learning_curve": {
+          "train_size_last": 2400.0,
+          "score_last": 0.0,
+          "score_prev": 0.0,
+          "score_delta": 0.0
+        },
+        "train_time_s": 0.6399419470003522,
+        "latency_ms": {
+          "mean": 237.19084541666766,
+          "low": 233.03279888227024,
+          "high": 242.54444341457742,
+          "n": 24
+        },
+        "peak_rss_mb": 643.26953125
+      }
+    },
+    "rvl_cdip": {
+      "skipped": "datasets/rvl_cdip unavailable in this environment"
+    }
+  },
+  "kv_extraction": {
+    "task": "key_value_extraction",
+    "methods": {
+      "regex_baseline": {
+        "micro_f1": {
+          "mean": 0.0,
+          "low": 0.0,
+          "high": 0.0,
+          "n": 9
+        },
+        "latency_ms": {
+          "mean": 0.0052427777619515024,
+          "low": 0.0024142138234613717,
+          "high": 0.010396027731631976,
+          "n": 9
+        },
+        "n_docs": 9
+      },
+      "layout_ridge_ce_shipped": {
+        "linking_f1_synthetic": 0.0,
+        "role_accuracy_synthetic": 0.6666666666666666,
+        "note": "Linear head on frozen e5 + layout features (artifact v1)"
+      }
+    },
+    "note": "FUNSD/XFUND reserved for offline eval (eval/layout_kv_roles/eval_offline.py)"
+  },
+  "extractive_qa": {
+    "task": "extractive_qa",
+    "methods": {
+      "token_overlap_ce": {
+        "retrieval_hit_rate": {
+          "mean": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "n": 16
+        },
+        "answer_accuracy": {
+          "mean": 0.1875,
+          "low": 0.0,
+          "high": 0.375,
+          "n": 16
+        },
+        "latency_ms": {
+          "mean": 1.9742269375200294,
+          "low": 1.2698623070050985,
+          "high": 2.668154367200159,
+          "n": 32
+        },
+        "n_eval": 16
+      },
+      "e5_sentence_cosine_closed_form": {
+        "retrieval_hit_rate": {
+          "mean": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "n": 16
+        },
+        "answer_accuracy": {
+          "mean": 0.875,
+          "low": 0.6875,
+          "high": 1.0,
+          "n": 16
+        },
+        "latency_ms": {
+          "mean": 17.830151062526056,
+          "low": 13.035108022696562,
+          "high": 22.79233302188572,
+          "n": 32
+        },
+        "n_eval": 16
+      },
+      "ridge_span_closed_form": {
+        "retrieval_hit_rate": {
+          "mean": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "n": 16
+        },
+        "answer_accuracy": {
+          "mean": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "n": 16
+        },
+        "latency_ms": {
+          "mean": 33.59386068748904,
+          "low": 22.79755679374773,
+          "high": 44.5106182632383,
+          "n": 32
+        },
+        "n_eval": 16
+      },
+      "xlm_roberta_finetune": {
+        "retrieval_hit_rate": {
+          "mean": 1.0,
+          "low": 1.0,
+          "high": 1.0,
+          "n": 16
+        },
+        "answer_accuracy": {
+          "mean": 0.0,
+          "low": 0.0,
+          "high": 0.0,
+          "n": 16
+        },
+        "latency_ms": {
+          "mean": 1.8838030312622323,
+          "low": 1.2106067820543132,
+          "high": 2.5307363593885412,
+          "n": 32
+        },
+        "n_eval": 16
+      }
+    },
+    "retrieval": "hybrid_e5_bm25_rrf"
+  },
+  "field_suggestions": {
+    "task": "field_suggestions_conditional_on_label",
+    "ridge_conditional_e5": {
+      "accuracy": {
+        "mean": 0.9893333333333333,
+        "low": 0.976,
+        "high": 0.9973333333333333,
+        "n": 375
+      },
+      "latency_ms": {
+        "mean": 1.8825895173225338,
+        "low": 1.8616112175875361,
+        "high": 1.904826254522565,
+        "n": 375
+      }
+    },
+    "majority_baseline": {
+      "mean": 0.5973333333333334,
+      "low": 0.5493333333333333,
+      "high": 0.648,
+      "n": 375
+    },
+    "n_train": 2125,
+    "n_test": 375
+  },
+  "wall_time_s": 289.69677090644836
+}
