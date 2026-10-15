@@ -71,6 +71,7 @@ import { HttpEmbeddingDensityAdapter } from './infrastructure/http-embedding-den
 import { PgEmbeddingDensityRepository } from './infrastructure/pg-embedding-density.repository.js';
 import { PgLabelCoOccurrenceRepository } from './infrastructure/pg-label-co-occurrence.repository.js';
 import { PgLabelEmbeddingRepository } from './infrastructure/pg-label-embedding.repository.js';
+import { PurgeExclusiveTagSuggestionsService } from './infrastructure/purge-exclusive-tag-suggestions.service.js';
 import { DocumentLabelsController } from './presentation/document-labels.controller.js';
 import { LabelsOverviewController } from './presentation/labels-overview.controller.js';
 import { TagCustomFieldsController } from './presentation/tag-custom-fields.controller.js';
@@ -144,6 +145,7 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     RecordEmbeddingFeedbackUseCase,
     LoadDocumentLabelSuggestionsUseCase,
     PgLabelCoOccurrenceRepository,
+    PurgeExclusiveTagSuggestionsService,
     AssignDocumentTagUseCase,
     RemoveDocumentTagUseCase,
     AcceptTagSuggestionUseCase,

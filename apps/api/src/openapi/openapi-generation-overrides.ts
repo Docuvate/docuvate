@@ -10,6 +10,8 @@ import { DocumentFactIndexQueueService } from '../modules/exact-facts/infrastruc
 import { ExtractionQueueService } from '../modules/extraction/infrastructure/extraction-queue.service.js';
 import { EmbeddingDensityCalibrationQueueService } from '../modules/labels/infrastructure/embedding-density-calibration-queue.service.js';
 import { MlRetrainQueueService } from '../modules/model-registry/infrastructure/ml-retrain-queue.service.js';
+import { HeuristicFieldSuggestionsBackfillService } from '../modules/documents/infrastructure/heuristic-field-suggestions-backfill.service.js';
+import { PurgeExclusiveTagSuggestionsService } from '../modules/labels/infrastructure/purge-exclusive-tag-suggestions.service.js';
 import { RecognizedFieldReextractBackfillService } from '../modules/recognized-fields/infrastructure/recognized-field-reextract-backfill.service.js';
 import { RecognizedFieldReextractQueueService } from '../modules/recognized-fields/infrastructure/recognized-field-reextract-queue.service.js';
 import { PG_POOL } from '../shared/infrastructure/database/tokens.js';
@@ -81,6 +83,10 @@ export function applyOpenApiGenerationOverrides(
     .overrideProvider(RecognizedFieldReextractQueueService)
     .useValue(noopQueue)
     .overrideProvider(RecognizedFieldReextractBackfillService)
+    .useValue({ onApplicationBootstrap: (): Promise<void> => Promise.resolve() })
+    .overrideProvider(HeuristicFieldSuggestionsBackfillService)
+    .useValue({ onApplicationBootstrap: (): Promise<void> => Promise.resolve() })
+    .overrideProvider(PurgeExclusiveTagSuggestionsService)
     .useValue({ onApplicationBootstrap: (): Promise<void> => Promise.resolve() })
     .overrideProvider(DocumentChatGenerationCancelRegistry)
     .useValue(noopCancelRegistry);

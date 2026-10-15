@@ -19,7 +19,7 @@ import { Link } from 'react-router-dom';
 
 import { deleteDocument, getDuplicateStack } from '../../lib/api';
 import { setDocumentDragData } from '../../lib/documentDnD';
-import { isExtractionPending } from '../../lib/documentExtractionState';
+import { extractionFailureMessage, isExtractionPending } from '../../lib/documentExtractionState';
 import { useFilesystemCompactDocs } from '../../lib/useFilesystemCompactDocs';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { ExtractionProgressBar } from '../documents/ExtractionProgressBar';
@@ -589,7 +589,15 @@ export function LibraryDocumentTable({
                             className="library-row-progress"
                           />
                         ) : (
-                          <Badge status={doc.status} />
+                          <span
+                            title={
+                              doc.status === 'failed'
+                                ? extractionFailureMessage(doc)
+                                : undefined
+                            }
+                          >
+                            <Badge status={doc.status} />
+                          </span>
                         )}
                       </td>
                     ) : null}

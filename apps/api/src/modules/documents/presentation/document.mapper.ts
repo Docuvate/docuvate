@@ -60,6 +60,7 @@ export function toDocumentDto(
     filename: entity.filename,
     title: entity.title,
     status: entity.status,
+    extractionFailureReason: entity.extractionFailureReason ?? null,
     mimeType: entity.mimeType,
     ingestSource: entity.ingestSource ?? null,
     documentDate: entity.documentDate ? entity.documentDate.toISOString().slice(0, 10) : null,

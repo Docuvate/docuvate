@@ -267,11 +267,50 @@ export class PgDocumentRepository implements DocumentRepository {
     });
   }
 
-  async updateStatus(id: string, status: DocumentStatus): Promise<void> {
-    await this.pool.query(`UPDATE documents SET status = $2, updated_at = now() WHERE id = $1`, [
-      id,
-      status,
-    ]);
+  async updateStatus(
+    id: string,
+    status: DocumentStatus,
+    options?: { failureReason?: string | null }
+  ): Promise<void> {
+    if (status === 'failed') {
+      const reason = options?.failureReason?.trim().slice(0, 2000) ?? null;
+      await this.pool.query(
+        `UPDATE documents SET status = $2, extraction_failure_reason = $3, updated_at = now() WHERE id = $1`,
+        [id, status, reason]
+      );
+      return;
+    }
+    await this.pool.query(
+      `UPDATE documents SET status = $2, extraction_failure_reason = NULL, updated_at = now() WHERE id = $1`,
+      [id, status]
+    );
+  }
+
+  async setHeuristicFieldExtractorVersion(documentId: string, version: number): Promise<void> {
+    await this.pool.query(
+      `UPDATE documents SET heuristic_field_extractor_version = $2, updated_at = now() WHERE id = $1`,
+      [documentId, version]
+    );
+  }
+
+  async listDocumentIdsNeedingHeuristicFieldRefresh(
+    userId: string,
+    currentVersion: number,
+    limit: number
+  ): Promise<string[]> {
+    const capped = Math.min(Math.max(limit, 1), 5000);
+    const result = await this.pool.query<{ id: string }>(
+      `SELECT d.id
+       FROM documents d
+       WHERE d.user_id = $1
+         AND trim(coalesce(d.extracted_text, '')) <> ''
+         AND d.status IN ('ready', 'failed')
+         AND coalesce(d.heuristic_field_extractor_version, 0) < $2
+       ORDER BY d.updated_at DESC
+       LIMIT $3`,
+      [userId, currentVersion, capped]
+    );
+    return result.rows.map((row) => parseString(requireRecord(row).id));
   }
 
   async saveExtraction(id: string, result: ExtractionResult): Promise<void> {

@@ -60,7 +60,11 @@ describe('QueueExtractionUseCase', () => {
 
     await useCase.execute('d1', 'u1');
 
-    expect(documents.updateStatus).toHaveBeenCalledWith('d1', 'failed');
+    expect(documents.updateStatus).toHaveBeenCalledWith(
+      'd1',
+      'failed',
+      expect.objectContaining({ failureReason: expect.any(String) })
+    );
     expect(documents.updateStatus).not.toHaveBeenCalledWith('d1', 'queued');
   });
 });

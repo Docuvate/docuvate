@@ -7,7 +7,7 @@ services:
     working_dir: /workspace
     volumes:
       - .:/workspace:ro
-    command: ['node', 'tools/smoke-bench/bad-ollama-stub.mjs']
+    command: ['node', 'tools/smoke-bench/realistic-ollama-stub.mjs']
     restart: unless-stopped
 
   api:

@@ -206,6 +206,9 @@ export class DocumentResponseDto implements DocumentDto {
   @ApiProperty({ enum: DOCUMENT_STATUSES })
   status!: DocumentStatus;
 
+  @ApiPropertyOptional({ nullable: true })
+  extractionFailureReason?: string | null;
+
   @ApiProperty()
   mimeType!: string;
 

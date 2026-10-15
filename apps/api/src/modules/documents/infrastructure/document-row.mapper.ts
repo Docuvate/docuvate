@@ -174,6 +174,8 @@ export function mapDocumentRow(
     archivedStorageKey: parseOptionalString(row.archived_storage_key),
     contentHash: parseOptionalString(row.content_hash),
     status: parseEnum(row.status, DOCUMENT_STATUSES, 'uploaded'),
+    extractionFailureReason: parseOptionalString(row.extraction_failure_reason),
+    heuristicFieldExtractorVersion: parseOptionalNumber(row.heuristic_field_extractor_version) ?? 0,
     documentDate,
     notes: parseOptionalString(row.notes),
     ingestSource: parseOptionalString(row.ingest_source),

@@ -150,7 +150,7 @@ export class PgRecognizedFieldExtractionAttemptRepository {
              WHERE a.document_id = d.id
                AND a.field_definition_id = $3
                AND a.tenant_id = $1
-               AND a.outcome IN ('not_found', 'below_threshold')
+               AND a.outcome IN ('not_found', 'below_threshold', 'found')
                AND coalesce(a.extractor_version, 0) < $6
            )
          )`,

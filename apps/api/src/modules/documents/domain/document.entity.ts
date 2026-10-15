@@ -17,6 +17,8 @@ export interface DocumentEntity {
   archivedStorageKey?: string | null;
   contentHash?: string | null;
   status: DocumentStatus;
+  extractionFailureReason?: string | null;
+  heuristicFieldExtractorVersion?: number;
   documentDate?: Date | null;
   notes?: string | null;
   folderId?: string | null;

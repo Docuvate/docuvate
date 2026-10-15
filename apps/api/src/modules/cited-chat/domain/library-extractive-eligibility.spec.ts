@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { libraryExtractiveRows, type RankedChunkRow } from './library-extractive-eligibility.js';
+import {
+  libraryExtractiveRows,
+  libraryExtractiveRowsForScopedFact,
+  type RankedChunkRow,
+} from './library-extractive-eligibility.js';
 
 function row(
   documentId: string,
@@ -42,5 +46,18 @@ describe('libraryExtractiveRows', () => {
       row('doc-b', 'Kfz-Versicherung 2026', 0.88),
     ];
     expect(libraryExtractiveRows(top)).toEqual([]);
+  });
+});
+
+describe('libraryExtractiveRowsForScopedFact', () => {
+  it('returns per-document leaders for amount questions when scores are close', () => {
+    const top = [
+      row('doc-a', 'Entgeltnachweis 10/2024', 0.9),
+      row('doc-b', 'Entgeltnachweis 09/2024', 0.88),
+      row('doc-c', 'Entgeltnachweis 08/2024', 0.87),
+    ];
+    const picked = libraryExtractiveRowsForScopedFact(top, 'amount');
+    expect(picked.length).toBeGreaterThan(1);
+    expect(picked.map((entry) => entry.chunk.documentId)).toEqual(['doc-a', 'doc-b', 'doc-c']);
   });
 });

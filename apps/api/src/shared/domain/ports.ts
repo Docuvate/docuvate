@@ -51,7 +51,17 @@ export interface DocumentRepository {
   findById(id: string): Promise<DocumentEntity | null>;
   findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null>;
   listForUser(userId: string, filters?: DocumentListQuery): Promise<DocumentEntity[]>;
-  updateStatus(id: string, status: DocumentStatus): Promise<void>;
+  updateStatus(
+    id: string,
+    status: DocumentStatus,
+    options?: { failureReason?: string | null }
+  ): Promise<void>;
+  setHeuristicFieldExtractorVersion(documentId: string, version: number): Promise<void>;
+  listDocumentIdsNeedingHeuristicFieldRefresh(
+    userId: string,
+    currentVersion: number,
+    limit: number
+  ): Promise<string[]>;
   saveExtraction(id: string, result: ExtractionResult): Promise<void>;
   findLayoutIrForUser(id: string, userId: string): Promise<Record<string, unknown> | null>;
   updateForUser(id: string, userId: string, patch: DocumentUpdatePatch): Promise<DocumentEntity>;

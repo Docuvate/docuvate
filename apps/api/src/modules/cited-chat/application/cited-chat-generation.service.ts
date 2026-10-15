@@ -38,7 +38,10 @@ import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
-import { libraryExtractiveRows } from '../domain/library-extractive-eligibility.js';
+import {
+  libraryExtractiveRows,
+  libraryExtractiveRowsForScopedFact,
+} from '../domain/library-extractive-eligibility.js';
 import {
   buildLibraryMetadataEmbedText,
   libraryMetadataEmbeddingBoost,
@@ -427,7 +430,9 @@ export class CitedChatGenerationService {
       ? ragRerankerGateThreshold()
       : ragFusionGateThreshold();
     const extractivePool =
-      scope === 'library' ? libraryExtractiveRows(top) : top.slice(0, RAG_RERANK_TOP_K);
+      scope === 'library'
+        ? libraryExtractiveRowsForScopedFact(top, answerType)
+        : top.slice(0, RAG_RERANK_TOP_K);
 
     const documentMeta = await this.retrieval.loadDocumentContextMeta(
       userId,
@@ -435,7 +440,6 @@ export class CitedChatGenerationService {
     );
 
     const libraryAmountExtractive =
-      llmConfigured &&
       scope === 'library' &&
       gateOk &&
       prefersAmountExtractiveAnswer(queryVector)

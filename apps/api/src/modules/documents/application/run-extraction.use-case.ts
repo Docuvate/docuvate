@@ -21,6 +21,7 @@ import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-emb
 import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 import { ResolveUserExtractorEngineUseCase } from '../../settings/application/settings.use-cases.js';
+import { HEURISTIC_FIELD_EXTRACTOR_VERSION } from '../domain/heuristic-field-suggestions-fingerprint.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './document-review/promote-extraction-suggestions.use-case.js';
 
 @Injectable()
@@ -83,12 +84,17 @@ export class RunExtractionUseCase {
       const content = `${doc.filename}\n${doc.title}\n${result.text}`;
       await this.postOcrPipeline.execute(documentId, doc.userId, content);
       await this.promoteHighConfidenceSuggestions.execute(documentId, doc.userId);
+      await this.documents.setHeuristicFieldExtractorVersion(
+        documentId,
+        HEURISTIC_FIELD_EXTRACTOR_VERSION
+      );
       await this.documents.updateStatus(documentId, 'ready');
     } catch (error: unknown) {
       const contentHash =
         (await this.documents.findById(documentId))?.contentHash ?? doc.contentHash ?? null;
       await this.applyDuplicateDetection.execute(documentId, doc.userId, contentHash);
-      await this.documents.updateStatus(documentId, 'failed');
+      const failureReason = error instanceof Error ? error.message : String(error);
+      await this.documents.updateStatus(documentId, 'failed', { failureReason });
       throw error;
     }
   }

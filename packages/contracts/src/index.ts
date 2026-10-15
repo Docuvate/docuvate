@@ -599,6 +599,8 @@ export interface DocumentDto {
   filename: string;
   title: string;
   status: DocumentStatus;
+  /** Set when status is failed (extraction or enqueue error). */
+  extractionFailureReason?: string | null;
   mimeType: string;
   /** Machine ingest channel (e.g. scanner_sftp). */
   ingestSource?: string | null;

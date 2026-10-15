@@ -6,9 +6,12 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
+import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-suggestions.js';
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
 import { HttpEmbeddingDensityAdapter } from '../infrastructure/http-embedding-density.adapter.js';
 import { PgEmbeddingDensityRepository } from '../infrastructure/pg-embedding-density.repository.js';
+import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';
+import { PurgeExclusiveTagSuggestionsService } from '../infrastructure/purge-exclusive-tag-suggestions.service.js';
 
 const TOP_CANDIDATE_COUNT = 3;
 
@@ -21,7 +24,9 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
   constructor(
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     private readonly densityRepo: PgEmbeddingDensityRepository,
-    private readonly densityWorker: HttpEmbeddingDensityAdapter
+    private readonly densityWorker: HttpEmbeddingDensityAdapter,
+    private readonly coOccurrence: PgLabelCoOccurrenceRepository,
+    private readonly purgeExclusive: PurgeExclusiveTagSuggestionsService
   ) {}
 
   async tryApply(
@@ -53,6 +58,8 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
       const assigned = new Set(
         (await this.taxonomy.listTagsForDocument(documentId)).map((t) => t.id)
       );
+      const exclusivePairs = await this.coOccurrence.listMutuallyExclusiveTagPairs(userId);
+      await this.purgeExclusive.purgeForDocument(userId, documentId);
       const assignedGroups = new Set(
         [...assigned].map((tagId) => state.label_to_group[tagId] ?? tagId)
       );
@@ -96,6 +103,9 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
       for (const tagId of rankedIds) {
         const tag = tagById.get(tagId);
         if (!tag || tag.isInbox) {
+          continue;
+        }
+        if (tagIdConflictsWithAssigned(tagId, assigned, exclusivePairs)) {
           continue;
         }
         let confidence =
