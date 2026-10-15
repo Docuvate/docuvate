@@ -28,9 +28,13 @@ def _with_markdown(result: ExtractionResult) -> ExtractionResult:
         field_suggestions=result.field_suggestions,
         blocks=result.blocks,
         markdown=markdown,
+        layout_ir=result.layout_ir,
+        layout_reconstruction_reliable=result.layout_reconstruction_reliable,
+        layout_unreliable_reason=result.layout_unreliable_reason,
         cpu_pipeline=result.cpu_pipeline,
         document_representation=result.document_representation,
         extracted_facts=result.extracted_facts,
+        preview_pdf=result.preview_pdf,
     )
 
 
@@ -73,6 +77,7 @@ def _with_layout_ir(
         cpu_pipeline=result.cpu_pipeline,
         document_representation=result.document_representation,
         extracted_facts=result.extracted_facts,
+        preview_pdf=result.preview_pdf,
     )
 
 
