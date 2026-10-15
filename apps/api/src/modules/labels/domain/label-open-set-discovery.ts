@@ -1,19 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import {
   normalizeSearchText,
   tokenizeSearchQuery,
 } from '../../search/domain/normalize-search-text.js';
-import { normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import { cosineSimilarity } from './cosine.js';
 import { isAcceptableLabelCandidate } from './label-candidate-validation.js';
 import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
 import {
   buildHybridFeatureModel,
+  type HybridFeatureModel,
   hybridFeatureVector,
   l2Normalize,
-  type HybridFeatureModel,
 } from './label-hybrid-features.js';
 
 /** Calibrated on synthetic open-set fixtures (held-out) for ≥0.95 precision. */

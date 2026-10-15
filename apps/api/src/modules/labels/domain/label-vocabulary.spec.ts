@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
+import { namesAreNearDuplicate, normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import { isAcceptableLabelCandidate } from './label-candidate-validation.js';
 import { suggestMergeAndRename } from './label-merge-rename-suggestions.js';
-import { namesAreNearDuplicate, normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 
 describe('label candidate validation', () => {
   it('normalizes German umlauts via shared helper', () => {

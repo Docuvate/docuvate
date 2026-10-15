@@ -4,8 +4,8 @@ import { cosineSimilarity } from './cosine.js';
 import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
 import { type LabelHybridModel,predictLabelHybrid } from './label-hybrid-auto-match.js';
-import { discoverOpenSetNewLabelClusters } from './label-open-set-discovery.js';
 import type { TagPairSignal } from './label-merge-rename-suggestions.js';
+import { discoverOpenSetNewLabelClusters } from './label-open-set-discovery.js';
 
 export interface AssignRecommendation {
   id: string;

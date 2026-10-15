@@ -7,6 +7,7 @@ import type {
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import { normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import {
   LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
@@ -19,7 +20,6 @@ import { assertTagNameNotNearDuplicate } from '../../../shared/domain/tag-name-u
 import { cosineSimilarity } from '../domain/cosine.js';
 import { adjustLabelNearThresholdFromFeedback } from '../domain/label-near-threshold.js';
 import { parseAssignRecommendationId } from '../domain/label-recommendation-scoring.js';
-import { normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import { phraseFromRecommendationKey } from '../domain/recommendation-blocklist.js';
 import { AssignDocumentTagUseCase } from './document-label.use-cases.js';
 
