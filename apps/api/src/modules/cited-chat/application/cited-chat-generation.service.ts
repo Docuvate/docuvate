@@ -36,9 +36,9 @@ import { rejectedClaimsAllowRetrievalFallback } from '../domain/cited-chat-retri
 import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
+import { filterDocumentIdsByLibraryQueryPeriod } from '../domain/filter-document-ids-by-library-query-period.js';
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
-import { filterDocumentIdsByLibraryQueryPeriod } from '../domain/filter-document-ids-by-library-query-period.js';
 import { libraryContextYearMonths } from '../domain/library-context-search-tokens.js';
 import { libraryExtractiveRowsForScopedFact } from '../domain/library-extractive-eligibility.js';
 import {
@@ -441,7 +441,7 @@ export class CitedChatGenerationService {
               }
             }
           }
-        } else if (wantsPeriodScope) {
+        } else {
           candidates = [];
         }
       }
