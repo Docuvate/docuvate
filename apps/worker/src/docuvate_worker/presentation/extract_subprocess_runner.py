@@ -144,6 +144,11 @@ def run_extract_isolated(
             )
         finally:
             reclaim_python_heap()
+    from docuvate_worker.infrastructure.extractors.paddle_engine import release_paddle_ocr  # noqa: PLC0415
+    from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder  # noqa: PLC0415
+
+    release_paddle_ocr()
+    release_onnx_encoder()
     payload = {
         "content_base64": base64.b64encode(content).decode("ascii"),
         "mime_type": mime_type,
