@@ -1,4 +1,11 @@
+import pytest
+
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_fields
+
+
+@pytest.fixture(autouse=True)
+def _regex_heuristics_only(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DOCUVATE_FEATURE_LEARNED_VALUE_TYPES", "false")
 
 
 def test_vendor_strips_absender_label_prefix() -> None:
