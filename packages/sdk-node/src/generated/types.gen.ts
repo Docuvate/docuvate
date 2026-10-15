@@ -3035,6 +3035,28 @@ export type GetDocumentLayoutTypstResponses = {
 
 export type GetDocumentLayoutTypstResponse = GetDocumentLayoutTypstResponses[keyof GetDocumentLayoutTypstResponses];
 
+export type DocumentPreviewData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/preview';
+};
+
+export type DocumentPreviewErrors = {
+    401: ApiErrorEnvelopeDto;
+    403: ApiErrorEnvelopeDto;
+    404: ApiErrorEnvelopeDto;
+    422: ApiErrorEnvelopeDto;
+};
+
+export type DocumentPreviewError = DocumentPreviewErrors[keyof DocumentPreviewErrors];
+
+export type DocumentPreviewResponses = {
+    200: unknown;
+};
+
 export type RefreshSuggestionsData = {
     body?: never;
     path: {
