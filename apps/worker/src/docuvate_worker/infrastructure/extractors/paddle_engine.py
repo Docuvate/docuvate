@@ -6,6 +6,8 @@ import logging
 import os
 from typing import Any, Protocol, cast
 
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
+
 import numpy as np
 from pdf2image import convert_from_bytes
 from PIL import Image
@@ -23,7 +25,11 @@ _ocr_instance: Any | None = None
 
 def release_paddle_ocr() -> None:
     global _ocr_instance  # noqa: PLW0603
+    instance = _ocr_instance
     _ocr_instance = None
+    if instance is not None:
+        del instance
+    reclaim_python_heap()
 
 
 def _configure_paddle_env() -> None:
@@ -158,11 +164,18 @@ def ocr_pdf_bytes(
     all_blocks: list[ExtractionBlock] = []
     block_index = 0
 
-    for page_num, image in enumerate(images, start=1):
-        page_text, blocks = _ocr_pil_image(image, page=page_num, block_offset=block_index)
-        if page_text:
-            page_texts.append(page_text)
-        all_blocks.extend(blocks)
-        block_index += len(blocks)
+    try:
+        for page_num, image in enumerate(images, start=1):
+            try:
+                page_text, blocks = _ocr_pil_image(image, page=page_num, block_offset=block_index)
+                if page_text:
+                    page_texts.append(page_text)
+                all_blocks.extend(blocks)
+                block_index += len(blocks)
+            finally:
+                image.close()
+    finally:
+        images.clear()
+        reclaim_python_heap()
 
     return "\n\n".join(page_texts).strip(), all_blocks

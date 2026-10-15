@@ -39,6 +39,7 @@ import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-cla
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
 import { filterDocumentIdsByLibraryQueryPeriod } from '../domain/filter-document-ids-by-library-query-period.js';
+import { libraryContextYearMonths } from '../domain/library-context-search-tokens.js';
 import { libraryExtractiveRowsForScopedFact } from '../domain/library-extractive-eligibility.js';
 import {
   buildLibraryMetadataEmbedText,
@@ -406,6 +407,28 @@ export class CitedChatGenerationService {
       }
     }
     retrieveMs = Date.now() - retrieveStarted;
+
+    if (scope === 'library' && candidates.length > 0) {
+      const uniqueDocIds = [...new Set(candidates.map((chunk) => chunk.documentId))];
+      const periodMeta = await this.retrieval.loadDocumentContextMeta(userId, uniqueDocIds);
+      const periodDocIds = filterDocumentIdsByLibraryQueryPeriod(
+        uniqueDocIds,
+        userMessage,
+        periodMeta
+      );
+      const wantsPeriodScope =
+        libraryContextYearMonths(userMessage).length > 0 ||
+        /\b20\d{2}\b/.test(userMessage);
+      if (wantsPeriodScope) {
+        if (periodDocIds.length > 0) {
+          const allowed = new Set(periodDocIds);
+          candidates = candidates.filter((chunk) => allowed.has(chunk.documentId));
+        } else {
+          candidates = [];
+        }
+      }
+    }
+
     const chunkPool = candidates.map((chunk) => ({ chunk }));
 
     if (await aborted()) {
@@ -477,16 +500,21 @@ export class CitedChatGenerationService {
         ? libraryExtractiveRowsForScopedFact(top, answerType)
         : top.slice(0, RAG_RERANK_TOP_K);
     if (scope === 'library' && labelAlignedDocumentIds.length > 0) {
-      const allowed = new Set(labelAlignedDocumentIds);
-      const fromTop = top.filter((row) => allowed.has(row.chunk.documentId));
-      if (fromTop.length > 0) {
-        extractivePool = fromTop.slice(0, 5);
-      } else {
-        extractivePool = candidates
-          .filter((chunk) => allowed.has(chunk.documentId))
-          .sort((a, b) => b.fusionScore - a.fusionScore)
-          .slice(0, 5)
-          .map((chunk) => ({ chunk, score: chunk.fusionScore }));
+      const scopedDocIds = new Set(candidates.map((chunk) => chunk.documentId));
+      const allowed = new Set(
+        labelAlignedDocumentIds.filter((documentId) => scopedDocIds.has(documentId))
+      );
+      if (allowed.size > 0) {
+        const fromTop = top.filter((row) => allowed.has(row.chunk.documentId));
+        if (fromTop.length > 0) {
+          extractivePool = fromTop.slice(0, 5);
+        } else {
+          extractivePool = candidates
+            .filter((chunk) => allowed.has(chunk.documentId))
+            .sort((a, b) => b.fusionScore - a.fusionScore)
+            .slice(0, 5)
+            .map((chunk) => ({ chunk, score: chunk.fusionScore }));
+        }
       }
     }
 

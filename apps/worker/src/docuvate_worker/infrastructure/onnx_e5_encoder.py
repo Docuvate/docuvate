@@ -17,6 +17,7 @@ from huggingface_hub import hf_hub_download
 from numpy.typing import NDArray
 from tokenizers import Tokenizer
 
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 from docuvate_worker.domain.representation.constants import (
     ENCODER_HF_REVISION,
     ENCODER_ID,
@@ -37,9 +38,13 @@ _onnx_path: Path | None = None
 def release_onnx_encoder() -> None:
     global _session, _tokenizer, _onnx_path  # noqa: PLW0603
     with _lock:
+        session = _session
         _session = None
         _tokenizer = None
         _onnx_path = None
+        if session is not None:
+            del session
+    reclaim_python_heap()
 
 
 def _cache_dir() -> Path:

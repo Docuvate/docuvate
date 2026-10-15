@@ -6,6 +6,12 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PG="${DOCUVATE_LAB_DATABASE_URL:-postgresql://docuvate:docuvate@127.0.0.1:55433/docuvate}"
 EMAIL="${DOCUVATE_TEST_EMAIL:-thomas@docuvate.test}"
 
+if [[ "${WORKER_URL:-}" == *":8001"* ]]; then
+  echo "lab acceptance refuses host worker on port 8001; use docuvate-lab container :18000" >&2
+  exit 1
+fi
+export WORKER_URL="${WORKER_URL:-http://127.0.0.1:18000}"
+
 psql_lab() {
   docker exec docuvate-lab-postgres-1 psql -U docuvate -d docuvate -tAc "$1"
 }
@@ -51,7 +57,6 @@ export DATABASE_URL="${PG}"
 export VALKEY_URL="${VALKEY_URL:-redis://127.0.0.1:16379}"
 export MINIO_ENDPOINT="${MINIO_ENDPOINT:-127.0.0.1}"
 export MINIO_PORT="${MINIO_PORT:-19010}"
-export WORKER_URL="http://127.0.0.1:18000"
 export OLLAMA_URL="http://127.0.0.1:11434"
 
 CHAT_JSON="$(
@@ -73,7 +78,6 @@ if [[ -n "${API_PID}" ]]; then
     export VALKEY_URL="${VALKEY_URL:-redis://127.0.0.1:16379}"
     export MINIO_ENDPOINT="${MINIO_ENDPOINT:-127.0.0.1}"
     export MINIO_PORT="${MINIO_PORT:-19010}"
-    export WORKER_URL="http://127.0.0.1:18000"
     export PORT="${DOCUVATE_LAB_API_PORT:-13001}"
     export DOCUVATE_API_PUBLIC_URL="http://127.0.0.1:${PORT}"
     export WEB_ORIGIN="${WEB_ORIGIN:-http://127.0.0.1:15173}"

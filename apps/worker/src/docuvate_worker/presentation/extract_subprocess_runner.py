@@ -7,10 +7,16 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
 import os
 import subprocess
 import sys
+import tempfile
 from typing import Any
+
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
+
+logger = logging.getLogger(__name__)
 
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
@@ -110,6 +116,13 @@ def extraction_result_to_wire(result: ExtractionResult) -> dict[str, Any]:
     }
 
 
+def _in_process_extract_allowed() -> bool:
+    """In-process extract loads Paddle/ONNX into the API process and caused production OOM."""
+    if os.environ.get("DOCUVATE_ALLOW_IN_PROCESS_EXTRACT", "0") != "1":
+        return False
+    return os.environ.get("DOCUVATE_EXTRACT_SUBPROCESS", "1") == "0"
+
+
 def run_extract_isolated(
     *,
     content: bytes,
@@ -118,14 +131,20 @@ def run_extract_isolated(
     embedding_density_state: EmbeddingDensityStatePayload | None,
     build_exact_fact_index: bool,
 ) -> ExtractionResult:
-    if os.environ.get("DOCUVATE_EXTRACT_SUBPROCESS", "1") == "0":
-        return extract_document(
-            content,
-            mime_type,
-            engine=engine,
-            embedding_density_state=embedding_density_state,
-            build_exact_fact_index=build_exact_fact_index,
+    if _in_process_extract_allowed():
+        logger.warning(
+            "DOCUVATE_ALLOW_IN_PROCESS_EXTRACT=1: running extract in-process (not for production)"
         )
+        try:
+            return extract_document(
+                content,
+                mime_type,
+                engine=engine,
+                embedding_density_state=embedding_density_state,
+                build_exact_fact_index=build_exact_fact_index,
+            )
+        finally:
+            reclaim_python_heap()
     payload = {
         "content_base64": base64.b64encode(content).decode("ascii"),
         "mime_type": mime_type,
@@ -135,21 +154,28 @@ def run_extract_isolated(
         ),
         "build_exact_fact_index": build_exact_fact_index,
     }
-    proc = subprocess.run(
-        [sys.executable, "-m", "docuvate_worker.presentation.extract_subprocess_runner"],
-        input=json.dumps(payload),
-        capture_output=True,
-        text=True,
-        timeout=float(os.environ.get("DOCUVATE_EXTRACT_TIMEOUT_SECONDS", "900")),
-        check=False,
-    )
-    if proc.returncode != 0:
-        detail = proc.stderr.strip() or proc.stdout.strip() or f"exit {proc.returncode}"
-        raise RuntimeError(detail)
-    envelope = json.loads(proc.stdout)
+    timeout = float(os.environ.get("DOCUVATE_EXTRACT_TIMEOUT_SECONDS", "900"))
+    with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as stdout_file:
+        proc = subprocess.run(
+            [sys.executable, "-m", "docuvate_worker.presentation.extract_subprocess_runner"],
+            input=json.dumps(payload),
+            stdout=stdout_file,
+            stderr=subprocess.PIPE,
+            text=True,
+            timeout=timeout,
+            check=False,
+        )
+        if proc.returncode != 0:
+            detail = (proc.stderr or "").strip() or f"exit {proc.returncode}"
+            raise RuntimeError(detail)
+        stdout_file.seek(0)
+        envelope = json.load(stdout_file)
     if not envelope.get("ok"):
         raise RuntimeError(str(envelope.get("error") or "extract subprocess failed"))
-    return extraction_result_from_wire(envelope["result"])
+    try:
+        return extraction_result_from_wire(envelope["result"])
+    finally:
+        reclaim_python_heap()
 
 
 def main() -> None:

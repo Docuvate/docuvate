@@ -1,6 +1,8 @@
 # Isolated lab stack — never use project name `docuvate` or live volume names.
+# Run the worker ONLY via this compose file (port 18000), never host uvicorn — OCR/RAG memory
+# must stay inside the container memory limit below.
 # Usage:
-#   docker compose -p docuvate-lab -f docker-compose.yml -f docker-compose.lab.yml --profile chat-local up -d --build
+#   docker compose -p docuvate-lab -f docker-compose.yml -f docker-compose.lab.yml up -d --build worker postgres minio valkey
 name: docuvate-lab
 
 services:
@@ -31,8 +33,13 @@ services:
       OLLAMA_URL: ${LAB_OLLAMA_URL:-http://host.docker.internal:11434}
 
   worker:
+    image: ${DOCUVATE_LAB_WORKER_IMAGE:-docuvate-lab-worker:local}
+    mem_limit: 4g
     ports: !override
       - '18000:8000'
+    environment:
+      DOCUVATE_EXTRACT_SUBPROCESS: '1'
+      PADDLE_PREWARM_ON_START: '0'
     volumes: !override
       - lab_workermlcache:/var/lib/docuvate-ml
 

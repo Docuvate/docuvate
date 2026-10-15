@@ -9,6 +9,7 @@ from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.infrastructure.extractors.arena import pick_random_arena_engines
 from docuvate_worker.infrastructure.extractors.engine_catalog import engine_by_name
 from docuvate_worker.infrastructure.extractors.paddle_errors import map_paddle_exception
+from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 
 
 @dataclass
@@ -95,7 +96,13 @@ def run_compare(
                     )
                 )
                 continue
-            result = engine.extract(payload, mime_type)
+            result = run_extract_isolated(
+                content=payload,
+                mime_type=mime_type,
+                engine=key,
+                embedding_density_state=None,
+                build_exact_fact_index=False,
+            )
             elapsed_ms = int((time.perf_counter() - started) * 1000)
             rows.append(
                 CompareEngineResult(engine=key, elapsed_ms=elapsed_ms, result=result, error=None)
