@@ -13,6 +13,10 @@
       {
         "include": "modules/cited-chat/domain/*.json",
         "outDir": "dist"
+      },
+      {
+        "include": "modules/documents/domain/artifacts/**/*",
+        "outDir": "dist"
       }
     ],
     "plugins": [

@@ -124,11 +124,17 @@ def main() -> None:
             "margin_offset": offset,
         },
     }
-    artifact_path = (
-        Path(__file__).resolve().parents[1]
-        / "src/docuvate_worker/infrastructure/ml/artifacts/value-types-field-confidence.v1.json"
+    artifact_text = json.dumps(payload, indent=2) + "\n"
+    repo_root = Path(__file__).resolve().parents[3]
+    artifact_paths = (
+        repo_root
+        / "apps/worker/src/docuvate_worker/infrastructure/ml/artifacts/value-types-field-confidence.v1.json",
+        repo_root
+        / "apps/api/src/modules/documents/domain/artifacts/value-types-field-confidence.v1.json",
     )
-    artifact_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    for artifact_path in artifact_paths:
+        artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        artifact_path.write_text(artifact_text, encoding="utf-8")
     print(json.dumps(payload, indent=2))
 
 

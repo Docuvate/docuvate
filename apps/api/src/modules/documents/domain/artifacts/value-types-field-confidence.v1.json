@@ -1,0 +1,24 @@
+{
+  "version": "1",
+  "auto_promote_min_by_field": {
+    "date": 0.95,
+    "amount": 0.88,
+    "vendor": 0.8872
+  },
+  "date_confidence_floors": [
+    {
+      "min_log_score": 55,
+      "confidence": 0.95
+    },
+    {
+      "min_log_score": 48,
+      "confidence": 0.95
+    }
+  ],
+  "vendor_gate": {
+    "min_org_margin": 35,
+    "min_calibrated_confidence": 0.8872,
+    "margin_scale": 0.012,
+    "margin_offset": 22.0
+  }
+}
