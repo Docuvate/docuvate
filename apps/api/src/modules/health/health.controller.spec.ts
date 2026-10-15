@@ -22,12 +22,18 @@ vi.mock('minio', () => ({
   })),
 }));
 
+vi.mock('../../shared/infrastructure/worker/worker-dependency-fetch.js', () => ({
+  fetchWorkerDependency: vi.fn().mockResolvedValue({ ok: true }),
+}));
+
 describe('HealthController ready', () => {
   beforeEach(() => {
     vi.stubEnv('VALKEY_URL', 'redis://127.0.0.1:6379');
     vi.stubEnv('MINIO_ENDPOINT', '127.0.0.1');
     vi.stubEnv('MINIO_ACCESS_KEY', 'key');
     vi.stubEnv('MINIO_SECRET_KEY', 'secret');
+    vi.stubEnv('MINIO_BUCKET', 'documents');
+    vi.stubEnv('WORKER_URL', 'http://127.0.0.1:18000');
   });
 
   async function buildController(query: ReturnType<typeof vi.fn>) {
