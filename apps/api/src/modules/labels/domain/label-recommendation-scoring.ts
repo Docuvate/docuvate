@@ -4,11 +4,8 @@ import { cosineSimilarity } from './cosine.js';
 import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
 import { type LabelHybridModel,predictLabelHybrid } from './label-hybrid-auto-match.js';
-import {
-  inferClusterLabelNameFromSnippets,
-  normalizeLabelKey,
-  type TagPairSignal,
-} from './label-vocabulary.js';
+import type { TagPairSignal } from './label-merge-rename-suggestions.js';
+import { discoverOpenSetNewLabelClusters } from './label-open-set-discovery.js';
 
 export interface AssignRecommendation {
   id: string;
@@ -263,111 +260,34 @@ export function suggestEmbeddingMergeRecommendations(input: {
   return out.sort((x, y) => y.score - x.score).slice(0, 6);
 }
 
-function clusterKey(documentIds: string[]): string {
-  return documentIds.slice().sort().join(',');
-}
-
 export function suggestEmbeddingClusterNewLabels(input: {
   rows: {
     documentId: string;
     embedding: number[];
     nonInboxTagIds: string[];
-    textSnippet: string;
+    title: string;
+    filename: string;
+    text: string;
+    fields: { key: string; value: string }[];
   }[];
   centroids: TagCentroidRef[];
   threshold: number;
   dismissedKeys: ReadonlySet<string>;
-  minClusterSize?: number;
-  minPairwiseSim?: number;
 }): EmbeddingClusterNewLabel[] {
-  const minClusterSize = input.minClusterSize ?? 2;
-  const minPairwiseSim = input.minPairwiseSim ?? 0.72;
-
-  const outside = input.rows.filter((row) => {
-    if (row.nonInboxTagIds.length > 0 || row.embedding.length === 0) {
-      return false;
-    }
-    const coverage = computeDocumentCoverage(
-      row.embedding,
-      row.nonInboxTagIds,
-      input.centroids,
-      input.threshold
-    );
-    return coverage.status === 'outside';
+  const clusters = discoverOpenSetNewLabelClusters({
+    rows: input.rows,
+    centroids: input.centroids,
+    threshold: input.threshold,
+    dismissedKeys: input.dismissedKeys,
   });
-
-  if (outside.length < minClusterSize) {
-    return [];
-  }
-
-  const used = new Set<string>();
-  const clusters: { documentIds: string[]; cohesion: number }[] = [];
-
-  for (const seed of outside) {
-    if (used.has(seed.documentId)) {
-      continue;
-    }
-    const members = [seed];
-    for (const other of outside) {
-      if (other.documentId === seed.documentId || used.has(other.documentId)) {
-        continue;
-      }
-      const sim = cosineSimilarity(seed.embedding, other.embedding);
-      if (sim >= minPairwiseSim) {
-        members.push(other);
-      }
-    }
-    if (members.length < minClusterSize) {
-      continue;
-    }
-    let simSum = 0;
-    let pairs = 0;
-    for (let i = 0; i < members.length; i++) {
-      for (let j = i + 1; j < members.length; j++) {
-        simSum += cosineSimilarity(members[i].embedding, members[j].embedding);
-        pairs += 1;
-      }
-    }
-    const cohesion = pairs > 0 ? simSum / pairs : minPairwiseSim;
-    const documentIds = members.map((m) => m.documentId);
-    for (const id of documentIds) {
-      used.add(id);
-    }
-    clusters.push({ documentIds, cohesion });
-  }
-
-  const results: EmbeddingClusterNewLabel[] = [];
-  for (const cluster of clusters) {
-    const key = clusterKey(cluster.documentIds);
-    const id = `new:cluster:${normalizeLabelKey(key).replace(/\s+/g, '-')}`;
-    if (input.dismissedKeys.has(id)) {
-      continue;
-    }
-
-    const clusterSnippets = input.rows
-      .filter((r) => cluster.documentIds.includes(r.documentId))
-      .map((r) => r.textSnippet);
-    const proposedName = inferClusterLabelNameFromSnippets(clusterSnippets);
-    if (!proposedName) {
-      continue;
-    }
-    const dismissNameKey = `new:${normalizeLabelKey(proposedName)}`;
-    if (input.dismissedKeys.has(dismissNameKey)) {
-      continue;
-    }
-
-    const pct = Math.round(cluster.cohesion * 100);
-    results.push({
-      id,
-      proposedName,
-      score: Math.min(0.9, 0.55 + cluster.cohesion * 0.35),
-      similarity: cluster.cohesion,
-      reason: `${String(cluster.documentIds.length)} ähnliche Dokumente ohne Label · ${String(pct)} % Übereinstimmung`,
-      documentIds: cluster.documentIds,
-    });
-  }
-
-  return results.sort((a, b) => b.score - a.score).slice(0, 3);
+  return clusters.map((cluster) => ({
+    id: cluster.id,
+    proposedName: cluster.proposedName,
+    score: cluster.score,
+    similarity: cluster.similarity,
+    reason: cluster.reason,
+    documentIds: cluster.documentIds,
+  }));
 }
 
 export function parseAssignRecommendationId(

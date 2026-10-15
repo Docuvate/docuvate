@@ -14,7 +14,11 @@ export function todoWhyLine(
     return t('labels.todoWhyAssignSimilarContent', { count });
   }
   if (item.kind === 'new') {
-    return item.source === 'text' ? t('labels.todoWhyNewText') : t('labels.todoWhyNewEmbedding');
+    const trimmed = item.reason.trim();
+    if (trimmed.length > 0) {
+      return trimmed;
+    }
+    return t('labels.todoWhyNewEmbedding');
   }
   if (item.kind === 'merge') {
     const idA = item.tagIds?.[0];

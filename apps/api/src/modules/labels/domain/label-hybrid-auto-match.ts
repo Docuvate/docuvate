@@ -1,17 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import {
-  normalizeSearchText,
-  tokenizeSearchQuery,
-} from '../../search/domain/normalize-search-text.js';
 import { cosineSimilarity } from './cosine.js';
+import {
+  buildHybridFeatureModel,
+  hybridFeatureVector,
+  l2Normalize,
+} from './label-hybrid-features.js';
 
-const MAX_VOCAB = 4096;
 const MIN_CLASS_EXAMPLES = 2;
 const MIN_TRAINED_CLASSES = 2;
 const LOO_TARGET_PRECISION = 0.95;
-const EMBED_FEATURE_WEIGHT = 1.25;
-const TFIDF_FEATURE_WEIGHT = 1.0;
 const TRAIN_EPOCHS = 48;
 const TRAIN_LR = 0.08;
 const L2 = 1e-4;
@@ -47,79 +45,13 @@ export interface LabelHybridPrediction {
   ranked: { tagId: string; confidence: number }[];
 }
 
-function l2Normalize(values: number[]): number[] {
-  let sum = 0;
-  for (const v of values) {
-    sum += v * v;
-  }
-  const norm = Math.sqrt(sum);
-  if (norm <= 1e-12) {
-    return values.map(() => 0);
-  }
-  return values.map((v) => v / norm);
-}
-
-function buildVocabulary(examples: readonly LabelHybridTrainingExample[]): string[] {
-  const df = new Map<string, number>();
-  for (const row of examples) {
-    const seen = new Set<string>();
-    for (const token of tokenizeSearchQuery(normalizeSearchText(row.text))) {
-      if (token.length < 2) {
-        continue;
-      }
-      if (seen.has(token)) {
-        continue;
-      }
-      seen.add(token);
-      df.set(token, (df.get(token) ?? 0) + 1);
-    }
-  }
-  return [...df.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .slice(0, MAX_VOCAB)
-    .map(([token]) => token);
-}
-
-function tfidfVector(text: string, vocabulary: readonly string[], idf: readonly number[]): number[] {
-  const counts = new Map<string, number>();
-  for (const token of tokenizeSearchQuery(normalizeSearchText(text))) {
-    counts.set(token, (counts.get(token) ?? 0) + 1);
-  }
-  const total = [...counts.values()].reduce((a, b) => a + b, 0) || 1;
-  const out: number[] = Array.from({ length: vocabulary.length }, () => 0);
-  for (let i = 0; i < vocabulary.length; i++) {
-    const token = vocabulary[i];
-    const tf = (counts.get(token) ?? 0) / total;
-    out[i] = tf * (idf[i] ?? 0);
-  }
-  return l2Normalize(out);
-}
-
-function buildIdf(examples: readonly LabelHybridTrainingExample[], vocabulary: readonly string[]): number[] {
-  const n = examples.length;
-  const df: number[] = Array.from({ length: vocabulary.length }, () => 0);
-  for (const row of examples) {
-    const present = new Set(tokenizeSearchQuery(normalizeSearchText(row.text)));
-    for (let i = 0; i < vocabulary.length; i++) {
-      if (present.has(vocabulary[i])) {
-        df[i] += 1;
-      }
-    }
-  }
-  return df.map((d) => Math.log((1 + n) / (1 + d)) + 1);
-}
-
 function featureVector(
   embedding: number[],
   text: string,
   vocabulary: readonly string[],
   idf: readonly number[]
 ): number[] {
-  const tfidf = tfidfVector(text, vocabulary, idf);
-  const embed = l2Normalize(embedding);
-  const weightedTfidf = tfidf.map((v) => v * TFIDF_FEATURE_WEIGHT);
-  const weightedEmbed = embed.map((v) => v * EMBED_FEATURE_WEIGHT);
-  return [1, ...weightedTfidf, ...weightedEmbed];
+  return hybridFeatureVector(embedding, text, { vocabulary: [...vocabulary], idf: [...idf] });
 }
 
 function softmax(logits: number[]): number[] {
@@ -306,8 +238,10 @@ export function trainLabelHybridModel(
   if (tagIds.length < MIN_TRAINED_CLASSES) {
     return null;
   }
-  const vocabulary = buildVocabulary(examples);
-  const idf = buildIdf(examples, vocabulary);
+  const corpus = examples.map((row) => ({ text: row.text }));
+  const featureModel = buildHybridFeatureModel(corpus);
+  const vocabulary = featureModel.vocabulary;
+  const idf = featureModel.idf;
   const rows = examples
     .filter((row) => tagIds.includes(row.tagId))
     .map((row) => ({

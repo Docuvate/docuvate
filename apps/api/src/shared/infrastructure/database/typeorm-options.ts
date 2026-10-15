@@ -40,6 +40,7 @@ import { DocumentRecognizedFieldExtractorVersion20261014170000 } from './migrati
 import { DocumentExtractionFailureHeuristicVersion20261015120000 } from './migrations/20261015120000-document-extraction-failure-heuristic-version.js';
 import { DocumentPreviewStorage20261015180000 } from './migrations/20261015180000-document-preview-storage.js';
 import { PurgeCentroidLabelSuggestions20261015193000 } from './migrations/20261015193000-purge-centroid-label-suggestions.js';
+import { PurgeVocabularyLabelSuggestions20261015200000 } from './migrations/20261015200000-purge-vocabulary-label-suggestions.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -102,6 +103,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DocumentExtractionFailureHeuristicVersion20261015120000,
       DocumentPreviewStorage20261015180000,
       PurgeCentroidLabelSuggestions20261015193000,
+      PurgeVocabularyLabelSuggestions20261015200000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,
