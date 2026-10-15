@@ -165,11 +165,18 @@ def run_extract_isolated(
             timeout=timeout,
             check=False,
         )
+        stdout_file.seek(0)
+        raw_out = stdout_file.read()
         if proc.returncode != 0:
+            try:
+                failed = json.loads(raw_out)
+            except json.JSONDecodeError:
+                failed = None
+            if isinstance(failed, dict) and failed.get("ok") is False:
+                raise RuntimeError(str(failed.get("error") or "extract subprocess failed"))
             detail = (proc.stderr or "").strip() or f"exit {proc.returncode}"
             raise RuntimeError(detail)
-        stdout_file.seek(0)
-        envelope = json.load(stdout_file)
+        envelope = json.loads(raw_out)
     if not envelope.get("ok"):
         raise RuntimeError(str(envelope.get("error") or "extract subprocess failed"))
     try:
