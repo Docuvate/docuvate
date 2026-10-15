@@ -14,6 +14,11 @@
       "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     },
     {
+      "file": "12-costs-synthetic.xlsx",
+      "title": "Costs XLSX synthetic",
+      "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    },
+    {
       "file": "10-smart-dup-a.pdf",
       "title": "Smart duplicate receipt A",
       "mime": "application/pdf",

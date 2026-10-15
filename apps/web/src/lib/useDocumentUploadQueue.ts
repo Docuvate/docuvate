@@ -9,6 +9,8 @@ import {
   applyDocumentUploadAssignment,
   type DocumentUploadAssignment,
 } from './documentUploadAssignment';
+import { mimeFromFilename, normalizeMimeType } from '@docuvate/contracts';
+
 import { isAllowedUploadMime, UPLOAD_MAX_BYTES } from './documentUploadConstants';
 import { uploadPlacementFromAssignment } from './uploadPlacementFromAssignment';
 
@@ -59,8 +61,10 @@ export function useDocumentUploadQueue(onUploaded?: () => void) {
           updateItem(item.id, { status: 'error', error: i18n.t('upload.errorFileTooLarge') });
           return;
         }
-        const mime = item.file.type;
-        if (mime && !isAllowedUploadMime(mime)) {
+        const declared = item.file.type ? normalizeMimeType(item.file.type) : '';
+        const fromName = mimeFromFilename(item.file.name);
+        const mime = declared && isAllowedUploadMime(declared) ? declared : fromName ?? '';
+        if (!mime || !isAllowedUploadMime(mime)) {
           updateItem(item.id, {
             status: 'error',
             error: i18n.t('upload.errorUnsupportedType'),

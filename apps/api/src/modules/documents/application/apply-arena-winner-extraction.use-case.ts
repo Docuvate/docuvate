@@ -31,7 +31,7 @@ export class ApplyArenaWinnerExtractionUseCase {
     }
 
     const buffer = await this.storage.getObject(doc.storageKey);
-    const result = await this.extraction.extract(buffer, doc.mimeType, { engine: winnerEngine });
+    const { result } = await this.extraction.extract(buffer, doc.mimeType, { engine: winnerEngine });
     await this.documents.saveExtraction(documentId, result);
     await this.syncSearchIndex.execute(doc.userId, documentId, {
       text: result.text,

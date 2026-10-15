@@ -2,9 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { createHash } from 'node:crypto';
 
+import { normalizeMimeType } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
+import { resolveAllowedUploadMime } from '../../../shared/domain/upload-mime-resolve.js';
 import {
   CLOCK,
   type Clock,
@@ -66,6 +68,18 @@ export class UploadDocumentUseCase {
       throw new ValidationError('File is empty');
     }
 
+    const resolvedMime = resolveAllowedUploadMime(
+      input.filename,
+      input.mimeType,
+      input.buffer
+    );
+    if (!resolvedMime) {
+      throw new ValidationError(
+        'This file format is not supported. Upload PDF, images, or common office documents (Word, Excel, PowerPoint, OpenDocument, RTF, CSV, text, HTML, or email).'
+      );
+    }
+    const mimeType = normalizeMimeType(resolvedMime);
+
     const placement = resolveDocumentPlacement({
       folderId: input.folderId ?? null,
       mappeId: input.mappeId ?? null,
@@ -82,7 +96,7 @@ export class UploadDocumentUseCase {
 
     const id = this.ids.generate();
     const storageKey = `users/${input.userId}/${id}/${input.filename}`;
-    await this.storage.putObject(storageKey, input.buffer, input.mimeType);
+    await this.storage.putObject(storageKey, input.buffer, mimeType);
 
     const skipInbox = input.ingestSource === 'scanner_sftp';
     const inboxTag = skipInbox ? null : await this.taxonomy.ensureInboxTag(input.userId);
@@ -104,7 +118,7 @@ export class UploadDocumentUseCase {
       userId: input.userId,
       filename: input.filename,
       title: input.filename,
-      mimeType: input.mimeType,
+      mimeType,
       storageKey,
       status: 'uploaded',
       documentDate: null,
@@ -122,7 +136,7 @@ export class UploadDocumentUseCase {
     const contentHash = createHash('sha256').update(input.buffer).digest('hex');
     await this.documents.setContentHash(saved.id, contentHash);
     await this.applyDuplicateDetection.execute(saved.id, input.userId, contentHash);
-    if (isPlainTextUploadMime(input.mimeType)) {
+    if (isPlainTextUploadMime(mimeType)) {
       const text = input.buffer.toString('utf8');
       await this.documents.saveExtraction(saved.id, { text, fields: [], blocks: [] });
       await this.syncSearchIndex.execute(input.userId, saved.id, {

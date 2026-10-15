@@ -224,6 +224,9 @@ def extract(
             if result.extracted_facts is not None
             else None
         ),
+        preview_pdf_base64=(
+            base64.b64encode(result.preview_pdf).decode("ascii") if result.preview_pdf else None
+        ),
     )
 
 

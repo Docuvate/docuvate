@@ -19,8 +19,16 @@ describe('scan-file-validation', () => {
     }
   });
 
-  it('rejects unknown content', () => {
+  it('accepts txt by extension', () => {
     const result = validateScanFile('note.txt', Buffer.from('hello'), 1024);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.mimeType).toBe('text/plain');
+    }
+  });
+
+  it('rejects unknown content', () => {
+    const result = validateScanFile('note.bin', Buffer.from('hello'), 1024);
     expect(result.ok).toBe(false);
   });
 });

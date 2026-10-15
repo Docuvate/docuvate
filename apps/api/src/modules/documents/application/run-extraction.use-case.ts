@@ -56,11 +56,16 @@ export class RunExtractionUseCase {
       const tagIds = tags.map((tag) => tag.id);
       const densityState = await this.densityRepo.loadWorkerState(doc.userId, tagIds);
       const flags = await this.resolveFeatureFlags.execute(doc.userId);
-      const result = await this.extraction.extract(buffer, doc.mimeType, {
+      const { result, previewPdf } = await this.extraction.extract(buffer, doc.mimeType, {
         engine,
         embeddingDensityState: densityState ?? undefined,
         buildExactFactIndex: flags.exactAnswers,
       });
+      if (previewPdf && previewPdf.length > 0) {
+        const previewKey = `users/${doc.userId}/${documentId}/preview.pdf`;
+        await this.storage.putObject(previewKey, previewPdf, 'application/pdf');
+        await this.documents.setPreviewStorageKey(documentId, previewKey);
+      }
       await this.documents.saveExtraction(documentId, result);
       await this.persistRepresentation.execute(
         doc.userId,

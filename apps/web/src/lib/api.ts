@@ -184,6 +184,18 @@ export function documentContentUrl(id: string, download = false): string {
   return `${baseURL}/documents/${id}/content${download ? '?download=1' : ''}`;
 }
 
+export function documentPreviewUrl(id: string): string {
+  return `${baseURL}/documents/${id}/preview`;
+}
+
+export async function fetchDocumentPreviewBlob(id: string): Promise<Blob> {
+  const response = await fetch(documentPreviewUrl(id), {
+    credentials: 'include',
+  });
+  if (!response.ok) throw new Error('Vorschau konnte nicht geladen werden');
+  return response.blob();
+}
+
 export async function fetchDocumentContentBlob(id: string): Promise<Blob> {
   const response = await fetch(`${baseURL}/documents/${id}/content`, {
     credentials: 'include',

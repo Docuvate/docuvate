@@ -38,6 +38,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   deleteDocument,
   fetchDocumentContentBlob,
+  fetchDocumentPreviewBlob,
   getDocument,
   getUserSettings,
   listFolders,
@@ -198,7 +199,7 @@ export function DocumentDetailPage() {
   }, [session, doc]);
 
   const mimeType = doc?.mimeType;
-  const isPdf = mimeType === 'application/pdf';
+  const isPdf = mimeType === 'application/pdf' || doc?.previewAvailable === true;
   const isImage = mimeType?.startsWith('image/') ?? false;
   const isPlainText =
     mimeType === 'text/plain' || (mimeType?.startsWith('text/plain;') ?? false);
@@ -291,7 +292,8 @@ export function DocumentDetailPage() {
       setPreviewFetchState('idle');
       return undefined;
     }
-    const wantsPdf = previewMime === 'application/pdf';
+    const wantsStoredPdf = doc?.previewAvailable === true;
+    const wantsPdf = previewMime === 'application/pdf' || wantsStoredPdf;
     const wantsImage = previewMime.startsWith('image/');
     if (!wantsPdf && !wantsImage) {
       setPreviewFetchState('idle');
@@ -301,7 +303,9 @@ export function DocumentDetailPage() {
     let cancelled = false;
     setPreviewFetchState('loading');
     setPreviewData(null);
-    void fetchDocumentPreviewBuffer(id, () => fetchDocumentContentBlob(id))
+    const fetchBlob = () =>
+      wantsStoredPdf ? fetchDocumentPreviewBlob(id) : fetchDocumentContentBlob(id);
+    void fetchDocumentPreviewBuffer(id, fetchBlob)
       .then((buffer) => {
         if (cancelled) return;
         if (buffer.byteLength > 0) {
@@ -322,7 +326,7 @@ export function DocumentDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, previewMime]);
+  }, [doc?.previewAvailable, id, previewMime]);
 
   useEffect(() => {
     if (!id || !doc) return undefined;

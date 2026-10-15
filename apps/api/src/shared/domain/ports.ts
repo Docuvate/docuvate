@@ -76,6 +76,7 @@ export interface DocumentRepository {
   ): Promise<number>;
   deleteDocuments(userId: string, documentIds: string[]): Promise<DocumentEntity[]>;
   setContentHash(id: string, hash: string): Promise<void>;
+  setPreviewStorageKey(id: string, previewStorageKey: string | null): Promise<void>;
   setFolderForDocuments(
     userId: string,
     documentIds: string[],
@@ -163,12 +164,17 @@ export interface ExtractionCompareItem {
   fields?: ExtractedField[];
 }
 
+export interface ExtractionWorkerPayload {
+  result: ExtractionResult;
+  previewPdf: Buffer | null;
+}
+
 export interface ExtractionPort {
   extract(
     buffer: Buffer,
     mimeType: string,
     options?: ExtractionExtractOptions
-  ): Promise<ExtractionResult>;
+  ): Promise<ExtractionWorkerPayload>;
   listEngines(): Promise<
     {
       id: string;

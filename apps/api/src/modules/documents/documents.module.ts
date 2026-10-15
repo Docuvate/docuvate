@@ -30,6 +30,7 @@ import { ListDocumentReviewQueueUseCase } from './application/document-review/li
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from './application/get-document-content.use-case.js';
+import { GetDocumentPreviewUseCase } from './application/get-document-preview.use-case.js';
 import { GetDocumentLayoutCompareMetricsUseCase } from './application/get-document-layout-compare-metrics.use-case.js';
 import { GetDocumentLayoutComparePageUseCase } from './application/get-document-layout-compare-page.use-case.js';
 import { GetDocumentLayoutCompareSummaryUseCase } from './application/get-document-layout-compare-summary.use-case.js';
@@ -92,6 +93,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     DeleteDocumentUseCase,
     BulkDocumentsUseCase,
     GetDocumentContentUseCase,
+    GetDocumentPreviewUseCase,
     QueueExtractionUseCase,
     RunExtractionUseCase,
     ExtractionQueueService,

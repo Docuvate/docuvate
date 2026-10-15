@@ -5,9 +5,13 @@ import type { DocumentEntity } from '../domain/document.entity.js';
 
 export async function deleteDocumentObjectKeys(
   storage: ObjectStorage,
-  doc: Pick<DocumentEntity, 'storageKey' | 'archivedStorageKey'>
+  doc: Pick<DocumentEntity, 'storageKey' | 'previewStorageKey' | 'archivedStorageKey'>
 ): Promise<void> {
   await storage.deleteObject(doc.storageKey);
+  const preview = doc.previewStorageKey?.trim();
+  if (preview) {
+    await storage.deleteObject(preview);
+  }
   const archived = doc.archivedStorageKey?.trim();
   if (archived) {
     await storage.deleteObject(archived);

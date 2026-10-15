@@ -16,6 +16,7 @@ import type {
   ExtractionCompareItem,
   ExtractionExtractOptions,
   ExtractionPort,
+  ExtractionWorkerPayload,
 } from '../../../shared/domain/ports.js';
 import { isRecord, parseOptionalString, parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
@@ -202,6 +203,17 @@ function parseDocumentRepresentation(value: unknown): DocumentRepresentationDto 
   };
 }
 
+function parsePreviewPdfBase64(value: unknown): Buffer | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const raw = parseOptionalString(value.previewPdfBase64)?.trim();
+  if (!raw) {
+    return null;
+  }
+  return Buffer.from(raw, 'base64');
+}
+
 function parseExtractionResultBody(value: unknown): ExtractionResult {
   const row = isRecord(value) ? value : {};
   const text = parseString(row.text);
@@ -303,7 +315,7 @@ export class HttpExtractionAdapter implements ExtractionPort {
     buffer: Buffer,
     mimeType: string,
     options?: ExtractionExtractOptions
-  ): Promise<ExtractionResult> {
+  ): Promise<ExtractionWorkerPayload> {
     const response = await fetch(workerApiUrl(this.workerUrl(), '/extract'), {
       method: 'POST',
       headers: this.workerHeaders(),
@@ -321,7 +333,10 @@ export class HttpExtractionAdapter implements ExtractionPort {
     }
 
     const data: unknown = await response.json();
-    return parseExtractionResultBody(data);
+    return {
+      result: parseExtractionResultBody(data),
+      previewPdf: parsePreviewPdfBase64(data),
+    };
   }
 
   async listEngines(): Promise<WorkerEngineListItem[]> {

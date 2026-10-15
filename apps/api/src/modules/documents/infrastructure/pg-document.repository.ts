@@ -400,6 +400,13 @@ export class PgDocumentRepository implements DocumentRepository {
     );
   }
 
+  async setPreviewStorageKey(id: string, previewStorageKey: string | null): Promise<void> {
+    await this.pool.query(
+      `UPDATE documents SET preview_storage_key = $2, updated_at = now() WHERE id = $1`,
+      [id, previewStorageKey]
+    );
+  }
+
   async updateForUser(
     id: string,
     userId: string,

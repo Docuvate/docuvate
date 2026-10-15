@@ -46,7 +46,10 @@ export function isDocumentPreviewPending(
   if (!doc?.mimeType) {
     return false;
   }
-  const wantsPreview = doc.mimeType === 'application/pdf' || doc.mimeType.startsWith('image/');
+  const wantsPreview =
+    doc.mimeType === 'application/pdf' ||
+    doc.mimeType.startsWith('image/') ||
+    doc.previewAvailable === true;
   if (!wantsPreview) {
     return false;
   }

@@ -195,6 +195,7 @@ class ExtractResponse(BaseModel):
     extracted_facts: list[ExtractedFactModel] | None = Field(
         default=None, serialization_alias="extractedFacts"
     )
+    preview_pdf_base64: str | None = Field(default=None, serialization_alias="previewPdfBase64")
 
 
 class BuildFactsFromTextRequest(BaseModel):

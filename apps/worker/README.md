@@ -5,7 +5,9 @@ FastAPI service for document extraction and **CPU/ARM embedding** (no GPU requir
 ## Extraction (default)
 
 1. **Born-digital PDFs** — `pdfplumber` reads the text layer and word boxes (no OCR). Most e-invoices skip OCR entirely.
-2. **Scans / image-only PDFs** — **PaddleOCR** PP-OCRv4 mobile with `PADDLE_OCR_LANG=german` (Paddle maps `german`/`de` to the **latin** multilingual model — tuned for DE Belege, still reads English on receipts).
+2. **Office / text formats** — `python-docx`, `openpyxl`, `python-pptx`, `odfpy`, plus CSV/RTF/HTML/Markdown/EML/MSG parsers (no OCR). Legacy `.doc`/`.xls`/`.ppt` use LibreOffice headless → PDF text layer. Spreadsheets emit layout IR tables.
+3. **PDF preview** — LibreOffice `--headless --convert-to pdf` for non-PDF uploads (stored separately; original retained).
+4. **Scans / image-only PDFs** — **PaddleOCR** PP-OCRv4 mobile with `PADDLE_OCR_LANG=german` (Paddle maps `german`/`de` to the **latin** multilingual model — tuned for DE Belege, still reads English on receipts).
 3. **Tesseract** — optional last resort only: `EXTRACTOR_ENGINE=tesseract` and `uv pip install -e ".[tesseract]"` plus system `tesseract-ocr` (not in default Docker image).
 
 **Why not Docling by default?** Docling pulls PyTorch and large layout models (~GB+), which bloats the Mac/CPU compose image. Docling remains a documented follow-up (`docs/ai-models.md`).
@@ -13,6 +15,8 @@ FastAPI service for document extraction and **CPU/ARM embedding** (no GPU requir
 The default Docker image **pre-downloads** Paddle det/rec weights at build time (`prewarm_paddle_models`). Cold Arena/compare on a fresh dev install may still download into `~/.paddleocr` until prewarm completes.
 
 **CPU vs GPU images:** default Compose and Kubernetes manifests use the **CPU** image (`docuvate-worker`, multi-arch). For CUDA + Donut, see [DOCKER-IMAGES.md](./DOCKER-IMAGES.md) (`docker-compose.worker-gpu.yml` or Helm/Kustomize GPU component).
+
+**Image size (office ingest delta):** adding `libreoffice-{writer,calc,impress}-nogui` and Python office libraries increases the CPU image by roughly **280–320 MB** compressed versus the pre-office baseline (measure locally with `docker image ls` before/after).
 
 | Env                    | Default    | Description                                                                   |
 | ---------------------- | ---------- | ----------------------------------------------------------------------------- |

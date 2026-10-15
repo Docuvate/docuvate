@@ -83,6 +83,7 @@ import { DeleteDocumentUseCase } from '../application/delete-document.use-case.j
 import { DocumentChatUseCase } from '../application/document-chat.use-case.js';
 import { GetDocumentUseCase } from '../application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from '../application/get-document-content.use-case.js';
+import { GetDocumentPreviewUseCase } from '../application/get-document-preview.use-case.js';
 import { GetDocumentLayoutCompareMetricsUseCase } from '../application/get-document-layout-compare-metrics.use-case.js';
 import { GetDocumentLayoutComparePageUseCase } from '../application/get-document-layout-compare-page.use-case.js';
 import { GetDocumentLayoutCompareSummaryUseCase } from '../application/get-document-layout-compare-summary.use-case.js';
@@ -114,6 +115,7 @@ export class DocumentsController {
     private readonly deleteDocument: DeleteDocumentUseCase,
     private readonly bulkDocuments: BulkDocumentsUseCase,
     private readonly getDocumentContent: GetDocumentContentUseCase,
+    private readonly getDocumentPreview: GetDocumentPreviewUseCase,
     private readonly loadSuggestions: LoadDocumentLabelSuggestionsUseCase,
     private readonly refreshEmbeddings: RefreshEmbeddingSuggestionsUseCase,
     private readonly documentChat: DocumentChatUseCase,
@@ -306,6 +308,25 @@ export class DocumentsController {
       pageNumber,
       includeHeatmap
     );
+  }
+
+  @Get(':id/preview')
+  @ApiDocuvateRoute({ operationId: 'documentPreview', summary: 'PDF preview for office uploads' })
+  async preview(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Param('id') id: string,
+    @Res({ passthrough: false }) reply: FastifyReply
+  ) {
+    const { buffer, filename } = await this.getDocumentPreview.execute(
+      id,
+      session.user.id,
+      subject
+    );
+    void reply
+      .header('Content-Type', 'application/pdf')
+      .header('Content-Disposition', `inline; filename="${encodeURIComponent(filename)}"`)
+      .send(buffer);
   }
 
   @Get(':id/content')
