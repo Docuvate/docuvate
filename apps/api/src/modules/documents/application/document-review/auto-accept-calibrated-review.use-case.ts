@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { buildUserAuthorizationSubject } from '../../../../shared/infrastructure/auth/user-authorization-subject.js';
 import { INSTANCE_ROLE_MEMBER } from '../../../auth/domain/instance-role.constants.js';

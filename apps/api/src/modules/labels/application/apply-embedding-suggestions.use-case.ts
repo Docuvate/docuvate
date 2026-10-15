@@ -18,14 +18,14 @@ import { EnsureDocumentRepresentationUseCase } from '../../representation/applic
 import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
 import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-suggestions.js';
+import {
+  classifyWithLabelHybrid,
+  type LabelHybridDocumentRow,
+  trainUserLabelHybridModel,
+} from '../domain/label-hybrid-training.js';
 import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
 import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';
 import { PurgeExclusiveTagSuggestionsService } from '../infrastructure/purge-exclusive-tag-suggestions.service.js';
-import {
-  classifyWithLabelHybrid,
-  trainUserLabelHybridModel,
-  type LabelHybridDocumentRow,
-} from '../domain/label-hybrid-training.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './apply-embedding-density-suggestions.use-case.js';
 
 const REJECT_PENALTY = 0.04;

@@ -88,7 +88,10 @@ class FieldConfidenceCalibration:
         margin = org_score - max(free_score, addr_score, id_score)
         if org_score - free_score < self.vendor_min_org_margin and not had_explicit_label:
             return False, 0.45
-        confidence = self.vendor_confidence_from_margin(margin, had_explicit_label=had_explicit_label)
+        confidence = self.vendor_confidence_from_margin(
+            margin,
+            had_explicit_label=had_explicit_label,
+        )
         return confidence >= self.vendor_min_calibrated_confidence, confidence
 
 

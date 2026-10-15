@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   canTrainLabelHybridModel,
-  predictLabelHybrid,
-  trainLabelHybridModel,
   type LabelHybridModel,
   type LabelHybridPrediction,
   type LabelHybridTrainingExample,
+  predictLabelHybrid,
+  trainLabelHybridModel,
 } from './label-hybrid-auto-match.js';
 
 export interface LabelHybridDocumentRow {

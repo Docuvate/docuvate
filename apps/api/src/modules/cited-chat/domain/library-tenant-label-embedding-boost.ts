@@ -42,11 +42,10 @@ export function tenantLabelsForLibraryRetrievalSupplement(
 ): TenantLabelEmbeddingRow[] {
   const RETRIEVAL_SUPPLEMENT_MIN_SIM = 0.72;
   const ranked = rankedLabelAlignments(queryVector, labelRows);
-  const top = ranked[0];
-  if (!top || top.score < RETRIEVAL_SUPPLEMENT_MIN_SIM) {
+  if (ranked.length === 0 || ranked[0].score < RETRIEVAL_SUPPLEMENT_MIN_SIM) {
     return [];
   }
-  return [top.row];
+  return [ranked[0].row];
 }
 
 export function libraryTenantLabelEmbeddingBoost(input: {

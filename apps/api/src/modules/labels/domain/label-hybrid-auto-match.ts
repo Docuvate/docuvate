@@ -86,7 +86,7 @@ function tfidfVector(text: string, vocabulary: readonly string[], idf: readonly 
     counts.set(token, (counts.get(token) ?? 0) + 1);
   }
   const total = [...counts.values()].reduce((a, b) => a + b, 0) || 1;
-  const out = new Array(vocabulary.length).fill(0);
+  const out: number[] = Array.from({ length: vocabulary.length }, () => 0);
   for (let i = 0; i < vocabulary.length; i++) {
     const token = vocabulary[i];
     const tf = (counts.get(token) ?? 0) / total;
@@ -97,7 +97,7 @@ function tfidfVector(text: string, vocabulary: readonly string[], idf: readonly 
 
 function buildIdf(examples: readonly LabelHybridTrainingExample[], vocabulary: readonly string[]): number[] {
   const n = examples.length;
-  const df = new Array(vocabulary.length).fill(0);
+  const df: number[] = Array.from({ length: vocabulary.length }, () => 0);
   for (const row of examples) {
     const present = new Set(tokenizeSearchQuery(normalizeSearchText(row.text)));
     for (let i = 0; i < vocabulary.length; i++) {
@@ -134,7 +134,7 @@ function trainMultinomialLogistic(
   rows: readonly { features: number[]; classIndex: number }[]
 ): number[][] {
   const dim = rows[0]?.features.length ?? 0;
-  const weights = tagIds.map(() => new Array(dim).fill(0));
+  const weights: number[][] = tagIds.map(() => Array.from({ length: dim }, () => 0));
   for (let epoch = 0; epoch < TRAIN_EPOCHS; epoch++) {
     for (const row of rows) {
       const logits = weights.map((w) =>
@@ -261,7 +261,7 @@ function learnConfidenceThreshold(
     const predicted = activeTags[bestIdx];
     const gate = partial.classGates.find((row) => row.tagId === predicted);
     const inDist =
-      gate && gate.centroid.length === held.embedding.length
+      gate?.centroid.length === held.embedding.length
         ? cosineSimilarity(held.embedding, gate.centroid) >= gate.minCosineToCentroid
         : true;
     if (!inDist) {
@@ -342,12 +342,9 @@ export function predictLabelHybrid(
     .map((tagId, idx) => ({ tagId, confidence: probs[idx] ?? 0 }))
     .sort((a, b) => b.confidence - a.confidence);
   const best = ranked[0];
-  if (!best) {
-    return { tagId: null, confidence: 0, inDistribution: false, ranked: [] };
-  }
   const gate = model.classGates.find((row) => row.tagId === best.tagId);
   let inDistribution = true;
-  if (gate && gate.centroid.length === embedding.length) {
+  if (gate?.centroid.length === embedding.length) {
     const cos = cosineSimilarity(embedding, gate.centroid);
     inDistribution = cos >= gate.minCosineToCentroid;
   }

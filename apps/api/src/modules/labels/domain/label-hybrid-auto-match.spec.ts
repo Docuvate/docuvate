@@ -3,9 +3,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  type LabelHybridTrainingExample,
   predictLabelHybrid,
   trainLabelHybridModel,
-  type LabelHybridTrainingExample,
 } from './label-hybrid-auto-match.js';
 
 function example(
@@ -31,7 +31,10 @@ describe('label-hybrid-auto-match', () => {
     ];
     const model = trainLabelHybridModel([...payroll, ...tax]);
     expect(model).not.toBeNull();
-    const trained = model!;
+    if (model === null) {
+      throw new Error('expected hybrid model');
+    }
+    const trained = model;
 
     const unrelated = predictLabelHybrid(
       trained,

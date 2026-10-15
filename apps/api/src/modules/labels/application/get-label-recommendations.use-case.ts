@@ -18,13 +18,13 @@ import {
 } from '../../../shared/domain/ports.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
+import { type LabelHybridDocumentRow,trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
 import {
   MIN_LABEL_SUPPORT_FOR_MERGE,
   suggestAssignRecommendations,
   suggestEmbeddingClusterNewLabels,
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
-import { trainUserLabelHybridModel, type LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
 import {
   collectNewLabelCandidates,
   type DocumentLabelSignal,

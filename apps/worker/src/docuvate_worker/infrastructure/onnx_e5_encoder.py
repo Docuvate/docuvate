@@ -17,7 +17,6 @@ from huggingface_hub import hf_hub_download
 from numpy.typing import NDArray
 from tokenizers import Tokenizer
 
-from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 from docuvate_worker.domain.representation.constants import (
     ENCODER_HF_REVISION,
     ENCODER_ID,
@@ -25,6 +24,7 @@ from docuvate_worker.domain.representation.constants import (
     ENCODER_ONNX_FILE,
     ENCODER_ONNX_FILE_ARM_FALLBACK,
 )
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 logger = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@
 import { cosineSimilarity } from './cosine.js';
 import type { TagCentroidRef } from './label-coverage.js';
 import { computeDocumentCoverage } from './label-coverage.js';
-import { predictLabelHybrid, type LabelHybridModel } from './label-hybrid-auto-match.js';
+import { type LabelHybridModel,predictLabelHybrid } from './label-hybrid-auto-match.js';
 import {
   inferClusterLabelNameFromSnippets,
   normalizeLabelKey,

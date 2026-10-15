@@ -6,14 +6,13 @@ import logging
 import os
 from typing import Any, Protocol, cast
 
-from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
-
 import numpy as np
 from pdf2image import convert_from_bytes
 from PIL import Image
 
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.extractors.paddle_errors import map_paddle_exception
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 logger = logging.getLogger(__name__)
 
