@@ -52,8 +52,8 @@ export function quoteGroundingVariants(quote: string): string[] {
     variants.add(withoutCurrency);
   }
   const colonSplit = /^([^:]{1,80}):\s*(.+)$/s.exec(withoutCurrency || trimmed);
-  if (colonSplit) {
-    const valuePart = colonSplit[2]?.trim();
+  if (colonSplit?.[2]) {
+    const valuePart = colonSplit[2].trim();
     if (valuePart) {
       variants.add(valuePart);
       const valueNoCurrency = valuePart.replace(/\s*(?:EUR|€|CHF|USD)\s*$/iu, '').trim();

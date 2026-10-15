@@ -27,7 +27,7 @@ export class RefreshHeuristicFieldSuggestionsUseCase {
     }
     const text = doc.extraction.text.trim();
     const suggestions = await fetchWorkerHeuristicFieldSuggestions(text);
-    const existing = doc.extraction.fields ?? [];
+    const existing = doc.extraction.fields;
     const kept = existing.filter((row) => {
       const semantic = parseSuggestionStorageKey(row.key);
       return semantic == null || !HEURISTIC_SEMANTICS.has(semantic);

@@ -3,10 +3,10 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  fingerprintToExtractorVersion,
   readLiveRecognizedFieldExtractorSha256,
   RECOGNIZED_FIELD_EXTRACTOR_LOGIC_SHA256,
   RECOGNIZED_FIELD_EXTRACTOR_VERSION,
-  fingerprintToExtractorVersion,
 } from './recognized-field-extractor-fingerprint.js';
 
 describe('recognized field extractor fingerprint', () => {

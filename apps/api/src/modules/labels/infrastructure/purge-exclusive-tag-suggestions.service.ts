@@ -5,8 +5,8 @@ import type pg from 'pg';
 
 import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
-import { PgLabelCoOccurrenceRepository } from './pg-label-co-occurrence.repository.js';
 import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-suggestions.js';
+import { PgLabelCoOccurrenceRepository } from './pg-label-co-occurrence.repository.js';
 
 @Injectable()
 export class PurgeExclusiveTagSuggestionsService implements OnApplicationBootstrap {

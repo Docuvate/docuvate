@@ -3,9 +3,9 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  fingerprintToHeuristicFieldVersion,
   HEURISTIC_FIELD_EXTRACTOR_VERSION,
   HEURISTIC_FIELD_SUGGESTIONS_LOGIC_SHA256,
-  fingerprintToHeuristicFieldVersion,
   readLiveHeuristicFieldSuggestionsSha256,
 } from './heuristic-field-suggestions-fingerprint.js';
 

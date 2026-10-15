@@ -38,10 +38,7 @@ import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
-import {
-  libraryExtractiveRows,
-  libraryExtractiveRowsForScopedFact,
-} from '../domain/library-extractive-eligibility.js';
+import { libraryExtractiveRowsForScopedFact } from '../domain/library-extractive-eligibility.js';
 import {
   buildLibraryMetadataEmbedText,
   libraryMetadataEmbeddingBoost,

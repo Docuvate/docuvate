@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ChatAnswerType } from './chat-answer-type-prototypes.schema.js';
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import type { ChatAnswerType } from './chat-answer-type-prototypes.schema.js';
 
 export interface RankedChunkRow {
   chunk: CitedChatChunkCandidate;
