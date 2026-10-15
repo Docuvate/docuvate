@@ -38,6 +38,7 @@ import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
+import { filterDocumentIdsByLibraryQueryPeriod } from '../domain/filter-document-ids-by-library-query-period.js';
 import { libraryExtractiveRowsForScopedFact } from '../domain/library-extractive-eligibility.js';
 import {
   buildLibraryMetadataEmbedText,
@@ -315,15 +316,26 @@ export class CitedChatGenerationService {
           queryVector,
           tenantLabelEmbeds
         );
-        labelsForBoost = alignedLabels.length > 0 ? alignedLabels : supplementLabels;
+        const supplementLabelRows =
+          alignedLabels.length > 0 ? alignedLabels : supplementLabels;
+        labelsForBoost = supplementLabelRows;
         const labelAlignedExtra = await this.retrieval.supplementLabelAlignedLibraryCandidates(
           userId,
-          supplementLabels.map((row) => row.name)
+          supplementLabelRows.map((row) => row.name)
         );
         if (labelAlignedExtra.length > 0) {
           labelAlignedDocumentIds = [
             ...new Set(labelAlignedExtra.map((chunk) => chunk.documentId)),
           ];
+          const periodMeta = await this.retrieval.loadDocumentContextMeta(
+            userId,
+            labelAlignedDocumentIds
+          );
+          labelAlignedDocumentIds = filterDocumentIdsByLibraryQueryPeriod(
+            labelAlignedDocumentIds,
+            userMessage,
+            periodMeta
+          );
           const seen = new Set(candidates.map((chunk) => chunk.chunkId));
           for (const extra of labelAlignedExtra) {
             if (!seen.has(extra.chunkId)) {
@@ -500,6 +512,7 @@ export class CitedChatGenerationService {
       return this.publishExtractiveResult({
         messageId,
         threadId,
+        userId,
         text: libraryAmountExtractive.text,
         chunk: libraryAmountExtractive.chunk,
         quote: libraryAmountExtractive.quote,
@@ -555,6 +568,7 @@ export class CitedChatGenerationService {
         return this.publishExtractiveResult({
           messageId,
           threadId,
+          userId,
           text: extractive.text,
           chunk: extractive.chunk,
           quote: extractive.quote,
@@ -602,6 +616,7 @@ export class CitedChatGenerationService {
         return this.publishExtractiveResult({
           messageId,
           threadId,
+          userId,
           text: earlyExtractive.text,
           chunk: earlyExtractive.chunk,
           quote: earlyExtractive.quote,
@@ -833,6 +848,7 @@ export class CitedChatGenerationService {
           return this.publishExtractiveResult({
             messageId,
             threadId,
+            userId,
             text: postVerifyExtractive.text,
             chunk: postVerifyExtractive.chunk,
             quote: postVerifyExtractive.quote,
@@ -862,6 +878,7 @@ export class CitedChatGenerationService {
           return this.publishExtractiveResult({
             messageId,
             threadId,
+            userId,
             text: fallbackText,
             chunk: topRow.chunk,
             quote: fallback.quote,
@@ -918,6 +935,7 @@ export class CitedChatGenerationService {
   private async publishExtractiveResult(input: {
     messageId: string;
     threadId: string;
+    userId: string;
     text: string;
     chunk: CitedChatChunkCandidate;
     quote: string;
@@ -925,15 +943,25 @@ export class CitedChatGenerationService {
     charEnd?: number;
     errorDetail?: string;
   }): Promise<CitedChatGenerationResult> {
-    const extractiveChunkId = input.chunk.chunkId;
+    let extractiveChunkId = input.chunk.chunkId;
     const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+    if (!extractiveChunkIsUuid) {
+      const resolved = await this.retrieval.resolvePrimaryTextChunkId(
+        input.userId,
+        input.chunk.documentId
+      );
+      if (resolved) {
+        extractiveChunkId = resolved;
+      }
+    }
+    const citationChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
     const charStart = input.charStart ?? input.chunk.charStart ?? 0;
     const charEnd = input.charEnd ?? input.chunk.charEnd ?? input.quote.length;
-    if (extractiveChunkIsUuid) {
+    if (citationChunkIsUuid) {
       await this.citationsRepo.replaceCitations(input.messageId, [
         {
           ordinal: 1,
-          chunkId: input.chunk.chunkId,
+          chunkId: extractiveChunkId,
           quote: input.quote,
           charStart,
           charEnd,
@@ -942,7 +970,7 @@ export class CitedChatGenerationService {
     } else {
       await this.citationsRepo.replaceCitations(input.messageId, []);
     }
-    const content = extractiveChunkIsUuid
+    const content = citationChunkIsUuid
       ? formatVerifiedCitedContent([{ text: input.text, ordinal: 1 }])
       : input.text;
     await this.threads.updateMessageGeneration(input.messageId, {

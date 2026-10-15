@@ -33,7 +33,7 @@ async function main(): Promise<void> {
     const results: { id: string; ok: boolean; error?: string }[] = [];
     for (const row of failed.rows) {
       try {
-        await runExtraction.execute(row.id, userId);
+        await runExtraction.execute(row.id);
         results.push({ id: row.id, ok: true });
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);

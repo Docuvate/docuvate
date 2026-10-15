@@ -111,7 +111,7 @@ print(json.dumps({
   "review_queue_docs_with_open_work": int("${REVIEW_OPEN}"),
   "failed_pdf_image_with_extracted_text": int("${FAILED_PDF}"),
   "clicks_to_library_sort": 3,
-  "review_queue_clicks_estimate": max(1, int("${REVIEW_OPEN}")),
+  "review_queue_clicks_estimate": int("${REVIEW_OPEN}") * 2,
 }, indent=2))
 PY
 rm -f "${EXTENDED_JSON_FILE}"

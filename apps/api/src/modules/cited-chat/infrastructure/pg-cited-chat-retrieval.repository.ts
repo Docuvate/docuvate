@@ -605,4 +605,17 @@ export class PgCitedChatRetrievalRepository {
 
     return scored;
   }
+
+  async resolvePrimaryTextChunkId(userId: string, documentId: string): Promise<string | null> {
+    const result = await this.pool.query<{ id: string }>(
+      `SELECT c.id
+       FROM document_text_chunks c
+       JOIN documents d ON d.id = c.document_id
+       WHERE d.user_id = $1 AND d.id = $2::uuid
+       ORDER BY c.chunk_index ASC
+       LIMIT 1`,
+      [userId, documentId]
+    );
+    return result.rows[0]?.id ?? null;
+  }
 }
