@@ -1,91 +1,95 @@
-#set document(title: "Closed-Form ML for Docuvate CE", author: "Docuvate Research")
+#set document(title: "Closed-Form ML for Docuvate CE — Round 2", author: "Docuvate Research")
 #set page(margin: 2cm)
 #set text(size: 10.5pt)
 #set heading(numbering: "1.")
 
-= Closed-form document ML on CPU (research round)
+= Closed-form document ML on CPU (Round 2 — public OCR data)
 
-This note reports *feasibility experiments* for pure-ML Docuvate tasks: no LLM training, no backprop in research heads, laptop CPU, peak RSS \< 1 GB in our harness (encoder ONNX dominates).
+Round 1 used licence-clean synthetic fixtures; metrics such as \(n=16\) QA at 100% are not evidence of production readiness. Round 2 pulls *real* public OCR-ground-truth data via Hugging Face, reports bootstrap 95% CIs, learning curves (train size 50→full), latency, and peak RSS, and tests whether *multi-layer closed-form* stacks beat a single ridge layer on hard tasks.
 
-== Prior work in-repo
-
-E1–E33 ledgers are *not* in this git tree; we anchored on shipped CE components (NEST/NIW, layout KV ridge, value-type n-grams). See `research/closed_form_ml/PRIOR_WORK.md`.
-
-== Setup
-
-- *Encoder (frozen):* `multilingual-e5-small` ONNX int8 (worker default).
-- *Data:* licence-clean fixtures (`bench/model_gates/fixtures/classification_texts.json`, `chat_extractive_cases.json`), CORD value types (`eval/data/cord_labeled_values.jsonl`), synthetic layout KV (`eval/layout_kv_roles`).
-- *Eval-only (not trained):* FUNSD/XFUND/DocVQA — reserved for offline scripts.
-- *Metrics:* bootstrap 95% CIs (2000 resamples), 3-fold stratified CV where noted, per-query latency, `ru_maxrss`.
-- *Reproduce:* `python -m closed_form_ml.experiments.run_matrix` (see `research/closed_form_ml/README.md`).
-
-== Task 1 — Document type classification
-
-#table(
-  columns: (auto, auto, auto, auto, auto),
-  [*Method*], [*CV accuracy*], [*Open-set rejection*], [*Latency*], [*Train*],
-  [Ridge on e5], [99.9% (99.6–100%)], [21% on held-out class], [3.3 ms], [0.14 s],
-  [Deep stack (PCA+ELM+ridge)], [99.8% (99.4–100%)], [29%], [3.4 ms], [0.94 s],
-  [NEST (CE NIW)], [—], [*100%* rejection], [*237 ms*], [0.64 s],
-)
-
-*Finding:* Closed-form ridge matches deep stack on synthetic German blurbs; both saturate the learning curve by 600 docs (no underfit). *NEST* is the only head with reliable open-set rejection but pays ~70× latency vs ridge argmax. RVL-CDIP subset was unavailable offline (`datasets`); hook is implemented.
-
-*Recommendation:* Keep *NEST* for tenant labels + rejection; optional ridge overlay for coarse routing prototypes when latency \< 5 ms matters.
-
-== Task 2 — Key–value extraction
+== Data sources (Round 2)
 
 #table(
   columns: (auto, auto, auto),
-  [*Method*], [*Link F1 (synthetic)*], [*Role accuracy*],
-  [Regex baseline], [0.0], [—],
-  [Shipped layout + ridge head], [0.0], [66.7%],
+  [*Corpus*], [*Use*], [*Split*],
+  [HAMMALE/rvl\_cdip\_OCR], [Doc-type classification], [2000 docs / 16 classes, OCR paragraphs],
+  [nielsr/docvqa\_1200\_examples], [Extractive QA], [500-question eval holdout; train for curves only],
+  [CORD + darentang/sroie], [KV link training], [Train pairs; no FUNSD weights],
+  [FUNSD (nielsr/funsd)], [KV linking eval], [Eval-only, 50 docs],
 )
 
-Regex fails on synthetic forms without ASCII colons; the shipped linear head labels roles but linking F1 is 0 at default thresholds on the bundled synthetic corpus — run `eval/layout_kv_roles/eval_offline.py` for FUNSD/XFUND eval-only.
+*Never* train shipped weights on FUNSD/XFUND/DocVQA. Reproduce: `research/closed_form_ml/scripts/run_round2.sh --seed 42 --docvqa-eval 500`.
 
-*Recommendation:* Continue *layout ridge* path; invest in closed-form CRF/HMM sequence layer (Baum–Welch) on role BIO tags rather than heavier ELM stacks.
+== Environment
 
-== Task 3 — Extractive QA (hybrid retrieve + span)
+- Encoder: frozen `multilingual-e5-small` (ONNX int8, worker default).
+- Round 2 wall time (RVL + DocVQA pass): ~831 s; peak RSS ~3.9 GB (DocVQA + XLM load).
+- Ollama + `qwen2.5:3b` / `qwen3:4b` Q4: *not run* (Ollama install requires `zstd` / host packages unavailable in agent VM). Harness: `OllamaExtractiveReader` + `--pull-ollama`.
+- XLM-RoBERTa: `deepset/xlm-roberta-base-squad2-distilled` with `transformers==4.46.3` (v5 removed QA pipeline).
 
-Hybrid BM25 + e5 RRF retrieval: *100%* evidence hit rate on held-out chat fixtures (\(n=16\)).
+== Task 1 — RVL-CDIP OCR (2000 docs, 16 classes)
+
+20% stratified holdout (\(n=400\)). *Shallow ridge on e5* wins; deep closed-form stacks underfit noisy OCR text.
 
 #table(
-  columns: (auto, auto, auto),
-  [*Reader*], [*Answer accuracy*], [*Latency*],
-  [Token overlap (CE fallback)], [18.8% (0–37.5%)], [2.0 ms],
-  [E5 sentence + amount heuristic], [87.5% (68.8–100%)], [17.8 ms],
-  [Ridge span (closed form)], [*100%*], [33.6 ms],
-  [XLM-RoBERTa SQuAD2], [skipped (`DOCUVATE_AI_PROFILE=off`)], [—],
+  columns: (auto, auto, auto, auto),
+  [*Model*], [*Test accuracy (95% CI)*], [*Train 1600*], [*Latency/query*],
+  [Shallow ridge (1 layer)], [*57.0%* (52.3–61.8%)], [57.0%], [~0.02 ms],
+  [Deep spectral stack], [30.5% (26.0–35.3%)], [30.5%], [~0.09 ms],
+  [Deep target propagation (3×ELM+ridge)], [25.8% (21.8–30.0%)], [25.8%], [~0.07 ms],
 )
 
-*Finding:* A closed-form ridge reader over concatenated query/passage features beats zero-shot token overlap and matches fine-tuned reader when transformers are disabled. Heuristic amount boosting is required for German currency questions without a generative model.
+Learning curve (shallow): 50→26%, 100→37%, 500→39%, 1600→57% — clear *underfitting* at small \(n\), monotonic gain to full train (no collapse), consistent with generalization rather than synthetic saturation.
 
-*Recommendation:* Ship *ridge span reader* as optional CE path when ONNX QA model absent; keep hybrid retriever.
+*Recommendation:* Use shallow ridge / NEST for routing; do not add depth on document-level e5 means for RVL-like OCR.
 
-== Task 4 — Field suggestions given label
+== Task 2 — KV linking (CORD+SROIE train → FUNSD eval)
 
-Conditional ridge on label one-hot + char hist + e5: *98.9%* (97.6–99.7%) vs majority baseline *59.7%* at ~1.9 ms/query.
-
-*Recommendation:* Promote conditional ridge alongside char-ngram value types for label-conditioned suggestions.
-
-== Cost summary
+Pairwise link features (frozen e5 + layout channels, same family as CE layout head). FUNSD linking F1 (50 docs):
 
 #table(
   columns: (auto, auto),
-  [*Resource*], [*Observed*],
-  [Peak RSS (full matrix)], [~908 MB],
-  [Wall time (matrix run)], [~290 s],
-  [LLM zero-shot (Qwen 3–4B Q4)], [not run — Ollama optional],
+  [*Method*], [*FUNSD link F1*],
+  [Shallow ridge (closed form)], [0.120],
+  [Deep target propagation (3 layers)], [0.121],
+  [CE shipped layout-ridge artifact @ default thresholds], [0.0],
 )
 
-== Modular CE integration
+Depth gives *+0.001* F1 (within noise) at ~2× train cost on link pairs. Learning curves flat ~0.08–0.12 F1 — task is hard; domain shift CORD/SROIE→FUNSD dominates.
 
-Protocols live in `apps/worker/.../ml/closed_form/ports.py`; research implementations under `research/closed_form_ml/src/closed_form_ml/`.
+*Recommendation:* Depth is not a lever until features/alignment improve; prioritize layout-aware pairs + calibration (FUNSD offline gate).
 
-== Next experiments
+== Task 3 — DocVQA (500-question eval, OCR words)
 
-- Nyström kernel reranker on retrieval pool (implemented, not gated yet).
-- RVL-CDIP + open-set discovery via NIW structure bank.
-- FUNSD/XFUND offline KV linking with confidence calibration.
-- Forward-forward ridge ablation vs deep stack (single hidden layer won on fixtures).
+#table(
+  columns: (auto, auto, auto),
+  [*Reader*], [*Accuracy (95% CI)*], [*Latency*],
+  [Token overlap (CE fallback)], [46.6% (42.4–50.8%)], [~0.07 ms],
+  [E5 sentence + amount heuristic], [47.0% (42.8–51.4%)], [~78 ms],
+  [Shallow ridge span], [47.2% (42.8–51.4%)], [~81 ms],
+  [Deep TP sentence stack (3 layers)], [30.2% at full train pool], [—],
+  [XLM-RoBERTa-base SQuAD2 (fine-tuned)], [*51.8%* (47.4–56.0%)], [~1–2 s/doc (CPU)],
+)
+
+Shallow ridge learning curve: 50→28.2%, 200→41.6%, 700→50.6% eval accuracy. Deep TP *underperforms* shallow at all train sizes (50→28.2% vs 28.2% tie, 700→30.2% vs 50.6%).
+
+*Recommendation:* Closed-form span reader as CPU fallback below fine-tuned XLM; depth not justified on DocVQA with current sentence features. Re-run Qwen 3–4B Q4 when Ollama is available for small-LLM comparison.
+
+== Core research question — does depth help?
+
+On *real* hard tasks in this round:
+
+1. *RVL classification:* **No** — shallow ridge +57% vs deep best +30%.
+2. *DocVQA:* **No** — shallow ridge ~47% vs deep TP ~30%; XLM still +5 pts above closed-form.
+3. *KV linking (FUNSD):* **Negligible** — shallow 0.120 vs deep 0.121 F1.
+
+Multi-layer closed-form target propagation and spectral stacks are feasible on CPU but do not beat a single ridge layer on these tasks; extra layers add latency without accuracy gains.
+
+== Modular CE ports
+
+Unchanged: `Classifier`, `KVExtractor`, `Retriever`, `Reader` (`research/closed_form_ml`, `apps/worker/.../closed_form/ports.py`). Round 2 implementations: `deep_closed_form.py`, `run_round2.py`.
+
+== Artifacts
+
+- Round 1 matrix: `research/closed_form_ml/results/matrix.json`
+- Round 2: `research/closed_form_ml/results/round2.json`

@@ -24,6 +24,18 @@ uv pip install -e ../../research/closed_form_ml scikit-learn
 
 Output: `research/closed_form_ml/results/matrix.json`
 
+## Round 2 (public OCR data)
+
+```bash
+research/closed_form_ml/scripts/run_round2.sh --seed 42 --docvqa-eval 500
+# Optional: --pull-ollama (requires host Ollama + qwen2.5:3b / qwen3:4b)
+# Staged: --skip-kv | --skip-docvqa | --skip-rvl
+```
+
+Output: `research/closed_form_ml/results/round2.json` (RVL-CDIP OCR via `HAMMALE/rvl_cdip_OCR`, DocVQA eval, CORD/SROIE→FUNSD KV).
+
+For XLM-RoBERTa QA baseline use `transformers==4.46.3` (QA pipeline removed in v5).
+
 ## Paper
 
 Typst source: `research/paper/closed_form_ml.typ` (compile with `typst compile` if installed).

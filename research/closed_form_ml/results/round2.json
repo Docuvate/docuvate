@@ -1,0 +1,315 @@
+{
+  "round": 2,
+  "seed": 42,
+  "environment": {
+    "peak_rss_mb_start": 134.54296875
+  },
+  "rvl_cdip_ocr": {
+    "n_docs": 2000,
+    "embed_time_s": 129.43347389999963,
+    "methods": {
+      "shallow_ridge_e5": {
+        "test_accuracy": {
+          "mean": 0.57,
+          "low": 0.5225,
+          "high": 0.6175624999999997,
+          "n": 400
+        },
+        "learning_curve": [
+          {
+            "train_size": 50.0,
+            "accuracy": 0.26
+          },
+          {
+            "train_size": 100.0,
+            "accuracy": 0.37
+          },
+          {
+            "train_size": 200.0,
+            "accuracy": 0.3325
+          },
+          {
+            "train_size": 500.0,
+            "accuracy": 0.3875
+          },
+          {
+            "train_size": 1000.0,
+            "accuracy": 0.5025
+          },
+          {
+            "train_size": 1600.0,
+            "accuracy": 0.57
+          }
+        ],
+        "train_time_s_last": 0.06777373499971873,
+        "latency_ms": {
+          "mean": 0.016578275017309352,
+          "low": 0.014347083242682857,
+          "high": 0.02029065686542708,
+          "n": 40
+        }
+      },
+      "deep_target_propagation": {
+        "test_accuracy": {
+          "mean": 0.2575,
+          "low": 0.2175,
+          "high": 0.3,
+          "n": 400
+        },
+        "learning_curve": [
+          {
+            "train_size": 50.0,
+            "accuracy": 0.0625
+          },
+          {
+            "train_size": 100.0,
+            "accuracy": 0.075
+          },
+          {
+            "train_size": 200.0,
+            "accuracy": 0.1375
+          },
+          {
+            "train_size": 500.0,
+            "accuracy": 0.225
+          },
+          {
+            "train_size": 1000.0,
+            "accuracy": 0.2425
+          },
+          {
+            "train_size": 1600.0,
+            "accuracy": 0.2575
+          }
+        ],
+        "train_time_s_last": 0.15369263700085867,
+        "latency_ms": {
+          "mean": 0.0727070001175889,
+          "low": 0.0672339032837499,
+          "high": 0.0807993113107841,
+          "n": 40
+        }
+      },
+      "deep_spectral_stack": {
+        "test_accuracy": {
+          "mean": 0.305,
+          "low": 0.26,
+          "high": 0.3525,
+          "n": 400
+        },
+        "learning_curve": [
+          {
+            "train_size": 50.0,
+            "accuracy": 0.1
+          },
+          {
+            "train_size": 100.0,
+            "accuracy": 0.09
+          },
+          {
+            "train_size": 200.0,
+            "accuracy": 0.1225
+          },
+          {
+            "train_size": 500.0,
+            "accuracy": 0.1875
+          },
+          {
+            "train_size": 1000.0,
+            "accuracy": 0.2575
+          },
+          {
+            "train_size": 1600.0,
+            "accuracy": 0.305
+          }
+        ],
+        "train_time_s_last": 1.1379646509994927,
+        "latency_ms": {
+          "mean": 0.08520134979335126,
+          "low": 0.08022422861586165,
+          "high": 0.0930346560369344,
+          "n": 40
+        }
+      }
+    }
+  },
+  "kv_linking": {
+    "train_pairs": 14551,
+    "funsd_eval_docs": 50,
+    "shallow_ridge_link": {
+      "funsd_f1": 0.11951588502269288,
+      "learning_curve": [
+        {
+          "train_size": 50.0,
+          "funsd_link_f1": 0.09778456837280365
+        },
+        {
+          "train_size": 100.0,
+          "funsd_link_f1": 0.09472880061115356
+        },
+        {
+          "train_size": 200.0,
+          "funsd_link_f1": 0.10518407212622088
+        },
+        {
+          "train_size": 500.0,
+          "funsd_link_f1": 0.08723747980613894
+        },
+        {
+          "train_size": 800.0,
+          "funsd_link_f1": 0.11935730680948739
+        },
+        {
+          "train_size": 14551.0,
+          "funsd_link_f1": 0.1197877179681577
+        }
+      ]
+    },
+    "deep_target_prop_link": {
+      "funsd_f1": 0.1213307240704501,
+      "learning_curve": [
+        {
+          "train_size": 50.0,
+          "funsd_link_f1": 0.05391527599486521
+        },
+        {
+          "train_size": 100.0,
+          "funsd_link_f1": 0.052318668252080855
+        },
+        {
+          "train_size": 200.0,
+          "funsd_link_f1": 0.07927519818799547
+        },
+        {
+          "train_size": 500.0,
+          "funsd_link_f1": 0.08144796380090497
+        },
+        {
+          "train_size": 800.0,
+          "funsd_link_f1": 0.10912698412698411
+        },
+        {
+          "train_size": 14551.0,
+          "funsd_link_f1": 0.11949069539666993
+        }
+      ]
+    },
+    "ce_shipped_layout_head_f1": 0.0,
+    "note": "FUNSD eval-only; CORD+SROIE train only"
+  },
+  "docvqa": {
+    "n_train_pool": 700,
+    "n_eval": 500,
+    "eval_only": true,
+    "ollama": {},
+    "readers": {
+      "token_overlap": {
+        "accuracy": {
+          "mean": 0.466,
+          "low": 0.42395,
+          "high": 0.508,
+          "n": 500
+        },
+        "latency_ms": {
+          "mean": 0.07121166236174759,
+          "low": 0.063192215098411,
+          "high": 0.07973028270498617,
+          "n": 80
+        },
+        "n_eval": 500
+      },
+      "e5_sentence_heuristic": {
+        "accuracy": {
+          "mean": 0.47,
+          "low": 0.428,
+          "high": 0.514,
+          "n": 500
+        },
+        "latency_ms": {
+          "mean": 78.44418147499255,
+          "low": 63.029936129379394,
+          "high": 95.77573930684477,
+          "n": 80
+        },
+        "n_eval": 500
+      },
+      "ridge_span_shallow": {
+        "accuracy": {
+          "mean": 0.472,
+          "low": 0.428,
+          "high": 0.514,
+          "n": 500
+        },
+        "latency_ms": {
+          "mean": 80.89342427510928,
+          "low": 65.26268184156493,
+          "high": 98.24862316759946,
+          "n": 80
+        },
+        "n_eval": 500
+      },
+      "xlm_roberta_base": {
+        "accuracy": {
+          "mean": 0.518,
+          "low": 0.474,
+          "high": 0.56,
+          "n": 500
+        },
+        "latency_ms": {
+          "mean": 53.46863610006949,
+          "low": 0.0008239653413966153,
+          "high": 160.4041898411225,
+          "n": 80
+        },
+        "n_eval": 500,
+        "note": "transformers 4.46.3 QA pipeline"
+      }
+    },
+    "ridge_span_learning_curve": [
+      {
+        "train_size": 50.0,
+        "accuracy": 0.282
+      },
+      {
+        "train_size": 100.0,
+        "accuracy": 0.34
+      },
+      {
+        "train_size": 200.0,
+        "accuracy": 0.416
+      },
+      {
+        "train_size": 500.0,
+        "accuracy": 0.48
+      },
+      {
+        "train_size": 700.0,
+        "accuracy": 0.506
+      }
+    ],
+    "deep_tp_sentence_learning_curve": [
+      {
+        "train_size": 50.0,
+        "accuracy": 0.282
+      },
+      {
+        "train_size": 100.0,
+        "accuracy": 0.274
+      },
+      {
+        "train_size": 200.0,
+        "accuracy": 0.296
+      },
+      {
+        "train_size": 500.0,
+        "accuracy": 0.31
+      },
+      {
+        "train_size": 700.0,
+        "accuracy": 0.302
+      }
+    ]
+  },
+  "wall_time_s": 831.3507341910008,
+  "peak_rss_mb_end": 3997.7421875
+}
