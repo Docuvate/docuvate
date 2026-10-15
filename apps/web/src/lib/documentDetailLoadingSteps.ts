@@ -39,7 +39,7 @@ export function resolveDocumentDetailLoadStep(
 }
 
 export function isDocumentPreviewPending(
-  doc: Pick<DocumentDto, 'mimeType'> | null | undefined,
+  doc: Pick<DocumentDto, 'mimeType' | 'previewAvailable'> | null | undefined,
   previewData: ArrayBuffer | null | undefined,
   previewUrl?: string | null
 ): boolean {

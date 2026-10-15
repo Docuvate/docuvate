@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import csv
 import email
+from email.message import Message
 import io
 import logging
 import re
@@ -32,13 +33,13 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_BLOCK_INDEX = 0
+_block_index_seq = 0
 
 
 def _next_block_index() -> int:
-    global _BLOCK_INDEX  # noqa: PLW0603
-    _BLOCK_INDEX += 1
-    return _BLOCK_INDEX
+    global _block_index_seq  # noqa: PLW0603
+    _block_index_seq += 1
+    return _block_index_seq
 
 
 def _paragraph_blocks(paragraphs: Sequence[str], *, page: int = 1) -> tuple[ExtractionBlock, ...]:
@@ -85,7 +86,7 @@ def _extract_docx(content: bytes) -> OfficeExtractResult:
         raw = para.text.strip()
         if not raw:
             continue
-        style_name = para.style.name if para.style is not None else ""
+        style_name = str(para.style.name if para.style is not None else "")
         if style_name.startswith("Heading"):
             paragraphs.append(raw.upper())
         else:
@@ -158,9 +159,8 @@ def _extract_pptx(content: bytes) -> OfficeExtractResult:
     for slide_idx, slide in enumerate(prs.slides, start=1):
         slide_lines: list[str] = []
         for shape in slide.shapes:
-            if not hasattr(shape, "text"):
-                continue
-            text = str(shape.text).strip()
+            raw_text = getattr(shape, "text", "")
+            text = str(raw_text).strip()
             if text:
                 slide_lines.append(text)
         if not slide_lines:
@@ -328,7 +328,7 @@ def _extract_eml(content: bytes) -> OfficeExtractResult:
     return _result_from_text("\n\n".join(parts), source="eml")
 
 
-def _email_body_text(msg: email.message.Message) -> str:
+def _email_body_text(msg: Message) -> str:
     if msg.is_multipart():
         texts: list[str] = []
         for part in msg.walk():
@@ -376,8 +376,8 @@ def _extract_via_libreoffice_to_pdf(content: bytes, mime_type: str) -> OfficeExt
 
 
 def extract_office_born_digital(content: bytes, mime_type: str) -> OfficeExtractResult | None:
-    global _BLOCK_INDEX  # noqa: PLW0603
-    _BLOCK_INDEX = 0
+    global _block_index_seq  # noqa: PLW0603
+    _block_index_seq = 0
     base = normalize_mime(mime_type)
     try:
         if base in LEGACY_OFFICE_MIMES:
