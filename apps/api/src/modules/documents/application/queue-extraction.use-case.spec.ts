@@ -3,11 +3,8 @@
 import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
-import {
-  DOCUMENT_REPOSITORY,
-  type DocumentRepository,
-  type DocumentStatus,
-} from '../../../shared/domain/ports.js';
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
+import type { DocumentStatus } from '../domain/document.entity.js';
 import { ExtractionQueueService } from '../../extraction/infrastructure/extraction-queue.service.js';
 import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
 
