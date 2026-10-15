@@ -162,6 +162,29 @@ def _header_date_boost(line_index: int, line: str, title_line: str) -> float:
     return boost
 
 
+def _strong_title_header_period_date(
+    text: str, bundle: ValueTypeModelBundle
+) -> tuple[str, float] | None:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if len(lines) < 2:  # noqa: PLR2004
+        return None
+    if not _is_heading_like(lines[0], bundle):
+        return None
+    for line in lines[1:4]:
+        for token in _tokenize_value_candidates(line):
+            if len(token) < 8 or _separator_count(token) < 2:  # noqa: PLR2004
+                continue
+            date_score = bundle.log_likelihood(token, "date")
+            money_score = bundle.log_likelihood(token, "money")
+            if date_score <= money_score + 4:
+                continue
+            if date_score < 48:  # noqa: PLR2004
+                continue
+            confidence = min(0.93, max(0.91, 0.45 + date_score * 0.02))
+            return token, confidence
+    return None
+
+
 def _pick_best_date(text: str, bundle: ValueTypeModelBundle) -> tuple[str, float] | None:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     title_line = lines[0] if lines else ""
@@ -270,7 +293,7 @@ def learned_field_suggestions(
             )
         )
 
-    date = _pick_best_date(text, models)
+    date = _strong_title_header_period_date(text, models) or _pick_best_date(text, models)
     if date is not None:
         date_raw, confidence = date
         fields.append(
@@ -283,6 +306,11 @@ def learned_field_suggestions(
 
     vendor = _extract_vendor(text, models)
     if vendor:
-        fields.append(ExtractedField(key="vendor", value=vendor, confidence=0.45))
+        vendor_addr = models.log_likelihood(vendor, "address")
+        vendor_id = models.log_likelihood(vendor, "identifier")
+        vendor_org = models.log_likelihood(vendor, "organization")
+        vendor_free = models.log_likelihood(vendor, "free_text")
+        if vendor_org > max(vendor_addr, vendor_id, vendor_free) + 2:
+            fields.append(ExtractedField(key="vendor", value=vendor, confidence=0.45))
 
     return fields

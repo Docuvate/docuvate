@@ -24,10 +24,14 @@ export function buildLibraryMetadataEmbedText(input: {
   title: string;
   filename: string;
   documentDate: string | null;
+  labelNames?: readonly string[];
 }): string {
   const parts = [input.title.trim(), input.filename.trim()];
   if (input.documentDate) {
     parts.push(input.documentDate.trim());
+  }
+  if (input.labelNames && input.labelNames.length > 0) {
+    parts.push(input.labelNames.join(' '));
   }
   return parts.filter((part) => part.length > 0).join('\n');
 }

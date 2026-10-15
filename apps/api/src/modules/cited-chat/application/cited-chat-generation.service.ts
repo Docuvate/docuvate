@@ -44,9 +44,11 @@ import {
   libraryMetadataEmbeddingBoost,
 } from '../domain/library-query-metadata-boost.js';
 import {
+  libraryTenantLabelAssignedMismatchPenalty,
   libraryTenantLabelEmbeddingBoost,
   type TenantLabelEmbeddingRow,
   tenantLabelsAlignedWithQuery,
+  tenantLabelsForLibraryRetrievalSupplement,
 } from '../domain/library-tenant-label-embedding-boost.js';
 import {
   passesCalibratedRetrievalGate,
@@ -301,7 +303,36 @@ export class CitedChatGenerationService {
           documentIds: filterIds,
           queryVector,
         });
+    let tenantLabelEmbeds: TenantLabelEmbeddingRow[] = [];
+    let alignedLabels: TenantLabelEmbeddingRow[] = [];
+    let labelsForBoost: TenantLabelEmbeddingRow[] = [];
+    let labelAlignedDocumentIds: string[] = [];
     if (scope === 'library') {
+      if (queryVector != null && queryVector.length > 0) {
+        tenantLabelEmbeds = await this.loadTenantLabelEmbeddings(userId);
+        alignedLabels = tenantLabelsAlignedWithQuery(queryVector, tenantLabelEmbeds);
+        const supplementLabels = tenantLabelsForLibraryRetrievalSupplement(
+          queryVector,
+          tenantLabelEmbeds
+        );
+        labelsForBoost = alignedLabels.length > 0 ? alignedLabels : supplementLabels;
+        const labelAlignedExtra = await this.retrieval.supplementLabelAlignedLibraryCandidates(
+          userId,
+          supplementLabels.map((row) => row.name)
+        );
+        if (labelAlignedExtra.length > 0) {
+          labelAlignedDocumentIds = [
+            ...new Set(labelAlignedExtra.map((chunk) => chunk.documentId)),
+          ];
+          const seen = new Set(candidates.map((chunk) => chunk.chunkId));
+          for (const extra of labelAlignedExtra) {
+            if (!seen.has(extra.chunkId)) {
+              candidates.push(extra);
+              seen.add(extra.chunkId);
+            }
+          }
+        }
+      }
       const contextualExtra = await this.retrieval.supplementContextualLibraryCandidates(
         userId,
         userMessage,
@@ -321,14 +352,13 @@ export class CitedChatGenerationService {
           userId,
           candidates.map((chunk) => chunk.documentId)
         );
-        const tenantLabelEmbeds = await this.loadTenantLabelEmbeddings(userId);
-        const alignedLabels = tenantLabelsAlignedWithQuery(queryVector, tenantLabelEmbeds);
         const metaTexts = [...boostMeta.entries()].map(([documentId, meta]) => ({
           documentId,
           text: buildLibraryMetadataEmbedText({
             title: meta.title,
             filename: meta.filename,
             documentDate: meta.documentDate,
+            labelNames: meta.labels,
           }),
         }));
         const metaEmbedResult = await this.embedding.embedTexts(
@@ -348,10 +378,14 @@ export class CitedChatGenerationService {
             const boost =
               libraryMetadataEmbeddingBoost(queryVector, metaVectorByDoc.get(chunk.documentId)) +
               libraryTenantLabelEmbeddingBoost({
-                alignedLabels,
+                alignedLabels: labelsForBoost,
                 filename: meta?.filename ?? chunk.documentTitle,
                 title: meta?.title ?? chunk.documentTitle,
                 body: chunk.body,
+                documentLabelNames: meta?.labels ?? [],
+              }) +
+              libraryTenantLabelAssignedMismatchPenalty({
+                alignedLabels: labelsForBoost,
                 documentLabelNames: meta?.labels ?? [],
               });
             return { ...chunk, fusionScore: chunk.fusionScore + boost };
@@ -426,10 +460,23 @@ export class CitedChatGenerationService {
     const extractiveMinScore = rerankerUsed
       ? ragRerankerGateThreshold()
       : ragFusionGateThreshold();
-    const extractivePool =
+    let extractivePool =
       scope === 'library'
         ? libraryExtractiveRowsForScopedFact(top, answerType)
         : top.slice(0, RAG_RERANK_TOP_K);
+    if (scope === 'library' && labelAlignedDocumentIds.length > 0) {
+      const allowed = new Set(labelAlignedDocumentIds);
+      const fromTop = top.filter((row) => allowed.has(row.chunk.documentId));
+      if (fromTop.length > 0) {
+        extractivePool = fromTop.slice(0, 5);
+      } else {
+        extractivePool = candidates
+          .filter((chunk) => allowed.has(chunk.documentId))
+          .sort((a, b) => b.fusionScore - a.fusionScore)
+          .slice(0, 5)
+          .map((chunk) => ({ chunk, score: chunk.fusionScore }));
+      }
+    }
 
     const documentMeta = await this.retrieval.loadDocumentContextMeta(
       userId,

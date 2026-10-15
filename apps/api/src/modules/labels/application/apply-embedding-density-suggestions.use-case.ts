@@ -75,9 +75,16 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
 
       if (result.decisionTier === 'auto_apply' && result.labelId && !assigned.has(result.labelId)) {
         const tag = tagById.get(result.labelId);
-        if (tag && !tag.isInbox) {
+        if (
+          tag &&
+          !tag.isInbox &&
+          tagAllowedWithAssigned(result.labelId) &&
+          !tagIdConflictsWithAssigned(result.labelId, assigned, exclusivePairs)
+        ) {
           await this.taxonomy.assignTagToDocument(documentId, result.labelId);
           await this.taxonomy.clearInboxTagForDocument(documentId, userId);
+          assigned.add(result.labelId);
+          assignedGroups.add(state.label_to_group[result.labelId] ?? result.labelId);
         }
       }
 

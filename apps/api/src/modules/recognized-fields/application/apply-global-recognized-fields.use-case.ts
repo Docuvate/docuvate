@@ -140,6 +140,15 @@ export class ApplyGlobalRecognizedFieldsUseCase {
       return !correctedFieldKeys.has(storageKey) && !correctedFieldKeys.has(def.key);
     });
     if (defsEligibleForExtract.length === 0) {
+      await this.attempts.upsertMany(
+        userId,
+        defsToExtract.map((def) => ({
+          documentId,
+          fieldDefinitionId: def.id,
+          outcome: 'not_applicable',
+          confidence: null,
+        }))
+      );
       return;
     }
 
@@ -182,6 +191,7 @@ export class ApplyGlobalRecognizedFieldsUseCase {
 
       const existing = extraction.fields;
       const patches: ExtractedField[] = [];
+      const storageKeysToClear = new Set<string>();
       const finalAttempts: {
         documentId: string;
         fieldDefinitionId: string;
@@ -198,6 +208,8 @@ export class ApplyGlobalRecognizedFieldsUseCase {
             outcome: 'not_found',
             confidence: null,
           });
+          storageKeysToClear.add(globalFieldStorageKey(def.key));
+          storageKeysToClear.add(def.key);
           continue;
         }
         const confidence = row.confidence ?? 0;
@@ -208,6 +220,8 @@ export class ApplyGlobalRecognizedFieldsUseCase {
             outcome: 'below_threshold',
             confidence,
           });
+          storageKeysToClear.add(globalFieldStorageKey(def.key));
+          storageKeysToClear.add(def.key);
           continue;
         }
         const storageKey = globalFieldStorageKey(row.key);
@@ -229,11 +243,25 @@ export class ApplyGlobalRecognizedFieldsUseCase {
 
       await this.attempts.upsertMany(userId, finalAttempts);
 
+      const clearedFields =
+        storageKeysToClear.size === 0
+          ? existing
+          : existing.filter(
+              (field) =>
+                !storageKeysToClear.has(field.key) &&
+                !storageKeysToClear.has(parseGlobalFieldStorageKey(field.key) ?? field.key)
+            );
+
       if (patches.length === 0) {
+        if (clearedFields !== existing) {
+          await this.documents.updateForUser(documentId, userId, {
+            extractionFields: clearedFields,
+          });
+        }
         return;
       }
 
-      const nextFields = mergeExtractedFields(existing, patches);
+      const nextFields = mergeExtractedFields(clearedFields, patches);
       if (nextFields === existing) {
         return;
       }
@@ -244,6 +272,15 @@ export class ApplyGlobalRecognizedFieldsUseCase {
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Recognized field extraction failed: ${message}`);
+      await this.attempts.upsertMany(
+        userId,
+        defsEligibleForExtract.map((def) => ({
+          documentId,
+          fieldDefinitionId: def.id,
+          outcome: 'not_found',
+          confidence: null,
+        }))
+      );
     }
   }
 }

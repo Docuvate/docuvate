@@ -56,6 +56,7 @@ import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-
 import { DocumentChatGenerationQueueService } from './infrastructure/document-chat-generation-queue.service.js';
 import { HeuristicFieldSuggestionsBackfillService } from './infrastructure/heuristic-field-suggestions-backfill.service.js';
 import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
+import { FailedDocumentExtractionReconcileService } from './infrastructure/failed-document-extraction-reconcile.service.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
 import { DocumentsController } from './presentation/documents.controller.js';
 import { ReviewQueueController } from './presentation/review-queue.controller.js';
@@ -104,6 +105,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     SendDocumentChatThreadMessageUseCase,
     RunDocumentChatGenerationUseCase,
     DocumentChatGenerationQueueService,
+    FailedDocumentExtractionReconcileService,
     StaleChatGenerationReconcileService,
     DocumentChatGenerationActiveRegistry,
     DocumentChatGenerationCancelRegistry,

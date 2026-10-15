@@ -6,6 +6,8 @@ import type { EmbeddingPort } from '../../../shared/domain/ports.js';
 import { isRecord, parseNumber, parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 
+const WORKER_EMBED_BATCH_MAX = 32;
+
 function parseEmbeddings(value: unknown): number[][] {
   if (!Array.isArray(value)) {
     return [];
@@ -26,13 +28,12 @@ function parseEmbeddings(value: unknown): number[][] {
 
 @Injectable()
 export class HttpEmbeddingAdapter implements EmbeddingPort {
-  async embedTexts(
+  private async embedBatch(
     texts: string[],
-    options?: { inputType?: 'query' | 'passage' }
+    inputType: 'query' | 'passage'
   ): Promise<{ model: string; embeddings: number[][] }> {
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
-    const inputType = options?.inputType ?? 'passage';
 
     const response = await fetch(workerApiUrl(workerUrl, '/embed'), {
       method: 'POST',
@@ -59,5 +60,25 @@ export class HttpEmbeddingAdapter implements EmbeddingPort {
           : 'intfloat/multilingual-e5-small',
       embeddings: parseEmbeddings(raw.embeddings),
     };
+  }
+
+  async embedTexts(
+    texts: string[],
+    options?: { inputType?: 'query' | 'passage' }
+  ): Promise<{ model: string; embeddings: number[][] }> {
+    const inputType = options?.inputType ?? 'passage';
+    if (texts.length === 0) {
+      return { model: 'intfloat/multilingual-e5-small', embeddings: [] };
+    }
+
+    const embeddings: number[][] = [];
+    let model = 'intfloat/multilingual-e5-small';
+    for (let offset = 0; offset < texts.length; offset += WORKER_EMBED_BATCH_MAX) {
+      const batch = texts.slice(offset, offset + WORKER_EMBED_BATCH_MAX);
+      const result = await this.embedBatch(batch, inputType);
+      model = result.model;
+      embeddings.push(...result.embeddings);
+    }
+    return { model, embeddings };
   }
 }

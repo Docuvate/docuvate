@@ -8,6 +8,7 @@ import { HEURISTIC_FIELD_EXTRACTOR_VERSION } from '../domain/heuristic-field-sug
 import { mergeExtractionFieldRows } from '../infrastructure/document-extraction.persistence.js';
 import { fetchWorkerHeuristicFieldSuggestions } from '../infrastructure/fetch-worker-heuristic-field-suggestions.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './document-review/promote-extraction-suggestions.use-case.js';
+import { stripJunkHeuristicFieldSuggestions } from './document-review/strip-junk-field-suggestions.js';
 
 const HEURISTIC_SEMANTICS = new Set(['vendor', 'amount', 'date']);
 
@@ -32,8 +33,12 @@ export class RefreshHeuristicFieldSuggestionsUseCase {
       const semantic = parseSuggestionStorageKey(row.key);
       return semantic == null || !HEURISTIC_SEMANTICS.has(semantic);
     });
+    const firstLine = text.split('\n').find((line) => line.trim().length > 0) ?? null;
     const merged = dedupeExtractedFields(
-      mergeExtractionFieldRows(kept, suggestions)
+      stripJunkHeuristicFieldSuggestions(
+        mergeExtractionFieldRows(kept, suggestions),
+        { title: doc.title, filename: doc.filename, firstLine }
+      )
     );
     await this.documents.updateForUser(documentId, userId, {
       extractionFields: merged,

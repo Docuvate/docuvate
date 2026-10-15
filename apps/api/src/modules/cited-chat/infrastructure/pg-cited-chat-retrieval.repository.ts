@@ -22,6 +22,7 @@ import { hammingDistance, int8Dot, quantizeQueryVector } from '../domain/int8-re
 import {
   libraryContextPeriodPatterns,
   libraryContextSearchTokens,
+  libraryContextYearMonths,
 } from '../domain/library-context-search-tokens.js';
 import { chunkIndexText } from '../domain/split-text-chunks-with-spans.js';
 
@@ -284,6 +285,84 @@ export class PgCitedChatRetrievalRepository {
   }
 
   /** Extra hybrid candidates for amount/date questions (token overlap on title/filename/body). */
+  /** Documents whose assigned non-inbox labels align with the question embedding. */
+  async supplementLabelAlignedLibraryCandidates(
+    userId: string,
+    alignedLabelNames: readonly string[]
+  ): Promise<CitedChatChunkCandidate[]> {
+    const names = [...new Set(alignedLabelNames.map((name) => name.trim()).filter(Boolean))];
+    if (names.length === 0) {
+      return [];
+    }
+
+    const rows = await this.pool.query<{
+      id: string;
+      document_id: string;
+      title: string;
+      body: string;
+      page: number | null;
+      char_start: number | null;
+      char_end: number | null;
+    }>(
+      `SELECT c.id, c.document_id, d.title, c.body, c.page, c.char_start, c.char_end
+       FROM document_text_chunks c
+       JOIN documents d ON d.id = c.document_id
+       JOIN document_tags dt ON dt.document_id = d.id
+       JOIN tags t ON t.id = dt.tag_id
+       WHERE d.user_id = $1
+         AND t.is_inbox = false
+         AND t.name = ANY($2::text[])
+       ORDER BY d.updated_at DESC, c.chunk_index ASC
+       LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT)}`,
+      [userId, names]
+    );
+
+    if (rows.rows.length > 0) {
+      return rows.rows.map((row, index) => ({
+        chunkId: row.id,
+        documentId: row.document_id,
+        documentTitle: row.title,
+        body: row.body,
+        page: row.page,
+        charStart: row.char_start,
+        charEnd: row.char_end,
+        fusionScore: 0.92 - index * 0.001,
+      }));
+    }
+
+    const blockRows = await this.pool.query<{
+      document_id: string;
+      title: string;
+      body: string;
+      page: number | null;
+    }>(
+      `SELECT b.document_id, d.title, string_agg(b.text, ' ' ORDER BY b.position) AS body,
+              MIN(b.page) AS page
+       FROM document_extraction_blocks b
+       JOIN documents d ON d.id = b.document_id
+       JOIN document_tags dt ON dt.document_id = d.id
+       JOIN tags t ON t.id = dt.tag_id
+       WHERE d.user_id = $1
+         AND t.is_inbox = false
+         AND t.name = ANY($2::text[])
+       GROUP BY b.document_id, d.title
+       ORDER BY d.updated_at DESC
+       LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT)}`,
+      [userId, names]
+    );
+
+    return blockRows.rows.map((row, index) => ({
+      chunkId: `label-aligned-block-${row.document_id}`,
+      documentId: row.document_id,
+      documentTitle: row.title,
+      body: row.body,
+      page: row.page,
+      charStart: null,
+      charEnd: null,
+      fusionScore: 0.92 - index * 0.001,
+    }));
+  }
+
   async supplementContextualLibraryCandidates(
     userId: string,
     query: string,
@@ -298,6 +377,9 @@ export class PgCitedChatRetrievalRepository {
     }
     const patterns = tokens.map((token) => `%${token}%`);
     const periodPatterns = libraryContextPeriodPatterns(tokens);
+    const periodKeys = libraryContextYearMonths(query).map(
+      ({ month, year }) => `${year}-${month}`
+    );
 
     const rows = await this.pool.query<{
       id: string;
@@ -319,17 +401,28 @@ export class PgCitedChatRetrievalRepository {
            OR c.body ILIKE ANY($2::text[])
          )
          ${
-           periodPatterns.length > 0
+           periodPatterns.length > 0 || periodKeys.length > 0
              ? `AND (
            d.filename ILIKE ANY($3::text[])
            OR d.title ILIKE ANY($3::text[])
            OR c.body ILIKE ANY($3::text[])
+           ${
+             periodKeys.length > 0
+               ? `OR to_char(d.document_date, 'YYYY-MM') = ANY($4::text[])`
+               : ''
+           }
          )`
              : ''
          }
        ORDER BY c.document_id, c.chunk_index ASC
        LIMIT ${String(RAG_HYBRID_CANDIDATE_LIMIT * 2)}`,
-      periodPatterns.length > 0 ? [userId, patterns, periodPatterns] : [userId, patterns]
+      periodPatterns.length > 0 && periodKeys.length > 0
+        ? [userId, patterns, periodPatterns, periodKeys]
+        : periodPatterns.length > 0
+          ? [userId, patterns, periodPatterns]
+          : periodKeys.length > 0
+            ? [userId, patterns, [], periodKeys]
+            : [userId, patterns]
     );
 
     return rows.rows.slice(0, RAG_HYBRID_CANDIDATE_LIMIT).map((row, index) => ({

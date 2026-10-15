@@ -11,6 +11,7 @@ describe('libraryContextSearchTokens', () => {
     );
     expect(tokens).toContain('10/2024');
     expect(tokens).toContain('2024-10');
+    expect(tokens).toContain('2024_10');
     expect(tokens).toContain('2024');
   });
 
