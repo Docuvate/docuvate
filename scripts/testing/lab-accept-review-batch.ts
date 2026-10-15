@@ -7,7 +7,8 @@ import { AppModule } from '../../apps/api/dist/app.module.js';
 import { AcceptDocumentReviewBatchUseCase } from '../../apps/api/dist/modules/documents/application/document-review/accept-document-review-batch.use-case.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from '../../apps/api/dist/modules/documents/application/document-review/promote-extraction-suggestions.use-case.js';
 import { autoPromoteMinConfidenceForField } from '../../apps/api/dist/modules/documents/domain/value-type-field-confidence.js';
-import { userAuthorizationSubject } from '../../apps/api/dist/shared/infrastructure/auth/user-authorization-subject.js';
+import { INSTALLATION_TENANT_ID } from '../../apps/api/dist/modules/auth/domain/installation.constants.js';
+import { INSTANCE_ROLE_MEMBER } from '../../apps/api/dist/modules/auth/domain/instance-role.constants.js';
 
 const LAB_EMAIL = process.env.DOCUVATE_TEST_EMAIL ?? 'thomas@docuvate.test';
 
@@ -28,7 +29,7 @@ async function main(): Promise<void> {
   const minConfidence = Math.min(
     autoPromoteMinConfidenceForField('vendor'),
     autoPromoteMinConfidenceForField('date'),
-    0.85
+    0.75
   );
 
   const app = await NestFactory.createApplicationContext(AppModule, { logger: ['error', 'warn'] });
@@ -42,7 +43,17 @@ async function main(): Promise<void> {
       await promote.execute(row.id, userId);
     }
     const batch = app.get(AcceptDocumentReviewBatchUseCase);
-    const result = await batch.execute(userId, userAuthorizationSubject(userId), minConfidence);
+    const result = await batch.execute(
+      userId,
+      {
+        kind: 'user',
+        id: userId,
+        tenantId: INSTALLATION_TENANT_ID,
+        roles: [INSTANCE_ROLE_MEMBER],
+        claims: ['document:*'],
+      },
+      minConfidence
+    );
     console.log(JSON.stringify({ minConfidence, ...result }, null, 2));
   } finally {
     await app.close();
