@@ -41,6 +41,9 @@ from docuvate_worker.infrastructure.chat.rag_rerank import (
 )
 from docuvate_worker.infrastructure.extractors.compare import run_compare
 from docuvate_worker.infrastructure.extractors.engine_catalog import list_engine_meta
+from docuvate_worker.infrastructure.extractors.heuristic_fields import (
+    heuristic_field_suggestions,
+)
 from docuvate_worker.infrastructure.extractors.label_custom_fields import (
     extract_label_custom_fields,
 )
@@ -81,6 +84,8 @@ from docuvate_worker.presentation.schemas import (
     ExtractResponse,
     HardwareCapabilitiesResponse,
     HealthResponse,
+    HeuristicFieldSuggestionsRequest,
+    HeuristicFieldSuggestionsResponse,
     LabelFieldsExtractRequest,
     LabelFieldsExtractResponse,
     LayoutCompareMetricsRequest,
@@ -279,6 +284,24 @@ def extract_label_fields_route(
         ],
     )
     return LabelFieldsExtractResponse(
+        fields=[
+            ExtractedField(key=f.key, value=f.value, confidence=f.confidence)
+            for f in rows
+        ]
+    )
+
+
+@router.post(
+    "/extract/heuristic-field-suggestions",
+    response_model=HeuristicFieldSuggestionsResponse,
+)
+def extract_heuristic_field_suggestions_route(
+    body: HeuristicFieldSuggestionsRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> HeuristicFieldSuggestionsResponse:
+    _require_worker_secret(x_worker_secret)
+    rows = heuristic_field_suggestions(body.text)
+    return HeuristicFieldSuggestionsResponse(
         fields=[
             ExtractedField(key=f.key, value=f.value, confidence=f.confidence)
             for f in rows

@@ -333,6 +333,7 @@ export type DocumentResponseDto = {
     filename: string;
     title: string;
     status: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
+    extractionFailureReason?: string;
     mimeType: string;
     tags: Array<{
         [key: string]: unknown;

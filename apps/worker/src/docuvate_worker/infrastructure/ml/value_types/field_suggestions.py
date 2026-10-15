@@ -187,6 +187,8 @@ def _pick_best_date(text: str, bundle: ValueTypeModelBundle) -> tuple[str, float
     confidence = min(0.95, max(0.45, 0.45 + raw_score * 0.02))
     if raw_score >= 55:  # noqa: PLR2004
         confidence = max(confidence, 0.92)
+    elif raw_score >= 48:  # noqa: PLR2004
+        confidence = max(confidence, 0.91)
     return best[0], confidence
 
 

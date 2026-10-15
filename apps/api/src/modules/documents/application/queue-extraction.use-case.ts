@@ -32,7 +32,8 @@ export class QueueExtractionUseCase {
           error instanceof Error ? error.message : String(error)
         }`
       );
-      await this.documents.updateStatus(documentId, 'failed');
+      const failureReason = error instanceof Error ? error.message : String(error);
+      await this.documents.updateStatus(documentId, 'failed', { failureReason });
     }
   }
 }

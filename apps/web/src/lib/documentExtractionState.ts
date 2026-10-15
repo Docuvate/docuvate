@@ -20,6 +20,10 @@ export function extractionFailureMessage(doc: DocumentDto): string {
   if (doc.status !== 'failed') {
     return '';
   }
+  const reason = doc.extractionFailureReason?.trim();
+  if (reason) {
+    return reason;
+  }
   return i18n.t('documents.extractionFailedDetail');
 }
 

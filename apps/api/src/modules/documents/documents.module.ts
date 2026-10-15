@@ -40,6 +40,7 @@ import { ListDocumentChatThreadMessagesUseCase } from './application/list-docume
 import { ListDocumentChatThreadsUseCase } from './application/list-document-chat-threads.use-case.js';
 import { ListDocumentsUseCase } from './application/list-documents.use-case.js';
 import { QueueExtractionUseCase } from './application/queue-extraction.use-case.js';
+import { RefreshHeuristicFieldSuggestionsUseCase } from './application/refresh-heuristic-field-suggestions.use-case.js';
 import { RequeueDocumentExtractionUseCase } from './application/requeue-document-extraction.use-case.js';
 import { RetryDocumentChatMessageUseCase } from './application/retry-document-chat-message.use-case.js';
 import { RunArenaSampleCompareUseCase } from './application/run-arena-sample-compare.use-case.js';
@@ -52,6 +53,7 @@ import { UploadDocumentUseCase } from './application/upload-document.use-case.js
 import { DocumentChatGenerationActiveRegistry } from './infrastructure/document-chat-generation-active.registry.js';
 import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from './infrastructure/document-chat-generation-queue.service.js';
+import { HeuristicFieldSuggestionsBackfillService } from './infrastructure/heuristic-field-suggestions-backfill.service.js';
 import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
 import { DocumentsController } from './presentation/documents.controller.js';
@@ -80,6 +82,8 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     AcceptDocumentReviewUseCase,
     AcceptDocumentReviewBatchUseCase,
     PromoteHighConfidenceExtractionSuggestionsUseCase,
+    RefreshHeuristicFieldSuggestionsUseCase,
+    HeuristicFieldSuggestionsBackfillService,
     ArchiveHashIdenticalDuplicateSetsUseCase,
     UploadDocumentUseCase,
     GetDocumentUseCase,

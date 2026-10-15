@@ -53,6 +53,12 @@ export class DocumentsEntity {
   @Column('text', { name: 'status' })
   status: string;
 
+  @Column('text', { name: 'extraction_failure_reason', nullable: true })
+  extractionFailureReason: string | null;
+
+  @Column('integer', { name: 'heuristic_field_extractor_version', default: () => '0' })
+  heuristicFieldExtractorVersion: number;
+
   @Column('text', { name: 'extracted_text', nullable: true })
   extractedText: string | null;
 

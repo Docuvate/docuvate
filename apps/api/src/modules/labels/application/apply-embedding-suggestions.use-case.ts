@@ -18,7 +18,10 @@ import { EnsureDocumentRepresentationUseCase } from '../../representation/applic
 import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
 import { cosineSimilarity } from '../domain/cosine.js';
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
+import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-suggestions.js';
 import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
+import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';
+import { PurgeExclusiveTagSuggestionsService } from '../infrastructure/purge-exclusive-tag-suggestions.service.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './apply-embedding-density-suggestions.use-case.js';
 
 const MAX_SUGGESTIONS = 5;
@@ -37,7 +40,9 @@ export class ApplyEmbeddingSuggestionsUseCase {
     private readonly embeddingDensity: ApplyEmbeddingDensitySuggestionsUseCase,
     private readonly densityCalibrationQueue: EmbeddingDensityCalibrationQueueService,
     private readonly documentRepresentation: PgDocumentRepresentationRepository,
-    private readonly ensureRepresentation: EnsureDocumentRepresentationUseCase
+    private readonly ensureRepresentation: EnsureDocumentRepresentationUseCase,
+    private readonly coOccurrence: PgLabelCoOccurrenceRepository,
+    private readonly purgeExclusive: PurgeExclusiveTagSuggestionsService
   ) {}
 
   async execute(documentId: string, userId: string, content: string): Promise<void> {
@@ -82,6 +87,8 @@ export class ApplyEmbeddingSuggestionsUseCase {
       const assigned = new Set(
         (await this.taxonomy.listTagsForDocument(documentId)).map((t) => t.id)
       );
+      const exclusivePairs = await this.coOccurrence.listMutuallyExclusiveTagPairs(userId);
+      await this.purgeExclusive.purgeForDocument(userId, documentId);
       const existingSuggestions = await this.taxonomy.listSuggestions(documentId, userId);
       const ruleTags = new Set(
         existingSuggestions.filter((s) => s.source !== 'embedding').map((s) => s.tag.id)
@@ -144,6 +151,9 @@ export class ApplyEmbeddingSuggestionsUseCase {
         }
         const tag = tagById.get(tagId);
         if (!tag) {
+          continue;
+        }
+        if (tagIdConflictsWithAssigned(tagId, assigned, exclusivePairs)) {
           continue;
         }
         const pct = Math.round(adjusted * 100);

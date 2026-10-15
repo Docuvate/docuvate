@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import type { ChatAnswerType } from './chat-answer-type-prototypes.schema.js';
 
 export interface RankedChunkRow {
   chunk: CitedChatChunkCandidate;
@@ -11,7 +12,9 @@ export interface RankedChunkRow {
 const LIBRARY_EXTRACTIVE_DOC_MARGIN = 1.06;
 const LIBRARY_EXTRACTIVE_CHUNK_MARGIN = 1.06;
 
-function bestRowPerDocument(top: RankedChunkRow[]): RankedChunkRow[] {
+const SCOPED_FACT_MAX_DOCS = 5;
+
+export function bestRowPerDocument(top: RankedChunkRow[]): RankedChunkRow[] {
   const byDoc = new Map<string, RankedChunkRow>();
   for (const row of top) {
     const existing = byDoc.get(row.chunk.documentId);
@@ -53,4 +56,30 @@ export function libraryExtractiveRows(top: RankedChunkRow[]): RankedChunkRow[] {
     return [best];
   }
   return [];
+}
+
+/**
+ * Amount/date library questions: pass several per-document leaders to worker extractive QA
+ * (avoids empty pool when many similar documents score close, e.g. payroll libraries).
+ */
+export function libraryExtractiveRowsForScopedFact(
+  top: RankedChunkRow[],
+  answerType: ChatAnswerType
+): RankedChunkRow[] {
+  if (answerType !== 'amount' && answerType !== 'date') {
+    return libraryExtractiveRows(top);
+  }
+  if (top.length === 0) {
+    return [];
+  }
+  const perDoc = bestRowPerDocument(top);
+  if (perDoc.length <= 1) {
+    return perDoc;
+  }
+  const leader = perDoc[0];
+  const runnerUp = perDoc[1];
+  if (leader.score >= runnerUp.score * LIBRARY_EXTRACTIVE_DOC_MARGIN) {
+    return [leader];
+  }
+  return perDoc.slice(0, SCOPED_FACT_MAX_DOCS);
 }

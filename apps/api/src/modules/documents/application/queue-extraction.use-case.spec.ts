@@ -5,12 +5,15 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
 import { ExtractionQueueService } from '../../extraction/infrastructure/extraction-queue.service.js';
+import type { DocumentStatus } from '../domain/document.entity.js';
 import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
+
+type UpdateStatusFn = DocumentRepository['updateStatus'];
 
 async function buildUseCase(
   documents: {
     findByIdForUser: ReturnType<typeof vi.fn>;
-    updateStatus: ReturnType<typeof vi.fn>;
+    updateStatus: ReturnType<typeof vi.fn<UpdateStatusFn>>;
   },
   queue: { enqueue: ReturnType<typeof vi.fn> }
 ) {
@@ -33,7 +36,7 @@ describe('QueueExtractionUseCase', () => {
   it('marks document queued after successful enqueue', async () => {
     const documents = {
       findByIdForUser: vi.fn(() => Promise.resolve({ id: 'd1', userId: 'u1' })),
-      updateStatus: vi.fn(),
+      updateStatus: vi.fn<UpdateStatusFn>(),
     };
     const queue = { enqueue: vi.fn(() => Promise.resolve()) };
     const useCase = await buildUseCase(documents, queue);
@@ -47,7 +50,7 @@ describe('QueueExtractionUseCase', () => {
   it('marks document failed when enqueue exhausts retries', async () => {
     const documents = {
       findByIdForUser: vi.fn(() => Promise.resolve({ id: 'd1', userId: 'u1' })),
-      updateStatus: vi.fn(),
+      updateStatus: vi.fn<UpdateStatusFn>(),
     };
     const queue = {
       enqueue: vi.fn(() =>
@@ -60,7 +63,13 @@ describe('QueueExtractionUseCase', () => {
 
     await useCase.execute('d1', 'u1');
 
-    expect(documents.updateStatus).toHaveBeenCalledWith('d1', 'failed');
+    const failedCall = documents.updateStatus.mock.calls.find(
+      (call): call is [string, Extract<DocumentStatus, 'failed'>, { failureReason?: string | null }] =>
+        call[1] === 'failed'
+    );
+    expect(failedCall?.[0]).toBe('d1');
+    expect(typeof failedCall?.[2]?.failureReason).toBe('string');
+    expect(String(failedCall?.[2]?.failureReason).length).toBeGreaterThan(0);
     expect(documents.updateStatus).not.toHaveBeenCalledWith('d1', 'queued');
   });
 });

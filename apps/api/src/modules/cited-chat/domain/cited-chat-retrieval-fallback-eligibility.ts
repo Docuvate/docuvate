@@ -15,8 +15,8 @@ export function rejectedClaimsAllowRetrievalFallback(
       case 'quote_not_in_chunk':
       case 'empty_claim_text':
       case 'claim_number_not_in_quote':
-        return true;
       case 'unknown_source':
+        return true;
       case 'quote_in_other_document':
       case 'claim_is_chunk_dump':
       case 'claim_is_index_passage':

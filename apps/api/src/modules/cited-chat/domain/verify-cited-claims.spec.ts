@@ -26,6 +26,8 @@ describe('verifyCitedClaims', () => {
     expect(normalizeCitedSourceLabel('s1', labels)).toBe('S1');
     expect(normalizeCitedSourceLabel('Quelle S2', labels)).toBe('S2');
     expect(normalizeCitedSourceLabel('2', labels)).toBe('S2');
+    expect(normalizeCitedSourceLabel('[1]', labels)).toBe('S1');
+    expect(normalizeCitedSourceLabel('Quelle 2', labels)).toBe('S2');
   });
 
   it('rejects chunk-dump claims that echo long passages', () => {

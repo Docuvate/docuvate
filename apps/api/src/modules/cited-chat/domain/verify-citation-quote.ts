@@ -38,6 +38,33 @@ export function truncateQuoteWords(quote: string, maxWords = QUOTE_WORD_LIMIT): 
   return words.slice(0, maxWords).join(' ');
 }
 
+/** LLM quotes often add currency labels or "Label: value" formatting absent in OCR text. */
+export function quoteGroundingVariants(quote: string): string[] {
+  const trimmed = quote.trim();
+  if (!trimmed) {
+    return [];
+  }
+  const variants = new Set<string>([trimmed]);
+  const withoutCurrency = trimmed
+    .replace(/\s*(?:EUR|€|CHF|USD)\s*$/iu, '')
+    .trim();
+  if (withoutCurrency && withoutCurrency !== trimmed) {
+    variants.add(withoutCurrency);
+  }
+  const colonSplit = /^([^:]{1,80}):\s*(.+)$/s.exec(withoutCurrency || trimmed);
+  if (colonSplit?.[2]) {
+    const valuePart = colonSplit[2].trim();
+    if (valuePart) {
+      variants.add(valuePart);
+      const valueNoCurrency = valuePart.replace(/\s*(?:EUR|€|CHF|USD)\s*$/iu, '').trim();
+      if (valueNoCurrency) {
+        variants.add(valueNoCurrency);
+      }
+    }
+  }
+  return [...variants];
+}
+
 interface NormalizedBodyMap {
   normalized: string;
   /** For each index in `normalized`, the index in the original chunk body. */
@@ -476,8 +503,12 @@ export function resolveQuoteInChunk(
   options?: { claimText?: string }
 ): QuoteSpanMatch | null {
   const claimText = options?.claimText?.trim() ?? '';
-  const trimmed = truncateQuoteWords(quote);
-  if (trimmed) {
+  const candidates = quoteGroundingVariants(quote);
+  for (const candidate of candidates) {
+    const trimmed = truncateQuoteWords(candidate);
+    if (!trimmed) {
+      continue;
+    }
     const direct = findQuoteInChunk(chunkBody, trimmed);
     if (direct) {
       return acceptResolvedMatch(chunkBody, trimmed, claimText, direct, 'literal', 1);

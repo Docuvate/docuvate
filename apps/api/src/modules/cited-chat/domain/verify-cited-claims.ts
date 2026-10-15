@@ -39,9 +39,13 @@ export interface VerifiedCitedClaim {
   charEnd: number;
 }
 
+const UUID_SOURCE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export function normalizeCitedSourceLabel(
   raw: string,
-  labels: ReadonlySet<string>
+  labels: ReadonlySet<string>,
+  chunkIdToLabel?: ReadonlyMap<string, string>
 ): string | null {
   const trimmed = raw.trim();
   if (labels.has(trimmed)) {
@@ -51,9 +55,29 @@ export function normalizeCitedSourceLabel(
   if (labels.has(upper)) {
     return upper;
   }
+  if (chunkIdToLabel && UUID_SOURCE.test(trimmed)) {
+    const fromChunk = chunkIdToLabel.get(trimmed);
+    if (fromChunk && labels.has(fromChunk)) {
+      return fromChunk;
+    }
+  }
+  const bracketIndex = /^\[\s*(\d+)\s*\]$/.exec(trimmed);
+  if (bracketIndex) {
+    const label = `S${bracketIndex[1]}`;
+    if (labels.has(label)) {
+      return label;
+    }
+  }
   const fromPattern = /\bS\s*(\d+)\b/i.exec(trimmed);
   if (fromPattern) {
     const label = `S${fromPattern[1]}`;
+    if (labels.has(label)) {
+      return label;
+    }
+  }
+  const trailingIndex = /(?:quelle|source|passage|ref)\s*(\d+)\s*$/i.exec(trimmed);
+  if (trailingIndex) {
+    const label = `S${trailingIndex[1]}`;
     if (labels.has(label)) {
       return label;
     }
@@ -90,10 +114,15 @@ type CitationRowResolve =
 
 function rowForSourceLabel(
   top: TopRow[],
+  chunkPool: TopRow[],
   labelByChunk: Map<string, string>,
   sourceLabel: string
 ): TopRow | undefined {
-  return top.find((row) => labelByChunk.get(row.chunk.chunkId) === sourceLabel);
+  const fromTop = top.find((row) => labelByChunk.get(row.chunk.chunkId) === sourceLabel);
+  if (fromTop) {
+    return fromTop;
+  }
+  return chunkPool.find((row) => labelByChunk.get(row.chunk.chunkId) === sourceLabel);
 }
 
 function rowsMatchingQuote(top: TopRow[], quote: string): TopRow[] {
@@ -135,7 +164,7 @@ function resolveCitationRow(
   sourceLabel: string,
   quote: string
 ): CitationRowResolve {
-  const labeled = rowForSourceLabel(top, labelByChunk, sourceLabel);
+  const labeled = rowForSourceLabel(top, chunkPool, labelByChunk, sourceLabel);
   if (!labeled) {
     return { ok: false, reason: 'unknown_source' };
   }
@@ -210,6 +239,7 @@ export function verifyCitedClaims(input: {
 }): { verified: VerifiedCitedClaim[]; rejected: RejectedCitedClaim[] } {
   const chunkPool = input.chunkPool ?? input.top;
   const labels = new Set(input.labelByChunk.values());
+  const chunkIdToLabel = input.labelByChunk;
   const verified: VerifiedCitedClaim[] = [];
   const rejected: RejectedCitedClaim[] = [];
   let ordinal = 1;
@@ -261,8 +291,11 @@ export function verifyCitedClaims(input: {
         resolved.length = 0;
         break;
       }
-      let sourceLabel = normalizeCitedSourceLabel(citation.source, labels);
-      sourceLabel ??= bestSourceLabelForQuote(chunkPool, input.labelByChunk, citation.quote);
+      let sourceLabel = normalizeCitedSourceLabel(citation.source, labels, chunkIdToLabel);
+      sourceLabel ??= bestSourceLabelForQuote(chunkPool, input.labelByChunk, groundedQuote);
+      if (!sourceLabel && groundedFromEmptyQuote && claimText.trim().length > 0) {
+        sourceLabel = bestSourceLabelForQuote(chunkPool, input.labelByChunk, claimText);
+      }
       if (!sourceLabel) {
         rejected.push({
           claimText,

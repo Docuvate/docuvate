@@ -401,6 +401,14 @@ class LabelFieldsExtractResponse(BaseModel):
     fields: list[ExtractedField] = Field(default_factory=list)
 
 
+class HeuristicFieldSuggestionsRequest(BaseModel):
+    text: str = Field(min_length=1)
+
+
+class HeuristicFieldSuggestionsResponse(BaseModel):
+    fields: list[ExtractedField] = Field(default_factory=list)
+
+
 class LayoutIrWireModel(BaseModel):
     model_config = ConfigDict(extra="allow")
 

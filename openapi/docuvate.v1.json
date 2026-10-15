@@ -13076,6 +13076,10 @@
             ],
             "type": "string"
           },
+          "extractionFailureReason": {
+            "type": "string",
+            "nullable": true
+          },
           "mimeType": {
             "type": "string"
           },
