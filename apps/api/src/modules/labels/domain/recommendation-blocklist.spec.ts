@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { collectNewLabelCandidates } from './label-vocabulary.js';
 import {
   clusterBlocklistPhrases,
   matchesBlocklistPattern,
@@ -32,24 +31,5 @@ describe('recommendation-blocklist', () => {
       '{"pattern":"pdf[- ]?x?change","explanation":"Varianten"}'
     );
     expect(parsed?.pattern).toBe('pdf[- ]?x?change');
-  });
-
-  it('respects blocklist in collectNewLabelCandidates', () => {
-    const candidates = collectNewLabelCandidates(
-      [
-        {
-          documentId: 'd1',
-          title: 'Scan',
-          filename: 'scan.pdf',
-          text: 'Angebot gültig bis morgen',
-          fields: [],
-          nonInboxTagIds: [],
-        },
-      ],
-      [],
-      new Set(),
-      ['Angebot']
-    );
-    expect(candidates).toHaveLength(0);
   });
 });

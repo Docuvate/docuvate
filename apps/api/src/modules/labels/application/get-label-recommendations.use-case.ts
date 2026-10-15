@@ -6,6 +6,7 @@ import type {
 } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
+import { namesAreNearDuplicate } from '../../../shared/domain/label-name-similarity.js';
 import {
   DOCUMENT_REPOSITORY,
   type DocumentRepository,
@@ -18,20 +19,14 @@ import {
 } from '../../../shared/domain/ports.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
-import { type LabelHybridDocumentRow,trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
+import { type LabelHybridDocumentRow, trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
+import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
 import {
   MIN_LABEL_SUPPORT_FOR_MERGE,
   suggestAssignRecommendations,
   suggestEmbeddingClusterNewLabels,
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
-import {
-  collectNewLabelCandidates,
-  type DocumentLabelSignal,
-  namesAreNearDuplicate,
-  normalizeLabelKey,
-  suggestMergeAndRename,
-} from '../domain/label-vocabulary.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 
 function enrichWithSampleDocuments(
@@ -92,15 +87,6 @@ export class GetLabelRecommendationsUseCase {
     const nonInboxTags = tags.filter((t) => !t.isInbox);
     const existingTagNames = nonInboxTags.map((t) => t.name);
     const threshold = preferences.labelNearSimilarityThreshold;
-
-    const signals: DocumentLabelSignal[] = docs.map((doc) => ({
-      documentId: doc.id,
-      title: doc.title,
-      filename: doc.filename,
-      text: doc.extraction?.text ?? '',
-      fields: doc.extraction?.fields ?? [],
-      nonInboxTagIds: doc.tags.filter((t) => !t.isInbox).map((t) => t.id),
-    }));
 
     const tagNameById = new Map(nonInboxTags.map((t) => [t.id, t.name]));
     const centroidByTag = new Map(centroids.map((c) => [c.tagId, c.centroid]));
@@ -194,12 +180,14 @@ export class GetLabelRecommendationsUseCase {
     const clusterNew = suggestEmbeddingClusterNewLabels({
       rows: embeddingRows.map((row) => {
         const doc = docs.find((d) => d.id === row.documentId);
-        const text = doc?.extraction?.text ?? '';
         return {
           documentId: row.documentId,
           embedding: row.embedding,
           nonInboxTagIds: row.nonInboxTagIds,
-          textSnippet: `${doc?.title ?? ''} ${doc?.filename ?? ''} ${text}`.slice(0, 8000),
+          title: doc?.title ?? row.title,
+          filename: doc?.filename ?? row.filename,
+          text: doc?.extraction?.text ?? '',
+          fields: doc?.extraction?.fields ?? [],
         };
       }),
       centroids: centroidRefs,
@@ -210,6 +198,9 @@ export class GetLabelRecommendationsUseCase {
     const clusterDocIds = new Set(clusterNew.flatMap((c) => c.documentIds));
 
     for (const cluster of clusterNew) {
+      if (assignDocIds.has(cluster.documentIds[0] ?? '')) {
+        continue;
+      }
       if (labelNameConflictsExisting(cluster.proposedName, existingTagNames)) {
         continue;
       }
@@ -225,20 +216,6 @@ export class GetLabelRecommendationsUseCase {
       });
     }
 
-    const textSignals = signals.filter(
-      (s) =>
-        !assignDocIds.has(s.documentId) &&
-        !clusterDocIds.has(s.documentId) &&
-        s.nonInboxTagIds.length === 0
-    );
-    const newCandidates = collectNewLabelCandidates(
-      textSignals,
-      tags.map((t) => t.name),
-      dismissedKeys,
-      blockPhrases,
-      patternStrings
-    );
-
     const mergeRename = suggestMergeAndRename(
       nonInboxTags.map((t) => ({
         tagId: t.id,
@@ -247,18 +224,6 @@ export class GetLabelRecommendationsUseCase {
       })),
       dismissedKeys
     );
-
-    for (const candidate of newCandidates) {
-      items.push({
-        id: `new:${normalizeLabelKey(candidate.name)}`,
-        kind: 'new',
-        proposedName: candidate.name,
-        score: candidate.score,
-        source: 'text',
-        reason: candidate.reason,
-        sampleDocumentIds: candidate.documentIds,
-      });
-    }
 
     for (const suggestion of mergeRename) {
       if (suggestion.kind === 'merge') {
@@ -322,7 +287,28 @@ export class GetLabelRecommendationsUseCase {
       return true;
     });
 
-    const sorted = filtered.sort((a, b) => b.score - a.score).slice(0, 8);
+    const newSuggestionsByDoc = new Map<string, LabelRecommendationDto>();
+    for (const item of filtered) {
+      if (item.kind !== 'new') {
+        continue;
+      }
+      for (const docId of item.sampleDocumentIds ?? []) {
+        if (assignDocIds.has(docId) || !clusterDocIds.has(docId)) {
+          continue;
+        }
+        const existing = newSuggestionsByDoc.get(docId);
+        if (!existing || item.score > existing.score) {
+          newSuggestionsByDoc.set(docId, item);
+        }
+      }
+    }
+    const allowedNewIds = new Set([...newSuggestionsByDoc.values()].map((item) => item.id));
+
+    const dedupedNew = filtered.filter(
+      (item) => item.kind !== 'new' || allowedNewIds.has(item.id)
+    );
+
+    const sorted = dedupedNew.sort((a, b) => b.score - a.score).slice(0, 8);
     return enrichWithSampleDocuments(sorted, docs);
   }
 }

@@ -24,7 +24,7 @@ import { withTenantPgClient } from '../../../shared/infrastructure/database/tena
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { EnsureDocumentRepresentationUseCase } from '../../representation/application/ensure-document-representation.use-case.js';
 import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
-import { normalizeLabelKey } from '../domain/label-vocabulary.js';
+import { normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 
 function mapBlocklistEntry(row: Record<string, unknown>): LabelRecommendationBlocklistEntry {
   const sourceRaw = parseString(row.source);
