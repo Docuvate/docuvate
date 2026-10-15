@@ -6,7 +6,8 @@ from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic
 from docuvate_worker.infrastructure.extractors.registry import build_extractor
 
 
-def test_heuristic_fields_amount_and_date() -> None:
+def test_heuristic_fields_amount_and_date(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DOCUVATE_FEATURE_LEARNED_VALUE_TYPES", "false")
     text = "Acme GmbH\nRechnung\nEUR 99,00\nDatum 01.02.2024"
     fields = {f.key: f.value for f in heuristic_fields(text)}
     assert fields["amount"] == "99.00"
@@ -14,7 +15,8 @@ def test_heuristic_fields_amount_and_date() -> None:
     assert fields["vendor"].startswith("Acme")
 
 
-def test_heuristic_fields_german_invoice_layout() -> None:
+def test_heuristic_fields_german_invoice_layout(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DOCUVATE_FEATURE_LEARNED_VALUE_TYPES", "false")
     text = (
         "Rechnung 2024-001\n"
         "Nordbeispiel Beratung GmbH\n"
