@@ -1,4 +1,4 @@
--- Remove legacy nearest-centroid and uncalibrated NEST label suggestions (superseded by hybrid classifier).
+-- Remove pre-hybrid embedding similarity and uncalibrated NEST label suggestions.
 
 DELETE FROM public.document_tag_suggestions
 WHERE source = 'embedding'
