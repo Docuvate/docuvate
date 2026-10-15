@@ -11,6 +11,7 @@ COPY packages/otel packages/otel
 COPY apps/api apps/api
 COPY scripts/db scripts/db
 RUN pnpm --filter "@docuvate/api..." build
+RUN test -f apps/api/dist/modules/documents/domain/artifacts/value-types-field-confidence.v1.json
 
 FROM node:24.21.0-alpine AS runner
 RUN apk add --no-cache bash postgresql-client

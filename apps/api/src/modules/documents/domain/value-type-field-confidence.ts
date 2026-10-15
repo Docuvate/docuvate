@@ -33,10 +33,7 @@ function loadArtifact(): ValueTypeFieldConfidenceArtifact {
   if (cached) {
     return cached;
   }
-  const path = join(
-    __dirname,
-    '../../../../../worker/src/docuvate_worker/infrastructure/ml/artifacts/value-types-field-confidence.v1.json'
-  );
+  const path = join(__dirname, 'artifacts/value-types-field-confidence.v1.json');
   cached = parseArtifact(JSON.parse(readFileSync(path, 'utf8')));
   return cached;
 }

@@ -57,6 +57,8 @@ jobs:
           python-version-file: .tool-versions
       - name: Third-party ML model manifest
         run: bash scripts/ci/check-third-party-models.sh
+      - name: Value-type field confidence artifacts (API ↔ worker)
+        run: bash scripts/ci/check-value-types-field-confidence-artifacts.sh
       - name: Tool-versions drift guard tests
         run: node --test scripts/ci/check-tool-versions.test.mjs
       - run: pnpm openapi:check
