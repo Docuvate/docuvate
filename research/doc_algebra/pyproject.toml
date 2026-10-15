@@ -1,0 +1,39 @@
+[project]
+name = "doc-algebra-research"
+version = "0.1.0"
+description = "Experimental study of document representations via associative algebras (research PoC)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "scikit-learn>=1.4",
+  "matplotlib>=3.8",
+  "hypothesis>=6.98",
+  "pytest>=8.0",
+  "pillow>=10.0",
+  "reportlab>=4.0",
+  "pandas>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "hypothesis"]
+
+[project.scripts]
+doc-algebra-train = "train:main"
+doc-algebra-eval = "evaluate:main"
+doc-algebra-experiment = "experiments.run_all:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

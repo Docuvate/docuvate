@@ -1,0 +1,125 @@
+/home/ubuntu/.local/lib/python3.12/site-packages/sklearn/linear_model/_logistic.py:599: ConvergenceWarning: lbfgs failed to converge after 500 iteration(s) (status=1):
+STOP: TOTAL NO. OF ITERATIONS REACHED LIMIT
+
+Increase the number of iterations to improve the convergence (max_iter=500).
+You might also want to scale the data as shown in:
+    https://scikit-learn.org/stable/modules/preprocessing.html
+Please also refer to the documentation for alternative solver options:
+    https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+  n_iter_i = _check_optimize_result(
+{
+  "hardware": {
+    "python": "3.12.3",
+    "machine": "x86_64",
+    "cpu_count": 4,
+    "platform": "Linux-6.12.94+-x86_64-with-glibc2.39",
+    "threads_blas": "default",
+    "warmup_s": 0.0
+  },
+  "n_docs_per_seed": 2000,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "wall_time_s": 592.676042953,
+  "peak_ram_kb": 378240,
+  "geometry_ablation": {
+    "B_base": [
+      0.06666266579770691,
+      0.09779206160783753
+    ],
+    "B_after_translate_u": [
+      0.7595353748175089,
+      -0.11751914646076378
+    ],
+    "translation_invariant_for_B": false,
+    "antisymmetric_component": 0.0,
+    "diff_vector_pair": [
+      -0.321079657585513,
+      0.0
+    ]
+  },
+  "bispectrum_translation": {
+    "l2_diff_after_shift": 4.492031861434434,
+    "translation_invariant": false
+  },
+  "aggregated_p1_macro_f1": [
+    {
+      "model": "A",
+      "split": "test",
+      "mean": 0.4337241564835607,
+      "std": 0.25093009500196717,
+      "ci95_low": 0.14977002300511905,
+      "ci95_high": 0.7176782899620024
+    },
+    {
+      "model": "B2",
+      "split": "test",
+      "mean": 0.22459752797026922,
+      "std": 0.22852957735721197,
+      "ci95_low": -0.03400803351948717,
+      "ci95_high": 0.4832030894600256
+    },
+    {
+      "model": "B3",
+      "split": "test",
+      "mean": 0.2514792045246593,
+      "std": 0.26919578295982505,
+      "ci95_low": -0.053144500678212137,
+      "ci95_high": 0.5561029097275307
+    },
+    {
+      "model": "C",
+      "split": "test",
+      "mean": 0.25098946386789944,
+      "std": 0.1297040514694201,
+      "ci95_low": 0.10421551256742409,
+      "ci95_high": 0.39776341516837477
+    },
+    {
+      "model": "D",
+      "split": "test",
+      "mean": 0.39578990727933394,
+      "std": 0.2581094812812622,
+      "ci95_low": 0.10371153342299638,
+      "ci95_high": 0.6878682811356716
+    },
+    {
+      "model": "E",
+      "split": "test",
+      "mean": 0.3939054227477588,
+      "std": 0.27273319417764685,
+      "ci95_low": 0.08527875991995343,
+      "ci95_high": 0.7025320855755641
+    },
+    {
+      "model": "F",
+      "split": "test",
+      "mean": 0.3935747836722341,
+      "std": 0.2729681130835627,
+      "ci95_low": 0.08468228507703496,
+      "ci95_high": 0.7024672822674332
+    },
+    {
+      "model": "G",
+      "split": "test",
+      "mean": 0.06712780757143821,
+      "std": 0.032281470689345046,
+      "ci95_low": 0.030597884618470676,
+      "ci95_high": 0.10365773052440574
+    },
+    {
+      "model": "H",
+      "split": "test",
+      "mean": 0.4043138771730647,
+      "std": 0.27561707409144337,
+      "ci95_low": 0.09242379700995906,
+      "ci95_high": 0.7162039573361704
+    }
+  ],
+  "hypothesis_notes": {
+    "H0": "Compare E/F/G vs B2/B3 in aggregated table",
+    "H1": "Parameter counts in per-run metrics"
+  }
+}
