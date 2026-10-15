@@ -286,13 +286,14 @@ export function DocumentDetailPage() {
   }, [id]);
 
   const previewMime = doc?.mimeType;
+  const docPreviewAvailable = doc?.previewAvailable === true;
 
   useEffect(() => {
     if (!id || !previewMime) {
       setPreviewFetchState('idle');
       return undefined;
     }
-    const wantsStoredPdf = doc?.previewAvailable === true;
+    const wantsStoredPdf = docPreviewAvailable;
     const wantsPdf = previewMime === 'application/pdf' || wantsStoredPdf;
     const wantsImage = previewMime.startsWith('image/');
     if (!wantsPdf && !wantsImage) {
@@ -326,7 +327,7 @@ export function DocumentDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [doc?.previewAvailable, id, previewMime]);
+  }, [docPreviewAvailable, id, previewMime]);
 
   useEffect(() => {
     if (!id || !doc) return undefined;

@@ -8,9 +8,10 @@ import email
 import io
 import logging
 import re
+from collections.abc import Callable
 from email.message import Message
 from html.parser import HTMLParser
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from docuvate_worker.domain.layout_ir import (
     LAYOUT_IR_VERSION,
@@ -257,8 +258,9 @@ def _extract_odp(content: bytes) -> OfficeExtractResult:
 
 
 def _extract_rtf(content: bytes) -> OfficeExtractResult:
-    from striprtf.striprtf import rtf_to_text  # noqa: PLC0415
+    from striprtf.striprtf import rtf_to_text as rtf_to_text_impl  # noqa: PLC0415
 
+    rtf_to_text = cast(Callable[[str], str], rtf_to_text_impl)
     text = rtf_to_text(content.decode("utf-8", errors="replace"))
     return _result_from_text(text, source="rtf")
 
@@ -348,7 +350,8 @@ def _email_body_text(msg: Message) -> str:
 def _extract_msg(content: bytes) -> OfficeExtractResult:
     import extract_msg  # noqa: PLC0415
 
-    msg = extract_msg.Message(io.BytesIO(content))
+    msg_ctor = cast(Callable[[io.BytesIO], extract_msg.Message], extract_msg.Message)
+    msg = msg_ctor(io.BytesIO(content))
     parts: list[str] = []
     if msg.subject:
         parts.append(f"Subject: {msg.subject}")

@@ -6,7 +6,6 @@ import { normalizeMimeType } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
-import { resolveAllowedUploadMime } from '../../../shared/domain/upload-mime-resolve.js';
 import {
   CLOCK,
   type Clock,
@@ -23,6 +22,7 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
+import { resolveAllowedUploadMime } from '../../../shared/domain/upload-mime-resolve.js';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 import type { DocumentEntity } from '../domain/document.entity.js';

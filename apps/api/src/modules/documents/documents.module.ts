@@ -30,13 +30,13 @@ import { ListDocumentReviewQueueUseCase } from './application/document-review/li
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
 import { GetDocumentContentUseCase } from './application/get-document-content.use-case.js';
-import { GetDocumentPreviewUseCase } from './application/get-document-preview.use-case.js';
 import { GetDocumentLayoutCompareMetricsUseCase } from './application/get-document-layout-compare-metrics.use-case.js';
 import { GetDocumentLayoutComparePageUseCase } from './application/get-document-layout-compare-page.use-case.js';
 import { GetDocumentLayoutCompareSummaryUseCase } from './application/get-document-layout-compare-summary.use-case.js';
 import { GetDocumentLayoutHtmlUseCase } from './application/get-document-layout-html.use-case.js';
 import { GetDocumentLayoutIrUseCase } from './application/get-document-layout-ir.use-case.js';
 import { GetDocumentLayoutTypstUseCase } from './application/get-document-layout-typst.use-case.js';
+import { GetDocumentPreviewUseCase } from './application/get-document-preview.use-case.js';
 import { ListDocumentChatThreadMessagesUseCase } from './application/list-document-chat-thread-messages.use-case.js';
 import { ListDocumentChatThreadsUseCase } from './application/list-document-chat-threads.use-case.js';
 import { ListDocumentsUseCase } from './application/list-documents.use-case.js';

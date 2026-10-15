@@ -1,11 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentDto } from '@docuvate/contracts';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { fetchDocumentContentBlob } from '../../lib/api';
-import type { DocumentDto } from '@docuvate/contracts';
-
 import { isImageMime, isPdfMime, isStoredPdfPreview } from './libraryDocumentUtils';
 
 interface DocumentThumbProps {
@@ -69,7 +68,7 @@ export function DocumentThumb({
   };
   const pdf = isPdfMime(mimeType) || isStoredPdfPreview(docPreview);
   const image = isImageMime(mimeType);
-  const badge = formatBadge?.trim() || (pdf ? 'PDF' : image ? 'IMG' : null);
+  const badge = formatBadge?.trim() ?? (pdf ? 'PDF' : image ? 'IMG' : null);
 
   return (
     <div ref={rootRef} className="doc-thumb" aria-hidden={title ? undefined : true}>

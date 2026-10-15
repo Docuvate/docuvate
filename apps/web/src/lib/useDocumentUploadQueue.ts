@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { mimeFromFilename, normalizeMimeType } from '@docuvate/contracts';
 import { useCallback, useState } from 'react';
 
 import i18n from '../i18n';
@@ -9,8 +10,6 @@ import {
   applyDocumentUploadAssignment,
   type DocumentUploadAssignment,
 } from './documentUploadAssignment';
-import { mimeFromFilename, normalizeMimeType } from '@docuvate/contracts';
-
 import { isAllowedUploadMime, UPLOAD_MAX_BYTES } from './documentUploadConstants';
 import { uploadPlacementFromAssignment } from './uploadPlacementFromAssignment';
 
