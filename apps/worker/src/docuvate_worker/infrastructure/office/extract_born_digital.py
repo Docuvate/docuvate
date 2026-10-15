@@ -5,10 +5,10 @@ from __future__ import annotations
 
 import csv
 import email
-from email.message import Message
 import io
 import logging
 import re
+from email.message import Message
 from html.parser import HTMLParser
 from typing import TYPE_CHECKING
 

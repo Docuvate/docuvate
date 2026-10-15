@@ -38,6 +38,7 @@ import { MappeDefaultRootFolders20261014150000 } from './migrations/202610141500
 import { SplitDuplicateStacksByContentHash20261014160000 } from './migrations/20261014160000-split-duplicate-stacks-by-content-hash.js';
 import { DocumentRecognizedFieldExtractorVersion20261014170000 } from './migrations/20261014170000-document-recognized-field-extractor-version.js';
 import { DocumentExtractionFailureHeuristicVersion20261015120000 } from './migrations/20261015120000-document-extraction-failure-heuristic-version.js';
+import { DocumentPreviewStorage20261015180000 } from './migrations/20261015180000-document-preview-storage.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -76,6 +77,7 @@ const EXPECTED_MIGRATIONS = [
   SplitDuplicateStacksByContentHash20261014160000,
   DocumentRecognizedFieldExtractorVersion20261014170000,
   DocumentExtractionFailureHeuristicVersion20261015120000,
+  DocumentPreviewStorage20261015180000,
 ];
 
 describe('buildTypeOrmOptions', () => {

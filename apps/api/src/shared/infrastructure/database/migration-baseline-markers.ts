@@ -42,6 +42,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'SplitDuplicateStacksByContentHash20261014160000',
   'DocumentRecognizedFieldExtractorVersion20261014170000',
   'DocumentExtractionFailureHeuristicVersion20261015120000',
+  'DocumentPreviewStorage20261015180000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -169,6 +170,8 @@ export async function migrationSchemaPresent(
       return columnExists(runner, 'document_recognized_field_extraction_attempt', 'extractor_version');
     case 'DocumentExtractionFailureHeuristicVersion20261015120000':
       return columnExists(runner, 'documents', 'extraction_failure_reason');
+    case 'DocumentPreviewStorage20261015180000':
+      return columnExists(runner, 'documents', 'preview_storage_key');
     default:
       return false;
   }
