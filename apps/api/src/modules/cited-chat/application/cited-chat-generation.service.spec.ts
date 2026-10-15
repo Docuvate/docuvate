@@ -48,6 +48,7 @@ async function buildService(deps: {
       indexPassageForRerank: (c: { documentTitle: string; body: string }) => string;
       loadDocumentContextMeta?: ReturnType<typeof vi.fn>;
       supplementContextualLibraryCandidates?: ReturnType<typeof vi.fn>;
+      supplementLabelAlignedLibraryCandidates?: ReturnType<typeof vi.fn>;
       listTenantLabelNames?: ReturnType<typeof vi.fn>;
       resolvePrimaryTextChunkId?: ReturnType<typeof vi.fn>;
   };

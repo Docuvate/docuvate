@@ -14,13 +14,12 @@ import sys
 import tempfile
 from typing import Any
 
-from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
-
-logger = logging.getLogger(__name__)
-
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractedField, ExtractionBlock, ExtractionResult
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
+
+logger = logging.getLogger(__name__)
 
 
 def extraction_result_from_wire(payload: dict[str, Any]) -> ExtractionResult:

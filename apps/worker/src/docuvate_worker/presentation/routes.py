@@ -18,8 +18,6 @@ from docuvate_worker.application.embedding_density import (
     run_calibration,
     train_from_labeled_examples,
 )
-from docuvate_worker.application.extract import extract_document
-from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.domain.cpu_pipeline.contracts import TacoStageData
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
@@ -51,6 +49,7 @@ from docuvate_worker.infrastructure.extractors.label_custom_fields import (
 from docuvate_worker.infrastructure.hardware_capabilities import detect_hardware_capabilities
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
 from docuvate_worker.presentation.representation_response import document_representation_to_response
 from docuvate_worker.presentation.schemas import (
