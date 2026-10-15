@@ -9,7 +9,8 @@ describe('ListExtractionEnginesUseCase', () => {
   it('returns static fallback when worker engines list fails', async () => {
     const extraction: ExtractionPort = {
       listEngines: () => Promise.reject(new Error('Worker engines list failed: 503')),
-      extract: () => Promise.reject(new Error('not used')) as never,
+      extract: () =>
+        Promise.reject(new Error('not used')) as Promise<import('../../../shared/domain/ports.js').ExtractionWorkerPayload>,
       compare: () => Promise.reject(new Error('not used')),
     };
     const resolveFeatureFlags = {

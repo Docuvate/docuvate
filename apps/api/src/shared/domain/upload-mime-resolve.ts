@@ -50,7 +50,8 @@ function sniffOoxmlKind(buffer: Buffer): string | null {
   return null;
 }
 
-export function sniffUploadMime(buffer: Buffer, filename: string): string | null {
+export function sniffUploadMime(payload: Uint8Array, filename: string): string | null {
+  const buffer = Buffer.from(payload);
   if (buffer.length >= 5 && readAscii(buffer, 0, 5) === '%PDF-') {
     return 'application/pdf';
   }
