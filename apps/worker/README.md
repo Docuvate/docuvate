@@ -5,7 +5,7 @@ FastAPI service for document extraction and **CPU/ARM embedding** (no GPU requir
 ## Extraction (default)
 
 1. **Born-digital PDFs** — `pdfplumber` reads the text layer and word boxes (no OCR). Most e-invoices skip OCR entirely.
-2. **Office / text formats** — `python-docx`, `openpyxl`, `python-pptx`, `odfpy`, plus CSV/RTF/HTML/Markdown/EML/MSG parsers (no OCR). Legacy `.doc`/`.xls`/`.ppt` use LibreOffice headless → PDF text layer. Spreadsheets emit layout IR tables.
+2. **Office / text formats** — `python-docx`, `openpyxl`, `python-pptx`, `odfpy`, plus CSV/RTF/HTML/Markdown/EML/MSG parsers (no OCR). Older `.doc`/`.xls`/`.ppt` binaries use LibreOffice headless → PDF text layer. Spreadsheets emit layout IR tables.
 3. **PDF preview** — LibreOffice `--headless --convert-to pdf` for non-PDF uploads (stored separately; original retained).
 4. **Scans / image-only PDFs** — **PaddleOCR** PP-OCRv4 mobile with `PADDLE_OCR_LANG=german` (Paddle maps `german`/`de` to the **latin** multilingual model — tuned for DE Belege, still reads English on receipts).
 3. **Tesseract** — optional last resort only: `EXTRACTOR_ENGINE=tesseract` and `uv pip install -e ".[tesseract]"` plus system `tesseract-ocr` (not in default Docker image).
