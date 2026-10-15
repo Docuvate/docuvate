@@ -39,6 +39,7 @@ import { SplitDuplicateStacksByContentHash20261014160000 } from './migrations/20
 import { DocumentRecognizedFieldExtractorVersion20261014170000 } from './migrations/20261014170000-document-recognized-field-extractor-version.js';
 import { DocumentExtractionFailureHeuristicVersion20261015120000 } from './migrations/20261015120000-document-extraction-failure-heuristic-version.js';
 import { DocumentPreviewStorage20261015180000 } from './migrations/20261015180000-document-preview-storage.js';
+import { PurgeCentroidLabelSuggestions20261015193000 } from './migrations/20261015193000-purge-centroid-label-suggestions.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -78,6 +79,7 @@ const EXPECTED_MIGRATIONS = [
   DocumentRecognizedFieldExtractorVersion20261014170000,
   DocumentExtractionFailureHeuristicVersion20261015120000,
   DocumentPreviewStorage20261015180000,
+  PurgeCentroidLabelSuggestions20261015193000,
 ];
 
 describe('buildTypeOrmOptions', () => {

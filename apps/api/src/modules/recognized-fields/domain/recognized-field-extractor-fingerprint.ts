@@ -11,7 +11,7 @@ const LABEL_FIELD_EXTRACTOR_SOURCE = join(
 
 /** SHA-256 of worker label-field extractor logic; update when `label_custom_fields.py` changes. */
 export const RECOGNIZED_FIELD_EXTRACTOR_LOGIC_SHA256 =
-  '90c95f098a2ccc352ebb6c4bb8a3a1b7779e06e4cb3fafd778c83bcfdd8bc2ee';
+  'dffab957c374d753f7b57bb7e3d68b66b14d5a5b164ac22ab8c2b3ad274f1f3f';
 
 export function fingerprintToExtractorVersion(sha256Hex: string): number {
   const slice = sha256Hex.slice(0, 7);

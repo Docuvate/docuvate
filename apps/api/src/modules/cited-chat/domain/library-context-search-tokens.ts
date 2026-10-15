@@ -96,9 +96,14 @@ function collectYearMonths(query: string): YearMonth[] {
 function yearMonthSearchTokens(periods: readonly YearMonth[]): string[] {
   const tokens: string[] = [];
   for (const { month, year } of periods) {
-    tokens.push(`${month}/${year}`, `${year}-${month}`);
+    tokens.push(`${month}/${year}`, `${year}-${month}`, `${year}_${month}`);
   }
   return tokens;
+}
+
+/** Calendar periods parsed from the user question (month/year). */
+export function libraryContextYearMonths(query: string): YearMonth[] {
+  return collectYearMonths(query);
 }
 
 /** Tokens for ILIKE library supplement (includes parsed month/year period forms). */
@@ -114,7 +119,19 @@ export function libraryContextSearchTokens(query: string): string[] {
 
 /** Month/year ILIKE patterns when the query resolves to a calendar period. */
 export function libraryContextPeriodPatterns(tokens: readonly string[]): string[] {
-  return tokens
-    .filter((token) => /^\d{2}\/20\d{2}$/.test(token) || /^20\d{2}-\d{2}$/.test(token))
-    .map((token) => `%${token}%`);
+  const patterns: string[] = [];
+  for (const token of tokens) {
+    if (/^\d{2}\/20\d{2}$/.test(token)) {
+      patterns.push(`%${token}%`, `%${token.replace('/', '_')}%`);
+      continue;
+    }
+    if (/^20\d{2}-\d{2}$/.test(token)) {
+      patterns.push(`%${token}%`, `%${token.replace('-', '_')}%`);
+      continue;
+    }
+    if (/^20\d{2}_\d{2}$/.test(token)) {
+      patterns.push(`%${token}%`);
+    }
+  }
+  return patterns;
 }

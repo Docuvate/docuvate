@@ -11,7 +11,10 @@ import {
   waitForValkeyReady,
 } from '../../../shared/infrastructure/valkey/valkey-connection.js';
 import { ApplyGlobalRecognizedFieldsUseCase } from '../application/apply-global-recognized-fields.use-case.js';
-import { RECOGNIZED_FIELD_REEXTRACT_QUEUE_NAME } from '../domain/recognized-field-reextract-config.js';
+import {
+  RECOGNIZED_FIELD_EXTRACTOR_VERSION,
+  RECOGNIZED_FIELD_REEXTRACT_QUEUE_NAME,
+} from '../domain/recognized-field-reextract-config.js';
 
 interface RecognizedFieldReextractJobData {
   userId: string;
@@ -62,7 +65,15 @@ export class RecognizedFieldReextractQueueService implements OnModuleInit, OnMod
     documentId: string,
     fieldDefinitionIds: readonly string[]
   ): Promise<void> {
-    const jobId = `recognized-field-reextract-${userId}-${documentId}-${fieldDefinitionIds.slice().sort().join(',')}`;
+    const scopeKey = fieldDefinitionIds.slice().sort().join(',');
+    const jobId = `recognized-field-reextract-v${String(RECOGNIZED_FIELD_EXTRACTOR_VERSION)}-${userId}-${documentId}-${scopeKey}`;
+    const existing = await this.queue.getJob(jobId);
+    if (existing) {
+      const state = await existing.getState();
+      if (state === 'completed' || state === 'failed') {
+        await existing.remove();
+      }
+    }
     await enqueueBullJobWithRetry(
       () =>
         this.queue.add(

@@ -48,7 +48,11 @@ async function buildService(deps: {
       indexPassageForRerank: (c: { documentTitle: string; body: string }) => string;
       loadDocumentContextMeta?: ReturnType<typeof vi.fn>;
       supplementContextualLibraryCandidates?: ReturnType<typeof vi.fn>;
+      supplementLabelAlignedLibraryCandidates?: ReturnType<typeof vi.fn>;
       listTenantLabelNames?: ReturnType<typeof vi.fn>;
+      resolvePrimaryTextChunkId?: ReturnType<typeof vi.fn>;
+      listReadyLibraryDocumentIds?: ReturnType<typeof vi.fn>;
+      loadScopedDocumentChunks?: ReturnType<typeof vi.fn>;
   };
   citations?: { replaceCitations: ReturnType<typeof vi.fn> };
 }) {
@@ -113,8 +117,17 @@ async function buildService(deps: {
           supplementContextualLibraryCandidates:
             deps.retrieval.supplementContextualLibraryCandidates ??
             vi.fn().mockResolvedValue([]),
+          supplementLabelAlignedLibraryCandidates:
+            deps.retrieval.supplementLabelAlignedLibraryCandidates ??
+            vi.fn().mockResolvedValue([]),
           listTenantLabelNames:
             deps.retrieval.listTenantLabelNames ?? vi.fn().mockResolvedValue([]),
+          resolvePrimaryTextChunkId:
+            deps.retrieval.resolvePrimaryTextChunkId ?? vi.fn().mockResolvedValue(null),
+          listReadyLibraryDocumentIds:
+            deps.retrieval.listReadyLibraryDocumentIds ?? vi.fn().mockResolvedValue([]),
+          loadScopedDocumentChunks:
+            deps.retrieval.loadScopedDocumentChunks ?? vi.fn().mockResolvedValue([]),
           ...deps.retrieval,
         },
       },

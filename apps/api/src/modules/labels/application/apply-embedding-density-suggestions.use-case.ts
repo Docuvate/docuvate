@@ -13,8 +13,6 @@ import { PgEmbeddingDensityRepository } from '../infrastructure/pg-embedding-den
 import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';
 import { PurgeExclusiveTagSuggestionsService } from '../infrastructure/purge-exclusive-tag-suggestions.service.js';
 
-const TOP_CANDIDATE_COUNT = 3;
-
 export type EmbeddingDensitySuggestionOutcome = 'not_ready' | 'handled';
 
 @Injectable()
@@ -75,9 +73,16 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
 
       if (result.decisionTier === 'auto_apply' && result.labelId && !assigned.has(result.labelId)) {
         const tag = tagById.get(result.labelId);
-        if (tag && !tag.isInbox) {
+        if (
+          tag &&
+          !tag.isInbox &&
+          tagAllowedWithAssigned(result.labelId) &&
+          !tagIdConflictsWithAssigned(result.labelId, assigned, exclusivePairs)
+        ) {
           await this.taxonomy.assignTagToDocument(documentId, result.labelId);
           await this.taxonomy.clearInboxTagForDocument(documentId, userId);
+          assigned.add(result.labelId);
+          assignedGroups.add(state.label_to_group[result.labelId] ?? result.labelId);
         }
       }
 
@@ -90,46 +95,30 @@ export class ApplyEmbeddingDensitySuggestionsUseCase {
             ? result.confidence
             : 0;
 
-      const rankedCandidates = [
-        confirmId,
-        ...Object.entries(result.posterior)
-          .sort((a, b) => b[1] - a[1])
-          .map(([tagId]) => tagId),
-      ].filter((tagId): tagId is string => typeof tagId === 'string' && tagId.length > 0);
-      const rankedIds = [...new Set(rankedCandidates)]
-        .filter((tagId) => !assigned.has(tagId) && tagAllowedWithAssigned(tagId))
-        .slice(0, TOP_CANDIDATE_COUNT);
-
-      for (const tagId of rankedIds) {
-        const tag = tagById.get(tagId);
-        if (!tag || tag.isInbox) {
-          continue;
-        }
-        if (tagIdConflictsWithAssigned(tagId, assigned, exclusivePairs)) {
-          continue;
-        }
-        let confidence =
-          tagId === confirmId ? confirmConf : (result.posterior[tagId] ?? result.confidence);
-        if (assigned.size > 0 && confidence >= 0.9) {
-          confidence = Math.min(confidence, 0.89);
-        }
-        const tier =
-          tagId === confirmId && confirmId
-            ? 'confirm'
-            : result.decisionTier === 'auto_apply' && tagId === result.labelId
-              ? 'auto_apply'
-              : 'none';
-        const pct = Math.round(confidence * 100);
-        await this.taxonomy.upsertSuggestion(
-          documentId,
-          tagId,
-          `NEST ${String(pct)}% (${tag.name})`,
-          {
-            source: 'embedding_density',
-            confidence,
-            decisionTier: tier,
+      if (
+        confirmId &&
+        !assigned.has(confirmId) &&
+        tagAllowedWithAssigned(confirmId) &&
+        !tagIdConflictsWithAssigned(confirmId, assigned, exclusivePairs)
+      ) {
+        const tag = tagById.get(confirmId);
+        if (tag && !tag.isInbox) {
+          let confidence = confirmConf;
+          if (assigned.size > 0 && confidence >= 0.9) {
+            confidence = Math.min(confidence, 0.89);
           }
-        );
+          const pct = Math.round(confidence * 100);
+          await this.taxonomy.upsertSuggestion(
+            documentId,
+            confirmId,
+            `NEST ${String(pct)}% (${tag.name})`,
+            {
+              source: 'embedding_density',
+              confidence,
+              decisionTier: 'confirm',
+            }
+          );
+        }
       }
 
       return 'handled';

@@ -7,7 +7,9 @@ import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/do
 import { HEURISTIC_FIELD_EXTRACTOR_VERSION } from '../domain/heuristic-field-suggestions-fingerprint.js';
 import { mergeExtractionFieldRows } from '../infrastructure/document-extraction.persistence.js';
 import { fetchWorkerHeuristicFieldSuggestions } from '../infrastructure/fetch-worker-heuristic-field-suggestions.js';
+import { AutoAcceptCalibratedReviewUseCase } from './document-review/auto-accept-calibrated-review.use-case.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './document-review/promote-extraction-suggestions.use-case.js';
+import { stripJunkHeuristicFieldSuggestions } from './document-review/strip-junk-field-suggestions.js';
 
 const HEURISTIC_SEMANTICS = new Set(['vendor', 'amount', 'date']);
 
@@ -17,7 +19,8 @@ export class RefreshHeuristicFieldSuggestionsUseCase {
 
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    private readonly promoteHighConfidenceSuggestions: PromoteHighConfidenceExtractionSuggestionsUseCase
+    private readonly promoteHighConfidenceSuggestions: PromoteHighConfidenceExtractionSuggestionsUseCase,
+    private readonly autoAcceptCalibratedReview: AutoAcceptCalibratedReviewUseCase
   ) {}
 
   async execute(documentId: string, userId: string): Promise<void> {
@@ -32,8 +35,12 @@ export class RefreshHeuristicFieldSuggestionsUseCase {
       const semantic = parseSuggestionStorageKey(row.key);
       return semantic == null || !HEURISTIC_SEMANTICS.has(semantic);
     });
+    const firstLine = text.split('\n').find((line) => line.trim().length > 0) ?? null;
     const merged = dedupeExtractedFields(
-      mergeExtractionFieldRows(kept, suggestions)
+      stripJunkHeuristicFieldSuggestions(
+        mergeExtractionFieldRows(kept, suggestions),
+        { title: doc.title, filename: doc.filename, firstLine }
+      )
     );
     await this.documents.updateForUser(documentId, userId, {
       extractionFields: merged,
@@ -43,6 +50,7 @@ export class RefreshHeuristicFieldSuggestionsUseCase {
       HEURISTIC_FIELD_EXTRACTOR_VERSION
     );
     await this.promoteHighConfidenceSuggestions.execute(documentId, userId);
+    await this.autoAcceptCalibratedReview.execute(documentId, userId);
   }
 
   async executeForUserBatch(userId: string, documentIds: readonly string[]): Promise<void> {

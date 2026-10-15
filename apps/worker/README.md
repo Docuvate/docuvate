@@ -14,6 +14,8 @@ FastAPI service for document extraction and **CPU/ARM embedding** (no GPU requir
 
 The default Docker image **pre-downloads** Paddle det/rec weights at build time (`prewarm_paddle_models`). Cold Arena/compare on a fresh dev install may still download into `~/.paddleocr` until prewarm completes.
 
+**Memory / production:** Full extraction (PaddleOCR, ONNX layout, embedding-density) must run in a **child process** (`DOCUVATE_EXTRACT_SUBPROCESS=1`, default). In-process extract (`DOCUVATE_EXTRACT_SUBPROCESS=0`) is only allowed when `DOCUVATE_ALLOW_IN_PROCESS_EXTRACT=1` (local debugging). Running `uvicorn` on the host for lab batches will leak native heap and OOM the machine — use `docker compose … lab` with a container `mem_limit` instead.
+
 **CPU vs GPU images:** default Compose and Kubernetes manifests use the **CPU** image (`docuvate-worker`, multi-arch). For CUDA + Donut, see [DOCKER-IMAGES.md](./DOCKER-IMAGES.md) (`docker-compose.worker-gpu.yml` or Helm/Kustomize GPU component).
 
 **Image size (office ingest delta):** adding `libreoffice-{writer,calc,impress}-nogui` and Python office libraries increases the CPU image by roughly **280–320 MB** compressed versus the pre-office baseline (measure locally with `docker image ls` before/after).

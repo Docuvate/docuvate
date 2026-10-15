@@ -11,7 +11,7 @@ const HEURISTIC_FIELD_SOURCE = join(
 
 /** SHA-256 of learned/heuristic date/amount suggestion logic in the worker. */
 export const HEURISTIC_FIELD_SUGGESTIONS_LOGIC_SHA256 =
-  '959b3a63a04615af8a0133239445f971a28b7ba05d74955f7e15b3c1964d03ea';
+  'feb1903ee48932cc8ca3586742ad78649ad2115f7808f02b316ae9e85fa985e6';
 
 export function fingerprintToHeuristicFieldVersion(sha256Hex: string): number {
   return parseInt(sha256Hex.slice(0, 7), 16);

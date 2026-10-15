@@ -32,8 +32,14 @@ def run_representation_stage(state: PipelineMutableState) -> StageEnvelope[Repre
                 mime_type=state.mime_type,
                 luna=state.luna_data,
                 taco=state.taco_data,
+                layout_pdf=state.cached_layout_pdf,
             )
             representation = encode_units(units)
+            from docuvate_worker.infrastructure.onnx_e5_encoder import (  # noqa: PLC0415
+                release_onnx_encoder,
+            )
+
+            release_onnx_encoder()
             state.document_representation = representation
             return (
                 RepresentationStageData(representation=representation),

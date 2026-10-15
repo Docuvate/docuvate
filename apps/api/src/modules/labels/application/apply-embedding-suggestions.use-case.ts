@@ -16,15 +16,18 @@ import {
 } from '../../../shared/domain/ports.js';
 import { EnsureDocumentRepresentationUseCase } from '../../representation/application/ensure-document-representation.use-case.js';
 import { PgDocumentRepresentationRepository } from '../../representation/infrastructure/pg-document-representation.repository.js';
-import { cosineSimilarity } from '../domain/cosine.js';
 import { embeddingDensityGloballyEnabled } from '../domain/embedding-density-flag.js';
 import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-suggestions.js';
+import {
+  classifyWithLabelHybrid,
+  type LabelHybridDocumentRow,
+  trainUserLabelHybridModel,
+} from '../domain/label-hybrid-training.js';
 import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
 import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';
 import { PurgeExclusiveTagSuggestionsService } from '../infrastructure/purge-exclusive-tag-suggestions.service.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './apply-embedding-density-suggestions.use-case.js';
 
-const MAX_SUGGESTIONS = 5;
 const REJECT_PENALTY = 0.04;
 
 @Injectable()
@@ -94,76 +97,67 @@ export class ApplyEmbeddingSuggestionsUseCase {
         existingSuggestions.filter((s) => s.source !== 'embedding').map((s) => s.tag.id)
       );
 
-      const references = await this.labelEmbeddings.listLabeledDocumentEmbeddings(
-        userId,
-        documentId
-      );
-      const centroids = await this.labelEmbeddings.getTagCentroids(userId);
       const tags = await this.taxonomy.listTags(userId);
       const tagById = new Map(tags.map((t) => [t.id, t]));
-
-      const scores = new Map<string, number>();
-
-      for (const ref of references) {
-        const sim = cosineSimilarity(vector, ref.embedding);
-        for (const tagId of ref.tagIds) {
-          if (assigned.has(tagId)) {
-            continue;
-          }
-          const tag = tagById.get(tagId);
-          if (!tag || tag.isInbox) {
-            continue;
-          }
-          const prev = scores.get(tagId) ?? 0;
-          scores.set(tagId, Math.max(prev, sim));
-        }
-      }
-
-      for (const centroid of centroids) {
-        if (assigned.has(centroid.tagId) || centroid.centroid.length === 0) {
-          continue;
-        }
-        const tag = tagById.get(centroid.tagId);
-        if (!tag || tag.isInbox) {
-          continue;
-        }
-        const sim = cosineSimilarity(vector, centroid.centroid);
-        const prev = scores.get(centroid.tagId) ?? 0;
-        scores.set(centroid.tagId, Math.max(prev, sim));
-      }
-
-      const ranked = [...scores.entries()]
-        .map(([tagId, score]) => ({ tagId, score }))
-        .sort((a, b) => b.score - a.score)
-        .slice(0, MAX_SUGGESTIONS);
-
-      for (const { tagId, score } of ranked) {
-        if (score < minConfidence) {
-          continue;
-        }
-        if (ruleTags.has(tagId)) {
-          continue;
-        }
-        const rejections = await this.labelEmbeddings.countRejectionsForTag(userId, tagId);
-        const adjusted = Math.max(0, score - rejections * REJECT_PENALTY);
-        if (adjusted < minConfidence) {
-          continue;
-        }
-        const tag = tagById.get(tagId);
-        if (!tag) {
-          continue;
-        }
-        if (tagIdConflictsWithAssigned(tagId, assigned, exclusivePairs)) {
-          continue;
-        }
-        const pct = Math.round(adjusted * 100);
-        await this.taxonomy.upsertSuggestion(
+      const [embeddingRows, readyDocs, docMeta] = await Promise.all([
+        this.labelEmbeddings.listDocumentEmbeddingsForUser(userId),
+        this.documents.listForUser(userId, { status: 'ready' }),
+        this.documents.findByIdForUser(documentId, userId),
+      ]);
+      const docTextById = new Map(
+        readyDocs.map((doc) => [
+          doc.id,
+          `${doc.title}\n${doc.filename}\n${doc.extraction?.text ?? ''}`.slice(0, 12000),
+        ])
+      );
+      const hybridRows: LabelHybridDocumentRow[] = embeddingRows.map((row) => ({
+        documentId: row.documentId,
+        embedding: row.embedding,
+        nonInboxTagIds: row.nonInboxTagIds,
+        text: docTextById.get(row.documentId) ?? row.documentId,
+      }));
+      if (docMeta && !hybridRows.some((row) => row.documentId === documentId)) {
+        hybridRows.push({
           documentId,
-          tagId,
-          `Embedding-Ähnlichkeit ${String(pct)}% (${tag.name})`,
-          { source: 'embedding', confidence: adjusted }
-        );
+          embedding: vector,
+          nonInboxTagIds: [],
+          text: `${docMeta.title}\n${docMeta.filename}\n${trimmed}`.slice(0, 12000),
+        });
       }
+      const hybridModel = trainUserLabelHybridModel(hybridRows);
+      if (!hybridModel) {
+        return;
+      }
+      const prediction = classifyWithLabelHybrid(hybridModel, {
+        embedding: vector,
+        text: `${docMeta?.title ?? ''}\n${docMeta?.filename ?? ''}\n${trimmed}`.slice(0, 12000),
+      });
+      const tagId = prediction.tagId;
+      if (!tagId) {
+        return;
+      }
+      if (ruleTags.has(tagId)) {
+        return;
+      }
+      const rejections = await this.labelEmbeddings.countRejectionsForTag(userId, tagId);
+      const adjusted = Math.max(0, prediction.confidence - rejections * REJECT_PENALTY);
+      if (adjusted < minConfidence) {
+        return;
+      }
+      const tag = tagById.get(tagId);
+      if (!tag) {
+        return;
+      }
+      if (tagIdConflictsWithAssigned(tagId, assigned, exclusivePairs)) {
+        return;
+      }
+      const pct = Math.round(adjusted * 100);
+      await this.taxonomy.upsertSuggestion(
+        documentId,
+        tagId,
+        `Label-Modell ${String(pct)}% (${tag.name})`,
+        { source: 'embedding', confidence: adjusted }
+      );
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
       this.logger.warn(`Embedding suggestions skipped for ${documentId}: ${message}`);

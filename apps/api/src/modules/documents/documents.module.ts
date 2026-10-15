@@ -26,6 +26,7 @@ import { DocumentChatUseCase } from './application/document-chat.use-case.js';
 import { AcceptDocumentReviewUseCase } from './application/document-review/accept-document-review.use-case.js';
 import { AcceptDocumentReviewBatchUseCase } from './application/document-review/accept-document-review-batch.use-case.js';
 import { ArchiveHashIdenticalDuplicateSetsUseCase } from './application/document-review/archive-hash-identical-duplicate-sets.use-case.js';
+import { AutoAcceptCalibratedReviewUseCase } from './application/document-review/auto-accept-calibrated-review.use-case.js';
 import { ListDocumentReviewQueueUseCase } from './application/document-review/list-document-review-queue.use-case.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './application/document-review/promote-extraction-suggestions.use-case.js';
 import { GetDocumentUseCase } from './application/get-document.use-case.js';
@@ -54,6 +55,7 @@ import { UploadDocumentUseCase } from './application/upload-document.use-case.js
 import { DocumentChatGenerationActiveRegistry } from './infrastructure/document-chat-generation-active.registry.js';
 import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from './infrastructure/document-chat-generation-queue.service.js';
+import { FailedDocumentExtractionReconcileService } from './infrastructure/failed-document-extraction-reconcile.service.js';
 import { HeuristicFieldSuggestionsBackfillService } from './infrastructure/heuristic-field-suggestions-backfill.service.js';
 import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
@@ -82,6 +84,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     ListDocumentReviewQueueUseCase,
     AcceptDocumentReviewUseCase,
     AcceptDocumentReviewBatchUseCase,
+    AutoAcceptCalibratedReviewUseCase,
     PromoteHighConfidenceExtractionSuggestionsUseCase,
     RefreshHeuristicFieldSuggestionsUseCase,
     HeuristicFieldSuggestionsBackfillService,
@@ -104,6 +107,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     SendDocumentChatThreadMessageUseCase,
     RunDocumentChatGenerationUseCase,
     DocumentChatGenerationQueueService,
+    FailedDocumentExtractionReconcileService,
     StaleChatGenerationReconcileService,
     DocumentChatGenerationActiveRegistry,
     DocumentChatGenerationCancelRegistry,

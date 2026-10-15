@@ -8,9 +8,8 @@ import {
 import { Inject, Injectable } from '@nestjs/common';
 
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../../shared/domain/ports.js';
+import { autoPromoteMinConfidenceForField } from '../../domain/value-type-field-confidence.js';
 import { isoDateFromFieldValue } from './document-review-field-display.js';
-
-const AUTO_PROMOTE_CONFIDENCE_MIN = 0.9;
 
 @Injectable()
 export class PromoteHighConfidenceExtractionSuggestionsUseCase {
@@ -31,7 +30,8 @@ export class PromoteHighConfidenceExtractionSuggestionsUseCase {
         continue;
       }
       const confidence = field.confidence ?? 0;
-      if (confidence < AUTO_PROMOTE_CONFIDENCE_MIN) {
+      const minConfidence = autoPromoteMinConfidenceForField(suggestionSemantic);
+      if (confidence < minConfidence) {
         continue;
       }
       const value = field.value.trim();

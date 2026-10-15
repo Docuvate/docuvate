@@ -18,7 +18,6 @@ from docuvate_worker.application.embedding_density import (
     run_calibration,
     train_from_labeled_examples,
 )
-from docuvate_worker.application.extract import extract_document
 from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.domain.cpu_pipeline.contracts import TacoStageData
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
@@ -50,6 +49,7 @@ from docuvate_worker.infrastructure.extractors.label_custom_fields import (
 from docuvate_worker.infrastructure.hardware_capabilities import detect_hardware_capabilities
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
 from docuvate_worker.presentation.representation_response import document_representation_to_response
 from docuvate_worker.presentation.schemas import (
@@ -183,13 +183,27 @@ def extract(
         density_state = EmbeddingDensityStatePayload.model_validate(
             body.embedding_density_state.model_dump()
         )
-    result = extract_document(
-        raw,
-        body.mime_type,
+    result = run_extract_isolated(
+        content=raw,
+        mime_type=body.mime_type,
         engine=body.engine,
         embedding_density_state=density_state,
         build_exact_fact_index=body.build_exact_fact_index,
     )
+    extracted_facts = result.extracted_facts
+    if (
+        body.build_exact_fact_index
+        and extracted_facts is None
+        and result.text.strip()
+    ):
+        rebuilt = build_exact_fact_index(
+            text=result.text,
+            blocks=tuple(result.blocks or ()),
+            content=raw,
+            mime_type=body.mime_type,
+            taco=TacoStageData(tables=()),
+        )
+        extracted_facts = rebuilt.facts
     active = body.engine or ExtractorRegistry().active_engine
     suggestions = result.field_suggestions or []
     return ExtractResponse(
@@ -220,8 +234,8 @@ def extract(
         cpu_pipeline=cpu_pipeline_to_response(result.cpu_pipeline),
         document_representation=document_representation_to_response(result.document_representation),
         extracted_facts=(
-            extracted_facts_to_response(result.extracted_facts)
-            if result.extracted_facts is not None
+            extracted_facts_to_response(extracted_facts)
+            if extracted_facts is not None
             else None
         ),
         preview_pdf_base64=(

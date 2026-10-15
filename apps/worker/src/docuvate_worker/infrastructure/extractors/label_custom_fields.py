@@ -114,6 +114,35 @@ def _extract_near_label(
     return None
 
 
+def _tokenize_value_candidates(line: str) -> list[str]:
+    tokens: list[str] = []
+    buf: list[str] = []
+    for ch in line:
+        if (
+            ch.isalnum()
+            or ch in "./-"
+            or (ch == "," and buf and any(c.isdigit() for c in buf))
+        ):
+            buf.append(ch)
+        elif buf:
+            tokens.append("".join(buf))
+            buf = []
+    if buf:
+        tokens.append("".join(buf))
+    return tokens
+
+
+def _first_currency_in_value(raw: str) -> str | None:
+    for line in raw.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        for token in _tokenize_value_candidates(stripped):
+            parsed = _parse_currency_field_value(token)
+            if parsed:
+                return parsed
+    return _parse_currency_field_value(raw.strip())
+
 def _extract_by_type(
     text: str,
     field_type: str,
@@ -128,7 +157,7 @@ def _extract_by_type(
             if parsed:
                 return parsed, 0.78
         elif field_type in ("currency", "number"):
-            parsed = _parse_currency_field_value(near)
+            parsed = _first_currency_in_value(near)
             if parsed:
                 return parsed, 0.78
         else:
@@ -192,7 +221,7 @@ def _extract_from_correction_examples(
                 if parsed:
                     return parsed, 0.88
             elif example_type in ("currency", "number"):
-                parsed = _parse_currency_field_value(value)
+                parsed = _first_currency_in_value(value)
                 if parsed:
                     return parsed, 0.88
             else:

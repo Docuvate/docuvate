@@ -79,5 +79,18 @@ export function isoDateFromFieldValue(raw: string): string | null {
   if (iso) {
     return value;
   }
+  const monthYear = /^(\d{1,2})[./](\d{4})$/.exec(value);
+  if (monthYear) {
+    const monthPart = monthYear[1];
+    const yearPart = monthYear[2];
+    if (!monthPart || !yearPart) {
+      return null;
+    }
+    const month = Number.parseInt(monthPart, 10);
+    if (month < 1 || month > 12) {
+      return null;
+    }
+    return `${yearPart}-${monthPart.padStart(2, '0')}-01`;
+  }
   return null;
 }

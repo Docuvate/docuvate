@@ -66,6 +66,7 @@ describe('suggestAssignRecommendations', () => {
         documentId: 'd1',
         embedding: [0.95, 0.05, 0],
         nonInboxTagIds: [] satisfies string[],
+        text: 'vertrag mietvertrag',
       },
     ];
     const recs = suggestAssignRecommendations({
@@ -87,6 +88,7 @@ describe('suggestAssignRecommendations', () => {
         documentId: 'd1',
         embedding: [0.95, 0.05, 0],
         nonInboxTagIds: [] satisfies string[],
+        text: 'vertrag mietvertrag',
       },
     ];
     const recs = suggestAssignRecommendations({
@@ -130,16 +132,19 @@ describe('suggestAssignRecommendations', () => {
         documentId: 'kontoauszug',
         embedding: vec([0.96, 0.04, 0, 0, 0, 0, 0, 0]),
         nonInboxTagIds: [] satisfies string[],
+        text: 'kontoauszug finanzen',
       },
       {
         documentId: 'lohnsteuer',
         embedding: vec([0.04, 0.96, 0, 0, 0, 0, 0, 0]),
         nonInboxTagIds: [] satisfies string[],
+        text: 'lohnsteuer steuer',
       },
       {
         documentId: 'mietvertrag-garage',
         embedding: vec([0, 0.04, 0.96, 0, 0, 0, 0, 0]),
         nonInboxTagIds: [] satisfies string[],
+        text: 'mietvertrag vertrag garage',
       },
     ];
     const recs = suggestAssignRecommendations({

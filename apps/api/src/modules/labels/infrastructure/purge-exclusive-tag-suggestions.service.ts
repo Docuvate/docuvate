@@ -33,9 +33,10 @@ export class PurgeExclusiveTagSuggestionsService implements OnApplicationBootstr
   }
 
   async purgeForUser(userId: string): Promise<number> {
+    let removed = await this.purgeHighConfidenceContradictingNonInboxAssignments(userId);
     const exclusivePairs = await this.coOccurrence.listMutuallyExclusiveTagPairs(userId);
     if (exclusivePairs.size === 0) {
-      return 0;
+      return removed;
     }
     const rows = await this.pool.query<{ document_id: string; tag_id: string }>(
       `SELECT s.document_id, s.tag_id
@@ -45,7 +46,6 @@ export class PurgeExclusiveTagSuggestionsService implements OnApplicationBootstr
        WHERE d.user_id = $1 AND s.dismissed = false`,
       [userId]
     );
-    let removed = 0;
     for (const raw of rows.rows) {
       const record = requireRecord(raw);
       const documentId = parseString(record.document_id);
@@ -72,6 +72,47 @@ export class PurgeExclusiveTagSuggestionsService implements OnApplicationBootstr
       );
     }
     return removed;
+  }
+
+  /** Drop high-confidence non-inbox suggestions when another non-inbox label is already assigned. */
+  private async purgeHighConfidenceContradictingNonInboxAssignments(
+    userId: string
+  ): Promise<number> {
+    const result = await this.pool.query(
+      `DELETE FROM document_tag_suggestions s
+       USING documents d, tags st
+       WHERE s.document_id = d.id
+         AND d.user_id = $1
+         AND st.id = s.tag_id
+         AND NOT s.dismissed
+         AND coalesce(s.confidence, 0) >= 0.9
+         AND st.is_inbox = false
+         AND (
+           EXISTS (
+             SELECT 1
+             FROM document_tags dt
+             INNER JOIN tags at ON at.id = dt.tag_id
+             WHERE dt.document_id = s.document_id
+               AND at.is_inbox = false
+               AND dt.tag_id <> s.tag_id
+           )
+           OR NOT EXISTS (
+             SELECT 1
+             FROM document_tags dt
+             INNER JOIN tags at ON at.id = dt.tag_id
+             WHERE dt.document_id = s.document_id
+               AND at.is_inbox = false
+           )
+         )`,
+      [userId]
+    );
+    const count = result.rowCount ?? 0;
+    if (count > 0) {
+      this.logger.log(
+        `Purged ${String(count)} high-confidence tag suggestion(s) contradicting assigned labels for user ${userId}`
+      );
+    }
+    return count;
   }
 
   async purgeForDocument(userId: string, documentId: string): Promise<void> {

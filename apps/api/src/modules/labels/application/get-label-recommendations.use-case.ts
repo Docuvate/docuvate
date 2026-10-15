@@ -18,6 +18,7 @@ import {
 } from '../../../shared/domain/ports.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
+import { type LabelHybridDocumentRow,trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
 import {
   MIN_LABEL_SUPPORT_FOR_MERGE,
   suggestAssignRecommendations,
@@ -126,13 +127,28 @@ export class GetLabelRecommendationsUseCase {
       labelSupportCountByTagId.set(tagId, embeddings.length);
     }
 
+    const hybridTrainingRows: LabelHybridDocumentRow[] = embeddingRows.map((row) => {
+      const doc = docs.find((d) => d.id === row.documentId);
+      const text = doc
+        ? `${doc.title}\n${doc.filename}\n${doc.extraction?.text ?? ''}`.slice(0, 12000)
+        : `${row.title}\n${row.filename}`;
+      return {
+        documentId: row.documentId,
+        embedding: row.embedding,
+        nonInboxTagIds: row.nonInboxTagIds,
+        text,
+      };
+    });
+    const hybridModel = trainUserLabelHybridModel(hybridTrainingRows);
+
     const assignRows = suggestAssignRecommendations({
-      rows: embeddingRows,
+      rows: hybridTrainingRows,
       centroids: centroidRefs,
       tagNameById,
       labelSupportCountByTagId,
       threshold,
       dismissedKeys,
+      hybridModel,
     });
     const assignDocIds = new Set(assignRows.map((r) => r.documentId));
 

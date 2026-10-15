@@ -18,6 +18,7 @@ from docuvate_worker.domain.exact_fact_index.value_transducers import (
     classify_typed_value,
     normalize_predicate_key,
 )
+from docuvate_worker.domain.layout_ir import LayoutIrDocument
 from docuvate_worker.domain.models import ExtractionBlock
 
 if TYPE_CHECKING:
@@ -172,16 +173,19 @@ def _extract_table_facts(
     content: bytes,
     mime_type: str,
     taco: TacoStageData,
+    layout_pdf: LayoutIrDocument | None = None,
 ) -> list[ExtractedFact]:
     if mime_type != "application/pdf" or not taco.tables:
         return []
-    try:
-        from docuvate_worker.infrastructure.layout.extract import (  # noqa: PLC0415
-            extract_layout_pdf_bytes,
-        )
-    except Exception:
-        return []
-    layout = extract_layout_pdf_bytes(content)
+    layout = layout_pdf
+    if layout is None:
+        try:
+            from docuvate_worker.infrastructure.layout.extract import (  # noqa: PLC0415
+                extract_layout_pdf_bytes,
+            )
+        except Exception:
+            return []
+        layout = extract_layout_pdf_bytes(content)
     if layout is None:
         return []
     facts: list[ExtractedFact] = []
@@ -236,12 +240,13 @@ def build_exact_fact_index(
     content: bytes,
     mime_type: str,
     taco: TacoStageData,
+    layout_pdf: LayoutIrDocument | None = None,
 ) -> FactIndexBuildResult:
     started = time.perf_counter()
     merged: list[ExtractedFact] = []
     for fact in _extract_key_value_lines(text, blocks):
         _append_fact(merged, fact)
-    for fact in _extract_table_facts(content, mime_type, taco):
+    for fact in _extract_table_facts(content, mime_type, taco, layout_pdf):
         _append_fact(merged, fact)
     elapsed_ms = (time.perf_counter() - started) * 1000.0
     return FactIndexBuildResult(facts=tuple(merged), wall_time_ms=elapsed_ms)

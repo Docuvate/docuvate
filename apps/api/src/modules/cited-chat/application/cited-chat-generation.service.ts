@@ -36,17 +36,21 @@ import { rejectedClaimsAllowRetrievalFallback } from '../domain/cited-chat-retri
 import { buildPassageWithStructuredContext } from '../domain/cited-chat-structured-context.js';
 import { diversifyLibraryRerank } from '../domain/diversify-reranked-chunks.js';
 import { extractCompleteCitedClaims } from '../domain/extract-complete-cited-claims.js';
+import { filterDocumentIdsByLibraryQueryPeriod } from '../domain/filter-document-ids-by-library-query-period.js';
 import { formatLibraryExtractiveAnswer } from '../domain/format-library-extractive-answer.js';
 import { formatVerifiedCitedContent } from '../domain/format-verified-cited-content.js';
+import { libraryContextYearMonths } from '../domain/library-context-search-tokens.js';
 import { libraryExtractiveRowsForScopedFact } from '../domain/library-extractive-eligibility.js';
 import {
   buildLibraryMetadataEmbedText,
   libraryMetadataEmbeddingBoost,
 } from '../domain/library-query-metadata-boost.js';
 import {
+  libraryTenantLabelAssignedMismatchPenalty,
   libraryTenantLabelEmbeddingBoost,
   type TenantLabelEmbeddingRow,
   tenantLabelsAlignedWithQuery,
+  tenantLabelsForLibraryRetrievalSupplement,
 } from '../domain/library-tenant-label-embedding-boost.js';
 import {
   passesCalibratedRetrievalGate,
@@ -301,7 +305,47 @@ export class CitedChatGenerationService {
           documentIds: filterIds,
           queryVector,
         });
+    let tenantLabelEmbeds: TenantLabelEmbeddingRow[] = [];
+    let alignedLabels: TenantLabelEmbeddingRow[] = [];
+    let labelsForBoost: TenantLabelEmbeddingRow[] = [];
+    let labelAlignedDocumentIds: string[] = [];
     if (scope === 'library') {
+      if (queryVector != null && queryVector.length > 0) {
+        tenantLabelEmbeds = await this.loadTenantLabelEmbeddings(userId);
+        alignedLabels = tenantLabelsAlignedWithQuery(queryVector, tenantLabelEmbeds);
+        const supplementLabels = tenantLabelsForLibraryRetrievalSupplement(
+          queryVector,
+          tenantLabelEmbeds
+        );
+        const supplementLabelRows =
+          alignedLabels.length > 0 ? alignedLabels : supplementLabels;
+        labelsForBoost = supplementLabelRows;
+        const labelAlignedExtra = await this.retrieval.supplementLabelAlignedLibraryCandidates(
+          userId,
+          supplementLabelRows.map((row) => row.name)
+        );
+        if (labelAlignedExtra.length > 0) {
+          labelAlignedDocumentIds = [
+            ...new Set(labelAlignedExtra.map((chunk) => chunk.documentId)),
+          ];
+          const periodMeta = await this.retrieval.loadDocumentContextMeta(
+            userId,
+            labelAlignedDocumentIds
+          );
+          labelAlignedDocumentIds = filterDocumentIdsByLibraryQueryPeriod(
+            labelAlignedDocumentIds,
+            userMessage,
+            periodMeta
+          );
+          const seen = new Set(candidates.map((chunk) => chunk.chunkId));
+          for (const extra of labelAlignedExtra) {
+            if (!seen.has(extra.chunkId)) {
+              candidates.push(extra);
+              seen.add(extra.chunkId);
+            }
+          }
+        }
+      }
       const contextualExtra = await this.retrieval.supplementContextualLibraryCandidates(
         userId,
         userMessage,
@@ -321,14 +365,13 @@ export class CitedChatGenerationService {
           userId,
           candidates.map((chunk) => chunk.documentId)
         );
-        const tenantLabelEmbeds = await this.loadTenantLabelEmbeddings(userId);
-        const alignedLabels = tenantLabelsAlignedWithQuery(queryVector, tenantLabelEmbeds);
         const metaTexts = [...boostMeta.entries()].map(([documentId, meta]) => ({
           documentId,
           text: buildLibraryMetadataEmbedText({
             title: meta.title,
             filename: meta.filename,
             documentDate: meta.documentDate,
+            labelNames: meta.labels,
           }),
         }));
         const metaEmbedResult = await this.embedding.embedTexts(
@@ -348,10 +391,14 @@ export class CitedChatGenerationService {
             const boost =
               libraryMetadataEmbeddingBoost(queryVector, metaVectorByDoc.get(chunk.documentId)) +
               libraryTenantLabelEmbeddingBoost({
-                alignedLabels,
+                alignedLabels: labelsForBoost,
                 filename: meta?.filename ?? chunk.documentTitle,
                 title: meta?.title ?? chunk.documentTitle,
                 body: chunk.body,
+                documentLabelNames: meta?.labels ?? [],
+              }) +
+              libraryTenantLabelAssignedMismatchPenalty({
+                alignedLabels: labelsForBoost,
                 documentLabelNames: meta?.labels ?? [],
               });
             return { ...chunk, fusionScore: chunk.fusionScore + boost };
@@ -360,6 +407,46 @@ export class CitedChatGenerationService {
       }
     }
     retrieveMs = Date.now() - retrieveStarted;
+
+    let libraryPeriodDocIds: string[] = [];
+    if (scope === 'library') {
+      const wantsPeriodScope =
+        libraryContextYearMonths(userMessage).length > 0 ||
+        /\b20\d{2}\b/.test(userMessage);
+      if (wantsPeriodScope) {
+        const readyDocIds = await this.retrieval.listReadyLibraryDocumentIds(userId);
+        if (readyDocIds.length > 0) {
+          const periodMeta = await this.retrieval.loadDocumentContextMeta(userId, readyDocIds);
+          libraryPeriodDocIds = filterDocumentIdsByLibraryQueryPeriod(
+            readyDocIds,
+            userMessage,
+            periodMeta
+          );
+        }
+        if (libraryPeriodDocIds.length > 0) {
+          const allowed = new Set(libraryPeriodDocIds);
+          candidates = candidates.filter((chunk) => allowed.has(chunk.documentId));
+          const present = new Set(candidates.map((chunk) => chunk.documentId));
+          const missingPeriodDocs = libraryPeriodDocIds.filter((id) => !present.has(id));
+          if (missingPeriodDocs.length > 0) {
+            const periodChunks = await this.retrieval.loadScopedDocumentChunks(
+              userId,
+              missingPeriodDocs
+            );
+            const seen = new Set(candidates.map((chunk) => chunk.chunkId));
+            for (const extra of periodChunks) {
+              if (!seen.has(extra.chunkId)) {
+                candidates.push({ ...extra, fusionScore: Math.max(extra.fusionScore, 0.95) });
+                seen.add(extra.chunkId);
+              }
+            }
+          }
+        } else {
+          candidates = [];
+        }
+      }
+    }
+
     const chunkPool = candidates.map((chunk) => ({ chunk }));
 
     if (await aborted()) {
@@ -426,10 +513,45 @@ export class CitedChatGenerationService {
     const extractiveMinScore = rerankerUsed
       ? ragRerankerGateThreshold()
       : ragFusionGateThreshold();
-    const extractivePool =
+    let extractivePool =
       scope === 'library'
         ? libraryExtractiveRowsForScopedFact(top, answerType)
         : top.slice(0, RAG_RERANK_TOP_K);
+    if (scope === 'library' && labelAlignedDocumentIds.length > 0) {
+      const scopedDocIds = new Set(candidates.map((chunk) => chunk.documentId));
+      let allowed = new Set(
+        labelAlignedDocumentIds.filter((documentId) => scopedDocIds.has(documentId))
+      );
+      if (libraryPeriodDocIds.length > 0) {
+        const periodSet = new Set(libraryPeriodDocIds);
+        allowed = new Set([...allowed].filter((documentId) => periodSet.has(documentId)));
+      }
+      if (allowed.size > 0) {
+        const fromTop = top.filter((row) => allowed.has(row.chunk.documentId));
+        if (fromTop.length > 0) {
+          extractivePool = fromTop.slice(0, 5);
+        } else {
+          extractivePool = candidates
+            .filter((chunk) => allowed.has(chunk.documentId))
+            .sort((a, b) => b.fusionScore - a.fusionScore)
+            .slice(0, 5)
+            .map((chunk) => ({ chunk, score: chunk.fusionScore }));
+        }
+      }
+    } else if (scope === 'library' && libraryPeriodDocIds.length === 1) {
+      const onlyDocId = libraryPeriodDocIds[0];
+      if (onlyDocId) {
+        const fromTop = top.filter((row) => row.chunk.documentId === onlyDocId);
+        extractivePool =
+          fromTop.length > 0
+            ? fromTop.slice(0, 5)
+            : candidates
+                .filter((chunk) => chunk.documentId === onlyDocId)
+                .sort((a, b) => b.fusionScore - a.fusionScore)
+                .slice(0, 5)
+                .map((chunk) => ({ chunk, score: chunk.fusionScore }));
+      }
+    }
 
     const documentMeta = await this.retrieval.loadDocumentContextMeta(
       userId,
@@ -453,6 +575,7 @@ export class CitedChatGenerationService {
       return this.publishExtractiveResult({
         messageId,
         threadId,
+        userId,
         text: libraryAmountExtractive.text,
         chunk: libraryAmountExtractive.chunk,
         quote: libraryAmountExtractive.quote,
@@ -508,6 +631,7 @@ export class CitedChatGenerationService {
         return this.publishExtractiveResult({
           messageId,
           threadId,
+          userId,
           text: extractive.text,
           chunk: extractive.chunk,
           quote: extractive.quote,
@@ -555,6 +679,7 @@ export class CitedChatGenerationService {
         return this.publishExtractiveResult({
           messageId,
           threadId,
+          userId,
           text: earlyExtractive.text,
           chunk: earlyExtractive.chunk,
           quote: earlyExtractive.quote,
@@ -786,6 +911,7 @@ export class CitedChatGenerationService {
           return this.publishExtractiveResult({
             messageId,
             threadId,
+            userId,
             text: postVerifyExtractive.text,
             chunk: postVerifyExtractive.chunk,
             quote: postVerifyExtractive.quote,
@@ -815,6 +941,7 @@ export class CitedChatGenerationService {
           return this.publishExtractiveResult({
             messageId,
             threadId,
+            userId,
             text: fallbackText,
             chunk: topRow.chunk,
             quote: fallback.quote,
@@ -871,6 +998,7 @@ export class CitedChatGenerationService {
   private async publishExtractiveResult(input: {
     messageId: string;
     threadId: string;
+    userId: string;
     text: string;
     chunk: CitedChatChunkCandidate;
     quote: string;
@@ -878,15 +1006,25 @@ export class CitedChatGenerationService {
     charEnd?: number;
     errorDetail?: string;
   }): Promise<CitedChatGenerationResult> {
-    const extractiveChunkId = input.chunk.chunkId;
+    let extractiveChunkId = input.chunk.chunkId;
     const extractiveChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
+    if (!extractiveChunkIsUuid) {
+      const resolved = await this.retrieval.resolvePrimaryTextChunkId(
+        input.userId,
+        input.chunk.documentId
+      );
+      if (resolved) {
+        extractiveChunkId = resolved;
+      }
+    }
+    const citationChunkIsUuid = /^[0-9a-f-]{36}$/i.test(extractiveChunkId);
     const charStart = input.charStart ?? input.chunk.charStart ?? 0;
     const charEnd = input.charEnd ?? input.chunk.charEnd ?? input.quote.length;
-    if (extractiveChunkIsUuid) {
+    if (citationChunkIsUuid) {
       await this.citationsRepo.replaceCitations(input.messageId, [
         {
           ordinal: 1,
-          chunkId: input.chunk.chunkId,
+          chunkId: extractiveChunkId,
           quote: input.quote,
           charStart,
           charEnd,
@@ -895,7 +1033,7 @@ export class CitedChatGenerationService {
     } else {
       await this.citationsRepo.replaceCitations(input.messageId, []);
     }
-    const content = extractiveChunkIsUuid
+    const content = citationChunkIsUuid
       ? formatVerifiedCitedContent([{ text: input.text, ordinal: 1 }])
       : input.text;
     await this.threads.updateMessageGeneration(input.messageId, {

@@ -24,6 +24,7 @@ from docuvate_worker.domain.representation.constants import (
     ENCODER_ONNX_FILE,
     ENCODER_ONNX_FILE_ARM_FALLBACK,
 )
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,18 @@ _lock = threading.Lock()
 _session: ort.InferenceSession | None = None
 _tokenizer: Tokenizer | None = None
 _onnx_path: Path | None = None
+
+
+def release_onnx_encoder() -> None:
+    global _session, _tokenizer, _onnx_path  # noqa: PLW0603
+    with _lock:
+        session = _session
+        _session = None
+        _tokenizer = None
+        _onnx_path = None
+        if session is not None:
+            del session
+    reclaim_python_heap()
 
 
 def _cache_dir() -> Path:

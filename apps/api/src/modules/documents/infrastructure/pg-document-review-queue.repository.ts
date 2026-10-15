@@ -78,6 +78,7 @@ export class PgDocumentReviewQueueRepository {
         FROM document_tag_suggestions s
         WHERE s.document_id = ${docAlias}.id
           AND s.dismissed = false
+          AND COALESCE(s.confidence, 0) >= 0.82
           AND NOT EXISTS (
             SELECT 1 FROM document_tags dt
             WHERE dt.document_id = ${docAlias}.id AND dt.tag_id = s.tag_id
@@ -89,6 +90,14 @@ export class PgDocumentReviewQueueRepository {
         WHERE v.document_id = ${docAlias}.id
           AND v.field_storage_key LIKE 'suggestion:%'
           AND length(trim(v.value_text)) > 0
+          AND COALESCE(v.confidence, 0) >= 0.85
+          AND NOT (
+            v.field_storage_key IN ('suggestion:vendor', 'suggestion:sender', 'suggestion:correspondent')
+            AND (
+              v.value_text ~ '^[0-9]{1,2}[./][0-9]{1,2}[./]'
+              OR v.value_text ~ '\\m[0-9]{5}\\M'
+            )
+          )
       )
       OR EXISTS (
         SELECT 1

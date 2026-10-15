@@ -34,13 +34,32 @@ export class PgChatMessageCitationsRepository {
       charEnd: number;
     }[]
   ): Promise<void> {
-    await this.pool.query(`DELETE FROM chat_message_citations WHERE message_id = $1`, [messageId]);
-    for (const c of citations) {
-      await this.pool.query(
-        `INSERT INTO chat_message_citations (message_id, chunk_id, ordinal, quote, char_start, char_end)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
-        [messageId, c.chunkId, c.ordinal, c.quote, c.charStart, c.charEnd]
-      );
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(`SELECT pg_advisory_xact_lock(hashtext($1::text))`, [messageId]);
+      await client.query(`DELETE FROM chat_message_citations WHERE message_id = $1`, [messageId]);
+      const seenOrdinals = new Set<number>();
+      let nextOrdinal = 1;
+      for (const c of citations) {
+        let ordinal = c.ordinal;
+        while (seenOrdinals.has(ordinal)) {
+          ordinal += 1;
+        }
+        seenOrdinals.add(ordinal);
+        nextOrdinal = Math.max(nextOrdinal, ordinal + 1);
+        await client.query(
+          `INSERT INTO chat_message_citations (message_id, chunk_id, ordinal, quote, char_start, char_end)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [messageId, c.chunkId, ordinal, c.quote, c.charStart, c.charEnd]
+        );
+      }
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
     }
   }
 

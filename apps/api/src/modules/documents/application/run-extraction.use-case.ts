@@ -22,6 +22,7 @@ import { PersistDocumentRepresentationUseCase } from '../../representation/appli
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 import { ResolveUserExtractorEngineUseCase } from '../../settings/application/settings.use-cases.js';
 import { HEURISTIC_FIELD_EXTRACTOR_VERSION } from '../domain/heuristic-field-suggestions-fingerprint.js';
+import { AutoAcceptCalibratedReviewUseCase } from './document-review/auto-accept-calibrated-review.use-case.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './document-review/promote-extraction-suggestions.use-case.js';
 
 @Injectable()
@@ -39,7 +40,8 @@ export class RunExtractionUseCase {
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
     private readonly persistFacts: PersistDocumentFactsUseCase,
-    private readonly promoteHighConfidenceSuggestions: PromoteHighConfidenceExtractionSuggestionsUseCase
+    private readonly promoteHighConfidenceSuggestions: PromoteHighConfidenceExtractionSuggestionsUseCase,
+    private readonly autoAcceptCalibratedReview: AutoAcceptCalibratedReviewUseCase
   ) {}
 
   async execute(documentId: string): Promise<void> {
@@ -89,6 +91,7 @@ export class RunExtractionUseCase {
       const content = `${doc.filename}\n${doc.title}\n${result.text}`;
       await this.postOcrPipeline.execute(documentId, doc.userId, content);
       await this.promoteHighConfidenceSuggestions.execute(documentId, doc.userId);
+      await this.autoAcceptCalibratedReview.execute(documentId, doc.userId);
       await this.documents.setHeuristicFieldExtractorVersion(
         documentId,
         HEURISTIC_FIELD_EXTRACTOR_VERSION
