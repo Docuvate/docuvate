@@ -37,6 +37,7 @@ export class PgChatMessageCitationsRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query(`SELECT pg_advisory_xact_lock(hashtext($1::text))`, [messageId]);
       await client.query(`DELETE FROM chat_message_citations WHERE message_id = $1`, [messageId]);
       const seenOrdinals = new Set<number>();
       let nextOrdinal = 1;

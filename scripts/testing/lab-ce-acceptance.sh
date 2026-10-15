@@ -41,10 +41,12 @@ REVIEW_OPEN="$(psql_lab "SELECT count(DISTINCT d.id) FROM documents d WHERE d.us
 
 FAILED_PDF="$(psql_lab "SELECT count(*) FROM documents d WHERE d.user_id='${USER_ID}' AND d.status='failed' AND trim(coalesce(d.extracted_text,''))<>'' AND ${PDF_FILTER}")"
 
+set +e
 set -a
 # shellcheck disable=SC1091
 source "${ROOT}/.env" 2>/dev/null || true
 set +a
+set -e
 export DATABASE_URL="${PG}"
 export VALKEY_URL="${VALKEY_URL:-redis://127.0.0.1:16379}"
 export MINIO_ENDPOINT="${MINIO_ENDPOINT:-127.0.0.1}"
@@ -87,13 +89,15 @@ fi
 CHAT_OCT="$(echo "${CHAT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('chat_oktober_gesamtbrutto',0))" 2>/dev/null || echo 0)"
 CHAT_TAX="$(echo "${CHAT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('chat_lohnsteuer_2024',0))" 2>/dev/null || echo 0)"
 
-EXTENDED_JSON="$(
+EXTENDED_JSON_FILE="$(mktemp)"
+(
   cd "${ROOT}" && pnpm exec tsx "${ROOT}/scripts/testing/lab-ce-acceptance-extended.ts" 2>/dev/null || echo '{}'
-)"
+) >"${EXTENDED_JSON_FILE}"
 
 python3 - <<PY
 import json
-extended = json.loads('''${EXTENDED_JSON}''')
+from pathlib import Path
+extended = json.loads(Path("${EXTENDED_JSON_FILE}").read_text(encoding="utf-8") or "{}")
 print(json.dumps({
   "chat_oktober_gesamtbrutto": int("${CHAT_OCT}"),
   "chat_lohnsteuer_2024": int("${CHAT_TAX}"),
@@ -110,3 +114,4 @@ print(json.dumps({
   "review_queue_clicks_estimate": max(1, int("${REVIEW_OPEN}")),
 }, indent=2))
 PY
+rm -f "${EXTENDED_JSON_FILE}"

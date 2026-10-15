@@ -64,16 +64,17 @@ async function main(): Promise<void> {
     throw new Error('lab user not found');
   }
 
+  const app = await NestFactory.createApplicationContext(AppModule, {
+    logger: ['error', 'warn'],
+  });
   const out: Record<string, number> = {};
-  for (const probe of PROBES) {
-    const app = await NestFactory.createApplicationContext(AppModule, {
-      logger: ['error', 'warn'],
-    });
-    try {
-      const createThread = app.get(CreateLibraryChatThreadUseCase);
-      const sendMessage = app.get(SendLibraryChatThreadMessageUseCase);
-      const listMessages = app.get(ListDocumentChatThreadMessagesUseCase);
-      const citedGeneration = app.get(CitedChatGenerationService);
+  try {
+    const createThread = app.get(CreateLibraryChatThreadUseCase);
+    const sendMessage = app.get(SendLibraryChatThreadMessageUseCase);
+    const listMessages = app.get(ListDocumentChatThreadMessagesUseCase);
+    const citedGeneration = app.get(CitedChatGenerationService);
+
+    for (const probe of PROBES) {
       const thread = await createThread.execute(userId, probe.title);
       const sent = await sendMessage.execute(thread.id, userId, probe.question);
       const assistantId = sent.assistantMessage.id;
@@ -91,11 +92,11 @@ async function main(): Promise<void> {
       const content = assistant?.content ?? '';
       const quotes = assistant?.citations?.map((c) => c.quote) ?? [];
       out[probe.key] = probe.pass(content, quotes) ? 1 : 0;
-    } finally {
-      await app.close();
     }
+  } finally {
+    await app.close();
+    await pool.end();
   }
-  await pool.end();
   console.log(JSON.stringify(out, null, 2));
 }
 
