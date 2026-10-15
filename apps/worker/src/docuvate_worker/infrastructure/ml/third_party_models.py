@@ -27,6 +27,7 @@ _OLLAMA_TAG = re.compile(r"^[\w.+-]+:[\w.+-]+$")
 _NON_HF_FIRST_SEGMENT = frozenset(
     {
         "application",
+        "message",
         "image",
         "text",
         "multipart",
