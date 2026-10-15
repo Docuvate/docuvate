@@ -34,6 +34,14 @@ _tokenizer: Tokenizer | None = None
 _onnx_path: Path | None = None
 
 
+def release_onnx_encoder() -> None:
+    global _session, _tokenizer, _onnx_path  # noqa: PLW0603
+    with _lock:
+        _session = None
+        _tokenizer = None
+        _onnx_path = None
+
+
 def _cache_dir() -> Path:
     raw = os.environ.get("DOCUVATE_ENCODER_CACHE_DIR") or os.environ.get("FASTEMBED_CACHE_PATH")
     if raw:

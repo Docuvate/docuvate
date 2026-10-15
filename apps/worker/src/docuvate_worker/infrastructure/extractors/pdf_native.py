@@ -7,6 +7,7 @@ import os
 from docuvate_worker.domain.models import ExtractionBlock
 
 _DEFAULT_MIN_CHARS = 80
+_MAX_NATIVE_WORD_BLOCKS = 2_500
 
 
 def pdf_native_min_chars() -> int:
@@ -52,6 +53,8 @@ def try_extract_pdf_native(content: bytes) -> tuple[str, list[ExtractionBlock]] 
                 continue
 
             for word in words:
+                if block_index >= _MAX_NATIVE_WORD_BLOCKS:
+                    break
                 text = (word.get("text") or "").strip()
                 if not text:
                     continue
@@ -71,6 +74,21 @@ def try_extract_pdf_native(content: bytes) -> tuple[str, list[ExtractionBlock]] 
                     )
                 )
                 block_index += 1
+            if block_index >= _MAX_NATIVE_WORD_BLOCKS:
+                if page_text:
+                    blocks.append(
+                        ExtractionBlock(
+                            page=page_num,
+                            x=0.05,
+                            y=0.05,
+                            width=0.9,
+                            height=0.9,
+                            text=page_text[:4000],
+                            block_index=block_index,
+                        )
+                    )
+                    block_index += 1
+                break
 
     full_text = "\n\n".join(page_texts).strip()
     if len(full_text) < pdf_native_min_chars():

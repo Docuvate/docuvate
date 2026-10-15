@@ -21,6 +21,11 @@ PADDLE_OCR_BUNDLE_ID = "paddleocr:PP-OCRv4-mobile-latin"
 _ocr_instance: Any | None = None
 
 
+def release_paddle_ocr() -> None:
+    global _ocr_instance  # noqa: PLW0603
+    _ocr_instance = None
+
+
 def _configure_paddle_env() -> None:
     """CPU-only inference flags before any paddle import (avoids MKLDNN batch_norm cast bugs)."""
     os.environ.setdefault("FLAGS_use_mkldnn", "0")

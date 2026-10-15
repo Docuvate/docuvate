@@ -39,6 +39,7 @@ def run_exact_fact_index_stage(
             content=state.content,
             mime_type=state.mime_type,
             taco=state.taco_data,
+            layout_pdf=state.cached_layout_pdf,
         )
         availability = StageAvailability.OK if built.facts else StageAvailability.UNCERTAIN
         detail = f"{len(built.facts)} fact(s) indexed" if built.facts else "no facts extracted"

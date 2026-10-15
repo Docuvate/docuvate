@@ -28,11 +28,11 @@ def run_rotation_stage(state: PipelineMutableState) -> StageEnvelope[RotationSta
         blocks = tuple(state.blocks)
         if state.mime_type == "application/pdf" and blocks:
             try:
-                from docuvate_worker.infrastructure.layout.extract import (  # noqa: PLC0415
-                    extract_layout_pdf_bytes,
+                from docuvate_worker.infrastructure.layout.layout_pdf_cache import (  # noqa: PLC0415
+                    get_or_extract_layout_pdf,
                 )
 
-                layout = extract_layout_pdf_bytes(state.content)
+                layout = get_or_extract_layout_pdf(state)
             except Exception:
                 layout = None
             if layout is not None and layout.pages:

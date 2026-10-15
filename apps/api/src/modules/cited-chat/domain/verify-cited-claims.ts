@@ -458,8 +458,8 @@ export function verifyCitedClaims(input: {
         charStart: (row.row.chunk.charStart ?? 0) + row.match.charStart,
         charEnd: (row.row.chunk.charStart ?? 0) + row.match.charEnd,
       });
+      ordinal += 1;
     }
-    ordinal += 1;
   }
 
   return { verified, rejected };

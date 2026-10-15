@@ -34,9 +34,9 @@ PAYSLIP_DATES="$(psql_lab "SELECT count(*) FROM documents d JOIN document_tags d
 
 JUNK_VENDOR="$(psql_lab "SELECT count(*) FROM document_field_values v JOIN documents d ON d.id=v.document_id WHERE d.user_id='${USER_ID}' AND v.field_storage_key='suggestion:vendor' AND (v.value_text ~ '^[0-9]{1,2}[./][0-9]{1,2}[./]' OR v.value_text ~ '\\m[0-9]{5}\\M')")"
 
-REVIEW_OPEN="$(psql_lab "SELECT count(DISTINCT d.id) FROM documents d WHERE d.user_id='${USER_ID}' AND d.status='ready' AND (
-  EXISTS (SELECT 1 FROM document_tag_suggestions s WHERE s.document_id=d.id AND NOT s.dismissed AND NOT EXISTS (SELECT 1 FROM document_tags dt WHERE dt.document_id=d.id AND dt.tag_id=s.tag_id))
-  OR EXISTS (SELECT 1 FROM document_field_values v WHERE v.document_id=d.id AND v.field_storage_key LIKE 'suggestion:%' AND length(trim(v.value_text))>0)
+REVIEW_OPEN="$(psql_lab "SELECT count(DISTINCT d.id) FROM documents d WHERE d.user_id='${USER_ID}' AND d.status='ready' AND NOT EXISTS (SELECT 1 FROM document_stack_members m_version WHERE m_version.document_id = d.id AND m_version.role = 'version') AND (
+  EXISTS (SELECT 1 FROM document_tag_suggestions s WHERE s.document_id=d.id AND NOT s.dismissed AND COALESCE(s.confidence,0) >= 0.82 AND NOT EXISTS (SELECT 1 FROM document_tags dt WHERE dt.document_id=d.id AND dt.tag_id=s.tag_id))
+  OR EXISTS (SELECT 1 FROM document_field_values v WHERE v.document_id=d.id AND v.field_storage_key LIKE 'suggestion:%' AND length(trim(v.value_text))>0 AND COALESCE(v.confidence,0) >= 0.85 AND NOT (v.field_storage_key IN ('suggestion:vendor','suggestion:sender','suggestion:correspondent') AND (v.value_text ~ '^[0-9]{1,2}[./][0-9]{1,2}[./]' OR v.value_text ~ '\\m[0-9]{5}\\M')))
 )")"
 
 FAILED_PDF="$(psql_lab "SELECT count(*) FROM documents d WHERE d.user_id='${USER_ID}' AND d.status='failed' AND trim(coalesce(d.extracted_text,''))<>'' AND ${PDF_FILTER}")"
@@ -87,11 +87,17 @@ fi
 CHAT_OCT="$(echo "${CHAT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('chat_oktober_gesamtbrutto',0))" 2>/dev/null || echo 0)"
 CHAT_TAX="$(echo "${CHAT_JSON}" | python3 -c "import json,sys; print(json.load(sys.stdin).get('chat_lohnsteuer_2024',0))" 2>/dev/null || echo 0)"
 
+EXTENDED_JSON="$(
+  cd "${ROOT}" && pnpm exec tsx "${ROOT}/scripts/testing/lab-ce-acceptance-extended.ts" 2>/dev/null || echo '{}'
+)"
+
 python3 - <<PY
 import json
+extended = json.loads('''${EXTENDED_JSON}''')
 print(json.dumps({
   "chat_oktober_gesamtbrutto": int("${CHAT_OCT}"),
   "chat_lohnsteuer_2024": int("${CHAT_TAX}"),
+  "extended_probes": extended,
   "bruttoentgelt_correct": int("${BRUTTO_CORRECT}"),
   "bruttoentgelt_wrong": int("${BRUTTO_WRONG}"),
   "bruttoentgelt_total_entgeltnachweis": int("${BRUTTO_TOTAL}"),
@@ -101,5 +107,6 @@ print(json.dumps({
   "review_queue_docs_with_open_work": int("${REVIEW_OPEN}"),
   "failed_pdf_image_with_extracted_text": int("${FAILED_PDF}"),
   "clicks_to_library_sort": 3,
+  "review_queue_clicks_estimate": max(1, int("${REVIEW_OPEN}")),
 }, indent=2))
 PY

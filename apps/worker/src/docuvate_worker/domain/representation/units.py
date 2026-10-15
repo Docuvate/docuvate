@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from docuvate_worker.domain.cpu_pipeline.contracts import LunaStageData, TacoStageData
+from docuvate_worker.domain.layout_ir import LayoutIrDocument
 from docuvate_worker.domain.models import ExtractionBlock
 
 
@@ -82,16 +83,19 @@ def _table_row_units(
     content: bytes,
     mime_type: str,
     taco: TacoStageData,
+    layout_pdf: LayoutIrDocument | None = None,
 ) -> list[RepresentationUnit]:
     if mime_type != "application/pdf" or not taco.tables:
         return []
-    try:
-        from docuvate_worker.infrastructure.layout.extract import (  # noqa: PLC0415
-            extract_layout_pdf_bytes,
-        )
-    except Exception:
-        return []
-    layout = extract_layout_pdf_bytes(content)
+    layout = layout_pdf
+    if layout is None:
+        try:
+            from docuvate_worker.infrastructure.layout.extract import (  # noqa: PLC0415
+                extract_layout_pdf_bytes,
+            )
+        except Exception:
+            return []
+        layout = extract_layout_pdf_bytes(content)
     if layout is None:
         return []
     units: list[RepresentationUnit] = []
@@ -141,10 +145,11 @@ def build_representation_units(
     mime_type: str,
     luna: LunaStageData,
     taco: TacoStageData,
+    layout_pdf: LayoutIrDocument | None = None,
 ) -> list[RepresentationUnit]:
     """Prefer block paragraphs and table rows; fall back to plain paragraph splits."""
     block_units = _block_paragraph_units(blocks, text)
-    table_units = _table_row_units(content, mime_type, taco)
+    table_units = _table_row_units(content, mime_type, taco, layout_pdf)
     if block_units or table_units:
         merged = block_units + table_units
         return [

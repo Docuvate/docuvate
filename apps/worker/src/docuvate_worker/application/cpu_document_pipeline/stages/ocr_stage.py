@@ -39,9 +39,19 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
                     StageAvailability.OK,
                     None,
                 )
+            from docuvate_worker.infrastructure.onnx_e5_encoder import (  # noqa: PLC0415
+                release_onnx_encoder,
+            )
+
+            release_onnx_encoder()
             text, blocks = ocr_pdf_bytes(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
+            from docuvate_worker.infrastructure.extractors.paddle_engine import (  # noqa: PLC0415
+                release_paddle_ocr,
+            )
+
+            release_paddle_ocr()
             return (
                 OcrStageData(
                     text=state.text,
@@ -52,9 +62,19 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
                 None,
             )
         if state.mime_type.startswith("image/"):
+            from docuvate_worker.infrastructure.onnx_e5_encoder import (  # noqa: PLC0415
+                release_onnx_encoder,
+            )
+
+            release_onnx_encoder()
             text, blocks = ocr_image_bytes(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
+            from docuvate_worker.infrastructure.extractors.paddle_engine import (  # noqa: PLC0415
+                release_paddle_ocr,
+            )
+
+            release_paddle_ocr()
             return (
                 OcrStageData(
                     text=state.text,

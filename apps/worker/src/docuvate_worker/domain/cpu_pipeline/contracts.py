@@ -184,6 +184,7 @@ class PipelineMutableState:
     taco_data: TacoStageData = field(default_factory=lambda: TacoStageData(tables=()))
     document_representation: DocumentRepresentation | None = None
     prebuilt_layout_ir: LayoutIrDocument | None = None
+    cached_layout_pdf: LayoutIrDocument | None = None
     preview_pdf: bytes | None = None
 
 

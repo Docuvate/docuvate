@@ -7,6 +7,9 @@ from docuvate_worker.domain.models import ExtractedField
 from docuvate_worker.infrastructure.extractors.field_value_normalize import (
     strip_leading_sender_label_prefixes,
 )
+from docuvate_worker.infrastructure.ml.value_types.field_confidence_calibration import (
+    get_field_confidence_calibration,
+)
 from docuvate_worker.infrastructure.ml.value_types.model import ValueTypeModelBundle
 from docuvate_worker.infrastructure.ml.value_types.registry import get_value_type_models
 
@@ -180,7 +183,8 @@ def _strong_title_header_period_date(
                 continue
             if date_score < 48:  # noqa: PLR2004
                 continue
-            confidence = min(0.93, max(0.91, 0.45 + date_score * 0.02))
+            cal = get_field_confidence_calibration()
+            confidence = cal.date_confidence_from_log_score(date_score)
             return token, confidence
     return None
 
@@ -207,11 +211,8 @@ def _pick_best_date(text: str, bundle: ValueTypeModelBundle) -> tuple[str, float
     if best is None:
         return None
     raw_score = best[1]
-    confidence = min(0.95, max(0.45, 0.45 + raw_score * 0.02))
-    if raw_score >= 55:  # noqa: PLR2004
-        confidence = max(confidence, 0.92)
-    elif raw_score >= 48:  # noqa: PLR2004
-        confidence = max(confidence, 0.91)
+    cal = get_field_confidence_calibration()
+    confidence = cal.date_confidence_from_log_score(raw_score)
     return best[0], confidence
 
 
@@ -310,7 +311,15 @@ def learned_field_suggestions(
         vendor_id = models.log_likelihood(vendor, "identifier")
         vendor_org = models.log_likelihood(vendor, "organization")
         vendor_free = models.log_likelihood(vendor, "free_text")
-        if vendor_org > max(vendor_addr, vendor_id, vendor_free) + 2:
-            fields.append(ExtractedField(key="vendor", value=vendor, confidence=0.45))
+        cal = get_field_confidence_calibration()
+        ok, confidence = cal.vendor_meets_auto_promote_gate(
+            org_score=vendor_org,
+            free_score=vendor_free,
+            addr_score=vendor_addr,
+            id_score=vendor_id,
+            had_explicit_label=False,
+        )
+        if ok and vendor_org > max(vendor_addr, vendor_id, vendor_free) + 2:
+            fields.append(ExtractedField(key="vendor", value=vendor, confidence=confidence))
 
     return fields

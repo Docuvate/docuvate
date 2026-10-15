@@ -26,8 +26,8 @@ def run_taco_stage(state: PipelineMutableState) -> StageEnvelope[TacoStageData]:
                 "table stage requires PDF bytes",
             )
         try:
-            from docuvate_worker.infrastructure.layout.extract import (  # noqa: PLC0415
-                extract_layout_pdf_bytes,
+            from docuvate_worker.infrastructure.layout.layout_pdf_cache import (  # noqa: PLC0415
+                get_or_extract_layout_pdf,
             )
         except Exception as exc:
             return (
@@ -35,7 +35,7 @@ def run_taco_stage(state: PipelineMutableState) -> StageEnvelope[TacoStageData]:
                 StageAvailability.NOT_AVAILABLE,
                 f"layout extract unavailable: {type(exc).__name__}",
             )
-        layout = extract_layout_pdf_bytes(state.content)
+        layout = get_or_extract_layout_pdf(state)
         if layout is None:
             return (
                 TacoStageData(tables=()),
