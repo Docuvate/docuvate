@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.exact_fact_index.types import ExtractedFact
+from docuvate_worker.domain.layout_ir import LayoutIrDocument
 from docuvate_worker.domain.models import ExtractedField, ExtractionBlock
 
 if TYPE_CHECKING:
@@ -141,6 +142,8 @@ class IntegratedPipelineResult:
     kite_index: StageEnvelope[KiteIndexStageData]
     representation: StageEnvelope[RepresentationStageData]
     exact_fact_index: StageEnvelope[ExactFactIndexStageData]
+    prebuilt_layout_ir: LayoutIrDocument | None = None
+    preview_pdf: bytes | None = None
 
     def latency_report_ms(self) -> dict[str, float]:
         return {
@@ -180,6 +183,8 @@ class PipelineMutableState:
     luna_data: LunaStageData = field(default_factory=lambda: LunaStageData(labels=()))
     taco_data: TacoStageData = field(default_factory=lambda: TacoStageData(tables=()))
     document_representation: DocumentRepresentation | None = None
+    prebuilt_layout_ir: LayoutIrDocument | None = None
+    preview_pdf: bytes | None = None
 
 
 @dataclass(frozen=True)

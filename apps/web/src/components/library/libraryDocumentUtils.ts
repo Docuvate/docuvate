@@ -37,3 +37,10 @@ export function isImageMime(mimeType: string): boolean {
 export function isPdfMime(mimeType: string): boolean {
   return mimeType === 'application/pdf';
 }
+
+export function isStoredPdfPreview(doc: {
+  mimeType: string;
+  previewAvailable?: boolean;
+}): boolean {
+  return doc.previewAvailable === true && !isPdfMime(doc.mimeType);
+}

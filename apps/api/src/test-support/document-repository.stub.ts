@@ -25,6 +25,7 @@ export function createDocumentRepositoryStub(
     setCorrespondentForDocuments: vi.fn(),
     deleteDocuments: vi.fn(),
     setContentHash: vi.fn(),
+    setPreviewStorageKey: vi.fn(),
     setFolderForDocuments: vi.fn(),
     ...overrides,
   };

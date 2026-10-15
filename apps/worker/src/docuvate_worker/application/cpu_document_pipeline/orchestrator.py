@@ -67,4 +67,6 @@ def run_integrated_cpu_document_pipeline(
         fields=fields,
         kite_index=kite_index,
         exact_fact_index=exact_fact_index,
+        prebuilt_layout_ir=state.prebuilt_layout_ir,
+        preview_pdf=state.preview_pdf,
     )

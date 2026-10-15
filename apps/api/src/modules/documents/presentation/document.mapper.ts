@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type {
-  DocumentBulkRequest,
-  DocumentDto,
-  DocumentDuplicateStackSummaryDto,
-  RecognizedFieldExtractionAttemptDto,
+import {
+  type DocumentBulkRequest,
+  type DocumentDto,
+  type DocumentDuplicateStackSummaryDto,
+  documentFormatBadge,
+  documentUsesPdfPreview,
+  type RecognizedFieldExtractionAttemptDto,
 } from '@docuvate/contracts';
 
 import type { DocumentBulkRequestDto } from '../../../shared/presentation/dtos/common.dto.js';
@@ -62,6 +64,11 @@ export function toDocumentDto(
     status: entity.status,
     extractionFailureReason: entity.extractionFailureReason ?? null,
     mimeType: entity.mimeType,
+    formatBadge: documentFormatBadge(entity.mimeType, entity.filename),
+    previewAvailable: documentUsesPdfPreview(
+      entity.mimeType,
+      Boolean(entity.previewStorageKey?.trim())
+    ),
     ingestSource: entity.ingestSource ?? null,
     documentDate: entity.documentDate ? entity.documentDate.toISOString().slice(0, 10) : null,
     notes: entity.notes ?? null,

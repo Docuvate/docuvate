@@ -171,6 +171,7 @@ export function mapDocumentRow(
     title: parseString(row.title ?? row.filename),
     mimeType: parseString(row.mime_type),
     storageKey: parseString(row.storage_key),
+    previewStorageKey: parseOptionalString(row.preview_storage_key),
     archivedStorageKey: parseOptionalString(row.archived_storage_key),
     contentHash: parseOptionalString(row.content_hash),
     status: parseEnum(row.status, DOCUMENT_STATUSES, 'uploaded'),

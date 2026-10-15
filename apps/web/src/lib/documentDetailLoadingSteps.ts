@@ -39,14 +39,17 @@ export function resolveDocumentDetailLoadStep(
 }
 
 export function isDocumentPreviewPending(
-  doc: Pick<DocumentDto, 'mimeType'> | null | undefined,
+  doc: Pick<DocumentDto, 'mimeType' | 'previewAvailable'> | null | undefined,
   previewData: ArrayBuffer | null | undefined,
   previewUrl?: string | null
 ): boolean {
   if (!doc?.mimeType) {
     return false;
   }
-  const wantsPreview = doc.mimeType === 'application/pdf' || doc.mimeType.startsWith('image/');
+  const wantsPreview =
+    doc.mimeType === 'application/pdf' ||
+    doc.mimeType.startsWith('image/') ||
+    doc.previewAvailable === true;
   if (!wantsPreview) {
     return false;
   }

@@ -15,6 +15,7 @@ from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensitySta
 from docuvate_worker.domain.models import ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
 from docuvate_worker.domain.representation.encode import DocumentRepresentation
+from docuvate_worker.infrastructure.office.mimes import is_pipeline_supported_mime
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +46,16 @@ def extract_with_cpu_pipeline(
         integrated.latency_report_ms(),
     )
     blocks = list(ocr.blocks) or None
+    layout_ir_json: dict[str, object] | None = None
+    if integrated.prebuilt_layout_ir is not None:
+        layout_ir_json = integrated.prebuilt_layout_ir.to_json()
     return ExtractionResult(
         text=ocr.text,
         fields=[],
         field_suggestions=list(integrated.fields.data.suggestions),
         blocks=blocks,
+        layout_ir=layout_ir_json,
+        preview_pdf=integrated.preview_pdf,
         cpu_pipeline=CpuPipelineExtractionArtifacts(
             taco_availability=integrated.taco.availability,
             taco=integrated.taco.data,
@@ -72,12 +78,12 @@ def state_representation(integrated: IntegratedPipelineResult) -> DocumentRepres
 
 
 class PipelineExtractor(ExtractorEngine):
-    """Born-digital PDF text first, then PaddleOCR; runs the integrated CPU analysis chain."""
+    """Born-digital PDF and office formats first, then PaddleOCR for scans."""
 
     name = "pipeline"
 
     def supports(self, mime_type: str) -> bool:
-        return mime_type.startswith("image/") or mime_type == "application/pdf"
+        return is_pipeline_supported_mime(mime_type)
 
     def extract(self, content: bytes, mime_type: str) -> ExtractionResult:
         return extract_with_cpu_pipeline(content, mime_type)

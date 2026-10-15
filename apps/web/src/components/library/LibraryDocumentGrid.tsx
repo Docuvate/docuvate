@@ -56,7 +56,13 @@ export function LibraryDocumentGrid({
             />
           </div>
           <Link to={`/documents/${doc.id}`} className="doc-card-link">
-            <DocumentThumb documentId={doc.id} mimeType={doc.mimeType} title={doc.title} />
+            <DocumentThumb
+              documentId={doc.id}
+              mimeType={doc.mimeType}
+              title={doc.title}
+              formatBadge={doc.formatBadge}
+              previewAvailable={doc.previewAvailable}
+            />
             <div className="doc-card-body">
               <div className="doc-card-title-row">
                 <h3 className="doc-card-title">{doc.title}</h3>

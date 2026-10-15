@@ -36,6 +36,7 @@ import { GetDocumentLayoutCompareSummaryUseCase } from '../application/get-docum
 import { GetDocumentLayoutHtmlUseCase } from '../application/get-document-layout-html.use-case.js';
 import { GetDocumentLayoutIrUseCase } from '../application/get-document-layout-ir.use-case.js';
 import { GetDocumentLayoutTypstUseCase } from '../application/get-document-layout-typst.use-case.js';
+import { GetDocumentPreviewUseCase } from '../application/get-document-preview.use-case.js';
 import { ListDocumentChatThreadMessagesUseCase } from '../application/list-document-chat-thread-messages.use-case.js';
 import { ListDocumentChatThreadsUseCase } from '../application/list-document-chat-threads.use-case.js';
 import { ListDocumentsUseCase } from '../application/list-documents.use-case.js';
@@ -109,6 +110,7 @@ describe('DocumentsController layout routes', () => {
             deleteDocument: DeleteDocumentUseCase,
             bulkDocuments: BulkDocumentsUseCase,
             getDocumentContent: GetDocumentContentUseCase,
+            getDocumentPreview: GetDocumentPreviewUseCase,
             loadSuggestions: LoadDocumentLabelSuggestionsUseCase,
             refreshEmbeddings: RefreshEmbeddingSuggestionsUseCase,
             documentChat: DocumentChatUseCase,
@@ -146,8 +148,9 @@ describe('DocumentsController layout routes', () => {
               updateDocument,
               deleteDocument,
               bulkDocuments,
-              getDocumentContent,
-              loadSuggestions,
+            getDocumentContent,
+            getDocumentPreview,
+            loadSuggestions,
               refreshEmbeddings,
               documentChat,
               listDocumentChatThreads,
@@ -185,6 +188,7 @@ describe('DocumentsController layout routes', () => {
             DeleteDocumentUseCase,
             BulkDocumentsUseCase,
             GetDocumentContentUseCase,
+            GetDocumentPreviewUseCase,
             LoadDocumentLabelSuggestionsUseCase,
             RefreshEmbeddingSuggestionsUseCase,
             DocumentChatUseCase,
@@ -228,6 +232,7 @@ describe('DocumentsController layout routes', () => {
         { provide: DeleteDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: BulkDocumentsUseCase, useValue: useCaseExecuteMock() },
         { provide: GetDocumentContentUseCase, useValue: useCaseExecuteMock() },
+        { provide: GetDocumentPreviewUseCase, useValue: useCaseExecuteMock() },
         { provide: LoadDocumentLabelSuggestionsUseCase, useValue: useCaseExecuteMock() },
         { provide: RefreshEmbeddingSuggestionsUseCase, useValue: useCaseExecuteMock() },
         { provide: DocumentChatUseCase, useValue: useCaseExecuteMock() },

@@ -3,6 +3,7 @@
  * Regenerate synthetic smoke-bench fixtures (no personal data).
  * Committed outputs are used in CI; run locally when editing sources or manifest.
  */
+import { execSync } from 'node:child_process';
 import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -186,6 +187,12 @@ writeFileSync(
     'Memo synthetisch',
     'Dieses DOCX ist ein reines Testdokument ohne personenbezogene Daten.'
   )
+);
+
+const xlsxOut = join(fixturesDir, '12-costs-synthetic.xlsx');
+execSync(
+  `uv run --project "${join(here, '../../apps/worker')}" python -c "from tests.synthetic_office_fixtures import synthetic_xlsx_bytes; open('${xlsxOut}','wb').write(synthetic_xlsx_bytes())"`,
+  { stdio: 'inherit' }
 );
 
 console.log(`Smoke fixtures written to ${fixturesDir}`);

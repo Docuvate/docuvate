@@ -43,3 +43,4 @@ class ExtractionResult:
     cpu_pipeline: CpuPipelineExtractionArtifacts | None = None
     document_representation: DocumentRepresentation | None = None
     extracted_facts: tuple[ExtractedFact, ...] | None = None
+    preview_pdf: bytes | None = None

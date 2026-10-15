@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+export * from './upload-formats.js';
 import type { ExtractedFactDto } from './extracted-facts.js';
 import type { RecognizedFieldExtractionAttemptDto } from './field-extraction-attempt.js';
 
@@ -602,6 +603,10 @@ export interface DocumentDto {
   /** Set when status is failed (extraction or enqueue error). */
   extractionFailureReason?: string | null;
   mimeType: string;
+  /** Short file-type badge (DOCX, PDF, …). */
+  formatBadge?: string;
+  /** True when GET /documents/:id/preview serves an application/pdf body. */
+  previewAvailable?: boolean;
   /** Machine ingest channel (e.g. scanner_sftp). */
   ingestSource?: string | null;
   documentDate?: string | null;
