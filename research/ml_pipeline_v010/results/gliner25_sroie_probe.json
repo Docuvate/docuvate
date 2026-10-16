@@ -1,0 +1,31 @@
+{
+  "benchmark_kind": "public_dataset_field_extraction_subset",
+  "dataset": "sroie",
+  "documents": 15,
+  "models": {
+    "gliner25_small": {
+      "model_id": "fastino/gliner2.5-small-v1",
+      "license": "Apache-2.0",
+      "status": "ok",
+      "micro_precision": 0.0,
+      "micro_recall": 0.0,
+      "micro_f1": 0.0,
+      "exact_match_docs": 0,
+      "exact_match_rate": 0.0,
+      "documents": 15.0,
+      "latency_ms_median": 1469.5877620000033
+    },
+    "gliner25_base": {
+      "model_id": "fastino/gliner2.5-base-v1",
+      "license": "Apache-2.0",
+      "status": "ok",
+      "micro_precision": 0.0,
+      "micro_recall": 0.0,
+      "micro_f1": 0.0,
+      "exact_match_docs": 0,
+      "exact_match_rate": 0.0,
+      "documents": 15.0,
+      "latency_ms_median": 2482.406860000026
+    }
+  }
+}

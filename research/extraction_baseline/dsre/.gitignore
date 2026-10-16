@@ -1,0 +1,7 @@
+.cache/
+data/*.npz
+results/*.png
+results/*.csv
+results/*.log
+!results/*.json
+__pycache__/
