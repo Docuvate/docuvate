@@ -1,8 +1,23 @@
 {
   "omp_threads": 4,
   "docker_8g": false,
-  "note": "Docker unavailable on benchmark VM; GLiNER+PyTorch concurrent runs hit ~15 GiB host limit (OOM at batch>1). DSRE-only peak RSS ~0.6–2.2 GiB in spot checks.",
-  "dsre_relational_train_seconds_sroie": 226,
-  "dsre_episode_score_seconds_sroie_approx": 4,
-  "hardware": "4 vCPU Intel Xeon KVM, no GPU"
+  "docker_note": "Not run — Docker unavailable on benchmark VM",
+  "peak_rss_mb_start": 12.5,
+  "peak_rss_mb_end": 2224.0,
+  "total_core_benchmark_wall_seconds": 3300,
+  "gliner2_batch_size": 1,
+  "gliner2_latency_ms_per_document": {
+    "sroie": {"median": 2463.7, "p95": 3489.7},
+    "cord": {"median": 1834.7, "p95": 2959.8}
+  },
+  "dsre_relational_episode_latency_ms": {
+    "sroie": {"median": 1.29, "p95": 1.44},
+    "cord": {"median": 3.62, "p95": 3.83}
+  },
+  "skipped_optional": [
+    "docker_8g_cgroup",
+    "gliner_dsre_rerank",
+    "few_shot_learning_curve",
+    "bootstrap_ci"
+  ]
 }
