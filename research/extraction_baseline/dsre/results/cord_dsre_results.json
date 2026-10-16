@@ -1,0 +1,34 @@
+{
+  "dataset": "cord",
+  "candidate_recall": 0.9323076923076923,
+  "heads": [
+    {
+      "head": "cosine",
+      "test_raw": {"f1": 0.0014673514306676452},
+      "test_gated": {"f1": 0.0},
+      "product_approved": false
+    },
+    {
+      "head": "linear",
+      "test_raw": {"f1": 0.13010516018586452},
+      "test_gated": {"f1": 0.0},
+      "product_approved": false
+    },
+    {
+      "head": "bilinear",
+      "test_raw": {"f1": 0.13010516018586452},
+      "test_gated": {"f1": 0.0},
+      "product_approved": false
+    },
+    {
+      "head": "relational",
+      "test_raw": {"f1": 0.19148936170212763},
+      "test_gated": {"f1": 0.0},
+      "product_approved": false
+    }
+  ],
+  "gliner2_reference": {
+    "source": "research/extraction_baseline/results/benchmark_scores.json",
+    "micro_f1": 0.4253521126760564
+  }
+}

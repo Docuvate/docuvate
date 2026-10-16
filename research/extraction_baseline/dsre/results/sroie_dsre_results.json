@@ -1,0 +1,36 @@
+{
+  "dataset": "sroie",
+  "candidate_recall": 0.6452442159383034,
+  "heads": [
+    {
+      "head": "cosine",
+      "test_raw": {"f1": 0.004139562389118865},
+      "test_gated": {"f1": 0.0},
+      "product_approved": false
+    },
+    {
+      "head": "linear",
+      "test_raw": {"f1": 0.05736250739207569},
+      "test_gated": {"f1": 0.0},
+      "product_approved": false
+    },
+    {
+      "head": "bilinear",
+      "test_raw": {"f1": 0.056179775280898875},
+      "test_gated": {"f1": 0.0},
+      "product_approved": false
+    },
+    {
+      "head": "relational",
+      "test_raw": {"f1": 0.06150206978119456},
+      "test_gated": {"f1": 0.0},
+      "product_approved": false
+    }
+  ],
+  "gliner2_reference": {
+    "source": "research/extraction_baseline/results/benchmark_scores.json",
+    "micro_f1": 0.42109566639411283,
+    "note": "Round-1 GLiNER2 zero-shot on identical field schema (test split); document-level normalized value match."
+  },
+  "bootstrap_relational_test_f1_95pct_note": "Run scripts/run_dsre_benchmark.py for full bootstrap CI (family resample)."
+}
