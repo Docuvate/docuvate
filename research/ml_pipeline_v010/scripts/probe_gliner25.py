@@ -30,29 +30,24 @@ CANDIDATES: tuple[tuple[str, str, str], ...] = (
 )
 
 
-def load_gliner25(model_id: str):
-    try:
-        from gliner2 import AutoExtractor
-    except ImportError as exc:
-        msg = "gliner2 package with AutoExtractor required for GLiNER2.5"
-        raise SystemExit(msg) from exc
+sys.path.insert(0, str(ROOT / "lib"))
+from field_extractor_backends import ExtractorId, extract_spans, load_extractor, unload_all_models  # noqa: E402
+from unified_gliner_protocol import entity_types_for_dataset  # noqa: E402
 
-    return AutoExtractor.from_pretrained(
-        model_id,
-        cache_dir=str(ROOT.parents[1] / "research" / "extraction_baseline" / ".cache" / "huggingface"),
-    )
+def resolve_extractor_id(model_id: str) -> ExtractorId:
+    if model_id == "fastino/gliner2.5-small-v1":
+        return "gliner2.5-small-v1"
+    if model_id == "fastino/gliner2.5-base-v1":
+        return "gliner2.5-base-v1"
+    msg = f"unsupported model_id {model_id}"
+    raise ValueError(msg)
 
 
-def extract_gliner25(extractor, text: str, labels: list[str]) -> list[tuple[str, str]]:
-    schema = {label: label.replace("_", " ") for label in labels}
-    out = extractor.extract(text, schema)
-    preds: list[tuple[str, str]] = []
-    entities = out.get("entities") if isinstance(out, dict) else None
-    if isinstance(entities, dict):
-        for key, spans in entities.items():
-            if isinstance(spans, list) and spans:
-                preds.append((str(key), str(spans[0])))
-    return preds
+def extract_gliner25(model_id: str, text: str, labels: list[str]) -> list[tuple[str, str]]:
+    eid = resolve_extractor_id(model_id)
+    load_extractor(eid)
+    spans = extract_spans(eid, text, labels, with_confidence=True)
+    return [(sp.key, sp.value) for sp in spans]
 
 
 def main() -> int:
@@ -78,10 +73,9 @@ def main() -> int:
         status = "ok"
         err: str | None = None
         try:
-            extractor = load_gliner25(model_id)
             for ex in examples:
                 t0 = time.perf_counter()
-                raw = extract_gliner25(extractor, ex.text, labels)
+                raw = extract_gliner25(model_id, ex.text, labels)
                 lat.append((time.perf_counter() - t0) * 1000.0)
                 from common import FieldPrediction
 
@@ -106,6 +100,7 @@ def main() -> int:
         if err:
             entry["error"] = err
         report["models"][slug] = entry
+        unload_all_models()
 
     out_dir = ROOT / "results"
     out_dir.mkdir(parents=True, exist_ok=True)

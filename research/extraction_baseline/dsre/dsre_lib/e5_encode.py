@@ -34,9 +34,9 @@ def _l2_rows(matrix: np.ndarray) -> np.ndarray:
     return matrix / norms
 
 
-def embed_queries(texts: list[str]) -> np.ndarray:
+def _embed_prefixed(texts: list[str], prefix: str) -> np.ndarray:
     session, tokenizer, _ = _load_artifacts()
-    prefixed = [QUERY_PREFIX + (t.strip() or " ") for t in texts]
+    prefixed = [prefix + (t.strip() or " ") for t in texts]
     encoded = [tokenizer.encode(t) for t in prefixed]
     max_len = min(max(len(e.ids) for e in encoded), 512)
     batch = len(encoded)
@@ -53,6 +53,14 @@ def embed_queries(texts: list[str]) -> np.ndarray:
     counts = np.clip(mask.sum(axis=1), 1e-9, None)
     pooled = summed / counts
     return _l2_rows(pooled.astype(np.float32))
+
+
+def embed_queries(texts: list[str]) -> np.ndarray:
+    return _embed_prefixed(texts, QUERY_PREFIX)
+
+
+def embed_passages(texts: list[str]) -> np.ndarray:
+    return _embed_prefixed(texts, PASSAGE_PREFIX)
 
 
 def embed_document_token_matrix(doc_text: str) -> tuple[np.ndarray, list[tuple[int, int]]]:
