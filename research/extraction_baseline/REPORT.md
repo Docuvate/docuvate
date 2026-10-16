@@ -228,3 +228,7 @@ python3 measure_latency.py          # RSS + latency sample
 ---
 
 *Generated as part of branch `cursor/extraction-baseline-5a49`. Raw artifacts: `results/benchmark_scores.json`, `results/e5_onnx_probe.json`, `results/model_manifest.json`, `results/latency_rss.json`.*
+
+## Round 2: DSRE
+
+See **`dsre/REPORT.md`** — E5 token spans + layout relational ridge vs GLiNER2 on the same schemas (CORD/SROIE test splits).
