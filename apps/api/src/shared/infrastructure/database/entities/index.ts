@@ -54,6 +54,7 @@ import { InstallationUserRolesEntity } from './installation-user-roles.entity.js
 import { InstallationUserSuspensionsEntity } from './installation-user-suspensions.entity.js';
 import { LabelRecommendationBlocklistEntity } from './label-recommendation-blocklist.entity.js';
 import { LabelRecommendationBlocklistPatternsEntity } from './label-recommendation-blocklist-patterns.entity.js';
+import { LabelRecommendationClusterExclusionsEntity } from './label-recommendation-cluster-exclusions.entity.js';
 import { LabelRecommendationDismissalsEntity } from './label-recommendation-dismissals.entity.js';
 import { MappenEntity } from './mappen.entity.js';
 import { MlCanaryEvaluationsEntity } from './ml-canary-evaluations.entity.js';
@@ -136,6 +137,7 @@ export const TYPEORM_ENTITIES = [
   InstallationUserSuspensionsEntity,
   LabelRecommendationBlocklistEntity,
   LabelRecommendationBlocklistPatternsEntity,
+  LabelRecommendationClusterExclusionsEntity,
   LabelRecommendationDismissalsEntity,
   MappenEntity,
   PasskeyEntity,
@@ -221,6 +223,7 @@ export {
   InstallationUserSuspensionsEntity,
   LabelRecommendationBlocklistEntity,
   LabelRecommendationBlocklistPatternsEntity,
+  LabelRecommendationClusterExclusionsEntity,
   LabelRecommendationDismissalsEntity,
   MappenEntity,
   MlCanaryEvaluationsEntity,

@@ -45,6 +45,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'DocumentPreviewStorage20261015180000',
   'PurgeCentroidLabelSuggestions20261015193000',
   'PurgeVocabularyLabelSuggestions20261015200000',
+  'LabelClusterDocumentExclusions20261017120000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -178,6 +179,8 @@ export async function migrationSchemaPresent(
       return migrationSchemaPresent(runner, 'DocumentPreviewStorage20261015180000');
     case 'PurgeVocabularyLabelSuggestions20261015200000':
       return migrationSchemaPresent(runner, 'PurgeCentroidLabelSuggestions20261015193000');
+    case 'LabelClusterDocumentExclusions20261017120000':
+      return regClassExists(runner, 'public.label_recommendation_cluster_exclusions');
     default:
       return false;
   }

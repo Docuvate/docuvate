@@ -24,6 +24,7 @@ export type AcceptLabelRecommendationRequestDto = {
     removeTagId?: string;
     color?: string;
     documentIds?: Array<string>;
+    excludedDocumentIds?: Array<string>;
 };
 
 export type AcceptLabelRecommendationResponseDto = {

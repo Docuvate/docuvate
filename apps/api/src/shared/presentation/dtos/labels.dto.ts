@@ -44,6 +44,11 @@ export class AcceptLabelRecommendationRequestDto {
   @IsArray()
   @IsUUID('4', { each: true })
   documentIds?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  excludedDocumentIds?: string[];
 }
 
 export class LabelRecommendationListResponseDto {

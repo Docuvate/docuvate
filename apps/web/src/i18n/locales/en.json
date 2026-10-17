@@ -1211,7 +1211,13 @@
     "renameAction": "Rename",
     "moreDocuments_one": "+{{count}} more document",
     "moreDocuments_other": "+{{count}} more documents",
-    "documentsAria": "Affected documents"
+    "documentsAria": "Affected documents",
+    "acceptSubset": "Apply to {{selected}} of {{total}}",
+    "selectAllDocuments": "Select all",
+    "deselectAllDocuments": "Deselect all",
+    "exclusionHint": "Deselected documents will not be suggested again for this label.",
+    "documentSelectAria": "Select document “{{title}}” for the new label",
+    "documentSimilarityPct": "{{pct}}% similarity"
   },
   "labelCustomFields": {
     "extractHint": "Fields are extracted once this label is on a document or a suggestion meets the confidence threshold in settings.",

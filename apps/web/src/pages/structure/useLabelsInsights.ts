@@ -56,8 +56,14 @@ interface LoadOptions {
   silent?: boolean;
 }
 
+export interface LabelRecommendationAcceptOptions {
+  documentIds: string[];
+  excludedDocumentIds: string[];
+}
+
 export function useLabelsInsights(
-  onReloadTags: (options?: LoadOptions) => Promise<void>
+  onReloadTags: (options?: LoadOptions) => Promise<void>,
+  hooks?: { onSaveSuccess?: () => void }
 ) {
   const [recommendations, setRecommendations] = useState<LabelRecommendationDto[]>([]);
   const [documents, setDocuments] = useState<DocumentDto[]>([]);
@@ -129,7 +135,7 @@ export function useLabelsInsights(
   }, []);
 
   const accept = useCallback(
-    async (item: LabelRecommendationDto) => {
+    async (item: LabelRecommendationDto, options?: LabelRecommendationAcceptOptions) => {
       setBusyId(item.id);
       setError(null);
       setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
@@ -137,9 +143,11 @@ export function useLabelsInsights(
         if (item.kind === 'assign' && item.tagId) {
           await acceptLabelRecommendation(item.id, { tagId: item.tagId });
         } else if (item.kind === 'new') {
+          const fallbackIds = item.sampleDocumentIds ?? [];
           await acceptLabelRecommendation(item.id, {
             proposedName: item.proposedName,
-            documentIds: item.sampleDocumentIds,
+            documentIds: options?.documentIds ?? fallbackIds,
+            excludedDocumentIds: options?.excludedDocumentIds,
           });
         } else if (item.kind === 'merge' && item.tagIds?.length === 2) {
           await acceptLabelRecommendation(item.id, {
@@ -153,6 +161,7 @@ export function useLabelsInsights(
           });
         }
         await Promise.all([onReloadTags({ silent: true }), load({ silent: true })]);
+        hooks?.onSaveSuccess?.();
       } catch (err) {
         setError(formatUserFacingError(err, 'errors.actionFailed'));
         void load({ silent: true });
@@ -160,7 +169,7 @@ export function useLabelsInsights(
         setBusyId(null);
       }
     },
-    [load, onReloadTags]
+    [hooks, load, onReloadTags]
   );
 
   const dismiss = useCallback(async (item: LabelRecommendationDto, scope: 'local' | 'global') => {

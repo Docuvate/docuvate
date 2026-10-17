@@ -413,6 +413,11 @@ export interface LabelRecommendationBlocklistPattern {
   createdAt: Date;
 }
 
+export interface LabelClusterDocumentExclusion {
+  labelKey: string;
+  documentId: string;
+}
+
 export interface LabelEmbeddingRepository {
   saveDocumentEmbedding(
     documentId: string,
@@ -431,6 +436,12 @@ export interface LabelEmbeddingRepository {
   getTagCentroids(userId: string): Promise<TagCentroidRecord[]>;
   listDismissedRecommendationKeys(userId: string): Promise<string[]>;
   dismissRecommendation(userId: string, recommendationKey: string): Promise<void>;
+  listClusterDocumentExclusions(userId: string): Promise<LabelClusterDocumentExclusion[]>;
+  addClusterDocumentExclusions(
+    userId: string,
+    labelKey: string,
+    documentIds: string[]
+  ): Promise<void>;
   listRecommendationBlocklist(userId: string): Promise<LabelRecommendationBlocklistEntry[]>;
   addRecommendationBlocklist(
     userId: string,

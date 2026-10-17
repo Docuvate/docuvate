@@ -91,6 +91,7 @@ export class LabelsOverviewController {
       removeTagId: body.removeTagId,
       color: body.color,
       documentIds: body.documentIds,
+      excludedDocumentIds: body.excludedDocumentIds,
     });
   }
 

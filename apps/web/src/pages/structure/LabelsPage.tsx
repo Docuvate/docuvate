@@ -64,7 +64,7 @@ export function LabelsPage() {
     }
   }, []);
 
-  const insights = useLabelsInsights(loadTags);
+  const insights = useLabelsInsights(loadTags, { onSaveSuccess: pushSuccess });
   const loadInsights = insights.load;
 
   useEffect(() => {
@@ -171,7 +171,7 @@ export function LabelsPage() {
         loading={insights.loading}
         busyId={insights.busyId}
         documentReviewPendingCount={insights.documentReviewPendingCount}
-        onAccept={(item) => void insights.accept(item)}
+        onAccept={(item, options) => void insights.accept(item, options)}
         onRename={(item) => {
           if (item.tagId) {
             startEdit({

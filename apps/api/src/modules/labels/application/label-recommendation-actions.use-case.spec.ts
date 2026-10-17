@@ -1,8 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-/* eslint-disable @typescript-eslint/consistent-type-assertions -- vitest partial mocks */
 import { describe, expect, it, vi } from 'vitest';
 
+import { createAssignDocumentTagUseCaseStub } from '../../../test-support/assign-document-tag-use-case.stub.js';
+import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
+import { createLabelEmbeddingRepositoryStub } from '../../../test-support/label-embedding-repository.stub.js';
+import { createTaxonomyRepositoryStub } from '../../../test-support/taxonomy-repository.stub.js';
+import {
+  createUserPreferencesEntity,
+  createUserPreferencesRepositoryStub,
+} from '../../../test-support/user-preferences-repository.stub.js';
 import type { TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 import { AcceptLabelRecommendationUseCase } from './label-recommendation-actions.use-case.js';
 
@@ -26,81 +33,87 @@ function tag(id: string, name: string): TagEntity {
 
 describe('AcceptLabelRecommendationUseCase', () => {
   it('accepts assign recommendations when document embeddings are missing', async () => {
-    const assignTag = {
-      execute: vi.fn().mockResolvedValue(undefined),
-    };
-    const labelEmbeddings = {
-      dismissRecommendation: vi.fn().mockResolvedValue(undefined),
+    const assignExecute = vi.fn().mockResolvedValue(undefined);
+    const assignTag = createAssignDocumentTagUseCaseStub({ execute: assignExecute });
+    const dismissRecommendation = vi.fn().mockResolvedValue(undefined);
+    const labelEmbeddings = createLabelEmbeddingRepositoryStub({
+      dismissRecommendation,
       listDocumentEmbeddingsForUser: vi.fn().mockResolvedValue([]),
       getTagCentroids: vi.fn().mockResolvedValue([]),
-    };
-    const prefs = {
-      getForUser: vi.fn().mockResolvedValue({ labelNearSimilarityThreshold: 0.7 }),
-      upsert: vi.fn().mockResolvedValue(undefined),
-    };
-    const taxonomy = {};
+    });
+    const prefs = createUserPreferencesRepositoryStub({
+      getForUser: vi
+        .fn()
+        .mockResolvedValue(createUserPreferencesEntity({ labelNearSimilarityThreshold: 0.7 })),
+      upsert: vi.fn().mockResolvedValue(createUserPreferencesEntity()),
+    });
+    const taxonomy = createTaxonomyRepositoryStub();
+    const documents = createDocumentRepositoryStub({
+      findByIdForUser: vi.fn().mockResolvedValue({ id: DOC }),
+    });
 
     const useCase = new AcceptLabelRecommendationUseCase(
-      taxonomy as never,
-      labelEmbeddings as never,
-      prefs as never,
-      assignTag as never
+      taxonomy,
+      labelEmbeddings,
+      prefs,
+      documents,
+      assignTag
     );
 
     const recommendationId = `assign:${DOC}:${TAG}`;
     const result = await useCase.execute(USER, { recommendationId, tagId: TAG });
 
     expect(result).toEqual({ tagId: TAG, action: 'assigned', documentId: DOC });
-    expect(assignTag.execute).toHaveBeenCalledWith(DOC, USER, TAG, { learnFromEmbedding: true });
-    expect(labelEmbeddings.dismissRecommendation).toHaveBeenCalledWith(USER, recommendationId);
+    expect(assignExecute).toHaveBeenCalledWith(DOC, USER, TAG, { learnFromEmbedding: true });
+    expect(dismissRecommendation).toHaveBeenCalledWith(USER, recommendationId);
   });
 
   it('creates a cluster label and assigns sample documents when documentIds are provided', async () => {
     const createdTag = tag('tag-new', 'Cluster Label');
-    const assignTag = {
-      execute: vi.fn().mockResolvedValue(undefined),
-    };
-    const taxonomy = {
+    const assignExecute = vi.fn().mockResolvedValue(undefined);
+    const assignTag = createAssignDocumentTagUseCaseStub({ execute: assignExecute });
+    const createTag = vi.fn().mockResolvedValue(createdTag);
+    const dismissRecommendation = vi.fn().mockResolvedValue(undefined);
+    const addClusterDocumentExclusions = vi.fn().mockResolvedValue(undefined);
+    const taxonomy = createTaxonomyRepositoryStub({
       listTags: vi.fn().mockResolvedValue([]),
-      createTag: vi.fn().mockResolvedValue(createdTag),
-    };
-    const labelEmbeddings = {
-      dismissRecommendation: vi.fn().mockResolvedValue(undefined),
-    };
-    const prefs = {
-      getForUser: vi.fn(),
-      upsert: vi.fn(),
-    };
+      createTag,
+    });
+    const labelEmbeddings = createLabelEmbeddingRepositoryStub({
+      dismissRecommendation,
+      addClusterDocumentExclusions,
+    });
+    const prefs = createUserPreferencesRepositoryStub();
+    const documents = createDocumentRepositoryStub({
+      findByIdForUser: vi.fn().mockImplementation((id: string) => Promise.resolve({ id })),
+    });
 
     const useCase = new AcceptLabelRecommendationUseCase(
-      taxonomy as never,
-      labelEmbeddings as never,
-      prefs as never,
-      assignTag as never
+      taxonomy,
+      labelEmbeddings,
+      prefs,
+      documents,
+      assignTag
     );
 
     const result = await useCase.execute(USER, {
       recommendationId: 'new:cluster:cluster-label',
       proposedName: 'Cluster Label',
-      documentIds: [DOC_A, DOC_B],
+      documentIds: [DOC_A],
+      excludedDocumentIds: [DOC_B],
     });
 
     expect(result).toEqual({ tagId: createdTag.id, action: 'created' });
-    expect(taxonomy.createTag).toHaveBeenCalledWith(USER, 'Cluster Label', {
+    expect(createTag).toHaveBeenCalledWith(USER, 'Cluster Label', {
       color: '#64748b',
       matchingAlgorithm: 'any',
       match: 'Cluster Label',
     });
-    expect(assignTag.execute).toHaveBeenCalledTimes(2);
-    expect(assignTag.execute).toHaveBeenCalledWith(DOC_A, USER, createdTag.id, {
+    expect(assignExecute).toHaveBeenCalledTimes(1);
+    expect(assignExecute).toHaveBeenCalledWith(DOC_A, USER, createdTag.id, {
       learnFromEmbedding: true,
     });
-    expect(assignTag.execute).toHaveBeenCalledWith(DOC_B, USER, createdTag.id, {
-      learnFromEmbedding: true,
-    });
-    expect(labelEmbeddings.dismissRecommendation).toHaveBeenCalledWith(
-      USER,
-      'new:cluster:cluster-label'
-    );
+    expect(addClusterDocumentExclusions).toHaveBeenCalledWith(USER, 'cluster label', [DOC_B]);
+    expect(dismissRecommendation).toHaveBeenCalledWith(USER, 'new:cluster:cluster-label');
   });
 });

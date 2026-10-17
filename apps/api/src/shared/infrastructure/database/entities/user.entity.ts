@@ -14,6 +14,7 @@ import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections
 import { FoldersEntity } from './folders.entity.js';
 import { LabelRecommendationBlocklistEntity } from './label-recommendation-blocklist.entity.js';
 import { LabelRecommendationBlocklistPatternsEntity } from './label-recommendation-blocklist-patterns.entity.js';
+import { LabelRecommendationClusterExclusionsEntity } from './label-recommendation-cluster-exclusions.entity.js';
 import { LabelRecommendationDismissalsEntity } from './label-recommendation-dismissals.entity.js';
 import { MappenEntity } from './mappen.entity.js';
 import { RecognizedFieldDefinitionsEntity } from './recognized-field-definitions.entity.js';
@@ -118,6 +119,12 @@ export class UserEntity {
     (labelRecommendationDismissals) => labelRecommendationDismissals.user
   )
   labelRecommendationDismissals: LabelRecommendationDismissalsEntity[];
+
+  @OneToMany(
+    () => LabelRecommendationClusterExclusionsEntity,
+    (labelRecommendationClusterExclusions) => labelRecommendationClusterExclusions.user
+  )
+  labelRecommendationClusterExclusions: LabelRecommendationClusterExclusionsEntity[];
 
   @OneToMany(() => MappenEntity, (mappen) => mappen.user)
   mappens: MappenEntity[];

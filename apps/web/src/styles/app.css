@@ -8790,6 +8790,47 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin-top: 2px;
 }
 
+.label-rec-doc-panel {
+  margin-top: var(--dv-space-xs);
+}
+
+.label-rec-doc-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.label-rec-doc-toggle-all,
+.label-rec-doc-expand {
+  font-size: 0.82rem;
+  padding-inline: 0;
+  min-height: 0;
+}
+
+.label-rec-doc-row.is-unselected {
+  opacity: 0.55;
+}
+
+.label-rec-doc-checkbox {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.label-rec-doc-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-2xs);
+  min-width: 0;
+}
+
+.label-rec-doc-meta {
+  font-size: 0.76rem;
+}
+
+.label-rec-doc-exclusion-hint {
+  margin: var(--dv-space-2xs) 0 0;
+  font-size: 0.78rem;
+}
+
 .label-rec-blocklist {
   margin-top: var(--dv-space-xs);
 }

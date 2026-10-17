@@ -47,6 +47,7 @@ const FORWARD_SQL_ORDER = [
   'document-preview-storage-up.sql',
   'purge-centroid-label-suggestions-up.sql',
   'purge-vocabulary-label-suggestions-up.sql',
+  'label-cluster-document-exclusions-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {
