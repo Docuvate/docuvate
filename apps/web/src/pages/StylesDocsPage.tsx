@@ -11,16 +11,19 @@ import { Chip } from '../components/ui/Chip';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
 import { useDocuvateTheme } from '../lib/useDocuvateTheme';
+import { DesignSystemShowcase } from './DesignSystemShowcase';
 
 function CatalogButton({
   variant = 'primary',
+  size,
   children,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  size?: 'md' | 'sm';
 }) {
   return (
-    <Button variant={variant} {...props}>
+    <Button variant={variant} size={size} {...props}>
       {children}
     </Button>
   );
@@ -81,6 +84,7 @@ export function StylesDocsPage() {
   return (
     <div data-ux="page" data-ux-scope="dev">
       <StylesCatalog components={catalogComponents} theme={theme} onThemeChange={setTheme} />
+      <DesignSystemShowcase />
     </div>
   );
 }

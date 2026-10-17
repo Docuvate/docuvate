@@ -13,6 +13,7 @@ import { initDocuvateTheme } from './lib/docuvateTheme';
 
 initDocuvateTheme();
 import './components/ui/components.css';
+import './components/ui/ds.css';
 import './styles/app.css';
 
 declare global {

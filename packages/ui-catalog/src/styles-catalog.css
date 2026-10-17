@@ -115,6 +115,10 @@
   margin: 0 auto var(--dv-space-2xs);
 }
 
+.styles-menu-demo {
+  max-width: 14rem;
+}
+
 .styles-component-grid {
   display: flex;
   flex-wrap: wrap;

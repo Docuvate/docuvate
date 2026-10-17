@@ -1710,5 +1710,100 @@
       "processingFailed": "Processing failed",
       "authFailed": "Sign-in failed"
     }
+  },
+  "ui": {
+    "pagination": {
+      "range": "{{from}}-{{to}} of {{total}}",
+      "previousPage": "Previous page",
+      "nextPage": "Next page"
+    },
+    "table": {
+      "selectAll": "Select all",
+      "selectRow": "Select row",
+      "title": "Title",
+      "correspondent": "Correspondent",
+      "labels": "Labels",
+      "date": "Date",
+      "status": "Status"
+    },
+    "fieldValue": {
+      "confirmed": "Confirmed",
+      "correct": "Correct",
+      "moreActions": "More actions"
+    },
+    "suggestion": {
+      "accept": "Apply",
+      "dismiss": "Dismiss"
+    },
+    "documentTile": {
+      "select": "Select {{title}}",
+      "exclusionHint": "Will no longer be suggested for this label"
+    },
+    "chat": {
+      "sources": "Sources",
+      "abstainTitle": "Not enough evidence",
+      "uploadDocument": "Upload document",
+      "searchDocuments": "Search documents"
+    },
+    "searchField": {
+      "placeholder": "Search",
+      "shortcut": "⌘K"
+    },
+    "breadcrumb": {
+      "label": "Breadcrumb"
+    }
+  },
+  "designSystem": {
+    "showcase": {
+      "title": "Design system (Figma §4)",
+      "brand": "Brand",
+      "formField": "Form field",
+      "controls": "Controls",
+      "navigation": "Navigation & search",
+      "dataDisplay": "Data display",
+      "feedback": "Feedback",
+      "chat": "Chat",
+      "menu": "Menu",
+      "serverUrlLabel": "Server URL",
+      "serverUrlHelp": "Address of your Paperless-ngx instance.",
+      "serverUrlValue": "https://paperless.home.lan",
+      "checkboxLabel": "Invoice (42)",
+      "radioLabel": "Automatic (recommended)",
+      "breadcrumbSettings": "Settings",
+      "breadcrumbConnectors": "Connections",
+      "tabDetails": "Details",
+      "tabLabels": "Labels",
+      "tabChat": "Chat",
+      "docTitle": "Invoice Stadtwerke 09/2026",
+      "docMeta": "PDF · 2 pages",
+      "docCorrespondent": "Stadtwerke München",
+      "chipRechnung": "Invoice",
+      "docDate": "12 Sep 2026",
+      "statusReady": "Ready",
+      "suggestLabel": "Electricity",
+      "suggestSource": "Invoice Stadtwerke 09/2026",
+      "fieldName": "Due date",
+      "fieldValue": "30 Sep 2026",
+      "fieldSource": "Page 1 · “Due 30 Sep 2026”",
+      "tileTitle2026": "Notice 2026",
+      "tileMeta2026": "12 Mar 2026 · 94%",
+      "tileTitle2025": "Notice 2025",
+      "tileMeta2025": "14 Mar 2025 · 92%",
+      "bannerTitle": "16 suggestions await your review",
+      "bannerDescription": "Labels and fields for 7 documents.",
+      "bannerAction": "Review suggestions",
+      "emptyTitle": "No documents yet",
+      "emptyDescription": "Upload PDFs or photos. Docuvate reads them and suggests labels.",
+      "emptyUpload": "Upload documents",
+      "emptyConnect": "Set up connection",
+      "chatQuestion": "What does the dog tax cost?",
+      "chatAnswer": "The dog tax is €108.00 per year.",
+      "chatSource": "Dog tax notice 2026 · p. 1",
+      "menuRename": "Rename",
+      "menuDelete": "Delete",
+      "noteLabel": "Note",
+      "noteHelp": "Optional",
+      "noteValue": "Advance payment increases from October."
+    }
   }
 }
