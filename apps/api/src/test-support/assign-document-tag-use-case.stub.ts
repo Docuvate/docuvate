@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { vi } from 'vitest';
 
-import type { AssignDocumentTagUseCase } from '../modules/labels/application/document-label.use-cases.js';
+import type { AssignDocumentTag } from '../modules/labels/domain/assign-document-tag.port.js';
 
 export function createAssignDocumentTagUseCaseStub(
-  overrides: Partial<Pick<AssignDocumentTagUseCase, 'execute'>> = {}
-): AssignDocumentTagUseCase {
+  overrides: Partial<AssignDocumentTag> = {}
+): AssignDocumentTag {
   return {
     execute: vi.fn().mockResolvedValue(undefined),
     ...overrides,
-  } as AssignDocumentTagUseCase;
+  };
 }

@@ -8818,7 +8818,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .label-rec-doc-main {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: var(--dv-space-2xs);
   min-width: 0;
 }
 
