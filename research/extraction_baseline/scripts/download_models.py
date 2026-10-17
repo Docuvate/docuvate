@@ -25,6 +25,13 @@ E5_ONNX_FILES = (
 GLINER2_ID = "fastino/gliner2-base-v1"
 GLINER2_FILES = ("model.safetensors", "config.json", "tokenizer.json")
 
+HF_HOME_CACHE = CACHE_DIR / "huggingface"
+
+
+def manifest_path(path: Path) -> str:
+    rel = path.resolve().relative_to(HF_HOME_CACHE.resolve())
+    return "${HF_HOME}/" + rel.as_posix()
+
 
 def sha256_file(path: Path) -> str:
     digest = hashlib.sha256()
@@ -36,15 +43,14 @@ def sha256_file(path: Path) -> str:
 
 def download_and_hash(repo: str, revision: str | None, files: tuple[str, ...]) -> list[dict]:
     rows: list[dict] = []
-    cache = CACHE_DIR / "huggingface"
-    cache.mkdir(parents=True, exist_ok=True)
+    HF_HOME_CACHE.mkdir(parents=True, exist_ok=True)
     for filename in files:
         path = Path(
             hf_hub_download(
                 repo,
                 filename,
                 revision=revision,
-                cache_dir=str(cache),
+                cache_dir=str(HF_HOME_CACHE),
             )
         )
         rows.append(
@@ -52,7 +58,7 @@ def download_and_hash(repo: str, revision: str | None, files: tuple[str, ...]) -
                 "repo": repo,
                 "revision": revision,
                 "file": filename,
-                "path": str(path),
+                "path": manifest_path(path),
                 "bytes": path.stat().st_size,
                 "sha256": sha256_file(path),
             }
