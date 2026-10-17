@@ -45,6 +45,7 @@ describe('migration baseline (existing schema, empty migration history)', () => 
       await runner.query('DROP TABLE IF EXISTS document_exact_fact_index CASCADE');
       await runner.query('DROP TABLE IF EXISTS tenant_exact_fact_chat_settings CASCADE');
       await runner.query('DROP TABLE IF EXISTS migrations');
+      // Global setup runs all migrations; simulate pre–LabelClusterDocumentExclusions schema.
       await runner.query('DROP TABLE IF EXISTS label_recommendation_cluster_exclusions CASCADE');
 
       await ensureMigrationBaseline(dataSource);
