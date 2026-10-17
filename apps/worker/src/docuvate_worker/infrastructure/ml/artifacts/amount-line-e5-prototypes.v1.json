@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "encoder_id": "intfloat/multilingual-e5-small",
+  "query_prototypes": [
+    "query: total amount due on an invoice including tax",
+    "query: Gesamtbetrag Bruttobetrag Summe zu zahlen",
+    "query: final payment amount premium Prämie Schadenhöhe",
+    "query: contract value Vertragswert Hauptforderung",
+    "query: line showing the overall monetary total not a subtotal"
+  ]
+}

@@ -26,26 +26,22 @@ from docuvate_worker.infrastructure.extractors.field_extraction_context import (
     clear_passage_vector_cache,
     register_passage_vectors,
 )
-from docuvate_worker.infrastructure.extractors.field_value_normalize import (
-    strip_leading_sender_label_prefixes,
-)
 from docuvate_worker.infrastructure.fastembed_model import embed_passages
+from docuvate_worker.infrastructure.ml.value_types.amount_candidate_rows import (
+    iter_amount_candidate_rows,
+)
 from docuvate_worker.infrastructure.ml.value_types.amount_line_ranker import (
-    build_amount_line_features,
     get_amount_line_ranker,
 )
 from docuvate_worker.infrastructure.ml.value_types.field_confidence_calibration import (
     get_field_confidence_calibration,
 )
 from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (
-    _digits_ratio,
     _has_sender_evidence,
     _is_heading_like,
     _is_invoice_banner,
-    _money_beats_date,
     _normalize_amount,
     _split_label_value,
-    _tokenize_value_candidates,
     learned_field_suggestions,
 )
 from docuvate_worker.infrastructure.ml.value_types.model import (
@@ -63,6 +59,9 @@ from docuvate_worker.infrastructure.ml.value_types.vendor_line_ranker import (
 )
 
 HOLDOUT_PATH = REPO_ROOT / "apps/worker/tests/fixtures/global_field_holdout.v1.json"
+FROZEN_EVAL_PATH = (
+    REPO_ROOT / "apps/worker/tests/fixtures/global_field_holdout_frozen_eval.v1.json"
+)
 VENDOR_RANKER_PATH = (
     REPO_ROOT
     / "apps/worker/src/docuvate_worker/infrastructure/ml/artifacts/vendor-line-ranker.v1.json"
@@ -112,15 +111,13 @@ def _iter_vendor_training_rows(
         sender_cosines = sender_lines_e5_cosine(lines)
         first_label_line_index: int | None = None
         for index, line in enumerate(lines):
-            cleaned = strip_leading_sender_label_prefixes(line)
-            if _split_label_value(cleaned)[1] is not None:
+            if _split_label_value(line)[1] is not None:
                 first_label_line_index = index
                 break
         for index, line in enumerate(lines):
-            cleaned = strip_leading_sender_label_prefixes(line)
-            _, value_part = _split_label_value(cleaned)
-            had_label = value_part is not None or cleaned != line
-            candidate = value_part if value_part is not None else cleaned
+            _, value_part = _split_label_value(line)
+            had_label = value_part is not None
+            candidate = value_part if value_part is not None else line.strip()
             if not candidate or _is_heading_like(candidate, bundle):
                 continue
             if not had_label and len(candidate.split()) >= 9:  # noqa: PLR2004
@@ -177,45 +174,13 @@ def _iter_amount_training_rows(
         amount_gt = expected.get("amount")
         amount_gt_norm = amount_gt if isinstance(amount_gt, str) else None
         text = str(doc.get("text", ""))
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        seen: set[tuple[str, int]] = set()
-        for line_index, stripped in enumerate(lines):
-            _, value_part = _split_label_value(stripped)
-            had_label = value_part is not None
-            token_sources: list[str] = []
-            if value_part:
-                token_sources.append(value_part)
-                token_sources.extend(_tokenize_value_candidates(value_part))
-            token_sources.extend(_tokenize_value_candidates(stripped))
-            for token in token_sources:
-                key = (token, line_index)
-                if key in seen:
-                    continue
-                seen.add(key)
-                lowered = token.lower()
-                if "x" in lowered:
-                    continue
-                if len(token) < 3 or _digits_ratio(token) < 0.15:  # noqa: PLR2004
-                    continue
-                money_score = bundle.log_likelihood(token, "money")
-                date_score = bundle.log_likelihood(token, "date")
-                if not _money_beats_date(token, money_score, date_score):
-                    continue
-                features = build_amount_line_features(
-                    bundle=bundle,
-                    token=token,
-                    line_index=line_index,
-                    line_count=len(lines),
-                    had_explicit_label=had_label,
-                    money_score=money_score,
-                    date_score=date_score,
-                )
-                if amount_gt_norm is None:
-                    label = 0
-                else:
-                    label = 1 if _normalize_amount(token) == amount_gt_norm else 0
-                xs.append(features.as_vector())
-                ys.append(label)
+        for row in iter_amount_candidate_rows(text, bundle):
+            if amount_gt_norm is None:
+                label = 0
+            else:
+                label = 1 if _normalize_amount(row.token) == amount_gt_norm else 0
+            xs.append(row.features.as_vector())
+            ys.append(label)
     return np.asarray(xs, dtype=np.float64), np.asarray(ys, dtype=np.int64)
 
 
@@ -296,9 +261,12 @@ def _warm_passage_cache(docs: list[dict[str, object]]) -> None:
 def main() -> None:
     if not HOLDOUT_PATH.is_file():
         raise SystemExit("Run generate_global_field_holdout.py first")
+    if not FROZEN_EVAL_PATH.is_file():
+        raise SystemExit("Run generate_global_field_frozen_eval.py first")
 
     all_docs = json.loads(HOLDOUT_PATH.read_text(encoding="utf-8"))["documents"]
-    _warm_passage_cache(all_docs)
+    frozen_docs = json.loads(FROZEN_EVAL_PATH.read_text(encoding="utf-8"))["documents"]
+    _warm_passage_cache(all_docs + frozen_docs)
 
     bundle = get_value_type_models()
     train_docs = _load_docs("train")
@@ -324,11 +292,12 @@ def main() -> None:
         "coefficients": [float(v) for v in vendor_model.coef_[0]],
         "intercept": float(vendor_model.intercept_[0]),
         "min_score": 0.99,
+        "min_score_labeled_sender_e5": 0.99,
     }
     _write_vendor_ranker(vendor_ranker)
 
     x_amount, y_amount = _iter_amount_training_rows(train_docs, bundle)
-    amount_model = LogisticRegression(max_iter=800, class_weight="balanced")
+    amount_model = LogisticRegression(max_iter=1200, class_weight="balanced", C=1.8)
     amount_model.fit(x_amount, y_amount)
     amount_ranker = {
         "version": "1",
@@ -337,8 +306,11 @@ def main() -> None:
             "money_minus_identifier",
             "money_minus_date",
             "money_minus_address",
+            "money_margin_over_non_money",
+            "amount_label_e5_cosine",
+            "vat_sum_consistency_hint",
             "label_hint",
-            "line_position_ratio",
+            "bottom_line_ratio",
             "thousands_sep_hint",
             "token_length",
         ],
@@ -356,55 +328,60 @@ def main() -> None:
         "min_calibrated_confidence": 0.88,
     }
 
-    vendor_feasible: list[tuple[float, float, float, float, float]] = []
+    vendor_feasible: list[tuple[float, float, float, float, float, float]] = []
     vendor_pr_curve: list[dict[str, float]] = []
-    for min_score in np.linspace(0.55, 0.98, 18):
-        for min_conf in np.linspace(0.55, 0.92, 13):
-            vendor_ranker["min_score"] = float(min_score)
-            _write_vendor_ranker(vendor_ranker)
-            payload["vendor_gate"]["min_calibrated_confidence"] = round(float(min_conf), 4)
-            payload["auto_promote_min_by_field"]["vendor"] = round(float(min_conf), 4)
-            _write_artifact(payload)
-            precision, recall = _slot_precision(threshold_docs, "vendor")
-            vendor_pr_curve.append(
-                {
-                    "min_score": float(min_score),
-                    "min_conf": float(min_conf),
-                    "precision": precision,
-                    "recall": recall,
-                }
-            )
-            if precision + 1e-9 >= TARGET_PRECISION:
-                strictness = float(min_score) + float(min_conf)
-                vendor_feasible.append(
-                    (
-                        recall,
-                        float(min_score),
-                        float(min_conf),
-                        precision,
-                        strictness,
-                    )
+    for min_score in np.linspace(0.55, 0.98, 16):
+        for min_labeled in np.linspace(0.48, 0.72, 9):
+            for min_conf in np.linspace(0.55, 0.92, 11):
+                vendor_ranker["min_score"] = float(min_score)
+                vendor_ranker["min_score_labeled_sender_e5"] = float(min_labeled)
+                _write_vendor_ranker(vendor_ranker)
+                payload["vendor_gate"]["min_calibrated_confidence"] = round(float(min_conf), 4)
+                payload["auto_promote_min_by_field"]["vendor"] = round(float(min_conf), 4)
+                _write_artifact(payload)
+                precision, recall = _slot_precision(threshold_docs, "vendor")
+                vendor_pr_curve.append(
+                    {
+                        "min_score": float(min_score),
+                        "min_score_labeled_sender_e5": float(min_labeled),
+                        "min_conf": float(min_conf),
+                        "precision": precision,
+                        "recall": recall,
+                    }
                 )
+                if precision + 1e-9 >= TARGET_PRECISION:
+                    strictness = float(min_score) + float(min_conf) - float(min_labeled) * 0.25
+                    vendor_feasible.append(
+                        (
+                            recall,
+                            float(min_score),
+                            float(min_labeled),
+                            float(min_conf),
+                            precision,
+                            strictness,
+                        )
+                    )
 
-    best_vendor: tuple[float, float, float, float, float] | None = None
+    best_vendor: tuple[float, float, float, float, float, float] | None = None
     if vendor_feasible:
         max_recall = max(row[0] for row in vendor_feasible)
         recall_cutoff = max_recall * RECALL_FLOOR_VS_BEST
         narrowed = [row for row in vendor_feasible if row[0] + 1e-9 >= recall_cutoff]
-        best_vendor = max(narrowed, key=lambda row: (row[4], row[0]))
+        best_vendor = max(narrowed, key=lambda row: (row[5], row[0]))
 
     if best_vendor is not None:
-        _, v_score, v_conf, _, _ = best_vendor
+        _, v_score, v_labeled, v_conf, _, _ = best_vendor
         vendor_ranker["min_score"] = v_score
+        vendor_ranker["min_score_labeled_sender_e5"] = v_labeled
         payload["vendor_gate"]["min_calibrated_confidence"] = round(v_conf, 4)
         payload["auto_promote_min_by_field"]["vendor"] = round(v_conf, 4)
     _write_vendor_ranker(vendor_ranker)
 
     amount_feasible: list[tuple[float, float, float, float, float]] = []
     amount_pr_curve: list[dict[str, float]] = []
-    for min_score in np.linspace(0.05, 0.95, 19):
-        for margin in (0.0, 0.02, 0.05, 0.08, 0.12):
-            for min_conf in (0.85, 0.88, 0.9, 0.92, 0.94):
+    for min_score in np.linspace(0.05, 0.88, 16):
+        for margin in (0.0, 0.01, 0.02, 0.04, 0.06):
+            for min_conf in np.linspace(0.40, 0.92, 14):
                 amount_ranker["min_score"] = float(min_score)
                 _write_amount_ranker(amount_ranker)
                 payload["amount_gate"] = {
@@ -425,23 +402,19 @@ def main() -> None:
                     }
                 )
                 if precision + 1e-9 >= TARGET_PRECISION:
-                    strictness = float(min_score) + float(min_conf) + float(margin)
                     amount_feasible.append(
                         (
                             recall,
                             float(min_score),
                             float(margin),
                             float(min_conf),
-                            strictness,
+                            float(min_score) + float(min_conf) + float(margin),
                         )
                     )
 
     best_amount: tuple[float, float, float, float, float] | None = None
     if amount_feasible:
-        max_recall = max(row[0] for row in amount_feasible)
-        recall_cutoff = max_recall * RECALL_FLOOR_VS_BEST
-        narrowed = [row for row in amount_feasible if row[0] + 1e-9 >= recall_cutoff]
-        best_amount = max(narrowed, key=lambda row: (row[4], row[0]))
+        best_amount = max(amount_feasible, key=lambda row: (row[0], -row[4]))
 
     if best_amount is not None:
         _, a_score, margin, a_conf, _ = best_amount
@@ -463,6 +436,10 @@ def main() -> None:
         field: asdict(slot_metrics_for_field(eval_docs, _predict, field))
         for field in FIELD_KEYS
     }
+    frozen_eval_metrics = {
+        field: asdict(slot_metrics_for_field(frozen_docs, _predict, field))
+        for field in FIELD_KEYS
+    }
 
     report = {
         "target_precision": TARGET_PRECISION,
@@ -471,6 +448,9 @@ def main() -> None:
         },
         "vendor_threshold_tuned": {
             "min_ranker_score": vendor_ranker["min_score"],
+            "min_ranker_score_labeled_sender_e5": vendor_ranker.get(
+                "min_score_labeled_sender_e5", vendor_ranker["min_score"]
+            ),
             "min_calibrated_confidence": payload["vendor_gate"]["min_calibrated_confidence"],
             "threshold_split_precision": _slot_precision(threshold_docs, "vendor")[0],
             "threshold_split_recall": _slot_precision(threshold_docs, "vendor")[1],
@@ -483,8 +463,15 @@ def main() -> None:
         },
         "confirm_split": confirm_metrics,
         "eval_split": eval_metrics,
+        "frozen_eval_split": frozen_eval_metrics,
+        "frozen_eval_doc_count": len(frozen_docs),
+        "amount_pr_curve": amount_pr_curve,
         "vendor_confirm_passed": confirm_metrics["vendor"]["precision"] >= TARGET_PRECISION,
         "amount_confirm_passed": confirm_metrics["amount"]["precision"] >= TARGET_PRECISION,
+        "amount_frozen_eval_passed": (
+            frozen_eval_metrics["amount"]["precision"] >= TARGET_PRECISION
+            and frozen_eval_metrics["amount"]["recall"] >= 0.70
+        ),
         "amount_false_positive_samples_threshold": _amount_false_positive_samples(threshold_docs),
         "vendor_pr_curve_sample": vendor_pr_curve[:: max(1, len(vendor_pr_curve) // 40)],
         "amount_pr_curve_sample": amount_pr_curve[:: max(1, len(amount_pr_curve) // 40)],

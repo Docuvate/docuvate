@@ -2,7 +2,7 @@
   "version": "1",
   "auto_promote_min_by_field": {
     "date": 0.95,
-    "amount": 0.85,
+    "amount": 0.4,
     "vendor": 0.55
   },
   "date_confidence_floors": [
@@ -24,8 +24,8 @@
     "sender_e5_margin_credit": 10.0
   },
   "amount_gate": {
-    "min_ranker_score": 0.85,
-    "min_ranker_margin_over_runner_up": 0.12,
-    "min_calibrated_confidence": 0.85
+    "min_ranker_score": 0.382,
+    "min_ranker_margin_over_runner_up": 0.0,
+    "min_calibrated_confidence": 0.4
   }
 }

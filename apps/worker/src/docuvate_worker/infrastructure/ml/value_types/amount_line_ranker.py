@@ -32,8 +32,11 @@ class AmountLineFeatures:
     money_minus_identifier: float
     money_minus_date: float
     money_minus_address: float
+    money_margin_over_non_money: float
+    amount_label_e5_cosine: float
+    vat_sum_consistency_hint: float
     label_hint: float
-    line_position_ratio: float
+    bottom_line_ratio: float
     thousands_sep_hint: float
     token_length: float
 
@@ -43,8 +46,11 @@ class AmountLineFeatures:
             self.money_minus_identifier,
             self.money_minus_date,
             self.money_minus_address,
+            self.money_margin_over_non_money,
+            self.amount_label_e5_cosine,
+            self.vat_sum_consistency_hint,
             self.label_hint,
-            self.line_position_ratio,
+            self.bottom_line_ratio,
             self.thousands_sep_hint,
             self.token_length,
         ]
@@ -101,17 +107,24 @@ def build_amount_line_features(
     had_explicit_label: bool,
     money_score: float,
     date_score: float,
+    money_margin_over_non_money: float = 0.0,
+    amount_label_e5_cosine: float = 0.0,
+    vat_sum_consistency_hint: float = 0.0,
 ) -> AmountLineFeatures:
     ident = bundle.log_likelihood(token, "identifier")
     address = bundle.log_likelihood(token, "address")
     denom = max(1, line_count - 1)
+    position = line_index / denom
     return AmountLineFeatures(
         money_score=money_score,
         money_minus_identifier=money_score - ident,
         money_minus_date=money_score - date_score,
         money_minus_address=money_score - address,
+        money_margin_over_non_money=money_margin_over_non_money,
+        amount_label_e5_cosine=amount_label_e5_cosine,
+        vat_sum_consistency_hint=vat_sum_consistency_hint,
         label_hint=1.0 if had_explicit_label else 0.0,
-        line_position_ratio=line_index / denom,
+        bottom_line_ratio=1.0 - position,
         thousands_sep_hint=_thousands_sep_hint(token),
         token_length=float(len(token)),
     )

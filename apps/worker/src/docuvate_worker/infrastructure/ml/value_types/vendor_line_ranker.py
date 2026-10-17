@@ -13,12 +13,13 @@ from typing import TypedDict
 from docuvate_worker.infrastructure.ml.value_types.model import ValueTypeModelBundle
 
 
-class VendorLineRankerArtifact(TypedDict):
+class VendorLineRankerArtifact(TypedDict, total=False):
     version: str
     feature_names: list[str]
     coefficients: list[float]
     intercept: float
     min_score: float
+    min_score_labeled_sender_e5: float
 
 
 _ARTIFACT_PATH = (
@@ -55,14 +56,30 @@ class VendorLineRanker:
     coefficients: tuple[float, ...]
     intercept: float
     min_score: float
+    min_score_labeled_sender_e5: float
 
     @classmethod
     def from_artifact(cls, payload: VendorLineRankerArtifact) -> VendorLineRanker:
+        default_min = float(payload["min_score"])
         return cls(
             coefficients=tuple(float(value) for value in payload["coefficients"]),
             intercept=float(payload["intercept"]),
-            min_score=float(payload["min_score"]),
+            min_score=default_min,
+            min_score_labeled_sender_e5=float(
+                payload.get("min_score_labeled_sender_e5", default_min)
+            ),
         )
+
+    def min_score_for(
+        self,
+        *,
+        had_explicit_label: bool,
+        sender_e5_cosine: float,
+        sender_e5_floor: float,
+    ) -> float:
+        if had_explicit_label and sender_e5_cosine + 1e-9 >= sender_e5_floor:
+            return self.min_score_labeled_sender_e5
+        return self.min_score
 
     def score(self, features: VendorLineFeatures) -> float:
         vector = features.as_vector()

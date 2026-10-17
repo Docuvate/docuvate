@@ -88,16 +88,31 @@ class FieldConfidenceCalibration:
             amount_min_calibrated_confidence=float(amount["min_calibrated_confidence"]),
         )
 
-    def amount_confidence_from_ranker_score(self, ranker_score: float) -> float:
-        return min(0.97, max(0.45, ranker_score))
+    def amount_confidence_from_ranker_score(
+        self,
+        ranker_score: float,
+        *,
+        amount_label_e5_cosine: float = 0.0,
+        money_margin_over_non_money: float = 0.0,
+    ) -> float:
+        e5_floor = 0.34 + amount_label_e5_cosine * 0.58
+        margin_boost = min(0.14, max(0.0, money_margin_over_non_money * 0.007))
+        blended = max(ranker_score, e5_floor + margin_boost)
+        return min(0.97, max(0.45, blended))
 
     def amount_meets_auto_promote_gate(
         self,
         *,
         ranker_score: float,
         runner_up_ranker_score: float,
+        amount_label_e5_cosine: float = 0.0,
+        money_margin_over_non_money: float = 0.0,
     ) -> tuple[bool, float]:
-        confidence = self.amount_confidence_from_ranker_score(ranker_score)
+        confidence = self.amount_confidence_from_ranker_score(
+            ranker_score,
+            amount_label_e5_cosine=amount_label_e5_cosine,
+            money_margin_over_non_money=money_margin_over_non_money,
+        )
         if ranker_score < self.amount_min_ranker_score:
             return False, confidence
         if ranker_score - runner_up_ranker_score < self.amount_min_ranker_margin_over_runner_up:

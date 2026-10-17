@@ -12,9 +12,6 @@ from pathlib import Path
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 
-from docuvate_worker.infrastructure.extractors.field_value_normalize import (
-    strip_leading_sender_label_prefixes,
-)
 from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (
     _has_sender_evidence,
     _is_heading_like,
@@ -51,12 +48,16 @@ CONFIDENCE_PATHS = (
 def _iter_candidates(text: str, bundle) -> list[tuple[str, int, bool, float, VendorLineFeatures]]:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     sender_cosines = sender_lines_e5_cosine(lines)
+    first_label_line_index: int | None = None
+    for index, line in enumerate(lines):
+        if _split_label_value(line)[1] is not None:
+            first_label_line_index = index
+            break
     rows: list[tuple[str, int, bool, float, VendorLineFeatures]] = []
     for index, line in enumerate(lines):
-        cleaned = strip_leading_sender_label_prefixes(line)
-        had_label = cleaned != line
-        _, value_part = _split_label_value(cleaned)
-        candidate = value_part if value_part is not None else cleaned
+        _, value_part = _split_label_value(line)
+        had_label = value_part is not None
+        candidate = value_part if value_part is not None else line.strip()
         if not candidate or _is_heading_like(candidate, bundle):
             continue
         if not had_label and len(candidate.split()) >= 9:  # noqa: PLR2004
@@ -88,6 +89,7 @@ def _iter_candidates(text: str, bundle) -> list[tuple[str, int, bool, float, Ven
             line_count=len(lines),
             sender_e5_cosine=sender_cosines[index],
             had_explicit_label=had_label,
+            first_label_line_index=first_label_line_index,
         )
         rows.append((candidate[:120], index, had_label, sender_cosines[index], features))
     return rows
