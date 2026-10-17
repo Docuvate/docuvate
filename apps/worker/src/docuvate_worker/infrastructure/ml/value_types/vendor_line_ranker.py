@@ -37,6 +37,10 @@ class VendorLineFeatures:
     line_position_ratio: float
     top_of_page_hint: float
     first_label_line_offset: float
+    recipient_e5_cosine: float
+    supplier_e5_cosine: float
+    doc_heading_e5_cosine: float
+    supplier_minus_recipient_e5: float
 
     def as_vector(self) -> list[float]:
         return [
@@ -48,6 +52,10 @@ class VendorLineFeatures:
             self.line_position_ratio,
             self.top_of_page_hint,
             self.first_label_line_offset,
+            self.recipient_e5_cosine,
+            self.supplier_e5_cosine,
+            self.doc_heading_e5_cosine,
+            self.supplier_minus_recipient_e5,
         ]
 
 
@@ -106,6 +114,9 @@ def build_line_features(
     sender_e5_cosine: float,
     had_explicit_label: bool,
     first_label_line_index: int | None = None,
+    recipient_e5_cosine: float = 0.0,
+    supplier_e5_cosine: float = 0.0,
+    doc_heading_e5_cosine: float = 0.0,
 ) -> VendorLineFeatures:
     org = bundle.log_likelihood(candidate, "organization")
     free = bundle.log_likelihood(candidate, "free_text")
@@ -126,4 +137,8 @@ def build_line_features(
             if first_label_line_index is not None and had_explicit_label
             else 0.0
         ),
+        recipient_e5_cosine=recipient_e5_cosine,
+        supplier_e5_cosine=supplier_e5_cosine,
+        doc_heading_e5_cosine=doc_heading_e5_cosine,
+        supplier_minus_recipient_e5=supplier_e5_cosine - recipient_e5_cosine,
     )

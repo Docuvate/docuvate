@@ -68,9 +68,13 @@ def test_holdout_eval_report_meets_precision_gates() -> None:
             )
             assert metrics["expected_slots"] > 0
 
-    frozen = report["frozen_eval_split"]["amount"]
-    assert frozen["precision"] >= target
-    assert frozen["recall"] >= 0.70
+    frozen_amount = report["frozen_eval_split"]["amount"]
+    assert frozen_amount["precision"] >= target
+    assert frozen_amount["recall"] >= 0.70
     assert report.get("amount_frozen_eval_passed") is True
+
+    frozen_vendor = report["frozen_eval_split"]["vendor"]
+    assert frozen_vendor["precision"] >= target
+    assert report.get("vendor_frozen_eval_passed") is True
     assert isinstance(report.get("amount_pr_curve"), list)
     assert len(report["amount_pr_curve"]) > 10

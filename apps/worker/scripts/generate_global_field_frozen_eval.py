@@ -13,7 +13,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OUT_PATH = REPO_ROOT / "apps/worker/tests/fixtures/global_field_holdout_frozen_eval.v1.json"
 
-FROZEN_SEED = 88_100_923
+FROZEN_SEED = 99_100_441
 
 PARTIES = (
     "Helios Werk AG",
@@ -24,6 +24,8 @@ PARTIES = (
     "Quellbach Steuerberatung GmbH",
     "NovaCare Versicherung AG",
     "Amt für Soziales Mitte",
+    "Rheinblick Analytics GmbH",
+    "Ostmark Facility KG",
 )
 
 STREETS = (

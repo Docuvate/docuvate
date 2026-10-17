@@ -22,6 +22,11 @@ from docuvate_worker.infrastructure.ml.value_types.vendor_line_ranker import (
     build_line_features,
     get_vendor_line_ranker,
 )
+from docuvate_worker.infrastructure.ml.value_types.vendor_role_line_e5 import (
+    doc_heading_lines_e5_cosine,
+    recipient_lines_e5_cosine,
+    supplier_lines_e5_cosine,
+)
 
 _HEADER_DATE_STRONG_TOP_LINE = 2
 _HEADER_DATE_WEAK_TOP_LINE = 5
@@ -272,6 +277,9 @@ class _VendorCandidate:
     value: str
     had_explicit_label: bool
     sender_e5_cosine: float
+    recipient_e5_cosine: float
+    supplier_e5_cosine: float
+    doc_heading_e5_cosine: float
     ranker_score: float
     line_index: int
 
@@ -279,6 +287,9 @@ class _VendorCandidate:
 def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate | None:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     sender_cosines = sender_lines_e5_cosine(lines)
+    recipient_cosines = recipient_lines_e5_cosine(lines)
+    supplier_cosines = supplier_lines_e5_cosine(lines)
+    heading_cosines = doc_heading_lines_e5_cosine(lines)
     ranker = get_vendor_line_ranker()
     first_label_line_index: int | None = None
     for index, line in enumerate(lines):
@@ -322,6 +333,9 @@ def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate
             sender_e5_cosine=sender_cosines[index],
             had_explicit_label=had_label,
             first_label_line_index=first_label_line_index,
+            recipient_e5_cosine=recipient_cosines[index],
+            supplier_e5_cosine=supplier_cosines[index],
+            doc_heading_e5_cosine=heading_cosines[index],
         )
         ranker_score = ranker.score(features)
         candidates.append(
@@ -329,6 +343,9 @@ def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate
                 value=candidate[:120],
                 had_explicit_label=had_label,
                 sender_e5_cosine=sender_cosines[index],
+                recipient_e5_cosine=recipient_cosines[index],
+                supplier_e5_cosine=supplier_cosines[index],
+                doc_heading_e5_cosine=heading_cosines[index],
                 ranker_score=ranker_score,
                 line_index=index,
             )
@@ -337,16 +354,139 @@ def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate
         return None
     best_score = max(row.ranker_score for row in candidates)
     shortlist = [row for row in candidates if row.ranker_score >= best_score - 0.06]
-    best = min(shortlist, key=lambda row: (row.line_index, -row.ranker_score))
+    recipient_filtered = [
+        row
+        for row in shortlist
+        if not (
+            row.had_explicit_label
+            and row.recipient_e5_cosine > row.supplier_e5_cosine
+        )
+    ]
+    if recipient_filtered:
+        shortlist = recipient_filtered
+    best = max(
+        shortlist,
+        key=lambda row: (
+            row.ranker_score,
+            row.had_explicit_label,
+            row.supplier_e5_cosine - row.doc_heading_e5_cosine,
+            row.sender_e5_cosine - row.recipient_e5_cosine,
+            -row.line_index,
+        ),
+    )
     cal = get_field_confidence_calibration()
     min_score = ranker.min_score_for(
         had_explicit_label=best.had_explicit_label,
         sender_e5_cosine=best.sender_e5_cosine,
         sender_e5_floor=cal.vendor_min_sender_e5_cosine,
     )
-    if best.ranker_score < min_score:
+    if best.ranker_score + 1e-9 < min_score:
         return None
     return best
+
+
+def peek_vendor_promotion_candidate(
+    text: str, bundle: ValueTypeModelBundle | None = None
+) -> _VendorCandidate | None:
+    """Top vendor line after ranker selection (before ranker min-score and probability gates)."""
+    models = bundle if bundle is not None else get_value_type_models()
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    sender_cosines = sender_lines_e5_cosine(lines)
+    recipient_cosines = recipient_lines_e5_cosine(lines)
+    supplier_cosines = supplier_lines_e5_cosine(lines)
+    heading_cosines = doc_heading_lines_e5_cosine(lines)
+    ranker = get_vendor_line_ranker()
+    first_label_line_index: int | None = None
+    for index, line in enumerate(lines):
+        if _split_label_value(line)[1] is not None:
+            first_label_line_index = index
+            break
+    candidates: list[_VendorCandidate] = []
+    for index, line in enumerate(lines):
+        _, value_part = _split_label_value(line)
+        had_label = value_part is not None
+        candidate = value_part if value_part is not None else line.strip()
+        if not candidate or _is_heading_like(candidate, models):
+            continue
+        if not had_label and len(candidate.split()) >= 9:  # noqa: PLR2004
+            continue
+        if _is_invoice_banner(candidate):
+            continue
+        money_score = models.log_likelihood(candidate, "money")
+        org_score = models.log_likelihood(candidate, "organization")
+        if money_score >= org_score and not had_label:
+            continue
+        if not _has_sender_evidence(
+            lines,
+            index,
+            candidate,
+            models,
+            had_explicit_label=had_label,
+            sender_e5_cosine=sender_cosines[index],
+        ):
+            continue
+        free_score = models.log_likelihood(candidate, "free_text")
+        if org_score <= free_score:
+            continue
+        if org_score - free_score <= 0.5 and not had_label:  # noqa: PLR2004
+            continue
+        features = build_line_features(
+            bundle=models,
+            candidate=candidate,
+            line_index=index,
+            line_count=len(lines),
+            sender_e5_cosine=sender_cosines[index],
+            had_explicit_label=had_label,
+            first_label_line_index=first_label_line_index,
+            recipient_e5_cosine=recipient_cosines[index],
+            supplier_e5_cosine=supplier_cosines[index],
+            doc_heading_e5_cosine=heading_cosines[index],
+        )
+        ranker_score = ranker.score(features)
+        candidates.append(
+            _VendorCandidate(
+                value=candidate[:120],
+                had_explicit_label=had_label,
+                sender_e5_cosine=sender_cosines[index],
+                recipient_e5_cosine=recipient_cosines[index],
+                supplier_e5_cosine=supplier_cosines[index],
+                doc_heading_e5_cosine=heading_cosines[index],
+                ranker_score=ranker_score,
+                line_index=index,
+            )
+        )
+    if not candidates:
+        return None
+    best_score = max(row.ranker_score for row in candidates)
+    shortlist = [row for row in candidates if row.ranker_score >= best_score - 0.06]
+    recipient_filtered = [
+        row
+        for row in shortlist
+        if not (
+            row.had_explicit_label
+            and row.recipient_e5_cosine > row.supplier_e5_cosine
+        )
+    ]
+    if recipient_filtered:
+        shortlist = recipient_filtered
+    return max(
+        shortlist,
+        key=lambda row: (
+            row.ranker_score,
+            row.had_explicit_label,
+            row.supplier_e5_cosine - row.doc_heading_e5_cosine,
+            row.sender_e5_cosine - row.recipient_e5_cosine,
+            -row.line_index,
+        ),
+    )
+
+
+def peek_amount_promotion_candidate(
+    text: str, bundle: ValueTypeModelBundle | None = None
+) -> _AmountCandidate | None:
+    models = bundle if bundle is not None else get_value_type_models()
+    ranked = _rank_amount_candidates(text, models)
+    return ranked[0] if ranked else None
 
 
 def learned_field_suggestions(
@@ -402,6 +542,10 @@ def learned_field_suggestions(
             id_score=vendor_id,
             had_explicit_label=vendor_row.had_explicit_label,
             sender_e5_cosine=vendor_row.sender_e5_cosine,
+            ranker_score=vendor_row.ranker_score,
+            recipient_e5_cosine=vendor_row.recipient_e5_cosine,
+            supplier_e5_cosine=vendor_row.supplier_e5_cosine,
+            doc_heading_e5_cosine=vendor_row.doc_heading_e5_cosine,
         )
         if ok:
             fields.append(ExtractedField(key="vendor", value=vendor, confidence=confidence))

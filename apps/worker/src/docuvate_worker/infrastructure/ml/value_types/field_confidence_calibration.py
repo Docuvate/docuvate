@@ -4,11 +4,14 @@
 from __future__ import annotations
 
 import json
-import math
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import TypedDict
+
+from docuvate_worker.infrastructure.ml.value_types.promotion_probability_calibrator import (
+    get_promotion_probability_calibrators,
+)
 
 
 class _DateFloor(TypedDict):
@@ -88,17 +91,9 @@ class FieldConfidenceCalibration:
             amount_min_calibrated_confidence=float(amount["min_calibrated_confidence"]),
         )
 
-    def amount_confidence_from_ranker_score(
-        self,
-        ranker_score: float,
-        *,
-        amount_label_e5_cosine: float = 0.0,
-        money_margin_over_non_money: float = 0.0,
-    ) -> float:
-        e5_floor = 0.34 + amount_label_e5_cosine * 0.58
-        margin_boost = min(0.14, max(0.0, money_margin_over_non_money * 0.007))
-        blended = max(ranker_score, e5_floor + margin_boost)
-        return min(0.97, max(0.45, blended))
+    def amount_promotion_probability(self, ranker_score: float) -> float:
+        calibrators = get_promotion_probability_calibrators()
+        return calibrators.amount.predict_proba(ranker_score)
 
     def amount_meets_auto_promote_gate(
         self,
@@ -108,11 +103,9 @@ class FieldConfidenceCalibration:
         amount_label_e5_cosine: float = 0.0,
         money_margin_over_non_money: float = 0.0,
     ) -> tuple[bool, float]:
-        confidence = self.amount_confidence_from_ranker_score(
-            ranker_score,
-            amount_label_e5_cosine=amount_label_e5_cosine,
-            money_margin_over_non_money=money_margin_over_non_money,
-        )
+        _ = amount_label_e5_cosine
+        _ = money_margin_over_non_money
+        confidence = self.amount_promotion_probability(ranker_score)
         if ranker_score < self.amount_min_ranker_score:
             return False, confidence
         if ranker_score - runner_up_ranker_score < self.amount_min_ranker_margin_over_runner_up:
@@ -126,19 +119,27 @@ class FieldConfidenceCalibration:
                 confidence = max(confidence, floor)
         return confidence
 
-    def vendor_confidence_from_margin(self, margin: float, *, had_explicit_label: bool) -> float:
-        adjusted = margin + (8.0 if had_explicit_label else 0.0)
-        linear = 0.45 + max(0.0, adjusted - self.vendor_margin_offset) * self.vendor_margin_scale
-        logistic = 1.0 / (1.0 + math.exp(-(adjusted - 38.0) / 6.0))
-        blended = 0.25 * linear + 0.75 * logistic
-        return min(0.97, max(0.35, blended))
-
-    def _sender_e5_margin_boost(self, sender_e5_cosine: float) -> float:
-        if sender_e5_cosine < self.vendor_min_sender_e5_cosine:
-            return 0.0
-        span = max(1e-6, 1.0 - self.vendor_min_sender_e5_cosine)
-        ratio = (sender_e5_cosine - self.vendor_min_sender_e5_cosine) / span
-        return self.vendor_sender_e5_margin_credit * min(1.0, ratio)
+    def vendor_promotion_probability(
+        self,
+        *,
+        ranker_score: float,
+        sender_e5_cosine: float,
+        recipient_e5_cosine: float,
+        supplier_e5_cosine: float,
+        doc_heading_e5_cosine: float,
+        label_hint: float,
+    ) -> float:
+        calibrators = get_promotion_probability_calibrators()
+        return calibrators.vendor.predict_proba(
+            (
+                ranker_score,
+                sender_e5_cosine,
+                recipient_e5_cosine,
+                supplier_e5_cosine,
+                doc_heading_e5_cosine,
+                label_hint,
+            )
+        )
 
     def vendor_meets_auto_promote_gate(
         self,
@@ -149,9 +150,16 @@ class FieldConfidenceCalibration:
         id_score: float,
         had_explicit_label: bool,
         sender_e5_cosine: float = 0.0,
+        ranker_score: float = 0.0,
+        recipient_e5_cosine: float = 0.0,
+        supplier_e5_cosine: float = 0.0,
+        doc_heading_e5_cosine: float = 0.0,
     ) -> tuple[bool, float]:
-        margin = org_score - max(free_score, addr_score, id_score)
-        e5_boost = self._sender_e5_margin_boost(sender_e5_cosine)
+        e5_boost = 0.0
+        if sender_e5_cosine >= self.vendor_min_sender_e5_cosine:
+            span = max(1e-6, 1.0 - self.vendor_min_sender_e5_cosine)
+            ratio = (sender_e5_cosine - self.vendor_min_sender_e5_cosine) / span
+            e5_boost = self.vendor_sender_e5_margin_credit * min(1.0, ratio)
         org_free_margin = org_score - free_score + e5_boost
         sender_e5_ok = sender_e5_cosine >= self.vendor_min_sender_e5_cosine
         if (
@@ -159,22 +167,15 @@ class FieldConfidenceCalibration:
             and not had_explicit_label
             and not sender_e5_ok
         ):
-            return False, 0.45
-        confidence = self.vendor_confidence_from_margin(
-            margin + e5_boost,
-            had_explicit_label=had_explicit_label,
+            return False, 0.0
+        confidence = self.vendor_promotion_probability(
+            ranker_score=ranker_score,
+            sender_e5_cosine=sender_e5_cosine,
+            recipient_e5_cosine=recipient_e5_cosine,
+            supplier_e5_cosine=supplier_e5_cosine,
+            doc_heading_e5_cosine=doc_heading_e5_cosine,
+            label_hint=1.0 if had_explicit_label else 0.0,
         )
-        if sender_e5_ok:
-            span = max(1e-6, 1.0 - self.vendor_min_sender_e5_cosine)
-            e5_ratio = min(1.0, (sender_e5_cosine - self.vendor_min_sender_e5_cosine) / span)
-            org_free = org_score - free_score
-            confidence = min(
-                0.97,
-                max(
-                    confidence,
-                    0.45 + e5_ratio * 0.42 + max(0.0, org_free) * 0.004,
-                ),
-            )
         return confidence >= self.vendor_min_calibrated_confidence, confidence
 
 
