@@ -41,6 +41,7 @@ import { DocumentExtractionFailureHeuristicVersion20261015120000 } from './migra
 import { DocumentPreviewStorage20261015180000 } from './migrations/20261015180000-document-preview-storage.js';
 import { PurgeCentroidLabelSuggestions20261015193000 } from './migrations/20261015193000-purge-centroid-label-suggestions.js';
 import { PurgeVocabularyLabelSuggestions20261015200000 } from './migrations/20261015200000-purge-vocabulary-label-suggestions.js';
+import { LabelClusterDocumentExclusions20261017120000 } from './migrations/20261017120000-label-cluster-document-exclusions.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -82,6 +83,7 @@ const EXPECTED_MIGRATIONS = [
   DocumentPreviewStorage20261015180000,
   PurgeCentroidLabelSuggestions20261015193000,
   PurgeVocabularyLabelSuggestions20261015200000,
+  LabelClusterDocumentExclusions20261017120000,
 ];
 
 describe('buildTypeOrmOptions', () => {
