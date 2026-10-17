@@ -1,15 +1,24 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DashboardWidgetDto, DocumentDto, SavedDocumentViewDto } from '@docuvate/contracts';
-import { useCallback, useEffect, useState } from 'react';
+import type {
+  DashboardStatisticsDto,
+  DashboardWidgetDto,
+  DocumentDto,
+  SavedDocumentViewDto,
+} from '@docuvate/contracts';
+import { FileText } from 'lucide-react';
+import { type ReactNode,useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { getDashboardStatistics, getSavedDocumentView, listDocuments } from '../../lib/api';
+import { getSavedDocumentView, listDocuments } from '../../lib/api';
 import { resolveLibraryDropTarget } from '../../lib/documentUploadAssignment';
+import { formatDocumentRelativeTime } from '../../lib/formatDocumentRelativeTime';
 import { routes } from '../../lib/routes';
 import { savedViewToListQuery } from '../../lib/savedViewState';
 import { Badge } from '../ui/Badge';
+import { Chip } from '../ui/Chip';
+import { Progress } from '../ui/Progress';
 import { DocumentUploadProvider } from '../upload/DocumentUploadProvider';
 import { UploadDropzone } from '../UploadDropzone';
 import { DashboardWidgetCard } from './DashboardWidgetCard';
@@ -20,6 +29,7 @@ interface DashboardWidgetsProps {
   onWidgetsChange: (widgets: DashboardWidgetDto[]) => void;
   savedViews: SavedDocumentViewDto[];
   onRefreshViews: () => void;
+  statistics: DashboardStatisticsDto | null;
 }
 
 function resolveWidgetTitle(
@@ -54,14 +64,47 @@ function widgetTitle(type: DashboardWidgetDto['type'], t: (k: string) => string)
   }
 }
 
+function widgetHeaderAside(
+  widget: DashboardWidgetDto,
+  attentionCount: number,
+  t: (k: string) => string
+): ReactNode | undefined {
+  switch (widget.type) {
+    case 'statistics':
+      return (
+        <Link to={routes.documents} className="dashboard-widget-link">
+          {t('dashboard.allDocuments')}
+        </Link>
+      );
+    case 'recent_documents':
+    case 'saved_view':
+      return (
+        <Link to={routes.documents} className="dashboard-widget-link">
+          {t('dashboard.viewAll')}
+        </Link>
+      );
+    case 'attention':
+      return attentionCount > 0 ? (
+        <span className="badge badge-failed dashboard-attention-count">{String(attentionCount)}</span>
+      ) : undefined;
+    case 'upload': {
+      return undefined;
+    }
+    default: {
+      const _never: never = widget.type;
+      return _never;
+    }
+  }
+}
+
 export function DashboardWidgets({
   widgets,
   editMode,
   onWidgetsChange,
   savedViews,
   onRefreshViews,
+  statistics,
 }: DashboardWidgetsProps) {
-  const { t } = useTranslation();
   const sorted = [...widgets].sort((a, b) => a.position - b.position);
 
   const moveWidget = useCallback(
@@ -111,53 +154,47 @@ export function DashboardWidgets({
     >
       <div className={`dashboard-grid${editMode ? ' dashboard-grid--edit' : ''}`}>
         {sorted.map((widget, index) => (
-          <DashboardWidgetCard
+          <WidgetSlot
             key={widget.id}
             widget={widget}
+            index={index}
             editMode={editMode}
-            title={resolveWidgetTitle(widget, savedViews, t)}
-            onMoveUp={() => { moveWidget(index, -1); }}
-            onMoveDown={() => { moveWidget(index, 1); }}
-            onRemove={() => { removeWidget(widget.id); }}
-            dragHandleProps={
-              editMode
-                ? {
-                    draggable: true,
-                    onDragStart: onDragStart(index),
-                    onDragOver: (e) => { e.preventDefault(); },
-                    onDrop: onDrop(index),
-                  }
-                : undefined
-            }
-          >
-            <DashboardWidgetBody widget={widget} savedViews={savedViews} />
-          </DashboardWidgetCard>
+            savedViews={savedViews}
+            statistics={statistics}
+            moveWidget={moveWidget}
+            removeWidget={removeWidget}
+            onDragStart={onDragStart}
+            onDrop={onDrop}
+          />
         ))}
       </div>
     </DocumentUploadProvider>
   );
 }
 
-function DashboardWidgetBody({
+function WidgetSlot({
   widget,
+  index,
+  editMode,
   savedViews,
+  statistics,
+  moveWidget,
+  removeWidget,
+  onDragStart,
+  onDrop,
 }: {
   widget: DashboardWidgetDto;
+  index: number;
+  editMode: boolean;
   savedViews: SavedDocumentViewDto[];
+  statistics: DashboardStatisticsDto | null;
+  moveWidget: (index: number, direction: -1 | 1) => void;
+  removeWidget: (id: string) => void;
+  onDragStart: (index: number) => (e: React.DragEvent) => void;
+  onDrop: (targetIndex: number) => (e: React.DragEvent) => void;
 }) {
-  const { t } = useTranslation();
-  const [stats, setStats] = useState<Awaited<ReturnType<typeof getDashboardStatistics>> | null>(
-    null
-  );
+  const { t, i18n } = useTranslation();
   const [docs, setDocs] = useState<DocumentDto[]>([]);
-
-  useEffect(() => {
-    if (widget.type === 'statistics') {
-      void getDashboardStatistics()
-        .then(setStats)
-        .catch(() => { setStats(null); });
-    }
-  }, [widget.type]);
 
   useEffect(() => {
     if (widget.type === 'recent_documents' || widget.type === 'attention') {
@@ -173,7 +210,9 @@ function DashboardWidgetBody({
               : items;
           setDocs(filtered.slice(0, limit));
         })
-        .catch(() => { setDocs([]); });
+        .catch(() => {
+          setDocs([]);
+        });
     }
   }, [widget]);
 
@@ -191,49 +230,70 @@ function DashboardWidgetBody({
       const items = await listDocuments(savedViewToListQuery(view));
       setDocs(items.slice(0, limit));
     };
-    void load().catch(() => { setDocs([]); });
+    void load().catch(() => {
+      setDocs([]);
+    });
   }, [widget, savedViews]);
+
+  const attentionCount = widget.type === 'attention' ? docs.length : 0;
+
+  return (
+    <DashboardWidgetCard
+      widget={widget}
+      editMode={editMode}
+      title={resolveWidgetTitle(widget, savedViews, t)}
+      headerAside={widgetHeaderAside(widget, attentionCount, t)}
+      onMoveUp={() => {
+        moveWidget(index, -1);
+      }}
+      onMoveDown={() => {
+        moveWidget(index, 1);
+      }}
+      onRemove={() => {
+        removeWidget(widget.id);
+      }}
+      dragHandleProps={
+        editMode
+          ? {
+              draggable: true,
+              onDragStart: onDragStart(index),
+              onDragOver: (e) => {
+                e.preventDefault();
+              },
+              onDrop: onDrop(index),
+            }
+          : undefined
+      }
+    >
+      <DashboardWidgetBody
+        widget={widget}
+        statistics={statistics}
+        docs={docs}
+        locale={i18n.language}
+      />
+    </DashboardWidgetCard>
+  );
+}
+
+function DashboardWidgetBody({
+  widget,
+  statistics,
+  docs,
+  locale,
+}: {
+  widget: DashboardWidgetDto;
+  statistics: DashboardStatisticsDto | null;
+  docs: DocumentDto[];
+  locale: string;
+}) {
+  const { t } = useTranslation();
 
   switch (widget.type) {
     case 'upload':
       return <UploadDropzone compact={false} />;
     case 'statistics':
-      if (!stats) return <p className="muted">{t('dashboard.loading')}</p>;
-      return (
-        <>
-          <dl className="dashboard-stats">
-            <div>
-              <dt>{t('dashboard.statTotal')}</dt>
-              <dd>{stats.documentsTotal}</dd>
-            </div>
-            <div>
-              <dt>{t('dashboard.statReady')}</dt>
-              <dd>{stats.byStatus.ready}</dd>
-            </div>
-            <div>
-              <dt>{t('dashboard.statUnlabeled')}</dt>
-              <dd>{stats.unlabeledCount}</dd>
-            </div>
-            <div>
-              <dt>{t('dashboard.statLabeled')}</dt>
-              <dd>{stats.labelsAssignedCount}</dd>
-            </div>
-          </dl>
-          {stats.topLabels.length > 0 ? (
-            <ul
-              className="dashboard-label-distribution"
-              aria-label={t('dashboard.statLabelDistribution')}
-            >
-              {stats.topLabels.map((row) => (
-                <li key={row.name}>
-                  <span>{row.name}</span>
-                  <span className="muted">{row.count}</span>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </>
-      );
+      if (!statistics) return <p className="muted">{t('dashboard.loading')}</p>;
+      return <DashboardStatisticsBody statistics={statistics} />;
     case 'recent_documents':
     case 'saved_view':
       if (docs.length === 0) {
@@ -242,12 +302,7 @@ function DashboardWidgetBody({
       return (
         <ul className="dashboard-doc-list">
           {docs.map((doc) => (
-            <li key={doc.id}>
-              <Link to={routes.document(doc.id)} className="dashboard-doc-link">
-                <span className="dashboard-doc-title">{doc.title || doc.filename}</span>
-                <Badge status={doc.status} />
-              </Link>
-            </li>
+            <DashboardDocumentRow key={doc.id} doc={doc} locale={locale} />
           ))}
         </ul>
       );
@@ -256,14 +311,9 @@ function DashboardWidgetBody({
         return <p className="muted">{t('dashboard.widgetAttentionEmpty')}</p>;
       }
       return (
-        <ul className="dashboard-doc-list">
+        <ul className="dashboard-doc-list dashboard-doc-list-attention">
           {docs.map((doc) => (
-            <li key={doc.id}>
-              <Link to={routes.document(doc.id)} className="dashboard-doc-link">
-                <span className="dashboard-doc-title">{doc.title || doc.filename}</span>
-                <Badge status={doc.status} />
-              </Link>
-            </li>
+            <DashboardDocumentRow key={doc.id} doc={doc} locale={locale} showOpenAction />
           ))}
         </ul>
       );
@@ -272,4 +322,93 @@ function DashboardWidgetBody({
       return _never;
     }
   }
+}
+
+function DashboardStatisticsBody({ statistics }: { statistics: DashboardStatisticsDto }) {
+  const { t } = useTranslation();
+  const total = Math.max(statistics.documentsTotal, 1);
+
+  const rows = [
+    {
+      label: t('dashboard.statTotal'),
+      display: `${String(statistics.documentsTotal)}/${String(statistics.documentsTotal)}`,
+      ratio: 1,
+    },
+    {
+      label: t('dashboard.statReady'),
+      display: String(statistics.byStatus.ready),
+      ratio: statistics.byStatus.ready / total,
+    },
+    {
+      label: t('dashboard.statLabeled'),
+      display: String(statistics.labelsAssignedCount),
+      ratio: statistics.labelsAssignedCount / total,
+    },
+    {
+      label: t('dashboard.statUnlabeled'),
+      display: String(statistics.unlabeledCount),
+      ratio: statistics.unlabeledCount / total,
+    },
+  ];
+
+  return (
+    <>
+      <ul className="dashboard-stat-rows">
+        {rows.map((row) => (
+          <li key={row.label} className="dashboard-stat-row">
+            <div className="dashboard-stat-row-head">
+              <span className="dashboard-stat-row-label">{row.label}</span>
+              <span className="dashboard-stat-row-value">{row.display}</span>
+            </div>
+            <Progress
+              value={row.ratio * 100}
+              max={100}
+              tone="accent"
+              label={row.label}
+              className="dashboard-stat-progress"
+            />
+          </li>
+        ))}
+      </ul>
+      {statistics.topLabels.length > 0 ? (
+        <div className="dashboard-label-chips" aria-label={t('dashboard.statLabelDistribution')}>
+          {statistics.topLabels.slice(0, 4).map((row) => (
+            <Chip key={row.name} label={`${row.name} ${String(row.count)}`} variant="outline" />
+          ))}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+function DashboardDocumentRow({
+  doc,
+  locale,
+  showOpenAction = false,
+}: {
+  doc: DocumentDto;
+  locale: string;
+  showOpenAction?: boolean;
+}) {
+  const { t } = useTranslation();
+  const title = doc.title || doc.filename;
+  const timeIso = doc.createdAt || doc.updatedAt;
+
+  return (
+    <li className="dashboard-doc-row">
+      <FileText size={16} className="dashboard-doc-row-icon" aria-hidden />
+      <Link to={routes.document(doc.id)} className="dashboard-doc-row-title">
+        {title}
+      </Link>
+      <Badge status={doc.status} />
+      <span className="dashboard-doc-row-time">
+        {formatDocumentRelativeTime(timeIso, locale)}
+      </span>
+      {showOpenAction ? (
+        <Link to={routes.document(doc.id)} className="btn btn-secondary btn-sm dashboard-doc-row-action">
+          {t('dashboard.openDocument')}
+        </Link>
+      ) : null}
+    </li>
+  );
 }
