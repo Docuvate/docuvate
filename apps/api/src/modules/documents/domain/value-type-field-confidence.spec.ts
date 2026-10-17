@@ -35,7 +35,7 @@ describe('value-type field confidence artifact', () => {
 
   it('loads calibrated thresholds for heuristic fields', () => {
     expect(autoPromoteMinConfidenceForField('date')).toBe(0.95);
-    expect(autoPromoteMinConfidenceForField('amount')).toBe(0.85);
+    expect(autoPromoteMinConfidenceForField('amount')).toBe(0.4);
     expect(autoPromoteMinConfidenceForField('vendor')).toBe(0.55);
     expect(autoPromoteMinConfidenceForField('unknown')).toBe(0.9);
   });

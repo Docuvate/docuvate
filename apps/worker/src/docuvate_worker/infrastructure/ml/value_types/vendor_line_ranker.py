@@ -13,7 +13,7 @@ from typing import TypedDict
 from docuvate_worker.infrastructure.ml.value_types.model import ValueTypeModelBundle
 
 
-class VendorLineRankerArtifact(TypedDict, total=False):
+class VendorLineRankerArtifact(TypedDict):
     version: str
     feature_names: list[str]
     coefficients: list[float]
