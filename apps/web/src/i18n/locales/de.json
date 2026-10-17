@@ -1617,6 +1617,13 @@
   "dashboard": {
     "title": "Start",
     "lead": "Dokumente, Uploads und Listen auf einen Blick.",
+    "reviewBannerTitle_one": "{{count}} Vorschlag wartet auf Ihre Prüfung",
+    "reviewBannerTitle_other": "{{count}} Vorschläge warten auf Ihre Prüfung",
+    "reviewBannerDescription": "Labels und Felder im Posteingang prüfen und mit wenigen Klicks übernehmen.",
+    "reviewBannerAction": "Vorschläge durchklicken",
+    "allDocuments": "Alle Dokumente →",
+    "viewAll": "Alle anzeigen",
+    "openDocument": "Öffnen",
     "reviewQueueLink_one": "Prüfen ({{count}} offen)",
     "reviewQueueLink_other": "Prüfen ({{count}} offen)",
     "loading": "Startseite wird geladen…",
@@ -1640,6 +1647,19 @@
     "statUnlabeled": "Ohne Label",
     "statLabelDistribution": "Labels nach Anzahl",
     "statLabeled": "Mit Labels",
+    "onboarding": {
+      "title": "Willkommen",
+      "lead": "In drei Schritten zu einer geordneten Ablage. Docuvate macht die Arbeit, Sie bestätigen nur.",
+      "stepUploadTitle": "1 · Dokumente hochladen",
+      "stepUploadText": "Ziehen Sie PDFs oder Fotos hierher. Die Texterkennung startet automatisch.",
+      "stepReviewTitle": "2 · Vorschläge durchklicken",
+      "stepReviewText": "Docuvate schlägt Labels und Felder vor. Ein Klick übernimmt.",
+      "stepReviewPending": "Wartet auf Upload",
+      "stepConnectTitle": "3 · Quellen verbinden (optional)",
+      "stepConnectText": "Paperless, SharePoint oder Scanner per SFTP anbinden.",
+      "stepConnectAction": "Verbindungen",
+      "privacyNote": "Alles bleibt auf Ihrer Hardware. Keine Cloud nötig."
+    },
     "widgetType": {
       "upload": "Upload",
       "statistics": "Statistik",

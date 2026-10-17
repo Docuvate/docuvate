@@ -1,20 +1,26 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  DashboardStatisticsDto,
   DashboardWidgetDto,
   DashboardWidgetType,
   SavedDocumentViewDto,
 } from '@docuvate/contracts';
+import { ListChecks } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import { DashboardOnboarding } from '../components/dashboard/DashboardOnboarding';
+import { DashboardStartSkeleton } from '../components/dashboard/DashboardStartSkeleton';
 import { DashboardWidgets } from '../components/dashboard/DashboardWidgets';
 import { useToastNotify } from '../components/save/ToastProvider';
+import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
 import {
   getDashboardLayout,
+  getDashboardStatistics,
   getDocumentReviewQueueSummary,
   listSavedDocumentViews,
   replaceDashboardLayout,
@@ -43,6 +49,7 @@ export function DashboardPage() {
   const { pushSuccess, pushError } = useToastNotify();
   const [widgets, setWidgets] = useState<DashboardWidgetDto[]>([]);
   const [savedViews, setSavedViews] = useState<SavedDocumentViewDto[]>([]);
+  const [statistics, setStatistics] = useState<DashboardStatisticsDto | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [addType, setAddType] = useState<DashboardWidgetType>('statistics');
@@ -65,8 +72,9 @@ export function DashboardPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const layout = await getDashboardLayout();
+      const [layout, stats] = await Promise.all([getDashboardLayout(), getDashboardStatistics()]);
       setWidgets(layout.widgets);
+      setStatistics(stats);
       await refreshViews();
     } catch (err) {
       pushError(err instanceof Error ? err.message : t('errors.generic'));
@@ -81,8 +89,12 @@ export function DashboardPage() {
 
   useEffect(() => {
     void getDocumentReviewQueueSummary()
-      .then((summary) => { setReviewPendingCount(summary.pendingCount); })
-      .catch(() => { setReviewPendingCount(0); });
+      .then((summary) => {
+        setReviewPendingCount(summary.pendingCount);
+      })
+      .catch(() => {
+        setReviewPendingCount(0);
+      });
   }, [widgets]);
 
   useEffect(() => {
@@ -140,38 +152,57 @@ export function DashboardPage() {
     void persist(next);
   }
 
+  const showOnboarding = statistics?.documentsTotal === 0 && !editMode;
+
   if (loading) {
     return (
       <div className="page dashboard-page">
-        <p className="muted">{t('dashboard.loading')}</p>
+        <DashboardStartSkeleton />
+      </div>
+    );
+  }
+
+  if (showOnboarding) {
+    return (
+      <div className="page dashboard-page dv-page-grid">
+        <DashboardOnboarding />
       </div>
     );
   }
 
   return (
-    <div className="page dashboard-page">
-      <header className="page-header">
+    <div className="page dashboard-page dv-page-grid">
+      <header className="page-header dashboard-page-header">
         <div>
           <h1>{t('dashboard.title')}</h1>
           <p className="muted">{t('dashboard.lead')}</p>
-          {reviewPendingCount > 0 ? (
-            <p className="dashboard-review-cta">
-              <Link to={routes.reviewQueue} className="dashboard-review-link">
-                {t('dashboard.reviewQueueLink', { count: reviewPendingCount })}
-              </Link>
-            </p>
-          ) : null}
         </div>
         <div className="dashboard-header-actions">
           <Button
             type="button"
             variant={editMode ? 'primary' : 'secondary'}
-            onClick={() => { setEditMode((v) => !v); }}
+            onClick={() => {
+              setEditMode((v) => !v);
+            }}
           >
             {editMode ? t('dashboard.doneEditing') : t('dashboard.customize')}
           </Button>
         </div>
       </header>
+
+      {reviewPendingCount > 0 && !editMode ? (
+        <Banner
+          icon={ListChecks}
+          title={t('dashboard.reviewBannerTitle', { count: reviewPendingCount })}
+          description={t('dashboard.reviewBannerDescription', { count: reviewPendingCount })}
+          action={
+            <Link to={routes.reviewQueue} className="btn btn-primary">
+              {t('dashboard.reviewBannerAction')}
+            </Link>
+          }
+          className="dashboard-review-banner"
+        />
+      ) : null}
 
       {editMode ? (
         <div className="dashboard-add-panel card">
@@ -179,7 +210,9 @@ export function DashboardPage() {
           <div className="dashboard-add-row">
             <Select
               value={addType}
-              onChange={(v) => { setAddType(parseDashboardWidgetType(v)); }}
+              onChange={(v) => {
+                setAddType(parseDashboardWidgetType(v));
+              }}
               options={addableWidgetTypes.map((type) => ({
                 value: type,
                 label: t(`dashboard.widgetType.${type}`),
@@ -211,9 +244,14 @@ export function DashboardPage() {
       <DashboardWidgets
         widgets={widgets}
         editMode={editMode}
-        onWidgetsChange={(next) => void persist(next)}
+        onWidgetsChange={(next) => {
+          void persist(next);
+        }}
         savedViews={savedViews}
-        onRefreshViews={() => void refreshViews()}
+        onRefreshViews={() => {
+          void refreshViews();
+        }}
+        statistics={statistics}
       />
     </div>
   );

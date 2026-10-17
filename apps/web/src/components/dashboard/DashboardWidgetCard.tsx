@@ -19,6 +19,7 @@ interface DashboardWidgetCardProps {
     onDrop: (e: React.DragEvent) => void;
   };
   title: string;
+  headerAside?: ReactNode;
   children: ReactNode;
 }
 
@@ -30,6 +31,7 @@ export function DashboardWidgetCard({
   onRemove,
   dragHandleProps,
   title,
+  headerAside,
   children,
 }: DashboardWidgetCardProps) {
   const { t } = useTranslation();
@@ -51,6 +53,9 @@ export function DashboardWidgetCard({
     >
       <header className="dashboard-widget-header">
         <h2 className="dashboard-widget-title">{title}</h2>
+        {!editMode && headerAside ? (
+          <div className="dashboard-widget-header-aside">{headerAside}</div>
+        ) : null}
         {editMode ? (
           <div className="dashboard-widget-edit-actions">
             <Button

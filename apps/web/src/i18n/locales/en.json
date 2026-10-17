@@ -1605,6 +1605,13 @@
   "dashboard": {
     "title": "Start",
     "lead": "Your documents, uploads, and lists at a glance.",
+    "reviewBannerTitle_one": "{{count}} suggestion waiting for review",
+    "reviewBannerTitle_other": "{{count}} suggestions waiting for review",
+    "reviewBannerDescription": "Review labels and fields in the inbox and accept them in a few clicks.",
+    "reviewBannerAction": "Review suggestions",
+    "allDocuments": "All documents →",
+    "viewAll": "View all",
+    "openDocument": "Open",
     "reviewQueueLink_one": "Review ({{count}} open)",
     "reviewQueueLink_other": "Review ({{count}} open)",
     "loading": "Loading dashboard…",
@@ -1628,6 +1635,19 @@
     "statUnlabeled": "Without label",
     "statLabelDistribution": "Labels by count",
     "statLabeled": "With labels",
+    "onboarding": {
+      "title": "Welcome",
+      "lead": "Three steps to an organized library. Docuvate does the work; you confirm.",
+      "stepUploadTitle": "1 · Upload documents",
+      "stepUploadText": "Drop PDFs or photos here. Text recognition starts automatically.",
+      "stepReviewTitle": "2 · Review suggestions",
+      "stepReviewText": "Docuvate suggests labels and fields. One click to accept.",
+      "stepReviewPending": "Waiting for upload",
+      "stepConnectTitle": "3 · Connect sources (optional)",
+      "stepConnectText": "Link Paperless, SharePoint, or scanners via SFTP.",
+      "stepConnectAction": "Connections",
+      "privacyNote": "Everything stays on your hardware. No cloud required."
+    },
     "widgetType": {
       "upload": "Upload",
       "statistics": "Statistics",
