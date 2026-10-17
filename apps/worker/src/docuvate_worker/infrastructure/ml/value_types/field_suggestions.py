@@ -291,7 +291,7 @@ def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate
         free_score = bundle.log_likelihood(candidate, "free_text")
         addr_score = bundle.log_likelihood(candidate, "address")
         id_score = bundle.log_likelihood(candidate, "identifier")
-        if org_score <= free_score:
+        if org_score <= max(free_score, addr_score, id_score):
             continue
         if org_score - free_score <= 0.5 and not had_label:  # noqa: PLR2004
             continue
