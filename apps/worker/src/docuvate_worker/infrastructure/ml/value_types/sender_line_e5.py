@@ -9,6 +9,9 @@ from functools import lru_cache
 from pathlib import Path
 from typing import TypedDict
 
+from docuvate_worker.infrastructure.extractors.field_extraction_context import (
+    passage_vector_for_text,
+)
 from docuvate_worker.infrastructure.fastembed_model import embed_passages, embed_query
 
 _ARTIFACT_PATH = (
@@ -64,12 +67,20 @@ def sender_line_e5_cosine(line_text: str) -> float:
 def sender_lines_e5_cosine(lines: list[str]) -> list[float]:
     """Batch passage embeddings for multiple lines."""
     stripped = [line.strip() for line in lines]
-    indices = [index for index, line in enumerate(stripped) if line]
     scores = [0.0] * len(lines)
-    if not indices:
-        return scores
-    texts = [stripped[index] for index in indices]
-    vectors = embed_passages(texts)
-    for index, passage in zip(indices, vectors, strict=True):
-        scores[index] = _max_query_cosine(passage)
+    missing_indices: list[int] = []
+    missing_texts: list[str] = []
+    for index, line in enumerate(stripped):
+        if not line:
+            continue
+        cached = passage_vector_for_text(line)
+        if cached is not None:
+            scores[index] = _max_query_cosine(cached)
+        else:
+            missing_indices.append(index)
+            missing_texts.append(line)
+    if missing_texts:
+        vectors = embed_passages(missing_texts)
+        for index, passage in zip(missing_indices, vectors, strict=True):
+            scores[index] = _max_query_cosine(passage)
     return scores
