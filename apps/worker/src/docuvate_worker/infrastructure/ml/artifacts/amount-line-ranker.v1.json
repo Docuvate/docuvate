@@ -1,0 +1,25 @@
+{
+  "version": "1",
+  "feature_names": [
+    "money_score",
+    "money_minus_identifier",
+    "money_minus_date",
+    "money_minus_address",
+    "label_hint",
+    "line_position_ratio",
+    "thousands_sep_hint",
+    "token_length"
+  ],
+  "coefficients": [
+    0.048588992718083264,
+    -0.08483363742891017,
+    0.3966797512305074,
+    -0.3269305410269907,
+    -0.7214992905238888,
+    5.52982260488305,
+    4.397960267549522,
+    -0.024383488851662076
+  ],
+  "intercept": -1.3117628806829913,
+  "min_score": 0.85
+}

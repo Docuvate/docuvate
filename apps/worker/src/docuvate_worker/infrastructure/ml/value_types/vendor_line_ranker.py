@@ -34,6 +34,8 @@ class VendorLineFeatures:
     money_minus_org: float
     label_hint: float
     line_position_ratio: float
+    top_of_page_hint: float
+    first_label_line_offset: float
 
     def as_vector(self) -> list[float]:
         return [
@@ -43,6 +45,8 @@ class VendorLineFeatures:
             self.money_minus_org,
             self.label_hint,
             self.line_position_ratio,
+            self.top_of_page_hint,
+            self.first_label_line_offset,
         ]
 
 
@@ -84,6 +88,7 @@ def build_line_features(
     line_count: int,
     sender_e5_cosine: float,
     had_explicit_label: bool,
+    first_label_line_index: int | None = None,
 ) -> VendorLineFeatures:
     org = bundle.log_likelihood(candidate, "organization")
     free = bundle.log_likelihood(candidate, "free_text")
@@ -98,4 +103,10 @@ def build_line_features(
         money_minus_org=money - org,
         label_hint=1.0 if had_explicit_label else 0.0,
         line_position_ratio=line_index / denom,
+        top_of_page_hint=1.0 if line_index == 0 else 0.0,
+        first_label_line_offset=float(
+            max(0, line_index - first_label_line_index)
+            if first_label_line_index is not None and had_explicit_label
+            else 0.0
+        ),
     )

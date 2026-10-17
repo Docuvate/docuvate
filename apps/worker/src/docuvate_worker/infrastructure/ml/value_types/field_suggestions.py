@@ -9,6 +9,10 @@ from docuvate_worker.domain.models import ExtractedField
 from docuvate_worker.infrastructure.extractors.field_value_normalize import (
     strip_leading_sender_label_prefixes,
 )
+from docuvate_worker.infrastructure.ml.value_types.amount_line_ranker import (
+    build_amount_line_features,
+    get_amount_line_ranker,
+)
 from docuvate_worker.infrastructure.ml.value_types.field_confidence_calibration import (
     get_field_confidence_calibration,
 )
@@ -130,28 +134,61 @@ def _money_beats_date(token: str, money_score: float, date_score: float) -> bool
     return money_score > date_score
 
 
-def _pick_best_money(text: str, bundle: ValueTypeModelBundle) -> tuple[str, float] | None:
-    best: tuple[str, float] | None = None
-    candidates: list[str] = []
-    for line in text.splitlines():
-        stripped = line.strip()
+@dataclass(frozen=True)
+class _AmountCandidate:
+    token: str
+    ranker_score: float
+
+
+def _iter_amount_candidates(text: str, bundle: ValueTypeModelBundle) -> list[_AmountCandidate]:
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    ranker = get_amount_line_ranker()
+    rows: list[_AmountCandidate] = []
+    seen: set[tuple[str, int]] = set()
+    for line_index, stripped in enumerate(lines):
         _, value_part = _split_label_value(stripped)
+        had_label = value_part is not None
+        token_sources: list[str] = []
         if value_part:
-            candidates.append(value_part)
-            candidates.extend(_tokenize_value_candidates(value_part))
-        candidates.extend(_tokenize_value_candidates(stripped))
-    for token in candidates:
-        lowered = token.lower()
-        if "x" in lowered:
-            continue
-        if len(token) < 3 or _digits_ratio(token) < 0.15:  # noqa: PLR2004
-            continue
-        money_score = bundle.log_likelihood(token, "money")
-        date_score = bundle.log_likelihood(token, "date")
-        if not _money_beats_date(token, money_score, date_score):
-            continue
-        if best is None or money_score > best[1]:
-            best = (token, money_score)
+            token_sources.append(value_part)
+            token_sources.extend(_tokenize_value_candidates(value_part))
+        token_sources.extend(_tokenize_value_candidates(stripped))
+        for token in token_sources:
+            key = (token, line_index)
+            if key in seen:
+                continue
+            seen.add(key)
+            lowered = token.lower()
+            if "x" in lowered:
+                continue
+            if len(token) < 3 or _digits_ratio(token) < 0.15:  # noqa: PLR2004
+                continue
+            money_score = bundle.log_likelihood(token, "money")
+            date_score = bundle.log_likelihood(token, "date")
+            if not _money_beats_date(token, money_score, date_score):
+                continue
+            features = build_amount_line_features(
+                bundle=bundle,
+                token=token,
+                line_index=line_index,
+                line_count=len(lines),
+                had_explicit_label=had_label,
+                money_score=money_score,
+                date_score=date_score,
+            )
+            rows.append(_AmountCandidate(token=token, ranker_score=ranker.score(features)))
+    rows.sort(key=lambda row: row.ranker_score, reverse=True)
+    return rows
+
+
+def _pick_best_amount(text: str, bundle: ValueTypeModelBundle) -> _AmountCandidate | None:
+    ranked = _iter_amount_candidates(text, bundle)
+    if not ranked:
+        return None
+    ranker = get_amount_line_ranker()
+    best = ranked[0]
+    if best.ranker_score < ranker.min_score:
+        return None
     return best
 
 
@@ -257,17 +294,24 @@ class _VendorCandidate:
     had_explicit_label: bool
     sender_e5_cosine: float
     ranker_score: float
+    line_index: int
 
 
 def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate | None:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
     sender_cosines = sender_lines_e5_cosine(lines)
     ranker = get_vendor_line_ranker()
-    best: _VendorCandidate | None = None
+    first_label_line_index: int | None = None
     for index, line in enumerate(lines):
         cleaned = strip_leading_sender_label_prefixes(line)
-        had_label = cleaned != line
+        if _split_label_value(cleaned)[1] is not None:
+            first_label_line_index = index
+            break
+    candidates: list[_VendorCandidate] = []
+    for index, line in enumerate(lines):
+        cleaned = strip_leading_sender_label_prefixes(line)
         _, value_part = _split_label_value(cleaned)
+        had_label = value_part is not None or cleaned != line
         candidate = value_part if value_part is not None else cleaned
         if not candidate or _is_heading_like(candidate, bundle):
             continue
@@ -277,7 +321,7 @@ def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate
             continue
         money_score = bundle.log_likelihood(candidate, "money")
         org_score = bundle.log_likelihood(candidate, "organization")
-        if money_score >= org_score:
+        if money_score >= org_score and not had_label:
             continue
         if not _has_sender_evidence(
             lines,
@@ -293,25 +337,31 @@ def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate
             continue
         if org_score - free_score <= 0.5 and not had_label:  # noqa: PLR2004
             continue
-        sender_e5 = sender_cosines[index]
         features = build_line_features(
             bundle=bundle,
             candidate=candidate,
             line_index=index,
             line_count=len(lines),
-            sender_e5_cosine=sender_e5,
+            sender_e5_cosine=sender_cosines[index],
             had_explicit_label=had_label,
+            first_label_line_index=first_label_line_index,
         )
         ranker_score = ranker.score(features)
-        row = _VendorCandidate(
-            value=candidate[:120],
-            had_explicit_label=had_label,
-            sender_e5_cosine=sender_e5,
-            ranker_score=ranker_score,
+        candidates.append(
+            _VendorCandidate(
+                value=candidate[:120],
+                had_explicit_label=had_label,
+                sender_e5_cosine=sender_cosines[index],
+                ranker_score=ranker_score,
+                line_index=index,
+            )
         )
-        if best is None or row.ranker_score > best.ranker_score:
-            best = row
-    if best is None or best.ranker_score < ranker.min_score:
+    if not candidates:
+        return None
+    best_score = max(row.ranker_score for row in candidates)
+    shortlist = [row for row in candidates if row.ranker_score >= best_score - 0.06]
+    best = min(shortlist, key=lambda row: (row.line_index, -row.ranker_score))
+    if best.ranker_score < ranker.min_score:
         return None
     return best
 
@@ -323,16 +373,23 @@ def learned_field_suggestions(
     models = bundle if bundle is not None else get_value_type_models()
     fields: list[ExtractedField] = []
 
-    money = _pick_best_money(text, models)
-    if money is not None:
-        amount_raw, score = money
-        fields.append(
-            ExtractedField(
-                key="amount",
-                value=_normalize_amount(amount_raw),
-                confidence=min(0.95, max(0.45, 0.45 + score * 0.02)),
-            )
+    amount_row = _pick_best_amount(text, models)
+    if amount_row is not None:
+        ranked = _iter_amount_candidates(text, models)
+        runner_up = ranked[1].ranker_score if len(ranked) > 1 else float("-inf")
+        cal = get_field_confidence_calibration()
+        ok, confidence = cal.amount_meets_auto_promote_gate(
+            ranker_score=amount_row.ranker_score,
+            runner_up_ranker_score=runner_up,
         )
+        if ok:
+            fields.append(
+                ExtractedField(
+                    key="amount",
+                    value=_normalize_amount(amount_row.token),
+                    confidence=confidence,
+                )
+            )
 
     date = _strong_title_header_period_date(text, models) or _pick_best_date(text, models)
     if date is not None:

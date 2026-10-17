@@ -1,735 +1,3791 @@
 {
-  "version": 1,
-  "doc_count": 70,
+  "version": 2,
+  "doc_count": 360,
+  "splits": [
+    "train",
+    "threshold",
+    "confirm",
+    "eval"
+  ],
   "documents": [
     {
-      "id": "letter_000",
+      "id": "letter_0000",
       "category": "letter",
-      "split": "calibration",
-      "text": "Dokument 000\n\nKrankenkasse Plus\nIndustriering 88, 44893 K\u00f6ln\n\n11.07.2023\n\nBetreff: Projektupdate",
+      "split": "train",
+      "text": "Dokument 0000\n\nKrankenkasse Plus\nUferpromenade 21, 51150 K\u00f6ln\n\n11.06.2024\n\nBetreff: Projektupdate",
       "expected": {
         "vendor": "Krankenkasse Plus",
-        "date": "11.07.2023"
+        "date": "11.06.2024"
       }
     },
     {
-      "id": "letter_001",
+      "id": "letter_0001",
       "category": "letter",
-      "split": "calibration",
-      "text": "Demo Nord GmbH\nMusterstra\u00dfe 12\n59307 M\u00fcnchen\n\nSchreiben vom 12.02.2023\n\nMit freundlichen Gr\u00fc\u00dfen",
-      "expected": {
-        "vendor": "Demo Nord GmbH",
-        "date": "12.02.2023"
-      }
-    },
-    {
-      "id": "letter_002",
-      "category": "letter",
-      "split": "calibration",
-      "text": "Acme GmbH\nHauptweg 4\n70303 K\u00f6ln\n\nDatum: 12.04.2024\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
-      "expected": {
-        "vendor": "Acme GmbH",
-        "date": "12.04.2024"
-      }
-    },
-    {
-      "id": "letter_003",
-      "category": "letter",
-      "split": "calibration",
-      "text": "Dokument 003\n\nContoso AG\nIndustriering 88, 82684 Hamburg\n\n16.04.2025\n\nBetreff: Projektupdate",
-      "expected": {
-        "vendor": "Contoso AG",
-        "date": "16.04.2025"
-      }
-    },
-    {
-      "id": "letter_004",
-      "category": "letter",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\nHauptweg 4\n51126 K\u00f6ln\n\nSchreiben vom 15.07.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\nMusterstra\u00dfe 12\n21179 M\u00fcnchen\n\nDatum: 13.06.2023\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
         "vendor": "Landesamt f\u00fcr Steuern",
-        "date": "15.07.2025"
+        "date": "13.06.2023"
       }
     },
     {
-      "id": "letter_005",
+      "id": "letter_0002",
       "category": "letter",
-      "split": "calibration",
-      "text": "Demo Nord GmbH\nMusterstra\u00dfe 12\n79239 M\u00fcnchen\n\nDatum: 19.07.2024\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "split": "train",
+      "text": "Krankenkasse Plus\nMusterstra\u00dfe 12\n35477 M\u00fcnchen\n\nSchreiben vom 11.06.2023\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "date": "11.06.2023"
+      }
+    },
+    {
+      "id": "letter_0003",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Dokument 0003\n\nDemo Nord GmbH\nHauptweg 4, 79644 K\u00f6ln\n\n18.03.2024\n\nBetreff: Projektupdate",
       "expected": {
         "vendor": "Demo Nord GmbH",
-        "date": "19.07.2024"
+        "date": "18.03.2024"
       }
     },
     {
-      "id": "letter_006",
+      "id": "letter_0004",
       "category": "letter",
-      "split": "calibration",
-      "text": "Finanzamt Mitte\nAm Markt 3\n14750 M\u00fcnchen\n\nSchreiben vom 15.10.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "split": "eval",
+      "text": "Krankenkasse Plus\nAbteilung Zentrale\nIndustriering 88\n72574 Hamburg\n\nIhr Schreiben vom 27.06.2024",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "date": "27.06.2024"
+      }
+    },
+    {
+      "id": "letter_0005",
+      "category": "letter",
+      "split": "train",
+      "text": "Finanzamt Mitte\nAbteilung Zentrale\nUferpromenade 21\n19481 Leipzig\n\nIhr Schreiben vom 24.02.2025",
       "expected": {
         "vendor": "Finanzamt Mitte",
-        "date": "15.10.2025"
+        "date": "24.02.2025"
       }
     },
     {
-      "id": "letter_007",
+      "id": "letter_0006",
       "category": "letter",
-      "split": "calibration",
-      "text": "Dokument 007\n\nLandesamt f\u00fcr Steuern\nAm Markt 3, 60787 M\u00fcnchen\n\n10.08.2023\n\nBetreff: Projektupdate",
+      "split": "eval",
+      "text": "Tech Solutions UG\nAbteilung Zentrale\nAm Markt 3\n60330 Hamburg\n\nIhr Schreiben vom 14.08.2023",
       "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "date": "10.08.2023"
+        "vendor": "Tech Solutions UG",
+        "date": "14.08.2023"
       }
     },
     {
-      "id": "letter_008",
+      "id": "letter_0007",
       "category": "letter",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\nMusterstra\u00dfe 12\n21523 K\u00f6ln\n\nDatum: 13.01.2024\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nUferpromenade 21\n82384 M\u00fcnchen\n\nSchreiben vom 15.07.2024\n\nMit freundlichen Gr\u00fc\u00dfen",
       "expected": {
         "vendor": "Landesamt f\u00fcr Steuern",
+        "date": "15.07.2024"
+      }
+    },
+    {
+      "id": "letter_0008",
+      "category": "letter",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nAbteilung Zentrale\nHauptweg 4\n45373 M\u00fcnchen\n\nIhr Schreiben vom 04.02.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "date": "04.02.2024"
+      }
+    },
+    {
+      "id": "letter_0009",
+      "category": "letter",
+      "split": "train",
+      "text": "Baltic Data UG\nAbteilung Zentrale\nMusterstra\u00dfe 12\n61559 Hamburg\n\nIhr Schreiben vom 14.06.2025",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "date": "14.06.2025"
+      }
+    },
+    {
+      "id": "letter_0010",
+      "category": "letter",
+      "split": "eval",
+      "text": "Dokument 0010\n\nFinanzamt Mitte\nHauptweg 4, 95196 M\u00fcnchen\n\n07.11.2025\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "date": "07.11.2025"
+      }
+    },
+    {
+      "id": "letter_0011",
+      "category": "letter",
+      "split": "eval",
+      "text": "Alpen Consulting GmbH\nAbteilung Zentrale\nHauptweg 4\n66369 Leipzig\n\nIhr Schreiben vom 13.01.2024",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
         "date": "13.01.2024"
       }
     },
     {
-      "id": "letter_009",
+      "id": "letter_0012",
       "category": "letter",
-      "split": "calibration",
-      "text": "Dokument 009\n\nFinanzamt Mitte\nIndustriering 88, 84675 M\u00fcnchen\n\n13.04.2025\n\nBetreff: Projektupdate",
+      "split": "train",
+      "text": "Dokument 0012\n\nDemo Nord GmbH\nIndustriering 88, 86275 Berlin\n\n27.05.2025\n\nBetreff: Projektupdate",
       "expected": {
-        "vendor": "Finanzamt Mitte",
-        "date": "13.04.2025"
+        "vendor": "Demo Nord GmbH",
+        "date": "27.05.2025"
       }
     },
     {
-      "id": "letter_010",
+      "id": "letter_0013",
       "category": "letter",
-      "split": "eval",
-      "text": "Contoso AG\nHauptweg 4\n95532 Hamburg\n\nSchreiben vom 25.07.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "split": "threshold",
+      "text": "Dokument 0013\n\nFinanzamt Mitte\nAm Markt 3, 94309 Leipzig\n\n21.07.2023\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "date": "21.07.2023"
+      }
+    },
+    {
+      "id": "letter_0014",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Dokument 0014\n\nContoso AG\nHauptweg 4, 43980 Leipzig\n\n08.02.2023\n\nBetreff: Projektupdate",
       "expected": {
         "vendor": "Contoso AG",
-        "date": "25.07.2025"
+        "date": "08.02.2023"
       }
     },
     {
-      "id": "letter_011",
+      "id": "letter_0015",
       "category": "letter",
-      "split": "eval",
-      "text": "Finanzamt Mitte\nMusterstra\u00dfe 12\n56100 M\u00fcnchen\n\nSchreiben vom 04.12.2024\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "split": "train",
+      "text": "Fabrikam KG\nAbteilung Zentrale\nHauptweg 4\n99981 Leipzig\n\nIhr Schreiben vom 11.04.2025",
       "expected": {
-        "vendor": "Finanzamt Mitte",
-        "date": "04.12.2024"
+        "vendor": "Fabrikam KG",
+        "date": "11.04.2025"
       }
     },
     {
-      "id": "letter_012",
+      "id": "letter_0016",
       "category": "letter",
       "split": "eval",
-      "text": "Acme GmbH\nIndustriering 88\n79355 Hamburg\n\nSchreiben vom 13.12.2024\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "text": "Landesamt f\u00fcr Steuern\nHauptweg 4\n61074 M\u00fcnchen\n\nSchreiben vom 19.10.2023\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "date": "19.10.2023"
+      }
+    },
+    {
+      "id": "letter_0017",
+      "category": "letter",
+      "split": "eval",
+      "text": "Acme GmbH\nAbteilung Zentrale\nIndustriering 88\n34971 K\u00f6ln\n\nIhr Schreiben vom 15.06.2024",
       "expected": {
         "vendor": "Acme GmbH",
-        "date": "13.12.2024"
+        "date": "15.06.2024"
       }
     },
     {
-      "id": "letter_013",
+      "id": "letter_0018",
       "category": "letter",
       "split": "eval",
-      "text": "Tech Solutions UG\nAm Markt 3\n38817 Hamburg\n\nSchreiben vom 07.04.2024\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "text": "Demo Nord GmbH\nMusterstra\u00dfe 12\n49201 Leipzig\n\nSchreiben vom 14.11.2024\n\nMit freundlichen Gr\u00fc\u00dfen",
       "expected": {
-        "vendor": "Tech Solutions UG",
-        "date": "07.04.2024"
+        "vendor": "Demo Nord GmbH",
+        "date": "14.11.2024"
       }
     },
     {
-      "id": "letter_014",
+      "id": "letter_0019",
       "category": "letter",
-      "split": "eval",
-      "text": "Contoso AG\nMusterstra\u00dfe 12\n35824 Hamburg\n\nSchreiben vom 10.04.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "split": "train",
+      "text": "Fabrikam KG\nUferpromenade 21\n75721 Leipzig\n\nDatum: 22.12.2023\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
-        "vendor": "Contoso AG",
-        "date": "10.04.2025"
+        "vendor": "Fabrikam KG",
+        "date": "22.12.2023"
       }
     },
     {
-      "id": "tax_000",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\n\nContoso AG\n\nBescheid vom 16.11.2023\n\nSumme: EUR 75.135,50",
+      "id": "letter_0020",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0020\n\nBaltic Data UG\nUferpromenade 21, 18381 M\u00fcnchen\n\n18.02.2025\n\nBetreff: Projektupdate",
       "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "75135.50",
-        "date": "16.11.2023"
-      }
-    },
-    {
-      "id": "tax_001",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Tech Solutions UG\n\nFestgesetzter Betrag: 76.511,00 EUR\n\nDatum: 09.01.2024",
-      "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "76511.00",
-        "date": "09.01.2024"
-      }
-    },
-    {
-      "id": "tax_002",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Landesamt f\u00fcr Steuern\n\nFestgesetzter Betrag: 46.770,50 EUR\n\nDatum: 28.08.2023",
-      "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "46770.50",
-        "date": "28.08.2023"
-      }
-    },
-    {
-      "id": "tax_003",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Tech Solutions UG\n\nFestgesetzter Betrag: 55.144,99 EUR\n\nDatum: 13.05.2024",
-      "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "55144.99",
-        "date": "13.05.2024"
-      }
-    },
-    {
-      "id": "tax_004",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Tech Solutions UG\n\nFestgesetzter Betrag: 8.501,50 EUR\n\nDatum: 18.02.2025",
-      "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "8501.50",
+        "vendor": "Baltic Data UG",
         "date": "18.02.2025"
       }
     },
     {
-      "id": "tax_005",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Finanzamt Mitte\n\nNordbeispiel Beratung GmbH\n\nBescheid vom 26.02.2025\n\nSumme: EUR 49.809,99",
+      "id": "letter_0021",
+      "category": "letter",
+      "split": "train",
+      "text": "Contoso AG\nAbteilung Zentrale\nHauptweg 4\n59689 Leipzig\n\nIhr Schreiben vom 26.02.2025",
       "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "49809.99",
+        "vendor": "Contoso AG",
         "date": "26.02.2025"
       }
     },
     {
-      "id": "tax_006",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Demo Nord GmbH\n\nFestgesetzter Betrag: 22.814,50 EUR\n\nDatum: 03.10.2024",
+      "id": "letter_0022",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0022\n\nFabrikam KG\nMusterstra\u00dfe 12, 32694 M\u00fcnchen\n\n03.10.2024\n\nBetreff: Projektupdate",
       "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "22814.50",
+        "vendor": "Fabrikam KG",
         "date": "03.10.2024"
       }
     },
     {
-      "id": "tax_007",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Nordbeispiel Beratung GmbH\n\nFestgesetzter Betrag: 32.602,00 EUR\n\nDatum: 24.11.2025",
+      "id": "letter_0023",
+      "category": "letter",
+      "split": "train",
+      "text": "Krankenkasse Plus\nMusterstra\u00dfe 12\n27256 Hamburg\n\nDatum: 05.12.2025\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "date": "05.12.2025"
+      }
+    },
+    {
+      "id": "letter_0024",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Rhein Logistik AG\nAbteilung Zentrale\nIndustriering 88\n75599 K\u00f6ln\n\nIhr Schreiben vom 18.11.2025",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "date": "18.11.2025"
+      }
+    },
+    {
+      "id": "letter_0025",
+      "category": "letter",
+      "split": "eval",
+      "text": "Finanzamt Mitte\nHauptweg 4\n51088 Hamburg\n\nSchreiben vom 06.02.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
       "expected": {
         "vendor": "Finanzamt Mitte",
-        "amount": "32602.00",
-        "date": "24.11.2025"
+        "date": "06.02.2025"
       }
     },
     {
-      "id": "tax_008",
-      "category": "tax_notice",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\n\nKrankenkasse Plus\n\nBescheid vom 21.10.2024\n\nSumme: EUR 48.160,99",
+      "id": "letter_0026",
+      "category": "letter",
+      "split": "train",
+      "text": "Fabrikam KG\nHauptweg 4\n95045 Berlin\n\nSchreiben vom 14.01.2024\n\nMit freundlichen Gr\u00fc\u00dfen",
       "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "48160.99",
-        "date": "21.10.2024"
+        "vendor": "Fabrikam KG",
+        "date": "14.01.2024"
       }
     },
     {
-      "id": "tax_009",
-      "category": "tax_notice",
+      "id": "letter_0027",
+      "category": "letter",
       "split": "eval",
-      "text": "Finanzamt Mitte\n\nMuster Versicherung AG\n\nBescheid vom 03.09.2024\n\nSumme: EUR 22.937,00",
+      "text": "Muster Versicherung AG\nUferpromenade 21\n68810 K\u00f6ln\n\nDatum: 17.11.2025\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "22937.00",
-        "date": "03.09.2024"
-      }
-    },
-    {
-      "id": "tax_010",
-      "category": "tax_notice",
-      "split": "eval",
-      "text": "Finanzamt Mitte\n\nAcme GmbH\n\nBescheid vom 11.12.2025\n\nSumme: EUR 54.853,00",
-      "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "54853.00",
-        "date": "11.12.2025"
-      }
-    },
-    {
-      "id": "tax_011",
-      "category": "tax_notice",
-      "split": "eval",
-      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Tech Solutions UG\n\nFestgesetzter Betrag: 58.930,50 EUR\n\nDatum: 17.11.2025",
-      "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "58930.50",
+        "vendor": "Muster Versicherung AG",
         "date": "17.11.2025"
       }
     },
     {
-      "id": "tax_012",
-      "category": "tax_notice",
-      "split": "eval",
-      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Contoso AG\n\nFestgesetzter Betrag: 71.117,50 EUR\n\nDatum: 03.08.2024",
+      "id": "letter_0028",
+      "category": "letter",
+      "split": "train",
+      "text": "Contoso AG\nHauptweg 4\n80997 M\u00fcnchen\n\nDatum: 03.08.2024\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "71117.50",
+        "vendor": "Contoso AG",
         "date": "03.08.2024"
       }
     },
     {
-      "id": "tax_013",
-      "category": "tax_notice",
+      "id": "letter_0029",
+      "category": "letter",
       "split": "eval",
-      "text": "Finanzamt Mitte\n\nTech Solutions UG\n\nBescheid vom 20.02.2024\n\nSumme: EUR 29.712,00",
+      "text": "Rhein Logistik AG\nUferpromenade 21\n39987 Leipzig\n\nDatum: 08.02.2025\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "date": "08.02.2025"
+      }
+    },
+    {
+      "id": "letter_0030",
+      "category": "letter",
+      "split": "train",
+      "text": "Finanzamt Mitte\nAbteilung Zentrale\nAm Markt 3\n35333 M\u00fcnchen\n\nIhr Schreiben vom 19.11.2025",
       "expected": {
         "vendor": "Finanzamt Mitte",
-        "amount": "29712.00",
-        "date": "20.02.2024"
+        "date": "19.11.2025"
       }
     },
     {
-      "id": "tax_014",
-      "category": "tax_notice",
-      "split": "eval",
-      "text": "Finanzamt Mitte\n\nLandesamt f\u00fcr Steuern\n\nBescheid vom 19.08.2024\n\nSumme: EUR 75.466,99",
-      "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "75466.99",
-        "date": "19.08.2024"
-      }
-    },
-    {
-      "id": "contract_000",
-      "category": "contract",
-      "split": "calibration",
-      "text": "Rahmenvertrag 000\n\nAuftragnehmer: Nordbeispiel Beratung GmbH\nAuftraggeber: Demo Nord GmbH\n\nVertragswert: 52.363,99 EUR\nUnterzeichnet am 24.04.2023",
-      "expected": {
-        "vendor": "Nordbeispiel Beratung GmbH",
-        "amount": "52363.99",
-        "date": "24.04.2023"
-      }
-    },
-    {
-      "id": "contract_001",
-      "category": "contract",
-      "split": "calibration",
-      "text": "Rahmenvertrag 001\n\nAuftragnehmer: Muster Versicherung AG\nAuftraggeber: Nordbeispiel Beratung GmbH\n\nVertragswert: 83.684,00 EUR\nUnterzeichnet am 28.02.2024",
+      "id": "letter_0031",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0031\n\nMuster Versicherung AG\nAm Markt 3, 93331 Hamburg\n\n21.03.2023\n\nBetreff: Projektupdate",
       "expected": {
         "vendor": "Muster Versicherung AG",
-        "amount": "83684.00",
+        "date": "21.03.2023"
+      }
+    },
+    {
+      "id": "letter_0032",
+      "category": "letter",
+      "split": "eval",
+      "text": "Dokument 0032\n\nDemo Nord GmbH\nAm Markt 3, 54316 Hamburg\n\n28.02.2024\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
         "date": "28.02.2024"
       }
     },
     {
-      "id": "contract_002",
-      "category": "contract",
-      "split": "calibration",
-      "text": "Rahmenvertrag 002\n\nAuftragnehmer: Finanzamt Mitte\nAuftraggeber: Demo Nord GmbH\n\nVertragswert: 45.582,99 EUR\nUnterzeichnet am 24.04.2023",
+      "id": "letter_0033",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Finanzamt Mitte\nMusterstra\u00dfe 12\n36607 Berlin\n\nDatum: 12.09.2025\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
         "vendor": "Finanzamt Mitte",
-        "amount": "45582.99",
-        "date": "24.04.2023"
+        "date": "12.09.2025"
       }
     },
     {
-      "id": "contract_003",
-      "category": "contract",
-      "split": "calibration",
-      "text": "Rahmenvertrag 003\n\nAuftragnehmer: Acme GmbH\nAuftraggeber: Demo Nord GmbH\n\nVertragswert: 58.309,00 EUR\nUnterzeichnet am 16.10.2024",
+      "id": "letter_0034",
+      "category": "letter",
+      "split": "eval",
+      "text": "Dokument 0034\n\nDemo Nord GmbH\nAm Markt 3, 88702 K\u00f6ln\n\n15.01.2024\n\nBetreff: Projektupdate",
       "expected": {
-        "vendor": "Acme GmbH",
-        "amount": "58309.00",
-        "date": "16.10.2024"
+        "vendor": "Demo Nord GmbH",
+        "date": "15.01.2024"
       }
     },
     {
-      "id": "contract_004",
-      "category": "contract",
-      "split": "calibration",
-      "text": "Rahmenvertrag 004\n\nAuftragnehmer: Finanzamt Mitte\nAuftraggeber: Contoso AG\n\nVertragswert: 69.949,50 EUR\nUnterzeichnet am 25.06.2023",
+      "id": "letter_0035",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0035\n\nBaltic Data UG\nIndustriering 88, 22197 Leipzig\n\n15.08.2024\n\nBetreff: Projektupdate",
       "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "69949.50",
-        "date": "25.06.2023"
+        "vendor": "Baltic Data UG",
+        "date": "15.08.2024"
       }
     },
     {
-      "id": "contract_005",
-      "category": "contract",
-      "split": "calibration",
-      "text": "Rahmenvertrag 005\n\nAuftragnehmer: Landesamt f\u00fcr Steuern\nAuftraggeber: Finanzamt Mitte\n\nVertragswert: 88.100,50 EUR\nUnterzeichnet am 06.08.2023",
+      "id": "letter_0036",
+      "category": "letter",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\nMusterstra\u00dfe 12\n97980 K\u00f6ln\n\nDatum: 13.05.2024\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
         "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "88100.50",
-        "date": "06.08.2023"
+        "date": "13.05.2024"
       }
     },
     {
-      "id": "contract_006",
-      "category": "contract",
-      "split": "calibration",
-      "text": "Rahmenvertrag 006\n\nAuftragnehmer: Finanzamt Mitte\nAuftraggeber: Fabrikam KG\n\nVertragswert: 86.597,99 EUR\nUnterzeichnet am 13.02.2025",
+      "id": "letter_0037",
+      "category": "letter",
+      "split": "train",
+      "text": "Alpen Consulting GmbH\nUferpromenade 21\n41931 Hamburg\n\nDatum: 27.04.2023\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "86597.99",
-        "date": "13.02.2025"
+        "vendor": "Alpen Consulting GmbH",
+        "date": "27.04.2023"
       }
     },
     {
-      "id": "contract_007",
-      "category": "contract",
+      "id": "letter_0038",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Dokument 0038\n\nKrankenkasse Plus\nIndustriering 88, 18029 M\u00fcnchen\n\n21.11.2024\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "date": "21.11.2024"
+      }
+    },
+    {
+      "id": "letter_0039",
+      "category": "letter",
       "split": "eval",
-      "text": "Rahmenvertrag 007\n\nAuftragnehmer: Contoso AG\nAuftraggeber: Nordbeispiel Beratung GmbH\n\nVertragswert: 38.097,00 EUR\nUnterzeichnet am 18.02.2025",
+      "text": "Nordbeispiel Beratung GmbH\nHauptweg 4\n64129 M\u00fcnchen\n\nDatum: 28.12.2024\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
-        "vendor": "Contoso AG",
-        "amount": "38097.00",
-        "date": "18.02.2025"
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "date": "28.12.2024"
       }
     },
     {
-      "id": "contract_008",
-      "category": "contract",
-      "split": "eval",
-      "text": "Rahmenvertrag 008\n\nAuftragnehmer: Landesamt f\u00fcr Steuern\nAuftraggeber: Fabrikam KG\n\nVertragswert: 54.249,99 EUR\nUnterzeichnet am 07.03.2023",
+      "id": "letter_0040",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0040\n\nMuster Versicherung AG\nIndustriering 88, 85259 Leipzig\n\n17.08.2025\n\nBetreff: Projektupdate",
       "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "54249.99",
-        "date": "07.03.2023"
+        "vendor": "Muster Versicherung AG",
+        "date": "17.08.2025"
       }
     },
     {
-      "id": "contract_009",
-      "category": "contract",
-      "split": "eval",
-      "text": "Rahmenvertrag 009\n\nAuftragnehmer: Landesamt f\u00fcr Steuern\nAuftraggeber: Fabrikam KG\n\nVertragswert: 39.991,99 EUR\nUnterzeichnet am 26.01.2024",
+      "id": "letter_0041",
+      "category": "letter",
+      "split": "train",
+      "text": "Muster Versicherung AG\nAm Markt 3\n66395 Leipzig\n\nSchreiben vom 19.07.2023\n\nMit freundlichen Gr\u00fc\u00dfen",
       "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "39991.99",
-        "date": "26.01.2024"
-      }
-    },
-    {
-      "id": "contract_010",
-      "category": "contract",
-      "split": "eval",
-      "text": "Rahmenvertrag 010\n\nAuftragnehmer: Tech Solutions UG\nAuftraggeber: Krankenkasse Plus\n\nVertragswert: 20.758,50 EUR\nUnterzeichnet am 28.08.2025",
-      "expected": {
-        "vendor": "Tech Solutions UG",
-        "amount": "20758.50",
-        "date": "28.08.2025"
-      }
-    },
-    {
-      "id": "contract_011",
-      "category": "contract",
-      "split": "eval",
-      "text": "Rahmenvertrag 011\n\nAuftragnehmer: Finanzamt Mitte\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 33.330,50 EUR\nUnterzeichnet am 19.07.2023",
-      "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "33330.50",
+        "vendor": "Muster Versicherung AG",
         "date": "19.07.2023"
       }
     },
     {
-      "id": "receipt_000",
-      "category": "receipt",
-      "split": "calibration",
-      "text": "Nordbeispiel Beratung GmbH\nRechnung\nEUR 17.718,00\nDatum 06.01.2023",
+      "id": "letter_0042",
+      "category": "letter",
+      "split": "train",
+      "text": "Finanzamt Mitte\nHauptweg 4\n27598 Hamburg\n\nSchreiben vom 06.01.2023\n\nMit freundlichen Gr\u00fc\u00dfen",
       "expected": {
-        "vendor": "Nordbeispiel Beratung GmbH",
-        "amount": "17718.00",
+        "vendor": "Finanzamt Mitte",
         "date": "06.01.2023"
       }
     },
     {
-      "id": "receipt_001",
-      "category": "receipt",
-      "split": "calibration",
-      "text": "Demo Nord GmbH\nRechnung\nEUR 59.771,99\nDatum 26.07.2024",
+      "id": "letter_0043",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Demo Nord GmbH\nAbteilung Zentrale\nAm Markt 3\n59612 M\u00fcnchen\n\nIhr Schreiben vom 15.09.2024",
       "expected": {
         "vendor": "Demo Nord GmbH",
-        "amount": "59771.99",
-        "date": "26.07.2024"
+        "date": "15.09.2024"
       }
     },
     {
-      "id": "receipt_002",
-      "category": "receipt",
-      "split": "calibration",
-      "text": "Beleg 002\nKurzer Absender: Krankenkasse Plus\nBruttobetrag: 55.176,99 EUR\nLeistungsdatum 14.07.2023",
-      "expected": {
-        "vendor": "Krankenkasse Plus",
-        "amount": "55176.99",
-        "date": "14.07.2023"
-      }
-    },
-    {
-      "id": "receipt_003",
-      "category": "receipt",
-      "split": "calibration",
-      "text": "Beleg 003\nKurzer Absender: Landesamt f\u00fcr Steuern\nBruttobetrag: 55.679,00 EUR\nLeistungsdatum 27.04.2025",
-      "expected": {
-        "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "55679.00",
-        "date": "27.04.2025"
-      }
-    },
-    {
-      "id": "receipt_004",
-      "category": "receipt",
-      "split": "calibration",
-      "text": "Rechnung 0004\nFinanzamt Mitte\nBetrag: 27.207,50 EUR\nF\u00e4lligkeit: 24.02.2023",
+      "id": "letter_0044",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Finanzamt Mitte\nAbteilung Zentrale\nMusterstra\u00dfe 12\n75674 M\u00fcnchen\n\nIhr Schreiben vom 14.03.2023",
       "expected": {
         "vendor": "Finanzamt Mitte",
-        "amount": "27207.50",
-        "date": "24.02.2023"
+        "date": "14.03.2023"
       }
     },
     {
-      "id": "receipt_005",
-      "category": "receipt",
-      "split": "calibration",
-      "text": "Rechnung 0005\nNordbeispiel Beratung GmbH\nBetrag: 58.163,50 EUR\nF\u00e4lligkeit: 12.11.2023",
+      "id": "letter_0045",
+      "category": "letter",
+      "split": "eval",
+      "text": "Baltic Data UG\nAbteilung Zentrale\nHauptweg 4\n61196 Berlin\n\nIhr Schreiben vom 06.01.2023",
       "expected": {
-        "vendor": "Nordbeispiel Beratung GmbH",
-        "amount": "58163.50",
-        "date": "12.11.2023"
+        "vendor": "Baltic Data UG",
+        "date": "06.01.2023"
       }
     },
     {
-      "id": "receipt_006",
-      "category": "receipt",
-      "split": "calibration",
-      "text": "Landesamt f\u00fcr Steuern\nRechnung\nEUR 79.870,50\nDatum 21.10.2024",
+      "id": "letter_0046",
+      "category": "letter",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nIndustriering 88\n99380 Hamburg\n\nSchreiben vom 07.08.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
       "expected": {
         "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "79870.50",
-        "date": "21.10.2024"
+        "date": "07.08.2025"
       }
     },
     {
-      "id": "receipt_007",
-      "category": "receipt",
-      "split": "calibration",
-      "text": "Finanzamt Mitte\nRechnung\nEUR 41.419,99\nDatum 13.08.2023",
+      "id": "letter_0047",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Alpen Consulting GmbH\nAbteilung Zentrale\nUferpromenade 21\n55677 K\u00f6ln\n\nIhr Schreiben vom 14.06.2025",
       "expected": {
-        "vendor": "Finanzamt Mitte",
-        "amount": "41419.99",
-        "date": "13.08.2023"
+        "vendor": "Alpen Consulting GmbH",
+        "date": "14.06.2025"
       }
     },
     {
-      "id": "receipt_008",
-      "category": "receipt",
-      "split": "eval",
-      "text": "Beleg 008\nKurzer Absender: Fabrikam KG\nBruttobetrag: 91.595,99 EUR\nLeistungsdatum 23.02.2025",
+      "id": "letter_0048",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Landesamt f\u00fcr Steuern\nMusterstra\u00dfe 12\n60314 K\u00f6ln\n\nDatum: 23.10.2025\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
       "expected": {
-        "vendor": "Fabrikam KG",
-        "amount": "91595.99",
-        "date": "23.02.2025"
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "date": "23.10.2025"
       }
     },
     {
-      "id": "receipt_009",
-      "category": "receipt",
+      "id": "letter_0049",
+      "category": "letter",
       "split": "eval",
-      "text": "Muster Versicherung AG\nRechnung\nEUR 44.421,50\nDatum 27.01.2024",
+      "text": "Tech Solutions UG\nUferpromenade 21\n56620 K\u00f6ln\n\nSchreiben vom 13.01.2024\n\nMit freundlichen Gr\u00fc\u00dfen",
       "expected": {
-        "vendor": "Muster Versicherung AG",
-        "amount": "44421.50",
-        "date": "27.01.2024"
+        "vendor": "Tech Solutions UG",
+        "date": "13.01.2024"
       }
     },
     {
-      "id": "receipt_010",
-      "category": "receipt",
-      "split": "eval",
-      "text": "Rechnung 0010\nContoso AG\nBetrag: 24.302,99 EUR\nF\u00e4lligkeit: 14.09.2023",
+      "id": "letter_0050",
+      "category": "letter",
+      "split": "train",
+      "text": "Contoso AG\nAbteilung Zentrale\nHauptweg 4\n77140 M\u00fcnchen\n\nIhr Schreiben vom 17.01.2023",
       "expected": {
         "vendor": "Contoso AG",
-        "amount": "24302.99",
-        "date": "14.09.2023"
+        "date": "17.01.2023"
       }
     },
     {
-      "id": "receipt_011",
-      "category": "receipt",
+      "id": "letter_0051",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Tech Solutions UG\nAm Markt 3\n50058 Berlin\n\nSchreiben vom 02.12.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "date": "02.12.2025"
+      }
+    },
+    {
+      "id": "letter_0052",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0052\n\nNordbeispiel Beratung GmbH\nUferpromenade 21, 89220 Leipzig\n\n08.01.2025\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "date": "08.01.2025"
+      }
+    },
+    {
+      "id": "letter_0053",
+      "category": "letter",
+      "split": "train",
+      "text": "Baltic Data UG\nUferpromenade 21\n97953 Hamburg\n\nSchreiben vom 13.02.2023\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "date": "13.02.2023"
+      }
+    },
+    {
+      "id": "letter_0054",
+      "category": "letter",
+      "split": "train",
+      "text": "Muster Versicherung AG\nAbteilung Zentrale\nIndustriering 88\n19580 Hamburg\n\nIhr Schreiben vom 23.06.2023",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "date": "23.06.2023"
+      }
+    },
+    {
+      "id": "letter_0055",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0055\n\nBaltic Data UG\nMusterstra\u00dfe 12, 10594 K\u00f6ln\n\n09.08.2023\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "date": "09.08.2023"
+      }
+    },
+    {
+      "id": "letter_0056",
+      "category": "letter",
+      "split": "train",
+      "text": "Baltic Data UG\nUferpromenade 21\n43196 Berlin\n\nSchreiben vom 12.10.2023\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "date": "12.10.2023"
+      }
+    },
+    {
+      "id": "letter_0057",
+      "category": "letter",
       "split": "eval",
-      "text": "Beleg 011\nKurzer Absender: Landesamt f\u00fcr Steuern\nBruttobetrag: 80.733,50 EUR\nLeistungsdatum 10.02.2023",
+      "text": "Dokument 0057\n\nFabrikam KG\nAm Markt 3, 63518 Hamburg\n\n16.01.2023\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "date": "16.01.2023"
+      }
+    },
+    {
+      "id": "letter_0058",
+      "category": "letter",
+      "split": "train",
+      "text": "Tech Solutions UG\nAm Markt 3\n15165 Berlin\n\nSchreiben vom 10.03.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "date": "10.03.2025"
+      }
+    },
+    {
+      "id": "letter_0059",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Tech Solutions UG\nIndustriering 88\n35965 Berlin\n\nDatum: 25.08.2023\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "date": "25.08.2023"
+      }
+    },
+    {
+      "id": "letter_0060",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Acme GmbH\nUferpromenade 21\n58540 K\u00f6ln\n\nDatum: 03.05.2025\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "date": "03.05.2025"
+      }
+    },
+    {
+      "id": "letter_0061",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Acme GmbH\nMusterstra\u00dfe 12\n59388 Leipzig\n\nSchreiben vom 26.10.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "date": "26.10.2025"
+      }
+    },
+    {
+      "id": "letter_0062",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Dokument 0062\n\nKrankenkasse Plus\nAm Markt 3, 72610 K\u00f6ln\n\n05.03.2024\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "date": "05.03.2024"
+      }
+    },
+    {
+      "id": "letter_0063",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0063\n\nKrankenkasse Plus\nAm Markt 3, 96155 Leipzig\n\n17.06.2023\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "date": "17.06.2023"
+      }
+    },
+    {
+      "id": "letter_0064",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0064\n\nRhein Logistik AG\nUferpromenade 21, 60853 Berlin\n\n17.11.2023\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "date": "17.11.2023"
+      }
+    },
+    {
+      "id": "letter_0065",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Rhein Logistik AG\nAbteilung Zentrale\nHauptweg 4\n49529 Berlin\n\nIhr Schreiben vom 04.08.2023",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "date": "04.08.2023"
+      }
+    },
+    {
+      "id": "letter_0066",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Nordbeispiel Beratung GmbH\nHauptweg 4\n12087 K\u00f6ln\n\nSchreiben vom 21.03.2023\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "date": "21.03.2023"
+      }
+    },
+    {
+      "id": "letter_0067",
+      "category": "letter",
+      "split": "train",
+      "text": "Fabrikam KG\nIndustriering 88\n30220 Leipzig\n\nDatum: 20.07.2023\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "date": "20.07.2023"
+      }
+    },
+    {
+      "id": "letter_0068",
+      "category": "letter",
+      "split": "train",
+      "text": "Fabrikam KG\nAm Markt 3\n25526 Hamburg\n\nSchreiben vom 08.04.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "date": "08.04.2025"
+      }
+    },
+    {
+      "id": "letter_0069",
+      "category": "letter",
+      "split": "train",
+      "text": "Contoso AG\nMusterstra\u00dfe 12\n81139 Berlin\n\nDatum: 24.01.2023\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Contoso AG",
+        "date": "24.01.2023"
+      }
+    },
+    {
+      "id": "letter_0070",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0070\n\nBaltic Data UG\nIndustriering 88, 35171 Berlin\n\n14.05.2023\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "date": "14.05.2023"
+      }
+    },
+    {
+      "id": "letter_0071",
+      "category": "letter",
+      "split": "train",
+      "text": "Tech Solutions UG\nUferpromenade 21\n10092 Leipzig\n\nDatum: 12.02.2025\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "date": "12.02.2025"
+      }
+    },
+    {
+      "id": "letter_0072",
+      "category": "letter",
+      "split": "eval",
+      "text": "Contoso AG\nIndustriering 88\n62257 Leipzig\n\nDatum: 21.11.2023\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Contoso AG",
+        "date": "21.11.2023"
+      }
+    },
+    {
+      "id": "letter_0073",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Muster Versicherung AG\nHauptweg 4\n19063 K\u00f6ln\n\nSchreiben vom 10.05.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "date": "10.05.2025"
+      }
+    },
+    {
+      "id": "letter_0074",
+      "category": "letter",
+      "split": "eval",
+      "text": "Demo Nord GmbH\nIndustriering 88\n23685 Berlin\n\nSchreiben vom 22.11.2025\n\nMit freundlichen Gr\u00fc\u00dfen",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "date": "22.11.2025"
+      }
+    },
+    {
+      "id": "letter_0075",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0075\n\nKrankenkasse Plus\nMusterstra\u00dfe 12, 57261 Hamburg\n\n06.09.2025\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "date": "06.09.2025"
+      }
+    },
+    {
+      "id": "letter_0076",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Finanzamt Mitte\nMusterstra\u00dfe 12\n21725 M\u00fcnchen\n\nDatum: 23.07.2025\n\nSehr geehrte Damen und Herren,\nAnhang: Vertragsunterlagen.",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "date": "23.07.2025"
+      }
+    },
+    {
+      "id": "letter_0077",
+      "category": "letter",
+      "split": "train",
+      "text": "Nordbeispiel Beratung GmbH\nAbteilung Zentrale\nMusterstra\u00dfe 12\n94089 Leipzig\n\nIhr Schreiben vom 13.09.2023",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "date": "13.09.2023"
+      }
+    },
+    {
+      "id": "letter_0078",
+      "category": "letter",
+      "split": "train",
+      "text": "Dokument 0078\n\nAcme GmbH\nAm Markt 3, 93120 M\u00fcnchen\n\n26.10.2025\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "date": "26.10.2025"
+      }
+    },
+    {
+      "id": "letter_0079",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Dokument 0079\n\nDemo Nord GmbH\nMusterstra\u00dfe 12, 35918 M\u00fcnchen\n\n03.07.2023\n\nBetreff: Projektupdate",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "date": "03.07.2023"
+      }
+    },
+    {
+      "id": "tax_0000",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00000\nAlpen Consulting GmbH\n\nHauptforderung 79.430,00 EUR\nDatum 10.06.2025",
       "expected": {
         "vendor": "Landesamt f\u00fcr Steuern",
-        "amount": "80733.50",
+        "amount": "79430.00",
+        "date": "10.06.2025"
+      }
+    },
+    {
+      "id": "tax_0001",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Rhein Logistik AG\n\nFestgesetzter Betrag: 48.129,50 EUR\n\nDatum: 04.04.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "48129.50",
+        "date": "04.04.2023"
+      }
+    },
+    {
+      "id": "tax_0002",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Muster Versicherung AG\n\nFestgesetzter Betrag: 19.788,50 EUR\n\nDatum: 27.06.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "19788.50",
+        "date": "27.06.2023"
+      }
+    },
+    {
+      "id": "tax_0003",
+      "category": "tax_notice",
+      "split": "confirm",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Contoso AG\n\nFestgesetzter Betrag: 67.083,00 EUR\n\nDatum: 19.05.2023",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "67083.00",
+        "date": "19.05.2023"
+      }
+    },
+    {
+      "id": "tax_0004",
+      "category": "tax_notice",
+      "split": "confirm",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Rhein Logistik AG\n\nFestgesetzter Betrag: 66.058,99 EUR\n\nDatum: 26.02.2024",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "66058.99",
+        "date": "26.02.2024"
+      }
+    },
+    {
+      "id": "tax_0005",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\n\nAlpen Consulting GmbH\n\nBescheid vom 22.11.2023\n\nSumme: EUR 42.216,50",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "42216.50",
+        "date": "22.11.2023"
+      }
+    },
+    {
+      "id": "tax_0006",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\nReference 00006\nDemo Nord GmbH\n\nHauptforderung 47.539,50 EUR\nDatum 23.06.2023",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "47539.50",
+        "date": "23.06.2023"
+      }
+    },
+    {
+      "id": "tax_0007",
+      "category": "tax_notice",
+      "split": "confirm",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Nordbeispiel Beratung GmbH\n\nFestgesetzter Betrag: 51.771,50 EUR\n\nDatum: 10.06.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "51771.50",
+        "date": "10.06.2025"
+      }
+    },
+    {
+      "id": "tax_0008",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Finanzamt Mitte\n\nFestgesetzter Betrag: 36.491,50 EUR\n\nDatum: 21.07.2023",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "36491.50",
+        "date": "21.07.2023"
+      }
+    },
+    {
+      "id": "tax_0009",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00009\nFabrikam KG\n\nHauptforderung 27.070,50 EUR\nDatum 02.05.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "27070.50",
+        "date": "02.05.2025"
+      }
+    },
+    {
+      "id": "tax_0010",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Finanzamt Mitte\nReference 00010\nMuster Versicherung AG\n\nHauptforderung 67.719,99 EUR\nDatum 19.03.2023",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "67719.99",
+        "date": "19.03.2023"
+      }
+    },
+    {
+      "id": "tax_0011",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Landesamt f\u00fcr Steuern\n\nAcme GmbH\n\nBescheid vom 11.01.2023\n\nSumme: EUR 80.734,50",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "80734.50",
+        "date": "11.01.2023"
+      }
+    },
+    {
+      "id": "tax_0012",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\n\nAlpen Consulting GmbH\n\nBescheid vom 09.11.2025\n\nSumme: EUR 57.285,00",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "57285.00",
+        "date": "09.11.2025"
+      }
+    },
+    {
+      "id": "tax_0013",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Muster Versicherung AG\n\nFestgesetzter Betrag: 29.706,99 EUR\n\nDatum: 28.12.2024",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "29706.99",
+        "date": "28.12.2024"
+      }
+    },
+    {
+      "id": "tax_0014",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\n\nNordbeispiel Beratung GmbH\n\nBescheid vom 17.06.2024\n\nSumme: EUR 96.276,50",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "96276.50",
+        "date": "17.06.2024"
+      }
+    },
+    {
+      "id": "tax_0015",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Nordbeispiel Beratung GmbH\n\nFestgesetzter Betrag: 56.643,50 EUR\n\nDatum: 23.06.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "56643.50",
+        "date": "23.06.2024"
+      }
+    },
+    {
+      "id": "tax_0016",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00016\nKrankenkasse Plus\n\nHauptforderung 57.111,00 EUR\nDatum 18.04.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "57111.00",
+        "date": "18.04.2024"
+      }
+    },
+    {
+      "id": "tax_0017",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Contoso AG\n\nFestgesetzter Betrag: 83.897,00 EUR\n\nDatum: 07.10.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "83897.00",
+        "date": "07.10.2025"
+      }
+    },
+    {
+      "id": "tax_0018",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Alpen Consulting GmbH\n\nFestgesetzter Betrag: 46.239,00 EUR\n\nDatum: 02.11.2023",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "46239.00",
+        "date": "02.11.2023"
+      }
+    },
+    {
+      "id": "tax_0019",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\n\nContoso AG\n\nBescheid vom 26.11.2024\n\nSumme: EUR 78.860,99",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "78860.99",
+        "date": "26.11.2024"
+      }
+    },
+    {
+      "id": "tax_0020",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Finanzamt Mitte\nReference 00020\nFinanzamt Mitte\n\nHauptforderung 77.748,50 EUR\nDatum 03.12.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "77748.50",
+        "date": "03.12.2025"
+      }
+    },
+    {
+      "id": "tax_0021",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Tech Solutions UG\n\nFestgesetzter Betrag: 58.443,50 EUR\n\nDatum: 04.04.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "58443.50",
+        "date": "04.04.2025"
+      }
+    },
+    {
+      "id": "tax_0022",
+      "category": "tax_notice",
+      "split": "confirm",
+      "text": "Finanzamt Mitte\n\nLandesamt f\u00fcr Steuern\n\nBescheid vom 14.12.2025\n\nSumme: EUR 27.752,50",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "27752.50",
+        "date": "14.12.2025"
+      }
+    },
+    {
+      "id": "tax_0023",
+      "category": "tax_notice",
+      "split": "confirm",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Tech Solutions UG\n\nFestgesetzter Betrag: 90.502,99 EUR\n\nDatum: 03.10.2023",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "90502.99",
+        "date": "03.10.2023"
+      }
+    },
+    {
+      "id": "tax_0024",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00024\nLandesamt f\u00fcr Steuern\n\nHauptforderung 56.677,50 EUR\nDatum 10.02.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "56677.50",
+        "date": "10.02.2024"
+      }
+    },
+    {
+      "id": "tax_0025",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Landesamt f\u00fcr Steuern\n\nTech Solutions UG\n\nBescheid vom 24.12.2023\n\nSumme: EUR 37.983,50",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "37983.50",
+        "date": "24.12.2023"
+      }
+    },
+    {
+      "id": "tax_0026",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Landesamt f\u00fcr Steuern\n\nKrankenkasse Plus\n\nBescheid vom 07.10.2024\n\nSumme: EUR 82.678,50",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "82678.50",
+        "date": "07.10.2024"
+      }
+    },
+    {
+      "id": "tax_0027",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\n\nFabrikam KG\n\nBescheid vom 12.04.2025\n\nSumme: EUR 14.802,50",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "14802.50",
+        "date": "12.04.2025"
+      }
+    },
+    {
+      "id": "tax_0028",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Landesamt f\u00fcr Steuern\n\nFestgesetzter Betrag: 13.886,00 EUR\n\nDatum: 17.05.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "13886.00",
+        "date": "17.05.2025"
+      }
+    },
+    {
+      "id": "tax_0029",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Alpen Consulting GmbH\n\nFestgesetzter Betrag: 2.923,99 EUR\n\nDatum: 17.01.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "2923.99",
+        "date": "17.01.2024"
+      }
+    },
+    {
+      "id": "tax_0030",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00030\nContoso AG\n\nHauptforderung 28.578,99 EUR\nDatum 01.01.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "28578.99",
+        "date": "01.01.2025"
+      }
+    },
+    {
+      "id": "tax_0031",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\n\nFabrikam KG\n\nBescheid vom 05.04.2024\n\nSumme: EUR 38.372,99",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "38372.99",
+        "date": "05.04.2024"
+      }
+    },
+    {
+      "id": "tax_0032",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Demo Nord GmbH\n\nFestgesetzter Betrag: 20.251,00 EUR\n\nDatum: 19.04.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "20251.00",
+        "date": "19.04.2025"
+      }
+    },
+    {
+      "id": "tax_0033",
+      "category": "tax_notice",
+      "split": "confirm",
+      "text": "Finanzamt Mitte\n\nKrankenkasse Plus\n\nBescheid vom 20.07.2024\n\nSumme: EUR 95.139,99",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "95139.99",
+        "date": "20.07.2024"
+      }
+    },
+    {
+      "id": "tax_0034",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Contoso AG\n\nFestgesetzter Betrag: 324,50 EUR\n\nDatum: 26.12.2024",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "324.50",
+        "date": "26.12.2024"
+      }
+    },
+    {
+      "id": "tax_0035",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00035\nAlpen Consulting GmbH\n\nHauptforderung 46.745,00 EUR\nDatum 26.11.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "46745.00",
+        "date": "26.11.2023"
+      }
+    },
+    {
+      "id": "tax_0036",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Landesamt f\u00fcr Steuern\n\nRhein Logistik AG\n\nBescheid vom 14.05.2025\n\nSumme: EUR 47.628,99",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "47628.99",
+        "date": "14.05.2025"
+      }
+    },
+    {
+      "id": "tax_0037",
+      "category": "tax_notice",
+      "split": "confirm",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00037\nBaltic Data UG\n\nHauptforderung 94.830,50 EUR\nDatum 18.11.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "94830.50",
+        "date": "18.11.2024"
+      }
+    },
+    {
+      "id": "tax_0038",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\n\nLandesamt f\u00fcr Steuern\n\nBescheid vom 28.05.2025\n\nSumme: EUR 50.298,99",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "50298.99",
+        "date": "28.05.2025"
+      }
+    },
+    {
+      "id": "tax_0039",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Tech Solutions UG\n\nFestgesetzter Betrag: 5.431,99 EUR\n\nDatum: 16.06.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "5431.99",
+        "date": "16.06.2025"
+      }
+    },
+    {
+      "id": "tax_0040",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00040\nDemo Nord GmbH\n\nHauptforderung 33.336,99 EUR\nDatum 06.04.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "33336.99",
+        "date": "06.04.2025"
+      }
+    },
+    {
+      "id": "tax_0041",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\nReference 00041\nDemo Nord GmbH\n\nHauptforderung 21.822,99 EUR\nDatum 11.02.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "21822.99",
+        "date": "11.02.2024"
+      }
+    },
+    {
+      "id": "tax_0042",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\n\nNordbeispiel Beratung GmbH\n\nBescheid vom 22.01.2025\n\nSumme: EUR 89.107,50",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "89107.50",
+        "date": "22.01.2025"
+      }
+    },
+    {
+      "id": "tax_0043",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Acme GmbH\n\nFestgesetzter Betrag: 67.178,00 EUR\n\nDatum: 13.06.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "67178.00",
+        "date": "13.06.2024"
+      }
+    },
+    {
+      "id": "tax_0044",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Acme GmbH\n\nFestgesetzter Betrag: 45.022,99 EUR\n\nDatum: 28.10.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "45022.99",
+        "date": "28.10.2024"
+      }
+    },
+    {
+      "id": "tax_0045",
+      "category": "tax_notice",
+      "split": "threshold",
+      "text": "Finanzamt Mitte\nReference 00045\nContoso AG\n\nHauptforderung 20.340,99 EUR\nDatum 17.10.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "20340.99",
+        "date": "17.10.2025"
+      }
+    },
+    {
+      "id": "tax_0046",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\n\nTech Solutions UG\n\nBescheid vom 07.11.2024\n\nSumme: EUR 14.949,50",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "14949.50",
+        "date": "07.11.2024"
+      }
+    },
+    {
+      "id": "tax_0047",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\n\nAlpen Consulting GmbH\n\nBescheid vom 10.08.2025\n\nSumme: EUR 68.818,50",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "68818.50",
+        "date": "10.08.2025"
+      }
+    },
+    {
+      "id": "tax_0048",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\nReference 00048\nRhein Logistik AG\n\nHauptforderung 2.912,00 EUR\nDatum 12.11.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "2912.00",
+        "date": "12.11.2025"
+      }
+    },
+    {
+      "id": "tax_0049",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Landesamt f\u00fcr Steuern\nSteuerbescheid\n\nEmpf\u00e4nger: Muster Versicherung AG\n\nFestgesetzter Betrag: 19.880,50 EUR\n\nDatum: 10.02.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "19880.50",
         "date": "10.02.2023"
       }
     },
     {
-      "id": "receipt_012",
+      "id": "tax_0050",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\nReference 00050\nLandesamt f\u00fcr Steuern\n\nHauptforderung 14.956,00 EUR\nDatum 07.07.2023",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "14956.00",
+        "date": "07.07.2023"
+      }
+    },
+    {
+      "id": "tax_0051",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\nSteuerbescheid\n\nEmpf\u00e4nger: Rhein Logistik AG\n\nFestgesetzter Betrag: 11.056,00 EUR\n\nDatum: 12.05.2024",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "11056.00",
+        "date": "12.05.2024"
+      }
+    },
+    {
+      "id": "tax_0052",
+      "category": "tax_notice",
+      "split": "train",
+      "text": "Finanzamt Mitte\nReference 00052\nNordbeispiel Beratung GmbH\n\nHauptforderung 67.266,99 EUR\nDatum 03.01.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "67266.99",
+        "date": "03.01.2025"
+      }
+    },
+    {
+      "id": "tax_0053",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\n\nKrankenkasse Plus\n\nBescheid vom 18.03.2024\n\nSumme: EUR 70.676,00",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "70676.00",
+        "date": "18.03.2024"
+      }
+    },
+    {
+      "id": "tax_0054",
+      "category": "tax_notice",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\n\nAlpen Consulting GmbH\n\nBescheid vom 25.11.2023\n\nSumme: EUR 9.411,00",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "9411.00",
+        "date": "25.11.2023"
+      }
+    },
+    {
+      "id": "contract_0000",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0000\n\nAuftragnehmer: Demo Nord GmbH\nAuftraggeber: Contoso AG\n\nVertragswert: 14.347,00 EUR\nUnterzeichnet am 13.05.2025",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "14347.00",
+        "date": "13.05.2025"
+      }
+    },
+    {
+      "id": "contract_0001",
+      "category": "contract",
+      "split": "confirm",
+      "text": "Rahmenvertrag 0001\n\nAuftragnehmer: Alpen Consulting GmbH\nAuftraggeber: Landesamt f\u00fcr Steuern\n\nVertragswert: 1.995,99 EUR\nUnterzeichnet am 20.04.2024",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "1995.99",
+        "date": "20.04.2024"
+      }
+    },
+    {
+      "id": "contract_0002",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0002\n\nAuftragnehmer: Landesamt f\u00fcr Steuern\nAuftraggeber: Rhein Logistik AG\n\nVertragswert: 81.077,00 EUR\nUnterzeichnet am 01.07.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "81077.00",
+        "date": "01.07.2025"
+      }
+    },
+    {
+      "id": "contract_0003",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0003\n\nAuftragnehmer: Fabrikam KG\nAuftraggeber: Krankenkasse Plus\n\nVertragswert: 54.857,00 EUR\nUnterzeichnet am 15.10.2025",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "54857.00",
+        "date": "15.10.2025"
+      }
+    },
+    {
+      "id": "contract_0004",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0004\n\nAuftragnehmer: Demo Nord GmbH\nAuftraggeber: Baltic Data UG\n\nVertragswert: 48.997,00 EUR\nUnterzeichnet am 23.07.2024",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "48997.00",
+        "date": "23.07.2024"
+      }
+    },
+    {
+      "id": "contract_0005",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0005\n\nAuftragnehmer: Fabrikam KG\nAuftraggeber: Nordbeispiel Beratung GmbH\n\nVertragswert: 15.194,50 EUR\nUnterzeichnet am 15.09.2024",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "15194.50",
+        "date": "15.09.2024"
+      }
+    },
+    {
+      "id": "contract_0006",
+      "category": "contract",
+      "split": "confirm",
+      "text": "Rahmenvertrag 0006\n\nAuftragnehmer: Tech Solutions UG\nAuftraggeber: Landesamt f\u00fcr Steuern\n\nVertragswert: 97.777,50 EUR\nUnterzeichnet am 08.01.2023",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "97777.50",
+        "date": "08.01.2023"
+      }
+    },
+    {
+      "id": "contract_0007",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0007\n\nAuftragnehmer: Muster Versicherung AG\nAuftraggeber: Demo Nord GmbH\n\nVertragswert: 77.425,99 EUR\nUnterzeichnet am 04.12.2025",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "77425.99",
+        "date": "04.12.2025"
+      }
+    },
+    {
+      "id": "contract_0008",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0008\n\nAuftragnehmer: Demo Nord GmbH\nAuftraggeber: Fabrikam KG\n\nVertragswert: 11.882,99 EUR\nUnterzeichnet am 14.03.2023",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "11882.99",
+        "date": "14.03.2023"
+      }
+    },
+    {
+      "id": "contract_0009",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0009\n\nAuftragnehmer: Alpen Consulting GmbH\nAuftraggeber: Demo Nord GmbH\n\nVertragswert: 93.188,00 EUR\nUnterzeichnet am 13.03.2023",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "93188.00",
+        "date": "13.03.2023"
+      }
+    },
+    {
+      "id": "contract_0010",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0010\n\nAuftragnehmer: Krankenkasse Plus\nAuftraggeber: Fabrikam KG\n\nVertragswert: 79.599,50 EUR\nUnterzeichnet am 22.06.2025",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "79599.50",
+        "date": "22.06.2025"
+      }
+    },
+    {
+      "id": "contract_0011",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0011\n\nAuftragnehmer: Tech Solutions UG\nAuftraggeber: Landesamt f\u00fcr Steuern\n\nVertragswert: 76.427,00 EUR\nUnterzeichnet am 04.05.2023",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "76427.00",
+        "date": "04.05.2023"
+      }
+    },
+    {
+      "id": "contract_0012",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0012\n\nAuftragnehmer: Acme GmbH\nAuftraggeber: Landesamt f\u00fcr Steuern\n\nVertragswert: 38.491,00 EUR\nUnterzeichnet am 28.05.2025",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "38491.00",
+        "date": "28.05.2025"
+      }
+    },
+    {
+      "id": "contract_0013",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0013\n\nAuftragnehmer: Demo Nord GmbH\nAuftraggeber: Fabrikam KG\n\nVertragswert: 38.156,00 EUR\nUnterzeichnet am 10.01.2024",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "38156.00",
+        "date": "10.01.2024"
+      }
+    },
+    {
+      "id": "contract_0014",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0014\n\nAuftragnehmer: Nordbeispiel Beratung GmbH\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 96.553,00 EUR\nUnterzeichnet am 18.05.2024",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "96553.00",
+        "date": "18.05.2024"
+      }
+    },
+    {
+      "id": "contract_0015",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0015\n\nAuftragnehmer: Contoso AG\nAuftraggeber: Nordbeispiel Beratung GmbH\n\nVertragswert: 41.843,00 EUR\nUnterzeichnet am 20.05.2023",
+      "expected": {
+        "vendor": "Contoso AG",
+        "amount": "41843.00",
+        "date": "20.05.2023"
+      }
+    },
+    {
+      "id": "contract_0016",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0016\n\nAuftragnehmer: Rhein Logistik AG\nAuftraggeber: Muster Versicherung AG\n\nVertragswert: 94.554,99 EUR\nUnterzeichnet am 20.12.2024",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "94554.99",
+        "date": "20.12.2024"
+      }
+    },
+    {
+      "id": "contract_0017",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0017\n\nAuftragnehmer: Muster Versicherung AG\nAuftraggeber: Finanzamt Mitte\n\nVertragswert: 26.142,50 EUR\nUnterzeichnet am 07.03.2023",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "26142.50",
+        "date": "07.03.2023"
+      }
+    },
+    {
+      "id": "contract_0018",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0018\n\nAuftragnehmer: Tech Solutions UG\nAuftraggeber: Fabrikam KG\n\nVertragswert: 11.061,50 EUR\nUnterzeichnet am 03.09.2025",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "11061.50",
+        "date": "03.09.2025"
+      }
+    },
+    {
+      "id": "contract_0019",
+      "category": "contract",
+      "split": "confirm",
+      "text": "Rahmenvertrag 0019\n\nAuftragnehmer: Krankenkasse Plus\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 85.193,99 EUR\nUnterzeichnet am 28.03.2023",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "85193.99",
+        "date": "28.03.2023"
+      }
+    },
+    {
+      "id": "contract_0020",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0020\n\nAuftragnehmer: Alpen Consulting GmbH\nAuftraggeber: Landesamt f\u00fcr Steuern\n\nVertragswert: 97.477,00 EUR\nUnterzeichnet am 20.02.2023",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "97477.00",
+        "date": "20.02.2023"
+      }
+    },
+    {
+      "id": "contract_0021",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0021\n\nAuftragnehmer: Finanzamt Mitte\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 93.782,99 EUR\nUnterzeichnet am 10.06.2023",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "93782.99",
+        "date": "10.06.2023"
+      }
+    },
+    {
+      "id": "contract_0022",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0022\n\nAuftragnehmer: Krankenkasse Plus\nAuftraggeber: Fabrikam KG\n\nVertragswert: 46.424,99 EUR\nUnterzeichnet am 05.01.2025",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "46424.99",
+        "date": "05.01.2025"
+      }
+    },
+    {
+      "id": "contract_0023",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0023\n\nAuftragnehmer: Rhein Logistik AG\nAuftraggeber: Nordbeispiel Beratung GmbH\n\nVertragswert: 11.051,99 EUR\nUnterzeichnet am 10.03.2023",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "11051.99",
+        "date": "10.03.2023"
+      }
+    },
+    {
+      "id": "contract_0024",
+      "category": "contract",
+      "split": "confirm",
+      "text": "Rahmenvertrag 0024\n\nAuftragnehmer: Rhein Logistik AG\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 77.518,00 EUR\nUnterzeichnet am 10.04.2024",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "77518.00",
+        "date": "10.04.2024"
+      }
+    },
+    {
+      "id": "contract_0025",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0025\n\nAuftragnehmer: Tech Solutions UG\nAuftraggeber: Fabrikam KG\n\nVertragswert: 19.790,99 EUR\nUnterzeichnet am 15.07.2023",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "19790.99",
+        "date": "15.07.2023"
+      }
+    },
+    {
+      "id": "contract_0026",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0026\n\nAuftragnehmer: Landesamt f\u00fcr Steuern\nAuftraggeber: Demo Nord GmbH\n\nVertragswert: 24.452,00 EUR\nUnterzeichnet am 11.11.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "24452.00",
+        "date": "11.11.2024"
+      }
+    },
+    {
+      "id": "contract_0027",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0027\n\nAuftragnehmer: Finanzamt Mitte\nAuftraggeber: Landesamt f\u00fcr Steuern\n\nVertragswert: 61.312,99 EUR\nUnterzeichnet am 24.12.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "61312.99",
+        "date": "24.12.2025"
+      }
+    },
+    {
+      "id": "contract_0028",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0028\n\nAuftragnehmer: Landesamt f\u00fcr Steuern\nAuftraggeber: Demo Nord GmbH\n\nVertragswert: 16.673,50 EUR\nUnterzeichnet am 22.09.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "16673.50",
+        "date": "22.09.2025"
+      }
+    },
+    {
+      "id": "contract_0029",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0029\n\nAuftragnehmer: Contoso AG\nAuftraggeber: Demo Nord GmbH\n\nVertragswert: 18.694,00 EUR\nUnterzeichnet am 18.01.2025",
+      "expected": {
+        "vendor": "Contoso AG",
+        "amount": "18694.00",
+        "date": "18.01.2025"
+      }
+    },
+    {
+      "id": "contract_0030",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0030\n\nAuftragnehmer: Nordbeispiel Beratung GmbH\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 87.572,50 EUR\nUnterzeichnet am 06.01.2025",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "87572.50",
+        "date": "06.01.2025"
+      }
+    },
+    {
+      "id": "contract_0031",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0031\n\nAuftragnehmer: Nordbeispiel Beratung GmbH\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 50.253,00 EUR\nUnterzeichnet am 27.04.2023",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "50253.00",
+        "date": "27.04.2023"
+      }
+    },
+    {
+      "id": "contract_0032",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0032\n\nAuftragnehmer: Demo Nord GmbH\nAuftraggeber: Landesamt f\u00fcr Steuern\n\nVertragswert: 9.066,00 EUR\nUnterzeichnet am 18.11.2025",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "9066.00",
+        "date": "18.11.2025"
+      }
+    },
+    {
+      "id": "contract_0033",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0033\n\nAuftragnehmer: Tech Solutions UG\nAuftraggeber: Alpen Consulting GmbH\n\nVertragswert: 11.910,00 EUR\nUnterzeichnet am 06.10.2024",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "11910.00",
+        "date": "06.10.2024"
+      }
+    },
+    {
+      "id": "contract_0034",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0034\n\nAuftragnehmer: Baltic Data UG\nAuftraggeber: Fabrikam KG\n\nVertragswert: 84.792,50 EUR\nUnterzeichnet am 17.08.2024",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "84792.50",
+        "date": "17.08.2024"
+      }
+    },
+    {
+      "id": "contract_0035",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0035\n\nAuftragnehmer: Rhein Logistik AG\nAuftraggeber: Fabrikam KG\n\nVertragswert: 46.568,99 EUR\nUnterzeichnet am 20.04.2023",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "46568.99",
+        "date": "20.04.2023"
+      }
+    },
+    {
+      "id": "contract_0036",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0036\n\nAuftragnehmer: Baltic Data UG\nAuftraggeber: Fabrikam KG\n\nVertragswert: 89.715,00 EUR\nUnterzeichnet am 02.10.2024",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "89715.00",
+        "date": "02.10.2024"
+      }
+    },
+    {
+      "id": "contract_0037",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0037\n\nAuftragnehmer: Baltic Data UG\nAuftraggeber: Fabrikam KG\n\nVertragswert: 66.959,99 EUR\nUnterzeichnet am 15.02.2024",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "66959.99",
+        "date": "15.02.2024"
+      }
+    },
+    {
+      "id": "contract_0038",
+      "category": "contract",
+      "split": "confirm",
+      "text": "Rahmenvertrag 0038\n\nAuftragnehmer: Fabrikam KG\nAuftraggeber: Nordbeispiel Beratung GmbH\n\nVertragswert: 29.710,99 EUR\nUnterzeichnet am 24.01.2023",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "29710.99",
+        "date": "24.01.2023"
+      }
+    },
+    {
+      "id": "contract_0039",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0039\n\nAuftragnehmer: Finanzamt Mitte\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 82.984,00 EUR\nUnterzeichnet am 06.07.2024",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "82984.00",
+        "date": "06.07.2024"
+      }
+    },
+    {
+      "id": "contract_0040",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0040\n\nAuftragnehmer: Landesamt f\u00fcr Steuern\nAuftraggeber: Tech Solutions UG\n\nVertragswert: 55.546,50 EUR\nUnterzeichnet am 27.03.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "55546.50",
+        "date": "27.03.2025"
+      }
+    },
+    {
+      "id": "contract_0041",
+      "category": "contract",
+      "split": "eval",
+      "text": "Rahmenvertrag 0041\n\nAuftragnehmer: Landesamt f\u00fcr Steuern\nAuftraggeber: Finanzamt Mitte\n\nVertragswert: 87.763,00 EUR\nUnterzeichnet am 17.08.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "87763.00",
+        "date": "17.08.2023"
+      }
+    },
+    {
+      "id": "contract_0042",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0042\n\nAuftragnehmer: Demo Nord GmbH\nAuftraggeber: Contoso AG\n\nVertragswert: 21.201,00 EUR\nUnterzeichnet am 21.11.2023",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "21201.00",
+        "date": "21.11.2023"
+      }
+    },
+    {
+      "id": "contract_0043",
+      "category": "contract",
+      "split": "train",
+      "text": "Rahmenvertrag 0043\n\nAuftragnehmer: Muster Versicherung AG\nAuftraggeber: Baltic Data UG\n\nVertragswert: 9.251,00 EUR\nUnterzeichnet am 22.05.2025",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "9251.00",
+        "date": "22.05.2025"
+      }
+    },
+    {
+      "id": "contract_0044",
+      "category": "contract",
+      "split": "threshold",
+      "text": "Rahmenvertrag 0044\n\nAuftragnehmer: Nordbeispiel Beratung GmbH\nAuftraggeber: Alpen Consulting GmbH\n\nVertragswert: 38.913,50 EUR\nUnterzeichnet am 18.05.2024",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "38913.50",
+        "date": "18.05.2024"
+      }
+    },
+    {
+      "id": "receipt_0000",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0000\nLandesamt f\u00fcr Steuern\nBetrag: 6.099,99 EUR\nF\u00e4lligkeit: 22.09.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "6099.99",
+        "date": "22.09.2025"
+      }
+    },
+    {
+      "id": "receipt_0001",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0001\nAlpen Consulting GmbH\nBetrag: 58.683,00 EUR\nF\u00e4lligkeit: 23.09.2024",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "58683.00",
+        "date": "23.09.2024"
+      }
+    },
+    {
+      "id": "receipt_0002",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0002\nKurzer Absender: Alpen Consulting GmbH\nBruttobetrag: 33.323,50 EUR\nLeistungsdatum 08.05.2023",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "33323.50",
+        "date": "08.05.2023"
+      }
+    },
+    {
+      "id": "receipt_0003",
       "category": "receipt",
       "split": "eval",
-      "text": "Rechnung 0012\nMuster Versicherung AG\nBetrag: 21.025,99 EUR\nF\u00e4lligkeit: 20.10.2023",
+      "text": "Rechnung 0003\nAlpen Consulting GmbH\nBetrag: 51.308,50 EUR\nF\u00e4lligkeit: 23.07.2024",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "51308.50",
+        "date": "23.07.2024"
+      }
+    },
+    {
+      "id": "receipt_0004",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0004\nFinanzamt Mitte\nBetrag: 42.946,00 EUR\nF\u00e4lligkeit: 17.10.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "42946.00",
+        "date": "17.10.2025"
+      }
+    },
+    {
+      "id": "receipt_0005",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Beleg 0005\nKurzer Absender: Muster Versicherung AG\nBruttobetrag: 52.866,00 EUR\nLeistungsdatum 18.08.2025",
       "expected": {
         "vendor": "Muster Versicherung AG",
-        "amount": "21025.99",
-        "date": "20.10.2023"
+        "amount": "52866.00",
+        "date": "18.08.2025"
       }
     },
     {
-      "id": "insurance_000",
-      "category": "insurance",
-      "split": "calibration",
-      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Krankenkasse Plus\n\nPr\u00e4mie: 51.577,00 EUR\nG\u00fcltig ab 22.12.2023",
+      "id": "receipt_0006",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Acme GmbH\nRechnung\nEUR 48.620,00\nDatum 04.01.2023",
       "expected": {
-        "date": "22.12.2023",
-        "vendor": "Muster Versicherung AG"
+        "vendor": "Acme GmbH",
+        "amount": "48620.00",
+        "date": "04.01.2023"
       }
     },
     {
-      "id": "insurance_001",
-      "category": "insurance",
-      "split": "calibration",
-      "text": "Krankenkasse Plus\nVersicherungsschein\n\nVersicherungsnehmer: Muster Versicherung AG\n\nPr\u00e4mie: 93.029,50 EUR\nG\u00fcltig ab 11.02.2023",
+      "id": "receipt_0007",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0007\nMuster Versicherung AG\nBetrag: 59.039,00 EUR\nF\u00e4lligkeit: 04.11.2025",
       "expected": {
-        "date": "11.02.2023",
-        "vendor": "Krankenkasse Plus"
-      }
-    },
-    {
-      "id": "insurance_002",
-      "category": "insurance",
-      "split": "calibration",
-      "text": "Krankenkasse Plus\nVersicherungsschein\n\nVersicherungsnehmer: Acme GmbH\n\nPr\u00e4mie: 65.176,00 EUR\nG\u00fcltig ab 01.06.2024",
-      "expected": {
-        "date": "01.06.2024",
-        "vendor": "Krankenkasse Plus"
-      }
-    },
-    {
-      "id": "insurance_003",
-      "category": "insurance",
-      "split": "calibration",
-      "text": "Krankenkasse Plus\n\nDemo Nord GmbH\nSchadensmeldung\nDatum 12.10.2023\nSchadenh\u00f6he EUR 79.794,50",
-      "expected": {
-        "date": "12.10.2023",
-        "vendor": "Krankenkasse Plus",
-        "amount": "79794.50"
-      }
-    },
-    {
-      "id": "insurance_004",
-      "category": "insurance",
-      "split": "calibration",
-      "text": "Muster Versicherung AG\n\nLandesamt f\u00fcr Steuern\nSchadensmeldung\nDatum 26.01.2023\nSchadenh\u00f6he EUR 75.067,00",
-      "expected": {
-        "date": "26.01.2023",
         "vendor": "Muster Versicherung AG",
-        "amount": "75067.00"
+        "amount": "59039.00",
+        "date": "04.11.2025"
       }
     },
     {
-      "id": "insurance_005",
-      "category": "insurance",
-      "split": "eval",
-      "text": "Muster Versicherung AG\n\nAcme GmbH\nSchadensmeldung\nDatum 10.03.2025\nSchadenh\u00f6he EUR 40.466,99",
+      "id": "receipt_0008",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0008\nKrankenkasse Plus\nBetrag: 846,99 EUR\nF\u00e4lligkeit: 14.05.2023",
       "expected": {
-        "date": "10.03.2025",
-        "amount": "40466.99"
+        "vendor": "Krankenkasse Plus",
+        "amount": "846.99",
+        "date": "14.05.2023"
       }
     },
     {
-      "id": "insurance_006",
-      "category": "insurance",
-      "split": "eval",
-      "text": "Krankenkasse Plus\n\nNordbeispiel Beratung GmbH\nSchadensmeldung\nDatum 17.02.2023\nSchadenh\u00f6he EUR 67.514,50",
+      "id": "receipt_0009",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rhein Logistik AG\nRechnung\nEUR 74.708,00\nDatum 13.10.2023",
       "expected": {
-        "date": "17.02.2023",
-        "amount": "67514.50"
+        "vendor": "Rhein Logistik AG",
+        "amount": "74708.00",
+        "date": "13.10.2023"
       }
     },
     {
-      "id": "insurance_007",
-      "category": "insurance",
-      "split": "eval",
-      "text": "Muster Versicherung AG\n\nAcme GmbH\nSchadensmeldung\nDatum 21.01.2024\nSchadenh\u00f6he EUR 67.007,99",
+      "id": "receipt_0010",
+      "category": "receipt",
+      "split": "train",
+      "text": "Krankenkasse Plus\nRechnung\nEUR 79.426,50\nDatum 11.04.2023",
       "expected": {
-        "date": "21.01.2024",
+        "vendor": "Krankenkasse Plus",
+        "amount": "79426.50",
+        "date": "11.04.2023"
+      }
+    },
+    {
+      "id": "receipt_0011",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0011\nKurzer Absender: Rhein Logistik AG\nBruttobetrag: 67.893,50 EUR\nLeistungsdatum 18.04.2025",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "67893.50",
+        "date": "18.04.2025"
+      }
+    },
+    {
+      "id": "receipt_0012",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Beleg 0012\nKurzer Absender: Krankenkasse Plus\nBruttobetrag: 12.747,50 EUR\nLeistungsdatum 06.04.2023",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "12747.50",
+        "date": "06.04.2023"
+      }
+    },
+    {
+      "id": "receipt_0013",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Nordbeispiel Beratung GmbH\nRechnung\nEUR 76.545,00\nDatum 28.04.2024",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "76545.00",
+        "date": "28.04.2024"
+      }
+    },
+    {
+      "id": "receipt_0014",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0014\nNordbeispiel Beratung GmbH\nBetrag: 89.761,50 EUR\nF\u00e4lligkeit: 14.09.2025",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "89761.50",
+        "date": "14.09.2025"
+      }
+    },
+    {
+      "id": "receipt_0015",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Muster Versicherung AG\nRechnung\nEUR 39.737,50\nDatum 10.09.2024",
+      "expected": {
         "vendor": "Muster Versicherung AG",
-        "amount": "67007.99"
+        "amount": "39737.50",
+        "date": "10.09.2024"
       }
     },
     {
-      "id": "insurance_008",
+      "id": "receipt_0016",
+      "category": "receipt",
+      "split": "train",
+      "text": "Krankenkasse Plus\nRechnung\nEUR 5.956,50\nDatum 17.05.2025",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "5956.50",
+        "date": "17.05.2025"
+      }
+    },
+    {
+      "id": "receipt_0017",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0017\nBaltic Data UG\nBetrag: 87.953,99 EUR\nF\u00e4lligkeit: 09.08.2023",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "87953.99",
+        "date": "09.08.2023"
+      }
+    },
+    {
+      "id": "receipt_0018",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Beleg 0018\nKurzer Absender: Muster Versicherung AG\nBruttobetrag: 81.646,50 EUR\nLeistungsdatum 15.10.2025",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "81646.50",
+        "date": "15.10.2025"
+      }
+    },
+    {
+      "id": "receipt_0019",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0019\nKurzer Absender: Krankenkasse Plus\nBruttobetrag: 97.756,99 EUR\nLeistungsdatum 23.02.2024",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "97756.99",
+        "date": "23.02.2024"
+      }
+    },
+    {
+      "id": "receipt_0020",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Beleg 0020\nKurzer Absender: Nordbeispiel Beratung GmbH\nBruttobetrag: 38.761,50 EUR\nLeistungsdatum 19.02.2023",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "38761.50",
+        "date": "19.02.2023"
+      }
+    },
+    {
+      "id": "receipt_0021",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Finanzamt Mitte\nRechnung\nEUR 28.967,00\nDatum 08.01.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "28967.00",
+        "date": "08.01.2025"
+      }
+    },
+    {
+      "id": "receipt_0022",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rhein Logistik AG\nRechnung\nEUR 29.864,00\nDatum 07.08.2024",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "29864.00",
+        "date": "07.08.2024"
+      }
+    },
+    {
+      "id": "receipt_0023",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0023\nKurzer Absender: Finanzamt Mitte\nBruttobetrag: 25.516,50 EUR\nLeistungsdatum 10.01.2024",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "25516.50",
+        "date": "10.01.2024"
+      }
+    },
+    {
+      "id": "receipt_0024",
+      "category": "receipt",
+      "split": "train",
+      "text": "Acme GmbH\nRechnung\nEUR 73.848,00\nDatum 22.04.2024",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "73848.00",
+        "date": "22.04.2024"
+      }
+    },
+    {
+      "id": "receipt_0025",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0025\nBaltic Data UG\nBetrag: 79.376,50 EUR\nF\u00e4lligkeit: 05.10.2024",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "79376.50",
+        "date": "05.10.2024"
+      }
+    },
+    {
+      "id": "receipt_0026",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Beleg 0026\nKurzer Absender: Landesamt f\u00fcr Steuern\nBruttobetrag: 89.782,50 EUR\nLeistungsdatum 24.06.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "89782.50",
+        "date": "24.06.2023"
+      }
+    },
+    {
+      "id": "receipt_0027",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0027\nFabrikam KG\nBetrag: 34.290,00 EUR\nF\u00e4lligkeit: 10.03.2024",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "34290.00",
+        "date": "10.03.2024"
+      }
+    },
+    {
+      "id": "receipt_0028",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0028\nRhein Logistik AG\nBetrag: 97.896,00 EUR\nF\u00e4lligkeit: 16.01.2023",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "97896.00",
+        "date": "16.01.2023"
+      }
+    },
+    {
+      "id": "receipt_0029",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0029\nAcme GmbH\nBetrag: 81.780,99 EUR\nF\u00e4lligkeit: 25.03.2024",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "81780.99",
+        "date": "25.03.2024"
+      }
+    },
+    {
+      "id": "receipt_0030",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Demo Nord GmbH\nRechnung\nEUR 55.133,50\nDatum 18.12.2024",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "55133.50",
+        "date": "18.12.2024"
+      }
+    },
+    {
+      "id": "receipt_0031",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0031\nKurzer Absender: Rhein Logistik AG\nBruttobetrag: 23.281,99 EUR\nLeistungsdatum 15.09.2024",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "23281.99",
+        "date": "15.09.2024"
+      }
+    },
+    {
+      "id": "receipt_0032",
+      "category": "receipt",
+      "split": "train",
+      "text": "Demo Nord GmbH\nRechnung\nEUR 50.342,99\nDatum 03.01.2023",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "50342.99",
+        "date": "03.01.2023"
+      }
+    },
+    {
+      "id": "receipt_0033",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Beleg 0033\nKurzer Absender: Baltic Data UG\nBruttobetrag: 61.835,50 EUR\nLeistungsdatum 16.05.2025",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "61835.50",
+        "date": "16.05.2025"
+      }
+    },
+    {
+      "id": "receipt_0034",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0034\nContoso AG\nBetrag: 19.809,99 EUR\nF\u00e4lligkeit: 21.02.2025",
+      "expected": {
+        "vendor": "Contoso AG",
+        "amount": "19809.99",
+        "date": "21.02.2025"
+      }
+    },
+    {
+      "id": "receipt_0035",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0035\nMuster Versicherung AG\nBetrag: 62.547,99 EUR\nF\u00e4lligkeit: 10.03.2023",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "62547.99",
+        "date": "10.03.2023"
+      }
+    },
+    {
+      "id": "receipt_0036",
+      "category": "receipt",
+      "split": "train",
+      "text": "Acme GmbH\nRechnung\nEUR 55.542,99\nDatum 08.07.2024",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "55542.99",
+        "date": "08.07.2024"
+      }
+    },
+    {
+      "id": "receipt_0037",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0037\nFabrikam KG\nBetrag: 37.283,00 EUR\nF\u00e4lligkeit: 16.06.2023",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "37283.00",
+        "date": "16.06.2023"
+      }
+    },
+    {
+      "id": "receipt_0038",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Beleg 0038\nKurzer Absender: Contoso AG\nBruttobetrag: 34.999,50 EUR\nLeistungsdatum 20.12.2023",
+      "expected": {
+        "vendor": "Contoso AG",
+        "amount": "34999.50",
+        "date": "20.12.2023"
+      }
+    },
+    {
+      "id": "receipt_0039",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Beleg 0039\nKurzer Absender: Krankenkasse Plus\nBruttobetrag: 66.617,99 EUR\nLeistungsdatum 26.11.2024",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "66617.99",
+        "date": "26.11.2024"
+      }
+    },
+    {
+      "id": "receipt_0040",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Acme GmbH\nRechnung\nEUR 52.694,99\nDatum 05.09.2024",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "52694.99",
+        "date": "05.09.2024"
+      }
+    },
+    {
+      "id": "receipt_0041",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Beleg 0041\nKurzer Absender: Tech Solutions UG\nBruttobetrag: 65.099,50 EUR\nLeistungsdatum 07.12.2023",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "65099.50",
+        "date": "07.12.2023"
+      }
+    },
+    {
+      "id": "receipt_0042",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Finanzamt Mitte\nRechnung\nEUR 24.148,00\nDatum 18.02.2024",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "24148.00",
+        "date": "18.02.2024"
+      }
+    },
+    {
+      "id": "receipt_0043",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0043\nLandesamt f\u00fcr Steuern\nBetrag: 5.526,99 EUR\nF\u00e4lligkeit: 03.08.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "5526.99",
+        "date": "03.08.2023"
+      }
+    },
+    {
+      "id": "receipt_0044",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0044\nTech Solutions UG\nBetrag: 86.329,99 EUR\nF\u00e4lligkeit: 19.10.2025",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "86329.99",
+        "date": "19.10.2025"
+      }
+    },
+    {
+      "id": "receipt_0045",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Beleg 0045\nKurzer Absender: Fabrikam KG\nBruttobetrag: 91.104,99 EUR\nLeistungsdatum 19.02.2024",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "91104.99",
+        "date": "19.02.2024"
+      }
+    },
+    {
+      "id": "receipt_0046",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Alpen Consulting GmbH\nRechnung\nEUR 52.287,50\nDatum 15.04.2023",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "52287.50",
+        "date": "15.04.2023"
+      }
+    },
+    {
+      "id": "receipt_0047",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0047\nKurzer Absender: Rhein Logistik AG\nBruttobetrag: 16.927,00 EUR\nLeistungsdatum 08.05.2023",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "16927.00",
+        "date": "08.05.2023"
+      }
+    },
+    {
+      "id": "receipt_0048",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0048\nKurzer Absender: Landesamt f\u00fcr Steuern\nBruttobetrag: 78.754,99 EUR\nLeistungsdatum 19.05.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "78754.99",
+        "date": "19.05.2025"
+      }
+    },
+    {
+      "id": "receipt_0049",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0049\nAcme GmbH\nBetrag: 66.341,50 EUR\nF\u00e4lligkeit: 21.12.2023",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "66341.50",
+        "date": "21.12.2023"
+      }
+    },
+    {
+      "id": "receipt_0050",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0050\nMuster Versicherung AG\nBetrag: 32.652,50 EUR\nF\u00e4lligkeit: 24.08.2024",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "32652.50",
+        "date": "24.08.2024"
+      }
+    },
+    {
+      "id": "receipt_0051",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Beleg 0051\nKurzer Absender: Fabrikam KG\nBruttobetrag: 95.011,99 EUR\nLeistungsdatum 27.01.2023",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "95011.99",
+        "date": "27.01.2023"
+      }
+    },
+    {
+      "id": "receipt_0052",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0052\nKurzer Absender: Landesamt f\u00fcr Steuern\nBruttobetrag: 22.182,99 EUR\nLeistungsdatum 11.10.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "22182.99",
+        "date": "11.10.2024"
+      }
+    },
+    {
+      "id": "receipt_0053",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0053\nBaltic Data UG\nBetrag: 30.846,99 EUR\nF\u00e4lligkeit: 04.07.2024",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "30846.99",
+        "date": "04.07.2024"
+      }
+    },
+    {
+      "id": "receipt_0054",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0054\nKurzer Absender: Alpen Consulting GmbH\nBruttobetrag: 52.821,00 EUR\nLeistungsdatum 14.03.2023",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "52821.00",
+        "date": "14.03.2023"
+      }
+    },
+    {
+      "id": "receipt_0055",
+      "category": "receipt",
+      "split": "train",
+      "text": "Demo Nord GmbH\nRechnung\nEUR 68.764,00\nDatum 07.02.2024",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "68764.00",
+        "date": "07.02.2024"
+      }
+    },
+    {
+      "id": "receipt_0056",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0056\nNordbeispiel Beratung GmbH\nBetrag: 25.987,50 EUR\nF\u00e4lligkeit: 16.07.2024",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "25987.50",
+        "date": "16.07.2024"
+      }
+    },
+    {
+      "id": "receipt_0057",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Baltic Data UG\nRechnung\nEUR 61.069,00\nDatum 22.11.2023",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "61069.00",
+        "date": "22.11.2023"
+      }
+    },
+    {
+      "id": "receipt_0058",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Beleg 0058\nKurzer Absender: Acme GmbH\nBruttobetrag: 61.561,50 EUR\nLeistungsdatum 22.12.2024",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "61561.50",
+        "date": "22.12.2024"
+      }
+    },
+    {
+      "id": "receipt_0059",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0059\nKurzer Absender: Alpen Consulting GmbH\nBruttobetrag: 68.502,50 EUR\nLeistungsdatum 21.04.2024",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "68502.50",
+        "date": "21.04.2024"
+      }
+    },
+    {
+      "id": "receipt_0060",
+      "category": "receipt",
+      "split": "train",
+      "text": "Demo Nord GmbH\nRechnung\nEUR 74.892,50\nDatum 03.02.2024",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "74892.50",
+        "date": "03.02.2024"
+      }
+    },
+    {
+      "id": "receipt_0061",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0061\nKurzer Absender: Contoso AG\nBruttobetrag: 96.282,00 EUR\nLeistungsdatum 25.10.2024",
+      "expected": {
+        "vendor": "Contoso AG",
+        "amount": "96282.00",
+        "date": "25.10.2024"
+      }
+    },
+    {
+      "id": "receipt_0062",
+      "category": "receipt",
+      "split": "train",
+      "text": "Baltic Data UG\nRechnung\nEUR 78.361,99\nDatum 07.01.2025",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "78361.99",
+        "date": "07.01.2025"
+      }
+    },
+    {
+      "id": "receipt_0063",
+      "category": "receipt",
+      "split": "train",
+      "text": "Muster Versicherung AG\nRechnung\nEUR 42.955,50\nDatum 14.03.2024",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "42955.50",
+        "date": "14.03.2024"
+      }
+    },
+    {
+      "id": "receipt_0064",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0064\nKurzer Absender: Rhein Logistik AG\nBruttobetrag: 34.812,50 EUR\nLeistungsdatum 13.01.2025",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "34812.50",
+        "date": "13.01.2025"
+      }
+    },
+    {
+      "id": "receipt_0065",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0065\nKurzer Absender: Fabrikam KG\nBruttobetrag: 1.633,00 EUR\nLeistungsdatum 27.02.2025",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "1633.00",
+        "date": "27.02.2025"
+      }
+    },
+    {
+      "id": "receipt_0066",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Baltic Data UG\nRechnung\nEUR 69.714,50\nDatum 09.09.2024",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "69714.50",
+        "date": "09.09.2024"
+      }
+    },
+    {
+      "id": "receipt_0067",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0067\nDemo Nord GmbH\nBetrag: 71.394,00 EUR\nF\u00e4lligkeit: 02.06.2025",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "71394.00",
+        "date": "02.06.2025"
+      }
+    },
+    {
+      "id": "receipt_0068",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Landesamt f\u00fcr Steuern\nRechnung\nEUR 61.352,99\nDatum 27.06.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "61352.99",
+        "date": "27.06.2024"
+      }
+    },
+    {
+      "id": "receipt_0069",
+      "category": "receipt",
+      "split": "train",
+      "text": "Beleg 0069\nKurzer Absender: Krankenkasse Plus\nBruttobetrag: 6.534,99 EUR\nLeistungsdatum 05.03.2023",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "6534.99",
+        "date": "05.03.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0000",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0000\nContoso AG\n\nZwischensumme: 27.639,00 EUR\nMwSt 19%: 5251,41 EUR\nGesamtbetrag: 32.890,41 EUR\nF\u00e4lligkeit: 07.12.2025",
+      "expected": {
+        "vendor": "Contoso AG",
+        "amount": "32890.41",
+        "date": "07.12.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0001",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0001\nTech Solutions UG\n\nZwischensumme: 10.545,00 EUR\nMwSt 19%: 2003,55 EUR\nGesamtbetrag: 12.548,55 EUR\nF\u00e4lligkeit: 25.02.2023",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "12548.55",
+        "date": "25.02.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0002",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0002\nKrankenkasse Plus\n\nZwischensumme: 19.157,00 EUR\nMwSt 19%: 3639,83 EUR\nGesamtbetrag: 22.796,83 EUR\nF\u00e4lligkeit: 12.11.2023",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "22796.83",
+        "date": "12.11.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0003",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0003\nLandesamt f\u00fcr Steuern\n\nZwischensumme: 7.150,00 EUR\nMwSt 19%: 1358,50 EUR\nGesamtbetrag: 8.508,50 EUR\nF\u00e4lligkeit: 13.02.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "8508.50",
+        "date": "13.02.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0004",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0004\nDemo Nord GmbH\n\nZwischensumme: 30.747,00 EUR\nMwSt 19%: 5841,93 EUR\nGesamtbetrag: 36.588,93 EUR\nF\u00e4lligkeit: 15.05.2023",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "36588.93",
+        "date": "15.05.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0005",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0005\nLandesamt f\u00fcr Steuern\n\nZwischensumme: 3.759,00 EUR\nMwSt 19%: 714,21 EUR\nGesamtbetrag: 4.473,21 EUR\nF\u00e4lligkeit: 19.09.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "4473.21",
+        "date": "19.09.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0006",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0006\nFinanzamt Mitte\n\nZwischensumme: 13.277,00 EUR\nMwSt 19%: 2522,63 EUR\nGesamtbetrag: 15.799,63 EUR\nF\u00e4lligkeit: 02.02.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "15799.63",
+        "date": "02.02.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0007",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0007\nAlpen Consulting GmbH\n\nZwischensumme: 24.727,00 EUR\nMwSt 19%: 4698,13 EUR\nGesamtbetrag: 29.425,13 EUR\nF\u00e4lligkeit: 19.03.2025",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "29425.13",
+        "date": "19.03.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0008",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0008\nContoso AG\n\nZwischensumme: 27.132,00 EUR\nMwSt 19%: 5155,08 EUR\nGesamtbetrag: 32.287,08 EUR\nF\u00e4lligkeit: 21.08.2024",
+      "expected": {
+        "vendor": "Contoso AG",
+        "amount": "32287.08",
+        "date": "21.08.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0009",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0009\nNordbeispiel Beratung GmbH\n\nZwischensumme: 5.461,00 EUR\nMwSt 19%: 1037,59 EUR\nGesamtbetrag: 6.498,59 EUR\nF\u00e4lligkeit: 19.10.2025",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "6498.59",
+        "date": "19.10.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0010",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0010\nKrankenkasse Plus\n\nZwischensumme: 38.545,00 EUR\nMwSt 19%: 7323,55 EUR\nGesamtbetrag: 45.868,55 EUR\nF\u00e4lligkeit: 04.03.2025",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "45868.55",
+        "date": "04.03.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0011",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0011\nDemo Nord GmbH\n\nZwischensumme: 38.177,00 EUR\nMwSt 19%: 7253,63 EUR\nGesamtbetrag: 45.430,63 EUR\nF\u00e4lligkeit: 14.09.2025",
+      "expected": {
+        "vendor": "Demo Nord GmbH",
+        "amount": "45430.63",
+        "date": "14.09.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0012",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0012\nNordbeispiel Beratung GmbH\n\nZwischensumme: 31.474,00 EUR\nMwSt 19%: 5980,06 EUR\nGesamtbetrag: 37.454,06 EUR\nF\u00e4lligkeit: 14.02.2024",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "37454.06",
+        "date": "14.02.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0013",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0013\nAlpen Consulting GmbH\n\nZwischensumme: 12.160,00 EUR\nMwSt 19%: 2310,40 EUR\nGesamtbetrag: 14.470,40 EUR\nF\u00e4lligkeit: 24.05.2025",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "14470.40",
+        "date": "24.05.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0014",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0014\nKrankenkasse Plus\n\nZwischensumme: 32.187,00 EUR\nMwSt 19%: 6115,53 EUR\nGesamtbetrag: 38.302,53 EUR\nF\u00e4lligkeit: 25.02.2023",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "38302.53",
+        "date": "25.02.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0015",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0015\nFabrikam KG\n\nZwischensumme: 24.910,00 EUR\nMwSt 19%: 4732,90 EUR\nGesamtbetrag: 29.642,90 EUR\nF\u00e4lligkeit: 09.04.2025",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "29642.90",
+        "date": "09.04.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0016",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0016\nLandesamt f\u00fcr Steuern\n\nZwischensumme: 6.421,00 EUR\nMwSt 19%: 1219,99 EUR\nGesamtbetrag: 7.640,99 EUR\nF\u00e4lligkeit: 23.04.2025",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "7640.99",
+        "date": "23.04.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0017",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0017\nTech Solutions UG\n\nZwischensumme: 1.881,00 EUR\nMwSt 19%: 357,39 EUR\nGesamtbetrag: 2.238,39 EUR\nF\u00e4lligkeit: 07.10.2024",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "2238.39",
+        "date": "07.10.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0018",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0018\nAlpen Consulting GmbH\n\nZwischensumme: 7.028,00 EUR\nMwSt 19%: 1335,32 EUR\nGesamtbetrag: 8.363,32 EUR\nF\u00e4lligkeit: 03.09.2025",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "8363.32",
+        "date": "03.09.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0019",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0019\nFabrikam KG\n\nZwischensumme: 12.944,00 EUR\nMwSt 19%: 2459,36 EUR\nGesamtbetrag: 15.403,36 EUR\nF\u00e4lligkeit: 21.08.2023",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "15403.36",
+        "date": "21.08.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0020",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0020\nContoso AG\n\nZwischensumme: 30.098,00 EUR\nMwSt 19%: 5718,62 EUR\nGesamtbetrag: 35.816,62 EUR\nF\u00e4lligkeit: 10.10.2025",
+      "expected": {
+        "vendor": "Contoso AG",
+        "amount": "35816.62",
+        "date": "10.10.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0021",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0021\nLandesamt f\u00fcr Steuern\n\nZwischensumme: 34.916,00 EUR\nMwSt 19%: 6634,04 EUR\nGesamtbetrag: 41.550,04 EUR\nF\u00e4lligkeit: 19.12.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "41550.04",
+        "date": "19.12.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0022",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0022\nRhein Logistik AG\n\nZwischensumme: 4.704,00 EUR\nMwSt 19%: 893,76 EUR\nGesamtbetrag: 5.597,76 EUR\nF\u00e4lligkeit: 15.02.2023",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "5597.76",
+        "date": "15.02.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0023",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0023\nFabrikam KG\n\nZwischensumme: 1.367,00 EUR\nMwSt 19%: 259,73 EUR\nGesamtbetrag: 1.626,73 EUR\nF\u00e4lligkeit: 12.07.2023",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "1626.73",
+        "date": "12.07.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0024",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0024\nTech Solutions UG\n\nZwischensumme: 11.053,00 EUR\nMwSt 19%: 2100,07 EUR\nGesamtbetrag: 13.153,07 EUR\nF\u00e4lligkeit: 19.07.2024",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "13153.07",
+        "date": "19.07.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0025",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0025\nNordbeispiel Beratung GmbH\n\nZwischensumme: 35.914,00 EUR\nMwSt 19%: 6823,66 EUR\nGesamtbetrag: 42.737,66 EUR\nF\u00e4lligkeit: 23.06.2025",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "42737.66",
+        "date": "23.06.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0026",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0026\nLandesamt f\u00fcr Steuern\n\nZwischensumme: 29.526,00 EUR\nMwSt 19%: 5609,94 EUR\nGesamtbetrag: 35.135,94 EUR\nF\u00e4lligkeit: 08.07.2024",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "35135.94",
+        "date": "08.07.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0027",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0027\nNordbeispiel Beratung GmbH\n\nZwischensumme: 22.759,00 EUR\nMwSt 19%: 4324,21 EUR\nGesamtbetrag: 27.083,21 EUR\nF\u00e4lligkeit: 10.09.2024",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "27083.21",
+        "date": "10.09.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0028",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0028\nAcme GmbH\n\nZwischensumme: 19.698,00 EUR\nMwSt 19%: 3742,62 EUR\nGesamtbetrag: 23.440,62 EUR\nF\u00e4lligkeit: 24.10.2025",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "23440.62",
+        "date": "24.10.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0029",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0029\nRhein Logistik AG\n\nZwischensumme: 2.064,00 EUR\nMwSt 19%: 392,16 EUR\nGesamtbetrag: 2.456,16 EUR\nF\u00e4lligkeit: 19.11.2024",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "2456.16",
+        "date": "19.11.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0030",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0030\nAlpen Consulting GmbH\n\nZwischensumme: 32.368,00 EUR\nMwSt 19%: 6149,92 EUR\nGesamtbetrag: 38.517,92 EUR\nF\u00e4lligkeit: 01.08.2024",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "38517.92",
+        "date": "01.08.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0031",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0031\nFinanzamt Mitte\n\nZwischensumme: 22.828,00 EUR\nMwSt 19%: 4337,32 EUR\nGesamtbetrag: 27.165,32 EUR\nF\u00e4lligkeit: 16.04.2025",
+      "expected": {
+        "vendor": "Finanzamt Mitte",
+        "amount": "27165.32",
+        "date": "16.04.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0032",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0032\nTech Solutions UG\n\nZwischensumme: 35.639,00 EUR\nMwSt 19%: 6771,41 EUR\nGesamtbetrag: 42.410,41 EUR\nF\u00e4lligkeit: 28.03.2023",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "42410.41",
+        "date": "28.03.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0033",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0033\nTech Solutions UG\n\nZwischensumme: 7.915,00 EUR\nMwSt 19%: 1503,85 EUR\nGesamtbetrag: 9.418,85 EUR\nF\u00e4lligkeit: 02.09.2024",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "9418.85",
+        "date": "02.09.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0034",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0034\nAlpen Consulting GmbH\n\nZwischensumme: 28.746,00 EUR\nMwSt 19%: 5461,74 EUR\nGesamtbetrag: 34.207,74 EUR\nF\u00e4lligkeit: 10.01.2025",
+      "expected": {
+        "vendor": "Alpen Consulting GmbH",
+        "amount": "34207.74",
+        "date": "10.01.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0035",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0035\nAcme GmbH\n\nZwischensumme: 34.335,00 EUR\nMwSt 19%: 6523,65 EUR\nGesamtbetrag: 40.858,65 EUR\nF\u00e4lligkeit: 19.08.2025",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "40858.65",
+        "date": "19.08.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0036",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0036\nAcme GmbH\n\nZwischensumme: 14.028,00 EUR\nMwSt 19%: 2665,32 EUR\nGesamtbetrag: 16.693,32 EUR\nF\u00e4lligkeit: 08.07.2023",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "16693.32",
+        "date": "08.07.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0037",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0037\nRhein Logistik AG\n\nZwischensumme: 36.868,00 EUR\nMwSt 19%: 7004,92 EUR\nGesamtbetrag: 43.872,92 EUR\nF\u00e4lligkeit: 18.10.2024",
+      "expected": {
+        "vendor": "Rhein Logistik AG",
+        "amount": "43872.92",
+        "date": "18.10.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0038",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0038\nMuster Versicherung AG\n\nZwischensumme: 14.675,00 EUR\nMwSt 19%: 2788,25 EUR\nGesamtbetrag: 17.463,25 EUR\nF\u00e4lligkeit: 26.05.2025",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "17463.25",
+        "date": "26.05.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0039",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0039\nLandesamt f\u00fcr Steuern\n\nZwischensumme: 5.778,00 EUR\nMwSt 19%: 1097,82 EUR\nGesamtbetrag: 6.875,82 EUR\nF\u00e4lligkeit: 12.09.2023",
+      "expected": {
+        "vendor": "Landesamt f\u00fcr Steuern",
+        "amount": "6875.82",
+        "date": "12.09.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0040",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0040\nBaltic Data UG\n\nZwischensumme: 10.984,00 EUR\nMwSt 19%: 2086,96 EUR\nGesamtbetrag: 13.070,96 EUR\nF\u00e4lligkeit: 25.12.2024",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "13070.96",
+        "date": "25.12.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0041",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0041\nFabrikam KG\n\nZwischensumme: 20.430,00 EUR\nMwSt 19%: 3881,70 EUR\nGesamtbetrag: 24.311,70 EUR\nF\u00e4lligkeit: 22.12.2024",
+      "expected": {
+        "vendor": "Fabrikam KG",
+        "amount": "24311.70",
+        "date": "22.12.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0042",
+      "category": "receipt",
+      "split": "confirm",
+      "text": "Rechnung 0042\nBaltic Data UG\n\nZwischensumme: 38.276,00 EUR\nMwSt 19%: 7272,44 EUR\nGesamtbetrag: 45.548,44 EUR\nF\u00e4lligkeit: 22.07.2025",
+      "expected": {
+        "vendor": "Baltic Data UG",
+        "amount": "45548.44",
+        "date": "22.07.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0043",
+      "category": "receipt",
+      "split": "threshold",
+      "text": "Rechnung 0043\nNordbeispiel Beratung GmbH\n\nZwischensumme: 11.236,00 EUR\nMwSt 19%: 2134,84 EUR\nGesamtbetrag: 13.370,84 EUR\nF\u00e4lligkeit: 05.12.2025",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "13370.84",
+        "date": "05.12.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0044",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0044\nKrankenkasse Plus\n\nZwischensumme: 37.924,00 EUR\nMwSt 19%: 7205,56 EUR\nGesamtbetrag: 45.129,56 EUR\nF\u00e4lligkeit: 24.03.2025",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "45129.56",
+        "date": "24.03.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0045",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0045\nNordbeispiel Beratung GmbH\n\nZwischensumme: 29.762,00 EUR\nMwSt 19%: 5654,78 EUR\nGesamtbetrag: 35.416,78 EUR\nF\u00e4lligkeit: 20.12.2023",
+      "expected": {
+        "vendor": "Nordbeispiel Beratung GmbH",
+        "amount": "35416.78",
+        "date": "20.12.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0046",
+      "category": "receipt",
+      "split": "eval",
+      "text": "Rechnung 0046\nTech Solutions UG\n\nZwischensumme: 38.343,00 EUR\nMwSt 19%: 7285,17 EUR\nGesamtbetrag: 45.628,17 EUR\nF\u00e4lligkeit: 26.08.2025",
+      "expected": {
+        "vendor": "Tech Solutions UG",
+        "amount": "45628.17",
+        "date": "26.08.2025"
+      }
+    },
+    {
+      "id": "receipt_vat_0047",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0047\nKrankenkasse Plus\n\nZwischensumme: 7.109,00 EUR\nMwSt 19%: 1350,71 EUR\nGesamtbetrag: 8.459,71 EUR\nF\u00e4lligkeit: 27.08.2023",
+      "expected": {
+        "vendor": "Krankenkasse Plus",
+        "amount": "8459.71",
+        "date": "27.08.2023"
+      }
+    },
+    {
+      "id": "receipt_vat_0048",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0048\nAcme GmbH\n\nZwischensumme: 18.026,00 EUR\nMwSt 19%: 3424,94 EUR\nGesamtbetrag: 21.450,94 EUR\nF\u00e4lligkeit: 19.12.2024",
+      "expected": {
+        "vendor": "Acme GmbH",
+        "amount": "21450.94",
+        "date": "19.12.2024"
+      }
+    },
+    {
+      "id": "receipt_vat_0049",
+      "category": "receipt",
+      "split": "train",
+      "text": "Rechnung 0049\nMuster Versicherung AG\n\nZwischensumme: 24.725,00 EUR\nMwSt 19%: 4697,75 EUR\nGesamtbetrag: 29.422,75 EUR\nF\u00e4lligkeit: 22.01.2025",
+      "expected": {
+        "vendor": "Muster Versicherung AG",
+        "amount": "29422.75",
+        "date": "22.01.2025"
+      }
+    },
+    {
+      "id": "insurance_0000",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Rhein Logistik AG\n\nPr\u00e4mie: 91.006,99 EUR\nG\u00fcltig ab 27.04.2023",
+      "expected": {
+        "date": "27.04.2023",
+        "vendor": "Muster Versicherung AG",
+        "amount": "91006.99"
+      }
+    },
+    {
+      "id": "insurance_0001",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Krankenkasse Plus\n\nContoso AG\nSchadensmeldung\nDatum 20.12.2025\nSchadenh\u00f6he EUR 51.442,99",
+      "expected": {
+        "date": "20.12.2025",
+        "vendor": "Krankenkasse Plus",
+        "amount": "51442.99"
+      }
+    },
+    {
+      "id": "insurance_0002",
       "category": "insurance",
       "split": "eval",
-      "text": "Krankenkasse Plus\n\nMuster Versicherung AG\nSchadensmeldung\nDatum 05.03.2024\nSchadenh\u00f6he EUR 25.116,99",
+      "text": "Muster Versicherung AG\n\nDemo Nord GmbH\nSchadensmeldung\nDatum 25.05.2023\nSchadenh\u00f6he EUR 48.453,00",
       "expected": {
-        "date": "05.03.2024",
-        "vendor": "Krankenkasse Plus",
-        "amount": "25116.99"
+        "date": "25.05.2023",
+        "vendor": "Muster Versicherung AG",
+        "amount": "48453.00"
       }
     },
     {
-      "id": "insurance_009",
+      "id": "insurance_0003",
       "category": "insurance",
       "split": "eval",
-      "text": "Krankenkasse Plus\n\nContoso AG\nSchadensmeldung\nDatum 27.03.2025\nSchadenh\u00f6he EUR 72.729,99",
+      "text": "Krankenkasse Plus\nVersicherungsschein\n\nVersicherungsnehmer: Contoso AG\n\nPr\u00e4mie: 82.064,99 EUR\nG\u00fcltig ab 08.12.2023",
       "expected": {
-        "date": "27.03.2025",
+        "date": "08.12.2023",
         "vendor": "Krankenkasse Plus",
-        "amount": "72729.99"
+        "amount": "82064.99"
       }
     },
     {
-      "id": "negative_000",
+      "id": "insurance_0004",
+      "category": "insurance",
+      "split": "train",
+      "text": "Krankenkasse Plus\n\nContoso AG\nSchadensmeldung\nDatum 21.07.2024\nSchadenh\u00f6he EUR 35.673,00",
+      "expected": {
+        "date": "21.07.2024",
+        "vendor": "Krankenkasse Plus",
+        "amount": "35673.00"
+      }
+    },
+    {
+      "id": "insurance_0005",
+      "category": "insurance",
+      "split": "eval",
+      "text": "Krankenkasse Plus\n\nFinanzamt Mitte\nSchadensmeldung\nDatum 27.12.2024\nSchadenh\u00f6he EUR 97.541,99",
+      "expected": {
+        "date": "27.12.2024",
+        "vendor": "Krankenkasse Plus",
+        "amount": "97541.99"
+      }
+    },
+    {
+      "id": "insurance_0006",
+      "category": "insurance",
+      "split": "train",
+      "text": "Muster Versicherung AG\n\nAcme GmbH\nSchadensmeldung\nDatum 09.06.2023\nSchadenh\u00f6he EUR 61.749,00",
+      "expected": {
+        "date": "09.06.2023",
+        "vendor": "Muster Versicherung AG",
+        "amount": "61749.00"
+      }
+    },
+    {
+      "id": "insurance_0007",
+      "category": "insurance",
+      "split": "train",
+      "text": "Muster Versicherung AG\n\nTech Solutions UG\nSchadensmeldung\nDatum 08.10.2024\nSchadenh\u00f6he EUR 56.175,00",
+      "expected": {
+        "date": "08.10.2024",
+        "vendor": "Muster Versicherung AG",
+        "amount": "56175.00"
+      }
+    },
+    {
+      "id": "insurance_0008",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Nordbeispiel Beratung GmbH\n\nPr\u00e4mie: 33.711,00 EUR\nG\u00fcltig ab 04.05.2023",
+      "expected": {
+        "date": "04.05.2023",
+        "vendor": "Muster Versicherung AG",
+        "amount": "33711.00"
+      }
+    },
+    {
+      "id": "insurance_0009",
+      "category": "insurance",
+      "split": "train",
+      "text": "Krankenkasse Plus\nVersicherungsschein\n\nVersicherungsnehmer: Baltic Data UG\n\nPr\u00e4mie: 2.767,99 EUR\nG\u00fcltig ab 06.09.2025",
+      "expected": {
+        "date": "06.09.2025",
+        "vendor": "Krankenkasse Plus",
+        "amount": "2767.99"
+      }
+    },
+    {
+      "id": "insurance_0010",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Krankenkasse Plus\nVersicherungsschein\n\nVersicherungsnehmer: Landesamt f\u00fcr Steuern\n\nPr\u00e4mie: 58.570,50 EUR\nG\u00fcltig ab 16.05.2023",
+      "expected": {
+        "date": "16.05.2023",
+        "vendor": "Krankenkasse Plus",
+        "amount": "58570.50"
+      }
+    },
+    {
+      "id": "insurance_0011",
+      "category": "insurance",
+      "split": "train",
+      "text": "Muster Versicherung AG\n\nLandesamt f\u00fcr Steuern\nSchadensmeldung\nDatum 14.02.2024\nSchadenh\u00f6he EUR 84.715,99",
+      "expected": {
+        "date": "14.02.2024",
+        "vendor": "Muster Versicherung AG",
+        "amount": "84715.99"
+      }
+    },
+    {
+      "id": "insurance_0012",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Acme GmbH\n\nPr\u00e4mie: 48.590,00 EUR\nG\u00fcltig ab 02.06.2024",
+      "expected": {
+        "date": "02.06.2024",
+        "vendor": "Muster Versicherung AG",
+        "amount": "48590.00"
+      }
+    },
+    {
+      "id": "insurance_0013",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Muster Versicherung AG\n\nPr\u00e4mie: 91.007,00 EUR\nG\u00fcltig ab 25.11.2025",
+      "expected": {
+        "date": "25.11.2025",
+        "vendor": "Muster Versicherung AG",
+        "amount": "91007.00"
+      }
+    },
+    {
+      "id": "insurance_0014",
+      "category": "insurance",
+      "split": "eval",
+      "text": "Krankenkasse Plus\n\nKrankenkasse Plus\nSchadensmeldung\nDatum 17.02.2025\nSchadenh\u00f6he EUR 60.605,00",
+      "expected": {
+        "date": "17.02.2025",
+        "vendor": "Krankenkasse Plus",
+        "amount": "60605.00"
+      }
+    },
+    {
+      "id": "insurance_0015",
+      "category": "insurance",
+      "split": "train",
+      "text": "Muster Versicherung AG\n\nContoso AG\nSchadensmeldung\nDatum 22.12.2025\nSchadenh\u00f6he EUR 14.593,00",
+      "expected": {
+        "date": "22.12.2025",
+        "vendor": "Muster Versicherung AG",
+        "amount": "14593.00"
+      }
+    },
+    {
+      "id": "insurance_0016",
+      "category": "insurance",
+      "split": "train",
+      "text": "Krankenkasse Plus\nVersicherungsschein\n\nVersicherungsnehmer: Fabrikam KG\n\nPr\u00e4mie: 52.850,50 EUR\nG\u00fcltig ab 18.12.2024",
+      "expected": {
+        "date": "18.12.2024",
+        "vendor": "Krankenkasse Plus",
+        "amount": "52850.50"
+      }
+    },
+    {
+      "id": "insurance_0017",
+      "category": "insurance",
+      "split": "train",
+      "text": "Krankenkasse Plus\n\nNordbeispiel Beratung GmbH\nSchadensmeldung\nDatum 18.03.2025\nSchadenh\u00f6he EUR 75.535,99",
+      "expected": {
+        "date": "18.03.2025",
+        "vendor": "Krankenkasse Plus",
+        "amount": "75535.99"
+      }
+    },
+    {
+      "id": "insurance_0018",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Muster Versicherung AG\n\nMuster Versicherung AG\nSchadensmeldung\nDatum 15.07.2025\nSchadenh\u00f6he EUR 44.061,00",
+      "expected": {
+        "date": "15.07.2025",
+        "vendor": "Muster Versicherung AG",
+        "amount": "44061.00"
+      }
+    },
+    {
+      "id": "insurance_0019",
+      "category": "insurance",
+      "split": "confirm",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Rhein Logistik AG\n\nPr\u00e4mie: 59.720,50 EUR\nG\u00fcltig ab 25.07.2023",
+      "expected": {
+        "date": "25.07.2023",
+        "vendor": "Muster Versicherung AG",
+        "amount": "59720.50"
+      }
+    },
+    {
+      "id": "insurance_0020",
+      "category": "insurance",
+      "split": "train",
+      "text": "Krankenkasse Plus\nVersicherungsschein\n\nVersicherungsnehmer: Rhein Logistik AG\n\nPr\u00e4mie: 89.035,99 EUR\nG\u00fcltig ab 19.03.2023",
+      "expected": {
+        "date": "19.03.2023",
+        "vendor": "Krankenkasse Plus",
+        "amount": "89035.99"
+      }
+    },
+    {
+      "id": "insurance_0021",
+      "category": "insurance",
+      "split": "confirm",
+      "text": "Muster Versicherung AG\n\nAlpen Consulting GmbH\nSchadensmeldung\nDatum 23.10.2024\nSchadenh\u00f6he EUR 88.336,50",
+      "expected": {
+        "date": "23.10.2024",
+        "vendor": "Muster Versicherung AG",
+        "amount": "88336.50"
+      }
+    },
+    {
+      "id": "insurance_0022",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Krankenkasse Plus\nVersicherungsschein\n\nVersicherungsnehmer: Demo Nord GmbH\n\nPr\u00e4mie: 80.312,50 EUR\nG\u00fcltig ab 04.07.2024",
+      "expected": {
+        "date": "04.07.2024",
+        "vendor": "Krankenkasse Plus",
+        "amount": "80312.50"
+      }
+    },
+    {
+      "id": "insurance_0023",
+      "category": "insurance",
+      "split": "train",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Finanzamt Mitte\n\nPr\u00e4mie: 41.395,99 EUR\nG\u00fcltig ab 04.11.2023",
+      "expected": {
+        "date": "04.11.2023",
+        "vendor": "Muster Versicherung AG",
+        "amount": "41395.99"
+      }
+    },
+    {
+      "id": "insurance_0024",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Nordbeispiel Beratung GmbH\n\nPr\u00e4mie: 82.300,00 EUR\nG\u00fcltig ab 02.02.2023",
+      "expected": {
+        "date": "02.02.2023",
+        "vendor": "Muster Versicherung AG",
+        "amount": "82300.00"
+      }
+    },
+    {
+      "id": "insurance_0025",
+      "category": "insurance",
+      "split": "train",
+      "text": "Krankenkasse Plus\n\nAlpen Consulting GmbH\nSchadensmeldung\nDatum 15.07.2025\nSchadenh\u00f6he EUR 75.677,99",
+      "expected": {
+        "date": "15.07.2025",
+        "vendor": "Krankenkasse Plus",
+        "amount": "75677.99"
+      }
+    },
+    {
+      "id": "insurance_0026",
+      "category": "insurance",
+      "split": "eval",
+      "text": "Krankenkasse Plus\n\nTech Solutions UG\nSchadensmeldung\nDatum 27.04.2023\nSchadenh\u00f6he EUR 35.582,00",
+      "expected": {
+        "date": "27.04.2023",
+        "vendor": "Krankenkasse Plus",
+        "amount": "35582.00"
+      }
+    },
+    {
+      "id": "insurance_0027",
+      "category": "insurance",
+      "split": "train",
+      "text": "Krankenkasse Plus\n\nRhein Logistik AG\nSchadensmeldung\nDatum 01.04.2025\nSchadenh\u00f6he EUR 74.162,00",
+      "expected": {
+        "date": "01.04.2025",
+        "vendor": "Krankenkasse Plus",
+        "amount": "74162.00"
+      }
+    },
+    {
+      "id": "insurance_0028",
+      "category": "insurance",
+      "split": "eval",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Alpen Consulting GmbH\n\nPr\u00e4mie: 90.353,50 EUR\nG\u00fcltig ab 02.05.2024",
+      "expected": {
+        "date": "02.05.2024",
+        "vendor": "Muster Versicherung AG",
+        "amount": "90353.50"
+      }
+    },
+    {
+      "id": "insurance_0029",
+      "category": "insurance",
+      "split": "train",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Muster Versicherung AG\n\nPr\u00e4mie: 21.089,50 EUR\nG\u00fcltig ab 28.10.2024",
+      "expected": {
+        "date": "28.10.2024",
+        "vendor": "Muster Versicherung AG",
+        "amount": "21089.50"
+      }
+    },
+    {
+      "id": "insurance_0030",
+      "category": "insurance",
+      "split": "train",
+      "text": "Krankenkasse Plus\n\nAcme GmbH\nSchadensmeldung\nDatum 03.04.2023\nSchadenh\u00f6he EUR 7.690,00",
+      "expected": {
+        "date": "03.04.2023",
+        "vendor": "Krankenkasse Plus",
+        "amount": "7690.00"
+      }
+    },
+    {
+      "id": "insurance_0031",
+      "category": "insurance",
+      "split": "train",
+      "text": "Muster Versicherung AG\nVersicherungsschein\n\nVersicherungsnehmer: Demo Nord GmbH\n\nPr\u00e4mie: 7.816,00 EUR\nG\u00fcltig ab 06.11.2023",
+      "expected": {
+        "date": "06.11.2023",
+        "vendor": "Muster Versicherung AG",
+        "amount": "7816.00"
+      }
+    },
+    {
+      "id": "insurance_0032",
+      "category": "insurance",
+      "split": "eval",
+      "text": "Krankenkasse Plus\n\nLandesamt f\u00fcr Steuern\nSchadensmeldung\nDatum 26.01.2025\nSchadenh\u00f6he EUR 69.603,99",
+      "expected": {
+        "date": "26.01.2025",
+        "vendor": "Krankenkasse Plus",
+        "amount": "69603.99"
+      }
+    },
+    {
+      "id": "insurance_0033",
+      "category": "insurance",
+      "split": "threshold",
+      "text": "Krankenkasse Plus\n\nFabrikam KG\nSchadensmeldung\nDatum 10.04.2024\nSchadenh\u00f6he EUR 46.979,50",
+      "expected": {
+        "date": "10.04.2024",
+        "vendor": "Krankenkasse Plus",
+        "amount": "46979.50"
+      }
+    },
+    {
+      "id": "insurance_0034",
+      "category": "insurance",
+      "split": "train",
+      "text": "Muster Versicherung AG\n\nRhein Logistik AG\nSchadensmeldung\nDatum 15.05.2025\nSchadenh\u00f6he EUR 90.363,00",
+      "expected": {
+        "date": "15.05.2025",
+        "vendor": "Muster Versicherung AG",
+        "amount": "90363.00"
+      }
+    },
+    {
+      "id": "negative_0000",
       "category": "letter",
-      "split": "eval",
+      "split": "train",
       "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 0",
       "expected": {}
     },
     {
-      "id": "negative_001",
+      "id": "negative_0001",
       "category": "letter",
-      "split": "eval",
+      "split": "train",
       "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 1",
       "expected": {}
     },
     {
-      "id": "negative_002",
+      "id": "negative_0002",
       "category": "letter",
-      "split": "eval",
+      "split": "train",
       "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 2",
       "expected": {}
     },
     {
-      "id": "negative_003",
+      "id": "negative_0003",
       "category": "letter",
-      "split": "eval",
+      "split": "train",
       "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 3",
       "expected": {}
     },
     {
-      "id": "negative_004",
+      "id": "negative_0004",
+      "category": "letter",
+      "split": "train",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 4",
+      "expected": {}
+    },
+    {
+      "id": "negative_0005",
       "category": "letter",
       "split": "eval",
-      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 4",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 5",
+      "expected": {}
+    },
+    {
+      "id": "negative_0006",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 6",
+      "expected": {}
+    },
+    {
+      "id": "negative_0007",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 7",
+      "expected": {}
+    },
+    {
+      "id": "negative_0008",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 8",
+      "expected": {}
+    },
+    {
+      "id": "negative_0009",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 9",
+      "expected": {}
+    },
+    {
+      "id": "negative_0010",
+      "category": "letter",
+      "split": "train",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 10",
+      "expected": {}
+    },
+    {
+      "id": "negative_0011",
+      "category": "letter",
+      "split": "eval",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 11",
+      "expected": {}
+    },
+    {
+      "id": "negative_0012",
+      "category": "letter",
+      "split": "train",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 12",
+      "expected": {}
+    },
+    {
+      "id": "negative_0013",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 13",
+      "expected": {}
+    },
+    {
+      "id": "negative_0014",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 14",
+      "expected": {}
+    },
+    {
+      "id": "negative_0015",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 15",
+      "expected": {}
+    },
+    {
+      "id": "negative_0016",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 16",
+      "expected": {}
+    },
+    {
+      "id": "negative_0017",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 17",
+      "expected": {}
+    },
+    {
+      "id": "negative_0018",
+      "category": "letter",
+      "split": "confirm",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 18",
+      "expected": {}
+    },
+    {
+      "id": "negative_0019",
+      "category": "letter",
+      "split": "train",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 19",
+      "expected": {}
+    },
+    {
+      "id": "negative_0020",
+      "category": "letter",
+      "split": "eval",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 20",
+      "expected": {}
+    },
+    {
+      "id": "negative_0021",
+      "category": "letter",
+      "split": "train",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 21",
+      "expected": {}
+    },
+    {
+      "id": "negative_0022",
+      "category": "letter",
+      "split": "threshold",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 22",
+      "expected": {}
+    },
+    {
+      "id": "negative_0023",
+      "category": "letter",
+      "split": "train",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 23",
+      "expected": {}
+    },
+    {
+      "id": "negative_0024",
+      "category": "letter",
+      "split": "train",
+      "text": "Synthetic Nine Word Academic Title Case Example Heading\nSecond Line Author Names Only\nFootnote marker 24",
       "expected": {}
     }
   ]

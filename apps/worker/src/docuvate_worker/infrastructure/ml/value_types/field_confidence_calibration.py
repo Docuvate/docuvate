@@ -16,6 +16,12 @@ class _DateFloor(TypedDict):
     confidence: float
 
 
+class _AmountGate(TypedDict):
+    min_ranker_score: float
+    min_ranker_margin_over_runner_up: float
+    min_calibrated_confidence: float
+
+
 class _VendorGate(TypedDict):
     min_org_margin: float
     min_calibrated_confidence: float
@@ -29,6 +35,7 @@ class FieldConfidenceArtifact(TypedDict):
     version: str
     auto_promote_min_by_field: dict[str, float]
     date_confidence_floors: list[_DateFloor]
+    amount_gate: _AmountGate
     vendor_gate: _VendorGate
 
 
@@ -47,6 +54,9 @@ class FieldConfidenceCalibration:
     vendor_margin_offset: float
     vendor_min_sender_e5_cosine: float
     vendor_sender_e5_margin_credit: float
+    amount_min_ranker_score: float
+    amount_min_ranker_margin_over_runner_up: float
+    amount_min_calibrated_confidence: float
 
     @classmethod
     def from_artifact(cls, payload: FieldConfidenceArtifact) -> FieldConfidenceCalibration:
@@ -55,6 +65,11 @@ class FieldConfidenceCalibration:
             for row in payload["date_confidence_floors"]
         )
         vendor = payload["vendor_gate"]
+        amount = payload.get("amount_gate") or {
+            "min_ranker_score": 0.5,
+            "min_ranker_margin_over_runner_up": 0.0,
+            "min_calibrated_confidence": 0.88,
+        }
         return cls(
             auto_promote_min_by_field={
                 key: float(value) for key, value in payload["auto_promote_min_by_field"].items()
@@ -66,7 +81,28 @@ class FieldConfidenceCalibration:
             vendor_margin_offset=float(vendor.get("margin_offset", 20.0)),
             vendor_min_sender_e5_cosine=float(vendor.get("min_sender_e5_cosine", 0.84)),
             vendor_sender_e5_margin_credit=float(vendor.get("sender_e5_margin_credit", 12.0)),
+            amount_min_ranker_score=float(amount["min_ranker_score"]),
+            amount_min_ranker_margin_over_runner_up=float(
+                amount.get("min_ranker_margin_over_runner_up", 0.0)
+            ),
+            amount_min_calibrated_confidence=float(amount["min_calibrated_confidence"]),
         )
+
+    def amount_confidence_from_ranker_score(self, ranker_score: float) -> float:
+        return min(0.97, max(0.45, ranker_score))
+
+    def amount_meets_auto_promote_gate(
+        self,
+        *,
+        ranker_score: float,
+        runner_up_ranker_score: float,
+    ) -> tuple[bool, float]:
+        confidence = self.amount_confidence_from_ranker_score(ranker_score)
+        if ranker_score < self.amount_min_ranker_score:
+            return False, confidence
+        if ranker_score - runner_up_ranker_score < self.amount_min_ranker_margin_over_runner_up:
+            return False, confidence
+        return confidence >= self.amount_min_calibrated_confidence, confidence
 
     def date_confidence_from_log_score(self, raw_score: float) -> float:
         confidence = min(0.95, max(0.45, 0.45 + raw_score * 0.02))
