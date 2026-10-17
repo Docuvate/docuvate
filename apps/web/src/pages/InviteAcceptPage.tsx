@@ -4,10 +4,9 @@ import { FormEvent, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { AuthFormError } from '../components/auth/AuthFormError';
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { AuthScreen } from '../components/auth/AuthScreen';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
 import { acceptUserInvitation } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
@@ -18,10 +17,12 @@ export function InviteAcceptPage() {
   const navigate = useNavigate();
   const [search] = useSearchParams();
   const [token] = useState(() => search.get('token')?.trim() ?? '');
-  const formErrorId = useId();
+  const passwordId = useId();
+  const confirmId = useId();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [confirmMismatch, setConfirmMismatch] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -65,9 +66,11 @@ export function InviteAcceptPage() {
       return;
     }
     if (password !== confirm) {
+      setConfirmMismatch(true);
       setError(t('auth.resetPasswordMismatch'));
       return;
     }
+    setConfirmMismatch(false);
     setLoading(true);
     setError(null);
     try {
@@ -80,42 +83,76 @@ export function InviteAcceptPage() {
     }
   }
 
+  const invalidLink = !token;
+
   return (
-    <div className="auth-layout">
-      <div className="auth-locale">
-        <LocaleSwitcher />
-      </div>
-      <Card className="auth-card">
-        <h1>{t('admin.inviteAcceptTitle')}</h1>
-        <p className="muted">{t('admin.inviteAcceptLead')}</p>
-        <form onSubmit={(e) => void onSubmit(e)} className="auth-form settings-stack">
-          <AuthFormError id={formErrorId} message={error ?? ''} />
-          <label>
-            {t('auth.newPassword')}
-            <Input
-              type="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); }}
-            />
-          </label>
-          <label>
-            {t('auth.confirmPassword')}
-            <Input
-              type="password"
-              autoComplete="new-password"
-              value={confirm}
-              onChange={(e) => { setConfirm(e.target.value); }}
-            />
-          </label>
-          <Button type="submit" disabled={loading || !token}>
-            {loading ? t('admin.inviteAcceptPending') : t('admin.inviteAcceptSubmit')}
-          </Button>
-        </form>
+    <AuthScreen
+      title={t('admin.inviteAcceptTitle')}
+      lead={t('admin.inviteAcceptLead')}
+      footer={
         <p className="auth-footer-link">
           <Link to={routes.login}>{t('auth.backToSignIn')}</Link>
         </p>
-      </Card>
-    </div>
+      }
+    >
+      {invalidLink ? (
+        <p className="auth-card-lead" role="alert">
+          {t('admin.inviteAcceptInvalidLink')}
+        </p>
+      ) : (
+        <form onSubmit={(e) => void onSubmit(e)} className="auth-form" noValidate>
+          <FormField label={t('auth.password')} htmlFor={passwordId} help={t('auth.registerPasswordHelp')}>
+            <Input
+              id={passwordId}
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              required
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (confirmMismatch) {
+                  setConfirmMismatch(false);
+                  setError(null);
+                }
+              }}
+              className={error && !confirmMismatch ? 'input-invalid' : ''}
+            />
+          </FormField>
+          <FormField
+            label={t('auth.confirmPassword')}
+            htmlFor={confirmId}
+            showHelp={false}
+            error={confirmMismatch || error ? (error ?? t('auth.resetPasswordMismatch')) : undefined}
+          >
+            <Input
+              id={confirmId}
+              type="password"
+              autoComplete="new-password"
+              minLength={8}
+              required
+              value={confirm}
+              onChange={(e) => {
+                setConfirm(e.target.value);
+                if (confirmMismatch) {
+                  setConfirmMismatch(false);
+                  setError(null);
+                }
+              }}
+              className={confirmMismatch || error ? 'input-invalid' : ''}
+            />
+          </FormField>
+          <Button
+            type="submit"
+            variant="primary"
+            className="auth-primary-btn"
+            disabled={loading}
+            loading={loading}
+          >
+            {loading ? t('admin.inviteAcceptPending') : t('admin.inviteAcceptSubmit')}
+          </Button>
+        </form>
+      )}
+    </AuthScreen>
   );
 }

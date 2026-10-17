@@ -9,13 +9,22 @@ import { Logo } from '../ui/Logo';
 
 export interface AuthScreenProps {
   title: string;
+  intro?: ReactNode;
+  lead?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
   /** Hide register/passkey blocks (e.g. login error state A2). */
   compactFooter?: boolean;
 }
 
-export function AuthScreen({ title, children, footer, compactFooter = false }: AuthScreenProps) {
+export function AuthScreen({
+  title,
+  intro,
+  lead,
+  children,
+  footer,
+  compactFooter = false,
+}: AuthScreenProps) {
   const { t } = useTranslation();
   return (
     <div className="auth-layout">
@@ -26,7 +35,9 @@ export function AuthScreen({ title, children, footer, compactFooter = false }: A
         <Logo type="full" />
         <p className="auth-screen-claim">{t('auth.tagline')}</p>
         <Card className="auth-card">
+          {intro}
           <h1 className="auth-card-title">{title}</h1>
+          {lead ? <div className="auth-card-lead">{lead}</div> : null}
           {children}
         </Card>
         {!compactFooter && footer ? <div className="auth-screen-footer">{footer}</div> : null}
