@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ChangeEvent, DragEvent } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export interface DropzoneProps {
@@ -11,6 +12,7 @@ export interface DropzoneProps {
 
 export function Dropzone({ disabled, busy, onFile }: DropzoneProps) {
   const { t } = useTranslation();
+  const [dragOver, setDragOver] = useState(false);
 
   function pick(file: File | undefined) {
     if (file && !disabled && !busy) {
@@ -20,6 +22,7 @@ export function Dropzone({ disabled, busy, onFile }: DropzoneProps) {
 
   function onDrop(event: DragEvent) {
     event.preventDefault();
+    setDragOver(false);
     pick(event.dataTransfer.files[0]);
   }
 
@@ -30,8 +33,17 @@ export function Dropzone({ disabled, busy, onFile }: DropzoneProps) {
 
   return (
     <label
-      className={`dropzone${busy ? ' dropzone-busy' : ''}`}
-      onDragOver={(e) => { e.preventDefault(); }}
+      className={`dropzone${busy ? ' dropzone-busy' : ''}${dragOver ? ' dropzone-dragover' : ''}`}
+      onDragEnter={() => {
+        setDragOver(true);
+      }}
+      onDragLeave={() => {
+        setDragOver(false);
+      }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
       onDrop={onDrop}
     >
       <input

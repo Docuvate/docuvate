@@ -8,6 +8,7 @@ export type StylesCatalogComponents = {
   Button: ComponentType<
     ButtonHTMLAttributes<HTMLButtonElement> & {
       variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+      size?: 'md' | 'sm';
     }
   >;
   Input: ComponentType<InputHTMLAttributes<HTMLInputElement>>;
@@ -17,7 +18,11 @@ export type StylesCatalogComponents = {
     options: { value: string; label: string }[];
     placeholder?: string;
   }>;
-  Chip: ComponentType<{ label: string; color?: string; variant?: 'assigned' | 'suggest' | 'inbox' | 'outline' }>;
+  Chip: ComponentType<{
+    label: string;
+    color?: string;
+    variant?: 'assigned' | 'suggest' | 'inbox' | 'outline' | 'new';
+  }>;
   Badge: ComponentType<{ children: ReactNode; tone?: string }>;
   Card: ComponentType<{ children?: ReactNode; title?: string }>;
   Alert: ComponentType<{ children: ReactNode; variant?: 'info' | 'success' | 'warn' | 'danger' }>;
@@ -28,6 +33,9 @@ const COLOR_SWATCHES = [
   { name: 'bg', var: '--dv-color-bg' },
   { name: 'bg-raised', var: '--dv-color-bg-raised' },
   { name: 'bg-overlay', var: '--dv-color-bg-overlay' },
+  { name: 'bg-muted', var: '--dv-color-bg-muted' },
+  { name: 'paper', var: '--dv-color-paper' },
+  { name: 'scene-bg', var: '--dv-color-scene-bg' },
   { name: 'text', var: '--dv-color-text' },
   { name: 'text-muted', var: '--dv-color-text-muted' },
   { name: 'border', var: '--dv-color-border' },
@@ -55,20 +63,26 @@ const TYPE_SAMPLES = [
 ];
 
 const SPACE_SCALE = [
-  { token: '2xs', var: '--dv-space-2xs', px: 4 },
-  { token: 'xs', var: '--dv-space-xs', px: 8 },
-  { token: 'sm', var: '--dv-space-sm', px: 12 },
-  { token: 'md', var: '--dv-space-md', px: 16 },
-  { token: 'lg', var: '--dv-space-lg', px: 24 },
-  { token: 'xl', var: '--dv-space-xl', px: 32 },
-  { token: '2xl', var: '--dv-space-2xl', px: 48 },
-  { token: '3xl', var: '--dv-space-3xl', px: 72 },
+  { token: '2xs', var: '--dv-space-2xs', rem: '0.25rem' },
+  { token: 'xs', var: '--dv-space-xs', rem: '0.5rem' },
+  { token: 'sm', var: '--dv-space-sm', rem: '0.75rem' },
+  { token: 'md', var: '--dv-space-md', rem: '1rem' },
+  { token: 'lg', var: '--dv-space-lg', rem: '1.5rem' },
+  { token: 'xl', var: '--dv-space-xl', rem: '2rem' },
+  { token: '2xl', var: '--dv-space-2xl', rem: '3rem' },
+  { token: '3xl', var: '--dv-space-3xl', rem: '4.5rem' },
 ] as const;
 
 const RADIUS_SCALE = [
-  { token: 'sm', var: '--dv-radius-sm', px: 4 },
-  { token: 'md', var: '--dv-radius-md', px: 8 },
-  { token: 'lg', var: '--dv-radius-lg', px: 12 },
+  { token: 'sm', var: '--dv-radius-sm', rem: '0.25rem' },
+  { token: 'md', var: '--dv-radius-md', rem: '0.5rem' },
+  { token: 'lg', var: '--dv-radius-lg', rem: '0.75rem' },
+] as const;
+
+const GRID_BREAKPOINTS = [
+  { id: 'desktop', columns: 12, gutter: '--dv-grid-desktop-gutter', margin: '--dv-grid-desktop-margin' },
+  { id: 'tablet', columns: 12, gutter: '--dv-grid-tablet-gutter', margin: '--dv-grid-tablet-margin' },
+  { id: 'mobile', columns: 4, gutter: '--dv-grid-mobile-gutter', margin: '--dv-grid-mobile-margin' },
 ] as const;
 
 export type StylesCatalogProps = {
@@ -157,7 +171,7 @@ export function StylesCatalog({ components, theme, onThemeChange }: StylesCatalo
             <div key={s.token} className="styles-space-block">
               <div className="styles-space-bar" style={{ width: `var(${s.var})` }} />
               <div>
-                <strong>{s.token}</strong> {s.px}
+                <strong>{s.token}</strong> {s.rem}
               </div>
             </div>
           ))}
@@ -176,7 +190,45 @@ export function StylesCatalog({ components, theme, onThemeChange }: StylesCatalo
           <div className="styles-swatch" style={{ boxShadow: 'var(--dv-shadow-bar)', padding: 'var(--dv-space-md)' }}>
             bar
           </div>
+          <div
+            className="styles-swatch"
+            style={{ boxShadow: 'var(--dv-shadow-overlay)', padding: 'var(--dv-space-md)' }}
+          >
+            overlay
+          </div>
         </div>
+      </section>
+
+      <section className="styles-catalog-section" aria-labelledby="styles-grid">
+        <h2 id="styles-grid">Layout grid</h2>
+        <p className="muted">
+          Content uses <code>.dv-page-grid</code> + <code>.dv-page-inset-x</code> (see{' '}
+          <code>apps/web/src/styles/foundations.css</code>).
+        </p>
+        <table className="styles-catalog-table">
+          <thead>
+            <tr>
+              <th>Breakpoint</th>
+              <th>Columns</th>
+              <th>Gutter</th>
+              <th>Margin</th>
+            </tr>
+          </thead>
+          <tbody>
+            {GRID_BREAKPOINTS.map((row) => (
+              <tr key={row.id}>
+                <td>{row.id}</td>
+                <td>{row.columns}</td>
+                <td>
+                  <code>{row.gutter}</code>
+                </td>
+                <td>
+                  <code>{row.margin}</code>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </section>
 
       <section className="styles-catalog-section" aria-labelledby="styles-motion">
@@ -196,7 +248,7 @@ export function StylesCatalog({ components, theme, onThemeChange }: StylesCatalo
             <div key={r.token} className="styles-space-block">
               <div className="styles-radius-demo" style={{ borderRadius: `var(${r.var})` }} />
               <div>
-                {r.token} {r.px}
+                {r.token} {r.rem}
               </div>
             </div>
           ))}
@@ -218,6 +270,9 @@ export function StylesCatalog({ components, theme, onThemeChange }: StylesCatalo
           </Button>
           <Button type="button" variant="danger">
             Danger
+          </Button>
+          <Button type="button" size="sm" variant="secondary">
+            Small
           </Button>
           <Button type="button" disabled>
             Disabled
@@ -242,6 +297,7 @@ export function StylesCatalog({ components, theme, onThemeChange }: StylesCatalo
           <Chip label="Default" />
           <Chip label="Inbox" variant="inbox" />
           <Chip label="Suggest" variant="suggest" />
+          <Chip label="Neues Label" variant="new" />
           <Badge>Status</Badge>
         </div>
 

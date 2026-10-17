@@ -1,13 +1,22 @@
 .btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--dv-space-xs);
+  box-sizing: border-box;
   border: 1px solid transparent;
   border-radius: var(--dv-radius-md);
-  padding: var(--dv-space-xs) var(--dv-space-md);
-  font: inherit;
-  font-weight: 500;
+  min-height: var(--dv-control-height);
+  padding: 0 var(--dv-space-md);
+  font-size: var(--dv-font-size-sm);
+  font-weight: var(--dv-font-weight-medium);
+  line-height: 1.5;
   cursor: pointer;
+}
+
+.btn-sm {
+  min-height: 2rem;
+  padding: var(--dv-space-2xs) var(--dv-space-sm);
 }
 
 a.btn {
@@ -87,26 +96,55 @@ a.btn:hover {
   color: var(--dv-color-text);
 }
 
+.btn-secondary:hover:not(:disabled) {
+  background: var(--dv-color-header-control-hover-bg);
+}
+
 .btn-ghost {
   background: transparent;
   color: var(--dv-color-text-muted);
 }
 
+.btn-ghost:hover:not(:disabled) {
+  background: var(--dv-color-header-control-hover-bg);
+}
+
 .input {
   width: 100%;
+  box-sizing: border-box;
+  min-height: var(--dv-control-height);
   border: 1px solid var(--dv-color-border);
   border-radius: var(--dv-radius-md);
-  padding: var(--dv-space-xs) var(--dv-space-sm);
-  font: inherit;
+  padding: 0 var(--dv-space-sm);
+  font-size: var(--dv-font-size-sm);
+  line-height: 1.5;
   background: var(--dv-color-bg-raised);
   color: var(--dv-color-text);
+}
+
+.input:disabled {
+  opacity: 0.55;
+  background: var(--dv-color-bg-overlay);
+  cursor: not-allowed;
+}
+
+.input:focus-visible {
+  border-color: var(--dv-color-focus);
+  box-shadow: inset 0 0 0 1px var(--dv-color-focus);
+  outline: 2px solid var(--dv-color-focus);
+  outline-offset: -1px;
+}
+
+.input.input-invalid,
+.input.input-error {
+  border-color: var(--dv-color-danger);
+  box-shadow: inset 0 0 0 1px var(--dv-color-danger);
 }
 
 .input::placeholder {
   color: var(--dv-color-text-subtle);
 }
 
-.input:focus-visible,
 .btn:focus-visible,
 .chip-remove:focus-visible {
   outline: 2px solid var(--dv-color-focus);
@@ -115,7 +153,8 @@ a.btn:hover {
 
 .textarea {
   resize: vertical;
-  min-height: 96px;
+  min-height: 6rem;
+  padding-block: var(--dv-space-xs);
 }
 
 .card {
@@ -131,8 +170,8 @@ a.btn:hover {
   align-items: center;
   border-radius: var(--dv-radius-sm);
   padding: 2px var(--dv-space-xs);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--dv-font-size-xs);
+  font-weight: var(--dv-font-weight-semibold);
   border: 1px solid var(--dv-color-border);
   background: var(--dv-color-bg-overlay);
 }
@@ -161,15 +200,9 @@ a.btn:hover {
   gap: var(--dv-space-2xs);
   border-radius: var(--dv-radius-md);
   padding: 2px var(--dv-space-xs);
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-:root {
-  --dv-control-height: 40px;
-  --dv-icon-btn-sm: 28px;
-  --dv-icon-btn-md: 36px;
+  font-size: var(--dv-font-size-xs);
+  font-weight: var(--dv-font-weight-semibold);
+  line-height: 1.5;
 }
 
 .icon-btn {
@@ -258,6 +291,12 @@ a.btn:hover {
   border: 1px solid var(--dv-color-border);
 }
 
+.chip-new {
+  background: var(--dv-color-accent-soft);
+  color: var(--dv-color-accent);
+  border: 1px dashed var(--dv-color-accent);
+}
+
 .chip-remove {
   border: none;
   background: transparent;
@@ -277,6 +316,8 @@ a.btn:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-sizing: border-box;
+  min-height: var(--dv-control-height);
   text-align: left;
   cursor: pointer;
   color: var(--dv-color-text);
@@ -352,7 +393,7 @@ a.btn:hover {
 .custom-select-option-suffix {
   flex-shrink: 0;
   margin-left: auto;
-  font-size: 0.85em;
+  font-size: var(--dv-font-size-xs);
 }
 
 .custom-select-option-disabled {
@@ -368,13 +409,20 @@ a.btn:hover {
 
 .dropzone {
   display: grid;
-  gap: var(--dv-space-2xs);
+  gap: var(--dv-space-xs);
+  box-sizing: border-box;
   border: 1px dashed var(--dv-color-border-strong);
   border-radius: var(--dv-radius-md);
   padding: var(--dv-space-lg);
   background: var(--dv-color-bg-overlay);
   cursor: pointer;
   text-align: center;
+}
+
+.dropzone-dragover {
+  border-color: var(--dv-color-accent);
+  background: var(--dv-color-accent-soft);
+  box-shadow: inset 0 0 0 1px var(--dv-color-accent);
 }
 
 .dropzone-busy {
@@ -387,7 +435,8 @@ a.btn:hover {
 }
 
 .dropzone-hint {
-  font-size: 0.9rem;
+  font-size: var(--dv-font-size-xs);
+  color: var(--dv-color-text-muted);
 }
 
 .switch-field {
@@ -398,7 +447,7 @@ a.btn:hover {
   margin: 0;
   padding: var(--dv-space-xs) 0;
   min-height: 2.75rem;
-  font-size: 0.9rem;
+  font-size: var(--dv-font-size-sm);
   cursor: pointer;
 }
 

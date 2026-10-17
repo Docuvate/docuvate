@@ -4,6 +4,7 @@
       "bg": { "value": "#f5f1e9" },
       "bg-raised": { "value": "#fffaf5" },
       "bg-overlay": { "value": "#f8f4ec" },
+      "bg-muted": { "value": "#e3dbd0" },
       "text": { "value": "#120f09" },
       "text-muted": { "value": "#5c5348" },
       "text-subtle": { "value": "#6b6256" },
@@ -70,12 +71,14 @@
       "chart-3": { "value": "#0d9488" },
       "chart-4": { "value": "#4338ca" },
       "tag-unlabeled": { "value": "#94a3b8" },
-      "scene-bg": { "value": "#f0ebe2" }
+      "scene-bg": { "value": "#f0ebe2" },
+      "paper": { "value": "#ffffff" }
     },
     "dark": {
       "bg": { "value": "#1e1a13" },
       "bg-raised": { "value": "#262118" },
       "bg-overlay": { "value": "#2e2920" },
+      "bg-muted": { "value": "#3d362c" },
       "text": { "value": "#f5f1ea" },
       "text-muted": { "value": "#c9bfb0" },
       "text-subtle": { "value": "#a89f90" },
@@ -142,7 +145,8 @@
       "chart-3": { "value": "#2dd4bf" },
       "chart-4": { "value": "#818cf8" },
       "tag-unlabeled": { "value": "#64748b" },
-      "scene-bg": { "value": "#0c1222" }
+      "scene-bg": { "value": "#0c1222" },
+      "paper": { "value": "#ffffff" }
     }
   }
 }
