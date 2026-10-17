@@ -183,3 +183,51 @@ def build_representation_units(
         )
         for idx, (body, start, end) in enumerate(paragraphs)
     ]
+
+
+def append_sender_line_units(
+    units: list[RepresentationUnit],
+    text: str,
+    *,
+    max_lines: int = 64,
+) -> list[RepresentationUnit]:
+    """Add one encoding unit per non-empty line (for sender E5 reuse in the same embed batch)."""
+    seen = {unit.text.strip() for unit in units if unit.text.strip()}
+    extras: list[RepresentationUnit] = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped in seen:
+            continue
+        seen.add(stripped)
+        extras.append(
+            RepresentationUnit(
+                unit_index=len(units) + len(extras),
+                kind="sender_line",
+                text=stripped,
+                page=None,
+                x=None,
+                y=None,
+                width=None,
+                height=None,
+                char_start=None,
+                char_end=None,
+            )
+        )
+        if len(extras) >= max_lines:
+            break
+    merged = units + extras
+    return [
+        RepresentationUnit(
+            unit_index=idx,
+            kind=unit.kind,
+            text=unit.text,
+            page=unit.page,
+            x=unit.x,
+            y=unit.y,
+            width=unit.width,
+            height=unit.height,
+            char_start=unit.char_start,
+            char_end=unit.char_end,
+        )
+        for idx, unit in enumerate(merged)
+    ]

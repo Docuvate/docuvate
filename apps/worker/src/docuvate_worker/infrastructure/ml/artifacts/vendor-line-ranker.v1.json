@@ -1,0 +1,34 @@
+{
+  "version": "1",
+  "feature_names": [
+    "sender_e5_cosine",
+    "org_minus_free",
+    "org_minus_alt",
+    "money_minus_org",
+    "label_hint",
+    "line_position_ratio",
+    "top_of_page_hint",
+    "first_label_line_offset",
+    "recipient_e5_cosine",
+    "supplier_e5_cosine",
+    "doc_heading_e5_cosine",
+    "supplier_minus_recipient_e5"
+  ],
+  "coefficients": [
+    0.37508798584092634,
+    -0.3302613447742055,
+    0.1391086618861863,
+    -0.23016967760204857,
+    0.9412288565673105,
+    -6.686560245977265,
+    -0.21232079182394642,
+    -2.536386838339962,
+    -0.3466716930934188,
+    0.5957717428185395,
+    -0.6556431296970311,
+    0.9424434359117622
+  ],
+  "intercept": -0.37611183077623717,
+  "min_score": 0.929,
+  "min_score_labeled_sender_e5": 0.45
+}

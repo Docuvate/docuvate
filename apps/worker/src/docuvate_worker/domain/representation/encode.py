@@ -17,6 +17,10 @@ from docuvate_worker.domain.representation.quantize import (
     quantize_vector,
 )
 from docuvate_worker.domain.representation.units import RepresentationUnit
+from docuvate_worker.infrastructure.extractors.field_extraction_context import (
+    clear_passage_vector_cache,
+    register_passage_vectors,
+)
 from docuvate_worker.infrastructure.fastembed_model import embed_passages
 
 
@@ -42,6 +46,7 @@ class DocumentRepresentation:
 
 
 def encode_units(units: list[RepresentationUnit]) -> DocumentRepresentation:
+    clear_passage_vector_cache()
     if not units:
         empty = [0.0] * EMBEDDING_DIM
         scale, int8 = quantize_vector(empty)
@@ -58,6 +63,9 @@ def encode_units(units: list[RepresentationUnit]) -> DocumentRepresentation:
         )
     texts = [u.text for u in units]
     vectors = embed_passages(texts)
+    register_passage_vectors(
+        {text.strip(): vector for text, vector in zip(texts, vectors, strict=True) if text.strip()}
+    )
     encoded_units: list[EncodedUnit] = []
     for unit, vector in zip(units, vectors, strict=True):
         scale, int8 = quantize_vector(vector)

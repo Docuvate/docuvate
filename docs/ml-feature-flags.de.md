@@ -15,7 +15,7 @@ Remote-Config nutzt **camelCase** (z. B. `exactAnswers`). Override-Zeilen in der
 | `exactAnswers` | aus | `DOCUVATE_FEATURE_EXACT_ANSWERS` | Strukturierter Fakten-Index beim Upload; Dokument- und Bibliotheks-Chat kann typisierte Abfragen und Aggregationen (Beträge, Anzahlen, Daten) aus indizierten Fakten beantworten, bevor Retrieval greift. |
 | `answerAbstention` | aus | `DOCUVATE_FEATURE_ANSWER_ABSTENTION` | Mit `exactAnswers`: unsichere Treffer **verweigern** (z. B. „Nicht in den Dokumenten gefunden.“) statt in Embedding/RAG zu fallen — weniger Halluzinationen bei unbekannten Entitäten. Schwellwert standardmäßig **0,55** (pro Mandant überschreibbar in den Exact-Fact-Chat-Einstellungen). |
 | `smartDuplicates` | aus | `DOCUVATE_FEATURE_SMART_DUPLICATES` | Template-bereinigte Duplikat-**Hinweise** zusätzlich zum Content-Hash. Nur UI-Hinweise; kein automatisches Zusammenführen oder Löschen. |
-| `learnedValueTypes` | **an** | `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Gelernte Werttypen für Feld-Kandidaten statt Regex-Heuristiken. Env `false` schaltet installationsweit ab. |
+| `learnedValueTypes` | **an** | `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Gelernte Werttypen für globale Feldvorschläge (`amount`, `date`, `vendor`). Env `false` = installationsweit keine Vorschläge (Abstention, kein Regex-Fallback). |
 | `layoutKeyValueRoles` | aus (**experimentell**) | `DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES` | Layout-Key/Value-Rollen-Kopf auf Passage-Embeddings. Experimentell; Standard bleibt aus. |
 | `localChatModel` | aus | `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL` | Freie LLM-Antworten im zitierten Dokument-Chat über **lokales** Ollama, wenn das optionale Compose-Profil **`chat-local`** läuft. Ohne Flag weiterhin extractive / Retrieval-Pfade. |
 

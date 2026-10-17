@@ -1,0 +1,1098 @@
+{
+  "version": 1,
+  "frozen_seed": 99100441,
+  "doc_count": 100,
+  "split": "frozen_eval",
+  "documents": [
+    {
+      "id": "frozen_invoice_0000",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0000\nNovaCare Versicherung AG\nF\u00e4lliger Gesamtbetrag 57.394,50 EUR\nZahlbar bis 07.03.2024",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "57394.50",
+        "date": "07.03.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0001",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nHonorarnote Nr. 0001\nEndsumme: 24.491,99 EUR\nDatum 11.11.2024",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "24491.99",
+        "date": "11.11.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0002",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0002\nQuellbach Steuerberatung GmbH\nF\u00e4lliger Gesamtbetrag 84.447,99 EUR\nZahlbar bis 20.10.2024",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "84447.99",
+        "date": "20.10.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0003",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "NovaCare Versicherung AG\nHonorarnote Nr. 0003\nEndsumme: 53.120,50 EUR\nDatum 22.10.2025",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "53120.50",
+        "date": "22.10.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0004",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Rheinblick Analytics GmbH\nHonorarnote Nr. 0004\nEndsumme: 27.566,50 EUR\nDatum 19.11.2025",
+      "expected": {
+        "vendor": "Rheinblick Analytics GmbH",
+        "amount": "27566.50",
+        "date": "19.11.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0005",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nHonorarnote Nr. 0005\nEndsumme: 58.808,00 EUR\nDatum 17.03.2026",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "58808.00",
+        "date": "17.03.2026"
+      }
+    },
+    {
+      "id": "frozen_invoice_0006",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Westk\u00fcste Medical UG\nHonorarnote Nr. 0006\nEndsumme: 50.803,50 EUR\nDatum 04.01.2025",
+      "expected": {
+        "vendor": "Westk\u00fcste Medical UG",
+        "amount": "50803.50",
+        "date": "04.01.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0007",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0007\nPolar Express Logistik AG\nF\u00e4lliger Gesamtbetrag 85.038,50 EUR\nZahlbar bis 11.04.2024",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "85038.50",
+        "date": "11.04.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0008",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0008\nHelios Werk AG\nF\u00e4lliger Gesamtbetrag 18.558,99 EUR\nZahlbar bis 06.06.2024",
+      "expected": {
+        "vendor": "Helios Werk AG",
+        "amount": "18558.99",
+        "date": "06.06.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0009",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0009\nPolar Express Logistik AG\nF\u00e4lliger Gesamtbetrag 4.692,99 EUR\nZahlbar bis 05.02.2026",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "4692.99",
+        "date": "05.02.2026"
+      }
+    },
+    {
+      "id": "frozen_invoice_0010",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "S\u00fcdportal Consulting GmbH\nHonorarnote Nr. 0010\nEndsumme: 32.569,99 EUR\nDatum 09.04.2026",
+      "expected": {
+        "vendor": "S\u00fcdportal Consulting GmbH",
+        "amount": "32569.99",
+        "date": "09.04.2026"
+      }
+    },
+    {
+      "id": "frozen_invoice_0011",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nHonorarnote Nr. 0011\nEndsumme: 2.874,99 EUR\nDatum 18.04.2024",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "2874.99",
+        "date": "18.04.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0012",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Zenith Systems KG\nHonorarnote Nr. 0012\nEndsumme: 76.230,99 EUR\nDatum 13.10.2024",
+      "expected": {
+        "vendor": "Zenith Systems KG",
+        "amount": "76230.99",
+        "date": "13.10.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0013",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Helios Werk AG\nHonorarnote Nr. 0013\nEndsumme: 24.140,50 EUR\nDatum 09.04.2025",
+      "expected": {
+        "vendor": "Helios Werk AG",
+        "amount": "24140.50",
+        "date": "09.04.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0014",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0014\nS\u00fcdportal Consulting GmbH\nF\u00e4lliger Gesamtbetrag 51.598,99 EUR\nZahlbar bis 07.10.2024",
+      "expected": {
+        "vendor": "S\u00fcdportal Consulting GmbH",
+        "amount": "51598.99",
+        "date": "07.10.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0015",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0015\nWestk\u00fcste Medical UG\nF\u00e4lliger Gesamtbetrag 41.526,50 EUR\nZahlbar bis 10.06.2025",
+      "expected": {
+        "vendor": "Westk\u00fcste Medical UG",
+        "amount": "41526.50",
+        "date": "10.06.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0016",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0016\nHelios Werk AG\nF\u00e4lliger Gesamtbetrag 10.073,00 EUR\nZahlbar bis 16.05.2025",
+      "expected": {
+        "vendor": "Helios Werk AG",
+        "amount": "10073.00",
+        "date": "16.05.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0017",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Westk\u00fcste Medical UG\nHonorarnote Nr. 0017\nEndsumme: 86.281,99 EUR\nDatum 16.10.2026",
+      "expected": {
+        "vendor": "Westk\u00fcste Medical UG",
+        "amount": "86281.99",
+        "date": "16.10.2026"
+      }
+    },
+    {
+      "id": "frozen_invoice_0018",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0018\nNovaCare Versicherung AG\nF\u00e4lliger Gesamtbetrag 54.504,50 EUR\nZahlbar bis 26.12.2024",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "54504.50",
+        "date": "26.12.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0019",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Helios Werk AG\nHonorarnote Nr. 0019\nEndsumme: 64.004,50 EUR\nDatum 22.02.2026",
+      "expected": {
+        "vendor": "Helios Werk AG",
+        "amount": "64004.50",
+        "date": "22.02.2026"
+      }
+    },
+    {
+      "id": "frozen_invoice_0020",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0020\nOstmark Facility KG\nF\u00e4lliger Gesamtbetrag 32.632,00 EUR\nZahlbar bis 02.11.2026",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "32632.00",
+        "date": "02.11.2026"
+      }
+    },
+    {
+      "id": "frozen_invoice_0021",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nHonorarnote Nr. 0021\nEndsumme: 50.318,00 EUR\nDatum 04.11.2025",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "50318.00",
+        "date": "04.11.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0022",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0022\nOstmark Facility KG\nF\u00e4lliger Gesamtbetrag 50.009,50 EUR\nZahlbar bis 27.08.2025",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "50009.50",
+        "date": "27.08.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0023",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nHonorarnote Nr. 0023\nEndsumme: 9.008,99 EUR\nDatum 10.11.2024",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "9008.99",
+        "date": "10.11.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0024",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Westk\u00fcste Medical UG\nHonorarnote Nr. 0024\nEndsumme: 50.428,50 EUR\nDatum 23.05.2024",
+      "expected": {
+        "vendor": "Westk\u00fcste Medical UG",
+        "amount": "50428.50",
+        "date": "23.05.2024"
+      }
+    },
+    {
+      "id": "frozen_invoice_0025",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Ostmark Facility KG\nHonorarnote Nr. 0025\nEndsumme: 85.652,50 EUR\nDatum 25.03.2025",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "85652.50",
+        "date": "25.03.2025"
+      }
+    },
+    {
+      "id": "frozen_invoice_0026",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nHonorarnote Nr. 0026\nEndsumme: 29.088,50 EUR\nDatum 24.12.2026",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "29088.50",
+        "date": "24.12.2026"
+      }
+    },
+    {
+      "id": "frozen_invoice_0027",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Leistungsabrechnung 0027\nQuellbach Steuerberatung GmbH\nF\u00e4lliger Gesamtbetrag 47.627,50 EUR\nZahlbar bis 06.10.2024",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "47627.50",
+        "date": "06.10.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0000",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0000\nNovaCare Versicherung AG\n\nNettowert 2.906,00 EUR\nUSt 19%: 552,14 EUR\nZu zahlen: 3.458,14 EUR\nLeistungsdatum 01.12.2024",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "3458.14",
+        "date": "01.12.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0001",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0001\nQuellbach Steuerberatung GmbH\n\nNettowert 24.345,00 EUR\nUSt 19%: 4625,55 EUR\nZu zahlen: 28.970,55 EUR\nLeistungsdatum 21.08.2024",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "28970.55",
+        "date": "21.08.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0002",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0002\nRheinblick Analytics GmbH\n\nNettowert 15.174,00 EUR\nUSt 19%: 2883,06 EUR\nZu zahlen: 18.057,06 EUR\nLeistungsdatum 18.12.2025",
+      "expected": {
+        "vendor": "Rheinblick Analytics GmbH",
+        "amount": "18057.06",
+        "date": "18.12.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0003",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0003\nAmt f\u00fcr Soziales Mitte\n\nNettowert 10.524,00 EUR\nUSt 19%: 1999,56 EUR\nZu zahlen: 12.523,56 EUR\nLeistungsdatum 24.03.2026",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "12523.56",
+        "date": "24.03.2026"
+      }
+    },
+    {
+      "id": "frozen_vat_0004",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0004\nRheinblick Analytics GmbH\n\nNettowert 35.917,00 EUR\nUSt 19%: 6824,23 EUR\nZu zahlen: 42.741,23 EUR\nLeistungsdatum 11.07.2024",
+      "expected": {
+        "vendor": "Rheinblick Analytics GmbH",
+        "amount": "42741.23",
+        "date": "11.07.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0005",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0005\nOstmark Facility KG\n\nNettowert 19.485,00 EUR\nUSt 19%: 3702,15 EUR\nZu zahlen: 23.187,15 EUR\nLeistungsdatum 05.01.2025",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "23187.15",
+        "date": "05.01.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0006",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0006\nHelios Werk AG\n\nNettowert 39.480,00 EUR\nUSt 19%: 7501,20 EUR\nZu zahlen: 46.981,20 EUR\nLeistungsdatum 08.05.2025",
+      "expected": {
+        "vendor": "Helios Werk AG",
+        "amount": "46981.20",
+        "date": "08.05.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0007",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0007\nAmt f\u00fcr Soziales Mitte\n\nNettowert 26.138,00 EUR\nUSt 19%: 4966,22 EUR\nZu zahlen: 31.104,22 EUR\nLeistungsdatum 27.10.2025",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "31104.22",
+        "date": "27.10.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0008",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0008\nZenith Systems KG\n\nNettowert 2.971,00 EUR\nUSt 19%: 564,49 EUR\nZu zahlen: 3.535,49 EUR\nLeistungsdatum 20.12.2025",
+      "expected": {
+        "vendor": "Zenith Systems KG",
+        "amount": "3535.49",
+        "date": "20.12.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0009",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0009\nRheinblick Analytics GmbH\n\nNettowert 34.158,00 EUR\nUSt 19%: 6490,02 EUR\nZu zahlen: 40.648,02 EUR\nLeistungsdatum 03.08.2024",
+      "expected": {
+        "vendor": "Rheinblick Analytics GmbH",
+        "amount": "40648.02",
+        "date": "03.08.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0010",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0010\nS\u00fcdportal Consulting GmbH\n\nNettowert 10.792,00 EUR\nUSt 19%: 2050,48 EUR\nZu zahlen: 12.842,48 EUR\nLeistungsdatum 09.01.2025",
+      "expected": {
+        "vendor": "S\u00fcdportal Consulting GmbH",
+        "amount": "12842.48",
+        "date": "09.01.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0011",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0011\nZenith Systems KG\n\nNettowert 40.699,00 EUR\nUSt 19%: 7732,81 EUR\nZu zahlen: 48.431,81 EUR\nLeistungsdatum 06.04.2024",
+      "expected": {
+        "vendor": "Zenith Systems KG",
+        "amount": "48431.81",
+        "date": "06.04.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0012",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0012\nOstmark Facility KG\n\nNettowert 14.333,00 EUR\nUSt 19%: 2723,27 EUR\nZu zahlen: 17.056,27 EUR\nLeistungsdatum 06.10.2024",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "17056.27",
+        "date": "06.10.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0013",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0013\nRheinblick Analytics GmbH\n\nNettowert 5.584,00 EUR\nUSt 19%: 1060,96 EUR\nZu zahlen: 6.644,96 EUR\nLeistungsdatum 08.11.2025",
+      "expected": {
+        "vendor": "Rheinblick Analytics GmbH",
+        "amount": "6644.96",
+        "date": "08.11.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0014",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0014\nOstmark Facility KG\n\nNettowert 23.195,00 EUR\nUSt 19%: 4407,05 EUR\nZu zahlen: 27.602,05 EUR\nLeistungsdatum 17.08.2025",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "27602.05",
+        "date": "17.08.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0015",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0015\nOstmark Facility KG\n\nNettowert 33.094,00 EUR\nUSt 19%: 6287,86 EUR\nZu zahlen: 39.381,86 EUR\nLeistungsdatum 06.01.2025",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "39381.86",
+        "date": "06.01.2025"
+      }
+    },
+    {
+      "id": "frozen_vat_0016",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0016\nPolar Express Logistik AG\n\nNettowert 35.650,00 EUR\nUSt 19%: 6773,50 EUR\nZu zahlen: 42.423,50 EUR\nLeistungsdatum 08.07.2024",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "42423.50",
+        "date": "08.07.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0017",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0017\nPolar Express Logistik AG\n\nNettowert 41.618,00 EUR\nUSt 19%: 7907,42 EUR\nZu zahlen: 49.525,42 EUR\nLeistungsdatum 13.06.2024",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "49525.42",
+        "date": "13.06.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0018",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0018\nWestk\u00fcste Medical UG\n\nNettowert 40.103,00 EUR\nUSt 19%: 7619,57 EUR\nZu zahlen: 47.722,57 EUR\nLeistungsdatum 12.09.2026",
+      "expected": {
+        "vendor": "Westk\u00fcste Medical UG",
+        "amount": "47722.57",
+        "date": "12.09.2026"
+      }
+    },
+    {
+      "id": "frozen_vat_0019",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0019\nRheinblick Analytics GmbH\n\nNettowert 17.766,00 EUR\nUSt 19%: 3375,54 EUR\nZu zahlen: 21.141,54 EUR\nLeistungsdatum 20.09.2026",
+      "expected": {
+        "vendor": "Rheinblick Analytics GmbH",
+        "amount": "21141.54",
+        "date": "20.09.2026"
+      }
+    },
+    {
+      "id": "frozen_vat_0020",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0020\nS\u00fcdportal Consulting GmbH\n\nNettowert 5.840,00 EUR\nUSt 19%: 1109,60 EUR\nZu zahlen: 6.949,60 EUR\nLeistungsdatum 01.11.2024",
+      "expected": {
+        "vendor": "S\u00fcdportal Consulting GmbH",
+        "amount": "6949.60",
+        "date": "01.11.2024"
+      }
+    },
+    {
+      "id": "frozen_vat_0021",
+      "category": "invoice",
+      "split": "frozen_eval",
+      "text": "Abrechnung 0021\nOstmark Facility KG\n\nNettowert 14.253,00 EUR\nUSt 19%: 2708,07 EUR\nZu zahlen: 16.961,07 EUR\nLeistungsdatum 05.08.2025",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "16961.07",
+        "date": "05.08.2025"
+      }
+    },
+    {
+      "id": "frozen_po_0000",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00000\nLieferant: Ostmark Facility KG\nAuftragswert 57.942,50 EUR\nBestellt am 23.07.2026",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "57942.50",
+        "date": "23.07.2026"
+      }
+    },
+    {
+      "id": "frozen_po_0001",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00001\nLieferant: Amt f\u00fcr Soziales Mitte\nAuftragswert 50.828,00 EUR\nBestellt am 10.03.2024",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "50828.00",
+        "date": "10.03.2024"
+      }
+    },
+    {
+      "id": "frozen_po_0002",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00002\nLieferant: Helios Werk AG\nAuftragswert 80.353,50 EUR\nBestellt am 19.02.2026",
+      "expected": {
+        "vendor": "Helios Werk AG",
+        "amount": "80353.50",
+        "date": "19.02.2026"
+      }
+    },
+    {
+      "id": "frozen_po_0003",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00003\nLieferant: Rheinblick Analytics GmbH\nAuftragswert 84.988,99 EUR\nBestellt am 10.10.2024",
+      "expected": {
+        "vendor": "Rheinblick Analytics GmbH",
+        "amount": "84988.99",
+        "date": "10.10.2024"
+      }
+    },
+    {
+      "id": "frozen_po_0004",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00004\nLieferant: Amt f\u00fcr Soziales Mitte\nAuftragswert 26.621,99 EUR\nBestellt am 10.01.2024",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "26621.99",
+        "date": "10.01.2024"
+      }
+    },
+    {
+      "id": "frozen_po_0005",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00005\nLieferant: NovaCare Versicherung AG\nAuftragswert 76.129,00 EUR\nBestellt am 08.12.2025",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "76129.00",
+        "date": "08.12.2025"
+      }
+    },
+    {
+      "id": "frozen_po_0006",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00006\nLieferant: Zenith Systems KG\nAuftragswert 29.823,50 EUR\nBestellt am 15.09.2026",
+      "expected": {
+        "vendor": "Zenith Systems KG",
+        "amount": "29823.50",
+        "date": "15.09.2026"
+      }
+    },
+    {
+      "id": "frozen_po_0007",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00007\nLieferant: Ostmark Facility KG\nAuftragswert 19.253,50 EUR\nBestellt am 07.04.2026",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "19253.50",
+        "date": "07.04.2026"
+      }
+    },
+    {
+      "id": "frozen_po_0008",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00008\nLieferant: Ostmark Facility KG\nAuftragswert 16.318,99 EUR\nBestellt am 16.06.2025",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "amount": "16318.99",
+        "date": "16.06.2025"
+      }
+    },
+    {
+      "id": "frozen_po_0009",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00009\nLieferant: Quellbach Steuerberatung GmbH\nAuftragswert 74.133,00 EUR\nBestellt am 18.09.2024",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "74133.00",
+        "date": "18.09.2024"
+      }
+    },
+    {
+      "id": "frozen_po_0010",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00010\nLieferant: Zenith Systems KG\nAuftragswert 62.586,00 EUR\nBestellt am 04.11.2024",
+      "expected": {
+        "vendor": "Zenith Systems KG",
+        "amount": "62586.00",
+        "date": "04.11.2024"
+      }
+    },
+    {
+      "id": "frozen_po_0011",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00011\nLieferant: Zenith Systems KG\nAuftragswert 57.794,00 EUR\nBestellt am 19.10.2026",
+      "expected": {
+        "vendor": "Zenith Systems KG",
+        "amount": "57794.00",
+        "date": "19.10.2026"
+      }
+    },
+    {
+      "id": "frozen_po_0012",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00012\nLieferant: S\u00fcdportal Consulting GmbH\nAuftragswert 76.139,99 EUR\nBestellt am 13.07.2026",
+      "expected": {
+        "vendor": "S\u00fcdportal Consulting GmbH",
+        "amount": "76139.99",
+        "date": "13.07.2026"
+      }
+    },
+    {
+      "id": "frozen_po_0013",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00013\nLieferant: Rheinblick Analytics GmbH\nAuftragswert 53.205,99 EUR\nBestellt am 08.09.2026",
+      "expected": {
+        "vendor": "Rheinblick Analytics GmbH",
+        "amount": "53205.99",
+        "date": "08.09.2026"
+      }
+    },
+    {
+      "id": "frozen_po_0014",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00014\nLieferant: S\u00fcdportal Consulting GmbH\nAuftragswert 61.045,00 EUR\nBestellt am 18.03.2024",
+      "expected": {
+        "vendor": "S\u00fcdportal Consulting GmbH",
+        "amount": "61045.00",
+        "date": "18.03.2024"
+      }
+    },
+    {
+      "id": "frozen_po_0015",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00015\nLieferant: Westk\u00fcste Medical UG\nAuftragswert 37.754,99 EUR\nBestellt am 27.12.2024",
+      "expected": {
+        "vendor": "Westk\u00fcste Medical UG",
+        "amount": "37754.99",
+        "date": "27.12.2024"
+      }
+    },
+    {
+      "id": "frozen_po_0016",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00016\nLieferant: NovaCare Versicherung AG\nAuftragswert 37.956,99 EUR\nBestellt am 03.08.2025",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "37956.99",
+        "date": "03.08.2025"
+      }
+    },
+    {
+      "id": "frozen_po_0017",
+      "category": "order",
+      "split": "frozen_eval",
+      "text": "Bestellung PO-00017\nLieferant: Quellbach Steuerberatung GmbH\nAuftragswert 21.544,99 EUR\nBestellt am 16.06.2025",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "21544.99",
+        "date": "16.06.2025"
+      }
+    },
+    {
+      "id": "frozen_notice_0000",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nBescheid 0000\n\nAdressat: Helios Werk AG\nHauptforderung: 69.925,00 EUR\nAusgestellt 13.02.2025",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "69925.00",
+        "date": "13.02.2025"
+      }
+    },
+    {
+      "id": "frozen_notice_0001",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nBescheid 0001\n\nAdressat: Polar Express Logistik AG\nHauptforderung: 46.792,50 EUR\nAusgestellt 24.10.2026",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "46792.50",
+        "date": "24.10.2026"
+      }
+    },
+    {
+      "id": "frozen_notice_0002",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nBescheid 0002\n\nAdressat: Quellbach Steuerberatung GmbH\nHauptforderung: 12.888,50 EUR\nAusgestellt 13.10.2024",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "12888.50",
+        "date": "13.10.2024"
+      }
+    },
+    {
+      "id": "frozen_notice_0003",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nBescheid 0003\n\nAdressat: Amt f\u00fcr Soziales Mitte\nHauptforderung: 21.230,00 EUR\nAusgestellt 22.07.2026",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "21230.00",
+        "date": "22.07.2026"
+      }
+    },
+    {
+      "id": "frozen_notice_0004",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nBescheid 0004\n\nAdressat: Helios Werk AG\nHauptforderung: 8.898,50 EUR\nAusgestellt 22.02.2025",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "8898.50",
+        "date": "22.02.2025"
+      }
+    },
+    {
+      "id": "frozen_notice_0005",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nBescheid 0005\n\nAdressat: Westk\u00fcste Medical UG\nHauptforderung: 43.591,50 EUR\nAusgestellt 27.05.2024",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "43591.50",
+        "date": "27.05.2024"
+      }
+    },
+    {
+      "id": "frozen_notice_0006",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nBescheid 0006\n\nAdressat: Quellbach Steuerberatung GmbH\nHauptforderung: 22.926,50 EUR\nAusgestellt 10.01.2025",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "22926.50",
+        "date": "10.01.2025"
+      }
+    },
+    {
+      "id": "frozen_notice_0007",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nBescheid 0007\n\nAdressat: NovaCare Versicherung AG\nHauptforderung: 78.707,99 EUR\nAusgestellt 22.08.2025",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "78707.99",
+        "date": "22.08.2025"
+      }
+    },
+    {
+      "id": "frozen_notice_0008",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nBescheid 0008\n\nAdressat: Quellbach Steuerberatung GmbH\nHauptforderung: 46.544,00 EUR\nAusgestellt 05.10.2026",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "46544.00",
+        "date": "05.10.2026"
+      }
+    },
+    {
+      "id": "frozen_notice_0009",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nBescheid 0009\n\nAdressat: NovaCare Versicherung AG\nHauptforderung: 43.715,50 EUR\nAusgestellt 20.11.2026",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "43715.50",
+        "date": "20.11.2026"
+      }
+    },
+    {
+      "id": "frozen_notice_0010",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nBescheid 0010\n\nAdressat: Zenith Systems KG\nHauptforderung: 71.940,99 EUR\nAusgestellt 25.07.2026",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "amount": "71940.99",
+        "date": "25.07.2026"
+      }
+    },
+    {
+      "id": "frozen_notice_0011",
+      "category": "notice",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nBescheid 0011\n\nAdressat: S\u00fcdportal Consulting GmbH\nHauptforderung: 43.575,00 EUR\nAusgestellt 01.12.2024",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "amount": "43575.00",
+        "date": "01.12.2024"
+      }
+    },
+    {
+      "id": "frozen_policy_0000",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nPolice 0000\n\nVersicherungsnehmer: Rheinblick Analytics GmbH\nJahrespr\u00e4mie 62.596,99 EUR\nG\u00fcltig ab 13.12.2026",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "62596.99",
+        "date": "13.12.2026"
+      }
+    },
+    {
+      "id": "frozen_policy_0001",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "NovaCare Versicherung AG\nPolice 0001\n\nVersicherungsnehmer: Polar Express Logistik AG\nJahrespr\u00e4mie 25.860,00 EUR\nG\u00fcltig ab 04.04.2026",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "25860.00",
+        "date": "04.04.2026"
+      }
+    },
+    {
+      "id": "frozen_policy_0002",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nPolice 0002\n\nVersicherungsnehmer: NovaCare Versicherung AG\nJahrespr\u00e4mie 64.137,99 EUR\nG\u00fcltig ab 06.10.2026",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "64137.99",
+        "date": "06.10.2026"
+      }
+    },
+    {
+      "id": "frozen_policy_0003",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "NovaCare Versicherung AG\nPolice 0003\n\nVersicherungsnehmer: Polar Express Logistik AG\nJahrespr\u00e4mie 27.527,99 EUR\nG\u00fcltig ab 08.06.2026",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "27527.99",
+        "date": "08.06.2026"
+      }
+    },
+    {
+      "id": "frozen_policy_0004",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nPolice 0004\n\nVersicherungsnehmer: Polar Express Logistik AG\nJahrespr\u00e4mie 47.484,99 EUR\nG\u00fcltig ab 17.06.2025",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "47484.99",
+        "date": "17.06.2025"
+      }
+    },
+    {
+      "id": "frozen_policy_0005",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "NovaCare Versicherung AG\nPolice 0005\n\nVersicherungsnehmer: Rheinblick Analytics GmbH\nJahrespr\u00e4mie 4.639,50 EUR\nG\u00fcltig ab 27.08.2025",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "4639.50",
+        "date": "27.08.2025"
+      }
+    },
+    {
+      "id": "frozen_policy_0006",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nPolice 0006\n\nVersicherungsnehmer: Amt f\u00fcr Soziales Mitte\nJahrespr\u00e4mie 60.798,00 EUR\nG\u00fcltig ab 28.01.2026",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "60798.00",
+        "date": "28.01.2026"
+      }
+    },
+    {
+      "id": "frozen_policy_0007",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nPolice 0007\n\nVersicherungsnehmer: Polar Express Logistik AG\nJahrespr\u00e4mie 81.627,00 EUR\nG\u00fcltig ab 02.09.2025",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "81627.00",
+        "date": "02.09.2025"
+      }
+    },
+    {
+      "id": "frozen_policy_0008",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nPolice 0008\n\nVersicherungsnehmer: S\u00fcdportal Consulting GmbH\nJahrespr\u00e4mie 14.801,00 EUR\nG\u00fcltig ab 21.09.2024",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "amount": "14801.00",
+        "date": "21.09.2024"
+      }
+    },
+    {
+      "id": "frozen_policy_0009",
+      "category": "insurance",
+      "split": "frozen_eval",
+      "text": "NovaCare Versicherung AG\nPolice 0009\n\nVersicherungsnehmer: Ostmark Facility KG\nJahrespr\u00e4mie 71.352,00 EUR\nG\u00fcltig ab 21.12.2026",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "amount": "71352.00",
+        "date": "21.12.2026"
+      }
+    },
+    {
+      "id": "frozen_letter_0000",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nParkallee 22\n\nSchreiben vom 09.07.2024\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "date": "09.07.2024"
+      }
+    },
+    {
+      "id": "frozen_letter_0001",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "Amt f\u00fcr Soziales Mitte\nFabrikhof 1\n\nSchreiben vom 02.07.2024\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "Amt f\u00fcr Soziales Mitte",
+        "date": "02.07.2024"
+      }
+    },
+    {
+      "id": "frozen_letter_0002",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "NovaCare Versicherung AG\nFabrikhof 1\n\nSchreiben vom 24.10.2024\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "NovaCare Versicherung AG",
+        "date": "24.10.2024"
+      }
+    },
+    {
+      "id": "frozen_letter_0003",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "Polar Express Logistik AG\nSeeweg 7\n\nSchreiben vom 22.06.2024\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "Polar Express Logistik AG",
+        "date": "22.06.2024"
+      }
+    },
+    {
+      "id": "frozen_letter_0004",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nFabrikhof 1\n\nSchreiben vom 25.06.2024\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "date": "25.06.2024"
+      }
+    },
+    {
+      "id": "frozen_letter_0005",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "Ostmark Facility KG\nSeeweg 7\n\nSchreiben vom 18.01.2026\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "date": "18.01.2026"
+      }
+    },
+    {
+      "id": "frozen_letter_0006",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "Quellbach Steuerberatung GmbH\nBahnhofsplatz 9\n\nSchreiben vom 04.11.2025\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "Quellbach Steuerberatung GmbH",
+        "date": "04.11.2025"
+      }
+    },
+    {
+      "id": "frozen_letter_0007",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "S\u00fcdportal Consulting GmbH\nBahnhofsplatz 9\n\nSchreiben vom 06.03.2024\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "S\u00fcdportal Consulting GmbH",
+        "date": "06.03.2024"
+      }
+    },
+    {
+      "id": "frozen_letter_0008",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "Helios Werk AG\nParkallee 22\n\nSchreiben vom 05.04.2025\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "Helios Werk AG",
+        "date": "05.04.2025"
+      }
+    },
+    {
+      "id": "frozen_letter_0009",
+      "category": "letter",
+      "split": "frozen_eval",
+      "text": "Ostmark Facility KG\nBahnhofsplatz 9\n\nSchreiben vom 02.12.2024\n\nBitte senden Sie Unterlagen.",
+      "expected": {
+        "vendor": "Ostmark Facility KG",
+        "date": "02.12.2024"
+      }
+    }
+  ]
+}
