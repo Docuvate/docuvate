@@ -94,6 +94,8 @@
       "unavailable": "Zwei-Faktor-Authentifizierung ist derzeit nicht verfügbar."
     },
     "errors": {
+      "invalidCredentialsTitle": "E-Mail oder Passwort ist falsch.",
+      "invalidCredentialsDescription": "Prüfen Sie Ihre Eingaben. Nach mehreren Versuchen wird kurz gesperrt.",
       "invalidEmailOrPassword": "E-Mail oder Passwort ist falsch.",
       "invalidEmail": "Bitte eine gültige E-Mail eingeben.",
       "emailNotVerified": "Bitte bestätigen Sie Ihre E-Mail, bevor Sie sich anmelden.",

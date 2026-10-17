@@ -94,6 +94,8 @@
       "unavailable": "Two-factor authentication is not available right now."
     },
     "errors": {
+      "invalidCredentialsTitle": "Email or password is incorrect.",
+      "invalidCredentialsDescription": "Check your entries. After several attempts, sign-in is briefly locked.",
       "invalidEmailOrPassword": "Email or password is incorrect.",
       "invalidEmail": "Please enter a valid email address.",
       "emailNotVerified": "Please verify your email before signing in.",
