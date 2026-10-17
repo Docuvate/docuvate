@@ -37,8 +37,12 @@ def _max_query_cosine(passage: list[float]) -> float:
 
 @lru_cache(maxsize=1)
 def _query_vectors() -> tuple[list[float], ...]:
-    payload = json.loads(_ARTIFACT_PATH.read_text(encoding="utf-8"))
-    artifact = SenderLinePrototypeArtifact(**payload)
+    raw = json.loads(_ARTIFACT_PATH.read_text(encoding="utf-8"))
+    artifact: SenderLinePrototypeArtifact = {
+        "version": str(raw["version"]),
+        "encoder_id": str(raw["encoder_id"]),
+        "query_prototypes": [str(item) for item in raw["query_prototypes"]],
+    }
     vectors: list[list[float]] = []
     for text in artifact["query_prototypes"]:
         if text.startswith("query:"):
