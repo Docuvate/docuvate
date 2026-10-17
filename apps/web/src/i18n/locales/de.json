@@ -1722,5 +1722,100 @@
       "processingFailed": "Verarbeitung fehlgeschlagen",
       "authFailed": "Anmeldung fehlgeschlagen"
     }
+  },
+  "ui": {
+    "pagination": {
+      "range": "{{from}}-{{to}} von {{total}}",
+      "previousPage": "Vorherige Seite",
+      "nextPage": "Nächste Seite"
+    },
+    "table": {
+      "selectAll": "Alle auswählen",
+      "selectRow": "Zeile auswählen",
+      "title": "Titel",
+      "correspondent": "Korrespondent",
+      "labels": "Labels",
+      "date": "Datum",
+      "status": "Status"
+    },
+    "fieldValue": {
+      "confirmed": "Bestätigt",
+      "correct": "Korrigieren",
+      "moreActions": "Weitere Aktionen"
+    },
+    "suggestion": {
+      "accept": "Übernehmen",
+      "dismiss": "Ablehnen"
+    },
+    "documentTile": {
+      "select": "{{title}} auswählen",
+      "exclusionHint": "Wird für dieses Label nicht mehr vorgeschlagen"
+    },
+    "chat": {
+      "sources": "Quellen",
+      "abstainTitle": "Nicht genug Belege",
+      "uploadDocument": "Dokument hochladen",
+      "searchDocuments": "In Dokumenten suchen"
+    },
+    "searchField": {
+      "placeholder": "Suchen",
+      "shortcut": "⌘K"
+    },
+    "breadcrumb": {
+      "label": "Brotkrumen"
+    }
+  },
+  "designSystem": {
+    "showcase": {
+      "title": "Design system (Figma §4)",
+      "brand": "Brand",
+      "formField": "Form field",
+      "controls": "Controls",
+      "navigation": "Navigation & Suche",
+      "dataDisplay": "Data display",
+      "feedback": "Feedback",
+      "chat": "Chat",
+      "menu": "Menu",
+      "serverUrlLabel": "Server-URL",
+      "serverUrlHelp": "Adresse Ihrer Paperless-ngx-Instanz.",
+      "serverUrlValue": "https://paperless.home.lan",
+      "checkboxLabel": "Rechnung (42)",
+      "radioLabel": "Automatisch (empfohlen)",
+      "breadcrumbSettings": "Einstellungen",
+      "breadcrumbConnectors": "Verbindungen",
+      "tabDetails": "Details",
+      "tabLabels": "Labels",
+      "tabChat": "Chat",
+      "docTitle": "Rechnung Stadtwerke 09/2026",
+      "docMeta": "PDF · 2 Seiten",
+      "docCorrespondent": "Stadtwerke München",
+      "chipRechnung": "Rechnung",
+      "docDate": "12.09.2026",
+      "statusReady": "Bereit",
+      "suggestLabel": "Strom",
+      "suggestSource": "Rechnung Stadtwerke 09/2026",
+      "fieldName": "Fälligkeitsdatum",
+      "fieldValue": "30.09.2026",
+      "fieldSource": "Seite 1 · „Fällig am 30.09.2026“",
+      "tileTitle2026": "Bescheid 2026",
+      "tileMeta2026": "12.03.2026 · 94 %",
+      "tileTitle2025": "Bescheid 2025",
+      "tileMeta2025": "14.03.2025 · 92 %",
+      "bannerTitle": "16 Vorschläge warten auf Ihre Prüfung",
+      "bannerDescription": "Labels und Felder für 7 Dokumente.",
+      "bannerAction": "Vorschläge durchklicken",
+      "emptyTitle": "Noch keine Dokumente",
+      "emptyDescription": "Laden Sie PDFs oder Fotos hoch. Docuvate liest sie und schlägt Labels vor.",
+      "emptyUpload": "Dokumente hochladen",
+      "emptyConnect": "Verbindung einrichten",
+      "chatQuestion": "Was kostet die Hundesteuer?",
+      "chatAnswer": "Die Hundesteuer beträgt 108,00 € pro Jahr.",
+      "chatSource": "Hundesteuerbescheid 2026 · S. 1",
+      "menuRename": "Umbenennen",
+      "menuDelete": "Löschen",
+      "noteLabel": "Notiz",
+      "noteHelp": "Optional",
+      "noteValue": "Abschlag ab Oktober erhöht."
+    }
   }
 }
