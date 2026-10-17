@@ -1223,7 +1223,13 @@
     "renameAction": "Umbenennen",
     "moreDocuments_one": "+{{count}} weiteres Dokument",
     "moreDocuments_other": "+{{count}} weitere Dokumente",
-    "documentsAria": "Betroffene Dokumente"
+    "documentsAria": "Betroffene Dokumente",
+    "acceptSubset": "Für {{selected}} von {{total}} übernehmen",
+    "selectAllDocuments": "Alle auswählen",
+    "deselectAllDocuments": "Alle abwählen",
+    "exclusionHint": "Abgewählte Dokumente werden für dieses Label nicht erneut vorgeschlagen.",
+    "documentSelectAria": "Dokument „{{title}}“ für das neue Label auswählen",
+    "documentSimilarityPct": "{{pct}} % Ähnlichkeit"
   },
   "labelCustomFields": {
     "extractHint": "Felder werden extrahiert, sobald dieses Label am Dokument sitzt oder als Vorschlag die Konfidenz-Schwelle in den Einstellungen erreicht.",

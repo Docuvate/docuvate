@@ -7,6 +7,7 @@ import { ValidationError } from '../../../shared/domain/errors.js';
 import { normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import type {
   DocumentEmbeddingReference,
+  LabelClusterDocumentExclusion,
   LabelEmbeddingRepository,
   LabelRecommendationBlocklistEntry,
   LabelRecommendationBlocklistPattern,
@@ -182,6 +183,45 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
        ON CONFLICT (user_id, recommendation_key) DO NOTHING`,
       [userId, recommendationKey]
     );
+  }
+
+  async listClusterDocumentExclusions(userId: string): Promise<LabelClusterDocumentExclusion[]> {
+    const result = await this.pool.query(
+      `SELECT label_key, document_id
+       FROM label_recommendation_cluster_exclusions
+       WHERE user_id = $1`,
+      [userId]
+    );
+    return result.rows.map((raw) => {
+      const row = requireRecord(raw);
+      return {
+        labelKey: parseString(row.label_key),
+        documentId: parseString(row.document_id),
+      };
+    });
+  }
+
+  async addClusterDocumentExclusions(
+    userId: string,
+    labelKey: string,
+    documentIds: string[]
+  ): Promise<void> {
+    const key = labelKey.trim();
+    if (!key || documentIds.length === 0) {
+      return;
+    }
+    for (const documentId of documentIds) {
+      const trimmedId = documentId.trim();
+      if (!trimmedId) {
+        continue;
+      }
+      await this.pool.query(
+        `INSERT INTO label_recommendation_cluster_exclusions (user_id, label_key, document_id)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (user_id, label_key, document_id) DO NOTHING`,
+        [userId, key, trimmedId]
+      );
+    }
   }
 
   async listRecommendationBlocklist(userId: string): Promise<LabelRecommendationBlocklistEntry[]> {

@@ -695,6 +695,9 @@ export interface LabelRecommendationDocumentPreviewDto {
   title: string;
   filename: string;
   status?: DocumentStatus;
+  documentDate?: string | null;
+  /** Cosine similarity to the cluster centroid (0..1), when available. */
+  similarity?: number;
 }
 
 export interface LabelRecommendationDto {
@@ -797,6 +800,8 @@ export interface AcceptLabelRecommendationRequest {
   color?: string;
   /** When accepting embedding cluster “new label” recommendations. */
   documentIds?: string[];
+  /** Cluster documents to exclude from future suggestions for this label name. */
+  excludedDocumentIds?: string[];
 }
 
 export interface DismissLabelRecommendationRequest {

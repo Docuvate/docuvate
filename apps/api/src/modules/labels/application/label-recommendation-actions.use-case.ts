@@ -9,6 +9,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import { normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import {
+  DOCUMENT_REPOSITORY,
+  type DocumentRepository,
   LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
   TAXONOMY_REPOSITORY,
@@ -92,6 +94,7 @@ export class AcceptLabelRecommendationUseCase {
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     private readonly assignTag: AssignDocumentTagUseCase
   ) {}
 
@@ -126,7 +129,21 @@ export class AcceptLabelRecommendationUseCase {
         match: name,
       });
       const docIds = (body.documentIds ?? []).filter((d) => d.trim().length > 0);
-      if (id.startsWith('new:cluster:') && docIds.length > 0) {
+      const excludedIds = (body.excludedDocumentIds ?? []).filter((d) => d.trim().length > 0);
+      if (id.startsWith('new:cluster:')) {
+        if (docIds.length === 0) {
+          throw new ValidationError('At least one document must be selected');
+        }
+        await this.assertDocumentsOwnedByUser(userId, [...docIds, ...excludedIds]);
+        for (const documentId of docIds) {
+          await this.assignTag.execute(documentId, userId, tag.id, { learnFromEmbedding: true });
+        }
+        const labelKey = normalizeLabelKey(name);
+        if (labelKey && excludedIds.length > 0) {
+          await this.labelEmbeddings.addClusterDocumentExclusions(userId, labelKey, excludedIds);
+        }
+      } else if (docIds.length > 0) {
+        await this.assertDocumentsOwnedByUser(userId, docIds);
         for (const documentId of docIds) {
           await this.assignTag.execute(documentId, userId, tag.id, { learnFromEmbedding: true });
         }
@@ -166,6 +183,16 @@ export class AcceptLabelRecommendationUseCase {
     }
 
     throw new ValidationError('Unknown recommendation id');
+  }
+
+  private async assertDocumentsOwnedByUser(userId: string, documentIds: string[]): Promise<void> {
+    const unique = [...new Set(documentIds)];
+    for (const documentId of unique) {
+      const doc = await this.documents.findByIdForUser(documentId, userId);
+      if (!doc) {
+        throw new ValidationError('Document not found');
+      }
+    }
   }
 
   private async learnFromAssignAccept(

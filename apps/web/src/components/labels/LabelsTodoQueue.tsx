@@ -9,18 +9,30 @@ import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Chip } from '../ui/Chip';
+import { LabelRecommendationDocuments } from './LabelRecommendationDocuments';
 import { recommendationDocumentTitle } from './labelRecDocumentDisplay';
+import {
+  excludedDocumentIds,
+  initialSelectedDocumentIds,
+  selectedDocumentIds,
+  syncSelectedDocumentIds,
+} from './labelRecDocumentSelection';
+import { clusterAcceptButtonLabel, clusterAcceptDisabled } from './labelsTodoAcceptLabel';
 import {
   mergeLabelPairNames,
   recommendationLabelName,
   syncVisibleQueueIds,
-  todoAcceptActionKey,
   todoWhyLine,
 } from './labelsTodoPresentation';
 import {
   LabelSuggestionDismissActions,
   type LabelSuggestionDismissScope,
 } from './LabelSuggestionDismissActions';
+
+export interface LabelRecommendationAcceptOptions {
+  documentIds: string[];
+  excludedDocumentIds: string[];
+}
 
 interface Props {
   items: LabelRecommendationDto[];
@@ -29,7 +41,10 @@ interface Props {
   loading?: boolean;
   busyId: string | null;
   documentReviewPendingCount?: number;
-  onAccept: (item: LabelRecommendationDto) => void | Promise<void>;
+  onAccept: (
+    item: LabelRecommendationDto,
+    options?: LabelRecommendationAcceptOptions
+  ) => void | Promise<void>;
   onRename: (item: LabelRecommendationDto) => void;
   onDismiss: (
     item: LabelRecommendationDto,
@@ -50,13 +65,19 @@ interface TodoRowMainProps {
   item: LabelRecommendationDto;
   tagColorById: Record<string, string>;
   documentCountByTagId: Record<string, number>;
+  selectedDocumentIds: Set<string>;
+  onSelectedDocumentIdsChange: (next: Set<string>) => void;
 }
 
 function TodoRowMain(props: TodoRowMainProps) {
-  const { item, tagColorById, documentCountByTagId } = props;
+  const { item, tagColorById, documentCountByTagId, selectedDocumentIds, onSelectedDocumentIdsChange } =
+    props;
   const { t } = useTranslation();
   const reason = todoWhyLine(item, t, documentCountByTagId);
-  const primaryDoc = item.sampleDocuments?.[0];
+  const sampleDocuments = item.sampleDocuments ?? [];
+  const clusterDocuments = item.kind === 'new' ? sampleDocuments : [];
+  const showClusterPicker = clusterDocuments.length > 1;
+  const primaryDoc = sampleDocuments[0];
   const mergeNames = mergeLabelPairNames(item);
 
   if (item.kind === 'rename') {
@@ -81,15 +102,15 @@ function TodoRowMain(props: TodoRowMainProps) {
   }
 
   const docTitle =
-    primaryDoc != null ? (
+    !showClusterPicker && primaryDoc != null ? (
       <Link to={routes.document(primaryDoc.id)} className="labels-todo-doc-title">
         {recommendationDocumentTitle(primaryDoc)}
       </Link>
-    ) : (
+    ) : !showClusterPicker ? (
       <p className="labels-todo-doc-title labels-todo-doc-title-static">
         {mergeNames ? `${mergeNames.keep} / ${mergeNames.remove}` : recommendationLabelName(item)}
       </p>
-    );
+    ) : null;
 
   return (
     <>
@@ -126,12 +147,13 @@ function TodoRowMain(props: TodoRowMainProps) {
           <span className="labels-todo-suggestion-reason">{reason}</span>
         )}
       </div>
-      {primaryDoc && (item.sampleDocuments?.length ?? 0) > 1 ? (
-        <p className="muted labels-todo-more-docs">
-          {t('labelRecommendations.moreDocuments', {
-            count: (item.sampleDocuments?.length ?? 0) - 1,
-          })}
-        </p>
+      {showClusterPicker ? (
+        <LabelRecommendationDocuments
+          documents={clusterDocuments}
+          selectedIds={selectedDocumentIds}
+          onSelectedIdsChange={onSelectedDocumentIdsChange}
+          exclusionHint
+        />
       ) : null}
     </>
   );
@@ -141,10 +163,34 @@ export function LabelsTodoQueue(props: Props) {
   const { t } = useTranslation();
   const [visibleIds, setVisibleIds] = useState<string[]>(() => props.items.map((i) => i.id));
   const [exitingIds, setExitingIds] = useState<Set<string>>(() => new Set());
+  const [selectedByItemId, setSelectedByItemId] = useState<Map<string, Set<string>>>(() => new Map());
   const exitTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   useEffect(() => {
     setVisibleIds((prev) => syncVisibleQueueIds(prev, props.items));
+  }, [props.items]);
+
+  useEffect(() => {
+    setSelectedByItemId((prev) => {
+      const next = new Map(prev);
+      for (const item of props.items) {
+        if (item.kind !== 'new') {
+          continue;
+        }
+        const documents = item.sampleDocuments ?? [];
+        if (documents.length <= 1) {
+          continue;
+        }
+        const existing = next.get(item.id);
+        next.set(
+          item.id,
+          existing
+            ? syncSelectedDocumentIds(existing, documents)
+            : initialSelectedDocumentIds(documents)
+        );
+      }
+      return next;
+    });
   }, [props.items]);
 
   useEffect(() => {
@@ -172,7 +218,19 @@ export function LabelsTodoQueue(props: Props) {
   }, []);
 
   const wrapAccept = (item: LabelRecommendationDto) => {
-    void props.onAccept(item);
+    const documents = item.sampleDocuments ?? [];
+    const selected =
+      item.kind === 'new' && documents.length > 1
+        ? (selectedByItemId.get(item.id) ?? initialSelectedDocumentIds(documents))
+        : initialSelectedDocumentIds(documents);
+    const options: LabelRecommendationAcceptOptions | undefined =
+      item.kind === 'new' && documents.length > 0
+        ? {
+            documentIds: selectedDocumentIds(documents, selected),
+            excludedDocumentIds: excludedDocumentIds(documents, selected),
+          }
+        : undefined;
+    void props.onAccept(item, options);
     beginExit(item.id, () => undefined);
   };
 
@@ -222,49 +280,73 @@ export function LabelsTodoQueue(props: Props) {
     <Card className="label-rec-panel labels-todo-panel">
       <TodoHead />
       <ul className="suggest-list label-rec-suggest-list labels-todo-list">
-        {ordered.map((item) => (
-          <li
-            key={item.id}
-            id={`label-rec-${item.id}`}
-            className={`suggest-row label-rec-suggest-row labels-todo-row${
-              exitingIds.has(item.id) ? ' is-exiting' : ''
-            }`}
-          >
-            <div className="label-rec-suggest-main labels-todo-main">
-              <TodoRowMain
-                item={item}
-                tagColorById={props.tagColorById}
-                documentCountByTagId={props.documentCountByTagId}
-              />
-            </div>
-            <div className="suggest-actions labels-todo-actions">
-              {item.kind === 'rename' ? (
-                <Button
-                  type="button"
-                  variant="secondary"
+        {ordered.map((item) => {
+          const documents = item.sampleDocuments ?? [];
+          const selected =
+            item.kind === 'new' && documents.length > 1
+              ? (selectedByItemId.get(item.id) ?? initialSelectedDocumentIds(documents))
+              : new Set<string>();
+          const selectedCount = selected.size;
+          const totalCount = documents.length;
+          const acceptDisabled =
+            props.busyId === item.id ||
+            exitingIds.has(item.id) ||
+            clusterAcceptDisabled(item, selectedCount, totalCount);
+          const acceptVariant =
+            item.kind === 'new' && totalCount > 1 ? 'primary' : 'secondary';
+
+          return (
+            <li
+              key={item.id}
+              id={`label-rec-${item.id}`}
+              className={`suggest-row label-rec-suggest-row labels-todo-row${
+                exitingIds.has(item.id) ? ' is-exiting' : ''
+              }`}
+            >
+              <div className="label-rec-suggest-main labels-todo-main">
+                <TodoRowMain
+                  item={item}
+                  tagColorById={props.tagColorById}
+                  documentCountByTagId={props.documentCountByTagId}
+                  selectedDocumentIds={selected}
+                  onSelectedDocumentIdsChange={(next) => {
+                    setSelectedByItemId((prev) => {
+                      const map = new Map(prev);
+                      map.set(item.id, next);
+                      return map;
+                    });
+                  }}
+                />
+              </div>
+              <div className="suggest-actions labels-todo-actions">
+                {item.kind === 'rename' ? (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    disabled={acceptDisabled}
+                    onClick={() => { props.onRename(item); }}
+                  >
+                    {t('labelRecommendations.renameAction')}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant={acceptVariant}
+                    disabled={acceptDisabled}
+                    onClick={() => { wrapAccept(item); }}
+                  >
+                    {clusterAcceptButtonLabel(item, selectedCount, totalCount, t)}
+                  </Button>
+                )}
+                <LabelSuggestionDismissActions
+                  labelName={recommendationLabelName(item)}
                   disabled={props.busyId === item.id || exitingIds.has(item.id)}
-                  onClick={() => { props.onRename(item); }}
-                >
-                  {t('labelRecommendations.renameAction')}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  disabled={props.busyId === item.id || exitingIds.has(item.id)}
-                  onClick={() => { wrapAccept(item); }}
-                >
-                  {t(todoAcceptActionKey(item))}
-                </Button>
-              )}
-              <LabelSuggestionDismissActions
-                labelName={recommendationLabelName(item)}
-                disabled={props.busyId === item.id || exitingIds.has(item.id)}
-                onDismiss={(scope) => { wrapDismiss(item, scope); }}
-              />
-            </div>
-          </li>
-        ))}
+                  onDismiss={(scope) => { wrapDismiss(item, scope); }}
+                />
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </Card>
   );

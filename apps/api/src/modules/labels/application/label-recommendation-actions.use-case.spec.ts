@@ -39,11 +39,15 @@ describe('AcceptLabelRecommendationUseCase', () => {
       upsert: vi.fn().mockResolvedValue(undefined),
     };
     const taxonomy = {};
+    const documents = {
+      findByIdForUser: vi.fn().mockResolvedValue({ id: DOC }),
+    };
 
     const useCase = new AcceptLabelRecommendationUseCase(
       taxonomy as never,
       labelEmbeddings as never,
       prefs as never,
+      documents as never,
       assignTag as never
     );
 
@@ -71,18 +75,29 @@ describe('AcceptLabelRecommendationUseCase', () => {
       getForUser: vi.fn(),
       upsert: vi.fn(),
     };
+    const labelEmbeddingsWithExclusions = {
+      ...labelEmbeddings,
+      addClusterDocumentExclusions: vi.fn().mockResolvedValue(undefined),
+    };
+    const documents = {
+      findByIdForUser: vi.fn().mockImplementation((id: string) =>
+        Promise.resolve({ id })
+      ),
+    };
 
     const useCase = new AcceptLabelRecommendationUseCase(
       taxonomy as never,
-      labelEmbeddings as never,
+      labelEmbeddingsWithExclusions as never,
       prefs as never,
+      documents as never,
       assignTag as never
     );
 
     const result = await useCase.execute(USER, {
       recommendationId: 'new:cluster:cluster-label',
       proposedName: 'Cluster Label',
-      documentIds: [DOC_A, DOC_B],
+      documentIds: [DOC_A],
+      excludedDocumentIds: [DOC_B],
     });
 
     expect(result).toEqual({ tagId: createdTag.id, action: 'created' });
@@ -91,13 +106,15 @@ describe('AcceptLabelRecommendationUseCase', () => {
       matchingAlgorithm: 'any',
       match: 'Cluster Label',
     });
-    expect(assignTag.execute).toHaveBeenCalledTimes(2);
+    expect(assignTag.execute).toHaveBeenCalledTimes(1);
     expect(assignTag.execute).toHaveBeenCalledWith(DOC_A, USER, createdTag.id, {
       learnFromEmbedding: true,
     });
-    expect(assignTag.execute).toHaveBeenCalledWith(DOC_B, USER, createdTag.id, {
-      learnFromEmbedding: true,
-    });
+    expect(labelEmbeddingsWithExclusions.addClusterDocumentExclusions).toHaveBeenCalledWith(
+      USER,
+      'cluster label',
+      [DOC_B]
+    );
     expect(labelEmbeddings.dismissRecommendation).toHaveBeenCalledWith(
       USER,
       'new:cluster:cluster-label'

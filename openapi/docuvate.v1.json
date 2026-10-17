@@ -12023,6 +12023,13 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          "excludedDocumentIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
           }
         }
       },

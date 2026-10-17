@@ -6,7 +6,7 @@ import type {
 } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { namesAreNearDuplicate } from '../../../shared/domain/label-name-similarity.js';
+import { namesAreNearDuplicate, normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import {
   DOCUMENT_REPOSITORY,
   type DocumentRepository,
@@ -27,11 +27,18 @@ import {
   suggestEmbeddingClusterNewLabels,
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
+import { OPEN_SET_MIN_CLUSTER_SIZE } from '../domain/label-open-set-discovery.js';
+import {
+  buildExcludedDocumentsByLabelKey,
+  filterClusterDocumentIds,
+} from '../domain/label-recommendation-cluster-exclusions.js';
+import { clusterDocumentSimilarities } from '../domain/label-recommendation-cluster-similarity.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 
 function enrichWithSampleDocuments(
   items: LabelRecommendationDto[],
-  docs: DocumentEntity[]
+  docs: DocumentEntity[],
+  embeddingByDocumentId: ReadonlyMap<string, number[]>
 ): LabelRecommendationDto[] {
   const byId = new Map(docs.map((doc) => [doc.id, doc]));
   return items.map((item) => {
@@ -39,17 +46,26 @@ function enrichWithSampleDocuments(
     if (ids.length === 0) {
       return item;
     }
+    const similarities =
+      item.kind === 'new'
+        ? clusterDocumentSimilarities(ids, embeddingByDocumentId)
+        : new Map<string, number>();
     const sampleDocuments: LabelRecommendationDocumentPreviewDto[] = [];
     for (const id of ids) {
       const doc = byId.get(id);
       if (!doc) {
         continue;
       }
+      const similarity = similarities.get(id);
       sampleDocuments.push({
         id: doc.id,
         title: doc.title,
         filename: doc.filename,
         status: doc.status,
+        documentDate: doc.documentDate
+          ? doc.documentDate.toISOString().slice(0, 10)
+          : null,
+        similarity,
       });
     }
     return sampleDocuments.length > 0 ? { ...item, sampleDocuments } : item;
@@ -70,17 +86,31 @@ export class GetLabelRecommendationsUseCase {
   ) {}
 
   async execute(userId: string): Promise<LabelRecommendationDto[]> {
-    const [tags, docs, centroids, dismissed, blocklist, blockPatterns, embeddingRows, preferences] =
-      await Promise.all([
-        this.taxonomy.listTags(userId),
-        this.documents.listForUser(userId, { status: 'ready' }),
-        this.labelEmbeddings.getTagCentroids(userId),
-        this.labelEmbeddings.listDismissedRecommendationKeys(userId),
-        this.labelEmbeddings.listRecommendationBlocklist(userId),
-        this.labelEmbeddings.listRecommendationBlocklistPatterns(userId),
-        this.labelEmbeddings.listDocumentEmbeddingsForUser(userId),
-        this.prefs.getForUser(userId),
-      ]);
+    const [
+      tags,
+      docs,
+      centroids,
+      dismissed,
+      blocklist,
+      blockPatterns,
+      embeddingRows,
+      preferences,
+      clusterExclusions,
+    ] = await Promise.all([
+      this.taxonomy.listTags(userId),
+      this.documents.listForUser(userId, { status: 'ready' }),
+      this.labelEmbeddings.getTagCentroids(userId),
+      this.labelEmbeddings.listDismissedRecommendationKeys(userId),
+      this.labelEmbeddings.listRecommendationBlocklist(userId),
+      this.labelEmbeddings.listRecommendationBlocklistPatterns(userId),
+      this.labelEmbeddings.listDocumentEmbeddingsForUser(userId),
+      this.prefs.getForUser(userId),
+      this.labelEmbeddings.listClusterDocumentExclusions(userId),
+    ]);
+    const excludedByLabelKey = buildExcludedDocumentsByLabelKey(clusterExclusions);
+    const embeddingByDocumentId = new Map(
+      embeddingRows.map((row) => [row.documentId, row.embedding] as const)
+    );
     const dismissedKeys = new Set(dismissed);
     const blockPhrases = blocklist.map((b) => b.phrase);
     const patternStrings = blockPatterns.map((p) => p.pattern);
@@ -198,7 +228,16 @@ export class GetLabelRecommendationsUseCase {
     const clusterDocIds = new Set(clusterNew.flatMap((c) => c.documentIds));
 
     for (const cluster of clusterNew) {
-      if (assignDocIds.has(cluster.documentIds[0] ?? '')) {
+      const labelKey = normalizeLabelKey(cluster.proposedName);
+      const documentIds = filterClusterDocumentIds(
+        cluster.documentIds,
+        labelKey,
+        excludedByLabelKey
+      );
+      if (documentIds.length < OPEN_SET_MIN_CLUSTER_SIZE) {
+        continue;
+      }
+      if (assignDocIds.has(documentIds[0] ?? '')) {
         continue;
       }
       if (labelNameConflictsExisting(cluster.proposedName, existingTagNames)) {
@@ -212,7 +251,7 @@ export class GetLabelRecommendationsUseCase {
         similarity: cluster.similarity,
         source: 'embedding',
         reason: cluster.reason,
-        sampleDocumentIds: cluster.documentIds,
+        sampleDocumentIds: documentIds,
       });
     }
 
@@ -309,6 +348,6 @@ export class GetLabelRecommendationsUseCase {
     );
 
     const sorted = dedupedNew.sort((a, b) => b.score - a.score).slice(0, 8);
-    return enrichWithSampleDocuments(sorted, docs);
+    return enrichWithSampleDocuments(sorted, docs, embeddingByDocumentId);
   }
 }

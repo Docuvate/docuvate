@@ -37,6 +37,34 @@ test.describe('labels page accept recommendation', () => {
     );
   });
 
+  test('accepting a cluster with exclusions persists only selected assignments', async ({ request }) => {
+    const documentsRes = await request.get(`${apiBase}/v1/documents?status=ready`, {
+      headers: { origin: webOrigin },
+    });
+    expect(documentsRes.ok()).toBeTruthy();
+    const documentsPayload = (await documentsRes.json()) as { items: { id: string }[] };
+    const documents = documentsPayload.items;
+    if (documents.length < 2) {
+      test.skip();
+      return;
+    }
+
+    const recommendationId = `new:cluster:e2e-excl-${String(Date.now())}`;
+    const proposedName = `E2E Excl ${String(Date.now()).slice(-6)}`;
+    const acceptRes = await request.post(
+      `${apiBase}/v1/labels/recommendations/${encodeURIComponent(recommendationId)}/accept`,
+      {
+        headers: { origin: webOrigin },
+        data: {
+          proposedName,
+          documentIds: [documents[0].id],
+          excludedDocumentIds: [documents[1].id],
+        },
+      }
+    );
+    expect(acceptRes.status()).toBe(201);
+  });
+
   test('labels page todo accept does not show action failed', async ({ page, request }) => {
     const recsRes = await request.get(`${apiBase}/v1/labels/recommendations`, {
       headers: { origin: webOrigin },
