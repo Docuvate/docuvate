@@ -13,7 +13,7 @@ Research branch: `cursor/ml-pipeline-v010-2cc2`. Builds on extraction baseline (
 | Central encoder | `intfloat/multilingual-e5-small` ONNX int8 @ `614241f622f53c4eeff9890bdc4f31cfecc418b3` (MIT) — keep | No change |
 | Labels | TF-IDF + E5 + LR hybrid + open-set clustering — keep | No change |
 | KV / fields | **GLiNER2-base** best measured zero-shot CPU baseline (F1 ~0.42); **layout KV head** and **DSRE** far below | Do **not** ship DSRE as extractor; defer GLiNER until gating + spans + positions; fix eval protocol only in research |
-| GLiNER protocols | Legacy DSRE episode-level F1 (~0.17) **not comparable** to document-level F1 (~0.42) | **Unified protocol** in `lib/unified_gliner_protocol.py` |
+| GLiNER protocols | Earlier DSRE episode-level F1 (~0.17) **not comparable** to document-level F1 (~0.42) | **Unified protocol** in `lib/unified_gliner_protocol.py` |
 | GLiNER2.5 | Wiring fixed (`batch_extract_entities` + spans/confidence). **multi-v1** beats base on SROIE F1 (0.50 vs 0.42); CORD still below base | No product PR; multilingual candidate only after layout offsets + calibration gates |
 | Retrieval (MIRACL de dev) | **E5 dense alone** beats BM25 proxy and BM25+E5 RRF on nDCG@10 and source@1; logistic reranker on RRF candidates recovers most of E5 nDCG | Keep prod hybrid; do **not** replace dense with RRF-only; optional tiny reranker only if validated on tenant data |
 | Chat (synthetic DE fixtures) | **Qwen3.5-4B Q4** (GGUF) higher faithfulness (0.60 vs 0.34) and ~3× lower latency than Qwen3-4B; Qwen3 over-abstains (94%) | Verify on maintainer Mac + real eval set; Qwen3.5 exists on HF as community GGUF (Apache-2.0 base) |
@@ -121,13 +121,13 @@ Artifacts: `results/unified_gliner2_base.json` (matches `extraction_baseline/res
 | Docuvate layout KV | 0.002 | 0.000 | Role/link thresholds abstain on unseen templates |
 | E5 token-span baseline | 0.077 | 0.051 | Ablation only |
 | DSRE relational | 0.191 | 0.062 | Episode-level; below GLiNER |
-| DSRE legacy GLiNER block | 0.346 | 0.169 | **Wrong protocol** — see §2.3 |
+| DSRE episode-level GLiNER block | 0.346 | 0.169 | **Wrong protocol** — see §2.3 |
 
 Peak RSS GLiNER loaded: ~2.2 GiB (`latency_rss.json`); unified full run peak ~11.6 GiB on this VM (includes HF datasets + torch).
 
 ### 2.3 GLiNER protocol reconciliation (resolved in research)
 
-Legacy DSRE reported F1 ~0.17 / ~0.35 and latency ~2–3 s/doc vs ~0.42 F1 and ~70–140 ms in extraction baseline.
+Earlier DSRE tooling reported F1 ~0.17 / ~0.35 and latency ~2–3 s/doc vs ~0.42 F1 and ~70–140 ms in extraction baseline.
 
 **Root causes** (see `results/gliner_protocol_reconciliation.json`):
 
@@ -137,7 +137,7 @@ Legacy DSRE reported F1 ~0.17 / ~0.35 and latency ~2–3 s/doc vs ~0.42 F1 and ~
 
 **Canonical protocol:** `research/ml_pipeline_v010/lib/unified_gliner_protocol.py` — all v0.1.0 comparisons must use this (or `extraction_baseline/scripts/run_benchmark.py`, which is equivalent for GLiNER2-base).
 
-DSRE `gliner_eval` retains legacy behavior but tags `"protocol": "legacy_dsre_episode_level_npz_text"` for audit.
+DSRE `gliner_eval` retains episode-level NPZ text behavior but tags `"protocol": "dsre_episode_level_npz_text"` for audit.
 
 ### 2.4 GLiNER2.5 — wiring fix + full public test (Round 2)
 

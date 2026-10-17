@@ -15,7 +15,7 @@ Research-only benchmark under `research/extraction_baseline/`. No product code c
 | API adapter | `apps/api/src/modules/labels/infrastructure/http-embedding.adapter.ts` | `EmbeddingPort` → worker `/embed`, batch 32 |
 | Domain port | `apps/api/src/shared/domain/ports.ts` | `EmbeddingPort`, `LabelEmbeddingRepository`, `DocumentEmbeddingReference` |
 
-Legacy name `fastembed_model.py` still wraps ONNX (`embed_passages` / `embed_query`).
+Historical name `fastembed_model.py` still wraps ONNX (`embed_passages` / `embed_query`).
 
 ### 1.2 OCR / layout IR
 
@@ -44,8 +44,8 @@ Label model is **unchanged** by this research branch.
 
 | Table | Purpose |
 | --- | --- |
-| `documents` | Core row; `extracted_text`, `extracted_fields` (JSONB legacy path) |
-| `document_embeddings` | Legacy whole-document JSONB embedding (`model`, `embedding`) |
+| `documents` | Core row; `extracted_text`, `extracted_fields` (JSONB storage path) |
+| `document_embeddings` | Superseded whole-document JSONB embedding (`model`, `embedding`) |
 | `document_representation` / `document_representation_unit` | Central encoder id/revision, per-unit int8 vectors (`document-representation-up.sql`) |
 | `document_field_values` | Normalized field index for search (3NF migration) |
 | `document_tag_suggestions` | Label suggestions (`source`: rule \| embedding \| embedding_density, `confidence`) |

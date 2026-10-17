@@ -1,6 +1,6 @@
 {
   "benchmark_kind": "synthetic_german_chat_extractive_fixtures",
-  "fixture": "/workspace/bench/model_gates/fixtures/chat_extractive_cases.json",
+  "fixture": "bench/model_gates/fixtures/chat_extractive_cases.json",
   "provenance": "Seeded synthetic German business documents (Docuvate CE, licence-clean).",
   "models": {
     "qwen3-4b-instruct": {

@@ -14,7 +14,7 @@ export PYTHONPATH=apps/worker/src:research/extraction_baseline/scripts:research/
 # Canonical GLiNER2-base eval (original OCR, document-level F1)
 python3 research/ml_pipeline_v010/scripts/run_unified_field_benchmark.py
 
-# Explain legacy DSRE vs extraction_baseline GLiNER discrepancies
+# Explain earlier DSRE vs extraction_baseline GLiNER discrepancies
 python3 research/ml_pipeline_v010/scripts/reconcile_gliner_protocols.py
 
 # Optional GLiNER2.5 CPU probe (subset; see REPORT for API caveats)

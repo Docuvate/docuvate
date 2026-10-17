@@ -75,7 +75,7 @@
   },
   "label_hybrid_proxy": {
     "benchmark_kind": "synthetic_label_hybrid_proxy",
-    "fixture": "/workspace/bench/model_gates/fixtures/classification_texts.json",
+    "fixture": "bench/model_gates/fixtures/classification_texts.json",
     "note": "TF-IDF+E5+LR proxy; real hybrid uses same weights in label-hybrid-features.ts",
     "full_retrain_curve": [
       {

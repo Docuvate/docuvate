@@ -3,11 +3,11 @@
     "encoder_id": "intfloat/multilingual-e5-small",
     "encoder_hf_revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
     "onnx_file": "model_qint8_avx512_vnni.onnx",
-    "onnx_path": "/home/ubuntu/.cache/docuvate/multilingual-e5-small-onnx/models--intfloat--multilingual-e5-small/snapshots/614241f622f53c4eeff9890bdc4f31cfecc418b3/onnx/model_qint8_avx512_vnni.onnx",
+    "onnx_path": "research/extraction_baseline/.cache/huggingface/models--intfloat--multilingual-e5-small/snapshots/614241f622f53c4eeff9890bdc4f31cfecc418b3/onnx/model_qint8_avx512_vnni.onnx",
     "intra_op_threads": 4,
     "backend": "onnxruntime"
   },
-  "onnx_path": "/home/ubuntu/.cache/docuvate/multilingual-e5-small-onnx/models--intfloat--multilingual-e5-small/snapshots/614241f622f53c4eeff9890bdc4f31cfecc418b3/onnx/model_qint8_avx512_vnni.onnx",
+  "onnx_path": "research/extraction_baseline/.cache/huggingface/models--intfloat--multilingual-e5-small/snapshots/614241f622f53c4eeff9890bdc4f31cfecc418b3/onnx/model_qint8_avx512_vnni.onnx",
   "inputs": [
     [
       "input_ids",

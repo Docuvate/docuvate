@@ -36,7 +36,7 @@ def peak_rss_mb() -> float:
 
 
 def gliner_eval(data: DsreNpz, schema_keys: list[str]) -> dict[str, object]:
-    """Legacy episode-level GLiNER eval (deprecated — use ml_pipeline_v010 unified protocol)."""
+    """Earlier DSRE episode-level GLiNER eval (superseded — use ml_pipeline_v010 unified protocol)."""
     from gliner2 import GLiNER2
 
     t_load = time.perf_counter()
@@ -99,7 +99,7 @@ def gliner_eval(data: DsreNpz, schema_keys: list[str]) -> dict[str, object]:
         "model_load_seconds": load_s,
         "total_infer_seconds": infer_s,
         "batch_size": 1,
-        "protocol": "legacy_dsre_episode_level_npz_text",
+        "protocol": "dsre_episode_level_npz_text",
     }
 
 

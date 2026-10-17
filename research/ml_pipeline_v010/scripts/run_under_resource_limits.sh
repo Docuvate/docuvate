@@ -29,6 +29,19 @@ from pathlib import Path
 name, cpus, vmem_kb, threads, root = sys.argv[1:6]
 root = Path(root)
 log = root / "results" / f"time_{name}.txt"
+
+
+def sanitize_paths(text: str) -> str:
+    import re
+
+    text = text.replace("/workspace/", "${REPO_ROOT}/")
+    text = re.sub(
+        r"/home/[^/]+/\.local/lib/python3\.12/site-packages",
+        "${PYTHON_SITE_PACKAGES}",
+        text,
+    )
+    text = re.sub(r"/home/[^/]+/\.cache/", "${HOME}/.cache/", text)
+    return text
 cmd = f"""
 ulimit -v {vmem_kb} || true
 export OMP_NUM_THREADS={threads} DOCUVATE_ENCODER_INTRA_OP_THREADS={threads}
@@ -43,7 +56,7 @@ lines = [
     f"wall_seconds={wall:.3f}",
     f"maxrss_kb_children={ru.ru_maxrss}",
     f"stdout_tail={proc.stdout[-2000:]!r}",
-    f"stderr_tail={proc.stderr[-2000:]!r}",
+    f"stderr_tail={sanitize_paths(proc.stderr[-2000:])!r}",
 ]
 log.write_text("\n".join(lines) + "\n", encoding="utf-8")
 print("\n".join(lines[:3]))
@@ -62,9 +75,22 @@ payload = {
     "note": "Failures under tight ulimit are informative OOM/kills; not identical to cgroup mem limits.",
     "profiles": {},
 }
+def sanitize_paths(text: str) -> str:
+    import re
+
+    text = text.replace("/workspace/", "${REPO_ROOT}/")
+    text = re.sub(
+        r"/home/[^/]+/\.local/lib/python3\.12/site-packages",
+        "${PYTHON_SITE_PACKAGES}",
+        text,
+    )
+    text = re.sub(r"/home/[^/]+/\.cache/", "${HOME}/.cache/", text)
+    return text
+
 for name in ("2cpu_4g", "4cpu_8g"):
     p = root / "results" / f"time_{name}.txt"
-    payload["profiles"][name] = p.read_text(encoding="utf-8") if p.exists() else ""
+    raw = p.read_text(encoding="utf-8") if p.exists() else ""
+    payload["profiles"][name] = sanitize_paths(raw)
 out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 print(out.read_text())
 PY

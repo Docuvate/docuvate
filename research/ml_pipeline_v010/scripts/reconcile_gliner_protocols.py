@@ -54,7 +54,7 @@ def main() -> int:
     out = {
         "summary": (
             "Use unified_gliner_protocol (original OCR, document-level micro-F1, one batch_extract per doc) "
-            "for all v0.1.0 comparisons. Legacy DSRE GLiNER numbers are episode-level and not comparable to F1≈0.42."
+            "for all v0.1.0 comparisons. Earlier DSRE GLiNER numbers are episode-level and not comparable to F1≈0.42."
         ),
         "rows": rows,
     }
