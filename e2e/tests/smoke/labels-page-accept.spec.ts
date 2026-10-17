@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
 
+import {
+  parseAcceptLabelRecommendationBody,
+  parseDocumentListBody,
+  parseLabelRecommendationListBody,
+} from '../../helpers/json-body';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -13,8 +18,7 @@ test.describe('labels page accept recommendation', () => {
       headers: { origin: webOrigin },
     });
     expect(documentsRes.ok()).toBeTruthy();
-    const documentsPayload = (await documentsRes.json()) as { items: { id: string }[] };
-    const documents = documentsPayload.items;
+    const documents = parseDocumentListBody(await documentsRes.json());
     expect(documents.length).toBeGreaterThan(0);
 
     const recommendationId = `new:cluster:e2e-${String(Date.now())}`;
@@ -30,7 +34,7 @@ test.describe('labels page accept recommendation', () => {
       }
     );
     expect(acceptRes.status()).toBe(201);
-    const body = (await acceptRes.json()) as { tagId: string; action: string };
+    const body = parseAcceptLabelRecommendationBody(await acceptRes.json());
     expect(body.action).toBe('created');
     expect(body.tagId).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -42,8 +46,7 @@ test.describe('labels page accept recommendation', () => {
       headers: { origin: webOrigin },
     });
     expect(documentsRes.ok()).toBeTruthy();
-    const documentsPayload = (await documentsRes.json()) as { items: { id: string }[] };
-    const documents = documentsPayload.items;
+    const documents = parseDocumentListBody(await documentsRes.json());
     if (documents.length < 2) {
       test.skip();
       return;
@@ -70,8 +73,8 @@ test.describe('labels page accept recommendation', () => {
       headers: { origin: webOrigin },
     });
     expect(recsRes.ok()).toBeTruthy();
-    const payload = (await recsRes.json()) as { items: { kind: string }[] };
-    if (!payload.items.some((item) => item.kind === 'new')) {
+    const recommendations = parseLabelRecommendationListBody(await recsRes.json());
+    if (!recommendations.some((item) => item.kind === 'new')) {
       test.skip();
       return;
     }
