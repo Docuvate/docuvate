@@ -45,7 +45,7 @@ Installation-wide **defaults** (when a tenant has no override row) are set in `.
 | `DOCUVATE_FEATURE_EXACT_ANSWERS` | Structured fact index and exact answers in document chat |
 | `DOCUVATE_FEATURE_ANSWER_ABSTENTION` | Abstention when fact match confidence is too low (with `exactAnswers`) |
 | `DOCUVATE_FEATURE_SMART_DUPLICATES` | Template-subtracted duplicate hints (UI only) |
-| `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Learned value types instead of regex field heuristics (**default on** when unset — see [ML feature flags](./ml-feature-flags.md)) |
+| `DOCUVATE_FEATURE_LEARNED_VALUE_TYPES` | Learned value types for global field suggestions; `false` abstains (**default on** when unset — see [ML feature flags](./ml-feature-flags.md)) |
 | `DOCUVATE_FEATURE_LAYOUT_KEY_VALUE_ROLES` | Experimental layout key/value role head |
 | `DOCUVATE_FEATURE_LOCAL_CHAT_MODEL` | Local Ollama LLM path when `chat-local` profile is enabled |
 

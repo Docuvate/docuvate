@@ -7,21 +7,18 @@ from docuvate_worker.domain.models import ExtractedField
 from docuvate_worker.infrastructure.extractors.field_extraction_context import (
     learned_value_types_enabled,
 )
-from docuvate_worker.infrastructure.extractors.heuristic_fields_regex import (
-    regex_heuristic_field_suggestions,
-)
 from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (
     learned_field_suggestions,
 )
 
 
 def heuristic_field_suggestions(text: str) -> list[ExtractedField]:
-    """Global field hints; learned value types by default, regex heuristics when flag is off."""
-    if learned_value_types_enabled():
-        return learned_field_suggestions(text)
-    return regex_heuristic_field_suggestions(text)
+    """Global field hints from learned value-type models; abstains when the feature is off."""
+    if not learned_value_types_enabled():
+        return []
+    return learned_field_suggestions(text)
 
 
 def heuristic_fields(text: str) -> list[ExtractedField]:
-    """Backward-compatible alias; heuristics are suggestions only."""
+    """Backward-compatible alias; suggestions only (never overwrites confirmed values upstream)."""
     return heuristic_field_suggestions(text)
