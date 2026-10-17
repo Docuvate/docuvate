@@ -1,0 +1,129 @@
+/**
+ * Layout foundations (12-column grid, page margins). Breakpoints align with App shell:
+ * mobile < 768px, tablet 768–1279px, desktop ≥ 1280px.
+ */
+
+.dv-page-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--dv-grid-mobile-columns, 4), minmax(0, 1fr));
+  column-gap: var(--dv-grid-mobile-gutter);
+  row-gap: var(--dv-grid-mobile-gutter);
+}
+
+.dv-page-inset-x {
+  padding-inline: var(--dv-grid-mobile-margin);
+}
+
+@media (min-width: 768px) {
+  .dv-page-grid {
+    grid-template-columns: repeat(var(--dv-grid-tablet-columns, 12), minmax(0, 1fr));
+    column-gap: var(--dv-grid-tablet-gutter);
+    row-gap: var(--dv-grid-tablet-gutter);
+  }
+
+  .dv-page-inset-x {
+    padding-inline: var(--dv-grid-tablet-margin);
+  }
+}
+
+@media (min-width: 1280px) {
+  .dv-page-grid {
+    column-gap: var(--dv-grid-desktop-gutter);
+    row-gap: var(--dv-grid-desktop-gutter);
+  }
+
+  .dv-page-inset-x {
+    padding-inline: var(--dv-grid-desktop-margin);
+  }
+}
+
+.dv-span-mobile-1 {
+  grid-column: span 1;
+}
+.dv-span-mobile-2 {
+  grid-column: span 2;
+}
+.dv-span-mobile-3 {
+  grid-column: span 3;
+}
+.dv-span-mobile-4 {
+  grid-column: span 4;
+}
+
+@media (min-width: 768px) {
+  .dv-span-tablet-1 {
+    grid-column: span 1;
+  }
+  .dv-span-tablet-2 {
+    grid-column: span 2;
+  }
+  .dv-span-tablet-3 {
+    grid-column: span 3;
+  }
+  .dv-span-tablet-4 {
+    grid-column: span 4;
+  }
+  .dv-span-tablet-5 {
+    grid-column: span 5;
+  }
+  .dv-span-tablet-6 {
+    grid-column: span 6;
+  }
+  .dv-span-tablet-7 {
+    grid-column: span 7;
+  }
+  .dv-span-tablet-8 {
+    grid-column: span 8;
+  }
+  .dv-span-tablet-9 {
+    grid-column: span 9;
+  }
+  .dv-span-tablet-10 {
+    grid-column: span 10;
+  }
+  .dv-span-tablet-11 {
+    grid-column: span 11;
+  }
+  .dv-span-tablet-12 {
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1280px) {
+  .dv-span-desktop-1 {
+    grid-column: span 1;
+  }
+  .dv-span-desktop-2 {
+    grid-column: span 2;
+  }
+  .dv-span-desktop-3 {
+    grid-column: span 3;
+  }
+  .dv-span-desktop-4 {
+    grid-column: span 4;
+  }
+  .dv-span-desktop-5 {
+    grid-column: span 5;
+  }
+  .dv-span-desktop-6 {
+    grid-column: span 6;
+  }
+  .dv-span-desktop-7 {
+    grid-column: span 7;
+  }
+  .dv-span-desktop-8 {
+    grid-column: span 8;
+  }
+  .dv-span-desktop-9 {
+    grid-column: span 9;
+  }
+  .dv-span-desktop-10 {
+    grid-column: span 10;
+  }
+  .dv-span-desktop-11 {
+    grid-column: span 11;
+  }
+  .dv-span-desktop-12 {
+    grid-column: span 12;
+  }
+}

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 
 import { chipColorStyle } from '../../lib/chipColorStyle';
 
-export type ChipVariant = 'assigned' | 'suggest' | 'inbox' | 'outline';
+export type ChipVariant = 'assigned' | 'suggest' | 'inbox' | 'outline' | 'new';
 
 export interface ChipProps {
   label: string;

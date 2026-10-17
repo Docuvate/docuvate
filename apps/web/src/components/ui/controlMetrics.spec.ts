@@ -14,20 +14,23 @@ import {
   ICON_GLYPH_PX,
 } from './controlMetrics';
 
-const componentsCss = readFileSync(
-  join(dirname(fileURLToPath(import.meta.url)), 'components.css'),
+const tokensCss = readFileSync(
+  join(dirname(fileURLToPath(import.meta.url)), '../../../../../packages/tokens/dist/css/tokens.css'),
   'utf8'
 );
 
 describe('controlMetrics', () => {
-  it('matches components.css custom properties', () => {
-    expect(componentsCss).toContain(`--dv-control-height: ${String(CONTROL_HEIGHT_PX)}px`);
-    expect(componentsCss).toContain(`--dv-icon-btn-sm: ${String(ICON_BUTTON_SM_PX)}px`);
-    expect(componentsCss).toContain(`--dv-icon-btn-md: ${String(ICON_BUTTON_MD_PX)}px`);
+  it('exposes control dimensions via design tokens', () => {
+    expect(tokensCss).toContain('--dv-control-height: 2.5rem');
+    expect(tokensCss).toContain('--dv-control-icon-btn-sm: 1.75rem');
+    expect(tokensCss).toContain('--dv-control-icon-btn-md: 2.25rem');
   });
 
   it('documents geometry tolerance for browser checks', () => {
     expect(GEOMETRY_TOLERANCE_PX).toBe(1);
+    expect(CONTROL_HEIGHT_PX).toBe(40);
+    expect(ICON_BUTTON_SM_PX).toBe(28);
+    expect(ICON_BUTTON_MD_PX).toBe(36);
     expect(ICON_GLYPH_PX).toBe(16);
   });
 });
