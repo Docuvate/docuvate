@@ -21,18 +21,18 @@ import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
 import { type LabelHybridDocumentRow, trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
 import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
-import {
-  MIN_LABEL_SUPPORT_FOR_MERGE,
-  suggestAssignRecommendations,
-  suggestEmbeddingClusterNewLabels,
-  suggestEmbeddingMergeRecommendations,
-} from '../domain/label-recommendation-scoring.js';
 import { OPEN_SET_MIN_CLUSTER_SIZE } from '../domain/label-open-set-discovery.js';
 import {
   buildExcludedDocumentsByLabelKey,
   filterClusterDocumentIds,
 } from '../domain/label-recommendation-cluster-exclusions.js';
 import { clusterDocumentSimilarities } from '../domain/label-recommendation-cluster-similarity.js';
+import {
+  MIN_LABEL_SUPPORT_FOR_MERGE,
+  suggestAssignRecommendations,
+  suggestEmbeddingClusterNewLabels,
+  suggestEmbeddingMergeRecommendations,
+} from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 
 function enrichWithSampleDocuments(
