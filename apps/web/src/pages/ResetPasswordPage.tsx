@@ -1,12 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { AuthScreen } from '../components/auth/AuthScreen';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
 import { Spinner } from '../components/ui/Spinner';
 import { authClient } from '../lib/auth-client';
@@ -25,10 +25,13 @@ export function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = useMemo(() => searchParams.get('token') ?? '', [searchParams]);
   const linkError = useMemo(() => searchParams.get('error'), [searchParams]);
+  const passwordId = useId();
+  const confirmId = useId();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [confirmMismatch, setConfirmMismatch] = useState(false);
   const [loading, setLoading] = useState(false);
   const [tokenGate, setTokenGate] = useState<TokenGateState>(() =>
     !token || linkError === 'INVALID_TOKEN' ? { kind: 'invalid' } : { kind: 'checking' }
@@ -60,9 +63,11 @@ export function ResetPasswordPage() {
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     if (password !== confirmPassword) {
+      setConfirmMismatch(true);
       setError(t('auth.resetPasswordMismatch'));
       return;
     }
+    setConfirmMismatch(false);
     setLoading(true);
     setError(null);
     try {
@@ -94,72 +99,96 @@ export function ResetPasswordPage() {
   const showChecking = tokenGate.kind === 'checking';
   const showForm = tokenGate.kind === 'valid';
 
-  return (
-    <div className="auth-layout">
-      <div className="auth-locale">
-        <LocaleSwitcher />
-      </div>
-      <Card className={`auth-card${showChecking ? ' auth-card-reset-pending' : ''}`}>
-        <h1>{t('auth.resetPasswordTitle')}</h1>
-        {showChecking ? (
-          <div className="auth-card-status" role="status" aria-live="polite">
-            <Spinner size="sm" label={t('auth.resetPasswordVerifying')} />
-            <span>{t('auth.resetPasswordVerifying')}</span>
-          </div>
-        ) : null}
-        {showInvalidLink ? (
-          <div className="auth-reset-invalid stack">
-            <p className="error" role="alert" aria-live="assertive">
-              {t('auth.resetPasswordInvalidLink')}
-            </p>
-            <Link className="btn btn-primary" to={routes.forgotPassword}>
-              {t('auth.requestNewResetLink')}
-            </Link>
-            <p className="muted auth-reset-secondary-link">
-              <Link to={routes.login}>{t('auth.backToSignIn')}</Link>
-            </p>
-          </div>
-        ) : null}
-        {showForm ? (
-          <form onSubmit={(e) => void onSubmit(e)} className="stack">
-            <label>
-              {t('auth.newPassword')}
-              <Input
-                type="password"
-                autoComplete="new-password"
-                minLength={MIN_PASSWORD_LENGTH}
-                required
-                value={password}
-                onChange={(e) => { setPassword(e.target.value); }}
-              />
-            </label>
-            <label>
-              {t('auth.confirmPassword')}
-              <Input
-                type="password"
-                autoComplete="new-password"
-                minLength={MIN_PASSWORD_LENGTH}
-                required
-                value={confirmPassword}
-                onChange={(e) => { setConfirmPassword(e.target.value); }}
-              />
-            </label>
-            {error ? (
-              <p className="error" role="alert">
-                {error}
-              </p>
-            ) : null}
-            <Button type="submit" disabled={loading}>
-              {loading ? t('auth.resetPasswordPending') : t('auth.resetPasswordSubmit')}
-            </Button>
-          </form>
-        ) : null}
-        {!showInvalidLink ? (
-          <p className="muted">
+  if (showInvalidLink) {
+    return (
+      <AuthScreen
+        title={t('auth.resetPasswordTitle')}
+        footer={
+          <p className="auth-footer-link">
             <Link to={routes.login}>{t('auth.backToSignIn')}</Link>
           </p>
-        ) : null}
-      </Card>
-    </div>
+        }
+      >
+        <p className="auth-card-lead" role="alert">
+          {t('auth.resetPasswordInvalidLink')}
+        </p>
+        <Link className="btn btn-primary auth-primary-btn" to={routes.forgotPassword}>
+          {t('auth.requestNewResetLink')}
+        </Link>
+      </AuthScreen>
+    );
+  }
+
+  return (
+    <AuthScreen
+      title={t('auth.resetPasswordTitle')}
+      footer={
+        !showChecking ? (
+          <p className="auth-footer-link">
+            <Link to={routes.login}>{t('auth.backToSignIn')}</Link>
+          </p>
+        ) : null
+      }
+    >
+      {showChecking ? (
+        <div className="auth-card-status" role="status" aria-live="polite">
+          <Spinner size="sm" label={t('auth.resetPasswordVerifying')} decorative />
+          <span>{t('auth.resetPasswordVerifying')}</span>
+        </div>
+      ) : null}
+      {showForm ? (
+        <form onSubmit={(e) => void onSubmit(e)} className="auth-form" noValidate>
+          <FormField label={t('auth.newPassword')} htmlFor={passwordId} showHelp={false}>
+            <Input
+              id={passwordId}
+              type="password"
+              autoComplete="new-password"
+              minLength={MIN_PASSWORD_LENGTH}
+              required
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (confirmMismatch) {
+                  setConfirmMismatch(false);
+                  setError(null);
+                }
+              }}
+            />
+          </FormField>
+          <FormField
+            label={t('auth.confirmPassword')}
+            htmlFor={confirmId}
+            showHelp={false}
+            error={confirmMismatch || error ? (error ?? t('auth.resetPasswordMismatch')) : undefined}
+          >
+            <Input
+              id={confirmId}
+              type="password"
+              autoComplete="new-password"
+              minLength={MIN_PASSWORD_LENGTH}
+              required
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (confirmMismatch) {
+                  setConfirmMismatch(false);
+                  setError(null);
+                }
+              }}
+              className={confirmMismatch || error ? 'input-invalid' : ''}
+            />
+          </FormField>
+          <Button
+            type="submit"
+            variant="primary"
+            className="auth-primary-btn"
+            disabled={loading}
+            loading={loading}
+          >
+            {loading ? t('auth.resetPasswordPending') : t('auth.resetPasswordSubmit')}
+          </Button>
+        </form>
+      ) : null}
+    </AuthScreen>
   );
 }

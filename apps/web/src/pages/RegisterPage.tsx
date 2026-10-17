@@ -4,10 +4,9 @@ import { FormEvent, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { AuthFormError } from '../components/auth/AuthFormError';
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { AuthScreen } from '../components/auth/AuthScreen';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
 import { authClient } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/authErrors';
@@ -17,7 +16,9 @@ import { routes } from '../lib/routes';
 export function RegisterPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const formErrorId = useId();
+  const nameId = useId();
+  const emailId = useId();
+  const passwordId = useId();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,55 +48,70 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="auth-layout">
-      <div className="auth-locale">
-        <LocaleSwitcher />
-      </div>
-      <Card className="auth-card">
-        <h1>{t('auth.registerTitle')}</h1>
-        <form onSubmit={(e) => void onSubmit(e)} className="stack" noValidate>
-          <label>
-            {t('auth.name')}
-            <Input
-              required
-              value={name}
-              onChange={(e) => { setName(e.target.value); }}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={error ? formErrorId : undefined}
-            />
-          </label>
-          <label>
-            {t('auth.email')}
-            <Input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => { setEmail(e.target.value); }}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={error ? formErrorId : undefined}
-            />
-          </label>
-          <label>
-            {t('auth.password')}
-            <Input
-              type="password"
-              minLength={8}
-              required
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); }}
-              aria-invalid={error ? true : undefined}
-              aria-describedby={error ? formErrorId : undefined}
-            />
-          </label>
-          {error ? <AuthFormError id={formErrorId} message={error} /> : null}
-          <Button type="submit" disabled={loading}>
-            {loading ? t('auth.registerCreatePending') : t('auth.register')}
-          </Button>
-        </form>
-        <p className="muted">
-          {t('auth.hasAccount')} <Link to={routes.login}>{t('auth.signIn')}</Link>
+    <AuthScreen
+      title={t('auth.registerTitle')}
+      footer={
+        <p className="auth-register-line">
+          <span className="muted">{t('auth.hasAccount')}</span>{' '}
+          <Link to={routes.login}>{t('auth.signIn')}</Link>
         </p>
-      </Card>
-    </div>
+      }
+    >
+      <form onSubmit={(e) => void onSubmit(e)} className="auth-form" noValidate>
+        <FormField label={t('auth.name')} htmlFor={nameId} showHelp={false}>
+          <Input
+            id={nameId}
+            required
+            autoComplete="name"
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+            className={error ? 'input-invalid' : ''}
+          />
+        </FormField>
+        <FormField label={t('auth.email')} htmlFor={emailId} showHelp={false}>
+          <Input
+            id={emailId}
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+            className={error ? 'input-invalid' : ''}
+          />
+        </FormField>
+        <FormField
+          label={t('auth.password')}
+          htmlFor={passwordId}
+          help={t('auth.registerPasswordHelp')}
+          error={error ?? undefined}
+        >
+          <Input
+            id={passwordId}
+            type="password"
+            minLength={8}
+            required
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+            className={error ? 'input-invalid' : ''}
+          />
+        </FormField>
+        <Button
+          type="submit"
+          variant="primary"
+          className="auth-primary-btn"
+          disabled={loading}
+          loading={loading}
+        >
+          {loading ? t('auth.registerPending') : t('auth.register')}
+        </Button>
+      </form>
+    </AuthScreen>
   );
 }

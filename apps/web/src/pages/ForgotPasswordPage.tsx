@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { FormEvent, useState } from 'react';
+import { Mail } from 'lucide-react';
+import { FormEvent, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { AuthScreen } from '../components/auth/AuthScreen';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
 import { authClient } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/format-auth-client-error';
@@ -14,6 +15,7 @@ import { routes } from '../lib/routes';
 
 export function ForgotPasswordPage() {
   const { t } = useTranslation();
+  const emailId = useId();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,43 +49,46 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <div className="auth-layout">
-      <div className="auth-locale">
-        <LocaleSwitcher />
-      </div>
-      <Card className="auth-card">
-        <h1>{t('auth.forgotPasswordTitle')}</h1>
-        {submitted ? (
-          <p className="muted">{t('auth.forgotPasswordConfirmation')}</p>
-        ) : (
-          <>
-            <p className="muted">{t('auth.forgotPasswordHint')}</p>
-            <form onSubmit={(e) => void onSubmit(e)} className="stack">
-              <label>
-                {t('auth.email')}
-                <Input
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => { setEmail(e.target.value); }}
-                />
-              </label>
-              {error ? (
-                <p className="error" role="alert">
-                  {error}
-                </p>
-              ) : null}
-              <Button type="submit" disabled={loading}>
-                {loading ? t('auth.forgotPasswordPending') : t('auth.forgotPasswordSubmit')}
-              </Button>
-            </form>
-          </>
-        )}
-        <p className="muted">
+    <AuthScreen
+      title={t('auth.forgotPasswordTitle')}
+      lead={submitted ? undefined : t('auth.forgotPasswordHint')}
+      footer={
+        <p className="auth-footer-link">
           <Link to={routes.login}>{t('auth.backToSignIn')}</Link>
         </p>
-      </Card>
-    </div>
+      }
+    >
+      {submitted ? (
+        <div className="auth-confirm-box" role="status">
+          <Mail size={18} aria-hidden />
+          <span>{t('auth.forgotPasswordConfirmation')}</span>
+        </div>
+      ) : (
+        <form onSubmit={(e) => void onSubmit(e)} className="auth-form" noValidate>
+          <FormField label={t('auth.email')} htmlFor={emailId} showHelp={false} error={error ?? undefined}>
+            <Input
+              id={emailId}
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+              className={error ? 'input-invalid' : ''}
+            />
+          </FormField>
+          <Button
+            type="submit"
+            variant="primary"
+            className="auth-primary-btn"
+            disabled={loading}
+            loading={loading}
+          >
+            {loading ? t('auth.forgotPasswordPending') : t('auth.forgotPasswordSubmit')}
+          </Button>
+        </form>
+      )}
+    </AuthScreen>
   );
 }

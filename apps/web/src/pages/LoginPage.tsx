@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { CircleAlert } from 'lucide-react';
 import { FormEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
-import { AuthFormError } from '../components/auth/AuthFormError';
-import { LocaleSwitcher } from '../components/layout/LocaleSwitcher';
+import { AuthScreen } from '../components/auth/AuthScreen';
+import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
 import { authClient } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/authErrors';
@@ -24,7 +25,8 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const formErrorId = useId();
+  const emailId = useId();
+  const passwordId = useId();
   const passwordResetSuccess = readLocationStateBoolean(location.state, 'passwordResetSuccess');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,6 +58,7 @@ export function LoginPage() {
   }, [searchParams, t]);
 
   const displayedError = error ?? sessionExpiredMessage;
+  const showCredentialBanner = displayedError != null && displayedError.length > 0;
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -81,56 +84,69 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-layout">
-      <div className="auth-locale">
-        <LocaleSwitcher />
-      </div>
-      <Card className="auth-card">
-        <h1>Docuvate</h1>
-        <p className="muted">{t('auth.tagline')}</p>
-        {passwordResetSuccess ? (
-          <p className="muted" role="status">
-            {t('auth.passwordResetSuccessHint')}
-          </p>
-        ) : null}
-        <form onSubmit={(e) => void onSubmit(e)} className="stack" noValidate>
-          <label>
-            {t('auth.email')}
-            <Input
-              ref={emailInputRef}
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => { setEmail(e.target.value); }}
-              aria-invalid={displayedError ? true : undefined}
-              aria-describedby={displayedError ? formErrorId : undefined}
-            />
-          </label>
-          <label>
-            {t('auth.password')}
-            <Input
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); }}
-              aria-invalid={displayedError ? true : undefined}
-              aria-describedby={displayedError ? formErrorId : undefined}
-            />
-          </label>
-          <p className="muted auth-forgot-link">
-            <Link to={routes.forgotPassword}>{t('auth.forgotPasswordLink')}</Link>
-          </p>
-          {displayedError ? <AuthFormError id={formErrorId} message={displayedError} /> : null}
-          <Button type="submit" disabled={loading}>
-            {loading ? t('auth.signInPending') : t('auth.signIn')}
-          </Button>
-        </form>
-        <p className="muted">
-          {t('auth.noAccount')} <Link to={routes.register}>{t('auth.register')}</Link>
+    <AuthScreen
+      title={t('auth.signIn')}
+      compactFooter={showCredentialBanner}
+      footer={
+        <p className="auth-register-line">
+          <span className="muted">{t('auth.noAccount')}</span>{' '}
+          <Link to={routes.register}>{t('auth.register')}</Link>
         </p>
-      </Card>
-    </div>
+      }
+    >
+      {passwordResetSuccess ? (
+        <p className="muted auth-reset-success" role="status">
+          {t('auth.passwordResetSuccessHint')}
+        </p>
+      ) : null}
+      {showCredentialBanner ? (
+        <Banner
+          variant="danger"
+          icon={CircleAlert}
+          title={t('auth.errors.invalidCredentialsTitle')}
+          description={t('auth.errors.invalidCredentialsDescription')}
+        />
+      ) : null}
+      <form onSubmit={(e) => void onSubmit(e)} className="auth-form stack" noValidate>
+        <FormField label={t('auth.email')} htmlFor={emailId} showHelp={false}>
+          <Input
+            ref={emailInputRef}
+            id={emailId}
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+            }}
+            className={showCredentialBanner ? 'input-invalid' : ''}
+          />
+        </FormField>
+        <FormField
+          label={t('auth.password')}
+          htmlFor={passwordId}
+          showHelp={false}
+          error={showCredentialBanner && displayedError ? displayedError : undefined}
+        >
+          <Input
+            id={passwordId}
+            type="password"
+            autoComplete="current-password"
+            required
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+            className={showCredentialBanner ? 'input-invalid' : ''}
+          />
+        </FormField>
+        <p className="auth-forgot-link">
+          <Link to={routes.forgotPassword}>{t('auth.forgotPasswordLink')}</Link>
+        </p>
+        <Button type="submit" variant="primary" className="auth-primary-btn" disabled={loading} loading={loading}>
+          {loading ? t('auth.signInPending') : t('auth.signIn')}
+        </Button>
+      </form>
+    </AuthScreen>
   );
 }
