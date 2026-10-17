@@ -21,6 +21,8 @@ class _VendorGate(TypedDict):
     min_calibrated_confidence: float
     margin_scale: float
     margin_offset: float
+    min_sender_e5_cosine: float
+    sender_e5_margin_credit: float
 
 
 class FieldConfidenceArtifact(TypedDict):
@@ -43,6 +45,8 @@ class FieldConfidenceCalibration:
     vendor_min_calibrated_confidence: float
     vendor_margin_scale: float
     vendor_margin_offset: float
+    vendor_min_sender_e5_cosine: float
+    vendor_sender_e5_margin_credit: float
 
     @classmethod
     def from_artifact(cls, payload: FieldConfidenceArtifact) -> FieldConfidenceCalibration:
@@ -60,6 +64,8 @@ class FieldConfidenceCalibration:
             vendor_min_calibrated_confidence=float(vendor["min_calibrated_confidence"]),
             vendor_margin_scale=float(vendor.get("margin_scale", 0.012)),
             vendor_margin_offset=float(vendor.get("margin_offset", 20.0)),
+            vendor_min_sender_e5_cosine=float(vendor.get("min_sender_e5_cosine", 0.84)),
+            vendor_sender_e5_margin_credit=float(vendor.get("sender_e5_margin_credit", 12.0)),
         )
 
     def date_confidence_from_log_score(self, raw_score: float) -> float:
@@ -76,6 +82,13 @@ class FieldConfidenceCalibration:
         blended = 0.25 * linear + 0.75 * logistic
         return min(0.97, max(0.35, blended))
 
+    def _sender_e5_margin_boost(self, sender_e5_cosine: float) -> float:
+        if sender_e5_cosine < self.vendor_min_sender_e5_cosine:
+            return 0.0
+        span = max(1e-6, 1.0 - self.vendor_min_sender_e5_cosine)
+        ratio = (sender_e5_cosine - self.vendor_min_sender_e5_cosine) / span
+        return self.vendor_sender_e5_margin_credit * min(1.0, ratio)
+
     def vendor_meets_auto_promote_gate(
         self,
         *,
@@ -84,14 +97,33 @@ class FieldConfidenceCalibration:
         addr_score: float,
         id_score: float,
         had_explicit_label: bool,
+        sender_e5_cosine: float = 0.0,
     ) -> tuple[bool, float]:
         margin = org_score - max(free_score, addr_score, id_score)
-        if org_score - free_score < self.vendor_min_org_margin and not had_explicit_label:
+        e5_boost = self._sender_e5_margin_boost(sender_e5_cosine)
+        org_free_margin = org_score - free_score + e5_boost
+        sender_e5_ok = sender_e5_cosine >= self.vendor_min_sender_e5_cosine
+        if (
+            org_free_margin < self.vendor_min_org_margin
+            and not had_explicit_label
+            and not sender_e5_ok
+        ):
             return False, 0.45
         confidence = self.vendor_confidence_from_margin(
-            margin,
+            margin + e5_boost,
             had_explicit_label=had_explicit_label,
         )
+        if sender_e5_ok:
+            span = max(1e-6, 1.0 - self.vendor_min_sender_e5_cosine)
+            e5_ratio = min(1.0, (sender_e5_cosine - self.vendor_min_sender_e5_cosine) / span)
+            org_free = org_score - free_score
+            confidence = min(
+                0.97,
+                max(
+                    confidence,
+                    0.45 + e5_ratio * 0.42 + max(0.0, org_free) * 0.004,
+                ),
+            )
         return confidence >= self.vendor_min_calibrated_confidence, confidence
 
 

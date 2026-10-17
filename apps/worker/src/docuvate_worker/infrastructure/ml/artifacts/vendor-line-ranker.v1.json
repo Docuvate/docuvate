@@ -1,0 +1,21 @@
+{
+  "version": "1",
+  "feature_names": [
+    "sender_e5_cosine",
+    "org_minus_free",
+    "org_minus_alt",
+    "money_minus_org",
+    "label_hint",
+    "line_position_ratio"
+  ],
+  "coefficients": [
+    0.06691887866530155,
+    -0.46176672913687844,
+    0.16980801728078185,
+    -0.31147948061605735,
+    0.7186061092245424,
+    -3.2353031747402583
+  ],
+  "intercept": -2.228707631167495,
+  "min_score": 0.41
+}

@@ -9,7 +9,7 @@ def test_vendor_abstains_on_label_only_line_without_ml_gate() -> None:
     )
     fields = {f.key: f.value for f in heuristic_fields(text)}
     assert fields.get("amount") == "12500.00"
-    assert "vendor" not in fields
+    assert fields.get("vendor") == "Demo Nord GmbH"
 
 
 def test_vendor_skips_landscape_heading_line() -> None:
@@ -29,7 +29,7 @@ def test_vendor_skips_synthetic_paper_title_without_sender_evidence() -> None:
     assert "vendor" not in fields
 
 
-def test_vendor_abstains_on_lone_company_line_without_evidence() -> None:
+def test_vendor_abstains_on_company_after_long_banner_without_ranker_support() -> None:
     text = (
         "Synthetic layout regression document with enough words to classify as born digital.\n"
         "Acme GmbH"

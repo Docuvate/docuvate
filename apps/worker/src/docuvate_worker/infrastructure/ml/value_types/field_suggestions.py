@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 from docuvate_worker.domain.models import ExtractedField
 from docuvate_worker.infrastructure.extractors.field_value_normalize import (
     strip_leading_sender_label_prefixes,
@@ -12,6 +14,11 @@ from docuvate_worker.infrastructure.ml.value_types.field_confidence_calibration 
 )
 from docuvate_worker.infrastructure.ml.value_types.model import ValueTypeModelBundle
 from docuvate_worker.infrastructure.ml.value_types.registry import get_value_type_models
+from docuvate_worker.infrastructure.ml.value_types.sender_line_e5 import sender_lines_e5_cosine
+from docuvate_worker.infrastructure.ml.value_types.vendor_line_ranker import (
+    build_line_features,
+    get_vendor_line_ranker,
+)
 
 _HEADER_DATE_STRONG_TOP_LINE = 2
 _HEADER_DATE_WEAK_TOP_LINE = 5
@@ -223,8 +230,12 @@ def _has_sender_evidence(
     bundle: ValueTypeModelBundle,
     *,
     had_explicit_label: bool,
+    sender_e5_cosine: float = 0.0,
 ) -> bool:
     if had_explicit_label:
+        return True
+    cal = get_field_confidence_calibration()
+    if sender_e5_cosine >= cal.vendor_min_sender_e5_cosine:
         return True
     org_score = bundle.log_likelihood(cleaned, "organization")
     free_score = bundle.log_likelihood(cleaned, "free_text")
@@ -240,10 +251,19 @@ def _has_sender_evidence(
     return block_addr > bundle.log_likelihood(block, "free_text") and len(cleaned) <= 64  # noqa: PLR2004
 
 
-def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> str | None:
+@dataclass(frozen=True)
+class _VendorCandidate:
+    value: str
+    had_explicit_label: bool
+    sender_e5_cosine: float
+    ranker_score: float
+
+
+def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate | None:
     lines = [line.strip() for line in text.splitlines() if line.strip()]
-    company_hits: list[str] = []
-    label_stripped_hits: list[str] = []
+    sender_cosines = sender_lines_e5_cosine(lines)
+    ranker = get_vendor_line_ranker()
+    best: _VendorCandidate | None = None
     for index, line in enumerate(lines):
         cleaned = strip_leading_sender_label_prefixes(line)
         had_label = cleaned != line
@@ -260,20 +280,42 @@ def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> str | None:
         if money_score >= org_score:
             continue
         if not _has_sender_evidence(
-            lines, index, candidate, bundle, had_explicit_label=had_label
+            lines,
+            index,
+            candidate,
+            bundle,
+            had_explicit_label=had_label,
+            sender_e5_cosine=sender_cosines[index],
         ):
             continue
         free_score = bundle.log_likelihood(candidate, "free_text")
+        addr_score = bundle.log_likelihood(candidate, "address")
+        id_score = bundle.log_likelihood(candidate, "identifier")
         if org_score <= free_score:
             continue
-        if org_score - free_score > 0.5 or had_label:  # noqa: PLR2004
-            if had_label:
-                label_stripped_hits.append(candidate[:120])
-            else:
-                company_hits.append(candidate[:120])
-    if company_hits:
-        return company_hits[0]
-    return label_stripped_hits[0] if label_stripped_hits else None
+        if org_score - free_score <= 0.5 and not had_label:  # noqa: PLR2004
+            continue
+        sender_e5 = sender_cosines[index]
+        features = build_line_features(
+            bundle=bundle,
+            candidate=candidate,
+            line_index=index,
+            line_count=len(lines),
+            sender_e5_cosine=sender_e5,
+            had_explicit_label=had_label,
+        )
+        ranker_score = ranker.score(features)
+        row = _VendorCandidate(
+            value=candidate[:120],
+            had_explicit_label=had_label,
+            sender_e5_cosine=sender_e5,
+            ranker_score=ranker_score,
+        )
+        if best is None or row.ranker_score > best.ranker_score:
+            best = row
+    if best is None or best.ranker_score < ranker.min_score:
+        return None
+    return best
 
 
 def learned_field_suggestions(
@@ -305,8 +347,9 @@ def learned_field_suggestions(
             )
         )
 
-    vendor = _extract_vendor(text, models)
-    if vendor:
+    vendor_row = _extract_vendor(text, models)
+    if vendor_row is not None:
+        vendor = vendor_row.value
         vendor_addr = models.log_likelihood(vendor, "address")
         vendor_id = models.log_likelihood(vendor, "identifier")
         vendor_org = models.log_likelihood(vendor, "organization")
@@ -317,9 +360,10 @@ def learned_field_suggestions(
             free_score=vendor_free,
             addr_score=vendor_addr,
             id_score=vendor_id,
-            had_explicit_label=False,
+            had_explicit_label=vendor_row.had_explicit_label,
+            sender_e5_cosine=vendor_row.sender_e5_cosine,
         )
-        if ok and vendor_org > max(vendor_addr, vendor_id, vendor_free) + 2:
+        if ok:
             fields.append(ExtractedField(key="vendor", value=vendor, confidence=confidence))
 
     return fields
