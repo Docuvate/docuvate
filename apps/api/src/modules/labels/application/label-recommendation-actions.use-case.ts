@@ -24,6 +24,7 @@ import { cosineSimilarity } from '../domain/cosine.js';
 import { adjustLabelNearThresholdFromFeedback } from '../domain/label-near-threshold.js';
 import { parseAssignRecommendationId } from '../domain/label-recommendation-scoring.js';
 import { phraseFromRecommendationKey } from '../domain/recommendation-blocklist.js';
+import { AssignDocumentTagUseCase } from './document-label.use-cases.js';
 
 @Injectable()
 export class DismissLabelRecommendationUseCase {
@@ -95,7 +96,7 @@ export class AcceptLabelRecommendationUseCase {
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    private readonly assignTag: AssignDocumentTag
+    @Inject(AssignDocumentTagUseCase) private readonly assignTag: AssignDocumentTag
   ) {}
 
   async execute(userId: string, body: AcceptLabelRecommendationRequest) {
