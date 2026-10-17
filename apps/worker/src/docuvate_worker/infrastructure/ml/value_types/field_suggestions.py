@@ -347,6 +347,8 @@ def _extract_vendor(text: str, bundle: ValueTypeModelBundle) -> _VendorCandidate
             first_label_line_index=first_label_line_index,
         )
         ranker_score = ranker.score(features)
+        if had_label and cleaned != line:
+            ranker_score = max(ranker_score, ranker.min_score)
         candidates.append(
             _VendorCandidate(
                 value=candidate[:120],

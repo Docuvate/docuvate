@@ -22,22 +22,22 @@ if str(REPO_ROOT / "apps/worker/scripts") not in sys.path:
 
 from holdout_metrics import FIELD_KEYS, slot_metrics_for_field
 
-from docuvate_worker.infrastructure.extractors.field_extraction_context import (  # noqa: E402
+from docuvate_worker.infrastructure.extractors.field_extraction_context import (
     clear_passage_vector_cache,
     register_passage_vectors,
 )
-from docuvate_worker.infrastructure.extractors.field_value_normalize import (  # noqa: E402
+from docuvate_worker.infrastructure.extractors.field_value_normalize import (
     strip_leading_sender_label_prefixes,
 )
-from docuvate_worker.infrastructure.fastembed_model import embed_passages  # noqa: E402
-from docuvate_worker.infrastructure.ml.value_types.amount_line_ranker import (  # noqa: E402
+from docuvate_worker.infrastructure.fastembed_model import embed_passages
+from docuvate_worker.infrastructure.ml.value_types.amount_line_ranker import (
     build_amount_line_features,
     get_amount_line_ranker,
 )
-from docuvate_worker.infrastructure.ml.value_types.field_confidence_calibration import (  # noqa: E402
+from docuvate_worker.infrastructure.ml.value_types.field_confidence_calibration import (
     get_field_confidence_calibration,
 )
-from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (  # noqa: E402
+from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (
     _digits_ratio,
     _has_sender_evidence,
     _is_heading_like,
@@ -48,16 +48,16 @@ from docuvate_worker.infrastructure.ml.value_types.field_suggestions import (  #
     _tokenize_value_candidates,
     learned_field_suggestions,
 )
-from docuvate_worker.infrastructure.ml.value_types.model import (  # noqa: E402
+from docuvate_worker.infrastructure.ml.value_types.model import (
     ValueTypeModelBundle,
 )
-from docuvate_worker.infrastructure.ml.value_types.registry import (  # noqa: E402
+from docuvate_worker.infrastructure.ml.value_types.registry import (
     get_value_type_models,
 )
-from docuvate_worker.infrastructure.ml.value_types.sender_line_e5 import (  # noqa: E402
+from docuvate_worker.infrastructure.ml.value_types.sender_line_e5 import (
     sender_lines_e5_cosine,
 )
-from docuvate_worker.infrastructure.ml.value_types.vendor_line_ranker import (  # noqa: E402
+from docuvate_worker.infrastructure.ml.value_types.vendor_line_ranker import (
     build_line_features,
     get_vendor_line_ranker,
 )
