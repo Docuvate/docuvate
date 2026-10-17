@@ -6,6 +6,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { EmbeddingDensityReadinessSplit20261010140000 } from '../../src/shared/infrastructure/database/migrations/20261010140000-embedding-density-readiness-split.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
 import { getIntegrationPool } from './pg-pool.js';
+import { restoreIntegrationDatabase } from './restore-integration-database.js';
 
 const READINESS_SPLIT_MIGRATION_TIMESTAMP = 20261010140000;
 
@@ -59,8 +60,10 @@ describe('EmbeddingDensityReadinessSplit migration (Postgres upgrade)', () => {
   });
 
   afterAll(async () => {
-    await dataSource.runMigrations();
-    await dataSource.destroy();
+    if (dataSource.isInitialized) {
+      await dataSource.destroy();
+    }
+    await restoreIntegrationDatabase();
   });
 
   it('upgrades from calibration_ready through down and back up', async () => {

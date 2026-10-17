@@ -7,6 +7,7 @@ import { ensureMigrationBaseline } from '../../src/shared/infrastructure/databas
 import { regClassExists } from '../../src/shared/infrastructure/database/migration-baseline-markers.js';
 import { isRecord } from '../../src/shared/infrastructure/database/row-parse.js';
 import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
+import { restoreIntegrationDatabase } from './restore-integration-database.js';
 
 describe('migration baseline (existing schema, empty migration history)', () => {
   let dataSource: DataSource;
@@ -17,11 +18,10 @@ describe('migration baseline (existing schema, empty migration history)', () => 
   });
 
   afterAll(async () => {
-    await dataSource.runMigrations();
-    await dataSource.destroy();
-    const { runDatabaseMigrations } =
-      await import('../../src/shared/infrastructure/database/run-database-migrations.js');
-    await runDatabaseMigrations();
+    if (dataSource.isInitialized) {
+      await dataSource.destroy();
+    }
+    await restoreIntegrationDatabase();
   });
 
   it('stamps only through existing schema then applies newer migrations', async () => {
