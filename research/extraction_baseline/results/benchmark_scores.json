@@ -1,0 +1,86 @@
+{
+  "hardware_threads": 4,
+  "datasets": {
+    "cord": {
+      "id": "naver-clova-ix/cord-v2",
+      "revision": "7f0115a4b758a71d6473b8d085751692da2fef98",
+      "license": "cc-by-4.0",
+      "split": "test",
+      "documents": 100
+    },
+    "sroie": {
+      "id": "rth/sroie-2019-v2",
+      "revision": "ede4bd3cd7e687bd5580d0e3f52cda1b4e9bac1c",
+      "license_note": "ICDAR 2019 SROIE Task 3 mirror (626 train / 347 test). HF card has no SPDX; competition data is research-oriented \u2014 verify terms at https://rrc.cvc.uab.es/?ch=13.",
+      "split": "test",
+      "documents": 347
+    }
+  },
+  "methods": {
+    "cord": {
+      "gliner2_zero_shot": {
+        "micro_precision": 0.4408759124087591,
+        "micro_recall": 0.4108843537414966,
+        "micro_f1": 0.4253521126760564,
+        "exact_match_docs": 1,
+        "exact_match_rate": 0.01,
+        "documents": 100.0,
+        "latency_ms_median": 70.19619499999408,
+        "latency_ms_p95": 97.75214500001539
+      },
+      "docuvate_layout_kv": {
+        "micro_precision": 0.005847953216374269,
+        "micro_recall": 0.0013605442176870747,
+        "micro_f1": 0.002207505518763797,
+        "exact_match_docs": 0,
+        "exact_match_rate": 0.0,
+        "documents": 100.0,
+        "latency_ms_median": 20.179702999996607,
+        "latency_ms_p95": 50.439561999951366
+      },
+      "e5_token_span": {
+        "micro_precision": 0.06218487394957983,
+        "micro_recall": 0.10068027210884353,
+        "micro_f1": 0.07688311688311689,
+        "exact_match_docs": 0,
+        "exact_match_rate": 0.0,
+        "documents": 100.0,
+        "latency_ms_median": 46.627766000028714,
+        "latency_ms_p95": 96.6312490000405
+      }
+    },
+    "sroie": {
+      "gliner2_zero_shot": {
+        "micro_precision": 0.4867674858223062,
+        "micro_recall": 0.37103746397694526,
+        "micro_f1": 0.42109566639411283,
+        "exact_match_docs": 0,
+        "exact_match_rate": 0.0,
+        "documents": 347.0,
+        "latency_ms_median": 138.3654589999992,
+        "latency_ms_p95": 227.57508099999768
+      },
+      "docuvate_layout_kv": {
+        "micro_precision": 0.0,
+        "micro_recall": 0.0,
+        "micro_f1": 0.0,
+        "exact_match_docs": 0,
+        "exact_match_rate": 0.0,
+        "documents": 347.0,
+        "latency_ms_median": 96.06515199999421,
+        "latency_ms_p95": 220.89842799999815
+      },
+      "e5_token_span": {
+        "micro_precision": 0.051152737752161385,
+        "micro_recall": 0.051152737752161385,
+        "micro_f1": 0.051152737752161385,
+        "exact_match_docs": 0,
+        "exact_match_rate": 0.0,
+        "documents": 347.0,
+        "latency_ms_median": 168.73074800002996,
+        "latency_ms_p95": 311.9170780000218
+      }
+    }
+  },
+  "abstain_threshold": 0.5
+}

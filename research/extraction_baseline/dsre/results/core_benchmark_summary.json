@@ -1,0 +1,250 @@
+{
+  "skipped": {
+    "docker_8g": "Docker not available on benchmark VM",
+    "gliner_dsre_rerank": "Not run (prior analysis: not justified)",
+    "few_shot_learning_curve": "Not run (runtime cap; script available in run_dsre_benchmark.py)",
+    "bootstrap_ci": "Not run (runtime cap)"
+  },
+  "omp_threads": 4,
+  "datasets": {
+    "sroie": {
+      "dataset": "sroie",
+      "candidate_recall": 0.6452442159383034,
+      "heads": [
+        {
+          "head": "cosine",
+          "threshold": Infinity,
+          "confirm_accepted": 0,
+          "confirm_lcb": 0.0,
+          "product_approved": false,
+          "test_raw": {
+            "precision": 0.004139562389118865,
+            "recall": 0.004139562389118865,
+            "f1": 0.004139562389118865,
+            "exact_span_f1": 0.004139562389118865
+          },
+          "test_gated": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "exact_span_f1": 0.0
+          },
+          "test_absent_false_positives": 0.0,
+          "unseen_template_raw_f1": 0.004139562389118865,
+          "unseen_field_type_raw_f1": 0.0,
+          "unseen_template_and_field_raw_f1": 0.0,
+          "train_eval_seconds": 4.063780529000724
+        },
+        {
+          "head": "linear",
+          "threshold": Infinity,
+          "confirm_accepted": 0,
+          "confirm_lcb": 0.0,
+          "product_approved": false,
+          "test_raw": {
+            "precision": 0.05736250739207569,
+            "recall": 0.05736250739207569,
+            "f1": 0.05736250739207569,
+            "exact_span_f1": 0.05736250739207569
+          },
+          "test_gated": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "exact_span_f1": 0.0
+          },
+          "test_absent_false_positives": 0.0,
+          "unseen_template_raw_f1": 0.05736250739207569,
+          "unseen_field_type_raw_f1": 0.0,
+          "unseen_template_and_field_raw_f1": 0.0,
+          "train_eval_seconds": 46.948241005000455
+        },
+        {
+          "head": "bilinear",
+          "threshold": Infinity,
+          "confirm_accepted": 0,
+          "confirm_lcb": 0.0,
+          "product_approved": false,
+          "test_raw": {
+            "precision": 0.056179775280898875,
+            "recall": 0.056179775280898875,
+            "f1": 0.056179775280898875,
+            "exact_span_f1": 0.056179775280898875
+          },
+          "test_gated": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "exact_span_f1": 0.0
+          },
+          "test_absent_false_positives": 0.0,
+          "unseen_template_raw_f1": 0.056179775280898875,
+          "unseen_field_type_raw_f1": 0.0,
+          "unseen_template_and_field_raw_f1": 0.0,
+          "train_eval_seconds": 211.17894043900014
+        },
+        {
+          "head": "relational",
+          "threshold": Infinity,
+          "confirm_accepted": 0,
+          "confirm_lcb": 0.0,
+          "product_approved": false,
+          "test_raw": {
+            "precision": 0.06150206978119456,
+            "recall": 0.06150206978119456,
+            "f1": 0.06150206978119456,
+            "exact_span_f1": 0.06150206978119456
+          },
+          "test_gated": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "exact_span_f1": 0.0
+          },
+          "test_absent_false_positives": 0.0,
+          "unseen_template_raw_f1": 0.06150206978119456,
+          "unseen_field_type_raw_f1": 0.0,
+          "unseen_template_and_field_raw_f1": 0.0,
+          "train_eval_seconds": 213.38444490700022
+        }
+      ],
+      "dsre_relational_episode_latency": {
+        "median_ms": 1.2936120001540985,
+        "p95_ms": 1.4433300002565375,
+        "episodes_sampled": 150.0
+      },
+      "gliner2": {
+        "micro_precision": 0.21351351351351353,
+        "micro_recall": 0.140153755174453,
+        "micro_f1": 0.16922527668689757,
+        "latency_ms_per_document_median": 2463.6546340007044,
+        "latency_ms_per_document_p95": 3489.702328999556,
+        "documents_inferred": 423,
+        "model_load_seconds": 3.073245395999038,
+        "total_infer_seconds": 1059.2666688610007,
+        "batch_size": 1
+      }
+    },
+    "cord": {
+      "dataset": "cord",
+      "candidate_recall": 0.9323076923076923,
+      "heads": [
+        {
+          "head": "cosine",
+          "threshold": Infinity,
+          "confirm_accepted": 0,
+          "confirm_lcb": 0.0,
+          "product_approved": false,
+          "test_raw": {
+            "precision": 0.001467351430667645,
+            "recall": 0.001467351430667645,
+            "f1": 0.0014673514306676452,
+            "exact_span_f1": 0.0014673514306676452
+          },
+          "test_gated": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "exact_span_f1": 0.0
+          },
+          "test_absent_false_positives": 0.0,
+          "unseen_template_raw_f1": 0.0014673514306676452,
+          "unseen_field_type_raw_f1": 0.0,
+          "unseen_template_and_field_raw_f1": 0.0,
+          "train_eval_seconds": 40.135088586001075
+        },
+        {
+          "head": "linear",
+          "threshold": Infinity,
+          "confirm_accepted": 0,
+          "confirm_lcb": 0.0,
+          "product_approved": false,
+          "test_raw": {
+            "precision": 0.13010516018586452,
+            "recall": 0.13010516018586452,
+            "f1": 0.13010516018586452,
+            "exact_span_f1": 0.13010516018586452
+          },
+          "test_gated": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "exact_span_f1": 0.0
+          },
+          "test_absent_false_positives": 0.0,
+          "unseen_template_raw_f1": 0.13010516018586452,
+          "unseen_field_type_raw_f1": 0.0,
+          "unseen_template_and_field_raw_f1": 0.0,
+          "train_eval_seconds": 48.164834347999204
+        },
+        {
+          "head": "bilinear",
+          "threshold": Infinity,
+          "confirm_accepted": 0,
+          "confirm_lcb": 0.0,
+          "product_approved": false,
+          "test_raw": {
+            "precision": 0.13010516018586452,
+            "recall": 0.13010516018586452,
+            "f1": 0.13010516018586452,
+            "exact_span_f1": 0.13010516018586452
+          },
+          "test_gated": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "exact_span_f1": 0.0
+          },
+          "test_absent_false_positives": 0.0,
+          "unseen_template_raw_f1": 0.13010516018586452,
+          "unseen_field_type_raw_f1": 0.0,
+          "unseen_template_and_field_raw_f1": 0.0,
+          "train_eval_seconds": 72.46817605999968
+        },
+        {
+          "head": "relational",
+          "threshold": Infinity,
+          "confirm_accepted": 0,
+          "confirm_lcb": 0.0,
+          "product_approved": false,
+          "test_raw": {
+            "precision": 0.19148936170212766,
+            "recall": 0.19148936170212766,
+            "f1": 0.19148936170212763,
+            "exact_span_f1": 0.19148936170212763
+          },
+          "test_gated": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "exact_span_f1": 0.0
+          },
+          "test_absent_false_positives": 0.0,
+          "unseen_template_raw_f1": 0.19148936170212763,
+          "unseen_field_type_raw_f1": 0.0,
+          "unseen_template_and_field_raw_f1": 0.0,
+          "train_eval_seconds": 74.79734869000094
+        }
+      ],
+      "dsre_relational_episode_latency": {
+        "median_ms": 3.616463000071235,
+        "p95_ms": 3.8346510009432677,
+        "episodes_sampled": 150.0
+      },
+      "gliner2": {
+        "micro_precision": 0.3581741965533302,
+        "micro_recall": 0.3352223190932868,
+        "micro_f1": 0.346318396757487,
+        "latency_ms_per_document_median": 1834.678614999575,
+        "latency_ms_per_document_p95": 2959.7868859982555,
+        "documents_inferred": 500,
+        "model_load_seconds": 2.7346470470001805,
+        "total_infer_seconds": 894.9375655570002,
+        "batch_size": 1
+      }
+    }
+  },
+  "peak_rss_mb_start": 63.23828125,
+  "peak_rss_mb_end": 2958.578125,
+  "total_wall_seconds": 3256.2336867939994
+}

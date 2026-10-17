@@ -1,0 +1,7 @@
+.cache/
+results/*.log
+results/benchmark_run.log
+*.log
+__pycache__/
+*.pyc
+.venv/

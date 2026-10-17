@@ -1,0 +1,35 @@
+{
+  "benchmark_kind": "synthetic_german_chat_extractive_fixtures",
+  "fixture": "bench/model_gates/fixtures/chat_extractive_cases.json",
+  "provenance": "Seeded synthetic German business documents (Docuvate CE, licence-clean).",
+  "models": {
+    "qwen3-4b-instruct": {
+      "model_key": "qwen3-4b-instruct",
+      "gguf_repo": "lmstudio-community/Qwen3-4B-Instruct-2507-GGUF",
+      "gguf_file": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+      "license_note": "Qwen3/Qwen3.5 base Apache-2.0; GGUF repack per repo card",
+      "cases_evaluated": 35,
+      "faithfulness_rate": 0.34285714285714286,
+      "abstention_rate": 0.9428571428571428,
+      "latency_ms_median": 16408.402332999685,
+      "latency_ms_p95": 17051.560267998866,
+      "load_seconds": 3.6920718620003754,
+      "peak_rss_mb_loaded": 5468.64453125,
+      "peak_rss_delta_mb": 5413.4375
+    },
+    "qwen3.5-4b-instruct": {
+      "model_key": "qwen3.5-4b-instruct",
+      "gguf_repo": "Hob-forge/Qwen3.5-4B-Instruct-GGUF",
+      "gguf_file": "Qwen3.5-4B-Instruct-Q4_K_M.gguf",
+      "license_note": "Qwen3/Qwen3.5 base Apache-2.0; GGUF repack per repo card",
+      "cases_evaluated": 35,
+      "faithfulness_rate": 0.6,
+      "abstention_rate": 0.5714285714285714,
+      "latency_ms_median": 4840.4112120006175,
+      "latency_ms_p95": 5333.531770000263,
+      "load_seconds": 1.54274875199917,
+      "peak_rss_mb_loaded": 5612.3828125,
+      "peak_rss_delta_mb": 0.0
+    }
+  }
+}

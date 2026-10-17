@@ -1,0 +1,158 @@
+{
+  "field_mapping_dsre": {
+    "cord": {
+      "dataset": "cord",
+      "candidate_recall": 0.9323076923076923,
+      "relational_head_test": null,
+      "learning_curve_full_retrain": [
+        {
+          "train_fraction": 0.15,
+          "micro_f1": 0.18708730741012472
+        },
+        {
+          "train_fraction": 0.4,
+          "micro_f1": 0.1892883345561262
+        },
+        {
+          "train_fraction": 0.7,
+          "micro_f1": 0.19515774027879673
+        },
+        {
+          "train_fraction": 1.0,
+          "micro_f1": 0.18953289312790414
+        }
+      ],
+      "gliner2_episode_baseline": {
+        "micro_precision": 0.3581741965533302,
+        "micro_recall": 0.3352223190932868,
+        "micro_f1": 0.346318396757487,
+        "latency_ms_per_document_median": 1834.678614999575,
+        "latency_ms_per_document_p95": 2959.7868859982555,
+        "documents_inferred": 500,
+        "model_load_seconds": 2.7346470470001805,
+        "total_infer_seconds": 894.9375655570002,
+        "batch_size": 1
+      },
+      "elapsed_seconds": null,
+      "incremental_vs_full_note": "DSRE train_head retrains from scratch at each train_fraction (full retrain). No warm-start incremental path in dsre_lib; regression on old types approximated by comparing micro-F1 at 1.0 fraction vs lower fractions on same test split."
+    },
+    "sroie": {
+      "dataset": "sroie",
+      "candidate_recall": 0.6452442159383034,
+      "relational_head_test": null,
+      "learning_curve_full_retrain": [
+        {
+          "train_fraction": 0.15,
+          "micro_f1": 0.039621525724423415
+        },
+        {
+          "train_fraction": 0.4,
+          "micro_f1": 0.054405677114133646
+        },
+        {
+          "train_fraction": 0.7,
+          "micro_f1": 0.05972797161442933
+        },
+        {
+          "train_fraction": 1.0,
+          "micro_f1": 0.06445890005913661
+        }
+      ],
+      "gliner2_episode_baseline": {
+        "micro_precision": 0.21351351351351353,
+        "micro_recall": 0.140153755174453,
+        "micro_f1": 0.16922527668689757,
+        "latency_ms_per_document_median": 2463.6546340007044,
+        "latency_ms_per_document_p95": 3489.702328999556,
+        "documents_inferred": 423,
+        "model_load_seconds": 3.073245395999038,
+        "total_infer_seconds": 1059.2666688610007,
+        "batch_size": 1
+      },
+      "elapsed_seconds": null,
+      "incremental_vs_full_note": "DSRE train_head retrains from scratch at each train_fraction (full retrain). No warm-start incremental path in dsre_lib; regression on old types approximated by comparing micro-F1 at 1.0 fraction vs lower fractions on same test split."
+    }
+  },
+  "label_hybrid_proxy": {
+    "benchmark_kind": "synthetic_label_hybrid_proxy",
+    "fixture": "bench/model_gates/fixtures/classification_texts.json",
+    "note": "TF-IDF+E5+LR proxy; real hybrid uses same weights in label-hybrid-features.ts",
+    "full_retrain_curve": [
+      {
+        "shots_per_class": 2,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 9
+      },
+      {
+        "shots_per_class": 4,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 9
+      },
+      {
+        "shots_per_class": 8,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 9
+      },
+      {
+        "shots_per_class": 16,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 9
+      },
+      {
+        "shots_per_class": 32,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 8
+      }
+    ],
+    "incremental_cumulative_curve": [
+      {
+        "shots_per_class": 2,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 9,
+        "cumulative_train_n": 18
+      },
+      {
+        "shots_per_class": 4,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 9,
+        "cumulative_train_n": 53
+      },
+      {
+        "shots_per_class": 8,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 9,
+        "cumulative_train_n": 124
+      },
+      {
+        "shots_per_class": 16,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 9,
+        "cumulative_train_n": 253
+      },
+      {
+        "shots_per_class": 32,
+        "holdout_accuracy": 1.0,
+        "holdout_n": 8,
+        "cumulative_train_n": 488
+      }
+    ],
+    "new_type_regression_on_old_types": {
+      "old_type_labels": [
+        "bescheid",
+        "bestellung",
+        "lieferschein",
+        "lohnabrechnung"
+      ],
+      "new_type_labels": [
+        "mahnung",
+        "rechnung",
+        "versicherung",
+        "vertrag",
+        "werkstattbericht"
+      ],
+      "baseline_old_only_holdout_accuracy": 0.16666666666666666,
+      "after_adding_new_types_old_holdout_accuracy": 0.16666666666666666,
+      "delta": 0.0
+    }
+  }
+}

@@ -1,0 +1,5 @@
+# Extra deps for Round 2 benchmarks (install after extraction_baseline/requirements.txt)
+scikit-learn>=1.5.0,<2
+llama-cpp-python>=0.3.0
+matplotlib>=3.8.0,<4
+ir-datasets>=0.5.0
