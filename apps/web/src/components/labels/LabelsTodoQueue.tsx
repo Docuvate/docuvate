@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LabelRecommendationDto } from '@docuvate/contracts';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -9,7 +9,6 @@ import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Chip } from '../ui/Chip';
-import { LabelRecommendationDocuments } from './LabelRecommendationDocuments';
 import { recommendationDocumentTitle } from './labelRecDocumentDisplay';
 import {
   excludedDocumentIds,
@@ -17,6 +16,7 @@ import {
   selectedDocumentIds,
   syncSelectedDocumentIds,
 } from './labelRecDocumentSelection';
+import { LabelRecommendationDocuments } from './LabelRecommendationDocuments';
 import { clusterAcceptButtonLabel, clusterAcceptDisabled } from './labelsTodoAcceptLabel';
 import {
   mergeLabelPairNames,
@@ -77,7 +77,6 @@ function TodoRowMain(props: TodoRowMainProps) {
   const sampleDocuments = item.sampleDocuments ?? [];
   const clusterDocuments = item.kind === 'new' ? sampleDocuments : [];
   const showClusterPicker = clusterDocuments.length > 1;
-  const primaryDoc = sampleDocuments[0];
   const mergeNames = mergeLabelPairNames(item);
 
   if (item.kind === 'rename') {
@@ -101,16 +100,23 @@ function TodoRowMain(props: TodoRowMainProps) {
     );
   }
 
-  const docTitle =
-    !showClusterPicker && primaryDoc != null ? (
-      <Link to={routes.document(primaryDoc.id)} className="labels-todo-doc-title">
-        {recommendationDocumentTitle(primaryDoc)}
-      </Link>
-    ) : !showClusterPicker ? (
-      <p className="labels-todo-doc-title labels-todo-doc-title-static">
-        {mergeNames ? `${mergeNames.keep} / ${mergeNames.remove}` : recommendationLabelName(item)}
-      </p>
-    ) : null;
+  let docTitle: ReactNode = null;
+  if (!showClusterPicker) {
+    if (sampleDocuments.length > 0) {
+      const firstDocument = sampleDocuments[0];
+      docTitle = (
+        <Link to={routes.document(firstDocument.id)} className="labels-todo-doc-title">
+          {recommendationDocumentTitle(firstDocument)}
+        </Link>
+      );
+    } else {
+      docTitle = (
+        <p className="labels-todo-doc-title labels-todo-doc-title-static">
+          {mergeNames ? `${mergeNames.keep} / ${mergeNames.remove}` : recommendationLabelName(item)}
+        </p>
+      );
+    }
+  }
 
   return (
     <>
