@@ -16,6 +16,10 @@ export type LibraryTableColumnId = 'title' | 'labels' | 'date' | 'status' | 'fol
 export interface SavedDocumentViewDto {
   id: string;
   name: string;
+  /** Optional short note shown in saved-view management. */
+  description?: string;
+  /** Documents matching this view’s filters (primary rows only). */
+  documentCount?: number;
   visibility: SavedViewVisibility;
   ownerUserId: string;
   searchQuery: string;
@@ -45,6 +49,7 @@ export interface SavedDocumentViewListResponse {
 
 export interface CreateSavedDocumentViewRequest {
   name: string;
+  description?: string;
   visibility?: SavedViewVisibility;
   searchQuery: string;
   sort?: DocumentSortField;
@@ -66,6 +71,7 @@ export interface CreateSavedDocumentViewRequest {
 
 export interface UpdateSavedDocumentViewRequest {
   name?: string;
+  description?: string;
   visibility?: SavedViewVisibility;
   searchQuery?: string;
   sort?: DocumentSortField;

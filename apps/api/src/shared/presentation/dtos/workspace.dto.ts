@@ -61,6 +61,10 @@ export class SavedDocumentViewFieldFilterDtoClass implements SavedDocumentViewFi
 export class SavedDocumentViewDtoClass implements SavedDocumentViewDto {
   id!: string;
   name!: string;
+  @ApiPropertyOptional()
+  description?: string;
+  @ApiPropertyOptional()
+  documentCount?: number;
   visibility!: SavedViewVisibility;
   ownerUserId!: string;
   searchQuery!: string;
@@ -90,6 +94,10 @@ export class SavedDocumentViewListResponseDto implements SavedDocumentViewListRe
 export class CreateSavedDocumentViewRequestDto implements CreateSavedDocumentViewRequest {
   @IsString()
   name!: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @IsOptional()
   @IsIn([...VISIBILITIES])
@@ -168,6 +176,10 @@ export class UpdateSavedDocumentViewRequestDto implements UpdateSavedDocumentVie
   @IsOptional()
   @IsString()
   name?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
 
   @IsOptional()
   @IsIn([...VISIBILITIES])

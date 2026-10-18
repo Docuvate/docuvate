@@ -9,6 +9,7 @@ import { LibraryBulkBar } from '../../components/library/LibraryBulkBar';
 import { LibraryDocumentGrid } from '../../components/library/LibraryDocumentGrid';
 import { LibraryDocumentTable } from '../../components/library/LibraryDocumentTable';
 import { LibraryFocusView } from '../../components/library/LibraryFocusView';
+import { LibraryGroupedLabelSuggestionCard } from '../../components/library/LibraryGroupedLabelSuggestionCard';
 import { LibraryViewSwitcher } from '../../components/library/LibraryViewSwitcher';
 import { FilesystemChildFoldersSection } from '../../components/ordner/FilesystemChildFoldersSection';
 import { MoveDocumentsFolderDialog } from '../../components/ordner/MoveDocumentsFolderDialog';
@@ -146,6 +147,15 @@ export function LibraryPageDocumentSection({
             </div>
           ) : null}
         </div>
+
+        {data.groupedLabelSuggestions.map((group) => (
+          <LibraryGroupedLabelSuggestionCard
+            key={group.tag.id}
+            group={group}
+            busy={data.groupedLabelBusy}
+            onAccept={data.acceptGroupedLabelSuggestion}
+          />
+        ))}
 
         {showBulkBar ? (
           <LibraryBulkBar

@@ -60,6 +60,7 @@ export function toDocumentDto(
     status: entity.status,
     extractionFailureReason: entity.extractionFailureReason ?? null,
     mimeType: entity.mimeType,
+    fileSizeBytes: entity.fileSizeBytes,
     formatBadge: documentFormatBadge(entity.mimeType, entity.filename),
     previewAvailable: documentUsesPdfPreview(
       entity.mimeType,

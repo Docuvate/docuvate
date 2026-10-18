@@ -8,7 +8,11 @@ import type {
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ForbiddenError, NotFoundError } from '../../../shared/domain/errors.js';
-import type { IdGenerator } from '../../../shared/domain/ports.js';
+import {
+  DOCUMENT_REPOSITORY,
+  type DocumentRepository,
+  type IdGenerator,
+} from '../../../shared/domain/ports.js';
 import { ID_GENERATOR } from '../../../shared/domain/ports.js';
 import {
   assertDashboardWidgetType,
@@ -23,16 +27,29 @@ import {
   assertCanReadView,
   assertCanSetVisibility,
 } from '../domain/saved-view-access.js';
+import { savedViewToDocumentListQuery } from '../domain/saved-view-list-query.js';
 import type { SavedDocumentViewEntity } from '../domain/workspace.types.js';
 import { PgWorkspaceRepository } from '../infrastructure/pg-workspace.repository.js';
 import { SavedViewScopeValidator } from '../infrastructure/saved-view-scope.validator.js';
 
 @Injectable()
 export class ListSavedViewsUseCase {
-  constructor(private readonly workspace: PgWorkspaceRepository) {}
+  constructor(
+    private readonly workspace: PgWorkspaceRepository,
+    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
+  ) {}
 
-  execute(userId: string) {
-    return this.workspace.listViewsVisibleToUser(userId);
+  async execute(userId: string) {
+    const views = await this.workspace.listViewsVisibleToUser(userId);
+    const counts = await Promise.all(
+      views.map((view) =>
+        this.documents.countForUser(userId, savedViewToDocumentListQuery(view))
+      )
+    );
+    return views.map((view, index) => ({
+      view,
+      documentCount: counts[index] ?? 0,
+    }));
   }
 }
 

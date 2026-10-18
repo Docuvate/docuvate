@@ -248,6 +248,7 @@ export class PaperlessImportExecutor {
         filename,
         title: fullDoc.title.trim() || filename,
         mimeType,
+        fileSizeBytes: fileBuffer.length,
         storageKey,
         status: 'uploaded',
         documentDate: fullDoc.created ? new Date(fullDoc.created) : null,

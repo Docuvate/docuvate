@@ -122,6 +122,7 @@ export type CreateFolderRequestDto = {
 export type CreateSavedDocumentViewRequestDto = {
     visibleColumns?: Array<LibraryTableColumnId>;
     name: string;
+    description?: string;
     visibility?: 'private' | 'shared';
     searchQuery: string;
     sort?: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
@@ -327,6 +328,10 @@ export type DocumentResponseDto = {
     status: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
     extractionFailureReason?: string;
     mimeType: string;
+    /**
+     * Original upload size in bytes
+     */
+    fileSizeBytes: number;
     tags: Array<{
         [key: string]: unknown;
     }>;
@@ -806,6 +811,8 @@ export type ReplaceTagCustomFieldsRequestDto = {
 };
 
 export type SavedDocumentViewDtoClass = {
+    description?: string;
+    documentCount?: number;
     visibleColumns: Array<LibraryTableColumnId>;
     id: string;
     name: string;
@@ -956,6 +963,7 @@ export type UpdatePasswordPolicyRequestDto = {
 export type UpdateSavedDocumentViewRequestDto = {
     visibleColumns?: Array<LibraryTableColumnId>;
     name?: string;
+    description?: string;
     visibility?: 'private' | 'shared';
     searchQuery?: string;
     sort?: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';

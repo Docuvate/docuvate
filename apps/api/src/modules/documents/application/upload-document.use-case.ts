@@ -110,6 +110,7 @@ export class UploadDocumentUseCase {
       filename: input.filename,
       title: input.filename,
       mimeType,
+      fileSizeBytes: input.buffer.length,
       storageKey,
       status: 'uploaded',
       documentDate: null,

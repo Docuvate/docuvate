@@ -15,6 +15,7 @@ export interface SavedDocumentViewEntity {
   id: string;
   ownerUserId: string;
   name: string;
+  description: string;
   visibility: SavedViewVisibility;
   searchQuery: string;
   sort: DocumentSortField;

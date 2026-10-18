@@ -13,6 +13,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { prepareLabelQueue } from '../../components/labels/labelsQueue';
 import {
   acceptLabelRecommendation,
+  deleteTag,
   dismissLabelRecommendation,
   getDocumentReviewQueueSummary,
   getLabelMap,
@@ -148,6 +149,7 @@ export function useLabelsInsights(
       try {
         const assignedDocumentIds = options?.documentIds ?? item.sampleDocumentIds ?? [];
         const assignedTagId = item.tagId;
+        let createdTagId: string | null = null;
         if (item.kind === 'assign' && item.tagId) {
           const fallbackIds = item.sampleDocumentIds ?? [];
           await acceptLabelRecommendation(item.id, {
@@ -157,11 +159,12 @@ export function useLabelsInsights(
           });
         } else if (item.kind === 'new') {
           const fallbackIds = item.sampleDocumentIds ?? [];
-          await acceptLabelRecommendation(item.id, {
+          const result = await acceptLabelRecommendation(item.id, {
             proposedName: item.proposedName,
             documentIds: options?.documentIds ?? fallbackIds,
             excludedDocumentIds: options?.excludedDocumentIds,
           });
+          createdTagId = result.tagId;
         } else if (item.kind === 'merge' && item.tagIds?.length === 2) {
           await acceptLabelRecommendation(item.id, {
             keepTagId: item.tagIds[0],
@@ -181,6 +184,15 @@ export function useLabelsInsights(
             undo: () => {
               void Promise.all(docIds.map((documentId) => removeDocumentTag(documentId, tagId))).then(
                 () => Promise.all([onReloadTags({ silent: true }), load({ silent: true })])
+              );
+            },
+          });
+        } else if (item.kind === 'new' && createdTagId) {
+          const tagId = createdTagId;
+          hooks?.onSaveSuccess?.({
+            undo: () => {
+              void deleteTag(tagId).then(() =>
+                Promise.all([onReloadTags({ silent: true }), load({ silent: true })])
               );
             },
           });

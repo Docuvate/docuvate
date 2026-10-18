@@ -4,10 +4,15 @@ import type { DashboardWidgetDto, SavedDocumentViewDto } from '@docuvate/contrac
 
 import type { DashboardWidgetEntity, SavedDocumentViewEntity } from '../domain/workspace.types.js';
 
-export function toSavedDocumentViewDto(entity: SavedDocumentViewEntity): SavedDocumentViewDto {
+export function toSavedDocumentViewDto(
+  entity: SavedDocumentViewEntity,
+  extras?: { documentCount?: number }
+): SavedDocumentViewDto {
   return {
     id: entity.id,
     name: entity.name,
+    description: entity.description.trim() ? entity.description : undefined,
+    documentCount: extras?.documentCount,
     visibility: entity.visibility,
     ownerUserId: entity.ownerUserId,
     searchQuery: entity.searchQuery,

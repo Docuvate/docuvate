@@ -13,14 +13,20 @@ import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
 
+import {
+  computeGroupedLibraryLabelSuggestions,
+  filterGroupedSuggestionsToSelection,
+} from '../../components/library/groupedLabelSuggestions';
 import { useToastNotify } from '../../components/save/ToastProvider';
 import {
+  acceptDocumentTagSuggestion,
   bulkDocuments,
   getSavedDocumentView,
   listDocuments,
   listFolders,
   listRecognizedFields,
   listTags,
+  removeDocumentTag,
   updateSavedDocumentView,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
@@ -69,6 +75,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   const [bulkTagId, setBulkTagId] = useState('');
   const [bulkFolderId, setBulkFolderId] = useState('');
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [groupedLabelBusy, setGroupedLabelBusy] = useState(false);
   const [viewMode, setViewMode] = useState<LibraryViewMode>(() => readLibraryViewMode());
   const [filterMode, setFilterModeState] = useState<LibraryFilterMode>(() =>
     readLibraryFilterMode()
@@ -372,6 +379,38 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     else setSelected(new Set(items.map((d) => d.id)));
   }
 
+  const groupedLabelSuggestions = useMemo(() => {
+    const scope =
+      selected.size > 0 ? items.filter((doc) => selected.has(doc.id)) : items;
+    const groups = computeGroupedLibraryLabelSuggestions(scope);
+    return filterGroupedSuggestionsToSelection(groups, selected);
+  }, [items, selected]);
+
+  async function acceptGroupedLabelSuggestion(tagId: string, documentIds: string[]) {
+    if (documentIds.length === 0) {
+      return;
+    }
+    setGroupedLabelBusy(true);
+    setError(null);
+    try {
+      for (const documentId of documentIds) {
+        await acceptDocumentTagSuggestion(documentId, tagId);
+      }
+      await load();
+      pushSuccess(t('library.groupedLabelApplied', { count: documentIds.length }), {
+        undo: () => {
+          void Promise.all(
+            documentIds.map((documentId) => removeDocumentTag(documentId, tagId))
+          ).then(() => load());
+        },
+      });
+    } catch (err) {
+      setError(formatUserFacingError(err, 'errors.actionFailed'));
+    } finally {
+      setGroupedLabelBusy(false);
+    }
+  }
+
   async function runBulk(action: Parameters<typeof bulkDocuments>[0]['bulk']) {
     if (selected.size === 0) return;
     const selectedIds = [...selected];
@@ -512,5 +551,8 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     activeViewId,
     activeViewName,
     updateActiveSavedView,
+    groupedLabelSuggestions,
+    groupedLabelBusy,
+    acceptGroupedLabelSuggestion,
   };
 }

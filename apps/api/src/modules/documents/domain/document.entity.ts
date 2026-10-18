@@ -13,6 +13,7 @@ export interface DocumentEntity {
   filename: string;
   title: string;
   mimeType: string;
+  fileSizeBytes: number;
   storageKey: string;
   previewStorageKey?: string | null;
   archivedStorageKey?: string | null;

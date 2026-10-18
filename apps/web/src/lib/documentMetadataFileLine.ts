@@ -3,6 +3,8 @@
 import type { DocumentDto } from '@docuvate/contracts';
 import type { TFunction } from 'i18next';
 
+import { formatFileSize } from './formatFileSize';
+
 export function documentPageCount(doc: DocumentDto): number | null {
   const pages = doc.extraction?.layoutIrPages;
   if (pages && pages.length > 0) {
@@ -49,12 +51,13 @@ export function formatDocumentMetadataFileSummary(
   const parts: string[] = [doc.filename.trim() || doc.title.trim() || doc.id];
   const format = documentFormatLabel(doc);
   const pageCount = documentPageCount(doc);
+  const sizeLabel = formatFileSize(doc.fileSizeBytes, locale);
   if (pageCount != null) {
     parts.push(
-      t('documents.metadataFileFormatPages', { format, count: pageCount })
+      t('documents.metadataFileFormatPagesSize', { format, count: pageCount, size: sizeLabel })
     );
   } else {
-    parts.push(format);
+    parts.push(t('documents.metadataFileFormatSize', { format, size: sizeLabel }));
   }
   parts.push(documentIngestSourceLabel(doc.ingestSource, t));
   const uploaded = Date.parse(doc.createdAt);

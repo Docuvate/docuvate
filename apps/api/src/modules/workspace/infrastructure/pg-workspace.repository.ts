@@ -81,15 +81,12 @@ function parseVisibleColumns(value: unknown): LibraryTableColumnId[] {
   return out.length > 0 ? out : DEFAULT_COLUMNS;
 }
 
-function mapViewRow(
-  row: Record<string, unknown>,
-  tagIds: string[],
-  fieldFilters: { fieldKey: string; valueText: string }[]
-): SavedDocumentViewEntity {
+function mapViewRow(row: Record<string, unknown>, tagIds: string[]): SavedDocumentViewEntity {
   return {
     id: parseString(row.id),
     ownerUserId: parseString(row.owner_user_id),
     name: parseString(row.name),
+    description: parseString(row.description ?? ''),
     visibility: parseEnum(row.visibility, VISIBILITY_VALUES, 'private'),
     searchQuery: parseString(row.search_query ?? ''),
     sort: parseEnum(row.sort_field, SORT_FIELD_VALUES, 'updatedAt'),
@@ -98,7 +95,7 @@ function mapViewRow(
     filterMode: parseEnum(row.filter_mode, FILTER_MODE_VALUES, 'ui'),
     listScope: parseEnum(row.list_scope, LIST_SCOPE_VALUES, 'all'),
     folderId: parseOptionalString(row.folder_id),
-    fieldFilters,
+    correspondentId: parseOptionalString(row.correspondent_id),
     status: parseOptionalEnum(row.status_filter, DOCUMENT_STATUS_VALUES),
     inbox:
       row.inbox_filter === null || row.inbox_filter === undefined
@@ -141,49 +138,6 @@ const DEFAULT_COLUMNS: LibraryTableColumnId[] = ['title', 'labels', 'date', 'sta
 export class PgWorkspaceRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
-  private async loadFieldFiltersForViews(
-    viewIds: string[]
-  ): Promise<Map<string, { fieldKey: string; valueText: string }[]>> {
-    const map = new Map<string, { fieldKey: string; valueText: string }[]>();
-    if (viewIds.length === 0) return map;
-    const result = await this.pool.query(
-      `SELECT view_id, field_key, value_text
-       FROM saved_document_view_field_filters
-       WHERE view_id = ANY($1::uuid[])`,
-      [viewIds]
-    );
-    for (const raw of result.rows) {
-      const row = requireRecord(raw);
-      const viewId = parseString(row.view_id);
-      const list = map.get(viewId) ?? [];
-      list.push({
-        fieldKey: parseString(row.field_key),
-        valueText: parseString(row.value_text),
-      });
-      map.set(viewId, list);
-    }
-    return map;
-  }
-
-  private async replaceFieldFiltersForView(
-    client: pg.PoolClient,
-    viewId: string,
-    filters: { fieldKey: string; valueText: string }[]
-  ): Promise<void> {
-    await client.query(`DELETE FROM saved_document_view_field_filters WHERE view_id = $1`, [viewId]);
-    for (const filter of filters) {
-      const fieldKey = filter.fieldKey.trim();
-      const valueText = filter.valueText.trim();
-      if (!fieldKey || !valueText) continue;
-      await client.query(
-        `INSERT INTO saved_document_view_field_filters (view_id, field_key, value_text)
-         VALUES ($1, $2, $3)
-         ON CONFLICT (view_id, field_key) DO UPDATE SET value_text = EXCLUDED.value_text`,
-        [viewId, fieldKey, valueText]
-      );
-    }
-  }
-
   private async loadTagIdsForViews(viewIds: string[]): Promise<Map<string, string[]>> {
     const map = new Map<string, string[]>();
     if (viewIds.length === 0) return map;
@@ -211,11 +165,9 @@ export class PgWorkspaceRepository {
     );
     const ids = result.rows.map((r) => parseString(requireRecord(r).id));
     const tagMap = await this.loadTagIdsForViews(ids);
-    const filterMap = await this.loadFieldFiltersForViews(ids);
     return result.rows.map((raw) => {
       const row = requireRecord(raw);
-      const viewId = parseString(row.id);
-      return mapViewRow(row, tagMap.get(viewId) ?? [], filterMap.get(viewId) ?? []);
+      return mapViewRow(row, tagMap.get(parseString(row.id)) ?? []);
     });
   }
 
@@ -223,8 +175,7 @@ export class PgWorkspaceRepository {
     const result = await this.pool.query(`SELECT * FROM saved_document_views WHERE id = $1`, [id]);
     if (!result.rows[0]) return null;
     const tagMap = await this.loadTagIdsForViews([id]);
-    const filterMap = await this.loadFieldFiltersForViews([id]);
-    return mapViewRow(requireRecord(result.rows[0]), tagMap.get(id) ?? [], filterMap.get(id) ?? []);
+    return mapViewRow(requireRecord(result.rows[0]), tagMap.get(id) ?? []);
   }
 
   async nextViewPosition(userId: string): Promise<number> {
@@ -248,18 +199,19 @@ export class PgWorkspaceRepository {
       await client.query('BEGIN');
       const result = await client.query(
         `INSERT INTO saved_document_views (
-          id, owner_user_id, name, visibility, search_query, sort_field, sort_order,
-          view_mode, filter_mode, list_scope, folder_id,
+          id, owner_user_id, name, description, visibility, search_query, sort_field, sort_order,
+          view_mode, filter_mode, list_scope, folder_id, correspondent_id,
           status_filter, inbox_filter, without_non_inbox_label, document_date_from, document_date_to,
           pinned_sidebar, position, visible_columns
         ) VALUES (
-          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19::jsonb
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21::jsonb
         )
         RETURNING *`,
         [
           id,
           userId,
           input.name,
+          input.description?.trim() ?? '',
           input.visibility ?? 'private',
           input.searchQuery,
           input.sort ?? 'updatedAt',
@@ -268,6 +220,7 @@ export class PgWorkspaceRepository {
           input.filterMode ?? 'ui',
           input.listScope ?? 'all',
           input.folderId ?? null,
+          input.correspondentId ?? null,
           input.status ?? null,
           input.inbox ?? null,
           input.withoutNonInboxLabel ?? null,
@@ -284,9 +237,8 @@ export class PgWorkspaceRepository {
           [id, tagId]
         );
       }
-      await this.replaceFieldFiltersForView(client, id, input.fieldFilters ?? []);
       await client.query('COMMIT');
-      return mapViewRow(requireRecord(result.rows[0]), tagIds, input.fieldFilters ?? []);
+      return mapViewRow(requireRecord(result.rows[0]), tagIds);
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -313,6 +265,7 @@ export class PgWorkspaceRepository {
     };
 
     if (input.name !== undefined) assign('name', input.name);
+    if (input.description !== undefined) assign('description', input.description.trim());
     if (input.visibility !== undefined) assign('visibility', input.visibility);
     if (input.searchQuery !== undefined) assign('search_query', input.searchQuery);
     if (input.sort !== undefined) assign('sort_field', input.sort);
@@ -321,6 +274,7 @@ export class PgWorkspaceRepository {
     if (input.filterMode !== undefined) assign('filter_mode', input.filterMode);
     if (input.listScope !== undefined) assign('list_scope', input.listScope);
     if ('folderId' in input) assign('folder_id', input.folderId);
+    if ('correspondentId' in input) assign('correspondent_id', input.correspondentId);
     if ('status' in input) assign('status_filter', input.status);
     if ('inbox' in input) assign('inbox_filter', input.inbox);
     if ('withoutNonInboxLabel' in input)
@@ -356,13 +310,9 @@ export class PgWorkspaceRepository {
           );
         }
       }
-      if (input.fieldFilters !== undefined) {
-        await this.replaceFieldFiltersForView(client, id, input.fieldFilters);
-      }
       await client.query('COMMIT');
       const tagIds = input.tagIds ?? existing.tagIds;
-      const fieldFilters = input.fieldFilters ?? existing.fieldFilters;
-      return mapViewRow(requireRecord(result.rows[0]), tagIds, fieldFilters);
+      return mapViewRow(requireRecord(result.rows[0]), tagIds);
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;

@@ -47,6 +47,8 @@ import { FoldersOnlyRemoveMappen20261018140000 } from './migrations/202610181400
 import { DocumentExtractionImages20261018150000 } from './migrations/20261018150000-document-extraction-images.js';
 import { ConnectorNamedConnectionsSourceScope20261018160000 } from './migrations/20261018160000-connector-named-connections-source-scope.js';
 import { CorrespondentsToAbsenderField20261018180000 } from './migrations/20261018180000-correspondents-to-absender-field.js';
+import { RecognizedFieldGateLabelPolarity20261018190000 } from './migrations/20261018190000-recognized-field-filter-and-gate-polarity.js';
+import { DocumentFileSizeSavedViewDescription20261018190500 } from './migrations/20261018190500-document-file-size-saved-view-description.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -116,6 +118,8 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DocumentExtractionImages20261018150000,
       ConnectorNamedConnectionsSourceScope20261018160000,
       CorrespondentsToAbsenderField20261018180000,
+      RecognizedFieldGateLabelPolarity20261018190000,
+      DocumentFileSizeSavedViewDescription20261018190500,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

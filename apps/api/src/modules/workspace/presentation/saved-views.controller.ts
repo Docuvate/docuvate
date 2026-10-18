@@ -46,7 +46,11 @@ export class SavedViewsController {
   @ApiDocuvateRoute({ operationId: 'listSavedDocumentViews', summary: 'List saved document views' })
   async list(@Session() session: AuthSession): Promise<SavedDocumentViewListResponseDto> {
     const items = await this.listViews.execute(session.user.id);
-    return { items: items.map(toSavedDocumentViewDto) };
+    return {
+      items: items.map(({ view, documentCount }) =>
+        toSavedDocumentViewDto(view, { documentCount })
+      ),
+    };
   }
 
   @Put('reorder')

@@ -12530,6 +12530,9 @@
           "name": {
             "type": "string"
           },
+          "description": {
+            "type": "string"
+          },
           "visibility": {
             "type": "string",
             "enum": [
@@ -13314,6 +13317,10 @@
           "mimeType": {
             "type": "string"
           },
+          "fileSizeBytes": {
+            "type": "number",
+            "description": "Original upload size in bytes"
+          },
           "tags": {
             "type": "array",
             "items": {
@@ -13336,6 +13343,7 @@
           "title",
           "status",
           "mimeType",
+          "fileSizeBytes",
           "tags",
           "createdAt",
           "updatedAt"
@@ -14947,6 +14955,12 @@
       "SavedDocumentViewDtoClass": {
         "type": "object",
         "properties": {
+          "description": {
+            "type": "string"
+          },
+          "documentCount": {
+            "type": "number"
+          },
           "visibleColumns": {
             "type": "array",
             "items": {
@@ -15474,6 +15488,9 @@
             }
           },
           "name": {
+            "type": "string"
+          },
+          "description": {
             "type": "string"
           },
           "visibility": {
