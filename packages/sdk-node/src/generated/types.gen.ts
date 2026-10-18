@@ -63,6 +63,7 @@ export type AdminUserResponseDto = {
     banReason?: string;
     accountStatus: 'active' | 'invited' | 'suspended';
     createdAt: string;
+    lastLoginAt?: string;
 };
 
 export type ApplyLabelCorrectionRequestDto = {
