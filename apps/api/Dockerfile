@@ -1,4 +1,4 @@
-FROM node:24.21.0-alpine AS build
+FROM node:24.22.0-alpine AS build
 RUN corepack enable && corepack prepare pnpm@10.34.6 --activate
 WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
@@ -13,7 +13,7 @@ COPY scripts/db scripts/db
 RUN pnpm --filter "@docuvate/api..." build
 RUN test -f apps/api/dist/modules/documents/domain/artifacts/value-types-field-confidence.v1.json
 
-FROM node:24.21.0-alpine AS runner
+FROM node:24.22.0-alpine AS runner
 RUN apk add --no-cache bash postgresql-client
 WORKDIR /app
 ENV NODE_ENV=production
