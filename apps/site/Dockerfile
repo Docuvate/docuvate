@@ -1,4 +1,4 @@
-FROM node:24.21.0-alpine AS build
+FROM node:24.22.0-alpine AS build
 RUN apk add --no-cache python3
 RUN corepack enable && corepack prepare pnpm@10.34.6 --activate
 WORKDIR /app
