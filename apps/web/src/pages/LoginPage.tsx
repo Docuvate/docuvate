@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { CircleAlert } from 'lucide-react';
+import { CircleAlert, KeyRound } from 'lucide-react';
 import { FormEvent, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
+import { AuthOrDivider } from '../components/auth/AuthOrDivider';
 import { AuthScreen } from '../components/auth/AuthScreen';
 import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
@@ -17,8 +18,10 @@ import {
   markAuthenticatedSessionHint,
 } from '../lib/authSessionHint';
 import { awaitAuthenticatedSession } from '../lib/awaitAuthenticatedSession';
+import { signInWithPasskey } from '../lib/loginPasskey';
 import { readLocationStateBoolean } from '../lib/routerLocationState';
 import { routes } from '../lib/routes';
+import { useAuthSignInOptions } from '../lib/useAuthSignInOptions';
 
 export function LoginPage() {
   const { t } = useTranslation();
@@ -32,6 +35,8 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
+  const signInOptions = useAuthSignInOptions();
   const emailInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -59,6 +64,36 @@ export function LoginPage() {
 
   const displayedError = error ?? sessionExpiredMessage;
   const showCredentialBanner = displayedError != null && displayedError.length > 0;
+
+  async function onPasskeySignIn() {
+    setPasskeyLoading(true);
+    setError(null);
+    try {
+      const result = await signInWithPasskey();
+      if (!result.ok) {
+        setError(formatAuthClientError(result.error, 'signIn'));
+        return;
+      }
+      markAuthenticatedSessionHint();
+      navigate(routes.documents);
+    } catch (err) {
+      setError(formatAuthClientError(err, 'signIn'));
+    } finally {
+      setPasskeyLoading(false);
+    }
+  }
+
+  async function onOidcSignIn(providerId: string) {
+    setPasskeyLoading(true);
+    setError(null);
+    try {
+      const callbackURL = `${window.location.origin}${routes.documents}`;
+      await authClient.signIn.social({ provider: providerId, callbackURL });
+    } catch (err) {
+      setError(formatAuthClientError(err, 'signIn'));
+      setPasskeyLoading(false);
+    }
+  }
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
@@ -139,10 +174,42 @@ export function LoginPage() {
         <p className="auth-forgot-link">
           <Link to={routes.forgotPassword}>{t('auth.forgotPasswordLink')}</Link>
         </p>
-        <Button type="submit" variant="primary" className="auth-primary-btn" disabled={loading} loading={loading}>
+        <Button type="submit" variant="primary" className="auth-primary-btn" disabled={loading || passkeyLoading} loading={loading}>
           {loading ? t('auth.signInPending') : t('auth.signIn')}
         </Button>
       </form>
+      {signInOptions.passkeysEnabled || signInOptions.oidcProviders.length > 0 ? (
+        <>
+          <AuthOrDivider />
+          <div className="auth-passwordless-stack">
+            {signInOptions.passkeysEnabled ? (
+              <Button
+                type="button"
+                variant="secondary"
+                className="auth-secondary-btn"
+                disabled={loading || passkeyLoading}
+                loading={passkeyLoading}
+                onClick={() => void onPasskeySignIn()}
+              >
+                <KeyRound size={18} aria-hidden />
+                {t('auth.signInWithPasskey')}
+              </Button>
+            ) : null}
+            {signInOptions.oidcProviders.map((provider) => (
+              <Button
+                key={provider.providerId}
+                type="button"
+                variant="secondary"
+                className="auth-secondary-btn"
+                disabled={loading || passkeyLoading}
+                onClick={() => void onOidcSignIn(provider.providerId)}
+              >
+                {t('auth.signInWithProvider', { provider: provider.displayName })}
+              </Button>
+            ))}
+          </div>
+        </>
+      ) : null}
     </AuthScreen>
   );
 }

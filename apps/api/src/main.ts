@@ -24,9 +24,10 @@ async function bootstrap(): Promise<void> {
   }
 
   const { AppModule } = await import('./app.module.js');
-  const { auth } = await import('./shared/infrastructure/auth/better-auth.config.js');
+  const { initializeAuth } = await import('./shared/infrastructure/auth/better-auth.config.js');
   const { registerBetterAuthHttpRoutes } =
     await import('./shared/infrastructure/auth/register-better-auth-http-routes.js');
+  const auth = await initializeAuth();
 
   const adapter = new FastifyAdapter({
     logger: true,

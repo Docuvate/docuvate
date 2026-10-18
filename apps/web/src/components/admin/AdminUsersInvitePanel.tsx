@@ -11,10 +11,8 @@ import { Select } from '../ui/Select';
 interface Props {
   busy: boolean;
   inviteEmail: string;
-  inviteName: string;
   inviteRole: InstanceRole;
   onEmailChange: (value: string) => void;
-  onNameChange: (value: string) => void;
   onRoleChange: (role: InstanceRole) => void;
   onSubmit: () => void;
 }
@@ -22,10 +20,8 @@ interface Props {
 export function AdminUsersInvitePanel({
   busy,
   inviteEmail,
-  inviteName,
   inviteRole,
   onEmailChange,
-  onNameChange,
   onRoleChange,
   onSubmit,
 }: Props) {
@@ -34,36 +30,27 @@ export function AdminUsersInvitePanel({
     <section className="settings-section-card admin-invite-panel">
       <h3 className="settings-subheading">{t('admin.usersInviteTitle')}</h3>
       <p className="muted admin-invite-lead">{t('admin.usersInviteLead')}</p>
-      <div className="admin-invite-form">
-        <label>
-          {t('auth.email')}
+      <div className="admin-invite-form admin-invite-form--spec">
+        <label className="admin-invite-email-field">
+          <span className="visually-hidden">{t('auth.email')}</span>
           <Input
             value={inviteEmail}
             onChange={(e) => { onEmailChange(e.target.value); }}
+            placeholder={t('admin.usersInviteEmailPlaceholder')}
             autoComplete="off"
           />
         </label>
-        <label>
-          {t('auth.name')}
-          <Input
-            value={inviteName}
-            onChange={(e) => { onNameChange(e.target.value); }}
-            autoComplete="off"
-          />
-        </label>
-        <label>
-          {t('admin.usersRoleLabel')}
-          <Select
-            value={inviteRole}
-            disabled={busy}
-            onChange={(value) => { onRoleChange(parseInstanceRole(value)); }}
-            options={[
-              { value: 'member', label: t('admin.roles.member') },
-              { value: 'admin', label: t('admin.roles.admin') },
-            ]}
-            aria-label={t('admin.usersRoleLabel')}
-          />
-        </label>
+        <Select
+          value={inviteRole}
+          disabled={busy}
+          onChange={(value) => { onRoleChange(parseInstanceRole(value)); }}
+          options={[
+            { value: 'member', label: t('admin.roles.member') },
+            { value: 'admin', label: t('admin.roles.admin') },
+          ]}
+          aria-label={t('admin.usersRoleLabel')}
+          className="admin-invite-role-select"
+        />
         <Button
           type="button"
           className="admin-invite-submit"

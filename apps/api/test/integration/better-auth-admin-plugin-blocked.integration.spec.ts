@@ -3,7 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { INSTALLATION_DB_ROLE_ADMIN } from '../../src/modules/auth/domain/installation.constants.js';
 import { INSTANCE_ROLE_MEMBER } from '../../src/modules/auth/domain/instance-role.constants.js';
-import { auth } from '../../src/shared/infrastructure/auth/better-auth.config.js';
+import { initializeAuth } from '../../src/shared/infrastructure/auth/better-auth.config.js';
 import { isBetterAuthAdminPluginPath } from '../../src/shared/infrastructure/auth/block-better-auth-admin-routes.js';
 import { registerBetterAuthHttpRoutes } from '../../src/shared/infrastructure/auth/register-better-auth-http-routes.js';
 import { getIntegrationPool } from './pg-pool.js';
@@ -13,6 +13,7 @@ describe('better-auth admin plugin HTTP surface (integration)', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
+    const auth = await initializeAuth();
     app = Fastify();
     registerBetterAuthHttpRoutes(app, auth);
     await app.ready();

@@ -13,6 +13,7 @@ export interface AdminUserListItem {
   banReason: string | null;
   accountStatus: AdminUserAccountStatus;
   createdAt: Date;
+  lastLoginAt: Date | null;
 }
 
 export interface UserAdministrationPort {

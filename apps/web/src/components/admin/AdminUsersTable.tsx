@@ -3,11 +3,11 @@
 import type { AdminUserDto, InstanceRole } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
+import { formatAdminLastLogin } from '../../lib/adminLastLogin';
 import { parseInstanceRole } from '../../lib/instanceRole';
-import { Button } from '../ui/Button';
 import { Select } from '../ui/Select';
 import { getUserRowState, type UserRowState } from './admin-user-row-state';
-import { AdminUserActionsMenu, type AdminUserMenuAction } from './AdminUserActionsMenu';
+import { type AdminUserMenuAction,AdminUserRowActions } from './AdminUserRowActions';
 import { AdminUserStatusBadge } from './AdminUserStatusBadge';
 
 interface Props {
@@ -18,7 +18,6 @@ interface Props {
   soleAdministratorUserId: string | null;
   onRoleChange: (user: AdminUserDto, role: InstanceRole) => void;
   onMenuAction: (action: AdminUserMenuAction) => void;
-  onPrimaryAction: (action: AdminUserMenuAction) => void;
 }
 
 function AdminUserPersonCell({
@@ -85,41 +84,29 @@ function AdminUserActionsCell({
   user,
   state,
   busy,
-  t,
   onMenuAction,
-  onPrimaryAction,
 }: {
   user: AdminUserDto;
   state: UserRowState;
   busy: boolean;
-  t: (key: string) => string;
   onMenuAction: (action: AdminUserMenuAction) => void;
-  onPrimaryAction: (action: AdminUserMenuAction) => void;
 }) {
   const { self, actionsDisabled } = state;
-  if (self) {
-    return null;
-  }
   return (
-    <div className="admin-users-actions-cell">
-      {user.accountStatus === 'invited' ? (
-        <Button
-          type="button"
-          variant="secondary"
+    <div
+      className={`admin-users-actions-cell${self ? ' admin-users-actions-cell--reserved' : ''}`}
+      aria-hidden={self ? true : undefined}
+    >
+      {self ? null : (
+        <AdminUserRowActions
+          user={user}
+          busy={busy}
           disabled={actionsDisabled}
-          onClick={() => { onPrimaryAction({ kind: 'resend-invite', user }); }}
-        >
-          {t('admin.usersResendInvite')}
-        </Button>
-      ) : null}
-      <AdminUserActionsMenu
-        user={user}
-        busy={busy}
-        disabled={actionsDisabled}
-        onSelect={(action) => {
-          onMenuAction(action);
-        }}
-      />
+          onSelect={(action) => {
+            onMenuAction(action);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -131,9 +118,9 @@ export function AdminUsersTable({
   soleAdministratorUserId,
   onRoleChange,
   onMenuAction,
-  onPrimaryAction,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
 
   if (users.length === 0) {
     return <p className="muted admin-users-empty">{t('admin.usersEmpty')}</p>;
@@ -141,13 +128,23 @@ export function AdminUsersTable({
 
   return (
     <div className="admin-users-table-wrap">
-      <table className="admin-users-table admin-users-table--wide">
+      <table className="admin-users-table admin-users-table--spec">
+        <colgroup>
+          <col className="admin-users-col-person" />
+          <col className="admin-users-col-role" />
+          <col className="admin-users-col-status" />
+          <col className="admin-users-col-last-login" />
+          <col className="admin-users-col-actions" />
+        </colgroup>
         <thead>
           <tr>
-            <th className="admin-users-col-person">{t('admin.usersPersonColumn')}</th>
-            <th className="admin-users-col-role">{t('admin.usersRoleLabel')}</th>
-            <th>{t('admin.usersStatusLabel')}</th>
-            <th className="admin-users-col-actions">{t('admin.usersActionsLabel')}</th>
+            <th scope="col">{t('admin.usersNameColumn')}</th>
+            <th scope="col">{t('admin.usersRoleLabel')}</th>
+            <th scope="col">{t('admin.usersStatusLabel')}</th>
+            <th scope="col">{t('admin.usersLastLoginColumn')}</th>
+            <th scope="col" className="admin-users-col-actions">
+              <span className="visually-hidden">{t('admin.usersActionsLabel')}</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -161,17 +158,18 @@ export function AdminUsersTable({
                 <td className="admin-users-col-role">
                   <AdminUserRoleCell user={user} state={state} t={t} onRoleChange={onRoleChange} />
                 </td>
-                <td>
+                <td className="admin-users-col-status">
                   <AdminUserStatusBadge user={user} />
+                </td>
+                <td className="admin-users-col-last-login muted">
+                  {formatAdminLastLogin(t, user.lastLoginAt, locale)}
                 </td>
                 <td className="admin-users-col-actions">
                   <AdminUserActionsCell
                     user={user}
                     state={state}
                     busy={busy}
-                    t={t}
                     onMenuAction={onMenuAction}
-                    onPrimaryAction={onPrimaryAction}
                   />
                 </td>
               </tr>
@@ -180,7 +178,7 @@ export function AdminUsersTable({
         </tbody>
       </table>
 
-      <ul className="admin-users-card-list" aria-label={t('admin.usersPersonColumn')}>
+      <ul className="admin-users-card-list" aria-label={t('admin.usersNameColumn')}>
         {users.map((user) => {
           const state = getUserRowState(user, busy, currentUserId, soleAdministratorUserId, t);
           return (
@@ -199,6 +197,12 @@ export function AdminUsersTable({
                 <span className="admin-users-card-label">{t('admin.usersStatusLabel')}</span>
                 <AdminUserStatusBadge user={user} />
               </div>
+              <div className="admin-users-card-field">
+                <span className="admin-users-card-label">{t('admin.usersLastLoginColumn')}</span>
+                <span className="muted">
+                  {formatAdminLastLogin(t, user.lastLoginAt, locale)}
+                </span>
+              </div>
               {!state.self ? (
                 <div className="admin-users-card-field admin-users-card-actions">
                   <span className="admin-users-card-label">{t('admin.usersActionsLabel')}</span>
@@ -206,9 +210,7 @@ export function AdminUsersTable({
                     user={user}
                     state={state}
                     busy={busy}
-                    t={t}
                     onMenuAction={onMenuAction}
-                    onPrimaryAction={onPrimaryAction}
                   />
                 </div>
               ) : null}

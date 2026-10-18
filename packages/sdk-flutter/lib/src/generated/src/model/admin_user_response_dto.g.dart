@@ -149,6 +149,8 @@ class _$AdminUserResponseDto extends AdminUserResponseDto {
   final AdminUserResponseDtoAccountStatusEnum accountStatus;
   @override
   final String createdAt;
+  @override
+  final String? lastLoginAt;
 
   factory _$AdminUserResponseDto(
           [void Function(AdminUserResponseDtoBuilder)? updates]) =>
@@ -162,7 +164,8 @@ class _$AdminUserResponseDto extends AdminUserResponseDto {
       required this.banned,
       this.banReason,
       required this.accountStatus,
-      required this.createdAt})
+      required this.createdAt,
+      this.lastLoginAt})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(id, r'AdminUserResponseDto', 'id');
     BuiltValueNullFieldError.checkNotNull(
@@ -199,7 +202,8 @@ class _$AdminUserResponseDto extends AdminUserResponseDto {
         banned == other.banned &&
         banReason == other.banReason &&
         accountStatus == other.accountStatus &&
-        createdAt == other.createdAt;
+        createdAt == other.createdAt &&
+        lastLoginAt == other.lastLoginAt;
   }
 
   @override
@@ -213,6 +217,7 @@ class _$AdminUserResponseDto extends AdminUserResponseDto {
     _$hash = $jc(_$hash, banReason.hashCode);
     _$hash = $jc(_$hash, accountStatus.hashCode);
     _$hash = $jc(_$hash, createdAt.hashCode);
+    _$hash = $jc(_$hash, lastLoginAt.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -227,7 +232,8 @@ class _$AdminUserResponseDto extends AdminUserResponseDto {
           ..add('banned', banned)
           ..add('banReason', banReason)
           ..add('accountStatus', accountStatus)
-          ..add('createdAt', createdAt))
+          ..add('createdAt', createdAt)
+          ..add('lastLoginAt', lastLoginAt))
         .toString();
   }
 }
@@ -270,6 +276,10 @@ class AdminUserResponseDtoBuilder
   String? get createdAt => _$this._createdAt;
   set createdAt(String? createdAt) => _$this._createdAt = createdAt;
 
+  String? _lastLoginAt;
+  String? get lastLoginAt => _$this._lastLoginAt;
+  set lastLoginAt(String? lastLoginAt) => _$this._lastLoginAt = lastLoginAt;
+
   AdminUserResponseDtoBuilder() {
     AdminUserResponseDto._defaults(this);
   }
@@ -285,6 +295,7 @@ class AdminUserResponseDtoBuilder
       _banReason = $v.banReason;
       _accountStatus = $v.accountStatus;
       _createdAt = $v.createdAt;
+      _lastLoginAt = $v.lastLoginAt;
       _$v = null;
     }
     return this;
@@ -321,7 +332,8 @@ class AdminUserResponseDtoBuilder
             accountStatus: BuiltValueNullFieldError.checkNotNull(
                 accountStatus, r'AdminUserResponseDto', 'accountStatus'),
             createdAt: BuiltValueNullFieldError.checkNotNull(
-                createdAt, r'AdminUserResponseDto', 'createdAt'));
+                createdAt, r'AdminUserResponseDto', 'createdAt'),
+            lastLoginAt: lastLoginAt);
     replace(_$result);
     return _$result;
   }

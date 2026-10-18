@@ -16,12 +16,17 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(AddLabelRecommendationBlocklistRequestDto.serializer)
       ..add(AdminAccessResponseDto.serializer)
       ..add(AdminAccessResponseDtoRoleEnum.serializer)
+      ..add(AdminAuthSignInSettingsResponseDto.serializer)
+      ..add(AdminOidcProviderResponseDto.serializer)
+      ..add(AdminOidcProviderResponseDtoSource_Enum.serializer)
       ..add(AdminUserListResponseDto.serializer)
       ..add(AdminUserResponseDto.serializer)
       ..add(AdminUserResponseDtoAccountStatusEnum.serializer)
       ..add(AdminUserResponseDtoRoleEnum.serializer)
       ..add(ApplyLabelCorrectionRequestDto.serializer)
       ..add(ApplyLabelCorrectionResponseDto.serializer)
+      ..add(AuthOidcProviderPublicResponseDto.serializer)
+      ..add(AuthSignInOptionsResponseDto.serializer)
       ..add(BanAdminUserRequestDto.serializer)
       ..add(ChatMessageDto.serializer)
       ..add(ChatMessageDtoRoleEnum.serializer)
@@ -30,6 +35,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(ChatMessageRecordDtoGenerationStatusEnum.serializer)
       ..add(ChatMessageRecordDtoRoleEnum.serializer)
       ..add(ConfirmLabelRecommendationBlocklistPatternRequestDto.serializer)
+      ..add(CreateAdminOidcProviderRequestDto.serializer)
       ..add(CreateConnectorInstallationRequestDto.serializer)
       ..add(CreateConnectorInstallationRequestDtoPluginIdEnum.serializer)
       ..add(CreateDocumentChatThreadRequestDto.serializer)
@@ -175,6 +181,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(TestPaperlessConnectionRequestDto.serializer)
       ..add(TestPaperlessInstallationConnectionRequestDto.serializer)
       ..add(TriggerMlRetrainRequestDto.serializer)
+      ..add(UpdateAdminOidcProviderRequestDto.serializer)
       ..add(UpdateConnectorInstallationRequestDto.serializer)
       ..add(UpdateDocumentChatThreadRequestDto.serializer)
       ..add(UpdateDocumentRequestDto.serializer)
@@ -200,8 +207,16 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(UserSettingsResponseDtoThemePreferenceEnum.serializer)
       ..addBuilderFactory(
           const FullType(
+              BuiltList, const [const FullType(AdminOidcProviderResponseDto)]),
+          () => new ListBuilder<AdminOidcProviderResponseDto>())
+      ..addBuilderFactory(
+          const FullType(
               BuiltList, const [const FullType(AdminUserResponseDto)]),
           () => new ListBuilder<AdminUserResponseDto>())
+      ..addBuilderFactory(
+          const FullType(BuiltList,
+              const [const FullType(AuthOidcProviderPublicResponseDto)]),
+          () => new ListBuilder<AuthOidcProviderPublicResponseDto>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [
             const FullType(

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { auth } from '../../../shared/infrastructure/auth/better-auth.config.js';
+import { getAuth } from '../../../shared/infrastructure/auth/better-auth.config.js';
 import { isRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import type { AdminResetPasswordAuthContext } from './admin-reset-password.use-case.js';
 
@@ -27,7 +27,7 @@ function isAdminResetPasswordAuthContext(value: unknown): value is AdminResetPas
 }
 
 export async function loadAdminResetPasswordAuthContext(): Promise<AdminResetPasswordAuthContext> {
-  const ctx: unknown = await auth.$context;
+  const ctx: unknown = await getAuth().$context;
   if (!isAdminResetPasswordAuthContext(ctx)) {
     throw new Error('Better Auth context is not available');
   }

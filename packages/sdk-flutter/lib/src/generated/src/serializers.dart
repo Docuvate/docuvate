@@ -22,14 +22,19 @@ import 'package:docuvate/src/generated/src/model/accept_label_recommendation_res
 import 'package:docuvate/src/generated/src/model/accept_user_invitation_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/add_label_recommendation_blocklist_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/admin_access_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/admin_auth_sign_in_settings_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/admin_oidc_provider_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/admin_user_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/admin_user_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/apply_label_correction_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/apply_label_correction_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/auth_oidc_provider_public_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/auth_sign_in_options_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/ban_admin_user_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/chat_message_dto.dart';
 import 'package:docuvate/src/generated/src/model/chat_message_record_dto.dart';
 import 'package:docuvate/src/generated/src/model/confirm_label_recommendation_blocklist_pattern_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/create_admin_oidc_provider_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_connector_installation_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_document_chat_thread_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_folder_request_dto.dart';
@@ -135,6 +140,7 @@ import 'package:docuvate/src/generated/src/model/tag_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/test_paperless_connection_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/test_paperless_installation_connection_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/trigger_ml_retrain_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/update_admin_oidc_provider_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_connector_installation_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_document_chat_thread_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_document_request_dto.dart';
@@ -157,14 +163,19 @@ part 'serializers.g.dart';
   AcceptUserInvitationRequestDto,
   AddLabelRecommendationBlocklistRequestDto,
   AdminAccessResponseDto,
+  AdminAuthSignInSettingsResponseDto,
+  AdminOidcProviderResponseDto,
   AdminUserListResponseDto,
   AdminUserResponseDto,
   ApplyLabelCorrectionRequestDto,
   ApplyLabelCorrectionResponseDto,
+  AuthOidcProviderPublicResponseDto,
+  AuthSignInOptionsResponseDto,
   BanAdminUserRequestDto,
   ChatMessageDto,
   ChatMessageRecordDto,
   ConfirmLabelRecommendationBlocklistPatternRequestDto,
+  CreateAdminOidcProviderRequestDto,
   CreateConnectorInstallationRequestDto,
   CreateDocumentChatThreadRequestDto,
   CreateFolderRequestDto,
@@ -270,6 +281,7 @@ part 'serializers.g.dart';
   TestPaperlessConnectionRequestDto,
   TestPaperlessInstallationConnectionRequestDto,
   TriggerMlRetrainRequestDto,
+  UpdateAdminOidcProviderRequestDto,
   UpdateConnectorInstallationRequestDto,
   UpdateDocumentChatThreadRequestDto,
   UpdateDocumentRequestDto,

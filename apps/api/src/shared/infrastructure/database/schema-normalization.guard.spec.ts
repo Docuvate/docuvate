@@ -52,6 +52,7 @@ const FORWARD_SQL_ORDER = [
   'folders-only-remove-mappen-up.sql',
   'document-extraction-images-up.sql',
   'connector-named-connections-source-scope-up.sql',
+  'installation-oidc-provider-up.sql',
   'correspondents-to-absender-up.sql',
 ];
 

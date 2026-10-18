@@ -49,6 +49,23 @@ export type AdminAccessResponseDto = {
     }>;
 };
 
+export type AdminAuthSignInSettingsResponseDto = {
+    passkeysEnabled: boolean;
+    oidcProviders: Array<AdminOidcProviderResponseDto>;
+};
+
+export type AdminOidcProviderResponseDto = {
+    id: string;
+    providerId: string;
+    displayName: string;
+    issuer: string;
+    clientId: string;
+    scopes: string;
+    enabled: boolean;
+    source: 'admin' | 'env';
+    hasClientSecret: boolean;
+};
+
 export type AdminUserListResponseDto = {
     users: Array<AdminUserResponseDto>;
     total: number;
@@ -63,6 +80,7 @@ export type AdminUserResponseDto = {
     banReason?: string;
     accountStatus: 'active' | 'invited' | 'suspended';
     createdAt: string;
+    lastLoginAt?: string;
 };
 
 export type ApplyLabelCorrectionRequestDto = {
@@ -73,6 +91,17 @@ export type ApplyLabelCorrectionResponseDto = {
     ok: boolean;
     correctionId: string;
     similarDocumentsUpdated: number;
+};
+
+export type AuthOidcProviderPublicResponseDto = {
+    providerId: string;
+    displayName: string;
+};
+
+export type AuthSignInOptionsResponseDto = {
+    passkeysEnabled: boolean;
+    oidcProviders: Array<AuthOidcProviderPublicResponseDto>;
+    emailChangeAvailable: boolean;
 };
 
 export type BanAdminUserRequestDto = {
@@ -97,6 +126,16 @@ export type ChatMessageRecordDto = {
 
 export type ConfirmLabelRecommendationBlocklistPatternRequestDto = {
     pattern: string;
+};
+
+export type CreateAdminOidcProviderRequestDto = {
+    providerId: string;
+    displayName: string;
+    issuer: string;
+    clientId: string;
+    clientSecret: string;
+    scopes: string;
+    enabled: boolean;
 };
 
 export type CreateConnectorInstallationRequestDto = {
@@ -915,6 +954,15 @@ export type TriggerMlRetrainRequestDto = {
     familyId: string;
 };
 
+export type UpdateAdminOidcProviderRequestDto = {
+    displayName: string;
+    issuer: string;
+    clientId: string;
+    clientSecret?: string;
+    scopes: string;
+    enabled: boolean;
+};
+
 export type UpdateConnectorInstallationRequestDto = {
     displayName?: string;
     sourceScope?: {
@@ -1050,6 +1098,96 @@ export type GetAdminAccessResponses = {
 };
 
 export type GetAdminAccessResponse = GetAdminAccessResponses[keyof GetAdminAccessResponses];
+
+export type GetAdminAuthSignInSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/admin/auth-sign-in';
+};
+
+export type GetAdminAuthSignInSettingsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type GetAdminAuthSignInSettingsError = GetAdminAuthSignInSettingsErrors[keyof GetAdminAuthSignInSettingsErrors];
+
+export type GetAdminAuthSignInSettingsResponses = {
+    200: AdminAuthSignInSettingsResponseDto;
+};
+
+export type GetAdminAuthSignInSettingsResponse = GetAdminAuthSignInSettingsResponses[keyof GetAdminAuthSignInSettingsResponses];
+
+export type CreateAdminOidcProviderData = {
+    body: CreateAdminOidcProviderRequestDto;
+    path?: never;
+    query?: never;
+    url: '/admin/oidc-providers';
+};
+
+export type CreateAdminOidcProviderErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type CreateAdminOidcProviderError = CreateAdminOidcProviderErrors[keyof CreateAdminOidcProviderErrors];
+
+export type CreateAdminOidcProviderResponses = {
+    201: AdminOidcProviderResponseDto;
+};
+
+export type CreateAdminOidcProviderResponse = CreateAdminOidcProviderResponses[keyof CreateAdminOidcProviderResponses];
+
+export type DeleteAdminOidcProviderData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/oidc-providers/{id}';
+};
+
+export type DeleteAdminOidcProviderErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type DeleteAdminOidcProviderError = DeleteAdminOidcProviderErrors[keyof DeleteAdminOidcProviderErrors];
+
+export type DeleteAdminOidcProviderResponses = {
+    200: unknown;
+};
+
+export type UpdateAdminOidcProviderData = {
+    body: UpdateAdminOidcProviderRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/admin/oidc-providers/{id}';
+};
+
+export type UpdateAdminOidcProviderErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type UpdateAdminOidcProviderError = UpdateAdminOidcProviderErrors[keyof UpdateAdminOidcProviderErrors];
+
+export type UpdateAdminOidcProviderResponses = {
+    200: AdminOidcProviderResponseDto;
+};
+
+export type UpdateAdminOidcProviderResponse = UpdateAdminOidcProviderResponses[keyof UpdateAdminOidcProviderResponses];
 
 export type GetAdminPasswordPolicyData = {
     body?: never;

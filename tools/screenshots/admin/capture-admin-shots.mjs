@@ -269,7 +269,7 @@ async function main() {
     await page.screenshot({ path: `${OUT}/13-admin-users-suspended-row-1280-light.png`, fullPage: true });
 
     const memberActions = page.locator('.admin-users-table tbody tr').filter({ hasText: /koehler@/i }).first();
-    await memberActions.locator('.admin-users-overflow-btn').click();
+    await memberActions.locator('.admin-users-action-danger').click();
     await page.getByRole('menuitem', { name: /sperren|suspend/i }).first().click();
     await page.waitForSelector('.confirm-dialog, [role="dialog"]', { timeout: 10_000 });
     await page.screenshot({ path: `${OUT}/14-admin-suspend-dialog-1280-light.png`, fullPage: true });

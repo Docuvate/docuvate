@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 export * from './upload-formats.js';
 export * from './password-policy.js';
+export * from './auth-sign-in.js';
 import type { ConnectorSourceScopeDto } from './connector-source-scope.js';
 export type { SavedDocumentViewFieldFilterDto } from './saved-view-field-filter.js';
 import type { SavedDocumentViewFieldFilterDto } from './saved-view-field-filter.js';
@@ -1391,6 +1392,7 @@ export interface AdminUserDto {
   banReason: string | null;
   accountStatus: AdminUserAccountStatus;
   createdAt: string;
+  lastLoginAt: string | null;
 }
 
 export interface AcceptUserInvitationRequest {

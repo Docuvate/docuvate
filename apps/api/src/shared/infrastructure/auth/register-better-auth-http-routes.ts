@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 
-import type { auth as authInstance } from './better-auth.config.js';
+import type { BetterAuthInstance } from './better-auth.config.js';
 import { isBetterAuthAdminPluginPath } from './block-better-auth-admin-routes.js';
 
-type AuthHandler = typeof authInstance;
+type AuthHandler = BetterAuthInstance;
 
 export function registerBetterAuthHttpRoutes(fastify: FastifyInstance, auth: AuthHandler): void {
   fastify.all(
