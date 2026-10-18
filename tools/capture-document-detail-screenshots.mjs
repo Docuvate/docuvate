@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Document detail acceptance captures: layout viewer modes + chat tab at repo HEAD.
- * Prereq: stack up, seed-e2e-smoke-user.mjs. Set LAYOUT_SCREENSHOT_OUT (Agent Store path).
+ * Prereq: stack up, seed-e2e-smoke-user.mjs. Set LAYOUT_SCREENSHOT_OUT to write outside the repo.
  */
 import { chromium } from 'playwright';
 import { join } from 'node:path';

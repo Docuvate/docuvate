@@ -7,6 +7,7 @@ useDefault = true
 description = "Known test fixtures and local dev defaults"
 paths = [
   '''^pnpm-lock\.yaml$''',
+  '''^research/ml_pipeline_v010/results/chat_llamacpp_qwen3_compare\.json$''',
 ]
 
 regexes = [

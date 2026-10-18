@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '../../..');
 const EXPECT_SHA = execSync('git -C ' + REPO_ROOT + ' rev-parse HEAD').toString().trim();
 const OUT =
-  process.env.SCREENSHOT_DIR ?? '.artifacts/pr42-screenshots';
+  process.env.SCREENSHOT_DIR ?? '.artifacts/paper-layout-screenshots';
 const PAPER_PDF =
   process.env.PAPER_PDF ??
   path.join(REPO_ROOT, 'tools/screenshots/layout/fixtures/synthetic-paper.pdf');
