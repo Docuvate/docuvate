@@ -50,4 +50,3 @@ Extend tokens here. Do not fork a parallel theme system.
 
 ## Reference
 
-Paperless-ngx parity for filter bar, colored rectangular tags, and matching dialog: see `docs/parity-paperless.md`.

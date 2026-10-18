@@ -1,14 +1,8 @@
 {
-  "name": "seeds",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "name": "docuvate-e2e-fixture-generator",
+  "private": true,
+  "type": "module",
+  "description": "Generates e2e/fixtures/synthetic-upload.pdf",
   "dependencies": {
     "pdf-lib": "^1.17.1"
   }

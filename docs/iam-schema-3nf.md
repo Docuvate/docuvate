@@ -1,6 +1,6 @@
 # IAM / admin schema (3NF)
 
-Owner rule: schema at least **3NF** (no repeating groups, no transitive dependencies, no duplicated derivable facts; JSONB only for opaque payloads that are never filtered or indexed).
+Rule: schema at least **3NF** (no repeating groups, no transitive dependencies, no duplicated derivable facts; JSONB only for opaque payloads that are never filtered or indexed).
 
 ## Installation roles and suspension
 

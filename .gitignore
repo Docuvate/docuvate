@@ -73,7 +73,6 @@ packages/sdk-flutter/pubspec.lock
 packages/sdk-flutter/example/.dart_tool/
 packages/sdk-flutter/example/pubspec.lock
 
-tools/screenshots/sftp/out/
 tools/flutter
 
 # Local screenshot / capture output

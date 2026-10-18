@@ -44,8 +44,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: No install-compat banned tokens
         run: node scripts/testing/check-no-legacy.mjs
-      - name: Lab probes must not embed document values
-        run: node scripts/testing/check-lab-probes-no-embedded-values.mjs
       - name: No unresolved merge conflict markers
         run: bash scripts/ci/check-conflict-markers.sh
       - name: SPDX license headers

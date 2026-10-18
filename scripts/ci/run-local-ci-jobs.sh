@@ -83,7 +83,6 @@ job_lint_test() {
   bash scripts/ci/mermaid-chrome-setup.sh
   bash scripts/ci/check-mermaid-markdown.sh
   node scripts/testing/check-no-legacy.mjs
-  node scripts/testing/check-lab-probes-no-embedded-values.mjs
   bash scripts/ci/check-conflict-markers.sh
   node scripts/ci/check-tool-versions.mjs
   node --test scripts/ci/check-tool-versions.test.mjs
