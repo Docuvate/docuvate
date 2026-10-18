@@ -1,0 +1,15 @@
+@import '@docuvate/tokens/css';
+
+:root {
+  --chip-max-width: 14rem;
+  --dv-header-control-height: var(--dv-control-height);
+  --dv-icon-btn-sm: var(--dv-control-icon-btn-sm);
+  --dv-icon-btn-md: var(--dv-control-icon-btn-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

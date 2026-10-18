@@ -1,0 +1,1108 @@
+{
+  "version": 1,
+  "frozen_seed": 88442110,
+  "doc_count": 100,
+  "split": "frozen_eval_v2",
+  "documents": [
+    {
+      "id": "frozen2_invoice_0000",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Cedar Legal Partners KG\nHonorarnote Nr. 0000\nEndsumme: 14.414,50 EUR\nDatum 08.07.2024",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "14414.50",
+        "date": "08.07.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0001",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Havelstrom IT KG\nHonorarnote Nr. 0001\nEndsumme: 89.052,50 EUR\nDatum 22.09.2024",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "89052.50",
+        "date": "22.09.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0002",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0002\nBlaufeld Engineering AG\nF\u00e4lliger Gesamtbetrag 79.909,99 EUR\nZahlbar bis 06.05.2024",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "79909.99",
+        "date": "06.05.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0003",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0003\nHavelstrom IT KG\nF\u00e4lliger Gesamtbetrag 50.846,99 EUR\nZahlbar bis 22.05.2026",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "50846.99",
+        "date": "22.05.2026"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0004",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Eichenwald Finanz GmbH\nHonorarnote Nr. 0004\nEndsumme: 57.106,50 EUR\nDatum 05.07.2024",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "57106.50",
+        "date": "05.07.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0005",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Iris Compliance GmbH\nHonorarnote Nr. 0005\nEndsumme: 24.588,99 EUR\nDatum 22.07.2025",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "24588.99",
+        "date": "22.07.2025"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0006",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Cedar Legal Partners KG\nHonorarnote Nr. 0006\nEndsumme: 46.058,99 EUR\nDatum 19.04.2026",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "46058.99",
+        "date": "19.04.2026"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0007",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0007\nHavelstrom IT KG\nF\u00e4lliger Gesamtbetrag 48.996,50 EUR\nZahlbar bis 22.02.2025",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "48996.50",
+        "date": "22.02.2025"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0008",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0008\nIris Compliance GmbH\nF\u00e4lliger Gesamtbetrag 32.624,00 EUR\nZahlbar bis 24.02.2024",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "32624.00",
+        "date": "24.02.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0009",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Blaufeld Engineering AG\nHonorarnote Nr. 0009\nEndsumme: 66.760,00 EUR\nDatum 10.02.2025",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "66760.00",
+        "date": "10.02.2025"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0010",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Havelstrom IT KG\nHonorarnote Nr. 0010\nEndsumme: 50.298,99 EUR\nDatum 05.08.2026",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "50298.99",
+        "date": "05.08.2026"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0011",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Granit Health Services GmbH\nHonorarnote Nr. 0011\nEndsumme: 76.637,99 EUR\nDatum 17.12.2026",
+      "expected": {
+        "vendor": "Granit Health Services GmbH",
+        "amount": "76637.99",
+        "date": "17.12.2026"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0012",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0012\nIris Compliance GmbH\nF\u00e4lliger Gesamtbetrag 30.460,50 EUR\nZahlbar bis 13.05.2025",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "30460.50",
+        "date": "13.05.2025"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0013",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0013\nHavelstrom IT KG\nF\u00e4lliger Gesamtbetrag 13.694,00 EUR\nZahlbar bis 27.05.2024",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "13694.00",
+        "date": "27.05.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0014",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Granit Health Services GmbH\nHonorarnote Nr. 0014\nEndsumme: 87.390,50 EUR\nDatum 21.10.2026",
+      "expected": {
+        "vendor": "Granit Health Services GmbH",
+        "amount": "87390.50",
+        "date": "21.10.2026"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0015",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0015\nCedar Legal Partners KG\nF\u00e4lliger Gesamtbetrag 72.550,50 EUR\nZahlbar bis 08.05.2024",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "72550.50",
+        "date": "08.05.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0016",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0016\nFjord Analytics AG\nF\u00e4lliger Gesamtbetrag 37.724,00 EUR\nZahlbar bis 24.10.2024",
+      "expected": {
+        "vendor": "Fjord Analytics AG",
+        "amount": "37724.00",
+        "date": "24.10.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0017",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Blaufeld Engineering AG\nHonorarnote Nr. 0017\nEndsumme: 52.179,50 EUR\nDatum 10.03.2026",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "52179.50",
+        "date": "10.03.2026"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0018",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Iris Compliance GmbH\nHonorarnote Nr. 0018\nEndsumme: 79.429,99 EUR\nDatum 03.07.2026",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "79429.99",
+        "date": "03.07.2026"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0019",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Aurora MedTech GmbH\nHonorarnote Nr. 0019\nEndsumme: 16.619,00 EUR\nDatum 16.02.2024",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "16619.00",
+        "date": "16.02.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0020",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0020\nEichenwald Finanz GmbH\nF\u00e4lliger Gesamtbetrag 87.623,00 EUR\nZahlbar bis 03.05.2026",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "87623.00",
+        "date": "03.05.2026"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0021",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Leistungsabrechnung 0021\nHavelstrom IT KG\nF\u00e4lliger Gesamtbetrag 28.797,00 EUR\nZahlbar bis 22.10.2025",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "28797.00",
+        "date": "22.10.2025"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0022",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Fjord Analytics AG\nHonorarnote Nr. 0022\nEndsumme: 88.502,50 EUR\nDatum 23.12.2024",
+      "expected": {
+        "vendor": "Fjord Analytics AG",
+        "amount": "88502.50",
+        "date": "23.12.2024"
+      }
+    },
+    {
+      "id": "frozen2_invoice_0023",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Granit Health Services GmbH\nHonorarnote Nr. 0023\nEndsumme: 44.193,50 EUR\nDatum 03.05.2025",
+      "expected": {
+        "vendor": "Granit Health Services GmbH",
+        "amount": "44193.50",
+        "date": "03.05.2025"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0000",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nBlaufeld Engineering AG\nGartenstra\u00dfe 6\n\nAbrechnung 0000\nBrutto 34.478,00 EUR\nTermin 24.11.2024",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "34478.00",
+        "date": "24.11.2024"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0001",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nEichenwald Finanz GmbH\nGartenstra\u00dfe 6\n\nAbrechnung 0001\nBrutto 79.084,99 EUR\nTermin 23.04.2024",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "79084.99",
+        "date": "23.04.2024"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0002",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nDelta Harbor Logistics UG\nMarktplatz 11\n\nAbrechnung 0002\nBrutto 54.023,99 EUR\nTermin 19.03.2024",
+      "expected": {
+        "vendor": "Delta Harbor Logistics UG",
+        "amount": "54023.99",
+        "date": "19.03.2024"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0003",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nJade Consulting AG\nIndustriepark 2\n\nAbrechnung 0003\nBrutto 81.947,50 EUR\nTermin 04.02.2025",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "81947.50",
+        "date": "04.02.2025"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0004",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nCedar Legal Partners KG\nGartenstra\u00dfe 6\n\nAbrechnung 0004\nBrutto 41.910,99 EUR\nTermin 17.04.2026",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "41910.99",
+        "date": "17.04.2026"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0005",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nJade Consulting AG\nIndustriepark 2\n\nAbrechnung 0005\nBrutto 72.983,50 EUR\nTermin 24.01.2024",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "72983.50",
+        "date": "24.01.2024"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0006",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nAurora MedTech GmbH\nUferweg 14\n\nAbrechnung 0006\nBrutto 16.956,00 EUR\nTermin 19.09.2024",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "16956.00",
+        "date": "19.09.2024"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0007",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nJade Consulting AG\nGartenstra\u00dfe 6\n\nAbrechnung 0007\nBrutto 15.716,00 EUR\nTermin 11.01.2026",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "15716.00",
+        "date": "11.01.2026"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0008",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nJade Consulting AG\nIndustriepark 2\n\nAbrechnung 0008\nBrutto 19.596,99 EUR\nTermin 07.12.2026",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "19596.99",
+        "date": "07.12.2026"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0009",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nAurora MedTech GmbH\nUferweg 14\n\nAbrechnung 0009\nBrutto 3.965,99 EUR\nTermin 10.12.2025",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "3965.99",
+        "date": "10.12.2025"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0010",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nIris Compliance GmbH\nGartenstra\u00dfe 6\n\nAbrechnung 0010\nBrutto 45.958,00 EUR\nTermin 21.12.2025",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "45958.00",
+        "date": "21.12.2025"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0011",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nCedar Legal Partners KG\nMarktplatz 11\n\nAbrechnung 0011\nBrutto 67.252,50 EUR\nTermin 15.06.2024",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "67252.50",
+        "date": "15.06.2024"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0012",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nFjord Analytics AG\nMarktplatz 11\n\nAbrechnung 0012\nBrutto 30.796,00 EUR\nTermin 28.04.2026",
+      "expected": {
+        "vendor": "Fjord Analytics AG",
+        "amount": "30796.00",
+        "date": "28.04.2026"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0013",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nCedar Legal Partners KG\nMarktplatz 11\n\nAbrechnung 0013\nBrutto 24.591,50 EUR\nTermin 08.06.2025",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "24591.50",
+        "date": "08.06.2025"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0014",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nCedar Legal Partners KG\nIndustriepark 2\n\nAbrechnung 0014\nBrutto 2.696,50 EUR\nTermin 16.09.2025",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "2696.50",
+        "date": "16.09.2025"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0015",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nDelta Harbor Logistics UG\nUferweg 14\n\nAbrechnung 0015\nBrutto 13.626,00 EUR\nTermin 14.05.2025",
+      "expected": {
+        "vendor": "Delta Harbor Logistics UG",
+        "amount": "13626.00",
+        "date": "14.05.2025"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0016",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nDelta Harbor Logistics UG\nMarktplatz 11\n\nAbrechnung 0016\nBrutto 69.703,99 EUR\nTermin 09.11.2025",
+      "expected": {
+        "vendor": "Delta Harbor Logistics UG",
+        "amount": "69703.99",
+        "date": "09.11.2025"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0017",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nJade Consulting AG\nIndustriepark 2\n\nAbrechnung 0017\nBrutto 80.724,99 EUR\nTermin 14.09.2026",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "80724.99",
+        "date": "14.09.2026"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0018",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nEichenwald Finanz GmbH\nGartenstra\u00dfe 6\n\nAbrechnung 0018\nBrutto 13.940,50 EUR\nTermin 07.06.2026",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "13940.50",
+        "date": "07.06.2026"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0019",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nEichenwald Finanz GmbH\nUferweg 14\n\nAbrechnung 0019\nBrutto 33.043,99 EUR\nTermin 02.09.2024",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "33043.99",
+        "date": "02.09.2024"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0020",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nBlaufeld Engineering AG\nMarktplatz 11\n\nAbrechnung 0020\nBrutto 33.671,99 EUR\nTermin 21.10.2026",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "33671.99",
+        "date": "21.10.2026"
+      }
+    },
+    {
+      "id": "frozen2_letterhead_0021",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "\u25c6\nAurora MedTech GmbH\nUferweg 14\n\nAbrechnung 0021\nBrutto 47.888,00 EUR\nTermin 16.09.2025",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "47888.00",
+        "date": "16.09.2025"
+      }
+    },
+    {
+      "id": "frozen2_footer_0000",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0000\n\nPositionen laut Anhang.\n\nForderung 25.182,50 EUR\nFrist 12.03.2025\n\n\u2014\nJade Consulting AG\nUferweg 14",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "25182.50",
+        "date": "12.03.2025"
+      }
+    },
+    {
+      "id": "frozen2_footer_0001",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0001\n\nPositionen laut Anhang.\n\nForderung 86.495,50 EUR\nFrist 09.02.2024\n\n\u2014\nDelta Harbor Logistics UG\nIndustriepark 2",
+      "expected": {
+        "vendor": "Delta Harbor Logistics UG",
+        "amount": "86495.50",
+        "date": "09.02.2024"
+      }
+    },
+    {
+      "id": "frozen2_footer_0002",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0002\n\nPositionen laut Anhang.\n\nForderung 65.591,99 EUR\nFrist 21.08.2025\n\n\u2014\nJade Consulting AG\nMarktplatz 11",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "65591.99",
+        "date": "21.08.2025"
+      }
+    },
+    {
+      "id": "frozen2_footer_0003",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0003\n\nPositionen laut Anhang.\n\nForderung 58.278,99 EUR\nFrist 12.10.2025\n\n\u2014\nHavelstrom IT KG\nIndustriepark 2",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "58278.99",
+        "date": "12.10.2025"
+      }
+    },
+    {
+      "id": "frozen2_footer_0004",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0004\n\nPositionen laut Anhang.\n\nForderung 44.026,00 EUR\nFrist 09.06.2026\n\n\u2014\nBlaufeld Engineering AG\nUferweg 14",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "44026.00",
+        "date": "09.06.2026"
+      }
+    },
+    {
+      "id": "frozen2_footer_0005",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0005\n\nPositionen laut Anhang.\n\nForderung 78.251,99 EUR\nFrist 16.11.2026\n\n\u2014\nBlaufeld Engineering AG\nMarktplatz 11",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "78251.99",
+        "date": "16.11.2026"
+      }
+    },
+    {
+      "id": "frozen2_footer_0006",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0006\n\nPositionen laut Anhang.\n\nForderung 81.073,00 EUR\nFrist 15.07.2024\n\n\u2014\nCedar Legal Partners KG\nMarktplatz 11",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "81073.00",
+        "date": "15.07.2024"
+      }
+    },
+    {
+      "id": "frozen2_footer_0007",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0007\n\nPositionen laut Anhang.\n\nForderung 47.099,50 EUR\nFrist 11.12.2026\n\n\u2014\nDelta Harbor Logistics UG\nMarktplatz 11",
+      "expected": {
+        "vendor": "Delta Harbor Logistics UG",
+        "amount": "47099.50",
+        "date": "11.12.2026"
+      }
+    },
+    {
+      "id": "frozen2_footer_0008",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0008\n\nPositionen laut Anhang.\n\nForderung 54.083,00 EUR\nFrist 19.10.2026\n\n\u2014\nGranit Health Services GmbH\nIndustriepark 2",
+      "expected": {
+        "vendor": "Granit Health Services GmbH",
+        "amount": "54083.00",
+        "date": "19.10.2026"
+      }
+    },
+    {
+      "id": "frozen2_footer_0009",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0009\n\nPositionen laut Anhang.\n\nForderung 27.000,00 EUR\nFrist 11.08.2026\n\n\u2014\nJade Consulting AG\nGartenstra\u00dfe 6",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "27000.00",
+        "date": "11.08.2026"
+      }
+    },
+    {
+      "id": "frozen2_footer_0010",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0010\n\nPositionen laut Anhang.\n\nForderung 23.452,50 EUR\nFrist 03.11.2025\n\n\u2014\nDelta Harbor Logistics UG\nMarktplatz 11",
+      "expected": {
+        "vendor": "Delta Harbor Logistics UG",
+        "amount": "23452.50",
+        "date": "03.11.2025"
+      }
+    },
+    {
+      "id": "frozen2_footer_0011",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0011\n\nPositionen laut Anhang.\n\nForderung 27.327,00 EUR\nFrist 22.04.2024\n\n\u2014\nFjord Analytics AG\nGartenstra\u00dfe 6",
+      "expected": {
+        "vendor": "Fjord Analytics AG",
+        "amount": "27327.00",
+        "date": "22.04.2024"
+      }
+    },
+    {
+      "id": "frozen2_footer_0012",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0012\n\nPositionen laut Anhang.\n\nForderung 2.105,50 EUR\nFrist 10.05.2026\n\n\u2014\nAurora MedTech GmbH\nMarktplatz 11",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "2105.50",
+        "date": "10.05.2026"
+      }
+    },
+    {
+      "id": "frozen2_footer_0013",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0013\n\nPositionen laut Anhang.\n\nForderung 17.234,50 EUR\nFrist 13.06.2024\n\n\u2014\nCedar Legal Partners KG\nUferweg 14",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "17234.50",
+        "date": "13.06.2024"
+      }
+    },
+    {
+      "id": "frozen2_footer_0014",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0014\n\nPositionen laut Anhang.\n\nForderung 7.133,99 EUR\nFrist 07.02.2026\n\n\u2014\nHavelstrom IT KG\nUferweg 14",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "7133.99",
+        "date": "07.02.2026"
+      }
+    },
+    {
+      "id": "frozen2_footer_0015",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0015\n\nPositionen laut Anhang.\n\nForderung 82.434,50 EUR\nFrist 14.12.2026\n\n\u2014\nGranit Health Services GmbH\nUferweg 14",
+      "expected": {
+        "vendor": "Granit Health Services GmbH",
+        "amount": "82434.50",
+        "date": "14.12.2026"
+      }
+    },
+    {
+      "id": "frozen2_footer_0016",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0016\n\nPositionen laut Anhang.\n\nForderung 65.502,00 EUR\nFrist 24.11.2025\n\n\u2014\nAurora MedTech GmbH\nIndustriepark 2",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "65502.00",
+        "date": "24.11.2025"
+      }
+    },
+    {
+      "id": "frozen2_footer_0017",
+      "category": "invoice",
+      "split": "frozen_eval_v2",
+      "text": "Statusbericht 0017\n\nPositionen laut Anhang.\n\nForderung 85.587,50 EUR\nFrist 14.09.2024\n\n\u2014\nGranit Health Services GmbH\nIndustriepark 2",
+      "expected": {
+        "vendor": "Granit Health Services GmbH",
+        "amount": "85587.50",
+        "date": "14.09.2024"
+      }
+    },
+    {
+      "id": "frozen2_iban_0000",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0000\n\nSaldo 55.206,00 EUR\nStichtag 24.08.2024\n\nDE12 5001 0517 0021 0489 8788\nAurora MedTech GmbH",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "55206.00",
+        "date": "24.08.2024"
+      }
+    },
+    {
+      "id": "frozen2_iban_0001",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0001\n\nSaldo 47.800,50 EUR\nStichtag 25.01.2025\n\nDE12 5001 0517 0021 0489 4807\nBlaufeld Engineering AG",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "47800.50",
+        "date": "25.01.2025"
+      }
+    },
+    {
+      "id": "frozen2_iban_0002",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0002\n\nSaldo 75.180,00 EUR\nStichtag 18.01.2025\n\nDE12 5001 0517 0021 0489 4601\nAurora MedTech GmbH",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "75180.00",
+        "date": "18.01.2025"
+      }
+    },
+    {
+      "id": "frozen2_iban_0003",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0003\n\nSaldo 33.950,50 EUR\nStichtag 23.03.2026\n\nDE12 5001 0517 0021 0489 9852\nCedar Legal Partners KG",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "33950.50",
+        "date": "23.03.2026"
+      }
+    },
+    {
+      "id": "frozen2_iban_0004",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0004\n\nSaldo 82.797,50 EUR\nStichtag 27.07.2026\n\nDE12 5001 0517 0021 0489 8850\nEichenwald Finanz GmbH",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "82797.50",
+        "date": "27.07.2026"
+      }
+    },
+    {
+      "id": "frozen2_iban_0005",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0005\n\nSaldo 5.602,99 EUR\nStichtag 23.02.2024\n\nDE12 5001 0517 0021 0489 4461\nJade Consulting AG",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "5602.99",
+        "date": "23.02.2024"
+      }
+    },
+    {
+      "id": "frozen2_iban_0006",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0006\n\nSaldo 26.342,00 EUR\nStichtag 16.08.2024\n\nDE12 5001 0517 0021 0489 7761\nBlaufeld Engineering AG",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "26342.00",
+        "date": "16.08.2024"
+      }
+    },
+    {
+      "id": "frozen2_iban_0007",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0007\n\nSaldo 15.467,00 EUR\nStichtag 25.03.2026\n\nDE12 5001 0517 0021 0489 4981\nBlaufeld Engineering AG",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "15467.00",
+        "date": "25.03.2026"
+      }
+    },
+    {
+      "id": "frozen2_iban_0008",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0008\n\nSaldo 32.517,50 EUR\nStichtag 14.11.2024\n\nDE12 5001 0517 0021 0489 7604\nGranit Health Services GmbH",
+      "expected": {
+        "vendor": "Granit Health Services GmbH",
+        "amount": "32517.50",
+        "date": "14.11.2024"
+      }
+    },
+    {
+      "id": "frozen2_iban_0009",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0009\n\nSaldo 46.291,99 EUR\nStichtag 09.01.2025\n\nDE12 5001 0517 0021 0489 4426\nCedar Legal Partners KG",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "46291.99",
+        "date": "09.01.2025"
+      }
+    },
+    {
+      "id": "frozen2_iban_0010",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0010\n\nSaldo 9.164,00 EUR\nStichtag 16.08.2024\n\nDE12 5001 0517 0021 0489 3846\nDelta Harbor Logistics UG",
+      "expected": {
+        "vendor": "Delta Harbor Logistics UG",
+        "amount": "9164.00",
+        "date": "16.08.2024"
+      }
+    },
+    {
+      "id": "frozen2_iban_0011",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0011\n\nSaldo 35.106,00 EUR\nStichtag 03.10.2024\n\nDE12 5001 0517 0021 0489 9093\nIris Compliance GmbH",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "35106.00",
+        "date": "03.10.2024"
+      }
+    },
+    {
+      "id": "frozen2_iban_0012",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0012\n\nSaldo 25.497,00 EUR\nStichtag 02.09.2026\n\nDE12 5001 0517 0021 0489 8816\nFjord Analytics AG",
+      "expected": {
+        "vendor": "Fjord Analytics AG",
+        "amount": "25497.00",
+        "date": "02.09.2026"
+      }
+    },
+    {
+      "id": "frozen2_iban_0013",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0013\n\nSaldo 82.162,00 EUR\nStichtag 23.09.2024\n\nDE12 5001 0517 0021 0489 8108\nJade Consulting AG",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "82162.00",
+        "date": "23.09.2024"
+      }
+    },
+    {
+      "id": "frozen2_iban_0014",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0014\n\nSaldo 88.345,99 EUR\nStichtag 18.09.2026\n\nDE12 5001 0517 0021 0489 9554\nCedar Legal Partners KG",
+      "expected": {
+        "vendor": "Cedar Legal Partners KG",
+        "amount": "88345.99",
+        "date": "18.09.2026"
+      }
+    },
+    {
+      "id": "frozen2_iban_0015",
+      "category": "notice",
+      "split": "frozen_eval_v2",
+      "text": "Zahlungserinnerung 0015\n\nSaldo 31.721,50 EUR\nStichtag 11.07.2026\n\nDE12 5001 0517 0021 0489 1675\nAurora MedTech GmbH",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "31721.50",
+        "date": "11.07.2026"
+      }
+    },
+    {
+      "id": "frozen2_po_0000",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00000\nLieferant: Aurora MedTech GmbH\nAuftragswert 42.030,00 EUR\nBestellt am 12.04.2026",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "42030.00",
+        "date": "12.04.2026"
+      }
+    },
+    {
+      "id": "frozen2_po_0001",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00001\nLieferant: Eichenwald Finanz GmbH\nAuftragswert 39.477,00 EUR\nBestellt am 07.09.2025",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "39477.00",
+        "date": "07.09.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0002",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00002\nLieferant: Blaufeld Engineering AG\nAuftragswert 25.279,50 EUR\nBestellt am 09.08.2025",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "25279.50",
+        "date": "09.08.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0003",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00003\nLieferant: Blaufeld Engineering AG\nAuftragswert 65.932,00 EUR\nBestellt am 26.10.2025",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "65932.00",
+        "date": "26.10.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0004",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00004\nLieferant: Blaufeld Engineering AG\nAuftragswert 46.009,50 EUR\nBestellt am 16.12.2024",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "46009.50",
+        "date": "16.12.2024"
+      }
+    },
+    {
+      "id": "frozen2_po_0005",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00005\nLieferant: Aurora MedTech GmbH\nAuftragswert 58.202,00 EUR\nBestellt am 18.12.2024",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "58202.00",
+        "date": "18.12.2024"
+      }
+    },
+    {
+      "id": "frozen2_po_0006",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00006\nLieferant: Havelstrom IT KG\nAuftragswert 26.423,00 EUR\nBestellt am 21.12.2026",
+      "expected": {
+        "vendor": "Havelstrom IT KG",
+        "amount": "26423.00",
+        "date": "21.12.2026"
+      }
+    },
+    {
+      "id": "frozen2_po_0007",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00007\nLieferant: Blaufeld Engineering AG\nAuftragswert 58.380,00 EUR\nBestellt am 19.06.2025",
+      "expected": {
+        "vendor": "Blaufeld Engineering AG",
+        "amount": "58380.00",
+        "date": "19.06.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0008",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00008\nLieferant: Delta Harbor Logistics UG\nAuftragswert 12.334,99 EUR\nBestellt am 02.05.2025",
+      "expected": {
+        "vendor": "Delta Harbor Logistics UG",
+        "amount": "12334.99",
+        "date": "02.05.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0009",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00009\nLieferant: Iris Compliance GmbH\nAuftragswert 30.513,99 EUR\nBestellt am 20.12.2025",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "30513.99",
+        "date": "20.12.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0010",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00010\nLieferant: Iris Compliance GmbH\nAuftragswert 83.020,50 EUR\nBestellt am 15.11.2026",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "83020.50",
+        "date": "15.11.2026"
+      }
+    },
+    {
+      "id": "frozen2_po_0011",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00011\nLieferant: Jade Consulting AG\nAuftragswert 25.561,00 EUR\nBestellt am 05.12.2024",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "25561.00",
+        "date": "05.12.2024"
+      }
+    },
+    {
+      "id": "frozen2_po_0012",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00012\nLieferant: Aurora MedTech GmbH\nAuftragswert 69.241,99 EUR\nBestellt am 03.08.2025",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "69241.99",
+        "date": "03.08.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0013",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00013\nLieferant: Eichenwald Finanz GmbH\nAuftragswert 79.063,99 EUR\nBestellt am 09.02.2026",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "79063.99",
+        "date": "09.02.2026"
+      }
+    },
+    {
+      "id": "frozen2_po_0014",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00014\nLieferant: Iris Compliance GmbH\nAuftragswert 89.321,00 EUR\nBestellt am 06.06.2025",
+      "expected": {
+        "vendor": "Iris Compliance GmbH",
+        "amount": "89321.00",
+        "date": "06.06.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0015",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00015\nLieferant: Aurora MedTech GmbH\nAuftragswert 44.303,99 EUR\nBestellt am 10.08.2025",
+      "expected": {
+        "vendor": "Aurora MedTech GmbH",
+        "amount": "44303.99",
+        "date": "10.08.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0016",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00016\nLieferant: Eichenwald Finanz GmbH\nAuftragswert 31.306,00 EUR\nBestellt am 28.09.2025",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "31306.00",
+        "date": "28.09.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0017",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00017\nLieferant: Jade Consulting AG\nAuftragswert 29.505,00 EUR\nBestellt am 07.08.2026",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "29505.00",
+        "date": "07.08.2026"
+      }
+    },
+    {
+      "id": "frozen2_po_0018",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00018\nLieferant: Jade Consulting AG\nAuftragswert 40.067,50 EUR\nBestellt am 25.05.2025",
+      "expected": {
+        "vendor": "Jade Consulting AG",
+        "amount": "40067.50",
+        "date": "25.05.2025"
+      }
+    },
+    {
+      "id": "frozen2_po_0019",
+      "category": "order",
+      "split": "frozen_eval_v2",
+      "text": "Bestellung PO-00019\nLieferant: Eichenwald Finanz GmbH\nAuftragswert 17.493,50 EUR\nBestellt am 03.06.2025",
+      "expected": {
+        "vendor": "Eichenwald Finanz GmbH",
+        "amount": "17493.50",
+        "date": "03.06.2025"
+      }
+    }
+  ]
+}

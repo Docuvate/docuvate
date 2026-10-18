@@ -1,0 +1,27 @@
+# Example: StackGres 1.19 cluster for Docuvate (PostgreSQL 18.6).
+# Not wired into the chart — set DATABASE_URL in docuvate-secrets to this cluster's rw service.
+#
+# Required extensions:
+#   pgcrypto — initial schema (gen_random_uuid)
+#   pg_trgm: fuzzy search; declare now so StackGres fetches contrib on apply
+#
+# Data directory: PG 18 uses /var/lib/postgresql/<major>/docker (StackGres 1.19 matches upstream layout).
+# Do not mount or override PGDATA to .../data/pgdata (PG16-era paths).
+#
+# Ref: https://stackgres.io/doc/1.19/administration/extensions/
+---
+apiVersion: stackgres.io/v1
+kind: SGCluster
+metadata:
+  name: docuvate-postgres
+  namespace: docuvate
+spec:
+  instances: 1
+  postgres:
+    version: "18.6"
+    extensions:
+      - name: pgcrypto
+      - name: pg_trgm
+  pods:
+    persistentVolume:
+      size: 20Gi

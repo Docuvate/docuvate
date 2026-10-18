@@ -1,0 +1,48 @@
+# Isolated Paperless-ngx stack for import E2E tests only (not part of the default Docuvate compose).
+name: docuvate-paperless-test
+
+services:
+  paperless-test-broker:
+    image: docker.io/library/redis:8-alpine@sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0
+  paperless-test-db:
+    image: docker.io/library/postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
+    volumes:
+      - paperless-test-pg:/var/lib/postgresql
+  paperless-test-web:
+    image: ghcr.io/paperless-ngx/paperless-ngx:3.3.0@sha256:6b94799bc769a063b3340cc5847402e626d4d91d29a295a8e747f8e9bead4207
+    depends_on:
+      - paperless-test-db
+      - paperless-test-broker
+    ports:
+      - '18080:8000'
+    environment:
+      PAPERLESS_REDIS: redis://paperless-test-broker:6379
+      PAPERLESS_DBHOST: paperless-test-db
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: paperless
+      PAPERLESS_DBNAME: paperless
+      PAPERLESS_ADMIN_USER: docuvate-test
+      PAPERLESS_ADMIN_PASSWORD: docuvate-test-secret
+      PAPERLESS_SECRET_KEY: docuvate-paperless-test-secret-key-not-for-production
+      PAPERLESS_OCR_MODE: skip
+      PAPERLESS_URL: http://localhost:18080
+      USERMAP_UID: '1000'
+      USERMAP_GID: '1000'
+    volumes:
+      - paperless-test-data:/usr/src/paperless/media
+      - paperless-test-export:/usr/src/paperless/export
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fsS http://localhost:8000/api/ >/dev/null || exit 1']
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 120s
+
+volumes:
+  paperless-test-pg:
+  paperless-test-data:
+  paperless-test-export:

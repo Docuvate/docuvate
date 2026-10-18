@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: docuvate-minio
+  labels:
+    app.kubernetes.io/name: docuvate-minio
+spec:
+  type: ClusterIP
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: docuvate-minio
+  ports:
+    - name: api
+      port: 9000
+      targetPort: api
+    - name: console
+      port: 9001
+      targetPort: console

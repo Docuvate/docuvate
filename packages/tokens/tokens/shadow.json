@@ -1,0 +1,8 @@
+{
+  "shadow": {
+    "sm": { "value": "0 0.0625rem 0.125rem rgba(15, 23, 42, 0.06)" },
+    "md": { "value": "0 0.125rem 0.5rem rgba(15, 23, 42, 0.08)" },
+    "bar": { "value": "0 0.0625rem 0 rgba(15, 23, 42, 0.06)" },
+    "overlay": { "value": "0 0.75rem 2rem rgba(18, 15, 10, 0.18)" }
+  }
+}

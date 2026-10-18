@@ -1,0 +1,45 @@
+%PDF-1.4
+1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj
+2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj
+3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>endobj
+4 0 obj<< /Length 929 >>stream
+BT /F1 9 Tf 36 760 Td (Synthetic layout regression document with enough words to classify as born digital.) Tj ET
+BT /F2 13 Tf 40 720 Td (Synthetic electronic payroll certificate for tax year 2025 (fictional employer, no personal data)) Tj ET
+0.5 680 m 520 680 l S
+0.5 660 m 520 660 l S
+0.5 640 m 520 640 l S
+0.5 620 m 520 620 l S
+0.5 600 m 520 600 l S
+0.5 580 m 520 580 l S
+120 680 m 120 580 l S
+280 680 m 280 580 l S
+400 680 m 400 580 l S
+520 680 m 520 580 l S
+BT /F1 8 Tf 48 668 Td (1.) Tj ET
+BT /F1 8 Tf 130 668 Td (Reporting period) Tj ET
+BT /F1 8 Tf 410 668 Td (01.01. - 31.12.) Tj ET
+BT /F1 8 Tf 48 648 Td (3.) Tj ET
+BT /F1 8 Tf 130 648 Td (Gross wages incl. benefits) Tj ET
+BT /F1 8 Tf 410 648 Td (48.250,00) Tj ET
+BT /F1 8 Tf 48 628 Td (5.) Tj ET
+BT /F1 8 Tf 130 628 Td (Income tax withheld) Tj ET
+BT /F1 8 Tf 410 628 Td (9.120,00) Tj ET
+BT /F1 9 Tf 40 540 Td (Employee ID:) Tj ET
+BT /F1 9 Tf 200 540 Td (SYN-4711) Tj ET
+endstream
+endobj
+5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj
+6 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000056 00000 n 
+0000000111 00000 n 
+0000000245 00000 n 
+0000001223 00000 n 
+0000001291 00000 n 
+trailer<< /Size 7 /Root 1 0 R >>
+startxref
+1364
+%%EOF

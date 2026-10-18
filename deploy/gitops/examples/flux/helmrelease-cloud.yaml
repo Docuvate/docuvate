@@ -1,0 +1,23 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: docuvate
+  namespace: docuvate
+spec:
+  interval: 15m
+  chart:
+    spec:
+      chart: ./deploy/helm/docuvate
+      sourceRef:
+        kind: GitRepository
+        name: docuvate
+        namespace: flux-system
+  valuesFrom:
+    - kind: ConfigMap
+      name: docuvate-values-cloud
+      valuesKey: values-cloud.yaml
+  install:
+    createNamespace: true
+  upgrade:
+    remediation:
+      retries: 3

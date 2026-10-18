@@ -1,0 +1,1 @@
+-- Purge migration: removed rows are not restored on down.

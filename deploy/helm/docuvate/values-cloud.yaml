@@ -1,0 +1,57 @@
+ingress:
+  className: traefik
+  host: app.docuvate.example.com
+  tls:
+    - secretName: docuvate-tls
+      hosts:
+        - app.docuvate.example.com
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+config:
+  minioEndpoint: REPLACE_WITH_S3_ENDPOINT
+  minioPort: "443"
+  minioUseSsl: "true"
+  minioRegion: REPLACE_WITH_S3_REGION
+  publicWebUrl: https://app.docuvate.example.com
+  publicApiUrl: https://app.docuvate.example.com/api
+  smtpUrl: REPLACE_WITH_SMTP_URL
+
+api:
+  replicas: 2
+  hpa:
+    minReplicas: 2
+    maxReplicas: 10
+
+web:
+  replicas: 2
+
+worker:
+  replicas: 2
+  hpa:
+    minReplicas: 2
+    maxReplicas: 20
+  resources:
+    requests:
+      cpu: "2"
+      memory: 4Gi
+    limits:
+      cpu: "8"
+      memory: 8Gi
+
+postgres:
+  enabled: false
+
+minio:
+  enabled: false
+
+ollama:
+  enabled: false
+
+networkPolicies:
+  # k3s Traefik runs in kube-system; use ingress-nginx here if you install that controller instead.
+  ingressNamespace: kube-system
+  allowExternalEgress: true
+
+secrets:
+  create: false

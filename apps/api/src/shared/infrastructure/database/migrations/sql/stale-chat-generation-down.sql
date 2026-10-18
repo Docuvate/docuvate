@@ -1,0 +1,1 @@
+-- Irreversible data repair; down is a no-op.

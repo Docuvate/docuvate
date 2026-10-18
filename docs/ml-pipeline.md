@@ -1,0 +1,124 @@
+# Docuvate ML pipeline — current and target (Community Edition)
+
+This document describes how document understanding flows through the API and worker today, and the target architecture after central per-tenant document representation (R1).
+
+## One-sentence overview
+
+The API (NestJS) accepts uploads and forwards bytes to the worker (FastAPI) at `POST /extract`. The worker runs an integrated CPU chain (OCR → rotation → LUNA → TACO → **single encode** → NEST → fields → KITE metadata). The API persists text, blocks, layout IR, and the **central representation** once. Labels, duplicates, search, chat, and SPARK read stored vectors and tenant state—no second encode on the document body.
+
+## Target diagram
+
+```mermaid
+flowchart TB
+  U[Upload / Scan / Connector] --> OCR[OCR + Rotation<br/>words, boxes, pages]
+  OCR --> TREE[Layout tree<br/>page → column → line → block]
+  TREE --> LUNA[LUNA sections]
+  TREE --> TACO[TACO tables<br/>rows and cells]
+  LUNA & TACO --> CHK[Units: sections, paragraphs,<br/>table rows with header]
+  CHK --> ENC[Encoder once<br/>multilingual-e5-small, 384d, 512 tokens, MIT]
+  ENC --> REP
+  subgraph REP["Central representation Z(d) — per tenant (RLS)"]
+    Q8[int8 vector per unit]
+    BIN[48-byte binary code per unit<br/>Hamming prefilter]
+    DOC[Document: int8 mean + int8 max]
+  end
+  DOC --> LBL[Labels: prototype when N&lt;5,<br/>else LDA/NIW, temperature calibration, τ for P≥0.99]
+  DOC --> DUP[Duplicate candidates]
+  BIN --> SR[Search: binary prefilter → int8 rerank + BM25 RRF]
+  Q8 --> SR
+  SR --> CHAT[Cited chat rerank + LLM]
+  LBL --> UI[Labels tab: top-3, confidence, accept / reject / undo]
+```
+
+## Encoder and units
+
+| Item | Choice |
+|------|--------|
+| Model | `intfloat/multilingual-e5-small` (MIT, 384 dimensions, 512 tokens) |
+| Revision | `614241f622f53c4eeff9890bdc4f31cfecc418b3-onnx-int8` (HF weights @ `614241f622f53c4eeff9890bdc4f31cfecc418b3`, ONNX int8 graph) |
+| Prefixes | `passage: ` for document units, `query: ` for questions |
+| Runtime | ONNX Runtime CPU (`onnx/model_qint8_avx512_vnni.onnx`, ~118 MB); `DOCUVATE_ENCODER_INTRA_OP_THREADS` / `OMP_NUM_THREADS` tune `intra_op` threads; see [ML feature flags](./ml-feature-flags.md) |
+| Units | LUNA sections/paragraphs and TACO table rows (row text prefixed with header) when layout is available; otherwise paragraph splits of OCR text. Fixed 320/64 character windows are used only when layout units are unavailable. |
+| Spans | Each unit stores `page`, bounding box, `char_start`, `char_end`. |
+
+## Storage format
+
+| Layer | Format |
+|-------|--------|
+| Per unit | `vector_scale` (float) + 384-byte int8 vector (`bytea`) + 48-byte binary code `sign(R·z)` with fixed versioned rotation `R` |
+| Per document | int8 mean and int8 elementwise max over unit float vectors (no extra encoder call) |
+| Metadata | `encoder_id`, `encoder_revision`, `representation_version` |
+| Tables | `document_representation`, `document_representation_unit` (tenant-scoped, RLS) |
+| Retired JSONB embeddings | No longer written; `document_embeddings.embedding` and `document_text_chunks.embedding` are nullable |
+
+## Encoder revision upgrades
+
+When `encoder_revision` on stored representations no longer matches the worker’s active revision (for example after upgrading to ONNX int8 weights), the API enqueues **background re-index jobs** per tenant and document. Uploads are not blocked. Signed-in users monitor `GET /v1/settings/encoder-reindex`. Details: [ML feature flags](./ml-feature-flags.md).
+
+## Label heads
+
+| Stage | Rule |
+|-------|------|
+| Cold start | Prototype classifier while a label has fewer than 5 examples |
+| Warm | LDA / NIW sufficient statistics from 5 examples onward (existing closed-form NEST) |
+| Calibration | Per-tenant temperature (NLL on held-out own documents) and threshold τ for auto-assign at precision ≥ 0.99 |
+| Product | Below τ: suggest only; at or above τ with calibrated precision: auto-assign |
+
+Tenant statistics live in `tenant_label_prototype` and existing `embedding_density_*` tables, all under RLS.
+
+## Tenant isolation
+
+- Every representation, statistic, calibration, suggestion, and duplicate table carries `tenant_id NOT NULL`.
+- PostgreSQL RLS policy: `tenant_id = current_setting('app.tenant_id')`.
+- The API sets `app.tenant_id` inside tenant-scoped transactions (`withTenantPgClient`).
+- The worker is stateless and receives only the calling tenant’s NIW/calibration payload on `/extract`.
+
+## Licenses (models in this pipeline)
+
+| Component | Model | License |
+|-----------|--------|---------|
+| Document encoder | `intfloat/multilingual-e5-small` @ `614241f622f53c4eeff9890bdc4f31cfecc418b3` (ONNX int8 CPU) | MIT |
+| RAG reranker | `BAAI/bge-reranker-v2-m3-int8` | Apache-2.0 |
+| Chat LLM (default) | Ollama `qwen2.5:1.5b` | Apache-2.0 |
+| OCR (default) | PaddleOCR `german` | Apache-2.0 |
+| NEST | NIW / Student-t (no weights) | — |
+
+Non-permissive or research-only models are not used in the CE pipeline.
+
+## Upload path (R1)
+
+1. API loads tenant NIW state and calls worker `POST /extract` with `embeddingDensityState`.
+2. Worker runs the integrated pipeline; **one** `embed_passages` batch covers all units.
+3. API persists `document_representation` (+ units), then indexes search chunks from stored int8 vectors (no `/embed` on document text).
+4. Post-OCR pipeline runs label suggestions using the stored document mean vector and NEST; NEST stage availability is `ok` when tenant state is present.
+
+## Search and chat
+
+### Retrieval (document and library cited chat)
+
+1. BM25 / trigram candidates (unchanged).
+2. Binary Hamming prefilter on chunk `binary_code` (top k₁).
+3. int8 inner-product rerank on survivors.
+4. RRF fusion with lexical ranks.
+5. Cross-encoder rerank in worker (`/rag/retrieve`) for cited chat.
+6. Index units are LUNA sections / TACO table rows from the central representation when available (not fixed 128-token windows).
+
+### Chat query pipeline (API)
+
+| Stage | Contract | Model / rule | Metric (CI) |
+|-------|-----------|--------------|-------------|
+| Understand | `ResolvedQuery` + route | e5-small query embeddings vs committed intent centroids (`chat-intent-prototypes.json`); follow-up merge when consecutive user turns have cosine ≥ 0.55 | `chat_routing.intent_accuracy` ≥ 0.95, `chat_routing.follow_up_resolution` ≥ 0.90 |
+| Stats | `StatsAnswer` | Operation centroids (`chat-stats-operation-prototypes.json`); label slot = best cosine to tenant tag names (passage embeddings) | Integration + eval `eval/chat_de/` |
+| Small talk / OOS | `Answer` | Same intent head; deterministic locale templates | Routing eval |
+| Retrieve | `Candidates` | Hybrid + rerank; gates from `bench/rag_gate_calibrate.py` | `chat_extractive.citation_precision` |
+| Read | `Span` | Worker `extractive_reader.py`: `deepset/xlm-roberta-base-squad2-distilled` (MIT), fallback token–sentence overlap | `chat_extractive.answer_accuracy` |
+| Compose | `Answer` | Ollama OpenAI-compatible (`qwen2.5:1.5b` default) or verified cited JSON; extractive path without LLM | E2E bench |
+| Verify | `VerifiedAnswer` | Quote must appear in cited chunk body | Citation tests |
+
+Calibrated thresholds: `RAG_RERANKER_GATE_MIN` / `RAG_FUSION_GATE_MIN` from `bench/rag-gate-calibration-scores.json`; dense retrieval floor `DOCUVATE_DENSE_RETRIEVAL_GATE_MIN` (default 0.75 on e5-small cosine).
+
+German eval: `eval/chat_de/test.json` (≥150 routing cases); extractive corpus cases in `bench/model_gates/fixtures/chat_extractive_cases.json`.
+
+## Feedback
+
+Label accept, reject, and undo flow through corrections into NEST `/correct` and SPARK propagation; representation is not re-encoded on correction.

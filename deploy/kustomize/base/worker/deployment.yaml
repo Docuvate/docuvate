@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuvate-worker
+  labels:
+    app.kubernetes.io/name: docuvate-worker
+    app.kubernetes.io/component: worker
+    app.kubernetes.io/instance: docuvate
+    app.kubernetes.io/managed-by: kustomize
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: docuvate-worker
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/part-of: docuvate
+    spec:
+      serviceAccountName: docuvate-worker
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: worker
+          image: docuvate-worker
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: docuvate-config
+          env:
+            - name: WORKER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: WORKER_SECRET
+            - name: HOME
+              value: /opt/models
+            - name: FASTEMBED_CACHE_PATH
+              value: /opt/models/fastembed
+            - name: PADDLE_PDX_CACHE_HOME
+              value: /opt/models/paddle
+            - name: PADDLE_PREWARM_ON_START
+              value: "0"
+          startupProbe:
+            httpGet:
+              path: /v1/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: http
+            periodSeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

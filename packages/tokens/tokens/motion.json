@@ -1,0 +1,13 @@
+{
+  "motion": {
+    "duration": {
+      "fast": { "value": "120ms" },
+      "normal": { "value": "200ms" },
+      "slow": { "value": "320ms" }
+    },
+    "easing": {
+      "standard": { "value": "cubic-bezier(0.4, 0, 0.2, 1)" },
+      "emphasized": { "value": "cubic-bezier(0.2, 0, 0, 1)" }
+    }
+  }
+}

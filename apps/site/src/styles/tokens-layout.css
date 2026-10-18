@@ -1,0 +1,48 @@
+/** Marketing site: typography, spacing, radius (no app indigo color tokens). */
+
+:root {
+  --dv-font-family-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --dv-font-family-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --dv-font-size-3xl: 3.5rem;
+  --dv-font-size-2xl: 2.5rem;
+  --dv-font-size-xl: 1.75rem;
+  --dv-font-size-lg: 1.25rem;
+  --dv-font-size-md: 1rem;
+  --dv-font-size-sm: 0.875rem;
+  --dv-font-size-xs: 0.75rem;
+  --dv-font-weight-regular: 400;
+  --dv-font-weight-medium: 500;
+  --dv-font-weight-semibold: 600;
+  --dv-font-weight-bold: 700;
+  --dv-font-line-height-tight: 1.2;
+  --dv-font-line-height-normal: 1.5;
+  --dv-font-line-height-relaxed: 1.65;
+  --dv-space-2xs: 4px;
+  --dv-space-xs: 8px;
+  --dv-space-sm: 12px;
+  --dv-space-md: 16px;
+  --dv-space-lg: 24px;
+  --dv-space-xl: 32px;
+  --dv-space-2xl: 48px;
+  --dv-space-3xl: 72px;
+  --dv-layout-library-filter-min: 15rem;
+  --dv-layout-library-filter-max: 17.5rem;
+  --dv-radius-sm: 4px;
+  --dv-radius-md: 8px;
+  --dv-radius-lg: 12px;
+  --dv-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --dv-shadow-md: 0 2px 8px rgba(15, 23, 42, 0.08);
+  --dv-shadow-bar: 0 1px 0 rgba(15, 23, 42, 0.06);
+  --dv-motion-duration-fast: 120ms;
+  --dv-motion-duration-normal: 200ms;
+  --dv-motion-duration-slow: 320ms;
+  --dv-motion-easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --dv-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

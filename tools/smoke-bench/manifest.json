@@ -1,0 +1,106 @@
+{
+  "fixtures": [
+    { "file": "01-mietvertrag-synthetic.pdf", "title": "Mietvertrag synthetic", "mime": "application/pdf" },
+    { "file": "02-arbeitszeugnis-synthetic.pdf", "title": "Arbeitszeugnis synthetic", "mime": "application/pdf" },
+    { "file": "03-rechnung-nordwind.pdf", "title": "Rechnung Nordwind GmbH", "mime": "application/pdf" },
+    { "file": "04-kontoauszug-synthetic.pdf", "title": "Kontoauszug synthetic", "mime": "application/pdf" },
+    { "file": "05-bescheid-hundesteuer.pdf", "title": "Bescheid Hundesteuer", "mime": "application/pdf" },
+    { "file": "06-formular-antrag.pdf", "title": "Antragsformular", "mime": "application/pdf" },
+    { "file": "07-memo-english.pdf", "title": "Memo English", "mime": "application/pdf" },
+    { "file": "08-scanned-letter.pdf", "title": "Scanned letter", "mime": "application/pdf" },
+    {
+      "file": "09-memo-synthetic.docx",
+      "title": "Memo DOCX synthetic",
+      "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    {
+      "file": "12-costs-synthetic.xlsx",
+      "title": "Costs XLSX synthetic",
+      "mime": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    },
+    {
+      "file": "10-smart-dup-a.pdf",
+      "title": "Smart duplicate receipt A",
+      "mime": "application/pdf",
+      "documentDate": "2024-06-01",
+      "duplicateSmokeAnchor": true
+    },
+    {
+      "file": "11-smart-dup-b.pdf",
+      "title": "Smart duplicate receipt B",
+      "mime": "application/pdf",
+      "documentDate": "2024-06-01"
+    }
+  ],
+  "duplicateSmoke": {
+    "anchorTitle": "Smart duplicate receipt A",
+    "expectPairTitle": "Smart duplicate receipt B"
+  },
+  "chatChecks": [
+    {
+      "id": "fact",
+      "question": "Welche Gesamtsumme steht auf der Rechnung Nordwind?",
+      "expectCitationTitleContains": "Rechnung Nordwind",
+      "expectAbstention": false
+    },
+    {
+      "id": "count",
+      "question": "In wie vielen meiner Dokumente wird eine Jahresgebuehr fuer die Hundesteuer genannt?",
+      "expectMinCitations": 1,
+      "expectAnswerContainsAny": ["1", "ein", "eine", "einem"],
+      "expectAbstention": false
+    },
+    {
+      "id": "out-of-scope",
+      "question": "Wie wird das Wetter morgen in Berlin?",
+      "expectAbstention": true,
+      "expectMinCitations": 0
+    },
+    {
+      "id": "payslip-gross-oct-2024",
+      "newThread": true,
+      "question": "Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?",
+      "expectAnswerContainsAny": ["5.432,10"],
+      "expectMinCitations": 1,
+      "expectAbstention": false
+    },
+    {
+      "id": "lohnsteuer-2024",
+      "newThread": true,
+      "question": "Wie viel Lohnsteuer wurde mir laut Lohnsteuerbescheinigung 2024 insgesamt einbehalten?",
+      "expectAnswerContainsAny": ["12.345,67"],
+      "expectMinCitations": 1,
+      "expectAbstention": false
+    }
+  ],
+  "payrollFieldLearning": {
+    "correctionTitles": [
+      "Entgeltnachweis 03/2024",
+      "Entgeltnachweis 04/2024",
+      "Entgeltnachweis 05/2024"
+    ],
+    "probeTitle": "Entgeltnachweis 06/2024",
+    "fieldKey": "bruttoentgelt",
+    "correctionValue": "6.400,00",
+    "expectedProbeValue": "6.550,00"
+  },
+  "headerDateAdoption": {
+    "documentTitle": "Entgeltnachweis 01/2023",
+    "expectDocumentDate": "2023-01-01"
+  },
+  "labelExclusivity": {
+    "primaryTagName": "SmokePayPrimaryA",
+    "conflictingTagName": "SmokePayConflictingB",
+    "primaryLabelTitles": [
+      "Entgeltnachweis 01/2023",
+      "Entgeltnachweis 02/2023",
+      "Entgeltnachweis 03/2023"
+    ],
+    "conflictingLabelTitles": [
+      "Lohnsteuerbescheinigung 2023",
+      "Lohnsteuerbescheinigung 2024"
+    ],
+    "probeTitle": "Entgeltnachweis 04/2023",
+    "maxConflictingSuggestionConfidence": 0.899
+  }
+}

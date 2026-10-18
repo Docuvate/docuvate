@@ -1,0 +1,122 @@
+{{- if .Values.minio.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "docuvate-minio-init-%s" (include "docuvate.versionSuffix" .) }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: docuvate-minio-init
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        {{- include "docuvate.podSecurityRestricted" . | nindent 8 }}
+        {{- if not .Values.minio.initUseAwsCli }}
+        runAsUser: 65532
+        runAsGroup: 65532
+        {{- end }}
+      containers:
+        - name: mc
+          image: {{ .Values.minio.mcImage }}
+          {{- if .Values.minio.initUseAwsCli }}
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.existingSecret }}
+                  key: MINIO_ACCESS_KEY
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.existingSecret }}
+                  key: MINIO_SECRET_KEY
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              END=http://docuvate-minio-0.docuvate-minio:9000
+              until aws --endpoint-url "$END" s3 ls >/dev/null 2>&1; do sleep 2; done
+              aws --endpoint-url "$END" s3 mb s3://documents 2>/dev/null || true
+              aws --endpoint-url "$END" s3 ls s3://documents
+          {{- else }}
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.existingSecret }}
+                  key: MINIO_ACCESS_KEY
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.existingSecret }}
+                  key: MINIO_SECRET_KEY
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              mc alias set local http://docuvate-minio-0.docuvate-minio:9000 "$MINIO_ACCESS_KEY" "$MINIO_SECRET_KEY"
+              mc mb --ignore-existing local/documents
+              mc ls local/documents
+          {{- end }}
+          securityContext:
+            {{- include "docuvate.containerSecurityRestricted" . | nindent 12 }}
+            {{- if not .Values.minio.initUseAwsCli }}
+            runAsUser: 65532
+            runAsGroup: 65532
+            {{- end }}
+{{- end }}
+{{- if .Values.ollama.enabled }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ printf "docuvate-ollama-init-%s" (include "docuvate.versionSuffix" .) }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: docuvate-ollama-init
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        {{- include "docuvate.podSecurityRestricted" . | nindent 8 }}
+        runAsUser: 1000
+        runAsGroup: 1000
+      containers:
+        - name: pull
+          image: {{ .Values.ollama.image }}
+          env:
+            - name: OLLAMA_HOST
+              value: http://docuvate-ollama:11434
+            - name: OLLAMA_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: docuvate-config
+                  key: OLLAMA_MODEL
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ollama pull "$OLLAMA_MODEL"
+              ollama list
+          securityContext:
+            {{- include "docuvate.containerSecurityRestricted" . | nindent 12 }}
+            runAsUser: 1000
+            runAsGroup: 1000
+{{- end }}

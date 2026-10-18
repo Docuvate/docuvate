@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: docuvate-ollama-init-0-1-0
+  labels:
+    app.kubernetes.io/name: docuvate-ollama-init
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: docuvate-ollama-init
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: pull
+          image: ollama/ollama:0.12.6@sha256:a61a8fd395dbb931cc8cb1b5da7a2510746575c87113fdc45b647ee59ef7f808
+          env:
+            - name: OLLAMA_HOST
+              value: http://docuvate-ollama:11434
+            - name: OLLAMA_MODEL
+              valueFrom:
+                configMapKeyRef:
+                  name: docuvate-config
+                  key: OLLAMA_MODEL
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              ollama pull "${OLLAMA_MODEL}"
+              ollama list
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+            runAsUser: 1000
+            runAsGroup: 1000

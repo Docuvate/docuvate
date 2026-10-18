@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": false,
+    "paths": {
+      "@docuvate/contracts": ["packages/contracts/src/index.ts"],
+      "@docuvate/otel": ["packages/otel/src/index.ts"],
+      "@docuvate/eslint-config": ["packages/eslint-config/index.js"],
+      "@docuvate/tsconfig/*": ["packages/tsconfig/*"],
+      "@docuvate/testing": ["packages/testing/src/index.ts"],
+      "@docuvate/testing/*": ["packages/testing/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build", ".nx"]
+}

@@ -1,0 +1,17 @@
+nodejs 24.21.0
+pnpm 10.34.6
+python 3.12.15
+uv 0.12.23
+golang 1.26.9
+# docuvate:image:postgres=postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+# docuvate:image:valkey=valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507
+# docuvate:image:minio=cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0
+# docuvate:image:mailpit=axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+# docuvate:tool:puppeteer=23.11.1
+# docuvate:tool:mermaid-cli=11.12.0
+# docuvate:tool:playwright=1.64.0
+# docuvate:tool:typst=0.13.1
+# docuvate:tool:typst:checksum:x86_64-unknown-linux-musl=7d214bfeffc2e585dc422d1a09d2b144969421281e8c7f5d784b65fc69b5673f
+# docuvate:tool:typst:checksum:aarch64-unknown-linux-musl=4f5b7ee6e57fb639019ee0f6bffcf940edad228ede6ff5269a9f05a1544ceed4
+# docuvate:tool:typst:checksum:x86_64-apple-darwin=4dabfe647f7f01ed9cc13ad8196a6c7f5e16f0732821b522d50740d3a9f5207b
+# docuvate:tool:typst:checksum:aarch64-apple-darwin=541e4f9eaca3f34ee865f81fc663e4839cb84d6253f71a372cd855b0a7283213

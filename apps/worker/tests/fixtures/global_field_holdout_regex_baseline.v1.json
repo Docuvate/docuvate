@@ -1,0 +1,501 @@
+{
+  "version": 1,
+  "predictions": [
+    {
+      "id": "letter_000",
+      "predicted": {
+        "date": "11.07.2023"
+      }
+    },
+    {
+      "id": "letter_001",
+      "predicted": {
+        "date": "12.02.2023",
+        "vendor": "Demo Nord GmbH"
+      }
+    },
+    {
+      "id": "letter_002",
+      "predicted": {
+        "date": "12.04.2024",
+        "vendor": "Acme GmbH"
+      }
+    },
+    {
+      "id": "letter_003",
+      "predicted": {
+        "date": "16.04.2025",
+        "vendor": "Contoso AG"
+      }
+    },
+    {
+      "id": "letter_004",
+      "predicted": {
+        "date": "15.07.2025"
+      }
+    },
+    {
+      "id": "letter_005",
+      "predicted": {
+        "date": "19.07.2024",
+        "vendor": "Demo Nord GmbH"
+      }
+    },
+    {
+      "id": "letter_006",
+      "predicted": {
+        "date": "15.10.2025"
+      }
+    },
+    {
+      "id": "letter_007",
+      "predicted": {
+        "date": "10.08.2023"
+      }
+    },
+    {
+      "id": "letter_008",
+      "predicted": {
+        "date": "13.01.2024"
+      }
+    },
+    {
+      "id": "letter_009",
+      "predicted": {
+        "date": "13.04.2025"
+      }
+    },
+    {
+      "id": "letter_010",
+      "predicted": {
+        "date": "25.07.2025",
+        "vendor": "Contoso AG"
+      }
+    },
+    {
+      "id": "letter_011",
+      "predicted": {
+        "date": "04.12.2024"
+      }
+    },
+    {
+      "id": "letter_012",
+      "predicted": {
+        "date": "13.12.2024",
+        "vendor": "Acme GmbH"
+      }
+    },
+    {
+      "id": "letter_013",
+      "predicted": {
+        "date": "07.04.2024",
+        "vendor": "Tech Solutions UG"
+      }
+    },
+    {
+      "id": "letter_014",
+      "predicted": {
+        "date": "10.04.2025",
+        "vendor": "Contoso AG"
+      }
+    },
+    {
+      "id": "tax_000",
+      "predicted": {
+        "amount": "75135.50",
+        "date": "16.11.2023",
+        "vendor": "Contoso AG"
+      }
+    },
+    {
+      "id": "tax_001",
+      "predicted": {
+        "amount": "76511.00",
+        "date": "09.01.2024",
+        "vendor": "Empf\u00e4nger: Tech Solutions UG"
+      }
+    },
+    {
+      "id": "tax_002",
+      "predicted": {
+        "amount": "46770.50",
+        "date": "28.08.2023"
+      }
+    },
+    {
+      "id": "tax_003",
+      "predicted": {
+        "amount": "55144.99",
+        "date": "13.05.2024",
+        "vendor": "Empf\u00e4nger: Tech Solutions UG"
+      }
+    },
+    {
+      "id": "tax_004",
+      "predicted": {
+        "amount": "8501.50",
+        "date": "18.02.2025",
+        "vendor": "Empf\u00e4nger: Tech Solutions UG"
+      }
+    },
+    {
+      "id": "tax_005",
+      "predicted": {
+        "amount": "49809.99",
+        "date": "26.02.2025",
+        "vendor": "Nordbeispiel Beratung GmbH"
+      }
+    },
+    {
+      "id": "tax_006",
+      "predicted": {
+        "amount": "22814.50",
+        "date": "03.10.2024",
+        "vendor": "Empf\u00e4nger: Demo Nord GmbH"
+      }
+    },
+    {
+      "id": "tax_007",
+      "predicted": {
+        "amount": "32602.00",
+        "date": "24.11.2025",
+        "vendor": "Empf\u00e4nger: Nordbeispiel Beratung GmbH"
+      }
+    },
+    {
+      "id": "tax_008",
+      "predicted": {
+        "amount": "48160.99",
+        "date": "21.10.2024"
+      }
+    },
+    {
+      "id": "tax_009",
+      "predicted": {
+        "amount": "22937.00",
+        "date": "03.09.2024",
+        "vendor": "Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "tax_010",
+      "predicted": {
+        "amount": "54853.00",
+        "date": "11.12.2025",
+        "vendor": "Acme GmbH"
+      }
+    },
+    {
+      "id": "tax_011",
+      "predicted": {
+        "amount": "58930.50",
+        "date": "17.11.2025",
+        "vendor": "Empf\u00e4nger: Tech Solutions UG"
+      }
+    },
+    {
+      "id": "tax_012",
+      "predicted": {
+        "amount": "71117.50",
+        "date": "03.08.2024",
+        "vendor": "Empf\u00e4nger: Contoso AG"
+      }
+    },
+    {
+      "id": "tax_013",
+      "predicted": {
+        "amount": "29712.00",
+        "date": "20.02.2024",
+        "vendor": "Tech Solutions UG"
+      }
+    },
+    {
+      "id": "tax_014",
+      "predicted": {
+        "amount": "75466.99",
+        "date": "19.08.2024"
+      }
+    },
+    {
+      "id": "contract_000",
+      "predicted": {
+        "date": "24.04.2023",
+        "vendor": "Auftragnehmer: Nordbeispiel Beratung GmbH"
+      }
+    },
+    {
+      "id": "contract_001",
+      "predicted": {
+        "date": "28.02.2024",
+        "vendor": "Auftragnehmer: Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "contract_002",
+      "predicted": {
+        "date": "24.04.2023",
+        "vendor": "Auftraggeber: Demo Nord GmbH"
+      }
+    },
+    {
+      "id": "contract_003",
+      "predicted": {
+        "date": "16.10.2024",
+        "vendor": "Auftragnehmer: Acme GmbH"
+      }
+    },
+    {
+      "id": "contract_004",
+      "predicted": {
+        "date": "25.06.2023",
+        "vendor": "Auftraggeber: Contoso AG"
+      }
+    },
+    {
+      "id": "contract_005",
+      "predicted": {
+        "date": "06.08.2023"
+      }
+    },
+    {
+      "id": "contract_006",
+      "predicted": {
+        "date": "13.02.2025",
+        "vendor": "Auftraggeber: Fabrikam KG"
+      }
+    },
+    {
+      "id": "contract_007",
+      "predicted": {
+        "date": "18.02.2025",
+        "vendor": "Auftragnehmer: Contoso AG"
+      }
+    },
+    {
+      "id": "contract_008",
+      "predicted": {
+        "date": "07.03.2023",
+        "vendor": "Auftraggeber: Fabrikam KG"
+      }
+    },
+    {
+      "id": "contract_009",
+      "predicted": {
+        "date": "26.01.2024",
+        "vendor": "Auftraggeber: Fabrikam KG"
+      }
+    },
+    {
+      "id": "contract_010",
+      "predicted": {
+        "date": "28.08.2025",
+        "vendor": "Auftragnehmer: Tech Solutions UG"
+      }
+    },
+    {
+      "id": "contract_011",
+      "predicted": {
+        "date": "19.07.2023",
+        "vendor": "Auftraggeber: Tech Solutions UG"
+      }
+    },
+    {
+      "id": "receipt_000",
+      "predicted": {
+        "amount": "17718.00",
+        "date": "06.01.2023",
+        "vendor": "Nordbeispiel Beratung GmbH"
+      }
+    },
+    {
+      "id": "receipt_001",
+      "predicted": {
+        "amount": "59771.99",
+        "date": "26.07.2024",
+        "vendor": "Demo Nord GmbH"
+      }
+    },
+    {
+      "id": "receipt_002",
+      "predicted": {
+        "amount": "55176.99",
+        "date": "14.07.2023",
+        "vendor": "Krankenkasse Plus"
+      }
+    },
+    {
+      "id": "receipt_003",
+      "predicted": {
+        "amount": "55679.00",
+        "date": "27.04.2025",
+        "vendor": "Landesamt f\u00fcr Steuern"
+      }
+    },
+    {
+      "id": "receipt_004",
+      "predicted": {
+        "amount": "27207.50",
+        "date": "24.02.2023"
+      }
+    },
+    {
+      "id": "receipt_005",
+      "predicted": {
+        "amount": "58163.50",
+        "date": "12.11.2023",
+        "vendor": "Nordbeispiel Beratung GmbH"
+      }
+    },
+    {
+      "id": "receipt_006",
+      "predicted": {
+        "amount": "79870.50",
+        "date": "21.10.2024"
+      }
+    },
+    {
+      "id": "receipt_007",
+      "predicted": {
+        "amount": "41419.99",
+        "date": "13.08.2023"
+      }
+    },
+    {
+      "id": "receipt_008",
+      "predicted": {
+        "amount": "91595.99",
+        "date": "23.02.2025",
+        "vendor": "Fabrikam KG"
+      }
+    },
+    {
+      "id": "receipt_009",
+      "predicted": {
+        "amount": "44421.50",
+        "date": "27.01.2024",
+        "vendor": "Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "receipt_010",
+      "predicted": {
+        "amount": "24302.99",
+        "date": "14.09.2023",
+        "vendor": "Contoso AG"
+      }
+    },
+    {
+      "id": "receipt_011",
+      "predicted": {
+        "amount": "80733.50",
+        "date": "10.02.2023",
+        "vendor": "Landesamt f\u00fcr Steuern"
+      }
+    },
+    {
+      "id": "receipt_012",
+      "predicted": {
+        "amount": "21025.99",
+        "date": "20.10.2023",
+        "vendor": "Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "insurance_000",
+      "predicted": {
+        "date": "22.12.2023",
+        "vendor": "Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "insurance_001",
+      "predicted": {
+        "date": "11.02.2023",
+        "vendor": "Versicherungsnehmer: Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "insurance_002",
+      "predicted": {
+        "date": "01.06.2024",
+        "vendor": "Versicherungsnehmer: Acme GmbH"
+      }
+    },
+    {
+      "id": "insurance_003",
+      "predicted": {
+        "amount": "79794.50",
+        "date": "12.10.2023",
+        "vendor": "Demo Nord GmbH"
+      }
+    },
+    {
+      "id": "insurance_004",
+      "predicted": {
+        "amount": "75067.00",
+        "date": "26.01.2023",
+        "vendor": "Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "insurance_005",
+      "predicted": {
+        "amount": "40466.99",
+        "date": "10.03.2025",
+        "vendor": "Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "insurance_006",
+      "predicted": {
+        "amount": "67514.50",
+        "date": "17.02.2023",
+        "vendor": "Nordbeispiel Beratung GmbH"
+      }
+    },
+    {
+      "id": "insurance_007",
+      "predicted": {
+        "amount": "67007.99",
+        "date": "21.01.2024",
+        "vendor": "Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "insurance_008",
+      "predicted": {
+        "amount": "25116.99",
+        "date": "05.03.2024",
+        "vendor": "Muster Versicherung AG"
+      }
+    },
+    {
+      "id": "insurance_009",
+      "predicted": {
+        "amount": "72729.99",
+        "date": "27.03.2025",
+        "vendor": "Contoso AG"
+      }
+    },
+    {
+      "id": "negative_000",
+      "predicted": {}
+    },
+    {
+      "id": "negative_001",
+      "predicted": {}
+    },
+    {
+      "id": "negative_002",
+      "predicted": {}
+    },
+    {
+      "id": "negative_003",
+      "predicted": {}
+    },
+    {
+      "id": "negative_004",
+      "predicted": {}
+    }
+  ]
+}

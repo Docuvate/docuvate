@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "encoder_id": "intfloat/multilingual-e5-small",
+  "query_prototypes": [
+    "query: purchase order title Bestellung PO document heading",
+    "query: invoice number title Rechnung Nr document header line",
+    "query: reference number Bescheid Steuerbescheid document title",
+    "query: contract reference Rahmenvertrag document heading not a company name"
+  ]
+}

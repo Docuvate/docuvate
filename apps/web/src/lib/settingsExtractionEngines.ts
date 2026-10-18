@@ -1,0 +1,49 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ExtractionEngineInfo } from '@docuvate/contracts';
+import type { TFunction } from 'i18next';
+
+import type { SelectOption } from '../components/ui/Select';
+import { extractionEngineLabel } from './extractionEngineI18n';
+
+export function shouldShowExtractionOfflineCallout(
+  enginesLoadFailed: boolean,
+  engines: ExtractionEngineInfo[],
+  selectedEngineId: string
+): boolean {
+  if (enginesLoadFailed) {
+    return true;
+  }
+  if (engines.length > 0 && engines.every((engine) => engine.available === false)) {
+    return true;
+  }
+  const selected = engines.find((engine) => engine.id === selectedEngineId);
+  return selected?.available === false;
+}
+
+export function buildExtractionEngineSelectOptions(
+  t: TFunction,
+  engines: ExtractionEngineInfo[],
+  options?: { hideUnavailableSuffix?: boolean }
+): SelectOption[] {
+  const hideUnavailableSuffix = options?.hideUnavailableSuffix === true;
+  if (engines.length === 0) {
+    return [
+      {
+        value: 'pipeline',
+        label: extractionEngineLabel(t, 'pipeline', t('settings.engineDefault')),
+      },
+    ];
+  }
+
+  return engines.map((engine) => {
+    const unavailable = engine.available === false;
+    const baseLabel = extractionEngineLabel(t, engine.id, engine.label);
+    return {
+      value: engine.id,
+      label: baseLabel,
+      suffix: unavailable && !hideUnavailableSuffix ? t('settings.engineUnavailableShort') : undefined,
+      disabled: unavailable && !hideUnavailableSuffix,
+    };
+  });
+}

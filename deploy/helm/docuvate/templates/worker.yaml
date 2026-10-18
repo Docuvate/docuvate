@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: docuvate-worker
+automountServiceAccountToken: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuvate-worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: docuvate-worker
+    spec:
+      {{- if .Values.gpuWorker.enabled }}
+      nodeSelector:
+        nvidia.com/gpu.present: "true"
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      {{- end }}
+      serviceAccountName: docuvate-worker
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        fsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: worker
+          image: {{ include "docuvate.workerImage" . }}
+          imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: docuvate-config
+          env:
+            - name: WORKER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets.existingSecret }}
+                  key: WORKER_SECRET
+            - name: HOME
+              value: /opt/models
+            - name: FASTEMBED_CACHE_PATH
+              value: /opt/models/fastembed
+            - name: PADDLE_PDX_CACHE_HOME
+              value: /opt/models/paddle
+            - name: PADDLE_PREWARM_ON_START
+              value: "0"
+          startupProbe:
+            httpGet:
+              path: /v1/health
+              port: http
+            periodSeconds: {{ .Values.worker.startupProbe.periodSeconds | default 10 }}
+            failureThreshold: {{ .Values.worker.startupProbe.failureThreshold | default 30 }}
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: http
+            periodSeconds: 15
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            {{- if .Values.gpuWorker.enabled }}
+            requests:
+              {{- toYaml .Values.worker.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.worker.resources.limits | nindent 14 }}
+              nvidia.com/gpu: 1
+            {{- else }}
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+            {{- end }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: docuvate-worker
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: docuvate-worker
+  ports:
+    - name: http
+      port: 8000
+      targetPort: http
+---
+{{- if .Values.worker.hpa.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: docuvate-worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: docuvate-worker
+  minReplicas: {{ .Values.worker.hpa.minReplicas }}
+  maxReplicas: {{ .Values.worker.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.worker.hpa.targetCPU }}
+{{- end }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: docuvate-worker
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: docuvate-worker

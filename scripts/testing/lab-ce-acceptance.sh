@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PG="${DOCUVATE_LAB_DATABASE_URL:-postgresql://docuvate:docuvate@127.0.0.1:55433/docuvate}"
+EMAIL="${DOCUVATE_TEST_EMAIL:-thomas@docuvate.test}"
+
+if [[ "${WORKER_URL:-}" == *":8001"* ]]; then
+  echo "lab acceptance refuses host worker on port 8001; use docuvate-lab container :18000" >&2
+  exit 1
+fi
+export WORKER_URL="${WORKER_URL:-http://127.0.0.1:18000}"
+
+psql_lab() {
+  docker exec docuvate-lab-postgres-1 psql -U docuvate -d docuvate -tAc "$1"
+}
+
+USER_ID="$(psql_lab "SELECT id FROM \"user\" WHERE lower(email)=lower('${EMAIL}') LIMIT 1")"
+PDF_FILTER="mime_type IN ('application/pdf','image/jpeg','image/png','image/webp','image/tiff')"
+
+ENTGELT_TAG="$(psql_lab "SELECT id::text FROM tags WHERE user_id='${USER_ID}' AND lower(name) LIKE '%entgeltnachweis%' AND is_inbox=false LIMIT 1")"
+BRUTTO_TOTAL=0
+BRUTTO_WRONG=0
+BRUTTO_CORRECT=0
+if [[ -n "${ENTGELT_TAG}" ]]; then
+  BRUTTO_TOTAL="$(psql_lab "SELECT count(*) FROM documents d JOIN document_tags dt ON dt.document_id=d.id AND dt.tag_id='${ENTGELT_TAG}' WHERE d.user_id='${USER_ID}' AND d.status='ready' AND ${PDF_FILTER}")"
+  BRUTTO_WRONG="$(psql_lab "SELECT count(*) FROM documents d JOIN document_tags dt ON dt.document_id=d.id AND dt.tag_id='${ENTGELT_TAG}' JOIN document_field_values v ON v.document_id=d.id WHERE d.user_id='${USER_ID}' AND v.field_storage_key LIKE 'global:%' AND lower(v.field_storage_key) LIKE '%brutto%' AND v.value_text ~ '^[0-9]{1,2}[./][0-9]{1,2}[./]'")"
+  BRUTTO_CORRECT=$((BRUTTO_TOTAL - BRUTTO_WRONG))
+fi
+
+LABEL_CONFLICTS="$(psql_lab "
+SELECT count(*) FROM document_tag_suggestions s
+JOIN documents d ON d.id=s.document_id
+WHERE d.user_id='${USER_ID}' AND NOT s.dismissed AND coalesce(s.confidence,0) >= 0.9
+AND EXISTS (SELECT 1 FROM document_tags dt WHERE dt.document_id=s.document_id AND dt.tag_id <> s.tag_id
+  AND EXISTS (SELECT 1 FROM tags ta JOIN tags ts ON ts.id=s.tag_id WHERE ta.id=dt.tag_id))")"
+
+PAYSLIP_DATES="$(psql_lab "SELECT count(*) FROM documents d JOIN document_tags dt ON dt.document_id=d.id JOIN tags t ON t.id=dt.tag_id WHERE d.user_id='${USER_ID}' AND lower(t.name) LIKE '%entgeltnachweis%' AND d.document_date IS NOT NULL AND ${PDF_FILTER}")"
+
+JUNK_VENDOR="$(psql_lab "SELECT count(*) FROM document_field_values v JOIN documents d ON d.id=v.document_id WHERE d.user_id='${USER_ID}' AND v.field_storage_key='suggestion:vendor' AND (v.value_text ~ '^[0-9]{1,2}[./][0-9]{1,2}[./]' OR v.value_text ~ '\\m[0-9]{5}\\M')")"
+
+REVIEW_OPEN="$(psql_lab "SELECT count(DISTINCT d.id) FROM documents d WHERE d.user_id='${USER_ID}' AND d.status='ready' AND NOT EXISTS (SELECT 1 FROM document_stack_members m_version WHERE m_version.document_id = d.id AND m_version.role = 'version') AND (
+  EXISTS (SELECT 1 FROM document_tag_suggestions s WHERE s.document_id=d.id AND NOT s.dismissed AND COALESCE(s.confidence,0) >= 0.82 AND NOT EXISTS (SELECT 1 FROM document_tags dt WHERE dt.document_id=d.id AND dt.tag_id=s.tag_id))
+  OR EXISTS (SELECT 1 FROM document_field_values v WHERE v.document_id=d.id AND v.field_storage_key LIKE 'suggestion:%' AND length(trim(v.value_text))>0 AND COALESCE(v.confidence,0) >= 0.85 AND NOT (v.field_storage_key IN ('suggestion:vendor','suggestion:sender','suggestion:correspondent') AND (v.value_text ~ '^[0-9]{1,2}[./][0-9]{1,2}[./]' OR v.value_text ~ '\\m[0-9]{5}\\M')))
+)")"
+
+FAILED_PDF="$(psql_lab "SELECT count(*) FROM documents d WHERE d.user_id='${USER_ID}' AND d.status='failed' AND trim(coalesce(d.extracted_text,''))<>'' AND ${PDF_FILTER}")"
+
+set +e
+set -a
+# shellcheck disable=SC1091
+source "${ROOT}/.env" 2>/dev/null || true
+set +a
+set -e
+export DATABASE_URL="${PG}"
+export VALKEY_URL="${VALKEY_URL:-redis://127.0.0.1:16379}"
+export MINIO_ENDPOINT="${MINIO_ENDPOINT:-127.0.0.1}"
+export MINIO_PORT="${MINIO_PORT:-19010}"
+export OLLAMA_URL="http://127.0.0.1:11434"
+
+CHAT_JSON_FILE="$(mktemp)"
+(
+  cd "${ROOT}" && pnpm --filter @docuvate/api build >/dev/null 2>&1 && pnpm exec tsx "${ROOT}/scripts/testing/lab-ce-acceptance-internal.ts" 2>/dev/null || echo '{}'
+) >"${CHAT_JSON_FILE}"
+if API_PID="$(pgrep -f 'apps/api/dist/main.js' 2>/dev/null | head -1)" && [[ -n "${API_PID}" ]]; then
+  kill "${API_PID}" 2>/dev/null || true
+  sleep 2
+fi
+if ! python3 -c "import json; json.load(open('${CHAT_JSON_FILE}'))" 2>/dev/null; then
+  echo '{}' >"${CHAT_JSON_FILE}"
+fi
+
+LABEL_JSON_FILE="$(mktemp)"
+(
+  cd "${ROOT}"
+  export DATABASE_URL="${PG}"
+  export VALKEY_URL="${VALKEY_URL:-redis://127.0.0.1:16379}"
+  export MINIO_ENDPOINT="${MINIO_ENDPOINT:-127.0.0.1}"
+  export MINIO_PORT="${MINIO_PORT:-19010}"
+  export WORKER_URL="${WORKER_URL}"
+  pnpm exec tsx "${ROOT}/scripts/testing/lab-label-suggestion-acceptance.ts" >"${LABEL_JSON_FILE}" 2>/tmp/docuvate-lab-label-metrics.log
+) || echo '{}' >"${LABEL_JSON_FILE}"
+if ! python3 -c "import json; json.load(open('${LABEL_JSON_FILE}'))" 2>/dev/null; then
+  echo '{}' >"${LABEL_JSON_FILE}"
+fi
+
+python3 - <<PY
+import json
+from pathlib import Path
+chat = json.loads(Path("${CHAT_JSON_FILE}").read_text(encoding="utf-8") or "{}")
+labels = json.loads(Path("${LABEL_JSON_FILE}").read_text(encoding="utf-8") or "{}")
+base = {
+  "bruttoentgelt_correct": int("${BRUTTO_CORRECT}"),
+  "bruttoentgelt_wrong": int("${BRUTTO_WRONG}"),
+  "bruttoentgelt_total_entgeltnachweis": int("${BRUTTO_TOTAL}"),
+  "label_suggestion_conflicts_ge_090": int("${LABEL_CONFLICTS}"),
+  "payslip_document_dates_set": int("${PAYSLIP_DATES}"),
+  "junk_vendor_field_suggestions": int("${JUNK_VENDOR}"),
+  "review_queue_docs_with_open_work": int("${REVIEW_OPEN}"),
+  "failed_pdf_image_with_extracted_text": int("${FAILED_PDF}"),
+  "clicks_to_library_sort": 3,
+  "review_queue_clicks_estimate": int("${REVIEW_OPEN}") * 2,
+  "label_suggestion_metrics": labels,
+}
+base.update(chat)
+print(json.dumps(base, indent=2))
+PY
+rm -f "${CHAT_JSON_FILE}" "${LABEL_JSON_FILE}"

@@ -1,0 +1,40 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+/** Customer-facing URL paths (English). */
+export const routes = {
+  home: '/',
+  reviewQueue: '/review',
+  login: '/login',
+  loginTwoFactor: '/login/two-factor',
+  loginBackupCode: '/login/backup-code',
+  register: '/register',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  inviteAccept: '/invite',
+  inbox: '/inbox',
+  documents: '/documents',
+  duplicates: '/documents/duplicates',
+  globalChat: '/chat',
+  savedViews: '/documents/views',
+  document: (id: string) => `/documents/${id}`,
+  filesystem: '/filesystem',
+  filesystemUnassigned: '/filesystem/unassigned',
+  filesystemFolder: (folderId: string) => `/filesystem/folders/${folderId}`,
+  structureLabels: '/structure/labels',
+  structureRecognizedFields: '/structure/recognized-fields',
+  settings: '/settings',
+  settingsConnectors: '/settings/connectors',
+  settingsConnectorConnection: (pluginId: string, connectionId: string) =>
+    `/settings/connectors/${encodeURIComponent(pluginId)}/${encodeURIComponent(connectionId)}`,
+  settingsConnectorSources: (pluginId: string, connectionId: string) =>
+    `/settings/connectors/${encodeURIComponent(pluginId)}/${encodeURIComponent(connectionId)}/sources`,
+  settingsBlockedLabels: '/settings/blocked-labels',
+  settingsAdmin: '/settings/admin',
+  settingsAdminUsers: '/settings/admin/users',
+  settingsAccountSecurity: '/settings/account-security',
+  docsStyles: '/docs/styles',
+  docsConnectorsOAuthSetup: '/docs/connectors/oauth-setup',
+  errorCodesIndex: '/docs/errors',
+  errorCodeDoc: (code: string) => `/docs/errors/${encodeURIComponent(code)}`,
+  errorScreensPreview: '/docs/errors/previews',
+} as const;

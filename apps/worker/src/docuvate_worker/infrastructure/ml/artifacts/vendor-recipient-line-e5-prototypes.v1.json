@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "encoder_id": "intfloat/multilingual-e5-small",
+  "query_prototypes": [
+    "query: recipient addressee Empfänger on a business letter",
+    "query: Rechnungsempfänger customer name on an invoice",
+    "query: Adressat of an official notice or letter",
+    "query: Versicherungsnehmer policyholder name on insurance document",
+    "query: ship-to delivery address party not the issuer"
+  ]
+}

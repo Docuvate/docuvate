@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+# GPU worker override (amd64 hosts with NVIDIA Container Toolkit).
+# Usage: docker compose -f docker-compose.yml -f docker-compose.worker-gpu.yml up -d worker
+services:
+  worker:
+    build:
+      target: gpu
+      args:
+        WORKER_OPTIONAL_EXTRAS: ${WORKER_OPTIONAL_EXTRAS:-donut}
+    environment:
+      DOCUVATE_WORKER_IMAGE_VARIANT: gpu

@@ -1,0 +1,15 @@
+title = "Docuvate gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known test fixtures and local dev defaults"
+paths = [
+  '''^pnpm-lock\.yaml$''',
+]
+
+regexes = [
+  '''docuvate-secret''',
+  '''(LabelsScreenshot1!|ReadmeScreenshot1!|TestPass123!)''',
+]

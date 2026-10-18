@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: docuvate-config
+data:
+  SMTP_URL: smtp://REPLACE_SMTP_HOST:587
+  DOCUVATE_PUBLIC_WEB_URL: https://docuvate.example.com
+  DOCUVATE_PUBLIC_API_URL: https://docuvate.example.com/api

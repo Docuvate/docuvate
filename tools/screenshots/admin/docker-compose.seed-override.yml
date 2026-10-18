@@ -1,0 +1,5 @@
+# Used only by tools/screenshots/admin/seed-admin-screenshots.mjs (not for production).
+services:
+  api:
+    environment:
+      DV_ALLOW_SIGNUP: 'true'

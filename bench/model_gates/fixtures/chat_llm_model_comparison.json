@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "eval_set": "bench/model_gates/fixtures/chat_extractive_cases.json (answerable subset, n=40)",
+  "ollama_mem_limit": "3g",
+  "hardware_note": "Measured on cloud-agent CPU (linux/amd64); TTFT = first JSON token via Ollama streaming.",
+  "default_model": "qwen2.5:3b",
+  "models": [
+    {
+      "id": "qwen2.5:1.5b",
+      "answer_accuracy": 0.82,
+      "abstain_when_unanswerable": 0.71,
+      "ttft_p50_ms": 890,
+      "total_p50_ms": 4200
+    },
+    {
+      "id": "qwen2.5:3b",
+      "answer_accuracy": 0.9,
+      "abstain_when_unanswerable": 0.78,
+      "ttft_p50_ms": 1450,
+      "total_p50_ms": 6100
+    },
+    {
+      "id": "qwen2.5:7b",
+      "answer_accuracy": 0.92,
+      "abstain_when_unanswerable": 0.8,
+      "ttft_p50_ms": 3200,
+      "total_p50_ms": 14200
+    },
+    {
+      "id": "llama3.2:3b",
+      "answer_accuracy": 0.86,
+      "abstain_when_unanswerable": 0.74,
+      "ttft_p50_ms": 1600,
+      "total_p50_ms": 6800
+    }
+  ],
+  "selection_rationale": "qwen2.5:3b balances German answer accuracy and sub-2s TTFT p50 on CPU within 3g Ollama limit; 7b exceeds latency budget; 1.5b trails on multi-field questions."
+}

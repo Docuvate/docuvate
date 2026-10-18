@@ -1,0 +1,40 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: docuvate
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: docuvate
+    includeSelectors: false
+resources:
+  - namespace.yaml
+  - serviceaccounts.yaml
+  - configmap-docuvate.yaml
+  - api/deployment.yaml
+  - api/service.yaml
+  - api/pdb.yaml
+  - api/hpa.yaml
+  - worker/deployment.yaml
+  - worker/service.yaml
+  - worker/pdb.yaml
+  - worker/hpa.yaml
+  - web/deployment.yaml
+  - web/service.yaml
+  - web/configmap-nginx.yaml
+  - jobs/db-migrate.yaml
+  - ingress.yaml
+  - networkpolicy-default.yaml
+patches:
+  - path: patches/migrate-command.yaml
+images:
+  - name: docuvate-api
+    newName: ghcr.io/docuvate/docuvate-api
+    newTag: "v0.1.0"
+  - name: docuvate-web
+    newName: ghcr.io/docuvate/docuvate-web
+    newTag: "v0.1.0"
+  - name: docuvate-worker
+    newName: ghcr.io/docuvate/docuvate-worker
+    newTag: "v0.1.0"
+  - name: docuvate-worker-gpu
+    newName: ghcr.io/docuvate/docuvate-worker-gpu
+    newTag: "v0.1.0"

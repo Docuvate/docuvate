@@ -1,0 +1,1 @@
+-- Data purge is not reversible.

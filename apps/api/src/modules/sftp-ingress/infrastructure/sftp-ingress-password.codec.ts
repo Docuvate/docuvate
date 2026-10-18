@@ -1,0 +1,20 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Algorithm, hash, verify } from '@node-rs/argon2';
+
+export async function hashSftpIngressPassword(plain: string): Promise<string> {
+  return hash(plain, {
+    algorithm: Algorithm.Argon2id,
+    memoryCost: 19456,
+    timeCost: 2,
+    parallelism: 1,
+  });
+}
+
+export async function verifySftpIngressPassword(plain: string, encoded: string): Promise<boolean> {
+  try {
+    return await verify(encoded, plain);
+  } catch {
+    return false;
+  }
+}

@@ -1,0 +1,80 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { DataSource } from 'typeorm';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+
+import { ensureMigrationBaseline } from '../../src/shared/infrastructure/database/ensure-migration-baseline.js';
+import { regClassExists } from '../../src/shared/infrastructure/database/migration-baseline-markers.js';
+import { isRecord } from '../../src/shared/infrastructure/database/row-parse.js';
+import { buildTypeOrmOptions } from '../../src/shared/infrastructure/database/typeorm-options.js';
+import { restoreIntegrationDatabase } from './restore-integration-database.js';
+
+describe('migration baseline (existing schema, empty migration history)', () => {
+  let dataSource: DataSource;
+
+  beforeAll(async () => {
+    dataSource = new DataSource(buildTypeOrmOptions());
+    await dataSource.initialize();
+  });
+
+  afterAll(async () => {
+    if (dataSource.isInitialized) {
+      await dataSource.destroy();
+    }
+    await restoreIntegrationDatabase();
+  });
+
+  it('stamps only through existing schema then applies newer migrations', async () => {
+    const runner = dataSource.createQueryRunner();
+    await runner.connect();
+    try {
+      expect(await regClassExists(runner, 'public.documents')).toBe(true);
+      expect(await regClassExists(runner, 'public.document_representation')).toBe(true);
+
+      await runner.query('DROP TABLE IF EXISTS feature_flag CASCADE');
+      await runner.query(`
+        ALTER TABLE user_preferences
+          DROP COLUMN IF EXISTS document_chat_cloud_base_url,
+          DROP COLUMN IF EXISTS document_chat_cloud_api_key_encrypted
+      `);
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact_value_date CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact_value_amount CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact_value_text CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact_provenance CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extracted_fact CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_exact_fact_index CASCADE');
+      await runner.query('DROP TABLE IF EXISTS tenant_exact_fact_chat_settings CASCADE');
+      await runner.query('DROP TABLE IF EXISTS migrations');
+      // Global setup runs all migrations; simulate pre–LabelClusterDocumentExclusions schema.
+      await runner.query('DROP TABLE IF EXISTS label_recommendation_cluster_exclusions CASCADE');
+      await runner.query('DROP TABLE IF EXISTS installation_password_policy CASCADE');
+      await runner.query('DROP TABLE IF EXISTS document_extraction_images CASCADE');
+
+      await ensureMigrationBaseline(dataSource);
+
+      const stampedRaw: unknown = await runner.query(
+        `SELECT name FROM migrations ORDER BY timestamp ASC`
+      );
+      const stamped = Array.isArray(stampedRaw) ? stampedRaw : [];
+      expect(stamped.length).toBeGreaterThan(0);
+      const names = stamped
+        .map((row) => {
+          if (!isRecord(row)) {
+            return null;
+          }
+          const name = row.name;
+          return typeof name === 'string' ? name : null;
+        })
+        .filter((name): name is string => name != null);
+      expect(names.includes('FeatureFlags20261013120000')).toBe(false);
+      expect(names.includes('DocumentRepresentation20261012120000')).toBe(true);
+
+      await dataSource.runMigrations();
+
+      expect(await regClassExists(runner, 'public.feature_flag')).toBe(true);
+    } finally {
+      await runner.release();
+    }
+  });
+
+});

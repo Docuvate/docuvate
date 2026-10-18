@@ -1,0 +1,30 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Module } from '@nestjs/common';
+
+import { EMBEDDING_PORT } from '../../shared/domain/ports.js';
+import { HttpEmbeddingAdapter } from '../labels/infrastructure/http-embedding.adapter.js';
+import { RepresentationModule } from '../representation/representation.module.js';
+import { GlobalSearchUseCase } from './application/global-search.use-case.js';
+import { SyncDocumentSearchIndexUseCase } from './application/sync-document-search-index.use-case.js';
+import { PgGlobalSearchRepository } from './infrastructure/pg-global-search.repository.js';
+import { SearchController } from './presentation/search.controller.js';
+
+@Module({
+  imports: [RepresentationModule],
+  controllers: [SearchController],
+  providers: [
+    GlobalSearchUseCase,
+    SyncDocumentSearchIndexUseCase,
+    PgGlobalSearchRepository,
+    { provide: EMBEDDING_PORT, useClass: HttpEmbeddingAdapter },
+  ],
+  exports: [
+    GlobalSearchUseCase,
+    SyncDocumentSearchIndexUseCase,
+    PgGlobalSearchRepository,
+    EMBEDDING_PORT,
+  ],
+})
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host
+export class SearchModule {}

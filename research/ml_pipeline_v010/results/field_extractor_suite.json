@@ -1,0 +1,216 @@
+{
+  "benchmark_kind": "public_dataset_field_extraction",
+  "protocol": "unified_original_ocr_document_micro_f1",
+  "omp_threads": 4,
+  "peak_rss_mb_start": 206.10546875,
+  "models": {
+    "gliner2-base-v1": {
+      "manifest": {
+        "model_id": "fastino/gliner2-base-v1",
+        "revision": "f9634218e53580c56edf0de97ca1a7d3f1c2354e",
+        "license": "Apache-2.0",
+        "weight_file": "model.safetensors",
+        "sha256": "845fc4bd93c525b86124c58ab4f56c9eacf8587953086b14c501fab25957c007",
+        "bytes": 833938108
+      },
+      "cord": {
+        "test": {
+          "micro_precision": 0.4408759124087591,
+          "micro_recall": 0.4108843537414966,
+          "micro_f1": 0.4253521126760564,
+          "exact_match_rate": 0.01,
+          "latency_ms_median": 69.5620169999529,
+          "latency_ms_p95": 95.79751000001124,
+          "wall_seconds": 7.238253906999944,
+          "bootstrap_micro_f1": {
+            "f1_mean": 0.4250401343024224,
+            "f1_low": 0.37407173450836595,
+            "f1_high": 0.4725848936382869,
+            "n_bootstrap": 500.0
+          },
+          "precision_coverage_points": 1204,
+          "span_labeled_count": 1204
+        }
+      },
+      "sroie": {
+        "test": {
+          "micro_precision": 0.4867674858223062,
+          "micro_recall": 0.37103746397694526,
+          "micro_f1": 0.42109566639411283,
+          "exact_match_rate": 0.0,
+          "latency_ms_median": 140.8542330000273,
+          "latency_ms_p95": 212.24559500001305,
+          "wall_seconds": 52.14758385800019,
+          "bootstrap_micro_f1": {
+            "f1_mean": 0.42020321339923566,
+            "f1_low": 0.3971945909357257,
+            "f1_high": 0.4444759568428471,
+            "n_bootstrap": 500.0
+          },
+          "precision_coverage_points": 2632,
+          "span_labeled_count": 2632
+        }
+      },
+      "peak_rss_mb": 13538.70703125,
+      "peak_rss_delta_mb": 0.0
+    },
+    "gliner2.5-small-v1": {
+      "manifest": {
+        "model_id": "fastino/gliner2.5-small-v1",
+        "revision": "df5910e44bc4ffdb0d95399a83b0ca4516349aa5",
+        "license": "Apache-2.0",
+        "weight_file": "model.safetensors",
+        "sha256": "4ee982787ace270d4bf15dbcb28ced38e0aa201372347114ceedd6336055de2b",
+        "bytes": 295567700
+      },
+      "cord": {
+        "test": {
+          "micro_precision": 0.4715447154471545,
+          "micro_recall": 0.23673469387755103,
+          "micro_f1": 0.31521739130434784,
+          "exact_match_rate": 0.0,
+          "latency_ms_p50": 29.518032999476418,
+          "latency_ms_median": 29.518032999476418,
+          "latency_ms_p95": 36.12364800028445,
+          "wall_seconds": 3.0197553140005766,
+          "bootstrap_micro_f1": {
+            "f1_mean": 0.3150134460818711,
+            "f1_low": 0.27328758818342147,
+            "f1_high": 0.3650613030059612,
+            "n_bootstrap": 500.0
+          },
+          "precision_coverage_points": 449,
+          "span_labeled_count": 449
+        }
+      },
+      "sroie": {
+        "test": {
+          "micro_precision": 0.31799838579499595,
+          "micro_recall": 0.2838616714697406,
+          "micro_f1": 0.2999619337647506,
+          "exact_match_rate": 0.0,
+          "latency_ms_p50": 61.79518800036021,
+          "latency_ms_median": 61.79518800036021,
+          "latency_ms_p95": 93.30994199990528,
+          "wall_seconds": 22.542598832000294,
+          "bootstrap_micro_f1": {
+            "f1_mean": 0.29905623898122224,
+            "f1_low": 0.27622764284450924,
+            "f1_high": 0.32016006097560973,
+            "n_bootstrap": 500.0
+          },
+          "precision_coverage_points": 2691,
+          "span_labeled_count": 2691
+        }
+      },
+      "peak_rss_mb": 14318.5859375,
+      "peak_rss_delta_mb": 0.0
+    },
+    "gliner2.5-base-v1": {
+      "manifest": {
+        "model_id": "fastino/gliner2.5-base-v1",
+        "revision": "54785d51df8d86a0d8f2eb212fec15871aad2c4d",
+        "license": "Apache-2.0",
+        "weight_file": "model.safetensors",
+        "sha256": "7274094de2e0c2a37a386f55fc4e23061a954da5bd7a335e7dfe56f2743c277a",
+        "bytes": 774366564
+      },
+      "cord": {
+        "test": {
+          "micro_precision": 0.4781746031746032,
+          "micro_recall": 0.32789115646258504,
+          "micro_f1": 0.38902340597255847,
+          "exact_match_rate": 0.0,
+          "latency_ms_p50": 69.04139899961592,
+          "latency_ms_median": 69.04139899961592,
+          "latency_ms_p95": 94.83574600017164,
+          "wall_seconds": 7.232100764999814,
+          "bootstrap_micro_f1": {
+            "f1_mean": 0.3894292251853539,
+            "f1_low": 0.3396121678953957,
+            "f1_high": 0.4402156532862446,
+            "n_bootstrap": 500.0
+          },
+          "precision_coverage_points": 975,
+          "span_labeled_count": 975
+        }
+      },
+      "sroie": {
+        "test": {
+          "micro_precision": 0.5106382978723404,
+          "micro_recall": 0.3976945244956772,
+          "micro_f1": 0.44714459295261233,
+          "exact_match_rate": 0.0,
+          "latency_ms_p50": 124.44972000048438,
+          "latency_ms_median": 124.44972000048438,
+          "latency_ms_p95": 189.95320399972115,
+          "wall_seconds": 46.68029672600005,
+          "bootstrap_micro_f1": {
+            "f1_mean": 0.44643386466887636,
+            "f1_low": 0.4286460369459266,
+            "f1_high": 0.46553945611927955,
+            "n_bootstrap": 500.0
+          },
+          "precision_coverage_points": 3429,
+          "span_labeled_count": 3429
+        }
+      },
+      "peak_rss_mb": 14318.4921875,
+      "peak_rss_delta_mb": 0.0
+    },
+    "gliner2.5-multi-v1": {
+      "manifest": {
+        "model_id": "fastino/gliner2.5-multi-v1",
+        "revision": "cf5593a5d45e3bbf204b9df621b13b1c0cf25ee3",
+        "license": "Apache-2.0",
+        "weight_file": "model.safetensors",
+        "sha256": "c1ff4ec0bc00031c15530b8f3c33d3677f27949e6a0cb52e1247a6224b6c5395",
+        "bytes": 1149461028
+      },
+      "cord": {
+        "test": {
+          "micro_precision": 0.4888888888888889,
+          "micro_recall": 0.29931972789115646,
+          "micro_f1": 0.3713080168776371,
+          "exact_match_rate": 0.0,
+          "latency_ms_p50": 67.79008400008024,
+          "latency_ms_median": 67.79008400008024,
+          "latency_ms_p95": 98.64846900018165,
+          "wall_seconds": 7.139314387999548,
+          "bootstrap_micro_f1": {
+            "f1_mean": 0.3725789141675171,
+            "f1_low": 0.32689355949941135,
+            "f1_high": 0.415916835016835,
+            "n_bootstrap": 500.0
+          },
+          "precision_coverage_points": 794,
+          "span_labeled_count": 794
+        }
+      },
+      "sroie": {
+        "test": {
+          "micro_precision": 0.5360655737704918,
+          "micro_recall": 0.4711815561959654,
+          "micro_f1": 0.5015337423312884,
+          "exact_match_rate": 0.0345821325648415,
+          "latency_ms_p50": 160.9343390000504,
+          "latency_ms_median": 160.9343390000504,
+          "latency_ms_p95": 282.1957870000915,
+          "wall_seconds": 61.94352028100002,
+          "bootstrap_micro_f1": {
+            "f1_mean": 0.5006101038023585,
+            "f1_low": 0.4749853619005544,
+            "f1_high": 0.526165142670531,
+            "n_bootstrap": 500.0
+          },
+          "precision_coverage_points": 3849,
+          "span_labeled_count": 3849
+        }
+      },
+      "peak_rss_mb": 14150.15625,
+      "peak_rss_delta_mb": 0.0
+    }
+  },
+  "datasets": {},
+  "peak_rss_mb_end": 14150.15625
+}

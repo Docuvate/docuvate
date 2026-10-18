@@ -1,0 +1,31 @@
+{
+  "version": "1",
+  "auto_promote_min_by_field": {
+    "date": 0.95,
+    "amount": 0.55,
+    "vendor": 0.942
+  },
+  "date_confidence_floors": [
+    {
+      "min_log_score": 55,
+      "confidence": 0.95
+    },
+    {
+      "min_log_score": 48,
+      "confidence": 0.95
+    }
+  ],
+  "vendor_gate": {
+    "min_org_margin": 35,
+    "min_calibrated_confidence": 0.942,
+    "margin_scale": 0.012,
+    "margin_offset": 22.0,
+    "min_sender_e5_cosine": 0.74,
+    "sender_e5_margin_credit": 10.0
+  },
+  "amount_gate": {
+    "min_ranker_score": 0.12,
+    "min_ranker_margin_over_runner_up": 0.0,
+    "min_calibrated_confidence": 0.55
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "sftp-ingest",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/sftp-ingest",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go build -o dist/sftp-ingest ./cmd/sftp-ingest",
+        "cwd": "apps/sftp-ingest"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go test ./...",
+        "cwd": "apps/sftp-ingest"
+      }
+    },
+    "test-ci": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go test ./... -count=1",
+        "cwd": "apps/sftp-ingest"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "go vet ./...",
+        "cwd": "apps/sftp-ingest"
+      }
+    }
+  },
+  "tags": ["scope:ingest", "lang:go"]
+}

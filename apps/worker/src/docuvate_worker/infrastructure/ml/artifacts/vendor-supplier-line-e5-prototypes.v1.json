@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "encoder_id": "intfloat/multilingual-e5-small",
+  "query_prototypes": [
+    "query: Lieferant supplier name on purchase order",
+    "query: Absender vendor on invoice header",
+    "query: Auftragnehmer contractor on agreement",
+    "query: issuing company on commercial invoice letterhead"
+  ]
+}

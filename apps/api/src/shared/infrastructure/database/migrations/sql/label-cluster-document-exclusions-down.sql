@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS public.label_recommendation_cluster_exclusions;

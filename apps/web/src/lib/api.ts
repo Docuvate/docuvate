@@ -1,0 +1,1295 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type {
+  AcceptDocumentReviewBatchResponseDto,
+  AcceptDocumentReviewResponseDto,
+  AcceptLabelRecommendationRequest,
+  AddLabelRecommendationBlocklistRequest,
+  AdminAccessResponse,
+  AdminUserDto,
+  AdminUserListResponse,
+  ApplyDuplicateSetDecisionsRequest,
+  ApplyLabelCorrectionResponse,
+  BanAdminUserRequest,
+  ConfirmLabelRecommendationBlocklistPatternRequest,
+  ConnectorCatalogResponse,
+  ConnectorInstallationDto,
+  ConnectorSourceTreeNodeDto,
+  CorrespondentDto,
+  CreateConnectorInstallationRequest,
+  CreateCorrespondentRequest,
+  CreateDocumentChatThreadRequest,
+  CreateFolderRequest,
+  CreateSavedDocumentViewRequest,
+  CreateTagRequest,
+  DashboardLayoutResponse,
+  DashboardStatisticsDto,
+  DismissLabelRecommendationRequest,
+  DocumentBulkRequest,
+  DocumentChatMessageRecordDto,
+  DocumentChatProvidersCatalogDto,
+  DocumentChatRequest,
+  DocumentChatResponse,
+  DocumentChatThreadDto,
+  DocumentChatThreadListResponse,
+  DocumentChatThreadMessagesResponse,
+  DocumentDto,
+  DocumentListQuery,
+  DocumentReviewQueueResponseDto,
+  DocumentReviewQueueSummaryDto,
+  DuplicateCandidateDto,
+  DuplicateSetDto,
+  DuplicateStackDto,
+  ExtractionArenaRatingRequest,
+  ExtractionCompareResponse,
+  ExtractionEngineInfo,
+  FolderDto,
+  GlobalSearchResponseDto,
+  HardwareCapabilitiesDto,
+  InviteAdminUserRequest,
+  LabelMapResponseDto,
+  LabelRecommendationBlocklistEntryDto,
+  LabelRecommendationBlocklistPatternDto,
+  LabelRecommendationBlocklistResponse,
+  LabelRecommendationDto,
+  LayoutIrDocument,
+  MoveDocumentsRequest,
+  MoveDocumentsResponse,
+  PaperlessImportDryRunSummaryDto,
+  PaperlessImportRunDto,
+  PaperlessImportRunErrorDto,
+  PaperlessInstallationDto,
+  PasswordPolicyDto,
+  ProposeLabelRecommendationBlocklistPatternRequest,
+  ProposeLabelRecommendationBlocklistPatternResponse,
+  RecognizedFieldDefinitionDto,
+  RemoteConfigDto,
+  ReorderSavedDocumentViewsRequest,
+  ReplaceDashboardLayoutRequest,
+  ReplaceRecognizedFieldsRequest,
+  ReplaceTagCustomFieldsRequest,
+  SavedDocumentViewDto,
+  SavedDocumentViewListResponse,
+  SendDocumentChatThreadMessageRequest,
+  SendDocumentChatThreadMessageResponse,
+  SetAdminUserRoleRequest,
+  SftpFetchHostProbeRequest,
+  SftpFetchHostProbeResponse,
+  SftpIngressAccountDto,
+  SftpIngressCreateAccountRequest,
+  SftpIngressCreateAccountResponseDto,
+  SftpIngressEventDto,
+  SftpIngressServerInfoDto,
+  TagCustomFieldDefinitionDto,
+  TagDto,
+  UpdateConnectorInstallationRequest,
+  UpdateCorrespondentRequest,
+  UpdateDocumentRequest,
+  UpdateDocumentResponse,
+  UpdateFolderRequest,
+  UpdateSavedDocumentViewRequest,
+  UpdateTagRequest,
+  UpdateUserSettingsRequest,
+  UserSettingsDto,
+} from '@docuvate/contracts';
+
+import { isRecord, notifyApiRequestSucceeded, throwApiRequestError } from './apiErrors';
+import type {
+  LayoutCompareMetrics,
+  LayoutComparePagePayload,
+  LayoutCompareSummary,
+} from './layoutCompare';
+
+function resolveApiBaseUrl(): string {
+  const configured =
+    import.meta.env.VITE_API_URL ??
+    (import.meta.env.PROD ? '/api' : 'http://localhost:3001');
+  const normalized = configured.replace(/\/$/, '');
+  if (normalized.endsWith('/v1')) {
+    return normalized;
+  }
+  return `${normalized}/v1`;
+}
+
+const baseURL = resolveApiBaseUrl();
+
+export function apiBaseUrl(): string {
+  return baseURL;
+}
+
+export function authHeaders(): Record<string, string> {
+  return {};
+}
+
+async function request<T>(path: string, init?: RequestInit & { timeoutMs?: number }): Promise<T> {
+  const { timeoutMs, ...fetchInit } = init ?? {};
+  const headers = new Headers(fetchInit.headers);
+  if (fetchInit.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  const signal =
+    timeoutMs != null && timeoutMs > 0
+      ? AbortSignal.timeout(timeoutMs)
+      : fetchInit.signal;
+  const response = await fetch(`${baseURL}${path}`, {
+    ...fetchInit,
+    credentials: 'include',
+    headers,
+    signal,
+  });
+  if (!response.ok) {
+    const bodyUnknown: unknown = await response.json().catch(() => ({}));
+    const body = isRecord(bodyUnknown) ? bodyUnknown : {};
+    throwApiRequestError(response.status, body, response.headers.get('x-request-id'));
+  }
+  notifyApiRequestSucceeded();
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  return response.json() as Promise<T>;
+}
+
+async function requestNoContent(
+  path: string,
+  init?: RequestInit & { timeoutMs?: number }
+): Promise<void> {
+  const { timeoutMs, ...fetchInit } = init ?? {};
+  const headers = new Headers(fetchInit.headers);
+  if (fetchInit.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  const signal =
+    timeoutMs != null && timeoutMs > 0
+      ? AbortSignal.timeout(timeoutMs)
+      : fetchInit.signal;
+  const response = await fetch(`${baseURL}${path}`, {
+    ...fetchInit,
+    credentials: 'include',
+    headers,
+    signal,
+  });
+  if (!response.ok) {
+    const bodyUnknown: unknown = await response.json().catch(() => ({}));
+    const body = isRecord(bodyUnknown) ? bodyUnknown : {};
+    throwApiRequestError(response.status, body, response.headers.get('x-request-id'));
+  }
+  notifyApiRequestSucceeded();
+}
+
+function queryString(params: Record<string, string | undefined>): string {
+  const q = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== '') q.set(key, value);
+  }
+  const s = q.toString();
+  return s ? `?${s}` : '';
+}
+
+export function documentContentUrl(id: string, download = false): string {
+  return `${baseURL}/documents/${id}/content${download ? '?download=1' : ''}`;
+}
+
+export function documentPreviewUrl(id: string): string {
+  return `${baseURL}/documents/${id}/preview`;
+}
+
+export function documentExtractionImageThumbnailUrl(documentId: string, imageId: string): string {
+  return `${baseURL}/documents/${documentId}/extraction-images/${imageId}/thumbnail`;
+}
+
+export async function fetchDocumentPreviewBlob(id: string): Promise<Blob> {
+  const response = await fetch(documentPreviewUrl(id), {
+    credentials: 'include',
+  });
+  if (!response.ok) throw new Error('Vorschau konnte nicht geladen werden');
+  return response.blob();
+}
+
+export async function fetchDocumentContentBlob(id: string): Promise<Blob> {
+  const response = await fetch(`${baseURL}/documents/${id}/content`, {
+    credentials: 'include',
+  });
+  if (!response.ok) throw new Error('Vorschau konnte nicht geladen werden');
+  return response.blob();
+}
+
+export async function listDocuments(filters: DocumentListQuery = {}): Promise<DocumentDto[]> {
+  const fieldFilters = filters.fieldFilters?.filter(
+    (entry) => entry.fieldKey.trim() && entry.valueText.trim()
+  );
+  const qs = queryString({
+    q: filters.q,
+    status: filters.status,
+    tagId: filters.tagId,
+    tags: filters.tagIds?.length ? filters.tagIds.join(',') : undefined,
+    fieldFilterKey: filters.fieldFilterKey,
+    fieldFilterValue: filters.fieldFilterValue,
+    fieldFilters:
+      fieldFilters && fieldFilters.length > 0 ? JSON.stringify(fieldFilters) : undefined,
+    inbox: filters.inbox ? 'true' : undefined,
+    folderId: filters.folderId,
+    unfiled: filters.unfiled ? 'true' : undefined,
+    withoutNonInboxLabel: filters.withoutNonInboxLabel ? 'true' : undefined,
+    documentDateFrom: filters.documentDateFrom,
+    documentDateTo: filters.documentDateTo,
+    sort: filters.sort,
+    order: filters.order,
+    includeTagSuggestions: filters.includeTagSuggestions ? 'true' : undefined,
+  });
+  const data = await request<{ items: DocumentDto[] }>(`/documents${qs}`);
+  return data.items;
+}
+
+export async function getDocument(id: string): Promise<DocumentDto> {
+  return request<DocumentDto>(`/documents/${id}`);
+}
+
+export async function fetchDocumentLayoutIr(documentId: string): Promise<LayoutIrDocument> {
+  return request<LayoutIrDocument>(`/documents/${documentId}/layout-ir`);
+}
+
+export interface LayoutRenderResponse {
+  html?: string;
+  typst?: string;
+  reconstructionReliable: boolean;
+  unreliableReason?: string | null;
+}
+
+export async function fetchDocumentLayoutHtml(
+  documentId: string
+): Promise<{ html: string; reconstructionReliable: boolean; unreliableReason?: string | null }> {
+  return request(`/documents/${documentId}/layout-html`);
+}
+
+export type LayoutTypstExportMode = 'exakt' | 'semantisch';
+
+export async function fetchDocumentLayoutTypst(
+  documentId: string,
+  mode: LayoutTypstExportMode = 'exakt'
+): Promise<{
+  typst: string;
+  exportMode: LayoutTypstExportMode;
+  reconstructionReliable: boolean;
+  unreliableReason?: string | null;
+}> {
+  const query = mode === 'exakt' ? '' : `?mode=${encodeURIComponent(mode)}`;
+  return request(`/documents/${documentId}/layout-typst${query}`);
+}
+
+export async function fetchDocumentLayoutCompareSummary(
+  documentId: string,
+  init?: { timeoutMs?: number }
+): Promise<LayoutCompareSummary> {
+  return request(`/documents/${documentId}/layout-compare/summary`, init);
+}
+
+export async function fetchDocumentLayoutCompareMetrics(
+  documentId: string,
+  from?: number,
+  to?: number,
+  init?: { timeoutMs?: number }
+): Promise<LayoutCompareMetrics> {
+  const params = new URLSearchParams();
+  if (from !== undefined) params.set('from', String(from));
+  if (to !== undefined) params.set('to', String(to));
+  const query = params.toString();
+  return request(
+    `/documents/${documentId}/layout-compare/metrics${query ? `?${query}` : ''}`,
+    init
+  );
+}
+
+export async function fetchDocumentLayoutComparePage(
+  documentId: string,
+  pageNumber: number,
+  includeHeatmap = true,
+  init?: { timeoutMs?: number }
+): Promise<LayoutComparePagePayload> {
+  const heatmapQuery = includeHeatmap ? '' : '?heatmap=0';
+  return request(
+    `/documents/${documentId}/layout-compare/pages/${String(pageNumber)}${heatmapQuery}`,
+    init
+  );
+}
+
+export async function updateDocument(
+  id: string,
+  body: UpdateDocumentRequest
+): Promise<UpdateDocumentResponse> {
+  return request(`/documents/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteDocument(id: string): Promise<void> {
+  await request(`/documents/${id}`, { method: 'DELETE' });
+}
+
+export async function requeueDocumentExtraction(documentId: string): Promise<void> {
+  await request(`/documents/${documentId}/extraction/requeue`, { method: 'POST' });
+}
+
+export async function bulkDocuments(body: DocumentBulkRequest): Promise<{ affected: number }> {
+  return request(`/documents/bulk`, { method: 'POST', body: JSON.stringify(body) });
+}
+
+export async function moveDocuments(body: MoveDocumentsRequest): Promise<MoveDocumentsResponse> {
+  return request<MoveDocumentsResponse>('/documents/move', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function uploadDocument(
+  file: File,
+  placement?: { folderId?: string }
+): Promise<DocumentDto> {
+  const form = new FormData();
+  form.append('file', file);
+  const params = new URLSearchParams();
+  if (placement?.folderId) params.set('folderId', placement.folderId);
+  const qs = params.toString();
+  const response = await fetch(`${baseURL}/documents${qs ? `?${qs}` : ''}`, {
+    method: 'POST',
+    body: form,
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    const bodyUnknown: unknown = await response.json().catch(() => ({}));
+    const errBody = isRecord(bodyUnknown) ? bodyUnknown : {};
+    throwApiRequestError(response.status, errBody, response.headers.get('x-request-id'));
+  }
+  notifyApiRequestSucceeded();
+  return response.json() as Promise<DocumentDto>;
+}
+
+export async function listTags(): Promise<TagDto[]> {
+  const data = await request<{ items: TagDto[] }>('/tags');
+  return data.items;
+}
+
+export async function createTag(body: CreateTagRequest): Promise<TagDto> {
+  return request<TagDto>('/tags', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export async function updateTag(id: string, body: UpdateTagRequest): Promise<TagDto> {
+  return request<TagDto>(`/tags/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+export async function deleteTag(id: string): Promise<void> {
+  await request(`/tags/${id}`, { method: 'DELETE' });
+}
+
+export async function listLabelRecommendations(): Promise<LabelRecommendationDto[]> {
+  const data = await request<{ items: LabelRecommendationDto[] }>('/labels/recommendations');
+  return data.items;
+}
+
+export async function getLabelMap(): Promise<LabelMapResponseDto> {
+  return request<LabelMapResponseDto>('/labels/map');
+}
+
+export async function acceptLabelRecommendation(
+  recommendationId: string,
+  body: Omit<AcceptLabelRecommendationRequest, 'recommendationId'> = {}
+): Promise<{ tagId: string; action: string }> {
+  return request(`/labels/recommendations/${encodeURIComponent(recommendationId)}/accept`, {
+    method: 'POST',
+    body: JSON.stringify({ ...body, recommendationId }),
+  });
+}
+
+export async function dismissLabelRecommendation(
+  recommendationId: string,
+  body: DismissLabelRecommendationRequest = {}
+): Promise<void> {
+  await request(`/labels/recommendations/${encodeURIComponent(recommendationId)}/dismiss`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function listLabelRecommendationBlocklist(): Promise<LabelRecommendationBlocklistResponse> {
+  return request<LabelRecommendationBlocklistResponse>('/labels/recommendation-blocklist');
+}
+
+export async function proposeLabelRecommendationBlocklistPattern(
+  phrases: string[]
+): Promise<ProposeLabelRecommendationBlocklistPatternResponse> {
+  const body: ProposeLabelRecommendationBlocklistPatternRequest = { phrases };
+  return request<ProposeLabelRecommendationBlocklistPatternResponse>(
+    '/labels/recommendation-blocklist/propose-pattern',
+    { method: 'POST', body: JSON.stringify(body) }
+  );
+}
+
+export async function confirmLabelRecommendationBlocklistPattern(
+  pattern: string
+): Promise<LabelRecommendationBlocklistPatternDto> {
+  const body: ConfirmLabelRecommendationBlocklistPatternRequest = { pattern };
+  return request<LabelRecommendationBlocklistPatternDto>(
+    '/labels/recommendation-blocklist/patterns',
+    { method: 'POST', body: JSON.stringify(body) }
+  );
+}
+
+export async function removeLabelRecommendationBlocklistPattern(id: string): Promise<void> {
+  await request(`/labels/recommendation-blocklist/patterns/${id}`, { method: 'DELETE' });
+}
+
+export async function addLabelRecommendationBlocklist(
+  phrase: string
+): Promise<LabelRecommendationBlocklistEntryDto> {
+  const body: AddLabelRecommendationBlocklistRequest = { phrase };
+  return request<LabelRecommendationBlocklistEntryDto>('/labels/recommendation-blocklist', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function removeLabelRecommendationBlocklist(id: string): Promise<void> {
+  await request(`/labels/recommendation-blocklist/${id}`, { method: 'DELETE' });
+}
+
+export async function listCorrespondents(): Promise<CorrespondentDto[]> {
+  const data = await request<{ items: CorrespondentDto[] }>('/correspondents');
+  return data.items;
+}
+
+export async function createCorrespondent(body: CreateCorrespondentRequest): Promise<CorrespondentDto> {
+  return request<CorrespondentDto>('/correspondents', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export async function updateCorrespondent(
+  id: string,
+  body: UpdateCorrespondentRequest
+): Promise<CorrespondentDto> {
+  return request<CorrespondentDto>(`/correspondents/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteCorrespondent(id: string): Promise<void> {
+  await request(`/correspondents/${id}`, { method: 'DELETE' });
+}
+
+export async function listRecognizedFields(): Promise<RecognizedFieldDefinitionDto[]> {
+  const data = await request<{ items: RecognizedFieldDefinitionDto[] }>('/recognized-fields');
+  return data.items;
+}
+
+export async function listRecognizedFieldFilterValues(fieldKey: string): Promise<string[]> {
+  const qs = queryString({ key: fieldKey });
+  const data = await request<{ items: string[] }>(`/recognized-fields/filter-values${qs}`);
+  return data.items;
+}
+
+export async function replaceRecognizedFields(
+  body: ReplaceRecognizedFieldsRequest
+): Promise<RecognizedFieldDefinitionDto[]> {
+  const data = await request<{ items: RecognizedFieldDefinitionDto[] }>('/recognized-fields', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  return data.items;
+}
+
+export async function replaceTagCustomFields(
+  tagId: string,
+  body: ReplaceTagCustomFieldsRequest
+): Promise<TagCustomFieldDefinitionDto[]> {
+  const data = await request<{ items: TagCustomFieldDefinitionDto[] }>(
+    `/tags/${tagId}/custom-fields`,
+    { method: 'PUT', body: JSON.stringify(body) }
+  );
+  return data.items;
+}
+
+async function mutateDocumentTags(
+  documentId: string,
+  path: string,
+  method: 'POST' | 'DELETE'
+): Promise<DocumentDto> {
+  await request(path, { method });
+  return getDocument(documentId);
+}
+
+export function assignDocumentTag(documentId: string, tagId: string): Promise<DocumentDto> {
+  return mutateDocumentTags(documentId, `/documents/${documentId}/tags/${tagId}`, 'POST');
+}
+
+export function acceptDocumentTagSuggestion(
+  documentId: string,
+  tagId: string
+): Promise<DocumentDto> {
+  return mutateDocumentTags(
+    documentId,
+    `/documents/${documentId}/tag-suggestions/${tagId}/accept`,
+    'POST'
+  );
+}
+
+export async function dismissDocumentTagSuggestion(
+  documentId: string,
+  tagId: string
+): Promise<DocumentDto> {
+  await request(`/documents/${documentId}/tag-suggestions/${tagId}/dismiss`, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  });
+  return getDocument(documentId);
+}
+
+export async function getDocumentReviewQueueSummary(): Promise<DocumentReviewQueueSummaryDto> {
+  return request<DocumentReviewQueueSummaryDto>('/review-queue/summary');
+}
+
+export async function listDocumentReviewQueue(options?: {
+  limit?: number;
+  offset?: number;
+}): Promise<DocumentReviewQueueResponseDto> {
+  const qs = queryString({
+    limit: options?.limit != null ? String(options.limit) : undefined,
+    offset: options?.offset != null ? String(options.offset) : undefined,
+  });
+  return request<DocumentReviewQueueResponseDto>(`/review-queue${qs}`);
+}
+
+export async function acceptDocumentReviewAll(
+  documentId: string
+): Promise<AcceptDocumentReviewResponseDto> {
+  return request<AcceptDocumentReviewResponseDto>(
+    `/review-queue/documents/${documentId}/accept-all`,
+    { method: 'POST' }
+  );
+}
+
+export async function acceptDocumentReviewHighConfidenceBatch(
+  minConfidence = 0.9
+): Promise<AcceptDocumentReviewBatchResponseDto> {
+  return request<AcceptDocumentReviewBatchResponseDto>('/review-queue/accept-high-confidence', {
+    method: 'POST',
+    body: JSON.stringify({ minConfidence }),
+  });
+}
+
+export async function archiveHashIdenticalDuplicateSets(): Promise<{ setsArchived: number }> {
+  return request<{ setsArchived: number }>('/review-queue/archive-hash-identical-duplicates', {
+    method: 'POST',
+  });
+}
+
+export async function applyDocumentLabelCorrection(
+  documentId: string,
+  toTagId: string
+): Promise<ApplyLabelCorrectionResponse> {
+  const result = await request<ApplyLabelCorrectionResponse>(
+    `/documents/${documentId}/label-corrections`,
+    { method: 'POST', body: JSON.stringify({ toTagId }) }
+  );
+  return result;
+}
+
+export async function withdrawDocumentLabelCorrection(
+  documentId: string,
+  correctionId: string
+): Promise<DocumentDto> {
+  await request(`/documents/${documentId}/label-corrections/${correctionId}/withdraw`, {
+    method: 'POST',
+  });
+  return getDocument(documentId);
+}
+
+export function removeDocumentTag(documentId: string, tagId: string): Promise<DocumentDto> {
+  return mutateDocumentTags(documentId, `/documents/${documentId}/tags/${tagId}`, 'DELETE');
+}
+
+export async function listFolders(): Promise<FolderDto[]> {
+  const data = await request<{ items: FolderDto[] }>('/folders');
+  return data.items;
+}
+
+export async function createFolder(body: CreateFolderRequest): Promise<FolderDto> {
+  return request<FolderDto>('/folders', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export async function updateFolder(id: string, body: UpdateFolderRequest): Promise<FolderDto> {
+  return request<FolderDto>(`/folders/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+}
+
+export async function deleteFolder(id: string): Promise<void> {
+  await request(`/folders/${id}`, { method: 'DELETE' });
+}
+
+export async function listDuplicateSets(documentId?: string): Promise<DuplicateSetDto[]> {
+  const query = documentId ? `?documentId=${encodeURIComponent(documentId)}` : '';
+  const data = await request<{ items: DuplicateSetDto[] }>(`/duplicate-sets${query}`);
+  return data.items;
+}
+
+export async function archiveDuplicateSet(setId: string): Promise<void> {
+  await request(`/duplicate-sets/${encodeURIComponent(setId)}/archive`, { method: 'POST' });
+}
+
+export async function dismissDuplicateSet(setId: string): Promise<void> {
+  await request(`/duplicate-sets/${encodeURIComponent(setId)}/dismiss`, { method: 'POST' });
+}
+
+export async function applyDuplicateSetDecisions(
+  body: ApplyDuplicateSetDecisionsRequest
+): Promise<void> {
+  await request('/duplicate-sets/apply-decisions', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function listDuplicateCandidates(
+  documentId: string
+): Promise<DuplicateCandidateDto[]> {
+  const data = await request<{ items: DuplicateCandidateDto[] }>(
+    `/documents/${documentId}/duplicate-candidates`
+  );
+  return data.items;
+}
+
+export async function dismissDuplicateCandidate(
+  documentId: string,
+  candidateId: string
+): Promise<void> {
+  await request(`/documents/${documentId}/duplicate-candidates/${candidateId}/dismiss`, {
+    method: 'POST',
+  });
+}
+
+export async function getDuplicateStack(documentId: string): Promise<DuplicateStackDto | null> {
+  const data = await request<{ stack: DuplicateStackDto | null }>(
+    `/documents/${documentId}/duplicate-stack`
+  );
+  return data.stack;
+}
+
+export async function setDuplicateStackPrimary(
+  primaryContextDocumentId: string,
+  stackId: string,
+  documentId: string
+): Promise<DuplicateStackDto | null> {
+  const data = await request<{ stack: DuplicateStackDto | null }>(
+    `/documents/${primaryContextDocumentId}/duplicate-stack/set-primary`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ stackId, documentId }),
+    }
+  );
+  return data.stack;
+}
+
+export async function keepDuplicateStackVersion(
+  primaryDocumentId: string,
+  versionDocumentId: string
+): Promise<DuplicateStackDto | null> {
+  const data = await request<{ stack: DuplicateStackDto | null }>(
+    `/documents/${primaryDocumentId}/duplicate-stack/keep-version`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ versionDocumentId }),
+    }
+  );
+  return data.stack;
+}
+
+export async function markDuplicateStackNotDuplicate(
+  primaryDocumentId: string,
+  otherDocumentId: string
+): Promise<void> {
+  await request(`/documents/${primaryDocumentId}/duplicate-stack/not-duplicate`, {
+    method: 'POST',
+    body: JSON.stringify({ otherDocumentId }),
+  });
+}
+
+export async function restoreDuplicateStackPair(
+  primaryDocumentId: string,
+  otherDocumentId: string
+): Promise<void> {
+  await request(`/documents/${primaryDocumentId}/duplicate-stack/restore-pair`, {
+    method: 'POST',
+    body: JSON.stringify({ otherDocumentId }),
+  });
+}
+
+export async function sendDocumentChat(
+  documentId: string,
+  body: DocumentChatRequest
+): Promise<DocumentChatResponse> {
+  return request(`/documents/${documentId}/chat`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function listDocumentChatThreads(
+  documentId: string
+): Promise<DocumentChatThreadDto[]> {
+  const data = await request<DocumentChatThreadListResponse>(
+    `/documents/${documentId}/chat/threads`
+  );
+  return data.threads;
+}
+
+export async function createDocumentChatThread(
+  documentId: string,
+  body: CreateDocumentChatThreadRequest = {}
+): Promise<DocumentChatThreadDto> {
+  const data = await request<{ thread: DocumentChatThreadDto }>(
+    `/documents/${documentId}/chat/threads`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }
+  );
+  return data.thread;
+}
+
+export async function listDocumentChatThreadMessages(
+  documentId: string,
+  threadId: string
+): Promise<DocumentChatMessageRecordDto[]> {
+  const data = await request<DocumentChatThreadMessagesResponse>(
+    `/documents/${documentId}/chat/threads/${threadId}/messages`
+  );
+  return data.messages;
+}
+
+export async function sendDocumentChatThreadMessage(
+  documentId: string,
+  threadId: string,
+  body: SendDocumentChatThreadMessageRequest
+): Promise<SendDocumentChatThreadMessageResponse> {
+  return request<SendDocumentChatThreadMessageResponse>(
+    `/documents/${documentId}/chat/threads/${threadId}/messages`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }
+  );
+}
+
+export async function cancelDocumentChatMessage(
+  documentId: string,
+  threadId: string,
+  messageId: string
+): Promise<void> {
+  await request<{ ok: boolean }>(
+    `/documents/${documentId}/chat/threads/${threadId}/messages/${messageId}/cancel`,
+    { method: 'POST' }
+  );
+}
+
+export async function retryDocumentChatMessage(
+  documentId: string,
+  threadId: string,
+  messageId: string
+): Promise<DocumentChatMessageRecordDto> {
+  const data = await request<{ message: DocumentChatMessageRecordDto }>(
+    `/documents/${documentId}/chat/threads/${threadId}/messages/${messageId}/retry`,
+    { method: 'POST' }
+  );
+  return data.message;
+}
+
+export async function listLibraryChatThreads(): Promise<DocumentChatThreadDto[]> {
+  const data = await request<DocumentChatThreadListResponse>('/chat/threads');
+  return data.threads;
+}
+
+export async function createLibraryChatThread(
+  body: CreateDocumentChatThreadRequest = {}
+): Promise<DocumentChatThreadDto> {
+  const data = await request<{ thread: DocumentChatThreadDto }>('/chat/threads', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  return data.thread;
+}
+
+export async function updateLibraryChatThread(
+  threadId: string,
+  title: string
+): Promise<DocumentChatThreadDto> {
+  const data = await request<{ thread: DocumentChatThreadDto }>(
+    `/chat/threads/${threadId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ title }),
+    }
+  );
+  return data.thread;
+}
+
+export async function deleteLibraryChatThread(threadId: string): Promise<void> {
+  await request<{ ok: boolean }>(`/chat/threads/${threadId}`, { method: 'DELETE' });
+}
+
+export async function listLibraryChatThreadMessages(
+  threadId: string
+): Promise<DocumentChatMessageRecordDto[]> {
+  const data = await request<DocumentChatThreadMessagesResponse>(
+    `/chat/threads/${threadId}/messages`
+  );
+  return data.messages;
+}
+
+export async function sendLibraryChatThreadMessage(
+  threadId: string,
+  body: SendDocumentChatThreadMessageRequest
+): Promise<SendDocumentChatThreadMessageResponse> {
+  return request<SendDocumentChatThreadMessageResponse>(
+    `/chat/threads/${threadId}/messages`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }
+  );
+}
+
+export async function cancelLibraryChatMessage(
+  threadId: string,
+  messageId: string
+): Promise<void> {
+  await request<{ ok: boolean }>(
+    `/chat/threads/${threadId}/messages/${messageId}/cancel`,
+    { method: 'POST' }
+  );
+}
+
+export async function retryLibraryChatMessage(
+  threadId: string,
+  messageId: string
+): Promise<DocumentChatMessageRecordDto> {
+  const data = await request<{ message: DocumentChatMessageRecordDto }>(
+    `/chat/threads/${threadId}/messages/${messageId}/retry`,
+    { method: 'POST' }
+  );
+  return data.message;
+}
+
+export async function getUserSettings(): Promise<UserSettingsDto> {
+  return request<UserSettingsDto>('/settings');
+}
+
+export async function getRemoteConfig(): Promise<RemoteConfigDto> {
+  return request<RemoteConfigDto>('/remote-config');
+}
+
+export async function globalSearch(
+  params: { q: string; types?: string; limit?: number },
+  init?: { signal?: AbortSignal }
+): Promise<GlobalSearchResponseDto> {
+  const search = new URLSearchParams();
+  search.set('q', params.q);
+  if (params.types) search.set('types', params.types);
+  if (params.limit != null) search.set('limit', String(params.limit));
+  return request<GlobalSearchResponseDto>(`/search?${search.toString()}`, {
+    signal: init?.signal,
+  });
+}
+
+export async function updateUserSettings(
+  body: UpdateUserSettingsRequest
+): Promise<UserSettingsDto> {
+  return request<UserSettingsDto>('/settings', {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function listExtractionEngines(): Promise<ExtractionEngineInfo[]> {
+  const data = await request<{ engines: ExtractionEngineInfo[] }>('/settings/extraction-engines');
+  return data.engines;
+}
+
+export async function getDocumentChatProvidersCatalog(): Promise<DocumentChatProvidersCatalogDto> {
+  return request<DocumentChatProvidersCatalogDto>('/settings/chat-providers');
+}
+
+export async function getHardwareCapabilities(): Promise<HardwareCapabilitiesDto> {
+  return request<HardwareCapabilitiesDto>('/settings/hardware');
+}
+
+export async function getConnectorCatalog(): Promise<ConnectorCatalogResponse> {
+  return request<ConnectorCatalogResponse>('/connectors/catalog');
+}
+
+export async function listConnectorInstallations(): Promise<ConnectorInstallationDto[]> {
+  const data = await request<{ installations: ConnectorInstallationDto[] }>(
+    '/connectors/installations'
+  );
+  return data.installations;
+}
+
+export async function createConnectorInstallation(
+  body: CreateConnectorInstallationRequest
+): Promise<ConnectorInstallationDto> {
+  return request<ConnectorInstallationDto>('/connectors/installations', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteConnectorInstallation(installationId: string): Promise<void> {
+  await requestNoContent(`/connectors/installations/${encodeURIComponent(installationId)}`, {
+    method: 'DELETE',
+  });
+}
+
+export async function getConnectorInstallation(
+  installationId: string
+): Promise<ConnectorInstallationDto> {
+  return request<ConnectorInstallationDto>(
+    `/connectors/installations/${encodeURIComponent(installationId)}`
+  );
+}
+
+export async function updateConnectorInstallation(
+  installationId: string,
+  body: UpdateConnectorInstallationRequest
+): Promise<ConnectorInstallationDto> {
+  return request<ConnectorInstallationDto>(
+    `/connectors/installations/${encodeURIComponent(installationId)}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }
+  );
+}
+
+export async function previewConnectorSourceNodes(
+  pluginId: string,
+  credentials: Record<string, string>,
+  parentPath = ''
+): Promise<ConnectorSourceTreeNodeDto[]> {
+  const data = await request<{ nodes: ConnectorSourceTreeNodeDto[] }>(
+    `/connectors/plugins/${encodeURIComponent(pluginId)}/source-nodes/preview`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ credentials, parentPath }),
+    }
+  );
+  return data.nodes;
+}
+
+export async function listConnectorInstallationSourceNodes(
+  installationId: string,
+  parentPath = ''
+): Promise<ConnectorSourceTreeNodeDto[]> {
+  const params = new URLSearchParams();
+  if (parentPath) params.set('parentPath', parentPath);
+  const query = params.toString();
+  const data = await request<{ nodes: ConnectorSourceTreeNodeDto[] }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/source-nodes${query ? `?${query}` : ''}`
+  );
+  return data.nodes;
+}
+
+export async function testPaperlessConnection(
+  credentials: Record<string, string>
+): Promise<{ ok: true; apiVersion: number }> {
+  return request<{ ok: true; apiVersion: number }>('/connectors/plugins/paperless/test-connection', {
+    method: 'POST',
+    body: JSON.stringify({ credentials }),
+  });
+}
+
+export async function getPaperlessInstallation(
+  installationId: string
+): Promise<PaperlessInstallationDto> {
+  return request<PaperlessInstallationDto>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless`
+  );
+}
+
+export async function testPaperlessInstallationConnection(
+  installationId: string,
+  credentials: Record<string, string>
+): Promise<{ ok: true; apiVersion: number }> {
+  return request<{ ok: true; apiVersion: number }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/test-connection`,
+    {
+      method: 'POST',
+      body: JSON.stringify({ credentials }),
+    }
+  );
+}
+
+export async function updatePaperlessInstallation(
+  installationId: string,
+  body: {
+    displayName?: string;
+    credentials?: Record<string, string>;
+    keepOcrText?: boolean;
+    rerunOcr?: boolean;
+    includeArchivedPdf?: boolean;
+  }
+): Promise<void> {
+  await request(`/connectors/installations/${encodeURIComponent(installationId)}/paperless`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function paperlessImportDryRun(
+  installationId: string
+): Promise<{ summary: PaperlessImportDryRunSummaryDto }> {
+  return request<{ summary: PaperlessImportDryRunSummaryDto }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/dry-run`,
+    { method: 'POST', body: '{}' }
+  );
+}
+
+export async function startPaperlessImport(
+  installationId: string
+): Promise<{ run: PaperlessImportRunDto }> {
+  return request<{ run: PaperlessImportRunDto }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/import`,
+    { method: 'POST', body: '{}' }
+  );
+}
+
+export async function getPaperlessImportRun(
+  installationId: string,
+  runId: string
+): Promise<{ run: PaperlessImportRunDto; errors: PaperlessImportRunErrorDto[] }> {
+  return request<{ run: PaperlessImportRunDto; errors: PaperlessImportRunErrorDto[] }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/import-runs/${encodeURIComponent(runId)}`
+  );
+}
+
+export async function getLatestPaperlessImportRun(
+  installationId: string
+): Promise<{ run: PaperlessImportRunDto; errors: PaperlessImportRunErrorDto[] }> {
+  return request<{ run: PaperlessImportRunDto; errors: PaperlessImportRunErrorDto[] }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/import-runs/latest`
+  );
+}
+
+export async function startConnectorOAuth(
+  pluginId: 'gmail' | 'outlook',
+  body: { displayName: string; accountHint?: string }
+): Promise<{ authorizationUrl: string }> {
+  return request<{ authorizationUrl: string }>(
+    `/connectors/oauth/${encodeURIComponent(pluginId)}/start`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }
+  );
+}
+
+export async function compareDocumentExtraction(
+  documentId: string,
+  body: { engines?: string[]; maxPages?: number }
+): Promise<ExtractionCompareResponse> {
+  return request<ExtractionCompareResponse>(`/documents/${documentId}/extraction/compare`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+    timeoutMs: 180_000,
+  });
+}
+
+export async function submitExtractionArenaRating(
+  documentId: string,
+  body: ExtractionArenaRatingRequest
+): Promise<void> {
+  await request(`/documents/${documentId}/extraction/arena-rating`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getAdminAccess(): Promise<AdminAccessResponse> {
+  return request<AdminAccessResponse>('/admin/access');
+}
+
+export async function getPasswordPolicy(): Promise<PasswordPolicyDto> {
+  return request<PasswordPolicyDto>('/auth/password-policy');
+}
+
+export async function getAdminPasswordPolicy(): Promise<PasswordPolicyDto> {
+  return request<PasswordPolicyDto>('/admin/password-policy');
+}
+
+export async function updateAdminPasswordPolicy(body: PasswordPolicyDto): Promise<PasswordPolicyDto> {
+  return request<PasswordPolicyDto>('/admin/password-policy', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function listAdminUsers(search?: string): Promise<AdminUserListResponse> {
+  const qs = search?.trim() ? `?search=${encodeURIComponent(search.trim())}` : '';
+  return request<AdminUserListResponse>(`/admin/users${qs}`);
+}
+
+export async function inviteAdminUser(body: InviteAdminUserRequest): Promise<AdminUserDto> {
+  return request<AdminUserDto>('/admin/users/invite', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function setAdminUserRole(
+  userId: string,
+  body: SetAdminUserRoleRequest
+): Promise<void> {
+  await request(`/admin/users/${encodeURIComponent(userId)}/role`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function banAdminUser(userId: string, body: BanAdminUserRequest): Promise<void> {
+  await request(`/admin/users/${encodeURIComponent(userId)}/ban`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function unbanAdminUser(userId: string): Promise<void> {
+  await request(`/admin/users/${encodeURIComponent(userId)}/unban`, { method: 'POST' });
+}
+
+export async function revokeAdminUserSessions(userId: string): Promise<void> {
+  await request(`/admin/users/${encodeURIComponent(userId)}/revoke-sessions`, {
+    method: 'POST',
+  });
+}
+
+export async function acceptUserInvitation(body: {
+  token: string;
+  password: string;
+}): Promise<void> {
+  await request<{ ok: true }>('/invitations/accept', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function resendAdminUserInvitation(userId: string): Promise<void> {
+  await request<{ ok: true }>(`/admin/users/${encodeURIComponent(userId)}/resend-invitation`, {
+    method: 'POST',
+  });
+}
+
+export async function revokeAdminUserInvitation(userId: string): Promise<void> {
+  await request<{ ok: true }>(`/admin/users/${encodeURIComponent(userId)}/revoke-invitation`, {
+    method: 'POST',
+  });
+}
+
+export async function listSavedDocumentViews(): Promise<SavedDocumentViewDto[]> {
+  const data = await request<SavedDocumentViewListResponse>('/saved-views');
+  return data.items;
+}
+
+export async function getSavedDocumentView(id: string): Promise<SavedDocumentViewDto> {
+  return request<SavedDocumentViewDto>(`/saved-views/${encodeURIComponent(id)}`);
+}
+
+export async function createSavedDocumentView(
+  body: CreateSavedDocumentViewRequest
+): Promise<SavedDocumentViewDto> {
+  return request<SavedDocumentViewDto>('/saved-views', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateSavedDocumentView(
+  id: string,
+  body: UpdateSavedDocumentViewRequest
+): Promise<SavedDocumentViewDto> {
+  return request<SavedDocumentViewDto>(`/saved-views/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteSavedDocumentView(id: string): Promise<void> {
+  await requestNoContent(`/saved-views/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+export async function reorderSavedDocumentViews(
+  body: ReorderSavedDocumentViewsRequest
+): Promise<void> {
+  await requestNoContent('/saved-views/reorder', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getDashboardLayout(): Promise<DashboardLayoutResponse> {
+  return request<DashboardLayoutResponse>('/dashboard');
+}
+
+export async function replaceDashboardLayout(
+  body: ReplaceDashboardLayoutRequest
+): Promise<DashboardLayoutResponse> {
+  return request<DashboardLayoutResponse>('/dashboard', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getDashboardStatistics(): Promise<DashboardStatisticsDto> {
+  return request<DashboardStatisticsDto>('/dashboard/statistics');
+}
+
+export async function getInstallationAdminStatus(): Promise<{ isInstallationAdmin: boolean }> {
+  return request<{ isInstallationAdmin: boolean }>('/dashboard/installation-admin');
+}
+
+export { baseURL };
+
+export async function getSftpIngressServer(): Promise<SftpIngressServerInfoDto> {
+  return request<SftpIngressServerInfoDto>('/sftp-ingress/server');
+}
+
+export async function listSftpIngressAccounts(): Promise<SftpIngressAccountDto[]> {
+  const res = await request<{ accounts: SftpIngressAccountDto[] }>('/sftp-ingress/accounts');
+  return res.accounts;
+}
+
+export async function createSftpIngressAccount(
+  body: SftpIngressCreateAccountRequest
+): Promise<SftpIngressCreateAccountResponseDto> {
+  return request<SftpIngressCreateAccountResponseDto>('/sftp-ingress/accounts', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function revokeSftpIngressAccount(accountId: string): Promise<void> {
+  await request(`/sftp-ingress/accounts/${encodeURIComponent(accountId)}`, { method: 'DELETE' });
+}
+
+export async function listSftpIngressEvents(
+  accountId: string,
+  limit = 20
+): Promise<SftpIngressEventDto[]> {
+  const res = await request<{ events: SftpIngressEventDto[] }>(
+    `/sftp-ingress/accounts/${encodeURIComponent(accountId)}/events?limit=${String(limit)}`
+  );
+  return res.events;
+}
+
+export async function probeSftpFetchHostKey(
+  body: SftpFetchHostProbeRequest
+): Promise<SftpFetchHostProbeResponse> {
+  return request<SftpFetchHostProbeResponse>('/connectors/plugins/sftp_fetch/probe-host-key', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}

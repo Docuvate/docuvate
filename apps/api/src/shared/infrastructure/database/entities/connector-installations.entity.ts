@@ -1,0 +1,59 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+
+import { SftpPullSyncStateEntity } from './sftp-pull-sync-state.entity.js';
+import { UserEntity } from './user.entity.js';
+
+@Index('connector_installations_user_idx', ['userId'], {})
+@Entity('connector_installations', { schema: 'public' })
+export class ConnectorInstallationsEntity {
+  @PrimaryGeneratedColumn('uuid', { name: 'id' })
+  id: string;
+
+  @Column('text', { name: 'user_id' })
+  userId: string;
+
+  @Column('text', { name: 'plugin_id' })
+  pluginId: string;
+
+  @Column('text', { name: 'display_name' })
+  displayName: string;
+
+  @Column('boolean', { name: 'enabled', default: () => 'true' })
+  enabled: boolean;
+
+  @Column('bytea', { name: 'credentials_encrypted' })
+  credentialsEncrypted: Buffer;
+
+  @Column('timestamp with time zone', {
+    name: 'created_at',
+    default: () => 'now()',
+  })
+  createdAt: Date;
+
+  @Column('timestamp with time zone', {
+    name: 'updated_at',
+    default: () => 'now()',
+  })
+  updatedAt: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.connectorInstallations, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
+  user: UserEntity;
+
+  @OneToOne(() => SftpPullSyncStateEntity, (sftpPullSyncState) => sftpPullSyncState.installation, {
+    onDelete: 'CASCADE',
+  })
+  sftpPullSyncState: SftpPullSyncStateEntity;
+}

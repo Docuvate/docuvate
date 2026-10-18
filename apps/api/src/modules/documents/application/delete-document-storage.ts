@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ObjectStorage } from '../../../shared/domain/ports.js';
+import type { DocumentEntity } from '../domain/document.entity.js';
+
+export async function deleteDocumentObjectKeys(
+  storage: ObjectStorage,
+  doc: Pick<DocumentEntity, 'storageKey' | 'previewStorageKey' | 'archivedStorageKey'>
+): Promise<void> {
+  await storage.deleteObject(doc.storageKey);
+  const preview = doc.previewStorageKey?.trim();
+  if (preview) {
+    await storage.deleteObject(preview);
+  }
+  const archived = doc.archivedStorageKey?.trim();
+  if (archived) {
+    await storage.deleteObject(archived);
+  }
+}

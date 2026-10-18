@@ -1,0 +1,10 @@
+# Local CI only: stable image names per runner so docker-build and compose-smoke share layers.
+services:
+  api:
+    image: docuvate-local-ci-api:${DOCUVATE_LOCAL_CI_IMAGE_TAG:-local}
+  web:
+    image: docuvate-local-ci-web:${DOCUVATE_LOCAL_CI_IMAGE_TAG:-local}
+  worker:
+    image: docuvate-local-ci-worker:${DOCUVATE_LOCAL_CI_IMAGE_TAG:-local}
+  migrate:
+    image: docuvate-local-ci-api:${DOCUVATE_LOCAL_CI_IMAGE_TAG:-local}

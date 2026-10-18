@@ -1,0 +1,61 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
+
+import {
+  AuthGuard,
+  type AuthSession,
+  Session,
+} from '../../../shared/infrastructure/auth/auth.guard.js';
+import { ReplaceRecognizedFieldsRequestDto } from '../../../shared/presentation/dtos/recognized-fields.dto.js';
+import {
+  ApiDocuvateController,
+  ApiDocuvateRoute,
+} from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { ListRecognizedFieldFilterValuesUseCase } from '../application/list-recognized-field-filter-values.use-case.js';
+import {
+  ListRecognizedFieldsUseCase,
+  ReplaceRecognizedFieldsUseCase,
+} from '../application/recognized-field.use-cases.js';
+import { toRecognizedFieldDto } from './recognized-fields.mapper.js';
+
+@ApiDocuvateController('settings')
+@Controller('recognized-fields')
+@UseGuards(AuthGuard)
+export class RecognizedFieldsController {
+  constructor(
+    private readonly listFields: ListRecognizedFieldsUseCase,
+    private readonly replaceFields: ReplaceRecognizedFieldsUseCase,
+    private readonly listFilterValues: ListRecognizedFieldFilterValuesUseCase
+  ) {}
+
+  @Get('filter-values')
+  @ApiDocuvateRoute({
+    operationId: 'listRecognizedFieldFilterValues',
+    summary: 'Distinct recognized field values for library filters',
+  })
+  async filterValues(@Session() session: AuthSession, @Query('key') key?: string) {
+    const items = await this.listFilterValues.execute(session.user.id, key ?? '');
+    return { items };
+  }
+
+  @Get()
+  @ApiDocuvateRoute({
+    operationId: 'listRecognizedFields',
+    summary: 'List recognized field catalog',
+  })
+  async get(@Session() session: AuthSession) {
+    const items = await this.listFields.execute(session.user.id);
+    return { items: items.map(toRecognizedFieldDto) };
+  }
+
+  @Put()
+  @ApiDocuvateRoute({
+    operationId: 'replaceRecognizedFields',
+    summary: 'Replace recognized field catalog',
+  })
+  async put(@Session() session: AuthSession, @Body() body: ReplaceRecognizedFieldsRequestDto) {
+    const items = await this.replaceFields.execute(session.user.id, body);
+    return { items: items.map(toRecognizedFieldDto) };
+  }
+}

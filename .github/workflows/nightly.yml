@@ -1,0 +1,215 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  model-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
+      - name: Model gates (CPU eval + ratchet)
+        run: bash scripts/ci/run-model-gates.sh
+
+  lint-heavy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm openapi:check
+      - run: pnpm sdk:check
+      - name: Cache Puppeteer browser (Mermaid CLI)
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: ~/.cache/puppeteer
+          key: puppeteer-23.11.1-chrome-headless-shell-${{ runner.os }}
+      - name: Mermaid diagrams in markdown
+        run: |
+          bash scripts/ci/mermaid-chrome-setup.sh
+          bash scripts/ci/check-mermaid-markdown.sh
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
+      - name: uv.lock matches pyproject
+        run: |
+          pip install 'uv==0.12.23'
+          cd apps/worker && uv lock --check
+      - name: Worker CPU torch resolution
+        run: |
+          pip install 'uv==0.12.23'
+          bash scripts/ci/check-worker-cpu-torch-resolution.sh
+      - name: Install Flutter SDK
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq curl
+          curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.5-stable.tar.xz | tar xJ -C /opt
+          echo "/opt/flutter/bin" >> "$GITHUB_PATH"
+      - name: Flutter SDK analyze + test
+        run: cd packages/sdk-flutter && flutter pub get && dart analyze && dart test
+      - name: Install typst (layout IR compile tests)
+        run: bash scripts/ci/install-typst.sh
+      - name: Poppler and fonts for layout pixel-compare tests
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils fonts-dejavu-core fonts-noto-cjk
+      - name: Worker layout PDF regression slice
+        run: |
+          pip install 'uv==0.12.23'
+          cd apps/worker && uv venv .venv && uv pip install -e ".[dev]"
+          .venv/bin/pytest tests/test_pipeline_extractor_equivalence.py -v --tb=short -rs
+      - run: pnpm nx run-many -t test-ci --all --parallel=3
+      - name: Coverage ratchet (no regression vs baseline)
+        run: node scripts/testing/coverage-ratchet.mjs
+      - name: Install uv (uvx for fastapi doctor)
+        run: pipx install 'uv==0.12.23'
+      - name: Doctor ratchet (no regression vs baseline)
+        run: node scripts/testing/doctor-ratchet.mjs
+      - name: Upload coverage summaries
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: nightly-coverage-summaries
+          path: |
+            apps/api/coverage/coverage-summary.json
+            apps/web/coverage/coverage-summary.json
+          if-no-files-found: ignore
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Pre-pull Dockerfile base images
+        run: bash scripts/ci/pull-dockerfile-base-images.sh
+      - name: Build service images
+        run: |
+          set -euo pipefail
+          docker compose -f docker-compose.yml build web api site sftp-ingest worker
+      - name: Assert CPU worker image has no CUDA pip packages
+        run: |
+          set -euo pipefail
+          img_id="$(docker image ls --format '{{.ID}}' --filter 'label=com.docker.compose.service=worker' | head -1)"
+          if [ -z "$img_id" ]; then
+            img_id="$(docker build -q -f apps/worker/Dockerfile --target cpu .)"
+          fi
+          docker run --rm "$img_id" python /app/scripts/ci/assert-worker-cpu-pip-freeze.py
+
+  worker-gpu-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Pre-pull Dockerfile base images
+        run: bash scripts/ci/pull-dockerfile-base-images.sh
+      - name: Build GPU worker image (amd64)
+        run: |
+          set -euo pipefail
+          docker build -f apps/worker/Dockerfile --target gpu -t docuvate-worker-gpu:nightly .
+          docker run --rm docuvate-worker-gpu:nightly python -c "import torch; assert torch.version.cuda"
+
+  kind-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Require Docker
+        run: docker info
+      - name: Install Kubernetes CI tools
+        run: |
+          set -euo pipefail
+          bash scripts/ci/install-k8s-ci-tools.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: PyYAML for kind-smoke helpers
+        run: pip install 'pyyaml==6.0.2'
+      - name: Kind cluster smoke (Kustomize dev + Helm dev)
+        run: bash tools/k8s-kind-smoke.sh
+
+  playwright-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Start compose stack (CI override, no Ollama)
+        run: |
+          set -euo pipefail
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build \
+            postgres migrate db-storage-guard minio minio-init valkey mailpit ollama-init api worker web
+      - name: Wait for API and web
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 90); do
+            if curl -sf http://localhost:3001/health/ready | jq -e '.status == "ready"' >/dev/null; then
+              break
+            fi
+            if [ "$i" -eq 90 ]; then exit 1; fi
+            sleep 2
+          done
+          curl -sf http://localhost:5173/ >/dev/null
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install chromium --with-deps
+      - name: Seed E2E users and bench
+        run: |
+          set -euo pipefail
+          DATABASE_URL=postgresql://docuvate:docuvate@localhost:5433/docuvate \
+          AUTH_BASE=http://localhost:3001 \
+          WEB_ORIGIN=http://localhost:5173 \
+          node scripts/seed-labels-screenshots.mjs
+          DATABASE_URL=postgresql://docuvate:docuvate@localhost:5433/docuvate \
+          AUTH_BASE=http://localhost:3001 \
+          WEB_ORIGIN=http://localhost:5173 \
+          node scripts/seed-e2e-smoke-user.mjs
+          AUTH_BASE=http://localhost:3001 \
+          WEB_ORIGIN=http://localhost:5173 \
+          node scripts/seed-cited-chat-bench.mjs
+      - name: Playwright full e2e (@docuvate/e2e)
+        env:
+          E2E_WEB_URL: http://localhost:5173
+          E2E_API_URL: http://localhost:3001
+        run: pnpm --filter @docuvate/e2e test

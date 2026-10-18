@@ -1,0 +1,14 @@
+---
+description: Postgres schema must remain at least 3NF (ADR 015)
+alwaysApply: true
+---
+
+# Database 3NF (Docuvate)
+
+- All production tables ≥ **3NF**: no transitive dependencies; no stored derivable duplicates.
+- **1NF:** no repeating groups — no CSV/arrays/JSONB arrays of foreign keys used for filters, joins, validation, or per-id updates.
+- **JSONB** only for opaque blobs never queried by attribute in SQL (see `apps/api/src/shared/infrastructure/database/schema-jsonb-allowlist.ts` and `docs/adr/015-datenbankschema-mindestens-3nf.md`).
+- **Enums:** lookup table or `CHECK`, documented in ADR audit.
+- **Denormalization:** explicit ADR only; never silent.
+- After schema changes: update allowlist if needed, run `schema-normalization.guard.spec.ts`.
+- **Schema changes:** add a TypeORM `MigrationInterface` with paired up/down SQL on **PostgreSQL 18.6**; keep entities in sync (`migration-generate-check.sh` in CI).

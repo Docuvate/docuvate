@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docuvate-api
+spec:
+  template:
+    spec:
+      containers:
+        - name: api
+          env:
+            - name: DOCUVATE_SFTP_PULL_GATEWAY_URL
+              value: http://docuvate-sftp-ingest:8080
+            - name: DOCUVATE_SFTP_INGEST_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: docuvate-secrets
+                  key: DOCUVATE_SFTP_INGEST_SERVICE_KEY

@@ -1,0 +1,11 @@
+# Local development: build app images from source instead of pulling GHCR.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+services:
+  api:
+    pull_policy: build
+  web:
+    pull_policy: build
+  worker:
+    pull_policy: build
+  migrate:
+    pull_policy: build

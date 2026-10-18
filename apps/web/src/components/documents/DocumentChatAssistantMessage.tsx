@@ -1,0 +1,214 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { ChatMessageCitationDto, DocumentChatMessageRecordDto } from '@docuvate/contracts';
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import ReactMarkdown from 'react-markdown';
+
+import { formatChatGenerationError, toUserFacingChatGenerationError } from '../../lib/apiErrors';
+import { CHAT_GENERATION_MAX_WAIT_SEC } from '../../lib/chatGenerationLimits';
+import { chatGenerationWaitStartMs } from '../../lib/chatGenerationWaitStart';
+import {
+  extractReadableCitedAnswerPreview,
+  looksLikeCitedAnswerJson,
+} from '../../lib/extractCitedStreamPreview';
+import { Button } from '../ui/Button';
+import { Spinner } from '../ui/Spinner';
+import { DocumentImage } from './DocumentImage';
+import { DocumentSnippet } from './DocumentSnippet';
+
+interface DocumentChatAssistantMessageProps {
+  message: DocumentChatMessageRecordDto;
+  onRetry: (messageId: string) => void;
+  onCancel: (messageId: string) => void;
+  retryBusy: boolean;
+  /** Library/global chat uses broader retrieval copy. */
+  chatScope?: 'document' | 'library';
+  renderCitationLink?: (citation: ChatMessageCitationDto) => React.ReactNode;
+}
+
+function formatElapsed(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m > 0 ? `${String(m)}:${String(s).padStart(2, '0')}` : `${String(s)}s`;
+}
+
+export function DocumentChatAssistantMessage({
+  message,
+  onRetry,
+  onCancel,
+  retryBusy,
+  chatScope = 'document',
+  renderCitationLink,
+}: DocumentChatAssistantMessageProps) {
+  const { t } = useTranslation();
+  const status = message.generationStatus ?? 'done';
+  const [elapsed, setElapsed] = useState(0);
+  const timedOutRef = useRef(false);
+
+  const isActive = status === 'pending' || status === 'streaming';
+  const isFailed = status === 'failed';
+
+  useEffect(() => {
+    if (!isActive) {
+      return undefined;
+    }
+    const tick = () => {
+      const started = chatGenerationWaitStartMs(message);
+      if (started == null) {
+        setElapsed(0);
+        return;
+      }
+      setElapsed(Math.max(0, Math.floor((Date.now() - started) / 1000)));
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => { clearInterval(id); };
+  }, [isActive, message.createdAt, message.updatedAt, message.generationPhase, message.generationStatus, message]);
+
+  useEffect(() => {
+    timedOutRef.current = false;
+  }, [message.id]);
+
+  useEffect(() => {
+    if (!isActive || chatGenerationWaitStartMs(message) == null) {
+      return;
+    }
+    if (elapsed < CHAT_GENERATION_MAX_WAIT_SEC || timedOutRef.current) {
+      return;
+    }
+    timedOutRef.current = true;
+    onCancel(message.id);
+  }, [elapsed, isActive, message, onCancel]);
+
+  let statusLine: string | null = null;
+  if (isActive) {
+    if (message.generationPhase === 'retrieving' || status === 'pending') {
+      statusLine =
+        chatScope === 'library'
+          ? t('documents.documentChat.phaseRetrievingLibrary')
+          : t('documents.documentChat.phaseRetrieving');
+    } else if (message.generationPhase === 'verifying') {
+      statusLine = t('documents.documentChat.phaseVerifying');
+    } else {
+      statusLine = t('documents.documentChat.phaseGenerating');
+    }
+  }
+
+  const generationError = isFailed
+    ? toUserFacingChatGenerationError(message.errorCode, { log: true })
+    : null;
+
+  const displayContent =
+    message.content && looksLikeCitedAnswerJson(message.content)
+      ? extractReadableCitedAnswerPreview(message.content)
+      : message.content;
+  const hasStreamingText = Boolean(displayContent && displayContent.trim().length > 0);
+
+  const sourceImages =
+    message.citations
+      ?.flatMap((citation) =>
+        citation.documentImage
+          ? [{ documentId: citation.documentId, image: citation.documentImage }]
+          : [],
+      )
+      .slice(0, 3) ?? [];
+
+  return (
+    <li
+      className={`doc-chat-bubble doc-chat-assistant${isFailed ? ' doc-chat-assistant-failed' : ''}${isActive ? ' doc-chat-assistant-pending' : ''}`}
+    >
+      <span className="doc-chat-role">{t('documents.documentChat.roleAssistant')}</span>
+
+      {isActive && !hasStreamingText ? (
+        <div className="doc-chat-status-block" role="status" aria-live="polite">
+          <div className="doc-chat-typing-body">
+            <Spinner size="sm" label={statusLine ?? t('documents.documentChat.typing')} />
+            <span className="doc-chat-typing-text">
+              {statusLine ?? t('documents.documentChat.typing')}
+            </span>
+          </div>
+          <span className="muted doc-chat-elapsed">{formatElapsed(elapsed)}</span>
+          <Button
+            type="button"
+            variant="secondary"
+            className="doc-chat-cancel-btn"
+            onClick={() => { onCancel(message.id); }}
+          >
+            {t('documents.documentChat.cancel')}
+          </Button>
+        </div>
+      ) : null}
+
+      {isActive && hasStreamingText ? (
+        <div className="doc-chat-status-block doc-chat-status-block-compact" role="status" aria-live="polite">
+          <span className="muted doc-chat-streaming-phase">{statusLine}</span>
+          <span className="muted doc-chat-elapsed">{formatElapsed(elapsed)}</span>
+        </div>
+      ) : null}
+
+      {displayContent ? (
+        <div
+          className={`doc-chat-assistant-content doc-chat-assistant-markdown${isActive ? ' doc-chat-assistant-content-streaming' : ''}`}
+        >
+          <ReactMarkdown>{displayContent}</ReactMarkdown>
+        </div>
+      ) : null}
+
+      {message.citations && message.citations.length > 0 ? (
+        <div className="doc-chat-sources">
+          <span className="doc-chat-sources-label">{t('documents.documentChat.sources')}</span>
+          <ul className="doc-chat-sources-list">
+            {message.citations.slice(0, 3).map((citation) => (
+              <li key={citation.ordinal} className="doc-chat-source-item">
+                <div className="doc-chat-source-head">
+                  {renderCitationLink ? (
+                    renderCitationLink(citation)
+                  ) : (
+                    <span className="doc-chat-citation-chip">[{citation.ordinal}]</span>
+                  )}
+                  <span className="muted">
+                    {citation.documentTitle}
+                    {citation.page != null ? `, S. ${String(citation.page)}` : ''}
+                  </span>
+                </div>
+                {citation.bbox && citation.page != null ? (
+                  <DocumentSnippet
+                    documentId={citation.documentId}
+                    page={citation.page}
+                    bbox={citation.bbox}
+                    highlightBlocks={citation.blocks}
+                  />
+                ) : null}
+              </li>
+            ))}
+          </ul>
+          {sourceImages.length > 0 ? (
+            <div className="doc-chat-source-images">
+              {sourceImages.map(({ documentId, image }) => (
+                <DocumentImage key={image.id} documentId={documentId} image={image} />
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
+      {isFailed ? (
+        <div className="doc-chat-error-block" role="alert">
+          <p>{formatChatGenerationError(message.errorCode)}</p>
+          {generationError?.retryable ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="doc-chat-retry-btn"
+              disabled={retryBusy}
+              onClick={() => { onRetry(message.id); }}
+            >
+              {t('documents.documentChat.retry')}
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
+    </li>
+  );
+}

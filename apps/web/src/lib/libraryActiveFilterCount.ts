@@ -1,0 +1,35 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { DocumentListQuery } from '@docuvate/contracts';
+
+import { normalizeFieldFilters } from './libraryFieldFilters';
+
+/** Count sidebar filter criteria for compact toolbar badge. */
+export function countLibraryActiveFilters(filters: DocumentListQuery): number {
+  let count = 0;
+  if (filters.status) {
+    count += 1;
+  }
+  if (filters.inbox) {
+    count += 1;
+  }
+  if (filters.withoutNonInboxLabel) {
+    count += 1;
+  }
+  count += filters.tagIds?.length ?? 0;
+  if (filters.documentDateFrom) {
+    count += 1;
+  }
+  if (filters.documentDateTo) {
+    count += 1;
+  }
+  count += normalizeFieldFilters(filters.fieldFilters).length;
+  if (
+    normalizeFieldFilters(filters.fieldFilters).length === 0 &&
+    filters.fieldFilterKey?.trim() &&
+    filters.fieldFilterValue?.trim()
+  ) {
+    count += 1;
+  }
+  return count;
+}

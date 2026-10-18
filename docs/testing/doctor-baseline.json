@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-10-08",
+  "targetMinScore": 95,
+  "gateRule": "PR blockiert wenn ein Doctor-Score unter dem Baseline-Wert liegt (keine Verschlechterung gegenüber main). Doctor-CLI-Versionen sind gepinnt (kein @latest), damit Scores vergleichbar bleiben.",
+  "packages": {
+    "nestjs": {
+      "path": "apps/api",
+      "command": "pnpm dlx nestjs-doctor@0.9.10 apps/api",
+      "baselineScore": 99
+    },
+    "react": {
+      "path": "apps/web",
+      "command": "pnpm dlx react-doctor@0.9.17 apps/web",
+      "baselineScore": 62
+    },
+    "fastapi": {
+      "path": "apps/worker",
+      "command": "uvx --from fastapi-doctor==0.12.0 --index https://s-smits.github.io/fastapi-doctor/simple/ fastapi-doctor --profile strict --score",
+      "baselineScore": 92
+    }
+  }
+}

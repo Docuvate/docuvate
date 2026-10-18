@@ -1,0 +1,52 @@
+{
+  "version": "1",
+  "vendor": {
+    "method": "platt",
+    "feature_names": [
+      "ranker_score",
+      "sender_e5_cosine",
+      "recipient_e5_cosine",
+      "supplier_e5_cosine",
+      "doc_heading_e5_cosine",
+      "label_hint",
+      "letterhead_band_hint",
+      "footer_band_hint",
+      "cross_block_supplier_e5",
+      "iban_holder_adjacency",
+      "supplier_minus_recipient_e5",
+      "digits_ratio",
+      "addr_minus_org"
+    ],
+    "coefficients": [
+      -0.3670860930335674,
+      -0.026475569617830538,
+      -0.028433087982289867,
+      -0.00895869297060173,
+      0.0011467984460432259,
+      -0.12936675927251906,
+      0.6410291469400066,
+      0.08563710003188375,
+      -0.012489555293749508,
+      -0.1427177773919372,
+      0.019474395011688118,
+      0.0,
+      0.002371408470810318
+    ],
+    "intercept": 3.433449260847796
+  },
+  "amount": {
+    "method": "isotonic",
+    "x": [
+      0.31855356000528096,
+      0.979295215560999,
+      0.9796279558483721,
+      0.9977758556064156
+    ],
+    "y": [
+      0.9743589743589743,
+      0.9743589743589743,
+      1.0,
+      1.0
+    ]
+  }
+}

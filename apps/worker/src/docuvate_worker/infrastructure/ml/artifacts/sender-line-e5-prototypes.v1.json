@@ -1,0 +1,12 @@
+{
+  "version": "1",
+  "encoder_id": "intfloat/multilingual-e5-small",
+  "query_prototypes": [
+    "query: the company or organization that issued and sent this document",
+    "query: business letterhead organization name of the sender",
+    "query: Absender Unternehmensname auf einem Geschäftsbrief",
+    "query: name of the vendor or supplier on an invoice",
+    "query: insurance company name on a policy letter",
+    "query: tax authority or employer name on an official notice"
+  ]
+}

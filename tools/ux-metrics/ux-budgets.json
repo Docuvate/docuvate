@@ -1,0 +1,273 @@
+{
+  "version": 2,
+  "mode": "report-only",
+  "layoutTolerancePx": 2,
+  "fittsRelativeMaxIncrease": 0.05,
+  "klmRelativeMaxIncrease": 0.05,
+  "metrics": {
+    "targets.desktop.wcagFailures": {
+      "direction": "lower-is-better",
+      "tolerance": 0
+    },
+    "targets.mobile.wcagFailures": {
+      "direction": "lower-is-better",
+      "tolerance": 0
+    },
+    "accessibility.axeViolations": {
+      "direction": "lower-is-better",
+      "tolerance": 0
+    },
+    "fitts.upload-document.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.open-document.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.assign-label.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.create-label.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.create-recognized-field.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.change-confidence-save.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.folder-create-move.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.search.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.switch-theme.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.change-setting-save.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.recognized-fields-save-bar.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.search-palette-open-result.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "fitts.document-title-save.desktop.sumId": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.upload-document.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.open-document.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.assign-label.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.create-label.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.create-recognized-field.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.change-confidence-save.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.folder-create-move.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.search.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.switch-theme.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.change-setting-save.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.recognized-fields-save-bar.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.search-palette-open-result.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "klm.document-title-save.predictedMs": {
+      "direction": "relative-max-increase",
+      "tolerance": 0.05
+    },
+    "layout.customer.documents.containerLeft": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.documents.containerMaxWidth": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.documents.titleY": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.documents.titleFontSizePx": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.structure_labels.containerLeft": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.structure_labels.containerMaxWidth": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.structure_labels.titleY": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.structure_labels.titleFontSizePx": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.structure_recognized_fields.containerLeft": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.structure_recognized_fields.containerMaxWidth": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.structure_recognized_fields.titleY": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.structure_recognized_fields.titleFontSizePx": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.filesystem.containerLeft": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.filesystem.containerMaxWidth": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.filesystem.titleY": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.filesystem.titleFontSizePx": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings.containerLeft": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings.containerMaxWidth": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings.titleY": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings.titleFontSizePx": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings_connectors.containerLeft": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings_connectors.containerMaxWidth": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings_connectors.titleY": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings_connectors.titleFontSizePx": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "stability.cls.open-account-menu": {
+      "direction": "exact",
+      "tolerance": 0.0001
+    },
+    "stability.cls.select-document-row": {
+      "direction": "exact",
+      "tolerance": 0.0001
+    },
+    "stability.cls.recognized-fields-dirty": {
+      "direction": "exact",
+      "tolerance": 0.0001
+    },
+    "stability.cls.save-bar-appears": {
+      "direction": "exact",
+      "tolerance": 0.0001
+    },
+    "stability.cls.search-palette-opens": {
+      "direction": "exact",
+      "tolerance": 0.0001
+    },
+    "layout.customer.settings_blocked_labels.containerLeft": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings_blocked_labels.containerMaxWidth": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings_blocked_labels.titleY": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.settings_blocked_labels.titleFontSizePx": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.documents_detail.containerLeft": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.documents_detail.containerMaxWidth": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.documents_detail.titleY": {
+      "direction": "exact",
+      "tolerance": 2
+    },
+    "layout.customer.documents_detail.titleFontSizePx": {
+      "direction": "exact",
+      "tolerance": 2
+    }
+  }
+}

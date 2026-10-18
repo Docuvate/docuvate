@@ -1,0 +1,16 @@
+{
+  "palette": "c1",
+  "source": "apps/site/src/styles/palettes.css (landing PR #75)",
+  "light": {
+    "accent": "#cb3a00",
+    "accentHover": "#b52300",
+    "text": "#120f09",
+    "background": "#f5f1e9"
+  },
+  "dark": {
+    "accent": "#e96f49",
+    "accentHover": "#cb3a00",
+    "text": "#f5f1ea",
+    "background": "#1e1a13"
+  }
+}

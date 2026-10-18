@@ -1,0 +1,31 @@
+{
+  "version": "1",
+  "feature_names": [
+    "money_score",
+    "money_minus_identifier",
+    "money_minus_date",
+    "money_minus_address",
+    "money_margin_over_non_money",
+    "amount_label_e5_cosine",
+    "vat_sum_consistency_hint",
+    "label_hint",
+    "bottom_line_ratio",
+    "thousands_sep_hint",
+    "token_length"
+  ],
+  "coefficients": [
+    -0.05966735147817779,
+    -0.36144165932654754,
+    0.21056631677885057,
+    -0.3366074053162183,
+    0.5178861251662185,
+    0.9549599053045256,
+    1.8583015415248394,
+    -3.524793830155647,
+    -5.015288756316015,
+    4.613221432428441,
+    -0.0460280659899299
+  ],
+  "intercept": -4.7134060016991475,
+  "min_score": 0.12
+}

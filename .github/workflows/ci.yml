@@ -1,0 +1,371 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docker: ${{ steps.paths.outputs.docker }}
+      k8s: ${{ steps.paths.outputs.k8s }}
+      sftp: ${{ steps.paths.outputs.sftp }}
+      site: ${{ steps.paths.outputs.site }}
+      worker: ${{ steps.paths.outputs.worker }}
+      migrations: ${{ steps.paths.outputs.migrations }}
+      api: ${{ steps.paths.outputs.api }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - name: Path filters (git diff)
+        id: paths
+        run: bash scripts/ci/ci-path-filters.sh
+
+  quick-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: No install-compat banned tokens
+        run: node scripts/testing/check-no-legacy.mjs
+      - name: Lab probes must not embed document values
+        run: node scripts/testing/check-lab-probes-no-embedded-values.mjs
+      - name: No unresolved merge conflict markers
+        run: bash scripts/ci/check-conflict-markers.sh
+      - name: SPDX license headers
+        run: node scripts/license/check-spdx-headers.mjs
+      - name: Runtime pins match .tool-versions
+        run: node scripts/ci/check-tool-versions.mjs
+      - name: Worker compose restart and memory bound
+        run: bash scripts/ci/check-docker-compose-worker-restart.sh
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
+      - name: Third-party ML model manifest
+        run: bash scripts/ci/check-third-party-models.sh
+      - name: Value-type field confidence artifacts (API ↔ worker)
+        run: bash scripts/ci/check-value-types-field-confidence-artifacts.sh
+      - name: Tool-versions drift guard tests
+        run: node --test scripts/ci/check-tool-versions.test.mjs
+      - run: pnpm openapi:check
+      - name: SDK Node codegen drift (Flutter SDK check runs in nightly)
+        run: |
+          set -euo pipefail
+          pnpm --filter @docuvate/sdk codegen
+          git diff --exit-code packages/sdk-node/src/generated
+
+  affected:
+    runs-on: ubuntu-latest
+    needs: quick-checks
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - name: Set NX_BASE / NX_HEAD for affected
+        env:
+          NX_BASE_INPUT: ${{ github.event.pull_request.base.sha || github.event.before }}
+          NX_HEAD_INPUT: ${{ github.sha }}
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: bash scripts/ci/nx-set-shas.sh
+      - run: pnpm install --frozen-lockfile
+      - name: Cache Nx
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: .nx/cache
+          key: nx-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'nx.json') }}-${{ github.sha }}
+          restore-keys: |
+            nx-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'nx.json') }}-
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
+      - name: Nx affected (lint, typecheck, test with coverage once, build)
+        run: |
+          set -euo pipefail
+          pnpm nx reset
+          pnpm nx affected -t typecheck test-ci build --parallel=3 --exclude=worker
+          pnpm nx affected -t lint --parallel=3 --exclude=worker
+
+  worker-unit:
+    runs-on: ubuntu-latest
+    needs: [changes, quick-checks]
+    if: needs.changes.outputs.worker == 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
+      - name: Install typst and poppler (layout unit tests)
+        run: |
+          bash scripts/ci/install-typst.sh
+          sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils fonts-dejavu-core fonts-noto-cjk
+      - name: Worker lint and unit tests
+        working-directory: apps/worker
+        run: bash scripts/ci/worker-ci.sh
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: quick-checks
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Compose smoke profile (CPU extractive cited-chat)
+        env:
+          DOCUVATE_API_IMAGE: docuvate-api
+          DOCUVATE_WEB_IMAGE: docuvate-web
+          DOCUVATE_WORKER_IMAGE: docuvate-worker
+        run: bash scripts/ci/smoke.sh
+
+  db-migrate-fresh:
+    runs-on: ubuntu-latest
+    needs: [changes, quick-checks]
+    if: needs.changes.outputs.migrations == 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Start Postgres (digest-pinned)
+        run: |
+          set -euo pipefail
+          source scripts/ci/lib-ephemeral-postgres.sh
+          bash scripts/ci/docker-pull-with-retry.sh "$DOCUVATE_PG_IMAGE"
+          docuvate_ci_start_postgres
+          echo "DATABASE_URL=${DATABASE_URL}" >> "$GITHUB_ENV"
+          echo "DOCUVATE_PG_DOCKER_CID=${DOCUVATE_PG_DOCKER_CID}" >> "$GITHUB_ENV"
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @docuvate/contracts build
+      - run: pnpm --filter @docuvate/otel build
+      - name: TypeORM migration roundtrip + generate-check
+        run: bash scripts/db/migration-roundtrip-check.sh
+      - name: Stop Postgres
+        if: always()
+        run: |
+          source scripts/ci/lib-ephemeral-postgres.sh
+          docuvate_ci_stop_postgres "${DOCUVATE_PG_DOCKER_CID:-}"
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: [changes, quick-checks]
+    if: needs.changes.outputs.api == 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Require Docker
+        run: docker info
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - name: Cache Testcontainers base images
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: /tmp/docuvate-tc-images
+          key: tc-images-v1-${{ runner.os }}
+      - name: Pre-pull Testcontainers images (digest-pinned)
+        run: |
+          set -euo pipefail
+          node scripts/testing/verify-container-images.mjs
+          bash scripts/ci/docker-pull-with-retry.sh \
+            postgres:18.6-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873 \
+            valkey/valkey:8-alpine@sha256:081c2f5cb575efc901aa80ff9cdbd1ec6a301682fd35e1ebb4b0990a4a4a8507 \
+            cgr.dev/chainguard/minio@sha256:59667194421209c2c1eacbe761e24787e047985c5dfa96b15da9b59fe9b55cd0 \
+            axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @docuvate/contracts build
+      - run: pnpm --filter @docuvate/otel build
+      - run: pnpm --filter @docuvate/api build
+      - name: API adapter integration (Testcontainers)
+        run: pnpm --filter @docuvate/api test:integration
+      - name: Tear down Paperless test stack
+        if: always()
+        run: docker compose -f tools/paperless-test/docker-compose.paperless-test.yml down 2>/dev/null || true
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version-file: .tool-versions
+      - name: Worker integration fixtures (Testcontainers)
+        if: needs.changes.outputs.worker == 'true'
+        run: |
+          pip install 'uv==0.12.23'
+          cd apps/worker && uv venv .venv && uv pip install -e ".[dev]"
+          .venv/bin/pytest tests/integration -q --maxfail=1
+
+  go-sftp-ingest:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.sftp == 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install Go (.tool-versions)
+        run: bash scripts/ci/install-go-toolchain.sh
+      - name: Go vet, tests, and govulncheck (sftp-ingest)
+        run: |
+          cd apps/sftp-ingest
+          go vet ./...
+          go test ./... -count=1 -v
+          go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+
+  sftp-integration:
+    runs-on: ubuntu-latest
+    needs: [changes, quick-checks]
+    if: needs.changes.outputs.sftp == 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Docker Hub mirror (daemon)
+        run: bash scripts/ci/github-actions-docker-mirror.sh
+      - name: Docker Hub login (optional)
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: bash scripts/ci/docker-login-hub.sh
+      - name: Require Docker
+        run: docker info
+      - name: Install Go (.tool-versions)
+        run: bash scripts/ci/install-go-toolchain.sh
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: SFTP ingest E2E (compose + Go client)
+        run: bash scripts/testing/run-sftp-integration-e2e.sh
+
+  kubernetes-manifests:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.k8s == 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install Kubernetes CI tools
+        run: |
+          set -euo pipefail
+          bash scripts/ci/install-k8s-ci-tools.sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: PyYAML for parity report
+        run: pip install 'pyyaml==6.0.2'
+      - name: Validate Kustomize, Helm, kubeconform, parity
+        run: bash tools/k8s-manifest-validate.sh
+
+  site-e2e:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.site == 'true'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @docuvate/tokens build
+      - run: node apps/site/scripts/materialize-compare.mjs
+      - run: node apps/site/scripts/enhance-openapi.mjs
+      - run: pnpm --filter @docuvate/site build
+      - name: Start preview server
+        working-directory: apps/site
+        run: nohup pnpm run preview > "$RUNNER_TEMP/site-preview.log" 2>&1 &
+      - name: Wait for site preview
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8081/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install chromium --with-deps
+      - name: Playwright site tests (retries=0)
+        working-directory: apps/site
+        run: pnpm exec playwright test --retries=0
+        env:
+          E2E_SITE_URL: http://127.0.0.1:8081
+
+  ci-ok:
+    name: ci-ok
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - quick-checks
+      - affected
+      - smoke
+      - db-migrate-fresh
+      - integration-test
+      - go-sftp-ingest
+      - sftp-integration
+      - kubernetes-manifests
+      - site-e2e
+      - worker-unit
+    if: always()
+    steps:
+      - name: Aggregate required checks (skipped jobs are OK)
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          QUICK: ${{ needs.quick-checks.result }}
+          AFFECTED: ${{ needs.affected.result }}
+          SMOKE: ${{ needs.smoke.result }}
+          DB: ${{ needs.db-migrate-fresh.result }}
+          INTEGRATION: ${{ needs.integration-test.result }}
+          GO_SFTP: ${{ needs.go-sftp-ingest.result }}
+          SFTP: ${{ needs.sftp-integration.result }}
+          K8S: ${{ needs.kubernetes-manifests.result }}
+          SITE: ${{ needs.site-e2e.result }}
+          WORKER: ${{ needs.worker-unit.result }}
+        run: |
+          set -euo pipefail
+          fail=0
+          for r in "$CHANGES" "$QUICK" "$AFFECTED" "$SMOKE"; do
+            if [ "$r" != "success" ]; then
+              echo "Required job must succeed (got: $r)"
+              fail=1
+            fi
+          done
+          for r in "$DB" "$INTEGRATION" "$GO_SFTP" "$SFTP" "$K8S" "$SITE" "$WORKER"; do
+            if [ "$r" != "success" ] && [ "$r" != "skipped" ]; then
+              echo "Job failed with result: $r"
+              fail=1
+            fi
+          done
+          if [ "$fail" -ne 0 ]; then
+            exit 1
+          fi
+          echo "ci-ok: all required jobs success or skipped"

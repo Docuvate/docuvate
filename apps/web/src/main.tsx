@@ -1,0 +1,45 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import './i18n';
+import './styles/global.css';
+
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
+import { App } from './App';
+import { RouteErrorFallback } from './components/RouteErrorFallback';
+import { initDocuvateTheme } from './lib/docuvateTheme';
+
+initDocuvateTheme();
+import './components/ui/components.css';
+import './components/ui/ds.css';
+import './styles/app.css';
+
+declare global {
+  interface Window {
+    __DOCUVATE_BUILD_SHA__?: string;
+  }
+}
+
+const viteBuildSha = import.meta.env.VITE_DOCUVATE_BUILD_SHA?.trim();
+window.__DOCUVATE_BUILD_SHA__ = viteBuildSha ?? __DOCUVATE_BUILD_SHA__;
+
+const router = createBrowserRouter([
+  {
+    path: '/*',
+    element: <App />,
+    errorElement: <RouteErrorFallback />,
+  },
+]);
+
+const rootEl = document.getElementById('root');
+if (!rootEl) {
+  throw new Error('Root element #root not found');
+}
+
+ReactDOM.createRoot(rootEl).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
+);

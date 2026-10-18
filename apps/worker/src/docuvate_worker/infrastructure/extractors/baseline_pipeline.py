@@ -1,0 +1,42 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
+"""Pre-integrated-CPU-pipeline extraction path (OCR + heuristic fields only)."""
+
+from __future__ import annotations
+
+import logging
+
+from docuvate_worker.domain.models import ExtractionResult
+from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
+from docuvate_worker.infrastructure.extractors.paddle_engine import ocr_image_bytes, ocr_pdf_bytes
+from docuvate_worker.infrastructure.extractors.pdf_native import try_extract_pdf_native
+
+logger = logging.getLogger(__name__)
+
+
+def extract_baseline_pipeline(content: bytes, mime_type: str) -> ExtractionResult:
+    if mime_type == "application/pdf":
+        native = try_extract_pdf_native(content)
+        if native is not None:
+            text, blocks = native
+            logger.info("PDF native text path (%d chars, %d blocks)", len(text), len(blocks))
+            return ExtractionResult(
+                text=text,
+                fields=[],
+                field_suggestions=heuristic_field_suggestions(text),
+                blocks=blocks or None,
+            )
+        logger.info("PDF has little/no text layer — falling back to PaddleOCR.")
+        text, blocks = ocr_pdf_bytes(content)
+    elif mime_type.startswith("image/"):
+        text, blocks = ocr_image_bytes(content)
+    else:
+        text, blocks = "", []
+
+    return ExtractionResult(
+        text=text.strip(),
+        fields=[],
+        field_suggestions=heuristic_field_suggestions(text),
+        blocks=blocks or None,
+    )

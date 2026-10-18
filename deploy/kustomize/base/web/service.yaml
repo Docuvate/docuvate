@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: docuvate-web
+  labels:
+    app.kubernetes.io/name: docuvate-web
+    app.kubernetes.io/component: web
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: docuvate-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

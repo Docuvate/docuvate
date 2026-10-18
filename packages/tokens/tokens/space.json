@@ -1,0 +1,38 @@
+{
+  "space": {
+    "2xs": { "value": "0.25rem" },
+    "xs": { "value": "0.5rem" },
+    "sm": { "value": "0.75rem" },
+    "md": { "value": "1rem" },
+    "lg": { "value": "1.5rem" },
+    "xl": { "value": "2rem" },
+    "2xl": { "value": "3rem" },
+    "3xl": { "value": "4.5rem" }
+  },
+  "control": {
+    "height": { "value": "2.5rem" },
+    "icon-btn-sm": { "value": "1.75rem" },
+    "icon-btn-md": { "value": "2.25rem" }
+  },
+  "layout": {
+    "library-filter-min": { "value": "15rem" },
+    "library-filter-max": { "value": "17.5rem" }
+  },
+  "grid": {
+    "desktop": {
+      "columns": { "value": "12" },
+      "gutter": { "value": "1.5rem" },
+      "margin": { "value": "2rem" }
+    },
+    "tablet": {
+      "columns": { "value": "12" },
+      "gutter": { "value": "1rem" },
+      "margin": { "value": "1.5rem" }
+    },
+    "mobile": {
+      "columns": { "value": "4" },
+      "gutter": { "value": "1rem" },
+      "margin": { "value": "1rem" }
+    }
+  }
+}

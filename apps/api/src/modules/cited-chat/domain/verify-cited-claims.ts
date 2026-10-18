@@ -1,0 +1,466 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CitedChatChunkCandidate } from '../infrastructure/pg-cited-chat-retrieval.repository.js';
+import type { CitedClaimCitationJson, CitedClaimJson } from './cited-answer-json.js';
+import { isChunkDumpClaim, isIndexPassageClaim } from './claim-chunk-dump.js';
+import { bestEvidenceSpanInChunk } from './retrieval-span-citation.js';
+import {
+  bestQuoteMatchScore,
+  findQuoteInChunk,
+  fuzzySpanSearchInChunk,
+  normalizeForQuoteMatch,
+  resolveQuoteInCandidateChunk,
+  validateMatchedSpanNumbers,
+} from './verify-citation-quote.js';
+
+export type CitedClaimRejectReason =
+  | 'unknown_source'
+  | 'empty_claim_text'
+  | 'quote_not_in_chunk'
+  | 'claim_number_not_in_quote'
+  | 'quote_in_other_document'
+  | 'claim_is_chunk_dump'
+  | 'claim_is_index_passage';
+
+export interface RejectedCitedClaim {
+  claimText: string;
+  quote: string;
+  bestMatchScore: number;
+  reason: CitedClaimRejectReason;
+  source: string;
+}
+
+export interface VerifiedCitedClaim {
+  ordinal: number;
+  text: string;
+  chunkId: string;
+  quote: string;
+  charStart: number;
+  charEnd: number;
+}
+
+const UUID_SOURCE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function normalizeCitedSourceLabel(
+  raw: string,
+  labels: ReadonlySet<string>,
+  chunkIdToLabel?: ReadonlyMap<string, string>
+): string | null {
+  const trimmed = raw.trim();
+  if (labels.has(trimmed)) {
+    return trimmed;
+  }
+  const upper = trimmed.toUpperCase();
+  if (labels.has(upper)) {
+    return upper;
+  }
+  if (chunkIdToLabel && UUID_SOURCE.test(trimmed)) {
+    const fromChunk = chunkIdToLabel.get(trimmed);
+    if (fromChunk && labels.has(fromChunk)) {
+      return fromChunk;
+    }
+  }
+  const bracketIndex = /^\[\s*(\d+)\s*\]$/.exec(trimmed);
+  if (bracketIndex) {
+    const label = `S${bracketIndex[1]}`;
+    if (labels.has(label)) {
+      return label;
+    }
+  }
+  const fromPattern = /\bS\s*(\d+)\b/i.exec(trimmed);
+  if (fromPattern) {
+    const label = `S${fromPattern[1]}`;
+    if (labels.has(label)) {
+      return label;
+    }
+  }
+  const trailingIndex = /(?:quelle|source|passage|ref)\s*(\d+)\s*$/i.exec(trimmed);
+  if (trailingIndex) {
+    const label = `S${trailingIndex[1]}`;
+    if (labels.has(label)) {
+      return label;
+    }
+  }
+  if (/^\d+$/.test(trimmed)) {
+    const label = `S${trimmed}`;
+    if (labels.has(label)) {
+      return label;
+    }
+  }
+  return null;
+}
+
+export function expandClaimCitations(claim: CitedClaimJson): CitedClaimCitationJson[] {
+  if (Array.isArray(claim.citations) && claim.citations.length > 0) {
+    return claim.citations.map((c) => ({
+      source: c.source.trim(),
+      quote: c.quote.trim(),
+    }));
+  }
+  return [
+    {
+      source: (claim.source ?? '').trim(),
+      quote: (claim.quote ?? '').trim(),
+    },
+  ];
+}
+
+interface TopRow { chunk: CitedChatChunkCandidate }
+
+type CitationRowResolve =
+  | { ok: true; row: TopRow }
+  | { ok: false; reason: CitedClaimRejectReason };
+
+function rowForSourceLabel(
+  top: TopRow[],
+  chunkPool: TopRow[],
+  labelByChunk: Map<string, string>,
+  sourceLabel: string
+): TopRow | undefined {
+  const fromTop = top.find((row) => labelByChunk.get(row.chunk.chunkId) === sourceLabel);
+  if (fromTop) {
+    return fromTop;
+  }
+  return chunkPool.find((row) => labelByChunk.get(row.chunk.chunkId) === sourceLabel);
+}
+
+function rowsMatchingQuote(top: TopRow[], quote: string): TopRow[] {
+  return top.filter(
+    (row) => resolveQuoteInCandidateChunk(row.chunk, quote, { claimText: '' }) != null
+  );
+}
+
+function bestSourceLabelForQuote(
+  chunkPool: TopRow[],
+  labelByChunk: Map<string, string>,
+  quote: string
+): string | null {
+  if (!quote.trim()) {
+    return null;
+  }
+  let best: { label: string; score: number } | null = null;
+  for (const row of chunkPool) {
+    const label = labelByChunk.get(row.chunk.chunkId);
+    if (!label) {
+      continue;
+    }
+    const match = resolveQuoteInCandidateChunk(row.chunk, quote, { claimText: '' });
+    if (!match) {
+      continue;
+    }
+    const score = bestQuoteMatchScore(row.chunk.body, quote);
+    if (!best || score > best.score) {
+      best = { label, score };
+    }
+  }
+  return best?.label ?? null;
+}
+
+function resolveCitationRow(
+  top: TopRow[],
+  chunkPool: TopRow[],
+  labelByChunk: Map<string, string>,
+  sourceLabel: string,
+  quote: string
+): CitationRowResolve {
+  const labeled = rowForSourceLabel(top, chunkPool, labelByChunk, sourceLabel);
+  if (!labeled) {
+    return { ok: false, reason: 'unknown_source' };
+  }
+  if (resolveQuoteInCandidateChunk(labeled.chunk, quote, { claimText: '' })) {
+    return { ok: true, row: labeled };
+  }
+
+  const poolHits = rowsMatchingQuote(chunkPool, quote);
+  const sameDoc = poolHits.filter((row) => row.chunk.documentId === labeled.chunk.documentId);
+  if (sameDoc.length > 0) {
+    return { ok: true, row: sameDoc[0] };
+  }
+
+  const topHits = rowsMatchingQuote(top, quote);
+  const otherDoc = topHits.filter((row) => row.chunk.documentId !== labeled.chunk.documentId);
+  if (otherDoc.length > 0) {
+    return { ok: false, reason: 'quote_in_other_document' };
+  }
+
+  return { ok: true, row: labeled };
+}
+
+export function buildRejectedClaimBenchLog(input: {
+  rejected: RejectedCitedClaim;
+  citedLabel: string | null;
+  labeledChunkId: string | null;
+  resolvedChunkId: string | null;
+  chunkBody: string | null;
+  passageText: string | null;
+}): Record<string, unknown> {
+  return {
+    reason: input.rejected.reason,
+    claimText: input.rejected.claimText,
+    citedLabel: input.citedLabel,
+    source: input.rejected.source,
+    quote: input.rejected.quote,
+    normalizedQuote: normalizeForQuoteMatch(input.rejected.quote),
+    resolvedChunkId: input.resolvedChunkId,
+    labeledChunkId: input.labeledChunkId,
+    chunkTextPreview: input.chunkBody?.slice(0, 240) ?? null,
+    passageTextPreview: input.passageText?.slice(0, 240) ?? null,
+    bestMatchScore: input.rejected.bestMatchScore,
+  };
+}
+
+function rejectReasonForQuote(
+  chunkBody: string,
+  quote: string,
+  claimText: string
+): CitedClaimRejectReason {
+  const spanHit = findQuoteInChunk(chunkBody, quote) ?? fuzzySpanSearchInChunk(chunkBody, quote);
+  if (
+    spanHit &&
+    !validateMatchedSpanNumbers({
+      quote,
+      claimText,
+      bodyQuote: spanHit.bodyQuote,
+      chunkBody,
+    })
+  ) {
+    return 'claim_number_not_in_quote';
+  }
+  return 'quote_not_in_chunk';
+}
+
+export function verifyCitedClaims(input: {
+  claims: CitedClaimJson[];
+  top: TopRow[];
+  labelByChunk: Map<string, string>;
+  /** Full hybrid retrieval pool (same-document quote rebind searches here, not only top-k). */
+  chunkPool?: TopRow[];
+}): { verified: VerifiedCitedClaim[]; rejected: RejectedCitedClaim[] } {
+  const chunkPool = input.chunkPool ?? input.top;
+  const labels = new Set(input.labelByChunk.values());
+  const chunkIdToLabel = input.labelByChunk;
+  const verified: VerifiedCitedClaim[] = [];
+  const rejected: RejectedCitedClaim[] = [];
+  let ordinal = 1;
+
+  for (const claim of input.claims) {
+    const claimText = claim.text.trim();
+    const citations = expandClaimCitations(claim);
+    const primaryQuote = citations[0].quote;
+    const primarySource = citations[0].source || (claim.source ?? '');
+
+    if (!claimText) {
+      rejected.push({
+        claimText,
+        quote: primaryQuote,
+        bestMatchScore: 0,
+        reason: 'empty_claim_text',
+        source: primarySource,
+      });
+      continue;
+    }
+
+    const resolved: {
+      row: TopRow;
+      match: NonNullable<ReturnType<typeof resolveQuoteInCandidateChunk>>;
+      quote: string;
+    }[] = [];
+
+    const claimTextForQuoteMatch = citations.length === 1 ? claimText : '';
+
+    for (const citation of citations) {
+      const groundedFromEmptyQuote =
+        citation.quote.trim().length === 0 && claimText.trim().length > 0;
+      const groundedQuote =
+        citation.quote.trim().length > 0
+          ? citation.quote.trim()
+          : claimText.trim().length > 0
+            ? claimText.trim()
+            : '';
+      const quoteMatchClaimText = groundedFromEmptyQuote ? '' : claimTextForQuoteMatch;
+
+      if (!citation.source) {
+        rejected.push({
+          claimText,
+          quote: groundedQuote,
+          bestMatchScore: 0,
+          reason: 'unknown_source',
+          source: '',
+        });
+        resolved.length = 0;
+        break;
+      }
+      let sourceLabel = normalizeCitedSourceLabel(citation.source, labels, chunkIdToLabel);
+      sourceLabel ??= bestSourceLabelForQuote(chunkPool, input.labelByChunk, groundedQuote);
+      if (!sourceLabel && groundedFromEmptyQuote && claimText.trim().length > 0) {
+        sourceLabel = bestSourceLabelForQuote(chunkPool, input.labelByChunk, claimText);
+      }
+      if (!sourceLabel) {
+        rejected.push({
+          claimText,
+          quote: groundedQuote,
+          bestMatchScore: 0,
+          reason: 'unknown_source',
+          source: citation.source,
+        });
+        resolved.length = 0;
+        break;
+      }
+
+      if (!groundedQuote) {
+        rejected.push({
+          claimText,
+          quote: primaryQuote,
+          bestMatchScore: 0,
+          reason: 'quote_not_in_chunk',
+          source: citation.source || sourceLabel || '',
+        });
+        resolved.length = 0;
+        break;
+      }
+
+      const rowResult = resolveCitationRow(
+        input.top,
+        chunkPool,
+        input.labelByChunk,
+        sourceLabel,
+        groundedQuote
+      );
+      if (!rowResult.ok) {
+        rejected.push({
+          claimText,
+          quote: groundedQuote,
+          bestMatchScore: 0,
+          reason: rowResult.reason,
+          source: citation.source || sourceLabel || '',
+        });
+        resolved.length = 0;
+        break;
+      }
+      const row = rowResult.row;
+
+      let match = resolveQuoteInCandidateChunk(row.chunk, groundedQuote, {
+        claimText: quoteMatchClaimText,
+      });
+      if (
+        !match &&
+        quoteMatchClaimText.length > 0 &&
+        groundedQuote !== quoteMatchClaimText
+      ) {
+        match = resolveQuoteInCandidateChunk(row.chunk, quoteMatchClaimText, {
+          claimText: quoteMatchClaimText,
+        });
+      }
+      if (!match && groundedFromEmptyQuote) {
+        const spanHit = bestEvidenceSpanInChunk(row.chunk.body, claimText);
+        if (spanHit) {
+          match = {
+            charStart: spanHit.charStart,
+            charEnd: spanHit.charEnd,
+            bodyQuote: spanHit.bodyQuote,
+            method: spanHit.method,
+            score: spanHit.score,
+          };
+        }
+      }
+      if (!match) {
+        rejected.push({
+          claimText,
+          quote: groundedQuote,
+          bestMatchScore: bestQuoteMatchScore(row.chunk.body, groundedQuote),
+          reason: rejectReasonForQuote(row.chunk.body, groundedQuote, claimText),
+          source: citation.source || sourceLabel || '',
+        });
+        resolved.length = 0;
+        break;
+      }
+
+      if (
+        !validateMatchedSpanNumbers({
+          quote: citation.quote,
+          claimText: '',
+          bodyQuote: match.bodyQuote,
+          chunkBody: row.chunk.body,
+        })
+      ) {
+        rejected.push({
+          claimText,
+          quote: citation.quote,
+          bestMatchScore: bestQuoteMatchScore(row.chunk.body, citation.quote),
+          reason: 'claim_number_not_in_quote',
+          source: citation.source || sourceLabel || '',
+        });
+        resolved.length = 0;
+        break;
+      }
+
+      resolved.push({
+        row,
+        match,
+        quote: citation.quote.trim().length > 0 ? citation.quote.trim() : match.bodyQuote,
+      });
+    }
+
+    if (resolved.length === 0) {
+      continue;
+    }
+
+    const unionBodyQuotes = resolved.map((r) => r.match.bodyQuote).join(' ');
+    const unionCitationQuotes = resolved.map((r) => r.quote).join(' ');
+    const unionChunkBodies = resolved.map((r) => r.row.chunk.body).join(' ');
+    if (
+      !validateMatchedSpanNumbers({
+        quote: unionCitationQuotes,
+        claimText,
+        bodyQuote: unionBodyQuotes,
+        chunkBody: unionChunkBodies,
+      })
+    ) {
+      rejected.push({
+        claimText,
+        quote: primaryQuote,
+        bestMatchScore: bestQuoteMatchScore(resolved[0].row.chunk.body, primaryQuote),
+        reason: 'claim_number_not_in_quote',
+        source: primarySource,
+      });
+      continue;
+    }
+
+    if (isChunkDumpClaim(claimText, primaryQuote)) {
+      rejected.push({
+        claimText,
+        quote: primaryQuote,
+        bestMatchScore: bestQuoteMatchScore(resolved[0].row.chunk.body, primaryQuote),
+        reason: 'claim_is_chunk_dump',
+        source: primarySource,
+      });
+      continue;
+    }
+
+    if (isIndexPassageClaim(claimText)) {
+      rejected.push({
+        claimText,
+        quote: primaryQuote,
+        bestMatchScore: bestQuoteMatchScore(resolved[0].row.chunk.body, primaryQuote),
+        reason: 'claim_is_index_passage',
+        source: primarySource,
+      });
+      continue;
+    }
+
+    for (const row of resolved) {
+      verified.push({
+        ordinal,
+        text: claimText,
+        chunkId: row.row.chunk.chunkId,
+        quote: row.match.bodyQuote,
+        charStart: (row.row.chunk.charStart ?? 0) + row.match.charStart,
+        charEnd: (row.row.chunk.charStart ?? 0) + row.match.charEnd,
+      });
+      ordinal += 1;
+    }
+  }
+
+  return { verified, rejected };
+}

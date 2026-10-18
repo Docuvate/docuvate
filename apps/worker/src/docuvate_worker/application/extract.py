@@ -1,0 +1,143 @@
+# SPDX-FileCopyrightText: 2026 Thomas Faust
+# SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+
+import logging
+
+from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
+from docuvate_worker.domain.models import ExtractionResult
+from docuvate_worker.infrastructure.extractors.document_images import extract_document_images
+from docuvate_worker.infrastructure.extractors.engine_catalog import engine_by_name
+from docuvate_worker.infrastructure.extractors.markdown import extraction_to_markdown
+from docuvate_worker.infrastructure.extractors.pipeline import extract_with_cpu_pipeline
+from docuvate_worker.infrastructure.extractors.registry import ExtractorRegistry
+from docuvate_worker.infrastructure.layout.build import build_layout_ir
+
+logger = logging.getLogger(__name__)
+
+_registry = ExtractorRegistry()
+
+
+def _with_markdown(result: ExtractionResult) -> ExtractionResult:
+    if result.markdown and result.markdown.strip():
+        return result
+    markdown = extraction_to_markdown(result.text, result.blocks)
+    if markdown is None:
+        return result
+    return ExtractionResult(
+        text=result.text,
+        fields=result.fields,
+        field_suggestions=result.field_suggestions,
+        blocks=result.blocks,
+        markdown=markdown,
+        layout_ir=result.layout_ir,
+        layout_reconstruction_reliable=result.layout_reconstruction_reliable,
+        layout_unreliable_reason=result.layout_unreliable_reason,
+        cpu_pipeline=result.cpu_pipeline,
+        document_representation=result.document_representation,
+        extracted_facts=result.extracted_facts,
+        preview_pdf=result.preview_pdf,
+        images=result.images,
+    )
+
+
+def _with_document_images(
+    result: ExtractionResult, content: bytes, mime_type: str
+) -> ExtractionResult:
+    if result.images:
+        return result
+    try:
+        images = extract_document_images(content, mime_type, result.blocks)
+    except Exception as exc:
+        logger.warning(
+            "document_image_extract_failed type=%s",
+            type(exc).__name__,
+            exc_info=exc,
+        )
+        return result
+    if not images:
+        return result
+    return ExtractionResult(
+        text=result.text,
+        fields=result.fields,
+        field_suggestions=result.field_suggestions,
+        blocks=result.blocks,
+        markdown=result.markdown,
+        layout_ir=result.layout_ir,
+        layout_reconstruction_reliable=result.layout_reconstruction_reliable,
+        layout_unreliable_reason=result.layout_unreliable_reason,
+        cpu_pipeline=result.cpu_pipeline,
+        document_representation=result.document_representation,
+        extracted_facts=result.extracted_facts,
+        preview_pdf=result.preview_pdf,
+        images=images,
+    )
+
+
+def _with_layout_ir(
+    result: ExtractionResult, content: bytes, mime_type: str
+) -> ExtractionResult:
+    if result.layout_ir:
+        return result
+    try:
+        layout = build_layout_ir(content, mime_type, result.blocks)
+    except Exception as exc:
+        logger.warning(
+            "layout_ir_build_failed type=%s",
+            type(exc).__name__,
+            exc_info=exc,
+        )
+        return result
+    if layout is None:
+        return result
+    from docuvate_worker.infrastructure.layout.layout_ir_parse import (  # noqa: PLC0415
+        document_from_dict,
+    )
+    from docuvate_worker.infrastructure.layout.layout_reconstruction_assess import (  # noqa: PLC0415
+        assess_layout_reconstruction,
+    )
+
+    doc = document_from_dict(layout.to_json())
+    fidelity = assess_layout_reconstruction(doc, content)
+    return ExtractionResult(
+        text=result.text,
+        fields=result.fields,
+        field_suggestions=result.field_suggestions,
+        blocks=result.blocks,
+        markdown=result.markdown,
+        layout_ir=layout.to_json(),
+        layout_reconstruction_reliable=fidelity.reconstruction_reliable,
+        layout_unreliable_reason=(
+            fidelity.unreliable_reason.value if fidelity.unreliable_reason else None
+        ),
+        cpu_pipeline=result.cpu_pipeline,
+        document_representation=result.document_representation,
+        extracted_facts=result.extracted_facts,
+        preview_pdf=result.preview_pdf,
+        images=result.images,
+    )
+
+
+def extract_document(
+    content: bytes,
+    mime_type: str,
+    engine: str | None = None,
+    *,
+    embedding_density_state: EmbeddingDensityStatePayload | None = None,
+    build_exact_fact_index: bool = False,
+) -> ExtractionResult:
+    resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
+    if resolved.name == "pipeline":
+        base = _with_markdown(
+            extract_with_cpu_pipeline(
+                content,
+                mime_type,
+                embedding_density_state=embedding_density_state,
+                build_exact_fact_index=build_exact_fact_index,
+            )
+        )
+    else:
+        base = _with_markdown(resolved.extract(content, mime_type))
+    with_layout = _with_layout_ir(base, content, mime_type)
+    return _with_document_images(with_layout, content, mime_type)
+
+

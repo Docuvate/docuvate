@@ -1,0 +1,8 @@
+qa-screenshots/*.png
+public/brand/
+public/og-image.png
+public/apple-touch-icon.png
+src/generated/
+public/openapi.json
+public/openapi.en.json
+test-results/

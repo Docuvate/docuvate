@@ -1,0 +1,198 @@
+{
+  "version": 1,
+  "description": "Held-out answer-type eval (never fed to prototype training). Domains: invoice, contract, tax, insurance, recipe; DE/EN. Includes paraphrases of smoke amount questions.",
+  "cases": [
+    {
+      "question": "Nenn mir den Endbetrag auf der Nordwind-Rechnung.",
+      "expected_answer_type": "amount",
+      "domain": "invoice",
+      "note": "smoke fact paraphrase"
+    },
+    {
+      "question": "What is the invoice total for Nordwind GmbH?",
+      "expected_answer_type": "amount",
+      "domain": "invoice",
+      "note": "smoke fact paraphrase EN"
+    },
+    {
+      "question": "Bruttoentgelt laut Entgeltnachweis vom Oktober 2024?",
+      "expected_answer_type": "amount",
+      "domain": "payroll_paraphrase",
+      "note": "smoke payslip paraphrase"
+    },
+    {
+      "question": "Total income tax withheld per my 2024 wage tax certificate?",
+      "expected_answer_type": "amount",
+      "domain": "payroll_paraphrase",
+      "note": "smoke lohnsteuer paraphrase EN"
+    },
+    {
+      "question": "Wie viel Euro steht als Rechnungssumme auf dem Beleg?",
+      "expected_answer_type": "amount",
+      "domain": "invoice"
+    },
+    {
+      "question": "Net amount payable on this vendor invoice?",
+      "expected_answer_type": "amount",
+      "domain": "invoice"
+    },
+    {
+      "question": "Wann wurde die Rechnung ausgestellt?",
+      "expected_answer_type": "date",
+      "domain": "invoice"
+    },
+    {
+      "question": "What is the invoice date?",
+      "expected_answer_type": "date",
+      "domain": "invoice"
+    },
+    {
+      "question": "Ab welchem Datum gilt der Mietvertrag?",
+      "expected_answer_type": "date",
+      "domain": "contract"
+    },
+    {
+      "question": "When does the lease agreement start?",
+      "expected_answer_type": "date",
+      "domain": "contract"
+    },
+    {
+      "question": "Bis wann muss gekündigt werden?",
+      "expected_answer_type": "date",
+      "domain": "contract"
+    },
+    {
+      "question": "Who is party B in this contract?",
+      "expected_answer_type": "entity",
+      "domain": "contract"
+    },
+    {
+      "question": "Wer ist der Vermieter im Vertrag?",
+      "expected_answer_type": "entity",
+      "domain": "contract"
+    },
+    {
+      "question": "Was steht in der Haftungsklausel?",
+      "expected_answer_type": "free_text",
+      "domain": "contract"
+    },
+    {
+      "question": "Summarize the termination clause in plain language.",
+      "expected_answer_type": "free_text",
+      "domain": "contract"
+    },
+    {
+      "question": "Wie hoch ist die Nachzahlung im Steuerbescheid?",
+      "expected_answer_type": "amount",
+      "domain": "tax"
+    },
+    {
+      "question": "How much VAT is assessed on this notice?",
+      "expected_answer_type": "amount",
+      "domain": "tax"
+    },
+    {
+      "question": "Bis wann kann ich Einspruch einlegen?",
+      "expected_answer_type": "date",
+      "domain": "tax"
+    },
+    {
+      "question": "What is the appeal deadline on this tax letter?",
+      "expected_answer_type": "date",
+      "domain": "tax"
+    },
+    {
+      "question": "Welche Steuernummer ist im Schreiben genannt?",
+      "expected_answer_type": "entity",
+      "domain": "tax"
+    },
+    {
+      "question": "Welche Jahresprämie verlangt die Police?",
+      "expected_answer_type": "amount",
+      "domain": "insurance"
+    },
+    {
+      "question": "What annual premium is listed on the policy?",
+      "expected_answer_type": "amount",
+      "domain": "insurance"
+    },
+    {
+      "question": "Bis wann läuft der Versicherungsschutz?",
+      "expected_answer_type": "date",
+      "domain": "insurance"
+    },
+    {
+      "question": "When does coverage end on this certificate?",
+      "expected_answer_type": "date",
+      "domain": "insurance"
+    },
+    {
+      "question": "Bei welcher Versicherung bin ich versichert?",
+      "expected_answer_type": "entity",
+      "domain": "insurance"
+    },
+    {
+      "question": "Policy number on the insurance document?",
+      "expected_answer_type": "entity",
+      "domain": "insurance"
+    },
+    {
+      "question": "Welche Leistungen deckt die Police ab?",
+      "expected_answer_type": "free_text",
+      "domain": "insurance"
+    },
+    {
+      "question": "Explain the deductible rules from this policy.",
+      "expected_answer_type": "free_text",
+      "domain": "insurance"
+    },
+    {
+      "question": "Wie viel Gramm Mehl braucht das Rezept?",
+      "expected_answer_type": "amount",
+      "domain": "recipe"
+    },
+    {
+      "question": "How many servings does this recipe make?",
+      "expected_answer_type": "amount",
+      "domain": "recipe"
+    },
+    {
+      "question": "Welches Datum steht auf der Rezeptkarte?",
+      "expected_answer_type": "date",
+      "domain": "recipe"
+    },
+    {
+      "question": "At what oven temperature should I bake this?",
+      "expected_answer_type": "amount",
+      "domain": "recipe"
+    },
+    {
+      "question": "Welche Zutaten stehen in Schritt 2?",
+      "expected_answer_type": "free_text",
+      "domain": "recipe"
+    },
+    {
+      "question": "Describe how to prepare the sauce step by step.",
+      "expected_answer_type": "free_text",
+      "domain": "recipe"
+    },
+    {
+      "question": "Welche Gesamtsumme steht auf der Rechnung Nordwind?",
+      "expected_answer_type": "amount",
+      "domain": "invoice",
+      "note": "exact smoke manifest wording (held-out from training)"
+    },
+    {
+      "question": "Wie hoch war das Gesamtbrutto im Entgeltnachweis Oktober 2024?",
+      "expected_answer_type": "amount",
+      "domain": "payroll_paraphrase",
+      "note": "exact smoke manifest wording"
+    },
+    {
+      "question": "Wie viel Lohnsteuer wurde mir laut Lohnsteuerbescheinigung 2024 insgesamt einbehalten?",
+      "expected_answer_type": "amount",
+      "domain": "payroll_paraphrase",
+      "note": "exact smoke manifest wording"
+    }
+  ]
+}

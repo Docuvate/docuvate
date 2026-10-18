@@ -1,0 +1,10 @@
+{
+  "name": "otel",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/otel",
+  "projectType": "library",
+  "targets": {
+    "build": { "command": "pnpm run build", "options": { "cwd": "packages/otel" } },
+    "typecheck": { "command": "pnpm run typecheck", "options": { "cwd": "packages/otel" } }
+  }
+}

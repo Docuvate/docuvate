@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "weights": [
+    0.836684853214668,
+    0.8415938211356591,
+    -0.8534929272599793,
+    -2.0459172385131565,
+    0.12363732421053343,
+    0.0500532924359011,
+    -1.620732676881077
+  ],
+  "autoStackThreshold": 0.5,
+  "suggestThreshold": 0.45,
+  "training": {
+    "seed": 42026,
+    "trainCount": 1920,
+    "holdoutCount": 480,
+    "holdoutPrecision": 0.9925373134328358,
+    "holdoutRecall": 1,
+    "holdoutF1": 0.9962546816479401
+  }
+}

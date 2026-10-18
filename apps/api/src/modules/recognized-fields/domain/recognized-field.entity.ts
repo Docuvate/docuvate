@@ -1,0 +1,28 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CustomFieldType, RecognizedFieldLabelGateMatch } from '@docuvate/contracts';
+
+export interface RecognizedFieldEntity {
+  id: string;
+  userId: string;
+  key: string;
+  label: string;
+  fieldType: CustomFieldType;
+  sortOrder: number;
+  /** When true, extracted for every document after OCR (global default). */
+  extractForAllDocuments: boolean;
+  gateLabelIds: string[];
+  gateLabelMatch: RecognizedFieldLabelGateMatch;
+  minLabelConfidence: number | null;
+  confidenceGateEnabled: boolean | null;
+  showInFilter: boolean;
+}
+
+export function globalFieldStorageKey(fieldKey: string): string {
+  return `global:${fieldKey}`;
+}
+
+export function parseGlobalFieldStorageKey(storageKey: string): string | null {
+  const match = /^global:([a-z0-9_]+)$/i.exec(storageKey);
+  return match ? match[1] : null;
+}
