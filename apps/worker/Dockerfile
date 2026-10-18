@@ -6,7 +6,7 @@
 #   cpu (default) — multi-arch friendly, PyTorch CPU wheels only, no NVIDIA pip packages.
 #   gpu           — amd64, CUDA PyTorch wheels (+ donut optional extras).
 
-FROM python:3.12.15-slim AS worker-base
+FROM python:3.14.8-slim AS worker-base
 ARG UV_VERSION=0.12.23
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
