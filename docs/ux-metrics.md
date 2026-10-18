@@ -22,10 +22,10 @@ pnpm install
 pnpm ux:metrics
 ```
 
-If Docker bridge traffic fails on a Cloud Agent VM (opt-in, not Mac/production):
+If Docker bridge traffic fails on a disposable CI/container host (opt-in, not for workstations or production):
 
 ```bash
-DV_AGENT_VM=1 bash scripts/ci/agent-vm-docker-setup.sh
+DOCUVATE_CI_DOCKER_SETUP=1 bash scripts/ci/docker-setup.sh
 ```
 
 Outputs:

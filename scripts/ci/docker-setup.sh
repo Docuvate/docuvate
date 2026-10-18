@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Agent VM ONLY: fix Docker bridge east-west traffic (iptables FORWARD DROP).
-# Not for Mac/production. Requires explicit opt-in: DV_AGENT_VM=1
+# Disposable CI/container hosts only: install and start Docker if needed and fix
+# Docker bridge east-west traffic (iptables FORWARD DROP).
+# Not for workstations or production. Requires explicit opt-in: DOCUVATE_CI_DOCKER_SETUP=1
 set -euo pipefail
 
-log() { printf '[agent-vm-docker] %s\n' "$*"; }
+log() { printf '[docker-setup] %s\n' "$*"; }
 
-if [ "${DV_AGENT_VM:-0}" != "1" ]; then
-  log "Refusing to run: set DV_AGENT_VM=1 (Cloud Agent VM only). Mac/local hosts must not use this script."
+if [ "${DOCUVATE_CI_DOCKER_SETUP:-0}" != "1" ]; then
+  log "Refusing to run: set DOCUVATE_CI_DOCKER_SETUP=1 (disposable CI/container hosts only). Do not use on workstations."
   exit 1
 fi
 
@@ -24,7 +25,7 @@ if ! command -v docker >/dev/null 2>&1; then
   $SUDO apt-get update -qq
   $SUDO env DEBIAN_FRONTEND=noninteractive apt-get install -y -qq docker.io docker-compose-v2
   docker_user="${SUDO_USER:-${USER:-}}"
-  # docker group is root-equivalent on Linux; only acceptable on throwaway agent VMs (DV_AGENT_VM=1).
+  # docker group is root-equivalent on Linux; only acceptable on disposable CI hosts (DOCUVATE_CI_DOCKER_SETUP=1).
   # Never chmod/chown /var/run/docker.sock — add the invoking user to the group instead.
   if [ -n "$docker_user" ] && [ "$docker_user" != "root" ]; then
     if id -nG "$docker_user" 2>/dev/null | tr ' ' '\n' | grep -qx docker; then
@@ -42,7 +43,7 @@ if ! $SUDO docker info >/dev/null 2>&1; then
     $SUDO systemctl start docker 2>/dev/null || true
   fi
   if ! $SUDO docker info >/dev/null 2>&1; then
-    $SUDO dockerd >/var/log/dockerd-agent.log 2>&1 &
+    $SUDO dockerd >/var/log/dockerd-ci.log 2>&1 &
     for _ in $(seq 1 30); do
       $SUDO docker info >/dev/null 2>&1 && break
       sleep 1
