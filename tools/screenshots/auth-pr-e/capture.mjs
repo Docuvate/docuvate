@@ -9,6 +9,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { chromium } from 'playwright';
 
+import { totpFromOtpAuthUri } from './totp-code.mjs';
+
 const ROOT = path.resolve(import.meta.dirname, '../../..');
 const OUT = process.env.SCREENSHOT_DIR ?? path.join(ROOT, 'docs/screenshots/pr-109');
 const WEB = process.env.DOCUVATE_WEB ?? 'http://localhost:5173';
@@ -18,6 +20,18 @@ const PASSWORD = process.env.SEED_PASSWORD ?? 'AdminDemo12!';
 
 const WIDTHS = [1440, 1024, 390];
 const THEMES = ['light', 'dark'];
+
+/** Match de/en account-security actions regardless of saved user locale. */
+const CHANGE_EMAIL_BUTTON = /^(E-Mail ändern|Change email)$/i;
+const CHANGE_EMAIL_DIALOG = /^(E-Mail ändern|Change email)$/i;
+const REGENERATE_CODES_BUTTON = /^(Wiederherstellungscodes erneuern|Regenerate recovery codes)$/i;
+const REGENERATE_CODES_DIALOG = /^(Wiederherstellungscodes erneuern|Regenerate recovery codes)$/i;
+const DIALOG_CANCEL = /^(Abbrechen|Cancel)$/i;
+const TOTP_START = /^(Set up TOTP|TOTP einrichten)$/i;
+const TOTP_SHOW_KEY = /^(Show secret key|Schlüssel anzeigen)$/i;
+const TOTP_CONFIRM = /^(Finish setup|Einrichtung abschließen)$/i;
+const PASSWORD_FIELD = /^(Current password|Aktuelles Passwort|Password|Passwort)$/i;
+const TOTP_CODE_FIELD = /^(One-time code|Einmalcode|TOTP code|TOTP-Code)$/i;
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
@@ -45,6 +59,27 @@ async function capture(page, file) {
   await page.screenshot({ path: file, fullPage: true });
 }
 
+/** Enables TOTP once so E8b regenerate-codes dialog is available in screenshots. */
+async function ensureTotpEnabled(page) {
+  await page.goto(`${WEB}/settings/account-security`, { waitUntil: 'networkidle' });
+  const regenButton = page.getByRole('button', { name: REGENERATE_CODES_BUTTON });
+  if (await regenButton.isVisible()) {
+    return;
+  }
+  const startForm = page.locator('form').filter({ has: page.getByRole('button', { name: TOTP_START }) });
+  await startForm.getByLabel(PASSWORD_FIELD).fill(PASSWORD);
+  await startForm.getByRole('button', { name: TOTP_START }).click();
+  await page.getByRole('button', { name: TOTP_SHOW_KEY }).click();
+  const uri = (await page.locator('.settings-totp-uri').textContent())?.trim();
+  if (!uri) {
+    throw new Error('TOTP secret URI missing after enrollment start');
+  }
+  const confirmForm = page.locator('form').filter({ has: page.getByRole('button', { name: TOTP_CONFIRM }) });
+  await confirmForm.getByLabel(TOTP_CODE_FIELD).fill(totpFromOtpAuthUri(uri));
+  await confirmForm.getByRole('button', { name: TOTP_CONFIRM }).click();
+  await regenButton.waitFor({ state: 'visible', timeout: 60_000 });
+}
+
 async function main() {
   if (process.env.SKIP_ADMIN_SEED !== '1') {
     execFileSync(process.execPath, ['tools/screenshots/admin/seed-admin-screenshots.mjs'], {
@@ -59,6 +94,9 @@ async function main() {
   const authDir = fs.mkdtempSync(path.join(os.tmpdir(), 'docuvate-auth-pr-e-'));
   const context = await browser.newContext();
   await signIn(context);
+  const setupPage = await context.newPage();
+  await ensureTotpEnabled(setupPage);
+  await setupPage.close();
   await context.storageState({ path: path.join(authDir, 'state.json') });
 
   for (const theme of THEMES) {
@@ -77,17 +115,25 @@ async function main() {
       await accountPage.goto(`${WEB}/settings/account-security`, { waitUntil: 'networkidle' });
       await capture(accountPage, path.join(OUT, `e8-account-security-${width}-${theme}.png`));
 
-      await accountPage.getByRole('button', { name: 'E-Mail ändern' }).click();
-      await accountPage.locator('[role="dialog"]').waitFor({ state: 'visible' });
+      const changeEmailBtn = accountPage.getByRole('button', { name: CHANGE_EMAIL_BUTTON });
+      await changeEmailBtn.waitFor({ state: 'visible' });
+      for (let attempt = 0; attempt < 60; attempt += 1) {
+        if (await changeEmailBtn.isEnabled()) break;
+        await accountPage.waitForTimeout(500);
+      }
+      await changeEmailBtn.click();
+      const changeEmailDialog = accountPage.getByRole('dialog', { name: CHANGE_EMAIL_DIALOG });
+      await changeEmailDialog.waitFor({ state: 'visible' });
       await capture(accountPage, path.join(OUT, `e8e-change-email-dialog-${width}-${theme}.png`));
-      await accountPage.keyboard.press('Escape');
+      await changeEmailDialog.getByRole('button', { name: DIALOG_CANCEL }).click();
 
-      const regenButton = accountPage.getByRole('button', { name: 'Wiederherstellungscodes erneuern' });
+      const regenButton = accountPage.getByRole('button', { name: REGENERATE_CODES_BUTTON });
       if (await regenButton.isVisible()) {
         await regenButton.click();
-        await accountPage.locator('[role="dialog"]').waitFor({ state: 'visible' });
+        const regenDialog = accountPage.getByRole('dialog', { name: REGENERATE_CODES_DIALOG });
+        await regenDialog.waitFor({ state: 'visible' });
         await capture(accountPage, path.join(OUT, `e8b-regenerate-codes-dialog-${width}-${theme}.png`));
-        await accountPage.keyboard.press('Escape');
+        await regenDialog.getByRole('button', { name: DIALOG_CANCEL }).click();
       }
 
       await accountPage.close();
