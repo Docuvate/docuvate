@@ -154,7 +154,9 @@
       "signOutFailed": "Sign-out failed. Please try again.",
       "sessionNotReady": "We could not start your session. Please try again.",
       "generic": "Something went wrong. Please try again."
-    }
+    },
+    "requestNewResetLink": "Request a new link",
+    "resetPasswordVerifying": "Checking link…"
   },
   "errors": {
     "loadFailed": "Failed to load",
@@ -320,7 +322,8 @@
     "retry": "Try again",
     "saved": "Saved",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "loading": "Loading…"
   },
   "save": {
     "saved": "Saved",
@@ -484,7 +487,8 @@
     "stackPrimaryDeleteTitle": "Delete primary document?",
     "stackPrimaryDeleteDescription": "“{{filename}}” will be permanently deleted.",
     "stackPrimaryDeleteAllVersions": "Also delete all versions in the stack",
-    "stackPrimaryDeleteConfirmWithVersions": "Delete {{count}} documents permanently"
+    "stackPrimaryDeleteConfirmWithVersions": "Delete {{count}} documents permanently",
+    "reviewPendingTooltip": "Suggestions are waiting for review"
   },
   "filesystem": {
     "title": "Filesystem",
@@ -942,7 +946,9 @@
     "extractedMarkdownPreview": "Preview",
     "extractedMarkdownSource": "Source",
     "extractedMarkdownViewAria": "Markdown view",
-    "ingestSourceScanner": "Scanner ingress"
+    "ingestSourceScanner": "Scanner ingress",
+    "previewLoading": "Loading preview…",
+    "previewTextEmpty": "No text has been recognised for this document yet."
   },
   "settings": {
     "title": "Settings",
@@ -1277,6 +1283,18 @@
           "completed": "Completed",
           "failed": "Failed",
           "cancelled": "Cancelled"
+        },
+        "storedSecret": "Stored",
+        "storedHint": "A stored secret stays active until you enter a new value.",
+        "saveSuccess": "Settings saved.",
+        "dryRunSuccess": "Preview finished: {{count}} documents found.",
+        "importStarted": "Import started.",
+        "errors": {
+          "unauthorized": "Paperless rejected the sign-in. Check the token or password.",
+          "notFound": "The Paperless API was not found at this URL.",
+          "timeout": "Paperless is not responding in time. Please try again later.",
+          "versionUnsupported": "This Paperless-ngx version is not supported. Please use Paperless-ngx 2.x or 3.x.",
+          "unreachable": "Paperless cannot be reached. Check the URL and network."
         }
       },
       "homeAssistant": {
@@ -2011,7 +2029,26 @@
       "recent_documents": "Recently added",
       "attention": "Needs attention",
       "saved_view": "Saved view"
-    }
+    },
+    "onboarding": {
+      "title": "Welcome, {{name}}",
+      "titleAnonymous": "Welcome to Docuvate",
+      "lead": "Three steps to a well-organised archive. Docuvate reads your documents and makes suggestions. You decide what is applied.",
+      "stepUploadTitle": "1 · Upload documents",
+      "stepUploadText": "Drag PDFs or photos here. Text recognition starts automatically.",
+      "stepReviewTitle": "2 · Go through suggestions",
+      "stepReviewText": "Docuvate suggests labels and fields. Apply confident suggestions with one click; when unsure, Docuvate holds back.",
+      "stepReviewPending": "Waiting for upload",
+      "stepConnectTitle": "3 · Connect sources (optional)",
+      "stepConnectText": "Connect Paperless, SharePoint or a scanner via SFTP.",
+      "stepConnectAction": "Connections",
+      "privacyNote": "By default, everything stays on your server."
+    },
+    "reviewBannerTitle_one": "{{count}} document is waiting for review",
+    "reviewBannerTitle_other": "{{count}} documents are waiting for review",
+    "reviewBannerDescription_one": "Confirm or correct the suggestions for this document.",
+    "reviewBannerDescription_other": "Confirm or correct the suggestions for these documents.",
+    "reviewBannerAction": "Review now"
   },
   "sftpIngress": {
     "title": "Scanner inbox (SFTP)",
@@ -2188,5 +2225,14 @@
       "noteHelp": "Optional",
       "noteValue": "Advance payment increases from October."
     }
+  },
+  "combobox": {
+    "searchPlaceholder": "Search…",
+    "expand": "Open list",
+    "collapse": "Close list",
+    "sectionSelected": "Selected",
+    "sectionFrequent": "Frequent",
+    "sectionAll": "All",
+    "empty": "No matches"
   }
 }

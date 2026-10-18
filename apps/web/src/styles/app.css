@@ -8810,12 +8810,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   min-width: 0;
 }
 
+/* Only an open <dialog> may set display: an unconditional author `display` beats the UA
+   `dialog:not([open]) { display: none }` and leaks every closed dialog into the page flow. */
 .dv-dialog,
 .confirm-dialog {
   width: min(35rem, calc(100vw - 2rem));
   max-height: 85vh;
-  display: flex;
-  flex-direction: column;
   gap: var(--dv-space-md);
   padding: var(--dv-space-lg);
   border: 1px solid var(--dv-color-border);
@@ -8825,6 +8825,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin: auto;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.dv-dialog[open],
+.confirm-dialog[open] {
+  display: flex;
+  flex-direction: column;
 }
 
 .dv-dialog::backdrop,
@@ -13129,6 +13135,159 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 8px;
+}
+
+/* Start page: every direct child of the page grid spans the full content width. */
+.dashboard-page.dv-page-grid > *,
+.dashboard-start-skeleton.dv-page-grid > * {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.dashboard-page-header {
+  margin-bottom: 0;
+}
+
+.dashboard-page-header > div:first-child {
+  min-width: 0;
+}
+
+.dashboard-page-header .muted {
+  margin: var(--dv-space-2xs) 0 0;
+}
+
+.dashboard-header-actions {
+  display: flex;
+  flex: none;
+  gap: var(--dv-space-xs);
+}
+
+.dashboard-add-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-sm);
+}
+
+.dashboard-add-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dashboard-skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-xs);
+}
+
+.dashboard-skeleton-card-tall {
+  min-height: 16rem;
+}
+
+.dashboard-onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-lg);
+  min-width: 0;
+}
+
+.dashboard-onboarding-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-2xs);
+}
+
+.dashboard-onboarding-title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.dashboard-onboarding-lead {
+  margin: 0;
+  max-width: 45rem;
+  color: var(--dv-color-text-muted);
+  line-height: 1.45;
+}
+
+.dashboard-onboarding-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--dv-space-md);
+}
+
+.dashboard-onboarding-step {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--dv-space-sm);
+  min-width: 0;
+}
+
+.dashboard-onboarding-step-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-accent-soft);
+  color: var(--dv-color-accent);
+}
+
+.dashboard-onboarding-step-icon-active {
+  background: var(--dv-color-accent);
+  color: var(--dv-color-on-accent);
+}
+
+.dashboard-onboarding-step-active {
+  border-color: var(--dv-color-accent);
+}
+
+.dashboard-onboarding-step-title {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.dashboard-onboarding-step-text {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: var(--dv-color-text-muted);
+}
+
+.dashboard-onboarding-step-btn {
+  margin-top: auto;
+}
+
+.dashboard-onboarding-dropzone {
+  min-width: 0;
+}
+
+.dashboard-onboarding-footnote {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--dv-color-text-muted);
+}
+
+@media (max-width: 1023px) {
+  .dashboard-onboarding-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 767px) {
+  .dashboard-page-header {
+    flex-direction: column;
+  }
 }
 
 .dashboard-grid {

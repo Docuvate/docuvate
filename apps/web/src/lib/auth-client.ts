@@ -38,7 +38,12 @@ export const authClient = createAuthClient({
 });
 
 type AuthSessionPayload = {
-  user?: { id: string; email?: string | null; twoFactorEnabled?: boolean | null } | null;
+  user?: {
+    id: string;
+    email?: string | null;
+    name?: string | null;
+    twoFactorEnabled?: boolean | null;
+  } | null;
 } | null | undefined;
 
 /** Session can exist before `user` is populated; `session?.user.id` throws when `user` is missing. */
@@ -56,6 +61,13 @@ export function authSessionUserEmail(session: AuthSessionPayload): string | unde
     return undefined;
   }
   return user.email ?? undefined;
+}
+
+/** First word of the display name, for greetings; undefined when no name is set. */
+export function authSessionUserFirstName(session: AuthSessionPayload): string | undefined {
+  const first = session?.user?.name?.trim().split(/\s+/)[0];
+  if (!first) return undefined;
+  return first;
 }
 
 export function authSessionUserTwoFactorEnabled(session: AuthSessionPayload): boolean {

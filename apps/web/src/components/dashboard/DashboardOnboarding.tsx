@@ -5,6 +5,7 @@ import { useId, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import { authClient, authSessionUserFirstName } from '../../lib/auth-client';
 import { resolveLibraryDropTarget } from '../../lib/documentUploadAssignment';
 import { UPLOAD_ACCEPT } from '../../lib/documentUploadConstants';
 import { routes } from '../../lib/routes';
@@ -51,6 +52,8 @@ function OnboardingUploadButton() {
 
 export function DashboardOnboarding() {
   const { t } = useTranslation();
+  const { data: session } = authClient.useSession();
+  const firstName = authSessionUserFirstName(session);
 
   return (
     <DocumentUploadProvider
@@ -62,7 +65,11 @@ export function DashboardOnboarding() {
     >
       <div className="dashboard-onboarding">
         <header className="dashboard-onboarding-header">
-          <h1 className="dashboard-onboarding-title">{t('dashboard.onboarding.title')}</h1>
+          <h1 className="dashboard-onboarding-title">
+            {firstName
+              ? t('dashboard.onboarding.title', { name: firstName })
+              : t('dashboard.onboarding.titleAnonymous')}
+          </h1>
           <p className="dashboard-onboarding-lead">{t('dashboard.onboarding.lead')}</p>
         </header>
         <div className="dashboard-onboarding-steps">
