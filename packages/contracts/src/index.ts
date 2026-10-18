@@ -656,6 +656,8 @@ export interface DocumentDto {
   /** Set when status is failed (extraction or enqueue error). */
   extractionFailureReason?: string | null;
   mimeType: string;
+  /** Original upload size in bytes. */
+  fileSizeBytes: number;
   /** Short file-type badge (DOCX, PDF, …). */
   formatBadge?: string;
   /** True when GET /documents/:id/preview serves an application/pdf body. */

@@ -16,6 +16,7 @@ part 'create_saved_document_view_request_dto.g.dart';
 /// Properties:
 /// * [visibleColumns] 
 /// * [name] 
+/// * [description] 
 /// * [visibility] 
 /// * [searchQuery] 
 /// * [sort] 
@@ -39,6 +40,9 @@ abstract class CreateSavedDocumentViewRequestDto implements Built<CreateSavedDoc
 
   @BuiltValueField(wireName: r'name')
   String get name;
+
+  @BuiltValueField(wireName: r'description')
+  String? get description;
 
   @BuiltValueField(wireName: r'visibility')
   CreateSavedDocumentViewRequestDtoVisibilityEnum? get visibility;
@@ -130,6 +134,13 @@ class _$CreateSavedDocumentViewRequestDtoSerializer implements PrimitiveSerializ
       object.name,
       specifiedType: const FullType(String),
     );
+    if (object.description != null) {
+      yield r'description';
+      yield serializers.serialize(
+        object.description,
+        specifiedType: const FullType(String),
+      );
+    }
     if (object.visibility != null) {
       yield r'visibility';
       yield serializers.serialize(
@@ -276,6 +287,13 @@ class _$CreateSavedDocumentViewRequestDtoSerializer implements PrimitiveSerializ
             specifiedType: const FullType(String),
           ) as String;
           result.name = valueDes;
+          break;
+        case r'description':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.description = valueDes;
           break;
         case r'visibility':
           final valueDes = serializers.deserialize(

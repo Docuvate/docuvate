@@ -46,6 +46,9 @@ export class RecognizedFieldDefinitionsEntity {
   @Column('boolean', { name: 'show_in_filter', default: () => 'false' })
   showInFilter: boolean;
 
+  @Column('text', { name: 'gate_label_polarity', default: () => "'include'" })
+  gateLabelPolarity: string;
+
   @Column('timestamp with time zone', {
     name: 'created_at',
     default: () => 'now()',

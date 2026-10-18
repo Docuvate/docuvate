@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-export function notifySaved(message?: string): void {
-  const event = new CustomEvent('docuvate-notify-saved', { detail: { message } });
+export function notifySaved(message?: string, undo?: () => void): void {
+  const event = new CustomEvent('docuvate-notify-saved', { detail: { message, undo } });
   window.dispatchEvent(event);
 }
 

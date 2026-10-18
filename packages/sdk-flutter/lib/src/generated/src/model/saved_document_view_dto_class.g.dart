@@ -480,6 +480,10 @@ class _$SavedDocumentViewDtoClassStatusEnumSerializer
 
 class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
   @override
+  final String? description;
+  @override
+  final num? documentCount;
+  @override
   final BuiltList<LibraryTableColumnId> visibleColumns;
   @override
   final String id;
@@ -504,7 +508,7 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
   @override
   final String? folderId;
   @override
-  final String? correspondentId;
+  final BuiltList<SavedDocumentViewFieldFilterDtoClass> fieldFilters;
   @override
   final SavedDocumentViewDtoClassStatusEnum? status;
   @override
@@ -527,7 +531,9 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
       (new SavedDocumentViewDtoClassBuilder()..update(updates))._build();
 
   _$SavedDocumentViewDtoClass._(
-      {required this.visibleColumns,
+      {this.description,
+      this.documentCount,
+      required this.visibleColumns,
       required this.id,
       required this.name,
       required this.visibility,
@@ -539,7 +545,7 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
       required this.filterMode,
       required this.listScope,
       this.folderId,
-      this.correspondentId,
+      required this.fieldFilters,
       this.status,
       this.inbox,
       this.withoutNonInboxLabel,
@@ -572,6 +578,8 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
     BuiltValueNullFieldError.checkNotNull(
         listScope, r'SavedDocumentViewDtoClass', 'listScope');
     BuiltValueNullFieldError.checkNotNull(
+        fieldFilters, r'SavedDocumentViewDtoClass', 'fieldFilters');
+    BuiltValueNullFieldError.checkNotNull(
         tagIds, r'SavedDocumentViewDtoClass', 'tagIds');
     BuiltValueNullFieldError.checkNotNull(
         pinnedSidebar, r'SavedDocumentViewDtoClass', 'pinnedSidebar');
@@ -596,6 +604,8 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     return other is SavedDocumentViewDtoClass &&
+        description == other.description &&
+        documentCount == other.documentCount &&
         visibleColumns == other.visibleColumns &&
         id == other.id &&
         name == other.name &&
@@ -608,7 +618,7 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
         filterMode == other.filterMode &&
         listScope == other.listScope &&
         folderId == other.folderId &&
-        correspondentId == other.correspondentId &&
+        fieldFilters == other.fieldFilters &&
         status == other.status &&
         inbox == other.inbox &&
         withoutNonInboxLabel == other.withoutNonInboxLabel &&
@@ -622,6 +632,8 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
   @override
   int get hashCode {
     var _$hash = 0;
+    _$hash = $jc(_$hash, description.hashCode);
+    _$hash = $jc(_$hash, documentCount.hashCode);
     _$hash = $jc(_$hash, visibleColumns.hashCode);
     _$hash = $jc(_$hash, id.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
@@ -634,7 +646,7 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
     _$hash = $jc(_$hash, filterMode.hashCode);
     _$hash = $jc(_$hash, listScope.hashCode);
     _$hash = $jc(_$hash, folderId.hashCode);
-    _$hash = $jc(_$hash, correspondentId.hashCode);
+    _$hash = $jc(_$hash, fieldFilters.hashCode);
     _$hash = $jc(_$hash, status.hashCode);
     _$hash = $jc(_$hash, inbox.hashCode);
     _$hash = $jc(_$hash, withoutNonInboxLabel.hashCode);
@@ -650,6 +662,8 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
   @override
   String toString() {
     return (newBuiltValueToStringHelper(r'SavedDocumentViewDtoClass')
+          ..add('description', description)
+          ..add('documentCount', documentCount)
           ..add('visibleColumns', visibleColumns)
           ..add('id', id)
           ..add('name', name)
@@ -662,7 +676,7 @@ class _$SavedDocumentViewDtoClass extends SavedDocumentViewDtoClass {
           ..add('filterMode', filterMode)
           ..add('listScope', listScope)
           ..add('folderId', folderId)
-          ..add('correspondentId', correspondentId)
+          ..add('fieldFilters', fieldFilters)
           ..add('status', status)
           ..add('inbox', inbox)
           ..add('withoutNonInboxLabel', withoutNonInboxLabel)
@@ -679,6 +693,15 @@ class SavedDocumentViewDtoClassBuilder
     implements
         Builder<SavedDocumentViewDtoClass, SavedDocumentViewDtoClassBuilder> {
   _$SavedDocumentViewDtoClass? _$v;
+
+  String? _description;
+  String? get description => _$this._description;
+  set description(String? description) => _$this._description = description;
+
+  num? _documentCount;
+  num? get documentCount => _$this._documentCount;
+  set documentCount(num? documentCount) =>
+      _$this._documentCount = documentCount;
 
   ListBuilder<LibraryTableColumnId>? _visibleColumns;
   ListBuilder<LibraryTableColumnId> get visibleColumns =>
@@ -734,10 +757,13 @@ class SavedDocumentViewDtoClassBuilder
   String? get folderId => _$this._folderId;
   set folderId(String? folderId) => _$this._folderId = folderId;
 
-  String? _correspondentId;
-  String? get correspondentId => _$this._correspondentId;
-  set correspondentId(String? correspondentId) =>
-      _$this._correspondentId = correspondentId;
+  ListBuilder<SavedDocumentViewFieldFilterDtoClass>? _fieldFilters;
+  ListBuilder<SavedDocumentViewFieldFilterDtoClass> get fieldFilters =>
+      _$this._fieldFilters ??=
+          new ListBuilder<SavedDocumentViewFieldFilterDtoClass>();
+  set fieldFilters(
+          ListBuilder<SavedDocumentViewFieldFilterDtoClass>? fieldFilters) =>
+      _$this._fieldFilters = fieldFilters;
 
   SavedDocumentViewDtoClassStatusEnum? _status;
   SavedDocumentViewDtoClassStatusEnum? get status => _$this._status;
@@ -782,6 +808,8 @@ class SavedDocumentViewDtoClassBuilder
   SavedDocumentViewDtoClassBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
+      _description = $v.description;
+      _documentCount = $v.documentCount;
       _visibleColumns = $v.visibleColumns.toBuilder();
       _id = $v.id;
       _name = $v.name;
@@ -794,7 +822,7 @@ class SavedDocumentViewDtoClassBuilder
       _filterMode = $v.filterMode;
       _listScope = $v.listScope;
       _folderId = $v.folderId;
-      _correspondentId = $v.correspondentId;
+      _fieldFilters = $v.fieldFilters.toBuilder();
       _status = $v.status;
       _inbox = $v.inbox;
       _withoutNonInboxLabel = $v.withoutNonInboxLabel;
@@ -827,6 +855,8 @@ class SavedDocumentViewDtoClassBuilder
     try {
       _$result = _$v ??
           new _$SavedDocumentViewDtoClass._(
+              description: description,
+              documentCount: documentCount,
               visibleColumns: visibleColumns.build(),
               id: BuiltValueNullFieldError.checkNotNull(
                   id, r'SavedDocumentViewDtoClass', 'id'),
@@ -847,7 +877,7 @@ class SavedDocumentViewDtoClassBuilder
               filterMode: BuiltValueNullFieldError.checkNotNull(filterMode, r'SavedDocumentViewDtoClass', 'filterMode'),
               listScope: BuiltValueNullFieldError.checkNotNull(listScope, r'SavedDocumentViewDtoClass', 'listScope'),
               folderId: folderId,
-              correspondentId: correspondentId,
+              fieldFilters: fieldFilters.build(),
               status: status,
               inbox: inbox,
               withoutNonInboxLabel: withoutNonInboxLabel,
@@ -861,6 +891,9 @@ class SavedDocumentViewDtoClassBuilder
       try {
         _$failedField = 'visibleColumns';
         visibleColumns.build();
+
+        _$failedField = 'fieldFilters';
+        fieldFilters.build();
 
         _$failedField = 'tagIds';
         tagIds.build();

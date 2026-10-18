@@ -29,6 +29,9 @@ export class SavedDocumentViewsEntity {
   @Column('text', { name: 'name' })
   name: string;
 
+  @Column('text', { name: 'description', default: () => "''" })
+  description: string;
+
   @Column('text', { name: 'visibility', default: () => "'private'" })
   visibility: string;
 

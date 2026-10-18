@@ -48,6 +48,8 @@ import { DocumentExtractionImages20261018150000 } from './migrations/20261018150
 import { ConnectorNamedConnectionsSourceScope20261018160000 } from './migrations/20261018160000-connector-named-connections-source-scope.js';
 import { InstallationOidcProvider20261018170000 } from './migrations/20261018170000-installation-oidc-provider.js';
 import { CorrespondentsToAbsenderField20261018180000 } from './migrations/20261018180000-correspondents-to-absender-field.js';
+import { RecognizedFieldGateLabelPolarity20261018190000 } from './migrations/20261018190000-recognized-field-filter-and-gate-polarity.js';
+import { DocumentFileSizeSavedViewDescription20261018190500 } from './migrations/20261018190500-document-file-size-saved-view-description.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -96,6 +98,8 @@ const EXPECTED_MIGRATIONS = [
   ConnectorNamedConnectionsSourceScope20261018160000,
   InstallationOidcProvider20261018170000,
   CorrespondentsToAbsenderField20261018180000,
+  RecognizedFieldGateLabelPolarity20261018190000,
+  DocumentFileSizeSavedViewDescription20261018190500,
 ];
 
 describe('buildTypeOrmOptions', () => {

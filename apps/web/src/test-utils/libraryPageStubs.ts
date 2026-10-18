@@ -63,6 +63,9 @@ export function createLibraryPageDataStub(
     activeViewId: null,
     activeViewName: null,
     updateActiveSavedView: () => Promise.resolve(),
+    groupedLabelSuggestions: [],
+    groupedLabelBusy: false,
+    acceptGroupedLabelSuggestion: () => Promise.resolve(),
     ...overrides,
   };
 }

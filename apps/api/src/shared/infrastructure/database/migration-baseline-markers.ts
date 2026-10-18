@@ -52,6 +52,8 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'ConnectorNamedConnectionsSourceScope20261018160000',
   'InstallationOidcProvider20261018170000',
   'CorrespondentsToAbsenderField20261018180000',
+  'RecognizedFieldGateLabelPolarity20261018190000',
+  'DocumentFileSizeSavedViewDescription20261018190500',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -216,6 +218,10 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.installation_oidc_provider');
     case 'CorrespondentsToAbsenderField20261018180000':
       return regClassExists(runner, 'public.saved_document_view_field_filters');
+    case 'RecognizedFieldGateLabelPolarity20261018190000':
+      return columnExists(runner, 'recognized_field_definitions', 'gate_label_polarity');
+    case 'DocumentFileSizeSavedViewDescription20261018190500':
+      return columnExists(runner, 'documents', 'file_size_bytes');
     default:
       return false;
   }

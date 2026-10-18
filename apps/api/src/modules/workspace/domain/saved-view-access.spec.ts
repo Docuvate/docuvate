@@ -14,6 +14,7 @@ const baseView = (overrides: Partial<SavedDocumentViewEntity> = {}): SavedDocume
   id: 'v1',
   ownerUserId: 'owner',
   name: 'Test',
+  description: '',
   visibility: 'private',
   searchQuery: '',
   sort: 'updatedAt',

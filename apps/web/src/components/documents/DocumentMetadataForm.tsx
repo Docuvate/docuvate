@@ -1,13 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { FolderDto } from '@docuvate/contracts';
+import type { DocumentDto, FolderDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
+import { formatDocumentMetadataFileSummary } from '../../lib/documentMetadataFileLine';
 import { Input } from '../ui/Input';
 import { LocalizedDateInput } from '../ui/LocalizedDateInput';
 import { Select } from '../ui/Select';
 
 interface DocumentMetadataFormProps {
+  doc: DocumentDto;
   title: string;
   documentDate: string;
   documentDateAutoFilled?: boolean;
@@ -23,63 +25,80 @@ interface DocumentMetadataFormProps {
 }
 
 export function DocumentMetadataForm(props: DocumentMetadataFormProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const folderOptions = [
     { value: '', label: t('documents.metadataNoFolder') },
     ...props.folders.map((f) => ({ value: f.id, label: f.name })),
   ];
+  const fileSummary = formatDocumentMetadataFileSummary(props.doc, t, i18n.language);
 
   return (
     <section className="detail-tab-section" aria-labelledby="document-metadata-heading">
       <h2 id="document-metadata-heading" className="detail-section-title">
         {t('documents.metadataHeading')}
       </h2>
-      <div className="stack document-metadata-fields">
-        <label>
-          {t('documents.metadataTitle')}
-          <Input
-            value={props.title}
-            onChange={(e) => { props.onTitleChange(e.target.value); }}
-            required
-          />
-        </label>
-        <label>
-          {t('documents.metadataDocumentDate')}
-          <LocalizedDateInput value={props.documentDate} onChange={props.onDocumentDateChange} />
-          {props.documentDateAutoFilled ? (
-            <span className="metadata-auto-date-hint">
-              {t('documents.metadataDocumentDateAuto')}
-              {props.onClearAutoDocumentDate ? (
-                <button
-                  type="button"
-                  className="metadata-auto-date-undo"
-                  onClick={props.onClearAutoDocumentDate}
-                >
-                  {t('documents.metadataDocumentDateAutoUndo')}
-                </button>
-              ) : null}
-            </span>
-          ) : null}
-        </label>
-        <label>
-          {t('documents.metadataNotes')}
-          <textarea
-            className="textarea"
-            rows={3}
-            value={props.notes}
-            onChange={(e) => { props.onNotesChange(e.target.value); }}
-          />
-        </label>
-        <label>
-          {t('documents.metadataFolder')}
-          <Select
-            value={props.folderId}
-            onChange={props.onFolderIdChange}
-            options={folderOptions}
-            aria-label={t('documents.metadataFolderAria')}
-          />
-        </label>
-        <p className="muted metadata-hint">{t('documents.metadataHint')}</p>
+      <div className="stack document-metadata-fields document-metadata-form">
+        <div className="document-metadata-form-row">
+          <span className="document-metadata-form-label">{t('documents.metadataTitle')}</span>
+          <div className="document-metadata-form-control">
+            <Input
+              value={props.title}
+              onChange={(e) => { props.onTitleChange(e.target.value); }}
+              required
+            />
+          </div>
+        </div>
+        <div className="document-metadata-form-row">
+          <span className="document-metadata-form-label">{t('documents.metadataDocumentDate')}</span>
+          <div className="document-metadata-form-control">
+            <LocalizedDateInput value={props.documentDate} onChange={props.onDocumentDateChange} />
+            {props.documentDateAutoFilled ? (
+              <span className="metadata-auto-date-hint">
+                {t('documents.metadataDocumentDateAuto')}
+                {props.onClearAutoDocumentDate ? (
+                  <button
+                    type="button"
+                    className="metadata-auto-date-undo"
+                    onClick={props.onClearAutoDocumentDate}
+                  >
+                    {t('documents.metadataDocumentDateAutoUndo')}
+                  </button>
+                ) : null}
+              </span>
+            ) : null}
+          </div>
+        </div>
+        <div className="document-metadata-form-row">
+          <span className="document-metadata-form-label">{t('documents.metadataFolder')}</span>
+          <div className="document-metadata-form-control">
+            <Select
+              value={props.folderId}
+              onChange={props.onFolderIdChange}
+              options={folderOptions}
+              aria-label={t('documents.metadataFolderAria')}
+            />
+          </div>
+        </div>
+        <div className="document-metadata-form-row document-metadata-form-row-notes">
+          <span className="document-metadata-form-label">{t('documents.metadataNotes')}</span>
+          <div className="document-metadata-form-control">
+            <textarea
+              className="textarea"
+              rows={3}
+              value={props.notes}
+              onChange={(e) => { props.onNotesChange(e.target.value); }}
+            />
+          </div>
+        </div>
+        <div className="document-metadata-form-row document-metadata-form-row-readonly">
+          <span className="document-metadata-form-label">{t('documents.metadataFileHeading')}</span>
+          <div className="document-metadata-form-control">
+            <p className="document-metadata-file-block muted" id="document-metadata-file-summary">
+              {fileSummary}
+            </p>
+          </div>
+        </div>
+        <p className="muted metadata-hint document-metadata-form-hint">{t('documents.metadataHint')}</p>
       </div>
     </section>
   );

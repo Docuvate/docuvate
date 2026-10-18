@@ -13,6 +13,7 @@ import type { DocumentRepository, DocumentUpdatePatch } from '../../../shared/do
 import {
   isRecord,
   parseJsonString,
+  parseNumber,
   parseOptionalString,
   parseString,
   recordFromUnknown,
@@ -31,6 +32,7 @@ import {
   replaceDocumentExtractionFields,
 } from './document-extraction.persistence.js';
 import { insertDocumentExtractionImageRow } from './document-extraction-images.persistence.js';
+import { buildDocumentListFilterSql } from './document-list-filter.sql.js';
 import { mapDocumentRow, parseLayoutIrPagesJson, parseTagsJson } from './document-row.mapper.js';
 import { textFromExtractionBlocks } from './extraction-text.util.js';
 
@@ -98,15 +100,16 @@ export class PgDocumentRepository implements DocumentRepository {
   async create(doc: DocumentEntity): Promise<DocumentEntity> {
     await this.pool.query(
       `INSERT INTO documents (
-        id, user_id, filename, title, mime_type, storage_key, status,
+        id, user_id, filename, title, mime_type, file_size_bytes, storage_key, status,
         document_date, notes, folder_id, ingest_source, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
       [
         doc.id,
         doc.userId,
         doc.filename,
         doc.title,
         doc.mimeType,
+        doc.fileSizeBytes,
         doc.storageKey,
         doc.status,
         doc.documentDate ?? null,
@@ -149,108 +152,18 @@ export class PgDocumentRepository implements DocumentRepository {
     return this.attachLayoutIrPages(entity, pages);
   }
 
-  async listForUser(userId: string, filters: DocumentListQuery = {}): Promise<DocumentEntity[]> {
-    const conditions: string[] = [
-      'd.user_id = $1',
-      `NOT EXISTS (
-        SELECT 1 FROM document_stack_members m
-        WHERE m.document_id = d.id AND m.role = 'version'
-      )`,
-    ];
-    const params: unknown[] = [userId];
-    let paramIndex = 2;
+  async countForUser(userId: string, filters: DocumentListQuery = {}): Promise<number> {
+    const { whereSql, params } = buildDocumentListFilterSql(userId, filters);
+    const result = await this.pool.query(
+      `SELECT COUNT(*)::int AS count FROM documents d WHERE ${whereSql}`,
+      params
+    );
+    const row = requireRecord(result.rows[0]);
+    return parseNumber(row.count, 0);
+  }
 
-    if (filters.status) {
-      conditions.push(`d.status = $${String(paramIndex)}`);
-      paramIndex += 1;
-      params.push(filters.status);
-    }
-    const fieldFilters =
-      filters.fieldFilters?.filter(
-        (entry) => entry.fieldKey.trim().length > 0 && entry.valueText.trim().length > 0
-      ) ?? [];
-    if (fieldFilters.length === 0) {
-      const fieldFilterKey = filters.fieldFilterKey ?? filters.recognizedFieldKey;
-      const fieldFilterValue = filters.fieldFilterValue ?? filters.recognizedFieldValue;
-      if (fieldFilterKey?.trim() && fieldFilterValue?.trim()) {
-        fieldFilters.push({
-          fieldKey: fieldFilterKey.trim(),
-          valueText: fieldFilterValue.trim(),
-        });
-      }
-    }
-    for (const entry of fieldFilters) {
-      const storageKey = entry.fieldKey.trim().startsWith('global:')
-        ? entry.fieldKey.trim()
-        : `global:${entry.fieldKey.trim()}`;
-      conditions.push(
-        `EXISTS (
-          SELECT 1 FROM document_field_values dfv
-          WHERE dfv.document_id = d.id
-            AND dfv.field_storage_key = $${String(paramIndex)}
-            AND dfv.value_text = $${String(paramIndex + 1)}
-        )`
-      );
-      paramIndex += 2;
-      params.push(storageKey, entry.valueText.trim());
-    }
-    const tagIds = filters.tagIds?.filter(Boolean) ?? (filters.tagId ? [filters.tagId] : undefined);
-    if (tagIds?.length) {
-      for (const tagId of tagIds) {
-        conditions.push(
-          `EXISTS (SELECT 1 FROM document_tags dtf WHERE dtf.document_id = d.id AND dtf.tag_id = $${String(paramIndex)})`
-        );
-        paramIndex += 1;
-        params.push(tagId);
-      }
-    }
-    if (filters.inbox) {
-      conditions.push(
-        `EXISTS (
-          SELECT 1 FROM document_tags dit
-          JOIN tags it ON it.id = dit.tag_id
-          WHERE dit.document_id = d.id AND it.is_inbox = true
-        )`
-      );
-    }
-    if (filters.withoutNonInboxLabel) {
-      conditions.push(
-        `NOT EXISTS (
-          SELECT 1 FROM document_tags dtn
-          JOIN tags nt ON nt.id = dtn.tag_id
-          WHERE dtn.document_id = d.id AND nt.is_inbox = false
-        )`
-      );
-    }
-    if (filters.folderId) {
-      conditions.push(`d.folder_id = $${String(paramIndex)}`);
-      paramIndex += 1;
-      params.push(filters.folderId);
-    }
-    if (filters.unfiled) {
-      conditions.push(`d.folder_id IS NULL`);
-    }
-    if (filters.q?.trim()) {
-      const q = filters.q.trim();
-      const qParam = String(paramIndex);
-      conditions.push(
-        `(d.filename ILIKE '%' || $${qParam} || '%'
-          OR d.title ILIKE '%' || $${qParam} || '%'
-          OR d.search_vector @@ plainto_tsquery('simple', $${qParam}))`
-      );
-      params.push(q);
-      paramIndex += 1;
-    }
-    if (filters.documentDateFrom) {
-      conditions.push(`d.document_date >= $${String(paramIndex)}::date`);
-      paramIndex += 1;
-      params.push(filters.documentDateFrom);
-    }
-    if (filters.documentDateTo) {
-      conditions.push(`d.document_date <= $${String(paramIndex)}::date`);
-      paramIndex += 1;
-      params.push(filters.documentDateTo);
-    }
+  async listForUser(userId: string, filters: DocumentListQuery = {}): Promise<DocumentEntity[]> {
+    const { whereSql, params } = buildDocumentListFilterSql(userId, filters);
 
     const sortField = filters.sort ?? 'updatedAt';
     const order = filters.order === 'asc' ? 'ASC' : 'DESC';
@@ -263,7 +176,7 @@ export class PgDocumentRepository implements DocumentRepository {
     const orderBy = sortColumn[sortField] ?? 'd.updated_at';
 
     const sql = `${LIST_SELECT}
-      WHERE ${conditions.join(' AND ')}
+      WHERE ${whereSql}
       GROUP BY d.id, f.id
       ORDER BY ${orderBy} ${order} NULLS LAST`;
 

@@ -10,6 +10,7 @@ export function minimalDocumentDto(
     title: 'Document',
     status: 'ready',
     mimeType: 'application/pdf',
+    fileSizeBytes: 0,
     tags: [],
     createdAt: '',
     updatedAt: '',

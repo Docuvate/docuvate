@@ -341,11 +341,15 @@ export function DocumentDetailPage() {
     return () => { window.clearInterval(timer); };
   }, [id, doc, load]);
 
-  async function persist(patch?: {
-    extractionFields?: ExtractedField[];
-    extractionBlocks?: ExtractionBlock[];
-  }) {
+  async function persist(
+    patch?: {
+      extractionFields?: ExtractedField[];
+      extractionBlocks?: ExtractionBlock[];
+    },
+    options?: { silentSuccess?: boolean }
+  ) {
     if (!id) return;
+    const fieldsBaselineBeforeSave = baselineFields;
     setSaving(true);
     setError(null);
     try {
@@ -374,9 +378,18 @@ export function DocumentDetailPage() {
           ? { ...updated.extraction, blocks: nextBlocks, text: nextText ?? updated.extraction.text }
           : updated.extraction,
       });
-      if (patch?.extractionFields !== undefined || patch?.extractionBlocks !== undefined) {
+      if (patch?.extractionFields !== undefined && !options?.silentSuccess) {
+        notifySaved(t('documents.fieldSavedToast'), () => {
+          setFields(fieldsBaselineBeforeSave);
+          void persist({ extractionFields: fieldsBaselineBeforeSave }, { silentSuccess: true });
+        });
+      } else if (patch?.extractionBlocks !== undefined && !options?.silentSuccess) {
         notifySaved();
-      } else {
+      } else if (
+        patch?.extractionFields === undefined &&
+        patch?.extractionBlocks === undefined &&
+        !options?.silentSuccess
+      ) {
         setMetadataBaseline({
           title,
           documentDate,
@@ -385,6 +398,14 @@ export function DocumentDetailPage() {
         });
         setMetadataSaveError(null);
         notifySaved();
+      } else if (patch?.extractionFields === undefined && patch?.extractionBlocks === undefined) {
+        setMetadataBaseline({
+          title,
+          documentDate,
+          notes,
+          folderId,
+        });
+        setMetadataSaveError(null);
       }
     } catch (err) {
       const message = formatUserFacingError(err, 'errors.saveFailed');
@@ -610,6 +631,7 @@ export function DocumentDetailPage() {
             aria-label={t('documents.tabDetails')}
           >
             <DocumentMetadataForm
+              doc={doc}
               title={title}
               documentDate={documentDate}
               documentDateAutoFilled={documentDateAuto}
@@ -636,14 +658,46 @@ export function DocumentDetailPage() {
               tags={tags}
               customFieldDefs={buildCustomFieldDefMap(tags)}
               globalFieldLabels={globalFieldLabels}
-              recognizedCatalog={recognizedCatalog}
-              fieldAttempts={doc.recognizedFieldAttempts ?? []}
               saving={saving}
               fieldsDirty={fieldsDirty}
+              baselineFields={baselineFields}
               feedbackRecordedCount={fieldFeedbackRecorded}
               onFieldsChange={(next) => {
                 setFieldFeedbackRecorded(0);
                 setFields(next);
+              }}
+              onDiscardField={(key) => {
+                const baseline = baselineFields.find((row) => row.key === key);
+                if (!baseline) {
+                  return;
+                }
+                setFields((prev) =>
+                  prev.map((row) => (row.key === key ? { ...row, value: baseline.value } : row))
+                );
+                notifySaved(t('documents.fieldDiscardedToast'));
+              }}
+              onConfirmField={(field) => {
+                const baseline = baselineFields.find((row) => row.key === field.key);
+                const previous = fields.find((row) => row.key === field.key) ?? field;
+                const nextFields = fields.map((row) =>
+                  row.key === field.key ? { ...row, value: field.value, confidence: 1 } : row
+                );
+                setFields(nextFields);
+                void persist({ extractionFields: nextFields }).then(() => {
+                  notifySaved(t('documents.fieldConfirmedToast'), () => {
+                    const restored = fields.map((row) =>
+                      row.key === field.key
+                        ? {
+                            ...row,
+                            value: baseline?.value ?? previous.value,
+                            confidence: previous.confidence,
+                          }
+                        : row
+                    );
+                    setFields(restored);
+                    void persist({ extractionFields: restored });
+                  });
+                });
               }}
               onSave={() => void persist({ extractionFields: fields })}
             />

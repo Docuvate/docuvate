@@ -5,22 +5,21 @@ import {
   dedupeExtractedFields,
   type ExtractedField,
   omitInvalidDateExtractedFields,
-  type RecognizedFieldDefinitionDto,
-  type RecognizedFieldExtractionAttemptDto,
   semanticFieldKey,
   type TagCustomFieldDefinitionDto,
   type TagDto,
 } from '@docuvate/contracts';
+import { X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { extractionFieldLabel } from '../../lib/extractionFieldLabels';
 import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
 import { labelFieldDisplayName } from '../../lib/labelFieldDisplay';
-import { attemptStatusTranslationKey } from '../../lib/recognizedFieldAttemptDisplay';
-import { definitionIdForFieldKey } from '../../lib/recognizedFieldDefinitionIndex';
 import { Button } from '../ui/Button';
+import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
+import { DocumentFieldValueCards } from './DocumentFieldValueCards';
 
 interface ExtractedFieldsPanelProps {
   fields: ExtractedField[];
@@ -29,12 +28,13 @@ interface ExtractedFieldsPanelProps {
   tags?: TagDto[];
   customFieldDefs?: Map<string, TagCustomFieldDefinitionDto[]>;
   globalFieldLabels?: Map<string, string>;
-  recognizedCatalog?: RecognizedFieldDefinitionDto[];
-  fieldAttempts?: RecognizedFieldExtractionAttemptDto[];
   saving: boolean;
   fieldsDirty: boolean;
+  baselineFields?: ExtractedField[];
   feedbackRecordedCount?: number;
   onFieldsChange: (fields: ExtractedField[]) => void;
+  onDiscardField?: (key: string) => void;
+  onConfirmField?: (field: ExtractedField) => void;
   onSave: () => void;
 }
 
@@ -43,14 +43,15 @@ export function ExtractedFieldsPanel({
   tags = [],
   customFieldDefs = new Map(),
   globalFieldLabels = new Map(),
-  recognizedCatalog = [],
-  fieldAttempts = [],
   heuristicSuggestions = [],
   onAcceptSuggestion,
   saving,
   fieldsDirty,
+  baselineFields = [],
   feedbackRecordedCount = 0,
   onFieldsChange,
+  onDiscardField,
+  onConfirmField,
   onSave,
 }: ExtractedFieldsPanelProps) {
   const { t, i18n } = useTranslation();
@@ -66,18 +67,6 @@ export function ExtractedFieldsPanel({
 
   const visibleFields = omitInvalidDateExtractedFields(dedupeExtractedFields(fields));
 
-  function attemptForField(field: ExtractedField): RecognizedFieldExtractionAttemptDto | null {
-    const defId = definitionIdForFieldKey(field.key, {
-      definitionIdByCatalogKey: new Map(recognizedCatalog.map((d) => [d.key, d.id])),
-      definitionIdBySemantic: new Map(
-        recognizedCatalog.map((d) => [semanticFieldKey({ key: d.key, value: '' }), d.id])
-      ),
-    });
-    if (!defId) {
-      return null;
-    }
-    return fieldAttempts.find((row) => row.fieldDefinitionId === defId) ?? null;
-  }
   const pendingSuggestions = heuristicSuggestions.filter(
     (s) => !visibleFields.some((f) => f.key === s.key)
   );
@@ -85,6 +74,14 @@ export function ExtractedFieldsPanel({
 
   function rowKey(field: ExtractedField): string {
     return field.tagId ? `${field.tagId}:${semanticFieldKey(field)}` : semanticFieldKey(field);
+  }
+
+  function baselineValueFor(field: ExtractedField): string {
+    return baselineFields.find((row) => row.key === field.key)?.value ?? field.value;
+  }
+
+  function fieldRowDirty(field: ExtractedField): boolean {
+    return field.value !== baselineValueFor(field);
   }
 
   return (
@@ -96,26 +93,17 @@ export function ExtractedFieldsPanel({
         {t('recognizedFields.documentSectionTitle')}
       </h2>
       {visibleFields.length > 0 ? (
-      <dl className="extracted-fields-dl">
-        {visibleFields.map((field) => (
-          <div key={rowKey(field)} className="extracted-fields-row">
-            <dt>{displayLabel(field)}</dt>
-            <dd>
-              {field.value.trim() ? (
-                formatExtractedFieldDisplayValue(field.key, field.value, i18n.language)
-              ) : (
-                <span className="extracted-field-attempt-status muted">
-                  {t(
-                    attemptStatusTranslationKey(
-                      attemptForField(field)?.outcome ?? 'not_found'
-                    )
-                  )}
-                </span>
-              )}
-            </dd>
-          </div>
-        ))}
-      </dl>
+        <DocumentFieldValueCards
+          fields={visibleFields}
+          baselineFields={baselineFields}
+          fieldLabel={displayLabel}
+          onConfirmField={(field) => {
+            onConfirmField?.(field);
+          }}
+          onCorrectField={() => {
+            setEditOpen(true);
+          }}
+        />
       ) : null}
       {pendingSuggestions.length > 0 ? (
         <section className="extracted-field-suggestions" aria-label={t('documents.layoutFieldSuggestions')}>
@@ -160,19 +148,30 @@ export function ExtractedFieldsPanel({
         </p>
         <div className="extraction-fields-grid extraction-fields-grid-compact">
           {visibleFields.map((field) => (
-            <label key={rowKey(field)} className="extraction-field-cell">
-              <span className="extraction-field-label">{displayLabel(field)}</span>
-              <Input
-                value={field.value}
-                onChange={(e) => {
-                  onFieldsChange(
-                    fields.map((row) =>
-                      row.key === field.key ? { ...row, value: e.target.value } : row
-                    )
-                  );
-                }}
-              />
-            </label>
+            <div key={rowKey(field)} className="extraction-field-cell extraction-field-cell-row">
+              <label className="extraction-field-cell">
+                <span className="extraction-field-label">{displayLabel(field)}</span>
+                <Input
+                  value={field.value}
+                  onChange={(e) => {
+                    onFieldsChange(
+                      fields.map((row) =>
+                        row.key === field.key ? { ...row, value: e.target.value } : row
+                      )
+                    );
+                  }}
+                />
+              </label>
+              {fieldRowDirty(field) && onDiscardField ? (
+                <IconButton
+                  icon={X}
+                  size="sm"
+                  className="extraction-field-discard-btn"
+                  label={t('save.discard')}
+                  onClick={() => { onDiscardField(field.key); }}
+                />
+              ) : null}
+            </div>
           ))}
         </div>
         {fieldsDirty ? (

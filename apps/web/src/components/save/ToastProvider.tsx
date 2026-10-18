@@ -156,7 +156,7 @@ export function ToastGlobalBridge() {
     function onSaved(e: Event) {
       const detail = readNotifySavedDetail(e);
       if (!detail) return;
-      pushSuccess(detail.message);
+      pushSuccess(detail.message, detail.undo ? { undo: detail.undo } : undefined);
     }
     function onError(e: Event) {
       const detail = readNotifySaveErrorDetail(e);

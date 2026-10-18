@@ -64,7 +64,20 @@ export function LabelsPage() {
     }
   }, []);
 
-  const insights = useLabelsInsights(loadTags, { onSaveSuccess: pushSuccess });
+  const insights = useLabelsInsights(loadTags, {
+    onSaveSuccess: (options) => {
+      pushSuccess(
+        options?.message,
+        options?.undo
+          ? {
+              undo: () => {
+                void options.undo?.();
+              },
+            }
+          : undefined
+      );
+    },
+  });
   const loadInsights = insights.load;
 
   useEffect(() => {

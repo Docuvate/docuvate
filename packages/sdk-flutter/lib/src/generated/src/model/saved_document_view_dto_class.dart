@@ -14,6 +14,8 @@ part 'saved_document_view_dto_class.g.dart';
 /// SavedDocumentViewDtoClass
 ///
 /// Properties:
+/// * [description] 
+/// * [documentCount] 
 /// * [visibleColumns] 
 /// * [id] 
 /// * [name] 
@@ -37,6 +39,12 @@ part 'saved_document_view_dto_class.g.dart';
 /// * [updatedAt] 
 @BuiltValue()
 abstract class SavedDocumentViewDtoClass implements Built<SavedDocumentViewDtoClass, SavedDocumentViewDtoClassBuilder> {
+  @BuiltValueField(wireName: r'description')
+  String? get description;
+
+  @BuiltValueField(wireName: r'documentCount')
+  num? get documentCount;
+
   @BuiltValueField(wireName: r'visibleColumns')
   BuiltList<LibraryTableColumnId> get visibleColumns;
 
@@ -130,6 +138,20 @@ class _$SavedDocumentViewDtoClassSerializer implements PrimitiveSerializer<Saved
     SavedDocumentViewDtoClass object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
+    if (object.description != null) {
+      yield r'description';
+      yield serializers.serialize(
+        object.description,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.documentCount != null) {
+      yield r'documentCount';
+      yield serializers.serialize(
+        object.documentCount,
+        specifiedType: const FullType(num),
+      );
+    }
     yield r'visibleColumns';
     yield serializers.serialize(
       object.visibleColumns,
@@ -266,6 +288,20 @@ class _$SavedDocumentViewDtoClassSerializer implements PrimitiveSerializer<Saved
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
+        case r'description':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.description = valueDes;
+          break;
+        case r'documentCount':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(num),
+          ) as num;
+          result.documentCount = valueDes;
+          break;
         case r'visibleColumns':
           final valueDes = serializers.deserialize(
             value,

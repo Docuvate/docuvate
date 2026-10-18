@@ -225,6 +225,9 @@ export class DocumentResponseDto implements DocumentDto {
   @ApiProperty()
   mimeType!: string;
 
+  @ApiProperty({ description: 'Original upload size in bytes' })
+  fileSizeBytes!: number;
+
   @ApiProperty({ type: 'array', items: { type: 'object' } })
   tags!: DocumentDto['tags'];
 

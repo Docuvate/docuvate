@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SavedDocumentViewDto } from '@docuvate/contracts';
-import { GripVertical, MoreHorizontal } from 'lucide-react';
+import { GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -9,9 +9,9 @@ import { Link } from 'react-router-dom';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
-import { ContextMenu } from '../ui/ContextMenu';
 import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
+import { Switch } from '../ui/Switch';
 
 interface Props {
   views: SavedDocumentViewDto[];
@@ -38,19 +38,7 @@ export function SavedViewsManageTable({
   const [renameId, setRenameId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<SavedDocumentViewDto | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
-  const [menuView, setMenuView] = useState<SavedDocumentViewDto | null>(null);
-  const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
   const dragIndexRef = useRef<number | null>(null);
-
-  const openMenu = (view: SavedDocumentViewDto, anchor: HTMLButtonElement) => {
-    menuAnchorRef.current = anchor;
-    setMenuView(view);
-    const rect = anchor.getBoundingClientRect();
-    setMenuPos({ x: rect.left, y: rect.bottom + 4 });
-    setMenuOpen(true);
-  };
 
   const owned = views.filter((v) => v.ownerUserId === currentUserId);
   const ownedIds = new Set(owned.map((v) => v.id));
@@ -87,19 +75,16 @@ export function SavedViewsManageTable({
     }
   }
 
-  function formatPinnedMeta(view: SavedDocumentViewDto, mobile: boolean): string {
+  function formatListMeta(view: SavedDocumentViewDto): string {
     const vis =
       view.visibility === 'shared'
         ? t('savedViews.visibilityShared')
         : t('savedViews.visibilityPrivate');
-    const pin = view.pinnedSidebar
-      ? mobile
-        ? t('savedViews.pinnedStatePinned')
-        : t('savedViews.pinnedYes')
-      : mobile
-        ? t('savedViews.pinnedStateUnpinned')
-        : t('savedViews.pinnedNo');
-    return `${vis} · ${pin}`;
+    const count =
+      view.documentCount != null
+        ? t('savedViews.documentCountShort', { count: view.documentCount })
+        : null;
+    return count ? `${vis} · ${count}` : vis;
   }
 
   function renderActions(view: SavedDocumentViewDto, canEdit: boolean) {
@@ -112,21 +97,23 @@ export function SavedViewsManageTable({
       return null;
     }
     return (
-      <div className="saved-views-manage-actions-cell">
-        <Button
-          type="button"
-          variant="secondary"
-          className="btn-compact saved-views-pin-btn"
-          onClick={() => void onTogglePin(view)}
-        >
-          {view.pinnedSidebar ? t('savedViews.unpin') : t('savedViews.pinSidebar')}
-        </Button>
+      <div className="saved-views-manage-actions-cell saved-views-manage-actions-m5">
         <IconButton
-          icon={MoreHorizontal}
-          className="saved-views-row-menu-btn"
-          label={t('savedViews.rowMenuAria', { name: view.name })}
-          expanded={menuOpen && menuView?.id === view.id}
-          onClick={(e) => { openMenu(view, e.currentTarget); }}
+          icon={Pencil}
+          size="sm"
+          className="saved-views-row-action-btn"
+          label={t('savedViews.rename')}
+          onClick={() => {
+            setRenameId(view.id);
+            setRenameValue(view.name);
+          }}
+        />
+        <IconButton
+          icon={Trash2}
+          size="sm"
+          className="saved-views-row-action-btn library-inline-action-danger"
+          label={t('common.delete')}
+          onClick={() => { setDeleteTarget(view); }}
         />
       </div>
     );
@@ -149,9 +136,10 @@ export function SavedViewsManageTable({
                   >
                     {view.name}
                   </Link>
-                  <p className="saved-views-manage-list-meta muted">
-                    {formatPinnedMeta(view, true)}
-                  </p>
+                  {view.description?.trim() ? (
+                    <p className="saved-views-manage-list-desc muted">{view.description}</p>
+                  ) : null}
+                  <p className="saved-views-manage-list-meta muted">{formatListMeta(view)}</p>
                 </div>
                 <div className="saved-views-manage-list-actions">
                   {renderActions(view, canEdit)}
@@ -167,6 +155,8 @@ export function SavedViewsManageTable({
                 {t('savedViews.colOrder')}
               </th>
               <th scope="col">{t('savedViews.nameLabel')}</th>
+              <th scope="col">{t('savedViews.colDescription')}</th>
+              <th scope="col">{t('savedViews.colDocuments')}</th>
               <th scope="col">{t('savedViews.visibilityLabel')}</th>
               <th scope="col">{t('savedViews.colPinned')}</th>
               <th scope="col" className="saved-views-col-actions">
@@ -236,13 +226,37 @@ export function SavedViewsManageTable({
                       </Link>
                     )}
                   </td>
+                  <td className="saved-views-col-description">
+                    {view.description?.trim() ? (
+                      <span className="saved-views-description-text">{view.description}</span>
+                    ) : (
+                      <span className="muted">—</span>
+                    )}
+                  </td>
+                  <td className="saved-views-col-documents">
+                    {view.documentCount != null
+                      ? t('savedViews.documentCount', { count: view.documentCount })
+                      : '—'}
+                  </td>
                   <td>
                     {view.visibility === 'shared'
                       ? t('savedViews.visibilityShared')
                       : t('savedViews.visibilityPrivate')}
                   </td>
                   <td>
-                    {view.pinnedSidebar ? t('savedViews.pinnedYes') : t('savedViews.pinnedNo')}
+                    {canEdit ? (
+                      <Switch
+                        checked={view.pinnedSidebar}
+                        label={t('savedViews.pinSidebar')}
+                        onCheckedChange={() => {
+                          void onTogglePin(view);
+                        }}
+                      />
+                    ) : view.pinnedSidebar ? (
+                      t('savedViews.pinnedYes')
+                    ) : (
+                      t('savedViews.pinnedNo')
+                    )}
                   </td>
                   <td>{renderActions(view, canEdit)}</td>
                 </tr>
@@ -251,38 +265,6 @@ export function SavedViewsManageTable({
           </tbody>
         </table>
       </div>
-
-      <ContextMenu
-        open={menuOpen && menuView != null}
-        x={menuPos.x}
-        y={menuPos.y}
-        anchorRef={menuAnchorRef}
-        onClose={() => { setMenuOpen(false); }}
-        items={[
-          {
-            kind: 'item',
-            id: 'rename',
-            label: t('savedViews.rename'),
-            onSelect: () => {
-              if (!menuView) return;
-              setRenameId(menuView.id);
-              setRenameValue(menuView.name);
-              setMenuOpen(false);
-            },
-          },
-          {
-            kind: 'item',
-            id: 'delete',
-            label: t('common.delete'),
-            danger: true,
-            onSelect: () => {
-              if (!menuView) return;
-              setDeleteTarget(menuView);
-              setMenuOpen(false);
-            },
-          },
-        ]}
-      />
 
       <ConfirmDialog
         open={deleteTarget != null}

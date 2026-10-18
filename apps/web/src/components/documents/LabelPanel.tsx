@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto, TagDto, TagSuggestionDto } from '@docuvate/contracts';
-import { type FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -17,7 +17,7 @@ import { formatUserFacingError } from '../../lib/apiErrors';
 import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
-import { Input } from '../ui/Input';
+import { Combobox, type ComboboxOption } from '../ui/Combobox';
 import { DocumentLabelSuggestionChips } from './DocumentLabelSuggestionChips';
 
 const NEST_CANDIDATE_LIMIT = 3;
@@ -48,7 +48,6 @@ function nestCandidates(suggestions: TagSuggestionDto[] | undefined): TagSuggest
 export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const { t } = useTranslation();
   const toast = useToast();
-  const [query, setQuery] = useState('');
   const [allTags, setAllTags] = useState<TagDto[]>([]);
   const [loadingTags, setLoadingTags] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
@@ -87,12 +86,6 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
     [document.tags]
   );
 
-  const trimmedQuery = query.trim();
-  const exactMatch = trimmedQuery.length > 0 ? findTagByName(allTags, trimmedQuery) : undefined;
-  const alreadyAssignedTag =
-    exactMatch !== undefined && assignedIds.has(exactMatch.id) ? exactMatch : undefined;
-  const alreadyAssigned = alreadyAssignedTag !== undefined;
-
   const showNestRow =
     candidates.length > 0 && candidates.every((item) => !assignedIds.has(item.tag.id));
 
@@ -108,15 +101,13 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
     }
   }
 
-  const addCandidates = useMemo(() => {
-    const q = trimmedQuery.toLowerCase();
-    return allTags.filter(
-      (tag) =>
-        !assignedIds.has(tag.id) &&
-        (q.length === 0 || tag.name.toLowerCase().includes(q)) &&
-        tag.id !== exactMatch?.id
-    );
-  }, [allTags, assignedIds, trimmedQuery, exactMatch?.id]);
+  const labelComboboxOptions: ComboboxOption[] = useMemo(
+    () =>
+      allTags
+        .filter((tag) => !assignedIds.has(tag.id))
+        .map((tag) => ({ value: tag.id, label: tag.name })),
+    [allTags, assignedIds]
+  );
 
   async function run(action: () => Promise<DocumentDto>, key: string) {
     setBusy(key);
@@ -128,9 +119,33 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
     }
   }
 
-  async function submitLabel(event: FormEvent) {
-    event.preventDefault();
-    if (!trimmedQuery || busy !== null || alreadyAssigned) {
+  async function assignExistingTag(tagId: string) {
+    if (busy !== null || assignedIds.has(tagId)) {
+      return;
+    }
+    setAddError(null);
+    setBusy(`add-${tagId}`);
+    try {
+      const doc = await assignDocumentTag(document.id, tagId);
+      onUpdated(doc);
+      const tagName = allTags.find((tag) => tag.id === tagId)?.name ?? '';
+      toast.success(t('documents.labelAssignedToast', { name: tagName }), {
+        undo: () => {
+          void removeDocumentTag(document.id, tagId).then((reverted) => {
+            onUpdated(reverted);
+          });
+        },
+      });
+    } catch (err) {
+      setAddError(formatUserFacingError(err, 'errors.addFailed'));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function createAndAssignLabel(name: string) {
+    const trimmed = name.trim();
+    if (!trimmed || busy !== null) {
       return;
     }
     setAddError(null);
@@ -139,21 +154,34 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
     if (allTags.length === 0) {
       setAllTags(tags);
     }
-    const existing = findTagByName(tags, trimmedQuery);
+    const existing = findTagByName(tags, trimmed);
+    if (existing && assignedIds.has(existing.id)) {
+      setAddError(t('documents.labelAddAlreadyAssigned', { name: existing.name }));
+      return;
+    }
     setBusy('add-label');
     try {
+      let assignedTagId: string;
       let doc: DocumentDto;
       if (existing) {
+        assignedTagId = existing.id;
         doc = await assignDocumentTag(document.id, existing.id);
       } else {
-        const created = await createTag({ name: trimmedQuery });
+        const created = await createTag({ name: trimmed });
+        assignedTagId = created.id;
         setAllTags((prev) =>
           prev.some((tag) => tag.id === created.id) ? prev : [...prev, created]
         );
         doc = await assignDocumentTag(document.id, created.id);
       }
       onUpdated(doc);
-      setQuery('');
+      toast.success(t('documents.labelAssignedToast', { name: trimmed }), {
+        undo: () => {
+          void removeDocumentTag(document.id, assignedTagId).then((reverted) => {
+            onUpdated(reverted);
+          });
+        },
+      });
     } catch (err) {
       setAddError(formatUserFacingError(err, 'errors.addFailed'));
     } finally {
@@ -198,11 +226,6 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
       setBusy(null);
     }
   }
-
-  const addButtonLabel =
-    exactMatch && !alreadyAssigned
-      ? t('documents.labelAddSubmitAssign')
-      : t('documents.labelAddSubmitCreate');
 
   return (
     <section className="label-panel" aria-labelledby="label-panel-heading">
@@ -287,65 +310,33 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
       </div>
 
       <div className="label-add">
-        <form className="label-add-form" onSubmit={(e) => void submitLabel(e)}>
-          <div className="label-add-row">
-            <Input
-              placeholder={t('documents.labelAddPlaceholder')}
-              value={query}
-              onFocus={() => void ensureTagsLoaded()}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setAddError(null);
-              }}
-              aria-label={t('documents.labelAddInputAria')}
-              aria-describedby="label-add-hint"
-              autoComplete="off"
-            />
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={busy !== null || trimmedQuery.length === 0 || alreadyAssigned}
-            >
-              {addButtonLabel}
-            </Button>
-          </div>
+        <div className="label-add-form">
+          <Combobox
+            value=""
+            options={labelComboboxOptions}
+            disabled={busy !== null}
+            placeholder={t('documents.labelAddPlaceholder')}
+            aria-label={t('documents.labelAddInputAria')}
+            createOptionLabel={(name) => t('documents.labelAddCreateOption', { name })}
+            onCreateOption={(name) => {
+              void createAndAssignLabel(name);
+            }}
+            onChange={(tagId) => {
+              void ensureTagsLoaded().then(() => {
+                void assignExistingTag(tagId);
+              });
+            }}
+          />
           <p id="label-add-hint" className="muted label-add-hint">
             {t('documents.labelAddHint')}
           </p>
-          {alreadyAssignedTag ? (
-            <p className="muted label-add-hint" role="status">
-              {t('documents.labelAddAlreadyAssigned', { name: alreadyAssignedTag.name })}
-            </p>
-          ) : null}
           {addError ? (
             <p className="error label-add-hint" role="alert">
               {addError}
             </p>
           ) : null}
-        </form>
+        </div>
         {loadingTags ? <p className="muted">{t('documents.labelPanelLoadingTags')}</p> : null}
-        {addCandidates.length > 0 ? (
-          <ul className="label-picker" aria-label={t('documents.labelAddPickerAria')}>
-            {addCandidates.slice(0, 8).map((tag) => (
-              <li key={tag.id}>
-                <button
-                  type="button"
-                  className="label-picker-item"
-                  disabled={busy !== null}
-                  onClick={() =>
-                    void run(() => assignDocumentTag(document.id, tag.id), `add-${tag.id}`)
-                  }
-                >
-                  <Chip
-                    label={tag.name}
-                    variant={tag.isInbox ? 'inbox' : 'outline'}
-                    color={tag.color}
-                  />
-                </button>
-              </li>
-            ))}
-          </ul>
-        ) : null}
       </div>
     </section>
   );

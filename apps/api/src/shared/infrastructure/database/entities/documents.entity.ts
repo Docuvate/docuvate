@@ -44,6 +44,9 @@ export class DocumentsEntity {
   @Column('text', { name: 'mime_type' })
   mimeType: string;
 
+  @Column('bigint', { name: 'file_size_bytes', default: () => '0' })
+  fileSizeBytes: string;
+
   @Column('text', { name: 'storage_key' })
   storageKey: string;
 

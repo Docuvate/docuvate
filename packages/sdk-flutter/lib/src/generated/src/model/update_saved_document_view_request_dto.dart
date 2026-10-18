@@ -16,6 +16,7 @@ part 'update_saved_document_view_request_dto.g.dart';
 /// Properties:
 /// * [visibleColumns] 
 /// * [name] 
+/// * [description] 
 /// * [visibility] 
 /// * [searchQuery] 
 /// * [sort] 
@@ -39,6 +40,9 @@ abstract class UpdateSavedDocumentViewRequestDto implements Built<UpdateSavedDoc
 
   @BuiltValueField(wireName: r'name')
   String? get name;
+
+  @BuiltValueField(wireName: r'description')
+  String? get description;
 
   @BuiltValueField(wireName: r'visibility')
   UpdateSavedDocumentViewRequestDtoVisibilityEnum? get visibility;
@@ -129,6 +133,13 @@ class _$UpdateSavedDocumentViewRequestDtoSerializer implements PrimitiveSerializ
       yield r'name';
       yield serializers.serialize(
         object.name,
+        specifiedType: const FullType(String),
+      );
+    }
+    if (object.description != null) {
+      yield r'description';
+      yield serializers.serialize(
+        object.description,
         specifiedType: const FullType(String),
       );
     }
@@ -280,6 +291,13 @@ class _$UpdateSavedDocumentViewRequestDtoSerializer implements PrimitiveSerializ
             specifiedType: const FullType(String),
           ) as String;
           result.name = valueDes;
+          break;
+        case r'description':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.description = valueDes;
           break;
         case r'visibility':
           final valueDes = serializers.deserialize(

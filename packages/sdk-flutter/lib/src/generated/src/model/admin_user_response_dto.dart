@@ -20,6 +20,7 @@ part 'admin_user_response_dto.g.dart';
 /// * [banReason] 
 /// * [accountStatus] 
 /// * [createdAt] 
+/// * [lastLoginAt] 
 @BuiltValue()
 abstract class AdminUserResponseDto implements Built<AdminUserResponseDto, AdminUserResponseDtoBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -47,6 +48,9 @@ abstract class AdminUserResponseDto implements Built<AdminUserResponseDto, Admin
 
   @BuiltValueField(wireName: r'createdAt')
   String get createdAt;
+
+  @BuiltValueField(wireName: r'lastLoginAt')
+  String? get lastLoginAt;
 
   AdminUserResponseDto._();
 
@@ -113,6 +117,13 @@ class _$AdminUserResponseDtoSerializer implements PrimitiveSerializer<AdminUserR
       object.createdAt,
       specifiedType: const FullType(String),
     );
+    if (object.lastLoginAt != null) {
+      yield r'lastLoginAt';
+      yield serializers.serialize(
+        object.lastLoginAt,
+        specifiedType: const FullType(String),
+      );
+    }
   }
 
   @override
@@ -191,6 +202,13 @@ class _$AdminUserResponseDtoSerializer implements PrimitiveSerializer<AdminUserR
             specifiedType: const FullType(String),
           ) as String;
           result.createdAt = valueDes;
+          break;
+        case r'lastLoginAt':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.lastLoginAt = valueDes;
           break;
         default:
           unhandled.add(key);

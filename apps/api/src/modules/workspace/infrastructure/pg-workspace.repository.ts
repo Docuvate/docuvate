@@ -90,6 +90,7 @@ function mapViewRow(
     id: parseString(row.id),
     ownerUserId: parseString(row.owner_user_id),
     name: parseString(row.name),
+    description: parseString(row.description ?? ''),
     visibility: parseEnum(row.visibility, VISIBILITY_VALUES, 'private'),
     searchQuery: parseString(row.search_query ?? ''),
     sort: parseEnum(row.sort_field, SORT_FIELD_VALUES, 'updatedAt'),
@@ -248,18 +249,19 @@ export class PgWorkspaceRepository {
       await client.query('BEGIN');
       const result = await client.query(
         `INSERT INTO saved_document_views (
-          id, owner_user_id, name, visibility, search_query, sort_field, sort_order,
+          id, owner_user_id, name, description, visibility, search_query, sort_field, sort_order,
           view_mode, filter_mode, list_scope, folder_id,
           status_filter, inbox_filter, without_non_inbox_label, document_date_from, document_date_to,
           pinned_sidebar, position, visible_columns
         ) VALUES (
-          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19::jsonb
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20::jsonb
         )
         RETURNING *`,
         [
           id,
           userId,
           input.name,
+          input.description?.trim() ?? '',
           input.visibility ?? 'private',
           input.searchQuery,
           input.sort ?? 'updatedAt',
@@ -313,6 +315,7 @@ export class PgWorkspaceRepository {
     };
 
     if (input.name !== undefined) assign('name', input.name);
+    if (input.description !== undefined) assign('description', input.description.trim());
     if (input.visibility !== undefined) assign('visibility', input.visibility);
     if (input.searchQuery !== undefined) assign('search_query', input.searchQuery);
     if (input.sort !== undefined) assign('sort_field', input.sort);

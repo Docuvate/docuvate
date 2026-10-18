@@ -12,8 +12,8 @@ const DocumentBulkActionDtoActionEnum
     _$documentBulkActionDtoActionEnum_removeTag =
     const DocumentBulkActionDtoActionEnum._('removeTag');
 const DocumentBulkActionDtoActionEnum
-    _$documentBulkActionDtoActionEnum_setCorrespondent =
-    const DocumentBulkActionDtoActionEnum._('setCorrespondent');
+    _$documentBulkActionDtoActionEnum_setAbsender =
+    const DocumentBulkActionDtoActionEnum._('setAbsender');
 const DocumentBulkActionDtoActionEnum
     _$documentBulkActionDtoActionEnum_setFolder =
     const DocumentBulkActionDtoActionEnum._('setFolder');
@@ -27,8 +27,8 @@ DocumentBulkActionDtoActionEnum _$documentBulkActionDtoActionEnumValueOf(
       return _$documentBulkActionDtoActionEnum_addTag;
     case 'removeTag':
       return _$documentBulkActionDtoActionEnum_removeTag;
-    case 'setCorrespondent':
-      return _$documentBulkActionDtoActionEnum_setCorrespondent;
+    case 'setAbsender':
+      return _$documentBulkActionDtoActionEnum_setAbsender;
     case 'setFolder':
       return _$documentBulkActionDtoActionEnum_setFolder;
     case 'delete':
@@ -43,7 +43,7 @@ final BuiltSet<DocumentBulkActionDtoActionEnum>
         DocumentBulkActionDtoActionEnum>(const <DocumentBulkActionDtoActionEnum>[
   _$documentBulkActionDtoActionEnum_addTag,
   _$documentBulkActionDtoActionEnum_removeTag,
-  _$documentBulkActionDtoActionEnum_setCorrespondent,
+  _$documentBulkActionDtoActionEnum_setAbsender,
   _$documentBulkActionDtoActionEnum_setFolder,
   _$documentBulkActionDtoActionEnum_delete,
 ]);
@@ -57,14 +57,14 @@ class _$DocumentBulkActionDtoActionEnumSerializer
   static const Map<String, Object> _toWire = const <String, Object>{
     'addTag': 'addTag',
     'removeTag': 'removeTag',
-    'setCorrespondent': 'setCorrespondent',
+    'setAbsender': 'setAbsender',
     'setFolder': 'setFolder',
     'delete': 'delete',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'addTag': 'addTag',
     'removeTag': 'removeTag',
-    'setCorrespondent': 'setCorrespondent',
+    'setAbsender': 'setAbsender',
     'setFolder': 'setFolder',
     'delete': 'delete',
   };
@@ -94,7 +94,7 @@ class _$DocumentBulkActionDto extends DocumentBulkActionDto {
   @override
   final String? tagId;
   @override
-  final String? correspondentId;
+  final String? value;
   @override
   final String? folderId;
 
@@ -103,7 +103,7 @@ class _$DocumentBulkActionDto extends DocumentBulkActionDto {
       (new DocumentBulkActionDtoBuilder()..update(updates))._build();
 
   _$DocumentBulkActionDto._(
-      {required this.action, this.tagId, this.correspondentId, this.folderId})
+      {required this.action, this.tagId, this.value, this.folderId})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(
         action, r'DocumentBulkActionDto', 'action');
@@ -124,7 +124,7 @@ class _$DocumentBulkActionDto extends DocumentBulkActionDto {
     return other is DocumentBulkActionDto &&
         action == other.action &&
         tagId == other.tagId &&
-        correspondentId == other.correspondentId &&
+        value == other.value &&
         folderId == other.folderId;
   }
 
@@ -133,7 +133,7 @@ class _$DocumentBulkActionDto extends DocumentBulkActionDto {
     var _$hash = 0;
     _$hash = $jc(_$hash, action.hashCode);
     _$hash = $jc(_$hash, tagId.hashCode);
-    _$hash = $jc(_$hash, correspondentId.hashCode);
+    _$hash = $jc(_$hash, value.hashCode);
     _$hash = $jc(_$hash, folderId.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -144,7 +144,7 @@ class _$DocumentBulkActionDto extends DocumentBulkActionDto {
     return (newBuiltValueToStringHelper(r'DocumentBulkActionDto')
           ..add('action', action)
           ..add('tagId', tagId)
-          ..add('correspondentId', correspondentId)
+          ..add('value', value)
           ..add('folderId', folderId))
         .toString();
   }
@@ -163,10 +163,9 @@ class DocumentBulkActionDtoBuilder
   String? get tagId => _$this._tagId;
   set tagId(String? tagId) => _$this._tagId = tagId;
 
-  String? _correspondentId;
-  String? get correspondentId => _$this._correspondentId;
-  set correspondentId(String? correspondentId) =>
-      _$this._correspondentId = correspondentId;
+  String? _value;
+  String? get value => _$this._value;
+  set value(String? value) => _$this._value = value;
 
   String? _folderId;
   String? get folderId => _$this._folderId;
@@ -181,7 +180,7 @@ class DocumentBulkActionDtoBuilder
     if ($v != null) {
       _action = $v.action;
       _tagId = $v.tagId;
-      _correspondentId = $v.correspondentId;
+      _value = $v.value;
       _folderId = $v.folderId;
       _$v = null;
     }
@@ -208,7 +207,7 @@ class DocumentBulkActionDtoBuilder
             action: BuiltValueNullFieldError.checkNotNull(
                 action, r'DocumentBulkActionDto', 'action'),
             tagId: tagId,
-            correspondentId: correspondentId,
+            value: value,
             folderId: folderId);
     replace(_$result);
     return _$result;

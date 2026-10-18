@@ -8,7 +8,6 @@ void main() {
     );
     expect(client.documents, isNotNull);
     expect(client.labels, isNotNull);
-    expect(client.correspondents, isNotNull);
     expect(client.models, isNotNull);
     expect(client.connectors, isNotNull);
     expect(client.dio.options.headers['Authorization'], 'Bearer k');

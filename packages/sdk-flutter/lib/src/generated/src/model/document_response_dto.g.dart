@@ -99,6 +99,8 @@ class _$DocumentResponseDto extends DocumentResponseDto {
   @override
   final String mimeType;
   @override
+  final num fileSizeBytes;
+  @override
   final BuiltList<JsonObject> tags;
   @override
   final String createdAt;
@@ -118,6 +120,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
       required this.status,
       this.extractionFailureReason,
       required this.mimeType,
+      required this.fileSizeBytes,
       required this.tags,
       required this.createdAt,
       required this.updatedAt,
@@ -132,6 +135,8 @@ class _$DocumentResponseDto extends DocumentResponseDto {
         status, r'DocumentResponseDto', 'status');
     BuiltValueNullFieldError.checkNotNull(
         mimeType, r'DocumentResponseDto', 'mimeType');
+    BuiltValueNullFieldError.checkNotNull(
+        fileSizeBytes, r'DocumentResponseDto', 'fileSizeBytes');
     BuiltValueNullFieldError.checkNotNull(tags, r'DocumentResponseDto', 'tags');
     BuiltValueNullFieldError.checkNotNull(
         createdAt, r'DocumentResponseDto', 'createdAt');
@@ -158,6 +163,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
         status == other.status &&
         extractionFailureReason == other.extractionFailureReason &&
         mimeType == other.mimeType &&
+        fileSizeBytes == other.fileSizeBytes &&
         tags == other.tags &&
         createdAt == other.createdAt &&
         updatedAt == other.updatedAt &&
@@ -173,6 +179,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
     _$hash = $jc(_$hash, status.hashCode);
     _$hash = $jc(_$hash, extractionFailureReason.hashCode);
     _$hash = $jc(_$hash, mimeType.hashCode);
+    _$hash = $jc(_$hash, fileSizeBytes.hashCode);
     _$hash = $jc(_$hash, tags.hashCode);
     _$hash = $jc(_$hash, createdAt.hashCode);
     _$hash = $jc(_$hash, updatedAt.hashCode);
@@ -190,6 +197,7 @@ class _$DocumentResponseDto extends DocumentResponseDto {
           ..add('status', status)
           ..add('extractionFailureReason', extractionFailureReason)
           ..add('mimeType', mimeType)
+          ..add('fileSizeBytes', fileSizeBytes)
           ..add('tags', tags)
           ..add('createdAt', createdAt)
           ..add('updatedAt', updatedAt)
@@ -227,6 +235,11 @@ class DocumentResponseDtoBuilder
   String? get mimeType => _$this._mimeType;
   set mimeType(String? mimeType) => _$this._mimeType = mimeType;
 
+  num? _fileSizeBytes;
+  num? get fileSizeBytes => _$this._fileSizeBytes;
+  set fileSizeBytes(num? fileSizeBytes) =>
+      _$this._fileSizeBytes = fileSizeBytes;
+
   ListBuilder<JsonObject>? _tags;
   ListBuilder<JsonObject> get tags =>
       _$this._tags ??= new ListBuilder<JsonObject>();
@@ -259,6 +272,7 @@ class DocumentResponseDtoBuilder
       _status = $v.status;
       _extractionFailureReason = $v.extractionFailureReason;
       _mimeType = $v.mimeType;
+      _fileSizeBytes = $v.fileSizeBytes;
       _tags = $v.tags.toBuilder();
       _createdAt = $v.createdAt;
       _updatedAt = $v.updatedAt;
@@ -298,6 +312,8 @@ class DocumentResponseDtoBuilder
               extractionFailureReason: extractionFailureReason,
               mimeType: BuiltValueNullFieldError.checkNotNull(
                   mimeType, r'DocumentResponseDto', 'mimeType'),
+              fileSizeBytes: BuiltValueNullFieldError.checkNotNull(
+                  fileSizeBytes, r'DocumentResponseDto', 'fileSizeBytes'),
               tags: tags.build(),
               createdAt: BuiltValueNullFieldError.checkNotNull(
                   createdAt, r'DocumentResponseDto', 'createdAt'),

@@ -494,6 +494,8 @@ class _$CreateSavedDocumentViewRequestDto
   @override
   final String name;
   @override
+  final String? description;
+  @override
   final CreateSavedDocumentViewRequestDtoVisibilityEnum? visibility;
   @override
   final String searchQuery;
@@ -510,7 +512,7 @@ class _$CreateSavedDocumentViewRequestDto
   @override
   final String? folderId;
   @override
-  final String? correspondentId;
+  final BuiltList<SavedDocumentViewFieldFilterDtoClass>? fieldFilters;
   @override
   final CreateSavedDocumentViewRequestDtoStatusEnum? status;
   @override
@@ -534,6 +536,7 @@ class _$CreateSavedDocumentViewRequestDto
   _$CreateSavedDocumentViewRequestDto._(
       {this.visibleColumns,
       required this.name,
+      this.description,
       this.visibility,
       required this.searchQuery,
       this.sort,
@@ -542,7 +545,7 @@ class _$CreateSavedDocumentViewRequestDto
       this.filterMode,
       this.listScope,
       this.folderId,
-      this.correspondentId,
+      this.fieldFilters,
       this.status,
       this.inbox,
       this.withoutNonInboxLabel,
@@ -572,6 +575,7 @@ class _$CreateSavedDocumentViewRequestDto
     return other is CreateSavedDocumentViewRequestDto &&
         visibleColumns == other.visibleColumns &&
         name == other.name &&
+        description == other.description &&
         visibility == other.visibility &&
         searchQuery == other.searchQuery &&
         sort == other.sort &&
@@ -580,7 +584,7 @@ class _$CreateSavedDocumentViewRequestDto
         filterMode == other.filterMode &&
         listScope == other.listScope &&
         folderId == other.folderId &&
-        correspondentId == other.correspondentId &&
+        fieldFilters == other.fieldFilters &&
         status == other.status &&
         inbox == other.inbox &&
         withoutNonInboxLabel == other.withoutNonInboxLabel &&
@@ -595,6 +599,7 @@ class _$CreateSavedDocumentViewRequestDto
     var _$hash = 0;
     _$hash = $jc(_$hash, visibleColumns.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
+    _$hash = $jc(_$hash, description.hashCode);
     _$hash = $jc(_$hash, visibility.hashCode);
     _$hash = $jc(_$hash, searchQuery.hashCode);
     _$hash = $jc(_$hash, sort.hashCode);
@@ -603,7 +608,7 @@ class _$CreateSavedDocumentViewRequestDto
     _$hash = $jc(_$hash, filterMode.hashCode);
     _$hash = $jc(_$hash, listScope.hashCode);
     _$hash = $jc(_$hash, folderId.hashCode);
-    _$hash = $jc(_$hash, correspondentId.hashCode);
+    _$hash = $jc(_$hash, fieldFilters.hashCode);
     _$hash = $jc(_$hash, status.hashCode);
     _$hash = $jc(_$hash, inbox.hashCode);
     _$hash = $jc(_$hash, withoutNonInboxLabel.hashCode);
@@ -620,6 +625,7 @@ class _$CreateSavedDocumentViewRequestDto
     return (newBuiltValueToStringHelper(r'CreateSavedDocumentViewRequestDto')
           ..add('visibleColumns', visibleColumns)
           ..add('name', name)
+          ..add('description', description)
           ..add('visibility', visibility)
           ..add('searchQuery', searchQuery)
           ..add('sort', sort)
@@ -628,7 +634,7 @@ class _$CreateSavedDocumentViewRequestDto
           ..add('filterMode', filterMode)
           ..add('listScope', listScope)
           ..add('folderId', folderId)
-          ..add('correspondentId', correspondentId)
+          ..add('fieldFilters', fieldFilters)
           ..add('status', status)
           ..add('inbox', inbox)
           ..add('withoutNonInboxLabel', withoutNonInboxLabel)
@@ -655,6 +661,10 @@ class CreateSavedDocumentViewRequestDtoBuilder
   String? _name;
   String? get name => _$this._name;
   set name(String? name) => _$this._name = name;
+
+  String? _description;
+  String? get description => _$this._description;
+  set description(String? description) => _$this._description = description;
 
   CreateSavedDocumentViewRequestDtoVisibilityEnum? _visibility;
   CreateSavedDocumentViewRequestDtoVisibilityEnum? get visibility =>
@@ -698,10 +708,13 @@ class CreateSavedDocumentViewRequestDtoBuilder
   String? get folderId => _$this._folderId;
   set folderId(String? folderId) => _$this._folderId = folderId;
 
-  String? _correspondentId;
-  String? get correspondentId => _$this._correspondentId;
-  set correspondentId(String? correspondentId) =>
-      _$this._correspondentId = correspondentId;
+  ListBuilder<SavedDocumentViewFieldFilterDtoClass>? _fieldFilters;
+  ListBuilder<SavedDocumentViewFieldFilterDtoClass> get fieldFilters =>
+      _$this._fieldFilters ??=
+          new ListBuilder<SavedDocumentViewFieldFilterDtoClass>();
+  set fieldFilters(
+          ListBuilder<SavedDocumentViewFieldFilterDtoClass>? fieldFilters) =>
+      _$this._fieldFilters = fieldFilters;
 
   CreateSavedDocumentViewRequestDtoStatusEnum? _status;
   CreateSavedDocumentViewRequestDtoStatusEnum? get status => _$this._status;
@@ -746,6 +759,7 @@ class CreateSavedDocumentViewRequestDtoBuilder
     if ($v != null) {
       _visibleColumns = $v.visibleColumns?.toBuilder();
       _name = $v.name;
+      _description = $v.description;
       _visibility = $v.visibility;
       _searchQuery = $v.searchQuery;
       _sort = $v.sort;
@@ -754,7 +768,7 @@ class CreateSavedDocumentViewRequestDtoBuilder
       _filterMode = $v.filterMode;
       _listScope = $v.listScope;
       _folderId = $v.folderId;
-      _correspondentId = $v.correspondentId;
+      _fieldFilters = $v.fieldFilters?.toBuilder();
       _status = $v.status;
       _inbox = $v.inbox;
       _withoutNonInboxLabel = $v.withoutNonInboxLabel;
@@ -790,6 +804,7 @@ class CreateSavedDocumentViewRequestDtoBuilder
               visibleColumns: _visibleColumns?.build(),
               name: BuiltValueNullFieldError.checkNotNull(
                   name, r'CreateSavedDocumentViewRequestDto', 'name'),
+              description: description,
               visibility: visibility,
               searchQuery: BuiltValueNullFieldError.checkNotNull(searchQuery,
                   r'CreateSavedDocumentViewRequestDto', 'searchQuery'),
@@ -799,7 +814,7 @@ class CreateSavedDocumentViewRequestDtoBuilder
               filterMode: filterMode,
               listScope: listScope,
               folderId: folderId,
-              correspondentId: correspondentId,
+              fieldFilters: _fieldFilters?.build(),
               status: status,
               inbox: inbox,
               withoutNonInboxLabel: withoutNonInboxLabel,
@@ -812,6 +827,9 @@ class CreateSavedDocumentViewRequestDtoBuilder
       try {
         _$failedField = 'visibleColumns';
         _visibleColumns?.build();
+
+        _$failedField = 'fieldFilters';
+        _fieldFilters?.build();
 
         _$failedField = 'tagIds';
         _tagIds?.build();

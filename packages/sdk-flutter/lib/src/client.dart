@@ -24,7 +24,6 @@ class DocuvateClient {
     apiMetadata = APIMetadataApi(dio, serializers);
     documents = DocumentsApi(dio, serializers);
     labels = LabelsApi(dio, serializers);
-    correspondents = CorrespondentsApi(dio, serializers);
     organizer = OrganizerApi(dio, serializers);
     settings = SettingsApi(dio, serializers);
     connectors = ConnectorsApi(dio, serializers);
@@ -35,7 +34,6 @@ class DocuvateClient {
   late final APIMetadataApi apiMetadata;
   late final DocumentsApi documents;
   late final LabelsApi labels;
-  late final CorrespondentsApi correspondents;
   late final OrganizerApi organizer;
   late final SettingsApi settings;
   late final ConnectorsApi connectors;
