@@ -120,6 +120,7 @@ describe('Duplicate set use cases', () => {
           filename: `${id}.pdf`,
           title: id,
           mimeType: 'application/pdf',
+          fileSizeBytes: 0,
           storageKey: `k/${id}`,
           status: 'ready' as const,
           tags: [],

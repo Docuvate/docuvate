@@ -50,6 +50,7 @@ describe('ABAC matrix (integration seed + adapter)', () => {
       filename: 'synthetic-invoice.pdf',
       title: 'Synthetic invoice',
       mimeType: 'application/pdf',
+      fileSizeBytes: 0,
       storageKey: `fixtures/${documentId}.pdf`,
       status: 'ready',
       tags: [],
