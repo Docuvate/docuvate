@@ -16,8 +16,6 @@ class _$UpdateDocumentRequestDto extends UpdateDocumentRequestDto {
   @override
   final String? folderId;
   @override
-  final String? correspondentId;
-  @override
   final BuiltList<String>? tagIds;
   @override
   final BuiltList<ExtractedFieldDto>? extractionFields;
@@ -33,7 +31,6 @@ class _$UpdateDocumentRequestDto extends UpdateDocumentRequestDto {
       this.documentDate,
       this.notes,
       this.folderId,
-      this.correspondentId,
       this.tagIds,
       this.extractionFields,
       this.extractionBlocks})
@@ -56,7 +53,6 @@ class _$UpdateDocumentRequestDto extends UpdateDocumentRequestDto {
         documentDate == other.documentDate &&
         notes == other.notes &&
         folderId == other.folderId &&
-        correspondentId == other.correspondentId &&
         tagIds == other.tagIds &&
         extractionFields == other.extractionFields &&
         extractionBlocks == other.extractionBlocks;
@@ -69,7 +65,6 @@ class _$UpdateDocumentRequestDto extends UpdateDocumentRequestDto {
     _$hash = $jc(_$hash, documentDate.hashCode);
     _$hash = $jc(_$hash, notes.hashCode);
     _$hash = $jc(_$hash, folderId.hashCode);
-    _$hash = $jc(_$hash, correspondentId.hashCode);
     _$hash = $jc(_$hash, tagIds.hashCode);
     _$hash = $jc(_$hash, extractionFields.hashCode);
     _$hash = $jc(_$hash, extractionBlocks.hashCode);
@@ -84,7 +79,6 @@ class _$UpdateDocumentRequestDto extends UpdateDocumentRequestDto {
           ..add('documentDate', documentDate)
           ..add('notes', notes)
           ..add('folderId', folderId)
-          ..add('correspondentId', correspondentId)
           ..add('tagIds', tagIds)
           ..add('extractionFields', extractionFields)
           ..add('extractionBlocks', extractionBlocks))
@@ -112,11 +106,6 @@ class UpdateDocumentRequestDtoBuilder
   String? _folderId;
   String? get folderId => _$this._folderId;
   set folderId(String? folderId) => _$this._folderId = folderId;
-
-  String? _correspondentId;
-  String? get correspondentId => _$this._correspondentId;
-  set correspondentId(String? correspondentId) =>
-      _$this._correspondentId = correspondentId;
 
   ListBuilder<String>? _tagIds;
   ListBuilder<String> get tagIds =>
@@ -146,7 +135,6 @@ class UpdateDocumentRequestDtoBuilder
       _documentDate = $v.documentDate;
       _notes = $v.notes;
       _folderId = $v.folderId;
-      _correspondentId = $v.correspondentId;
       _tagIds = $v.tagIds?.toBuilder();
       _extractionFields = $v.extractionFields?.toBuilder();
       _extractionBlocks = $v.extractionBlocks?.toBuilder();
@@ -178,7 +166,6 @@ class UpdateDocumentRequestDtoBuilder
               documentDate: documentDate,
               notes: notes,
               folderId: folderId,
-              correspondentId: correspondentId,
               tagIds: _tagIds?.build(),
               extractionFields: _extractionFields?.build(),
               extractionBlocks: _extractionBlocks?.build());

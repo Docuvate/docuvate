@@ -14988,10 +14988,10 @@
           },
           "sort": {
             "enum": [
-              "title",
-              "documentDate",
               "createdAt",
-              "updatedAt"
+              "updatedAt",
+              "title",
+              "documentDate"
             ],
             "type": "string"
           },

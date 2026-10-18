@@ -30,11 +30,8 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(ChatMessageRecordDtoGenerationStatusEnum.serializer)
       ..add(ChatMessageRecordDtoRoleEnum.serializer)
       ..add(ConfirmLabelRecommendationBlocklistPatternRequestDto.serializer)
-      ..add(CorrespondentListResponseDto.serializer)
       ..add(CreateConnectorInstallationRequestDto.serializer)
       ..add(CreateConnectorInstallationRequestDtoPluginIdEnum.serializer)
-      ..add(CreateCorrespondentRequestDto.serializer)
-      ..add(CreateCorrespondentRequestDtoMatchingAlgorithmEnum.serializer)
       ..add(CreateDocumentChatThreadRequestDto.serializer)
       ..add(CreateFolderRequestDto.serializer)
       ..add(CreateSavedDocumentViewRequestDto.serializer)
@@ -161,6 +158,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(SavedDocumentViewDtoClassStatusEnum.serializer)
       ..add(SavedDocumentViewDtoClassViewModeEnum.serializer)
       ..add(SavedDocumentViewDtoClassVisibilityEnum.serializer)
+      ..add(SavedDocumentViewFieldFilterDtoClass.serializer)
       ..add(SavedDocumentViewListResponseDto.serializer)
       ..add(SendDocumentChatThreadMessageRequestDto.serializer)
       ..add(SendDocumentChatThreadMessageResponseDto.serializer)
@@ -178,8 +176,6 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(TestPaperlessInstallationConnectionRequestDto.serializer)
       ..add(TriggerMlRetrainRequestDto.serializer)
       ..add(UpdateConnectorInstallationRequestDto.serializer)
-      ..add(UpdateCorrespondentRequestDto.serializer)
-      ..add(UpdateCorrespondentRequestDtoMatchingAlgorithmEnum.serializer)
       ..add(UpdateDocumentChatThreadRequestDto.serializer)
       ..add(UpdateDocumentRequestDto.serializer)
       ..add(UpdateFolderRequestDto.serializer)
@@ -299,9 +295,6 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(BuiltList, const [const FullType(JsonObject)]),
           () => new ListBuilder<JsonObject>())
       ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(JsonObject)]),
-          () => new ListBuilder<JsonObject>())
-      ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(DocumentReviewFieldSuggestionDtoClass)]),
           () => new ListBuilder<DocumentReviewFieldSuggestionDtoClass>())
@@ -338,12 +331,9 @@ Serializers _$serializers = (new Serializers().toBuilder()
               BuiltList, const [const FullType(LibraryTableColumnId)]),
           () => new ListBuilder<LibraryTableColumnId>())
       ..addBuilderFactory(
-          const FullType(BuiltList, const [const FullType(String)]),
-          () => new ListBuilder<String>())
-      ..addBuilderFactory(
-          const FullType(
-              BuiltList, const [const FullType(LibraryTableColumnId)]),
-          () => new ListBuilder<LibraryTableColumnId>())
+          const FullType(BuiltList,
+              const [const FullType(SavedDocumentViewFieldFilterDtoClass)]),
+          () => new ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
           () => new ListBuilder<String>())
@@ -351,6 +341,21 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(
               BuiltList, const [const FullType(LibraryTableColumnId)]),
           () => new ListBuilder<LibraryTableColumnId>())
+      ..addBuilderFactory(
+          const FullType(BuiltList,
+              const [const FullType(SavedDocumentViewFieldFilterDtoClass)]),
+          () => new ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
+      ..addBuilderFactory(
+          const FullType(
+              BuiltList, const [const FullType(LibraryTableColumnId)]),
+          () => new ListBuilder<LibraryTableColumnId>())
+      ..addBuilderFactory(
+          const FullType(BuiltList,
+              const [const FullType(SavedDocumentViewFieldFilterDtoClass)]),
+          () => new ListBuilder<SavedDocumentViewFieldFilterDtoClass>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
           () => new ListBuilder<String>())

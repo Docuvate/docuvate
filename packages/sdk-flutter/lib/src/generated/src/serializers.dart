@@ -30,9 +30,7 @@ import 'package:docuvate/src/generated/src/model/ban_admin_user_request_dto.dart
 import 'package:docuvate/src/generated/src/model/chat_message_dto.dart';
 import 'package:docuvate/src/generated/src/model/chat_message_record_dto.dart';
 import 'package:docuvate/src/generated/src/model/confirm_label_recommendation_blocklist_pattern_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/correspondent_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_connector_installation_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/create_correspondent_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_document_chat_thread_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_folder_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/create_saved_document_view_request_dto.dart';
@@ -123,6 +121,7 @@ import 'package:docuvate/src/generated/src/model/replace_recognized_fields_reque
 import 'package:docuvate/src/generated/src/model/replace_tag_custom_field_item_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_tag_custom_fields_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/saved_document_view_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/saved_document_view_field_filter_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/saved_document_view_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_response_dto.dart';
@@ -137,7 +136,6 @@ import 'package:docuvate/src/generated/src/model/test_paperless_connection_reque
 import 'package:docuvate/src/generated/src/model/test_paperless_installation_connection_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/trigger_ml_retrain_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_connector_installation_request_dto.dart';
-import 'package:docuvate/src/generated/src/model/update_correspondent_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_document_chat_thread_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_document_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_folder_request_dto.dart';
@@ -167,9 +165,7 @@ part 'serializers.g.dart';
   ChatMessageDto,
   ChatMessageRecordDto,
   ConfirmLabelRecommendationBlocklistPatternRequestDto,
-  CorrespondentListResponseDto,
   CreateConnectorInstallationRequestDto,
-  CreateCorrespondentRequestDto,
   CreateDocumentChatThreadRequestDto,
   CreateFolderRequestDto,
   CreateSavedDocumentViewRequestDto,
@@ -260,6 +256,7 @@ part 'serializers.g.dart';
   ReplaceTagCustomFieldItemDto,
   ReplaceTagCustomFieldsRequestDto,
   SavedDocumentViewDtoClass,
+  SavedDocumentViewFieldFilterDtoClass,
   SavedDocumentViewListResponseDto,
   SendDocumentChatThreadMessageRequestDto,
   SendDocumentChatThreadMessageResponseDto,
@@ -274,7 +271,6 @@ part 'serializers.g.dart';
   TestPaperlessInstallationConnectionRequestDto,
   TriggerMlRetrainRequestDto,
   UpdateConnectorInstallationRequestDto,
-  UpdateCorrespondentRequestDto,
   UpdateDocumentChatThreadRequestDto,
   UpdateDocumentRequestDto,
   UpdateFolderRequestDto,

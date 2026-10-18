@@ -14,7 +14,6 @@ export 'package:docuvate/src/generated/src/api/api_metadata_api.dart';
 export 'package:docuvate/src/generated/src/api/admin_api.dart';
 export 'package:docuvate/src/generated/src/api/chat_api.dart';
 export 'package:docuvate/src/generated/src/api/connectors_api.dart';
-export 'package:docuvate/src/generated/src/api/correspondents_api.dart';
 export 'package:docuvate/src/generated/src/api/documents_api.dart';
 export 'package:docuvate/src/generated/src/api/duplicates_api.dart';
 export 'package:docuvate/src/generated/src/api/invitations_api.dart';
@@ -44,9 +43,7 @@ export 'package:docuvate/src/generated/src/model/ban_admin_user_request_dto.dart
 export 'package:docuvate/src/generated/src/model/chat_message_dto.dart';
 export 'package:docuvate/src/generated/src/model/chat_message_record_dto.dart';
 export 'package:docuvate/src/generated/src/model/confirm_label_recommendation_blocklist_pattern_request_dto.dart';
-export 'package:docuvate/src/generated/src/model/correspondent_list_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/create_connector_installation_request_dto.dart';
-export 'package:docuvate/src/generated/src/model/create_correspondent_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/create_document_chat_thread_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/create_folder_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/create_saved_document_view_request_dto.dart';
@@ -137,6 +134,7 @@ export 'package:docuvate/src/generated/src/model/replace_recognized_fields_reque
 export 'package:docuvate/src/generated/src/model/replace_tag_custom_field_item_dto.dart';
 export 'package:docuvate/src/generated/src/model/replace_tag_custom_fields_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/saved_document_view_dto_class.dart';
+export 'package:docuvate/src/generated/src/model/saved_document_view_field_filter_dto_class.dart';
 export 'package:docuvate/src/generated/src/model/saved_document_view_list_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/send_document_chat_thread_message_response_dto.dart';
@@ -151,7 +149,6 @@ export 'package:docuvate/src/generated/src/model/test_paperless_connection_reque
 export 'package:docuvate/src/generated/src/model/test_paperless_installation_connection_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/trigger_ml_retrain_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_connector_installation_request_dto.dart';
-export 'package:docuvate/src/generated/src/model/update_correspondent_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_document_chat_thread_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_document_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/update_folder_request_dto.dart';

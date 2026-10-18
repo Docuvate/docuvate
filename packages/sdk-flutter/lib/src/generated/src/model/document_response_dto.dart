@@ -20,6 +20,7 @@ part 'document_response_dto.g.dart';
 /// * [status] 
 /// * [extractionFailureReason] 
 /// * [mimeType] 
+/// * [fileSizeBytes] - Original upload size in bytes
 /// * [tags] 
 /// * [createdAt] 
 /// * [updatedAt] 
@@ -44,6 +45,10 @@ abstract class DocumentResponseDto implements Built<DocumentResponseDto, Documen
 
   @BuiltValueField(wireName: r'mimeType')
   String get mimeType;
+
+  /// Original upload size in bytes
+  @BuiltValueField(wireName: r'fileSizeBytes')
+  num get fileSizeBytes;
 
   @BuiltValueField(wireName: r'tags')
   BuiltList<JsonObject> get tags;
@@ -111,6 +116,11 @@ class _$DocumentResponseDtoSerializer implements PrimitiveSerializer<DocumentRes
     yield serializers.serialize(
       object.mimeType,
       specifiedType: const FullType(String),
+    );
+    yield r'fileSizeBytes';
+    yield serializers.serialize(
+      object.fileSizeBytes,
+      specifiedType: const FullType(num),
     );
     yield r'tags';
     yield serializers.serialize(
@@ -198,6 +208,13 @@ class _$DocumentResponseDtoSerializer implements PrimitiveSerializer<DocumentRes
             specifiedType: const FullType(String),
           ) as String;
           result.mimeType = valueDes;
+          break;
+        case r'fileSizeBytes':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(num),
+          ) as num;
+          result.fileSizeBytes = valueDes;
           break;
         case r'tags':
           final valueDes = serializers.deserialize(

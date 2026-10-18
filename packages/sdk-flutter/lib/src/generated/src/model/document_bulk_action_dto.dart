@@ -14,19 +14,19 @@ part 'document_bulk_action_dto.g.dart';
 /// Properties:
 /// * [action] 
 /// * [tagId] 
-/// * [correspondentId] 
+/// * [value] 
 /// * [folderId] 
 @BuiltValue()
 abstract class DocumentBulkActionDto implements Built<DocumentBulkActionDto, DocumentBulkActionDtoBuilder> {
   @BuiltValueField(wireName: r'action')
   DocumentBulkActionDtoActionEnum get action;
-  // enum actionEnum {  addTag,  removeTag,  setCorrespondent,  setFolder,  delete,  };
+  // enum actionEnum {  addTag,  removeTag,  setAbsender,  setFolder,  delete,  };
 
   @BuiltValueField(wireName: r'tagId')
   String? get tagId;
 
-  @BuiltValueField(wireName: r'correspondentId')
-  String? get correspondentId;
+  @BuiltValueField(wireName: r'value')
+  String? get value;
 
   @BuiltValueField(wireName: r'folderId')
   String? get folderId;
@@ -66,10 +66,10 @@ class _$DocumentBulkActionDtoSerializer implements PrimitiveSerializer<DocumentB
         specifiedType: const FullType(String),
       );
     }
-    if (object.correspondentId != null) {
-      yield r'correspondentId';
+    if (object.value != null) {
+      yield r'value';
       yield serializers.serialize(
-        object.correspondentId,
+        object.value,
         specifiedType: const FullType(String),
       );
     }
@@ -117,12 +117,12 @@ class _$DocumentBulkActionDtoSerializer implements PrimitiveSerializer<DocumentB
           ) as String;
           result.tagId = valueDes;
           break;
-        case r'correspondentId':
+        case r'value':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(String),
           ) as String;
-          result.correspondentId = valueDes;
+          result.value = valueDes;
           break;
         case r'folderId':
           final valueDes = serializers.deserialize(
@@ -166,8 +166,8 @@ class DocumentBulkActionDtoActionEnum extends EnumClass {
   static const DocumentBulkActionDtoActionEnum addTag = _$documentBulkActionDtoActionEnum_addTag;
   @BuiltValueEnumConst(wireName: r'removeTag')
   static const DocumentBulkActionDtoActionEnum removeTag = _$documentBulkActionDtoActionEnum_removeTag;
-  @BuiltValueEnumConst(wireName: r'setCorrespondent')
-  static const DocumentBulkActionDtoActionEnum setCorrespondent = _$documentBulkActionDtoActionEnum_setCorrespondent;
+  @BuiltValueEnumConst(wireName: r'setAbsender')
+  static const DocumentBulkActionDtoActionEnum setAbsender = _$documentBulkActionDtoActionEnum_setAbsender;
   @BuiltValueEnumConst(wireName: r'setFolder')
   static const DocumentBulkActionDtoActionEnum setFolder = _$documentBulkActionDtoActionEnum_setFolder;
   @BuiltValueEnumConst(wireName: r'delete')
