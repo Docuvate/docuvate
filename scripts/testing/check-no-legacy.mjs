@@ -18,8 +18,8 @@ const BANNED = [
 
 const ALLOWLIST = [
   /^scripts\/testing\/check-no-legacy\.mjs$/,
-  /^scripts\/ci\/agent-vm-docker-setup\.sh$/,
-  /^scripts\/ci\/agent-docker-forward\.sh$/,
+  /^scripts\/ci\/docker-setup\.sh$/,
+  /^scripts\/ci\/docker-forward\.sh$/,
   /^docs\/local-ci\.md$/,
   /^apps\/site\/scripts\/check-dist-marketing-palette\.mjs$/,
   /^pnpm-lock\.yaml$/,

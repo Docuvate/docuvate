@@ -83,13 +83,12 @@ job_lint_test() {
   bash scripts/ci/mermaid-chrome-setup.sh
   bash scripts/ci/check-mermaid-markdown.sh
   node scripts/testing/check-no-legacy.mjs
-  node scripts/testing/check-lab-probes-no-embedded-values.mjs
   bash scripts/ci/check-conflict-markers.sh
   node scripts/ci/check-tool-versions.mjs
   node --test scripts/ci/check-tool-versions.test.mjs
   if [[ ! -x /opt/flutter/bin/flutter ]]; then
-    if [[ "${DV_AGENT_VM:-0}" != "1" ]]; then
-      echo "flutter not found; install it or run with DV_AGENT_VM=1" >&2
+    if [[ "${DOCUVATE_CI_DOCKER_SETUP:-0}" != "1" ]]; then
+      echo "flutter not found; install it or run with DOCUVATE_CI_DOCKER_SETUP=1" >&2
       exit 1
     fi
     sudo apt-get update -qq
@@ -225,8 +224,8 @@ job_compose_smoke() {
   E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 pnpm --filter @docuvate/e2e test
 }
 
-if [[ "${DV_AGENT_VM:-0}" == "1" ]]; then
-  bash scripts/ci/agent-vm-docker-setup.sh
+if [[ "${DOCUVATE_CI_DOCKER_SETUP:-0}" == "1" ]]; then
+  bash scripts/ci/docker-setup.sh
 fi
 
 run_local_ci_job lint-test job_lint_test

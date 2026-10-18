@@ -1,57 +1,59 @@
-# Nutzer- und Rollenverwaltung
+# User and role administration
 
-Siehe **ADR 019** (Rollen und Administration) und **ADR 011** (Speicherkonzept Frontend).
+[Deutsch](./user-administration.de.md)
 
-## Rollen
+See **ADR 019** (roles and administration) and **ADR 011** (frontend save concept).
 
-| Rolle | Bedeutung |
-|-------|-----------|
-| Administrator | Nutzerverwaltung, Einladungen, Sperren und Entsperren |
-| Mitglied | Normale Nutzung, eigene Dokumente |
+## Roles
 
-## Erster Administrator
+| Role          | Meaning                                             |
+| ------------- | --------------------------------------------------- |
+| Administrator | User management, invitations, suspend and unsuspend |
+| Member        | Regular use, own documents                          |
 
-Der **erste registrierte Nutzer** wird automatisch Administrator. Weitere Administratoren können per Einladung oder CLI ernannt werden:
+## First administrator
+
+The **first registered user** automatically becomes an administrator. Further administrators can be appointed by invitation or via the CLI:
 
 ```bash
 pnpm --filter @docuvate/api auth:promote-admin user@example.com
 ```
 
-Im Compose-Stack:
+In the Compose stack:
 
 ```bash
 docker compose exec -T api pnpm --filter @docuvate/api auth:promote-admin user@example.com
 ```
 
-## Einladungen
+## Invitations
 
-Administratoren laden Nutzer unter **Einstellungen → Administration → Nutzer** ein. Es wird eine **Einladungs-E-Mail** (de/en) mit Link zum Passwort festlegen versendet (nicht „Passwort vergessen“).
+Administrators invite users under **Settings → Administration → Users**. Docuvate sends an **invitation email** (German or English) with a link to set a password (not "forgot password").
 
-Bis zur Annahme gibt es **keine** Zeile in `"user"`. Die Einladung speichert E-Mail, Anzeigename und Rolle in `user_invitations`. Die Person erscheint in der Nutzerliste mit Status **Eingeladen**. **Annahme** legt das Konto an. **Widerruf** oder **Ablauf** betrifft nur die Einladung.
+Until the invitation is accepted there is **no** row in `"user"`. The invitation stores email, display name and role in `user_invitations`, and the person appears in the user list with the status **Invited**. **Accepting** creates the account. **Revoking** or **expiry** only affects the invitation.
 
-| Variable | Bedeutung |
-|----------|-----------|
-| `SMTP_URL` / `MAIL_FROM` | Wie Passwort-Reset ([password-reset.md](./password-reset.md)) |
-| `DOCUVATE_INSTALLATION_NAME` | Anzeigename in der Einladung (Standard: Docuvate) |
-| `DOCUVATE_INVITE_TTL_HOURS` | Gültigkeit des Links (Standard: 168) |
-| `WEB_ORIGIN` | Basis-URL für Einladungslinks |
+| Variable                     | Meaning                                                           |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `SMTP_URL` / `MAIL_FROM`     | Same as password reset ([password-reset.md](./password-reset.md)) |
+| `DOCUVATE_INSTALLATION_NAME` | Display name in the invitation (default: Docuvate)                |
+| `DOCUVATE_INVITE_TTL_HOURS`  | Link validity in hours (default: 168)                             |
+| `WEB_ORIGIN`                 | Base URL for invitation links                                     |
 
-Lokal: Mailpit http://localhost:8025
+Locally, emails arrive in Mailpit at http://localhost:8025.
 
-## Sperren und Entsperren
+## Suspend and unsuspend
 
-Administratoren können Mitglieder und andere Administratoren **sperren** (Suspend) und wieder **entsperren**. Gesperrte Nutzer können sich nicht anmelden; die Sperre liegt in `installation_user_suspensions`.
+Administrators can **suspend** members and other administrators and **unsuspend** them again. Suspended users cannot sign in; the suspension is stored in `installation_user_suspensions`.
 
-## ML-Feature-Flags pro Mandant (0.1.0 Beta)
+## ML feature flags per tenant (0.1.0 beta)
 
-Installations-Administratoren können ML-Funktionen **pro Mandant** aktivieren oder deaktivieren, unabhängig vom installationsweiten Standard in `.env`:
+Installation administrators can enable or disable ML features **per tenant**, independently of the installation-wide default in `.env`:
 
-- API: `PATCH /v1/admin/users/{userId}/feature-flags` (OpenAPI unter `/v1/openapi.json`)
-- Aufgelöste Werte für die Web-App: `GET /v1/remote-config` nach Anmeldung
+- API: `PATCH /v1/admin/users/{userId}/feature-flags` (OpenAPI at `/v1/openapi.json`)
+- Resolved values for the web app: `GET /v1/remote-config` after sign-in
 
-Beschreibung der Flags (`exactAnswers`, `answerAbstention`, `smartDuplicates`, `learnedValueTypes`, `layoutKeyValueRoles`, `localChatModel`), Env-Variablen `DOCUVATE_FEATURE_*`, Compose-Profil **`chat-local`** und Encoder-Re-Index: **[ML-Feature-Flags (DE)](./ml-feature-flags.de.md)** bzw. [English](./ml-feature-flags.md).
+Flags (`exactAnswers`, `answerAbstention`, `smartDuplicates`, `learnedValueTypes`, `layoutKeyValueRoles`, `localChatModel`), the `DOCUVATE_FEATURE_*` environment variables, the **`chat-local`** Compose profile and encoder re-indexing are described in **[ML feature flags](./ml-feature-flags.md)**.
 
-## Demo-Daten für Screenshots
+## Demo data for screenshots
 
 ```bash
 node tools/screenshots/admin/seed-admin-screenshots.mjs

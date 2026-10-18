@@ -3,10 +3,14 @@
 import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 
-import oauthSetupMarkdown from '../../../../docs/connectors-oauth-setup.md?raw';
+import oauthSetupMarkdownDe from '../../../../docs/connectors-oauth-setup.de.md?raw';
+import oauthSetupMarkdownEn from '../../../../docs/connectors-oauth-setup.md?raw';
 
 export function ConnectorsOAuthSetupDocPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const oauthSetupMarkdown = i18n.language.startsWith('de')
+    ? oauthSetupMarkdownDe
+    : oauthSetupMarkdownEn;
 
   return (
     <div className="page docs-page">

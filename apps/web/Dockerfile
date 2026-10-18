@@ -15,7 +15,7 @@ COPY packages/contracts packages/contracts
 COPY packages/tokens packages/tokens
 COPY packages/ui-catalog packages/ui-catalog
 COPY apps/web apps/web
-COPY docs/connectors-oauth-setup.md docs/connectors-oauth-setup.md
+COPY docs/connectors-oauth-setup.md docs/connectors-oauth-setup.de.md docs/
 RUN pnpm --filter "@docuvate/web..." build
 
 FROM nginx:alpine
