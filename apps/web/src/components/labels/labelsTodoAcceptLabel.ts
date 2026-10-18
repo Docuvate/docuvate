@@ -5,13 +5,17 @@ import type { TFunction } from 'i18next';
 
 import { todoAcceptActionKey } from './labelsTodoPresentation';
 
+function usesDocumentSubsetPicker(item: LabelRecommendationDto, totalCount: number): boolean {
+  return (item.kind === 'new' || item.kind === 'assign') && totalCount > 1;
+}
+
 export function clusterAcceptButtonLabel(
   item: LabelRecommendationDto,
   selectedCount: number,
   totalCount: number,
   t: TFunction
 ): string {
-  if (item.kind === 'new' && totalCount > 1) {
+  if (usesDocumentSubsetPicker(item, totalCount)) {
     return t('labelRecommendations.acceptSubset', {
       selected: selectedCount,
       total: totalCount,
@@ -25,5 +29,5 @@ export function clusterAcceptDisabled(
   selectedCount: number,
   totalCount: number
 ): boolean {
-  return item.kind === 'new' && totalCount > 1 && selectedCount === 0;
+  return usesDocumentSubsetPicker(item, totalCount) && selectedCount === 0;
 }

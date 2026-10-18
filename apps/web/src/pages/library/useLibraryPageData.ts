@@ -13,6 +13,7 @@ import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 're
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
 
+import { useToastNotify } from '../../components/save/ToastProvider';
 import {
   bulkDocuments,
   getSavedDocumentView,
@@ -49,6 +50,7 @@ type SortField = NonNullable<DocumentListQuery['sort']>;
 
 export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordner-root') {
   const { t } = useTranslation();
+  const { pushSuccess } = useToastNotify();
   const { folderId } = useParams<{ folderId?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -372,12 +374,25 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
 
   async function runBulk(action: Parameters<typeof bulkDocuments>[0]['bulk']) {
     if (selected.size === 0) return;
+    const selectedIds = [...selected];
     setBulkBusy(true);
     setError(null);
     try {
-      await bulkDocuments({ ids: [...selected], bulk: action });
+      await bulkDocuments({ ids: selectedIds, bulk: action });
       setSelected(new Set());
       await load();
+      if (action.action === 'addTag' || action.action === 'removeTag') {
+        const tagId = action.tagId;
+        const reverseAction =
+          action.action === 'addTag'
+            ? ({ action: 'removeTag', tagId } as const)
+            : ({ action: 'addTag', tagId } as const);
+        pushSuccess(t('library.bulkLabelChanged'), {
+          undo: () => {
+            void bulkDocuments({ ids: selectedIds, bulk: reverseAction }).then(() => load());
+          },
+        });
+      }
     } catch (err) {
       setError(formatUserFacingError(err, 'errors.actionFailed'));
     } finally {

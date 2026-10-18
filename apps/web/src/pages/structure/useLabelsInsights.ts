@@ -18,6 +18,7 @@ import {
   getLabelMap,
   listDocuments,
   listLabelRecommendations,
+  removeDocumentTag,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
 
@@ -61,9 +62,14 @@ export interface LabelRecommendationAcceptOptions {
   excludedDocumentIds: string[];
 }
 
+export interface LabelInsightsSaveSuccessOptions {
+  message?: string;
+  undo?: () => void | Promise<void>;
+}
+
 export function useLabelsInsights(
   onReloadTags: (options?: LoadOptions) => Promise<void>,
-  hooks?: { onSaveSuccess?: () => void }
+  hooks?: { onSaveSuccess?: (options?: LabelInsightsSaveSuccessOptions) => void }
 ) {
   const [recommendations, setRecommendations] = useState<LabelRecommendationDto[]>([]);
   const [documents, setDocuments] = useState<DocumentDto[]>([]);
@@ -140,8 +146,15 @@ export function useLabelsInsights(
       setError(null);
       setRecommendations((prev) => prev.filter((r) => r.id !== item.id));
       try {
+        const assignedDocumentIds = options?.documentIds ?? item.sampleDocumentIds ?? [];
+        const assignedTagId = item.tagId;
         if (item.kind === 'assign' && item.tagId) {
-          await acceptLabelRecommendation(item.id, { tagId: item.tagId });
+          const fallbackIds = item.sampleDocumentIds ?? [];
+          await acceptLabelRecommendation(item.id, {
+            tagId: item.tagId,
+            documentIds: options?.documentIds ?? fallbackIds,
+            excludedDocumentIds: options?.excludedDocumentIds,
+          });
         } else if (item.kind === 'new') {
           const fallbackIds = item.sampleDocumentIds ?? [];
           await acceptLabelRecommendation(item.id, {
@@ -161,7 +174,21 @@ export function useLabelsInsights(
           });
         }
         await Promise.all([onReloadTags({ silent: true }), load({ silent: true })]);
-        hooks?.onSaveSuccess?.();
+        if (item.kind === 'assign' && assignedTagId && assignedDocumentIds.length > 0) {
+          const tagId = assignedTagId;
+          const docIds = [...assignedDocumentIds];
+          hooks?.onSaveSuccess?.({
+            undo: () => {
+              void Promise.all(docIds.map((documentId) => removeDocumentTag(documentId, tagId))).then(
+                () => Promise.all([onReloadTags({ silent: true }), load({ silent: true })])
+              );
+            },
+          });
+        } else if (item.kind === 'new') {
+          hooks?.onSaveSuccess?.({});
+        } else {
+          hooks?.onSaveSuccess?.({});
+        }
       } catch (err) {
         setError(formatUserFacingError(err, 'errors.actionFailed'));
         void load({ silent: true });

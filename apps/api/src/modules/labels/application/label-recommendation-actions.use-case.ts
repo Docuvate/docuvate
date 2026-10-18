@@ -111,10 +111,26 @@ export class AcceptLabelRecommendationUseCase {
         throw new ValidationError('Invalid assign recommendation id');
       }
       const tagId = body.tagId ?? parsed.tagId;
-      await this.assignTag.execute(parsed.documentId, userId, tagId, { learnFromEmbedding: true });
-      await this.learnFromAssignAccept(userId, parsed.documentId, tagId);
+      const docIds = (body.documentIds ?? [parsed.documentId]).filter((d) => d.trim().length > 0);
+      const excludedIds = (body.excludedDocumentIds ?? []).filter((d) => d.trim().length > 0);
+      if (docIds.length === 0) {
+        throw new ValidationError('At least one document must be selected');
+      }
+      await this.assertDocumentsOwnedByUser(userId, [...docIds, ...excludedIds]);
+      for (const documentId of docIds) {
+        await this.assignTag.execute(documentId, userId, tagId, { learnFromEmbedding: true });
+        await this.learnFromAssignAccept(userId, documentId, tagId);
+        await this.labelEmbeddings.dismissRecommendation(userId, `assign:${documentId}:${tagId}`);
+      }
+      if (excludedIds.length > 0) {
+        const tag = await this.taxonomy.findTagByIdForUser(tagId, userId);
+        const labelKey = tag ? normalizeLabelKey(tag.name) : '';
+        if (labelKey) {
+          await this.labelEmbeddings.addClusterDocumentExclusions(userId, labelKey, excludedIds);
+        }
+      }
       await this.labelEmbeddings.dismissRecommendation(userId, id);
-      return { tagId, action: 'assigned' as const, documentId: parsed.documentId };
+      return { tagId, action: 'assigned' as const, documentId: docIds[0] };
     }
 
     if (id.startsWith('new:')) {

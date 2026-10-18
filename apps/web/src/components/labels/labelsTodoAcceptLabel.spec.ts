@@ -18,4 +18,15 @@ describe('labelsTodoAcceptLabel', () => {
     expect(clusterAcceptDisabled(item, 0, 2)).toBe(true);
     expect(clusterAcceptDisabled(item, 1, 2)).toBe(false);
   });
+
+  it('treats assign recommendations with multiple documents like cluster picks', () => {
+    const assignItem: LabelRecommendationDto = {
+      ...item,
+      id: 'assign:d1:tag',
+      kind: 'assign',
+      tagId: 'tag',
+    };
+    expect(clusterAcceptDisabled(assignItem, 0, 2)).toBe(true);
+    expect(clusterAcceptDisabled(assignItem, 2, 2)).toBe(false);
+  });
 });

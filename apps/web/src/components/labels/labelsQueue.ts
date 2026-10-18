@@ -17,6 +17,66 @@ function docHasNonInboxTag(doc: DocumentDto, tagId: string): boolean {
   return doc.tags.some((tag) => tag.id === tagId && !tag.isInbox);
 }
 
+function mergeSampleDocumentPreviews(
+  items: LabelRecommendationDto[]
+): NonNullable<LabelRecommendationDto['sampleDocuments']> {
+  const byId = new Map<string, NonNullable<LabelRecommendationDto['sampleDocuments']>[number]>();
+  for (const item of items) {
+    for (const doc of item.sampleDocuments ?? []) {
+      if (!byId.has(doc.id)) {
+        byId.set(doc.id, doc);
+      }
+    }
+    for (const id of item.sampleDocumentIds ?? []) {
+      if (!byId.has(id)) {
+        byId.set(id, { id, title: id, filename: '', status: 'ready' });
+      }
+    }
+  }
+  return [...byId.values()];
+}
+
+/** Merge assign recommendations that target the same label into one row with a document picker. */
+export function enrichAssignRecommendations(
+  items: LabelRecommendationDto[]
+): LabelRecommendationDto[] {
+  const nonAssign: LabelRecommendationDto[] = [];
+  const assignByTag = new Map<string, LabelRecommendationDto[]>();
+
+  for (const item of items) {
+    if (item.kind !== 'assign') {
+      nonAssign.push(item);
+      continue;
+    }
+    const tagId = item.tagId?.trim() ?? '';
+    if (!tagId) {
+      nonAssign.push(item);
+      continue;
+    }
+    const bucket = assignByTag.get(tagId) ?? [];
+    bucket.push(item);
+    assignByTag.set(tagId, bucket);
+  }
+
+  const groupedAssign: LabelRecommendationDto[] = [];
+  for (const group of assignByTag.values()) {
+    if (group.length === 1) {
+      groupedAssign.push(group[0]);
+      continue;
+    }
+    const sorted = [...group].sort((a, b) => b.score - a.score);
+    const primary = sorted[0];
+    const sampleDocuments = mergeSampleDocumentPreviews(sorted);
+    groupedAssign.push({
+      ...primary,
+      sampleDocumentIds: sampleDocuments.map((doc) => doc.id),
+      sampleDocuments,
+    });
+  }
+
+  return [...nonAssign, ...groupedAssign];
+}
+
 export function enrichMergeRecommendations(
   items: LabelRecommendationDto[],
   documents: DocumentDto[],
@@ -74,5 +134,6 @@ export function prepareLabelQueue(
   items: LabelRecommendationDto[],
   documents: DocumentDto[]
 ): LabelRecommendationDto[] {
-  return sortLabelQueue(enrichMergeRecommendations(items, documents));
+  const withAssign = enrichAssignRecommendations(items);
+  return sortLabelQueue(enrichMergeRecommendations(withAssign, documents));
 }

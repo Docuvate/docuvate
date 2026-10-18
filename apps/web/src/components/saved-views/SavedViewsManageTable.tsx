@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SavedDocumentViewDto } from '@docuvate/contracts';
-import { GripVertical, MoreHorizontal } from 'lucide-react';
+import { GripVertical, Pencil, Trash2 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -9,7 +9,6 @@ import { Link } from 'react-router-dom';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
-import { ContextMenu } from '../ui/ContextMenu';
 import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
 
@@ -38,19 +37,7 @@ export function SavedViewsManageTable({
   const [renameId, setRenameId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<SavedDocumentViewDto | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
-  const [menuView, setMenuView] = useState<SavedDocumentViewDto | null>(null);
-  const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
   const dragIndexRef = useRef<number | null>(null);
-
-  const openMenu = (view: SavedDocumentViewDto, anchor: HTMLButtonElement) => {
-    menuAnchorRef.current = anchor;
-    setMenuView(view);
-    const rect = anchor.getBoundingClientRect();
-    setMenuPos({ x: rect.left, y: rect.bottom + 4 });
-    setMenuOpen(true);
-  };
 
   const owned = views.filter((v) => v.ownerUserId === currentUserId);
   const ownedIds = new Set(owned.map((v) => v.id));
@@ -112,7 +99,7 @@ export function SavedViewsManageTable({
       return null;
     }
     return (
-      <div className="saved-views-manage-actions-cell">
+      <div className="saved-views-manage-actions-cell saved-views-manage-actions-m5">
         <Button
           type="button"
           variant="secondary"
@@ -122,11 +109,21 @@ export function SavedViewsManageTable({
           {view.pinnedSidebar ? t('savedViews.unpin') : t('savedViews.pinSidebar')}
         </Button>
         <IconButton
-          icon={MoreHorizontal}
-          className="saved-views-row-menu-btn"
-          label={t('savedViews.rowMenuAria', { name: view.name })}
-          expanded={menuOpen && menuView?.id === view.id}
-          onClick={(e) => { openMenu(view, e.currentTarget); }}
+          icon={Pencil}
+          size="sm"
+          className="saved-views-row-action-btn"
+          label={t('savedViews.rename')}
+          onClick={() => {
+            setRenameId(view.id);
+            setRenameValue(view.name);
+          }}
+        />
+        <IconButton
+          icon={Trash2}
+          size="sm"
+          className="saved-views-row-action-btn library-inline-action-danger"
+          label={t('common.delete')}
+          onClick={() => { setDeleteTarget(view); }}
         />
       </div>
     );
@@ -251,38 +248,6 @@ export function SavedViewsManageTable({
           </tbody>
         </table>
       </div>
-
-      <ContextMenu
-        open={menuOpen && menuView != null}
-        x={menuPos.x}
-        y={menuPos.y}
-        anchorRef={menuAnchorRef}
-        onClose={() => { setMenuOpen(false); }}
-        items={[
-          {
-            kind: 'item',
-            id: 'rename',
-            label: t('savedViews.rename'),
-            onSelect: () => {
-              if (!menuView) return;
-              setRenameId(menuView.id);
-              setRenameValue(menuView.name);
-              setMenuOpen(false);
-            },
-          },
-          {
-            kind: 'item',
-            id: 'delete',
-            label: t('common.delete'),
-            danger: true,
-            onSelect: () => {
-              if (!menuView) return;
-              setDeleteTarget(menuView);
-              setMenuOpen(false);
-            },
-          },
-        ]}
-      />
 
       <ConfirmDialog
         open={deleteTarget != null}

@@ -3,7 +3,12 @@
 import type { DocumentDto, LabelRecommendationDto } from '@docuvate/contracts';
 import { describe, expect, it } from 'vitest';
 
-import { enrichMergeRecommendations, prepareLabelQueue, sortLabelQueue } from './labelsQueue';
+import {
+  enrichAssignRecommendations,
+  enrichMergeRecommendations,
+  prepareLabelQueue,
+  sortLabelQueue,
+} from './labelsQueue';
 
 function rec(
   partial: Partial<LabelRecommendationDto> & Pick<LabelRecommendationDto, 'id' | 'kind' | 'score'>
@@ -48,6 +53,32 @@ describe('sortLabelQueue', () => {
       rec({ id: 'a2', kind: 'assign', score: 40 }),
     ];
     expect(sortLabelQueue(items).map((i) => i.id)).toEqual(['a2', 'a1']);
+  });
+});
+
+describe('enrichAssignRecommendations', () => {
+  it('merges assign rows with the same tag into one item', () => {
+    const items = [
+      rec({
+        id: 'assign:d1:tag-a',
+        kind: 'assign',
+        score: 80,
+        tagId: 'tag-a',
+        sampleDocumentIds: ['d1'],
+        sampleDocuments: [{ id: 'd1', title: 'D1', filename: 'd1.pdf', status: 'ready' }],
+      }),
+      rec({
+        id: 'assign:d2:tag-a',
+        kind: 'assign',
+        score: 70,
+        tagId: 'tag-a',
+        sampleDocumentIds: ['d2'],
+        sampleDocuments: [{ id: 'd2', title: 'D2', filename: 'd2.pdf', status: 'ready' }],
+      }),
+    ];
+    const enriched = enrichAssignRecommendations(items);
+    expect(enriched).toHaveLength(1);
+    expect(enriched[0]?.sampleDocuments?.map((d) => d.id)).toEqual(['d1', 'd2']);
   });
 });
 

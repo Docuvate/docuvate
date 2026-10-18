@@ -3,7 +3,11 @@
 import type { TagSuggestionDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 
-import { acceptDocumentTagSuggestion, dismissDocumentTagSuggestion } from '../../lib/api';
+import {
+  acceptDocumentTagSuggestion,
+  dismissDocumentTagSuggestion,
+  removeDocumentTag,
+} from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
 import { useToastNotify } from '../save/ToastProvider';
 import { Chip } from '../ui/Chip';
@@ -24,7 +28,7 @@ export function DocumentLabelSuggestionChips({
   onUpdated,
 }: Props) {
   const { t } = useTranslation();
-  const { pushError } = useToastNotify();
+  const { pushError, pushSuccess } = useToastNotify();
 
   const open = suggestions.filter((item) => !assignedTagIds.has(item.tag.id));
   if (open.length === 0) {
@@ -32,9 +36,15 @@ export function DocumentLabelSuggestionChips({
   }
 
   async function accept(tagId: string) {
+    const tagName = open.find((item) => item.tag.id === tagId)?.tag.name ?? '';
     try {
       await acceptDocumentTagSuggestion(documentId, tagId);
       await onUpdated();
+      pushSuccess(t('documents.labelAssignedToast', { name: tagName }), {
+        undo: () => {
+          void removeDocumentTag(documentId, tagId).then(() => onUpdated());
+        },
+      });
     } catch (err) {
       pushError(formatUserFacingError(err, 'errors.generic'));
     }

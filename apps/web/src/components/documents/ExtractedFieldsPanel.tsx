@@ -11,6 +11,7 @@ import {
   type TagCustomFieldDefinitionDto,
   type TagDto,
 } from '@docuvate/contracts';
+import { X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +21,7 @@ import { labelFieldDisplayName } from '../../lib/labelFieldDisplay';
 import { attemptStatusTranslationKey } from '../../lib/recognizedFieldAttemptDisplay';
 import { definitionIdForFieldKey } from '../../lib/recognizedFieldDefinitionIndex';
 import { Button } from '../ui/Button';
+import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
 
 interface ExtractedFieldsPanelProps {
@@ -33,8 +35,10 @@ interface ExtractedFieldsPanelProps {
   fieldAttempts?: RecognizedFieldExtractionAttemptDto[];
   saving: boolean;
   fieldsDirty: boolean;
+  baselineFields?: ExtractedField[];
   feedbackRecordedCount?: number;
   onFieldsChange: (fields: ExtractedField[]) => void;
+  onDiscardField?: (key: string) => void;
   onSave: () => void;
 }
 
@@ -49,8 +53,10 @@ export function ExtractedFieldsPanel({
   onAcceptSuggestion,
   saving,
   fieldsDirty,
+  baselineFields = [],
   feedbackRecordedCount = 0,
   onFieldsChange,
+  onDiscardField,
   onSave,
 }: ExtractedFieldsPanelProps) {
   const { t, i18n } = useTranslation();
@@ -85,6 +91,14 @@ export function ExtractedFieldsPanel({
 
   function rowKey(field: ExtractedField): string {
     return field.tagId ? `${field.tagId}:${semanticFieldKey(field)}` : semanticFieldKey(field);
+  }
+
+  function baselineValueFor(field: ExtractedField): string {
+    return baselineFields.find((row) => row.key === field.key)?.value ?? field.value;
+  }
+
+  function fieldRowDirty(field: ExtractedField): boolean {
+    return field.value !== baselineValueFor(field);
   }
 
   return (
@@ -160,19 +174,30 @@ export function ExtractedFieldsPanel({
         </p>
         <div className="extraction-fields-grid extraction-fields-grid-compact">
           {visibleFields.map((field) => (
-            <label key={rowKey(field)} className="extraction-field-cell">
-              <span className="extraction-field-label">{displayLabel(field)}</span>
-              <Input
-                value={field.value}
-                onChange={(e) => {
-                  onFieldsChange(
-                    fields.map((row) =>
-                      row.key === field.key ? { ...row, value: e.target.value } : row
-                    )
-                  );
-                }}
-              />
-            </label>
+            <div key={rowKey(field)} className="extraction-field-cell extraction-field-cell-row">
+              <label className="extraction-field-cell">
+                <span className="extraction-field-label">{displayLabel(field)}</span>
+                <Input
+                  value={field.value}
+                  onChange={(e) => {
+                    onFieldsChange(
+                      fields.map((row) =>
+                        row.key === field.key ? { ...row, value: e.target.value } : row
+                      )
+                    );
+                  }}
+                />
+              </label>
+              {fieldRowDirty(field) && onDiscardField ? (
+                <IconButton
+                  icon={X}
+                  size="sm"
+                  className="extraction-field-discard-btn"
+                  label={t('save.discard')}
+                  onClick={() => { onDiscardField(field.key); }}
+                />
+              ) : null}
+            </div>
           ))}
         </div>
         {fieldsDirty ? (

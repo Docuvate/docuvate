@@ -75,7 +75,10 @@ function TodoRowMain(props: TodoRowMainProps) {
   const { t } = useTranslation();
   const reason = todoWhyLine(item, t, documentCountByTagId);
   const sampleDocuments = item.sampleDocuments ?? [];
-  const clusterDocuments = item.kind === 'new' ? sampleDocuments : [];
+  const clusterDocuments =
+    (item.kind === 'new' || item.kind === 'assign') && sampleDocuments.length > 1
+      ? sampleDocuments
+      : [];
   const showClusterPicker = clusterDocuments.length > 1;
   const mergeNames = mergeLabelPairNames(item);
 
@@ -180,7 +183,7 @@ export function LabelsTodoQueue(props: Props) {
     setSelectedByItemId((prev) => {
       const next = new Map(prev);
       for (const item of props.items) {
-        if (item.kind !== 'new') {
+        if (item.kind !== 'new' && item.kind !== 'assign') {
           continue;
         }
         const documents = item.sampleDocuments ?? [];
@@ -225,12 +228,13 @@ export function LabelsTodoQueue(props: Props) {
 
   const wrapAccept = (item: LabelRecommendationDto) => {
     const documents = item.sampleDocuments ?? [];
-    const selected =
-      item.kind === 'new' && documents.length > 1
-        ? (selectedByItemId.get(item.id) ?? initialSelectedDocumentIds(documents))
-        : initialSelectedDocumentIds(documents);
+    const usesSubsetPicker =
+      (item.kind === 'new' || item.kind === 'assign') && documents.length > 1;
+    const selected = usesSubsetPicker
+      ? (selectedByItemId.get(item.id) ?? initialSelectedDocumentIds(documents))
+      : initialSelectedDocumentIds(documents);
     const options: LabelRecommendationAcceptOptions | undefined =
-      item.kind === 'new' && documents.length > 0
+      (item.kind === 'new' || item.kind === 'assign') && documents.length > 0
         ? {
             documentIds: selectedDocumentIds(documents, selected),
             excludedDocumentIds: excludedDocumentIds(documents, selected),
@@ -288,18 +292,18 @@ export function LabelsTodoQueue(props: Props) {
       <ul className="suggest-list label-rec-suggest-list labels-todo-list">
         {ordered.map((item) => {
           const documents = item.sampleDocuments ?? [];
-          const selected =
-            item.kind === 'new' && documents.length > 1
-              ? (selectedByItemId.get(item.id) ?? initialSelectedDocumentIds(documents))
-              : new Set<string>();
+          const usesSubsetPicker =
+            (item.kind === 'new' || item.kind === 'assign') && documents.length > 1;
+          const selected = usesSubsetPicker
+            ? (selectedByItemId.get(item.id) ?? initialSelectedDocumentIds(documents))
+            : new Set<string>();
           const selectedCount = selected.size;
           const totalCount = documents.length;
           const acceptDisabled =
             props.busyId === item.id ||
             exitingIds.has(item.id) ||
             clusterAcceptDisabled(item, selectedCount, totalCount);
-          const acceptVariant =
-            item.kind === 'new' && totalCount > 1 ? 'primary' : 'secondary';
+          const acceptVariant = usesSubsetPicker ? 'primary' : 'secondary';
 
           return (
             <li
