@@ -3993,7 +3993,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 .global-chat-empty-icon {
   width: 3.5rem;
   height: 3.5rem;
-  border-radius: 999px;
+  border-radius: var(--dv-radius-lg);
   display: grid;
   place-items: center;
   background: var(--dv-color-accent-soft);
@@ -4131,7 +4131,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 .review-wizard-step-badge {
   width: 1.5rem;
   height: 1.5rem;
-  border-radius: 999px;
+  border-radius: var(--dv-radius-lg);
   display: grid;
   place-items: center;
   font-size: var(--dv-font-caption-xs-size);
