@@ -20,6 +20,8 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { globalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
+import { upsertDocumentFieldValue } from '../../search/infrastructure/document-field-value-index.js';
 import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
 import {
   type DocumentExtractionRows,
@@ -38,7 +40,6 @@ const LIST_SELECT = `
   SELECT d.*,
     EXISTS (SELECT 1 FROM document_layout_ir li WHERE li.document_id = d.id) AS layout_ir_available,
     f.name AS folder_name,
-    c.id AS corr_id, c.name AS corr_name,
     COALESCE(
       json_agg(
         json_build_object(
@@ -55,7 +56,6 @@ const LIST_SELECT = `
     ) AS tags_json
   FROM documents d
   LEFT JOIN folders f ON f.id = d.folder_id
-  LEFT JOIN correspondents c ON c.id = d.correspondent_id
   LEFT JOIN document_tags dtag ON dtag.document_id = d.id
   LEFT JOIN tags t ON t.id = dtag.tag_id
 `;
@@ -101,8 +101,8 @@ export class PgDocumentRepository implements DocumentRepository {
     await this.pool.query(
       `INSERT INTO documents (
         id, user_id, filename, title, mime_type, file_size_bytes, storage_key, status,
-        document_date, notes, folder_id, correspondent_id, ingest_source, created_at, updated_at
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+        document_date, notes, folder_id, ingest_source, created_at, updated_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
       [
         doc.id,
         doc.userId,
@@ -115,7 +115,6 @@ export class PgDocumentRepository implements DocumentRepository {
         doc.documentDate ?? null,
         doc.notes ?? null,
         doc.folderId ?? null,
-        doc.correspondent?.id ?? null,
         doc.ingestSource ?? null,
         doc.createdAt,
         doc.updatedAt,
@@ -133,7 +132,7 @@ export class PgDocumentRepository implements DocumentRepository {
 
   async findById(id: string): Promise<DocumentEntity | null> {
     const result = await this.pool.query(
-      `${LIST_SELECT} WHERE d.id = $1 GROUP BY d.id, f.id, c.id`,
+      `${LIST_SELECT} WHERE d.id = $1 GROUP BY d.id, f.id`,
       [id]
     );
     if (!result.rows[0]) return null;
@@ -144,7 +143,7 @@ export class PgDocumentRepository implements DocumentRepository {
 
   async findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null> {
     const result = await this.pool.query(
-      `${LIST_SELECT} WHERE d.id = $1 AND d.user_id = $2 GROUP BY d.id, f.id, c.id`,
+      `${LIST_SELECT} WHERE d.id = $1 AND d.user_id = $2 GROUP BY d.id, f.id`,
       [id, userId]
     );
     if (!result.rows[0]) return null;
@@ -178,7 +177,7 @@ export class PgDocumentRepository implements DocumentRepository {
 
     const sql = `${LIST_SELECT}
       WHERE ${whereSql}
-      GROUP BY d.id, f.id, c.id
+      GROUP BY d.id, f.id
       ORDER BY ${orderBy} ${order} NULLS LAST`;
 
     const result = await this.pool.query(sql, params);
@@ -412,11 +411,6 @@ export class PgDocumentRepository implements DocumentRepository {
       idx += 1;
       params.push(patch.folderId);
     }
-    if (patch.correspondentId !== undefined) {
-      fields.push(`correspondent_id = $${String(idx)}`);
-      idx += 1;
-      params.push(patch.correspondentId);
-    }
     const nextFields =
       patch.extractionFields !== undefined
         ? dedupeExtractedFields(patch.extractionFields)
@@ -513,18 +507,28 @@ export class PgDocumentRepository implements DocumentRepository {
     return result.rowCount ?? 0;
   }
 
-  async setCorrespondentForDocuments(
+  async setAbsenderFieldForDocuments(
     userId: string,
     documentIds: string[],
-    correspondentId: string | null
+    value: string | null
   ): Promise<number> {
     if (documentIds.length === 0) return 0;
-    const result = await this.pool.query(
-      `UPDATE documents SET correspondent_id = $3, updated_at = now()
-       WHERE user_id = $1 AND id = ANY($2::uuid[])`,
-      [userId, documentIds, correspondentId]
-    );
-    return result.rowCount ?? 0;
+    const storageKey = globalFieldStorageKey('absender');
+    let updated = 0;
+    for (const documentId of documentIds) {
+      const owned = await this.pool.query(
+        `SELECT id FROM documents WHERE user_id = $1 AND id = $2`,
+        [userId, documentId]
+      );
+      if (owned.rowCount === 0) continue;
+      await upsertDocumentFieldValue(this.pool, documentId, userId, {
+        key: storageKey,
+        value: value ?? '',
+      });
+      await this.pool.query(`UPDATE documents SET updated_at = now() WHERE id = $1`, [documentId]);
+      updated += 1;
+    }
+    return updated;
   }
 
   async setFolderForDocuments(
@@ -603,14 +607,8 @@ export class PgDocumentRepository implements DocumentRepository {
 
   private mapRow(row: Record<string, unknown>, extraction: DocumentExtractionRows): DocumentEntity {
     const tags = parseTagsJson(row.tags_json);
-    const corrId = row.corr_id;
-    const corrIdStr =
-      corrId === null || corrId === undefined ? null : parseString(corrId);
     return mapDocumentRow(row, {
       tags,
-      correspondent: corrIdStr
-        ? { id: corrIdStr, name: parseString(row.corr_name) }
-        : null,
       extraction,
     });
   }

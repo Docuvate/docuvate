@@ -13,7 +13,7 @@ export function savedViewToDocumentListQuery(view: SavedDocumentViewEntity): Doc
     withoutNonInboxLabel: view.withoutNonInboxLabel ?? undefined,
     tagIds: view.tagIds.length > 0 ? view.tagIds : undefined,
     folderId: view.folderId ?? undefined,
-    correspondentId: view.correspondentId ?? undefined,
+    fieldFilters: view.fieldFilters.length > 0 ? view.fieldFilters : undefined,
     documentDateFrom: view.documentDateFrom ?? undefined,
     documentDateTo: view.documentDateTo ?? undefined,
     q: view.searchQuery.trim() || undefined,

@@ -56,11 +56,6 @@ export function buildDocumentListFilterSql(
     paramIndex += 2;
     params.push(storageKey, entry.valueText.trim());
   }
-  if (filters.correspondentId) {
-    conditions.push(`d.correspondent_id = $${String(paramIndex)}`);
-    paramIndex += 1;
-    params.push(filters.correspondentId);
-  }
   const tagIds = filters.tagIds?.filter(Boolean) ?? (filters.tagId ? [filters.tagId] : undefined);
   if (tagIds?.length) {
     for (const tagId of tagIds) {
