@@ -139,7 +139,7 @@ wait_core_resources() {
     sleep 2
   done
   echo "Timed out waiting for secrets and postgres"
-  kubectl -n docuvate get events --sort-by=.lastTimestamp | tail -25
+  kubectl -n docuvate get events --sort-by=.metadata.creationTimestamp | tail -25
   return 1
 }
 
@@ -297,7 +297,7 @@ if ! helm upgrade --install docuvate "$ROOT/deploy/helm/docuvate" \
   --set minio.initUseAwsCli=false \
   --set mailpit.image="${REG_PULL}/mailpit:v1.31.4" \
   --namespace docuvate --wait --timeout=20m 2>&1 | tee "$ART/helm-install.log"; then
-  kubectl -n docuvate get pods,jobs,events --sort-by=.lastTimestamp | tail -40 >>"$ART/job-debug.txt" 2>&1 || true
+  kubectl -n docuvate get pods,jobs,events --sort-by=.metadata.creationTimestamp | tail -40 >>"$ART/job-debug.txt" 2>&1 || true
   dump_job_debug "docuvate-db-migrate-${JOB_SUFFIX}"
   exit 1
 fi
@@ -312,7 +312,7 @@ if ! helm upgrade docuvate "$ROOT/deploy/helm/docuvate" \
   --set minio.initUseAwsCli=false \
   --set mailpit.image="${REG_PULL}/mailpit:v1.31.4" \
   --namespace docuvate --wait --timeout=20m 2>&1 | tee "$ART/helm-upgrade.log"; then
-  kubectl -n docuvate get pods,jobs,events --sort-by=.lastTimestamp | tail -40 >>"$ART/job-debug.txt" 2>&1 || true
+  kubectl -n docuvate get pods,jobs,events --sort-by=.metadata.creationTimestamp | tail -40 >>"$ART/job-debug.txt" 2>&1 || true
   exit 1
 fi
 
