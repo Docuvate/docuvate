@@ -84,13 +84,11 @@ function AdminUserActionsCell({
   user,
   state,
   busy,
-  t,
   onMenuAction,
 }: {
   user: AdminUserDto;
   state: UserRowState;
   busy: boolean;
-  t: (key: string) => string;
   onMenuAction: (action: AdminUserMenuAction) => void;
 }) {
   const { self, actionsDisabled } = state;
@@ -169,7 +167,6 @@ export function AdminUsersTable({
                     user={user}
                     state={state}
                     busy={busy}
-                    t={t}
                     onMenuAction={onMenuAction}
                   />
                 </td>
@@ -211,7 +208,6 @@ export function AdminUsersTable({
                     user={user}
                     state={state}
                     busy={busy}
-                    t={t}
                     onMenuAction={onMenuAction}
                   />
                 </div>
