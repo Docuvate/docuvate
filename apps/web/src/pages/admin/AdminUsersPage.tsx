@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AdminSettingsLayout } from '../../components/admin/AdminSettingsLayout';
-import type { AdminUserMenuAction } from '../../components/admin/AdminUserActionsMenu';
+import type { AdminUserMenuAction } from '../../components/admin/AdminUserRowActions';
 import { AdminUsersInvitePanel } from '../../components/admin/AdminUsersInvitePanel';
 import { AdminUsersTable } from '../../components/admin/AdminUsersTable';
 import { useToast } from '../../components/save/ToastProvider';

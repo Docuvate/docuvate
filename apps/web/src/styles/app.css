@@ -12738,7 +12738,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .admin-users-table--spec .admin-users-col-actions {
-  width: 2.25rem;
+  width: 4.5rem;
+  min-width: 4.5rem;
+  max-width: 4.5rem;
   padding-inline: var(--dv-space-2xs);
 }
 
@@ -12781,16 +12783,22 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .admin-users-actions-cell {
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: center;
-  gap: var(--dv-space-2xs);
+  justify-content: flex-end;
+  gap: 0;
 }
 
-.admin-users-overflow-btn.icon-btn {
-  width: 2.25rem;
-  height: 2.25rem;
-  min-width: 2.25rem;
-  min-height: 2.25rem;
+.admin-users-actions-cell--reserved {
+  min-height: var(--dv-icon-btn-sm);
+}
+
+.admin-users-action-danger {
+  color: var(--dv-color-danger);
+}
+
+.admin-users-action-danger:hover:not(:disabled) {
+  color: var(--dv-color-danger-strong);
 }
 
 .admin-users-table tbody tr {

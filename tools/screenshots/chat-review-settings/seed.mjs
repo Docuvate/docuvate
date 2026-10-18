@@ -24,7 +24,7 @@ const SCREENSHOT_USER = {
 
 const E10_FIXTURE = {
   invited: {
-    email: 'mustermensch@docuvate.de',
+    email: 'mustermensch@fixture.docuvate.test',
     name: 'Hades Mustermensch',
   },
   member: {

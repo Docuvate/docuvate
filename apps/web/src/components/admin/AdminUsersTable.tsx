@@ -7,7 +7,7 @@ import { formatAdminLastLogin } from '../../lib/adminLastLogin';
 import { parseInstanceRole } from '../../lib/instanceRole';
 import { Select } from '../ui/Select';
 import { getUserRowState, type UserRowState } from './admin-user-row-state';
-import { AdminUserActionsMenu, type AdminUserMenuAction } from './AdminUserActionsMenu';
+import { type AdminUserMenuAction,AdminUserRowActions } from './AdminUserRowActions';
 import { AdminUserStatusBadge } from './AdminUserStatusBadge';
 
 interface Props {
@@ -92,19 +92,21 @@ function AdminUserActionsCell({
   onMenuAction: (action: AdminUserMenuAction) => void;
 }) {
   const { self, actionsDisabled } = state;
-  if (self) {
-    return null;
-  }
   return (
-    <div className="admin-users-actions-cell">
-      <AdminUserActionsMenu
-        user={user}
-        busy={busy}
-        disabled={actionsDisabled}
-        onSelect={(action) => {
-          onMenuAction(action);
-        }}
-      />
+    <div
+      className={`admin-users-actions-cell${self ? ' admin-users-actions-cell--reserved' : ''}`}
+      aria-hidden={self ? true : undefined}
+    >
+      {self ? null : (
+        <AdminUserRowActions
+          user={user}
+          busy={busy}
+          disabled={actionsDisabled}
+          onSelect={(action) => {
+            onMenuAction(action);
+          }}
+        />
+      )}
     </div>
   );
 }
