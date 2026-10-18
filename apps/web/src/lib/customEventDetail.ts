@@ -6,16 +6,22 @@ export function readCustomEventDetail(event: Event): unknown {
   return event instanceof CustomEvent ? event.detail : undefined;
 }
 
-export function readNotifySavedDetail(event: Event): { message?: string } | undefined {
+export function readNotifySavedDetail(
+  event: Event
+): { message?: string; undo?: () => void } | undefined {
   const detail = readCustomEventDetail(event);
   if (!isRecord(detail)) {
     return undefined;
   }
   const message = detail.message;
-  if (message === undefined) {
-    return {};
+  if (message !== undefined && typeof message !== 'string') {
+    return undefined;
   }
-  return typeof message === 'string' ? { message } : undefined;
+  const undo = isVoidCallback(detail.undo) ? detail.undo : undefined;
+  return {
+    ...(message === undefined ? {} : { message }),
+    ...(undo === undefined ? {} : { undo }),
+  };
 }
 
 export function readNotifySaveErrorDetail(
