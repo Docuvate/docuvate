@@ -21,7 +21,7 @@ import {
 
 const siteRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const srcDir = join(siteRoot, 'public', 'screenshots');
-const storeDir = process.env.LANDING_R5_STORE ?? '/cursor/stores/self/landing-r5';
+const storeDir = process.env.LANDING_R5_STORE ?? '.artifacts/landing-r5';
 const captureSha =
   process.env.CAPTURE_GIT_SHA ?? execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
 

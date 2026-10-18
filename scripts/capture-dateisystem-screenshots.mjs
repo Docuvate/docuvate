@@ -7,7 +7,7 @@ import { execSync } from 'node:child_process';
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
-const OUT = process.env.SCREENSHOT_DIR ?? '/opt/cursor/artifacts/screenshots';
+const OUT = process.env.SCREENSHOT_DIR ?? '.artifacts/screenshots';
 const BASE = process.env.WEB_BASE ?? 'http://127.0.0.1:5173';
 const EXPECT_SHA = process.env.VITE_BUILD_SHA ?? process.env.EXPECT_BUILD_SHA;
 

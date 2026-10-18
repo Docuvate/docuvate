@@ -15,7 +15,7 @@ import { execSync } from 'node:child_process';
 
 const siteRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const srcDir = join(siteRoot, 'qa-screenshots');
-const storeDir = process.env.LANDING_R9_STORE ?? '/cursor/stores/self/landing-r9';
+const storeDir = process.env.LANDING_R9_STORE ?? '.artifacts/landing-r9';
 const captureSha = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
 
 mkdirSync(storeDir, { recursive: true });

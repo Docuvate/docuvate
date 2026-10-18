@@ -22,7 +22,7 @@ import {
 const siteRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const qaDir = join(siteRoot, 'qa-screenshots');
 const publicDir = join(siteRoot, 'public', 'screenshots');
-const storeDir = process.env.LANDING_R7_STORE ?? '/cursor/stores/self/landing-r7';
+const storeDir = process.env.LANDING_R7_STORE ?? '.artifacts/landing-r7';
 const mobilePartPattern = /^landing-(de|en)-390-(light|dark)-part[1-4]\.png$/;
 const captureSha =
   process.env.CAPTURE_GIT_SHA ?? execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();

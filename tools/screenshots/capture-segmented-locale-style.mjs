@@ -12,7 +12,7 @@ import path from 'node:path';
 const BASE = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:4173';
 const OUT = process.env.SCREENSHOT_DIR
   ? path.resolve(process.env.SCREENSHOT_DIR)
-  : '/opt/cursor/artifacts/segmented-locale-style';
+  : '.artifacts/segmented-locale-style';
 
 async function setTheme(page, theme) {
   await page.evaluate((t) => {

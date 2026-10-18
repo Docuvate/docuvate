@@ -10,7 +10,7 @@ import path from 'node:path';
 const BASE = process.env.WEB_BASE ?? 'http://localhost:5173';
 const API = `${BASE}/api/v1`;
 const ORIGIN = new URL(BASE).origin;
-const OUT = process.env.SCREENSHOT_DIR ?? '/cursor/stores/self/library-polish';
+const OUT = process.env.SCREENSHOT_DIR ?? '.artifacts/library-polish';
 const authHeaders = { Origin: ORIGIN, Referer: `${ORIGIN}/` };
 const EMAIL =
   process.env.SCREENSHOT_USER_EMAIL ?? 'labels-screenshots@docuvate.local';

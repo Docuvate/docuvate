@@ -16,7 +16,7 @@ const REPO_ROOT = path.resolve(__dirname, '../../..');
 const EXPECT_SHA = execSync('git -C ' + REPO_ROOT + ' rev-parse HEAD').toString().trim();
 const OUT = process.env.SCREENSHOT_DIR
   ? path.resolve(process.env.SCREENSHOT_DIR)
-  : '/opt/cursor/artifacts/layout-screenshots';
+  : '.artifacts/layout-screenshots';
 const FIXTURES = path.join(__dirname, 'fixtures');
 const BASE = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:5173';
 const EMAIL = process.env.SEED_EMAIL ?? 'labels-screenshots@docuvate.local';

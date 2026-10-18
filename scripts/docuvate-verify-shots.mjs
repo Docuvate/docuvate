@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 
 const EXPECT_SHA = execSync('git -C /workspace rev-parse --short HEAD').toString().trim();
 const BASE = process.env.DOCUVATE_WEB_URL ?? 'http://127.0.0.1:5174';
-const OUT = '/opt/cursor/artifacts/settings-shots';
+const OUT = '.artifacts/settings-shots';
 mkdirSync(OUT, { recursive: true });
 
 const email = 'screenshot-user@test.local';
@@ -177,8 +177,8 @@ async function main() {
 
   const page3 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await login(page3);
-  await deleteDialog(page3, 'de', 'dark', '/opt/cursor/artifacts/delete-dialog-de-dark.png');
-  await deleteDialog(page3, 'en', 'light', '/opt/cursor/artifacts/delete-dialog-en-light.png');
+  await deleteDialog(page3, 'de', 'dark', '.artifacts/delete-dialog-de-dark.png');
+  await deleteDialog(page3, 'en', 'light', '.artifacts/delete-dialog-en-light.png');
   await browser.close();
 
   console.log('EXPECTED_SHA', EXPECT_SHA);

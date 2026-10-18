@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const siteRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const srcDir = join(siteRoot, 'qa-screenshots');
-const storeDir = process.env.LANDING_R10_STORE ?? '/cursor/stores/self/landing-r10';
+const storeDir = process.env.LANDING_R10_STORE ?? '.artifacts/landing-r10';
 const captureSha = execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
 const files = ['docs-api-de-1440-light.png', 'docs-api-de-1440-dark.png'];
 

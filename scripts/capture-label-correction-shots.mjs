@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { chromium } from 'playwright';
 
 const BASE = process.env.WEB_BASE_URL ?? 'http://localhost:5173';
-const OUT = process.env.E2E_ARTIFACT_DIR ?? '/opt/cursor/artifacts/screenshots';
+const OUT = process.env.E2E_ARTIFACT_DIR ?? '.artifacts/screenshots';
 const WIDTHS = [1440, 1024];
 
 async function capture(width, suffix) {

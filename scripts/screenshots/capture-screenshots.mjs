@@ -11,9 +11,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const OUT = '/opt/cursor/artifacts/e2e-ux-fixes';
-const STORE_OUT = '/cursor/stores/self/artifacts/e2e-ux-fixes';
-const PR80_SHOTS = '/cursor/stores/self/pr80-shots';
+const OUT = '.artifacts/e2e-ux-fixes';
+const STORE_OUT = '.artifacts/e2e-ux-fixes';
+const PR80_SHOTS = '.artifacts/pr80-shots';
 const PROJEKT_MAPPE_NAME = 'Projekt';
 const BASE = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:5173';
 const API = `${BASE}/api/v1`;

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 
 const siteRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
-const storeDir = process.env.LANDING_R5_STORE ?? '/cursor/stores/self/landing-r5';
+const storeDir = process.env.LANDING_R5_STORE ?? '.artifacts/landing-r5';
 const baseUrl = process.env.SITE_URL ?? 'http://127.0.0.1:8081';
 
 const dashDe = execSync("rg -n '[\\u2013\\u2014\\u2012]|—|–' src/content/de.ts || true", {

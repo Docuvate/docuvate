@@ -1,6 +1,6 @@
 # Landing site on GitHub Pages
 
-The public marketing site is built from `apps/site` in the private monorepo and published to the **public** repository [Docuvate/docuvate.github.io](https://github.com/Docuvate/docuvate.github.io). GitHub Free does not serve Pages from private repos; Actions billing is disabled for the org, so publishing is a **local build + git push** of static files only.
+The public marketing site is built from `apps/site` in this repository and published to the **public** repository [Docuvate/docuvate.github.io](https://github.com/Docuvate/docuvate.github.io). Publishing is a **local build + git push** of static files only.
 
 ## Build output
 
@@ -44,7 +44,7 @@ Requires **gitleaks** on your PATH (`brew install gitleaks` or see upstream rele
 `main` has a ruleset that **blocks force pushes and branch deletion** and requires **linear history**. The publish script therefore:
 
 1. Clones (or reuses) the public repo and `git pull --ff-only origin main`.
-2. Deletes every file in the clone except `.git`, copies the new build output, adds `.nojekyll` and a short root `README.md` (source lives in the private monorepo).
+2. Deletes every file in the clone except `.git`, copies the new build output, adds `.nojekyll` and a short root `README.md` (source lives in `apps/site` of this repository).
 3. Commits and runs `git push origin main` with **no `--force`** and **no orphan branch**.
 
 If your local clone is behind `origin/main`, the script exits so you can `git pull --ff-only` and retry.

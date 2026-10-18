@@ -3,7 +3,7 @@ import { mkdirSync } from 'fs';
 import { join } from 'path';
 
 const BASE = process.env.DOCUVATE_WEB_URL ?? 'http://127.0.0.1:5174';
-const OUT = process.env.OUT_DIR ?? '/opt/cursor/artifacts/settings-callout-fix';
+const OUT = process.env.OUT_DIR ?? '.artifacts/settings-callout-fix';
 const PREFIX = process.env.SHOT_PREFIX ?? 'after';
 const email = 'screenshot-user@test.local';
 const password = 'TestPass123!';

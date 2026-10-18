@@ -10,7 +10,7 @@ import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const BASE = process.env.WEB_BASE ?? 'http://localhost:5173';
-const OUT = process.env.SCREENSHOT_DIR ?? '/opt/cursor/artifacts/screenshots/errors';
+const OUT = process.env.SCREENSHOT_DIR ?? '.artifacts/screenshots/errors';
 const EMAIL = process.env.SEED_EMAIL ?? 'labels-screenshots@docuvate.local';
 const PASSWORD = process.env.SEED_PASSWORD ?? 'LabelsScreenshot1!';
 const SKIP_LOGIN = process.env.SKIP_LOGIN === '1' || process.env.VITE_ERROR_SCREENSHOT_HARNESS === 'true';

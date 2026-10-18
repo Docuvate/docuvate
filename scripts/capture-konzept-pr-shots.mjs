@@ -11,7 +11,7 @@ import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const BASE = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:5173';
-const OUT = process.env.SCREENSHOT_DIR ?? '/opt/cursor/artifacts/konzept-pr';
+const OUT = process.env.SCREENSHOT_DIR ?? '.artifacts/konzept-pr';
 const PR_SET = process.env.PR_SET ?? 'start';
 
 const WIDTHS = [1440, 1024, 390];

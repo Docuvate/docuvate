@@ -5,7 +5,7 @@ import { execSync } from 'child_process';
 
 const EXPECT_SHA = execSync('git -C /workspace rev-parse --short HEAD').toString().trim();
 const BASE = process.env.DOCUVATE_WEB_URL ?? 'http://127.0.0.1:5174';
-const OUT = process.env.OUT_DIR ?? '/opt/cursor/artifacts/settings-merge-proof';
+const OUT = process.env.OUT_DIR ?? '.artifacts/settings-merge-proof';
 mkdirSync(OUT, { recursive: true });
 
 const email = 'screenshot-user@test.local';

@@ -75,3 +75,6 @@ packages/sdk-flutter/example/pubspec.lock
 
 tools/screenshots/sftp/out/
 tools/flutter
+
+# Local screenshot / capture output
+.artifacts/

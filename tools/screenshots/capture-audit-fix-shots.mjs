@@ -5,7 +5,7 @@ import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 const BASE = process.env.SCREENSHOT_BASE_URL ?? 'http://localhost:4173';
-const OUT = process.env.SCREENSHOT_DIR ?? '/opt/cursor/artifacts/audit-fix-shots';
+const OUT = process.env.SCREENSHOT_DIR ?? '.artifacts/audit-fix-shots';
 const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'alex.upload@fixture.docuvate.test';
 const PASSWORD = process.env.E2E_SMOKE_PASSWORD ?? 'E2eSmokeFixture1!';
 
