@@ -819,7 +819,7 @@ export type SavedDocumentViewDtoClass = {
     visibility: 'private' | 'shared';
     ownerUserId: string;
     searchQuery: string;
-    sort: 'createdAt' | 'updatedAt' | 'title' | 'documentDate';
+    sort: 'title' | 'documentDate' | 'createdAt' | 'updatedAt';
     order: 'asc' | 'desc';
     viewMode: 'klassisch' | 'karten' | 'fokus';
     filterMode: 'query' | 'ui';
