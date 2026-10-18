@@ -17,27 +17,30 @@ const { hash } = require('@node-rs/argon2');
 const databaseUrl = process.env.DATABASE_URL ?? 'postgresql://docuvate:docuvate@localhost:5433/docuvate';
 const authBase = process.env.AUTH_BASE ?? 'http://127.0.0.1:3001';
 const webOrigin = process.env.WEB_ORIGIN ?? 'http://localhost:5173';
+/** Fixture admin from tools/screenshots/admin/seed-admin-screenshots.mjs (invite-only auth). */
 const seedEmail = process.env.SEED_EMAIL ?? 'elena.kraemer@beispiel.de';
-const seedPassword = process.env.SEED_PASSWORD ?? 'ElenaScreenshot1!';
+const seedPassword = process.env.SEED_PASSWORD ?? 'AdminDemo12!';
 const seedName = process.env.SEED_NAME ?? 'Elena Krämer';
 const accountCount = Math.min(2, Math.max(1, Number(process.env.SFTP_SCREENSHOT_ACCOUNT_COUNT ?? '1') || 1));
 
 const DEMO_USERNAMES = ['buero-scanner', 'konferenz-scanner'];
 
 async function ensureUser(pool) {
-  const res = await fetch(`${authBase}/api/auth/sign-up/email`, {
+  const signIn = await fetch(`${authBase}/api/auth/sign-in/email`, {
     method: 'POST',
     headers: { 'content-type': 'application/json', origin: webOrigin },
-    body: JSON.stringify({ email: seedEmail, password: seedPassword, name: seedName }),
+    body: JSON.stringify({ email: seedEmail, password: seedPassword }),
   });
-  if (!res.ok && res.status !== 422) {
-    const text = await res.text();
-    throw new Error(`sign-up failed ${res.status}: ${text}`);
+  if (!signIn.ok) {
+    const text = await signIn.text();
+    throw new Error(
+      `sign-in failed ${signIn.status} for ${seedEmail}: ${text}. Run tools/screenshots/admin/seed-admin-screenshots.mjs first.`,
+    );
   }
   const row = await pool.query(`SELECT id FROM "user" WHERE email = $1 LIMIT 1`, [seedEmail]);
   const userId = row.rows[0]?.id;
   if (!userId) {
-    throw new Error(`No user ${seedEmail} after sign-up`);
+    throw new Error(`No user ${seedEmail}; seed the fixture admin before SFTP screenshots`);
   }
   return userId;
 }

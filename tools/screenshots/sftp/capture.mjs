@@ -15,7 +15,7 @@ const AUTH_BASE = process.env.AUTH_BASE ?? 'http://localhost:3001';
 const OUT = process.env.SCREENSHOT_DIR ?? join(ROOT, 'artifacts/screenshots/sftp');
 const ARTIFACT_MIRROR = process.env.SCREENSHOT_ARTIFACT_DIR ?? null;
 const EMAIL = process.env.SEED_EMAIL ?? 'elena.kraemer@beispiel.de';
-const PASSWORD = process.env.SEED_PASSWORD ?? 'ElenaScreenshot1!';
+const PASSWORD = process.env.SEED_PASSWORD ?? 'AdminDemo12!';
 
 const THEME_PREF_KEY = 'docuvate-theme-preference';
 const THEME_LEGACY_KEY = 'docuvate-theme';
