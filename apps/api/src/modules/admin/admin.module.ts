@@ -3,6 +3,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../../shared/infrastructure/auth/auth.module.js';
+import { AuthOidcModule } from '../auth/auth-oidc.module.js';
 import { AuthPasswordPolicyModule } from '../auth/auth-password-policy.module.js';
 import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import {
@@ -23,7 +24,7 @@ import { PgUserInvitationRepository } from './infrastructure/pg-user-invitation.
 import { AdminController } from './presentation/admin.controller.js';
 
 @Module({
-  imports: [AuthModule, AuthPasswordPolicyModule, FeatureFlagsModule],
+  imports: [AuthModule, AuthPasswordPolicyModule, AuthOidcModule, FeatureFlagsModule],
   controllers: [AdminController],
   providers: [
     { provide: USER_INVITATION_REPOSITORY, useClass: PgUserInvitationRepository },

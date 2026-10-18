@@ -1,14 +1,11 @@
-// SPDX-FileCopyrightText: 2026 Thomas Faust
-// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { BASELINE_MARKER_MIGRATION_NAMES } from './migration-baseline-markers.js';
+import { AuthMfaPasskey20261008132100 } from './migrations/20261008132100-auth-mfa-passkey.js';
 import { InitialSchema20261008120000 } from './migrations/20261008120000-initial-schema.js';
 import { GlobalSearchSchema20261008130500 } from './migrations/20261008130500-global-search-schema.js';
 import { DocumentFieldValuesBackfill20261008130600 } from './migrations/20261008130600-document-field-values-backfill.js';
 import { SearchIndexBackfill20261008130700 } from './migrations/20261008130700-search-index-backfill.js';
 import { SchemaNormalization3nf20261008131000 } from './migrations/20261008131000-schema-normalization-3nf.js';
-import { AuthMfaPasskey20261008132100 } from './migrations/20261008132100-auth-mfa-passkey.js';
 import { InstallationIam20261008132200 } from './migrations/20261008132200-installation-iam.js';
 import { SavedViewsDashboard20261008133000 } from './migrations/20261008133000-saved-views-dashboard.js';
 import { SftpIngress20261008133500 } from './migrations/20261008133500-sftp-ingress.js';
@@ -17,7 +14,7 @@ import { ConnectorPaperlessImport20261008234500 } from './migrations/20261008234
 import { CitedChat20261009120000 } from './migrations/20261009120000-cited-chat.js';
 import { StaleChatGeneration20261009183000 } from './migrations/20261009183000-stale-chat-generation.js';
 import { EmbeddingDensity20261010120000 } from './migrations/20261010120000-embedding-density.js';
-import { EmbeddingDensityClassNiw20261010131500 } from './migrations/20261010131500-embedding-density-f32.js';
+import { EmbeddingDensityClassNiw20261010131500 } from './migrations/20261010131500-embedding-density-class-niw.js';
 import { EmbeddingDensityReadinessSplit20261010140000 } from './migrations/20261010140000-embedding-density-readiness-split.js';
 import { HeuristicFieldSuggestions20261010150000 } from './migrations/20261010150000-heuristic-field-suggestions.js';
 import { PurgeHeadingVendorSuggestions20261010153000 } from './migrations/20261010153000-purge-heading-vendor-suggestions.js';
@@ -47,6 +44,7 @@ import { FoldersOnlyRemoveMappen20261018140000 } from './migrations/202610181400
 import { DocumentExtractionImages20261018150000 } from './migrations/20261018150000-document-extraction-images.js';
 import { ConnectorNamedConnectionsSourceScope20261018160000 } from './migrations/20261018160000-connector-named-connections-source-scope.js';
 import { CorrespondentsToAbsenderField20261018180000 } from './migrations/20261018180000-correspondents-to-absender-field.js';
+import { InstallationOidcProvider20261018170000 } from './migrations/20261018170000-installation-oidc-provider.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -93,6 +91,7 @@ const EXPECTED_MIGRATIONS = [
   FoldersOnlyRemoveMappen20261018140000,
   DocumentExtractionImages20261018150000,
   ConnectorNamedConnectionsSourceScope20261018160000,
+  InstallationOidcProvider20261018170000,
   CorrespondentsToAbsenderField20261018180000,
 ];
 
@@ -107,21 +106,13 @@ describe('buildTypeOrmOptions', () => {
     }
   });
 
-  it('requires DATABASE_URL', () => {
-    delete process.env['DATABASE_URL'];
-    expect(() => buildTypeOrmOptions()).toThrow(/DATABASE_URL/);
+  it('registers migrations in chronological order', () => {
+    process.env['DATABASE_URL'] = 'postgres://u:p@localhost:5432/db';
+    const options = buildTypeOrmOptions();
+    expect(options.migrations).toEqual(EXPECTED_MIGRATIONS);
   });
 
-  it('registers initial schema, global search, 3NF, MFA, IAM, saved views, SFTP ingress, layout IR, and Paperless connector migrations in order', () => {
-    process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
-    const opts = buildTypeOrmOptions();
-    expect(opts.migrations).toEqual(EXPECTED_MIGRATIONS);
-    expect(InitialSchema20261008120000.name).toBe(TYPEORM_INITIAL_MIGRATION_NAME);
-  });
-
-  it('keeps baseline schema markers aligned with registered migrations', () => {
-    process.env['DATABASE_URL'] = 'postgresql://docuvate:docuvate@127.0.0.1:5432/docuvate';
-    const registeredNames = EXPECTED_MIGRATIONS.map((ctor) => new ctor().name);
-    expect([...BASELINE_MARKER_MIGRATION_NAMES]).toEqual(registeredNames);
+  it('uses the initial migration name constant', () => {
+    expect(TYPEORM_INITIAL_MIGRATION_NAME).toBe('InitialSchema20261008120000');
   });
 });

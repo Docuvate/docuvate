@@ -1,7 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { auth } from '../../src/shared/infrastructure/auth/better-auth.config.js';
+import { initializeAuth } from '../../src/shared/infrastructure/auth/better-auth.config.js';
 import { registerBetterAuthHttpRoutes } from '../../src/shared/infrastructure/auth/register-better-auth-http-routes.js';
 import { parseInjectJsonBody } from '../helpers/fastify-inject.js';
 import { getIntegrationPool } from './pg-pool.js';
@@ -13,6 +13,7 @@ describe('better-auth suspended user sign-in (integration)', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
+    const auth = await initializeAuth();
     app = Fastify();
     registerBetterAuthHttpRoutes(app, auth);
     await app.ready();

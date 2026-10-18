@@ -2894,6 +2894,7 @@ class DocumentsApi {
   /// 
   ///
   /// Parameters:
+  /// * [fieldFilters] - JSON array of { fieldKey, valueText } recognized field filters (AND).
   /// * [withoutNonInboxLabel] - When true, only documents without a non-inbox label are returned.
   /// * [unfiled] - When true, only documents without a folder assignment are returned.
   /// * [inbox] - When true, only documents in the inbox label are returned.
@@ -2902,7 +2903,10 @@ class DocumentsApi {
   /// * [status] 
   /// * [tagId] 
   /// * [tags] 
-  /// * [correspondentId] 
+  /// * [recognizedFieldKey] 
+  /// * [recognizedFieldValue] 
+  /// * [fieldFilterKey] 
+  /// * [fieldFilterValue] 
   /// * [folderId] 
   /// * [documentDateFrom] 
   /// * [documentDateTo] 
@@ -2918,6 +2922,7 @@ class DocumentsApi {
   /// Returns a [Future] containing a [Response] with a [DocumentListResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<DocumentListResponseDto>> listDocuments({ 
+    String? fieldFilters,
     bool? withoutNonInboxLabel,
     bool? unfiled,
     bool? inbox,
@@ -2926,7 +2931,10 @@ class DocumentsApi {
     String? status,
     String? tagId,
     String? tags,
-    String? correspondentId,
+    String? recognizedFieldKey,
+    String? recognizedFieldValue,
+    String? fieldFilterKey,
+    String? fieldFilterValue,
     String? folderId,
     String? documentDateFrom,
     String? documentDateTo,
@@ -2964,6 +2972,7 @@ class DocumentsApi {
     );
 
     final _queryParameters = <String, dynamic>{
+      if (fieldFilters != null) r'fieldFilters': encodeQueryParameter(_serializers, fieldFilters, const FullType(String)),
       if (withoutNonInboxLabel != null) r'withoutNonInboxLabel': encodeQueryParameter(_serializers, withoutNonInboxLabel, const FullType(bool)),
       if (unfiled != null) r'unfiled': encodeQueryParameter(_serializers, unfiled, const FullType(bool)),
       if (inbox != null) r'inbox': encodeQueryParameter(_serializers, inbox, const FullType(bool)),
@@ -2972,7 +2981,10 @@ class DocumentsApi {
       if (status != null) r'status': encodeQueryParameter(_serializers, status, const FullType(String)),
       if (tagId != null) r'tagId': encodeQueryParameter(_serializers, tagId, const FullType(String)),
       if (tags != null) r'tags': encodeQueryParameter(_serializers, tags, const FullType(String)),
-      if (correspondentId != null) r'correspondentId': encodeQueryParameter(_serializers, correspondentId, const FullType(String)),
+      if (recognizedFieldKey != null) r'recognizedFieldKey': encodeQueryParameter(_serializers, recognizedFieldKey, const FullType(String)),
+      if (recognizedFieldValue != null) r'recognizedFieldValue': encodeQueryParameter(_serializers, recognizedFieldValue, const FullType(String)),
+      if (fieldFilterKey != null) r'fieldFilterKey': encodeQueryParameter(_serializers, fieldFilterKey, const FullType(String)),
+      if (fieldFilterValue != null) r'fieldFilterValue': encodeQueryParameter(_serializers, fieldFilterValue, const FullType(String)),
       if (folderId != null) r'folderId': encodeQueryParameter(_serializers, folderId, const FullType(String)),
       if (documentDateFrom != null) r'documentDateFrom': encodeQueryParameter(_serializers, documentDateFrom, const FullType(String)),
       if (documentDateTo != null) r'documentDateTo': encodeQueryParameter(_serializers, documentDateTo, const FullType(String)),

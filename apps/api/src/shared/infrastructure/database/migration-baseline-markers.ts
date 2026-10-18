@@ -50,6 +50,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'FoldersOnlyRemoveMappen20261018140000',
   'DocumentExtractionImages20261018150000',
   'ConnectorNamedConnectionsSourceScope20261018160000',
+  'InstallationOidcProvider20261018170000',
   'CorrespondentsToAbsenderField20261018180000',
 ] as const;
 
@@ -211,6 +212,8 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.document_extraction_images');
     case 'ConnectorNamedConnectionsSourceScope20261018160000':
       return regClassExists(runner, 'public.connector_installation_source_scope');
+    case 'InstallationOidcProvider20261018170000':
+      return regClassExists(runner, 'public.installation_oidc_provider');
     case 'CorrespondentsToAbsenderField20261018180000':
       return regClassExists(runner, 'public.saved_document_view_field_filters');
     default:

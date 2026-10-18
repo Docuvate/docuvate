@@ -71,6 +71,317 @@
         ]
       }
     },
+    "/admin/auth-sign-in": {
+      "get": {
+        "operationId": "getAdminAuthSignInSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAuthSignInSettingsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Read passkey and OIDC sign-in settings (admin)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/oidc-providers": {
+      "post": {
+        "operationId": "createAdminOidcProvider",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdminOidcProviderRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOidcProviderResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Create an OIDC SSO provider (admin-managed)",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/admin/oidc-providers/{id}": {
+      "put": {
+        "operationId": "updateAdminOidcProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdminOidcProviderRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminOidcProviderResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Update an admin-managed OIDC provider",
+        "tags": [
+          "admin"
+        ]
+      },
+      "delete": {
+        "operationId": "deleteAdminOidcProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Delete an admin-managed OIDC provider",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/admin/password-policy": {
       "get": {
         "operationId": "getAdminPasswordPolicy",
@@ -12271,6 +12582,72 @@
           "roleDescriptions"
         ]
       },
+      "AdminAuthSignInSettingsResponseDto": {
+        "type": "object",
+        "properties": {
+          "passkeysEnabled": {
+            "type": "boolean"
+          },
+          "oidcProviders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminOidcProviderResponseDto"
+            }
+          }
+        },
+        "required": [
+          "passkeysEnabled",
+          "oidcProviders"
+        ]
+      },
+      "AdminOidcProviderResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "providerId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "clientId": {
+            "type": "string"
+          },
+          "scopes": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "source": {
+            "enum": [
+              "admin",
+              "env"
+            ],
+            "type": "string"
+          },
+          "hasClientSecret": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "providerId",
+          "displayName",
+          "issuer",
+          "clientId",
+          "scopes",
+          "enabled",
+          "source",
+          "hasClientSecret"
+        ]
+      },
       "AdminUserListResponseDto": {
         "type": "object",
         "properties": {
@@ -12369,6 +12746,43 @@
           "similarDocumentsUpdated"
         ]
       },
+      "AuthOidcProviderPublicResponseDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "providerId",
+          "displayName"
+        ]
+      },
+      "AuthSignInOptionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "passkeysEnabled": {
+            "type": "boolean"
+          },
+          "oidcProviders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthOidcProviderPublicResponseDto"
+            }
+          },
+          "emailChangeAvailable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "passkeysEnabled",
+          "oidcProviders",
+          "emailChangeAvailable"
+        ]
+      },
       "BanAdminUserRequestDto": {
         "type": "object",
         "properties": {
@@ -12458,6 +12872,48 @@
         },
         "required": [
           "pattern"
+        ]
+      },
+      "CreateAdminOidcProviderRequestDto": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]{0,62}$"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "issuer": {
+            "type": "string",
+            "minLength": 8
+          },
+          "clientId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "clientSecret": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scopes": {
+            "type": "string",
+            "minLength": 3
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "providerId",
+          "displayName",
+          "issuer",
+          "clientId",
+          "clientSecret",
+          "scopes",
+          "enabled"
         ]
       },
       "CreateConnectorInstallationRequestDto": {
@@ -15329,6 +15785,42 @@
         },
         "required": [
           "familyId"
+        ]
+      },
+      "UpdateAdminOidcProviderRequestDto": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "issuer": {
+            "type": "string",
+            "minLength": 8
+          },
+          "clientId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "clientSecret": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scopes": {
+            "type": "string",
+            "minLength": 3
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "displayName",
+          "issuer",
+          "clientId",
+          "scopes",
+          "enabled"
         ]
       },
       "UpdateConnectorInstallationRequestDto": {
