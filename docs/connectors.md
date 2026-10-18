@@ -29,7 +29,7 @@ External integrations are modeled as **categories** (mail, DMS, home automation,
 | `DOCUVATE_GMAIL_OAUTH_*` / `DOCUVATE_OUTLOOK_OAUTH_*` | Mail OAuth client credentials |
 | `WEB_ORIGIN` | Redirect target after OAuth callback |
 
-Step-by-step provider setup (DE): [connectors-oauth-setup.md](./connectors-oauth-setup.md).
+Step-by-step provider setup: [connectors-oauth-setup.md](./connectors-oauth-setup.md) ([Deutsch](./connectors-oauth-setup.de.md)).
 
 ## Verify locally
 

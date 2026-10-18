@@ -20,4 +20,3 @@ Users think in themes and kinds (`Photovoltaik`, `Rechnung`, `Haus`) more than i
 
 - Library filtering emphasizes multi-label AND chips in the filter panel and sidebar.
 - Struktur nav: Labels first, Korrespondenten second; no Dokumenttypen page.
-- Product docs (`docs/mvp.md`) describe the label-first journey.

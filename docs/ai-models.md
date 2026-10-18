@@ -85,7 +85,7 @@ Ollama tags verified on [ollama.com/library](https://ollama.com/library): `qwen2
 
 ## Background retrain and model registry
 
-See [`docs/mlops-retrain-and-registry.md`](./mlops-retrain-and-registry.md) for versioned training data, MLflow recommendation, canary promotion, and rollback. Default inference is unchanged until `MLOPS_REGISTRY_ENABLED=true`.
+The optional model registry (versioned training data, canary promotion and rollback) is off by default. Default inference is unchanged until `MLOPS_REGISTRY_ENABLED=true`.
 
 ## Follow-ups
 

@@ -1,6 +1,6 @@
 # Local CI (mirror `.github/workflows/ci.yml`)
 
-GitHub Actions may be disabled; run the same jobs locally and post results on the PR.
+Run the same jobs as GitHub Actions locally before opening a pull request.
 
 **Prerequisites:** Runtimes from `.tool-versions` (asdf: `asdf install`), and Docker.
 
@@ -10,7 +10,7 @@ GitHub Actions may be disabled; run the same jobs locally and post results on th
 ./scripts/ci/run-local-ci-jobs.sh
 ```
 
-Optional wrapper: `./scripts/ci/run-local-ci.sh` sources `scripts/ci/agent-docker-forward.sh` when `CI_ENABLE_DOCKER_FORWARD=1` (same as the wrapper script on main).
+Optional wrapper: `./scripts/ci/run-local-ci.sh` sources `scripts/ci/docker-forward.sh` when `CI_ENABLE_DOCKER_FORWARD=1`.
 
 Each job runs in a subshell with `set -euo pipefail` so **any** failing step fails the job (not only the last command). At the start of **lint-test**, `scripts/ci/test-run-job.sh` and `scripts/ci/check-no-and-chains.sh` verify runner behavior and forbid `&&` / `||` chains in job bodies (bash errexit blind spot).
 
@@ -24,19 +24,19 @@ Each runner invocation gets a unique `DOCUVATE_LOCAL_CI_RUN_ID`. Jobs run **sequ
 
 **compose-smoke** fails fast if fixed ports (e.g. **8025** Mailpit, **3001**, **5173**, **5433**) are taken, naming the holding container.
 
-## Cloud Agent VM Docker networking (opt-in only)
+## Docker networking on CI/container hosts (opt-in only)
 
-On **Cursor Cloud Agent VMs** only, inter-container traffic may fail (`iptables-legacy FORWARD DROP`). **Do not** run this on Mac or production hosts.
+On some disposable CI or container hosts, inter-container traffic may fail (`iptables-legacy FORWARD DROP`). **Do not** run this on workstations or production hosts.
 
-Export `DV_AGENT_VM=1` before the local CI runner (the runner calls the setup script only when that variable is set):
+Export `DOCUVATE_CI_DOCKER_SETUP=1` before the local CI runner (the runner calls the setup script only when that variable is set):
 
 ```bash
-export DV_AGENT_VM=1
-sudo -E ./scripts/ci/agent-vm-docker-setup.sh
-DV_AGENT_VM=1 ./scripts/ci/run-local-ci-jobs.sh
+export DOCUVATE_CI_DOCKER_SETUP=1
+sudo -E ./scripts/ci/docker-setup.sh
+DOCUVATE_CI_DOCKER_SETUP=1 ./scripts/ci/run-local-ci-jobs.sh
 ```
 
-The agent setup applies `iptables-legacy -P FORWARD ACCEPT` and `iptables -P FORWARD ACCEPT`, then verifies with a two-container ping. It is **not** invoked unconditionally by `run-local-ci-jobs.sh`.
+The setup script applies `iptables-legacy -P FORWARD ACCEPT` and `iptables -P FORWARD ACCEPT`, then verifies with a two-container ping. It is **not** invoked unconditionally by `run-local-ci-jobs.sh`.
 
 Mac / local Docker Desktop: use normal Docker; skip the agent script unless you explicitly opt in.
 
