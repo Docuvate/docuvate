@@ -14548,8 +14548,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   font-size: var(--dv-font-size-xs);
   color: var(--dv-color-text-muted);
 }
-<<<<<<< HEAD
-=======
 
 .combobox {
   position: relative;
@@ -14801,4 +14799,3 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     position: static;
   }
 }
->>>>>>> 567758ff (feat(web,api): finish PR-I documents, labels partial accept, and toasts)
