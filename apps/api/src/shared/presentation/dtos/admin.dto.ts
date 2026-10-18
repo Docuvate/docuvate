@@ -48,6 +48,9 @@ export class AdminUserResponseDto implements AdminUserDto {
 
   @ApiProperty()
   createdAt!: string;
+
+  @ApiPropertyOptional({ nullable: true })
+  lastLoginAt!: string | null;
 }
 
 export class AdminUserListResponseDto implements AdminUserListResponse {

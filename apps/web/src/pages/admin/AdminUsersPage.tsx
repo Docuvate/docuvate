@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AdminSettingsLayout } from '../../components/admin/AdminSettingsLayout';
-import type { AdminUserMenuAction } from '../../components/admin/AdminUserActionsMenu';
+import type { AdminUserMenuAction } from '../../components/admin/AdminUserRowActions';
 import { AdminUsersInvitePanel } from '../../components/admin/AdminUsersInvitePanel';
 import { AdminUsersTable } from '../../components/admin/AdminUsersTable';
 import { useToast } from '../../components/save/ToastProvider';
@@ -44,7 +44,6 @@ export function AdminUsersPage() {
   const [reloadBusy, setReloadBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState<InstanceRole>('member');
   const [pending, setPending] = useState<PendingAction | null>(null);
 
@@ -72,13 +71,13 @@ export function AdminUsersPage() {
   async function runInvite() {
     setBusy(true);
     try {
+      const email = inviteEmail.trim();
       await inviteAdminUser({
-        email: inviteEmail.trim(),
-        name: inviteName.trim() || inviteEmail.trim(),
+        email,
+        name: email.split('@')[0] ?? email,
         role: inviteRole,
       });
       setInviteEmail('');
-      setInviteName('');
       toast.success(t('admin.usersInviteSuccess'));
       await reload();
     } catch (err) {
@@ -250,10 +249,8 @@ export function AdminUsersPage() {
       <AdminUsersInvitePanel
         busy={busy}
         inviteEmail={inviteEmail}
-        inviteName={inviteName}
         inviteRole={inviteRole}
         onEmailChange={setInviteEmail}
-        onNameChange={setInviteName}
         onRoleChange={setInviteRole}
         onSubmit={() => void runInvite()}
       />
@@ -272,7 +269,6 @@ export function AdminUsersPage() {
             }
             onRoleChange={requestRoleChange}
             onMenuAction={openMenuAction}
-            onPrimaryAction={openMenuAction}
           />
         ) : null}
       </section>

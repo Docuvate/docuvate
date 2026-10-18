@@ -31,6 +31,7 @@ interface DirectoryRow {
   suspended: boolean;
   sort_at: Date;
   row_kind: 'user' | 'invite';
+  last_login_at: Date | null;
 }
 
 @Injectable()
@@ -68,10 +69,16 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
                    AND (sx.expires_at IS NULL OR sx.expires_at > now())
                ) AS suspended,
                u."createdAt" AS sort_at,
-               'user'::text AS row_kind
+               'user'::text AS row_kind,
+               sess.last_login_at
         FROM "user" u
         LEFT JOIN installation_user_roles r ON r.user_id = u.id
         LEFT JOIN installation_user_suspensions s ON s.user_id = u.id
+        LEFT JOIN LATERAL (
+          SELECT MAX(s2."updatedAt") AS last_login_at
+          FROM session s2
+          WHERE s2."userId" = u.id
+        ) sess ON true
         WHERE true ${searchClauseUsers}
         UNION ALL
         SELECT i.id::text,
@@ -82,14 +89,15 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
                NULL::timestamptz,
                false,
                i.created_at,
-               'invite'::text
+               'invite'::text,
+               NULL::timestamptz AS last_login_at
         FROM user_invitations i
         WHERE i.accepted_at IS NULL
           AND i.revoked_at IS NULL
           AND i.expires_at > now()
           ${searchClauseInvites}
       )
-      SELECT id, name, email, role, reason, expires_at, suspended, sort_at, row_kind
+      SELECT id, name, email, role, reason, expires_at, suspended, sort_at, row_kind, last_login_at
       FROM combined
       ORDER BY sort_at DESC, id
       LIMIT $1 OFFSET $2`;
@@ -197,6 +205,7 @@ function mapRow(row: DirectoryRow): AdminUserListItem {
       banReason: null,
       accountStatus: 'invited',
       createdAt: row.sort_at,
+      lastLoginAt: null,
     };
   }
 
@@ -213,5 +222,6 @@ function mapRow(row: DirectoryRow): AdminUserListItem {
     banReason: row.reason,
     accountStatus: suspended ? 'suspended' : 'active',
     createdAt: row.sort_at,
+    lastLoginAt: row.last_login_at,
   };
 }

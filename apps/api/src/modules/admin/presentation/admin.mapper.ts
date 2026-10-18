@@ -14,5 +14,6 @@ export function toAdminUserDto(user: AdminUserListItem): AdminUserDto {
     banReason: user.banReason,
     accountStatus: user.accountStatus,
     createdAt: user.createdAt.toISOString(),
+    lastLoginAt: user.lastLoginAt ? user.lastLoginAt.toISOString() : null,
   };
 }

@@ -12702,6 +12702,10 @@
           },
           "createdAt": {
             "type": "string"
+          },
+          "lastLoginAt": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [

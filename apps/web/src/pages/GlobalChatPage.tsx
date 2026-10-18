@@ -1,12 +1,20 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentChatMessageRecordDto, DocumentChatThreadDto } from '@docuvate/contracts';
+import type {
+  DocumentChatMessageRecordDto,
+  DocumentChatThreadDto,
+  UserSettingsDto,
+} from '@docuvate/contracts';
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
+import { GlobalChatEmptyState } from '../components/chat/GlobalChatEmptyState';
+import { GlobalChatNotReadyPanel } from '../components/chat/GlobalChatNotReadyPanel';
+import { GlobalChatThreadRow } from '../components/chat/GlobalChatThreadRow';
 import { DocumentChatAssistantMessage } from '../components/documents/DocumentChatAssistantMessage';
 import { mergeThreadMessagesAfterSend } from '../components/documents/documentChatMessages';
+import { useToastNotify } from '../components/save/ToastProvider';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Spinner } from '../components/ui/Spinner';
@@ -15,8 +23,10 @@ import {
   createLibraryChatThread,
   deleteLibraryChatThread,
   getUserSettings,
+  listDocuments,
   listLibraryChatThreadMessages,
   listLibraryChatThreads,
+  listTags,
   retryLibraryChatMessage,
   sendLibraryChatThreadMessage,
   updateLibraryChatThread,
@@ -24,6 +34,7 @@ import {
 import { formatUserFacingError } from '../lib/apiErrors';
 import { isChatGenerationInProgress } from '../lib/chatGenerationActive';
 import { showThreadListSpinner } from '../lib/chatThreadSpinner';
+import { buildGlobalChatSuggestions } from '../lib/globalChatSuggestions';
 import { routes } from '../lib/routes';
 import { useLibraryChatMessageStream } from '../lib/useLibraryChatMessageStream';
 import { useStackedDocChatLayout } from '../lib/useStackedDocChatLayout';
@@ -43,6 +54,8 @@ function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string
 
 export function GlobalChatPage() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { pushSuccess } = useToastNotify();
   const [threads, setThreads] = useState<DocumentChatThreadDto[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DocumentChatMessageRecordDto[]>([]);
@@ -53,9 +66,13 @@ export function GlobalChatPage() {
   const [retryBusy, setRetryBusy] = useState(false);
   const [chatUiEnabled, setChatUiEnabled] = useState(true);
   const [threadSearch, setThreadSearch] = useState('');
-  const [renamingThreadId, setRenamingThreadId] = useState<string | null>(null);
-  const [renameDraft, setRenameDraft] = useState('');
   const [composerDraftActive, setComposerDraftActive] = useState(false);
+  const [userSettings, setUserSettings] = useState<UserSettingsDto | null>(null);
+  const [suggestionChips, setSuggestionChips] = useState<
+    ReturnType<typeof buildGlobalChatSuggestions>['chips']
+  >([]);
+  const [recentQuestions, setRecentQuestions] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const logEndRef = useRef<HTMLDivElement | null>(null);
   const streamTargetRef = useRef<string | null>(null);
 
@@ -122,15 +139,21 @@ export function GlobalChatPage() {
     [activeThreadId, connectStream, stopStream]
   );
 
-  useEffect(() => {
+  const reloadSettings = useCallback(() => {
     void getUserSettings()
       .then((settings) => {
+        setUserSettings(settings);
         setChatUiEnabled(settings.documentChatUiEnabled !== false);
       })
       .catch(() => {
         setChatUiEnabled(true);
+        setUserSettings(null);
       });
   }, []);
+
+  useEffect(() => {
+    reloadSettings();
+  }, [reloadSettings]);
 
   useEffect(() => {
     if (!chatUiEnabled) {
@@ -199,6 +222,24 @@ export function GlobalChatPage() {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages]);
 
+  async function onRenameThread(threadId: string, nextTitle: string) {
+    const previousTitle = threads.find((row) => row.id === threadId)?.title ?? '';
+    setError(null);
+    try {
+      const updated = await updateLibraryChatThread(threadId, nextTitle);
+      setThreads((prev) => prev.map((thread) => (thread.id === threadId ? updated : thread)));
+      pushSuccess(undefined, {
+        undo: () => {
+          void updateLibraryChatThread(threadId, previousTitle).then((restored) => {
+            setThreads((prev) => prev.map((thread) => (thread.id === threadId ? restored : thread)));
+          });
+        },
+      });
+    } catch (err) {
+      setError(formatUserFacingError(err, 'common.error'));
+    }
+  }
+
   async function onDeleteThread(threadId: string) {
     setError(null);
     try {
@@ -208,22 +249,6 @@ export function GlobalChatPage() {
         setActiveThreadId(null);
         setMessages([]);
       }
-    } catch (err) {
-      setError(formatUserFacingError(err, 'common.error'));
-    }
-  }
-
-  async function onSaveThreadRename(threadId: string) {
-    const trimmed = renameDraft.trim();
-    if (!trimmed) {
-      setRenamingThreadId(null);
-      return;
-    }
-    setError(null);
-    try {
-      const updated = await updateLibraryChatThread(threadId, trimmed);
-      setThreads((prev) => prev.map((thread) => (thread.id === threadId ? updated : thread)));
-      setRenamingThreadId(null);
     } catch (err) {
       setError(formatUserFacingError(err, 'common.error'));
     }
@@ -298,6 +323,49 @@ export function GlobalChatPage() {
     !composerDraftActive;
   const showComposerDraft =
     composerDraftActive && activeThreadId == null && messages.length === 0;
+  const chatReadiness = userSettings?.documentChatReadiness ?? 'ready';
+  const chatProviderOff =
+    userSettings?.customerChatProvider === 'off' || userSettings?.preferredChatProvider === 'off';
+  const showChatNotReady = chatUiEnabled && !chatProviderOff && chatReadiness !== 'ready';
+  const composerEnabled =
+    chatUiEnabled && !showChatNotReady && !generationInProgress && !(loadingMessages && !!activeThreadId);
+
+  useEffect(() => {
+    if (!chatUiEnabled || showChatNotReady) return;
+    if (!(showBootstrapEmpty || showComposerDraft)) return;
+    let cancelled = false;
+    setLoadingSuggestions(true);
+    void Promise.all([listTags(), listDocuments(), Promise.resolve(threads)])
+      .then(([tags, documents, threadList]) => {
+        if (cancelled) return;
+        const built = buildGlobalChatSuggestions({
+          tags,
+          documents,
+          threads: threadList,
+        });
+        setSuggestionChips(built.chips);
+        setRecentQuestions(built.recentQuestions);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSuggestionChips([]);
+          setRecentQuestions([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSuggestions(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    chatUiEnabled,
+    showChatNotReady,
+    showBootstrapEmpty,
+    showComposerDraft,
+    threads,
+    dateLocale,
+  ]);
 
   return (
     <div className="page global-chat-page" data-ux="page">
@@ -344,8 +412,7 @@ export function GlobalChatPage() {
           ) : null}
           {hasThreads ? (
             <aside className="doc-chat-threads" aria-label={t('globalChat.threads')}>
-              <div className="doc-chat-threads-head">
-                <span className="doc-chat-threads-label">{t('globalChat.threads')}</span>
+              <div className="doc-chat-threads-head global-chat-threads-head">
                 <Button
                   type="button"
                   variant="secondary"
@@ -354,14 +421,15 @@ export function GlobalChatPage() {
                 >
                   {t('globalChat.newThread')}
                 </Button>
+                <Input
+                  className="doc-chat-thread-search"
+                  value={threadSearch}
+                  onChange={(e) => { setThreadSearch(e.target.value); }}
+                  placeholder={t('globalChat.threadSearchPlaceholder')}
+                  aria-label={t('globalChat.threadSearchPlaceholder')}
+                />
+                <span className="doc-chat-threads-label">{t('globalChat.threads')}</span>
               </div>
-              <Input
-                className="doc-chat-thread-search"
-                value={threadSearch}
-                onChange={(e) => { setThreadSearch(e.target.value); }}
-                placeholder={t('globalChat.threadSearchPlaceholder')}
-                aria-label={t('globalChat.threadSearchPlaceholder')}
-              />
               {loadingThreads ? (
                 <p className="muted doc-chat-threads-loading" role="status">
                   <Spinner size="sm" label={t('common.loading')} />
@@ -376,87 +444,20 @@ export function GlobalChatPage() {
                     activeThreadId,
                     generationInProgress
                   );
-                  const renaming = renamingThreadId === thread.id;
                   return (
-                    <li key={thread.id} className="doc-chat-thread-row">
-                      {renaming ? (
-                        <form
-                          className="doc-chat-thread-rename-form"
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            void onSaveThreadRename(thread.id);
-                          }}
-                        >
-                          <Input
-                            value={renameDraft}
-                            onChange={(e) => { setRenameDraft(e.target.value); }}
-                            aria-label={t('globalChat.renameThreadAria')}
-                          />
-                          <Button type="submit" variant="secondary">
-                            {t('common.save')}
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => { setRenamingThreadId(null); }}
-                          >
-                            {t('common.cancel')}
-                          </Button>
-                        </form>
-                      ) : (
-                        <>
-                          <button
-                            type="button"
-                            className={`doc-chat-thread-item${selected ? ' active' : ''}`}
-                            aria-current={selected ? 'true' : undefined}
-                            onClick={() => {
-                              setActiveThreadId(thread.id);
-                              if (stacked) closeThreads();
-                            }}
-                          >
-                            <span className="doc-chat-thread-title-row">
-                              <span className="doc-chat-thread-title">{thread.title}</span>
-                              {threadBusy ? (
-                                <Spinner
-                                  size="sm"
-                                  className="doc-chat-thread-status"
-                                  label={t('documents.documentChat.threadGenerating')}
-                                />
-                              ) : null}
-                            </span>
-                            {thread.lastMessagePreview ? (
-                              <span className="doc-chat-thread-preview">
-                                {thread.lastMessagePreview}
-                              </span>
-                            ) : null}
-                            <span className="doc-chat-thread-meta">
-                              {formatThreadMeta(thread, dateLocale)}
-                            </span>
-                          </button>
-                          <div className="doc-chat-thread-actions">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="doc-chat-thread-action"
-                              onClick={() => {
-                                setRenamingThreadId(thread.id);
-                                setRenameDraft(thread.title);
-                              }}
-                            >
-                              {t('globalChat.renameThread')}
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="doc-chat-thread-action"
-                              onClick={() => { void onDeleteThread(thread.id); }}
-                            >
-                              {t('globalChat.deleteThread')}
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                    </li>
+                    <GlobalChatThreadRow
+                      key={thread.id}
+                      thread={thread}
+                      selected={selected}
+                      busy={threadBusy}
+                      meta={formatThreadMeta(thread, dateLocale)}
+                      onSelect={() => {
+                        setActiveThreadId(thread.id);
+                        if (stacked) closeThreads();
+                      }}
+                      onRename={(title) => onRenameThread(thread.id, title)}
+                      onDelete={() => onDeleteThread(thread.id)}
+                    />
                   );
                 })}
               </ul>
@@ -480,19 +481,29 @@ export function GlobalChatPage() {
                   </p>
                 ) : null}
 
-                {showBootstrapEmpty || showPanePickThread ? (
+                {showChatNotReady ? (
+                  <GlobalChatNotReadyPanel
+                    settings={userSettings}
+                    onRetryStatus={reloadSettings}
+                    onOpenChatMode={() => {
+                      navigate(`${routes.settings}#settings-document-chat`);
+                    }}
+                  />
+                ) : null}
+
+                {!showChatNotReady && showPanePickThread ? (
                   <div className="doc-chat-empty-state doc-chat-empty-state-bootstrap">
-                    <h2 className="doc-chat-empty-title">{t('globalChat.emptyPaneTitle')}</h2>
-                    <p className="muted doc-chat-empty-lead">
-                      {showPanePickThread ? t('globalChat.pickThreadLead') : t('globalChat.bootstrapLead')}
-                    </p>
-                    <p className="muted doc-chat-empty-hint">{t('globalChat.placeholder')}</p>
-                    <ul className="doc-chat-empty-examples">
-                      <li>{t('globalChat.exampleHundesteuer')}</li>
-                      <li>{t('globalChat.exampleMiete')}</li>
-                      <li>{t('globalChat.exampleKuendigung')}</li>
-                    </ul>
+                    <p className="muted doc-chat-empty-lead">{t('globalChat.pickThreadLead')}</p>
                   </div>
+                ) : null}
+
+                {!showChatNotReady && (showBootstrapEmpty || showComposerDraft) ? (
+                  <GlobalChatEmptyState
+                    chips={suggestionChips}
+                    recentQuestions={recentQuestions}
+                    loadingSuggestions={loadingSuggestions}
+                    onPickQuestion={(text) => { setInput(text); }}
+                  />
                 ) : null}
 
                 {showThreadEmpty ? (
@@ -500,12 +511,6 @@ export function GlobalChatPage() {
                     <p className="muted doc-chat-empty-lead">
                       {t('documents.documentChat.threadEmptyLead')}
                     </p>
-                  </div>
-                ) : null}
-
-                {showComposerDraft ? (
-                  <div className="doc-chat-empty-state doc-chat-empty-state-thread">
-                    <p className="muted doc-chat-empty-lead">{t('globalChat.bootstrapLead')}</p>
                   </div>
                 ) : null}
 
@@ -567,23 +572,24 @@ export function GlobalChatPage() {
                 <div ref={logEndRef} className="doc-chat-log-anchor" aria-hidden="true" />
               </div>
 
-              <form className="doc-chat-composer" onSubmit={(e) => void onSubmit(e)}>
+              <form
+                className={`doc-chat-composer${showChatNotReady ? ' doc-chat-composer-disabled' : ''}`}
+                onSubmit={(e) => void onSubmit(e)}
+              >
                 <Input
                   value={input}
                   onChange={(e) => { setInput(e.target.value); }}
-                  placeholder={t('globalChat.placeholder')}
-                  disabled={!chatUiEnabled || generationInProgress || (loadingMessages && !!activeThreadId)}
+                  placeholder={
+                    showChatNotReady ? t('globalChat.composerNotReadyPlaceholder') : t('globalChat.placeholder')
+                  }
+                  disabled={!composerEnabled}
                   aria-label={t('globalChat.placeholder')}
                 />
                 <Button
                   type="submit"
+                  variant={showChatNotReady ? 'secondary' : 'primary'}
                   className="doc-chat-submit"
-                  disabled={
-                    !chatUiEnabled ||
-                    generationInProgress ||
-                    (loadingMessages && !!activeThreadId) ||
-                    !input.trim()
-                  }
+                  disabled={!composerEnabled || !input.trim()}
                   aria-busy={generationInProgress}
                 >
                   {generationInProgress ? (
