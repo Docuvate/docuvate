@@ -6,16 +6,20 @@ import type {
   AcceptLabelRecommendationRequest,
   AddLabelRecommendationBlocklistRequest,
   AdminAccessResponse,
+  AdminAuthSignInSettingsDto,
+  AdminOidcProviderDto,
   AdminUserDto,
   AdminUserListResponse,
   ApplyDuplicateSetDecisionsRequest,
   ApplyLabelCorrectionResponse,
+  AuthSignInOptionsDto,
   BanAdminUserRequest,
   ConfirmLabelRecommendationBlocklistPatternRequest,
   ConnectorCatalogResponse,
   ConnectorInstallationDto,
   ConnectorSourceTreeNodeDto,
   CorrespondentDto,
+  CreateAdminOidcProviderRequest,
   CreateConnectorInstallationRequest,
   CreateCorrespondentRequest,
   CreateDocumentChatThreadRequest,
@@ -82,6 +86,7 @@ import type {
   SftpIngressServerInfoDto,
   TagCustomFieldDefinitionDto,
   TagDto,
+  UpdateAdminOidcProviderRequest,
   UpdateConnectorInstallationRequest,
   UpdateCorrespondentRequest,
   UpdateDocumentRequest,
@@ -1115,6 +1120,39 @@ export async function getAdminAccess(): Promise<AdminAccessResponse> {
 
 export async function getPasswordPolicy(): Promise<PasswordPolicyDto> {
   return request<PasswordPolicyDto>('/auth/password-policy');
+}
+
+export async function getAuthSignInOptions(): Promise<AuthSignInOptionsDto> {
+  return request<AuthSignInOptionsDto>('/auth/sign-in-options');
+}
+
+export async function getAdminAuthSignInSettings(): Promise<AdminAuthSignInSettingsDto> {
+  return request<AdminAuthSignInSettingsDto>('/admin/auth-sign-in');
+}
+
+export async function createAdminOidcProvider(
+  body: CreateAdminOidcProviderRequest
+): Promise<AdminOidcProviderDto> {
+  return request<AdminOidcProviderDto>('/admin/oidc-providers', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function updateAdminOidcProvider(
+  id: string,
+  body: UpdateAdminOidcProviderRequest
+): Promise<AdminOidcProviderDto> {
+  return request<AdminOidcProviderDto>(`/admin/oidc-providers/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function deleteAdminOidcProvider(id: string): Promise<void> {
+  await request(`/admin/oidc-providers/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function getAdminPasswordPolicy(): Promise<PasswordPolicyDto> {

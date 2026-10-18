@@ -46,6 +46,7 @@ import { InstallationPasswordPolicy20261018120000 } from './migrations/202610181
 import { FoldersOnlyRemoveMappen20261018140000 } from './migrations/20261018140000-folders-only-remove-mappen.js';
 import { DocumentExtractionImages20261018150000 } from './migrations/20261018150000-document-extraction-images.js';
 import { ConnectorNamedConnectionsSourceScope20261018160000 } from './migrations/20261018160000-connector-named-connections-source-scope.js';
+import { InstallationOidcProvider20261018170000 } from './migrations/20261018170000-installation-oidc-provider.js';
 import { CorrespondentsToAbsenderField20261018180000 } from './migrations/20261018180000-correspondents-to-absender-field.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
@@ -93,6 +94,7 @@ const EXPECTED_MIGRATIONS = [
   FoldersOnlyRemoveMappen20261018140000,
   DocumentExtractionImages20261018150000,
   ConnectorNamedConnectionsSourceScope20261018160000,
+  InstallationOidcProvider20261018170000,
   CorrespondentsToAbsenderField20261018180000,
 ];
 

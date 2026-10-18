@@ -69,16 +69,20 @@ describe('admin OpenAPI routes', () => {
     );
     const labels = privileged.map((route) => `${route.method} ${route.path}`).sort();
     expect(labels).toEqual([
+      'DELETE /admin/oidc-providers/{id}',
+      'GET /admin/auth-sign-in',
       'GET /admin/password-policy',
       'GET /admin/users',
       'PATCH /admin/users/{userId}/feature-flags',
       'PATCH /admin/users/{userId}/role',
+      'POST /admin/oidc-providers',
       'POST /admin/users',
       'POST /admin/users/{userId}/ban',
       'POST /admin/users/{userId}/resend-invitation',
       'POST /admin/users/{userId}/revoke-invitation',
       'POST /admin/users/{userId}/revoke-sessions',
       'POST /admin/users/{userId}/unban',
+      'PUT /admin/oidc-providers/{id}',
       'PUT /admin/password-policy',
     ]);
   });

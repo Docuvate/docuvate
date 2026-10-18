@@ -3,6 +3,7 @@
 import { Module } from '@nestjs/common';
 
 import { VerifyPasswordResetTokenUseCase } from './application/verify-password-reset-token.use-case.js';
+import { AuthOidcModule } from './auth-oidc.module.js';
 import { AuthPasswordPolicyModule } from './auth-password-policy.module.js';
 import {
   AuthPasswordResetPublicController,
@@ -10,7 +11,7 @@ import {
 } from './presentation/auth-public.controller.js';
 
 @Module({
-  imports: [AuthPasswordPolicyModule],
+  imports: [AuthPasswordPolicyModule, AuthOidcModule],
   controllers: [AuthPublicController, AuthPasswordResetPublicController],
   providers: [VerifyPasswordResetTokenUseCase],
 })

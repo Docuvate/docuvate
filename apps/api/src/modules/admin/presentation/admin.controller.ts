@@ -1,6 +1,18 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Get, Param, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyRequest } from 'fastify';
 
@@ -23,6 +35,13 @@ import {
 } from '../../../shared/presentation/dtos/admin.dto.js';
 import { SetAdminUserFeatureFlagRequestDto } from '../../../shared/presentation/dtos/admin-feature-flag.dto.js';
 import {
+  AdminAuthSignInSettingsResponseDto,
+  AdminOidcProviderIdParamDto,
+  AdminOidcProviderResponseDto,
+  CreateAdminOidcProviderRequestDto,
+  UpdateAdminOidcProviderRequestDto,
+} from '../../../shared/presentation/dtos/auth-sign-in.dto.js';
+import {
   PasswordPolicyResponseDto,
   UpdatePasswordPolicyRequestDto,
 } from '../../../shared/presentation/dtos/password-policy.dto.js';
@@ -31,6 +50,12 @@ import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import {
+  CreateAdminOidcProviderUseCase,
+  DeleteAdminOidcProviderUseCase,
+  UpdateAdminOidcProviderUseCase,
+} from '../../auth/application/admin-oidc-provider.use-cases.js';
+import { GetAdminAuthSignInSettingsUseCase } from '../../auth/application/get-admin-auth-sign-in-settings.use-case.js';
 import { GetPasswordPolicyUseCase } from '../../auth/application/get-password-policy.use-case.js';
 import { UpdatePasswordPolicyUseCase } from '../../auth/application/update-password-policy.use-case.js';
 import { INSTANCE_ROLE_MEMBER } from '../../auth/domain/instance-role.constants.js';
@@ -68,7 +93,11 @@ export class AdminController {
     private readonly revokeInvitation: RevokeAdminUserInvitationUseCase,
     private readonly setFeatureFlagOverride: SetTenantFeatureFlagOverrideUseCase,
     private readonly getPasswordPolicy: GetPasswordPolicyUseCase,
-    private readonly updatePasswordPolicy: UpdatePasswordPolicyUseCase
+    private readonly updatePasswordPolicy: UpdatePasswordPolicyUseCase,
+    private readonly getAuthSignInSettings: GetAdminAuthSignInSettingsUseCase,
+    private readonly createOidcProvider: CreateAdminOidcProviderUseCase,
+    private readonly updateOidcProvider: UpdateAdminOidcProviderUseCase,
+    private readonly deleteOidcProvider: DeleteAdminOidcProviderUseCase
   ) {}
 
   @Get('access')
@@ -97,6 +126,52 @@ export class AdminController {
     @Body() body: UpdatePasswordPolicyRequestDto
   ): Promise<PasswordPolicyResponseDto> {
     return this.updatePasswordPolicy.execute(body);
+  }
+
+  @Get('auth-sign-in')
+  @UseGuards(AdminGuard)
+  @ApiDocuvateRoute({
+    operationId: 'getAdminAuthSignInSettings',
+    summary: 'Read passkey and OIDC sign-in settings (admin)',
+  })
+  async getAdminAuthSignInSettings(): Promise<AdminAuthSignInSettingsResponseDto> {
+    return this.getAuthSignInSettings.execute();
+  }
+
+  @Post('oidc-providers')
+  @UseGuards(AdminGuard)
+  @ApiDocuvateRoute({
+    operationId: 'createAdminOidcProvider',
+    summary: 'Create an OIDC SSO provider (admin-managed)',
+  })
+  async createAdminOidcProvider(
+    @Body() body: CreateAdminOidcProviderRequestDto
+  ): Promise<AdminOidcProviderResponseDto> {
+    return this.createOidcProvider.execute(body);
+  }
+
+  @Put('oidc-providers/:id')
+  @UseGuards(AdminGuard)
+  @ApiDocuvateRoute({
+    operationId: 'updateAdminOidcProvider',
+    summary: 'Update an admin-managed OIDC provider',
+  })
+  async updateAdminOidcProvider(
+    @Param() params: AdminOidcProviderIdParamDto,
+    @Body() body: UpdateAdminOidcProviderRequestDto
+  ): Promise<AdminOidcProviderResponseDto> {
+    return this.updateOidcProvider.execute(params.id, body);
+  }
+
+  @Delete('oidc-providers/:id')
+  @UseGuards(AdminGuard)
+  @ApiDocuvateRoute({
+    operationId: 'deleteAdminOidcProvider',
+    summary: 'Delete an admin-managed OIDC provider',
+  })
+  async deleteAdminOidcProvider(@Param() params: AdminOidcProviderIdParamDto): Promise<{ ok: true }> {
+    await this.deleteOidcProvider.execute(params.id);
+    return { ok: true };
   }
 
   @Get('users')

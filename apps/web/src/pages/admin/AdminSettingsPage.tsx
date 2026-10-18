@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
+import { AdminAuthSignInCard } from '../../components/admin/AdminAuthSignInCard';
+import { AdminOidcProvidersCard } from '../../components/admin/AdminOidcProvidersCard';
 import { AdminPasswordPolicyCard } from '../../components/admin/AdminPasswordPolicyCard';
 import { AdminSettingsLayout } from '../../components/admin/AdminSettingsLayout';
 import { SettingsSectionCard } from '../../components/settings/SettingsSectionCard';
@@ -38,6 +40,8 @@ export function AdminSettingsPage() {
 
       <div className="settings-grid page--with-save-bar">
         <AdminPasswordPolicyCard />
+        <AdminAuthSignInCard />
+        <AdminOidcProvidersCard />
 
         <SettingsSectionCard
           icon={<Users {...ICON} />}

@@ -13,7 +13,7 @@ import type { FastifyRequest } from 'fastify';
 
 import { InstallationMembershipService } from '../../../modules/auth/infrastructure/installation-membership.service.js';
 import type { AuthorizationSubject } from '../../domain/authorization.js';
-import { auth } from './better-auth.config.js';
+import { getAuth } from './better-auth.config.js';
 import { IS_PUBLIC_ROUTE_KEY } from './public.decorator.js';
 import { ServiceApiKeyRegistry } from './service-api-key.registry.js';
 import { buildUserAuthorizationSubject } from './user-authorization-subject.js';
@@ -72,7 +72,7 @@ export class AuthGuard implements CanActivate {
     }
 
     const headers = fromNodeHeaders(req.headers);
-    const session = await auth.api.getSession({ headers });
+    const session = await getAuth().api.getSession({ headers });
     if (!session?.user) {
       throw new UnauthorizedException('Not authenticated');
     }

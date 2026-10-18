@@ -20,6 +20,7 @@ export interface PublicRouteEntry {
 export const PUBLIC_ROUTE_ALLOWLIST: PublicRouteEntry[] = [
   { method: 'GET', path: '/auth/password-policy' },
   { method: 'GET', path: '/auth/password-reset/verify' },
+  { method: 'GET', path: '/auth/sign-in-options' },
   { method: 'GET', path: '/connectors/oauth/callback' },
   { method: 'GET', path: '/health' },
   { method: 'GET', path: '/health/ready' },

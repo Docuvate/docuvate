@@ -1,19 +1,26 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { PASSWORD_LENGTH_MAX_BOUND } from '@docuvate/contracts';
-import { KeyRound, LockKeyhole, ShieldCheck } from 'lucide-react';
+import { KeyRound, LockKeyhole, ShieldCheck, UserRound } from 'lucide-react';
 import QRCode from 'qrcode';
 import { FormEvent, useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PasswordPolicyChecklist } from '../components/auth/PasswordPolicyChecklist';
 import { useToast } from '../components/save/ToastProvider';
+import { AccountSecurityChangeEmailDialog } from '../components/settings/AccountSecurityChangeEmailDialog';
+import { AccountSecurityRegenerateBackupCodesDialog } from '../components/settings/AccountSecurityRegenerateBackupCodesDialog';
 import { SettingsSectionCard } from '../components/settings/SettingsSectionCard';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { authClient, authSessionUserTwoFactorEnabled } from '../lib/auth-client';
+import {
+  authClient,
+  authSessionUserEmail,
+  authSessionUserTwoFactorEnabled,
+} from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/authErrors';
+import { useAuthSignInOptions } from '../lib/useAuthSignInOptions';
 import { usePasswordPolicy } from '../lib/usePasswordPolicy';
 
 const ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true };
@@ -28,6 +35,7 @@ export function AccountSecuritySettingsPage() {
   const { t } = useTranslation();
   const toast = useToast();
   const passwordPolicy = usePasswordPolicy();
+  const signInOptions = useAuthSignInOptions();
   const passwordId = useId();
   const changeCurrentPasswordId = useId();
   const changeNewPasswordId = useId();
@@ -51,6 +59,11 @@ export function AccountSecuritySettingsPage() {
   const [changeRepeatTouched, setChangeRepeatTouched] = useState(false);
   const [changeRevokeOtherSessions, setChangeRevokeOtherSessions] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState('');
+  const [nameBusy, setNameBusy] = useState(false);
+  const [regenerateOpen, setRegenerateOpen] = useState(false);
+  const [changeEmailOpen, setChangeEmailOpen] = useState(false);
+  const displayNameId = useId();
 
   const refreshPasskeys = useCallback(async () => {
     const result = await authClient.passkey.listUserPasskeys();
@@ -62,6 +75,10 @@ export function AccountSecuritySettingsPage() {
   useEffect(() => {
     setTotpEnabled(authSessionUserTwoFactorEnabled(session));
     void refreshPasskeys();
+    const name = session?.user.name;
+    if (typeof name === 'string') {
+      setDisplayName(name);
+    }
   }, [session, refreshPasskeys]);
 
   const changeRepeatMismatch =
@@ -196,6 +213,23 @@ export function AccountSecuritySettingsPage() {
     }
   }
 
+  async function saveDisplayName() {
+    setNameBusy(true);
+    setError(null);
+    try {
+      const result = await authClient.updateUser({ name: displayName.trim() });
+      if (result.error) {
+        setError(formatAuthClientError(result.error, 'signIn'));
+        return;
+      }
+      toast.success(t('settings.accountSecurity.displayNameSaved'));
+    } catch (err) {
+      setError(formatAuthClientError(err, 'signIn'));
+    } finally {
+      setNameBusy(false);
+    }
+  }
+
   async function removePasskey(id: string) {
     setBusy(true);
     setError(null);
@@ -226,6 +260,45 @@ export function AccountSecuritySettingsPage() {
       ) : null}
 
       <div className="settings-grid">
+        <SettingsSectionCard
+          icon={<UserRound {...ICON} />}
+          title={t('settings.accountSecurity.displayNameTitle')}
+          description={t('settings.accountSecurity.displayNameLead')}
+        >
+          <div className="settings-stack">
+            <label className="settings-field" htmlFor={displayNameId}>
+              {t('settings.accountSecurity.displayNameLabel')}
+              <Input
+                id={displayNameId}
+                value={displayName}
+                disabled={nameBusy}
+                onChange={(e) => { setDisplayName(e.target.value); }}
+              />
+            </label>
+            <p className="muted">{authSessionUserEmail(session)}</p>
+            <Button
+              type="button"
+              disabled={nameBusy || !displayName.trim()}
+              onClick={() => void saveDisplayName()}
+            >
+              {t('settings.accountSecurity.displayNameSave')}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={!signInOptions.emailChangeAvailable}
+              title={
+                signInOptions.emailChangeAvailable
+                  ? undefined
+                  : t('settings.accountSecurity.changeEmailDisabledHint')
+              }
+              onClick={() => { setChangeEmailOpen(true); }}
+            >
+              {t('settings.accountSecurity.changeEmailOpen')}
+            </Button>
+          </div>
+        </SettingsSectionCard>
+
         <SettingsSectionCard
           icon={<LockKeyhole {...ICON} />}
           title={t('settings.accountSecurity.changePasswordTitle')}
@@ -313,6 +386,9 @@ export function AccountSecuritySettingsPage() {
           {totpEnabled ? (
             <div className="settings-stack">
               <p className="muted">{t('settings.accountSecurity.totpActive')}</p>
+              <Button type="button" variant="secondary" disabled={busy} onClick={() => { setRegenerateOpen(true); }}>
+                {t('settings.accountSecurity.regenerateBackupCodesOpen')}
+              </Button>
               <label className="settings-field" htmlFor={passwordId}>
                 {t('settings.accountSecurity.passwordLabel')}
                 <Input
@@ -452,6 +528,14 @@ export function AccountSecuritySettingsPage() {
           </div>
         </SettingsSectionCard>
       </div>
+      <AccountSecurityRegenerateBackupCodesDialog
+        open={regenerateOpen}
+        onClose={() => { setRegenerateOpen(false); }}
+      />
+      <AccountSecurityChangeEmailDialog
+        open={changeEmailOpen}
+        onClose={() => { setChangeEmailOpen(false); }}
+      />
     </SettingsSectionLayout>
   );
 }

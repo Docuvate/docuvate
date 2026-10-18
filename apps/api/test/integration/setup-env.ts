@@ -10,3 +10,7 @@ if (!isRecord(parsed) || typeof parsed.databaseUrl !== 'string') {
   throw new Error('invalid integration env file');
 }
 process.env.DATABASE_URL = parsed.databaseUrl;
+
+const { initializeAuth } =
+  await import('../../src/shared/infrastructure/auth/better-auth.config.js');
+await initializeAuth();

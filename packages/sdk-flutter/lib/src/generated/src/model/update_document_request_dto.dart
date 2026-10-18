@@ -18,7 +18,6 @@ part 'update_document_request_dto.g.dart';
 /// * [documentDate] 
 /// * [notes] 
 /// * [folderId] 
-/// * [correspondentId] 
 /// * [tagIds] 
 /// * [extractionFields] 
 /// * [extractionBlocks] 
@@ -35,9 +34,6 @@ abstract class UpdateDocumentRequestDto implements Built<UpdateDocumentRequestDt
 
   @BuiltValueField(wireName: r'folderId')
   String? get folderId;
-
-  @BuiltValueField(wireName: r'correspondentId')
-  String? get correspondentId;
 
   @BuiltValueField(wireName: r'tagIds')
   BuiltList<String>? get tagIds;
@@ -96,13 +92,6 @@ class _$UpdateDocumentRequestDtoSerializer implements PrimitiveSerializer<Update
       yield r'folderId';
       yield serializers.serialize(
         object.folderId,
-        specifiedType: const FullType(String),
-      );
-    }
-    if (object.correspondentId != null) {
-      yield r'correspondentId';
-      yield serializers.serialize(
-        object.correspondentId,
         specifiedType: const FullType(String),
       );
     }
@@ -177,13 +166,6 @@ class _$UpdateDocumentRequestDtoSerializer implements PrimitiveSerializer<Update
             specifiedType: const FullType(String),
           ) as String;
           result.folderId = valueDes;
-          break;
-        case r'correspondentId':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.correspondentId = valueDes;
           break;
         case r'tagIds':
           final valueDes = serializers.deserialize(

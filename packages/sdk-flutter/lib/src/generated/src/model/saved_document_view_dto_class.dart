@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:docuvate/src/generated/src/model/saved_document_view_field_filter_dto_class.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:docuvate/src/generated/src/model/library_table_column_id.dart';
 import 'package:built_value/built_value.dart';
@@ -25,7 +26,7 @@ part 'saved_document_view_dto_class.g.dart';
 /// * [filterMode] 
 /// * [listScope] 
 /// * [folderId] 
-/// * [correspondentId] 
+/// * [fieldFilters] 
 /// * [status] 
 /// * [inbox] 
 /// * [withoutNonInboxLabel] 
@@ -78,8 +79,8 @@ abstract class SavedDocumentViewDtoClass implements Built<SavedDocumentViewDtoCl
   @BuiltValueField(wireName: r'folderId')
   String? get folderId;
 
-  @BuiltValueField(wireName: r'correspondentId')
-  String? get correspondentId;
+  @BuiltValueField(wireName: r'fieldFilters')
+  BuiltList<SavedDocumentViewFieldFilterDtoClass> get fieldFilters;
 
   @BuiltValueField(wireName: r'status')
   SavedDocumentViewDtoClassStatusEnum? get status;
@@ -191,13 +192,11 @@ class _$SavedDocumentViewDtoClassSerializer implements PrimitiveSerializer<Saved
         specifiedType: const FullType(String),
       );
     }
-    if (object.correspondentId != null) {
-      yield r'correspondentId';
-      yield serializers.serialize(
-        object.correspondentId,
-        specifiedType: const FullType(String),
-      );
-    }
+    yield r'fieldFilters';
+    yield serializers.serialize(
+      object.fieldFilters,
+      specifiedType: const FullType(BuiltList, [FullType(SavedDocumentViewFieldFilterDtoClass)]),
+    );
     if (object.status != null) {
       yield r'status';
       yield serializers.serialize(
@@ -351,12 +350,12 @@ class _$SavedDocumentViewDtoClassSerializer implements PrimitiveSerializer<Saved
           ) as String;
           result.folderId = valueDes;
           break;
-        case r'correspondentId':
+        case r'fieldFilters':
           final valueDes = serializers.deserialize(
             value,
-            specifiedType: const FullType(String),
-          ) as String;
-          result.correspondentId = valueDes;
+            specifiedType: const FullType(BuiltList, [FullType(SavedDocumentViewFieldFilterDtoClass)]),
+          ) as BuiltList<SavedDocumentViewFieldFilterDtoClass>;
+          result.fieldFilters.replace(valueDes);
           break;
         case r'status':
           final valueDes = serializers.deserialize(
