@@ -7,6 +7,7 @@
 import { createRequire } from 'node:module';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 const require = createRequire(new URL('../apps/api/package.json', import.meta.url));
@@ -20,7 +21,7 @@ const PASSWORD = process.env.SEED_PASSWORD ?? 'LabelsScreenshot1!';
 const NAME = 'Labels Screenshots';
 const MANIFEST_PATH =
   process.env.SEED_MANIFEST_PATH ??
-  path.join(process.cwd(), 'docs/screenshots/pr-i/seed-manifest.json');
+  path.join(os.tmpdir(), 'docuvate-labels-screenshots', 'seed-manifest.json');
 
 const DIM = 8;
 function vec(values) {
