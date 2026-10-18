@@ -50,8 +50,7 @@ export function AccountSecurityRegenerateBackupCodesDialog({
         setError(formatAuthClientError(result.error, 'signIn'));
         return;
       }
-      const nextCodes = result.data?.backupCodes ?? [];
-      setCodes(nextCodes);
+      setCodes(result.data.backupCodes);
       setPassword('');
     } catch (err) {
       setError(formatAuthClientError(err, 'signIn'));

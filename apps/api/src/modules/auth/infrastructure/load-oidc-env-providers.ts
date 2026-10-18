@@ -18,14 +18,14 @@ function parseEnvProviderEntry(value: unknown): EnvOidcProviderConfig | null {
   if (!isRecord(value)) {
     return null;
   }
-  const providerId = parseString(value['providerId']);
-  const displayName = parseString(value['displayName']);
-  const issuer = parseString(value['issuer']);
-  const clientId = parseString(value['clientId']);
-  const clientSecret = parseString(value['clientSecret']);
-  const scopesRaw = parseString(value['scopes']);
+  const providerId = parseString(value.providerId);
+  const displayName = parseString(value.displayName);
+  const issuer = parseString(value.issuer);
+  const clientId = parseString(value.clientId);
+  const clientSecret = parseString(value.clientSecret);
+  const scopesRaw = parseString(value.scopes);
   const scopes = scopesRaw.length > 0 ? scopesRaw : DEFAULT_SCOPES;
-  const enabled = value['enabled'] === undefined ? true : parseBoolean(value['enabled']);
+  const enabled = value.enabled === undefined ? true : parseBoolean(value.enabled);
   if (!providerId || !displayName || !issuer || !clientId || !clientSecret) {
     return null;
   }

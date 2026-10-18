@@ -7,9 +7,9 @@ import { FormEvent, useCallback, useEffect, useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { PasswordPolicyChecklist } from '../components/auth/PasswordPolicyChecklist';
+import { useToast } from '../components/save/ToastProvider';
 import { AccountSecurityChangeEmailDialog } from '../components/settings/AccountSecurityChangeEmailDialog';
 import { AccountSecurityRegenerateBackupCodesDialog } from '../components/settings/AccountSecurityRegenerateBackupCodesDialog';
-import { useToast } from '../components/save/ToastProvider';
 import { SettingsSectionCard } from '../components/settings/SettingsSectionCard';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { Button } from '../components/ui/Button';
@@ -19,8 +19,8 @@ import {
   authSessionUserEmail,
   authSessionUserTwoFactorEnabled,
 } from '../lib/auth-client';
-import { useAuthSignInOptions } from '../lib/useAuthSignInOptions';
 import { formatAuthClientError } from '../lib/authErrors';
+import { useAuthSignInOptions } from '../lib/useAuthSignInOptions';
 import { usePasswordPolicy } from '../lib/usePasswordPolicy';
 
 const ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true };
@@ -75,7 +75,7 @@ export function AccountSecuritySettingsPage() {
   useEffect(() => {
     setTotpEnabled(authSessionUserTwoFactorEnabled(session));
     void refreshPasskeys();
-    const name = session?.user?.name;
+    const name = session?.user.name;
     if (typeof name === 'string') {
       setDisplayName(name);
     }

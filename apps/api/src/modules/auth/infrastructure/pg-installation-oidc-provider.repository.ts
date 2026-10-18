@@ -51,8 +51,8 @@ export class PgInstallationOidcProviderRepository {
        WHERE id = $1`,
       [id]
     );
-    const row = result.rows[0];
-    return row ? oidcProviderRowFromUnknown(row) : null;
+    const firstRow: unknown = result.rows.at(0);
+    return firstRow === undefined ? null : oidcProviderRowFromUnknown(firstRow);
   }
 
   async create(input: UpsertOidcProviderInput): Promise<InstallationOidcProviderRow> {
@@ -116,8 +116,8 @@ export class PgInstallationOidcProviderRepository {
         input.enabled,
       ]
     );
-    const row = result.rows[0];
-    return row ? oidcProviderRowFromUnknown(row) : null;
+    const firstRow: unknown = result.rows.at(0);
+    return firstRow === undefined ? null : oidcProviderRowFromUnknown(firstRow);
   }
 
   async upsertEnv(input: EnvOidcProviderConfig): Promise<void> {

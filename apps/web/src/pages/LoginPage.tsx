@@ -13,15 +13,15 @@ import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
 import { authClient } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/authErrors';
-import { signInWithPasskey } from '../lib/loginPasskey';
-import { useAuthSignInOptions } from '../lib/useAuthSignInOptions';
 import {
   clearAuthenticatedSessionHint,
   markAuthenticatedSessionHint,
 } from '../lib/authSessionHint';
 import { awaitAuthenticatedSession } from '../lib/awaitAuthenticatedSession';
+import { signInWithPasskey } from '../lib/loginPasskey';
 import { readLocationStateBoolean } from '../lib/routerLocationState';
 import { routes } from '../lib/routes';
+import { useAuthSignInOptions } from '../lib/useAuthSignInOptions';
 
 export function LoginPage() {
   const { t } = useTranslation();

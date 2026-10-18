@@ -45,21 +45,21 @@ export function AdminOidcProvidersCard() {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const selected = providers.find((p) => p.id === selectedId) ?? null;
-  const editingAdmin = selected?.source === 'admin';
-  const formBaseline = useMemo((): CreateAdminOidcProviderRequest & { clientSecret?: string } => {
-    if (editingAdmin && selected) {
+  const adminSelected = selected?.source === 'admin' ? selected : null;
+  const formBaseline = useMemo((): CreateAdminOidcProviderRequest => {
+    if (adminSelected) {
       return {
-        providerId: selected.providerId,
-        displayName: selected.displayName,
-        issuer: selected.issuer,
-        clientId: selected.clientId,
+        providerId: adminSelected.providerId,
+        displayName: adminSelected.displayName,
+        issuer: adminSelected.issuer,
+        clientId: adminSelected.clientId,
         clientSecret: '',
-        scopes: selected.scopes,
-        enabled: selected.enabled,
+        scopes: adminSelected.scopes,
+        enabled: adminSelected.enabled,
       };
     }
     return EMPTY_DRAFT;
-  }, [editingAdmin, selected]);
+  }, [adminSelected]);
   const form = useFormDraft(formBaseline);
 
   async function reload() {
@@ -77,7 +77,7 @@ export function AdminOidcProvidersCard() {
     setSaving(true);
     setSaveError(null);
     try {
-      if (editingAdmin && selected) {
+      if (adminSelected) {
         const body: UpdateAdminOidcProviderRequest = {
           displayName: form.draft.displayName,
           issuer: form.draft.issuer,
@@ -85,17 +85,18 @@ export function AdminOidcProvidersCard() {
           scopes: form.draft.scopes,
           enabled: form.draft.enabled,
         };
-        if (form.draft.clientSecret?.trim()) {
-          body.clientSecret = form.draft.clientSecret.trim();
+        const secret = form.draft.clientSecret.trim();
+        if (secret.length > 0) {
+          body.clientSecret = secret;
         }
-        await updateAdminOidcProvider(selected.id, body);
+        await updateAdminOidcProvider(adminSelected.id, body);
       } else {
         const createBody: CreateAdminOidcProviderRequest = {
           providerId: form.draft.providerId,
           displayName: form.draft.displayName,
           issuer: form.draft.issuer,
           clientId: form.draft.clientId,
-          clientSecret: form.draft.clientSecret ?? '',
+          clientSecret: form.draft.clientSecret,
           scopes: form.draft.scopes,
           enabled: form.draft.enabled,
         };
@@ -114,13 +115,13 @@ export function AdminOidcProvidersCard() {
   }
 
   async function removeSelected() {
-    if (!selected || selected.source !== 'admin') {
+    if (!adminSelected) {
       return;
     }
     setSaving(true);
     setSaveError(null);
     try {
-      await deleteAdminOidcProvider(selected.id);
+      await deleteAdminOidcProvider(adminSelected.id);
       setSelectedId(null);
       await reload();
       notifySaved();
@@ -165,7 +166,7 @@ export function AdminOidcProvidersCard() {
           </ul>
         </div>
         <div className="admin-oidc-form settings-stack">
-          {!editingAdmin ? (
+          {!adminSelected ? (
             <label className="settings-field" htmlFor={providerIdField}>
               {t('admin.oidcProviders.providerIdLabel')}
               <Input
@@ -212,10 +213,10 @@ export function AdminOidcProvidersCard() {
             {t('admin.oidcProviders.clientSecretLabel')}
             <Input
               type="password"
-              value={form.draft.clientSecret ?? ''}
+              value={form.draft.clientSecret}
               disabled={saving}
               placeholder={
-                editingAdmin && selected?.hasClientSecret
+                adminSelected?.hasClientSecret
                   ? t('admin.oidcProviders.clientSecretKeepPlaceholder')
                   : undefined
               }
@@ -247,7 +248,7 @@ export function AdminOidcProvidersCard() {
               {saveError}
             </p>
           ) : null}
-          {editingAdmin ? (
+          {adminSelected ? (
             <Button type="button" variant="secondary" disabled={saving} onClick={() => void removeSelected()}>
               {t('admin.oidcProviders.delete')}
             </Button>

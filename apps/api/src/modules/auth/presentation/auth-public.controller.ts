@@ -4,11 +4,11 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 
 import { Public } from '../../../shared/infrastructure/auth/public.decorator.js';
+import { AuthSignInOptionsResponseDto } from '../../../shared/presentation/dtos/auth-sign-in.dto.js';
 import { PasswordPolicyResponseDto } from '../../../shared/presentation/dtos/password-policy.dto.js';
 import { ApiDocuvatePublicRoute } from '../../../shared/presentation/swagger/openapi-decorators.js';
 import { GetAuthSignInOptionsUseCase } from '../application/get-auth-sign-in-options.use-case.js';
 import { GetPasswordPolicyUseCase } from '../application/get-password-policy.use-case.js';
-import { AuthSignInOptionsResponseDto } from '../../../shared/presentation/dtos/auth-sign-in.dto.js';
 import { VerifyPasswordResetTokenUseCase } from '../application/verify-password-reset-token.use-case.js';
 import {
   VerifyPasswordResetTokenQueryDto,

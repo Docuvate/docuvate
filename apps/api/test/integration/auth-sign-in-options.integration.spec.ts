@@ -1,14 +1,27 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-
-import { Test } from '@nestjs/testing';
+import { Global, Module } from '@nestjs/common';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { Test } from '@nestjs/testing';
+import type pg from 'pg';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { AuthPublicModule } from '../../src/modules/auth/auth-public.module.js';
 import { encryptOidcClientSecret } from '../../src/modules/auth/infrastructure/oidc-client-secret.codec.js';
 import { PG_POOL } from '../../src/shared/infrastructure/database/tokens.js';
 import { getIntegrationPool } from './pg-pool.js';
+
+function testPgPoolModule(pool: pg.Pool) {
+  @Global()
+  @Module({
+    providers: [{ provide: PG_POOL, useValue: pool }],
+    exports: [PG_POOL],
+  })
+  // eslint-disable-next-line @typescript-eslint/no-extraneous-class -- Nest @Module() host
+  class TestPgPoolModule {}
+
+  return TestPgPoolModule;
+}
 
 describe('GET /v1/auth/sign-in-options (integration)', () => {
   const pool = getIntegrationPool();
@@ -16,11 +29,8 @@ describe('GET /v1/auth/sign-in-options (integration)', () => {
 
   beforeAll(async () => {
     const moduleFixture = await Test.createTestingModule({
-      imports: [AuthPublicModule],
-    })
-      .overrideProvider(PG_POOL)
-      .useValue(pool)
-      .compile();
+      imports: [testPgPoolModule(pool), AuthPublicModule],
+    }).compile();
     app = moduleFixture.createNestApplication(new FastifyAdapter());
     app.setGlobalPrefix('v1');
     await app.init();

@@ -33,15 +33,15 @@ export function oidcProviderRowFromUnknown(row: unknown): InstallationOidcProvid
   if (!record) {
     return null;
   }
-  const id = parseString(record['id']);
-  const providerId = parseString(record['provider_id']);
-  const displayName = parseString(record['display_name']);
-  const issuer = parseString(record['issuer']);
-  const clientId = parseString(record['client_id']);
-  const secret = record['client_secret_encrypted'];
-  const scopes = parseString(record['scopes']);
-  const enabled = parseBoolean(record['enabled']);
-  const source = parseSource(record['source']);
+  const id = parseString(record.id);
+  const providerId = parseString(record.provider_id);
+  const displayName = parseString(record.display_name);
+  const issuer = parseString(record.issuer);
+  const clientId = parseString(record.client_id);
+  const secret = record.client_secret_encrypted;
+  const scopes = parseString(record.scopes);
+  const enabled = parseBoolean(record.enabled);
+  const source = parseSource(record.source);
   if (
     !id ||
     !providerId ||

@@ -18,8 +18,8 @@ import {
 } from '../../../modules/auth/infrastructure/mail/email-change-mailer.factory.js';
 import { createPasswordResetMailer } from '../../../modules/auth/infrastructure/mail/password-reset-mailer.factory.js';
 import { PgInstallationOidcProviderRepository } from '../../../modules/auth/infrastructure/pg-installation-oidc-provider.repository.js';
-import { syncEnvOidcProviders } from '../../../modules/auth/infrastructure/sync-env-oidc-providers.js';
 import { isSignupPermitted } from '../../../modules/auth/infrastructure/signup-policy.js';
+import { syncEnvOidcProviders } from '../../../modules/auth/infrastructure/sync-env-oidc-providers.js';
 import { assertBetterAuthSecretForRuntime } from './better-auth-secret.js';
 
 const pool = new pg.Pool({
@@ -154,12 +154,10 @@ export async function initializeAuth(): Promise<BetterAuthInstance> {
   if (authInstance) {
     return authInstance;
   }
-  if (!initPromise) {
-    initPromise = buildAuthInstance().then((instance) => {
-      authInstance = instance;
-      return instance;
-    });
-  }
+  initPromise ??= buildAuthInstance().then((instance) => {
+    authInstance = instance;
+    return instance;
+  });
   return initPromise;
 }
 
