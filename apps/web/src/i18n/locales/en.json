@@ -1168,9 +1168,6 @@
     "manageConnection": "Manage “{{name}}”",
     "connectAnotherCta": "Add another connection",
     "connectedAs": "Connected as “{{name}}”",
-    "errors": {
-      "nameConflict": "You already have a connection with this name."
-    },
     "stepper": {
       "aria": "Setup steps",
       "access": "Access",
@@ -1349,6 +1346,7 @@
       }
     },
     "errors": {
+      "nameConflict": "You already have a connection with this name.",
       "missingRequiredField": "A required field is missing.",
       "tokenOrPasswordAuthRequired": "Provide an API token or both username and password.",
       "remoteValidationFailed": "The remote system rejected the connection.",

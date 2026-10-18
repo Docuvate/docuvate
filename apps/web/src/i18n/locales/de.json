@@ -1169,9 +1169,6 @@
     "manageConnection": "„{{name}}“ verwalten",
     "connectAnotherCta": "Weitere Verbindung",
     "connectedAs": "Verbunden als „{{name}}“",
-    "errors": {
-      "nameConflict": "Sie haben bereits eine Verbindung mit diesem Namen."
-    },
     "stepper": {
       "aria": "Einrichtungsschritte",
       "access": "Zugang",
@@ -1362,6 +1359,7 @@
       }
     },
     "errors": {
+      "nameConflict": "Sie haben bereits eine Verbindung mit diesem Namen.",
       "missingRequiredField": "Ein Pflichtfeld fehlt.",
       "tokenOrPasswordAuthRequired": "API-Token oder Benutzername und Passwort angeben.",
       "remoteValidationFailed": "Remote-System hat die Verbindung abgelehnt.",
