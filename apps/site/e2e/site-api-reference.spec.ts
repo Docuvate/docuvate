@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 
-const TAGS = ['dokumente', 'labels', 'korrespondenten'] as const;
+const TAGS = ['dokumente', 'labels', 'ordner'] as const;
 
 type SiteOpenApiSpec = {
   info?: { description?: string };
@@ -847,7 +847,7 @@ test.describe('API reference operations', () => {
   });
 
   for (const hash of [
-    '#tag/korrespondenten',
+    '#tag/ordner',
     '#tag/labels',
     '#tag/dokumente',
     '#tag/dokumente/POST/documents',
