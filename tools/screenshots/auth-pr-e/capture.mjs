@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * PR-E auth screenshots (1440 / 1024 / 390, light + dark): A1 login, E8 account security, E9 admin.
+ * PR-E auth screenshots (1440 / 1024 / 390, light + dark): A1 login, E8 account security,
+ * E8b/E8c dialogs, E9 admin sign-in settings.
  */
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -9,7 +10,7 @@ import path from 'node:path';
 import { chromium } from 'playwright';
 
 const ROOT = path.resolve(import.meta.dirname, '../../..');
-const OUT = process.env.SCREENSHOT_DIR ?? path.join(ROOT, 'artifacts/screenshots/auth-pr-e');
+const OUT = process.env.SCREENSHOT_DIR ?? path.join(ROOT, 'docs/screenshots/pr-109');
 const WEB = process.env.DOCUVATE_WEB ?? 'http://localhost:5173';
 const API = process.env.DOCUVATE_API ?? 'http://localhost:3001';
 const EMAIL = process.env.SCREENSHOT_USER_EMAIL ?? 'elena.kraemer@beispiel.de';
@@ -65,7 +66,7 @@ async function main() {
       const loginPage = await browser.newPage({ viewport: { width, height: 900 } });
       await setTheme(loginPage, theme);
       await loginPage.goto(`${WEB}/login`, { waitUntil: 'networkidle' });
-      await capture(loginPage, path.join(OUT, `login-a1-${width}-${theme}.png`));
+      await capture(loginPage, path.join(OUT, `a1-login-${width}-${theme}.png`));
       await loginPage.close();
 
       const accountPage = await browser.newPage({
@@ -74,7 +75,21 @@ async function main() {
       });
       await setTheme(accountPage, theme);
       await accountPage.goto(`${WEB}/settings/account-security`, { waitUntil: 'networkidle' });
-      await capture(accountPage, path.join(OUT, `account-security-e8-${width}-${theme}.png`));
+      await capture(accountPage, path.join(OUT, `e8-account-security-${width}-${theme}.png`));
+
+      await accountPage.getByRole('button', { name: 'E-Mail ändern' }).click();
+      await accountPage.locator('[role="dialog"]').waitFor({ state: 'visible' });
+      await capture(accountPage, path.join(OUT, `e8e-change-email-dialog-${width}-${theme}.png`));
+      await accountPage.keyboard.press('Escape');
+
+      const regenButton = accountPage.getByRole('button', { name: 'Wiederherstellungscodes erneuern' });
+      if (await regenButton.isVisible()) {
+        await regenButton.click();
+        await accountPage.locator('[role="dialog"]').waitFor({ state: 'visible' });
+        await capture(accountPage, path.join(OUT, `e8b-regenerate-codes-dialog-${width}-${theme}.png`));
+        await accountPage.keyboard.press('Escape');
+      }
+
       await accountPage.close();
 
       const adminPage = await browser.newPage({
@@ -83,7 +98,7 @@ async function main() {
       });
       await setTheme(adminPage, theme);
       await adminPage.goto(`${WEB}/settings/admin`, { waitUntil: 'networkidle' });
-      await capture(adminPage, path.join(OUT, `admin-auth-e9-${width}-${theme}.png`));
+      await capture(adminPage, path.join(OUT, `e9-admin-auth-sign-in-${width}-${theme}.png`));
       await adminPage.close();
     }
   }
