@@ -30,13 +30,21 @@ export function AdminUserActionsMenu({ user, busy, disabled, onSelect }: Props) 
 
   const items: ContextMenuEntry[] = [];
   if (user.accountStatus === 'invited') {
-    items.push({
-      kind: 'item',
-      id: 'revoke-invite',
-      label: t('admin.usersRevokeInvite'),
-      danger: true,
-      onSelect: () => { onSelect({ kind: 'revoke-invite', user }); },
-    });
+    items.push(
+      {
+        kind: 'item',
+        id: 'resend-invite',
+        label: t('admin.usersResendInvite'),
+        onSelect: () => { onSelect({ kind: 'resend-invite', user }); },
+      },
+      {
+        kind: 'item',
+        id: 'revoke-invite',
+        label: t('admin.usersRevokeInvite'),
+        danger: true,
+        onSelect: () => { onSelect({ kind: 'revoke-invite', user }); },
+      }
+    );
   } else if (user.accountStatus === 'suspended') {
     items.push({
       kind: 'item',

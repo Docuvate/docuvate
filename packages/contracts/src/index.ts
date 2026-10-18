@@ -1389,6 +1389,7 @@ export interface AdminUserDto {
   banReason: string | null;
   accountStatus: AdminUserAccountStatus;
   createdAt: string;
+  lastLoginAt: string | null;
 }
 
 export interface AcceptUserInvitationRequest {

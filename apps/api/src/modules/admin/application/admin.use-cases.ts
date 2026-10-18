@@ -76,6 +76,7 @@ function invitationToListItem(invite: {
     banReason: null,
     accountStatus: 'invited',
     createdAt: invite.createdAt,
+    lastLoginAt: null,
   };
 }
 

@@ -12717,6 +12717,31 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin: 0 0 var(--dv-space-sm);
 }
 
+.admin-users-table--spec {
+  table-layout: fixed;
+}
+
+.admin-users-table--spec .admin-users-col-person {
+  width: 17.5rem;
+}
+
+.admin-users-table--spec .admin-users-col-role {
+  width: 10rem;
+}
+
+.admin-users-table--spec .admin-users-col-status {
+  width: 9rem;
+}
+
+.admin-users-table--spec .admin-users-col-last-login {
+  width: auto;
+}
+
+.admin-users-table--spec .admin-users-col-actions {
+  width: 2.25rem;
+  padding-inline: var(--dv-space-2xs);
+}
+
 .admin-users-table .admin-users-col-person {
   min-width: 12rem;
 }
@@ -12750,16 +12775,22 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   white-space: nowrap;
 }
 
+.admin-users-table--spec tbody tr {
+  height: 4rem;
+}
+
 .admin-users-actions-cell {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: var(--dv-space-2xs);
 }
 
 .admin-users-overflow-btn.icon-btn {
-  min-width: 40px;
-  min-height: 40px;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
 }
 
 .admin-users-table tbody tr {
@@ -12806,6 +12837,19 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   gap: var(--dv-space-sm);
   align-items: end;
+}
+
+.admin-invite-form--spec {
+  grid-template-columns: minmax(0, 1fr) 10rem auto;
+  align-items: center;
+}
+
+.admin-invite-form--spec .admin-invite-email-field {
+  margin: 0;
+}
+
+.admin-invite-form--spec .admin-invite-role-select {
+  width: 100%;
 }
 
 .admin-invite-submit {
