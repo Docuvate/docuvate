@@ -6,7 +6,7 @@ cd "$ROOT"
 
 if [[ "${CI_ENABLE_DOCKER_FORWARD:-0}" == "1" ]]; then
   # shellcheck source=/dev/null
-  source "$ROOT/scripts/ci/agent-docker-forward.sh"
+  source "$ROOT/scripts/ci/docker-forward.sh"
 fi
 
 exec bash "$ROOT/scripts/ci/run-local-ci-jobs.sh"

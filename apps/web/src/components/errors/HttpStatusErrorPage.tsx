@@ -105,7 +105,7 @@ export function HttpStatusErrorPage({
                 <RefreshCw size={16} strokeWidth={2} aria-hidden />
                 {t('errors.pages.retry')}
               </Button>
-              <a className="btn btn-secondary" href="mailto:support@docuvate.app?subject=Docuvate%20Fehler">
+              <a className="btn btn-secondary" href="mailto:hello@docuvate.de?subject=Docuvate%20Fehler">
                 {t('errors.pages.internal.report')}
               </a>
             </>

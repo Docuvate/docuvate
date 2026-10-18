@@ -5,7 +5,7 @@ import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 
 const BASE = process.env.WEB_BASE ?? 'http://localhost:5173';
-const OUT = process.env.SCREENSHOT_DIR ?? '/opt/cursor/artifacts';
+const OUT = process.env.SCREENSHOT_DIR ?? '.artifacts';
 const EMAIL = process.env.SEED_EMAIL ?? 'labels-screenshots@docuvate.local';
 const PASSWORD = process.env.SEED_PASSWORD ?? 'LabelsScreenshot1!';
 

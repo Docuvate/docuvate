@@ -13,7 +13,7 @@ Kürzel werden in allen Vergleichstabellen verwendet.
 - **R4** Dokumenten-Pipeline und Feldkorrekturen: https://github.com/Docuvate/docuvate/blob/main/docs/document-processing-pipeline.md
 - **R5** Hybride Suche (pg_trgm, Embeddings): https://github.com/Docuvate/docuvate/blob/main/docs/adr/016-global-search-embeddings.md
 - **R6** Konnektoren (Gmail/Outlook OAuth, S3, Paperless, Home Assistant): https://github.com/Docuvate/docuvate/blob/main/docs/connectors.md
-- **R7** SFTP-Eingang und Paperless-Parität: https://github.com/Docuvate/docuvate/blob/main/docs/connectors/sftp.md · https://github.com/Docuvate/docuvate/blob/main/docs/parity-paperless.md
+- **R7** SFTP-Eingang: https://github.com/Docuvate/docuvate/blob/main/docs/connectors/sftp.md
 - **R8** Benutzer und Rollen: https://github.com/Docuvate/docuvate/blob/main/docs/user-administration.md
 - **R9** Bibliotheks-Chat mit Zitaten (ADR): https://github.com/Docuvate/docuvate/blob/main/docs/adr/024-cited-chat.md
 
