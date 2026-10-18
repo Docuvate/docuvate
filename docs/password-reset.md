@@ -1,55 +1,57 @@
-# Passwort zurücksetzen
+# Password reset
 
-## Self-Service (Web)
+[Deutsch](./password-reset.de.md)
 
-1. Auf der Anmeldeseite **Passwort vergessen?** wählen.
-2. E-Mail eingeben und **Link anfordern**. Die Bestätigung ist neutral (keine Konto-Enumeration).
-3. Link aus der E-Mail öffnen, neues Passwort zweimal eingeben, speichern, dann anmelden.
+## Self-service (web)
 
-Im Standard-**Docker Compose**-Stack versendet die API Reset-Mails per SMTP an **Mailpit** (kein Versand ins Internet). E-Mails und Links einsehen: http://localhost:8025
+1. On the sign-in page, choose **Forgot password?**.
+2. Enter your email and **request a link**. The confirmation is neutral (no account enumeration).
+3. Open the link from the email, enter the new password twice, save, then sign in.
 
-## E-Mail (Produktion / eigener SMTP)
+In the default **Docker Compose** stack the API sends reset emails via SMTP to **Mailpit** (nothing leaves the machine). View emails and links at http://localhost:8025.
 
-| Variable | Bedeutung |
-|----------|-----------|
-| `SMTP_URL` | SMTP-URL, z. B. `smtp://user:pass@mail.example:587` |
-| `MAIL_FROM` | Absender, z. B. `Docuvate <noreply@example.com>` |
-| `PASSWORD_RESET_MAIL_MODE` | `auto` (Standard), `smtp` oder `log` (nur Nicht-Produktion) |
+## Email (production or your own SMTP)
 
-Compose-Defaults: `PASSWORD_RESET_MAIL_MODE=smtp`, `SMTP_URL=smtp://mailpit:1025`, `MAIL_FROM=Docuvate <no-reply@docuvate.local>`. Für echten Versand `SMTP_URL` und `MAIL_FROM` setzen (z. B. in `.env`).
+| Variable                   | Meaning                                                   |
+| -------------------------- | --------------------------------------------------------- |
+| `SMTP_URL`                 | SMTP URL, for example `smtp://user:pass@mail.example:587` |
+| `MAIL_FROM`                | Sender, for example `Docuvate <noreply@example.com>`      |
+| `PASSWORD_RESET_MAIL_MODE` | `auto` (default), `smtp` or `log` (non-production only)   |
 
-In Produktion (`NODE_ENV=production`) ist `log` deaktiviert; `SMTP_URL` und `MAIL_FROM` sind erforderlich, sofern kein SMTP über `auto` erkannt wird.
+Compose defaults: `PASSWORD_RESET_MAIL_MODE=smtp`, `SMTP_URL=smtp://mailpit:1025`, `MAIL_FROM=Docuvate <no-reply@docuvate.local>`. Set `SMTP_URL` and `MAIL_FROM` (for example in `.env`) to send real emails.
 
-## Admin-CLI (Self-Hosting)
+In production (`NODE_ENV=production`) the `log` mode is disabled; `SMTP_URL` and `MAIL_FROM` are required unless `auto` detects an SMTP configuration.
 
-Setzt das Passwort direkt (better-auth Hashing, nur Credential-Account):
+## Admin CLI (self-hosting)
+
+Sets the password directly (better-auth hashing, credential accounts only):
 
 ```bash
 pnpm --filter @docuvate/api auth:reset-password user@example.com
 ```
 
-Im Compose-Stack:
+In the Compose stack:
 
 ```bash
 docker compose exec -T api pnpm --filter @docuvate/api auth:reset-password user@example.com
 ```
 
-Mit TTY für verdeckte Eingabe:
+With a TTY for hidden input:
 
 ```bash
 docker compose exec api pnpm --filter @docuvate/api auth:reset-password user@example.com
 ```
 
-Alle aktiven Sessions widerrufen:
+Revoke all active sessions:
 
 ```bash
 pnpm --filter @docuvate/api auth:reset-password user@example.com --revoke-sessions
 ```
 
-Passwort per stdin (ohne TTY):
+Password via stdin (no TTY):
 
 ```bash
 printf '%s' 'new-secret-password' | pnpm --filter @docuvate/api auth:reset-password user@example.com
 ```
 
-Passwörter werden nicht geloggt.
+Passwords are never logged.

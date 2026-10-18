@@ -5,7 +5,7 @@ import { mkdir, readFile } from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const OUT = '/cursor/stores/self/readme-shots';
+const OUT = '.artifacts/readme-shots';
 
 const MIME_BY_EXT = {
   '.svg': 'image/svg+xml',

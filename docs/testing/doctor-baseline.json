@@ -1,7 +1,7 @@
 {
   "recordedAt": "2026-10-08",
   "targetMinScore": 95,
-  "gateRule": "PR blockiert wenn ein Doctor-Score unter dem Baseline-Wert liegt (keine Verschlechterung gegenüber main). Doctor-CLI-Versionen sind gepinnt (kein @latest), damit Scores vergleichbar bleiben.",
+  "gateRule": "A pull request fails if any doctor score drops below its baseline (no regression against main). Doctor CLI versions are pinned (no @latest) so scores stay comparable.",
   "packages": {
     "nestjs": {
       "path": "apps/api",

@@ -24,7 +24,7 @@ Remote-Config nutzt **camelCase** (z. B. `exactAnswers`). Override-Zeilen in der
 ### Flags aktivieren
 
 1. **Installations-Standard:** passende `DOCUVATE_FEATURE_*`-Variable in `.env` auf `true` (oder `1` / `yes`) setzen und API neu starten.
-2. **Pro Mandant:** Admin-API-Override (siehe [Nutzer- und Rollenverwaltung](./user-administration.md)).
+2. **Pro Mandant:** Admin-API-Override (siehe [Nutzer- und Rollenverwaltung](./user-administration.de.md)).
 3. **Web-App:** nach Anmeldung Remote-Config.
 
 `learnedValueTypes`: ist die Env-Variable **nicht gesetzt**, gilt **an**. Explizit `false`, `0` oder `no` schaltet ab.
