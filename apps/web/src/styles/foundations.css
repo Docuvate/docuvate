@@ -3,6 +3,10 @@
  * mobile < 768px, tablet 768–1279px, desktop ≥ 1280px.
  */
 
+dialog:not([open]) {
+  display: none;
+}
+
 .dv-page-grid {
   display: grid;
   grid-template-columns: repeat(var(--dv-grid-mobile-columns, 4), minmax(0, 1fr));

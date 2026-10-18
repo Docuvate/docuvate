@@ -241,7 +241,7 @@ export function AdminUsersPage() {
             disabled={reloadBusy}
             onClick={() => void reload()}
           >
-            {t('actions.retry')}
+            {t('common.retry')}
           </Button>
         </div>
       ) : null}

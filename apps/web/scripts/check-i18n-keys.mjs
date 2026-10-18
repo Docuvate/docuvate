@@ -86,8 +86,8 @@ for (const file of walk(SRC)) {
 }
 
 const missing = [];
+// Every literal key must resolve in both locales; a missing key renders as raw text in the UI.
 for (const key of [...usedKeys].sort()) {
-  if (!isScopedKey(key)) continue;
   if (!hasTranslation(de, key) || !hasTranslation(en, key)) {
     missing.push(key);
   }

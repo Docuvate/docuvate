@@ -154,7 +154,9 @@
       "signOutFailed": "Abmeldung fehlgeschlagen. Bitte erneut versuchen.",
       "sessionNotReady": "Die Sitzung konnte nicht gestartet werden. Bitte erneut versuchen.",
       "generic": "Das hat leider nicht geklappt. Bitte erneut versuchen."
-    }
+    },
+    "requestNewResetLink": "Neuen Link anfordern",
+    "resetPasswordVerifying": "Link wird geprüft…"
   },
   "errors": {
     "loadFailed": "Laden fehlgeschlagen",
@@ -321,7 +323,8 @@
     "retry": "Erneut versuchen",
     "saved": "Gespeichert",
     "copy": "Kopieren",
-    "copied": "Kopiert"
+    "copied": "Kopiert",
+    "loading": "Wird geladen…"
   },
   "save": {
     "saved": "Gespeichert",
@@ -485,7 +488,8 @@
     "stackPrimaryDeleteTitle": "Primäres Dokument löschen?",
     "stackPrimaryDeleteDescription": "„{{filename}}“ wird unwiderruflich gelöscht.",
     "stackPrimaryDeleteAllVersions": "Alle Versionen im Stapel mit löschen",
-    "stackPrimaryDeleteConfirmWithVersions": "{{count}} Dokumente endgültig löschen"
+    "stackPrimaryDeleteConfirmWithVersions": "{{count}} Dokumente endgültig löschen",
+    "reviewPendingTooltip": "Vorschläge warten auf Prüfung"
   },
   "filesystem": {
     "title": "Dateisystem",
@@ -943,7 +947,9 @@
     "extractedMarkdownPreview": "Vorschau",
     "extractedMarkdownSource": "Quelle",
     "extractedMarkdownViewAria": "Markdown-Ansicht",
-    "ingestSourceScanner": "Scanner-Eingang"
+    "ingestSourceScanner": "Scanner-Eingang",
+    "previewLoading": "Vorschau wird geladen…",
+    "previewTextEmpty": "Für dieses Dokument wurde noch kein Text erkannt."
   },
   "settings": {
     "title": "Einstellungen",
@@ -2024,7 +2030,26 @@
       "recent_documents": "Zuletzt hinzugefügt",
       "attention": "Aufmerksamkeit nötig",
       "saved_view": "Gespeicherte Ansicht"
-    }
+    },
+    "onboarding": {
+      "title": "Willkommen, {{name}}",
+      "titleAnonymous": "Willkommen bei Docuvate",
+      "lead": "In drei Schritten zu einer geordneten Ablage. Docuvate liest Ihre Dokumente und macht Vorschläge. Sie entscheiden, was übernommen wird.",
+      "stepUploadTitle": "1 · Dokumente hochladen",
+      "stepUploadText": "Ziehen Sie PDFs oder Fotos hierher. Die Texterkennung startet automatisch.",
+      "stepReviewTitle": "2 · Vorschläge durchklicken",
+      "stepReviewText": "Docuvate schlägt Labels und Felder vor. Sichere Vorschläge übernehmen Sie mit einem Klick, bei unsicheren hält sich Docuvate zurück.",
+      "stepReviewPending": "Wartet auf Upload",
+      "stepConnectTitle": "3 · Quellen verbinden (optional)",
+      "stepConnectText": "Paperless, SharePoint oder Scanner per SFTP anbinden.",
+      "stepConnectAction": "Verbindungen",
+      "privacyNote": "Standardmäßig bleibt alles auf Ihrem Server."
+    },
+    "reviewBannerTitle_one": "{{count}} Dokument wartet auf Prüfung",
+    "reviewBannerTitle_other": "{{count}} Dokumente warten auf Prüfung",
+    "reviewBannerDescription_one": "Bestätigen oder korrigieren Sie die Vorschläge für dieses Dokument.",
+    "reviewBannerDescription_other": "Bestätigen oder korrigieren Sie die Vorschläge für diese Dokumente.",
+    "reviewBannerAction": "Jetzt prüfen"
   },
   "sftpIngress": {
     "title": "Scanner-Eingang (SFTP)",
@@ -2201,5 +2226,14 @@
       "noteHelp": "Optional",
       "noteValue": "Abschlag ab Oktober erhöht."
     }
+  },
+  "combobox": {
+    "searchPlaceholder": "Suchen…",
+    "expand": "Liste öffnen",
+    "collapse": "Liste schließen",
+    "sectionSelected": "Ausgewählt",
+    "sectionFrequent": "Häufig",
+    "sectionAll": "Alle",
+    "empty": "Keine Treffer"
   }
 }
