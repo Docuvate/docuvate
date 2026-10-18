@@ -18,8 +18,8 @@ TAG="${DOCUVATE_SMOKE_TAG:-v0.1.0}"
 JOB_SUFFIX="${TAG#v}"
 JOB_SUFFIX="${JOB_SUFFIX//./-}"
 
-if [[ "${DV_AGENT_VM:-}" == "1" ]]; then
-  bash "$ROOT/scripts/ci/agent-vm-docker-setup.sh"
+if [[ "${DOCUVATE_CI_DOCKER_SETUP:-}" == "1" ]]; then
+  bash "$ROOT/scripts/ci/docker-setup.sh"
 fi
 
 run_docker() {
@@ -29,11 +29,11 @@ run_kind() {
   kind "$@"
 }
 if ! docker info >/dev/null 2>&1; then
-  if [[ "${DV_AGENT_VM:-}" == "1" ]]; then
+  if [[ "${DOCUVATE_CI_DOCKER_SETUP:-}" == "1" ]]; then
     run_docker() { sudo docker "$@"; }
     run_kind() { sudo kind "$@"; }
   else
-    echo "Docker is not accessible. Start Docker or set DV_AGENT_VM=1 on an agent VM." >&2
+    echo "Docker is not accessible. Start Docker or set DOCUVATE_CI_DOCKER_SETUP=1 on a disposable CI host." >&2
     exit 1
   fi
 fi

@@ -22,7 +22,7 @@ node tools/readme/render-readme-preview.mjs
 
 Optional: `README_RENDER_SHA=<git-sha>` loads repo assets from `raw.githubusercontent.com` instead of a local static server.
 
-## Screenshot pipeline (follow-up PRs)
+## Screenshot pipeline
 
 With the stack running locally:
 

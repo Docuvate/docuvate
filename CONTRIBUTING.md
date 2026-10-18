@@ -47,17 +47,17 @@ pnpm format:check
 cd apps/worker && uv venv .venv && uv pip install -e ".[dev]" && .venv/bin/ruff check src && .venv/bin/pyright && .venv/bin/mypy
 ```
 
-### Cloud Agent VMs only (throwaway hosts)
+### Disposable CI or container hosts
 
 If Docker Compose smoke tests fail because containers cannot reach each other (for example `minio-init` or API to Postgres timeouts), the host may have `iptables` **FORWARD DROP**. **Do not change firewall policy on your workstation.**
 
-On **throwaway Cursor Cloud Agent VMs only**, after `dockerd` is running, you may opt in to [`scripts/ci/agent-vm-docker-setup.sh`](scripts/ci/agent-vm-docker-setup.sh):
+On **disposable CI or container hosts only**, after `dockerd` is running, you may opt in to [`scripts/ci/docker-setup.sh`](scripts/ci/docker-setup.sh):
 
 ```bash
-DV_AGENT_VM=1 sudo -E scripts/ci/agent-vm-docker-setup.sh
+DOCUVATE_CI_DOCKER_SETUP=1 sudo -E scripts/ci/docker-setup.sh
 ```
 
-That script refuses to run unless `DV_AGENT_VM=1` is set. It is **not** for Mac, Linux desktops, or production servers.
+That script refuses to run unless `DOCUVATE_CI_DOCKER_SETUP=1` is set. It is **not** for Mac, Linux desktops, or production servers.
 
 ## Architecture rules
 

@@ -4,9 +4,9 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 
-if [[ "${DV_AGENT_VM:-0}" == "1" ]] && [[ -f scripts/ci/agent-vm-docker-setup.sh ]]; then
+if [[ "${DOCUVATE_CI_DOCKER_SETUP:-0}" == "1" ]] && [[ -f scripts/ci/docker-setup.sh ]]; then
   # shellcheck source=/dev/null
-  source scripts/ci/agent-vm-docker-setup.sh
+  source scripts/ci/docker-setup.sh
 fi
 
 DOCKER="${DOCKER:-docker}"

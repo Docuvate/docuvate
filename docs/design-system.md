@@ -1,53 +1,56 @@
-# Docuvate Design System
+# Design system
 
-Docuvate should feel like a **serious Beleg-OS** (NN/g): dense, trustworthy, optimized for scanning and filing, not a consumer soft UI.
+Docuvate is a dense, calm tool for filing and finding documents. The UI favours scanning speed and trust over decoration: warm stone-grey surfaces, one vermilion accent, IBM Plex type and a strict grid.
 
-## Tone
+All values come from the design tokens in [`packages/tokens`](../packages/tokens) (see [Design tokens](design-tokens.md)). Apps consume them as `--dv-*` CSS variables. Do not hard-code colours or sizes, and do not fork a parallel theme system.
 
-- Calm **slate** surfaces, one **ink indigo** primary (`--color-primary`, ~`#2F3E8C`).
-- **IBM Plex Sans** for UI copy; German labels in product surfaces.
+## Colour
+
+| Role            | Token                     | Light     | Dark      |
+| --------------- | ------------------------- | --------- | --------- |
+| Page background | `--dv-color-bg`           | `#f5f1e9` | `#1e1a13` |
+| Raised surface  | `--dv-color-bg-raised`    | `#fffaf5` | `#262118` |
+| Muted surface   | `--dv-color-bg-muted`     | `#e3dbd0` | `#3d362c` |
+| Text            | `--dv-color-text`         | `#120f09` | `#f5f1ea` |
+| Secondary text  | `--dv-color-text-muted`   | `#5c5348` | `#c9bfb0` |
+| Border          | `--dv-color-border`       | `#d9d0c4` | `#3d362c` |
+| Accent          | `--dv-color-accent`       | `#cb3a00` | `#e96f49` |
+| Accent (hover)  | `--dv-color-accent-hover` | `#b52300` | `#cb3a00` |
+| Focus ring      | `--dv-color-focus`        | `#cb3a00` | `#e96f49` |
+
+Status colours (`danger`, `ok`, `warn`), the inbox and suggestion colours and the label presets have their own tokens. Use the accent for primary actions, the active navigation item and focus only.
+
+Themes switch with the `data-docuvate-theme` attribute (`light` or `dark`) on `<html>`.
+
+## Type
+
+- **IBM Plex Sans** for UI text, **IBM Plex Mono** for code and identifiers (`--dv-font-family-sans`, `--dv-font-family-mono`).
+- Sizes come from the `--dv-font-size-*` scale; never set font sizes in pixels.
 - Labels are short nouns (Rechnung, Versicherung, Fahrzeug), not verb phrases.
 
-## Tokens (`apps/web/src/styles/tokens.css`)
+## Size and spacing
 
-| Token | Role |
-| --- | --- |
-| `--radius-sm` … `--radius-max` (≤12px) | Cards, inputs, chips. No pill blobs |
-| `--radius-chip` (8px) | Assigned / inbox / suggest chips |
-| `--color-primary` | Top bar, primary actions, sidebar active |
-| `--color-inbox*` | Posteingang chip |
-| `--color-suggest*` | Vorschlags-Chips, duplicate hint |
-| `--shadow-sm`, `--elevation-bar` | Subtle elevation only |
-
-Extend tokens here. Do not fork a parallel theme system.
+- Everything is specified in **rem**: spacing (`--dv-space-2xs` 0.25rem to `--dv-space-3xl` 4.5rem), radii (`--dv-radius-sm` 0.25rem, `md` 0.5rem, `lg` 0.75rem) and control heights (`--dv-control-height` 2.5rem).
+- Radii stay at or below `--dv-radius-lg`; no pill-shaped controls or chips.
+- Elevation is subtle (`--dv-shadow-*`).
 
 ## Layout
 
-- **Left sidebar**: Posteingang, Dokumente, Ordner tree, Struktur (Labels, Korrespondenten, Dokumenttypen), Einstellungen.
-- **Top bar**: global search + account only (no peer nav tabs).
+- A 12-column grid on desktop and tablet and 4 columns on mobile, with token-defined gutters and margins.
+- Elements stay on the grid. Hover, focus, selected, loading and error states never change an element's size or position.
+- Dialogs share one width of 35rem.
+- Forms with unsaved changes use the shared save bar and confirm with a short "saved" state.
 
 ## Components
 
-| Component | Usage |
-| --- | --- |
-| `Button` | Primary / secondary / ghost |
-| `Input` | Forms, search |
-| `Select` | Custom dropdown (matches Input styling) |
-| `Chip` | Tags (assigned, inbox, suggest, outline) |
-| `Dropzone` | Upload |
-| `Card` | Panels |
-| `Badge` | Pipeline status (not tags) |
-| `LabelPanel` | Document detail: assigned chips, picker, suggestions |
-| `PdfViewer` | pdf.js canvas + selectable text layer |
+Reusable components live in `apps/web/src/components/ui` (for example `Button`, `IconButton`, `Input`, `SearchField`, `Chip`, `Badge`, `Card`, `Dialog`, `SegmentedControl`, `Breadcrumb`). Use them instead of styling raw elements.
+
+- `Chip` is for user-defined labels; `Badge` is for system status.
+- New components take their colours, spacing and radii from tokens only.
 
 ## Anti-patterns
 
-- Border-radius > 12px on interactive controls or chips.
-- Pastel gradient hero sections or oversized rounded tags.
-- Using `Badge` for user-defined labels (use `Chip`).
-- English-only copy on user-facing DE screens.
-- User-facing word **Nomen** (internal guidance only).
-
-## Reference
-
-Paperless-ngx parity for filter bar, colored rectangular tags, and matching dialog: see `docs/parity-paperless.md`.
+- Hard-coded colours, pixel sizes or one-off radii.
+- Gradients, oversized rounded tags or decorative illustrations in the app.
+- Layout shifts between interaction states.
+- English-only copy on German screens (all UI text goes through i18n).
