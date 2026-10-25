@@ -28,6 +28,7 @@ dependencies = [
   "huggingface-hub>=0.26.0",
   "onnxruntime>=1.19.0",
   "rapidocr-onnxruntime>=1.4.0",
+  "psutil>=6.0.0",
   "tokenizers>=0.20.0",
   "python-docx>=1.1.2",
   "openpyxl>=3.1.5",
@@ -48,6 +49,7 @@ dev = [
   "pyright==1.1.396",
   "mypy==1.14.1",
   "scipy-stubs>=1.11.0,<1.18",
+  "types-psutil>=6.0.0",
 ]
 tesseract = [
   "pytesseract>=0.3.13",
@@ -160,6 +162,11 @@ venv = ".venv"
 include = ["src/docuvate_worker"]
 exclude = ["src/docuvate_worker/infrastructure/layout"]
 stubPath = "typings"
+
+[tool.pytest.ini_options]
+markers = [
+  "slow: long-running memory or model integration tests",
+]
 
 [build-system]
 requires = ["setuptools>=75.0"]

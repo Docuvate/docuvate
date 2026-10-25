@@ -25,7 +25,10 @@ from docuvate_worker.domain.representation.constants import (
     ENCODER_ONNX_FILE,
     ENCODER_ONNX_FILE_ARM_FALLBACK,
 )
-from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
+from docuvate_worker.infrastructure.onnx_runtime_env import (
+    apply_onnx_session_options,
+    configure_onnx_runtime_env,
+)
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 logger = logging.getLogger(__name__)
@@ -114,8 +117,9 @@ def _load_artifacts() -> tuple[ort.InferenceSession, Tokenizer, Path]:
             cache_dir=cache,
         )
         options = ort.SessionOptions()
-        options.intra_op_num_threads = _intra_op_threads()
-        options.inter_op_num_threads = 1
+        apply_onnx_session_options(options)
+        if os.environ.get("DOCUVATE_ENCODER_INTRA_OP_THREADS", "").strip():
+            options.intra_op_num_threads = _intra_op_threads()
         session = ort.InferenceSession(
             str(onnx_path),
             sess_options=options,

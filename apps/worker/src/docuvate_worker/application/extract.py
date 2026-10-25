@@ -125,19 +125,31 @@ def extract_document(
     embedding_density_state: EmbeddingDensityStatePayload | None = None,
     build_exact_fact_index: bool = False,
 ) -> ExtractionResult:
-    resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
-    if resolved.name == "pipeline":
-        base = _with_markdown(
-            extract_with_cpu_pipeline(
-                content,
-                mime_type,
-                embedding_density_state=embedding_density_state,
-                build_exact_fact_index=build_exact_fact_index,
+    from docuvate_worker.infrastructure.extract_memory.profiling import (  # noqa: PLC0415
+        MemoryProfiler,
+        set_active_memory_profiler,
+    )
+
+    profiler = MemoryProfiler()
+    profiler.start()
+    set_active_memory_profiler(profiler)
+    try:
+        resolved = engine_by_name(engine) if engine else _registry.resolve(mime_type)
+        if resolved.name == "pipeline":
+            base = _with_markdown(
+                extract_with_cpu_pipeline(
+                    content,
+                    mime_type,
+                    embedding_density_state=embedding_density_state,
+                    build_exact_fact_index=build_exact_fact_index,
+                )
             )
-        )
-    else:
-        base = _with_markdown(resolved.extract(content, mime_type))
-    with_layout = _with_layout_ir(base, content, mime_type)
-    return _with_document_images(with_layout, content, mime_type)
+        else:
+            base = _with_markdown(resolved.extract(content, mime_type))
+        with_layout = _with_layout_ir(base, content, mime_type)
+        return _with_document_images(with_layout, content, mime_type)
+    finally:
+        set_active_memory_profiler(None)
+        profiler.stop()
 
 

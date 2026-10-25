@@ -1,0 +1,13 @@
+from typing import Any
+
+class SessionOptions:
+    intra_op_num_threads: int
+    inter_op_num_threads: int
+    enable_cpu_mem_arena: bool
+
+class InferenceSession:
+    def __init__(self, *args: Any, **kwargs: Any) -> None: ...
+    def run(self, *args: Any, **kwargs: Any) -> Any: ...
+    def get_inputs(self) -> list[Any]: ...
+
+def set_default_logger_severity(level: int) -> None: ...

@@ -49,6 +49,9 @@ RUN chmod +x scripts/ci/worker-docker-install.sh \
     bash scripts/ci/worker-docker-install.sh \
   && chown -R 65534:65534 /opt/models
 ENV EXTRACTOR_ENGINE=pipeline
+ENV DOCUVATE_EXTRACT_POOL=1
+ENV DOCUVATE_ORT_DISABLE_MEM_ARENA=1
+ENV DOCUVATE_ORT_INTRA_OP_THREADS=2
 ENV PADDLE_OCR_LANG=german
 WORKDIR /app/apps/worker
 EXPOSE 8000
@@ -66,6 +69,9 @@ RUN chmod +x scripts/ci/worker-docker-install.sh \
     bash scripts/ci/worker-docker-install.sh \
   && chown -R 65534:65534 /opt/models
 ENV EXTRACTOR_ENGINE=pipeline
+ENV DOCUVATE_EXTRACT_POOL=1
+ENV DOCUVATE_ORT_DISABLE_MEM_ARENA=1
+ENV DOCUVATE_ORT_INTRA_OP_THREADS=2
 ENV PADDLE_OCR_LANG=german
 WORKDIR /app/apps/worker
 EXPOSE 8000

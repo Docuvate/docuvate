@@ -9,6 +9,7 @@ import base64
 import json
 import logging
 import os
+import signal
 import subprocess
 import sys
 import tempfile
@@ -27,6 +28,11 @@ from docuvate_worker.domain.models import (
     ExtractionBlock,
     ExtractionResult,
 )
+from docuvate_worker.infrastructure.extract_memory.admission import extract_admission_slot
+from docuvate_worker.infrastructure.extract_memory.retry_policy import (
+    apply_memory_retry_overrides,
+    memory_retry_already_applied,
+)
 from docuvate_worker.infrastructure.extractors.paddle_engine import release_paddle_ocr
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
@@ -34,6 +40,10 @@ from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_
 from docuvate_worker.presentation.extract_subprocess_errors import (
     meaningful_stderr_tail,
     subprocess_failure_message,
+)
+from docuvate_worker.presentation.extract_subprocess_pool import (
+    extract_pool_enabled,
+    pooled_extract_child,
 )
 
 logger = logging.getLogger(__name__)
@@ -173,41 +183,60 @@ def _in_process_extract_allowed() -> bool:
     return os.environ.get("DOCUVATE_EXTRACT_SUBPROCESS", "1") == "0"
 
 
-def run_extract_isolated(
-    *,
-    content: bytes,
-    mime_type: str,
-    engine: str | None,
-    embedding_density_state: EmbeddingDensityStatePayload | None,
-    build_exact_fact_index: bool,
-) -> ExtractionResult:
-    configure_onnx_runtime_env()
-    if _in_process_extract_allowed():
-        logger.warning(
-            "DOCUVATE_ALLOW_IN_PROCESS_EXTRACT=1: running extract in-process (not for production)"
+def _raise_from_envelope(envelope: dict[str, Any]) -> None:
+    if envelope.get("ok"):
+        return
+    error_text = str(envelope.get("error") or "extract subprocess failed")
+    error_type = str(envelope.get("error_type") or "RuntimeError")
+    tb = envelope.get("traceback")
+    if isinstance(tb, list):
+        logger.error(
+            "extract subprocess traceback:\n%s",
+            "".join(str(line) for line in tb),
         )
-        try:
-            return extract_document(
-                content,
-                mime_type,
-                engine=engine,
-                embedding_density_state=embedding_density_state,
-                build_exact_fact_index=build_exact_fact_index,
-            )
-        finally:
-            reclaim_python_heap()
-    release_paddle_ocr()
-    release_onnx_encoder()
-    payload = {
-        "content_base64": base64.b64encode(content).decode("ascii"),
-        "mime_type": mime_type,
-        "engine": engine,
-        "embedding_density_state": (
-            embedding_density_state.model_dump() if embedding_density_state is not None else None
-        ),
-        "build_exact_fact_index": build_exact_fact_index,
-    }
-    timeout = float(os.environ.get("DOCUVATE_EXTRACT_TIMEOUT_SECONDS", "900"))
+    permanent = permanent_failure_from_subprocess(
+        error_type=error_type,
+        reason=error_text,
+    )
+    if permanent is not None or envelope.get("permanent") is True:
+        if permanent is not None:
+            raise permanent
+        raise ExtractPermanentError(reason=error_text, error_type=error_type)
+    raise RuntimeError(error_text)
+
+
+def _execute_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    density = payload.get("embedding_density_state")
+    density_state = (
+        EmbeddingDensityStatePayload.model_validate(density) if density is not None else None
+    )
+    try:
+        result = extract_document(
+            base64.b64decode(str(payload["content_base64"])),
+            str(payload["mime_type"]),
+            engine=payload.get("engine"),
+            embedding_density_state=density_state,
+            build_exact_fact_index=bool(payload.get("build_exact_fact_index")),
+        )
+        return {"ok": True, "result": extraction_result_to_wire(result)}
+    except Exception as exc:
+        tb_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+        permanent = permanent_failure_from_subprocess(
+            error_type=type(exc).__name__,
+            reason=str(exc),
+        )
+        return {
+            "ok": False,
+            "error": f"{type(exc).__name__}: {exc}",
+            "error_type": type(exc).__name__,
+            "traceback": tb_lines,
+            "permanent": permanent is not None,
+        }
+
+
+def _run_subprocess_once(payload: dict[str, Any], *, timeout: float) -> dict[str, Any]:
+    if extract_pool_enabled() and os.environ.get("DOCUVATE_EXTRACT_CHILD_LOOP") != "1":
+        return pooled_extract_child().run_job(payload, timeout=timeout)
     with tempfile.TemporaryFile(mode="w+", encoding="utf-8") as stdout_file:
         proc = subprocess.run(
             [sys.executable, "-m", "docuvate_worker.presentation.extract_subprocess_runner"],
@@ -226,79 +255,122 @@ def run_extract_isolated(
             except json.JSONDecodeError:
                 failed = None
             if isinstance(failed, dict) and failed.get("ok") is False:
-                tb = failed.get("traceback")
-                if isinstance(tb, list):
-                    logger.error(
-                        "extract subprocess traceback:\n%s",
-                        "".join(str(line) for line in tb),
-                    )
-                error_text = str(failed.get("error") or "extract subprocess failed")
-                error_type = str(failed.get("error_type") or "RuntimeError")
-                permanent = permanent_failure_from_subprocess(
-                    error_type=error_type,
-                    reason=error_text,
-                )
-                if permanent is not None or failed.get("permanent") is True:
-                    raise ExtractPermanentError(reason=error_text, error_type=error_type)
-                raise RuntimeError(error_text)
+                return failed
             tail = meaningful_stderr_tail(proc.stderr)
             if tail:
                 logger.error("extract subprocess stderr (filtered):\n%s", tail)
-            raise RuntimeError(
-                subprocess_failure_message(
-                    proc.returncode,
-                    proc.stderr,
-                    stdout_snippet=raw_out[:500] if raw_out else None,
-                )
+            message = subprocess_failure_message(
+                proc.returncode,
+                proc.stderr,
+                stdout_snippet=raw_out[:500] if raw_out else None,
             )
-        envelope = json.loads(raw_out)
-    if not envelope.get("ok"):
-        error_text = str(envelope.get("error") or "extract subprocess failed")
-        error_type = str(envelope.get("error_type") or "RuntimeError")
-        permanent = permanent_failure_from_subprocess(
-            error_type=error_type,
-            reason=error_text,
+            return {
+                "ok": False,
+                "error": message,
+                "error_type": "RuntimeError",
+                "permanent": proc.returncode == -signal.SIGKILL,
+            }
+        parsed = json.loads(raw_out)
+        if not isinstance(parsed, dict):
+            raise RuntimeError("extract subprocess returned non-object JSON")
+        return parsed
+
+
+def _sigkill_envelope(envelope: dict[str, Any]) -> bool:
+    if envelope.get("ok") is not False:
+        return False
+    error_text = str(envelope.get("error") or "")
+    return "SIGKILL" in error_text
+
+
+def _resource_exhausted_message() -> str:
+    return (
+        "Document is too large or memory-intensive for this worker "
+        "(zu groß/zu speicherintensiv)."
+    )
+
+
+def _run_extract_subprocess(
+    payload: dict[str, Any],
+    *,
+    timeout: float,
+) -> ExtractionResult:
+    envelope = _run_subprocess_once(payload, timeout=timeout)
+    if _sigkill_envelope(envelope) and not memory_retry_already_applied():
+        logger.warning("extract_subprocess_sigkill_retry")
+        with apply_memory_retry_overrides():
+            envelope = _run_subprocess_once(payload, timeout=timeout)
+    if _sigkill_envelope(envelope):
+        raise ExtractPermanentError(
+            reason=_resource_exhausted_message(),
+            error_type="ExtractResourceExhausted",
         )
-        if permanent is not None or envelope.get("permanent") is True:
-            raise ExtractPermanentError(reason=error_text, error_type=error_type)
-        raise RuntimeError(error_text)
+    _raise_from_envelope(envelope)
     try:
         return extraction_result_from_wire(envelope["result"])
     finally:
         reclaim_python_heap()
 
 
+def run_extract_isolated(
+    *,
+    content: bytes,
+    mime_type: str,
+    engine: str | None,
+    embedding_density_state: EmbeddingDensityStatePayload | None,
+    build_exact_fact_index: bool,
+) -> ExtractionResult:
+    configure_onnx_runtime_env()
+    if _in_process_extract_allowed():
+        logger.warning(
+            "DOCUVATE_ALLOW_IN_PROCESS_EXTRACT=1: running extract in-process (not for production)"
+        )
+        with extract_admission_slot(content, mime_type):
+            try:
+                return extract_document(
+                    content,
+                    mime_type,
+                    engine=engine,
+                    embedding_density_state=embedding_density_state,
+                    build_exact_fact_index=build_exact_fact_index,
+                )
+            finally:
+                reclaim_python_heap()
+    release_paddle_ocr()
+    release_onnx_encoder()
+    payload = {
+        "content_base64": base64.b64encode(content).decode("ascii"),
+        "mime_type": mime_type,
+        "engine": engine,
+        "embedding_density_state": (
+            embedding_density_state.model_dump() if embedding_density_state is not None else None
+        ),
+        "build_exact_fact_index": build_exact_fact_index,
+    }
+    timeout = float(os.environ.get("DOCUVATE_EXTRACT_TIMEOUT_SECONDS", "900"))
+    with extract_admission_slot(content, mime_type):
+        return _run_extract_subprocess(payload, timeout=timeout)
+
+
 def main() -> None:
     configure_onnx_runtime_env()
+    if os.environ.get("DOCUVATE_EXTRACT_CHILD_LOOP") == "1":
+        for line in sys.stdin:
+            stripped = line.strip()
+            if not stripped:
+                continue
+            payload = json.loads(stripped)
+            envelope = _execute_payload(payload)
+            sys.stdout.write(json.dumps(envelope) + "\n")
+            sys.stdout.flush()
+            if not envelope.get("ok"):
+                sys.stderr.write(str(envelope.get("error")) + "\n")
+        return
     raw = sys.stdin.read()
     payload = json.loads(raw)
-    density = payload.get("embedding_density_state")
-    density_state = (
-        EmbeddingDensityStatePayload.model_validate(density) if density is not None else None
-    )
-    try:
-        result = extract_document(
-            base64.b64decode(str(payload["content_base64"])),
-            str(payload["mime_type"]),
-            engine=payload.get("engine"),
-            embedding_density_state=density_state,
-            build_exact_fact_index=bool(payload.get("build_exact_fact_index")),
-        )
-        print(json.dumps({"ok": True, "result": extraction_result_to_wire(result)}))
-    except Exception as exc:
-        tb_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
-        permanent = permanent_failure_from_subprocess(
-            error_type=type(exc).__name__,
-            reason=str(exc),
-        )
-        envelope: dict[str, object] = {
-            "ok": False,
-            "error": f"{type(exc).__name__}: {exc}",
-            "error_type": type(exc).__name__,
-            "traceback": tb_lines,
-            "permanent": permanent is not None,
-        }
-        print(json.dumps(envelope))
+    envelope = _execute_payload(payload)
+    print(json.dumps(envelope))
+    if not envelope.get("ok"):
         sys.exit(1)
 
 

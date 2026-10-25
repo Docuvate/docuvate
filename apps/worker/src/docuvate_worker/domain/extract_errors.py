@@ -5,15 +5,16 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 
-
-@dataclass(frozen=True, slots=True)
 class ExtractPermanentError(Exception):
     """Document or configuration cannot be processed; retrying will not help."""
 
-    reason: str
-    error_type: str
+    __slots__ = ("error_type", "reason")
+
+    def __init__(self, *, reason: str, error_type: str) -> None:
+        super().__init__(reason)
+        self.reason = reason
+        self.error_type = error_type
 
     def __str__(self) -> str:
         return f"{self.error_type}: {self.reason}"
@@ -29,8 +30,10 @@ def permanent_failure_from_subprocess(
         return ExtractPermanentError(reason=reason, error_type=error_type)
     if "overflowerror" in lowered or "math range error" in lowered:
         return ExtractPermanentError(reason=reason, error_type=error_type)
+    if "extractresourceexhausted" in lowered or "zu groß" in lowered:
+        return ExtractPermanentError(reason=reason, error_type="ExtractResourceExhausted")
     if "out of memory" in lowered or "sigkill" in lowered:
-        return ExtractPermanentError(reason=reason, error_type=error_type)
+        return ExtractPermanentError(reason=reason, error_type="ExtractResourceExhausted")
     if error_type in {"MemoryError", "RecursionError"}:
         return ExtractPermanentError(reason=reason, error_type=error_type)
     return None

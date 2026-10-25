@@ -84,10 +84,28 @@ def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock]]
     merged_texts: list[str] = []
     merged_blocks: list[ExtractionBlock] = []
     block_index = 0
-    for spec in specs:
-        cached = load_cached_chunk_result(content, spec)
-        if cached is not None:
-            text, blocks = cached
+    release_onnx_encoder()
+    try:
+        for spec in specs:
+            cached = load_cached_chunk_result(content, spec)
+            if cached is not None:
+                text, blocks = cached
+                shifted = shift_blocks_page_offset(blocks, spec.page_offset)
+                block_index = append_chunk_ocr_part(
+                    merged_texts,
+                    merged_blocks,
+                    text,
+                    shifted,
+                    block_index_start=block_index,
+                )
+                continue
+            sub_pdf = slice_pdf_bytes(content, spec.first_page, spec.last_page)
+            try:
+                text, blocks = _ocr_pdf(sub_pdf)
+            finally:
+                del sub_pdf
+                reclaim_python_heap()
+            persist_chunk_result(content, spec, text, blocks)
             shifted = shift_blocks_page_offset(blocks, spec.page_offset)
             block_index = append_chunk_ocr_part(
                 merged_texts,
@@ -96,25 +114,10 @@ def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock]]
                 shifted,
                 block_index_start=block_index,
             )
-            continue
-        sub_pdf = slice_pdf_bytes(content, spec.first_page, spec.last_page)
-        release_onnx_encoder()
-        try:
-            text, blocks = _ocr_pdf(sub_pdf)
-        finally:
-            _release_ocr_backends()
+            del text, blocks, shifted
             reclaim_python_heap()
-        persist_chunk_result(content, spec, text, blocks)
-        shifted = shift_blocks_page_offset(blocks, spec.page_offset)
-        block_index = append_chunk_ocr_part(
-            merged_texts,
-            merged_blocks,
-            text,
-            shifted,
-            block_index_start=block_index,
-        )
-        del sub_pdf, text, blocks, shifted
-        reclaim_python_heap()
+    finally:
+        _release_ocr_backends()
     return "\n\n".join(merged_texts).strip(), merged_blocks
 
 
