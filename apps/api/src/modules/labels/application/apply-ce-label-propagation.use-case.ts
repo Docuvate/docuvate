@@ -44,12 +44,22 @@ export class ApplyCeLabelPropagationUseCase {
     const seedIndices = seedDocumentIds
       .map((documentId) => indexByDocumentId.get(documentId))
       .filter((index): index is number => index != null);
+    const passageTexts = rows.map((row) => `${row.title}\n${row.filename}`);
+    const calibrationDocumentIndices = rows.flatMap((row, index) =>
+      row.nonInboxTagIds.length > 0 ? [index] : []
+    );
+    const positiveDocumentIndices = rows.flatMap((row, index) =>
+      row.nonInboxTagIds.includes(tagId) ? [index] : []
+    );
     let scores;
     try {
       scores = await this.ceMl.propagateLabelScores({
         labelName: tag.name,
         passageVectors: rows.map((row) => row.embedding),
+        passageTexts,
         seedDocumentIndices: seedIndices,
+        positiveDocumentIndices,
+        calibrationDocumentIndices,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

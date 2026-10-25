@@ -24,7 +24,11 @@ from docuvate_worker.infrastructure.extractors.rapidocr_protocol import RapidOcr
 from docuvate_worker.infrastructure.ml.docai import features as layout_features
 from docuvate_worker.infrastructure.ml.docai.features import LayoutDocument, LayoutUnit
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
-from docuvate_worker.infrastructure.onnx_e5_encoder import resolve_e5_onnx_dir
+from docuvate_worker.infrastructure.onnx_e5_encoder import (
+    resolve_docai_onnx_model_path,
+    resolve_e5_onnx_dir,
+    resolve_e5_tokenizer_path,
+)
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
@@ -100,9 +104,9 @@ class DocaiRuntime:
         self._field = _session(model_dir / "field_head.onnx")
         self._rank = _session(model_dir / "link_ranker.onnx")
         e5_dir = resolve_e5_onnx_dir(quantized_for_docai=True)
-        self._e5 = _session(e5_dir / "onnx" / "model_quantized.onnx")
+        self._e5 = _session(resolve_docai_onnx_model_path(e5_dir))
         self._e5_inputs = [item.name for item in self._e5.get_inputs()]
-        self._tokenizer = Tokenizer.from_file(str(e5_dir / "tokenizer.json"))
+        self._tokenizer = Tokenizer.from_file(str(resolve_e5_tokenizer_path(e5_dir)))
         self._tokenizer.enable_truncation(int(self._cfg["e5_maxlen"]))
         self._tokenizer.enable_padding()
         self._classes: list[str] = list(self._cfg["classes"])
@@ -284,6 +288,8 @@ class DocaiRuntime:
             )[0],
             dtype=np.float32,
         )
+        payload["G"] = geometry
+        payload["rows"] = rows
         if self._field_stack and self._f2 is not None and self._pca_e5 is not None:
             f2_input = np.hstack(
                 [
@@ -299,8 +305,6 @@ class DocaiRuntime:
             probabilities = stacked
         timings["fields"] = (time.perf_counter() - field_started) * 1e3
 
-        payload["G"] = geometry
-        payload["rows"] = rows
         payload["y"] = ["other"] * len(units)
         link_started = time.perf_counter()
         sources, targets = layout_features.cand_sets(

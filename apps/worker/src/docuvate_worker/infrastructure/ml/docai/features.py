@@ -76,7 +76,10 @@ def node_geom(document: LayoutDocumentCore) -> tuple[FloatArray, list[list[int]]
             0,
             None,
         ) / np.minimum(heights[index], heights)
-        row_groups.append(list(np.where(overlap > _ROW_OVERLAP_THRESHOLD)[0]))
+        row_members = list(np.where(overlap > _ROW_OVERLAP_THRESHOLD)[0])
+        if index not in row_members:
+            row_members.append(index)
+        row_groups.append(row_members)
     features: list[list[float]] = []
     for index, unit in enumerate(units):
         text = unit["text"]
@@ -84,7 +87,7 @@ def node_geom(document: LayoutDocumentCore) -> tuple[FloatArray, list[list[int]]
         row = row_groups[index]
         row_array = np.asarray(row, dtype=np.intp)
         sorted_row = list(row_array[np.argsort(boxes[row_array, 0])])
-        position = sorted_row.index(index)
+        position = sorted_row.index(index) if index in sorted_row else 0
         numeric = digits(text)
         stripped = text.strip()
         is_number = float(

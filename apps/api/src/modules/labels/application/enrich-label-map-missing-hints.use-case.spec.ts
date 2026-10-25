@@ -42,13 +42,17 @@ describe('EnrichLabelMapMissingHintsUseCase', () => {
     const result = await useCase.execute('user-1', points, [
       {
         documentId: 'doc-1',
+        documentIndex: 0,
         nonInboxTagIds: ['tag-a'],
         text: 'title',
+        embedding: [1, 0],
       },
       {
         documentId: 'doc-2',
+        documentIndex: 1,
         nonInboxTagIds: ['tag-a'],
         text: 'gehaltsabrechnung entgelt brutto',
+        embedding: [0.9, 0.1],
       },
     ]);
     expect(result.labelMissingHintCount).toBe(1);

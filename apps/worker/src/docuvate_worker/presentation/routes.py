@@ -54,7 +54,6 @@ from docuvate_worker.infrastructure.ml.ce_ml.kv_items import (
 )
 from docuvate_worker.infrastructure.ml.ce_ml.label_propagation import propagate_label_scores
 from docuvate_worker.infrastructure.ml.ce_ml.missing_label import missing_label_hint_score
-from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
@@ -647,10 +646,16 @@ def ce_label_propagation(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> CeLabelPropagationResponse:
     _require_worker_secret(x_worker_secret)
+    passage_texts = body.passage_texts
+    if not passage_texts:
+        passage_texts = [""] * len(body.passage_vectors)
     scores = propagate_label_scores(
         body.passage_vectors,
         label_name=body.label_name,
         seed_document_indices=body.seed_document_indices,
+        passage_texts=passage_texts,
+        positive_document_indices=body.positive_document_indices or None,
+        calibration_document_indices=body.calibration_document_indices or None,
     )
     return CeLabelPropagationResponse(
         scores=[
@@ -710,22 +715,24 @@ def ce_missing_label(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> CeMissingLabelResponse:
     _require_worker_secret(x_worker_secret)
-    words = [
-        NerWord(
-            text=word.text,
-            box=(word.box[0], word.box[1], word.box[2], word.box[3]),
-        )
-        for word in body.words
-    ]
-    example_sets = [
-        {token.strip().lower() for token in tokens if token.strip()}
-        for tokens in body.example_token_sets
-    ]
+    if not body.labeled_document_indices:
+        labeled_indices = [
+            document.document_index
+            for document in body.corpus
+            if document.tag_ids
+        ]
+    else:
+        labeled_indices = body.labeled_document_indices
+    vectors = [document.embedding for document in body.corpus]
+    texts = [document.text for document in body.corpus]
+    tag_ids = [document.tag_ids for document in body.corpus]
     hint = missing_label_hint_score(
-        example_token_sets=example_sets,
-        document_words=words,
-        page_width=body.page_width,
-        page_height=body.page_height,
+        passage_vectors=vectors,
+        passage_texts=texts,
+        tag_ids_per_document=tag_ids,
+        target_document_index=body.target_document_index,
+        assigned_tag_ids=body.assigned_tag_ids,
+        labeled_document_indices=labeled_indices,
     )
     return CeMissingLabelResponse(score=hint.score, show=hint.show)
 

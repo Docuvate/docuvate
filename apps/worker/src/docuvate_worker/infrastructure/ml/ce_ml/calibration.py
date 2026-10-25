@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import TypedDict, cast
+from typing import NotRequired, TypedDict, cast
 
 _ARTIFACT = (
     Path(__file__).resolve().parent.parent / "artifacts" / "ce-ml-calibration.v1.json"
@@ -30,6 +30,7 @@ class LabelPropagationTier(TypedDict, total=False):
 class LabelPropagationConfig(TypedDict):
     zeroExample: LabelPropagationTier
     withExamples: LabelPropagationTier
+    minCalibrationDocuments: NotRequired[int]
 
 
 class FieldSuggestionConfig(TypedDict):
@@ -103,6 +104,11 @@ def label_tiers(example_count: int) -> LabelTierThresholds:
         "method": str(with_ex.get("method", "LP")),
         "autoAssignPrecisionTarget": float(with_ex.get("autoAssignPrecisionTarget", 0.98)),
     }
+
+
+def label_propagation_min_calibration_docs() -> int:
+    raw = load_ce_ml_calibration()["labelPropagation"].get("minCalibrationDocuments", 8)
+    return int(raw)
 
 
 def field_abstain_threshold() -> float:

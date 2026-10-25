@@ -665,7 +665,10 @@ class EmbeddingDensityTrainResponse(BaseModel):
 class CeLabelPropagationRequest(BaseModel):
     label_name: str = Field(min_length=1)
     passage_vectors: list[list[float]] = Field(min_length=1)
+    passage_texts: list[str] = Field(default_factory=list)
     seed_document_indices: list[int] = Field(default_factory=list)
+    positive_document_indices: list[int] = Field(default_factory=list)
+    calibration_document_indices: list[int] = Field(default_factory=list)
 
 
 class CeLabelPropagationScore(BaseModel):
@@ -713,11 +716,18 @@ class CeMissingLabelWord(BaseModel):
     box: list[float] = Field(min_length=4, max_length=4)
 
 
+class CeMissingLabelCorpusDocument(BaseModel):
+    document_index: int = Field(ge=0)
+    embedding: list[float] = Field(min_length=1)
+    tag_ids: list[str] = Field(default_factory=list)
+    text: str = ""
+
+
 class CeMissingLabelRequest(BaseModel):
-    example_token_sets: list[list[str]] = Field(default_factory=list)
-    words: list[CeMissingLabelWord] = Field(default_factory=list)
-    page_width: float = 1.0
-    page_height: float = 1.0
+    target_document_index: int = Field(ge=0)
+    assigned_tag_ids: list[str] = Field(default_factory=list)
+    corpus: list[CeMissingLabelCorpusDocument] = Field(min_length=1)
+    labeled_document_indices: list[int] = Field(default_factory=list)
 
 
 class CeMissingLabelResponse(BaseModel):

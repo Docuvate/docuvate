@@ -9,15 +9,11 @@ import numpy as np
 from numpy.typing import NDArray
 
 from docuvate_worker.infrastructure.ml.ce_ml.calibration import missing_label_threshold
-from docuvate_worker.infrastructure.ml.ce_ml.constants import (
-    MAX_SVD_BASIS_ROWS,
-    MIN_CONTENT_TOKEN_LEN,
-    VECTOR_NORM_EPSILON,
-)
-from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord, predict_doc_ner_spans
-from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
+from docuvate_worker.infrastructure.ml.ce_ml.hybrid_knn import knn_neighbor_label_mass
 
 FloatArray = NDArray[np.float32]
+
+_MIN_NEIGHBOR_POOL = 2
 
 
 @dataclass(frozen=True)
@@ -26,58 +22,60 @@ class MissingLabelHint:
     show: bool
 
 
-def _content_tokens(words: list[str]) -> list[str]:
-    return [
-        word.lower()
-        for word in words
-        if word.isalpha() and len(word) >= MIN_CONTENT_TOKEN_LEN
-    ]
+def unexplained_neighbor_label_mass_share(
+    *,
+    passage_vectors: FloatArray,
+    passage_texts: list[str],
+    tag_ids_per_document: list[list[str]],
+    target_index: int,
+    assigned_tag_ids: list[str],
+    pool_indices: list[int],
+) -> float:
+    mass = knn_neighbor_label_mass(
+        passage_vectors,
+        passage_texts,
+        tag_ids_per_document,
+        target_index=target_index,
+        pool_indices=pool_indices,
+    )
+    if not mass:
+        return 0.0
+    total = sum(mass.values())
+    if total <= 0:
+        return 0.0
+    assigned = {tag_id for tag_id in assigned_tag_ids}
+    covered = sum(value for tag_id, value in mass.items() if tag_id in assigned)
+    return float((total - covered) / total)
 
 
 def missing_label_hint_score(
     *,
-    example_token_sets: list[set[str]],
-    document_words: list[NerWord],
-    page_width: float,
-    page_height: float,
+    passage_vectors: list[list[float]],
+    passage_texts: list[str],
+    tag_ids_per_document: list[list[str]],
+    target_document_index: int,
+    assigned_tag_ids: list[str],
+    labeled_document_indices: list[int],
 ) -> MissingLabelHint:
     threshold = missing_label_threshold()
-    if not example_token_sets or not document_words:
+    matrix = np.asarray(passage_vectors, dtype=np.float32)
+    if (
+        matrix.size == 0
+        or target_document_index < 0
+        or target_document_index >= matrix.shape[0]
+        or not assigned_tag_ids
+        or not labeled_document_indices
+    ):
         return MissingLabelHint(score=0.0, show=False)
-    spans = predict_doc_ner_spans(document_words, page_width=page_width, page_height=page_height)
-    ner_other_indices = set(range(len(document_words)))
-    for span in spans:
-        for idx in range(span.start_index, span.end_index):
-            ner_other_indices.discard(idx)
-    tokens = _content_tokens([document_words[i].text for i in sorted(ner_other_indices)])
-    if not tokens:
+    pool = [index for index in labeled_document_indices if index != target_document_index]
+    if len(pool) < _MIN_NEIGHBOR_POOL:
         return MissingLabelHint(score=0.0, show=False)
-    passage_inputs = [f"passage: {token}" for token in tokens]
-    token_vectors = np.asarray(embed_texts_onnx(passage_inputs), dtype=np.float32)
-    example_vectors = [
-        np.asarray(
-            embed_texts_onnx([f"passage: {token}" for token in sorted(example_tokens)]),
-            dtype=np.float32,
-        )
-        for example_tokens in example_token_sets
-        if example_tokens
-    ]
-    if not example_vectors:
-        return MissingLabelHint(score=0.0, show=False)
-    basis_rows: list[FloatArray] = []
-    for matrix in example_vectors:
-        centered = matrix - matrix.mean(axis=0, keepdims=True)
-        if centered.shape[0] == 0:
-            continue
-        _, _, vt = np.linalg.svd(centered, full_matrices=False)
-        explained = min(MAX_SVD_BASIS_ROWS, vt.shape[0])
-        basis_rows.append(vt[:explained])
-    if not basis_rows:
-        return MissingLabelHint(score=0.0, show=False)
-    basis = np.vstack(basis_rows)
-    centered_doc = token_vectors - token_vectors.mean(axis=0, keepdims=True)
-    explained_variance = ((centered_doc @ basis.T) ** 2).sum(axis=1) / (
-        (centered_doc**2).sum(axis=1) + VECTOR_NORM_EPSILON
+    share = unexplained_neighbor_label_mass_share(
+        passage_vectors=matrix,
+        passage_texts=passage_texts,
+        tag_ids_per_document=tag_ids_per_document,
+        target_index=target_document_index,
+        assigned_tag_ids=assigned_tag_ids,
+        pool_indices=pool,
     )
-    coverage = float(1.0 - explained_variance.mean())
-    return MissingLabelHint(score=coverage, show=coverage >= threshold)
+    return MissingLabelHint(score=share, show=share >= threshold)

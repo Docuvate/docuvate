@@ -212,26 +212,71 @@ def embed_texts_onnx(texts: list[str]) -> list[list[float]]:
 DOCAI_ENCODER_ONNX_FILE = "model_quantized.onnx"
 
 
-def resolve_e5_onnx_dir(*, quantized_for_docai: bool = False) -> Path:
-    """Directory containing ``onnx/*.onnx`` and ``onnx/tokenizer.json`` for DocAI parity."""
-    cache = _cache_dir()
-    onnx_leaf = (
-        f"{ENCODER_ONNX_DIR}/{DOCAI_ENCODER_ONNX_FILE}"
-        if quantized_for_docai
-        else f"{ENCODER_ONNX_DIR}/{_resolve_onnx_filename()}"
-    )
-    onnx_path = Path(
+def resolve_e5_tokenizer_path(snapshot_dir: Path) -> Path:
+    path = snapshot_dir / ENCODER_ONNX_DIR / "tokenizer.json"
+    if not path.is_file():
+        msg = f"E5 tokenizer missing at {path}"
+        raise FileNotFoundError(msg)
+    return path
+
+
+def _download_onnx_leaf(cache: Path, leaf_name: str) -> Path:
+    return Path(
         hf_hub_download(
             ENCODER_ID,
-            onnx_leaf,
+            f"{ENCODER_ONNX_DIR}/{leaf_name}",
             revision=ENCODER_HF_REVISION,
             cache_dir=cache,
         )
     )
+
+
+def resolve_docai_onnx_model_path(snapshot_dir: Path) -> Path:
+    onnx_dir = snapshot_dir / ENCODER_ONNX_DIR
+    preferred = [
+        DOCAI_ENCODER_ONNX_FILE,
+        _resolve_onnx_filename(),
+        ENCODER_ONNX_FILE,
+        ENCODER_ONNX_FILE_ARM_FALLBACK,
+    ]
+    seen: set[str] = set()
+    for name in preferred:
+        if name in seen:
+            continue
+        seen.add(name)
+        candidate = onnx_dir / name
+        if candidate.is_file():
+            return candidate
+    discovered = sorted(onnx_dir.glob("*.onnx"))
+    if discovered:
+        return discovered[0]
+    msg = f"No ONNX encoder model found under {onnx_dir}"
+    raise FileNotFoundError(msg)
+
+
+def resolve_e5_onnx_dir(*, quantized_for_docai: bool = False) -> Path:
+    """Hugging Face snapshot directory containing ``onnx/*.onnx`` and ``onnx/tokenizer.json``."""
+    cache = _cache_dir()
     hf_hub_download(
         ENCODER_ID,
         f"{ENCODER_ONNX_DIR}/tokenizer.json",
         revision=ENCODER_HF_REVISION,
         cache_dir=cache,
     )
-    return onnx_path.parent.parent
+    if quantized_for_docai:
+        onnx_path: Path | None = None
+        for leaf in (DOCAI_ENCODER_ONNX_FILE, _resolve_onnx_filename(), ENCODER_ONNX_FILE):
+            try:
+                onnx_path = _download_onnx_leaf(cache, leaf)
+                break
+            except OSError:
+                continue
+        if onnx_path is None:
+            msg = "Unable to download any DocAI-compatible E5 ONNX model"
+            raise FileNotFoundError(msg)
+    else:
+        onnx_path = _download_onnx_leaf(cache, _resolve_onnx_filename())
+    snapshot_dir = onnx_path.parent.parent
+    resolve_e5_tokenizer_path(snapshot_dir)
+    resolve_docai_onnx_model_path(snapshot_dir)
+    return snapshot_dir

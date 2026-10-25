@@ -51,7 +51,10 @@ export class HttpCeMlAdapter {
   async propagateLabelScores(input: {
     labelName: string;
     passageVectors: number[][];
+    passageTexts: string[];
     seedDocumentIndices: number[];
+    positiveDocumentIndices: number[];
+    calibrationDocumentIndices: number[];
   }): Promise<CeLabelPropagationScore[]> {
     const { url, secret } = workerBase();
     const response = await fetch(workerApiUrl(url, '/ml/ce/label-propagation'), {
@@ -63,7 +66,10 @@ export class HttpCeMlAdapter {
       body: JSON.stringify({
         label_name: input.labelName,
         passage_vectors: input.passageVectors,
+        passage_texts: input.passageTexts,
         seed_document_indices: input.seedDocumentIndices,
+        positive_document_indices: input.positiveDocumentIndices,
+        calibration_document_indices: input.calibrationDocumentIndices,
       }),
     });
     if (!response.ok) {
@@ -131,10 +137,15 @@ export class HttpCeMlAdapter {
   }
 
   async scoreMissingLabelHint(input: {
-    exampleTokenSets: string[][];
-    words: { text: string; box: [number, number, number, number] }[];
-    pageWidth: number;
-    pageHeight: number;
+    targetDocumentIndex: number;
+    assignedTagIds: string[];
+    corpus: {
+      documentIndex: number;
+      embedding: number[];
+      tagIds: string[];
+      text: string;
+    }[];
+    labeledDocumentIndices: number[];
   }): Promise<{ score: number; show: boolean }> {
     const { url, secret } = workerBase();
     const response = await fetch(workerApiUrl(url, '/ml/ce/missing-label'), {
@@ -144,10 +155,15 @@ export class HttpCeMlAdapter {
         'X-Worker-Secret': secret,
       },
       body: JSON.stringify({
-        example_token_sets: input.exampleTokenSets,
-        words: input.words.map((word) => ({ text: word.text, box: word.box })),
-        page_width: input.pageWidth,
-        page_height: input.pageHeight,
+        target_document_index: input.targetDocumentIndex,
+        assigned_tag_ids: input.assignedTagIds,
+        corpus: input.corpus.map((row) => ({
+          document_index: row.documentIndex,
+          embedding: row.embedding,
+          tag_ids: row.tagIds,
+          text: row.text,
+        })),
+        labeled_document_indices: input.labeledDocumentIndices,
       }),
     });
     if (!response.ok) {
