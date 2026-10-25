@@ -35,6 +35,10 @@ import {
 } from './paperless-api.client.js';
 import type { PaperlessCustomField, PaperlessDocument } from './paperless-api.types.js';
 import {
+  paperlessMaxDownloadMegabytes,
+  readPaperlessMaxDownloadBytes,
+} from './paperless-download-limits.js';
+import {
   formatPaperlessCustomFieldValue,
   mapPaperlessCustomFieldType,
   mergePaperlessNotes,
@@ -42,17 +46,13 @@ import {
   paperlessDocumentChecksum,
   type PaperlessOcrMode,
 } from './paperless-field-mapping.js';
-import {
-  paperlessMaxDownloadMegabytes,
-  readPaperlessMaxDownloadBytes,
-} from './paperless-download-limits.js';
 import { buildPaperlessDryRunSummary } from './paperless-import.dry-run.js';
+import type { ConnectorImportRunRow } from './paperless-import.repository.js';
+import { PaperlessImportRepository } from './paperless-import.repository.js';
 import {
   encodePaperlessImportErrorMessageParams,
   PAPERLESS_IMPORT_MESSAGE_KEYS,
 } from './paperless-import-message-keys.js';
-import type { ConnectorImportRunRow } from './paperless-import.repository.js';
-import { PaperlessImportRepository } from './paperless-import.repository.js';
 
 function paperlessDocumentTitle(doc: {
   id: number;

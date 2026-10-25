@@ -600,11 +600,13 @@ export function PaperlessConnectorSetupPage() {
                   <ul className="paperless-import-errors">
                     {errors.map((row) => {
                       const message = formatPaperlessImportRunError(t, row);
+                      const trimmedTitle = row.sourceDocumentTitle?.trim() ?? '';
                       const title =
-                        row.sourceDocumentTitle?.trim() ||
-                        t('connectors.plugins.paperless.importErrorUntitled', {
-                          sourceDocumentId: row.sourceDocumentId,
-                        });
+                        trimmedTitle.length > 0
+                          ? trimmedTitle
+                          : t('connectors.plugins.paperless.importErrorUntitled', {
+                              sourceDocumentId: row.sourceDocumentId,
+                            });
                       return (
                         <li key={row.id}>
                           {t('connectors.plugins.paperless.importErrorRow', {

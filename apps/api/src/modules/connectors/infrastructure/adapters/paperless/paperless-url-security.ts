@@ -4,7 +4,6 @@ import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 
 import { connectorFetch, trimTrailingSlash } from '../shared/connector-http.js';
-
 import { readPaperlessMaxDownloadBytes } from './paperless-download-limits.js';
 
 const MAX_REDIRECT_HOPS = 3;

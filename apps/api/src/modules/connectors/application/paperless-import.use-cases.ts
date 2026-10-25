@@ -12,9 +12,9 @@ import { validatePaperlessConnection } from '../infrastructure/adapters/paperles
 import { mapPaperlessClientError } from '../infrastructure/adapters/paperless/paperless-errors.js';
 import type { PaperlessOcrMode } from '../infrastructure/adapters/paperless/paperless-field-mapping.js';
 import { PaperlessImportExecutor } from '../infrastructure/adapters/paperless/paperless-import.executor.js';
-import { PAPERLESS_IMPORT_MESSAGE_KEYS } from '../infrastructure/adapters/paperless/paperless-import-message-keys.js';
 import { PaperlessImportQueueService } from '../infrastructure/adapters/paperless/paperless-import.queue.js';
 import { PaperlessImportRepository } from '../infrastructure/adapters/paperless/paperless-import.repository.js';
+import { PAPERLESS_IMPORT_MESSAGE_KEYS } from '../infrastructure/adapters/paperless/paperless-import-message-keys.js';
 import { ConnectorRuntimeResolver } from './connector-runtime.resolver.js';
 
 function coerceCredentialPatch(patch: Record<string, unknown>): Record<string, string> {
