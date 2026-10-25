@@ -837,6 +837,8 @@
     "extractionRunning": "Extraction is running. You can keep this page open. the view updates automatically.",
     "extractionFailed": "Text recognition failed. You can retry or choose another method in Settings.",
     "extractionFailedDetail": "Automatic text extraction failed. The file is saved, but the content could not be read reliably.",
+    "extractionFailedWorker": "The processing service could not extract text from this document. You can retry or choose another method in Settings.",
+    "extractionFailedTechnicalToggle": "Technical details",
     "extractionPleaseWait": "Please wait a moment…",
     "extractionSettingsLink": "Text recognition in Settings",
     "reprocess": "Retry processing",

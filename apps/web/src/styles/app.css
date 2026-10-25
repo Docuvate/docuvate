@@ -364,15 +364,23 @@
   justify-content: flex-end;
 }
 
-.global-search-desktop-host.topbar-search {
-  display: block;
+.topbar-search.global-search-desktop-host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-template-columns: unset;
+  gap: 0;
+  max-width: none;
 }
 
 .global-search-host {
   position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   max-width: 35rem;
-  height: 2.5rem;
+  min-height: 2.5rem;
   margin: 0 auto;
 }
 
@@ -395,24 +403,38 @@
 }
 
 .global-search-trigger {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--dv-space-sm);
   width: min(15rem, 100%);
-  height: 2.5rem;
+  min-height: 2.5rem;
   padding: 0 var(--dv-space-sm);
   border-radius: var(--dv-radius-md);
   border: 1px solid var(--dv-color-header-input-border);
   background: var(--dv-color-header-input-bg);
   color: var(--dv-color-header-input-fg);
   cursor: pointer;
-  transform: translateX(-50%);
+  font: inherit;
   transition:
     width 180ms ease,
     box-shadow 180ms ease;
+}
+
+.global-search-trigger-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  color: var(--dv-color-header-input-fg);
+  opacity: 0.88;
+}
+
+.global-search-trigger-icon svg {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2177,6 +2199,23 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   margin: 0 0 var(--dv-space-xs);
   font-size: 0.92rem;
   line-height: 1.45;
+}
+
+.extraction-recovery-technical {
+  margin: 0 0 var(--dv-space-xs);
+  font-size: 0.85rem;
+}
+
+.extraction-recovery-technical summary {
+  cursor: pointer;
+  color: var(--dv-color-text-muted);
+}
+
+.extraction-recovery-technical-body {
+  margin: var(--dv-space-2xs) 0 0;
+  font-family: var(--dv-font-mono, ui-monospace, monospace);
+  font-size: 0.8rem;
+  word-break: break-word;
 }
 
 .extraction-recovery-actions {

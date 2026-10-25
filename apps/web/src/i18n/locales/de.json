@@ -838,6 +838,8 @@
     "extractionRunning": "Extraktion läuft. Sie können die Seite offen lassen. die Ansicht aktualisiert sich automatisch.",
     "extractionFailed": "Die Texterkennung ist fehlgeschlagen. Sie können es erneut versuchen oder ein anderes Verfahren wählen.",
     "extractionFailedDetail": "Die automatische Textextraktion ist fehlgeschlagen. Die PDF ist gespeichert, der Inhalt konnte nicht zuverlässig gelesen werden.",
+    "extractionFailedWorker": "Der Verarbeitungsdienst konnte den Text nicht extrahieren. Sie können es erneut versuchen oder in den Einstellungen ein anderes Verfahren wählen.",
+    "extractionFailedTechnicalToggle": "Technische Details",
     "extractionPleaseWait": "Bitte kurz warten…",
     "extractionSettingsLink": "Texterkennung in Einstellungen",
     "reprocess": "Erneut verarbeiten",

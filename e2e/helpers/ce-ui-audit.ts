@@ -26,6 +26,7 @@ export const CE_PUBLIC_AUTH_ROUTES: { path: string; slug: string }[] = [
   { path: '/login', slug: 'login' },
   { path: '/register', slug: 'register' },
   { path: '/forgot-password', slug: 'forgot-password' },
+  { path: '/reset-password', slug: 'reset-password' },
 ];
 
 export async function setLocale(page: Page, locale: 'de' | 'en'): Promise<void> {
