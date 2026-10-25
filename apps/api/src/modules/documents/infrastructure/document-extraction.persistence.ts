@@ -51,19 +51,28 @@ export async function replaceDocumentExtractionFields(
 }
 
 /** Replaces all layout blocks of a document, keeping their order. */
+const EXTRACTION_BLOCK_INSERT_BATCH = 250;
+
 export async function replaceDocumentExtractionBlocks(
   client: Db,
   documentId: string,
   blocks: ExtractionBlock[]
 ): Promise<void> {
   await client.query(`DELETE FROM document_extraction_blocks WHERE document_id = $1`, [documentId]);
-  for (const [position, block] of blocks.entries()) {
-    await client.query(
-      `INSERT INTO document_extraction_blocks (
-         document_id, position, page, block_index, x, y, width, height, text
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-      [
-        documentId,
+  for (let offset = 0; offset < blocks.length; offset += EXTRACTION_BLOCK_INSERT_BATCH) {
+    const batch = blocks.slice(offset, offset + EXTRACTION_BLOCK_INSERT_BATCH);
+    if (batch.length === 0) {
+      continue;
+    }
+    const values: string[] = [];
+    const params: unknown[] = [documentId];
+    let paramIndex = 2;
+    for (const [batchIndex, block] of batch.entries()) {
+      const position = offset + batchIndex;
+      values.push(
+        `($1, $${String(paramIndex)}, $${String(paramIndex + 1)}, $${String(paramIndex + 2)}, $${String(paramIndex + 3)}, $${String(paramIndex + 4)}, $${String(paramIndex + 5)}, $${String(paramIndex + 6)}, $${String(paramIndex + 7)})`
+      );
+      params.push(
         position,
         block.page,
         block.blockIndex ?? null,
@@ -71,8 +80,15 @@ export async function replaceDocumentExtractionBlocks(
         block.y,
         block.width,
         block.height,
-        block.text,
-      ]
+        block.text
+      );
+      paramIndex += 8;
+    }
+    await client.query(
+      `INSERT INTO document_extraction_blocks (
+         document_id, position, page, block_index, x, y, width, height, text
+       ) VALUES ${values.join(', ')}`,
+      params
     );
   }
 }

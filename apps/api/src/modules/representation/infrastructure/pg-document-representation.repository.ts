@@ -64,16 +64,20 @@ export class PgDocumentRepresentationRepository {
           payload.documentMaxInt8,
         ]
       );
-      for (const unit of payload.units) {
-        await client.query(
-          `INSERT INTO document_representation_unit (
-            document_id, tenant_id, unit_index, kind, body, page,
-            bbox_x, bbox_y, bbox_width, bbox_height, char_start, char_end,
-            vector_scale, vector_int8, binary_code
-          ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
-          [
-            documentId,
-            tenantId,
+      const batchSize = 200;
+      for (let offset = 0; offset < payload.units.length; offset += batchSize) {
+        const batch = payload.units.slice(offset, offset + batchSize);
+        if (batch.length === 0) {
+          continue;
+        }
+        const values: string[] = [];
+        const params: unknown[] = [documentId, tenantId];
+        let paramIndex = 3;
+        for (const unit of batch) {
+          values.push(
+            `($1,$2,$${String(paramIndex)},$${String(paramIndex + 1)},$${String(paramIndex + 2)},$${String(paramIndex + 3)},$${String(paramIndex + 4)},$${String(paramIndex + 5)},$${String(paramIndex + 6)},$${String(paramIndex + 7)},$${String(paramIndex + 8)},$${String(paramIndex + 9)},$${String(paramIndex + 10)},$${String(paramIndex + 11)},$${String(paramIndex + 12)})`
+          );
+          params.push(
             unit.unitIndex,
             unit.kind,
             unit.body,
@@ -86,8 +90,17 @@ export class PgDocumentRepresentationRepository {
             unit.charEnd,
             unit.vectorScale,
             unit.vectorInt8,
-            unit.binaryCode,
-          ]
+            unit.binaryCode
+          );
+          paramIndex += 13;
+        }
+        await client.query(
+          `INSERT INTO document_representation_unit (
+            document_id, tenant_id, unit_index, kind, body, page,
+            bbox_x, bbox_y, bbox_width, bbox_height, char_start, char_end,
+            vector_scale, vector_int8, binary_code
+          ) VALUES ${values.join(', ')}`,
+          params
         );
       }
     });

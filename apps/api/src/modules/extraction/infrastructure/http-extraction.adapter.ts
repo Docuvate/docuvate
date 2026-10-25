@@ -364,27 +364,52 @@ export class HttpExtractionAdapter implements ExtractionPort {
     mimeType: string,
     options?: ExtractionExtractOptions
   ): Promise<ExtractionWorkerPayload> {
-    const response = await fetch(workerApiUrl(this.workerUrl(), '/extract'), {
-      method: 'POST',
-      headers: this.workerHeaders(),
-      body: JSON.stringify({
-        mime_type: mimeType,
-        content_base64: buffer.toString('base64'),
-        engine: options?.engine,
-        embeddingDensityState: options?.embeddingDensityState,
-        buildExactFactIndex: options?.buildExactFactIndex === true,
-      }),
+    const url = workerApiUrl(this.workerUrl(), '/extract');
+    const body = JSON.stringify({
+      mime_type: mimeType,
+      content_base64: buffer.toString('base64'),
+      engine: options?.engine,
+      embeddingDensityState: options?.embeddingDensityState,
+      buildExactFactIndex: options?.buildExactFactIndex === true,
     });
-
-    if (!response.ok) {
-      throw new Error(`Worker extraction failed: ${String(response.status)}`);
+    const maxAttempts = 5;
+    let lastError: Error | null = null;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: this.workerHeaders(),
+          body,
+        });
+        if (response.status === 502 || response.status === 503 || response.status === 504) {
+          throw new Error(`Worker extraction unavailable: ${String(response.status)}`);
+        }
+        if (!response.ok) {
+          throw new Error(`Worker extraction failed: ${String(response.status)}`);
+        }
+        const data: unknown = await response.json();
+        return {
+          result: parseExtractionResultBody(data),
+          previewPdf: parsePreviewPdfBase64(data),
+        };
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : String(error);
+        const retryable =
+          message.includes('fetch failed') ||
+          message.includes('Worker extraction unavailable') ||
+          message.includes('ECONNREFUSED') ||
+          message.includes('ECONNRESET');
+        lastError = error instanceof Error ? error : new Error(message);
+        if (!retryable || attempt >= maxAttempts) {
+          throw lastError;
+        }
+        const delayMs = Math.min(32_000, 2_000 * 2 ** (attempt - 1));
+        await new Promise((resolve) => {
+          setTimeout(resolve, delayMs);
+        });
+      }
     }
-
-    const data: unknown = await response.json();
-    return {
-      result: parseExtractionResultBody(data),
-      previewPdf: parsePreviewPdfBase64(data),
-    };
+    throw lastError ?? new Error('Worker extraction failed');
   }
 
   async listEngines(): Promise<WorkerEngineListItem[]> {

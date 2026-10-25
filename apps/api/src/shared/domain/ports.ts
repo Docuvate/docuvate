@@ -57,6 +57,10 @@ export interface DocumentRepository {
     status: DocumentStatus,
     options?: { failureReason?: string | null }
   ): Promise<void>;
+  tryClaimForExtraction(
+    id: string,
+    staleAfterSeconds: number
+  ): Promise<'claimed' | 'already_ready' | 'busy'>;
   setHeuristicFieldExtractorVersion(documentId: string, version: number): Promise<void>;
   listDocumentIdsNeedingHeuristicFieldRefresh(
     userId: string,

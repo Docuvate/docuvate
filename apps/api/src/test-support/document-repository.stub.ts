@@ -14,6 +14,7 @@ export function createDocumentRepositoryStub(
     listForUser: vi.fn(),
     countForUser: vi.fn().mockResolvedValue(0),
     updateStatus: vi.fn(),
+    tryClaimForExtraction: vi.fn().mockResolvedValue('claimed'),
     setHeuristicFieldExtractorVersion: vi.fn(),
     listDocumentIdsNeedingHeuristicFieldRefresh: vi.fn().mockResolvedValue([]),
     saveExtraction: vi.fn(),

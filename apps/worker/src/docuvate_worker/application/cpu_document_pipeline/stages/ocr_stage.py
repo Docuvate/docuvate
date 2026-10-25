@@ -22,6 +22,17 @@ from docuvate_worker.infrastructure.extractors.paddle_engine import (
 from docuvate_worker.infrastructure.extractors.paddle_engine import (
     release_paddle_ocr,
 )
+from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import (
+    iter_pdf_page_chunk_specs,
+    load_cached_chunk_result,
+    merge_chunk_ocr_results,
+    pdf_chunk_page_size,
+    pdf_page_count,
+    persist_chunk_result,
+    shift_blocks_page_offset,
+    should_chunk_scanned_pdf,
+    slice_pdf_bytes,
+)
 from docuvate_worker.infrastructure.extractors.pdf_native import try_extract_pdf_native
 from docuvate_worker.infrastructure.extractors.rapidocr_engine import (
     ocr_image_bytes as rapidocr_ocr_image_bytes,
@@ -39,6 +50,7 @@ from docuvate_worker.infrastructure.office.mimes import (
     needs_libreoffice_preview,
 )
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 STAGE_ID = "ocr"
 
@@ -65,6 +77,29 @@ def _release_ocr_backends() -> None:
         release_rapidocr()
 
 
+def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock]]:
+    pages = pdf_page_count(content)
+    chunk_pages = pdf_chunk_page_size()
+    specs = iter_pdf_page_chunk_specs(pages, chunk_pages)
+    parts: list[tuple[str, list[ExtractionBlock]]] = []
+    for spec in specs:
+        cached = load_cached_chunk_result(content, spec)
+        if cached is not None:
+            text, blocks = cached
+            parts.append((text, shift_blocks_page_offset(blocks, spec.page_offset)))
+            continue
+        sub_pdf = slice_pdf_bytes(content, spec.first_page, spec.last_page)
+        release_onnx_encoder()
+        try:
+            text, blocks = _ocr_pdf(sub_pdf)
+        finally:
+            _release_ocr_backends()
+            reclaim_python_heap()
+        persist_chunk_result(content, spec, text, blocks)
+        parts.append((text, shift_blocks_page_offset(blocks, spec.page_offset)))
+    return merge_chunk_ocr_results(parts)
+
+
 def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
     def _run() -> tuple[OcrStageData, StageAvailability, str | None]:
         if state.mime_type == "application/pdf":
@@ -83,7 +118,10 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
                     None,
                 )
             release_onnx_encoder()
-            text, blocks = _ocr_pdf(state.content)
+            if should_chunk_scanned_pdf(state.content, state.mime_type, requires_ocr=True):
+                text, blocks = _ocr_pdf_in_page_chunks(state.content)
+            else:
+                text, blocks = _ocr_pdf(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
             _release_ocr_backends()
