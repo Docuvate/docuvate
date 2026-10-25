@@ -4,11 +4,12 @@
 from __future__ import annotations
 
 import json
-import math
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Literal, TypedDict
+
+from docuvate_worker.domain.math_stable import sigmoid
 
 
 class _PlattPayload(TypedDict):
@@ -48,7 +49,7 @@ class PlattCalibrator:
         linear = self.intercept + sum(
             coef * value for coef, value in zip(self.coefficients, features, strict=True)
         )
-        return 1.0 / (1.0 + math.exp(-linear))
+        return sigmoid(linear)
 
 
 @dataclass(frozen=True)

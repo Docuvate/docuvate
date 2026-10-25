@@ -4,12 +4,12 @@
 from __future__ import annotations
 
 import json
-import math
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import TypedDict
 
+from docuvate_worker.domain.math_stable import sigmoid
 from docuvate_worker.infrastructure.ml.value_types.model import ValueTypeModelBundle
 from docuvate_worker.infrastructure.ml.value_types.vendor_document_layout import (
     cross_block_supplier_agreement,
@@ -126,7 +126,7 @@ class VendorLineRanker:
         linear = self.intercept + sum(
             coef * value for coef, value in zip(self.coefficients, vector, strict=True)
         )
-        return 1.0 / (1.0 + math.exp(-linear))
+        return sigmoid(linear)
 
 
 @lru_cache(maxsize=1)

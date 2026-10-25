@@ -9,6 +9,8 @@ import math
 import re
 from dataclasses import dataclass
 
+from docuvate_worker.domain.math_stable import sigmoid
+
 _YEAR_TOKEN = re.compile(r"^(19|20)\d{2}$")
 _MIN_QUERY_TOKEN_LEN = 2
 
@@ -83,13 +85,6 @@ def _field_log_odds(agree: bool, m: float, u: float) -> float:
     return math.log((1.0 - m_clamped) / (1.0 - u_clamped))
 
 
-def _sigmoid(log_odds: float) -> float:
-    if log_odds >= 0.0:
-        return 1.0 / (1.0 + math.exp(-log_odds))
-    exp_val = math.exp(log_odds)
-    return exp_val / (1.0 + exp_val)
-
-
 def fellegi_sunter_match_score(
     query_tokens: tuple[str, ...],
     predicate_key: str,
@@ -104,4 +99,4 @@ def fellegi_sunter_match_score(
     cov_non = _field_log_odds(False, weights.coverage_m, weights.coverage_u)
     log_odds = coverage * cov_match + (1.0 - coverage) * cov_non
     log_odds += _field_log_odds(agree_full, weights.full_predicate_m, weights.full_predicate_u)
-    return _sigmoid(log_odds)
+    return sigmoid(log_odds)

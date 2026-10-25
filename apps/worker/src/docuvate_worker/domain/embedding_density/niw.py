@@ -109,10 +109,11 @@ def log_student_t_pdf(
     sol = np.linalg.solve(chol, delta)
     quad = float(np.dot(sol, sol))
     log_det = 2.0 * float(np.sum(np.log(np.diag(chol))))
+    nu_safe = max(float(nu), 1e-12)
     log_norm = (
-        math.lgamma((nu + dim) / 2.0)
-        - math.lgamma(nu / 2.0)
-        - 0.5 * dim * math.log(nu * math.pi)
+        math.lgamma((nu_safe + dim) / 2.0)
+        - math.lgamma(nu_safe / 2.0)
+        - 0.5 * dim * math.log(nu_safe * math.pi)
         - 0.5 * log_det
     )
     return float(log_norm - 0.5 * (nu + dim) * np.log1p(quad / nu))
