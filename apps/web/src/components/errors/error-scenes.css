@@ -17,9 +17,8 @@
   background-color: var(--dv-color-bg);
   background-image:
     url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 80% 50% at 12% 18%, color-mix(in srgb, var(--dv-color-accent) 9%, transparent), transparent 62%),
-    radial-gradient(ellipse 65% 45% at 88% 82%, color-mix(in srgb, var(--dv-color-text) 5%, transparent), transparent 58%),
-    linear-gradient(155deg, var(--dv-color-bg) 0%, color-mix(in srgb, var(--dv-color-bg) 93%, var(--dv-color-accent) 7%) 45%, var(--dv-color-bg) 100%);
+    radial-gradient(ellipse 120% 80% at 15% 10%, color-mix(in srgb, var(--dv-color-accent) 8%, transparent), transparent 72%),
+    radial-gradient(ellipse 100% 70% at 90% 95%, color-mix(in srgb, var(--dv-color-text) 4%, transparent), transparent 68%);
 }
 
 [data-docuvate-theme='dark'] .full-page-error-shell {
@@ -29,40 +28,8 @@
 
   background-image:
     url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"),
-    radial-gradient(ellipse 80% 50% at 12% 18%, color-mix(in srgb, var(--dv-color-accent) 12%, transparent), transparent 62%),
-    radial-gradient(ellipse 65% 45% at 88% 82%, color-mix(in srgb, var(--dv-color-accent) 6%, transparent), transparent 58%),
-    linear-gradient(
-      155deg,
-      var(--dv-color-bg) 0%,
-      color-mix(in srgb, var(--dv-color-bg) 88%, var(--dv-color-bg-muted) 12%) 48%,
-      var(--dv-color-bg) 100%
-    );
-}
-
-.full-page-error-shell::before,
-.full-page-error-shell::after {
-  content: '';
-  position: absolute;
-  border-radius: var(--dv-radius-lg);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.full-page-error-shell::before {
-  width: min(52vw, 28rem);
-  height: min(52vw, 28rem);
-  right: -12%;
-  top: 8%;
-  background: color-mix(in srgb, var(--dv-color-accent) 7%, transparent);
-  filter: blur(2px);
-}
-
-.full-page-error-shell::after {
-  width: min(44vw, 22rem);
-  height: min(44vw, 22rem);
-  left: -10%;
-  bottom: 6%;
-  background: color-mix(in srgb, var(--dv-color-text) 4%, transparent);
+    radial-gradient(ellipse 120% 80% at 15% 10%, color-mix(in srgb, var(--dv-color-accent) 10%, transparent), transparent 72%),
+    radial-gradient(ellipse 100% 70% at 90% 95%, color-mix(in srgb, var(--dv-color-accent) 5%, transparent), transparent 68%);
 }
 
 .full-page-error-topbar {

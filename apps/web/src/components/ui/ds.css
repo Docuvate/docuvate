@@ -717,37 +717,7 @@
   min-height: min(70vh, 40rem);
 }
 
-.full-page-error-shell {
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--dv-space-lg) var(--dv-space-md);
-  position: relative;
-  background-color: var(--dv-color-bg);
-  background-image:
-    radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, var(--dv-color-accent) 11%, transparent), transparent 68%),
-    radial-gradient(ellipse 70% 45% at 100% 100%, color-mix(in srgb, var(--dv-color-text) 4%, transparent), transparent 55%),
-    linear-gradient(
-      165deg,
-      var(--dv-color-bg) 0%,
-      color-mix(in srgb, var(--dv-color-bg) 94%, var(--dv-color-accent) 6%) 48%,
-      var(--dv-color-bg) 100%
-    );
-}
-
-[data-docuvate-theme='dark'] .full-page-error-shell {
-  background-image:
-    radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, var(--dv-color-accent) 14%, transparent), transparent 68%),
-    radial-gradient(ellipse 70% 45% at 0% 100%, color-mix(in srgb, var(--dv-color-accent) 6%, transparent), transparent 50%),
-    linear-gradient(
-      165deg,
-      var(--dv-color-bg) 0%,
-      color-mix(in srgb, var(--dv-color-bg) 88%, var(--dv-color-bg-muted) 12%) 50%,
-      var(--dv-color-bg) 100%
-    );
-}
+/* Full-page error shell background and layout live in error-scenes.css */
 
 .full-page-error-locale {
   position: absolute;
