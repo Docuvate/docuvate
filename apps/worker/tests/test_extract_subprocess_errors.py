@@ -26,7 +26,7 @@ def test_filter_benign_stderr_keeps_real_errors() -> None:
     assert "out of memory" in filter_benign_stderr(raw)
 
 
-def test_run_extract_isolated_reports_sigkill(monkeypatch: MonkeyPatch) -> None:
+def test_run_extract_isolated_reports_sigkill(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("DOCUVATE_ALLOW_IN_PROCESS_EXTRACT", raising=False)
     proc = MagicMock()
     proc.returncode = -signal.SIGKILL
