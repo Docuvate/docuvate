@@ -16,15 +16,53 @@ export function hasExtractedContent(
   return fromBlocks.length > 0 || blocks.length > 0;
 }
 
+export interface ExtractionFailurePresentation {
+  userMessage: string;
+  technicalDetail: string | null;
+}
+
+const WORKER_HTTP_FAILURE = /^Worker extraction failed: (\d{3})$/;
+
+function looksLikeInternalError(reason: string): boolean {
+  if (WORKER_HTTP_FAILURE.test(reason)) {
+    return true;
+  }
+  if (reason.startsWith('Worker extraction failed')) {
+    return true;
+  }
+  if (/^[A-Za-z][A-Za-z ]+ failed: \d{3}$/.test(reason)) {
+    return true;
+  }
+  return false;
+}
+
+export function presentExtractionFailure(
+  reason: string | null | undefined
+): ExtractionFailurePresentation {
+  const trimmed = reason?.trim() ?? '';
+  if (!trimmed) {
+    return {
+      userMessage: i18n.t('documents.extractionFailedDetail'),
+      technicalDetail: null,
+    };
+  }
+  if (looksLikeInternalError(trimmed)) {
+    return {
+      userMessage: i18n.t('documents.extractionFailedWorker'),
+      technicalDetail: trimmed,
+    };
+  }
+  return {
+    userMessage: trimmed,
+    technicalDetail: null,
+  };
+}
+
 export function extractionFailureMessage(doc: DocumentDto): string {
   if (doc.status !== 'failed') {
     return '';
   }
-  const reason = doc.extractionFailureReason?.trim();
-  if (reason) {
-    return reason;
-  }
-  return i18n.t('documents.extractionFailedDetail');
+  return presentExtractionFailure(doc.extractionFailureReason).userMessage;
 }
 
 export function isExtractionPending(status: DocumentDto['status']): boolean {

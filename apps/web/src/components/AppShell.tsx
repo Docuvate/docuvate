@@ -98,7 +98,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <GlobalSearch narrowTopbar />
             </div>
           ) : (
-            <div className="topbar-search topbar-search--desktop global-search-desktop-host">
+            <div className="global-search-desktop-host">
               <GlobalSearch narrowTopbar={false} />
             </div>
           )}

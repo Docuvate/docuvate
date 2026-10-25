@@ -288,6 +288,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
           ref={triggerRef}
           type="button"
           className="global-search-trigger"
+          aria-label={t('shell.globalSearch')}
           aria-haspopup="dialog"
           aria-expanded={paletteOpen}
           aria-controls={paletteOpen ? listboxId : undefined}
@@ -295,7 +296,9 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
           onFocus={() => { setTriggerFocused(true); }}
           onBlur={() => { setTriggerFocused(false); }}
         >
-          <Search size={18} strokeWidth={1.75} aria-hidden />
+          <span className="global-search-trigger-icon" aria-hidden>
+            <Search size={18} strokeWidth={1.75} />
+          </span>
           <span className="global-search-trigger-placeholder">{t('search.triggerLabel')}</span>
           <span className="global-search-shortcut" aria-hidden>
             <kbd>{shortcut}</kbd>

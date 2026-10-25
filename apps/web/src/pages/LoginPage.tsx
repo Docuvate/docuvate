@@ -11,6 +11,7 @@ import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
 import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import { authClient } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/authErrors';
 import {
@@ -158,9 +159,8 @@ export function LoginPage() {
           />
         </FormField>
         <FormField label={t('auth.password')} htmlFor={passwordId} showHelp={false}>
-          <Input
+          <PasswordInput
             id={passwordId}
-            type="password"
             autoComplete="current-password"
             required
             value={password}

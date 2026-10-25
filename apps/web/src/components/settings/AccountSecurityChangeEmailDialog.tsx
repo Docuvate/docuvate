@@ -16,6 +16,7 @@ import {
   DialogHeader,
 } from '../ui/Dialog';
 import { Input } from '../ui/Input';
+import { PasswordInput } from '../ui/PasswordInput';
 
 interface AccountSecurityChangeEmailDialogProps {
   open: boolean;
@@ -118,9 +119,8 @@ export function AccountSecurityChangeEmailDialog({
               <DialogFieldSpan>
                 <label className="settings-field" htmlFor={passwordId}>
                   {t('settings.accountSecurity.passwordLabel')}
-                  <Input
+                  <PasswordInput
                     id={passwordId}
-                    type="password"
                     autoComplete="current-password"
                     value={password}
                     disabled={busy}

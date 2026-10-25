@@ -2,6 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, describe, expect, it } from 'vitest';
 
+import {
+  clearProcessEnv,
+  restoreProcessEnv,
+  snapshotProcessEnv,
+} from '../../../test-support/process-env.js';
 import { readFeatureFlagDefaultsFromEnv } from './read-feature-flag-defaults.js';
 
 const ENV_KEYS = [
@@ -17,25 +22,15 @@ const ENV_KEYS = [
 ] as const;
 
 describe('readFeatureFlagDefaultsFromEnv', () => {
-  const original: Record<string, string | undefined> = {};
+  let envSnapshot: Record<string, string | undefined> = {};
 
   afterEach(() => {
-    for (const key of ENV_KEYS) {
-      if (original[key] === undefined) {
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- restore env after each case
-        delete process.env[key];
-      } else {
-        process.env[key] = original[key];
-      }
-    }
+    restoreProcessEnv(ENV_KEYS, envSnapshot);
   });
 
   it('defaults conservative flags off, source connectors and learned value types on when env is unset', () => {
-    for (const key of ENV_KEYS) {
-      original[key] ??= process.env[key];
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- simulate unset env
-      delete process.env[key];
-    }
+    envSnapshot = snapshotProcessEnv(ENV_KEYS);
+    clearProcessEnv(ENV_KEYS);
     expect(readFeatureFlagDefaultsFromEnv()).toEqual({
       layoutReconstructionCompare: false,
       sourceConnectors: true,
@@ -50,9 +45,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
   });
 
   it('parses true-like env values', () => {
-    for (const key of ENV_KEYS) {
-      original[key] ??= process.env[key];
-    }
+    envSnapshot = snapshotProcessEnv(ENV_KEYS);
     process.env['DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE'] = 'true';
     process.env['DOCUVATE_FEATURE_SOURCE_CONNECTORS'] = '1';
     process.env['DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS'] = 'yes';
@@ -76,21 +69,15 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
   });
 
   it('allows disabling source connectors via env', () => {
-    for (const key of ENV_KEYS) {
-      original[key] ??= process.env[key];
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- simulate unset env
-      delete process.env[key];
-    }
+    envSnapshot = snapshotProcessEnv(ENV_KEYS);
+    clearProcessEnv(ENV_KEYS);
     process.env['DOCUVATE_FEATURE_SOURCE_CONNECTORS'] = 'false';
     expect(readFeatureFlagDefaultsFromEnv().sourceConnectors).toBe(false);
   });
 
   it('allows disabling learned value types via env', () => {
-    for (const key of ENV_KEYS) {
-      original[key] ??= process.env[key];
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- simulate unset env
-      delete process.env[key];
-    }
+    envSnapshot = snapshotProcessEnv(ENV_KEYS);
+    clearProcessEnv(ENV_KEYS);
     process.env['DOCUVATE_FEATURE_LEARNED_VALUE_TYPES'] = 'false';
     expect(readFeatureFlagDefaultsFromEnv().learnedValueTypes).toBe(false);
   });

@@ -4,7 +4,10 @@ import type { DocumentDto } from '@docuvate/contracts';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { extractionFailureMessage, isExtractionPending } from '../../lib/documentExtractionState';
+import {
+  isExtractionPending,
+  presentExtractionFailure,
+} from '../../lib/documentExtractionState';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { ExtractionProgressBar } from './ExtractionProgressBar';
@@ -33,7 +36,8 @@ export function DocumentExtractionRecovery({
     return null;
   }
 
-  const message = failed ? extractionFailureMessage(doc) : t('documents.extractionRunning');
+  const failure = failed ? presentExtractionFailure(doc.extractionFailureReason) : null;
+  const message = failed ? failure?.userMessage : t('documents.extractionRunning');
 
   return (
     <div
@@ -41,6 +45,12 @@ export function DocumentExtractionRecovery({
       role={failed ? 'alert' : 'status'}
     >
       <p className="extraction-recovery-message">{message}</p>
+      {failed && failure?.technicalDetail ? (
+        <details className="extraction-recovery-technical">
+          <summary>{t('documents.extractionFailedTechnicalToggle')}</summary>
+          <p className="muted extraction-recovery-technical-body">{failure.technicalDetail}</p>
+        </details>
+      ) : null}
       {pending ? <ExtractionProgressBar doc={doc} /> : null}
       <div className="extraction-recovery-actions">
         {failed ? (

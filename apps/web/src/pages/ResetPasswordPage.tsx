@@ -10,7 +10,7 @@ import { AuthScreen } from '../components/auth/AuthScreen';
 import { PasswordPolicyChecklist } from '../components/auth/PasswordPolicyChecklist';
 import { Button } from '../components/ui/Button';
 import { FormField } from '../components/ui/FormField';
-import { Input } from '../components/ui/Input';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import { Spinner } from '../components/ui/Spinner';
 import { authClient } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/format-auth-client-error';
@@ -149,9 +149,8 @@ export function ResetPasswordPage() {
       {showForm ? (
         <form onSubmit={(e) => void onSubmit(e)} className="auth-form" noValidate>
           <FormField label={t('auth.newPassword')} htmlFor={passwordId} showHelp={false}>
-            <Input
+            <PasswordInput
               id={passwordId}
-              type="password"
               autoComplete="new-password"
               minLength={passwordPolicy.minLength}
               maxLength={PASSWORD_LENGTH_MAX_BOUND}
@@ -173,9 +172,8 @@ export function ResetPasswordPage() {
             showHelp={false}
             error={confirmMismatch || error ? (error ?? t('auth.resetPasswordMismatch')) : undefined}
           >
-            <Input
+            <PasswordInput
               id={confirmId}
-              type="password"
               autoComplete="new-password"
               minLength={passwordPolicy.minLength}
               maxLength={PASSWORD_LENGTH_MAX_BOUND}

@@ -14,6 +14,7 @@ import { SettingsSectionCard } from '../components/settings/SettingsSectionCard'
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import {
   authClient,
   authSessionUserEmail,
@@ -307,9 +308,8 @@ export function AccountSecuritySettingsPage() {
           <form className="auth-form settings-stack" onSubmit={(e) => void submitChangePassword(e)}>
             <label className="settings-field" htmlFor={changeCurrentPasswordId}>
               {t('settings.accountSecurity.passwordLabel')}
-              <Input
+              <PasswordInput
                 id={changeCurrentPasswordId}
-                type="password"
                 autoComplete="current-password"
                 value={changeCurrentPassword}
                 disabled={busy}
@@ -318,9 +318,8 @@ export function AccountSecuritySettingsPage() {
             </label>
             <label className="settings-field" htmlFor={changeNewPasswordId}>
               {t('settings.accountSecurity.newPasswordLabel')}
-              <Input
+              <PasswordInput
                 id={changeNewPasswordId}
-                type="password"
                 autoComplete="new-password"
                 minLength={passwordPolicy.minLength}
                 maxLength={PASSWORD_LENGTH_MAX_BOUND}
@@ -332,9 +331,8 @@ export function AccountSecuritySettingsPage() {
             </label>
             <label className="settings-field" htmlFor={changeRepeatPasswordId}>
               {t('settings.accountSecurity.repeatPasswordLabel')}
-              <Input
+              <PasswordInput
                 id={changeRepeatPasswordId}
-                type="password"
                 autoComplete="new-password"
                 minLength={passwordPolicy.minLength}
                 maxLength={PASSWORD_LENGTH_MAX_BOUND}
@@ -391,9 +389,8 @@ export function AccountSecuritySettingsPage() {
               </Button>
               <label className="settings-field" htmlFor={passwordId}>
                 {t('settings.accountSecurity.passwordLabel')}
-                <Input
+                <PasswordInput
                   id={passwordId}
-                  type="password"
                   autoComplete="current-password"
                   value={password}
                   disabled={busy}
@@ -468,9 +465,8 @@ export function AccountSecuritySettingsPage() {
             <form className="settings-stack" onSubmit={(e) => void startTotpEnrollment(e)}>
               <label className="settings-field" htmlFor={passwordId}>
                 {t('settings.accountSecurity.passwordLabel')}
-                <Input
+                <PasswordInput
                   id={passwordId}
-                  type="password"
                   autoComplete="current-password"
                   value={password}
                   disabled={busy}
