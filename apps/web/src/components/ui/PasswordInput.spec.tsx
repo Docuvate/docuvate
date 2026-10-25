@@ -17,10 +17,12 @@ describe('PasswordInput', () => {
     );
     const field = screen.getByLabelText('Secret');
     const wrap = field.closest('.password-input-wrap');
-    expect(wrap).toBeTruthy();
+    if (!(wrap instanceof HTMLElement)) {
+      throw new Error('expected .password-input-wrap around the password field');
+    }
     expect(field.getAttribute('type')).toBe('password');
     fireEvent.click(
-      within(wrap as HTMLElement).getByRole('button', {
+      within(wrap).getByRole('button', {
         name: /show password|passwort anzeigen/i,
       })
     );
