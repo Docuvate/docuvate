@@ -11,6 +11,9 @@ from collections.abc import Callable
 from typing import Protocol, TypedDict
 
 import numpy as np
+from numpy.typing import NDArray
+
+FloatArray = NDArray[np.float32]
 
 _ROW_OVERLAP_THRESHOLD = 0.5
 _HORIZONTAL_ALIGN_TOLERANCE = 2.0
@@ -19,15 +22,15 @@ _PAIR_FEAT_EXTRA = 12
 
 
 class PcaTransformProtocol(Protocol):
-    def transform(self, matrix: np.ndarray) -> np.ndarray: ...
+    def transform(self, matrix: FloatArray) -> FloatArray: ...
 
 
 class NeighborFeatureCache(TypedDict, total=False):
     nb: tuple[
         list[list[int | None]],
-        np.ndarray,
-        np.ndarray,
-        np.ndarray,
+        FloatArray,
+        FloatArray,
+        FloatArray,
     ]
 
 
@@ -36,12 +39,15 @@ class LayoutUnit(TypedDict):
     box: list[float]
 
 
-class LayoutDocument(TypedDict, total=False):
+class LayoutDocumentCore(TypedDict):
     w: float
     h: float
     units: list[LayoutUnit]
-    E: np.ndarray
-    G: np.ndarray
+
+
+class LayoutDocument(LayoutDocumentCore, total=False):
+    E: FloatArray
+    G: FloatArray
     rows: list[list[int]]
     y: list[str]
 
@@ -50,7 +56,7 @@ def digits(text: str) -> str:
     return "".join(character for character in text if character.isdigit())
 
 
-def node_geom(document: LayoutDocument) -> tuple[np.ndarray, list[list[int]]]:
+def node_geom(document: LayoutDocumentCore) -> tuple[FloatArray, list[list[int]]]:
     units = document["units"]
     count = len(units)
     if count == 0:
@@ -76,7 +82,8 @@ def node_geom(document: LayoutDocument) -> tuple[np.ndarray, list[list[int]]]:
         text = unit["text"]
         text_len = max(len(text), 1)
         row = row_groups[index]
-        sorted_row = list(row[np.argsort(boxes[row, 0])])
+        row_array = np.asarray(row, dtype=np.intp)
+        sorted_row = list(row_array[np.argsort(boxes[row_array, 0])])
         position = sorted_row.index(index)
         numeric = digits(text)
         stripped = text.strip()
@@ -120,15 +127,15 @@ def node_geom(document: LayoutDocument) -> tuple[np.ndarray, list[list[int]]]:
 
 def node_ctx(
     document: LayoutDocument,
-    geometry: np.ndarray,
-    embeddings: np.ndarray,
+    geometry: FloatArray,
+    embeddings: FloatArray,
     rows: list[list[int]],
-) -> np.ndarray:
+) -> FloatArray:
     units = document["units"]
     count = len(units)
     boxes = np.array([unit["box"] for unit in units], float).reshape(-1, 4)
     center_y = (boxes[:, 1] + boxes[:, 3]) / 2
-    context_rows: list[np.ndarray] = []
+    context_rows: list[FloatArray] = []
     embedding_width = embeddings.shape[1]
     geometry_width = geometry.shape[1]
     zero_embedding = np.zeros(embedding_width, np.float32)
@@ -178,7 +185,7 @@ def node_ctx(
 
 def cand_sets(
     document: LayoutDocument,
-    probabilities: np.ndarray,
+    probabilities: FloatArray,
     classes: list[str],
     source: str,
     destination: str,
@@ -186,13 +193,17 @@ def cand_sets(
     *,
     oracle: bool = False,
 ) -> tuple[list[int], list[int]]:
+    labels = document.get("y")
+    if labels is None:
+        msg = "LayoutDocument requires y labels for candidate selection"
+        raise ValueError(msg)
     if oracle:
-        sources = [index for index, label in enumerate(document["y"]) if label == source]
-        targets = [index for index, label in enumerate(document["y"]) if label == destination]
+        sources = [index for index, label in enumerate(labels) if label == source]
+        targets = [index for index, label in enumerate(labels) if label == destination]
         return sources, targets
     source_index = classes.index(source)
     destination_index = classes.index(destination)
-    label_count = len(document["y"])
+    label_count = len(labels)
     sources = [
         index
         for index in range(label_count)
@@ -208,26 +219,36 @@ def cand_sets(
 
 def pair_feats(
     document: LayoutDocument,
-    probabilities: np.ndarray,
+    probabilities: FloatArray,
     sources: list[int],
     targets: list[int],
     pca: PcaTransformProtocol,
-) -> tuple[np.ndarray, list[tuple[int, int]]]:
+) -> tuple[FloatArray, list[tuple[int, int]]]:
     boxes = np.array([unit["box"] for unit in document["units"]], float)
     median_height = max(np.median(boxes[:, 3] - boxes[:, 1]), 1)
     page_width = document["w"]
     page_height = document["h"]
     center_y = (boxes[:, 1] + boxes[:, 3]) / 2
     center_x = (boxes[:, 0] + boxes[:, 2]) / 2
-    projected = pca.transform(document["E"]) if len(document["E"]) else None
-    node = np.hstack([document["G"], probabilities, projected])
+    embedding_matrix = document.get("E")
+    geometry_matrix = document.get("G")
+    if embedding_matrix is None or geometry_matrix is None:
+        msg = "LayoutDocument requires E and G embeddings for pair features"
+        raise ValueError(msg)
+    if len(embedding_matrix):
+        projected = pca.transform(embedding_matrix)
+        node = np.hstack([geometry_matrix, probabilities, projected])
+    else:
+        node = np.hstack([geometry_matrix, probabilities])
     pairs: list[tuple[int, int]] = []
-    feature_rows: list[np.ndarray] = []
+    feature_rows: list[FloatArray] = []
     for target_index in targets:
         distances = np.array(
             [abs(center_y[source_index] - center_y[target_index]) for source_index in sources]
         )
-        rank = np.argsort(np.argsort(distances)) if len(sources) else []
+        rank: NDArray[np.intp] = (
+            np.argsort(np.argsort(distances)) if len(sources) else np.empty(0, dtype=np.intp)
+        )
         for rank_value, source_index in zip(rank, sources, strict=False):
             if source_index == target_index:
                 continue
@@ -264,7 +285,9 @@ def pair_feats(
                             rank_value,
                             neighbors_target,
                             neighbors_source,
-                            float(document["E"][source_index] @ document["E"][target_index]),
+                            float(
+                                embedding_matrix[source_index] @ embedding_matrix[target_index]
+                            ),
                             np.hypot(
                                 (center_x[target_index] - center_x[source_index]) / page_width,
                                 (center_y[target_index] - center_y[source_index]) / page_height,
@@ -281,7 +304,7 @@ def pair_feats(
 
 def decode(
     meta: list[tuple[int, int, int]],
-    scores: np.ndarray,
+    scores: FloatArray,
     document_count: int,
     threshold: float,
     *,
@@ -307,7 +330,7 @@ def decode(
 def dir_nbrs(
     document: LayoutDocument,
     rows: list[list[int]],
-) -> tuple[list[list[int | None]], np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[list[list[int | None]], FloatArray, FloatArray, FloatArray]:
     units = document["units"]
     count = len(units)
     boxes = np.array([unit["box"] for unit in units], float).reshape(-1, 4)
@@ -354,20 +377,24 @@ def dir_nbrs(
             for neighbor in range(count)
             if center_y[neighbor] > boxes[index, 3] and neighbor not in row_set
         ]
+        def left_key(neighbor: int) -> float:
+            return float(boxes[neighbor, 2])
+
+        def right_key(neighbor: int) -> float:
+            return float(boxes[neighbor, 0])
+
+        def above_key(neighbor: int, unit_index: int = index) -> float:
+            return float(boxes[unit_index, 1] - center_y[neighbor])
+
+        def below_key(neighbor: int, unit_index: int = index) -> float:
+            return float(center_y[neighbor] - boxes[unit_index, 3])
+
         neighbors.append(
             [
-                max(left, key=lambda neighbor: boxes[neighbor, 2]) if left else None,
-                min(right, key=lambda neighbor: boxes[neighbor, 0]) if right else None,
-                vertical_best(
-                    above,
-                    index,
-                    lambda neighbor, unit_index=index: boxes[unit_index, 1] - center_y[neighbor],
-                ),
-                vertical_best(
-                    below,
-                    index,
-                    lambda neighbor, unit_index=index: center_y[neighbor] - boxes[unit_index, 3],
-                ),
+                max(left, key=left_key) if left else None,
+                min(right, key=right_key) if right else None,
+                vertical_best(above, index, above_key),
+                vertical_best(below, index, below_key),
             ]
         )
     return neighbors, boxes, center_x, center_y
@@ -375,15 +402,19 @@ def dir_nbrs(
 
 def nbr_feats(
     document: LayoutDocument,
-    probabilities: np.ndarray,
+    probabilities: FloatArray,
     cache: NeighborFeatureCache,
-) -> np.ndarray:
+) -> FloatArray:
     count = len(document["units"])
     class_count = probabilities.shape[1]
     if count == 0:
         return np.zeros((0, 4 * (class_count + 2) + 2 * class_count + 1), np.float32)
+    layout_rows = document.get("rows")
+    if layout_rows is None:
+        msg = "LayoutDocument requires rows for neighbor features"
+        raise ValueError(msg)
     if "nb" not in cache:
-        cache["nb"] = dir_nbrs(document, document["rows"])
+        cache["nb"] = dir_nbrs(document, layout_rows)
     neighbor_indices, _boxes, center_x, center_y = cache["nb"]
     page_width = document["w"]
     page_height = document["h"]
@@ -402,7 +433,11 @@ def nbr_feats(
                 neighbor_probabilities = [*probabilities[neighbor], 0.0, distance_value]
                 row_features.extend(neighbor_probabilities)
         knn_limit = min(_MAX_NEIGHBOR_KNN, count - 1)
-        knn = np.argsort(distances[index])[:knn_limit] if count > 1 else []
+        knn: NDArray[np.intp] = (
+            np.argsort(distances[index])[:knn_limit]
+            if count > 1
+            else np.empty(0, dtype=np.intp)
+        )
         row_features.extend(list(probabilities[knn].mean(0)) if len(knn) else [0.0] * class_count)
         row_features.extend(list(probabilities[index]))
         row_features.append(float(distances[index, knn[0]]) if len(knn) else 1.0)

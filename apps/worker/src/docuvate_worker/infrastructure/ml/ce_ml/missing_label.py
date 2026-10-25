@@ -6,6 +6,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+from numpy.typing import NDArray
 
 from docuvate_worker.infrastructure.ml.ce_ml.calibration import missing_label_threshold
 from docuvate_worker.infrastructure.ml.ce_ml.constants import (
@@ -15,6 +16,8 @@ from docuvate_worker.infrastructure.ml.ce_ml.constants import (
 )
 from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord, predict_doc_ner_spans
 from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
+
+FloatArray = NDArray[np.float32]
 
 
 @dataclass(frozen=True)
@@ -61,7 +64,7 @@ def missing_label_hint_score(
     ]
     if not example_vectors:
         return MissingLabelHint(score=0.0, show=False)
-    basis_rows: list[np.ndarray] = []
+    basis_rows: list[FloatArray] = []
     for matrix in example_vectors:
         centered = matrix - matrix.mean(axis=0, keepdims=True)
         if centered.shape[0] == 0:

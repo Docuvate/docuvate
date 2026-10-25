@@ -6,10 +6,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+from numpy.typing import NDArray
 
 from docuvate_worker.infrastructure.ml.ce_ml.calibration import label_tiers
 from docuvate_worker.infrastructure.ml.ce_ml.constants import VECTOR_NORM_EPSILON
 from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
+
+FloatArray = NDArray[np.float32]
 
 _ALPHA = 0.9
 _KNN_K = 10
@@ -22,15 +25,15 @@ class LabelPropagationDocumentScore:
     tier: str
 
 
-def _normalize_rows(vectors: np.ndarray) -> np.ndarray:
+def _normalize_rows(vectors: FloatArray) -> FloatArray:
     if vectors.size == 0:
         return vectors
     norms = np.linalg.norm(vectors, axis=1, keepdims=True)
     norms = np.where(norms < VECTOR_NORM_EPSILON, 1.0, norms)
-    return vectors / norms
+    return np.asarray(vectors / norms, dtype=np.float32)
 
 
-def _knn_normalized_affinity(vectors: np.ndarray, k: int) -> np.ndarray:
+def _knn_normalized_affinity(vectors: FloatArray, k: int) -> FloatArray:
     n = vectors.shape[0]
     if n == 0:
         return np.zeros((0, 0), dtype=np.float32)
@@ -44,10 +47,14 @@ def _knn_normalized_affinity(vectors: np.ndarray, k: int) -> np.ndarray:
     weights[rows, cols] = np.maximum(sim[rows, cols], 0.0)
     weights = np.maximum(weights, weights.T)
     degree = weights.sum(axis=1) + 1e-9
-    return weights / np.sqrt(degree[:, None] * degree[None, :])
+    normalized: FloatArray = np.asarray(
+        weights / np.sqrt(degree[:, None] * degree[None, :]),
+        dtype=np.float32,
+    )
+    return normalized
 
 
-def _label_spreading(affinity: np.ndarray, seed_mask: np.ndarray) -> np.ndarray:
+def _label_spreading(affinity: FloatArray, seed_mask: FloatArray) -> FloatArray:
     n = affinity.shape[0]
     if n == 0:
         return np.zeros(0, dtype=np.float32)
@@ -57,11 +64,14 @@ def _label_spreading(affinity: np.ndarray, seed_mask: np.ndarray) -> np.ndarray:
     return propagated.astype(np.float32)
 
 
-def zero_shot_scores(label_name: str, passage_vectors: np.ndarray) -> np.ndarray:
+def zero_shot_scores(label_name: str, passage_vectors: FloatArray) -> FloatArray:
     if passage_vectors.size == 0:
         return np.zeros(0, dtype=np.float32)
-    query = embed_texts_onnx([f"query: {label_name.strip()}"])[0]
-    q = query / (np.linalg.norm(query) + 1e-9)
+    query = np.asarray(
+        embed_texts_onnx([f"query: {label_name.strip()}"])[0],
+        dtype=np.float32,
+    )
+    q = query / (np.linalg.norm(query) + VECTOR_NORM_EPSILON)
     return (passage_vectors @ q).astype(np.float32)
 
 

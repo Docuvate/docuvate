@@ -15,20 +15,24 @@ from typing import Any, cast
 
 import numpy as np
 import onnxruntime as ort
+from numpy.typing import NDArray
 from tokenizers import Tokenizer
 
 from docuvate_worker.infrastructure.ml.docai import features as layout_features
+from docuvate_worker.infrastructure.ml.docai.features import LayoutDocument, LayoutUnit
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
 from docuvate_worker.infrastructure.ml.docai.rapidocr_protocol import RapidOcrEngine
 from docuvate_worker.infrastructure.onnx_e5_encoder import resolve_e5_onnx_dir
 
+FloatArray = NDArray[np.float32]
+
 
 class _PcaTransform:
-    def __init__(self, mean: np.ndarray, components: np.ndarray) -> None:
+    def __init__(self, mean: FloatArray, components: FloatArray) -> None:
         self._mean = mean
         self._components = components
 
-    def transform(self, matrix: np.ndarray) -> np.ndarray:
+    def transform(self, matrix: FloatArray) -> FloatArray:
         return (np.asarray(matrix, np.float32) - self._mean) @ self._components.T
 
 
@@ -134,7 +138,7 @@ class DocaiRuntime:
                     break
         return out
 
-    def _tfidf(self, texts: Sequence[str]) -> np.ndarray:
+    def _tfidf(self, texts: Sequence[str]) -> FloatArray:
         matrix = np.zeros((len(texts), len(self._idf)), dtype=np.float32)
         for row, text in enumerate(texts):
             counts = Counter(g for g in self._ngrams(text) if g in self._vocab)
@@ -146,18 +150,18 @@ class DocaiRuntime:
                 matrix[row] /= norm
         return matrix
 
-    def _embed(self, texts: Sequence[str], batch_size: int = 64) -> np.ndarray:
+    def _embed(self, texts: Sequence[str], batch_size: int = 64) -> FloatArray:
         prefix = str(self._cfg.get("e5_prefix", "query: "))
-        chunks: list[np.ndarray] = []
+        chunks: list[FloatArray] = []
         for start in range(0, len(texts), batch_size):
             batch = [prefix + t for t in texts[start : start + batch_size]]
             encoded = self._tokenizer.encode_batch(batch)
             ids = np.array([entry.ids for entry in encoded], dtype=np.int64)
             mask = np.array([entry.attention_mask for entry in encoded], dtype=np.int64)
-            feed: dict[str, np.ndarray] = {"input_ids": ids, "attention_mask": mask}
+            feed: dict[str, NDArray[np.int64]] = {"input_ids": ids, "attention_mask": mask}
             if "token_type_ids" in self._e5_inputs:
                 feed["token_type_ids"] = np.zeros_like(ids)
-            hidden = self._e5.run(None, feed)[0]
+            hidden = np.asarray(self._e5.run(None, feed)[0], dtype=np.float32)
             pooled = (hidden * mask[..., None]).sum(axis=1) / mask.sum(axis=1, keepdims=True)
             normalized = pooled / np.linalg.norm(pooled, axis=1, keepdims=True)
             chunks.append(normalized.astype(np.float32))
@@ -165,12 +169,12 @@ class DocaiRuntime:
             return np.zeros((0, 384), dtype=np.float32)
         return np.vstack(chunks)
 
-    def _calibrate(self, probabilities: np.ndarray) -> np.ndarray:
-        return np.interp(probabilities, self._cal_x, self._cal_y)
+    def _calibrate(self, probabilities: FloatArray) -> FloatArray:
+        return np.interp(probabilities, self._cal_x, self._cal_y).astype(np.float32)
 
     def predict_image(
         self,
-        image: np.ndarray,
+        image: NDArray[np.uint8],
         *,
         width: int | None = None,
         height: int | None = None,
@@ -210,7 +214,7 @@ class DocaiRuntime:
         *,
         width: float,
         height: float,
-        embeddings: np.ndarray | None = None,
+        embeddings: NDArray[np.float32] | None = None,
         timings: dict[str, float] | None = None,
         started: float | None = None,
     ) -> dict[str, Any]:
@@ -221,17 +225,20 @@ class DocaiRuntime:
             return {"fields": [], "links": [], "menu_items": [], "timings_ms": timings}
 
         embed_started = time.perf_counter()
-        unit_dicts = [
-            {"text": unit.text, "box": list(unit.box), "ocr_conf": unit.ocr_conf} for unit in units
+        layout_units: list[LayoutUnit] = [
+            {"text": unit.text, "box": list(unit.box)} for unit in units
         ]
         texts = [unit.text for unit in units]
-        embeddings_matrix = embeddings if embeddings is not None else self._embed(texts)
+        embeddings_matrix = np.asarray(
+            embeddings if embeddings is not None else self._embed(texts),
+            dtype=np.float32,
+        )
         timings["embed"] = (time.perf_counter() - embed_started) * 1e3
 
-        payload: dict[str, Any] = {
+        payload: LayoutDocument = {
             "w": width,
             "h": height,
-            "units": unit_dicts,
+            "units": layout_units,
             "E": embeddings_matrix,
         }
         geom_started = time.perf_counter()
@@ -244,14 +251,17 @@ class DocaiRuntime:
         else:
             dense = geometry
         field_started = time.perf_counter()
-        probabilities = self._field.run(
-            None,
-            {
-                "tfidf": self._tfidf(texts),
-                "e5": embeddings_matrix,
-                "dense": dense.astype(np.float32),
-            },
-        )[0]
+        probabilities = np.asarray(
+            self._field.run(
+                None,
+                {
+                    "tfidf": self._tfidf(texts),
+                    "e5": embeddings_matrix,
+                    "dense": dense.astype(np.float32),
+                },
+            )[0],
+            dtype=np.float32,
+        )
         if self._field_stack and self._f2 is not None and self._pca_e5 is not None:
             f2_input = np.hstack(
                 [
@@ -260,7 +270,7 @@ class DocaiRuntime:
                     layout_features.nbr_feats(payload, probabilities, {}),
                 ]
             ).astype(np.float32)
-            f2_probs = self._f2.run(None, {"X": f2_input})[1]
+            f2_probs = np.asarray(self._f2.run(None, {"X": f2_input})[1], dtype=np.float32)
             stacked = np.zeros_like(probabilities)
             cols = self._cfg["f2_cols"]
             stacked[:, cols] = f2_probs
@@ -283,7 +293,11 @@ class DocaiRuntime:
             payload, probabilities, sources, targets, self._pca
         )
         if len(pair_matrix):
-            link_scores = self._rank.run(None, {"X": pair_matrix.astype(np.float32)})[1][:, 1]
+            rank_output = np.asarray(
+                self._rank.run(None, {"X": pair_matrix.astype(np.float32)})[1],
+                dtype=np.float32,
+            )
+            link_scores = rank_output[:, 1]
         else:
             link_scores = np.zeros(0, dtype=np.float32)
         link_meta = [(0, source_index, target_index) for source_index, target_index in pairs]

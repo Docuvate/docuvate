@@ -95,7 +95,7 @@ def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
     _height, _width = array.shape[:2]
     ocr = _get_rapidocr()
     result, _ = ocr(array, use_cls=False)
-    return _blocks_from_ocr_result(cast(list, result), page=1, scale_x=1.0, scale_y=1.0)
+    return _blocks_from_ocr_result(result, page=1, scale_x=1.0, scale_y=1.0)
 
 
 def ocr_pdf_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
@@ -108,7 +108,7 @@ def ocr_pdf_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
         _page_h, _page_w = array.shape[:2]
         result, _ = ocr(array, use_cls=False)
         text, page_blocks = _blocks_from_ocr_result(
-            cast(list, result),
+            result,
             page=page_index,
             scale_x=1.0,
             scale_y=1.0,

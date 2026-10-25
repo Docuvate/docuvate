@@ -130,6 +130,7 @@ module = [
   "striprtf.*",
   "bs4.*",
   "extract_msg.*",
+  "rapidocr_onnxruntime.*",
 ]
 ignore_missing_imports = true
 

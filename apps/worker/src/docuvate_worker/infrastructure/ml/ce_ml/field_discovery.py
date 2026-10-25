@@ -35,7 +35,7 @@ def _open_set_params() -> tuple[float, float, float]:
     )
 
 
-def _slug(name: str) -> str:
+def field_key_slug(name: str) -> str:
     lowered = "".join(ch.lower() if ch.isalnum() else "_" for ch in name.strip())
     parts = [part for part in lowered.split("_") if part]
     return "_".join(parts) or "field"
@@ -84,7 +84,7 @@ def discover_conditional_fields(
                 continue
             discovered.append(
                 DiscoveredField(
-                    field_key=_slug(name),
+                    field_key=field_key_slug(name),
                     display_name=name.strip(),
                     confidence=confidence,
                     kind="key_cluster",
@@ -123,7 +123,7 @@ def discover_conditional_fields(
                 continue
             discovered.append(
                 DiscoveredField(
-                    field_key=_slug(name),
+                    field_key=field_key_slug(name),
                     display_name=name,
                     confidence=confidence,
                     kind="entity_cluster",

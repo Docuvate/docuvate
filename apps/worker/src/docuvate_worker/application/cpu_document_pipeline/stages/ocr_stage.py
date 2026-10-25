@@ -12,6 +12,7 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
     StageEnvelope,
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
+from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.extractors.paddle_engine import (
     ocr_image_bytes as paddle_ocr_image_bytes,
 )
@@ -33,7 +34,7 @@ def _ocr_backend() -> str:
     return os.environ.get("DOCUVATE_OCR_BACKEND", "paddle").strip().lower()
 
 
-def _ocr_pdf(content: bytes) -> tuple[str, list]:
+def _ocr_pdf(content: bytes) -> tuple[str, list[ExtractionBlock]]:
     if _ocr_backend() == "rapidocr":
         from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
             ocr_pdf_bytes,
@@ -43,7 +44,7 @@ def _ocr_pdf(content: bytes) -> tuple[str, list]:
     return paddle_ocr_pdf_bytes(content)
 
 
-def _ocr_image(content: bytes) -> tuple[str, list]:
+def _ocr_image(content: bytes) -> tuple[str, list[ExtractionBlock]]:
     if _ocr_backend() == "rapidocr":
         from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
             ocr_image_bytes,

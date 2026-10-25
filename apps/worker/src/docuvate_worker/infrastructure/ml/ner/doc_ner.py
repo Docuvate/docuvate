@@ -89,7 +89,8 @@ def predict_doc_ner_spans(
         ],
         dtype=np.float32,
     )[None, ...]
-    probabilities = _session().run(None, {"X": features, "c": centers})[0][0]
+    raw_output = _session().run(None, {"X": features, "c": centers})[0]
+    probabilities = np.asarray(raw_output, dtype=np.float32)[0]
     tags = probabilities.argmax(axis=-1)
     spans: list[NerSpan] = []
     current: list[int] | None = None
