@@ -9,7 +9,10 @@ from typing import Any, Protocol, cast
 import numpy as np
 from PIL import Image
 
-from docuvate_worker.domain.extraction_geometry import PageDimensions, extraction_block_from_absolute
+from docuvate_worker.domain.extraction_geometry import (
+    PageDimensions,
+    extraction_block_from_absolute,
+)
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.extractors.paddle_errors import map_paddle_exception
 from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images

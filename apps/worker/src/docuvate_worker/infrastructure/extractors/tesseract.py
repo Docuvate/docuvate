@@ -3,7 +3,10 @@
 
 import io
 
-from docuvate_worker.domain.extraction_geometry import PageDimensions, extraction_block_from_absolute
+from docuvate_worker.domain.extraction_geometry import (
+    PageDimensions,
+    extraction_block_from_absolute,
+)
 from docuvate_worker.domain.models import ExtractionBlock, ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions

@@ -57,9 +57,9 @@ from docuvate_worker.infrastructure.ml.ce_ml.missing_label import missing_label_
 from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
-from docuvate_worker.presentation.extraction_block_response import extraction_blocks_to_models
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
+from docuvate_worker.presentation.extraction_block_response import extraction_blocks_to_models
 from docuvate_worker.presentation.representation_response import document_representation_to_response
 from docuvate_worker.presentation.schemas import (
     BuildFactsFromTextRequest,
@@ -96,7 +96,6 @@ from docuvate_worker.presentation.schemas import (
     EngineInfo,
     EngineListResponse,
     ExtractedField,
-    ExtractionBlockModel,
     ExtractionImageModel,
     ExtractRequest,
     ExtractResponse,

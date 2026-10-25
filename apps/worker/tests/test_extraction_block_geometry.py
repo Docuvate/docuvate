@@ -38,7 +38,6 @@ def test_extraction_block_from_absolute_pdf_points() -> None:
         block_index=0,
     )
     assert block is not None
-    assert block.x == block.x  # finite
     assert 0.0 <= block.x <= 1.0
     assert 0.0 <= block.y <= 1.0
     assert 0.0 <= block.width <= 1.0
