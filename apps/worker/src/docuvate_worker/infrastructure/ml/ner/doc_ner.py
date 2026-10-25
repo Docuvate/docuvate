@@ -8,6 +8,7 @@ from functools import lru_cache
 
 import numpy as np
 import onnxruntime as ort
+from numpy.typing import NDArray
 
 from docuvate_worker.infrastructure.ml.docai.paths import ner_doc_model_path
 from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
@@ -72,7 +73,7 @@ def predict_doc_ner_spans(
     *,
     page_width: float,
     page_height: float,
-    word_vectors: np.ndarray | None = None,
+    word_vectors: NDArray[np.float32] | None = None,
 ) -> list[NerSpan]:
     if not words:
         return []
