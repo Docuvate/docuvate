@@ -325,9 +325,15 @@ class EmbeddingDensityModel:
         )
 
     def content_measures(self) -> list[LabelContentMeasure]:
-        priors = np.array(
-            [np.exp(self.log_priors[lid]) for lid in self.label_ids],
+        log_prior_values = np.array(
+            [self.log_priors[lid] for lid in self.label_ids],
             dtype=np.float64,
         )
-        priors = priors / np.sum(priors)
+        shifted = log_prior_values - np.max(log_prior_values)
+        priors = np.exp(shifted)
+        total = float(np.sum(priors))
+        if total <= 0.0:
+            priors = np.ones(len(self.label_ids), dtype=np.float64) / max(len(self.label_ids), 1)
+        else:
+            priors = priors / total
         return compute_label_content_measures(self.label_ids, self.class_stats, self.hyper, priors)

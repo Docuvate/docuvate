@@ -14,6 +14,12 @@ import {
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import {
+  extractionJobId,
+  extractionQueueLockDurationMs,
+  extractionQueueMaxStalledCount,
+  extractionQueueStalledIntervalMs,
+} from '../domain/extraction-queue.config.js';
 
 function parseExtractionJobDocumentId(data: unknown): string {
   const row = requireRecord(data);
@@ -58,7 +64,12 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
         await this.runExtraction.execute(documentId);
         await this.maybeEnqueueArenaSample(documentId, userId);
       },
-      { connection: this.connection }
+      {
+        connection: this.connection,
+        lockDuration: extractionQueueLockDurationMs(),
+        stalledInterval: extractionQueueStalledIntervalMs(),
+        maxStalledCount: extractionQueueMaxStalledCount(),
+      }
     );
   }
 
@@ -69,8 +80,9 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           'extract',
           { documentId, userId: _userId },
           {
-            attempts: 3,
-            backoff: { type: 'exponential', delay: 2_000 },
+            jobId: extractionJobId(documentId),
+            attempts: 5,
+            backoff: { type: 'exponential', delay: 5_000 },
             removeOnComplete: 1_000,
             removeOnFail: 500,
           }

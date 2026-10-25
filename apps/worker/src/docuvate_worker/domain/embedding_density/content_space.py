@@ -97,7 +97,8 @@ def compute_label_content_measures(
             if other == lid:
                 continue
             db = bhattacharyya_distance(mus[lid], cov, mus[other], covs[other])
-            overlap = float(np.exp(-db))
+            db_clamped = max(0.0, float(db))
+            overlap = float(np.exp(-db_clamped))
             if overlap > best_overlap:
                 best_overlap = overlap
                 best_partner = other

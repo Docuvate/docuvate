@@ -84,14 +84,7 @@ export class SyncDocumentSearchIndexUseCase {
           charStart: unit.charStart ?? 0,
           charEnd: unit.charEnd ?? unit.body.length,
         }));
-        const vectors = units.map((unit) => {
-          const vector: number[] = [];
-          for (let i = 0; i < unit.vectorInt8.length; i += 1) {
-            vector.push(unit.vectorInt8.readInt8(i) * unit.vectorScale);
-          }
-          return vector;
-        });
-        await this.searchRepo.indexDocumentChunks(userId, documentId, spans, vectors, {
+        await this.searchRepo.indexDocumentChunks(userId, documentId, spans, undefined, {
           int8Vectors: units.map((unit) => ({
             scale: unit.vectorScale,
             bytes: unit.vectorInt8,

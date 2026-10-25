@@ -211,6 +211,39 @@ export class PgDocumentRepository implements DocumentRepository {
     );
   }
 
+  async tryClaimForExtraction(
+    id: string,
+    staleAfterSeconds: number
+  ): Promise<'claimed' | 'already_ready' | 'busy'> {
+    const claimed = await this.pool.query<{ id: string }>(
+      `UPDATE documents
+       SET status = 'extracting', extraction_failure_reason = NULL, updated_at = now()
+       WHERE id = $1
+         AND (
+           status IN ('queued', 'uploaded', 'failed')
+           OR (
+             status = 'extracting'
+             AND updated_at < now() - ($2::int * interval '1 second')
+           )
+         )
+       RETURNING id`,
+      [id, staleAfterSeconds]
+    );
+    if (claimed.rowCount && claimed.rowCount > 0) {
+      return 'claimed';
+    }
+    const statusRow = await this.pool.query<{ status: string }>(
+      `SELECT status FROM documents WHERE id = $1`,
+      [id]
+    );
+    const row = recordFromUnknown(statusRow.rows[0]);
+    const status = row ? parseString(row.status) : '';
+    if (status === 'ready') {
+      return 'already_ready';
+    }
+    return 'busy';
+  }
+
   async setHeuristicFieldExtractorVersion(documentId: string, version: number): Promise<void> {
     await this.pool.query(
       `UPDATE documents SET heuristic_field_extractor_version = $2, updated_at = now() WHERE id = $1`,

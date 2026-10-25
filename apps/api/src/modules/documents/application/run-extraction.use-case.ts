@@ -16,6 +16,7 @@ import {
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
 import { PersistDocumentFactsUseCase } from '../../exact-facts/application/persist-document-facts.use-case.js';
+import { extractionStaleClaimSeconds } from '../../extraction/domain/extraction-queue.config.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
 import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
@@ -51,7 +52,16 @@ export class RunExtractionUseCase {
       throw new NotFoundError('Document');
     }
 
-    await this.documents.updateStatus(documentId, 'extracting');
+    const claim = await this.documents.tryClaimForExtraction(
+      documentId,
+      extractionStaleClaimSeconds()
+    );
+    if (claim === 'already_ready') {
+      return;
+    }
+    if (claim === 'busy') {
+      throw new Error('document extraction already in progress');
+    }
     try {
       const buffer = await this.storage.getObject(doc.storageKey);
       const engine = await this.resolveExtractorEngine.execute(doc.userId);
@@ -107,11 +117,19 @@ export class RunExtractionUseCase {
       );
       await this.documents.updateStatus(documentId, 'ready');
     } catch (error: unknown) {
-      const contentHash =
-        (await this.documents.findById(documentId))?.contentHash ?? doc.contentHash ?? null;
-      await this.applyDuplicateDetection.execute(documentId, doc.userId, contentHash);
       const failureReason = error instanceof Error ? error.message : String(error);
-      await this.documents.updateStatus(documentId, 'failed', { failureReason });
+      const retryable =
+        failureReason.includes('document extraction already in progress') ||
+        failureReason.includes('fetch failed') ||
+        failureReason.includes('Worker extraction unavailable') ||
+        failureReason.includes('ECONNREFUSED') ||
+        failureReason.includes('ECONNRESET');
+      if (!retryable) {
+        const contentHash =
+          (await this.documents.findById(documentId))?.contentHash ?? doc.contentHash ?? null;
+        await this.applyDuplicateDetection.execute(documentId, doc.userId, contentHash);
+        await this.documents.updateStatus(documentId, 'failed', { failureReason });
+      }
       throw error;
     }
   }

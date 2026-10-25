@@ -157,11 +157,35 @@ export class PgGlobalSearchRepository {
     } finally {
       client.release();
     }
+    const chunkTerms = new Set<string>();
     for (const chunk of chunks) {
-      await this.upsertVocabularyTerms(userId, chunk.body, 'chunk');
+      for (const term of tokenizeSearchQuery(chunk.body)) {
+        if (term.length >= 3 && term.length <= 48) {
+          chunkTerms.add(term);
+        }
+      }
     }
+    await this.upsertVocabularyTermBatch(userId, [...chunkTerms].slice(0, 200), 'chunk');
     const fullText = chunks.map((c) => c.body).join(' ');
     await this.upsertVocabularyTerms(userId, fullText.slice(0, 4000), 'document');
+  }
+
+  async upsertVocabularyTermBatch(
+    userId: string,
+    terms: string[],
+    source: 'document' | 'chunk'
+  ): Promise<void> {
+    const unique = [...new Set(terms)].filter((t) => t.length >= 3 && t.length <= 48);
+    if (unique.length === 0) {
+      return;
+    }
+    await this.pool.query(
+      `INSERT INTO search_vocabulary_terms (user_id, term, source, doc_frequency)
+       SELECT $1, term, $2, 1
+       FROM unnest($3::text[]) AS term
+       ON CONFLICT (user_id, term) DO UPDATE SET doc_frequency = search_vocabulary_terms.doc_frequency + 1`,
+      [userId, source, unique]
+    );
   }
 
   async upsertVocabularyTerms(
@@ -171,15 +195,7 @@ export class PgGlobalSearchRepository {
   ): Promise<void> {
     const tokens = tokenizeSearchQuery(text);
     const unique = [...new Set(tokens)].filter((t) => t.length >= 3 && t.length <= 48);
-    if (unique.length === 0) return;
-    for (const term of unique.slice(0, 200)) {
-      await this.pool.query(
-        `INSERT INTO search_vocabulary_terms (user_id, term, source, doc_frequency)
-         VALUES ($1, $2, $3, 1)
-         ON CONFLICT (user_id, term) DO UPDATE SET doc_frequency = search_vocabulary_terms.doc_frequency + 1`,
-        [userId, term, source]
-      );
-    }
+    await this.upsertVocabularyTermBatch(userId, unique.slice(0, 200), source);
   }
 
   async findSimilarVocabularyTerms(
