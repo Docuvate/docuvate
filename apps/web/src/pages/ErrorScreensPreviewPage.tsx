@@ -98,6 +98,14 @@ export function ErrorScreensPreviewPage() {
     );
   }
 
+  if (screenId === 'scene-unexpected') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-unexpected" key={`scene-unexpected-${previewLangKey}`}>
+        <DocuvateErrorPage variant="unexpected" />
+      </FullPageErrorShell>
+    );
+  }
+
   if (screenId === 'x11') {
     return (
       <div className="error-screens-preview" data-testid="error-preview-x11">

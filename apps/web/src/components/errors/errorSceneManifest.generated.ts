@@ -10,8 +10,6 @@ export type ErrorSceneId =
   | 'unexpected'
   | 'forbidden';
 
-export type ErrorSceneThemeVariant = "light" | "dark";
-
 export interface ErrorSceneManifestEntry {
   id: ErrorSceneId;
   slug: string;

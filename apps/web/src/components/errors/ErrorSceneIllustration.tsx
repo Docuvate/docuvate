@@ -29,9 +29,10 @@ export function ErrorSceneIllustration({
 
   return (
     <div className={rootClass}>
-      <picture className="error-scene-mascot__picture error-scene-mascot__picture--light">
-        <source type="image/avif" srcSet={buildErrorSceneSrcSet(scene, 'light', 'avif')} sizes={MASCOT_SIZES} />
-        <source type="image/webp" srcSet={buildErrorSceneSrcSet(scene, 'light', 'webp')} sizes={MASCOT_SIZES} />
+      <div className="error-scene-mascot__shadow" aria-hidden />
+      <picture className="error-scene-mascot__picture">
+        <source type="image/avif" srcSet={buildErrorSceneSrcSet(scene, 'avif')} sizes={MASCOT_SIZES} />
+        <source type="image/webp" srcSet={buildErrorSceneSrcSet(scene, 'webp')} sizes={MASCOT_SIZES} />
         <img
           alt={alt}
           className="error-scene-mascot__img"
@@ -39,21 +40,7 @@ export function ErrorSceneIllustration({
           height={height}
           loading="lazy"
           sizes={MASCOT_SIZES}
-          src={errorSceneFallbackSrc(scene, 'light')}
-          width={width}
-        />
-      </picture>
-      <picture className="error-scene-mascot__picture error-scene-mascot__picture--dark">
-        <source type="image/avif" srcSet={buildErrorSceneSrcSet(scene, 'dark', 'avif')} sizes={MASCOT_SIZES} />
-        <source type="image/webp" srcSet={buildErrorSceneSrcSet(scene, 'dark', 'webp')} sizes={MASCOT_SIZES} />
-        <img
-          alt={alt}
-          className="error-scene-mascot__img"
-          decoding="async"
-          height={height}
-          loading="lazy"
-          sizes={MASCOT_SIZES}
-          src={errorSceneFallbackSrc(scene, 'dark')}
+          src={errorSceneFallbackSrc(scene)}
           width={width}
         />
       </picture>

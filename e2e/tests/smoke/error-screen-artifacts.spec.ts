@@ -4,14 +4,12 @@ import path from 'node:path';
 
 const artifactDir = path.join(process.cwd(), 'ce-ui-audit-output', 'error-scenes');
 
-type Theme = 'light' | 'dark';
-type Locale = 'de' | 'en';
-
 const SCENES = [
   {
     id: 'scene-unreachable',
     file: 'unreachable',
     testId: 'error-preview-scene-unreachable',
+    errorVariantTestId: 'docuvate-error-server-unreachable',
     headlines: {
       de: 'Unsere Dokumente machen gerade Kaffeepause.',
       en: 'Our documents are on a coffee break.',
@@ -21,6 +19,7 @@ const SCENES = [
     id: 'scene-offline',
     file: 'offline',
     testId: 'error-preview-scene-offline',
+    errorVariantTestId: 'docuvate-error-browser-offline',
     headlines: {
       de: 'Kein Internet.',
       en: 'No internet.',
@@ -30,15 +29,47 @@ const SCENES = [
     id: 'scene-not-found',
     file: 'not-found',
     testId: 'error-preview-scene-not-found',
+    errorVariantTestId: 'docuvate-error-not-found',
     headlines: {
       de: 'Dieses Dokument haben wir nicht abgelegt.',
       en: 'We have not filed this document.',
     },
   },
+  {
+    id: 'scene-server',
+    file: 'server-error',
+    testId: 'error-preview-scene-server',
+    errorVariantTestId: 'docuvate-error-server-error-page',
+    headlines: {
+      de: 'Der Server braucht einen kurzen Moment.',
+      en: 'The server needs a short breather.',
+    },
+  },
+  {
+    id: 'scene-forbidden',
+    file: 'forbidden',
+    testId: 'error-preview-scene-forbidden',
+    errorVariantTestId: 'docuvate-error-forbidden',
+    headlines: {
+      de: 'Kein Zugriff',
+      en: 'Access denied',
+    },
+  },
+  {
+    id: 'scene-unexpected',
+    file: 'unexpected',
+    testId: 'error-preview-scene-unexpected',
+    errorVariantTestId: 'docuvate-error-unexpected',
+    headlines: {
+      de: 'Hier ist etwas schiefgelaufen.',
+      en: 'Something went sideways here.',
+    },
+  },
 ] as const;
 
 test.describe('Error scene screenshot artifacts', () => {
-  test('captures unreachable, offline, not-found (light/dark, DE/EN, desktop/mobile)', async ({ browser }) => {
+  test('captures all mascot scenes (light/dark, DE/EN, desktop/mobile)', async ({ browser }) => {
+    test.setTimeout(600_000);
     fs.mkdirSync(artifactDir, { recursive: true });
 
     for (const scene of SCENES) {
@@ -60,8 +91,20 @@ test.describe('Error scene screenshot artifacts', () => {
           await page.goto(`/docs/errors/previews/${scene.id}?lang=${locale}`, { waitUntil: 'networkidle' });
 
           await expect(page.getByTestId(scene.testId)).toBeVisible();
-          await expect(page.getByTestId(`docuvate-error-${scene.id === 'scene-offline' ? 'browser-offline' : scene.id === 'scene-not-found' ? 'not-found' : 'server-unreachable'}`)).toBeVisible();
+          await expect(page.getByTestId(scene.errorVariantTestId)).toBeVisible();
           await expect(page.getByRole('heading', { level: 1, name: scene.headlines[locale] })).toBeVisible();
+
+          const mascotImg = page.locator('.error-scene-mascot__img').first();
+          await expect(mascotImg).toBeVisible();
+          await mascotImg.evaluate((img) => {
+            const el = img;
+            if (!(el instanceof HTMLImageElement)) {
+              throw new Error('Expected image element');
+            }
+            if (!el.complete || el.naturalWidth === 0) {
+              throw new Error('Mascot image not loaded');
+            }
+          });
 
           const themeAttr = await page.locator('html').getAttribute('data-docuvate-theme');
           expect(themeAttr).toBe(theme);
