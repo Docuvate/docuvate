@@ -68,6 +68,7 @@ import {
 } from './application/tag-custom-field.use-cases.js';
 import { WithdrawLabelCorrectionUseCase } from './application/withdraw-label-correction.use-case.js';
 import { EmbeddingDensityCalibrationQueueService } from './infrastructure/embedding-density-calibration-queue.service.js';
+import { LabelHybridModelCacheService } from './infrastructure/label-hybrid-model-cache.service.js';
 import { HeadlessPgEmbeddingDensityRepository } from './infrastructure/headless-pg-embedding-density.repository.js';
 import { HttpCeMlAdapter } from './infrastructure/http-ce-ml.adapter.js';
 import { HttpEmbeddingAdapter } from './infrastructure/http-embedding.adapter.js';
@@ -132,6 +133,7 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     ApplyEmbeddingDensitySuggestionsUseCase,
     RunEmbeddingDensityCalibrationUseCase,
     EmbeddingDensityCalibrationQueueService,
+    LabelHybridModelCacheService,
     RecordEmbeddingDensityCorrectionUseCase,
     ApplyLabelCorrectionUseCase,
     ApplySparkLabelPropagationUseCase,

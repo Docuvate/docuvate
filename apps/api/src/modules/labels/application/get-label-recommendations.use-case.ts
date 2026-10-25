@@ -19,7 +19,8 @@ import {
 } from '../../../shared/domain/ports.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
-import { type LabelHybridDocumentRow, trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
+import { type LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
+import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
 import { OPEN_SET_MIN_CLUSTER_SIZE } from '../domain/label-open-set-discovery.js';
 import {
@@ -82,7 +83,8 @@ export class GetLabelRecommendationsUseCase {
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
-    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository
+    @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    private readonly labelHybridCache: LabelHybridModelCacheService
   ) {}
 
   async execute(userId: string): Promise<LabelRecommendationDto[]> {
@@ -155,7 +157,7 @@ export class GetLabelRecommendationsUseCase {
         text,
       };
     });
-    const hybridModel = trainUserLabelHybridModel(hybridTrainingRows);
+    const hybridModel = await this.labelHybridCache.resolveModel(userId, hybridTrainingRows);
 
     const assignRows = suggestAssignRecommendations({
       rows: hybridTrainingRows,
