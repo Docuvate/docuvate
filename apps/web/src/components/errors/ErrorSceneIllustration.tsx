@@ -45,7 +45,15 @@ export function ErrorSceneIllustration({
       </g>
 
       <g className="error-scene-character" filter="url(#error-scene-soft-shadow)">
-        <rect x="168" y="118" width="144" height="188" rx="16" fill="url(#error-scene-paper)" />
+        <rect
+          className="error-scene-character-body"
+          x="168"
+          y="118"
+          width="144"
+          height="188"
+          rx="16"
+          fill="url(#error-scene-paper)"
+        />
         <circle className="error-scene-face" cx="216" cy="178" r="10" />
         <circle className="error-scene-face" cx="264" cy="178" r="10" />
         <path className="error-scene-mouth" d="M228 208 Q240 220 252 208" />

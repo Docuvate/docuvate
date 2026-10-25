@@ -285,17 +285,18 @@
       },
       "scene": {
         "offline": {
-          "kicker": "Offline",
+          "kicker": "OFFLINE",
           "title": "No internet.",
           "lead": "Without a connection we cannot reach the server. We reconnect automatically when you are back online."
         },
         "unreachable": {
-          "kicker": "Connection interrupted",
+          "kicker": "CONNECTION",
           "title": "Our documents are on a coffee break.",
           "lead": "The server is not responding right now. We keep trying automatically. When it is back, you will continue right here."
         },
         "serverFault": {
-          "kicker": "Server",
+          "kicker": "SERVER ERROR",
+          "kickerStatus": "ERROR {{code}}",
           "title": "The server needs a short breather.",
           "lead": "Something went wrong on our side. We keep trying automatically until Docuvate is reachable again."
         },

@@ -286,17 +286,18 @@
       },
       "scene": {
         "offline": {
-          "kicker": "Offline",
+          "kicker": "OFFLINE",
           "title": "Kein Internet.",
           "lead": "Ohne Verbindung können wir den Server nicht erreichen. Sobald Sie wieder online sind, verbinden wir automatisch neu."
         },
         "unreachable": {
-          "kicker": "Verbindung unterbrochen",
+          "kicker": "VERBINDUNG",
           "title": "Unsere Dokumente machen gerade Kaffeepause.",
           "lead": "Der Server antwortet gerade nicht. Wir versuchen es automatisch weiter. Sobald er wieder da ist, geht es genau hier weiter."
         },
         "serverFault": {
-          "kicker": "Server",
+          "kicker": "SERVERFEHLER",
+          "kickerStatus": "FEHLER {{code}}",
           "title": "Der Server braucht einen kurzen Moment.",
           "lead": "Es ist ein Fehler aufgetreten. Wir versuchen es automatisch weiter, bis Docuvate wieder erreichbar ist."
         },

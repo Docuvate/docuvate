@@ -8,7 +8,7 @@ import { AppShell } from './components/AppShell';
 import { SessionBootErrorScreen } from './components/errors/SessionBootErrorScreen';
 import { authClient } from './lib/auth-client';
 import { hadAuthenticatedSessionHint } from './lib/authSessionHint';
-import { isErrorScreenshotHarnessBuild } from './lib/errorPreviewRoutes';
+import { isErrorScreenPreviewEnabled } from './lib/errorPreviewRoutes';
 import { useFeatureFlags } from './lib/remoteConfig';
 import { routes } from './lib/routes';
 import { AccountSecuritySettingsPage } from './pages/AccountSecuritySettingsPage';
@@ -26,7 +26,6 @@ import { DuplicatesOverviewPage } from './pages/DuplicatesOverviewPage';
 import { ErrorCodeDocPage } from './pages/ErrorCodeDocPage';
 import { ErrorScreensPreviewHarnessShell } from './pages/ErrorScreensPreviewHarnessShell';
 import { ErrorScreensPreviewPage } from './pages/ErrorScreensPreviewPage';
-import { ErrorScreensPreviewRoute } from './pages/ErrorScreensPreviewRoute';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { GlobalChatPage } from './pages/GlobalChatPage';
 import { InviteAcceptPage } from './pages/InviteAcceptPage';
@@ -233,7 +232,7 @@ export function App() {
           </ShellRoute>
         }
       />
-      {isErrorScreenshotHarnessBuild() ? (
+      {isErrorScreenPreviewEnabled() ? (
         <Route
           path={`${routes.errorScreensPreview}/:screenId`}
           element={
@@ -242,16 +241,7 @@ export function App() {
             </ErrorScreensPreviewHarnessShell>
           }
         />
-      ) : (
-        <Route
-          path={`${routes.errorScreensPreview}/:screenId`}
-          element={
-            <ShellRoute>
-              <ErrorScreensPreviewRoute />
-            </ShellRoute>
-          }
-        />
-      )}
+      ) : null}
       <Route
         path={routes.settingsConnectors}
         element={

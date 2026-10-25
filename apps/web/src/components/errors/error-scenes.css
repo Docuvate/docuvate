@@ -23,8 +23,8 @@
 }
 
 [data-docuvate-theme='dark'] .full-page-error-shell {
-  --error-scene-paper-top: color-mix(in srgb, var(--dv-color-bg-raised) 90%, #3a322c 10%);
-  --error-scene-paper-bottom: color-mix(in srgb, var(--dv-color-bg) 85%, #1a1614 15%);
+  --error-scene-paper-top: color-mix(in srgb, #5c5248 55%, var(--dv-color-bg-raised) 45%);
+  --error-scene-paper-bottom: color-mix(in srgb, #4a4038 50%, var(--dv-color-bg) 50%);
   --error-scene-shadow: color-mix(in srgb, #000 70%, transparent);
 
   background-image:
@@ -343,12 +343,48 @@
 
 .error-scene-countdown-fill {
   height: 100%;
+  min-width: 0.75rem;
   border-radius: inherit;
   background: linear-gradient(
     90deg,
     color-mix(in srgb, var(--dv-color-accent) 80%, #fff 20%),
     var(--dv-color-accent)
   );
+}
+
+.error-scene-countdown-fill--active {
+  box-shadow: 0 0 10px color-mix(in srgb, var(--dv-color-accent) 45%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .error-scene-countdown-fill--active {
+    animation: error-scene-countdown-shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes error-scene-countdown-shimmer {
+  0%,
+  100% {
+    filter: brightness(1);
+    opacity: 0.92;
+  }
+
+  50% {
+    filter: brightness(1.08);
+    opacity: 1;
+  }
+}
+
+[data-docuvate-theme='dark'] .error-scene-character-body {
+  stroke: color-mix(in srgb, #c9bfb3 55%, var(--dv-color-border) 45%);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--dv-color-accent) 22%, transparent));
+}
+
+[data-docuvate-theme='dark'] .error-scene-hero-doc rect,
+[data-docuvate-theme='dark'] .error-scene-float rect {
+  stroke: color-mix(in srgb, #b8aea3 40%, var(--dv-color-border) 60%);
+  stroke-width: 1.5;
 }
 
 .error-scene-countdown-label {

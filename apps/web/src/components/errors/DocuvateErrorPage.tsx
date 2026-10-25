@@ -21,6 +21,11 @@ export type DocuvateErrorPageVariant =
   | 'unexpected'
   | 'server-error-page';
 
+export interface PreviewReconnectSnapshot {
+  secondsLeft: number;
+  totalSeconds: number;
+}
+
 export interface DocuvateErrorPageProps {
   variant: DocuvateErrorPageVariant;
   sourceError?: unknown;
@@ -28,6 +33,8 @@ export interface DocuvateErrorPageProps {
   errorCode?: string;
   requestId?: string;
   enableAutoReconnect?: boolean;
+  /** Static countdown display for design previews (no live polling). */
+  previewReconnect?: PreviewReconnectSnapshot;
   onRecovered?: () => void;
   actionsSlot?: React.ReactNode;
 }
@@ -63,6 +70,7 @@ export function DocuvateErrorPage({
   errorCode,
   requestId,
   enableAutoReconnect = false,
+  previewReconnect,
   onRecovered,
   actionsSlot,
 }: DocuvateErrorPageProps) {
@@ -75,10 +83,15 @@ export function DocuvateErrorPage({
     enableAutoReconnect &&
     (variant === 'server-unreachable' || variant === 'server-error' || variant === 'server-error-page');
 
-  const { secondsUntilRetry, countdownTotalSeconds, isProbing, retryNow } = useApiHealthReconnect({
-    enabled: reconnectEnabled,
+  const reconnectHook = useApiHealthReconnect({
+    enabled: reconnectEnabled && previewReconnect == null,
     onRecovered,
   });
+
+  const secondsUntilRetry = previewReconnect?.secondsLeft ?? reconnectHook.secondsUntilRetry;
+  const countdownTotalSeconds = previewReconnect?.totalSeconds ?? reconnectHook.countdownTotalSeconds;
+  const isProbing = previewReconnect != null ? false : reconnectHook.isProbing;
+  const retryNow = reconnectHook.retryNow;
 
   const parsed = sourceError != null ? readAuthClientErrorShape(sourceError) : {};
   const technicalErrorType =
@@ -88,15 +101,21 @@ export function DocuvateErrorPage({
   const technicalStatus = httpStatus ?? parsed.status ?? undefined;
 
   const copyKey = sceneCopyKey(variant);
-  const kicker = t(`errors.pages.scene.${copyKey}.kicker`, { defaultValue: '' });
+  const kicker = useMemo(() => {
+    if (copyKey === 'serverFault' && technicalStatus != null) {
+      return t('errors.pages.scene.serverFault.kickerStatus', { code: technicalStatus });
+    }
+    return t(`errors.pages.scene.${copyKey}.kicker`, { defaultValue: '' });
+  }, [copyKey, t, technicalStatus]);
   const title = t(`errors.pages.scene.${copyKey}.title`);
   const lead = t(`errors.pages.scene.${copyKey}.lead`);
 
   const scene = sceneIdForVariant(variant);
-  const animating = reconnectEnabled && (isProbing || secondsUntilRetry > 0);
+  const showReconnectUi = reconnectEnabled || previewReconnect != null;
+  const animating = showReconnectUi && (isProbing || secondsUntilRetry > 0);
 
   const countdownSlot =
-    reconnectEnabled && (secondsUntilRetry > 0 || isProbing || secondsUntilRetry === 0)
+    showReconnectUi && (secondsUntilRetry > 0 || isProbing || secondsUntilRetry === 0)
       ? (
         <ReconnectCountdownBar
           secondsLeft={secondsUntilRetry}
@@ -119,13 +138,13 @@ export function DocuvateErrorPage({
           {t('notFoundPage.documentsLink')}
         </Link>
       )
-      : reconnectEnabled
+      : showReconnectUi
         ? (
           <Button
             ref={retryButtonRef}
             type="button"
             variant="primary"
-            disabled={isProbing}
+            disabled={isProbing || previewReconnect != null}
             onClick={retryNow}
           >
             <RefreshCw size={16} strokeWidth={2} aria-hidden />

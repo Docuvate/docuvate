@@ -18,8 +18,8 @@ export function ReconnectCountdownBar({
 }: ReconnectCountdownBarProps) {
   const safeTotal = Math.max(1, totalSeconds);
   const elapsed = Math.max(0, safeTotal - secondsLeft);
-  const ratio = isProbing ? 1 : Math.min(1, elapsed / safeTotal);
-  const percent = Math.round(ratio * 100);
+  const fillRatio = isProbing ? 1 : Math.min(1, elapsed / safeTotal);
+  const percent = Math.max(12, Math.round(fillRatio * 100));
 
   return (
     <div className="error-scene-countdown" aria-live="polite">
@@ -31,7 +31,10 @@ export function ReconnectCountdownBar({
         aria-valuenow={percent}
         aria-label={isProbing && probingLabel ? probingLabel : label}
       >
-        <div className="error-scene-countdown-fill" style={{ width: `${percent}%` }} />
+        <div
+          className={`error-scene-countdown-fill${isProbing || fillRatio > 0 ? ' error-scene-countdown-fill--active' : ''}`}
+          style={{ width: `${percent}%` }}
+        />
       </div>
       <p className="error-scene-countdown-label">
         {isProbing && probingLabel ? probingLabel : label}
