@@ -225,7 +225,7 @@
     {
       "id": "ce-ml-calibration",
       "path": "apps/worker/src/docuvate_worker/infrastructure/ml/artifacts/ce-ml-calibration.v1.json",
-      "sha256": "fbe4859312e2f77ea5ac54f49e35bad2bc63871e60f7af19a0b8d151c7d50469"
+      "sha256": "fc9a092813723f424e793a3d318cc4410e9baf04f84353dbce37c25f9c6ac0d5"
     },
     {
       "id": "docai-v0.3-config",
