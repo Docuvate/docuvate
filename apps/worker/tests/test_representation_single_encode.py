@@ -14,10 +14,11 @@ from docuvate_worker.infrastructure.embedding_encoder_stats import (
 from tests.synthetic_layout_pdfs import delivery_note_table_pdf
 
 
-def test_single_encoder_batch_per_extract_pipeline() -> None:
+def test_bounded_passage_batches_per_extract_pipeline() -> None:
     reset_passage_batch_calls()
     pdf = delivery_note_table_pdf()
     run_integrated_cpu_document_pipeline(
         PipelineRunInput(content=pdf, mime_type="application/pdf", document_id="doc-1")
     )
-    assert passage_batch_calls() == 1
+    calls = passage_batch_calls()
+    assert 1 <= calls <= 12

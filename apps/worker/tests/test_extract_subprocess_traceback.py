@@ -15,6 +15,7 @@ def test_run_extract_isolated_logs_subprocess_traceback(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     monkeypatch.delenv("DOCUVATE_ALLOW_IN_PROCESS_EXTRACT", raising=False)
+    monkeypatch.setenv("DOCUVATE_EXTRACT_ADMISSION", "0")
     payload = {
         "ok": False,
         "error": "OverflowError: math range error",

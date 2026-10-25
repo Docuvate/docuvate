@@ -27,15 +27,18 @@ def test_filter_benign_stderr_keeps_real_errors() -> None:
 
 
 def test_run_extract_isolated_reports_sigkill(monkeypatch: pytest.MonkeyPatch) -> None:
+    from docuvate_worker.domain.extract_errors import ExtractPermanentError
+
     monkeypatch.delenv("DOCUVATE_ALLOW_IN_PROCESS_EXTRACT", raising=False)
+    monkeypatch.setenv("DOCUVATE_EXTRACT_ADMISSION", "0")
     proc = MagicMock()
     proc.returncode = -signal.SIGKILL
     proc.stderr = (
         "[W:onnxruntime:Default, telemetry_1ds.cc:600] Failed to persist telemetry device ID\n"
     )
     with (
-        patch.object(runner.subprocess, "run", return_value=proc),
-        pytest.raises(RuntimeError, match="SIGKILL") as exc_info,
+        patch.object(runner.subprocess, "run", side_effect=[proc, proc]),
+        pytest.raises(ExtractPermanentError) as exc_info,
     ):
         runner.run_extract_isolated(
             content=b"%PDF",
@@ -44,4 +47,5 @@ def test_run_extract_isolated_reports_sigkill(monkeypatch: pytest.MonkeyPatch) -
             embedding_density_state=None,
             build_exact_fact_index=False,
         )
-    assert "likely out of memory" in str(exc_info.value)
+    assert exc_info.value.error_type == "ExtractResourceExhausted"
+    assert "speicherintensiv" in str(exc_info.value).casefold()

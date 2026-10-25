@@ -1,0 +1,5 @@
+{
+  "source": "nielsr/funsd train split (eval only; images fetched at test time)",
+  "page_ids": ["0", "1", "2", "3", "4"],
+  "baseline_mean_cer": 0.5226702702491101
+}

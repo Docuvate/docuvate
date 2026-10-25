@@ -123,7 +123,11 @@ def scanned_image_only_pdf() -> bytes:
     return _build_scan_pdf(lines, include_text_layer=False)
 
 
-def scanned_image_only_multipage_pdf(page_count: int = 60) -> bytes:
+def scanned_image_only_multipage_pdf(
+    page_count: int = 60,
+    *,
+    dpi: int = 120,
+) -> bytes:
     """Many single-page scan objects merged into one PDF (image-only, no text layer)."""
     if page_count < 1:
         msg = "page_count must be >= 1"
@@ -135,6 +139,7 @@ def scanned_image_only_multipage_pdf(page_count: int = 60) -> bytes:
         page_pdf = _build_scan_pdf(
             [(f"Scan page {page_index + 1} label", 48.0, 700.0, 11)],
             include_text_layer=False,
+            dpi=dpi,
         )
         reader = PdfReader(io.BytesIO(page_pdf))
         writer.add_page(reader.pages[0])
