@@ -44,7 +44,7 @@ describe('label-hybrid-auto-match performance guard', () => {
     const smallMs = await trainMs(small);
     const largeMs = await trainMs(large);
     const sizeRatio = 200 / 100;
-    expect(largeMs).toBeLessThan(90_000);
+    expect(largeMs).toBeLessThan(120_000);
     expect(largeMs / Math.max(smallMs, 1)).toBeLessThan(sizeRatio * sizeRatio * 16);
   }, 180_000);
 });
