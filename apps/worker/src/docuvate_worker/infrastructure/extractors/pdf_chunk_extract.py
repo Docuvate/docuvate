@@ -217,6 +217,35 @@ def should_chunk_scanned_pdf(content: bytes, mime_type: str, *, requires_ocr: bo
     return pages > pdf_chunk_page_size()
 
 
+def append_chunk_ocr_part(
+    texts: list[str],
+    blocks: list[ExtractionBlock],
+    text: str,
+    chunk_blocks: list[ExtractionBlock],
+    *,
+    block_index_start: int,
+) -> int:
+    """Merge one chunk into accumulators; returns next block_index."""
+    piece = text.strip()
+    if piece:
+        texts.append(piece)
+    block_index = block_index_start
+    for block in chunk_blocks:
+        blocks.append(
+            ExtractionBlock(
+                page=block.page,
+                x=block.x,
+                y=block.y,
+                width=block.width,
+                height=block.height,
+                text=block.text,
+                block_index=block_index,
+            )
+        )
+        block_index += 1
+    return block_index
+
+
 def merge_chunk_ocr_results(
     parts: list[tuple[str, list[ExtractionBlock]]],
 ) -> tuple[str, list[ExtractionBlock]]:
@@ -224,20 +253,11 @@ def merge_chunk_ocr_results(
     blocks: list[ExtractionBlock] = []
     block_index = 0
     for text, chunk_blocks in parts:
-        piece = text.strip()
-        if piece:
-            texts.append(piece)
-        for block in chunk_blocks:
-            blocks.append(
-                ExtractionBlock(
-                    page=block.page,
-                    x=block.x,
-                    y=block.y,
-                    width=block.width,
-                    height=block.height,
-                    text=block.text,
-                    block_index=block_index,
-                )
-            )
-            block_index += 1
+        block_index = append_chunk_ocr_part(
+            texts,
+            blocks,
+            text,
+            chunk_blocks,
+            block_index_start=block_index,
+        )
     return "\n\n".join(texts).strip(), blocks

@@ -23,9 +23,9 @@ from docuvate_worker.infrastructure.extractors.paddle_engine import (
     release_paddle_ocr,
 )
 from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import (
+    append_chunk_ocr_part,
     iter_pdf_page_chunk_specs,
     load_cached_chunk_result,
-    merge_chunk_ocr_results,
     pdf_chunk_page_size,
     pdf_page_count,
     persist_chunk_result,
@@ -81,12 +81,21 @@ def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock]]
     pages = pdf_page_count(content)
     chunk_pages = pdf_chunk_page_size()
     specs = iter_pdf_page_chunk_specs(pages, chunk_pages)
-    parts: list[tuple[str, list[ExtractionBlock]]] = []
+    merged_texts: list[str] = []
+    merged_blocks: list[ExtractionBlock] = []
+    block_index = 0
     for spec in specs:
         cached = load_cached_chunk_result(content, spec)
         if cached is not None:
             text, blocks = cached
-            parts.append((text, shift_blocks_page_offset(blocks, spec.page_offset)))
+            shifted = shift_blocks_page_offset(blocks, spec.page_offset)
+            block_index = append_chunk_ocr_part(
+                merged_texts,
+                merged_blocks,
+                text,
+                shifted,
+                block_index_start=block_index,
+            )
             continue
         sub_pdf = slice_pdf_bytes(content, spec.first_page, spec.last_page)
         release_onnx_encoder()
@@ -96,8 +105,17 @@ def _ocr_pdf_in_page_chunks(content: bytes) -> tuple[str, list[ExtractionBlock]]
             _release_ocr_backends()
             reclaim_python_heap()
         persist_chunk_result(content, spec, text, blocks)
-        parts.append((text, shift_blocks_page_offset(blocks, spec.page_offset)))
-    return merge_chunk_ocr_results(parts)
+        shifted = shift_blocks_page_offset(blocks, spec.page_offset)
+        block_index = append_chunk_ocr_part(
+            merged_texts,
+            merged_blocks,
+            text,
+            shifted,
+            block_index_start=block_index,
+        )
+        del sub_pdf, text, blocks, shifted
+        reclaim_python_heap()
+    return "\n\n".join(merged_texts).strip(), merged_blocks
 
 
 def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:

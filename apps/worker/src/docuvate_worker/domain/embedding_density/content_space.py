@@ -15,6 +15,7 @@ from docuvate_worker.domain.embedding_density.niw import (
     NiwHyperparameters,
     class_marginal_log_density_components,
 )
+from docuvate_worker.domain.math_stable import exp_neg_clamped
 
 
 @dataclass(frozen=True)
@@ -98,7 +99,7 @@ def compute_label_content_measures(
                 continue
             db = bhattacharyya_distance(mus[lid], cov, mus[other], covs[other])
             db_clamped = max(0.0, float(db))
-            overlap = float(np.exp(-db_clamped))
+            overlap = exp_neg_clamped(db_clamped)
             if overlap > best_overlap:
                 best_overlap = overlap
                 best_partner = other

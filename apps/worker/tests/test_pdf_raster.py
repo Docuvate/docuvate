@@ -5,7 +5,10 @@ import shutil
 
 import pytest
 
-from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
+from docuvate_worker.infrastructure.extractors.pdf_raster import (
+    iter_pdf_page_images,
+    pdf_raster_max_pixels_per_page,
+)
 from tests.synthetic_scan_pdfs import scanned_image_only_multipage_pdf
 
 
@@ -22,3 +25,8 @@ def test_iter_pdf_page_images_yields_one_page_at_a_time() -> None:
             assert image.height > 0
         finally:
             image.close()
+
+
+def test_raster_caps_pixels_per_page(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("DOCUVATE_PDF_RASTER_MAX_PIXELS", "100000")
+    assert pdf_raster_max_pixels_per_page() == 100000

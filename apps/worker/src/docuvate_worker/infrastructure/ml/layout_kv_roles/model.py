@@ -12,6 +12,7 @@ from typing import Literal
 import numpy as np
 from numpy.typing import NDArray
 
+from docuvate_worker.domain.math_stable import sigmoid
 from docuvate_worker.infrastructure.ml.layout_kv_roles.features import (
     ENTITY_FEATURE_DIM,
     LINK_EXTRA_DIM,
@@ -56,14 +57,6 @@ def _softmax(logits: NDArray[np.float32]) -> NDArray[np.float32]:
         uniform = np.ones_like(logits, dtype=np.float32) / float(len(logits))
         return uniform
     return np.asarray(exp / denom, dtype=np.float32)
-
-
-def _sigmoid(logit: float) -> float:
-    if logit >= 0:
-        z = np.exp(-logit)
-        return float(1.0 / (1.0 + z))
-    z = np.exp(logit)
-    return float(z / (1.0 + z))
 
 
 def _parse_weights(raw: object, *, rows: int, cols: int, name: str) -> NDArray[np.float32]:
@@ -170,4 +163,4 @@ def predict_link_probability(model: LayoutKvRoleHeadModel, features: list[float]
         raise ValueError(msg)
     row = model.link_weights[0]
     logit = float(row[0] + np.dot(row[1:], vector))
-    return _sigmoid(logit)
+    return sigmoid(logit)

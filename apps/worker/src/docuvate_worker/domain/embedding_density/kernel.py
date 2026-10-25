@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 import numpy as np
 from numpy.typing import NDArray
 
+from docuvate_worker.domain.math_stable import exp_neg_clamped
+
 KERNEL_REGULARIZER_LAMBDA = 1e-3
 CORRECTION_MARGIN_KAPPA = 1.0
 
@@ -25,7 +27,8 @@ def _empty_org_list() -> list[str]:
 def rbf_kernel(x: NDArray[np.float64], y: NDArray[np.float64], bandwidth: float) -> float:
     diff = np.asarray(x, dtype=np.float64) - np.asarray(y, dtype=np.float64)
     h2 = max(bandwidth * bandwidth, 1e-12)
-    return float(np.exp(-0.5 * float(np.dot(diff, diff)) / h2))
+    quad = 0.5 * float(np.dot(diff, diff)) / h2
+    return exp_neg_clamped(quad)
 
 
 def correction_log_odds_targets(

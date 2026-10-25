@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { Queue, Worker } from 'bullmq';
+import { Queue, UnrecoverableError, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
@@ -61,7 +61,15 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           return;
         }
         const userId = parseString(requireRecord(job.data).userId).trim();
-        await this.runExtraction.execute(documentId);
+        try {
+          await this.runExtraction.execute(documentId);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          if (message.includes('Worker extraction failed: 422')) {
+            throw new UnrecoverableError(message);
+          }
+          throw error;
+        }
         await this.maybeEnqueueArenaSample(documentId, userId);
       },
       {

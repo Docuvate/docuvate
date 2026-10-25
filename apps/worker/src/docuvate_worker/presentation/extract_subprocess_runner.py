@@ -12,10 +12,15 @@ import os
 import subprocess
 import sys
 import tempfile
+import traceback
 from typing import Any
 
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
+from docuvate_worker.domain.extract_errors import (
+    ExtractPermanentError,
+    permanent_failure_from_subprocess,
+)
 from docuvate_worker.domain.models import (
     ExtractedDocumentImage,
     ExtractedField,
@@ -221,7 +226,21 @@ def run_extract_isolated(
             except json.JSONDecodeError:
                 failed = None
             if isinstance(failed, dict) and failed.get("ok") is False:
-                raise RuntimeError(str(failed.get("error") or "extract subprocess failed"))
+                tb = failed.get("traceback")
+                if isinstance(tb, list):
+                    logger.error(
+                        "extract subprocess traceback:\n%s",
+                        "".join(str(line) for line in tb),
+                    )
+                error_text = str(failed.get("error") or "extract subprocess failed")
+                error_type = str(failed.get("error_type") or "RuntimeError")
+                permanent = permanent_failure_from_subprocess(
+                    error_type=error_type,
+                    reason=error_text,
+                )
+                if permanent is not None or failed.get("permanent") is True:
+                    raise ExtractPermanentError(reason=error_text, error_type=error_type)
+                raise RuntimeError(error_text)
             tail = meaningful_stderr_tail(proc.stderr)
             if tail:
                 logger.error("extract subprocess stderr (filtered):\n%s", tail)
@@ -234,7 +253,15 @@ def run_extract_isolated(
             )
         envelope = json.loads(raw_out)
     if not envelope.get("ok"):
-        raise RuntimeError(str(envelope.get("error") or "extract subprocess failed"))
+        error_text = str(envelope.get("error") or "extract subprocess failed")
+        error_type = str(envelope.get("error_type") or "RuntimeError")
+        permanent = permanent_failure_from_subprocess(
+            error_type=error_type,
+            reason=error_text,
+        )
+        if permanent is not None or envelope.get("permanent") is True:
+            raise ExtractPermanentError(reason=error_text, error_type=error_type)
+        raise RuntimeError(error_text)
     try:
         return extraction_result_from_wire(envelope["result"])
     finally:
@@ -259,7 +286,19 @@ def main() -> None:
         )
         print(json.dumps({"ok": True, "result": extraction_result_to_wire(result)}))
     except Exception as exc:
-        print(json.dumps({"ok": False, "error": f"{type(exc).__name__}: {exc}"}))
+        tb_lines = traceback.format_exception(type(exc), exc, exc.__traceback__)
+        permanent = permanent_failure_from_subprocess(
+            error_type=type(exc).__name__,
+            reason=str(exc),
+        )
+        envelope: dict[str, object] = {
+            "ok": False,
+            "error": f"{type(exc).__name__}: {exc}",
+            "error_type": type(exc).__name__,
+            "traceback": tb_lines,
+            "permanent": permanent is not None,
+        }
+        print(json.dumps(envelope))
         sys.exit(1)
 
 
