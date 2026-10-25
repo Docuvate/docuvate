@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FeatureFlagsDto } from '@docuvate/contracts';
+import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
-import type { ConnectorPlugin, ConnectorRegistryPort } from '../domain/connector.ports.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import { CONNECTOR_REGISTRY, type ConnectorPlugin, type ConnectorRegistryPort } from '../domain/connector.ports.js';
 import type { ConnectorPluginId } from '../domain/connector.types.js';
 import { GetConnectorCatalogUseCase } from './connector.use-cases.js';
 
@@ -24,7 +25,7 @@ function makePlugin(id: ConnectorPluginId): ConnectorPlugin {
       strategy: 'custom',
       fields: [],
     }),
-    validateConfiguration: async () => ({ ok: true }),
+    validateConfiguration: () => Promise.resolve({ ok: true }),
     openRuntime: () => {
       throw new Error('not used in catalog test');
     },
@@ -57,15 +58,26 @@ describe('GetConnectorCatalogUseCase', () => {
     getPlugin: () => undefined,
   };
 
-  it('includes CE source connectors when sourceConnectors is enabled', async () => {
+  async function catalogWithSourceConnectors(enabled: boolean) {
     const resolveFeatureFlags = {
-      execute: vi.fn().mockResolvedValue(flags({ sourceConnectors: true })),
-    } as unknown as ResolveFeatureFlagsUseCase;
-    const useCase = new GetConnectorCatalogUseCase(registry, resolveFeatureFlags);
-    const result = await useCase.execute({
+      execute: vi.fn().mockResolvedValue(flags({ sourceConnectors: enabled })),
+    };
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        GetConnectorCatalogUseCase,
+        { provide: CONNECTOR_REGISTRY, useValue: registry },
+        { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
+      ],
+    }).compile();
+    const useCase = moduleRef.get(GetConnectorCatalogUseCase);
+    return useCase.execute({
       viewerIsServerAdmin: false,
       tenantId: 'tenant-1',
     });
+  }
+
+  it('includes CE source connectors when sourceConnectors is enabled', async () => {
+    const result = await catalogWithSourceConnectors(true);
     const ids = result.plugins.map((plugin) => plugin.id);
     for (const id of CE_SOURCE_CONNECTOR_IDS) {
       expect(ids).toContain(id);
@@ -74,14 +86,7 @@ describe('GetConnectorCatalogUseCase', () => {
   });
 
   it('omits source connectors when sourceConnectors is disabled', async () => {
-    const resolveFeatureFlags = {
-      execute: vi.fn().mockResolvedValue(flags({ sourceConnectors: false })),
-    } as unknown as ResolveFeatureFlagsUseCase;
-    const useCase = new GetConnectorCatalogUseCase(registry, resolveFeatureFlags);
-    const result = await useCase.execute({
-      viewerIsServerAdmin: false,
-      tenantId: 'tenant-1',
-    });
+    const result = await catalogWithSourceConnectors(false);
     const ids = result.plugins.map((plugin) => plugin.id);
     for (const id of CE_SOURCE_CONNECTOR_IDS) {
       expect(ids).not.toContain(id);
