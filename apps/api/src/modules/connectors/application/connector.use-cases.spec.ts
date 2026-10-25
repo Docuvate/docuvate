@@ -64,7 +64,14 @@ describe('GetConnectorCatalogUseCase', () => {
     };
     const moduleRef = await Test.createTestingModule({
       providers: [
-        GetConnectorCatalogUseCase,
+        {
+          provide: GetConnectorCatalogUseCase,
+          useFactory: (
+            reg: ConnectorRegistryPort,
+            resolve: ResolveFeatureFlagsUseCase
+          ) => new GetConnectorCatalogUseCase(reg, resolve),
+          inject: [CONNECTOR_REGISTRY, ResolveFeatureFlagsUseCase],
+        },
         { provide: CONNECTOR_REGISTRY, useValue: registry },
         { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
       ],
