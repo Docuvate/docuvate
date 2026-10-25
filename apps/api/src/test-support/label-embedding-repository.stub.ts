@@ -13,6 +13,7 @@ export function createLabelEmbeddingRepositoryStub(
     countExtractedDocumentsForMap: vi.fn(),
     listDocumentIdsMissingEmbeddings: vi.fn(),
     listDocumentEmbeddingsForUser: vi.fn(),
+    listUserConfirmedDocumentEmbeddingsForUser: vi.fn(),
     listLabeledDocumentEmbeddings: vi.fn(),
     getTagCentroids: vi.fn(),
     listDismissedRecommendationKeys: vi.fn(),

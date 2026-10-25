@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
+import {
+  LABEL_HYBRID_K_FOLD_COUNT,
+  LABEL_HYBRID_LOO_MAX_EXAMPLES,
+} from './label-hybrid-training-config.js';
 
 const MIN_CLASS_EXAMPLES = 2;
 const MIN_TRAINED_CLASSES = 2;
@@ -314,6 +318,132 @@ export function thresholdFromLooScores(looScores: readonly LooCalibrationScore[]
   return Math.min(0.99, Math.max(0.55, threshold));
 }
 
+function buildKFoldPartitions(exampleCount: number, foldCount: number): number[][] {
+  const folds: number[][] = Array.from({ length: foldCount }, () => []);
+  for (let index = 0; index < exampleCount; index += 1) {
+    folds[index % foldCount].push(index);
+  }
+  return folds.filter((fold) => fold.length > 0);
+}
+
+function scoreCalibrationFold(
+  tagIds: readonly string[],
+  prepared: readonly PreparedTrainingExamplePayload[],
+  trainIndices: readonly number[],
+  testIndices: readonly number[]
+): LooCalibrationScore[] {
+  const train = trainIndices.map((index) => prepared[index]);
+  const activeTags = activeTagsForTrain(tagIds, train);
+  if (activeTags.length < MIN_TRAINED_CLASSES) {
+    return [];
+  }
+  const tagIdSet = new Set(tagIds);
+  const activeTagIndex = new Map<string, number>();
+  for (let i = 0; i < activeTags.length; i += 1) {
+    activeTagIndex.set(activeTags[i], i);
+  }
+  const rows: { features: Float64Array; classIndex: number }[] = [];
+  for (const row of train) {
+    if (!tagIdSet.has(row.tagId)) {
+      continue;
+    }
+    const classIndex = activeTagIndex.get(row.tagId);
+    if (classIndex === undefined) {
+      continue;
+    }
+    rows.push({ features: Float64Array.from(row.features), classIndex });
+  }
+  if (rows.length === 0) {
+    return [];
+  }
+  const dim = rows[0].features.length;
+  const weightRows = trainMultinomialLogistic(activeTags.length, rows, dim);
+  const trainExamples: TrainingExampleSlice[] = train.map((row) => ({
+    tagId: row.tagId,
+    embedding: row.embedding,
+    text: row.text,
+  }));
+  const classGates = buildClassGates(trainExamples, activeTags);
+  const out: LooCalibrationScore[] = [];
+  for (const testIndex of testIndices) {
+    const held = prepared[testIndex];
+    const heldFeatures = Float64Array.from(held.features);
+    const probs = predictProbsFromFeatures(weightRows, heldFeatures);
+    let bestIdx = 0;
+    let bestProb = probs[0] ?? 0;
+    for (let i = 1; i < probs.length; i += 1) {
+      const p = probs[i] ?? 0;
+      if (p > bestProb) {
+        bestProb = p;
+        bestIdx = i;
+      }
+    }
+    const predicted = activeTags[bestIdx];
+    let gate: ClassGate | undefined;
+    for (const g of classGates) {
+      if (g.tagId === predicted) {
+        gate = g;
+        break;
+      }
+    }
+    const inDist =
+      gate?.centroid.length === held.embedding.length
+        ? cosineSimilarity(held.embedding, gate.centroid) >= gate.minCosineToCentroid
+        : true;
+    if (!inDist) {
+      continue;
+    }
+    out.push({
+      confidence: bestProb,
+      correct: predicted === held.tagId,
+    });
+  }
+  return out;
+}
+
+export function learnConfidenceThresholdLoo(
+  tagIds: readonly string[],
+  prepared: readonly PreparedTrainingExamplePayload[]
+): number {
+  const holdIndices = prepared.map((_, index) => index);
+  if (holdIndices.length === 0) {
+    return 0.92;
+  }
+  const looScores = evaluateLooFoldsBatch({
+    tagIds: [...tagIds],
+    prepared: [...prepared],
+    holdIndices,
+  });
+  return thresholdFromLooScores(looScores);
+}
+
+/**
+ * K-fold cross-conformal calibration (marginal coverage at target precision on calibration fold).
+ * Used above {@link LABEL_HYBRID_LOO_MAX_EXAMPLES} for bounded CPU; exact LOO below that size.
+ */
+export function learnConfidenceThresholdKFold(
+  tagIds: readonly string[],
+  prepared: readonly PreparedTrainingExamplePayload[],
+  foldCount: number
+): number {
+  if (prepared.length === 0) {
+    return 0.92;
+  }
+  const folds = buildKFoldPartitions(prepared.length, foldCount);
+  const scores: LooCalibrationScore[] = [];
+  for (const testIndices of folds) {
+    const testSet = new Set(testIndices);
+    const trainIndices: number[] = [];
+    for (let index = 0; index < prepared.length; index += 1) {
+      if (!testSet.has(index)) {
+        trainIndices.push(index);
+      }
+    }
+    scores.push(...scoreCalibrationFold(tagIds, prepared, trainIndices, testIndices));
+  }
+  return thresholdFromLooScores(scores);
+}
+
 export function learnConfidenceThresholdFromPrepared(
   tagIds: readonly string[],
   prepared: readonly {
@@ -324,15 +454,11 @@ export function learnConfidenceThresholdFromPrepared(
   }[]
 ): number {
   const payload = toPreparedPayload(prepared);
-  const holdIndices = payload.map((_, index) => index);
-  if (holdIndices.length === 0) {
+  if (payload.length === 0) {
     return 0.92;
   }
-
-  const looScores = evaluateLooFoldsBatch({
-    tagIds: [...tagIds],
-    prepared: payload,
-    holdIndices,
-  });
-  return thresholdFromLooScores(looScores);
+  if (payload.length <= LABEL_HYBRID_LOO_MAX_EXAMPLES) {
+    return learnConfidenceThresholdLoo(tagIds, payload);
+  }
+  return learnConfidenceThresholdKFold(tagIds, payload, LABEL_HYBRID_K_FOLD_COUNT);
 }

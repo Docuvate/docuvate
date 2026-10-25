@@ -1,14 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { createHash } from 'node:crypto';
-
 import type { LabelHybridDocumentRow } from './label-hybrid-training.js';
 
-function digestText(text: string): string {
-  return createHash('sha256').update(text).digest('hex').slice(0, 16);
-}
-
-/** Fingerprint of labeled training rows; unchanged when only unlabeled documents gain embeddings. */
+/**
+ * Fingerprint of user-confirmed labeled rows (document + tag set).
+ * Omits document text so extraction refinements do not invalidate the model.
+ */
 export function computeLabelHybridTrainingRevision(
   rows: readonly LabelHybridDocumentRow[]
 ): string {
@@ -18,7 +15,7 @@ export function computeLabelHybridTrainingRevision(
       continue;
     }
     const tags = [...row.nonInboxTagIds].sort((a, b) => a.localeCompare(b)).join(',');
-    parts.push(`${row.documentId}\t${tags}\t${digestText(row.text)}`);
+    parts.push(`${row.documentId}\t${tags}`);
   }
   parts.sort((a, b) => a.localeCompare(b));
   return `${String(parts.length)}\n${parts.join('\n')}`;

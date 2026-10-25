@@ -137,8 +137,8 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
     try {
       await client.query('BEGIN');
       await client.query(
-        `INSERT INTO document_tags (document_id, tag_id)
-         SELECT document_id, $1 FROM document_tags WHERE tag_id = $2
+        `INSERT INTO document_tags (document_id, tag_id, user_confirmed)
+         SELECT document_id, $1, user_confirmed FROM document_tags WHERE tag_id = $2
          ON CONFLICT DO NOTHING`,
         [keepTagId, removeTagId]
       );
@@ -245,10 +245,18 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
     return result.rows.map((raw) => this.mapTag(requireRecord(raw)));
   }
 
-  async assignTagToDocument(documentId: string, tagId: string): Promise<void> {
+  async assignTagToDocument(
+    documentId: string,
+    tagId: string,
+    options?: { userConfirmed?: boolean }
+  ): Promise<void> {
+    const userConfirmed = options?.userConfirmed === true;
     await this.pool.query(
-      `INSERT INTO document_tags (document_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-      [documentId, tagId]
+      `INSERT INTO document_tags (document_id, tag_id, user_confirmed)
+       VALUES ($1, $2, $3)
+       ON CONFLICT (document_id, tag_id)
+       DO UPDATE SET user_confirmed = (document_tags.user_confirmed OR EXCLUDED.user_confirmed)`,
+      [documentId, tagId, userConfirmed]
     );
   }
 

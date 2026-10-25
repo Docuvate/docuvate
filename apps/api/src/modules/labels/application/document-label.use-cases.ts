@@ -38,7 +38,7 @@ export class AssignDocumentTagUseCase {
     if (!tag) {
       throw new NotFoundError('Tag');
     }
-    await this.taxonomy.assignTagToDocument(documentId, tagId);
+    await this.taxonomy.assignTagToDocument(documentId, tagId, { userConfirmed: true });
     await this.taxonomy.clearSuggestion(documentId, tagId);
     if (!tag.isInbox) {
       await this.taxonomy.clearInboxTagForDocument(documentId, userId);
