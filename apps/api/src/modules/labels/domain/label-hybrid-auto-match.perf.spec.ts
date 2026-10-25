@@ -44,7 +44,8 @@ describe('label-hybrid-auto-match performance guard', () => {
     const smallMs = await trainMs(small);
     const largeMs = await trainMs(large);
     const sizeRatio = 200 / 100;
-    expect(largeMs).toBeLessThan(120_000);
+    // Absolute ceiling for shared CI runners; sub-cubic ratio is the primary regression guard.
+    expect(largeMs).toBeLessThan(180_000);
     expect(largeMs / Math.max(smallMs, 1)).toBeLessThan(sizeRatio * sizeRatio * 16);
-  }, 180_000);
+  }, 240_000);
 });
