@@ -25,11 +25,15 @@ from docuvate_worker.infrastructure.ml.docai import features as layout_features
 from docuvate_worker.infrastructure.ml.docai.features import LayoutDocument, LayoutUnit
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
 from docuvate_worker.infrastructure.onnx_e5_encoder import (
+    embed_texts_onnx,
     resolve_docai_onnx_model_path,
     resolve_e5_onnx_dir,
     resolve_e5_tokenizer_path,
 )
-from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
+from docuvate_worker.infrastructure.onnx_runtime_env import (
+    apply_onnx_session_options,
+    configure_onnx_runtime_env,
+)
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 FloatArray = NDArray[np.float32]
@@ -76,8 +80,10 @@ class DocaiRuntime:
             msg = f"DocAI model directory missing: {model_dir}"
             raise FileNotFoundError(msg)
         session_options = ort.SessionOptions()
+        apply_onnx_session_options(session_options)
         session_options.intra_op_num_threads = threads
         session_options.inter_op_num_threads = 1
+        self._share_encoder = os.environ.get("DOCUVATE_DOCAI_SHARE_ENCODER", "1") == "1"
 
         def _session(path: Path) -> ort.InferenceSession:
             return ort.InferenceSession(
@@ -103,12 +109,17 @@ class DocaiRuntime:
         )
         self._field = _session(model_dir / "field_head.onnx")
         self._rank = _session(model_dir / "link_ranker.onnx")
-        e5_dir = resolve_e5_onnx_dir(quantized_for_docai=True)
-        self._e5 = _session(resolve_docai_onnx_model_path(e5_dir))
-        self._e5_inputs = [item.name for item in self._e5.get_inputs()]
-        self._tokenizer = Tokenizer.from_file(str(resolve_e5_tokenizer_path(e5_dir)))
-        self._tokenizer.enable_truncation(int(self._cfg["e5_maxlen"]))
-        self._tokenizer.enable_padding()
+        if self._share_encoder:
+            self._e5 = None
+            self._e5_inputs: list[str] = []
+            self._tokenizer = None
+        else:
+            e5_dir = resolve_e5_onnx_dir(quantized_for_docai=True)
+            self._e5 = _session(resolve_docai_onnx_model_path(e5_dir))
+            self._e5_inputs = [item.name for item in self._e5.get_inputs()]
+            self._tokenizer = Tokenizer.from_file(str(resolve_e5_tokenizer_path(e5_dir)))
+            self._tokenizer.enable_truncation(int(self._cfg["e5_maxlen"]))
+            self._tokenizer.enable_padding()
         self._classes: list[str] = list(self._cfg["classes"])
         calibration = self._cfg["calibration"]
         self._cal_x = np.array(calibration["x"], dtype=np.float64)
@@ -179,18 +190,27 @@ class DocaiRuntime:
             batch_size = self._embed_batch_size()
         prefix = str(self._cfg.get("e5_prefix", "query: "))
         chunks: list[FloatArray] = []
-        for start in range(0, len(texts), batch_size):
-            batch = [prefix + t for t in texts[start : start + batch_size]]
-            encoded = self._tokenizer.encode_batch(batch)
-            ids = np.array([entry.ids for entry in encoded], dtype=np.int64)
-            mask = np.array([entry.attention_mask for entry in encoded], dtype=np.int64)
-            feed: dict[str, NDArray[np.int64]] = {"input_ids": ids, "attention_mask": mask}
-            if "token_type_ids" in self._e5_inputs:
-                feed["token_type_ids"] = np.zeros_like(ids)
-            hidden = np.asarray(self._e5.run(None, feed)[0], dtype=np.float32)
-            pooled = (hidden * mask[..., None]).sum(axis=1) / mask.sum(axis=1, keepdims=True)
-            normalized = pooled / np.linalg.norm(pooled, axis=1, keepdims=True)
-            chunks.append(normalized.astype(np.float32))
+        if self._share_encoder:
+            for start in range(0, len(texts), batch_size):
+                batch = [prefix + str(text) for text in texts[start : start + batch_size]]
+                rows = embed_texts_onnx(batch)
+                chunks.append(np.asarray(rows, dtype=np.float32))
+        else:
+            if self._tokenizer is None or self._e5 is None:
+                msg = "DocAI E5 session is not initialized"
+                raise RuntimeError(msg)
+            for start in range(0, len(texts), batch_size):
+                batch = [prefix + str(t) for t in texts[start : start + batch_size]]
+                encoded = self._tokenizer.encode_batch(batch)
+                ids = np.array([entry.ids for entry in encoded], dtype=np.int64)
+                mask = np.array([entry.attention_mask for entry in encoded], dtype=np.int64)
+                feed: dict[str, NDArray[np.int64]] = {"input_ids": ids, "attention_mask": mask}
+                if "token_type_ids" in self._e5_inputs:
+                    feed["token_type_ids"] = np.zeros_like(ids)
+                hidden = np.asarray(self._e5.run(None, feed)[0], dtype=np.float32)
+                pooled = (hidden * mask[..., None]).sum(axis=1) / mask.sum(axis=1, keepdims=True)
+                normalized = pooled / np.linalg.norm(pooled, axis=1, keepdims=True)
+                chunks.append(normalized.astype(np.float32))
         if not chunks:
             return np.zeros((0, 384), dtype=np.float32)
         return np.vstack(chunks)

@@ -11,6 +11,7 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
 from docuvate_worker.domain.representation.encode import encode_units
+from docuvate_worker.domain.representation.unit_limits import cap_representation_units
 from docuvate_worker.domain.representation.units import (
     append_sender_line_units,
     build_representation_units,
@@ -37,7 +38,9 @@ def run_representation_stage(state: PipelineMutableState) -> StageEnvelope[Repre
                 taco=state.taco_data,
                 layout_pdf=state.cached_layout_pdf,
             )
-            units = append_sender_line_units(units, state.text)
+            units = cap_representation_units(units)
+            if len(units) < 128:
+                units = append_sender_line_units(units, state.text, max_lines=32)
             representation = encode_units(units)
             from docuvate_worker.infrastructure.onnx_e5_encoder import (  # noqa: PLC0415
                 release_onnx_encoder,

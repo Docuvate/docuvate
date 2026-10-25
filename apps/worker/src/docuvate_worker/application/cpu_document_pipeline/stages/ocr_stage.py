@@ -146,6 +146,7 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
             state.text = text.strip()
             state.blocks = list(blocks or [])
             _release_ocr_backends()
+            reclaim_python_heap()
             return (
                 OcrStageData(
                     text=state.text,

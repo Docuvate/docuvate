@@ -2,6 +2,11 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
+TYPST_BIN_DIR="$(bash ../../scripts/ci/install-typst.sh | awk -F= '/^typst_bin_dir=/{print $2}')"
+export PATH="${TYPST_BIN_DIR}:${PATH}"
+if command -v apt-get >/dev/null 2>&1; then
+  sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils fonts-dejavu-core fonts-noto-cjk >/dev/null || true
+fi
 bash ../../scripts/ci/check-third-party-models-manifest.sh
 pip install 'uv==0.12.23' >/dev/null
 # Must match [tool.pyright].venv in pyproject.toml (pyright resolves types from this venv).

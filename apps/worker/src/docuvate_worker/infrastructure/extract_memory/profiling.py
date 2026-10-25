@@ -15,6 +15,10 @@ from enum import StrEnum
 
 import psutil
 
+from docuvate_worker.infrastructure.extract_memory.tracemalloc_report import (
+    capture_tracemalloc_top,
+)
+
 
 class ExtractMemoryStage(StrEnum):
     PDF_OPEN = "pdf_open"
@@ -35,6 +39,7 @@ class StagePeak:
     stage: ExtractMemoryStage
     peak_rss_mib: float
     peak_traced_mib: float
+    top_allocations: list[dict[str, float | int | str]] = field(default_factory=list)
 
 
 @dataclass
@@ -49,6 +54,9 @@ class MemoryProfileReport:
 
     def to_dict(self) -> dict[str, float]:
         return {row.stage.value: row.peak_rss_mib for row in self.stages}
+
+    def stage_rows(self) -> list[StagePeak]:
+        return list(self.stages)
 
 
 class MemoryProfiler:
@@ -99,11 +107,20 @@ class MemoryProfiler:
             if tracemalloc.is_tracing():
                 traced = tracemalloc.get_traced_memory()[1]
                 peak_traced = max(peak_traced, traced)
+            top = capture_tracemalloc_top(stage_id.value)
             self._report.stages.append(
                 StagePeak(
                     stage=stage_id,
                     peak_rss_mib=peak_rss / (1024 * 1024),
                     peak_traced_mib=peak_traced / (1024 * 1024),
+                    top_allocations=[
+                        {
+                            "size_kib": site.size_kib,
+                            "count": site.count,
+                            "traceback": site.traceback,
+                        }
+                        for site in top
+                    ],
                 )
             )
 

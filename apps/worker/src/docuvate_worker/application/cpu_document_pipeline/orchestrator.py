@@ -70,6 +70,11 @@ def run_integrated_cpu_document_pipeline(
     state.luna_data = luna.data
     taco = run_taco_stage(state)
     state.taco_data = taco.data
+    from docuvate_worker.infrastructure.pipeline_memory import (  # noqa: PLC0415
+        release_pdf_bytes_after_taco,
+    )
+
+    release_pdf_bytes_after_taco(state)
     if profiler is not None:
         with profiler.stage(ExtractMemoryStage.EMBEDDING):
             representation = run_representation_stage(state)
