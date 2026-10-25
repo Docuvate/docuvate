@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
+import { learnConfidenceThresholdFromPrepared } from './label-hybrid-calibration.js';
 import {
   buildHybridFeatureModel,
   hybridFeatureVector,
@@ -9,7 +10,6 @@ import {
 
 const MIN_CLASS_EXAMPLES = 2;
 const MIN_TRAINED_CLASSES = 2;
-const LOO_TARGET_PRECISION = 0.95;
 const TRAIN_EPOCHS = 48;
 const TRAIN_LR = 0.08;
 const L2 = 1e-4;
@@ -45,69 +45,119 @@ export interface LabelHybridPrediction {
   ranked: { tagId: string; confidence: number }[];
 }
 
+interface PreparedTrainingExample {
+  tagId: string;
+  embedding: number[];
+  text: string;
+  features: Float64Array;
+}
+
 function featureVector(
   embedding: number[],
   text: string,
   vocabulary: readonly string[],
   idf: readonly number[]
-): number[] {
-  return hybridFeatureVector(embedding, text, { vocabulary: [...vocabulary], idf: [...idf] });
+): Float64Array {
+  const dense = hybridFeatureVector(embedding, text, { vocabulary: [...vocabulary], idf: [...idf] });
+  return Float64Array.from(dense);
 }
 
-function softmax(logits: number[]): number[] {
-  const max = Math.max(...logits);
-  const exps = logits.map((z) => Math.exp(z - max));
-  const sum = exps.reduce((a, b) => a + b, 0) || 1;
-  return exps.map((e) => e / sum);
+function softmaxInto(logits: Float64Array, out: Float64Array): void {
+  let max = logits[0];
+  for (let i = 1; i < logits.length; i++) {
+    if (logits[i] > max) {
+      max = logits[i];
+    }
+  }
+  let sum = 0;
+  for (let i = 0; i < logits.length; i++) {
+    const e = Math.exp(logits[i] - max);
+    out[i] = e;
+    sum += e;
+  }
+  const denom = sum > 0 ? sum : 1;
+  for (let i = 0; i < out.length; i++) {
+    out[i] /= denom;
+  }
 }
 
 function trainMultinomialLogistic(
-  tagIds: readonly string[],
-  rows: readonly { features: number[]; classIndex: number }[]
+  classCount: number,
+  rows: readonly { features: Float64Array; classIndex: number }[],
+  dim: number
 ): number[][] {
-  const dim = rows[0]?.features.length ?? 0;
-  const weights: number[][] = tagIds.map(() => Array.from({ length: dim }, () => 0));
+  const weights: Float64Array[] = Array.from(
+    { length: classCount },
+    () => new Float64Array(dim)
+  );
+  const logits = new Float64Array(classCount);
+  const probs = new Float64Array(classCount);
   for (let epoch = 0; epoch < TRAIN_EPOCHS; epoch++) {
     for (const row of rows) {
-      const logits = weights.map((w) =>
-        w.reduce((acc, coeff, idx) => acc + coeff * (row.features[idx] ?? 0), 0)
-      );
-      const probs = softmax(logits);
-      for (let c = 0; c < weights.length; c++) {
+      const features = row.features;
+      for (let c = 0; c < classCount; c++) {
+        const w = weights[c];
+        let dot = 0;
+        for (let j = 0; j < dim; j++) {
+          dot += w[j] * features[j];
+        }
+        logits[c] = dot;
+      }
+      softmaxInto(logits, probs);
+      for (let c = 0; c < classCount; c++) {
         const target = c === row.classIndex ? 1 : 0;
         const err = probs[c] - target;
+        const w = weights[c];
         for (let j = 0; j < dim; j++) {
-          weights[c][j] -=
-            TRAIN_LR * (err * (row.features[j] ?? 0) + L2 * weights[c][j]);
+          w[j] -= TRAIN_LR * (err * features[j] + L2 * w[j]);
         }
       }
     }
   }
-  return weights;
+  return weights.map((w) => [...w]);
+}
+
+function predictProbsFromFeatures(
+  weightRows: readonly number[][],
+  features: Float64Array
+): number[] {
+  const logits = new Float64Array(weightRows.length);
+  for (let c = 0; c < weightRows.length; c++) {
+    const w = weightRows[c];
+    let dot = 0;
+    for (let j = 0; j < features.length; j++) {
+      dot += w[j] * features[j];
+    }
+    logits[c] = dot;
+  }
+  const probs = new Float64Array(weightRows.length);
+  softmaxInto(logits, probs);
+  return [...probs];
 }
 
 function predictProbs(model: LabelHybridModel, embedding: number[], text: string): number[] {
   const x = featureVector(embedding, text, model.vocabulary, model.idf);
-  const logits = model.weightRows.map((w) =>
-    w.reduce((acc, coeff, idx) => acc + coeff * (x[idx] ?? 0), 0)
-  );
-  return softmax(logits);
+  return predictProbsFromFeatures(model.weightRows, x);
 }
 
 function buildClassGates(
   examples: readonly LabelHybridTrainingExample[],
   tagIds: readonly string[]
 ): LabelHybridClassGate[] {
+  const tagIdSet = new Set(tagIds);
   const sums = new Map<string, number[]>();
   const counts = new Map<string, number>();
+  const cosinesByTag = new Map<string, number[]>();
+
   for (const row of examples) {
-    if (!tagIds.includes(row.tagId) || row.embedding.length === 0) {
+    if (!tagIdSet.has(row.tagId) || row.embedding.length === 0) {
       continue;
     }
     const prev = sums.get(row.tagId);
     if (!prev) {
       sums.set(row.tagId, [...row.embedding]);
       counts.set(row.tagId, 1);
+      cosinesByTag.set(row.tagId, []);
       continue;
     }
     for (let i = 0; i < prev.length; i++) {
@@ -115,6 +165,7 @@ function buildClassGates(
     }
     counts.set(row.tagId, (counts.get(row.tagId) ?? 0) + 1);
   }
+
   const gates: LabelHybridClassGate[] = [];
   for (const tagId of tagIds) {
     const sum = sums.get(tagId);
@@ -123,10 +174,14 @@ function buildClassGates(
       continue;
     }
     const centroid = l2Normalize(sum.map((v) => v / count));
-    const cosines = examples
-      .filter((row) => row.tagId === tagId)
-      .map((row) => cosineSimilarity(row.embedding, centroid))
-      .sort((a, b) => a - b);
+    const cosines = cosinesByTag.get(tagId) ?? [];
+    for (const row of examples) {
+      if (row.tagId !== tagId) {
+        continue;
+      }
+      cosines.push(cosineSimilarity(row.embedding, centroid));
+    }
+    cosines.sort((a, b) => a - b);
     const idx = Math.max(
       0,
       Math.min(cosines.length - 1, Math.floor(IN_DISTRIBUTION_COSINE_QUANTILE * cosines.length))
@@ -148,80 +203,23 @@ function examplesPerClass(examples: readonly LabelHybridTrainingExample[]): Map<
   return counts;
 }
 
+function prepareTrainingExamples(
+  examples: readonly LabelHybridTrainingExample[],
+  vocabulary: readonly string[],
+  idf: readonly number[]
+): PreparedTrainingExample[] {
+  return examples.map((row) => ({
+    tagId: row.tagId,
+    embedding: row.embedding,
+    text: row.text,
+    features: featureVector(row.embedding, row.text, vocabulary, idf),
+  }));
+}
+
 export function canTrainLabelHybridModel(examples: readonly LabelHybridTrainingExample[]): boolean {
   const counts = examplesPerClass(examples);
   const eligible = [...counts.values()].filter((c) => c >= MIN_CLASS_EXAMPLES).length;
   return eligible >= MIN_TRAINED_CLASSES;
-}
-
-function learnConfidenceThreshold(
-  tagIds: readonly string[],
-  examples: readonly LabelHybridTrainingExample[],
-  vocabulary: readonly string[],
-  idf: readonly number[]
-): number {
-  const looScores: { confidence: number; correct: boolean }[] = [];
-  for (let hold = 0; hold < examples.length; hold++) {
-    const held = examples[hold];
-    const train = examples.filter((_, idx) => idx !== hold);
-    const counts = examplesPerClass(train);
-    const activeTags = tagIds.filter((tagId) => (counts.get(tagId) ?? 0) >= MIN_CLASS_EXAMPLES);
-    if (activeTags.length < MIN_TRAINED_CLASSES) {
-      continue;
-    }
-    const rows = train
-      .filter((row) => activeTags.includes(row.tagId))
-      .map((row) => ({
-        features: featureVector(row.embedding, row.text, vocabulary, idf),
-        classIndex: activeTags.indexOf(row.tagId),
-      }));
-    if (rows.length === 0) {
-      continue;
-    }
-    const weights = trainMultinomialLogistic(activeTags, rows);
-    const partial: LabelHybridModel = {
-      tagIds: activeTags,
-      vocabulary: [...vocabulary],
-      idf: [...idf],
-      weightRows: weights,
-      embedDim: held.embedding.length,
-      confidenceThreshold: 0,
-      classGates: buildClassGates(train, activeTags),
-    };
-    const probs = predictProbs(partial, held.embedding, held.text);
-    const bestIdx = probs.indexOf(Math.max(...probs));
-    const predicted = activeTags[bestIdx];
-    const gate = partial.classGates.find((row) => row.tagId === predicted);
-    const inDist =
-      gate?.centroid.length === held.embedding.length
-        ? cosineSimilarity(held.embedding, gate.centroid) >= gate.minCosineToCentroid
-        : true;
-    if (!inDist) {
-      continue;
-    }
-    looScores.push({
-      confidence: probs[bestIdx] ?? 0,
-      correct: predicted === held.tagId,
-    });
-  }
-  if (looScores.length === 0) {
-    return 0.92;
-  }
-  const sorted = [...looScores].sort((a, b) => b.confidence - a.confidence);
-  let correct = 0;
-  let total = 0;
-  let threshold = 0.99;
-  for (const row of sorted) {
-    total += 1;
-    if (row.correct) {
-      correct += 1;
-    }
-    const precision = correct / total;
-    if (precision >= LOO_TARGET_PRECISION) {
-      threshold = row.confidence;
-    }
-  }
-  return Math.min(0.99, Math.max(0.55, threshold));
 }
 
 export function trainLabelHybridModel(
@@ -242,16 +240,28 @@ export function trainLabelHybridModel(
   const featureModel = buildHybridFeatureModel(corpus);
   const vocabulary = featureModel.vocabulary;
   const idf = featureModel.idf;
-  const rows = examples
-    .filter((row) => tagIds.includes(row.tagId))
-    .map((row) => ({
-      features: featureVector(row.embedding, row.text, vocabulary, idf),
-      classIndex: tagIds.indexOf(row.tagId),
-    }));
-  const weightRows = trainMultinomialLogistic(tagIds, rows);
+  const prepared = prepareTrainingExamples(examples, vocabulary, idf);
+  const tagIdSet = new Set(tagIds);
+  const tagIdToIndex = new Map<string, number>();
+  for (let i = 0; i < tagIds.length; i++) {
+    tagIdToIndex.set(tagIds[i], i);
+  }
+  const rows: { features: Float64Array; classIndex: number }[] = [];
+  for (const row of prepared) {
+    if (!tagIdSet.has(row.tagId)) {
+      continue;
+    }
+    const classIndex = tagIdToIndex.get(row.tagId);
+    if (classIndex === undefined) {
+      continue;
+    }
+    rows.push({ features: row.features, classIndex });
+  }
+  const dim = rows[0]?.features.length ?? 0;
+  const weightRows = trainMultinomialLogistic(tagIds.length, rows, dim);
   const embedDim = examples.find((row) => row.embedding.length > 0)?.embedding.length ?? 0;
   const classGates = buildClassGates(examples, tagIds);
-  const confidenceThreshold = learnConfidenceThreshold(tagIds, examples, vocabulary, idf);
+  const confidenceThreshold = learnConfidenceThresholdFromPrepared(tagIds, prepared);
   return {
     tagIds,
     vocabulary,

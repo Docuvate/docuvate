@@ -72,6 +72,7 @@ import { HeadlessPgEmbeddingDensityRepository } from './infrastructure/headless-
 import { HttpCeMlAdapter } from './infrastructure/http-ce-ml.adapter.js';
 import { HttpEmbeddingAdapter } from './infrastructure/http-embedding.adapter.js';
 import { HttpEmbeddingDensityAdapter } from './infrastructure/http-embedding-density.adapter.js';
+import { LabelHybridModelCacheService } from './infrastructure/label-hybrid-model-cache.service.js';
 import { PgEmbeddingDensityRepository } from './infrastructure/pg-embedding-density.repository.js';
 import { PgLabelCoOccurrenceRepository } from './infrastructure/pg-label-co-occurrence.repository.js';
 import { PgLabelEmbeddingRepository } from './infrastructure/pg-label-embedding.repository.js';
@@ -132,6 +133,7 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     ApplyEmbeddingDensitySuggestionsUseCase,
     RunEmbeddingDensityCalibrationUseCase,
     EmbeddingDensityCalibrationQueueService,
+    LabelHybridModelCacheService,
     RecordEmbeddingDensityCorrectionUseCase,
     ApplyLabelCorrectionUseCase,
     ApplySparkLabelPropagationUseCase,

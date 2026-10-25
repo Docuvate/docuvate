@@ -21,9 +21,9 @@ import { tagIdConflictsWithAssigned } from '../domain/filter-exclusive-tag-sugge
 import {
   classifyWithLabelHybrid,
   type LabelHybridDocumentRow,
-  trainUserLabelHybridModel,
 } from '../domain/label-hybrid-training.js';
 import { EmbeddingDensityCalibrationQueueService } from '../infrastructure/embedding-density-calibration-queue.service.js';
+import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';
 import { PurgeExclusiveTagSuggestionsService } from '../infrastructure/purge-exclusive-tag-suggestions.service.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './apply-embedding-density-suggestions.use-case.js';
@@ -45,7 +45,8 @@ export class ApplyEmbeddingSuggestionsUseCase {
     private readonly documentRepresentation: PgDocumentRepresentationRepository,
     private readonly ensureRepresentation: EnsureDocumentRepresentationUseCase,
     private readonly coOccurrence: PgLabelCoOccurrenceRepository,
-    private readonly purgeExclusive: PurgeExclusiveTagSuggestionsService
+    private readonly purgeExclusive: PurgeExclusiveTagSuggestionsService,
+    private readonly labelHybridCache: LabelHybridModelCacheService
   ) {}
 
   async execute(documentId: string, userId: string, content: string): Promise<void> {
@@ -124,7 +125,7 @@ export class ApplyEmbeddingSuggestionsUseCase {
           text: `${docMeta.title}\n${docMeta.filename}\n${trimmed}`.slice(0, 12000),
         });
       }
-      const hybridModel = trainUserLabelHybridModel(hybridRows);
+      const hybridModel = await this.labelHybridCache.resolveModel(userId, hybridRows);
       if (!hybridModel) {
         return;
       }
