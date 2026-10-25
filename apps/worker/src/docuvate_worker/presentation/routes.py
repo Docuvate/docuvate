@@ -47,6 +47,14 @@ from docuvate_worker.infrastructure.extractors.label_custom_fields import (
     extract_label_custom_fields,
 )
 from docuvate_worker.infrastructure.hardware_capabilities import detect_hardware_capabilities
+from docuvate_worker.infrastructure.ml.ce_ml.field_discovery import discover_conditional_fields
+from docuvate_worker.infrastructure.ml.ce_ml.kv_items import (
+    KeyValueItem,
+    extract_kv_items_from_blocks,
+)
+from docuvate_worker.infrastructure.ml.ce_ml.label_propagation import propagate_label_scores
+from docuvate_worker.infrastructure.ml.ce_ml.missing_label import missing_label_hint_score
+from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
@@ -55,6 +63,14 @@ from docuvate_worker.presentation.representation_response import document_repres
 from docuvate_worker.presentation.schemas import (
     BuildFactsFromTextRequest,
     BuildFactsFromTextResponse,
+    CeDiscoveredField,
+    CeFieldDiscoveryRequest,
+    CeFieldDiscoveryResponse,
+    CeLabelPropagationRequest,
+    CeLabelPropagationResponse,
+    CeLabelPropagationScore,
+    CeMissingLabelRequest,
+    CeMissingLabelResponse,
     CompareEngineResponse,
     CompareRequest,
     CompareResponse,
@@ -101,14 +117,6 @@ from docuvate_worker.presentation.schemas import (
     LayoutRenderTypstRequest,
     LayoutRenderTypstResponse,
     MlResolvedModelResponse,
-    CeFieldDiscoveryRequest,
-    CeFieldDiscoveryResponse,
-    CeDiscoveredField,
-    CeLabelPropagationRequest,
-    CeLabelPropagationResponse,
-    CeLabelPropagationScore,
-    CeMissingLabelRequest,
-    CeMissingLabelResponse,
     MlRetrainRunRequest,
     MlRetrainRunResponse,
     RagExtractiveAnswerRequest,
@@ -650,10 +658,6 @@ def ce_label_propagation(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> CeLabelPropagationResponse:
     _require_worker_secret(x_worker_secret)
-    from docuvate_worker.infrastructure.ml.ce_ml.label_propagation import (  # noqa: PLC0415
-        propagate_label_scores,
-    )
-
     scores = propagate_label_scores(
         body.passage_vectors,
         label_name=body.label_name,
@@ -677,15 +681,7 @@ def ce_field_discovery(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> CeFieldDiscoveryResponse:
     _require_worker_secret(x_worker_secret)
-    from docuvate_worker.domain.models import ExtractionBlock
-    from docuvate_worker.infrastructure.ml.ce_ml.field_discovery import (  # noqa: PLC0415
-        discover_conditional_fields,
-    )
-    from docuvate_worker.infrastructure.ml.ce_ml.kv_items import (  # noqa: PLC0415
-        extract_kv_items_from_blocks,
-    )
-
-    items_by_document: dict[str, list] = {}
+    items_by_document: dict[str, list[KeyValueItem]] = {}
     for document in body.documents:
         blocks = [
             ExtractionBlock(
@@ -725,11 +721,6 @@ def ce_missing_label(
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> CeMissingLabelResponse:
     _require_worker_secret(x_worker_secret)
-    from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (  # noqa: PLC0415
-        missing_label_hint_score,
-    )
-    from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord
-
     words = [
         NerWord(
             text=word.text,
@@ -737,7 +728,10 @@ def ce_missing_label(
         )
         for word in body.words
     ]
-    example_sets = [{token.strip().lower() for token in tokens if token.strip()} for tokens in body.example_token_sets]
+    example_sets = [
+        {token.strip().lower() for token in tokens if token.strip()}
+        for tokens in body.example_token_sets
+    ]
     hint = missing_label_hint_score(
         example_token_sets=example_sets,
         document_words=words,

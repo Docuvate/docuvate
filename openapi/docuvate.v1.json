@@ -12218,7 +12218,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TagCustomFieldListResponseDto"
+                  "$ref": "#/components/schemas/TagCustomFieldListResponseDtoClass"
                 }
               }
             }
@@ -12305,7 +12305,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TagCustomFieldListResponseDto"
+                  "$ref": "#/components/schemas/TagCustomFieldListResponseDtoClass"
                 }
               }
             }
@@ -15741,10 +15741,16 @@
           "displayName"
         ]
       },
-      "TagCustomFieldListResponseDto": {
+      "TagCustomFieldListResponseDtoClass": {
         "type": "object",
         "properties": {
           "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "suggestions": {
             "type": "array",
             "items": {
               "type": "object"

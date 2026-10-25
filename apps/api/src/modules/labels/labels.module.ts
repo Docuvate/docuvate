@@ -31,6 +31,8 @@ import { ApplyLabelCorrectionUseCase } from './application/apply-label-correctio
 import { ApplyLabelCustomFieldsUseCase } from './application/apply-label-custom-fields.use-case.js';
 import { ApplyLabelMatchingUseCase } from './application/apply-label-matching.use-case.js';
 import { ApplyCeLabelPropagationUseCase } from './application/apply-ce-label-propagation.use-case.js';
+import { EnrichLabelMapMissingHintsUseCase } from './application/enrich-label-map-missing-hints.use-case.js';
+import { SuggestTagCustomFieldsUseCase } from './application/suggest-tag-custom-fields.use-case.js';
 import { ApplySparkLabelPropagationUseCase } from './application/apply-spark-label-propagation.use-case.js';
 import { BackfillDocumentEmbeddingsUseCase } from './application/backfill-document-embeddings.use-case.js';
 import {
@@ -134,6 +136,8 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     ApplyLabelCorrectionUseCase,
     ApplySparkLabelPropagationUseCase,
     ApplyCeLabelPropagationUseCase,
+    EnrichLabelMapMissingHintsUseCase,
+    SuggestTagCustomFieldsUseCase,
     HttpCeMlAdapter,
     WithdrawLabelCorrectionUseCase,
     RefreshEmbeddingSuggestionsUseCase,

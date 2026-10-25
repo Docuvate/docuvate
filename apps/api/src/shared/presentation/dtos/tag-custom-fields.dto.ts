@@ -4,6 +4,8 @@ import type {
   CustomFieldType,
   ReplaceTagCustomFieldsRequest,
   TagCustomFieldDefinitionDto,
+  TagCustomFieldListResponseDto,
+  TagCustomFieldSuggestionDto,
 } from '@docuvate/contracts';
 import { Type } from 'class-transformer';
 import { IsArray, IsIn, IsInt, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
@@ -41,6 +43,14 @@ export class ReplaceTagCustomFieldsRequestDto implements ReplaceTagCustomFieldsR
   fields!: ReplaceTagCustomFieldItemDto[];
 }
 
-export class TagCustomFieldListResponseDto {
+export class TagCustomFieldSuggestionDtoClass implements TagCustomFieldSuggestionDto {
+  key!: string;
+  label!: string;
+  confidence!: number;
+  kind!: string;
+}
+
+export class TagCustomFieldListResponseDtoClass implements TagCustomFieldListResponseDto {
   items!: TagCustomFieldDefinitionDto[];
+  suggestions?: TagCustomFieldSuggestionDto[];
 }

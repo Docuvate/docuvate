@@ -129,4 +129,37 @@ export class HttpCeMlAdapter {
     }
     return fields.filter((field) => field.fieldKey.length > 0);
   }
+
+  async scoreMissingLabelHint(input: {
+    exampleTokenSets: string[][];
+    words: { text: string; box: [number, number, number, number] }[];
+    pageWidth: number;
+    pageHeight: number;
+  }): Promise<{ score: number; show: boolean }> {
+    const { url, secret } = workerBase();
+    const response = await fetch(workerApiUrl(url, '/ml/ce/missing-label'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Worker-Secret': secret,
+      },
+      body: JSON.stringify({
+        example_token_sets: input.exampleTokenSets,
+        words: input.words.map((word) => ({ text: word.text, box: word.box })),
+        page_width: input.pageWidth,
+        page_height: input.pageHeight,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`Worker CE missing-label hint failed: ${String(response.status)}`);
+    }
+    const raw: unknown = await response.json();
+    if (!isRecord(raw)) {
+      return { score: 0, show: false };
+    }
+    return {
+      score: parseNumber(raw.score, 0),
+      show: raw.show === true,
+    };
+  }
 }

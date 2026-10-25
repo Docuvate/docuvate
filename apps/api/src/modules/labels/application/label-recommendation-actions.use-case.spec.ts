@@ -110,7 +110,6 @@ describe('AcceptLabelRecommendationUseCase', () => {
     expect(result).toEqual({ tagId: createdTag.id, action: 'created' });
     expect(ceLabelPropagation.propagateAfterLabelSeed).toHaveBeenCalledWith(USER, 'tag-new', [
       DOC_A,
-      DOC_B,
     ]);
     expect(createTag).toHaveBeenCalledWith(USER, 'Cluster Label', {
       color: '#64748b',

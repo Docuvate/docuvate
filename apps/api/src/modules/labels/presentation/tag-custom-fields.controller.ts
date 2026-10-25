@@ -9,12 +9,13 @@ import {
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
   ReplaceTagCustomFieldsRequestDto,
-  TagCustomFieldListResponseDto,
+  TagCustomFieldListResponseDtoClass,
 } from '../../../shared/presentation/dtos/tag-custom-fields.dto.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { SuggestTagCustomFieldsUseCase } from '../application/suggest-tag-custom-fields.use-case.js';
 import {
   ListTagCustomFieldsUseCase,
   ReplaceTagCustomFieldsUseCase,
@@ -27,7 +28,8 @@ import { toTagCustomFieldDto } from './tag-custom-fields.mapper.js';
 export class TagCustomFieldsController {
   constructor(
     private readonly listFields: ListTagCustomFieldsUseCase,
-    private readonly replaceFields: ReplaceTagCustomFieldsUseCase
+    private readonly replaceFields: ReplaceTagCustomFieldsUseCase,
+    private readonly suggestFields: SuggestTagCustomFieldsUseCase
   ) {}
 
   @Get(':tagId/custom-fields')
@@ -35,9 +37,20 @@ export class TagCustomFieldsController {
   async getCustomFields(
     @Session() session: AuthSession,
     @Param('tagId') tagId: string
-  ): Promise<TagCustomFieldListResponseDto> {
-    const items = await this.listFields.execute(tagId, session.user.id);
-    return { items: items.map(toTagCustomFieldDto) };
+  ): Promise<TagCustomFieldListResponseDtoClass> {
+    const userId = session.user.id;
+    const [items, suggestions] = await Promise.all([
+      this.listFields.execute(tagId, userId),
+      this.suggestFields.execute(tagId, userId),
+    ]);
+    const existingKeys = new Set(items.map((field) => field.key.trim().toLowerCase()));
+    const filteredSuggestions = suggestions.filter(
+      (field) => !existingKeys.has(field.key.trim().toLowerCase())
+    );
+    return {
+      items: items.map(toTagCustomFieldDto),
+      suggestions: filteredSuggestions.length > 0 ? filteredSuggestions : undefined,
+    };
   }
 
   @Put(':tagId/custom-fields')
@@ -46,7 +59,7 @@ export class TagCustomFieldsController {
     @Session() session: AuthSession,
     @Param('tagId') tagId: string,
     @Body() body: ReplaceTagCustomFieldsRequestDto
-  ): Promise<TagCustomFieldListResponseDto> {
+  ): Promise<TagCustomFieldListResponseDtoClass> {
     const items = await this.replaceFields.execute(tagId, session.user.id, body);
     return { items: items.map(toTagCustomFieldDto) };
   }
