@@ -16,7 +16,15 @@ MODEL = "birefnet-general"
 
 
 def main() -> int:
-    jpgs = sorted(SOURCE_DIR.glob("*.jpg"))
+    only = sys.argv[1].strip() if len(sys.argv) > 1 else None
+    if only:
+        jpg_path = SOURCE_DIR / f"{only}.jpg"
+        if not jpg_path.is_file():
+            print(f"Missing source JPEG: {jpg_path}", file=sys.stderr)
+            return 1
+        jpgs = [jpg_path]
+    else:
+        jpgs = sorted(SOURCE_DIR.glob("*.jpg"))
     if not jpgs:
         print(f"No JPEG sources in {SOURCE_DIR}", file=sys.stderr)
         return 1

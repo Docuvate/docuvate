@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { mkdir, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -455,15 +455,55 @@ function renderManifest(entries) {
   return lines.join('\n');
 }
 
-async function main() {
-  await mkdir(outDir, { recursive: true });
+async function parseExistingManifestEntries() {
+  const text = await readFile(manifestPath, 'utf8');
   const entries = [];
-  for (const scene of SCENES) {
-    entries.push(await buildScene(scene));
+  const lineRe =
+    /^\s+(\w+): \{ id: '([^']+)', slug: '([^']+)', width: (\d+), height: (\d+) \},?\s*$/gm;
+  for (const match of text.matchAll(lineRe)) {
+    entries.push({
+      id: match[1],
+      slug: match[3],
+      width: Number(match[4]),
+      height: Number(match[5]),
+    });
   }
+  return entries;
+}
+
+async function main() {
+  const onlySlug = process.argv[2];
+  const scenesToBuild =
+    onlySlug != null && onlySlug.length > 0
+      ? SCENES.filter((scene) => scene.slug === onlySlug)
+      : SCENES;
+  if (scenesToBuild.length === 0) {
+    throw new Error(`Unknown error scene slug: ${String(onlySlug)}`);
+  }
+
+  await mkdir(outDir, { recursive: true });
+  const builtEntries = [];
+  for (const scene of scenesToBuild) {
+    builtEntries.push(await buildScene(scene));
+  }
+
+  let entries = builtEntries;
+  if (onlySlug != null && onlySlug.length > 0) {
+    const existing = await parseExistingManifestEntries();
+    const builtIds = new Set(builtEntries.map((entry) => entry.id));
+    entries = [
+      ...existing.filter((entry) => !builtIds.has(entry.id)),
+      ...builtEntries,
+    ].sort((left, right) => {
+      const leftIndex = SCENES.findIndex((scene) => scene.id === left.id);
+      const rightIndex = SCENES.findIndex((scene) => scene.id === right.id);
+      return leftIndex - rightIndex;
+    });
+  }
+
   await writeFile(manifestPath, renderManifest(entries), 'utf8');
 
-  for (const scene of SCENES) {
+  for (const scene of scenesToBuild) {
     const sceneDir = path.join(outDir, scene.slug);
     const files = await readdir(sceneDir);
     for (const file of files) {
