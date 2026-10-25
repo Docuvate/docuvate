@@ -7,6 +7,7 @@ import random
 from collections.abc import Iterable
 
 from PIL import Image, ImageDraw, ImageFont
+from pypdf import PdfReader, PdfWriter
 
 from tests.synthetic_layout_pdfs import _BORN_DIGITAL_BANNER
 
@@ -129,8 +130,6 @@ def scanned_image_only_multipage_pdf(page_count: int = 60) -> bytes:
         raise ValueError(msg)
     if page_count == 1:
         return scanned_image_only_pdf()
-    from pypdf import PdfReader, PdfWriter  # noqa: PLC0415
-
     writer = PdfWriter()
     for page_index in range(page_count):
         page_pdf = _build_scan_pdf(

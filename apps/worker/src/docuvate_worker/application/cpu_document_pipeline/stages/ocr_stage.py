@@ -19,13 +19,26 @@ from docuvate_worker.infrastructure.extractors.paddle_engine import (
 from docuvate_worker.infrastructure.extractors.paddle_engine import (
     ocr_pdf_bytes as paddle_ocr_pdf_bytes,
 )
+from docuvate_worker.infrastructure.extractors.paddle_engine import (
+    release_paddle_ocr,
+)
 from docuvate_worker.infrastructure.extractors.pdf_native import try_extract_pdf_native
+from docuvate_worker.infrastructure.extractors.rapidocr_engine import (
+    ocr_image_bytes as rapidocr_ocr_image_bytes,
+)
+from docuvate_worker.infrastructure.extractors.rapidocr_engine import (
+    ocr_pdf_bytes as rapidocr_ocr_pdf_bytes,
+)
+from docuvate_worker.infrastructure.extractors.rapidocr_engine import (
+    release_rapidocr,
+)
 from docuvate_worker.infrastructure.office.extract_born_digital import extract_office_born_digital
 from docuvate_worker.infrastructure.office.libreoffice import convert_bytes_to_pdf
 from docuvate_worker.infrastructure.office.mimes import (
     is_office_born_digital_mime,
     needs_libreoffice_preview,
 )
+from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 
 STAGE_ID = "ocr"
 
@@ -36,22 +49,20 @@ def _ocr_backend() -> str:
 
 def _ocr_pdf(content: bytes) -> tuple[str, list[ExtractionBlock]]:
     if _ocr_backend() == "rapidocr":
-        from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
-            ocr_pdf_bytes,
-        )
-
-        return ocr_pdf_bytes(content)
+        return rapidocr_ocr_pdf_bytes(content)
     return paddle_ocr_pdf_bytes(content)
 
 
 def _ocr_image(content: bytes) -> tuple[str, list[ExtractionBlock]]:
     if _ocr_backend() == "rapidocr":
-        from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
-            ocr_image_bytes,
-        )
-
-        return ocr_image_bytes(content)
+        return rapidocr_ocr_image_bytes(content)
     return paddle_ocr_image_bytes(content)
+
+
+def _release_ocr_backends() -> None:
+    release_paddle_ocr()
+    if _ocr_backend() == "rapidocr":
+        release_rapidocr()
 
 
 def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
@@ -71,25 +82,11 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
                     StageAvailability.OK,
                     None,
                 )
-            from docuvate_worker.infrastructure.onnx_e5_encoder import (  # noqa: PLC0415
-                release_onnx_encoder,
-            )
-
             release_onnx_encoder()
             text, blocks = _ocr_pdf(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
-            from docuvate_worker.infrastructure.extractors.paddle_engine import (  # noqa: PLC0415
-                release_paddle_ocr,
-            )
-
-            release_paddle_ocr()
-            if _ocr_backend() == "rapidocr":
-                from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
-                    release_rapidocr,
-                )
-
-                release_rapidocr()
+            _release_ocr_backends()
             return (
                 OcrStageData(
                     text=state.text,
@@ -100,25 +97,11 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
                 None,
             )
         if state.mime_type.startswith("image/"):
-            from docuvate_worker.infrastructure.onnx_e5_encoder import (  # noqa: PLC0415
-                release_onnx_encoder,
-            )
-
             release_onnx_encoder()
             text, blocks = _ocr_image(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
-            from docuvate_worker.infrastructure.extractors.paddle_engine import (  # noqa: PLC0415
-                release_paddle_ocr,
-            )
-
-            release_paddle_ocr()
-            if _ocr_backend() == "rapidocr":
-                from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
-                    release_rapidocr,
-                )
-
-                release_rapidocr()
+            _release_ocr_backends()
             return (
                 OcrStageData(
                     text=state.text,

@@ -9,6 +9,7 @@ import logging
 import os
 import platform
 import threading
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -24,24 +25,31 @@ from docuvate_worker.domain.representation.constants import (
     ENCODER_ONNX_FILE,
     ENCODER_ONNX_FILE_ARM_FALLBACK,
 )
+from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 logger = logging.getLogger(__name__)
 
 _MAX_TOKENS = 512
 _lock = threading.Lock()
-_session: ort.InferenceSession | None = None
-_tokenizer: Tokenizer | None = None
-_onnx_path: Path | None = None
+
+
+@dataclass
+class _OnnxEncoderState:
+    session: ort.InferenceSession | None = None
+    tokenizer: Tokenizer | None = None
+    onnx_path: Path | None = None
+
+
+_encoder_state = _OnnxEncoderState()
 
 
 def release_onnx_encoder() -> None:
-    global _session, _tokenizer, _onnx_path  # noqa: PLW0603
     with _lock:
-        session = _session
-        _session = None
-        _tokenizer = None
-        _onnx_path = None
+        session = _encoder_state.session
+        _encoder_state.session = None
+        _encoder_state.tokenizer = None
+        _encoder_state.onnx_path = None
         if session is not None:
             del session
     reclaim_python_heap()
@@ -75,17 +83,20 @@ def _intra_op_threads() -> int:
 
 
 def _load_artifacts() -> tuple[ort.InferenceSession, Tokenizer, Path]:
-    from docuvate_worker.infrastructure.onnx_runtime_env import (  # noqa: PLC0415
-        configure_onnx_runtime_env,
-    )
-
     configure_onnx_runtime_env()
-    global _session, _tokenizer, _onnx_path  # noqa: PLW0603
-    if _session is not None and _tokenizer is not None and _onnx_path is not None:
-        return _session, _tokenizer, _onnx_path
+    if (
+        _encoder_state.session is not None
+        and _encoder_state.tokenizer is not None
+        and _encoder_state.onnx_path is not None
+    ):
+        return _encoder_state.session, _encoder_state.tokenizer, _encoder_state.onnx_path
     with _lock:
-        if _session is not None and _tokenizer is not None and _onnx_path is not None:
-            return _session, _tokenizer, _onnx_path
+        if (
+            _encoder_state.session is not None
+            and _encoder_state.tokenizer is not None
+            and _encoder_state.onnx_path is not None
+        ):
+            return _encoder_state.session, _encoder_state.tokenizer, _encoder_state.onnx_path
         cache = _cache_dir()
         onnx_file = _resolve_onnx_filename()
         onnx_path = Path(
@@ -111,9 +122,9 @@ def _load_artifacts() -> tuple[ort.InferenceSession, Tokenizer, Path]:
             providers=["CPUExecutionProvider"],
         )
         tokenizer = Tokenizer.from_file(tok_path)
-        _session = session
-        _tokenizer = tokenizer
-        _onnx_path = onnx_path
+        _encoder_state.session = session
+        _encoder_state.tokenizer = tokenizer
+        _encoder_state.onnx_path = onnx_path
         logger.info(
             "encoder_backend=onnxruntime model=%s revision=%s onnx=%s threads=%s",
             ENCODER_ID,

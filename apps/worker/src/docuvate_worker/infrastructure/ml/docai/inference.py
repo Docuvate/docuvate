@@ -12,18 +12,20 @@ from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import numpy as np
 import onnxruntime as ort
 from numpy.typing import NDArray
 from tokenizers import Tokenizer
 
+from docuvate_worker.infrastructure.extractors.rapidocr_loader import build_rapidocr_engine
+from docuvate_worker.infrastructure.extractors.rapidocr_protocol import RapidOcrEngine
 from docuvate_worker.infrastructure.ml.docai import features as layout_features
 from docuvate_worker.infrastructure.ml.docai.features import LayoutDocument, LayoutUnit
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
-from docuvate_worker.infrastructure.ml.docai.rapidocr_protocol import RapidOcrEngine
 from docuvate_worker.infrastructure.onnx_e5_encoder import resolve_e5_onnx_dir
+from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 FloatArray = NDArray[np.float32]
@@ -64,10 +66,6 @@ class DocaiLinkPrediction:
 
 class DocaiRuntime:
     def __init__(self, *, threads: int = 2) -> None:
-        from docuvate_worker.infrastructure.onnx_runtime_env import (  # noqa: PLC0415
-            configure_onnx_runtime_env,
-        )
-
         configure_onnx_runtime_env()
         model_dir = docai_model_dir()
         if not model_dir.is_dir():
@@ -129,8 +127,6 @@ class DocaiRuntime:
         return self._rapidocr
 
     def _build_ocr(self, model_dir: Path, ocr_cfg: dict[str, Any], threads: int) -> RapidOcrEngine:
-        from rapidocr_onnxruntime import RapidOCR  # noqa: PLC0415
-
         kwargs: dict[str, Any] = {
             "intra_op_num_threads": threads,
             "inter_op_num_threads": 1,
@@ -139,7 +135,7 @@ class DocaiRuntime:
         rec_rel = ocr_cfg.get("rec_model")
         if isinstance(rec_rel, str) and rec_rel.strip():
             kwargs["rec_model_path"] = str(model_dir / rec_rel)
-        return cast(RapidOcrEngine, RapidOCR(**kwargs))
+        return build_rapidocr_engine(**kwargs)
 
     def _ngrams(self, text: str) -> list[str]:
         text = re.sub(r"\s\s+", " ", text.lower())
@@ -373,18 +369,21 @@ class DocaiRuntime:
         }
 
 
-_runtime: DocaiRuntime | None = None
+@dataclass
+class _DocaiRuntimeHolder:
+    runtime: DocaiRuntime | None = None
+
+
+_docai_runtime_holder = _DocaiRuntimeHolder()
 
 
 def get_docai_runtime() -> DocaiRuntime:
-    global _runtime  # noqa: PLW0603
-    if _runtime is None:
+    if _docai_runtime_holder.runtime is None:
         threads = int(os.environ.get("DOCUVATE_DOCAI_THREADS", "2"))
-        _runtime = DocaiRuntime(threads=threads)
-    return _runtime
+        _docai_runtime_holder.runtime = DocaiRuntime(threads=threads)
+    return _docai_runtime_holder.runtime
 
 
 def release_docai_runtime() -> None:
-    global _runtime  # noqa: PLW0603
-    _runtime = None
+    _docai_runtime_holder.runtime = None
     reclaim_python_heap()

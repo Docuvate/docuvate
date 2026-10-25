@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
+from pdf2image import convert_from_bytes
 from PIL import Image
 
 
@@ -16,8 +17,6 @@ def iter_pdf_page_images(
     dpi: int = 200,
     max_pages: int | None = None,
 ) -> Iterator[tuple[int, Image.Image]]:
-    from pdf2image import convert_from_bytes  # noqa: PLC0415
-
     page_num = 1
     while True:
         if max_pages is not None and page_num > max_pages:

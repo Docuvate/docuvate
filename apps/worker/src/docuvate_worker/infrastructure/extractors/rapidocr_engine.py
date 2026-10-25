@@ -3,17 +3,21 @@
 
 from __future__ import annotations
 
+import io
 import logging
 import os
-from typing import Any, cast
+from dataclasses import dataclass, field
+from typing import Any
 
 import numpy as np
 from PIL import Image
 
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
+from docuvate_worker.infrastructure.extractors.rapidocr_loader import build_rapidocr_engine
+from docuvate_worker.infrastructure.extractors.rapidocr_protocol import RapidOcrEngine
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
-from docuvate_worker.infrastructure.ml.docai.rapidocr_protocol import RapidOcrEngine
+from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 logger = logging.getLogger(__name__)
@@ -21,25 +25,23 @@ logger = logging.getLogger(__name__)
 RAPIDOCR_BUNDLE_ID = "rapidocr:docai-v0.3-en-latin-rec"
 _REC_BATCH_NUM = 3
 
-_ocr_instance: RapidOcrEngine | None = None
+
+@dataclass
+class _RapidOcrHolder:
+    instance: RapidOcrEngine | None = field(default=None)
+
+
+_rapidocr_holder = _RapidOcrHolder()
 
 
 def release_rapidocr() -> None:
-    global _ocr_instance  # noqa: PLW0603
-    _ocr_instance = None
+    _rapidocr_holder.instance = None
 
 
 def _get_rapidocr() -> RapidOcrEngine:
-    global _ocr_instance  # noqa: PLW0603
-    if _ocr_instance is not None:
-        return _ocr_instance
-    from docuvate_worker.infrastructure.onnx_runtime_env import (  # noqa: PLC0415
-        configure_onnx_runtime_env,
-    )
-
+    if _rapidocr_holder.instance is not None:
+        return _rapidocr_holder.instance
     configure_onnx_runtime_env()
-    from rapidocr_onnxruntime import RapidOCR  # noqa: PLC0415
-
     model_dir = docai_model_dir()
     ocr_cfg_path = model_dir / "config.json"
     rec_path = model_dir / "ocr" / "en_PP-OCRv5_rec_mobile.onnx"
@@ -56,10 +58,10 @@ def _get_rapidocr() -> RapidOcrEngine:
         _REC_BATCH_NUM,
         RAPIDOCR_BUNDLE_ID,
     )
-    _ocr_instance = cast(RapidOcrEngine, RapidOCR(**kwargs))
+    _rapidocr_holder.instance = build_rapidocr_engine(**kwargs)
     if not ocr_cfg_path.is_file():
         logger.warning("DocAI config.json missing at %s", ocr_cfg_path)
-    return _ocr_instance
+    return _rapidocr_holder.instance
 
 
 def _blocks_from_ocr_result(
@@ -96,9 +98,8 @@ def _blocks_from_ocr_result(
 
 
 def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
-    image = Image.open(__import__("io").BytesIO(content)).convert("RGB")
+    image = Image.open(io.BytesIO(content)).convert("RGB")
     array = np.asarray(image)
-    _height, _width = array.shape[:2]
     ocr = _get_rapidocr()
     result, _ = ocr(array, use_cls=False)
     return _blocks_from_ocr_result(result, page=1, scale_x=1.0, scale_y=1.0)

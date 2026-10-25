@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import importlib
 import logging
 
 from docuvate_worker.domain.cpu_pipeline.contracts import (
@@ -18,6 +20,10 @@ from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic
 STAGE_ID = "field_suggestions"
 
 logger = logging.getLogger(__name__)
+
+_FIELD_SUGGESTIONS_FACADE = (
+    "docuvate_worker.application.cpu_document_pipeline.stages.field_suggestions_ml_facade"
+)
 
 
 def _merge_suggestions(
@@ -39,16 +45,13 @@ def _merge_suggestions(
 
 def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggestionsStageData]:
     def _run() -> FieldSuggestionsStageData:
+        ml = importlib.import_module(_FIELD_SUGGESTIONS_FACADE)
         suggestions = heuristic_field_suggestions(state.text)
         layout_rows: list[ExtractedField] = []
         if state.layout_key_value_roles and state.blocks:
             try:
-                from docuvate_worker.infrastructure.ml.layout_kv_roles import (  # noqa: PLC0415
-                    layout_kv_field_suggestions,
-                )
-
-                layout_rows = layout_kv_field_suggestions(
-                    state.blocks,
+                layout_rows = ml.run_layout_kv_field_suggestions(
+                    list(state.blocks),
                     state.document_representation,
                     recognized_field_keys=state.recognized_field_keys,
                     existing_field_keys=frozenset(
@@ -65,11 +68,7 @@ def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggesti
         docai_rows: list[ExtractedField] = []
         if state.blocks and len(state.blocks) >= 2:
             try:
-                from docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions import (  # noqa: PLC0415
-                    docai_kv_field_suggestions,
-                )
-
-                docai_rows = docai_kv_field_suggestions(
+                docai_rows = ml.run_docai_field_suggestions(
                     list(state.blocks),
                     recognized_field_keys=state.recognized_field_keys,
                     existing_field_keys=frozenset(
@@ -90,14 +89,9 @@ def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggesti
         try:
             return _run()
         finally:
-            try:
-                from docuvate_worker.infrastructure.ml.docai.inference import (  # noqa: PLC0415
-                    release_docai_runtime,
-                )
-
-                release_docai_runtime()
-            except Exception:
-                pass
+            with contextlib.suppress(Exception):
+                ml = importlib.import_module(_FIELD_SUGGESTIONS_FACADE)
+                ml.release_docai_models()
 
     data, metrics = measure_stage(_run_wrapped)
     return StageEnvelope(
