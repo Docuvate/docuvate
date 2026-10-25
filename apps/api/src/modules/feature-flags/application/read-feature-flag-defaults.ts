@@ -22,7 +22,7 @@ function envFlagEnabledDefaultTrue(name: string): boolean {
 export function readFeatureFlagDefaultsFromEnv(): FeatureFlagsDto {
   return {
     layoutReconstructionCompare: envFlagEnabled('DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE'),
-    sourceConnectors: envFlagEnabled('DOCUVATE_FEATURE_SOURCE_CONNECTORS'),
+    sourceConnectors: envFlagEnabledDefaultTrue('DOCUVATE_FEATURE_SOURCE_CONNECTORS'),
     experimentalResearchModels: envFlagEnabled('DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS'),
     exactAnswers: envFlagEnabled('DOCUVATE_FEATURE_EXACT_ANSWERS'),
     smartDuplicates: envFlagEnabled('DOCUVATE_FEATURE_SMART_DUPLICATES'),

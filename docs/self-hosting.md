@@ -40,7 +40,7 @@ Installation-wide **defaults** (when a tenant has no override row) are set in `.
 | Variable | When `true` |
 |----------|-------------|
 | `DOCUVATE_FEATURE_LAYOUT_RECONSTRUCTION_COMPARE` | Layout reconstruction / SSIM compare (Nachbau/Vergleich) |
-| `DOCUVATE_FEATURE_SOURCE_CONNECTORS` | SFTP scanner ingress, SFTP fetch, Paperless-ngx connectors |
+| `DOCUVATE_FEATURE_SOURCE_CONNECTORS` | SFTP scanner ingress, SFTP fetch, Paperless-ngx connectors (**default on** when unset — set `false` to hide) |
 | `DOCUVATE_FEATURE_EXPERIMENTAL_RESEARCH_MODELS` | Arena engine compare and non-default extractors |
 | `DOCUVATE_FEATURE_EXACT_ANSWERS` | Structured fact index and exact answers in document chat |
 | `DOCUVATE_FEATURE_ANSWER_ABSTENTION` | Abstention when fact match confidence is too low (with `exactAnswers`) |
