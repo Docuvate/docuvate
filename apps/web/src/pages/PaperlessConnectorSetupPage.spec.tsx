@@ -16,6 +16,7 @@ const api = vi.hoisted(() => ({
   testPaperlessInstallationConnection: vi.fn(),
   paperlessImportDryRun: vi.fn(),
   startPaperlessImport: vi.fn(),
+  retryFailedPaperlessImport: vi.fn(),
   updatePaperlessInstallation: vi.fn(),
 }));
 
@@ -215,6 +216,74 @@ describe('PaperlessConnectorSetupPage', () => {
     await vi.advanceTimersByTimeAsync(2000);
     await waitFor(() => {
       expect(screen.getByText(/Abgeschlossen:/i)).toBeTruthy();
+    });
+  });
+
+  it('shows translated per-document errors with title and Paperless id', async () => {
+    api.getLatestPaperlessImportRun.mockResolvedValue({
+      run: {
+        id: 'run-3',
+        status: 'completed',
+        progressProcessed: 2,
+        progressTotal: 2,
+        fatalErrorKey: null,
+      },
+      errors: [
+        {
+          id: 'err-1',
+          sourceDocumentId: '170',
+          sourceDocumentTitle: 'Große Rechnung',
+          messageKey: 'connectors.paperlessImport.documentTooLarge',
+          messageDetail: null,
+          messageParams: { maxMb: 200 },
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+    renderPage();
+    await waitFor(() => {
+      expect(screen.getByText(/Große Rechnung/i)).toBeTruthy();
+      expect(screen.getByText(/über 200 MB/i)).toBeTruthy();
+      expect(screen.getByText(/Paperless-ID 170/i)).toBeTruthy();
+    });
+    expect(screen.queryByText(/connectors\.paperlessImport/)).toBeNull();
+  });
+
+  it('starts retry for failed documents from the latest run', async () => {
+    api.getLatestPaperlessImportRun.mockResolvedValue({
+      run: {
+        id: 'run-4',
+        status: 'completed',
+        progressProcessed: 5,
+        progressTotal: 5,
+        fatalErrorKey: null,
+      },
+      errors: [
+        {
+          id: 'err-2',
+          sourceDocumentId: '42',
+          sourceDocumentTitle: 'Scan',
+          messageKey: 'connectors.paperlessImport.documentFailed',
+          messageDetail: null,
+          messageParams: {},
+          createdAt: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+    api.retryFailedPaperlessImport.mockResolvedValue({
+      run: {
+        id: 'run-retry',
+        status: 'running',
+        progressProcessed: 0,
+        progressTotal: 1,
+        fatalErrorKey: null,
+      },
+    });
+    renderPage();
+    await waitFor(() => screen.getByRole('button', { name: /Fehlgeschlagene erneut importieren/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Fehlgeschlagene erneut importieren/i }));
+    await waitFor(() => {
+      expect(api.retryFailedPaperlessImport).toHaveBeenCalledWith(installationId);
     });
   });
 

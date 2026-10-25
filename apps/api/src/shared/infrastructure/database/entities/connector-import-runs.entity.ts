@@ -40,6 +40,9 @@ export class ConnectorImportRunsEntity {
   @Column('timestamp with time zone', { name: 'incremental_modified_gt', nullable: true })
   incrementalModifiedGt: Date | null;
 
+  @Column('text', { name: 'retry_source_document_ids', array: true, nullable: true })
+  retrySourceDocumentIds: string[] | null;
+
   @Column('text', { name: 'fatal_error_key', nullable: true })
   fatalErrorKey: string | null;
 

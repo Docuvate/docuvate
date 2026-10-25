@@ -14,6 +14,7 @@ import {
   parseOptionalNumber,
   parseOptionalString,
   parseString,
+  parseStringArray,
   recordFromUnknown,
   requireRecord,
 } from '../../../../../shared/infrastructure/database/row-parse.js';
@@ -45,6 +46,7 @@ export interface ConnectorImportRunRow {
   resumePage: number;
   resumeModifiedCursor: Date | null;
   incrementalModifiedGt: Date | null;
+  retrySourceDocumentIds: string[] | null;
   fatalErrorKey: string | null;
   startedAt: Date | null;
   completedAt: Date | null;
@@ -58,6 +60,8 @@ export interface ConnectorImportRunErrorRow {
   sourceDocumentId: string;
   messageKey: string;
   messageDetail: string | null;
+  sourceDocumentTitle: string | null;
+  messageParamsJson: string | null;
   createdAt: Date;
 }
 
@@ -95,6 +99,10 @@ function mapRun(row: Record<string, unknown>): ConnectorImportRunRow {
     resumePage: parseNumber(row.resume_page, 1),
     resumeModifiedCursor: parseOptionalDate(row.resume_modified_cursor),
     incrementalModifiedGt: parseOptionalDate(row.incremental_modified_gt),
+    retrySourceDocumentIds: (() => {
+      const ids = parseStringArray(row.retry_source_document_ids);
+      return ids.length > 0 ? ids : null;
+    })(),
     fatalErrorKey: parseOptionalString(row.fatal_error_key),
     startedAt: parseOptionalDate(row.started_at),
     completedAt: parseOptionalDate(row.completed_at),
@@ -218,19 +226,22 @@ export class PaperlessImportRepository {
     ocrMode: PaperlessOcrMode;
     includeArchivedPdf: boolean;
     incrementalModifiedGt?: Date | null;
+    retrySourceDocumentIds?: string[] | null;
   }): Promise<ConnectorImportRunRow> {
     const id = randomUUID();
     try {
       await this.pool.query(
         `INSERT INTO connector_import_runs (
-           id, installation_id, status, ocr_mode, include_archived_pdf, incremental_modified_gt
-         ) VALUES ($1, $2, 'pending', $3, $4, $5)`,
+           id, installation_id, status, ocr_mode, include_archived_pdf,
+           incremental_modified_gt, retry_source_document_ids
+         ) VALUES ($1, $2, 'pending', $3, $4, $5, $6)`,
         [
           id,
           input.installationId,
           input.ocrMode,
           input.includeArchivedPdf,
           input.incrementalModifiedGt ?? null,
+          input.retrySourceDocumentIds ?? null,
         ]
       );
     } catch (err: unknown) {
@@ -381,18 +392,48 @@ export class PaperlessImportRepository {
     runId: string,
     sourceDocumentId: string,
     messageKey: string,
-    messageDetail?: string
+    input?: {
+      messageDetail?: string;
+      sourceDocumentTitle?: string | null;
+      messageParamsJson?: string | null;
+    }
   ): Promise<void> {
     await this.pool.query(
-      `INSERT INTO connector_import_run_errors (run_id, source_document_id, message_key, message_detail)
-       VALUES ($1, $2, $3, $4)`,
-      [runId, sourceDocumentId, messageKey, messageDetail ?? null]
+      `INSERT INTO connector_import_run_errors (
+         run_id, source_document_id, message_key, message_detail,
+         source_document_title, message_params_json
+       ) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [
+        runId,
+        sourceDocumentId,
+        messageKey,
+        input?.messageDetail ?? null,
+        input?.sourceDocumentTitle ?? null,
+        input?.messageParamsJson ?? null,
+      ]
     );
+  }
+
+  async listFailedSourceDocumentIdsForRun(runId: string): Promise<string[]> {
+    const result = await this.pool.query(
+      `SELECT DISTINCT source_document_id
+       FROM connector_import_run_errors
+       WHERE run_id = $1
+       ORDER BY source_document_id`,
+      [runId]
+    );
+    const ids: string[] = [];
+    for (const raw of result.rows) {
+      const row = requireRecord(raw);
+      ids.push(parseString(row.source_document_id));
+    }
+    return ids;
   }
 
   async listRunErrors(runId: string, limit = 200): Promise<ConnectorImportRunErrorRow[]> {
     const result = await this.pool.query(
-      `SELECT id, run_id, source_document_id, message_key, message_detail, created_at
+      `SELECT id, run_id, source_document_id, message_key, message_detail,
+              source_document_title, message_params_json, created_at
        FROM connector_import_run_errors
        WHERE run_id = $1
        ORDER BY created_at ASC
@@ -407,6 +448,8 @@ export class PaperlessImportRepository {
         sourceDocumentId: parseString(row.source_document_id),
         messageKey: parseString(row.message_key),
         messageDetail: parseOptionalString(row.message_detail),
+        sourceDocumentTitle: parseOptionalString(row.source_document_title),
+        messageParamsJson: parseOptionalString(row.message_params_json),
         createdAt: parseDate(row.created_at),
       };
     });

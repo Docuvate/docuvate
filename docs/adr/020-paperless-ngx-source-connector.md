@@ -70,3 +70,5 @@ Custom field types: `string`, `url`, `boolean`, `select`, `documentlink` → tex
 
 - BullMQ job `connector-paperless-import` processes runs with rate limiting and resumes pending runs after API restart.
 - OpenAPI documents `/connectors/plugins/paperless/test-connection` and installation import endpoints.
+- `DOCUVATE_PAPERLESS_MAX_DOWNLOAD_BYTES` caps streamed downloads (default 200 MiB, above the web upload limit).
+- `POST …/paperless/import-runs/retry-failed` re-imports only Paperless document IDs that failed in the latest run (idempotent via `connector_source_documents`).

@@ -22,6 +22,12 @@ export class ConnectorImportRunErrorsEntity {
   @Column('text', { name: 'message_detail', nullable: true })
   messageDetail: string | null;
 
+  @Column('text', { name: 'source_document_title', nullable: true })
+  sourceDocumentTitle: string | null;
+
+  @Column('text', { name: 'message_params_json', nullable: true })
+  messageParamsJson: string | null;
+
   @Column('timestamp with time zone', { name: 'created_at', default: () => 'now()' })
   createdAt: Date;
 

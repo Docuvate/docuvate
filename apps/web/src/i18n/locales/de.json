@@ -1290,6 +1290,11 @@
         "runProgressNoTotal": "{{status}}: {{processed}} Dokumente",
         "runCompletedWithErrors": "Abgeschlossen mit Fehlern: {{processed}} Dokumente verarbeitet",
         "runFailedGeneric": "Der Importlauf ist fehlgeschlagen.",
+        "retryFailedImport": "Fehlgeschlagene erneut importieren",
+        "retryFailedBusy": "Wiederholung startet…",
+        "retryFailedStarted": "Wiederholung für fehlgeschlagene Dokumente wurde gestartet.",
+        "importErrorRow": "{{title}}: {{message}} (Paperless-ID {{sourceDocumentId}})",
+        "importErrorUntitled": "Dokument {{sourceDocumentId}}",
         "runStatus": {
           "pending": "Wartet",
           "running": "Läuft",
@@ -1397,8 +1402,11 @@
     "sftpProbeSuccess": "Host-Key bestätigt: {{fingerprint}}",
     "sftpProbeFailed": "Verbindungstest fehlgeschlagen. Host, Port und Zugangsdaten prüfen.",
     "paperlessImport": {
-      "documentFailed": "Dieses Dokument konnte nicht importiert werden.",
-      "runFailed": "Der Importlauf wurde wegen eines Verbindungsfehlers beendet."
+      "documentTooLarge": "Dokument ist zu groß (über {{maxMb}} MB).",
+      "documentFailed": "Import fehlgeschlagen.",
+      "runFailed": "Der Importlauf wurde wegen eines Verbindungsfehlers beendet.",
+      "runAlreadyActive": "Ein Import läuft bereits.",
+      "retryNoFailedDocuments": "Es gibt keine fehlgeschlagenen Dokumente zum Wiederholen."
     }
   },
   "labels": {

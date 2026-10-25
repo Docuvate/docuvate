@@ -539,11 +539,17 @@ export interface PaperlessInstallationDto {
   lastSuccessfulModifiedAt: string | null;
 }
 
+export interface PaperlessImportRunErrorMessageParamsDto {
+  maxMb?: number;
+}
+
 export interface PaperlessImportRunErrorDto {
   id: string;
   sourceDocumentId: string;
+  sourceDocumentTitle: string | null;
   messageKey: string;
   messageDetail: string | null;
+  messageParams: PaperlessImportRunErrorMessageParamsDto;
   createdAt: string;
 }
 

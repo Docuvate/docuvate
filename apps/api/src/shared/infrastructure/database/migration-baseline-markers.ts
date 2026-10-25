@@ -54,6 +54,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'CorrespondentsToAbsenderField20261018180000',
   'RecognizedFieldGateLabelPolarity20261018190000',
   'DocumentFileSizeSavedViewDescription20261018190500',
+  'ConnectorPaperlessImportRetry20261025120000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {

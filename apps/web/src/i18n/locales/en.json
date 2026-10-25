@@ -1277,6 +1277,11 @@
         "runProgressNoTotal": "{{status}}: {{processed}} documents",
         "runCompletedWithErrors": "Completed with errors: {{processed}} documents processed",
         "runFailedGeneric": "The import run failed.",
+        "retryFailedImport": "Retry failed imports",
+        "retryFailedBusy": "Starting retry…",
+        "retryFailedStarted": "Retry started for failed documents.",
+        "importErrorRow": "{{title}}: {{message}} (Paperless ID {{sourceDocumentId}})",
+        "importErrorUntitled": "Document {{sourceDocumentId}}",
         "runStatus": {
           "pending": "Pending",
           "running": "Running",
@@ -1396,8 +1401,11 @@
     "sftpProbeSuccess": "Host key confirmed: {{fingerprint}}",
     "sftpProbeFailed": "Connection test failed. Check host, port, and credentials.",
     "paperlessImport": {
-      "documentFailed": "This document could not be imported.",
-      "runFailed": "The import run stopped because of a connection error."
+      "documentTooLarge": "Document is too large (over {{maxMb}} MB).",
+      "documentFailed": "Import failed for this document.",
+      "runFailed": "The import run stopped because of a connection error.",
+      "runAlreadyActive": "An import is already running.",
+      "retryNoFailedDocuments": "There are no failed documents to retry."
     }
   },
   "labels": {

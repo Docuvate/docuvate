@@ -23,12 +23,13 @@ import {
   GetPaperlessImportRunUseCase,
   GetPaperlessInstallationUseCase,
   PaperlessImportDryRunUseCase,
+  RetryFailedPaperlessImportUseCase,
   StartPaperlessImportUseCase,
   TestPaperlessConnectionUseCase,
   TestPaperlessInstallationConnectionUseCase,
   UpdatePaperlessInstallationUseCase,
 } from '../application/paperless-import.use-cases.js';
-import { toPaperlessImportRunDto } from './paperless-import.mapper.js';
+import { toPaperlessImportRunDto, toPaperlessImportRunErrorDto } from './paperless-import.mapper.js';
 
 @ApiDocuvateController('connectors')
 @Controller('connectors')
@@ -41,6 +42,7 @@ export class PaperlessImportController {
     private readonly updateInstallation: UpdatePaperlessInstallationUseCase,
     private readonly dryRun: PaperlessImportDryRunUseCase,
     private readonly startImport: StartPaperlessImportUseCase,
+    private readonly retryFailedImport: RetryFailedPaperlessImportUseCase,
     private readonly getRun: GetPaperlessImportRunUseCase
   ) {}
 
@@ -124,6 +126,19 @@ export class PaperlessImportController {
     return { run: toPaperlessImportRunDto(run) };
   }
 
+  @Post('installations/:installationId/paperless/import-runs/retry-failed')
+  @ApiDocuvateRoute({
+    operationId: 'retryFailedPaperlessImport',
+    summary: 'Retry failed documents from the latest Paperless import run',
+  })
+  async retryFailedPaperlessImport(
+    @Session() session: AuthSession,
+    @Param() params: ConnectorInstallationIdParamDto
+  ) {
+    const run = await this.retryFailedImport.execute(session.user.id, params.installationId);
+    return { run: toPaperlessImportRunDto(run) };
+  }
+
   @Get('installations/:installationId/paperless/import-runs/:runId')
   @ApiDocuvateRoute({
     operationId: 'getPaperlessImportRun',
@@ -140,13 +155,7 @@ export class PaperlessImportController {
     );
     return {
       run: toPaperlessImportRunDto(run),
-      errors: errors.map((row) => ({
-        id: row.id,
-        sourceDocumentId: row.sourceDocumentId,
-        messageKey: row.messageKey,
-        messageDetail: row.messageDetail,
-        createdAt: row.createdAt.toISOString(),
-      })),
+      errors: errors.map(toPaperlessImportRunErrorDto),
     };
   }
 
@@ -162,13 +171,7 @@ export class PaperlessImportController {
     const { run, errors } = await this.getRun.execute(session.user.id, params.installationId);
     return {
       run: toPaperlessImportRunDto(run),
-      errors: errors.map((row) => ({
-        id: row.id,
-        sourceDocumentId: row.sourceDocumentId,
-        messageKey: row.messageKey,
-        messageDetail: row.messageDetail,
-        createdAt: row.createdAt.toISOString(),
-      })),
+      errors: errors.map(toPaperlessImportRunErrorDto),
     };
   }
 }

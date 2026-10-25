@@ -20,7 +20,7 @@ import type {
   PaperlessTag,
 } from './paperless-api.types.js';
 import {
-  MAX_DOWNLOAD_BYTES,
+  getPaperlessMaxDownloadBytes,
   MAX_LIST_ITEMS,
   MAX_LIST_PAGES,
   paperlessSafeFetch,
@@ -435,7 +435,7 @@ export class PaperlessApiClient {
       throw new Error('PAPERLESS_DOWNLOAD_FAILED');
     }
     try {
-      return await readResponseWithSizeCap(response, MAX_DOWNLOAD_BYTES);
+      return await readResponseWithSizeCap(response, getPaperlessMaxDownloadBytes());
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       if (message === 'PAPERLESS_DOWNLOAD_TOO_LARGE') {

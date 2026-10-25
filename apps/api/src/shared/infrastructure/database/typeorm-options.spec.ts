@@ -50,6 +50,7 @@ import { InstallationOidcProvider20261018170000 } from './migrations/20261018170
 import { CorrespondentsToAbsenderField20261018180000 } from './migrations/20261018180000-correspondents-to-absender-field.js';
 import { RecognizedFieldGateLabelPolarity20261018190000 } from './migrations/20261018190000-recognized-field-filter-and-gate-polarity.js';
 import { DocumentFileSizeSavedViewDescription20261018190500 } from './migrations/20261018190500-document-file-size-saved-view-description.js';
+import { ConnectorPaperlessImportRetry20261025120000 } from './migrations/20261025120000-connector-paperless-import-retry.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -100,6 +101,7 @@ const EXPECTED_MIGRATIONS = [
   CorrespondentsToAbsenderField20261018180000,
   RecognizedFieldGateLabelPolarity20261018190000,
   DocumentFileSizeSavedViewDescription20261018190500,
+  ConnectorPaperlessImportRetry20261025120000,
 ];
 
 describe('buildTypeOrmOptions', () => {

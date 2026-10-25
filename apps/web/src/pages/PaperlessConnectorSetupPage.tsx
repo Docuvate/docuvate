@@ -21,12 +21,14 @@ import {
   getPaperlessInstallation,
   listConnectorInstallations,
   paperlessImportDryRun,
+  retryFailedPaperlessImport,
   startPaperlessImport,
   testPaperlessInstallationConnection,
   updatePaperlessInstallation,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { formatConnectorError } from '../lib/connectorErrors';
+import { formatPaperlessImportRunError } from '../lib/formatPaperlessImportRunError';
 import { routes } from '../lib/routes';
 
 interface FormState {
@@ -108,6 +110,7 @@ export function PaperlessConnectorSetupPage() {
   const [run, setRun] = useState<PaperlessImportRunDto | null>(null);
   const [errors, setErrors] = useState<PaperlessImportRunErrorDto[]>([]);
   const [importBusy, setImportBusy] = useState(false);
+  const [retryBusy, setRetryBusy] = useState(false);
 
   useEffect(() => {
     void i18n.changeLanguage('de');
@@ -258,6 +261,27 @@ export function PaperlessConnectorSetupPage() {
       setActionMessage(formatConnectorError(err, 'connectors.plugins.paperless.dryRunFailed'));
     } finally {
       setDryRunBusy(false);
+    }
+  }
+
+  const canRetryFailed =
+    run !== null &&
+    (run.status === 'completed' || run.status === 'failed') &&
+    errors.length > 0 &&
+    !importLocked;
+
+  async function handleRetryFailed() {
+    setRetryBusy(true);
+    setActionMessage(null);
+    try {
+      const { run: started } = await retryFailedPaperlessImport(installationId);
+      setRun(started);
+      setErrors([]);
+      setActionMessage(t('connectors.plugins.paperless.retryFailedStarted'));
+    } catch (err) {
+      setActionMessage(formatConnectorError(err, 'connectors.plugins.paperless.importFailed'));
+    } finally {
+      setRetryBusy(false);
     }
   }
 
@@ -557,14 +581,40 @@ export function PaperlessConnectorSetupPage() {
                     })}
                   </p>
                 ) : null}
+                {canRetryFailed ? (
+                  <div className="paperless-action-row">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="paperless-action-btn"
+                      disabled={retryBusy || importLocked}
+                      onClick={() => void handleRetryFailed()}
+                    >
+                      {retryBusy
+                        ? t('connectors.plugins.paperless.retryFailedBusy')
+                        : t('connectors.plugins.paperless.retryFailedImport')}
+                    </Button>
+                  </div>
+                ) : null}
                 {errors.length > 0 ? (
                   <ul className="paperless-import-errors">
-                    {errors.map((row) => (
-                      <li key={row.id}>
-                        {t(row.messageKey, { defaultValue: row.messageKey })}
-                        {row.sourceDocumentId ? ` (${row.sourceDocumentId})` : ''}
-                      </li>
-                    ))}
+                    {errors.map((row) => {
+                      const message = formatPaperlessImportRunError(t, row);
+                      const title =
+                        row.sourceDocumentTitle?.trim() ||
+                        t('connectors.plugins.paperless.importErrorUntitled', {
+                          sourceDocumentId: row.sourceDocumentId,
+                        });
+                      return (
+                        <li key={row.id}>
+                          {t('connectors.plugins.paperless.importErrorRow', {
+                            title,
+                            message,
+                            sourceDocumentId: row.sourceDocumentId,
+                          })}
+                        </li>
+                      );
+                    })}
                   </ul>
                 ) : null}
               </div>

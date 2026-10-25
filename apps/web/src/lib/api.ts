@@ -1063,6 +1063,15 @@ export async function startPaperlessImport(
   );
 }
 
+export async function retryFailedPaperlessImport(
+  installationId: string
+): Promise<{ run: PaperlessImportRunDto }> {
+  return request<{ run: PaperlessImportRunDto }>(
+    `/connectors/installations/${encodeURIComponent(installationId)}/paperless/import-runs/retry-failed`,
+    { method: 'POST', body: '{}' }
+  );
+}
+
 export async function getPaperlessImportRun(
   installationId: string,
   runId: string

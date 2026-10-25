@@ -7,6 +7,7 @@ import IORedis from 'ioredis';
 import { isRecord, parseString } from '../../../../../shared/infrastructure/database/row-parse.js';
 import { ConnectorRuntimeResolver } from '../../../application/connector-runtime.resolver.js';
 import { PaperlessImportExecutor } from './paperless-import.executor.js';
+import { PAPERLESS_IMPORT_MESSAGE_KEYS } from './paperless-import-message-keys.js';
 import { PaperlessImportRepository } from './paperless-import.repository.js';
 
 const QUEUE_NAME = 'connector-paperless-import';
@@ -65,7 +66,7 @@ export class PaperlessImportQueueService implements OnModuleInit, OnModuleDestro
             runId,
             run.installationId,
             'failed',
-            'connectors.paperlessImport.runFailed'
+            PAPERLESS_IMPORT_MESSAGE_KEYS.runFailed
           );
         }
       },
