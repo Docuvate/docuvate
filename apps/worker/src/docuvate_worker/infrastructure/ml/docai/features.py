@@ -1,7 +1,12 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 """Verbatim copies of the training feature code — parity-tested; do not edit."""
-import math, unicodedata, numpy as np
+import math
+import unicodedata
+
+import numpy as np
+
+
 def digits(s): return ''.join(c for c in s if c.isdigit())
 def node_geom(d):
     U = d['units']; n = len(U)

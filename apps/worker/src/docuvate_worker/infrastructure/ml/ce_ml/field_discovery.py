@@ -9,7 +9,10 @@ import numpy as np
 from scipy.cluster.hierarchy import fcluster, linkage
 from scipy.spatial.distance import pdist
 
-from docuvate_worker.infrastructure.ml.ce_ml.calibration import field_abstain_threshold, load_ce_ml_calibration
+from docuvate_worker.infrastructure.ml.ce_ml.calibration import (
+    field_abstain_threshold,
+    load_ce_ml_calibration,
+)
 from docuvate_worker.infrastructure.ml.ce_ml.kv_items import KeyValueItem
 from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
 

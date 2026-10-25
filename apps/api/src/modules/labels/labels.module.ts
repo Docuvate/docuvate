@@ -25,14 +25,12 @@ import {
 import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.module.js';
 import { RepresentationModule } from '../representation/representation.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
+import { ApplyCeLabelPropagationUseCase } from './application/apply-ce-label-propagation.use-case.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './application/apply-embedding-density-suggestions.use-case.js';
 import { ApplyEmbeddingSuggestionsUseCase } from './application/apply-embedding-suggestions.use-case.js';
 import { ApplyLabelCorrectionUseCase } from './application/apply-label-correction.use-case.js';
 import { ApplyLabelCustomFieldsUseCase } from './application/apply-label-custom-fields.use-case.js';
 import { ApplyLabelMatchingUseCase } from './application/apply-label-matching.use-case.js';
-import { ApplyCeLabelPropagationUseCase } from './application/apply-ce-label-propagation.use-case.js';
-import { EnrichLabelMapMissingHintsUseCase } from './application/enrich-label-map-missing-hints.use-case.js';
-import { SuggestTagCustomFieldsUseCase } from './application/suggest-tag-custom-fields.use-case.js';
 import { ApplySparkLabelPropagationUseCase } from './application/apply-spark-label-propagation.use-case.js';
 import { BackfillDocumentEmbeddingsUseCase } from './application/backfill-document-embeddings.use-case.js';
 import {
@@ -47,6 +45,7 @@ import {
   RemoveDocumentTagUseCase,
 } from './application/document-label.use-cases.js';
 import { RecordEmbeddingFeedbackUseCase } from './application/embedding-feedback.use-case.js';
+import { EnrichLabelMapMissingHintsUseCase } from './application/enrich-label-map-missing-hints.use-case.js';
 import { GetLabelMapUseCase } from './application/get-label-map.use-case.js';
 import { GetLabelRecommendationsUseCase } from './application/get-label-recommendations.use-case.js';
 import {
@@ -62,6 +61,7 @@ import {
 import { RecordEmbeddingDensityCorrectionUseCase } from './application/record-embedding-density-correction.use-case.js';
 import { RefreshEmbeddingSuggestionsUseCase } from './application/refresh-embedding-suggestions.use-case.js';
 import { RunEmbeddingDensityCalibrationUseCase } from './application/run-embedding-density-calibration.use-case.js';
+import { SuggestTagCustomFieldsUseCase } from './application/suggest-tag-custom-fields.use-case.js';
 import {
   ListTagCustomFieldsUseCase,
   ReplaceTagCustomFieldsUseCase,

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import os
+
 from docuvate_worker.domain.cpu_pipeline.contracts import (
     OcrStageData,
     PipelineMutableState,
@@ -10,10 +12,12 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
     StageEnvelope,
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
-import os
-
-from docuvate_worker.infrastructure.extractors.paddle_engine import ocr_image_bytes as paddle_ocr_image_bytes
-from docuvate_worker.infrastructure.extractors.paddle_engine import ocr_pdf_bytes as paddle_ocr_pdf_bytes
+from docuvate_worker.infrastructure.extractors.paddle_engine import (
+    ocr_image_bytes as paddle_ocr_image_bytes,
+)
+from docuvate_worker.infrastructure.extractors.paddle_engine import (
+    ocr_pdf_bytes as paddle_ocr_pdf_bytes,
+)
 from docuvate_worker.infrastructure.extractors.pdf_native import try_extract_pdf_native
 from docuvate_worker.infrastructure.office.extract_born_digital import extract_office_born_digital
 from docuvate_worker.infrastructure.office.libreoffice import convert_bytes_to_pdf

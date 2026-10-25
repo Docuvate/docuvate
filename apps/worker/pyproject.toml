@@ -85,6 +85,25 @@ suppress-dummy-args = true
 "src/docuvate_worker/infrastructure/office/**/*.py" = ["PLR2004", "PLR0911", "E501"]
 "src/docuvate_worker/infrastructure/extractors/document_images.py" = ["PLR2004", "E501"]
 "src/docuvate_worker/infrastructure/extractors/markdown.py" = ["PLR2004", "E501", "SIM103"]
+# Research parity layout feature builder (deliverable D v0.3); keep aligned with bundle reference.
+"src/docuvate_worker/infrastructure/ml/docai/features.py" = [
+  "ANN",
+  "B023",
+  "B905",
+  "E501",
+  "E701",
+  "E702",
+  "E741",
+  "N803",
+  "N806",
+  "PLR2004",
+  "RUF005",
+  "RUF059",
+]
+"src/docuvate_worker/infrastructure/ml/ce_ml/**/*.py" = ["PLR2004", "E501"]
+"src/docuvate_worker/infrastructure/ml/docai/inference.py" = ["E501", "ANN401"]
+"src/docuvate_worker/infrastructure/extractors/rapidocr_engine.py" = ["ANN401"]
+"src/docuvate_worker/infrastructure/ml/ner/doc_ner.py" = ["E501"]
 
 [tool.ruff.lint.pylint]
 max-args = 12

@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+/* eslint-disable @typescript-eslint/consistent-type-assertions -- vitest partial mocks */
 import { describe, expect, it, vi } from 'vitest';
 
 import { createAssignDocumentTagUseCaseStub } from '../../../test-support/assign-document-tag-use-case.stub.js';

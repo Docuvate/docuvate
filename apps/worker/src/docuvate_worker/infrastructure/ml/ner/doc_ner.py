@@ -10,9 +10,9 @@ import numpy as np
 import onnxruntime as ort
 
 from docuvate_worker.infrastructure.ml.docai.paths import ner_doc_model_path
+from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
 
 NER_DOC_MODEL_KEY = "docuvate:ner-doc-int8"
-from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
 
 _DOC_TAG_NAMES: tuple[str, ...] = (
     "O",
@@ -94,7 +94,7 @@ def predict_doc_ner_spans(
     spans: list[NerSpan] = []
     current: list[int] | None = None
     current_type = ""
-    for index, tag_id in enumerate(list(tags) + [0]):
+    for index, tag_id in enumerate([*list(tags), 0]):
         label = _DOC_TAG_NAMES[int(tag_id)]
         if current and (label == "O" or label.startswith("B-") or label[2:] != current_type):
             spans.append(NerSpan(start_index=current[0], end_index=current[1], entity_type=current_type))

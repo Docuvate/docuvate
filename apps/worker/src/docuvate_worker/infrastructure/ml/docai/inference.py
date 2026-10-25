@@ -19,7 +19,7 @@ from tokenizers import Tokenizer
 
 from docuvate_worker.infrastructure.ml.docai import features as layout_features
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
-from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx, resolve_e5_onnx_dir
+from docuvate_worker.infrastructure.onnx_e5_encoder import resolve_e5_onnx_dir
 
 
 class _PcaTransform:

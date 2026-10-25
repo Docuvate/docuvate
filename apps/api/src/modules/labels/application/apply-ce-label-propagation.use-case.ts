@@ -58,8 +58,11 @@ export class ApplyCeLabelPropagationUseCase {
 
     let applied = 0;
     for (const score of scores) {
-      const row = rows[score.documentIndex];
-      if (!row || row.nonInboxTagIds.length > 0) {
+      const row = rows.at(score.documentIndex);
+      if (row === undefined) {
+        continue;
+      }
+      if (row.nonInboxTagIds.length > 0) {
         continue;
       }
       if (score.tier === 'none') {

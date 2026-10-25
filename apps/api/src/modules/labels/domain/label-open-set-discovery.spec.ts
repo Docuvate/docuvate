@@ -39,7 +39,6 @@ function row(input: {
 describe('label-open-set-discovery', () => {
   it('names clusters from discriminative c-TF-IDF terms, not a fixed vocabulary', () => {
     const labeledCentroid = vec([1, 0, 0, 0, 0, 0, 0, 0]);
-    const payrollBase = vec([0, 0.98, 0.02, 0, 0, 0, 0, 0]);
     const noise = vec([0, 0.1, 0.05, 0.9, 0, 0, 0, 0]);
     const payrollRows = ['p1', 'p2', 'p3', 'p4', 'p5'].map((id, index) =>
       row({
