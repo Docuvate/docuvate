@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 /** @vitest-environment jsdom */
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nextProvider } from 'react-i18next';
 import { describe, expect, it } from 'vitest';
 
@@ -16,8 +16,14 @@ describe('PasswordInput', () => {
       </I18nextProvider>
     );
     const field = screen.getByLabelText('Secret');
+    const wrap = field.closest('.password-input-wrap');
+    expect(wrap).toBeTruthy();
     expect(field.getAttribute('type')).toBe('password');
-    fireEvent.click(screen.getByRole('button', { name: /show password|passwort anzeigen/i }));
+    fireEvent.click(
+      within(wrap as HTMLElement).getByRole('button', {
+        name: /show password|passwort anzeigen/i,
+      })
+    );
     expect(field.getAttribute('type')).toBe('text');
   });
 });

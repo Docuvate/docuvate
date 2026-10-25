@@ -364,13 +364,15 @@
   justify-content: flex-end;
 }
 
-.topbar-search.global-search-desktop-host {
+.global-search-desktop-host {
   display: flex;
   justify-content: center;
   align-items: center;
-  grid-template-columns: unset;
-  gap: 0;
-  max-width: none;
+  flex: 1;
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+  min-height: var(--dv-header-control-height);
 }
 
 .global-search-host {
@@ -12070,7 +12072,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     padding-inline: var(--dv-space-sm);
   }
 
-  .topbar-search--desktop {
+  .global-search-desktop-host {
     display: none;
   }
 
