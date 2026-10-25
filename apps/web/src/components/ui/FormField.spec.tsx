@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FormField } from './FormField';
 import { Input } from './Input';
+import { PasswordInput } from './PasswordInput';
 
 describe('FormField', () => {
   it('keeps a fixed hint slot when help is hidden', () => {
@@ -20,7 +21,7 @@ describe('FormField', () => {
   it('shows error text in the hint slot', () => {
     render(
       <FormField label="Passwort" error="E-Mail oder Passwort ist falsch.">
-        <Input id="password" type="password" />
+        <PasswordInput id="password" aria-label="Password" />
       </FormField>
     );
     expect(screen.getByRole('alert').textContent).toContain('E-Mail oder Passwort ist falsch.');

@@ -10,6 +10,7 @@ import { PasswordPolicyChecklist } from '../components/auth/PasswordPolicyCheckl
 import { Button } from '../components/ui/Button';
 import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import { authClient } from '../lib/auth-client';
 import { formatAuthClientError } from '../lib/authErrors';
 import { awaitAuthenticatedSession } from '../lib/awaitAuthenticatedSession';
@@ -94,9 +95,8 @@ export function RegisterPage() {
           showHelp={false}
           error={error ?? undefined}
         >
-          <Input
+          <PasswordInput
             id={passwordId}
-            type="password"
             minLength={passwordPolicy.minLength}
             maxLength={PASSWORD_LENGTH_MAX_BOUND}
             required

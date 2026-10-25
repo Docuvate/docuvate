@@ -10,6 +10,7 @@ import { PasswordPolicyChecklist } from '../components/auth/PasswordPolicyCheckl
 import { Button } from '../components/ui/Button';
 import { FormField } from '../components/ui/FormField';
 import { Input } from '../components/ui/Input';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import { acceptUserInvitation } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
 import { routes } from '../lib/routes';
@@ -107,9 +108,8 @@ export function InviteAcceptPage() {
       ) : (
         <form onSubmit={(e) => void onSubmit(e)} className="auth-form" noValidate>
           <FormField label={t('auth.password')} htmlFor={passwordId} showHelp={false}>
-            <Input
+            <PasswordInput
               id={passwordId}
-              type="password"
               autoComplete="new-password"
               minLength={passwordPolicy.minLength}
               maxLength={PASSWORD_LENGTH_MAX_BOUND}
@@ -132,9 +132,8 @@ export function InviteAcceptPage() {
             showHelp={false}
             error={confirmMismatch || error ? (error ?? t('auth.resetPasswordMismatch')) : undefined}
           >
-            <Input
+            <PasswordInput
               id={confirmId}
-              type="password"
               autoComplete="new-password"
               minLength={passwordPolicy.minLength}
               maxLength={PASSWORD_LENGTH_MAX_BOUND}

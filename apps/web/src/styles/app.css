@@ -7417,6 +7417,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: flex;
   flex-wrap: wrap;
   gap: var(--dv-space-xs);
+  min-height: 1.75rem;
+  align-items: center;
 }
 
 .connector-capability-badge {

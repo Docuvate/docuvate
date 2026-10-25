@@ -22,6 +22,7 @@ import { PageFormSaveKit } from '../save/PageFormSaveKit';
 import { SettingsSectionCard } from '../settings/SettingsSectionCard';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
+import { PasswordInput } from '../ui/PasswordInput';
 import { Switch } from '../ui/Switch';
 
 const ICON = { size: 20, strokeWidth: 1.75, 'aria-hidden': true as const };
@@ -211,8 +212,7 @@ export function AdminOidcProvidersCard() {
           </label>
           <label className="settings-field">
             {t('admin.oidcProviders.clientSecretLabel')}
-            <Input
-              type="password"
+            <PasswordInput
               value={form.draft.clientSecret}
               disabled={saving}
               placeholder={

@@ -19,6 +19,7 @@ import { SettingsChatStatus } from '../components/settings/SettingsChatStatus';
 import { SettingsSectionCard } from '../components/settings/SettingsSectionCard';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { Button } from '../components/ui/Button';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import { Select } from '../components/ui/Select';
 import { Switch } from '../components/ui/Switch';
 import { useAdvancedFeaturesEnabled, writeAdvancedFeaturesEnabled } from '../lib/advancedFeatures';
@@ -407,8 +408,7 @@ export function SettingsPage() {
               </label>
               <label className="settings-field">
                 {t('settings.chatCloudApiKey')}
-                <input
-                  type="password"
+                <PasswordInput
                   className="settings-input"
                   disabled={saving || !settings}
                   value={chatCloudApiKeyDraft}

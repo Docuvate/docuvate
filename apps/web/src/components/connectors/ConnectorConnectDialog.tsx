@@ -15,6 +15,7 @@ import { connectorPluginSupportsSourceSelection } from '../../lib/connectorSourc
 import { Button } from '../ui/Button';
 import { Dialog, DialogBody, DialogFooter, DialogHeader } from '../ui/Dialog';
 import { Input } from '../ui/Input';
+import { PasswordInput } from '../ui/PasswordInput';
 import { Select } from '../ui/Select';
 import { type ConnectorSetupStep,ConnectorSetupStepper } from './ConnectorSetupStepper';
 import { ConnectorSourceScopePicker } from './ConnectorSourceScopePicker';
@@ -241,24 +242,32 @@ export function ConnectorConnectDialog({
                     <label key={field.key} className="settings-field">
                       {fieldLabel(field)}
                       {field.required ? ' *' : ''}
-                      <Input
-                        type={
-                          field.type === 'password'
-                            ? 'password'
-                            : field.type === 'email'
-                              ? 'email'
-                              : 'text'
-                        }
-                        value={credentials[field.key] ?? ''}
-                        required={field.required}
-                        disabled={busy}
-                        autoComplete={field.secret ? 'off' : undefined}
-                        placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
-                        onChange={(e) => {
-                          setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
-                        }}
-                        aria-label={fieldLabel(field)}
-                      />
+                      {field.type === 'password' ? (
+                        <PasswordInput
+                          value={credentials[field.key] ?? ''}
+                          required={field.required}
+                          disabled={busy}
+                          autoComplete={field.secret ? 'off' : undefined}
+                          placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
+                          onChange={(e) => {
+                            setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
+                          }}
+                          aria-label={fieldLabel(field)}
+                        />
+                      ) : (
+                        <Input
+                          type={field.type === 'email' ? 'email' : 'text'}
+                          value={credentials[field.key] ?? ''}
+                          required={field.required}
+                          disabled={busy}
+                          autoComplete={field.secret ? 'off' : undefined}
+                          placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
+                          onChange={(e) => {
+                            setCredentials((prev) => ({ ...prev, [field.key]: e.target.value }));
+                          }}
+                          aria-label={fieldLabel(field)}
+                        />
+                      )}
                       {field.helpKey ? (
                         <span className="muted settings-hint">{t(field.helpKey)}</span>
                       ) : null}

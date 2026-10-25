@@ -145,6 +145,53 @@ a.btn:hover {
   color: var(--dv-color-text-subtle);
 }
 
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.password-input-wrap .password-input {
+  width: 100%;
+  padding-right: 2.75rem;
+}
+
+.password-input-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 100%;
+  min-height: var(--dv-control-height);
+  border: none;
+  border-radius: 0 var(--dv-radius-md) var(--dv-radius-md) 0;
+  background: transparent;
+  color: var(--dv-color-text-muted);
+  cursor: pointer;
+}
+
+.password-input-toggle:hover:not(:disabled) {
+  color: var(--dv-color-text);
+}
+
+.password-input-toggle:focus-visible {
+  outline: 2px solid var(--dv-color-focus);
+  outline-offset: -2px;
+}
+
+.password-input-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.password-input-wrap--disabled .password-input-toggle {
+  pointer-events: none;
+}
+
 .btn:focus-visible,
 .chip-remove:focus-visible {
   outline: 2px solid var(--dv-color-focus);

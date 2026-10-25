@@ -324,7 +324,9 @@
     "saved": "Gespeichert",
     "copy": "Kopieren",
     "copied": "Kopiert",
-    "loading": "Wird geladen…"
+    "loading": "Wird geladen…",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen"
   },
   "save": {
     "saved": "Gespeichert",

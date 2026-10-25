@@ -15,6 +15,7 @@ import { PageFormSaveKit } from '../components/save/PageFormSaveKit';
 import { SettingsSectionLayout } from '../components/settings/SettingsSectionLayout';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
+import { PasswordInput } from '../components/ui/PasswordInput';
 import {
   getLatestPaperlessImportRun,
   getPaperlessImportRun,
@@ -344,9 +345,8 @@ export function PaperlessConnectorSetupPage() {
               </label>
               <label className="settings-field">
                 <span>{t('connectors.auth.fields.apiToken')}</span>
-                <Input
+                <PasswordInput
                   className="paperless-control"
-                  type="password"
                   value={form.apiToken}
                   placeholder={
                     storedFlags.hasStoredApiToken && !form.apiToken
@@ -378,9 +378,8 @@ export function PaperlessConnectorSetupPage() {
               </label>
               <label className="settings-field">
                 <span>{t('connectors.auth.fields.password')}</span>
-                <Input
+                <PasswordInput
                   className="paperless-control"
-                  type="password"
                   value={form.password}
                   placeholder={
                     storedFlags.hasStoredPassword && !form.password ? secretPlaceholder : undefined

@@ -323,7 +323,9 @@
     "saved": "Saved",
     "copy": "Copy",
     "copied": "Copied",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "save": {
     "saved": "Saved",
