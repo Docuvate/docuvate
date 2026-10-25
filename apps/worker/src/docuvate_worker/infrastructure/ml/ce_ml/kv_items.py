@@ -3,15 +3,18 @@
 
 from __future__ import annotations
 
+import os
+from collections import defaultdict
 from dataclasses import dataclass
-
-import numpy as np
 
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.ml.ce_ml.constants import MIN_LAYOUT_UNITS
-from docuvate_worker.infrastructure.ml.docai.inference import DocaiUnit, get_docai_runtime
+from docuvate_worker.infrastructure.ml.docai.inference import (
+    DocaiRuntime,
+    DocaiUnit,
+    get_docai_runtime,
+)
 from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord, predict_doc_ner_spans
-from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
 
 _ENTITY_INDEX = {"PER": 0, "ORG": 1, "LOC": 2, "DATE": 3, "MONEY": 4}
 
@@ -32,7 +35,16 @@ def _page_size(blocks: list[ExtractionBlock]) -> tuple[float, float]:
     return max(max_x, 1.0), max(max_y, 1.0)
 
 
-def extract_kv_items_from_blocks(
+def _max_units_per_docai_chunk() -> int | None:
+    raw = os.environ.get("DOCUVATE_DOCAI_MAX_UNITS_PER_CHUNK", "400").strip()
+    if not raw.isdigit():
+        return 400
+    value = int(raw)
+    return value if value > 0 else None
+
+
+def _extract_kv_chunk(
+    runtime: DocaiRuntime,
     document_id: str,
     blocks: list[ExtractionBlock],
 ) -> list[KeyValueItem]:
@@ -47,19 +59,21 @@ def extract_kv_items_from_blocks(
         for block in blocks
         if block.text.strip()
     ]
-    runtime = get_docai_runtime()
+    if len(units) < MIN_LAYOUT_UNITS:
+        return []
     texts = [unit.text for unit in units]
-    embed_inputs = [f"query: {text}" for text in texts]
-    embeddings = np.asarray(embed_texts_onnx(embed_inputs), dtype=np.float32)
+    embeddings = runtime.embed_texts(texts)
     prediction = runtime.predict_units(units, width=width, height=height, embeddings=embeddings)
     fields = prediction["fields"]
     links = prediction["links"]
     key_indices = {index for index, field in enumerate(fields) if field.field_type == "key"}
-    ner_words = [
-        NerWord(text=unit.text, box=unit.box)
-        for unit in units
-    ]
-    spans = predict_doc_ner_spans(ner_words, page_width=width, page_height=height)
+    ner_words = [NerWord(text=unit.text, box=unit.box) for unit in units]
+    spans = predict_doc_ner_spans(
+        ner_words,
+        page_width=width,
+        page_height=height,
+        word_vectors=embeddings,
+    )
     ent_by_index: dict[int, int] = {}
     for span in spans:
         ent = _ENTITY_INDEX.get(span.entity_type, -1)
@@ -97,4 +111,28 @@ def extract_kv_items_from_blocks(
                     link_score=0.0,
                 )
             )
+    return items
+
+
+def extract_kv_items_from_blocks(
+    document_id: str,
+    blocks: list[ExtractionBlock],
+) -> list[KeyValueItem]:
+    if len(blocks) < MIN_LAYOUT_UNITS:
+        return []
+    by_page: dict[int, list[ExtractionBlock]] = defaultdict(list)
+    for block in blocks:
+        by_page[block.page].append(block)
+
+    runtime = get_docai_runtime()
+    chunk_limit = _max_units_per_docai_chunk()
+    items: list[KeyValueItem] = []
+    for page_num in sorted(by_page):
+        page_blocks = by_page[page_num]
+        if chunk_limit is not None and len(page_blocks) > chunk_limit:
+            for start in range(0, len(page_blocks), chunk_limit):
+                chunk = page_blocks[start : start + chunk_limit]
+                items.extend(_extract_kv_chunk(runtime, document_id, chunk))
+        else:
+            items.extend(_extract_kv_chunk(runtime, document_id, page_blocks))
     return items

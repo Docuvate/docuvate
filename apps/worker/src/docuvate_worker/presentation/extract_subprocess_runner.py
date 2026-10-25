@@ -16,8 +16,20 @@ from typing import Any
 
 from docuvate_worker.application.extract import extract_document
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
-from docuvate_worker.domain.models import ExtractedField, ExtractionBlock, ExtractionResult
+from docuvate_worker.domain.models import (
+    ExtractedDocumentImage,
+    ExtractedField,
+    ExtractionBlock,
+    ExtractionResult,
+)
+from docuvate_worker.infrastructure.extractors.paddle_engine import release_paddle_ocr
+from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
+from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
+from docuvate_worker.presentation.extract_subprocess_errors import (
+    meaningful_stderr_tail,
+    subprocess_failure_message,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +74,6 @@ def extraction_result_from_wire(payload: dict[str, Any]) -> ExtractionResult:
     images_raw = payload.get("images")
     images = None
     if images_raw is not None:
-        from docuvate_worker.domain.models import ExtractedDocumentImage  # noqa: PLC0415
-
         images = [
             ExtractedDocumentImage(
                 page=int(row["page"]),
@@ -166,6 +176,7 @@ def run_extract_isolated(
     embedding_density_state: EmbeddingDensityStatePayload | None,
     build_exact_fact_index: bool,
 ) -> ExtractionResult:
+    configure_onnx_runtime_env()
     if _in_process_extract_allowed():
         logger.warning(
             "DOCUVATE_ALLOW_IN_PROCESS_EXTRACT=1: running extract in-process (not for production)"
@@ -180,11 +191,6 @@ def run_extract_isolated(
             )
         finally:
             reclaim_python_heap()
-    from docuvate_worker.infrastructure.extractors.paddle_engine import (  # noqa: PLC0415
-        release_paddle_ocr,
-    )
-    from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder  # noqa: PLC0415
-
     release_paddle_ocr()
     release_onnx_encoder()
     payload = {
@@ -216,8 +222,16 @@ def run_extract_isolated(
                 failed = None
             if isinstance(failed, dict) and failed.get("ok") is False:
                 raise RuntimeError(str(failed.get("error") or "extract subprocess failed"))
-            detail = (proc.stderr or "").strip() or f"exit {proc.returncode}"
-            raise RuntimeError(detail)
+            tail = meaningful_stderr_tail(proc.stderr)
+            if tail:
+                logger.error("extract subprocess stderr (filtered):\n%s", tail)
+            raise RuntimeError(
+                subprocess_failure_message(
+                    proc.returncode,
+                    proc.stderr,
+                    stdout_snippet=raw_out[:500] if raw_out else None,
+                )
+            )
         envelope = json.loads(raw_out)
     if not envelope.get("ok"):
         raise RuntimeError(str(envelope.get("error") or "extract subprocess failed"))
@@ -228,6 +242,7 @@ def run_extract_isolated(
 
 
 def main() -> None:
+    configure_onnx_runtime_env()
     raw = sys.stdin.read()
     payload = json.loads(raw)
     density = payload.get("embedding_density_state")

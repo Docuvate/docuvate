@@ -3,6 +3,10 @@
 
 from __future__ import annotations
 
+import contextlib
+import importlib
+import logging
+
 from docuvate_worker.domain.cpu_pipeline.contracts import (
     FieldSuggestionsStageData,
     PipelineMutableState,
@@ -14,6 +18,12 @@ from docuvate_worker.domain.models import ExtractedField
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
 
 STAGE_ID = "field_suggestions"
+
+logger = logging.getLogger(__name__)
+
+_FIELD_SUGGESTIONS_FACADE = (
+    "docuvate_worker.application.cpu_document_pipeline.stages.field_suggestions_ml_facade"
+)
 
 
 def _merge_suggestions(
@@ -35,44 +45,55 @@ def _merge_suggestions(
 
 def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggestionsStageData]:
     def _run() -> FieldSuggestionsStageData:
+        ml = importlib.import_module(_FIELD_SUGGESTIONS_FACADE)
         suggestions = heuristic_field_suggestions(state.text)
         layout_rows: list[ExtractedField] = []
         if state.layout_key_value_roles and state.blocks:
             try:
-                from docuvate_worker.infrastructure.ml.layout_kv_roles import (  # noqa: PLC0415
-                    layout_kv_field_suggestions,
-                )
-
-                layout_rows = layout_kv_field_suggestions(
-                    state.blocks,
+                layout_rows = ml.run_layout_kv_field_suggestions(
+                    list(state.blocks),
                     state.document_representation,
                     recognized_field_keys=state.recognized_field_keys,
                     existing_field_keys=frozenset(
                         row.key for row in suggestions if row.key.strip()
                     ),
                 )
-            except Exception:
+            except Exception as exc:
+                logger.warning(
+                    "layout_kv_field_suggestions_failed type=%s",
+                    type(exc).__name__,
+                    exc_info=exc,
+                )
                 layout_rows = []
         docai_rows: list[ExtractedField] = []
         if state.blocks and len(state.blocks) >= 2:
             try:
-                from docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions import (  # noqa: PLC0415
-                    docai_kv_field_suggestions,
-                )
-
-                docai_rows = docai_kv_field_suggestions(
+                docai_rows = ml.run_docai_field_suggestions(
                     list(state.blocks),
                     recognized_field_keys=state.recognized_field_keys,
                     existing_field_keys=frozenset(
                         row.key for row in (*suggestions, *layout_rows) if row.key.strip()
                     ),
                 )
-            except Exception:
+            except Exception as exc:
+                logger.warning(
+                    "docai_field_suggestions_failed type=%s",
+                    type(exc).__name__,
+                    exc_info=exc,
+                )
                 docai_rows = []
         merged = _merge_suggestions(_merge_suggestions(tuple(suggestions), layout_rows), docai_rows)
         return FieldSuggestionsStageData(suggestions=merged)
 
-    data, metrics = measure_stage(_run)
+    def _run_wrapped() -> FieldSuggestionsStageData:
+        try:
+            return _run()
+        finally:
+            with contextlib.suppress(Exception):
+                ml = importlib.import_module(_FIELD_SUGGESTIONS_FACADE)
+                ml.release_docai_models()
+
+    data, metrics = measure_stage(_run_wrapped)
     return StageEnvelope(
         stage_id=STAGE_ID,
         availability=StageAvailability.OK,

@@ -7,6 +7,7 @@ import random
 from collections.abc import Iterable
 
 from PIL import Image, ImageDraw, ImageFont
+from pypdf import PdfReader, PdfWriter
 
 from tests.synthetic_layout_pdfs import _BORN_DIGITAL_BANNER
 
@@ -120,6 +121,26 @@ def scanned_image_only_pdf() -> bytes:
         ("Raster-only label", 48.0, 700.0, 11),
     ]
     return _build_scan_pdf(lines, include_text_layer=False)
+
+
+def scanned_image_only_multipage_pdf(page_count: int = 60) -> bytes:
+    """Many single-page scan objects merged into one PDF (image-only, no text layer)."""
+    if page_count < 1:
+        msg = "page_count must be >= 1"
+        raise ValueError(msg)
+    if page_count == 1:
+        return scanned_image_only_pdf()
+    writer = PdfWriter()
+    for page_index in range(page_count):
+        page_pdf = _build_scan_pdf(
+            [(f"Scan page {page_index + 1} label", 48.0, 700.0, 11)],
+            include_text_layer=False,
+        )
+        reader = PdfReader(io.BytesIO(page_pdf))
+        writer.add_page(reader.pages[0])
+    out = io.BytesIO()
+    writer.write(out)
+    return out.getvalue()
 
 
 def scanned_rotated_90_pdf() -> bytes:
