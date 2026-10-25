@@ -19,15 +19,25 @@ export interface CeLabelPropagationScoresPort {
   propagateLabelScores(input: {
     labelName: string;
     passageVectors: number[][];
+    passageTexts: string[];
     seedDocumentIndices: number[];
+    positiveDocumentIndices: number[];
+    calibrationDocumentIndices: number[];
   }): Promise<CeLabelPropagationScoreRow[]>;
+}
+
+export interface MissingLabelCorpusDocument {
+  documentIndex: number;
+  embedding: number[];
+  tagIds: string[];
+  text: string;
 }
 
 export interface MissingLabelHintPort {
   scoreMissingLabelHint(input: {
-    exampleTokenSets: string[][];
-    words: { text: string; box: [number, number, number, number] }[];
-    pageWidth: number;
-    pageHeight: number;
+    targetDocumentIndex: number;
+    assignedTagIds: string[];
+    corpus: MissingLabelCorpusDocument[];
+    labeledDocumentIndices: number[];
   }): Promise<{ score: number; show: boolean }>;
 }

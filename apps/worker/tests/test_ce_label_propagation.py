@@ -30,13 +30,21 @@ def test_zero_examples_never_auto_assign(_mock: object) -> None:
     "docuvate_worker.infrastructure.ml.ce_ml.label_propagation.embed_texts_onnx",
     side_effect=_mock_embed,
 )
-def test_seeded_label_spreading_prefers_neighbor(_mock: object) -> None:
+def test_seeded_hybrid_prefers_neighbor(_mock: object) -> None:
     vectors = [
         [1.0, 0.0, 0.0, 0.0],
         [0.99, 0.01, 0.0, 0.0],
         [0.0, 1.0, 0.0, 0.0],
         [0.0, 0.0, 1.0, 0.0],
     ]
-    scores = propagate_label_scores(vectors, label_name="Rechnung", seed_document_indices=[0])
+    texts = [f"doc {index}" for index in range(len(vectors))]
+    scores = propagate_label_scores(
+        vectors,
+        label_name="Rechnung",
+        seed_document_indices=[0],
+        passage_texts=texts,
+        positive_document_indices=[0],
+        calibration_document_indices=[0, 1, 2, 3],
+    )
     by_index = {row.document_index: row for row in scores}
     assert by_index[1].score > by_index[2].score

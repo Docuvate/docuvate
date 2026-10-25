@@ -179,10 +179,12 @@ export class GetLabelMapUseCase {
     }));
     const overlap = buildLabelOverlapMatrix(overlapTags);
 
-    const mapRows = rows.map((row) => ({
+    const mapRows = rows.map((row, index) => ({
       documentId: row.documentId,
+      documentIndex: index,
       nonInboxTagIds: row.nonInboxTagIds,
       text: `${row.title}\n${row.filename}`,
+      embedding: row.embedding,
     }));
     const { points: enrichedPoints, labelMissingHintCount } =
       await this.enrichMissingHints.execute(userId, points, mapRows);

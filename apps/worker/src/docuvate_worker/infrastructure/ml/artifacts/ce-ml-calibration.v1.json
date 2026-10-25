@@ -14,7 +14,8 @@
       "suggestThreshold": 0.023735437419444567,
       "method": "LP",
       "autoAssignPrecisionTarget": 0.98
-    }
+    },
+    "minCalibrationDocuments": 8
   },
   "fieldSuggestion": {
     "abstainThreshold": 0.97,
@@ -33,7 +34,7 @@
   "openSetFieldDiscovery": {
     "keyClusterTau": 0.1,
     "minDocFrequencyPhi": 0.3,
-    "keylessClusterTau2": 0.15
+    "keylessClusterTau2": 0.10
   },
   "attribution": {
     "cord": "CC-BY-4.0",

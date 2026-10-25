@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ExtractionBlock, LabelMapPointDto } from '@docuvate/contracts';
+import type { LabelMapPointDto } from '@docuvate/contracts';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import {
   DOCUMENT_REPOSITORY,
   type DocumentRepository,
 } from '../../../shared/domain/ports.js';
-import { contentTokensFromText } from '../domain/ce-content-tokens.js';
 import type { MissingLabelHintPort } from '../domain/ce-label-propagation.port.js';
 import { HttpCeMlAdapter } from '../infrastructure/http-ce-ml.adapter.js';
 
@@ -15,8 +14,10 @@ const MAX_HINTS_PER_MAP = 12;
 
 interface MapRowRef {
   documentId: string;
+  documentIndex: number;
   nonInboxTagIds: string[];
   text: string;
+  embedding: number[];
 }
 
 @Injectable()
@@ -44,6 +45,15 @@ export class EnrichLabelMapMissingHintsUseCase {
       return { points, labelMissingHintCount: 0 };
     }
     const byDocumentId = new Map(rows.map((row) => [row.documentId, row] as const));
+    const corpus = rows.map((row) => ({
+      documentIndex: row.documentIndex,
+      embedding: row.embedding,
+      tagIds: row.nonInboxTagIds,
+      text: row.text,
+    }));
+    const labeledDocumentIndices = rows.flatMap((row) =>
+      row.nonInboxTagIds.length > 0 ? [row.documentIndex] : []
+    );
     const sorted = [...candidates].sort(
       (a, b) => (a.coverageScore ?? 0) - (b.coverageScore ?? 0)
     );
@@ -60,25 +70,15 @@ export class EnrichLabelMapMissingHintsUseCase {
       if (!row) {
         continue;
       }
-      const entity = await this.documents.findByIdForUser(documentId, userId);
-      const blocks = entity?.extraction?.blocks;
-      if (!blocks || blocks.length === 0) {
+      if (row.embedding.length === 0 || labeledDocumentIndices.length < 2) {
         continue;
       }
-      const exampleSets = this.exampleTokenSetsForDocument(row, rows);
-      if (exampleSets.length === 0) {
-        continue;
-      }
-      const pageSize = pageDimensions(blocks);
       try {
         const result = await this.ceMl.scoreMissingLabelHint({
-          exampleTokenSets: exampleSets,
-          words: blocks.map((block) => ({
-            text: block.text,
-            box: [block.x, block.y, block.x + block.width, block.y + block.height],
-          })),
-          pageWidth: pageSize.width,
-          pageHeight: pageSize.height,
+          targetDocumentIndex: row.documentIndex,
+          assignedTagIds: row.nonInboxTagIds,
+          corpus,
+          labeledDocumentIndices,
         });
         if (result.show) {
           hintByDocId.set(documentId, true);
@@ -100,31 +100,4 @@ export class EnrichLabelMapMissingHintsUseCase {
     return { points: enriched, labelMissingHintCount: hintCount };
   }
 
-  private exampleTokenSetsForDocument(target: MapRowRef, allRows: MapRowRef[]): string[][] {
-    const tagSet = new Set(target.nonInboxTagIds);
-    const sets: string[][] = [];
-    for (const row of allRows) {
-      if (row.documentId === target.documentId) {
-        continue;
-      }
-      if (!row.nonInboxTagIds.some((tagId) => tagSet.has(tagId))) {
-        continue;
-      }
-      const tokens = contentTokensFromText(row.text);
-      if (tokens.length > 0) {
-        sets.push(tokens);
-      }
-    }
-    return sets;
-  }
-}
-
-function pageDimensions(blocks: ExtractionBlock[]): { width: number; height: number } {
-  let maxX = 1;
-  let maxY = 1;
-  for (const block of blocks) {
-    maxX = Math.max(maxX, block.x + block.width);
-    maxY = Math.max(maxY, block.y + block.height);
-  }
-  return { width: maxX, height: maxY };
 }
