@@ -35,6 +35,10 @@ import {
 } from './paperless-api.client.js';
 import type { PaperlessCustomField, PaperlessDocument } from './paperless-api.types.js';
 import {
+  paperlessMaxDownloadMegabytes,
+  readPaperlessMaxDownloadBytes,
+} from './paperless-download-limits.js';
+import {
   formatPaperlessCustomFieldValue,
   mapPaperlessCustomFieldType,
   mergePaperlessNotes,
@@ -45,6 +49,26 @@ import {
 import { buildPaperlessDryRunSummary } from './paperless-import.dry-run.js';
 import type { ConnectorImportRunRow } from './paperless-import.repository.js';
 import { PaperlessImportRepository } from './paperless-import.repository.js';
+import {
+  encodePaperlessImportErrorMessageParams,
+  PAPERLESS_IMPORT_MESSAGE_KEYS,
+} from './paperless-import-message-keys.js';
+
+function paperlessDocumentTitle(doc: {
+  id: number;
+  title: string;
+  original_file_name?: string | null;
+}): string {
+  const title = doc.title.trim();
+  if (title.length > 0) {
+    return title;
+  }
+  const fileName = doc.original_file_name?.trim() ?? '';
+  if (fileName.length > 0) {
+    return fileName;
+  }
+  return String(doc.id);
+}
 
 function withAbsenderField(fields: ExtractedField[], absenderName: string | null): ExtractedField[] {
   const trimmed = absenderName?.trim() ?? '';
@@ -125,13 +149,19 @@ export class PaperlessImportExecutor {
     const apiVersion = run.paperlessApiVersion ?? (await detectPaperlessApiVersion(resolved));
     const client = new PaperlessApiClient(resolved, apiVersion);
 
-    const firstPage = await client.listDocuments({ page: 1, pageSize: 1 });
-    await this.imports.markRunRunning(run.id, apiVersion, firstPage.count);
-
     const customFieldDefs = (await client.listCustomFields()).items;
     const customFieldById = new Map(customFieldDefs.map((field) => [field.id, field]));
 
     await this.syncTaxonomyEntities(run.installationId, run.userId, resolved);
+
+    const retryIds = run.retrySourceDocumentIds;
+    if (retryIds && retryIds.length > 0) {
+      await this.runRetryImportJob(run, client, customFieldById, retryIds, apiVersion);
+      return;
+    }
+
+    const firstPage = await client.listDocuments({ page: 1, pageSize: 1 });
+    await this.imports.markRunRunning(run.id, apiVersion, firstPage.count);
 
     let page = run.resumePage;
     let processed = run.progressProcessed;
@@ -156,12 +186,7 @@ export class PaperlessImportExecutor {
             customFieldById,
           });
         } catch (err: unknown) {
-          const detail = err instanceof Error ? err.message : String(err);
-          const messageKey =
-            detail === 'PAPERLESS_DOWNLOAD_TOO_LARGE'
-              ? 'connectors.paperlessImport.documentTooLarge'
-              : 'connectors.paperlessImport.documentFailed';
-          await this.imports.addRunError(run.id, String(row.id), messageKey, detail.slice(0, 500));
+          await this.recordDocumentImportError(run.id, row, err);
         }
         processed += 1;
         modifiedCursor = new Date(row.modified);
@@ -179,6 +204,85 @@ export class PaperlessImportExecutor {
     }
 
     await this.imports.completeRun(run.id, run.installationId, 'completed');
+  }
+
+  private async runRetryImportJob(
+    run: ConnectorImportRunRow,
+    client: PaperlessApiClient,
+    customFieldById: Map<number, PaperlessCustomField>,
+    retryIds: string[],
+    apiVersion: number
+  ): Promise<void> {
+    await this.imports.markRunRunning(run.id, apiVersion, retryIds.length);
+    let processed = 0;
+    for (const sourceId of retryIds) {
+      const paperlessId = parseNumber(sourceId);
+      let doc: PaperlessDocument;
+      try {
+        doc = await client.getDocument(paperlessId);
+      } catch (err: unknown) {
+        await this.recordDocumentImportError(
+          run.id,
+          { id: paperlessId, title: '', original_file_name: sourceId },
+          err
+        );
+        processed += 1;
+        await this.imports.updateRunProgress(run.id, {
+          progressProcessed: processed,
+          resumePage: 1,
+          resumeModifiedCursor: null,
+        });
+        await this.rateLimitPause();
+        continue;
+      }
+      try {
+        await this.importOneDocument({
+          run,
+          client,
+          doc,
+          customFieldById,
+        });
+      } catch (err: unknown) {
+        await this.recordDocumentImportError(run.id, doc, err);
+      }
+      processed += 1;
+      await this.imports.updateRunProgress(run.id, {
+        progressProcessed: processed,
+        resumePage: 1,
+        resumeModifiedCursor: new Date(doc.modified),
+      });
+      await this.rateLimitPause();
+    }
+    await this.imports.completeRun(run.id, run.installationId, 'completed');
+  }
+
+  private async recordDocumentImportError(
+    runId: string,
+    doc: {
+      id: number;
+      title: string;
+      original_file_name?: string | null;
+    },
+    err: unknown
+  ): Promise<void> {
+    const detail = err instanceof Error ? err.message : String(err);
+    const maxBytes = readPaperlessMaxDownloadBytes();
+    const messageKey =
+      detail === 'PAPERLESS_DOWNLOAD_TOO_LARGE'
+        ? PAPERLESS_IMPORT_MESSAGE_KEYS.documentTooLarge
+        : PAPERLESS_IMPORT_MESSAGE_KEYS.documentFailed;
+    const messageParamsJson =
+      messageKey === PAPERLESS_IMPORT_MESSAGE_KEYS.documentTooLarge
+        ? encodePaperlessImportErrorMessageParams({
+            maxMb: paperlessMaxDownloadMegabytes(maxBytes),
+          })
+        : null;
+    const title = paperlessDocumentTitle(doc);
+    await this.imports.addRunError(runId, String(doc.id), messageKey, {
+      messageDetail: detail.slice(0, 500),
+      sourceDocumentTitle: title,
+      messageParamsJson,
+    });
   }
 
   private async rateLimitPause(): Promise<void> {

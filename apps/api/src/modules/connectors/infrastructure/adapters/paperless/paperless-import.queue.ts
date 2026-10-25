@@ -8,6 +8,7 @@ import { isRecord, parseString } from '../../../../../shared/infrastructure/data
 import { ConnectorRuntimeResolver } from '../../../application/connector-runtime.resolver.js';
 import { PaperlessImportExecutor } from './paperless-import.executor.js';
 import { PaperlessImportRepository } from './paperless-import.repository.js';
+import { PAPERLESS_IMPORT_MESSAGE_KEYS } from './paperless-import-message-keys.js';
 
 const QUEUE_NAME = 'connector-paperless-import';
 const RESUME_BACKOFF_MS = [5_000, 15_000, 60_000, 120_000];
@@ -65,7 +66,7 @@ export class PaperlessImportQueueService implements OnModuleInit, OnModuleDestro
             runId,
             run.installationId,
             'failed',
-            'connectors.paperlessImport.runFailed'
+            PAPERLESS_IMPORT_MESSAGE_KEYS.runFailed
           );
         }
       },

@@ -1967,6 +1967,28 @@ export type GetLatestPaperlessImportRunResponses = {
     200: unknown;
 };
 
+export type RetryFailedPaperlessImportData = {
+    body?: never;
+    path: {
+        installationId: string;
+    };
+    query?: never;
+    url: '/connectors/installations/{installationId}/paperless/import-runs/retry-failed';
+};
+
+export type RetryFailedPaperlessImportErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type RetryFailedPaperlessImportError = RetryFailedPaperlessImportErrors[keyof RetryFailedPaperlessImportErrors];
+
+export type RetryFailedPaperlessImportResponses = {
+    201: unknown;
+};
+
 export type GetPaperlessImportRunData = {
     body?: never;
     path: {

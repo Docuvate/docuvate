@@ -54,6 +54,7 @@ const FORWARD_SQL_ORDER = [
   'connector-named-connections-source-scope-up.sql',
   'installation-oidc-provider-up.sql',
   'correspondents-to-absender-up.sql',
+  'connector-paperless-import-retry-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

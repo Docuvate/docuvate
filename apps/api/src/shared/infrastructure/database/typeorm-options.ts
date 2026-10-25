@@ -50,6 +50,7 @@ import { InstallationOidcProvider20261018170000 } from './migrations/20261018170
 import { CorrespondentsToAbsenderField20261018180000 } from './migrations/20261018180000-correspondents-to-absender-field.js';
 import { RecognizedFieldGateLabelPolarity20261018190000 } from './migrations/20261018190000-recognized-field-filter-and-gate-polarity.js';
 import { DocumentFileSizeSavedViewDescription20261018190500 } from './migrations/20261018190500-document-file-size-saved-view-description.js';
+import { ConnectorPaperlessImportRetry20261025120000 } from './migrations/20261025120000-connector-paperless-import-retry.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -122,6 +123,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       CorrespondentsToAbsenderField20261018180000,
       RecognizedFieldGateLabelPolarity20261018190000,
       DocumentFileSizeSavedViewDescription20261018190500,
+      ConnectorPaperlessImportRetry20261025120000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

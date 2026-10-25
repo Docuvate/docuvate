@@ -14,6 +14,7 @@ import type { PaperlessOcrMode } from '../infrastructure/adapters/paperless/pape
 import { PaperlessImportExecutor } from '../infrastructure/adapters/paperless/paperless-import.executor.js';
 import { PaperlessImportQueueService } from '../infrastructure/adapters/paperless/paperless-import.queue.js';
 import { PaperlessImportRepository } from '../infrastructure/adapters/paperless/paperless-import.repository.js';
+import { PAPERLESS_IMPORT_MESSAGE_KEYS } from '../infrastructure/adapters/paperless/paperless-import-message-keys.js';
 import { ConnectorRuntimeResolver } from './connector-runtime.resolver.js';
 
 function coerceCredentialPatch(patch: Record<string, unknown>): Record<string, string> {
@@ -208,7 +209,7 @@ export class StartPaperlessImportUseCase {
     }
     const active = await this.imports.findActiveRunForInstallation(installationId, userId);
     if (active) {
-      throw new ConflictError('connectors.paperlessImport.runAlreadyActive');
+      throw new ConflictError(PAPERLESS_IMPORT_MESSAGE_KEYS.runAlreadyActive);
     }
     const settings = await this.imports.getInstallationSettings(installationId, userId);
     const ocrMode: PaperlessOcrMode = settings?.rerunOcr ? 'rerun_docuvate' : 'keep_paperless';
@@ -218,6 +219,45 @@ export class StartPaperlessImportUseCase {
       ocrMode,
       includeArchivedPdf: settings === null ? false : settings.includeArchivedPdf,
       incrementalModifiedGt: watermark,
+    });
+    await this.queue.enqueue(run.id, userId);
+    return run;
+  }
+}
+
+@Injectable()
+export class RetryFailedPaperlessImportUseCase {
+  constructor(
+    private readonly runtime: ConnectorRuntimeResolver,
+    private readonly imports: PaperlessImportRepository,
+    private readonly queue: PaperlessImportQueueService
+  ) {}
+
+  async execute(userId: string, installationId: string) {
+    const resolved = await this.runtime.resolve(userId, installationId);
+    if (resolved.pluginId !== 'paperless') {
+      throw new ValidationError('connectors.errors.sourceNotSupported');
+    }
+    const active = await this.imports.findActiveRunForInstallation(installationId, userId);
+    if (active) {
+      throw new ConflictError(PAPERLESS_IMPORT_MESSAGE_KEYS.runAlreadyActive);
+    }
+    const latest = await this.imports.findLatestRunForInstallation(installationId, userId);
+    if (!latest) {
+      throw new NotFoundError('Import run');
+    }
+    const failedIds = await this.imports.listFailedSourceDocumentIdsForRun(latest.id);
+    if (failedIds.length === 0) {
+      throw new ValidationError(PAPERLESS_IMPORT_MESSAGE_KEYS.retryNoFailedDocuments);
+    }
+    const settings = await this.imports.getInstallationSettings(installationId, userId);
+    const ocrMode: PaperlessOcrMode = settings?.rerunOcr ? 'rerun_docuvate' : 'keep_paperless';
+    const run = await this.imports.createRun({
+      installationId,
+      ocrMode,
+      includeArchivedPdf: settings === null ? false : settings.includeArchivedPdf,
+      incrementalModifiedGt: null,
+      retrySourceDocumentIds: failedIds,
     });
     await this.queue.enqueue(run.id, userId);
     return run;

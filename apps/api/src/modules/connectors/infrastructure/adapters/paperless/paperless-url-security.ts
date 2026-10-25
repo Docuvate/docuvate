@@ -4,13 +4,17 @@ import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 
 import { connectorFetch, trimTrailingSlash } from '../shared/connector-http.js';
+import { readPaperlessMaxDownloadBytes } from './paperless-download-limits.js';
 
 const MAX_REDIRECT_HOPS = 3;
-const MAX_DOWNLOAD_BYTES = 25 * 1024 * 1024;
 const MAX_LIST_PAGES = 500;
 const MAX_LIST_ITEMS = 50_000;
 
-export { MAX_DOWNLOAD_BYTES, MAX_LIST_ITEMS,MAX_LIST_PAGES };
+export { MAX_LIST_ITEMS, MAX_LIST_PAGES };
+
+export function getPaperlessMaxDownloadBytes(): number {
+  return readPaperlessMaxDownloadBytes();
+}
 
 export class PaperlessUrlValidationError extends Error {
   constructor(readonly messageKey: string) {

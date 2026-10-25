@@ -53,7 +53,38 @@ test.describe('Paperless connector setup route', () => {
     await page.route(
       `**/v1/connectors/installations/${installationId}/paperless/import-runs/latest`,
       async (route) => {
-        await route.fulfill({ status: 404, body: 'not found' });
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            run: {
+              id: 'run-e2e-1',
+              installationId,
+              status: 'completed',
+              paperlessApiVersion: 3,
+              ocrMode: 'keep_paperless',
+              includeArchivedPdf: false,
+              progressProcessed: 2,
+              progressTotal: 2,
+              fatalErrorKey: null,
+              startedAt: now,
+              completedAt: now,
+              createdAt: now,
+              updatedAt: now,
+            },
+            errors: [
+              {
+                id: 'err-e2e-1',
+                sourceDocumentId: '170',
+                sourceDocumentTitle: 'Große Rechnung',
+                messageKey: 'connectors.paperlessImport.documentTooLarge',
+                messageDetail: null,
+                messageParams: { maxMb: 200 },
+                createdAt: now,
+              },
+            ],
+          }),
+        });
       }
     );
 
@@ -86,5 +117,13 @@ test.describe('Paperless connector setup route', () => {
     await expect(page.getByRole('button', { name: /Verbindung testen|Test connection/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Import-Vorschau|Import preview/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /^Import starten$|^Start import$/i })).toBeVisible();
+    await expect(
+      page.getByRole('button', {
+        name: /Fehlgeschlagene erneut importieren|Retry failed imports/i,
+      })
+    ).toBeVisible();
+    await expect(page.getByText(/Große Rechnung/i)).toBeVisible();
+    await expect(page.getByText(/über 200 MB|over 200 MB/i)).toBeVisible();
+    await expect(page.getByText(/Paperless-ID 170|Paperless ID 170/i)).toBeVisible();
   });
 });

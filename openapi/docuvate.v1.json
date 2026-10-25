@@ -3015,6 +3015,79 @@
         ]
       }
     },
+    "/connectors/installations/{installationId}/paperless/import-runs/retry-failed": {
+      "post": {
+        "operationId": "retryFailedPaperlessImport",
+        "parameters": [
+          {
+            "name": "installationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Retry failed documents from the latest Paperless import run",
+        "tags": [
+          "Connectors"
+        ]
+      }
+    },
     "/connectors/installations/{installationId}/paperless/import-runs/{runId}": {
       "get": {
         "operationId": "getPaperlessImportRun",

@@ -34,6 +34,6 @@ Step-by-step provider setup: [connectors-oauth-setup.md](./connectors-oauth-setu
 ## Verify locally
 
 - **S3 / MinIO:** connect with bucket, keys, `endpoint` + `path_style=true`; connect should succeed only if bucket is listable.
-- **Paperless:** instance URL + API token (or username/password); **source-only** bulk import via `/settings/connectors/paperless/{installationId}`. See [ADR 020](./adr/020-paperless-ngx-source-connector.md). Set `DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS` when Paperless runs on a private network.
+- **Paperless:** instance URL + API token (or username/password); **source-only** bulk import via `/settings/connectors/paperless/{installationId}`. See [ADR 020](./adr/020-paperless-ngx-source-connector.md). Set `DV_CONNECTOR_ALLOW_PRIVATE_NETWORKS` when Paperless runs on a private network. Per-file download size is capped by `DOCUVATE_PAPERLESS_MAX_DOWNLOAD_BYTES` (default 200 MiB).
 - **Home Assistant:** base URL + long-lived token; sink-only in catalog.
 - **Gmail / Outlook:** requires OAuth env vars; use **Mit Anbieter verbinden** in UI.
