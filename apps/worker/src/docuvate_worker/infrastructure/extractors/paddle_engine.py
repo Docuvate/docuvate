@@ -7,11 +7,11 @@ import os
 from typing import Any, Protocol, cast
 
 import numpy as np
-from pdf2image import convert_from_bytes
 from PIL import Image
 
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.extractors.paddle_errors import map_paddle_exception
+from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 logger = logging.getLogger(__name__)
@@ -151,20 +151,14 @@ def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
 def ocr_pdf_bytes(
     content: bytes, *, max_pages: int | None = None
 ) -> tuple[str, list[ExtractionBlock]]:
-    logger.info("Rasterizing PDF for PaddleOCR (poppler); this may take a while on large files.")
-    if max_pages and max_pages > 0:
-        images = convert_from_bytes(content, last_page=max_pages)
-    else:
-        images = convert_from_bytes(content)
-    if not images:
-        return "", []
-
+    logger.info(
+        "Rasterizing PDF for PaddleOCR one page at a time; large files may take a while."
+    )
     page_texts: list[str] = []
     all_blocks: list[ExtractionBlock] = []
     block_index = 0
-
     try:
-        for page_num, image in enumerate(images, start=1):
+        for page_num, image in iter_pdf_page_images(content, max_pages=max_pages):
             try:
                 page_text, blocks = _ocr_pil_image(image, page=page_num, block_offset=block_index)
                 if page_text:
@@ -173,8 +167,8 @@ def ocr_pdf_bytes(
                 block_index += len(blocks)
             finally:
                 image.close()
+                reclaim_python_heap()
     finally:
-        images.clear()
         reclaim_python_heap()
 
     return "\n\n".join(page_texts).strip(), all_blocks

@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from docuvate_worker.domain.cpu_pipeline.contracts import (
     FieldSuggestionsStageData,
     PipelineMutableState,
@@ -14,6 +16,8 @@ from docuvate_worker.domain.models import ExtractedField
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
 
 STAGE_ID = "field_suggestions"
+
+logger = logging.getLogger(__name__)
 
 
 def _merge_suggestions(
@@ -51,7 +55,12 @@ def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggesti
                         row.key for row in suggestions if row.key.strip()
                     ),
                 )
-            except Exception:
+            except Exception as exc:
+                logger.warning(
+                    "layout_kv_field_suggestions_failed type=%s",
+                    type(exc).__name__,
+                    exc_info=exc,
+                )
                 layout_rows = []
         docai_rows: list[ExtractedField] = []
         if state.blocks and len(state.blocks) >= 2:
@@ -67,12 +76,30 @@ def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggesti
                         row.key for row in (*suggestions, *layout_rows) if row.key.strip()
                     ),
                 )
-            except Exception:
+            except Exception as exc:
+                logger.warning(
+                    "docai_field_suggestions_failed type=%s",
+                    type(exc).__name__,
+                    exc_info=exc,
+                )
                 docai_rows = []
         merged = _merge_suggestions(_merge_suggestions(tuple(suggestions), layout_rows), docai_rows)
         return FieldSuggestionsStageData(suggestions=merged)
 
-    data, metrics = measure_stage(_run)
+    def _run_wrapped() -> FieldSuggestionsStageData:
+        try:
+            return _run()
+        finally:
+            try:
+                from docuvate_worker.infrastructure.ml.docai.inference import (  # noqa: PLC0415
+                    release_docai_runtime,
+                )
+
+                release_docai_runtime()
+            except Exception:
+                pass
+
+    data, metrics = measure_stage(_run_wrapped)
     return StageEnvelope(
         stage_id=STAGE_ID,
         availability=StageAvailability.OK,

@@ -8,12 +8,13 @@ import os
 from typing import Any, cast
 
 import numpy as np
-from pdf2image import convert_from_bytes
 from PIL import Image
 
 from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
 from docuvate_worker.infrastructure.ml.docai.rapidocr_protocol import RapidOcrEngine
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,11 @@ def _get_rapidocr() -> RapidOcrEngine:
     global _ocr_instance  # noqa: PLW0603
     if _ocr_instance is not None:
         return _ocr_instance
+    from docuvate_worker.infrastructure.onnx_runtime_env import (  # noqa: PLC0415
+        configure_onnx_runtime_env,
+    )
+
+    configure_onnx_runtime_env()
     from rapidocr_onnxruntime import RapidOCR  # noqa: PLC0415
 
     model_dir = docai_model_dir()
@@ -98,25 +104,39 @@ def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
     return _blocks_from_ocr_result(result, page=1, scale_x=1.0, scale_y=1.0)
 
 
-def ocr_pdf_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
-    pages = convert_from_bytes(content, dpi=200)
+def _ocr_pdf_dpi() -> int:
+    raw = os.environ.get("DOCUVATE_OCR_PDF_DPI", "200").strip()
+    return int(raw) if raw.isdigit() and int(raw) > 0 else 200
+
+
+def ocr_pdf_bytes(
+    content: bytes, *, max_pages: int | None = None
+) -> tuple[str, list[ExtractionBlock]]:
     ocr = _get_rapidocr()
     all_lines: list[str] = []
     blocks: list[ExtractionBlock] = []
-    for page_index, page in enumerate(pages, start=1):
-        array = np.asarray(page.convert("RGB"))
-        _page_h, _page_w = array.shape[:2]
-        result, _ = ocr(array, use_cls=False)
-        text, page_blocks = _blocks_from_ocr_result(
-            result,
-            page=page_index,
-            scale_x=1.0,
-            scale_y=1.0,
-        )
-        if text.strip():
-            all_lines.append(text)
-        blocks.extend(page_blocks)
-        del array
+    dpi = _ocr_pdf_dpi()
+    try:
+        for page_index, page in iter_pdf_page_images(
+            content, dpi=dpi, max_pages=max_pages
+        ):
+            try:
+                array = np.asarray(page.convert("RGB"))
+                result, _ = ocr(array, use_cls=False)
+                text, page_blocks = _blocks_from_ocr_result(
+                    result,
+                    page=page_index,
+                    scale_x=1.0,
+                    scale_y=1.0,
+                )
+                if text.strip():
+                    all_lines.append(text)
+                blocks.extend(page_blocks)
+            finally:
+                page.close()
+                reclaim_python_heap()
+    finally:
+        reclaim_python_heap()
     return "\n\n".join(all_lines).strip(), blocks
 
 

@@ -84,6 +84,12 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
             )
 
             release_paddle_ocr()
+            if _ocr_backend() == "rapidocr":
+                from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
+                    release_rapidocr,
+                )
+
+                release_rapidocr()
             return (
                 OcrStageData(
                     text=state.text,
@@ -107,6 +113,12 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
             )
 
             release_paddle_ocr()
+            if _ocr_backend() == "rapidocr":
+                from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
+                    release_rapidocr,
+                )
+
+                release_rapidocr()
             return (
                 OcrStageData(
                     text=state.text,

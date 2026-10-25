@@ -72,11 +72,20 @@ def predict_doc_ner_spans(
     *,
     page_width: float,
     page_height: float,
+    word_vectors: np.ndarray | None = None,
 ) -> list[NerSpan]:
     if not words:
         return []
     texts = [word.text for word in words]
-    vectors = np.asarray(embed_texts_onnx([f"query: {text}" for text in texts]), dtype=np.float32)
+    if word_vectors is not None:
+        vectors = np.asarray(word_vectors, dtype=np.float32)
+        if vectors.shape[0] != len(words):
+            msg = "word_vectors row count must match words length"
+            raise ValueError(msg)
+    else:
+        vectors = np.asarray(
+            embed_texts_onnx([f"query: {text}" for text in texts]), dtype=np.float32
+        )
     shape = np.asarray([_shape_features(text) for text in texts], dtype=np.float32)
     features = np.hstack([vectors, shape]).astype(np.float32)[None, ...]
     centers = np.array(

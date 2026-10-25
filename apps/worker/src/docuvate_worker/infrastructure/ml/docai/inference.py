@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import math
 import re
 import time
@@ -23,6 +24,7 @@ from docuvate_worker.infrastructure.ml.docai.features import LayoutDocument, Lay
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
 from docuvate_worker.infrastructure.ml.docai.rapidocr_protocol import RapidOcrEngine
 from docuvate_worker.infrastructure.onnx_e5_encoder import resolve_e5_onnx_dir
+from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
 FloatArray = NDArray[np.float32]
 
@@ -62,6 +64,11 @@ class DocaiLinkPrediction:
 
 class DocaiRuntime:
     def __init__(self, *, threads: int = 2) -> None:
+        from docuvate_worker.infrastructure.onnx_runtime_env import (  # noqa: PLC0415
+            configure_onnx_runtime_env,
+        )
+
+        configure_onnx_runtime_env()
         model_dir = docai_model_dir()
         if not model_dir.is_dir():
             msg = f"DocAI model directory missing: {model_dir}"
@@ -106,7 +113,20 @@ class DocaiRuntime:
         self._cal_y = np.array(calibration["y"], dtype=np.float64)
         ocr_cfg = self._cfg.get("ocr", {})
         self._use_cls = bool(ocr_cfg.get("use_cls", True))
-        self._rapidocr = self._build_ocr(model_dir, ocr_cfg, threads)
+        self._ocr_model_dir = model_dir
+        self._ocr_cfg = ocr_cfg
+        self._ocr_threads = threads
+        self._rapidocr: RapidOcrEngine | None = None
+
+    def embed_texts(self, texts: Sequence[str]) -> FloatArray:
+        return self._embed(texts)
+
+    def _rapidocr_engine(self) -> RapidOcrEngine:
+        if self._rapidocr is None:
+            self._rapidocr = self._build_ocr(
+                self._ocr_model_dir, self._ocr_cfg, self._ocr_threads
+            )
+        return self._rapidocr
 
     def _build_ocr(self, model_dir: Path, ocr_cfg: dict[str, Any], threads: int) -> RapidOcrEngine:
         from rapidocr_onnxruntime import RapidOCR  # noqa: PLC0415
@@ -150,7 +170,13 @@ class DocaiRuntime:
                 matrix[row] /= norm
         return matrix
 
-    def _embed(self, texts: Sequence[str], batch_size: int = 64) -> FloatArray:
+    def _embed_batch_size(self) -> int:
+        raw = os.environ.get("DOCUVATE_DOCAI_EMBED_BATCH", "32").strip()
+        return int(raw) if raw.isdigit() and int(raw) > 0 else 32
+
+    def _embed(self, texts: Sequence[str], batch_size: int | None = None) -> FloatArray:
+        if batch_size is None:
+            batch_size = self._embed_batch_size()
         prefix = str(self._cfg.get("e5_prefix", "query: "))
         chunks: list[FloatArray] = []
         for start in range(0, len(texts), batch_size):
@@ -182,7 +208,7 @@ class DocaiRuntime:
         started = time.perf_counter()
         timings: dict[str, float] = {}
         ocr_started = time.perf_counter()
-        raw, _ = self._rapidocr(image, use_cls=self._use_cls)
+        raw, _ = self._rapidocr_engine()(image, use_cls=self._use_cls)
         timings["ocr"] = (time.perf_counter() - ocr_started) * 1e3
         if width is None or height is None:
             height, width = int(image.shape[0]), int(image.shape[1])
@@ -353,6 +379,12 @@ _runtime: DocaiRuntime | None = None
 def get_docai_runtime() -> DocaiRuntime:
     global _runtime  # noqa: PLW0603
     if _runtime is None:
-        threads = int(__import__("os").environ.get("DOCUVATE_DOCAI_THREADS", "2"))
+        threads = int(os.environ.get("DOCUVATE_DOCAI_THREADS", "2"))
         _runtime = DocaiRuntime(threads=threads)
     return _runtime
+
+
+def release_docai_runtime() -> None:
+    global _runtime  # noqa: PLW0603
+    _runtime = None
+    reclaim_python_heap()

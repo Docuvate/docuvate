@@ -75,6 +75,11 @@ def _intra_op_threads() -> int:
 
 
 def _load_artifacts() -> tuple[ort.InferenceSession, Tokenizer, Path]:
+    from docuvate_worker.infrastructure.onnx_runtime_env import (  # noqa: PLC0415
+        configure_onnx_runtime_env,
+    )
+
+    configure_onnx_runtime_env()
     global _session, _tokenizer, _onnx_path  # noqa: PLW0603
     if _session is not None and _tokenizer is not None and _onnx_path is not None:
         return _session, _tokenizer, _onnx_path
