@@ -4,6 +4,11 @@
 import io
 import os
 
+from docuvate_worker.domain.extraction_geometry import (
+    PageDimensions,
+    extraction_block_from_absolute,
+    extraction_block_from_normalized,
+)
 from docuvate_worker.domain.models import ExtractionBlock
 
 _DEFAULT_MIN_CHARS = 80
@@ -44,19 +49,20 @@ def try_extract_pdf_native(content: bytes) -> tuple[str, list[ExtractionBlock]] 
                     continue
 
                 words = page.extract_words() or []
+                page_size = PageDimensions(width=width, height=height)
                 if not words and page_text:
-                    blocks.append(
-                        ExtractionBlock(
-                            page=page_num,
-                            x=0.05,
-                            y=0.05,
-                            width=0.9,
-                            height=0.1,
-                            text=page_text[:500],
-                            block_index=block_index,
-                        )
+                    fallback = extraction_block_from_normalized(
+                        page=page_num,
+                        x=0.05,
+                        y=0.05,
+                        width=0.9,
+                        height=0.1,
+                        text=page_text[:500],
+                        block_index=block_index,
                     )
-                    block_index += 1
+                    if fallback is not None:
+                        blocks.append(fallback)
+                        block_index += 1
                     continue
 
                 for word in words:
@@ -69,32 +75,34 @@ def try_extract_pdf_native(content: bytes) -> tuple[str, list[ExtractionBlock]] 
                     x1 = float(word["x1"])
                     top = float(word["top"])
                     bottom = float(word["bottom"])
-                    blocks.append(
-                        ExtractionBlock(
-                            page=page_num,
-                            x=x0 / width,
-                            y=top / height,
-                            width=max(0.0, (x1 - x0) / width),
-                            height=max(0.0, (bottom - top) / height),
-                            text=text,
-                            block_index=block_index,
-                        )
+                    block = extraction_block_from_absolute(
+                        page=page_num,
+                        x0=x0,
+                        y0=top,
+                        x1=x1,
+                        y1=bottom,
+                        page_size=page_size,
+                        text=text,
+                        block_index=block_index,
                     )
+                    if block is None:
+                        continue
+                    blocks.append(block)
                     block_index += 1
                 if block_index >= _MAX_NATIVE_WORD_BLOCKS:
                     if page_text:
-                        blocks.append(
-                            ExtractionBlock(
-                                page=page_num,
-                                x=0.05,
-                                y=0.05,
-                                width=0.9,
-                                height=0.9,
-                                text=page_text[:4000],
-                                block_index=block_index,
-                            )
+                        fallback = extraction_block_from_normalized(
+                            page=page_num,
+                            x=0.05,
+                            y=0.05,
+                            width=0.9,
+                            height=0.9,
+                            text=page_text[:4000],
+                            block_index=block_index,
                         )
-                        block_index += 1
+                        if fallback is not None:
+                            blocks.append(fallback)
+                            block_index += 1
                     break
     except Exception:
         return None
