@@ -43,7 +43,7 @@ export function ErrorScreenLayout({
     >
       {showHero ? (
         <div className="ds-error-screen-hero-slot">{hero}</div>
-      ) : showIcon && Icon ? (
+      ) : showIcon ? (
         <div className="ds-error-screen-icon-slot">
           <div className="ds-error-screen-icon">
             <Icon size={32} strokeWidth={2} aria-hidden />

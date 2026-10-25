@@ -9,7 +9,7 @@ import i18n from '../../i18n';
 import { DocuvateErrorPage } from './DocuvateErrorPage';
 
 vi.mock('../../lib/apiHealth', () => ({
-  probeApiHealth: vi.fn(async () => ({ ok: false, errorType: 'network' })),
+  probeApiHealth: vi.fn(() => Promise.resolve({ ok: false, errorType: 'network' })),
   apiHealthCheckUrl: () => 'http://localhost/api/health',
 }));
 

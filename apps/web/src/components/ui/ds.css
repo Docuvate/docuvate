@@ -744,7 +744,7 @@
     linear-gradient(
       165deg,
       var(--dv-color-bg) 0%,
-      color-mix(in srgb, var(--dv-color-bg) 88%, #1a1614 12%) 50%,
+      color-mix(in srgb, var(--dv-color-bg) 88%, var(--dv-color-bg-muted) 12%) 50%,
       var(--dv-color-bg) 100%
     );
 }

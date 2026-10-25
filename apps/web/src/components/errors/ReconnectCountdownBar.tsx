@@ -33,7 +33,7 @@ export function ReconnectCountdownBar({
       >
         <div
           className={`error-scene-countdown-fill${isProbing || fillRatio > 0 ? ' error-scene-countdown-fill--active' : ''}`}
-          style={{ width: `${percent}%` }}
+          style={{ width: `${String(percent)}%` }}
         />
       </div>
       <p className="error-scene-countdown-label">

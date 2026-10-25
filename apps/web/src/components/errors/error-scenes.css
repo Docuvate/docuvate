@@ -2,7 +2,7 @@
 /* SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0 */
 
 .full-page-error-shell {
-  --error-scene-paper-top: color-mix(in srgb, var(--dv-color-bg-raised) 92%, #fff 8%);
+  --error-scene-paper-top: color-mix(in srgb, var(--dv-color-bg-raised) 92%, var(--dv-color-accent-contrast) 8%);
   --error-scene-paper-bottom: color-mix(in srgb, var(--dv-color-bg) 88%, var(--dv-color-accent) 4%);
   --error-scene-shadow: color-mix(in srgb, var(--dv-color-text) 55%, transparent);
   --error-scene-ink: color-mix(in srgb, var(--dv-color-text-muted) 85%, transparent);
@@ -23,22 +23,27 @@
 }
 
 [data-docuvate-theme='dark'] .full-page-error-shell {
-  --error-scene-paper-top: color-mix(in srgb, #5c5248 55%, var(--dv-color-bg-raised) 45%);
-  --error-scene-paper-bottom: color-mix(in srgb, #4a4038 50%, var(--dv-color-bg) 50%);
-  --error-scene-shadow: color-mix(in srgb, #000 70%, transparent);
+  --error-scene-paper-top: color-mix(in srgb, var(--dv-color-text-muted) 55%, var(--dv-color-bg-raised) 45%);
+  --error-scene-paper-bottom: color-mix(in srgb, var(--dv-color-border-strong) 50%, var(--dv-color-bg) 50%);
+  --error-scene-shadow: color-mix(in srgb, var(--dv-color-text) 70%, transparent);
 
   background-image:
     url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E"),
     radial-gradient(ellipse 80% 50% at 12% 18%, color-mix(in srgb, var(--dv-color-accent) 12%, transparent), transparent 62%),
     radial-gradient(ellipse 65% 45% at 88% 82%, color-mix(in srgb, var(--dv-color-accent) 6%, transparent), transparent 58%),
-    linear-gradient(155deg, #1a1614 0%, color-mix(in srgb, var(--dv-color-bg) 88%, #1a1614 12%) 48%, #1a1614 100%);
+    linear-gradient(
+      155deg,
+      var(--dv-color-bg) 0%,
+      color-mix(in srgb, var(--dv-color-bg) 88%, var(--dv-color-bg-muted) 12%) 48%,
+      var(--dv-color-bg) 100%
+    );
 }
 
 .full-page-error-shell::before,
 .full-page-error-shell::after {
   content: '';
   position: absolute;
-  border-radius: 50%;
+  border-radius: var(--dv-radius-lg);
   pointer-events: none;
   z-index: 0;
 }
@@ -368,7 +373,7 @@
   border-radius: inherit;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--dv-color-accent) 80%, #fff 20%),
+    color-mix(in srgb, var(--dv-color-accent) 80%, var(--dv-color-accent-contrast) 20%),
     var(--dv-color-accent)
   );
 }
@@ -394,18 +399,6 @@
     filter: brightness(1.08);
     opacity: 1;
   }
-}
-
-[data-docuvate-theme='dark'] .error-scene-character-body {
-  stroke: color-mix(in srgb, #c9bfb3 55%, var(--dv-color-border) 45%);
-  stroke-width: 2;
-  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--dv-color-accent) 22%, transparent));
-}
-
-[data-docuvate-theme='dark'] .error-scene-hero-doc rect,
-[data-docuvate-theme='dark'] .error-scene-float rect {
-  stroke: color-mix(in srgb, #b8aea3 40%, var(--dv-color-border) 60%);
-  stroke-width: 1.5;
 }
 
 .error-scene-countdown-label {
