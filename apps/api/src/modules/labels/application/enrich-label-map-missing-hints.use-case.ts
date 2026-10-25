@@ -9,6 +9,7 @@ import {
 } from '../../../shared/domain/ports.js';
 import { contentTokensFromText } from '../domain/ce-content-tokens.js';
 import type { MissingLabelHintPort } from '../domain/ce-label-propagation.port.js';
+import { HttpCeMlAdapter } from '../infrastructure/http-ce-ml.adapter.js';
 
 const MAX_HINTS_PER_MAP = 12;
 
@@ -24,7 +25,7 @@ export class EnrichLabelMapMissingHintsUseCase {
 
   constructor(
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    private readonly ceMl: MissingLabelHintPort
+    @Inject(HttpCeMlAdapter) private readonly ceMl: MissingLabelHintPort
   ) {}
 
   async execute(

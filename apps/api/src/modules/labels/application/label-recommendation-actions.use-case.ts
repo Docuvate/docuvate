@@ -25,6 +25,7 @@ import { cosineSimilarity } from '../domain/cosine.js';
 import { adjustLabelNearThresholdFromFeedback } from '../domain/label-near-threshold.js';
 import { parseAssignRecommendationId } from '../domain/label-recommendation-scoring.js';
 import { phraseFromRecommendationKey } from '../domain/recommendation-blocklist.js';
+import { ApplyCeLabelPropagationUseCase } from './apply-ce-label-propagation.use-case.js';
 import { AssignDocumentTagUseCase } from './document-label.use-cases.js';
 
 @Injectable()
@@ -98,6 +99,7 @@ export class AcceptLabelRecommendationUseCase {
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(AssignDocumentTagUseCase) private readonly assignTag: AssignDocumentTag,
+    @Inject(ApplyCeLabelPropagationUseCase)
     private readonly ceLabelPropagation: CeLabelPropagationSeedPort
   ) {}
 
