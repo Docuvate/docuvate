@@ -5,8 +5,8 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AdminRouteGuard } from './components/admin/AdminRouteGuard';
 import { AppBootLoading } from './components/AppBootLoading';
 import { AppShell } from './components/AppShell';
+import { SessionBootErrorScreen } from './components/errors/SessionBootErrorScreen';
 import { authClient } from './lib/auth-client';
-import { formatAuthClientError } from './lib/authErrors';
 import { hadAuthenticatedSessionHint } from './lib/authSessionHint';
 import { isErrorScreenshotHarnessBuild } from './lib/errorPreviewRoutes';
 import { useFeatureFlags } from './lib/remoteConfig';
@@ -46,13 +46,16 @@ import { RecognizedFieldsPage } from './pages/structure/RecognizedFieldsPage';
 import { StylesDocsPage } from './pages/StylesDocsPage';
 
 function Protected({ children }: { children: React.ReactNode }) {
-  const { data, isPending, error } = authClient.useSession();
+  const { data, isPending, error, refetch } = authClient.useSession();
   if (isPending) return <AppBootLoading />;
   if (error) {
     return (
-      <p className="error" role="alert">
-        {formatAuthClientError(error, 'session')}
-      </p>
+      <SessionBootErrorScreen
+        error={error}
+        onRecovered={() => {
+          void refetch({ query: { disableCookieCache: true } });
+        }}
+      />
     );
   }
   if (!data?.session) {

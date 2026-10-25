@@ -259,7 +259,28 @@
       },
       "browserOffline": {
         "title": "Offline",
-        "lead": "Check your internet connection and try again."
+        "lead": "Check your internet connection and try again.",
+        "fullTitle": "You are offline",
+        "fullLead": "Without a network connection, Docuvate cannot reach the server. We reconnect automatically when you are back online."
+      },
+      "unreachable": {
+        "title": "Docuvate is unreachable right now",
+        "lead": "The server is not responding. Your data on this device is safe. We are trying to restore the connection automatically.",
+        "reconnectCountdown": "Reconnecting in {{seconds}} s",
+        "retryNow": "Try reconnecting now",
+        "ready": "You can restore the connection now.",
+        "probing": "Checking connection …"
+      },
+      "serverFault": {
+        "title": "Docuvate is temporarily unavailable",
+        "lead": "The server reported an error. We are trying to restore the connection automatically."
+      },
+      "technicalDetails": {
+        "toggle": "Technical details",
+        "errorType": "Error type",
+        "statusCode": "Status code",
+        "timestamp": "Timestamp",
+        "none": "n/a"
       },
       "sessionExpired": {
         "title": "Session expired",

@@ -260,7 +260,28 @@
       },
       "browserOffline": {
         "title": "Offline",
-        "lead": "Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut."
+        "lead": "Bitte prüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.",
+        "fullTitle": "Sie sind offline",
+        "fullLead": "Ohne Internetverbindung kann Docuvate nicht mit dem Server sprechen. Sobald Sie wieder online sind, verbinden wir automatisch neu."
+      },
+      "unreachable": {
+        "title": "Docuvate ist gerade nicht erreichbar",
+        "lead": "Der Server antwortet nicht. Ihre Daten auf diesem Gerät sind sicher. Wir versuchen automatisch, die Verbindung wiederherzustellen.",
+        "reconnectCountdown": "Erneut verbinden in {{seconds}} s",
+        "retryNow": "Jetzt erneut versuchen",
+        "ready": "Sie können die Verbindung jetzt wiederherstellen.",
+        "probing": "Verbindung wird geprüft …"
+      },
+      "serverFault": {
+        "title": "Docuvate ist vorübergehend nicht verfügbar",
+        "lead": "Auf dem Server ist ein Fehler aufgetreten. Wir versuchen automatisch, die Verbindung wiederherzustellen."
+      },
+      "technicalDetails": {
+        "toggle": "Technische Details",
+        "errorType": "Fehlertyp",
+        "statusCode": "Statuscode",
+        "timestamp": "Zeitpunkt",
+        "none": "k. A."
       },
       "sessionExpired": {
         "title": "Sitzung abgelaufen",

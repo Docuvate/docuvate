@@ -1,23 +1,21 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { DocuvateErrorPage } from '../components/errors/DocuvateErrorPage';
+import { FullPageErrorShell } from '../components/errors/FullPageErrorShell';
 
-import { Card } from '../components/ui/Card';
-import { routes } from '../lib/routes';
+export interface NotFoundPageProps {
+  /** When true, render only the error card (inside AppShell). */
+  embedded?: boolean;
+}
 
-export function NotFoundPage() {
-  const { t } = useTranslation();
-
+export function NotFoundPage({ embedded = false }: NotFoundPageProps) {
+  const content = <DocuvateErrorPage variant="not-found" />;
+  if (embedded) {
+    return <div className="not-found-page not-found-page--embedded" data-testid="not-found-page">{content}</div>;
+  }
   return (
-    <div className="not-found-page">
-      <Card className="not-found-card">
-        <h1>{t('notFoundPage.title')}</h1>
-        <p className="muted">{t('notFoundPage.lead')}</p>
-        <Link className="btn btn-primary" to={routes.documents}>
-          {t('notFoundPage.documentsLink')}
-        </Link>
-      </Card>
-    </div>
+    <FullPageErrorShell testId="not-found-page">
+      {content}
+    </FullPageErrorShell>
   );
 }

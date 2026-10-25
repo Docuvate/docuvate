@@ -62,7 +62,13 @@ export function ConnectionStatusBanners() {
         title={t('errors.pages.connectionLost.title')}
         description={t('errors.pages.connectionLost.lead')}
         action={
-          <Button type="button" variant="secondary" onClick={retryServerConnection}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              void retryServerConnection();
+            }}
+          >
             {t('errors.pages.connectionLost.action')}
           </Button>
         }
