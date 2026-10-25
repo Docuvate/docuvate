@@ -9,6 +9,10 @@ interface LabelHybridTrainWorkerData {
   rows: LabelHybridDocumentRow[];
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
 function parseWorkerData(value: unknown): LabelHybridTrainWorkerData {
   if (typeof value !== 'object' || value === null) {
     throw new Error('label hybrid train worker: invalid payload');
@@ -20,7 +24,7 @@ function parseWorkerData(value: unknown): LabelHybridTrainWorkerData {
   }
   const rows: LabelHybridDocumentRow[] = [];
   for (const raw of rowsEntry[1]) {
-    if (typeof raw !== 'object' || raw === null) {
+    if (!isRecord(raw)) {
       continue;
     }
     const rowEntries = Object.entries(raw);

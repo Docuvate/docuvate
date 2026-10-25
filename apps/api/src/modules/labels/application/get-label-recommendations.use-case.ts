@@ -20,7 +20,6 @@ import {
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
 import { type LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
-import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
 import { OPEN_SET_MIN_CLUSTER_SIZE } from '../domain/label-open-set-discovery.js';
 import {
@@ -35,6 +34,7 @@ import {
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
+import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 
 function enrichWithSampleDocuments(
   items: LabelRecommendationDto[],

@@ -68,11 +68,11 @@ import {
 } from './application/tag-custom-field.use-cases.js';
 import { WithdrawLabelCorrectionUseCase } from './application/withdraw-label-correction.use-case.js';
 import { EmbeddingDensityCalibrationQueueService } from './infrastructure/embedding-density-calibration-queue.service.js';
-import { LabelHybridModelCacheService } from './infrastructure/label-hybrid-model-cache.service.js';
 import { HeadlessPgEmbeddingDensityRepository } from './infrastructure/headless-pg-embedding-density.repository.js';
 import { HttpCeMlAdapter } from './infrastructure/http-ce-ml.adapter.js';
 import { HttpEmbeddingAdapter } from './infrastructure/http-embedding.adapter.js';
 import { HttpEmbeddingDensityAdapter } from './infrastructure/http-embedding-density.adapter.js';
+import { LabelHybridModelCacheService } from './infrastructure/label-hybrid-model-cache.service.js';
 import { PgEmbeddingDensityRepository } from './infrastructure/pg-embedding-density.repository.js';
 import { PgLabelCoOccurrenceRepository } from './infrastructure/pg-label-co-occurrence.repository.js';
 import { PgLabelEmbeddingRepository } from './infrastructure/pg-label-embedding.repository.js';
