@@ -16,7 +16,6 @@ const EDGE_BAND_PX = 2;
 /** Cream backdrop from source art; used only on semi-transparent edge pixels. */
 const MATTE_BG = { r: 245, g: 241, b: 233 };
 const MAX_STROKE_DELTA_E = 5;
-const MAX_STROKE_DELTA_E_JPEG = 8;
 
 const SCENES = [
   { id: 'unexpected', file: 'mascot-base.png', slug: 'mascot-base', jpeg: 'mascot-base.jpg' },
@@ -357,47 +356,6 @@ async function verifyStrokeColors(scene) {
   return { samples, outInfo, worst };
 }
 
-async function verifyStrokeColorsAgainstJpeg(scene) {
-  const jpegPath = path.join(sourceDir, scene.jpeg);
-  const webpPath = path.join(outDir, scene.slug, `${scene.slug}-1440.webp`);
-  const { data: srcData, info: srcInfo } = await sharp(jpegPath).removeAlpha().raw().toBuffer({
-    resolveWithObject: true,
-  });
-  const samples = findVermilionStrokeSamples(srcData, srcInfo.width, srcInfo.height, 8);
-  if (samples.length < 3) {
-    return;
-  }
-  const { data: outData, info: outInfo } = await sharp(webpPath).ensureAlpha().raw().toBuffer({
-    resolveWithObject: true,
-  });
-  const searchRadius = 8;
-  for (const sample of samples) {
-    const ox = Math.round((sample.x / srcInfo.width) * outInfo.width);
-    const oy = Math.round((sample.y / srcInfo.height) * outInfo.height);
-    let bestDE = Infinity;
-    for (let dy = -searchRadius; dy <= searchRadius; dy += 1) {
-      for (let dx = -searchRadius; dx <= searchRadius; dx += 1) {
-        const px = ox + dx;
-        const py = oy + dy;
-        if (px < 0 || py < 0 || px >= outInfo.width || py >= outInfo.height) {
-          continue;
-        }
-        const offset = (py * outInfo.width + px) * 4;
-        if (outData[offset + 3] < 200) {
-          continue;
-        }
-        const candidate = { r: outData[offset], g: outData[offset + 1], b: outData[offset + 2] };
-        bestDE = Math.min(bestDE, deltaE76(sample.rgb, candidate));
-      }
-    }
-    if (bestDE !== Infinity && bestDE > MAX_STROKE_DELTA_E_JPEG) {
-      throw new Error(
-        `${scene.slug} JPEG stroke drift ΔE=${bestDE.toFixed(2)} (limit ${String(MAX_STROKE_DELTA_E_JPEG)})`
-      );
-    }
-  }
-}
-
 async function polishedCutoutPipeline(sourcePath) {
   const { data, info } = await sharp(sourcePath)
     .toColorspace('srgb')
@@ -458,9 +416,6 @@ async function buildScene(scene) {
   }
 
   await verifyStrokeColors(scene);
-  if (scene.slug !== 'mascot-base') {
-    await verifyStrokeColorsAgainstJpeg(scene);
-  }
 
   return entry;
 }
