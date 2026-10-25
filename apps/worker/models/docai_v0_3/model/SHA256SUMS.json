@@ -1,0 +1,9 @@
+{
+ "arrays.npz": "c137a3c93103b9fd",
+ "config.json": "ab04d58f0372901e",
+ "f2_head.onnx": "4f59ed97c0b11adf",
+ "field_head.onnx": "a709d2a4d1779282",
+ "link_ranker.onnx": "b33db57e26545a44",
+ "tfidf_vocab.json": "db9cff701eb7682b",
+ "ocr/en_PP-OCRv5_rec_mobile.onnx": "c3461add59bb4323"
+}

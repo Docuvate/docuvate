@@ -20,10 +20,12 @@ import {
 } from '../../../shared/domain/ports.js';
 import { assertTagNameNotNearDuplicate } from '../../../shared/domain/tag-name-uniqueness.js';
 import type { AssignDocumentTag } from '../domain/assign-document-tag.port.js';
+import type { CeLabelPropagationSeedPort } from '../domain/ce-label-propagation.port.js';
 import { cosineSimilarity } from '../domain/cosine.js';
 import { adjustLabelNearThresholdFromFeedback } from '../domain/label-near-threshold.js';
 import { parseAssignRecommendationId } from '../domain/label-recommendation-scoring.js';
 import { phraseFromRecommendationKey } from '../domain/recommendation-blocklist.js';
+import { ApplyCeLabelPropagationUseCase } from './apply-ce-label-propagation.use-case.js';
 import { AssignDocumentTagUseCase } from './document-label.use-cases.js';
 
 @Injectable()
@@ -96,7 +98,9 @@ export class AcceptLabelRecommendationUseCase {
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
-    @Inject(AssignDocumentTagUseCase) private readonly assignTag: AssignDocumentTag
+    @Inject(AssignDocumentTagUseCase) private readonly assignTag: AssignDocumentTag,
+    @Inject(ApplyCeLabelPropagationUseCase)
+    private readonly ceLabelPropagation: CeLabelPropagationSeedPort
   ) {}
 
   async execute(userId: string, body: AcceptLabelRecommendationRequest) {
@@ -130,6 +134,7 @@ export class AcceptLabelRecommendationUseCase {
         }
       }
       await this.labelEmbeddings.dismissRecommendation(userId, id);
+      await this.runCeLabelPropagation(userId, tagId);
       return { tagId, action: 'assigned' as const, documentId: docIds[0] };
     }
 
@@ -167,6 +172,9 @@ export class AcceptLabelRecommendationUseCase {
       }
       await this.labelEmbeddings.dismissRecommendation(userId, id);
       await this.labelEmbeddings.dismissRecommendation(userId, `new:${normalizeLabelKey(name)}`);
+      if (docIds.length > 0) {
+        await this.ceLabelPropagation.propagateAfterLabelSeed(userId, tag.id, docIds);
+      }
       return { tagId: tag.id, action: 'created' as const };
     }
 
@@ -210,6 +218,17 @@ export class AcceptLabelRecommendationUseCase {
         throw new ValidationError('Document not found');
       }
     }
+  }
+
+  private async runCeLabelPropagation(userId: string, tagId: string): Promise<void> {
+    const rows = await this.labelEmbeddings.listDocumentEmbeddingsForUser(userId);
+    const seedDocumentIds = rows
+      .filter((row) => row.nonInboxTagIds.includes(tagId))
+      .map((row) => row.documentId);
+    if (seedDocumentIds.length === 0) {
+      return;
+    }
+    await this.ceLabelPropagation.propagateAfterLabelSeed(userId, tagId, seedDocumentIds);
   }
 
   private async learnFromAssignAccept(

@@ -25,6 +25,7 @@ import {
 import { RecognizedFieldsModule } from '../recognized-fields/recognized-fields.module.js';
 import { RepresentationModule } from '../representation/representation.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
+import { ApplyCeLabelPropagationUseCase } from './application/apply-ce-label-propagation.use-case.js';
 import { ApplyEmbeddingDensitySuggestionsUseCase } from './application/apply-embedding-density-suggestions.use-case.js';
 import { ApplyEmbeddingSuggestionsUseCase } from './application/apply-embedding-suggestions.use-case.js';
 import { ApplyLabelCorrectionUseCase } from './application/apply-label-correction.use-case.js';
@@ -44,6 +45,7 @@ import {
   RemoveDocumentTagUseCase,
 } from './application/document-label.use-cases.js';
 import { RecordEmbeddingFeedbackUseCase } from './application/embedding-feedback.use-case.js';
+import { EnrichLabelMapMissingHintsUseCase } from './application/enrich-label-map-missing-hints.use-case.js';
 import { GetLabelMapUseCase } from './application/get-label-map.use-case.js';
 import { GetLabelRecommendationsUseCase } from './application/get-label-recommendations.use-case.js';
 import {
@@ -59,6 +61,7 @@ import {
 import { RecordEmbeddingDensityCorrectionUseCase } from './application/record-embedding-density-correction.use-case.js';
 import { RefreshEmbeddingSuggestionsUseCase } from './application/refresh-embedding-suggestions.use-case.js';
 import { RunEmbeddingDensityCalibrationUseCase } from './application/run-embedding-density-calibration.use-case.js';
+import { SuggestTagCustomFieldsUseCase } from './application/suggest-tag-custom-fields.use-case.js';
 import {
   ListTagCustomFieldsUseCase,
   ReplaceTagCustomFieldsUseCase,
@@ -66,6 +69,7 @@ import {
 import { WithdrawLabelCorrectionUseCase } from './application/withdraw-label-correction.use-case.js';
 import { EmbeddingDensityCalibrationQueueService } from './infrastructure/embedding-density-calibration-queue.service.js';
 import { HeadlessPgEmbeddingDensityRepository } from './infrastructure/headless-pg-embedding-density.repository.js';
+import { HttpCeMlAdapter } from './infrastructure/http-ce-ml.adapter.js';
 import { HttpEmbeddingAdapter } from './infrastructure/http-embedding.adapter.js';
 import { HttpEmbeddingDensityAdapter } from './infrastructure/http-embedding-density.adapter.js';
 import { PgEmbeddingDensityRepository } from './infrastructure/pg-embedding-density.repository.js';
@@ -131,6 +135,10 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     RecordEmbeddingDensityCorrectionUseCase,
     ApplyLabelCorrectionUseCase,
     ApplySparkLabelPropagationUseCase,
+    ApplyCeLabelPropagationUseCase,
+    EnrichLabelMapMissingHintsUseCase,
+    SuggestTagCustomFieldsUseCase,
+    HttpCeMlAdapter,
     WithdrawLabelCorrectionUseCase,
     RefreshEmbeddingSuggestionsUseCase,
     HttpEmbeddingDensityAdapter,

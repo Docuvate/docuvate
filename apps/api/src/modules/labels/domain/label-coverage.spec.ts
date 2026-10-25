@@ -47,5 +47,6 @@ describe('summarizeCoverage', () => {
     expect(summary.threshold).toBe(LABEL_CONTENT_SIM_THRESHOLD);
     expect(summary.gapCount).toBe(2);
     expect(summary.coveredPercent).toBe(50);
+    expect(summary.labelMissingHintCount).toBe(0);
   });
 });

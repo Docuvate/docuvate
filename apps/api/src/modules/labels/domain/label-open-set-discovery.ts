@@ -17,7 +17,7 @@ import {
 } from './label-hybrid-features.js';
 
 /** Calibrated on synthetic open-set fixtures (held-out) for ≥0.95 precision. */
-export const OPEN_SET_MIN_CLUSTER_SIZE = 2;
+export const OPEN_SET_MIN_CLUSTER_SIZE = 5;
 export const OPEN_SET_MIN_PAIRWISE_HYBRID_SIM = 0.68;
 export const OPEN_SET_MIN_COHESION = 0.72;
 export const OPEN_SET_MIN_SEPARATION = 0.08;

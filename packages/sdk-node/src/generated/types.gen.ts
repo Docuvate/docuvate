@@ -926,8 +926,11 @@ export type StartMailOAuthRequestDto = {
     accountHint?: string;
 };
 
-export type TagCustomFieldListResponseDto = {
+export type TagCustomFieldListResponseDtoClass = {
     items: Array<{
+        [key: string]: unknown;
+    }>;
+    suggestions?: Array<{
         [key: string]: unknown;
     }>;
 };
@@ -4695,7 +4698,7 @@ export type GetCustomFieldsErrors = {
 export type GetCustomFieldsError = GetCustomFieldsErrors[keyof GetCustomFieldsErrors];
 
 export type GetCustomFieldsResponses = {
-    200: TagCustomFieldListResponseDto;
+    200: TagCustomFieldListResponseDtoClass;
 };
 
 export type GetCustomFieldsResponse = GetCustomFieldsResponses[keyof GetCustomFieldsResponses];
@@ -4719,7 +4722,7 @@ export type PutCustomFieldsErrors = {
 export type PutCustomFieldsError = PutCustomFieldsErrors[keyof PutCustomFieldsErrors];
 
 export type PutCustomFieldsResponses = {
-    200: TagCustomFieldListResponseDto;
+    200: TagCustomFieldListResponseDtoClass;
 };
 
 export type PutCustomFieldsResponse = PutCustomFieldsResponses[keyof PutCustomFieldsResponses];

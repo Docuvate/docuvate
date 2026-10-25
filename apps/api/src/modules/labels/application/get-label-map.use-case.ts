@@ -28,6 +28,7 @@ import {
 import { projectLabelMap2D } from '../domain/label-map-projection.js';
 import { buildLabelOverlapMatrix } from '../domain/label-overlap-matrix.js';
 import { BackfillDocumentEmbeddingsUseCase } from './backfill-document-embeddings.use-case.js';
+import { EnrichLabelMapMissingHintsUseCase } from './enrich-label-map-missing-hints.use-case.js';
 
 @Injectable()
 export class GetLabelMapUseCase {
@@ -35,7 +36,8 @@ export class GetLabelMapUseCase {
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
-    private readonly backfillEmbeddings: BackfillDocumentEmbeddingsUseCase
+    private readonly backfillEmbeddings: BackfillDocumentEmbeddingsUseCase,
+    private readonly enrichMissingHints: EnrichLabelMapMissingHintsUseCase
   ) {}
 
   async execute(userId: string): Promise<LabelMapResponseDto> {
@@ -177,13 +179,25 @@ export class GetLabelMapUseCase {
     }));
     const overlap = buildLabelOverlapMatrix(overlapTags);
 
+    const mapRows = rows.map((row) => ({
+      documentId: row.documentId,
+      nonInboxTagIds: row.nonInboxTagIds,
+      text: `${row.title}\n${row.filename}`,
+    }));
+    const { points: enrichedPoints, labelMissingHintCount } =
+      await this.enrichMissingHints.execute(userId, points, mapRows);
+    const coverageSummary = {
+      ...summarizeCoverage(coverageStatuses, nearThreshold),
+      labelMissingHintCount,
+    };
+
     return {
-      points,
+      points: enrichedPoints,
       documentCount: rows.length,
       tagCount: tagCentroids.length,
       extractedDocumentCount,
       emptyReason: null,
-      coverageSummary: summarizeCoverage(coverageStatuses, nearThreshold),
+      coverageSummary,
       projectionMethod,
       overlap,
     };

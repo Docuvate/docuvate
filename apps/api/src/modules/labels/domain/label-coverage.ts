@@ -82,6 +82,7 @@ export interface LabelMapCoverageSummary {
   threshold: number;
   coveredPercent: number;
   gapCount: number;
+  labelMissingHintCount: number;
 }
 
 export function summarizeCoverage(
@@ -96,6 +97,7 @@ export function summarizeCoverage(
     threshold,
     coveredPercent: 100,
     gapCount: 0,
+    labelMissingHintCount: 0,
   };
   for (const status of statuses) {
     switch (status) {

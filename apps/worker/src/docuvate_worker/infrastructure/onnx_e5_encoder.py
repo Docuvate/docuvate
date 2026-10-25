@@ -191,3 +191,31 @@ def _encode_tokenized(
 def embed_texts_onnx(texts: list[str]) -> list[list[float]]:
     session, tokenizer, _ = _load_artifacts()
     return _encode_tokenized(session, tokenizer, texts)
+
+
+DOCAI_ENCODER_ONNX_FILE = "model_quantized.onnx"
+
+
+def resolve_e5_onnx_dir(*, quantized_for_docai: bool = False) -> Path:
+    """Directory containing ``onnx/*.onnx`` and ``onnx/tokenizer.json`` for DocAI parity."""
+    cache = _cache_dir()
+    onnx_leaf = (
+        f"{ENCODER_ONNX_DIR}/{DOCAI_ENCODER_ONNX_FILE}"
+        if quantized_for_docai
+        else f"{ENCODER_ONNX_DIR}/{_resolve_onnx_filename()}"
+    )
+    onnx_path = Path(
+        hf_hub_download(
+            ENCODER_ID,
+            onnx_leaf,
+            revision=ENCODER_HF_REVISION,
+            cache_dir=cache,
+        )
+    )
+    hf_hub_download(
+        ENCODER_ID,
+        f"{ENCODER_ONNX_DIR}/tokenizer.json",
+        revision=ENCODER_HF_REVISION,
+        cache_dir=cache,
+    )
+    return onnx_path.parent.parent

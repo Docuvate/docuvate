@@ -24,6 +24,14 @@ export interface TagCustomFieldDefinitionDto {
   sortOrder: number;
 }
 
+/** Open-set CE field discovery for a label (suggest only; user saves via unified custom-fields API). */
+export interface TagCustomFieldSuggestionDto {
+  key: string;
+  label: string;
+  confidence: number;
+  kind: string;
+}
+
 export type RecognizedFieldLabelGateMatch = 'any' | 'all';
 
 /** User-managed field catalog entry (global or label-attached via tag defs). */
@@ -785,6 +793,8 @@ export interface LabelMapCoverageSummaryDto {
   coveredPercent: number;
   /** Documents that still need labeling attention (not explained). */
   gapCount: number;
+  /** Documents where information-coverage hints an additional label may be missing (calibrated). */
+  labelMissingHintCount: number;
 }
 
 export type LabelMapProjectionMethod = 'pca' | 'umap';
@@ -825,6 +835,8 @@ export interface LabelMapPointDto {
   nearestTagName?: string | null;
   /** Max cosine similarity vs centroids and labeled documents (gap ordering). */
   coverageScore?: number;
+  /** Information-coverage “label missing?” hint (only when above calibrated threshold). */
+  labelMissingHint?: boolean;
 }
 
 export type LabelMapEmptyReason =
@@ -1083,6 +1095,11 @@ export interface ReplaceTagCustomFieldsRequest {
     fieldType?: CustomFieldType;
     sortOrder?: number;
   }>;
+}
+
+export interface TagCustomFieldListResponseDto {
+  items: TagCustomFieldDefinitionDto[];
+  suggestions?: TagCustomFieldSuggestionDto[];
 }
 
 export interface ExtractionCompareItem {

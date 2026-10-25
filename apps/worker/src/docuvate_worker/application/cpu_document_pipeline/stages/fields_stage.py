@@ -53,7 +53,23 @@ def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggesti
                 )
             except Exception:
                 layout_rows = []
-        merged = _merge_suggestions(tuple(suggestions), layout_rows)
+        docai_rows: list[ExtractedField] = []
+        if state.blocks and len(state.blocks) >= 2:
+            try:
+                from docuvate_worker.infrastructure.ml.ce_ml.docai_field_suggestions import (  # noqa: PLC0415
+                    docai_kv_field_suggestions,
+                )
+
+                docai_rows = docai_kv_field_suggestions(
+                    list(state.blocks),
+                    recognized_field_keys=state.recognized_field_keys,
+                    existing_field_keys=frozenset(
+                        row.key for row in (*suggestions, *layout_rows) if row.key.strip()
+                    ),
+                )
+            except Exception:
+                docai_rows = []
+        merged = _merge_suggestions(_merge_suggestions(tuple(suggestions), layout_rows), docai_rows)
         return FieldSuggestionsStageData(suggestions=merged)
 
     data, metrics = measure_stage(_run)

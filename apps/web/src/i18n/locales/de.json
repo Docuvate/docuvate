@@ -1457,6 +1457,8 @@
     "coverageHowMeasured": "Wie wird das berechnet?",
     "coverageThresholdExplain": "Ein Dokument gilt als abgedeckt, wenn die zugeordneten Labels zum Inhalt passen. Dafür vergleicht Docuvate den Text mit bereits gelabelten Dokumenten. Ab {{threshold}} % Übereinstimmung zählt ein Label als passend. Die Schwelle lernt Docuvate aus Ihren bisherigen Zuweisungen.",
     "coverageProgressAria": "Abdeckung {{pct}} Prozent",
+    "labelMissingHintCount_one": "{{count}} Dokument: möglicherweise fehlt ein Label (Informationsabdeckung).",
+    "labelMissingHintCount_other": "{{count}} Dokumente: möglicherweise fehlt ein Label (Informationsabdeckung).",
     "todoTitle": "Zu erledigen",
     "todoEmpty": "Alles erledigt",
     "todoDocumentReviewOpen": "An einzelnen Dokumenten liegen noch Label- oder Feldvorschläge offen.",

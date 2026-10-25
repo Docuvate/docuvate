@@ -39,24 +39,19 @@ function row(input: {
 describe('label-open-set-discovery', () => {
   it('names clusters from discriminative c-TF-IDF terms, not a fixed vocabulary', () => {
     const labeledCentroid = vec([1, 0, 0, 0, 0, 0, 0, 0]);
-    const payrollA = vec([0, 0.98, 0.02, 0, 0, 0, 0, 0]);
-    const payrollB = vec([0, 0.96, 0.04, 0, 0, 0, 0, 0]);
     const noise = vec([0, 0.1, 0.05, 0.9, 0, 0, 0, 0]);
+    const payrollRows = ['p1', 'p2', 'p3', 'p4', 'p5'].map((id, index) =>
+      row({
+        id,
+        embedding: vec([0, 0.98 - index * 0.005, 0.02 + index * 0.005, 0, 0, 0, 0, 0]),
+        title: `Entgelt ${String(index + 1)}`,
+        text: `gehaltsabrechnung entgelt brutto netto monat ${String(index + 1)}`,
+      })
+    );
 
     const suggestions = discoverOpenSetNewLabelClusters({
       rows: [
-        row({
-          id: 'p1',
-          embedding: payrollA,
-          title: 'Entgelt Oktober',
-          text: 'gehaltsabrechnung entgelt brutto netto oktober',
-        }),
-        row({
-          id: 'p2',
-          embedding: payrollB,
-          title: 'Entgelt November',
-          text: 'gehaltsabrechnung entgelt brutto netto november',
-        }),
+        ...payrollRows,
         row({
           id: 'n1',
           embedding: noise,
@@ -70,7 +65,7 @@ describe('label-open-set-discovery', () => {
     });
 
     expect(suggestions).toHaveLength(1);
-    expect(suggestions[0]?.documentIds).toEqual(expect.arrayContaining(['p1', 'p2']));
+    expect(suggestions[0]?.documentIds.length).toBeGreaterThanOrEqual(5);
     expect(['gehaltsabrechnung', 'entgelt']).toContain(
       suggestions[0]?.proposedName.toLowerCase() ?? ''
     );
@@ -118,34 +113,22 @@ describe('label-open-set-discovery', () => {
     const payrollCluster = 'payroll';
     const insuranceCluster = 'insurance';
 
-    const payrollRows = [
+    const payrollRows = ['pay1', 'pay2', 'pay3', 'pay4', 'pay5'].map((id, index) =>
       row({
-        id: 'pay1',
-        embedding: vec([0, 0.97, 0.03, 0, 0, 0, 0, 0]),
+        id,
+        embedding: vec([0, 0.97 - index * 0.005, 0.03 + index * 0.005, 0, 0, 0, 0, 0]),
         title: 'Gehalt',
-        text: 'gehaltsabrechnung oktober brutto netto',
-      }),
+        text: `gehaltsabrechnung monat ${String(index + 1)} brutto netto`,
+      })
+    );
+    const insuranceRows = ['ins1', 'ins2', 'ins3', 'ins4', 'ins5'].map((id, index) =>
       row({
-        id: 'pay2',
-        embedding: vec([0, 0.96, 0.04, 0, 0, 0, 0, 0]),
-        title: 'Gehalt',
-        text: 'gehaltsabrechnung november brutto netto',
-      }),
-    ];
-    const insuranceRows = [
-      row({
-        id: 'ins1',
-        embedding: vec([0, 0.03, 0.97, 0, 0, 0, 0, 0]),
+        id,
+        embedding: vec([0, 0.03 + index * 0.005, 0.97 - index * 0.005, 0, 0, 0, 0, 0]),
         title: 'Police',
-        text: 'haftpflichtversicherung police deckung',
-      }),
-      row({
-        id: 'ins2',
-        embedding: vec([0, 0.04, 0.96, 0, 0, 0, 0, 0]),
-        title: 'Police',
-        text: 'haftpflichtversicherung police schadenfreiheit',
-      }),
-    ];
+        text: `haftpflichtversicherung police deckung ${String(index + 1)}`,
+      })
+    );
     const noiseRows = [
       row({
         id: 'noise1',
@@ -158,8 +141,14 @@ describe('label-open-set-discovery', () => {
     const expected = new Map<string, string>([
       ['pay1', payrollCluster],
       ['pay2', payrollCluster],
+      ['pay3', payrollCluster],
+      ['pay4', payrollCluster],
+      ['pay5', payrollCluster],
       ['ins1', insuranceCluster],
       ['ins2', insuranceCluster],
+      ['ins3', insuranceCluster],
+      ['ins4', insuranceCluster],
+      ['ins5', insuranceCluster],
     ]);
 
     const metrics = evaluateOpenSetDiscoveryPrecision([

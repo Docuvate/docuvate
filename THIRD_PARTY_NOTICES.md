@@ -16,6 +16,18 @@ Copyright Beijing Academy of Artificial Intelligence (BAAI) and contributors. Us
 
 Copyright PaddlePaddle authors and contributors. Detection and recognition weights downloaded by PaddleOCR at runtime. See [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR).
 
+### RapidOCR / PP-OCRv5 English-Latin recognition (Apache-2.0)
+
+Copyright PaddlePaddle and RapidAI contributors. Shipped in the DocAI v0.3 bundle (`en_PP-OCRv5_rec_mobile.onnx`) for optional `DOCUVATE_OCR_BACKEND=rapidocr`. See [RapidOCR](https://github.com/RapidAI/RapidOCR).
+
+### DocAI v0.3 CPU bundle — CORD field/link heads (CC-BY-4.0)
+
+Field head (logistic regression), F2 stacking head, and link ranker ONNX graphs trained on [CORD-v2](https://github.com/clovaai/cord) train split only. Attribution: Clova AI Research.
+
+### German NER layout transformer (GermEval 2014 + synthetic docs, CC-BY-4.0)
+
+`ner_doc.int8.onnx` uses GermEval 2014 (Shared Task on Named Entity Recognition) under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/) plus Docuvate synthetic layout documents for DATE/MONEY types.
+
 ### Qwen2.5 Instruct (Apache-2.0) via Ollama
 
 Copyright Alibaba Cloud. GGUF artifacts are pulled through [Ollama](https://ollama.com/) (MIT) when local chat is enabled.

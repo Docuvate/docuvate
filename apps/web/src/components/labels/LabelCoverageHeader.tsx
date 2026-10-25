@@ -54,6 +54,13 @@ export function LabelCoverageHeader(props: Props) {
             {t('labels.showUnlabeled', { count: unlabeledCount })}
           </Link>
         ) : null}
+        {coverageSummary && coverageSummary.labelMissingHintCount > 0 ? (
+          <span className="labels-coverage-missing-hint">
+            {t('labels.labelMissingHintCount', {
+              count: coverageSummary.labelMissingHintCount,
+            })}
+          </span>
+        ) : null}
         <details className="labels-coverage-threshold-details">
           <summary className="labels-coverage-threshold-toggle">
             {t('labels.coverageHowMeasured')}

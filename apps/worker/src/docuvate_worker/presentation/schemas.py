@@ -662,4 +662,67 @@ class EmbeddingDensityTrainResponse(BaseModel):
     state: EmbeddingDensityStateModel
 
 
+class CeLabelPropagationRequest(BaseModel):
+    label_name: str = Field(min_length=1)
+    passage_vectors: list[list[float]] = Field(min_length=1)
+    seed_document_indices: list[int] = Field(default_factory=list)
+
+
+class CeLabelPropagationScore(BaseModel):
+    document_index: int
+    score: float
+    tier: str
+
+
+class CeLabelPropagationResponse(BaseModel):
+    scores: list[CeLabelPropagationScore]
+
+
+class CeFieldDiscoveryBlock(BaseModel):
+    text: str
+    page: int = 1
+    x: float = 0.0
+    y: float = 0.0
+    width: float = 1.0
+    height: float = 1.0
+
+
+class CeFieldDiscoveryDocument(BaseModel):
+    document_id: str
+    blocks: list[CeFieldDiscoveryBlock]
+
+
+class CeFieldDiscoveryRequest(BaseModel):
+    label_confidence: float = Field(ge=0.0, le=1.0)
+    documents: list[CeFieldDiscoveryDocument] = Field(min_length=1)
+
+
+class CeDiscoveredField(BaseModel):
+    field_key: str
+    display_name: str
+    confidence: float
+    kind: str
+
+
+class CeFieldDiscoveryResponse(BaseModel):
+    fields: list[CeDiscoveredField]
+
+
+class CeMissingLabelWord(BaseModel):
+    text: str
+    box: list[float] = Field(min_length=4, max_length=4)
+
+
+class CeMissingLabelRequest(BaseModel):
+    example_token_sets: list[list[str]] = Field(default_factory=list)
+    words: list[CeMissingLabelWord] = Field(default_factory=list)
+    page_width: float = 1.0
+    page_height: float = 1.0
+
+
+class CeMissingLabelResponse(BaseModel):
+    score: float
+    show: bool
+
+
 ExtractRequest.model_rebuild()

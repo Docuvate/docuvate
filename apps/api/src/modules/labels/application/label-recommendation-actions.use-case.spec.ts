@@ -11,6 +11,7 @@ import {
   createUserPreferencesRepositoryStub,
 } from '../../../test-support/user-preferences-repository.stub.js';
 import type { TagEntity } from '../../taxonomy/domain/taxonomy.entity.js';
+import type { CeLabelPropagationSeedPort } from '../domain/ce-label-propagation.port.js';
 import { AcceptLabelRecommendationUseCase } from './label-recommendation-actions.use-case.js';
 
 const USER = 'user-1';
@@ -52,12 +53,16 @@ describe('AcceptLabelRecommendationUseCase', () => {
       findByIdForUser: vi.fn().mockResolvedValue({ id: DOC }),
     });
 
+    const ceLabelPropagation: CeLabelPropagationSeedPort = {
+      propagateAfterLabelSeed: vi.fn().mockResolvedValue(0),
+    };
     const useCase = new AcceptLabelRecommendationUseCase(
       taxonomy,
       labelEmbeddings,
       prefs,
       documents,
-      assignTag
+      assignTag,
+      ceLabelPropagation
     );
 
     const recommendationId = `assign:${DOC}:${TAG}`;
@@ -88,12 +93,15 @@ describe('AcceptLabelRecommendationUseCase', () => {
       findByIdForUser: vi.fn().mockImplementation((id: string) => Promise.resolve({ id })),
     });
 
+    const propagateAfterLabelSeed = vi.fn().mockResolvedValue(0);
+    const ceLabelPropagation: CeLabelPropagationSeedPort = { propagateAfterLabelSeed };
     const useCase = new AcceptLabelRecommendationUseCase(
       taxonomy,
       labelEmbeddings,
       prefs,
       documents,
-      assignTag
+      assignTag,
+      ceLabelPropagation
     );
 
     const result = await useCase.execute(USER, {
@@ -104,6 +112,7 @@ describe('AcceptLabelRecommendationUseCase', () => {
     });
 
     expect(result).toEqual({ tagId: createdTag.id, action: 'created' });
+    expect(propagateAfterLabelSeed).toHaveBeenCalledWith(USER, 'tag-new', [DOC_A]);
     expect(createTag).toHaveBeenCalledWith(USER, 'Cluster Label', {
       color: '#64748b',
       matchingAlgorithm: 'any',

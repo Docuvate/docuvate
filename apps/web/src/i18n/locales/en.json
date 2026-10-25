@@ -1456,6 +1456,8 @@
     "coverageHowMeasured": "How is this calculated?",
     "coverageThresholdExplain": "A document counts as covered when its assigned labels match the content. Docuvate compares document text with already labeled documents. From {{threshold}}% match upward, a label counts as a fit. The threshold is learned from your past assignments.",
     "coverageProgressAria": "Coverage {{pct}} percent",
+    "labelMissingHintCount_one": "{{count}} document may need another label (information coverage).",
+    "labelMissingHintCount_other": "{{count}} documents may need another label (information coverage).",
     "todoTitle": "To do",
     "todoEmpty": "All caught up",
     "todoEmptyHint": "New documents or extraction may create suggestions later.",
