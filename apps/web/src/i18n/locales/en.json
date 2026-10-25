@@ -265,7 +265,7 @@
       },
       "unreachable": {
         "title": "Docuvate is unreachable right now",
-        "lead": "The server is not responding. Your data on this device is safe. We are trying to restore the connection automatically.",
+        "lead": "The server is not responding right now. We will keep trying automatically. When it is back, you will continue right here.",
         "reconnectCountdown": "Reconnecting in {{seconds}} s",
         "retryNow": "Try reconnecting now",
         "ready": "You can restore the connection now.",
@@ -273,14 +273,42 @@
       },
       "serverFault": {
         "title": "Docuvate is temporarily unavailable",
-        "lead": "The server reported an error. We are trying to restore the connection automatically."
+        "lead": "The server reported an error. We will keep trying automatically. When it is back, you will continue right here."
       },
       "technicalDetails": {
         "toggle": "Technical details",
+        "link": "Status / technical details",
         "errorType": "Error type",
         "statusCode": "Status code",
         "timestamp": "Timestamp",
         "none": "n/a"
+      },
+      "scene": {
+        "offline": {
+          "kicker": "Offline",
+          "title": "No internet.",
+          "lead": "Without a connection we cannot reach the server. We reconnect automatically when you are back online."
+        },
+        "unreachable": {
+          "kicker": "Connection interrupted",
+          "title": "Our documents are on a coffee break.",
+          "lead": "The server is not responding right now. We keep trying automatically. When it is back, you will continue right here."
+        },
+        "serverFault": {
+          "kicker": "Server",
+          "title": "The server needs a short breather.",
+          "lead": "Something went wrong on our side. We keep trying automatically until Docuvate is reachable again."
+        },
+        "notFound": {
+          "kicker": "404",
+          "title": "We have not filed this document.",
+          "lead": "This address does not exist or has moved. Check the URL or return to your documents."
+        },
+        "unexpected": {
+          "kicker": "Unexpected",
+          "title": "Something went sideways here.",
+          "lead": "An unexpected error occurred. Please try again."
+        }
       },
       "sessionExpired": {
         "title": "Session expired",

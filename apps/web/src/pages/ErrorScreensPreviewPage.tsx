@@ -5,7 +5,9 @@ import { Info, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 
+import { DocuvateErrorPage } from '../components/errors/DocuvateErrorPage';
 import { ErrorCodeDetails } from '../components/errors/ErrorCodeDetails';
+import { FullPageErrorShell } from '../components/errors/FullPageErrorShell';
 import { type HttpErrorScreenVariant,HttpStatusErrorPage } from '../components/errors/HttpStatusErrorPage';
 import { RouteErrorScreen } from '../components/errors/RouteErrorScreen';
 import { Banner } from '../components/ui/Banner';
@@ -33,6 +35,38 @@ function isPreviewVariant(value: string | undefined): value is HttpErrorScreenVa
 export function ErrorScreensPreviewPage() {
   const { t } = useTranslation();
   const { screenId } = useParams();
+
+  if (screenId === 'scene-offline') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-offline">
+        <DocuvateErrorPage variant="browser-offline" />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-unreachable') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-unreachable">
+        <DocuvateErrorPage variant="server-unreachable" enableAutoReconnect />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-server') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-server">
+        <DocuvateErrorPage variant="server-error-page" enableAutoReconnect httpStatus={503} />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-not-found') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-not-found">
+        <DocuvateErrorPage variant="not-found" />
+      </FullPageErrorShell>
+    );
+  }
 
   if (screenId === 'x11') {
     return (

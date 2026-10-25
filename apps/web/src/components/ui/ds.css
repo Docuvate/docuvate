@@ -719,11 +719,34 @@
 
 .full-page-error-shell {
   min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: var(--dv-space-lg);
-  background: var(--dv-color-bg);
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--dv-space-lg) var(--dv-space-md);
   position: relative;
+  background-color: var(--dv-color-bg);
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, var(--dv-color-accent) 11%, transparent), transparent 68%),
+    radial-gradient(ellipse 70% 45% at 100% 100%, color-mix(in srgb, var(--dv-color-text) 4%, transparent), transparent 55%),
+    linear-gradient(
+      165deg,
+      var(--dv-color-bg) 0%,
+      color-mix(in srgb, var(--dv-color-bg) 94%, var(--dv-color-accent) 6%) 48%,
+      var(--dv-color-bg) 100%
+    );
+}
+
+[data-docuvate-theme='dark'] .full-page-error-shell {
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -8%, color-mix(in srgb, var(--dv-color-accent) 14%, transparent), transparent 68%),
+    radial-gradient(ellipse 70% 45% at 0% 100%, color-mix(in srgb, var(--dv-color-accent) 6%, transparent), transparent 50%),
+    linear-gradient(
+      165deg,
+      var(--dv-color-bg) 0%,
+      color-mix(in srgb, var(--dv-color-bg) 88%, #1a1614 12%) 50%,
+      var(--dv-color-bg) 100%
+    );
 }
 
 .full-page-error-locale {
@@ -733,11 +756,11 @@
 }
 
 .full-page-error-inner {
-  width: min(100%, 32rem);
+  width: min(100%, 26.5rem);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--dv-space-md);
+  gap: var(--dv-space-sm);
 }
 
 .full-page-error-logo {
@@ -746,84 +769,234 @@
 
 .full-page-error-card {
   width: 100%;
-  padding: var(--dv-space-xl) var(--dv-space-lg);
-  border: 1px solid var(--dv-color-border);
-  background: var(--dv-color-bg-raised);
-  box-shadow: 0 12px 40px color-mix(in srgb, var(--dv-color-text) 6%, transparent);
+  padding: var(--dv-space-lg) var(--dv-space-md) var(--dv-space-md);
+  border: 1px solid color-mix(in srgb, var(--dv-color-border) 88%, var(--dv-color-accent) 12%);
+  background: color-mix(in srgb, var(--dv-color-bg-raised) 96%, var(--dv-color-bg) 4%);
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--dv-color-text) 4%, transparent),
+    0 16px 48px color-mix(in srgb, var(--dv-color-text) 7%, transparent);
 }
 
 .docuvate-error-page {
+  width: 100%;
+}
+
+.ds-error-screen--compact {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.ds-error-screen--compact .ds-error-screen-hero-slot {
+  min-height: auto;
+  margin-bottom: var(--dv-space-sm);
+}
+
+.ds-error-screen--compact .ds-error-screen-title-slot,
+.ds-error-screen--compact .ds-error-screen-text-slot,
+.ds-error-screen--compact .ds-error-screen-status-slot,
+.ds-error-screen--compact .ds-error-screen-actions-slot,
+.ds-error-screen--compact .ds-error-screen-code-slot {
+  min-height: auto;
+}
+
+.ds-error-screen--compact .ds-error-screen-title {
+  font-size: 1.375rem;
+  line-height: 1.35;
+  max-width: 22rem;
+  text-wrap: balance;
+}
+
+.ds-error-screen--compact .ds-error-screen-text {
+  margin-top: var(--dv-space-xs);
+}
+
+.ds-error-screen--compact .ds-error-screen-status-slot {
+  margin-top: var(--dv-space-sm);
+}
+
+.ds-error-screen--compact .ds-error-screen-actions-slot {
+  margin-top: var(--dv-space-md);
+}
+
+.ds-error-screen--compact .ds-error-screen-code-slot {
+  margin-top: var(--dv-space-sm);
+  gap: var(--dv-space-2xs);
+}
+
+.ds-error-screen-hero-slot {
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--dv-space-md);
+  justify-content: center;
 }
 
-.ds-connectivity-illustration {
-  width: min(100%, 9rem);
+.ds-connectivity-hero {
+  width: min(100%, 12.5rem);
   height: auto;
+  display: block;
 }
 
-.ds-connectivity-illustration-bg {
-  fill: color-mix(in srgb, var(--dv-color-accent) 8%, var(--dv-color-bg));
-  stroke: var(--dv-color-border);
+.ds-connectivity-hero-glow {
+  fill: color-mix(in srgb, var(--dv-color-accent) 5%, var(--dv-color-bg));
+  stroke: color-mix(in srgb, var(--dv-color-border) 70%, transparent);
   stroke-width: 1;
 }
 
-.ds-connectivity-illustration-node {
-  fill: var(--dv-color-bg-raised);
-  stroke: var(--dv-color-accent);
-  stroke-width: 2;
+.ds-connectivity-hero-doc rect {
+  stroke: var(--dv-color-border);
+  stroke-width: 1.25;
 }
 
-.ds-connectivity-illustration-link {
-  stroke: var(--dv-color-accent);
+.ds-connectivity-hero-doc-line {
+  stroke: var(--dv-color-text-subtle);
+  stroke-width: 2;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.ds-connectivity-hero-doc-fold {
+  fill: color-mix(in srgb, var(--dv-color-accent) 18%, var(--dv-color-bg-raised));
+}
+
+.ds-connectivity-hero-plug rect {
+  fill: var(--dv-color-bg-raised);
+  stroke: var(--dv-color-border);
+  stroke-width: 1.25;
+}
+
+.ds-connectivity-hero-plug-prong {
+  stroke: var(--dv-color-text-muted);
   stroke-width: 2.5;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.ds-connectivity-hero-plug-led {
+  fill: color-mix(in srgb, var(--dv-color-accent) 55%, var(--dv-color-bg));
+}
+
+.ds-connectivity-hero-cable {
+  fill: none;
+  stroke: var(--dv-color-accent);
+  stroke-width: 3;
   stroke-linecap: round;
 }
 
-.ds-connectivity-illustration-link--tail {
-  stroke-dasharray: 4 5;
-}
-
-.ds-connectivity-illustration-break {
+.ds-connectivity-hero-spark {
   stroke: var(--dv-color-danger);
   stroke-width: 2.5;
   stroke-linecap: round;
+  fill: none;
 }
 
-.ds-connectivity-illustration-pulse {
+.ds-connectivity-hero-question {
+  font-size: 1.25rem;
+  font-weight: 600;
   fill: var(--dv-color-accent);
+  font-family: var(--dv-font-family-sans, system-ui, sans-serif);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .ds-connectivity-illustration-pulse {
-    animation: ds-connectivity-pulse 2.4s ease-in-out infinite;
+  .ds-connectivity-hero--animating .ds-connectivity-hero-cable--left {
+    animation: ds-connectivity-hero-cable-left 2.2s ease-in-out infinite;
   }
 
-  .ds-connectivity-illustration-link--tail {
-    animation: ds-connectivity-dash 1.8s linear infinite;
+  .ds-connectivity-hero--animating .ds-connectivity-hero-cable--right {
+    animation: ds-connectivity-hero-cable-right 2.2s ease-in-out infinite;
+  }
+
+  .ds-connectivity-hero--animating .ds-connectivity-hero-spark {
+    animation: ds-connectivity-hero-spark 2.2s ease-in-out infinite;
   }
 }
 
-@keyframes ds-connectivity-pulse {
+@keyframes ds-connectivity-hero-cable-left {
   0%,
   100% {
-    opacity: 0.45;
-    transform-origin: 60px 40px;
+    transform: translateX(0);
+  }
+
+  45%,
+  55% {
+    transform: translateX(-3px);
+  }
+}
+
+@keyframes ds-connectivity-hero-cable-right {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  45%,
+  55% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes ds-connectivity-hero-spark {
+  0%,
+  40%,
+  60%,
+  100% {
+    opacity: 0.35;
   }
 
   50% {
     opacity: 1;
-    transform: scale(1.15);
-    transform-origin: 60px 40px;
   }
 }
 
-@keyframes ds-connectivity-dash {
-  to {
-    stroke-dashoffset: -18;
-  }
+.ds-reconnect-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  width: 100%;
+}
+
+.ds-reconnect-progress-ring-wrap {
+  position: relative;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.ds-reconnect-progress-ring {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ds-reconnect-progress-track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--dv-color-border) 80%, transparent);
+  stroke-width: 3;
+}
+
+.ds-reconnect-progress-indicator {
+  fill: none;
+  stroke: var(--dv-color-accent);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.35s ease;
+}
+
+.ds-reconnect-progress-seconds {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--dv-font-size-xs);
+  font-weight: var(--dv-font-weight-semibold);
+  color: var(--dv-color-text-muted);
+}
+
+.ds-reconnect-progress-label {
+  margin: 0;
+  font-size: var(--dv-font-size-xs);
+  color: var(--dv-color-text-muted);
+  text-align: center;
 }
 
 .ds-error-technical-details {

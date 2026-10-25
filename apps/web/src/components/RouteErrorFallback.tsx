@@ -6,9 +6,7 @@ import { RouteErrorScreen } from './errors/RouteErrorScreen';
 export function RouteErrorFallback() {
   return (
     <FullPageErrorShell testId="route-error-fallback">
-      <div className="route-error-page">
-        <RouteErrorScreen />
-      </div>
+      <RouteErrorScreen />
     </FullPageErrorShell>
   );
 }

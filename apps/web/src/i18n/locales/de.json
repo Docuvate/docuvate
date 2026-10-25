@@ -266,22 +266,50 @@
       },
       "unreachable": {
         "title": "Docuvate ist gerade nicht erreichbar",
-        "lead": "Der Server antwortet nicht. Ihre Daten auf diesem Gerät sind sicher. Wir versuchen automatisch, die Verbindung wiederherzustellen.",
+        "lead": "Der Server antwortet gerade nicht. Wir versuchen es automatisch weiter. Sobald er wieder da ist, geht es genau hier weiter.",
         "reconnectCountdown": "Erneut verbinden in {{seconds}} s",
         "retryNow": "Jetzt erneut versuchen",
-        "ready": "Sie können die Verbindung jetzt wiederherstellen.",
+        "ready": "Verbindung kann wiederhergestellt werden.",
         "probing": "Verbindung wird geprüft …"
       },
       "serverFault": {
         "title": "Docuvate ist vorübergehend nicht verfügbar",
-        "lead": "Auf dem Server ist ein Fehler aufgetreten. Wir versuchen automatisch, die Verbindung wiederherzustellen."
+        "lead": "Auf dem Server ist ein Fehler aufgetreten. Wir versuchen es automatisch weiter. Sobald er wieder da ist, geht es genau hier weiter."
       },
       "technicalDetails": {
         "toggle": "Technische Details",
+        "link": "Status / technische Details",
         "errorType": "Fehlertyp",
         "statusCode": "Statuscode",
         "timestamp": "Zeitpunkt",
         "none": "k. A."
+      },
+      "scene": {
+        "offline": {
+          "kicker": "Offline",
+          "title": "Kein Internet.",
+          "lead": "Ohne Verbindung können wir den Server nicht erreichen. Sobald Sie wieder online sind, verbinden wir automatisch neu."
+        },
+        "unreachable": {
+          "kicker": "Verbindung unterbrochen",
+          "title": "Unsere Dokumente machen gerade Kaffeepause.",
+          "lead": "Der Server antwortet gerade nicht. Wir versuchen es automatisch weiter. Sobald er wieder da ist, geht es genau hier weiter."
+        },
+        "serverFault": {
+          "kicker": "Server",
+          "title": "Der Server braucht einen kurzen Moment.",
+          "lead": "Es ist ein Fehler aufgetreten. Wir versuchen es automatisch weiter, bis Docuvate wieder erreichbar ist."
+        },
+        "notFound": {
+          "kicker": "404",
+          "title": "Dieses Dokument haben wir nicht abgelegt.",
+          "lead": "Die Adresse existiert nicht oder wurde verschoben. Prüfen Sie die URL oder kehren Sie zu Ihren Dokumenten zurück."
+        },
+        "unexpected": {
+          "kicker": "Unerwartet",
+          "title": "Hier ist etwas schiefgelaufen.",
+          "lead": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut. Ihre bisherigen Daten bleiben unverändert."
+        }
       },
       "sessionExpired": {
         "title": "Sitzung abgelaufen",

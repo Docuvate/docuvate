@@ -41,7 +41,7 @@ test.describe('API unreachable full-page recovery', () => {
     await page.emulateMedia({ colorScheme: 'light' });
     await page.goto('/');
     await expect(page.getByTestId('session-boot-error-shell')).toBeVisible();
-    await expect(page.getByRole('heading', { level: 1 })).toContainText(/nicht erreichbar|nicht verfügbar/i);
+    await expect(page.getByRole('heading', { level: 1 })).toContainText(/Kaffeepause|nicht verfügbar|nicht erreichbar/i);
     await page.screenshot({ path: path.join(artifactDir, 'unreachable-light-de.png'), fullPage: true });
 
     await page.emulateMedia({ colorScheme: 'dark' });

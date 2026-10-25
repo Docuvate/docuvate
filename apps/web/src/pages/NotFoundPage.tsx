@@ -11,7 +11,11 @@ export interface NotFoundPageProps {
 export function NotFoundPage({ embedded = false }: NotFoundPageProps) {
   const content = <DocuvateErrorPage variant="not-found" />;
   if (embedded) {
-    return <div className="not-found-page not-found-page--embedded" data-testid="not-found-page">{content}</div>;
+    return (
+      <FullPageErrorShell embedded testId="not-found-page">
+        {content}
+      </FullPageErrorShell>
+    );
   }
   return (
     <FullPageErrorShell testId="not-found-page">

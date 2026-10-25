@@ -43,7 +43,7 @@ export function CollapsibleTechnicalDetails({
           aria-hidden
           className={open ? 'ds-error-technical-details-chevron-open' : undefined}
         />
-        {t('errors.pages.technicalDetails.toggle')}
+        {t('errors.pages.technicalDetails.link')}
       </button>
       {open ? (
         <dl id={panelId} className="ds-error-technical-details-panel">

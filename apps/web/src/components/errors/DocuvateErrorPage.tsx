@@ -1,14 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { LucideIcon } from 'lucide-react';
-import {
-  AlertCircle,
-  FileQuestion,
-  RefreshCw,
-  ServerCrash,
-  WifiOff,
-} from 'lucide-react';
-import { useEffect, useMemo, useRef } from 'react';
+import { RefreshCw } from 'lucide-react';
+import { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -17,8 +10,9 @@ import { readAuthClientErrorShape } from '../../lib/authConnectivity';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { CollapsibleTechnicalDetails } from './CollapsibleTechnicalDetails';
-import { ConnectivityIllustration } from './ConnectivityIllustration';
-import { ErrorScreenLayout } from './ErrorScreenLayout';
+import { ErrorCodeDetails } from './ErrorCodeDetails';
+import { ErrorSceneIllustration, type ErrorSceneId } from './ErrorSceneIllustration';
+import { ReconnectCountdownBar } from './ReconnectCountdownBar';
 import { useApiHealthReconnect } from './useApiHealthReconnect';
 
 export type DocuvateErrorPageVariant =
@@ -29,7 +23,6 @@ export type DocuvateErrorPageVariant =
 
 export interface DocuvateErrorPageProps {
   variant: DocuvateErrorPageVariant;
-  /** Source error for technical details (boot/session failures). */
   sourceError?: unknown;
   httpStatus?: number;
   errorCode?: string;
@@ -39,19 +32,19 @@ export interface DocuvateErrorPageProps {
   actionsSlot?: React.ReactNode;
 }
 
-function variantIcon(variant: DocuvateErrorPageVariant): LucideIcon {
+function sceneIdForVariant(variant: DocuvateErrorPageVariant): ErrorSceneId {
   switch (variant) {
     case 'browser-offline':
-      return WifiOff;
+      return 'offline';
     case 'server-unreachable':
-      return WifiOff;
+      return 'unreachable';
     case 'server-error':
     case 'server-error-page':
-      return ServerCrash;
+      return 'serverFault';
     case 'not-found':
-      return FileQuestion;
+      return 'notFound';
     case 'unexpected':
-      return AlertCircle;
+      return 'unexpected';
     default: {
       const exhaustive: never = variant;
       return exhaustive;
@@ -59,17 +52,8 @@ function variantIcon(variant: DocuvateErrorPageVariant): LucideIcon {
   }
 }
 
-function illustrationKind(variant: DocuvateErrorPageVariant): ConnectivityFailureKind | 'generic' {
-  if (variant === 'browser-offline') {
-    return 'browser-offline';
-  }
-  if (variant === 'server-unreachable') {
-    return 'server-unreachable';
-  }
-  if (variant === 'server-error' || variant === 'server-error-page') {
-    return 'server-error';
-  }
-  return 'generic';
+function sceneCopyKey(variant: DocuvateErrorPageVariant): string {
+  return sceneIdForVariant(variant);
 }
 
 export function DocuvateErrorPage({
@@ -91,14 +75,10 @@ export function DocuvateErrorPage({
     enableAutoReconnect &&
     (variant === 'server-unreachable' || variant === 'server-error' || variant === 'server-error-page');
 
-  const { secondsUntilRetry, isProbing, retryNow } = useApiHealthReconnect({
+  const { secondsUntilRetry, countdownTotalSeconds, isProbing, retryNow } = useApiHealthReconnect({
     enabled: reconnectEnabled,
     onRecovered,
   });
-
-  useEffect(() => {
-    retryButtonRef.current?.focus();
-  }, []);
 
   const parsed = sourceError != null ? readAuthClientErrorShape(sourceError) : {};
   const technicalErrorType =
@@ -107,133 +87,97 @@ export function DocuvateErrorPage({
     variant;
   const technicalStatus = httpStatus ?? parsed.status ?? undefined;
 
-  const title = useMemo(() => {
-    switch (variant) {
-      case 'browser-offline':
-        return t('errors.pages.browserOffline.fullTitle');
-      case 'server-unreachable':
-        return t('errors.pages.unreachable.title');
-      case 'server-error':
-      case 'server-error-page':
-        return t('errors.pages.serverFault.title');
-      case 'not-found':
-        return t('notFoundPage.title');
-      case 'unexpected':
-        return t('errors.pages.routeFailed.title');
-      default: {
-        const exhaustive: never = variant;
-        return exhaustive;
-      }
-    }
-  }, [t, variant]);
+  const copyKey = sceneCopyKey(variant);
+  const kicker = t(`errors.pages.scene.${copyKey}.kicker`, { defaultValue: '' });
+  const title = t(`errors.pages.scene.${copyKey}.title`);
+  const lead = t(`errors.pages.scene.${copyKey}.lead`);
 
-  const description = useMemo(() => {
-    switch (variant) {
-      case 'browser-offline':
-        return t('errors.pages.browserOffline.fullLead');
-      case 'server-unreachable':
-        return t('errors.pages.unreachable.lead');
-      case 'server-error':
-      case 'server-error-page':
-        return t('errors.pages.serverFault.lead');
-      case 'not-found':
-        return t('notFoundPage.lead');
-      case 'unexpected':
-        return t('errors.pages.routeFailed.lead');
-      default: {
-        const exhaustive: never = variant;
-        return exhaustive;
-      }
-    }
-  }, [t, variant]);
+  const scene = sceneIdForVariant(variant);
+  const animating = reconnectEnabled && (isProbing || secondsUntilRetry > 0);
 
-  const statusSlot = useMemo(() => {
-    if (reconnectEnabled) {
-      if (isProbing) {
-        return <p className="ds-error-screen-status">{t('errors.pages.unreachable.probing')}</p>;
-      }
-      if (secondsUntilRetry > 0) {
-        return (
-          <p className="ds-error-screen-status" aria-live="polite">
-            {t('errors.pages.unreachable.reconnectCountdown', { seconds: secondsUntilRetry })}
-          </p>
-        );
-      }
-      return (
-        <p className="ds-error-screen-status" aria-live="polite">
-          {t('errors.pages.unreachable.ready')}
-        </p>
-      );
-    }
-    return null;
-  }, [isProbing, reconnectEnabled, secondsUntilRetry, t]);
+  const countdownSlot =
+    reconnectEnabled && (secondsUntilRetry > 0 || isProbing || secondsUntilRetry === 0)
+      ? (
+        <ReconnectCountdownBar
+          secondsLeft={secondsUntilRetry}
+          totalSeconds={countdownTotalSeconds}
+          isProbing={isProbing}
+          probingLabel={t('errors.pages.unreachable.probing')}
+          label={
+            secondsUntilRetry > 0
+              ? t('errors.pages.unreachable.reconnectCountdown', { seconds: secondsUntilRetry })
+              : t('errors.pages.unreachable.ready')
+          }
+        />
+      )
+      : null;
 
-  const defaultActions = useMemo(() => {
-    if (variant === 'not-found') {
-      return (
+  const defaultActions =
+    variant === 'not-found'
+      ? (
         <Link className="btn btn-primary" to={routes.documents}>
           {t('notFoundPage.documentsLink')}
         </Link>
-      );
-    }
-    if (reconnectEnabled) {
-      return (
-        <Button
-          ref={retryButtonRef}
-          type="button"
-          variant="primary"
-          disabled={isProbing}
-          onClick={retryNow}
-        >
-          <RefreshCw size={16} strokeWidth={2} aria-hidden />
-          {t('errors.pages.unreachable.retryNow')}
-        </Button>
-      );
-    }
-    return (
-      <>
-        <Button
-          ref={retryButtonRef}
-          type="button"
-          variant="primary"
-          onClick={() => {
-            window.location.reload();
-          }}
-        >
-          <RefreshCw size={16} strokeWidth={2} aria-hidden />
-          {t('errors.pages.retry')}
-        </Button>
-        <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
-          {t('errors.pages.home')}
-        </Button>
-      </>
-    );
-  }, [isProbing, navigate, reconnectEnabled, retryNow, t, variant]);
+      )
+      : reconnectEnabled
+        ? (
+          <Button
+            ref={retryButtonRef}
+            type="button"
+            variant="primary"
+            disabled={isProbing}
+            onClick={retryNow}
+          >
+            <RefreshCw size={16} strokeWidth={2} aria-hidden />
+            {t('errors.pages.unreachable.retryNow')}
+          </Button>
+        )
+        : (
+          <>
+            <Button
+              ref={retryButtonRef}
+              type="button"
+              variant="primary"
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              <RefreshCw size={16} strokeWidth={2} aria-hidden />
+              {t('errors.pages.retry')}
+            </Button>
+            <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
+              {t('errors.pages.home')}
+            </Button>
+          </>
+        );
 
-  const Icon = variantIcon(variant);
+  const showCodeBlock = Boolean(errorCode && requestId);
 
   return (
-    <div
-      className="docuvate-error-page"
-      role="alert"
-      aria-live="assertive"
-      data-testid={`docuvate-error-${variant}`}
-    >
-      <ConnectivityIllustration kind={illustrationKind(variant)} />
-      <ErrorScreenLayout
-        icon={Icon}
-        title={title}
-        description={description}
-        statusSlot={statusSlot}
-        actions={actionsSlot ?? defaultActions}
-        errorCode={errorCode}
-        requestId={requestId}
-      />
-      <CollapsibleTechnicalDetails
-        errorType={technicalErrorType}
-        statusCode={technicalStatus}
-        occurredAt={occurredAt}
-      />
-    </div>
+    <>
+      <div
+        className="error-scene-visual"
+        data-testid={`docuvate-error-${variant}`}
+      >
+        <ErrorSceneIllustration scene={scene} animating={animating} />
+      </div>
+      <div className="error-scene-copy" role="alert" aria-live="assertive">
+        {kicker ? <p className="error-scene-kicker">{kicker}</p> : null}
+        <h1 className="error-scene-title">{title}</h1>
+        <p className="error-scene-lead">{lead}</p>
+        {countdownSlot}
+        <div className="error-scene-actions">{actionsSlot ?? defaultActions}</div>
+        <div className="error-scene-meta">
+          <CollapsibleTechnicalDetails
+            errorType={technicalErrorType}
+            statusCode={technicalStatus}
+            occurredAt={occurredAt}
+          />
+          {showCodeBlock && errorCode && requestId ? (
+            <ErrorCodeDetails code={errorCode} requestId={requestId} compact />
+          ) : null}
+        </div>
+      </div>
+    </>
   );
 }

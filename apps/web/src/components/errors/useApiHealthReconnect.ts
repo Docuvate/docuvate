@@ -13,6 +13,7 @@ export interface UseApiHealthReconnectOptions {
 
 export interface ApiHealthReconnectState {
   secondsUntilRetry: number;
+  countdownTotalSeconds: number;
   isProbing: boolean;
   attempt: number;
   retryNow: () => void;
@@ -24,6 +25,7 @@ export function useApiHealthReconnect({
 }: UseApiHealthReconnectOptions): ApiHealthReconnectState {
   const [attempt, setAttempt] = useState(1);
   const [secondsUntilRetry, setSecondsUntilRetry] = useState(apiHealthBackoffSeconds(1));
+  const [countdownTotalSeconds, setCountdownTotalSeconds] = useState(apiHealthBackoffSeconds(1));
   const [isProbing, setIsProbing] = useState(false);
   const attemptRef = useRef(1);
   const onRecoveredRef = useRef(onRecovered);
@@ -32,7 +34,9 @@ export function useApiHealthReconnect({
   const scheduleNextBackoff = useCallback((nextAttempt: number) => {
     attemptRef.current = nextAttempt;
     setAttempt(nextAttempt);
-    setSecondsUntilRetry(apiHealthBackoffSeconds(nextAttempt));
+    const delay = apiHealthBackoffSeconds(nextAttempt);
+    setCountdownTotalSeconds(delay);
+    setSecondsUntilRetry(delay);
   }, []);
 
   const runProbe = useCallback(async () => {
@@ -86,6 +90,7 @@ export function useApiHealthReconnect({
 
   return {
     secondsUntilRetry,
+    countdownTotalSeconds,
     isProbing,
     attempt,
     retryNow,

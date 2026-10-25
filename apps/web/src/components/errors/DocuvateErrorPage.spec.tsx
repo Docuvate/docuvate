@@ -18,7 +18,7 @@ describe('DocuvateErrorPage', () => {
     cleanup();
   });
 
-  it('renders German unreachable copy with reconnect affordances', async () => {
+  it('renders playful German unreachable copy with reconnect controls', async () => {
     await i18n.changeLanguage('de');
     render(
       <MemoryRouter>
@@ -26,21 +26,18 @@ describe('DocuvateErrorPage', () => {
       </MemoryRouter>
     );
     expect(screen.getByRole('alert')).toBeTruthy();
-    expect(screen.getByText('Docuvate ist gerade nicht erreichbar')).toBeTruthy();
+    expect(screen.getByText('Unsere Dokumente machen gerade Kaffeepause.')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Jetzt erneut versuchen/i })).toBeTruthy();
+    expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 
-  it('exposes technical details for admins', async () => {
+  it('exposes technical details link for admins', async () => {
     await i18n.changeLanguage('de');
     render(
       <MemoryRouter>
-        <DocuvateErrorPage
-          variant="server-error-page"
-          sourceError={new TypeError('Failed to fetch')}
-          httpStatus={503}
-        />
+        <DocuvateErrorPage variant="server-error-page" httpStatus={503} />
       </MemoryRouter>
     );
-    expect(screen.getByTestId('docuvate-error-server-error-page').querySelector('.ds-error-technical-details-toggle')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Status / technische Details' })).toBeTruthy();
   });
 });
