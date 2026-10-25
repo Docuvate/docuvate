@@ -1,103 +1,410 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-"""Verbatim copies of the training feature code — parity-tested; do not edit."""
+
+"""Layout feature builders for DocAI D v0.3 (parity with training reference)."""
+
+from __future__ import annotations
+
 import math
 import unicodedata
+from collections.abc import Callable
+from typing import Protocol, TypedDict
 
 import numpy as np
 
+_ROW_OVERLAP_THRESHOLD = 0.5
+_HORIZONTAL_ALIGN_TOLERANCE = 2.0
+_MAX_NEIGHBOR_KNN = 4
+_PAIR_FEAT_EXTRA = 12
 
-def digits(s): return ''.join(c for c in s if c.isdigit())
-def node_geom(d):
-    U = d['units']; n = len(U)
-    if n == 0: return np.zeros((0, 22), np.float32), [[] for _ in range(0)]
-    B = np.array([u['box'] for u in U], float); W, H = d['w'], d['h']
-    h = np.clip(B[:, 3] - B[:, 1], 1, None); mh = np.median(h); cy = (B[:, 1] + B[:, 3]) / 2; cx = (B[:, 0] + B[:, 2]) / 2
-    order = np.argsort(np.argsort(cy)) / max(n - 1, 1)
-    rows = []
-    for i in range(n):
-        ov = np.clip(np.minimum(B[i, 3], B[:, 3]) - np.maximum(B[i, 1], B[:, 1]), 0, None) / np.minimum(h[i], h)
-        rows.append(np.where(ov > 0.5)[0])
-    F = []
-    for i, u in enumerate(U):
-        t = u['text']; L = max(len(t), 1); r = rows[i]; xs = np.argsort(B[r, 0]); pos = list(r[xs]).index(i)
-        num = digits(t); is_num = float(len(num) > 0 and all(c.isdigit() or c in ',.- ' for c in t.strip()))
-        F.append([B[i, 0] / W, B[i, 1] / H, B[i, 2] / W, B[i, 3] / H, cx[i] / W, cy[i] / H, (B[i, 2] - B[i, 0]) / W, h[i] / mh,
-                  order[i], math.log1p(n), math.log1p(len(t)), len(num) / L, sum(c.isalpha() for c in t) / L,
-                  sum(c.isupper() for c in t) / L, t.count(' ') / L, is_num, math.log1p(float(''.join(str(unicodedata.digit(c)) for c in num[-12:])) if num else 0),
-                  len(r), pos / max(len(r) - 1, 1), float(pos == len(r) - 1), float(pos == 0), (B[i, 2] - B[:, 2].max()) / W])
-    return np.array(F, np.float32), rows
-def node_ctx(d, G, E, rows):
-    """Context: left/right same-row neighbour geometry+embedding, units directly above/below (embedding)."""
-    U = d['units']; n = len(U); B = np.array([u['box'] for u in U], float).reshape(-1, 4); cy = (B[:, 1] + B[:, 3]) / 2
-    C = []
-    for i in range(n):
-        r = [j for j in rows[i] if j != i]
-        left = [j for j in r if B[j, 2] <= B[i, 0] + 2]; right = [j for j in r if B[j, 0] >= B[i, 2] - 2]
-        l = max(left, key=lambda j: B[j, 2]) if left else None; rt = min(right, key=lambda j: B[j, 0]) if right else None
-        above = [j for j in range(n) if cy[j] < B[i, 1] and j not in rows[i]]; below = [j for j in range(n) if cy[j] > B[i, 3] and j not in rows[i]]
-        a = max(above, key=lambda j: cy[j]) if above else None; b = min(below, key=lambda j: cy[j]) if below else None
-        z = np.zeros(E.shape[1], np.float32); zg = np.zeros(G.shape[1], np.float32)
-        C.append(np.concatenate([G[l] if l is not None else zg, E[l] if l is not None else z, [l is None],
-                                 G[rt] if rt is not None else zg, E[rt] if rt is not None else z, [rt is None],
-                                 E[a] if a is not None else z, E[b] if b is not None else z]))
-    return np.array(C, np.float32).reshape(n, -1)
-def cand_sets(d, P, classes, src, dst, tau, oracle=False):
+
+class PcaTransformProtocol(Protocol):
+    def transform(self, matrix: np.ndarray) -> np.ndarray: ...
+
+
+class NeighborFeatureCache(TypedDict, total=False):
+    nb: tuple[
+        list[list[int | None]],
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+    ]
+
+
+class LayoutUnit(TypedDict):
+    text: str
+    box: list[float]
+
+
+class LayoutDocument(TypedDict, total=False):
+    w: float
+    h: float
+    units: list[LayoutUnit]
+    E: np.ndarray
+    G: np.ndarray
+    rows: list[list[int]]
+    y: list[str]
+
+
+def digits(text: str) -> str:
+    return "".join(character for character in text if character.isdigit())
+
+
+def node_geom(document: LayoutDocument) -> tuple[np.ndarray, list[list[int]]]:
+    units = document["units"]
+    count = len(units)
+    if count == 0:
+        return np.zeros((0, 22), np.float32), [[] for _ in range(0)]
+    boxes = np.array([unit["box"] for unit in units], float)
+    page_width = document["w"]
+    page_height = document["h"]
+    heights = np.clip(boxes[:, 3] - boxes[:, 1], 1, None)
+    median_height = np.median(heights)
+    center_y = (boxes[:, 1] + boxes[:, 3]) / 2
+    center_x = (boxes[:, 0] + boxes[:, 2]) / 2
+    order = np.argsort(np.argsort(center_y)) / max(count - 1, 1)
+    row_groups: list[list[int]] = []
+    for index in range(count):
+        overlap = np.clip(
+            np.minimum(boxes[index, 3], boxes[:, 3]) - np.maximum(boxes[index, 1], boxes[:, 1]),
+            0,
+            None,
+        ) / np.minimum(heights[index], heights)
+        row_groups.append(list(np.where(overlap > _ROW_OVERLAP_THRESHOLD)[0]))
+    features: list[list[float]] = []
+    for index, unit in enumerate(units):
+        text = unit["text"]
+        text_len = max(len(text), 1)
+        row = row_groups[index]
+        sorted_row = list(row[np.argsort(boxes[row, 0])])
+        position = sorted_row.index(index)
+        numeric = digits(text)
+        stripped = text.strip()
+        is_number = float(
+            len(numeric) > 0
+            and all(character.isdigit() or character in ",.- " for character in stripped)
+        )
+        digit_value = (
+            float("".join(str(unicodedata.digit(character)) for character in numeric[-12:]))
+            if numeric
+            else 0
+        )
+        features.append(
+            [
+                boxes[index, 0] / page_width,
+                boxes[index, 1] / page_height,
+                boxes[index, 2] / page_width,
+                boxes[index, 3] / page_height,
+                center_x[index] / page_width,
+                center_y[index] / page_height,
+                (boxes[index, 2] - boxes[index, 0]) / page_width,
+                heights[index] / median_height,
+                order[index],
+                math.log1p(count),
+                math.log1p(len(text)),
+                len(numeric) / text_len,
+                sum(character.isalpha() for character in text) / text_len,
+                sum(character.isupper() for character in text) / text_len,
+                text.count(" ") / text_len,
+                is_number,
+                math.log1p(digit_value),
+                len(row),
+                position / max(len(row) - 1, 1),
+                float(position == len(row) - 1),
+                float(position == 0),
+                (boxes[index, 2] - boxes[:, 2].max()) / page_width,
+            ]
+        )
+    return np.array(features, np.float32), row_groups
+
+
+def node_ctx(
+    document: LayoutDocument,
+    geometry: np.ndarray,
+    embeddings: np.ndarray,
+    rows: list[list[int]],
+) -> np.ndarray:
+    units = document["units"]
+    count = len(units)
+    boxes = np.array([unit["box"] for unit in units], float).reshape(-1, 4)
+    center_y = (boxes[:, 1] + boxes[:, 3]) / 2
+    context_rows: list[np.ndarray] = []
+    embedding_width = embeddings.shape[1]
+    geometry_width = geometry.shape[1]
+    zero_embedding = np.zeros(embedding_width, np.float32)
+    zero_geometry = np.zeros(geometry_width, np.float32)
+    for index in range(count):
+        row = [neighbor for neighbor in rows[index] if neighbor != index]
+        left = [
+            neighbor
+            for neighbor in row
+            if boxes[neighbor, 2] <= boxes[index, 0] + _HORIZONTAL_ALIGN_TOLERANCE
+        ]
+        right = [
+            neighbor
+            for neighbor in row
+            if boxes[neighbor, 0] >= boxes[index, 2] - _HORIZONTAL_ALIGN_TOLERANCE
+        ]
+        left_idx = max(left, key=lambda neighbor: boxes[neighbor, 2]) if left else None
+        right_idx = min(right, key=lambda neighbor: boxes[neighbor, 0]) if right else None
+        above = [
+            neighbor
+            for neighbor in range(count)
+            if center_y[neighbor] < boxes[index, 1] and neighbor not in rows[index]
+        ]
+        below = [
+            neighbor
+            for neighbor in range(count)
+            if center_y[neighbor] > boxes[index, 3] and neighbor not in rows[index]
+        ]
+        above_idx = max(above, key=lambda neighbor: center_y[neighbor]) if above else None
+        below_idx = min(below, key=lambda neighbor: center_y[neighbor]) if below else None
+        context_rows.append(
+            np.concatenate(
+                [
+                    geometry[left_idx] if left_idx is not None else zero_geometry,
+                    embeddings[left_idx] if left_idx is not None else zero_embedding,
+                    [left_idx is None],
+                    geometry[right_idx] if right_idx is not None else zero_geometry,
+                    embeddings[right_idx] if right_idx is not None else zero_embedding,
+                    [right_idx is None],
+                    embeddings[above_idx] if above_idx is not None else zero_embedding,
+                    embeddings[below_idx] if below_idx is not None else zero_embedding,
+                ]
+            )
+        )
+    return np.array(context_rows, np.float32).reshape(count, -1)
+
+
+def cand_sets(
+    document: LayoutDocument,
+    probabilities: np.ndarray,
+    classes: list[str],
+    source: str,
+    destination: str,
+    threshold: float,
+    *,
+    oracle: bool = False,
+) -> tuple[list[int], list[int]]:
     if oracle:
-        return [i for i, l in enumerate(d['y']) if l == src], [j for j, l in enumerate(d['y']) if l == dst]
-    a, b = classes.index(src), classes.index(dst)
-    return [i for i in range(len(d['y'])) if P[i, a] >= tau], [j for j in range(len(d['y'])) if P[j, b] >= tau]
-def pair_feats(d, P, S, T, pca):
-    B = np.array([u['box'] for u in d['units']], float); mh = max(np.median(B[:, 3] - B[:, 1]), 1); W = d['w']
-    cy = (B[:, 1] + B[:, 3]) / 2; cx = (B[:, 0] + B[:, 2]) / 2; Z = pca.transform(d['E']) if len(d['E']) else None
-    node = np.hstack([d['G'], P, Z]); rows, pairs = [], []
-    for j in T:
-        ds = np.array([abs(cy[i] - cy[j]) for i in S]); rk = np.argsort(np.argsort(ds)) if len(S) else []
-        for r, i in zip(rk, S):
-            if i == j: continue
-            lo, hi = sorted((cy[i], cy[j])); ov = max(0, min(B[i, 3], B[j, 3]) - max(B[i, 1], B[j, 1])) / max(min(B[i, 3] - B[i, 1], B[j, 3] - B[j, 1]), 1)
-            nb_t = sum(lo < cy[t] < hi for t in T if t != j); nb_s = sum(lo < cy[s] < hi for s in S if s != i)
-            rows.append(np.concatenate([node[i], node[j], [(cy[j] - cy[i]) / mh, abs(cy[j] - cy[i]) / mh, (B[j, 1] - B[i, 1]) / mh,
-                        (B[j, 0] - B[i, 2]) / W, (cx[j] - cx[i]) / W, ov, float(B[j, 0] >= B[i, 0]), r, nb_t, nb_s,
-                        float(d['E'][i] @ d['E'][j]), np.hypot((cx[j] - cx[i]) / W, (cy[j] - cy[i]) / d['h'])]]))
-            pairs.append((i, j))
-    return (np.array(rows, np.float32) if rows else np.zeros((0, 2 * node.shape[1] + 12), np.float32)), pairs
-def decode(meta, sc, ndoc, th, src_cap=1):
-    out = [[] for _ in range(ndoc)]; o = np.argsort(-sc); used_t, used_s = set(), {}
-    for k in o:
-        if sc[k] < th: break
-        di, i, j = meta[k]
-        if (di, j) in used_t or used_s.get((di, i), 0) >= src_cap: continue
-        used_t.add((di, j)); used_s[(di, i)] = used_s.get((di, i), 0) + 1; out[di].append((i, j, float(sc[k])))
-    return out
-def dir_nbrs(d, rows):
-    U = d['units']; n = len(U); B = np.array([u['box'] for u in U], float).reshape(-1, 4); cy = (B[:, 1] + B[:, 3]) / 2; cx = (B[:, 0] + B[:, 2]) / 2
-    out = []
-    for i in range(n):
-        r = [j for j in rows[i] if j != i]; rs = set(rows[i])
-        left = [j for j in r if B[j, 2] <= B[i, 0] + 2]; right = [j for j in r if B[j, 0] >= B[i, 2] - 2]
-        above = [j for j in range(n) if cy[j] < B[i, 1] and j not in rs]; below = [j for j in range(n) if cy[j] > B[i, 3] and j not in rs]
-        # above/below: prefer horizontally overlapping units, nearest vertically
-        def vbest(c, key):
-            if not c: return None
-            ov = [j for j in c if min(B[i, 2], B[j, 2]) - max(B[i, 0], B[j, 0]) > 0]
-            return min(ov or c, key=key)
-        out.append([max(left, key=lambda j: B[j, 2]) if left else None, min(right, key=lambda j: B[j, 0]) if right else None,
-                    vbest(above, lambda j: B[i, 1] - cy[j]), vbest(below, lambda j: cy[j] - B[i, 3])])
-    return out, B, cx, cy
-def nbr_feats(d, P, cache):
-    n = len(d['units']); k = P.shape[1]
-    if n == 0: return np.zeros((0, 4 * (k + 2) + 2 * k + 1), np.float32)
-    if 'nb' not in cache: cache['nb'] = dir_nbrs(d, d['rows'])
-    nb, B, cx, cy = cache['nb']; W, H = d['w'], d['h']; F = []
-    D = np.hypot((cx[:, None] - cx[None]) / W, (cy[:, None] - cy[None]) / H); np.fill_diagonal(D, np.inf)
-    for i in range(n):
-        f = []
-        for j in nb[i]:
-            if j is None: f += [0.0] * k + [1.0, 1.0]
-            else: f += list(P[j]) + [0.0, float(D[i, j])]
-        kn = np.argsort(D[i])[:min(4, n - 1)] if n > 1 else []
-        f += list(P[kn].mean(0)) if len(kn) else [0.0] * k
-        f += list(P[i]); f += [float(D[i, kn[0]]) if len(kn) else 1.0]
-        F.append(f)
-    return np.array(F, np.float32)
+        sources = [index for index, label in enumerate(document["y"]) if label == source]
+        targets = [index for index, label in enumerate(document["y"]) if label == destination]
+        return sources, targets
+    source_index = classes.index(source)
+    destination_index = classes.index(destination)
+    label_count = len(document["y"])
+    sources = [
+        index
+        for index in range(label_count)
+        if probabilities[index, source_index] >= threshold
+    ]
+    targets = [
+        index
+        for index in range(label_count)
+        if probabilities[index, destination_index] >= threshold
+    ]
+    return sources, targets
+
+
+def pair_feats(
+    document: LayoutDocument,
+    probabilities: np.ndarray,
+    sources: list[int],
+    targets: list[int],
+    pca: PcaTransformProtocol,
+) -> tuple[np.ndarray, list[tuple[int, int]]]:
+    boxes = np.array([unit["box"] for unit in document["units"]], float)
+    median_height = max(np.median(boxes[:, 3] - boxes[:, 1]), 1)
+    page_width = document["w"]
+    page_height = document["h"]
+    center_y = (boxes[:, 1] + boxes[:, 3]) / 2
+    center_x = (boxes[:, 0] + boxes[:, 2]) / 2
+    projected = pca.transform(document["E"]) if len(document["E"]) else None
+    node = np.hstack([document["G"], probabilities, projected])
+    pairs: list[tuple[int, int]] = []
+    feature_rows: list[np.ndarray] = []
+    for target_index in targets:
+        distances = np.array(
+            [abs(center_y[source_index] - center_y[target_index]) for source_index in sources]
+        )
+        rank = np.argsort(np.argsort(distances)) if len(sources) else []
+        for rank_value, source_index in zip(rank, sources, strict=False):
+            if source_index == target_index:
+                continue
+            low = min(center_y[source_index], center_y[target_index])
+            high = max(center_y[source_index], center_y[target_index])
+            vertical_overlap = (
+                min(boxes[source_index, 3], boxes[target_index, 3])
+                - max(boxes[source_index, 1], boxes[target_index, 1])
+            )
+            min_heights = min(
+                boxes[source_index, 3] - boxes[source_index, 1],
+                boxes[target_index, 3] - boxes[target_index, 1],
+            )
+            overlap = max(0, vertical_overlap) / max(min_heights, 1)
+            neighbors_target = sum(
+                low < center_y[other] < high for other in targets if other != target_index
+            )
+            neighbors_source = sum(
+                low < center_y[other] < high for other in sources if other != source_index
+            )
+            feature_rows.append(
+                np.concatenate(
+                    [
+                        node[source_index],
+                        node[target_index],
+                        [
+                            (center_y[target_index] - center_y[source_index]) / median_height,
+                            abs(center_y[target_index] - center_y[source_index]) / median_height,
+                            (boxes[target_index, 1] - boxes[source_index, 1]) / median_height,
+                            (boxes[target_index, 0] - boxes[source_index, 2]) / page_width,
+                            (center_x[target_index] - center_x[source_index]) / page_width,
+                            overlap,
+                            float(boxes[target_index, 0] >= boxes[source_index, 0]),
+                            rank_value,
+                            neighbors_target,
+                            neighbors_source,
+                            float(document["E"][source_index] @ document["E"][target_index]),
+                            np.hypot(
+                                (center_x[target_index] - center_x[source_index]) / page_width,
+                                (center_y[target_index] - center_y[source_index]) / page_height,
+                            ),
+                        ],
+                    ]
+                )
+            )
+            pairs.append((source_index, target_index))
+    if not feature_rows:
+        return np.zeros((0, 2 * node.shape[1] + _PAIR_FEAT_EXTRA), np.float32), pairs
+    return np.array(feature_rows, np.float32), pairs
+
+
+def decode(
+    meta: list[tuple[int, int, int]],
+    scores: np.ndarray,
+    document_count: int,
+    threshold: float,
+    *,
+    source_cap: int = 1,
+) -> list[list[tuple[int, int, float]]]:
+    output: list[list[tuple[int, int, float]]] = [[] for _ in range(document_count)]
+    order = np.argsort(-scores)
+    used_targets: set[tuple[int, int]] = set()
+    used_sources: dict[tuple[int, int], int] = {}
+    for key in order:
+        if scores[key] < threshold:
+            break
+        doc_index, source_index, target_index = meta[key]
+        source_uses = used_sources.get((doc_index, source_index), 0)
+        if (doc_index, target_index) in used_targets or source_uses >= source_cap:
+            continue
+        used_targets.add((doc_index, target_index))
+        used_sources[(doc_index, source_index)] = used_sources.get((doc_index, source_index), 0) + 1
+        output[doc_index].append((source_index, target_index, float(scores[key])))
+    return output
+
+
+def dir_nbrs(
+    document: LayoutDocument,
+    rows: list[list[int]],
+) -> tuple[list[list[int | None]], np.ndarray, np.ndarray, np.ndarray]:
+    units = document["units"]
+    count = len(units)
+    boxes = np.array([unit["box"] for unit in units], float).reshape(-1, 4)
+    center_y = (boxes[:, 1] + boxes[:, 3]) / 2
+    center_x = (boxes[:, 0] + boxes[:, 2]) / 2
+    neighbors: list[list[int | None]] = []
+
+    def vertical_best(
+        candidates: list[int],
+        unit_index: int,
+        key: Callable[[int], float],
+    ) -> int | None:
+        if not candidates:
+            return None
+        overlapping = [
+            candidate
+            for candidate in candidates
+            if min(boxes[unit_index, 2], boxes[candidate, 2])
+            - max(boxes[unit_index, 0], boxes[candidate, 0])
+            > 0
+        ]
+        return min(overlapping or candidates, key=key)
+
+    for index in range(count):
+        row = [neighbor for neighbor in rows[index] if neighbor != index]
+        row_set = set(rows[index])
+        left = [
+            neighbor
+            for neighbor in row
+            if boxes[neighbor, 2] <= boxes[index, 0] + _HORIZONTAL_ALIGN_TOLERANCE
+        ]
+        right = [
+            neighbor
+            for neighbor in row
+            if boxes[neighbor, 0] >= boxes[index, 2] - _HORIZONTAL_ALIGN_TOLERANCE
+        ]
+        above = [
+            neighbor
+            for neighbor in range(count)
+            if center_y[neighbor] < boxes[index, 1] and neighbor not in row_set
+        ]
+        below = [
+            neighbor
+            for neighbor in range(count)
+            if center_y[neighbor] > boxes[index, 3] and neighbor not in row_set
+        ]
+        neighbors.append(
+            [
+                max(left, key=lambda neighbor: boxes[neighbor, 2]) if left else None,
+                min(right, key=lambda neighbor: boxes[neighbor, 0]) if right else None,
+                vertical_best(
+                    above,
+                    index,
+                    lambda neighbor, unit_index=index: boxes[unit_index, 1] - center_y[neighbor],
+                ),
+                vertical_best(
+                    below,
+                    index,
+                    lambda neighbor, unit_index=index: center_y[neighbor] - boxes[unit_index, 3],
+                ),
+            ]
+        )
+    return neighbors, boxes, center_x, center_y
+
+
+def nbr_feats(
+    document: LayoutDocument,
+    probabilities: np.ndarray,
+    cache: NeighborFeatureCache,
+) -> np.ndarray:
+    count = len(document["units"])
+    class_count = probabilities.shape[1]
+    if count == 0:
+        return np.zeros((0, 4 * (class_count + 2) + 2 * class_count + 1), np.float32)
+    if "nb" not in cache:
+        cache["nb"] = dir_nbrs(document, document["rows"])
+    neighbor_indices, _boxes, center_x, center_y = cache["nb"]
+    page_width = document["w"]
+    page_height = document["h"]
+    feature_rows: list[list[float]] = []
+    x_delta = (center_x[:, None] - center_x[None]) / page_width
+    y_delta = (center_y[:, None] - center_y[None]) / page_height
+    distances = np.hypot(x_delta, y_delta)
+    np.fill_diagonal(distances, np.inf)
+    for index in range(count):
+        row_features: list[float] = []
+        for neighbor in neighbor_indices[index]:
+            if neighbor is None:
+                row_features.extend([0.0] * class_count + [1.0, 1.0])
+            else:
+                distance_value = float(distances[index, neighbor])
+                neighbor_probabilities = [*probabilities[neighbor], 0.0, distance_value]
+                row_features.extend(neighbor_probabilities)
+        knn_limit = min(_MAX_NEIGHBOR_KNN, count - 1)
+        knn = np.argsort(distances[index])[:knn_limit] if count > 1 else []
+        row_features.extend(list(probabilities[knn].mean(0)) if len(knn) else [0.0] * class_count)
+        row_features.extend(list(probabilities[index]))
+        row_features.append(float(distances[index, knn[0]]) if len(knn) else 1.0)
+        feature_rows.append(row_features)
+    return np.array(feature_rows, np.float32)

@@ -9,8 +9,8 @@ import {
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import type { AssignDocumentTag } from '../domain/assign-document-tag.port.js';
+import type { CeLabelPropagationScoresPort } from '../domain/ce-label-propagation.port.js';
 import { formatAssignRecommendationReason } from '../domain/label-recommendation-scoring.js';
-import { HttpCeMlAdapter } from '../infrastructure/http-ce-ml.adapter.js';
 import { AssignDocumentTagUseCase } from './document-label.use-cases.js';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class ApplyCeLabelPropagationUseCase {
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(AssignDocumentTagUseCase) private readonly assignTag: AssignDocumentTag,
-    private readonly ceMl: HttpCeMlAdapter
+    private readonly ceMl: CeLabelPropagationScoresPort
   ) {}
 
   async propagateAfterLabelSeed(

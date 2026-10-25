@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from docuvate_worker.infrastructure.ml.ce_ml.calibration import label_tiers
+from docuvate_worker.infrastructure.ml.ce_ml.constants import VECTOR_NORM_EPSILON
 from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
 
 _ALPHA = 0.9
@@ -25,7 +26,7 @@ def _normalize_rows(vectors: np.ndarray) -> np.ndarray:
     if vectors.size == 0:
         return vectors
     norms = np.linalg.norm(vectors, axis=1, keepdims=True)
-    norms = np.where(norms < 1e-9, 1.0, norms)
+    norms = np.where(norms < VECTOR_NORM_EPSILON, 1.0, norms)
     return vectors / norms
 
 

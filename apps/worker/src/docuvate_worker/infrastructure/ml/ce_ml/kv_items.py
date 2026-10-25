@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import numpy as np
 
 from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.infrastructure.ml.ce_ml.constants import MIN_LAYOUT_UNITS
 from docuvate_worker.infrastructure.ml.docai.inference import DocaiUnit, get_docai_runtime
 from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord, predict_doc_ner_spans
 from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
@@ -35,7 +36,7 @@ def extract_kv_items_from_blocks(
     document_id: str,
     blocks: list[ExtractionBlock],
 ) -> list[KeyValueItem]:
-    if len(blocks) < 2:
+    if len(blocks) < MIN_LAYOUT_UNITS:
         return []
     width, height = _page_size(blocks)
     units = [
@@ -48,7 +49,8 @@ def extract_kv_items_from_blocks(
     ]
     runtime = get_docai_runtime()
     texts = [unit.text for unit in units]
-    embeddings = np.asarray(embed_texts_onnx([f"query: {text}" for text in texts]), dtype=np.float32)
+    embed_inputs = [f"query: {text}" for text in texts]
+    embeddings = np.asarray(embed_texts_onnx(embed_inputs), dtype=np.float32)
     prediction = runtime.predict_units(units, width=width, height=height, embeddings=embeddings)
     fields = prediction["fields"]
     links = prediction["links"]

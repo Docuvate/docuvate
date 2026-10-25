@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-/* eslint-disable @typescript-eslint/consistent-type-assertions -- vitest partial mocks */
 import type { LabelMapPointDto } from '@docuvate/contracts';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
+import type { MissingLabelHintPort } from '../domain/ce-label-propagation.port.js';
 import { EnrichLabelMapMissingHintsUseCase } from './enrich-label-map-missing-hints.use-case.js';
 
 describe('EnrichLabelMapMissingHintsUseCase', () => {
@@ -22,10 +22,10 @@ describe('EnrichLabelMapMissingHintsUseCase', () => {
         },
       }),
     });
-    const ceMl = {
+    const ceMl: MissingLabelHintPort = {
       scoreMissingLabelHint: vi.fn().mockResolvedValue({ score: 0.9, show: true }),
     };
-    const useCase = new EnrichLabelMapMissingHintsUseCase(documents, ceMl as never);
+    const useCase = new EnrichLabelMapMissingHintsUseCase(documents, ceMl);
     const points: LabelMapPointDto[] = [
       {
         id: 'doc:doc-1',

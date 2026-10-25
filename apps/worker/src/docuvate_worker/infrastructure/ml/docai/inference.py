@@ -11,7 +11,7 @@ from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 import onnxruntime as ort
@@ -19,6 +19,7 @@ from tokenizers import Tokenizer
 
 from docuvate_worker.infrastructure.ml.docai import features as layout_features
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
+from docuvate_worker.infrastructure.ml.docai.rapidocr_protocol import RapidOcrEngine
 from docuvate_worker.infrastructure.onnx_e5_encoder import resolve_e5_onnx_dir
 
 
@@ -72,7 +73,8 @@ class DocaiRuntime:
                 providers=["CPUExecutionProvider"],
             )
 
-        self._cfg: dict[str, Any] = json.loads((model_dir / "config.json").read_text(encoding="utf-8"))
+        config_text = (model_dir / "config.json").read_text(encoding="utf-8")
+        self._cfg: dict[str, Any] = json.loads(config_text)
         arrays = np.load(model_dir / "arrays.npz")
         vocab_payload = json.loads((model_dir / "tfidf_vocab.json").read_text(encoding="utf-8"))
         self._vocab: dict[str, int] = vocab_payload["vocabulary"]
@@ -102,7 +104,7 @@ class DocaiRuntime:
         self._use_cls = bool(ocr_cfg.get("use_cls", True))
         self._rapidocr = self._build_ocr(model_dir, ocr_cfg, threads)
 
-    def _build_ocr(self, model_dir: Path, ocr_cfg: dict[str, Any], threads: int) -> Any:
+    def _build_ocr(self, model_dir: Path, ocr_cfg: dict[str, Any], threads: int) -> RapidOcrEngine:
         from rapidocr_onnxruntime import RapidOCR  # noqa: PLC0415
 
         kwargs: dict[str, Any] = {
@@ -113,7 +115,7 @@ class DocaiRuntime:
         rec_rel = ocr_cfg.get("rec_model")
         if isinstance(rec_rel, str) and rec_rel.strip():
             kwargs["rec_model_path"] = str(model_dir / rec_rel)
-        return RapidOCR(**kwargs)
+        return cast(RapidOcrEngine, RapidOCR(**kwargs))
 
     def _ngrams(self, text: str) -> list[str]:
         text = re.sub(r"\s\s+", " ", text.lower())
@@ -166,7 +168,13 @@ class DocaiRuntime:
     def _calibrate(self, probabilities: np.ndarray) -> np.ndarray:
         return np.interp(probabilities, self._cal_x, self._cal_y)
 
-    def predict_image(self, image: np.ndarray, *, width: int | None = None, height: int | None = None) -> dict[str, Any]:
+    def predict_image(
+        self,
+        image: np.ndarray,
+        *,
+        width: int | None = None,
+        height: int | None = None,
+    ) -> dict[str, Any]:
         started = time.perf_counter()
         timings: dict[str, float] = {}
         ocr_started = time.perf_counter()
@@ -188,7 +196,13 @@ class DocaiRuntime:
                     ocr_conf=float(conf),
                 )
             )
-        return self.predict_units(units, width=width, height=height, timings=timings, started=started)
+        return self.predict_units(
+            units,
+            width=width,
+            height=height,
+            timings=timings,
+            started=started,
+        )
 
     def predict_units(
         self,
@@ -222,11 +236,13 @@ class DocaiRuntime:
         }
         geom_started = time.perf_counter()
         geometry, rows = layout_features.node_geom(payload)
-        dense = (
-            np.hstack([geometry, layout_features.node_ctx(payload, geometry, embeddings_matrix, rows)])
-            if self._cfg.get("field_ctx")
-            else geometry
-        )
+        if self._cfg.get("field_ctx"):
+            node_context = layout_features.node_ctx(
+                payload, geometry, embeddings_matrix, rows
+            )
+            dense = np.hstack([geometry, node_context])
+        else:
+            dense = geometry
         field_started = time.perf_counter()
         probabilities = self._field.run(
             None,
@@ -270,9 +286,13 @@ class DocaiRuntime:
             link_scores = self._rank.run(None, {"X": pair_matrix.astype(np.float32)})[1][:, 1]
         else:
             link_scores = np.zeros(0, dtype=np.float32)
-        decoded = layout_features.decode([(0, i, j) for i, j in pairs], link_scores, 1, float(self._cfg["theta"]))[
-            0
-        ]
+        link_meta = [(0, source_index, target_index) for source_index, target_index in pairs]
+        decoded = layout_features.decode(
+            link_meta,
+            link_scores,
+            1,
+            float(self._cfg["theta"]),
+        )[0]
         timings["links"] = (time.perf_counter() - link_started) * 1e3
         timings["geom"] = (time.perf_counter() - geom_started) * 1e3
 

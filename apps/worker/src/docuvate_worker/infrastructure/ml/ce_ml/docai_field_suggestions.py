@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from docuvate_worker.domain.models import ExtractedField, ExtractionBlock
 from docuvate_worker.infrastructure.ml.ce_ml.calibration import field_abstain_threshold
+from docuvate_worker.infrastructure.ml.ce_ml.constants import MIN_LAYOUT_UNITS, MIN_LINK_SCORE_FLOOR
 from docuvate_worker.infrastructure.ml.ce_ml.field_discovery import _slug
 from docuvate_worker.infrastructure.ml.ce_ml.kv_items import extract_kv_items_from_blocks
 
@@ -15,7 +16,7 @@ def docai_kv_field_suggestions(
     recognized_field_keys: frozenset[str] | None = None,
     existing_field_keys: frozenset[str] | None = None,
 ) -> list[ExtractedField]:
-    if len(blocks) < 2:
+    if len(blocks) < MIN_LAYOUT_UNITS:
         return []
     items = extract_kv_items_from_blocks("pipeline", blocks)
     if not items:
@@ -34,7 +35,7 @@ def docai_kv_field_suggestions(
             continue
         if storage_key in existing or slug in existing:
             continue
-        confidence = float(min(1.0, max(item.link_score, 0.5)))
+        confidence = float(min(1.0, max(item.link_score, MIN_LINK_SCORE_FLOOR)))
         if confidence < abstain:
             continue
         suggestions.append(

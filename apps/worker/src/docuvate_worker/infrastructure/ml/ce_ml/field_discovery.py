@@ -13,6 +13,7 @@ from docuvate_worker.infrastructure.ml.ce_ml.calibration import (
     field_abstain_threshold,
     load_ce_ml_calibration,
 )
+from docuvate_worker.infrastructure.ml.ce_ml.constants import ENTITY_TYPE_COUNT, MIN_CLUSTER_ITEMS
 from docuvate_worker.infrastructure.ml.ce_ml.kv_items import KeyValueItem
 from docuvate_worker.infrastructure.onnx_e5_encoder import embed_texts_onnx
 
@@ -27,7 +28,11 @@ class DiscoveredField:
 
 def _open_set_params() -> tuple[float, float, float]:
     raw = load_ce_ml_calibration()["openSetFieldDiscovery"]
-    return float(raw["keyClusterTau"]), float(raw["minDocFrequencyPhi"]), float(raw["keylessClusterTau2"])
+    return (
+        float(raw["keyClusterTau"]),
+        float(raw["minDocFrequencyPhi"]),
+        float(raw["keylessClusterTau2"]),
+    )
 
 
 def _slug(name: str) -> str:
@@ -47,13 +52,24 @@ def discover_conditional_fields(
         return []
     doc_ids = sorted(items_by_document)
     doc_count = max(len(doc_ids), 1)
-    keyed = [(doc_id, item) for doc_id in doc_ids for item in items_by_document[doc_id] if item.key_text]
-    keyless = [(doc_id, item) for doc_id in doc_ids for item in items_by_document[doc_id] if not item.key_text]
+    keyed = [
+        (doc_id, item)
+        for doc_id in doc_ids
+        for item in items_by_document[doc_id]
+        if item.key_text
+    ]
+    keyless = [
+        (doc_id, item)
+        for doc_id in doc_ids
+        for item in items_by_document[doc_id]
+        if not item.key_text
+    ]
 
     discovered: list[DiscoveredField] = []
-    if len(keyed) >= 2:
+    if len(keyed) >= MIN_CLUSTER_ITEMS:
         keys = [item.key_text or "" for _, item in keyed]
-        embeddings = np.asarray(embed_texts_onnx([f"query: {text}" for text in keys]), dtype=np.float32)
+        query_inputs = [f"query: {text}" for text in keys]
+        embeddings = np.asarray(embed_texts_onnx(query_inputs), dtype=np.float32)
         dist = pdist(embeddings, metric="cosine")
         hierarchy = linkage(dist, method="average")
         labels = fcluster(hierarchy, t=tau, criterion="distance") - 1
@@ -75,11 +91,14 @@ def discover_conditional_fields(
                 )
             )
 
-    if len(keyless) >= 2:
+    if len(keyless) >= MIN_CLUSTER_ITEMS:
         features = np.stack(
             [
                 np.r_[
-                    [1.0 if item.value_entity == ent else 0.0 for ent in range(5)],
+                    [
+                        1.0 if item.value_entity == ent else 0.0
+                        for ent in range(ENTITY_TYPE_COUNT)
+                    ],
                     item.position[0],
                     item.position[1] + item.position[3],
                 ]

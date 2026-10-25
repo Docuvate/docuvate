@@ -97,7 +97,13 @@ def predict_doc_ner_spans(
     for index, tag_id in enumerate([*list(tags), 0]):
         label = _DOC_TAG_NAMES[int(tag_id)]
         if current and (label == "O" or label.startswith("B-") or label[2:] != current_type):
-            spans.append(NerSpan(start_index=current[0], end_index=current[1], entity_type=current_type))
+            spans.append(
+                NerSpan(
+                    start_index=current[0],
+                    end_index=current[1],
+                    entity_type=current_type,
+                )
+            )
             current = None
         if label != "O" and current is None:
             current = [index, index + 1]

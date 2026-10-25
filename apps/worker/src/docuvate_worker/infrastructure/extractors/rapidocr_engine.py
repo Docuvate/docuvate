@@ -13,13 +13,14 @@ from PIL import Image
 
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.ml.docai.paths import docai_model_dir
+from docuvate_worker.infrastructure.ml.docai.rapidocr_protocol import RapidOcrEngine
 
 logger = logging.getLogger(__name__)
 
 RAPIDOCR_BUNDLE_ID = "rapidocr:docai-v0.3-en-latin-rec"
 _REC_BATCH_NUM = 3
 
-_ocr_instance: Any | None = None
+_ocr_instance: RapidOcrEngine | None = None
 
 
 def release_rapidocr() -> None:
@@ -27,7 +28,7 @@ def release_rapidocr() -> None:
     _ocr_instance = None
 
 
-def _get_rapidocr() -> Any:
+def _get_rapidocr() -> RapidOcrEngine:
     global _ocr_instance  # noqa: PLW0603
     if _ocr_instance is not None:
         return _ocr_instance
@@ -49,7 +50,7 @@ def _get_rapidocr() -> Any:
         _REC_BATCH_NUM,
         RAPIDOCR_BUNDLE_ID,
     )
-    _ocr_instance = RapidOCR(**kwargs)
+    _ocr_instance = cast(RapidOcrEngine, RapidOCR(**kwargs))
     if not ocr_cfg_path.is_file():
         logger.warning("DocAI config.json missing at %s", ocr_cfg_path)
     return _ocr_instance
