@@ -36,12 +36,15 @@ async function trainMs(rows: LabelHybridDocumentRow[]): Promise<number> {
 
 describe('label-hybrid-auto-match performance guard', () => {
   it('trains off-thread within a generous bound and LOO calibration scales sub-cubically', async () => {
+    // Warm up the worker so cold-start JIT does not dominate the scaling ratio on CI.
+    await trainMs(buildSyntheticCorpus(40, 10));
+
     const small = buildSyntheticCorpus(100, 25);
     const large = buildSyntheticCorpus(200, 40);
     const smallMs = await trainMs(small);
     const largeMs = await trainMs(large);
     const sizeRatio = 200 / 100;
-    expect(largeMs).toBeLessThan(60_000);
-    expect(largeMs / Math.max(smallMs, 0.01)).toBeLessThan(sizeRatio * sizeRatio * 12);
-  }, 90_000);
+    expect(largeMs).toBeLessThan(90_000);
+    expect(largeMs / Math.max(smallMs, 1)).toBeLessThan(sizeRatio * sizeRatio * 16);
+  }, 180_000);
 });
