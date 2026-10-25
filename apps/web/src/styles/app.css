@@ -7365,11 +7365,24 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   overflow: hidden;
 }
 
+.connector-catalog-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dv-space-2xs);
+  margin-top: var(--dv-space-xs);
+  min-height: 0;
+}
+
+.connector-catalog-card-meta:has(.connector-oauth-status),
+.connector-catalog-card-meta:has(.connector-oauth-admin-details) {
+  min-height: 2.75rem;
+}
+
 .connector-oauth-status {
   display: flex;
   align-items: center;
   gap: var(--dv-space-2xs);
-  margin: var(--dv-space-xs) 0 0;
+  margin: 0;
   font-size: 0.85rem;
   line-height: 1.4;
 }

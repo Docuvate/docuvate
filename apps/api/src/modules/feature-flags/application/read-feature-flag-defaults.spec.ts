@@ -30,7 +30,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
     }
   });
 
-  it('defaults conservative flags off and learned value types on when env is unset', () => {
+  it('defaults conservative flags off, source connectors and learned value types on when env is unset', () => {
     for (const key of ENV_KEYS) {
       original[key] ??= process.env[key];
       // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- simulate unset env
@@ -38,7 +38,7 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
     }
     expect(readFeatureFlagDefaultsFromEnv()).toEqual({
       layoutReconstructionCompare: false,
-      sourceConnectors: false,
+      sourceConnectors: true,
       experimentalResearchModels: false,
       exactAnswers: false,
       smartDuplicates: false,
@@ -73,6 +73,16 @@ describe('readFeatureFlagDefaultsFromEnv', () => {
       layoutKeyValueRoles: true,
       localChatModel: true,
     });
+  });
+
+  it('allows disabling source connectors via env', () => {
+    for (const key of ENV_KEYS) {
+      original[key] ??= process.env[key];
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- simulate unset env
+      delete process.env[key];
+    }
+    process.env['DOCUVATE_FEATURE_SOURCE_CONNECTORS'] = 'false';
+    expect(readFeatureFlagDefaultsFromEnv().sourceConnectors).toBe(false);
   });
 
   it('allows disabling learned value types via env', () => {

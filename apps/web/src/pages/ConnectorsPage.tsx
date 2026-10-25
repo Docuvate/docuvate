@@ -294,16 +294,20 @@ export function ConnectorsPage() {
                 ))}
               </ul>
             ) : null}
-          {!hasInstallation && !oauthReady && plugin.auth.strategy === 'oauth2' ? (
-            <p
-              className="connector-oauth-status muted"
-              title={connectDisabledHint(plugin, oauthReady)}
-            >
-              <Info size={16} strokeWidth={2} aria-hidden />
-              <span>{t('connectors.oauthNotConfiguredShort')}</span>
-            </p>
+          {!hasInstallation ? (
+            <div className="connector-catalog-card-meta">
+              {!oauthReady && plugin.auth.strategy === 'oauth2' ? (
+                <p
+                  className="connector-oauth-status muted"
+                  title={connectDisabledHint(plugin, oauthReady)}
+                >
+                  <Info size={16} strokeWidth={2} aria-hidden />
+                  <span>{t('connectors.oauthNotConfiguredShort')}</span>
+                </p>
+              ) : null}
+              {renderAdminOAuthDetails(plugin)}
+            </div>
           ) : null}
-          {!hasInstallation ? renderAdminOAuthDetails(plugin) : null}
         </div>
         <footer className="connector-catalog-card-footer">
           <div className="connector-catalog-badges">
@@ -355,7 +359,7 @@ export function ConnectorsPage() {
               <Button
                 type="button"
                 variant="secondary"
-                disabled={!oauthReady}
+                disabled={plugin.auth.strategy === 'oauth2' && !oauthReady}
                 title={connectDisabledHint(plugin, oauthReady)}
                 onClick={() => { setConnectPlugin(plugin); }}
               >
