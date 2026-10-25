@@ -68,7 +68,7 @@ function renderPage() {
     <MemoryRouter initialEntries={[`/settings/connectors/paperless/${installationId}`]}>
       <Routes>
         <Route
-          path="/settings/connectors/paperless/:connectionId"
+          path="/settings/connectors/:pluginId/:connectionId"
           element={<PaperlessConnectorSetupPage />}
         />
       </Routes>

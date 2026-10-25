@@ -88,13 +88,6 @@ function ConnectorConnectionSwitch() {
   return <ConnectorConnectionPage />;
 }
 
-function LegacyPaperlessConnectorRedirect() {
-  const { installationId = '' } = useParams();
-  return (
-    <Navigate to={routes.settingsConnectorConnection('paperless', installationId)} replace />
-  );
-}
-
 export function App() {
   return (
     <Routes>
@@ -281,14 +274,6 @@ export function App() {
             <SourceConnectorsRoute>
               <ConnectorConnectionSwitch />
             </SourceConnectorsRoute>
-          </ShellRoute>
-        }
-      />
-      <Route
-        path="/settings/connectors/paperless/:installationId"
-        element={
-          <ShellRoute>
-            <LegacyPaperlessConnectorRedirect />
           </ShellRoute>
         }
       />
