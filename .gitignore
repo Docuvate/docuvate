@@ -20,6 +20,7 @@ apps/worker/.venv/
 experiments/.venv/
 experiments/out/
 apps/worker/.ruff_cache/
+apps/worker/tests/.cache/
 venv/
 *.egg-info/
 .eggs/

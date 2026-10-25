@@ -34,6 +34,8 @@ from docuvate_worker.infrastructure.extract_memory.profiling import (
     ExtractMemoryStage,
     active_memory_profiler,
 )
+from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import pdf_page_count
+from docuvate_worker.infrastructure.pipeline_memory import release_pdf_bytes_after_taco
 
 
 def run_integrated_cpu_document_pipeline(
@@ -50,10 +52,6 @@ def run_integrated_cpu_document_pipeline(
         recognized_field_keys=run_input.recognized_field_keys,
     )
     if profiler is not None and run_input.mime_type == "application/pdf":
-        from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import (  # noqa: PLC0415
-            pdf_page_count,
-        )
-
         with profiler.stage(ExtractMemoryStage.PDF_OPEN):
             pdf_page_count(run_input.content)
     if profiler is not None:
@@ -70,10 +68,6 @@ def run_integrated_cpu_document_pipeline(
     state.luna_data = luna.data
     taco = run_taco_stage(state)
     state.taco_data = taco.data
-    from docuvate_worker.infrastructure.pipeline_memory import (  # noqa: PLC0415
-        release_pdf_bytes_after_taco,
-    )
-
     release_pdf_bytes_after_taco(state)
     if profiler is not None:
         with profiler.stage(ExtractMemoryStage.EMBEDDING):

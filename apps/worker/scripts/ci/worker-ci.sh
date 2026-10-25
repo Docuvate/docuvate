@@ -17,5 +17,7 @@ uv pip install --python "$VENV/bin/python" -e ".[dev]" >/dev/null
 "$VENV/bin/pyright"
 "$VENV/bin/mypy"
 "$VENV/bin/python" -m docuvate_worker.infrastructure.ml.third_party_models
+export DOCUVATE_FUNSD_OCR_CACHE="${DOCUVATE_FUNSD_OCR_CACHE:-$ROOT/tests/.cache/funsd_ocr_eval}"
+"$VENV/bin/python" tests/scripts/materialize_funsd_fixtures.py --cache-dir "$DOCUVATE_FUNSD_OCR_CACHE"
 "$VENV/bin/pytest" tests -q --ignore=tests/integration --ignore=tests/test_pipeline_extractor_equivalence.py --maxfail=1
 bash "$ROOT/../../scripts/ci/check-third-party-models-manifest.sh"

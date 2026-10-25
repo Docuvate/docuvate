@@ -2,10 +2,15 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-"""Materialize FUNSD evaluation pages (evaluation-only; not used for training)."""
+"""Materialize FUNSD evaluation pages into a local cache (evaluation-only; not for training).
+
+FUNSD images are research/non-commercial — do not commit them to the public CE repo.
+The committed manifest under fixtures/ocr_eval/funsd/ holds baseline metrics only.
+"""
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -16,7 +21,7 @@ HF_ROWS = (
     "https://datasets-server.huggingface.co/rows?"
     "dataset=nielsr%2Ffunsd&config=default&split=train&offset={offset}&length=1"
 )
-OUT_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "ocr_eval" / "funsd"
+DEFAULT_CACHE = Path(__file__).resolve().parents[1] / ".cache" / "funsd_ocr_eval"
 PAGE_COUNT = 5
 
 
@@ -46,8 +51,8 @@ def _download_image(image_field: object, dest: Path) -> None:
         dest.write_bytes(response.read())
 
 
-def main() -> int:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+def materialize(cache_dir: Path) -> None:
+    cache_dir.mkdir(parents=True, exist_ok=True)
     manifest: list[dict[str, object]] = []
     for offset in range(PAGE_COUNT):
         row = _fetch_row(offset)
@@ -58,7 +63,7 @@ def main() -> int:
             raise RuntimeError(msg)
         words = [str(word) for word in words_raw]
         reference = " ".join(words)
-        image_path = OUT_DIR / f"{page_id}.jpg"
+        image_path = cache_dir / f"{page_id}.jpg"
         _download_image(row.get("image"), image_path)
         manifest.append(
             {
@@ -70,10 +75,21 @@ def main() -> int:
     payload = {
         "source": "nielsr/funsd train split (eval only)",
         "pages": manifest,
-        "baseline_mean_cer": None,
     }
-    (OUT_DIR / "manifest.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
-    print(f"Wrote {len(manifest)} FUNSD pages to {OUT_DIR}")
+    (cache_dir / "manifest.json").write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Download FUNSD OCR eval pages into a cache dir")
+    parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=DEFAULT_CACHE,
+        help="Directory for JPGs and cache manifest.json (default: tests/.cache/funsd_ocr_eval)",
+    )
+    args = parser.parse_args()
+    materialize(args.cache_dir.resolve())
+    print(f"Wrote {PAGE_COUNT} FUNSD pages to {args.cache_dir}")
     return 0
 
 

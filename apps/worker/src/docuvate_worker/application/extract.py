@@ -5,6 +5,10 @@ import logging
 
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.models import ExtractionResult
+from docuvate_worker.infrastructure.extract_memory.profiling import (
+    MemoryProfiler,
+    set_active_memory_profiler,
+)
 from docuvate_worker.infrastructure.extractors.document_images import extract_document_images
 from docuvate_worker.infrastructure.extractors.engine_catalog import engine_by_name
 from docuvate_worker.infrastructure.extractors.markdown import extraction_to_markdown
@@ -125,11 +129,6 @@ def extract_document(
     embedding_density_state: EmbeddingDensityStatePayload | None = None,
     build_exact_fact_index: bool = False,
 ) -> ExtractionResult:
-    from docuvate_worker.infrastructure.extract_memory.profiling import (  # noqa: PLC0415
-        MemoryProfiler,
-        set_active_memory_profiler,
-    )
-
     profiler = MemoryProfiler()
     profiler.start()
     set_active_memory_profiler(profiler)

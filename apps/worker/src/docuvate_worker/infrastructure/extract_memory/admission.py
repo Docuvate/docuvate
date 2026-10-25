@@ -15,12 +15,18 @@ from dataclasses import dataclass
 
 from pypdf import PdfReader
 
+from docuvate_worker.domain.extract_errors import ExtractPermanentError
 from docuvate_worker.infrastructure.extract_memory.cgroup import (
     cgroup_memory_current_bytes,
     cgroup_memory_limit_bytes,
 )
 from docuvate_worker.infrastructure.extract_memory.pixel_budget import (
     page_pixel_count_at_dpi,
+)
+from docuvate_worker.infrastructure.extract_memory.raster_estimate import (
+    estimate_raster_dpi,
+    estimate_raster_max_dpi,
+    estimate_raster_max_pixels_per_page,
 )
 from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import pdf_page_count
 
@@ -57,12 +63,6 @@ def _pdf_page_sizes_pt(content: bytes) -> list[tuple[float, float]]:
 
 def estimate_extract_memory_bytes(content: bytes, mime_type: str) -> int:
     """Conservative RSS estimate from page count and raster megapixels."""
-    from docuvate_worker.infrastructure.extractors.pdf_raster import (  # noqa: PLC0415
-        pdf_raster_dpi,
-        pdf_raster_max_dpi,
-        pdf_raster_max_pixels_per_page,
-    )
-
     base = _env_int(_ENV_BASE_OVERHEAD, _DEFAULT_BASE_OVERHEAD)
     bytes_per_mp = _env_int(_ENV_BYTES_PER_MEGAPIXEL, _DEFAULT_BYTES_PER_MP)
     if mime_type != "application/pdf":
@@ -70,10 +70,10 @@ def estimate_extract_memory_bytes(content: bytes, mime_type: str) -> int:
     pages = pdf_page_count(content)
     if pages <= 0:
         return base
-    target_dpi = pdf_raster_dpi()
-    max_dpi = pdf_raster_max_dpi()
+    target_dpi = estimate_raster_dpi()
+    max_dpi = estimate_raster_max_dpi()
     dpi = min(target_dpi, max_dpi)
-    max_px = pdf_raster_max_pixels_per_page()
+    max_px = estimate_raster_max_pixels_per_page()
     sizes = _pdf_page_sizes_pt(content)
     if not sizes:
         megapixels = pages * (max_px / 1_000_000.0)
@@ -156,10 +156,6 @@ def extract_admission_slot(content: bytes, mime_type: str) -> Iterator[None]:
     estimate = estimate_extract_memory_bytes(content, mime_type)
     controller = admission_controller()
     if not controller.try_acquire(estimate):
-        from docuvate_worker.domain.extract_errors import (  # noqa: PLC0415
-            ExtractPermanentError,
-        )
-
         raise ExtractPermanentError(
             reason=(
                 "Document exceeds available worker memory; "

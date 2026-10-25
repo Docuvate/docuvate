@@ -1,16 +1,17 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-import json
-from pathlib import Path
-
 import pytest
 
 from docuvate_worker.infrastructure.extractors.rapidocr_engine import ocr_image_bytes
+from tests.funsd_ocr_cache import committed_baseline_mean_cer, load_funsd_eval_pages
 
-_FIXTURE_DIR = Path(__file__).resolve().parent / "fixtures" / "ocr_eval" / "funsd"
-_MANIFEST = _FIXTURE_DIR / "manifest.json"
 _MAX_REGRESSION_PP = 0.005
+_SKIP_OFFLINE = (
+    "FUNSD OCR eval skipped: no network and cache empty. "
+    "Run: python tests/scripts/materialize_funsd_fixtures.py "
+    "(or set DOCUVATE_FUNSD_OCR_CACHE). CI fetches automatically."
+)
 
 
 def _character_error_rate(reference: str, hypothesis: str) -> float:
@@ -36,27 +37,21 @@ def _character_error_rate(reference: str, hypothesis: str) -> float:
     return dist[rows - 1][cols - 1] / len(ref)
 
 
-@pytest.mark.skipif(not _MANIFEST.is_file(), reason="FUNSD fixtures missing; run materialize script")
 def test_funsd_pages_cer_within_baseline(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DOCUVATE_OCR_BACKEND", "rapidocr")
-    manifest = json.loads(_MANIFEST.read_text(encoding="utf-8"))
-    baseline_raw = manifest.get("baseline_mean_cer")
-    if not isinstance(baseline_raw, (int, float)):
-        pytest.fail("FUNSD manifest missing baseline_mean_cer; re-run materialize script")
-    baseline_cer = float(baseline_raw)
-    pages = manifest.get("pages")
-    if not isinstance(pages, list) or not pages:
-        pytest.fail("FUNSD manifest has no pages")
+    baseline_cer = committed_baseline_mean_cer()
+    if baseline_cer is None:
+        pytest.fail("Committed FUNSD manifest missing baseline_mean_cer")
+    pages = load_funsd_eval_pages()
+    if pages is None:
+        pytest.skip(_SKIP_OFFLINE)
     total_cer = 0.0
     for entry in pages:
-        if not isinstance(entry, dict):
-            continue
-        image_name = str(entry.get("image") or "")
-        reference = str(entry.get("reference") or "")
-        image_path = _FIXTURE_DIR / image_name
-        if not image_path.is_file() or not reference:
-            continue
-        hypothesis, _blocks = ocr_image_bytes(image_path.read_bytes())
+        image_path = entry["image_path"]
+        reference = entry["reference"]
+        with open(image_path, "rb") as handle:
+            image_bytes = handle.read()
+        hypothesis, _blocks = ocr_image_bytes(image_bytes)
         total_cer += _character_error_rate(reference.casefold(), hypothesis.casefold())
     page_count = len(pages)
     mean_cer = total_cer / page_count
