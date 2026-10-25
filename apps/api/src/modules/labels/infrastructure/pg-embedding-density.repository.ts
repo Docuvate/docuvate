@@ -481,7 +481,8 @@ export class PgEmbeddingDensityRepository {
     const rows = await this.documentEmbeddingRepo
       .createQueryBuilder('de')
       .innerJoin('de.document', 'document')
-      .innerJoin('document.tags', 'tag')
+      .innerJoin('document.documentTags', 'documentTag')
+      .innerJoin('documentTag.tag', 'tag')
       .where('document.userId = :userId', { userId })
       .andWhere('tag.isInbox = :inbox', { inbox: false })
       .select('de.embedding', 'embedding')

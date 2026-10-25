@@ -55,6 +55,7 @@ const FORWARD_SQL_ORDER = [
   'installation-oidc-provider-up.sql',
   'correspondents-to-absender-up.sql',
   'connector-paperless-import-retry-up.sql',
+  'document-tags-user-confirmed-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

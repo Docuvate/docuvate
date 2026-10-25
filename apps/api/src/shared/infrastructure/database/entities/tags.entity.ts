@@ -5,14 +5,13 @@ import {
   Entity,
   Index,
   JoinColumn,
-  ManyToMany,
   OneToMany,
   OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
-import { DocumentsEntity } from './documents.entity.js';
+import { DocumentTagsEntity } from './document-tags.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
 import { TagCustomFieldDefinitionsEntity } from './tag-custom-field-definitions.entity.js';
 import { TagEmbeddingCentroidsEntity } from './tag-embedding-centroids.entity.js';
@@ -63,8 +62,8 @@ export class TagsEntity {
   )
   documentTagSuggestions: DocumentTagSuggestionsEntity[];
 
-  @ManyToMany(() => DocumentsEntity, (documents) => documents.tags)
-  documents: DocumentsEntity[];
+  @OneToMany(() => DocumentTagsEntity, (documentTags) => documentTags.tag)
+  documentTags: DocumentTagsEntity[];
 
   @OneToMany(
     () => ExtractionFieldCorrectionsEntity,
