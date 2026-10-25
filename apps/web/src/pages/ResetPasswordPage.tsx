@@ -10,7 +10,6 @@ import { AuthScreen } from '../components/auth/AuthScreen';
 import { PasswordPolicyChecklist } from '../components/auth/PasswordPolicyChecklist';
 import { Button } from '../components/ui/Button';
 import { FormField } from '../components/ui/FormField';
-import { Input } from '../components/ui/Input';
 import { PasswordInput } from '../components/ui/PasswordInput';
 import { Spinner } from '../components/ui/Spinner';
 import { authClient } from '../lib/auth-client';

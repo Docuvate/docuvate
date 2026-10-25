@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Eye, EyeOff } from 'lucide-react';
-import { forwardRef, useId, useState, type InputHTMLAttributes } from 'react';
+import { forwardRef, type InputHTMLAttributes,useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export const PasswordInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(

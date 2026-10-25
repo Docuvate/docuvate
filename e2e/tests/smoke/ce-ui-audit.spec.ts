@@ -46,6 +46,12 @@ test.describe('CE UI audit capture', () => {
             const bodyText = await page.locator('body').innerText();
             expect(findRawI18nSnippets(bodyText)).toEqual([]);
 
+            if (route.path === '/login' || route.path === '/register' || route.path === '/reset-password') {
+              await expect(
+                page.getByRole('button', { name: /show password|passwort anzeigen/i }).first()
+              ).toBeVisible();
+            }
+
             const dir = await ensureAuditDir(`public/${locale}/${viewport.label}`);
             await page.screenshot({
               path: `${dir}/${route.slug}.png`,
@@ -79,6 +85,15 @@ test.describe('CE UI audit capture', () => {
               await page.waitForLoadState('networkidle');
               const bodyText = await page.locator('body').innerText();
               expect(findRawI18nSnippets(bodyText), route.path).toEqual([]);
+
+              if (route.path === '/settings/connectors') {
+                await expect(page.getByRole('heading', { name: /Paperless-ngx/i })).toBeVisible();
+              }
+              if (route.path === '/settings/account-security') {
+                await expect(
+                  page.getByRole('button', { name: /show password|passwort anzeigen/i }).first()
+                ).toBeVisible();
+              }
 
               const dir = await ensureAuditDir(`auth/${locale}/${theme}/${viewport.label}`);
               await page.screenshot({

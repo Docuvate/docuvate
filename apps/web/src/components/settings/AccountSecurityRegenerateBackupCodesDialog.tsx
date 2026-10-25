@@ -14,7 +14,6 @@ import {
   DialogFormGrid,
   DialogHeader,
 } from '../ui/Dialog';
-import { Input } from '../ui/Input';
 import { PasswordInput } from '../ui/PasswordInput';
 
 interface AccountSecurityRegenerateBackupCodesDialogProps {
