@@ -307,6 +307,7 @@ services:
       WORKER_SECRET: worker-shared-secret
       OTEL_SDK_DISABLED: 'true'
       EXTRACTOR_ENGINE: pipeline
+      DOCUVATE_OCR_BACKEND: ${DOCUVATE_OCR_BACKEND:-rapidocr}
       PADDLE_OCR_LANG: german
       PADDLE_PREWARM_ON_START: ${PADDLE_PREWARM_ON_START:-0}
       DOCUVATE_AI_PROFILE: ${DOCUVATE_AI_PROFILE:-cpu-small}

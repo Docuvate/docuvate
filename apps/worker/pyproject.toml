@@ -27,6 +27,7 @@ dependencies = [
   "fastembed>=0.4.2",
   "huggingface-hub>=0.26.0",
   "onnxruntime>=1.19.0",
+  "rapidocr-onnxruntime>=1.4.0",
   "tokenizers>=0.20.0",
   "python-docx>=1.1.2",
   "openpyxl>=3.1.5",

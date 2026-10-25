@@ -30,6 +30,7 @@ import { ApplyEmbeddingSuggestionsUseCase } from './application/apply-embedding-
 import { ApplyLabelCorrectionUseCase } from './application/apply-label-correction.use-case.js';
 import { ApplyLabelCustomFieldsUseCase } from './application/apply-label-custom-fields.use-case.js';
 import { ApplyLabelMatchingUseCase } from './application/apply-label-matching.use-case.js';
+import { ApplyCeLabelPropagationUseCase } from './application/apply-ce-label-propagation.use-case.js';
 import { ApplySparkLabelPropagationUseCase } from './application/apply-spark-label-propagation.use-case.js';
 import { BackfillDocumentEmbeddingsUseCase } from './application/backfill-document-embeddings.use-case.js';
 import {
@@ -66,6 +67,7 @@ import {
 import { WithdrawLabelCorrectionUseCase } from './application/withdraw-label-correction.use-case.js';
 import { EmbeddingDensityCalibrationQueueService } from './infrastructure/embedding-density-calibration-queue.service.js';
 import { HeadlessPgEmbeddingDensityRepository } from './infrastructure/headless-pg-embedding-density.repository.js';
+import { HttpCeMlAdapter } from './infrastructure/http-ce-ml.adapter.js';
 import { HttpEmbeddingAdapter } from './infrastructure/http-embedding.adapter.js';
 import { HttpEmbeddingDensityAdapter } from './infrastructure/http-embedding-density.adapter.js';
 import { PgEmbeddingDensityRepository } from './infrastructure/pg-embedding-density.repository.js';
@@ -131,6 +133,8 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     RecordEmbeddingDensityCorrectionUseCase,
     ApplyLabelCorrectionUseCase,
     ApplySparkLabelPropagationUseCase,
+    ApplyCeLabelPropagationUseCase,
+    HttpCeMlAdapter,
     WithdrawLabelCorrectionUseCase,
     RefreshEmbeddingSuggestionsUseCase,
     HttpEmbeddingDensityAdapter,

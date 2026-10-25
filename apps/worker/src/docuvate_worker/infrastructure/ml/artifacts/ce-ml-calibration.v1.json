@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "labelPropagation": {
+    "method": "LP",
+    "alpha": 0.9,
+    "knnK": 10,
+    "zeroExample": {
+      "autoAssignThreshold": null,
+      "suggestThreshold": 0.30788710533307057,
+      "method": "ZS"
+    },
+    "withExamples": {
+      "autoAssignThreshold": 0.6208055706180955,
+      "suggestThreshold": 0.023735437419444567,
+      "method": "LP",
+      "autoAssignPrecisionTarget": 0.98
+    }
+  },
+  "fieldSuggestion": {
+    "abstainThreshold": 0.97,
+    "wrongToMissingCostRatio": 3
+  },
+  "missingLabel": {
+    "scoreKey": "ev_minpage",
+    "threshold": 0.5004168949476163
+  },
+  "zeroInputCluster": {
+    "distanceThreshold": 0.15,
+    "minClusterSize": 5,
+    "nameMargin": 0.02,
+    "membershipRho": 0.7
+  },
+  "openSetFieldDiscovery": {
+    "keyClusterTau": 0.1,
+    "minDocFrequencyPhi": 0.3,
+    "keylessClusterTau2": 0.15
+  },
+  "attribution": {
+    "cord": "CC-BY-4.0",
+    "germeval2014": "CC-BY-4.0",
+    "paddleOcrRapidOcr": "Apache-2.0",
+    "multilingualE5Small": "MIT"
+  }
+}

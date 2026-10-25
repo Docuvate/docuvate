@@ -23,7 +23,8 @@
       "id": "multilingual-e5-small",
       "display_name": "intfloat/multilingual-e5-small",
       "load_keys": [
-        "intfloat/multilingual-e5-small"
+        "intfloat/multilingual-e5-small",
+        "onnx/model_quantized.onnx"
       ],
       "source": "https://huggingface.co/intfloat/multilingual-e5-small",
       "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
@@ -67,6 +68,37 @@
       "purpose": "OCR detection and recognition for scanned documents when the pipeline engine uses PaddleOCR.",
       "shipped_in_default_cpu_image": true,
       "training_data_summary": "PaddleOCR PP-OCRv4 mobile weights; Latin script pack covers German and English receipts."
+    },
+    {
+      "id": "docai-v0.3-cpu-bundle",
+      "display_name": "Docuvate DocAI v0.3 CPU bundle",
+      "load_keys": [
+        "rapidocr:docai-v0.3-en-latin-rec",
+        "docai:v0.3"
+      ],
+      "source": "https://github.com/Docuvate/docuvate",
+      "revision": "0.3.0",
+      "content_sha256": null,
+      "license_spdx": "LicenseRef-Docuvate-SUL-1.0",
+      "size_bytes_approx": 20971520,
+      "purpose": "ONNX field head, F2 stacking head, link ranker, TF-IDF vocab, and bundled PP-OCRv5 rec weights for CE layout field extraction.",
+      "shipped_in_default_cpu_image": true,
+      "training_data_summary": "CORD-v2 train split for field/link heads (CC-BY-4.0 attribution). OCR weights Apache-2.0 (PaddleOCR/RapidAI)."
+    },
+    {
+      "id": "ner-doc-int8-germeval",
+      "display_name": "German layout NER (GermEval 2014 + synthetic)",
+      "load_keys": [
+        "docuvate:ner-doc-int8"
+      ],
+      "source": "https://github.com/Docuvate/docuvate",
+      "revision": "p7-doc-head",
+      "content_sha256": "fdfdf2360ea867739c9d61f24b3e85a4639686b46f17870c158085fff83a0810",
+      "license_spdx": "CC-BY-4.0",
+      "size_bytes_approx": 1441792,
+      "purpose": "Vocabulary-free 2D-layout NER ONNX (int8) for value candidate typing (PER/ORG/LOC/DATE/MONEY).",
+      "shipped_in_default_cpu_image": true,
+      "training_data_summary": "GermEval 2014 Shared Task (CC-BY-4.0) plus Docuvate synthetic layout documents."
     },
     {
       "id": "ollama-qwen2.5-3b",
@@ -189,6 +221,16 @@
       "id": "layout-kv-role-head",
       "path": "apps/worker/src/docuvate_worker/infrastructure/ml/artifacts/layout-kv-role-head.v1.json",
       "sha256": "630483711f5732801498c42b616162c48ff7c5a6b417693b80cfe6c815f3d951"
+    },
+    {
+      "id": "ce-ml-calibration",
+      "path": "apps/worker/src/docuvate_worker/infrastructure/ml/artifacts/ce-ml-calibration.v1.json",
+      "sha256": "fbe4859312e2f77ea5ac54f49e35bad2bc63871e60f7af19a0b8d151c7d50469"
+    },
+    {
+      "id": "docai-v0.3-config",
+      "path": "apps/worker/models/docai_v0_3/model/config.json",
+      "sha256": "70cff5c08c4be8daa8b08524a2dac429929f3c311c831351b40cb03f1604f7da"
     }
   ],
   "scan": {
@@ -214,17 +256,5 @@
       "/bench/",
       "/experiments/"
     ]
-  },
-  "artifacts": [
-    {
-      "id": "value_types_v1",
-      "path": "apps/worker/models/value_types_v1.json",
-      "sha256": "58e0270dbb2fb94463a9df4d4fe7929533a3328bcc447b08dc722e8a8d073c77"
-    },
-    {
-      "id": "layout-kv-role-head",
-      "path": "apps/worker/src/docuvate_worker/infrastructure/ml/artifacts/layout-kv-role-head.v1.json",
-      "sha256": "630483711f5732801498c42b616162c48ff7c5a6b417693b80cfe6c815f3d951"
-    }
-  ]
+  }
 }

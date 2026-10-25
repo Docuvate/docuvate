@@ -52,12 +52,14 @@ describe('AcceptLabelRecommendationUseCase', () => {
       findByIdForUser: vi.fn().mockResolvedValue({ id: DOC }),
     });
 
+    const ceLabelPropagation = { propagateAfterLabelSeed: vi.fn().mockResolvedValue(0) };
     const useCase = new AcceptLabelRecommendationUseCase(
       taxonomy,
       labelEmbeddings,
       prefs,
       documents,
-      assignTag
+      assignTag,
+      ceLabelPropagation as never
     );
 
     const recommendationId = `assign:${DOC}:${TAG}`;
@@ -88,12 +90,14 @@ describe('AcceptLabelRecommendationUseCase', () => {
       findByIdForUser: vi.fn().mockImplementation((id: string) => Promise.resolve({ id })),
     });
 
+    const ceLabelPropagation = { propagateAfterLabelSeed: vi.fn().mockResolvedValue(0) };
     const useCase = new AcceptLabelRecommendationUseCase(
       taxonomy,
       labelEmbeddings,
       prefs,
       documents,
-      assignTag
+      assignTag,
+      ceLabelPropagation as never
     );
 
     const result = await useCase.execute(USER, {
@@ -104,6 +108,10 @@ describe('AcceptLabelRecommendationUseCase', () => {
     });
 
     expect(result).toEqual({ tagId: createdTag.id, action: 'created' });
+    expect(ceLabelPropagation.propagateAfterLabelSeed).toHaveBeenCalledWith(USER, 'tag-new', [
+      DOC_A,
+      DOC_B,
+    ]);
     expect(createTag).toHaveBeenCalledWith(USER, 'Cluster Label', {
       color: '#64748b',
       matchingAlgorithm: 'any',

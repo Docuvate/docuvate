@@ -10,7 +10,10 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
     StageEnvelope,
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
-from docuvate_worker.infrastructure.extractors.paddle_engine import ocr_image_bytes, ocr_pdf_bytes
+import os
+
+from docuvate_worker.infrastructure.extractors.paddle_engine import ocr_image_bytes as paddle_ocr_image_bytes
+from docuvate_worker.infrastructure.extractors.paddle_engine import ocr_pdf_bytes as paddle_ocr_pdf_bytes
 from docuvate_worker.infrastructure.extractors.pdf_native import try_extract_pdf_native
 from docuvate_worker.infrastructure.office.extract_born_digital import extract_office_born_digital
 from docuvate_worker.infrastructure.office.libreoffice import convert_bytes_to_pdf
@@ -20,6 +23,30 @@ from docuvate_worker.infrastructure.office.mimes import (
 )
 
 STAGE_ID = "ocr"
+
+
+def _ocr_backend() -> str:
+    return os.environ.get("DOCUVATE_OCR_BACKEND", "paddle").strip().lower()
+
+
+def _ocr_pdf(content: bytes) -> tuple[str, list]:
+    if _ocr_backend() == "rapidocr":
+        from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
+            ocr_pdf_bytes,
+        )
+
+        return ocr_pdf_bytes(content)
+    return paddle_ocr_pdf_bytes(content)
+
+
+def _ocr_image(content: bytes) -> tuple[str, list]:
+    if _ocr_backend() == "rapidocr":
+        from docuvate_worker.infrastructure.extractors.rapidocr_engine import (  # noqa: PLC0415
+            ocr_image_bytes,
+        )
+
+        return ocr_image_bytes(content)
+    return paddle_ocr_image_bytes(content)
 
 
 def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
@@ -44,7 +71,7 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
             )
 
             release_onnx_encoder()
-            text, blocks = ocr_pdf_bytes(state.content)
+            text, blocks = _ocr_pdf(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
             from docuvate_worker.infrastructure.extractors.paddle_engine import (  # noqa: PLC0415
@@ -56,7 +83,7 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
                 OcrStageData(
                     text=state.text,
                     blocks=tuple(state.blocks),
-                    source="paddle_ocr",
+                    source="rapidocr" if _ocr_backend() == "rapidocr" else "paddle_ocr",
                 ),
                 StageAvailability.OK,
                 None,
@@ -67,7 +94,7 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
             )
 
             release_onnx_encoder()
-            text, blocks = ocr_image_bytes(state.content)
+            text, blocks = _ocr_image(state.content)
             state.text = text.strip()
             state.blocks = list(blocks or [])
             from docuvate_worker.infrastructure.extractors.paddle_engine import (  # noqa: PLC0415
@@ -79,7 +106,7 @@ def run_ocr_stage(state: PipelineMutableState) -> StageEnvelope[OcrStageData]:
                 OcrStageData(
                     text=state.text,
                     blocks=tuple(state.blocks),
-                    source="paddle_ocr",
+                    source="rapidocr" if _ocr_backend() == "rapidocr" else "paddle_ocr",
                 ),
                 StageAvailability.OK,
                 None,

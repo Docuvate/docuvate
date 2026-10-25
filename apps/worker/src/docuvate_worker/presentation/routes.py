@@ -101,6 +101,14 @@ from docuvate_worker.presentation.schemas import (
     LayoutRenderTypstRequest,
     LayoutRenderTypstResponse,
     MlResolvedModelResponse,
+    CeFieldDiscoveryRequest,
+    CeFieldDiscoveryResponse,
+    CeDiscoveredField,
+    CeLabelPropagationRequest,
+    CeLabelPropagationResponse,
+    CeLabelPropagationScore,
+    CeMissingLabelRequest,
+    CeMissingLabelResponse,
     MlRetrainRunRequest,
     MlRetrainRunResponse,
     RagExtractiveAnswerRequest,
@@ -634,6 +642,109 @@ def representation_from_text(
     if model is None:
         raise HTTPException(status_code=500, detail="representation encode failed")
     return model
+
+
+@router.post("/ml/ce/label-propagation", response_model=CeLabelPropagationResponse)
+def ce_label_propagation(
+    body: CeLabelPropagationRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> CeLabelPropagationResponse:
+    _require_worker_secret(x_worker_secret)
+    from docuvate_worker.infrastructure.ml.ce_ml.label_propagation import (  # noqa: PLC0415
+        propagate_label_scores,
+    )
+
+    scores = propagate_label_scores(
+        body.passage_vectors,
+        label_name=body.label_name,
+        seed_document_indices=body.seed_document_indices,
+    )
+    return CeLabelPropagationResponse(
+        scores=[
+            CeLabelPropagationScore(
+                document_index=row.document_index,
+                score=row.score,
+                tier=row.tier,
+            )
+            for row in scores
+        ]
+    )
+
+
+@router.post("/ml/ce/field-discovery", response_model=CeFieldDiscoveryResponse)
+def ce_field_discovery(
+    body: CeFieldDiscoveryRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> CeFieldDiscoveryResponse:
+    _require_worker_secret(x_worker_secret)
+    from docuvate_worker.domain.models import ExtractionBlock
+    from docuvate_worker.infrastructure.ml.ce_ml.field_discovery import (  # noqa: PLC0415
+        discover_conditional_fields,
+    )
+    from docuvate_worker.infrastructure.ml.ce_ml.kv_items import (  # noqa: PLC0415
+        extract_kv_items_from_blocks,
+    )
+
+    items_by_document: dict[str, list] = {}
+    for document in body.documents:
+        blocks = [
+            ExtractionBlock(
+                text=block.text,
+                page=block.page,
+                x=block.x,
+                y=block.y,
+                width=block.width,
+                height=block.height,
+            )
+            for block in document.blocks
+        ]
+        items_by_document[document.document_id] = extract_kv_items_from_blocks(
+            document.document_id,
+            blocks,
+        )
+    discovered = discover_conditional_fields(
+        items_by_document,
+        label_confidence=body.label_confidence,
+    )
+    return CeFieldDiscoveryResponse(
+        fields=[
+            CeDiscoveredField(
+                field_key=field.field_key,
+                display_name=field.display_name,
+                confidence=field.confidence,
+                kind=field.kind,
+            )
+            for field in discovered
+        ]
+    )
+
+
+@router.post("/ml/ce/missing-label", response_model=CeMissingLabelResponse)
+def ce_missing_label(
+    body: CeMissingLabelRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> CeMissingLabelResponse:
+    _require_worker_secret(x_worker_secret)
+    from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (  # noqa: PLC0415
+        missing_label_hint_score,
+    )
+    from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord
+
+    words = [
+        NerWord(
+            text=word.text,
+            box=(word.box[0], word.box[1], word.box[2], word.box[3]),
+        )
+        for word in body.words
+    ]
+    example_sets = [{token.strip().lower() for token in tokens if token.strip()} for tokens in body.example_token_sets]
+    hint = missing_label_hint_score(
+        example_token_sets=example_sets,
+        document_words=words,
+        page_width=body.page_width,
+        page_height=body.page_height,
+    )
+    return CeMissingLabelResponse(score=hint.score, show=hint.show)
 
 
 @router.post("/ml/retrain/run", response_model=MlRetrainRunResponse)
