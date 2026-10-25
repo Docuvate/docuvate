@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
+import { probeApiHealth } from './apiHealth';
+
 type Listener = (state: ServerReachabilityState) => void;
 
 export interface ServerReachabilityState {
@@ -84,8 +86,13 @@ export function bindBrowserOnlineListeners(): () => void {
   };
 }
 
-export function retryServerConnection(): void {
-  state = { ...state, serverUnreachable: false };
+export async function retryServerConnection(): Promise<void> {
+  const result = await probeApiHealth();
+  if (result.ok) {
+    state = { ...state, serverUnreachable: false };
+    emit();
+    return;
+  }
+  state = { ...state, serverUnreachable: true };
   emit();
-  window.location.reload();
 }

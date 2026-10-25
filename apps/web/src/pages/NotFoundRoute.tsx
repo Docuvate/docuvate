@@ -22,7 +22,7 @@ export function NotFoundRoute() {
   if (data?.session) {
     return (
       <AppShell>
-        <NotFoundPage />
+        <NotFoundPage embedded />
       </AppShell>
     );
   }

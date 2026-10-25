@@ -2,15 +2,19 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ERROR_CODES } from '@docuvate/contracts';
 import { Info, WifiOff } from 'lucide-react';
+import { useLayoutEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 
+import { DocuvateErrorPage } from '../components/errors/DocuvateErrorPage';
 import { ErrorCodeDetails } from '../components/errors/ErrorCodeDetails';
+import { FullPageErrorShell } from '../components/errors/FullPageErrorShell';
 import { type HttpErrorScreenVariant,HttpStatusErrorPage } from '../components/errors/HttpStatusErrorPage';
 import { RouteErrorScreen } from '../components/errors/RouteErrorScreen';
 import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
+import i18n from '../i18n';
 
 const PREVIEW_VARIANTS: HttpErrorScreenVariant[] = [
   'preview-x2',
@@ -33,6 +37,74 @@ function isPreviewVariant(value: string | undefined): value is HttpErrorScreenVa
 export function ErrorScreensPreviewPage() {
   const { t } = useTranslation();
   const { screenId } = useParams();
+  const [searchParams] = useSearchParams();
+
+  useLayoutEffect(() => {
+    const lang = searchParams.get('lang');
+    if (lang === 'de' || lang === 'en') {
+      if (i18n.language !== lang) {
+        void i18n.changeLanguage(lang);
+      }
+    }
+  }, [searchParams]);
+
+  const previewLang = searchParams.get('lang');
+  const previewLangKey = previewLang === 'de' || previewLang === 'en' ? previewLang : 'default';
+
+  if (screenId === 'scene-offline') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-offline" key={`scene-offline-${previewLangKey}`}>
+        <DocuvateErrorPage variant="browser-offline" />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-unreachable') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-unreachable" key={`scene-unreachable-${previewLangKey}`}>
+        <DocuvateErrorPage
+          variant="server-unreachable"
+          previewReconnect={{ secondsLeft: 5, totalSeconds: 8 }}
+        />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-server') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-server" key={`scene-server-${previewLangKey}`}>
+        <DocuvateErrorPage
+          variant="server-error-page"
+          previewReconnect={{ secondsLeft: 5, totalSeconds: 8 }}
+          httpStatus={503}
+        />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-not-found') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-not-found" key={`scene-not-found-${previewLangKey}`}>
+        <DocuvateErrorPage variant="not-found" />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-forbidden') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-forbidden" key={`scene-forbidden-${previewLangKey}`}>
+        <DocuvateErrorPage variant="forbidden" />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-unexpected') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-unexpected" key={`scene-unexpected-${previewLangKey}`}>
+        <DocuvateErrorPage variant="unexpected" />
+      </FullPageErrorShell>
+    );
+  }
 
   if (screenId === 'x11') {
     return (

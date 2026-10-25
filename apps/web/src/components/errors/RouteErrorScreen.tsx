@@ -1,19 +1,13 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { AlertCircle, RefreshCw } from 'lucide-react';
 import { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import { isRouteErrorResponse, useNavigate, useRouteError } from 'react-router-dom';
+import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 
 import { toUserFacingError } from '../../lib/apiErrors';
 import { newClientErrorRequestId } from '../../lib/errorCodes';
-import { routes } from '../../lib/routes';
-import { Button } from '../ui/Button';
-import { ErrorScreenLayout } from './ErrorScreenLayout';
+import { DocuvateErrorPage } from './DocuvateErrorPage';
 
 export function RouteErrorScreen() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
   const error = useRouteError();
 
   const facing = useMemo(() => toUserFacingError(error, 'errors.pages.routeFailed.lead'), [error]);
@@ -30,30 +24,27 @@ export function RouteErrorScreen() {
       ? 'INTERNAL_ERROR'
       : 'DOC_LOAD_FAILED');
 
-  const title = t('errors.pages.routeFailed.title');
-  const description =
-    facing.i18nKey === 'errors.pages.routeFailed.lead'
-      ? t('errors.pages.routeFailed.lead')
-      : t(facing.i18nKey, facing.params ?? {});
+  const httpStatus =
+    isRouteErrorResponse(error) && typeof error.status === 'number' ? error.status : undefined;
+
+  if (httpStatus != null && httpStatus >= 500) {
+    return (
+      <DocuvateErrorPage
+        variant="server-error-page"
+        sourceError={error}
+        httpStatus={httpStatus}
+        errorCode={code}
+        requestId={requestId}
+      />
+    );
+  }
 
   return (
-    <ErrorScreenLayout
-      icon={AlertCircle}
-      title={title}
-      description={description}
+    <DocuvateErrorPage
+      variant="unexpected"
+      sourceError={error}
       errorCode={code}
       requestId={requestId}
-      actions={
-        <>
-          <Button type="button" variant="primary" onClick={() => { window.location.reload(); }}>
-            <RefreshCw size={16} strokeWidth={2} aria-hidden />
-            {t('errors.pages.retry')}
-          </Button>
-          <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
-            {t('errors.pages.home')}
-          </Button>
-        </>
-      }
     />
   );
 }

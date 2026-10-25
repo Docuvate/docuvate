@@ -5,10 +5,10 @@ import { Navigate, Route, Routes, useParams } from 'react-router-dom';
 import { AdminRouteGuard } from './components/admin/AdminRouteGuard';
 import { AppBootLoading } from './components/AppBootLoading';
 import { AppShell } from './components/AppShell';
+import { SessionBootErrorScreen } from './components/errors/SessionBootErrorScreen';
 import { authClient } from './lib/auth-client';
-import { formatAuthClientError } from './lib/authErrors';
 import { hadAuthenticatedSessionHint } from './lib/authSessionHint';
-import { isErrorScreenshotHarnessBuild } from './lib/errorPreviewRoutes';
+import { isErrorScreenPreviewEnabled } from './lib/errorPreviewRoutes';
 import { useFeatureFlags } from './lib/remoteConfig';
 import { routes } from './lib/routes';
 import { AccountSecuritySettingsPage } from './pages/AccountSecuritySettingsPage';
@@ -26,7 +26,6 @@ import { DuplicatesOverviewPage } from './pages/DuplicatesOverviewPage';
 import { ErrorCodeDocPage } from './pages/ErrorCodeDocPage';
 import { ErrorScreensPreviewHarnessShell } from './pages/ErrorScreensPreviewHarnessShell';
 import { ErrorScreensPreviewPage } from './pages/ErrorScreensPreviewPage';
-import { ErrorScreensPreviewRoute } from './pages/ErrorScreensPreviewRoute';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { GlobalChatPage } from './pages/GlobalChatPage';
 import { InviteAcceptPage } from './pages/InviteAcceptPage';
@@ -46,13 +45,16 @@ import { RecognizedFieldsPage } from './pages/structure/RecognizedFieldsPage';
 import { StylesDocsPage } from './pages/StylesDocsPage';
 
 function Protected({ children }: { children: React.ReactNode }) {
-  const { data, isPending, error } = authClient.useSession();
+  const { data, isPending, error, refetch } = authClient.useSession();
   if (isPending) return <AppBootLoading />;
   if (error) {
     return (
-      <p className="error" role="alert">
-        {formatAuthClientError(error, 'session')}
-      </p>
+      <SessionBootErrorScreen
+        error={error}
+        onRecovered={() => {
+          void refetch({ query: { disableCookieCache: true } });
+        }}
+      />
     );
   }
   if (!data?.session) {
@@ -230,7 +232,7 @@ export function App() {
           </ShellRoute>
         }
       />
-      {isErrorScreenshotHarnessBuild() ? (
+      {isErrorScreenPreviewEnabled() ? (
         <Route
           path={`${routes.errorScreensPreview}/:screenId`}
           element={
@@ -239,16 +241,7 @@ export function App() {
             </ErrorScreensPreviewHarnessShell>
           }
         />
-      ) : (
-        <Route
-          path={`${routes.errorScreensPreview}/:screenId`}
-          element={
-            <ShellRoute>
-              <ErrorScreensPreviewRoute />
-            </ShellRoute>
-          }
-        />
-      )}
+      ) : null}
       <Route
         path={routes.settingsConnectors}
         element={

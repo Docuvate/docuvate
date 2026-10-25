@@ -17,7 +17,9 @@ import { useNavigate } from 'react-router-dom';
 import { newClientErrorRequestId } from '../../lib/errorCodes';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
+import { DocuvateErrorPage } from './DocuvateErrorPage';
 import { ErrorScreenLayout } from './ErrorScreenLayout';
+import { FullPageErrorShell } from './FullPageErrorShell';
 
 export type HttpErrorScreenVariant =
   | '401'
@@ -116,25 +118,11 @@ export function HttpStatusErrorPage({
       case '503':
         return {
           icon: ServerCrash,
-          title: t('errors.pages.unavailable.title'),
-          description: t('errors.pages.unavailable.lead'),
+          title: '',
+          description: '',
           code: errorCode ?? ERROR_CODES.SERVICE_UNAVAILABLE,
-          actions: (
-            <Button
-              type="button"
-              variant="primary"
-              disabled={secondsLeft > 0}
-              onClick={() => { window.location.reload(); }}
-            >
-              {t('errors.pages.retry')}
-            </Button>
-          ),
-          status:
-            secondsLeft > 0 ? (
-              <p className="ds-error-screen-status">{t('errors.pages.unavailable.countdown', { seconds: secondsLeft })}</p>
-            ) : (
-              <p className="ds-error-screen-status">{t('errors.pages.unavailable.ready')}</p>
-            ),
+          actions: null,
+          status: null,
         };
       case '429':
         return {
@@ -195,6 +183,36 @@ export function HttpStatusErrorPage({
       }
     }
   }, [errorCode, missingPermissionLabel, navigate, secondsLeft, t, variant]);
+
+  if (variant === '403') {
+    return (
+      <FullPageErrorShell testId="http-error-403">
+        <DocuvateErrorPage
+          variant="forbidden"
+          errorCode={errorCode ?? ERROR_CODES.ACCESS_FORBIDDEN}
+          requestId={resolvedRequestId}
+          missingPermissionLabel={missingPermissionLabel}
+        />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (variant === '502' || variant === '503') {
+    return (
+      <FullPageErrorShell testId={`http-error-${variant}`}>
+        <DocuvateErrorPage
+          variant="server-error-page"
+          errorCode={errorCode ?? ERROR_CODES.SERVICE_UNAVAILABLE}
+          requestId={resolvedRequestId}
+          httpStatus={variant === '502' ? 502 : 503}
+          enableAutoReconnect
+          onRecovered={() => {
+            window.location.reload();
+          }}
+        />
+      </FullPageErrorShell>
+    );
+  }
 
   return (
     <ErrorScreenLayout
