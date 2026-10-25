@@ -101,21 +101,38 @@ def _chunk_cache_path(content: bytes, spec: PdfPageChunkSpec) -> Path:
     return _chunk_cache_dir() / name
 
 
+def _wire_int(value: object, field: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        raise TypeError(f"chunk cache field {field} must be numeric")
+    return int(value)
+
+
+def _wire_float(value: object, field: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float, str)):
+        raise TypeError(f"chunk cache field {field} must be numeric")
+    return float(value)
+
+
+def _wire_optional_int(value: object) -> int | None:
+    if value is None:
+        return None
+    return _wire_int(value, "block_index")
+
+
+def _block_from_wire_row(row: dict[str, object]) -> ExtractionBlock:
+    return ExtractionBlock(
+        page=_wire_int(row["page"], "page"),
+        x=_wire_float(row["x"], "x"),
+        y=_wire_float(row["y"], "y"),
+        width=_wire_float(row["width"], "width"),
+        height=_wire_float(row["height"], "height"),
+        text=str(row["text"]),
+        block_index=_wire_optional_int(row.get("block_index")),
+    )
+
+
 def _blocks_from_wire(rows: list[dict[str, object]]) -> list[ExtractionBlock]:
-    blocks: list[ExtractionBlock] = []
-    for row in rows:
-        blocks.append(
-            ExtractionBlock(
-                page=int(row["page"]),
-                x=float(row["x"]),
-                y=float(row["y"]),
-                width=float(row["width"]),
-                height=float(row["height"]),
-                text=str(row["text"]),
-                block_index=row.get("block_index"),
-            )
-        )
-    return blocks
+    return [_block_from_wire_row(row) for row in rows]
 
 
 def _blocks_to_wire(blocks: list[ExtractionBlock]) -> list[dict[str, object]]:
@@ -140,14 +157,23 @@ def load_cached_chunk_result(
     if not path.is_file():
         return None
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-        if not isinstance(payload, dict):
+        payload_raw = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(payload_raw, dict):
             return None
+        payload: dict[str, object] = payload_raw
         text = str(payload.get("text") or "")
-        rows = payload.get("blocks")
-        if not isinstance(rows, list):
+        rows_raw = payload.get("blocks")
+        if not isinstance(rows_raw, list):
             return None
-        return text, _blocks_from_wire([row for row in rows if isinstance(row, dict)])
+        wire_rows: list[dict[str, object]] = []
+        for row in rows_raw:
+            if not isinstance(row, dict):
+                continue
+            wire_row: dict[str, object] = {}
+            for key, value in row.items():
+                wire_row[str(key)] = value
+            wire_rows.append(wire_row)
+        return text, _blocks_from_wire(wire_rows)
     except Exception:
         return None
 
