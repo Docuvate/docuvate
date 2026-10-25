@@ -184,6 +184,19 @@ export function HttpStatusErrorPage({
     }
   }, [errorCode, missingPermissionLabel, navigate, secondsLeft, t, variant]);
 
+  if (variant === '403') {
+    return (
+      <FullPageErrorShell testId="http-error-403">
+        <DocuvateErrorPage
+          variant="forbidden"
+          errorCode={errorCode ?? ERROR_CODES.ACCESS_FORBIDDEN}
+          requestId={resolvedRequestId}
+          missingPermissionLabel={missingPermissionLabel}
+        />
+      </FullPageErrorShell>
+    );
+  }
+
   if (variant === '502' || variant === '503') {
     return (
       <FullPageErrorShell testId={`http-error-${variant}`}>

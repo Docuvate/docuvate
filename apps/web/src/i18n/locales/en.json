@@ -287,28 +287,37 @@
         "offline": {
           "kicker": "OFFLINE",
           "title": "No internet.",
-          "lead": "Without a connection we cannot reach the server. We reconnect automatically when you are back online."
+          "lead": "Without a connection we cannot reach the server. We reconnect automatically when you are back online.",
+          "imageAlt": "Clay paper mascot holding a Wi-Fi symbol with a red slash, indicating the browser is offline."
         },
         "unreachable": {
           "kicker": "CONNECTION",
           "title": "Our documents are on a coffee break.",
-          "lead": "The server is not responding right now. We keep trying automatically. When it is back, you will continue right here."
+          "lead": "The server is not responding right now. We keep trying automatically. When it is back, you will continue right here.",
+          "imageAlt": "Clay mascot sitting with coffee on a book, with an unplugged cable on the ground."
         },
         "serverFault": {
           "kicker": "SERVER ERROR",
           "kickerStatus": "ERROR {{code}}",
           "title": "The server needs a short breather.",
-          "lead": "Something went wrong on our side. We keep trying automatically until Docuvate is reachable again."
+          "lead": "Something went wrong on our side. We keep trying automatically until Docuvate is reachable again.",
+          "imageAlt": "Determined clay paper mascot with a wrench and toolbox, ready to fix a server error."
         },
         "notFound": {
           "kicker": "404",
           "title": "We have not filed this document.",
-          "lead": "This address does not exist or has moved. Check the URL or return to your documents."
+          "lead": "This address does not exist or has moved. Check the URL or return to your documents.",
+          "imageAlt": "Sad clay paper mascot searching a box of file folders with a magnifying glass."
         },
         "unexpected": {
           "kicker": "Unexpected",
           "title": "Something went sideways here.",
-          "lead": "An unexpected error occurred. Please try again."
+          "lead": "An unexpected error occurred. Please try again.",
+          "imageAlt": "Friendly clay paper mascot with a dog-eared corner and three red stripes."
+        },
+        "forbidden": {
+          "kicker": "403",
+          "imageAlt": "Sad clay paper mascot beside a folder secured with a red padlock."
         }
       },
       "sessionExpired": {

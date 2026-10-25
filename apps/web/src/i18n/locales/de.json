@@ -288,28 +288,37 @@
         "offline": {
           "kicker": "OFFLINE",
           "title": "Kein Internet.",
-          "lead": "Ohne Verbindung können wir den Server nicht erreichen. Sobald Sie wieder online sind, verbinden wir automatisch neu."
+          "lead": "Ohne Verbindung können wir den Server nicht erreichen. Sobald Sie wieder online sind, verbinden wir automatisch neu.",
+          "imageAlt": "Knetmaskottchen in Papierform hält ein durchgestrichenes WLAN-Symbol, der Browser ist offline."
         },
         "unreachable": {
           "kicker": "VERBINDUNG",
           "title": "Unsere Dokumente machen gerade Kaffeepause.",
-          "lead": "Der Server antwortet gerade nicht. Wir versuchen es automatisch weiter. Sobald er wieder da ist, geht es genau hier weiter."
+          "lead": "Der Server antwortet gerade nicht. Wir versuchen es automatisch weiter. Sobald er wieder da ist, geht es genau hier weiter.",
+          "imageAlt": "Knetmaskottchen sitzt mit Kaffee auf einem Buch, daneben liegt ein ausgestecktes Verbindungskabel."
         },
         "serverFault": {
           "kicker": "SERVERFEHLER",
           "kickerStatus": "FEHLER {{code}}",
           "title": "Der Server braucht einen kurzen Moment.",
-          "lead": "Es ist ein Fehler aufgetreten. Wir versuchen es automatisch weiter, bis Docuvate wieder erreichbar ist."
+          "lead": "Es ist ein Fehler aufgetreten. Wir versuchen es automatisch weiter, bis Docuvate wieder erreichbar ist.",
+          "imageAlt": "Knetmaskottchen mit Schraubenschlüssel und Werkzeugkasten, bereit einen Serverfehler zu beheben."
         },
         "notFound": {
           "kicker": "404",
           "title": "Dieses Dokument haben wir nicht abgelegt.",
-          "lead": "Die Adresse existiert nicht oder wurde verschoben. Prüfen Sie die URL oder kehren Sie zu Ihren Dokumenten zurück."
+          "lead": "Die Adresse existiert nicht oder wurde verschoben. Prüfen Sie die URL oder kehren Sie zu Ihren Dokumenten zurück.",
+          "imageAlt": "Trauriges Knetmaskottchen durchsucht mit einer Lupe eine Kiste mit Aktenordnern."
         },
         "unexpected": {
           "kicker": "Unerwartet",
           "title": "Hier ist etwas schiefgelaufen.",
-          "lead": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut. Ihre bisherigen Daten bleiben unverändert."
+          "lead": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut. Ihre bisherigen Daten bleiben unverändert.",
+          "imageAlt": "Freundliches Knetmaskottchen in Form eines Papierblatts mit drei roten Streifen."
+        },
+        "forbidden": {
+          "kicker": "403",
+          "imageAlt": "Trauriges Knetmaskottchen neben einem mit einem roten Vorhängeschloss gesicherten Ordner."
         }
       },
       "sessionExpired": {

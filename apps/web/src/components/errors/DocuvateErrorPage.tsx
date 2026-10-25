@@ -11,7 +11,8 @@ import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { CollapsibleTechnicalDetails } from './CollapsibleTechnicalDetails';
 import { ErrorCodeDetails } from './ErrorCodeDetails';
-import { ErrorSceneIllustration, type ErrorSceneId } from './ErrorSceneIllustration';
+import { ErrorSceneIllustration } from './ErrorSceneIllustration';
+import type { ErrorSceneId } from './errorSceneManifest.generated';
 import { ReconnectCountdownBar } from './ReconnectCountdownBar';
 import { useApiHealthReconnect } from './useApiHealthReconnect';
 
@@ -19,7 +20,8 @@ export type DocuvateErrorPageVariant =
   | ConnectivityFailureKind
   | 'not-found'
   | 'unexpected'
-  | 'server-error-page';
+  | 'server-error-page'
+  | 'forbidden';
 
 export interface PreviewReconnectSnapshot {
   secondsLeft: number;
@@ -37,6 +39,7 @@ export interface DocuvateErrorPageProps {
   previewReconnect?: PreviewReconnectSnapshot;
   onRecovered?: () => void;
   actionsSlot?: React.ReactNode;
+  missingPermissionLabel?: string;
 }
 
 function sceneIdForVariant(variant: DocuvateErrorPageVariant): ErrorSceneId {
@@ -52,6 +55,8 @@ function sceneIdForVariant(variant: DocuvateErrorPageVariant): ErrorSceneId {
       return 'notFound';
     case 'unexpected':
       return 'unexpected';
+    case 'forbidden':
+      return 'forbidden';
     default: {
       const exhaustive: never = variant;
       return exhaustive;
@@ -73,6 +78,7 @@ export function DocuvateErrorPage({
   previewReconnect,
   onRecovered,
   actionsSlot,
+  missingPermissionLabel,
 }: DocuvateErrorPageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -102,13 +108,24 @@ export function DocuvateErrorPage({
 
   const copyKey = sceneCopyKey(variant);
   const kicker = useMemo(() => {
+    if (variant === 'forbidden') {
+      return t('errors.pages.scene.forbidden.kicker');
+    }
     if (copyKey === 'serverFault' && technicalStatus != null) {
       return t('errors.pages.scene.serverFault.kickerStatus', { code: technicalStatus });
     }
     return t(`errors.pages.scene.${copyKey}.kicker`, { defaultValue: '' });
-  }, [copyKey, t, technicalStatus]);
-  const title = t(`errors.pages.scene.${copyKey}.title`);
-  const lead = t(`errors.pages.scene.${copyKey}.lead`);
+  }, [copyKey, t, technicalStatus, variant]);
+  const title =
+    variant === 'forbidden'
+      ? t('errors.pages.forbidden.title')
+      : t(`errors.pages.scene.${copyKey}.title`);
+  const lead =
+    variant === 'forbidden'
+      ? t('errors.pages.forbidden.lead', {
+          permission: missingPermissionLabel ?? t('errors.pages.forbidden.permissionFallback'),
+        })
+      : t(`errors.pages.scene.${copyKey}.lead`);
 
   const scene = sceneIdForVariant(variant);
   const showReconnectUi = reconnectEnabled || previewReconnect != null;
@@ -138,6 +155,12 @@ export function DocuvateErrorPage({
           {t('notFoundPage.documentsLink')}
         </Link>
       )
+      : variant === 'forbidden'
+        ? (
+          <Button type="button" variant="secondary" onClick={() => { navigate(routes.home); }}>
+            {t('errors.pages.home')}
+          </Button>
+        )
       : showReconnectUi
         ? (
           <Button

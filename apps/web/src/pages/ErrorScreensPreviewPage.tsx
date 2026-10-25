@@ -2,11 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { ERROR_CODES } from '@docuvate/contracts';
 import { Info, WifiOff } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { useLayoutEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router-dom';
-
-import i18n from '../i18n';
 
 import { DocuvateErrorPage } from '../components/errors/DocuvateErrorPage';
 import { ErrorCodeDetails } from '../components/errors/ErrorCodeDetails';
@@ -16,6 +14,7 @@ import { RouteErrorScreen } from '../components/errors/RouteErrorScreen';
 import { Banner } from '../components/ui/Banner';
 import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
+import i18n from '../i18n';
 
 const PREVIEW_VARIANTS: HttpErrorScreenVariant[] = [
   'preview-x2',
@@ -87,6 +86,14 @@ export function ErrorScreensPreviewPage() {
     return (
       <FullPageErrorShell testId="error-preview-scene-not-found" key={`scene-not-found-${previewLangKey}`}>
         <DocuvateErrorPage variant="not-found" />
+      </FullPageErrorShell>
+    );
+  }
+
+  if (screenId === 'scene-forbidden') {
+    return (
+      <FullPageErrorShell testId="error-preview-scene-forbidden" key={`scene-forbidden-${previewLangKey}`}>
+        <DocuvateErrorPage variant="forbidden" />
       </FullPageErrorShell>
     );
   }

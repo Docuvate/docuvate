@@ -99,10 +99,36 @@
   min-height: min(48vh, 26rem);
 }
 
-.error-scene-illustration {
+.error-scene-mascot {
   width: min(100%, 28rem);
+  max-height: min(52vh, 30rem);
+  position: relative;
+}
+
+.error-scene-mascot__picture {
+  display: block;
+  margin: 0;
+  width: 100%;
+}
+
+.error-scene-mascot__picture--dark {
+  display: none;
+}
+
+[data-docuvate-theme='dark'] .error-scene-mascot__picture--light {
+  display: none;
+}
+
+[data-docuvate-theme='dark'] .error-scene-mascot__picture--dark {
+  display: block;
+}
+
+.error-scene-mascot__img {
+  display: block;
+  width: 100%;
   height: auto;
   max-height: min(52vh, 30rem);
+  object-fit: contain;
 }
 
 .error-scene-ink {
@@ -209,28 +235,23 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .error-scene-illustration .error-scene-float--a {
-    animation: error-scene-float-a 4.5s ease-in-out infinite;
-  }
-
-  .error-scene-illustration .error-scene-float--b {
-    animation: error-scene-float-b 5.2s ease-in-out infinite;
-  }
-
-  .error-scene-illustration--animating .error-scene-cable-wire--left {
-    animation: error-scene-cable-left 2.4s ease-in-out infinite;
-  }
-
-  .error-scene-illustration--animating .error-scene-cable-wire--right {
-    animation: error-scene-cable-right 2.4s ease-in-out infinite;
-  }
-
-  .error-scene-illustration--animating .error-scene-spark {
-    animation: error-scene-spark 2.4s ease-in-out infinite;
+  .error-scene-mascot--animating .error-scene-mascot__img {
+    animation: error-scene-mascot-float 4.8s ease-in-out infinite;
   }
 
   .error-scene-countdown-fill {
     transition: width 0.35s ease;
+  }
+}
+
+@keyframes error-scene-mascot-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
   }
 }
 
@@ -441,8 +462,12 @@
     max-width: none;
   }
 
-  .error-scene-illustration {
+  .error-scene-mascot {
     width: min(100%, 20rem);
+    max-height: none;
+  }
+
+  .error-scene-mascot__img {
     max-height: none;
   }
 }
