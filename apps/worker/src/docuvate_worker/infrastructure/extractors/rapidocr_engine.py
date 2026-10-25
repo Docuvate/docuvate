@@ -12,6 +12,10 @@ from typing import Any
 import numpy as np
 from PIL import Image
 
+from docuvate_worker.domain.extraction_geometry import (
+    PageDimensions,
+    extraction_block_from_absolute,
+)
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
 from docuvate_worker.infrastructure.extractors.rapidocr_loader import build_rapidocr_engine
@@ -68,41 +72,44 @@ def _blocks_from_ocr_result(
     ocr_result: list[tuple[list[list[float]], str, float]] | None,
     *,
     page: int,
-    scale_x: float,
-    scale_y: float,
+    page_size: PageDimensions,
+    block_offset: int = 0,
 ) -> tuple[str, list[ExtractionBlock]]:
     lines: list[str] = []
     blocks: list[ExtractionBlock] = []
+    block_index = block_offset
     for quad, text, _conf in ocr_result or []:
         cleaned = text.strip()
         if not cleaned:
             continue
         xs = [point[0] for point in quad]
         ys = [point[1] for point in quad]
-        x0 = min(xs) * scale_x
-        y0 = min(ys) * scale_y
-        x1 = max(xs) * scale_x
-        y1 = max(ys) * scale_y
-        lines.append(cleaned)
-        blocks.append(
-            ExtractionBlock(
-                text=cleaned,
-                page=page,
-                x=x0,
-                y=y0,
-                width=max(x1 - x0, 1.0),
-                height=max(y1 - y0, 1.0),
-            )
+        block = extraction_block_from_absolute(
+            page=page,
+            x0=min(xs),
+            y0=min(ys),
+            x1=max(xs),
+            y1=max(ys),
+            page_size=page_size,
+            text=cleaned,
+            block_index=block_index,
         )
+        if block is None:
+            continue
+        lines.append(cleaned)
+        blocks.append(block)
+        block_index += 1
     return "\n".join(lines), blocks
 
 
 def ocr_image_bytes(content: bytes) -> tuple[str, list[ExtractionBlock]]:
     image = Image.open(io.BytesIO(content)).convert("RGB")
     array = np.asarray(image)
+    page_height, page_width = array.shape[:2]
     ocr = _get_rapidocr()
     result, _ = ocr(array, use_cls=False)
-    return _blocks_from_ocr_result(result, page=1, scale_x=1.0, scale_y=1.0)
+    page_size = PageDimensions(width=float(page_width), height=float(page_height))
+    return _blocks_from_ocr_result(result, page=1, page_size=page_size)
 
 
 def _ocr_pdf_dpi() -> int:
@@ -116,6 +123,7 @@ def ocr_pdf_bytes(
     ocr = _get_rapidocr()
     all_lines: list[str] = []
     blocks: list[ExtractionBlock] = []
+    block_index = 0
     dpi = _ocr_pdf_dpi()
     try:
         for page_index, page in iter_pdf_page_images(
@@ -123,16 +131,19 @@ def ocr_pdf_bytes(
         ):
             try:
                 array = np.asarray(page.convert("RGB"))
+                page_h, page_w = array.shape[:2]
+                page_size = PageDimensions(width=float(page_w), height=float(page_h))
                 result, _ = ocr(array, use_cls=False)
                 text, page_blocks = _blocks_from_ocr_result(
                     result,
                     page=page_index,
-                    scale_x=1.0,
-                    scale_y=1.0,
+                    page_size=page_size,
+                    block_offset=block_index,
                 )
                 if text.strip():
                     all_lines.append(text)
                 blocks.extend(page_blocks)
+                block_index += len(page_blocks)
             finally:
                 page.close()
                 reclaim_python_heap()

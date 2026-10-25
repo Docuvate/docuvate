@@ -3,6 +3,7 @@
 
 import io
 
+from docuvate_worker.domain.extraction_geometry import PageDimensions, extraction_block_from_absolute
 from docuvate_worker.domain.models import ExtractionBlock, ExtractionResult
 from docuvate_worker.domain.ports import ExtractorEngine
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
@@ -82,17 +83,17 @@ class TesseractExtractor(ExtractorEngine):
             top = float(data["top"][i])
             w = float(data["width"][i])
             h = float(data["height"][i])
-            if width <= 0 or height <= 0:
-                continue
-            blocks.append(
-                ExtractionBlock(
-                    page=page,
-                    x=left / width,
-                    y=top / height,
-                    width=w / width,
-                    height=h / height,
-                    text=word,
-                    block_index=block_offset + i,
-                )
+            page_size = PageDimensions(width=float(width), height=float(height))
+            block = extraction_block_from_absolute(
+                page=page,
+                x0=left,
+                y0=top,
+                x1=left + w,
+                y1=top + h,
+                page_size=page_size,
+                text=word,
+                block_index=block_offset + len(blocks),
             )
+            if block is not None:
+                blocks.append(block)
         return text, blocks

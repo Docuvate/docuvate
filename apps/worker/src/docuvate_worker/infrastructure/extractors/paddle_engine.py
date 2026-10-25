@@ -9,6 +9,7 @@ from typing import Any, Protocol, cast
 import numpy as np
 from PIL import Image
 
+from docuvate_worker.domain.extraction_geometry import PageDimensions, extraction_block_from_absolute
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.infrastructure.extractors.paddle_errors import map_paddle_exception
 from docuvate_worker.infrastructure.extractors.pdf_raster import iter_pdf_page_images
@@ -91,19 +92,17 @@ def _box_to_block(
     width: int,
     height: int,
     block_index: int,
-) -> ExtractionBlock:
+) -> ExtractionBlock | None:
     xs = [float(p[0]) for p in box]
     ys = [float(p[1]) for p in box]
-    left = min(xs)
-    top = min(ys)
-    w = max(xs) - left
-    h = max(ys) - top
-    return ExtractionBlock(
+    page_size = PageDimensions(width=float(width), height=float(height))
+    return extraction_block_from_absolute(
         page=page,
-        x=left / width if width else 0.0,
-        y=top / height if height else 0.0,
-        width=w / width if width else 0.0,
-        height=h / height if height else 0.0,
+        x0=min(xs),
+        y0=min(ys),
+        x1=max(xs),
+        y1=max(ys),
+        page_size=page_size,
         text=text,
         block_index=block_index,
     )
@@ -136,8 +135,10 @@ def _ocr_pil_image(
             if not text:
                 continue
             page_lines.append(text)
-            blocks.append(_box_to_block(box, text, page, width, height, idx))
-            idx += 1
+            block = _box_to_block(box, text, page, width, height, idx)
+            if block is not None:
+                blocks.append(block)
+                idx += 1
 
     return "\n".join(page_lines), blocks
 

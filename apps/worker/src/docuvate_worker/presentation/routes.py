@@ -57,6 +57,7 @@ from docuvate_worker.infrastructure.ml.ce_ml.missing_label import missing_label_
 from docuvate_worker.infrastructure.ml.ner.doc_ner import NerWord
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.extraction_block_response import extraction_blocks_to_models
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
 from docuvate_worker.presentation.representation_response import document_representation_to_response
@@ -231,18 +232,7 @@ def extract(
         field_suggestions=[
             ExtractedField(key=f.key, value=f.value, confidence=f.confidence) for f in suggestions
         ],
-        blocks=[
-            ExtractionBlockModel(
-                page=b.page,
-                x=b.x,
-                y=b.y,
-                width=b.width,
-                height=b.height,
-                text=b.text,
-                block_index=b.block_index if b.block_index is not None else None,
-            )
-            for b in (result.blocks or [])
-        ],
+        blocks=extraction_blocks_to_models(result.blocks, context="extract"),
         markdown=result.markdown,
         layout_ir=result.layout_ir,
         layout_reconstruction_reliable=result.layout_reconstruction_reliable,
