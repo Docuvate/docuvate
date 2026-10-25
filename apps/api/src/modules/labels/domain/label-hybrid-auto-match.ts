@@ -1,7 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { cosineSimilarity } from './cosine.js';
-import { learnConfidenceThresholdFromPrepared } from './label-hybrid-calibration.js';
+import {
+  learnConfidenceThresholdFromPrepared,
+  type PreparedTrainingExamplePayload,
+} from './label-hybrid-calibration.js';
 import {
   buildHybridFeatureModel,
   hybridFeatureVector,
@@ -220,6 +223,34 @@ export function canTrainLabelHybridModel(examples: readonly LabelHybridTrainingE
   const counts = examplesPerClass(examples);
   const eligible = [...counts.values()].filter((c) => c >= MIN_CLASS_EXAMPLES).length;
   return eligible >= MIN_TRAINED_CLASSES;
+}
+
+/** Feature payloads for calibration benchmarks (synthetic / public fixtures only). */
+export function buildLabelHybridCalibrationPayload(
+  examples: readonly LabelHybridTrainingExample[]
+): { tagIds: string[]; prepared: PreparedTrainingExamplePayload[] } | null {
+  if (!canTrainLabelHybridModel(examples)) {
+    return null;
+  }
+  const counts = examplesPerClass(examples);
+  const tagIds = [...counts.entries()]
+    .filter(([, count]) => count >= MIN_CLASS_EXAMPLES)
+    .map(([tagId]) => tagId)
+    .sort();
+  if (tagIds.length < MIN_TRAINED_CLASSES) {
+    return null;
+  }
+  const corpus = examples.map((row) => ({ text: row.text }));
+  const featureModel = buildHybridFeatureModel(corpus);
+  const prepared = prepareTrainingExamples(examples, featureModel.vocabulary, featureModel.idf).map(
+    (row) => ({
+      tagId: row.tagId,
+      embedding: row.embedding,
+      text: row.text,
+      features: [...row.features],
+    })
+  );
+  return { tagIds, prepared };
 }
 
 export function trainLabelHybridModel(

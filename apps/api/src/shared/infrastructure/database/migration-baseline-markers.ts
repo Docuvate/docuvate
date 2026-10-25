@@ -55,6 +55,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'RecognizedFieldGateLabelPolarity20261018190000',
   'DocumentFileSizeSavedViewDescription20261018190500',
   'ConnectorPaperlessImportRetry20261025120000',
+  'DocumentTagsUserConfirmed20261025210000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -225,6 +226,8 @@ export async function migrationSchemaPresent(
       return columnExists(runner, 'documents', 'file_size_bytes');
     case 'ConnectorPaperlessImportRetry20261025120000':
       return columnExists(runner, 'connector_import_run_errors', 'source_document_title');
+    case 'DocumentTagsUserConfirmed20261025210000':
+      return columnExists(runner, 'document_tags', 'user_confirmed');
     default:
       return false;
   }

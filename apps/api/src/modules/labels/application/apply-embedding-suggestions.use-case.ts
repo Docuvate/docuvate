@@ -101,7 +101,7 @@ export class ApplyEmbeddingSuggestionsUseCase {
       const tags = await this.taxonomy.listTags(userId);
       const tagById = new Map(tags.map((t) => [t.id, t]));
       const [embeddingRows, readyDocs, docMeta] = await Promise.all([
-        this.labelEmbeddings.listDocumentEmbeddingsForUser(userId),
+        this.labelEmbeddings.listUserConfirmedDocumentEmbeddingsForUser(userId),
         this.documents.listForUser(userId, { status: 'ready' }),
         this.documents.findByIdForUser(documentId, userId),
       ]);

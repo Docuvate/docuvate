@@ -123,6 +123,25 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
   }
 
   async listDocumentEmbeddingsForUser(userId: string): Promise<UserDocumentEmbeddingRow[]> {
+    return this.queryDocumentEmbeddingsForUser(userId, false);
+  }
+
+  async listUserConfirmedDocumentEmbeddingsForUser(
+    userId: string
+  ): Promise<UserDocumentEmbeddingRow[]> {
+    return this.queryDocumentEmbeddingsForUser(userId, true);
+  }
+
+  private async queryDocumentEmbeddingsForUser(
+    userId: string,
+    userConfirmedOnly: boolean
+  ): Promise<UserDocumentEmbeddingRow[]> {
+    const tagFilter = userConfirmedOnly
+      ? 't.is_inbox = false AND dt.user_confirmed = true'
+      : 't.is_inbox = false';
+    const havingConfirmed = userConfirmedOnly
+      ? 'HAVING bool_or(t.is_inbox = false AND dt.user_confirmed = true)'
+      : '';
     return withTenantPgClient(this.pool, userId, async (client) => {
       const result = await client.query(
         `SELECT dr.document_id,
@@ -130,7 +149,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
                 dr.document_mean_int8,
                 d.title,
                 d.filename,
-                COALESCE(array_agg(dt.tag_id) FILTER (WHERE t.is_inbox = false), '{}') AS tag_ids
+                COALESCE(array_agg(dt.tag_id) FILTER (WHERE ${tagFilter}), '{}') AS tag_ids
          FROM document_representation dr
          INNER JOIN documents d ON d.id = dr.document_id
          LEFT JOIN document_tags dt ON dt.document_id = dr.document_id
@@ -142,6 +161,7 @@ export class PgLabelEmbeddingRepository implements LabelEmbeddingRepository {
              WHERE m.document_id = d.id AND m.role = 'version'
            )
          GROUP BY dr.document_id, dr.document_mean_scale, dr.document_mean_int8, d.title, d.filename, d.updated_at
+         ${havingConfirmed}
          ORDER BY d.updated_at DESC`,
         [userId]
       );

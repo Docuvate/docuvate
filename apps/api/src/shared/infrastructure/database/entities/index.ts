@@ -34,6 +34,7 @@ import { DocumentLayoutIrPagesEntity } from './document-layout-ir-pages.entity.j
 import { DocumentRecognizedFieldExtractionAttemptEntity } from './document-recognized-field-extraction-attempt.entity.js';
 import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
+import { DocumentTagsEntity } from './document-tags.entity.js';
 import { DocumentTextChunksEntity } from './document-text-chunks.entity.js';
 import { DocumentsEntity } from './documents.entity.js';
 import { DuplicatePairLabelsEntity } from './duplicate-pair-labels.entity.js';
@@ -129,6 +130,7 @@ export const TYPEORM_ENTITIES = [
   DocumentTextChunksEntity,
   DocumentStackMembersEntity,
   DocumentTagSuggestionsEntity,
+  DocumentTagsEntity,
   DocumentsEntity,
   ExtractionArenaRatingComparedEnginesEntity,
   ExtractionArenaRatingsEntity,

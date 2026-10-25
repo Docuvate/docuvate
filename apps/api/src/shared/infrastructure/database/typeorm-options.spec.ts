@@ -51,6 +51,7 @@ import { CorrespondentsToAbsenderField20261018180000 } from './migrations/202610
 import { RecognizedFieldGateLabelPolarity20261018190000 } from './migrations/20261018190000-recognized-field-filter-and-gate-polarity.js';
 import { DocumentFileSizeSavedViewDescription20261018190500 } from './migrations/20261018190500-document-file-size-saved-view-description.js';
 import { ConnectorPaperlessImportRetry20261025120000 } from './migrations/20261025120000-connector-paperless-import-retry.js';
+import { DocumentTagsUserConfirmed20261025210000 } from './migrations/20261025210000-document-tags-user-confirmed.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -102,6 +103,7 @@ const EXPECTED_MIGRATIONS = [
   RecognizedFieldGateLabelPolarity20261018190000,
   DocumentFileSizeSavedViewDescription20261018190500,
   ConnectorPaperlessImportRetry20261025120000,
+  DocumentTagsUserConfirmed20261025210000,
 ];
 
 describe('buildTypeOrmOptions', () => {

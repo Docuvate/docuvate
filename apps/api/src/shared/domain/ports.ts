@@ -147,7 +147,11 @@ export interface TaxonomyRepository {
   deleteCorrespondent(id: string, userId: string): Promise<void>;
 
   listTagsForDocument(documentId: string): Promise<TagEntity[]>;
-  assignTagToDocument(documentId: string, tagId: string): Promise<void>;
+  assignTagToDocument(
+    documentId: string,
+    tagId: string,
+    options?: { userConfirmed?: boolean }
+  ): Promise<void>;
   removeTagFromDocument(documentId: string, tagId: string): Promise<void>;
   clearInboxTagForDocument(documentId: string, userId: string): Promise<void>;
 
@@ -455,6 +459,8 @@ export interface LabelEmbeddingRepository {
   countExtractedDocumentsForMap(userId: string): Promise<number>;
   listDocumentIdsMissingEmbeddings(userId: string, limit: number): Promise<string[]>;
   listDocumentEmbeddingsForUser(userId: string): Promise<UserDocumentEmbeddingRow[]>;
+  /** Labels assigned or accepted by the user (excludes rule/ML auto-assign). */
+  listUserConfirmedDocumentEmbeddingsForUser(userId: string): Promise<UserDocumentEmbeddingRow[]>;
   listLabeledDocumentEmbeddings(
     userId: string,
     excludeDocumentId: string

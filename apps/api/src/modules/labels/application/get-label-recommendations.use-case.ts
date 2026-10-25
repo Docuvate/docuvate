@@ -96,6 +96,7 @@ export class GetLabelRecommendationsUseCase {
       blocklist,
       blockPatterns,
       embeddingRows,
+      confirmedEmbeddingRows,
       preferences,
       clusterExclusions,
     ] = await Promise.all([
@@ -106,6 +107,7 @@ export class GetLabelRecommendationsUseCase {
       this.labelEmbeddings.listRecommendationBlocklist(userId),
       this.labelEmbeddings.listRecommendationBlocklistPatterns(userId),
       this.labelEmbeddings.listDocumentEmbeddingsForUser(userId),
+      this.labelEmbeddings.listUserConfirmedDocumentEmbeddingsForUser(userId),
       this.prefs.getForUser(userId),
       this.labelEmbeddings.listClusterDocumentExclusions(userId),
     ]);
@@ -145,7 +147,7 @@ export class GetLabelRecommendationsUseCase {
       labelSupportCountByTagId.set(tagId, embeddings.length);
     }
 
-    const hybridTrainingRows: LabelHybridDocumentRow[] = embeddingRows.map((row) => {
+    const hybridTrainingRows: LabelHybridDocumentRow[] = confirmedEmbeddingRows.map((row) => {
       const doc = docs.find((d) => d.id === row.documentId);
       const text = doc
         ? `${doc.title}\n${doc.filename}\n${doc.extraction?.text ?? ''}`.slice(0, 12000)

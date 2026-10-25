@@ -5,8 +5,6 @@ import {
   Entity,
   Index,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -19,11 +17,11 @@ import { DocumentEmbeddingsEntity } from './document-embeddings.entity.js';
 import { DocumentLayoutIrEntity } from './document-layout-ir.entity.js';
 import { DocumentStackMembersEntity } from './document-stack-members.entity.js';
 import { DocumentTagSuggestionsEntity } from './document-tag-suggestions.entity.js';
+import { DocumentTagsEntity } from './document-tags.entity.js';
 import { ExtractionArenaRatingsEntity } from './extraction-arena-ratings.entity.js';
 import { ExtractionFieldCorrectionsEntity } from './extraction-field-corrections.entity.js';
 import { FoldersEntity } from './folders.entity.js';
 import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
-import { TagsEntity } from './tags.entity.js';
 import { UserEntity } from './user.entity.js';
 
 @Index('documents_content_hash_idx', ['contentHash', 'userId'], {})
@@ -137,14 +135,8 @@ export class DocumentsEntity {
   )
   documentTagSuggestions: DocumentTagSuggestionsEntity[];
 
-  @ManyToMany(() => TagsEntity, (tags) => tags.documents)
-  @JoinTable({
-    name: 'document_tags',
-    joinColumns: [{ name: 'document_id', referencedColumnName: 'id' }],
-    inverseJoinColumns: [{ name: 'tag_id', referencedColumnName: 'id' }],
-    schema: 'public',
-  })
-  tags: TagsEntity[];
+  @OneToMany(() => DocumentTagsEntity, (documentTags) => documentTags.document)
+  documentTags: DocumentTagsEntity[];
 
   @ManyToOne(() => FoldersEntity, (folders) => folders.documents, {
     onDelete: 'SET NULL',
