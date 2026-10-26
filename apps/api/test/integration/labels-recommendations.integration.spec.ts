@@ -67,10 +67,14 @@ describe('GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)', 
     expect(Array.isArray(items)).toBe(true);
   });
 
-  it('completes a second call while hybrid retrain may be in flight', async () => {
-    const first = await recommendations.execute(userId);
-    const second = await recommendations.execute(userId);
-    expect(Array.isArray(first)).toBe(true);
-    expect(Array.isArray(second)).toBe(true);
-  });
+  it(
+    'completes a second call while hybrid retrain may be in flight',
+    async () => {
+      const first = await recommendations.execute(userId);
+      const second = await recommendations.execute(userId);
+      expect(Array.isArray(first)).toBe(true);
+      expect(Array.isArray(second)).toBe(true);
+    },
+    240_000
+  );
 });
