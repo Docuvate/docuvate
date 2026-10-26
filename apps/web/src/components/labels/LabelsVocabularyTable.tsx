@@ -4,8 +4,9 @@ import type { TagDto } from '@docuvate/contracts';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { MoreHorizontal } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { useTranslation, type TFunction } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import type { CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
 import { flattenTagSearchPages, useTagSearchInfiniteQuery } from '../../lib/labels/useTagSearchInfiniteQuery';
