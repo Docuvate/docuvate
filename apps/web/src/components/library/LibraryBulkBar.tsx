@@ -97,7 +97,7 @@ export function LibraryBulkBar(props: LibraryBulkBarProps) {
             {countLabel}
             {props.bulkBusy ? ` · ${t('library.bulkApplying')}` : ''}
           </span>
-          {showSelectAllMatching && total !== null ? (
+          {showSelectAllMatching ? (
             <Button
               type="button"
               variant="secondary"
@@ -107,7 +107,7 @@ export function LibraryBulkBar(props: LibraryBulkBarProps) {
                 props.onSelectAllMatching?.();
               }}
             >
-              {t('library.bulkSelectAllMatching', { total })}
+              {t('library.bulkSelectAllMatching', { total: total ?? 0 })}
             </Button>
           ) : null}
           <div className="bulk-bar-actions">
