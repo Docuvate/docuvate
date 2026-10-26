@@ -4,8 +4,8 @@ import { randomUUID } from 'node:crypto';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { RecordExtractionFieldCorrectionsUseCase } from '../../src/modules/extraction-feedback/application/record-extraction-field-corrections.use-case.js';
 import { PgDocumentRepository } from '../../src/modules/documents/infrastructure/pg-document.repository.js';
+import { RecordExtractionFieldCorrectionsUseCase } from '../../src/modules/extraction-feedback/application/record-extraction-field-corrections.use-case.js';
 import { PgExtractionFieldFeedbackRepository } from '../../src/modules/extraction-feedback/infrastructure/pg-extraction-field-feedback.repository.js';
 import { PgTaxonomyRepository } from '../../src/modules/taxonomy/infrastructure/pg-taxonomy.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';

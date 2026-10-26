@@ -64,16 +64,16 @@ import {
   mergeCatalogFieldsForDocument,
 } from '../lib/documentRecognizedCatalogFields';
 import { areBlocksDirty, areFieldsDirty } from '../lib/extractionDirty';
-import {
-  type FieldExtractionFeedbackCounts,
-  parseFieldExtractionFeedbackCounts,
-} from '../lib/fieldExtractionFeedback';
 import { extractionFieldLabel } from '../lib/extractionFieldLabels';
 import {
   findBlockIndexAtPoint,
   normalizeExtractionBlocks,
   textFromExtractionBlocks,
 } from '../lib/extractionLayout';
+import {
+  type FieldExtractionFeedbackCounts,
+  parseFieldExtractionFeedbackCounts,
+} from '../lib/fieldExtractionFeedback';
 import { humanizeFieldKey } from '../lib/humanizeFieldKey';
 import {
   buildCustomFieldDefMap,

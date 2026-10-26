@@ -3,8 +3,8 @@
 import { semanticFieldKey } from '@docuvate/contracts';
 
 import {
-  normalizeFieldValue,
   type NormalizedFieldKind,
+  normalizeFieldValue,
 } from '../../search/domain/normalize-field-value.js';
 
 function inferFieldKind(fieldKey: string): NormalizedFieldKind {

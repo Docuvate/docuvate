@@ -14,16 +14,16 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { extractionFieldLabel } from '../../lib/extractionFieldLabels';
-import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
-import { labelFieldDisplayName } from '../../lib/labelFieldDisplay';
-import { Button } from '../ui/Button';
-import { IconButton } from '../ui/IconButton';
-import { Input } from '../ui/Input';
 import {
   type FieldExtractionFeedbackCounts,
   showFieldConfirmationFeedbackBanner,
   showFieldCorrectionFeedbackBanner,
 } from '../../lib/fieldExtractionFeedback';
+import { formatExtractedFieldDisplayValue } from '../../lib/formatExtractedFieldDisplayValue';
+import { labelFieldDisplayName } from '../../lib/labelFieldDisplay';
+import { Button } from '../ui/Button';
+import { IconButton } from '../ui/IconButton';
+import { Input } from '../ui/Input';
 import { DocumentFieldValueCards } from './DocumentFieldValueCards';
 
 interface ExtractedFieldsPanelProps {
