@@ -88,7 +88,7 @@ async function provisionLongLabelRowFixture(
   const runToken = randomUUID().slice(0, 8);
   for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
     const name = `ws-b-lang-${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
-    const response = await request.post(`${apiBase}/tags`, {
+    const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
     });
@@ -180,7 +180,7 @@ async function countSeedLabels(
   request: import('@playwright/test').APIRequestContext
 ): Promise<number> {
   const response = await request.get(
-    `${apiBase}/tags/search?q=${encodeURIComponent('ws-b-seed')}&limit=1`,
+    `${apiBase}/v1/tags/search?q=${encodeURIComponent('ws-b-seed')}&limit=1`,
     { headers: { origin: webOrigin } }
   );
   if (!response.ok()) {
@@ -199,7 +199,7 @@ async function seedLabels(request: import('@playwright/test').APIRequestContext,
 
   for (let index = existing; index < count; index += 1) {
     const name = `ws-b-seed-${String(index).padStart(4, '0')}`;
-    const response = await request.post(`${apiBase}/tags`, {
+    const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
     });
