@@ -27,7 +27,19 @@ function isDocumentListApiResponse(url: string, method: string): boolean {
   }
 }
 
-interface ListRequestMetric {
+function isTagSuggestionsBatchResponse(url: string, method: string): boolean {
+  if (method !== 'POST') {
+    return false;
+  }
+  try {
+    const parsed = new URL(url);
+    return /\/v1\/documents\/tag-suggestions$/.test(parsed.pathname);
+  } catch {
+    return false;
+  }
+}
+
+interface RequestMetric {
   url: string;
   status: number;
   payloadBytes: number;
@@ -59,7 +71,9 @@ async function assertStatusColumnAlignment(page: import('@playwright/test').Page
   expect(headerBox).not.toBeNull();
   const headerX = headerBox?.x ?? 0;
 
-  const statusCells = page.locator('.library-table-virtual-body tr.library-table-virtual-row td.library-col-status');
+  const statusCells = page.locator(
+    '.library-table-virtual-body tr.library-table-virtual-row td.library-col-status'
+  );
   const count = await statusCells.count();
   const rowsToCheck = Math.min(20, count);
   expect(rowsToCheck).toBeGreaterThan(0);
@@ -69,6 +83,72 @@ async function assertStatusColumnAlignment(page: import('@playwright/test').Page
     expect(box).not.toBeNull();
     expect(Math.abs((box?.x ?? 0) - headerX)).toBeLessThan(1);
   }
+}
+
+async function assertDesktopTableLayout(page: import('@playwright/test').Page): Promise<void> {
+  const scroll = page.getByTestId('library-doc-virtual-scroll');
+  await expect(scroll).toBeVisible();
+  const scrollBox = await scroll.boundingBox();
+  expect(scrollBox).not.toBeNull();
+
+  const firstRow = page.locator('.library-table-virtual-body tr.library-table-virtual-row').first();
+  await expect(firstRow).toBeVisible();
+  const rowBox = await firstRow.boundingBox();
+  expect(rowBox).not.toBeNull();
+  const rowRight = (rowBox?.x ?? 0) + (rowBox?.width ?? 0);
+  const containerRight = (scrollBox?.x ?? 0) + (scrollBox?.width ?? 0);
+  expect(Math.abs(rowRight - containerRight)).toBeLessThanOrEqual(1);
+
+  const titleCell = firstRow.locator('td.library-col-title').first();
+  const titleBox = await titleCell.boundingBox();
+  expect(titleBox).not.toBeNull();
+  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.4);
+
+  const labelOverflow = await page.evaluate(() => {
+    const cells = document.querySelectorAll(
+      '.library-table-virtual-body tr.library-table-virtual-row td.library-col-labels'
+    );
+    const limit = Math.min(20, cells.length);
+    for (let i = 0; i < limit; i += 1) {
+      const cell = cells.item(i);
+      if (!(cell instanceof HTMLElement)) {
+        continue;
+      }
+      const chips = cell.querySelectorAll('.chip-label');
+      for (let j = 0; j < chips.length; j += 1) {
+        const chip = chips.item(j);
+        if (!(chip instanceof HTMLElement)) {
+          continue;
+        }
+        const ellipsis = getComputedStyle(chip).textOverflow === 'ellipsis';
+        if (chip.scrollWidth > chip.clientWidth && !ellipsis) {
+          return true;
+        }
+      }
+      if (cell.scrollWidth > cell.clientWidth + 1) {
+        const overflowBtn = cell.querySelector('.document-labels-overflow-btn');
+        if (!overflowBtn) {
+          return true;
+        }
+      }
+    }
+    return false;
+  });
+  expect(labelOverflow).toBe(false);
+}
+
+async function assertMobileStackLayout(page: import('@playwright/test').Page): Promise<void> {
+  const scroll = page.getByTestId('library-doc-virtual-scroll');
+  await expect(scroll).toBeVisible();
+  const scrollBox = await scroll.boundingBox();
+  expect(scrollBox).not.toBeNull();
+  const firstItem = page.locator('.library-doc-stack-item').first();
+  await expect(firstItem).toBeVisible();
+  const itemBox = await firstItem.boundingBox();
+  expect(itemBox).not.toBeNull();
+  const itemRight = (itemBox?.x ?? 0) + (itemBox?.width ?? 0);
+  const containerRight = (scrollBox?.x ?? 0) + (scrollBox?.width ?? 0);
+  expect(Math.abs(itemRight - containerRight)).toBeLessThanOrEqual(1);
 }
 
 test.describe('library list performance', () => {
@@ -85,25 +165,36 @@ test.describe('library list performance', () => {
   });
 
   test('first page loads once with DOM and timing budgets', async ({ page }) => {
-    const listRequests: ListRequestMetric[] = [];
+    const listRequests: RequestMetric[] = [];
+    const tagSuggestionRequests: RequestMetric[] = [];
     let listResponseAtMs: number | null = null;
+    let tagSuggestionsResponseAtMs: number | null = null;
     const navigationStarted = Date.now();
 
     page.on('response', async (res) => {
       const url = res.url();
-      if (!isDocumentListApiResponse(url, res.request().method())) {
-        return;
-      }
+      const method = res.request().method();
       const timing = res.request().timing();
+      const durationMs = timing.responseEnd > 0 ? timing.responseEnd - timing.requestStart : null;
       const body = await res.body().catch(() => new Uint8Array());
-      listRequests.push({
+      const metric: RequestMetric = {
         url,
         status: res.status(),
         payloadBytes: body.byteLength,
-        durationMs: timing.responseEnd > 0 ? timing.responseEnd - timing.requestStart : null,
-      });
-      if (listResponseAtMs === null) {
-        listResponseAtMs = Date.now() - navigationStarted;
+        durationMs,
+      };
+      if (isDocumentListApiResponse(url, method)) {
+        listRequests.push(metric);
+        if (listResponseAtMs === null) {
+          listResponseAtMs = Date.now() - navigationStarted;
+        }
+        return;
+      }
+      if (isTagSuggestionsBatchResponse(url, method)) {
+        tagSuggestionRequests.push(metric);
+        if (tagSuggestionsResponseAtMs === null) {
+          tagSuggestionsResponseAtMs = Date.now() - navigationStarted;
+        }
       }
     });
 
@@ -148,13 +239,20 @@ test.describe('library list performance', () => {
       viewport: { width: 390, height: 844 },
       firstRowMs,
       listResponseAtMs,
+      tagSuggestionsResponseAtMs,
+      tagSuggestionRequestCount: tagSuggestionRequests.length,
+      tagSuggestionPayloadBytes: tagSuggestionRequests.reduce(
+        (sum, entry) => sum + entry.payloadBytes,
+        0
+      ),
+      tagSuggestionRequests,
       domNodeCount: nodeCount,
       listRequestCount: listRequests.length,
       listPayloadBytes: listRequests.reduce((sum, entry) => sum + entry.payloadBytes, 0),
       listRequests,
       navigationTiming,
       notes: {
-        includeTagSuggestions: false,
+        tagSuggestions: 'lazy batch POST /documents/tag-suggestions',
         explicitLimit: 50,
       },
     };
@@ -166,11 +264,14 @@ test.describe('library list performance', () => {
     expect(firstRowMs).toBeLessThan(1000);
     expect(nodeCount).toBeLessThan(3000);
 
+    await assertMobileStackLayout(page);
+
     await page.setViewportSize({ width: 1440, height: 900 });
     await applyDocuvateThemePreference(page, 'light');
     await page.goto('/documents');
     await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible' });
     await assertStatusColumnAlignment(page);
+    await assertDesktopTableLayout(page);
 
     await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'light');
     await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'dark');

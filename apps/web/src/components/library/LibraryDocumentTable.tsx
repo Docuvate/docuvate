@@ -7,11 +7,13 @@ import type {
 } from '@docuvate/contracts';
 import { ExternalLink, ScanLine } from 'lucide-react';
 import {
+  type CSSProperties,
   Fragment,
   type KeyboardEvent,
   type MouseEvent,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +21,7 @@ import { Link } from 'react-router-dom';
 
 import { deleteDocument, getDuplicateStack } from '../../lib/api';
 import { extractionFailureMessage, isExtractionPending } from '../../lib/documentExtractionState';
+import { useLibraryDocumentTagSuggestions } from '../../lib/documents/useLibraryDocumentTagSuggestions';
 import { useFilesystemCompactDocs } from '../../lib/useFilesystemCompactDocs';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import { ExtractionProgressBar } from '../documents/ExtractionProgressBar';
@@ -269,6 +272,32 @@ export function LibraryDocumentTable({
     scrollStorageKey: listScrollStorageKey,
   });
   const virtualRows = virtualizer.getVirtualItems();
+  const visibleDocumentIds = useMemo(
+    () => virtualRows.map((row) => items[row.index].id),
+    [items, virtualRows]
+  );
+  const { suggestionsByDocumentId } = useLibraryDocumentTagSuggestions(visibleDocumentIds);
+  const showFolderCol = !hideFolderColumn && showColumn(visibleColumns, 'folder');
+  const showLabelsCol = showColumn(visibleColumns, 'labels');
+  const showStatusCol = showColumn(visibleColumns, 'status');
+  const showDateCol = showColumn(visibleColumns, 'date');
+  const virtualGridStyle = useMemo((): CSSProperties => {
+    const columns = ['2rem', '2.5rem', 'minmax(0, 1fr)'];
+    if (showFolderCol) {
+      columns.push('7.5rem');
+    }
+    if (showLabelsCol) {
+      columns.push('9rem');
+    }
+    if (showStatusCol) {
+      columns.push('6.5rem');
+    }
+    if (showDateCol) {
+      columns.push('5.25rem');
+    }
+    columns.push('3.75rem');
+    return { gridTemplateColumns: columns.join(' ') };
+  }, [showDateCol, showFolderCol, showLabelsCol, showStatusCol]);
 
   if (items.length === 0) {
     return null;
@@ -490,7 +519,13 @@ export function LibraryDocumentTable({
                     </div>
                     <div className="library-doc-stack-meta">
                       <div className="library-doc-stack-meta-main">
-                        <DocumentLabelsCell document={doc} onRefresh={onRefresh} />
+                        <DocumentLabelsCell
+                          document={{
+                            ...doc,
+                            tagSuggestions: suggestionsByDocumentId[doc.id] ?? doc.tagSuggestions,
+                          }}
+                          onRefresh={onRefresh}
+                        />
                         {doc.duplicateStack?.pendingReview ? (
                           <span className="badge badge-warn">{t('library.reviewPending')}</span>
                         ) : isExtractionPending(doc.status) ? (
@@ -558,15 +593,16 @@ export function LibraryDocumentTable({
     );
   }
 
-  const showFolderCol = !hideFolderColumn && showColumn(visibleColumns, 'folder');
-  const showLabelsCol = showColumn(visibleColumns, 'labels');
-  const showStatusCol = showColumn(visibleColumns, 'status');
-  const showDateCol = showColumn(visibleColumns, 'date');
-
   return (
     <>
       <div
-        className={`library-table-wrap${hideFolderColumn ? ' library-table-wrap-hide-folder' : ''}`}
+        className={[
+          'library-table-wrap',
+          showFolderCol ? 'library-table-virtual-with-folder' : 'library-table-virtual-no-folder',
+          hideFolderColumn ? 'library-table-wrap-hide-folder' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
       >
         <div
           ref={virtualScrollRef}
@@ -574,18 +610,8 @@ export function LibraryDocumentTable({
           data-testid="library-doc-virtual-scroll"
         >
         <table className="data-table library-table library-table-virtualized">
-          <colgroup>
-            <col className="library-col-expand" />
-            <col className="library-col-check" />
-            <col className="library-col-title" />
-            {showFolderCol ? <col className="library-col-meta" /> : null}
-            {showLabelsCol ? <col className="library-col-labels" /> : null}
-            {showStatusCol ? <col className="library-col-status" /> : null}
-            {showDateCol ? <col className="library-col-date" /> : null}
-            <col className="library-col-action" />
-          </colgroup>
           <thead>
-            <tr className="library-table-virtual-header-row">
+            <tr className="library-table-virtual-header-row" style={virtualGridStyle}>
               <th className="library-col-expand" aria-hidden="true" />
               <th className="library-col-check">
                 <input
@@ -656,6 +682,7 @@ export function LibraryDocumentTable({
                     className={['library-table-virtual-row', rowClassName].filter(Boolean).join(' ')}
                     data-index={virtualRow.index}
                     style={{
+                      ...virtualGridStyle,
                       width: '100%',
                       position: 'absolute',
                       top: 0,
@@ -765,7 +792,13 @@ export function LibraryDocumentTable({
                     ) : null}
                     {showLabelsCol ? (
                       <td className="library-col-labels">
-                        <DocumentLabelsCell document={doc} onRefresh={onRefresh} />
+                        <DocumentLabelsCell
+                          document={{
+                            ...doc,
+                            tagSuggestions: suggestionsByDocumentId[doc.id] ?? doc.tagSuggestions,
+                          }}
+                          onRefresh={onRefresh}
+                        />
                       </td>
                     ) : null}
                     {showStatusCol ? (

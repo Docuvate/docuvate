@@ -42,6 +42,8 @@ import type {
   DocumentListResponseDto,
   DocumentReviewQueueResponseDto,
   DocumentReviewQueueSummaryDto,
+  DocumentTagSuggestionsBatchRequestDto,
+  DocumentTagSuggestionsBatchResponseDto,
   DuplicateCandidateDto,
   DuplicateSetDto,
   DuplicateStackDto,
@@ -251,6 +253,16 @@ export async function listDocumentsPage(
 ): Promise<DocumentListResponseDto> {
   const qs = documentListQueryString(filters);
   return request<DocumentListResponseDto>(`/documents${qs}`);
+}
+
+export async function fetchDocumentTagSuggestionsBatch(
+  documentIds: string[]
+): Promise<DocumentTagSuggestionsBatchResponseDto> {
+  const body: DocumentTagSuggestionsBatchRequestDto = { documentIds };
+  return request<DocumentTagSuggestionsBatchResponseDto>('/documents/tag-suggestions', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 }
 
 export async function listDocuments(filters: DocumentListQuery = {}): Promise<DocumentDto[]> {

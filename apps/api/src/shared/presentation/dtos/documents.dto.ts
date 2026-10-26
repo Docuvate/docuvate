@@ -3,6 +3,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsIn,
@@ -271,6 +272,22 @@ export class DocumentResponseDto implements DocumentDto {
 
   @ApiPropertyOptional({ type: DocumentExtractionSummaryDto })
   extraction?: DocumentExtractionSummaryDto;
+}
+
+export class DocumentTagSuggestionsBatchRequestDto {
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsUUID('4', { each: true })
+  documentIds!: string[];
+}
+
+export class DocumentTagSuggestionsBatchItemDto {
+  documentId!: string;
+  suggestions!: DocumentDto['tagSuggestions'];
+}
+
+export class DocumentTagSuggestionsBatchResponseDto {
+  items!: DocumentTagSuggestionsBatchItemDto[];
 }
 
 export class MoveDocumentsRequestDto implements MoveDocumentsRequest {
