@@ -4,7 +4,10 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { runWithRequestDeadline } from './request-deadline.js';
 
-type DeadlineProbe = { items: []; state: 'ready' | 'warming' };
+interface DeadlineProbe {
+  items: [];
+  state: 'ready' | 'warming';
+}
 
 describe('runWithRequestDeadline', () => {
   it('returns the handler result when it finishes before the deadline', async () => {
