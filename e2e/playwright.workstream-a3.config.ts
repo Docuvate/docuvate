@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import { smokeFixtureStoragePath } from './helpers/smoke-fixture-auth.js';
+
 const webBase = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 
@@ -13,6 +15,7 @@ export default defineConfig({
   reporter: process.env['CI'] ? [['github'], ['list']] : [['list']],
   use: {
     baseURL: webBase,
+    storageState: smokeFixtureStoragePath(),
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

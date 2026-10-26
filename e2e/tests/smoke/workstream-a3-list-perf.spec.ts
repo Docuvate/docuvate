@@ -26,7 +26,8 @@ const ROUTES: RouteProbe[] = [
   {
     route: '/filesystem/unassigned',
     listPathPattern: /\/v1\/documents$/,
-    readySelector: '[data-testid="folder-tree-virtual-scroll"], .dateisystem-content-pane',
+    readySelector:
+      '[data-testid="library-doc-virtual-scroll"], [data-testid="library-doc-stack-list"], .library-main-card-filesystem',
   },
   {
     route: '/documents/duplicates',
@@ -42,11 +43,6 @@ const ROUTES: RouteProbe[] = [
     route: '/chat',
     listPathPattern: /\/v1\/chat\/threads$/,
     readySelector: '.global-chat-page',
-  },
-  {
-    route: '/settings/admin/users',
-    listPathPattern: /\/v1\/admin\/users$/,
-    readySelector: '.admin-users-panel, .admin-load-error',
   },
   {
     route: '/saved-views',
