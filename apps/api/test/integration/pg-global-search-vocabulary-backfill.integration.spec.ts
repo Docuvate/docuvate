@@ -61,4 +61,49 @@ describe('search_vocabulary_terms batch backfill (Testcontainers Postgres)', () 
     expect(names).toContain('gez');
     expect(names).toContain('versicherung');
   });
+
+  it('counts doc_frequency as distinct documents and is idempotent across two backfill runs', async () => {
+    const secondDocId = uuidv4();
+    await pool.query(
+      `INSERT INTO documents (
+        id, user_id, filename, title, mime_type, storage_key, status, extracted_text, created_at, updated_at
+      ) VALUES ($1, $2, 'dup.pdf', 'Kfz Versicherung', 'application/pdf', 'k/dup', 'ready',
+        'Police fuer Kfz und GEZ. Police fuer Kfz und GEZ.', now(), now())`,
+      [secondDocId, userId]
+    );
+    const chunks = splitTextChunksWithSpans('Police fuer Kfz und GEZ. Police fuer Kfz und GEZ.');
+    for (let i = 0; i < chunks.length; i += 1) {
+      const chunk = chunks[i];
+      await pool.query(
+        `INSERT INTO document_text_chunks (document_id, chunk_index, body, updated_at)
+         VALUES ($1, $2, $3, now())`,
+        [secondDocId, i, chunk.body]
+      );
+    }
+
+    const client = await pool.connect();
+    try {
+      await backfillSearchVocabularyForDocuments(client, [documentId, secondDocId]);
+      const firstRun = await pool.query<{ term: string; doc_frequency: number }>(
+        `SELECT term, doc_frequency FROM search_vocabulary_terms
+         WHERE user_id = $1 AND term IN ('kfz', 'gez')
+         ORDER BY term`,
+        [userId]
+      );
+      await backfillSearchVocabularyForDocuments(client, [documentId, secondDocId]);
+      const secondRun = await pool.query<{ term: string; doc_frequency: number }>(
+        `SELECT term, doc_frequency FROM search_vocabulary_terms
+         WHERE user_id = $1 AND term IN ('kfz', 'gez')
+         ORDER BY term`,
+        [userId]
+      );
+      expect(secondRun.rows).toEqual(firstRun.rows);
+      const kfz = firstRun.rows.find((row) => row.term === 'kfz');
+      expect(kfz?.doc_frequency).toBe(2);
+      const gez = firstRun.rows.find((row) => row.term === 'gez');
+      expect(gez?.doc_frequency).toBe(2);
+    } finally {
+      client.release();
+    }
+  });
 });

@@ -59,6 +59,7 @@ import { UserPreferencesFuzzyDuplicateDetection20261026150000 } from './migratio
 import { RepairBinDocumentFilenames20261026160000 } from './migrations/20261026160000-repair-bin-document-filenames.js';
 import { SearchVocabularyMaintain20261027140000 } from './migrations/20261027140000-search-vocabulary-maintain.js';
 import { SearchVocabularyBatchBackfill20261028120000 } from './migrations/20261028120000-search-vocabulary-batch-backfill.js';
+import { SearchVocabularyDocFrequencyCorrect20261028140000 } from './migrations/20261028140000-search-vocabulary-doc-frequency-correct.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -118,6 +119,7 @@ const EXPECTED_MIGRATIONS = [
   RepairBinDocumentFilenames20261026160000,
   SearchVocabularyMaintain20261027140000,
   SearchVocabularyBatchBackfill20261028120000,
+  SearchVocabularyDocFrequencyCorrect20261028140000,
 ];
 
 describe('buildTypeOrmOptions', () => {

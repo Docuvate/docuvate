@@ -9,6 +9,13 @@ import {
 } from './expand-query-terms.js';
 
 describe('expandQueryTerms', () => {
+  it('rejects vocabulary neighbors shorter than four characters even when similarity is high', async () => {
+    const lookup = vi.fn(() => Promise.resolve([{ term: 'xyz', similarity: 0.9 }]));
+    const result = await expandQueryTerms('xyzqq', lookup);
+    expect(result.expanded).toEqual(['xyzqq']);
+    expect(result.queryRelevance).toBe(0);
+  });
+
   it('does not expand nonsense tokens when neighbors are below similarity threshold', async () => {
     const lookup = vi.fn(() =>
       Promise.resolve([
