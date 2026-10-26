@@ -47,23 +47,32 @@ function pair(theme, fgKey, bgKey) {
   };
 }
 
+/** @type {[string, string][]} */
 const TEXT_PAIRS = [
   ['text', 'bg-raised'],
   ['text', 'bg'],
-  ['accent', 'bg'],
+  ['accent-text', 'bg-raised'],
+  ['accent-text', 'accent-soft'],
+  ['error-text', 'bg'],
+  ['error-text', 'bg-raised'],
   ['header-fg', 'header-bg'],
   ['header-muted', 'header-bg'],
   ['header-surface-fg', 'header-surface'],
   ['header-input-fg', 'header-input-bg'],
   ['header-control-fg', 'header-control-bg'],
   ['table-header-fg', 'bg-raised'],
+  ['on-accent', 'accent-fill'],
+  ['danger', 'danger-soft'],
+  ['danger-strong', 'danger-soft'],
 ];
 
+/** @type {[string, string][]} */
 const UI_PAIRS = [
   ['header-input-placeholder', 'header-input-bg'],
   ['header-control-active-fg', 'header-control-active-bg'],
-  ['on-accent', 'accent'],
-  ['accent-contrast', 'accent'],
+  ['accent-contrast', 'accent-fill'],
+  ['focus', 'bg-raised'],
+  ['focus', 'bg'],
 ];
 
 const failures = [];
