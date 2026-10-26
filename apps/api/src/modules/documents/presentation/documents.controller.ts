@@ -6,6 +6,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  MethodNotAllowedException,
   Param,
   Patch,
   Post,
@@ -196,6 +198,16 @@ export class DocumentsController {
       hasMore: page.hasMore,
       total: page.total,
     };
+  }
+
+  @Get('tag-suggestions')
+  @HttpCode(405)
+  @ApiDocuvateRoute({
+    operationId: 'tagSuggestionsGetNotAllowed',
+    summary: 'Tag suggestions batch endpoint does not support GET',
+  })
+  tagSuggestionsGetNotAllowed(): never {
+    throw new MethodNotAllowedException();
   }
 
   @Post('tag-suggestions')

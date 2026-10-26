@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
-  type DocumentDto,
   type LabelAssignmentInventory,
+  type LabelInventoryDocument,
   type LabelMapCoverageSummaryDto,
   type LabelMapEmptyReason,
   type LabelRecommendationDto,
-  summarizeLabelAssignmentInventory,
 } from '@docuvate/contracts';
 import { useCallback, useMemo, useState } from 'react';
 
@@ -16,8 +15,8 @@ import {
   deleteTag,
   dismissLabelRecommendation,
   getDocumentReviewQueueSummary,
+  getLabelDocumentInventory,
   getLabelMap,
-  listDocuments,
   listLabelRecommendations,
   removeDocumentTag,
 } from '../../lib/api';
@@ -43,17 +42,6 @@ function dismissPhrases(item: LabelRecommendationDto): string[] | undefined {
   return undefined;
 }
 
-function countDocumentsByTag(documents: DocumentDto[]): Record<string, number> {
-  const counts: Record<string, number> = {};
-  for (const doc of documents) {
-    for (const tag of doc.tags) {
-      if (tag.isInbox) continue;
-      counts[tag.id] = (counts[tag.id] ?? 0) + 1;
-    }
-  }
-  return counts;
-}
-
 interface LoadOptions {
   silent?: boolean;
 }
@@ -73,7 +61,7 @@ export function useLabelsInsights(
   hooks?: { onSaveSuccess?: (options?: LabelInsightsSaveSuccessOptions) => void }
 ) {
   const [recommendations, setRecommendations] = useState<LabelRecommendationDto[]>([]);
-  const [documents, setDocuments] = useState<DocumentDto[]>([]);
+  const [documents, setDocuments] = useState<LabelInventoryDocument[]>([]);
   const [coverageSummary, setCoverageSummary] = useState<LabelMapCoverageSummaryDto | null>(null);
   const [mapEmptyReason, setMapEmptyReason] = useState<LabelMapEmptyReason | null>(null);
   const [extractedDocumentCount, setExtractedDocumentCount] = useState(0);
@@ -83,12 +71,12 @@ export function useLabelsInsights(
   const [recommendationsError, setRecommendationsError] = useState<string | null>(null);
   const [documentReviewPendingCount, setDocumentReviewPendingCount] = useState(0);
 
-  const documentCountByTagId = useMemo(() => countDocumentsByTag(documents), [documents]);
-
-  const labelInventory = useMemo(
-    (): LabelAssignmentInventory => summarizeLabelAssignmentInventory(documents),
-    [documents]
-  );
+  const [documentCountByTagId, setDocumentCountByTagId] = useState<Record<string, number>>({});
+  const [labelInventory, setLabelInventory] = useState<LabelAssignmentInventory>({
+    total: 0,
+    labeled: 0,
+    unlabeled: 0,
+  });
 
   const queueItems = useMemo(
     () => prepareLabelQueue(recommendations, documents),
@@ -112,9 +100,17 @@ export function useLabelsInsights(
           setRecommendationsError(formatUserFacingError(err, 'errors.recommendationsLoadFailed'));
         });
 
-      const docsPromise = listDocuments({ status: 'ready' })
-        .then(setDocuments)
-        .catch(() => { setDocuments([]); });
+      const docsPromise = getLabelDocumentInventory()
+        .then((inventory) => {
+          setDocuments(inventory.documents);
+          setDocumentCountByTagId(inventory.documentCountByTagId);
+          setLabelInventory(inventory.inventory);
+        })
+        .catch(() => {
+          setDocuments([]);
+          setDocumentCountByTagId({});
+          setLabelInventory({ total: 0, labeled: 0, unlabeled: 0 });
+        });
 
       const mapPromise = getLabelMap()
         .then((map) => {

@@ -46,7 +46,7 @@ export function LibraryDocumentGrid({
   onLoadMore,
   listScrollStorageKey,
 }: LibraryDocumentGridProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { parentRef, virtualizer } = useLibraryDocumentVirtualizer({
     count: items.length,
     estimateSize: 228,
@@ -141,7 +141,9 @@ export function LibraryDocumentGrid({
               </p>
               <div className="doc-card-meta">
                 <Badge status={doc.status} />
-                <time dateTime={doc.documentDate ?? doc.updatedAt}>{documentDisplayDate(doc)}</time>
+                <time dateTime={doc.documentDate ?? doc.updatedAt}>
+                  {documentDisplayDate(doc, i18n.language)}
+                </time>
               </div>
               {(() => {
                 const labelTags = doc.tags.filter((tag) => !tag.isInbox);

@@ -245,6 +245,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   }, [filters, query, mode, folderId]);
 
   const documentsQuery = useDocumentsInfiniteQuery(listFilters);
+  const refetchDocuments = documentsQuery.refetch;
   const listQueryKey = useMemo(() => documentListQueryKey(listFilters), [listFilters]);
   const items = useMemo(
     () => flattenDocumentPages(documentsQuery.data?.pages),
@@ -267,8 +268,8 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   }, [documentsQuery.error]);
 
   const load = useCallback(async () => {
-    await documentsQuery.refetch();
-  }, [documentsQuery]);
+    await refetchDocuments();
+  }, [refetchDocuments]);
 
   useEffect(() => {
     if (selectionScope === 'all-matching') {
@@ -301,10 +302,10 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     const hasPending = items.some((d) => ['uploaded', 'queued', 'extracting'].includes(d.status));
     if (!hasPending) return;
     const timer = window.setInterval(() => {
-      void documentsQuery.refetch();
+      void refetchDocuments();
     }, 4000);
     return () => { window.clearInterval(timer); };
-  }, [items, documentsQuery]);
+  }, [items, refetchDocuments]);
 
   async function onSearch(event: FormEvent) {
     event.preventDefault();

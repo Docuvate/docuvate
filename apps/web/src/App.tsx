@@ -9,7 +9,6 @@ import { SessionBootErrorScreen } from './components/errors/SessionBootErrorScre
 import { authClient } from './lib/auth-client';
 import { hadAuthenticatedSessionHint } from './lib/authSessionHint';
 import { isErrorScreenPreviewEnabled } from './lib/errorPreviewRoutes';
-import { useFeatureFlags } from './lib/remoteConfig';
 import { routes } from './lib/routes';
 import { AccountSecuritySettingsPage } from './pages/AccountSecuritySettingsPage';
 import { AdminSettingsPage } from './pages/admin/AdminSettingsPage';
@@ -72,14 +71,6 @@ function ShellRoute({ children }: { children: React.ReactNode }) {
       <AppShell>{children}</AppShell>
     </Protected>
   );
-}
-
-function SourceConnectorsRoute({ children }: { children: React.ReactNode }) {
-  const featureFlags = useFeatureFlags();
-  if (!featureFlags.sourceConnectors) {
-    return <Navigate to={routes.settingsConnectors} replace />;
-  }
-  return <>{children}</>;
 }
 
 function ConnectorConnectionSwitch() {
@@ -254,9 +245,7 @@ export function App() {
         path="/settings/connectors/:pluginId/:connectionId/sources"
         element={
           <ShellRoute>
-            <SourceConnectorsRoute>
-              <ConnectorSourcesPage />
-            </SourceConnectorsRoute>
+            <ConnectorSourcesPage />
           </ShellRoute>
         }
       />

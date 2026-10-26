@@ -7,6 +7,22 @@ export function showDocumentFilenameSubtitle(doc: DocumentDto): boolean {
   return title.length > 0 && doc.filename.trim() !== title;
 }
 
+function resolveLocaleTag(locale: string): string {
+  return locale.startsWith('de') ? 'de-DE' : 'en-US';
+}
+
+function formatLocaleDate(raw: string, locale: string): string {
+  const parsed = Date.parse(raw);
+  if (Number.isNaN(parsed)) {
+    return raw;
+  }
+  const tag = resolveLocaleTag(locale);
+  const hasTime = raw.includes('T');
+  return new Intl.DateTimeFormat(tag, hasTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' }).format(
+    new Date(parsed)
+  );
+}
+
 export function documentDisplayDateParts(
   doc: Pick<DocumentDto, 'documentDate' | 'createdAt' | 'updatedAt'>,
   locale = 'de-DE'
@@ -14,11 +30,7 @@ export function documentDisplayDateParts(
   const isUploadFallback = !doc.documentDate;
   const raw = doc.documentDate ?? doc.createdAt;
   return {
-    text: new Date(raw).toLocaleDateString(locale, {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    }),
+    text: formatLocaleDate(raw, locale),
     isUploadFallback,
   };
 }

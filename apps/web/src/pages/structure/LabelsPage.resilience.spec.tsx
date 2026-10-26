@@ -11,7 +11,7 @@ import { LabelsPage } from './LabelsPage';
 const api = vi.hoisted(() => ({
   listTags: vi.fn(),
   listLabelRecommendations: vi.fn(),
-  listDocuments: vi.fn(),
+  getLabelDocumentInventory: vi.fn(),
   getLabelMap: vi.fn(),
   getDocumentReviewQueueSummary: vi.fn(),
 }));
@@ -53,7 +53,11 @@ describe('LabelsPage resilience', () => {
       },
     ]);
     api.listLabelRecommendations.mockRejectedValue(new Error('recommendations down'));
-    api.listDocuments.mockResolvedValue([]);
+    api.getLabelDocumentInventory.mockResolvedValue({
+      inventory: { total: 0, labeled: 0, unlabeled: 0 },
+      documentCountByTagId: {},
+      documents: [],
+    });
     api.getLabelMap.mockResolvedValue({
       coverageSummary: null,
       emptyReason: null,
@@ -77,6 +81,8 @@ describe('LabelsPage resilience', () => {
     await waitFor(() => {
       expect(screen.getByText('Invoices')).toBeTruthy();
     });
-    expect(screen.getByRole('alert')).toBeTruthy();
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeTruthy();
+    });
   });
 });

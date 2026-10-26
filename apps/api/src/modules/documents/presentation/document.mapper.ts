@@ -5,6 +5,7 @@ import {
   type DocumentDto,
   type DocumentDuplicateStackSummaryDto,
   documentFormatBadge,
+  type DocumentListItemDto,
   documentUsesPdfPreview,
   type RecognizedFieldExtractionAttemptDto,
 } from '@docuvate/contracts';
@@ -38,15 +39,45 @@ export function toDocumentBulkRequest(dto: DocumentBulkRequestDto): DocumentBulk
   }
 }
 
+export function toDocumentListItemDto(
+  entity: DocumentEntity,
+  duplicateCandidateCount?: number,
+  duplicateStack?: DocumentDuplicateStackSummaryDto | null
+): DocumentListItemDto {
+  return {
+    id: entity.id,
+    filename: entity.filename,
+    title: entity.title,
+    status: entity.status,
+    extractionFailureReason: entity.extractionFailureReason ?? null,
+    mimeType: entity.mimeType,
+    fileSizeBytes: entity.fileSizeBytes,
+    formatBadge: documentFormatBadge(entity.mimeType, entity.filename),
+    previewAvailable: documentUsesPdfPreview(
+      entity.mimeType,
+      Boolean(entity.previewStorageKey?.trim())
+    ),
+    ingestSource: entity.ingestSource ?? null,
+    documentDate: entity.documentDate ? entity.documentDate.toISOString().slice(0, 10) : null,
+    folderId: entity.folderId ?? null,
+    folder: entity.folder ? { id: entity.folder.id, name: entity.folder.name } : null,
+    tags: entity.tags.map(toTagDto),
+    duplicateCandidateCount,
+    duplicateStack: duplicateStack ?? null,
+    createdAt: entity.createdAt.toISOString(),
+    updatedAt: entity.updatedAt.toISOString(),
+  };
+}
+
 export function toDocumentListResponse(page: ListedDocumentPage): {
-  items: DocumentDto[];
+  items: DocumentListItemDto[];
   nextCursor: string | null;
   hasMore: boolean;
   total: number | null;
 } {
   return {
     items: page.items.map(({ entity, duplicateCandidateCount, duplicateStack }) =>
-      toDocumentDto(entity, [], duplicateCandidateCount, duplicateStack)
+      toDocumentListItemDto(entity, duplicateCandidateCount, duplicateStack)
     ),
     nextCursor: page.nextCursor,
     hasMore: page.hasMore,

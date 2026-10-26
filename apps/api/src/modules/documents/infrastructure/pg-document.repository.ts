@@ -246,15 +246,24 @@ export class PgDocumentRepository implements DocumentRepository {
       }
     }
 
-    const extractions = await loadExtractionForDocuments(
-      this.pool,
-      rows.map((raw) => parseString(requireRecord(raw).id))
-    );
-    const entities = rows.map((raw) => {
-      const row = requireRecord(raw);
-      const id = parseString(row.id);
-      return this.mapRow(row, extractions.get(id) ?? { fields: [], blocks: [], images: [] });
-    });
+    const emptyExtraction: DocumentExtractionRows = { fields: [], blocks: [], images: [] };
+    let entities: DocumentEntity[];
+    if (paginated) {
+      entities = rows.map((raw) => {
+        const row = requireRecord(raw);
+        return this.mapRow(row, emptyExtraction);
+      });
+    } else {
+      const extractions = await loadExtractionForDocuments(
+        this.pool,
+        rows.map((raw) => parseString(requireRecord(raw).id))
+      );
+      entities = rows.map((raw) => {
+        const row = requireRecord(raw);
+        const id = parseString(row.id);
+        return this.mapRow(row, extractions.get(id) ?? emptyExtraction);
+      });
+    }
 
     let nextCursor: string | null = null;
     if (paginated && hasMore && rows.length > 0) {

@@ -83,6 +83,9 @@ export 'package:docuvate/src/generated/src/model/document_review_field_suggestio
 export 'package:docuvate/src/generated/src/model/document_review_queue_item_dto_class.dart';
 export 'package:docuvate/src/generated/src/model/document_review_queue_response_dto_class.dart';
 export 'package:docuvate/src/generated/src/model/document_review_queue_summary_dto_class.dart';
+export 'package:docuvate/src/generated/src/model/document_tag_suggestions_batch_item_dto.dart';
+export 'package:docuvate/src/generated/src/model/document_tag_suggestions_batch_request_dto.dart';
+export 'package:docuvate/src/generated/src/model/document_tag_suggestions_batch_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/duplicate_stack_keep_version_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/duplicate_stack_not_duplicate_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/duplicate_stack_set_primary_request_dto.dart';
@@ -148,7 +151,7 @@ export 'package:docuvate/src/generated/src/model/set_admin_user_role_request_dto
 export 'package:docuvate/src/generated/src/model/set_ml_model_lifecycle_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/sftp_ingress_create_account_body_dto.dart';
 export 'package:docuvate/src/generated/src/model/start_mail_o_auth_request_dto.dart';
-export 'package:docuvate/src/generated/src/model/tag_custom_field_list_response_dto.dart';
+export 'package:docuvate/src/generated/src/model/tag_custom_field_list_response_dto_class.dart';
 export 'package:docuvate/src/generated/src/model/tag_list_response_dto.dart';
 export 'package:docuvate/src/generated/src/model/test_paperless_connection_request_dto.dart';
 export 'package:docuvate/src/generated/src/model/test_paperless_installation_connection_request_dto.dart';

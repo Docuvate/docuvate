@@ -1222,6 +1222,7 @@
     "connectDisabledOAuth": "Noch nicht eingerichtet. Ihre Administration kann die Anmeldung aktivieren.",
     "oauthNotConfiguredShort": "Noch nicht eingerichtet",
     "oauthAdminDetailsToggle": "Technische Einrichtung",
+    "md": "Konnektoren (Architekturübersicht)",
     "oauthSetupDocLink": "Anleitung zur Anmeldung (Dokumentation)",
     "oauthSetupDocPageTitle": "Anmeldung für Mail-Verbindungen einrichten",
     "oauthSetupDocPageLead": "Schritte für Google Mail und Microsoft Outlook auf diesem Server.",
@@ -1797,6 +1798,9 @@
     "correspondentsDeleteDescription": "Der Korrespondent wird aus der Liste entfernt. Bestehende Dokument-Verknüpfungen bleiben unverändert.",
     "correspondentsNewPlaceholder": "Neuer Korrespondent",
     "noResults": "Keine Treffer."
+  },
+  "ai": {
+    "processed": "Verarbeitet"
   },
   "admin": {
     "accessDeniedToast": "Diese Seite ist Administratoren vorbehalten.",

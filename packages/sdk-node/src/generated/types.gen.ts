@@ -2519,6 +2519,23 @@ export type MoveDocumentsResponses = {
 
 export type MoveDocumentsResponse = MoveDocumentsResponses[keyof MoveDocumentsResponses];
 
+export type TagSuggestionsGetNotAllowedData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/documents/tag-suggestions';
+};
+
+export type TagSuggestionsGetNotAllowedErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    405: unknown;
+    422: ProblemDetailsDto;
+};
+
+export type TagSuggestionsGetNotAllowedError = TagSuggestionsGetNotAllowedErrors[keyof TagSuggestionsGetNotAllowedErrors];
+
 export type BatchDocumentTagSuggestionsData = {
     body: DocumentTagSuggestionsBatchRequestDto;
     path?: never;
@@ -3663,6 +3680,30 @@ export type AcceptUserInvitationError = AcceptUserInvitationErrors[keyof AcceptU
 export type AcceptUserInvitationResponses = {
     201: unknown;
 };
+
+export type GetLabelDocumentInventoryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/labels/document-inventory';
+};
+
+export type GetLabelDocumentInventoryErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type GetLabelDocumentInventoryError = GetLabelDocumentInventoryErrors[keyof GetLabelDocumentInventoryErrors];
+
+export type GetLabelDocumentInventoryResponses = {
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetLabelDocumentInventoryResponse = GetLabelDocumentInventoryResponses[keyof GetLabelDocumentInventoryResponses];
 
 export type MapData = {
     body?: never;

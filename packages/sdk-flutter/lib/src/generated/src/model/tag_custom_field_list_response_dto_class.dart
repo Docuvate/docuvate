@@ -8,38 +8,42 @@ import 'package:built_value/json_object.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
-part 'tag_custom_field_list_response_dto.g.dart';
+part 'tag_custom_field_list_response_dto_class.g.dart';
 
-/// TagCustomFieldListResponseDto
+/// TagCustomFieldListResponseDtoClass
 ///
 /// Properties:
 /// * [items] 
+/// * [suggestions] 
 @BuiltValue()
-abstract class TagCustomFieldListResponseDto implements Built<TagCustomFieldListResponseDto, TagCustomFieldListResponseDtoBuilder> {
+abstract class TagCustomFieldListResponseDtoClass implements Built<TagCustomFieldListResponseDtoClass, TagCustomFieldListResponseDtoClassBuilder> {
   @BuiltValueField(wireName: r'items')
   BuiltList<JsonObject> get items;
 
-  TagCustomFieldListResponseDto._();
+  @BuiltValueField(wireName: r'suggestions')
+  BuiltList<JsonObject>? get suggestions;
 
-  factory TagCustomFieldListResponseDto([void updates(TagCustomFieldListResponseDtoBuilder b)]) = _$TagCustomFieldListResponseDto;
+  TagCustomFieldListResponseDtoClass._();
+
+  factory TagCustomFieldListResponseDtoClass([void updates(TagCustomFieldListResponseDtoClassBuilder b)]) = _$TagCustomFieldListResponseDtoClass;
 
   @BuiltValueHook(initializeBuilder: true)
-  static void _defaults(TagCustomFieldListResponseDtoBuilder b) => b;
+  static void _defaults(TagCustomFieldListResponseDtoClassBuilder b) => b;
 
   @BuiltValueSerializer(custom: true)
-  static Serializer<TagCustomFieldListResponseDto> get serializer => _$TagCustomFieldListResponseDtoSerializer();
+  static Serializer<TagCustomFieldListResponseDtoClass> get serializer => _$TagCustomFieldListResponseDtoClassSerializer();
 }
 
-class _$TagCustomFieldListResponseDtoSerializer implements PrimitiveSerializer<TagCustomFieldListResponseDto> {
+class _$TagCustomFieldListResponseDtoClassSerializer implements PrimitiveSerializer<TagCustomFieldListResponseDtoClass> {
   @override
-  final Iterable<Type> types = const [TagCustomFieldListResponseDto, _$TagCustomFieldListResponseDto];
+  final Iterable<Type> types = const [TagCustomFieldListResponseDtoClass, _$TagCustomFieldListResponseDtoClass];
 
   @override
-  final String wireName = r'TagCustomFieldListResponseDto';
+  final String wireName = r'TagCustomFieldListResponseDtoClass';
 
   Iterable<Object?> _serializeProperties(
     Serializers serializers,
-    TagCustomFieldListResponseDto object, {
+    TagCustomFieldListResponseDtoClass object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
     yield r'items';
@@ -47,12 +51,19 @@ class _$TagCustomFieldListResponseDtoSerializer implements PrimitiveSerializer<T
       object.items,
       specifiedType: const FullType(BuiltList, [FullType(JsonObject)]),
     );
+    if (object.suggestions != null) {
+      yield r'suggestions';
+      yield serializers.serialize(
+        object.suggestions,
+        specifiedType: const FullType(BuiltList, [FullType(JsonObject)]),
+      );
+    }
   }
 
   @override
   Object serialize(
     Serializers serializers,
-    TagCustomFieldListResponseDto object, {
+    TagCustomFieldListResponseDtoClass object, {
     FullType specifiedType = FullType.unspecified,
   }) {
     return _serializeProperties(serializers, object, specifiedType: specifiedType).toList();
@@ -63,7 +74,7 @@ class _$TagCustomFieldListResponseDtoSerializer implements PrimitiveSerializer<T
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
     required List<Object?> serializedList,
-    required TagCustomFieldListResponseDtoBuilder result,
+    required TagCustomFieldListResponseDtoClassBuilder result,
     required List<Object?> unhandled,
   }) {
     for (var i = 0; i < serializedList.length; i += 2) {
@@ -77,6 +88,13 @@ class _$TagCustomFieldListResponseDtoSerializer implements PrimitiveSerializer<T
           ) as BuiltList<JsonObject>;
           result.items.replace(valueDes);
           break;
+        case r'suggestions':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(BuiltList, [FullType(JsonObject)]),
+          ) as BuiltList<JsonObject>;
+          result.suggestions.replace(valueDes);
+          break;
         default:
           unhandled.add(key);
           unhandled.add(value);
@@ -86,12 +104,12 @@ class _$TagCustomFieldListResponseDtoSerializer implements PrimitiveSerializer<T
   }
 
   @override
-  TagCustomFieldListResponseDto deserialize(
+  TagCustomFieldListResponseDtoClass deserialize(
     Serializers serializers,
     Object serialized, {
     FullType specifiedType = FullType.unspecified,
   }) {
-    final result = TagCustomFieldListResponseDtoBuilder();
+    final result = TagCustomFieldListResponseDtoClassBuilder();
     final serializedList = (serialized as Iterable<Object?>).toList();
     final unhandled = <Object?>[];
     _deserializeProperties(

@@ -10,7 +10,10 @@ export function applyUserSettingsUiPreferences(settings: UserSettingsDto): void 
   applyThemePreference(themePreference);
 
   if (settings.locale === 'de' || settings.locale === 'en') {
-    void i18n.changeLanguage(settings.locale);
     window.localStorage.setItem(LOCALE_STORAGE_KEY, settings.locale);
+    const current = i18n.resolvedLanguage?.startsWith('en') ? 'en' : 'de';
+    if (current !== settings.locale) {
+      void i18n.changeLanguage(settings.locale);
+    }
   }
 }
