@@ -74,6 +74,9 @@ export function createLibraryPageDataStub(
     hasNextPage: false,
     fetchNextPage: stubFetchNextPage,
     isFetchingNextPage: false,
+    selectionScope: 'none',
+    selectAllMatchingDocuments: async () => undefined,
+    bulkSelectedCount: 0,
     ...overrides,
   };
 }

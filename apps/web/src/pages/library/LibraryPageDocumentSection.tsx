@@ -181,8 +181,13 @@ export function LibraryPageDocumentSection({
 
         {showBulkBar ? (
           <LibraryBulkBar
-            selectedCount={data.visibleSelectedCount}
-            showIdleHint={!data.loading && data.items.length > 0 && data.visibleSelectedCount === 0}
+            selectedCount={data.bulkSelectedCount}
+            totalCount={data.totalCount}
+            selectionScope={data.selectionScope}
+            onSelectAllMatching={() => {
+              void data.selectAllMatchingDocuments();
+            }}
+            showIdleHint={!data.loading && data.items.length > 0 && data.bulkSelectedCount === 0}
             bulkBusy={data.bulkBusy}
             selectedIds={[...data.selected]}
             items={data.items}
