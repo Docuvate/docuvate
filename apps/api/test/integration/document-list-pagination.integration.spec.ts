@@ -73,4 +73,29 @@ describe('document list keyset pagination', () => {
     const page = await repo.listPageForUser(userId, { limit: DOCUMENT_LIST_DEFAULT_LIMIT });
     expect(page.entities.length).toBeLessThanOrEqual(DOCUMENT_LIST_DEFAULT_LIMIT);
   });
+
+  it('pages stably for every sort field with id tie-breaker', async () => {
+    const sorts: Array<{
+      sort: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
+      order: 'asc' | 'desc';
+    }> = [
+      { sort: 'updatedAt', order: 'desc' },
+      { sort: 'createdAt', order: 'asc' },
+      { sort: 'title', order: 'asc' },
+      { sort: 'documentDate', order: 'desc' },
+    ];
+
+    for (const { sort, order } of sorts) {
+      const first = await repo.listPageForUser(userId, { limit: 2, sort, order });
+      expect(first.entities).toHaveLength(2);
+      const second = await repo.listPageForUser(userId, {
+        limit: 2,
+        sort,
+        order,
+        cursor: first.nextCursor ?? undefined,
+      });
+      const ids = [...first.entities, ...second.entities].map((doc) => doc.id);
+      expect(new Set(ids).size).toBe(4);
+    }
+  });
 });
