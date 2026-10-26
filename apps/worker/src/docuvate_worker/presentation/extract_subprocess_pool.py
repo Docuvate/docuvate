@@ -8,11 +8,15 @@ from __future__ import annotations
 import json
 import logging
 import os
+import select
 import subprocess
 import sys
 import threading
+import time
 from dataclasses import dataclass, field
 from typing import Any
+
+from docuvate_worker.domain.extract_errors import ExtractRetryableError
 
 from docuvate_worker.infrastructure.extract_memory.child_process_diagnostics import (
     describe_child_exit,
@@ -34,7 +38,31 @@ logger = logging.getLogger(__name__)
 _ENV_POOL = "DOCUVATE_EXTRACT_POOL"
 _ENV_POOL_SIZE = "DOCUVATE_EXTRACT_POOL_SIZE"
 _ENV_RECYCLE = "DOCUVATE_EXTRACT_POOL_RECYCLE_DOCS"
+_ENV_CANCEL_GRACE = "DOCUVATE_EXTRACT_CANCEL_GRACE_SECONDS"
 _DEFAULT_RECYCLE = 40
+_DEFAULT_CANCEL_GRACE = 5.0
+_CANCEL_LINE = json.dumps({"__docuvate_op": "cancel"})
+
+
+def _cancel_grace_seconds() -> float:
+    raw = os.environ.get(_ENV_CANCEL_GRACE, str(_DEFAULT_CANCEL_GRACE))
+    try:
+        parsed = float(raw)
+    except ValueError:
+        return _DEFAULT_CANCEL_GRACE
+    return parsed if parsed > 0 else _DEFAULT_CANCEL_GRACE
+
+
+def _readline_with_timeout(stream: Any, timeout: float) -> str | None:
+    if timeout <= 0:
+        return None
+    ready, _, _ = select.select([stream], [], [], timeout)
+    if not ready:
+        return None
+    line = stream.readline()
+    if not line:
+        return None
+    return line
 
 
 class _PooledExtractChild:
@@ -44,6 +72,7 @@ class _PooledExtractChild:
         self._jobs_served = 0
         self._recycle_after = int(os.environ.get(_ENV_RECYCLE, str(_DEFAULT_RECYCLE)))
         self._intra_op_threads = intra_op_threads
+        self._cancel_requested = threading.Event()
 
     def _spawn(self) -> subprocess.Popen[str]:
         configure_onnx_runtime_env()
@@ -136,7 +165,22 @@ class _PooledExtractChild:
     def release_slot(self) -> None:
         self._lock.release()
 
+    def request_cancel(self) -> None:
+        self._cancel_requested.set()
+        proc = self._proc
+        if proc is None or proc.stdin is None:
+            return
+        try:
+            proc.stdin.write(_CANCEL_LINE + "\n")
+            proc.stdin.flush()
+        except OSError:
+            return
+
     def run_job(self, payload: dict[str, Any], *, timeout: float) -> dict[str, Any]:
+        self._cancel_requested.clear()
+        from docuvate_worker.presentation.extract_active import attach_pool_child_to_active  # noqa: PLC0415
+
+        attach_pool_child_to_active(self)
         with self._lock:
             if self._proc is not None and self._proc.poll() is not None:
                 self._close(reason="exited_before_job")
@@ -165,7 +209,26 @@ class _PooledExtractChild:
                 self._log_exit(proc, "broken_pipe_on_write")
                 self._close(reason="broken_pipe_on_write")
                 raise RuntimeError("extract pool child stdin broken (pipe EOF)") from None
-            raw_out = stdout.readline()
+            deadline = time.monotonic() + timeout
+            remaining = max(0.0, deadline - time.monotonic())
+            raw_out = _readline_with_timeout(stdout, remaining)
+            if raw_out is None and (
+                self._cancel_requested.is_set() or time.monotonic() >= deadline
+            ):
+                self.request_cancel()
+                grace = _cancel_grace_seconds()
+                raw_out = _readline_with_timeout(stdout, grace)
+            if raw_out is None:
+                reason = (
+                    "client disconnected"
+                    if self._cancel_requested.is_set()
+                    else "extract deadline exceeded"
+                )
+                self._close(reason="deadline_exceeded")
+                raise ExtractRetryableError(
+                    reason=reason,
+                    error_type="ExtractDeadlineExceeded",
+                )
             self._jobs_served += 1
             exit_after = proc.poll()
             if exit_after is not None:

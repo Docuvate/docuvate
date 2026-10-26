@@ -905,6 +905,9 @@
     "extractionFailedDetail": "Die automatische Textextraktion ist fehlgeschlagen. Die PDF ist gespeichert, der Inhalt konnte nicht zuverlässig gelesen werden.",
     "extractionFailedWorker": "Der Verarbeitungsdienst konnte den Text nicht extrahieren. Sie können es erneut versuchen oder in den Einstellungen ein anderes Verfahren wählen.",
     "extractionFailedTechnicalToggle": "Technische Details",
+    "errors": {
+      "extractionDeadlineExceeded": "Die Texterkennung hat zu lange gedauert und wurde abgebrochen. Sie können es erneut versuchen; sehr große Dokumente benötigen eventuell ein höheres Zeitlimit auf dem Worker."
+    },
     "extractionPleaseWait": "Bitte kurz warten…",
     "extractionSettingsLink": "Texterkennung in Einstellungen",
     "reprocess": "Erneut verarbeiten",

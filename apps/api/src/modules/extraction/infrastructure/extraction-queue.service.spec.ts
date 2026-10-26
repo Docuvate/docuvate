@@ -24,3 +24,16 @@ describe('isPermanentExtractionFailureMessage', () => {
     expect(isPermanentExtractionFailureMessage('Worker extraction unavailable: 503')).toBe(false);
   });
 });
+
+describe('isRetryableExtractionFailureMessage', () => {
+  it('retries worker extract deadline failures', async () => {
+    const { isRetryableExtractionFailureMessage } = await import(
+      '../domain/extraction-queue-failures.js'
+    );
+    expect(
+      isRetryableExtractionFailureMessage(
+        'Worker extraction deadline: 503 ExtractDeadlineExceeded extract deadline exceeded'
+      )
+    ).toBe(true);
+  });
+});

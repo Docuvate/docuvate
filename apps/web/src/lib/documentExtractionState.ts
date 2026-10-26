@@ -23,6 +23,10 @@ export interface ExtractionFailurePresentation {
 
 const WORKER_HTTP_FAILURE = /^Worker extraction failed: (\d{3})$/;
 
+function looksLikeI18nKey(reason: string): boolean {
+  return /^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+$/i.test(reason);
+}
+
 function looksLikeInternalError(reason: string): boolean {
   if (WORKER_HTTP_FAILURE.test(reason)) {
     return true;
@@ -43,6 +47,12 @@ export function presentExtractionFailure(
   if (!trimmed) {
     return {
       userMessage: i18n.t('documents.extractionFailedDetail'),
+      technicalDetail: null,
+    };
+  }
+  if (looksLikeI18nKey(trimmed) && i18n.exists(trimmed)) {
+    return {
+      userMessage: i18n.t(trimmed),
       technicalDetail: null,
     };
   }

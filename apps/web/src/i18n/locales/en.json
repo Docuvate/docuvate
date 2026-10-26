@@ -905,6 +905,9 @@
     "extractionFailedDetail": "Automatic text extraction failed. The file is saved, but the content could not be read reliably.",
     "extractionFailedWorker": "The processing service could not extract text from this document. You can retry or choose another method in Settings.",
     "extractionFailedTechnicalToggle": "Technical details",
+    "errors": {
+      "extractionDeadlineExceeded": "Text extraction took too long and was stopped. You can retry; very large documents may need a longer limit on the worker."
+    },
     "extractionPleaseWait": "Please wait a moment…",
     "extractionSettingsLink": "Text recognition in Settings",
     "reprocess": "Retry processing",

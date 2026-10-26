@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
+import asyncio
 import base64
 import os
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 
 from docuvate_worker.application.document_chat import (
     DocumentChatError,
@@ -65,6 +66,7 @@ from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (
 )
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.extract_active import cancel_active_extract
 from docuvate_worker.presentation.extract_http_concurrency import extract_http_slot
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
@@ -211,7 +213,8 @@ def hardware_capabilities(
 
 
 @router.post("/extract", response_model=ExtractResponse)
-def extract(
+async def extract(
+    request: Request,
     body: ExtractRequest,
     x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
 ) -> ExtractResponse:
@@ -229,18 +232,37 @@ def extract(
         )
     try:
         with extract_http_slot():
-            result = run_extract_isolated(
-                content=raw,
-                mime_type=body.mime_type,
-                engine=body.engine,
-                embedding_density_state=density_state,
-                build_exact_fact_index=body.build_exact_fact_index,
+            loop = asyncio.get_running_loop()
+            future = loop.run_in_executor(
+                None,
+                lambda: run_extract_isolated(
+                    content=raw,
+                    mime_type=body.mime_type,
+                    engine=body.engine,
+                    embedding_density_state=density_state,
+                    build_exact_fact_index=body.build_exact_fact_index,
+                ),
             )
+            while not future.done():
+                if await request.is_disconnected():
+                    cancel_active_extract()
+                    raise ExtractRetryableError(
+                        reason="client disconnected",
+                        error_type="ExtractClientDisconnected",
+                    )
+                await asyncio.sleep(0.25)
+            result = future.result()
     except ExtractRetryableError as exc:
+        if exc.error_type == "ExtractDeadlineExceeded":
+            error_code = "extract_deadline_exceeded"
+        elif exc.error_type == "ExtractClientDisconnected":
+            error_code = "extract_client_disconnected"
+        else:
+            error_code = "extract_resource_busy"
         raise HTTPException(
             status_code=503,
             detail={
-                "errorCode": "extract_resource_busy",
+                "errorCode": error_code,
                 "errorType": exc.error_type,
                 "reason": exc.reason,
             },

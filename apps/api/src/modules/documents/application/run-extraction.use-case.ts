@@ -17,6 +17,7 @@ import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/appli
 import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { PersistDocumentFactsUseCase } from '../../exact-facts/application/persist-document-facts.use-case.js';
 import { extractionStaleClaimSeconds } from '../../extraction/domain/extraction-queue.config.js';
+import { isRetryableExtractionFailureMessage } from '../../extraction/domain/extraction-queue-failures.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
 import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
@@ -118,13 +119,7 @@ export class RunExtractionUseCase {
       await this.documents.updateStatus(documentId, 'ready');
     } catch (error: unknown) {
       const failureReason = error instanceof Error ? error.message : String(error);
-      const retryable =
-        failureReason.includes('document extraction already in progress') ||
-        failureReason.includes('fetch failed') ||
-        failureReason.includes('Worker extraction unavailable') ||
-        failureReason.includes('Worker extraction failed: 503') ||
-        failureReason.includes('ECONNREFUSED') ||
-        failureReason.includes('ECONNRESET');
+      const retryable = isRetryableExtractionFailureMessage(failureReason);
       if (!retryable) {
         const contentHash =
           (await this.documents.findById(documentId))?.contentHash ?? doc.contentHash ?? null;

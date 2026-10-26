@@ -26,6 +26,13 @@ import {
   workerCompareTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
+import { extractionWorkerFetchTimeoutMs } from '../domain/extraction-deadline.config.js';
+import {
+  isWorkerExtractDeadlineResponse,
+  parseWorkerExtractErrorBody,
+  WorkerExtractDeadlineError,
+  workerExtractDeadlineFailureMessage,
+} from '../domain/extraction-worker-errors.js';
 import { parseExtractedFacts } from '../../exact-facts/infrastructure/parse-extracted-facts.js';
 import {
   parseWorkerRetryAfterSeconds,
@@ -380,14 +387,30 @@ export class HttpExtractionAdapter implements ExtractionPort {
     });
     const maxAttempts = 5;
     let lastError: Error | null = null;
+    const fetchTimeoutMs = extractionWorkerFetchTimeoutMs();
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
         const response = await fetch(url, {
           method: 'POST',
           headers: this.workerHeaders(),
           body,
+          signal: AbortSignal.timeout(fetchTimeoutMs),
         });
         if (response.status === 502 || response.status === 503 || response.status === 504) {
+          let errorBody: ReturnType<typeof parseWorkerExtractErrorBody> = null;
+          try {
+            errorBody = parseWorkerExtractErrorBody(await response.json());
+          } catch {
+            errorBody = null;
+          }
+          if (isWorkerExtractDeadlineResponse(response.status, errorBody)) {
+            throw new WorkerExtractDeadlineError(
+              workerExtractDeadlineFailureMessage({
+                errorType: errorBody?.errorType ?? 'ExtractDeadlineExceeded',
+                reason: errorBody?.reason ?? 'extract deadline exceeded',
+              })
+            );
+          }
           if (response.status === 503) {
             this.extractCapacity.onWorkerPressure503(
               parseWorkerRetryAfterSeconds(response.headers.get('retry-after'))
@@ -406,10 +429,14 @@ export class HttpExtractionAdapter implements ExtractionPort {
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
         const retryable =
+          error instanceof WorkerExtractDeadlineError ||
           message.includes('fetch failed') ||
           message.includes('Worker extraction unavailable') ||
+          message.includes('Worker extraction deadline') ||
           message.includes('ECONNREFUSED') ||
-          message.includes('ECONNRESET');
+          message.includes('ECONNRESET') ||
+          message.includes('TimeoutError') ||
+          message.includes('aborted');
         lastError = error instanceof Error ? error : new Error(message);
         if (!retryable || attempt >= maxAttempts) {
           throw lastError;

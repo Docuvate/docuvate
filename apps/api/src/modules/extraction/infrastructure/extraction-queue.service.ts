@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue, UnrecoverableError, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
@@ -16,8 +16,10 @@ import {
   createValkeyConnection,
   waitForValkeyReady,
 } from '../../../shared/infrastructure/valkey/valkey-connection.js';
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
+import { EXTRACTION_DEADLINE_FAILURE_I18N_KEY, extractionDeadlineMaxRetries } from '../domain/extraction-deadline.config.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
   documentExtractionConcurrency,
@@ -27,6 +29,7 @@ import {
   extractionQueueStalledIntervalMs,
 } from '../domain/extraction-queue.config.js';
 import { isPermanentExtractionFailureMessage } from '../domain/extraction-queue-failures.js';
+import { isWorkerExtractDeadlineFailureMessage } from '../domain/extraction-worker-errors.js';
 import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
 
 function parseExtractionJobDocumentId(data: unknown): string {
@@ -52,7 +55,8 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     private readonly runExtraction: RunExtractionUseCase,
     private readonly runArenaSample: RunArenaSampleCompareUseCase,
     private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
-    private readonly extractCapacity: WorkerExtractCapacityCoordinator
+    private readonly extractCapacity: WorkerExtractCapacityCoordinator,
+    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -77,6 +81,15 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
             if (isPermanentExtractionFailureMessage(message)) {
+              throw new UnrecoverableError(message);
+            }
+            if (
+              isWorkerExtractDeadlineFailureMessage(message) &&
+              job.attemptsMade + 1 >= extractionDeadlineMaxRetries()
+            ) {
+              await this.documents.updateStatus(documentId, 'failed', {
+                failureReason: EXTRACTION_DEADLINE_FAILURE_I18N_KEY,
+              });
               throw new UnrecoverableError(message);
             }
             throw error;

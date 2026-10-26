@@ -17,4 +17,11 @@ describe('presentExtractionFailure', () => {
     expect(result.technicalDetail).toBeNull();
     expect(result.userMessage.length).toBeGreaterThan(10);
   });
+
+  it('translates stored i18n failure keys', () => {
+    const result = presentExtractionFailure('documents.errors.extractionDeadlineExceeded');
+    expect(result.userMessage).not.toBe('documents.errors.extractionDeadlineExceeded');
+    expect(result.userMessage.toLowerCase()).toContain('long');
+    expect(result.technicalDetail).toBeNull();
+  });
 });
