@@ -96,7 +96,7 @@ describe('normalized junction tables (Testcontainers Postgres)', () => {
 
   it('stores correction labels and arena engines', async () => {
     const feedback = new PgExtractionFieldFeedbackRepository(pool);
-    await feedback.insertMany(userId, [
+    await feedback.insertCorrectionsIdempotent(userId, [
       {
         documentId,
         fieldKey: 'global:betrag',

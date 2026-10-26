@@ -53,7 +53,7 @@ const LIST_SQL = `
 export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedbackRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
-  async insertMany(
+  async insertCorrectionsIdempotent(
     userId: string,
     rows: {
       documentId: string;
@@ -68,6 +68,7 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
       return 0;
     }
     const client = await this.pool.connect();
+    let insertedCount = 0;
     try {
       await client.query('BEGIN');
       for (const row of rows) {
@@ -75,13 +76,15 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
           `INSERT INTO extraction_field_corrections (
              user_id, document_id, field_key, old_value, new_value, field_tag_id, source
            ) VALUES ($1, $2, $3, $4, $5, $6, 'user_correction')
+           ON CONFLICT (user_id, document_id, field_key, old_value, new_value) DO NOTHING
            RETURNING id`,
           [userId, row.documentId, row.fieldKey, row.oldValue, row.newValue, row.fieldTagId]
         );
         const correctionId = inserted.rows[0]?.id;
         if (!correctionId) {
-          throw new Error('extraction_field_corrections insert missing id');
+          continue;
         }
+        insertedCount += 1;
         if (row.labelTagIds.length > 0) {
           await client.query(
             `INSERT INTO extraction_field_correction_labels (correction_id, tag_id)
@@ -93,7 +96,57 @@ export class PgExtractionFieldFeedbackRepository implements ExtractionFieldFeedb
         }
       }
       await client.query('COMMIT');
-      return rows.length;
+      return insertedCount;
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async upsertConfirmations(
+    userId: string,
+    rows: {
+      documentId: string;
+      fieldKey: string;
+      labelTagIds: string[];
+      fieldTagId: string | null;
+    }[]
+  ): Promise<number> {
+    if (rows.length === 0) {
+      return 0;
+    }
+    const client = await this.pool.connect();
+    let upsertedCount = 0;
+    try {
+      await client.query('BEGIN');
+      for (const row of rows) {
+        const inserted = await client.query<{ id: string }>(
+          `INSERT INTO extraction_field_confirmations (
+             user_id, document_id, field_key, field_tag_id
+           ) VALUES ($1, $2, $3, $4)
+           ON CONFLICT (user_id, document_id, field_key) DO NOTHING
+           RETURNING id`,
+          [userId, row.documentId, row.fieldKey, row.fieldTagId]
+        );
+        const confirmationId = inserted.rows[0]?.id;
+        if (!confirmationId) {
+          continue;
+        }
+        upsertedCount += 1;
+        if (row.labelTagIds.length > 0) {
+          await client.query(
+            `INSERT INTO extraction_field_confirmation_labels (confirmation_id, tag_id)
+             SELECT $1, t.id FROM tags t
+             WHERE t.user_id = $2 AND t.id::text = ANY($3::text[])
+             ON CONFLICT DO NOTHING`,
+            [confirmationId, userId, row.labelTagIds]
+          );
+        }
+      }
+      await client.query('COMMIT');
+      return upsertedCount;
     } catch (error) {
       await client.query('ROLLBACK');
       throw error;

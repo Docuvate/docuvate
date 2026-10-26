@@ -707,6 +707,8 @@ export interface UpdateDocumentResponse {
   document: DocumentDto;
   /** Count of field-value corrections persisted as extraction training feedback. */
   fieldCorrectionsRecorded?: number;
+  /** Count of newly recorded field confirmations (confidence-only, idempotent per field). */
+  fieldConfirmationsRecorded?: number;
 }
 
 /** Export / pipeline consumption of user field corrections. */

@@ -50,6 +50,11 @@ describe('migration baseline (existing schema, empty migration history)', () => 
       await runner.query('DROP TABLE IF EXISTS installation_password_policy CASCADE');
       await runner.query('DROP TABLE IF EXISTS document_extraction_images CASCADE');
       await runner.query('DROP TABLE IF EXISTS installation_oidc_provider CASCADE');
+      await runner.query('DROP TABLE IF EXISTS extraction_field_confirmation_labels CASCADE');
+      await runner.query('DROP TABLE IF EXISTS extraction_field_confirmations CASCADE');
+      await runner.query(
+        'DROP INDEX IF EXISTS public.extraction_field_corrections_exact_dedupe_uidx'
+      );
 
       await ensureMigrationBaseline(dataSource);
 

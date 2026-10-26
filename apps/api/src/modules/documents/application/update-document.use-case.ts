@@ -22,6 +22,7 @@ import { mergeDocumentPlacementPatch } from '../domain/document-placement.js';
 export interface UpdateDocumentResult {
   document: DocumentEntity;
   fieldCorrectionsRecorded: number;
+  fieldConfirmationsRecorded: number;
 }
 
 @Injectable()
@@ -75,13 +76,16 @@ export class UpdateDocumentUseCase {
 
     const previousFields = existing.extraction?.fields ?? [];
     let fieldCorrectionsRecorded = 0;
+    let fieldConfirmationsRecorded = 0;
     if (body.extractionFields !== undefined) {
-      fieldCorrectionsRecorded = await this.recordFieldCorrections.execute(
+      const feedback = await this.recordFieldCorrections.execute(
         id,
         userId,
         previousFields,
         body.extractionFields
       );
+      fieldCorrectionsRecorded = feedback.correctionsRecorded;
+      fieldConfirmationsRecorded = feedback.confirmationsRecorded;
       if (fieldCorrectionsRecorded > 0) {
         const changedKeys = [
           ...new Set(
@@ -120,6 +124,6 @@ export class UpdateDocumentUseCase {
       });
     }
 
-    return { document, fieldCorrectionsRecorded };
+    return { document, fieldCorrectionsRecorded, fieldConfirmationsRecorded };
   }
 }

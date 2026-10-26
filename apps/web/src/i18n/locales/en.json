@@ -1739,7 +1739,9 @@
     "saveCorrections": "Save corrections",
     "noCorrections": "No changes.",
     "feedbackSaved_one": "1 correction saved as training feedback.",
-    "feedbackSaved_other": "{{count}} corrections saved as training feedback."
+    "feedbackSaved_other": "{{count}} corrections saved as training feedback.",
+    "feedbackConfirmationsSaved_one": "1 confirmation saved as training feedback.",
+    "feedbackConfirmationsSaved_other": "{{count}} confirmations saved as training feedback."
   },
   "labelSpace": {
     "title": "Label space",

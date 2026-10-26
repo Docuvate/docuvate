@@ -12,7 +12,13 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
+import { diffExtractionFieldConfirmations } from '../domain/diff-extraction-field-confirmations.js';
 import { diffExtractionFieldCorrections } from '../domain/diff-extraction-field-corrections.js';
+
+export interface RecordExtractionFieldFeedbackResult {
+  correctionsRecorded: number;
+  confirmationsRecorded: number;
+}
 
 @Injectable()
 export class RecordExtractionFieldCorrectionsUseCase {
@@ -28,10 +34,11 @@ export class RecordExtractionFieldCorrectionsUseCase {
     userId: string,
     previousFields: ExtractedField[],
     nextFields: ExtractedField[]
-  ): Promise<number> {
-    const drafts = diffExtractionFieldCorrections(previousFields, nextFields);
-    if (drafts.length === 0) {
-      return 0;
+  ): Promise<RecordExtractionFieldFeedbackResult> {
+    const correctionDrafts = diffExtractionFieldCorrections(previousFields, nextFields);
+    const confirmationDrafts = diffExtractionFieldConfirmations(previousFields, nextFields);
+    if (correctionDrafts.length === 0 && confirmationDrafts.length === 0) {
+      return { correctionsRecorded: 0, confirmationsRecorded: 0 };
     }
 
     const doc = await this.documents.findByIdForUser(documentId, userId);
@@ -42,16 +49,34 @@ export class RecordExtractionFieldCorrectionsUseCase {
     const assignedTags = await this.taxonomy.listTagsForDocument(documentId);
     const labelTagIds = assignedTags.map((t) => t.id);
 
-    return this.feedback.insertMany(
-      userId,
-      drafts.map((draft) => ({
-        documentId,
-        fieldKey: draft.fieldKey,
-        oldValue: draft.oldValue,
-        newValue: draft.newValue,
-        labelTagIds,
-        fieldTagId: draft.fieldTagId,
-      }))
-    );
+    const correctionsRecorded =
+      correctionDrafts.length === 0
+        ? 0
+        : await this.feedback.insertCorrectionsIdempotent(
+            userId,
+            correctionDrafts.map((draft) => ({
+              documentId,
+              fieldKey: draft.fieldKey,
+              oldValue: draft.oldValue,
+              newValue: draft.newValue,
+              labelTagIds,
+              fieldTagId: draft.fieldTagId,
+            }))
+          );
+
+    const confirmationsRecorded =
+      confirmationDrafts.length === 0
+        ? 0
+        : await this.feedback.upsertConfirmations(
+            userId,
+            confirmationDrafts.map((draft) => ({
+              documentId,
+              fieldKey: draft.fieldKey,
+              labelTagIds,
+              fieldTagId: draft.fieldTagId,
+            }))
+          );
+
+    return { correctionsRecorded, confirmationsRecorded };
   }
 }

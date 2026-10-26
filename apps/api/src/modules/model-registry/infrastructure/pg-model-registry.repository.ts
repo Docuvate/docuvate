@@ -310,9 +310,15 @@ export class PgModelRegistryRepository implements ModelRegistryRepository {
   async countCorrectionsSince(since: Date | null): Promise<number> {
     const result =
       since === null
-        ? await this.pool.query(`SELECT COUNT(*)::int AS c FROM extraction_field_corrections`)
+        ? await this.pool.query(
+            `SELECT COUNT(DISTINCT (document_id, field_key, new_value))::int AS c
+             FROM extraction_field_corrections
+             WHERE btrim(old_value) <> btrim(new_value)`
+          )
         : await this.pool.query(
-            `SELECT COUNT(*)::int AS c FROM extraction_field_corrections WHERE created_at > $1`,
+            `SELECT COUNT(DISTINCT (document_id, field_key, new_value))::int AS c
+             FROM extraction_field_corrections
+             WHERE created_at > $1 AND btrim(old_value) <> btrim(new_value)`,
             [since]
           );
     const row = requireRecord(result.rows[0]);

@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ExtractedField } from '@docuvate/contracts';
 
+import { fieldsByCorrectionSlot } from './correction-diff-slots.js';
+import { extractionFieldValuesEquivalent } from './extraction-field-value-equivalence.js';
+
 export interface ExtractionFieldCorrectionDraft {
   fieldKey: string;
   oldValue: string;
@@ -13,26 +16,27 @@ function normalizeValue(value: string | undefined): string {
   return (value ?? '').trim();
 }
 
-/** Emits one draft per field key whose trimmed value changed. */
+/** Emits one draft per semantic field slot whose normalized value changed. */
 export function diffExtractionFieldCorrections(
   before: ExtractedField[],
   after: ExtractedField[]
 ): ExtractionFieldCorrectionDraft[] {
-  const beforeByKey = new Map(before.map((row) => [row.key, row]));
-  const afterByKey = new Map(after.map((row) => [row.key, row]));
-  const keys = new Set([...beforeByKey.keys(), ...afterByKey.keys()]);
+  const beforeBySlot = fieldsByCorrectionSlot(before);
+  const afterBySlot = fieldsByCorrectionSlot(after);
+  const slots = new Set([...beforeBySlot.keys(), ...afterBySlot.keys()]);
   const drafts: ExtractionFieldCorrectionDraft[] = [];
 
-  for (const key of keys) {
-    const prev = beforeByKey.get(key);
-    const next = afterByKey.get(key);
+  for (const slot of slots) {
+    const prev = beforeBySlot.get(slot);
+    const next = afterBySlot.get(slot);
+    const fieldKey = next?.key ?? prev?.key ?? slot;
     const oldValue = normalizeValue(prev?.value);
     const newValue = normalizeValue(next?.value);
-    if (oldValue === newValue) {
+    if (extractionFieldValuesEquivalent(fieldKey, oldValue, newValue)) {
       continue;
     }
     drafts.push({
-      fieldKey: key,
+      fieldKey,
       oldValue,
       newValue,
       fieldTagId: next?.tagId ?? prev?.tagId ?? null,
