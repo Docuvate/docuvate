@@ -75,10 +75,10 @@ describe('document list keyset pagination', () => {
   });
 
   it('pages stably for every sort field with id tie-breaker', async () => {
-    const sorts: Array<{
+    const sorts: {
       sort: 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
       order: 'asc' | 'desc';
-    }> = [
+    }[] = [
       { sort: 'updatedAt', order: 'desc' },
       { sort: 'createdAt', order: 'asc' },
       { sort: 'title', order: 'asc' },

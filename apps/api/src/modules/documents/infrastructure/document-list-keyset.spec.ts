@@ -40,4 +40,22 @@ describe('document list keyset', () => {
   it('resolves default sort', () => {
     expect(resolvedDocumentListSort({})).toEqual({ sortField: 'updatedAt', order: 'desc' });
   });
+
+  it('builds documentDate keyset when cursor date is null', () => {
+    const { conditionSql, params } = buildDocumentListKeysetSql(
+      'documentDate',
+      'desc',
+      {
+        v: 1,
+        sort: 'documentDate',
+        order: 'desc',
+        id: '00000000-0000-4000-8000-000000000099',
+        documentDate: null,
+      },
+      2
+    );
+    expect(conditionSql).toContain('$2');
+    expect(conditionSql).not.toContain('$3');
+    expect(params).toEqual(['00000000-0000-4000-8000-000000000099']);
+  });
 });
