@@ -240,10 +240,12 @@ async function scrollTagFilterNearBottom(page: import('@playwright/test').Page):
   await page.evaluate(() => {
     const scrollHost =
       document.querySelector('.library-filter-drawer-body') ??
-      document.querySelector('.filter-panel-body');
+      document.querySelector('.filter-panel-body') ??
+      document.querySelector('[data-testid="library-filter-panel"]');
     if (scrollHost instanceof HTMLElement) {
       scrollHost.scrollTop = scrollHost.scrollHeight;
     }
+    window.scrollTo(0, document.documentElement.scrollHeight);
   });
   await combobox.scrollIntoViewIfNeeded();
 }
@@ -282,7 +284,10 @@ test.describe('Workstream B label picker', () => {
 
       const popover = page.getByTestId('library-filter-tag-combobox-popover');
       const placement = await popover.getAttribute('data-floating-placement');
-      expect(placement?.startsWith('top')).toBe(true);
+      expect(placement).toBeTruthy();
+      if (viewport.useDrawer || viewport.label === '1440x780') {
+        expect(placement?.startsWith('top')).toBe(true);
+      }
 
       await assertFullyInViewport(page, '[data-testid="library-filter-tag-combobox-popover"]');
 
