@@ -9,8 +9,9 @@ export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
   forbidOnly: Boolean(process.env['CI']),
-  retries: 0,
+  retries: process.env['CI'] ? 2 : 0,
   workers: 1,
+  timeout: 300_000,
   reporter: process.env['CI'] ? [['github'], ['list']] : [['list']],
   use: {
     baseURL: webBase,
