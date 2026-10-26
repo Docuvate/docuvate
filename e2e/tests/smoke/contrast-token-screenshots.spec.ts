@@ -3,7 +3,16 @@ import path from 'node:path';
 
 import { expect, test } from '@playwright/test';
 
-import { setTheme } from '../../helpers/ce-ui-audit';
+import {
+  applyContrastLocale,
+  applyContrastTheme,
+  assertContrastTheme,
+  resolveSmokeReadyDocumentPath,
+  routePathForSlug,
+  waitForContrastPageReady,
+  type ContrastLocale,
+  type ContrastTheme,
+} from '../../helpers/contrast-screenshot';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -20,28 +29,33 @@ function viewportsForRun(): typeof ALL_VIEWPORTS | typeof REVIEW_VIEWPORTS {
   return process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1' ? REVIEW_VIEWPORTS : ALL_VIEWPORTS;
 }
 
-const THEMES = ['light', 'dark'] as const;
+const THEMES: ContrastTheme[] = ['light', 'dark'];
 
-const AUTHENTICATED_CAPTURES: { path: string; slug: string }[] = [
-  { path: '/', slug: 'dashboard' },
-  { path: '/documents', slug: 'documents' },
-  { path: '/settings', slug: 'settings' },
-  { path: '/structure/labels', slug: 'labels' },
-  { path: '/settings/connectors', slug: 'connectors' },
-  { path: '/filesystem', slug: 'filesystem' },
+const AUTHENTICATED_CAPTURES: { slug: string; locale: ContrastLocale }[] = [
+  { slug: 'dashboard', locale: 'en' },
+  { slug: 'documents', locale: 'en' },
+  { slug: 'documents-de', locale: 'de' },
+  { slug: 'settings', locale: 'en' },
+  { slug: 'labels', locale: 'en' },
+  { slug: 'connectors', locale: 'en' },
+  { slug: 'filesystem', locale: 'en' },
+  { slug: 'document-detail', locale: 'en' },
+  { slug: 'document-detail-de', locale: 'de' },
 ];
 
 const REVIEW_CAPTURE_SLUGS = new Set([
   'documents',
+  'documents-de',
   'labels',
   'connectors',
   'filesystem',
   'document-detail',
+  'document-detail-de',
 ]);
 
-function authenticatedCapturesForRun(): { path: string; slug: string }[] {
+function capturesForRun(): { slug: string; locale: ContrastLocale }[] {
   if (process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1') {
-    return AUTHENTICATED_CAPTURES.filter((route) => REVIEW_CAPTURE_SLUGS.has(route.slug));
+    return AUTHENTICATED_CAPTURES.filter((row) => REVIEW_CAPTURE_SLUGS.has(row.slug));
   }
   return AUTHENTICATED_CAPTURES;
 }
@@ -52,6 +66,7 @@ type ManifestEntry = {
   theme: string;
   width: string;
   slug: string;
+  locale: ContrastLocale;
 };
 
 function artifactBase(): string {
@@ -98,43 +113,39 @@ test.describe('Contrast workstream screenshots', () => {
     }
   });
 
-  async function capturePage(
+  async function captureShot(
     page: import('@playwright/test').Page,
     slug: string,
-    theme: 'light' | 'dark',
-    viewportLabel: string
+    locale: ContrastLocale,
+    theme: ContrastTheme,
+    viewportLabel: string,
+    documentDetailPath: string
   ): Promise<string> {
-    await setTheme(page, theme);
+    const routePath = routePathForSlug(slug, documentDetailPath);
+
+    await page.goto(`${webOrigin}/`, { waitUntil: 'domcontentloaded' });
+    await applyContrastLocale(page, locale);
+    await applyContrastTheme(page, theme);
+
+    await page.goto(`${webOrigin}${routePath}`, { waitUntil: 'domcontentloaded' });
+    await waitForContrastPageReady(page, slug, documentDetailPath, webOrigin);
+    await applyContrastTheme(page, theme);
+    await assertContrastTheme(page, theme);
+
     const dir = path.join(artifactRoot(), theme, viewportLabel);
     await fs.mkdir(dir, { recursive: true });
     const filePath = path.join(dir, `${slug}.png`);
     await page.screenshot({ path: filePath, fullPage: false });
+
     manifest.push({
       file: filePath,
       phase,
       theme,
       width: viewportLabel,
       slug,
+      locale,
     });
     return filePath;
-  }
-
-  async function captureRoute(
-    page: import('@playwright/test').Page,
-    routePath: string,
-    slug: string,
-    theme: 'light' | 'dark',
-    viewportLabel: string
-  ): Promise<string> {
-    await page.goto(`${webOrigin}${routePath}`, { waitUntil: 'domcontentloaded' });
-    await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
-    if (slug === 'document-detail') {
-      const pdfToolbar = page.locator('.pdf-viewer-toolbar');
-      if ((await pdfToolbar.count()) > 0) {
-        await pdfToolbar.first().waitFor({ state: 'visible', timeout: 60_000 });
-      }
-    }
-    return capturePage(page, slug, theme, viewportLabel);
   }
 
   test('login (public)', async ({ page }) => {
@@ -147,7 +158,19 @@ test.describe('Contrast workstream screenshots', () => {
       for (const theme of THEMES) {
         await page.goto(`${webOrigin}/login`);
         await page.waitForLoadState('networkidle');
-        const filePath = await capturePage(page, 'login', theme, viewport.label);
+        await applyContrastTheme(page, theme);
+        const dir = path.join(artifactRoot(), theme, viewport.label);
+        await fs.mkdir(dir, { recursive: true });
+        const filePath = path.join(dir, 'login.png');
+        await page.screenshot({ path: filePath, fullPage: false });
+        manifest.push({
+          file: filePath,
+          phase,
+          theme,
+          width: viewport.label,
+          slug: 'login',
+          locale: 'en',
+        });
         expect(filePath).toBeTruthy();
       }
     }
@@ -156,63 +179,70 @@ test.describe('Contrast workstream screenshots', () => {
   test.describe('authenticated routes', () => {
     test.use({ storageState: smokeFixtureStoragePath() });
 
-    let documentDetailPath = '/documents';
-
-    test.beforeAll(async ({ request }) => {
-      const health = await request.get(`${apiBase}/health`);
-      if (!health.ok()) {
-        return;
-      }
-      const list = await request.get(`${apiBase}/api/v1/documents?limit=1`);
-      if (list.ok()) {
-        const body: { items?: { id?: string }[] } = await list.json();
-        const id = body.items?.[0]?.id;
-        if (id) {
-          documentDetailPath = `/documents/${id}`;
-        }
-      }
-    });
-
     test('core routes and contrast states', async ({ page, request }) => {
-      test.setTimeout(180_000);
+      test.setTimeout(300_000);
       const health = await request.get(`${apiBase}/health`);
       test.skip(!health.ok(), 'compose API not running');
 
+      const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
       const reviewOnly = process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1';
-      const routes = [
-        ...authenticatedCapturesForRun(),
-        { path: documentDetailPath, slug: 'document-detail' },
-      ];
+      const captures = capturesForRun();
 
       for (const viewport of viewportsForRun()) {
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
-        for (const theme of THEMES) {
-          for (const route of routes) {
-            const filePath = await captureRoute(page, route.path, route.slug, theme, viewport.label);
+        for (const capture of captures) {
+          for (const theme of THEMES) {
+            const filePath = await captureShot(
+              page,
+              capture.slug,
+              capture.locale,
+              theme,
+              viewport.label,
+              documentDetailPath
+            );
             expect(filePath).toBeTruthy();
           }
+        }
 
-          if (reviewOnly) {
-            continue;
-          }
+        if (reviewOnly) {
+          continue;
+        }
 
+        for (const theme of THEMES) {
           await page.goto(`${webOrigin}/structure/labels`, { waitUntil: 'domcontentloaded' });
-          await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
-          await setTheme(page, theme);
+          await waitForContrastPageReady(page, 'labels', documentDetailPath);
+          await applyContrastTheme(page, theme);
           const errorLine = page.locator('p.error').first();
           if ((await errorLine.count()) > 0) {
             await errorLine.scrollIntoViewIfNeeded();
           }
-          const errorPath = await capturePage(page, 'labels-error', theme, viewport.label);
-          expect(errorPath).toBeTruthy();
+          const errorPath = path.join(artifactRoot(), theme, viewport.label, 'labels-error.png');
+          await page.screenshot({ path: errorPath, fullPage: false });
+          manifest.push({
+            file: errorPath,
+            phase,
+            theme,
+            width: viewport.label,
+            slug: 'labels-error',
+            locale: 'en',
+          });
 
           await page.goto(`${webOrigin}/docs/styles`);
           await page.waitForLoadState('domcontentloaded');
           const dangerItem = page.locator('.styles-menu-demo .menu-item-danger').first();
           await dangerItem.waitFor({ state: 'visible', timeout: 60_000 });
           await dangerItem.scrollIntoViewIfNeeded();
-          const dangerPath = await capturePage(page, 'danger-menu', theme, viewport.label);
-          expect(dangerPath).toBeTruthy();
+          await applyContrastTheme(page, theme);
+          const dangerPath = path.join(artifactRoot(), theme, viewport.label, 'danger-menu.png');
+          await page.screenshot({ path: dangerPath, fullPage: false });
+          manifest.push({
+            file: dangerPath,
+            phase,
+            theme,
+            width: viewport.label,
+            slug: 'danger-menu',
+            locale: 'en',
+          });
         }
       }
     });

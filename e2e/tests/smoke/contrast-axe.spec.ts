@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 import { setTheme } from '../../helpers/ce-ui-audit';
+import { resolveSmokeReadyDocumentPath } from '../../helpers/contrast-screenshot';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -68,27 +69,12 @@ test.describe('Contrast axe color-contrast', () => {
   test.describe('authenticated routes', () => {
     test.use({ storageState: smokeFixtureStoragePath() });
 
-    let documentDetailPath = '/documents';
-
-    test.beforeAll(async ({ request }) => {
-      const health = await request.get(`${apiBase}/health`);
-      if (!health.ok()) {
-        return;
-      }
-      const list = await request.get(`${apiBase}/api/v1/documents?limit=1`);
-      if (list.ok()) {
-        const body: { items?: { id?: string }[] } = await list.json();
-        const id = body.items?.[0]?.id;
-        if (id) {
-          documentDetailPath = `/documents/${id}`;
-        }
-      }
-    });
-
     test('app surfaces', async ({ page, request }) => {
       test.setTimeout(180_000);
       const health = await request.get(`${apiBase}/health`);
       test.skip(!health.ok(), 'compose API not running');
+
+      const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
 
       let recommendationsMode: 'ok' | 'fail' = 'ok';
       await page.route('**/v1/labels/recommendations**', async (route) => {
