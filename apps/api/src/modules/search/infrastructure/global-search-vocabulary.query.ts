@@ -13,7 +13,7 @@ WHERE v.user_id = $1
 ORDER BY sim DESC
 LIMIT $3`;
 
-/** Fallback typo lookup when strict <<% returns no rows (GIN: indexed term <% constant). */
+/** Fallback typo lookup when strict <<% returns no rows (GIN: indexed term % constant). */
 export const VOCABULARY_RELAXED_TRGM_SQL = `
 SELECT v.term,
        similarity(v.term, $2::text) AS sim
@@ -21,7 +21,7 @@ FROM search_vocabulary_terms v
 WHERE v.user_id = $1
   AND length(v.term) >= 3
   AND length(v.term) <= 48
-  AND v.term <% $2::text
+  AND v.term % $2::text
 ORDER BY sim DESC
 LIMIT $3`;
 

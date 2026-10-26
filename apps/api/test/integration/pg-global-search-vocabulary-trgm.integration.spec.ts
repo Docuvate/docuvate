@@ -72,7 +72,7 @@ describe('search_vocabulary_terms trgm lookup plans (Testcontainers Postgres)', 
       0.45,
       `EXPLAIN (ANALYZE, FORMAT TEXT) ${VOCABULARY_RELAXED_TRGM_SQL}`,
       [userId, 'rechnug', 6],
-      { disableSeqScan: true }
+      { similarityThreshold: 0.45, disableSeqScan: true }
     );
     assertNoSeqScanOnVocabulary(explain.rows.map((row) => row['QUERY PLAN']).join('\n'));
   });

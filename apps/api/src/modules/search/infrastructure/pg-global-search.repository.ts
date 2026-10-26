@@ -233,7 +233,8 @@ export class PgGlobalSearchRepository {
         this.pool,
         WORD_SIM_THRESHOLD,
         VOCABULARY_RELAXED_TRGM_SQL,
-        [userId, probe, limit]
+        [userId, probe, limit],
+        { similarityThreshold: MIN_QUERY_RELEVANCE_SCORE }
       );
     }
     if (result.rows.length === 0 && probe.length >= 5) {
