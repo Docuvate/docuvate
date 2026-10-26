@@ -33,12 +33,12 @@ import { type RankedItem,reciprocalRankFusion } from '../domain/reciprocal-rank-
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
 import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
 import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
-import { queryWithWordSimilarityThreshold } from './pg-trgm-query.js';
 import {
   defaultFieldLabel,
   type FieldDefinitionLookup,
   loadFieldDefinitionLookup,
 } from './document-field-value-index.js';
+import { queryWithWordSimilarityThreshold } from './pg-trgm-query.js';
 
 const TRGM_THRESHOLD = 0.45;
 const WORD_SIM_THRESHOLD = 0.45;

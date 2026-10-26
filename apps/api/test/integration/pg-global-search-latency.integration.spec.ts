@@ -1,4 +1,5 @@
 import { performance } from 'node:perf_hooks';
+
 import { v4 as uuidv4 } from 'uuid';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
@@ -81,7 +82,8 @@ describe('PgGlobalSearchRepository lexical latency (Testcontainers Postgres)', (
            WHERE p.token <% c.body OR c.body %> p.token
          )
        LIMIT 32`,
-      [userId, [probe]]
+      [userId, [probe]],
+      { disableSeqScan: true }
     );
     const plan = explain.rows.map((row) => row['QUERY PLAN']).join('\n');
     expect(plan).toContain('document_text_chunks_body_trgm_idx');
