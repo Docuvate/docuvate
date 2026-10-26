@@ -5681,6 +5681,20 @@ mark.global-search-mark {
   box-sizing: border-box;
 }
 
+.library-doc-list-scroll {
+  max-height: min(70vh, calc(100dvh - 14rem));
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.library-table-virtualized thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-raised, var(--surface-1));
+}
+
 @media (max-width: 768px) {
   .library-page .library-main .card.library-doc-table-card {
     padding: 0;
