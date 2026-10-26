@@ -1,10 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import fs from 'node:fs';
 
 import { expect } from '@playwright/test';
 import type { APIRequestContext, Page } from '@playwright/test';
 
-import { deliveryNoteTablePdfPath } from './layout-table-pdf';
+import { deliveryNoteTablePdf } from './layout-table-pdf';
 import { waitForDocumentLayoutIrReady } from './wait-for-layout-ir';
 
 const DOC_CHAT_QUESTION = 'Wie viele Widget A sind in der Lieferung?';
@@ -76,16 +75,14 @@ async function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Unique filename + trailing bytes so hash-identical leftover docs on the shared
- * smoke stack cannot return an already-failed extraction. Retry a few times
- * when enqueue marks the new row failed immediately.
+ * Unique filename + unique content-stream token. Do not append bytes after
+ * %%EOF — the worker treats that as a permanent 422 on hand-rolled PDFs.
  */
 export async function uploadLayoutTableDocument(
   request: APIRequestContext,
   apiBase: string,
   webOrigin: string
 ): Promise<string> {
-  const basePdf = fs.readFileSync(deliveryNoteTablePdfPath());
   let lastError: Error | undefined;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     const token = randomUUID().replace(/-/g, '').slice(0, 12);
@@ -95,10 +92,7 @@ export async function uploadLayoutTableDocument(
         file: {
           name: `delivery-note-table-${token}.pdf`,
           mimeType: 'application/pdf',
-          buffer: Buffer.concat([
-            basePdf,
-            Buffer.from(`\n%%LAYOUT_TABLE_FIXTURE=${token}\n`, 'utf8'),
-          ]),
+          buffer: deliveryNoteTablePdf(token),
         },
       },
     });
