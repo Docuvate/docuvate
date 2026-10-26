@@ -18,6 +18,7 @@ for attempt in 1 2 3 4 5; do
   if "${COMPOSE[@]}" --profile smoke up --wait --build \
     postgres migrate db-storage-guard minio minio-init valkey mailpit api worker web smoke-seed; then
     "${COMPOSE[@]}" --profile smoke logs smoke-seed
+    bash apps/worker/tests/scripts/worker_http_throughput_smoke.sh
     exit 0
   fi
   if [ "$attempt" -eq 5 ]; then
