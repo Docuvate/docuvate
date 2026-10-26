@@ -112,10 +112,9 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
       if (!input || !toggle) {
         return { ok: false as const, reason: 'missing controls' };
       }
-      const ir = input.getBoundingClientRect();
-      const tr = toggle.getBoundingClientRect();
-      const gap = tr.left - ir.right;
-      return { ok: gap >= -1, gap, textEnd: ir.right };
+      const paddingRight = Number.parseFloat(getComputedStyle(input).paddingRight);
+      const toggleWidth = toggle.getBoundingClientRect().width;
+      return { ok: paddingRight >= toggleWidth - 1, paddingRight, toggleWidth };
     });
     expect(metrics.ok, JSON.stringify(metrics)).toBe(true);
     await screenshotLoaded(page, 'f17-password-input', '1440');
