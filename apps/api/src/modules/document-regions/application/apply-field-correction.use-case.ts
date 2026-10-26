@@ -213,6 +213,7 @@ export class ApplyFieldCorrectionUseCase {
         y1: resolved.rect.y1,
         irSha256: snapshot.irSha256,
         blockIndexes: resolved.tokens.map((token) => token.blockIndex),
+        boundText: joinedTokenText(resolved.tokens),
         fieldKey,
         valueOverride: valueChanged ? nextValue : null,
       });

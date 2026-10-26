@@ -1,5 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { expect, type Locator, type Page, type TestInfo } from '@playwright/test';
 
 const CONTAINERS = ['.document-detail-page', '.layout-side-panel', '.label-panel'];
@@ -90,5 +93,10 @@ export async function captureLoadedScreenshot(
   await locator.waitFor({ state: 'visible', timeout: 60_000 });
   const body = await locator.screenshot({ animations: 'disabled' });
   await testInfo.attach(name, { body, contentType: 'image/png' });
+  const artifactDir = process.env['FIELD_REGIONS_ARTIFACT_DIR'];
+  if (artifactDir) {
+    mkdirSync(artifactDir, { recursive: true });
+    writeFileSync(join(artifactDir, name), body);
+  }
   return body;
 }

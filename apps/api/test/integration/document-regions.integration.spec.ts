@@ -93,6 +93,7 @@ describe('document regions (Testcontainers Postgres)', () => {
       y1: 0.34,
       irSha256: hashLayoutIrHex(sampleIr('208,82 €')),
       blockIndexes: [4],
+      boundText: '208,82 €',
       fieldKey: 'global:nachzahlung',
       valueOverride: '208,82 €',
     });

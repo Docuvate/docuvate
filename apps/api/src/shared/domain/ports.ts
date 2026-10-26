@@ -908,6 +908,7 @@ export interface InsertDocumentRegionInput {
   y1: number;
   irSha256: string;
   blockIndexes: readonly number[];
+  boundText?: string;
   fieldKey?: string;
   valueOverride?: string | null;
 }

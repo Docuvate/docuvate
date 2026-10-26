@@ -27,7 +27,6 @@ import {
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { bufferToHex } from '../domain/ir-hash.js';
-import { tokensByBlockIndex } from '../domain/layout-tokens.js';
 
 function parseRole(value: unknown): DocumentRegionRole {
   const role = parseString(value);
@@ -154,12 +153,11 @@ export async function remapActiveRegionsOnClient(
   irSha256Hex: string
 ): Promise<void> {
   const active = await client.query(
-    `SELECT r.id, r.page, r.x0, r.y0, r.x1, r.y1, r.ir_sha256
+    `SELECT r.id, r.page, r.x0, r.y0, r.x1, r.y1, r.ir_sha256, r.bound_text
      FROM document_regions r
      WHERE r.document_id = $1 AND r.superseded_by IS NULL`,
     [documentId]
   );
-  const tokenMap = tokensByBlockIndex(tokens);
   const tokensByPage = new Map<number, LayoutToken[]>();
   for (const token of tokens) {
     const list = tokensByPage.get(token.page) ?? [];
@@ -174,21 +172,21 @@ export async function remapActiveRegionsOnClient(
     }
     const regionId = parseString(row.id);
     const page = parseNumber(row.page, 1);
-    const previousIds = await client.query(
-      `SELECT block_index FROM document_region_tokens WHERE region_id = $1 ORDER BY block_index`,
-      [regionId]
-    );
-    const previousTokens: LayoutToken[] = [];
-    for (const tokenRowRaw of previousIds.rows) {
-      const tokenRow = recordFromUnknown(tokenRowRaw);
-      if (!tokenRow) {
-        continue;
-      }
-      const previous = tokenMap.get(parseNumber(tokenRow.block_index, -1));
-      if (previous) {
-        previousTokens.push(previous);
-      }
-    }
+    const previousText = parseString(row.bound_text);
+    const previousTokens: LayoutToken[] =
+      previousText.length > 0
+        ? [
+            {
+              blockIndex: -1,
+              page,
+              x0: 0,
+              y0: 0,
+              x1: 0.001,
+              y1: 0.001,
+              text: previousText,
+            },
+          ]
+        : [];
     const remapped = remapRegionTokens(previousTokens, tokensByPage.get(page) ?? [], {
       x0: parseNumber(row.x0),
       y0: parseNumber(row.y0),
@@ -208,15 +206,17 @@ export async function remapActiveRegionsOnClient(
       `UPDATE document_regions
        SET ir_sha256 = $2,
            needs_review = $3,
-           x0 = COALESCE($4, x0),
-           y0 = COALESCE($5, y0),
-           x1 = COALESCE($6, x1),
-           y1 = COALESCE($7, y1)
+           bound_text = $4,
+           x0 = COALESCE($5, x0),
+           y0 = COALESCE($6, y0),
+           x1 = COALESCE($7, x1),
+           y1 = COALESCE($8, y1)
        WHERE id = $1`,
       [
         regionId,
         irSha256,
         remapped.textChanged || remapped.tokens.length === 0,
+        remapped.nextText,
         snapped?.x0 ?? null,
         snapped?.y0 ?? null,
         snapped?.x1 ?? null,
@@ -330,8 +330,8 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
       await client.query('BEGIN');
       await client.query(
         `INSERT INTO document_regions
-           (id, document_id, page, x0, y0, x1, y1, shape, role, ir_sha256)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, decode($10, 'hex'))`,
+           (id, document_id, page, x0, y0, x1, y1, shape, role, ir_sha256, bound_text)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, decode($10, 'hex'), $11)`,
         [
           input.id,
           input.documentId,
@@ -343,6 +343,7 @@ export class PgDocumentRegionRepository implements DocumentRegionRepository {
           input.shape,
           input.role,
           input.irSha256,
+          input.boundText ?? '',
         ]
       );
       if (input.blockIndexes.length > 0) {
