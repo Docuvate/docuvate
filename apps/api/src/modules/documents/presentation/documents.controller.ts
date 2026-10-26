@@ -108,6 +108,7 @@ import { SendDocumentChatThreadMessageUseCase } from '../application/send-docume
 import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
 import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
 import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
+import { PgInstallationUserCountReader } from '../infrastructure/pg-installation-user-count.reader.js';
 import { toDocumentBulkRequest, toDocumentDto, toDocumentListResponse } from './document.mapper.js';
 import { toDocumentChatMessageRecordDto, toDocumentChatThreadDto } from './document-chat.mapper.js';
 import { parseDocumentListQuery } from './document-list-query.js';
