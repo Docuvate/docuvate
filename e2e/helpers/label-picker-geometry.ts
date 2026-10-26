@@ -25,12 +25,18 @@ export async function assertTagFilterPopoverChipInset(
         return 'chip-past-popover-edge';
       }
     }
-    const sections = popover.querySelectorAll('.label-picker-combobox-section');
-    for (let i = 0; i < sections.length; i += 1) {
-      const section = sections.item(i);
-      const text = section?.textContent?.trim() ?? '';
-      if (text.length === 1) {
-        return `stray-letter-header:${text}`;
+    const comboboxInput = document.querySelector(
+      '[data-testid="library-filter-tag-combobox"] input[role="combobox"]'
+    );
+    const query = comboboxInput instanceof HTMLInputElement ? comboboxInput.value.trim() : '';
+    if (query.length === 0) {
+      const sections = popover.querySelectorAll('.label-picker-combobox-section');
+      for (let i = 0; i < sections.length; i += 1) {
+        const section = sections.item(i);
+        const text = section?.textContent?.trim() ?? '';
+        if (text.length === 1) {
+          return `stray-letter-header:${text}`;
+        }
       }
     }
     return null;

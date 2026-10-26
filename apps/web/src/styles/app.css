@@ -15969,6 +15969,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .label-picker-combobox-list-host {
   max-height: 20rem;
   overflow: auto;
+  overflow-x: hidden;
   box-sizing: border-box;
   padding: 12px;
 }
@@ -15999,11 +16000,15 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .label-picker-combobox-option .chip {
-  max-width: 100%;
+  max-width: calc(100% - 1.5rem);
   min-width: 0;
   flex: 1 1 auto;
   overflow: hidden;
   box-sizing: border-box;
+}
+
+.label-picker-combobox-option:not(:has(svg)) .chip {
+  max-width: 100%;
 }
 
 .label-picker-combobox-option .chip .chip-label {

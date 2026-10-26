@@ -269,6 +269,7 @@ async function openTagFilterPortaledList(page: import('@playwright/test').Page):
   const input = combobox.getByRole('combobox');
   await input.click();
   await input.fill('ws-b-seed');
+  await page.waitForTimeout(250);
   const popover = page.getByTestId('library-filter-tag-combobox-popover');
   await expect(popover).toBeVisible({ timeout: 30_000 });
   await expect(popover).toHaveAttribute('data-floating-placement', /.+/);
