@@ -6,18 +6,22 @@ import { GetLabelRecommendationsUseCase } from '../../../src/modules/labels/appl
 import { LabelHybridModelCacheService } from '../../../src/modules/labels/infrastructure/label-hybrid-model-cache.service.js';
 import { PgLabelEmbeddingRepository } from '../../../src/modules/labels/infrastructure/pg-label-embedding.repository.js';
 import { RepresentationModule } from '../../../src/modules/representation/representation.module.js';
-import { SettingsModule } from '../../../src/modules/settings/settings.module.js';
-import { LABEL_EMBEDDING_REPOSITORY } from '../../../src/shared/domain/ports.js';
+import { PgUserPreferencesRepository } from '../../../src/modules/settings/infrastructure/pg-user-preferences.repository.js';
+import {
+  LABEL_EMBEDDING_REPOSITORY,
+  USER_PREFERENCES_REPOSITORY,
+} from '../../../src/shared/domain/ports.js';
 import { DatabaseModule } from '../../../src/shared/infrastructure/database/database.module.js';
 
 export async function createLabelsRecommendationsUseCase(): Promise<GetLabelRecommendationsUseCase> {
   const moduleRef = await Test.createTestingModule({
-    imports: [DatabaseModule, RepresentationModule, SettingsModule],
+    imports: [DatabaseModule, RepresentationModule],
     providers: [
       GetLabelRecommendationsUseCase,
       LabelHybridModelCacheService,
       PgLabelEmbeddingRepository,
       { provide: LABEL_EMBEDDING_REPOSITORY, useExisting: PgLabelEmbeddingRepository },
+      { provide: USER_PREFERENCES_REPOSITORY, useClass: PgUserPreferencesRepository },
     ],
   }).compile();
   return moduleRef.get(GetLabelRecommendationsUseCase);
