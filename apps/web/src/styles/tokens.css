@@ -1,6 +1,23 @@
 @import '@docuvate/tokens/css';
 
-:root {
+/**
+ * Semantic colour roles (WCAG AA). Canonical hex values live in
+ * packages/tokens/tokens/color.json and are emitted as --dv-color-* by @docuvate/tokens.
+ *
+ * Brand vermilion fill: --dv-color-accent (#d9480f light, darkened #b8360a dark for fills)
+ * Text/links on tint or raised surfaces: --dv-color-accent-text
+ * Text on accent fills: --dv-color-on-accent (warm near-black light, white dark)
+ * Errors: --dv-color-error-text; danger badges/menus: --dv-color-danger on --dv-color-danger-soft
+ */
+:root,
+[data-docuvate-theme='light'] {
+  --chip-max-width: 14rem;
+  --dv-header-control-height: var(--dv-control-height);
+  --dv-icon-btn-sm: var(--dv-control-icon-btn-sm);
+  --dv-icon-btn-md: var(--dv-control-icon-btn-md);
+}
+
+[data-docuvate-theme='dark'] {
   --chip-max-width: 14rem;
   --dv-header-control-height: var(--dv-control-height);
   --dv-icon-btn-sm: var(--dv-control-icon-btn-sm);
