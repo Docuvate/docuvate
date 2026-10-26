@@ -1,3 +1,5 @@
+@import './overlay/overlay.css';
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -368,8 +370,6 @@ a.btn:hover {
 .custom-select {
   position: relative;
 }
-
-@import './overlay/overlay.css';
 
 .custom-select-trigger {
   display: flex;
