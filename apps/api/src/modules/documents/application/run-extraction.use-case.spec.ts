@@ -3,9 +3,27 @@
 import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
-import { type DocumentRepository, type ObjectStorage } from '../../../shared/domain/ports.js';
+import {
+  type DocumentRepository,
+  type ObjectStorage,
+  type TaxonomyRepository,
+} from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
+import {
+  createClassStub,
+  createExecuteUseCaseStub,
+} from '../../../test-support/execute-use-case.stub.js';
 import { createExtractionPortStub } from '../../../test-support/extraction-port.stub.js';
+import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
+import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
+import { PersistDocumentFactsUseCase } from '../../exact-facts/application/persist-document-facts.use-case.js';
+import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import { PgEmbeddingDensityRepository } from '../../labels/infrastructure/pg-embedding-density.repository.js';
+import { PersistDocumentRepresentationUseCase } from '../../representation/application/persist-document-representation.use-case.js';
+import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
+import { ResolveUserExtractorEngineUseCase } from '../../settings/application/settings.use-cases.js';
+import { AutoAcceptCalibratedReviewUseCase } from './document-review/auto-accept-calibrated-review.use-case.js';
+import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './document-review/promote-extraction-suggestions.use-case.js';
 import { RunExtractionUseCase } from './run-extraction.use-case.js';
 
 async function buildUseCase(options: {
@@ -35,17 +53,26 @@ async function buildUseCase(options: {
       ? { extract: vi.fn().mockRejectedValue(options.extractError) }
       : {}
   );
-  const postOcr = { execute: vi.fn() };
-  const scheduleDuplicates = { execute: vi.fn() };
-  const resolveEngine = { execute: vi.fn().mockResolvedValue('default') };
-  const syncSearch = { execute: vi.fn() };
-  const persistRepresentation = { execute: vi.fn() };
-  const densityRepo = { loadWorkerState: vi.fn().mockResolvedValue(null) };
-  const taxonomy = { listTags: vi.fn().mockResolvedValue([]) };
-  const featureFlags = { execute: vi.fn().mockResolvedValue({ exactAnswers: false }) };
-  const persistFacts = { execute: vi.fn() };
-  const promoteSuggestions = { execute: vi.fn() };
-  const autoAccept = { execute: vi.fn() };
+  const postOcr = createExecuteUseCaseStub<RunDocumentPostOcrPipelineUseCase>();
+  const scheduleDuplicates = createExecuteUseCaseStub<ScheduleDuplicateDetectionUseCase>();
+  const resolveEngine = createExecuteUseCaseStub<ResolveUserExtractorEngineUseCase>({
+    execute: vi.fn().mockResolvedValue('default'),
+  });
+  const syncSearch = createExecuteUseCaseStub<SyncDocumentSearchIndexUseCase>();
+  const persistRepresentation = createExecuteUseCaseStub<PersistDocumentRepresentationUseCase>();
+  const densityRepo = createClassStub<PgEmbeddingDensityRepository>({
+    loadWorkerState: vi.fn().mockResolvedValue(null),
+  });
+  const taxonomy = createClassStub<TaxonomyRepository>({
+    listTags: vi.fn().mockResolvedValue([]),
+  });
+  const featureFlags = createExecuteUseCaseStub<ResolveFeatureFlagsUseCase>({
+    execute: vi.fn().mockResolvedValue({ exactAnswers: false }),
+  });
+  const persistFacts = createExecuteUseCaseStub<PersistDocumentFactsUseCase>();
+  const promoteSuggestions =
+    createExecuteUseCaseStub<PromoteHighConfidenceExtractionSuggestionsUseCase>();
+  const autoAccept = createExecuteUseCaseStub<AutoAcceptCalibratedReviewUseCase>();
 
   const moduleRef = await Test.createTestingModule({
     providers: [
