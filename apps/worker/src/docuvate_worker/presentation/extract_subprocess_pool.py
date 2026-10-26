@@ -14,7 +14,7 @@ import sys
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Any, IO
+from typing import IO, Any
 
 from docuvate_worker.domain.extract_errors import ExtractRetryableError
 from docuvate_worker.infrastructure.extract_memory.child_process_diagnostics import (
