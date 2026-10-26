@@ -11,12 +11,10 @@ import {
   workerCompareTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
+import { WorkerExtractCapacityCoordinator } from '../../extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { withWorkerExtractSlot } from '../../extraction/infrastructure/with-worker-extract-slot.js';
-import type {
-  PersistDocumentRepresentationPort,
-  WorkerExtractSlotPort,
-} from '../domain/representation-worker.port.js';
 import { PgDocumentRepresentationRepository } from '../infrastructure/pg-document-representation.repository.js';
+import { PersistDocumentRepresentationUseCase } from './persist-document-representation.use-case.js';
 
 function parseWorkerRepresentation(value: unknown): DocumentRepresentationDto | undefined {
   if (!isRecord(value)) {
@@ -96,8 +94,8 @@ function parseWorkerRepresentation(value: unknown): DocumentRepresentationDto | 
 export class EnsureDocumentRepresentationUseCase {
   constructor(
     private readonly repository: PgDocumentRepresentationRepository,
-    private readonly persist: PersistDocumentRepresentationPort,
-    private readonly extractCapacity: WorkerExtractSlotPort
+    private readonly persist: PersistDocumentRepresentationUseCase,
+    private readonly extractCapacity: WorkerExtractCapacityCoordinator
   ) {}
 
   async execute(tenantId: string, documentId: string, text: string): Promise<boolean> {

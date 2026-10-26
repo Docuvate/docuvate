@@ -11,11 +11,9 @@ import { EnrichLabelMapMissingHintsUseCase } from '../../src/modules/labels/appl
 import { GetLabelMapUseCase } from '../../src/modules/labels/application/get-label-map.use-case.js';
 import type { MissingLabelHintPort } from '../../src/modules/labels/domain/ce-label-propagation.port.js';
 import { PgLabelEmbeddingRepository } from '../../src/modules/labels/infrastructure/pg-label-embedding.repository.js';
+import { WorkerExtractCapacityCoordinator } from '../../src/modules/extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { EnsureDocumentRepresentationUseCase } from '../../src/modules/representation/application/ensure-document-representation.use-case.js';
-import type {
-  PersistDocumentRepresentationPort,
-  WorkerExtractSlotPort,
-} from '../../src/modules/representation/domain/representation-worker.port.js';
+import { PersistDocumentRepresentationUseCase } from '../../src/modules/representation/application/persist-document-representation.use-case.js';
 import { PgDocumentRepresentationRepository } from '../../src/modules/representation/infrastructure/pg-document-representation.repository.js';
 import { PgUserPreferencesRepository } from '../../src/modules/settings/infrastructure/pg-user-preferences.repository.js';
 import { PgTaxonomyRepository } from '../../src/modules/taxonomy/infrastructure/pg-taxonomy.repository.js';
