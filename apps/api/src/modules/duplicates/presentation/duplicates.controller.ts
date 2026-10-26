@@ -4,6 +4,12 @@ import type { ApplyDuplicateSetDecisionsRequest } from '@docuvate/contracts';
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 
 import {
+  DuplicateSetListResponseDtoClass,
+  ListDuplicateSetsQueryDto,
+} from '../../../shared/presentation/dtos/duplicate-sets.dto.js';
+import { parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
+
+import {
   AuthGuard,
   type AuthSession,
   Session,
@@ -35,10 +41,10 @@ export class DuplicatesController {
   @ApiDocuvateRoute({ operationId: 'listDuplicateSets', summary: 'List duplicate suggestion sets' })
   async list(
     @Session() session: AuthSession,
-    @Query('documentId') documentId?: string
-  ) {
-    const items = await this.listDuplicateSets.execute(session.user.id, documentId);
-    return { items };
+    @Query() query: ListDuplicateSetsQueryDto
+  ): Promise<DuplicateSetListResponseDtoClass> {
+    const pagination = parseCursorListQuery(query);
+    return this.listDuplicateSets.execute(session.user.id, query.documentId, pagination);
   }
 
   @Post('apply-decisions')

@@ -1,5 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { CursorListQuery, CursorListResponse } from './cursor-list.js';
+
 /** Minimal document shape for label assignment KPIs (library list, one row per document). */
 export type LabelInventoryDocument = {
   id: string;
@@ -9,11 +11,18 @@ export type LabelInventoryDocument = {
   tags: { id: string; isInbox?: boolean }[];
 };
 
-export type LabelDocumentInventoryResponseDto = {
+export type LabelDocumentInventorySummaryResponseDto = {
   inventory: LabelAssignmentInventory;
   documentCountByTagId: Record<string, number>;
-  documents: LabelInventoryDocument[];
 };
+
+export type LabelDocumentInventoryResponseDto = LabelDocumentInventorySummaryResponseDto &
+  CursorListResponse<LabelInventoryDocument> & {
+    /** @deprecated Prefer paginated `items`; kept as alias for first page compatibility. */
+    documents: LabelInventoryDocument[];
+  };
+
+export type LabelDocumentInventoryQuery = CursorListQuery;
 
 export type LabelAssignmentInventory = {
   total: number;

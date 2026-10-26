@@ -13,9 +13,21 @@ part 'saved_document_view_list_response_dto.g.dart';
 /// SavedDocumentViewListResponseDto
 ///
 /// Properties:
+/// * [nextCursor] 
+/// * [hasMore] 
+/// * [total] 
 /// * [items] 
 @BuiltValue()
 abstract class SavedDocumentViewListResponseDto implements Built<SavedDocumentViewListResponseDto, SavedDocumentViewListResponseDtoBuilder> {
+  @BuiltValueField(wireName: r'nextCursor')
+  String get nextCursor;
+
+  @BuiltValueField(wireName: r'hasMore')
+  bool get hasMore;
+
+  @BuiltValueField(wireName: r'total')
+  num get total;
+
   @BuiltValueField(wireName: r'items')
   BuiltList<SavedDocumentViewDtoClass> get items;
 
@@ -42,6 +54,21 @@ class _$SavedDocumentViewListResponseDtoSerializer implements PrimitiveSerialize
     SavedDocumentViewListResponseDto object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
+    yield r'nextCursor';
+    yield serializers.serialize(
+      object.nextCursor,
+      specifiedType: const FullType(String),
+    );
+    yield r'hasMore';
+    yield serializers.serialize(
+      object.hasMore,
+      specifiedType: const FullType(bool),
+    );
+    yield r'total';
+    yield serializers.serialize(
+      object.total,
+      specifiedType: const FullType(num),
+    );
     yield r'items';
     yield serializers.serialize(
       object.items,
@@ -70,6 +97,27 @@ class _$SavedDocumentViewListResponseDtoSerializer implements PrimitiveSerialize
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
+        case r'nextCursor':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.nextCursor = valueDes;
+          break;
+        case r'hasMore':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.hasMore = valueDes;
+          break;
+        case r'total':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(num),
+          ) as num;
+          result.total = valueDes;
+          break;
         case r'items':
           final valueDes = serializers.deserialize(
             value,

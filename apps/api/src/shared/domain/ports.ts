@@ -633,7 +633,15 @@ export interface DocumentChatMessageGenerationPatch {
 }
 
 export interface DocumentChatThreadRepository {
-  listThreadsForLibrary(userId: string): Promise<DocumentChatThreadEntity[]>;
+  listThreadsForLibrary(
+    userId: string,
+    pagination?: { limit: number; cursor?: string }
+  ): Promise<{
+    threads: DocumentChatThreadEntity[];
+    hasMore: boolean;
+    nextCursor: string | null;
+    total: number | null;
+  }>;
   listThreadsForDocument(documentId: string, userId: string): Promise<DocumentChatThreadEntity[]>;
   createThread(
     userId: string,

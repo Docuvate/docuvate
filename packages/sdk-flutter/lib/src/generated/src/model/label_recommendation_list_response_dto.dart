@@ -14,10 +14,15 @@ part 'label_recommendation_list_response_dto.g.dart';
 ///
 /// Properties:
 /// * [items] 
+/// * [state] 
 @BuiltValue()
 abstract class LabelRecommendationListResponseDto implements Built<LabelRecommendationListResponseDto, LabelRecommendationListResponseDtoBuilder> {
   @BuiltValueField(wireName: r'items')
   BuiltList<JsonObject> get items;
+
+  @BuiltValueField(wireName: r'state')
+  LabelRecommendationListResponseDtoStateEnum get state;
+  // enum stateEnum {  ready,  warming,  };
 
   LabelRecommendationListResponseDto._();
 
@@ -46,6 +51,11 @@ class _$LabelRecommendationListResponseDtoSerializer implements PrimitiveSeriali
     yield serializers.serialize(
       object.items,
       specifiedType: const FullType(BuiltList, [FullType(JsonObject)]),
+    );
+    yield r'state';
+    yield serializers.serialize(
+      object.state,
+      specifiedType: const FullType(LabelRecommendationListResponseDtoStateEnum),
     );
   }
 
@@ -77,6 +87,13 @@ class _$LabelRecommendationListResponseDtoSerializer implements PrimitiveSeriali
           ) as BuiltList<JsonObject>;
           result.items.replace(valueDes);
           break;
+        case r'state':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(LabelRecommendationListResponseDtoStateEnum),
+          ) as LabelRecommendationListResponseDtoStateEnum;
+          result.state = valueDes;
+          break;
         default:
           unhandled.add(key);
           unhandled.add(value);
@@ -104,5 +121,20 @@ class _$LabelRecommendationListResponseDtoSerializer implements PrimitiveSeriali
     );
     return result.build();
   }
+}
+
+class LabelRecommendationListResponseDtoStateEnum extends EnumClass {
+
+  @BuiltValueEnumConst(wireName: r'ready')
+  static const LabelRecommendationListResponseDtoStateEnum ready = _$labelRecommendationListResponseDtoStateEnum_ready;
+  @BuiltValueEnumConst(wireName: r'warming')
+  static const LabelRecommendationListResponseDtoStateEnum warming = _$labelRecommendationListResponseDtoStateEnum_warming;
+
+  static Serializer<LabelRecommendationListResponseDtoStateEnum> get serializer => _$labelRecommendationListResponseDtoStateEnumSerializer;
+
+  const LabelRecommendationListResponseDtoStateEnum._(String name): super(name);
+
+  static BuiltSet<LabelRecommendationListResponseDtoStateEnum> get values => _$labelRecommendationListResponseDtoStateEnumValues;
+  static LabelRecommendationListResponseDtoStateEnum valueOf(String name) => _$labelRecommendationListResponseDtoStateEnumValueOf(name);
 }
 

@@ -33,6 +33,7 @@ import {
   ListAdminUsersQueryDto,
   SetAdminUserRoleRequestDto,
 } from '../../../shared/presentation/dtos/admin.dto.js';
+import { parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 import { SetAdminUserFeatureFlagRequestDto } from '../../../shared/presentation/dtos/admin-feature-flag.dto.js';
 import {
   AdminAuthSignInSettingsResponseDto,
@@ -181,17 +182,18 @@ export class AdminController {
     @Query() query: ListAdminUsersQueryDto,
     @Req() req: FastifyRequest
   ): Promise<AdminUserListResponseDto> {
-    const limit = query.limit ?? 50;
-    const offset = query.offset ?? 0;
+    const pagination = parseCursorListQuery(query);
     const result = await this.listUsers.execute({
       headers: requestHeaders(req),
-      limit,
-      offset,
+      limit: pagination.limit,
+      cursor: pagination.cursor,
       search: query.search,
     });
     return {
       users: result.users.map(toAdminUserDto),
       total: result.total,
+      hasMore: result.hasMore,
+      nextCursor: result.nextCursor,
     };
   }
 

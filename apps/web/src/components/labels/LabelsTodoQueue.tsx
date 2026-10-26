@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LabelRecommendationDto } from '@docuvate/contracts';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -259,6 +260,16 @@ export function LabelsTodoQueue(props: Props) {
     .map((id) => itemsById.get(id))
     .filter((item): item is LabelRecommendationDto => item != null);
 
+  const useVirtual = ordered.length > 20;
+  const listScrollRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: ordered.length,
+    getScrollElement: () => listScrollRef.current,
+    estimateSize: () => 132,
+    overscan: 6,
+    measureElement: (element) => element.getBoundingClientRect().height,
+  });
+
   if (props.loading) {
     return (
       <Card className="label-rec-panel labels-todo-panel">
@@ -322,78 +333,116 @@ export function LabelsTodoQueue(props: Props) {
     );
   }
 
+  function renderRow(item: LabelRecommendationDto) {
+    const documents = item.sampleDocuments ?? [];
+    const usesSubsetPicker =
+      (item.kind === 'new' || item.kind === 'assign') && documents.length > 1;
+    const selected = usesSubsetPicker
+      ? (selectedByItemId.get(item.id) ?? initialSelectedDocumentIds(documents))
+      : new Set<string>();
+    const selectedCount = selected.size;
+    const totalCount = documents.length;
+    const acceptDisabled =
+      props.busyId === item.id ||
+      exitingIds.has(item.id) ||
+      clusterAcceptDisabled(item, selectedCount, totalCount);
+    const acceptVariant = usesSubsetPicker ? 'primary' : 'secondary';
+
+    return (
+      <li
+        key={item.id}
+        id={`label-rec-${item.id}`}
+        className={`suggest-row label-rec-suggest-row labels-todo-row${
+          exitingIds.has(item.id) ? ' is-exiting' : ''
+        }`}
+      >
+        <div className="label-rec-suggest-main labels-todo-main">
+          <TodoRowMain
+            item={item}
+            tagColorById={props.tagColorById}
+            documentCountByTagId={props.documentCountByTagId}
+            selectedDocumentIds={selected}
+            onSelectedDocumentIdsChange={(next) => {
+              setSelectedByItemId((prev) => {
+                const map = new Map(prev);
+                map.set(item.id, next);
+                return map;
+              });
+            }}
+          />
+        </div>
+        <div className="suggest-actions labels-todo-actions">
+          {item.kind === 'rename' ? (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={acceptDisabled}
+              onClick={() => { props.onRename(item); }}
+            >
+              {t('labelRecommendations.renameAction')}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant={acceptVariant}
+              disabled={acceptDisabled}
+              onClick={() => { wrapAccept(item); }}
+            >
+              {clusterAcceptButtonLabel(item, selectedCount, totalCount, t)}
+            </Button>
+          )}
+          <LabelSuggestionDismissActions
+            labelName={recommendationLabelName(item)}
+            disabled={props.busyId === item.id || exitingIds.has(item.id)}
+            onDismiss={(scope) => { wrapDismiss(item, scope); }}
+          />
+        </div>
+      </li>
+    );
+  }
+
   return (
     <Card className="label-rec-panel labels-todo-panel">
       <TodoHead />
-      <ul className="suggest-list label-rec-suggest-list labels-todo-list">
-        {ordered.map((item) => {
-          const documents = item.sampleDocuments ?? [];
-          const usesSubsetPicker =
-            (item.kind === 'new' || item.kind === 'assign') && documents.length > 1;
-          const selected = usesSubsetPicker
-            ? (selectedByItemId.get(item.id) ?? initialSelectedDocumentIds(documents))
-            : new Set<string>();
-          const selectedCount = selected.size;
-          const totalCount = documents.length;
-          const acceptDisabled =
-            props.busyId === item.id ||
-            exitingIds.has(item.id) ||
-            clusterAcceptDisabled(item, selectedCount, totalCount);
-          const acceptVariant = usesSubsetPicker ? 'primary' : 'secondary';
-
-          return (
-            <li
-              key={item.id}
-              id={`label-rec-${item.id}`}
-              className={`suggest-row label-rec-suggest-row labels-todo-row${
-                exitingIds.has(item.id) ? ' is-exiting' : ''
-              }`}
-            >
-              <div className="label-rec-suggest-main labels-todo-main">
-                <TodoRowMain
-                  item={item}
-                  tagColorById={props.tagColorById}
-                  documentCountByTagId={props.documentCountByTagId}
-                  selectedDocumentIds={selected}
-                  onSelectedDocumentIdsChange={(next) => {
-                    setSelectedByItemId((prev) => {
-                      const map = new Map(prev);
-                      map.set(item.id, next);
-                      return map;
-                    });
+      {useVirtual ? (
+        <div
+          ref={listScrollRef}
+          className="labels-todo-list-virtual-scroll"
+          data-testid="labels-todo-virtual-scroll"
+        >
+          <ul
+            className="suggest-list label-rec-suggest-list labels-todo-list labels-todo-list-virtual"
+            style={{
+              height: `${String(rowVirtualizer.getTotalSize())}px`,
+              position: 'relative',
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const item = ordered[virtualRow.index];
+              return (
+                <div
+                  key={item.id}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${String(virtualRow.start)}px)`,
                   }}
-                />
-              </div>
-              <div className="suggest-actions labels-todo-actions">
-                {item.kind === 'rename' ? (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={acceptDisabled}
-                    onClick={() => { props.onRename(item); }}
-                  >
-                    {t('labelRecommendations.renameAction')}
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    variant={acceptVariant}
-                    disabled={acceptDisabled}
-                    onClick={() => { wrapAccept(item); }}
-                  >
-                    {clusterAcceptButtonLabel(item, selectedCount, totalCount, t)}
-                  </Button>
-                )}
-                <LabelSuggestionDismissActions
-                  labelName={recommendationLabelName(item)}
-                  disabled={props.busyId === item.id || exitingIds.has(item.id)}
-                  onDismiss={(scope) => { wrapDismiss(item, scope); }}
-                />
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                >
+                  {renderRow(item)}
+                </div>
+              );
+            })}
+          </ul>
+        </div>
+      ) : (
+        <ul className="suggest-list label-rec-suggest-list labels-todo-list">
+          {ordered.map((item) => renderRow(item))}
+        </ul>
+      )}
     </Card>
   );
 }

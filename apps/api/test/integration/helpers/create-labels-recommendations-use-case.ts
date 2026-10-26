@@ -4,6 +4,7 @@ import { Test } from '@nestjs/testing';
 
 import { GetLabelRecommendationsUseCase } from '../../../src/modules/labels/application/get-label-recommendations.use-case.js';
 import { LabelHybridModelCacheService } from '../../../src/modules/labels/infrastructure/label-hybrid-model-cache.service.js';
+import { PgLabelDocumentInventoryRepository } from '../../../src/modules/labels/infrastructure/pg-label-document-inventory.repository.js';
 import { PgLabelEmbeddingRepository } from '../../../src/modules/labels/infrastructure/pg-label-embedding.repository.js';
 import { RepresentationModule } from '../../../src/modules/representation/representation.module.js';
 import { PgUserPreferencesRepository } from '../../../src/modules/settings/infrastructure/pg-user-preferences.repository.js';
@@ -27,6 +28,7 @@ export async function createLabelsRecommendationsUseCase(): Promise<GetLabelReco
     imports: [DatabaseModule, RepresentationModule],
     providers: [
       GetLabelRecommendationsUseCase,
+      PgLabelDocumentInventoryRepository,
       { provide: LabelHybridModelCacheService, useValue: labelHybridCacheStub },
       PgLabelEmbeddingRepository,
       { provide: LABEL_EMBEDDING_REPOSITORY, useExisting: PgLabelEmbeddingRepository },

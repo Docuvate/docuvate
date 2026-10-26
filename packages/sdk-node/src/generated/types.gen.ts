@@ -68,6 +68,8 @@ export type AdminOidcProviderResponseDto = {
 
 export type AdminUserListResponseDto = {
     users: Array<AdminUserResponseDto>;
+    nextCursor: string;
+    hasMore: boolean;
     total: number;
 };
 
@@ -207,6 +209,13 @@ export type DashboardStatisticsDtoClass = {
     }>;
 };
 
+export type DashboardWidgetDocumentPreviewsResponseDtoClass = {
+    items: Array<{
+        [key: string]: unknown;
+    }>;
+    attentionCount?: number;
+};
+
 export type DashboardWidgetDtoClass = {
     id: string;
     type: 'saved_view' | 'upload' | 'statistics' | 'recent_documents' | 'attention';
@@ -293,6 +302,9 @@ export type DocumentChatThreadDto = {
 };
 
 export type DocumentChatThreadListResponseDto = {
+    nextCursor: string;
+    hasMore: boolean;
+    total: number;
     threads: Array<DocumentChatThreadDto>;
 };
 
@@ -415,8 +427,10 @@ export type DocumentReviewQueueItemDtoClass = {
 };
 
 export type DocumentReviewQueueResponseDtoClass = {
-    total: number;
     items: Array<DocumentReviewQueueItemDtoClass>;
+    nextCursor: string;
+    hasMore: boolean;
+    total: number;
 };
 
 export type DocumentReviewQueueSummaryDtoClass = {
@@ -436,6 +450,15 @@ export type DocumentTagSuggestionsBatchRequestDto = {
 
 export type DocumentTagSuggestionsBatchResponseDto = {
     items: Array<DocumentTagSuggestionsBatchItemDto>;
+};
+
+export type DuplicateSetListResponseDtoClass = {
+    items: Array<{
+        [key: string]: unknown;
+    }>;
+    nextCursor: string;
+    hasMore: boolean;
+    total: number;
 };
 
 export type DuplicateStackKeepVersionRequestDto = {
@@ -523,6 +546,18 @@ export type FolderListResponseDto = {
     items: Array<{
         [key: string]: unknown;
     }>;
+};
+
+export type GlobalChatSuggestionBootstrapDtoClass = {
+    topTagId: string;
+    topTagName: string;
+    topTagDocumentCount: number;
+    amountTaggedDocumentCount: number;
+    contractEndSample?: {
+        label: string;
+        value: string;
+    };
+    recentQuestions: Array<string>;
 };
 
 export type ImportFromConnectorRequestDto = {
@@ -911,6 +946,9 @@ export type SavedDocumentViewFieldFilterDtoClass = {
 };
 
 export type SavedDocumentViewListResponseDto = {
+    nextCursor: string;
+    hasMore: boolean;
+    total: number;
     items: Array<SavedDocumentViewDtoClass>;
 };
 
@@ -1273,7 +1311,10 @@ export type ListAdminUsersData = {
     path?: never;
     query?: {
         limit?: number;
-        offset?: number;
+        /**
+         * Opaque keyset cursor from a previous response
+         */
+        cursor?: string;
         search?: string;
     };
     url: '/admin/users';
@@ -1474,10 +1515,38 @@ export type UnbanAdminUserResponses = {
     201: unknown;
 };
 
-export type ListLibraryChatThreadsData = {
+export type GetGlobalChatSuggestionBootstrapData = {
     body?: never;
     path?: never;
     query?: never;
+    url: '/chat/suggestion-bootstrap';
+};
+
+export type GetGlobalChatSuggestionBootstrapErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type GetGlobalChatSuggestionBootstrapError = GetGlobalChatSuggestionBootstrapErrors[keyof GetGlobalChatSuggestionBootstrapErrors];
+
+export type GetGlobalChatSuggestionBootstrapResponses = {
+    200: GlobalChatSuggestionBootstrapDtoClass;
+};
+
+export type GetGlobalChatSuggestionBootstrapResponse = GetGlobalChatSuggestionBootstrapResponses[keyof GetGlobalChatSuggestionBootstrapResponses];
+
+export type ListLibraryChatThreadsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        limit?: number;
+        /**
+         * Opaque keyset cursor from a previous response
+         */
+        cursor?: string;
+    };
     url: '/chat/threads';
 };
 
@@ -2373,6 +2442,32 @@ export type GetDashboardStatisticsResponses = {
 };
 
 export type GetDashboardStatisticsResponse = GetDashboardStatisticsResponses[keyof GetDashboardStatisticsResponses];
+
+export type GetDashboardWidgetDocumentPreviewsData = {
+    body?: never;
+    path?: never;
+    query: {
+        type: 'recent_documents' | 'attention' | 'saved_view';
+        limit?: number;
+        savedViewId?: string;
+    };
+    url: '/dashboard/widget-document-previews';
+};
+
+export type GetDashboardWidgetDocumentPreviewsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type GetDashboardWidgetDocumentPreviewsError = GetDashboardWidgetDocumentPreviewsErrors[keyof GetDashboardWidgetDocumentPreviewsErrors];
+
+export type GetDashboardWidgetDocumentPreviewsResponses = {
+    200: DashboardWidgetDocumentPreviewsResponseDtoClass;
+};
+
+export type GetDashboardWidgetDocumentPreviewsResponse = GetDashboardWidgetDocumentPreviewsResponses[keyof GetDashboardWidgetDocumentPreviewsResponses];
 
 export type ListDocumentPipelineModulesData = {
     body?: never;
@@ -3464,6 +3559,11 @@ export type ListDuplicateSetsData = {
     body?: never;
     path?: never;
     query?: {
+        limit?: number;
+        /**
+         * Opaque keyset cursor from a previous response
+         */
+        cursor?: string;
         documentId?: string;
     };
     url: '/duplicate-sets';
@@ -3479,8 +3579,10 @@ export type ListDuplicateSetsErrors = {
 export type ListDuplicateSetsError = ListDuplicateSetsErrors[keyof ListDuplicateSetsErrors];
 
 export type ListDuplicateSetsResponses = {
-    200: unknown;
+    200: DuplicateSetListResponseDtoClass;
 };
+
+export type ListDuplicateSetsResponse = ListDuplicateSetsResponses[keyof ListDuplicateSetsResponses];
 
 export type ApplyDuplicateSetDecisionsData = {
     body?: never;
@@ -3695,7 +3797,13 @@ export type AcceptUserInvitationResponses = {
 export type GetLabelDocumentInventoryData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        limit?: number;
+        /**
+         * Opaque keyset cursor from a previous response
+         */
+        cursor?: string;
+    };
     url: '/labels/document-inventory';
 };
 
@@ -3715,6 +3823,30 @@ export type GetLabelDocumentInventoryResponses = {
 };
 
 export type GetLabelDocumentInventoryResponse = GetLabelDocumentInventoryResponses[keyof GetLabelDocumentInventoryResponses];
+
+export type GetLabelDocumentInventorySummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/labels/document-inventory/summary';
+};
+
+export type GetLabelDocumentInventorySummaryErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type GetLabelDocumentInventorySummaryError = GetLabelDocumentInventorySummaryErrors[keyof GetLabelDocumentInventorySummaryErrors];
+
+export type GetLabelDocumentInventorySummaryResponses = {
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type GetLabelDocumentInventorySummaryResponse = GetLabelDocumentInventorySummaryResponses[keyof GetLabelDocumentInventorySummaryResponses];
 
 export type MapData = {
     body?: never;
@@ -4186,7 +4318,10 @@ export type ListDocumentReviewQueueData = {
     path?: never;
     query?: {
         limit?: number;
-        offset?: number;
+        /**
+         * Opaque keyset cursor from a previous response
+         */
+        cursor?: string;
     };
     url: '/review-queue';
 };
@@ -4297,7 +4432,13 @@ export type GetDocumentReviewQueueSummaryResponse = GetDocumentReviewQueueSummar
 export type ListSavedDocumentViewsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        limit?: number;
+        /**
+         * Opaque keyset cursor from a previous response
+         */
+        cursor?: string;
+    };
     url: '/saved-views';
 };
 

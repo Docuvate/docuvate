@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   CreateSavedDocumentViewRequest,
+  CursorListQuery,
   ReplaceDashboardLayoutRequest,
   UpdateSavedDocumentViewRequest,
 } from '@docuvate/contracts';
@@ -29,6 +30,7 @@ import {
 } from '../domain/saved-view-access.js';
 import { savedViewToDocumentListQuery } from '../domain/saved-view-list-query.js';
 import type { SavedDocumentViewEntity } from '../domain/workspace.types.js';
+import { clampCursorListLimit } from '../../../shared/infrastructure/pagination/clamp-cursor-list-limit.js';
 import { PgWorkspaceRepository } from '../infrastructure/pg-workspace.repository.js';
 import { SavedViewScopeValidator } from '../infrastructure/saved-view-scope.validator.js';
 
@@ -39,17 +41,27 @@ export class ListSavedViewsUseCase {
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
   ) {}
 
-  async execute(userId: string) {
-    const views = await this.workspace.listViewsVisibleToUser(userId);
+  async execute(userId: string, pagination: CursorListQuery) {
+    const limit = clampCursorListLimit(pagination.limit);
+    const page = await this.workspace.listViewsPageForUser(userId, {
+      limit,
+      cursor: pagination.cursor,
+    });
     const counts = await Promise.all(
-      views.map((view) =>
+      page.items.map((view) =>
         this.documents.countForUser(userId, savedViewToDocumentListQuery(view))
       )
     );
-    return views.map((view, index) => ({
+    const rows = page.items.map((view, index) => ({
       view,
       documentCount: counts[index] ?? 0,
     }));
+    return {
+      rows,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
+      total: page.total,
+    };
   }
 }
 

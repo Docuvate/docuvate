@@ -3565,6 +3565,14 @@ mark.global-search-mark {
   font-size: 0.875rem;
 }
 
+.doc-chat-thread-list-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .doc-chat-thread-list {
   list-style: none;
   margin: 0;
@@ -3576,7 +3584,6 @@ mark.global-search-mark {
   gap: var(--dv-space-2xs);
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
 }
 
 .doc-chat-thread-list > li {
@@ -11291,13 +11298,31 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dateisystem-sidebar .dateisystem-tree-nav {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
   max-width: 100%;
-  overflow-x: clip;
-  overflow-y: visible;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   margin-bottom: var(--dv-space-xs);
+}
+
+.dateisystem-sidebar .dateisystem-tree-nav-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+.duplicate-set-list-virtual {
+  max-height: min(70vh, 960px);
+  overflow-y: auto;
+}
+
+.labels-todo-list-virtual-scroll {
+  max-height: min(70vh, 960px);
+  overflow-y: auto;
 }
 
 .dateisystem-tree-list,

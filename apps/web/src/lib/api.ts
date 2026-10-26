@@ -28,6 +28,8 @@ import type {
   CreateTagRequest,
   DashboardLayoutResponse,
   DashboardStatisticsDto,
+  DashboardWidgetDocumentPreviewsQuery,
+  DashboardWidgetDocumentPreviewsResponseDto,
   DismissLabelRecommendationRequest,
   DocumentBulkRequest,
   DocumentChatMessageRecordDto,
@@ -46,15 +48,19 @@ import type {
   DocumentTagSuggestionsBatchResponseDto,
   DuplicateCandidateDto,
   DuplicateSetDto,
+  DuplicateSetListResponse,
   DuplicateStackDto,
   ExtractionArenaRatingRequest,
   ExtractionCompareResponse,
   ExtractionEngineInfo,
   FolderDto,
+  GlobalChatSuggestionBootstrapDto,
   GlobalSearchResponseDto,
   HardwareCapabilitiesDto,
   InviteAdminUserRequest,
+  LabelDocumentInventoryQuery,
   LabelDocumentInventoryResponseDto,
+  LabelDocumentInventorySummaryResponseDto,
   LabelMapResponseDto,
   LabelRecommendationBlocklistEntryDto,
   LabelRecommendationBlocklistPatternDto,
@@ -420,8 +426,23 @@ export async function getLabelMap(): Promise<LabelMapResponseDto> {
   return request<LabelMapResponseDto>('/labels/map');
 }
 
+export async function getLabelDocumentInventorySummary(): Promise<LabelDocumentInventorySummaryResponseDto> {
+  return request<LabelDocumentInventorySummaryResponseDto>('/labels/document-inventory/summary');
+}
+
+export async function listLabelDocumentInventoryPage(
+  options: LabelDocumentInventoryQuery = {}
+): Promise<LabelDocumentInventoryResponseDto> {
+  const qs = queryString({
+    limit: options.limit != null ? String(options.limit) : undefined,
+    cursor: options.cursor,
+  });
+  return request<LabelDocumentInventoryResponseDto>(`/labels/document-inventory${qs}`);
+}
+
+/** @deprecated Prefer {@link getLabelDocumentInventorySummary} and {@link listLabelDocumentInventoryPage}. */
 export async function getLabelDocumentInventory(): Promise<LabelDocumentInventoryResponseDto> {
-  return request<LabelDocumentInventoryResponseDto>('/labels/document-inventory');
+  return listLabelDocumentInventoryPage();
 }
 
 export async function acceptLabelRecommendation(
@@ -580,15 +601,22 @@ export async function getDocumentReviewQueueSummary(): Promise<DocumentReviewQue
   return request<DocumentReviewQueueSummaryDto>('/review-queue/summary');
 }
 
-export async function listDocumentReviewQueue(options?: {
+export async function listDocumentReviewQueuePage(options?: {
   limit?: number;
-  offset?: number;
+  cursor?: string;
 }): Promise<DocumentReviewQueueResponseDto> {
   const qs = queryString({
     limit: options?.limit != null ? String(options.limit) : undefined,
-    offset: options?.offset != null ? String(options.offset) : undefined,
+    cursor: options?.cursor,
   });
   return request<DocumentReviewQueueResponseDto>(`/review-queue${qs}`);
+}
+
+/** @deprecated Prefer {@link listDocumentReviewQueuePage} for paginated reads. */
+export async function listDocumentReviewQueue(options?: {
+  limit?: number;
+}): Promise<DocumentReviewQueueResponseDto> {
+  return listDocumentReviewQueuePage({ limit: options?.limit });
 }
 
 export async function acceptDocumentReviewAll(
@@ -657,9 +685,21 @@ export async function deleteFolder(id: string): Promise<void> {
   await request(`/folders/${id}`, { method: 'DELETE' });
 }
 
+export async function listDuplicateSetsPage(options?: {
+  documentId?: string;
+  limit?: number;
+  cursor?: string;
+}): Promise<DuplicateSetListResponse> {
+  const qs = queryString({
+    documentId: options?.documentId,
+    limit: options?.limit != null ? String(options.limit) : undefined,
+    cursor: options?.cursor,
+  });
+  return request<DuplicateSetListResponse>(`/duplicate-sets${qs}`);
+}
+
 export async function listDuplicateSets(documentId?: string): Promise<DuplicateSetDto[]> {
-  const query = documentId ? `?documentId=${encodeURIComponent(documentId)}` : '';
-  const data = await request<{ items: DuplicateSetDto[] }>(`/duplicate-sets${query}`);
+  const data = await listDuplicateSetsPage({ documentId });
   return data.items;
 }
 
@@ -834,9 +874,24 @@ export async function retryDocumentChatMessage(
   return data.message;
 }
 
+export async function listLibraryChatThreadsPage(options?: {
+  limit?: number;
+  cursor?: string;
+}): Promise<DocumentChatThreadListResponse> {
+  const qs = queryString({
+    limit: options?.limit != null ? String(options.limit) : undefined,
+    cursor: options?.cursor,
+  });
+  return request<DocumentChatThreadListResponse>(`/chat/threads${qs}`);
+}
+
 export async function listLibraryChatThreads(): Promise<DocumentChatThreadDto[]> {
-  const data = await request<DocumentChatThreadListResponse>('/chat/threads');
+  const data = await listLibraryChatThreadsPage();
   return data.threads;
+}
+
+export async function getGlobalChatSuggestionBootstrap(): Promise<GlobalChatSuggestionBootstrapDto> {
+  return request<GlobalChatSuggestionBootstrapDto>('/chat/suggestion-bootstrap');
 }
 
 export async function createLibraryChatThread(
@@ -1204,9 +1259,21 @@ export async function updateAdminPasswordPolicy(body: PasswordPolicyDto): Promis
   });
 }
 
-export async function listAdminUsers(search?: string): Promise<AdminUserListResponse> {
-  const qs = search?.trim() ? `?search=${encodeURIComponent(search.trim())}` : '';
+export async function listAdminUsersPage(options?: {
+  search?: string;
+  limit?: number;
+  cursor?: string;
+}): Promise<AdminUserListResponse> {
+  const qs = queryString({
+    search: options?.search?.trim() ? options.search.trim() : undefined,
+    limit: options?.limit != null ? String(options.limit) : undefined,
+    cursor: options?.cursor,
+  });
   return request<AdminUserListResponse>(`/admin/users${qs}`);
+}
+
+export async function listAdminUsers(search?: string): Promise<AdminUserListResponse> {
+  return listAdminUsersPage({ search });
 }
 
 export async function inviteAdminUser(body: InviteAdminUserRequest): Promise<AdminUserDto> {
@@ -1265,8 +1332,19 @@ export async function revokeAdminUserInvitation(userId: string): Promise<void> {
   });
 }
 
+export async function listSavedDocumentViewsPage(options?: {
+  limit?: number;
+  cursor?: string;
+}): Promise<SavedDocumentViewListResponse> {
+  const qs = queryString({
+    limit: options?.limit != null ? String(options.limit) : undefined,
+    cursor: options?.cursor,
+  });
+  return request<SavedDocumentViewListResponse>(`/saved-views${qs}`);
+}
+
 export async function listSavedDocumentViews(): Promise<SavedDocumentViewDto[]> {
-  const data = await request<SavedDocumentViewListResponse>('/saved-views');
+  const data = await listSavedDocumentViewsPage();
   return data.items;
 }
 
@@ -1317,6 +1395,19 @@ export async function replaceDashboardLayout(
     method: 'PUT',
     body: JSON.stringify(body),
   });
+}
+
+export async function getDashboardWidgetDocumentPreviews(
+  query: DashboardWidgetDocumentPreviewsQuery
+): Promise<DashboardWidgetDocumentPreviewsResponseDto> {
+  const qs = queryString({
+    type: query.type,
+    limit: query.limit != null ? String(query.limit) : undefined,
+    savedViewId: query.savedViewId,
+  });
+  return request<DashboardWidgetDocumentPreviewsResponseDto>(
+    `/dashboard/widget-document-previews${qs}`
+  );
 }
 
 export async function getDashboardStatistics(): Promise<DashboardStatisticsDto> {

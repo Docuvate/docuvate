@@ -1,9 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Get, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
 
+import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import {
   AuthGuard,
+  AuthSubject,
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
@@ -13,6 +15,10 @@ import {
   InstallationDashboardDefaultResponseDto,
   ReplaceDashboardLayoutRequestDto,
 } from '../../../shared/presentation/dtos/workspace.dto.js';
+import {
+  DashboardWidgetDocumentPreviewsQueryDto,
+  DashboardWidgetDocumentPreviewsResponseDtoClass,
+} from '../../../shared/presentation/dtos/dashboard-widget-previews.dto.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
@@ -25,6 +31,7 @@ import {
   ReplaceDashboardLayoutUseCase,
   SetInstallationDashboardDefaultUseCase,
 } from '../application/workspace.use-cases.js';
+import { GetDashboardWidgetDocumentPreviewsUseCase } from '../application/get-dashboard-widget-document-previews.use-case.js';
 import { toDashboardWidgetDto } from './workspace.mapper.js';
 
 @ApiDocuvateController('workspace')
@@ -37,8 +44,26 @@ export class DashboardController {
     private readonly getStatistics: GetDashboardStatisticsUseCase,
     private readonly getInstallationDefault: GetInstallationDashboardDefaultUseCase,
     private readonly setInstallationDefault: SetInstallationDashboardDefaultUseCase,
-    private readonly installationAdmin: GetInstallationAdminStatusUseCase
+    private readonly installationAdmin: GetInstallationAdminStatusUseCase,
+    private readonly widgetPreviews: GetDashboardWidgetDocumentPreviewsUseCase
   ) {}
+
+  @Get('widget-document-previews')
+  @ApiDocuvateRoute({
+    operationId: 'getDashboardWidgetDocumentPreviews',
+    summary: 'Limited document rows for dashboard widgets',
+  })
+  async widgetDocumentPreviews(
+    @Session() session: AuthSession,
+    @AuthSubject() subject: AuthorizationSubject,
+    @Query() query: DashboardWidgetDocumentPreviewsQueryDto
+  ): Promise<DashboardWidgetDocumentPreviewsResponseDtoClass> {
+    return this.widgetPreviews.execute(session.user.id, subject, {
+      type: query.type,
+      limit: query.limit,
+      savedViewId: query.savedViewId,
+    });
+  }
 
   @Get('installation-admin')
   @ApiDocuvateRoute({

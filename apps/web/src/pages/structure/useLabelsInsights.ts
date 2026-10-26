@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   type LabelAssignmentInventory,
-  type LabelInventoryDocument,
   type LabelMapCoverageSummaryDto,
   type LabelMapEmptyReason,
   type LabelRecommendationDto,
@@ -15,7 +14,7 @@ import {
   deleteTag,
   dismissLabelRecommendation,
   getDocumentReviewQueueSummary,
-  getLabelDocumentInventory,
+  getLabelDocumentInventorySummary,
   getLabelMap,
   listLabelRecommendations,
   removeDocumentTag,
@@ -61,7 +60,6 @@ export function useLabelsInsights(
   hooks?: { onSaveSuccess?: (options?: LabelInsightsSaveSuccessOptions) => void }
 ) {
   const [recommendations, setRecommendations] = useState<LabelRecommendationDto[]>([]);
-  const [documents, setDocuments] = useState<LabelInventoryDocument[]>([]);
   const [coverageSummary, setCoverageSummary] = useState<LabelMapCoverageSummaryDto | null>(null);
   const [mapEmptyReason, setMapEmptyReason] = useState<LabelMapEmptyReason | null>(null);
   const [extractedDocumentCount, setExtractedDocumentCount] = useState(0);
@@ -80,8 +78,8 @@ export function useLabelsInsights(
   });
 
   const queueItems = useMemo(
-    () => prepareLabelQueue(recommendations, documents),
-    [recommendations, documents]
+    () => prepareLabelQueue(recommendations, []),
+    [recommendations]
   );
 
   const warmPollDelayMsRef = useRef(4_000);
@@ -132,14 +130,12 @@ export function useLabelsInsights(
           setRecommendationsError(formatUserFacingError(err, 'errors.recommendationsLoadFailed'));
         });
 
-      const docsPromise = getLabelDocumentInventory()
-        .then((inventory) => {
-          setDocuments(inventory.documents);
-          setDocumentCountByTagId(inventory.documentCountByTagId);
-          setLabelInventory(inventory.inventory);
+      const summaryPromise = getLabelDocumentInventorySummary()
+        .then((summary) => {
+          setDocumentCountByTagId(summary.documentCountByTagId);
+          setLabelInventory(summary.inventory);
         })
         .catch(() => {
-          setDocuments([]);
           setDocumentCountByTagId({});
           setLabelInventory({ total: 0, labeled: 0, unlabeled: 0 });
         });
@@ -165,7 +161,7 @@ export function useLabelsInsights(
           setDocumentReviewPendingCount(0);
         });
 
-      await Promise.all([recsPromise, docsPromise, mapPromise, reviewPromise]);
+      await Promise.all([recsPromise, summaryPromise, mapPromise, reviewPromise]);
     } finally {
       if (!options?.silent) {
         setLoading(false);

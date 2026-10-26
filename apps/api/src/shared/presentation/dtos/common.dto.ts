@@ -229,6 +229,15 @@ export class DocumentChatThreadMessagesResponseDto {
 
 export class DocumentChatThreadListResponseDto {
   threads!: DocumentChatThreadDto[];
+
+  @ApiProperty({ nullable: true })
+  nextCursor!: string | null;
+
+  @ApiProperty()
+  hasMore!: boolean;
+
+  @ApiProperty({ nullable: true })
+  total!: number | null;
 }
 
 export class ChatMessageRecordDto {

@@ -122,7 +122,6 @@ describe('admin security (integration)', () => {
     const { users } = await adapter.listUsers({
       headers: new Headers(),
       limit: 50,
-      offset: 0,
     });
     const invite = users.find((u) => u.email === 'pending@example.com');
     expect(invite?.accountStatus).toBe('invited');
@@ -164,7 +163,6 @@ describe('admin security (integration)', () => {
     const searchResult = await adapter.listUsers({
       headers: new Headers(),
       limit: 10,
-      offset: 0,
       search: 'search',
     });
     expect(searchResult.total).toBe(2);
@@ -176,7 +174,6 @@ describe('admin security (integration)', () => {
     const page1 = await adapter.listUsers({
       headers: new Headers(),
       limit: 1,
-      offset: 0,
       search: 'search',
     });
     expect(page1.total).toBe(2);
@@ -185,10 +182,10 @@ describe('admin security (integration)', () => {
     const page2 = await adapter.listUsers({
       headers: new Headers(),
       limit: 1,
-      offset: 1,
+      cursor: page1.nextCursor ?? undefined,
       search: 'search',
     });
-    expect(page2.total).toBe(2);
+    expect(page2.total).toBeNull();
     expect(page2.users).toHaveLength(1);
     expect(page1.users[0].id).not.toBe(page2.users[0].id);
     expect(new Set([page1.users[0].email, page2.users[0].email]).size).toBe(2);
@@ -196,7 +193,6 @@ describe('admin security (integration)', () => {
     const wildcard = await adapter.listUsers({
       headers: new Headers(),
       limit: 10,
-      offset: 0,
       search: 'a%_',
     });
     expect(wildcard.total).toBe(0);
@@ -228,7 +224,6 @@ describe('admin security (integration)', () => {
     const { users, total } = await adapter.listUsers({
       headers: new Headers(),
       limit: 50,
-      offset: 0,
     });
     expect(total).toBe(1);
     expect(users.some((u) => u.email === 'expired@example.com')).toBe(false);
@@ -252,7 +247,6 @@ describe('admin security (integration)', () => {
     const { users } = await adapter.listUsers({
       headers: new Headers(),
       limit: 50,
-      offset: 0,
     });
     const row = users.find((u) => u.id === 'suspended-user');
     expect(row?.accountStatus).toBe('suspended');

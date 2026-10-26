@@ -9,6 +9,7 @@ import {
   AuthSubject,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
+import { parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 import {
   AcceptDocumentReviewBatchRequestDto,
   AcceptDocumentReviewBatchResponseDtoClass,
@@ -59,10 +60,8 @@ export class ReviewQueueController {
     @AuthSubject() subject: AuthorizationSubject,
     @Query() query: ReviewQueueQueryDto
   ): Promise<DocumentReviewQueueResponseDtoClass> {
-    return this.listQueue.execute(session.user.id, subject, {
-      limit: query.limit,
-      offset: query.offset,
-    });
+    const pagination = parseCursorListQuery(query);
+    return this.listQueue.execute(session.user.id, subject, pagination);
   }
 
   @Post('documents/:documentId/accept-all')

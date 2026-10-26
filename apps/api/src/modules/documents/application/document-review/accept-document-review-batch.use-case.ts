@@ -19,7 +19,7 @@ export class AcceptDocumentReviewBatchUseCase {
     subject: AuthorizationSubject,
     minConfidence: number
   ): Promise<AcceptDocumentReviewBatchResponseDto> {
-    const { rows } = await this.reviewQueueRepo.listPendingDocumentIds(userId, 200, 0);
+    const { rows } = await this.reviewQueueRepo.listPendingDocumentPage(userId, 200);
     let documentsProcessed = 0;
     let acceptedLabels = 0;
     let acceptedFields = 0;

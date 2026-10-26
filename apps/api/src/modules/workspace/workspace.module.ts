@@ -16,6 +16,7 @@ import {
   SetInstallationDashboardDefaultUseCase,
   UpdateSavedViewUseCase,
 } from './application/workspace.use-cases.js';
+import { GetDashboardWidgetDocumentPreviewsUseCase } from './application/get-dashboard-widget-document-previews.use-case.js';
 import { INSTALLATION_ROLE_READER } from './domain/installation-role.port.js';
 import { PgInstallationRoleReader } from './infrastructure/pg-installation-role.reader.js';
 import { PgWorkspaceRepository } from './infrastructure/pg-workspace.repository.js';
@@ -42,6 +43,7 @@ import { SavedViewsController } from './presentation/saved-views.controller.js';
     GetInstallationDashboardDefaultUseCase,
     SetInstallationDashboardDefaultUseCase,
     GetInstallationAdminStatusUseCase,
+    GetDashboardWidgetDocumentPreviewsUseCase,
   ],
   exports: [GetInstallationAdminStatusUseCase, INSTALLATION_ROLE_READER],
 })

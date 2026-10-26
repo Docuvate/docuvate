@@ -8,11 +8,10 @@ import { useLabelsInsights } from './useLabelsInsights';
 
 vi.mock('../../lib/api', () => ({
   listLabelRecommendations: vi.fn(() => Promise.resolve({ items: [], state: 'ready' })),
-  getLabelDocumentInventory: vi.fn(() =>
+  getLabelDocumentInventorySummary: vi.fn(() =>
     Promise.resolve({
       inventory: { total: 0, labeled: 0, unlabeled: 0 },
       documentCountByTagId: {},
-      documents: [],
     })
   ),
   getLabelMap: vi.fn(() =>

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 
-import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { createLabelEmbeddingRepositoryStub } from '../../../test-support/label-embedding-repository.stub.js';
 import { createTaxonomyRepositoryStub } from '../../../test-support/taxonomy-repository.stub.js';
 import {
@@ -10,7 +9,17 @@ import {
   createUserPreferencesRepositoryStub,
 } from '../../../test-support/user-preferences-repository.stub.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
+import type { PgLabelDocumentInventoryRepository } from '../infrastructure/pg-label-document-inventory.repository.js';
 import { GetLabelRecommendationsUseCase } from './get-label-recommendations.use-case.js';
+
+function createInventoryRepoStub(): PgLabelDocumentInventoryRepository {
+  return {
+    loadSummary: vi.fn(),
+    listDocumentsPage: vi.fn(),
+    loadSampleDocumentIdsByTag: vi.fn().mockResolvedValue(new Map()),
+    loadDocumentPreviewsByIds: vi.fn().mockResolvedValue(new Map()),
+  } as unknown as PgLabelDocumentInventoryRepository;
+}
 
 const USER = 'user-cold-cache';
 
@@ -40,9 +49,6 @@ describe('GetLabelRecommendationsUseCase cold hybrid cache', () => {
     const taxonomy = createTaxonomyRepositoryStub({
       listTags: vi.fn().mockImplementation(() => new Promise(() => undefined)),
     });
-    const documents = createDocumentRepositoryStub({
-      listForUser: vi.fn().mockImplementation(() => new Promise(() => undefined)),
-    });
     const prefs = createUserPreferencesRepositoryStub({
       getForUser: vi
         .fn()
@@ -50,11 +56,11 @@ describe('GetLabelRecommendationsUseCase cold hybrid cache', () => {
     });
 
     const useCase = new GetLabelRecommendationsUseCase(
-      documents,
       taxonomy,
       labelEmbeddings,
       prefs,
-      cache
+      cache,
+      createInventoryRepoStub()
     );
 
     const started = performance.now();

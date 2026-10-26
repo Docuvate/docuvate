@@ -20,9 +20,14 @@ export interface UserAdministrationPort {
   listUsers(input: {
     headers: Headers;
     limit: number;
-    offset: number;
+    cursor?: string;
     search?: string;
-  }): Promise<{ users: AdminUserListItem[]; total: number }>;
+  }): Promise<{
+    users: AdminUserListItem[];
+    total: number | null;
+    hasMore: boolean;
+    nextCursor: string | null;
+  }>;
 
   createUser(input: {
     headers: Headers;

@@ -43,6 +43,7 @@ import 'package:docuvate/src/generated/src/model/create_tag_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/dashboard_layout_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/dashboard_statistics_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/dashboard_statistics_dto_class_top_labels_inner.dart';
+import 'package:docuvate/src/generated/src/model/dashboard_widget_document_previews_response_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/dashboard_widget_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/dashboard_widget_input_dto.dart';
 import 'package:docuvate/src/generated/src/model/dismiss_label_recommendation_request_dto.dart';
@@ -62,6 +63,7 @@ import 'package:docuvate/src/generated/src/model/document_duplicate_stack_summar
 import 'package:docuvate/src/generated/src/model/document_extraction_image_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_extraction_summary_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_extraction_summary_dto_layout_ir_pages_inner.dart';
+import 'package:docuvate/src/generated/src/model/document_list_library_ui_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_module_descriptor_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_pipeline_modules_response_dto.dart';
@@ -73,6 +75,7 @@ import 'package:docuvate/src/generated/src/model/document_review_queue_summary_d
 import 'package:docuvate/src/generated/src/model/document_tag_suggestions_batch_item_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_tag_suggestions_batch_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_tag_suggestions_batch_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/duplicate_set_list_response_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_keep_version_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_not_duplicate_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_set_primary_request_dto.dart';
@@ -85,6 +88,8 @@ import 'package:docuvate/src/generated/src/model/extraction_compare_request_dto.
 import 'package:docuvate/src/generated/src/model/extraction_engine_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/feature_flags_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/folder_list_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/global_chat_suggestion_bootstrap_dto_class.dart';
+import 'package:docuvate/src/generated/src/model/global_chat_suggestion_bootstrap_dto_class_contract_end_sample.dart';
 import 'package:docuvate/src/generated/src/model/import_from_connector_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/installation_dashboard_default_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/invite_admin_user_request_dto.dart';
@@ -187,6 +192,7 @@ part 'serializers.g.dart';
   DashboardLayoutResponseDto,
   DashboardStatisticsDtoClass,
   DashboardStatisticsDtoClassTopLabelsInner,
+  DashboardWidgetDocumentPreviewsResponseDtoClass,
   DashboardWidgetDtoClass,
   DashboardWidgetInputDto,
   DismissLabelRecommendationRequestDto,
@@ -206,6 +212,7 @@ part 'serializers.g.dart';
   DocumentExtractionImageDto,
   DocumentExtractionSummaryDto,
   DocumentExtractionSummaryDtoLayoutIrPagesInner,
+  DocumentListLibraryUiDto,
   DocumentListResponseDto,
   DocumentPipelineModuleDescriptorDto,
   DocumentPipelineModulesResponseDto,
@@ -217,6 +224,7 @@ part 'serializers.g.dart';
   DocumentTagSuggestionsBatchItemDto,
   DocumentTagSuggestionsBatchRequestDto,
   DocumentTagSuggestionsBatchResponseDto,
+  DuplicateSetListResponseDtoClass,
   DuplicateStackKeepVersionRequestDto,
   DuplicateStackNotDuplicateRequestDto,
   DuplicateStackSetPrimaryRequestDto,
@@ -229,6 +237,8 @@ part 'serializers.g.dart';
   ExtractionEngineListResponseDto,
   FeatureFlagsResponseDto,
   FolderListResponseDto,
+  GlobalChatSuggestionBootstrapDtoClass,
+  GlobalChatSuggestionBootstrapDtoClassContractEndSample,
   ImportFromConnectorRequestDto,
   InstallationDashboardDefaultResponseDto,
   InviteAdminUserRequestDto,

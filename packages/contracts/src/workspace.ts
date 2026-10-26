@@ -43,9 +43,9 @@ export interface SavedDocumentViewDto {
   updatedAt: string;
 }
 
-export interface SavedDocumentViewListResponse {
-  items: SavedDocumentViewDto[];
-}
+import type { CursorListResponse } from './cursor-list.js';
+
+export interface SavedDocumentViewListResponse extends CursorListResponse<SavedDocumentViewDto> {}
 
 export interface CreateSavedDocumentViewRequest {
   name: string;

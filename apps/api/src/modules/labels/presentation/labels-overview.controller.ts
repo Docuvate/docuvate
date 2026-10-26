@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+
+import {
+  CursorListQueryDto,
+  parseCursorListQuery,
+} from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 
 import {
   AuthGuard,
@@ -82,13 +87,25 @@ export class LabelsOverviewController {
     return this.getMap.execute(session.user.id);
   }
 
+  @Get('document-inventory/summary')
+  @ApiDocuvateRoute({
+    operationId: 'getLabelDocumentInventorySummary',
+    summary: 'Label assignment inventory aggregates without document rows',
+  })
+  async documentInventorySummary(@Session() session: AuthSession) {
+    return this.getDocumentInventory.executeSummary(session.user.id);
+  }
+
   @Get('document-inventory')
   @ApiDocuvateRoute({
     operationId: 'getLabelDocumentInventory',
-    summary: 'Ready-document label assignment inventory (slim)',
+    summary: 'Ready-document label assignment inventory (paginated documents)',
   })
-  async documentInventory(@Session() session: AuthSession) {
-    return this.getDocumentInventory.execute(session.user.id);
+  async documentInventory(
+    @Session() session: AuthSession,
+    @Query() query: CursorListQueryDto
+  ) {
+    return this.getDocumentInventory.execute(session.user.id, parseCursorListQuery(query));
   }
 
   @Post('recommendations/:id/accept')

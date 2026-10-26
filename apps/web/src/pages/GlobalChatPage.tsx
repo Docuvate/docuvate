@@ -5,6 +5,7 @@ import type {
   DocumentChatThreadDto,
   UserSettingsDto,
 } from '@docuvate/contracts';
+import { useQueryClient } from '@tanstack/react-query';
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
@@ -22,19 +23,20 @@ import {
   cancelLibraryChatMessage,
   createLibraryChatThread,
   deleteLibraryChatThread,
+  getGlobalChatSuggestionBootstrap,
   getUserSettings,
-  listDocuments,
   listLibraryChatThreadMessages,
-  listLibraryChatThreads,
-  listTags,
   retryLibraryChatMessage,
   sendLibraryChatThreadMessage,
   updateLibraryChatThread,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
+import { useLibraryChatThreadsInfiniteQuery } from '../lib/chat/useLibraryChatThreadsInfiniteQuery';
 import { isChatGenerationInProgress } from '../lib/chatGenerationActive';
 import { showThreadListSpinner } from '../lib/chatThreadSpinner';
-import { buildGlobalChatSuggestions } from '../lib/globalChatSuggestions';
+import { buildGlobalChatSuggestionsFromBootstrap } from '../lib/globalChatSuggestionsFromBootstrap';
+import { flattenCursorPages } from '../lib/pagination/useCursorInfiniteQuery';
+import { useCursorLoadMoreSentinel } from '../lib/pagination/useCursorLoadMoreSentinel';
 import { routes } from '../lib/routes';
 import { useLibraryChatMessageStream } from '../lib/useLibraryChatMessageStream';
 import { useStackedDocChatLayout } from '../lib/useStackedDocChatLayout';
@@ -56,11 +58,10 @@ export function GlobalChatPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { pushSuccess } = useToastNotify();
-  const [threads, setThreads] = useState<DocumentChatThreadDto[]>([]);
+  const queryClient = useQueryClient();
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DocumentChatMessageRecordDto[]>([]);
   const [input, setInput] = useState('');
-  const [loadingThreads, setLoadingThreads] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retryBusy, setRetryBusy] = useState(false);
@@ -69,12 +70,17 @@ export function GlobalChatPage() {
   const [composerDraftActive, setComposerDraftActive] = useState(false);
   const [userSettings, setUserSettings] = useState<UserSettingsDto | null>(null);
   const [suggestionChips, setSuggestionChips] = useState<
-    ReturnType<typeof buildGlobalChatSuggestions>['chips']
+    ReturnType<typeof buildGlobalChatSuggestionsFromBootstrap>['chips']
   >([]);
   const [recentQuestions, setRecentQuestions] = useState<string[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const logEndRef = useRef<HTMLDivElement | null>(null);
+  const threadListScrollRef = useRef<HTMLDivElement | null>(null);
   const streamTargetRef = useRef<string | null>(null);
+
+  const threadsQuery = useLibraryChatThreadsInfiniteQuery(chatUiEnabled);
+  const threads = flattenCursorPages(threadsQuery.data?.pages);
+  const loadingThreads = chatUiEnabled && threadsQuery.isLoading;
 
   const generationInProgress = useMemo(
     () => isChatGenerationInProgress(messages, loadingMessages),
@@ -111,13 +117,24 @@ export function GlobalChatPage() {
     upsertMessage
   );
 
-  const refreshThreads = useCallback(async (selectThreadId?: string) => {
-    const list = await listLibraryChatThreads();
-    setThreads(list);
-    if (selectThreadId) {
-      setActiveThreadId(selectThreadId);
-    }
-  }, []);
+  const refreshThreads = useCallback(
+    async (selectThreadId?: string) => {
+      await queryClient.invalidateQueries({ queryKey: ['library-chat-threads'] });
+      if (selectThreadId) {
+        setActiveThreadId(selectThreadId);
+      }
+    },
+    [queryClient]
+  );
+
+  useCursorLoadMoreSentinel({
+    containerRef: threadListScrollRef,
+    hasNextPage: threadsQuery.hasNextPage,
+    isFetchingNextPage: threadsQuery.isFetchingNextPage,
+    fetchNextPage: () => {
+      void threadsQuery.fetchNextPage();
+    },
+  });
 
   const attachStreamIfNeeded = useCallback(
     (rows: DocumentChatMessageRecordDto[]) => {
@@ -157,31 +174,16 @@ export function GlobalChatPage() {
 
   useEffect(() => {
     if (!chatUiEnabled) {
-      setThreads([]);
       setActiveThreadId(null);
       setMessages([]);
-      setLoadingThreads(false);
-      return undefined;
     }
-    let cancelled = false;
-    setLoadingThreads(true);
-    void listLibraryChatThreads()
-      .then((list) => {
-        if (cancelled) return;
-        setThreads(list);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(formatUserFacingError(err, 'common.error'));
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingThreads(false);
-      });
-    return () => {
-      cancelled = true;
-    };
   }, [chatUiEnabled]);
+
+  useEffect(() => {
+    if (threadsQuery.isError) {
+      setError(formatUserFacingError(threadsQuery.error, 'common.error'));
+    }
+  }, [threadsQuery.error, threadsQuery.isError]);
 
   useEffect(() => {
     if (!activeThreadId) {
@@ -226,13 +228,11 @@ export function GlobalChatPage() {
     const previousTitle = threads.find((row) => row.id === threadId)?.title ?? '';
     setError(null);
     try {
-      const updated = await updateLibraryChatThread(threadId, nextTitle);
-      setThreads((prev) => prev.map((thread) => (thread.id === threadId ? updated : thread)));
+      await updateLibraryChatThread(threadId, nextTitle);
+      await refreshThreads(threadId);
       pushSuccess(undefined, {
         undo: () => {
-          void updateLibraryChatThread(threadId, previousTitle).then((restored) => {
-            setThreads((prev) => prev.map((thread) => (thread.id === threadId ? restored : thread)));
-          });
+          void updateLibraryChatThread(threadId, previousTitle).then(() => refreshThreads(threadId));
         },
       });
     } catch (err) {
@@ -244,7 +244,7 @@ export function GlobalChatPage() {
     setError(null);
     try {
       await deleteLibraryChatThread(threadId);
-      setThreads((prev) => prev.filter((thread) => thread.id !== threadId));
+      await refreshThreads();
       if (activeThreadId === threadId) {
         setActiveThreadId(null);
         setMessages([]);
@@ -280,7 +280,6 @@ export function GlobalChatPage() {
       if (!threadId) {
         const thread = await createLibraryChatThread({});
         threadId = thread.id;
-        setThreads((prev) => [thread, ...prev]);
         setActiveThreadId(threadId);
         setComposerDraftActive(false);
       }
@@ -335,14 +334,10 @@ export function GlobalChatPage() {
     if (!(showBootstrapEmpty || showComposerDraft)) return;
     let cancelled = false;
     setLoadingSuggestions(true);
-    void Promise.all([listTags(), listDocuments(), Promise.resolve(threads)])
-      .then(([tags, documents, threadList]) => {
+    void getGlobalChatSuggestionBootstrap()
+      .then((bootstrap) => {
         if (cancelled) return;
-        const built = buildGlobalChatSuggestions({
-          tags,
-          documents,
-          threads: threadList,
-        });
+        const built = buildGlobalChatSuggestionsFromBootstrap(bootstrap);
         setSuggestionChips(built.chips);
         setRecentQuestions(built.recentQuestions);
       })
@@ -363,7 +358,6 @@ export function GlobalChatPage() {
     showChatNotReady,
     showBootstrapEmpty,
     showComposerDraft,
-    threads,
     dateLocale,
   ]);
 
@@ -436,6 +430,7 @@ export function GlobalChatPage() {
                   <span>{t('common.loading')}</span>
                 </p>
               ) : null}
+              <div ref={threadListScrollRef} className="doc-chat-thread-list-scroll">
               <ul className="doc-chat-thread-list">
                 {filteredThreads.map((thread) => {
                   const selected = thread.id === activeThreadId;
@@ -461,6 +456,7 @@ export function GlobalChatPage() {
                   );
                 })}
               </ul>
+              </div>
             </aside>
           ) : null}
 

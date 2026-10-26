@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+
+import { CursorListQueryDto, parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 
 import {
   AuthGuard,
@@ -44,12 +46,19 @@ export class SavedViewsController {
 
   @Get()
   @ApiDocuvateRoute({ operationId: 'listSavedDocumentViews', summary: 'List saved document views' })
-  async list(@Session() session: AuthSession): Promise<SavedDocumentViewListResponseDto> {
-    const items = await this.listViews.execute(session.user.id);
+  async list(
+    @Session() session: AuthSession,
+    @Query() query: CursorListQueryDto
+  ): Promise<SavedDocumentViewListResponseDto> {
+    const pagination = parseCursorListQuery(query);
+    const page = await this.listViews.execute(session.user.id, pagination);
     return {
-      items: items.map(({ view, documentCount }) =>
+      items: page.rows.map(({ view, documentCount }) =>
         toSavedDocumentViewDto(view, { documentCount })
       ),
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
+      total: page.total,
     };
   }
 
