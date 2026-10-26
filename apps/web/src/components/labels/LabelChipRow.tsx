@@ -33,6 +33,7 @@ export function LabelChipRow({ items, className, overflowAriaLabel }: LabelChipR
   const visible = items.slice(0, visibleCount);
   const overflow = items.slice(visibleCount);
   const singleTruncatedChip = visibleCount === 1 && overflow.length > 0;
+  const truncateVisibleLabels = true;
 
   if (items.length === 0) {
     return null;
@@ -56,7 +57,7 @@ export function LabelChipRow({ items, className, overflowAriaLabel }: LabelChipR
               label={item.label}
               variant={item.variant ?? 'assigned'}
               color={item.color}
-              truncateLabel={item.truncateLabel ?? singleTruncatedChip}
+              truncateLabel={item.truncateLabel ?? truncateVisibleLabels}
               onRemove={item.onRemove}
             />
           </span>

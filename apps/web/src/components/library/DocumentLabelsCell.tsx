@@ -6,8 +6,6 @@ import { useMemo } from 'react';
 import { DocumentLabelSuggestionChips } from '../documents/DocumentLabelSuggestionChips';
 import { LabelChipRow } from '../labels/LabelChipRow';
 
-const LONG_LABEL_CHARS = 18;
-
 interface DocumentLabelsCellProps {
   document: Pick<DocumentDto, 'id' | 'tags' | 'tagSuggestions'>;
   onRefresh?: () => void | Promise<void>;
@@ -34,7 +32,6 @@ export function DocumentLabelsCell({ document, onRefresh }: DocumentLabelsCellPr
           id: tag.id,
           label: tag.name,
           color: tag.color,
-          truncateLabel: tag.name.length > LONG_LABEL_CHARS,
         }))}
       />
     </div>

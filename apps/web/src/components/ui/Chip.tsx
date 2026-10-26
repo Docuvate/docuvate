@@ -31,6 +31,7 @@ export function Chip({
       className={`chip chip-${variant}${truncateLabel ? ' chip-label-truncate' : ''}`}
       style={style}
       title={label}
+      aria-label={truncateLabel ? label : undefined}
     >
       <span className="chip-label">{label}</span>
       {trailing}

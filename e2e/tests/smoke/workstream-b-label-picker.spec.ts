@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import crypto from 'node:crypto';
+import crypto, { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -24,10 +24,157 @@ const searchViewports = [
   { label: '390', width: 390, height: 844 },
 ] as const;
 
+const rowChipEllipsisViewports = [
+  { label: '390', width: 390, height: 844 },
+  { label: '1024', width: 1024, height: 768 },
+  { label: '1440', width: 1440, height: 900 },
+] as const;
+
+const rowChipEllipsisRoutes = [
+  { path: '/documents', slug: 'documents' },
+  { path: '/filesystem', slug: 'filesystem' },
+] as const;
+
+/** German compound-style names (each ≥ 60 characters). */
+const WS_B_LONG_GERMAN_LABEL_STEMS = [
+  'Bundesfinanzministeriumsverwaltungsarchivierungsbestimmungsdokumentenregisterführung',
+  'VerkehrsinfrastrukturfinanzierungsgesellschaftsjahresabrechnungsunterlagenOriginal',
+  'LandwirtschaftlicheBetriebshaftungsvertragsnachweisdokumentationGesamtbestand',
+  'Universitätsverwaltungsstudienabgabenbescheinigungsarchivierungssachbearbeitung',
+  'EnergieversorgungsnetzwerkstrompreisregulierungsbehördlicheMeldungsdokumentation',
+] as const;
+
+const fixturePdf = path.join(process.cwd(), 'fixtures/synthetic-upload.pdf');
+
 test.use({ storageState: smokeFixtureStoragePath() });
+
+let ellipsisFixtureUploadName = '';
 
 function md5File(filePath: string): string {
   return crypto.createHash('md5').update(fs.readFileSync(filePath)).digest('hex');
+}
+
+function assertLongGermanLabelStems(): void {
+  for (const stem of WS_B_LONG_GERMAN_LABEL_STEMS) {
+    expect(stem.length).toBeGreaterThanOrEqual(60);
+  }
+}
+
+async function waitForDocumentReady(
+  request: import('@playwright/test').APIRequestContext,
+  documentId: string
+): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        const res = await request.get(`${apiBase}/v1/documents/${documentId}`, {
+          headers: { origin: webOrigin },
+        });
+        if (!res.ok()) {
+          return 'pending';
+        }
+        const doc = (await res.json()) as { status: string };
+        return doc.status;
+      },
+      { timeout: 280_000, intervals: [2000, 3000, 5000] }
+    )
+    .toBe('ready');
+}
+
+async function provisionLongLabelRowFixture(
+  request: import('@playwright/test').APIRequestContext
+): Promise<string> {
+  assertLongGermanLabelStems();
+  const tagIds: string[] = [];
+  const runToken = randomUUID().slice(0, 8);
+  for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
+    const name = `ws-b-lang-${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
+    const response = await request.post(`${apiBase}/tags`, {
+      headers: { origin: webOrigin },
+      data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
+    });
+    expect(response.ok()).toBeTruthy();
+    const body = (await response.json()) as { id: string };
+    tagIds.push(body.id);
+  }
+
+  const uploadName = `ws-b-ellipsis-fixture-${runToken}.pdf`;
+  const pdf = Buffer.concat([
+    fs.readFileSync(fixturePdf),
+    Buffer.from(`\n%%WS_B_ELLIPSIS_FIXTURE=${runToken}\n`, 'utf8'),
+  ]);
+  const upload = await request.post(`${apiBase}/v1/documents`, {
+    headers: { origin: webOrigin },
+    multipart: {
+      file: {
+        name: uploadName,
+        mimeType: 'application/pdf',
+        buffer: pdf,
+      },
+    },
+  });
+  expect(upload.ok()).toBeTruthy();
+  const created = (await upload.json()) as { id: string };
+
+  for (const tagId of tagIds) {
+    const assign = await request.post(`${apiBase}/v1/documents/${created.id}/tags/${tagId}`, {
+      headers: { origin: webOrigin },
+    });
+    expect(assign.ok()).toBeTruthy();
+  }
+
+  await waitForDocumentReady(request, created.id);
+  return uploadName;
+}
+
+async function assertRowLabelChipsNeverHardClip(
+  page: import('@playwright/test').Page
+): Promise<void> {
+  const issues = await page.evaluate(() => {
+    const violations: string[] = [];
+
+    const hasEllipsis = (el: HTMLElement): boolean => {
+      const style = getComputedStyle(el);
+      const overflowHidden =
+        style.overflow === 'hidden' ||
+        style.overflowX === 'hidden' ||
+        style.overflow === 'clip' ||
+        style.overflowX === 'clip';
+      return style.textOverflow === 'ellipsis' && overflowHidden;
+    };
+
+    const chipLabels = document.querySelectorAll(
+      '.document-labels-cell-row .label-chip-row-visible .label-chip-row-chip .chip-label'
+    );
+    for (let i = 0; i < chipLabels.length; i += 1) {
+      const labelEl = chipLabels.item(i);
+      if (!(labelEl instanceof HTMLElement)) {
+        continue;
+      }
+      const chip = labelEl.closest('.chip');
+      if (!(chip instanceof HTMLElement)) {
+        continue;
+      }
+      const overflowed =
+        labelEl.scrollWidth > labelEl.clientWidth + 1 || chip.scrollWidth > chip.clientWidth + 1;
+      if (!overflowed) {
+        continue;
+      }
+      if (!hasEllipsis(labelEl)) {
+        violations.push(
+          `overflow-without-ellipsis:${labelEl.textContent?.trim().slice(0, 48) ?? '(empty)'}`
+        );
+      }
+      const fullName = chip.getAttribute('aria-label') ?? chip.getAttribute('title');
+      if (!fullName?.trim()) {
+        violations.push(
+          `missing-full-name-tooltip:${labelEl.textContent?.trim().slice(0, 48) ?? '(empty)'}`
+        );
+      }
+    }
+    return violations;
+  });
+  expect(issues).toEqual([]);
 }
 
 async function seedLabels(request: import('@playwright/test').APIRequestContext, count: number) {
@@ -111,6 +258,7 @@ test.describe('Workstream B label picker', () => {
     const health = await request.get(`${apiBase}/health`);
     test.skip(!health.ok(), 'API not running');
     await seedLabels(request, 500);
+    ellipsisFixtureUploadName = await provisionLongLabelRowFixture(request);
   });
 
   for (const viewport of tagFilterViewports) {
@@ -156,6 +304,38 @@ test.describe('Workstream B label picker', () => {
       await page.screenshot({ path: shot });
       expect(md5File(shot).length).toBe(32);
     });
+  }
+
+  for (const route of rowChipEllipsisRoutes) {
+    for (const viewport of rowChipEllipsisViewports) {
+      test(`document row label chips ellipsis (${route.slug} ${viewport.label})`, async ({
+        page,
+      }) => {
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+        await page.goto(`${webOrigin}${route.path}`);
+        await page.waitForLoadState('networkidle');
+        await setTheme(page, 'light');
+
+        const scrollHost = page.getByTestId('library-doc-virtual-scroll');
+        await expect(scrollHost).toBeVisible({ timeout: 60_000 });
+
+        const fixtureRow = page
+          .locator('.library-doc-stack-item, .library-table tbody tr')
+          .filter({ hasText: ellipsisFixtureUploadName })
+          .first();
+        await fixtureRow.scrollIntoViewIfNeeded({ timeout: 120_000 });
+        await expect(fixtureRow).toBeVisible();
+
+        await assertRowLabelChipsNeverHardClip(page);
+
+        const shot = path.join(
+          artifactRoot,
+          `row-chip-ellipsis-${route.slug}-${viewport.label}.png`
+        );
+        await page.screenshot({ path: shot });
+        expect(md5File(shot).length).toBe(32);
+      });
+    }
   }
 
   test('chip contrast and +N popover stay in viewport (1440)', async ({ page }) => {

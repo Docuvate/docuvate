@@ -320,6 +320,18 @@ a.btn:hover {
   white-space: nowrap;
 }
 
+.chip-label-truncate {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  flex: 0 1 auto;
+}
+
+.chip-label-truncate .chip-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .chip-assigned {
   background: var(--chip-bg, var(--dv-color-border-strong));
   color: var(--chip-fg, var(--dv-color-on-accent));
