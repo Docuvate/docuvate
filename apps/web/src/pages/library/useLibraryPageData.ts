@@ -241,7 +241,6 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
       folderId: mode === 'folder' ? folderId : undefined,
       unfiled: mode === 'unassigned' ? true : undefined,
       tagId: undefined,
-      includeTagSuggestions: true,
     });
   }, [filters, query, mode, folderId]);
 

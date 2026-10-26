@@ -1,5 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { DOCUMENT_LIST_DEFAULT_LIMIT } from '@docuvate/contracts';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -36,6 +37,11 @@ describe('useDocumentsInfiniteQuery', () => {
     const { rerender } = renderHook(() => useDocumentsInfiniteQuery(filters), { wrapper });
     await waitFor(() => {
       expect(listDocumentsPage).toHaveBeenCalledTimes(1);
+      expect(listDocumentsPage).toHaveBeenCalledWith({
+        sort: 'updatedAt',
+        order: 'desc',
+        limit: DOCUMENT_LIST_DEFAULT_LIMIT,
+      });
     });
 
     rerender();
