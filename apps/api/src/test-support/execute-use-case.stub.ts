@@ -9,10 +9,10 @@ export function createExecuteUseCaseStub<T extends { execute: (...args: never[])
   return {
     execute: vi.fn(),
     ...overrides,
-  } as T;
+  } as unknown as T;
 }
 
 /** Structural test double when only a subset of methods is exercised. */
 export function createClassStub<T>(methods: Partial<T>): T {
-  return methods as T;
+  return methods as unknown as T;
 }
