@@ -22,6 +22,7 @@ import {
   extractionQueueStalledIntervalMs,
 } from '../domain/extraction-queue.config.js';
 import { isPermanentExtractionFailureMessage } from '../domain/extraction-queue-failures.js';
+import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
 
 function parseExtractionJobDocumentId(data: unknown): string {
   const row = requireRecord(data);
@@ -45,7 +46,8 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly runExtraction: RunExtractionUseCase,
     private readonly runArenaSample: RunArenaSampleCompareUseCase,
-    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase
+    private readonly resolveFeatureFlags: ResolveFeatureFlagsUseCase,
+    private readonly extractCapacity: WorkerExtractCapacityCoordinator
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -63,16 +65,21 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           return;
         }
         const userId = parseString(requireRecord(job.data).userId).trim();
+        await this.extractCapacity.acquireSlot();
         try {
-          await this.runExtraction.execute(documentId);
-        } catch (error: unknown) {
-          const message = error instanceof Error ? error.message : String(error);
-          if (isPermanentExtractionFailureMessage(message)) {
-            throw new UnrecoverableError(message);
+          try {
+            await this.runExtraction.execute(documentId);
+          } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            if (isPermanentExtractionFailureMessage(message)) {
+              throw new UnrecoverableError(message);
+            }
+            throw error;
           }
-          throw error;
+          await this.maybeEnqueueArenaSample(documentId, userId);
+        } finally {
+          this.extractCapacity.releaseSlot();
         }
-        await this.maybeEnqueueArenaSample(documentId, userId);
       },
       {
         connection: this.connection,

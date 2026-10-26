@@ -23,7 +23,6 @@ from docuvate_worker.domain.cpu_pipeline.contracts import TacoStageData
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.exact_fact_index.build import build_exact_fact_index
 from docuvate_worker.domain.extract_errors import ExtractPermanentError, ExtractRetryableError
-from docuvate_worker.infrastructure.extract_memory.admission import admission_retry_after_seconds
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.domain.representation.encode import encode_units
 from docuvate_worker.domain.representation.units import (
@@ -39,6 +38,10 @@ from docuvate_worker.infrastructure.chat.rag_rerank import (
     RagPassage,
     rerank_passages,
     reranker_status,
+)
+from docuvate_worker.infrastructure.extract_memory.admission import admission_retry_after_seconds
+from docuvate_worker.infrastructure.extract_memory.extract_capacity import (
+    capacity_report_with_http_slots,
 )
 from docuvate_worker.infrastructure.extractors.compare import run_compare
 from docuvate_worker.infrastructure.extractors.engine_catalog import list_engine_meta
@@ -104,6 +107,7 @@ from docuvate_worker.presentation.schemas import (
     EmbedResponse,
     EngineInfo,
     EngineListResponse,
+    ExtractCapacityResponse,
     ExtractedField,
     ExtractionImageModel,
     ExtractRequest,
@@ -156,6 +160,19 @@ def _decode_content(content_base64: str) -> bytes:
 async def health() -> HealthResponse:
     """Async so liveness probes stay fast while sync /extract blocks the thread pool."""
     return HealthResponse(status="ok")
+
+
+@router.get("/health/capacity", response_model=ExtractCapacityResponse)
+async def health_capacity() -> ExtractCapacityResponse:
+    report = capacity_report_with_http_slots()
+    return ExtractCapacityResponse(
+        recommended_concurrent_extractions=report.recommended_concurrent_extractions,
+        active_extract_jobs=report.active_extract_jobs,
+        extract_slots_free=report.extract_slots_free,
+        memory_available_bytes=report.memory_available_bytes,
+        evictable_model_bytes=report.evictable_model_bytes,
+        cgroup_limit_bytes=report.cgroup_limit_bytes,
+    )
 
 
 @router.get("/health/ready", response_model=HealthResponse)

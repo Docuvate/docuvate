@@ -22,16 +22,16 @@ from docuvate_worker.infrastructure.extract_memory.cgroup import (
     cgroup_memory_available_bytes,
     read_cgroup_memory_snapshot,
 )
-from docuvate_worker.infrastructure.extract_memory.pixel_budget import (
-    effective_raster_dpi,
-    page_pixel_count_at_dpi,
-)
 from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
     DEFAULT_PARENT_RSS_BYTES,
 )
 from docuvate_worker.infrastructure.extract_memory.model_residency import (
     evictable_pool_model_bytes,
     reclaim_model_memory_for_admission,
+)
+from docuvate_worker.infrastructure.extract_memory.pixel_budget import (
+    effective_raster_dpi,
+    page_pixel_count_at_dpi,
 )
 from docuvate_worker.infrastructure.extract_memory.pool_memory import pool_memory_reserved_bytes
 from docuvate_worker.infrastructure.extract_memory.raster_estimate import (
@@ -319,6 +319,10 @@ class ExtractAdmissionController:
             if self._active:
                 self._active.pop()
 
+    def active_job_count(self) -> int:
+        with self._lock:
+            return len(self._active)
+
 
 _admission_controller = ExtractAdmissionController()
 
@@ -361,11 +365,13 @@ def extract_admission_slot(content: bytes, mime_type: str) -> Iterator[None]:
                 ),
                 error_type="ExtractResourceExhausted",
             )
-        if decision.reason in {"memory_pressure", "concurrent_capacity"}:
-            if reclaim_model_memory_for_admission() > 0:
-                decision = controller.try_acquire(estimate, minimum)
-                if decision.admit:
-                    break
+        if (
+            decision.reason in {"memory_pressure", "concurrent_capacity"}
+            and reclaim_model_memory_for_admission() > 0
+        ):
+            decision = controller.try_acquire(estimate, minimum)
+            if decision.admit:
+                break
         if attempt + 1 < attempts:
             time.sleep(_wait_interval_seconds())
     if decision is None or not decision.admit:

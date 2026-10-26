@@ -27,6 +27,10 @@ import {
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
 import { parseExtractedFacts } from '../../exact-facts/infrastructure/parse-extracted-facts.js';
+import {
+  parseWorkerRetryAfterSeconds,
+  WorkerExtractCapacityCoordinator,
+} from './worker-extract-capacity.coordinator.js';
 
 function isExtractedField(value: unknown): value is ExtractedField {
   if (!isRecord(value)) {
@@ -351,6 +355,8 @@ function parseCompareResponse(
 
 @Injectable()
 export class HttpExtractionAdapter implements ExtractionPort {
+  constructor(private readonly extractCapacity: WorkerExtractCapacityCoordinator) {}
+
   private workerHeaders(): Record<string, string> {
     return workerRequestHeaders();
   }
@@ -382,6 +388,11 @@ export class HttpExtractionAdapter implements ExtractionPort {
           body,
         });
         if (response.status === 502 || response.status === 503 || response.status === 504) {
+          if (response.status === 503) {
+            this.extractCapacity.onWorkerPressure503(
+              parseWorkerRetryAfterSeconds(response.headers.get('retry-after'))
+            );
+          }
           throw new Error(`Worker extraction unavailable: ${String(response.status)}`);
         }
         if (!response.ok) {

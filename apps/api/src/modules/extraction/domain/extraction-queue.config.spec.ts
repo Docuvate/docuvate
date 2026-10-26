@@ -20,10 +20,8 @@ describe('documentExtractionConcurrency', () => {
     expect(documentExtractionConcurrency()).toBe(2);
   });
 
-  it('falls back to cgroup/cpu heuristic when unset', () => {
+  it('falls back to worker-slot ceiling when unset', () => {
     delete process.env['DOCUMENT_EXTRACTION_CONCURRENCY'];
-    const value = documentExtractionConcurrency();
-    expect(value).toBeGreaterThanOrEqual(1);
-    expect(value).toBeLessThanOrEqual(4);
+    expect(documentExtractionConcurrency()).toBe(4);
   });
 });

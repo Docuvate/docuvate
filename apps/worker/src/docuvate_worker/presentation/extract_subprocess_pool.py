@@ -23,7 +23,10 @@ from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
     resolve_extract_concurrency,
 )
 from docuvate_worker.infrastructure.extract_memory.memory_pressure import should_defer_pool_recycle
-from docuvate_worker.infrastructure.extract_memory.pool_memory import pool_memory_registry
+from docuvate_worker.infrastructure.extract_memory.pool_memory import (
+    pool_memory_registry,
+    pool_resident_bytes_per_child,
+)
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 
 logger = logging.getLogger(__name__)
@@ -210,11 +213,7 @@ class _ExtractSubprocessPool:
 
     def evict_idle_children(self, *, keep_warm: int) -> int:
         """Close idle warm children; return estimated bytes reclaimed."""
-        from docuvate_worker.infrastructure.extract_memory.pool_memory import (
-            _pool_resident_bytes,
-        )
-
-        resident = _pool_resident_bytes()
+        resident = pool_resident_bytes_per_child()
         reclaimed = 0
         with self._assign_lock:
             warm_count = sum(1 for child in self.children if child.is_warm())

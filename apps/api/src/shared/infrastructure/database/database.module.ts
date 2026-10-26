@@ -10,6 +10,7 @@ import { PgDuplicateRepository } from '../../../modules/duplicates/infrastructur
 import { PgDuplicatePairLabelRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate-pair-label.repository.js';
 import { PgDuplicateStackRepository } from '../../../modules/duplicates/infrastructure/pg-duplicate-stack.repository.js';
 import { HttpExtractionAdapter } from '../../../modules/extraction/infrastructure/http-extraction.adapter.js';
+import { WorkerExtractCapacityCoordinator } from '../../../modules/extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { PgFolderRepository } from '../../../modules/folders/infrastructure/pg-folder.repository.js';
 import { HttpLabelFieldExtractionAdapter } from '../../../modules/labels/infrastructure/http-label-field-extraction.adapter.js';
 import { PgTagCustomFieldRepository } from '../../../modules/labels/infrastructure/pg-tag-custom-field.repository.js';
@@ -69,6 +70,7 @@ const typeOrmRootImports =
     { provide: DOCUMENT_REPOSITORY, useClass: PgDocumentRepository },
     { provide: TAXONOMY_REPOSITORY, useClass: PgTaxonomyRepository },
     { provide: OBJECT_STORAGE, useClass: MinioObjectStorage },
+    WorkerExtractCapacityCoordinator,
     { provide: EXTRACTION_PORT, useClass: HttpExtractionAdapter },
     { provide: SEARCH_PORT, useClass: PostgresSearchAdapter },
     { provide: FOLDER_REPOSITORY, useClass: PgFolderRepository },
@@ -86,6 +88,7 @@ const typeOrmRootImports =
     DOCUMENT_REPOSITORY,
     TAXONOMY_REPOSITORY,
     OBJECT_STORAGE,
+    WorkerExtractCapacityCoordinator,
     EXTRACTION_PORT,
     SEARCH_PORT,
     FOLDER_REPOSITORY,

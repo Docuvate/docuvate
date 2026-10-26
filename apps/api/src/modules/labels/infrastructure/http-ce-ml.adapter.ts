@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import { isRecord, parseNumber, parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
@@ -48,6 +48,7 @@ function parsePropagationScores(raw: unknown): CeLabelPropagationScore[] {
 
 @Injectable()
 export class HttpCeMlAdapter {
+  private readonly logger = new Logger(HttpCeMlAdapter.name);
   async propagateLabelScores(input: {
     labelName: string;
     passageVectors: number[][];
@@ -213,6 +214,12 @@ export class HttpCeMlAdapter {
         labeled_document_indices: input.labeledDocumentIndices,
       }),
     });
+    if (response.status === 404 || response.status === 405) {
+      this.logger.debug(
+        `Worker CE missing-label batch unavailable (${String(response.status)}); skipping batch hints`
+      );
+      return [];
+    }
     if (!response.ok) {
       throw new Error(`Worker CE missing-label batch failed: ${String(response.status)}`);
     }

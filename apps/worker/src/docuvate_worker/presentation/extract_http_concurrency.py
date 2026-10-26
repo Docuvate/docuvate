@@ -37,6 +37,17 @@ def _semaphore() -> threading.Semaphore:
         return _HttpExtractSlotState.semaphore
 
 
+def http_extract_slots_in_use() -> int:
+    sem = _HttpExtractSlotState.semaphore
+    if sem is None:
+        return 0
+    value = getattr(sem, "_value", None)
+    if not isinstance(value, int):
+        return 0
+    total = _slot_count()
+    return max(0, total - value)
+
+
 @contextmanager
 def extract_http_slot() -> Iterator[None]:
     sem = _semaphore()

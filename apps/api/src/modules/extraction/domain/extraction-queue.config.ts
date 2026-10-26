@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-import { defaultDocumentExtractionConcurrency } from '../../../shared/infrastructure/cgroup/default-parallelism.js';
+import { extractionWorkerMaxConcurrency } from '../infrastructure/extraction-slot-limiter.js';
 
 const DEFAULT_LOCK_MS = 20 * 60 * 1000;
 const DEFAULT_STALLED_INTERVAL_MS = 5 * 60 * 1000;
@@ -56,5 +56,5 @@ export function documentExtractionConcurrency(): number {
   if (configured > 0) {
     return configured;
   }
-  return defaultDocumentExtractionConcurrency();
+  return extractionWorkerMaxConcurrency();
 }
