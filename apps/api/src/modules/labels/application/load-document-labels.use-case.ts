@@ -13,6 +13,23 @@ import { filterExclusiveTagSuggestions } from '../domain/filter-exclusive-tag-su
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 import { PgLabelCoOccurrenceRepository } from '../infrastructure/pg-label-co-occurrence.repository.js';
 
+function filterSuggestionsForDocument(
+  suggestions: TagSuggestionEntity[],
+  assignedTagIds: Set<string>,
+  blockPhrases: string[],
+  blockPatterns: string[],
+  exclusivePairs: Awaited<ReturnType<PgLabelCoOccurrenceRepository['listMutuallyExclusiveTagPairs']>>
+): TagSuggestionEntity[] {
+  const notBlocked = suggestions.filter(
+    (suggestion) => !isBlockedLabelCandidate(suggestion.tag.name, blockPhrases, blockPatterns)
+  );
+  return filterExclusiveTagSuggestions({
+    suggestions: notBlocked,
+    assignedTagIds,
+    exclusivePairs,
+  });
+}
+
 @Injectable()
 export class LoadDocumentLabelSuggestionsUseCase {
   constructor(
@@ -31,14 +48,49 @@ export class LoadDocumentLabelSuggestionsUseCase {
     ]);
     const blockPhrases = blocklist.map((entry) => entry.phrase);
     const blockPatterns = patterns.map((entry) => entry.pattern);
-    const notBlocked = suggestions.filter(
-      (suggestion) => !isBlockedLabelCandidate(suggestion.tag.name, blockPhrases, blockPatterns)
-    );
     const assignedIds = new Set(assignedTags.map((tag) => tag.id));
-    return filterExclusiveTagSuggestions({
-      suggestions: notBlocked,
-      assignedTagIds: assignedIds,
-      exclusivePairs,
-    });
+    return filterSuggestionsForDocument(
+      suggestions,
+      assignedIds,
+      blockPhrases,
+      blockPatterns,
+      exclusivePairs
+    );
+  }
+
+  async executeMany(
+    userId: string,
+    documentIds: string[]
+  ): Promise<Map<string, TagSuggestionEntity[]>> {
+    const uniqueIds = [...new Set(documentIds)];
+    if (uniqueIds.length === 0) {
+      return new Map();
+    }
+    const [suggestionsByDoc, blocklist, patterns, assignedByDoc, exclusivePairs] =
+      await Promise.all([
+        this.taxonomy.listSuggestionsForDocuments(uniqueIds, userId),
+        this.labelEmbeddings.listRecommendationBlocklist(userId),
+        this.labelEmbeddings.listRecommendationBlocklistPatterns(userId),
+        this.taxonomy.listTagsForDocuments(uniqueIds),
+        this.coOccurrence.listMutuallyExclusiveTagPairs(userId),
+      ]);
+    const blockPhrases = blocklist.map((entry) => entry.phrase);
+    const blockPatterns = patterns.map((entry) => entry.pattern);
+    const result = new Map<string, TagSuggestionEntity[]>();
+    for (const documentId of uniqueIds) {
+      const suggestions = suggestionsByDoc.get(documentId) ?? [];
+      const assignedIds = new Set((assignedByDoc.get(documentId) ?? []).map((tag) => tag.id));
+      result.set(
+        documentId,
+        filterSuggestionsForDocument(
+          suggestions,
+          assignedIds,
+          blockPhrases,
+          blockPatterns,
+          exclusivePairs
+        )
+      );
+    }
+    return result;
   }
 }

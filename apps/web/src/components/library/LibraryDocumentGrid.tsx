@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentDto } from '@docuvate/contracts';
 import { ScanLine } from 'lucide-react';
-import { type MouseEvent } from 'react';
+import { type MouseEvent, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -17,6 +17,7 @@ import {
 } from './duplicateStackLabel';
 import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import { documentDisplayDate } from './libraryDocumentUtils';
+import { useLibraryDocumentVirtualizer } from './useLibraryDocumentVirtualizer';
 
 interface LibraryDocumentGridProps {
   items: DocumentDto[];
@@ -26,6 +27,10 @@ interface LibraryDocumentGridProps {
   onRefresh?: () => void;
   onReviewStack?: (primaryId: string, versionId?: string | null) => void;
   enableDocumentDrag?: boolean;
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  onLoadMore?: () => void;
+  listScrollStorageKey?: string;
 }
 
 export function LibraryDocumentGrid({
@@ -36,20 +41,55 @@ export function LibraryDocumentGrid({
   onRefresh,
   onReviewStack,
   enableDocumentDrag,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  onLoadMore,
+  listScrollStorageKey,
 }: LibraryDocumentGridProps) {
   const { t } = useTranslation();
+  const { parentRef, virtualizer } = useLibraryDocumentVirtualizer({
+    count: items.length,
+    estimateSize: 228,
+    hasNextPage,
+    isFetchingNextPage,
+    onLoadMore,
+    scrollStorageKey: listScrollStorageKey,
+  });
+  const virtualRows = virtualizer.getVirtualItems();
+  const gridStyle = useMemo(
+    () => ({
+      height: virtualizer.getTotalSize(),
+      position: 'relative' as const,
+    }),
+    [virtualizer]
+  );
+
   if (items.length === 0) {
     return null;
   }
 
   return (
-    <ul className="doc-grid">
-      {items.map((doc) => (
+    <div
+      ref={parentRef}
+      className="library-doc-list-scroll library-doc-grid-scroll"
+      data-testid="library-doc-virtual-scroll"
+    >
+      <ul className="doc-grid doc-grid-virtual" style={gridStyle}>
+      {virtualRows.map((virtualRow) => {
+        const doc = items[virtualRow.index];
+        return (
         <DocumentDraggableGridItem
           key={doc.id}
           documentId={doc.id}
           dragEnabled={enableDocumentDrag}
           className={`doc-card${selected.has(doc.id) ? ' doc-card-selected' : ''}`}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            transform: `translateY(${String(virtualRow.start)}px)`,
+          }}
           onContextMenu={(event) => { onContextMenu(event, doc.id); }}
         >
           <div className="doc-card-check">
@@ -128,7 +168,9 @@ export function LibraryDocumentGrid({
             </div>
           </Link>
         </DocumentDraggableGridItem>
-      ))}
+        );
+      })}
     </ul>
+    </div>
   );
 }

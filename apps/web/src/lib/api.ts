@@ -39,8 +39,11 @@ import type {
   DocumentChatThreadMessagesResponse,
   DocumentDto,
   DocumentListQuery,
+  DocumentListResponseDto,
   DocumentReviewQueueResponseDto,
   DocumentReviewQueueSummaryDto,
+  DocumentTagSuggestionsBatchRequestDto,
+  DocumentTagSuggestionsBatchResponseDto,
   DuplicateCandidateDto,
   DuplicateSetDto,
   DuplicateStackDto,
@@ -218,11 +221,11 @@ export async function fetchDocumentContentBlob(id: string): Promise<Blob> {
   return response.blob();
 }
 
-export async function listDocuments(filters: DocumentListQuery = {}): Promise<DocumentDto[]> {
+function documentListQueryString(filters: DocumentListQuery): string {
   const fieldFilters = filters.fieldFilters?.filter(
     (entry) => entry.fieldKey.trim() && entry.valueText.trim()
   );
-  const qs = queryString({
+  return queryString({
     q: filters.q,
     status: filters.status,
     tagId: filters.tagId,
@@ -240,8 +243,30 @@ export async function listDocuments(filters: DocumentListQuery = {}): Promise<Do
     sort: filters.sort,
     order: filters.order,
     includeTagSuggestions: filters.includeTagSuggestions ? 'true' : undefined,
+    limit: filters.limit != null ? String(filters.limit) : undefined,
+    cursor: filters.cursor,
   });
-  const data = await request<{ items: DocumentDto[] }>(`/documents${qs}`);
+}
+
+export async function listDocumentsPage(
+  filters: DocumentListQuery = {}
+): Promise<DocumentListResponseDto> {
+  const qs = documentListQueryString(filters);
+  return request<DocumentListResponseDto>(`/documents${qs}`);
+}
+
+export async function fetchDocumentTagSuggestionsBatch(
+  documentIds: string[]
+): Promise<DocumentTagSuggestionsBatchResponseDto> {
+  const body: DocumentTagSuggestionsBatchRequestDto = { documentIds };
+  return request<DocumentTagSuggestionsBatchResponseDto>('/documents/tag-suggestions', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function listDocuments(filters: DocumentListQuery = {}): Promise<DocumentDto[]> {
+  const data = await listDocumentsPage(filters);
   return data.items;
 }
 

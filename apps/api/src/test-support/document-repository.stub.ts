@@ -11,6 +11,7 @@ export function createDocumentRepositoryStub(
     create: vi.fn(),
     findById: vi.fn(),
     findByIdForUser: vi.fn(),
+    filterOwnedDocumentIds: vi.fn().mockResolvedValue([]),
     listForUser: vi.fn(),
     listPageForUser: vi
       .fn()

@@ -50,6 +50,7 @@ export interface DocumentRepository {
   create(doc: DocumentEntity): Promise<DocumentEntity>;
   findById(id: string): Promise<DocumentEntity | null>;
   findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null>;
+  filterOwnedDocumentIds(userId: string, documentIds: string[]): Promise<string[]>;
   listForUser(userId: string, filters?: DocumentListQuery): Promise<DocumentEntity[]>;
   listPageForUser(
     userId: string,
@@ -160,6 +161,11 @@ export interface TaxonomyRepository {
   clearInboxTagForDocument(documentId: string, userId: string): Promise<void>;
 
   listSuggestions(documentId: string, userId: string): Promise<TagSuggestionEntity[]>;
+  listSuggestionsForDocuments(
+    documentIds: string[],
+    userId: string
+  ): Promise<Map<string, TagSuggestionEntity[]>>;
+  listTagsForDocuments(documentIds: string[]): Promise<Map<string, TagEntity[]>>;
   upsertSuggestion(
     documentId: string,
     tagId: string,

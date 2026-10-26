@@ -17,6 +17,7 @@ import { RepresentationModule } from '../representation/representation.module.js
 import { SearchModule } from '../search/search.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { ApplyArenaWinnerExtractionUseCase } from './application/apply-arena-winner-extraction.use-case.js';
+import { BatchDocumentTagSuggestionsUseCase } from './application/batch-document-tag-suggestions.use-case.js';
 import { BulkDocumentsUseCase } from './application/bulk-documents.use-case.js';
 import { CancelDocumentChatGenerationUseCase } from './application/cancel-document-chat-generation.use-case.js';
 import { CompareDocumentExtractionUseCase } from './application/compare-extraction.use-case.js';
@@ -94,6 +95,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     UploadDocumentUseCase,
     GetDocumentUseCase,
     ListDocumentsUseCase,
+    BatchDocumentTagSuggestionsUseCase,
     UpdateDocumentUseCase,
     DeleteDocumentUseCase,
     BulkDocumentsUseCase,

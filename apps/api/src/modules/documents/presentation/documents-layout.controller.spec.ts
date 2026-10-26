@@ -22,6 +22,7 @@ import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/ref
 import { ListRecognizedFieldAttemptsUseCase } from '../../recognized-fields/application/list-recognized-field-attempts.use-case.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
+import { BatchDocumentTagSuggestionsUseCase } from '../application/batch-document-tag-suggestions.use-case.js';
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
 import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
 import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
@@ -108,6 +109,7 @@ describe('DocumentsController layout routes', () => {
             uploadDocument: UploadDocumentUseCase,
             getDocument: GetDocumentUseCase,
             listDocuments: ListDocumentsUseCase,
+            batchDocumentTagSuggestions: BatchDocumentTagSuggestionsUseCase,
             updateDocument: UpdateDocumentUseCase,
             deleteDocument: DeleteDocumentUseCase,
             bulkDocuments: BulkDocumentsUseCase,
@@ -148,8 +150,9 @@ describe('DocumentsController layout routes', () => {
             new DocumentsController(
               uploadDocument,
               getDocument,
-              listDocuments,
-              updateDocument,
+            listDocuments,
+            batchDocumentTagSuggestions,
+            updateDocument,
               deleteDocument,
               bulkDocuments,
               moveDocuments,
@@ -190,6 +193,7 @@ describe('DocumentsController layout routes', () => {
             UploadDocumentUseCase,
             GetDocumentUseCase,
             ListDocumentsUseCase,
+            BatchDocumentTagSuggestionsUseCase,
             UpdateDocumentUseCase,
             DeleteDocumentUseCase,
             BulkDocumentsUseCase,
@@ -236,6 +240,7 @@ describe('DocumentsController layout routes', () => {
         { provide: UploadDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: GetDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: ListDocumentsUseCase, useValue: useCaseExecuteMock() },
+        { provide: BatchDocumentTagSuggestionsUseCase, useValue: useCaseExecuteMock() },
         { provide: UpdateDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: DeleteDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: BulkDocumentsUseCase, useValue: useCaseExecuteMock() },

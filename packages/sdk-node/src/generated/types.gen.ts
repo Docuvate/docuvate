@@ -415,6 +415,21 @@ export type DocumentReviewQueueSummaryDtoClass = {
     pendingCount: number;
 };
 
+export type DocumentTagSuggestionsBatchItemDto = {
+    documentId: string;
+    suggestions: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+export type DocumentTagSuggestionsBatchRequestDto = {
+    documentIds: Array<string>;
+};
+
+export type DocumentTagSuggestionsBatchResponseDto = {
+    items: Array<DocumentTagSuggestionsBatchItemDto>;
+};
+
 export type DuplicateStackKeepVersionRequestDto = {
     versionDocumentId: string;
 };
@@ -2503,6 +2518,28 @@ export type MoveDocumentsResponses = {
 };
 
 export type MoveDocumentsResponse = MoveDocumentsResponses[keyof MoveDocumentsResponses];
+
+export type BatchDocumentTagSuggestionsData = {
+    body: DocumentTagSuggestionsBatchRequestDto;
+    path?: never;
+    query?: never;
+    url: '/documents/tag-suggestions';
+};
+
+export type BatchDocumentTagSuggestionsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type BatchDocumentTagSuggestionsError = BatchDocumentTagSuggestionsErrors[keyof BatchDocumentTagSuggestionsErrors];
+
+export type BatchDocumentTagSuggestionsResponses = {
+    200: DocumentTagSuggestionsBatchResponseDto;
+};
+
+export type BatchDocumentTagSuggestionsResponse = BatchDocumentTagSuggestionsResponses[keyof BatchDocumentTagSuggestionsResponses];
 
 export type ApplyDocumentLabelCorrectionData = {
     body: ApplyLabelCorrectionRequestDto;

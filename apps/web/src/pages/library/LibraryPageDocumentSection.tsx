@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode, RefObject } from 'react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DuplicateStackReviewDialog } from '../../components/library/DuplicateStackReviewDialog';
@@ -22,6 +22,7 @@ import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
 import { moveDocuments } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
+import { documentListQueryKey } from '../../lib/documents/documentListQueryKey';
 import { librarySortSelectOptions, parseLibrarySortSelectValue } from '../../lib/librarySortOptions';
 import { useNarrowTopbar } from '../../lib/useNarrowTopbar';
 import type { useLibraryDocumentContextMenu } from './useLibraryDocumentContextMenu';
@@ -81,6 +82,26 @@ export function LibraryPageDocumentSection({
   const showBulkBar = data.visibleSelectedCount > 0 || (!data.loading && data.items.length > 0);
   const showTableArea =
     data.loading || data.items.length > 0 || (data.viewMode !== 'klassisch' && !data.error);
+  const listScrollStorageKey = useMemo(() => {
+    const key = documentListQueryKey({
+      ...data.filters,
+      q: data.query || undefined,
+    });
+    return `library-doc-scroll:${JSON.stringify(key[2] ?? '')}`;
+  }, [data.filters, data.query]);
+  const { fetchNextPage, hasNextPage, isFetchingNextPage } = data;
+  const loadMore = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) {
+      return;
+    }
+    void fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  const listPagingProps = {
+    hasNextPage: data.hasNextPage,
+    isFetchingNextPage: data.isFetchingNextPage,
+    onLoadMore: loadMore,
+    listScrollStorageKey,
+  };
 
   return (
     <>
@@ -159,8 +180,13 @@ export function LibraryPageDocumentSection({
 
         {showBulkBar ? (
           <LibraryBulkBar
-            selectedCount={data.visibleSelectedCount}
-            showIdleHint={!data.loading && data.items.length > 0 && data.visibleSelectedCount === 0}
+            selectedCount={data.bulkSelectedCount}
+            totalCount={data.totalCount}
+            selectionScope={data.selectionScope}
+            onSelectAllMatching={() => {
+              void data.selectAllMatchingDocuments();
+            }}
+            showIdleHint={!data.loading && data.items.length > 0 && data.bulkSelectedCount === 0}
             bulkBusy={data.bulkBusy}
             selectedIds={[...data.selected]}
             items={data.items}
@@ -225,6 +251,7 @@ export function LibraryPageDocumentSection({
                 hideFolderColumn={filesystemLayout}
                 visibleColumns={data.visibleColumns}
                 suppressFolderFallbackForId={filesystemLayout ? data.activeFolderId : undefined}
+                {...listPagingProps}
               />
             ) : null}
             {data.viewMode === 'karten' ? (
@@ -240,6 +267,7 @@ export function LibraryPageDocumentSection({
                   ctx.setStackReview({ primaryId, versionId: versionId ?? null });
                 }}
                 enableDocumentDrag={enableDocumentDrag}
+                {...listPagingProps}
               />
             ) : null}
             {data.viewMode === 'fokus' ? (

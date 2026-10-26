@@ -3,6 +3,7 @@
 import './i18n';
 import './styles/global.css';
 
+import { QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -10,6 +11,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { App } from './App';
 import { RouteErrorFallback } from './components/RouteErrorFallback';
 import { initDocuvateTheme } from './lib/docuvateTheme';
+import { createAppQueryClient } from './lib/queryClient';
 
 initDocuvateTheme();
 import './components/ui/components.css';
@@ -26,6 +28,8 @@ declare global {
 const viteBuildSha = import.meta.env.VITE_DOCUVATE_BUILD_SHA?.trim();
 window.__DOCUVATE_BUILD_SHA__ = viteBuildSha ?? __DOCUVATE_BUILD_SHA__;
 
+const queryClient = createAppQueryClient();
+
 const router = createBrowserRouter([
   {
     path: '/*',
@@ -41,6 +45,8 @@ if (!rootEl) {
 
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   </React.StrictMode>
 );

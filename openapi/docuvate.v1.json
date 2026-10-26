@@ -4833,6 +4833,86 @@
         ]
       }
     },
+    "/documents/tag-suggestions": {
+      "post": {
+        "operationId": "batchDocumentTagSuggestions",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentTagSuggestionsBatchRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentTagSuggestionsBatchResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Load open tag suggestions for multiple documents (batch)",
+        "tags": [
+          "Documents"
+        ]
+      }
+    },
     "/documents/{documentId}/label-corrections": {
       "post": {
         "operationId": "applyDocumentLabelCorrection",
@@ -14021,6 +14101,54 @@
         },
         "required": [
           "pendingCount"
+        ]
+      },
+      "DocumentTagSuggestionsBatchItemDto": {
+        "type": "object",
+        "properties": {
+          "documentId": {
+            "type": "string"
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "documentId",
+          "suggestions"
+        ]
+      },
+      "DocumentTagSuggestionsBatchRequestDto": {
+        "type": "object",
+        "properties": {
+          "documentIds": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "documentIds"
+        ]
+      },
+      "DocumentTagSuggestionsBatchResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentTagSuggestionsBatchItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
         ]
       },
       "DuplicateStackKeepVersionRequestDto": {

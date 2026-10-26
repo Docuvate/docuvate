@@ -8,6 +8,10 @@ import type { useLibraryPageData } from '../pages/library/useLibraryPageData';
 export type LibraryPageDataStub = ReturnType<typeof useLibraryPageData>;
 export type LibraryPageContextStub = ReturnType<typeof useLibraryDocumentContextMenu>;
 
+const stubFetchNextPage: LibraryPageDataStub['fetchNextPage'] = () => {
+  return Promise.reject(new Error('fetchNextPage not implemented in library page stub'));
+};
+
 export function createLibraryPageDataStub(
   overrides: Partial<LibraryPageDataStub> = {}
 ): LibraryPageDataStub {
@@ -66,6 +70,13 @@ export function createLibraryPageDataStub(
     groupedLabelSuggestions: [],
     groupedLabelBusy: false,
     acceptGroupedLabelSuggestion: () => Promise.resolve(),
+    totalCount: null,
+    hasNextPage: false,
+    fetchNextPage: stubFetchNextPage,
+    isFetchingNextPage: false,
+    selectionScope: 'none',
+    selectAllMatchingDocuments: () => Promise.resolve(),
+    bulkSelectedCount: 0,
     ...overrides,
   };
 }

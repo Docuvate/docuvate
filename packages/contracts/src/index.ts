@@ -955,6 +955,21 @@ export type SortOrder = 'asc' | 'desc';
 export const DOCUMENT_LIST_DEFAULT_LIMIT = 50;
 /** Maximum allowed `limit` for GET /documents. */
 export const DOCUMENT_LIST_MAX_LIMIT = 200;
+/** Maximum document IDs per POST /documents/tag-suggestions batch. */
+export const DOCUMENT_TAG_SUGGESTIONS_BATCH_MAX = 50;
+
+export interface DocumentTagSuggestionsBatchRequestDto {
+  documentIds: string[];
+}
+
+export interface DocumentTagSuggestionsBatchItemDto {
+  documentId: string;
+  suggestions: TagSuggestionDto[];
+}
+
+export interface DocumentTagSuggestionsBatchResponseDto {
+  items: DocumentTagSuggestionsBatchItemDto[];
+}
 
 export interface DocumentListQuery {
   q?: string;

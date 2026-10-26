@@ -5681,6 +5681,120 @@ mark.global-search-mark {
   box-sizing: border-box;
 }
 
+.library-doc-list-scroll {
+  max-height: min(70vh, calc(100dvh - 14rem));
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.library-table-virtualized thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-raised, var(--surface-1));
+}
+
+.library-table.library-table-virtualized {
+  display: block;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.library-table.library-table-virtualized thead {
+  display: block;
+  width: 100%;
+}
+
+.library-table-wrap.library-table-virtual-with-folder .library-table-virtualized {
+  --library-virtual-grid-cols:
+    2rem 2.5rem minmax(0, 1fr) 7.5rem 16rem 8.75rem 6.25rem 4.5rem;
+}
+
+.library-table-wrap.library-table-virtual-no-folder .library-table-virtualized {
+  --library-virtual-grid-cols:
+    2rem 2.5rem minmax(0, 1fr) 16rem 8.75rem 6.25rem 4.5rem;
+}
+
+.library-doc-list-scroll.library-table-scroll {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.library-table.library-table-virtualized .library-table-virtual-header-row,
+.library-table.library-table-virtualized .library-table-virtual-row {
+  display: grid;
+  width: 100%;
+  grid-template-columns: var(--library-virtual-grid-cols);
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--dv-color-border);
+}
+
+.library-table.library-table-virtualized .library-table-virtual-header-row > th,
+.library-table.library-table-virtualized .library-table-virtual-row > td {
+  min-width: 0;
+  border-bottom: none;
+}
+
+.library-table.library-table-virtualized .library-table-virtual-body {
+  display: block;
+  width: 100%;
+  min-width: 100%;
+  position: relative;
+}
+
+.library-table.library-table-virtualized .library-table-virtual-row {
+  left: 0;
+}
+
+.library-table.library-table-virtualized .library-col-title {
+  width: auto;
+  min-width: 0;
+  max-width: none;
+}
+
+.library-table.library-table-virtualized td.library-col-labels .document-labels-cell {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.library-table.library-table-virtualized td.library-col-labels .document-label-suggestion-chips {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.library-table.library-table-virtualized td.library-col-labels .document-label-suggestion-chip-btn {
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.library-table.library-table-virtualized td.library-col-labels .document-label-suggestion-chip-btn .chip {
+  --chip-max-width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
+}
+
+.library-table.library-table-virtualized td.library-col-labels .document-labels-cell-row .chip {
+  max-width: 100%;
+  min-width: 0;
+  --chip-max-width: 100%;
+}
+
+.library-doc-stack-virtual-host .library-doc-stack-item {
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--dv-color-border);
+}
+
 @media (max-width: 768px) {
   .library-page .library-main .card.library-doc-table-card {
     padding: 0;
@@ -7891,6 +8005,9 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .library-table-wrap {
+  --library-table-date-col-min: 6.25rem;
+  --library-table-labels-col-min: 10rem;
+  --library-table-labels-col-max: 11.5rem;
   width: 100%;
   min-width: 0;
   overflow-x: auto;
@@ -8166,6 +8283,45 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .library-table td.library-col-action {
   overflow: visible;
   text-overflow: clip;
+}
+
+.library-table.library-table-virtualized th.library-col-title,
+.library-table.library-table-virtualized td.library-col-title {
+  width: unset;
+  min-width: 0;
+  max-width: none;
+  white-space: normal;
+}
+
+.library-table.library-table-virtualized th.library-col-status,
+.library-table.library-table-virtualized td.library-col-status,
+.library-table.library-table-virtualized th.library-col-meta,
+.library-table.library-table-virtualized td.library-col-meta,
+.library-table.library-table-virtualized th.library-col-action,
+.library-table.library-table-virtualized td.library-col-action,
+.library-table.library-table-virtualized th.library-col-check,
+.library-table.library-table-virtualized td.library-col-check {
+  width: unset;
+  min-width: 0;
+  max-width: none;
+}
+
+.library-table.library-table-virtualized th.library-col-labels,
+.library-table.library-table-virtualized td.library-col-labels {
+  width: auto;
+  min-width: var(--library-table-labels-col-min, 10rem);
+  max-width: var(--library-table-labels-col-max, 11.5rem);
+  overflow: hidden;
+}
+
+.library-table.library-table-virtualized th.library-col-date,
+.library-table.library-table-virtualized td.library-col-date {
+  width: auto;
+  min-width: var(--library-table-date-col-min, 6.25rem);
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .library-open-doc-btn {

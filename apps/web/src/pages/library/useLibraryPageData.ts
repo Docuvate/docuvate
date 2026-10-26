@@ -1,7 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
-  DocumentDto,
   DocumentListQuery,
   DocumentStatus,
   FolderDto,
@@ -22,7 +21,6 @@ import {
   acceptDocumentTagSuggestion,
   bulkDocuments,
   getSavedDocumentView,
-  listDocuments,
   listFolders,
   listRecognizedFields,
   listTags,
@@ -36,6 +34,11 @@ import {
   resolveDocumentFilterFields,
   serializeDocumentFilterQuery,
 } from '../../lib/documentFilterQuery';
+import { documentListQueryKey } from '../../lib/documents/documentListQueryKey';
+import {
+  flattenDocumentPages,
+  useDocumentsInfiniteQuery,
+} from '../../lib/documents/useDocumentsInfiniteQuery';
 import {
   documentListQueryWithFieldFilters,
   patchFieldFilter,
@@ -54,13 +57,14 @@ import { childFolders } from '../../lib/ordnerTree';
 import { applySavedViewToLibrary, buildSavedViewPayload } from '../../lib/savedViewState';
 type SortField = NonNullable<DocumentListQuery['sort']>;
 
+export type LibrarySelectionScope = 'none' | 'loaded' | 'all-matching';
+
 export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordner-root') {
   const { t } = useTranslation();
   const { pushSuccess } = useToastNotify();
   const { folderId } = useParams<{ folderId?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [items, setItems] = useState<DocumentDto[]>([]);
   const [folders, setFolders] = useState<FolderDto[]>([]);
   const [tags, setTags] = useState<TagDto[]>([]);
   const [recognizedFields, setRecognizedFields] = useState<RecognizedFieldDefinitionDto[]>([]);
@@ -69,9 +73,9 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     sort: 'updatedAt',
     order: 'desc',
   });
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [selectionScope, setSelectionScope] = useState<LibrarySelectionScope>('none');
   const [bulkTagId, setBulkTagId] = useState('');
   const [bulkFolderId, setBulkFolderId] = useState('');
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -237,41 +241,39 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
       folderId: mode === 'folder' ? folderId : undefined,
       unfiled: mode === 'unassigned' ? true : undefined,
       tagId: undefined,
-      includeTagSuggestions: true,
     });
   }, [filters, query, mode, folderId]);
 
-  const load = useCallback(
-    async (options?: { silent?: boolean }) => {
-      if (!listFilters) {
-        setItems([]);
-        setLoading(false);
-        setError(null);
-        return;
-      }
-      if (!options?.silent) {
-        setLoading(true);
-      }
-      setError(null);
-      try {
-        const docs = await listDocuments(listFilters);
-        setItems(docs);
-      } catch (err) {
-        setError(formatUserFacingError(err, 'errors.loadFailed'));
-      } finally {
-        if (!options?.silent) {
-          setLoading(false);
-        }
-      }
-    },
-    [listFilters]
+  const documentsQuery = useDocumentsInfiniteQuery(listFilters);
+  const listQueryKey = useMemo(() => documentListQueryKey(listFilters), [listFilters]);
+  const items = useMemo(
+    () => flattenDocumentPages(documentsQuery.data?.pages),
+    [documentsQuery.data?.pages]
   );
+  const totalCount = documentsQuery.data?.pages[0]?.total ?? null;
+  const loading = documentsQuery.isPending && items.length === 0;
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    setSelected(new Set());
+    setSelectionScope('none');
+  }, [listQueryKey]);
 
   useEffect(() => {
+    if (documentsQuery.error) {
+      setError(formatUserFacingError(documentsQuery.error, 'errors.loadFailed'));
+      return;
+    }
+    setError(null);
+  }, [documentsQuery.error]);
+
+  const load = useCallback(async () => {
+    await documentsQuery.refetch();
+  }, [documentsQuery]);
+
+  useEffect(() => {
+    if (selectionScope === 'all-matching') {
+      return;
+    }
     setSelected((prev) => {
       if (prev.size === 0) return prev;
       const visible = new Set(items.map((d) => d.id));
@@ -283,7 +285,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
       }
       return changed ? next : prev;
     });
-  }, [items]);
+  }, [items, selectionScope]);
 
   const visibleSelectedCount = useMemo(() => {
     if (items.length === 0) return 0;
@@ -298,9 +300,11 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   useEffect(() => {
     const hasPending = items.some((d) => ['uploaded', 'queued', 'extracting'].includes(d.status));
     if (!hasPending) return;
-    const timer = window.setInterval(() => void load({ silent: true }), 4000);
+    const timer = window.setInterval(() => {
+      void documentsQuery.refetch();
+    }, 4000);
     return () => { window.clearInterval(timer); };
-  }, [items, load]);
+  }, [items, documentsQuery]);
 
   async function onSearch(event: FormEvent) {
     event.preventDefault();
@@ -358,6 +362,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   }
 
   function toggleSelect(id: string) {
+    setSelectionScope('none');
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
@@ -372,12 +377,48 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
 
   function clearSelection() {
     setSelected(new Set());
+    setSelectionScope('none');
   }
 
   function toggleSelectAll() {
-    if (selected.size === items.length) setSelected(new Set());
-    else setSelected(new Set(items.map((d) => d.id)));
+    const loadedIds = items.map((d) => d.id);
+    const allLoadedSelected =
+      loadedIds.length > 0 && loadedIds.every((id) => selected.has(id));
+    if (allLoadedSelected) {
+      setSelected(new Set());
+      setSelectionScope('none');
+      return;
+    }
+    setSelected(new Set(loadedIds));
+    setSelectionScope('loaded');
   }
+
+  const fetchAllDocumentPages = useCallback(async () => {
+    let hasMore = documentsQuery.hasNextPage;
+    let data = documentsQuery.data;
+    while (hasMore) {
+      const result = await documentsQuery.fetchNextPage();
+      data = result.data;
+      hasMore = result.hasNextPage;
+    }
+    return data;
+  }, [documentsQuery]);
+
+  const selectAllMatchingDocuments = useCallback(async () => {
+    const data = await fetchAllDocumentPages();
+    const loaded = flattenDocumentPages(data?.pages);
+    setSelected(new Set(loaded.map((doc) => doc.id)));
+    setSelectionScope('all-matching');
+  }, [fetchAllDocumentPages]);
+
+  const resolveBulkDocumentIds = useCallback(async (): Promise<string[]> => {
+    if (selectionScope === 'all-matching') {
+      const data = await fetchAllDocumentPages();
+      const loaded = flattenDocumentPages(data?.pages);
+      return loaded.map((doc) => doc.id);
+    }
+    return [...selected];
+  }, [fetchAllDocumentPages, selected, selectionScope]);
 
   const groupedLabelSuggestions = useMemo(() => {
     const scope =
@@ -412,13 +453,15 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
   }
 
   async function runBulk(action: Parameters<typeof bulkDocuments>[0]['bulk']) {
-    if (selected.size === 0) return;
-    const selectedIds = [...selected];
+    if (selected.size === 0 && selectionScope !== 'all-matching') return;
+    const selectedIds = await resolveBulkDocumentIds();
+    if (selectedIds.length === 0) return;
     setBulkBusy(true);
     setError(null);
     try {
       await bulkDocuments({ ids: selectedIds, bulk: action });
       setSelected(new Set());
+      setSelectionScope('none');
       await load();
       if (action.action === 'addTag' || action.action === 'removeTag') {
         const tagId = action.tagId;
@@ -554,5 +597,12 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     groupedLabelSuggestions,
     groupedLabelBusy,
     acceptGroupedLabelSuggestion,
+    totalCount,
+    hasNextPage: documentsQuery.hasNextPage,
+    fetchNextPage: documentsQuery.fetchNextPage,
+    isFetchingNextPage: documentsQuery.isFetchingNextPage,
+    selectionScope,
+    selectAllMatchingDocuments,
+    bulkSelectedCount: selected.size,
   };
 }
