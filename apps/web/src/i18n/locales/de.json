@@ -1938,6 +1938,8 @@
     "recentDocuments": "Zuletzt geöffnet",
     "quickActions": "Schnellaktionen",
     "noResults": "Keine Treffer. Versuchen Sie einen anderen Begriff oder einen Filter wie <code>label:Finanzen</code>.",
+    "loadError": "Die Suche ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    "retry": "Erneut versuchen",
     "closePalette": "Suche schließen",
     "showAll": "Alle {{count}} anzeigen",
     "footerNavigate": "navigieren",

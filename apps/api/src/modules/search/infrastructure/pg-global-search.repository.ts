@@ -13,7 +13,10 @@ import {
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { TextChunkSpan } from '../../cited-chat/domain/split-text-chunks-with-spans.js';
 import { cosineSimilarity } from '../domain/cosine-similarity.js';
-import { expandQueryTerms } from '../domain/expand-query-terms.js';
+import {
+  expandQueryTerms,
+  MIN_QUERY_RELEVANCE_SCORE,
+} from '../domain/expand-query-terms.js';
 import type { GlobalSearchRepositoryResult } from '../domain/global-search.types.js';
 import {
   buildHighlightTerms,
@@ -30,14 +33,15 @@ import { type RankedItem,reciprocalRankFusion } from '../domain/reciprocal-rank-
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
 import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
 import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
+import { queryWithWordSimilarityThreshold } from './pg-trgm-query.js';
 import {
   defaultFieldLabel,
   type FieldDefinitionLookup,
   loadFieldDefinitionLookup,
 } from './document-field-value-index.js';
 
-const TRGM_THRESHOLD = 0.32;
-const WORD_SIM_THRESHOLD = 0.32;
+const TRGM_THRESHOLD = 0.45;
+const WORD_SIM_THRESHOLD = 0.45;
 const PER_GROUP_LIMIT = 8;
 const EMBED_CANDIDATE_CAP = Number(process.env['GLOBAL_SEARCH_EMBED_CANDIDATE_CAP'] ?? 24);
 
@@ -69,6 +73,12 @@ function buildTrgmProbes(variantQueries: string[]): string[] {
     }
   }
   return [...probes];
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new DOMException('The operation was aborted', 'AbortError');
+  }
 }
 
 function buildTsQuery(terms: string[]): string | null {
@@ -241,8 +251,8 @@ export class PgGlobalSearchRepository {
        FROM corpus
        WHERE term IS NOT NULL AND length(term) >= 3
          AND (
-           similarity(unaccent(lower(term)), unaccent(lower($2::text))) >= 0.28
-           OR word_similarity(unaccent(lower($2::text)), term) >= 0.28
+           similarity(unaccent(lower(term)), unaccent(lower($2::text))) >= 0.45
+           OR word_similarity(unaccent(lower($2::text)), term) >= 0.45
            OR unaccent(lower(term)) % unaccent(lower($2::text))
            OR unaccent(lower($2::text)) % unaccent(lower(term))
          )
@@ -267,14 +277,17 @@ export class PgGlobalSearchRepository {
       queryVector?: number[];
       embedFullScan?: boolean;
       fieldFilters?: ResolvedFieldFilter[];
+      abortSignal?: AbortSignal;
     }
   ): Promise<GlobalSearchRepositoryResult> {
+    throwIfAborted(options.abortSignal);
     const perGroup = options.perGroupLimit ?? PER_GROUP_LIMIT;
     const q = rawQuery.trim();
     const queryTokens = tokenizeSearchQuery(q);
-    const { expanded } = await expandQueryTerms(q, (token, limit) =>
+    const { expanded, queryRelevance } = await expandQueryTerms(q, (token, limit) =>
       this.findSimilarVocabularyTerms(userId, token, limit)
     );
+    throwIfAborted(options.abortSignal);
     const variantQueries = [...new Set([...searchTextVariants(q), ...expanded])].filter(Boolean);
     const highlightTerms = buildHighlightTerms(queryTokens, expanded);
     const tsQuery = buildTsQuery([...queryTokens, ...expanded]);
@@ -298,7 +311,9 @@ export class PgGlobalSearchRepository {
         perGroup,
         options.queryVector,
         options.embedFullScan === true,
-        fieldFilters
+        fieldFilters,
+        queryRelevance,
+        options.abortSignal
       );
       documents.push(...docResult.items);
       documentTotal = docResult.total;
@@ -336,8 +351,11 @@ export class PgGlobalSearchRepository {
     limit: number,
     queryVector?: number[],
     embedFullScan = false,
-    fieldFilters: ResolvedFieldFilter[] = []
+    fieldFilters: ResolvedFieldFilter[] = [],
+    queryRelevance = 0,
+    abortSignal?: AbortSignal
   ): Promise<{ items: GlobalSearchRepositoryResult['documents']; total: number }> {
+    throwIfAborted(abortSignal);
     const trgmProbes = buildTrgmProbes(variantQueries);
     const probe = trgmProbes[0] ?? normalizeSearchText(variantQueries[0] ?? q);
     const chunkSnippets = new Map<string, string>();
@@ -364,25 +382,36 @@ export class PgGlobalSearchRepository {
 
     const trgmPromise =
       trgmProbes.length > 0
-        ? this.pool.query<{ id: string; score: number }>(
+        ? queryWithWordSimilarityThreshold<{ id: string; score: number }>(
+            this.pool,
+            WORD_SIM_THRESHOLD,
             `SELECT d.id,
-                    MAX(GREATEST(
-                      word_similarity(p.token, d.title),
-                      word_similarity(p.token, d.filename),
-                      similarity(d.title, p.token),
-                      similarity(d.filename, p.token)
-                    )) AS score
+                    (
+                      SELECT MAX(GREATEST(
+                        word_similarity(p.token, d.title),
+                        word_similarity(p.token, d.filename),
+                        similarity(d.title, p.token),
+                        similarity(d.filename, p.token)
+                      ))
+                      FROM unnest($2::text[]) AS p(token)
+                      WHERE p.token <% d.title
+                         OR d.title %> p.token
+                         OR p.token <% d.filename
+                         OR d.filename %> p.token
+                    ) AS score
              FROM documents d
-             CROSS JOIN unnest($2::text[]) AS p(token)
              WHERE d.user_id = $1
-             GROUP BY d.id
-             HAVING MAX(GREATEST(
-               word_similarity(p.token, d.title),
-               word_similarity(p.token, d.filename)
-             )) >= $3
-             ORDER BY score DESC
+               AND EXISTS (
+                 SELECT 1
+                 FROM unnest($2::text[]) AS p(token)
+                 WHERE p.token <% d.title
+                    OR d.title %> p.token
+                    OR p.token <% d.filename
+                    OR d.filename %> p.token
+               )
+             ORDER BY score DESC NULLS LAST
              LIMIT 32`,
-            [userId, trgmProbes, WORD_SIM_THRESHOLD]
+            [userId, trgmProbes]
           )
         : Promise.resolve({ rows: EMPTY_TRGM_ROWS });
 
@@ -403,18 +432,29 @@ export class PgGlobalSearchRepository {
 
     const chunkTrgmPromise =
       trgmProbes.length > 0
-        ? this.pool.query<{ document_id: string; body: string; score: number }>(
+        ? queryWithWordSimilarityThreshold<{ document_id: string; body: string; score: number }>(
+            this.pool,
+            WORD_SIM_THRESHOLD,
             `SELECT c.document_id, c.body,
-                    MAX(GREATEST(word_similarity(p.token, c.body), similarity(c.body, p.token))) AS score
+                    (
+                      SELECT MAX(GREATEST(
+                        word_similarity(p.token, c.body),
+                        similarity(c.body, p.token)
+                      ))
+                      FROM unnest($2::text[]) AS p(token)
+                      WHERE p.token <% c.body OR c.body %> p.token
+                    ) AS score
              FROM document_text_chunks c
              JOIN documents cd ON cd.id = c.document_id
-             CROSS JOIN unnest($2::text[]) AS p(token)
              WHERE cd.user_id = $1
-             GROUP BY c.document_id, c.body
-             HAVING MAX(GREATEST(word_similarity(p.token, c.body), similarity(c.body, p.token))) >= $3
-             ORDER BY score DESC
+               AND EXISTS (
+                 SELECT 1
+                 FROM unnest($2::text[]) AS p(token)
+                 WHERE p.token <% c.body OR c.body %> p.token
+               )
+             ORDER BY score DESC NULLS LAST
              LIMIT 32`,
-            [userId, trgmProbes, WORD_SIM_THRESHOLD]
+            [userId, trgmProbes]
           )
         : Promise.resolve({ rows: EMPTY_CHUNK_ROWS });
 
@@ -424,6 +464,7 @@ export class PgGlobalSearchRepository {
       chunkFtsPromise,
       chunkTrgmPromise,
     ]);
+    throwIfAborted(abortSignal);
 
     const ftsList: RankedItem[] = fts.rows.map((row, i) => ({ id: row.id, rank: i + 1 }));
     const trgmTitleList: RankedItem[] = trgm.rows.map((row, i) => ({ id: row.id, rank: i + 1 }));
@@ -448,6 +489,18 @@ export class PgGlobalSearchRepository {
       chunkTrgmList,
       fieldLeg.ranks,
     ]);
+
+    if (
+      fieldFilters.length === 0 &&
+      queryRelevance < MIN_QUERY_RELEVANCE_SCORE &&
+      ftsList.length === 0 &&
+      trgmTitleList.length === 0 &&
+      chunkFtsList.length === 0 &&
+      chunkTrgmList.length === 0 &&
+      fieldLeg.ranks.length === 0
+    ) {
+      return { items: [], total: 0 };
+    }
 
     if (queryVector && queryVector.length > 0) {
       const lexicalCandidates = [...fused.entries()]
@@ -565,7 +618,9 @@ export class PgGlobalSearchRepository {
       }>[] = [];
     for (const textProbe of textProbes) {
       textQueries.push(
-        this.pool.query(
+        queryWithWordSimilarityThreshold(
+          this.pool,
+          WORD_SIM_THRESHOLD,
           `SELECT v.document_id, v.field_storage_key, v.value_text,
                   GREATEST(
                     word_similarity($2::text, v.value_text_norm),
@@ -575,13 +630,15 @@ export class PgGlobalSearchRepository {
            JOIN documents fd ON fd.id = v.document_id
            WHERE fd.user_id = $1
              AND v.value_text_norm IS NOT NULL
-             AND GREATEST(
-               word_similarity($2::text, v.value_text_norm),
-               word_similarity($2::text, v.value_text)
-             ) >= $3
+             AND (
+               $2::text <% v.value_text_norm
+               OR v.value_text_norm %> $2::text
+               OR $2::text <% v.value_text
+               OR v.value_text %> $2::text
+             )
            ORDER BY score DESC
            LIMIT 32`,
-          [userId, textProbe, WORD_SIM_THRESHOLD]
+          [userId, textProbe]
         )
       );
     }

@@ -73,6 +73,8 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiGroups, setApiGroups] = useState<GlobalSearchGroupDto[]>([]);
+  const [searchError, setSearchError] = useState(false);
+  const [searchRequestKey, setSearchRequestKey] = useState(0);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [activeScopes, setActiveScopes] = useState<string[]>([]);
@@ -177,7 +179,14 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
 
   const openPalette = useCallback(() => {
     setPaletteOpen(true);
-    requestAnimationFrame(() => inputRef.current?.focus());
+    requestAnimationFrame(() => {
+      const input = inputRef.current;
+      if (!input) {
+        return;
+      }
+      input.focus();
+      input.select();
+    });
   }, []);
 
   const closePalette = useCallback(() => {
@@ -212,10 +221,12 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
     const apiQ = parsed.apiQuery || parsed.text.trim();
     if (apiQ.length < 1) {
       setApiGroups([]);
+      setSearchError(false);
       setLoading(false);
       return;
     }
     setLoading(true);
+    setSearchError(false);
     const timer = window.setTimeout(() => {
       abortRef.current?.abort();
       const controller = new AbortController();
@@ -224,16 +235,25 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
       void globalSearch({ q: apiQ, types, limit: 8 }, { signal: controller.signal })
         .then((res) => {
           setApiGroups(res.groups);
+          setSearchError(false);
         })
-        .catch(() => {
-          if (!controller.signal.aborted) setApiGroups([]);
+        .catch((err: unknown) => {
+          if (controller.signal.aborted) {
+            return;
+          }
+          const aborted = err instanceof DOMException && err.name === 'AbortError';
+          if (aborted) {
+            return;
+          }
+          setApiGroups([]);
+          setSearchError(true);
         })
         .finally(() => {
           if (!controller.signal.aborted) setLoading(false);
         });
     }, DEBOUNCE_MS);
     return () => { window.clearTimeout(timer); };
-  }, [parsed.apiQuery, parsed.text, paletteOpen]);
+  }, [parsed.apiQuery, parsed.text, paletteOpen, searchRequestKey]);
 
   const fieldSuggestions = useMemo(() => {
     const tail = query.trim().split(/\s+/).pop() ?? '';
@@ -277,7 +297,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
   const showEmpty = parsed.text.trim().length === 0;
   const recentSearches = userId ? readRecentSearches(userId) : [];
   const recentDocs = userId ? readRecentDocuments(userId) : [];
-  const noResults = !showEmpty && !loading && visibleGroups.length === 0;
+  const noResults = !showEmpty && !loading && !searchError && visibleGroups.length === 0;
 
   return (
     <>
@@ -517,6 +537,19 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                         </section>
                       ))
                     : null}
+
+                  {searchError ? (
+                    <div className="global-search-error" role="alert">
+                      <p>{t('search.loadError')}</p>
+                      <button
+                        type="button"
+                        className="global-search-error-retry"
+                        onClick={() => { setSearchRequestKey((k) => k + 1); }}
+                      >
+                        {t('search.retry')}
+                      </button>
+                    </div>
+                  ) : null}
 
                   {noResults ? (
                     <p className="global-search-no-results" role="status">

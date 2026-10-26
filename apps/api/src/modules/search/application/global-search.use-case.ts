@@ -14,6 +14,24 @@ import { resolveFieldFilters } from '../domain/resolve-field-definition.js';
 import { PgGlobalSearchRepository } from '../infrastructure/pg-global-search.repository.js';
 
 const DEFAULT_LIMIT = 8;
+const EMBED_TIMEOUT_MS = 300;
+
+function mergeAbortSignals(primary?: AbortSignal, secondary?: AbortSignal): AbortSignal | undefined {
+  if (!primary && !secondary) {
+    return undefined;
+  }
+  if (!primary) {
+    return secondary;
+  }
+  if (!secondary) {
+    return primary;
+  }
+  return AbortSignal.any([primary, secondary]);
+}
+
+function isAbortError(err: unknown): boolean {
+  return err instanceof DOMException && err.name === 'AbortError';
+}
 
 @Injectable()
 export class GlobalSearchUseCase {
@@ -22,7 +40,15 @@ export class GlobalSearchUseCase {
     @Inject(EMBEDDING_PORT) private readonly embedding: EmbeddingPort
   ) {}
 
-  async execute(userId: string, query: GlobalSearchQuery): Promise<GlobalSearchResponseDto> {
+  async execute(
+    userId: string,
+    query: GlobalSearchQuery,
+    options?: { signal?: AbortSignal }
+  ): Promise<GlobalSearchResponseDto> {
+    if (options?.signal?.aborted) {
+      throw new DOMException('The operation was aborted', 'AbortError');
+    }
+
     const parsed = parseSearchScope(query.q);
     const types = resolveSearchTypes(parsed.scopes, query.types);
     const perGroup = Math.min(Math.max(query.limit ?? DEFAULT_LIMIT, 1), 20);
@@ -41,12 +67,26 @@ export class GlobalSearchUseCase {
       textQuery.length >= 3 &&
       process.env['GLOBAL_SEARCH_DISABLE_EMBED'] !== '1';
     if (embedLegEnabled && (await this.searchRepo.userHasDocumentEmbeddings(userId))) {
+      const embedSignal = mergeAbortSignals(
+        options?.signal,
+        AbortSignal.timeout(EMBED_TIMEOUT_MS)
+      );
       try {
-        const { embeddings } = await this.embedding.embedTexts([textQuery]);
+        const { embeddings } = await this.embedding.embedTexts([textQuery], {
+          inputType: 'query',
+          signal: embedSignal,
+        });
         queryVector = embeddings[0];
-      } catch {
-        /* vector leg optional when worker unavailable */
+      } catch (err) {
+        if (isAbortError(err) && options?.signal?.aborted) {
+          throw err;
+        }
+        /* vector leg optional on timeout or worker errors */
       }
+    }
+
+    if (options?.signal?.aborted) {
+      throw new DOMException('The operation was aborted', 'AbortError');
     }
 
     const result = await this.searchRepo.search(userId, textQuery, {
@@ -57,6 +97,7 @@ export class GlobalSearchUseCase {
       queryVector,
       embedFullScan: process.env['GLOBAL_SEARCH_EMBED_FULL_SCAN'] === '1',
       fieldFilters: resolvedFieldFilters,
+      abortSignal: options?.signal,
     });
 
     const groups: GlobalSearchGroupDto[] = [];

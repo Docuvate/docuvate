@@ -425,7 +425,7 @@ export const LABEL_FIELD_EXTRACTION_PORT = Symbol('LABEL_FIELD_EXTRACTION_PORT')
 export interface EmbeddingPort {
   embedTexts(
     texts: string[],
-    options?: { inputType?: 'query' | 'passage' }
+    options?: { inputType?: 'query' | 'passage'; signal?: AbortSignal }
   ): Promise<{ model: string; embeddings: number[][] }>;
 }
 

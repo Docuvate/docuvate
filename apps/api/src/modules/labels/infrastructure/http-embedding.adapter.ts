@@ -30,7 +30,8 @@ function parseEmbeddings(value: unknown): number[][] {
 export class HttpEmbeddingAdapter implements EmbeddingPort {
   private async embedBatch(
     texts: string[],
-    inputType: 'query' | 'passage'
+    inputType: 'query' | 'passage',
+    signal?: AbortSignal
   ): Promise<{ model: string; embeddings: number[][] }> {
     const workerUrl = process.env['WORKER_URL'] ?? 'http://localhost:8000';
     const secret = process.env['WORKER_SECRET'] ?? 'worker-shared-secret';
@@ -42,6 +43,7 @@ export class HttpEmbeddingAdapter implements EmbeddingPort {
         'X-Worker-Secret': secret,
       },
       body: JSON.stringify({ texts, input_type: inputType }),
+      signal,
     });
 
     if (!response.ok) {
@@ -64,7 +66,7 @@ export class HttpEmbeddingAdapter implements EmbeddingPort {
 
   async embedTexts(
     texts: string[],
-    options?: { inputType?: 'query' | 'passage' }
+    options?: { inputType?: 'query' | 'passage'; signal?: AbortSignal }
   ): Promise<{ model: string; embeddings: number[][] }> {
     const inputType = options?.inputType ?? 'passage';
     if (texts.length === 0) {
@@ -75,7 +77,7 @@ export class HttpEmbeddingAdapter implements EmbeddingPort {
     let model = 'intfloat/multilingual-e5-small';
     for (let offset = 0; offset < texts.length; offset += WORKER_EMBED_BATCH_MAX) {
       const batch = texts.slice(offset, offset + WORKER_EMBED_BATCH_MAX);
-      const result = await this.embedBatch(batch, inputType);
+      const result = await this.embedBatch(batch, inputType, options?.signal);
       model = result.model;
       embeddings.push(...result.embeddings);
     }

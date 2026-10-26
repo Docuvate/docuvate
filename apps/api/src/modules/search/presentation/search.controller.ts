@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { GlobalSearchResponseDto } from '@docuvate/contracts';
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import type { FastifyRequest } from 'fastify';
 
 import {
   AuthGuard,
@@ -30,12 +31,26 @@ export class SearchController {
   })
   async search(
     @Session() session: AuthSession,
-    @Query() query: GlobalSearchQueryDto
+    @Query() query: GlobalSearchQueryDto,
+    @Req() req: FastifyRequest
   ): Promise<GlobalSearchResponseDto> {
-    return this.globalSearch.execute(session.user.id, {
-      q: query.q,
-      types: query.types,
-      limit: query.limit,
-    });
+    const abortController = new AbortController();
+    const onClose = () => {
+      abortController.abort();
+    };
+    req.raw.on('close', onClose);
+    try {
+      return await this.globalSearch.execute(
+        session.user.id,
+        {
+          q: query.q,
+          types: query.types,
+          limit: query.limit,
+        },
+        { signal: abortController.signal }
+      );
+    } finally {
+      req.raw.off('close', onClose);
+    }
   }
 }

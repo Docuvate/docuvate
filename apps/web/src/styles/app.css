@@ -763,8 +763,24 @@ mark.global-search-mark {
 }
 
 .global-search-no-results,
-.global-search-empty {
+.global-search-empty,
+.global-search-error {
   padding: var(--dv-space-sm) var(--dv-space-md);
+}
+
+.global-search-error-retry {
+  margin-top: var(--dv-space-sm);
+  padding: var(--dv-space-xs) var(--dv-space-md);
+  border-radius: var(--dv-radius-sm);
+  border: 1px solid var(--dv-color-border);
+  background: var(--dv-color-bg-overlay);
+  color: inherit;
+  cursor: pointer;
+}
+
+.global-search-error-retry:hover,
+.global-search-error-retry:focus-visible {
+  background: var(--dv-color-accent-soft);
 }
 
 .global-search-no-results code {
