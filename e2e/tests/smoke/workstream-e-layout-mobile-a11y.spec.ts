@@ -105,7 +105,7 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
     await requireApi(page);
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`${webOrigin}/login`);
-    await page.getByLabel(/password|passwort/i).fill('long-password-value-for-padding-check');
+    await page.locator('input.password-input').fill('long-password-value-for-padding-check');
     const metrics = await page.evaluate(() => {
       const input = document.querySelector<HTMLInputElement>('.password-input');
       const toggle = document.querySelector<HTMLButtonElement>('.password-input-toggle');
