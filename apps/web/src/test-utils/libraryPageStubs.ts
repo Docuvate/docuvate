@@ -75,7 +75,7 @@ export function createLibraryPageDataStub(
     fetchNextPage: stubFetchNextPage,
     isFetchingNextPage: false,
     selectionScope: 'none',
-    selectAllMatchingDocuments: async () => undefined,
+    selectAllMatchingDocuments: () => Promise.resolve(),
     bulkSelectedCount: 0,
     ...overrides,
   };
