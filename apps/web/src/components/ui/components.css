@@ -46,7 +46,7 @@ a.btn:hover {
   display: inline-block;
   flex-shrink: 0;
   border: 2px solid var(--dv-color-border);
-  border-top-color: var(--dv-color-accent);
+  border-top-color: var(--dv-color-accent-text);
   border-radius: var(--dv-radius-lg);
   animation: spinner-turn 0.75s linear infinite;
 }
@@ -83,7 +83,7 @@ a.btn:hover {
 
 .btn-danger {
   background: var(--dv-color-danger);
-  color: var(--dv-color-on-accent);
+  color: var(--dv-color-on-danger);
 }
 
 .btn-danger:hover:not(:disabled) {
@@ -331,9 +331,9 @@ a.btn:hover {
 }
 
 .chip-suggest {
-  background: var(--dv-color-suggest-soft);
-  color: var(--dv-color-suggest);
-  border: 1px dashed var(--dv-color-suggest);
+  background: var(--chip-bg, var(--dv-color-suggest-soft));
+  color: var(--chip-fg, var(--dv-color-suggest));
+  border: 1px dashed var(--chip-bg, var(--dv-color-suggest));
 }
 
 .chip-outline {
@@ -478,7 +478,7 @@ a.btn:hover {
 }
 
 .dropzone-dragover {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dv-color-accent) 35%, transparent);
 }

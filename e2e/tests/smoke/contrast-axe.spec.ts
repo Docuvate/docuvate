@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 import { setTheme } from '../../helpers/ce-ui-audit';
+import { resolveSmokeReadyDocumentPath } from '../../helpers/contrast-screenshot';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -21,6 +22,8 @@ const AUTHENTICATED_ROUTES: { path: string; slug: string }[] = [
   { path: '/documents', slug: 'documents' },
   { path: '/settings', slug: 'settings' },
   { path: '/structure/labels', slug: 'labels' },
+  { path: '/settings/connectors', slug: 'connectors' },
+  { path: '/filesystem', slug: 'filesystem' },
 ];
 
 async function assertColorContrast(page: import('@playwright/test').Page, label: string): Promise<void> {
@@ -34,6 +37,10 @@ async function assertColorContrast(page: import('@playwright/test').Page, label:
 async function waitForLabelsPageReady(page: import('@playwright/test').Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
   await page.locator('main').waitFor({ state: 'visible', timeout: 60_000 });
+}
+
+async function waitForAppShell(page: import('@playwright/test').Page): Promise<void> {
+  await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
 }
 
 test.describe('Contrast axe color-contrast', () => {
@@ -62,28 +69,12 @@ test.describe('Contrast axe color-contrast', () => {
   test.describe('authenticated routes', () => {
     test.use({ storageState: smokeFixtureStoragePath() });
 
-    let documentDetailPath = '/documents';
-
-    test.beforeAll(async ({ request }) => {
-      const health = await request.get(`${apiBase}/health`);
-      if (!health.ok()) {
-        return;
-      }
-      const list = await request.get(`${apiBase}/api/v1/documents?limit=1`);
-      if (list.ok()) {
-        const body: { items?: { id?: string }[] } = await list.json();
-        const id = body.items?.[0]?.id;
-        if (id) {
-          documentDetailPath = `/documents/${id}`;
-        }
-      }
-    });
-
     test('app surfaces', async ({ page, request }) => {
       test.setTimeout(180_000);
-
       const health = await request.get(`${apiBase}/health`);
       test.skip(!health.ok(), 'compose API not running');
+
+      const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
 
       let recommendationsMode: 'ok' | 'fail' = 'ok';
       await page.route('**/v1/labels/recommendations**', async (route) => {
@@ -112,11 +103,11 @@ test.describe('Contrast axe color-contrast', () => {
         for (const theme of THEMES) {
           recommendationsMode = 'ok';
           for (const route of routes) {
-            await page.goto(`${webOrigin}${route.path}`);
+            await page.goto(`${webOrigin}${route.path}`, { waitUntil: 'domcontentloaded' });
             if (route.path === '/structure/labels') {
               await waitForLabelsPageReady(page);
             } else {
-              await page.waitForLoadState('networkidle');
+              await waitForAppShell(page);
             }
             await setTheme(page, theme);
             await assertColorContrast(
@@ -126,7 +117,7 @@ test.describe('Contrast axe color-contrast', () => {
           }
 
           recommendationsMode = 'fail';
-          await page.goto(`${webOrigin}/structure/labels`);
+          await page.goto(`${webOrigin}/structure/labels`, { waitUntil: 'domcontentloaded' });
           await waitForLabelsPageReady(page);
           await page.locator('.labels-todo-load-error p.error').waitFor({ state: 'visible', timeout: 30_000 });
           await setTheme(page, theme);

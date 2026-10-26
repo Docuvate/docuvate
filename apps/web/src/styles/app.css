@@ -75,7 +75,7 @@
 
 .locale-switcher-btn.active {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .auth-locale .locale-switcher {
@@ -243,7 +243,7 @@
   align-items: center;
   justify-content: center;
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .auth-otp-row {
@@ -766,7 +766,7 @@ mark.global-search-mark {
   min-height: 2.5rem;
   border: none;
   background: transparent;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   cursor: pointer;
   text-align: left;
 }
@@ -859,7 +859,7 @@ mark.global-search-mark {
 }
 
 .global-search-scope-chip.active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
   color: var(--dv-color-text);
 }
@@ -1634,7 +1634,7 @@ mark.global-search-mark {
 
 .sidebar-label-chip:hover,
 .sidebar-label-chip.active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
@@ -1855,7 +1855,7 @@ mark.global-search-mark {
 }
 
 .filter-chip-active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -2017,7 +2017,7 @@ mark.global-search-mark {
 
 .document-detail-tab-region .detail-tab.active {
   z-index: 1;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
   background: var(--dv-color-bg-raised);
   border-color: var(--dv-color-border);
@@ -2138,7 +2138,7 @@ mark.global-search-mark {
   display: inline-flex;
   align-items: center;
   gap: var(--dv-space-xs);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: none;
   font-weight: 600;
   max-width: 100%;
@@ -2187,7 +2187,7 @@ mark.global-search-mark {
   background: transparent;
   font: inherit;
   font-size: 0.85rem;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   cursor: pointer;
   padding: var(--dv-space-2xs) var(--dv-space-xs);
   border-radius: var(--dv-radius-md);
@@ -2208,7 +2208,7 @@ mark.global-search-mark {
   padding: 0 var(--dv-space-2xs);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-size: 0.75rem;
   font-weight: 600;
 }
@@ -2343,6 +2343,7 @@ mark.global-search-mark {
   white-space: normal;
   overflow-wrap: anywhere;
   hyphens: auto;
+  color: var(--dv-color-progress-label);
 }
 
 .skeleton {
@@ -2581,7 +2582,7 @@ mark.global-search-mark {
 
 .detail-toolstrip-tab.active {
   background: var(--dv-color-bg-raised);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
   box-shadow: 0 1px 2px rgb(15 23 42 / 8%);
 }
@@ -2732,7 +2733,7 @@ mark.global-search-mark {
 
 .layout-zoom-btn-active {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .layout-viewer-toolbar-actions {
@@ -2946,7 +2947,7 @@ mark.global-search-mark {
 }
 
 .layout-compare-page-chip-active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -3149,8 +3150,8 @@ mark.global-search-mark {
 }
 
 .layout-side-tab-active {
-  color: var(--dv-color-accent);
-  border-bottom-color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
+  border-bottom-color: var(--dv-color-accent-text);
 }
 
 .layout-side-panel-body {
@@ -3231,7 +3232,7 @@ mark.global-search-mark {
 }
 
 .layout-table-card-active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
 }
 
 .layout-table-card-head {
@@ -3305,7 +3306,7 @@ mark.global-search-mark {
 
 .layout-export-format-card:focus-visible,
 .layout-export-format-card:hover {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
 }
 
 .layout-export-format-title {
@@ -3668,7 +3669,7 @@ mark.global-search-mark {
 }
 
 .doc-chat-thread-item.active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -3767,7 +3768,7 @@ mark.global-search-mark {
 
 .doc-chat-admin-details summary {
   cursor: pointer;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .doc-chat-messages {
@@ -4164,7 +4165,7 @@ mark.global-search-mark {
   display: grid;
   place-items: center;
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .global-chat-suggestion-chips {
@@ -4212,7 +4213,7 @@ mark.global-search-mark {
 .global-chat-recent-item {
   border: none;
   background: transparent;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   cursor: pointer;
   font: inherit;
   padding: var(--dv-space-2xs) 0;
@@ -5470,7 +5471,7 @@ mark.global-search-mark {
 }
 
 .dropzone-active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dv-color-accent) 35%, transparent);
 }
@@ -5571,7 +5572,7 @@ mark.global-search-mark {
 
 .upload-queue-icon-spin {
   animation: library-table-spin 0.75s linear infinite;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .upload-queue-icon-done {
@@ -6057,7 +6058,7 @@ mark.global-search-mark {
 
 .filter-mode-btn-active {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .filter-mode-btn:hover:not(.filter-mode-btn-active) {
@@ -6123,7 +6124,7 @@ mark.global-search-mark {
 }
 
 .filter-panel .filter-chip-active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -6886,7 +6887,7 @@ mark.global-search-mark {
 }
 
 .settings-callout--info .settings-callout__icon {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .settings-callout--success {
@@ -6922,7 +6923,7 @@ mark.global-search-mark {
   place-items: center;
   border-radius: var(--dv-radius-md);
   background: color-mix(in srgb, var(--dv-color-accent) 10%, var(--dv-color-bg-raised));
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   border: 1px solid var(--dv-color-border);
 }
 
@@ -6963,7 +6964,7 @@ mark.global-search-mark {
 
 .settings-more-info summary {
   cursor: pointer;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
   user-select: none;
 }
@@ -7655,7 +7656,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .connector-oauth-admin-details summary {
   cursor: pointer;
   font-weight: 600;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .connector-oauth-admin-details-body {
@@ -7747,7 +7748,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .connector-detail-tab--active {
   color: var(--dv-color-text);
-  border-bottom-color: var(--dv-color-accent);
+  border-bottom-color: var(--dv-color-accent-text);
 }
 
 .connector-connected-list {
@@ -7972,7 +7973,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .view-switcher-btn-active {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .view-switcher-btn:hover:not(.view-switcher-btn-active) {
@@ -8372,13 +8373,13 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: var(--dv-radius-md);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: none;
 }
 
 .library-open-doc-btn:hover,
 .library-open-doc-btn:focus-visible {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   background: var(--dv-color-bg-overlay);
   outline: 2px solid var(--dv-color-focus);
   outline-offset: 2px;
@@ -8661,7 +8662,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .library-title-link:hover {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: underline;
 }
 
@@ -8686,7 +8687,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .doc-card-selected {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   box-shadow: var(--dv-shadow-sm);
 }
 
@@ -8722,7 +8723,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .doc-thumb-fallback {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   letter-spacing: 0.04em;
 }
 
@@ -9150,7 +9151,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .confirm-dialog-inline-link {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 500;
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -9426,7 +9427,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: inline-block;
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   margin-bottom: var(--dv-space-2xs);
 }
 
@@ -9565,11 +9566,11 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin: 0 0 var(--dv-space-2xs);
   font-size: 0.72rem;
   font-weight: 600;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .extracted-text-page-active .extracted-text-page-title {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .extracted-text-line {
@@ -9671,7 +9672,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .extracted-fields-edit-summary {
   cursor: pointer;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
   margin-bottom: var(--dv-space-xs);
 }
@@ -9729,7 +9730,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .extraction-arena-head h3 {
   margin: 0;
   font-size: 0.88rem;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .extraction-arena-grid {
@@ -9748,7 +9749,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .extraction-arena-card-winner {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   box-shadow: 0 0 0 1px var(--dv-color-accent-soft);
 }
 
@@ -9922,7 +9923,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .extraction-block-item-active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -10545,7 +10546,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin-top: var(--dv-space-2xs);
   font: inherit;
   font-size: 0.78rem;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   background: none;
   border: none;
   padding: 0;
@@ -10755,7 +10756,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   padding: 0;
   border: none;
   background: none;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-size: 0.82rem;
   cursor: pointer;
   text-decoration: underline;
@@ -11034,7 +11035,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .mappen-browse-mappe-link:hover {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: none;
 }
 
@@ -11323,7 +11324,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   height: 1.5rem;
   border-radius: var(--dv-radius-md);
   border: 2px solid var(--dv-color-border);
-  border-top-color: var(--dv-color-accent);
+  border-top-color: var(--dv-color-accent-text);
   animation: library-table-spin 0.75s linear infinite;
 }
 
@@ -11584,7 +11585,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   height: 1.25rem;
   border-radius: var(--dv-radius-md);
   border: 2px solid var(--dv-color-border);
-  border-top-color: var(--dv-color-accent);
+  border-top-color: var(--dv-color-accent-text);
   animation: library-table-spin 0.75s linear infinite;
 }
 
@@ -11640,7 +11641,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   padding: var(--dv-space-xs) var(--dv-space-sm);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-size: 0.875rem;
   font-weight: 500;
 }
@@ -11686,7 +11687,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dateisystem-breadcrumb a {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: none;
 }
 
@@ -11740,12 +11741,12 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .dateisystem-tree-row.is-selected .dateisystem-tree-link {
   background: transparent;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
 }
 
 .dateisystem-tree-row.is-selected .dateisystem-tree-count {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .dateisystem-tree-chevron-cell {
@@ -11932,7 +11933,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dateisystem-root-mappe-card:hover {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -11961,7 +11962,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dateisystem-root-folder-card:hover {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -11990,7 +11991,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .filesystem-folder-tile-wrap.drop-target .filesystem-folder-tile {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -12010,7 +12011,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .filesystem-folder-tile:hover {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
 }
 
 .filesystem-folder-tile-name {
@@ -12075,7 +12076,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .dateisystem-tree-unassigned-link.active,
 .dateisystem-tree-unassigned.is-selected .dateisystem-tree-unassigned-link {
   font-weight: 600;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .dateisystem-tree-footer-new {
@@ -12096,7 +12097,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dateisystem-folder-dropzone.is-drag-over {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -12136,7 +12137,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .folder-picker-option-active {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
 }
 
@@ -12579,7 +12580,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .labels-todo-doc-title:hover {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: underline;
 }
 
@@ -13256,7 +13257,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .admin-status-badge--invited {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -13501,7 +13502,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   height: 2.5rem;
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .dashboard-onboarding-step-icon-active {
@@ -13510,7 +13511,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dashboard-onboarding-step-active {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
 }
 
 .dashboard-onboarding-step-title {
@@ -14525,7 +14526,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .connector-sftp-wizard-step--active .connector-sftp-wizard-step-index {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   background: color-mix(in srgb, var(--dv-color-accent) 12%, transparent);
 }
 
@@ -14896,7 +14897,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   margin-top: var(--dv-space-2xs);
   font: inherit;
   font-size: 0.78rem;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   background: none;
   border: none;
   padding: 0;
@@ -15106,7 +15107,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   padding: 0;
   border: none;
   background: none;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-size: 0.82rem;
   cursor: pointer;
   text-decoration: underline;
@@ -15502,7 +15503,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .combobox-create-option {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
 }
 
@@ -15581,7 +15582,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   justify-content: space-between;
   gap: var(--dv-space-xs);
   font-weight: 500;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: none;
 }
 

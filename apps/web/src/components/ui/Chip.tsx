@@ -24,7 +24,7 @@ export function Chip({
   trailing,
   truncateLabel = false,
 }: ChipProps) {
-  const style = color && variant === 'assigned' ? chipColorStyle(color) : undefined;
+  const style = color ? chipColorStyle(color) : undefined;
 
   return (
     <span

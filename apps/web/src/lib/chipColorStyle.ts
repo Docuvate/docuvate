@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { CSSProperties } from 'react';
 
-import { readDocumentTheme, themePalette } from './themePalette';
-
 type ChipCssVariables = CSSProperties & {
   '--chip-bg': string;
   '--chip-fg': string;
 };
+
+const CHIP_FG_ON_LIGHT = '#0f172a';
+const CHIP_FG_ON_DARK = '#ffffff';
 
 function parseHexColor(input: string): { r: number; g: number; b: number } | null {
   const trimmed = input.trim();
@@ -37,14 +38,31 @@ function relativeLuminance(r: number, g: number, b: number): number {
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 
+function contrastRatio(fg: { r: number; g: number; b: number }, bg: { r: number; g: number; b: number }): number {
+  const l1 = relativeLuminance(fg.r, fg.g, fg.b);
+  const l2 = relativeLuminance(bg.r, bg.g, bg.b);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function pickChipForeground(bg: { r: number; g: number; b: number }): string {
+  const white = parseHexColor(CHIP_FG_ON_DARK);
+  const black = parseHexColor(CHIP_FG_ON_LIGHT);
+  if (!white || !black) {
+    return CHIP_FG_ON_DARK;
+  }
+  const whiteRatio = contrastRatio(white, bg);
+  const blackRatio = contrastRatio(black, bg);
+  return whiteRatio > blackRatio ? CHIP_FG_ON_DARK : CHIP_FG_ON_LIGHT;
+}
+
 /** Maps a label hex color to chip CSS variables with readable foreground. */
 export function chipColorStyle(color: string | undefined): ChipCssVariables | undefined {
   if (!color) return undefined;
   const rgb = parseHexColor(color);
   if (!rgb) return undefined;
-  const lum = relativeLuminance(rgb.r, rgb.g, rgb.b);
-  const palette = themePalette(readDocumentTheme());
-  const fg = lum > 0.55 ? palette.colorChipFgOnLight : palette.colorChipFgOnDark;
+  const fg = pickChipForeground(rgb);
   const style: ChipCssVariables = { '--chip-bg': color, '--chip-fg': fg };
   return style;
 }
