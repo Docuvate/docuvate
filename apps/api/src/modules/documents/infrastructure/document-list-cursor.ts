@@ -33,18 +33,26 @@ function decodeBase64Url(value: string): Uint8Array {
 const SORT_FIELDS: DocumentSortField[] = ['updatedAt', 'createdAt', 'title', 'documentDate'];
 const SORT_ORDERS: SortOrder[] = ['asc', 'desc'];
 
+function isDocumentSortField(value: string): value is DocumentSortField {
+  return SORT_FIELDS.some((field) => field === value);
+}
+
+function isSortOrder(value: string): value is SortOrder {
+  return SORT_ORDERS.some((order) => order === value);
+}
+
 function parseSortField(value: unknown): DocumentSortField {
-  if (typeof value !== 'string' || !SORT_FIELDS.includes(value as DocumentSortField)) {
+  if (typeof value !== 'string' || !isDocumentSortField(value)) {
     throw new ValidationError('Invalid document list cursor');
   }
-  return value as DocumentSortField;
+  return value;
 }
 
 function parseSortOrder(value: unknown): SortOrder {
-  if (typeof value !== 'string' || !SORT_ORDERS.includes(value as SortOrder)) {
+  if (typeof value !== 'string' || !isSortOrder(value)) {
     throw new ValidationError('Invalid document list cursor');
   }
-  return value as SortOrder;
+  return value;
 }
 
 export function encodeDocumentListCursor(payload: DocumentListCursorPayload): string {
@@ -56,7 +64,7 @@ export function decodeDocumentListCursor(cursor: string): DocumentListCursorPayl
   let parsed: unknown;
   try {
     const text = new TextDecoder().decode(decodeBase64Url(cursor.trim()));
-    parsed = JSON.parse(text) as unknown;
+    parsed = JSON.parse(text);
   } catch {
     throw new ValidationError('Invalid document list cursor');
   }
