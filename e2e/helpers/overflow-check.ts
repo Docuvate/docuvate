@@ -229,26 +229,68 @@ export async function assertLongLabelChipsTruncateWithTooltip(page: Page): Promi
 }
 
 export async function assertCorrectionsBottomSheet(page: Page): Promise<void> {
+  const dialog = page.getByRole('dialog').filter({
+    has: page.locator('[data-testid="field-correction-sheet"], .document-field-correction-actions, .document-field-correction-value'),
+  });
+  const sheet = page.locator('[data-testid="field-correction-sheet"]');
+  const target = (await sheet.count()) > 0 ? sheet : dialog;
+  await expect(target).toBeVisible({ timeout: 15_000 });
+  await expect(target).toHaveAttribute('role', 'dialog');
   const layout = await page.evaluate((): BottomSheetLayout => {
     const pageRoot = document.querySelector('.document-detail-page');
     const workspace = pageRoot?.querySelector('.layout-workspace');
-    const panel = pageRoot?.querySelector('.layout-side-panel');
-    const stage = pageRoot?.querySelector('.layout-viewer-stage');
-    if (!(workspace instanceof HTMLElement) || !(panel instanceof HTMLElement)) {
-      return { ok: false, reason: 'missing workspace or side panel' };
+    const stage = pageRoot?.querySelector('.layout-viewer-stage, .layout-viewer-card, .pdf-page-canvas');
+    const sheetEl =
+      document.querySelector('[data-testid="field-correction-sheet"]') ??
+      document.querySelector('.bottom-sheet-panel[role="dialog"]');
+    if (!(workspace instanceof HTMLElement) || !(sheetEl instanceof HTMLElement)) {
+      return { ok: false, reason: 'missing workspace or correction sheet' };
     }
     const columns = getComputedStyle(workspace).gridTemplateColumns.trim();
     const columnCount = columns.split(/\s+/).filter((part) => part.length > 0).length;
-    const panelBox = panel.getBoundingClientRect();
+    const sheetBox = sheetEl.getBoundingClientRect();
     const stageBox = stage instanceof HTMLElement ? stage.getBoundingClientRect() : null;
-    const belowStage = stageBox ? panelBox.top + 1 >= stageBox.bottom - 8 : true;
-    const singleColumn = columnCount === 1;
+    const documentVisible = stageBox ? stageBox.height > 80 : true;
+    const sheetBelow = stageBox ? sheetBox.top + 1 >= stageBox.top + 40 : true;
     return {
-      ok: singleColumn && belowStage && panelBox.height > 0,
-      reason: `cols=${columns} panelTop=${String(panelBox.top)} stageBottom=${String(stageBox?.bottom ?? 'n/a')}`,
+      ok: columnCount === 1 && documentVisible && sheetBelow && sheetBox.height > 0,
+      reason: `cols=${columns} sheetTop=${String(sheetBox.top)} stageTop=${String(stageBox?.top ?? 'n/a')} stageH=${String(stageBox?.height ?? 'n/a')}`,
     };
   });
   expect(layout.ok, layout.reason).toBe(true);
+}
+
+export async function assertOverflowMissesHeader(page: Page): Promise<void> {
+  const overlap = await page.evaluate(() => {
+    const header =
+      document.querySelector('.app-topbar') ?? document.querySelector('[data-testid="app-topbar"]');
+    const popover =
+      document.querySelector('.label-chip-row-overflow-popover') ??
+      document.querySelector('[data-testid="label-overflow-sheet"]');
+    if (!(header instanceof HTMLElement) || !(popover instanceof HTMLElement)) {
+      return { ok: false, reason: 'missing header or overflow' };
+    }
+    const a = header.getBoundingClientRect();
+    const b = popover.getBoundingClientRect();
+    const intersects = !(
+      a.bottom <= b.top + 0.5 ||
+      b.bottom <= a.top + 0.5 ||
+      a.right <= b.left + 0.5 ||
+      b.right <= a.left + 0.5
+    );
+    return { ok: !intersects, reason: `headerBottom=${String(a.bottom)} popoverTop=${String(b.top)}` };
+  });
+  expect(overlap.ok, overlap.reason).toBe(true);
+}
+
+export async function assertFieldRegionRenderedWithValue(page: Page): Promise<void> {
+  const overlay = page.locator('.pdf-layout-overlay-field, [data-overlay-id^="region-field-"]').first();
+  await expect(overlay).toBeVisible({ timeout: 30_000 });
+  const value = page.locator('.field-value-row-value, .document-field-correction-value-text, .document-field-correction-value input').first();
+  await expect(value).toBeVisible({ timeout: 15_000 });
+  const text = ((await value.inputValue().catch(async () => value.innerText())) ?? '').trim();
+  expect(text.length).toBeGreaterThan(0);
+  expect(text).not.toBe('-');
 }
 
 export async function captureLoadedScreenshot(
@@ -258,6 +300,17 @@ export async function captureLoadedScreenshot(
 ): Promise<Buffer> {
   await locator.waitFor({ state: 'visible', timeout: 60_000 });
   const body = await locator.screenshot({ animations: 'disabled' });
+  await testInfo.attach(name, { body, contentType: 'image/png' });
+  writeScreenshotFiles(name, body);
+  return body;
+}
+
+export async function captureViewportScreenshot(
+  page: Page,
+  testInfo: Pick<TestInfo, 'attach'>,
+  name: string
+): Promise<Buffer> {
+  const body = await page.screenshot({ animations: 'disabled' });
   await testInfo.attach(name, { body, contentType: 'image/png' });
   writeScreenshotFiles(name, body);
   return body;

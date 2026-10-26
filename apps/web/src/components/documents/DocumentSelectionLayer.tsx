@@ -169,5 +169,11 @@ export function DocumentSelectionLayer({
     };
   }, [liveRect, tool]);
 
-  return null;
+  return (
+    <span
+      hidden
+      data-testid="document-selection-layer"
+      data-token-count={String(tokens.length)}
+    />
+  );
 }

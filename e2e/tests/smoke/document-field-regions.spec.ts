@@ -7,10 +7,13 @@ import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers
 import { assignLongLabels, longLabelNames } from '../../helpers/long-label-fixture';
 import {
   assertCorrectionsBottomSheet,
+  assertFieldRegionRenderedWithValue,
   assertLongLabelChipsTruncateWithTooltip,
   assertNoClippedOrOverlappingChips,
   assertNoHorizontalOverflow,
+  assertOverflowMissesHeader,
   captureLoadedScreenshot,
+  captureViewportScreenshot,
 } from '../../helpers/overflow-check';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
@@ -52,6 +55,19 @@ async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
 }
 
 async function startRectangle(page: Page): Promise<void> {
+  const word = page.locator('.pdf-page-wrap .textLayer span').filter({ hasText: /Widget/i }).first();
+  if ((await word.count()) > 0) {
+    await expect(word).toBeVisible({ timeout: 60_000 });
+    const box = await word.boundingBox();
+    expect(box).toBeTruthy();
+    if (!box) {
+      return;
+    }
+    await page.mouse.move(box.x + 2, box.y + 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width + 80, box.y + box.height + 24);
+    return;
+  }
   const canvas = page.locator('.pdf-page-canvas').first();
   await expect(canvas).toBeVisible({ timeout: 180_000 });
   const box = await canvas.boundingBox();
@@ -59,9 +75,9 @@ async function startRectangle(page: Page): Promise<void> {
   if (!box) {
     return;
   }
-  await page.mouse.move(box.x + 48, box.y + 48);
+  await page.mouse.move(box.x + box.width * 0.04, box.y + box.height * 0.12);
   await page.mouse.down();
-  await page.mouse.move(box.x + 220, box.y + 110);
+  await page.mouse.move(box.x + box.width * 0.42, box.y + box.height * 0.22);
 }
 
 async function finishRectangle(page: Page): Promise<void> {
@@ -94,6 +110,11 @@ test.describe('document field regions', () => {
     await openLayoutDocumentPage(page, layoutDocId);
 
     await page.locator('.layout-side-tabs').getByRole('tab', { name: /Übersicht|Overview/i }).click();
+    await expect(page.getByTestId('document-selection-layer')).toHaveAttribute(
+      'data-token-count',
+      /^(?!0$)\d+$/,
+      { timeout: 60_000 }
+    );
     await page.getByRole('radio', { name: /Rechteck|Rectangle/i }).click();
     await startRectangle(page);
     await expect(page.getByTestId('document-selection-rect')).toBeVisible({ timeout: 15_000 });
@@ -111,6 +132,7 @@ test.describe('document field regions', () => {
       timeout: 30_000,
     });
     await expect(page.locator('.source-chip')).toContainText('Seite 1');
+    await assertFieldRegionRenderedWithValue(page);
     await captureLoadedScreenshot(
       page.locator('.document-detail-page'),
       testInfo,
@@ -128,17 +150,26 @@ test.describe('document field regions', () => {
         await page.emulateMedia({ colorScheme: scheme });
         await setLabelsTabOpen(page, false);
         await page.locator('.layout-side-tabs').getByRole('tab', { name: /Übersicht|Overview/i }).click();
-        await expect(page.locator('.source-chip')).toContainText('Seite 1');
-        await assertNoHorizontalOverflow(page);
         if (viewport.width < 1024) {
+          const sheet = page.locator('[data-testid="field-correction-sheet"]');
+          if ((await sheet.count()) === 0) {
+            await page.locator('.pdf-layout-overlay-field, .field-value-row').first().click();
+          }
           await assertCorrectionsBottomSheet(page);
+          await expect(page.locator('.source-chip')).toContainText('Seite 1');
+          await assertNoHorizontalOverflow(page);
           if (scheme === 'light') {
-            await captureLoadedScreenshot(
-              page.locator('.document-detail-page'),
+            await captureViewportScreenshot(
+              page,
               testInfo,
               `field-regions-bottom-sheet-${viewport.name}-${scheme}.png`
             );
           }
+          await page.keyboard.press('Escape');
+          await expect(sheet).toHaveCount(0);
+        } else {
+          await expect(page.locator('.source-chip')).toContainText('Seite 1');
+          await assertNoHorizontalOverflow(page);
         }
 
         await setLabelsTabOpen(page, true);
@@ -150,10 +181,11 @@ test.describe('document field regions', () => {
         await assertNoHorizontalOverflow(page);
         if (scheme === 'light') {
           await more.click();
-          const popover = page.locator('.label-chip-row-overflow-popover, .overflow-chip-popover');
+          const popover = page.locator('.label-chip-row-overflow-popover, .overflow-chip-popover, [data-testid="label-overflow-sheet"]');
           await expect(popover).toBeVisible();
-          await captureLoadedScreenshot(
-            page.locator('.document-detail-page'),
+          await assertOverflowMissesHeader(page);
+          await captureViewportScreenshot(
+            page,
             testInfo,
             `field-regions-long-labels-${viewport.name}-${scheme}.png`
           );

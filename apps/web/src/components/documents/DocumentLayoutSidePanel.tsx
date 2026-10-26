@@ -31,7 +31,6 @@ import {
 import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { Button } from '../ui/Button';
 import { FieldValueRow } from '../ui/FieldValueRow';
-import { Input } from '../ui/Input';
 import { SourceChip } from '../ui/SourceChip';
 import { DocumentChatPanel } from './DocumentChatPanel';
 
@@ -50,7 +49,6 @@ interface DocumentLayoutSidePanelProps {
   activeOverlayId: string | null;
   onOverlaySelect: (overlayId: string, page: number) => void;
   onAcceptSuggestion: (key: string, value: string) => void;
-  onFieldValueChange?: (key: string, value: string) => void;
   onDismissSuggestion: (key: string) => void;
   dismissedSuggestions: Set<string>;
   heuristicSuggestions?: { key: string; value: string }[];
@@ -64,6 +62,7 @@ interface DocumentLayoutSidePanelProps {
   onConfirmField?: (key: string, value: string) => void;
   onCorrectField?: (key: string) => void;
   onHighlightField?: (key: string) => void;
+  onSelectField?: (key: string) => void;
 }
 
 export function DocumentLayoutSidePanel({
@@ -77,7 +76,6 @@ export function DocumentLayoutSidePanel({
   activeOverlayId,
   onOverlaySelect,
   onAcceptSuggestion,
-  onFieldValueChange,
   onDismissSuggestion,
   dismissedSuggestions,
   heuristicSuggestions = [],
@@ -91,6 +89,7 @@ export function DocumentLayoutSidePanel({
   onConfirmField,
   onCorrectField,
   onHighlightField,
+  onSelectField,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -337,12 +336,19 @@ export function DocumentLayoutSidePanel({
                   >
                     <FieldValueRow
                       fieldName={fieldLabelForKey(field.key)}
-                      value={formatFieldValue(field.key, field.value)}
+                      value={
+                        field.value.trim().length > 0
+                          ? formatFieldValue(field.key, field.value)
+                          : t('documents.fieldRegionEmptyHint')
+                      }
                       state={(field.confidence ?? 1) >= 0.85 ? 'confirmed' : 'suggested'}
                       confidencePercent={
                         field.confidence != null ? Math.round(field.confidence * 100) : undefined
                       }
                       sourceLabel={sourceLabel}
+                      onSelect={
+                        onSelectField ? () => { onSelectField(field.key); } : undefined
+                      }
                       onConfirm={
                         onConfirmField
                           ? () => { onConfirmField(field.key, field.value); }
@@ -355,14 +361,6 @@ export function DocumentLayoutSidePanel({
                         onHighlightField ? () => { onHighlightField(field.key); } : undefined
                       }
                     />
-                    {onFieldValueChange ? (
-                      <Input
-                        className="layout-field-input"
-                        value={field.value}
-                        aria-label={fieldLabelForKey(field.key)}
-                        onChange={(e) => { onFieldValueChange(field.key, e.target.value); }}
-                      />
-                    ) : null}
                   </li>
                 );
               })}

@@ -445,6 +445,7 @@
 }
 
 .field-value-row-primary,
+.field-value-row-select,
 .field-value-row-meta,
 .field-value-row-actions {
   display: flex;
@@ -454,8 +455,19 @@
   max-width: 100%;
 }
 
-.field-value-row-primary {
+.field-value-row-primary,
+.field-value-row-select {
   grid-area: primary;
+}
+
+.field-value-row-select {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
 }
 
 .field-value-row-meta {
