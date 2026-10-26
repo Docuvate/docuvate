@@ -14,7 +14,7 @@ import {
 import { DatabaseModule } from '../../../src/shared/infrastructure/database/database.module.js';
 
 const labelHybridCacheStub = {
-  resolveModel: async () => null,
+  resolveModel: () => Promise.resolve(null),
 } satisfies Pick<LabelHybridModelCacheService, 'resolveModel'>;
 
 export async function createLabelsRecommendationsUseCase(): Promise<GetLabelRecommendationsUseCase> {

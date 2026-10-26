@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
   type StartedValkey,
@@ -16,6 +16,8 @@ import {
   newIsolationUserId,
 } from './pg-test-isolation.js';
 
+vi.setConfig({ hookTimeout: 300_000 });
+
 /**
  * Audit seed: 620 ready + 140 failed + 140 queued documents, 120 labels (~5 tags/doc),
  * mixed text/document dates, embeddings, no pre-trained hybrid model.
@@ -23,10 +25,7 @@ import {
  * Production 500s without `document_tags.user_confirmed` mean migration
  * `DocumentTagsUserConfirmed20261025210000` is pending (see migration readiness checks).
  */
-describe(
-  'GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)',
-  { hookTimeout: 300_000 },
-  () => {
+describe('GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)', () => {
   const pool = getIntegrationPool();
   let valkey: StartedValkey;
   let recommendations: GetLabelRecommendationsUseCase;
@@ -62,5 +61,4 @@ describe(
     const items = await recommendations.execute(userId);
     expect(Array.isArray(items)).toBe(true);
   });
-  }
-);
+});
