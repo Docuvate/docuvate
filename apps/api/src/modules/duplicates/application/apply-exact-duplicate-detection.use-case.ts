@@ -25,7 +25,7 @@ export class ApplyExactDuplicateDetectionUseCase {
   async execute(documentId: string, userId: string, contentHash: string | null): Promise<void> {
     try {
       if (contentHash) {
-        await this.linkHashMatches(userId, documentId, contentHash, 'bytes');
+        await this.linkHashMatches(userId, documentId, contentHash);
       }
 
       const sourceDoc = await this.documents.findByIdForUser(documentId, userId);
@@ -52,12 +52,7 @@ export class ApplyExactDuplicateDetectionUseCase {
     }
   }
 
-  private async linkHashMatches(
-    userId: string,
-    documentId: string,
-    hash: string,
-    _kind: 'bytes'
-  ): Promise<void> {
+  private async linkHashMatches(userId: string, documentId: string, hash: string): Promise<void> {
     const hashMatches = await this.duplicates.findDocumentIdsByHash(userId, hash, documentId);
     for (const candidateId of hashMatches) {
       await this.duplicates.upsertCandidate(userId, documentId, candidateId, 1, 'hash');

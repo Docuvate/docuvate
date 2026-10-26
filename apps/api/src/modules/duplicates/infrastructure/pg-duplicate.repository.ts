@@ -261,9 +261,9 @@ export class PgDuplicateRepository implements DuplicateRepository {
          WHERE d.user_id = $1 AND dr.document_id = $2`,
         [userId, documentId]
       );
-      const raw = result.rows[0];
-      if (!raw) return null;
-      const row = requireRecord(raw);
+      const firstRow: unknown = result.rows[0];
+      if (firstRow === undefined) return null;
+      const row = requireRecord(firstRow);
       const buffer = row.document_mean_int8;
       if (!Buffer.isBuffer(buffer) || buffer.length === 0) return null;
       return { scale: parseNumber(row.document_mean_scale, 0), int8: buffer };

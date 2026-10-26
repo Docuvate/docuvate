@@ -6,11 +6,9 @@ import {
   LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
-const DEFAULT_BATCH = 12;
+import { RefreshEmbeddingSuggestionsUseCase } from './refresh-embedding-suggestions.use-case.js';
 
-interface RefreshEmbeddingsRunner {
-  execute(documentId: string, userId: string): Promise<void>;
-}
+const DEFAULT_BATCH = 12;
 
 @Injectable()
 export class BackfillDocumentEmbeddingsUseCase {
@@ -18,7 +16,8 @@ export class BackfillDocumentEmbeddingsUseCase {
 
   constructor(
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
-    private readonly refreshEmbeddings: RefreshEmbeddingsRunner
+    @Inject(RefreshEmbeddingSuggestionsUseCase)
+    private readonly refreshEmbeddings: RefreshEmbeddingSuggestionsUseCase
   ) {}
 
   /** Embeds extracted documents that never received a vector (e.g. pre-feature uploads). */

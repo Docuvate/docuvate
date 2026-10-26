@@ -12,12 +12,12 @@ import {
 } from '../../../shared/domain/ports.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
-import { int8EmbeddingDot } from '../domain/embedding-int8-similarity.js';
 import {
   compareInputFromDocument,
   compareInputFromEmbeddingPeer,
 } from '../domain/duplicate-compare-input.js';
 import { readDuplicateDetectionConfig } from '../domain/duplicate-detection.config.js';
+import { int8EmbeddingDot } from '../domain/embedding-int8-similarity.js';
 import { extractionTextToLines } from '../domain/extraction-lines.js';
 import { HttpSmartDuplicatesAdapter } from '../infrastructure/http-smart-duplicates.adapter.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
@@ -101,8 +101,8 @@ export class ApplyFuzzyDuplicateDetectionUseCase {
     if (!sourceMean) {
       const vector = await this.embeddings.getDocumentEmbedding(documentId);
       if (!vector || vector.length === 0) return [];
-      const legacy = await this.duplicates.listDocumentEmbeddings(userId, documentId);
-      const scoredLegacy = legacy
+      const fullCorpus = await this.duplicates.listDocumentEmbeddings(userId, documentId);
+      const scoredFullCorpus = fullCorpus
         .map((row) => {
           let dot = 0;
           const len = Math.min(vector.length, row.embedding.length);
@@ -114,7 +114,7 @@ export class ApplyFuzzyDuplicateDetectionUseCase {
         .filter((entry) => entry.similarity >= config.embeddingThreshold)
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, config.maxEmbeddingCandidates);
-      return scoredLegacy;
+      return scoredFullCorpus;
     }
 
     const compact = await this.duplicates.listCompactDocumentEmbeddings(userId, documentId);

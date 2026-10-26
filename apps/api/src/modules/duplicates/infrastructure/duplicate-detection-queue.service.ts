@@ -33,33 +33,36 @@ function parseJobData(data: unknown): DuplicateDetectionJobData {
 @Injectable()
 export class DuplicateDetectionQueueService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DuplicateDetectionQueueService.name);
-  private connection!: IORedis;
-  private queue!: Queue<DuplicateDetectionJobData>;
-  private worker!: Worker<DuplicateDetectionJobData>;
+  private connection: IORedis | null = null;
+  private queue: Queue<DuplicateDetectionJobData> | null = null;
+  private worker: Worker<DuplicateDetectionJobData> | null = null;
 
   constructor(private readonly applyFuzzyDuplicateDetection: ApplyFuzzyDuplicateDetectionUseCase) {}
 
   async onModuleInit(): Promise<void> {
-    this.connection = createValkeyConnection();
-    await waitForValkeyReady(this.connection);
+    const connection = createValkeyConnection();
+    await waitForValkeyReady(connection);
+    this.connection = connection;
 
-    this.queue = new Queue<DuplicateDetectionJobData>(DUPLICATE_DETECTION_QUEUE_NAME, {
-      connection: this.connection,
+    const queue = new Queue<DuplicateDetectionJobData>(DUPLICATE_DETECTION_QUEUE_NAME, {
+      connection,
     });
+    this.queue = queue;
 
-    this.worker = new Worker<DuplicateDetectionJobData>(
+    const worker = new Worker<DuplicateDetectionJobData>(
       DUPLICATE_DETECTION_QUEUE_NAME,
       async (job) => {
         const { documentId, userId } = parseJobData(job.data);
         await this.applyFuzzyDuplicateDetection.execute(documentId, userId);
       },
       {
-        connection: this.connection,
+        connection,
         concurrency: duplicateDetectionQueueConcurrency(),
       }
     );
+    this.worker = worker;
 
-    this.worker.on('failed', (job, error) => {
+    worker.on('failed', (job, error) => {
       const id = job?.data != null ? parseJobData(job.data).documentId : 'unknown';
       this.logger.warn(`Duplicate detection job failed for ${id}: ${error.message}`);
     });
@@ -67,9 +70,13 @@ export class DuplicateDetectionQueueService implements OnModuleInit, OnModuleDes
 
   async enqueueFuzzy(documentId: string, userId: string): Promise<void> {
     const jobId = duplicateDetectionJobId(documentId);
+    const queue = this.queue;
+    if (!queue) {
+      return;
+    }
     await enqueueBullJobWithRetry(
       () =>
-        this.queue.add(
+        queue.add(
           'fuzzy',
           { documentId, userId },
           {
@@ -84,8 +91,14 @@ export class DuplicateDetectionQueueService implements OnModuleInit, OnModuleDes
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.worker?.close();
-    await this.queue?.close();
-    await this.connection?.quit();
+    if (this.worker) {
+      await this.worker.close();
+    }
+    if (this.queue) {
+      await this.queue.close();
+    }
+    if (this.connection) {
+      await this.connection.quit();
+    }
   }
 }
