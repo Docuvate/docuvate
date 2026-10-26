@@ -194,13 +194,16 @@ export class HttpCeMlAdapter {
       return [];
     }
     const { url, secret } = workerBase();
-    const response = await fetch(workerApiUrl(url, '/ml/ce/missing-label-batch'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Worker-Secret': secret,
-      },
-      body: JSON.stringify({
+    let response: Response;
+    try {
+      response = await fetch(workerApiUrl(url, '/ml/ce/missing-label-batch'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Worker-Secret': secret,
+        },
+        signal: AbortSignal.timeout(10_000),
+        body: JSON.stringify({
         targets: input.targets.map((target) => ({
           target_document_index: target.targetDocumentIndex,
           assigned_tag_ids: target.assignedTagIds,
@@ -213,7 +216,12 @@ export class HttpCeMlAdapter {
         })),
         labeled_document_indices: input.labeledDocumentIndices,
       }),
-    });
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.debug(`Worker CE missing-label batch unavailable (${message}); skipping batch hints`);
+      return [];
+    }
     if (response.status === 404 || response.status === 405) {
       this.logger.debug(
         `Worker CE missing-label batch unavailable (${String(response.status)}); skipping batch hints`
