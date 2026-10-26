@@ -4,8 +4,8 @@ import { Check, Loader2, X } from 'lucide-react';
 import { useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Popover } from '../ui/overlay/Popover';
 import { Button } from '../ui/Button';
+import { Popover } from '../ui/overlay/Popover';
 import { useDocumentUploadContext } from './DocumentUploadProvider';
 import {
   showUploadProgressBar,

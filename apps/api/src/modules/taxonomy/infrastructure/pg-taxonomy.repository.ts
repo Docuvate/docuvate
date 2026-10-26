@@ -6,8 +6,8 @@ import type pg from 'pg';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
 import type {
-  TagSearchParams,
   TagSearchPage,
+  TagSearchParams,
   TagWriteOptions,
   TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
@@ -18,10 +18,6 @@ import {
   parseString,
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
-import {
-  decodeTagSearchCursor,
-  encodeTagSearchCursor,
-} from './tag-search-cursor.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
   parseTagSuggestionDecisionTier,
@@ -33,6 +29,10 @@ import type {
   TagEntity,
   TagSuggestionEntity,
 } from '../domain/taxonomy.entity.js';
+import {
+  decodeTagSearchCursor,
+  encodeTagSearchCursor,
+} from './tag-search-cursor.js';
 
 const INBOX_NAME = 'Posteingang';
 

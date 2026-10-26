@@ -77,11 +77,18 @@ function foregroundCandidates(theme: DocuvateTheme): Rgb[] {
       unique.push(rgb);
     }
   }
+  if (unique.length === 0) {
+    const white = parseHexColor(CHIP_FG_DARK);
+    const black = parseHexColor(CHIP_FG_LIGHT);
+    if (white) unique.push(white);
+    if (black) unique.push(black);
+  }
   return unique;
 }
 
 function pickForeground(bg: Rgb, theme: DocuvateTheme): Rgb {
-  let best = foregroundCandidates(theme)[0] ?? parseHexColor(CHIP_FG_DARK) ?? { r: 255, g: 255, b: 255 };
+  const candidates = foregroundCandidates(theme);
+  let best = candidates[0];
   let bestRatio = 0;
   for (const fg of foregroundCandidates(theme)) {
     const ratio = contrastRatio(fg, bg);
@@ -94,8 +101,8 @@ function pickForeground(bg: Rgb, theme: DocuvateTheme): Rgb {
 }
 
 function ensureContrast(baseBg: Rgb, theme: DocuvateTheme): { bg: Rgb; fg: Rgb } {
-  let bg = baseBg;
-  let fg = pickForeground(bg, theme);
+  const bg = baseBg;
+  const fg = pickForeground(bg, theme);
   if (contrastRatio(fg, bg) >= MIN_CONTRAST) {
     return { bg, fg };
   }

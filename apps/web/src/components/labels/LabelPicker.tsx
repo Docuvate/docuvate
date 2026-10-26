@@ -16,8 +16,8 @@ import { useTranslation } from 'react-i18next';
 
 import {
   buildLabelPickerRows,
-  labelPickerRowHeight,
   type LabelPickerRow,
+  labelPickerRowHeight,
 } from '../../lib/labels/buildLabelPickerRows';
 import {
   flattenTagSearchPages,
@@ -181,10 +181,12 @@ export function LabelPicker(props: LabelPickerProps) {
     }
     if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
       e.preventDefault();
-      const row = rows[activeRowIndex];
-      if (row?.kind === 'option') {
-        selectTag(row.tag);
-        return;
+      if (activeRowIndex >= 0 && activeRowIndex < rows.length) {
+        const row = rows[activeRowIndex];
+        if (row.kind === 'option') {
+          selectTag(row.tag);
+          return;
+        }
       }
       const trimmed = query.trim();
       if (trimmed && props.allowCreate && props.onCreateOption) {
@@ -275,9 +277,6 @@ export function LabelPicker(props: LabelPickerProps) {
           >
             {virtualizer.getVirtualItems().map((virtualRow) => {
               const row = rows[virtualRow.index];
-              if (!row) {
-                return null;
-              }
               return (
                 <div
                   key={row.id}

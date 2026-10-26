@@ -78,8 +78,10 @@ export function FieldFilterValuePicker({
     return merged;
   }, [search.data?.pages]);
 
-  const hasMore = search.data?.pages?.[search.data.pages.length - 1]?.hasMore ?? false;
-  const total = search.data?.pages?.[0]?.total ?? null;
+  const pages = search.data?.pages;
+  const lastPage = pages && pages.length > 0 ? pages[pages.length - 1] : undefined;
+  const hasMore = lastPage?.hasMore ?? false;
+  const total = pages && pages.length > 0 ? pages[0].total : null;
 
   const rowCount =
     options.length +

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TagDto } from '@docuvate/contracts';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { MoreHorizontal } from 'lucide-react';
-import { useCallback, useMemo, useRef, useState } from 'react';
 import type { TFunction } from 'i18next';
+import { MoreHorizontal } from 'lucide-react';
 import type { CSSProperties } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
@@ -191,9 +191,6 @@ export function LabelsVocabularyTable(props: Props) {
             >
               {virtualizer.getVirtualItems().map((virtualRow) => {
                 const tag = displayTags[virtualRow.index];
-                if (!tag) {
-                  return null;
-                }
                 return (
                   <VocabularyRow
                     key={tag.id}

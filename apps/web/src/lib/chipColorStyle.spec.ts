@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { contrastRatio, meetsChipContrast, parseHexColor, rgbToHex } from './chipContrast';
 import { chipColorStyle } from './chipColorStyle';
+import { contrastRatio, meetsChipContrast, parseHexColor, rgbToHex } from './chipContrast';
 import {
   LABEL_COLOR_PRESET_IDS,
   labelColorPresetHex,

@@ -14,9 +14,9 @@ import {
   withdrawDocumentLabelCorrection,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
-import { useToast } from '../save/ToastProvider';
-import { LabelPicker } from '../labels/LabelPicker';
 import { LabelChipRow } from '../labels/LabelChipRow';
+import { LabelPicker } from '../labels/LabelPicker';
+import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
 import { DocumentLabelSuggestionChips } from './DocumentLabelSuggestionChips';
