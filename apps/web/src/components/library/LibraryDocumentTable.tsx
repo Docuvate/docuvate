@@ -292,7 +292,9 @@ export function LibraryDocumentTable({
       columns.push('7.5rem');
     }
     if (showLabelsCol) {
-      columns.push('9rem');
+      columns.push(
+        'minmax(var(--library-table-labels-col-min, 10rem), var(--library-table-labels-col-max, 11.5rem))'
+      );
     }
     if (showStatusCol) {
       columns.push('6.25rem');
