@@ -44,6 +44,8 @@ import {
   DocumentListQueryDto,
   DocumentListResponseDto,
   DocumentResponseDto,
+  DocumentTagSuggestionsBatchRequestDto,
+  DocumentTagSuggestionsBatchResponseDto,
   MoveDocumentsRequestDto,
   MoveDocumentsResponseDto,
   UpdateDocumentRequestDto,
@@ -72,7 +74,9 @@ import {
   SetDuplicateStackPrimaryUseCase,
 } from '../../duplicates/application/duplicate-stack.use-cases.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import { BatchDocumentTagSuggestionsUseCase } from '../application/batch-document-tag-suggestions.use-case.js';
 import { LoadDocumentLabelSuggestionsUseCase } from '../../labels/application/load-document-labels.use-case.js';
+import { toTagSuggestionDto } from '../../taxonomy/presentation/taxonomy.mapper.js';
 import { RefreshEmbeddingSuggestionsUseCase } from '../../labels/application/refresh-embedding-suggestions.use-case.js';
 import { ListRecognizedFieldAttemptsUseCase } from '../../recognized-fields/application/list-recognized-field-attempts.use-case.js';
 import { RecordExtractionArenaRatingUseCase } from '../../settings/application/settings.use-cases.js';
@@ -115,6 +119,7 @@ export class DocumentsController {
     private readonly uploadDocument: UploadDocumentUseCase,
     private readonly getDocument: GetDocumentUseCase,
     private readonly listDocuments: ListDocumentsUseCase,
+    private readonly batchDocumentTagSuggestions: BatchDocumentTagSuggestionsUseCase,
     private readonly updateDocument: UpdateDocumentUseCase,
     private readonly deleteDocument: DeleteDocumentUseCase,
     private readonly bulkDocuments: BulkDocumentsUseCase,
@@ -191,6 +196,27 @@ export class DocumentsController {
       hasMore: page.hasMore,
       total: page.total,
     };
+  }
+
+  @Post('tag-suggestions')
+  @ApiDocuvateRoute({
+    operationId: 'batchDocumentTagSuggestions',
+    summary: 'Load open tag suggestions for multiple documents (batch)',
+  })
+  @ApiOkResponse({ type: DocumentTagSuggestionsBatchResponseDto })
+  async batchTagSuggestions(
+    @Session() session: AuthSession,
+    @Body() body: DocumentTagSuggestionsBatchRequestDto
+  ): Promise<DocumentTagSuggestionsBatchResponseDto> {
+    const byDocument = await this.batchDocumentTagSuggestions.execute(
+      session.user.id,
+      body.documentIds
+    );
+    const items = [...byDocument.entries()].map(([documentId, suggestions]) => ({
+      documentId,
+      suggestions: suggestions.map(toTagSuggestionDto),
+    }));
+    return { items };
   }
 
   @Post('bulk')

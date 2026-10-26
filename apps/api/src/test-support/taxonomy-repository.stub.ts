@@ -25,6 +25,8 @@ export function createTaxonomyRepositoryStub(
     removeTagFromDocument: vi.fn(),
     clearInboxTagForDocument: vi.fn(),
     listSuggestions: vi.fn(),
+    listSuggestionsForDocuments: vi.fn(),
+    listTagsForDocuments: vi.fn(),
     upsertSuggestion: vi.fn(),
     dismissSuggestion: vi.fn(),
     clearSuggestion: vi.fn(),

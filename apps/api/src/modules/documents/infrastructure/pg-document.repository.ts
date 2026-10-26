@@ -156,6 +156,17 @@ export class PgDocumentRepository implements DocumentRepository {
     return this.attachLayoutIrPages(entity, pages);
   }
 
+  async filterOwnedDocumentIds(userId: string, documentIds: string[]): Promise<string[]> {
+    if (documentIds.length === 0) {
+      return [];
+    }
+    const result = await this.pool.query(
+      `SELECT id::text AS id FROM documents WHERE user_id = $1 AND id = ANY($2::uuid[])`,
+      [userId, documentIds]
+    );
+    return result.rows.map((row) => String(row.id));
+  }
+
   async findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null> {
     const result = await this.pool.query(
       `${LIST_SELECT} WHERE d.id = $1 AND d.user_id = $2 GROUP BY d.id, f.id`,

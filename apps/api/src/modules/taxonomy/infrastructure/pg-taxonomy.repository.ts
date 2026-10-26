@@ -245,6 +245,32 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
     return result.rows.map((raw) => this.mapTag(requireRecord(raw)));
   }
 
+  async listTagsForDocuments(documentIds: string[]): Promise<Map<string, TagEntity[]>> {
+    const grouped = new Map<string, TagEntity[]>();
+    if (documentIds.length === 0) {
+      return grouped;
+    }
+    const result = await this.pool.query(
+      `SELECT dt.document_id::text AS document_id, t.* FROM tags t
+       INNER JOIN document_tags dt ON dt.tag_id = t.id
+       WHERE dt.document_id = ANY($1::uuid[])
+       ORDER BY dt.document_id, t.name ASC`,
+      [documentIds]
+    );
+    for (const raw of result.rows) {
+      const record = requireRecord(raw);
+      const documentId = String(record.document_id);
+      const tag = this.mapTag(record);
+      const list = grouped.get(documentId);
+      if (list) {
+        list.push(tag);
+      } else {
+        grouped.set(documentId, [tag]);
+      }
+    }
+    return grouped;
+  }
+
   async assignTagToDocument(
     documentId: string,
     tagId: string,
@@ -277,16 +303,31 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
   }
 
   async listSuggestions(documentId: string, userId: string): Promise<TagSuggestionEntity[]> {
+    const batch = await this.listSuggestionsForDocuments([documentId], userId);
+    return batch.get(documentId) ?? [];
+  }
+
+  async listSuggestionsForDocuments(
+    documentIds: string[],
+    userId: string
+  ): Promise<Map<string, TagSuggestionEntity[]>> {
+    const grouped = new Map<string, TagSuggestionEntity[]>();
+    if (documentIds.length === 0) {
+      return grouped;
+    }
     const result = await this.pool.query(
-      `SELECT s.reason, s.confidence, s.source, s.decision_tier, t.* FROM document_tag_suggestions s
+      `SELECT s.document_id::text AS document_id, s.reason, s.confidence, s.source, s.decision_tier, t.*
+       FROM document_tag_suggestions s
        INNER JOIN tags t ON t.id = s.tag_id
-       WHERE s.document_id = $1 AND t.user_id = $2 AND s.dismissed = false
-       ORDER BY t.name ASC`,
-      [documentId, userId]
+       WHERE s.document_id = ANY($1::uuid[]) AND t.user_id = $2 AND s.dismissed = false
+       ORDER BY s.document_id, t.name ASC`,
+      [documentIds, userId]
     );
-    return result.rows.map((row) => {
+    for (const row of result.rows) {
+      const record = requireRecord(row);
+      const documentId = String(record.document_id);
       const parsed = tagSuggestionJoinRowSchema.parse(row);
-      return {
+      const suggestion: TagSuggestionEntity = {
         tag: this.mapTagFromJoinRow(parsed),
         reason: typeof parsed.reason === 'string' ? parsed.reason : '',
         confidence:
@@ -296,7 +337,14 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
         source: parseTagSuggestionSource(parsed.source),
         decisionTier: parseTagSuggestionDecisionTier(parsed.decision_tier),
       };
-    });
+      const list = grouped.get(documentId);
+      if (list) {
+        list.push(suggestion);
+      } else {
+        grouped.set(documentId, [suggestion]);
+      }
+    }
+    return grouped;
   }
 
   async upsertSuggestion(
