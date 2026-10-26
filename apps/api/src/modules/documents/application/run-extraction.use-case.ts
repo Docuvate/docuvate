@@ -14,7 +14,7 @@ import {
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
-import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
+import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { PersistDocumentFactsUseCase } from '../../exact-facts/application/persist-document-facts.use-case.js';
 import { extractionStaleClaimSeconds } from '../../extraction/domain/extraction-queue.config.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
@@ -34,7 +34,7 @@ export class RunExtractionUseCase {
     @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
     @Inject(EXTRACTION_PORT) private readonly extraction: ExtractionPort,
     private readonly postOcrPipeline: RunDocumentPostOcrPipelineUseCase,
-    private readonly applyDuplicateDetection: ApplyDuplicateDetectionUseCase,
+    private readonly scheduleDuplicateDetection: ScheduleDuplicateDetectionUseCase,
     private readonly resolveExtractorEngine: ResolveUserExtractorEngineUseCase,
     private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase,
     private readonly persistRepresentation: PersistDocumentRepresentationUseCase,
@@ -128,7 +128,7 @@ export class RunExtractionUseCase {
       if (!retryable) {
         const contentHash =
           (await this.documents.findById(documentId))?.contentHash ?? doc.contentHash ?? null;
-        await this.applyDuplicateDetection.execute(documentId, doc.userId, contentHash);
+        await this.scheduleDuplicateDetection.execute(documentId, doc.userId, contentHash);
         await this.documents.updateStatus(documentId, 'failed', { failureReason });
       }
       throw error;

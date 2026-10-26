@@ -21,7 +21,7 @@ import {
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { resolveAllowedUploadMime } from '../../../shared/domain/upload-mime-resolve.js';
-import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
+import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { SyncDocumentSearchIndexUseCase } from '../../search/application/sync-document-search-index.use-case.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
 import { resolveDocumentPlacement } from '../domain/document-placement.js';
@@ -52,7 +52,7 @@ export class UploadDocumentUseCase {
     @Inject(ID_GENERATOR) private readonly ids: IdGenerator,
     @Inject(CLOCK) private readonly clock: Clock,
     private readonly queueExtraction: QueueExtractionUseCase,
-    private readonly applyDuplicateDetection: ApplyDuplicateDetectionUseCase,
+    private readonly scheduleDuplicateDetection: ScheduleDuplicateDetectionUseCase,
     private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase
   ) {}
 
@@ -125,7 +125,7 @@ export class UploadDocumentUseCase {
     const saved = await this.documents.create(doc);
     const contentHash = createHash('sha256').update(input.buffer).digest('hex');
     await this.documents.setContentHash(saved.id, contentHash);
-    await this.applyDuplicateDetection.execute(saved.id, input.userId, contentHash);
+    await this.scheduleDuplicateDetection.execute(saved.id, input.userId, contentHash);
     if (isPlainTextUploadMime(mimeType)) {
       const text = input.buffer.toString('utf8');
       await this.documents.saveExtraction(saved.id, { text, fields: [], blocks: [] });

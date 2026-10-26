@@ -32,6 +32,7 @@ export function createDocumentRepositoryStub(
     setAbsenderFieldForDocuments: vi.fn(),
     deleteDocuments: vi.fn(),
     setContentHash: vi.fn(),
+    setExtractedTextHash: vi.fn(),
     setPreviewStorageKey: vi.fn(),
     setFolderForDocuments: vi.fn(),
     moveDocumentsToFolder: vi.fn().mockResolvedValue({ affected: 0, previousFolderIds: [] }),

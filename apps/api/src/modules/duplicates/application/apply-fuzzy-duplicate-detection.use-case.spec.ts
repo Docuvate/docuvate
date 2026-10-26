@@ -18,7 +18,7 @@ import { createDuplicateStackRepositoryStub } from '../../../test-support/duplic
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
 import { HttpSmartDuplicatesAdapter } from '../infrastructure/http-smart-duplicates.adapter.js';
-import { ApplyDuplicateDetectionUseCase } from './apply-duplicate-detection.use-case.js';
+import { ApplyFuzzyDuplicateDetectionUseCase } from './apply-fuzzy-duplicate-detection.use-case.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
 
 const defaultFlags = {
@@ -28,94 +28,7 @@ const defaultFlags = {
   smartDuplicates: false,
 };
 
-describe('ApplyDuplicateDetectionUseCase', () => {
-  it('still links hash-identical documents regardless of classifier', async () => {
-    const documents = createDocumentRepositoryStub({
-      findByIdForUser: vi.fn().mockResolvedValue({
-        id: 'doc-new',
-        filename: 'file.pdf',
-        title: 'file',
-        extraction: { text: 'content', fields: [] },
-      }),
-    });
-    const duplicates = {
-      findDocumentIdsByHash: vi.fn().mockResolvedValue(['doc-old']),
-      upsertCandidate: vi.fn(),
-      listDocumentEmbeddings: vi.fn().mockResolvedValue([]),
-      isPairDismissed: vi.fn().mockResolvedValue(false),
-    };
-    const embeddings = {
-      getDocumentEmbedding: vi.fn().mockResolvedValue([1, 0]),
-    };
-    const linkPair = vi.fn();
-    const stacks = createDuplicateStackRepositoryStub({ linkPair });
-    const classifier = { evaluate: vi.fn() };
-    const resolveFeatureFlags = { execute: vi.fn().mockResolvedValue(defaultFlags) };
-    const smartDuplicates = { detectCandidates: vi.fn() };
-
-    const moduleRef = await Test.createTestingModule({
-      providers: [
-        {
-          provide: ApplyDuplicateDetectionUseCase,
-          useFactory: (
-            documentRepository: DocumentRepository,
-            duplicateRepository: DuplicateRepository,
-            embeddingRepository: LabelEmbeddingRepository,
-            duplicateClassifier: DuplicateClassifierService,
-            linkDuplicatePair: LinkDuplicatePairUseCase,
-            featureFlags: ResolveFeatureFlagsUseCase,
-            smartDuplicateAdapter: HttpSmartDuplicatesAdapter
-          ) =>
-            new ApplyDuplicateDetectionUseCase(
-              documentRepository,
-              duplicateRepository,
-              embeddingRepository,
-              duplicateClassifier,
-              linkDuplicatePair,
-              featureFlags,
-              smartDuplicateAdapter
-            ),
-          inject: [
-            DOCUMENT_REPOSITORY,
-            DUPLICATE_REPOSITORY,
-            LABEL_EMBEDDING_REPOSITORY,
-            DuplicateClassifierService,
-            LinkDuplicatePairUseCase,
-            ResolveFeatureFlagsUseCase,
-            HttpSmartDuplicatesAdapter,
-          ],
-        },
-        {
-          provide: LinkDuplicatePairUseCase,
-          useFactory: (
-            stackRepository: DuplicateStackRepository,
-            duplicateRepository: DuplicateRepository
-          ) => new LinkDuplicatePairUseCase(stackRepository, duplicateRepository),
-          inject: [DUPLICATE_STACK_REPOSITORY, DUPLICATE_REPOSITORY],
-        },
-        { provide: DOCUMENT_REPOSITORY, useValue: documents },
-        { provide: DUPLICATE_REPOSITORY, useValue: duplicates },
-        { provide: LABEL_EMBEDDING_REPOSITORY, useValue: embeddings },
-        { provide: DUPLICATE_STACK_REPOSITORY, useValue: stacks },
-        { provide: DuplicateClassifierService, useValue: classifier },
-        { provide: ResolveFeatureFlagsUseCase, useValue: resolveFeatureFlags },
-        { provide: HttpSmartDuplicatesAdapter, useValue: smartDuplicates },
-      ],
-    }).compile();
-    const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
-
-    await useCase.execute('doc-new', 'user-1', 'same-hash');
-
-    expect(duplicates.upsertCandidate).toHaveBeenCalledWith(
-      'user-1',
-      'doc-new',
-      'doc-old',
-      1,
-      'hash'
-    );
-    expect(linkPair).toHaveBeenCalledWith('user-1', 'doc-new', 'doc-old');
-  });
-
+describe('ApplyFuzzyDuplicateDetectionUseCase', () => {
   it('suggests without linking when classifier returns suggest', async () => {
     const documents = createDocumentRepositoryStub({
       findByIdForUser: vi.fn().mockResolvedValue({
@@ -128,6 +41,9 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     const duplicates = {
       findDocumentIdsByHash: vi.fn().mockResolvedValue([]),
       upsertCandidate: vi.fn(),
+      getDocumentMeanInt8: vi.fn().mockResolvedValue(null),
+      listCompactDocumentEmbeddings: vi.fn(),
+      loadEmbeddingPeersByIds: vi.fn(),
       listDocumentEmbeddings: vi.fn().mockResolvedValue([
         {
           documentId: 'doc-old',
@@ -155,7 +71,7 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
-          provide: ApplyDuplicateDetectionUseCase,
+          provide: ApplyFuzzyDuplicateDetectionUseCase,
           useFactory: (
             documentRepository: DocumentRepository,
             duplicateRepository: DuplicateRepository,
@@ -165,7 +81,7 @@ describe('ApplyDuplicateDetectionUseCase', () => {
             featureFlags: ResolveFeatureFlagsUseCase,
             smartDuplicateAdapter: HttpSmartDuplicatesAdapter
           ) =>
-            new ApplyDuplicateDetectionUseCase(
+            new ApplyFuzzyDuplicateDetectionUseCase(
               documentRepository,
               duplicateRepository,
               embeddingRepository,
@@ -201,9 +117,9 @@ describe('ApplyDuplicateDetectionUseCase', () => {
         { provide: HttpSmartDuplicatesAdapter, useValue: smartDuplicates },
       ],
     }).compile();
-    const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
+    const useCase = moduleRef.get(ApplyFuzzyDuplicateDetectionUseCase);
 
-    await useCase.execute('doc-new', 'user-1', null);
+    await useCase.execute('doc-new', 'user-1');
 
     expect(duplicates.upsertCandidate).toHaveBeenCalled();
     expect(linkPair).not.toHaveBeenCalled();
@@ -226,6 +142,9 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     const duplicates = {
       findDocumentIdsByHash: vi.fn().mockResolvedValue([]),
       upsertCandidate: vi.fn(),
+      getDocumentMeanInt8: vi.fn().mockResolvedValue(null),
+      listCompactDocumentEmbeddings: vi.fn(),
+      loadEmbeddingPeersByIds: vi.fn(),
       listDocumentEmbeddings: vi.fn(),
       listSmartDuplicatePeers: vi.fn().mockResolvedValue([
         {
@@ -251,7 +170,7 @@ describe('ApplyDuplicateDetectionUseCase', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
-          provide: ApplyDuplicateDetectionUseCase,
+          provide: ApplyFuzzyDuplicateDetectionUseCase,
           useFactory: (
             documentRepository: DocumentRepository,
             duplicateRepository: DuplicateRepository,
@@ -261,7 +180,7 @@ describe('ApplyDuplicateDetectionUseCase', () => {
             featureFlags: ResolveFeatureFlagsUseCase,
             smartDuplicateAdapter: HttpSmartDuplicatesAdapter
           ) =>
-            new ApplyDuplicateDetectionUseCase(
+            new ApplyFuzzyDuplicateDetectionUseCase(
               documentRepository,
               duplicateRepository,
               embeddingRepository,
@@ -297,9 +216,9 @@ describe('ApplyDuplicateDetectionUseCase', () => {
         { provide: HttpSmartDuplicatesAdapter, useValue: smartDuplicates },
       ],
     }).compile();
-    const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
+    const useCase = moduleRef.get(ApplyFuzzyDuplicateDetectionUseCase);
 
-    await useCase.execute('doc-new', 'user-1', null);
+    await useCase.execute('doc-new', 'user-1');
 
     expect(smartDuplicates.detectCandidates).toHaveBeenCalled();
     expect(duplicates.upsertCandidate).toHaveBeenCalledWith(

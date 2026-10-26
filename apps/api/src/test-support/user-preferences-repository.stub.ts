@@ -18,6 +18,7 @@ export function createUserPreferencesEntity(
     fieldExtractionConfidenceGateEnabled: false,
     fieldExtractionRequiredLabelIds: [],
     advancedFeaturesEnabled: false,
+    fuzzyDuplicateDetectionEnabled: false,
     themePreference: 'system',
     locale: null,
     documentChatCloudBaseUrl: null,

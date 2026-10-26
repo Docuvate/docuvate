@@ -19,7 +19,7 @@ import { createDuplicateStackRepositoryStub } from '../../../test-support/duplic
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import { DuplicateClassifierService } from '../domain/duplicate-classifier.service.js';
 import { HttpSmartDuplicatesAdapter } from '../infrastructure/http-smart-duplicates.adapter.js';
-import { ApplyDuplicateDetectionUseCase } from './apply-duplicate-detection.use-case.js';
+import { ApplyFuzzyDuplicateDetectionUseCase } from './apply-fuzzy-duplicate-detection.use-case.js';
 import { LinkDuplicatePairUseCase } from './duplicate-stack.use-cases.js';
 
 const defaultFlags = {
@@ -29,7 +29,7 @@ const defaultFlags = {
   smartDuplicates: false,
 };
 
-describe('ApplyDuplicateDetectionUseCase auto_stack', () => {
+describe('ApplyFuzzyDuplicateDetectionUseCase auto_stack', () => {
   it('auto-stacks embedding matches when classifier returns auto_stack', async () => {
     const documents = createDocumentRepositoryStub({
       findByIdForUser: vi.fn().mockResolvedValue({
@@ -69,7 +69,7 @@ describe('ApplyDuplicateDetectionUseCase auto_stack', () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
-          provide: ApplyDuplicateDetectionUseCase,
+          provide: ApplyFuzzyDuplicateDetectionUseCase,
           useFactory: (
             documentRepository: DocumentRepository,
             duplicateRepository: DuplicateRepository,
@@ -79,7 +79,7 @@ describe('ApplyDuplicateDetectionUseCase auto_stack', () => {
             featureFlags: ResolveFeatureFlagsUseCase,
             smartDuplicateAdapter: HttpSmartDuplicatesAdapter
           ) =>
-            new ApplyDuplicateDetectionUseCase(
+            new ApplyFuzzyDuplicateDetectionUseCase(
               documentRepository,
               duplicateRepository,
               embeddingRepository,
@@ -115,9 +115,9 @@ describe('ApplyDuplicateDetectionUseCase auto_stack', () => {
         { provide: HttpSmartDuplicatesAdapter, useValue: smartDuplicates },
       ],
     }).compile();
-    const useCase = moduleRef.get(ApplyDuplicateDetectionUseCase);
+    const useCase = moduleRef.get(ApplyFuzzyDuplicateDetectionUseCase);
 
-    await useCase.execute('doc-new', 'user-1', null);
+    await useCase.execute('doc-new', 'user-1');
 
     expect(duplicates.upsertCandidate).toHaveBeenCalled(); // eslint-disable-line @typescript-eslint/unbound-method -- vitest mock
     expect(linkPair).toHaveBeenCalledWith('user-1', 'doc-new', 'doc-old');

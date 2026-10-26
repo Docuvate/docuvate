@@ -57,6 +57,10 @@ export class UpdateUserSettingsRequestDto implements UpdateUserSettingsRequest {
   advancedFeaturesEnabled?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  fuzzyDuplicateDetectionEnabled?: boolean;
+
+  @IsOptional()
   @IsIn(THEME_PREFERENCES)
   themePreference?: (typeof THEME_PREFERENCES)[number];
 
@@ -90,6 +94,7 @@ export class UserSettingsResponseDto implements UserSettingsDto {
   documentChatLocalModelEnabled?: boolean;
   documentChatLocalModelReady?: boolean;
   advancedFeaturesEnabled?: boolean;
+  fuzzyDuplicateDetectionEnabled?: boolean;
   useArenaWinnerAsDefault!: boolean;
   arenaWinnerEngine?: string | null;
   labelFieldConfidenceThreshold?: number;

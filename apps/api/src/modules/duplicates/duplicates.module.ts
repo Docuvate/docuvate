@@ -4,7 +4,10 @@ import { Module } from '@nestjs/common';
 
 import { FeatureFlagsModule } from '../feature-flags/feature-flags.module.js';
 import { LabelsModule } from '../labels/labels.module.js';
-import { ApplyDuplicateDetectionUseCase } from './application/apply-duplicate-detection.use-case.js';
+import { SettingsModule } from '../settings/settings.module.js';
+import { ApplyExactDuplicateDetectionUseCase } from './application/apply-exact-duplicate-detection.use-case.js';
+import { ApplyFuzzyDuplicateDetectionUseCase } from './application/apply-fuzzy-duplicate-detection.use-case.js';
+import { ScheduleDuplicateDetectionUseCase } from './application/schedule-duplicate-detection.use-case.js';
 import {
   DismissDuplicateCandidateUseCase,
   ListDuplicateCandidatesUseCase,
@@ -27,17 +30,21 @@ import {
 } from './application/duplicate-stack.use-cases.js';
 import { SyncUserHashDuplicatesUseCase } from './application/sync-user-hash-duplicates.use-case.js';
 import { DuplicateClassifierService } from './domain/duplicate-classifier.service.js';
+import { DuplicateDetectionQueueService } from './infrastructure/duplicate-detection-queue.service.js';
 import { HttpSmartDuplicatesAdapter } from './infrastructure/http-smart-duplicates.adapter.js';
 import { DuplicatesController } from './presentation/duplicates.controller.js';
 
 @Module({
-  imports: [LabelsModule, FeatureFlagsModule],
+  imports: [LabelsModule, FeatureFlagsModule, SettingsModule],
   controllers: [DuplicatesController],
   providers: [
     HttpSmartDuplicatesAdapter,
     SyncUserHashDuplicatesUseCase,
     DuplicateClassifierService,
-    ApplyDuplicateDetectionUseCase,
+    ApplyExactDuplicateDetectionUseCase,
+    ApplyFuzzyDuplicateDetectionUseCase,
+    ScheduleDuplicateDetectionUseCase,
+    DuplicateDetectionQueueService,
     ListDuplicateCandidatesUseCase,
     DismissDuplicateCandidateUseCase,
     SyncDuplicateStacksUseCase,
@@ -54,7 +61,9 @@ import { DuplicatesController } from './presentation/duplicates.controller.js';
     DismissDuplicateSetUseCase,
   ],
   exports: [
-    ApplyDuplicateDetectionUseCase,
+    ApplyExactDuplicateDetectionUseCase,
+    ApplyFuzzyDuplicateDetectionUseCase,
+    ScheduleDuplicateDetectionUseCase,
     ListDuplicateCandidatesUseCase,
     DismissDuplicateCandidateUseCase,
     SyncDuplicateStacksUseCase,

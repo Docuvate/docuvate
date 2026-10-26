@@ -24,7 +24,7 @@ import {
 } from '../../../../../shared/infrastructure/database/row-parse.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { QueueExtractionUseCase } from '../../../../documents/application/queue-extraction.use-case.js';
-import { ApplyDuplicateDetectionUseCase } from '../../../../duplicates/application/apply-duplicate-detection.use-case.js';
+import { ScheduleDuplicateDetectionUseCase } from '../../../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { globalFieldStorageKey } from '../../../../recognized-fields/domain/recognized-field.entity.js';
 import { SyncDocumentSearchIndexUseCase } from '../../../../search/application/sync-document-search-index.use-case.js';
 import type { ConnectorConfigurationInput } from '../../../domain/connector.types.js';
@@ -126,7 +126,7 @@ export class PaperlessImportExecutor {
     private readonly queueExtraction: QueueExtractionUseCase,
     private readonly postOcrPipeline: RunDocumentPostOcrPipelineUseCase,
     private readonly syncSearchIndex: SyncDocumentSearchIndexUseCase,
-    private readonly applyDuplicateDetection: ApplyDuplicateDetectionUseCase
+    private readonly scheduleDuplicateDetection: ScheduleDuplicateDetectionUseCase
   ) {}
 
   async dryRun(
@@ -369,7 +369,7 @@ export class PaperlessImportExecutor {
         });
       }
       await this.documents.setContentHash(documentId, contentHash);
-      await this.applyDuplicateDetection.execute(documentId, run.userId, contentHash);
+      await this.scheduleDuplicateDetection.execute(documentId, run.userId, contentHash);
     } else {
       const docEntity = await this.documents.findByIdForUser(documentId, run.userId);
       if (!docEntity) {

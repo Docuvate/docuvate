@@ -22,6 +22,7 @@ export function toUserSettingsResponseDto(
     documentChatLocalModelEnabled: resolved.documentChatLocalModelEnabled,
     documentChatLocalModelReady: resolved.documentChatLocalModelReady,
     advancedFeaturesEnabled: row.advancedFeaturesEnabled,
+    fuzzyDuplicateDetectionEnabled: row.fuzzyDuplicateDetectionEnabled,
     useArenaWinnerAsDefault: row.useArenaWinnerAsDefault,
     arenaWinnerEngine: row.arenaWinnerEngine,
     labelFieldConfidenceThreshold: row.labelFieldConfidenceThreshold,

@@ -80,6 +80,14 @@ class _PooledExtractChild:
 
     def run_job(self, payload: dict[str, Any], *, timeout: float) -> dict[str, Any]:
         with self._lock:
+            if self._proc is not None:
+                exit_code = self._proc.poll()
+                if exit_code is not None:
+                    logger.warning(
+                        "extract_pool_child_exited code=%s jobs_served=%s",
+                        exit_code,
+                        self._jobs_served,
+                    )
             if self._proc is None or self._proc.poll() is not None:
                 self._close()
                 self._proc = self._spawn()
@@ -97,6 +105,13 @@ class _PooledExtractChild:
             stdin.flush()
             raw_out = stdout.readline()
             self._jobs_served += 1
+            exit_after = proc.poll()
+            if exit_after is not None:
+                logger.warning(
+                    "extract_pool_child_exited_after_job code=%s jobs_served=%s",
+                    exit_after,
+                    self._jobs_served,
+                )
         if not raw_out:
             raise RuntimeError("extract pool child closed stdout")
         envelope = json.loads(raw_out)
