@@ -3,6 +3,8 @@
 import type {
   LabelRecommendationDocumentPreviewDto,
   LabelRecommendationDto,
+  LabelRecommendationListResponse,
+  LabelRecommendationsLoadState,
 } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -36,6 +38,35 @@ import {
 } from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
+
+export interface GetLabelRecommendationsOptions {
+  abortSignal?: AbortSignal;
+}
+
+function buildHybridTrainingRowsFromConfirmed(
+  confirmedEmbeddingRows: Awaited<
+    ReturnType<LabelEmbeddingRepository['listUserConfirmedDocumentEmbeddingsForUser']>
+  >,
+  docs: DocumentEntity[]
+): LabelHybridDocumentRow[] {
+  const docById = new Map(docs.map((doc) => [doc.id, doc]));
+  return confirmedEmbeddingRows.map((row) => {
+    const doc = docById.get(row.documentId);
+    const text = doc
+      ? `${doc.title}\n${doc.filename}\n${doc.extraction?.text ?? ''}`.slice(0, 12000)
+      : `${row.title}\n${row.filename}`;
+    return {
+      documentId: row.documentId,
+      embedding: row.embedding,
+      nonInboxTagIds: row.nonInboxTagIds,
+      text,
+    };
+  });
+}
+
+function warmingResponse(): LabelRecommendationListResponse {
+  return { items: [], state: 'warming' };
+}
 
 function enrichWithSampleDocuments(
   items: LabelRecommendationDto[],
@@ -87,7 +118,27 @@ export class GetLabelRecommendationsUseCase {
     private readonly labelHybridCache: LabelHybridModelCacheService
   ) {}
 
-  async execute(userId: string): Promise<LabelRecommendationDto[]> {
+  async execute(
+    userId: string,
+    options?: GetLabelRecommendationsOptions
+  ): Promise<LabelRecommendationListResponse> {
+    const confirmedEmbeddingRows =
+      await this.labelEmbeddings.listUserConfirmedDocumentEmbeddingsForUser(userId);
+    if (options?.abortSignal?.aborted) {
+      return warmingResponse();
+    }
+
+    const hybridTrainingRowsPreview = confirmedEmbeddingRows.map((row) => ({
+      documentId: row.documentId,
+      embedding: row.embedding,
+      nonInboxTagIds: row.nonInboxTagIds,
+      text: `${row.title}\n${row.filename}`,
+    }));
+    if (this.labelHybridCache.shouldReturnWarmingResponse(userId, hybridTrainingRowsPreview)) {
+      this.labelHybridCache.scheduleHybridWarm(userId, hybridTrainingRowsPreview);
+      return warmingResponse();
+    }
+
     const [
       tags,
       docs,
@@ -96,7 +147,6 @@ export class GetLabelRecommendationsUseCase {
       blocklist,
       blockPatterns,
       embeddingRows,
-      confirmedEmbeddingRows,
       preferences,
       clusterExclusions,
     ] = await Promise.all([
@@ -107,10 +157,12 @@ export class GetLabelRecommendationsUseCase {
       this.labelEmbeddings.listRecommendationBlocklist(userId),
       this.labelEmbeddings.listRecommendationBlocklistPatterns(userId),
       this.labelEmbeddings.listDocumentEmbeddingsForUser(userId),
-      this.labelEmbeddings.listUserConfirmedDocumentEmbeddingsForUser(userId),
       this.prefs.getForUser(userId),
       this.labelEmbeddings.listClusterDocumentExclusions(userId),
     ]);
+    if (options?.abortSignal?.aborted) {
+      return warmingResponse();
+    }
     const excludedByLabelKey = buildExcludedDocumentsByLabelKey(clusterExclusions);
     const embeddingByDocumentId = new Map(
       embeddingRows.map((row) => [row.documentId, row.embedding] as const)
@@ -147,19 +199,9 @@ export class GetLabelRecommendationsUseCase {
       labelSupportCountByTagId.set(tagId, embeddings.length);
     }
 
-    const hybridTrainingRows: LabelHybridDocumentRow[] = confirmedEmbeddingRows.map((row) => {
-      const doc = docs.find((d) => d.id === row.documentId);
-      const text = doc
-        ? `${doc.title}\n${doc.filename}\n${doc.extraction?.text ?? ''}`.slice(0, 12000)
-        : `${row.title}\n${row.filename}`;
-      return {
-        documentId: row.documentId,
-        embedding: row.embedding,
-        nonInboxTagIds: row.nonInboxTagIds,
-        text,
-      };
-    });
-    const hybridModel = await this.labelHybridCache.resolveModel(userId, hybridTrainingRows);
+    const hybridTrainingRows = buildHybridTrainingRowsFromConfirmed(confirmedEmbeddingRows, docs);
+    this.labelHybridCache.scheduleHybridWarm(userId, hybridTrainingRows);
+    const hybridModel = this.labelHybridCache.resolveModelForInference(userId, hybridTrainingRows);
 
     const assignRows = suggestAssignRecommendations({
       rows: hybridTrainingRows,
@@ -352,6 +394,8 @@ export class GetLabelRecommendationsUseCase {
     );
 
     const sorted = dedupedNew.sort((a, b) => b.score - a.score).slice(0, 8);
-    return enrichWithSampleDocuments(sorted, docs, embeddingByDocumentId);
+    const enrichedItems = enrichWithSampleDocuments(sorted, docs, embeddingByDocumentId);
+    const state: LabelRecommendationsLoadState = 'ready';
+    return { items: enrichedItems, state };
   }
 }

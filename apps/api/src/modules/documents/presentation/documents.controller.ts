@@ -206,7 +206,8 @@ export class DocumentsController {
     operationId: 'tagSuggestionsGetNotAllowed',
     summary: 'Tag suggestions batch endpoint does not support GET',
   })
-  tagSuggestionsGetNotAllowed(): never {
+  tagSuggestionsGetNotAllowed(@Res({ passthrough: true }) reply: FastifyReply): never {
+    reply.header('Allow', 'POST');
     throw new MethodNotAllowedException();
   }
 

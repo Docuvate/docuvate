@@ -14,8 +14,13 @@ import {
 import { DatabaseModule } from '../../../src/shared/infrastructure/database/database.module.js';
 
 const labelHybridCacheStub = {
-  resolveModel: () => Promise.resolve(null),
-} satisfies Pick<LabelHybridModelCacheService, 'resolveModel'>;
+  shouldReturnWarmingResponse: () => false,
+  scheduleHybridWarm: () => undefined,
+  resolveModelForInference: () => null,
+} satisfies Pick<
+  LabelHybridModelCacheService,
+  'shouldReturnWarmingResponse' | 'scheduleHybridWarm' | 'resolveModelForInference'
+>;
 
 export async function createLabelsRecommendationsUseCase(): Promise<GetLabelRecommendationsUseCase> {
   const moduleRef = await Test.createTestingModule({

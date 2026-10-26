@@ -126,11 +126,32 @@ export class LabelHybridModelCacheService {
       return staleModel;
     }
 
-    if (entry.trainingPromise) {
-      return entry.trainingPromise;
-    }
-
     return null;
+  }
+
+  /**
+   * True when hybrid assign scoring must wait for a first model and training should run off-request.
+   */
+  shouldReturnWarmingResponse(
+    userId: string,
+    rows: readonly LabelHybridDocumentRow[]
+  ): boolean {
+    const revision = computeLabelHybridTrainingRevision(rows);
+    const entry = this.entries.get(userId) ?? createCacheEntry();
+    this.entries.set(userId, entry);
+
+    if (entry.revision === revision) {
+      return false;
+    }
+    if (entry.model !== null) {
+      return false;
+    }
+    const significance = evaluateRetrainSignificance(entry.retrainBaseline, rows);
+    return significance !== null;
+  }
+
+  scheduleHybridWarm(userId: string, rows: readonly LabelHybridDocumentRow[]): void {
+    this.resolveModelForInference(userId, rows);
   }
 
   private scheduleDebouncedTrain(

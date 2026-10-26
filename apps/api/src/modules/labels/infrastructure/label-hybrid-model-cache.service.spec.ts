@@ -259,6 +259,18 @@ describe('LabelHybridModelCacheService', () => {
     expect(afterBudget).toEqual(stubModel);
   });
 
+  it('shouldReturnWarmingResponse is true on cold start and false after the model is cached', async () => {
+    const train = vi.fn((): Promise<LabelHybridModel | null> => Promise.resolve(stubModel));
+    const cache = new LabelHybridModelCacheService();
+    cache.replaceTrainer({ train });
+    const userId = 'user-warm-flag';
+    const rows = seedLabeledCorpus(5, 5, 'warm');
+    expect(cache.shouldReturnWarmingResponse(userId, rows)).toBe(true);
+    await cache.resolveModel(userId, rows);
+    await flushHybridTrainTimers(100, 0);
+    expect(cache.shouldReturnWarmingResponse(userId, rows)).toBe(false);
+  });
+
   it('coalesces fifty rapid revision bumps into at most two trainings', async () => {
     const train = vi.fn((): Promise<LabelHybridModel | null> => Promise.resolve(stubModel));
     const cache = new LabelHybridModelCacheService();

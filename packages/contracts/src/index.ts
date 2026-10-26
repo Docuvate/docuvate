@@ -766,6 +766,13 @@ export interface LabelRecommendationDocumentPreviewDto {
   similarity?: number;
 }
 
+export type LabelRecommendationsLoadState = 'ready' | 'warming';
+
+export interface LabelRecommendationListResponse {
+  items: LabelRecommendationDto[];
+  state: LabelRecommendationsLoadState;
+}
+
 export interface LabelRecommendationDto {
   id: string;
   kind: LabelRecommendationKind;

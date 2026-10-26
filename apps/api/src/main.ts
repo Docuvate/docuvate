@@ -5,6 +5,7 @@ initOtel({ serviceName: process.env['OTEL_SERVICE_NAME'] ?? 'docuvate-api' });
 
 import './shared/infrastructure/http/fastify-raw-body.augmentation.js';
 
+import compress from '@fastify/compress';
 import multipart from '@fastify/multipart';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -54,6 +55,11 @@ async function bootstrap(): Promise<void> {
 
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
     bodyParser: false,
+  });
+
+  await app.register(compress, {
+    global: true,
+    encodings: ['br', 'gzip', 'deflate'],
   });
 
   await app.register(multipart, {

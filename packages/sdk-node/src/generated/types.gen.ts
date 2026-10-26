@@ -561,6 +561,7 @@ export type LabelRecommendationListResponseDto = {
     items: Array<{
         [key: string]: unknown;
     }>;
+    state: 'ready' | 'warming';
 };
 
 export type LayoutCompareMetricsResponseDto = {

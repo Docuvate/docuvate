@@ -60,6 +60,7 @@ import type {
   LabelRecommendationBlocklistPatternDto,
   LabelRecommendationBlocklistResponse,
   LabelRecommendationDto,
+  LabelRecommendationListResponse,
   LayoutIrDocument,
   MoveDocumentsRequest,
   MoveDocumentsResponse,
@@ -412,9 +413,8 @@ export async function deleteTag(id: string): Promise<void> {
   await request(`/tags/${id}`, { method: 'DELETE' });
 }
 
-export async function listLabelRecommendations(): Promise<LabelRecommendationDto[]> {
-  const data = await request<{ items: LabelRecommendationDto[] }>('/labels/recommendations');
-  return data.items;
+export async function listLabelRecommendations(): Promise<LabelRecommendationListResponse> {
+  return request<LabelRecommendationListResponse>('/labels/recommendations');
 }
 
 export async function getLabelMap(): Promise<LabelMapResponseDto> {

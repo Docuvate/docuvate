@@ -17,7 +17,8 @@ const USER = 'user-rec-1';
 describe('GetLabelRecommendationsUseCase', () => {
   it('returns an empty list when there are no tags or documents', async () => {
     const cache = new LabelHybridModelCacheService();
-    vi.spyOn(cache, 'resolveModel').mockResolvedValue(null);
+    vi.spyOn(cache, 'shouldReturnWarmingResponse').mockReturnValue(false);
+    vi.spyOn(cache, 'resolveModelForInference').mockReturnValue(null);
 
     const taxonomy = createTaxonomyRepositoryStub({
       listTags: vi.fn().mockResolvedValue([]),
@@ -48,7 +49,7 @@ describe('GetLabelRecommendationsUseCase', () => {
       cache
     );
 
-    const items = await useCase.execute(USER);
-    expect(items).toEqual([]);
+    const result = await useCase.execute(USER);
+    expect(result).toEqual({ items: [], state: 'ready' });
   });
 });

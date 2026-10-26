@@ -14683,10 +14683,18 @@
             "items": {
               "type": "object"
             }
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "ready",
+              "warming"
+            ]
           }
         },
         "required": [
-          "items"
+          "items",
+          "state"
         ]
       },
       "LayoutCompareMetricsResponseDto": {

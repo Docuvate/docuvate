@@ -1571,6 +1571,7 @@
   "labelRecommendations": {
     "title": "Empfehlungen",
     "loading": "Lade Vorschläge…",
+    "warming": "Label-Vorschläge werden im Hintergrund vorbereitet und erscheinen gleich hier.",
     "empty": "Noch keine passenden Vorschläge. Nach Extraktion oder neuen Dokumenten erneut prüfen.",
     "badgeAssign": "Zuweisen",
     "badgeMerge": "Zusammenführen",
