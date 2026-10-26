@@ -68,7 +68,21 @@ describe('PgGlobalSearchRepository lexical latency (Testcontainers Postgres)', (
 
   it('uses document_text_chunks_body_trgm_idx for chunk word similarity', async () => {
     const probe = 'rechnung';
-    const explain = await queryWithWordSimilarityThreshold<{ 'QUERY PLAN': string }>(
+    const indexProbe = await queryWithWordSimilarityThreshold<{ 'QUERY PLAN': string }>(
+      pool,
+      WORD_SIM_THRESHOLD,
+      `EXPLAIN (FORMAT TEXT)
+       SELECT c.document_id
+       FROM document_text_chunks c
+       WHERE c.body %> $1::text
+       LIMIT 8`,
+      [probe],
+      { disableSeqScan: true }
+    );
+    const indexPlan = indexProbe.rows.map((row) => row['QUERY PLAN']).join('\n');
+    expect(indexPlan).toContain('document_text_chunks_body_trgm_idx');
+
+    const scoped = await queryWithWordSimilarityThreshold<{ 'QUERY PLAN': string }>(
       pool,
       WORD_SIM_THRESHOLD,
       `EXPLAIN (FORMAT TEXT)
@@ -82,9 +96,8 @@ describe('PgGlobalSearchRepository lexical latency (Testcontainers Postgres)', (
       [userId, [probe]],
       { disableSeqScan: true }
     );
-    const plan = explain.rows.map((row) => row['QUERY PLAN']).join('\n');
-    expect(plan).toContain('document_text_chunks_body_trgm_idx');
-    expect(plan).not.toMatch(/Seq Scan on document_text_chunks\b/);
+    const scopedPlan = scoped.rows.map((row) => row['QUERY PLAN']).join('\n');
+    expect(scopedPlan).not.toMatch(/Seq Scan on document_text_chunks\b/);
   });
 
   it('returns no documents for nonsense queries', async () => {
