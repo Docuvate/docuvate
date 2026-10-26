@@ -1,0 +1,43 @@
+/* SPDX-FileCopyrightText: 2026 Thomas Faust */
+/* SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0 */
+
+.docuvate-overlay-portal {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.docuvate-overlay-portal--drawer {
+  z-index: var(--dv-z-drawer);
+}
+
+.docuvate-overlay-portal--modal {
+  z-index: var(--dv-z-modal);
+}
+
+.docuvate-overlay-portal--popover {
+  z-index: var(--dv-z-popover);
+}
+
+.docuvate-overlay-portal--toast {
+  z-index: var(--dv-z-toast);
+}
+
+.docuvate-overlay-portal > * {
+  pointer-events: auto;
+}
+
+.popover-surface {
+  margin: 0;
+  padding: var(--dv-space-2xs);
+  list-style: none;
+  background: var(--dv-color-bg-raised);
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+  box-shadow: var(--dv-shadow-md);
+}
+
+.popover-surface-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

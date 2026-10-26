@@ -6,6 +6,8 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
+import { Button } from '../ui/Button';
+import { getOverlayPortalRoot } from '../ui/overlay/overlayPortal';
 
 interface LibraryFilterDrawerProps {
   open: boolean;
@@ -81,9 +83,14 @@ export function LibraryFilterDrawer({
             <X size={20} strokeWidth={2} aria-hidden />
           </button>
         </div>
-        {children}
+        <div className="library-filter-drawer-body">{children}</div>
+        <footer className="library-filter-drawer-footer">
+          <Button type="button" variant="primary" onClick={closeAndRestoreFocus}>
+            {t('library.filter.hidePanel')}
+          </Button>
+        </footer>
       </div>
     </div>,
-    document.body
+    getOverlayPortalRoot('drawer')
   );
 }
