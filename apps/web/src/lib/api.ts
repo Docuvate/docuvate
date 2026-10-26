@@ -440,7 +440,6 @@ export async function listLabelDocumentInventoryPage(
   return request<LabelDocumentInventoryResponseDto>(`/labels/document-inventory${qs}`);
 }
 
-/** @deprecated Prefer {@link getLabelDocumentInventorySummary} and {@link listLabelDocumentInventoryPage}. */
 export async function getLabelDocumentInventory(): Promise<LabelDocumentInventoryResponseDto> {
   return listLabelDocumentInventoryPage();
 }
@@ -612,7 +611,6 @@ export async function listDocumentReviewQueuePage(options?: {
   return request<DocumentReviewQueueResponseDto>(`/review-queue${qs}`);
 }
 
-/** @deprecated Prefer {@link listDocumentReviewQueuePage} for paginated reads. */
 export async function listDocumentReviewQueue(options?: {
   limit?: number;
 }): Promise<DocumentReviewQueueResponseDto> {

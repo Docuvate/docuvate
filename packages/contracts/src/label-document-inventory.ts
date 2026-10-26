@@ -18,7 +18,7 @@ export type LabelDocumentInventorySummaryResponseDto = {
 
 export type LabelDocumentInventoryResponseDto = LabelDocumentInventorySummaryResponseDto &
   CursorListResponse<LabelInventoryDocument> & {
-    /** @deprecated Prefer paginated `items`; kept as alias for first page compatibility. */
+    /** Same as `items` on the first page for older clients. */
     documents: LabelInventoryDocument[];
   };
 
