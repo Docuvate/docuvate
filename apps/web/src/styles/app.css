@@ -8268,6 +8268,37 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   overflow: hidden;
 }
 
+.document-labels-cell-row .label-chip-row-visible {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  flex: 1;
+}
+
+.document-labels-cell-row .label-chip-row-chip {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.document-labels-cell-row .label-chip-row-measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  max-width: none;
+  width: max-content;
+  height: 0;
+  overflow: hidden;
+}
+
 .document-labels-visible-chip {
   flex: 0 1 auto;
   min-width: 0;
@@ -12826,6 +12857,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .labels-vocabulary-scroll {
+  max-height: 28rem;
+  overflow: auto;
   overflow-x: auto;
 }
 
@@ -15905,9 +15938,145 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .labels-vocabulary-grid {
   display: grid;
-  grid-template-columns: 12.5rem 7.5rem minmax(0, 1fr) 12.5rem 4.5rem;
+  grid-template-columns: minmax(0, 1.2fr) 7.5rem minmax(0, 1.4fr) 12.5rem;
   column-gap: var(--dv-space-md);
   align-items: center;
+}
+
+.labels-vocabulary-virtual-body {
+  width: 100%;
+}
+
+.label-picker-combobox {
+  position: relative;
+  width: 100%;
+}
+
+.label-picker-combobox-control {
+  display: flex;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  border: 1px solid var(--dv-color-border);
+  border-radius: var(--dv-radius-md);
+  background: var(--dv-color-bg-raised);
+  padding: 0 var(--dv-space-2xs);
+}
+
+.label-picker-combobox-search-icon {
+  flex-shrink: 0;
+  color: var(--dv-color-text-muted);
+}
+
+.label-picker-combobox-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.label-picker-combobox-input:focus {
+  outline: none;
+}
+
+.label-picker-combobox-toggle {
+  flex-shrink: 0;
+}
+
+.label-picker-combobox-list-host {
+  max-height: 20rem;
+  overflow: auto;
+  padding: var(--dv-space-2xs);
+}
+
+.label-picker-combobox-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dv-space-sm);
+  min-height: 2.5rem;
+  padding: var(--dv-space-2xs) var(--dv-space-sm);
+  border: none;
+  border-radius: var(--dv-radius-sm);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.label-picker-combobox-option:hover,
+.label-picker-combobox-option--active {
+  background: var(--dv-color-bg-overlay);
+}
+
+.label-picker-combobox-section {
+  padding: var(--dv-space-2xs) var(--dv-space-sm);
+  font-size: var(--dv-font-size-xs);
+  font-weight: 600;
+  color: var(--dv-color-text-muted);
+}
+
+.label-picker-combobox-status,
+.label-picker-combobox-total {
+  margin: 0;
+  padding: var(--dv-space-2xs) var(--dv-space-sm);
+  font-size: var(--dv-font-size-sm);
+}
+
+.label-picker-combobox-create {
+  border-top: 1px solid var(--dv-color-border);
+  padding-top: var(--dv-space-2xs);
+}
+
+.label-chip-row-visible {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  min-width: 0;
+}
+
+.label-chip-row-measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--dv-space-2xs);
+  height: 0;
+  overflow: hidden;
+}
+
+.label-chip-row-overflow-popover {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs);
+  padding: var(--dv-space-sm);
+  max-width: min(24rem, calc(100vw - 2rem));
+}
+
+.label-chip-row-overflow-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs);
+}
+
+.upload-queue-overflow-btn {
+  margin-top: var(--dv-space-2xs);
+}
+
+.upload-queue-overflow-popover {
+  padding: var(--dv-space-xs);
+  max-height: min(20rem, 70vh);
+}
+
+.upload-queue-overflow-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--dv-space-2xs);
+  min-width: min(22rem, calc(100vw - 2rem));
 }
 
 .labels-vocabulary-grid--head {

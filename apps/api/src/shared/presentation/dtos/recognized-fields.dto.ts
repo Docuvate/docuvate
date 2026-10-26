@@ -55,6 +55,33 @@ export class ReplaceRecognizedFieldItemDto {
   confidenceGateEnabled?: boolean | null;
 }
 
+export class RecognizedFieldFilterValuesQueryDto {
+  @IsString()
+  key!: string;
+
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+}
+
+export class RecognizedFieldFilterValuesResponseDto {
+  items!: string[];
+  nextCursor!: string | null;
+  hasMore!: boolean;
+  total!: number | null;
+}
+
 export class ReplaceRecognizedFieldsRequestDto implements ReplaceRecognizedFieldsRequest {
   @IsArray()
   @ValidateNested({ each: true })

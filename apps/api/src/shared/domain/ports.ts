@@ -126,8 +126,23 @@ export interface TagWriteOptions {
   match?: string;
 }
 
+export interface TagSearchParams {
+  q?: string;
+  limit: number;
+  cursor?: string;
+  excludeInbox?: boolean;
+}
+
+export interface TagSearchPage {
+  entities: TagEntity[];
+  hasMore: boolean;
+  nextCursor: string | null;
+  total: number | null;
+}
+
 export interface TaxonomyRepository {
   listTags(userId: string): Promise<TagEntity[]>;
+  searchTags(userId: string, params: TagSearchParams): Promise<TagSearchPage>;
   findTagByIdForUser(id: string, userId: string): Promise<TagEntity | null>;
   createTag(userId: string, name: string, options?: TagWriteOptions): Promise<TagEntity>;
   updateTag(

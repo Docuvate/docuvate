@@ -71,6 +71,8 @@ import type {
   ProposeLabelRecommendationBlocklistPatternRequest,
   ProposeLabelRecommendationBlocklistPatternResponse,
   RecognizedFieldDefinitionDto,
+  RecognizedFieldFilterValuesPageDto,
+  RecognizedFieldFilterValuesQuery,
   RemoteConfigDto,
   ReorderSavedDocumentViewsRequest,
   ReplaceDashboardLayoutRequest,
@@ -90,6 +92,8 @@ import type {
   SftpIngressServerInfoDto,
   TagCustomFieldDefinitionDto,
   TagDto,
+  TagSearchPageDto,
+  TagSearchQuery,
   UpdateAdminOidcProviderRequest,
   UpdateConnectorInstallationRequest,
   UpdateCorrespondentRequest,
@@ -400,6 +404,15 @@ export async function listTags(): Promise<TagDto[]> {
   return data.items;
 }
 
+export async function searchTagsPage(query: TagSearchQuery): Promise<TagSearchPageDto> {
+  const qs = queryString({
+    q: query.q,
+    limit: query.limit != null ? String(query.limit) : undefined,
+    cursor: query.cursor,
+  });
+  return request(`/tags/search${qs}`);
+}
+
 export async function createTag(body: CreateTagRequest): Promise<TagDto> {
   return request<TagDto>('/tags', { method: 'POST', body: JSON.stringify(body) });
 }
@@ -514,10 +527,16 @@ export async function listRecognizedFields(): Promise<RecognizedFieldDefinitionD
   return data.items;
 }
 
-export async function listRecognizedFieldFilterValues(fieldKey: string): Promise<string[]> {
-  const qs = queryString({ key: fieldKey });
-  const data = await request<{ items: string[] }>(`/recognized-fields/filter-values${qs}`);
-  return data.items;
+export async function searchRecognizedFieldFilterValuesPage(
+  query: RecognizedFieldFilterValuesQuery
+): Promise<RecognizedFieldFilterValuesPageDto> {
+  const qs = queryString({
+    key: query.key,
+    q: query.q,
+    limit: query.limit != null ? String(query.limit) : undefined,
+    cursor: query.cursor,
+  });
+  return request(`/recognized-fields/filter-values${qs}`);
 }
 
 export async function replaceRecognizedFields(

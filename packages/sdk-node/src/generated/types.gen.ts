@@ -840,6 +840,13 @@ export type ProposeLabelRecommendationBlocklistPatternRequestDto = {
     phrases: Array<string>;
 };
 
+export type RecognizedFieldFilterValuesResponseDto = {
+    items: Array<string>;
+    nextCursor: string;
+    hasMore: boolean;
+    total: number;
+};
+
 export type RemoteConfigResponseDto = {
     featureFlags: FeatureFlagsResponseDto;
 };
@@ -969,6 +976,15 @@ export type TagListResponseDto = {
     items: Array<{
         [key: string]: unknown;
     }>;
+};
+
+export type TagSearchResponseDto = {
+    items: Array<{
+        [key: string]: unknown;
+    }>;
+    nextCursor: string;
+    hasMore: boolean;
+    total: number;
 };
 
 export type TestPaperlessConnectionRequestDto = {
@@ -4140,8 +4156,11 @@ export type ReplaceRecognizedFieldsResponses = {
 export type ListRecognizedFieldFilterValuesData = {
     body?: never;
     path?: never;
-    query?: {
-        key?: string;
+    query: {
+        key: string;
+        q?: string;
+        limit?: number;
+        cursor?: string;
     };
     url: '/recognized-fields/filter-values';
 };
@@ -4156,8 +4175,10 @@ export type ListRecognizedFieldFilterValuesErrors = {
 export type ListRecognizedFieldFilterValuesError = ListRecognizedFieldFilterValuesErrors[keyof ListRecognizedFieldFilterValuesErrors];
 
 export type ListRecognizedFieldFilterValuesResponses = {
-    200: unknown;
+    200: RecognizedFieldFilterValuesResponseDto;
 };
+
+export type ListRecognizedFieldFilterValuesResponse = ListRecognizedFieldFilterValuesResponses[keyof ListRecognizedFieldFilterValuesResponses];
 
 export type GetRemoteConfigData = {
     body?: never;
@@ -4753,6 +4774,32 @@ export type CreateTagResponses = {
 };
 
 export type CreateTagResponse = CreateTagResponses[keyof CreateTagResponses];
+
+export type SearchTagsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        q?: string;
+        limit?: number;
+        cursor?: string;
+    };
+    url: '/tags/search';
+};
+
+export type SearchTagsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type SearchTagsError = SearchTagsErrors[keyof SearchTagsErrors];
+
+export type SearchTagsResponses = {
+    200: TagSearchResponseDto;
+};
+
+export type SearchTagsResponse = SearchTagsResponses[keyof SearchTagsResponses];
 
 export type DeleteTagData = {
     body?: never;

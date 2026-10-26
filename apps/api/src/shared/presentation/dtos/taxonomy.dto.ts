@@ -8,7 +8,8 @@ import type {
   UpdateCorrespondentRequest,
   UpdateTagRequest,
 } from '@docuvate/contracts';
-import { IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 import { MatchingAlgorithmFieldsDto } from './common.dto.js';
 
@@ -58,6 +59,30 @@ export class UpdateCorrespondentRequestDto
 
 export class TagListResponseDto {
   items!: TagDto[];
+}
+
+export class TagSearchQueryDto {
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(100)
+  limit?: number;
+
+  @IsOptional()
+  @IsString()
+  cursor?: string;
+}
+
+export class TagSearchResponseDto {
+  items!: TagDto[];
+  nextCursor!: string | null;
+  hasMore!: boolean;
+  total!: number | null;
 }
 
 export class CorrespondentListResponseDto {
