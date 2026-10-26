@@ -17,6 +17,10 @@ interface RouteProbe {
   readySelector: string;
   /** Page content root (excludes app chrome) for DOM budget checks. */
   domRootSelector: string;
+  /** When false, list endpoint may omit cursor `limit` (aggregates / legacy list). */
+  expectLimitQueryParam?: boolean;
+  /** Optional aggregate endpoint that must be requested (F04). */
+  aggregatePathPattern?: RegExp;
 }
 
 const ROUTES: RouteProbe[] = [
@@ -44,6 +48,8 @@ const ROUTES: RouteProbe[] = [
     listPathPattern: /\/v1\/labels\/recommendations$/,
     readySelector: '.labels-todo-panel, .label-rec-panel',
     domRootSelector: '[data-ux="page"]',
+    expectLimitQueryParam: false,
+    aggregatePathPattern: /\/v1\/labels\/document-inventory\/summary$/,
   },
   {
     route: '/chat',
@@ -59,6 +65,14 @@ const ROUTES: RouteProbe[] = [
   },
 ];
 
+function urlHasLimitParam(url: string): boolean {
+  try {
+    return new URL(url).searchParams.has('limit');
+  } catch {
+    return false;
+  }
+}
+
 function percentile(values: number[], p: number): number {
   if (values.length === 0) {
     return 0;
@@ -73,8 +87,10 @@ async function measureRoute(page: Page, probe: RouteProbe): Promise<{
   firstContentMs: number;
   domNodeCount: number;
   listRequestUrls: string[];
+  aggregateRequestUrls: string[];
 }> {
   const listRequestUrls: string[] = [];
+  const aggregateRequestUrls: string[] = [];
   const onRequest = (req: { url: () => string; method: () => string }) => {
     if (req.method() !== 'GET') {
       return;
@@ -83,6 +99,9 @@ async function measureRoute(page: Page, probe: RouteProbe): Promise<{
       const pathname = new URL(req.url()).pathname;
       if (probe.listPathPattern.test(pathname)) {
         listRequestUrls.push(req.url());
+      }
+      if (probe.aggregatePathPattern?.test(pathname)) {
+        aggregateRequestUrls.push(req.url());
       }
     } catch {
       // ignore malformed URLs
@@ -101,7 +120,13 @@ async function measureRoute(page: Page, probe: RouteProbe): Promise<{
   }, probe.domRootSelector);
   page.off('request', onRequest);
 
-  return { route: probe.route, firstContentMs, domNodeCount, listRequestUrls };
+  return {
+    route: probe.route,
+    firstContentMs,
+    domNodeCount,
+    listRequestUrls,
+    aggregateRequestUrls,
+  };
 }
 
 test.describe('workstream A3 list performance', () => {
@@ -134,7 +159,12 @@ test.describe('workstream A3 list performance', () => {
 
       expect(result.domNodeCount).toBeLessThan(MAX_DOM_NODES);
       expect(result.listRequestUrls.length).toBeGreaterThan(0);
-      expect(result.listRequestUrls.some((url) => url.includes('limit='))).toBe(true);
+      if (probe.expectLimitQueryParam ?? true) {
+        expect(result.listRequestUrls.some((url) => urlHasLimitParam(url))).toBe(true);
+      }
+      if (probe.aggregatePathPattern) {
+        expect(result.aggregateRequestUrls.length).toBeGreaterThan(0);
+      }
     }
 
     const perf = {
