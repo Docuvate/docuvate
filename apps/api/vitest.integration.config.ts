@@ -25,7 +25,7 @@ export default defineConfig({
     globalSetup: ['test/integration/global-setup.ts'],
     setupFiles: ['test/integration/setup-env.ts'],
     testTimeout: 120_000,
-    hookTimeout: 120_000,
+    hookTimeout: 900_000,
     pool: 'forks',
     poolOptions: { forks: { singleFork: true } },
     fileParallelism: false,

@@ -18,6 +18,9 @@ export class SearchVocabularyTermsEntity {
   @Column('integer', { name: 'doc_frequency', default: () => '1' })
   docFrequency: number;
 
+  @Column('timestamptz', { name: 'updated_at', default: () => 'now()' })
+  updatedAt: Date;
+
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   user: UserEntity;

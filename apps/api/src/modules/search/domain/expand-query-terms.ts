@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { isTypoWithinDistance } from './damerau-levenshtein.js';
 import { normalizeSearchText, tokenizeSearchQuery } from './normalize-search-text.js';
+import { CHUNK_VOCAB_GATE_MIN_LENGTH, isFourDigitYearToken } from './vocabulary-gate.js';
 
 export interface VocabularyCandidate {
   term: string;
@@ -42,6 +43,11 @@ export async function expandQueryTerms(
         normToken.length >= MIN_TOKEN_LENGTH_FOR_TYPO &&
         normTerm.length >= MIN_TOKEN_LENGTH_FOR_TYPO &&
         isTypoWithinDistance(normToken, normTerm, 1);
+      const longToken =
+        normToken.length >= CHUNK_VOCAB_GATE_MIN_LENGTH && !isFourDigitYearToken(normToken);
+      if (longToken && !dlOk) {
+        continue;
+      }
       if (pgOk || dlOk) {
         expanded.add(n.term);
         if (pgOk) {
