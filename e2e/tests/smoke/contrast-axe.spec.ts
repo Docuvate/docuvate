@@ -31,6 +31,11 @@ async function assertColorContrast(page: import('@playwright/test').Page, label:
   ).toEqual([]);
 }
 
+async function waitForLabelsPageReady(page: import('@playwright/test').Page): Promise<void> {
+  await page.waitForLoadState('domcontentloaded');
+  await page.locator('main').waitFor({ state: 'visible', timeout: 60_000 });
+}
+
 test.describe('Contrast axe color-contrast', () => {
   test.describe.configure({ mode: 'serial' });
 
@@ -75,8 +80,27 @@ test.describe('Contrast axe color-contrast', () => {
     });
 
     test('app surfaces', async ({ page, request }) => {
+      test.setTimeout(180_000);
+
       const health = await request.get(`${apiBase}/health`);
       test.skip(!health.ok(), 'compose API not running');
+
+      let recommendationsMode: 'ok' | 'fail' = 'ok';
+      await page.route('**/v1/labels/recommendations**', async (route) => {
+        if (recommendationsMode === 'fail') {
+          await route.fulfill({
+            status: 500,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'recommendations unavailable' }),
+          });
+          return;
+        }
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ items: [] }),
+        });
+      });
 
       const routes = [
         ...AUTHENTICATED_ROUTES,
@@ -86,9 +110,14 @@ test.describe('Contrast axe color-contrast', () => {
       for (const viewport of VIEWPORTS) {
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
         for (const theme of THEMES) {
+          recommendationsMode = 'ok';
           for (const route of routes) {
             await page.goto(`${webOrigin}${route.path}`);
-            await page.waitForLoadState('networkidle');
+            if (route.path === '/structure/labels') {
+              await waitForLabelsPageReady(page);
+            } else {
+              await page.waitForLoadState('networkidle');
+            }
             await setTheme(page, theme);
             await assertColorContrast(
               page,
@@ -96,8 +125,10 @@ test.describe('Contrast axe color-contrast', () => {
             );
           }
 
+          recommendationsMode = 'fail';
           await page.goto(`${webOrigin}/structure/labels`);
-          await page.waitForLoadState('networkidle');
+          await waitForLabelsPageReady(page);
+          await page.locator('.labels-todo-load-error p.error').waitFor({ state: 'visible', timeout: 30_000 });
           await setTheme(page, theme);
           await assertColorContrast(page, `labels-error ${theme} ${viewport.label}`);
 
