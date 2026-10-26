@@ -22,7 +22,7 @@ from docuvate_worker.application.retrain import run_retrain_stub
 from docuvate_worker.domain.cpu_pipeline.contracts import TacoStageData
 from docuvate_worker.domain.embedding_density.schemas import EmbeddingDensityStatePayload
 from docuvate_worker.domain.exact_fact_index.build import build_exact_fact_index
-from docuvate_worker.domain.extract_errors import ExtractPermanentError
+from docuvate_worker.domain.extract_errors import ExtractPermanentError, ExtractRetryableError
 from docuvate_worker.domain.models import ExtractionBlock
 from docuvate_worker.domain.representation.encode import encode_units
 from docuvate_worker.domain.representation.units import (
@@ -208,6 +208,15 @@ def extract(
             embedding_density_state=density_state,
             build_exact_fact_index=body.build_exact_fact_index,
         )
+    except ExtractRetryableError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "errorCode": "extract_resource_busy",
+                "errorType": exc.error_type,
+                "reason": exc.reason,
+            },
+        ) from exc
     except ExtractPermanentError as exc:
         raise HTTPException(
             status_code=422,

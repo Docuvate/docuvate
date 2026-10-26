@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-"""Limit concurrent extractions based on cgroup free memory and job estimates."""
+"""Cgroup-aware admission using incremental RSS estimates (reclaimable page cache excluded)."""
 
 from __future__ import annotations
 
@@ -9,18 +9,21 @@ import io
 import logging
 import os
 import threading
+import time
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 
 from pypdf import PdfReader
 
-from docuvate_worker.domain.extract_errors import ExtractPermanentError
+from docuvate_worker.domain.extract_errors import ExtractPermanentError, ExtractRetryableError
 from docuvate_worker.infrastructure.extract_memory.cgroup import (
-    cgroup_memory_current_bytes,
-    cgroup_memory_limit_bytes,
+    CgroupMemorySnapshot,
+    cgroup_memory_available_bytes,
+    read_cgroup_memory_snapshot,
 )
 from docuvate_worker.infrastructure.extract_memory.pixel_budget import (
+    effective_raster_dpi,
     page_pixel_count_at_dpi,
 )
 from docuvate_worker.infrastructure.extract_memory.raster_estimate import (
@@ -28,18 +31,27 @@ from docuvate_worker.infrastructure.extract_memory.raster_estimate import (
     estimate_raster_max_dpi,
     estimate_raster_max_pixels_per_page,
 )
-from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import pdf_page_count
+from docuvate_worker.infrastructure.extractors.pdf_chunk_extract import (
+    pdf_chunk_page_size,
+    pdf_page_count,
+)
 
 logger = logging.getLogger(__name__)
 
 _ENV_BYTES_PER_MEGAPIXEL = "DOCUVATE_EXTRACT_MEM_BYTES_PER_MEGAPIXEL"
-_ENV_BASE_OVERHEAD = "DOCUVATE_EXTRACT_MEM_BASE_OVERHEAD_BYTES"
+_ENV_PEAK_RASTER_PAGES = "DOCUVATE_EXTRACT_MEM_PEAK_RASTER_PAGES"
 _ENV_HEADROOM = "DOCUVATE_EXTRACT_MEM_HEADROOM_BYTES"
 _ENV_MIN_FREE = "DOCUVATE_EXTRACT_MEM_MIN_FREE_BYTES"
-_DEFAULT_BYTES_PER_MP = 48_000_000
-_DEFAULT_BASE_OVERHEAD = 450_000_000
+_ENV_COUNT_ACTIVE_FILE = "DOCUVATE_EXTRACT_MEM_COUNT_ACTIVE_FILE"
+_ENV_ADMISSION_WAIT_MS = "DOCUVATE_EXTRACT_ADMISSION_WAIT_MS"
+_ENV_ADMISSION_WAIT_ATTEMPTS = "DOCUVATE_EXTRACT_ADMISSION_WAIT_ATTEMPTS"
+_DEFAULT_BYTES_PER_MP = 52_000_000
+_DEFAULT_PEAK_RASTER_PAGES = 2
 _DEFAULT_HEADROOM = 200_000_000
-_DEFAULT_MIN_FREE = 150_000_000
+_DEFAULT_MIN_FREE = 64_000_000
+_DEFAULT_WAIT_MS = 250
+_DEFAULT_WAIT_ATTEMPTS = 12
+_MIN_CHUNK_PAGES = 1
 
 
 def _env_int(name: str, default: int) -> int:
@@ -47,6 +59,13 @@ def _env_int(name: str, default: int) -> int:
     if not raw.isdigit():
         return default
     return int(raw)
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    raw = os.environ.get(name, "").strip().casefold()
+    if not raw:
+        return default
+    return raw in {"1", "true", "yes", "on"}
 
 
 def _pdf_page_sizes_pt(content: bytes) -> list[tuple[float, float]]:
@@ -61,29 +80,127 @@ def _pdf_page_sizes_pt(content: bytes) -> list[tuple[float, float]]:
         return []
 
 
-def estimate_extract_memory_bytes(content: bytes, mime_type: str) -> int:
-    """Conservative RSS estimate from page count and raster megapixels."""
-    base = _env_int(_ENV_BASE_OVERHEAD, _DEFAULT_BASE_OVERHEAD)
+def _megapixels_for_pdf_pages(
+    sizes: list[tuple[float, float]],
+    pages_to_count: int,
+    *,
+    target_dpi: int,
+    max_dpi: int,
+    max_px: int,
+) -> float:
+    if pages_to_count <= 0:
+        return 0.0
+    if not sizes:
+        return pages_to_count * (max_px / 1_000_000.0)
+    mp_sum = 0.0
+    for width_pt, height_pt in sizes[:pages_to_count]:
+        dpi = effective_raster_dpi(
+            width_pt,
+            height_pt,
+            target_dpi=target_dpi,
+            max_dpi=max_dpi,
+            max_pixels_per_page=max_px,
+        )
+        px = page_pixel_count_at_dpi(width_pt, height_pt, dpi)
+        mp_sum += min(px, max_px) / 1_000_000.0
+    return mp_sum
+
+
+def estimate_extract_incremental_memory_bytes(
+    content: bytes,
+    mime_type: str,
+    *,
+    pages_per_chunk: int | None = None,
+) -> int:
+    """Per-job RSS increment (models already resident; one OCR chunk at a time)."""
     bytes_per_mp = _env_int(_ENV_BYTES_PER_MEGAPIXEL, _DEFAULT_BYTES_PER_MP)
     if mime_type != "application/pdf":
-        return base + bytes_per_mp
+        return bytes_per_mp
     pages = pdf_page_count(content)
     if pages <= 0:
-        return base
+        return bytes_per_mp
+    chunk_pages = pages_per_chunk if pages_per_chunk is not None else pdf_chunk_page_size()
+    chunk_pages = max(_MIN_CHUNK_PAGES, chunk_pages)
+    peak_raster_pages = _env_int(_ENV_PEAK_RASTER_PAGES, _DEFAULT_PEAK_RASTER_PAGES)
+    peak_raster_pages = max(_MIN_CHUNK_PAGES, peak_raster_pages)
+    pages_in_chunk = min(chunk_pages, pages, peak_raster_pages)
     target_dpi = estimate_raster_dpi()
     max_dpi = estimate_raster_max_dpi()
-    dpi = min(target_dpi, max_dpi)
     max_px = estimate_raster_max_pixels_per_page()
     sizes = _pdf_page_sizes_pt(content)
-    if not sizes:
-        megapixels = pages * (max_px / 1_000_000.0)
-    else:
-        mp_sum = 0.0
-        for width_pt, height_pt in sizes:
-            px = page_pixel_count_at_dpi(width_pt, height_pt, dpi)
-            mp_sum += min(px, max_px) / 1_000_000.0
-        megapixels = mp_sum
-    return base + int(megapixels * bytes_per_mp)
+    megapixels = _megapixels_for_pdf_pages(
+        sizes,
+        pages_in_chunk,
+        target_dpi=target_dpi,
+        max_dpi=max_dpi,
+        max_px=max_px,
+    )
+    return max(bytes_per_mp, int(megapixels * bytes_per_mp))
+
+
+def estimate_minimum_chunk_memory_bytes(content: bytes, mime_type: str) -> int:
+    """Smallest single-chunk incremental estimate (one page at pixel budget)."""
+    return estimate_extract_incremental_memory_bytes(
+        content,
+        mime_type,
+        pages_per_chunk=_MIN_CHUNK_PAGES,
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class AdmissionDecision:
+    admit: bool
+    available_bytes: int | None
+    reason: str
+
+
+def decide_extract_admission(
+    *,
+    snapshot: CgroupMemorySnapshot | None,
+    estimate_bytes: int,
+    minimum_chunk_bytes: int,
+    active_jobs: int,
+    headroom_bytes: int,
+    min_free_bytes: int,
+    reserved_bytes: int,
+    count_active_file: bool,
+) -> AdmissionDecision:
+    if snapshot is None or snapshot.limit_bytes is None:
+        return AdmissionDecision(admit=True, available_bytes=None, reason="no_cgroup_limit")
+    available = cgroup_memory_available_bytes(
+        snapshot,
+        headroom_bytes=headroom_bytes,
+        reserved_bytes=reserved_bytes,
+        count_active_file=count_active_file,
+    )
+    if active_jobs <= 0:
+        whole_budget = cgroup_memory_available_bytes(
+            snapshot,
+            headroom_bytes=0,
+            reserved_bytes=0,
+            count_active_file=count_active_file,
+        )
+        if whole_budget is not None and minimum_chunk_bytes > whole_budget:
+            return AdmissionDecision(
+                admit=False,
+                available_bytes=available,
+                reason="minimum_chunk_exceeds_cgroup",
+            )
+        return AdmissionDecision(admit=True, available_bytes=available, reason="idle_always_admit")
+    if available is None:
+        return AdmissionDecision(admit=True, available_bytes=None, reason="no_cgroup_limit")
+    need = estimate_bytes + min_free_bytes
+    if available >= need:
+        return AdmissionDecision(
+            admit=True,
+            available_bytes=available,
+            reason="capacity_ok",
+        )
+    return AdmissionDecision(
+        admit=False,
+        available_bytes=available,
+        reason="concurrent_capacity",
+    )
 
 
 @dataclass
@@ -92,7 +209,7 @@ class _AdmissionSlot:
 
 
 class ExtractAdmissionController:
-    """Process-wide gate: one slot per job while estimated RSS fits cgroup headroom."""
+    """Process-wide gate: one slot per job while incremental estimates fit cgroup headroom."""
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
@@ -104,32 +221,41 @@ class ExtractAdmissionController:
     def _min_free_bytes(self) -> int:
         return _env_int(_ENV_MIN_FREE, _DEFAULT_MIN_FREE)
 
-    def _available_for_jobs(self) -> int | None:
-        limit = cgroup_memory_limit_bytes()
-        current = cgroup_memory_current_bytes()
-        if limit is None or current is None:
-            return None
-        reserved = sum(slot.estimate_bytes for slot in self._active)
-        free = limit - current - reserved - self._headroom_bytes()
-        return max(0, free)
+    def _count_active_file(self) -> bool:
+        return _env_bool(_ENV_COUNT_ACTIVE_FILE, False)
 
-    def try_acquire(self, estimate_bytes: int) -> bool:
+    def _reserved_bytes(self) -> int:
+        return sum(slot.estimate_bytes for slot in self._active)
+
+    def try_acquire(
+        self,
+        estimate_bytes: int,
+        minimum_chunk_bytes: int,
+    ) -> AdmissionDecision:
         with self._lock:
-            available = self._available_for_jobs()
-            if available is None:
+            snapshot = read_cgroup_memory_snapshot()
+            decision = decide_extract_admission(
+                snapshot=snapshot,
+                estimate_bytes=estimate_bytes,
+                minimum_chunk_bytes=minimum_chunk_bytes,
+                active_jobs=len(self._active),
+                headroom_bytes=self._headroom_bytes(),
+                min_free_bytes=self._min_free_bytes(),
+                reserved_bytes=self._reserved_bytes(),
+                count_active_file=self._count_active_file(),
+            )
+            if decision.admit:
                 self._active.append(_AdmissionSlot(estimate_bytes=estimate_bytes))
-                return True
-            need = estimate_bytes + self._min_free_bytes()
-            if available < need:
+            else:
                 logger.warning(
-                    "extract_admission_denied estimate_bytes=%s available=%s active_jobs=%s",
+                    "extract_admission_denied estimate_bytes=%s available=%s active_jobs=%s "
+                    "reason=%s",
                     estimate_bytes,
-                    available,
+                    decision.available_bytes,
                     len(self._active),
+                    decision.reason,
                 )
-                return False
-            self._active.append(_AdmissionSlot(estimate_bytes=estimate_bytes))
-            return True
+            return decision
 
     def release(self, estimate_bytes: int) -> None:
         with self._lock:
@@ -148,22 +274,51 @@ def admission_controller() -> ExtractAdmissionController:
     return _admission_controller
 
 
+def _wait_attempts() -> int:
+    return max(1, _env_int(_ENV_ADMISSION_WAIT_ATTEMPTS, _DEFAULT_WAIT_ATTEMPTS))
+
+
+def _wait_interval_seconds() -> float:
+    return max(0.0, _env_int(_ENV_ADMISSION_WAIT_MS, _DEFAULT_WAIT_MS) / 1000.0)
+
+
 @contextmanager
 def extract_admission_slot(content: bytes, mime_type: str) -> Iterator[None]:
     if os.environ.get("DOCUVATE_EXTRACT_ADMISSION", "1") != "1":
         yield
         return
-    estimate = estimate_extract_memory_bytes(content, mime_type)
+    estimate = estimate_extract_incremental_memory_bytes(content, mime_type)
+    minimum = estimate_minimum_chunk_memory_bytes(content, mime_type)
     controller = admission_controller()
-    if not controller.try_acquire(estimate):
-        raise ExtractPermanentError(
+    decision: AdmissionDecision | None = None
+    for attempt in range(_wait_attempts()):
+        decision = controller.try_acquire(estimate, minimum)
+        if decision.admit:
+            break
+        if decision.reason == "minimum_chunk_exceeds_cgroup":
+            raise ExtractPermanentError(
+                reason=(
+                    "Document requires more memory than this worker can provide "
+                    "even for a single page."
+                ),
+                error_type="ExtractResourceExhausted",
+            )
+        if attempt + 1 < _wait_attempts():
+            time.sleep(_wait_interval_seconds())
+    if decision is None or not decision.admit:
+        raise ExtractRetryableError(
             reason=(
-                "Document exceeds available worker memory; "
-                "try again later or upload a smaller scan."
+                "Worker memory is temporarily fully utilized; "
+                "retry extraction shortly."
             ),
-            error_type="ExtractResourceExhausted",
+            error_type="ExtractResourceBusy",
         )
     try:
         yield
     finally:
         controller.release(estimate)
+
+
+# Backwards-compatible alias for tests and metrics.
+def estimate_extract_memory_bytes(content: bytes, mime_type: str) -> int:
+    return estimate_extract_incremental_memory_bytes(content, mime_type)

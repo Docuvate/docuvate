@@ -122,6 +122,7 @@ export class RunExtractionUseCase {
         failureReason.includes('document extraction already in progress') ||
         failureReason.includes('fetch failed') ||
         failureReason.includes('Worker extraction unavailable') ||
+        failureReason.includes('Worker extraction failed: 503') ||
         failureReason.includes('ECONNREFUSED') ||
         failureReason.includes('ECONNRESET');
       if (!retryable) {
