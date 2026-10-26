@@ -155,6 +155,18 @@ export function LabelPicker(props: LabelPickerProps) {
     virtualizer.range?.endIndex,
   ]);
 
+  function trySelectActiveRow(): boolean {
+    if (activeRowIndex < 0 || activeRowIndex >= rows.length) {
+      return false;
+    }
+    const row = rows[activeRowIndex];
+    if (row.kind !== 'option') {
+      return false;
+    }
+    selectTag(row.tag);
+    return true;
+  }
+
   function onInputKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Escape') {
       e.preventDefault();
@@ -181,12 +193,8 @@ export function LabelPicker(props: LabelPickerProps) {
     }
     if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
       e.preventDefault();
-      if (activeRowIndex >= 0 && activeRowIndex < rows.length) {
-        const row = rows[activeRowIndex];
-        if (row.kind === 'option') {
-          selectTag(row.tag);
-          return;
-        }
+      if (trySelectActiveRow()) {
+        return;
       }
       const trimmed = query.trim();
       if (trimmed && props.allowCreate && props.onCreateOption) {
@@ -204,6 +212,9 @@ export function LabelPicker(props: LabelPickerProps) {
     !flattened.tags.some(
       (tag) => tag.name.trim().toLocaleLowerCase('de-DE') === query.trim().toLocaleLowerCase('de-DE')
     );
+
+  const showTruncatedTotal =
+    flattened.total != null && flattened.total > flattened.tags.length;
 
   return (
     <div
@@ -317,7 +328,7 @@ export function LabelPicker(props: LabelPickerProps) {
               </button>
             </div>
           ) : null}
-          {flattened.total != null && flattened.total > flattened.tags.length ? (
+          {showTruncatedTotal ? (
             <p className="label-picker-combobox-total muted" role="status">
               {t('labelPicker.resultsTruncated', {
                 shown: flattened.tags.length,
