@@ -101,8 +101,9 @@ export function LabelPicker(props: LabelPickerProps) {
         showTruncatedHint: flattened.hasMore,
         showEmpty: !search.isFetching && flattened.tags.length === 0,
         showLoading: search.isFetching && flattened.tags.length === 0,
+        groupByLetter: debouncedQuery.trim().length === 0,
       }),
-    [flattened.hasMore, flattened.tags, props.excludeTagIds, search.isFetching]
+    [debouncedQuery, flattened.hasMore, flattened.tags, props.excludeTagIds, search.isFetching]
   );
 
   const optionRowIndexes = useMemo(() => {
@@ -379,7 +380,12 @@ function LabelPickerRowView({
       className={`label-picker-combobox-option label-picker-item${active ? ' label-picker-combobox-option--active' : ''}${isActive ? ' label-picker-combobox-option--selected' : ''}`}
       onClick={() => { onSelect(row.tag); }}
     >
-      <Chip label={row.tag.name} variant="assigned" color={row.tag.color} />
+      <Chip
+        label={row.tag.name}
+        variant="assigned"
+        color={row.tag.color}
+        truncateLabel
+      />
       {selectionMode === 'toggle' && isActive ? (
         <Check size={16} strokeWidth={2.25} aria-hidden />
       ) : null}

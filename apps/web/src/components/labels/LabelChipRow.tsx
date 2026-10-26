@@ -107,8 +107,16 @@ export function LabelChipRow({ items, className, overflowAriaLabel }: LabelChipR
         ) : null}
       </div>
       <div className="label-chip-row-measure" aria-hidden="true" ref={measureRef}>
+        <span data-measure-six-chars="" className="label-chip-row-measure-chip">
+          <Chip label="mmmmmm" variant="assigned" />
+        </span>
         {items.map((item) => (
-          <span key={item.id} data-measure-chip="" className="label-chip-row-measure-chip">
+          <span
+            key={item.id}
+            data-measure-chip=""
+            data-label-length={String(item.label.length)}
+            className="label-chip-row-measure-chip"
+          >
             <Chip
               label={item.label}
               variant={item.variant ?? 'assigned'}

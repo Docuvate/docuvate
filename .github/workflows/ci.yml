@@ -197,6 +197,7 @@ jobs:
           set -euo pipefail
           node e2e/scripts/provision-smoke-storage.mjs
           export WORKSTREAM_B_ARTIFACT_DIR="${GITHUB_WORKSPACE}/workstream-b-screenshots"
+          export WORKSTREAM_B_POLISH_ARTIFACT_DIR="${GITHUB_WORKSPACE}/workstream-b-screenshots"
           mkdir -p "$WORKSTREAM_B_ARTIFACT_DIR"
           E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
             pnpm --filter @docuvate/e2e exec playwright test workstream-b-label-picker \

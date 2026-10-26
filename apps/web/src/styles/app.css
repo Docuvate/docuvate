@@ -15969,22 +15969,51 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .label-picker-combobox-list-host {
   max-height: 20rem;
   overflow: auto;
-  padding: var(--dv-space-2xs);
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding: 12px;
+}
+
+.label-picker-combobox-list-inner {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
 }
 
 .label-picker-combobox-option {
   display: flex;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   align-items: center;
   justify-content: space-between;
   gap: var(--dv-space-sm);
   min-height: 2.5rem;
-  padding: var(--dv-space-2xs) var(--dv-space-sm);
+  padding: var(--dv-space-2xs) 0;
   border: none;
   border-radius: var(--dv-radius-sm);
   background: transparent;
   cursor: pointer;
   text-align: left;
+  overflow: hidden;
+}
+
+.label-picker-combobox-option .chip {
+  max-width: calc(100% - 1.5rem);
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.label-picker-combobox-option:not(:has(svg)) .chip {
+  max-width: 100%;
+}
+
+.label-picker-combobox-option .chip .chip-label {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
 .label-picker-combobox-option:hover,
