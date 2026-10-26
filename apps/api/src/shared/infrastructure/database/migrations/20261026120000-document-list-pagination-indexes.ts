@@ -12,11 +12,26 @@ async function loadSql(name: string): Promise<string> {
 export class DocumentListPaginationIndexes20261026120000 implements MigrationInterface {
   name = 'DocumentListPaginationIndexes20261026120000';
 
+  /** CONCURRENTLY cannot run inside a transaction (safe on populated Postgres 18). */
+  transaction = false;
+
   public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(await loadSql('document-list-pagination-indexes-up.sql'));
+    const statements = (await loadSql('document-list-pagination-indexes-up.sql'))
+      .split(';')
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
+    for (const statement of statements) {
+      await queryRunner.query(statement);
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(await loadSql('document-list-pagination-indexes-down.sql'));
+    const statements = (await loadSql('document-list-pagination-indexes-down.sql'))
+      .split(';')
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
+    for (const statement of statements) {
+      await queryRunner.query(statement);
+    }
   }
 }
