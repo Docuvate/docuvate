@@ -204,6 +204,7 @@ jobs:
           E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
             pnpm --filter @docuvate/e2e exec playwright test workstream-a3-list-perf \
             --config=playwright.workstream-a3.config.ts
+      # Merge-gate PNGs for PR #49 (A3 surfaces); see workstream-a3-visual-artifacts.spec.ts
       - name: Workstream A3 visual artifacts (screenshots)
         env:
           E2E_SMOKE_EMAIL: smoke.bench@fixture.docuvate.test
