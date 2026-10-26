@@ -14,7 +14,7 @@ import sys
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Any, TextIO
+from typing import Any, IO
 
 from docuvate_worker.domain.extract_errors import ExtractRetryableError
 from docuvate_worker.infrastructure.extract_memory.child_process_diagnostics import (
@@ -53,7 +53,7 @@ def _cancel_grace_seconds() -> float:
     return parsed if parsed > 0 else _DEFAULT_CANCEL_GRACE
 
 
-def _readline_with_timeout(stream: TextIO, timeout: float) -> str | None:
+def _readline_with_timeout(stream: IO[str], timeout: float) -> str | None:
     if timeout <= 0:
         return None
     ready, _, _ = select.select([stream], [], [], timeout)
@@ -65,7 +65,7 @@ def _readline_with_timeout(stream: TextIO, timeout: float) -> str | None:
     return line
 
 
-class _PooledExtractChild:
+class PooledExtractChild:
     def __init__(self, *, intra_op_threads: int) -> None:
         self._lock = threading.RLock()
         self._proc: subprocess.Popen[str] | None = None
@@ -245,7 +245,7 @@ class _PooledExtractChild:
 
 @dataclass
 class _ExtractSubprocessPool:
-    children: list[_PooledExtractChild] = field(default_factory=list)
+    children: list[PooledExtractChild] = field(default_factory=list)
     _assign_lock: threading.Lock = field(default_factory=threading.Lock)
     _wait_lock: threading.Lock = field(default_factory=threading.Lock)
     _idle: threading.Condition = field(init=False, repr=False)
@@ -264,14 +264,14 @@ class _ExtractSubprocessPool:
             with self._wait_lock:
                 self._idle.wait(timeout=0.05)
 
-    def _acquire_child(self) -> _PooledExtractChild | None:
+    def _acquire_child(self) -> PooledExtractChild | None:
         with self._assign_lock:
             for child in self.children:
                 if child.try_acquire():
                     return child
         return None
 
-    def _release_child(self, child: _PooledExtractChild) -> None:
+    def _release_child(self, child: PooledExtractChild) -> None:
         child.release_slot()
         with self._wait_lock:
             self._idle.notify_all()
@@ -333,7 +333,7 @@ def pooled_extract_child() -> _ExtractSubprocessPool:
         if _pool_registry.pool is None:
             concurrency = _pool_size()
             intra = onnx_intra_op_threads_for_concurrency(concurrency)
-            children = [_PooledExtractChild(intra_op_threads=intra) for _ in range(concurrency)]
+            children = [PooledExtractChild(intra_op_threads=intra) for _ in range(concurrency)]
             _pool_registry.pool = _ExtractSubprocessPool(children=children)
             logger.info(
                 "extract_pool_ready size=%s ort_intra_op_threads=%s",

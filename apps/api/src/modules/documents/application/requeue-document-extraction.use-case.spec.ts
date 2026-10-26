@@ -3,12 +3,15 @@
 import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { DOCUMENT_REPOSITORY } from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
+import { createQueueExtractionStub } from '../../../test-support/queue-extraction.stub.js';
+import { QueueExtractionUseCase } from './queue-extraction.use-case.js';
 import { RequeueDocumentExtractionUseCase } from './requeue-document-extraction.use-case.js';
 
 describe('RequeueDocumentExtractionUseCase', () => {
   it('queues extraction for a failed document', async () => {
-    const queueExtraction = { execute: vi.fn().mockResolvedValue(undefined) };
+    const queueExtraction = createQueueExtractionStub();
     const documents = createDocumentRepositoryStub({
       findByIdForUser: vi.fn().mockResolvedValue({
         id: 'doc-1',
@@ -18,10 +21,9 @@ describe('RequeueDocumentExtractionUseCase', () => {
     });
     const moduleRef = await Test.createTestingModule({
       providers: [
-        {
-          provide: RequeueDocumentExtractionUseCase,
-          useFactory: () => new RequeueDocumentExtractionUseCase(documents, queueExtraction),
-        },
+        RequeueDocumentExtractionUseCase,
+        { provide: DOCUMENT_REPOSITORY, useValue: documents },
+        { provide: QueueExtractionUseCase, useValue: queueExtraction },
       ],
     }).compile();
     const useCase = moduleRef.get(RequeueDocumentExtractionUseCase);

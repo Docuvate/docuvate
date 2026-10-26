@@ -8,16 +8,17 @@ from __future__ import annotations
 import threading
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import Protocol
 
-if TYPE_CHECKING:
-    from docuvate_worker.presentation.extract_subprocess_pool import _PooledExtractChild
+
+class CancelablePooledExtractChild(Protocol):
+    def request_cancel(self) -> None: ...
 
 
 @dataclass
 class ActiveExtractHandle:
     cancel_event: threading.Event
-    child: _PooledExtractChild | None = None
+    child: CancelablePooledExtractChild | None = None
 
 
 _ACTIVE_EXTRACT = "docuvate_active_extract"
@@ -42,7 +43,7 @@ def cancel_active_extract() -> bool:
     return True
 
 
-def attach_pool_child_to_active(child: _PooledExtractChild) -> None:
+def attach_pool_child_to_active(child: CancelablePooledExtractChild) -> None:
     handle = _active.get()
     if handle is not None:
         handle.child = child

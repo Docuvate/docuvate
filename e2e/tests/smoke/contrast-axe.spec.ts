@@ -2,10 +2,7 @@ import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 import { setTheme } from '../../helpers/ce-ui-audit';
-import {
-  resolveSmokeReadyDocumentPath,
-  waitForContrastPageReady,
-} from '../../helpers/contrast-screenshot';
+import { resolveSmokeReadyDocumentPath } from '../../helpers/contrast-screenshot';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -35,6 +32,11 @@ async function assertColorContrast(page: import('@playwright/test').Page, label:
     results.violations,
     `${label}: ${results.violations.map((v) => v.id).join(', ')}`
   ).toEqual([]);
+}
+
+async function waitForLabelsPageReady(page: import('@playwright/test').Page): Promise<void> {
+  await page.waitForLoadState('domcontentloaded');
+  await page.locator('main').waitFor({ state: 'visible', timeout: 60_000 });
 }
 
 async function waitForAppShell(page: import('@playwright/test').Page): Promise<void> {
@@ -75,38 +77,6 @@ test.describe('Contrast axe color-contrast', () => {
       const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
 
       let recommendationsMode: 'ok' | 'fail' = 'ok';
-      await page.route('**/v1/labels/map**', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            points: [],
-            documentCount: 0,
-            tagCount: 0,
-            extractedDocumentCount: 0,
-            emptyReason: null,
-            coverageSummary: null,
-          }),
-        });
-      });
-      await page.route('**/v1/labels/document-inventory**', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            documents: [],
-            documentCountByTagId: {},
-            inventory: { total: 0, labeled: 0, unlabeled: 0 },
-          }),
-        });
-      });
-      await page.route('**/v1/documents/review-queue/summary**', async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ pendingCount: 0 }),
-        });
-      });
       await page.route('**/v1/labels/recommendations**', async (route) => {
         if (recommendationsMode === 'fail') {
           await route.fulfill({
@@ -135,7 +105,7 @@ test.describe('Contrast axe color-contrast', () => {
           for (const route of routes) {
             await page.goto(`${webOrigin}${route.path}`, { waitUntil: 'domcontentloaded' });
             if (route.path === '/structure/labels') {
-              await waitForContrastPageReady(page, 'labels', documentDetailPath, webOrigin);
+              await waitForLabelsPageReady(page);
             } else {
               await waitForAppShell(page);
             }
@@ -148,7 +118,7 @@ test.describe('Contrast axe color-contrast', () => {
 
           recommendationsMode = 'fail';
           await page.goto(`${webOrigin}/structure/labels`, { waitUntil: 'domcontentloaded' });
-          await waitForContrastPageReady(page, 'labels', documentDetailPath, webOrigin);
+          await waitForLabelsPageReady(page);
           await page.locator('.labels-todo-load-error p.error').waitFor({ state: 'visible', timeout: 30_000 });
           await setTheme(page, theme);
           await assertColorContrast(page, `labels-error ${theme} ${viewport.label}`);

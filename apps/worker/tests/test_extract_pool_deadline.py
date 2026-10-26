@@ -7,12 +7,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from docuvate_worker.domain.extract_errors import ExtractRetryableError
-from docuvate_worker.presentation.extract_subprocess_pool import _PooledExtractChild
+from docuvate_worker.presentation.extract_subprocess_pool import PooledExtractChild
 
 
 def test_run_job_raises_retryable_when_stdout_times_out(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("DOCUVATE_EXTRACT_CANCEL_GRACE_SECONDS", "0.01")
-    child = _PooledExtractChild(intra_op_threads=1)
+    child = PooledExtractChild(intra_op_threads=1)
     proc = MagicMock()
     proc.poll.return_value = None
     proc.stdin = MagicMock()
