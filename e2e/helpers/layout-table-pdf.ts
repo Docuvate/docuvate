@@ -1,17 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 import { PDFDocument, StandardFonts } from 'pdf-lib';
 
 function syntheticUploadPath(): string {
-  const fromHelper = join(dirname(fileURLToPath(import.meta.url)), '../fixtures/synthetic-upload.pdf');
-  if (existsSync(fromHelper)) {
-    return fromHelper;
-  }
   return join(process.cwd(), 'fixtures/synthetic-upload.pdf');
 }
 
