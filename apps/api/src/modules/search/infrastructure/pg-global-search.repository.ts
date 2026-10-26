@@ -233,7 +233,8 @@ export class PgGlobalSearchRepository {
         this.pool,
         WORD_SIM_THRESHOLD,
         VOCABULARY_RELAXED_TRGM_SQL,
-        [userId, probe, limit]
+        [userId, probe, limit],
+        { similarityThreshold: MIN_QUERY_RELEVANCE_SCORE }
       );
     }
     if (result.rows.length === 0 && probe.length >= 5) {
@@ -241,7 +242,8 @@ export class PgGlobalSearchRepository {
         this.pool,
         WORD_SIM_THRESHOLD,
         VOCABULARY_SIMILARITY_FALLBACK_SQL,
-        [userId, probe, limit]
+        [userId, probe, limit],
+        { similarityThreshold: 0.25 }
       );
     }
     return result.rows.map((raw) => {
@@ -561,6 +563,11 @@ export class PgGlobalSearchRepository {
       const t = normalizeSearchText(token);
       if (t.length >= 3) textProbes.add(t);
     }
+    const gatedFieldProbes = await filterLexicalTermsByVocabularyGate(
+      this.pool,
+      userId,
+      [...textProbes].map((textProbe) => normalizeSearchText(textProbe))
+    );
 
     const textQueries: Promise<{
         rows: {
@@ -570,7 +577,7 @@ export class PgGlobalSearchRepository {
           score: number;
         }[];
       }>[] = [];
-    for (const textProbe of textProbes) {
+    for (const textProbe of gatedFieldProbes) {
       textQueries.push(
         queryWithWordSimilarityThreshold(
           this.pool,

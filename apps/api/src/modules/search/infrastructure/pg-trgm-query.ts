@@ -7,6 +7,8 @@ export interface TrgmSessionOptions {
   disableSeqScan?: boolean;
   /** When set, applies SET LOCAL pg_trgm.strict_word_similarity_threshold for <<% / <<% ops. */
   strictWordSimilarityThreshold?: number;
+  /** When set, applies SET LOCAL pg_trgm.similarity_threshold for % / similarity ops. */
+  similarityThreshold?: number;
 }
 
 /** Run SQL in a short transaction with pg_trgm.word_similarity_threshold set for <% / %> index use. */
@@ -27,6 +29,10 @@ export async function queryWithWordSimilarityThreshold<R extends pg.QueryResultR
       await client.query(
         `SET LOCAL pg_trgm.strict_word_similarity_threshold = ${strictLiteral}`
       );
+    }
+    if (sessionOptions?.similarityThreshold != null) {
+      const similarityLiteral = String(sessionOptions.similarityThreshold);
+      await client.query(`SET LOCAL pg_trgm.similarity_threshold = ${similarityLiteral}`);
     }
     if (sessionOptions?.disableSeqScan === true) {
       await client.query('SET LOCAL enable_seqscan = off');

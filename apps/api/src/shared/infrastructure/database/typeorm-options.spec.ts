@@ -60,6 +60,7 @@ import { RepairBinDocumentFilenames20261026160000 } from './migrations/202610261
 import { SearchVocabularyMaintain20261027140000 } from './migrations/20261027140000-search-vocabulary-maintain.js';
 import { SearchVocabularyBatchBackfill20261028120000 } from './migrations/20261028120000-search-vocabulary-batch-backfill.js';
 import { SearchVocabularyDocFrequencyCorrect20261028140000 } from './migrations/20261028140000-search-vocabulary-doc-frequency-correct.js';
+import { SearchVocabularyPruneStale20261028160000 } from './migrations/20261028160000-search-vocabulary-prune-stale.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -120,6 +121,7 @@ const EXPECTED_MIGRATIONS = [
   SearchVocabularyMaintain20261027140000,
   SearchVocabularyBatchBackfill20261028120000,
   SearchVocabularyDocFrequencyCorrect20261028140000,
+  SearchVocabularyPruneStale20261028160000,
 ];
 
 describe('buildTypeOrmOptions', () => {
