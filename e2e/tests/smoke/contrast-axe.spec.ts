@@ -36,7 +36,8 @@ async function assertColorContrast(page: import('@playwright/test').Page, label:
 
 async function waitForLabelsPageReady(page: import('@playwright/test').Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
-  await page.locator('main').waitFor({ state: 'visible', timeout: 60_000 });
+  await expect(page.locator('.app-boot-loading')).toHaveCount(0, { timeout: 90_000 });
+  await page.locator('.labels-page').waitFor({ state: 'visible', timeout: 90_000 });
 }
 
 async function waitForAppShell(page: import('@playwright/test').Page): Promise<void> {
@@ -75,6 +76,9 @@ test.describe('Contrast axe color-contrast', () => {
       test.skip(!health.ok(), 'compose API not running');
 
       const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
+
+      await page.goto(`${webOrigin}/documents`, { waitUntil: 'networkidle' });
+      await page.locator('#app-main-content').waitFor({ state: 'visible', timeout: 60_000 });
 
       let recommendationsMode: 'ok' | 'fail' = 'ok';
       await page.route('**/v1/labels/recommendations**', async (route) => {
