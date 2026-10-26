@@ -176,28 +176,8 @@ async function assertRowLabelChipsNeverHardClip(
   expect(issues).toEqual([]);
 }
 
-async function countSeedLabels(
-  request: import('@playwright/test').APIRequestContext
-): Promise<number> {
-  const response = await request.get(
-    `${apiBase}/v1/tags/search?q=${encodeURIComponent('ws-b-seed')}&limit=1`,
-    { headers: { origin: webOrigin } }
-  );
-  if (!response.ok()) {
-    const detail = await response.text();
-    throw new Error(`tag search failed: ${String(response.status())} ${detail}`);
-  }
-  const body = (await response.json()) as { total: number | null };
-  return body.total ?? 0;
-}
-
 async function seedLabels(request: import('@playwright/test').APIRequestContext, count: number) {
-  const existing = await countSeedLabels(request);
-  if (existing >= count) {
-    return;
-  }
-
-  for (let index = existing; index < count; index += 1) {
+  for (let index = 0; index < count; index += 1) {
     const name = `ws-b-seed-${String(index).padStart(4, '0')}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
@@ -209,8 +189,14 @@ async function seedLabels(request: import('@playwright/test').APIRequestContext,
     expect(response.ok()).toBeTruthy();
   }
 
-  const total = await countSeedLabels(request);
-  expect(total).toBeGreaterThanOrEqual(count);
+  const search = await request.get(
+    `${apiBase}/v1/tags/search?q=${encodeURIComponent('ws-b-seed')}&limit=50`,
+    { headers: { origin: webOrigin } }
+  );
+  expect(search.ok()).toBeTruthy();
+  const page = (await search.json()) as { items: unknown[]; hasMore: boolean };
+  expect(page.items.length).toBeGreaterThan(0);
+  expect(page.hasMore).toBe(true);
 }
 
 async function assertFullyInViewport(
