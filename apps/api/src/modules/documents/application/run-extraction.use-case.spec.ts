@@ -5,12 +5,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   DOCUMENT_REPOSITORY,
-  EXTRACTION_PORT,
-  OBJECT_STORAGE,
-  TAXONOMY_REPOSITORY,
   type DocumentRepository,
+  EXTRACTION_PORT,
   type ExtractionPort,
+  OBJECT_STORAGE,
   type ObjectStorage,
+  TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
@@ -30,8 +30,6 @@ import { RunExtractionUseCase } from './run-extraction.use-case.js';
 
 vi.mock('../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js', () => ({
   RunDocumentPostOcrPipelineUseCase: class RunDocumentPostOcrPipelineUseCase {
-    constructor(..._args: unknown[]) {}
-
     execute = vi.fn().mockResolvedValue(undefined);
     listModuleDescriptors = vi.fn().mockReturnValue([]);
   },
@@ -39,48 +37,36 @@ vi.mock('../../document-pipeline/application/run-document-post-ocr-pipeline.use-
 
 vi.mock('../../duplicates/application/schedule-duplicate-detection.use-case.js', () => ({
   ScheduleDuplicateDetectionUseCase: class ScheduleDuplicateDetectionUseCase {
-    constructor(..._args: unknown[]) {}
-
     execute = vi.fn().mockResolvedValue(undefined);
   },
 }));
 
 vi.mock('../../settings/application/settings.use-cases.js', () => ({
   ResolveUserExtractorEngineUseCase: class ResolveUserExtractorEngineUseCase {
-    constructor(..._args: unknown[]) {}
-
     execute = vi.fn().mockResolvedValue('default');
   },
 }));
 
 vi.mock('../../search/application/sync-document-search-index.use-case.js', () => ({
   SyncDocumentSearchIndexUseCase: class SyncDocumentSearchIndexUseCase {
-    constructor(..._args: unknown[]) {}
-
     execute = vi.fn().mockResolvedValue(undefined);
   },
 }));
 
 vi.mock('../../representation/application/persist-document-representation.use-case.js', () => ({
   PersistDocumentRepresentationUseCase: class PersistDocumentRepresentationUseCase {
-    constructor(..._args: unknown[]) {}
-
     execute = vi.fn().mockResolvedValue(undefined);
   },
 }));
 
 vi.mock('../../labels/infrastructure/pg-embedding-density.repository.js', () => ({
   PgEmbeddingDensityRepository: class PgEmbeddingDensityRepository {
-    constructor(..._args: unknown[]) {}
-
     loadWorkerState = vi.fn().mockResolvedValue(null);
   },
 }));
 
 vi.mock('../../feature-flags/application/resolve-feature-flags.use-case.js', () => ({
   ResolveFeatureFlagsUseCase: class ResolveFeatureFlagsUseCase {
-    constructor(..._args: unknown[]) {}
-
     execute = vi.fn().mockResolvedValue({ exactAnswers: false });
     assertEnabled = vi.fn().mockResolvedValue(undefined);
   },
@@ -88,8 +74,6 @@ vi.mock('../../feature-flags/application/resolve-feature-flags.use-case.js', () 
 
 vi.mock('../../exact-facts/application/persist-document-facts.use-case.js', () => ({
   PersistDocumentFactsUseCase: class PersistDocumentFactsUseCase {
-    constructor(..._args: unknown[]) {}
-
     execute = vi.fn().mockResolvedValue(undefined);
   },
 }));
@@ -97,16 +81,12 @@ vi.mock('../../exact-facts/application/persist-document-facts.use-case.js', () =
 vi.mock('./document-review/promote-extraction-suggestions.use-case.js', () => ({
   PromoteHighConfidenceExtractionSuggestionsUseCase:
     class PromoteHighConfidenceExtractionSuggestionsUseCase {
-      constructor(..._args: unknown[]) {}
-
       execute = vi.fn().mockResolvedValue(undefined);
     },
 }));
 
 vi.mock('./document-review/auto-accept-calibrated-review.use-case.js', () => ({
   AutoAcceptCalibratedReviewUseCase: class AutoAcceptCalibratedReviewUseCase {
-    constructor(..._args: unknown[]) {}
-
     execute = vi.fn().mockResolvedValue(undefined);
   },
 }));
