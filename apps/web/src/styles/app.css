@@ -7987,6 +7987,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .library-table-wrap {
+  --library-table-date-col-min: 6.25rem;
   width: 100%;
   min-width: 0;
   overflow-x: auto;
@@ -8274,8 +8275,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .library-table.library-table-virtualized th.library-col-status,
 .library-table.library-table-virtualized td.library-col-status,
-.library-table.library-table-virtualized th.library-col-date,
-.library-table.library-table-virtualized td.library-col-date,
 .library-table.library-table-virtualized th.library-col-meta,
 .library-table.library-table-virtualized td.library-col-meta,
 .library-table.library-table-virtualized th.library-col-action,
@@ -8287,6 +8286,16 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   width: unset;
   min-width: 0;
   max-width: none;
+}
+
+.library-table.library-table-virtualized th.library-col-date,
+.library-table.library-table-virtualized td.library-col-date {
+  width: auto;
+  min-width: var(--library-table-date-col-min, 6.25rem);
+  max-width: none;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .library-open-doc-btn {

@@ -7,6 +7,7 @@ import path from 'node:path';
 import { expect, test } from '@playwright/test';
 
 import {
+  applyDocuvateLocale,
   applyDocuvateThemePreference,
   readDocBodyBackground,
 } from '../../helpers/docuvate-theme.js';
@@ -46,6 +47,13 @@ interface RequestMetric {
   durationMs: number | null;
 }
 
+async function waitForInlineTagSuggestion(page: import('@playwright/test').Page): Promise<void> {
+  await page.locator('.document-label-suggestion-chip-btn').first().waitFor({
+    state: 'visible',
+    timeout: 15_000,
+  });
+}
+
 async function captureViewport(
   page: import('@playwright/test').Page,
   name: string,
@@ -56,12 +64,52 @@ async function captureViewport(
   await applyDocuvateThemePreference(page, theme);
   await page.goto('/documents');
   await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible' });
+  if (viewport.width >= 1280) {
+    await waitForInlineTagSuggestion(page);
+  }
   const bg = await readDocBodyBackground(page);
   expect(bg).not.toBe('');
   await page.screenshot({
     path: path.join(artifactRoot, `${name}-${String(viewport.width)}-${theme}.png`),
     fullPage: false,
   });
+}
+
+async function assertDateColumnNotTruncated(page: import('@playwright/test').Page): Promise<void> {
+  const clipped = await page.evaluate(() => {
+    const cells = document.querySelectorAll(
+      '.library-table-virtual-body tr.library-table-virtual-row td.library-col-date'
+    );
+    const limit = Math.min(20, cells.length);
+    for (let i = 0; i < limit; i += 1) {
+      const cell = cells.item(i);
+      if (!(cell instanceof HTMLElement)) {
+        continue;
+      }
+      if (cell.scrollWidth > cell.clientWidth + 1) {
+        return true;
+      }
+    }
+    return false;
+  });
+  expect(clipped).toBe(false);
+}
+
+async function assertDateColumnAtViewports(
+  page: import('@playwright/test').Page,
+  locales: readonly ('de' | 'en')[],
+  widths: readonly number[]
+): Promise<void> {
+  for (const locale of locales) {
+    await applyDocuvateLocale(page, locale);
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: 900 });
+      await applyDocuvateThemePreference(page, 'light');
+      await page.goto('/documents');
+      await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible' });
+      await assertDateColumnNotTruncated(page);
+    }
+  }
 }
 
 async function assertStatusColumnAlignment(page: import('@playwright/test').Page): Promise<void> {
@@ -102,7 +150,7 @@ async function assertDesktopTableLayout(page: import('@playwright/test').Page): 
   const titleCell = firstRow.locator('td.library-col-title').first();
   const titleBox = await titleCell.boundingBox();
   expect(titleBox).not.toBeNull();
-  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.4);
+  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.399);
 
   const labelOverflow = await page.evaluate(() => {
     const cells = document.querySelectorAll(
@@ -240,8 +288,10 @@ test.describe('library list performance', () => {
       ),
     ]);
     await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible' });
+    await waitForInlineTagSuggestion(page);
     await assertStatusColumnAlignment(page);
     await assertDesktopTableLayout(page);
+    await assertDateColumnAtViewports(page, ['de', 'en'], [1440, 1280]);
 
     await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'light');
     await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'dark');

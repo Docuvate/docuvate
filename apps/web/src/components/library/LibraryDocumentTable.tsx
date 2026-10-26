@@ -295,12 +295,12 @@ export function LibraryDocumentTable({
       columns.push('9rem');
     }
     if (showStatusCol) {
-      columns.push('6.5rem');
+      columns.push('6.25rem');
     }
     if (showDateCol) {
-      columns.push('5.25rem');
+      columns.push('max-content');
     }
-    columns.push('3.75rem');
+    columns.push('3.5rem');
     return { gridTemplateColumns: columns.join(' ') };
   }, [showDateCol, showFolderCol, showLabelsCol, showStatusCol]);
 

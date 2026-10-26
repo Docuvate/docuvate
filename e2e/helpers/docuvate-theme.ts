@@ -5,6 +5,7 @@ import type { Page } from '@playwright/test';
 const THEME_PREFERENCE_STORAGE_KEY = 'docuvate-theme-preference';
 const COMPACT_THEME_STORAGE_KEY = 'docuvate-theme';
 const THEME_ATTRIBUTE = 'data-docuvate-theme';
+const LOCALE_STORAGE_KEY = 'docuvate.locale';
 
 export async function applyDocuvateThemePreference(
   page: Page,
@@ -31,4 +32,13 @@ export async function applyDocuvateThemePreference(
 
 export async function readDocBodyBackground(page: Page): Promise<string> {
   return page.evaluate(() => getComputedStyle(document.body).backgroundColor);
+}
+
+export async function applyDocuvateLocale(page: Page, locale: 'de' | 'en'): Promise<void> {
+  await page.evaluate(
+    ({ key, loc }) => {
+      window.localStorage.setItem(key, loc);
+    },
+    { key: LOCALE_STORAGE_KEY, loc: locale }
+  );
 }
