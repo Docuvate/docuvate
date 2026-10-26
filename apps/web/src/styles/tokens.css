@@ -6,7 +6,8 @@
  *
  * Brand vermilion fill: --dv-color-accent (#d9480f light, darkened #b8360a dark for fills)
  * Text/links on tint or raised surfaces: --dv-color-accent-text
- * Text on accent fills: --dv-color-on-accent (warm near-black light, white dark)
+ * Filled controls (buttons, active header controls): --dv-color-accent-fill + white --dv-color-on-accent
+ * Brand accent #d9480f: --dv-color-accent (logo, focus, highlights); deeper --dv-color-accent-fill on light for AA fills
  * Errors: --dv-color-error-text; danger badges/menus: --dv-color-danger on --dv-color-danger-soft
  */
 :root,
