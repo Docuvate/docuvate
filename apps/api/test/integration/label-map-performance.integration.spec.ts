@@ -142,6 +142,9 @@ describe('GET /labels/map scale (Testcontainers Postgres)', () => {
     const started = performance.now();
     const map: LabelMapResponseDto = await useCase.execute(userId);
     const elapsedMs = performance.now() - started;
+    console.info(
+      `label-map perf: ${elapsedMs.toFixed(1)}ms for ${String(DOCUMENT_COUNT)} documents`
+    );
 
     expect(map.documentCount).toBe(DOCUMENT_COUNT);
     expect(map.points.length).toBeGreaterThanOrEqual(DOCUMENT_COUNT);
