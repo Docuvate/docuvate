@@ -15,6 +15,9 @@ from docuvate_worker.domain.representation.units import (
     append_sender_line_units,
     build_representation_units,
 )
+from docuvate_worker.infrastructure.extract_memory.model_residency import (
+    extract_keep_models_resident,
+)
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 
 STAGE_ID = "document_representation"
@@ -41,7 +44,8 @@ def run_representation_stage(state: PipelineMutableState) -> StageEnvelope[Repre
             if len(units) < 128:
                 units = append_sender_line_units(units, state.text, max_lines=32)
             representation = encode_units(units)
-            release_onnx_encoder()
+            if not extract_keep_models_resident():
+                release_onnx_encoder()
             state.document_representation = representation
             return (
                 RepresentationStageData(representation=representation),

@@ -647,6 +647,7 @@ dependencies = [
     { name = "pdf2image" },
     { name = "pdfplumber" },
     { name = "pillow" },
+    { name = "psutil" },
     { name = "pydantic" },
     { name = "pypdf" },
     { name = "python-docx" },
@@ -670,6 +671,7 @@ dev = [
     { name = "ruff" },
     { name = "scipy-stubs" },
     { name = "testcontainers" },
+    { name = "types-psutil" },
 ]
 docling = [
     { name = "docling" },
@@ -709,6 +711,7 @@ requires-dist = [
     { name = "pdf2image", specifier = ">=1.17.0" },
     { name = "pdfplumber", specifier = ">=0.11.0" },
     { name = "pillow", specifier = ">=11.0.0" },
+    { name = "psutil", specifier = ">=6.0.0" },
     { name = "psycopg", extras = ["binary"], marker = "extra == 'dev'", specifier = ">=3.2.0" },
     { name = "pydantic", specifier = ">=2.9.0" },
     { name = "pypdf", specifier = ">=5.0.0" },
@@ -728,6 +731,7 @@ requires-dist = [
     { name = "tokenizers", specifier = ">=0.20.0" },
     { name = "torch", marker = "extra == 'donut'", specifier = ">=2.2.0" },
     { name = "transformers", marker = "extra == 'donut'", specifier = ">=4.44.0" },
+    { name = "types-psutil", marker = "extra == 'dev'", specifier = ">=6.0.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
 ]
 provides-extras = ["dev", "tesseract", "docling", "donut"]
@@ -3248,6 +3252,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/7c/f7/68adc395201b20b872d68e975386832e8005ffeacedd43a1d837a32815be/typer-0.26.8.tar.gz", hash = "sha256:c244a6bd558886fe3f8780efb6bdd28bb9aff005a94eedebaa5cb32926fe2f7e", size = 202097, upload-time = "2026-06-26T09:22:45.705Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/80/87/b9fd69c92c6102a066e1b86a35243f53e70bd4c709f2a26d9f4fee4f4dc0/typer-0.26.8-py3-none-any.whl", hash = "sha256:3512ca79ac5c11113414b36e80281b872884477722440691c89d1112e321a49c", size = 122564, upload-time = "2026-06-26T09:22:44.72Z" },
+]
+
+[[package]]
+name = "types-psutil"
+version = "7.2.2.20260906"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/97/0a/f48b9b0ab5ba8599fd117309e345152bf82c756c72be2ff0f635780c2792/types_psutil-7.2.2.20260906.tar.gz", hash = "sha256:93abf22cf9a62b915f724e433bde702995ac274865425fd4a76d1d9b5828da1a", size = 27396, upload-time = "2026-09-06T06:35:24.499Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/eb/8d/81a86107486e1c23f5ca21bea1e9e5b18a50754242e7a0b82f41f9ae8384/types_psutil-7.2.2.20260906-py3-none-any.whl", hash = "sha256:db00baf7f96c3f63421c4d3d68d373923094a0dfddf13e922c5c5fbc42488159", size = 33383, upload-time = "2026-09-06T06:35:23.575Z" },
 ]
 
 [[package]]

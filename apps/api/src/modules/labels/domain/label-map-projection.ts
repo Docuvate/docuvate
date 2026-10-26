@@ -9,6 +9,9 @@ export type LabelMapProjectionMethod = 'pca' | 'umap';
 /** Below this count, UMAP is unstable — use linear PCA. */
 export const MIN_VECTORS_FOR_UMAP = 15;
 
+/** Above this count, UMAP latency dominates map load — use PCA (still 2D). */
+export const MAX_VECTORS_FOR_UMAP = 250;
+
 export function projectLabelMap2D(vectors: number[][]): {
   coords: [number, number][];
   method: LabelMapProjectionMethod;
@@ -17,7 +20,7 @@ export function projectLabelMap2D(vectors: number[][]): {
     return { coords: [], method: 'pca' };
   }
 
-  if (vectors.length < MIN_VECTORS_FOR_UMAP) {
+  if (vectors.length < MIN_VECTORS_FOR_UMAP || vectors.length > MAX_VECTORS_FOR_UMAP) {
     return {
       coords: normalizePlotCoords(projectTo2D(vectors)),
       method: 'pca',

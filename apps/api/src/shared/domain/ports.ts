@@ -100,6 +100,7 @@ export interface DocumentRepository {
   ): Promise<number>;
   deleteDocuments(userId: string, documentIds: string[]): Promise<DocumentEntity[]>;
   setContentHash(id: string, hash: string): Promise<void>;
+  setExtractedTextHash(id: string, hash: string): Promise<void>;
   setPreviewStorageKey(id: string, previewStorageKey: string | null): Promise<void>;
   setFolderForDocuments(
     userId: string,
@@ -245,6 +246,8 @@ export interface UserPreferencesEntity {
   /** All must be assigned on the document before gated extraction (AND). */
   fieldExtractionRequiredLabelIds: string[];
   advancedFeaturesEnabled: boolean;
+  /** Near-duplicate embedding classifier (low-priority queue); default off. */
+  fuzzyDuplicateDetectionEnabled: boolean;
   themePreference: 'light' | 'dark' | 'system';
   locale: 'de' | 'en' | null;
   documentChatCloudBaseUrl: string | null;
@@ -267,6 +270,7 @@ export interface UserPreferencesRepository {
       fieldExtractionConfidenceGateEnabled?: boolean;
       fieldExtractionRequiredLabelIds?: string[];
       advancedFeaturesEnabled?: boolean;
+      fuzzyDuplicateDetectionEnabled?: boolean;
       themePreference?: 'light' | 'dark' | 'system';
       locale?: 'de' | 'en' | null;
       documentChatCloudBaseUrl?: string | null;
@@ -744,6 +748,33 @@ export interface DuplicateRepository {
   ): Promise<boolean>;
   countPendingByDocumentIds(userId: string, documentIds: string[]): Promise<Map<string, number>>;
   findDocumentIdsByHash(userId: string, hash: string, excludeDocumentId: string): Promise<string[]>;
+  findDocumentIdsByExtractedTextHash(
+    userId: string,
+    hash: string,
+    excludeDocumentId: string
+  ): Promise<string[]>;
+  getDocumentMeanInt8(
+    userId: string,
+    documentId: string
+  ): Promise<{ scale: number; int8: Buffer } | null>;
+  listCompactDocumentEmbeddings(
+    userId: string,
+    excludeDocumentId: string
+  ): Promise<{ documentId: string; scale: number; int8: Buffer }[]>;
+  loadEmbeddingPeersByIds(
+    userId: string,
+    documentIds: string[]
+  ): Promise<
+    {
+      documentId: string;
+      embedding: number[];
+      filename: string;
+      title: string;
+      documentDate: Date | null;
+      extractedText: string | null;
+      extractedFields: unknown;
+    }[]
+  >;
   listDocumentEmbeddings(
     userId: string,
     excludeDocumentId: string

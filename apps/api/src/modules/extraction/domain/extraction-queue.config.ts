@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
+import { defaultDocumentExtractionConcurrency } from '../../../shared/infrastructure/cgroup/default-parallelism.js';
+
 const DEFAULT_LOCK_MS = 20 * 60 * 1000;
 const DEFAULT_STALLED_INTERVAL_MS = 5 * 60 * 1000;
 const DEFAULT_MAX_STALLED_COUNT = 2;
@@ -46,4 +48,13 @@ export function extractionStaleClaimSeconds(): number {
 
 export function extractionJobId(documentId: string): string {
   return `document-extract-${documentId}`;
+}
+
+/** BullMQ worker concurrency for `document-extraction` (coordinated with worker admission). */
+export function documentExtractionConcurrency(): number {
+  const configured = parsePositiveInt(process.env['DOCUMENT_EXTRACTION_CONCURRENCY'], 0);
+  if (configured > 0) {
+    return configured;
+  }
+  return defaultDocumentExtractionConcurrency();
 }

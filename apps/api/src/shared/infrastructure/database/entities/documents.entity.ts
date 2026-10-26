@@ -25,6 +25,7 @@ import { TagEmbeddingFeedbackEntity } from './tag-embedding-feedback.entity.js';
 import { UserEntity } from './user.entity.js';
 
 @Index('documents_content_hash_idx', ['contentHash', 'userId'], {})
+@Index('documents_extracted_text_hash_idx', ['extractedTextHash', 'userId'], {})
 @Index('documents_folder_id_idx', ['folderId'], {})
 @Index('documents_search_idx', ['searchVector'], {})
 @Index('documents_user_id_idx', ['userId'], {})
@@ -92,6 +93,9 @@ export class DocumentsEntity {
 
   @Column('text', { name: 'content_hash', nullable: true })
   contentHash: string | null;
+
+  @Column('text', { name: 'extracted_text_hash', nullable: true })
+  extractedTextHash: string | null;
 
   @Column('text', { name: 'archived_storage_key', nullable: true })
   archivedStorageKey: string | null;

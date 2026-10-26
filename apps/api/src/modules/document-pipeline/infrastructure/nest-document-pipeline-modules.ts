@@ -3,7 +3,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
-import { ApplyDuplicateDetectionUseCase } from '../../duplicates/application/apply-duplicate-detection.use-case.js';
+import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { ApplyEmbeddingSuggestionsUseCase } from '../../labels/application/apply-embedding-suggestions.use-case.js';
 import { ApplyLabelMatchingUseCase } from '../../labels/application/apply-label-matching.use-case.js';
 import { ApplyGlobalRecognizedFieldsUseCase } from '../../recognized-fields/application/apply-global-recognized-fields.use-case.js';
@@ -96,13 +96,13 @@ export class DuplicateDetectionDocumentPipelineStep implements DocumentPipelineM
   };
 
   constructor(
-    private readonly applyDuplicateDetection: ApplyDuplicateDetectionUseCase,
+    private readonly scheduleDuplicateDetection: ScheduleDuplicateDetectionUseCase,
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
   ) {}
 
   async run(context: DocumentPipelineContext): Promise<void> {
     const doc = await this.documents.findById(context.documentId);
-    await this.applyDuplicateDetection.execute(
+    await this.scheduleDuplicateDetection.execute(
       context.documentId,
       context.userId,
       doc?.contentHash ?? null

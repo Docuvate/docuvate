@@ -87,6 +87,9 @@ suppress-dummy-args = true
 "src/docuvate_worker/infrastructure/office/**/*.py" = ["PLR2004", "PLR0911", "E501"]
 "src/docuvate_worker/infrastructure/extractors/document_images.py" = ["PLR2004", "E501"]
 "src/docuvate_worker/infrastructure/extractors/markdown.py" = ["PLR2004", "E501", "SIM103"]
+"tests/scripts/**/*.py" = ["E402"]
+"tests/test_extract_concurrency.py" = ["ANN001", "PLR2004"]
+"tests/test_model_residency.py" = ["ANN001"]
 
 [tool.ruff.lint.pylint]
 max-args = 12

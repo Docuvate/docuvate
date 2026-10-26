@@ -40,4 +40,9 @@ export interface MissingLabelHintPort {
     corpus: MissingLabelCorpusDocument[];
     labeledDocumentIndices: number[];
   }): Promise<{ score: number; show: boolean }>;
+  scoreMissingLabelHintsBatch(input: {
+    targets: { targetDocumentIndex: number; assignedTagIds: string[] }[];
+    corpus: MissingLabelCorpusDocument[];
+    labeledDocumentIndices: number[];
+  }): Promise<{ targetDocumentIndex: number; score: number; show: boolean }[]>;
 }

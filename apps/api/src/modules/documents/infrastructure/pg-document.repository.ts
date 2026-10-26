@@ -20,6 +20,7 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import { hashNormalizedExtractedText } from '../../duplicates/domain/normalized-extracted-text-hash.js';
 import { globalFieldStorageKey } from '../../recognized-fields/domain/recognized-field.entity.js';
 import { upsertDocumentFieldValue } from '../../search/infrastructure/document-field-value-index.js';
 import type { DocumentEntity, DocumentStatus } from '../domain/document.entity.js';
@@ -425,9 +426,15 @@ export class PgDocumentRepository implements DocumentRepository {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
+      const extractedTextHash = hashNormalizedExtractedText(result.text);
       await client.query(
-        `UPDATE documents SET extracted_text = $2, extracted_markdown = $3, updated_at = now() WHERE id = $1`,
-        [id, result.text, result.markdown ?? null]
+        `UPDATE documents
+         SET extracted_text = $2,
+             extracted_markdown = $3,
+             extracted_text_hash = $4,
+             updated_at = now()
+         WHERE id = $1`,
+        [id, result.text, result.markdown ?? null, extractedTextHash]
       );
       await client.query(`DELETE FROM document_layout_ir WHERE document_id = $1`, [id]);
       if (result.layoutIr != null && isRecord(result.layoutIr)) {
@@ -501,6 +508,13 @@ export class PgDocumentRepository implements DocumentRepository {
   async setContentHash(id: string, hash: string): Promise<void> {
     await this.pool.query(
       `UPDATE documents SET content_hash = $2, updated_at = now() WHERE id = $1`,
+      [id, hash]
+    );
+  }
+
+  async setExtractedTextHash(id: string, hash: string): Promise<void> {
+    await this.pool.query(
+      `UPDATE documents SET extracted_text_hash = $2, updated_at = now() WHERE id = $1`,
       [id, hash]
     );
   }

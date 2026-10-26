@@ -54,9 +54,14 @@ from docuvate_worker.infrastructure.ml.ce_ml.kv_items import (
     extract_kv_items_from_blocks,
 )
 from docuvate_worker.infrastructure.ml.ce_ml.label_propagation import propagate_label_scores
-from docuvate_worker.infrastructure.ml.ce_ml.missing_label import missing_label_hint_score
+from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (
+    MissingLabelBatchTarget,
+    missing_label_hint_score,
+    missing_label_hint_scores_batch,
+)
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.extract_http_concurrency import extract_http_slot
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
 from docuvate_worker.presentation.extraction_block_response import extraction_blocks_to_models
@@ -70,6 +75,9 @@ from docuvate_worker.presentation.schemas import (
     CeLabelPropagationRequest,
     CeLabelPropagationResponse,
     CeLabelPropagationScore,
+    CeMissingLabelBatchRequest,
+    CeMissingLabelBatchResponse,
+    CeMissingLabelBatchResult,
     CeMissingLabelRequest,
     CeMissingLabelResponse,
     CompareEngineResponse,
@@ -144,7 +152,8 @@ def _decode_content(content_base64: str) -> bytes:
 
 
 @router.get("/health", response_model=HealthResponse)
-def health() -> HealthResponse:
+async def health() -> HealthResponse:
+    """Async so liveness probes stay fast while sync /extract blocks the thread pool."""
     return HealthResponse(status="ok")
 
 
@@ -201,13 +210,14 @@ def extract(
             body.embedding_density_state.model_dump()
         )
     try:
-        result = run_extract_isolated(
-            content=raw,
-            mime_type=body.mime_type,
-            engine=body.engine,
-            embedding_density_state=density_state,
-            build_exact_fact_index=body.build_exact_fact_index,
-        )
+        with extract_http_slot():
+            result = run_extract_isolated(
+                content=raw,
+                mime_type=body.mime_type,
+                engine=body.engine,
+                embedding_density_state=density_state,
+                build_exact_fact_index=body.build_exact_fact_index,
+            )
     except ExtractRetryableError as exc:
         raise HTTPException(
             status_code=503,
@@ -755,6 +765,47 @@ def ce_missing_label(
         labeled_document_indices=labeled_indices,
     )
     return CeMissingLabelResponse(score=hint.score, show=hint.show)
+
+
+@router.post("/ml/ce/missing-label-batch", response_model=CeMissingLabelBatchResponse)
+def ce_missing_label_batch(
+    body: CeMissingLabelBatchRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> CeMissingLabelBatchResponse:
+    _require_worker_secret(x_worker_secret)
+    if not body.labeled_document_indices:
+        labeled_indices = [
+            document.document_index for document in body.corpus if document.tag_ids
+        ]
+    else:
+        labeled_indices = body.labeled_document_indices
+    vectors = [document.embedding for document in body.corpus]
+    texts = [document.text for document in body.corpus]
+    tag_ids = [document.tag_ids for document in body.corpus]
+    targets = [
+        MissingLabelBatchTarget(
+            target_document_index=target.target_document_index,
+            assigned_tag_ids=target.assigned_tag_ids,
+        )
+        for target in body.targets
+    ]
+    hints = missing_label_hint_scores_batch(
+        passage_vectors=vectors,
+        passage_texts=texts,
+        tag_ids_per_document=tag_ids,
+        targets=targets,
+        labeled_document_indices=labeled_indices,
+    )
+    return CeMissingLabelBatchResponse(
+        results=[
+            CeMissingLabelBatchResult(
+                target_document_index=targets[index].target_document_index,
+                score=hint.score,
+                show=hint.show,
+            )
+            for index, hint in enumerate(hints)
+        ]
+    )
 
 
 @router.post("/ml/retrain/run", response_model=MlRetrainRunResponse)

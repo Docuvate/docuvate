@@ -16,6 +16,7 @@ export class BackfillDocumentEmbeddingsUseCase {
 
   constructor(
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
+    @Inject(RefreshEmbeddingSuggestionsUseCase)
     private readonly refreshEmbeddings: RefreshEmbeddingSuggestionsUseCase
   ) {}
 

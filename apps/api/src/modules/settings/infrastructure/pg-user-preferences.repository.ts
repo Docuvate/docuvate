@@ -61,6 +61,10 @@ function mapRow(row: Record<string, unknown>): UserPreferencesEntity {
     fieldExtractionRequiredLabelIds: parseRequiredLabelIds(row.required_label_ids),
     advancedFeaturesEnabled:
       row.advanced_features_enabled != null ? Boolean(row.advanced_features_enabled) : false,
+    fuzzyDuplicateDetectionEnabled:
+      row.fuzzy_duplicate_detection_enabled != null
+        ? Boolean(row.fuzzy_duplicate_detection_enabled)
+        : false,
     themePreference:
       row.theme_preference === 'light' ||
       row.theme_preference === 'dark' ||
@@ -87,6 +91,7 @@ const DEFAULTS: Omit<UserPreferencesEntity, 'userId'> = {
   fieldExtractionConfidenceGateEnabled: true,
   fieldExtractionRequiredLabelIds: [],
   advancedFeaturesEnabled: false,
+  fuzzyDuplicateDetectionEnabled: false,
   themePreference: 'system',
   locale: null,
   documentChatCloudBaseUrl: null,
@@ -148,6 +153,7 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
       fieldExtractionConfidenceGateEnabled?: boolean;
       fieldExtractionRequiredLabelIds?: string[];
       advancedFeaturesEnabled?: boolean;
+      fuzzyDuplicateDetectionEnabled?: boolean;
       themePreference?: 'light' | 'dark' | 'system';
       locale?: 'de' | 'en' | null;
       documentChatCloudBaseUrl?: string | null;
@@ -175,6 +181,8 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
       fieldExtractionRequiredLabelIds:
         patch.fieldExtractionRequiredLabelIds ?? existing.fieldExtractionRequiredLabelIds,
       advancedFeaturesEnabled: patch.advancedFeaturesEnabled ?? existing.advancedFeaturesEnabled,
+      fuzzyDuplicateDetectionEnabled:
+        patch.fuzzyDuplicateDetectionEnabled ?? existing.fuzzyDuplicateDetectionEnabled,
       themePreference: patch.themePreference ?? existing.themePreference,
       locale: patch.locale !== undefined ? patch.locale : existing.locale,
       documentChatCloudBaseUrl:
@@ -212,12 +220,13 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
            label_near_similarity_threshold,
            field_extraction_confidence_gate_enabled,
            advanced_features_enabled,
+           fuzzy_duplicate_detection_enabled,
            theme_preference,
            locale,
            document_chat_cloud_base_url,
            document_chat_cloud_api_key_encrypted,
            updated_at
-         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now())
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, now())
          ON CONFLICT (user_id) DO UPDATE SET
            preferred_extractor_engine = EXCLUDED.preferred_extractor_engine,
            preferred_chat_provider = EXCLUDED.preferred_chat_provider,
@@ -227,6 +236,7 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
            label_near_similarity_threshold = EXCLUDED.label_near_similarity_threshold,
            field_extraction_confidence_gate_enabled = EXCLUDED.field_extraction_confidence_gate_enabled,
            advanced_features_enabled = EXCLUDED.advanced_features_enabled,
+           fuzzy_duplicate_detection_enabled = EXCLUDED.fuzzy_duplicate_detection_enabled,
            theme_preference = EXCLUDED.theme_preference,
            locale = EXCLUDED.locale,
            document_chat_cloud_base_url = EXCLUDED.document_chat_cloud_base_url,
@@ -242,6 +252,7 @@ export class PgUserPreferencesRepository implements UserPreferencesRepository {
           next.labelNearSimilarityThreshold,
           next.fieldExtractionConfidenceGateEnabled,
           next.advancedFeaturesEnabled,
+          next.fuzzyDuplicateDetectionEnabled,
           next.themePreference,
           next.locale,
           next.documentChatCloudBaseUrl,

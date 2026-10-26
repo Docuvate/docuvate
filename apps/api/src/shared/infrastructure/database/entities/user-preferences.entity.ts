@@ -60,6 +60,12 @@ export class UserPreferencesEntity {
   })
   advancedFeaturesEnabled: boolean;
 
+  @Column('boolean', {
+    name: 'fuzzy_duplicate_detection_enabled',
+    default: () => 'false',
+  })
+  fuzzyDuplicateDetectionEnabled: boolean;
+
   @Column('text', {
     name: 'theme_preference',
     default: () => "'system'",

@@ -13,6 +13,9 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
 from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.infrastructure.extract_memory.model_residency import (
+    extract_keep_models_resident,
+)
 from docuvate_worker.infrastructure.extractors.paddle_engine import (
     ocr_image_bytes as paddle_ocr_image_bytes,
 )
@@ -72,6 +75,8 @@ def _ocr_image(content: bytes) -> tuple[str, list[ExtractionBlock]]:
 
 
 def _release_ocr_backends() -> None:
+    if extract_keep_models_resident():
+        return
     release_paddle_ocr()
     if _ocr_backend() == "rapidocr":
         release_rapidocr()

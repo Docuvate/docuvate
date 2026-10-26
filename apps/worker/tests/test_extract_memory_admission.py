@@ -104,7 +104,7 @@ def test_production_idle_admits_first_job_despite_legacy_denial() -> None:
         count_active_file=False,
     )
     assert decision.admit
-    assert decision.reason == "idle_always_admit"
+    assert decision.reason == "idle_first_job"
 
 
 def test_logged_available_with_active_job_denies_under_legacy_need() -> None:

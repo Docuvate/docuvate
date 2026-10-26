@@ -1111,6 +1111,8 @@ export interface UserSettingsDto {
   /** Local model loaded and ready for open-ended LLM answers. */
   documentChatLocalModelReady?: boolean;
   advancedFeaturesEnabled?: boolean;
+  /** Embedding/smart near-duplicate detection (async, off by default). */
+  fuzzyDuplicateDetectionEnabled?: boolean;
   useArenaWinnerAsDefault: boolean;
   arenaWinnerEngine?: string | null;
   /** Min. label confidence (0–1) before gated recognized fields run for a suggested label. Assigned non-inbox labels qualify. */
@@ -1134,6 +1136,7 @@ export interface UpdateUserSettingsRequest {
   fieldExtractionConfidenceGateEnabled?: boolean;
   fieldExtractionRequiredLabelIds?: string[];
   advancedFeaturesEnabled?: boolean;
+  fuzzyDuplicateDetectionEnabled?: boolean;
   themePreference?: ThemePreference;
   locale?: UiLocale | null;
   documentChatCloudBaseUrl?: string | null;

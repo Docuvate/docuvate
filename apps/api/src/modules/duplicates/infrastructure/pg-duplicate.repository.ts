@@ -192,6 +192,19 @@ export class PgDuplicateRepository implements DuplicateRepository {
     return result.rows.map((raw) => parseString(requireRecord(raw).id));
   }
 
+  async findDocumentIdsByExtractedTextHash(
+    userId: string,
+    hash: string,
+    excludeDocumentId: string
+  ): Promise<string[]> {
+    const result = await this.pool.query(
+      `SELECT id FROM documents
+       WHERE user_id = $1 AND extracted_text_hash = $2 AND id <> $3`,
+      [userId, hash, excludeDocumentId]
+    );
+    return result.rows.map((raw) => parseString(requireRecord(raw).id));
+  }
+
   async listDocumentIdsBySharedHash(userId: string): Promise<string[][]> {
     const result = await this.pool.query(
       `SELECT array_agg(id ORDER BY created_at ASC) AS ids
@@ -233,6 +246,118 @@ export class PgDuplicateRepository implements DuplicateRepository {
         documentId: parseString(row.document_id),
         candidateDocumentId: parseString(row.candidate_document_id),
       };
+    });
+  }
+
+  async getDocumentMeanInt8(
+    userId: string,
+    documentId: string
+  ): Promise<{ scale: number; int8: Buffer } | null> {
+    return withTenantPgClient(this.pool, userId, async (client) => {
+      const result = await client.query(
+        `SELECT dr.document_mean_scale, dr.document_mean_int8
+         FROM document_representation dr
+         JOIN documents d ON d.id = dr.document_id
+         WHERE d.user_id = $1 AND dr.document_id = $2`,
+        [userId, documentId]
+      );
+      const firstRow: unknown = result.rows[0];
+      if (firstRow === undefined) return null;
+      const row = requireRecord(firstRow);
+      const buffer = row.document_mean_int8;
+      if (!Buffer.isBuffer(buffer) || buffer.length === 0) return null;
+      return { scale: parseNumber(row.document_mean_scale, 0), int8: buffer };
+    });
+  }
+
+  async listCompactDocumentEmbeddings(
+    userId: string,
+    excludeDocumentId: string
+  ): Promise<{ documentId: string; scale: number; int8: Buffer }[]> {
+    return withTenantPgClient(this.pool, userId, async (client) => {
+      const result = await client.query(
+        `SELECT dr.document_id, dr.document_mean_scale, dr.document_mean_int8
+         FROM document_representation dr
+         JOIN documents d ON d.id = dr.document_id
+         WHERE d.user_id = $1 AND dr.document_id <> $2`,
+        [userId, excludeDocumentId]
+      );
+      return result.rows
+        .map((raw) => {
+          const row = requireRecord(raw);
+          const buffer = row.document_mean_int8;
+          if (!Buffer.isBuffer(buffer) || buffer.length === 0) return null;
+          return {
+            documentId: parseString(row.document_id),
+            scale: parseNumber(row.document_mean_scale, 0),
+            int8: buffer,
+          };
+        })
+        .filter((row): row is { documentId: string; scale: number; int8: Buffer } => row != null);
+    });
+  }
+
+  async loadEmbeddingPeersByIds(
+    userId: string,
+    documentIds: string[]
+  ): Promise<
+    {
+      documentId: string;
+      embedding: number[];
+      filename: string;
+      title: string;
+      documentDate: Date | null;
+      extractedText: string | null;
+      extractedFields: unknown;
+    }[]
+  > {
+    if (documentIds.length === 0) return [];
+    return withTenantPgClient(this.pool, userId, async (client) => {
+      const result = await client.query(
+        `SELECT dr.document_id,
+                dr.document_mean_scale,
+                dr.document_mean_int8,
+                d.filename, d.title, d.document_date, d.extracted_text,
+                (
+                  SELECT jsonb_build_object(
+                    'blocks',
+                    COALESCE(
+                      (
+                        SELECT jsonb_agg(jsonb_build_object('page', b.page) ORDER BY b.page)
+                        FROM document_extraction_blocks b
+                        WHERE b.document_id = d.id
+                      ),
+                      '[]'::jsonb
+                    )
+                  )
+                ) AS extraction_payload
+         FROM document_representation dr
+         JOIN documents d ON d.id = dr.document_id
+         WHERE d.user_id = $1 AND dr.document_id = ANY($2::uuid[])`,
+        [userId, documentIds]
+      );
+      return result.rows
+        .map((raw) => {
+          const row = requireRecord(raw);
+          const scale = parseNumber(row.document_mean_scale, 0);
+          const buffer = row.document_mean_int8;
+          const embedding: number[] = [];
+          if (Buffer.isBuffer(buffer)) {
+            for (let i = 0; i < buffer.length; i += 1) {
+              embedding.push(buffer.readInt8(i) * scale);
+            }
+          }
+          return {
+            documentId: parseString(row.document_id),
+            embedding,
+            filename: parseString(row.filename),
+            title: parseString(row.title ?? row.filename),
+            documentDate: parseOptionalDate(row.document_date),
+            extractedText: parseOptionalString(row.extracted_text),
+            extractedFields: row.extraction_payload,
+          };
+        })
+        .filter((row) => row.embedding.length > 0);
     });
   }
 
