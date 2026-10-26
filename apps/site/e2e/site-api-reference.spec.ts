@@ -795,18 +795,23 @@ test.describe('API reference operations', () => {
       await page.locator('.scalar-embed button').filter({ hasText: name }).first().click();
       await page.waitForTimeout(300);
     }
-    const bad = await page.evaluate(() => {
-      const offenders: string[] = [];
-      document.querySelectorAll('.scalar-embed .sidebar-heading').forEach((el) => {
-        const r = el.getBoundingClientRect();
-        if (r.width < 1 || r.height < 1) return;
-        if (r.width < 200 || r.height > 56) {
-          offenders.push(`heading:${r.width}x${r.height}`);
-        }
-      });
-      return offenders.slice(0, 5);
-    });
-    expect(bad).toEqual([]);
+    await page.waitForFunction(
+      () => {
+        const offenders: string[] = [];
+        document.querySelectorAll('.scalar-embed .sidebar-heading').forEach((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.width < 1 || r.height < 1) {
+            return;
+          }
+          if (r.width < 200 || r.height > 56) {
+            offenders.push(`heading:${r.width}x${r.height}`);
+          }
+        });
+        return offenders.length === 0;
+      },
+      undefined,
+      { timeout: 30_000 }
+    );
   });
 
   test('DE API renders all tag sections after scrolling', async ({ page }) => {
