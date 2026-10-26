@@ -118,9 +118,10 @@ test.describe('Contrast workstream screenshots', () => {
           expect(errorPath).toBeTruthy();
 
           await page.goto(`${webOrigin}/docs/styles`);
-          await page.waitForLoadState('networkidle');
-          await page.locator('.menu-item-danger').first().waitFor({ state: 'visible', timeout: 30_000 });
-          await page.locator('.styles-menu-demo').scrollIntoViewIfNeeded();
+          await page.waitForLoadState('domcontentloaded');
+          const dangerItem = page.locator('.styles-menu-demo .menu-item-danger').first();
+          await dangerItem.waitFor({ state: 'visible', timeout: 60_000 });
+          await dangerItem.scrollIntoViewIfNeeded();
           const dangerPath = await capturePage(page, 'danger-menu', theme, viewport.label);
           expect(dangerPath).toBeTruthy();
         }
