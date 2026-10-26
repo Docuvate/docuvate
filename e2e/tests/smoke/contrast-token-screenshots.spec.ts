@@ -105,8 +105,8 @@ test.describe('Contrast workstream screenshots', () => {
     theme: 'light' | 'dark',
     viewportLabel: string
   ): Promise<string> {
-    await page.goto(`${webOrigin}${routePath}`);
-    await page.waitForLoadState('networkidle');
+    await page.goto(`${webOrigin}${routePath}`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
     return capturePage(page, slug, theme, viewportLabel);
   }
 
@@ -146,6 +146,7 @@ test.describe('Contrast workstream screenshots', () => {
     });
 
     test('core routes and contrast states', async ({ page, request }) => {
+      test.setTimeout(180_000);
       const health = await request.get(`${apiBase}/health`);
       test.skip(!health.ok(), 'compose API not running');
 

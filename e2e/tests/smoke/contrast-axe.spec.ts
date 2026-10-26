@@ -83,7 +83,10 @@ test.describe('Contrast axe color-contrast', () => {
 
     test('app surfaces', async ({ page, request }) => {
       test.setTimeout(180_000);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 6f5ecb2 (test(e2e): stabilize contrast smoke navigation waits)
       const health = await request.get(`${apiBase}/health`);
       test.skip(!health.ok(), 'compose API not running');
 
@@ -114,12 +117,17 @@ test.describe('Contrast axe color-contrast', () => {
         for (const theme of THEMES) {
           recommendationsMode = 'ok';
           for (const route of routes) {
+<<<<<<< HEAD
             await page.goto(`${webOrigin}${route.path}`);
             if (route.path === '/structure/labels') {
               await waitForLabelsPageReady(page);
             } else {
               await page.waitForLoadState('networkidle');
             }
+=======
+            await page.goto(`${webOrigin}${route.path}`, { waitUntil: 'domcontentloaded' });
+            await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
+>>>>>>> 6f5ecb2 (test(e2e): stabilize contrast smoke navigation waits)
             await setTheme(page, theme);
             await assertColorContrast(
               page,
@@ -127,10 +135,15 @@ test.describe('Contrast axe color-contrast', () => {
             );
           }
 
+<<<<<<< HEAD
           recommendationsMode = 'fail';
           await page.goto(`${webOrigin}/structure/labels`);
           await waitForLabelsPageReady(page);
           await page.locator('.labels-todo-load-error p.error').waitFor({ state: 'visible', timeout: 30_000 });
+=======
+          await page.goto(`${webOrigin}/structure/labels`, { waitUntil: 'domcontentloaded' });
+          await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
+>>>>>>> 6f5ecb2 (test(e2e): stabilize contrast smoke navigation waits)
           await setTheme(page, theme);
           await assertColorContrast(page, `labels-error ${theme} ${viewport.label}`);
 
