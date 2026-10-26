@@ -20,7 +20,7 @@ interface MenuContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
   menuId: string;
-  triggerRef: RefObject<HTMLButtonElement | null>;
+  triggerRef: RefObject<HTMLButtonElement>;
 }
 
 const MenuContext = createContext<MenuContextValue | null>(null);

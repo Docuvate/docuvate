@@ -16,8 +16,8 @@ import { useAnchoredOverlay,type UseAnchoredOverlayOptions } from './useAnchored
 export interface PopoverProps extends UseAnchoredOverlayOptions {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  referenceRef: RefObject<HTMLElement | null>;
-  returnFocusRef?: RefObject<HTMLElement | null>;
+  referenceRef: RefObject<HTMLElement>;
+  returnFocusRef?: RefObject<HTMLElement>;
   portalLayer?: OverlayPortalLayer;
   className?: string;
   style?: CSSProperties;
