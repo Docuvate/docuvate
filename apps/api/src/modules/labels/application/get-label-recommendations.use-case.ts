@@ -18,6 +18,7 @@ import {
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
+import { formatDocumentDatePreview } from '../domain/format-document-date-preview.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
 import { type LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
 import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
@@ -34,7 +35,6 @@ import {
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
-import { formatDocumentDatePreview } from '../domain/format-document-date-preview.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 
 function enrichWithSampleDocuments(
