@@ -83,6 +83,7 @@ export class GetLabelRecommendationsUseCase {
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    @Inject(LabelHybridModelCacheService)
     private readonly labelHybridCache: LabelHybridModelCacheService
   ) {}
 
