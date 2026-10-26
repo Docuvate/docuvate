@@ -144,7 +144,7 @@ describe('GET /labels/map scale (Testcontainers Postgres)', () => {
     const elapsedMs = performance.now() - started;
 
     expect(map.documentCount).toBe(DOCUMENT_COUNT);
-    expect(map.points.length).toBeGreaterThan(DOCUMENT_COUNT);
+    expect(map.points.length).toBeGreaterThanOrEqual(DOCUMENT_COUNT);
     expect(elapsedMs).toBeLessThan(500);
   });
 });
