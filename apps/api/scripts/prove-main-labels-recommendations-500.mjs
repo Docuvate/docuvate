@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Proves main-line F11: legacy sample-document enrichment throws RangeError.
+ * Proves F11: pre-fix sample-document enrichment throws RangeError.
  * Run from apps/api: node scripts/prove-main-labels-recommendations-500.mjs
  */
-function legacyEnrich(items, docs) {
+function unfixedEnrich(items, docs) {
   return items.map((item) => {
     const ids = item.sampleDocumentIds ?? [];
     if (ids.length === 0) {
@@ -29,7 +29,7 @@ const docs = [{ id: 'd1', documentDate: new Date(Number.NaN) }];
 
 let message = '';
 try {
-  legacyEnrich(items, docs);
+  unfixedEnrich(items, docs);
 } catch (error) {
   message = error instanceof Error ? error.message : String(error);
 }
@@ -38,4 +38,4 @@ if (message !== 'Invalid time value') {
   console.error(`Expected "Invalid time value", got: ${message || '(no throw)'}`);
   process.exit(1);
 }
-console.log(`main-line GET /v1/labels/recommendations enrichment error: ${message}`);
+console.log(`GET /v1/labels/recommendations enrichment error (pre-fix): ${message}`);

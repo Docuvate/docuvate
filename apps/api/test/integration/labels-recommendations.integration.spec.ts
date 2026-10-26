@@ -36,7 +36,7 @@ async function getRecommendations(
  * Audit seed: 620 ready + 140 failed + 140 queued documents, 120 labels (~5 tags/doc),
  * mixed text/document dates, embeddings, no pre-trained hybrid model.
  * `patchInvalidDocumentDates` simulates truthy invalid `Date` values (main F11).
- * On `main`, legacy `documentDate.toISOString()` yields HTTP 500 / `RangeError: Invalid time value`.
+ * Before the F11 fix, `documentDate.toISOString()` yields HTTP 500 / `RangeError: Invalid time value`.
  */
 describe('GET /v1/labels/recommendations (Nest + Postgres audit seed)', () => {
   const pool = getIntegrationPool();

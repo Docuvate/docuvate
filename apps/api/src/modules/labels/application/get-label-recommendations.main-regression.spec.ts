@@ -12,8 +12,8 @@ import type { LabelHybridDocumentRow } from '../domain/label-hybrid-training.js'
 import { clusterDocumentSimilarities } from '../domain/label-recommendation-cluster-similarity.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 
-/** Sample preview enrichment as on `main` before formatDocumentDatePreview (F11). */
-function legacyEnrichWithSampleDocuments(
+/** Sample preview enrichment before formatDocumentDatePreview (F11). */
+function unfixedEnrichWithSampleDocuments(
   items: LabelRecommendationDto[],
   docs: DocumentEntity[],
   embeddingByDocumentId: ReadonlyMap<string, number[]>
@@ -50,8 +50,8 @@ function legacyEnrichWithSampleDocuments(
   });
 }
 
-describe('GET /labels/recommendations main-branch regressions (documented)', () => {
-  it('legacy enrichment throws RangeError: Invalid time value for invalid documentDate', () => {
+describe('GET /labels/recommendations pre-fix regressions (documented)', () => {
+  it('unfixed enrichment throws RangeError: Invalid time value for invalid documentDate', () => {
     const invalidDate = new Date('not-a-valid-date');
     expect(Number.isNaN(invalidDate.getTime())).toBe(true);
 
@@ -84,14 +84,14 @@ describe('GET /labels/recommendations main-branch regressions (documented)', () 
 
     let message = '';
     try {
-      legacyEnrichWithSampleDocuments(items, docs, new Map());
+      unfixedEnrichWithSampleDocuments(items, docs, new Map());
     } catch (error: unknown) {
       message = error instanceof Error ? error.message : String(error);
     }
     expect(message).toBe('Invalid time value');
   });
 
-  it('main resolveModel awaits in-flight hybrid training (blocking inference)', async () => {
+  it('resolveModel awaits in-flight hybrid training (blocking inference)', async () => {
     process.env['LABEL_HYBRID_TRAIN_DEBOUNCE_MS'] = '0';
     const stubModel: LabelHybridModel = {
       tagIds: ['a'],
