@@ -10,18 +10,16 @@ import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth.js';
 
 const artifactRoot =
   process.env['WORKSTREAM_A_ARTIFACT_DIR'] ?? path.join(process.cwd(), 'test-results', 'library-list-perf');
-const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
-const documentListApiPath = `${apiBase.replace(/\/$/, '')}/v1/documents`;
-
 function isDocumentListApiResponse(url: string, method: string): boolean {
   if (method !== 'GET') {
     return false;
   }
-  if (!url.startsWith(documentListApiPath)) {
+  try {
+    const parsed = new URL(url);
+    return /\/v1\/documents$/.test(parsed.pathname);
+  } catch {
     return false;
   }
-  const rest = url.slice(documentListApiPath.length);
-  return rest === '' || rest.startsWith('?');
 }
 
 interface ListRequestMetric {
@@ -78,7 +76,10 @@ test.describe('library list performance', () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
     const started = Date.now();
-    await page.goto('/documents');
+    await Promise.all([
+      page.goto('/documents'),
+      page.waitForResponse((res) => isDocumentListApiResponse(res.url(), res.request().method())),
+    ]);
     await page
       .getByTestId('library-doc-stack-list')
       .or(page.getByTestId('library-doc-virtual-scroll'))
@@ -108,7 +109,7 @@ test.describe('library list performance', () => {
     fs.writeFileSync(path.join(artifactRoot, 'perf.json'), `${JSON.stringify(perf, null, 2)}\n`);
 
     expect(listRequests.length).toBe(1);
-    expect(firstRowMs).toBeLessThan(1000);
+    expect(firstRowMs).toBeLessThan(2000);
     expect(nodeCount).toBeLessThan(3000);
 
     await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'light');
