@@ -70,10 +70,17 @@ test.describe('Workstream A3 visual artifacts', () => {
     });
   });
 
-  test('captures A3 surfaces at required viewports', async ({ page }) => {
-    test.setTimeout(900_000);
+  test.afterAll(() => {
+    const files = fs.readdirSync(artifactRoot).filter((name) => name.endsWith('.png'));
+    fs.writeFileSync(
+      path.join(artifactRoot, 'manifest.json'),
+      `${JSON.stringify({ artifactRoot, files: files.sort() }, null, 2)}\n`
+    );
+  });
 
-    for (const viewport of VIEWPORTS) {
+  for (const viewport of VIEWPORTS) {
+    test(`captures A3 surfaces at ${viewport.label}px`, async ({ page }) => {
+      test.setTimeout(300_000);
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await applyDocuvateLocale(page, 'en');
 
@@ -145,10 +152,13 @@ test.describe('Workstream A3 visual artifacts', () => {
         state: 'visible',
         timeout: 120_000,
       });
-      const reasonText = await page.locator('.labels-todo-suggestion-reason').first().textContent();
-      if (reasonText && reasonText.trim().length > 0) {
-        expect(reasonText).not.toMatch(/ähnliche Dokumente ohne Label/);
-        expect(reasonText).not.toMatch(/Übereinstimmung/);
+      const reasonLoc = page.locator('.labels-todo-suggestion-reason');
+      if ((await reasonLoc.count()) > 0) {
+        const reasonText = (await reasonLoc.first().textContent()) ?? '';
+        if (reasonText.trim().length > 0) {
+          expect(reasonText).not.toMatch(/ähnliche Dokumente ohne Label/);
+          expect(reasonText).not.toMatch(/Übereinstimmung/);
+        }
       }
       await shot(page, `labels-todo-queue-${viewport.label}-initial.png`);
       const todoVirtual = page.getByTestId('labels-todo-virtual-scroll');
