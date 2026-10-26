@@ -94,6 +94,29 @@ async function waitForDocumentReady(
     .toBe('ready');
 }
 
+async function createTagForFixture(
+  request: import('@playwright/test').APIRequestContext,
+  baseName: string
+): Promise<string> {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const name =
+      attempt === 0 ? baseName : `${baseName.slice(0, 220)}-${randomUUID().slice(0, 8)}`;
+    const response = await request.post(`${apiBase}/v1/tags`, {
+      headers: { origin: webOrigin },
+      data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
+    });
+    if (response.ok()) {
+      const body = (await response.json()) as { id: string };
+      return body.id;
+    }
+    if (![400, 409, 422].includes(response.status())) {
+      const detail = await response.text();
+      expect(response.ok(), `create tag failed status=${response.status()} body=${detail}`).toBeTruthy();
+    }
+  }
+  throw new Error(`create tag failed after retries: ${baseName}`);
+}
+
 async function provisionLongLabelRowFixture(
   request: import('@playwright/test').APIRequestContext
 ): Promise<string> {
@@ -102,13 +125,7 @@ async function provisionLongLabelRowFixture(
   const runToken = randomUUID().slice(0, 8);
   for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
     const name = `ws-b-lang-${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
-    const response = await request.post(`${apiBase}/v1/tags`, {
-      headers: { origin: webOrigin },
-      data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
-    });
-    expect(response.ok()).toBeTruthy();
-    const body = (await response.json()) as { id: string };
-    tagIds.push(body.id);
+    tagIds.push(await createTagForFixture(request, name));
   }
 
   const uploadName = `ws-b-ellipsis-fixture-${runToken}.pdf`;
