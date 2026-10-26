@@ -62,7 +62,7 @@ a.btn:hover {
 }
 
 .spinner-onPrimary {
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: color-mix(in srgb, var(--dv-color-on-accent) 35%, transparent);
   border-top-color: var(--dv-color-on-accent);
 }
 
@@ -233,13 +233,13 @@ a.btn:hover {
 }
 
 .badge-failed {
-  color: var(--dv-color-danger);
+  color: var(--dv-color-danger-strong);
   background: var(--dv-color-danger-soft);
 }
 
 .badge-extracting,
 .badge-queued {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .chip {

@@ -278,6 +278,12 @@
   text-align: center;
 }
 
+.auth-footer-link a,
+.auth-forgot-link a {
+  color: var(--dv-color-accent-text);
+  font-weight: var(--dv-font-weight-medium);
+}
+
 .auth-readonly-field {
   display: flex;
   align-items: center;
@@ -1235,7 +1241,7 @@ mark.global-search-mark {
 
 .sidebar-link.active {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
 }
 
@@ -1362,7 +1368,7 @@ mark.global-search-mark {
 
 .sidebar-tree-link.active {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
 }
 
@@ -1589,7 +1595,7 @@ mark.global-search-mark {
 .sidebar-label-chip:hover,
 .sidebar-label-chip.active {
   border-color: var(--dv-color-accent);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   background: var(--dv-color-accent-soft);
 }
 
@@ -1778,7 +1784,7 @@ mark.global-search-mark {
 }
 
 .error {
-  color: var(--dv-color-danger);
+  color: var(--dv-color-error-text);
 }
 
 .stack {
@@ -1888,11 +1894,6 @@ mark.global-search-mark {
   --detail-pad: var(--dv-space-sm);
   --detail-gap: var(--dv-space-sm);
   --document-detail-chrome: 13.5rem;
-  /* c1 Zinnober accent on warm stone (docs/assets/logo/brand-colors.json) */
-  --dv-color-accent: oklch(52% 0.19 38deg);
-  --dv-color-accent-hover: oklch(46% 0.19 38deg);
-  --dv-color-accent-soft: oklch(94% 0.022 85deg);
-  --dv-color-focus: oklch(52% 0.19 38deg);
   max-width: 1600px;
   padding: var(--detail-pad) var(--dv-space-md);
   padding-inline: max(var(--dv-space-md), var(--dv-space-sm));
@@ -1902,13 +1903,6 @@ mark.global-search-mark {
   flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
-}
-
-html[data-docuvate-theme='dark'] .document-detail-page {
-  --dv-color-accent: oklch(68% 0.16 38deg);
-  --dv-color-accent-hover: oklch(52% 0.19 38deg);
-  --dv-color-accent-soft: oklch(26% 0.018 75deg);
-  --dv-color-focus: oklch(68% 0.16 38deg);
 }
 
 .document-detail-page .card {
@@ -4926,7 +4920,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 
 .segmented-control--shell .segmented-control__option--selected {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
   box-shadow: none;
 }
@@ -4949,7 +4943,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 
 .segmented-control__option--selected {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
 }
 
@@ -4959,7 +4953,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 }
 
 .segmented-control__option:focus-visible {
-  outline: 2px solid var(--dv-color-accent, var(--dv-color-accent));
+  outline: 2px solid var(--dv-color-focus);
   outline-offset: -2px;
   z-index: 1;
 }
@@ -4991,7 +4985,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
 
 .segmented-control--preference.segmented-control--shell .segmented-control__option--selected {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: 600;
 }
 
@@ -5022,7 +5016,7 @@ html[data-docuvate-theme='dark'] .document-detail-page {
   .segmented-control--preference.segmented-control--shell
   .segmented-control__option--selected {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .segmented-control--toolbar.segmented-control--shell .segmented-control__option {
@@ -9063,8 +9057,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .pdf-viewer-toolbar {
   flex-shrink: 0;
   padding: var(--dv-space-2xs) var(--dv-space-xs);
-  background: rgb(15 23 42 / 35%);
-  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  background: var(--dv-color-pdf-chrome);
+  border-bottom: 1px solid var(--dv-color-pdf-chrome-border);
 }
 
 .pdf-viewer-pager {
@@ -9075,7 +9069,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .pdf-viewer-pager-btn {
-  color: rgb(255 255 255 / 92%) !important;
+  color: var(--dv-color-pdf-chrome-text) !important;
   min-width: 2rem;
   padding: var(--dv-space-2xs) !important;
 }
@@ -9090,7 +9084,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .pdf-viewer-meta {
   font-size: 0.78rem;
-  color: rgb(255 255 255 / 78%);
+  color: var(--dv-color-pdf-chrome-text-muted);
 }
 
 .pdf-viewer-error {
@@ -12878,8 +12872,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .settings-tab--active {
-  color: var(--dv-color-text);
-  box-shadow: inset 0 -2px 0 var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
+  box-shadow: inset 0 -2px 0 var(--dv-color-accent-text);
 }
 
 .settings-subpage-header {
