@@ -11,6 +11,7 @@ import {
 } from '../domain/label-hybrid-retrain-policy.js';
 import { computeLabelHybridTrainingRevision } from '../domain/label-hybrid-revision.js';
 import type { LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
+import { trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
 import {
   labelHybridRetrainMinIntervalMs,
   labelHybridTrainBudgetMs,
@@ -160,13 +161,25 @@ export class LabelHybridModelCacheService {
     rows: readonly LabelHybridDocumentRow[],
     revision: string
   ): void {
+    const sameRevision = entry.pendingRevision === revision;
     entry.pendingRows = [...rows];
     entry.pendingRevision = revision;
+
     if (entry.trainingPromise) {
       return;
     }
+
+    if (sameRevision && (entry.debounceTimer !== null || entry.intervalTimer !== null)) {
+      return;
+    }
+
+    if (sameRevision && entry.revision === revision) {
+      return;
+    }
+
     if (entry.debounceTimer) {
       clearTimeout(entry.debounceTimer);
+      entry.debounceTimer = null;
     }
     entry.debounceTimer = setTimeout(() => {
       entry.debounceTimer = null;
@@ -257,6 +270,25 @@ export class LabelHybridModelCacheService {
       .catch((error: unknown) => {
         entry.trainingPromise = null;
         if (error instanceof LabelHybridTrainBudgetExceededError) {
+          const fallbackRows = entry.pendingRows ?? rows;
+          const fallback =
+            entry.model ??
+            trainUserLabelHybridModel(fallbackRows, {
+              fastCalibration: true,
+              shouldAbort: () => false,
+            });
+          if (fallback) {
+            this.logger.warn(
+              `Label hybrid training budget exceeded for user ${userId}; serving capped fast model`
+            );
+            entry.lastTrainedAtMs = Date.now();
+            entry.revision = revision;
+            entry.model = fallback;
+            entry.retrainBaseline = baselineFromTrainedRows(fallbackRows);
+            entry.pendingRows = null;
+            entry.pendingRevision = null;
+            return fallback;
+          }
           this.logger.warn(
             `Label hybrid training budget exceeded for user ${userId}; keeping previous model`
           );

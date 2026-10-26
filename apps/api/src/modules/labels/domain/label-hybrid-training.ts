@@ -8,6 +8,13 @@ import {
   predictLabelHybrid,
   trainLabelHybridModel,
 } from './label-hybrid-auto-match.js';
+import type { LabelHybridTrainRuntimeOptions } from './label-hybrid-training-config.js';
+import {
+  capLabelHybridTrainingExamples,
+  sampleRowsForVocabulary,
+  trimLabelHybridDocumentRows,
+} from './label-hybrid-training-corpus.js';
+
 
 export interface LabelHybridDocumentRow {
   documentId: string;
@@ -36,13 +43,17 @@ export function buildLabelHybridTrainingExamples(
 }
 
 export function trainUserLabelHybridModel(
-  rows: readonly LabelHybridDocumentRow[]
+  rows: readonly LabelHybridDocumentRow[],
+  options?: LabelHybridTrainRuntimeOptions
 ): LabelHybridModel | null {
-  const examples = buildLabelHybridTrainingExamples(rows);
-  if (!canTrainLabelHybridModel(examples)) {
+  const trimmedRows = trimLabelHybridDocumentRows(rows);
+  const examples = buildLabelHybridTrainingExamples(trimmedRows);
+  const capped = capLabelHybridTrainingExamples(examples);
+  if (!canTrainLabelHybridModel(capped)) {
     return null;
   }
-  return trainLabelHybridModel(examples);
+  const vocabRows = sampleRowsForVocabulary(trimmedRows).map((row) => ({ text: row.text }));
+  return trainLabelHybridModel(capped, vocabRows, options);
 }
 
 export function classifyWithLabelHybrid(

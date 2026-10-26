@@ -7,6 +7,7 @@ import { trainUserLabelHybridModel } from '../domain/label-hybrid-training.js';
 
 interface LabelHybridTrainWorkerData {
   rows: LabelHybridDocumentRow[];
+  budgetMs: number;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -19,9 +20,14 @@ function parseWorkerData(value: unknown): LabelHybridTrainWorkerData {
   }
   const entries = Object.entries(value);
   const rowsEntry = entries.find(([key]) => key === 'rows');
+  const budgetEntry = entries.find(([key]) => key === 'budgetMs');
   if (!rowsEntry || !Array.isArray(rowsEntry[1])) {
     throw new Error('label hybrid train worker: missing rows');
   }
+  const budgetMs =
+    typeof budgetEntry?.[1] === 'number' && Number.isFinite(budgetEntry[1])
+      ? Math.max(0, Math.floor(budgetEntry[1]))
+      : 0;
   const rows: LabelHybridDocumentRow[] = [];
   for (const raw of rowsEntry[1]) {
     if (!isRecord(raw)) {
@@ -42,9 +48,16 @@ function parseWorkerData(value: unknown): LabelHybridTrainWorkerData {
     const nonInboxTagIds = tagIdsRaw.filter((v): v is string => typeof v === 'string');
     rows.push({ documentId, text, embedding, nonInboxTagIds });
   }
-  return { rows };
+  return { rows, budgetMs };
 }
 
 const payload = parseWorkerData(workerData);
-const model = trainUserLabelHybridModel(payload.rows);
+const started = performance.now();
+const shouldAbort = (): boolean => {
+  if (payload.budgetMs <= 0) {
+    return false;
+  }
+  return performance.now() - started >= payload.budgetMs;
+};
+const model = trainUserLabelHybridModel(payload.rows, { shouldAbort });
 parentPort?.postMessage(model);

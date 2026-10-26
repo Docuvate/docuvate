@@ -28,32 +28,6 @@ export interface LabelHybridTrainer {
   ): Promise<LabelHybridModel | null>;
 }
 
-function withTrainBudget<T>(budgetMs: number, task: () => Promise<T>): Promise<T> {
-  if (budgetMs <= 0) {
-    return task();
-  }
-  return new Promise<T>((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new LabelHybridTrainBudgetExceededError(budgetMs));
-    }, budgetMs);
-    task()
-      .then(
-        (value) => {
-          clearTimeout(timer);
-          resolve(value);
-        },
-        (error: unknown) => {
-          clearTimeout(timer);
-          reject(error instanceof Error ? error : new Error(String(error)));
-        }
-      )
-      .catch((error: unknown) => {
-        clearTimeout(timer);
-        reject(error instanceof Error ? error : new Error(String(error)));
-      });
-  });
-}
-
 const WORKER_RESOURCE_LIMITS = {
   maxOldGenerationSizeMb: 256,
   maxYoungGenerationSizeMb: 32,
@@ -70,7 +44,7 @@ export function trainInWorkerThread(
         let settled = false;
         let budgetTimer: ReturnType<typeof setTimeout> | null = null;
         const worker = new Worker(resolved.filename, {
-          workerData: { rows: [...rows] },
+          workerData: { rows: [...rows], budgetMs },
           execArgv: resolved.execArgv,
           resourceLimits: WORKER_RESOURCE_LIMITS,
         });
@@ -86,12 +60,13 @@ export function trainInWorkerThread(
           handler();
         };
         if (budgetMs > 0) {
+          const hardStopMs = budgetMs + Math.min(15_000, Math.floor(budgetMs * 0.25));
           budgetTimer = setTimeout(() => {
             void worker.terminate();
             finish(() => {
               reject(new LabelHybridTrainBudgetExceededError(budgetMs));
             });
-          }, budgetMs);
+          }, hardStopMs);
         }
         worker.once('message', (message: LabelHybridModel | null) => {
           finish(() => {
@@ -129,8 +104,13 @@ export class InlineLabelHybridTrainer implements LabelHybridTrainer {
     rows: readonly LabelHybridDocumentRow[],
     context: { userId: string; revision: string; exampleCount: number; budgetMs: number }
   ): Promise<LabelHybridModel | null> {
-    return withTrainBudget(context.budgetMs, () =>
-      Promise.resolve(trainUserLabelHybridModel(rows))
-    );
+    const started = performance.now();
+    const shouldAbort = (): boolean => {
+      if (context.budgetMs <= 0) {
+        return false;
+      }
+      return performance.now() - started >= context.budgetMs;
+    };
+    return Promise.resolve(trainUserLabelHybridModel(rows, { shouldAbort }));
   }
 }

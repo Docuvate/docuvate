@@ -4,6 +4,7 @@ import { cosineSimilarity } from './cosine.js';
 import {
   LABEL_HYBRID_K_FOLD_COUNT,
   LABEL_HYBRID_LOO_MAX_EXAMPLES,
+  labelHybridMaxCalibrationExamples,
 } from './label-hybrid-training-config.js';
 
 const MIN_CLASS_EXAMPLES = 2;
@@ -444,6 +445,21 @@ export function learnConfidenceThresholdKFold(
   return thresholdFromLooScores(scores);
 }
 
+function samplePreparedForCalibration(
+  prepared: readonly PreparedTrainingExamplePayload[],
+  maxExamples: number
+): PreparedTrainingExamplePayload[] {
+  if (prepared.length <= maxExamples) {
+    return [...prepared];
+  }
+  const stride = Math.ceil(prepared.length / maxExamples);
+  const sampled: PreparedTrainingExamplePayload[] = [];
+  for (let index = 0; index < prepared.length && sampled.length < maxExamples; index += stride) {
+    sampled.push(prepared[index]);
+  }
+  return sampled;
+}
+
 export function learnConfidenceThresholdFromPrepared(
   tagIds: readonly string[],
   prepared: readonly {
@@ -457,8 +473,12 @@ export function learnConfidenceThresholdFromPrepared(
   if (payload.length === 0) {
     return 0.92;
   }
-  if (payload.length <= LABEL_HYBRID_LOO_MAX_EXAMPLES) {
-    return learnConfidenceThresholdLoo(tagIds, payload);
+  const calibrationSet = samplePreparedForCalibration(
+    payload,
+    labelHybridMaxCalibrationExamples()
+  );
+  if (calibrationSet.length <= LABEL_HYBRID_LOO_MAX_EXAMPLES) {
+    return learnConfidenceThresholdLoo(tagIds, calibrationSet);
   }
-  return learnConfidenceThresholdKFold(tagIds, payload, LABEL_HYBRID_K_FOLD_COUNT);
+  return learnConfidenceThresholdKFold(tagIds, calibrationSet, LABEL_HYBRID_K_FOLD_COUNT);
 }

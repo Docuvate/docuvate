@@ -50,6 +50,52 @@ export function labelHybridTrainBudgetMs(): number {
   return parsePositiveIntEnv('DOCUVATE_LABEL_HYBRID_TRAIN_BUDGET_MS', 120_000);
 }
 
+/** Max labeled examples per tag used for hybrid training (stratified cap). */
+export function labelHybridMaxExamplesPerTag(): number {
+  return parsePositiveIntEnv('DOCUVATE_LABEL_HYBRID_MAX_EXAMPLES_PER_TAG', 40);
+}
+
+/** Max total labeled examples per training run. */
+export function labelHybridMaxTrainingExamples(): number {
+  return parsePositiveIntEnv('DOCUVATE_LABEL_HYBRID_MAX_TRAINING_EXAMPLES', 2_400);
+}
+
+/** Max distinct documents used to build TF-IDF vocabulary per train. */
+export function labelHybridMaxVocabDocuments(): number {
+  return parsePositiveIntEnv('DOCUVATE_LABEL_HYBRID_MAX_VOCAB_DOCUMENTS', 400);
+}
+
+/** Characters of document text fed into hybrid TF-IDF features. */
+export function labelHybridTextCharsForFeatures(): number {
+  return parsePositiveIntEnv('DOCUVATE_LABEL_HYBRID_TEXT_CHARS', 2_048);
+}
+
+/** Training epochs for large corpora (full 48 below this example count). */
+export function labelHybridTrainEpochsForExampleCount(exampleCount: number): number {
+  if (exampleCount <= 96) {
+    return 48;
+  }
+  if (exampleCount <= 480) {
+    return 24;
+  }
+  if (exampleCount <= 1_200) {
+    return 12;
+  }
+  return 8;
+}
+
+/** Max prepared rows used for confidence calibration (subset of training set). */
+export function labelHybridMaxCalibrationExamples(): number {
+  return parsePositiveIntEnv('DOCUVATE_LABEL_HYBRID_MAX_CALIBRATION_EXAMPLES', 72);
+}
+
+export const LABEL_HYBRID_FAST_DEFAULT_THRESHOLD = 0.88;
+
+export interface LabelHybridTrainRuntimeOptions {
+  shouldAbort?: () => boolean;
+  fastCalibration?: boolean;
+}
+
 /** Use exact leave-one-out calibration only up to this many training examples. */
 export const LABEL_HYBRID_LOO_MAX_EXAMPLES = 72;
 
