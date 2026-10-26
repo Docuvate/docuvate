@@ -173,7 +173,8 @@ jobs:
           node e2e/scripts/provision-smoke-storage.mjs
           node scripts/seed-library-perf-fixture.mjs
           E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
-            pnpm --filter @docuvate/e2e exec playwright test workstream-a3-list-perf
+            pnpm --filter @docuvate/e2e exec playwright test workstream-a3-list-perf \
+            --config=playwright.workstream-a3.config.ts
       - name: Verify contrast screenshot artifact
         run: |
           set -euo pipefail
