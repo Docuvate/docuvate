@@ -893,7 +893,7 @@
     "selectionFieldCreateOption": "Create field “{{name}}”",
     "selectionAccept": "Create field",
     "fieldCorrectionSaved": "Correction saved · {{name}}",
-    "fieldRegionEmptyHint": "No text in this region – saved as an image area",
+    "fieldRegionEmptyHint": "No text in this region - saved as an image area",
     "fieldCorrectionSheetTitle": "Correct {{name}}",
     "fieldValueInputLabel": "Field value",
     "fieldValueInputAria": "Value for {{name}}",

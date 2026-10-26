@@ -92,7 +92,7 @@ export async function uploadLayoutTableDocument(
         file: {
           name: `delivery-note-table-${token}.pdf`,
           mimeType: 'application/pdf',
-          buffer: deliveryNoteTablePdf(token),
+          buffer: await deliveryNoteTablePdf(token),
         },
       },
     });

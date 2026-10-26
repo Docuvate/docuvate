@@ -12,7 +12,7 @@ test.use({ storageState: smokeFixtureStoragePath() });
 test.describe('document detail layout tables', () => {
   test('tables tab renders grid and highlights table overlay in the viewer', async ({ page, request }) => {
     test.setTimeout(360_000);
-    const pdfPath = deliveryNoteTablePdfPath();
+    const pdfPath = await deliveryNoteTablePdfPath();
     const upload = await request.post(`${apiBase}/v1/documents`, {
       headers: { origin: webOrigin },
       multipart: {

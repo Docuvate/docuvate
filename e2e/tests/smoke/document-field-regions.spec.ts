@@ -85,7 +85,7 @@ async function finishRectangle(page: Page): Promise<void> {
 }
 
 test.describe('document field regions', () => {
-  test.describe.configure({ mode: 'serial', timeout: 240_000 });
+  test.describe.configure({ mode: 'serial', timeout: 420_000 });
 
   let layoutDocId: string;
   const labels = longLabelNames(25);

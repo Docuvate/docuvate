@@ -893,7 +893,7 @@
     "selectionFieldCreateOption": "Feld „{{name}}“ anlegen",
     "selectionAccept": "Feld anlegen",
     "fieldCorrectionSaved": "Korrektur gespeichert · {{name}}",
-    "fieldRegionEmptyHint": "Kein Text im Bereich – als Bildbereich gespeichert",
+    "fieldRegionEmptyHint": "Kein Text im Bereich - als Bildbereich gespeichert",
     "fieldCorrectionSheetTitle": "{{name}} korrigieren",
     "fieldValueInputLabel": "Feldwert",
     "fieldValueInputAria": "Wert für {{name}}",
