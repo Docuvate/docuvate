@@ -6,7 +6,7 @@ import { join } from 'node:path';
 
 import { expect, type Locator, type Page, type TestInfo } from '@playwright/test';
 
-const CONTAINERS = ['.document-detail-page', '.layout-side-panel', '.label-panel'];
+const CONTAINERS = ['.document-detail-page', '.layout-side-panel', '.label-panel', '.label-chip-row'];
 const DEFAULT_CURSOR_SCREENSHOTS = '/opt/cursor/artifacts/screenshots';
 
 interface OverflowHit {
@@ -146,7 +146,9 @@ export async function assertNoHorizontalOverflow(page: Page): Promise<void> {
 export async function assertNoClippedOrOverlappingChips(page: Page): Promise<void> {
   const issues = await page.evaluate(() => {
     const out: ChipBoxIssue[] = [];
-    const row = document.querySelector('.overflow-chip-list');
+    const row =
+      document.querySelector('.label-chip-row-visible') ??
+      document.querySelector('.overflow-chip-list');
     if (!(row instanceof HTMLElement)) {
       return out;
     }
@@ -200,7 +202,9 @@ export async function assertNoClippedOrOverlappingChips(page: Page): Promise<voi
 
 export async function assertLongLabelChipsTruncateWithTooltip(page: Page): Promise<void> {
   const chips = await page.evaluate(() => {
-    const nodes = document.querySelectorAll('.overflow-chip-list > .chip-label-truncate');
+    const nodes = document.querySelectorAll(
+      '.label-chip-row-visible .chip-label-truncate, .overflow-chip-list > .chip-label-truncate'
+    );
     const result: ChipTooltipState[] = [];
     nodes.forEach((node) => {
       if (!(node instanceof HTMLElement)) {

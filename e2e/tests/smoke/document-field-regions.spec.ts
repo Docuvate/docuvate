@@ -133,7 +133,7 @@ test.describe('document field regions', () => {
         }
 
         await setLabelsTabOpen(page, true);
-        const more = page.locator('.overflow-chip-more');
+        const more = page.locator('.label-chip-row-overflow-btn, .overflow-chip-more');
         await expect(more).toBeVisible({ timeout: 60_000 });
         await expect(more).toHaveText(/\+\d+/);
         await assertLongLabelChipsTruncateWithTooltip(page);
@@ -141,14 +141,15 @@ test.describe('document field regions', () => {
         await assertNoHorizontalOverflow(page);
         if (scheme === 'light') {
           await more.click();
-          await expect(page.locator('.overflow-chip-popover')).toBeVisible();
+          const popover = page.locator('.label-chip-row-overflow-popover, .overflow-chip-popover');
+          await expect(popover).toBeVisible();
           await captureLoadedScreenshot(
             page.locator('.document-detail-page'),
             testInfo,
             `field-regions-long-labels-${viewport.name}-${scheme}.png`
           );
           await page.keyboard.press('Escape');
-          await expect(page.locator('.overflow-chip-popover')).toHaveCount(0);
+          await expect(popover).toHaveCount(0);
         }
       }
     }
