@@ -342,6 +342,13 @@ export type DocumentExtractionSummaryDto = {
     }>;
 };
 
+export type DocumentListLibraryUiDto = {
+    /**
+     * When false, hide per-document owner lines in the library (single-user installs).
+     */
+    showDocumentOwnerLine: boolean;
+};
+
 export type DocumentListResponseDto = {
     nextCursor: string;
     hasMore: boolean;
@@ -349,6 +356,7 @@ export type DocumentListResponseDto = {
      * Total matching documents when `cursor` was omitted.
      */
     total: number;
+    libraryUi?: DocumentListLibraryUiDto;
     items: Array<{
         [key: string]: unknown;
     }>;

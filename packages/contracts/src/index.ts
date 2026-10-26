@@ -691,6 +691,13 @@ export interface DocumentDto {
   extraction?: DocumentExtractionDto;
   /** Per catalog field: latest extraction attempt for this document (tenant-scoped). */
   recognizedFieldAttempts?: RecognizedFieldExtractionAttemptDto[];
+  /** Absender / owner preview for library rows (from indexed field values). */
+  ownerLine?: string | null;
+}
+
+export interface DocumentListLibraryUiDto {
+  /** When false, hide per-document owner lines in the library table (single-user installs). */
+  showDocumentOwnerLine: boolean;
 }
 
 export interface UpdateDocumentRequest {
@@ -1025,6 +1032,7 @@ export interface DocumentListResponseDto {
   hasMore: boolean;
   /** Total rows for the current filter set; present on the first page when no `cursor` was sent. */
   total: number | null;
+  libraryUi?: DocumentListLibraryUiDto;
 }
 
 export type ExtractorEngineId = 'pipeline' | 'paddle' | 'docling' | 'pdf_native' | 'tesseract';

@@ -62,6 +62,7 @@ import { FailedDocumentExtractionReconcileService } from './infrastructure/faile
 import { HeuristicFieldSuggestionsBackfillService } from './infrastructure/heuristic-field-suggestions-backfill.service.js';
 import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
 import { PgInstallationUserCountReader } from './infrastructure/pg-installation-user-count.reader.js';
+import { PgInstallationUserCountReader } from './infrastructure/pg-installation-user-count.reader.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';
 import { DocumentsController } from './presentation/documents.controller.js';
 import { ReviewQueueController } from './presentation/review-queue.controller.js';
@@ -96,6 +97,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     UploadDocumentUseCase,
     GetDocumentUseCase,
     ListDocumentsUseCase,
+    PgInstallationUserCountReader,
     BatchDocumentTagSuggestionsUseCase,
     UpdateDocumentUseCase,
     DeleteDocumentUseCase,

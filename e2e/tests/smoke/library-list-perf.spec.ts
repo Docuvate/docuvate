@@ -108,7 +108,7 @@ async function assertLabelChipsContainedInCells(page: import('@playwright/test')
         continue;
       }
       const cellRect = cell.getBoundingClientRect();
-      const chips = cell.querySelectorAll('.chip');
+      const chips = cell.querySelectorAll('.document-labels-cell-row .chip');
       for (let j = 0; j < chips.length; j += 1) {
         const chip = chips.item(j);
         if (!(chip instanceof HTMLElement)) {
@@ -173,6 +173,77 @@ async function assertStatusColumnAlignment(page: import('@playwright/test').Page
   }
 }
 
+async function assertVirtualRowContentLayout(page: import('@playwright/test').Page): Promise<void> {
+  const issue = await page.evaluate(() => {
+    const rows = document.querySelectorAll('.library-table-virtual-body tr.library-table-virtual-row');
+    const limit = Math.min(25, rows.length);
+    for (let i = 0; i < limit; i += 1) {
+      const row = rows.item(i);
+      if (!(row instanceof HTMLElement)) {
+        continue;
+      }
+      const rowRect = row.getBoundingClientRect();
+      const titleCell = row.querySelector('td.library-col-title');
+      if (!(titleCell instanceof HTMLElement)) {
+        continue;
+      }
+      const titleParts = titleCell.querySelectorAll(
+        '.cell-title-text, .cell-sub, .library-title-owner-line'
+      );
+      let contentBottom = rowRect.top;
+      for (let p = 0; p < titleParts.length; p += 1) {
+        const part = titleParts.item(p);
+        if (!(part instanceof HTMLElement)) {
+          continue;
+        }
+        const partRect = part.getBoundingClientRect();
+        if (partRect.height > 0) {
+          contentBottom = Math.max(contentBottom, partRect.bottom);
+        }
+      }
+      if (contentBottom > rowRect.bottom + 1.5) {
+        return `row-${String(i)}-content-overflow`;
+      }
+
+      const dateCell = row.querySelector('td.library-col-date');
+      const titleLink = titleCell.querySelector('.cell-title-text');
+      if (dateCell instanceof HTMLElement && titleLink instanceof HTMLElement) {
+        const dateTop = dateCell.getBoundingClientRect().top;
+        const titleTop = titleLink.getBoundingClientRect().top;
+        if (Math.abs(dateTop - titleTop) > 4) {
+          return `row-${String(i)}-date-misaligned`;
+        }
+      }
+
+      const labelsCell = row.querySelector('td.library-col-labels');
+      if (labelsCell instanceof HTMLElement) {
+        const cellRect = labelsCell.getBoundingClientRect();
+        const chips = labelsCell.querySelectorAll('.document-labels-cell-row > .chip');
+        for (let c = 0; c < chips.length; c += 1) {
+          const chip = chips.item(c);
+          if (!(chip instanceof HTMLElement)) {
+            continue;
+          }
+          const chipRect = chip.getBoundingClientRect();
+          if (chipRect.width < 2 || chipRect.height < 2) {
+            continue;
+          }
+          if (
+            chipRect.left < cellRect.left - 1 ||
+            chipRect.right > cellRect.right + 1 ||
+            chipRect.top < cellRect.top - 1 ||
+            chipRect.bottom > cellRect.bottom + 1
+          ) {
+            return `row-${String(i)}-chip-outside-cell`;
+          }
+        }
+      }
+    }
+    return null;
+  });
+  expect(issue).toBeNull();
+}
+
 async function assertDesktopTableLayout(page: import('@playwright/test').Page): Promise<void> {
   const scroll = page.getByTestId('library-doc-virtual-scroll');
   await expect(scroll).toBeVisible();
@@ -193,6 +264,28 @@ async function assertDesktopTableLayout(page: import('@playwright/test').Page): 
   expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.33);
 
   await assertLabelChipsContainedInCells(page);
+  await assertVirtualRowContentLayout(page);
+  await assertNoVisibleBinFilenames(page);
+}
+
+async function assertNoVisibleBinFilenames(page: import('@playwright/test').Page): Promise<void> {
+  const hasBin = await page.evaluate(() => {
+    const filenameLines = document.querySelectorAll(
+      '.library-col-title .cell-sub, .library-doc-stack-filename'
+    );
+    for (let i = 0; i < filenameLines.length; i += 1) {
+      const line = filenameLines.item(i);
+      if (!(line instanceof HTMLElement)) {
+        continue;
+      }
+      const text = line.textContent?.trim().toLowerCase() ?? '';
+      if (text.endsWith('.bin')) {
+        return true;
+      }
+    }
+    return false;
+  });
+  expect(hasBin).toBe(false);
 }
 
 async function assertMobileStackLayout(page: import('@playwright/test').Page): Promise<void> {

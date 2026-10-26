@@ -60,6 +60,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'ExtractionFieldConfirmations20261026130000',
   'DocumentExtractedTextHash20261026140000',
   'UserPreferencesFuzzyDuplicateDetection20261026150000',
+  'RepairBinDocumentFilenames20261026160000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -240,6 +241,8 @@ export async function migrationSchemaPresent(
       return columnExists(runner, 'documents', 'extracted_text_hash');
     case 'UserPreferencesFuzzyDuplicateDetection20261026150000':
       return columnExists(runner, 'user_preferences', 'fuzzy_duplicate_detection_enabled');
+    case 'RepairBinDocumentFilenames20261026160000':
+      return migrationSchemaPresent(runner, 'UserPreferencesFuzzyDuplicateDetection20261026150000');
     default:
       return false;
   }

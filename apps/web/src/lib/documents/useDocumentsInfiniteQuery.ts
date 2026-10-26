@@ -3,6 +3,7 @@
 import {
   DOCUMENT_LIST_DEFAULT_LIMIT,
   type DocumentDto,
+  type DocumentListLibraryUiDto,
   type DocumentListQuery,
 } from '@docuvate/contracts';
 import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ export interface DocumentsInfinitePage {
   nextCursor: string | null;
   hasMore: boolean;
   total: number | null;
+  libraryUi?: DocumentListLibraryUiDto;
 }
 
 export function useDocumentsInfiniteQuery(filters: DocumentListQuery | null) {

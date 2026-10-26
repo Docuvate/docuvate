@@ -13998,6 +13998,18 @@
           "fields"
         ]
       },
+      "DocumentListLibraryUiDto": {
+        "type": "object",
+        "properties": {
+          "showDocumentOwnerLine": {
+            "type": "boolean",
+            "description": "When false, hide per-document owner lines in the library (single-user installs)."
+          }
+        },
+        "required": [
+          "showDocumentOwnerLine"
+        ]
+      },
       "DocumentListResponseDto": {
         "type": "object",
         "properties": {
@@ -14012,6 +14024,9 @@
             "type": "number",
             "nullable": true,
             "description": "Total matching documents when `cursor` was omitted."
+          },
+          "libraryUi": {
+            "$ref": "#/components/schemas/DocumentListLibraryUiDto"
           },
           "items": {
             "type": "array",

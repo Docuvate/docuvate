@@ -71,6 +71,7 @@ export function createLibraryPageDataStub(
     groupedLabelBusy: false,
     acceptGroupedLabelSuggestion: () => Promise.resolve(),
     totalCount: null,
+    showDocumentOwnerLine: false,
     hasNextPage: false,
     fetchNextPage: stubFetchNextPage,
     isFetchingNextPage: false,

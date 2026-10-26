@@ -109,6 +109,7 @@ import { StreamDocumentChatMessageUseCase } from '../application/stream-document
 import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
 import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
 import { PgInstallationUserCountReader } from '../infrastructure/pg-installation-user-count.reader.js';
+import { PgInstallationUserCountReader } from '../infrastructure/pg-installation-user-count.reader.js';
 import { toDocumentBulkRequest, toDocumentDto, toDocumentListResponse } from './document.mapper.js';
 import { toDocumentChatMessageRecordDto, toDocumentChatThreadDto } from './document-chat.mapper.js';
 import { parseDocumentListQuery } from './document-list-query.js';
@@ -122,6 +123,7 @@ export class DocumentsController {
     private readonly uploadDocument: UploadDocumentUseCase,
     private readonly getDocument: GetDocumentUseCase,
     private readonly listDocuments: ListDocumentsUseCase,
+    private readonly installationUserCount: PgInstallationUserCountReader,
     private readonly batchDocumentTagSuggestions: BatchDocumentTagSuggestionsUseCase,
     private readonly updateDocument: UpdateDocumentUseCase,
     private readonly deleteDocument: DeleteDocumentUseCase,
@@ -184,8 +186,10 @@ export class DocumentsController {
   ): Promise<DocumentListResponseDto> {
     const filters = parseDocumentListQuery(query);
     const page = await this.listDocuments.execute(session.user.id, subject, filters);
+    const userCount = await this.installationUserCount.countActiveUsers();
+    const libraryUi = { showDocumentOwnerLine: userCount > 1 };
     if (!filters.includeTagSuggestions) {
-      return toDocumentListResponse(page);
+      return toDocumentListResponse(page, libraryUi);
     }
     const items = await Promise.all(
       page.items.map(async ({ entity, duplicateCandidateCount, duplicateStack }) => {
@@ -198,6 +202,7 @@ export class DocumentsController {
       nextCursor: page.nextCursor,
       hasMore: page.hasMore,
       total: page.total,
+      libraryUi,
     };
   }
 

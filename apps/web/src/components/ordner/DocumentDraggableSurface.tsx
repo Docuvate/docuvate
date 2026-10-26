@@ -7,12 +7,14 @@ import { useDocumentDraggable } from './DocumentFolderDnD';
 interface DocumentDraggableTableRowProps extends HTMLAttributes<HTMLTableRowElement> {
   documentId: string;
   dragEnabled?: boolean;
+  measureElementRef?: (element: HTMLTableRowElement | null) => void;
   children: ReactNode;
 }
 
 export function DocumentDraggableTableRow({
   documentId,
   dragEnabled,
+  measureElementRef,
   children,
   style,
   ...rest
@@ -20,9 +22,15 @@ export function DocumentDraggableTableRow({
   const drag = useDocumentDraggable({ documentId, disabled: !dragEnabled });
   const mergedStyle: CSSProperties | undefined =
     drag.style || style ? { ...style, ...drag.style } : undefined;
+  const setRowRef = (node: HTMLTableRowElement | null) => {
+    measureElementRef?.(node);
+    if (dragEnabled) {
+      drag.setNodeRef(node);
+    }
+  };
   return (
     <tr
-      ref={dragEnabled ? drag.setNodeRef : undefined}
+      ref={setRowRef}
       style={mergedStyle}
       {...(dragEnabled ? drag.listeners : {})}
       {...(dragEnabled ? drag.attributes : {})}

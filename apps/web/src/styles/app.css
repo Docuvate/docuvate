@@ -5749,12 +5749,12 @@ mark.global-search-mark {
 
 .library-table-wrap.library-table-virtual-with-folder .library-table-virtualized {
   --library-virtual-grid-cols:
-    2rem 2.5rem minmax(0, 1fr) 7.5rem 16rem 8.75rem 6.25rem 4.5rem;
+    2rem 2.5rem minmax(0, 1fr) 7.5rem minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
 }
 
 .library-table-wrap.library-table-virtual-no-folder .library-table-virtualized {
   --library-virtual-grid-cols:
-    2rem 2.5rem minmax(0, 1fr) 16rem 8.75rem 6.25rem 4.5rem;
+    2rem 2.5rem minmax(0, 1fr) minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
 }
 
 .library-doc-list-scroll.library-table-scroll {
@@ -5786,6 +5786,12 @@ mark.global-search-mark {
 
 .library-table.library-table-virtualized .library-table-virtual-row {
   left: 0;
+  align-items: start;
+}
+
+.library-table.library-table-virtualized .library-table-virtual-row > td.library-col-date,
+.library-table.library-table-virtualized .library-table-virtual-row > td.library-col-action {
+  padding-top: 0.35rem;
 }
 
 .library-table.library-table-virtualized .library-col-title {
@@ -8047,8 +8053,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .library-table-wrap {
   --library-table-date-col-min: 6.25rem;
-  --library-table-labels-col-min: 10rem;
-  --library-table-labels-col-max: 11.5rem;
+  --library-table-labels-col-min: 7rem;
+  --library-table-labels-col-max: 9rem;
   width: 100%;
   min-width: 0;
   overflow-x: auto;
@@ -8227,6 +8233,51 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   gap: var(--dv-space-2xs);
   min-width: 0;
   max-width: 100%;
+}
+
+.document-labels-visible-chip {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.document-labels-visible-chip--truncate {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.document-labels-visible-chip--truncate .chip {
+  max-width: 100%;
+}
+
+.document-labels-measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: var(--dv-space-2xs);
+  max-width: none;
+  width: max-content;
+  height: 0;
+  overflow: hidden;
+}
+
+.document-labels-cell {
+  position: relative;
+}
+
+.library-doc-stack-filename,
+.library-doc-stack-owner {
+  margin-top: var(--dv-space-2xs);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--dv-color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .document-labels-overflow-details {
@@ -8451,11 +8502,6 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
 .library-doc-stack-filename {
   margin-top: var(--dv-space-2xs);
-  font-size: 0.85rem;
-  line-height: 1.35;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 .library-doc-stack-meta {

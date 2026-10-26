@@ -50,6 +50,7 @@ import { buildPaperlessDryRunSummary } from './paperless-import.dry-run.js';
 import type { ConnectorImportRunRow } from './paperless-import.repository.js';
 import { PaperlessImportRepository } from './paperless-import.repository.js';
 import { resolvePaperlessImportFilename } from './paperless-import-filename.js';
+import { resolvePaperlessImportFilename } from './paperless-import-filename.js';
 import {
   encodePaperlessImportErrorMessageParams,
   PAPERLESS_IMPORT_MESSAGE_KEYS,
@@ -326,10 +327,13 @@ export class PaperlessImportExecutor {
     }
 
     const contentHash = createHash('sha256').update(fileBuffer).digest('hex');
-    const filename =
-      fullDoc.original_file_name?.trim() ??
-      `${fullDoc.title.trim() || String(doc.id)}.bin`;
     const mimeType = fullDoc.mime_type ?? 'application/octet-stream';
+    const filename = resolvePaperlessImportFilename({
+      id: fullDoc.id,
+      title: fullDoc.title,
+      original_file_name: fullDoc.original_file_name,
+      mime_type: mimeType,
+    });
     const notes = mergePaperlessNotes(fullDoc.notes);
     const tagIds = await this.resolveTagIds(run, fullDoc);
     const absenderName = await this.resolveAbsenderName(run, fullDoc.correspondent);
@@ -436,10 +440,16 @@ export class PaperlessImportExecutor {
       await this.buildCustomFields(run, fullDoc, customFieldById, run.userId),
       absenderName
     );
-    const filename =
-      fullDoc.original_file_name?.trim() ??
-      `${fullDoc.title.trim() || String(fullDoc.id)}.bin`;
+    const mimeType = fullDoc.mime_type ?? 'application/octet-stream';
+    const filename = resolvePaperlessImportFilename({
+      id: fullDoc.id,
+      title: fullDoc.title,
+      original_file_name: fullDoc.original_file_name,
+      mime_type: mimeType,
+    });
     await this.documents.updateForUser(documentId, run.userId, {
+      filename,
+      mimeType,
       title: fullDoc.title.trim() || filename,
       documentDate: fullDoc.created ? new Date(fullDoc.created) : null,
       notes,

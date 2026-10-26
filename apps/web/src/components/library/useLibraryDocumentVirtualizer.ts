@@ -22,6 +22,7 @@ export function useLibraryDocumentVirtualizer(options: LibraryDocumentVirtualize
     getScrollElement: () => parentRef.current,
     estimateSize: () => options.estimateSize,
     overscan: 14,
+    measureElement: (element) => element.getBoundingClientRect().height,
   });
 
   const scrollStorageKey = options.scrollStorageKey;

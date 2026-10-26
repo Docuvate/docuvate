@@ -196,6 +196,13 @@ export class UpdateDocumentRequestDto implements UpdateDocumentRequest {
   extractionBlocks?: ExtractionBlockDto[];
 }
 
+export class DocumentListLibraryUiDto {
+  @ApiProperty({
+    description: 'When false, hide per-document owner lines in the library (single-user installs).',
+  })
+  showDocumentOwnerLine!: boolean;
+}
+
 export class DocumentListResponseDto {
   items!: DocumentDto[];
 
@@ -207,6 +214,9 @@ export class DocumentListResponseDto {
 
   @ApiProperty({ nullable: true, description: 'Total matching documents when `cursor` was omitted.' })
   total!: number | null;
+
+  @ApiPropertyOptional({ type: DocumentListLibraryUiDto })
+  libraryUi?: DocumentListLibraryUiDto;
 }
 
 export class DocumentExtractionSummaryDto {
