@@ -372,7 +372,7 @@
 }
 
 .menu-item-danger {
-  color: var(--dv-color-danger);
+  color: var(--dv-color-danger-strong);
 }
 
 .menu-item:disabled {
@@ -394,7 +394,7 @@
   padding: 0.125rem var(--dv-space-xs);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   border: none;
