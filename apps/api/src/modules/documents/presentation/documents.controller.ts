@@ -7,7 +7,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  MethodNotAllowedException,
   Param,
   Patch,
   Post,
@@ -83,6 +82,7 @@ import { RecordExtractionArenaRatingUseCase } from '../../settings/application/s
 import { toTagSuggestionDto } from '../../taxonomy/presentation/taxonomy.mapper.js';
 import { ApplyArenaWinnerExtractionUseCase } from '../application/apply-arena-winner-extraction.use-case.js';
 import { BatchDocumentTagSuggestionsUseCase } from '../application/batch-document-tag-suggestions.use-case.js';
+import { throwTagSuggestionsGetNotAllowed } from './tag-suggestions-get-not-allowed.js';
 import { BulkDocumentsUseCase } from '../application/bulk-documents.use-case.js';
 import { CancelDocumentChatGenerationUseCase } from '../application/cancel-document-chat-generation.use-case.js';
 import { CompareDocumentExtractionUseCase } from '../application/compare-extraction.use-case.js';
@@ -207,8 +207,7 @@ export class DocumentsController {
     summary: 'Tag suggestions batch endpoint does not support GET',
   })
   tagSuggestionsGetNotAllowed(@Res({ passthrough: true }) reply: FastifyReply): never {
-    reply.header('Allow', 'POST');
-    throw new MethodNotAllowedException();
+    return throwTagSuggestionsGetNotAllowed(reply);
   }
 
   @Post('tag-suggestions')

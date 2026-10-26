@@ -59,7 +59,6 @@ import type {
   LabelRecommendationBlocklistEntryDto,
   LabelRecommendationBlocklistPatternDto,
   LabelRecommendationBlocklistResponse,
-  LabelRecommendationDto,
   LabelRecommendationListResponse,
   LayoutIrDocument,
   MoveDocumentsRequest,

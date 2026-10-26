@@ -8,7 +8,7 @@ describe('runWithRequestDeadline', () => {
   it('returns the handler result when it finishes before the deadline', async () => {
     const result = await runWithRequestDeadline(
       200,
-      async () => ({ items: [], state: 'ready' as const }),
+      () => Promise.resolve({ items: [], state: 'ready' as const }),
       () => ({ items: [], state: 'warming' as const })
     );
     expect(result.state).toBe('ready');

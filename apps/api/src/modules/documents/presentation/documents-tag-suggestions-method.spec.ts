@@ -3,17 +3,12 @@
 import { MethodNotAllowedException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 
-import { DocumentsController } from './documents.controller.js';
+import { throwTagSuggestionsGetNotAllowed } from './tag-suggestions-get-not-allowed.js';
 
-describe('DocumentsController tag-suggestions HTTP methods', () => {
+describe('tag-suggestions GET method guard', () => {
   it('rejects GET with 405 and Allow POST', () => {
-    const reply = { header: vi.fn() };
-    expect(() =>
-      DocumentsController.prototype.tagSuggestionsGetNotAllowed.call(
-        {},
-        reply as { header: (name: string, value: string) => void }
-      )
-    ).toThrow(MethodNotAllowedException);
-    expect(reply.header).toHaveBeenCalledWith('Allow', 'POST');
+    const header = vi.fn<(name: string, value: string) => void>();
+    expect(() => throwTagSuggestionsGetNotAllowed({ header })).toThrow(MethodNotAllowedException);
+    expect(header).toHaveBeenCalledWith('Allow', 'POST');
   });
 });

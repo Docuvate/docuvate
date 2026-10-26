@@ -107,7 +107,7 @@ export class LabelHybridModelCacheService {
     return staleModel;
   }
 
-  async resolveModel(
+  resolveModel(
     userId: string,
     rows: readonly LabelHybridDocumentRow[]
   ): Promise<LabelHybridModel | null> {
@@ -116,17 +116,17 @@ export class LabelHybridModelCacheService {
     this.entries.set(userId, entry);
 
     if (entry.revision === revision) {
-      return entry.model;
+      return Promise.resolve(entry.model);
     }
 
     const staleModel = entry.model;
     this.scheduleDebouncedTrain(userId, entry, rows, revision);
 
     if (staleModel) {
-      return staleModel;
+      return Promise.resolve(staleModel);
     }
 
-    return null;
+    return Promise.resolve(null);
   }
 
   /**
