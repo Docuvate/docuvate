@@ -1070,6 +1070,7 @@ export type UpdateUserSettingsRequestDto = {
     fieldExtractionConfidenceGateEnabled?: boolean;
     fieldExtractionRequiredLabelIds?: Array<string>;
     advancedFeaturesEnabled?: boolean;
+    fuzzyDuplicateDetectionEnabled?: boolean;
     themePreference?: 'light' | 'dark' | 'system';
     locale?: 'de' | 'en';
     documentChatCloudBaseUrl?: string;
@@ -1090,6 +1091,7 @@ export type UserSettingsResponseDto = {
     documentChatLocalModelEnabled?: boolean;
     documentChatLocalModelReady?: boolean;
     advancedFeaturesEnabled?: boolean;
+    fuzzyDuplicateDetectionEnabled?: boolean;
     useArenaWinnerAsDefault: boolean;
     arenaWinnerEngine?: string;
     labelFieldConfidenceThreshold?: number;
