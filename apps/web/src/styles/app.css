@@ -8555,6 +8555,42 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex-wrap: nowrap;
 }
 
+.library-doc-stack-meta .document-labels-visible-chip {
+  flex: 0 1 auto;
+  min-width: 5rem;
+  max-width: min(12rem, 100%);
+}
+
+.library-doc-stack-meta .document-labels-visible-chip--truncate {
+  flex: 1 1 5rem;
+  min-width: 5rem;
+  max-width: min(12rem, 100%);
+}
+
+.library-doc-stack-meta .document-labels-visible-chip .chip {
+  min-width: 5rem;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.library-doc-stack-meta .document-labels-overflow-details {
+  flex-shrink: 0;
+}
+
+.library-doc-stack-date-secondary {
+  margin-top: var(--dv-space-2xs);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--dv-color-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.library-doc-stack-date-secondary .library-doc-stack-date {
+  max-width: none;
+}
+
 .library-doc-stack-meta-end {
   display: flex;
   flex: 0 0 auto;

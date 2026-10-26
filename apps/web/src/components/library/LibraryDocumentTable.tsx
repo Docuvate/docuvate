@@ -530,6 +530,9 @@ export function LibraryDocumentTable({
                             {doc.ownerLine}
                           </div>
                         ) : null}
+                        <div className="muted library-doc-stack-date-secondary">
+                          {renderStackDocumentDate(doc)}
+                        </div>
                         {doc.ingestSource === 'scanner_sftp' ? (
                           <span className="library-title-ingest-meta">
                             <ScanLine
@@ -562,7 +565,6 @@ export function LibraryDocumentTable({
                         ) : (
                           <Badge status={doc.status} />
                         )}
-                        {renderStackDocumentDate(doc)}
                         {hasStack ? (
                           <>
                             <Button

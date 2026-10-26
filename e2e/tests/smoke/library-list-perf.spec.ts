@@ -244,6 +244,19 @@ async function assertMobileLabelOverflowInline(page: import('@playwright/test').
     if (maxTop - minTop > 3) {
       return 'chip-overflow-wrapped';
     }
+    const visibleChipLabel = item.querySelector(
+      '.document-labels-visible-chip .chip-label'
+    );
+    if (visibleChipLabel instanceof HTMLElement) {
+      const labelText = visibleChipLabel.textContent?.trim() ?? '';
+      if (labelText.length > 0 && labelText.length < 4) {
+        return 'chip-label-too-short';
+      }
+      const chip = visibleChipLabel.closest('.chip');
+      if (chip instanceof HTMLElement && !chip.title?.trim()) {
+        return 'chip-missing-title';
+      }
+    }
     const badge = item.querySelector('.library-doc-stack-meta-end .badge');
     if (badge instanceof HTMLElement) {
       const itemRect = item.getBoundingClientRect();
