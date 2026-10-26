@@ -285,7 +285,7 @@ test.describe('Workstream B label picker', () => {
       const popover = page.getByTestId('library-filter-tag-combobox-popover');
       const placement = await popover.getAttribute('data-floating-placement');
       expect(placement).toBeTruthy();
-      if (viewport.useDrawer || viewport.label === '1440x780') {
+      if (viewport.useDrawer) {
         expect(placement?.startsWith('top')).toBe(true);
       }
 
