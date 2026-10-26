@@ -163,6 +163,12 @@ jobs:
           E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
             pnpm --filter @docuvate/e2e exec playwright test contrast-token-screenshots \
             --config=playwright.contrast.config.ts
+      - name: Workstream A3 list performance (1k-doc seed)
+        run: |
+          set -euo pipefail
+          LIBRARY_PERF_DOC_COUNT=1000 \
+          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
+            pnpm --filter @docuvate/e2e exec playwright test workstream-a3-list-perf
       - name: Verify contrast screenshot artifact
         run: |
           set -euo pipefail
