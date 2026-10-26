@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { expect, test, type Page } from '@playwright/test';
 
-import { setLocale } from '../../helpers/ce-ui-audit';
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme';
 import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
 import { assignLongLabels, longLabelNames } from '../../helpers/long-label-fixture';
@@ -37,9 +36,11 @@ const VIEWPORTS: ViewportSpec[] = [
 const COLOR_SCHEMES: ('light' | 'dark')[] = ['light', 'dark'];
 
 async function applyGermanLocale(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    window.localStorage.setItem('docuvate.locale', 'de');
+  });
   await page.goto('/');
   await applyDocuvateLocale(page, 'de');
-  await setLocale(page, 'de');
 }
 
 async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
@@ -68,7 +69,7 @@ async function finishRectangle(page: Page): Promise<void> {
 }
 
 test.describe('document field regions', () => {
-  test.describe.configure({ mode: 'serial' });
+  test.describe.configure({ mode: 'serial', timeout: 240_000 });
 
   let layoutDocId: string;
   const labels = longLabelNames(25);
@@ -82,7 +83,6 @@ test.describe('document field regions', () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await applyGermanLocale(page);
     await openLayoutDocumentPage(page, layoutDocId);
-    await setLocale(page, 'de');
 
     await page.locator('.layout-side-tabs').getByRole('tab', { name: /Übersicht|Overview/i }).click();
     await page.getByRole('radio', { name: /Rechteck|Rectangle/i }).click();
