@@ -338,6 +338,44 @@ test.describe('Workstream B label picker', () => {
     }
   }
 
+  test('upload queue +N popover stays in viewport (1440)', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(`${webOrigin}/documents`);
+    await page.waitForLoadState('networkidle');
+    await setTheme(page, 'light');
+
+    const compactBar = page.locator('.upload-compact-bar');
+    if (await compactBar.isVisible().catch(() => false)) {
+      await compactBar.getByRole('button', { name: /^upload$|^hochladen$/i }).click();
+    }
+    const uploadSection = page.locator('.library-page .upload-section').first();
+    await expect(uploadSection).toBeVisible({ timeout: 90_000 });
+    const fileInput = uploadSection.locator('input[type="file"]');
+    await expect(fileInput).toBeAttached({ timeout: 30_000 });
+
+    const queueFiles = Array.from({ length: 13 }, (_, index) => ({
+      name: `ws-b-queue-${String(index).padStart(2, '0')}.pdf`,
+      mimeType: 'application/pdf',
+      buffer: Buffer.concat([
+        fs.readFileSync(fixturePdf),
+        Buffer.from(`\n%%WS_B_QUEUE=${randomUUID()}-${String(index)}\n`, 'utf8'),
+      ]),
+    }));
+    await fileInput.setInputFiles(queueFiles, { timeout: 180_000 });
+
+    const overflowBtn = page.locator('.upload-queue-overflow-btn');
+    await expect(overflowBtn).toBeVisible({ timeout: 180_000 });
+    await expect(overflowBtn).toHaveText('+1');
+    await overflowBtn.click();
+    const popover = page.locator('.upload-queue-overflow-popover');
+    await expect(popover).toBeVisible();
+    await assertFullyInViewport(page, '.upload-queue-overflow-popover');
+
+    const shot = path.join(artifactRoot, 'upload-queue-overflow-1440.png');
+    await page.screenshot({ path: shot });
+    expect(md5File(shot).length).toBe(32);
+  });
+
   test('chip contrast and +N popover stay in viewport (1440)', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`${webOrigin}/documents`);
