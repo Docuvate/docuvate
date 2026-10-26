@@ -107,7 +107,7 @@ export function LibraryBulkBar(props: LibraryBulkBarProps) {
                 props.onSelectAllMatching?.();
               }}
             >
-              {t('library.bulkSelectAllMatching', { total: total ?? 0 })}
+              {t('library.bulkSelectAllMatching', { total })}
             </Button>
           ) : null}
           <div className="bulk-bar-actions">

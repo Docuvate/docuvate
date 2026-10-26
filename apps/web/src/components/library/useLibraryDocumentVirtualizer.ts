@@ -46,15 +46,16 @@ export function useLibraryDocumentVirtualizer(options: LibraryDocumentVirtualize
     };
   }, [scrollStorageKey]);
 
+  const { count, hasNextPage, isFetchingNextPage, onLoadMore } = options;
   const endIndex = virtualizer.range?.endIndex ?? 0;
   useEffect(() => {
-    if (!options.hasNextPage || options.isFetchingNextPage || !options.onLoadMore) {
+    if (!hasNextPage || isFetchingNextPage || !onLoadMore) {
       return;
     }
-    if (endIndex >= options.count - 10) {
-      options.onLoadMore();
+    if (endIndex >= count - 10) {
+      onLoadMore();
     }
-  }, [endIndex, options.count, options.hasNextPage, options.isFetchingNextPage, options.onLoadMore]);
+  }, [count, endIndex, hasNextPage, isFetchingNextPage, onLoadMore]);
 
   return { parentRef, virtualizer };
 }
