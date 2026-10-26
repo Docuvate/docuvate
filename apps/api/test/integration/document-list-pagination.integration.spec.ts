@@ -30,8 +30,8 @@ describe('document list keyset pagination', () => {
         const id = randomUUID();
         const updatedAt = new Date(now - i * 60_000);
         await client.query(
-          `INSERT INTO documents (id, user_id, filename, title, status, storage_key, updated_at, created_at)
-           VALUES ($1, $2, $3, $4, 'ready', $5, $6, $6)`,
+          `INSERT INTO documents (id, user_id, filename, title, status, storage_key, mime_type, updated_at, created_at)
+           VALUES ($1, $2, $3, $4, 'ready', $5, 'application/pdf', $6, $6)`,
           [id, userId, `doc-${String(i)}.pdf`, `Doc ${String(i)}`, `storage/${id}`, updatedAt]
         );
       }

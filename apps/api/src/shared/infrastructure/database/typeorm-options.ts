@@ -52,6 +52,7 @@ import { RecognizedFieldGateLabelPolarity20261018190000 } from './migrations/202
 import { DocumentFileSizeSavedViewDescription20261018190500 } from './migrations/20261018190500-document-file-size-saved-view-description.js';
 import { ConnectorPaperlessImportRetry20261025120000 } from './migrations/20261025120000-connector-paperless-import-retry.js';
 import { DocumentTagsUserConfirmed20261025210000 } from './migrations/20261025210000-document-tags-user-confirmed.js';
+import { DocumentListPaginationIndexes20261026120000 } from './migrations/20261026120000-document-list-pagination-indexes.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -126,6 +127,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DocumentFileSizeSavedViewDescription20261018190500,
       ConnectorPaperlessImportRetry20261025120000,
       DocumentTagsUserConfirmed20261025210000,
+      DocumentListPaginationIndexes20261026120000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,
