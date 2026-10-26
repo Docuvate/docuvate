@@ -197,6 +197,7 @@ jobs:
           E2E_SMOKE_EMAIL: smoke.bench@fixture.docuvate.test
           E2E_SMOKE_PASSWORD: SmokeBenchFixture1!
           LIBRARY_PERF_DOC_COUNT: '1000'
+          LIBRARY_PERF_REVIEW_PENDING_COUNT: '60'
         run: |
           set -euo pipefail
           node e2e/scripts/provision-smoke-storage.mjs
@@ -211,6 +212,7 @@ jobs:
           E2E_SMOKE_PASSWORD: SmokeBenchFixture1!
           LIBRARY_PERF_DOC_COUNT: '1000'
           LIBRARY_PERF_LABEL_COUNT: '300'
+          LIBRARY_PERF_REVIEW_PENDING_COUNT: '60'
           WORKSTREAM_A3_ARTIFACT_DIR: ${{ github.workspace }}/workstream-a3-artifacts
         run: |
           set -euo pipefail

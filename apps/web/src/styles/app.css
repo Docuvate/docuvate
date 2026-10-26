@@ -13639,8 +13639,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   word-break: normal;
 }
 
-@media (max-width: 480px) {
-  .admin-users-table--wide {
+@media (max-width: 640px) {
+  .admin-users-table.admin-users-table--spec {
     display: none;
   }
 
@@ -13650,6 +13650,24 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
   .admin-users-table-wrap {
     overflow-x: visible;
+  }
+
+  .admin-invite-form--spec {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .admin-invite-form--spec .admin-invite-email-field {
+    width: 100%;
+  }
+
+  .admin-invite-form--spec .admin-invite-role-select,
+  .admin-invite-form--spec .admin-invite-submit {
+    width: 100%;
+  }
+
+  .admin-users-card-field .select-trigger {
+    width: 100%;
   }
 }
 .dashboard-add-row {
@@ -16155,6 +16173,81 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .labels-vocabulary-grid__actions {
   display: flex;
   justify-content: flex-end;
+  gap: var(--dv-space-2xs);
+  flex-shrink: 0;
+}
+
+.labels-vocabulary-cell-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labels-vocabulary-cell-truncate .chip,
+.labels-vocabulary-cell-truncate .chip-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labels-vocabulary-scroll--stacked {
+  max-height: min(70vh, 640px);
+  overflow: auto;
+}
+
+.labels-vocabulary-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--dv-space-sm);
+  padding: var(--dv-space-sm);
+  border-bottom: 1px solid var(--dv-color-border);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.labels-vocabulary-card-row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.labels-vocabulary-card-row__line1 {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.labels-vocabulary-card-row__line1 .chip {
+  max-width: 100%;
+}
+
+.labels-vocabulary-card-row__line1 .chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labels-vocabulary-card-row__line2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs) var(--dv-space-sm);
+  margin-top: var(--dv-space-2xs);
+  font-size: var(--dv-font-size-sm);
+  line-height: 1.35;
+}
+
+.labels-vocabulary-card-row__count,
+.labels-vocabulary-card-row__auto {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labels-vocabulary-card-row__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
   gap: var(--dv-space-2xs);
 }
 

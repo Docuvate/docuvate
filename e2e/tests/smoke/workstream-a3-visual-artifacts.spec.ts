@@ -7,6 +7,7 @@ import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme.js';
+import { assertScrollListRowsLayout } from '../../helpers/list-layout-assertions.js';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth.js';
 
 const artifactRoot =
@@ -30,8 +31,26 @@ async function assertNoHorizontalOverflow(page: Page): Promise<void> {
   expect(overflow, 'horizontal overflow in main content').toBe(false);
 }
 
-async function shot(page: Page, fileName: string): Promise<string> {
+async function assertDenseListLayouts(page: Page, viewportWidth: number): Promise<void> {
+  const vocabScroll = page.locator('.labels-vocabulary-scroll');
+  if (await vocabScroll.count()) {
+    const rowSel = viewportWidth <= 640
+      ? '.labels-vocabulary-card-row'
+      : '.labels-vocabulary-grid--row';
+    await assertScrollListRowsLayout(page, '.labels-vocabulary-scroll', rowSel);
+  }
+
+  if (viewportWidth <= 640) {
+    const adminCards = page.locator('.admin-users-card-list');
+    if (await adminCards.count()) {
+      await assertScrollListRowsLayout(page, '.admin-users-card-list', '.admin-users-card');
+    }
+  }
+}
+
+async function shot(page: Page, fileName: string, viewportWidth: number): Promise<string> {
   await assertNoHorizontalOverflow(page);
+  await assertDenseListLayouts(page, viewportWidth);
   const filePath = path.join(artifactRoot, fileName);
   await page.screenshot({ path: filePath, fullPage: false });
   return filePath;
@@ -68,6 +87,7 @@ test.describe('Workstream A3 visual artifacts', () => {
         ...process.env,
         LIBRARY_PERF_DOC_COUNT: process.env['LIBRARY_PERF_DOC_COUNT'] ?? '1000',
         LIBRARY_PERF_LABEL_COUNT: process.env['LIBRARY_PERF_LABEL_COUNT'] ?? '300',
+        LIBRARY_PERF_REVIEW_PENDING_COUNT: process.env['LIBRARY_PERF_REVIEW_PENDING_COUNT'] ?? '60',
       },
     });
   });
@@ -92,58 +112,70 @@ test.describe('Workstream A3 visual artifacts', () => {
         .locator('.dashboard-grid, .dashboard-start-skeleton, .dashboard-onboarding')
         .first()
         .waitFor({ state: 'visible', timeout: 60_000 });
-      await shot(page, `dashboard-widgets-${viewport.label}.png`);
+      await shot(page, `dashboard-widgets-${viewport.label}.png`, viewport.width);
 
       await page.goto('/review');
       await page.locator('.review-queue-page').waitFor({ state: 'visible', timeout: 60_000 });
-      await shot(page, `review-queue-${viewport.label}-initial.png`);
+      await page.locator('.review-wizard').waitFor({ state: 'visible', timeout: 120_000 });
+      await shot(page, `review-queue-${viewport.label}-initial.png`, viewport.width);
+      await page.evaluate(() => {
+        window.scrollBy(0, Math.min(480, document.documentElement.scrollHeight));
+      });
+      await page.waitForTimeout(300);
+      await shot(page, `review-queue-${viewport.label}-scrolled.png`, viewport.width);
+      const reviewLoadMore = page.locator('.review-queue-load-more button');
+      if (await reviewLoadMore.isVisible().catch(() => false)) {
+        await reviewLoadMore.click();
+        await page.waitForTimeout(600);
+        await shot(page, `review-queue-${viewport.label}-loading-more.png`, viewport.width);
+      }
 
       await page.goto('/documents/duplicates');
       await page.getByTestId('duplicates-overview-page').waitFor({ state: 'visible', timeout: 60_000 });
-      await shot(page, `duplicates-overview-${viewport.label}-initial.png`);
+      await shot(page, `duplicates-overview-${viewport.label}-initial.png`, viewport.width);
       const dupScroll = page.getByTestId('duplicates-virtual-scroll');
       if (await dupScroll.count()) {
         await scrollVirtualList(page, '[data-testid="duplicates-virtual-scroll"]', 0.45);
         await page.waitForTimeout(300);
-        await shot(page, `duplicates-overview-${viewport.label}-scrolled.png`);
+        await shot(page, `duplicates-overview-${viewport.label}-scrolled.png`, viewport.width);
         const nextBtn = page.getByRole('button', { name: /next page|nächste seite/i });
         if (await nextBtn.isVisible().catch(() => false)) {
           await nextBtn.click();
           await page.waitForTimeout(500);
-          await shot(page, `duplicates-overview-${viewport.label}-loading-more.png`);
+          await shot(page, `duplicates-overview-${viewport.label}-loading-more.png`, viewport.width);
         } else {
           await scrollVirtualList(page, '[data-testid="duplicates-virtual-scroll"]', 0.95);
           await page.waitForTimeout(400);
-          await shot(page, `duplicates-overview-${viewport.label}-scrolled-deep.png`);
+          await shot(page, `duplicates-overview-${viewport.label}-scrolled-deep.png`, viewport.width);
         }
       }
 
       await page.goto('/documents/views');
       await page.locator('.saved-views-page').waitFor({ state: 'visible', timeout: 60_000 });
-      await shot(page, `saved-views-page-${viewport.label}.png`);
+      await shot(page, `saved-views-page-${viewport.label}.png`, viewport.width);
       const sidebarViews = page.locator('.sidebar-saved-views');
       if (await sidebarViews.count()) {
-        await shot(page, `saved-views-sidebar-${viewport.label}.png`);
+        await shot(page, `saved-views-sidebar-${viewport.label}.png`, viewport.width);
       }
 
       await page.goto('/chat');
       await page.locator('.global-chat-page').waitFor({ state: 'visible', timeout: 60_000 });
-      await shot(page, `global-chat-threads-${viewport.label}-initial.png`);
+      await shot(page, `global-chat-threads-${viewport.label}-initial.png`, viewport.width);
       const threadScroll = page.locator('.doc-chat-thread-list-scroll');
       if (await threadScroll.count()) {
         await scrollVirtualList(page, '.doc-chat-thread-list-scroll', 0.5);
         await page.waitForTimeout(300);
-        await shot(page, `global-chat-threads-${viewport.label}-scrolled.png`);
+        await shot(page, `global-chat-threads-${viewport.label}-scrolled.png`, viewport.width);
       }
 
       await page.goto('/settings/admin/users');
       const adminTable = page.locator('.admin-users-panel');
       try {
         await adminTable.first().waitFor({ state: 'visible', timeout: 15_000 });
-        await shot(page, `admin-users-pagination-${viewport.label}.png`);
+        await shot(page, `admin-users-pagination-${viewport.label}.png`, viewport.width);
         const pagination = page.locator('.ui-pagination, [data-testid="ui-pagination"]');
         if (await pagination.count()) {
-          await shot(page, `admin-users-pagination-controls-${viewport.label}.png`);
+          await shot(page, `admin-users-pagination-controls-${viewport.label}.png`, viewport.width);
         }
       } catch {
         // smoke user may lack installation admin; skip admin captures
@@ -162,20 +194,20 @@ test.describe('Workstream A3 visual artifacts', () => {
           expect(reasonText).not.toMatch(/Übereinstimmung/);
         }
       }
-      await shot(page, `labels-todo-queue-${viewport.label}-initial.png`);
+      await shot(page, `labels-todo-queue-${viewport.label}-initial.png`, viewport.width);
       const todoVirtual = page.getByTestId('labels-todo-virtual-scroll');
       if (await todoVirtual.count()) {
         await scrollVirtualList(page, '[data-testid="labels-todo-virtual-scroll"]', 0.55);
         await page.waitForTimeout(300);
-        await shot(page, `labels-todo-queue-${viewport.label}-scrolled.png`);
+        await shot(page, `labels-todo-queue-${viewport.label}-scrolled.png`, viewport.width);
       }
-      const vocabVirtual = page.getByTestId('labels-vocabulary-virtual-scroll');
-      if (await vocabVirtual.count()) {
-        await scrollVirtualList(page, '[data-testid="labels-vocabulary-virtual-scroll"]', 0.35);
+      const vocabScroll = page.locator('.labels-vocabulary-scroll');
+      if (await vocabScroll.count()) {
+        await scrollVirtualList(page, '.labels-vocabulary-scroll', 0.35);
         await page.waitForTimeout(300);
-        await shot(page, `labels-vocabulary-table-${viewport.label}-scrolled.png`);
+        await shot(page, `labels-vocabulary-table-${viewport.label}-scrolled.png`, viewport.width);
       } else {
-        await shot(page, `labels-vocabulary-table-${viewport.label}.png`);
+        await shot(page, `labels-vocabulary-table-${viewport.label}.png`, viewport.width);
       }
 
       await page.goto('/filesystem/unassigned');
@@ -185,12 +217,12 @@ test.describe('Workstream A3 visual artifacts', () => {
         )
         .first()
         .waitFor({ state: 'visible', timeout: 60_000 });
-      await shot(page, `folder-tree-unassigned-${viewport.label}-initial.png`);
+      await shot(page, `folder-tree-unassigned-${viewport.label}-initial.png`, viewport.width);
       const treeScroll = page.getByTestId('folder-tree-virtual-scroll');
       if (await treeScroll.count()) {
         await scrollVirtualList(page, '[data-testid="folder-tree-virtual-scroll"]', 0.5);
         await page.waitForTimeout(300);
-        await shot(page, `folder-tree-unassigned-${viewport.label}-scrolled.png`);
+        await shot(page, `folder-tree-unassigned-${viewport.label}-scrolled.png`, viewport.width);
       }
     });
   }

@@ -7,6 +7,7 @@ const DATABASE_URL =
 const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'alex.upload@fixture.docuvate.test';
 const DOC_COUNT = Number(process.env.LIBRARY_PERF_DOC_COUNT ?? '5000');
 const LABEL_COUNT = Number(process.env.LIBRARY_PERF_LABEL_COUNT ?? '300');
+const REVIEW_PENDING_COUNT = Number(process.env.LIBRARY_PERF_REVIEW_PENDING_COUNT ?? '0');
 
 const LONG_TITLE_PREFIX =
   'Sehr langer Dokumenttitel für Layout-Regressionstests mit virtuellem Scrollen und mehrzeiligen Metadaten ';
@@ -86,6 +87,16 @@ async function main() {
           [id, `Absender Zeile ${String(i)} — Muster GmbH & Co. KG`]
         );
       }
+      if (i < REVIEW_PENDING_COUNT) {
+        await pool.query(
+          `INSERT INTO document_field_values (
+             document_id, field_storage_key, value_text, confidence,
+             value_text_norm, value_numeric, value_date
+           ) VALUES ($1, 'suggestion:vendor', $2, 0.9, lower($2), NULL, NULL)
+           ON CONFLICT (document_id, field_storage_key) DO UPDATE SET value_text = EXCLUDED.value_text`,
+          [id, `Review queue vendor ${String(i)} — Fixture GmbH`]
+        );
+      }
       if (isShowcase && tagIds.length >= LONG_LABEL_NAMES.length) {
         for (let t = 0; t < LONG_LABEL_NAMES.length; t += 1) {
           await pool.query(
@@ -111,7 +122,7 @@ async function main() {
     }
 
     console.log(
-      `Seeded user ${EMAIL}: ${String(DOC_COUNT)} documents, ${String(LABEL_COUNT)} labels`
+      `Seeded user ${EMAIL}: ${String(DOC_COUNT)} documents, ${String(LABEL_COUNT)} labels, ${String(REVIEW_PENDING_COUNT)} review-queue items`
     );
   } finally {
     await pool.end();
