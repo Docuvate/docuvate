@@ -4,6 +4,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { setTheme } from '../../helpers/ce-ui-audit';
+import {
+  assertDocumentRowChipsMinReadable,
+  assertTagFilterPopoverChipInset,
+} from '../../helpers/label-picker-geometry';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
@@ -11,6 +15,16 @@ const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 
 const artifactRoot =
   process.env['WORKSTREAM_B_ARTIFACT_DIR'] ?? '/opt/cursor/artifacts/workstream-b-label-picker';
+
+const polishArtifactRoot =
+  process.env['WORKSTREAM_B_POLISH_ARTIFACT_DIR'] ??
+  '/opt/cursor/artifacts/workstream-b-label-polish';
+
+const polishViewports = [
+  { label: '390', width: 390, height: 844, useDrawer: true },
+  { label: '1024', width: 1024, height: 768, useDrawer: true },
+  { label: '1440', width: 1440, height: 900, useDrawer: false },
+] as const;
 
 const tagFilterViewports = [
   { label: '1440x900', width: 1440, height: 900, useDrawer: false },
@@ -281,6 +295,7 @@ test.describe('Workstream B label picker', () => {
       await openLibraryFilters(page, viewport.useDrawer);
       await scrollTagFilterNearBottom(page);
       await openTagFilterPortaledList(page);
+      await assertTagFilterPopoverChipInset(page);
 
       const popover = page.getByTestId('library-filter-tag-combobox-popover');
       const placement = await popover.getAttribute('data-floating-placement');
@@ -337,6 +352,7 @@ test.describe('Workstream B label picker', () => {
         await expect(fixtureRow).toBeVisible();
 
         await assertRowLabelChipsNeverHardClip(page);
+        await assertDocumentRowChipsMinReadable(page);
 
         const shot = path.join(
           artifactRoot,
@@ -382,6 +398,50 @@ test.describe('Workstream B label picker', () => {
     await assertFullyInViewport(page, '.upload-queue-overflow-popover');
 
     const shot = path.join(artifactRoot, 'upload-queue-overflow-1440.png');
+    await page.screenshot({ path: shot });
+    expect(md5File(shot).length).toBe(32);
+  });
+
+  for (const viewport of polishViewports) {
+    test(`label polish tag filter popover inset (${viewport.label})`, async ({ page }) => {
+      fs.mkdirSync(polishArtifactRoot, { recursive: true });
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto(`${webOrigin}/documents`);
+      await page.waitForLoadState('networkidle');
+      await setTheme(page, 'light');
+
+      await openLibraryFilters(page, viewport.useDrawer);
+      await scrollTagFilterNearBottom(page);
+      await openTagFilterPortaledList(page);
+      await assertTagFilterPopoverChipInset(page);
+
+      const shot = path.join(polishArtifactRoot, `polish-tag-filter-popover-${viewport.label}.png`);
+      await page.screenshot({ path: shot });
+      expect(md5File(shot).length).toBe(32);
+    });
+  }
+
+  test('label polish filesystem row chips at 390', async ({ page }) => {
+    fs.mkdirSync(polishArtifactRoot, { recursive: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${webOrigin}/filesystem/unassigned`);
+    await page.waitForLoadState('networkidle');
+    await setTheme(page, 'light');
+
+    const scrollHost = page.getByTestId('library-doc-virtual-scroll');
+    await expect(scrollHost).toBeVisible({ timeout: 60_000 });
+
+    const fixtureRow = page
+      .locator('.library-doc-stack-item, .library-table tbody tr')
+      .filter({ hasText: ellipsisFixtureUploadName })
+      .first();
+    await fixtureRow.scrollIntoViewIfNeeded({ timeout: 120_000 });
+    await expect(fixtureRow).toBeVisible();
+
+    await assertRowLabelChipsNeverHardClip(page);
+    await assertDocumentRowChipsMinReadable(page);
+
+    const shot = path.join(polishArtifactRoot, 'polish-filesystem-row-chips-390.png');
     await page.screenshot({ path: shot });
     expect(md5File(shot).length).toBe(32);
   });

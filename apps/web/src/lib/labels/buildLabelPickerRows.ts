@@ -31,6 +31,8 @@ export function buildLabelPickerRows(
     showTruncatedHint: boolean;
     showEmpty: boolean;
     showLoading: boolean;
+    /** When false, omit single-letter section headers (e.g. while searching). */
+    groupByLetter?: boolean;
   }
 ): LabelPickerRow[] {
   const rows: LabelPickerRow[] = [];
@@ -43,12 +45,15 @@ export function buildLabelPickerRows(
     rows.push({ kind: 'empty', id: 'empty' });
     return rows;
   }
+  const groupByLetter = options.groupByLetter ?? true;
   let lastGroup: string | null = null;
   for (const tag of filtered) {
-    const group = groupLabel(tag.name);
-    if (group !== lastGroup) {
-      rows.push({ kind: 'header', id: `header-${group}`, label: group });
-      lastGroup = group;
+    if (groupByLetter) {
+      const group = groupLabel(tag.name);
+      if (group !== lastGroup) {
+        rows.push({ kind: 'header', id: `header-${group}`, label: group });
+        lastGroup = group;
+      }
     }
     rows.push({ kind: 'option', id: tag.id, tag });
   }

@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import {
   CHIP_GAP_PX,
   computeVisibleChipCount,
+  MIN_VISIBLE_CHIP_TEXT_CHARS,
   OVERFLOW_CHIP_RESERVE_PX,
 } from './computeVisibleChipCount';
 
@@ -23,5 +24,19 @@ describe('computeVisibleChipCount', () => {
     const rowWidth = 200;
     const naturalWidths = [320, 70, 70, 70];
     expect(computeVisibleChipCount(naturalWidths, rowWidth)).toBe(1);
+  });
+
+  it('shows only +N when the row cannot fit six characters of the first label', () => {
+    const rowWidth = 72;
+    const naturalWidths = [240];
+    const labelLengths = [80];
+    const sixCharWidthPx = 48;
+    expect(
+      computeVisibleChipCount(naturalWidths, rowWidth, {
+        labelLengths,
+        sixCharWidthPx,
+      })
+    ).toBe(0);
+    expect(MIN_VISIBLE_CHIP_TEXT_CHARS).toBe(6);
   });
 });
