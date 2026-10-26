@@ -264,9 +264,7 @@ export function App() {
         path="/settings/connectors/:pluginId/:connectionId"
         element={
           <ShellRoute>
-            <SourceConnectorsRoute>
-              <ConnectorConnectionSwitch />
-            </SourceConnectorsRoute>
+            <ConnectorConnectionSwitch />
           </ShellRoute>
         }
       />
