@@ -56,6 +56,8 @@ async function scrollVirtualList(
 }
 
 test.describe('Workstream A3 visual artifacts', () => {
+  test.describe.configure({ mode: 'serial' });
+
   test.beforeAll(() => {
     fs.mkdirSync(artifactRoot, { recursive: true });
     const script = path.join(process.cwd(), '..', 'scripts', 'seed-library-perf-fixture.mjs');

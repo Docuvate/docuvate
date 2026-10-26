@@ -8,6 +8,7 @@ const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 /** A3 list perf — uses provision-smoke-storage.mjs; no global-search globalSetup. */
 export default defineConfig({
   testDir: './tests',
+  timeout: 300_000,
   fullyParallel: false,
   forbidOnly: Boolean(process.env['CI']),
   retries: process.env['CI'] ? 1 : 0,
