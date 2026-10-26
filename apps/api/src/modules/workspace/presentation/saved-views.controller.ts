@@ -2,14 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 
-import { CursorListQueryDto, parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
-
 import {
   AuthGuard,
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
+import { CursorListQueryDto, parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 import {
   CreateSavedDocumentViewRequestDto,
   ReorderSavedDocumentViewsRequestDto,

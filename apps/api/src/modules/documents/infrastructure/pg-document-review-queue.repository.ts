@@ -4,17 +4,17 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import {
-  buildDescIdTiebreakerKeyset,
-  decodeIdTiebreakerCursor,
-  encodeIdTiebreakerCursor,
-} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
-import {
   parseDate,
   parseNumber,
   parseString,
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  buildDescIdTiebreakerKeyset,
+  decodeIdTiebreakerCursor,
+  encodeIdTiebreakerCursor,
+} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 
 export interface PendingReviewDocumentRow {
   id: string;
@@ -107,13 +107,11 @@ export class PgDocumentReviewQueueRepository {
     let nextCursor: string | null = null;
     if (hasMore && rows.length > 0) {
       const last = rows[rows.length - 1];
-      if (last) {
-        nextCursor = encodeIdTiebreakerCursor({
-          v: 1,
-          id: last.id,
-          sortValue: last.createdAt.toISOString(),
-        });
-      }
+      nextCursor = encodeIdTiebreakerCursor({
+        v: 1,
+        id: last.id,
+        sortValue: last.createdAt.toISOString(),
+      });
     }
 
     const total = cursor ? null : await this.countPendingDocuments(userId);

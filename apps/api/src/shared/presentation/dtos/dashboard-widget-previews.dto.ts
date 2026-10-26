@@ -6,7 +6,7 @@ import type {
 } from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsOptional, IsUUID, Max, Min, IsNumber } from 'class-validator';
+import { IsIn, IsNumber,IsOptional, IsUUID, Max, Min } from 'class-validator';
 
 import { CURSOR_LIST_MAX_LIMIT } from '../../infrastructure/pagination/clamp-cursor-list-limit.js';
 

@@ -5,10 +5,14 @@ import { Body, Controller, Get, Put, Query, UseGuards } from '@nestjs/common';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
 import {
   AuthGuard,
-  AuthSubject,
   type AuthSession,
+  AuthSubject,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
+import {
+  DashboardWidgetDocumentPreviewsQueryDto,
+  DashboardWidgetDocumentPreviewsResponseDtoClass,
+} from '../../../shared/presentation/dtos/dashboard-widget-previews.dto.js';
 import {
   DashboardLayoutResponseDto,
   DashboardStatisticsDtoClass,
@@ -16,13 +20,10 @@ import {
   ReplaceDashboardLayoutRequestDto,
 } from '../../../shared/presentation/dtos/workspace.dto.js';
 import {
-  DashboardWidgetDocumentPreviewsQueryDto,
-  DashboardWidgetDocumentPreviewsResponseDtoClass,
-} from '../../../shared/presentation/dtos/dashboard-widget-previews.dto.js';
-import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
+import { GetDashboardWidgetDocumentPreviewsUseCase } from '../application/get-dashboard-widget-document-previews.use-case.js';
 import {
   GetDashboardLayoutUseCase,
   GetDashboardStatisticsUseCase,
@@ -31,7 +32,6 @@ import {
   ReplaceDashboardLayoutUseCase,
   SetInstallationDashboardDefaultUseCase,
 } from '../application/workspace.use-cases.js';
-import { GetDashboardWidgetDocumentPreviewsUseCase } from '../application/get-dashboard-widget-document-previews.use-case.js';
 import { toDashboardWidgetDto } from './workspace.mapper.js';
 
 @ApiDocuvateController('workspace')

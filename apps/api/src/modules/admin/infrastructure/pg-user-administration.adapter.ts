@@ -143,13 +143,11 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
     let nextCursor: string | null = null;
     if (hasMore && rows.length > 0) {
       const last = rows[rows.length - 1];
-      if (last) {
-        nextCursor = encodeIdTiebreakerCursor({
-          v: 1,
-          id: last.id,
-          sortValue: last.sort_at.toISOString(),
-        });
-      }
+      nextCursor = encodeIdTiebreakerCursor({
+        v: 1,
+        id: last.id,
+        sortValue: last.sort_at.toISOString(),
+      });
     }
 
     let total: number | null = null;

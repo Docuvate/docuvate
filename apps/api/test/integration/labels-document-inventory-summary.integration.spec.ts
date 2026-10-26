@@ -65,7 +65,7 @@ describe('label document inventory summary', () => {
 
   it('paginates documents on the inventory endpoint', async () => {
     const first = await useCase.execute(userId, { limit: 2 });
-    expect(first.documents).toHaveLength(2);
+    expect(first.items).toHaveLength(2);
     expect(first.total).toBe(3);
     expect(first.hasMore).toBe(true);
     expect(first.nextCursor).toBeTruthy();
@@ -74,7 +74,7 @@ describe('label document inventory summary', () => {
       limit: 2,
       cursor: first.nextCursor ?? undefined,
     });
-    expect(second.documents).toHaveLength(1);
+    expect(second.items).toHaveLength(1);
     expect(second.hasMore).toBe(false);
   });
 });

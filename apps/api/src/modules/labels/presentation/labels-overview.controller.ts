@@ -3,17 +3,16 @@
 import { Body, Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 
 import {
-  CursorListQueryDto,
-  parseCursorListQuery,
-} from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
-
-import {
   AuthGuard,
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { runWithRequestDeadline } from '../../../shared/infrastructure/http/request-deadline.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
+import {
+  CursorListQueryDto,
+  parseCursorListQuery,
+} from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 import {
   AcceptLabelRecommendationRequestDto,
   AcceptLabelRecommendationResponseDto,

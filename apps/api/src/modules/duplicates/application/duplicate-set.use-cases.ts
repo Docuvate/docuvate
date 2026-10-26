@@ -25,9 +25,9 @@ import {
   type DuplicateRepository,
   type DuplicateStackRepository,
 } from '../../../shared/domain/ports.js';
-import { decodeIdTiebreakerCursor } from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
-import { sliceSortedCursorPage } from '../../../shared/infrastructure/pagination/cursor-list-page.js';
 import { clampCursorListLimit } from '../../../shared/infrastructure/pagination/clamp-cursor-list-limit.js';
+import { sliceSortedCursorPage } from '../../../shared/infrastructure/pagination/cursor-list-page.js';
+import { decodeIdTiebreakerCursor } from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 
 function pairKey(documentIdA: string, documentIdB: string): string {
   return documentIdA < documentIdB

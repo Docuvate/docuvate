@@ -10,15 +10,15 @@ import type pg from 'pg';
 
 import { DocumentAuthorizationService } from '../../../shared/application/document-authorization.service.js';
 import type { AuthorizationSubject } from '../../../shared/domain/authorization.js';
+import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
   DOCUMENT_REPOSITORY,
+  type DocumentRepository,
   DUPLICATE_REPOSITORY,
   DUPLICATE_STACK_REPOSITORY,
-  type DocumentRepository,
   type DuplicateRepository,
   type DuplicateStackRepository,
 } from '../../../shared/domain/ports.js';
-import { NotFoundError } from '../../../shared/domain/errors.js';
 import { parseNumber, parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { clampCursorListLimit } from '../../../shared/infrastructure/pagination/clamp-cursor-list-limit.js';

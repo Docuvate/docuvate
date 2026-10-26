@@ -174,13 +174,11 @@ export class PgDocumentChatThreadRepository implements DocumentChatThreadReposit
     let nextCursor: string | null = null;
     if (hasMore && threads.length > 0) {
       const last = threads[threads.length - 1];
-      if (last) {
-        nextCursor = encodeIdTiebreakerCursor({
-          v: 1,
-          id: last.id,
-          sortValue: last.updatedAt.toISOString(),
-        });
-      }
+      nextCursor = encodeIdTiebreakerCursor({
+        v: 1,
+        id: last.id,
+        sortValue: last.updatedAt.toISOString(),
+      });
     }
 
     const total = pagination.cursor

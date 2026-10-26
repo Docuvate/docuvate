@@ -85,9 +85,11 @@ export class GetGlobalChatSuggestionBootstrapUseCase {
        LIMIT 1`,
       [userId]
     );
-    const row = result.rows[0];
-    if (!row) return null;
-    const parsed = requireRecord(row);
+    const rawFirst: unknown = result.rows[0];
+    if (rawFirst === undefined) {
+      return null;
+    }
+    const parsed = requireRecord(rawFirst);
     return {
       id: parseString(parsed.id),
       name: parseString(parsed.name),
@@ -126,9 +128,11 @@ export class GetGlobalChatSuggestionBootstrapUseCase {
        LIMIT 1`,
       [userId, CONTRACT_END_FIELD_KEYS]
     );
-    const row = result.rows[0];
-    if (!row) return null;
-    const parsed = requireRecord(row);
+    const rawFirst: unknown = result.rows[0];
+    if (rawFirst === undefined) {
+      return null;
+    }
+    const parsed = requireRecord(rawFirst);
     const title = parseString(parsed.title).trim();
     const filename = parseString(parsed.filename).trim();
     const value = parseString(parsed.value_text).trim();

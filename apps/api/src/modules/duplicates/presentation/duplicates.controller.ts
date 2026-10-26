@@ -4,17 +4,16 @@ import type { ApplyDuplicateSetDecisionsRequest } from '@docuvate/contracts';
 import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 
 import {
-  DuplicateSetListResponseDtoClass,
-  ListDuplicateSetsQueryDto,
-} from '../../../shared/presentation/dtos/duplicate-sets.dto.js';
-import { parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
-
-import {
   AuthGuard,
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
+import { parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
+import {
+  DuplicateSetListResponseDtoClass,
+  ListDuplicateSetsQueryDto,
+} from '../../../shared/presentation/dtos/duplicate-sets.dto.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,

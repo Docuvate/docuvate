@@ -1,11 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
-
-import {
-  CursorListQueryDto,
-  parseCursorListQuery,
-} from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import {
@@ -14,9 +9,6 @@ import {
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
 import {
-  GlobalChatSuggestionBootstrapDtoClass,
-} from '../../../shared/presentation/dtos/dashboard-widget-previews.dto.js';
-import {
   CreateDocumentChatThreadRequestDto,
   DocumentChatThreadListResponseDto,
   DocumentChatThreadMessagesResponseDto,
@@ -24,6 +16,13 @@ import {
   SendDocumentChatThreadMessageResponseDto,
   UpdateDocumentChatThreadRequestDto,
 } from '../../../shared/presentation/dtos/common.dto.js';
+import {
+  CursorListQueryDto,
+  parseCursorListQuery,
+} from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
+import {
+  GlobalChatSuggestionBootstrapDtoClass,
+} from '../../../shared/presentation/dtos/dashboard-widget-previews.dto.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,

@@ -18,11 +18,6 @@ import type pg from 'pg';
 
 import { NotFoundError } from '../../../shared/domain/errors.js';
 import {
-  buildAscIdTiebreakerKeyset,
-  decodeIdTiebreakerCursor,
-  encodeIdTiebreakerCursor,
-} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
-import {
   parseBoolean,
   parseDate,
   parseEnum,
@@ -35,6 +30,11 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  buildAscIdTiebreakerKeyset,
+  decodeIdTiebreakerCursor,
+  encodeIdTiebreakerCursor,
+} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 import {
   assertDashboardWidgetType,
   parseDashboardWidgetFields,
@@ -266,13 +266,11 @@ export class PgWorkspaceRepository {
     let nextCursor: string | null = null;
     if (hasMore && items.length > 0) {
       const last = items[items.length - 1];
-      if (last) {
-        nextCursor = encodeIdTiebreakerCursor({
-          v: 1,
-          id: last.id,
-          sortValue: last.position,
-        });
-      }
+      nextCursor = encodeIdTiebreakerCursor({
+        v: 1,
+        id: last.id,
+        sortValue: last.position,
+      });
     }
 
     const total = input.cursor

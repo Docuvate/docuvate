@@ -125,5 +125,8 @@ export function buildDescTextIdTiebreakerKeyset(
 
 export function parseOptionalCursor(raw: string | undefined): string | undefined {
   const trimmed = raw?.trim();
-  return trimmed ? trimmed : undefined;
+  if (!trimmed) {
+    return undefined;
+  }
+  return trimmed;
 }

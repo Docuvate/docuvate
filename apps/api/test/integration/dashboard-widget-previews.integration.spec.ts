@@ -5,14 +5,14 @@ import { randomUUID } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
-import { GetDashboardWidgetDocumentPreviewsUseCase } from '../../src/modules/workspace/application/get-dashboard-widget-document-previews.use-case.js';
-import { PgWorkspaceRepository } from '../../src/modules/workspace/infrastructure/pg-workspace.repository.js';
+import { INSTALLATION_TENANT_ID } from '../../src/modules/auth/domain/installation.constants.js';
 import { PgDocumentRepository } from '../../src/modules/documents/infrastructure/pg-document.repository.js';
 import { PgDuplicateRepository } from '../../src/modules/duplicates/infrastructure/pg-duplicate.repository.js';
 import { PgDuplicateStackRepository } from '../../src/modules/duplicates/infrastructure/pg-duplicate-stack.repository.js';
-import type { AuthorizationPort } from '../../src/shared/domain/authorization.js';
+import { GetDashboardWidgetDocumentPreviewsUseCase } from '../../src/modules/workspace/application/get-dashboard-widget-document-previews.use-case.js';
+import { PgWorkspaceRepository } from '../../src/modules/workspace/infrastructure/pg-workspace.repository.js';
 import { DocumentAuthorizationService } from '../../src/shared/application/document-authorization.service.js';
-import { INSTALLATION_TENANT_ID } from '../../src/modules/auth/domain/installation.constants.js';
+import type { AuthorizationPort } from '../../src/shared/domain/authorization.js';
 import { getIntegrationPool } from './pg-pool.js';
 import {
   deleteSyntheticUser,
@@ -30,7 +30,7 @@ describe('dashboard widget document previews', () => {
     new PgDuplicateStackRepository(pool),
     new PgWorkspaceRepository(pool),
     new DocumentAuthorizationService({
-      authorize: async () => 'allow',
+      authorize: () => Promise.resolve('allow'),
     } satisfies AuthorizationPort),
     pool
   );

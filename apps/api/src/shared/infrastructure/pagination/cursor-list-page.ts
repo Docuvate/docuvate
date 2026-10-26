@@ -72,14 +72,12 @@ export function sliceSortedCursorPage<T>(input: {
   let nextCursor: string | null = null;
   if (hasMore && items.length > 0) {
     const last = items[items.length - 1];
-    if (last) {
-      const payload: IdTiebreakerCursorPayload = {
-        v: 1,
-        id: input.getId(last),
-        sortValue: input.getSortValue(last),
-      };
-      nextCursor = encodeIdTiebreakerCursor(payload);
-    }
+    const payload: IdTiebreakerCursorPayload = {
+      v: 1,
+      id: input.getId(last),
+      sortValue: input.getSortValue(last),
+    };
+    nextCursor = encodeIdTiebreakerCursor(payload);
   }
 
   return {

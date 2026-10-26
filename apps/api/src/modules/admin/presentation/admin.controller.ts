@@ -33,7 +33,6 @@ import {
   ListAdminUsersQueryDto,
   SetAdminUserRoleRequestDto,
 } from '../../../shared/presentation/dtos/admin.dto.js';
-import { parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 import { SetAdminUserFeatureFlagRequestDto } from '../../../shared/presentation/dtos/admin-feature-flag.dto.js';
 import {
   AdminAuthSignInSettingsResponseDto,
@@ -42,6 +41,7 @@ import {
   CreateAdminOidcProviderRequestDto,
   UpdateAdminOidcProviderRequestDto,
 } from '../../../shared/presentation/dtos/auth-sign-in.dto.js';
+import { parseCursorListQuery } from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
 import {
   PasswordPolicyResponseDto,
   UpdatePasswordPolicyRequestDto,

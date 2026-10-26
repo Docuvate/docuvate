@@ -15,6 +15,7 @@ import {
   type IdGenerator,
 } from '../../../shared/domain/ports.js';
 import { ID_GENERATOR } from '../../../shared/domain/ports.js';
+import { clampCursorListLimit } from '../../../shared/infrastructure/pagination/clamp-cursor-list-limit.js';
 import {
   assertDashboardWidgetType,
   parseDashboardWidgetFields,
@@ -30,7 +31,6 @@ import {
 } from '../domain/saved-view-access.js';
 import { savedViewToDocumentListQuery } from '../domain/saved-view-list-query.js';
 import type { SavedDocumentViewEntity } from '../domain/workspace.types.js';
-import { clampCursorListLimit } from '../../../shared/infrastructure/pagination/clamp-cursor-list-limit.js';
 import { PgWorkspaceRepository } from '../infrastructure/pg-workspace.repository.js';
 import { SavedViewScopeValidator } from '../infrastructure/saved-view-scope.validator.js';
 

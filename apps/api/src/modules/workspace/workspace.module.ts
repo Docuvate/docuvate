@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 
+import { GetDashboardWidgetDocumentPreviewsUseCase } from './application/get-dashboard-widget-document-previews.use-case.js';
 import {
   CreateSavedViewUseCase,
   DeleteSavedViewUseCase,
@@ -16,7 +17,6 @@ import {
   SetInstallationDashboardDefaultUseCase,
   UpdateSavedViewUseCase,
 } from './application/workspace.use-cases.js';
-import { GetDashboardWidgetDocumentPreviewsUseCase } from './application/get-dashboard-widget-document-previews.use-case.js';
 import { INSTALLATION_ROLE_READER } from './domain/installation-role.port.js';
 import { PgInstallationRoleReader } from './infrastructure/pg-installation-role.reader.js';
 import { PgWorkspaceRepository } from './infrastructure/pg-workspace.repository.js';

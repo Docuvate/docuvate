@@ -10,11 +10,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import {
-  buildDescIdTiebreakerKeyset,
-  decodeIdTiebreakerCursor,
-  encodeIdTiebreakerCursor,
-} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
-import {
   parseDate,
   parseEnum,
   parseNumber,
@@ -22,6 +17,11 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  buildDescIdTiebreakerKeyset,
+  decodeIdTiebreakerCursor,
+  encodeIdTiebreakerCursor,
+} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 import { parseTagsJson } from '../../documents/infrastructure/document-row.mapper.js';
 
 const READY_STATUSES = ['uploaded', 'queued', 'extracting', 'ready', 'failed'] as const;
@@ -154,22 +154,21 @@ export class PgLabelDocumentInventoryRepository {
       });
     }
 
-    const total = cursor
-      ? null
-      : (
-          await this.pool.query(
-            `SELECT COUNT(*)::int AS count FROM documents d WHERE d.user_id = $1 AND d.status = 'ready'`,
-            [userId]
-          )
-        ).rows[0];
-
-    const totalRow = total ? requireRecord(total) : null;
+    let totalCount: number | null = null;
+    if (!cursor) {
+      const countResult = await this.pool.query(
+        `SELECT COUNT(*)::int AS count FROM documents d WHERE d.user_id = $1 AND d.status = 'ready'`,
+        [userId]
+      );
+      const countRow = requireRecord(countResult.rows[0] ?? {});
+      totalCount = parseNumber(countRow.count, 0);
+    }
 
     return {
       documents,
       hasMore,
       nextCursor,
-      total: totalRow ? parseNumber(totalRow.count, 0) : null,
+      total: totalCount,
     };
   }
 
@@ -242,3 +241,8 @@ export class PgLabelDocumentInventoryRepository {
     return map;
   }
 }
+
+export type LabelDocumentInventoryQueries = Pick<
+  PgLabelDocumentInventoryRepository,
+  'loadSummary' | 'listDocumentsPage' | 'loadSampleDocumentIdsByTag' | 'loadDocumentPreviewsByIds'
+>;

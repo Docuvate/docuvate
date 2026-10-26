@@ -34,6 +34,7 @@ import {
 } from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
+import type { LabelDocumentInventoryQueries } from '../infrastructure/pg-label-document-inventory.repository.js';
 import { PgLabelDocumentInventoryRepository } from '../infrastructure/pg-label-document-inventory.repository.js';
 
 export interface GetLabelRecommendationsOptions {
@@ -98,7 +99,8 @@ export class GetLabelRecommendationsUseCase {
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     @Inject(LabelHybridModelCacheService)
     private readonly labelHybridCache: LabelHybridModelCacheService,
-    private readonly inventoryRepo: PgLabelDocumentInventoryRepository
+    @Inject(PgLabelDocumentInventoryRepository)
+    private readonly inventoryRepo: LabelDocumentInventoryQueries
   ) {}
 
   async execute(
