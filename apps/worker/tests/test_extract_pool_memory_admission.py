@@ -31,6 +31,12 @@ def test_pool_memory_reserved_scales_with_pending_jobs(
         registry.unregister_spawned_child()
     assert pool_memory_reserved_bytes(pending_jobs=1) == 550_000_000
     assert pool_memory_reserved_bytes(pending_jobs=2) == 1_100_000_000
+    registry.register_spawned_child()
+    registry.register_spawned_child()
+    assert pool_memory_reserved_bytes(pending_jobs=1) == 0
+    assert pool_memory_reserved_bytes(pending_jobs=2) == 0
+    registry.unregister_spawned_child()
+    assert pool_memory_reserved_bytes(pending_jobs=2) == 550_000_000
 
 
 def test_pool_reserved_denies_second_job_when_cgroup_tight(

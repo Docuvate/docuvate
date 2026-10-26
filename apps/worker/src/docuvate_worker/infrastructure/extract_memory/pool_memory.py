@@ -60,10 +60,11 @@ def _pool_size_from_env() -> int:
 
 
 def pool_memory_reserved_bytes(*, pending_jobs: int) -> int:
-    """Bytes for warm pool children that exist or will spawn for pending work."""
+    """Bytes for pool children that would spawn beyond those already counted in cgroup RSS."""
     if os.environ.get("DOCUVATE_EXTRACT_POOL", "0") != "1":
         return 0
     size = _pool_size_from_env()
     spawned = _pool_memory_registry.spawned_children()
-    slots = min(size, max(spawned, pending_jobs))
-    return slots * _pool_resident_bytes()
+    slots_needed = min(size, max(0, pending_jobs))
+    incremental_children = max(0, slots_needed - spawned)
+    return incremental_children * _pool_resident_bytes()
