@@ -20,7 +20,8 @@ class ActiveExtractHandle:
     child: _PooledExtractChild | None = None
 
 
-_active: ContextVar[ActiveExtractHandle | None] = ContextVar("docuvate_active_extract", default=None)
+_ACTIVE_EXTRACT = "docuvate_active_extract"
+_active: ContextVar[ActiveExtractHandle | None] = ContextVar(_ACTIVE_EXTRACT, default=None)
 
 
 def bind_active_extract(handle: ActiveExtractHandle) -> None:

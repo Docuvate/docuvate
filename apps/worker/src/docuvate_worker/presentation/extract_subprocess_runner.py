@@ -24,9 +24,6 @@ from docuvate_worker.domain.extract_errors import (
     ExtractRetryableError,
     permanent_failure_from_subprocess,
 )
-from docuvate_worker.infrastructure.extract_memory.extract_deadline import (
-    extract_wall_clock_deadline_seconds,
-)
 from docuvate_worker.domain.models import (
     ExtractedDocumentImage,
     ExtractedField,
@@ -34,6 +31,9 @@ from docuvate_worker.domain.models import (
     ExtractionResult,
 )
 from docuvate_worker.infrastructure.extract_memory.admission import extract_admission_slot
+from docuvate_worker.infrastructure.extract_memory.extract_deadline import (
+    extract_wall_clock_deadline_seconds,
+)
 from docuvate_worker.infrastructure.extract_memory.retry_policy import (
     apply_memory_retry_overrides,
     memory_retry_already_applied,
@@ -42,14 +42,14 @@ from docuvate_worker.infrastructure.extractors.paddle_engine import release_padd
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
-from docuvate_worker.presentation.extract_subprocess_errors import (
-    meaningful_stderr_tail,
-    subprocess_failure_message,
-)
 from docuvate_worker.presentation.extract_active import (
     ActiveExtractHandle,
     bind_active_extract,
     clear_active_extract,
+)
+from docuvate_worker.presentation.extract_subprocess_errors import (
+    meaningful_stderr_tail,
+    subprocess_failure_message,
 )
 from docuvate_worker.presentation.extract_subprocess_pool import (
     extract_pool_enabled,

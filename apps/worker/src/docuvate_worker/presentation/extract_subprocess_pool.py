@@ -14,11 +14,9 @@ import sys
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, TextIO
 
 from docuvate_worker.domain.extract_errors import ExtractRetryableError
-from docuvate_worker.presentation.extract_active import attach_pool_child_to_active
-
 from docuvate_worker.infrastructure.extract_memory.child_process_diagnostics import (
     describe_child_exit,
     log_child_exit,
@@ -33,6 +31,7 @@ from docuvate_worker.infrastructure.extract_memory.pool_memory import (
     pool_resident_bytes_per_child,
 )
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
+from docuvate_worker.presentation.extract_active import attach_pool_child_to_active
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +53,7 @@ def _cancel_grace_seconds() -> float:
     return parsed if parsed > 0 else _DEFAULT_CANCEL_GRACE
 
 
-def _readline_with_timeout(stream: Any, timeout: float) -> str | None:
+def _readline_with_timeout(stream: TextIO, timeout: float) -> str | None:
     if timeout <= 0:
         return None
     ready, _, _ = select.select([stream], [], [], timeout)
