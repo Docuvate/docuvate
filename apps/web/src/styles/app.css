@@ -12767,6 +12767,19 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   overflow-x: auto;
 }
 
+.labels-vocabulary-scroll-virtual {
+  max-height: min(70vh, 640px);
+  overflow-y: auto;
+}
+
+.labels-vocabulary-table-virtual-row {
+  table-layout: fixed;
+}
+
+.labels-vocabulary-virtual-row .labels-vocabulary-table {
+  margin: 0;
+}
+
 .labels-vocabulary-table {
   width: 100%;
   border-collapse: collapse;

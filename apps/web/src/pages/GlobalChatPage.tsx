@@ -6,6 +6,7 @@ import type {
   UserSettingsDto,
 } from '@docuvate/contracts';
 import { useQueryClient } from '@tanstack/react-query';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { FormEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
@@ -40,6 +41,9 @@ import { useCursorLoadMoreSentinel } from '../lib/pagination/useCursorLoadMoreSe
 import { routes } from '../lib/routes';
 import { useLibraryChatMessageStream } from '../lib/useLibraryChatMessageStream';
 import { useStackedDocChatLayout } from '../lib/useStackedDocChatLayout';
+
+const CHAT_THREAD_ROW_ESTIMATE_PX = 68;
+const CHAT_THREAD_VIRTUAL_THRESHOLD = 20;
 
 function formatThreadMeta(thread: DocumentChatThreadDto, locale: string): string {
   const date = new Date(thread.updatedAt);
@@ -98,6 +102,13 @@ export function GlobalChatPage() {
       return haystack.includes(q);
     });
   }, [threadSearch, threads]);
+  const useThreadVirtual = filteredThreads.length > CHAT_THREAD_VIRTUAL_THRESHOLD;
+  const threadVirtualizer = useVirtualizer({
+    count: filteredThreads.length,
+    getScrollElement: () => threadListScrollRef.current,
+    estimateSize: () => CHAT_THREAD_ROW_ESTIMATE_PX,
+    overscan: 8,
+  });
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
 
   const upsertMessage = useCallback((next: DocumentChatMessageRecordDto) => {
@@ -430,32 +441,84 @@ export function GlobalChatPage() {
                   <span>{t('common.loading')}</span>
                 </p>
               ) : null}
-              <div ref={threadListScrollRef} className="doc-chat-thread-list-scroll">
-              <ul className="doc-chat-thread-list">
-                {filteredThreads.map((thread) => {
-                  const selected = thread.id === activeThreadId;
-                  const threadBusy = showThreadListSpinner(
-                    thread,
-                    activeThreadId,
-                    generationInProgress
-                  );
-                  return (
-                    <GlobalChatThreadRow
-                      key={thread.id}
-                      thread={thread}
-                      selected={selected}
-                      busy={threadBusy}
-                      meta={formatThreadMeta(thread, dateLocale)}
-                      onSelect={() => {
-                        setActiveThreadId(thread.id);
-                        if (stacked) closeThreads();
-                      }}
-                      onRename={(title) => onRenameThread(thread.id, title)}
-                      onDelete={() => onDeleteThread(thread.id)}
-                    />
-                  );
-                })}
-              </ul>
+              <div
+                ref={threadListScrollRef}
+                className="doc-chat-thread-list-scroll"
+                data-testid={useThreadVirtual ? 'global-chat-thread-virtual-scroll' : undefined}
+              >
+                {useThreadVirtual ? (
+                  <ul
+                    className="doc-chat-thread-list doc-chat-thread-list-virtual"
+                    style={{
+                      height: `${String(threadVirtualizer.getTotalSize())}px`,
+                      position: 'relative',
+                    }}
+                  >
+                    {threadVirtualizer.getVirtualItems().map((virtualRow) => {
+                      const thread = filteredThreads[virtualRow.index];
+                      const selected = thread.id === activeThreadId;
+                      const threadBusy = showThreadListSpinner(
+                        thread,
+                        activeThreadId,
+                        generationInProgress
+                      );
+                      return (
+                        <li
+                          key={thread.id}
+                          data-index={virtualRow.index}
+                          ref={threadVirtualizer.measureElement}
+                          className="doc-chat-thread-virtual-row"
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            transform: `translateY(${String(virtualRow.start)}px)`,
+                          }}
+                        >
+                          <GlobalChatThreadRow
+                            thread={thread}
+                            selected={selected}
+                            busy={threadBusy}
+                            meta={formatThreadMeta(thread, dateLocale)}
+                            onSelect={() => {
+                              setActiveThreadId(thread.id);
+                              if (stacked) closeThreads();
+                            }}
+                            onRename={(title) => onRenameThread(thread.id, title)}
+                            onDelete={() => onDeleteThread(thread.id)}
+                          />
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <ul className="doc-chat-thread-list">
+                    {filteredThreads.map((thread) => {
+                      const selected = thread.id === activeThreadId;
+                      const threadBusy = showThreadListSpinner(
+                        thread,
+                        activeThreadId,
+                        generationInProgress
+                      );
+                      return (
+                        <GlobalChatThreadRow
+                          key={thread.id}
+                          thread={thread}
+                          selected={selected}
+                          busy={threadBusy}
+                          meta={formatThreadMeta(thread, dateLocale)}
+                          onSelect={() => {
+                            setActiveThreadId(thread.id);
+                            if (stacked) closeThreads();
+                          }}
+                          onRename={(title) => onRenameThread(thread.id, title)}
+                          onDelete={() => onDeleteThread(thread.id)}
+                        />
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
             </aside>
           ) : null}

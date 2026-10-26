@@ -103,6 +103,12 @@ export function ReviewWizardView({
     setCorrecting(false);
     setCorrectionDraft('');
     setSelectionHint(null);
+    if (current.stepKind !== 'fields') {
+      setDocCache(null);
+      setPreviewData(null);
+      setPreviewLoading(false);
+      return;
+    }
     void loadDocumentContext(current.documentId);
   }, [plan.tasks, taskIndex, loadDocumentContext]);
 

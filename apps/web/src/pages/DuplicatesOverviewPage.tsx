@@ -42,7 +42,11 @@ export function DuplicatesOverviewPage() {
   }
 
   return (
-    <div className="page duplicates-overview-page" data-testid="duplicates-overview-page">
+    <div
+      className="page duplicates-overview-page"
+      data-testid="duplicates-overview-page"
+      data-ux="page"
+    >
       <header className="page-header">
         <h1>{t('documents.duplicateQueueTitle')}</h1>
         <p className="muted">{t('documents.duplicateQueueLead')}</p>

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { TagDto } from '@docuvate/contracts';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { MoreHorizontal } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,9 @@ interface Props {
   onDelete: (tagId: string) => void | Promise<void>;
 }
 
+const VOCABULARY_ROW_ESTIMATE_PX = 52;
+const VOCABULARY_VIRTUAL_THRESHOLD = 25;
+
 function filterLinkForTag(tag: TagDto): string {
   const needsQuotes = /\s/.test(tag.name);
   const token = needsQuotes ? `label:"${tag.name}"` : `label:${tag.name}`;
@@ -38,6 +42,15 @@ export function LabelsVocabularyTable(props: Props) {
   const [confirmTag, setConfirmTag] = useState<TagDto | null>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const useVirtual = vocabularyTags.length > VOCABULARY_VIRTUAL_THRESHOLD;
+
+  const rowVirtualizer = useVirtualizer({
+    count: vocabularyTags.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => VOCABULARY_ROW_ESTIMATE_PX,
+    overscan: 10,
+  });
 
   const openMenu = (tagId: string, anchor: HTMLButtonElement) => {
     menuAnchorRef.current = anchor;
@@ -58,6 +71,55 @@ export function LabelsVocabularyTable(props: Props) {
     }
   }, [confirmTag, props]);
 
+  function renderRow(tag: TagDto) {
+    const count = props.documentCountByTagId[tag.id] ?? 0;
+    return (
+      <tr key={tag.id}>
+        <td>
+          <Chip label={tag.name} variant="assigned" color={tag.color} />
+        </td>
+        <td>
+          {count > 0 ? (
+            <Link to={filterLinkForTag(tag)} className="labels-vocabulary-doc-link">
+              {t('labels.vocabularyDocCount', { count })}
+            </Link>
+          ) : (
+            <span className="muted">{t('labels.vocabularyDocCount', { count: 0 })}</span>
+          )}
+        </td>
+        <td className="labels-vocabulary-auto muted">{describeLabelAutoAssignment(tag, t)}</td>
+        <td className="labels-vocabulary-col-actions">
+          <div className="labels-vocabulary-actions-inner">
+            <Button type="button" variant="secondary" onClick={() => { props.onEdit(tag); }}>
+              {t('labels.editAction')}
+            </Button>
+            <IconButton
+              icon={MoreHorizontal}
+              label={t('labels.deleteMenuAria', { name: tag.name })}
+              hasPopup="menu"
+              expanded={menuOpen && menuTagId === tag.id}
+              className="labels-overflow-btn"
+              onClick={(e) => { openMenu(tag.id, e.currentTarget); }}
+            />
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  const tableHead = (
+    <thead>
+      <tr>
+        <th scope="col">{t('labels.vocabularyColName')}</th>
+        <th scope="col">{t('labels.vocabularyColDocuments')}</th>
+        <th scope="col">{t('labels.matchingAlgorithm')}</th>
+        <th scope="col" className="labels-vocabulary-col-actions">
+          {t('labels.vocabularyColActions')}
+        </th>
+      </tr>
+    </thead>
+  );
+
   return (
     <Card className="labels-vocabulary-card">
       <h2 className="labels-vocabulary-title">{t('labels.vocabularyTitle')}</h2>
@@ -66,60 +128,47 @@ export function LabelsVocabularyTable(props: Props) {
         <p className="muted">{t('labels.emptyHint')}</p>
       ) : null}
       {vocabularyTags.length > 0 ? (
-        <div className="labels-vocabulary-scroll">
+        <div
+          ref={scrollRef}
+          className={`labels-vocabulary-scroll${useVirtual ? ' labels-vocabulary-scroll-virtual' : ''}`}
+          data-testid={useVirtual ? 'labels-vocabulary-virtual-scroll' : undefined}
+        >
           <table className="labels-vocabulary-table">
-            <thead>
-              <tr>
-                <th scope="col">{t('labels.vocabularyColName')}</th>
-                <th scope="col">{t('labels.vocabularyColDocuments')}</th>
-                <th scope="col">{t('labels.matchingAlgorithm')}</th>
-                <th scope="col" className="labels-vocabulary-col-actions">
-                  {t('labels.vocabularyColActions')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {vocabularyTags.map((tag) => {
-                const count = props.documentCountByTagId[tag.id] ?? 0;
+            {tableHead}
+            {!useVirtual ? <tbody>{vocabularyTags.map((tag) => renderRow(tag))}</tbody> : null}
+          </table>
+          {useVirtual ? (
+            <div
+              className="labels-vocabulary-virtual-body"
+              style={{
+                height: `${String(rowVirtualizer.getTotalSize())}px`,
+                position: 'relative',
+              }}
+            >
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const tag = vocabularyTags[virtualRow.index];
                 return (
-                  <tr key={tag.id}>
-                    <td>
-                      <Chip label={tag.name} variant="assigned" color={tag.color} />
-                    </td>
-                    <td>
-                      {count > 0 ? (
-                        <Link to={filterLinkForTag(tag)} className="labels-vocabulary-doc-link">
-                          {t('labels.vocabularyDocCount', { count })}
-                        </Link>
-                      ) : (
-                        <span className="muted">
-                          {t('labels.vocabularyDocCount', { count: 0 })}
-                        </span>
-                      )}
-                    </td>
-                    <td className="labels-vocabulary-auto muted">
-                      {describeLabelAutoAssignment(tag, t)}
-                    </td>
-                    <td className="labels-vocabulary-col-actions">
-                      <div className="labels-vocabulary-actions-inner">
-                        <Button type="button" variant="secondary" onClick={() => { props.onEdit(tag); }}>
-                          {t('labels.editAction')}
-                        </Button>
-                        <IconButton
-                          icon={MoreHorizontal}
-                          label={t('labels.deleteMenuAria', { name: tag.name })}
-                          hasPopup="menu"
-                          expanded={menuOpen && menuTagId === tag.id}
-                          className="labels-overflow-btn"
-                          onClick={(e) => { openMenu(tag.id, e.currentTarget); }}
-                        />
-                      </div>
-                    </td>
-                  </tr>
+                  <div
+                    key={tag.id}
+                    data-index={virtualRow.index}
+                    ref={rowVirtualizer.measureElement}
+                    className="labels-vocabulary-virtual-row"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${String(virtualRow.start)}px)`,
+                    }}
+                  >
+                    <table className="labels-vocabulary-table labels-vocabulary-table-virtual-row">
+                      <tbody>{renderRow(tag)}</tbody>
+                    </table>
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+          ) : null}
         </div>
       ) : null}
       <ContextMenu
@@ -135,7 +184,7 @@ export function LabelsVocabularyTable(props: Props) {
             label: t('common.delete'),
             danger: true,
             onSelect: () => {
-              const tag = vocabularyTags.find((t) => t.id === menuTagId);
+              const tag = vocabularyTags.find((row) => row.id === menuTagId);
               if (tag) setConfirmTag(tag);
               setMenuOpen(false);
             },

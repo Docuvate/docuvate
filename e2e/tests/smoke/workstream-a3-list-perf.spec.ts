@@ -15,6 +15,8 @@ interface RouteProbe {
   route: string;
   listPathPattern: RegExp;
   readySelector: string;
+  /** Page content root (excludes app chrome) for DOM budget checks. */
+  domRootSelector: string;
 }
 
 const ROUTES: RouteProbe[] = [
@@ -22,32 +24,38 @@ const ROUTES: RouteProbe[] = [
     route: '/review',
     listPathPattern: /\/v1\/review-queue$/,
     readySelector: '.review-queue-page h1, .review-queue-done-card',
+    domRootSelector: '[data-ux="page"]',
   },
   {
     route: '/filesystem/unassigned',
     listPathPattern: /\/v1\/documents$/,
     readySelector:
       '[data-testid="library-doc-virtual-scroll"], [data-testid="library-doc-stack-list"], .library-main-card-filesystem',
+    domRootSelector: '[data-ux="page"]',
   },
   {
     route: '/documents/duplicates',
     listPathPattern: /\/v1\/duplicate-sets$/,
     readySelector: '[data-testid="duplicates-overview-page"]',
+    domRootSelector: '[data-testid="duplicates-overview-page"]',
   },
   {
     route: '/structure/labels',
     listPathPattern: /\/v1\/labels\/recommendations$/,
     readySelector: '.labels-todo-panel, .label-rec-panel',
+    domRootSelector: '[data-ux="page"]',
   },
   {
     route: '/chat',
     listPathPattern: /\/v1\/chat\/threads$/,
     readySelector: '.global-chat-page',
+    domRootSelector: '[data-ux="page"]',
   },
   {
     route: '/saved-views',
     listPathPattern: /\/v1\/saved-views$/,
     readySelector: '.saved-views-page',
+    domRootSelector: '[data-ux="page"]',
   },
 ];
 
@@ -86,7 +94,11 @@ async function measureRoute(page: Page, probe: RouteProbe): Promise<{
   await page.goto(probe.route);
   await page.locator(probe.readySelector).first().waitFor({ state: 'visible', timeout: 60_000 });
   const firstContentMs = Date.now() - started;
-  const domNodeCount = await page.evaluate(() => document.querySelectorAll('*').length);
+  const domNodeCount = await page.evaluate((domRootSelector) => {
+    const root = document.querySelector(domRootSelector);
+    const scope = root ?? document.querySelector('.app-main') ?? document.body;
+    return scope.querySelectorAll('*').length;
+  }, probe.domRootSelector);
   page.off('request', onRequest);
 
   return { route: probe.route, firstContentMs, domNodeCount, listRequestUrls };
@@ -132,6 +144,7 @@ test.describe('workstream A3 list performance', () => {
       p95Ms: percentile(timings, 0.95),
       routes: results,
       maxDomNodes: MAX_DOM_NODES,
+      domBudgetScope: 'page-root (data-ux=page or route-specific)',
     };
 
     fs.writeFileSync(path.join(artifactRoot, 'perf.json'), `${JSON.stringify(perf, null, 2)}\n`);
