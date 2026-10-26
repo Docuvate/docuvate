@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { stubPgPool } from '../../shared/infrastructure/database/pg-pool.spec-util.js';
 import { PG_POOL } from '../../shared/infrastructure/database/tokens.js';
+import { DatabaseMigrationReadinessService } from './database-migration-readiness.service.js';
 import { HealthController } from './health.controller.js';
 
 vi.mock('ioredis', () => ({
@@ -36,11 +37,24 @@ describe('HealthController ready', () => {
     vi.stubEnv('WORKER_URL', 'http://127.0.0.1:18000');
   });
 
-  async function buildController(query: ReturnType<typeof vi.fn>) {
+  async function buildController(
+    query: ReturnType<typeof vi.fn>,
+    pendingMigrations: string[] = []
+  ) {
+    const migrationReadiness = {
+      listPendingMigrationNames: vi.fn().mockResolvedValue(pendingMigrations),
+      logPendingMigrationsAtStartup: vi.fn(),
+    };
     const moduleRef = await Test.createTestingModule({
       controllers: [HealthController],
-      providers: [{ provide: PG_POOL, useValue: stubPgPool({ query }) }],
-    }).compile();
+      providers: [
+        DatabaseMigrationReadinessService,
+        { provide: PG_POOL, useValue: stubPgPool({ query }) },
+      ],
+    })
+      .overrideProvider(DatabaseMigrationReadinessService)
+      .useValue(migrationReadiness)
+      .compile();
     return moduleRef.get(HealthController);
   }
 
@@ -54,6 +68,20 @@ describe('HealthController ready', () => {
 
   it('returns ready when dependencies succeed', async () => {
     const controller = await buildController(vi.fn().mockResolvedValue({ rows: [] }));
-    await expect(controller.ready()).resolves.toMatchObject({ status: 'ready' });
+    await expect(controller.ready()).resolves.toMatchObject({
+      status: 'ready',
+      checks: { migrations: 'ok' },
+    });
+  });
+
+  it('returns degraded when database migrations are pending', async () => {
+    const controller = await buildController(
+      vi.fn().mockResolvedValue({ rows: [] }),
+      ['DocumentTagsUserConfirmed20261025210000']
+    );
+    await expect(controller.ready()).resolves.toMatchObject({
+      status: 'degraded',
+      checks: { migrations: 'fail' },
+    });
   });
 });

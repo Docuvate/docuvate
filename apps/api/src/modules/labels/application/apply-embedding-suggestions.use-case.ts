@@ -125,7 +125,7 @@ export class ApplyEmbeddingSuggestionsUseCase {
           text: `${docMeta.title}\n${docMeta.filename}\n${trimmed}`.slice(0, 12000),
         });
       }
-      const hybridModel = await this.labelHybridCache.resolveModel(userId, hybridRows);
+      const hybridModel = this.labelHybridCache.resolveModelForInference(userId, hybridRows);
       if (!hybridModel) {
         return;
       }

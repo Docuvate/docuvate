@@ -155,6 +155,40 @@ describe('LabelHybridModelCacheService', () => {
     expect(train).toHaveBeenCalledTimes(2);
   });
 
+  it('resolveModelForInference returns stale model without awaiting in-flight training', async () => {
+    let resolveTrain: ((model: LabelHybridModel | null) => void) | undefined;
+    let trainCalls = 0;
+    const train = vi.fn((): Promise<LabelHybridModel | null> => {
+      trainCalls += 1;
+      if (trainCalls === 1) {
+        return Promise.resolve(stubModel);
+      }
+      return new Promise((resolve) => {
+        resolveTrain = resolve;
+      });
+    });
+    const cache = new LabelHybridModelCacheService();
+    cache.replaceTrainer({ train });
+
+    const userId = 'user-inference';
+    const rowsV1 = seedLabeledCorpus(5, 5, 'infer');
+    await cache.resolveModel(userId, rowsV1);
+    await flushHybridTrainTimers(100, 0);
+
+    const rowsV2 = [
+      ...rowsV1,
+      labeledRow('infer-new', 'brand-new-class', 'material change'),
+    ];
+    void cache.resolveModel(userId, rowsV2);
+    await flushHybridTrainTimers(100, 1000);
+    expect(train).toHaveBeenCalledTimes(2);
+
+    const peeked = cache.resolveModelForInference(userId, rowsV2);
+    expect(peeked).toEqual(stubModel);
+    resolveTrain?.({ ...stubModel, confidenceThreshold: 0.75 });
+    await Promise.resolve();
+  });
+
   it('serves stale model while a significant revision trains in the background', async () => {
     let resolveTrain: ((model: LabelHybridModel | null) => void) | undefined;
     let trainCalls = 0;

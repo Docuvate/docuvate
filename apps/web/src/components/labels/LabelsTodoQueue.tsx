@@ -41,6 +41,9 @@ interface Props {
   loading?: boolean;
   busyId: string | null;
   documentReviewPendingCount?: number;
+  loadError?: string | null;
+  onRetryLoad?: () => void;
+  retryBusy?: boolean;
   onAccept: (
     item: LabelRecommendationDto,
     options?: LabelRecommendationAcceptOptions
@@ -260,6 +263,29 @@ export function LabelsTodoQueue(props: Props) {
       <Card className="label-rec-panel labels-todo-panel">
         <TodoHead />
         <p className="muted label-rec-hint">{t('labelRecommendations.loading')}</p>
+      </Card>
+    );
+  }
+
+  if (props.loadError) {
+    return (
+      <Card className="label-rec-panel labels-todo-panel">
+        <TodoHead />
+        <div className="labels-todo-load-error" role="alert">
+          <p className="error">{props.loadError}</p>
+          {props.onRetryLoad ? (
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={props.retryBusy}
+              onClick={() => {
+                props.onRetryLoad?.();
+              }}
+            >
+              {t('common.retry')}
+            </Button>
+          ) : null}
+        </div>
       </Card>
     );
   }

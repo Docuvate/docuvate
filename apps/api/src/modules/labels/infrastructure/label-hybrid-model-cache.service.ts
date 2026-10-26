@@ -86,6 +86,27 @@ export class LabelHybridModelCacheService {
    * Returns a cached model for inference. Retrains off-thread (debounced, threshold-gated,
    * rate-limited, single-flight globally) when user-confirmed labels change materially.
    */
+  /**
+   * Returns the best model available for inference without waiting on an in-flight retrain.
+   * Schedules background training when the confirmed-label revision changes.
+   */
+  resolveModelForInference(
+    userId: string,
+    rows: readonly LabelHybridDocumentRow[]
+  ): LabelHybridModel | null {
+    const revision = computeLabelHybridTrainingRevision(rows);
+    const entry = this.entries.get(userId) ?? createCacheEntry();
+    this.entries.set(userId, entry);
+
+    if (entry.revision === revision) {
+      return entry.model;
+    }
+
+    const staleModel = entry.model;
+    this.scheduleDebouncedTrain(userId, entry, rows, revision);
+    return staleModel;
+  }
+
   async resolveModel(
     userId: string,
     rows: readonly LabelHybridDocumentRow[]

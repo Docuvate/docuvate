@@ -18,6 +18,7 @@ import {
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
+import { formatDocumentDatePreview } from '../domain/format-document-date-preview.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
 import { type LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
 import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
@@ -63,9 +64,7 @@ function enrichWithSampleDocuments(
         title: doc.title,
         filename: doc.filename,
         status: doc.status,
-        documentDate: doc.documentDate
-          ? doc.documentDate.toISOString().slice(0, 10)
-          : null,
+        documentDate: formatDocumentDatePreview(doc.documentDate),
         similarity,
       });
     }
@@ -84,6 +83,7 @@ export class GetLabelRecommendationsUseCase {
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
+    @Inject(LabelHybridModelCacheService)
     private readonly labelHybridCache: LabelHybridModelCacheService
   ) {}
 
