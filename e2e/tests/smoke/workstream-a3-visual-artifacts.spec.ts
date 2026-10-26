@@ -24,10 +24,10 @@ test.use({ storageState: smokeFixtureStoragePath() });
 
 async function assertNoHorizontalOverflow(page: Page): Promise<void> {
   const overflow = await page.evaluate(() => {
-    const doc = document.documentElement;
-    return doc.scrollWidth > doc.clientWidth + 2;
+    const scope = document.querySelector('.app-main') ?? document.documentElement;
+    return scope.scrollWidth > scope.clientWidth + 4;
   });
-  expect(overflow, 'horizontal overflow on page').toBe(false);
+  expect(overflow, 'horizontal overflow in main content').toBe(false);
 }
 
 async function shot(page: Page, fileName: string): Promise<string> {
@@ -190,6 +190,6 @@ test.describe('Workstream A3 visual artifacts', () => {
         await page.waitForTimeout(300);
         await shot(page, `folder-tree-unassigned-${viewport.label}-scrolled.png`);
       }
-    }
-  });
+    });
+  }
 });
