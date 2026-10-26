@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { APIRequestContext } from '@playwright/test';
 
-import { smokeProvisionCredentials } from './smoke-fixture-auth';
-
 const ROOT_NAME = 'Workstream-E-Tree-Root';
 const LEVEL2_NAME = 'Workstream-E-Tree-L2';
 const LEVEL3_NAME = 'Workstream-E-Tree-L3';
@@ -88,15 +86,6 @@ export async function ensureWorkstreamEFilesystemTree(
   apiBase: string,
   webOrigin: string
 ): Promise<WorkstreamEFilesystemFixture> {
-  const creds = smokeProvisionCredentials();
-  const signIn = await request.post(`${apiBase}/api/auth/sign-in/email`, {
-    headers: { origin: webOrigin },
-    data: { email: creds.email, password: creds.password },
-  });
-  if (!signIn.ok()) {
-    throw new Error(`workstream E folder seed sign-in failed: ${signIn.status()} ${await signIn.text()}`);
-  }
-
   const root = await findOrCreateFolder(request, apiBase, webOrigin, ROOT_NAME, null);
   const level2 = await findOrCreateFolder(request, apiBase, webOrigin, LEVEL2_NAME, root.id);
   const level3 = await findOrCreateFolder(request, apiBase, webOrigin, LEVEL3_NAME, level2.id);

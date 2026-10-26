@@ -6,7 +6,6 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, request as playwrightRequest, test } from '@playwright/test';
 
 import { domRectToRect, rectsOverlap } from '../../helpers/geometry';
-import { uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 import { ensureWorkstreamEFilesystemTree } from '../../helpers/workstream-e-filesystem-fixture';
 
@@ -64,18 +63,18 @@ async function openWorkstreamEFilesystemTree(
 test.describe('Workstream E — layout, mobile, a11y', () => {
   test.describe.configure({ mode: 'serial', timeout: 120_000 });
 
-  let layoutPdfDocumentId: string | null = null;
   let workstreamBrowseFolderId: string | null = null;
 
   test.beforeAll(async () => {
-    const healthRes = await playwrightRequest.newContext().then(async (probe) => {
-      try {
-        return await probe.get(`${apiBase}/health`);
-      } finally {
-        await probe.dispose();
-      }
-    });
-    if (!healthRes.ok()) {
+    const probe = await playwrightRequest.newContext();
+    let healthOk = false;
+    try {
+      const healthRes = await probe.get(`${apiBase}/health`);
+      healthOk = healthRes.ok();
+    } finally {
+      await probe.dispose();
+    }
+    if (!healthOk) {
       return;
     }
 
@@ -85,11 +84,26 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
     try {
       const filesystem = await ensureWorkstreamEFilesystemTree(authed, apiBase, webOrigin);
       workstreamBrowseFolderId = filesystem.browseFolderId;
-      layoutPdfDocumentId = await uploadLayoutTableDocument(authed, apiBase, webOrigin);
     } finally {
       await authed.dispose();
     }
   });
+
+  async function resolveSmokePdfDocumentId(
+    page: import('@playwright/test').Page
+  ): Promise<string | null> {
+    const listRes = await page.request.get(`${apiBase}/v1/documents?limit=32`, {
+      headers: { origin: webOrigin },
+    });
+    if (!listRes.ok()) {
+      return null;
+    }
+    const body = (await listRes.json()) as {
+      items?: { id: string; mimeType?: string }[];
+    };
+    const pdf = (body.items ?? []).find((item) => item.mimeType === 'application/pdf');
+    return pdf?.id ?? null;
+  }
 
   for (const viewport of VIEWPORTS) {
     test(`F13 folder tree link vs actions (${viewport.label}px)`, async ({ page }) => {
@@ -175,9 +189,13 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
 
   test('F19 PDF viewer toolbar mobile layout at 390px', async ({ page }) => {
     await requireApi(page);
-    test.skip(!layoutPdfDocumentId, 'layout PDF fixture unavailable');
+    const pdfDocumentId = await resolveSmokePdfDocumentId(page);
+    expect(pdfDocumentId, 'smoke PDF document').toBeTruthy();
+    if (!pdfDocumentId) {
+      return;
+    }
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`${webOrigin}/documents/${layoutPdfDocumentId}`);
+    await page.goto(`${webOrigin}/documents/${pdfDocumentId}`);
     await page.locator('.pdf-viewer-toolbar').waitFor({ state: 'visible', timeout: 120_000 });
     await page.locator('.pdf-viewer-pager').waitFor({ state: 'visible', timeout: 120_000 });
     const layout = await page.evaluate(() => {
