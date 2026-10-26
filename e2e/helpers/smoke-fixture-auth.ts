@@ -1,6 +1,8 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const storagePath = path.join(process.cwd(), '.auth', 'smoke-fixture-storage.json');
+const e2ePackageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const storagePath = path.join(e2ePackageRoot, '.auth', 'smoke-fixture-storage.json');
 
 export function smokeFixtureStoragePath(): string {
   return storagePath;

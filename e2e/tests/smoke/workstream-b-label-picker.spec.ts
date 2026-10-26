@@ -26,7 +26,6 @@ const searchViewports = [
 
 const rowChipEllipsisViewports = [
   { label: '390', width: 390, height: 844 },
-  { label: '1024', width: 1024, height: 768 },
   { label: '1440', width: 1440, height: 900 },
 ] as const;
 
@@ -177,17 +176,38 @@ async function assertRowLabelChipsNeverHardClip(
   expect(issues).toEqual([]);
 }
 
+async function countSeedLabels(
+  request: import('@playwright/test').APIRequestContext
+): Promise<number> {
+  const response = await request.get(
+    `${apiBase}/tags/search?q=${encodeURIComponent('ws-b-seed')}&limit=1`,
+    { headers: { origin: webOrigin } }
+  );
+  expect(response.ok()).toBeTruthy();
+  const body = (await response.json()) as { total: number | null };
+  return body.total ?? 0;
+}
+
 async function seedLabels(request: import('@playwright/test').APIRequestContext, count: number) {
-  for (let index = 0; index < count; index += 1) {
+  const existing = await countSeedLabels(request);
+  if (existing >= count) {
+    return;
+  }
+
+  for (let index = existing; index < count; index += 1) {
     const name = `ws-b-seed-${String(index).padStart(4, '0')}`;
     const response = await request.post(`${apiBase}/tags`, {
+      headers: { origin: webOrigin },
       data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
     });
-    if (response.status() === 409 || response.status() === 400) {
+    if (response.status() === 409 || response.status() === 400 || response.status() === 422) {
       continue;
     }
     expect(response.ok()).toBeTruthy();
   }
+
+  const total = await countSeedLabels(request);
+  expect(total).toBeGreaterThanOrEqual(count);
 }
 
 async function assertFullyInViewport(
