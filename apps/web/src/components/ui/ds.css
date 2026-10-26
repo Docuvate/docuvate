@@ -30,7 +30,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--dv-radius-lg);
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
   font-weight: var(--dv-font-weight-semibold);
   flex-shrink: 0;
@@ -113,8 +113,8 @@
 }
 
 .checkbox-input:checked + .checkbox-box {
-  background: var(--dv-color-accent);
-  border-color: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
+  border-color: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 
