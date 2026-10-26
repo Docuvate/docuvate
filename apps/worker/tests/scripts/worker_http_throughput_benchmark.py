@@ -22,15 +22,17 @@ if str(_WORKER_ROOT) not in sys.path:
     sys.path.insert(0, str(_WORKER_ROOT))
 
 from tests.public_domain_dense_scans import public_domain_dense_scan_pdf
+from tests.synthetic_layout_pdfs import form_disclosure_pdf
 
-_COMPOSE_2G_CASES: tuple[tuple[int, int], ...] = ((1, 120), (1, 120))
 _STRESS_CASES: tuple[tuple[int, int], ...] = ((8, 300), (12, 280))
 
 
-def _resolve_cases(workload: str) -> tuple[tuple[int, int], ...]:
+def _resolve_pdfs(workload: str) -> list[bytes]:
     if workload == "stress":
-        return _STRESS_CASES
-    return _COMPOSE_2G_CASES
+        return [public_domain_dense_scan_pdf(pages, dpi=dpi) for pages, dpi in _STRESS_CASES]
+    # Born-digital PDF: exercises /v1/extract on a 2GiB compose worker without scan raster budget.
+    sample = form_disclosure_pdf()
+    return [sample, sample]
 
 
 def _percentile(sorted_values: list[float], p: float) -> float:
@@ -85,8 +87,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    cases = _resolve_cases(args.workload)
-    pdfs = [public_domain_dense_scan_pdf(pages, dpi=dpi) for pages, dpi in cases]
+    pdfs = _resolve_pdfs(args.workload)
     jobs = args.rounds * len(pdfs)
     durations: list[float] = []
     started = time.perf_counter()
