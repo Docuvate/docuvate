@@ -50,6 +50,14 @@ test.describe('document field regions', () => {
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
         await page.emulateMedia({ colorScheme: scheme });
         await openLayoutDocumentPage(page, layoutDocId);
+        if (viewport.name === '390' && scheme === 'light') {
+          await expect(page.locator('.layout-side-panel')).toBeVisible({ timeout: 60_000 });
+          await captureLoadedScreenshot(
+            page.locator('.document-detail-page'),
+            testInfo,
+            `field-regions-bottom-sheet-${viewport.name}-${scheme}.png`
+          );
+        }
         await page.getByRole('tab', { name: /Labels|Label/i }).click();
         await expect(page.locator('.overflow-chip-more')).toBeVisible({ timeout: 60_000 });
         await assertNoHorizontalOverflow(page);
