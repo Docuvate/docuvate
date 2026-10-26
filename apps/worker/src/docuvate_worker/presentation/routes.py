@@ -61,6 +61,7 @@ from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (
 )
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
+from docuvate_worker.presentation.extract_http_concurrency import extract_http_slot
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
 from docuvate_worker.presentation.extracted_fact_response import extracted_facts_to_response
 from docuvate_worker.presentation.extraction_block_response import extraction_blocks_to_models
@@ -151,7 +152,8 @@ def _decode_content(content_base64: str) -> bytes:
 
 
 @router.get("/health", response_model=HealthResponse)
-def health() -> HealthResponse:
+async def health() -> HealthResponse:
+    """Async so liveness probes stay fast while sync /extract blocks the thread pool."""
     return HealthResponse(status="ok")
 
 
@@ -208,13 +210,14 @@ def extract(
             body.embedding_density_state.model_dump()
         )
     try:
-        result = run_extract_isolated(
-            content=raw,
-            mime_type=body.mime_type,
-            engine=body.engine,
-            embedding_density_state=density_state,
-            build_exact_fact_index=body.build_exact_fact_index,
-        )
+        with extract_http_slot():
+            result = run_extract_isolated(
+                content=raw,
+                mime_type=body.mime_type,
+                engine=body.engine,
+                embedding_density_state=density_state,
+                build_exact_fact_index=body.build_exact_fact_index,
+            )
     except ExtractRetryableError as exc:
         raise HTTPException(
             status_code=503,

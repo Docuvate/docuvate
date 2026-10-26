@@ -36,7 +36,7 @@ _DEFAULT_RECYCLE = 40
 
 class _PooledExtractChild:
     def __init__(self, *, intra_op_threads: int) -> None:
-        self._lock = threading.Lock()
+        self._lock = threading.RLock()
         self._proc: subprocess.Popen[str] | None = None
         self._jobs_served = 0
         self._recycle_after = int(os.environ.get(_ENV_RECYCLE, str(_DEFAULT_RECYCLE)))
@@ -60,7 +60,32 @@ class _PooledExtractChild:
         self._jobs_served = 0
         pool_memory_registry().register_spawned_child()
         logger.info("extract_pool_child_started pid=%s", proc.pid)
+        self._start_stderr_drainer(proc)
         return proc
+
+    def _start_stderr_drainer(self, proc: subprocess.Popen[str]) -> None:
+        stderr = proc.stderr
+        if stderr is None:
+            return
+
+        def _drain() -> None:
+            try:
+                for line in stderr:
+                    stripped = line.strip()
+                    if stripped:
+                        logger.debug(
+                            "extract_pool_child_stderr pid=%s line=%s",
+                            proc.pid,
+                            stripped[:500],
+                        )
+            except OSError:
+                return
+
+        threading.Thread(
+            target=_drain,
+            name=f"extract-pool-stderr-{proc.pid}",
+            daemon=True,
+        ).start()
 
     def _log_exit(self, proc: subprocess.Popen[str] | None, reason: str) -> None:
         log_child_exit(
@@ -120,8 +145,13 @@ class _PooledExtractChild:
             if stdin is None or stdout is None:
                 raise RuntimeError("extract pool child missing stdio pipes")
             line = json.dumps(payload)
-            stdin.write(line + "\n")
-            stdin.flush()
+            try:
+                stdin.write(line + "\n")
+                stdin.flush()
+            except BrokenPipeError:
+                self._log_exit(proc, "broken_pipe_on_write")
+                self._close(reason="broken_pipe_on_write")
+                raise RuntimeError("extract pool child stdin broken (pipe EOF)") from None
             raw_out = stdout.readline()
             self._jobs_served += 1
             exit_after = proc.poll()
@@ -140,7 +170,10 @@ class _ExtractSubprocessPool:
     children: list[_PooledExtractChild] = field(default_factory=list)
     _assign_lock: threading.Lock = field(default_factory=threading.Lock)
     _wait_lock: threading.Lock = field(default_factory=threading.Lock)
-    _idle: threading.Condition = field(default_factory=threading.Condition)
+    _idle: threading.Condition = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._idle = threading.Condition(self._wait_lock)
 
     def run_job(self, payload: dict[str, Any], *, timeout: float) -> dict[str, Any]:
         while True:
