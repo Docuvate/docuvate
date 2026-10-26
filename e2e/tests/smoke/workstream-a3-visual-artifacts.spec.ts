@@ -78,7 +78,11 @@ test.describe('Workstream A3 visual artifacts', () => {
       await applyDocuvateLocale(page, 'en');
 
       await page.goto('/');
-      await page.locator('[data-ux="page"]').first().waitFor({ state: 'visible', timeout: 60_000 });
+      await page.locator('.dashboard-page').waitFor({ state: 'visible', timeout: 60_000 });
+      await page
+        .locator('.dashboard-grid, .dashboard-start-skeleton, .dashboard-onboarding')
+        .first()
+        .waitFor({ state: 'visible', timeout: 60_000 });
       await shot(page, `dashboard-widgets-${viewport.label}.png`);
 
       await page.goto('/review');
