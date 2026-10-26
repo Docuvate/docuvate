@@ -15,8 +15,8 @@ import {
   type DuplicateStackRepository,
 } from '../../../shared/domain/ports.js';
 import { SyncDuplicateStacksUseCase } from '../../duplicates/application/duplicate-stack.use-cases.js';
-import { isPaginatedDocumentListQuery } from '../infrastructure/document-list-pagination.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
+import { isPaginatedDocumentListQuery } from '../infrastructure/document-list-pagination.js';
 
 export interface ListedDocument {
   entity: DocumentEntity;
@@ -32,8 +32,10 @@ export interface ListedDocumentPage {
 }
 
 function filtersWithoutPagination(filters: DocumentListQuery): DocumentListQuery {
-  const { limit: _limit, cursor: _cursor, ...rest } = filters;
-  return rest;
+  const next: DocumentListQuery = { ...filters };
+  delete next.limit;
+  delete next.cursor;
+  return next;
 }
 
 @Injectable()

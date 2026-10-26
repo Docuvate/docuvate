@@ -12,7 +12,7 @@ import {
 import type { DocumentBulkRequestDto } from '../../../shared/presentation/dtos/common.dto.js';
 import type { TagSuggestionEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 import { toTagDto, toTagSuggestionDto } from '../../taxonomy/presentation/taxonomy.mapper.js';
-import type { ListedDocument, ListedDocumentPage } from '../application/list-documents.use-case.js';
+import type { ListedDocumentPage } from '../application/list-documents.use-case.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
 
 export function toDocumentBulkRequest(dto: DocumentBulkRequestDto): DocumentBulkRequest {
