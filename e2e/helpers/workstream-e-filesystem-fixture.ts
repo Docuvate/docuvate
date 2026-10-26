@@ -1,0 +1,93 @@
+// SPDX-FileCopyrightText: 2026 Thomas Faust
+// SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import type { APIRequestContext } from '@playwright/test';
+
+import {
+  type FolderListItem,
+  parseFolderBody,
+  parseFolderListBody,
+} from './json-body';
+
+const ROOT_NAME = 'Workstream-E-Tree-Root';
+const LEVEL2_NAME = 'Workstream-E-Tree-L2';
+const LEVEL3_NAME = 'Workstream-E-Tree-L3';
+
+export interface WorkstreamEFilesystemFixture {
+  rootFolderId: string;
+  level2FolderId: string;
+  browseFolderId: string;
+}
+
+async function listFolders(
+  request: APIRequestContext,
+  apiBase: string,
+  webOrigin: string
+): Promise<FolderListItem[]> {
+  const res = await request.get(`${apiBase}/v1/folders`, {
+    headers: { origin: webOrigin },
+  });
+  if (!res.ok()) {
+    throw new Error(`list folders failed: ${res.status()} ${await res.text()}`);
+  }
+  return parseFolderListBody(await res.json());
+}
+
+async function createFolder(
+  request: APIRequestContext,
+  apiBase: string,
+  webOrigin: string,
+  name: string,
+  parentId: string | null
+): Promise<FolderListItem> {
+  const res = await request.post(`${apiBase}/v1/folders`, {
+    headers: { origin: webOrigin, 'content-type': 'application/json' },
+    data: { name, parentId },
+  });
+  if (!res.ok()) {
+    throw new Error(`create folder "${name}" failed: ${res.status()} ${await res.text()}`);
+  }
+  return parseFolderBody(await res.json());
+}
+
+function findFolder(
+  items: FolderListItem[],
+  name: string,
+  parentId: string | null
+): FolderListItem | undefined {
+  return items.find((folder) => folder.name === name && folder.parentId === parentId);
+}
+
+async function findOrCreateFolder(
+  request: APIRequestContext,
+  apiBase: string,
+  webOrigin: string,
+  name: string,
+  parentId: string | null
+): Promise<FolderListItem> {
+  const items = await listFolders(request, apiBase, webOrigin);
+  const existing = findFolder(items, name, parentId);
+  if (existing) {
+    return existing;
+  }
+  return createFolder(request, apiBase, webOrigin, name, parentId);
+}
+
+/**
+ * Ensures a nested folder tree (3 levels) owned by the smoke fixture user.
+ * Used by workstream E F13 so tree rows expose add/menu actions in the sidebar.
+ */
+export async function ensureWorkstreamEFilesystemTree(
+  request: APIRequestContext,
+  apiBase: string,
+  webOrigin: string
+): Promise<WorkstreamEFilesystemFixture> {
+  const root = await findOrCreateFolder(request, apiBase, webOrigin, ROOT_NAME, null);
+  const level2 = await findOrCreateFolder(request, apiBase, webOrigin, LEVEL2_NAME, root.id);
+  const level3 = await findOrCreateFolder(request, apiBase, webOrigin, LEVEL3_NAME, level2.id);
+
+  return {
+    rootFolderId: root.id,
+    level2FolderId: level2.id,
+    browseFolderId: level3.id,
+  };
+}

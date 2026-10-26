@@ -1,0 +1,19 @@
+import { defineConfig, devices } from '@playwright/test';
+
+const webBase = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
+
+/** Workstream E regressions — no global setup (uses provision-smoke-storage.mjs). */
+export default defineConfig({
+  testDir: './tests',
+  fullyParallel: false,
+  forbidOnly: Boolean(process.env['CI']),
+  retries: process.env['CI'] ? 2 : 0,
+  workers: 1,
+  reporter: process.env['CI'] ? [['github'], ['list']] : [['list']],
+  use: {
+    baseURL: webBase,
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+  },
+  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+});

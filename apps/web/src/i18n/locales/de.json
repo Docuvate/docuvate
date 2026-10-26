@@ -65,7 +65,8 @@
     "themeSegmentLight": "Hell",
     "themeSegmentDark": "Dunkel",
     "themeSegmentSystem": "System",
-    "uiPreferenceSaveFailed": "Ihre Einstellung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
+    "uiPreferenceSaveFailed": "Ihre Einstellung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+    "skipToMain": "Zum Hauptinhalt springen"
   },
   "auth": {
     "tagline": "Belege und Dokumente mit strukturierter Extraktion.",

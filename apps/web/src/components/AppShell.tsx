@@ -78,6 +78,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <ToastGlobalBridge />
       <SaveBarLayoutSync />
       <div className={`app-shell${mobileNavOpen ? ' app-shell-mobile-nav-open' : ''}`}>
+        <a className="skip-link" href="#app-main-content">
+          {t('shell.skipToMain')}
+        </a>
         <header className="app-topbar">
           <div className="topbar-brand">
             {narrowTopbar ? (
@@ -120,7 +123,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             mobileDrawerOpen={narrowTopbar && mobileNavOpen}
             onCloseMobileDrawer={() => { setMobileNavOpen(false); }}
           />
-          <main className="app-main">
+          <main id="app-main-content" className="app-main" tabIndex={-1}>
             <ConnectionStatusBanners />
             {children}
           </main>

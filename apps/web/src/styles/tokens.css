@@ -30,6 +30,7 @@
 :root,
 [data-docuvate-theme='light'] {
   --chip-max-width: 14rem;
+  --dv-touch-target-min: 2.75rem;
   --dv-header-control-height: var(--dv-control-height);
   --dv-icon-btn-sm: var(--dv-control-icon-btn-sm);
   --dv-icon-btn-md: var(--dv-control-icon-btn-md);
@@ -37,6 +38,7 @@
 
 [data-docuvate-theme='dark'] {
   --chip-max-width: 14rem;
+  --dv-touch-target-min: 2.75rem;
   --dv-header-control-height: var(--dv-control-height);
   --dv-icon-btn-sm: var(--dv-control-icon-btn-sm);
   --dv-icon-btn-md: var(--dv-control-icon-btn-md);

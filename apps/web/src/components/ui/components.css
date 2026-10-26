@@ -156,7 +156,7 @@ a.btn:hover {
 
 .password-input-wrap .password-input {
   width: 100%;
-  padding-right: 2.75rem;
+  padding-right: calc(2.75rem + var(--dv-space-xs));
 }
 
 .password-input-toggle {
@@ -582,4 +582,35 @@ a.btn:hover {
 .switch-input:focus-visible + .switch-track {
   outline: 2px solid var(--dv-color-focus);
   outline-offset: 2px;
+}
+
+@media (max-width: 768px) {
+  :root,
+  [data-docuvate-theme='light'],
+  [data-docuvate-theme='dark'] {
+    --dv-icon-btn-sm: var(--dv-touch-target-min);
+    --dv-icon-btn-md: var(--dv-touch-target-min);
+    --dv-header-control-height: var(--dv-touch-target-min);
+  }
+
+  .topbar-icon-btn,
+  .icon-btn-sm,
+  .icon-btn-md,
+  .password-input-toggle,
+  .bulk-bar-select-all-matching,
+  .dateisystem-tree-chevron,
+  .dateisystem-tree-row .sidebar-row-action,
+  .library-table-header .checkbox-field,
+  .library-doc-row .checkbox-field,
+  .global-chat-composer textarea,
+  .layout-quality-badge-technical {
+    min-width: var(--dv-touch-target-min);
+    min-height: var(--dv-touch-target-min);
+  }
+
+  .checkbox-field:not(:has(> span:not(.checkbox-box))) {
+    min-width: var(--dv-touch-target-min);
+    min-height: var(--dv-touch-target-min);
+    justify-content: center;
+  }
 }
