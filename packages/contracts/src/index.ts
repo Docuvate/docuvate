@@ -1674,3 +1674,24 @@ export {
   parseDuplicateSetId,
 } from './duplicate-set-groups.js';
 export type { DuplicatePairEdge, DuplicatePairMetaEdge } from './duplicate-set-groups.js';
+export * from './document-regions.js';
+export {
+  TOKEN_COVERAGE_THRESHOLD,
+  GEOMETRY_HASH_DECIMALS,
+  clampUnit,
+  normalizeRect,
+  rectFromXywh,
+  rectWidth,
+  rectHeight,
+  rectArea,
+  intersectionRect,
+  tokenCoverageRatio,
+  tokenBelongsToRect,
+  tokensInsideRect,
+  snapRectToTokenHull,
+  joinedTokenText,
+  remapRegionTokens,
+  roundGeometry,
+  canonicalRegionPayload,
+} from './region-geometry.js';
+export type { NormalizedRect, LayoutToken, RemappedRegionTokens } from './region-geometry.js';

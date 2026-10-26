@@ -15,6 +15,9 @@ export class DocumentLayoutIrEntity {
   @Column('jsonb', { name: 'ir' })
   ir: Record<string, unknown>;
 
+  @Column('bytea', { name: 'ir_sha256' })
+  irSha256: Buffer;
+
   @Column('timestamp with time zone', {
     name: 'created_at',
     default: () => 'now()',

@@ -19,6 +19,8 @@ export interface FieldValueRowProps {
   sourceLabel?: string;
   onConfirm?: () => void;
   onCorrect?: () => void;
+  onDismiss?: () => void;
+  onSourceClick?: () => void;
 }
 
 export function FieldValueRow({
@@ -30,24 +32,39 @@ export function FieldValueRow({
   sourceLabel,
   onConfirm,
   onCorrect,
+  onDismiss,
+  onSourceClick,
 }: FieldValueRowProps) {
   const { t } = useTranslation();
   return (
     <article className="field-value-row">
-      <div className="field-value-row-head">
-        <p className="field-value-row-name">{fieldName}</p>
-        {state === 'suggested' && confidencePercent != null ? <Confidence value={confidencePercent} /> : null}
+      <div className="field-value-row-primary">
+        <p className="field-value-row-name" title={fieldName}>
+          {fieldName}
+        </p>
+        <p className="field-value-row-value" title={value}>
+          {value}
+        </p>
+      </div>
+      <div className="field-value-row-meta">
+        {state === 'suggested' && confidencePercent != null ? (
+          <Confidence value={confidencePercent} />
+        ) : null}
         {state === 'confirmed' ? (
           <span className="field-value-row-confirmed">
             <Check size={14} aria-hidden /> {t('ui.fieldValue.confirmed')}
           </span>
         ) : null}
         {state === 'corrected' && originalValue ? (
-          <span className="field-value-row-original">{originalValue}</span>
+          <span className="field-value-row-original" title={originalValue}>
+            {originalValue}
+          </span>
+        ) : null}
+        {sourceLabel ? (
+          <SourceChip kind="page" label={sourceLabel} onClick={onSourceClick} />
         ) : null}
       </div>
-      <div className="field-value-row-value-line">
-        <p className="field-value-row-value">{value}</p>
+      <div className="field-value-row-actions">
         {state === 'suggested' ? (
           <>
             {onConfirm ? (
@@ -60,12 +77,16 @@ export function FieldValueRow({
                 {t('ui.fieldValue.correct')}
               </Button>
             ) : null}
+            {onDismiss ? (
+              <Button type="button" size="sm" variant="ghost" onClick={onDismiss}>
+                {t('documents.layoutSuggestionDismiss')}
+              </Button>
+            ) : null}
           </>
         ) : (
           <IconButton icon={Ellipsis} label={t('ui.fieldValue.moreActions')} size="sm" />
         )}
       </div>
-      {sourceLabel ? <SourceChip kind="page" label={sourceLabel} /> : null}
     </article>
   );
 }

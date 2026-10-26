@@ -11,9 +11,12 @@ import type {
   AdminUserDto,
   AdminUserListResponse,
   ApplyDuplicateSetDecisionsRequest,
+  ApplyFieldCorrectionRequest,
+  ApplyFieldCorrectionResponse,
   ApplyLabelCorrectionResponse,
   AuthSignInOptionsDto,
   BanAdminUserRequest,
+  ConfirmDocumentFieldResponse,
   ConfirmLabelRecommendationBlocklistPatternRequest,
   ConnectorCatalogResponse,
   ConnectorInstallationDto,
@@ -40,8 +43,11 @@ import type {
   DocumentChatThreadListResponse,
   DocumentChatThreadMessagesResponse,
   DocumentDto,
+  DocumentLayoutTokensResponse,
   DocumentListQuery,
   DocumentListResponseDto,
+  DocumentRegionListResponse,
+  DocumentRegionRole,
   DocumentReviewQueueResponseDto,
   DocumentReviewQueueSummaryDto,
   DocumentTagSuggestionsBatchRequestDto,
@@ -287,6 +293,57 @@ export async function getDocument(id: string): Promise<DocumentDto> {
 
 export async function fetchDocumentLayoutIr(documentId: string): Promise<LayoutIrDocument> {
   return request<LayoutIrDocument>(`/documents/${documentId}/layout-ir`);
+}
+
+export async function listDocumentLayoutTokens(
+  documentId: string,
+  page?: number
+): Promise<DocumentLayoutTokensResponse> {
+  return request<DocumentLayoutTokensResponse>(
+    `/documents/${documentId}/layout/tokens${queryString({
+      page: page != null ? String(page) : undefined,
+    })}`
+  );
+}
+
+export async function listDocumentRegions(
+  documentId: string,
+  role?: DocumentRegionRole
+): Promise<DocumentRegionListResponse> {
+  return request<DocumentRegionListResponse>(
+    `/documents/${documentId}/regions${queryString({ role })}`
+  );
+}
+
+export async function applyDocumentFieldCorrection(
+  documentId: string,
+  body: ApplyFieldCorrectionRequest
+): Promise<ApplyFieldCorrectionResponse | null> {
+  const result = await request<ApplyFieldCorrectionResponse | undefined>(
+    `/documents/${documentId}/corrections`,
+    { method: 'POST', body: JSON.stringify(body) }
+  );
+  return result ?? null;
+}
+
+export async function withdrawDocumentFieldCorrection(
+  documentId: string,
+  correctionId: string
+): Promise<void> {
+  await requestNoContent(`/documents/${documentId}/corrections/${correctionId}/withdraw`, {
+    method: 'POST',
+  });
+}
+
+export async function confirmDocumentField(
+  documentId: string,
+  fieldKey: string,
+  value: string
+): Promise<ConfirmDocumentFieldResponse> {
+  return request<ConfirmDocumentFieldResponse>(`/documents/${documentId}/field-confirmations`, {
+    method: 'POST',
+    body: JSON.stringify({ fieldKey, value }),
+  });
 }
 
 export interface LayoutRenderResponse {

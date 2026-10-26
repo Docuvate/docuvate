@@ -764,6 +764,7 @@ export function DocumentDetailPage() {
           fields={recognizedFields}
           recognizedCatalog={recognizedCatalog}
           onFieldValueChange={onFieldValueChange}
+          onFieldsChange={setFields}
           heuristicSuggestions={heuristicSuggestions}
           highlightBlocks={highlightBlocks}
           viewerPage={viewerPage}

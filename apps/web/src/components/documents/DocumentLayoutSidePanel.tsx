@@ -1,6 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { ExtractedField, LayoutIrDocument, RecognizedFieldDefinitionDto } from '@docuvate/contracts';
+import type {
+  DocumentRegionDto,
+  ExtractedField,
+  LayoutIrDocument,
+  RecognizedFieldDefinitionDto,
+} from '@docuvate/contracts';
 import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -23,8 +28,11 @@ import {
   persistedRecognizedDefinitionIds,
   suggestionMatchesPersistedDefinition,
 } from '../../lib/recognizedFieldDefinitionIndex';
+import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { Button } from '../ui/Button';
+import { FieldValueRow } from '../ui/FieldValueRow';
 import { Input } from '../ui/Input';
+import { SourceChip } from '../ui/SourceChip';
 import { DocumentChatPanel } from './DocumentChatPanel';
 
 export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'chat';
@@ -52,6 +60,10 @@ interface DocumentLayoutSidePanelProps {
   documentChatLocalModelEnabled?: boolean;
   documentChatLocalModelReady?: boolean;
   showChatTab?: boolean;
+  fieldRegions?: DocumentRegionDto[];
+  onConfirmField?: (key: string, value: string) => void;
+  onCorrectField?: (key: string) => void;
+  onHighlightField?: (key: string) => void;
 }
 
 export function DocumentLayoutSidePanel({
@@ -75,6 +87,10 @@ export function DocumentLayoutSidePanel({
   documentChatLocalModelEnabled = false,
   documentChatLocalModelReady = false,
   showChatTab = true,
+  fieldRegions = [],
+  onConfirmField,
+  onCorrectField,
+  onHighlightField,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -249,6 +265,17 @@ export function DocumentLayoutSidePanel({
     target?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [activeOverlayId, activeTab]);
 
+  const regionByFieldKey = useMemo(() => {
+    const map = new Map<string, DocumentRegionDto>();
+    for (const region of fieldRegions) {
+      const key = region.field?.fieldKey;
+      if (key) {
+        map.set(key, region);
+      }
+    }
+    return map;
+  }, [fieldRegions]);
+
   return (
     <aside
       className={`layout-side-panel${activeTab === 'chat' ? ' layout-side-panel--chat' : ''}`}
@@ -297,27 +324,48 @@ export function DocumentLayoutSidePanel({
               <p className="muted">{t('documents.layoutFieldsEmpty')}</p>
             ) : null}
             <ul className="layout-field-list">
-              {panelFields.map((field) => (
-                <li
-                  key={field.key}
-                  className="layout-field-row"
-                  data-layout-overlay-target={fieldOverlayIdByKey.get(field.key) ?? undefined}
-                >
-                  <span className="layout-field-label">{fieldLabelForKey(field.key)}</span>
-                  {onFieldValueChange ? (
-                    <Input
-                      className="layout-field-input"
-                      value={field.value}
-                      aria-label={fieldLabelForKey(field.key)}
-                      onChange={(e) => { onFieldValueChange(field.key, e.target.value); }}
+              {panelFields.map((field) => {
+                const region = regionByFieldKey.get(field.key);
+                const sourceLabel = region
+                  ? sourceChipPageLabel(region.page, locale)
+                  : undefined;
+                return (
+                  <li
+                    key={field.key}
+                    className="layout-field-row"
+                    data-layout-overlay-target={fieldOverlayIdByKey.get(field.key) ?? undefined}
+                  >
+                    <FieldValueRow
+                      fieldName={fieldLabelForKey(field.key)}
+                      value={formatFieldValue(field.key, field.value)}
+                      state={(field.confidence ?? 1) >= 0.85 ? 'confirmed' : 'suggested'}
+                      confidencePercent={
+                        field.confidence != null ? Math.round(field.confidence * 100) : undefined
+                      }
+                      sourceLabel={sourceLabel}
+                      onConfirm={
+                        onConfirmField
+                          ? () => { onConfirmField(field.key, field.value); }
+                          : undefined
+                      }
+                      onCorrect={
+                        onCorrectField ? () => { onCorrectField(field.key); } : undefined
+                      }
+                      onSourceClick={
+                        onHighlightField ? () => { onHighlightField(field.key); } : undefined
+                      }
                     />
-                  ) : (
-                    <span className="layout-field-value">
-                      {formatFieldValue(field.key, field.value)}
-                    </span>
-                  )}
-                </li>
-              ))}
+                    {onFieldValueChange ? (
+                      <Input
+                        className="layout-field-input"
+                        value={field.value}
+                        aria-label={fieldLabelForKey(field.key)}
+                        onChange={(e) => { onFieldValueChange(field.key, e.target.value); }}
+                      />
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
             {suggestions.length > 0 ? (
               <>
@@ -329,11 +377,22 @@ export function DocumentLayoutSidePanel({
                       className="layout-field-suggestion"
                       data-layout-overlay-target={fieldOverlayIdByKey.get(s.key) ?? undefined}
                     >
-                      <div className="layout-field-suggestion-head">
-                        <span className="layout-field-suggestion-tag">{t('documents.layoutSuggestionTag')}</span>
-                        <span className="layout-field-label">{fieldLabelForKey(s.key)}</span>
+                      <div className="layout-field-suggestion-primary">
+                        <span className="layout-field-label" title={fieldLabelForKey(s.key)}>
+                          {fieldLabelForKey(s.key)}
+                        </span>
+                        <span className="layout-field-value" title={formatFieldValue(s.key, s.value)}>
+                          {formatFieldValue(s.key, s.value)}
+                        </span>
                       </div>
-                      <p className="layout-field-value">{formatFieldValue(s.key, s.value)}</p>
+                      <div className="layout-field-suggestion-meta">
+                        <span className="layout-field-suggestion-tag">{t('documents.layoutSuggestionTag')}</span>
+                        <SourceChip
+                          kind="page"
+                          label={sourceChipPageLabel(1, locale)}
+                          onClick={() => { onHighlightField?.(s.key); }}
+                        />
+                      </div>
                       {fieldSuggestionOutsideUserSchema(s.key, knownFieldKeys) ? (
                         <p className="muted layout-field-suggestion-note">
                           <span className="layout-field-suggestion-badge">

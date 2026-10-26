@@ -18,7 +18,13 @@ export interface SourceChipProps extends ButtonHTMLAttributes<HTMLButtonElement>
 export function SourceChip({ kind = 'document', label, className = '', type = 'button', ...props }: SourceChipProps) {
   const Icon = KIND_ICON[kind];
   return (
-    <button type={type} className={`source-chip${className ? ` ${className}` : ''}`.trim()} title={label} {...props}>
+    <button
+      type={type}
+      className={`source-chip${className ? ` ${className}` : ''}`.trim()}
+      title={label}
+      aria-label={label}
+      {...props}
+    >
       <Icon size={13} strokeWidth={2} aria-hidden />
       <span className="source-chip-label">{label}</span>
     </button>

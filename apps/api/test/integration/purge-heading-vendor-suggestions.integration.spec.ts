@@ -76,8 +76,8 @@ describe('purge heading vendor suggestions migration (integration)', () => {
       [headingDocId, userId]
     );
     await pool.query(
-      `INSERT INTO document_layout_ir (document_id, version, ir)
-       VALUES ($1, 1, $2::jsonb)`,
+      `INSERT INTO document_layout_ir (document_id, version, ir, ir_sha256)
+       VALUES ($1, 1, $2::jsonb, digest(convert_to($2::text, 'UTF8'), 'sha256'))`,
       [headingDocId, JSON.stringify(layoutIrWithHeading(headingTitle))]
     );
     await pool.query(
@@ -97,8 +97,8 @@ describe('purge heading vendor suggestions migration (integration)', () => {
         [docId, userId, `sender-${String(i)}.pdf`, `k${String(i + 2)}`]
       );
       await pool.query(
-        `INSERT INTO document_layout_ir (document_id, version, ir)
-         VALUES ($1, 1, $2::jsonb)`,
+        `INSERT INTO document_layout_ir (document_id, version, ir, ir_sha256)
+         VALUES ($1, 1, $2::jsonb, digest(convert_to($2::text, 'UTF8'), 'sha256'))`,
         [docId, JSON.stringify(layoutIrWithHeading('Unrelated body heading'))]
       );
       await pool.query(
