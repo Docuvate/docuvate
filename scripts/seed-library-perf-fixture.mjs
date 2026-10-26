@@ -36,6 +36,7 @@ async function main() {
     }
 
     const now = Date.now();
+    let showcaseDocumentId = null;
     for (let i = 0; i < DOC_COUNT; i += 1) {
       const id = randomUUID();
       const updatedAt = new Date(now - i * 1000);
@@ -45,13 +46,24 @@ async function main() {
         ) VALUES ($1, $2, $3, $4, 'ready', $5, 'application/pdf', $6, $6)`,
         [id, userId, `perf-${String(i)}.pdf`, `Perf document ${String(i)}`, `perf/${id}`, updatedAt]
       );
-      if (i % 7 === 0) {
+      if (i === 0) {
+        showcaseDocumentId = id;
+      }
+      if (i % 7 === 0 && i !== 0) {
         const tagId = tagIds[i % tagIds.length];
         await pool.query(
           `INSERT INTO document_tags (document_id, tag_id, user_confirmed) VALUES ($1, $2, true)`,
           [id, tagId]
         );
       }
+    }
+
+    if (showcaseDocumentId && tagIds.length > 0) {
+      await pool.query(
+        `INSERT INTO document_tag_suggestions (document_id, tag_id, reason, dismissed, source, confidence)
+         VALUES ($1, $2, 'perf-fixture', false, 'embedding', 0.92)`,
+        [showcaseDocumentId, tagIds[0]]
+      );
     }
 
     console.log(
