@@ -199,7 +199,8 @@ jobs:
           export WORKSTREAM_B_ARTIFACT_DIR="${GITHUB_WORKSPACE}/workstream-b-screenshots"
           mkdir -p "$WORKSTREAM_B_ARTIFACT_DIR"
           E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
-            pnpm --filter @docuvate/e2e exec playwright test workstream-b-label-picker
+            pnpm --filter @docuvate/e2e exec playwright test workstream-b-label-picker \
+            --config=playwright.workstream-b.config.ts
       - name: Upload Workstream B screenshots
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
