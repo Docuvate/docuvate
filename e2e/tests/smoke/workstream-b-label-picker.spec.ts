@@ -183,7 +183,10 @@ async function countSeedLabels(
     `${apiBase}/tags/search?q=${encodeURIComponent('ws-b-seed')}&limit=1`,
     { headers: { origin: webOrigin } }
   );
-  expect(response.ok()).toBeTruthy();
+  if (!response.ok()) {
+    const detail = await response.text();
+    throw new Error(`tag search failed: ${String(response.status())} ${detail}`);
+  }
   const body = (await response.json()) as { total: number | null };
   return body.total ?? 0;
 }

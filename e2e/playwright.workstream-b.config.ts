@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import { smokeFixtureStoragePath } from './helpers/smoke-fixture-auth';
+
 const webBase = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
 /** Workstream B smoke — uses provision-smoke-storage.mjs (no global-search globalSetup). */
@@ -12,6 +14,7 @@ export default defineConfig({
   reporter: process.env['CI'] ? [['github'], ['list']] : [['list']],
   use: {
     baseURL: webBase,
+    storageState: smokeFixtureStoragePath(),
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
