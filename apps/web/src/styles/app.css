@@ -88,7 +88,7 @@
 }
 
 .auth-locale .locale-switcher-btn.active {
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 
@@ -1703,7 +1703,7 @@ mark.global-search-mark {
   align-items: center;
   padding: var(--dv-space-sm) var(--dv-space-lg);
   border-bottom: 1px solid var(--dv-color-border);
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
   box-shadow: var(--dv-shadow-bar);
 }
@@ -2662,7 +2662,7 @@ mark.global-search-mark {
 }
 
 .layout-view-mode-btn-active {
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 
@@ -4267,7 +4267,7 @@ mark.global-search-mark {
 }
 
 .review-wizard-step-current .review-wizard-step-badge {
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 
@@ -6554,7 +6554,7 @@ mark.global-search-mark {
   display: inline-block;
   border-radius: var(--dv-radius-md);
   padding: var(--dv-space-xs) var(--dv-space-sm);
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
   text-decoration: none;
   font-size: 0.9rem;
@@ -6918,8 +6918,8 @@ mark.global-search-mark {
 }
 
 .connector-category-chip.active {
-  background: var(--dv-color-accent);
-  border-color: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
+  border-color: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 
@@ -13288,7 +13288,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dashboard-onboarding-step-icon-active {
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 

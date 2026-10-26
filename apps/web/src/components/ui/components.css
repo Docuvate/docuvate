@@ -73,12 +73,12 @@ a.btn:hover {
 }
 
 .btn-primary {
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--dv-color-accent-hover);
+  background: var(--dv-color-accent-fill-hover);
 }
 
 .btn-danger {
@@ -344,14 +344,14 @@ a.btn:hover {
 
 .chip-new {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   border: 1px dashed var(--dv-color-accent);
 }
 
 .chip-selected {
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
-  border: 1px solid var(--dv-color-accent);
+  border: 1px solid var(--dv-color-accent-fill);
 }
 
 .chip-remove {
