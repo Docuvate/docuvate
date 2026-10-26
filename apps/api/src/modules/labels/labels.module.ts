@@ -46,6 +46,7 @@ import {
 } from './application/document-label.use-cases.js';
 import { RecordEmbeddingFeedbackUseCase } from './application/embedding-feedback.use-case.js';
 import { EnrichLabelMapMissingHintsUseCase } from './application/enrich-label-map-missing-hints.use-case.js';
+import { GetLabelDocumentInventoryUseCase } from './application/get-label-document-inventory.use-case.js';
 import { GetLabelMapUseCase } from './application/get-label-map.use-case.js';
 import { GetLabelRecommendationsUseCase } from './application/get-label-recommendations.use-case.js';
 import {
@@ -118,6 +119,7 @@ const embeddingDensityTypeOrmImports = skipEmbeddingDensityTypeOrm
     ReplaceTagCustomFieldsUseCase,
     ApplyLabelCustomFieldsUseCase,
     GetLabelRecommendationsUseCase,
+    GetLabelDocumentInventoryUseCase,
     GetLabelMapUseCase,
     BackfillDocumentEmbeddingsUseCase,
     AcceptLabelRecommendationUseCase,

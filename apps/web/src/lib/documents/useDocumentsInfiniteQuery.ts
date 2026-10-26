@@ -30,6 +30,8 @@ export function useDocumentsInfiniteQuery(filters: DocumentListQuery | null) {
   >({
     queryKey,
     enabled: filters !== null,
+    staleTime: 30_000,
+    refetchOnMount: false,
     initialPageParam: undefined,
     queryFn: async ({ pageParam }) => {
       if (filters === null) {

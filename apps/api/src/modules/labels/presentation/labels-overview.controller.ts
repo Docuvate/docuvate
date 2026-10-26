@@ -29,6 +29,7 @@ import {
   ProposeBlocklistPatternUseCase,
   RemoveBlocklistPatternUseCase,
 } from '../application/blocklist-pattern.use-case.js';
+import { GetLabelDocumentInventoryUseCase } from '../application/get-label-document-inventory.use-case.js';
 import { GetLabelMapUseCase } from '../application/get-label-map.use-case.js';
 import { GetLabelRecommendationsUseCase } from '../application/get-label-recommendations.use-case.js';
 import {
@@ -47,6 +48,7 @@ import {
 export class LabelsOverviewController {
   constructor(
     private readonly getRecommendations: GetLabelRecommendationsUseCase,
+    private readonly getDocumentInventory: GetLabelDocumentInventoryUseCase,
     private readonly getMap: GetLabelMapUseCase,
     private readonly acceptRecommendation: AcceptLabelRecommendationUseCase,
     private readonly dismissRecommendation: DismissLabelRecommendationUseCase,
@@ -71,6 +73,15 @@ export class LabelsOverviewController {
   @ApiDocuvateRoute({ operationId: 'map', summary: 'map' })
   async map(@Session() session: AuthSession): Promise<LabelMapResponseDtoClass> {
     return this.getMap.execute(session.user.id);
+  }
+
+  @Get('document-inventory')
+  @ApiDocuvateRoute({
+    operationId: 'getLabelDocumentInventory',
+    summary: 'Ready-document label assignment inventory (slim)',
+  })
+  async documentInventory(@Session() session: AuthSession) {
+    return this.getDocumentInventory.execute(session.user.id);
   }
 
   @Post('recommendations/:id/accept')

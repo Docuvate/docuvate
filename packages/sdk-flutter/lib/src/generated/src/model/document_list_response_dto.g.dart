@@ -8,13 +8,30 @@ part of 'document_list_response_dto.dart';
 
 class _$DocumentListResponseDto extends DocumentListResponseDto {
   @override
+  final String nextCursor;
+  @override
+  final bool hasMore;
+  @override
+  final num total;
+  @override
   final BuiltList<JsonObject> items;
 
   factory _$DocumentListResponseDto(
           [void Function(DocumentListResponseDtoBuilder)? updates]) =>
       (new DocumentListResponseDtoBuilder()..update(updates))._build();
 
-  _$DocumentListResponseDto._({required this.items}) : super._() {
+  _$DocumentListResponseDto._(
+      {required this.nextCursor,
+      required this.hasMore,
+      required this.total,
+      required this.items})
+      : super._() {
+    BuiltValueNullFieldError.checkNotNull(
+        nextCursor, r'DocumentListResponseDto', 'nextCursor');
+    BuiltValueNullFieldError.checkNotNull(
+        hasMore, r'DocumentListResponseDto', 'hasMore');
+    BuiltValueNullFieldError.checkNotNull(
+        total, r'DocumentListResponseDto', 'total');
     BuiltValueNullFieldError.checkNotNull(
         items, r'DocumentListResponseDto', 'items');
   }
@@ -31,12 +48,19 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is DocumentListResponseDto && items == other.items;
+    return other is DocumentListResponseDto &&
+        nextCursor == other.nextCursor &&
+        hasMore == other.hasMore &&
+        total == other.total &&
+        items == other.items;
   }
 
   @override
   int get hashCode {
     var _$hash = 0;
+    _$hash = $jc(_$hash, nextCursor.hashCode);
+    _$hash = $jc(_$hash, hasMore.hashCode);
+    _$hash = $jc(_$hash, total.hashCode);
     _$hash = $jc(_$hash, items.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -45,6 +69,9 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
   @override
   String toString() {
     return (newBuiltValueToStringHelper(r'DocumentListResponseDto')
+          ..add('nextCursor', nextCursor)
+          ..add('hasMore', hasMore)
+          ..add('total', total)
           ..add('items', items))
         .toString();
   }
@@ -54,6 +81,18 @@ class DocumentListResponseDtoBuilder
     implements
         Builder<DocumentListResponseDto, DocumentListResponseDtoBuilder> {
   _$DocumentListResponseDto? _$v;
+
+  String? _nextCursor;
+  String? get nextCursor => _$this._nextCursor;
+  set nextCursor(String? nextCursor) => _$this._nextCursor = nextCursor;
+
+  bool? _hasMore;
+  bool? get hasMore => _$this._hasMore;
+  set hasMore(bool? hasMore) => _$this._hasMore = hasMore;
+
+  num? _total;
+  num? get total => _$this._total;
+  set total(num? total) => _$this._total = total;
 
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
@@ -67,6 +106,9 @@ class DocumentListResponseDtoBuilder
   DocumentListResponseDtoBuilder get _$this {
     final $v = _$v;
     if ($v != null) {
+      _nextCursor = $v.nextCursor;
+      _hasMore = $v.hasMore;
+      _total = $v.total;
       _items = $v.items.toBuilder();
       _$v = null;
     }
@@ -90,7 +132,15 @@ class DocumentListResponseDtoBuilder
   _$DocumentListResponseDto _build() {
     _$DocumentListResponseDto _$result;
     try {
-      _$result = _$v ?? new _$DocumentListResponseDto._(items: items.build());
+      _$result = _$v ??
+          new _$DocumentListResponseDto._(
+              nextCursor: BuiltValueNullFieldError.checkNotNull(
+                  nextCursor, r'DocumentListResponseDto', 'nextCursor'),
+              hasMore: BuiltValueNullFieldError.checkNotNull(
+                  hasMore, r'DocumentListResponseDto', 'hasMore'),
+              total: BuiltValueNullFieldError.checkNotNull(
+                  total, r'DocumentListResponseDto', 'total'),
+              items: items.build());
     } catch (_) {
       late String _$failedField;
       try {

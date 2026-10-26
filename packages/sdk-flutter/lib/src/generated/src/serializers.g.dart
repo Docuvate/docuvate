@@ -87,6 +87,9 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(DocumentReviewQueueItemDtoClass.serializer)
       ..add(DocumentReviewQueueResponseDtoClass.serializer)
       ..add(DocumentReviewQueueSummaryDtoClass.serializer)
+      ..add(DocumentTagSuggestionsBatchItemDto.serializer)
+      ..add(DocumentTagSuggestionsBatchRequestDto.serializer)
+      ..add(DocumentTagSuggestionsBatchResponseDto.serializer)
       ..add(DuplicateStackKeepVersionRequestDto.serializer)
       ..add(DuplicateStackNotDuplicateRequestDto.serializer)
       ..add(DuplicateStackSetPrimaryRequestDto.serializer)
@@ -176,7 +179,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(SetMlModelLifecycleRequestDtoLifecycleEnum.serializer)
       ..add(SftpIngressCreateAccountBodyDto.serializer)
       ..add(StartMailOAuthRequestDto.serializer)
-      ..add(TagCustomFieldListResponseDto.serializer)
+      ..add(TagCustomFieldListResponseDtoClass.serializer)
       ..add(TagListResponseDto.serializer)
       ..add(TestPaperlessConnectionRequestDto.serializer)
       ..add(TestPaperlessInstallationConnectionRequestDto.serializer)
@@ -267,6 +270,10 @@ Serializers _$serializers = (new Serializers().toBuilder()
               const [const FullType(DocumentReviewQueueItemDtoClass)]),
           () => new ListBuilder<DocumentReviewQueueItemDtoClass>())
       ..addBuilderFactory(
+          const FullType(BuiltList,
+              const [const FullType(DocumentTagSuggestionsBatchItemDto)]),
+          () => new ListBuilder<DocumentTagSuggestionsBatchItemDto>())
+      ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(ExtractedFieldDto)]),
           () => new ListBuilder<ExtractedFieldDto>())
       ..addBuilderFactory(
@@ -313,6 +320,12 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(BuiltList,
               const [const FullType(DocumentReviewFieldSuggestionDtoClass)]),
           () => new ListBuilder<DocumentReviewFieldSuggestionDtoClass>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(JsonObject)]),
+          () => new ListBuilder<JsonObject>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(JsonObject)]),
+          () => new ListBuilder<JsonObject>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(JsonObject)]),
           () => new ListBuilder<JsonObject>())
@@ -399,6 +412,9 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(
               BuiltList, const [const FullType(SavedDocumentViewDtoClass)]),
           () => new ListBuilder<SavedDocumentViewDtoClass>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
           () => new ListBuilder<String>())

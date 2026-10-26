@@ -21,6 +21,8 @@ import 'package:docuvate/src/generated/src/model/document_chat_thread_list_respo
 import 'package:docuvate/src/generated/src/model/document_chat_thread_messages_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/document_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_tag_suggestions_batch_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/document_tag_suggestions_batch_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_keep_version_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_not_duplicate_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/duplicate_stack_set_primary_request_dto.dart';
@@ -321,6 +323,112 @@ class DocumentsApi {
     }
 
     return Response<OkResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Load open tag suggestions for multiple documents (batch)
+  /// 
+  ///
+  /// Parameters:
+  /// * [documentTagSuggestionsBatchRequestDto] 
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [DocumentTagSuggestionsBatchResponseDto] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<DocumentTagSuggestionsBatchResponseDto>> batchDocumentTagSuggestions({ 
+    required DocumentTagSuggestionsBatchRequestDto documentTagSuggestionsBatchRequestDto,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/tag-suggestions';
+    final _options = Options(
+      method: r'POST',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'apiKeyAuth',
+            'keyName': 'X-Docuvate-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(DocumentTagSuggestionsBatchRequestDto);
+      _bodyData = _serializers.serialize(documentTagSuggestionsBatchRequestDto, specifiedType: _type);
+
+    } catch(error, stackTrace) {
+      throw DioException(
+         requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    DocumentTagSuggestionsBatchResponseDto? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(DocumentTagSuggestionsBatchResponseDto),
+      ) as DocumentTagSuggestionsBatchResponseDto;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<DocumentTagSuggestionsBatchResponseDto>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,
@@ -2899,6 +3007,8 @@ class DocumentsApi {
   /// * [unfiled] - When true, only documents without a folder assignment are returned.
   /// * [inbox] - When true, only documents in the inbox label are returned.
   /// * [includeTagSuggestions] - When true, include open tag suggestions on each document.
+  /// * [limit] - Maximum documents per page (default 50, max 200).
+  /// * [cursor] - Opaque cursor from a previous response `nextCursor` for the next page.
   /// * [q] 
   /// * [status] 
   /// * [tagId] 
@@ -2927,6 +3037,8 @@ class DocumentsApi {
     bool? unfiled,
     bool? inbox,
     bool? includeTagSuggestions,
+    num? limit = 50,
+    String? cursor,
     String? q,
     String? status,
     String? tagId,
@@ -2977,6 +3089,8 @@ class DocumentsApi {
       if (unfiled != null) r'unfiled': encodeQueryParameter(_serializers, unfiled, const FullType(bool)),
       if (inbox != null) r'inbox': encodeQueryParameter(_serializers, inbox, const FullType(bool)),
       if (includeTagSuggestions != null) r'includeTagSuggestions': encodeQueryParameter(_serializers, includeTagSuggestions, const FullType(bool)),
+      if (limit != null) r'limit': encodeQueryParameter(_serializers, limit, const FullType(num)),
+      if (cursor != null) r'cursor': encodeQueryParameter(_serializers, cursor, const FullType(String)),
       if (q != null) r'q': encodeQueryParameter(_serializers, q, const FullType(String)),
       if (status != null) r'status': encodeQueryParameter(_serializers, status, const FullType(String)),
       if (tagId != null) r'tagId': encodeQueryParameter(_serializers, tagId, const FullType(String)),
@@ -3512,6 +3626,62 @@ class DocumentsApi {
     ProgressCallback? onReceiveProgress,
   }) async {
     final _path = r'/documents/{id}/chat/threads/{threadId}/messages/{messageId}/stream'.replaceAll('{' r'id' '}', encodeQueryParameter(_serializers, id, const FullType(String)).toString()).replaceAll('{' r'threadId' '}', encodeQueryParameter(_serializers, threadId, const FullType(String)).toString()).replaceAll('{' r'messageId' '}', encodeQueryParameter(_serializers, messageId, const FullType(String)).toString());
+    final _options = Options(
+      method: r'GET',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'apiKey',
+            'name': 'apiKeyAuth',
+            'keyName': 'X-Docuvate-Api-Key',
+            'where': 'header',
+          },{
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
+  /// Tag suggestions batch endpoint does not support GET
+  /// 
+  ///
+  /// Parameters:
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> tagSuggestionsGetNotAllowed({ 
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/documents/tag-suggestions';
     final _options = Options(
       method: r'GET',
       headers: <String, dynamic>{

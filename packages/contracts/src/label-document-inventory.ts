@@ -3,7 +3,16 @@
 /** Minimal document shape for label assignment KPIs (library list, one row per document). */
 export type LabelInventoryDocument = {
   id: string;
+  title?: string;
+  filename?: string;
+  status?: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
   tags: { id: string; isInbox?: boolean }[];
+};
+
+export type LabelDocumentInventoryResponseDto = {
+  inventory: LabelAssignmentInventory;
+  documentCountByTagId: Record<string, number>;
+  documents: LabelInventoryDocument[];
 };
 
 export type LabelAssignmentInventory = {

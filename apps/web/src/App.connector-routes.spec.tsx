@@ -12,6 +12,8 @@ const installationId = 'inst-connector-route-1';
 
 const api = vi.hoisted(() => ({
   listConnectorInstallations: vi.fn(),
+  getConnectorInstallation: vi.fn(),
+  listConnectorInstallationSourceNodes: vi.fn(),
   getPaperlessInstallation: vi.fn(),
   getLatestPaperlessImportRun: vi.fn(),
 }));
@@ -98,6 +100,16 @@ beforeEach(async () => {
     lastSuccessfulModifiedAt: null,
   });
   api.getLatestPaperlessImportRun.mockRejectedValue(new Error('no run'));
+  api.getConnectorInstallation.mockResolvedValue({
+    id: installationId,
+    pluginId: 'paperless',
+    displayName: 'Paperless-ngx',
+    enabled: true,
+    sourceScope: { mode: 'all', paths: [] },
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  });
+  api.listConnectorInstallationSourceNodes.mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -115,5 +127,19 @@ describe('App connector routes with sourceConnectors disabled', () => {
     await waitFor(() => {
       expect(screen.getByPlaceholderText('https://paperless.example.com')).toBeTruthy();
     });
+  });
+
+  it('still renders connector sources at /settings/connectors/paperless/:connectionId/sources', async () => {
+    render(
+      <MemoryRouter
+        initialEntries={[`/settings/connectors/paperless/${installationId}/sources`]}
+      >
+        <App />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId('app-shell')).toBeTruthy();
+    });
+    expect(screen.queryByPlaceholderText('https://paperless.example.com')).toBeNull();
   });
 });

@@ -1,15 +1,19 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type pg from 'pg';
+
+import { listPendingDatabaseMigrationNamesFromPool } from '../../shared/infrastructure/database/list-pending-database-migrations.js';
+import { PG_POOL } from '../../shared/infrastructure/database/tokens.js';
 
 @Injectable()
 export class DatabaseMigrationReadinessService {
   private readonly logger = new Logger(DatabaseMigrationReadinessService.name);
 
+  constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
+
   async listPendingMigrationNames(): Promise<string[]> {
-    const { listPendingDatabaseMigrationNames } =
-      await import('../../shared/infrastructure/database/list-pending-database-migrations.js');
-    return listPendingDatabaseMigrationNames();
+    return listPendingDatabaseMigrationNamesFromPool(this.pool);
   }
 
   logPendingMigrationsAtStartup(pending: readonly string[]): void {

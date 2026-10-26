@@ -1222,6 +1222,7 @@
     "connectDisabledOAuth": "Not set up yet. Your IT team can enable sign-in.",
     "oauthNotConfiguredShort": "Not set up yet",
     "oauthAdminDetailsToggle": "Technical setup",
+    "md": "Connectors (architecture overview)",
     "oauthSetupDocLink": "Sign-in setup guide (documentation)",
     "oauthSetupDocPageTitle": "Set up sign-in for mail connections",
     "oauthSetupDocPageLead": "Steps for Google Mail and Microsoft Outlook on this server.",
@@ -1797,6 +1798,9 @@
     "correspondentsDeleteDescription": "The correspondent will be removed from your list. Existing document links are unchanged.",
     "correspondentsNewPlaceholder": "New correspondent",
     "noResults": "No matches."
+  },
+  "ai": {
+    "processed": "Processed"
   },
   "admin": {
     "accessDeniedToast": "This page is reserved for administrators.",

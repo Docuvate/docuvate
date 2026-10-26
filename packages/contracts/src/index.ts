@@ -1006,8 +1006,14 @@ export interface DocumentListQuery {
   cursor?: string;
 }
 
+/** Slim document row for list/search responses (no extraction payload or large nested fields). */
+export type DocumentListItemDto = Omit<
+  DocumentDto,
+  'extraction' | 'recognizedFieldAttempts' | 'tagSuggestions' | 'notes'
+>;
+
 export interface DocumentListResponseDto {
-  items: DocumentDto[];
+  items: DocumentListItemDto[];
   nextCursor: string | null;
   hasMore: boolean;
   /** Total rows for the current filter set; present on the first page when no `cursor` was sent. */
@@ -1479,6 +1485,7 @@ export interface BanAdminUserRequest {
 export {
   summarizeLabelAssignmentInventory,
   type LabelAssignmentInventory,
+  type LabelDocumentInventoryResponseDto,
   type LabelInventoryDocument,
 } from './label-document-inventory.js';
 

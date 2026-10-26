@@ -54,6 +54,7 @@ import type {
   GlobalSearchResponseDto,
   HardwareCapabilitiesDto,
   InviteAdminUserRequest,
+  LabelDocumentInventoryResponseDto,
   LabelMapResponseDto,
   LabelRecommendationBlocklistEntryDto,
   LabelRecommendationBlocklistPatternDto,
@@ -418,6 +419,10 @@ export async function listLabelRecommendations(): Promise<LabelRecommendationDto
 
 export async function getLabelMap(): Promise<LabelMapResponseDto> {
   return request<LabelMapResponseDto>('/labels/map');
+}
+
+export async function getLabelDocumentInventory(): Promise<LabelDocumentInventoryResponseDto> {
+  return request<LabelDocumentInventoryResponseDto>('/labels/document-inventory');
 }
 
 export async function acceptLabelRecommendation(

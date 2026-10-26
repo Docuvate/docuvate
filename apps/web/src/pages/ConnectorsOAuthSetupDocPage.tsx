@@ -21,7 +21,18 @@ export function ConnectorsOAuthSetupDocPage() {
         </div>
       </header>
       <article className="docs-markdown prose">
-        <ReactMarkdown>{oauthSetupMarkdown}</ReactMarkdown>
+        <ReactMarkdown
+          components={{
+            a: ({ href, children }) => {
+              if (href === './connectors.md' || href?.endsWith('/connectors.md')) {
+                return <span>{t('connectors.md')}</span>;
+              }
+              return <a href={href}>{children}</a>;
+            },
+          }}
+        >
+          {oauthSetupMarkdown}
+        </ReactMarkdown>
       </article>
     </div>
   );

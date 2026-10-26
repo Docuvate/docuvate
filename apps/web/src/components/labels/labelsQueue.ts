@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
-  DocumentDto,
+  LabelInventoryDocument,
   LabelRecommendationDto,
   LabelRecommendationKind,
 } from '@docuvate/contracts';
@@ -13,7 +13,7 @@ const KIND_ORDER: Record<LabelRecommendationKind, number> = {
   rename: 3,
 };
 
-function docHasNonInboxTag(doc: DocumentDto, tagId: string): boolean {
+function docHasNonInboxTag(doc: LabelInventoryDocument, tagId: string): boolean {
   return doc.tags.some((tag) => tag.id === tagId && !tag.isInbox);
 }
 
@@ -79,7 +79,7 @@ export function enrichAssignRecommendations(
 
 export function enrichMergeRecommendations(
   items: LabelRecommendationDto[],
-  documents: DocumentDto[],
+  documents: LabelInventoryDocument[],
   maxPerTag = 2
 ): LabelRecommendationDto[] {
   return items.map((item) => {
@@ -97,17 +97,17 @@ export function enrichMergeRecommendations(
       if (fromA.length < maxPerTag && docHasNonInboxTag(doc, tagA)) {
         fromA.push({
           id: doc.id,
-          title: doc.title,
-          filename: doc.filename,
-          status: doc.status,
+          title: doc.title ?? doc.id,
+          filename: doc.filename ?? '',
+          status: doc.status ?? 'ready',
         });
       }
       if (fromB.length < maxPerTag && docHasNonInboxTag(doc, tagB)) {
         fromB.push({
           id: doc.id,
-          title: doc.title,
-          filename: doc.filename,
-          status: doc.status,
+          title: doc.title ?? doc.id,
+          filename: doc.filename ?? '',
+          status: doc.status ?? 'ready',
         });
       }
       if (fromA.length >= maxPerTag && fromB.length >= maxPerTag) {
@@ -132,7 +132,7 @@ export function sortLabelQueue(items: LabelRecommendationDto[]): LabelRecommenda
 
 export function prepareLabelQueue(
   items: LabelRecommendationDto[],
-  documents: DocumentDto[]
+  documents: LabelInventoryDocument[]
 ): LabelRecommendationDto[] {
   const withAssign = enrichAssignRecommendations(items);
   return sortLabelQueue(enrichMergeRecommendations(withAssign, documents));
