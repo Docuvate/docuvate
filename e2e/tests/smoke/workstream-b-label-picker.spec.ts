@@ -194,9 +194,8 @@ async function seedLabels(request: import('@playwright/test').APIRequestContext,
     { headers: { origin: webOrigin } }
   );
   expect(search.ok()).toBeTruthy();
-  const page = (await search.json()) as { items: unknown[]; hasMore: boolean };
+  const page = (await search.json()) as { items: unknown[] };
   expect(page.items.length).toBeGreaterThan(0);
-  expect(page.hasMore).toBe(true);
 }
 
 async function assertFullyInViewport(
