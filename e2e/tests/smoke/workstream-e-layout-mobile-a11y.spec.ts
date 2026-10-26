@@ -72,6 +72,16 @@ async function openFilesystemTreeRow(page: import('@playwright/test').Page): Pro
 test.describe('Workstream E — layout, mobile, a11y', () => {
   test.describe.configure({ mode: 'serial', timeout: 120_000 });
 
+  let layoutPdfDocumentId: string | null = null;
+
+  test.beforeAll(async ({ request }) => {
+    const health = await request.get(`${apiBase}/health`);
+    if (!health.ok()) {
+      return;
+    }
+    layoutPdfDocumentId = await uploadLayoutTableDocument(request, apiBase, webOrigin);
+  });
+
   for (const viewport of VIEWPORTS) {
     test(`F13 folder tree link vs actions (${viewport.label}px)`, async ({ page }) => {
       await requireApi(page);
@@ -151,14 +161,11 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
 
   test('F19 PDF viewer toolbar mobile layout at 390px', async ({ page }) => {
     await requireApi(page);
+    test.skip(!layoutPdfDocumentId, 'layout PDF fixture unavailable');
     await page.setViewportSize({ width: 390, height: 844 });
-    const docs = await page.request.get(`${apiBase}/v1/documents?limit=1`);
-    test.skip(!docs.ok(), 'documents API unavailable');
-    const payload = (await docs.json()) as { items?: { id: string }[] };
-    const docId = payload.items?.[0]?.id;
-    test.skip(!docId, 'no documents for PDF chrome check');
-    await page.goto(`${webOrigin}/documents/${docId}`);
+    await page.goto(`${webOrigin}/documents/${layoutPdfDocumentId}`);
     await page.locator('.pdf-viewer-toolbar').waitFor({ state: 'visible', timeout: 120_000 });
+    await page.locator('.pdf-viewer-pager').waitFor({ state: 'visible', timeout: 120_000 });
     const layout = await page.evaluate(() => {
       const accessory = document.querySelector('.pdf-viewer-toolbar-accessory');
       const pager = document.querySelector('.pdf-viewer-pager');
