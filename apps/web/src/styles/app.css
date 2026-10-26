@@ -5749,7 +5749,7 @@ mark.global-search-mark {
 
 .library-table-wrap.library-table-virtual-with-folder .library-table-virtualized {
   --library-virtual-grid-cols:
-    2rem 2.5rem minmax(0, 1fr) 7.5rem minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
+    2rem 2.5rem minmax(0, 1fr) minmax(0, 7.5rem) minmax(7rem, 9rem) 8.75rem 6.25rem 4.5rem;
 }
 
 .library-table-wrap.library-table-virtual-no-folder .library-table-virtualized {
@@ -5789,8 +5789,7 @@ mark.global-search-mark {
   align-items: start;
 }
 
-.library-table.library-table-virtualized .library-table-virtual-row > td.library-col-date,
-.library-table.library-table-virtualized .library-table-virtual-row > td.library-col-action {
+.library-table.library-table-virtualized .library-table-virtual-row > td {
   padding-top: 0.35rem;
 }
 
@@ -5800,9 +5799,14 @@ mark.global-search-mark {
   max-width: none;
 }
 
+.library-table.library-table-virtualized td.library-col-labels {
+  overflow: hidden;
+}
+
 .library-table.library-table-virtualized td.library-col-labels .document-labels-cell {
   min-width: 0;
   max-width: 100%;
+  overflow: hidden;
 }
 
 .library-table.library-table-virtualized td.library-col-labels .document-label-suggestion-chips {
@@ -8233,6 +8237,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   gap: var(--dv-space-2xs);
   min-width: 0;
   max-width: 100%;
+  overflow: hidden;
 }
 
 .document-labels-visible-chip {
@@ -8296,6 +8301,10 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .document-labels-overflow-btn {
   cursor: pointer;
   font: inherit;
+}
+
+.document-labels-overflow-details:not([open]) .document-labels-overflow-popover {
+  display: none;
 }
 
 .document-labels-overflow-popover {
@@ -8401,8 +8410,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .library-table.library-table-virtualized th.library-col-labels,
 .library-table.library-table-virtualized td.library-col-labels {
   width: auto;
-  min-width: var(--library-table-labels-col-min, 10rem);
-  max-width: var(--library-table-labels-col-max, 11.5rem);
+  min-width: var(--library-table-labels-col-min, 7rem);
+  max-width: var(--library-table-labels-col-max, 9rem);
   overflow: hidden;
 }
 
