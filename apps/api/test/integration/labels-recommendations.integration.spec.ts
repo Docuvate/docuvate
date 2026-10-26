@@ -58,7 +58,8 @@ describe('GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)', 
   });
 
   it('returns recommendations for ~900 documents and 120 labels', async () => {
-    const items = await recommendations.execute(userId);
+    const { items, state } = await recommendations.execute(userId);
     expect(Array.isArray(items)).toBe(true);
+    expect(state).toBe('ready');
   });
 });

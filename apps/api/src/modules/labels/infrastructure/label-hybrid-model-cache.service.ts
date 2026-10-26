@@ -107,7 +107,7 @@ export class LabelHybridModelCacheService {
     return staleModel;
   }
 
-  async resolveModel(
+  resolveModel(
     userId: string,
     rows: readonly LabelHybridDocumentRow[]
   ): Promise<LabelHybridModel | null> {
@@ -116,21 +116,42 @@ export class LabelHybridModelCacheService {
     this.entries.set(userId, entry);
 
     if (entry.revision === revision) {
-      return entry.model;
+      return Promise.resolve(entry.model);
     }
 
     const staleModel = entry.model;
     this.scheduleDebouncedTrain(userId, entry, rows, revision);
 
     if (staleModel) {
-      return staleModel;
+      return Promise.resolve(staleModel);
     }
 
-    if (entry.trainingPromise) {
-      return entry.trainingPromise;
-    }
+    return Promise.resolve(null);
+  }
 
-    return null;
+  /**
+   * True when hybrid assign scoring must wait for a first model and training should run off-request.
+   */
+  shouldReturnWarmingResponse(
+    userId: string,
+    rows: readonly LabelHybridDocumentRow[]
+  ): boolean {
+    const revision = computeLabelHybridTrainingRevision(rows);
+    const entry = this.entries.get(userId) ?? createCacheEntry();
+    this.entries.set(userId, entry);
+
+    if (entry.revision === revision) {
+      return false;
+    }
+    if (entry.model !== null) {
+      return false;
+    }
+    const significance = evaluateRetrainSignificance(entry.retrainBaseline, rows);
+    return significance !== null;
+  }
+
+  scheduleHybridWarm(userId: string, rows: readonly LabelHybridDocumentRow[]): void {
+    this.resolveModelForInference(userId, rows);
   }
 
   private scheduleDebouncedTrain(

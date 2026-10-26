@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { useLabelsInsights } from './useLabelsInsights';
 
 vi.mock('../../lib/api', () => ({
-  listLabelRecommendations: vi.fn(() => Promise.resolve([])),
+  listLabelRecommendations: vi.fn(() => Promise.resolve({ items: [], state: 'ready' })),
   getLabelDocumentInventory: vi.fn(() =>
     Promise.resolve({
       inventory: { total: 0, labeled: 0, unlabeled: 0 },

@@ -183,6 +183,7 @@ export function LabelsPage() {
         documentCountByTagId={insights.documentCountByTagId}
         tagColorById={tagColorById}
         loading={insights.loading}
+        recommendationsWarming={insights.recommendationsWarming}
         busyId={insights.busyId}
         documentReviewPendingCount={insights.documentReviewPendingCount}
         loadError={insights.recommendationsError}

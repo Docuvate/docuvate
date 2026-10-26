@@ -7,7 +7,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  MethodNotAllowedException,
   Param,
   Patch,
   Post,
@@ -112,6 +111,7 @@ import { UploadDocumentUseCase } from '../application/upload-document.use-case.j
 import { toDocumentBulkRequest, toDocumentDto, toDocumentListResponse } from './document.mapper.js';
 import { toDocumentChatMessageRecordDto, toDocumentChatThreadDto } from './document-chat.mapper.js';
 import { parseDocumentListQuery } from './document-list-query.js';
+import { throwTagSuggestionsGetNotAllowed } from './tag-suggestions-get-not-allowed.js';
 
 @ApiDocuvateController('documents')
 @Controller('documents')
@@ -206,8 +206,8 @@ export class DocumentsController {
     operationId: 'tagSuggestionsGetNotAllowed',
     summary: 'Tag suggestions batch endpoint does not support GET',
   })
-  tagSuggestionsGetNotAllowed(): never {
-    throw new MethodNotAllowedException();
+  tagSuggestionsGetNotAllowed(@Res({ passthrough: true }) reply: FastifyReply): never {
+    return throwTagSuggestionsGetNotAllowed(reply);
   }
 
   @Post('tag-suggestions')

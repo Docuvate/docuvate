@@ -39,6 +39,7 @@ interface Props {
   documentCountByTagId: Record<string, number>;
   tagColorById: Record<string, string>;
   loading?: boolean;
+  recommendationsWarming?: boolean;
   busyId: string | null;
   documentReviewPendingCount?: number;
   loadError?: string | null;
@@ -263,6 +264,15 @@ export function LabelsTodoQueue(props: Props) {
       <Card className="label-rec-panel labels-todo-panel">
         <TodoHead />
         <p className="muted label-rec-hint">{t('labelRecommendations.loading')}</p>
+      </Card>
+    );
+  }
+
+  if (props.recommendationsWarming && ordered.length === 0) {
+    return (
+      <Card className="label-rec-panel labels-todo-panel">
+        <TodoHead />
+        <p className="muted label-rec-hint">{t('labelRecommendations.warming')}</p>
       </Card>
     );
   }

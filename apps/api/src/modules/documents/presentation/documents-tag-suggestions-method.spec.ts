@@ -1,14 +1,14 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { MethodNotAllowedException } from '@nestjs/common';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
-import { DocumentsController } from './documents.controller.js';
+import { throwTagSuggestionsGetNotAllowed } from './tag-suggestions-get-not-allowed.js';
 
-describe('DocumentsController tag-suggestions HTTP methods', () => {
-  it('rejects GET with 405', () => {
-    expect(() => DocumentsController.prototype.tagSuggestionsGetNotAllowed()).toThrow(
-      MethodNotAllowedException
-    );
+describe('tag-suggestions GET method guard', () => {
+  it('rejects GET with 405 and Allow POST', () => {
+    const header = vi.fn<(name: string, value: string) => void>();
+    expect(() => throwTagSuggestionsGetNotAllowed({ header })).toThrow(MethodNotAllowedException);
+    expect(header).toHaveBeenCalledWith('Allow', 'POST');
   });
 });

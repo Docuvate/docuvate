@@ -11,6 +11,8 @@ import type {
   LabelRecommendationBlocklistEntryDto,
   LabelRecommendationBlocklistPatternDto,
   LabelRecommendationDto,
+  LabelRecommendationListResponse,
+  LabelRecommendationsLoadState,
   ProposeLabelRecommendationBlocklistPatternRequest,
 } from '@docuvate/contracts';
 import { IsArray, IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
@@ -51,8 +53,9 @@ export class AcceptLabelRecommendationRequestDto {
   excludedDocumentIds?: string[];
 }
 
-export class LabelRecommendationListResponseDto {
+export class LabelRecommendationListResponseDto implements LabelRecommendationListResponse {
   items!: LabelRecommendationDto[];
+  state!: LabelRecommendationsLoadState;
 }
 
 export class LabelMapResponseDtoClass implements LabelMapResponseDto {

@@ -7,6 +7,7 @@ import {
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
+import { runWithRequestDeadline } from '../../../shared/infrastructure/http/request-deadline.js';
 import { OkResponseDto } from '../../../shared/presentation/dtos/common.dto.js';
 import {
   AcceptLabelRecommendationRequestDto,
@@ -42,6 +43,8 @@ import {
   RemoveRecommendationBlocklistUseCase,
 } from '../application/recommendation-blocklist.use-case.js';
 
+const LABEL_RECOMMENDATIONS_REQUEST_DEADLINE_MS = 8_000;
+
 @ApiDocuvateController('taxonomy')
 @Controller('labels')
 @UseGuards(AuthGuard)
@@ -65,8 +68,12 @@ export class LabelsOverviewController {
   async recommendations(
     @Session() session: AuthSession
   ): Promise<LabelRecommendationListResponseDto> {
-    const items = await this.getRecommendations.execute(session.user.id);
-    return { items };
+    return runWithRequestDeadline(
+      LABEL_RECOMMENDATIONS_REQUEST_DEADLINE_MS,
+      (abortSignal) =>
+        this.getRecommendations.execute(session.user.id, { abortSignal }),
+      () => ({ items: [], state: 'warming' })
+    );
   }
 
   @Get('map')

@@ -1571,6 +1571,7 @@
   "labelRecommendations": {
     "title": "Recommendations",
     "loading": "Loading suggestions…",
+    "warming": "Label suggestions are warming up in the background. They will appear here shortly.",
     "empty": "No matching suggestions yet. Check again after extraction or new documents.",
     "badgeAssign": "Assign",
     "badgeMerge": "Merge",
