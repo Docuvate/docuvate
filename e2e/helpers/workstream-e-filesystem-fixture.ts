@@ -2,6 +2,12 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { APIRequestContext } from '@playwright/test';
 
+import {
+  type FolderListItem,
+  parseFolderBody,
+  parseFolderListBody,
+} from './json-body';
+
 const ROOT_NAME = 'Workstream-E-Tree-Root';
 const LEVEL2_NAME = 'Workstream-E-Tree-L2';
 const LEVEL3_NAME = 'Workstream-E-Tree-L3';
@@ -12,29 +18,18 @@ export interface WorkstreamEFilesystemFixture {
   browseFolderId: string;
 }
 
-interface FolderDto {
-  id: string;
-  name: string;
-  parentId?: string | null;
-}
-
-interface FolderListResponse {
-  items?: FolderDto[];
-}
-
 async function listFolders(
   request: APIRequestContext,
   apiBase: string,
   webOrigin: string
-): Promise<FolderDto[]> {
+): Promise<FolderListItem[]> {
   const res = await request.get(`${apiBase}/v1/folders`, {
     headers: { origin: webOrigin },
   });
   if (!res.ok()) {
     throw new Error(`list folders failed: ${res.status()} ${await res.text()}`);
   }
-  const body = (await res.json()) as FolderListResponse;
-  return body.items ?? [];
+  return parseFolderListBody(await res.json());
 }
 
 async function createFolder(
@@ -43,7 +38,7 @@ async function createFolder(
   webOrigin: string,
   name: string,
   parentId: string | null
-): Promise<FolderDto> {
+): Promise<FolderListItem> {
   const res = await request.post(`${apiBase}/v1/folders`, {
     headers: { origin: webOrigin, 'content-type': 'application/json' },
     data: { name, parentId },
@@ -51,15 +46,15 @@ async function createFolder(
   if (!res.ok()) {
     throw new Error(`create folder "${name}" failed: ${res.status()} ${await res.text()}`);
   }
-  return (await res.json()) as FolderDto;
+  return parseFolderBody(await res.json());
 }
 
 function findFolder(
-  items: FolderDto[],
+  items: FolderListItem[],
   name: string,
   parentId: string | null
-): FolderDto | undefined {
-  return items.find((folder) => folder.name === name && (folder.parentId ?? null) === parentId);
+): FolderListItem | undefined {
+  return items.find((folder) => folder.name === name && folder.parentId === parentId);
 }
 
 async function findOrCreateFolder(
@@ -68,7 +63,7 @@ async function findOrCreateFolder(
   webOrigin: string,
   name: string,
   parentId: string | null
-): Promise<FolderDto> {
+): Promise<FolderListItem> {
   const items = await listFolders(request, apiBase, webOrigin);
   const existing = findFolder(items, name, parentId);
   if (existing) {

@@ -6,6 +6,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, request as playwrightRequest, test } from '@playwright/test';
 
 import { domRectToRect, rectsOverlap } from '../../helpers/geometry';
+import { parseDocumentListBody } from '../../helpers/json-body';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 import { ensureWorkstreamEFilesystemTree } from '../../helpers/workstream-e-filesystem-fixture';
 
@@ -98,10 +99,9 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
     if (!listRes.ok()) {
       return null;
     }
-    const body = (await listRes.json()) as {
-      items?: { id: string; mimeType?: string }[];
-    };
-    const pdf = (body.items ?? []).find((item) => item.mimeType === 'application/pdf');
+    const pdf = parseDocumentListBody(await listRes.json()).find(
+      (item) => item.mimeType === 'application/pdf'
+    );
     return pdf?.id ?? null;
   }
 
