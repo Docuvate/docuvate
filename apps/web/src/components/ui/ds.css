@@ -1099,6 +1099,22 @@
   min-width: 40rem;
 }
 
+.styles-showcase-subsection-title {
+  overflow-wrap: anywhere;
+}
+
+.styles-showcase-doc-table {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 1024px) {
+  .styles-showcase-doc-table {
+    min-width: 0;
+  }
+}
+
 .doc-table-header,
 .doc-table-row {
   display: grid;

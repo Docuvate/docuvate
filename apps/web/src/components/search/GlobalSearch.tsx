@@ -34,6 +34,7 @@ import {
 } from '../../lib/search/searchRecent';
 import { searchRegistry } from '../../lib/search/searchRegistry';
 import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
+import { getOverlayPortalRoot } from '../ui/overlay/overlayPortal';
 import { GlobalSearchHighlight } from './GlobalSearchHighlight';
 
 const DEBOUNCE_MS = 150;
@@ -608,7 +609,7 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                 ) : null}
               </div>
             </div>,
-            document.body
+            getOverlayPortalRoot('modal')
           )
         : null}
     </>

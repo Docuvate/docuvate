@@ -14,6 +14,7 @@ import {
   TAXONOMY_REPOSITORY,
   type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
+import { PgGlobalSearchRepository } from '../../search/infrastructure/pg-global-search.repository.js';
 import { deleteDocumentObjectKeys } from './delete-document-storage.js';
 
 @Injectable()
@@ -22,7 +23,8 @@ export class BulkDocumentsUseCase {
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(FOLDER_REPOSITORY) private readonly folders: FolderRepository,
-    @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage
+    @Inject(OBJECT_STORAGE) private readonly storage: ObjectStorage,
+    private readonly globalSearch: PgGlobalSearchRepository
   ) {}
 
   async execute(userId: string, body: DocumentBulkRequest): Promise<{ affected: number }> {
@@ -57,6 +59,7 @@ export class BulkDocumentsUseCase {
         return { affected };
       }
       case 'delete': {
+        await this.globalSearch.releaseDocumentVocabularyForDocuments(userId, ids);
         const deleted = await this.documents.deleteDocuments(userId, ids);
         await Promise.all(deleted.map((d) => deleteDocumentObjectKeys(this.storage, d)));
         return { affected: deleted.length };

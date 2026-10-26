@@ -35,6 +35,7 @@ import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definitio
 import {
   filterChunkFtsTermsByVocabulary,
   filterLexicalTermsByVocabularyGate,
+  resolveVocabularyGatedNameProbe,
 } from './chunk-fts-term-policy.js';
 import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
 import {
@@ -53,6 +54,10 @@ import {
   VOCABULARY_STRICT_TRGM_SQL,
 } from './global-search-vocabulary.query.js';
 import { queryWithWordSimilarityThreshold } from './pg-trgm-query.js';
+import {
+  refreshDocumentVocabularyTerms,
+  releaseDocumentVocabularyTermsBatch,
+} from './search-vocabulary-document-sync.js';
 
 const TRGM_THRESHOLD = 0.45;
 const WORD_SIM_THRESHOLD = 0.45;
@@ -169,47 +174,14 @@ export class PgGlobalSearchRepository {
     } finally {
       client.release();
     }
-    const chunkTerms = new Set<string>();
-    for (const chunk of chunks) {
-      for (const term of tokenizeSearchQuery(chunk.body)) {
-        if (term.length >= 3 && term.length <= 48) {
-          chunkTerms.add(term);
-        }
-      }
-    }
-    await this.upsertVocabularyTermBatch(userId, [...chunkTerms].slice(0, 200), 'chunk');
-    const fullText = chunks.map((c) => c.body).join(' ');
-    await this.upsertVocabularyTerms(userId, fullText.slice(0, 4000), 'document');
+    await refreshDocumentVocabularyTerms(this.pool, userId, documentId);
   }
 
-  async upsertVocabularyTermBatch(
+  async releaseDocumentVocabularyForDocuments(
     userId: string,
-    terms: string[],
-    source: 'document' | 'chunk'
+    documentIds: string[]
   ): Promise<void> {
-    const unique = [...new Set(terms)].filter((t) => t.length >= 3 && t.length <= 48);
-    if (unique.length === 0) {
-      return;
-    }
-    await this.pool.query(
-      `INSERT INTO search_vocabulary_terms (user_id, term, source, doc_frequency, updated_at)
-       SELECT $1, term, $2, 1, now()
-       FROM unnest($3::text[]) AS term
-       ON CONFLICT (user_id, term) DO UPDATE SET
-         doc_frequency = search_vocabulary_terms.doc_frequency + 1,
-         updated_at = now()`,
-      [userId, source, unique]
-    );
-  }
-
-  async upsertVocabularyTerms(
-    userId: string,
-    text: string,
-    source: 'document' | 'chunk'
-  ): Promise<void> {
-    const tokens = tokenizeSearchQuery(text);
-    const unique = [...new Set(tokens)].filter((t) => t.length >= 3 && t.length <= 48);
-    await this.upsertVocabularyTermBatch(userId, unique.slice(0, 200), source);
+    await releaseDocumentVocabularyTermsBatch(this.pool, userId, documentIds);
   }
 
   async findSimilarVocabularyTerms(
@@ -232,7 +204,8 @@ export class PgGlobalSearchRepository {
         this.pool,
         WORD_SIM_THRESHOLD,
         VOCABULARY_RELAXED_TRGM_SQL,
-        [userId, probe, limit]
+        [userId, probe, limit],
+        { similarityThreshold: MIN_QUERY_RELEVANCE_SCORE }
       );
     }
     if (result.rows.length === 0 && probe.length >= 5) {
@@ -240,7 +213,8 @@ export class PgGlobalSearchRepository {
         this.pool,
         WORD_SIM_THRESHOLD,
         VOCABULARY_SIMILARITY_FALLBACK_SQL,
-        [userId, probe, limit]
+        [userId, probe, limit],
+        { similarityThreshold: 0.25 }
       );
     }
     return result.rows.map((raw) => {
@@ -346,7 +320,11 @@ export class PgGlobalSearchRepository {
     abortSignal?: AbortSignal
   ): Promise<{ items: GlobalSearchRepositoryResult['documents']; total: number }> {
     throwIfAborted(abortSignal);
-    const lexicalTrgmProbes = buildLexicalTrgmProbes(queryTokens, expandedTerms);
+    const lexicalTrgmProbes = await filterLexicalTermsByVocabularyGate(
+      this.pool,
+      userId,
+      buildLexicalTrgmProbes(queryTokens, expandedTerms)
+    );
     const chunkFtsTerms = await filterChunkFtsTermsByVocabulary(
       this.pool,
       userId,
@@ -556,6 +534,11 @@ export class PgGlobalSearchRepository {
       const t = normalizeSearchText(token);
       if (t.length >= 3) textProbes.add(t);
     }
+    const gatedFieldProbes = await filterLexicalTermsByVocabularyGate(
+      this.pool,
+      userId,
+      [...textProbes].map((textProbe) => normalizeSearchText(textProbe))
+    );
 
     const textQueries: Promise<{
         rows: {
@@ -565,7 +548,7 @@ export class PgGlobalSearchRepository {
           score: number;
         }[];
       }>[] = [];
-    for (const textProbe of textProbes) {
+    for (const textProbe of gatedFieldProbes) {
       textQueries.push(
         queryWithWordSimilarityThreshold(
           this.pool,
@@ -706,7 +689,14 @@ export class PgGlobalSearchRepository {
     queryTokens: string[],
     limit: number
   ): Promise<{ items: GlobalSearchRepositoryResult['folders'] }> {
-    const probe = variantQueries[0] ?? q;
+    const probe = await resolveVocabularyGatedNameProbe(
+      this.pool,
+      userId,
+      variantQueries[0] ?? q
+    );
+    if (probe === null) {
+      return { items: [] };
+    }
     const result = await this.pool.query(
       `SELECT f.id, f.name,
               COUNT(d.id)::int AS document_count,
@@ -746,7 +736,14 @@ export class PgGlobalSearchRepository {
     queryTokens: string[],
     limit: number
   ): Promise<{ items: GlobalSearchRepositoryResult['labels'] }> {
-    const probe = variantQueries[0] ?? q;
+    const probe = await resolveVocabularyGatedNameProbe(
+      this.pool,
+      userId,
+      variantQueries[0] ?? q
+    );
+    if (probe === null) {
+      return { items: [] };
+    }
     const result = await this.pool.query(
       `SELECT t.id, t.name, t.color,
               COUNT(dt.document_id)::int AS document_count,

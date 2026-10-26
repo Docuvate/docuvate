@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '../ui/Button';
+import { DashboardWidgetTitle } from './DashboardWidgetTitle';
 
 interface DashboardWidgetCardProps {
   widget: DashboardWidgetDto;
@@ -52,7 +53,7 @@ export function DashboardWidgetCard({
         : {})}
     >
       <header className="dashboard-widget-header">
-        <h2 className="dashboard-widget-title">{title}</h2>
+        <DashboardWidgetTitle title={title} />
         {!editMode && headerAside ? (
           <div className="dashboard-widget-header-aside">{headerAside}</div>
         ) : null}

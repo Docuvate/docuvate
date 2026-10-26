@@ -6,6 +6,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useDialogFocusTrap } from '../../lib/useDialogFocusTrap';
+import { getOverlayPortalRoot } from '../ui/overlay/overlayPortal';
 
 interface SftpIngressManageDrawerShellProps {
   open: boolean;
@@ -90,6 +91,6 @@ export function SftpIngressManageDrawerShell({
         {children}
       </div>
     </div>,
-    document.body
+    getOverlayPortalRoot('drawer')
   );
 }

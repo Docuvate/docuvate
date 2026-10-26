@@ -6,20 +6,32 @@ import type {
   FolderDto,
   TagDto,
 } from '@docuvate/contracts';
-import { useMemo } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Button } from '../ui/Button';
 import { ContextMenuPanel } from '../ui/ContextMenu';
+import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 import { buildLibraryLabelToggleEntries } from './buildLibraryContextMenuItems';
 import { buildFolderContextMenuEntries } from './folderContextMenuEntries';
 
-function closeBulkBarMenus() {
-  document.querySelectorAll('.bulk-bar-menu[open]').forEach((node) => {
-    if (node instanceof HTMLDetailsElement) {
-      node.open = false;
-    }
-  });
+function BulkBarDropdownMenu({
+  label,
+  children,
+}: {
+  label: string;
+  children: (closeMenu: () => void) => ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const closeMenu = () => { setOpen(false); };
+  return (
+    <Menu open={open} onOpenChange={setOpen}>
+      <MenuTrigger className="bulk-bar-menu-trigger">{label}</MenuTrigger>
+      <MenuContent className="bulk-bar-menu-panel popover-surface" align="start">
+        {children(closeMenu)}
+      </MenuContent>
+    </Menu>
+  );
 }
 
 interface LibraryBulkBarProps {
@@ -111,12 +123,11 @@ export function LibraryBulkBar(props: LibraryBulkBarProps) {
             </Button>
           ) : null}
           <div className="bulk-bar-actions">
-            <details className="bulk-bar-menu">
-              <summary className="bulk-bar-menu-trigger">{t('library.contextLabels')}</summary>
-              <div className="bulk-bar-menu-panel">
-                <ContextMenuPanel items={labelMenuItems} onClose={closeBulkBarMenus} depth={0} />
-              </div>
-            </details>
+            <BulkBarDropdownMenu label={t('library.contextLabels')}>
+              {(closeMenu) => (
+                <ContextMenuPanel items={labelMenuItems} onClose={closeMenu} depth={0} />
+              )}
+            </BulkBarDropdownMenu>
             {props.onRequestBulkMove ? (
               <Button
                 type="button"
@@ -128,12 +139,11 @@ export function LibraryBulkBar(props: LibraryBulkBarProps) {
                 {t('filesystem.bulkMove')}
               </Button>
             ) : (
-              <details className="bulk-bar-menu">
-                <summary className="bulk-bar-menu-trigger">{t('library.contextSetFolder')}</summary>
-                <div className="bulk-bar-menu-panel">
-                  <ContextMenuPanel items={folderMenuItems} onClose={closeBulkBarMenus} depth={0} />
-                </div>
-              </details>
+              <BulkBarDropdownMenu label={t('library.contextSetFolder')}>
+                {(closeMenu) => (
+                  <ContextMenuPanel items={folderMenuItems} onClose={closeMenu} depth={0} />
+                )}
+              </BulkBarDropdownMenu>
             )}
             <Button
               type="button"

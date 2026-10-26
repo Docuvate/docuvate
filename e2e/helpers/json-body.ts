@@ -24,6 +24,7 @@ function requireRecord(value: unknown, label: string): Record<string, unknown> {
 
 export interface DocumentListItem {
   id: string;
+  mimeType?: string;
 }
 
 export function parseDocumentListBody(value: unknown): DocumentListItem[] {
@@ -39,9 +40,47 @@ export function parseDocumentListBody(value: unknown): DocumentListItem[] {
     if (!id) {
       continue;
     }
-    items.push({ id });
+    const mimeType = parseString(row.mimeType);
+    items.push(mimeType ? { id, mimeType } : { id });
   }
   return items;
+}
+
+export interface FolderListItem {
+  id: string;
+  name: string;
+  parentId: string | null;
+}
+
+function parseNullableUuid(value: unknown): string | null {
+  if (value === null || value === undefined) {
+    return null;
+  }
+  const parsed = parseString(value);
+  return parsed.length > 0 ? parsed : null;
+}
+
+export function parseFolderBody(value: unknown): FolderListItem {
+  const root = requireRecord(value, 'folder');
+  const id = parseString(root.id);
+  const name = parseString(root.name);
+  if (!id || !name) {
+    throw new Error('Invalid folder response');
+  }
+  return {
+    id,
+    name,
+    parentId: parseNullableUuid(root.parentId),
+  };
+}
+
+export function parseFolderListBody(value: unknown): FolderListItem[] {
+  const root = requireRecord(value, 'folder list');
+  const itemsRaw = root.items;
+  if (!Array.isArray(itemsRaw)) {
+    throw new Error('Expected folder list items array');
+  }
+  return itemsRaw.map((entry) => parseFolderBody(entry));
 }
 
 export interface AcceptLabelRecommendationBody {

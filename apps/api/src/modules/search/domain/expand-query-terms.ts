@@ -11,6 +11,8 @@ export interface VocabularyCandidate {
 
 export const MIN_VOCABULARY_SIMILARITY = 0.45;
 export const MIN_QUERY_RELEVANCE_SCORE = 0.45;
+/** Vocabulary neighbors shorter than this are never used as fuzzy expansions. */
+export const MIN_FUZZY_EXPANSION_TERM_LENGTH = 4;
 const MAX_EXPANSIONS_PER_TOKEN = 6;
 const MIN_TOKEN_LENGTH_FOR_TYPO = 5;
 
@@ -38,6 +40,9 @@ export async function expandQueryTerms(
     const normToken = normalizeSearchText(token);
     for (const n of neighbors) {
       const normTerm = normalizeSearchText(n.term);
+      if (normTerm.length < MIN_FUZZY_EXPANSION_TERM_LENGTH) {
+        continue;
+      }
       const pgOk = n.similarity >= MIN_VOCABULARY_SIMILARITY;
       const dlOk =
         normToken.length >= MIN_TOKEN_LENGTH_FOR_TYPO &&

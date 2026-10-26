@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import * as pdfjs from 'pdfjs-dist';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { formatUserFacingError } from '../../lib/apiErrors';
@@ -52,6 +52,8 @@ interface PdfViewerProps {
   onLayoutOverlaySelect?: (id: string) => void;
   onLayoutOverlayHover?: (overlay: PdfLayoutOverlay | null) => void;
   onLayoutOverlayClear?: () => void;
+  /** Renders in the PDF chrome row (e.g. layout overlay toggle on narrow viewports). */
+  toolbarAccessory?: ReactNode;
 }
 
 const DEFAULT_PAGE_SCALE = 1.25;
@@ -239,6 +241,7 @@ export function PdfViewer({
   page: controlledPage,
   onPageChange,
   onPageClick,
+  toolbarAccessory,
 }: PdfViewerProps) {
   const { t } = useTranslation();
   const pagesRef = useRef<HTMLDivElement>(null);
@@ -648,6 +651,9 @@ export function PdfViewer({
   return (
     <div className="pdf-viewer">
       <div className="pdf-viewer-toolbar">
+        {toolbarAccessory ? (
+          <div className="pdf-viewer-toolbar-accessory">{toolbarAccessory}</div>
+        ) : null}
         {paginated && pageCount > 0 ? (
           <div className="pdf-viewer-pager">
             <Button

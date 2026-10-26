@@ -10,14 +10,15 @@
     "preview": "vite preview",
     "lint": "eslint src && stylelint \"src/**/*.css\"",
     "typecheck": "tsc -b --noEmit",
-    "test": "vitest run && node ./scripts/check-ui-literals.mjs && node ./scripts/check-i18n-keys.mjs && node ../../scripts/testing/check-global-search-css-tokens.mjs",
+    "test": "vitest run && node ./scripts/check-ui-literals.mjs && node ./scripts/check-i18n-keys.mjs && node ./scripts/check-z-index-tokens.mjs && node ../../scripts/testing/check-global-search-css-tokens.mjs",
     "test:coverage": "vitest run --coverage",
-    "test:ci": "vitest run --coverage && node ./scripts/check-ui-literals.mjs && node ./scripts/check-i18n-keys.mjs && node ../../scripts/testing/check-global-search-css-tokens.mjs"
+    "test:ci": "vitest run --coverage && node ./scripts/check-ui-literals.mjs && node ./scripts/check-i18n-keys.mjs && node ./scripts/check-z-index-tokens.mjs && node ../../scripts/testing/check-global-search-css-tokens.mjs"
   },
   "dependencies": {
     "@better-auth/passkey": "1.7.7",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/utilities": "^3.2.2",
+    "@floating-ui/react": "^0.27.20",
     "@docuvate/contracts": "workspace:*",
     "@docuvate/tokens": "workspace:*",
     "@docuvate/ui-catalog": "workspace:*",
