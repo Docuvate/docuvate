@@ -61,7 +61,7 @@ const TEXT_PAIRS = [
   ['header-input-fg', 'header-input-bg'],
   ['header-control-fg', 'header-control-bg'],
   ['table-header-fg', 'bg-raised'],
-  ['on-accent', 'accent'],
+  ['on-accent', 'accent-fill'],
   ['danger', 'danger-soft'],
   ['danger-strong', 'danger-soft'],
 ];
@@ -70,7 +70,7 @@ const TEXT_PAIRS = [
 const UI_PAIRS = [
   ['header-input-placeholder', 'header-input-bg'],
   ['header-control-active-fg', 'header-control-active-bg'],
-  ['accent-contrast', 'accent'],
+  ['accent-contrast', 'accent-fill'],
   ['focus', 'bg-raised'],
   ['focus', 'bg'],
 ];
