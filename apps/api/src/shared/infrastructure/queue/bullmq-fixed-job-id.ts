@@ -1,9 +1,16 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { Job, Queue } from 'bullmq';
+/** Minimal BullMQ job surface used for fixed jobId enqueue helpers. */
+export interface BullFixedIdJob {
+  getState(): Promise<string>;
+  retry(): Promise<void>;
+  remove(): Promise<void>;
+}
 
-type BullFixedIdJob = Pick<Job, 'getState' | 'retry' | 'remove'>;
-type BullFixedIdQueue = Pick<Queue, 'getJob'>;
+/** Minimal BullMQ queue surface used for fixed jobId enqueue helpers. */
+export interface BullFixedIdQueue {
+  getJob(jobId: string): Promise<BullFixedIdJob | null | undefined>;
+}
 
 const QUEUED_JOB_STATES = new Set([
   'active',
