@@ -87,14 +87,12 @@ async function main() {
           [id, `Absender Zeile ${String(i)} — Muster GmbH & Co. KG`]
         );
       }
-      if (i < REVIEW_PENDING_COUNT) {
+      if (i < REVIEW_PENDING_COUNT && tagIds.length > 0) {
+        const suggestTagId = tagIds[(i + 3) % tagIds.length];
         await pool.query(
-          `INSERT INTO document_field_values (
-             document_id, field_storage_key, value_text, confidence,
-             value_text_norm, value_numeric, value_date
-           ) VALUES ($1, 'suggestion:vendor', $2, 0.9, lower($2), NULL, NULL)
-           ON CONFLICT (document_id, field_storage_key) DO UPDATE SET value_text = EXCLUDED.value_text`,
-          [id, `Review queue vendor ${String(i)} — Fixture GmbH`]
+          `INSERT INTO document_tag_suggestions (document_id, tag_id, reason, dismissed, source, confidence)
+           VALUES ($1, $2, 'perf-fixture-review', false, 'embedding', 0.88)`,
+          [id, suggestTagId]
         );
       }
       if (isShowcase && tagIds.length >= LONG_LABEL_NAMES.length) {
@@ -104,7 +102,7 @@ async function main() {
             [id, tagIds[t]]
           );
         }
-      } else if (i % 7 === 0 && i !== 0) {
+      } else if (i % 7 === 0 && i !== 0 && i >= REVIEW_PENDING_COUNT) {
         const tagId = tagIds[i % tagIds.length];
         await pool.query(
           `INSERT INTO document_tags (document_id, tag_id, user_confirmed) VALUES ($1, $2, true)`,
