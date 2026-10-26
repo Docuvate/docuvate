@@ -6,6 +6,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 import { domRectToRect, rectsOverlap } from '../../helpers/geometry';
+import { uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
