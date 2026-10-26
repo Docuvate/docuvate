@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type {
-  DocumentDto,
-  DuplicateStackMemberDto,
-  LibraryTableColumnId,
+import {
+  DOCUMENT_TAG_SUGGESTIONS_BATCH_MAX,
+  type DocumentDto,
+  type DuplicateStackMemberDto,
+  type LibraryTableColumnId,
 } from '@docuvate/contracts';
 import { ExternalLink, ScanLine } from 'lucide-react';
 import {
@@ -272,9 +273,13 @@ export function LibraryDocumentTable({
     scrollStorageKey: listScrollStorageKey,
   });
   const virtualRows = virtualizer.getVirtualItems();
+  const virtualWindowStart = virtualRows[0]?.index ?? 0;
   const visibleDocumentIds = useMemo(
-    () => virtualRows.map((row) => items[row.index].id),
-    [items, virtualRows]
+    () =>
+      items
+        .slice(virtualWindowStart, virtualWindowStart + DOCUMENT_TAG_SUGGESTIONS_BATCH_MAX)
+        .map((doc) => doc.id),
+    [items, virtualWindowStart]
   );
   const { suggestionsByDocumentId } = useLibraryDocumentTagSuggestions(visibleDocumentIds);
   const showFolderCol = !hideFolderColumn && showColumn(visibleColumns, 'folder');
