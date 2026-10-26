@@ -4,7 +4,7 @@
  */
 const DATABASE_URL =
   process.env.DATABASE_URL ?? 'postgresql://docuvate:docuvate@127.0.0.1:5433/docuvate';
-const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'alex.upload@fixture.docuvate.test';
+const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'smoke.bench@fixture.docuvate.test';
 const DOC_COUNT = Number(process.env.LIBRARY_PERF_DOC_COUNT ?? '5000');
 const LABEL_COUNT = Number(process.env.LIBRARY_PERF_LABEL_COUNT ?? '300');
 const REVIEW_PENDING_COUNT = Number(process.env.LIBRARY_PERF_REVIEW_PENDING_COUNT ?? '0');

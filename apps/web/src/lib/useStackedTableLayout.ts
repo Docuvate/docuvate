@@ -18,6 +18,9 @@ export function useStackedTableLayout(): boolean {
   const [matches, setMatches] = useState(readStackedTableLayout);
 
   useLayoutEffect(() => {
+    if (typeof window.matchMedia !== 'function') {
+      return;
+    }
     const mq = window.matchMedia(STACKED_TABLE_MEDIA_QUERY);
     const sync = () => { setMatches(mq.matches); };
     sync();

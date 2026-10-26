@@ -8,7 +8,7 @@ import { expect, test, type Page } from '@playwright/test';
 
 import { applyDocuvateLocale } from '../../helpers/docuvate-theme.js';
 import { assertScrollListRowsLayout } from '../../helpers/list-layout-assertions.js';
-import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth.js';
+import { smokeFixtureCredentials, smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth.js';
 
 const artifactRoot =
   process.env['WORKSTREAM_A3_ARTIFACT_DIR'] ?? '/opt/cursor/artifacts/workstream-a3';
@@ -80,11 +80,13 @@ test.describe('Workstream A3 visual artifacts', () => {
   test.beforeAll(() => {
     fs.mkdirSync(artifactRoot, { recursive: true });
     const script = path.join(process.cwd(), '..', 'scripts', 'seed-library-perf-fixture.mjs');
+    const smokeCreds = smokeFixtureCredentials();
     execFileSync('node', [script], {
       cwd: path.join(process.cwd(), '..'),
       stdio: 'inherit',
       env: {
         ...process.env,
+        E2E_SMOKE_EMAIL: smokeCreds.email,
         LIBRARY_PERF_DOC_COUNT: process.env['LIBRARY_PERF_DOC_COUNT'] ?? '1000',
         LIBRARY_PERF_LABEL_COUNT: process.env['LIBRARY_PERF_LABEL_COUNT'] ?? '300',
         LIBRARY_PERF_REVIEW_PENDING_COUNT: process.env['LIBRARY_PERF_REVIEW_PENDING_COUNT'] ?? '60',

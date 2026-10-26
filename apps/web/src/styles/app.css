@@ -13669,6 +13669,10 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   .admin-users-card-field .select-trigger {
     width: 100%;
   }
+
+  .admin-users-panel {
+    overflow: visible;
+  }
 }
 .dashboard-add-row {
   display: flex;
