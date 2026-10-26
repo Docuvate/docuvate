@@ -4,6 +4,7 @@ import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nest
 import { Queue, UnrecoverableError, Worker } from 'bullmq';
 import type IORedis from 'ioredis';
 
+import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
 import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-sample-config.js';
 import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
@@ -16,11 +17,10 @@ import {
   createValkeyConnection,
   waitForValkeyReady,
 } from '../../../shared/infrastructure/valkey/valkey-connection.js';
-import { DOCUMENT_REPOSITORY, type DocumentRepository } from '../../../shared/domain/ports.js';
 import { RunArenaSampleCompareUseCase } from '../../documents/application/run-arena-sample-compare.use-case.js';
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
-import { EXTRACTION_DEADLINE_FAILURE_I18N_KEY, extractionDeadlineMaxRetries } from '../domain/extraction-deadline.config.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
+import { EXTRACTION_DEADLINE_FAILURE_I18N_KEY, extractionDeadlineMaxRetries } from '../domain/extraction-deadline.config.js';
 import {
   documentExtractionConcurrency,
   extractionJobId,

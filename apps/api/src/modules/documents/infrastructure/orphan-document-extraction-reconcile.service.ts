@@ -71,7 +71,7 @@ export class OrphanDocumentExtractionReconcileService implements OnModuleInit, O
   }
 
   private async listOrphanCandidates(): Promise<OrphanRow[]> {
-    const result = await this.pool.query(
+    const result = await this.pool.query<{ id: string; user_id: string }>(
       `SELECT id, user_id
        FROM documents
        WHERE status IN ('queued', 'extracting')`

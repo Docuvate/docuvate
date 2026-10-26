@@ -11,8 +11,8 @@ import {
   workerCompareTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
-import { WorkerExtractCapacityCoordinator } from '../../extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { withWorkerExtractSlot } from '../../extraction/infrastructure/with-worker-extract-slot.js';
+import { WorkerExtractCapacityCoordinator } from '../../extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { PgDocumentRepresentationRepository } from '../infrastructure/pg-document-representation.repository.js';
 import { PersistDocumentRepresentationUseCase } from './persist-document-representation.use-case.js';
 

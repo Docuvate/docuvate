@@ -22,9 +22,10 @@ describe('OrphanDocumentExtractionReconcileService', () => {
         })
       ),
     });
+    const enqueue = vi.fn(() => Promise.resolve());
     const extractionQueue = createDocumentExtractionEnqueueStub({
       isJobQueuedOrActive: vi.fn(() => Promise.resolve(false)),
-      enqueue: vi.fn(() => Promise.resolve()),
+      enqueue,
     });
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -38,7 +39,7 @@ describe('OrphanDocumentExtractionReconcileService', () => {
     const count = await service.reconcileOnce();
 
     expect(count).toBe(1);
-    expect(extractionQueue.enqueue).toHaveBeenCalledWith('doc-1', 'user-1');
+    expect(enqueue).toHaveBeenCalledWith('doc-1', 'user-1');
   });
 
   it('skips documents that already have an active queue job', async () => {
@@ -53,8 +54,10 @@ describe('OrphanDocumentExtractionReconcileService', () => {
         })
       ),
     });
+    const enqueue = vi.fn(() => Promise.resolve());
     const extractionQueue = createDocumentExtractionEnqueueStub({
       isJobQueuedOrActive: vi.fn(() => Promise.resolve(true)),
+      enqueue,
     });
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -68,6 +71,6 @@ describe('OrphanDocumentExtractionReconcileService', () => {
     const count = await service.reconcileOnce();
 
     expect(count).toBe(0);
-    expect(extractionQueue.enqueue).not.toHaveBeenCalled();
+    expect(enqueue).not.toHaveBeenCalled();
   });
 });

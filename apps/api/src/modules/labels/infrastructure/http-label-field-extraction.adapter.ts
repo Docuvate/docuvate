@@ -13,12 +13,12 @@ import {
   parseOptionalNumber,
   parseString,
 } from '../../../shared/infrastructure/database/row-parse.js';
+import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
+import { withWorkerExtractSlot } from '../../extraction/infrastructure/with-worker-extract-slot.js';
 import {
   parseWorkerRetryAfterSeconds,
   WorkerExtractCapacityCoordinator,
 } from '../../extraction/infrastructure/worker-extract-capacity.coordinator.js';
-import { withWorkerExtractSlot } from '../../extraction/infrastructure/with-worker-extract-slot.js';
-import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 
 function parseExtractedFields(raw: unknown): ExtractedField[] {
   if (!Array.isArray(raw)) {

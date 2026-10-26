@@ -26,6 +26,7 @@ import {
   workerCompareTimeoutMs,
 } from '../../../shared/infrastructure/worker/worker-fetch.js';
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
+import { parseExtractedFacts } from '../../exact-facts/infrastructure/parse-extracted-facts.js';
 import { extractionWorkerFetchTimeoutMs } from '../domain/extraction-deadline.config.js';
 import {
   isWorkerExtractDeadlineResponse,
@@ -33,7 +34,6 @@ import {
   WorkerExtractDeadlineError,
   workerExtractDeadlineFailureMessage,
 } from '../domain/extraction-worker-errors.js';
-import { parseExtractedFacts } from '../../exact-facts/infrastructure/parse-extracted-facts.js';
 import {
   parseWorkerRetryAfterSeconds,
   WorkerExtractCapacityCoordinator,

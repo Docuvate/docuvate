@@ -44,7 +44,6 @@ import { ListDocumentChatThreadMessagesUseCase } from './application/list-docume
 import { ListDocumentChatThreadsUseCase } from './application/list-document-chat-threads.use-case.js';
 import { ListDocumentsUseCase } from './application/list-documents.use-case.js';
 import { MoveDocumentsUseCase } from './application/move-documents.use-case.js';
-import { DOCUMENT_EXTRACTION_ENQUEUE } from './domain/document-extraction-enqueue.token.js';
 import { QueueExtractionUseCase } from './application/queue-extraction.use-case.js';
 import { RefreshHeuristicFieldSuggestionsUseCase } from './application/refresh-heuristic-field-suggestions.use-case.js';
 import { RequeueDocumentExtractionUseCase } from './application/requeue-document-extraction.use-case.js';
@@ -56,12 +55,13 @@ import { SendDocumentChatThreadMessageUseCase } from './application/send-documen
 import { StreamDocumentChatMessageUseCase } from './application/stream-document-chat-message.use-case.js';
 import { UpdateDocumentUseCase } from './application/update-document.use-case.js';
 import { UploadDocumentUseCase } from './application/upload-document.use-case.js';
+import { DOCUMENT_EXTRACTION_ENQUEUE } from './domain/document-extraction-enqueue.token.js';
 import { DocumentChatGenerationActiveRegistry } from './infrastructure/document-chat-generation-active.registry.js';
 import { DocumentChatGenerationCancelRegistry } from './infrastructure/document-chat-generation-cancel.registry.js';
 import { DocumentChatGenerationQueueService } from './infrastructure/document-chat-generation-queue.service.js';
 import { FailedDocumentExtractionReconcileService } from './infrastructure/failed-document-extraction-reconcile.service.js';
-import { OrphanDocumentExtractionReconcileService } from './infrastructure/orphan-document-extraction-reconcile.service.js';
 import { HeuristicFieldSuggestionsBackfillService } from './infrastructure/heuristic-field-suggestions-backfill.service.js';
+import { OrphanDocumentExtractionReconcileService } from './infrastructure/orphan-document-extraction-reconcile.service.js';
 import { PgDocumentReviewQueueRepository } from './infrastructure/pg-document-review-queue.repository.js';
 import { PgInstallationUserCountReader } from './infrastructure/pg-installation-user-count.reader.js';
 import { StaleChatGenerationReconcileService } from './infrastructure/stale-chat-generation-reconcile.service.js';

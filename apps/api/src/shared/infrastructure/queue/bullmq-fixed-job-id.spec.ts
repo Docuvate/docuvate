@@ -19,17 +19,18 @@ function mockJob(state: string, overrides?: { retry?: () => Promise<void> }) {
 describe('bullmq-fixed-job-id', () => {
   it('removes completed jobs before re-add', async () => {
     const job = mockJob('completed');
-    await clearStaleBullJobForFixedId(job as never);
+    await clearStaleBullJobForFixedId(job);
     expect(job.remove).toHaveBeenCalled();
   });
 
   it('retries failed jobs when retry succeeds', async () => {
     const job = mockJob('failed', {
-      retry: vi.fn(async () => {
+      retry: vi.fn(() => {
         job.getState = vi.fn(() => Promise.resolve('waiting'));
+        return Promise.resolve();
       }),
     });
-    await clearStaleBullJobForFixedId(job as never);
+    await clearStaleBullJobForFixedId(job);
     expect(job.retry).toHaveBeenCalled();
     expect(job.remove).not.toHaveBeenCalled();
   });
@@ -38,7 +39,7 @@ describe('bullmq-fixed-job-id', () => {
     const queue = {
       getJob: vi.fn(() => Promise.resolve(mockJob('active'))),
     };
-    const result = await prepareBullFixedJobIdForAdd(queue as never, 'document-extract-x');
+    const result = await prepareBullFixedJobIdForAdd(queue, 'document-extract-x');
     expect(result).toBe('already-queued');
   });
 
@@ -50,18 +51,18 @@ describe('bullmq-fixed-job-id', () => {
         .mockResolvedValueOnce(failed)
         .mockResolvedValueOnce(null),
     };
-    const result = await prepareBullFixedJobIdForAdd(queue as never, 'document-extract-x');
+    const result = await prepareBullFixedJobIdForAdd(queue, 'document-extract-x');
     expect(result).toBe('add');
     expect(failed.remove).toHaveBeenCalled();
   });
 
   it('assert throws when job missing', async () => {
     const queue = { getJob: vi.fn(() => Promise.resolve(null)) };
-    await expect(assertBullFixedJobIdQueued(queue as never, 'j1')).rejects.toThrow(/missing/);
+    await expect(assertBullFixedJobIdQueued(queue, 'j1')).rejects.toThrow(/missing/);
   });
 
   it('assert passes for waiting jobs', async () => {
     const queue = { getJob: vi.fn(() => Promise.resolve(mockJob('waiting'))) };
-    await assertBullFixedJobIdQueued(queue as never, 'j1');
+    await assertBullFixedJobIdQueued(queue, 'j1');
   });
 });
