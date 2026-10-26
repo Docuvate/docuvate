@@ -178,5 +178,8 @@ test.describe('workstream A3 list performance', () => {
     };
 
     fs.writeFileSync(path.join(artifactRoot, 'perf.json'), `${JSON.stringify(perf, null, 2)}\n`);
+    console.log(
+      `workstream-a3-perf first-content p50=${String(perf.p50Ms)}ms p95=${String(perf.p95Ms)}ms`
+    );
   });
 });
