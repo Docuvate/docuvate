@@ -18,7 +18,7 @@ def test_run_job_raises_retryable_when_stdout_times_out(monkeypatch: pytest.Monk
     proc.stdin = MagicMock()
     proc.stdout = MagicMock()
     proc.stdout.readline.return_value = ""
-    child._proc = proc  # noqa: SLF001
+    child.bind_subprocess_for_testing(proc)
 
     with (
         patch(

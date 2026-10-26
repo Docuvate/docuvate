@@ -2,27 +2,28 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 
+import { createDocumentExtractionEnqueueStub } from '../../../test-support/document-extraction-enqueue.stub.js';
+import { createOrphanReconcileDbStub } from '../../../test-support/orphan-reconcile-db.stub.js';
 import { OrphanDocumentExtractionReconcileService } from './orphan-document-extraction-reconcile.service.js';
 
 describe('OrphanDocumentExtractionReconcileService', () => {
   it('re-enqueues queued documents without a BullMQ job', async () => {
-    const pool = {
+    const pool = createOrphanReconcileDbStub({
       query: vi.fn(() =>
         Promise.resolve({
           rows: [{ id: 'doc-1', user_id: 'user-1' }],
+          rowCount: 1,
+          command: 'SELECT',
+          oid: 0,
+          fields: [],
         })
       ),
-    };
-    const extractionQueue = {
+    });
+    const extractionQueue = createDocumentExtractionEnqueueStub({
       isJobQueuedOrActive: vi.fn(() => Promise.resolve(false)),
       enqueue: vi.fn(() => Promise.resolve()),
-    };
-    const service = new OrphanDocumentExtractionReconcileService(
-      // @ts-expect-error partial pg.Pool stub for unit test
-      pool,
-      // @ts-expect-error partial ExtractionQueueService stub for unit test
-      extractionQueue
-    );
+    });
+    const service = new OrphanDocumentExtractionReconcileService(pool, extractionQueue);
 
     const count = await service.reconcileOnce();
 
@@ -31,23 +32,21 @@ describe('OrphanDocumentExtractionReconcileService', () => {
   });
 
   it('skips documents that already have an active queue job', async () => {
-    const pool = {
+    const pool = createOrphanReconcileDbStub({
       query: vi.fn(() =>
         Promise.resolve({
           rows: [{ id: 'doc-1', user_id: 'user-1' }],
+          rowCount: 1,
+          command: 'SELECT',
+          oid: 0,
+          fields: [],
         })
       ),
-    };
-    const extractionQueue = {
+    });
+    const extractionQueue = createDocumentExtractionEnqueueStub({
       isJobQueuedOrActive: vi.fn(() => Promise.resolve(true)),
-      enqueue: vi.fn(),
-    };
-    const service = new OrphanDocumentExtractionReconcileService(
-      // @ts-expect-error partial pg.Pool stub for unit test
-      pool,
-      // @ts-expect-error partial ExtractionQueueService stub for unit test
-      extractionQueue
-    );
+    });
+    const service = new OrphanDocumentExtractionReconcileService(pool, extractionQueue);
 
     const count = await service.reconcileOnce();
 

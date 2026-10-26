@@ -3,14 +3,15 @@
 import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
-import { type DocumentRepository } from '../../../shared/domain/ports.js';
+import { type DocumentRepository, type ObjectStorage } from '../../../shared/domain/ports.js';
+import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { RunExtractionUseCase } from './run-extraction.use-case.js';
 
 async function buildUseCase(options: {
   extractError?: Error;
   updateStatus: ReturnType<typeof vi.fn<DocumentRepository['updateStatus']>>;
 }): Promise<RunExtractionUseCase> {
-  const documents = {
+  const documents = createDocumentRepositoryStub({
     findById: vi.fn().mockResolvedValue({
       id: 'doc-1',
       userId: 'user-1',
@@ -22,10 +23,11 @@ async function buildUseCase(options: {
     }),
     tryClaimForExtraction: vi.fn().mockResolvedValue('claimed'),
     updateStatus: options.updateStatus,
-    setPreviewStorageKey: vi.fn(),
-    saveExtraction: vi.fn(),
-    saveExtractionImages: vi.fn(),
-    setHeuristicFieldExtractorVersion: vi.fn(),
+  });
+  const storage: ObjectStorage = {
+    putObject: vi.fn(),
+    getObject: vi.fn().mockResolvedValue(Buffer.from('pdf')),
+    deleteObject: vi.fn(),
   };
   const extraction = {
     extract: options.extractError
@@ -50,9 +52,8 @@ async function buildUseCase(options: {
         provide: RunExtractionUseCase,
         useFactory: () =>
           new RunExtractionUseCase(
-            // @ts-expect-error partial DocumentRepository stub for unit test
             documents,
-            { getObject: vi.fn().mockResolvedValue(Buffer.from('pdf')) },
+            storage,
             extraction,
             postOcr,
             scheduleDuplicates,

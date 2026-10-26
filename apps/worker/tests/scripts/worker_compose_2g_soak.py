@@ -34,7 +34,7 @@ _PERMANENT_MARKERS = (
 def _build_corpus() -> list[tuple[str, bytes]]:
     items: list[tuple[str, bytes]] = []
     items.append(("born_digital", form_disclosure_pdf()))
-    for pages in (1, 2, 3):
+    for pages in (1, 2, 3, 42):
         for dpi in (120, 150, 180):
             label = f"scan_p{pages}_d{dpi}"
             items.append((label, public_domain_dense_scan_pdf(pages, dpi=dpi)))
@@ -101,6 +101,7 @@ def main() -> int:
     successes = 0
     permanent_memory = 0
     retryable = 0
+    deadline_exceeded = 0
     other_failures = 0
     peak_cgroup_bytes = 0
     cgroup_limit_bytes: int | None = None
@@ -131,6 +132,8 @@ def main() -> int:
             successes += 1
         elif status == 503:
             retryable += 1
+            if "extract_deadline_exceeded" in detail or "ExtractDeadlineExceeded" in detail:
+                deadline_exceeded += 1
         elif status == 422 and any(marker in detail for marker in _PERMANENT_MARKERS):
             permanent_memory += 1
         else:
@@ -138,6 +141,7 @@ def main() -> int:
     elapsed = time.monotonic() - started
     docs_per_min = (successes / elapsed) * 60.0 if elapsed > 0 else 0.0
     _sample_cgroup()
+    after_capacity = _get_capacity(args.base_url)
     result = {
         "mode": "compose_2g_soak",
         "capacity_recommended_slots": recommended,
@@ -148,7 +152,9 @@ def main() -> int:
         "permanent_memory_failures": permanent_memory,
         "permanent_422_memory": permanent_memory,
         "retryable_503": retryable,
-        "memory_pressure_503": retryable,
+        "extract_deadline_503": deadline_exceeded,
+        "memory_pressure_503": max(0, retryable - deadline_exceeded),
+        "capacity_slots_free_after": after_capacity.get("extractSlotsFree"),
         "other_failures": other_failures,
         "docs_per_min": round(docs_per_min, 2),
         "corpus_size": len(corpus),

@@ -11,6 +11,7 @@ from docuvate_worker.infrastructure.extract_memory.pool_memory import (
     pool_memory_registry,
     pool_resident_bytes_per_child,
 )
+from docuvate_worker.presentation.extract_subprocess_pool import evict_idle_pool_children
 
 _ENV_KEEP_MODELS = "DOCUVATE_EXTRACT_KEEP_MODELS"
 _ENV_CHILD_LOOP = "DOCUVATE_EXTRACT_CHILD_LOOP"
@@ -33,10 +34,6 @@ def evictable_pool_model_bytes() -> int:
 
 def reclaim_model_memory_for_admission() -> int:
     """Unload idle pool children to free cgroup memory; return estimated bytes reclaimed."""
-    from docuvate_worker.presentation.extract_subprocess_pool import (  # noqa: PLC0415
-        evict_idle_pool_children,
-    )
-
     return evict_idle_pool_children(keep=0)
 
 

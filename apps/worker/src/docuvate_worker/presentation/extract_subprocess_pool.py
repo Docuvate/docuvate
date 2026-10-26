@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from docuvate_worker.domain.extract_errors import ExtractRetryableError
+from docuvate_worker.presentation.extract_active import attach_pool_child_to_active
 
 from docuvate_worker.infrastructure.extract_memory.child_process_diagnostics import (
     describe_child_exit,
@@ -176,10 +177,12 @@ class _PooledExtractChild:
         except OSError:
             return
 
+    def bind_subprocess_for_testing(self, proc: subprocess.Popen[str]) -> None:
+        """Test hook: attach a mock child process without spawning."""
+        self._proc = proc
+
     def run_job(self, payload: dict[str, Any], *, timeout: float) -> dict[str, Any]:
         self._cancel_requested.clear()
-        from docuvate_worker.presentation.extract_active import attach_pool_child_to_active  # noqa: PLC0415
-
         attach_pool_child_to_active(self)
         with self._lock:
             if self._proc is not None and self._proc.poll() is not None:

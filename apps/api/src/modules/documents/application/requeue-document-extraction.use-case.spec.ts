@@ -3,24 +3,24 @@
 import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
 import { RequeueDocumentExtractionUseCase } from './requeue-document-extraction.use-case.js';
 
 describe('RequeueDocumentExtractionUseCase', () => {
   it('queues extraction for a failed document', async () => {
     const queueExtraction = { execute: vi.fn().mockResolvedValue(undefined) };
-    const documents = {
+    const documents = createDocumentRepositoryStub({
       findByIdForUser: vi.fn().mockResolvedValue({
         id: 'doc-1',
         status: 'failed',
+        userId: 'user-1',
       }),
-    };
+    });
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
           provide: RequeueDocumentExtractionUseCase,
-          useFactory: () =>
-            // @ts-expect-error partial DocumentRepository stub for unit test
-            new RequeueDocumentExtractionUseCase(documents, queueExtraction),
+          useFactory: () => new RequeueDocumentExtractionUseCase(documents, queueExtraction),
         },
       ],
     }).compile();
