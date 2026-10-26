@@ -21,6 +21,8 @@ const AUTHENTICATED_ROUTES: { path: string; slug: string }[] = [
   { path: '/documents', slug: 'documents' },
   { path: '/settings', slug: 'settings' },
   { path: '/structure/labels', slug: 'labels' },
+  { path: '/settings/connectors', slug: 'connectors' },
+  { path: '/filesystem', slug: 'filesystem' },
 ];
 
 async function assertColorContrast(page: import('@playwright/test').Page, label: string): Promise<void> {

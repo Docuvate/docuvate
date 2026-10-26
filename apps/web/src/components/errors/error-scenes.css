@@ -420,7 +420,7 @@
 
 .error-scene-meta .ds-error-technical-details-toggle {
   font-size: var(--dv-font-size-sm);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   padding: 0;
   text-decoration: underline;
   text-underline-offset: 0.15rem;

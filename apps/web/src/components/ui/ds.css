@@ -9,7 +9,7 @@
 }
 
 .logo-mark {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .logo-mark {
@@ -145,7 +145,7 @@
 }
 
 .radio-input:checked + .radio-dot {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   box-shadow: inset 0 0 0 1px var(--dv-color-accent);
 }
 
@@ -266,9 +266,9 @@
 }
 
 .tab-active {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: var(--dv-font-weight-semibold);
-  border-bottom-color: var(--dv-color-accent);
+  border-bottom-color: var(--dv-color-accent-text);
 }
 
 .tab-bar {
@@ -287,7 +287,7 @@
 }
 
 .breadcrumb-link {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: none;
 }
 
@@ -322,7 +322,7 @@
 
 .nav-item-active {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: var(--dv-font-weight-semibold);
 }
 
@@ -471,7 +471,7 @@
 }
 
 .document-tile-selected {
-  border-color: var(--dv-color-accent);
+  border-color: var(--dv-color-accent-text);
   box-shadow: inset 0 0 0 1px var(--dv-color-accent);
 }
 
@@ -556,7 +556,7 @@
   align-items: center;
   justify-content: center;
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .ds-empty-state-title {
@@ -635,12 +635,12 @@
   align-items: center;
   justify-content: center;
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .docuvate-error-page .ds-error-screen-icon {
   background: color-mix(in srgb, var(--dv-color-accent) 16%, var(--dv-color-bg-raised));
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .ds-error-screen-title {
@@ -690,7 +690,7 @@
 
 .ds-error-code-details-link {
   font-size: var(--dv-font-size-xs);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   text-decoration: underline;
   text-underline-offset: 0.125rem;
 }

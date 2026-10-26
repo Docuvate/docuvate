@@ -21,6 +21,8 @@ const AUTHENTICATED_CAPTURES: { path: string; slug: string }[] = [
   { path: '/documents', slug: 'documents' },
   { path: '/settings', slug: 'settings' },
   { path: '/structure/labels', slug: 'labels' },
+  { path: '/settings/connectors', slug: 'connectors' },
+  { path: '/filesystem', slug: 'filesystem' },
 ];
 
 type ManifestEntry = {
