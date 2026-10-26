@@ -47,6 +47,20 @@
   --scalar-sidebar-item-hover-color: var(--scalar-sidebar-color-active);
 }
 
+.scalar-embed .scalar-app .sidebar-heading-link-title {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.25;
+  max-width: 100%;
+}
+
+.scalar-embed .scalar-app .sidebar-pages > li > .sidebar-heading {
+  max-height: 3.5rem;
+  overflow: hidden;
+}
+
 .scalar-embed-light .scalar-app .sidebar-heading:hover .sidebar-heading-link-title {
   color: #cb3a00 !important;
 }
