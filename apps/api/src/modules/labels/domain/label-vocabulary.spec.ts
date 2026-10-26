@@ -15,6 +15,18 @@ describe('label candidate validation', () => {
   it('detects near duplicate names', () => {
     expect(namesAreNearDuplicate('Rechnung', 'Rechnungen')).toBe(true);
     expect(namesAreNearDuplicate('Haus', 'Photovoltaik')).toBe(false);
+    expect(
+      namesAreNearDuplicate(
+        'Betriebskostenabrechnungsnachzahlungsfestsetzungsbescheid-01-aaaaaaaa',
+        'Betriebskostenabrechnungsnachzahlungsfestsetzungsbescheid-02-bbbbbbbb'
+      )
+    ).toBe(true);
+    expect(
+      namesAreNearDuplicate(
+        `x${'a'.repeat(32)}${'a'.repeat(32)}01`,
+        `x${'b'.repeat(32)}${'b'.repeat(32)}02`
+      )
+    ).toBe(false);
   });
 
   it('rejects PDF producer metadata as label names', () => {

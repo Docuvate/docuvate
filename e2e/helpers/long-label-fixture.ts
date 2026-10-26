@@ -4,14 +4,15 @@ import { randomUUID } from 'node:crypto';
 
 import type { APIRequestContext } from '@playwright/test';
 
-const LONG_STEM =
-  'Betriebskostenabrechnungsnachzahlungsfestsetzungsbescheid';
-
+/**
+ * Long enough to force chip ellipsis, but not near-duplicates: a shared German
+ * stem fails CreateTag (levenshtein ≤ 0.22 or substring of an existing tag).
+ */
 export function longLabelNames(count = 25): string[] {
   const names: string[] = [];
   for (let index = 1; index <= count; index += 1) {
-    const suffix = `-${String(index).padStart(2, '0')}-${randomUUID().slice(0, 8)}`;
-    names.push(`${LONG_STEM}${suffix}`);
+    const unique = randomUUID().replace(/-/g, '');
+    names.push(`x${unique}${unique}${String(index).padStart(2, '0')}`);
   }
   return names;
 }
