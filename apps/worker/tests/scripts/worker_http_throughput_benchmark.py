@@ -23,7 +23,14 @@ if str(_WORKER_ROOT) not in sys.path:
 
 from tests.public_domain_dense_scans import public_domain_dense_scan_pdf
 
-_CASES: tuple[tuple[int, int], ...] = ((8, 300), (12, 280))
+_COMPOSE_2G_CASES: tuple[tuple[int, int], ...] = ((1, 120), (1, 120))
+_STRESS_CASES: tuple[tuple[int, int], ...] = ((8, 300), (12, 280))
+
+
+def _resolve_cases(workload: str) -> tuple[tuple[int, int], ...]:
+    if workload == "stress":
+        return _STRESS_CASES
+    return _COMPOSE_2G_CASES
 
 
 def _percentile(sorted_values: list[float], p: float) -> float:
@@ -70,9 +77,16 @@ def main() -> int:
     parser.add_argument("--rounds", type=int, default=2)
     parser.add_argument("--concurrency", type=int, default=2)
     parser.add_argument("--timeout-seconds", type=float, default=900.0)
+    parser.add_argument(
+        "--workload",
+        default=os.environ.get("WORKER_HTTP_BENCH_WORKLOAD", "compose_2g"),
+        choices=("compose_2g", "stress"),
+        help="compose_2g: single-page scans that pass 2GiB admission; stress: multi-page lab PDFs",
+    )
     args = parser.parse_args()
 
-    pdfs = [public_domain_dense_scan_pdf(pages, dpi=dpi) for pages, dpi in _CASES]
+    cases = _resolve_cases(args.workload)
+    pdfs = [public_domain_dense_scan_pdf(pages, dpi=dpi) for pages, dpi in cases]
     jobs = args.rounds * len(pdfs)
     durations: list[float] = []
     started = time.perf_counter()
@@ -103,6 +117,7 @@ def main() -> int:
     durations.sort()
     result = {
         "mode": "http_extract_compose_worker",
+        "workload": args.workload,
         "concurrency": args.concurrency,
         "jobs": jobs,
         "wall_seconds": round(elapsed, 3),

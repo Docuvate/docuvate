@@ -18,5 +18,6 @@ echo "=== worker HTTP extract throughput (compose worker, default env) ==="
 "${COMPOSE[@]}" exec -T worker \
   python tests/scripts/worker_http_throughput_benchmark.py \
   --base-url "http://127.0.0.1:8000" \
-  --rounds "${WORKER_HTTP_BENCH_ROUNDS:-2}" \
-  --concurrency "${WORKER_HTTP_BENCH_CONCURRENCY:-2}"
+  --rounds "${WORKER_HTTP_BENCH_ROUNDS:-4}" \
+  --concurrency "${WORKER_HTTP_BENCH_CONCURRENCY:-1}" \
+  --workload "${WORKER_HTTP_BENCH_WORKLOAD:-compose_2g}"
