@@ -3,11 +3,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, request as playwrightRequest, test } from '@playwright/test';
 
 import { domRectToRect, rectsOverlap } from '../../helpers/geometry';
 import { uploadLayoutTableDocument } from '../../helpers/layout-chat-fixture';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
+import { ensureWorkstreamEFilesystemTree } from '../../helpers/workstream-e-filesystem-fixture';
 
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -43,60 +44,73 @@ async function screenshotLoaded(
   return filePath;
 }
 
-async function openFilesystemTreeRow(page: import('@playwright/test').Page): Promise<boolean> {
-  await page.goto(`${webOrigin}/filesystem`, { waitUntil: 'domcontentloaded' });
-  await page.locator('.dateisystem-sidebar').waitFor({ state: 'visible', timeout: 90_000 });
-  const existing = page.locator('.dateisystem-tree-row').first();
-  if (await existing.isVisible().catch(() => false)) {
-    return true;
-  }
-  const foldersRes = await page.request.get(`${apiBase}/v1/folders`, {
-    headers: { origin: webOrigin },
+async function openWorkstreamEFilesystemTree(
+  page: import('@playwright/test').Page,
+  browseFolderId: string
+): Promise<void> {
+  await page.goto(`${webOrigin}/filesystem/folders/${browseFolderId}`, {
+    waitUntil: 'domcontentloaded',
   });
-  if (!foldersRes.ok()) {
-    return false;
-  }
-  const foldersPayload = (await foldersRes.json()) as { id?: string }[] | { items?: { id: string }[] };
-  const folderList = Array.isArray(foldersPayload)
-    ? foldersPayload
-    : foldersPayload.items ?? [];
-  const folderId = folderList[0]?.id;
-  if (!folderId) {
-    return false;
-  }
-  await page.goto(`${webOrigin}/filesystem/folders/${folderId}`, { waitUntil: 'domcontentloaded' });
-  await page.locator('.dateisystem-tree-row').first().waitFor({ state: 'visible', timeout: 90_000 });
-  return true;
+  await page.locator('.dateisystem-sidebar').waitFor({ state: 'visible', timeout: 90_000 });
+  const row = page
+    .locator('.dateisystem-tree-row')
+    .filter({ has: page.locator('.dateisystem-tree-menu-btn, .dateisystem-tree-add-btn') })
+    .first();
+  await row.waitFor({ state: 'visible', timeout: 90_000 });
+  await row.scrollIntoViewIfNeeded();
+  await row.hover();
 }
 
 test.describe('Workstream E — layout, mobile, a11y', () => {
   test.describe.configure({ mode: 'serial', timeout: 120_000 });
 
   let layoutPdfDocumentId: string | null = null;
+  let workstreamBrowseFolderId: string | null = null;
 
-  test.beforeAll(async ({ request }) => {
-    const health = await request.get(`${apiBase}/health`);
-    if (!health.ok()) {
+  test.beforeAll(async () => {
+    const healthRes = await playwrightRequest.newContext().then(async (probe) => {
+      try {
+        return await probe.get(`${apiBase}/health`);
+      } finally {
+        await probe.dispose();
+      }
+    });
+    if (!healthRes.ok()) {
       return;
     }
-    layoutPdfDocumentId = await uploadLayoutTableDocument(request, apiBase, webOrigin);
+
+    const authed = await playwrightRequest.newContext({
+      storageState: smokeFixtureStoragePath(),
+    });
+    try {
+      const filesystem = await ensureWorkstreamEFilesystemTree(authed, apiBase, webOrigin);
+      workstreamBrowseFolderId = filesystem.browseFolderId;
+      layoutPdfDocumentId = await uploadLayoutTableDocument(authed, apiBase, webOrigin);
+    } finally {
+      await authed.dispose();
+    }
   });
 
   for (const viewport of VIEWPORTS) {
     test(`F13 folder tree link vs actions (${viewport.label}px)`, async ({ page }) => {
       await requireApi(page);
+      expect(workstreamBrowseFolderId, 'workstream E filesystem fixture').toBeTruthy();
+      if (!workstreamBrowseFolderId) {
+        return;
+      }
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      const hasRow = await openFilesystemTreeRow(page);
-      test.skip(!hasRow, 'no filesystem folders in smoke fixture');
-      const overlap = await page.evaluate(() => {
-        const row = document.querySelector('.dateisystem-tree-row');
-        if (!row) {
-          return { ok: false as const, reason: 'missing row' };
-        }
-        const link = row.querySelector('a.dateisystem-tree-link');
-        const action = row.querySelector('.dateisystem-tree-actions button, .dateisystem-tree-actions .sidebar-row-action');
+      await openWorkstreamEFilesystemTree(page, workstreamBrowseFolderId);
+      const row = page
+        .locator('.dateisystem-tree-row')
+        .filter({ has: page.locator('.dateisystem-tree-menu-btn, .dateisystem-tree-add-btn') })
+        .first();
+      const overlap = await row.evaluate((treeRow) => {
+        const link = treeRow.querySelector('a.dateisystem-tree-link');
+        const action = treeRow.querySelector(
+          '.dateisystem-tree-actions .dateisystem-tree-menu-btn, .dateisystem-tree-actions .dateisystem-tree-add-btn'
+        );
         if (!link || !action) {
-          return { ok: true as const, skipped: 'no action control' };
+          return { ok: false as const, reason: 'missing link or action control' };
         }
         const lr = link.getBoundingClientRect();
         const ar = action.getBoundingClientRect();

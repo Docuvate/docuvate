@@ -6,9 +6,14 @@ export function smokeFixtureStoragePath(): string {
   return storagePath;
 }
 
-export function smokeFixtureCredentials(): { email: string; password: string } {
+/** Credentials used by `e2e/scripts/provision-smoke-storage.mjs` in CI smoke. */
+export function smokeProvisionCredentials(): { email: string; password: string } {
   return {
-    email: process.env['E2E_SMOKE_EMAIL'] ?? 'alex.upload@fixture.docuvate.test',
-    password: process.env['E2E_SMOKE_PASSWORD'] ?? 'E2eSmokeFixture1!',
+    email: process.env['E2E_SMOKE_EMAIL'] ?? 'smoke.bench@fixture.docuvate.test',
+    password: process.env['E2E_SMOKE_PASSWORD'] ?? 'SmokeBenchFixture1!',
   };
+}
+
+export function smokeFixtureCredentials(): { email: string; password: string } {
+  return smokeProvisionCredentials();
 }
