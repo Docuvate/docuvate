@@ -161,6 +161,11 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${webOrigin}/documents`);
     await page.locator('.app-topbar').waitFor({ state: 'visible', timeout: 60_000 });
+    await page.locator('.topbar-menu-trigger').waitFor({ state: 'visible', timeout: 30_000 });
+    await page.locator('.library-documents-panel, .library-table-loading').first().waitFor({
+      state: 'visible',
+      timeout: 60_000,
+    });
     const undersized = await page.evaluate(
       ({ minPx, tolerance }) => {
         const selectors = [
@@ -234,6 +239,10 @@ test.describe('Workstream E — layout, mobile, a11y', () => {
     await requireApi(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`${webOrigin}/login/two-factor`);
+    const twoFactorCard = page.locator('.auth-card--two-factor');
+    if (!(await twoFactorCard.isVisible({ timeout: 5_000 }).catch(() => false))) {
+      test.skip(true, '2FA screen requires an in-progress sign-in session');
+    }
     const footer = page.locator('.auth-screen-footer');
     await footer.waitFor({ state: 'visible', timeout: 30_000 });
     const links = footer.locator('a');
