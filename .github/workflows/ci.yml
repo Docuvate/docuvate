@@ -139,6 +139,7 @@ jobs:
           DOCUVATE_API_IMAGE: docuvate-api
           DOCUVATE_WEB_IMAGE: docuvate-web
           DOCUVATE_WORKER_IMAGE: docuvate-worker
+          WORKER_COMPOSE_2G_SOAK: '0'
         run: bash scripts/ci/smoke.sh
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
       - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
@@ -248,6 +249,10 @@ jobs:
           path: workstream-b-screenshots/
           retention-days: 14
           if-no-files-found: warn
+      - name: Worker 2GiB compose soak (HTTP /v1/extract, after web e2e)
+        env:
+          WORKER_SOAK_MIN_DOCS: '20'
+        run: bash apps/worker/tests/scripts/worker_compose_2g_soak.sh
 
   db-migrate-fresh:
     runs-on: ubuntu-latest

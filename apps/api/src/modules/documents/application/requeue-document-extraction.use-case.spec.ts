@@ -18,9 +18,12 @@ describe('RequeueDocumentExtractionUseCase', () => {
     };
     const moduleRef = await Test.createTestingModule({
       providers: [
-        RequeueDocumentExtractionUseCase,
-        { provide: DOCUMENT_REPOSITORY, useValue: documents },
-        { provide: QueueExtractionUseCase, useValue: queueExtraction },
+        {
+          provide: RequeueDocumentExtractionUseCase,
+          useFactory: () =>
+            // @ts-expect-error partial DocumentRepository stub for unit test
+            new RequeueDocumentExtractionUseCase(documents, queueExtraction),
+        },
       ],
     }).compile();
     const useCase = moduleRef.get(RequeueDocumentExtractionUseCase);
