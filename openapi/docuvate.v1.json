@@ -4374,6 +4374,27 @@
             }
           },
           {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum documents per page (default 50, max 200).",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Opaque cursor from a previous response `nextCursor` for the next page.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "q",
             "required": false,
             "in": "query",
@@ -13769,6 +13790,18 @@
       "DocumentListResponseDto": {
         "type": "object",
         "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "number",
+            "nullable": true,
+            "description": "Total matching documents when `cursor` was omitted."
+          },
           "items": {
             "type": "array",
             "items": {
@@ -13777,6 +13810,9 @@
           }
         },
         "required": [
+          "nextCursor",
+          "hasMore",
+          "total",
           "items"
         ]
       },

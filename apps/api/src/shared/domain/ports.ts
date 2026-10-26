@@ -51,6 +51,10 @@ export interface DocumentRepository {
   findById(id: string): Promise<DocumentEntity | null>;
   findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null>;
   listForUser(userId: string, filters?: DocumentListQuery): Promise<DocumentEntity[]>;
+  listPageForUser(
+    userId: string,
+    filters: DocumentListQuery
+  ): Promise<{ entities: DocumentEntity[]; hasMore: boolean; nextCursor: string | null }>;
   countForUser(userId: string, filters?: DocumentListQuery): Promise<number>;
   updateStatus(
     id: string,

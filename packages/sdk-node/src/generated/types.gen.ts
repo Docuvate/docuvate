@@ -343,6 +343,12 @@ export type DocumentExtractionSummaryDto = {
 };
 
 export type DocumentListResponseDto = {
+    nextCursor: string;
+    hasMore: boolean;
+    /**
+     * Total matching documents when `cursor` was omitted.
+     */
+    total: number;
     items: Array<{
         [key: string]: unknown;
     }>;
@@ -2388,6 +2394,14 @@ export type ListDocumentsData = {
          * When true, include open tag suggestions on each document.
          */
         includeTagSuggestions?: boolean;
+        /**
+         * Maximum documents per page (default 50, max 200).
+         */
+        limit?: number;
+        /**
+         * Opaque cursor from a previous response `nextCursor` for the next page.
+         */
+        cursor?: string;
         q?: string;
         status?: 'uploaded' | 'queued' | 'extracting' | 'ready' | 'failed';
         tagId?: string;

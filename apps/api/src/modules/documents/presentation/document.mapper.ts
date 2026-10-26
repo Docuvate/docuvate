@@ -12,7 +12,7 @@ import {
 import type { DocumentBulkRequestDto } from '../../../shared/presentation/dtos/common.dto.js';
 import type { TagSuggestionEntity } from '../../taxonomy/domain/taxonomy.entity.js';
 import { toTagDto, toTagSuggestionDto } from '../../taxonomy/presentation/taxonomy.mapper.js';
-import type { ListedDocument } from '../application/list-documents.use-case.js';
+import type { ListedDocument, ListedDocumentPage } from '../application/list-documents.use-case.js';
 import type { DocumentEntity } from '../domain/document.entity.js';
 
 export function toDocumentBulkRequest(dto: DocumentBulkRequestDto): DocumentBulkRequest {
@@ -38,11 +38,19 @@ export function toDocumentBulkRequest(dto: DocumentBulkRequestDto): DocumentBulk
   }
 }
 
-export function toDocumentListResponse(docs: ListedDocument[]): { items: DocumentDto[] } {
+export function toDocumentListResponse(page: ListedDocumentPage): {
+  items: DocumentDto[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  total: number | null;
+} {
   return {
-    items: docs.map(({ entity, duplicateCandidateCount, duplicateStack }) =>
+    items: page.items.map(({ entity, duplicateCandidateCount, duplicateStack }) =>
       toDocumentDto(entity, [], duplicateCandidateCount, duplicateStack)
     ),
+    nextCursor: page.nextCursor,
+    hasMore: page.hasMore,
+    total: page.total,
   };
 }
 

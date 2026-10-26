@@ -6,9 +6,12 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
+  IsNumber,
   IsOptional,
   IsString,
   IsUUID,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -135,6 +138,26 @@ export class DocumentListQueryDto {
   @Transform(({ value }) => parseOptionalQueryBoolean(value))
   @IsBoolean()
   includeTagSuggestions?: boolean;
+
+  @ApiPropertyOptional({
+    default: 50,
+    minimum: 1,
+    maximum: 200,
+    description: 'Maximum documents per page (default 50, max 200).',
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(1)
+  @Max(200)
+  limit?: number;
+
+  @ApiPropertyOptional({
+    description: 'Opaque cursor from a previous response `nextCursor` for the next page.',
+  })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
 }
 
 export class UpdateDocumentRequestDto implements UpdateDocumentRequest {
@@ -174,6 +197,15 @@ export class UpdateDocumentRequestDto implements UpdateDocumentRequest {
 
 export class DocumentListResponseDto {
   items!: DocumentDto[];
+
+  @ApiProperty({ nullable: true })
+  nextCursor!: string | null;
+
+  @ApiProperty()
+  hasMore!: boolean;
+
+  @ApiProperty({ nullable: true, description: 'Total matching documents when `cursor` was omitted.' })
+  total!: number | null;
 }
 
 export class DocumentExtractionSummaryDto {

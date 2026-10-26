@@ -175,17 +175,22 @@ export class DocumentsController {
     @Query() query: DocumentListQueryDto
   ): Promise<DocumentListResponseDto> {
     const filters = parseDocumentListQuery(query);
-    const docs = await this.listDocuments.execute(session.user.id, subject, filters);
+    const page = await this.listDocuments.execute(session.user.id, subject, filters);
     if (!filters.includeTagSuggestions) {
-      return toDocumentListResponse(docs);
+      return toDocumentListResponse(page);
     }
     const items = await Promise.all(
-      docs.map(async ({ entity, duplicateCandidateCount, duplicateStack }) => {
+      page.items.map(async ({ entity, duplicateCandidateCount, duplicateStack }) => {
         const suggestions = await this.loadSuggestions.execute(entity.id, session.user.id);
         return toDocumentDto(entity, suggestions, duplicateCandidateCount, duplicateStack);
       })
     );
-    return { items };
+    return {
+      items,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+      total: page.total,
+    };
   }
 
   @Post('bulk')

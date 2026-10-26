@@ -1,11 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentListQuery } from '@docuvate/contracts';
+import { DOCUMENT_LIST_MAX_LIMIT, type DocumentListQuery } from '@docuvate/contracts';
 
 import type { DocumentListQueryDto } from '../../../shared/presentation/dtos/documents.dto.js';
+import { clampDocumentListLimit } from '../infrastructure/document-list-pagination.js';
 import { parseFieldFiltersQuery } from './parse-field-filters-query.js';
 
 export function parseDocumentListQuery(params: DocumentListQueryDto): DocumentListQuery {
+  const limit = clampDocumentListLimit(params.limit);
+  const cursor = params.cursor?.trim() ? params.cursor.trim() : undefined;
+
   return {
     q: params.q,
     status: params.status,
@@ -30,5 +34,9 @@ export function parseDocumentListQuery(params: DocumentListQueryDto): DocumentLi
     sort: params.sort,
     order: params.order,
     includeTagSuggestions: params.includeTagSuggestions ?? undefined,
+    limit,
+    cursor,
   };
 }
+
+export { DOCUMENT_LIST_MAX_LIMIT };
