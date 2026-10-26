@@ -34,6 +34,7 @@ import {
 } from './duplicateStackLabel';
 import { DuplicateStackQuickReview } from './DuplicateStackQuickReview';
 import { documentDisplayDateParts } from './libraryDocumentUtils';
+import { useLibraryDocumentVirtualizer } from './useLibraryDocumentVirtualizer';
 
 type SortField = 'title' | 'documentDate' | 'updatedAt';
 
@@ -54,6 +55,10 @@ interface LibraryDocumentTableProps {
   /** When set, hide redundant folder line under title for docs in this folder. */
   suppressFolderFallbackForId?: string;
   visibleColumns?: LibraryTableColumnId[];
+  hasNextPage?: boolean;
+  isFetchingNextPage?: boolean;
+  onLoadMore?: () => void;
+  listScrollStorageKey?: string;
 }
 
 function showColumn(
@@ -79,6 +84,10 @@ export function LibraryDocumentTable({
   hideFolderColumn = false,
   suppressFolderFallbackForId,
   visibleColumns,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  onLoadMore,
+  listScrollStorageKey,
 }: LibraryDocumentTableProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
@@ -251,6 +260,15 @@ export function LibraryDocumentTable({
   const narrowTopbar = useNarrowTopbar();
   const filesystemCompactDocs = useFilesystemCompactDocs(hideFolderColumn);
   const mobileStack = narrowTopbar || filesystemCompactDocs;
+  const { parentRef: virtualScrollRef, virtualizer } = useLibraryDocumentVirtualizer({
+    count: items.length,
+    estimateSize: mobileStack ? 136 : 58,
+    hasNextPage,
+    isFetchingNextPage,
+    onLoadMore,
+    scrollStorageKey: listScrollStorageKey,
+  });
+  const virtualRows = virtualizer.getVirtualItems();
 
   if (items.length === 0) {
     return null;
@@ -369,18 +387,30 @@ export function LibraryDocumentTable({
         <div
           className={`library-table-wrap library-table-wrap--stack${hideFolderColumn ? ' library-table-wrap-hide-folder' : ''}`}
         >
-          <ul className="library-doc-stack-list" data-testid="library-doc-stack-list">
-            <li className="library-doc-stack-select-all">
-              <input
-                type="checkbox"
-                checked={selected.size === items.length && items.length > 0}
-                onChange={onToggleSelectAll}
-                aria-label={t('library.selectAll')}
-              />
-              <span>{t('library.selectAll')}</span>
-            </li>
-            {items.map((doc) => {
-              const stackLabel = duplicateStackVersionLabel(doc, t);
+          <div
+            ref={virtualScrollRef}
+            className="library-doc-list-scroll"
+            data-testid="library-doc-virtual-scroll"
+          >
+            <ul className="library-doc-stack-list" data-testid="library-doc-stack-list">
+              <li className="library-doc-stack-select-all">
+                <input
+                  type="checkbox"
+                  checked={selected.size === items.length && items.length > 0}
+                  onChange={onToggleSelectAll}
+                  aria-label={t('library.selectAll')}
+                />
+                <span>{t('library.selectAll')}</span>
+              </li>
+            </ul>
+            <div
+              className="library-doc-stack-virtual-host"
+              style={{ height: virtualizer.getTotalSize(), position: 'relative' }}
+              role="list"
+            >
+              {virtualRows.map((virtualRow) => {
+                const doc = items[virtualRow.index];
+                const stackLabel = duplicateStackVersionLabel(doc, t);
               const hasStack = showDuplicateStackBadge(doc);
               const rowSelected = selected.has(doc.id);
               const rowContextOpen = contextMenuDocumentId === doc.id;
@@ -392,13 +422,23 @@ export function LibraryDocumentTable({
                 .filter(Boolean)
                 .join(' ');
 
-              return (
-                <li
-                  key={doc.id}
-                  className={rowClassName}
-                  onContextMenu={(event) => { onContextMenu(event, doc.id); }}
-                >
-                  <article className="library-doc-stack-item-inner">
+                return (
+                  <div
+                    key={doc.id}
+                    data-index={virtualRow.index}
+                    ref={virtualizer.measureElement}
+                    className={rowClassName}
+                    role="listitem"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${String(virtualRow.start)}px)`,
+                    }}
+                    onContextMenu={(event) => { onContextMenu(event, doc.id); }}
+                  >
+                    <article className="library-doc-stack-item-inner">
                     <div className="library-doc-stack-primary">
                       <input
                         type="checkbox"
@@ -506,11 +546,12 @@ export function LibraryDocumentTable({
                         </button>
                       </div>
                     </div>
-                  </article>
-                </li>
-              );
-            })}
-          </ul>
+                    </article>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
         {deleteDialogs}
       </>
@@ -527,7 +568,12 @@ export function LibraryDocumentTable({
       <div
         className={`library-table-wrap${hideFolderColumn ? ' library-table-wrap-hide-folder' : ''}`}
       >
-        <table className="data-table library-table">
+        <div
+          ref={virtualScrollRef}
+          className="library-doc-list-scroll library-table-scroll"
+          data-testid="library-doc-virtual-scroll"
+        >
+        <table className="data-table library-table library-table-virtualized">
           <colgroup>
             <col className="library-col-expand" />
             <col className="library-col-check" />
@@ -581,8 +627,12 @@ export function LibraryDocumentTable({
               </th>
             </tr>
           </thead>
-          <tbody>
-            {items.map((doc) => {
+          <tbody
+            className="library-table-virtual-body"
+            style={{ height: virtualizer.getTotalSize(), position: 'relative', display: 'block' }}
+          >
+            {virtualRows.map((virtualRow) => {
+              const doc = items[virtualRow.index];
               const stackLabel = duplicateStackVersionLabel(doc, t);
               const hasStack = showDuplicateStackBadge(doc);
               const expanded = expandedIds.has(doc.id);
@@ -604,6 +654,14 @@ export function LibraryDocumentTable({
                     documentId={doc.id}
                     dragEnabled={enableDocumentDrag}
                     className={rowClassName || undefined}
+                    data-index={virtualRow.index}
+                    style={{
+                      display: 'table',
+                      width: '100%',
+                      position: 'absolute',
+                      top: 0,
+                      transform: `translateY(${String(virtualRow.start)}px)`,
+                    }}
                     tabIndex={0}
                     aria-selected={rowSelected}
                     onContextMenu={(event) => { onContextMenu(event, doc.id); }}
@@ -828,6 +886,7 @@ export function LibraryDocumentTable({
             })}
           </tbody>
         </table>
+        </div>
       </div>
 
       {deleteDialogs}
