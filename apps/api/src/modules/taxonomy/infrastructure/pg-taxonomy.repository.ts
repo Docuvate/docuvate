@@ -5,7 +5,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import { NotFoundError, ValidationError } from '../../../shared/domain/errors.js';
-import type { TagWriteOptions, TaxonomyRepository } from '../../../shared/domain/ports.js';
+import type {
+  TagSearchPage,
+  TagSearchParams,
+  TagWriteOptions,
+  TaxonomyRepository,
+} from '../../../shared/domain/ports.js';
 import {
   parseBoolean,
   parseEnum,
@@ -24,6 +29,10 @@ import type {
   TagEntity,
   TagSuggestionEntity,
 } from '../domain/taxonomy.entity.js';
+import {
+  decodeTagSearchCursor,
+  encodeTagSearchCursor,
+} from './tag-search-cursor.js';
 
 const INBOX_NAME = 'Posteingang';
 
@@ -39,6 +48,69 @@ export class PgTaxonomyRepository implements TaxonomyRepository {
       [userId]
     );
     return result.rows.map((raw) => this.mapTag(requireRecord(raw)));
+  }
+
+  async searchTags(userId: string, params: TagSearchParams): Promise<TagSearchPage> {
+    const q = params.q?.trim() ?? '';
+    const excludeInbox = params.excludeInbox !== false;
+    const limit = Math.max(1, Math.min(params.limit, 100));
+    const values: unknown[] = [userId];
+    const where: string[] = ['user_id = $1'];
+    if (excludeInbox) {
+      where.push('is_inbox = false');
+    }
+    if (q.length > 0) {
+      values.push(`%${q}%`);
+      where.push(`name ILIKE $${String(values.length)}`);
+    }
+    let cursorPayload: ReturnType<typeof decodeTagSearchCursor> | null = null;
+    if (params.cursor) {
+      cursorPayload = decodeTagSearchCursor(params.cursor);
+      values.push(cursorPayload.sortName, cursorPayload.id);
+      const sortIdx = values.length - 1;
+      const idIdx = values.length;
+      where.push(
+        `(lower(name) > lower($${String(sortIdx)}) OR (lower(name) = lower($${String(sortIdx)}) AND id > $${String(idIdx)}))`
+      );
+    }
+    values.push(limit + 1);
+    const limitIdx = values.length;
+    const sql = `SELECT * FROM tags WHERE ${where.join(' AND ')} ORDER BY lower(name) ASC, id ASC LIMIT $${String(limitIdx)}`;
+    const result = await this.pool.query(sql, values);
+    const rows = result.rows.map((raw) => this.mapTag(requireRecord(raw)));
+    const hasMore = rows.length > limit;
+    const entities = hasMore ? rows.slice(0, limit) : rows;
+
+    let total: number | null = null;
+    if (!params.cursor) {
+      const countValues: unknown[] = [userId];
+      const countWhere: string[] = ['user_id = $1'];
+      if (excludeInbox) {
+        countWhere.push('is_inbox = false');
+      }
+      if (q.length > 0) {
+        countValues.push(`%${q}%`);
+        countWhere.push(`name ILIKE $${String(countValues.length)}`);
+      }
+      const countResult = await this.pool.query(
+        `SELECT COUNT(*)::int AS count FROM tags WHERE ${countWhere.join(' AND ')}`,
+        countValues
+      );
+      const countRow = requireRecord(countResult.rows[0]);
+      total = Number.parseInt(parseString(countRow.count), 10);
+    }
+
+    let nextCursor: string | null = null;
+    if (hasMore && entities.length > 0) {
+      const last = entities[entities.length - 1];
+      nextCursor = encodeTagSearchCursor({
+        v: 1,
+        sortName: last.name,
+        id: last.id,
+      });
+    }
+
+    return { entities, hasMore, nextCursor, total };
   }
 
   async findTagByIdForUser(id: string, userId: string): Promise<TagEntity | null> {

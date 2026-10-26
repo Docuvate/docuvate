@@ -127,7 +127,6 @@ export function LibraryPage() {
           {!narrowFilters ? (
             <LibraryFilterPanel
               filters={data.filters}
-              tags={data.tags}
               filterableFields={data.filterableFields}
               statusOptions={data.statusOptions}
               onToggleFilter={data.toggleFilter}
@@ -164,7 +163,6 @@ export function LibraryPage() {
           >
             <LibraryFilterPanel
               filters={data.filters}
-              tags={data.tags}
               filterableFields={data.filterableFields}
               statusOptions={data.statusOptions}
               onToggleFilter={data.toggleFilter}

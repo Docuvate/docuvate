@@ -9,6 +9,7 @@ export function createTaxonomyRepositoryStub(
 ): TaxonomyRepository {
   return {
     listTags: vi.fn(),
+    searchTags: vi.fn(),
     findTagByIdForUser: vi.fn(),
     createTag: vi.fn(),
     updateTag: vi.fn(),

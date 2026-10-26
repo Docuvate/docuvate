@@ -4,7 +4,6 @@ import type {
   DocumentListQuery,
   DocumentStatus,
   RecognizedFieldDefinitionDto,
-  TagDto,
 } from '@docuvate/contracts';
 import { Filter, Inbox } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +23,6 @@ const ICON_STROKE = 1.75;
 
 interface LibraryFilterPanelProps {
   filters: DocumentListQuery;
-  tags: TagDto[];
   filterableFields: RecognizedFieldDefinitionDto[];
   statusOptions: DocumentStatus[];
   onToggleFilter: (patch: Partial<DocumentListQuery>) => void;
@@ -40,7 +38,6 @@ interface LibraryFilterPanelProps {
 
 export function LibraryFilterPanel({
   filters,
-  tags,
   filterableFields,
   statusOptions,
   onToggleFilter,
@@ -219,7 +216,6 @@ export function LibraryFilterPanel({
             ))}
             <div className="filter-group filter-group-labels">
               <LibraryTagFilterCombobox
-                tags={tags}
                 activeTagIds={activeTagIds}
                 onToggleTag={onToggleLabelFilter}
               />

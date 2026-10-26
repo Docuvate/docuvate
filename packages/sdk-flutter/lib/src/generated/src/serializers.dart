@@ -126,6 +126,7 @@ import 'package:docuvate/src/generated/src/model/password_policy_response_dto.da
 import 'package:docuvate/src/generated/src/model/preview_connector_source_nodes_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/problem_details_dto.dart';
 import 'package:docuvate/src/generated/src/model/propose_label_recommendation_blocklist_pattern_request_dto.dart';
+import 'package:docuvate/src/generated/src/model/recognized_field_filter_values_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/remote_config_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/reorder_saved_document_views_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_dashboard_layout_request_dto.dart';
@@ -145,6 +146,7 @@ import 'package:docuvate/src/generated/src/model/sftp_ingress_create_account_bod
 import 'package:docuvate/src/generated/src/model/start_mail_o_auth_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/tag_custom_field_list_response_dto_class.dart';
 import 'package:docuvate/src/generated/src/model/tag_list_response_dto.dart';
+import 'package:docuvate/src/generated/src/model/tag_search_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/test_paperless_connection_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/test_paperless_installation_connection_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/trigger_ml_retrain_request_dto.dart';
@@ -275,6 +277,7 @@ part 'serializers.g.dart';
   PreviewConnectorSourceNodesRequestDto,
   ProblemDetailsDto,
   ProposeLabelRecommendationBlocklistPatternRequestDto,
+  RecognizedFieldFilterValuesResponseDto,
   RemoteConfigResponseDto,
   ReorderSavedDocumentViewsRequestDto,
   ReplaceDashboardLayoutRequestDto,
@@ -294,6 +297,7 @@ part 'serializers.g.dart';
   StartMailOAuthRequestDto,
   TagCustomFieldListResponseDtoClass,
   TagListResponseDto,
+  TagSearchResponseDto,
   TestPaperlessConnectionRequestDto,
   TestPaperlessInstallationConnectionRequestDto,
   TriggerMlRetrainRequestDto,

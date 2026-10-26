@@ -641,6 +641,8 @@
     "dismissItem": "Remove {{name}} from the list",
     "progressAria": "Progress for {{name}}",
     "queueMore": "… and {{count}} more",
+    "queueMoreAria": "Show {{count}} more uploads",
+    "queueOverflowPopoverAria": "Additional uploads",
     "dropzoneBusy": "Upload in progress…",
     "dropzoneTitle": "Drop or choose a document",
     "dropzoneHint": "Upload a PDF or image. Text recognition starts automatically.",
@@ -1558,6 +1560,8 @@
     "todoWhyMergeNearName_one": "Nearly the same name, each with {{count}} document of similar content.",
     "todoWhyMergeNearName_other": "Nearly the same name, both with {{count}} documents of similar content.",
     "todoDismissMenuAria": "More actions for suggestion “{{name}}”",
+    "vocabularyFilterPlaceholder": "Filter labels…",
+    "vocabularyFilterAria": "Filter label vocabulary",
     "vocabularyTitle": "All labels",
     "vocabularyColName": "Name",
     "vocabularyColDocuments": "Documents",
@@ -2313,6 +2317,16 @@
       "noteHelp": "Optional",
       "noteValue": "Advance payment increases from October."
     }
+  },
+  "labelPicker": {
+    "searchPlaceholder": "Search labels…",
+    "expand": "Open label list",
+    "collapse": "Close label list",
+    "loading": "Loading labels…",
+    "empty": "No labels found.",
+    "moreResultsHint": "Refine your search or scroll for more matches.",
+    "resultsTruncated": "Showing {{shown}} of {{total}} labels. Refine your search to find more.",
+    "overflowPopoverAria": "Additional labels"
   },
   "combobox": {
     "searchPlaceholder": "Search…",

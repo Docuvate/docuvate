@@ -15,6 +15,7 @@ import 'package:docuvate/src/generated/src/model/document_pipeline_modules_respo
 import 'package:docuvate/src/generated/src/model/encoder_reindex_progress_dto.dart';
 import 'package:docuvate/src/generated/src/model/extraction_engine_list_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/problem_details_dto.dart';
+import 'package:docuvate/src/generated/src/model/recognized_field_filter_values_response_dto.dart';
 import 'package:docuvate/src/generated/src/model/replace_recognized_fields_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/update_user_settings_request_dto.dart';
 import 'package:docuvate/src/generated/src/model/user_settings_response_dto.dart';
@@ -605,6 +606,9 @@ class SettingsApi {
   ///
   /// Parameters:
   /// * [key] 
+  /// * [q] 
+  /// * [limit] 
+  /// * [cursor] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -612,10 +616,13 @@ class SettingsApi {
   /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
   /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
   ///
-  /// Returns a [Future]
+  /// Returns a [Future] containing a [Response] with a [RecognizedFieldFilterValuesResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
-  Future<Response<void>> listRecognizedFieldFilterValues({ 
-    String? key,
+  Future<Response<RecognizedFieldFilterValuesResponseDto>> listRecognizedFieldFilterValues({ 
+    required String key,
+    String? q,
+    num? limit,
+    String? cursor,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -648,7 +655,10 @@ class SettingsApi {
     );
 
     final _queryParameters = <String, dynamic>{
-      if (key != null) r'key': encodeQueryParameter(_serializers, key, const FullType(String)),
+      r'key': encodeQueryParameter(_serializers, key, const FullType(String)),
+      if (q != null) r'q': encodeQueryParameter(_serializers, q, const FullType(String)),
+      if (limit != null) r'limit': encodeQueryParameter(_serializers, limit, const FullType(num)),
+      if (cursor != null) r'cursor': encodeQueryParameter(_serializers, cursor, const FullType(String)),
     };
 
     final _response = await _dio.request<Object>(
@@ -660,7 +670,35 @@ class SettingsApi {
       onReceiveProgress: onReceiveProgress,
     );
 
-    return _response;
+    RecognizedFieldFilterValuesResponseDto? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null ? null : _serializers.deserialize(
+        rawResponse,
+        specifiedType: const FullType(RecognizedFieldFilterValuesResponseDto),
+      ) as RecognizedFieldFilterValuesResponseDto;
+
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<RecognizedFieldFilterValuesResponseDto>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
   }
 
   /// List recognized field catalog
