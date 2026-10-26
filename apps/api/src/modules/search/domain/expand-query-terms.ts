@@ -8,19 +8,28 @@ export interface VocabularyCandidate {
   similarity: number;
 }
 
-const MIN_SIMILARITY = 0.28;
+export const MIN_VOCABULARY_SIMILARITY = 0.45;
+export const MIN_QUERY_RELEVANCE_SCORE = 0.45;
 const MAX_EXPANSIONS_PER_TOKEN = 6;
+const MIN_TOKEN_LENGTH_FOR_TYPO = 5;
+
+export interface ExpandQueryTermsResult {
+  expanded: string[];
+  /** Highest confidence from accepted vocabulary neighbors (0 when none qualify). */
+  queryRelevance: number;
+}
 
 /** Expand query tokens with vocabulary neighbors (trigram similarity supplied by caller). */
 export async function expandQueryTerms(
   query: string,
   lookupSimilar: (token: string, limit: number) => Promise<VocabularyCandidate[]>
-): Promise<{ expanded: string[] }> {
+): Promise<ExpandQueryTermsResult> {
   const tokens = tokenizeSearchQuery(query);
   if (tokens.length === 0) {
-    return { expanded: [] };
+    return { expanded: [], queryRelevance: 0 };
   }
   const expanded = new Set<string>(tokens);
+  let queryRelevance = 0;
 
   for (const token of tokens) {
     expanded.add(normalizeSearchText(token));
@@ -28,16 +37,25 @@ export async function expandQueryTerms(
     const normToken = normalizeSearchText(token);
     for (const n of neighbors) {
       const normTerm = normalizeSearchText(n.term);
-      const pgOk = n.similarity >= MIN_SIMILARITY;
+      const pgOk = n.similarity >= MIN_VOCABULARY_SIMILARITY;
       const dlOk =
-        normToken.length >= 4 &&
-        normTerm.length >= 4 &&
-        isTypoWithinDistance(normToken, normTerm, normToken.length <= 8 ? 1 : 2);
+        normToken.length >= MIN_TOKEN_LENGTH_FOR_TYPO &&
+        normTerm.length >= MIN_TOKEN_LENGTH_FOR_TYPO &&
+        isTypoWithinDistance(normToken, normTerm, 1);
       if (pgOk || dlOk) {
         expanded.add(n.term);
+        if (pgOk) {
+          queryRelevance = Math.max(queryRelevance, n.similarity);
+        }
+        if (dlOk) {
+          queryRelevance = Math.max(queryRelevance, MIN_QUERY_RELEVANCE_SCORE);
+        }
       }
     }
   }
 
-  return { expanded: [...expanded].filter((t) => t.length >= 2) };
+  return {
+    expanded: [...expanded].filter((t) => t.length >= 2),
+    queryRelevance,
+  };
 }

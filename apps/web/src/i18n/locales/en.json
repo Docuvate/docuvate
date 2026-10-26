@@ -1942,6 +1942,8 @@
     "recentDocuments": "Recently opened",
     "quickActions": "Quick actions",
     "noResults": "No results. Try a different term or a filter such as <code>label:Finances</code>.",
+    "loadError": "Search failed. Please try again.",
+    "retry": "Try again",
     "closePalette": "Close search",
     "showAll": "Show all {{count}}",
     "footerNavigate": "navigate",
