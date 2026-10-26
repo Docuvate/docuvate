@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { GlobalSearchGroupDto, GlobalSearchHitDto } from '@docuvate/contracts';
-import { FileText, Folder, Search, Settings2, Tag, X, Zap } from 'lucide-react';
+import { Clock, FileText, Folder, Search, Settings2, Tag, X, Zap } from 'lucide-react';
 import {
   type KeyboardEvent,
   useCallback,
@@ -429,13 +429,24 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                   {showEmpty ? (
                     <div className="global-search-empty">
                       {recentSearches.length > 0 ? (
-                        <section>
-                          <h3>{t('search.recentSearches')}</h3>
-                          <ul>
+                        <section className="global-search-empty-section">
+                          <h3 className="global-search-empty-header">{t('search.recentSearches')}</h3>
+                          <ul className="global-search-group-list">
                             {recentSearches.map((s) => (
                               <li key={s}>
-                                <button type="button" onClick={() => { setQuery(s); }}>
-                                  {s}
+                                <button
+                                  type="button"
+                                  className="global-search-option"
+                                  onClick={() => { setQuery(s); }}
+                                >
+                                  <span className="global-search-result">
+                                    <span className="global-search-result-icon" aria-hidden>
+                                      <Clock size={18} strokeWidth={1.75} />
+                                    </span>
+                                    <span className="global-search-result-body">
+                                      <span className="global-search-result-title">{s}</span>
+                                    </span>
+                                  </span>
                                 </button>
                               </li>
                             ))}
@@ -443,32 +454,56 @@ export function GlobalSearch({ narrowTopbar = false }: { narrowTopbar?: boolean 
                         </section>
                       ) : null}
                       {recentDocs.length > 0 ? (
-                        <section>
-                          <h3>{t('search.recentDocuments')}</h3>
-                          <ul>
+                        <section className="global-search-empty-section">
+                          <h3 className="global-search-empty-header">{t('search.recentDocuments')}</h3>
+                          <ul className="global-search-group-list">
                             {recentDocs.map((d) => (
                               <li key={d.id}>
                                 <button
                                   type="button"
+                                  className="global-search-option"
                                   data-ux="search-recent-document"
                                   onClick={() => { navigate(routes.document(d.id)); }}
                                 >
-                                  {d.title}
+                                  <span className="global-search-result">
+                                    <span className="global-search-result-icon" aria-hidden>
+                                      <FileText size={18} strokeWidth={1.75} />
+                                    </span>
+                                    <span className="global-search-result-body">
+                                      <span className="global-search-result-title">{d.title}</span>
+                                    </span>
+                                  </span>
                                 </button>
                               </li>
                             ))}
                           </ul>
                         </section>
                       ) : null}
-                      <section>
-                        <h3>{t('search.quickActions')}</h3>
-                        <ul>
+                      <section className="global-search-empty-section">
+                        <h3 className="global-search-empty-header">{t('search.quickActions')}</h3>
+                        <ul className="global-search-group-list">
                           {searchRegistry('hochladen', t, isAdmin)
                             .slice(0, 3)
                             .map((a) => (
                               <li key={a.id}>
-                                <button type="button" onClick={() => { navigate(a.route); }}>
-                                  {a.title}
+                                <button
+                                  type="button"
+                                  className="global-search-option"
+                                  onClick={() => { navigate(a.route); }}
+                                >
+                                  <span className="global-search-result">
+                                    <span className="global-search-result-icon" aria-hidden>
+                                      <Zap size={18} strokeWidth={1.75} />
+                                    </span>
+                                    <span className="global-search-result-body">
+                                      <span className="global-search-result-title">{a.title}</span>
+                                      {a.description ? (
+                                        <span className="global-search-result-meta muted">
+                                          {a.description}
+                                        </span>
+                                      ) : null}
+                                    </span>
+                                  </span>
                                 </button>
                               </li>
                             ))}
