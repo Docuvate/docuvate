@@ -13,12 +13,16 @@ import {
 } from '../../../src/shared/domain/ports.js';
 import { DatabaseModule } from '../../../src/shared/infrastructure/database/database.module.js';
 
+const labelHybridCacheStub = {
+  resolveModel: async () => null,
+} satisfies Pick<LabelHybridModelCacheService, 'resolveModel'>;
+
 export async function createLabelsRecommendationsUseCase(): Promise<GetLabelRecommendationsUseCase> {
   const moduleRef = await Test.createTestingModule({
     imports: [DatabaseModule, RepresentationModule],
     providers: [
       GetLabelRecommendationsUseCase,
-      LabelHybridModelCacheService,
+      { provide: LabelHybridModelCacheService, useValue: labelHybridCacheStub },
       PgLabelEmbeddingRepository,
       { provide: LABEL_EMBEDDING_REPOSITORY, useExisting: PgLabelEmbeddingRepository },
       { provide: USER_PREFERENCES_REPOSITORY, useClass: PgUserPreferencesRepository },

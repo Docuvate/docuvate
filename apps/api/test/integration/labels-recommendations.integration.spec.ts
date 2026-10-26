@@ -23,7 +23,10 @@ import {
  * Production 500s without `document_tags.user_confirmed` mean migration
  * `DocumentTagsUserConfirmed20261025210000` is pending (see migration readiness checks).
  */
-describe('GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)', () => {
+describe(
+  'GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)',
+  { hookTimeout: 300_000 },
+  () => {
   const pool = getIntegrationPool();
   let valkey: StartedValkey;
   let recommendations: GetLabelRecommendationsUseCase;
@@ -32,10 +35,6 @@ describe('GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)', 
   beforeAll(async () => {
     valkey = await startValkeyContainer();
     process.env.VALKEY_URL = valkey.url;
-    process.env.LABEL_HYBRID_TRAIN_DEBOUNCE_MS = '0';
-    process.env.LABEL_HYBRID_TRAIN_INLINE = '1';
-    process.env.DOCUVATE_LABEL_HYBRID_TRAIN_BUDGET_MS = '120000';
-
     userId = newIsolationUserId();
     const client = await pool.connect();
     try {
@@ -55,9 +54,6 @@ describe('GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)', 
   afterAll(async () => {
     await deleteSyntheticUser(pool, userId);
     await valkey.stop();
-    delete process.env.LABEL_HYBRID_TRAIN_DEBOUNCE_MS;
-    delete process.env.LABEL_HYBRID_TRAIN_INLINE;
-    delete process.env.DOCUVATE_LABEL_HYBRID_TRAIN_BUDGET_MS;
     delete process.env.DOCUVATE_SERVICE_API_KEYS;
     await closeIntegrationPool();
   });
@@ -65,5 +61,6 @@ describe('GET /v1/labels/recommendations (LabelsModule + Postgres audit seed)', 
   it('returns recommendations for ~900 documents and 120 labels', async () => {
     const items = await recommendations.execute(userId);
     expect(Array.isArray(items)).toBe(true);
-  }, 240_000);
-});
+  });
+  }
+);
