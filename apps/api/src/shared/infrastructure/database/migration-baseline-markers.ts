@@ -58,6 +58,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'DocumentTagsUserConfirmed20261025210000',
   'DocumentListPaginationIndexes20261026120000',
   'ExtractionFieldConfirmations20261026130000',
+  'DocumentExtractedTextHash20261026140000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -234,6 +235,11 @@ export async function migrationSchemaPresent(
       return regClassExists(runner, 'public.idx_documents_user_updated_id');
     case 'ExtractionFieldConfirmations20261026130000':
       return regClassExists(runner, 'public.extraction_field_confirmations');
+    case 'DocumentExtractedTextHash20261026140000':
+      return (
+        (await columnExists(runner, 'documents', 'extracted_text_hash')) &&
+        (await columnExists(runner, 'user_preferences', 'fuzzy_duplicate_detection_enabled'))
+      );
     default:
       return false;
   }

@@ -9,8 +9,8 @@ async function loadSql(name: string): Promise<string> {
   return readFile(join(__dirname, 'sql', name), 'utf8');
 }
 
-export class DocumentExtractedTextHash20261026120000 implements MigrationInterface {
-  name = 'DocumentExtractedTextHash20261026120000';
+export class DocumentExtractedTextHash20261026140000 implements MigrationInterface {
+  name = 'DocumentExtractedTextHash20261026140000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(await loadSql('document-extracted-text-hash-up.sql'));
