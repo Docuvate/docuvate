@@ -42,6 +42,24 @@ describe('todoWhyLine', () => {
     expect(line).not.toMatch(/Labelraum|Zentren|100\s*%/);
   });
 
+  it('localizes open-set cluster reason via reasonKey (EN)', async () => {
+    const t = await tFor('en');
+    const line = todoWhyLine(
+      rec({
+        id: 'n',
+        kind: 'new',
+        score: 1,
+        reason: '',
+        reasonKey: 'labels.todoWhyNewOpenSetCluster',
+        reasonParams: { peerCount: 4, matchPercent: 87 },
+        proposedName: 'Payroll',
+      }),
+      t,
+      {}
+    );
+    expect(line).toBe('4 similar documents without a label · 87% match');
+  });
+
   it('uses plain merge copy without percentages (EN)', async () => {
     const t = await tFor('en');
     const line = todoWhyLine(

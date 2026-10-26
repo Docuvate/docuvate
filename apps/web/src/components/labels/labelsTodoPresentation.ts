@@ -8,16 +8,15 @@ export function todoWhyLine(
   t: TFunction,
   documentCountByTagId: Record<string, number>
 ): string {
+  if (item.reasonKey) {
+    return t(item.reasonKey, { ...(item.reasonParams ?? {}) });
+  }
   if (item.kind === 'assign') {
     const taggedCount = item.tagId ? (documentCountByTagId[item.tagId] ?? 0) : 0;
     const count = taggedCount > 0 ? taggedCount : (item.sampleDocuments?.length ?? 1);
     return t('labels.todoWhyAssignSimilarContent', { count });
   }
   if (item.kind === 'new') {
-    const trimmed = item.reason.trim();
-    if (trimmed.length > 0) {
-      return trimmed;
-    }
     return t('labels.todoWhyNewEmbedding');
   }
   if (item.kind === 'merge') {
@@ -28,8 +27,7 @@ export function todoWhyLine(
     const count = Math.min(countA, countB) || countA || countB;
     return t('labels.todoWhyMergeNearName', { count });
   }
-  const trimmedReason = item.reason.trim();
-  return trimmedReason.length > 0 ? trimmedReason : t('labelRecommendations.typeRename');
+  return t('labelRecommendations.typeRename');
 }
 
 export function todoBadgeLabel(item: LabelRecommendationDto, t: TFunction): string {

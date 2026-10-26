@@ -1554,6 +1554,7 @@
     "todoSuggestionPrefix": "Suggestion:",
     "todoWhyNewText": "Term found in document text.",
     "todoWhyNewEmbedding": "Several documents share similar content without a matching label.",
+    "todoWhyNewOpenSetCluster": "{{peerCount}} similar documents without a label · {{matchPercent}}% match",
     "todoWhyMergeNearName_one": "Nearly the same name, each with {{count}} document of similar content.",
     "todoWhyMergeNearName_other": "Nearly the same name, both with {{count}} documents of similar content.",
     "todoDismissMenuAria": "More actions for suggestion “{{name}}”",

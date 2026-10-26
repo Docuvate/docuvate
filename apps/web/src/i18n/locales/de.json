@@ -1554,6 +1554,7 @@
     "todoSuggestionPrefix": "Vorschlag:",
     "todoWhyNewText": "Begriff im Dokumenttext erkannt.",
     "todoWhyNewEmbedding": "Mehrere Dokumente haben ähnlichen Inhalt ohne passendes Label.",
+    "todoWhyNewOpenSetCluster": "{{peerCount}} ähnliche Dokumente ohne Label · {{matchPercent}} % Übereinstimmung",
     "todoWhyMergeNearName_one": "Fast gleicher Name, jeweils {{count}} Dokument ähnlichen Inhalts.",
     "todoWhyMergeNearName_other": "Fast gleicher Name, beide mit {{count}} Dokumenten ähnlichen Inhalts.",
     "todoDismissMenuAria": "Weitere Aktionen für Vorschlag „{{name}}“",

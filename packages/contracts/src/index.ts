@@ -784,11 +784,21 @@ export interface LabelRecommendationListResponse {
   state: LabelRecommendationsLoadState;
 }
 
+export interface LabelRecommendationReasonParams {
+  peerCount?: number;
+  matchPercent?: number;
+  count?: number;
+}
+
 export interface LabelRecommendationDto {
   id: string;
   kind: LabelRecommendationKind;
   score: number;
+  /** Machine-oriented hint for logs; UI must use reasonKey + reasonParams. */
   reason: string;
+  /** i18n key under the web `labels` namespace (passed to t()). */
+  reasonKey?: string;
+  reasonParams?: LabelRecommendationReasonParams;
   /** Cosine similarity when recommendation is embedding-based (0..1). */
   similarity?: number;
   source?: LabelRecommendationSource;

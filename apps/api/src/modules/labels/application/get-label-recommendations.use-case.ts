@@ -284,6 +284,8 @@ export class GetLabelRecommendationsUseCase {
         similarity: cluster.similarity,
         source: 'embedding',
         reason: cluster.reason,
+        reasonKey: cluster.reasonKey,
+        reasonParams: cluster.reasonParams,
         sampleDocumentIds: documentIds,
       });
     }
