@@ -10,11 +10,13 @@ function readQueryRows(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) {
     return result.map((row) => requireRecord(row));
   }
-  if (result !== null && typeof result === 'object' && 'rows' in result) {
-    const rows = (result as { rows: unknown }).rows;
-    if (Array.isArray(rows)) {
-      return rows.map((row) => requireRecord(row));
-    }
+  if (result === null || typeof result !== 'object') {
+    return [];
+  }
+  const record = requireRecord(result);
+  const rows = record.rows;
+  if (Array.isArray(rows)) {
+    return rows.map((row) => requireRecord(row));
   }
   return [];
 }
