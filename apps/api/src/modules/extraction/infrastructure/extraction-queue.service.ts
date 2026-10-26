@@ -20,6 +20,7 @@ import {
   extractionQueueMaxStalledCount,
   extractionQueueStalledIntervalMs,
 } from '../domain/extraction-queue.config.js';
+import { isPermanentExtractionFailureMessage } from '../domain/extraction-queue-failures.js';
 
 function parseExtractionJobDocumentId(data: unknown): string {
   const row = requireRecord(data);
@@ -65,7 +66,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
           await this.runExtraction.execute(documentId);
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : String(error);
-          if (message.includes('Worker extraction failed: 422')) {
+          if (isPermanentExtractionFailureMessage(message)) {
             throw new UnrecoverableError(message);
           }
           throw error;
