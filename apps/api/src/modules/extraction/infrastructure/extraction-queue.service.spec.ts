@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { describe, expect, it } from 'vitest';
 import { UnrecoverableError } from 'bullmq';
+import { describe, expect, it } from 'vitest';
 
 import { isPermanentExtractionFailureMessage } from '../domain/extraction-queue-failures.js';
 
