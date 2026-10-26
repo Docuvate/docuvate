@@ -6,8 +6,6 @@ import {
   LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
 } from '../../../shared/domain/ports.js';
-import { RefreshEmbeddingSuggestionsUseCase } from './refresh-embedding-suggestions.use-case.js';
-
 const DEFAULT_BATCH = 12;
 
 interface RefreshEmbeddingsRunner {
