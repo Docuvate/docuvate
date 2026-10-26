@@ -44,6 +44,7 @@ import { ListDocumentChatThreadMessagesUseCase } from './application/list-docume
 import { ListDocumentChatThreadsUseCase } from './application/list-document-chat-threads.use-case.js';
 import { ListDocumentsUseCase } from './application/list-documents.use-case.js';
 import { MoveDocumentsUseCase } from './application/move-documents.use-case.js';
+import { DOCUMENT_EXTRACTION_ENQUEUE } from './domain/document-extraction-enqueue.token.js';
 import { QueueExtractionUseCase } from './application/queue-extraction.use-case.js';
 import { RefreshHeuristicFieldSuggestionsUseCase } from './application/refresh-heuristic-field-suggestions.use-case.js';
 import { RequeueDocumentExtractionUseCase } from './application/requeue-document-extraction.use-case.js';
@@ -109,6 +110,7 @@ import { ReviewQueueController } from './presentation/review-queue.controller.js
     QueueExtractionUseCase,
     RunExtractionUseCase,
     ExtractionQueueService,
+    { provide: DOCUMENT_EXTRACTION_ENQUEUE, useExisting: ExtractionQueueService },
     DocumentChatUseCase,
     ListDocumentChatThreadsUseCase,
     CreateDocumentChatThreadUseCase,

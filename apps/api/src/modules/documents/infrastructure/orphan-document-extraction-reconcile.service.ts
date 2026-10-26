@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import type pg from 'pg';
+
 import { parseString } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import type { DocumentExtractionEnqueuePort } from '../domain/document-extraction-enqueue.port.js';
-import type { OrphanReconcileDbPort } from '../domain/orphan-reconcile-db.port.js';
-import { ExtractionQueueService } from '../../extraction/infrastructure/extraction-queue.service.js';
+import { DOCUMENT_EXTRACTION_ENQUEUE } from '../domain/document-extraction-enqueue.token.js';
 
 const RECONCILE_INTERVAL_MS = 60_000;
 
@@ -20,7 +21,8 @@ export class OrphanDocumentExtractionReconcileService implements OnModuleInit, O
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor(
-    @Inject(PG_POOL) private readonly pool: OrphanReconcileDbPort,
+    @Inject(PG_POOL) private readonly pool: pg.Pool,
+    @Inject(DOCUMENT_EXTRACTION_ENQUEUE)
     private readonly extractionQueue: DocumentExtractionEnqueuePort
   ) {}
 

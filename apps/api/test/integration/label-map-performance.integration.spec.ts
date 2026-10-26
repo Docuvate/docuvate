@@ -108,14 +108,8 @@ describe('GET /labels/map scale (Testcontainers Postgres)', () => {
 
   it('builds label map under 500ms at ~900 documents', async () => {
     const representationRepo = new PgDocumentRepresentationRepository(pool);
-    const persistRepresentation: PersistDocumentRepresentationPort = {
-      execute: () => Promise.resolve(),
-    };
-    const extractCapacity: WorkerExtractSlotPort = {
-      acquireSlot: () => Promise.resolve(),
-      releaseSlot: () => {},
-      onWorkerPressure503: () => {},
-    };
+    const persistRepresentation = new PersistDocumentRepresentationUseCase(representationRepo);
+    const extractCapacity = new WorkerExtractCapacityCoordinator();
     const ensureRepresentation = new EnsureDocumentRepresentationUseCase(
       representationRepo,
       persistRepresentation,

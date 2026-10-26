@@ -1,9 +1,12 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import { createDocumentExtractionEnqueueStub } from '../../../test-support/document-extraction-enqueue.stub.js';
 import { createOrphanReconcileDbStub } from '../../../test-support/orphan-reconcile-db.stub.js';
+import { DOCUMENT_EXTRACTION_ENQUEUE } from '../domain/document-extraction-enqueue.token.js';
 import { OrphanDocumentExtractionReconcileService } from './orphan-document-extraction-reconcile.service.js';
 
 describe('OrphanDocumentExtractionReconcileService', () => {
@@ -23,7 +26,14 @@ describe('OrphanDocumentExtractionReconcileService', () => {
       isJobQueuedOrActive: vi.fn(() => Promise.resolve(false)),
       enqueue: vi.fn(() => Promise.resolve()),
     });
-    const service = new OrphanDocumentExtractionReconcileService(pool, extractionQueue);
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        OrphanDocumentExtractionReconcileService,
+        { provide: PG_POOL, useValue: pool },
+        { provide: DOCUMENT_EXTRACTION_ENQUEUE, useValue: extractionQueue },
+      ],
+    }).compile();
+    const service = moduleRef.get(OrphanDocumentExtractionReconcileService);
 
     const count = await service.reconcileOnce();
 
@@ -46,7 +56,14 @@ describe('OrphanDocumentExtractionReconcileService', () => {
     const extractionQueue = createDocumentExtractionEnqueueStub({
       isJobQueuedOrActive: vi.fn(() => Promise.resolve(true)),
     });
-    const service = new OrphanDocumentExtractionReconcileService(pool, extractionQueue);
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        OrphanDocumentExtractionReconcileService,
+        { provide: PG_POOL, useValue: pool },
+        { provide: DOCUMENT_EXTRACTION_ENQUEUE, useValue: extractionQueue },
+      ],
+    }).compile();
+    const service = moduleRef.get(OrphanDocumentExtractionReconcileService);
 
     const count = await service.reconcileOnce();
 
