@@ -1,14 +1,30 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { Test } from '@nestjs/testing';
 import { describe, expect, it, vi } from 'vitest';
 
+import {
+  type DocumentRepository,
+  type ExtractionPort,
+  type ObjectStorage,
+  type TaxonomyRepository,
+} from '../../../shared/domain/ports.js';
 import { RunExtractionUseCase } from './run-extraction.use-case.js';
 
-function buildUseCase(overrides: {
+async function buildUseCase(options: {
   extractError?: Error;
-  updateStatus?: ReturnType<typeof vi.fn>;
-}): RunExtractionUseCase {
-  const documents = {
+  updateStatus: ReturnType<typeof vi.fn<DocumentRepository['updateStatus']>>;
+}): Promise<RunExtractionUseCase> {
+  const documents: Pick<
+    DocumentRepository,
+    | 'findById'
+    | 'tryClaimForExtraction'
+    | 'updateStatus'
+    | 'setPreviewStorageKey'
+    | 'saveExtraction'
+    | 'saveExtractionImages'
+    | 'setHeuristicFieldExtractorVersion'
+  > = {
     findById: vi.fn().mockResolvedValue({
       id: 'doc-1',
       userId: 'user-1',
@@ -19,39 +35,65 @@ function buildUseCase(overrides: {
       contentHash: 'hash',
     }),
     tryClaimForExtraction: vi.fn().mockResolvedValue('claimed'),
-    updateStatus: overrides.updateStatus ?? vi.fn().mockResolvedValue(undefined),
+    updateStatus: options.updateStatus,
     setPreviewStorageKey: vi.fn(),
     saveExtraction: vi.fn(),
     saveExtractionImages: vi.fn(),
     setHeuristicFieldExtractorVersion: vi.fn(),
   };
-  const extraction = {
-    extract: overrides.extractError
-      ? vi.fn().mockRejectedValue(overrides.extractError)
+  const storage: Pick<ObjectStorage, 'getObject'> = {
+    getObject: vi.fn().mockResolvedValue(Buffer.from('pdf')),
+  };
+  const extraction: Pick<ExtractionPort, 'extract'> = {
+    extract: options.extractError
+      ? vi.fn().mockRejectedValue(options.extractError)
       : vi.fn(),
   };
-  return new RunExtractionUseCase(
-    documents as never,
-    { getObject: vi.fn().mockResolvedValue(Buffer.from('pdf')) } as never,
-    extraction as never,
-    { execute: vi.fn() } as never,
-    { execute: vi.fn() } as never,
-    { execute: vi.fn().mockResolvedValue('default') } as never,
-    { execute: vi.fn() } as never,
-    { execute: vi.fn() } as never,
-    { loadWorkerState: vi.fn().mockResolvedValue(null) } as never,
-    { listTags: vi.fn().mockResolvedValue([]) } as never,
-    { execute: vi.fn().mockResolvedValue({ exactAnswers: false }) } as never,
-    { execute: vi.fn() } as never,
-    { execute: vi.fn() } as never,
-    { execute: vi.fn() } as never
-  );
+  const taxonomy: Pick<TaxonomyRepository, 'listTags'> = {
+    listTags: vi.fn().mockResolvedValue([]),
+  };
+  const postOcr = { execute: vi.fn() };
+  const scheduleDuplicates = { execute: vi.fn() };
+  const resolveEngine = { execute: vi.fn().mockResolvedValue('default') };
+  const syncSearch = { execute: vi.fn() };
+  const persistRepresentation = { execute: vi.fn() };
+  const densityRepo = { loadWorkerState: vi.fn().mockResolvedValue(null) };
+  const featureFlags = { execute: vi.fn().mockResolvedValue({ exactAnswers: false }) };
+  const persistFacts = { execute: vi.fn() };
+  const promoteSuggestions = { execute: vi.fn() };
+  const autoAccept = { execute: vi.fn() };
+
+  const moduleRef = await Test.createTestingModule({
+    providers: [
+      {
+        provide: RunExtractionUseCase,
+        useFactory: () =>
+          new RunExtractionUseCase(
+            documents,
+            storage,
+            extraction,
+            postOcr,
+            scheduleDuplicates,
+            resolveEngine,
+            syncSearch,
+            persistRepresentation,
+            densityRepo,
+            taxonomy,
+            featureFlags,
+            persistFacts,
+            promoteSuggestions,
+            autoAccept
+          ),
+      },
+    ],
+  }).compile();
+  return moduleRef.get(RunExtractionUseCase);
 }
 
 describe('RunExtractionUseCase', () => {
   it('does not mark failed on worker 503 pressure', async () => {
-    const updateStatus = vi.fn().mockResolvedValue(undefined);
-    const useCase = buildUseCase({
+    const updateStatus = vi.fn<DocumentRepository['updateStatus']>();
+    const useCase = await buildUseCase({
       extractError: new Error('Worker extraction unavailable: 503'),
       updateStatus,
     });

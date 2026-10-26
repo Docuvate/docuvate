@@ -4,12 +4,12 @@
 import { isRecord, parseNumber } from '../../../shared/infrastructure/database/row-parse.js';
 import { workerApiUrl } from '../../../shared/infrastructure/worker/worker-api-path.js';
 
-export type WorkerExtractCapacity = {
+export interface WorkerExtractCapacity {
   recommendedConcurrentExtractions: number;
   activeExtractJobs: number;
   extractSlotsFree: number;
   memoryAvailableBytes: number | null;
-};
+}
 
 function parseCapacityBody(raw: unknown): WorkerExtractCapacity | null {
   if (!isRecord(raw)) {

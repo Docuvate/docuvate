@@ -6,7 +6,7 @@ const MAX_API_EXTRACTION_SLOTS = 4;
 export class ExtractionSlotLimiter {
   private maxSlots: number;
   private inFlight = 0;
-  private readonly waiters: Array<() => void> = [];
+  private readonly waiters: (() => void)[] = [];
 
   constructor(initialSlots: number) {
     this.maxSlots = clampSlots(initialSlots);

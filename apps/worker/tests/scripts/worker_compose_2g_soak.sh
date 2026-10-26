@@ -39,14 +39,17 @@ if [ "${RESTARTS_AFTER}" != "${RESTARTS_BEFORE}" ]; then
   exit 5
 fi
 
-OOM_KILLED_LOG_LINES="$(docker logs "${WORKER_CID}" 2>&1 | rg -c 'likely_oom_kill=True' || true)"
+OOM_KILLED_LOG_LINES="$(docker logs "${WORKER_CID}" 2>&1 | grep -c 'likely_oom_kill=True' || true)"
+if [ -z "${OOM_KILLED_LOG_LINES}" ]; then
+  OOM_KILLED_LOG_LINES=0
+fi
 echo "worker_soak_oom_killed_log_lines=${OOM_KILLED_LOG_LINES}"
 
 if [ "${SOAK_RC}" -ne 0 ]; then
   exit "${SOAK_RC}"
 fi
 
-if [ "${OOM_KILLED_LOG_LINES}" != "0" ]; then
+if [ "${OOM_KILLED_LOG_LINES}" -gt 0 ]; then
   echo "worker logged oom_killed child exits during soak" >&2
   exit 6
 fi
