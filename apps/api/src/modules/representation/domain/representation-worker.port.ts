@@ -10,8 +10,4 @@ export interface PersistDocumentRepresentationPort {
   ): Promise<void>;
 }
 
-export interface WorkerExtractSlotPort {
-  acquireSlot(): Promise<void>;
-  releaseSlot(): void;
-  onWorkerPressure503(retryAfterSeconds: number): void;
-}
+export type { WorkerExtractSlotPort } from '../../extraction/domain/worker-extract-slot.port.js';
