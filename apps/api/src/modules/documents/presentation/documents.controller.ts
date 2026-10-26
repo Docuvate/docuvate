@@ -736,15 +736,13 @@ export class DocumentsController {
     @Param('id') id: string,
     @Body() body: UpdateDocumentRequestDto
   ) {
-    const { document, fieldCorrectionsRecorded } = await this.updateDocument.execute(
-      id,
-      session.user.id,
-      body
-    );
+    const { document, fieldCorrectionsRecorded, fieldConfirmationsRecorded } =
+      await this.updateDocument.execute(id, session.user.id, body);
     const suggestions = await this.loadSuggestions.execute(id, session.user.id);
     return {
       document: await this.documentResponse(id, session.user.id, document, suggestions),
       fieldCorrectionsRecorded,
+      fieldConfirmationsRecorded,
     };
   }
 

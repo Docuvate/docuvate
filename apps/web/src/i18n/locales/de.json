@@ -1739,7 +1739,9 @@
     "saveCorrections": "Korrekturen speichern",
     "noCorrections": "Keine Änderungen.",
     "feedbackSaved_one": "1 Korrektur als Trainings-Feedback gespeichert.",
-    "feedbackSaved_other": "{{count}} Korrekturen als Trainings-Feedback gespeichert."
+    "feedbackSaved_other": "{{count}} Korrekturen als Trainings-Feedback gespeichert.",
+    "feedbackConfirmationsSaved_one": "1 Bestätigung als Trainings-Feedback gespeichert.",
+    "feedbackConfirmationsSaved_other": "{{count}} Bestätigungen als Trainings-Feedback gespeichert."
   },
   "labelSpace": {
     "title": "Labelraum",

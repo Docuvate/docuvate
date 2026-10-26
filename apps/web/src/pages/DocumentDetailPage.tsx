@@ -64,6 +64,10 @@ import {
   mergeCatalogFieldsForDocument,
 } from '../lib/documentRecognizedCatalogFields';
 import { areBlocksDirty, areFieldsDirty } from '../lib/extractionDirty';
+import {
+  type FieldExtractionFeedbackCounts,
+  parseFieldExtractionFeedbackCounts,
+} from '../lib/fieldExtractionFeedback';
 import { extractionFieldLabel } from '../lib/extractionFieldLabels';
 import {
   findBlockIndexAtPoint,
@@ -144,7 +148,7 @@ export function DocumentDetailPage() {
   const [documentChatUiEnabled, setDocumentChatUiEnabled] = useState(true);
   const [documentChatLocalModelEnabled, setDocumentChatLocalModelEnabled] = useState(false);
   const [documentChatLocalModelReady, setDocumentChatLocalModelReady] = useState(false);
-  const [fieldFeedbackRecorded, setFieldFeedbackRecorded] = useState(0);
+  const [fieldFeedback, setFieldFeedback] = useState<FieldExtractionFeedbackCounts | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [metadataBaseline, setMetadataBaseline] = useState<DocumentMetadataBaseline>({
@@ -353,7 +357,11 @@ export function DocumentDetailPage() {
     setSaving(true);
     setError(null);
     try {
-      const { document: updated, fieldCorrectionsRecorded = 0 } = await updateDocument(id, {
+      const {
+        document: updated,
+        fieldCorrectionsRecorded = 0,
+        fieldConfirmationsRecorded = 0,
+      } = await updateDocument(id, {
         title,
         documentDate: documentDate || null,
         notes: notes || null,
@@ -370,7 +378,12 @@ export function DocumentDetailPage() {
       setBaselineFields(nextFields);
       setBaselineBlocks(nextBlocks);
       if (patch?.extractionFields !== undefined) {
-        setFieldFeedbackRecorded(fieldCorrectionsRecorded);
+        setFieldFeedback(
+          parseFieldExtractionFeedbackCounts(
+            fieldCorrectionsRecorded,
+            fieldConfirmationsRecorded
+          )
+        );
       }
       setDoc({
         ...updated,
@@ -551,7 +564,7 @@ export function DocumentDetailPage() {
   );
 
   const onFieldValueChange = useCallback((key: string, value: string) => {
-    setFieldFeedbackRecorded(0);
+    setFieldFeedback(null);
     setFields((prev) => {
       const idx = prev.findIndex((field) => field.key === key);
       if (idx >= 0) {
@@ -661,9 +674,9 @@ export function DocumentDetailPage() {
               saving={saving}
               fieldsDirty={fieldsDirty}
               baselineFields={baselineFields}
-              feedbackRecordedCount={fieldFeedbackRecorded}
+              fieldFeedback={fieldFeedback}
               onFieldsChange={(next) => {
-                setFieldFeedbackRecorded(0);
+                setFieldFeedback(null);
                 setFields(next);
               }}
               onDiscardField={(key) => {

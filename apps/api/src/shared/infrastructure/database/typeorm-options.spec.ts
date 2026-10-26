@@ -53,6 +53,7 @@ import { DocumentFileSizeSavedViewDescription20261018190500 } from './migrations
 import { ConnectorPaperlessImportRetry20261025120000 } from './migrations/20261025120000-connector-paperless-import-retry.js';
 import { DocumentTagsUserConfirmed20261025210000 } from './migrations/20261025210000-document-tags-user-confirmed.js';
 import { DocumentListPaginationIndexes20261026120000 } from './migrations/20261026120000-document-list-pagination-indexes.js';
+import { ExtractionFieldConfirmations20261026130000 } from './migrations/20261026130000-extraction-field-confirmations.js';
 import { buildTypeOrmOptions, TYPEORM_INITIAL_MIGRATION_NAME } from './typeorm-options.js';
 
 const EXPECTED_MIGRATIONS = [
@@ -106,6 +107,7 @@ const EXPECTED_MIGRATIONS = [
   ConnectorPaperlessImportRetry20261025120000,
   DocumentTagsUserConfirmed20261025210000,
   DocumentListPaginationIndexes20261026120000,
+  ExtractionFieldConfirmations20261026130000,
 ];
 
 describe('buildTypeOrmOptions', () => {

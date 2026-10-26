@@ -25,4 +25,22 @@ describe('diffExtractionFieldCorrections', () => {
       diffExtractionFieldCorrections([{ key: 'a', value: 'x' }], [{ key: 'a', value: 'x' }])
     ).toEqual([]);
   });
+
+  it('ignores equivalent date formats', () => {
+    expect(
+      diffExtractionFieldCorrections(
+        [{ key: 'global:datum', value: '2024-03-15' }],
+        [{ key: 'global:datum', value: '15.03.2024' }]
+      )
+    ).toEqual([]);
+  });
+
+  it('does not emit corrections when only the storage key alias changes', () => {
+    expect(
+      diffExtractionFieldCorrections(
+        [{ key: 'global:absender', value: 'Nordwind GmbH', confidence: 0.7 }],
+        [{ key: 'global:vendor', value: 'Nordwind GmbH', confidence: 1 }]
+      )
+    ).toEqual([]);
+  });
 });

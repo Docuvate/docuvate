@@ -300,13 +300,22 @@ export interface ExtractionFieldCorrectionRecord {
 }
 
 export interface ExtractionFieldFeedbackRepository {
-  insertMany(
+  insertCorrectionsIdempotent(
     userId: string,
     rows: {
       documentId: string;
       fieldKey: string;
       oldValue: string;
       newValue: string;
+      labelTagIds: string[];
+      fieldTagId: string | null;
+    }[]
+  ): Promise<number>;
+  upsertConfirmations(
+    userId: string,
+    rows: {
+      documentId: string;
+      fieldKey: string;
       labelTagIds: string[];
       fieldTagId: string | null;
     }[]

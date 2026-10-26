@@ -19,6 +19,11 @@ import { labelFieldDisplayName } from '../../lib/labelFieldDisplay';
 import { Button } from '../ui/Button';
 import { IconButton } from '../ui/IconButton';
 import { Input } from '../ui/Input';
+import {
+  type FieldExtractionFeedbackCounts,
+  showFieldConfirmationFeedbackBanner,
+  showFieldCorrectionFeedbackBanner,
+} from '../../lib/fieldExtractionFeedback';
 import { DocumentFieldValueCards } from './DocumentFieldValueCards';
 
 interface ExtractedFieldsPanelProps {
@@ -31,7 +36,7 @@ interface ExtractedFieldsPanelProps {
   saving: boolean;
   fieldsDirty: boolean;
   baselineFields?: ExtractedField[];
-  feedbackRecordedCount?: number;
+  fieldFeedback?: FieldExtractionFeedbackCounts | null;
   onFieldsChange: (fields: ExtractedField[]) => void;
   onDiscardField?: (key: string) => void;
   onConfirmField?: (field: ExtractedField) => void;
@@ -48,7 +53,7 @@ export function ExtractedFieldsPanel({
   saving,
   fieldsDirty,
   baselineFields = [],
-  feedbackRecordedCount = 0,
+  fieldFeedback = null,
   onFieldsChange,
   onDiscardField,
   onConfirmField,
@@ -181,9 +186,16 @@ export function ExtractedFieldsPanel({
         ) : (
           <p className="muted extracted-fields-save-hint">{t('recognizedFields.noCorrections')}</p>
         )}
-        {feedbackRecordedCount > 0 ? (
+        {showFieldCorrectionFeedbackBanner(fieldsDirty, fieldFeedback) ? (
           <p className="info-banner extracted-fields-feedback-banner" role="status">
-            {t('recognizedFields.feedbackSaved', { count: feedbackRecordedCount })}
+            {t('recognizedFields.feedbackSaved', { count: fieldFeedback?.corrections ?? 0 })}
+          </p>
+        ) : null}
+        {showFieldConfirmationFeedbackBanner(fieldsDirty, fieldFeedback) ? (
+          <p className="info-banner extracted-fields-feedback-banner" role="status">
+            {t('recognizedFields.feedbackConfirmationsSaved', {
+              count: fieldFeedback?.confirmations ?? 0,
+            })}
           </p>
         ) : null}
       </details>

@@ -9637,7 +9637,17 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .extraction-fields-grid-compact {
+  grid-template-columns: minmax(0, 1fr);
   margin-bottom: var(--dv-space-xs);
+}
+
+.extraction-fields-grid-compact .extraction-field-cell-row {
+  width: 100%;
+}
+
+.extraction-fields-grid-compact .extraction-field-cell-row input {
+  width: 100%;
+  min-width: 0;
 }
 
 .extracted-text-inline-edit {

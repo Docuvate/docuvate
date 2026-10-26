@@ -57,6 +57,7 @@ const FORWARD_SQL_ORDER = [
   'connector-paperless-import-retry-up.sql',
   'document-tags-user-confirmed-up.sql',
   'document-list-pagination-indexes-up.sql',
+  'extraction-field-confirmations-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {
