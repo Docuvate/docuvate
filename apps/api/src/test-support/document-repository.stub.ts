@@ -12,6 +12,9 @@ export function createDocumentRepositoryStub(
     findById: vi.fn(),
     findByIdForUser: vi.fn(),
     listForUser: vi.fn(),
+    listPageForUser: vi
+      .fn()
+      .mockResolvedValue({ entities: [], hasMore: false, nextCursor: null }),
     countForUser: vi.fn().mockResolvedValue(0),
     updateStatus: vi.fn(),
     tryClaimForExtraction: vi.fn().mockResolvedValue('claimed'),

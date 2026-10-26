@@ -951,6 +951,11 @@ export {
 export type DocumentSortField = 'updatedAt' | 'createdAt' | 'title' | 'documentDate';
 export type SortOrder = 'asc' | 'desc';
 
+/** Default page size for GET /documents when `limit` is omitted. */
+export const DOCUMENT_LIST_DEFAULT_LIMIT = 50;
+/** Maximum allowed `limit` for GET /documents. */
+export const DOCUMENT_LIST_MAX_LIMIT = 200;
+
 export interface DocumentListQuery {
   q?: string;
   status?: DocumentStatus;
@@ -978,6 +983,18 @@ export interface DocumentListQuery {
   order?: SortOrder;
   /** Include open tag suggestions on each list item (library label chips). */
   includeTagSuggestions?: boolean;
+  /** Page size (HTTP list only; internal repository calls omit for unpaginated reads). */
+  limit?: number;
+  /** Opaque keyset cursor from a previous response's `nextCursor`. */
+  cursor?: string;
+}
+
+export interface DocumentListResponseDto {
+  items: DocumentDto[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  /** Total rows for the current filter set; present on the first page when no `cursor` was sent. */
+  total: number | null;
 }
 
 export type ExtractorEngineId = 'pipeline' | 'paddle' | 'docling' | 'pdf_native' | 'tesseract';

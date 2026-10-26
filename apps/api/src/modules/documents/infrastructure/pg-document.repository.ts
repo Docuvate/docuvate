@@ -32,7 +32,22 @@ import {
   replaceDocumentExtractionFields,
 } from './document-extraction.persistence.js';
 import { insertDocumentExtractionImageRow } from './document-extraction-images.persistence.js';
+import {
+  assertCursorMatchesQuery,
+  decodeDocumentListCursor,
+  encodeDocumentListCursor,
+} from './document-list-cursor.js';
 import { buildDocumentListFilterSql } from './document-list-filter.sql.js';
+import {
+  buildDocumentListKeysetSql,
+  buildDocumentListOrderBy,
+  cursorPayloadFromDocumentRow,
+  resolvedDocumentListSort,
+} from './document-list-keyset.js';
+import {
+  isPaginatedDocumentListQuery,
+  paginatedFetchLimit,
+} from './document-list-pagination.js';
 import { mapDocumentRow, parseLayoutIrPagesJson, parseTagsJson } from './document-row.mapper.js';
 import { textFromExtractionBlocks } from './extraction-text.util.js';
 
@@ -163,33 +178,98 @@ export class PgDocumentRepository implements DocumentRepository {
   }
 
   async listForUser(userId: string, filters: DocumentListQuery = {}): Promise<DocumentEntity[]> {
-    const { whereSql, params } = buildDocumentListFilterSql(userId, filters);
+    const page = await this.listForUserInternal(userId, filters);
+    return page.entities;
+  }
 
-    const sortField = filters.sort ?? 'updatedAt';
-    const order = filters.order === 'asc' ? 'ASC' : 'DESC';
-    const sortColumn: Record<string, string> = {
-      updatedAt: 'd.updated_at',
-      createdAt: 'd.created_at',
-      title: 'd.title',
-      documentDate: 'd.document_date',
-    };
-    const orderBy = sortColumn[sortField] ?? 'd.updated_at';
+  async listPageForUser(
+    userId: string,
+    filters: DocumentListQuery
+  ): Promise<{ entities: DocumentEntity[]; hasMore: boolean; nextCursor: string | null }> {
+    return this.listForUserInternal(userId, filters);
+  }
+
+  private async listForUserInternal(
+    userId: string,
+    filters: DocumentListQuery = {}
+  ): Promise<{ entities: DocumentEntity[]; hasMore: boolean; nextCursor: string | null }> {
+    const { whereSql, params } = buildDocumentListFilterSql(userId, filters);
+    const { sortField, order } = resolvedDocumentListSort(filters);
+    const orderBy = buildDocumentListOrderBy(sortField, order);
+
+    const paginated = isPaginatedDocumentListQuery(filters);
+    const queryParams = [...params];
+    let whereWithKeyset = whereSql;
+
+    if (paginated && filters.cursor) {
+      const cursor = decodeDocumentListCursor(filters.cursor);
+      assertCursorMatchesQuery(cursor, sortField, order);
+      const keyset = buildDocumentListKeysetSql(
+        sortField,
+        order,
+        cursor,
+        queryParams.length + 1
+      );
+      whereWithKeyset = `${whereSql} AND ${keyset.conditionSql}`;
+      queryParams.push(...keyset.params);
+    }
+
+    const limitClause = paginated ? ` LIMIT $${String(queryParams.length + 1)}` : '';
+    if (paginated) {
+      queryParams.push(paginatedFetchLimit(filters));
+    }
 
     const sql = `${LIST_SELECT}
-      WHERE ${whereSql}
+      WHERE ${whereWithKeyset}
       GROUP BY d.id, f.id
-      ORDER BY ${orderBy} ${order} NULLS LAST`;
+      ORDER BY ${orderBy}${limitClause}`;
 
-    const result = await this.pool.query(sql, params);
+    const result = await this.pool.query(sql, queryParams);
+    let rows = result.rows;
+    let hasMore = false;
+    if (paginated) {
+      const pageSize = paginatedFetchLimit(filters) - 1;
+      hasMore = rows.length > pageSize;
+      if (hasMore) {
+        rows = rows.slice(0, pageSize);
+      }
+    }
+
     const extractions = await loadExtractionForDocuments(
       this.pool,
-      result.rows.map((raw) => parseString(requireRecord(raw).id))
+      rows.map((raw) => parseString(requireRecord(raw).id))
     );
-    return result.rows.map((raw) => {
+    const entities = rows.map((raw) => {
       const row = requireRecord(raw);
       const id = parseString(row.id);
       return this.mapRow(row, extractions.get(id) ?? { fields: [], blocks: [], images: [] });
     });
+
+    let nextCursor: string | null = null;
+    if (paginated && hasMore && rows.length > 0) {
+      const lastRow = requireRecord(rows[rows.length - 1]);
+      const cursorRow = {
+        id: parseString(lastRow.id),
+        updated_at: lastRow.updated_at instanceof Date
+          ? lastRow.updated_at
+          : new Date(parseString(lastRow.updated_at)),
+        created_at: lastRow.created_at instanceof Date
+          ? lastRow.created_at
+          : new Date(parseString(lastRow.created_at)),
+        title: parseString(lastRow.title),
+        document_date:
+          lastRow.document_date == null
+            ? null
+            : lastRow.document_date instanceof Date
+              ? lastRow.document_date
+              : new Date(parseString(lastRow.document_date)),
+      };
+      nextCursor = encodeDocumentListCursor(
+        cursorPayloadFromDocumentRow(sortField, order, cursorRow)
+      );
+    }
+
+    return { entities, hasMore, nextCursor };
   }
 
   async updateStatus(
