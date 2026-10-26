@@ -38,6 +38,7 @@ interface LabelPickerBaseProps {
   'aria-label'?: string;
   className?: string;
   testId?: string;
+  popoverTestId?: string;
   excludeTagIds?: ReadonlySet<string>;
   activeTagIds?: ReadonlySet<string>;
   allowCreate?: boolean;
@@ -273,6 +274,7 @@ export function LabelPicker(props: LabelPickerProps) {
         maxHeightPx={LIST_MAX_HEIGHT_PX}
         className="label-picker-combobox-popover popover-surface popover-surface-scroll"
         role="presentation"
+        testId={props.popoverTestId}
         onEscape={close}
       >
         <div

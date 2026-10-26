@@ -24,6 +24,8 @@ export function LibraryTagFilterCombobox({
         activeTagIds={activeTagIds}
         placeholder={t('library.filter.labelSearchPlaceholder')}
         aria-label={t('nav.labels')}
+        testId="library-filter-tag-combobox-control"
+        popoverTestId="library-filter-tag-combobox-popover"
       />
     </div>
   );

@@ -12,7 +12,14 @@ const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const artifactRoot =
   process.env['WORKSTREAM_B_ARTIFACT_DIR'] ?? '/opt/cursor/artifacts/workstream-b-label-picker';
 
-const viewports = [
+const tagFilterViewports = [
+  { label: '1440x900', width: 1440, height: 900, useDrawer: false },
+  { label: '1440x780', width: 1440, height: 780, useDrawer: false },
+  { label: '1024x640', width: 1024, height: 640, useDrawer: true },
+  { label: '390x620', width: 390, height: 620, useDrawer: true },
+] as const;
+
+const searchViewports = [
   { label: '1440', width: 1440, height: 900 },
   { label: '390', width: 390, height: 844 },
 ] as const;
@@ -53,6 +60,49 @@ async function assertFullyInViewport(
   expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
 }
 
+async function openLibraryFilters(
+  page: import('@playwright/test').Page,
+  useDrawer: boolean
+): Promise<void> {
+  const filterToggle = page.getByRole('button', {
+    name: /show filters|filter anzeigen|hide filters|filter ausblenden/i,
+  });
+  if (useDrawer) {
+    await filterToggle.click();
+    await expect(page.locator('.library-filter-drawer')).toBeVisible({ timeout: 30_000 });
+    return;
+  }
+  const panel = page.getByTestId('library-filter-panel');
+  if (!(await panel.isVisible())) {
+    await filterToggle.click();
+  }
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+}
+
+async function scrollTagFilterNearBottom(page: import('@playwright/test').Page): Promise<void> {
+  const combobox = page.getByTestId('library-filter-tag-combobox');
+  await combobox.scrollIntoViewIfNeeded();
+  await page.evaluate(() => {
+    const scrollHost =
+      document.querySelector('.library-filter-drawer-body') ??
+      document.querySelector('.filter-panel-body');
+    if (scrollHost instanceof HTMLElement) {
+      scrollHost.scrollTop = scrollHost.scrollHeight;
+    }
+  });
+  await combobox.scrollIntoViewIfNeeded();
+}
+
+async function openTagFilterPortaledList(page: import('@playwright/test').Page): Promise<void> {
+  const combobox = page.getByTestId('library-filter-tag-combobox');
+  const input = combobox.getByRole('combobox');
+  await input.click();
+  await input.fill('ws-b-seed');
+  const popover = page.getByTestId('library-filter-tag-combobox-popover');
+  await expect(popover).toBeVisible({ timeout: 30_000 });
+  await expect(popover).toHaveAttribute('data-floating-placement', /.+/);
+}
+
 test.describe('Workstream B label picker', () => {
   test.describe.configure({ mode: 'serial' });
 
@@ -63,29 +113,44 @@ test.describe('Workstream B label picker', () => {
     await seedLabels(request, 500);
   });
 
-  for (const viewport of viewports) {
+  for (const viewport of tagFilterViewports) {
+    test(`tag filter portaled popover in viewport (${viewport.label})`, async ({ page }) => {
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await page.goto(`${webOrigin}/documents`);
+      await page.waitForLoadState('networkidle');
+      await setTheme(page, 'light');
+
+      await openLibraryFilters(page, viewport.useDrawer);
+      await scrollTagFilterNearBottom(page);
+      await openTagFilterPortaledList(page);
+
+      const popover = page.getByTestId('library-filter-tag-combobox-popover');
+      const placement = await popover.getAttribute('data-floating-placement');
+      expect(placement?.startsWith('top')).toBe(true);
+
+      await assertFullyInViewport(page, '[data-testid="library-filter-tag-combobox-popover"]');
+
+      const listHost = popover.locator('.label-picker-combobox-list-host');
+      await expect(listHost).toBeVisible();
+      const optionCount = await listHost.locator('.label-picker-item').count();
+      expect(optionCount).toBeGreaterThan(0);
+      expect(optionCount).toBeLessThan(80);
+
+      const shot = path.join(artifactRoot, `tag-filter-popover-${viewport.label}.png`);
+      await page.screenshot({ path: shot });
+      expect(md5File(shot).length).toBe(32);
+    });
+  }
+
+  for (const viewport of searchViewports) {
     test(`label picker search and virtualization (${viewport.label})`, async ({ page }) => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       await page.goto(`${webOrigin}/documents`);
       await page.waitForLoadState('networkidle');
       await setTheme(page, 'dark');
 
-      const filterToggle = page.getByRole('button', {
-        name: /show filters|filter anzeigen|hide filters|filter ausblenden/i,
-      });
-      await filterToggle.click();
-
-      const pickerInput = page
-        .getByTestId('library-filter-tag-combobox')
-        .locator('.label-picker-combobox-input');
-      await expect(pickerInput).toBeVisible({ timeout: 30_000 });
-      await pickerInput.fill('ws-b-seed-04');
-      await pickerInput.press('ArrowDown');
-
-      const listHost = page.locator('.label-picker-combobox-list-host');
-      await expect(listHost).toBeVisible({ timeout: 30_000 });
-      const optionCount = await listHost.locator('.label-picker-item, .label-picker-combobox-option').count();
-      expect(optionCount).toBeLessThan(80);
+      await openLibraryFilters(page, viewport.width < 1024);
+      await openTagFilterPortaledList(page);
 
       const shot = path.join(artifactRoot, `label-picker-${viewport.label}.png`);
       await page.screenshot({ path: shot });
