@@ -1,4 +1,4 @@
-CREATE TABLE public.extraction_field_confirmations (
+CREATE TABLE IF NOT EXISTS public.extraction_field_confirmations (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     user_id text NOT NULL,
     document_id uuid NOT NULL,
@@ -12,10 +12,10 @@ CREATE TABLE public.extraction_field_confirmations (
     CONSTRAINT extraction_field_confirmations_user_id_fkey FOREIGN KEY (user_id) REFERENCES public."user"(id) ON DELETE CASCADE
 );
 
-CREATE INDEX extraction_field_confirmations_user_created_idx
+CREATE INDEX IF NOT EXISTS extraction_field_confirmations_user_created_idx
   ON public.extraction_field_confirmations USING btree (user_id, confirmed_at DESC);
 
-CREATE TABLE public.extraction_field_confirmation_labels (
+CREATE TABLE IF NOT EXISTS public.extraction_field_confirmation_labels (
     confirmation_id uuid NOT NULL,
     tag_id uuid NOT NULL,
     CONSTRAINT extraction_field_confirmation_labels_pkey PRIMARY KEY (confirmation_id, tag_id),
@@ -23,7 +23,7 @@ CREATE TABLE public.extraction_field_confirmation_labels (
     CONSTRAINT extraction_field_confirmation_labels_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id) ON DELETE CASCADE
 );
 
-CREATE INDEX extraction_field_confirmation_labels_tag_idx
+CREATE INDEX IF NOT EXISTS extraction_field_confirmation_labels_tag_idx
   ON public.extraction_field_confirmation_labels USING btree (tag_id);
 
 DELETE FROM public.extraction_field_corrections
@@ -38,5 +38,5 @@ WHERE c.id > c2.id
   AND c.old_value = c2.old_value
   AND c.new_value = c2.new_value;
 
-CREATE UNIQUE INDEX extraction_field_corrections_exact_dedupe_uidx
+CREATE UNIQUE INDEX IF NOT EXISTS extraction_field_corrections_exact_dedupe_uidx
   ON public.extraction_field_corrections (user_id, document_id, field_key, old_value, new_value);
