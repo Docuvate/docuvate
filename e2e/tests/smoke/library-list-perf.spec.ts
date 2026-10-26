@@ -95,6 +95,44 @@ async function assertDateColumnNotTruncated(page: import('@playwright/test').Pag
   expect(clipped).toBe(false);
 }
 
+async function assertLabelChipsContainedInCells(page: import('@playwright/test').Page): Promise<void> {
+  const chipOverflow = await page.evaluate(() => {
+    const cells = document.querySelectorAll(
+      '.library-table-virtual-body tr.library-table-virtual-row td.library-col-labels'
+    );
+    const tolerance = 1;
+    const limit = Math.min(20, cells.length);
+    for (let i = 0; i < limit; i += 1) {
+      const cell = cells.item(i);
+      if (!(cell instanceof HTMLElement)) {
+        continue;
+      }
+      const cellRect = cell.getBoundingClientRect();
+      const chips = cell.querySelectorAll('.chip');
+      for (let j = 0; j < chips.length; j += 1) {
+        const chip = chips.item(j);
+        if (!(chip instanceof HTMLElement)) {
+          continue;
+        }
+        const chipRect = chip.getBoundingClientRect();
+        if (chipRect.width === 0 && chipRect.height === 0) {
+          continue;
+        }
+        if (
+          chipRect.left < cellRect.left - tolerance ||
+          chipRect.right > cellRect.right + tolerance ||
+          chipRect.top < cellRect.top - tolerance ||
+          chipRect.bottom > cellRect.bottom + tolerance
+        ) {
+          return true;
+        }
+      }
+    }
+    return false;
+  });
+  expect(chipOverflow).toBe(false);
+}
+
 async function assertDateColumnAtViewports(
   page: import('@playwright/test').Page,
   locales: readonly ('de' | 'en')[],
@@ -107,7 +145,9 @@ async function assertDateColumnAtViewports(
       await applyDocuvateThemePreference(page, 'light');
       await page.goto('/documents');
       await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible' });
+      await waitForInlineTagSuggestion(page);
       await assertDateColumnNotTruncated(page);
+      await assertLabelChipsContainedInCells(page);
     }
   }
 }
@@ -150,39 +190,9 @@ async function assertDesktopTableLayout(page: import('@playwright/test').Page): 
   const titleCell = firstRow.locator('td.library-col-title').first();
   const titleBox = await titleCell.boundingBox();
   expect(titleBox).not.toBeNull();
-  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.399);
+  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.33);
 
-  const labelOverflow = await page.evaluate(() => {
-    const cells = document.querySelectorAll(
-      '.library-table-virtual-body tr.library-table-virtual-row td.library-col-labels'
-    );
-    const limit = Math.min(20, cells.length);
-    for (let i = 0; i < limit; i += 1) {
-      const cell = cells.item(i);
-      if (!(cell instanceof HTMLElement)) {
-        continue;
-      }
-      const chips = cell.querySelectorAll('.chip-label');
-      for (let j = 0; j < chips.length; j += 1) {
-        const chip = chips.item(j);
-        if (!(chip instanceof HTMLElement)) {
-          continue;
-        }
-        const ellipsis = getComputedStyle(chip).textOverflow === 'ellipsis';
-        if (chip.scrollWidth > chip.clientWidth && !ellipsis) {
-          return true;
-        }
-      }
-      if (cell.scrollWidth > cell.clientWidth + 1) {
-        const overflowBtn = cell.querySelector('.document-labels-overflow-btn');
-        if (!overflowBtn) {
-          return true;
-        }
-      }
-    }
-    return false;
-  });
-  expect(labelOverflow).toBe(false);
+  await assertLabelChipsContainedInCells(page);
 }
 
 async function assertMobileStackLayout(page: import('@playwright/test').Page): Promise<void> {

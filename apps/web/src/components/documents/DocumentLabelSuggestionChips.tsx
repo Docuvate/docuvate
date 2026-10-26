@@ -67,7 +67,7 @@ export function DocumentLabelSuggestionChips({
           type="button"
           className="document-label-suggestion-chip-btn"
           disabled={disabled}
-          title={t('documents.labelSuggestionAcceptHint', { name: item.tag.name })}
+          aria-label={t('documents.labelSuggestionAcceptHint', { name: item.tag.name })}
           onClick={() => void accept(item.tag.id)}
           onContextMenu={(event) => {
             event.preventDefault();
@@ -75,9 +75,10 @@ export function DocumentLabelSuggestionChips({
           }}
         >
           <Chip
-            label={`${t('documents.labelSuggestionChipPrefix')} ${item.tag.name}`}
+            label={item.tag.name}
             variant="suggest"
             color={item.tag.color}
+            truncateLabel
           />
         </button>
       ))}
