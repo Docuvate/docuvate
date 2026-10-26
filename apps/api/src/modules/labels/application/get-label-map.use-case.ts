@@ -101,8 +101,9 @@ export class GetLabelMapUseCase {
         embedding: r.embedding,
         nonInboxTagIds: r.nonInboxTagIds,
       }));
+    const emptyLabeledDocuments: LabeledDocumentEmbedding[] = [];
     const coverageScoreCorpus =
-      rows.length > 250 ? ([] as LabeledDocumentEmbedding[]) : labeledDocuments;
+      rows.length > MAX_VECTORS_FOR_UMAP ? emptyLabeledDocuments : labeledDocuments;
 
     const docEmbeddingsByTagId = new Map<string, number[][]>();
     for (const row of rows) {
