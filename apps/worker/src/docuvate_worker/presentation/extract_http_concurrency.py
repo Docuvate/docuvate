@@ -10,14 +10,17 @@ import threading
 from collections.abc import Iterator
 from contextlib import contextmanager
 
+from docuvate_worker.domain.extract_errors import ExtractRetryableError
 from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
     resolve_extract_concurrency,
 )
 
 _ENV_HTTP_EXTRACT_SLOTS = "DOCUVATE_HTTP_EXTRACT_CONCURRENCY"
 
-_extract_slots: threading.Semaphore | None = None
-_slots_lock = threading.Lock()
+
+class _HttpExtractSlotState:
+    lock = threading.Lock()
+    semaphore: threading.Semaphore | None = None
 
 
 def _slot_count() -> int:
@@ -28,11 +31,10 @@ def _slot_count() -> int:
 
 
 def _semaphore() -> threading.Semaphore:
-    global _extract_slots
-    with _slots_lock:
-        if _extract_slots is None:
-            _extract_slots = threading.Semaphore(_slot_count())
-        return _extract_slots
+    with _HttpExtractSlotState.lock:
+        if _HttpExtractSlotState.semaphore is None:
+            _HttpExtractSlotState.semaphore = threading.Semaphore(_slot_count())
+        return _HttpExtractSlotState.semaphore
 
 
 @contextmanager
@@ -40,8 +42,6 @@ def extract_http_slot() -> Iterator[None]:
     sem = _semaphore()
     acquired = sem.acquire(blocking=False)
     if not acquired:
-        from docuvate_worker.domain.extract_errors import ExtractRetryableError
-
         raise ExtractRetryableError(
             reason="Worker extract HTTP concurrency limit reached; retry shortly.",
             error_type="ExtractResourceBusy",

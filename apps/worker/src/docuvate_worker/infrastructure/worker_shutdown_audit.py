@@ -17,7 +17,10 @@ from docuvate_worker.infrastructure.extract_memory.cgroup import (
 )
 
 logger = logging.getLogger(__name__)
-_installed = False
+
+
+class _ShutdownAuditState:
+    installed = False
 
 
 def _cgroup_summary() -> str:
@@ -46,10 +49,9 @@ def _handle_shutdown_signal(signum: int, _frame: object | None) -> None:
 
 
 def install_worker_shutdown_audit() -> None:
-    global _installed
-    if _installed:
+    if _ShutdownAuditState.installed:
         return
     signal.signal(signal.SIGTERM, _handle_shutdown_signal)
     signal.signal(signal.SIGINT, _handle_shutdown_signal)
-    _installed = True
+    _ShutdownAuditState.installed = True
     logger.info("worker_shutdown_audit_installed pid=%s", os.getpid())

@@ -8,6 +8,10 @@ from __future__ import annotations
 import os
 import threading
 
+from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
+    resolve_extract_concurrency,
+)
+
 _ENV_POOL_RESIDENT_BYTES = "DOCUVATE_EXTRACT_POOL_RESIDENT_BYTES"
 _DEFAULT_POOL_RESIDENT_BYTES = 550_000_000
 
@@ -49,10 +53,6 @@ def pool_memory_registry() -> _PoolMemoryRegistry:
 
 
 def _pool_size_from_env() -> int:
-    from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
-        resolve_extract_concurrency,
-    )
-
     raw = os.environ.get("DOCUVATE_EXTRACT_POOL_SIZE", "").strip()
     if raw.isdigit() and int(raw) > 0:
         return int(raw)

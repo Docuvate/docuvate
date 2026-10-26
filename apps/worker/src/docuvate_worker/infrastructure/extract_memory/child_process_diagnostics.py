@@ -21,6 +21,8 @@ from docuvate_worker.infrastructure.extract_memory.cgroup import (
 
 logger = logging.getLogger(__name__)
 
+_PROC_STATUS_FIELD_COUNT = 2
+
 ChildExitReason = Literal[
     "planned_recycle",
     "replaced_dead_child",
@@ -35,7 +37,7 @@ ChildExitReason = Literal[
 class ChildExitDiagnostics:
     pid: int | None
     returncode: int | None
-    reason: ChildExitReason
+    reason: ChildExitReason | str
     rss_bytes: int | None
     signal_name: str | None
     cgroup_limit_bytes: int | None
@@ -51,7 +53,7 @@ def _read_proc_rss_bytes(pid: int) -> int | None:
     for line in status_path.read_text(encoding="utf-8").splitlines():
         if line.startswith("VmRSS:"):
             parts = line.split()
-            if len(parts) >= 2:
+            if len(parts) >= _PROC_STATUS_FIELD_COUNT:
                 try:
                     kib = int(parts[1])
                 except ValueError:
@@ -80,16 +82,20 @@ def describe_child_exit(
     returncode = proc.poll() if proc is not None else None
     rss = _read_proc_rss_bytes(pid) if pid is not None else None
     snapshot = read_cgroup_memory_snapshot()
+    if snapshot is not None:
+        cgroup_limit = snapshot.limit_bytes
+        cgroup_current = snapshot.current_bytes
+    else:
+        cgroup_limit = cgroup_memory_limit_bytes()
+        cgroup_current = cgroup_memory_current_bytes()
     return ChildExitDiagnostics(
         pid=pid,
         returncode=returncode,
         reason=reason,
         rss_bytes=rss,
         signal_name=_signal_name(returncode),
-        cgroup_limit_bytes=snapshot.limit_bytes if snapshot is not None else cgroup_memory_limit_bytes(),
-        cgroup_current_bytes=(
-            snapshot.current_bytes if snapshot is not None else cgroup_memory_current_bytes()
-        ),
+        cgroup_limit_bytes=cgroup_limit,
+        cgroup_current_bytes=cgroup_current,
         cgroup_oom_kills=cgroup_oom_kill_count(),
         jobs_served=jobs_served,
     )
