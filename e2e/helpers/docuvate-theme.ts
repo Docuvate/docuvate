@@ -35,6 +35,9 @@ export async function readDocBodyBackground(page: Page): Promise<string> {
 }
 
 export async function applyDocuvateLocale(page: Page, locale: 'de' | 'en'): Promise<void> {
+  if (!page.url().startsWith('http')) {
+    await page.goto('/');
+  }
   await page.evaluate(
     ({ key, loc }) => {
       window.localStorage.setItem(key, loc);
