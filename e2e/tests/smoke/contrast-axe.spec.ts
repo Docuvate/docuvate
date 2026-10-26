@@ -77,6 +77,38 @@ test.describe('Contrast axe color-contrast', () => {
       const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
 
       let recommendationsMode: 'ok' | 'fail' = 'ok';
+      await page.route('**/v1/labels/map**', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            points: [],
+            documentCount: 0,
+            tagCount: 0,
+            extractedDocumentCount: 0,
+            emptyReason: null,
+            coverageSummary: null,
+          }),
+        });
+      });
+      await page.route('**/v1/labels/document-inventory**', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            documents: [],
+            documentCountByTagId: {},
+            inventory: { total: 0, labeled: 0, unlabeled: 0 },
+          }),
+        });
+      });
+      await page.route('**/v1/documents/review-queue/summary**', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ pendingCount: 0 }),
+        });
+      });
       await page.route('**/v1/labels/recommendations**', async (route) => {
         if (recommendationsMode === 'fail') {
           await route.fulfill({
