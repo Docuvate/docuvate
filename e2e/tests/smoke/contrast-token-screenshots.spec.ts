@@ -9,10 +9,16 @@ import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
 
-const VIEWPORTS = [
+const ALL_VIEWPORTS = [
   { label: '1440', width: 1440, height: 900 },
   { label: '390', width: 390, height: 844 },
 ] as const;
+
+const REVIEW_VIEWPORTS = [{ label: '1440', width: 1440, height: 900 }] as const;
+
+function viewportsForRun(): typeof ALL_VIEWPORTS | typeof REVIEW_VIEWPORTS {
+  return process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1' ? REVIEW_VIEWPORTS : ALL_VIEWPORTS;
+}
 
 const THEMES = ['light', 'dark'] as const;
 
@@ -24,6 +30,21 @@ const AUTHENTICATED_CAPTURES: { path: string; slug: string }[] = [
   { path: '/settings/connectors', slug: 'connectors' },
   { path: '/filesystem', slug: 'filesystem' },
 ];
+
+const REVIEW_CAPTURE_SLUGS = new Set([
+  'documents',
+  'labels',
+  'connectors',
+  'filesystem',
+  'document-detail',
+]);
+
+function authenticatedCapturesForRun(): { path: string; slug: string }[] {
+  if (process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1') {
+    return AUTHENTICATED_CAPTURES.filter((route) => REVIEW_CAPTURE_SLUGS.has(route.slug));
+  }
+  return AUTHENTICATED_CAPTURES;
+}
 
 type ManifestEntry = {
   file: string;
@@ -107,14 +128,21 @@ test.describe('Contrast workstream screenshots', () => {
   ): Promise<string> {
     await page.goto(`${webOrigin}${routePath}`, { waitUntil: 'domcontentloaded' });
     await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
+    if (slug === 'document-detail') {
+      const pdfToolbar = page.locator('.pdf-viewer-toolbar');
+      if ((await pdfToolbar.count()) > 0) {
+        await pdfToolbar.first().waitFor({ state: 'visible', timeout: 60_000 });
+      }
+    }
     return capturePage(page, slug, theme, viewportLabel);
   }
 
   test('login (public)', async ({ page }) => {
     const health = await page.request.get(`${apiBase}/health`);
     test.skip(!health.ok(), 'compose API not running');
+    test.skip(process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1', 'review-only CI captures');
 
-    for (const viewport of VIEWPORTS) {
+    for (const viewport of viewportsForRun()) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       for (const theme of THEMES) {
         await page.goto(`${webOrigin}/login`);
@@ -150,9 +178,13 @@ test.describe('Contrast workstream screenshots', () => {
       const health = await request.get(`${apiBase}/health`);
       test.skip(!health.ok(), 'compose API not running');
 
-      const routes = [...AUTHENTICATED_CAPTURES, { path: documentDetailPath, slug: 'document-detail' }];
+      const reviewOnly = process.env['CONTRAST_SCREENSHOT_REVIEW_ONLY'] === '1';
+      const routes = [
+        ...authenticatedCapturesForRun(),
+        { path: documentDetailPath, slug: 'document-detail' },
+      ];
 
-      for (const viewport of VIEWPORTS) {
+      for (const viewport of viewportsForRun()) {
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
         for (const theme of THEMES) {
           for (const route of routes) {
@@ -160,8 +192,12 @@ test.describe('Contrast workstream screenshots', () => {
             expect(filePath).toBeTruthy();
           }
 
-          await page.goto(`${webOrigin}/structure/labels`);
-          await page.waitForLoadState('networkidle');
+          if (reviewOnly) {
+            continue;
+          }
+
+          await page.goto(`${webOrigin}/structure/labels`, { waitUntil: 'domcontentloaded' });
+          await page.locator('#root').waitFor({ state: 'attached', timeout: 60_000 });
           await setTheme(page, theme);
           const errorLine = page.locator('p.error').first();
           if ((await errorLine.count()) > 0) {

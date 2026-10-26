@@ -9,6 +9,8 @@ const colorJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'tokens/color.
 
 const MIN_TEXT_RATIO = 4.5;
 const MIN_UI_RATIO = 3;
+/** Accent link text must stay vermilion, not drift to brown (excess contrast on page bg). */
+const MAX_ACCENT_TEXT_RATIO_ON_BG = 7;
 
 const CHIP_FG_LIGHT = '#0f172a';
 const CHIP_FG_DARK = '#ffffff';
@@ -27,7 +29,10 @@ const TEXT_PAIRS = [
   ['accent-text', 'bg-raised'],
   ['accent-text', 'bg'],
   ['accent-text', 'bg-overlay'],
+  ['accent-text', 'bg-muted'],
   ['accent-text', 'accent-soft'],
+  ['accent-text', 'header-bg'],
+  ['accent-text', 'scene-bg'],
   ['error-text', 'bg'],
   ['error-text', 'bg-raised'],
   ['header-fg', 'header-bg'],
@@ -129,6 +134,23 @@ for (const theme of ['light', 'dark']) {
     if (Math.round(ratio * 100) / 100 < MIN_UI_RATIO) {
       failures.push({ theme, fgKey, bgKey, fg, bg, ratio, minRequired: MIN_UI_RATIO });
     }
+  }
+
+  const accentOnBg = ratioForPair(
+    colorJson.color[theme]['accent-text'].value,
+    colorJson.color[theme].bg.value
+  );
+  if (accentOnBg !== null && accentOnBg > MAX_ACCENT_TEXT_RATIO_ON_BG) {
+    failures.push({
+      theme,
+      fgKey: 'accent-text',
+      bgKey: 'bg',
+      fg: colorJson.color[theme]['accent-text'].value,
+      bg: colorJson.color[theme].bg.value,
+      ratio: accentOnBg,
+      minRequired: MAX_ACCENT_TEXT_RATIO_ON_BG,
+      reason: 'accent-text too dark (contrast above max on bg)',
+    });
   }
 
   for (const presetKey of LABEL_PRESET_KEYS) {

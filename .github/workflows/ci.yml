@@ -154,6 +154,23 @@ jobs:
           E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
             pnpm --filter @docuvate/e2e exec playwright test contrast-axe \
             --config=playwright.contrast.config.ts
+      - name: Contrast token screenshots (review set)
+        run: |
+          set -euo pipefail
+          export CONTRAST_SCREENSHOT_DIR="${GITHUB_WORKSPACE}/contrast-screenshots"
+          export CONTRAST_SCREENSHOT_PHASE=ci
+          export CONTRAST_SCREENSHOT_REVIEW_ONLY=1
+          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
+            pnpm --filter @docuvate/e2e exec playwright test contrast-token-screenshots \
+            --config=playwright.contrast.config.ts
+      - name: Upload contrast screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@b4b15b8c7c6e9b9d6bce5373d9d4fcef9be268f3 # v4.6.0
+        with:
+          name: contrast-screenshots
+          path: contrast-screenshots/
+          retention-days: 14
+          if-no-files-found: error
 
   db-migrate-fresh:
     runs-on: ubuntu-latest
