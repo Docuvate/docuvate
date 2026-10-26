@@ -109,7 +109,7 @@ test.describe('library list performance', () => {
     fs.writeFileSync(path.join(artifactRoot, 'perf.json'), `${JSON.stringify(perf, null, 2)}\n`);
 
     expect(listRequests.length).toBe(1);
-    expect(firstRowMs).toBeLessThan(2000);
+    expect(firstRowMs).toBeLessThan(1500);
     expect(nodeCount).toBeLessThan(3000);
 
     await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'light');
