@@ -31,7 +31,7 @@ const rowChipEllipsisViewports = [
 
 const rowChipEllipsisRoutes = [
   { path: '/documents', slug: 'documents' },
-  { path: '/filesystem', slug: 'filesystem' },
+  { path: '/filesystem/unassigned', slug: 'filesystem' },
 ] as const;
 
 /** German compound-style names (each ≥ 60 characters). */
