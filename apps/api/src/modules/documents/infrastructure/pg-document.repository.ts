@@ -55,6 +55,13 @@ import { textFromExtractionBlocks } from './extraction-text.util.js';
 const LIST_SELECT = `
   SELECT d.*,
     EXISTS (SELECT 1 FROM document_layout_ir li WHERE li.document_id = d.id) AS layout_ir_available,
+    (
+      SELECT dfv.value_text
+      FROM document_field_values dfv
+      WHERE dfv.document_id = d.id
+        AND dfv.field_storage_key = 'global:absender'
+      LIMIT 1
+    ) AS absender_preview,
     f.name AS folder_name,
     COALESCE(
       json_agg(
@@ -538,6 +545,16 @@ export class PgDocumentRepository implements DocumentRepository {
     const params: unknown[] = [id, userId];
     let idx = 3;
 
+    if (patch.filename !== undefined) {
+      fields.push(`filename = $${String(idx)}`);
+      idx += 1;
+      params.push(patch.filename);
+    }
+    if (patch.mimeType !== undefined) {
+      fields.push(`mime_type = $${String(idx)}`);
+      idx += 1;
+      params.push(patch.mimeType);
+    }
     if (patch.title !== undefined) {
       fields.push(`title = $${String(idx)}`);
       idx += 1;

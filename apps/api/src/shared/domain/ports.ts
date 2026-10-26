@@ -37,6 +37,8 @@ export interface UnitOfWork {
 }
 
 export interface DocumentUpdatePatch {
+  filename?: string;
+  mimeType?: string;
   title?: string;
   documentDate?: Date | null;
   notes?: string | null;

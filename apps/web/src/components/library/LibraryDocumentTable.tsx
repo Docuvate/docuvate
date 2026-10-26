@@ -63,6 +63,7 @@ interface LibraryDocumentTableProps {
   isFetchingNextPage?: boolean;
   onLoadMore?: () => void;
   listScrollStorageKey?: string;
+  showDocumentOwnerLine?: boolean;
 }
 
 function showColumn(
@@ -92,21 +93,33 @@ export function LibraryDocumentTable({
   isFetchingNextPage = false,
   onLoadMore,
   listScrollStorageKey,
+  showDocumentOwnerLine = false,
 }: LibraryDocumentTableProps) {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language.startsWith('de') ? 'de-DE' : 'en-US';
-  const renderDocumentDate = (doc: DocumentDto) => {
-    const parts = documentDisplayDateParts(doc, dateLocale);
+  const documentDateTooltip = (doc: DocumentDto): string => {
+    const full = documentDisplayDateParts(doc, dateLocale, 'full');
+    if (!full.isUploadFallback) {
+      return full.text;
+    }
+    return `${full.text} — ${t('library.dateUploadFallback')}`;
+  };
+
+  const renderTableDocumentDate = (doc: DocumentDto) => {
+    const parts = documentDisplayDateParts(doc, dateLocale, 'table');
     return (
-      <>
+      <span className="library-col-date-text" title={documentDateTooltip(doc)}>
         {parts.text}
-        {parts.isUploadFallback ? (
-          <span className="library-date-fallback muted" title={t('library.dateUploadFallback')}>
-            {' '}
-            *
-          </span>
-        ) : null}
-      </>
+      </span>
+    );
+  };
+
+  const renderStackDocumentDate = (doc: DocumentDto) => {
+    const parts = documentDisplayDateParts(doc, dateLocale, 'table');
+    return (
+      <span className="library-doc-stack-date" title={documentDateTooltip(doc)}>
+        {parts.text}
+      </span>
     );
   };
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -266,7 +279,7 @@ export function LibraryDocumentTable({
   const mobileStack = narrowTopbar || filesystemCompactDocs;
   const { parentRef: virtualScrollRef, virtualizer } = useLibraryDocumentVirtualizer({
     count: items.length,
-    estimateSize: mobileStack ? 136 : 58,
+    estimateSize: mobileStack ? 136 : 76,
     hasNextPage,
     isFetchingNextPage,
     onLoadMore,
@@ -293,16 +306,16 @@ export function LibraryDocumentTable({
     }
     if (showLabelsCol) {
       columns.push(
-        'minmax(var(--library-table-labels-col-min, 10rem), var(--library-table-labels-col-max, 11.5rem))'
+        'minmax(var(--library-table-labels-col-min, 6rem), var(--library-table-labels-col-max, 7.5rem))'
       );
     }
     if (showStatusCol) {
-      columns.push('6.25rem');
+      columns.push('5.5rem');
     }
     if (showDateCol) {
-      columns.push('max-content');
+      columns.push('7.25rem');
     }
-    columns.push('3.5rem');
+    columns.push('4.5rem');
     return { gridTemplateColumns: columns.join(' ') };
   }, [showDateCol, showFolderCol, showLabelsCol, showStatusCol]);
 
@@ -512,6 +525,14 @@ export function LibraryDocumentTable({
                             {doc.filename}
                           </div>
                         ) : null}
+                        {showDocumentOwnerLine && doc.ownerLine ? (
+                          <div className="muted library-doc-stack-owner" title={doc.ownerLine}>
+                            {doc.ownerLine}
+                          </div>
+                        ) : null}
+                        <div className="muted library-doc-stack-date-secondary">
+                          {renderStackDocumentDate(doc)}
+                        </div>
                         {doc.ingestSource === 'scanner_sftp' ? (
                           <span className="library-title-ingest-meta">
                             <ScanLine
@@ -525,14 +546,14 @@ export function LibraryDocumentTable({
                       </div>
                     </div>
                     <div className="library-doc-stack-meta">
-                      <div className="library-doc-stack-meta-main">
-                        <DocumentLabelsCell
-                          document={{
-                            ...doc,
-                            tagSuggestions: suggestionsByDocumentId[doc.id] ?? doc.tagSuggestions,
-                          }}
-                          onRefresh={onRefresh}
-                        />
+                      <DocumentLabelsCell
+                        document={{
+                          ...doc,
+                          tagSuggestions: suggestionsByDocumentId[doc.id] ?? doc.tagSuggestions,
+                        }}
+                        onRefresh={onRefresh}
+                      />
+                      <div className="library-doc-stack-meta-end">
                         {doc.duplicateStack?.pendingReview ? (
                           <span className="badge badge-warn">{t('library.reviewPending')}</span>
                         ) : isExtractionPending(doc.status) ? (
@@ -544,9 +565,6 @@ export function LibraryDocumentTable({
                         ) : (
                           <Badge status={doc.status} />
                         )}
-                        <span className="library-doc-stack-date">{renderDocumentDate(doc)}</span>
-                      </div>
-                      <div className="library-doc-stack-meta-actions">
                         {hasStack ? (
                           <>
                             <Button
@@ -686,6 +704,7 @@ export function LibraryDocumentTable({
                   <DocumentDraggableTableRow
                     documentId={doc.id}
                     dragEnabled={enableDocumentDrag}
+                    measureElementRef={virtualizer.measureElement}
                     className={['library-table-virtual-row', rowClassName].filter(Boolean).join(' ')}
                     data-index={virtualRow.index}
                     style={{
@@ -770,7 +789,14 @@ export function LibraryDocumentTable({
                           {doc.filename}
                         </div>
                       ) : null}
-                      {doc.folder?.name && doc.folder.id !== suppressFolderFallbackForId ? (
+                      {showDocumentOwnerLine && doc.ownerLine ? (
+                        <div className="muted cell-sub library-title-owner-line" title={doc.ownerLine}>
+                          {doc.ownerLine}
+                        </div>
+                      ) : null}
+                      {!showFolderCol &&
+                      doc.folder?.name &&
+                      doc.folder.id !== suppressFolderFallbackForId ? (
                         <div
                           className="muted cell-sub library-title-folder-fallback"
                           title={doc.folder.name}
@@ -837,7 +863,7 @@ export function LibraryDocumentTable({
                       </td>
                     ) : null}
                     {showDateCol ? (
-                      <td className="library-col-date">{renderDocumentDate(doc)}</td>
+                      <td className="library-col-date">{renderTableDocumentDate(doc)}</td>
                     ) : null}
                     <td className="library-col-action">
                       <div className="library-row-actions">

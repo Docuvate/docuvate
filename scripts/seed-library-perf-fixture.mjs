@@ -8,6 +8,14 @@ const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'alex.upload@fixture.docuvate.test'
 const DOC_COUNT = Number(process.env.LIBRARY_PERF_DOC_COUNT ?? '5000');
 const LABEL_COUNT = Number(process.env.LIBRARY_PERF_LABEL_COUNT ?? '300');
 
+const LONG_TITLE_PREFIX =
+  'Sehr langer Dokumenttitel für Layout-Regressionstests mit virtuellem Scrollen und mehrzeiligen Metadaten ';
+const LONG_LABEL_NAMES = [
+  'Versicherungsnachweis-Krankenhausaufenthalt',
+  'Steuerbescheid-Einkommen-Nachzahlung',
+  'Mietvertrag-Nebenkostenabrechnung-2024',
+];
+
 async function main() {
   const { createRequire } = await import('node:module');
   const { randomUUID } = await import('node:crypto');
@@ -21,6 +29,14 @@ async function main() {
       throw new Error(`Smoke user not found: ${EMAIL}`);
     }
 
+    const secondUserId = randomUUID();
+    await pool.query(
+      `INSERT INTO "user" (id, name, email, "emailVerified", "createdAt", "updatedAt")
+       VALUES ($1, $2, $3, true, now(), now())
+       ON CONFLICT (email) DO NOTHING`,
+      [secondUserId, 'Fixture Second User', 'fixture.second@fixture.docuvate.test']
+    );
+
     await pool.query(`DELETE FROM documents WHERE user_id = $1`, [userId]);
     await pool.query(`DELETE FROM tags WHERE user_id = $1`, [userId]);
 
@@ -28,10 +44,14 @@ async function main() {
     for (let i = 0; i < LABEL_COUNT; i += 1) {
       const id = randomUUID();
       tagIds.push(id);
+      const name =
+        i < LONG_LABEL_NAMES.length
+          ? LONG_LABEL_NAMES[i]
+          : `perf-label-${String(i).padStart(4, '0')}`;
       await pool.query(
         `INSERT INTO tags (id, user_id, name, color, is_inbox, created_at, updated_at)
          VALUES ($1, $2, $3, '#888888', false, now(), now())`,
-        [id, userId, `perf-label-${String(i).padStart(4, '0')}`]
+        [id, userId, name]
       );
     }
 
@@ -40,16 +60,40 @@ async function main() {
     for (let i = 0; i < DOC_COUNT; i += 1) {
       const id = randomUUID();
       const updatedAt = new Date(now - i * 1000);
+      const isShowcase = i === 0;
+      const title = isShowcase
+        ? `${LONG_TITLE_PREFIX}${String(i)}`
+        : i < 40
+          ? `${LONG_TITLE_PREFIX}${String(i)}`
+          : `Perf document ${String(i)}`;
+      const filename = isShowcase ? 'paperless-import-placeholder.pdf' : `perf-${String(i)}.pdf`;
       await pool.query(
         `INSERT INTO documents (
           id, user_id, filename, title, status, storage_key, mime_type, updated_at, created_at
         ) VALUES ($1, $2, $3, $4, 'ready', $5, 'application/pdf', $6, $6)`,
-        [id, userId, `perf-${String(i)}.pdf`, `Perf document ${String(i)}`, `perf/${id}`, updatedAt]
+        [id, userId, filename, title, `perf/${id}`, updatedAt]
       );
-      if (i === 0) {
+      if (isShowcase) {
         showcaseDocumentId = id;
       }
-      if (i % 7 === 0 && i !== 0) {
+      if (i < 40) {
+        await pool.query(
+          `INSERT INTO document_field_values (
+             document_id, field_storage_key, value_text, confidence,
+             value_text_norm, value_numeric, value_date
+           ) VALUES ($1, 'global:absender', $2, 1, lower($2), NULL, NULL)
+           ON CONFLICT (document_id, field_storage_key) DO UPDATE SET value_text = EXCLUDED.value_text`,
+          [id, `Absender Zeile ${String(i)} — Muster GmbH & Co. KG`]
+        );
+      }
+      if (isShowcase && tagIds.length >= LONG_LABEL_NAMES.length) {
+        for (let t = 0; t < LONG_LABEL_NAMES.length; t += 1) {
+          await pool.query(
+            `INSERT INTO document_tags (document_id, tag_id, user_confirmed) VALUES ($1, $2, true)`,
+            [id, tagIds[t]]
+          );
+        }
+      } else if (i % 7 === 0 && i !== 0) {
         const tagId = tagIds[i % tagIds.length];
         await pool.query(
           `INSERT INTO document_tags (document_id, tag_id, user_confirmed) VALUES ($1, $2, true)`,

@@ -11,13 +11,18 @@ function resolveLocaleTag(locale: string): string {
   return locale.startsWith('de') ? 'de-DE' : 'en-US';
 }
 
-function formatLocaleDate(raw: string, locale: string): string {
+export type DocumentDateDisplayStyle = 'full' | 'table';
+
+function formatLocaleDate(raw: string, locale: string, style: DocumentDateDisplayStyle): string {
   const parsed = Date.parse(raw);
   if (Number.isNaN(parsed)) {
     return raw;
   }
   const tag = resolveLocaleTag(locale);
   const hasTime = raw.includes('T');
+  if (style === 'table') {
+    return new Intl.DateTimeFormat(tag, { dateStyle: 'medium' }).format(new Date(parsed));
+  }
   return new Intl.DateTimeFormat(tag, hasTime ? { dateStyle: 'medium', timeStyle: 'short' } : { dateStyle: 'medium' }).format(
     new Date(parsed)
   );
@@ -25,12 +30,13 @@ function formatLocaleDate(raw: string, locale: string): string {
 
 export function documentDisplayDateParts(
   doc: Pick<DocumentDto, 'documentDate' | 'createdAt' | 'updatedAt'>,
-  locale = 'de-DE'
+  locale = 'de-DE',
+  style: DocumentDateDisplayStyle = 'full'
 ): { text: string; isUploadFallback: boolean } {
   const isUploadFallback = !doc.documentDate;
   const raw = doc.documentDate ?? doc.createdAt;
   return {
-    text: formatLocaleDate(raw, locale),
+    text: formatLocaleDate(raw, locale, style),
     isUploadFallback,
   };
 }

@@ -123,6 +123,29 @@ export function documentUsesPdfPreview(
   return uploadFormatForMime(base)?.needsPdfPreview === true;
 }
 
+export function primaryUploadExtensionForMime(mimeType: string): string | null {
+  const normalized = normalizeMimeType(mimeType);
+  const def = uploadFormatForMime(normalized);
+  return def?.extensions[0] ?? null;
+}
+
+/** Repairs placeholder `.bin` filenames using the stored MIME type. */
+export function repairBinPlaceholderFilename(filename: string, mimeType: string): string {
+  const trimmed = filename.trim();
+  if (!trimmed.toLowerCase().endsWith('.bin')) {
+    return trimmed;
+  }
+  const extension = primaryUploadExtensionForMime(mimeType);
+  if (!extension) {
+    return trimmed;
+  }
+  const base = trimmed.slice(0, -4).trim();
+  if (base.length === 0) {
+    return `document${extension}`;
+  }
+  return `${base}${extension}`;
+}
+
 export function documentFormatBadge(mimeType: string, filename?: string): string {
   const fromMime = uploadFormatForMime(mimeType)?.badge;
   if (fromMime) return fromMime;

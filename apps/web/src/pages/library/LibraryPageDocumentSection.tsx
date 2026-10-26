@@ -101,6 +101,7 @@ export function LibraryPageDocumentSection({
     isFetchingNextPage: data.isFetchingNextPage,
     onLoadMore: loadMore,
     listScrollStorageKey,
+    showDocumentOwnerLine: data.showDocumentOwnerLine,
   };
 
   return (

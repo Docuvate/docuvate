@@ -27,6 +27,7 @@ export interface DocumentEntity {
   folder?: Pick<FolderEntity, 'id' | 'name'> | null;
   tags: TagEntity[];
   ingestSource?: string | null;
+  ownerLine?: string | null;
   createdAt: Date;
   updatedAt: Date;
   extraction?: DocumentExtractionDto;

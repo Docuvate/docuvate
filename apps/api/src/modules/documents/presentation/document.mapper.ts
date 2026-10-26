@@ -58,6 +58,7 @@ export function toDocumentListItemDto(
       Boolean(entity.previewStorageKey?.trim())
     ),
     ingestSource: entity.ingestSource ?? null,
+    ownerLine: entity.ownerLine?.trim() ? entity.ownerLine.trim() : null,
     documentDate: entity.documentDate ? entity.documentDate.toISOString().slice(0, 10) : null,
     folderId: entity.folderId ?? null,
     folder: entity.folder ? { id: entity.folder.id, name: entity.folder.name } : null,
@@ -69,11 +70,15 @@ export function toDocumentListItemDto(
   };
 }
 
-export function toDocumentListResponse(page: ListedDocumentPage): {
+export function toDocumentListResponse(
+  page: ListedDocumentPage,
+  libraryUi?: { showDocumentOwnerLine: boolean }
+): {
   items: DocumentListItemDto[];
   nextCursor: string | null;
   hasMore: boolean;
   total: number | null;
+  libraryUi?: { showDocumentOwnerLine: boolean };
 } {
   return {
     items: page.items.map(({ entity, duplicateCandidateCount, duplicateStack }) =>
@@ -82,6 +87,7 @@ export function toDocumentListResponse(page: ListedDocumentPage): {
     nextCursor: page.nextCursor,
     hasMore: page.hasMore,
     total: page.total,
+    libraryUi,
   };
 }
 
@@ -106,6 +112,7 @@ export function toDocumentDto(
       Boolean(entity.previewStorageKey?.trim())
     ),
     ingestSource: entity.ingestSource ?? null,
+    ownerLine: entity.ownerLine?.trim() ? entity.ownerLine.trim() : null,
     documentDate: entity.documentDate ? entity.documentDate.toISOString().slice(0, 10) : null,
     notes: entity.notes ?? null,
     folderId: entity.folderId ?? null,

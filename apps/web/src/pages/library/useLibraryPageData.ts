@@ -252,6 +252,8 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     [documentsQuery.data?.pages]
   );
   const totalCount = documentsQuery.data?.pages[0]?.total ?? null;
+  const showDocumentOwnerLine =
+    documentsQuery.data?.pages[0]?.libraryUi?.showDocumentOwnerLine ?? false;
   const loading = documentsQuery.isPending && items.length === 0;
 
   useEffect(() => {
@@ -599,6 +601,7 @@ export function useLibraryPageData(mode: 'all' | 'folder' | 'unassigned' | 'ordn
     groupedLabelBusy,
     acceptGroupedLabelSuggestion,
     totalCount,
+    showDocumentOwnerLine,
     hasNextPage: documentsQuery.hasNextPage,
     fetchNextPage: documentsQuery.fetchNextPage,
     isFetchingNextPage: documentsQuery.isFetchingNextPage,

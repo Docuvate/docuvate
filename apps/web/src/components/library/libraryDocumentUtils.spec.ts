@@ -18,6 +18,29 @@ describe('documentDisplayDateParts', () => {
     expect(parts.text).not.toMatch(/2026-03-15T/);
   });
 
+  it('uses date-only text for table style (time belongs in tooltip)', () => {
+    const full = documentDisplayDateParts(
+      {
+        documentDate: null,
+        createdAt: '2026-03-15T14:30:00.000Z',
+        updatedAt: '2026-03-16T08:00:00.000Z',
+      },
+      'en-US',
+      'full'
+    );
+    const table = documentDisplayDateParts(
+      {
+        documentDate: null,
+        createdAt: '2026-03-15T14:30:00.000Z',
+        updatedAt: '2026-03-16T08:00:00.000Z',
+      },
+      'en-US',
+      'table'
+    );
+    expect(table.text).not.toContain(':');
+    expect(full.text.length).toBeGreaterThan(table.text.length);
+  });
+
   it('formats German locale dates', () => {
     const parts = documentDisplayDateParts(
       {
