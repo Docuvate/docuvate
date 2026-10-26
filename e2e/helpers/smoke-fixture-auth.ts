@@ -1,11 +1,20 @@
+import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const e2ePackageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const storagePath = path.join(e2ePackageRoot, '.auth', 'smoke-fixture-storage.json');
+function resolveSmokeStoragePath(): string {
+  const fromPackageRoot = path.join(process.cwd(), '.auth', 'smoke-fixture-storage.json');
+  const fromMonorepoRoot = path.join(process.cwd(), 'e2e', '.auth', 'smoke-fixture-storage.json');
+  if (fs.existsSync(fromPackageRoot)) {
+    return fromPackageRoot;
+  }
+  if (fs.existsSync(fromMonorepoRoot)) {
+    return fromMonorepoRoot;
+  }
+  return fromPackageRoot;
+}
 
 export function smokeFixtureStoragePath(): string {
-  return storagePath;
+  return resolveSmokeStoragePath();
 }
 
 /** Credentials used by `e2e/scripts/provision-smoke-storage.mjs` in CI smoke. */
