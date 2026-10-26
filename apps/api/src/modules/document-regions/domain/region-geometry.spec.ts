@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { LayoutToken, NormalizedRect } from '@docuvate/contracts';
 import {
+  inferTableGrid,
   remapRegionTokens,
   snapRectToTokenHull,
   tokenBelongsToRect,
@@ -77,5 +78,29 @@ describe('geometry remapping after re-extraction', () => {
     expect(remapped.tokens).toEqual([]);
     expect(remapped.textChanged).toBe(true);
     expect(remapped.snappedRect).toBeNull();
+  });
+});
+
+describe('inferTableGrid', () => {
+  it('clusters a 2x2 token grid and treats the first row as header', () => {
+    const tokens: LayoutToken[] = [
+      token(1, 0.1, 0.1, 0.3, 0.16, 'Item'),
+      token(2, 0.4, 0.1, 0.6, 0.16, 'Qty'),
+      token(3, 0.1, 0.22, 0.3, 0.28, 'Widget A'),
+      token(4, 0.4, 0.22, 0.6, 0.28, '2'),
+    ];
+    const grid = inferTableGrid(tokens, { x0: 0.08, y0: 0.08, x1: 0.62, y1: 0.3 });
+    expect(grid.headerRows).toBe(1);
+    expect(grid.cells).toHaveLength(4);
+    expect(grid.cells.find((cell) => cell.row === 0 && cell.col === 0)?.text).toBe('Item');
+    expect(grid.cells.find((cell) => cell.row === 1 && cell.col === 1)?.text).toBe('2');
+    expect(grid.rules.filter((rule) => rule.axis === 'row')).toHaveLength(3);
+    expect(grid.rules.filter((rule) => rule.axis === 'col')).toHaveLength(3);
+  });
+
+  it('returns a single empty cell when no tokens are selected', () => {
+    const grid = inferTableGrid([], { x0: 0.2, y0: 0.2, x1: 0.5, y1: 0.4 });
+    expect(grid.cells).toEqual([{ row: 0, col: 0, text: '' }]);
+    expect(grid.headerRows).toBe(0);
   });
 });

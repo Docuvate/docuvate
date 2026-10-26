@@ -1695,3 +1695,10 @@ export {
   canonicalRegionPayload,
 } from './region-geometry.js';
 export type { NormalizedRect, LayoutToken, RemappedRegionTokens } from './region-geometry.js';
+export { inferTableGrid } from './table-geometry.js';
+export type {
+  TableGridAxis,
+  TableGridRule,
+  TableGridCell,
+  InferredTableGrid,
+} from './table-geometry.js';

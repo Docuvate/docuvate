@@ -3325,6 +3325,39 @@ mark.global-search-mark {
   vertical-align: top;
 }
 
+.layout-table-header-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-sm);
+  padding: var(--dv-space-xs) var(--dv-space-sm);
+}
+
+.layout-table-header-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--dv-space-xs);
+  min-height: var(--dv-touch-target-min);
+}
+
+.layout-table-header-stepper input {
+  width: 4.5rem;
+  min-height: var(--dv-touch-target-min);
+}
+
+.layout-data-table-editable th,
+.layout-data-table-editable td {
+  padding: 0;
+}
+
+.layout-table-cell-input {
+  width: 100%;
+  min-height: var(--dv-touch-target-min);
+  border: 0;
+  padding: var(--dv-space-xs) var(--dv-space-sm);
+  background: transparent;
+  font: inherit;
+}
+
 .layout-outline-item {
   width: 100%;
   display: flex;

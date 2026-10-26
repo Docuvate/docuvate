@@ -11,6 +11,7 @@ interface DocumentFieldContextBarProps {
   draft: DocumentSelectionDraft;
   fieldOptions: ComboboxOption[];
   onCreate: (fieldKey: string) => void;
+  onMarkTable?: () => void;
   onCancel: () => void;
 }
 
@@ -18,6 +19,7 @@ export function DocumentFieldContextBar({
   draft,
   fieldOptions,
   onCreate,
+  onMarkTable,
   onCancel,
 }: DocumentFieldContextBarProps) {
   const { t } = useTranslation();
@@ -53,6 +55,11 @@ export function DocumentFieldContextBar({
         >
           {t('documents.selectionAccept')}
         </Button>
+        {onMarkTable ? (
+          <Button type="button" variant="secondary" onClick={onMarkTable}>
+            {t('documents.selectionMarkTable')}
+          </Button>
+        ) : null}
         <Button type="button" variant="ghost" onClick={onCancel}>
           {t('common.cancel')}
         </Button>

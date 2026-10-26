@@ -14,6 +14,8 @@ import type {
   ApplyFieldCorrectionRequest,
   ApplyFieldCorrectionResponse,
   ApplyLabelCorrectionResponse,
+  ApplyTableCorrectionRequest,
+  ApplyTableCorrectionResponse,
   AuthSignInOptionsDto,
   BanAdminUserRequest,
   ConfirmDocumentFieldResponse,
@@ -331,6 +333,26 @@ export async function withdrawDocumentFieldCorrection(
   correctionId: string
 ): Promise<void> {
   await requestNoContent(`/documents/${documentId}/corrections/${correctionId}/withdraw`, {
+    method: 'POST',
+  });
+}
+
+export async function applyDocumentTableCorrection(
+  documentId: string,
+  body: ApplyTableCorrectionRequest
+): Promise<ApplyTableCorrectionResponse | null> {
+  const result = await request<ApplyTableCorrectionResponse | undefined>(
+    `/documents/${documentId}/table-corrections`,
+    { method: 'POST', body: JSON.stringify(body) }
+  );
+  return result ?? null;
+}
+
+export async function withdrawDocumentTableCorrection(
+  documentId: string,
+  correctionId: string
+): Promise<void> {
+  await requestNoContent(`/documents/${documentId}/table-corrections/${correctionId}/withdraw`, {
     method: 'POST',
   });
 }
