@@ -7,7 +7,11 @@ import {
   type AuthSession,
   Session,
 } from '../../../shared/infrastructure/auth/auth.guard.js';
-import { ReplaceRecognizedFieldsRequestDto } from '../../../shared/presentation/dtos/recognized-fields.dto.js';
+import {
+  RecognizedFieldFilterValuesQueryDto,
+  RecognizedFieldFilterValuesResponseDto,
+  ReplaceRecognizedFieldsRequestDto,
+} from '../../../shared/presentation/dtos/recognized-fields.dto.js';
 import {
   ApiDocuvateController,
   ApiDocuvateRoute,
@@ -34,9 +38,11 @@ export class RecognizedFieldsController {
     operationId: 'listRecognizedFieldFilterValues',
     summary: 'Distinct recognized field values for library filters',
   })
-  async filterValues(@Session() session: AuthSession, @Query('key') key?: string) {
-    const items = await this.listFilterValues.execute(session.user.id, key ?? '');
-    return { items };
+  async filterValues(
+    @Session() session: AuthSession,
+    @Query() query: RecognizedFieldFilterValuesQueryDto
+  ): Promise<RecognizedFieldFilterValuesResponseDto> {
+    return this.listFilterValues.execute(session.user.id, query);
   }
 
   @Get()

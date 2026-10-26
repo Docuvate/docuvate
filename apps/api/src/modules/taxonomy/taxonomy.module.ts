@@ -9,6 +9,7 @@ import {
   DeleteTagUseCase,
   ListCorrespondentsUseCase,
   ListTagsUseCase,
+  SearchTagsUseCase,
   UpdateCorrespondentUseCase,
   UpdateTagUseCase,
 } from './application/taxonomy.use-cases.js';
@@ -18,6 +19,7 @@ import { TaxonomyController } from './presentation/taxonomy.controller.js';
   controllers: [TaxonomyController],
   providers: [
     ListTagsUseCase,
+    SearchTagsUseCase,
     CreateTagUseCase,
     UpdateTagUseCase,
     DeleteTagUseCase,

@@ -4,8 +4,13 @@ import type {
   CreateCorrespondentRequest,
   CreateTagRequest,
   MatchingAlgorithm,
+  TagSearchQuery,
   UpdateCorrespondentRequest,
   UpdateTagRequest,
+} from '@docuvate/contracts';
+import {
+  TAG_SEARCH_DEFAULT_LIMIT,
+  TAG_SEARCH_MAX_LIMIT,
 } from '@docuvate/contracts';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -48,6 +53,52 @@ export class ListTagsUseCase {
         sortOrder: field.sortOrder,
       })),
     }));
+  }
+}
+
+function clampTagSearchLimit(limit: number | undefined): number {
+  const raw = limit ?? TAG_SEARCH_DEFAULT_LIMIT;
+  return Math.min(TAG_SEARCH_MAX_LIMIT, Math.max(1, raw));
+}
+
+@Injectable()
+export class SearchTagsUseCase {
+  constructor(
+    @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
+    @Inject(TAG_CUSTOM_FIELD_REPOSITORY) private readonly customFields: TagCustomFieldRepository
+  ) {}
+
+  async execute(userId: string, query: TagSearchQuery) {
+    const page = await this.taxonomy.searchTags(userId, {
+      q: query.q,
+      limit: clampTagSearchLimit(query.limit),
+      cursor: query.cursor,
+      excludeInbox: true,
+    });
+    const allFields = await this.customFields.listForUser(userId);
+    const fieldsByTag = new Map<string, typeof allFields>();
+    for (const field of allFields) {
+      const list = fieldsByTag.get(field.tagId) ?? [];
+      list.push(field);
+      fieldsByTag.set(field.tagId, list);
+    }
+    const items = page.entities.map((tag) => ({
+      ...tag,
+      customFields: (fieldsByTag.get(tag.id) ?? []).map((field) => ({
+        id: field.id,
+        tagId: field.tagId,
+        key: field.key,
+        label: field.label,
+        fieldType: field.fieldType,
+        sortOrder: field.sortOrder,
+      })),
+    }));
+    return {
+      items,
+      nextCursor: page.nextCursor,
+      hasMore: page.hasMore,
+      total: page.total,
+    };
   }
 }
 

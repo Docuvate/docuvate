@@ -467,6 +467,43 @@ export interface TagDto {
   customFields?: TagCustomFieldDefinitionDto[];
 }
 
+/** Default page size for GET /tags/search when `limit` is omitted. */
+export const TAG_SEARCH_DEFAULT_LIMIT = 50;
+/** Maximum allowed `limit` for GET /tags/search. */
+export const TAG_SEARCH_MAX_LIMIT = 100;
+
+export interface TagSearchQuery {
+  q?: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export interface TagSearchPageDto {
+  items: TagDto[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  total: number | null;
+}
+
+/** Default page size for GET /recognized-fields/filter-values when `limit` is omitted. */
+export const RECOGNIZED_FIELD_FILTER_VALUES_DEFAULT_LIMIT = 50;
+/** Maximum allowed `limit` for GET /recognized-fields/filter-values. */
+export const RECOGNIZED_FIELD_FILTER_VALUES_MAX_LIMIT = 100;
+
+export interface RecognizedFieldFilterValuesQuery {
+  key: string;
+  q?: string;
+  limit?: number;
+  cursor?: string;
+}
+
+export interface RecognizedFieldFilterValuesPageDto {
+  items: string[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  total: number | null;
+}
+
 export interface CorrespondentDto {
   id: string;
   name: string;

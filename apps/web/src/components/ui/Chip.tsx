@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { ReactNode } from 'react';
 
-import { chipColorStyle } from '../../lib/chipColorStyle';
+import { useChipColorStyle } from '../../lib/useChipColorStyle';
 
 export type ChipVariant = 'assigned' | 'suggest' | 'inbox' | 'outline' | 'new' | 'selected';
 
@@ -24,13 +24,14 @@ export function Chip({
   trailing,
   truncateLabel = false,
 }: ChipProps) {
-  const style = color ? chipColorStyle(color) : undefined;
+  const style = useChipColorStyle(color);
 
   return (
     <span
       className={`chip chip-${variant}${truncateLabel ? ' chip-label-truncate' : ''}`}
       style={style}
       title={label}
+      aria-label={truncateLabel ? label : undefined}
     >
       <span className="chip-label">{label}</span>
       {trailing}

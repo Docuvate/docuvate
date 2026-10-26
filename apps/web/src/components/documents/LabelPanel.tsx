@@ -14,10 +14,11 @@ import {
   withdrawDocumentLabelCorrection,
 } from '../../lib/api';
 import { formatUserFacingError } from '../../lib/apiErrors';
+import { LabelChipRow } from '../labels/LabelChipRow';
+import { LabelPicker } from '../labels/LabelPicker';
 import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Chip } from '../ui/Chip';
-import { Combobox, type ComboboxOption } from '../ui/Combobox';
 import { DocumentLabelSuggestionChips } from './DocumentLabelSuggestionChips';
 
 const NEST_CANDIDATE_LIMIT = 3;
@@ -48,8 +49,6 @@ function nestCandidates(suggestions: TagSuggestionDto[] | undefined): TagSuggest
 export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const { t } = useTranslation();
   const toast = useToast();
-  const [allTags, setAllTags] = useState<TagDto[]>([]);
-  const [loadingTags, setLoadingTags] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const [selectedNestTagId, setSelectedNestTagId] = useState<string | null>(null);
@@ -89,26 +88,6 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
   const showNestRow =
     candidates.length > 0 && candidates.every((item) => !assignedIds.has(item.tag.id));
 
-  async function ensureTagsLoaded() {
-    if (allTags.length > 0 || loadingTags) {
-      return;
-    }
-    setLoadingTags(true);
-    try {
-      setAllTags(await listTags());
-    } finally {
-      setLoadingTags(false);
-    }
-  }
-
-  const labelComboboxOptions: ComboboxOption[] = useMemo(
-    () =>
-      allTags
-        .filter((tag) => !assignedIds.has(tag.id))
-        .map((tag) => ({ value: tag.id, label: tag.name })),
-    [allTags, assignedIds]
-  );
-
   async function run(action: () => Promise<DocumentDto>, key: string) {
     setBusy(key);
     setAddError(null);
@@ -128,7 +107,7 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
     try {
       const doc = await assignDocumentTag(document.id, tagId);
       onUpdated(doc);
-      const tagName = allTags.find((tag) => tag.id === tagId)?.name ?? '';
+      const tagName = doc.tags.find((tag) => tag.id === tagId)?.name ?? '';
       toast.success(t('documents.labelAssignedToast', { name: tagName }), {
         undo: () => {
           void removeDocumentTag(document.id, tagId).then((reverted) => {
@@ -149,11 +128,7 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
       return;
     }
     setAddError(null);
-    await ensureTagsLoaded();
-    const tags = allTags.length > 0 ? allTags : await listTags();
-    if (allTags.length === 0) {
-      setAllTags(tags);
-    }
+    const tags = await listTags();
     const existing = findTagByName(tags, trimmed);
     if (existing && assignedIds.has(existing.id)) {
       setAddError(t('documents.labelAddAlreadyAssigned', { name: existing.name }));
@@ -169,9 +144,6 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
       } else {
         const created = await createTag({ name: trimmed });
         assignedTagId = created.id;
-        setAllTags((prev) =>
-          prev.some((tag) => tag.id === created.id) ? prev : [...prev, created]
-        );
         doc = await assignDocumentTag(document.id, created.id);
       }
       onUpdated(doc);
@@ -291,40 +263,37 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
         </div>
       ) : null}
 
-      <div className="chip-row">
-        {document.tags.length === 0 ? (
-          <p className="muted">{t('documents.labelPanelNoneAssigned')}</p>
-        ) : (
-          document.tags.map((tag) => (
-            <Chip
-              key={tag.id}
-              label={tag.name}
-              variant={tag.isInbox ? 'inbox' : 'assigned'}
-              color={tag.isInbox ? undefined : tag.color}
-              onRemove={() =>
-                void run(() => removeDocumentTag(document.id, tag.id), `remove-${tag.id}`)
-              }
-            />
-          ))
-        )}
-      </div>
+      {document.tags.length === 0 ? (
+        <p className="muted">{t('documents.labelPanelNoneAssigned')}</p>
+      ) : (
+        <LabelChipRow
+          className="chip-row"
+          items={document.tags.map((tag) => ({
+            id: tag.id,
+            label: tag.name,
+            variant: tag.isInbox ? 'inbox' : 'assigned',
+            color: tag.isInbox ? undefined : tag.color,
+            onRemove: () =>
+              void run(() => removeDocumentTag(document.id, tag.id), `remove-${tag.id}`),
+          }))}
+        />
+      )}
 
       <div className="label-add">
         <div className="label-add-form">
-          <Combobox
+          <LabelPicker
             value=""
-            options={labelComboboxOptions}
             disabled={busy !== null}
+            excludeTagIds={assignedIds}
             placeholder={t('documents.labelAddPlaceholder')}
             aria-label={t('documents.labelAddInputAria')}
+            allowCreate
             createOptionLabel={(name) => t('documents.labelAddCreateOption', { name })}
             onCreateOption={(name) => {
               void createAndAssignLabel(name);
             }}
             onChange={(tagId) => {
-              void ensureTagsLoaded().then(() => {
-                void assignExistingTag(tagId);
-              });
+              void assignExistingTag(tagId);
             }}
           />
           <p id="label-add-hint" className="muted label-add-hint">
@@ -336,7 +305,6 @@ export function LabelPanel({ document, onUpdated }: LabelPanelProps) {
             </p>
           ) : null}
         </div>
-        {loadingTags ? <p className="muted">{t('documents.labelPanelLoadingTags')}</p> : null}
       </div>
     </section>
   );

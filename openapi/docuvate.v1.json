@@ -10310,6 +10310,32 @@
         "parameters": [
           {
             "name": "key",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
             "required": false,
             "in": "query",
             "schema": {
@@ -10319,7 +10345,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecognizedFieldFilterValuesResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "",
@@ -12333,6 +12366,103 @@
           }
         ],
         "summary": "Create tag",
+        "tags": [
+          "Labels"
+        ]
+      }
+    },
+    "/tags/search": {
+      "get": {
+        "operationId": "searchTags",
+        "parameters": [
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagSearchResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Search tags (paginated)",
         "tags": [
           "Labels"
         ]
@@ -15653,6 +15783,34 @@
           "phrases"
         ]
       },
+      "RecognizedFieldFilterValuesResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "hasMore",
+          "total"
+        ]
+      },
       "RemoteConfigResponseDto": {
         "type": "object",
         "properties": {
@@ -16164,6 +16322,34 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "TagSearchResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "hasMore",
+          "total"
         ]
       },
       "TestPaperlessConnectionRequestDto": {

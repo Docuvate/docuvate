@@ -24,6 +24,7 @@ export interface PopoverProps extends UseAnchoredOverlayOptions {
   role?: string;
   id?: string;
   'aria-label'?: string;
+  testId?: string;
   children: ReactNode;
   onEscape?: () => void;
 }
@@ -39,6 +40,7 @@ export function Popover({
   role,
   id,
   'aria-label': ariaLabel,
+  testId,
   children,
   onEscape,
   placement,
@@ -117,6 +119,7 @@ export function Popover({
         role={role}
         aria-label={ariaLabel}
         data-floating-placement={resolvedPlacement}
+        data-testid={testId}
       >
         {children}
       </div>

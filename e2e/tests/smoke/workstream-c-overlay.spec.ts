@@ -89,12 +89,15 @@ test.describe('Workstream C overlay regressions', () => {
         body.scrollTop = body.scrollHeight;
       }
     });
-    const combobox = page.getByRole('combobox').first();
-    await combobox.click();
-    await combobox.fill('a');
-    const list = page.locator('[data-floating-placement]').first();
+    const combobox = page.getByTestId('library-filter-tag-combobox');
+    await combobox.scrollIntoViewIfNeeded();
+    const input = combobox.getByRole('combobox');
+    await input.click();
+    await input.fill('a');
+    const list = page.getByTestId('library-filter-tag-combobox-popover');
     await expect(list).toBeVisible({ timeout: 15_000 });
-    await assertFullyInViewport(page, '[data-floating-placement]');
+    await expect(list).toHaveAttribute('data-floating-placement', /.+/);
+    await assertFullyInViewport(page, '[data-testid="library-filter-tag-combobox-popover"]');
     await page.screenshot({ path: shotPath });
     expect(md5File(shotPath).length).toBe(32);
   }

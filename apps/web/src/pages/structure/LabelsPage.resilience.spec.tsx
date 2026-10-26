@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -14,6 +15,7 @@ const api = vi.hoisted(() => ({
   getLabelDocumentInventory: vi.fn(),
   getLabelMap: vi.fn(),
   getDocumentReviewQueueSummary: vi.fn(),
+  searchTagsPage: vi.fn(),
 }));
 
 vi.mock('../../lib/api', async (importOriginal) => {
@@ -64,6 +66,12 @@ describe('LabelsPage resilience', () => {
       extractedDocumentCount: 0,
     });
     api.getDocumentReviewQueueSummary.mockResolvedValue({ pendingCount: 0 });
+    api.searchTagsPage.mockResolvedValue({
+      items: [],
+      nextCursor: null,
+      hasMore: false,
+      total: 0,
+    });
   });
 
   afterEach(() => {
@@ -72,10 +80,15 @@ describe('LabelsPage resilience', () => {
   });
 
   it('still renders the vocabulary list when recommendations fail', async () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
     render(
-      <MemoryRouter>
-        <LabelsPage />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <LabelsPage />
+        </MemoryRouter>
+      </QueryClientProvider>
     );
 
     await waitFor(() => {

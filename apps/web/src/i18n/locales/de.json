@@ -641,6 +641,8 @@
     "dismissItem": "{{name}} aus der Liste entfernen",
     "progressAria": "Fortschritt für {{name}}",
     "queueMore": "… und {{count}} weitere",
+    "queueMoreAria": "{{count}} weitere Uploads anzeigen",
+    "queueOverflowPopoverAria": "Weitere Uploads",
     "dropzoneBusy": "Upload läuft…",
     "dropzoneTitle": "Dokument ablegen oder wählen",
     "dropzoneHint": "PDF oder Bild hochladen. Die Texterkennung startet automatisch.",
@@ -1557,6 +1559,8 @@
     "todoWhyMergeNearName_one": "Fast gleicher Name, jeweils {{count}} Dokument ähnlichen Inhalts.",
     "todoWhyMergeNearName_other": "Fast gleicher Name, beide mit {{count}} Dokumenten ähnlichen Inhalts.",
     "todoDismissMenuAria": "Weitere Aktionen für Vorschlag „{{name}}“",
+    "vocabularyFilterPlaceholder": "Labels filtern…",
+    "vocabularyFilterAria": "Label-Vokabular filtern",
     "vocabularyTitle": "Alle Labels",
     "vocabularyColName": "Name",
     "vocabularyColDocuments": "Dokumente",
@@ -2312,6 +2316,16 @@
       "noteHelp": "Optional",
       "noteValue": "Abschlag ab Oktober erhöht."
     }
+  },
+  "labelPicker": {
+    "searchPlaceholder": "Labels suchen…",
+    "expand": "Labelliste öffnen",
+    "collapse": "Labelliste schließen",
+    "loading": "Labels werden geladen…",
+    "empty": "Keine Labels gefunden.",
+    "moreResultsHint": "Suche verfeinern oder für weitere Treffer scrollen.",
+    "resultsTruncated": "{{shown}} von {{total}} Labels angezeigt. Suche verfeinern, um mehr zu finden.",
+    "overflowPopoverAria": "Weitere Labels"
   },
   "combobox": {
     "searchPlaceholder": "Suchen…",
