@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type pg from 'pg';
 
+import { normalizeSearchText } from '../domain/normalize-search-text.js';
 import {
   CHUNK_VOCAB_GATE_MIN_LENGTH,
   isFourDigitYearToken,
@@ -87,4 +88,21 @@ export async function filterLexicalTermsByVocabularyGate(
     }
   }
   return allowed;
+}
+
+/** Returns a probe suitable for title/label/folder trigram search, or null when vocabulary-gated out. */
+export async function resolveVocabularyGatedNameProbe(
+  pool: pg.Pool,
+  userId: string,
+  probe: string
+): Promise<string | null> {
+  const normalized = normalizeSearchText(probe);
+  if (normalized.length < 3) {
+    return null;
+  }
+  if (!requiresVocabularyForChunkFts(normalized)) {
+    return probe;
+  }
+  const present = await vocabularyPresence(pool, userId, [normalized]);
+  return present.has(normalized) ? probe : null;
 }

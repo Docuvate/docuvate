@@ -35,6 +35,7 @@ import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definitio
 import {
   filterChunkFtsTermsByVocabulary,
   filterLexicalTermsByVocabularyGate,
+  resolveVocabularyGatedNameProbe,
 } from './chunk-fts-term-policy.js';
 import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
 import {
@@ -346,7 +347,11 @@ export class PgGlobalSearchRepository {
     abortSignal?: AbortSignal
   ): Promise<{ items: GlobalSearchRepositoryResult['documents']; total: number }> {
     throwIfAborted(abortSignal);
-    const lexicalTrgmProbes = buildLexicalTrgmProbes(queryTokens, expandedTerms);
+    const lexicalTrgmProbes = await filterLexicalTermsByVocabularyGate(
+      this.pool,
+      userId,
+      buildLexicalTrgmProbes(queryTokens, expandedTerms)
+    );
     const chunkFtsTerms = await filterChunkFtsTermsByVocabulary(
       this.pool,
       userId,
@@ -706,7 +711,14 @@ export class PgGlobalSearchRepository {
     queryTokens: string[],
     limit: number
   ): Promise<{ items: GlobalSearchRepositoryResult['folders'] }> {
-    const probe = variantQueries[0] ?? q;
+    const probe = await resolveVocabularyGatedNameProbe(
+      this.pool,
+      userId,
+      variantQueries[0] ?? q
+    );
+    if (probe === null) {
+      return { items: [] };
+    }
     const result = await this.pool.query(
       `SELECT f.id, f.name,
               COUNT(d.id)::int AS document_count,
@@ -746,7 +758,14 @@ export class PgGlobalSearchRepository {
     queryTokens: string[],
     limit: number
   ): Promise<{ items: GlobalSearchRepositoryResult['labels'] }> {
-    const probe = variantQueries[0] ?? q;
+    const probe = await resolveVocabularyGatedNameProbe(
+      this.pool,
+      userId,
+      variantQueries[0] ?? q
+    );
+    if (probe === null) {
+      return { items: [] };
+    }
     const result = await this.pool.query(
       `SELECT t.id, t.name, t.color,
               COUNT(dt.document_id)::int AS document_count,

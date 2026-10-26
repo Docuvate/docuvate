@@ -3,32 +3,48 @@
 
 /** Strict trigram vocabulary lookup (precomputed search_vocabulary_terms only). */
 export const VOCABULARY_STRICT_TRGM_SQL = `
-SELECT v.term,
-       GREATEST(
-         similarity(v.term, $2::text),
-         word_similarity($2::text, v.term)
-       ) AS sim
-FROM search_vocabulary_terms v
-WHERE v.user_id = $1
-  AND length(v.term) >= 3
-  AND length(v.term) <= 48
-  AND ($2::text <<% v.term OR v.term <<% $2::text)
-ORDER BY sim DESC
+SELECT combined.term, combined.sim
+FROM (
+  SELECT v.term,
+         similarity(v.term, $2::text) AS sim
+  FROM search_vocabulary_terms v
+  WHERE v.user_id = $1
+    AND length(v.term) >= 3
+    AND length(v.term) <= 48
+    AND $2::text <<% v.term
+  UNION ALL
+  SELECT v.term,
+         similarity(v.term, $2::text) AS sim
+  FROM search_vocabulary_terms v
+  WHERE v.user_id = $1
+    AND length(v.term) >= 3
+    AND length(v.term) <= 48
+    AND v.term <<% $2::text
+) combined
+ORDER BY combined.sim DESC
 LIMIT $3`;
 
 /** Fallback typo lookup when strict <<% returns no rows (still index-friendly <%). */
 export const VOCABULARY_RELAXED_TRGM_SQL = `
-SELECT v.term,
-       GREATEST(
-         similarity(v.term, $2::text),
-         word_similarity($2::text, v.term)
-       ) AS sim
-FROM search_vocabulary_terms v
-WHERE v.user_id = $1
-  AND length(v.term) >= 3
-  AND length(v.term) <= 48
-  AND ($2::text <% v.term OR v.term <% $2::text)
-ORDER BY sim DESC
+SELECT combined.term, combined.sim
+FROM (
+  SELECT v.term,
+         similarity(v.term, $2::text) AS sim
+  FROM search_vocabulary_terms v
+  WHERE v.user_id = $1
+    AND length(v.term) >= 3
+    AND length(v.term) <= 48
+    AND $2::text <% v.term
+  UNION ALL
+  SELECT v.term,
+         similarity(v.term, $2::text) AS sim
+  FROM search_vocabulary_terms v
+  WHERE v.user_id = $1
+    AND length(v.term) >= 3
+    AND length(v.term) <= 48
+    AND v.term <% $2::text
+) combined
+ORDER BY combined.sim DESC
 LIMIT $3`;
 
 /** Last-resort typo neighbors (GIN similarity on term; used when <% / <<% return nothing). */
