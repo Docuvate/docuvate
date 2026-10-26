@@ -96,7 +96,5 @@ export class SyncDocumentSearchIndexUseCase {
         await this.searchRepo.indexDocumentChunks(userId, documentId, spans, undefined);
       }
     }
-    await this.searchRepo.upsertVocabularyTerms(userId, input.title, 'document');
-    await this.searchRepo.upsertVocabularyTerms(userId, input.filename, 'document');
   }
 }

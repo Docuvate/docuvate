@@ -54,6 +54,10 @@ import {
   VOCABULARY_STRICT_TRGM_SQL,
 } from './global-search-vocabulary.query.js';
 import { queryWithWordSimilarityThreshold } from './pg-trgm-query.js';
+import {
+  refreshDocumentVocabularyTerms,
+  releaseDocumentVocabularyTermsBatch,
+} from './search-vocabulary-document-sync.js';
 
 const TRGM_THRESHOLD = 0.45;
 const WORD_SIM_THRESHOLD = 0.45;
@@ -170,47 +174,14 @@ export class PgGlobalSearchRepository {
     } finally {
       client.release();
     }
-    const chunkTerms = new Set<string>();
-    for (const chunk of chunks) {
-      for (const term of tokenizeSearchQuery(chunk.body)) {
-        if (term.length >= 3 && term.length <= 48) {
-          chunkTerms.add(term);
-        }
-      }
-    }
-    await this.upsertVocabularyTermBatch(userId, [...chunkTerms].slice(0, 200), 'chunk');
-    const fullText = chunks.map((c) => c.body).join(' ');
-    await this.upsertVocabularyTerms(userId, fullText.slice(0, 4000), 'document');
+    await refreshDocumentVocabularyTerms(this.pool, userId, documentId);
   }
 
-  async upsertVocabularyTermBatch(
+  async releaseDocumentVocabularyForDocuments(
     userId: string,
-    terms: string[],
-    source: 'document' | 'chunk'
+    documentIds: string[]
   ): Promise<void> {
-    const unique = [...new Set(terms)].filter((t) => t.length >= 3 && t.length <= 48);
-    if (unique.length === 0) {
-      return;
-    }
-    await this.pool.query(
-      `INSERT INTO search_vocabulary_terms (user_id, term, source, doc_frequency, updated_at)
-       SELECT $1, term, $2, 1, now()
-       FROM unnest($3::text[]) AS term
-       ON CONFLICT (user_id, term) DO UPDATE SET
-         doc_frequency = search_vocabulary_terms.doc_frequency + 1,
-         updated_at = now()`,
-      [userId, source, unique]
-    );
-  }
-
-  async upsertVocabularyTerms(
-    userId: string,
-    text: string,
-    source: 'document' | 'chunk'
-  ): Promise<void> {
-    const tokens = tokenizeSearchQuery(text);
-    const unique = [...new Set(tokens)].filter((t) => t.length >= 3 && t.length <= 48);
-    await this.upsertVocabularyTermBatch(userId, unique.slice(0, 200), source);
+    await releaseDocumentVocabularyTermsBatch(this.pool, userId, documentIds);
   }
 
   async findSimilarVocabularyTerms(

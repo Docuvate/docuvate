@@ -18,6 +18,7 @@ import {
   loadDocumentFieldValues,
   replaceDocumentFieldValues,
 } from '../../search/infrastructure/document-field-value-index.js';
+import { refreshDocumentVocabularyTerms } from '../../search/infrastructure/search-vocabulary-document-sync.js';
 import { loadExtractionImagesForDocuments } from './document-extraction-images.persistence.js';
 
 type Db = pg.Pool | pg.PoolClient;
@@ -48,6 +49,7 @@ export async function replaceDocumentExtractionFields(
   fields: ExtractedField[]
 ): Promise<void> {
   await replaceDocumentFieldValues(client, documentId, userId, fields);
+  await refreshDocumentVocabularyTerms(client, userId, documentId);
 }
 
 /** Replaces all layout blocks of a document, keeping their order. */

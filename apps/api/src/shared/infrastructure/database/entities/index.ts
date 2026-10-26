@@ -70,6 +70,7 @@ import { RecognizedFieldDefinitionsEntity } from './recognized-field-definitions
 import { SavedDocumentViewFieldFiltersEntity } from './saved-document-view-field-filters.entity.js';
 import { SavedDocumentViewTagsEntity } from './saved-document-view-tags.entity.js';
 import { SavedDocumentViewsEntity } from './saved-document-views.entity.js';
+import { SearchVocabularyDocumentTermsEntity } from './search-vocabulary-document-terms.entity.js';
 import { SearchVocabularyTermsEntity } from './search-vocabulary-terms.entity.js';
 import { SessionEntity } from './session.entity.js';
 import { SftpIngressAccountLabelsEntity } from './sftp-ingress-account-labels.entity.js';
@@ -156,6 +157,7 @@ export const TYPEORM_ENTITIES = [
   SavedDocumentViewFieldFiltersEntity,
   SavedDocumentViewTagsEntity,
   SavedDocumentViewsEntity,
+  SearchVocabularyDocumentTermsEntity,
   SearchVocabularyTermsEntity,
   SftpIngressAccountLabelsEntity,
   SftpIngressAccountsEntity,
@@ -243,6 +245,7 @@ export {
   RecognizedFieldDefinitionsEntity,
   SavedDocumentViewsEntity,
   SavedDocumentViewTagsEntity,
+  SearchVocabularyDocumentTermsEntity,
   SearchVocabularyTermsEntity,
   SessionEntity,
   SftpIngressAccountLabelsEntity,

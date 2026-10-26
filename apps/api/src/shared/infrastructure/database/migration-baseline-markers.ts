@@ -65,6 +65,7 @@ export const BASELINE_MARKER_MIGRATION_NAMES = [
   'SearchVocabularyBatchBackfill20261028120000',
   'SearchVocabularyDocFrequencyCorrect20261028140000',
   'SearchVocabularyPruneStale20261028160000',
+  'SearchVocabularyDocumentTerms20261028180000',
 ] as const;
 
 async function featureFlagMlKeysConstraintPresent(runner: QueryRunner): Promise<boolean> {
@@ -255,6 +256,8 @@ export async function migrationSchemaPresent(
       return migrationSchemaPresent(runner, 'SearchVocabularyBatchBackfill20261028120000');
     case 'SearchVocabularyPruneStale20261028160000':
       return migrationSchemaPresent(runner, 'SearchVocabularyDocFrequencyCorrect20261028140000');
+    case 'SearchVocabularyDocumentTerms20261028180000':
+      return regClassExists(runner, 'public.search_vocabulary_document_terms');
     default:
       return false;
   }
