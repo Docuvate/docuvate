@@ -6,7 +6,7 @@ export interface SqlQueryExecutor {
   query: (query: string, parameters?: unknown[]) => Promise<unknown>;
 }
 
-function readQueryRows(result: unknown): Record<string, unknown>[] {
+export function readQueryRows(result: unknown): Record<string, unknown>[] {
   if (Array.isArray(result)) {
     return result.map((row) => requireRecord(row));
   }
@@ -133,6 +133,17 @@ counts AS (
   SELECT user_id, term, count(DISTINCT document_id)::int AS doc_frequency
   FROM term_docs
   GROUP BY user_id, term
+),
+cleared_junction AS (
+  DELETE FROM search_vocabulary_document_terms
+  WHERE user_id = $1
+),
+repopulated_junction AS (
+  INSERT INTO search_vocabulary_document_terms (user_id, document_id, term)
+  SELECT DISTINCT user_id, document_id, term
+  FROM term_docs
+  ON CONFLICT (document_id, term) DO NOTHING
+  RETURNING user_id
 ),
 updated AS (
   UPDATE search_vocabulary_terms s
