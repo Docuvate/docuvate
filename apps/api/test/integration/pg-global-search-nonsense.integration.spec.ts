@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
 import { splitTextChunksWithSpans } from '../../src/modules/cited-chat/domain/split-text-chunks-with-spans.js';
+import { replaceDocumentFieldValues } from '../../src/modules/search/infrastructure/document-field-value-index.js';
 import { PgGlobalSearchRepository } from '../../src/modules/search/infrastructure/pg-global-search.repository.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
@@ -38,6 +39,17 @@ describe('Global search nonsense queries (Testcontainers Postgres)', () => {
       documentId,
       splitTextChunksWithSpans('Monatliche Rechnung.')
     );
+
+    await pool.query(
+      `INSERT INTO recognized_field_definitions
+       (id, user_id, field_key, label, field_type, sort_order, extract_for_all_documents)
+       VALUES ($1, $2, 'notiz', 'Notiz', 'text', 0, true)
+       ON CONFLICT DO NOTHING`,
+      [uuidv4(), userId]
+    );
+    await replaceDocumentFieldValues(pool, documentId, userId, [
+      { key: 'global:notiz', value: 'Verweis qwertyuiopasdfg Ende' },
+    ]);
 
     labelId = uuidv4();
     await pool.query(

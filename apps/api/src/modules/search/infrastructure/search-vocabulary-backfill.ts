@@ -133,14 +133,22 @@ counts AS (
   SELECT user_id, term, count(DISTINCT document_id)::int AS doc_frequency
   FROM term_docs
   GROUP BY user_id, term
+),
+updated AS (
+  UPDATE search_vocabulary_terms s
+  SET doc_frequency = c.doc_frequency,
+      updated_at = now()
+  FROM counts c
+  WHERE s.user_id = c.user_id
+    AND s.term = c.term
+    AND s.user_id = $1
+  RETURNING s.user_id
 )
-UPDATE search_vocabulary_terms s
-SET doc_frequency = c.doc_frequency,
-    updated_at = now()
-FROM counts c
-WHERE s.user_id = c.user_id
-  AND s.term = c.term
-  AND s.user_id = $1`;
+DELETE FROM search_vocabulary_terms s
+WHERE s.user_id = $1
+  AND NOT EXISTS (
+    SELECT 1 FROM counts c WHERE c.user_id = s.user_id AND c.term = s.term
+  )`;
 
 export async function recomputeSearchVocabularyDocFrequencyForUser(
   executor: SqlQueryExecutor,

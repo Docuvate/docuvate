@@ -1,14 +1,24 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { buildSyntheticUser } from '../../../../packages/testing/src/factories/index.js';
-import { VOCABULARY_STRICT_TRGM_SQL } from '../../src/modules/search/infrastructure/global-search-vocabulary.query.js';
+import {
+  VOCABULARY_RELAXED_TRGM_SQL,
+  VOCABULARY_SIMILARITY_FALLBACK_SQL,
+  VOCABULARY_STRICT_TRGM_SQL,
+} from '../../src/modules/search/infrastructure/global-search-vocabulary.query.js';
 import { queryWithWordSimilarityThreshold } from '../../src/modules/search/infrastructure/pg-trgm-query.js';
 import { closeIntegrationPool, getIntegrationPool } from './pg-pool.js';
 import { insertSyntheticUser, newIsolationUserId } from './pg-test-isolation.js';
 
 const VOCABULARY_ROW_TARGET = 100_000;
 
-describe('search_vocabulary_terms strict trgm lookup (Testcontainers Postgres)', () => {
+function assertNoSeqScanOnVocabulary(plan: string): void {
+  expect(plan).toContain('search_vocabulary_terms_trgm_idx');
+  expect(plan).not.toMatch(/Parallel Seq Scan on search_vocabulary_terms\b/);
+  expect(plan).not.toMatch(/Seq Scan on search_vocabulary_terms\b/);
+}
+
+describe('search_vocabulary_terms trgm lookup plans (Testcontainers Postgres)', () => {
   const pool = getIntegrationPool();
   let userId: string;
 
@@ -45,7 +55,7 @@ describe('search_vocabulary_terms strict trgm lookup (Testcontainers Postgres)',
     await closeIntegrationPool();
   });
 
-  it('uses GIN trigram index for strict vocabulary lookup at 100k+ rows', async () => {
+  it('uses GIN for strict vocabulary lookup at 100k+ rows', async () => {
     const explain = await queryWithWordSimilarityThreshold<{ 'QUERY PLAN': string }>(
       pool,
       0.45,
@@ -53,9 +63,28 @@ describe('search_vocabulary_terms strict trgm lookup (Testcontainers Postgres)',
       [userId, 'rechnug', 6],
       { strictWordSimilarityThreshold: 0.45, disableSeqScan: true }
     );
-    const plan = explain.rows.map((row) => row['QUERY PLAN']).join('\n');
-    expect(plan).toContain('search_vocabulary_terms_trgm_idx');
-    expect(plan).not.toMatch(/Parallel Seq Scan on search_vocabulary_terms\b/);
-    expect(plan).not.toMatch(/Seq Scan on search_vocabulary_terms\b/);
+    assertNoSeqScanOnVocabulary(explain.rows.map((row) => row['QUERY PLAN']).join('\n'));
+  });
+
+  it('uses GIN for relaxed vocabulary lookup at 100k+ rows', async () => {
+    const explain = await queryWithWordSimilarityThreshold<{ 'QUERY PLAN': string }>(
+      pool,
+      0.45,
+      `EXPLAIN (ANALYZE, FORMAT TEXT) ${VOCABULARY_RELAXED_TRGM_SQL}`,
+      [userId, 'rechnug', 6],
+      { disableSeqScan: true }
+    );
+    assertNoSeqScanOnVocabulary(explain.rows.map((row) => row['QUERY PLAN']).join('\n'));
+  });
+
+  it('uses GIN for similarity fallback vocabulary lookup at 100k+ rows', async () => {
+    const explain = await queryWithWordSimilarityThreshold<{ 'QUERY PLAN': string }>(
+      pool,
+      0.45,
+      `EXPLAIN (ANALYZE, FORMAT TEXT) ${VOCABULARY_SIMILARITY_FALLBACK_SQL}`,
+      [userId, 'rechnug', 6],
+      { similarityThreshold: 0.25, disableSeqScan: true }
+    );
+    assertNoSeqScanOnVocabulary(explain.rows.map((row) => row['QUERY PLAN']).join('\n'));
   });
 });

@@ -60,6 +60,7 @@ import { RepairBinDocumentFilenames20261026160000 } from './migrations/202610261
 import { SearchVocabularyMaintain20261027140000 } from './migrations/20261027140000-search-vocabulary-maintain.js';
 import { SearchVocabularyBatchBackfill20261028120000 } from './migrations/20261028120000-search-vocabulary-batch-backfill.js';
 import { SearchVocabularyDocFrequencyCorrect20261028140000 } from './migrations/20261028140000-search-vocabulary-doc-frequency-correct.js';
+import { SearchVocabularyPruneStale20261028160000 } from './migrations/20261028160000-search-vocabulary-prune-stale.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -142,6 +143,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       SearchVocabularyMaintain20261027140000,
       SearchVocabularyBatchBackfill20261028120000,
       SearchVocabularyDocFrequencyCorrect20261028140000,
+      SearchVocabularyPruneStale20261028160000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,
