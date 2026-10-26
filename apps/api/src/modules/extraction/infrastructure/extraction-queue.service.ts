@@ -15,6 +15,7 @@ import { RunArenaSampleCompareUseCase } from '../../documents/application/run-ar
 import { RunExtractionUseCase } from '../../documents/application/run-extraction.use-case.js';
 import { ResolveFeatureFlagsUseCase } from '../../feature-flags/application/resolve-feature-flags.use-case.js';
 import {
+  documentExtractionConcurrency,
   extractionJobId,
   extractionQueueLockDurationMs,
   extractionQueueMaxStalledCount,
@@ -75,6 +76,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
       },
       {
         connection: this.connection,
+        concurrency: documentExtractionConcurrency(),
         lockDuration: extractionQueueLockDurationMs(),
         stalledInterval: extractionQueueStalledIntervalMs(),
         maxStalledCount: extractionQueueMaxStalledCount(),

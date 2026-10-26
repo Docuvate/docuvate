@@ -88,25 +88,25 @@ export class RunExtractionUseCase {
         imageIngest ?? []
       );
       await this.documents.saveExtractionImages(documentId, persistedImages);
-      await this.persistRepresentation.execute(
-        doc.userId,
-        documentId,
-        result.documentRepresentation
-      );
-      await this.syncSearchIndex.execute(doc.userId, documentId, {
-        text: result.text,
-        title: doc.title,
-        filename: doc.filename,
-        blocks: result.blocks,
-      });
-      if (flags.exactAnswers) {
-        await this.persistFacts.execute(
+      const persistTasks: Promise<void>[] = [
+        this.persistRepresentation.execute(
           doc.userId,
           documentId,
-          result.extractedFacts ?? [],
-          null
+          result.documentRepresentation
+        ),
+        this.syncSearchIndex.execute(doc.userId, documentId, {
+          text: result.text,
+          title: doc.title,
+          filename: doc.filename,
+          blocks: result.blocks,
+        }),
+      ];
+      if (flags.exactAnswers) {
+        persistTasks.push(
+          this.persistFacts.execute(doc.userId, documentId, result.extractedFacts ?? [], null)
         );
       }
+      await Promise.all(persistTasks);
       const content = `${doc.filename}\n${doc.title}\n${result.text}`;
       await this.postOcrPipeline.execute(documentId, doc.userId, content);
       await this.promoteHighConfidenceSuggestions.execute(documentId, doc.userId);

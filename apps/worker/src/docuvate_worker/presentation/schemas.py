@@ -735,4 +735,25 @@ class CeMissingLabelResponse(BaseModel):
     show: bool
 
 
+class CeMissingLabelBatchTarget(BaseModel):
+    target_document_index: int = Field(ge=0)
+    assigned_tag_ids: list[str] = Field(default_factory=list)
+
+
+class CeMissingLabelBatchRequest(BaseModel):
+    targets: list[CeMissingLabelBatchTarget] = Field(min_length=1, max_length=32)
+    corpus: list[CeMissingLabelCorpusDocument] = Field(min_length=1)
+    labeled_document_indices: list[int] = Field(default_factory=list)
+
+
+class CeMissingLabelBatchResult(BaseModel):
+    target_document_index: int
+    score: float
+    show: bool
+
+
+class CeMissingLabelBatchResponse(BaseModel):
+    results: list[CeMissingLabelBatchResult]
+
+
 ExtractRequest.model_rebuild()

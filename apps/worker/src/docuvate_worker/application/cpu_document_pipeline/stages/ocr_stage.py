@@ -49,6 +49,7 @@ from docuvate_worker.infrastructure.office.mimes import (
     is_office_born_digital_mime,
     needs_libreoffice_preview,
 )
+from docuvate_worker.infrastructure.extract_memory.model_residency import extract_keep_models_resident
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 
@@ -72,6 +73,8 @@ def _ocr_image(content: bytes) -> tuple[str, list[ExtractionBlock]]:
 
 
 def _release_ocr_backends() -> None:
+    if extract_keep_models_resident():
+        return
     release_paddle_ocr()
     if _ocr_backend() == "rapidocr":
         release_rapidocr()

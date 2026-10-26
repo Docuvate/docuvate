@@ -15,6 +15,7 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
 from docuvate_worker.domain.models import ExtractedField
+from docuvate_worker.infrastructure.extract_memory.model_residency import extract_keep_models_resident
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
 
 STAGE_ID = "field_suggestions"
@@ -89,9 +90,10 @@ def run_fields_stage(state: PipelineMutableState) -> StageEnvelope[FieldSuggesti
         try:
             return _run()
         finally:
-            with contextlib.suppress(Exception):
-                ml = importlib.import_module(_FIELD_SUGGESTIONS_FACADE)
-                ml.release_docai_models()
+            if not extract_keep_models_resident():
+                with contextlib.suppress(Exception):
+                    ml = importlib.import_module(_FIELD_SUGGESTIONS_FACADE)
+                    ml.release_docai_models()
 
     data, metrics = measure_stage(_run_wrapped)
     return StageEnvelope(

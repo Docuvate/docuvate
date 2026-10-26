@@ -58,9 +58,8 @@ export class EnrichLabelMapMissingHintsUseCase {
       (a, b) => (a.coverageScore ?? 0) - (b.coverageScore ?? 0)
     );
     const toScore = sorted.slice(0, MAX_HINTS_PER_MAP);
-    let hintCount = 0;
-    const hintByDocId = new Map<string, boolean>();
-
+    const targets: { targetDocumentIndex: number; assignedTagIds: string[]; documentId: string }[] =
+      [];
     for (const point of toScore) {
       const documentId = point.documentId;
       if (!documentId) {
@@ -73,21 +72,38 @@ export class EnrichLabelMapMissingHintsUseCase {
       if (row.embedding.length === 0 || labeledDocumentIndices.length < 2) {
         continue;
       }
-      try {
-        const result = await this.ceMl.scoreMissingLabelHint({
-          targetDocumentIndex: row.documentIndex,
-          assignedTagIds: row.nonInboxTagIds,
-          corpus,
-          labeledDocumentIndices,
-        });
-        if (result.show) {
-          hintByDocId.set(documentId, true);
+      targets.push({
+        targetDocumentIndex: row.documentIndex,
+        assignedTagIds: row.nonInboxTagIds,
+        documentId,
+      });
+    }
+    if (targets.length === 0) {
+      return { points, labelMissingHintCount: 0 };
+    }
+    let hintCount = 0;
+    const hintByDocId = new Map<string, boolean>();
+    try {
+      const batch = await this.ceMl.scoreMissingLabelHintsBatch({
+        targets: targets.map((target) => ({
+          targetDocumentIndex: target.targetDocumentIndex,
+          assignedTagIds: target.assignedTagIds,
+        })),
+        corpus,
+        labeledDocumentIndices,
+      });
+      const showByIndex = new Map(
+        batch.filter((row) => row.show).map((row) => [row.targetDocumentIndex, true] as const)
+      );
+      for (const target of targets) {
+        if (showByIndex.get(target.targetDocumentIndex)) {
+          hintByDocId.set(target.documentId, true);
           hintCount += 1;
         }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        this.logger.debug(`Missing-label hint skipped for ${documentId}: ${message}`);
       }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.debug(`Missing-label hint batch skipped: ${message}`);
     }
 
     const enriched = points.map((point) => {
@@ -99,5 +115,4 @@ export class EnrichLabelMapMissingHintsUseCase {
     });
     return { points: enriched, labelMissingHintCount: hintCount };
   }
-
 }

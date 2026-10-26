@@ -2,7 +2,11 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it } from 'vitest';
 
-import { MIN_VECTORS_FOR_UMAP, projectLabelMap2D } from './label-map-projection.js';
+import {
+  MAX_VECTORS_FOR_UMAP,
+  MIN_VECTORS_FOR_UMAP,
+  projectLabelMap2D,
+} from './label-map-projection.js';
 
 describe('projectLabelMap2D', () => {
   it('uses PCA for small sets', () => {
@@ -14,6 +18,16 @@ describe('projectLabelMap2D', () => {
     const result = projectLabelMap2D(vectors);
     expect(result.method).toBe('pca');
     expect(result.coords).toHaveLength(3);
+  });
+
+  it('uses PCA for very large sets', () => {
+    const vectors = Array.from({ length: MAX_VECTORS_FOR_UMAP + 1 }, (_, i) => [
+      Math.sin(i * 0.11),
+      Math.cos(i * 0.07),
+    ]);
+    const result = projectLabelMap2D(vectors);
+    expect(result.method).toBe('pca');
+    expect(result.coords).toHaveLength(MAX_VECTORS_FOR_UMAP + 1);
   });
 
   it('uses UMAP when enough vectors', () => {

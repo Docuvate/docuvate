@@ -24,6 +24,9 @@ describe('EnrichLabelMapMissingHintsUseCase', () => {
     });
     const ceMl: MissingLabelHintPort = {
       scoreMissingLabelHint: vi.fn().mockResolvedValue({ score: 0.9, show: true }),
+      scoreMissingLabelHintsBatch: vi.fn().mockResolvedValue([
+        { targetDocumentIndex: 0, score: 0.9, show: true },
+      ]),
     };
     const useCase = new EnrichLabelMapMissingHintsUseCase(documents, ceMl);
     const points: LabelMapPointDto[] = [

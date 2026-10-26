@@ -178,4 +178,59 @@ export class HttpCeMlAdapter {
       show: raw.show === true,
     };
   }
+
+  async scoreMissingLabelHintsBatch(input: {
+    targets: { targetDocumentIndex: number; assignedTagIds: string[] }[];
+    corpus: {
+      documentIndex: number;
+      embedding: number[];
+      tagIds: string[];
+      text: string;
+    }[];
+    labeledDocumentIndices: number[];
+  }): Promise<{ targetDocumentIndex: number; score: number; show: boolean }[]> {
+    if (input.targets.length === 0) {
+      return [];
+    }
+    const { url, secret } = workerBase();
+    const response = await fetch(workerApiUrl(url, '/ml/ce/missing-label-batch'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Worker-Secret': secret,
+      },
+      body: JSON.stringify({
+        targets: input.targets.map((target) => ({
+          target_document_index: target.targetDocumentIndex,
+          assigned_tag_ids: target.assignedTagIds,
+        })),
+        corpus: input.corpus.map((row) => ({
+          document_index: row.documentIndex,
+          embedding: row.embedding,
+          tag_ids: row.tagIds,
+          text: row.text,
+        })),
+        labeled_document_indices: input.labeledDocumentIndices,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`Worker CE missing-label batch failed: ${String(response.status)}`);
+    }
+    const raw: unknown = await response.json();
+    if (!isRecord(raw) || !Array.isArray(raw.results)) {
+      return [];
+    }
+    const results: { targetDocumentIndex: number; score: number; show: boolean }[] = [];
+    for (const row of raw.results) {
+      if (!isRecord(row)) {
+        continue;
+      }
+      results.push({
+        targetDocumentIndex: parseNumber(row.target_document_index, -1),
+        score: parseNumber(row.score, 0),
+        show: row.show === true,
+      });
+    }
+    return results.filter((row) => row.targetDocumentIndex >= 0);
+  }
 }

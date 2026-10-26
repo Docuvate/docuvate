@@ -54,7 +54,11 @@ from docuvate_worker.infrastructure.ml.ce_ml.kv_items import (
     extract_kv_items_from_blocks,
 )
 from docuvate_worker.infrastructure.ml.ce_ml.label_propagation import propagate_label_scores
-from docuvate_worker.infrastructure.ml.ce_ml.missing_label import missing_label_hint_score
+from docuvate_worker.infrastructure.ml.ce_ml.missing_label import (
+    MissingLabelBatchTarget,
+    missing_label_hint_score,
+    missing_label_hint_scores_batch,
+)
 from docuvate_worker.infrastructure.ml.registry import resolve_active_model
 from docuvate_worker.presentation.cpu_pipeline_response import cpu_pipeline_to_response
 from docuvate_worker.presentation.extract_subprocess_runner import run_extract_isolated
@@ -70,6 +74,9 @@ from docuvate_worker.presentation.schemas import (
     CeLabelPropagationRequest,
     CeLabelPropagationResponse,
     CeLabelPropagationScore,
+    CeMissingLabelBatchRequest,
+    CeMissingLabelBatchResponse,
+    CeMissingLabelBatchResult,
     CeMissingLabelRequest,
     CeMissingLabelResponse,
     CompareEngineResponse,
@@ -755,6 +762,47 @@ def ce_missing_label(
         labeled_document_indices=labeled_indices,
     )
     return CeMissingLabelResponse(score=hint.score, show=hint.show)
+
+
+@router.post("/ml/ce/missing-label-batch", response_model=CeMissingLabelBatchResponse)
+def ce_missing_label_batch(
+    body: CeMissingLabelBatchRequest,
+    x_worker_secret: str | None = Header(default=None, alias="X-Worker-Secret"),
+) -> CeMissingLabelBatchResponse:
+    _require_worker_secret(x_worker_secret)
+    if not body.labeled_document_indices:
+        labeled_indices = [
+            document.document_index for document in body.corpus if document.tag_ids
+        ]
+    else:
+        labeled_indices = body.labeled_document_indices
+    vectors = [document.embedding for document in body.corpus]
+    texts = [document.text for document in body.corpus]
+    tag_ids = [document.tag_ids for document in body.corpus]
+    targets = [
+        MissingLabelBatchTarget(
+            target_document_index=target.target_document_index,
+            assigned_tag_ids=target.assigned_tag_ids,
+        )
+        for target in body.targets
+    ]
+    hints = missing_label_hint_scores_batch(
+        passage_vectors=vectors,
+        passage_texts=texts,
+        tag_ids_per_document=tag_ids,
+        targets=targets,
+        labeled_document_indices=labeled_indices,
+    )
+    return CeMissingLabelBatchResponse(
+        results=[
+            CeMissingLabelBatchResult(
+                target_document_index=targets[index].target_document_index,
+                score=hint.score,
+                show=hint.show,
+            )
+            for index, hint in enumerate(hints)
+        ]
+    )
 
 
 @router.post("/ml/retrain/run", response_model=MlRetrainRunResponse)

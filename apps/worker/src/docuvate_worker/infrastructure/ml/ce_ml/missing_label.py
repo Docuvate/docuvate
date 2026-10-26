@@ -59,6 +59,27 @@ def missing_label_hint_score(
 ) -> MissingLabelHint:
     threshold = missing_label_threshold()
     matrix = np.asarray(passage_vectors, dtype=np.float32)
+    return _missing_label_hint_from_matrix(
+        matrix=matrix,
+        passage_texts=passage_texts,
+        tag_ids_per_document=tag_ids_per_document,
+        target_document_index=target_document_index,
+        assigned_tag_ids=assigned_tag_ids,
+        labeled_document_indices=labeled_document_indices,
+        threshold=threshold,
+    )
+
+
+def _missing_label_hint_from_matrix(
+    *,
+    matrix: FloatArray,
+    passage_texts: list[str],
+    tag_ids_per_document: list[list[str]],
+    target_document_index: int,
+    assigned_tag_ids: list[str],
+    labeled_document_indices: list[int],
+    threshold: float,
+) -> MissingLabelHint:
     if (
         matrix.size == 0
         or target_document_index < 0
@@ -79,3 +100,33 @@ def missing_label_hint_score(
         pool_indices=pool,
     )
     return MissingLabelHint(score=share, show=share >= threshold)
+
+
+@dataclass(frozen=True)
+class MissingLabelBatchTarget:
+    target_document_index: int
+    assigned_tag_ids: list[str]
+
+
+def missing_label_hint_scores_batch(
+    *,
+    passage_vectors: list[list[float]],
+    passage_texts: list[str],
+    tag_ids_per_document: list[list[str]],
+    targets: list[MissingLabelBatchTarget],
+    labeled_document_indices: list[int],
+) -> list[MissingLabelHint]:
+    threshold = missing_label_threshold()
+    matrix = np.asarray(passage_vectors, dtype=np.float32)
+    return [
+        _missing_label_hint_from_matrix(
+            matrix=matrix,
+            passage_texts=passage_texts,
+            tag_ids_per_document=tag_ids_per_document,
+            target_document_index=target.target_document_index,
+            assigned_tag_ids=target.assigned_tag_ids,
+            labeled_document_indices=labeled_document_indices,
+            threshold=threshold,
+        )
+        for target in targets
+    ]
