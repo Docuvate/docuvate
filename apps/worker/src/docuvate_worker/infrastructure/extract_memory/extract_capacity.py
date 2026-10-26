@@ -23,7 +23,7 @@ from docuvate_worker.infrastructure.extract_memory.pool_memory import (
 )
 from docuvate_worker.presentation.extract_http_concurrency import http_extract_slots_in_use
 
-_DEFAULT_HEADROOM_BYTES = 200_000_000
+_DEFAULT_HEADROOM_BYTES = 300_000_000
 
 
 @dataclass(frozen=True, slots=True)

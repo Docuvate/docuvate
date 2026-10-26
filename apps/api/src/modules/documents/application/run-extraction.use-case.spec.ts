@@ -1,19 +1,15 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Test } from '@nestjs/testing';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   type DocumentRepository,
   type ObjectStorage,
-  type TaxonomyRepository,
 } from '../../../shared/domain/ports.js';
 import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
-import {
-  createClassStub,
-  createExecuteUseCaseStub,
-} from '../../../test-support/execute-use-case.stub.js';
 import { createExtractionPortStub } from '../../../test-support/extraction-port.stub.js';
+import { createTaxonomyRepositoryStub } from '../../../test-support/taxonomy-repository.stub.js';
 import { RunDocumentPostOcrPipelineUseCase } from '../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js';
 import { ScheduleDuplicateDetectionUseCase } from '../../duplicates/application/schedule-duplicate-detection.use-case.js';
 import { PersistDocumentFactsUseCase } from '../../exact-facts/application/persist-document-facts.use-case.js';
@@ -25,6 +21,69 @@ import { ResolveUserExtractorEngineUseCase } from '../../settings/application/se
 import { AutoAcceptCalibratedReviewUseCase } from './document-review/auto-accept-calibrated-review.use-case.js';
 import { PromoteHighConfidenceExtractionSuggestionsUseCase } from './document-review/promote-extraction-suggestions.use-case.js';
 import { RunExtractionUseCase } from './run-extraction.use-case.js';
+
+vi.mock('../../document-pipeline/application/run-document-post-ocr-pipeline.use-case.js', () => ({
+  RunDocumentPostOcrPipelineUseCase: class RunDocumentPostOcrPipelineUseCase {
+    execute = vi.fn().mockResolvedValue(undefined);
+    listModuleDescriptors = vi.fn().mockReturnValue([]);
+  },
+}));
+
+vi.mock('../../duplicates/application/schedule-duplicate-detection.use-case.js', () => ({
+  ScheduleDuplicateDetectionUseCase: class ScheduleDuplicateDetectionUseCase {
+    execute = vi.fn().mockResolvedValue(undefined);
+  },
+}));
+
+vi.mock('../../settings/application/settings.use-cases.js', () => ({
+  ResolveUserExtractorEngineUseCase: class ResolveUserExtractorEngineUseCase {
+    execute = vi.fn().mockResolvedValue('default');
+  },
+}));
+
+vi.mock('../../search/application/sync-document-search-index.use-case.js', () => ({
+  SyncDocumentSearchIndexUseCase: class SyncDocumentSearchIndexUseCase {
+    execute = vi.fn().mockResolvedValue(undefined);
+  },
+}));
+
+vi.mock('../../representation/application/persist-document-representation.use-case.js', () => ({
+  PersistDocumentRepresentationUseCase: class PersistDocumentRepresentationUseCase {
+    execute = vi.fn().mockResolvedValue(undefined);
+  },
+}));
+
+vi.mock('../../labels/infrastructure/pg-embedding-density.repository.js', () => ({
+  PgEmbeddingDensityRepository: class PgEmbeddingDensityRepository {
+    loadWorkerState = vi.fn().mockResolvedValue(null);
+  },
+}));
+
+vi.mock('../../feature-flags/application/resolve-feature-flags.use-case.js', () => ({
+  ResolveFeatureFlagsUseCase: class ResolveFeatureFlagsUseCase {
+    execute = vi.fn().mockResolvedValue({ exactAnswers: false });
+    assertEnabled = vi.fn().mockResolvedValue(undefined);
+  },
+}));
+
+vi.mock('../../exact-facts/application/persist-document-facts.use-case.js', () => ({
+  PersistDocumentFactsUseCase: class PersistDocumentFactsUseCase {
+    execute = vi.fn().mockResolvedValue(undefined);
+  },
+}));
+
+vi.mock('./document-review/promote-extraction-suggestions.use-case.js', () => ({
+  PromoteHighConfidenceExtractionSuggestionsUseCase:
+    class PromoteHighConfidenceExtractionSuggestionsUseCase {
+      execute = vi.fn().mockResolvedValue(undefined);
+    },
+}));
+
+vi.mock('./document-review/auto-accept-calibrated-review.use-case.js', () => ({
+  AutoAcceptCalibratedReviewUseCase: class AutoAcceptCalibratedReviewUseCase {
+    execute = vi.fn().mockResolvedValue(undefined);
+  },
+}));
 
 async function buildUseCase(options: {
   extractError?: Error;
@@ -53,26 +112,9 @@ async function buildUseCase(options: {
       ? { extract: vi.fn().mockRejectedValue(options.extractError) }
       : {}
   );
-  const postOcr = createExecuteUseCaseStub<RunDocumentPostOcrPipelineUseCase>();
-  const scheduleDuplicates = createExecuteUseCaseStub<ScheduleDuplicateDetectionUseCase>();
-  const resolveEngine = createExecuteUseCaseStub<ResolveUserExtractorEngineUseCase>({
-    execute: vi.fn().mockResolvedValue('default'),
-  });
-  const syncSearch = createExecuteUseCaseStub<SyncDocumentSearchIndexUseCase>();
-  const persistRepresentation = createExecuteUseCaseStub<PersistDocumentRepresentationUseCase>();
-  const densityRepo = createClassStub<PgEmbeddingDensityRepository>({
-    loadWorkerState: vi.fn().mockResolvedValue(null),
-  });
-  const taxonomy = createClassStub<TaxonomyRepository>({
+  const taxonomy = createTaxonomyRepositoryStub({
     listTags: vi.fn().mockResolvedValue([]),
   });
-  const featureFlags = createExecuteUseCaseStub<ResolveFeatureFlagsUseCase>({
-    execute: vi.fn().mockResolvedValue({ exactAnswers: false }),
-  });
-  const persistFacts = createExecuteUseCaseStub<PersistDocumentFactsUseCase>();
-  const promoteSuggestions =
-    createExecuteUseCaseStub<PromoteHighConfidenceExtractionSuggestionsUseCase>();
-  const autoAccept = createExecuteUseCaseStub<AutoAcceptCalibratedReviewUseCase>();
 
   const moduleRef = await Test.createTestingModule({
     providers: [
@@ -83,17 +125,17 @@ async function buildUseCase(options: {
             documents,
             storage,
             extraction,
-            postOcr,
-            scheduleDuplicates,
-            resolveEngine,
-            syncSearch,
-            persistRepresentation,
-            densityRepo,
+            new RunDocumentPostOcrPipelineUseCase(),
+            new ScheduleDuplicateDetectionUseCase(),
+            new ResolveUserExtractorEngineUseCase(),
+            new SyncDocumentSearchIndexUseCase(),
+            new PersistDocumentRepresentationUseCase(),
+            new PgEmbeddingDensityRepository(),
             taxonomy,
-            featureFlags,
-            persistFacts,
-            promoteSuggestions,
-            autoAccept
+            new ResolveFeatureFlagsUseCase(),
+            new PersistDocumentFactsUseCase(),
+            new PromoteHighConfidenceExtractionSuggestionsUseCase(),
+            new AutoAcceptCalibratedReviewUseCase()
           ),
       },
     ],
@@ -102,6 +144,10 @@ async function buildUseCase(options: {
 }
 
 describe('RunExtractionUseCase', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('does not mark failed on worker 503 pressure', async () => {
     const updateStatus = vi.fn<DocumentRepository['updateStatus']>();
     const useCase = await buildUseCase({

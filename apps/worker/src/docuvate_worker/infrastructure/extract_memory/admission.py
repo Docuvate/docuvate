@@ -25,6 +25,9 @@ from docuvate_worker.infrastructure.extract_memory.cgroup import (
 from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
     DEFAULT_PARENT_RSS_BYTES,
 )
+from docuvate_worker.infrastructure.extract_memory.memory_pressure import (
+    cgroup_should_reclaim_idle_models,
+)
 from docuvate_worker.infrastructure.extract_memory.model_residency import (
     evictable_pool_model_bytes,
     reclaim_model_memory_for_admission,
@@ -55,8 +58,8 @@ _ENV_ADMISSION_WAIT_MS = "DOCUVATE_EXTRACT_ADMISSION_WAIT_MS"
 _ENV_ADMISSION_WAIT_ATTEMPTS = "DOCUVATE_EXTRACT_ADMISSION_WAIT_ATTEMPTS"
 _DEFAULT_BYTES_PER_MP = 52_000_000
 _DEFAULT_PEAK_RASTER_PAGES = 2
-_DEFAULT_HEADROOM = 200_000_000
-_DEFAULT_MIN_FREE = 64_000_000
+_DEFAULT_HEADROOM = 300_000_000
+_DEFAULT_MIN_FREE = 96_000_000
 _DEFAULT_WAIT_MS = 250
 _DEFAULT_WAIT_ATTEMPTS = 12
 _MIN_CHUNK_PAGES = 1
@@ -311,13 +314,19 @@ class ExtractAdmissionController:
             return decision
 
     def release(self, estimate_bytes: int) -> None:
+        idle_after_release = False
         with self._lock:
             for index, slot in enumerate(self._active):
                 if slot.estimate_bytes == estimate_bytes:
                     del self._active[index]
-                    return
-            if self._active:
-                self._active.pop()
+                    idle_after_release = len(self._active) == 0
+                    break
+            else:
+                if self._active:
+                    self._active.pop()
+                idle_after_release = len(self._active) == 0
+        if idle_after_release and cgroup_should_reclaim_idle_models():
+            reclaim_model_memory_for_admission()
 
     def active_job_count(self) -> int:
         with self._lock:
