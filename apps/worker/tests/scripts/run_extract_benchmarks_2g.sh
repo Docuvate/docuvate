@@ -41,3 +41,10 @@ done
 
 echo "=== quality concurrency 1 vs 4 ==="
 run_in_cgroup "${PYTHON}" "${ROOT}/tests/scripts/extract_quality_concurrency_equivalence.py"
+
+SOAK_MINUTES="${DOCUVATE_EXTRACT_SOAK_MINUTES:-0}"
+if [ "${SOAK_MINUTES}" != "0" ]; then
+  echo "=== soak concurrency=2 (${SOAK_MINUTES} min) ==="
+  run_in_cgroup "${PYTHON}" "${ROOT}/tests/scripts/extract_soak_benchmark.py" \
+    --minutes "${SOAK_MINUTES}" --concurrency 2
+fi

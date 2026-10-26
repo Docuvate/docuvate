@@ -14,10 +14,16 @@ import threading
 from dataclasses import dataclass, field
 from typing import Any
 
+from docuvate_worker.infrastructure.extract_memory.child_process_diagnostics import (
+    describe_child_exit,
+    log_child_exit,
+)
 from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
     onnx_intra_op_threads_for_concurrency,
     resolve_extract_concurrency,
 )
+from docuvate_worker.infrastructure.extract_memory.memory_pressure import should_defer_pool_recycle
+from docuvate_worker.infrastructure.extract_memory.pool_memory import pool_memory_registry
 from docuvate_worker.infrastructure.onnx_runtime_env import configure_onnx_runtime_env
 
 logger = logging.getLogger(__name__)
@@ -52,25 +58,39 @@ class _PooledExtractChild:
             env=env,
         )
         self._jobs_served = 0
+        pool_memory_registry().register_spawned_child()
         logger.info("extract_pool_child_started pid=%s", proc.pid)
         return proc
 
-    def _close(self) -> None:
+    def _log_exit(self, proc: subprocess.Popen[str] | None, reason: str) -> None:
+        log_child_exit(
+            describe_child_exit(
+                proc,
+                reason=reason,
+                jobs_served=self._jobs_served,
+            )
+        )
+
+    def _close(self, *, reason: str) -> None:
         if self._proc is None:
             return
+        proc = self._proc
+        self._proc = None
+        self._log_exit(proc, reason)
         try:
-            if self._proc.stdin is not None:
-                self._proc.stdin.close()
+            if proc.stdin is not None:
+                proc.stdin.close()
         except OSError:
             pass
         try:
-            self._proc.wait(timeout=30)
+            proc.wait(timeout=30)
         except subprocess.TimeoutExpired:
-            self._proc.kill()
-        stderr = self._proc.stderr.read() if self._proc.stderr is not None else ""
+            proc.kill()
+            proc.wait(timeout=10)
+        stderr = proc.stderr.read() if proc.stderr is not None else ""
         if stderr.strip():
             logger.warning("extract_pool_child_stderr tail=%s", stderr[-2000:])
-        self._proc = None
+        pool_memory_registry().unregister_spawned_child()
 
     def try_acquire(self) -> bool:
         return self._lock.acquire(blocking=False)
@@ -80,21 +100,20 @@ class _PooledExtractChild:
 
     def run_job(self, payload: dict[str, Any], *, timeout: float) -> dict[str, Any]:
         with self._lock:
-            if self._proc is not None:
-                exit_code = self._proc.poll()
-                if exit_code is not None:
-                    logger.warning(
-                        "extract_pool_child_exited code=%s jobs_served=%s",
-                        exit_code,
-                        self._jobs_served,
-                    )
-            if self._proc is None or self._proc.poll() is not None:
-                self._close()
+            if self._proc is not None and self._proc.poll() is not None:
+                self._close(reason="exited_before_job")
+            if self._proc is None:
                 self._proc = self._spawn()
             if self._jobs_served >= self._recycle_after:
-                logger.info("extract_pool_recycle jobs_served=%s", self._jobs_served)
-                self._close()
-                self._proc = self._spawn()
+                if should_defer_pool_recycle():
+                    logger.info(
+                        "extract_pool_recycle_deferred jobs_served=%s memory_pressure=1",
+                        self._jobs_served,
+                    )
+                else:
+                    logger.info("extract_pool_recycle jobs_served=%s", self._jobs_served)
+                    self._close(reason="planned_recycle")
+                    self._proc = self._spawn()
             proc = self._proc
             stdin = proc.stdin
             stdout = proc.stdout
@@ -107,11 +126,7 @@ class _PooledExtractChild:
             self._jobs_served += 1
             exit_after = proc.poll()
             if exit_after is not None:
-                logger.warning(
-                    "extract_pool_child_exited_after_job code=%s jobs_served=%s",
-                    exit_after,
-                    self._jobs_served,
-                )
+                self._log_exit(proc, "exited_after_job")
         if not raw_out:
             raise RuntimeError("extract pool child closed stdout")
         envelope = json.loads(raw_out)

@@ -26,6 +26,7 @@ from docuvate_worker.infrastructure.extract_memory.pixel_budget import (
     effective_raster_dpi,
     page_pixel_count_at_dpi,
 )
+from docuvate_worker.infrastructure.extract_memory.pool_memory import pool_memory_reserved_bytes
 from docuvate_worker.infrastructure.extract_memory.raster_estimate import (
     estimate_raster_dpi,
     estimate_raster_max_dpi,
@@ -174,19 +175,14 @@ def decide_extract_admission(
         count_active_file=count_active_file,
     )
     if active_jobs <= 0:
-        whole_budget = cgroup_memory_available_bytes(
-            snapshot,
-            headroom_bytes=0,
-            reserved_bytes=0,
-            count_active_file=count_active_file,
-        )
-        if whole_budget is not None and minimum_chunk_bytes > whole_budget:
+        need = minimum_chunk_bytes + min_free_bytes + reserved_bytes
+        if available is not None and available < need:
             return AdmissionDecision(
                 admit=False,
                 available_bytes=available,
                 reason="minimum_chunk_exceeds_cgroup",
             )
-        return AdmissionDecision(admit=True, available_bytes=available, reason="idle_always_admit")
+        return AdmissionDecision(admit=True, available_bytes=available, reason="idle_first_job")
     if available is None:
         return AdmissionDecision(admit=True, available_bytes=None, reason="no_cgroup_limit")
     need = estimate_bytes + min_free_bytes
@@ -234,6 +230,8 @@ class ExtractAdmissionController:
     ) -> AdmissionDecision:
         with self._lock:
             snapshot = read_cgroup_memory_snapshot()
+            pending_jobs = len(self._active) + 1
+            pool_reserved = pool_memory_reserved_bytes(pending_jobs=pending_jobs)
             decision = decide_extract_admission(
                 snapshot=snapshot,
                 estimate_bytes=estimate_bytes,
@@ -241,16 +239,17 @@ class ExtractAdmissionController:
                 active_jobs=len(self._active),
                 headroom_bytes=self._headroom_bytes(),
                 min_free_bytes=self._min_free_bytes(),
-                reserved_bytes=self._reserved_bytes(),
+                reserved_bytes=self._reserved_bytes() + pool_reserved,
                 count_active_file=self._count_active_file(),
             )
             if decision.admit:
                 self._active.append(_AdmissionSlot(estimate_bytes=estimate_bytes))
             else:
                 logger.warning(
-                    "extract_admission_denied estimate_bytes=%s available=%s active_jobs=%s "
-                    "reason=%s",
+                    "extract_admission_denied estimate_bytes=%s pool_reserved=%s available=%s "
+                    "active_jobs=%s reason=%s",
                     estimate_bytes,
+                    pool_reserved,
                     decision.available_bytes,
                     len(self._active),
                     decision.reason,
