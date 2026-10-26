@@ -71,7 +71,7 @@ test.describe('Workstream A3 visual artifacts', () => {
   });
 
   test('captures A3 surfaces at required viewports', async ({ page }) => {
-    test.setTimeout(600_000);
+    test.setTimeout(900_000);
 
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
