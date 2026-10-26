@@ -59,6 +59,7 @@ const FORWARD_SQL_ORDER = [
   'document-list-pagination-indexes-up.sql',
   'extraction-field-confirmations-up.sql',
   'document-extracted-text-hash-up.sql',
+  'user-preferences-fuzzy-duplicate-up.sql',
 ];
 
 function loadForwardMigrationSql(): string {

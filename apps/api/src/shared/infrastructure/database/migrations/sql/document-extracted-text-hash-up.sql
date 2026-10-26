@@ -16,6 +16,3 @@ WHERE extracted_text IS NOT NULL
 CREATE INDEX IF NOT EXISTS documents_extracted_text_hash_idx
   ON public.documents USING btree (user_id, extracted_text_hash)
   WHERE extracted_text_hash IS NOT NULL;
-
-ALTER TABLE public.user_preferences
-  ADD COLUMN IF NOT EXISTS fuzzy_duplicate_detection_enabled boolean NOT NULL DEFAULT false;

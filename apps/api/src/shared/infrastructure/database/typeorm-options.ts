@@ -55,6 +55,7 @@ import { DocumentTagsUserConfirmed20261025210000 } from './migrations/2026102521
 import { DocumentListPaginationIndexes20261026120000 } from './migrations/20261026120000-document-list-pagination-indexes.js';
 import { ExtractionFieldConfirmations20261026130000 } from './migrations/20261026130000-extraction-field-confirmations.js';
 import { DocumentExtractedTextHash20261026140000 } from './migrations/20261026140000-document-extracted-text-hash.js';
+import { UserPreferencesFuzzyDuplicateDetection20261026150000 } from './migrations/20261026150000-user-preferences-fuzzy-duplicate-detection.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -132,6 +133,7 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DocumentListPaginationIndexes20261026120000,
       ExtractionFieldConfirmations20261026130000,
       DocumentExtractedTextHash20261026140000,
+      UserPreferencesFuzzyDuplicateDetection20261026150000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

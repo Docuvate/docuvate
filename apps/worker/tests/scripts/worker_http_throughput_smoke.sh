@@ -8,6 +8,7 @@ WORKER_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 REPO_ROOT="$(cd "${WORKER_ROOT}/../.." && pwd)"
 COMPOSE=(
   docker compose
+  --profile smoke
   -f "${REPO_ROOT}/docker-compose.yml"
   -f "${REPO_ROOT}/docker-compose.ci.yml"
   -f "${REPO_ROOT}/docker-compose.smoke.yml"
