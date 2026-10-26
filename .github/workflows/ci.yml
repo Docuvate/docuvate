@@ -139,6 +139,21 @@ jobs:
           DOCUVATE_WEB_IMAGE: docuvate-web
           DOCUVATE_WORKER_IMAGE: docuvate-worker
         run: bash scripts/ci/smoke.sh
+      - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright (Chromium)
+        run: pnpm exec playwright install chromium --with-deps
+      - name: Contrast axe (color-contrast only)
+        run: |
+          set -euo pipefail
+          node e2e/scripts/provision-smoke-storage.mjs
+          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
+            pnpm --filter @docuvate/e2e exec playwright test contrast-axe \
+            --config=playwright.contrast.config.ts
 
   db-migrate-fresh:
     runs-on: ubuntu-latest

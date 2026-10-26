@@ -62,7 +62,7 @@ a.btn:hover {
 }
 
 .spinner-onPrimary {
-  border-color: rgba(255, 255, 255, 0.35);
+  border-color: color-mix(in srgb, var(--dv-color-on-accent) 35%, transparent);
   border-top-color: var(--dv-color-on-accent);
 }
 
@@ -73,12 +73,12 @@ a.btn:hover {
 }
 
 .btn-primary {
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--dv-color-accent-hover);
+  background: var(--dv-color-accent-fill-hover);
 }
 
 .btn-danger {
@@ -233,13 +233,13 @@ a.btn:hover {
 }
 
 .badge-failed {
-  color: var(--dv-color-danger);
+  color: var(--dv-color-danger-strong);
   background: var(--dv-color-danger-soft);
 }
 
 .badge-extracting,
 .badge-queued {
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
 }
 
 .chip {
@@ -344,14 +344,14 @@ a.btn:hover {
 
 .chip-new {
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   border: 1px dashed var(--dv-color-accent);
 }
 
 .chip-selected {
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
-  border: 1px solid var(--dv-color-accent);
+  border: 1px solid var(--dv-color-accent-fill);
 }
 
 .chip-remove {
@@ -472,6 +472,7 @@ a.btn:hover {
   border-radius: var(--dv-radius-md);
   padding: var(--dv-space-lg);
   background: var(--dv-color-bg-overlay);
+  color: var(--dv-color-text);
   cursor: pointer;
   text-align: center;
 }
@@ -479,7 +480,7 @@ a.btn:hover {
 .dropzone-dragover {
   border-color: var(--dv-color-accent);
   background: var(--dv-color-accent-soft);
-  box-shadow: inset 0 0 0 1px var(--dv-color-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dv-color-accent) 35%, transparent);
 }
 
 .dropzone-busy {
@@ -489,6 +490,7 @@ a.btn:hover {
 
 .dropzone-title {
   font-weight: 600;
+  color: var(--dv-color-text);
 }
 
 .dropzone-hint {

@@ -30,7 +30,7 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--dv-radius-lg);
-  background: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
   font-weight: var(--dv-font-weight-semibold);
   flex-shrink: 0;
@@ -113,8 +113,8 @@
 }
 
 .checkbox-input:checked + .checkbox-box {
-  background: var(--dv-color-accent);
-  border-color: var(--dv-color-accent);
+  background: var(--dv-color-accent-fill);
+  border-color: var(--dv-color-accent-fill);
   color: var(--dv-color-on-accent);
 }
 
@@ -372,7 +372,7 @@
 }
 
 .menu-item-danger {
-  color: var(--dv-color-danger);
+  color: var(--dv-color-danger-strong);
 }
 
 .menu-item:disabled {
@@ -394,7 +394,7 @@
   padding: 0.125rem var(--dv-space-xs);
   border-radius: var(--dv-radius-md);
   background: var(--dv-color-accent-soft);
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   border: none;
