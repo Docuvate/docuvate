@@ -1,6 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentDto, DocumentListQuery } from '@docuvate/contracts';
+import {
+  DOCUMENT_LIST_DEFAULT_LIMIT,
+  type DocumentDto,
+  type DocumentListQuery,
+} from '@docuvate/contracts';
 import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
@@ -34,6 +38,7 @@ export function useDocumentsInfiniteQuery(filters: DocumentListQuery | null) {
       return listDocumentsPage({
         ...filters,
         cursor: pageParam,
+        limit: filters.limit ?? DOCUMENT_LIST_DEFAULT_LIMIT,
       });
     },
     getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor ?? undefined : undefined),

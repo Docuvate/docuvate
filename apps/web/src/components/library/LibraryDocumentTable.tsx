@@ -585,7 +585,7 @@ export function LibraryDocumentTable({
             <col className="library-col-action" />
           </colgroup>
           <thead>
-            <tr>
+            <tr className="library-table-virtual-header-row">
               <th className="library-col-expand" aria-hidden="true" />
               <th className="library-col-check">
                 <input
@@ -653,10 +653,9 @@ export function LibraryDocumentTable({
                   <DocumentDraggableTableRow
                     documentId={doc.id}
                     dragEnabled={enableDocumentDrag}
-                    className={rowClassName || undefined}
+                    className={['library-table-virtual-row', rowClassName].filter(Boolean).join(' ')}
                     data-index={virtualRow.index}
                     style={{
-                      display: 'table',
                       width: '100%',
                       position: 'absolute',
                       top: 0,
@@ -686,7 +685,7 @@ export function LibraryDocumentTable({
                         </button>
                       ) : null}
                     </td>
-                    <td>
+                    <td className="library-col-check">
                       <input
                         type="checkbox"
                         checked={selected.has(doc.id)}

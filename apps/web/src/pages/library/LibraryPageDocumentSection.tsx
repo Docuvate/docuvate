@@ -86,7 +86,6 @@ export function LibraryPageDocumentSection({
     const key = documentListQueryKey({
       ...data.filters,
       q: data.query || undefined,
-      includeTagSuggestions: true,
     });
     return `library-doc-scroll:${JSON.stringify(key[2] ?? '')}`;
   }, [data.filters, data.query]);

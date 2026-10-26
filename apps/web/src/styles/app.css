@@ -5695,6 +5695,53 @@ mark.global-search-mark {
   background: var(--surface-raised, var(--surface-1));
 }
 
+.library-table.library-table-virtualized {
+  display: block;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.library-table.library-table-virtualized thead {
+  display: block;
+  width: 100%;
+}
+
+.library-table-wrap:not(.library-table-wrap-hide-folder) .library-table-virtualized {
+  --library-virtual-grid-cols:
+    2rem 2.5rem minmax(12rem, 1fr) 7.5rem minmax(7rem, 14rem) 8.75rem 6.25rem 4.5rem;
+}
+
+.library-table-wrap.library-table-wrap-hide-folder .library-table-virtualized {
+  --library-virtual-grid-cols:
+    2rem 2.5rem minmax(12rem, 1fr) minmax(7rem, 14rem) 8.75rem 6.25rem 4.5rem;
+}
+
+.library-table.library-table-virtualized .library-table-virtual-header-row,
+.library-table.library-table-virtualized .library-table-virtual-row {
+  display: grid;
+  width: 100%;
+  grid-template-columns: var(--library-virtual-grid-cols);
+  box-sizing: border-box;
+}
+
+.library-table.library-table-virtualized .library-table-virtual-header-row > th,
+.library-table.library-table-virtualized .library-table-virtual-row > td {
+  min-width: 0;
+}
+
+.library-table.library-table-virtualized .library-table-virtual-body {
+  display: block;
+  width: 100%;
+  position: relative;
+}
+
+.library-table.library-table-virtualized td.library-col-labels,
+.library-table.library-table-virtualized th.library-col-labels {
+  width: auto;
+  max-width: none;
+  overflow: hidden;
+}
+
 @media (max-width: 768px) {
   .library-page .library-main .card.library-doc-table-card {
     padding: 0;
