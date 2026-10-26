@@ -96,6 +96,16 @@ class _PooledExtractChild:
             )
         )
 
+    def is_warm(self) -> bool:
+        return self._proc is not None and self._proc.poll() is None
+
+    def shutdown_warm_process(self, *, reason: str) -> bool:
+        """Terminate the warm child process; caller must hold this child's lock."""
+        if not self.is_warm():
+            return False
+        self._close(reason=reason)
+        return True
+
     def _close(self, *, reason: str) -> None:
         if self._proc is None:
             return
@@ -198,6 +208,35 @@ class _ExtractSubprocessPool:
         with self._wait_lock:
             self._idle.notify_all()
 
+    def evict_idle_children(self, *, keep_warm: int) -> int:
+        """Close idle warm children; return estimated bytes reclaimed."""
+        from docuvate_worker.infrastructure.extract_memory.pool_memory import (
+            _pool_resident_bytes,
+        )
+
+        resident = _pool_resident_bytes()
+        reclaimed = 0
+        with self._assign_lock:
+            warm_count = sum(1 for child in self.children if child.is_warm())
+            for child in self.children:
+                if warm_count <= keep_warm:
+                    break
+                if not child.try_acquire():
+                    continue
+                try:
+                    if child.shutdown_warm_process(reason="admission_reclaim"):
+                        reclaimed += resident
+                        warm_count -= 1
+                finally:
+                    child.release_slot()
+        if reclaimed > 0:
+            logger.info(
+                "extract_pool_evicted_idle reclaimed_mib=%.1f keep_warm=%s",
+                reclaimed / (1024 * 1024),
+                keep_warm,
+            )
+        return reclaimed
+
 
 @dataclass
 class _PoolRegistry:
@@ -217,6 +256,12 @@ def _pool_size() -> int:
     if raw.isdigit() and int(raw) > 0:
         return int(raw)
     return resolve_extract_concurrency()
+
+
+def evict_idle_pool_children(keep: int = 0) -> int:
+    if not extract_pool_enabled():
+        return 0
+    return pooled_extract_child().evict_idle_children(keep_warm=keep)
 
 
 def pooled_extract_child() -> _ExtractSubprocessPool:

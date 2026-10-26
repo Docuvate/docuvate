@@ -26,6 +26,13 @@ from docuvate_worker.infrastructure.extract_memory.pixel_budget import (
     effective_raster_dpi,
     page_pixel_count_at_dpi,
 )
+from docuvate_worker.infrastructure.extract_memory.extract_concurrency import (
+    DEFAULT_PARENT_RSS_BYTES,
+)
+from docuvate_worker.infrastructure.extract_memory.model_residency import (
+    evictable_pool_model_bytes,
+    reclaim_model_memory_for_admission,
+)
 from docuvate_worker.infrastructure.extract_memory.pool_memory import pool_memory_reserved_bytes
 from docuvate_worker.infrastructure.extract_memory.raster_estimate import (
     estimate_raster_dpi,
@@ -155,6 +162,25 @@ class AdmissionDecision:
     reason: str
 
 
+def document_exceeds_cgroup_even_without_models(
+    minimum_chunk_bytes: int,
+    snapshot: CgroupMemorySnapshot | None,
+    *,
+    headroom_bytes: int,
+    min_free_bytes: int,
+) -> bool:
+    """True when a single page cannot fit even if all pool models were unloaded."""
+    if snapshot is None or snapshot.limit_bytes is None:
+        return False
+    ceiling = (
+        snapshot.limit_bytes
+        - headroom_bytes
+        - min_free_bytes
+        - DEFAULT_PARENT_RSS_BYTES
+    )
+    return minimum_chunk_bytes > max(0, ceiling)
+
+
 def decide_extract_admission(
     *,
     snapshot: CgroupMemorySnapshot | None,
@@ -165,6 +191,7 @@ def decide_extract_admission(
     min_free_bytes: int,
     reserved_bytes: int,
     count_active_file: bool,
+    evictable_model_bytes: int = 0,
 ) -> AdmissionDecision:
     if snapshot is None or snapshot.limit_bytes is None:
         return AdmissionDecision(admit=True, available_bytes=None, reason="no_cgroup_limit")
@@ -176,11 +203,34 @@ def decide_extract_admission(
     )
     if active_jobs <= 0:
         need = minimum_chunk_bytes + min_free_bytes + reserved_bytes
-        if available is not None and available < need:
+        effective_available = (available or 0) + evictable_model_bytes
+        if available is not None and effective_available < need:
+            if document_exceeds_cgroup_even_without_models(
+                minimum_chunk_bytes,
+                snapshot,
+                headroom_bytes=headroom_bytes,
+                min_free_bytes=min_free_bytes,
+            ):
+                return AdmissionDecision(
+                    admit=False,
+                    available_bytes=available,
+                    reason="minimum_chunk_exceeds_cgroup",
+                )
             return AdmissionDecision(
                 admit=False,
                 available_bytes=available,
-                reason="minimum_chunk_exceeds_cgroup",
+                reason="memory_pressure",
+            )
+        if (
+            available is not None
+            and available < need
+            and effective_available >= need
+            and evictable_model_bytes > 0
+        ):
+            return AdmissionDecision(
+                admit=True,
+                available_bytes=available,
+                reason="idle_evictable_models",
             )
         return AdmissionDecision(admit=True, available_bytes=available, reason="idle_first_job")
     if available is None:
@@ -232,6 +282,7 @@ class ExtractAdmissionController:
             snapshot = read_cgroup_memory_snapshot()
             pending_jobs = len(self._active) + 1
             pool_reserved = pool_memory_reserved_bytes(pending_jobs=pending_jobs)
+            evictable = evictable_pool_model_bytes() if len(self._active) == 0 else 0
             decision = decide_extract_admission(
                 snapshot=snapshot,
                 estimate_bytes=estimate_bytes,
@@ -241,8 +292,11 @@ class ExtractAdmissionController:
                 min_free_bytes=self._min_free_bytes(),
                 reserved_bytes=self._reserved_bytes() + pool_reserved,
                 count_active_file=self._count_active_file(),
+                evictable_model_bytes=evictable,
             )
             if decision.admit:
+                if decision.reason == "idle_evictable_models":
+                    reclaim_model_memory_for_admission()
                 self._active.append(_AdmissionSlot(estimate_bytes=estimate_bytes))
             else:
                 logger.warning(
@@ -281,6 +335,10 @@ def _wait_interval_seconds() -> float:
     return max(0.0, _env_int(_ENV_ADMISSION_WAIT_MS, _DEFAULT_WAIT_MS) / 1000.0)
 
 
+def admission_retry_after_seconds() -> int:
+    return max(1, int(_wait_attempts() * _wait_interval_seconds()))
+
+
 @contextmanager
 def extract_admission_slot(content: bytes, mime_type: str) -> Iterator[None]:
     if os.environ.get("DOCUVATE_EXTRACT_ADMISSION", "1") != "1":
@@ -290,7 +348,8 @@ def extract_admission_slot(content: bytes, mime_type: str) -> Iterator[None]:
     minimum = estimate_minimum_chunk_memory_bytes(content, mime_type)
     controller = admission_controller()
     decision: AdmissionDecision | None = None
-    for attempt in range(_wait_attempts()):
+    attempts = _wait_attempts()
+    for attempt in range(attempts):
         decision = controller.try_acquire(estimate, minimum)
         if decision.admit:
             break
@@ -298,11 +357,16 @@ def extract_admission_slot(content: bytes, mime_type: str) -> Iterator[None]:
             raise ExtractPermanentError(
                 reason=(
                     "Document requires more memory than this worker can provide "
-                    "even for a single page."
+                    "even with models unloaded."
                 ),
                 error_type="ExtractResourceExhausted",
             )
-        if attempt + 1 < _wait_attempts():
+        if decision.reason in {"memory_pressure", "concurrent_capacity"}:
+            if reclaim_model_memory_for_admission() > 0:
+                decision = controller.try_acquire(estimate, minimum)
+                if decision.admit:
+                    break
+        if attempt + 1 < attempts:
             time.sleep(_wait_interval_seconds())
     if decision is None or not decision.admit:
         raise ExtractRetryableError(

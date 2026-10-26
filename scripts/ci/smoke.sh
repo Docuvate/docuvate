@@ -18,6 +18,9 @@ for attempt in 1 2 3 4 5; do
   if "${COMPOSE[@]}" --profile smoke up --wait --build \
     postgres migrate db-storage-guard minio minio-init valkey mailpit api worker web; then
     bash apps/worker/tests/scripts/worker_http_throughput_smoke.sh
+    if [ "${WORKER_COMPOSE_2G_SOAK:-1}" = "1" ]; then
+      bash apps/worker/tests/scripts/worker_compose_2g_soak.sh
+    fi
     if ! "${COMPOSE[@]}" --profile smoke up --wait smoke-seed; then
       exit 1
     fi
