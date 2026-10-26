@@ -112,8 +112,8 @@ describe('GET /labels/map scale (Testcontainers Postgres)', () => {
     const taxonomy = new PgTaxonomyRepository(pool);
     const prefs = new PgUserPreferencesRepository(pool);
     class RefreshEmbeddingsStub {
-      async execute(): Promise<number> {
-        return 0;
+      async execute(): Promise<void> {
+        return;
       }
     }
     const backfill = new BackfillDocumentEmbeddingsUseCase(

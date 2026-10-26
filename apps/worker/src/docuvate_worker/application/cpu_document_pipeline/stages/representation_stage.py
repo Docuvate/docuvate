@@ -15,7 +15,9 @@ from docuvate_worker.domain.representation.units import (
     append_sender_line_units,
     build_representation_units,
 )
-from docuvate_worker.infrastructure.extract_memory.model_residency import extract_keep_models_resident
+from docuvate_worker.infrastructure.extract_memory.model_residency import (
+    extract_keep_models_resident,
+)
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 
 STAGE_ID = "document_representation"

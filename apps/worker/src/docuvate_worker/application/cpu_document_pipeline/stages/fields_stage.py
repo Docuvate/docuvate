@@ -15,7 +15,9 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
 from docuvate_worker.domain.models import ExtractedField
-from docuvate_worker.infrastructure.extract_memory.model_residency import extract_keep_models_resident
+from docuvate_worker.infrastructure.extract_memory.model_residency import (
+    extract_keep_models_resident,
+)
 from docuvate_worker.infrastructure.extractors.heuristic_fields import heuristic_field_suggestions
 
 STAGE_ID = "field_suggestions"

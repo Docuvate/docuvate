@@ -13,6 +13,9 @@ from docuvate_worker.domain.cpu_pipeline.contracts import (
 )
 from docuvate_worker.domain.cpu_pipeline.metrics import measure_stage
 from docuvate_worker.domain.models import ExtractionBlock
+from docuvate_worker.infrastructure.extract_memory.model_residency import (
+    extract_keep_models_resident,
+)
 from docuvate_worker.infrastructure.extractors.paddle_engine import (
     ocr_image_bytes as paddle_ocr_image_bytes,
 )
@@ -49,7 +52,6 @@ from docuvate_worker.infrastructure.office.mimes import (
     is_office_born_digital_mime,
     needs_libreoffice_preview,
 )
-from docuvate_worker.infrastructure.extract_memory.model_residency import extract_keep_models_resident
 from docuvate_worker.infrastructure.onnx_e5_encoder import release_onnx_encoder
 from docuvate_worker.infrastructure.worker_memory_hygiene import reclaim_python_heap
 

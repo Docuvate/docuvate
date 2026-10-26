@@ -25,7 +25,7 @@ import {
   computeCoverageSimilarity,
   type LabeledDocumentEmbedding,
 } from '../domain/label-coverage-score.js';
-import { projectLabelMap2D } from '../domain/label-map-projection.js';
+import { MAX_VECTORS_FOR_UMAP, projectLabelMap2D } from '../domain/label-map-projection.js';
 import { buildLabelOverlapMatrix } from '../domain/label-overlap-matrix.js';
 import { BackfillDocumentEmbeddingsUseCase } from './backfill-document-embeddings.use-case.js';
 import { EnrichLabelMapMissingHintsUseCase } from './enrich-label-map-missing-hints.use-case.js';
@@ -101,6 +101,8 @@ export class GetLabelMapUseCase {
         embedding: r.embedding,
         nonInboxTagIds: r.nonInboxTagIds,
       }));
+    const coverageScoreCorpus =
+      rows.length > 250 ? ([] as LabeledDocumentEmbedding[]) : labeledDocuments;
 
     const docEmbeddingsByTagId = new Map<string, number[][]>();
     for (const row of rows) {
@@ -131,7 +133,7 @@ export class GetLabelMapUseCase {
       const coverageScore = computeCoverageSimilarity(
         row.embedding,
         centroidRefs,
-        labeledDocuments
+        coverageScoreCorpus
       );
       points.push({
         id: `doc:${row.documentId}`,

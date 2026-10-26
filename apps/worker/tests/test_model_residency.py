@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: 2026 Thomas Faust
 # SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 
-from docuvate_worker.infrastructure.extract_memory.model_residency import extract_keep_models_resident
+from docuvate_worker.infrastructure.extract_memory.model_residency import (
+    extract_keep_models_resident,
+)
 
 
 def test_keep_models_defaults_on_child_loop(monkeypatch) -> None:
