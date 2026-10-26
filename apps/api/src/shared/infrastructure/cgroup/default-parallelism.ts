@@ -12,7 +12,7 @@ function readCgroupInt(paths: string[]): number | null {
   for (const path of paths) {
     try {
       const first = readFileSync(path, 'utf8').trim().split(/\s+/)[0];
-      if (first === 'max' || first === undefined) {
+      if (!first || first === 'max') {
         continue;
       }
       const parsed = Number.parseInt(first, 10);
