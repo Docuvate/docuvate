@@ -58,7 +58,7 @@ const ROUTES: RouteProbe[] = [
     domRootSelector: '[data-ux="page"]',
   },
   {
-    route: '/saved-views',
+    route: '/documents/views',
     listPathPattern: /\/v1\/saved-views$/,
     readySelector: '.saved-views-page',
     domRootSelector: '[data-ux="page"]',
