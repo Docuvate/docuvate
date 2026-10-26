@@ -6,6 +6,19 @@ export interface SqlQueryExecutor {
   query: (query: string, parameters?: unknown[]) => Promise<unknown>;
 }
 
+function readQueryRows(result: unknown): Record<string, unknown>[] {
+  if (Array.isArray(result)) {
+    return result.map((row) => requireRecord(row));
+  }
+  if (result !== null && typeof result === 'object' && 'rows' in result) {
+    const rows = (result as { rows: unknown }).rows;
+    if (Array.isArray(rows)) {
+      return rows.map((row) => requireRecord(row));
+    }
+  }
+  return [];
+}
+
 const BATCH_SIZE = 250;
 const USER_RECOMPUTE_BATCH_SIZE = 25;
 
@@ -140,18 +153,20 @@ export async function recomputeSearchVocabularyDocFrequencyAll(
 ): Promise<void> {
   let offset = 0;
   for (;;) {
-    const rawRows: unknown = await executor.query(
-      `SELECT DISTINCT user_id::text AS user_id
-       FROM search_vocabulary_terms
-       ORDER BY user_id
-       LIMIT $1 OFFSET $2`,
-      [USER_RECOMPUTE_BATCH_SIZE, offset]
+    const rawRows = readQueryRows(
+      await executor.query(
+        `SELECT DISTINCT user_id::text AS user_id
+         FROM search_vocabulary_terms
+         ORDER BY user_id
+         LIMIT $1 OFFSET $2`,
+        [USER_RECOMPUTE_BATCH_SIZE, offset]
+      )
     );
-    if (!Array.isArray(rawRows) || rawRows.length === 0) {
+    if (rawRows.length === 0) {
       return;
     }
     for (const row of rawRows) {
-      const userId = parseString(requireRecord(row).user_id);
+      const userId = parseString(row.user_id);
       await recomputeSearchVocabularyDocFrequencyForUser(executor, userId);
     }
     offset += USER_RECOMPUTE_BATCH_SIZE;
@@ -165,16 +180,15 @@ async function distinctUserIdsForDocuments(
   if (documentIds.length === 0) {
     return [];
   }
-  const rawRows: unknown = await executor.query(
-    `SELECT DISTINCT user_id::text AS user_id FROM documents WHERE id = ANY($1::uuid[])`,
-    [documentIds]
+  const rawRows = readQueryRows(
+    await executor.query(
+      `SELECT DISTINCT user_id::text AS user_id FROM documents WHERE id = ANY($1::uuid[])`,
+      [documentIds]
+    )
   );
-  if (!Array.isArray(rawRows)) {
-    return [];
-  }
   const userIds: string[] = [];
   for (const row of rawRows) {
-    userIds.push(parseString(requireRecord(row).user_id));
+    userIds.push(parseString(row.user_id));
   }
   return userIds;
 }
@@ -201,17 +215,19 @@ export async function backfillSearchVocabularyAllDocuments(
 ): Promise<void> {
   let offset = 0;
   for (;;) {
-    const rawRows: unknown = await executor.query(
-      `SELECT id::text AS id FROM documents ORDER BY id LIMIT $1 OFFSET $2`,
-      [BATCH_SIZE, offset]
+    const rawRows = readQueryRows(
+      await executor.query(
+        `SELECT id::text AS id FROM documents ORDER BY id LIMIT $1 OFFSET $2`,
+        [BATCH_SIZE, offset]
+      )
     );
-    if (!Array.isArray(rawRows) || rawRows.length === 0) {
+    if (rawRows.length === 0) {
       await recomputeSearchVocabularyDocFrequencyAll(executor);
       return;
     }
     const documentIds: string[] = [];
     for (const row of rawRows) {
-      documentIds.push(parseString(requireRecord(row).id));
+      documentIds.push(parseString(row.id));
     }
     await backfillSearchVocabularyForDocuments(executor, documentIds);
     offset += BATCH_SIZE;
