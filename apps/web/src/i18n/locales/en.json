@@ -218,6 +218,7 @@
       "CONFLICT": "An error occurred. Please try again.",
       "AUTH_INVALID_CREDENTIALS": "An error occurred. Please try again.",
       "AUTH_PASSWORD_POLICY_VIOLATION": "The password does not meet this instance policy.",
+      "OIDC_PROVIDER_NOT_FOUND": "The OIDC provider was not found.",
       "AUTH_SESSION_EXPIRED": "Your session has expired.",
       "RATE_LIMIT_EXCEEDED": "Too many requests. Please wait a moment and try again.",
       "CONNECTOR_AUTH_FAILED": "The connection could not be authenticated.",

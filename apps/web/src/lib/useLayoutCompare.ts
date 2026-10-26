@@ -164,8 +164,11 @@ export function useLayoutCompare(
   );
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
     void loadPage(activePage, includeHeatmap);
-  }, [activePage, includeHeatmap, loadPage, pageRetryToken]);
+  }, [activePage, enabled, includeHeatmap, loadPage, pageRetryToken]);
 
   const retryMetrics = useCallback(() => {
     metricsLoadedRef.current.clear();
