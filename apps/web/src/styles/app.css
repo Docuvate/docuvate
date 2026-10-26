@@ -13672,6 +13672,31 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
   .admin-users-panel {
     overflow: visible;
+    min-width: 0;
+  }
+
+  .admin-invite-panel,
+  .admin-users-card-list {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-invite-form--spec .admin-invite-email-field input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .pagination.admin-users-pagination {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-inline: var(--dv-space-xs);
+  }
+
+  .pagination.admin-users-pagination > span {
+    flex: 1 1 100%;
+    min-width: 0;
   }
 }
 .dashboard-add-row {

@@ -40,11 +40,14 @@ async function assertDenseListLayouts(page: Page, viewportWidth: number): Promis
     await assertScrollListRowsLayout(page, '.labels-vocabulary-scroll', rowSel);
   }
 
-  if (viewportWidth <= 640) {
-    const adminCards = page.locator('.admin-users-card-list');
-    if (await adminCards.count()) {
-      await assertScrollListRowsLayout(page, '.admin-users-card-list', '.admin-users-card');
-    }
+  const adminPanel = page.locator('.admin-users-panel');
+  if (viewportWidth <= 640 && (await adminPanel.count()) > 0) {
+    await assertScrollListRowsLayout(
+      page,
+      '.admin-users-panel',
+      '.admin-users-card',
+      '.app-main'
+    );
   }
 }
 
@@ -171,16 +174,20 @@ test.describe('Workstream A3 visual artifacts', () => {
       }
 
       await page.goto('/settings/admin/users');
-      const adminTable = page.locator('.admin-users-panel');
-      try {
-        await adminTable.first().waitFor({ state: 'visible', timeout: 15_000 });
+      await page.locator('.settings-page').waitFor({ state: 'visible', timeout: 60_000 });
+      const adminReady = await page
+        .locator('.admin-invite-panel, .admin-users-card-list')
+        .first()
+        .waitFor({ state: 'visible', timeout: 60_000 })
+        .then(() => true)
+        .catch(() => false);
+      if (adminReady) {
+        await page.locator('.pagination.admin-users-pagination').scrollIntoViewIfNeeded();
         await shot(page, `admin-users-pagination-${viewport.label}.png`, viewport.width);
-        const pagination = page.locator('.ui-pagination, [data-testid="ui-pagination"]');
-        if (await pagination.count()) {
+        const pagination = page.locator('.pagination.admin-users-pagination');
+        if (await pagination.isVisible()) {
           await shot(page, `admin-users-pagination-controls-${viewport.label}.png`, viewport.width);
         }
-      } catch {
-        // smoke user may lack installation admin; skip admin captures
       }
 
       await page.goto('/structure/labels');

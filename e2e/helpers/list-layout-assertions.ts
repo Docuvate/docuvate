@@ -15,15 +15,20 @@ function rectsIntersect(
 export async function assertScrollListRowsLayout(
   page: Page,
   scrollSelector: string,
-  rowSelector: string
+  rowSelector: string,
+  boundsSelector?: string
 ): Promise<void> {
   const issues = await page.evaluate(
-    ({ scrollSel, rowSel }) => {
+    ({ scrollSel, rowSel, boundsSel }) => {
       const scroll = document.querySelector(scrollSel);
       if (!scroll) {
         return ['missing scroll container'];
       }
-      const scrollRect = scroll.getBoundingClientRect();
+      const boundsEl = boundsSel ? document.querySelector(boundsSel) : scroll;
+      if (!boundsEl) {
+        return ['missing bounds container'];
+      }
+      const scrollRect = boundsEl.getBoundingClientRect();
       const rows = scroll.querySelectorAll(rowSel);
       const out: string[] = [];
       rows.forEach((row, rowIndex) => {
@@ -57,7 +62,11 @@ export async function assertScrollListRowsLayout(
       });
       return out;
     },
-    { scrollSel: scrollSelector, rowSel: rowSelector }
+    {
+      scrollSel: scrollSelector,
+      rowSel: rowSelector,
+      boundsSel: boundsSelector ?? null,
+    }
   );
 
   expect(issues, `layout violations in ${scrollSelector}`).toEqual([]);
