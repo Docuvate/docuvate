@@ -472,6 +472,7 @@ a.btn:hover {
   border-radius: var(--dv-radius-md);
   padding: var(--dv-space-lg);
   background: var(--dv-color-bg-overlay);
+  color: var(--dv-color-text);
   cursor: pointer;
   text-align: center;
 }
@@ -479,7 +480,7 @@ a.btn:hover {
 .dropzone-dragover {
   border-color: var(--dv-color-accent);
   background: var(--dv-color-accent-soft);
-  box-shadow: inset 0 0 0 1px var(--dv-color-accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dv-color-accent) 35%, transparent);
 }
 
 .dropzone-busy {
@@ -489,6 +490,7 @@ a.btn:hover {
 
 .dropzone-title {
   font-weight: 600;
+  color: var(--dv-color-text);
 }
 
 .dropzone-hint {
