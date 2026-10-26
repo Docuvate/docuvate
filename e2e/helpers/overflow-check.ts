@@ -284,8 +284,9 @@ export async function assertOverflowMissesHeader(page: Page): Promise<void> {
 }
 
 export async function assertFieldRegionRenderedWithValue(page: Page): Promise<void> {
-  const overlay = page.locator('.pdf-layout-overlay-field, [data-overlay-id^="region-field-"]').first();
+  const overlay = page.locator('[data-overlay-id^="region-field-"]').first();
   await expect(overlay).toBeVisible({ timeout: 30_000 });
+  await expect(overlay).toHaveClass(/pdf-layout-overlay-field/);
   const value = page.locator('.field-value-row-value, .document-field-correction-value-text, .document-field-correction-value input').first();
   await expect(value).toBeVisible({ timeout: 15_000 });
   const text = ((await value.inputValue().catch(async () => value.innerText())) ?? '').trim();
