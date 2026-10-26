@@ -4,12 +4,14 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { runWithRequestDeadline } from './request-deadline.js';
 
+type DeadlineProbe = { items: []; state: 'ready' | 'warming' };
+
 describe('runWithRequestDeadline', () => {
   it('returns the handler result when it finishes before the deadline', async () => {
-    const result = await runWithRequestDeadline(
+    const result = await runWithRequestDeadline<DeadlineProbe>(
       200,
-      () => Promise.resolve({ items: [], state: 'ready' as const }),
-      () => ({ items: [], state: 'warming' as const })
+      () => Promise.resolve({ items: [], state: 'ready' }),
+      () => ({ items: [], state: 'warming' })
     );
     expect(result.state).toBe('ready');
   });
@@ -17,7 +19,7 @@ describe('runWithRequestDeadline', () => {
   it('returns the timeout fallback and aborts the signal when the deadline elapses', async () => {
     vi.useFakeTimers();
     let sawAbort = false;
-    const slow = runWithRequestDeadline(
+    const slow = runWithRequestDeadline<DeadlineProbe>(
       50,
       async (signal) => {
         await new Promise<void>((resolve) => {
@@ -26,9 +28,9 @@ describe('runWithRequestDeadline', () => {
             resolve();
           });
         });
-        return { items: [], state: 'ready' as const };
+        return { items: [], state: 'ready' };
       },
-      () => ({ items: [], state: 'warming' as const })
+      () => ({ items: [], state: 'warming' })
     );
     await vi.advanceTimersByTimeAsync(50);
     const result = await slow;
