@@ -154,6 +154,109 @@ async function assertDateColumnAtViewports(
   }
 }
 
+async function assertDateAndActionsSeparated(
+  page: import('@playwright/test').Page,
+  viewportWidth: number
+): Promise<void> {
+  await page.setViewportSize({ width: viewportWidth, height: 900 });
+  await applyDocuvateThemePreference(page, 'light');
+  await page.goto('/documents');
+  await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible' });
+  const overlaps = await page.evaluate(() => {
+    const rows = document.querySelectorAll('.library-table-virtual-body tr.library-table-virtual-row');
+    const limit = Math.min(15, rows.length);
+    for (let i = 0; i < limit; i += 1) {
+      const row = rows.item(i);
+      if (!(row instanceof HTMLElement)) {
+        continue;
+      }
+      const dateCell = row.querySelector('td.library-col-date');
+      const actionCell = row.querySelector('td.library-col-action');
+      if (!(dateCell instanceof HTMLElement) || !(actionCell instanceof HTMLElement)) {
+        continue;
+      }
+      const dateRect = dateCell.getBoundingClientRect();
+      const controls = actionCell.querySelectorAll('.library-open-doc-btn, .library-row-menu-btn');
+      for (let c = 0; c < controls.length; c += 1) {
+        const control = controls.item(c);
+        if (!(control instanceof HTMLElement)) {
+          continue;
+        }
+        const controlRect = control.getBoundingClientRect();
+        if (controlRect.width < 2 || controlRect.height < 2) {
+          continue;
+        }
+        const overlap =
+          dateRect.left < controlRect.right - 1 &&
+          dateRect.right > controlRect.left + 1 &&
+          dateRect.top < controlRect.bottom - 1 &&
+          dateRect.bottom > controlRect.top + 1;
+        if (overlap) {
+          return `row-${String(i)}-date-action-overlap`;
+        }
+      }
+      if (dateCell.scrollWidth > dateCell.clientWidth + 1) {
+        return `row-${String(i)}-date-clipped`;
+      }
+    }
+    return null;
+  });
+  expect(overlaps).toBeNull();
+}
+
+async function assertMobileLabelOverflowInline(page: import('@playwright/test').Page): Promise<void> {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await applyDocuvateThemePreference(page, 'light');
+  await page.goto('/documents');
+  await page.getByTestId('library-doc-stack-list').waitFor({ state: 'visible' });
+  const issue = await page.evaluate(() => {
+    const item = document.querySelector('.library-doc-stack-item');
+    if (!(item instanceof HTMLElement)) {
+      return 'no-stack-item';
+    }
+    const chipRow = item.querySelector('.document-labels-cell-row');
+    if (!(chipRow instanceof HTMLElement)) {
+      return 'no-chip-row';
+    }
+    const chipParts = chipRow.querySelectorAll(
+      '.document-labels-visible-chip, .document-labels-overflow-details'
+    );
+    if (chipParts.length < 2) {
+      return null;
+    }
+    const tops: number[] = [];
+    for (let i = 0; i < chipParts.length; i += 1) {
+      const part = chipParts.item(i);
+      if (!(part instanceof HTMLElement)) {
+        continue;
+      }
+      const rect = part.getBoundingClientRect();
+      if (rect.height < 2) {
+        continue;
+      }
+      tops.push(rect.top);
+    }
+    if (tops.length < 2) {
+      return null;
+    }
+    const minTop = Math.min(...tops);
+    const maxTop = Math.max(...tops);
+    if (maxTop - minTop > 3) {
+      return 'chip-overflow-wrapped';
+    }
+    const badge = item.querySelector('.library-doc-stack-meta-end .badge');
+    if (badge instanceof HTMLElement) {
+      const itemRect = item.getBoundingClientRect();
+      const badgeRect = badge.getBoundingClientRect();
+      if (badgeRect.bottom > itemRect.bottom + 1 || badgeRect.top < itemRect.top - 1) {
+        return 'badge-clipped';
+      }
+    }
+    return null;
+  });
+  expect(issue).toBeNull();
+}
+
 async function assertStatusColumnAlignment(page: import('@playwright/test').Page): Promise<void> {
   const header = page.locator('.library-table-virtualized thead th.library-col-status');
   await expect(header).toBeVisible();
@@ -265,7 +368,7 @@ async function assertDesktopTableLayout(page: import('@playwright/test').Page): 
   const titleCell = firstRow.locator('td.library-col-title').first();
   const titleBox = await titleCell.boundingBox();
   expect(titleBox).not.toBeNull();
-  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.32);
+  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.35);
 
   await assertLabelChipsContainedInCells(page);
   await assertVirtualRowContentLayout(page);
@@ -385,6 +488,7 @@ test.describe('library list performance', () => {
     expect(mobileDomNodeCount).toBeLessThan(3000);
 
     await assertMobileStackLayout(page);
+    await assertMobileLabelOverflowInline(page);
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await applyDocuvateThemePreference(page, 'light');
@@ -400,6 +504,8 @@ test.describe('library list performance', () => {
     await assertStatusColumnAlignment(page);
     await assertDesktopTableLayout(page);
     await assertDateColumnAtViewports(page, ['de', 'en'], [1440, 1280]);
+    await assertDateAndActionsSeparated(page, 1440);
+    await assertDateAndActionsSeparated(page, 1280);
 
     await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'light');
     await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'dark');
