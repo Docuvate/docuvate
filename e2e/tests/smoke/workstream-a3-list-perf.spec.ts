@@ -17,7 +17,7 @@ interface RouteProbe {
   readySelector: string;
   /** Page content root (excludes app chrome) for DOM budget checks. */
   domRootSelector: string;
-  /** When false, list endpoint may omit cursor `limit` (aggregates / legacy list). */
+  /** When false, the list endpoint may omit cursor limit (aggregates or non-paginated lists). */
   expectLimitQueryParam?: boolean;
   /** Optional aggregate endpoint that must be requested (F04). */
   aggregatePathPattern?: RegExp;
