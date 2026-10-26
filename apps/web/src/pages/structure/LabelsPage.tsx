@@ -47,6 +47,7 @@ export function LabelsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<CreateTagRequest>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [insightsRetryBusy, setInsightsRetryBusy] = useState(false);
 
   const loadTags = useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) {
@@ -125,7 +126,7 @@ export function LabelsPage() {
     }
   }
 
-  const error = pageError ?? insights.error;
+  const error = pageError ?? (insights.error && !insights.recommendationsError ? insights.error : null);
   const tagColorById = useMemo(() => {
     const out: Record<string, string> = {};
     for (const tag of tags) {
@@ -184,6 +185,14 @@ export function LabelsPage() {
         loading={insights.loading}
         busyId={insights.busyId}
         documentReviewPendingCount={insights.documentReviewPendingCount}
+        loadError={insights.recommendationsError}
+        retryBusy={insightsRetryBusy}
+        onRetryLoad={() => {
+          setInsightsRetryBusy(true);
+          void insights.load().finally(() => {
+            setInsightsRetryBusy(false);
+          });
+        }}
         onAccept={(item, options) => void insights.accept(item, options)}
         onRename={(item) => {
           if (item.tagId) {

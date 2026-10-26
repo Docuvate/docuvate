@@ -34,6 +34,7 @@ import {
   suggestEmbeddingMergeRecommendations,
 } from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
+import { formatDocumentDatePreview } from '../domain/format-document-date-preview.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 
 function enrichWithSampleDocuments(
@@ -63,9 +64,7 @@ function enrichWithSampleDocuments(
         title: doc.title,
         filename: doc.filename,
         status: doc.status,
-        documentDate: doc.documentDate
-          ? doc.documentDate.toISOString().slice(0, 10)
-          : null,
+        documentDate: formatDocumentDatePreview(doc.documentDate),
         similarity,
       });
     }
@@ -159,7 +158,10 @@ export class GetLabelRecommendationsUseCase {
         text,
       };
     });
-    const hybridModel = await this.labelHybridCache.resolveModel(userId, hybridTrainingRows);
+    const hybridModel = this.labelHybridCache.resolveModelForInference(
+      userId,
+      hybridTrainingRows
+    );
 
     const assignRows = suggestAssignRecommendations({
       rows: hybridTrainingRows,

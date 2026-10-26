@@ -80,6 +80,7 @@ export function useLabelsInsights(
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [recommendationsError, setRecommendationsError] = useState<string | null>(null);
   const [documentReviewPendingCount, setDocumentReviewPendingCount] = useState(0);
 
   const documentCountByTagId = useMemo(() => countDocumentsByTag(documents), [documents]);
@@ -99,13 +100,16 @@ export function useLabelsInsights(
       setLoading(true);
     }
     setError(null);
+    setRecommendationsError(null);
     try {
       const recsPromise = listLabelRecommendations()
         .then((recs) => {
           setRecommendations(recs);
+          setRecommendationsError(null);
         })
         .catch((err: unknown) => {
-          setError(formatUserFacingError(err, 'errors.recommendationsLoadFailed'));
+          setRecommendations([]);
+          setRecommendationsError(formatUserFacingError(err, 'errors.recommendationsLoadFailed'));
         });
 
       const docsPromise = listDocuments({ status: 'ready' })
@@ -238,6 +242,7 @@ export function useLabelsInsights(
     loading,
     busyId,
     error,
+    recommendationsError,
     documentReviewPendingCount,
     load,
     accept,

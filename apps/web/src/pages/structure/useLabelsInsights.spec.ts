@@ -18,6 +18,20 @@ vi.mock('../../lib/api', () => ({
 }));
 
 describe('useLabelsInsights', () => {
+  it('records recommendations errors separately from map errors', async () => {
+    const api = await import('../../lib/api');
+    vi.mocked(api.listLabelRecommendations).mockRejectedValueOnce(new Error('boom'));
+    const onReloadTags = vi.fn(() => Promise.resolve());
+    const { result } = renderHook(() => useLabelsInsights(onReloadTags));
+
+    await act(async () => {
+      await result.current.load();
+    });
+
+    expect(result.current.recommendationsError).toBeTruthy();
+    expect(result.current.queueItems).toEqual([]);
+  });
+
   it('accept refreshes silently without toggling loading', async () => {
     const onReloadTags = vi.fn(() => Promise.resolve());
     const { result } = renderHook(() => useLabelsInsights(onReloadTags));

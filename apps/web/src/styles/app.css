@@ -12300,6 +12300,14 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   font-size: 0.88rem;
 }
 
+.labels-todo-load-error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--dv-space-sm);
+  margin-top: var(--dv-space-xs);
+}
+
 .labels-page ul.labels-todo-list {
   gap: var(--dv-space-sm);
 }
