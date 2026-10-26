@@ -10,13 +10,17 @@ import { RefreshEmbeddingSuggestionsUseCase } from './refresh-embedding-suggesti
 
 const DEFAULT_BATCH = 12;
 
+interface RefreshEmbeddingsRunner {
+  execute(documentId: string, userId: string): Promise<void>;
+}
+
 @Injectable()
 export class BackfillDocumentEmbeddingsUseCase {
   private readonly logger = new Logger(BackfillDocumentEmbeddingsUseCase.name);
 
   constructor(
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
-    private readonly refreshEmbeddings: RefreshEmbeddingSuggestionsUseCase
+    private readonly refreshEmbeddings: RefreshEmbeddingsRunner
   ) {}
 
   /** Embeds extracted documents that never received a vector (e.g. pre-feature uploads). */

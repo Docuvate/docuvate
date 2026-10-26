@@ -3,6 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 
+import type { LabelMapResponseDto } from '@docuvate/contracts';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { BackfillDocumentEmbeddingsUseCase } from '../../src/modules/labels/application/backfill-document-embeddings.use-case.js';
@@ -139,7 +140,7 @@ describe('GET /labels/map scale (Testcontainers Postgres)', () => {
     );
 
     const started = performance.now();
-    const map = await useCase.execute(userId);
+    const map: LabelMapResponseDto = await useCase.execute(userId);
     const elapsedMs = performance.now() - started;
 
     expect(map.documentCount).toBe(DOCUMENT_COUNT);
