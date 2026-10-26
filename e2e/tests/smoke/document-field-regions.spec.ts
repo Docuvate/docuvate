@@ -84,6 +84,19 @@ async function finishRectangle(page: Page): Promise<void> {
   await page.mouse.up();
 }
 
+async function dismissOverlaySheets(page: Page): Promise<void> {
+  const open = page.locator(
+    '[data-testid="field-correction-sheet"], [data-testid="label-overflow-sheet"], .label-chip-row-overflow-popover'
+  );
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    if ((await open.count()) === 0) {
+      return;
+    }
+    await page.keyboard.press('Escape');
+    await expect(open).toHaveCount(0, { timeout: 5_000 }).catch(() => undefined);
+  }
+}
+
 test.describe('document field regions', () => {
   test.describe.configure({ mode: 'serial', timeout: 420_000 });
 
@@ -148,12 +161,13 @@ test.describe('document field regions', () => {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
       for (const scheme of COLOR_SCHEMES) {
         await page.emulateMedia({ colorScheme: scheme });
+        await dismissOverlaySheets(page);
         await setLabelsTabOpen(page, false);
         await page.locator('.layout-side-tabs').getByRole('tab', { name: /Übersicht|Overview/i }).click();
         if (viewport.width < 1024) {
           const sheet = page.locator('[data-testid="field-correction-sheet"]');
           if ((await sheet.count()) === 0) {
-            await page.locator('.pdf-layout-overlay-field, .field-value-row').first().click();
+            await page.locator('.field-value-row-select, .field-value-row, [data-overlay-id^="region-field-"]').first().click();
           }
           await assertCorrectionsBottomSheet(page);
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
@@ -165,7 +179,7 @@ test.describe('document field regions', () => {
               `field-regions-bottom-sheet-${viewport.name}-${scheme}.png`
             );
           }
-          await page.keyboard.press('Escape');
+          await dismissOverlaySheets(page);
           await expect(sheet).toHaveCount(0);
         } else {
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
