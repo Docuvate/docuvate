@@ -227,6 +227,27 @@ describe('LabelHybridModelCacheService', () => {
     expect(fresh?.confidenceThreshold).toBe(0.88);
   });
 
+  it('serves a capped fast model when training exceeds the wall-clock budget on cold start', async () => {
+    let calls = 0;
+    const train = vi.fn((): Promise<LabelHybridModel | null> => {
+      calls += 1;
+      if (calls === 1) {
+        return Promise.reject(new LabelHybridTrainBudgetExceededError(50));
+      }
+      return Promise.resolve(stubModel);
+    });
+    const cache = new LabelHybridModelCacheService();
+    cache.replaceTrainer({ train });
+
+    const userId = 'user-budget-fallback';
+    const rows = seedLabeledCorpus(5, 5, 'budget-fallback');
+    void cache.resolveModel(userId, rows);
+    await flushHybridTrainTimers(100, 0);
+    const model = await cache.resolveModel(userId, rows);
+    expect(model).not.toBeNull();
+    expect(cache.shouldReturnWarmingResponse(userId, rows)).toBe(false);
+  });
+
   it('keeps the previous model when training exceeds the wall-clock budget', async () => {
     let calls = 0;
     const train = vi.fn((): Promise<LabelHybridModel | null> => {
@@ -257,6 +278,28 @@ describe('LabelHybridModelCacheService', () => {
 
     const afterBudget = await cache.resolveModel(userId, rowsV2);
     expect(afterBudget).toEqual(stubModel);
+  });
+
+  it('does not reset debounce when the same revision is scheduled on a poll interval', async () => {
+    process.env['LABEL_HYBRID_TRAIN_DEBOUNCE_MS'] = '45_000';
+    const train = vi.fn((): Promise<LabelHybridModel | null> => Promise.resolve(stubModel));
+    const cache = new LabelHybridModelCacheService();
+    cache.replaceTrainer({ train });
+
+    const userId = 'user-poll-debounce';
+    const rows = seedLabeledCorpus(5, 5, 'poll');
+    cache.scheduleHybridWarm(userId, rows);
+
+    for (let poll = 0; poll < 10; poll += 1) {
+      cache.scheduleHybridWarm(userId, rows);
+      await vi.advanceTimersByTimeAsync(4_000);
+    }
+    expect(train).not.toHaveBeenCalled();
+
+    await vi.advanceTimersByTimeAsync(5_000);
+    await flushHybridTrainTimers(0, 0);
+    expect(train).toHaveBeenCalledTimes(1);
+    delete process.env['LABEL_HYBRID_TRAIN_DEBOUNCE_MS'];
   });
 
   it('shouldReturnWarmingResponse is true on cold start and false after the model is cached', async () => {

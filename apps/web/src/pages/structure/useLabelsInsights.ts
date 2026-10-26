@@ -7,7 +7,7 @@ import {
   type LabelMapEmptyReason,
   type LabelRecommendationDto,
 } from '@docuvate/contracts';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { prepareLabelQueue } from '../../components/labels/labelsQueue';
 import {
@@ -84,6 +84,21 @@ export function useLabelsInsights(
     [recommendations, documents]
   );
 
+  const warmPollDelayMsRef = useRef(4_000);
+  const warmPollTimeoutRef = useRef<number | null>(null);
+
+  const clearWarmPoll = useCallback(() => {
+    if (warmPollTimeoutRef.current !== null) {
+      window.clearTimeout(warmPollTimeoutRef.current);
+      warmPollTimeoutRef.current = null;
+    }
+    warmPollDelayMsRef.current = 4_000;
+  }, []);
+
+  useEffect(() => () => {
+    clearWarmPoll();
+  }, [clearWarmPoll]);
+
   const load = useCallback(async (options?: LoadOptions) => {
     if (!options?.silent) {
       setLoading(true);
@@ -94,12 +109,21 @@ export function useLabelsInsights(
       const recsPromise = listLabelRecommendations()
         .then((recs) => {
           setRecommendations(recs.items);
-          setRecommendationsWarming(recs.state === 'warming');
+          const warming = recs.state === 'warming';
+          setRecommendationsWarming(warming);
           setRecommendationsError(null);
-          if (recs.state === 'warming') {
-            window.setTimeout(() => {
+          if (warming) {
+            if (warmPollTimeoutRef.current !== null) {
+              window.clearTimeout(warmPollTimeoutRef.current);
+            }
+            const delayMs = warmPollDelayMsRef.current;
+            warmPollTimeoutRef.current = window.setTimeout(() => {
+              warmPollTimeoutRef.current = null;
               void load({ silent: true });
-            }, 4_000);
+            }, delayMs);
+            warmPollDelayMsRef.current = Math.min(30_000, delayMs * 2);
+          } else {
+            clearWarmPoll();
           }
         })
         .catch((err: unknown) => {
@@ -147,7 +171,7 @@ export function useLabelsInsights(
         setLoading(false);
       }
     }
-  }, []);
+  }, [clearWarmPoll]);
 
   const accept = useCallback(
     async (item: LabelRecommendationDto, options?: LabelRecommendationAcceptOptions) => {

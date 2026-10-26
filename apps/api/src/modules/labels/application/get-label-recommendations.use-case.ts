@@ -201,6 +201,9 @@ export class GetLabelRecommendationsUseCase {
 
     const hybridTrainingRows = buildHybridTrainingRowsFromConfirmed(confirmedEmbeddingRows, docs);
     this.labelHybridCache.scheduleHybridWarm(userId, hybridTrainingRows);
+    if (this.labelHybridCache.shouldReturnWarmingResponse(userId, hybridTrainingRows)) {
+      return warmingResponse();
+    }
     const hybridModel = this.labelHybridCache.resolveModelForInference(userId, hybridTrainingRows);
 
     const assignRows = suggestAssignRecommendations({

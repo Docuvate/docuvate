@@ -6,6 +6,11 @@ import {
   type PreparedTrainingExamplePayload,
 } from './label-hybrid-calibration.js';
 import {
+  LABEL_HYBRID_FAST_DEFAULT_THRESHOLD,
+  labelHybridTrainEpochsForExampleCount,
+  type LabelHybridTrainRuntimeOptions,
+} from './label-hybrid-training-config.js';
+import {
   buildHybridFeatureModel,
   hybridFeatureVector,
   l2Normalize,
@@ -13,7 +18,6 @@ import {
 
 const MIN_CLASS_EXAMPLES = 2;
 const MIN_TRAINED_CLASSES = 2;
-const TRAIN_EPOCHS = 48;
 const TRAIN_LR = 0.08;
 const L2 = 1e-4;
 const IN_DISTRIBUTION_COSINE_QUANTILE = 0.1;
@@ -87,7 +91,9 @@ function softmaxInto(logits: Float64Array, out: Float64Array): void {
 function trainMultinomialLogistic(
   classCount: number,
   rows: readonly { features: Float64Array; classIndex: number }[],
-  dim: number
+  dim: number,
+  epochCount: number,
+  shouldAbort?: () => boolean
 ): number[][] {
   const weights: Float64Array[] = Array.from(
     { length: classCount },
@@ -95,7 +101,11 @@ function trainMultinomialLogistic(
   );
   const logits = new Float64Array(classCount);
   const probs = new Float64Array(classCount);
-  for (let epoch = 0; epoch < TRAIN_EPOCHS; epoch++) {
+  const epochs = Math.max(1, epochCount);
+  for (let epoch = 0; epoch < epochs; epoch++) {
+    if (shouldAbort?.()) {
+      break;
+    }
     for (const row of rows) {
       const features = row.features;
       for (let c = 0; c < classCount; c++) {
@@ -254,7 +264,9 @@ export function buildLabelHybridCalibrationPayload(
 }
 
 export function trainLabelHybridModel(
-  examples: readonly LabelHybridTrainingExample[]
+  examples: readonly LabelHybridTrainingExample[],
+  vocabRows?: readonly { text: string }[],
+  options?: LabelHybridTrainRuntimeOptions
 ): LabelHybridModel | null {
   if (!canTrainLabelHybridModel(examples)) {
     return null;
@@ -267,7 +279,7 @@ export function trainLabelHybridModel(
   if (tagIds.length < MIN_TRAINED_CLASSES) {
     return null;
   }
-  const corpus = examples.map((row) => ({ text: row.text }));
+  const corpus = (vocabRows ?? examples).map((row) => ({ text: row.text }));
   const featureModel = buildHybridFeatureModel(corpus);
   const vocabulary = featureModel.vocabulary;
   const idf = featureModel.idf;
@@ -289,10 +301,21 @@ export function trainLabelHybridModel(
     rows.push({ features: row.features, classIndex });
   }
   const dim = rows[0]?.features.length ?? 0;
-  const weightRows = trainMultinomialLogistic(tagIds.length, rows, dim);
+  const epochCount = labelHybridTrainEpochsForExampleCount(rows.length);
+  const weightRows = trainMultinomialLogistic(
+    tagIds.length,
+    rows,
+    dim,
+    epochCount,
+    options?.shouldAbort
+  );
   const embedDim = examples.find((row) => row.embedding.length > 0)?.embedding.length ?? 0;
   const classGates = buildClassGates(examples, tagIds);
-  const confidenceThreshold = learnConfidenceThresholdFromPrepared(tagIds, prepared);
+  const aborted = options?.shouldAbort?.() ?? false;
+  const confidenceThreshold =
+    options?.fastCalibration || aborted
+      ? LABEL_HYBRID_FAST_DEFAULT_THRESHOLD
+      : learnConfidenceThresholdFromPrepared(tagIds, prepared);
   return {
     tagIds,
     vocabulary,
