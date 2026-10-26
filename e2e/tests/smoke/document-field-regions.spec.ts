@@ -79,6 +79,15 @@ test.describe('document field regions', () => {
     await assignLongLabels(request, apiBase, webOrigin, layoutDocId, labels);
   });
 
+  test.afterAll(async ({ request }) => {
+    if (!layoutDocId) {
+      return;
+    }
+    await request.delete(`${apiBase}/v1/documents/${layoutDocId}`, {
+      headers: { origin: webOrigin },
+    });
+  });
+
   test('overflow, chips, bottom sheet, rectangle, and source chip', async ({ page }, testInfo) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await applyGermanLocale(page);

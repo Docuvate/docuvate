@@ -176,6 +176,27 @@ jobs:
           path: contrast-screenshots/
           retention-days: 14
           if-no-files-found: error
+      - name: Document field regions (Playwright)
+        run: |
+          set -euo pipefail
+          node e2e/scripts/provision-smoke-storage.mjs
+          export FIELD_REGIONS_ARTIFACT_DIR="${GITHUB_WORKSPACE}/field-regions-artifacts"
+          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
+            pnpm --filter @docuvate/e2e exec playwright test tests/smoke/document-field-regions.spec.ts \
+            --config=playwright.workstream-e.config.ts
+      - name: Verify field-region screenshots
+        run: |
+          set -euo pipefail
+          export FIELD_REGIONS_ARTIFACT_DIR="${GITHUB_WORKSPACE}/field-regions-artifacts"
+          node e2e/scripts/verify-field-region-screenshots.mjs
+      - name: Upload field-region screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: field-regions-screenshots
+          path: field-regions-artifacts/
+          retention-days: 14
+          if-no-files-found: error
       - name: Workstream E layout/mobile/a11y (Playwright)
         run: |
           set -euo pipefail
@@ -247,27 +268,6 @@ jobs:
           path: workstream-b-screenshots/
           retention-days: 14
           if-no-files-found: warn
-      - name: Document field regions (Playwright)
-        run: |
-          set -euo pipefail
-          node e2e/scripts/provision-smoke-storage.mjs
-          export FIELD_REGIONS_ARTIFACT_DIR="${GITHUB_WORKSPACE}/field-regions-artifacts"
-          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
-            pnpm --filter @docuvate/e2e exec playwright test tests/smoke/document-field-regions.spec.ts \
-            --config=playwright.workstream-e.config.ts
-      - name: Verify field-region screenshots
-        run: |
-          set -euo pipefail
-          export FIELD_REGIONS_ARTIFACT_DIR="${GITHUB_WORKSPACE}/field-regions-artifacts"
-          node e2e/scripts/verify-field-region-screenshots.mjs
-      - name: Upload field-region screenshots
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: field-regions-screenshots
-          path: field-regions-artifacts/
-          retention-days: 14
-          if-no-files-found: error
 
   db-migrate-fresh:
     runs-on: ubuntu-latest
