@@ -190,6 +190,27 @@ async function assertRowLabelChipsNeverHardClip(
   expect(issues).toEqual([]);
 }
 
+async function revealEllipsisFixtureRow(
+  page: import('@playwright/test').Page
+): Promise<import('@playwright/test').Locator> {
+  const searchInput = page
+    .locator('.library-list-search input')
+    .or(page.getByLabel(/Search documents|Dokumente suchen/i))
+    .first();
+  await expect(searchInput).toBeVisible({ timeout: 60_000 });
+  await searchInput.fill(ellipsisFixtureUploadName);
+  await searchInput.press('Enter');
+  await page.waitForLoadState('networkidle');
+
+  const fixtureRow = page
+    .locator('.library-doc-stack-item, .library-table tbody tr')
+    .filter({ hasText: ellipsisFixtureUploadName })
+    .first();
+  await expect(fixtureRow).toBeVisible({ timeout: 120_000 });
+  await fixtureRow.scrollIntoViewIfNeeded();
+  return fixtureRow;
+}
+
 async function seedLabels(request: import('@playwright/test').APIRequestContext, count: number) {
   for (let index = 0; index < count; index += 1) {
     const name = `ws-b-seed-${String(index).padStart(4, '0')}`;
@@ -358,12 +379,7 @@ test.describe('Workstream B label picker', () => {
         const scrollHost = page.getByTestId('library-doc-virtual-scroll');
         await expect(scrollHost).toBeVisible({ timeout: 60_000 });
 
-        const fixtureRow = page
-          .locator('.library-doc-stack-item, .library-table tbody tr')
-          .filter({ hasText: ellipsisFixtureUploadName })
-          .first();
-        await fixtureRow.scrollIntoViewIfNeeded({ timeout: 120_000 });
-        await expect(fixtureRow).toBeVisible();
+        await revealEllipsisFixtureRow(page);
 
         await assertRowLabelChipsNeverHardClip(page);
         await assertDocumentRowChipsMinReadable(page);
@@ -377,6 +393,26 @@ test.describe('Workstream B label picker', () => {
       });
     }
   }
+
+  test('label polish filesystem row chips at 390', async ({ page }) => {
+    fs.mkdirSync(polishArtifactRoot, { recursive: true });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${webOrigin}/filesystem/unassigned`);
+    await page.waitForLoadState('networkidle');
+    await setTheme(page, 'light');
+
+    const scrollHost = page.getByTestId('library-doc-virtual-scroll');
+    await expect(scrollHost).toBeVisible({ timeout: 60_000 });
+
+    await revealEllipsisFixtureRow(page);
+
+    await assertRowLabelChipsNeverHardClip(page);
+    await assertDocumentRowChipsMinReadable(page);
+
+    const shot = path.join(polishArtifactRoot, 'polish-filesystem-row-chips-390.png');
+    await page.screenshot({ path: shot });
+    expect(md5File(shot).length).toBe(32);
+  });
 
   test('upload queue +N popover stays in viewport (1440)', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -434,31 +470,6 @@ test.describe('Workstream B label picker', () => {
       expect(md5File(shot).length).toBe(32);
     });
   }
-
-  test('label polish filesystem row chips at 390', async ({ page }) => {
-    fs.mkdirSync(polishArtifactRoot, { recursive: true });
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`${webOrigin}/filesystem/unassigned`);
-    await page.waitForLoadState('networkidle');
-    await setTheme(page, 'light');
-
-    const scrollHost = page.getByTestId('library-doc-virtual-scroll');
-    await expect(scrollHost).toBeVisible({ timeout: 60_000 });
-
-    const fixtureRow = page
-      .locator('.library-doc-stack-item, .library-table tbody tr')
-      .filter({ hasText: ellipsisFixtureUploadName })
-      .first();
-    await fixtureRow.scrollIntoViewIfNeeded({ timeout: 120_000 });
-    await expect(fixtureRow).toBeVisible();
-
-    await assertRowLabelChipsNeverHardClip(page);
-    await assertDocumentRowChipsMinReadable(page);
-
-    const shot = path.join(polishArtifactRoot, 'polish-filesystem-row-chips-390.png');
-    await page.screenshot({ path: shot });
-    expect(md5File(shot).length).toBe(32);
-  });
 
   test('chip contrast and +N popover stay in viewport (1440)', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
