@@ -10,6 +10,19 @@ import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth.js';
 
 const artifactRoot =
   process.env['WORKSTREAM_A_ARTIFACT_DIR'] ?? path.join(process.cwd(), 'test-results', 'library-list-perf');
+const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
+const documentListApiPath = `${apiBase.replace(/\/$/, '')}/v1/documents`;
+
+function isDocumentListApiResponse(url: string, method: string): boolean {
+  if (method !== 'GET') {
+    return false;
+  }
+  if (!url.startsWith(documentListApiPath)) {
+    return false;
+  }
+  const rest = url.slice(documentListApiPath.length);
+  return rest === '' || rest.startsWith('?');
+}
 
 interface ListRequestMetric {
   url: string;
@@ -52,10 +65,7 @@ test.describe('library list performance', () => {
     const listRequests: ListRequestMetric[] = [];
     page.on('response', async (res) => {
       const url = res.url();
-      if (res.request().method() !== 'GET' || !/\/documents(\?|$)/.test(url)) {
-        return;
-      }
-      if (url.includes('/documents/')) {
+      if (!isDocumentListApiResponse(url, res.request().method())) {
         return;
       }
       const body = await res.body().catch(() => new Uint8Array());
@@ -92,6 +102,7 @@ test.describe('library list performance', () => {
       firstRowMs,
       domNodeCount: nodeCount,
       listRequestCount: listRequests.length,
+      listPayloadBytes: listRequests.reduce((sum, entry) => sum + entry.payloadBytes, 0),
       listRequests,
     };
     fs.writeFileSync(path.join(artifactRoot, 'perf.json'), `${JSON.stringify(perf, null, 2)}\n`);
