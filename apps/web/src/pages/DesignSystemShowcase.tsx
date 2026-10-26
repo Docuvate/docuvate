@@ -44,7 +44,11 @@ export function DesignSystemShowcase() {
       </div>
 
       <h3>{t('designSystem.showcase.formField')}</h3>
-      <FormField label={t('designSystem.showcase.serverUrlLabel')} help={t('designSystem.showcase.serverUrlHelp')}>
+      <FormField
+        label={t('designSystem.showcase.serverUrlLabel')}
+        help={t('designSystem.showcase.serverUrlHelp')}
+        htmlFor="ds-server-url"
+      >
         <Input id="ds-server-url" defaultValue={t('designSystem.showcase.serverUrlValue')} />
       </FormField>
 
@@ -71,8 +75,8 @@ export function DesignSystemShowcase() {
       </TabBar>
       <Pagination from={1} to={8} total={128} />
 
-      <h3>{t('designSystem.showcase.dataDisplay')}</h3>
-      <div className="doc-table">
+      <h3 className="styles-showcase-subsection-title">{t('designSystem.showcase.dataDisplay')}</h3>
+      <div className="doc-table styles-showcase-doc-table">
         <DocumentTableHeader />
         <DocumentTableRow
           selected

@@ -320,16 +320,6 @@ export function DocumentLayoutWorkspace({
               options={leftModeOptions}
               onChange={setLeftDocumentMode}
             />
-            {leftMode === 'original' && !showAdvancedStage ? (
-              <label className="layout-overlay-toggle">
-                <input
-                  type="checkbox"
-                  checked={overlayEnabled}
-                  onChange={(e) => { setOverlayEnabled(e.target.checked); }}
-                />
-                <span>{t('documents.layoutOverlayToggle')}</span>
-              </label>
-            ) : null}
             {showAdvancedStage || leftMode === 'text' ? (
               <SegmentedControl
                 ariaLabel={t('documents.layoutZoomAria')}
@@ -441,6 +431,18 @@ export function DocumentLayoutWorkspace({
                     paginated
                     fitWidth
                     onPageClick={onPdfPageClick}
+                    toolbarAccessory={
+                      overlays.length > 0 ? (
+                        <label className="layout-overlay-toggle pdf-viewer-overlay-toggle">
+                          <input
+                            type="checkbox"
+                            checked={overlayEnabled}
+                            onChange={(e) => { setOverlayEnabled(e.target.checked); }}
+                          />
+                          <span>{t('documents.layoutOverlayToggle')}</span>
+                        </label>
+                      ) : null
+                    }
                   />
                 )}
                 {hoverOverlay && overlayEnabled ? (

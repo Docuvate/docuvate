@@ -65,7 +65,8 @@
     "themeSegmentLight": "Light",
     "themeSegmentDark": "Dark",
     "themeSegmentSystem": "System",
-    "uiPreferenceSaveFailed": "Your setting could not be saved. Please try again."
+    "uiPreferenceSaveFailed": "Your setting could not be saved. Please try again.",
+    "skipToMain": "Skip to main content"
   },
   "auth": {
     "tagline": "Receipts and documents with structured extraction.",
