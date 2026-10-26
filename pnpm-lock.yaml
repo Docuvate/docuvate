@@ -347,6 +347,9 @@ importers:
 
   e2e:
     devDependencies:
+      '@axe-core/playwright':
+        specifier: ^4.10.1
+        version: 4.13.0(playwright-core@1.64.0)
       '@playwright/test':
         specifier: ^1.64.0
         version: 1.64.0

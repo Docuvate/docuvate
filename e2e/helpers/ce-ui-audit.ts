@@ -40,7 +40,10 @@ export async function setLocale(page: Page, locale: 'de' | 'en'): Promise<void> 
 
 export async function setTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
   await page.evaluate((next) => {
-    document.documentElement.dataset.docuvateTheme = next;
+    window.localStorage.setItem('docuvate-theme-preference', next);
+    window.localStorage.setItem('docuvate-theme', next);
+    document.documentElement.setAttribute('data-docuvate-theme', next);
+    window.dispatchEvent(new CustomEvent('docuvate-theme-preference-change'));
   }, theme);
 }
 

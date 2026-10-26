@@ -5420,19 +5420,19 @@ mark.global-search-mark {
 }
 
 .dropzone {
-  border: 2px dashed var(--dv-color-border);
+  border: 2px dashed var(--dv-color-border-strong);
   border-radius: var(--dv-radius-md);
   padding: var(--dv-space-lg);
   text-align: center;
-  background: var(--dv-color-bg-raised);
-  transition:
-    border-color 0.15s,
-    background 0.15s;
+  background: var(--dv-color-bg-overlay);
+  color: var(--dv-color-text);
+  transition: border-color 0.15s;
 }
 
 .dropzone-active {
   border-color: var(--dv-color-accent);
-  background: var(--dv-color-inbox-soft);
+  background: var(--dv-color-accent-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--dv-color-accent) 35%, transparent);
 }
 
 .page-drop-overlay {
@@ -5442,7 +5442,7 @@ mark.global-search-mark {
   display: grid;
   place-items: center;
   padding: var(--dv-space-lg);
-  background: rgb(15 23 42 / 0.45);
+  background: var(--dv-color-overlay-backdrop);
   pointer-events: auto;
 }
 
@@ -5471,11 +5471,13 @@ mark.global-search-mark {
 .dropzone-title {
   margin: 0 0 var(--dv-space-xs);
   font-weight: 600;
+  color: var(--dv-color-text);
 }
 
 .dropzone-hint {
   margin: 0 0 var(--dv-space-sm);
   font-size: 0.88rem;
+  color: var(--dv-color-text-muted);
 }
 
 .upload-queue-panel {
@@ -7058,8 +7060,8 @@ mark.global-search-mark {
 
 .settings-section-tab--active,
 .settings-section-tab[aria-current='page'] {
-  color: var(--dv-color-accent);
-  border-bottom-color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
+  border-bottom-color: var(--dv-color-accent-text);
 }
 
 .settings-section-card-footer--stack {
@@ -12221,6 +12223,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .labels-coverage-filter-link {
   font-weight: 600;
   margin-left: 0;
+  color: var(--dv-color-accent-text);
 }
 
 .labels-coverage-summary-text + .labels-coverage-filter-link::before,
@@ -12240,7 +12243,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   display: inline;
   cursor: pointer;
   font-size: inherit;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   list-style: none;
 }
 
@@ -13561,12 +13564,22 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   flex-shrink: 0;
 }
 
+.dashboard-widget-link {
+  color: var(--dv-color-accent-text);
+  font-weight: var(--dv-font-weight-medium);
+  text-decoration: none;
+}
+
+.dashboard-widget-link:hover {
+  text-decoration: underline;
+}
+
 .dashboard-doc-row-title {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: var(--dv-color-accent);
+  color: var(--dv-color-accent-text);
   font-weight: var(--dv-font-weight-medium);
 }
 

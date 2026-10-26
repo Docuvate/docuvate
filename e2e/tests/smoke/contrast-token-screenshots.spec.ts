@@ -23,40 +23,90 @@ const AUTHENTICATED_CAPTURES: { path: string; slug: string }[] = [
   { path: '/structure/labels', slug: 'labels' },
 ];
 
+type ManifestEntry = {
+  file: string;
+  phase: string;
+  theme: string;
+  width: string;
+  slug: string;
+};
+
+function artifactBase(): string {
+  return process.env['CONTRAST_SCREENSHOT_DIR'] ?? path.join(process.cwd(), 'contrast-screenshots');
+}
+
 function artifactRoot(): string {
   const phase = process.env['CONTRAST_SCREENSHOT_PHASE'] ?? 'after';
-  const base = process.env['CONTRAST_SCREENSHOT_DIR'] ?? path.join(process.cwd(), 'contrast-screenshots');
-  return path.join(base, phase);
+  return path.join(artifactBase(), phase);
 }
 
-async function capturePage(
-  page: import('@playwright/test').Page,
-  slug: string,
-  theme: 'light' | 'dark',
-  viewportLabel: string
-): Promise<string> {
-  await setTheme(page, theme);
-  const dir = path.join(artifactRoot(), theme, viewportLabel);
-  await fs.mkdir(dir, { recursive: true });
-  const filePath = path.join(dir, `${slug}.png`);
-  await page.screenshot({ path: filePath, fullPage: false });
-  return filePath;
-}
-
-async function captureRoute(
-  page: import('@playwright/test').Page,
-  routePath: string,
-  slug: string,
-  theme: 'light' | 'dark',
-  viewportLabel: string
-): Promise<string> {
-  await page.goto(`${webOrigin}${routePath}`);
-  await page.waitForLoadState('networkidle');
-  return capturePage(page, slug, theme, viewportLabel);
+async function writeManifest(entries: ManifestEntry[]): Promise<void> {
+  const manifestPath = path.join(artifactBase(), 'manifest.json');
+  let merged = entries;
+  try {
+    const raw = await fs.readFile(manifestPath, 'utf8');
+    const parsed: { captures?: ManifestEntry[] } = JSON.parse(raw);
+    const existing = parsed.captures ?? [];
+    const byKey = new Map<string, ManifestEntry>();
+    for (const row of [...existing, ...entries]) {
+      byKey.set(`${row.phase}/${row.theme}/${row.width}/${row.slug}`, row);
+    }
+    merged = [...byKey.values()];
+  } catch {
+    merged = entries;
+  }
+  const sorted = [...merged].sort((a, b) =>
+    `${a.phase}/${a.theme}/${a.width}/${a.slug}`.localeCompare(
+      `${b.phase}/${b.theme}/${b.width}/${b.slug}`
+    )
+  );
+  await fs.writeFile(manifestPath, `${JSON.stringify({ captures: sorted }, null, 2)}\n`, 'utf8');
 }
 
 test.describe('Contrast workstream screenshots', () => {
   test.describe.configure({ mode: 'serial' });
+
+  const manifest: ManifestEntry[] = [];
+  const phase = process.env['CONTRAST_SCREENSHOT_PHASE'] ?? 'after';
+
+  test.afterAll(async () => {
+    if (manifest.length > 0) {
+      await writeManifest(manifest);
+    }
+  });
+
+  async function capturePage(
+    page: import('@playwright/test').Page,
+    slug: string,
+    theme: 'light' | 'dark',
+    viewportLabel: string
+  ): Promise<string> {
+    await setTheme(page, theme);
+    const dir = path.join(artifactRoot(), theme, viewportLabel);
+    await fs.mkdir(dir, { recursive: true });
+    const filePath = path.join(dir, `${slug}.png`);
+    await page.screenshot({ path: filePath, fullPage: false });
+    manifest.push({
+      file: filePath,
+      phase,
+      theme,
+      width: viewportLabel,
+      slug,
+    });
+    return filePath;
+  }
+
+  async function captureRoute(
+    page: import('@playwright/test').Page,
+    routePath: string,
+    slug: string,
+    theme: 'light' | 'dark',
+    viewportLabel: string
+  ): Promise<string> {
+    await page.goto(`${webOrigin}${routePath}`);
+    await page.waitForLoadState('networkidle');
+    return capturePage(page, slug, theme, viewportLabel);
+  }
 
   test('login (public)', async ({ page }) => {
     const health = await page.request.get(`${apiBase}/health`);
