@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Controller, Get, Inject, Logger } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
 import * as Minio from 'minio';
 import pg from 'pg';
@@ -14,11 +14,18 @@ import {
   HealthResponseDto,
   ReadinessResponseDto,
 } from '../../shared/presentation/dtos/health.dto.js';
+import { DatabaseMigrationReadinessService } from './database-migration-readiness.service.js';
 
 @ApiExcludeController()
 @Controller('health')
 export class HealthController {
-  constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
+  private readonly logger = new Logger(HealthController.name);
+
+  constructor(
+    @Inject(PG_POOL) private readonly pool: pg.Pool,
+    @Inject(DatabaseMigrationReadinessService)
+    private readonly migrationReadiness: DatabaseMigrationReadinessService
+  ) {}
 
   @Public()
   @Get()
@@ -63,6 +70,22 @@ export class HealthController {
       checks.minio = 'ok';
     } catch {
       checks.minio = 'fail';
+    }
+
+    try {
+      const pending = await this.migrationReadiness.listPendingMigrationNames();
+      if (pending.length > 0) {
+        checks.migrations = 'fail';
+        this.logger.error(
+          `Readiness: pending database migrations (${String(pending.length)}): ${pending.join(', ')}`
+        );
+      } else {
+        checks.migrations = 'ok';
+      }
+    } catch (err: unknown) {
+      checks.migrations = 'fail';
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Readiness: could not verify database migrations: ${message}`);
     }
 
     const healthy = Object.values(checks).every((v) => v === 'ok');

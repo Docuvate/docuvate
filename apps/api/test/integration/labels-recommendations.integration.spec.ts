@@ -36,12 +36,14 @@ async function getRecommendations(
  * Audit seed: 620 ready + 140 failed + 140 queued documents, 120 labels (~5 tags/doc),
  * mixed text/document dates, embeddings, no pre-trained hybrid model.
  * `patchInvalidDocumentDates` simulates truthy invalid `Date` values (main F11).
- * Before the F11 fix, `documentDate.toISOString()` yields HTTP 500 / `RangeError: Invalid time value`.
+ * Before the F11 date-preview fix, `documentDate.toISOString()` yields HTTP 500 / `RangeError: Invalid time value`.
+ * Production 500s without that column are usually missing migration `DocumentTagsUserConfirmed20261025210000`
+ * (`document_tags.user_confirmed`); readiness checks surface pending migrations instead.
  */
 describe('GET /v1/labels/recommendations (Nest + Postgres audit seed)', () => {
   const pool = getIntegrationPool();
   let valkey: StartedValkey;
-  let app: NestFastifyApplication;
+  let app: NestFastifyApplication | undefined;
   let userId: string;
   let apiKeySecret: string;
 
@@ -71,7 +73,9 @@ describe('GET /v1/labels/recommendations (Nest + Postgres audit seed)', () => {
   }, 180_000);
 
   afterAll(async () => {
-    await app?.close();
+    if (app) {
+      await app.close();
+    }
     await deleteSyntheticUser(pool, userId);
     await valkey.stop();
     delete process.env.LABEL_HYBRID_TRAIN_DEBOUNCE_MS;
@@ -82,6 +86,9 @@ describe('GET /v1/labels/recommendations (Nest + Postgres audit seed)', () => {
   });
 
   it('returns 200 with items for ~900 documents and 120 labels', async () => {
+    if (!app) {
+      throw new Error('integration app not initialized');
+    }
     const { statusCode, body } = await getRecommendations(app, apiKeySecret);
     expect(statusCode, body).toBe(200);
     const parsed = parseJsonUnknown(body);
@@ -89,6 +96,9 @@ describe('GET /v1/labels/recommendations (Nest + Postgres audit seed)', () => {
   });
 
   it('stays 200 on a second request while hybrid retrain may be in flight', async () => {
+    if (!app) {
+      throw new Error('integration app not initialized');
+    }
     const first = await getRecommendations(app, apiKeySecret);
     const second = await getRecommendations(app, apiKeySecret);
     expect(first.statusCode, first.body).toBe(200);

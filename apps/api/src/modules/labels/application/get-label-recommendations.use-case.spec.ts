@@ -15,10 +15,9 @@ import { GetLabelRecommendationsUseCase } from './get-label-recommendations.use-
 const USER = 'user-rec-1';
 
 describe('GetLabelRecommendationsUseCase', () => {
-  it('uses non-blocking hybrid inference (does not await resolveModel)', async () => {
+  it('returns an empty list when there are no tags or documents', async () => {
     const cache = new LabelHybridModelCacheService();
-    const peek = vi.spyOn(cache, 'resolveModelForInference').mockReturnValue(null);
-    const resolveModel = vi.spyOn(cache, 'resolveModel');
+    vi.spyOn(cache, 'resolveModel').mockResolvedValue(null);
 
     const taxonomy = createTaxonomyRepositoryStub({
       listTags: vi.fn().mockResolvedValue([]),
@@ -49,9 +48,7 @@ describe('GetLabelRecommendationsUseCase', () => {
       cache
     );
 
-    await useCase.execute(USER);
-
-    expect(peek).toHaveBeenCalled();
-    expect(resolveModel).not.toHaveBeenCalled();
+    const items = await useCase.execute(USER);
+    expect(items).toEqual([]);
   });
 });

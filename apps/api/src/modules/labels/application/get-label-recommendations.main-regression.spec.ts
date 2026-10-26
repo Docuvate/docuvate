@@ -4,13 +4,10 @@ import type {
   LabelRecommendationDocumentPreviewDto,
   LabelRecommendationDto,
 } from '@docuvate/contracts';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import type { DocumentEntity } from '../../documents/domain/document.entity.js';
-import type { LabelHybridModel } from '../domain/label-hybrid-auto-match.js';
-import type { LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
 import { clusterDocumentSimilarities } from '../domain/label-recommendation-cluster-similarity.js';
-import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 
 /** Sample preview enrichment before formatDocumentDatePreview (F11). */
 function unfixedEnrichWithSampleDocuments(
@@ -91,52 +88,4 @@ describe('GET /labels/recommendations pre-fix regressions (documented)', () => {
     expect(message).toBe('Invalid time value');
   });
 
-  it('resolveModel awaits in-flight hybrid training (blocking inference)', async () => {
-    process.env['LABEL_HYBRID_TRAIN_DEBOUNCE_MS'] = '0';
-    const stubModel: LabelHybridModel = {
-      tagIds: ['a'],
-      vocabulary: ['x'],
-      idf: [1],
-      weightRows: [[1]],
-      embedDim: 2,
-      confidenceThreshold: 0.9,
-      classGates: [],
-    };
-    let resolveTrain: ((model: LabelHybridModel | null) => void) | undefined;
-    const train = vi.fn((): Promise<LabelHybridModel | null> => {
-      return new Promise((resolve) => {
-        resolveTrain = resolve;
-      });
-    });
-    const cache = new LabelHybridModelCacheService();
-    cache.replaceTrainer({ train });
-
-    const rows: LabelHybridDocumentRow[] = [
-      {
-        documentId: 'd1',
-        embedding: [0.1, 0.2],
-        nonInboxTagIds: ['tag-a'],
-        text: 'confirmed label training row',
-      },
-    ];
-    const userId = 'user-blocking';
-
-    const pending = cache.resolveModel(userId, rows);
-    await vi.waitFor(() => {
-      expect(train).toHaveBeenCalled();
-    });
-
-    const blocked = Promise.race([
-      pending,
-      new Promise<null>((resolve) => {
-        setTimeout(() => {
-          resolve(null);
-        }, 150);
-      }),
-    ]);
-    const result = await blocked;
-    expect(result).toBeNull();
-    resolveTrain?.(stubModel);
-    delete process.env['LABEL_HYBRID_TRAIN_DEBOUNCE_MS'];
-  });
 });

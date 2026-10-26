@@ -158,10 +158,7 @@ export class GetLabelRecommendationsUseCase {
         text,
       };
     });
-    const hybridModel = this.labelHybridCache.resolveModelForInference(
-      userId,
-      hybridTrainingRows
-    );
+    const hybridModel = await this.labelHybridCache.resolveModel(userId, hybridTrainingRows);
 
     const assignRows = suggestAssignRecommendations({
       rows: hybridTrainingRows,

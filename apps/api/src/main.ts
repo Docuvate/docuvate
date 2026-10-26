@@ -10,6 +10,7 @@ import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 
+import { DatabaseMigrationReadinessService } from './modules/health/database-migration-readiness.service.js';
 import { resolveRequestId } from './shared/infrastructure/http/request-id.js';
 import { API_VERSION_PREFIX } from './shared/presentation/api-version.js';
 import { ProblemDetailsExceptionFilter } from './shared/presentation/problem-exception.filter.js';
@@ -85,6 +86,11 @@ async function bootstrap(): Promise<void> {
   app.useGlobalFilters(new ProblemDetailsExceptionFilter());
 
   await app.init();
+
+  const migrationReadiness = app.get(DatabaseMigrationReadinessService);
+  const pendingMigrations = await migrationReadiness.listPendingMigrationNames();
+  migrationReadiness.logPendingMigrationsAtStartup(pendingMigrations);
+
   const { buildOpenApiDocument } = await import('./openapi/build-openapi-document.js');
   const { OpenapiDocumentService } = await import('./openapi/openapi-document.service.js');
   app.get(OpenapiDocumentService).setDocument(buildOpenApiDocument(app));
