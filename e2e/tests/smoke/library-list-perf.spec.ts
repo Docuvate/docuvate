@@ -220,6 +220,33 @@ test.describe('library list performance', () => {
         timeout: 1000,
       });
     const firstRowMs = Date.now() - started;
+    const mobileDomNodeCount = await page.evaluate(() => document.querySelectorAll('*').length);
+
+    expect(listRequests.length).toBe(1);
+    expect(listRequests[0]?.url).toContain('limit=50');
+    expect(listRequests[0]?.url).not.toContain('includeTagSuggestions=true');
+    expect(firstRowMs).toBeLessThan(1000);
+    expect(mobileDomNodeCount).toBeLessThan(3000);
+
+    await assertMobileStackLayout(page);
+
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await applyDocuvateThemePreference(page, 'light');
+    await Promise.all([
+      page.goto('/documents'),
+      page.waitForResponse(
+        (res) => isTagSuggestionsBatchResponse(res.url(), res.request().method()),
+        { timeout: 15_000 }
+      ),
+    ]);
+    await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible' });
+    await assertStatusColumnAlignment(page);
+    await assertDesktopTableLayout(page);
+
+    await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'light');
+    await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'dark');
+    await captureViewport(page, 'documents', { width: 390, height: 844 }, 'light');
+    await captureViewport(page, 'documents', { width: 390, height: 844 }, 'dark');
 
     const nodeCount = await page.evaluate(() => document.querySelectorAll('*').length);
     const navigationTiming = await page.evaluate(() => {
@@ -236,7 +263,7 @@ test.describe('library list performance', () => {
 
     const perf = {
       capturedAt: new Date().toISOString(),
-      viewport: { width: 390, height: 844 },
+      viewport: { width: 1440, height: 900 },
       firstRowMs,
       listResponseAtMs,
       tagSuggestionsResponseAtMs,
@@ -257,26 +284,7 @@ test.describe('library list performance', () => {
       },
     };
     fs.writeFileSync(path.join(artifactRoot, 'perf.json'), `${JSON.stringify(perf, null, 2)}\n`);
-
-    expect(listRequests.length).toBe(1);
-    expect(listRequests[0]?.url).toContain('limit=50');
-    expect(listRequests[0]?.url).not.toContain('includeTagSuggestions=true');
-    expect(firstRowMs).toBeLessThan(1000);
-    expect(nodeCount).toBeLessThan(3000);
-
-    await assertMobileStackLayout(page);
-
-    await page.setViewportSize({ width: 1440, height: 900 });
-    await applyDocuvateThemePreference(page, 'light');
-    await page.goto('/documents');
-    await page.getByTestId('library-doc-virtual-scroll').waitFor({ state: 'visible' });
-    await assertStatusColumnAlignment(page);
-    await assertDesktopTableLayout(page);
-
-    await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'light');
-    await captureViewport(page, 'documents', { width: 1440, height: 900 }, 'dark');
-    await captureViewport(page, 'documents', { width: 390, height: 844 }, 'light');
-    await captureViewport(page, 'documents', { width: 390, height: 844 }, 'dark');
+    expect(tagSuggestionRequests.length).toBeGreaterThanOrEqual(1);
 
     await applyDocuvateThemePreference(page, 'light');
     const lightBg = await readDocBodyBackground(page);
