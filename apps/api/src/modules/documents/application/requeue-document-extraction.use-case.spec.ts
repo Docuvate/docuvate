@@ -27,6 +27,8 @@ describe('RequeueDocumentExtractionUseCase', () => {
     const useCase = moduleRef.get(RequeueDocumentExtractionUseCase);
 
     await useCase.execute('doc-1', 'user-1');
-    expect(queueExtraction.execute).toHaveBeenCalledWith('doc-1', 'user-1');
+    expect(queueExtraction.execute).toHaveBeenCalledWith('doc-1', 'user-1', {
+      throwOnEnqueueFailure: true,
+    });
   });
 });

@@ -2,7 +2,10 @@ import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
 import { setTheme } from '../../helpers/ce-ui-audit';
-import { resolveSmokeReadyDocumentPath } from '../../helpers/contrast-screenshot';
+import {
+  resolveSmokeReadyDocumentPath,
+  waitForContrastPageReady,
+} from '../../helpers/contrast-screenshot';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
@@ -32,12 +35,6 @@ async function assertColorContrast(page: import('@playwright/test').Page, label:
     results.violations,
     `${label}: ${results.violations.map((v) => v.id).join(', ')}`
   ).toEqual([]);
-}
-
-async function waitForLabelsPageReady(page: import('@playwright/test').Page): Promise<void> {
-  await page.waitForLoadState('domcontentloaded');
-  await waitForAppShell(page);
-  await page.locator('[data-ux="page-title"]').waitFor({ state: 'visible', timeout: 60_000 });
 }
 
 async function waitForAppShell(page: import('@playwright/test').Page): Promise<void> {
@@ -138,7 +135,7 @@ test.describe('Contrast axe color-contrast', () => {
           for (const route of routes) {
             await page.goto(`${webOrigin}${route.path}`, { waitUntil: 'domcontentloaded' });
             if (route.path === '/structure/labels') {
-              await waitForLabelsPageReady(page);
+              await waitForContrastPageReady(page, 'labels', documentDetailPath, webOrigin);
             } else {
               await waitForAppShell(page);
             }
@@ -151,7 +148,7 @@ test.describe('Contrast axe color-contrast', () => {
 
           recommendationsMode = 'fail';
           await page.goto(`${webOrigin}/structure/labels`, { waitUntil: 'domcontentloaded' });
-          await waitForLabelsPageReady(page);
+          await waitForContrastPageReady(page, 'labels', documentDetailPath, webOrigin);
           await page.locator('.labels-todo-load-error p.error').waitFor({ state: 'visible', timeout: 30_000 });
           await setTheme(page, theme);
           await assertColorContrast(page, `labels-error ${theme} ${viewport.label}`);

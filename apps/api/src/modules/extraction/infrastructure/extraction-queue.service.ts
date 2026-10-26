@@ -8,6 +8,11 @@ import { arenaSampleRate } from '../../../shared/infrastructure/arena/arena-samp
 import { parseString, requireRecord } from '../../../shared/infrastructure/database/row-parse.js';
 import { enqueueBullJobWithRetry } from '../../../shared/infrastructure/queue/bullmq-enqueue-retry.js';
 import {
+  assertBullFixedJobIdQueued,
+  isBullJobQueuedState,
+  prepareBullFixedJobIdForAdd,
+} from '../../../shared/infrastructure/queue/bullmq-fixed-job-id.js';
+import {
   createValkeyConnection,
   waitForValkeyReady,
 } from '../../../shared/infrastructure/valkey/valkey-connection.js';
@@ -91,22 +96,37 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
     );
   }
 
+  async isJobQueuedOrActive(documentId: string): Promise<boolean> {
+    const jobId = extractionJobId(documentId);
+    const job = await this.queue.getJob(jobId);
+    if (!job) {
+      return false;
+    }
+    const state = await job.getState();
+    return isBullJobQueuedState(state);
+  }
+
   async enqueue(documentId: string, _userId: string): Promise<void> {
-    await enqueueBullJobWithRetry(
-      () =>
-        this.queue.add(
-          'extract',
-          { documentId, userId: _userId },
-          {
-            jobId: extractionJobId(documentId),
-            attempts: 5,
-            backoff: { type: 'exponential', delay: 5_000 },
-            removeOnComplete: 1_000,
-            removeOnFail: 500,
-          }
-        ),
-      { maxAttempts: 5, label: QUEUE_NAME }
-    );
+    const jobId = extractionJobId(documentId);
+    const prep = await prepareBullFixedJobIdForAdd(this.queue, jobId);
+    if (prep === 'add') {
+      await enqueueBullJobWithRetry(
+        () =>
+          this.queue.add(
+            'extract',
+            { documentId, userId: _userId },
+            {
+              jobId,
+              attempts: 5,
+              backoff: { type: 'exponential', delay: 5_000 },
+              removeOnComplete: 1_000,
+              removeOnFail: 500,
+            }
+          ),
+        { maxAttempts: 5, label: QUEUE_NAME }
+      );
+    }
+    await assertBullFixedJobIdQueued(this.queue, jobId);
     this.logger.debug(`Enqueued extraction for document ${documentId}`);
   }
 

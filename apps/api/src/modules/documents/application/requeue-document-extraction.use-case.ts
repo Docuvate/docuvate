@@ -21,6 +21,6 @@ export class RequeueDocumentExtractionUseCase {
     if (doc.status === 'queued' || doc.status === 'extracting') {
       throw new ValidationError('Extraktion läuft bereits.');
     }
-    await this.queueExtraction.execute(documentId, userId);
+    await this.queueExtraction.execute(documentId, userId, { throwOnEnqueueFailure: true });
   }
 }

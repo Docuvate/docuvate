@@ -11,7 +11,9 @@ import { EnrichLabelMapMissingHintsUseCase } from '../../src/modules/labels/appl
 import { GetLabelMapUseCase } from '../../src/modules/labels/application/get-label-map.use-case.js';
 import type { MissingLabelHintPort } from '../../src/modules/labels/domain/ce-label-propagation.port.js';
 import { PgLabelEmbeddingRepository } from '../../src/modules/labels/infrastructure/pg-label-embedding.repository.js';
+import type { WorkerExtractCapacityCoordinator } from '../../src/modules/extraction/infrastructure/worker-extract-capacity.coordinator.js';
 import { EnsureDocumentRepresentationUseCase } from '../../src/modules/representation/application/ensure-document-representation.use-case.js';
+import type { PersistDocumentRepresentationUseCase } from '../../src/modules/representation/application/persist-document-representation.use-case.js';
 import { PgDocumentRepresentationRepository } from '../../src/modules/representation/infrastructure/pg-document-representation.repository.js';
 import { PgUserPreferencesRepository } from '../../src/modules/settings/infrastructure/pg-user-preferences.repository.js';
 import { PgTaxonomyRepository } from '../../src/modules/taxonomy/infrastructure/pg-taxonomy.repository.js';
@@ -106,7 +108,22 @@ describe('GET /labels/map scale (Testcontainers Postgres)', () => {
 
   it('builds label map under 500ms at ~900 documents', async () => {
     const representationRepo = new PgDocumentRepresentationRepository(pool);
-    const ensureRepresentation = new EnsureDocumentRepresentationUseCase(representationRepo);
+    const persistRepresentation: Pick<PersistDocumentRepresentationUseCase, 'execute'> = {
+      execute: () => Promise.resolve(),
+    };
+    const extractCapacity: Pick<
+      WorkerExtractCapacityCoordinator,
+      'acquireSlot' | 'releaseSlot' | 'onWorkerPressure503'
+    > = {
+      acquireSlot: () => Promise.resolve(),
+      releaseSlot: () => {},
+      onWorkerPressure503: () => {},
+    };
+    const ensureRepresentation = new EnsureDocumentRepresentationUseCase(
+      representationRepo,
+      persistRepresentation as PersistDocumentRepresentationUseCase,
+      extractCapacity as WorkerExtractCapacityCoordinator
+    );
     const labelEmbeddings = new PgLabelEmbeddingRepository(
       pool,
       representationRepo,
