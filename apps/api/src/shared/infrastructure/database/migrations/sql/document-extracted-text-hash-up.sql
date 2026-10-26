@@ -4,7 +4,7 @@ ALTER TABLE public.documents
 UPDATE public.documents
 SET extracted_text_hash = encode(
   digest(
-    lower(regexp_replace(trim(extracted_text), '\s+', ' ', 'g')),
+    lower(regexp_replace(trim(extracted_text), '[[:space:]]+', ' ', 'g')),
     'sha256'
   ),
   'hex'
