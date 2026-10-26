@@ -49,6 +49,7 @@ import { SendDocumentChatThreadMessageUseCase } from '../application/send-docume
 import { StreamDocumentChatMessageUseCase } from '../application/stream-document-chat-message.use-case.js';
 import { UpdateDocumentUseCase } from '../application/update-document.use-case.js';
 import { UploadDocumentUseCase } from '../application/upload-document.use-case.js';
+import { PgInstallationUserCountReader } from '../infrastructure/pg-installation-user-count.reader.js';
 import { DocumentsController } from './documents.controller.js';
 
 const layoutIr: LayoutIrDocument = {
@@ -109,6 +110,7 @@ describe('DocumentsController layout routes', () => {
             uploadDocument: UploadDocumentUseCase,
             getDocument: GetDocumentUseCase,
             listDocuments: ListDocumentsUseCase,
+            installationUserCount: PgInstallationUserCountReader,
             batchDocumentTagSuggestions: BatchDocumentTagSuggestionsUseCase,
             updateDocument: UpdateDocumentUseCase,
             deleteDocument: DeleteDocumentUseCase,
@@ -151,6 +153,7 @@ describe('DocumentsController layout routes', () => {
               uploadDocument,
               getDocument,
             listDocuments,
+            installationUserCount,
             batchDocumentTagSuggestions,
             updateDocument,
               deleteDocument,
@@ -193,6 +196,7 @@ describe('DocumentsController layout routes', () => {
             UploadDocumentUseCase,
             GetDocumentUseCase,
             ListDocumentsUseCase,
+            PgInstallationUserCountReader,
             BatchDocumentTagSuggestionsUseCase,
             UpdateDocumentUseCase,
             DeleteDocumentUseCase,
@@ -240,6 +244,10 @@ describe('DocumentsController layout routes', () => {
         { provide: UploadDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: GetDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: ListDocumentsUseCase, useValue: useCaseExecuteMock() },
+        {
+          provide: PgInstallationUserCountReader,
+          useValue: { countActiveUsers: vi.fn().mockResolvedValue(1) },
+        },
         { provide: BatchDocumentTagSuggestionsUseCase, useValue: useCaseExecuteMock() },
         { provide: UpdateDocumentUseCase, useValue: useCaseExecuteMock() },
         { provide: DeleteDocumentUseCase, useValue: useCaseExecuteMock() },

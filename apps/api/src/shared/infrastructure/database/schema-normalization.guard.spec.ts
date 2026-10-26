@@ -58,8 +58,12 @@ const FORWARD_SQL_ORDER = [
   'document-tags-user-confirmed-up.sql',
   'document-list-pagination-indexes-up.sql',
   'extraction-field-confirmations-up.sql',
+<<<<<<< HEAD
   'document-extracted-text-hash-up.sql',
   'user-preferences-fuzzy-duplicate-up.sql',
+=======
+  'repair-bin-document-filenames-up.sql',
+>>>>>>> 85ecb81 (fix(api): align layout controller test DI and migration SQL guard)
 ];
 
 function loadForwardMigrationSql(): string {
