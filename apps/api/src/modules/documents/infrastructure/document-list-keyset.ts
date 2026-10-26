@@ -87,8 +87,9 @@ function documentDateKeyset(
         params: [cursorDate, cursor.id],
       };
     }
+    const onlyIdParam = `$${String(startIndex)}`;
     return {
-      conditionSql: `(d.document_date IS NULL AND d.id ${op} ${idParam}::uuid)`,
+      conditionSql: `(d.document_date IS NULL AND d.id ${op} ${onlyIdParam}::uuid)`,
       params: [cursor.id],
     };
   }
@@ -102,8 +103,9 @@ function documentDateKeyset(
       params: [cursorDate, cursor.id],
     };
   }
+  const onlyIdParam = `$${String(startIndex)}`;
   return {
-    conditionSql: `(d.document_date IS NULL AND d.id ${op} ${idParam}::uuid)`,
+    conditionSql: `(d.document_date IS NULL AND d.id ${op} ${onlyIdParam}::uuid)`,
     params: [cursor.id],
   };
 }
