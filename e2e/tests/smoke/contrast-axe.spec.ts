@@ -36,7 +36,8 @@ async function assertColorContrast(page: import('@playwright/test').Page, label:
 
 async function waitForLabelsPageReady(page: import('@playwright/test').Page): Promise<void> {
   await page.waitForLoadState('domcontentloaded');
-  await page.locator('main').waitFor({ state: 'visible', timeout: 60_000 });
+  await waitForAppShell(page);
+  await page.locator('[data-ux="page-title"]').waitFor({ state: 'visible', timeout: 60_000 });
 }
 
 async function waitForAppShell(page: import('@playwright/test').Page): Promise<void> {
