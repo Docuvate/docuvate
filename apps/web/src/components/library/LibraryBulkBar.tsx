@@ -24,6 +24,9 @@ function closeBulkBarMenus() {
 
 interface LibraryBulkBarProps {
   selectedCount: number;
+  totalCount?: number | null;
+  selectionScope?: 'none' | 'loaded' | 'all-matching';
+  onSelectAllMatching?: () => void;
   showIdleHint?: boolean;
   bulkBusy: boolean;
   selectedIds: string[];
@@ -39,6 +42,19 @@ interface LibraryBulkBarProps {
 export function LibraryBulkBar(props: LibraryBulkBarProps) {
   const { t } = useTranslation();
   const active = props.selectedCount > 0;
+  const total = props.totalCount ?? null;
+  const showSelectAllMatching =
+    active &&
+    total !== null &&
+    total > props.selectedCount &&
+    props.selectionScope !== 'all-matching' &&
+    props.onSelectAllMatching !== undefined;
+  const countLabel =
+    props.selectionScope === 'all-matching' && total !== null
+      ? t('library.bulkAllMatchingSelected', { total })
+      : total !== null && props.selectedCount > 0 && props.selectedCount < total
+        ? t('library.bulkSelectedOfTotal', { selected: props.selectedCount, total })
+        : t('library.bulkSelectedCount', { count: props.selectedCount });
 
   const selectedDocuments = useMemo(
     () =>
@@ -78,9 +94,22 @@ export function LibraryBulkBar(props: LibraryBulkBarProps) {
       {active ? (
         <>
           <span className="bulk-bar-count">
-            {t('library.bulkSelectedCount', { count: props.selectedCount })}
+            {countLabel}
             {props.bulkBusy ? ` · ${t('library.bulkApplying')}` : ''}
           </span>
+          {showSelectAllMatching && total !== null ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="bulk-bar-select-all-matching"
+              disabled={props.bulkBusy}
+              onClick={() => {
+                props.onSelectAllMatching?.();
+              }}
+            >
+              {t('library.bulkSelectAllMatching', { total })}
+            </Button>
+          ) : null}
           <div className="bulk-bar-actions">
             <details className="bulk-bar-menu">
               <summary className="bulk-bar-menu-trigger">{t('library.contextLabels')}</summary>
