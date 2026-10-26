@@ -71,7 +71,7 @@ describe('GET /v1/labels/recommendations (Nest + Postgres audit seed)', () => {
   }, 180_000);
 
   afterAll(async () => {
-    await app.close();
+    await app?.close();
     await deleteSyntheticUser(pool, userId);
     await valkey.stop();
     delete process.env.LABEL_HYBRID_TRAIN_DEBOUNCE_MS;

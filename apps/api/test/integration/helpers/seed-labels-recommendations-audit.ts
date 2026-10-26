@@ -23,7 +23,7 @@ export interface LabelsRecommendationsAuditSeed {
 function pseudoEmbedding(seed: number): Buffer {
   const buf = Buffer.alloc(EMBED_BYTES);
   for (let i = 0; i < EMBED_BYTES; i += 1) {
-    buf.writeInt8(i, ((seed + i * 17) % 251) - 125);
+    buf.writeInt8(((seed + i * 17) % 251) - 125, i);
   }
   return buf;
 }

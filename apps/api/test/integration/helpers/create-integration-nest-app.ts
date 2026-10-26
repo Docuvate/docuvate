@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import multipart from '@fastify/multipart';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../src/app.module.js';
 import { DOCUMENT_REPOSITORY } from '../../../src/shared/domain/ports.js';
