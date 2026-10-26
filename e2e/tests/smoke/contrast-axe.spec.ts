@@ -77,9 +77,6 @@ test.describe('Contrast axe color-contrast', () => {
 
       const documentDetailPath = await resolveSmokeReadyDocumentPath(request, apiBase, webOrigin);
 
-      await page.goto(`${webOrigin}/documents`, { waitUntil: 'networkidle' });
-      await page.locator('#app-main-content').waitFor({ state: 'visible', timeout: 60_000 });
-
       let recommendationsMode: 'ok' | 'fail' = 'ok';
       await page.route('**/v1/labels/recommendations**', async (route) => {
         if (recommendationsMode === 'fail') {
