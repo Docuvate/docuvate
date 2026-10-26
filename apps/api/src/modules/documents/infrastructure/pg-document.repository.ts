@@ -164,7 +164,7 @@ export class PgDocumentRepository implements DocumentRepository {
       `SELECT id::text AS id FROM documents WHERE user_id = $1 AND id = ANY($2::uuid[])`,
       [userId, documentIds]
     );
-    return result.rows.map((row) => String(row.id));
+    return result.rows.map((row) => parseString(requireRecord(row).id));
   }
 
   async findByIdForUser(id: string, userId: string): Promise<DocumentEntity | null> {
