@@ -265,7 +265,7 @@ async function assertDesktopTableLayout(page: import('@playwright/test').Page): 
   const titleCell = firstRow.locator('td.library-col-title').first();
   const titleBox = await titleCell.boundingBox();
   expect(titleBox).not.toBeNull();
-  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.33);
+  expect((titleBox?.width ?? 0) / (rowBox?.width ?? 1)).toBeGreaterThanOrEqual(0.32);
 
   await assertLabelChipsContainedInCells(page);
   await assertVirtualRowContentLayout(page);

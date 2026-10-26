@@ -302,7 +302,7 @@ export function LibraryDocumentTable({
       columns.push('6.25rem');
     }
     if (showDateCol) {
-      columns.push('max-content');
+      columns.push('10rem');
     }
     columns.push('3.5rem');
     return { gridTemplateColumns: columns.join(' ') };
