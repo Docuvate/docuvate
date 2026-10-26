@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { LabelHybridDocumentRow } from './label-hybrid-training.js';
-import { trainUserLabelHybridModel } from './label-hybrid-training.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
 import { InlineLabelHybridTrainer } from '../infrastructure/label-hybrid-trainer.js';
+import type { LabelHybridDocumentRow } from './label-hybrid-training.js';
+import { trainUserLabelHybridModel } from './label-hybrid-training.js';
 
 function buildRealisticLabelHybridRows(): LabelHybridDocumentRow[] {
   const tagCount = 100;

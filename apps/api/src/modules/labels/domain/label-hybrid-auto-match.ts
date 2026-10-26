@@ -6,15 +6,15 @@ import {
   type PreparedTrainingExamplePayload,
 } from './label-hybrid-calibration.js';
 import {
-  LABEL_HYBRID_FAST_DEFAULT_THRESHOLD,
-  labelHybridTrainEpochsForExampleCount,
-  type LabelHybridTrainRuntimeOptions,
-} from './label-hybrid-training-config.js';
-import {
   buildHybridFeatureModel,
   hybridFeatureVector,
   l2Normalize,
 } from './label-hybrid-features.js';
+import {
+  LABEL_HYBRID_FAST_DEFAULT_THRESHOLD,
+  labelHybridTrainEpochsForExampleCount,
+  type LabelHybridTrainRuntimeOptions,
+} from './label-hybrid-training-config.js';
 
 const MIN_CLASS_EXAMPLES = 2;
 const MIN_TRAINED_CLASSES = 2;

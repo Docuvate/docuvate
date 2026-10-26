@@ -8,12 +8,12 @@ import {
   predictLabelHybrid,
   trainLabelHybridModel,
 } from './label-hybrid-auto-match.js';
+import type { LabelHybridTrainRuntimeOptions } from './label-hybrid-training-config.js';
 import {
   capLabelHybridTrainingExamples,
   sampleRowsForVocabulary,
   trimLabelHybridDocumentRows,
 } from './label-hybrid-training-corpus.js';
-import type { LabelHybridTrainRuntimeOptions } from './label-hybrid-training-config.js';
 
 
 export interface LabelHybridDocumentRow {
