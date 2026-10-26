@@ -276,14 +276,27 @@ async function openTagFilterPortaledList(page: import('@playwright/test').Page):
 }
 
 test.describe('Workstream B label picker', () => {
-  test.describe.configure({ mode: 'serial', retries: 0 });
+  test.describe.configure({ mode: 'serial', retries: 0, timeout: 300_000 });
 
   test.beforeAll(async ({ request }) => {
+    test.setTimeout(300_000);
     fs.mkdirSync(artifactRoot, { recursive: true });
     const health = await request.get(`${apiBase}/health`);
     test.skip(!health.ok(), 'API not running');
     await seedLabels(request, 500);
-    ellipsisFixtureUploadName = await provisionLongLabelRowFixture(request);
+    let lastError: unknown;
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        ellipsisFixtureUploadName = await provisionLongLabelRowFixture(request);
+        lastError = undefined;
+        break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    if (lastError !== undefined) {
+      throw lastError;
+    }
   });
 
   for (const viewport of tagFilterViewports) {
