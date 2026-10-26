@@ -57,6 +57,8 @@ import { ExtractionFieldConfirmations20261026130000 } from './migrations/2026102
 import { DocumentExtractedTextHash20261026140000 } from './migrations/20261026140000-document-extracted-text-hash.js';
 import { UserPreferencesFuzzyDuplicateDetection20261026150000 } from './migrations/20261026150000-user-preferences-fuzzy-duplicate-detection.js';
 import { RepairBinDocumentFilenames20261026160000 } from './migrations/20261026160000-repair-bin-document-filenames.js';
+import { SearchVocabularyMaintain20261027140000 } from './migrations/20261027140000-search-vocabulary-maintain.js';
+import { SearchVocabularyBatchBackfill20261028120000 } from './migrations/20261028120000-search-vocabulary-batch-backfill.js';
 
 export const TYPEORM_INITIAL_MIGRATION_TIMESTAMP = 20261008120000;
 export const TYPEORM_INITIAL_MIGRATION_NAME = 'InitialSchema20261008120000';
@@ -136,6 +138,8 @@ export function buildTypeOrmOptions(): DataSourceOptions {
       DocumentExtractedTextHash20261026140000,
       UserPreferencesFuzzyDuplicateDetection20261026150000,
       RepairBinDocumentFilenames20261026160000,
+      SearchVocabularyMaintain20261027140000,
+      SearchVocabularyBatchBackfill20261028120000,
     ],
     migrationsTableName: 'migrations',
     synchronize: false,

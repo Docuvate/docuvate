@@ -32,16 +32,31 @@ import {
 import { type RankedItem,reciprocalRankFusion } from '../domain/reciprocal-rank-fusion.js';
 import type { ResolvedFieldFilter } from '../domain/resolve-field-definition.js';
 import type { SearchFieldDefinitionRow } from '../domain/resolve-field-definition.js';
+import {
+  filterChunkFtsTermsByVocabulary,
+  filterLexicalTermsByVocabularyGate,
+} from './chunk-fts-term-policy.js';
 import { DocumentEmbeddingVectorCache } from './document-embedding-vector.cache.js';
 import {
   defaultFieldLabel,
   type FieldDefinitionLookup,
   loadFieldDefinitionLookup,
 } from './document-field-value-index.js';
+import {
+  buildChunkFtsSearchTerms,
+  buildLexicalTrgmProbes,
+  CHUNK_FTS_LATERAL_SQL,
+} from './global-search-chunk-fts.query.js';
+import {
+  VOCABULARY_RELAXED_TRGM_SQL,
+  VOCABULARY_SIMILARITY_FALLBACK_SQL,
+  VOCABULARY_STRICT_TRGM_SQL,
+} from './global-search-vocabulary.query.js';
 import { queryWithWordSimilarityThreshold } from './pg-trgm-query.js';
 
 const TRGM_THRESHOLD = 0.45;
 const WORD_SIM_THRESHOLD = 0.45;
+const VOCABULARY_STRICT_TRGM_THRESHOLD = 0.45;
 const PER_GROUP_LIMIT = 8;
 const EMBED_CANDIDATE_CAP = Number(process.env['GLOBAL_SEARCH_EMBED_CANDIDATE_CAP'] ?? 24);
 
@@ -60,19 +75,6 @@ function documentTextChunkIndexLockKey(documentId: string): { high: number; low:
 
 function escapeTsToken(term: string): string {
   return term.replace(/[&|!():*'"]/g, ' ').trim();
-}
-
-function buildTrgmProbes(variantQueries: string[]): string[] {
-  const probes = new Set<string>();
-  for (const v of variantQueries) {
-    const folded = normalizeSearchText(v);
-    if (folded.length >= 3) probes.add(folded);
-    for (const token of tokenizeSearchQuery(v)) {
-      const t = normalizeSearchText(token);
-      if (t.length >= 3) probes.add(t);
-    }
-  }
-  return [...probes];
 }
 
 function throwIfAborted(signal?: AbortSignal): void {
@@ -190,10 +192,12 @@ export class PgGlobalSearchRepository {
       return;
     }
     await this.pool.query(
-      `INSERT INTO search_vocabulary_terms (user_id, term, source, doc_frequency)
-       SELECT $1, term, $2, 1
+      `INSERT INTO search_vocabulary_terms (user_id, term, source, doc_frequency, updated_at)
+       SELECT $1, term, $2, 1, now()
        FROM unnest($3::text[]) AS term
-       ON CONFLICT (user_id, term) DO UPDATE SET doc_frequency = search_vocabulary_terms.doc_frequency + 1`,
+       ON CONFLICT (user_id, term) DO UPDATE SET
+         doc_frequency = search_vocabulary_terms.doc_frequency + 1,
+         updated_at = now()`,
       [userId, source, unique]
     );
   }
@@ -215,51 +219,30 @@ export class PgGlobalSearchRepository {
   ): Promise<{ term: string; similarity: number }[]> {
     const variants = searchTextVariants(token);
     const probe = normalizeSearchText(variants[0] ?? token);
-    const result = await this.pool.query<{ term: string; sim: number }>(
-      `WITH corpus AS (
-         SELECT term FROM search_vocabulary_terms WHERE user_id = $1 AND length(term) >= 3
-         UNION
-         SELECT DISTINCT unnest(
-           regexp_split_to_array(unaccent(lower(coalesce(v.value_text_norm, v.value_text, ''))), '\\s+')
-         ) AS term
-         FROM document_field_values v
-         JOIN documents fd ON fd.id = v.document_id
-         WHERE fd.user_id = $1
-         UNION
-         SELECT DISTINCT unnest(
-           regexp_split_to_array(unaccent(lower(coalesce(d.title, ''))), '[^[:alnum:]]+')
-         ) AS term
-         FROM documents d WHERE d.user_id = $1
-         UNION
-         SELECT DISTINCT unnest(
-           regexp_split_to_array(unaccent(lower(coalesce(d.filename, ''))), '[^[:alnum:]]+')
-         ) AS term
-         FROM documents d WHERE d.user_id = $1
-         UNION
-         SELECT DISTINCT unnest(
-           regexp_split_to_array(unaccent(lower(coalesce(c.body, ''))), '[^[:alnum:]]+')
-         ) AS term
-         FROM document_text_chunks c
-         JOIN documents cd ON cd.id = c.document_id
-         WHERE cd.user_id = $1
-       )
-       SELECT term,
-              GREATEST(
-                similarity(unaccent(lower(term)), unaccent(lower($2::text))),
-                word_similarity(unaccent(lower($2::text)), term)
-              ) AS sim
-       FROM corpus
-       WHERE term IS NOT NULL AND length(term) >= 3
-         AND (
-           similarity(unaccent(lower(term)), unaccent(lower($2::text))) >= 0.45
-           OR word_similarity(unaccent(lower($2::text)), term) >= 0.45
-           OR unaccent(lower(term)) % unaccent(lower($2::text))
-           OR unaccent(lower($2::text)) % unaccent(lower(term))
-         )
-       ORDER BY sim DESC
-       LIMIT $3`,
-      [userId, probe, limit]
+    const strict = await queryWithWordSimilarityThreshold<{ term: string; sim: number }>(
+      this.pool,
+      WORD_SIM_THRESHOLD,
+      VOCABULARY_STRICT_TRGM_SQL,
+      [userId, probe, limit],
+      { strictWordSimilarityThreshold: VOCABULARY_STRICT_TRGM_THRESHOLD }
     );
+    let result = strict;
+    if (result.rows.length === 0 && probe.length >= 5) {
+      result = await queryWithWordSimilarityThreshold<{ term: string; sim: number }>(
+        this.pool,
+        WORD_SIM_THRESHOLD,
+        VOCABULARY_RELAXED_TRGM_SQL,
+        [userId, probe, limit]
+      );
+    }
+    if (result.rows.length === 0 && probe.length >= 5) {
+      result = await queryWithWordSimilarityThreshold<{ term: string; sim: number }>(
+        this.pool,
+        WORD_SIM_THRESHOLD,
+        VOCABULARY_SIMILARITY_FALLBACK_SQL,
+        [userId, probe, limit]
+      );
+    }
     return result.rows.map((raw) => {
       const r = requireRecord(raw);
       return { term: parseString(r.term), similarity: parseNumber(r.sim) };
@@ -290,7 +273,12 @@ export class PgGlobalSearchRepository {
     throwIfAborted(options.abortSignal);
     const variantQueries = [...new Set([...searchTextVariants(q), ...expanded])].filter(Boolean);
     const highlightTerms = buildHighlightTerms(queryTokens, expanded);
-    const tsQuery = buildTsQuery([...queryTokens, ...expanded]);
+    const lexicalTsTerms = await filterLexicalTermsByVocabularyGate(
+      this.pool,
+      userId,
+      [...queryTokens, ...expanded].map((term) => normalizeSearchText(term))
+    );
+    const tsQuery = buildTsQuery(lexicalTsTerms);
 
     let documentTotal = 0;
     let folderTotal = 0;
@@ -305,6 +293,7 @@ export class PgGlobalSearchRepository {
         userId,
         q,
         variantQueries,
+        expanded,
         tsQuery,
         queryTokens,
         highlightTerms,
@@ -345,6 +334,7 @@ export class PgGlobalSearchRepository {
     userId: string,
     q: string,
     variantQueries: string[],
+    expandedTerms: string[],
     tsQuery: string | null,
     queryTokens: string[],
     highlightTerms: string[],
@@ -356,8 +346,13 @@ export class PgGlobalSearchRepository {
     abortSignal?: AbortSignal
   ): Promise<{ items: GlobalSearchRepositoryResult['documents']; total: number }> {
     throwIfAborted(abortSignal);
-    const trgmProbes = buildTrgmProbes(variantQueries);
-    const probe = trgmProbes[0] ?? normalizeSearchText(variantQueries[0] ?? q);
+    const lexicalTrgmProbes = buildLexicalTrgmProbes(queryTokens, expandedTerms);
+    const chunkFtsTerms = await filterChunkFtsTermsByVocabulary(
+      this.pool,
+      userId,
+      buildChunkFtsSearchTerms(queryTokens)
+    );
+    const probe = lexicalTrgmProbes[0] ?? normalizeSearchText(queryTokens[0] ?? q);
     const chunkSnippets = new Map<string, string>();
     const fieldLeg = await this.searchFieldValueLeg(
       userId,
@@ -365,7 +360,7 @@ export class PgGlobalSearchRepository {
       queryTokens,
       probe,
       fieldFilters,
-      trgmProbes
+      lexicalTrgmProbes
     );
 
     const ftsPromise = tsQuery
@@ -381,7 +376,7 @@ export class PgGlobalSearchRepository {
       : Promise.resolve({ rows: EMPTY_ID_ROWS });
 
     const trgmPromise =
-      trgmProbes.length > 0
+      lexicalTrgmProbes.length > 0
         ? queryWithWordSimilarityThreshold<{ id: string; score: number }>(
             this.pool,
             WORD_SIM_THRESHOLD,
@@ -411,53 +406,19 @@ export class PgGlobalSearchRepository {
                )
              ORDER BY score DESC NULLS LAST
              LIMIT 32`,
-            [userId, trgmProbes]
+            [userId, lexicalTrgmProbes]
           )
         : Promise.resolve({ rows: EMPTY_TRGM_ROWS });
 
-    const chunkProbe = queryTokens[0] ?? probe;
     const chunkFtsPromise =
-      chunkProbe.length >= 3
+      chunkFtsTerms.length > 0
         ? this.pool.query<{ document_id: string; body: string; score: number }>(
-            `SELECT c.document_id, c.body, ts_rank_cd(c.search_vector, plainto_tsquery('simple', $2::text)) AS score
-             FROM document_text_chunks c
-             JOIN documents cd ON cd.id = c.document_id
-             WHERE cd.user_id = $1
-               AND c.search_vector @@ plainto_tsquery('simple', $2::text)
-             ORDER BY score DESC
-             LIMIT 32`,
-            [userId, chunkProbe]
+            CHUNK_FTS_LATERAL_SQL,
+            [userId, chunkFtsTerms]
           )
         : Promise.resolve({ rows: EMPTY_CHUNK_ROWS });
 
-    const chunkTrgmPromise =
-      trgmProbes.length > 0
-        ? queryWithWordSimilarityThreshold<{ document_id: string; body: string; score: number }>(
-            this.pool,
-            WORD_SIM_THRESHOLD,
-            `SELECT c.document_id, c.body,
-                    MAX(GREATEST(
-                      word_similarity(p.token, c.body),
-                      similarity(c.body, p.token)
-                    )) AS score
-             FROM document_text_chunks c
-             JOIN documents cd ON cd.id = c.document_id
-             CROSS JOIN unnest($2::text[]) AS p(token)
-             WHERE cd.user_id = $1
-               AND (p.token <% c.body OR c.body %> p.token)
-             GROUP BY c.document_id, c.body
-             ORDER BY score DESC NULLS LAST
-             LIMIT 32`,
-            [userId, trgmProbes]
-          )
-        : Promise.resolve({ rows: EMPTY_CHUNK_ROWS });
-
-    const [fts, trgm, chunks, chunkTrgm] = await Promise.all([
-      ftsPromise,
-      trgmPromise,
-      chunkFtsPromise,
-      chunkTrgmPromise,
-    ]);
+    const [fts, trgm, chunks] = await Promise.all([ftsPromise, trgmPromise, chunkFtsPromise]);
     throwIfAborted(abortSignal);
 
     const ftsList: RankedItem[] = fts.rows.map((row, i) => ({ id: row.id, rank: i + 1 }));
@@ -466,11 +427,7 @@ export class PgGlobalSearchRepository {
       id: row.document_id,
       rank: i + 1,
     }));
-    const chunkTrgmList: RankedItem[] = chunkTrgm.rows.map((row, i) => ({
-      id: row.document_id,
-      rank: i + 1,
-    }));
-    for (const row of [...chunks.rows, ...chunkTrgm.rows]) {
+    for (const row of chunks.rows) {
       if (!chunkSnippets.has(row.document_id)) {
         chunkSnippets.set(row.document_id, row.body);
       }
@@ -480,7 +437,6 @@ export class PgGlobalSearchRepository {
       ftsList,
       trgmTitleList,
       chunkFtsList,
-      chunkTrgmList,
       fieldLeg.ranks,
     ]);
 
@@ -490,7 +446,6 @@ export class PgGlobalSearchRepository {
       ftsList.length === 0 &&
       trgmTitleList.length === 0 &&
       chunkFtsList.length === 0 &&
-      chunkTrgmList.length === 0 &&
       fieldLeg.ranks.length === 0
     ) {
       return { items: [], total: 0 };
