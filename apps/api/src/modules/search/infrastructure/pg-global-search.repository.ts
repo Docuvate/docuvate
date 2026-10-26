@@ -436,22 +436,16 @@ export class PgGlobalSearchRepository {
             this.pool,
             WORD_SIM_THRESHOLD,
             `SELECT c.document_id, c.body,
-                    (
-                      SELECT MAX(GREATEST(
-                        word_similarity(p.token, c.body),
-                        similarity(c.body, p.token)
-                      ))
-                      FROM unnest($2::text[]) AS p(token)
-                      WHERE p.token <% c.body OR c.body %> p.token
-                    ) AS score
+                    MAX(GREATEST(
+                      word_similarity(p.token, c.body),
+                      similarity(c.body, p.token)
+                    )) AS score
              FROM document_text_chunks c
              JOIN documents cd ON cd.id = c.document_id
+             CROSS JOIN unnest($2::text[]) AS p(token)
              WHERE cd.user_id = $1
-               AND EXISTS (
-                 SELECT 1
-                 FROM unnest($2::text[]) AS p(token)
-                 WHERE p.token <% c.body OR c.body %> p.token
-               )
+               AND (p.token <% c.body OR c.body %> p.token)
+             GROUP BY c.document_id, c.body
              ORDER BY score DESC NULLS LAST
              LIMIT 32`,
             [userId, trgmProbes]
