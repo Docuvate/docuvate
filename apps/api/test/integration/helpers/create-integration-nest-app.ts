@@ -2,27 +2,16 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import multipart from '@fastify/multipart';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../../../src/app.module.js';
-import { DOCUMENT_REPOSITORY } from '../../../src/shared/domain/ports.js';
 import { initializeAuth } from '../../../src/shared/infrastructure/auth/better-auth.config.js';
 import { registerBetterAuthHttpRoutes } from '../../../src/shared/infrastructure/auth/register-better-auth-http-routes.js';
-import { PG_POOL } from '../../../src/shared/infrastructure/database/tokens.js';
 import { API_VERSION_PREFIX } from '../../../src/shared/presentation/api-version.js';
 import { ProblemDetailsExceptionFilter } from '../../../src/shared/presentation/problem-exception.filter.js';
-import { getIntegrationPool } from '../pg-pool.js';
-import { InvalidDatePatchingDocumentRepository } from './patching-document.repository.js';
 
-export interface CreateIntegrationNestAppOptions {
-  /** Force invalid `documentDate` on listed docs (reproduces main `RangeError: Invalid time value`). */
-  patchInvalidDocumentDates?: boolean;
-}
-
-export async function createIntegrationNestApp(
-  options: CreateIntegrationNestAppOptions = {}
-): Promise<NestFastifyApplication> {
+export async function createIntegrationNestApp(): Promise<NestFastifyApplication> {
   process.env.BETTER_AUTH_SECRET ??= 'integration-test-better-auth-secret-32ch!';
   process.env.BETTER_AUTH_URL ??= 'http://localhost:3001';
   process.env.MINIO_ENDPOINT ??= '127.0.0.1';
@@ -34,18 +23,7 @@ export async function createIntegrationNestApp(
 
   const auth = await initializeAuth();
   const adapter = new FastifyAdapter({ logger: false });
-
-  let builder = Test.createTestingModule({ imports: [AppModule] });
-  if (options.patchInvalidDocumentDates) {
-    const pool = getIntegrationPool();
-    builder = builder.overrideProvider(DOCUMENT_REPOSITORY).useFactory({
-      factory: () => new InvalidDatePatchingDocumentRepository(pool),
-      inject: [PG_POOL],
-    });
-  }
-
-  const moduleFixture = await builder.compile();
-  const app = moduleFixture.createNestApplication<NestFastifyApplication>(adapter, {
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, adapter, {
     bodyParser: true,
   });
   await app.register(multipart, {

@@ -35,7 +35,7 @@ async function getRecommendations(
 /**
  * Audit seed: 620 ready + 140 failed + 140 queued documents, 120 labels (~5 tags/doc),
  * mixed text/document dates, embeddings, no pre-trained hybrid model.
- * `patchInvalidDocumentDates` simulates truthy invalid `Date` values (main F11).
+ * Invalid-date regression is covered in unit tests (`get-label-recommendations.main-regression.spec.ts`).
  * Before the F11 date-preview fix, `documentDate.toISOString()` yields HTTP 500 / `RangeError: Invalid time value`.
  * Production 500s without that column are usually missing migration `DocumentTagsUserConfirmed20261025210000`
  * (`document_tags.user_confirmed`); readiness checks surface pending migrations instead.
@@ -69,7 +69,7 @@ describe('GET /v1/labels/recommendations (Nest + Postgres audit seed)', () => {
     const seed = await seedLabelsRecommendationsAudit(pool, userId);
     apiKeySecret = seed.apiKeySecret;
 
-    app = await createIntegrationNestApp({ patchInvalidDocumentDates: true });
+    app = await createIntegrationNestApp();
   }, 180_000);
 
   afterAll(async () => {
