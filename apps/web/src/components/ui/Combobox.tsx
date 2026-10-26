@@ -4,7 +4,6 @@ import { Check, ChevronDown, Search } from 'lucide-react';
 import {
   type KeyboardEvent,
   useCallback,
-  useEffect,
   useId,
   useMemo,
   useRef,
@@ -14,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Chip } from './Chip';
 import { IconButton } from './IconButton';
+import { Popover } from './overlay/Popover';
 
 export interface ComboboxOption {
   value: string;
@@ -60,6 +60,7 @@ export function Combobox(props: ComboboxProps) {
   const { t } = useTranslation();
   const listId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const controlRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -111,20 +112,6 @@ export function Combobox(props: ComboboxProps) {
     setOpen(false);
     setQuery('');
   }, []);
-
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    function onDocPointerDown(e: MouseEvent) {
-      const root = rootRef.current;
-      if (root && e.target instanceof Node && !root.contains(e.target)) {
-        close();
-      }
-    }
-    document.addEventListener('mousedown', onDocPointerDown);
-    return () => { document.removeEventListener('mousedown', onDocPointerDown); };
-  }, [open, close]);
 
   function toggleOption(value: string) {
     if (multiple) {
@@ -179,7 +166,7 @@ export function Combobox(props: ComboboxProps) {
           ))}
         </div>
       ) : null}
-      <div className="combobox-control">
+      <div className="combobox-control" ref={controlRef}>
         <Search className="combobox-search-icon" size={16} strokeWidth={2} aria-hidden />
         <input
           ref={inputRef}
@@ -209,13 +196,26 @@ export function Combobox(props: ComboboxProps) {
           onClick={() => { setOpen((v) => !v); inputRef.current?.focus(); }}
         />
       </div>
-      {open ? (
+      <Popover
+        open={open}
+        onOpenChange={(next) => {
+          if (!next) {
+            close();
+          }
+        }}
+        referenceRef={controlRef}
+        returnFocusRef={inputRef}
+        matchReferenceWidth
+        maxHeightPx={LIST_MAX_HEIGHT_REM * 16}
+        className="combobox-list popover-surface popover-surface-scroll custom-select-menu"
+        role="presentation"
+        onEscape={close}
+      >
         <ul
           id={listId}
-          className="combobox-list custom-select-menu"
+          className="combobox-list-inner"
           role="listbox"
           aria-multiselectable={multiple || undefined}
-          style={{ maxHeight: `${String(LIST_MAX_HEIGHT_REM)}rem` }}
         >
           {selectedOptions.length > 0 ? (
             <>
@@ -298,7 +298,7 @@ export function Combobox(props: ComboboxProps) {
               })()
             : null}
         </ul>
-      ) : null}
+      </Popover>
     </div>
   );
 }

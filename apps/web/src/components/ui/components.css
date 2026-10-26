@@ -1,3 +1,5 @@
+@import './overlay/overlay.css';
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -391,7 +393,7 @@ a.btn:hover {
 
 .custom-select-menu {
   position: absolute;
-  z-index: 20;
+  z-index: var(--dv-z-dropdown);
   left: 0;
   right: 0;
   top: calc(100% + 2px);
@@ -411,7 +413,7 @@ a.btn:hover {
 
 .custom-select-menu-portal {
   position: fixed;
-  z-index: 2100;
+  z-index: var(--dv-z-popover);
   right: auto;
   top: auto;
   margin: 0;

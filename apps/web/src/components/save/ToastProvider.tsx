@@ -13,6 +13,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { readNotifySavedDetail, readNotifySaveErrorDetail } from '../../lib/customEventDetail';
+import { getOverlayPortalRoot } from '../ui/overlay/overlayPortal';
 import { ToastItem } from './ToastItem';
 
 type ToastKind = 'success' | 'error';
@@ -121,7 +122,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             />
           ))}
         </div>,
-        document.body
+        getOverlayPortalRoot('toast')
       )}
     </ToastContext.Provider>
   );

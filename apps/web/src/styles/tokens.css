@@ -12,6 +12,22 @@
  * Progress captions on tinted tracks: --dv-color-progress-label
  */
 :root,
+[data-docuvate-theme='light'],
+[data-docuvate-theme='dark'] {
+  /**
+   * Overlay stacking (low → high). Use only these tokens for z-index in app styles;
+   * local stacking within one surface may use calc(var(--dv-z-base) + N).
+   */
+  --dv-z-base: 0;
+  --dv-z-sticky: 30;
+  --dv-z-dropdown: 40;
+  --dv-z-drawer: 200;
+  --dv-z-modal: 1000;
+  --dv-z-popover: 1100;
+  --dv-z-toast: 1200;
+}
+
+:root,
 [data-docuvate-theme='light'] {
   --chip-max-width: 14rem;
   --dv-header-control-height: var(--dv-control-height);

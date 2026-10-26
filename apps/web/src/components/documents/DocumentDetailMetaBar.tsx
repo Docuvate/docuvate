@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { documentContentUrl } from '../../lib/api';
 import { Badge } from '../ui/Badge';
+import { Menu, MenuContent, MenuTrigger } from '../ui/overlay/Menu';
 
 type DetailTab = 'details' | 'labels' | 'chat';
 
@@ -97,14 +98,17 @@ export function DocumentDetailMetaBar({
           >
             {t('documents.download')}
           </a>
-          <details className="document-detail-overflow-menu">
-            <summary
+          <Menu>
+            <MenuTrigger
               className="document-detail-overflow-trigger btn btn-ghost"
               aria-label={t('documents.moreActionsAria')}
             >
               <MoreVertical size={18} strokeWidth={2} aria-hidden />
-            </summary>
-            <div className="document-detail-overflow-panel" role="menu">
+            </MenuTrigger>
+            <MenuContent
+              className="document-detail-overflow-panel popover-surface"
+              align="end"
+            >
               {onRequeueExtraction ? (
                 <button
                   type="button"
@@ -137,8 +141,8 @@ export function DocumentDetailMetaBar({
               >
                 {t('common.delete')}
               </button>
-            </div>
-          </details>
+            </MenuContent>
+          </Menu>
         </div>
       </div>
     </header>
