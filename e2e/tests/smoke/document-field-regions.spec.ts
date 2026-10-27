@@ -47,11 +47,33 @@ async function applyGermanLocale(page: Page): Promise<void> {
 }
 
 async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
-  const tab = page.getByRole('tab', { name: /^Labels/i });
-  const selected = (await tab.getAttribute('aria-selected')) === 'true';
-  if (selected !== open) {
-    await tab.click({ force: true });
+  const labels = page.getByRole('tab', { name: /^Labels/i });
+  const selected = (await labels.getAttribute('aria-selected')) === 'true';
+  if (open === selected) {
+    return;
   }
+  if (open) {
+    await labels.click({ force: true });
+    return;
+  }
+  await page.getByRole('tab', { name: /^Details/i }).click({ force: true });
+}
+
+async function openFieldCorrectionSheet(page: Page): Promise<void> {
+  const sheet = page.locator('[data-testid="field-correction-sheet"]');
+  if (await sheet.isVisible()) {
+    return;
+  }
+  await setLabelsTabOpen(page, false);
+  await page
+    .locator('.layout-side-tabs')
+    .getByRole('tab', { name: /Übersicht|Overview/i })
+    .click({ force: true });
+  const row = page.getByTestId('field-value-row-select').first();
+  await expect(row).toBeVisible({ timeout: 15_000 });
+  await row.click();
+  await expect(page.locator('.layout-workspace')).not.toHaveAttribute('data-selected-field', '');
+  await expect(sheet).toBeVisible({ timeout: 15_000 });
 }
 
 async function startRectangle(page: Page): Promise<void> {
@@ -160,7 +182,6 @@ test.describe('document field regions', () => {
       testInfo,
       'field-regions-source-chip-seite-1.png'
     );
-    await dismissOverlaySheets(page);
     await expect(page.locator('[data-testid="field-correction-sheet"]')).toHaveCount(0);
 
     for (const viewport of VIEWPORTS) {
@@ -172,19 +193,9 @@ test.describe('document field regions', () => {
       );
       for (const scheme of COLOR_SCHEMES) {
         await page.emulateMedia({ colorScheme: scheme });
-        await dismissOverlaySheets(page);
         await setLabelsTabOpen(page, false);
-        await page
-          .locator('.layout-side-tabs')
-          .getByRole('tab', { name: /Übersicht|Overview/i })
-          .click({ force: true });
         if (viewport.width < 1024) {
-          const sheet = page.locator('[data-testid="field-correction-sheet"]');
-          if ((await sheet.count()) === 0) {
-            const row = page.locator('.field-value-row-select').first();
-            await expect(row).toBeAttached({ timeout: 15_000 });
-            await row.click({ force: true });
-          }
+          await openFieldCorrectionSheet(page);
           await assertCorrectionsBottomSheet(page);
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
           await assertNoHorizontalOverflow(page);
@@ -196,8 +207,12 @@ test.describe('document field regions', () => {
             );
           }
           await dismissOverlaySheets(page);
-          await expect(sheet).toHaveCount(0);
+          await expect(page.locator('[data-testid="field-correction-sheet"]')).toHaveCount(0);
         } else {
+          await page
+            .locator('.layout-side-tabs')
+            .getByRole('tab', { name: /Übersicht|Overview/i })
+            .click({ force: true });
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
           await assertNoHorizontalOverflow(page);
         }

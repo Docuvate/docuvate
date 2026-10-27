@@ -544,6 +544,7 @@ export function DocumentLayoutWorkspace({
           : 'layout-workspace'
       }
       data-correction-sheet-viewport={correctionSheetViewport ? '1' : '0'}
+      data-selected-field={selectedFieldKey ?? ''}
     >
       <div className="layout-workspace-main">
         <Card className="preview-card preview-card-pdf layout-viewer-card">

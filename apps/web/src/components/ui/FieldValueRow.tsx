@@ -41,7 +41,12 @@ export function FieldValueRow({
   return (
     <article className="field-value-row">
       {onSelect ? (
-        <button type="button" className="field-value-row-select" onClick={onSelect}>
+        <button
+          type="button"
+          className="field-value-row-select"
+          data-testid="field-value-row-select"
+          onClick={onSelect}
+        >
           <span className="field-value-row-name" title={fieldName}>
             {fieldName}
           </span>
