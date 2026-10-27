@@ -61,6 +61,56 @@ describe('StaleDocumentExtractionReconcileService', () => {
     }
   });
 
+  it('skips a headless queue stub that has no isReady', async () => {
+    const query = vi.fn<QueryFn>();
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        {
+          provide: StaleDocumentExtractionReconcileService,
+          useFactory: (pool: ExtractionReconcileStore, queue: ExtractionQueueService) =>
+            new StaleDocumentExtractionReconcileService(pool, queue),
+          inject: [PG_POOL, ExtractionQueueService],
+        },
+        { provide: PG_POOL, useValue: { query } },
+        { provide: ExtractionQueueService, useValue: { enqueue: () => Promise.resolve() } },
+      ],
+    }).compile();
+    const service = moduleRef.get(StaleDocumentExtractionReconcileService);
+
+    await expect(service.reconcileOnce()).resolves.toEqual({ failed: 0, enqueued: 0 });
+    expect(query).not.toHaveBeenCalled();
+  });
+
+  it('skips when the extraction queue is not ready', async () => {
+    const query = vi.fn<QueryFn>();
+    const inspect = vi.fn<(documentId: string) => Promise<ExtractionReconcileJob>>();
+    const ensureQueued = vi.fn<(documentId: string, userId: string) => Promise<void>>();
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        {
+          provide: StaleDocumentExtractionReconcileService,
+          useFactory: (pool: ExtractionReconcileStore, queue: ExtractionQueueService) =>
+            new StaleDocumentExtractionReconcileService(pool, queue),
+          inject: [PG_POOL, ExtractionQueueService],
+        },
+        { provide: PG_POOL, useValue: { query } },
+        {
+          provide: ExtractionQueueService,
+          useValue: {
+            isReady: () => false,
+            inspectExtractionJob: inspect,
+            ensureQueued,
+          },
+        },
+      ],
+    }).compile();
+    const service = moduleRef.get(StaleDocumentExtractionReconcileService);
+
+    await expect(service.reconcileOnce()).resolves.toEqual({ failed: 0, enqueued: 0 });
+    expect(query).not.toHaveBeenCalled();
+    expect(inspect).not.toHaveBeenCalled();
+  });
+
   it('leaves a long queued backlog untouched', async () => {
     const query = vi.fn<QueryFn>().mockResolvedValue({
       rowCount: 2,

@@ -59,10 +59,10 @@ export class StaleDocumentExtractionReconcileService implements OnModuleInit, On
 
   /** Exposed for tests. */
   async reconcileOnce(): Promise<{ failed: number; enqueued: number }> {
-    if (!this.extractionQueue.isReady()) {
-      return { failed: 0, enqueued: 0 };
-    }
     try {
+      if (!this.canInspectQueue()) {
+        return { failed: 0, enqueued: 0 };
+      }
       const docs = await this.listInFlightDocuments();
       const jobs = new Map<string, ExtractionReconcileJob>();
       for (const doc of docs) {
@@ -89,6 +89,15 @@ export class StaleDocumentExtractionReconcileService implements OnModuleInit, On
       this.logger.warn(`Stale document extraction reconcile skipped: ${message}`);
       return { failed: 0, enqueued: 0 };
     }
+  }
+
+  private canInspectQueue(): boolean {
+    return (
+      typeof this.extractionQueue.isReady === 'function' &&
+      this.extractionQueue.isReady() &&
+      typeof this.extractionQueue.inspectExtractionJob === 'function' &&
+      typeof this.extractionQueue.ensureQueued === 'function'
+    );
   }
 
   private async listInFlightDocuments(): Promise<ExtractionReconcileDocument[]> {
