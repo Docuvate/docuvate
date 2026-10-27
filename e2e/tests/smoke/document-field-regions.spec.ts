@@ -213,6 +213,12 @@ test.describe('document field regions', () => {
         if (viewport.width < 1024) {
           await openFieldCorrectionSheet(page);
           await assertCorrectionsBottomSheet(page);
+          await expect(page.locator('.document-detail-page')).toHaveAttribute(
+            'data-correction-sheet-open',
+            '1'
+          );
+          await expect(page.locator('.extracted-fields-section')).toHaveCount(0);
+          await expect(page.locator('.field-value-row')).toHaveCount(0);
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
           await assertNoHorizontalOverflow(page);
           if (scheme === 'light') {

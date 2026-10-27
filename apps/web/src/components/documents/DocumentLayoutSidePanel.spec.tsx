@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { DocumentRegionDto, LayoutIrDocument } from '@docuvate/contracts';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../lib/api', () => ({
@@ -132,10 +132,15 @@ describe('DocumentLayoutSidePanel', () => {
     expect(screen.getByRole('button', { name: 'Seite 1' })).toBeTruthy();
   });
 
-  it('unmounts the inline field list when the correction sheet replaces it', () => {
+  it('unmounts the inline field list when the correction sheet replaces it', async () => {
     const { container } = renderFieldsPanel(true);
     expect(container.querySelectorAll('.source-chip')).toHaveLength(0);
     expect(container.querySelector('.layout-side-fields')).toBeNull();
     expect(container.querySelector('.field-value-row')).toBeNull();
+    await waitFor(() => {
+      const body = container.querySelector('.layout-side-panel-body');
+      expect(body?.hasAttribute('inert')).toBe(true);
+      expect(body?.getAttribute('aria-hidden')).toBe('true');
+    });
   });
 });

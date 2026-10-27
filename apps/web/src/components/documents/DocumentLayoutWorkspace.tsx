@@ -111,6 +111,7 @@ interface DocumentLayoutWorkspaceProps {
   showTechnicalDetails?: boolean;
   layoutSideTab: LayoutSideTab;
   onLayoutSideTabChange: (tab: LayoutSideTab) => void;
+  onCorrectionSheetOpenChange?: (open: boolean) => void;
 }
 
 export function DocumentLayoutWorkspace({
@@ -150,6 +151,7 @@ export function DocumentLayoutWorkspace({
   showTechnicalDetails = false,
   layoutSideTab,
   onLayoutSideTabChange,
+  onCorrectionSheetOpenChange,
 }: DocumentLayoutWorkspaceProps) {
   const { t, i18n } = useTranslation();
   const toast = useToast();
@@ -234,6 +236,14 @@ export function DocumentLayoutWorkspace({
     },
     [highlightRegion, onLayoutSideTabChange]
   );
+
+  const correctionSheetOpen = Boolean(correctionSheetViewport && selectedFieldKey);
+  useEffect(() => {
+    onCorrectionSheetOpenChange?.(correctionSheetOpen);
+    return () => {
+      onCorrectionSheetOpenChange?.(false);
+    };
+  }, [correctionSheetOpen, onCorrectionSheetOpenChange]);
 
   const runFieldCorrection = useCallback(
     async (body: ApplyFieldCorrectionRequest, successMessage: string) => {
@@ -837,7 +847,7 @@ export function DocumentLayoutWorkspace({
           }}
           onHighlightField={highlightRegion}
           onSelectField={selectField}
-          hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
+          hideInlineFieldList={correctionSheetOpen}
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
           documentChatLocalModelEnabled={documentChatLocalModelEnabled}

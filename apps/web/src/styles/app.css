@@ -12619,6 +12619,11 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
     min-height: 0;
     max-height: none;
   }
+
+  .document-detail-page:has(.layout-workspace--correction-sheet) .extracted-fields-section,
+  .document-detail-page[data-correction-sheet-open="1"] .extracted-fields-section {
+    display: none;
+  }
 }
 
 @media (max-width: 800px) {
