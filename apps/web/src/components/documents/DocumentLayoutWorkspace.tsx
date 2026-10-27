@@ -837,6 +837,7 @@ export function DocumentLayoutWorkspace({
           }}
           onHighlightField={highlightRegion}
           onSelectField={selectField}
+          hideInlineFieldList={Boolean(correctionSheetViewport && selectedFieldKey)}
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
           documentChatLocalModelEnabled={documentChatLocalModelEnabled}

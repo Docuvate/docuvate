@@ -63,6 +63,8 @@ interface DocumentLayoutSidePanelProps {
   onCorrectField?: (key: string) => void;
   onHighlightField?: (key: string) => void;
   onSelectField?: (key: string) => void;
+  /** When the correction bottom sheet is open, unmount the inline field list so each field has one source chip. */
+  hideInlineFieldList?: boolean;
 }
 
 export function DocumentLayoutSidePanel({
@@ -90,6 +92,7 @@ export function DocumentLayoutSidePanel({
   onCorrectField,
   onHighlightField,
   onSelectField,
+  hideInlineFieldList = false,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -264,6 +267,20 @@ export function DocumentLayoutSidePanel({
     target?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [activeOverlayId, activeTab]);
 
+  useEffect(() => {
+    const root = panelBodyRef.current;
+    if (!root) {
+      return;
+    }
+    if (hideInlineFieldList) {
+      root.setAttribute('inert', '');
+      root.setAttribute('aria-hidden', 'true');
+      return;
+    }
+    root.removeAttribute('inert');
+    root.removeAttribute('aria-hidden');
+  }, [hideInlineFieldList]);
+
   const regionByFieldKey = useMemo(() => {
     const map = new Map<string, DocumentRegionDto>();
     for (const region of fieldRegions) {
@@ -316,7 +333,7 @@ export function DocumentLayoutSidePanel({
         id={activePanelId}
         aria-labelledby={activeTabId}
       >
-        {activeTab === 'fields' ? (
+        {activeTab === 'fields' && !hideInlineFieldList ? (
           <div className="layout-side-fields">
             <h3 className="layout-side-section-title">{t('documents.layoutFieldsDetected')}</h3>
             {panelFields.length === 0 && suggestions.length === 0 ? (
