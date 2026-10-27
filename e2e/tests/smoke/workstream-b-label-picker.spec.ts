@@ -98,6 +98,8 @@ async function createTagForFixture(
   request: import('@playwright/test').APIRequestContext,
   baseName: string
 ): Promise<string> {
+  let lastStatus = 0;
+  let lastBody = '';
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const name =
       attempt === 0 ? baseName : `${baseName.slice(0, 220)}-${randomUUID().slice(0, 8)}`;
@@ -109,12 +111,15 @@ async function createTagForFixture(
       const body = (await response.json()) as { id: string };
       return body.id;
     }
-    if (![400, 409, 422].includes(response.status())) {
-      const detail = await response.text();
-      expect(response.ok(), `create tag failed status=${response.status()} body=${detail}`).toBeTruthy();
+    lastStatus = response.status();
+    lastBody = await response.text();
+    if (![400, 409, 422].includes(lastStatus)) {
+      expect(response.ok(), `create tag failed status=${lastStatus} body=${lastBody}`).toBeTruthy();
     }
   }
-  throw new Error(`create tag failed after retries: ${baseName}`);
+  throw new Error(
+    `create tag failed after retries: ${baseName} (last status=${lastStatus} body=${lastBody})`
+  );
 }
 
 async function provisionLongLabelRowFixture(
