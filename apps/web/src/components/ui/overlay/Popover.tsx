@@ -46,6 +46,7 @@ export function Popover({
   placement,
   matchReferenceWidth,
   maxHeightPx,
+  flipEnabled,
 }: PopoverProps) {
   const generatedId = useId();
   const panelId = id ?? generatedId;
@@ -54,6 +55,7 @@ export function Popover({
     placement,
     matchReferenceWidth,
     maxHeightPx,
+    flipEnabled,
   });
 
   useLayoutEffect(() => {

@@ -5,11 +5,16 @@ import type {
   DocumentBulkAction,
   DocumentExtractionImageDto,
   DocumentListQuery,
+  DocumentRegionDto,
+  DocumentRegionRole,
   DuplicateCandidateSource,
   DuplicateFeatureVector,
   ExtractedField,
   ExtractionBlock,
   ExtractionResult,
+  FieldCorrectionOp,
+  FieldCorrectionScope,
+  LayoutToken,
   MatchingAlgorithm,
   NormalizedBBox,
 } from '@docuvate/contracts';
@@ -867,6 +872,76 @@ export interface DuplicateStackRepository {
 }
 
 export type { DocumentBulkAction };
+
+export interface DocumentLayoutIrSnapshot {
+  ir: Record<string, unknown>;
+  irSha256: string;
+}
+
+export interface DocumentRegionRecord extends DocumentRegionDto {
+  supersededBy: string | null;
+}
+
+export interface InsertFieldCorrectionInput {
+  id: string;
+  userId: string;
+  documentId: string;
+  op: FieldCorrectionOp;
+  fieldKey: string;
+  beforeRegionId: string | null;
+  afterRegionId: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+  scope: FieldCorrectionScope;
+  tagId: string | null;
+}
+
+export interface InsertDocumentRegionInput {
+  id: string;
+  documentId: string;
+  page: number;
+  shape: 'rect' | 'polygon';
+  role: DocumentRegionRole;
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+  irSha256: string;
+  blockIndexes: readonly number[];
+  boundText?: string;
+  fieldKey?: string;
+  valueOverride?: string | null;
+}
+
+export interface DocumentRegionRepository {
+  findLayoutIrSnapshot(documentId: string, userId: string): Promise<DocumentLayoutIrSnapshot | null>;
+  listActiveRegions(documentId: string, role?: DocumentRegionRole): Promise<DocumentRegionRecord[]>;
+  findRegionById(documentId: string, regionId: string): Promise<DocumentRegionRecord | null>;
+  findActiveFieldRegion(documentId: string, fieldKey: string): Promise<DocumentRegionRecord | null>;
+  insertRegion(input: InsertDocumentRegionInput): Promise<DocumentRegionRecord>;
+  supersedeRegion(regionId: string, successorId: string | null): Promise<void>;
+  insertFieldCorrection(input: InsertFieldCorrectionInput): Promise<boolean>;
+  findFieldCorrection(
+    documentId: string,
+    correctionId: string
+  ): Promise<InsertFieldCorrectionInput | null>;
+  withdrawFieldCorrection(documentId: string, correctionId: string): Promise<boolean>;
+  confirmField(input: {
+    documentId: string;
+    userId: string;
+    fieldKey: string;
+    valueSha256: Buffer;
+    fieldTagId: string | null;
+  }): Promise<boolean>;
+  replaceFieldTokenSpans(
+    documentId: string,
+    fieldKey: string,
+    blockIndexes: readonly number[]
+  ): Promise<void>;
+  remapActiveRegions(documentId: string, tokens: readonly LayoutToken[], irSha256: string): Promise<void>;
+}
+
+export const DOCUMENT_REGION_REPOSITORY = Symbol('DOCUMENT_REGION_REPOSITORY');
 
 export const CLOCK = Symbol('CLOCK');
 export const ID_GENERATOR = Symbol('ID_GENERATOR');

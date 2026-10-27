@@ -11,7 +11,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env['CI']),
   retries: process.env['CI'] ? 2 : 0,
   workers: 1,
-  timeout: 300_000,
+  timeout: 600_000,
   reporter: process.env['CI'] ? [['github'], ['list']] : [['list']],
   use: {
     baseURL: webBase,

@@ -28,6 +28,7 @@ import {
 import { workerRequestHeaders } from '../../../shared/infrastructure/worker/worker-request-headers.js';
 import { parseExtractedFacts } from '../../exact-facts/infrastructure/parse-extracted-facts.js';
 import { extractionWorkerFetchTimeoutMs } from '../domain/extraction-deadline.config.js';
+import { EXTRACTION_TIMEOUT_FAILURE_MESSAGE } from '../domain/extraction-queue-failures.js';
 import {
   isWorkerExtractDeadlineResponse,
   parseWorkerExtractErrorBody,
@@ -427,6 +428,9 @@ export class HttpExtractionAdapter implements ExtractionPort {
           previewPdf: parsePreviewPdfBase64(data),
         };
       } catch (error: unknown) {
+        if (error instanceof Error && (error.name === 'TimeoutError' || error.name === 'AbortError')) {
+          throw new Error(EXTRACTION_TIMEOUT_FAILURE_MESSAGE);
+        }
         const message = error instanceof Error ? error.message : String(error);
         const retryable =
           error instanceof WorkerExtractDeadlineError ||

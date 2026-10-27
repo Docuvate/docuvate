@@ -22,6 +22,12 @@ const noopQueue = {
   onModuleDestroy: (): void => undefined,
   enqueue: (): Promise<void> => Promise.resolve(),
   enqueueJob: (): Promise<void> => Promise.resolve(),
+  isReady: (): boolean => false,
+  inspectExtractionJob: (): Promise<{ live: boolean; startedAtMs: number | null }> =>
+    Promise.resolve({ live: false, startedAtMs: null }),
+  ensureQueued: (): Promise<void> => Promise.resolve(),
+  recordExtractionStart: (): Promise<void> => Promise.resolve(),
+  isJobQueuedOrActive: (): Promise<boolean> => Promise.resolve(false),
 };
 
 const noopCancelRegistry = {

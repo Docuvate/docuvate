@@ -29,6 +29,7 @@ import {
   extractionQueueStalledIntervalMs,
 } from '../domain/extraction-queue.config.js';
 import { isPermanentExtractionFailureMessage } from '../domain/extraction-queue-failures.js';
+import type { ExtractionReconcileJob } from '../domain/plan-extraction-reconcile.js';
 import { isWorkerExtractDeadlineFailureMessage } from '../domain/extraction-worker-errors.js';
 import { WorkerExtractCapacityCoordinator } from './worker-extract-capacity.coordinator.js';
 
@@ -43,6 +44,29 @@ function parseExtractionJobDocumentId(data: unknown): string {
 
 const QUEUE_NAME = 'document-extraction';
 const ARENA_COUNTER_KEY = 'arena:sample:counter';
+const EXTRACT_STARTED_KEY_PREFIX = 'document-extract-started:';
+const EXTRACT_STARTED_TTL_SECONDS = 24 * 60 * 60;
+
+function extractionStartedRedisKey(documentId: string): string {
+  return `${EXTRACT_STARTED_KEY_PREFIX}${documentId}`;
+}
+
+function isLiveExtractionJobState(state: string): boolean {
+  switch (state) {
+    case 'active':
+    case 'waiting':
+    case 'delayed':
+    case 'paused':
+    case 'waiting-children':
+      return true;
+    case 'completed':
+    case 'failed':
+    case 'unknown':
+      return false;
+    default:
+      return false;
+  }
+}
 
 @Injectable()
 export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
@@ -50,6 +74,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   private connection!: IORedis;
   private queue!: Queue;
   private worker!: Worker;
+  private ready = false;
 
   constructor(
     private readonly runExtraction: RunExtractionUseCase,
@@ -77,6 +102,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
         await this.extractCapacity.acquireSlot();
         try {
           try {
+            await this.recordExtractionStart(documentId);
             await this.runExtraction.execute(documentId);
           } catch (error: unknown) {
             const message = error instanceof Error ? error.message : String(error);
@@ -107,6 +133,64 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
         maxStalledCount: extractionQueueMaxStalledCount(),
       }
     );
+    this.ready = true;
+  }
+
+  isReady(): boolean {
+    return this.ready;
+  }
+
+  async inspectExtractionJob(documentId: string): Promise<ExtractionReconcileJob> {
+    if (!this.isReady()) {
+      return { live: false, startedAtMs: null };
+    }
+    const job = await this.queue.getJob(extractionJobId(documentId));
+    let live = false;
+    let startedAtMs: number | null = null;
+    if (job) {
+      const state = await job.getState();
+      live = isLiveExtractionJobState(state);
+      if (typeof job.processedOn === 'number' && Number.isFinite(job.processedOn) && job.processedOn > 0) {
+        startedAtMs = job.processedOn;
+      }
+    }
+    if (startedAtMs === null) {
+      const raw = await this.connection.get(extractionStartedRedisKey(documentId));
+      if (raw) {
+        const parsed = Number.parseInt(raw, 10);
+        if (Number.isFinite(parsed) && parsed > 0) {
+          startedAtMs = parsed;
+        }
+      }
+    }
+    return { live, startedAtMs };
+  }
+
+  async recordExtractionStart(documentId: string): Promise<void> {
+    if (!this.isReady()) {
+      return;
+    }
+    await this.connection.set(
+      extractionStartedRedisKey(documentId),
+      String(Date.now()),
+      'EX',
+      EXTRACT_STARTED_TTL_SECONDS
+    );
+  }
+
+  async ensureQueued(documentId: string, userId: string): Promise<void> {
+    if (!this.isReady()) {
+      throw new Error('document-extraction queue is not ready');
+    }
+    const existing = await this.queue.getJob(extractionJobId(documentId));
+    if (existing) {
+      const state = await existing.getState();
+      if (isLiveExtractionJobState(state)) {
+        return;
+      }
+      await existing.remove();
+    }
+    await this.enqueue(documentId, userId);
   }
 
   async isJobQueuedOrActive(documentId: string): Promise<boolean> {
@@ -164,6 +248,7 @@ export class ExtractionQueueService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
+    this.ready = false;
     await this.worker.close();
     await this.queue.close();
     await this.connection.quit();

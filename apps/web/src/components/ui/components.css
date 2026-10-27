@@ -322,7 +322,7 @@ a.btn:hover {
 
 .chip-label-truncate {
   min-width: 0;
-  max-width: 100%;
+  max-width: min(100%, var(--chip-max-width));
   overflow: hidden;
   flex: 0 1 auto;
 }
@@ -615,7 +615,10 @@ a.btn:hover {
   .library-table-header .checkbox-field,
   .library-doc-row .checkbox-field,
   .global-chat-composer textarea,
-  .layout-quality-badge-technical {
+  .layout-quality-badge-technical,
+  .overflow-chip-more,
+  .source-chip,
+  .document-field-context-bar-actions .btn {
     min-width: var(--dv-touch-target-min);
     min-height: var(--dv-touch-target-min);
   }

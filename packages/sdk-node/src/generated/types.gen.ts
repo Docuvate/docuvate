@@ -85,6 +85,29 @@ export type AdminUserResponseDto = {
     lastLoginAt?: string;
 };
 
+export type ApplyFieldCorrectionRequestDto = {
+    id: string;
+    op: 'create' | 'reanchor' | 'edit_value' | 'remove';
+    fieldKey: string;
+    page?: number;
+    shape?: 'rect' | 'polygon';
+    x0?: number;
+    y0?: number;
+    x1?: number;
+    y1?: number;
+    blockIndexes?: Array<number>;
+    valueOverride?: string;
+    scope?: 'document' | 'label' | 'always';
+    tagId?: string;
+    beforeRegionId?: string;
+};
+
+export type ApplyFieldCorrectionResponseDto = {
+    noChange: boolean;
+    correction: DocumentCorrectionDto;
+    region: DocumentRegionDto;
+};
+
 export type ApplyLabelCorrectionRequestDto = {
     toTagId: string;
 };
@@ -124,6 +147,17 @@ export type ChatMessageRecordDto = {
     generationStatus?: 'failed' | 'pending' | 'streaming' | 'done';
     generationPhase?: 'retrieving' | 'generating' | 'verifying';
     errorCode?: string;
+};
+
+export type ConfirmDocumentFieldRequestDto = {
+    fieldKey: string;
+    value: string;
+};
+
+export type ConfirmDocumentFieldResponseDto = {
+    confirmed: boolean;
+    fieldKey: string;
+    valueSha256: string;
 };
 
 export type ConfirmLabelRecommendationBlocklistPatternRequestDto = {
@@ -319,6 +353,20 @@ export type DocumentChatUnavailableBackendInfoDto = {
     setupHint: string;
 };
 
+export type DocumentCorrectionDto = {
+    id: string;
+    documentId: string;
+    kind: 'label' | 'field' | 'table' | 'block';
+    status: 'active' | 'withdrawn';
+    op: string;
+    fieldKey: string;
+    beforeRegionId: string;
+    afterRegionId: string;
+    oldValue: string;
+    newValue: string;
+    createdAt: string;
+};
+
 export type DocumentDuplicateStackSummaryDtoClass = {
     stackId: string;
     versionCount: number;
@@ -354,6 +402,12 @@ export type DocumentExtractionSummaryDto = {
     }>;
 };
 
+export type DocumentLayoutTokensResponseDto = {
+    page: number;
+    irSha256: string;
+    tokens: Array<LayoutTokenDto>;
+};
+
 export type DocumentListLibraryUiDto = {
     /**
      * When false, hide per-document owner lines in the library (single-user installs).
@@ -384,6 +438,33 @@ export type DocumentPipelineModuleDescriptorDto = {
 
 export type DocumentPipelineModulesResponseDto = {
     modules: Array<DocumentPipelineModuleDescriptorDto>;
+};
+
+export type DocumentRegionDto = {
+    id: string;
+    documentId: string;
+    page: number;
+    shape: 'rect' | 'polygon';
+    role: 'field' | 'table' | 'block' | 'ignore';
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+    irSha256: string;
+    needsReview: boolean;
+    blockIndexes: Array<number>;
+    field?: DocumentRegionFieldDto;
+    createdAt: string;
+};
+
+export type DocumentRegionFieldDto = {
+    fieldKey: string;
+    valueOverride: string;
+};
+
+export type DocumentRegionListResponseDto = {
+    irSha256: string;
+    items: Array<DocumentRegionDto>;
 };
 
 export type DocumentResponseDto = {
@@ -768,6 +849,16 @@ export type LayoutIrWidgetDto = {
     fontFamily?: string;
     align?: string;
     checkMark?: string;
+};
+
+export type LayoutTokenDto = {
+    blockIndex: number;
+    page: number;
+    x0: number;
+    y0: number;
+    x1: number;
+    y1: number;
+    text: string;
 };
 
 export type LayoutTypstResponseDto = {
@@ -3115,6 +3206,55 @@ export type ContentResponses = {
     200: unknown;
 };
 
+export type ApplyDocumentFieldCorrectionData = {
+    body: ApplyFieldCorrectionRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/corrections';
+};
+
+export type ApplyDocumentFieldCorrectionErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ApplyDocumentFieldCorrectionError = ApplyDocumentFieldCorrectionErrors[keyof ApplyDocumentFieldCorrectionErrors];
+
+export type ApplyDocumentFieldCorrectionResponses = {
+    200: ApplyFieldCorrectionResponseDto;
+};
+
+export type ApplyDocumentFieldCorrectionResponse = ApplyDocumentFieldCorrectionResponses[keyof ApplyDocumentFieldCorrectionResponses];
+
+export type WithdrawDocumentFieldCorrectionData = {
+    body?: never;
+    path: {
+        id: string;
+        correctionId: string;
+    };
+    query?: never;
+    url: '/documents/{id}/corrections/{correctionId}/withdraw';
+};
+
+export type WithdrawDocumentFieldCorrectionErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type WithdrawDocumentFieldCorrectionError = WithdrawDocumentFieldCorrectionErrors[keyof WithdrawDocumentFieldCorrectionErrors];
+
+export type WithdrawDocumentFieldCorrectionResponses = {
+    200: OkResponseDto;
+};
+
+export type WithdrawDocumentFieldCorrectionResponse = WithdrawDocumentFieldCorrectionResponses[keyof WithdrawDocumentFieldCorrectionResponses];
+
 export type DuplicateCandidatesData = {
     body?: never;
     path: {
@@ -3371,6 +3511,30 @@ export type ExtractionRequeueResponses = {
 
 export type ExtractionRequeueResponse = ExtractionRequeueResponses[keyof ExtractionRequeueResponses];
 
+export type ConfirmDocumentFieldData = {
+    body: ConfirmDocumentFieldRequestDto;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/documents/{id}/field-confirmations';
+};
+
+export type ConfirmDocumentFieldErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ConfirmDocumentFieldError = ConfirmDocumentFieldErrors[keyof ConfirmDocumentFieldErrors];
+
+export type ConfirmDocumentFieldResponses = {
+    200: ConfirmDocumentFieldResponseDto;
+};
+
+export type ConfirmDocumentFieldResponse = ConfirmDocumentFieldResponses[keyof ConfirmDocumentFieldResponses];
+
 export type GetDocumentLayoutCompareMetricsData = {
     body?: never;
     path: {
@@ -3523,6 +3687,32 @@ export type GetDocumentLayoutTypstResponses = {
 
 export type GetDocumentLayoutTypstResponse = GetDocumentLayoutTypstResponses[keyof GetDocumentLayoutTypstResponses];
 
+export type ListDocumentLayoutTokensData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        page?: number;
+    };
+    url: '/documents/{id}/layout/tokens';
+};
+
+export type ListDocumentLayoutTokensErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ListDocumentLayoutTokensError = ListDocumentLayoutTokensErrors[keyof ListDocumentLayoutTokensErrors];
+
+export type ListDocumentLayoutTokensResponses = {
+    200: DocumentLayoutTokensResponseDto;
+};
+
+export type ListDocumentLayoutTokensResponse = ListDocumentLayoutTokensResponses[keyof ListDocumentLayoutTokensResponses];
+
 export type DocumentPreviewData = {
     body?: never;
     path: {
@@ -3544,6 +3734,32 @@ export type DocumentPreviewError = DocumentPreviewErrors[keyof DocumentPreviewEr
 export type DocumentPreviewResponses = {
     200: unknown;
 };
+
+export type ListDocumentRegionsData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        role?: 'field' | 'table' | 'block' | 'ignore';
+    };
+    url: '/documents/{id}/regions';
+};
+
+export type ListDocumentRegionsErrors = {
+    401: ProblemDetailsDto;
+    403: ProblemDetailsDto;
+    404: ProblemDetailsDto;
+    422: ProblemDetailsDto;
+};
+
+export type ListDocumentRegionsError = ListDocumentRegionsErrors[keyof ListDocumentRegionsErrors];
+
+export type ListDocumentRegionsResponses = {
+    200: DocumentRegionListResponseDto;
+};
+
+export type ListDocumentRegionsResponse = ListDocumentRegionsResponses[keyof ListDocumentRegionsResponses];
 
 export type RefreshSuggestionsData = {
     body?: never;

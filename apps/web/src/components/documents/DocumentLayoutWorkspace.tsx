@@ -1,14 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
+  ApplyFieldCorrectionRequest,
   DocumentDto,
+  DocumentRegionDto,
   ExtractedField,
   ExtractionBlock,
+  LayoutToken,
   RecognizedFieldDefinitionDto,
 } from '@docuvate/contracts';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import {
+  applyDocumentFieldCorrection,
+  confirmDocumentField,
+  listDocumentLayoutTokens,
+  listDocumentRegions,
+  withdrawDocumentFieldCorrection,
+} from '../../lib/api';
+import { formatUserFacingError } from '../../lib/apiErrors';
 import { isExtractionPending } from '../../lib/documentExtractionState';
 import { findBlockIndexAtPoint } from '../../lib/extractionLayout';
 import { layoutIrDocumentFromPageSummaries } from '../../lib/layoutIrPages';
@@ -23,21 +34,45 @@ import {
 } from '../../lib/layoutReconstructionQuality';
 import { useFeatureFlags } from '../../lib/remoteConfig';
 import { segmentedToolbarClass } from '../../lib/segmentedControlClasses';
+import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { useDocumentLayoutIr } from '../../lib/useDocumentLayoutIr';
 import { useLayoutCompare } from '../../lib/useLayoutCompare';
+import { useViewportMaxWidth } from '../../lib/useViewportMaxWidth';
+import { useToast } from '../save/ToastProvider';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SegmentedControl } from '../ui/SegmentedControl';
 import { DocumentExtractionRecovery } from './DocumentExtractionRecovery';
+import { DocumentFieldContextBar } from './DocumentFieldContextBar';
+import { DocumentFieldCorrectionSheet } from './DocumentFieldCorrectionSheet';
 import { DocumentLayoutCompareView } from './DocumentLayoutCompareView';
 import { DocumentLayoutExportTab } from './DocumentLayoutExportTab';
 import { DocumentLayoutSidePanel, type LayoutSideTab, overlayRegionById } from './DocumentLayoutSidePanel';
+import {
+  type DocumentSelectionDraft,
+  DocumentSelectionLayer,
+} from './DocumentSelectionLayer';
+import { type DocumentSelectionTool, DocumentSelectionTools } from './DocumentSelectionTools';
 import { ExtractedLayoutHtmlFrame, LAYOUT_IR_ZOOM_STEPS, type LayoutIrZoomStep } from './ExtractedLayoutHtmlFrame';
 import { ExtractedTextPanel } from './ExtractedTextPanel';
 import { type PdfLayoutOverlay, PdfViewer } from './PdfViewer';
 
 type LeftDocumentMode = 'original' | 'text';
 type AdvancedViewerMode = 'reconstruction' | 'compare';
+
+const REGION_FIELD_OVERLAY_PREFIX = 'region-field-';
+const CORRECTION_SHEET_MAX_WIDTH_PX = 1023;
+
+function regionFieldOverlayId(regionId: string): string {
+  return `${REGION_FIELD_OVERLAY_PREFIX}${regionId}`;
+}
+
+function regionIdFromFieldOverlay(overlayId: string): string | null {
+  if (!overlayId.startsWith(REGION_FIELD_OVERLAY_PREFIX)) {
+    return null;
+  }
+  return overlayId.slice(REGION_FIELD_OVERLAY_PREFIX.length);
+}
 
 interface DocumentLayoutWorkspaceProps {
   doc: DocumentDto;
@@ -58,6 +93,7 @@ interface DocumentLayoutWorkspaceProps {
   onBlocksChange: (blocks: ExtractionBlock[]) => void;
   onAcceptFieldSuggestion: (key: string, value: string) => void;
   onFieldValueChange?: (key: string, value: string) => void;
+  onFieldsChange?: (fields: ExtractedField[]) => void;
   recognizedCatalog?: RecognizedFieldDefinitionDto[];
   editMode: boolean;
   onEditModeChange: (edit: boolean) => void;
@@ -75,6 +111,7 @@ interface DocumentLayoutWorkspaceProps {
   showTechnicalDetails?: boolean;
   layoutSideTab: LayoutSideTab;
   onLayoutSideTabChange: (tab: LayoutSideTab) => void;
+  onCorrectionSheetOpenChange?: (open: boolean) => void;
 }
 
 export function DocumentLayoutWorkspace({
@@ -96,6 +133,7 @@ export function DocumentLayoutWorkspace({
   onBlocksChange,
   onAcceptFieldSuggestion,
   onFieldValueChange,
+  onFieldsChange,
   recognizedCatalog = [],
   editMode,
   onEditModeChange,
@@ -113,8 +151,11 @@ export function DocumentLayoutWorkspace({
   showTechnicalDetails = false,
   layoutSideTab,
   onLayoutSideTabChange,
+  onCorrectionSheetOpenChange,
 }: DocumentLayoutWorkspaceProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const toast = useToast();
+  const correctionSheetViewport = useViewportMaxWidth(CORRECTION_SHEET_MAX_WIDTH_PX);
   const layoutIrAvailable = doc.extraction?.layoutIrAvailable === true;
   const layoutIrPages = doc.extraction?.layoutIrPages;
   const { layoutIr, state: layoutIrState } = useDocumentLayoutIr(
@@ -134,6 +175,123 @@ export function DocumentLayoutWorkspace({
   const [hoverOverlay, setHoverOverlay] = useState<PdfLayoutOverlay | null>(null);
   const [layoutZoom, setLayoutZoom] = useState<LayoutIrZoomStep>(100);
   const [dismissedSuggestions, setDismissedSuggestions] = useState<Set<string>>(() => new Set());
+  const [selectionTool, setSelectionTool] = useState<DocumentSelectionTool>('none');
+  const [selectionDraft, setSelectionDraft] = useState<DocumentSelectionDraft | null>(null);
+  const [layoutTokens, setLayoutTokens] = useState<LayoutToken[]>([]);
+  const [fieldRegions, setFieldRegions] = useState<DocumentRegionDto[]>([]);
+  const [reanchorFieldKey, setReanchorFieldKey] = useState<string | null>(null);
+  const [selectedFieldKey, setSelectedFieldKey] = useState<string | null>(null);
+
+  const refreshRegions = useCallback(async () => {
+    const [tokenPage, regions] = await Promise.all([
+      listDocumentLayoutTokens(doc.id, viewerPage),
+      listDocumentRegions(doc.id, 'field'),
+    ]);
+    setLayoutTokens(tokenPage.tokens);
+    setFieldRegions(regions.items);
+  }, [doc.id, viewerPage]);
+
+  useEffect(() => {
+    void refreshRegions().catch(() => {
+      setLayoutTokens([]);
+      setFieldRegions([]);
+    });
+  }, [refreshRegions]);
+
+  const fieldOptions = useMemo(
+    () =>
+      [...knownFieldKeys].map((key) => ({
+        value: key,
+        label: fieldLabelForKey(key),
+      })),
+    [fieldLabelForKey, knownFieldKeys]
+  );
+
+  const highlightRegion = useCallback(
+    (key: string) => {
+      const region = fieldRegions.find((item) => item.field?.fieldKey === key);
+      if (!region) {
+        return;
+      }
+      setActiveOverlayId(regionFieldOverlayId(region.id));
+      onViewerPageChange(region.page);
+      const matched = blocks.filter(
+        (block) =>
+          block.page === region.page &&
+          block.blockIndex != null &&
+          region.blockIndexes.includes(block.blockIndex)
+      );
+      if (matched.length > 0) {
+        onHighlightBlocks(matched);
+      }
+    },
+    [blocks, fieldRegions, onHighlightBlocks, onViewerPageChange]
+  );
+
+  const selectField = useCallback(
+    (key: string) => {
+      setSelectedFieldKey(key);
+      highlightRegion(key);
+      onLayoutSideTabChange('fields');
+    },
+    [highlightRegion, onLayoutSideTabChange]
+  );
+
+  const correctionSheetOpen = Boolean(correctionSheetViewport && selectedFieldKey);
+  useEffect(() => {
+    onCorrectionSheetOpenChange?.(correctionSheetOpen);
+    return () => {
+      onCorrectionSheetOpenChange?.(false);
+    };
+  }, [correctionSheetOpen, onCorrectionSheetOpenChange]);
+
+  const runFieldCorrection = useCallback(
+    async (body: ApplyFieldCorrectionRequest, successMessage: string) => {
+      const result = await applyDocumentFieldCorrection(doc.id, body);
+      await refreshRegions();
+      if (result?.region?.field) {
+        const nextValue =
+          result.correction?.newValue ??
+          result.region.field.valueOverride ??
+          selectionDraft?.text ??
+          '';
+        const fieldKey = result.region.field.fieldKey;
+        setSelectedFieldKey(fieldKey);
+        setActiveOverlayId(regionFieldOverlayId(result.region.id));
+        if (onFieldsChange) {
+          const exists = fields.some((field) => field.key === fieldKey);
+          onFieldsChange(
+            exists
+              ? fields.map((field) =>
+                  field.key === fieldKey
+                    ? { ...field, value: nextValue || field.value, confidence: 1 }
+                    : field
+                )
+              : [
+                  ...fields,
+                  { key: fieldKey, value: nextValue, confidence: 1 },
+                ]
+          );
+        }
+      }
+      if (result?.correction) {
+        const correctionId = result.correction.id;
+        toast.success(successMessage, {
+          undo: () => {
+            void withdrawDocumentFieldCorrection(doc.id, correctionId)
+              .then(() => refreshRegions())
+              .catch((err: unknown) => {
+                toast.error(formatUserFacingError(err, 'errors.generic'));
+              });
+          },
+        });
+      }
+      setSelectionDraft(null);
+      setSelectionTool('none');
+      setReanchorFieldKey(null);
+    },
+    [doc.id, fields, onFieldsChange, refreshRegions, selectionDraft?.text, toast]
+  );
 
   const layoutPageCount = layoutIr?.pages.length ?? layoutIrPages?.length ?? 1;
   const { metricsByPage, metrics: compareMetrics } = useLayoutCompare(
@@ -173,33 +331,59 @@ export function DocumentLayoutWorkspace({
     [layoutIr]
   );
 
-  const pdfOverlays: PdfLayoutOverlay[] = useMemo(
-    () =>
-      overlays.map((o) => {
-        let label = o.label;
-        if (o.kind === 'table' && o.tableIndex != null) {
-          label = t('documents.layoutTableLabel', { n: o.tableIndex + 1 });
-        } else if (o.kind === 'field' && o.label) {
-          label = fieldLabelForKey(o.label);
-        }
-        return {
-          id: o.id,
-          page: o.page,
-          x: o.x,
-          y: o.y,
-          width: o.width,
-          height: o.height,
-          kind: o.kind,
-          label,
-          value: o.value,
-        };
-      }),
-    [fieldLabelForKey, overlays, t]
-  );
+  const pdfOverlays: PdfLayoutOverlay[] = useMemo(() => {
+    const fromIr = overlays.map((o) => {
+      let label = o.label;
+      if (o.kind === 'table' && o.tableIndex != null) {
+        label = t('documents.layoutTableLabel', { n: o.tableIndex + 1 });
+      } else if (o.kind === 'field' && o.label) {
+        label = fieldLabelForKey(o.label);
+      }
+      return {
+        id: o.id,
+        page: o.page,
+        x: o.x,
+        y: o.y,
+        width: o.width,
+        height: o.height,
+        kind: o.kind,
+        label,
+        value: o.value,
+      };
+    });
+    const fromRegions: PdfLayoutOverlay[] = fieldRegions.map((region) => {
+      const fieldKey = region.field?.fieldKey ?? '';
+      return {
+        id: regionFieldOverlayId(region.id),
+        page: region.page,
+        x: region.x0,
+        y: region.y0,
+        width: Math.max(0, region.x1 - region.x0),
+        height: Math.max(0, region.y1 - region.y0),
+        kind: 'field',
+        label: fieldKey ? fieldLabelForKey(fieldKey) : t('documents.layoutOverlayKind.field'),
+        value: region.field?.valueOverride ?? undefined,
+      };
+    });
+    return [...fromIr, ...fromRegions];
+  }, [fieldLabelForKey, fieldRegions, overlays, t]);
 
   const onOverlaySelect = useCallback(
     (overlayId: string, page?: number) => {
       setActiveOverlayId(overlayId);
+      const regionId = regionIdFromFieldOverlay(overlayId);
+      if (regionId) {
+        const fieldRegion = fieldRegions.find((item) => item.id === regionId);
+        const fieldKey = fieldRegion?.field?.fieldKey;
+        if (fieldKey) {
+          setSelectedFieldKey(fieldKey);
+          onLayoutSideTabChange('fields');
+        }
+        if (fieldRegion) {
+          onViewerPageChange(fieldRegion.page);
+        }
+        return;
+      }
       const region = overlayRegionById(overlays, overlayId);
       const targetPage = page ?? region?.page;
       if (targetPage) onViewerPageChange(targetPage);
@@ -217,6 +401,7 @@ export function DocumentLayoutWorkspace({
     },
     [
       blocks,
+      fieldRegions,
       onActiveBlockIndexChange,
       onHighlightBlocks,
       onLayoutSideTabChange,
@@ -227,13 +412,69 @@ export function DocumentLayoutWorkspace({
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && activeOverlayId) {
+      const target = event.target;
+      if (target instanceof HTMLElement) {
+        const tag = target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || target.isContentEditable) {
+          return;
+        }
+      }
+      if (event.key === 'Escape') {
         setActiveOverlayId(null);
+        setSelectionDraft(null);
+        setSelectionTool('none');
+        setReanchorFieldKey(null);
+        setSelectedFieldKey(null);
+        return;
+      }
+      if (event.key === 't' || event.key === 'T') {
+        setSelectionTool('text');
+        return;
+      }
+      if (event.key === 'r' || event.key === 'R') {
+        setSelectionTool('rect');
+        return;
+      }
+      if (event.key === 'Enter' && selectionDraft) {
+        const fieldKey = reanchorFieldKey ?? fieldOptions[0]?.value;
+        if (!fieldKey) {
+          return;
+        }
+        event.preventDefault();
+        void runFieldCorrection(
+          {
+            id: crypto.randomUUID(),
+            op: reanchorFieldKey ? 'reanchor' : 'create',
+            fieldKey,
+            page: selectionDraft.page,
+            shape: 'rect',
+            x0: selectionDraft.rect.x0,
+            y0: selectionDraft.rect.y0,
+            x1: selectionDraft.rect.x1,
+            y1: selectionDraft.rect.y1,
+            blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+            ...(selectionDraft.text.trim().length > 0
+              ? { valueOverride: selectionDraft.text }
+              : {}),
+          },
+          t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
+        ).catch((err: unknown) => {
+          toast.error(formatUserFacingError(err, 'errors.generic'));
+        });
       }
     };
     window.addEventListener('keydown', onKey);
     return () => { window.removeEventListener('keydown', onKey); };
-  }, [activeOverlayId]);
+  }, [
+    activeOverlayId,
+    fieldLabelForKey,
+    fieldOptions,
+    reanchorFieldKey,
+    runFieldCorrection,
+    selectionDraft,
+    t,
+    toast,
+  ]);
 
   const onPdfPageClick = useCallback(
     (page: number, nx: number, ny: number) => {
@@ -298,9 +539,23 @@ export function DocumentLayoutWorkspace({
   const failed = doc.status === 'failed';
   const showRecovery =
     (failed || isExtractionPending(doc.status)) && onRequeueExtraction != null;
+  const selectedField = selectedFieldKey
+    ? fields.find((field) => field.key === selectedFieldKey)
+    : undefined;
+  const selectedRegion = selectedFieldKey
+    ? fieldRegions.find((item) => item.field?.fieldKey === selectedFieldKey)
+    : undefined;
 
   return (
-    <div className="layout-workspace">
+    <div
+      className={
+        correctionSheetViewport && selectedFieldKey
+          ? 'layout-workspace layout-workspace--correction-sheet'
+          : 'layout-workspace'
+      }
+      data-correction-sheet-viewport={correctionSheetViewport ? '1' : '0'}
+      data-selected-field={selectedFieldKey ?? ''}
+    >
       <div className="layout-workspace-main">
         <Card className="preview-card preview-card-pdf layout-viewer-card">
           {showRecovery ? (
@@ -320,6 +575,9 @@ export function DocumentLayoutWorkspace({
               options={leftModeOptions}
               onChange={setLeftDocumentMode}
             />
+            {leftMode === 'original' && !showAdvancedStage ? (
+              <DocumentSelectionTools value={selectionTool} onChange={setSelectionTool} />
+            ) : null}
             {showAdvancedStage || leftMode === 'text' ? (
               <SegmentedControl
                 ariaLabel={t('documents.layoutZoomAria')}
@@ -421,7 +679,7 @@ export function DocumentLayoutWorkspace({
                     data={previewData}
                     highlightBlocks={highlights}
                     layoutOverlays={pdfOverlays}
-                    layoutOverlayEnabled={overlayEnabled && overlays.length > 0}
+                    layoutOverlayEnabled={overlayEnabled && pdfOverlays.length > 0}
                     activeLayoutOverlayId={activeOverlayId}
                     onLayoutOverlaySelect={(id) => { onOverlaySelect(id); }}
                     onLayoutOverlayHover={setHoverOverlay}
@@ -430,9 +688,9 @@ export function DocumentLayoutWorkspace({
                     onPageChange={onViewerPageChange}
                     paginated
                     fitWidth
-                    onPageClick={onPdfPageClick}
+                    onPageClick={selectionTool === 'none' ? onPdfPageClick : undefined}
                     toolbarAccessory={
-                      overlays.length > 0 ? (
+                      pdfOverlays.length > 0 ? (
                         <label className="layout-overlay-toggle pdf-viewer-overlay-toggle">
                           <input
                             type="checkbox"
@@ -445,6 +703,55 @@ export function DocumentLayoutWorkspace({
                     }
                   />
                 )}
+                {!showAdvancedStage ? (
+                  <DocumentSelectionLayer
+                    tool={selectionTool}
+                    page={viewerPage}
+                    tokens={layoutTokens}
+                    onDraftChange={setSelectionDraft}
+                  />
+                ) : null}
+                {selectionDraft ? (
+                  <DocumentFieldContextBar
+                    draft={selectionDraft}
+                    fieldOptions={
+                      reanchorFieldKey
+                        ? [
+                            {
+                              value: reanchorFieldKey,
+                              label: fieldLabelForKey(reanchorFieldKey),
+                            },
+                          ]
+                        : fieldOptions
+                    }
+                    onCreate={(fieldKey) => {
+                      void runFieldCorrection(
+                        {
+                          id: crypto.randomUUID(),
+                          op: reanchorFieldKey ? 'reanchor' : 'create',
+                          fieldKey,
+                          page: selectionDraft.page,
+                          shape: 'rect',
+                          x0: selectionDraft.rect.x0,
+                          y0: selectionDraft.rect.y0,
+                          x1: selectionDraft.rect.x1,
+                          y1: selectionDraft.rect.y1,
+                          blockIndexes: selectionDraft.tokens.map((token) => token.blockIndex),
+                          ...(selectionDraft.text.trim().length > 0
+                            ? { valueOverride: selectionDraft.text }
+                            : {}),
+                        },
+                        t('documents.fieldCorrectionSaved', { name: fieldLabelForKey(fieldKey) })
+                      ).catch((err: unknown) => {
+                        toast.error(formatUserFacingError(err, 'errors.generic'));
+                      });
+                    }}
+                    onCancel={() => {
+                      setSelectionDraft(null);
+                      setReanchorFieldKey(null);
+                    }}
+                  />
+                ) : null}
                 {hoverOverlay && overlayEnabled ? (
                   <div className="layout-overlay-popover" role="tooltip">
                     <span className={`layout-overlay-kind layout-overlay-kind-${hoverOverlay.kind}`}>
@@ -515,7 +822,32 @@ export function DocumentLayoutWorkspace({
           dismissedSuggestions={dismissedSuggestions}
           heuristicSuggestions={heuristicSuggestions}
           recognizedCatalog={recognizedCatalog}
-          onFieldValueChange={onFieldValueChange}
+          fieldRegions={fieldRegions}
+          onConfirmField={(key, value) => {
+            void confirmDocumentField(doc.id, key, value)
+              .then(() => {
+                if (onFieldsChange) {
+                  onFieldsChange(
+                    fields.map((field) =>
+                      field.key === key ? { ...field, value, confidence: 1 } : field
+                    )
+                  );
+                }
+                toast.success(t('documents.fieldConfirmedToast'));
+                highlightRegion(key);
+              })
+              .catch((err: unknown) => {
+                toast.error(formatUserFacingError(err, 'errors.generic'));
+              });
+          }}
+          onCorrectField={(key) => {
+            setReanchorFieldKey(key);
+            setSelectionTool('rect');
+            highlightRegion(key);
+          }}
+          onHighlightField={highlightRegion}
+          onSelectField={selectField}
+          hideInlineFieldList={correctionSheetOpen}
           documentChatAvailable={documentChatAvailable}
           documentChatUiEnabled={documentChatUiEnabled}
           documentChatLocalModelEnabled={documentChatLocalModelEnabled}
@@ -526,6 +858,57 @@ export function DocumentLayoutWorkspace({
           <p className="muted">{t('documents.layoutIrLoading')}</p>
         </aside>
       )}
+      {correctionSheetViewport ? (
+        <DocumentFieldCorrectionSheet
+          open={selectedFieldKey != null}
+          fieldName={selectedFieldKey ? fieldLabelForKey(selectedFieldKey) : ''}
+          value={selectedField?.value ?? ''}
+          sourceLabel={
+            selectedRegion ? sourceChipPageLabel(selectedRegion.page, i18n.language) : undefined
+          }
+          onClose={() => { setSelectedFieldKey(null); }}
+          onConfirm={
+            selectedField
+              ? () => {
+                  const field = selectedField;
+                  void confirmDocumentField(doc.id, field.key, field.value)
+                    .then(() => {
+                      if (onFieldsChange) {
+                        onFieldsChange(
+                          fields.map((item) =>
+                            item.key === field.key ? { ...item, value: field.value, confidence: 1 } : item
+                          )
+                        );
+                      }
+                      toast.success(t('documents.fieldConfirmedToast'));
+                      highlightRegion(field.key);
+                    })
+                    .catch((err: unknown) => {
+                      toast.error(formatUserFacingError(err, 'errors.generic'));
+                    });
+                }
+              : undefined
+          }
+          onCorrect={
+            selectedFieldKey
+              ? () => {
+                  setReanchorFieldKey(selectedFieldKey);
+                  setSelectionTool('rect');
+                  highlightRegion(selectedFieldKey);
+                  setSelectedFieldKey(null);
+                }
+              : undefined
+          }
+          onValueChange={
+            selectedFieldKey && onFieldValueChange
+              ? (value) => { onFieldValueChange(selectedFieldKey, value); }
+              : undefined
+          }
+          onSourceClick={
+            selectedFieldKey ? () => { highlightRegion(selectedFieldKey); } : undefined
+          }
+        />
+      ) : null}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import {
   createContext,
+  type CSSProperties,
   type ReactNode,
   useCallback,
   useContext,
@@ -13,6 +14,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 import { readNotifySavedDetail, readNotifySaveErrorDetail } from '../../lib/customEventDetail';
+import { useBottomSheetToastOffset } from '../../lib/useBottomSheetToastOffset';
 import { getOverlayPortalRoot } from '../ui/overlay/overlayPortal';
 import { ToastItem } from './ToastItem';
 
@@ -38,6 +40,10 @@ interface ToastRecord {
   requestId?: string;
 }
 
+interface ToastRegionStyle extends CSSProperties {
+  '--dv-toast-sheet-offset': string;
+}
+
 interface ToastContextValue {
   pushSuccess: (message?: string, options?: ToastSuccessOptions) => void;
   pushError: (message: string, retryOrMeta?: (() => void) | ToastErrorMeta) => void;
@@ -54,6 +60,7 @@ function nextToastId(): string {
 export function ToastProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
+  const sheetOffsetPx = useBottomSheetToastOffset();
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((item) => item.id !== id));
@@ -103,11 +110,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [pushSuccess, pushError, dismissSuccessToasts, dismissAllToasts]
   );
 
+  const toastRegionStyle: ToastRegionStyle = {
+    '--dv-toast-sheet-offset': `${String(sheetOffsetPx)}px`,
+  };
+
   return (
     <ToastContext.Provider value={value}>
       {children}
       {createPortal(
-        <div className="toast-region">
+        <div
+          className="toast-region"
+          data-testid="toast-region"
+          data-sheet-offset={String(sheetOffsetPx)}
+          style={toastRegionStyle}
+        >
           {toasts.map((toast) => (
             <ToastItem
               key={toast.id}

@@ -388,7 +388,8 @@
 
 .source-chip {
   display: inline-flex;
-  max-width: 100%;
+  max-width: min(100%, 8.5rem);
+  flex: 0 1 auto;
   align-items: center;
   gap: var(--dv-space-2xs);
   padding: 0.125rem var(--dv-space-xs);
@@ -425,36 +426,95 @@
 }
 
 .field-value-row {
+  container-type: inline-size;
+  container-name: field-row;
   display: grid;
-  grid-template-rows: auto auto auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    'primary'
+    'meta'
+    'actions';
   row-gap: var(--dv-space-2xs);
+  column-gap: var(--dv-space-xs);
   box-sizing: border-box;
-  min-height: 6rem;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 0;
   padding-block: var(--dv-space-xs);
   border-bottom: 1px solid var(--dv-color-border);
 }
 
-.field-value-row-head,
-.field-value-row-value-line {
+.field-value-row-primary,
+.field-value-row-select,
+.field-value-row-meta,
+.field-value-row-actions {
   display: flex;
   align-items: center;
   gap: var(--dv-space-xs);
   min-width: 0;
+  max-width: 100%;
+}
+
+.field-value-row-primary,
+.field-value-row-select {
+  grid-area: primary;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.field-value-row-select {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.field-value-row-meta {
+  grid-area: meta;
+  flex-wrap: wrap;
+}
+
+.field-value-row-actions {
+  grid-area: actions;
+  flex-wrap: wrap;
+}
+
+.field-value-row-name,
+.field-value-row-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
 }
 
 .field-value-row-name {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   color: var(--dv-color-text-muted);
-  margin: 0;
 }
 
 .field-value-row-value {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
   font-size: var(--dv-font-size-md);
   font-weight: var(--dv-font-weight-medium);
-  margin: 0;
+}
+
+@container field-row (min-width: 22rem) {
+  .field-value-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      'primary primary'
+      'meta actions';
+  }
 }
 
 .document-tile {

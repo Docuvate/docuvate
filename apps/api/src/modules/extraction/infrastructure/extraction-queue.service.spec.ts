@@ -23,6 +23,16 @@ describe('isPermanentExtractionFailureMessage', () => {
   it('allows BullMQ retry for worker unavailable responses', () => {
     expect(isPermanentExtractionFailureMessage('Worker extraction unavailable: 503')).toBe(false);
   });
+
+  it('marks extract-deadline timeout as unrecoverable', () => {
+    const message = 'documents.extractionFailedTimeout';
+    expect(isPermanentExtractionFailureMessage(message)).toBe(true);
+    expect(() => {
+      if (isPermanentExtractionFailureMessage(message)) {
+        throw new UnrecoverableError(message);
+      }
+    }).toThrow(UnrecoverableError);
+  });
 });
 
 describe('isRetryableExtractionFailureMessage', () => {
