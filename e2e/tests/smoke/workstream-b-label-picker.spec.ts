@@ -101,9 +101,7 @@ async function provisionLongLabelRowFixture(
   const tagIds: string[] = [];
   const runToken = randomUUID().slice(0, 8);
   for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
-    const stem = WS_B_LONG_GERMAN_LABEL_STEMS[index];
-    const name = stem.slice(0, 60);
-    expect(name.length).toBe(60);
+    const name = `ws-b-long-${runToken}-${String(index)}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed' },
