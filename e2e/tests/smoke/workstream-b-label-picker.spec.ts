@@ -66,27 +66,6 @@ function uniqueLongLabelName(runToken: string, index: number): string {
   return `wsb${runToken}${unique}${unique}${String(index).padStart(2, '0')}`;
 }
 
-async function waitForDocumentReady(
-  request: import('@playwright/test').APIRequestContext,
-  documentId: string
-): Promise<void> {
-  await expect
-    .poll(
-      async () => {
-        const res = await request.get(`${apiBase}/v1/documents/${documentId}`, {
-          headers: { origin: webOrigin },
-        });
-        if (!res.ok()) {
-          return 'pending';
-        }
-        const doc = (await res.json()) as { status: string };
-        return doc.status;
-      },
-      { timeout: 280_000, intervals: [2000, 3000, 5000] }
-    )
-    .toBe('ready');
-}
-
 async function provisionLongLabelRowFixture(
   request: import('@playwright/test').APIRequestContext
 ): Promise<string> {
@@ -138,7 +117,8 @@ async function provisionLongLabelRowFixture(
     expect(assign.ok()).toBeTruthy();
   }
 
-  await waitForDocumentReady(request, created.id);
+  // Chip-row tests only need the library row and tags. Waiting for extract-ready
+  // turns a worker 422 into a 5-minute poll of a permanently failed document.
   return uploadName;
 }
 

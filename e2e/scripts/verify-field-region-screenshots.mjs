@@ -8,6 +8,8 @@ const REQUIRED = [
   'field-regions-long-labels-1024-light.png',
   'field-regions-long-labels-1440-light.png',
   'field-regions-long-labels-1920-light.png',
+  'field-regions-recognized-fields-1024-light.png',
+  'field-regions-recognized-fields-1440-light.png',
   'field-regions-bottom-sheet-360-light.png',
   'field-regions-bottom-sheet-390-light.png',
   'field-regions-before-rectangle.png',

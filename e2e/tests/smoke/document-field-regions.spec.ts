@@ -241,6 +241,13 @@ test.describe('document field regions', () => {
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
           await assertFieldNameStackedAboveValue(page);
           await assertNoHorizontalOverflow(page);
+          if (scheme === 'light' && (viewport.width === 1024 || viewport.width === 1440)) {
+            await captureLoadedScreenshot(
+              page.locator('.layout-side-fields'),
+              testInfo,
+              `field-regions-recognized-fields-${viewport.name}-${scheme}.png`
+            );
+          }
         }
 
         await setLabelsTabOpen(page, true);

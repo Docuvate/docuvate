@@ -341,8 +341,9 @@ export async function assertFieldNameStackedAboveValue(page: Page): Promise<void
     const nameOnOwnLine = nameBox.bottom <= valueBox.top + 1;
     const nameFullWidth = nameBox.width + 1 >= valueBox.width;
     const nameText = (nameEl.textContent ?? '').trim();
+    const nameReadable = nameText.length > 0 && !nameText.includes('…') && !nameText.endsWith('...');
     return {
-      ok: nameOnOwnLine && nameFullWidth && nameText.length > 0,
+      ok: nameOnOwnLine && nameFullWidth && nameReadable,
       reason: `nameBottom=${String(nameBox.bottom)} valueTop=${String(valueBox.top)} nameW=${String(nameBox.width)} valueW=${String(valueBox.width)} text=${nameText}`,
       nameText,
     };
