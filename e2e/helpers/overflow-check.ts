@@ -280,6 +280,76 @@ export async function assertOverflowMissesHeader(page: Page): Promise<void> {
   expect(overlap.ok, overlap.reason).toBe(true);
 }
 
+export async function assertToastMissesSheetActions(page: Page): Promise<void> {
+  const toast = page.locator('.toast').first();
+  if ((await toast.count()) === 0 || !(await toast.isVisible())) {
+    await page.evaluate(() => {
+      window.dispatchEvent(
+        new CustomEvent('docuvate-notify-saved', {
+          detail: { message: 'Korrektur gespeichert · nachzahlung' },
+        })
+      );
+    });
+  }
+  await expect(toast).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('[data-testid="toast-region"]')).not.toHaveAttribute(
+    'data-sheet-offset',
+    '0'
+  );
+  await expect
+    .poll(
+      async () => {
+        return page.evaluate(() => {
+          const toastEl = document.querySelector('.toast');
+          const actions = document.querySelector(
+            '[data-testid="field-correction-sheet"] .document-field-correction-actions'
+          );
+          if (!(toastEl instanceof HTMLElement) || !(actions instanceof HTMLElement)) {
+            return 'missing toast or sheet actions';
+          }
+          const a = toastEl.getBoundingClientRect();
+          const b = actions.getBoundingClientRect();
+          const intersects = !(
+            a.bottom <= b.top + 0.5 ||
+            b.bottom <= a.top + 0.5 ||
+            a.right <= b.left + 0.5 ||
+            b.right <= a.left + 0.5
+          );
+          return intersects
+            ? `toastBottom=${String(a.bottom)} actionsTop=${String(b.top)}`
+            : 'ok';
+        });
+      },
+      { timeout: 5_000 }
+    )
+    .toBe('ok');
+}
+
+export async function assertFieldNameStackedAboveValue(page: Page): Promise<void> {
+  const name = page.locator('.layout-side-fields .field-value-row-name').first();
+  const value = page.locator('.layout-side-fields .field-value-row-value').first();
+  await expect(name).toBeVisible({ timeout: 15_000 });
+  await expect(value).toBeVisible();
+  const stacked = await page.evaluate(() => {
+    const nameEl = document.querySelector('.layout-side-fields .field-value-row-name');
+    const valueEl = document.querySelector('.layout-side-fields .field-value-row-value');
+    if (!(nameEl instanceof HTMLElement) || !(valueEl instanceof HTMLElement)) {
+      return { ok: false, reason: 'missing name or value', nameText: '' };
+    }
+    const nameBox = nameEl.getBoundingClientRect();
+    const valueBox = valueEl.getBoundingClientRect();
+    const nameOnOwnLine = nameBox.bottom <= valueBox.top + 1;
+    const nameFullWidth = nameBox.width + 1 >= valueBox.width;
+    const nameText = (nameEl.textContent ?? '').trim();
+    return {
+      ok: nameOnOwnLine && nameFullWidth && nameText.length > 0,
+      reason: `nameBottom=${String(nameBox.bottom)} valueTop=${String(valueBox.top)} nameW=${String(nameBox.width)} valueW=${String(valueBox.width)} text=${nameText}`,
+      nameText,
+    };
+  });
+  expect(stacked.ok, stacked.reason).toBe(true);
+}
+
 export async function assertFieldRegionRenderedWithValue(page: Page): Promise<void> {
   const overlay = page.locator('[data-overlay-id^="region-field-"]').first();
   await expect(overlay).toBeVisible({ timeout: 30_000 });

@@ -7,11 +7,13 @@ import { openLayoutDocumentPage, uploadLayoutTableDocument } from '../../helpers
 import { assignLongLabels, longLabelNames } from '../../helpers/long-label-fixture';
 import {
   assertCorrectionsBottomSheet,
+  assertFieldNameStackedAboveValue,
   assertFieldRegionRenderedWithValue,
   assertLongLabelChipsTruncateWithTooltip,
   assertNoClippedOrOverlappingChips,
   assertNoHorizontalOverflow,
   assertOverflowMissesHeader,
+  assertToastMissesSheetActions,
   captureLoadedScreenshot,
   captureViewportScreenshot,
 } from '../../helpers/overflow-check';
@@ -220,6 +222,7 @@ test.describe('document field regions', () => {
           await expect(page.locator('.extracted-fields-section')).toHaveCount(0);
           await expect(page.locator('.field-value-row')).toHaveCount(0);
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
+          await assertToastMissesSheetActions(page);
           await assertNoHorizontalOverflow(page);
           if (scheme === 'light') {
             await captureViewportScreenshot(
@@ -236,6 +239,7 @@ test.describe('document field regions', () => {
             .getByRole('tab', { name: /Übersicht|Overview/i })
             .click({ force: true });
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
+          await assertFieldNameStackedAboveValue(page);
           await assertNoHorizontalOverflow(page);
         }
 

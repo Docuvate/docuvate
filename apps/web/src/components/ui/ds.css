@@ -458,6 +458,8 @@
 .field-value-row-primary,
 .field-value-row-select {
   grid-area: primary;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .field-value-row-select {
@@ -490,14 +492,18 @@
 }
 
 .field-value-row-name {
-  flex: 0 1 42%;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
   font-size: var(--dv-font-size-xs);
   font-weight: var(--dv-font-weight-semibold);
   color: var(--dv-color-text-muted);
 }
 
 .field-value-row-value {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
   font-size: var(--dv-font-size-md);
   font-weight: var(--dv-font-weight-medium);
 }

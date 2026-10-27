@@ -13085,7 +13085,7 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   position: fixed;
   z-index: var(--dv-z-toast);
   top: auto;
-  bottom: 16px;
+  bottom: calc(16px + var(--dv-toast-sheet-offset, 0px));
   right: 16px;
   display: flex;
   flex-direction: column;

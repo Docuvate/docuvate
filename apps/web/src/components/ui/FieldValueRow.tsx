@@ -1,8 +1,10 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Check } from 'lucide-react';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useElementOverflowTitle } from '../../lib/useElementOverflowTitle';
 import { Button } from './Button';
 import { Confidence } from './Confidence';
 import { SourceChip } from './SourceChip';
@@ -47,18 +49,14 @@ export function FieldValueRow({
           data-testid="field-value-row-select"
           onClick={onSelect}
         >
-          <span className="field-value-row-name" title={fieldName}>
-            {fieldName}
-          </span>
+          <OverflowText className="field-value-row-name" text={fieldName} />
           <span className="field-value-row-value" title={value}>
             {value}
           </span>
         </button>
       ) : (
         <div className="field-value-row-primary">
-          <p className="field-value-row-name" title={fieldName}>
-            {fieldName}
-          </p>
+          <OverflowText className="field-value-row-name" text={fieldName} />
           <p className="field-value-row-value" title={value}>
             {value}
           </p>
@@ -133,5 +131,15 @@ export function FieldValueRow({
         </div>
       ) : null}
     </article>
+  );
+}
+
+function OverflowText({ className, text }: { className: string; text: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const title = useElementOverflowTitle(ref, text);
+  return (
+    <span ref={ref} className={className} title={title}>
+      {text}
+    </span>
   );
 }
