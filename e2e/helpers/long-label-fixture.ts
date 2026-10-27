@@ -23,7 +23,8 @@ export async function assignLongLabels(
   webOrigin: string,
   documentId: string,
   names: string[]
-): Promise<void> {
+): Promise<string[]> {
+  const tagIds: string[] = [];
   for (const name of names) {
     const created = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
@@ -46,5 +47,7 @@ export async function assignLongLabels(
     if (!assign.ok()) {
       throw new Error(`assign tag failed: ${assign.status()} ${await assign.text()}`);
     }
+    tagIds.push(tagId);
   }
+  return tagIds;
 }

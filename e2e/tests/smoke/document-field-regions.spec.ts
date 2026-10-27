@@ -16,6 +16,7 @@ import {
   captureViewportScreenshot,
 } from '../../helpers/overflow-check';
 import { smokeFixtureStoragePath } from '../../helpers/smoke-fixture-auth';
+import { findReadyLayoutDocument } from '../../helpers/wait-for-layout-ir';
 
 const apiBase = process.env['E2E_API_URL'] ?? 'http://localhost:3001';
 const webOrigin = process.env['E2E_WEB_URL'] ?? 'http://localhost:5173';
@@ -125,17 +126,32 @@ test.describe('document field regions', () => {
   test.describe.configure({ mode: 'serial', timeout: 420_000, retries: 0 });
 
   let layoutDocId: string;
+  let ownedLayoutDoc = false;
   const labels = longLabelNames(25);
+  const createdTagIds: string[] = [];
 
   test.beforeAll(async ({ request }) => {
     test.setTimeout(420_000);
-    layoutDocId = await uploadLayoutTableDocument(request, apiBase, webOrigin);
-    await assignLongLabels(request, apiBase, webOrigin, layoutDocId, labels);
+    const existing = await findReadyLayoutDocument(request, apiBase, webOrigin);
+    if (existing) {
+      layoutDocId = existing;
+    } else {
+      layoutDocId = await uploadLayoutTableDocument(request, apiBase, webOrigin);
+      ownedLayoutDoc = true;
+    }
+    createdTagIds.push(
+      ...(await assignLongLabels(request, apiBase, webOrigin, layoutDocId, labels))
+    );
   });
 
   test.afterAll(async ({ request }) => {
     test.setTimeout(60_000);
-    if (!layoutDocId) {
+    for (const tagId of createdTagIds) {
+      await request.delete(`${apiBase}/v1/tags/${tagId}`, {
+        headers: { origin: webOrigin },
+      });
+    }
+    if (!layoutDocId || !ownedLayoutDoc) {
       return;
     }
     await request.delete(`${apiBase}/v1/documents/${layoutDocId}`, {

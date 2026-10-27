@@ -1,5 +1,9 @@
 import { expect, type APIRequestContext } from '@playwright/test';
 
+import { parseDocumentListBody } from './json-body';
+
+const REQUEST_TIMEOUT_MS = 15_000;
+
 interface DocumentReadyState {
   status: string;
   layoutIrAvailable: boolean;
@@ -43,7 +47,7 @@ export async function waitForSmokeApiReady(
   await expect
     .poll(
       async () => {
-        const res = await request.get(`${apiBase}/health/ready`);
+        const res = await request.get(`${apiBase}/health/ready`, { timeout: REQUEST_TIMEOUT_MS });
         if (!res.ok()) {
           return `http-${String(res.status())}`;
         }
@@ -66,6 +70,7 @@ export async function waitForDocumentLayoutIrReady(
       async () => {
         const docRes = await request.get(`${apiBase}/v1/documents/${docId}`, {
           headers: { origin: webOrigin },
+          timeout: REQUEST_TIMEOUT_MS,
         });
         if (!docRes.ok()) {
           return `document-${String(docRes.status())}`;
@@ -76,6 +81,7 @@ export async function waitForDocumentLayoutIrReady(
             requeued = true;
             const rq = await request.post(`${apiBase}/v1/documents/${docId}/extraction/requeue`, {
               headers: { origin: webOrigin },
+              timeout: REQUEST_TIMEOUT_MS,
             });
             if (rq.ok()) {
               return 'requeued';
@@ -92,6 +98,7 @@ export async function waitForDocumentLayoutIrReady(
         }
         const irRes = await request.get(`${apiBase}/v1/documents/${docId}/layout-ir`, {
           headers: { origin: webOrigin },
+          timeout: REQUEST_TIMEOUT_MS,
         });
         if (!irRes.ok()) {
           return `layout-ir-${String(irRes.status())}`;
@@ -101,4 +108,44 @@ export async function waitForDocumentLayoutIrReady(
       { timeout: 160_000, intervals: [2000, 3000, 5000] }
     )
     .toBe('ready');
+}
+
+/** Prefer a smoke-seed document that already has layout IR over a new extract. */
+export async function findReadyLayoutDocument(
+  request: APIRequestContext,
+  apiBase: string,
+  webOrigin: string
+): Promise<string | null> {
+  const listRes = await request.get(`${apiBase}/v1/documents?status=ready&limit=32`, {
+    headers: { origin: webOrigin },
+    timeout: REQUEST_TIMEOUT_MS,
+  });
+  if (!listRes.ok()) {
+    return null;
+  }
+  const documents = parseDocumentListBody(await listRes.json());
+  for (const item of documents) {
+    if (item.mimeType && item.mimeType !== 'application/pdf') {
+      continue;
+    }
+    const docRes = await request.get(`${apiBase}/v1/documents/${item.id}`, {
+      headers: { origin: webOrigin },
+      timeout: REQUEST_TIMEOUT_MS,
+    });
+    if (!docRes.ok()) {
+      continue;
+    }
+    const state = readDocumentReadyState(await docRes.json());
+    if (state.status !== 'ready' || !state.layoutIrAvailable) {
+      continue;
+    }
+    const irRes = await request.get(`${apiBase}/v1/documents/${item.id}/layout-ir`, {
+      headers: { origin: webOrigin },
+      timeout: REQUEST_TIMEOUT_MS,
+    });
+    if (irRes.ok()) {
+      return item.id;
+    }
+  }
+  return null;
 }
