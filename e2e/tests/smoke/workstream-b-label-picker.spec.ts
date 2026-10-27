@@ -101,14 +101,27 @@ async function provisionLongLabelRowFixture(
   const tagIds: string[] = [];
   const runToken = randomUUID().slice(0, 8);
   for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
-    const name = `ws-b-lang-${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
+    // Keep stems ≥60 chars for UI ellipsis; avoid a long ws-b-lang prefix (API name budget).
+    const name = `${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
     });
-    expect(response.ok()).toBeTruthy();
-    const body = (await response.json()) as { id: string };
-    tagIds.push(body.id);
+    const responseBody = await response.text();
+    expect(
+      response.ok(),
+      `create tag failed status=${response.status()} body=${responseBody}`
+    ).toBeTruthy();
+    const parsed: unknown = JSON.parse(responseBody);
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      !('id' in parsed) ||
+      typeof parsed.id !== 'string'
+    ) {
+      throw new Error(`create tag returned unexpected body: ${responseBody}`);
+    }
+    tagIds.push(parsed.id);
   }
 
   const uploadName = `ws-b-ellipsis-fixture-${runToken}.pdf`;
@@ -304,7 +317,6 @@ test.describe('Workstream B label picker', () => {
     fs.mkdirSync(artifactRoot, { recursive: true });
     const health = await request.get(`${apiBase}/health`);
     test.skip(!health.ok(), 'API not running');
-    await seedLabels(request, 500);
     let lastError: unknown;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
@@ -315,6 +327,7 @@ test.describe('Workstream B label picker', () => {
         lastError = error;
       }
     }
+    await seedLabels(request, 500);
     if (lastError !== undefined) {
       throw lastError;
     }
