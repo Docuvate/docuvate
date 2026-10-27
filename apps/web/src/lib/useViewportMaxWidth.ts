@@ -20,8 +20,10 @@ export function useViewportMaxWidth(maxWidthPx: number): boolean {
     };
     sync();
     mq.addEventListener('change', sync);
+    window.addEventListener('resize', sync);
     return () => {
       mq.removeEventListener('change', sync);
+      window.removeEventListener('resize', sync);
     };
   }, [maxWidthPx]);
 

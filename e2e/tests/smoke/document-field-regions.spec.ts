@@ -163,6 +163,11 @@ test.describe('document field regions', () => {
 
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await expect(page.locator('.layout-workspace')).toHaveAttribute(
+        'data-correction-sheet-viewport',
+        viewport.width < 1024 ? '1' : '0',
+        { timeout: 10_000 }
+      );
       for (const scheme of COLOR_SCHEMES) {
         await page.emulateMedia({ colorScheme: scheme });
         await dismissOverlaySheets(page);
@@ -174,7 +179,9 @@ test.describe('document field regions', () => {
         if (viewport.width < 1024) {
           const sheet = page.locator('[data-testid="field-correction-sheet"]');
           if ((await sheet.count()) === 0) {
-            await page.locator('.field-value-row-select').first().click({ force: true });
+            const row = page.locator('.field-value-row-select').first();
+            await expect(row).toBeAttached({ timeout: 15_000 });
+            await row.click({ force: true });
           }
           await assertCorrectionsBottomSheet(page);
           await expect(page.locator('.source-chip')).toContainText('Seite 1');

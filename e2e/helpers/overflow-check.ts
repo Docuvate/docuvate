@@ -229,13 +229,10 @@ export async function assertLongLabelChipsTruncateWithTooltip(page: Page): Promi
 }
 
 export async function assertCorrectionsBottomSheet(page: Page): Promise<void> {
-  const dialog = page.getByRole('dialog').filter({
-    has: page.locator('[data-testid="field-correction-sheet"], .document-field-correction-actions, .document-field-correction-value'),
-  });
   const sheet = page.locator('[data-testid="field-correction-sheet"]');
-  const target = (await sheet.count()) > 0 ? sheet : dialog;
-  await expect(target).toBeVisible({ timeout: 15_000 });
-  await expect(target).toHaveAttribute('role', 'dialog');
+  await expect(sheet).toBeVisible({ timeout: 15_000 });
+  await expect(sheet).toHaveAttribute('role', 'dialog');
+  await expect(sheet).toHaveAttribute('aria-modal', 'true');
   const layout = await page.evaluate((): BottomSheetLayout => {
     const pageRoot = document.querySelector('.document-detail-page');
     const workspace = pageRoot?.querySelector('.layout-workspace');
