@@ -32,6 +32,7 @@ import { sourceChipPageLabel } from '../../lib/sourceChipLabel';
 import { Button } from '../ui/Button';
 import { FieldValueRow } from '../ui/FieldValueRow';
 import { SourceChip } from '../ui/SourceChip';
+import { CorrectedTableCard } from './CorrectedTableCard';
 import { DocumentChatPanel } from './DocumentChatPanel';
 
 export type LayoutSideTab = 'fields' | 'tables' | 'outline' | 'chat';
@@ -68,6 +69,7 @@ interface DocumentLayoutSidePanelProps {
   onSelectField?: (key: string) => void;
   /** When the correction bottom sheet is open, unmount the inline field list so each field has one source chip. */
   hideInlineFieldList?: boolean;
+  hideInlineTableList?: boolean;
 }
 
 export function DocumentLayoutSidePanel({
@@ -99,6 +101,7 @@ export function DocumentLayoutSidePanel({
   onHighlightField,
   onSelectField,
   hideInlineFieldList = false,
+  hideInlineTableList = false,
 }: DocumentLayoutSidePanelProps) {
   const { t, i18n } = useTranslation();
   const tabsBaseId = useId();
@@ -442,102 +445,23 @@ export function DocumentLayoutSidePanel({
 
         {activeTab === 'tables' ? (
           <div className="layout-side-tables">
-            {tableRegions.map((region, index) => {
-              const table = region.table;
-              if (!table) {
-                return null;
-              }
-              const colCount = table.cells.reduce((max, cell) => Math.max(max, cell.col + 1), 0);
-              const rowCount = table.cells.reduce((max, cell) => Math.max(max, cell.row + 1), 0);
-              const overlayId = `region-table-${region.id}`;
-              return (
-                <section
-                  key={region.id}
-                  className={`layout-table-card${
-                    activeOverlayId === overlayId ? ' layout-table-card-active' : ''
-                  }`}
-                  data-testid="corrected-table-card"
-                  data-layout-overlay-target={overlayId}
-                >
-                  <button
-                    type="button"
-                    className="layout-table-card-head"
-                    onClick={() => { onOverlaySelect(overlayId, region.page); }}
-                  >
-                    <span>{t('documents.layoutCorrectedTableLabel', { n: index + 1 })}</span>
-                    <span className="muted">
-                      {t('documents.layoutTableMeta', {
-                        rows: rowCount,
-                        cols: colCount,
-                      })}
-                    </span>
-                  </button>
-                  <div className="layout-table-header-controls">
-                    <label className="layout-table-header-stepper">
-                      <span>{t('documents.tableHeaderRows')}</span>
-                      <input
-                        type="number"
-                        min={0}
-                        max={Math.max(0, rowCount)}
-                        value={table.headerRows}
-                        aria-label={t('documents.tableHeaderRows')}
-                        onChange={(event) => {
-                          onTableHeaderChange?.(region.id, Number(event.target.value), table.headerCols);
-                        }}
-                      />
-                    </label>
-                    <label className="layout-table-header-stepper">
-                      <span>{t('documents.tableHeaderCols')}</span>
-                      <input
-                        type="number"
-                        min={0}
-                        max={Math.max(0, colCount)}
-                        value={table.headerCols}
-                        aria-label={t('documents.tableHeaderCols')}
-                        onChange={(event) => {
-                          onTableHeaderChange?.(region.id, table.headerRows, Number(event.target.value));
-                        }}
-                      />
-                    </label>
-                  </div>
-                  <div className="layout-table-scroll">
-                    <table className="layout-data-table layout-data-table-editable">
-                      <tbody>
-                        {Array.from({ length: rowCount }, (_, row) => (
-                          <tr key={row}>
-                            {Array.from({ length: colCount }, (_, col) => {
-                              const cell = table.cells.find((item) => item.row === row && item.col === col);
-                              const isHeader = row < table.headerRows || col < table.headerCols;
-                              const Tag = isHeader ? 'th' : 'td';
-                              return (
-                                <Tag key={col} scope={isHeader && row < table.headerRows ? 'col' : undefined}>
-                                  <input
-                                    key={`${region.id}-${String(row)}-${String(col)}-${cell?.text ?? ''}`}
-                                    className="layout-table-cell-input"
-                                    defaultValue={cell?.text ?? ''}
-                                    aria-label={t('documents.tableCellAria', {
-                                      row: row + 1,
-                                      col: col + 1,
-                                    })}
-                                    onBlur={(event) => {
-                                      const next = event.target.value;
-                                      if (next === (cell?.text ?? '')) {
-                                        return;
-                                      }
-                                      onTableCellChange?.(region.id, row, col, next);
-                                    }}
-                                  />
-                                </Tag>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-              );
-            })}
+            {hideInlineTableList
+              ? null
+              : tableRegions.map((region, index) => (
+                  <CorrectedTableCard
+                    key={region.id}
+                    region={region}
+                    index={index}
+                    active={activeOverlayId === `region-table-${region.id}`}
+                    onSelect={() => { onOverlaySelect(`region-table-${region.id}`, region.page); }}
+                    onHeaderChange={(headerRows, headerCols) => {
+                      onTableHeaderChange?.(region.id, headerRows, headerCols);
+                    }}
+                    onCellChange={(row, col, text) => {
+                      onTableCellChange?.(region.id, row, col, text);
+                    }}
+                  />
+                ))}
             {tables.length === 0 && tableRegions.length === 0 ? (
               <p className="muted">{t('documents.layoutTablesEmpty')}</p>
             ) : (

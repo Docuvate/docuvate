@@ -874,6 +874,8 @@
     "selectionMarkTable": "Als Tabelle markieren",
     "tableCorrectionSaved": "Tabellenkorrektur gespeichert",
     "tableRegionRequired": "Zuerst eine Tabellenregion wählen.",
+    "tableRegionEmpty": "Kein Text im Bereich - Tabelle braucht mindestens ein Wort.",
+    "tableCorrectionSheetTitle": "Tabelle {{n}} korrigieren",
     "layoutExportPreviewMore": "Mehr anzeigen",
     "layoutExportPreviewLess": "Weniger anzeigen",
     "layoutOutlineEmpty": "Keine Überschriften erkannt.",

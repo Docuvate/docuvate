@@ -874,6 +874,8 @@
     "selectionMarkTable": "Mark as table",
     "tableCorrectionSaved": "Table correction saved",
     "tableRegionRequired": "Select a table region first.",
+    "tableRegionEmpty": "No text in this region - a table needs at least one word.",
+    "tableCorrectionSheetTitle": "Correct table {{n}}",
     "layoutExportPreviewMore": "Show more",
     "layoutExportPreviewLess": "Show less",
     "layoutOutlineEmpty": "No headings detected.",

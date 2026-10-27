@@ -3349,8 +3349,16 @@ mark.global-search-mark {
   padding: 0;
 }
 
+.layout-table-scroll {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .layout-table-cell-input {
+  box-sizing: border-box;
   width: 100%;
+  min-width: 4.5rem;
   min-height: var(--dv-touch-target-min);
   border: 0;
   padding: var(--dv-space-xs) var(--dv-space-sm);

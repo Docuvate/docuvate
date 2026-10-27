@@ -153,6 +153,9 @@ export class ApplyTableCorrectionUseCase {
     }
 
     const resolved = this.resolveSelection(body, existing, tokens);
+    if (body.op === 'create' && resolved.tokens.length === 0) {
+      throw new ValidationError('documents.tableRegionEmpty');
+    }
     const nextTable = this.nextTable(body, existing, resolved.tokens, resolved.rect);
     const beforePayload = existing
       ? canonicalRegionPayload({
