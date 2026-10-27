@@ -101,8 +101,12 @@ async function provisionLongLabelRowFixture(
   const tagIds: string[] = [];
   const runToken = randomUUID().slice(0, 8);
   for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
-    // ≥60 chars for chip ellipsis; unique per tag/run (near-dup guard rejects similar long names).
-    const name = `${runToken}-${String(index)}-${'L'.repeat(62)}`;
+    const stem = WS_B_LONG_GERMAN_LABEL_STEMS[index];
+    // Distinct stems (near-dup rejects identical long suffixes); keep total name ≤64 chars.
+    const prefix = `${runToken}-${String(index)}-`;
+    const name = `${prefix}${stem.slice(0, Math.max(0, 64 - prefix.length))}`;
+    expect(name.length).toBeLessThanOrEqual(64);
+    expect(name.length).toBeGreaterThanOrEqual(60);
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed' },
