@@ -49,7 +49,7 @@ export async function waitForSmokeApiReady(
         }
         return readHealthStatus(await res.json());
       },
-      { timeout: 120_000, intervals: [1000, 2000, 3000] }
+      { timeout: 60_000, intervals: [1000, 2000, 3000] }
     )
     .toBe('ready');
 }
@@ -98,7 +98,7 @@ export async function waitForDocumentLayoutIrReady(
         }
         return 'ready';
       },
-      { timeout: 280_000, intervals: [2000, 3000, 5000] }
+      { timeout: 160_000, intervals: [2000, 3000, 5000] }
     )
     .toBe('ready');
 }

@@ -85,7 +85,7 @@ export async function uploadLayoutTableDocument(
 ): Promise<string> {
   await waitForSmokeApiReady(request, apiBase);
   let lastError: Error | undefined;
-  for (let attempt = 1; attempt <= 5; attempt += 1) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
     const token = randomUUID().replace(/-/g, '').slice(0, 12);
     const upload = await request.post(`${apiBase}/v1/documents`, {
       headers: { origin: webOrigin },
@@ -99,7 +99,7 @@ export async function uploadLayoutTableDocument(
     });
     if (!upload.ok()) {
       lastError = new Error(
-        `layout fixture upload failed (${String(attempt)}/5): ${String(upload.status())} ${await upload.text()}`
+        `layout fixture upload failed (${String(attempt)}/3): ${String(upload.status())} ${await upload.text()}`
       );
       await sleep(2000 * attempt);
       continue;
