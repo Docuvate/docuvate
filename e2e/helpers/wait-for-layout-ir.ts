@@ -26,12 +26,41 @@ function readDocumentReadyState(body: unknown): DocumentReadyState {
   return { status, layoutIrAvailable, failureReason };
 }
 
+function readHealthStatus(body: unknown): string {
+  if (typeof body !== 'object' || body === null) {
+    return 'unknown';
+  }
+  if (!('status' in body) || typeof body.status !== 'string') {
+    return 'unknown';
+  }
+  return body.status;
+}
+
+export async function waitForSmokeApiReady(
+  request: APIRequestContext,
+  apiBase: string
+): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        const res = await request.get(`${apiBase}/health/ready`);
+        if (!res.ok()) {
+          return `http-${String(res.status())}`;
+        }
+        return readHealthStatus(await res.json());
+      },
+      { timeout: 120_000, intervals: [1000, 2000, 3000] }
+    )
+    .toBe('ready');
+}
+
 export async function waitForDocumentLayoutIrReady(
   request: APIRequestContext,
   apiBase: string,
   webOrigin: string,
   docId: string
 ): Promise<void> {
+  let requeued = false;
   await expect
     .poll(
       async () => {
@@ -43,6 +72,15 @@ export async function waitForDocumentLayoutIrReady(
         }
         const doc = readDocumentReadyState(await docRes.json());
         if (doc.status === 'failed') {
+          if (!requeued) {
+            requeued = true;
+            const rq = await request.post(`${apiBase}/v1/documents/${docId}/extraction/requeue`, {
+              headers: { origin: webOrigin },
+            });
+            if (rq.ok()) {
+              return 'requeued';
+            }
+          }
           const reason = doc.failureReason.length > 0 ? doc.failureReason : 'unknown';
           throw new Error(`document extraction failed (${docId}): ${reason}`);
         }

@@ -4,7 +4,7 @@ import { expect } from '@playwright/test';
 import type { APIRequestContext, Page } from '@playwright/test';
 
 import { deliveryNoteTablePdf } from './layout-table-pdf';
-import { waitForDocumentLayoutIrReady } from './wait-for-layout-ir';
+import { waitForDocumentLayoutIrReady, waitForSmokeApiReady } from './wait-for-layout-ir';
 
 const DOC_CHAT_QUESTION = 'Wie viele Widget A sind in der Lieferung?';
 
@@ -75,16 +75,17 @@ async function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Unique filename + unique content-stream token. Do not append bytes after
- * %%EOF — the worker treats that as a permanent 422 on hand-rolled PDFs.
+ * Unique filename + unique trailer on the known-good synthetic PDF (same
+ * pattern as Workstream B). Do not rewrite the content stream.
  */
 export async function uploadLayoutTableDocument(
   request: APIRequestContext,
   apiBase: string,
   webOrigin: string
 ): Promise<string> {
+  await waitForSmokeApiReady(request, apiBase);
   let lastError: Error | undefined;
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
+  for (let attempt = 1; attempt <= 5; attempt += 1) {
     const token = randomUUID().replace(/-/g, '').slice(0, 12);
     const upload = await request.post(`${apiBase}/v1/documents`, {
       headers: { origin: webOrigin },
@@ -98,9 +99,9 @@ export async function uploadLayoutTableDocument(
     });
     if (!upload.ok()) {
       lastError = new Error(
-        `layout fixture upload failed (${String(attempt)}/3): ${String(upload.status())} ${await upload.text()}`
+        `layout fixture upload failed (${String(attempt)}/5): ${String(upload.status())} ${await upload.text()}`
       );
-      await sleep(2000);
+      await sleep(2000 * attempt);
       continue;
     }
     const docId = readUploadedDocumentId(await upload.json());
@@ -112,7 +113,7 @@ export async function uploadLayoutTableDocument(
       await request.delete(`${apiBase}/v1/documents/${docId}`, {
         headers: { origin: webOrigin },
       });
-      await sleep(2000);
+      await sleep(2000 * attempt);
     }
   }
   throw lastError ?? new Error('layout fixture upload failed');
