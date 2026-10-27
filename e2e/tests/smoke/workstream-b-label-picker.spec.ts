@@ -105,7 +105,7 @@ async function provisionLongLabelRowFixture(
     const name = `${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
-      data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
+      data: { name, color: '#7c3aed' },
     });
     const responseBody = await response.text();
     expect(
@@ -229,7 +229,7 @@ async function seedLabels(request: import('@playwright/test').APIRequestContext,
     const name = `ws-b-seed-${String(index).padStart(4, '0')}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
-      data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
+      data: { name, color: '#7c3aed' },
     });
     if (response.status() === 409 || response.status() === 400 || response.status() === 422) {
       continue;
