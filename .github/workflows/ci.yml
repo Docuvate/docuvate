@@ -236,6 +236,8 @@ jobs:
           # Isolated from A3 bench seed (wiped tags/docs) so long-label fixtures stay creatable.
           E2E_SMOKE_EMAIL: alex.upload@fixture.docuvate.test
           E2E_SMOKE_PASSWORD: E2eSmokeFixture1!
+          AUTH_BASE: http://localhost:3001
+          WEB_ORIGIN: http://localhost:5173
         run: |
           set -euo pipefail
           node scripts/seed-e2e-smoke-user.mjs
