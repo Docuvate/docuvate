@@ -101,7 +101,7 @@ async function provisionLongLabelRowFixture(
   const tagIds: string[] = [];
   const runToken = randomUUID().slice(0, 8);
   for (let index = 0; index < WS_B_LONG_GERMAN_LABEL_STEMS.length; index += 1) {
-    const name = `ws-b-lang-${runToken}-${String(index)}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
+    const name = `${randomUUID()}-${WS_B_LONG_GERMAN_LABEL_STEMS[index]}`;
     const response = await request.post(`${apiBase}/v1/tags`, {
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
@@ -309,19 +309,7 @@ test.describe('Workstream B label picker', () => {
     const health = await request.get(`${apiBase}/health`);
     test.skip(!health.ok(), 'API not running');
     await seedLabels(request, 500);
-    let lastError: unknown;
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      try {
-        ellipsisFixtureUploadName = await provisionLongLabelRowFixture(request);
-        lastError = undefined;
-        break;
-      } catch (error) {
-        lastError = error;
-      }
-    }
-    if (lastError !== undefined) {
-      throw lastError;
-    }
+    ellipsisFixtureUploadName = await provisionLongLabelRowFixture(request);
   });
 
   for (const viewport of tagFilterViewports) {
