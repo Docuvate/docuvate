@@ -3,17 +3,39 @@
 import { DomainError, GatewayTimeoutError, ServiceUnavailableError } from '../../domain/errors.js';
 
 const DEFAULT_COMPARE_TIMEOUT_MS = 600_000;
+/** Matches worker `DOCUVATE_EXTRACT_TIMEOUT_SECONDS` (900s) so a hung `/extract` cannot run forever. */
+const DEFAULT_EXTRACT_TIMEOUT_MS = 900_000;
 
-export function workerCompareTimeoutMs(): number {
-  const raw = process.env['WORKER_COMPARE_TIMEOUT_MS'];
+function parsePositiveTimeoutMs(raw: string | undefined, fallback: number): number {
   if (!raw) {
-    return DEFAULT_COMPARE_TIMEOUT_MS;
+    return fallback;
   }
   const parsed = Number.parseInt(raw, 10);
   if (!Number.isFinite(parsed) || parsed <= 0) {
-    return DEFAULT_COMPARE_TIMEOUT_MS;
+    return fallback;
   }
   return parsed;
+}
+
+export function workerCompareTimeoutMs(): number {
+  return parsePositiveTimeoutMs(process.env['WORKER_COMPARE_TIMEOUT_MS'], DEFAULT_COMPARE_TIMEOUT_MS);
+}
+
+/** HTTP deadline for API → worker `/extract`. A hung worker must not keep the document non-terminal. */
+export function workerExtractTimeoutMs(): number {
+  const fromMs = parsePositiveTimeoutMs(process.env['WORKER_EXTRACT_TIMEOUT_MS'], 0);
+  if (fromMs > 0) {
+    return fromMs;
+  }
+  const fromSeconds = parsePositiveTimeoutMs(process.env['DOCUVATE_EXTRACT_TIMEOUT_SECONDS'], 0);
+  if (fromSeconds > 0) {
+    return fromSeconds * 1000;
+  }
+  return DEFAULT_EXTRACT_TIMEOUT_MS;
+}
+
+export function workerExtractTimeoutSeconds(): number {
+  return Math.max(1, Math.ceil(workerExtractTimeoutMs() / 1000));
 }
 
 export function workerCompareTimeoutError(): GatewayTimeoutError {
