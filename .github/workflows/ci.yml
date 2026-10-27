@@ -232,8 +232,13 @@ jobs:
           retention-days: 14
           if-no-files-found: error
       - name: Workstream B label picker (Playwright + screenshots)
+        env:
+          # Isolated from A3 bench seed (wiped tags/docs) so long-label fixtures stay creatable.
+          E2E_SMOKE_EMAIL: alex.upload@fixture.docuvate.test
+          E2E_SMOKE_PASSWORD: E2eSmokeFixture1!
         run: |
           set -euo pipefail
+          node scripts/seed-e2e-smoke-user.mjs
           node e2e/scripts/provision-smoke-storage.mjs
           export WORKSTREAM_B_ARTIFACT_DIR="${GITHUB_WORKSPACE}/workstream-b-screenshots"
           export WORKSTREAM_B_POLISH_ARTIFACT_DIR="${GITHUB_WORKSPACE}/workstream-b-screenshots"
