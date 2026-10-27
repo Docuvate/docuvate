@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 import {
@@ -17,6 +17,13 @@ import {
   UpdateDocumentChatThreadRequestDto,
 } from '../../../shared/presentation/dtos/common.dto.js';
 import {
+  CursorListQueryDto,
+  parseCursorListQuery,
+} from '../../../shared/presentation/dtos/cursor-list-query.dto.js';
+import {
+  GlobalChatSuggestionBootstrapDtoClass,
+} from '../../../shared/presentation/dtos/dashboard-widget-previews.dto.js';
+import {
   ApiDocuvateController,
   ApiDocuvateRoute,
 } from '../../../shared/presentation/swagger/openapi-decorators.js';
@@ -30,6 +37,7 @@ import {
 } from '../../documents/presentation/document-chat.mapper.js';
 import { CreateLibraryChatThreadUseCase } from '../application/create-library-chat-thread.use-case.js';
 import { DeleteLibraryChatThreadUseCase } from '../application/delete-library-chat-thread.use-case.js';
+import { GetGlobalChatSuggestionBootstrapUseCase } from '../application/get-global-chat-suggestion-bootstrap.use-case.js';
 import { ListLibraryChatThreadsUseCase } from '../application/list-library-chat-threads.use-case.js';
 import { SendLibraryChatThreadMessageUseCase } from '../application/send-library-chat-thread-message.use-case.js';
 import { UpdateLibraryChatThreadUseCase } from '../application/update-library-chat-thread.use-case.js';
@@ -40,6 +48,7 @@ import { UpdateLibraryChatThreadUseCase } from '../application/update-library-ch
 export class ChatController {
   constructor(
     private readonly listLibraryThreads: ListLibraryChatThreadsUseCase,
+    private readonly suggestionBootstrap: GetGlobalChatSuggestionBootstrapUseCase,
     private readonly createLibraryThread: CreateLibraryChatThreadUseCase,
     private readonly sendLibraryMessage: SendLibraryChatThreadMessageUseCase,
     private readonly updateLibraryThread: UpdateLibraryChatThreadUseCase,
@@ -50,14 +59,28 @@ export class ChatController {
     private readonly retryMessage: RetryDocumentChatMessageUseCase
   ) {}
 
+  @Get('suggestion-bootstrap')
+  @ApiDocuvateRoute({
+    operationId: 'getGlobalChatSuggestionBootstrap',
+    summary: 'Data for global chat suggestion chips without loading the full library',
+  })
+  async suggestionBootstrapRoute(
+    @Session() session: AuthSession
+  ): Promise<GlobalChatSuggestionBootstrapDtoClass> {
+    return this.suggestionBootstrap.execute(session.user.id);
+  }
+
   @Get('threads')
   @ApiDocuvateRoute({
     operationId: 'listLibraryChatThreads',
     summary: 'List library-scoped chat threads',
   })
-  async listThreads(@Session() session: AuthSession): Promise<DocumentChatThreadListResponseDto> {
-    const threads = await this.listLibraryThreads.execute(session.user.id);
-    return { threads: threads.map(toDocumentChatThreadDto) };
+  async listThreads(
+    @Session() session: AuthSession,
+    @Query() query: CursorListQueryDto
+  ): Promise<DocumentChatThreadListResponseDto> {
+    const pagination = parseCursorListQuery(query);
+    return this.listLibraryThreads.execute(session.user.id, pagination);
   }
 
   @Post('threads')

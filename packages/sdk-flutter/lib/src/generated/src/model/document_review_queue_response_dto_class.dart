@@ -13,15 +13,23 @@ part 'document_review_queue_response_dto_class.g.dart';
 /// DocumentReviewQueueResponseDtoClass
 ///
 /// Properties:
-/// * [total] 
 /// * [items] 
+/// * [nextCursor] 
+/// * [hasMore] 
+/// * [total] 
 @BuiltValue()
 abstract class DocumentReviewQueueResponseDtoClass implements Built<DocumentReviewQueueResponseDtoClass, DocumentReviewQueueResponseDtoClassBuilder> {
-  @BuiltValueField(wireName: r'total')
-  num get total;
-
   @BuiltValueField(wireName: r'items')
   BuiltList<DocumentReviewQueueItemDtoClass> get items;
+
+  @BuiltValueField(wireName: r'nextCursor')
+  String get nextCursor;
+
+  @BuiltValueField(wireName: r'hasMore')
+  bool get hasMore;
+
+  @BuiltValueField(wireName: r'total')
+  num get total;
 
   DocumentReviewQueueResponseDtoClass._();
 
@@ -46,15 +54,25 @@ class _$DocumentReviewQueueResponseDtoClassSerializer implements PrimitiveSerial
     DocumentReviewQueueResponseDtoClass object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
-    yield r'total';
-    yield serializers.serialize(
-      object.total,
-      specifiedType: const FullType(num),
-    );
     yield r'items';
     yield serializers.serialize(
       object.items,
       specifiedType: const FullType(BuiltList, [FullType(DocumentReviewQueueItemDtoClass)]),
+    );
+    yield r'nextCursor';
+    yield serializers.serialize(
+      object.nextCursor,
+      specifiedType: const FullType(String),
+    );
+    yield r'hasMore';
+    yield serializers.serialize(
+      object.hasMore,
+      specifiedType: const FullType(bool),
+    );
+    yield r'total';
+    yield serializers.serialize(
+      object.total,
+      specifiedType: const FullType(num),
     );
   }
 
@@ -79,19 +97,33 @@ class _$DocumentReviewQueueResponseDtoClassSerializer implements PrimitiveSerial
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
-        case r'total':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(num),
-          ) as num;
-          result.total = valueDes;
-          break;
         case r'items':
           final valueDes = serializers.deserialize(
             value,
             specifiedType: const FullType(BuiltList, [FullType(DocumentReviewQueueItemDtoClass)]),
           ) as BuiltList<DocumentReviewQueueItemDtoClass>;
           result.items.replace(valueDes);
+          break;
+        case r'nextCursor':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.nextCursor = valueDes;
+          break;
+        case r'hasMore':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.hasMore = valueDes;
+          break;
+        case r'total':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(num),
+          ) as num;
+          result.total = valueDes;
           break;
         default:
           unhandled.add(key);

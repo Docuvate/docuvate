@@ -3,6 +3,8 @@
 export * from './upload-formats.js';
 export * from './password-policy.js';
 export * from './auth-sign-in.js';
+export * from './cursor-list.js';
+import type { CursorListResponse } from './cursor-list.js';
 import type { ConnectorSourceScopeDto } from './connector-source-scope.js';
 export type { SavedDocumentViewFieldFilterDto } from './saved-view-field-filter.js';
 import type { SavedDocumentViewFieldFilterDto } from './saved-view-field-filter.js';
@@ -391,10 +393,7 @@ export interface DocumentReviewQueueItemDto {
   duplicateStack: DocumentDuplicateStackSummaryDto | null;
 }
 
-export interface DocumentReviewQueueResponseDto {
-  total: number;
-  items: DocumentReviewQueueItemDto[];
-}
+export interface DocumentReviewQueueResponseDto extends CursorListResponse<DocumentReviewQueueItemDto> {}
 
 export interface DocumentReviewQueueSummaryDto {
   pendingCount: number;
@@ -445,6 +444,8 @@ export interface DuplicateSetDto {
   bulkArchiveEligible: boolean;
   sources: DuplicateCandidateSource[];
 }
+
+export interface DuplicateSetListResponse extends CursorListResponse<DuplicateSetDto> {}
 
 export type DuplicateSetDecisionAction = 'archive' | 'dismiss';
 
@@ -623,6 +624,9 @@ export interface DocumentChatThreadDto {
 
 export interface DocumentChatThreadListResponse {
   threads: DocumentChatThreadDto[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  total: number | null;
 }
 
 export interface CreateDocumentChatThreadRequest {
@@ -817,11 +821,21 @@ export interface LabelRecommendationListResponse {
   state: LabelRecommendationsLoadState;
 }
 
+export interface LabelRecommendationReasonParams {
+  peerCount?: number;
+  matchPercent?: number;
+  count?: number;
+}
+
 export interface LabelRecommendationDto {
   id: string;
   kind: LabelRecommendationKind;
   score: number;
+  /** Machine-oriented hint for logs; UI must use reasonKey + reasonParams. */
   reason: string;
+  /** i18n key under the web `labels` namespace (passed to t()). */
+  reasonKey?: string;
+  reasonParams?: LabelRecommendationReasonParams;
   /** Cosine similarity when recommendation is embedding-based (0..1). */
   similarity?: number;
   source?: LabelRecommendationSource;
@@ -1520,7 +1534,9 @@ export interface AcceptUserInvitationRequest {
 
 export interface AdminUserListResponse {
   users: AdminUserDto[];
-  total: number;
+  nextCursor: string | null;
+  hasMore: boolean;
+  total: number | null;
 }
 
 export interface InviteAdminUserRequest {
@@ -1540,9 +1556,19 @@ export interface BanAdminUserRequest {
 export {
   summarizeLabelAssignmentInventory,
   type LabelAssignmentInventory,
+  type LabelDocumentInventoryQuery,
   type LabelDocumentInventoryResponseDto,
+  type LabelDocumentInventorySummaryResponseDto,
   type LabelInventoryDocument,
 } from './label-document-inventory.js';
+
+export type {
+  DashboardWidgetDocumentPreviewsQuery,
+  DashboardWidgetDocumentPreviewsResponseDto,
+  DashboardWidgetPreviewType,
+} from './dashboard-widget-previews.js';
+
+export type { GlobalChatSuggestionBootstrapDto } from './global-chat-suggestion-bootstrap.js';
 
 export type {
   SavedViewVisibility,

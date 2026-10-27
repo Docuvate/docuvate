@@ -361,7 +361,7 @@ class ReviewQueueApi {
   ///
   /// Parameters:
   /// * [limit] 
-  /// * [offset] 
+  /// * [cursor] - Opaque keyset cursor from a previous response
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
   /// * [extras] - Can be used to add flags to the request
@@ -372,8 +372,8 @@ class ReviewQueueApi {
   /// Returns a [Future] containing a [Response] with a [DocumentReviewQueueResponseDtoClass] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<DocumentReviewQueueResponseDtoClass>> listDocumentReviewQueue({ 
-    num? limit = 40,
-    num? offset = 0,
+    num? limit = 50,
+    String? cursor,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
     Map<String, dynamic>? extra,
@@ -407,7 +407,7 @@ class ReviewQueueApi {
 
     final _queryParameters = <String, dynamic>{
       if (limit != null) r'limit': encodeQueryParameter(_serializers, limit, const FullType(num)),
-      if (offset != null) r'offset': encodeQueryParameter(_serializers, offset, const FullType(num)),
+      if (cursor != null) r'cursor': encodeQueryParameter(_serializers, cursor, const FullType(String)),
     };
 
     final _response = await _dio.request<Object>(

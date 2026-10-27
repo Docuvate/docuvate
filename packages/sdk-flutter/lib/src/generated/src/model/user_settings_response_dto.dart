@@ -25,6 +25,7 @@ part 'user_settings_response_dto.g.dart';
 /// * [documentChatLocalModelEnabled] 
 /// * [documentChatLocalModelReady] 
 /// * [advancedFeaturesEnabled] 
+/// * [fuzzyDuplicateDetectionEnabled] 
 /// * [useArenaWinnerAsDefault] 
 /// * [arenaWinnerEngine] 
 /// * [labelFieldConfidenceThreshold] 
@@ -75,6 +76,9 @@ abstract class UserSettingsResponseDto implements Built<UserSettingsResponseDto,
 
   @BuiltValueField(wireName: r'advancedFeaturesEnabled')
   bool? get advancedFeaturesEnabled;
+
+  @BuiltValueField(wireName: r'fuzzyDuplicateDetectionEnabled')
+  bool? get fuzzyDuplicateDetectionEnabled;
 
   @BuiltValueField(wireName: r'useArenaWinnerAsDefault')
   bool get useArenaWinnerAsDefault;
@@ -214,6 +218,13 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
       yield r'advancedFeaturesEnabled';
       yield serializers.serialize(
         object.advancedFeaturesEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.fuzzyDuplicateDetectionEnabled != null) {
+      yield r'fuzzyDuplicateDetectionEnabled';
+      yield serializers.serialize(
+        object.fuzzyDuplicateDetectionEnabled,
         specifiedType: const FullType(bool),
       );
     }
@@ -391,6 +402,13 @@ class _$UserSettingsResponseDtoSerializer implements PrimitiveSerializer<UserSet
             specifiedType: const FullType(bool),
           ) as bool;
           result.advancedFeaturesEnabled = valueDes;
+          break;
+        case r'fuzzyDuplicateDetectionEnabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.fuzzyDuplicateDetectionEnabled = valueDes;
           break;
         case r'useArenaWinnerAsDefault':
           final valueDes = serializers.deserialize(

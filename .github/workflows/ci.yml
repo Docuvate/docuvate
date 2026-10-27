@@ -192,6 +192,43 @@ jobs:
           path: workstream-e-artifacts/
           retention-days: 14
           if-no-files-found: warn
+      - name: Workstream A3 list performance (1k-doc seed)
+        env:
+          E2E_SMOKE_EMAIL: smoke.bench@fixture.docuvate.test
+          E2E_SMOKE_PASSWORD: SmokeBenchFixture1!
+          LIBRARY_PERF_DOC_COUNT: '1000'
+          LIBRARY_PERF_REVIEW_PENDING_COUNT: '60'
+        run: |
+          set -euo pipefail
+          node e2e/scripts/provision-smoke-storage.mjs
+          node scripts/seed-library-perf-fixture.mjs
+          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
+            pnpm --filter @docuvate/e2e exec playwright test workstream-a3-list-perf \
+            --config=playwright.workstream-a3.config.ts
+      # Merge-gate PNGs for PR #49 (A3 surfaces); see workstream-a3-visual-artifacts.spec.ts
+      - name: Workstream A3 visual artifacts (screenshots)
+        env:
+          E2E_SMOKE_EMAIL: smoke.bench@fixture.docuvate.test
+          E2E_SMOKE_PASSWORD: SmokeBenchFixture1!
+          LIBRARY_PERF_DOC_COUNT: '1000'
+          LIBRARY_PERF_LABEL_COUNT: '300'
+          LIBRARY_PERF_REVIEW_PENDING_COUNT: '60'
+          WORKSTREAM_A3_ARTIFACT_DIR: ${{ github.workspace }}/workstream-a3-artifacts
+        run: |
+          set -euo pipefail
+          node e2e/scripts/provision-smoke-storage.mjs
+          node scripts/seed-library-perf-fixture.mjs
+          E2E_WEB_URL=http://localhost:5173 E2E_API_URL=http://localhost:3001 \
+            pnpm --filter @docuvate/e2e exec playwright test workstream-a3-visual-artifacts \
+            --config=playwright.workstream-a3.config.ts
+      - name: Upload workstream A3 screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: workstream-a3-screenshots
+          path: workstream-a3-artifacts/
+          retention-days: 14
+          if-no-files-found: error
       - name: Workstream B label picker (Playwright + screenshots)
         run: |
           set -euo pipefail

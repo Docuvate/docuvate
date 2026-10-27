@@ -10,8 +10,6 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { namesAreNearDuplicate, normalizeLabelKey } from '../../../shared/domain/label-name-similarity.js';
 import {
-  DOCUMENT_REPOSITORY,
-  type DocumentRepository,
   LABEL_EMBEDDING_REPOSITORY,
   type LabelEmbeddingRepository,
   TAXONOMY_REPOSITORY,
@@ -19,8 +17,6 @@ import {
   USER_PREFERENCES_REPOSITORY,
   type UserPreferencesRepository,
 } from '../../../shared/domain/ports.js';
-import type { DocumentEntity } from '../../documents/domain/document.entity.js';
-import { formatDocumentDatePreview } from '../domain/format-document-date-preview.js';
 import type { TagCentroidRef } from '../domain/label-coverage.js';
 import { type LabelHybridDocumentRow } from '../domain/label-hybrid-training.js';
 import { suggestMergeAndRename } from '../domain/label-merge-rename-suggestions.js';
@@ -38,6 +34,8 @@ import {
 } from '../domain/label-recommendation-scoring.js';
 import { isBlockedLabelCandidate } from '../domain/recommendation-blocklist.js';
 import { LabelHybridModelCacheService } from '../infrastructure/label-hybrid-model-cache.service.js';
+import type { LabelDocumentInventoryQueries } from '../infrastructure/pg-label-document-inventory.repository.js';
+import { PgLabelDocumentInventoryRepository } from '../infrastructure/pg-label-document-inventory.repository.js';
 
 export interface GetLabelRecommendationsOptions {
   abortSignal?: AbortSignal;
@@ -46,22 +44,14 @@ export interface GetLabelRecommendationsOptions {
 function buildHybridTrainingRowsFromConfirmed(
   confirmedEmbeddingRows: Awaited<
     ReturnType<LabelEmbeddingRepository['listUserConfirmedDocumentEmbeddingsForUser']>
-  >,
-  docs: DocumentEntity[]
+  >
 ): LabelHybridDocumentRow[] {
-  const docById = new Map(docs.map((doc) => [doc.id, doc]));
-  return confirmedEmbeddingRows.map((row) => {
-    const doc = docById.get(row.documentId);
-    const text = doc
-      ? `${doc.title}\n${doc.filename}\n${doc.extraction?.text ?? ''}`.slice(0, 12000)
-      : `${row.title}\n${row.filename}`;
-    return {
-      documentId: row.documentId,
-      embedding: row.embedding,
-      nonInboxTagIds: row.nonInboxTagIds,
-      text,
-    };
-  });
+  return confirmedEmbeddingRows.map((row) => ({
+    documentId: row.documentId,
+    embedding: row.embedding,
+    nonInboxTagIds: row.nonInboxTagIds,
+    text: `${row.title}\n${row.filename}`.slice(0, 12000),
+  }));
 }
 
 function warmingResponse(): LabelRecommendationListResponse {
@@ -70,10 +60,9 @@ function warmingResponse(): LabelRecommendationListResponse {
 
 function enrichWithSampleDocuments(
   items: LabelRecommendationDto[],
-  docs: DocumentEntity[],
+  previews: ReadonlyMap<string, LabelRecommendationDocumentPreviewDto>,
   embeddingByDocumentId: ReadonlyMap<string, number[]>
 ): LabelRecommendationDto[] {
-  const byId = new Map(docs.map((doc) => [doc.id, doc]));
   return items.map((item) => {
     const ids = item.sampleDocumentIds ?? [];
     if (ids.length === 0) {
@@ -85,19 +74,14 @@ function enrichWithSampleDocuments(
         : new Map<string, number>();
     const sampleDocuments: LabelRecommendationDocumentPreviewDto[] = [];
     for (const id of ids) {
-      const doc = byId.get(id);
-      if (!doc) {
+      const preview = previews.get(id);
+      if (!preview) {
         continue;
       }
       const similarity = similarities.get(id);
-      sampleDocuments.push({
-        id: doc.id,
-        title: doc.title,
-        filename: doc.filename,
-        status: doc.status,
-        documentDate: formatDocumentDatePreview(doc.documentDate),
-        similarity,
-      });
+      sampleDocuments.push(
+        similarity !== undefined ? { ...preview, similarity } : preview
+      );
     }
     return sampleDocuments.length > 0 ? { ...item, sampleDocuments } : item;
   });
@@ -110,12 +94,13 @@ function labelNameConflictsExisting(name: string, existingNames: string[]): bool
 @Injectable()
 export class GetLabelRecommendationsUseCase {
   constructor(
-    @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository,
     @Inject(TAXONOMY_REPOSITORY) private readonly taxonomy: TaxonomyRepository,
     @Inject(LABEL_EMBEDDING_REPOSITORY) private readonly labelEmbeddings: LabelEmbeddingRepository,
     @Inject(USER_PREFERENCES_REPOSITORY) private readonly prefs: UserPreferencesRepository,
     @Inject(LabelHybridModelCacheService)
-    private readonly labelHybridCache: LabelHybridModelCacheService
+    private readonly labelHybridCache: LabelHybridModelCacheService,
+    @Inject(PgLabelDocumentInventoryRepository)
+    private readonly inventoryRepo: LabelDocumentInventoryQueries
   ) {}
 
   async execute(
@@ -141,7 +126,6 @@ export class GetLabelRecommendationsUseCase {
 
     const [
       tags,
-      docs,
       centroids,
       dismissed,
       blocklist,
@@ -151,7 +135,6 @@ export class GetLabelRecommendationsUseCase {
       clusterExclusions,
     ] = await Promise.all([
       this.taxonomy.listTags(userId),
-      this.documents.listForUser(userId, { status: 'ready' }),
       this.labelEmbeddings.getTagCentroids(userId),
       this.labelEmbeddings.listDismissedRecommendationKeys(userId),
       this.labelEmbeddings.listRecommendationBlocklist(userId),
@@ -199,7 +182,7 @@ export class GetLabelRecommendationsUseCase {
       labelSupportCountByTagId.set(tagId, embeddings.length);
     }
 
-    const hybridTrainingRows = buildHybridTrainingRowsFromConfirmed(confirmedEmbeddingRows, docs);
+    const hybridTrainingRows = buildHybridTrainingRowsFromConfirmed(confirmedEmbeddingRows);
     this.labelHybridCache.scheduleHybridWarm(userId, hybridTrainingRows);
     if (this.labelHybridCache.shouldReturnWarmingResponse(userId, hybridTrainingRows)) {
       return warmingResponse();
@@ -243,7 +226,11 @@ export class GetLabelRecommendationsUseCase {
       nameNearDuplicate: namesAreNearDuplicate,
     });
 
+    const mergeTagIds = new Set<string>();
     for (const suggestion of embeddingMerges) {
+      for (const tagId of suggestion.tagIds) {
+        mergeTagIds.add(tagId);
+      }
       items.push({
         id: suggestion.id,
         kind: 'merge',
@@ -257,18 +244,15 @@ export class GetLabelRecommendationsUseCase {
     }
 
     const clusterNew = suggestEmbeddingClusterNewLabels({
-      rows: embeddingRows.map((row) => {
-        const doc = docs.find((d) => d.id === row.documentId);
-        return {
-          documentId: row.documentId,
-          embedding: row.embedding,
-          nonInboxTagIds: row.nonInboxTagIds,
-          title: doc?.title ?? row.title,
-          filename: doc?.filename ?? row.filename,
-          text: doc?.extraction?.text ?? '',
-          fields: doc?.extraction?.fields ?? [],
-        };
-      }),
+      rows: embeddingRows.map((row) => ({
+        documentId: row.documentId,
+        embedding: row.embedding,
+        nonInboxTagIds: row.nonInboxTagIds,
+        title: row.title,
+        filename: row.filename,
+        text: '',
+        fields: [],
+      })),
       centroids: centroidRefs,
       threshold,
       dismissedKeys,
@@ -300,6 +284,8 @@ export class GetLabelRecommendationsUseCase {
         similarity: cluster.similarity,
         source: 'embedding',
         reason: cluster.reason,
+        reasonKey: cluster.reasonKey,
+        reasonParams: cluster.reasonParams,
         sampleDocumentIds: documentIds,
       });
     }
@@ -397,7 +383,46 @@ export class GetLabelRecommendationsUseCase {
     );
 
     const sorted = dedupedNew.sort((a, b) => b.score - a.score).slice(0, 8);
-    const enrichedItems = enrichWithSampleDocuments(sorted, docs, embeddingByDocumentId);
+
+    for (const item of sorted) {
+      if (item.kind !== 'merge' || !item.tagIds?.length) {
+        continue;
+      }
+      for (const tagId of item.tagIds) {
+        mergeTagIds.add(tagId);
+      }
+    }
+
+    const mergeSamples = await this.inventoryRepo.loadSampleDocumentIdsByTag(
+      userId,
+      [...mergeTagIds],
+      2
+    );
+    for (const item of sorted) {
+      if (item.kind !== 'merge' || !item.tagIds?.length) {
+        continue;
+      }
+      const sampleIds: string[] = [];
+      for (const tagId of item.tagIds) {
+        for (const docId of mergeSamples.get(tagId) ?? []) {
+          if (!sampleIds.includes(docId)) {
+            sampleIds.push(docId);
+          }
+        }
+      }
+      if (sampleIds.length > 0) {
+        item.sampleDocumentIds = sampleIds.slice(0, 4);
+      }
+    }
+
+    const previewIds = new Set<string>();
+    for (const item of sorted) {
+      for (const id of item.sampleDocumentIds ?? []) {
+        previewIds.add(id);
+      }
+    }
+    const previews = await this.inventoryRepo.loadDocumentPreviewsByIds(userId, [...previewIds]);
+    const enrichedItems = enrichWithSampleDocuments(sorted, previews, embeddingByDocumentId);
     const state: LabelRecommendationsLoadState = 'ready';
     return { items: enrichedItems, state };
   }

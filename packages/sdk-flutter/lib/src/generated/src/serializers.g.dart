@@ -53,6 +53,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(DashboardLayoutResponseDto.serializer)
       ..add(DashboardStatisticsDtoClass.serializer)
       ..add(DashboardStatisticsDtoClassTopLabelsInner.serializer)
+      ..add(DashboardWidgetDocumentPreviewsResponseDtoClass.serializer)
       ..add(DashboardWidgetDtoClass.serializer)
       ..add(DashboardWidgetDtoClassTypeEnum.serializer)
       ..add(DashboardWidgetInputDto.serializer)
@@ -78,6 +79,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(DocumentExtractionImageDtoKindEnum.serializer)
       ..add(DocumentExtractionSummaryDto.serializer)
       ..add(DocumentExtractionSummaryDtoLayoutIrPagesInner.serializer)
+      ..add(DocumentListLibraryUiDto.serializer)
       ..add(DocumentListResponseDto.serializer)
       ..add(DocumentPipelineModuleDescriptorDto.serializer)
       ..add(DocumentPipelineModulesResponseDto.serializer)
@@ -90,6 +92,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(DocumentTagSuggestionsBatchItemDto.serializer)
       ..add(DocumentTagSuggestionsBatchRequestDto.serializer)
       ..add(DocumentTagSuggestionsBatchResponseDto.serializer)
+      ..add(DuplicateSetListResponseDtoClass.serializer)
       ..add(DuplicateStackKeepVersionRequestDto.serializer)
       ..add(DuplicateStackNotDuplicateRequestDto.serializer)
       ..add(DuplicateStackSetPrimaryRequestDto.serializer)
@@ -102,6 +105,8 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(ExtractionEngineListResponseDto.serializer)
       ..add(FeatureFlagsResponseDto.serializer)
       ..add(FolderListResponseDto.serializer)
+      ..add(GlobalChatSuggestionBootstrapDtoClass.serializer)
+      ..add(GlobalChatSuggestionBootstrapDtoClassContractEndSample.serializer)
       ..add(ImportFromConnectorRequestDto.serializer)
       ..add(InstallationDashboardDefaultResponseDto.serializer)
       ..add(InviteAdminUserRequestDto.serializer)
@@ -112,6 +117,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(LabelRecommendationBlocklistEntryResponseDtoSource_Enum.serializer)
       ..add(LabelRecommendationBlocklistListResponseDto.serializer)
       ..add(LabelRecommendationListResponseDto.serializer)
+      ..add(LabelRecommendationListResponseDtoStateEnum.serializer)
       ..add(LayoutCompareMetricsResponseDto.serializer)
       ..add(LayoutComparePageMetricDto.serializer)
       ..add(LayoutComparePageResponseDto.serializer)
@@ -149,6 +155,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(PreviewConnectorSourceNodesRequestDto.serializer)
       ..add(ProblemDetailsDto.serializer)
       ..add(ProposeLabelRecommendationBlocklistPatternRequestDto.serializer)
+      ..add(RecognizedFieldFilterValuesResponseDto.serializer)
       ..add(RemoteConfigResponseDto.serializer)
       ..add(ReorderSavedDocumentViewsRequestDto.serializer)
       ..add(ReplaceDashboardLayoutRequestDto.serializer)
@@ -181,6 +188,7 @@ Serializers _$serializers = (new Serializers().toBuilder()
       ..add(StartMailOAuthRequestDto.serializer)
       ..add(TagCustomFieldListResponseDtoClass.serializer)
       ..add(TagListResponseDto.serializer)
+      ..add(TagSearchResponseDto.serializer)
       ..add(TestPaperlessConnectionRequestDto.serializer)
       ..add(TestPaperlessInstallationConnectionRequestDto.serializer)
       ..add(TriggerMlRetrainRequestDto.serializer)
@@ -317,6 +325,15 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(BuiltList, const [const FullType(JsonObject)]),
           () => new ListBuilder<JsonObject>())
       ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(JsonObject)]),
+          () => new ListBuilder<JsonObject>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(JsonObject)]),
+          () => new ListBuilder<JsonObject>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(JsonObject)]),
+          () => new ListBuilder<JsonObject>())
+      ..addBuilderFactory(
           const FullType(BuiltList,
               const [const FullType(DocumentReviewFieldSuggestionDtoClass)]),
           () => new ListBuilder<DocumentReviewFieldSuggestionDtoClass>())
@@ -412,6 +429,12 @@ Serializers _$serializers = (new Serializers().toBuilder()
           const FullType(
               BuiltList, const [const FullType(SavedDocumentViewDtoClass)]),
           () => new ListBuilder<SavedDocumentViewDtoClass>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(String)]),
+          () => new ListBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(String)]),
           () => new ListBuilder<String>())

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { Module } from '@nestjs/common';
 
+import { GetDashboardWidgetDocumentPreviewsUseCase } from './application/get-dashboard-widget-document-previews.use-case.js';
 import {
   CreateSavedViewUseCase,
   DeleteSavedViewUseCase,
@@ -42,6 +43,7 @@ import { SavedViewsController } from './presentation/saved-views.controller.js';
     GetInstallationDashboardDefaultUseCase,
     SetInstallationDashboardDefaultUseCase,
     GetInstallationAdminStatusUseCase,
+    GetDashboardWidgetDocumentPreviewsUseCase,
   ],
   exports: [GetInstallationAdminStatusUseCase, INSTALLATION_ROLE_READER],
 })

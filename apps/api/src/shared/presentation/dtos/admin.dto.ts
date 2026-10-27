@@ -10,8 +10,9 @@ import type {
   SetAdminUserRoleRequest,
 } from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEmail, IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString } from 'class-validator';
+
+import { CursorListQueryDto } from './cursor-list-query.dto.js';
 
 export class AdminAccessResponseDto implements AdminAccessResponse {
   @ApiProperty()
@@ -57,24 +58,17 @@ export class AdminUserListResponseDto implements AdminUserListResponse {
   @ApiProperty({ type: [AdminUserResponseDto] })
   users!: AdminUserDto[];
 
+  @ApiProperty({ nullable: true })
+  nextCursor!: string | null;
+
   @ApiProperty()
-  total!: number;
+  hasMore!: boolean;
+
+  @ApiProperty({ nullable: true })
+  total!: number | null;
 }
 
-export class ListAdminUsersQueryDto {
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  @Max(100)
-  limit?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  offset?: number;
-
+export class ListAdminUsersQueryDto extends CursorListQueryDto {
   @IsOptional()
   @IsString()
   search?: string;

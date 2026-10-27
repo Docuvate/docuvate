@@ -55,7 +55,7 @@ export class GetAdminAccessUseCase {
 export class ListAdminUsersUseCase {
   constructor(@Inject(USER_ADMINISTRATION_PORT) private readonly users: UserAdministrationPort) {}
 
-  async execute(input: { headers: Headers; limit: number; offset: number; search?: string }) {
+  async execute(input: { headers: Headers; limit: number; cursor?: string; search?: string }) {
     return await this.users.listUsers(input);
   }
 }

@@ -239,6 +239,8 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
   @override
   final bool? advancedFeaturesEnabled;
   @override
+  final bool? fuzzyDuplicateDetectionEnabled;
+  @override
   final bool useArenaWinnerAsDefault;
   @override
   final String? arenaWinnerEngine;
@@ -275,6 +277,7 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
       this.documentChatLocalModelEnabled,
       this.documentChatLocalModelReady,
       this.advancedFeaturesEnabled,
+      this.fuzzyDuplicateDetectionEnabled,
       required this.useArenaWinnerAsDefault,
       this.arenaWinnerEngine,
       this.labelFieldConfidenceThreshold,
@@ -317,6 +320,8 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
         documentChatLocalModelEnabled == other.documentChatLocalModelEnabled &&
         documentChatLocalModelReady == other.documentChatLocalModelReady &&
         advancedFeaturesEnabled == other.advancedFeaturesEnabled &&
+        fuzzyDuplicateDetectionEnabled ==
+            other.fuzzyDuplicateDetectionEnabled &&
         useArenaWinnerAsDefault == other.useArenaWinnerAsDefault &&
         arenaWinnerEngine == other.arenaWinnerEngine &&
         labelFieldConfidenceThreshold == other.labelFieldConfidenceThreshold &&
@@ -347,6 +352,7 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
     _$hash = $jc(_$hash, documentChatLocalModelEnabled.hashCode);
     _$hash = $jc(_$hash, documentChatLocalModelReady.hashCode);
     _$hash = $jc(_$hash, advancedFeaturesEnabled.hashCode);
+    _$hash = $jc(_$hash, fuzzyDuplicateDetectionEnabled.hashCode);
     _$hash = $jc(_$hash, useArenaWinnerAsDefault.hashCode);
     _$hash = $jc(_$hash, arenaWinnerEngine.hashCode);
     _$hash = $jc(_$hash, labelFieldConfidenceThreshold.hashCode);
@@ -376,6 +382,8 @@ class _$UserSettingsResponseDto extends UserSettingsResponseDto {
           ..add('documentChatLocalModelEnabled', documentChatLocalModelEnabled)
           ..add('documentChatLocalModelReady', documentChatLocalModelReady)
           ..add('advancedFeaturesEnabled', advancedFeaturesEnabled)
+          ..add(
+              'fuzzyDuplicateDetectionEnabled', fuzzyDuplicateDetectionEnabled)
           ..add('useArenaWinnerAsDefault', useArenaWinnerAsDefault)
           ..add('arenaWinnerEngine', arenaWinnerEngine)
           ..add('labelFieldConfidenceThreshold', labelFieldConfidenceThreshold)
@@ -467,6 +475,12 @@ class UserSettingsResponseDtoBuilder
   set advancedFeaturesEnabled(bool? advancedFeaturesEnabled) =>
       _$this._advancedFeaturesEnabled = advancedFeaturesEnabled;
 
+  bool? _fuzzyDuplicateDetectionEnabled;
+  bool? get fuzzyDuplicateDetectionEnabled =>
+      _$this._fuzzyDuplicateDetectionEnabled;
+  set fuzzyDuplicateDetectionEnabled(bool? fuzzyDuplicateDetectionEnabled) =>
+      _$this._fuzzyDuplicateDetectionEnabled = fuzzyDuplicateDetectionEnabled;
+
   bool? _useArenaWinnerAsDefault;
   bool? get useArenaWinnerAsDefault => _$this._useArenaWinnerAsDefault;
   set useArenaWinnerAsDefault(bool? useArenaWinnerAsDefault) =>
@@ -543,6 +557,7 @@ class UserSettingsResponseDtoBuilder
       _documentChatLocalModelEnabled = $v.documentChatLocalModelEnabled;
       _documentChatLocalModelReady = $v.documentChatLocalModelReady;
       _advancedFeaturesEnabled = $v.advancedFeaturesEnabled;
+      _fuzzyDuplicateDetectionEnabled = $v.fuzzyDuplicateDetectionEnabled;
       _useArenaWinnerAsDefault = $v.useArenaWinnerAsDefault;
       _arenaWinnerEngine = $v.arenaWinnerEngine;
       _labelFieldConfidenceThreshold = $v.labelFieldConfidenceThreshold;
@@ -594,6 +609,7 @@ class UserSettingsResponseDtoBuilder
               documentChatLocalModelEnabled: documentChatLocalModelEnabled,
               documentChatLocalModelReady: documentChatLocalModelReady,
               advancedFeaturesEnabled: advancedFeaturesEnabled,
+              fuzzyDuplicateDetectionEnabled: fuzzyDuplicateDetectionEnabled,
               useArenaWinnerAsDefault: BuiltValueNullFieldError.checkNotNull(
                   useArenaWinnerAsDefault,
                   r'UserSettingsResponseDto',

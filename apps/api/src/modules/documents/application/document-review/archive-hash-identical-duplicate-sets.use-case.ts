@@ -19,7 +19,7 @@ export class ArchiveHashIdenticalDuplicateSetsUseCase {
   ) {}
 
   async execute(userId: string): Promise<ArchiveHashIdenticalDuplicateSetsResult> {
-    const sets = await this.listSets.execute(userId);
+    const { items: sets } = await this.listSets.execute(userId);
     let setsArchived = 0;
     for (const set of sets) {
       if (!set.bulkArchiveEligible) {

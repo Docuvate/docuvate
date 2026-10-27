@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { AdminUserDto, InstanceRole } from '@docuvate/contracts';
-import { useCallback, useEffect, useState } from 'react';
+import { type AdminUserDto, CURSOR_LIST_DEFAULT_LIMIT, type InstanceRole } from '@docuvate/contracts';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { AdminSettingsLayout } from '../../components/admin/AdminSettingsLayout';
@@ -12,11 +12,12 @@ import { useToast } from '../../components/save/ToastProvider';
 import { SettingsBreadcrumb } from '../../components/settings/SettingsBreadcrumb';
 import { Button } from '../../components/ui/Button';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+import { Pagination } from '../../components/ui/Pagination';
 import { formatAdminUserFacingError } from '../../lib/adminErrors';
 import {
   banAdminUser,
   inviteAdminUser,
-  listAdminUsers,
+  listAdminUsersPage,
   resendAdminUserInvitation,
   revokeAdminUserInvitation,
   revokeAdminUserSessions,
@@ -40,6 +41,10 @@ export function AdminUsersPage() {
   const { data: session } = authClient.useSession();
   const currentUserId = authSessionUserId(session) ?? null;
   const [users, setUsers] = useState<AdminUserDto[]>([]);
+  const [listTotal, setListTotal] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageCursors, setPageCursors] = useState<(string | undefined)[]>([undefined]);
   const [loadError, setLoadError] = useState(false);
   const [reloadBusy, setReloadBusy] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -47,22 +52,54 @@ export function AdminUsersPage() {
   const [inviteRole, setInviteRole] = useState<InstanceRole>('member');
   const [pending, setPending] = useState<PendingAction | null>(null);
 
+  const activeCursor = pageCursors[pageIndex];
+
   const reload = useCallback(async () => {
     setReloadBusy(true);
     try {
-      const list = await listAdminUsers();
+      const list = await listAdminUsersPage({
+        cursor: activeCursor,
+        limit: CURSOR_LIST_DEFAULT_LIMIT,
+      });
       setUsers(list.users);
+      setListTotal(list.total ?? list.users.length);
+      setHasMore(list.hasMore);
+      setPageCursors((prev) => {
+        const copy = [...prev];
+        copy[pageIndex + 1] = list.nextCursor ?? undefined;
+        return copy.slice(0, pageIndex + 2);
+      });
       setLoadError(false);
     } catch {
       setLoadError(true);
     } finally {
       setReloadBusy(false);
     }
-  }, []);
+  }, [activeCursor, pageIndex]);
 
   useEffect(() => {
     void reload();
   }, [reload]);
+
+  const paginationRange = useMemo(() => {
+    if (users.length === 0) {
+      return { from: 0, to: 0, total: listTotal };
+    }
+    const from = pageIndex * CURSOR_LIST_DEFAULT_LIMIT + 1;
+    const to = pageIndex * CURSOR_LIST_DEFAULT_LIMIT + users.length;
+    return { from, to, total: listTotal };
+  }, [listTotal, pageIndex, users.length]);
+
+  function goToNextPage() {
+    if (!hasMore) {
+      return;
+    }
+    setPageIndex((index) => index + 1);
+  }
+
+  function goToPreviousPage() {
+    setPageIndex((index) => Math.max(0, index - 1));
+  }
 
   function notifyActionError(err: unknown, fallbackKey: string) {
     toast.error(formatAdminUserFacingError(err, fallbackKey));
@@ -79,6 +116,8 @@ export function AdminUsersPage() {
       });
       setInviteEmail('');
       toast.success(t('admin.usersInviteSuccess'));
+      setPageIndex(0);
+      setPageCursors([undefined]);
       await reload();
     } catch (err) {
       notifyActionError(err, 'admin.usersInviteFailed');
@@ -257,19 +296,32 @@ export function AdminUsersPage() {
 
       <section className="settings-section-card admin-users-panel">
         {!loadError ? (
-          <AdminUsersTable
-            users={users}
-            busy={busy}
-            currentUserId={currentUserId}
-            soleAdministratorUserId={
-              users.filter((u) => u.role === 'admin' && u.accountStatus !== 'invited').length === 1
-                ? (users.find((u) => u.role === 'admin' && u.accountStatus !== 'invited')?.id ??
-                  null)
-                : null
-            }
-            onRoleChange={requestRoleChange}
-            onMenuAction={openMenuAction}
-          />
+          <>
+            <AdminUsersTable
+              users={users}
+              busy={busy}
+              currentUserId={currentUserId}
+              soleAdministratorUserId={
+                users.filter((u) => u.role === 'admin' && u.accountStatus !== 'invited').length ===
+                1
+                  ? (users.find((u) => u.role === 'admin' && u.accountStatus !== 'invited')?.id ??
+                    null)
+                  : null
+              }
+              onRoleChange={requestRoleChange}
+              onMenuAction={openMenuAction}
+            />
+            <Pagination
+              from={paginationRange.from}
+              to={paginationRange.to}
+              total={paginationRange.total}
+              onPrevious={pageIndex > 0 ? goToPreviousPage : undefined}
+              onNext={hasMore ? goToNextPage : undefined}
+              previousDisabled={pageIndex === 0 || reloadBusy}
+              nextDisabled={!hasMore || reloadBusy}
+              className="admin-users-pagination"
+            />
+          </>
         ) : null}
       </section>
 

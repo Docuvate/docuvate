@@ -130,9 +130,9 @@ describe('Duplicate set use cases', () => {
       ),
     });
     const useCase = new ListDuplicateSetsUseCase(duplicates, documents);
-    const sets = await useCase.execute('user-1');
-    expect(sets).toHaveLength(1);
-    expect(sets[0]?.bulkArchiveEligible).toBe(true);
-    expect(sets[0]?.similarityPercent).toBe(100);
+    const page = await useCase.execute('user-1');
+    expect(page.items).toHaveLength(1);
+    expect(page.items[0]?.bulkArchiveEligible).toBe(true);
+    expect(page.items[0]?.similarityPercent).toBe(100);
   });
 });

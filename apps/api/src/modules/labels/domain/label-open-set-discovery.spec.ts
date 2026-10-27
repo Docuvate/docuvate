@@ -69,7 +69,8 @@ describe('label-open-set-discovery', () => {
     expect(['gehaltsabrechnung', 'entgelt']).toContain(
       suggestions[0]?.proposedName.toLowerCase() ?? ''
     );
-    expect(suggestions[0]?.reason).toMatch(/ähnliche Dokumente ohne Label/);
+    expect(suggestions[0]?.reasonKey).toBe('labels.todoWhyNewOpenSetCluster');
+    expect(suggestions[0]?.reasonParams?.peerCount).toBeGreaterThan(0);
   });
 
   it('does not emit multiple new-label suggestions for one document', () => {

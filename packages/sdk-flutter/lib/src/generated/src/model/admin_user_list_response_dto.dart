@@ -14,11 +14,19 @@ part 'admin_user_list_response_dto.g.dart';
 ///
 /// Properties:
 /// * [users] 
+/// * [nextCursor] 
+/// * [hasMore] 
 /// * [total] 
 @BuiltValue()
 abstract class AdminUserListResponseDto implements Built<AdminUserListResponseDto, AdminUserListResponseDtoBuilder> {
   @BuiltValueField(wireName: r'users')
   BuiltList<AdminUserResponseDto> get users;
+
+  @BuiltValueField(wireName: r'nextCursor')
+  String get nextCursor;
+
+  @BuiltValueField(wireName: r'hasMore')
+  bool get hasMore;
 
   @BuiltValueField(wireName: r'total')
   num get total;
@@ -50,6 +58,16 @@ class _$AdminUserListResponseDtoSerializer implements PrimitiveSerializer<AdminU
     yield serializers.serialize(
       object.users,
       specifiedType: const FullType(BuiltList, [FullType(AdminUserResponseDto)]),
+    );
+    yield r'nextCursor';
+    yield serializers.serialize(
+      object.nextCursor,
+      specifiedType: const FullType(String),
+    );
+    yield r'hasMore';
+    yield serializers.serialize(
+      object.hasMore,
+      specifiedType: const FullType(bool),
     );
     yield r'total';
     yield serializers.serialize(
@@ -85,6 +103,20 @@ class _$AdminUserListResponseDtoSerializer implements PrimitiveSerializer<AdminU
             specifiedType: const FullType(BuiltList, [FullType(AdminUserResponseDto)]),
           ) as BuiltList<AdminUserResponseDto>;
           result.users.replace(valueDes);
+          break;
+        case r'nextCursor':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.nextCursor = valueDes;
+          break;
+        case r'hasMore':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.hasMore = valueDes;
           break;
         case r'total':
           final valueDes = serializers.deserialize(

@@ -540,17 +540,18 @@
             "in": "query",
             "schema": {
               "minimum": 1,
-              "maximum": 100,
+              "maximum": 200,
+              "default": 50,
               "type": "number"
             }
           },
           {
-            "name": "offset",
+            "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Opaque keyset cursor from a previous response",
             "schema": {
-              "minimum": 0,
-              "type": "number"
+              "type": "string"
             }
           },
           {
@@ -1247,10 +1248,101 @@
         ]
       }
     },
+    "/chat/suggestion-bootstrap": {
+      "get": {
+        "operationId": "getGlobalChatSuggestionBootstrap",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalChatSuggestionBootstrapDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Data for global chat suggestion chips without loading the full library",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
     "/chat/threads": {
       "get": {
         "operationId": "listLibraryChatThreads",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Opaque keyset cursor from a previous response",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -4248,6 +4340,109 @@
           }
         ],
         "summary": "Dashboard document statistics",
+        "tags": [
+          "workspace"
+        ]
+      }
+    },
+    "/dashboard/widget-document-previews": {
+      "get": {
+        "operationId": "getDashboardWidgetDocumentPreviews",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "recent_documents",
+                "attention",
+                "saved_view"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "type": "number"
+            }
+          },
+          {
+            "name": "savedViewId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardWidgetDocumentPreviewsResponseDtoClass"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Limited document rows for dashboard widgets",
         "tags": [
           "workspace"
         ]
@@ -8085,17 +8280,45 @@
         "operationId": "listDuplicateSets",
         "parameters": [
           {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Opaque keyset cursor from a previous response",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "documentId",
             "required": false,
             "in": "query",
             "schema": {
+              "format": "uuid",
               "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DuplicateSetListResponseDtoClass"
+                }
+              }
+            }
           },
           "401": {
             "description": "",
@@ -8858,6 +9081,97 @@
     "/labels/document-inventory": {
       "get": {
         "operationId": "getLabelDocumentInventory",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Opaque keyset cursor from a previous response",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Ready-document label assignment inventory (paginated documents)",
+        "tags": [
+          "Labels"
+        ]
+      }
+    },
+    "/labels/document-inventory/summary": {
+      "get": {
+        "operationId": "getLabelDocumentInventorySummary",
         "parameters": [],
         "responses": {
           "200": {
@@ -8919,7 +9233,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Ready-document label assignment inventory (slim)",
+        "summary": "Label assignment inventory aggregates without document rows",
         "tags": [
           "Labels"
         ]
@@ -10489,19 +10803,18 @@
             "in": "query",
             "schema": {
               "minimum": 1,
-              "maximum": 100,
-              "default": 40,
+              "maximum": 200,
+              "default": 50,
               "type": "number"
             }
           },
           {
-            "name": "offset",
+            "name": "cursor",
             "required": false,
             "in": "query",
+            "description": "Opaque keyset cursor from a previous response",
             "schema": {
-              "minimum": 0,
-              "default": 0,
-              "type": "number"
+              "type": "string"
             }
           }
         ],
@@ -10866,7 +11179,28 @@
     "/saved-views": {
       "get": {
         "operationId": "listSavedDocumentViews",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Opaque keyset cursor from a previous response",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -13092,12 +13426,22 @@
               "$ref": "#/components/schemas/AdminUserResponseDto"
             }
           },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
           "total": {
-            "type": "number"
+            "type": "number",
+            "nullable": true
           }
         },
         "required": [
           "users",
+          "nextCursor",
+          "hasMore",
           "total"
         ]
       },
@@ -13627,6 +13971,23 @@
           "topLabels"
         ]
       },
+      "DashboardWidgetDocumentPreviewsResponseDtoClass": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "attentionCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
       "DashboardWidgetDtoClass": {
         "type": "object",
         "properties": {
@@ -13962,6 +14323,17 @@
       "DocumentChatThreadListResponseDto": {
         "type": "object",
         "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "number",
+            "nullable": true
+          },
           "threads": {
             "type": "array",
             "items": {
@@ -13970,6 +14342,9 @@
           }
         },
         "required": [
+          "nextCursor",
+          "hasMore",
+          "total",
           "threads"
         ]
       },
@@ -14353,19 +14728,29 @@
       "DocumentReviewQueueResponseDtoClass": {
         "type": "object",
         "properties": {
-          "total": {
-            "type": "number"
-          },
           "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/DocumentReviewQueueItemDtoClass"
             }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "number",
+            "nullable": true
           }
         },
         "required": [
-          "total",
-          "items"
+          "items",
+          "nextCursor",
+          "hasMore",
+          "total"
         ]
       },
       "DocumentReviewQueueSummaryDtoClass": {
@@ -14425,6 +14810,34 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "DuplicateSetListResponseDtoClass": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor",
+          "hasMore",
+          "total"
         ]
       },
       "DuplicateStackKeepVersionRequestDto": {
@@ -14687,6 +15100,53 @@
         },
         "required": [
           "items"
+        ]
+      },
+      "GlobalChatSuggestionBootstrapDtoClass": {
+        "type": "object",
+        "properties": {
+          "topTagId": {
+            "type": "string",
+            "nullable": true
+          },
+          "topTagName": {
+            "type": "string",
+            "nullable": true
+          },
+          "topTagDocumentCount": {
+            "type": "number"
+          },
+          "amountTaggedDocumentCount": {
+            "type": "number"
+          },
+          "contractEndSample": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "label",
+              "value"
+            ]
+          },
+          "recentQuestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "topTagId",
+          "topTagName",
+          "topTagDocumentCount",
+          "amountTaggedDocumentCount",
+          "recentQuestions"
         ]
       },
       "ImportFromConnectorRequestDto": {
@@ -16119,6 +16579,17 @@
       "SavedDocumentViewListResponseDto": {
         "type": "object",
         "properties": {
+          "nextCursor": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMore": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "number",
+            "nullable": true
+          },
           "items": {
             "type": "array",
             "items": {
@@ -16127,6 +16598,9 @@
           }
         },
         "required": [
+          "nextCursor",
+          "hasMore",
+          "total",
           "items"
         ]
       },

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { FolderDto } from '@docuvate/contracts';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { ChevronDown, ChevronRight, Folder, FolderOpen, MoreHorizontal, Plus } from 'lucide-react';
 import {
   type DragEvent,
@@ -18,13 +19,10 @@ import { NavLink } from 'react-router-dom';
 import { isFileDrag } from '../../lib/documentUploadConstants';
 import { canCreateChildFolder, MAX_FOLDER_DEPTH } from '../../lib/folderDepth';
 import {
-  childFolders,
-  folderDirectDocumentCount,
-  folderHref,
-  folderSubtreeMatchesSearch,
-  isDescendant,
-  nodeMatchesQuery,
-} from '../../lib/ordnerTree';
+  collectVisibleFolderTreeRows,
+  type FlatFolderTreeRow,
+} from '../../lib/ordner/folderExplorerFlatRows';
+import { folderDirectDocumentCount, folderHref } from '../../lib/ordnerTree';
 import { routes } from '../../lib/routes';
 import { Button } from '../ui/Button';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
@@ -36,6 +34,7 @@ import { DateisystemTreeRow, TREE_ICON } from './DateisystemTreeRow';
 import { useFolderDropTarget } from './DocumentFolderDnD';
 
 const TREE_ICON_STROKE = 1.75;
+const FOLDER_TREE_ROW_ESTIMATE_PX = 36;
 
 export interface FolderDocumentTarget {
   folderId: string;
@@ -92,7 +91,26 @@ export function FolderExplorerTree({
     name: string;
   } | null>(null);
 
-  const rootFolders = useMemo(() => childFolders(folders, null), [folders]);
+  const treeScrollRef = useRef<HTMLDivElement>(null);
+  const visibleRows = useMemo(
+    () =>
+      collectVisibleFolderTreeRows({
+        folders,
+        parentId: null,
+        depth: 0,
+        treeQuery,
+        selectionFolderId: selection.unassigned ? undefined : selection.folderId,
+        expanded,
+      }),
+    [expanded, folders, selection.folderId, selection.unassigned, treeQuery]
+  );
+  const treeVirtualizer = useVirtualizer({
+    count: visibleRows.length,
+    getScrollElement: () => treeScrollRef.current,
+    estimateSize: () => FOLDER_TREE_ROW_ESTIMATE_PX,
+    overscan: 12,
+    measureElement: (element) => element.getBoundingClientRect().height,
+  });
 
   function setExpandedExplicit(key: string, open: boolean) {
     setExpanded((prev) => {
@@ -238,30 +256,41 @@ export function FolderExplorerTree({
       ) : null}
 
       <nav className="dateisystem-tree-nav" aria-label={t('filesystem.treeNavAria')}>
-        <ul
-          className="sidebar-tree-list dateisystem-tree-list"
-          role="tree"
-          tabIndex={0}
-          onKeyDown={onTreeKeyDown}
+        <div
+          ref={treeScrollRef}
+          className="dateisystem-tree-nav-scroll"
+          data-testid="folder-tree-virtual-scroll"
         >
-          {rootFolders.map((folder) => (
-            <FolderTreeNode
-              key={folder.id}
-              folder={folder}
-              depth={0}
-              folders={folders}
-              treeQuery={treeQuery}
-              selectionFolderId={selection.unassigned ? undefined : selection.folderId}
-              expanded={expanded}
-              fileDropHighlightId={fileDropHighlightId}
-              onSetExpandedExplicit={setExpandedExplicit}
-              onCreateChildFolder={onCreateChildFolder}
-              onOpenMenu={openFolderMenu}
-              onFileDropHighlight={setFileDropHighlightId}
-              onFileDrop={handleFolderFileDrop}
-            />
-          ))}
-        </ul>
+          <ul
+            className="sidebar-tree-list dateisystem-tree-list dateisystem-tree-list-virtual"
+            role="tree"
+            tabIndex={0}
+            onKeyDown={onTreeKeyDown}
+            style={{
+              height: `${String(treeVirtualizer.getTotalSize())}px`,
+              position: 'relative',
+            }}
+          >
+            {treeVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = visibleRows[virtualRow.index];
+              return (
+                <FolderFlatTreeRow
+                  key={row.folderKey}
+                  row={row}
+                  folders={folders}
+                  fileDropHighlightId={fileDropHighlightId}
+                  virtualRow={virtualRow}
+                  measureElement={treeVirtualizer.measureElement}
+                  onSetExpandedExplicit={setExpandedExplicit}
+                  onCreateChildFolder={onCreateChildFolder}
+                  onOpenMenu={openFolderMenu}
+                  onFileDropHighlight={setFileDropHighlightId}
+                  onFileDrop={handleFolderFileDrop}
+                />
+              );
+            })}
+          </ul>
+        </div>
       </nav>
 
       <div className="dateisystem-tree-footer">
@@ -338,14 +367,12 @@ function UnassignedTreeLink({ active }: { active: boolean }) {
   );
 }
 
-interface FolderTreeNodeProps {
-  folder: FolderDto;
-  depth: number;
+interface FolderFlatTreeRowProps {
+  row: FlatFolderTreeRow;
   folders: FolderDto[];
-  treeQuery: string;
-  selectionFolderId?: string;
-  expanded: Set<string>;
   fileDropHighlightId: string | null;
+  virtualRow: { index: number; start: number };
+  measureElement: (element: Element) => void;
   onSetExpandedExplicit: (key: string, open: boolean) => void;
   onCreateChildFolder: (args: { parentId: string | null; name: string }) => Promise<void>;
   onOpenMenu: (event: React.MouseEvent, folder: FolderDto) => void;
@@ -353,52 +380,49 @@ interface FolderTreeNodeProps {
   onFileDrop: (folderId: string, event: DragEvent) => void;
 }
 
-function FolderTreeNode({
-  folder,
-  depth,
+function FolderFlatTreeRow({
+  row,
   folders,
-  treeQuery,
-  selectionFolderId,
-  expanded,
   fileDropHighlightId,
+  virtualRow,
+  measureElement,
   onSetExpandedExplicit,
   onCreateChildFolder,
   onOpenMenu,
   onFileDropHighlight,
   onFileDrop,
-}: FolderTreeNodeProps) {
+}: FolderFlatTreeRowProps) {
   const { t } = useTranslation();
-  const children = childFolders(folders, folder.id);
-  const folderKey = `f:${folder.id}`;
-  const onPath =
-    selectionFolderId === folder.id ||
-    (selectionFolderId != null && isDescendant(folders, selectionFolderId, folder.id));
-  const defaultOpen = onPath || folderSubtreeMatchesSearch(folders, folder.id, treeQuery);
-  const open = expanded.has(folderKey) ? true : expanded.has(`!${folderKey}`) ? false : defaultOpen;
-  const active = selectionFolderId === folder.id;
+  const { folder, depth, folderKey, open, hasChildren, active } = row;
   const canAddChild = canCreateChildFolder(folders, folder.id);
   const { setNodeRef, highlighted: dndHighlight } = useFolderDropTarget({
     folderId: folder.id,
     folderName: folder.name,
   });
 
-  if (
-    !nodeMatchesQuery(folder.name, treeQuery) &&
-    !folderSubtreeMatchesSearch(folders, folder.id, treeQuery)
-  ) {
-    return null;
-  }
-
   const dropTarget = dndHighlight || fileDropHighlightId === folderKey;
   const count = folderDirectDocumentCount(folder);
 
   return (
     <li
-      ref={setNodeRef}
-      className="sidebar-tree-item"
+      ref={(node) => {
+        setNodeRef(node);
+        if (node) {
+          measureElement(node);
+        }
+      }}
+      data-index={virtualRow.index}
+      className="sidebar-tree-item dateisystem-tree-virtual-item"
       role="treeitem"
       aria-expanded={open}
       aria-selected={active}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        transform: `translateY(${String(virtualRow.start)}px)`,
+      }}
     >
       <DateisystemTreeRow
         to={folderHref(folder.id)}
@@ -419,7 +443,7 @@ function FolderTreeNode({
         onDrop={(e) => { onFileDrop(folder.id, e); }}
         chevron={
           <TreeExpandChevron
-            hasChildren={children.length > 0}
+            hasChildren={hasChildren}
             open={open}
             collapseLabel={t('filesystem.collapseChildren')}
             expandLabel={t('filesystem.expandChildren')}
@@ -427,7 +451,7 @@ function FolderTreeNode({
           />
         }
         icon={
-          open && children.length > 0 ? (
+          open && hasChildren ? (
             <FolderOpen size={TREE_ICON} strokeWidth={TREE_ICON_STROKE} aria-hidden />
           ) : (
             <Folder size={TREE_ICON} strokeWidth={TREE_ICON_STROKE} aria-hidden />
@@ -457,27 +481,6 @@ function FolderTreeNode({
           </>
         }
       />
-      {open && children.length > 0 ? (
-        <ul className="sidebar-mappe-children dateisystem-tree-children" role="group">
-          {children.map((child) => (
-            <FolderTreeNode
-              key={child.id}
-              folder={child}
-              depth={depth + 1}
-              folders={folders}
-              treeQuery={treeQuery}
-              selectionFolderId={selectionFolderId}
-              expanded={expanded}
-              fileDropHighlightId={fileDropHighlightId}
-              onSetExpandedExplicit={onSetExpandedExplicit}
-              onCreateChildFolder={onCreateChildFolder}
-              onOpenMenu={onOpenMenu}
-              onFileDropHighlight={onFileDropHighlight}
-              onFileDrop={onFileDrop}
-            />
-          ))}
-        </ul>
-      ) : null}
     </li>
   );
 }

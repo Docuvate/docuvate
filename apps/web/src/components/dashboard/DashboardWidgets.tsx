@@ -3,7 +3,7 @@
 import type {
   DashboardStatisticsDto,
   DashboardWidgetDto,
-  DocumentDto,
+  DocumentListItemDto,
   SavedDocumentViewDto,
 } from '@docuvate/contracts';
 import { FileText } from 'lucide-react';
@@ -11,11 +11,10 @@ import { type ReactNode,useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 
-import { getSavedDocumentView, listDocuments } from '../../lib/api';
+import { getDashboardWidgetDocumentPreviews } from '../../lib/api';
 import { resolveLibraryDropTarget } from '../../lib/documentUploadAssignment';
 import { formatDocumentRelativeTime } from '../../lib/formatDocumentRelativeTime';
 import { routes } from '../../lib/routes';
-import { savedViewToListQuery } from '../../lib/savedViewState';
 import { Badge } from '../ui/Badge';
 import { Chip } from '../ui/Chip';
 import { Progress } from '../ui/Progress';
@@ -196,48 +195,43 @@ function WidgetSlot({
   onDrop: (targetIndex: number) => (e: React.DragEvent) => void;
 }) {
   const { t, i18n } = useTranslation();
-  const [docs, setDocs] = useState<DocumentDto[]>([]);
+  const [docs, setDocs] = useState<DocumentListItemDto[]>([]);
+  const [attentionCount, setAttentionCount] = useState(0);
 
   useEffect(() => {
-    if (widget.type === 'recent_documents' || widget.type === 'attention') {
-      const limit = widget.itemLimit ?? 8;
-      void listDocuments({
-        sort: widget.type === 'recent_documents' ? 'createdAt' : 'updatedAt',
-        order: 'desc',
-      })
-        .then((items) => {
-          const filtered =
-            widget.type === 'attention'
-              ? items.filter((d) => d.status === 'failed' || d.status === 'extracting')
-              : items;
-          setDocs(filtered.slice(0, limit));
-        })
-        .catch(() => {
-          setDocs([]);
-        });
+    if (
+      widget.type !== 'recent_documents' &&
+      widget.type !== 'attention' &&
+      widget.type !== 'saved_view'
+    ) {
+      return;
     }
-  }, [widget]);
-
-  useEffect(() => {
-    if (widget.type !== 'saved_view') return;
-    const viewId = widget.savedViewId ?? '';
-    const known = savedViews.find((v) => v.id === viewId);
-    const limit = widget.itemLimit ?? 5;
-    const load = async () => {
-      const view = known ?? (viewId ? await getSavedDocumentView(viewId) : null);
-      if (!view) {
-        setDocs([]);
-        return;
-      }
-      const items = await listDocuments(savedViewToListQuery(view));
-      setDocs(items.slice(0, limit));
+    const limit = widget.itemLimit ?? (widget.type === 'saved_view' ? 5 : 8);
+    let cancelled = false;
+    void getDashboardWidgetDocumentPreviews({
+      type: widget.type === 'saved_view' ? 'saved_view' : widget.type,
+      limit,
+      savedViewId: widget.type === 'saved_view' ? widget.savedViewId ?? undefined : undefined,
+    })
+      .then((response) => {
+        if (cancelled) {
+          return;
+        }
+        setDocs(response.items);
+        setAttentionCount(
+          widget.type === 'attention' ? (response.attentionCount ?? response.items.length) : 0
+        );
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDocs([]);
+          setAttentionCount(0);
+        }
+      });
+    return () => {
+      cancelled = true;
     };
-    void load().catch(() => {
-      setDocs([]);
-    });
-  }, [widget, savedViews]);
-
-  const attentionCount = widget.type === 'attention' ? docs.length : 0;
+  }, [widget]);
 
   return (
     <DashboardWidgetCard
@@ -285,7 +279,7 @@ function DashboardWidgetBody({
 }: {
   widget: DashboardWidgetDto;
   statistics: DashboardStatisticsDto | null;
-  docs: DocumentDto[];
+  docs: DocumentListItemDto[];
   locale: string;
 }) {
   const { t } = useTranslation();
@@ -413,7 +407,7 @@ function DashboardDocumentRow({
   locale,
   showOpenAction = false,
 }: {
-  doc: DocumentDto;
+  doc: DocumentListItemDto;
   locale: string;
   showOpenAction?: boolean;
 }) {

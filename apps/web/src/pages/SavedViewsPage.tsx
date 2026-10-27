@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SavedDocumentViewDto } from '@docuvate/contracts';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,12 +10,13 @@ import { SavedViewsManageTable } from '../components/saved-views/SavedViewsManag
 import { Button } from '../components/ui/Button';
 import {
   deleteSavedDocumentView,
-  listSavedDocumentViews,
   reorderSavedDocumentViews,
   updateSavedDocumentView,
 } from '../lib/api';
 import { authClient, authSessionUserId } from '../lib/auth-client';
+import { flattenCursorPages } from '../lib/pagination/useCursorInfiniteQuery';
 import { routes } from '../lib/routes';
+import { useSavedDocumentViewsInfiniteQuery } from '../lib/saved-views/useSavedDocumentViewsInfiniteQuery';
 import { notifySavedViewsChanged } from '../lib/savedViewsEvents';
 import { useInstallationRole } from '../lib/useInstallationRole';
 
@@ -26,25 +27,20 @@ export function SavedViewsPage() {
   const role = useInstallationRole();
   const { data: sessionData } = authClient.useSession();
   const currentUserId = authSessionUserId(sessionData);
-  const [views, setViews] = useState<SavedDocumentViewDto[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    data,
+    isLoading: loading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch,
+  } = useSavedDocumentViewsInfiniteQuery();
+  const views = useMemo(() => flattenCursorPages(data?.pages), [data?.pages]);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const items = await listSavedDocumentViews();
-      setViews(items);
-    } catch (err) {
-      pushError(err instanceof Error ? err.message : t('errors.generic'));
-    } finally {
-      setLoading(false);
-    }
-  }, [pushError, t]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
+    await refetch();
+  }, [refetch]);
 
   async function saveRename(id: string, name: string) {
     const trimmed = name.trim();
@@ -120,16 +116,32 @@ export function SavedViewsPage() {
       {loading ? <p className="muted">{t('dashboard.loading')}</p> : null}
 
       {!loading && views.length > 0 ? (
-        <SavedViewsManageTable
-          views={views}
-          currentUserId={currentUserId}
-          canManageShared={canManageShared}
-          busy={busy}
-          onRename={saveRename}
-          onTogglePin={togglePin}
-          onDelete={remove}
-          onReorder={reorder}
-        />
+        <>
+          <SavedViewsManageTable
+            views={views}
+            currentUserId={currentUserId}
+            canManageShared={canManageShared}
+            busy={busy}
+            onRename={saveRename}
+            onTogglePin={togglePin}
+            onDelete={remove}
+            onReorder={reorder}
+          />
+          {hasNextPage ? (
+            <div className="saved-views-load-more">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={isFetchingNextPage}
+                onClick={() => {
+                  void fetchNextPage();
+                }}
+              >
+                {isFetchingNextPage ? t('common.loading') : t('ui.pagination.nextPage')}
+              </Button>
+            </div>
+          ) : null}
+        </>
       ) : null}
       {!loading && views.length === 0 ? (
         <p className="muted">{t('savedViews.manageEmpty')}</p>

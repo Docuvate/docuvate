@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Thomas Faust
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
-import type { DocumentReviewQueueItemDto } from '@docuvate/contracts';
 import { Check } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,36 +13,33 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import {
   acceptDocumentReviewHighConfidenceBatch,
   archiveHashIdenticalDuplicateSets,
-  listDocumentReviewQueue,
 } from '../lib/api';
 import { formatUserFacingError } from '../lib/apiErrors';
+import { flattenCursorPages } from '../lib/pagination/useCursorInfiniteQuery';
+import { useDocumentReviewQueueInfiniteQuery } from '../lib/review/useDocumentReviewQueueInfiniteQuery';
 import { routes } from '../lib/routes';
 
 export function ReviewQueuePage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { pushSuccess, pushError } = useToastNotify();
-  const [items, setItems] = useState<DocumentReviewQueueItemDto[]>([]);
-  const [loading, setLoading] = useState(true);
   const [batchBusy, setBatchBusy] = useState(false);
   const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await listDocumentReviewQueue();
-      setItems(res.items);
-    } catch (err) {
-      pushError(formatUserFacingError(err, 'errors.loadFailed'));
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [pushError]);
+  const {
+    data,
+    isLoading: loading,
+    isError: loadError,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    refetch,
+  } = useDocumentReviewQueueInfiniteQuery();
+  const items = flattenCursorPages(data?.pages);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  const reload = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   async function onBatchHighConfidence() {
     setBatchBusy(true);
@@ -56,7 +52,7 @@ export function ReviewQueuePage() {
           fields: result.acceptedFields,
         })
       );
-      await load();
+      await reload();
     } catch (err) {
       pushError(formatUserFacingError(err, 'errors.generic'));
     } finally {
@@ -64,7 +60,7 @@ export function ReviewQueuePage() {
     }
   }
 
-  const showWizard = !loading && items.length > 0;
+  const showWizard = !loading && !loadError && items.length > 0;
 
   return (
     <div className="page review-queue-page" data-ux="page">
@@ -99,8 +95,16 @@ export function ReviewQueuePage() {
       </header>
 
       {loading ? <p className="muted">{t('reviewQueue.loading')}</p> : null}
+      {loadError ? (
+        <div className="review-queue-load-error" role="alert">
+          <p className="error">{t('errors.loadFailed')}</p>
+          <Button type="button" variant="secondary" onClick={() => void reload()}>
+            {t('common.retry')}
+          </Button>
+        </div>
+      ) : null}
 
-      {!loading && items.length === 0 ? (
+      {!loading && !loadError && items.length === 0 ? (
         <Card className="review-queue-done-card">
           <div className="review-queue-done-icon" aria-hidden="true">
             <Check size={28} strokeWidth={2} />
@@ -119,7 +123,23 @@ export function ReviewQueuePage() {
       ) : null}
 
       {showWizard ? (
-        <ReviewWizardView items={items} batchBusy={batchBusy} onReload={load} />
+        <>
+          <ReviewWizardView items={items} batchBusy={batchBusy} onReload={reload} />
+          {hasNextPage ? (
+            <div className="review-queue-load-more">
+              <Button
+                type="button"
+                variant="secondary"
+                disabled={isFetchingNextPage}
+                onClick={() => {
+                  void fetchNextPage();
+                }}
+              >
+                {isFetchingNextPage ? t('common.loading') : t('ui.pagination.nextPage')}
+              </Button>
+            </div>
+          ) : null}
+        </>
       ) : null}
 
       <ConfirmDialog
@@ -136,7 +156,7 @@ export function ReviewQueuePage() {
               pushSuccess(
                 t('reviewQueue.archiveHashIdenticalSuccess', { count: result.setsArchived })
               );
-              return load();
+              return reload();
             })
             .catch((err: unknown) => {
               pushError(formatUserFacingError(err, 'errors.generic'));

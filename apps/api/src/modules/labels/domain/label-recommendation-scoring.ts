@@ -23,6 +23,8 @@ export interface EmbeddingClusterNewLabel {
   score: number;
   similarity: number;
   reason: string;
+  reasonKey?: string;
+  reasonParams?: { peerCount: number; matchPercent: number };
   documentIds: string[];
 }
 
@@ -286,6 +288,8 @@ export function suggestEmbeddingClusterNewLabels(input: {
     score: cluster.score,
     similarity: cluster.similarity,
     reason: cluster.reason,
+    reasonKey: cluster.reasonKey,
+    reasonParams: cluster.reasonParams,
     documentIds: cluster.documentIds,
   }));
 }

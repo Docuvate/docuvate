@@ -4,9 +4,10 @@
  */
 const DATABASE_URL =
   process.env.DATABASE_URL ?? 'postgresql://docuvate:docuvate@127.0.0.1:5433/docuvate';
-const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'alex.upload@fixture.docuvate.test';
+const EMAIL = process.env.E2E_SMOKE_EMAIL ?? 'smoke.bench@fixture.docuvate.test';
 const DOC_COUNT = Number(process.env.LIBRARY_PERF_DOC_COUNT ?? '5000');
 const LABEL_COUNT = Number(process.env.LIBRARY_PERF_LABEL_COUNT ?? '300');
+const REVIEW_PENDING_COUNT = Number(process.env.LIBRARY_PERF_REVIEW_PENDING_COUNT ?? '0');
 
 const LONG_TITLE_PREFIX =
   'Sehr langer Dokumenttitel für Layout-Regressionstests mit virtuellem Scrollen und mehrzeiligen Metadaten ';
@@ -86,6 +87,14 @@ async function main() {
           [id, `Absender Zeile ${String(i)} — Muster GmbH & Co. KG`]
         );
       }
+      if (i < REVIEW_PENDING_COUNT && tagIds.length > 0) {
+        const suggestTagId = tagIds[(i + 3) % tagIds.length];
+        await pool.query(
+          `INSERT INTO document_tag_suggestions (document_id, tag_id, reason, dismissed, source, confidence)
+           VALUES ($1, $2, 'perf-fixture-review', false, 'embedding', 0.88)`,
+          [id, suggestTagId]
+        );
+      }
       if (isShowcase && tagIds.length >= LONG_LABEL_NAMES.length) {
         for (let t = 0; t < LONG_LABEL_NAMES.length; t += 1) {
           await pool.query(
@@ -93,7 +102,7 @@ async function main() {
             [id, tagIds[t]]
           );
         }
-      } else if (i % 7 === 0 && i !== 0) {
+      } else if (i % 7 === 0 && i !== 0 && i >= REVIEW_PENDING_COUNT) {
         const tagId = tagIds[i % tagIds.length];
         await pool.query(
           `INSERT INTO document_tags (document_id, tag_id, user_confirmed) VALUES ($1, $2, true)`,
@@ -111,7 +120,7 @@ async function main() {
     }
 
     console.log(
-      `Seeded user ${EMAIL}: ${String(DOC_COUNT)} documents, ${String(LABEL_COUNT)} labels`
+      `Seeded user ${EMAIL}: ${String(DOC_COUNT)} documents, ${String(LABEL_COUNT)} labels, ${String(REVIEW_PENDING_COUNT)} review-queue items`
     );
   } finally {
     await pool.end();

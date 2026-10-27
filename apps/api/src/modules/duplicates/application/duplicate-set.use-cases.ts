@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type {
   ApplyDuplicateSetDecisionsRequest,
+  CursorListQuery,
   DuplicateCandidateSource,
   DuplicateSetDto,
+  DuplicateSetListResponse,
 } from '@docuvate/contracts';
 import {
   duplicateSetBulkArchiveEligible,
@@ -23,6 +25,9 @@ import {
   type DuplicateRepository,
   type DuplicateStackRepository,
 } from '../../../shared/domain/ports.js';
+import { clampCursorListLimit } from '../../../shared/infrastructure/pagination/clamp-cursor-list-limit.js';
+import { sliceSortedCursorPage } from '../../../shared/infrastructure/pagination/cursor-list-page.js';
+import { decodeIdTiebreakerCursor } from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 
 function pairKey(documentIdA: string, documentIdB: string): string {
   return documentIdA < documentIdB
@@ -37,7 +42,11 @@ export class ListDuplicateSetsUseCase {
     @Inject(DOCUMENT_REPOSITORY) private readonly documents: DocumentRepository
   ) {}
 
-  async execute(userId: string, focusDocumentId?: string): Promise<DuplicateSetDto[]> {
+  async execute(
+    userId: string,
+    focusDocumentId?: string,
+    pagination?: CursorListQuery
+  ): Promise<DuplicateSetListResponse> {
     const rows = await this.duplicates.listActiveCandidates(userId);
     const pairs = rows.map((row) => ({
       documentId: row.documentId,
@@ -128,7 +137,36 @@ export class ListDuplicateSetsUseCase {
       });
     }
 
-    return sets.sort((a, b) => b.maxSimilarity - a.maxSimilarity);
+    const sorted = sets.sort((a, b) => {
+      if (b.maxSimilarity !== a.maxSimilarity) {
+        return b.maxSimilarity - a.maxSimilarity;
+      }
+      return b.setId.localeCompare(a.setId);
+    });
+
+    if (!pagination) {
+      return {
+        items: sorted,
+        hasMore: false,
+        nextCursor: null,
+        total: null,
+      };
+    }
+
+    const limit = clampCursorListLimit(pagination.limit);
+    const cursorPayload = pagination.cursor
+      ? decodeIdTiebreakerCursor(pagination.cursor)
+      : null;
+
+    return sliceSortedCursorPage({
+      sorted,
+      limit,
+      cursor: cursorPayload,
+      getSortValue: (set) => set.maxSimilarity,
+      getId: (set) => set.setId,
+      order: 'desc',
+      includeTotal: !pagination.cursor,
+    });
   }
 }
 

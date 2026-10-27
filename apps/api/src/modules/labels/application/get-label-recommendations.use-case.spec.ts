@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import { describe, expect, it, vi } from 'vitest';
 
-import { createDocumentRepositoryStub } from '../../../test-support/document-repository.stub.js';
+import { createLabelDocumentInventoryRepositoryStub } from '../../../test-support/label-document-inventory-repository.stub.js';
 import { createLabelEmbeddingRepositoryStub } from '../../../test-support/label-embedding-repository.stub.js';
 import { createTaxonomyRepositoryStub } from '../../../test-support/taxonomy-repository.stub.js';
 import {
@@ -23,9 +23,6 @@ describe('GetLabelRecommendationsUseCase', () => {
     const taxonomy = createTaxonomyRepositoryStub({
       listTags: vi.fn().mockResolvedValue([]),
     });
-    const documents = createDocumentRepositoryStub({
-      listForUser: vi.fn().mockResolvedValue([]),
-    });
     const labelEmbeddings = createLabelEmbeddingRepositoryStub({
       listDocumentEmbeddingsForUser: vi.fn().mockResolvedValue([]),
       listUserConfirmedDocumentEmbeddingsForUser: vi.fn().mockResolvedValue([]),
@@ -42,11 +39,11 @@ describe('GetLabelRecommendationsUseCase', () => {
     });
 
     const useCase = new GetLabelRecommendationsUseCase(
-      documents,
       taxonomy,
       labelEmbeddings,
       prefs,
-      cache
+      cache,
+      createLabelDocumentInventoryRepositoryStub()
     );
 
     const result = await useCase.execute(USER);

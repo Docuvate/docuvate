@@ -456,7 +456,12 @@ export class DocumentsController {
     @Param('id') id: string
   ): Promise<DocumentChatThreadListResponseDto> {
     const threads = await this.listDocumentChatThreads.execute(id, session.user.id, subject);
-    return { threads: threads.map(toDocumentChatThreadDto) };
+    return {
+      threads: threads.map(toDocumentChatThreadDto),
+      nextCursor: null,
+      hasMore: false,
+      total: null,
+    };
   }
 
   @Post(':id/chat/threads')

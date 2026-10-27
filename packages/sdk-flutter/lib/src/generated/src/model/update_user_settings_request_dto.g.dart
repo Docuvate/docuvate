@@ -154,6 +154,8 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
   @override
   final bool? advancedFeaturesEnabled;
   @override
+  final bool? fuzzyDuplicateDetectionEnabled;
+  @override
   final UpdateUserSettingsRequestDtoThemePreferenceEnum? themePreference;
   @override
   final UpdateUserSettingsRequestDtoLocaleEnum? locale;
@@ -174,6 +176,7 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
       this.fieldExtractionConfidenceGateEnabled,
       this.fieldExtractionRequiredLabelIds,
       this.advancedFeaturesEnabled,
+      this.fuzzyDuplicateDetectionEnabled,
       this.themePreference,
       this.locale,
       this.documentChatCloudBaseUrl,
@@ -202,6 +205,8 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
         fieldExtractionRequiredLabelIds ==
             other.fieldExtractionRequiredLabelIds &&
         advancedFeaturesEnabled == other.advancedFeaturesEnabled &&
+        fuzzyDuplicateDetectionEnabled ==
+            other.fuzzyDuplicateDetectionEnabled &&
         themePreference == other.themePreference &&
         locale == other.locale &&
         documentChatCloudBaseUrl == other.documentChatCloudBaseUrl &&
@@ -218,6 +223,7 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
     _$hash = $jc(_$hash, fieldExtractionConfidenceGateEnabled.hashCode);
     _$hash = $jc(_$hash, fieldExtractionRequiredLabelIds.hashCode);
     _$hash = $jc(_$hash, advancedFeaturesEnabled.hashCode);
+    _$hash = $jc(_$hash, fuzzyDuplicateDetectionEnabled.hashCode);
     _$hash = $jc(_$hash, themePreference.hashCode);
     _$hash = $jc(_$hash, locale.hashCode);
     _$hash = $jc(_$hash, documentChatCloudBaseUrl.hashCode);
@@ -238,6 +244,8 @@ class _$UpdateUserSettingsRequestDto extends UpdateUserSettingsRequestDto {
           ..add('fieldExtractionRequiredLabelIds',
               fieldExtractionRequiredLabelIds)
           ..add('advancedFeaturesEnabled', advancedFeaturesEnabled)
+          ..add(
+              'fuzzyDuplicateDetectionEnabled', fuzzyDuplicateDetectionEnabled)
           ..add('themePreference', themePreference)
           ..add('locale', locale)
           ..add('documentChatCloudBaseUrl', documentChatCloudBaseUrl)
@@ -293,6 +301,12 @@ class UpdateUserSettingsRequestDtoBuilder
   set advancedFeaturesEnabled(bool? advancedFeaturesEnabled) =>
       _$this._advancedFeaturesEnabled = advancedFeaturesEnabled;
 
+  bool? _fuzzyDuplicateDetectionEnabled;
+  bool? get fuzzyDuplicateDetectionEnabled =>
+      _$this._fuzzyDuplicateDetectionEnabled;
+  set fuzzyDuplicateDetectionEnabled(bool? fuzzyDuplicateDetectionEnabled) =>
+      _$this._fuzzyDuplicateDetectionEnabled = fuzzyDuplicateDetectionEnabled;
+
   UpdateUserSettingsRequestDtoThemePreferenceEnum? _themePreference;
   UpdateUserSettingsRequestDtoThemePreferenceEnum? get themePreference =>
       _$this._themePreference;
@@ -331,6 +345,7 @@ class UpdateUserSettingsRequestDtoBuilder
       _fieldExtractionRequiredLabelIds =
           $v.fieldExtractionRequiredLabelIds?.toBuilder();
       _advancedFeaturesEnabled = $v.advancedFeaturesEnabled;
+      _fuzzyDuplicateDetectionEnabled = $v.fuzzyDuplicateDetectionEnabled;
       _themePreference = $v.themePreference;
       _locale = $v.locale;
       _documentChatCloudBaseUrl = $v.documentChatCloudBaseUrl;
@@ -368,6 +383,7 @@ class UpdateUserSettingsRequestDtoBuilder
               fieldExtractionRequiredLabelIds:
                   _fieldExtractionRequiredLabelIds?.build(),
               advancedFeaturesEnabled: advancedFeaturesEnabled,
+              fuzzyDuplicateDetectionEnabled: fuzzyDuplicateDetectionEnabled,
               themePreference: themePreference,
               locale: locale,
               documentChatCloudBaseUrl: documentChatCloudBaseUrl,

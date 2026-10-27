@@ -16,12 +16,18 @@ import type {
 import {
   parseDate,
   parseEnum,
+  parseNumber,
   parseOptionalEnum,
   parseOptionalString,
   parseString,
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  buildDescIdTiebreakerKeyset,
+  decodeIdTiebreakerCursor,
+  encodeIdTiebreakerCursor,
+} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 import { PLACEHOLDER_CHAT_THREAD_TITLES } from '../application/chat-thread-title.js';
 import { sanitizeChatThreadDocumentIds } from '../domain/chat-thread-document-ids.js';
 
@@ -104,18 +110,95 @@ function mapMessageRow(row: Record<string, unknown>): DocumentChatMessageEntity 
 export class PgDocumentChatThreadRepository implements DocumentChatThreadRepository {
   constructor(@Inject(PG_POOL) private readonly pool: pg.Pool) {}
 
-  async listThreadsForLibrary(userId: string): Promise<DocumentChatThreadEntity[]> {
+  async listThreadsForLibrary(
+    userId: string,
+    pagination?: { limit: number; cursor?: string }
+  ): Promise<{
+    threads: DocumentChatThreadEntity[];
+    hasMore: boolean;
+    nextCursor: string | null;
+    total: number | null;
+  }> {
+    if (!pagination) {
+      const result = await this.pool.query(
+        `SELECT ${THREAD_LIST_SELECT}
+         FROM chat_threads t
+         LEFT JOIN chat_thread_documents ctd ON ctd.thread_id = t.id
+         WHERE t.user_id = $1 AND t.scope = 'library'
+           AND EXISTS (SELECT 1 FROM chat_messages m WHERE m.thread_id = t.id)
+         GROUP BY t.id
+         ORDER BY t.updated_at DESC, t.id DESC`,
+        [userId]
+      );
+      const threads = result.rows.map((raw) => mapThreadRow(requireRecord(raw)));
+      return { threads, hasMore: false, nextCursor: null, total: null };
+    }
+
+    const fetchLimit = pagination.limit + 1;
+    const params: unknown[] = [userId];
+    let keysetSql = '';
+    if (pagination.cursor) {
+      const decoded = decodeIdTiebreakerCursor(pagination.cursor);
+      const keyset = buildDescIdTiebreakerKeyset(
+        't.updated_at',
+        't.id',
+        decoded,
+        params.length + 1,
+        '::timestamptz'
+      );
+      keysetSql = ` AND ${keyset.conditionSql}`;
+      params.push(...keyset.params);
+    }
+    params.push(fetchLimit);
+
     const result = await this.pool.query(
       `SELECT ${THREAD_LIST_SELECT}
        FROM chat_threads t
        LEFT JOIN chat_thread_documents ctd ON ctd.thread_id = t.id
        WHERE t.user_id = $1 AND t.scope = 'library'
          AND EXISTS (SELECT 1 FROM chat_messages m WHERE m.thread_id = t.id)
+         ${keysetSql}
        GROUP BY t.id
-       ORDER BY t.updated_at DESC`,
+       ORDER BY t.updated_at DESC, t.id DESC
+       LIMIT $${String(params.length)}`,
+      params
+    );
+
+    let rows = result.rows;
+    const hasMore = rows.length > pagination.limit;
+    if (hasMore) {
+      rows = rows.slice(0, pagination.limit);
+    }
+    const threads = rows.map((raw) => mapThreadRow(requireRecord(raw)));
+
+    let nextCursor: string | null = null;
+    if (hasMore && threads.length > 0) {
+      const last = threads[threads.length - 1];
+      nextCursor = encodeIdTiebreakerCursor({
+        v: 1,
+        id: last.id,
+        sortValue: last.updatedAt.toISOString(),
+      });
+    }
+
+    const total = pagination.cursor
+      ? null
+      : await this.countLibraryThreadsForUser(userId);
+
+    return { threads, hasMore, nextCursor, total };
+  }
+
+  private async countLibraryThreadsForUser(userId: string): Promise<number> {
+    const result = await this.pool.query(
+      `SELECT COUNT(*)::int AS count
+       FROM chat_threads t
+       WHERE t.user_id = $1
+         AND t.scope = 'library'
+         AND EXISTS (SELECT 1 FROM chat_messages m WHERE m.thread_id = t.id)`,
       [userId]
     );
-    return result.rows.map((raw) => mapThreadRow(requireRecord(raw)));
+    const row = requireRecord(result.rows[0] ?? {});
+    return parseNumber(row.count, 0);
   }
 
   async listThreadsForDocument(

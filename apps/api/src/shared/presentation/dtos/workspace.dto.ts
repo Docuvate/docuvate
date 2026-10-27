@@ -89,6 +89,15 @@ export class SavedDocumentViewDtoClass implements SavedDocumentViewDto {
 
 export class SavedDocumentViewListResponseDto implements SavedDocumentViewListResponse {
   items!: SavedDocumentViewDtoClass[];
+
+  @ApiProperty({ nullable: true })
+  nextCursor!: string | null;
+
+  @ApiProperty()
+  hasMore!: boolean;
+
+  @ApiProperty({ nullable: true })
+  total!: number | null;
 }
 
 export class CreateSavedDocumentViewRequestDto implements CreateSavedDocumentViewRequest {

@@ -31,6 +31,11 @@ import {
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
 import {
+  buildAscIdTiebreakerKeyset,
+  decodeIdTiebreakerCursor,
+  encodeIdTiebreakerCursor,
+} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
+import {
   assertDashboardWidgetType,
   parseDashboardWidgetFields,
 } from '../domain/dashboard-widget-config.js';
@@ -204,20 +209,86 @@ export class PgWorkspaceRepository {
   }
 
   async listViewsVisibleToUser(userId: string): Promise<SavedDocumentViewEntity[]> {
+    const page = await this.listViewsPageForUser(userId, { limit: 10_000 });
+    return page.items;
+  }
+
+  async listViewsPageForUser(
+    userId: string,
+    input: { limit: number; cursor?: string }
+  ): Promise<{
+    items: SavedDocumentViewEntity[];
+    hasMore: boolean;
+    nextCursor: string | null;
+    total: number | null;
+  }> {
+    const fetchLimit = input.limit + 1;
+    const params: unknown[] = [userId];
+    let keysetSql = '';
+    if (input.cursor) {
+      const decoded = decodeIdTiebreakerCursor(input.cursor);
+      const keyset = buildAscIdTiebreakerKeyset(
+        'v.position',
+        'v.id',
+        decoded,
+        params.length + 1
+      );
+      keysetSql = ` AND ${keyset.conditionSql}`;
+      params.push(...keyset.params);
+    }
+    params.push(fetchLimit);
+
     const result = await this.pool.query(
-      `SELECT * FROM saved_document_views
-       WHERE owner_user_id = $1 OR visibility = 'shared'
-       ORDER BY position ASC, name ASC`,
-      [userId]
+      `SELECT v.*
+       FROM saved_document_views v
+       WHERE v.owner_user_id = $1 OR v.visibility = 'shared'
+       ${keysetSql}
+       ORDER BY v.position ASC, v.id ASC
+       LIMIT $${String(params.length)}`,
+      params
     );
-    const ids = result.rows.map((r) => parseString(requireRecord(r).id));
+
+    let rows = result.rows;
+    const hasMore = rows.length > input.limit;
+    if (hasMore) {
+      rows = rows.slice(0, input.limit);
+    }
+
+    const ids = rows.map((r) => parseString(requireRecord(r).id));
     const tagMap = await this.loadTagIdsForViews(ids);
     const filterMap = await this.loadFieldFiltersForViews(ids);
-    return result.rows.map((raw) => {
+    const items = rows.map((raw) => {
       const row = requireRecord(raw);
       const viewId = parseString(row.id);
       return mapViewRow(row, tagMap.get(viewId) ?? [], filterMap.get(viewId) ?? []);
     });
+
+    let nextCursor: string | null = null;
+    if (hasMore && items.length > 0) {
+      const last = items[items.length - 1];
+      nextCursor = encodeIdTiebreakerCursor({
+        v: 1,
+        id: last.id,
+        sortValue: last.position,
+      });
+    }
+
+    const total = input.cursor
+      ? null
+      : await this.countViewsVisibleToUser(userId);
+
+    return { items, hasMore, nextCursor, total };
+  }
+
+  async countViewsVisibleToUser(userId: string): Promise<number> {
+    const result = await this.pool.query(
+      `SELECT COUNT(*)::int AS count
+       FROM saved_document_views v
+       WHERE v.owner_user_id = $1 OR v.visibility = 'shared'`,
+      [userId]
+    );
+    const row = requireRecord(result.rows[0] ?? {});
+    return parseNumber(row.count, 0);
   }
 
   async findViewById(id: string): Promise<SavedDocumentViewEntity | null> {

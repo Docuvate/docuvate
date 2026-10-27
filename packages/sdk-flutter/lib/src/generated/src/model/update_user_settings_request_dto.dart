@@ -19,6 +19,7 @@ part 'update_user_settings_request_dto.g.dart';
 /// * [fieldExtractionConfidenceGateEnabled] 
 /// * [fieldExtractionRequiredLabelIds] 
 /// * [advancedFeaturesEnabled] 
+/// * [fuzzyDuplicateDetectionEnabled] 
 /// * [themePreference] 
 /// * [locale] 
 /// * [documentChatCloudBaseUrl] 
@@ -45,6 +46,9 @@ abstract class UpdateUserSettingsRequestDto implements Built<UpdateUserSettingsR
 
   @BuiltValueField(wireName: r'advancedFeaturesEnabled')
   bool? get advancedFeaturesEnabled;
+
+  @BuiltValueField(wireName: r'fuzzyDuplicateDetectionEnabled')
+  bool? get fuzzyDuplicateDetectionEnabled;
 
   @BuiltValueField(wireName: r'themePreference')
   UpdateUserSettingsRequestDtoThemePreferenceEnum? get themePreference;
@@ -129,6 +133,13 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
       yield r'advancedFeaturesEnabled';
       yield serializers.serialize(
         object.advancedFeaturesEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.fuzzyDuplicateDetectionEnabled != null) {
+      yield r'fuzzyDuplicateDetectionEnabled';
+      yield serializers.serialize(
+        object.fuzzyDuplicateDetectionEnabled,
         specifiedType: const FullType(bool),
       );
     }
@@ -231,6 +242,13 @@ class _$UpdateUserSettingsRequestDtoSerializer implements PrimitiveSerializer<Up
             specifiedType: const FullType(bool),
           ) as bool;
           result.advancedFeaturesEnabled = valueDes;
+          break;
+        case r'fuzzyDuplicateDetectionEnabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.fuzzyDuplicateDetectionEnabled = valueDes;
           break;
         case r'themePreference':
           final valueDes = serializers.deserialize(

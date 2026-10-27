@@ -39,6 +39,8 @@ export interface OpenSetClusterSuggestion {
   score: number;
   similarity: number;
   reason: string;
+  reasonKey?: string;
+  reasonParams?: { peerCount: number; matchPercent: number };
   documentIds: string[];
 }
 
@@ -343,7 +345,9 @@ export function discoverOpenSetNewLabelClusters(input: {
       proposedName,
       score: Math.min(0.92, 0.5 + cohesion * 0.42),
       similarity: cohesion,
-      reason: `${String(peerCount)} ähnliche Dokumente ohne Label · ${String(pct)} % Übereinstimmung`,
+      reason: '',
+      reasonKey: 'labels.todoWhyNewOpenSetCluster',
+      reasonParams: { peerCount, matchPercent: pct },
       documentIds: ids,
     });
   }

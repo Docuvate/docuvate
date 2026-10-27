@@ -4,6 +4,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import type pg from 'pg';
 
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  buildDescTextIdTiebreakerKeyset,
+  decodeIdTiebreakerCursor,
+  encodeIdTiebreakerCursor,
+} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 import { instanceRoleToDbRole } from '../../auth/domain/installation-authorization.js';
 import {
   INSTANCE_ROLE_ADMIN,
@@ -41,11 +46,17 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
   async listUsers(input: {
     headers: Headers;
     limit: number;
-    offset: number;
+    cursor?: string;
     search?: string;
-  }): Promise<{ users: AdminUserListItem[]; total: number }> {
+  }): Promise<{
+    users: AdminUserListItem[];
+    total: number | null;
+    hasMore: boolean;
+    nextCursor: string | null;
+  }> {
     const searchRaw = input.search?.trim().toLowerCase();
-    const params: unknown[] = [input.limit, input.offset];
+    const fetchLimit = input.limit + 1;
+    const params: unknown[] = [];
     let searchClauseUsers = '';
     let searchClauseInvites = '';
     if (searchRaw) {
@@ -54,6 +65,22 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
       searchClauseUsers = `AND (lower(u.email) LIKE $${idx} ESCAPE '\\' OR lower(u.name) LIKE $${idx} ESCAPE '\\')`;
       searchClauseInvites = `AND (lower(i.invitee_email) LIKE $${idx} ESCAPE '\\' OR lower(i.invitee_name) LIKE $${idx} ESCAPE '\\')`;
     }
+
+    let keysetSql = '';
+    if (input.cursor) {
+      const decoded = decodeIdTiebreakerCursor(input.cursor);
+      const keyset = buildDescTextIdTiebreakerKeyset(
+        'sort_at',
+        'id',
+        decoded,
+        params.length + 1,
+        '::timestamptz'
+      );
+      keysetSql = `WHERE ${keyset.conditionSql}`;
+      params.push(...keyset.params);
+    }
+
+    params.push(fetchLimit);
 
     const combinedSql = `
       WITH combined AS (
@@ -99,37 +126,59 @@ export class PgUserAdministrationAdapter implements UserAdministrationPort {
       )
       SELECT id, name, email, role, reason, expires_at, suspended, sort_at, row_kind, last_login_at
       FROM combined
-      ORDER BY sort_at DESC, id
-      LIMIT $1 OFFSET $2`;
+      ${keysetSql}
+      ORDER BY sort_at DESC, id DESC
+      LIMIT $${String(params.length)}`;
 
     const result = await this.pool.query<DirectoryRow>(combinedSql, params);
 
-    const countParams: unknown[] = [];
-    let countSearchClauseUsers = '';
-    let countSearchClauseInvites = '';
-    if (searchRaw) {
-      countParams.push(`%${escapeLikePattern(searchRaw)}%`);
-      countSearchClauseUsers = `AND (lower(u.email) LIKE $1 ESCAPE '\\' OR lower(u.name) LIKE $1 ESCAPE '\\')`;
-      countSearchClauseInvites = `AND (lower(i.invitee_email) LIKE $1 ESCAPE '\\' OR lower(i.invitee_name) LIKE $1 ESCAPE '\\')`;
+    let rows = result.rows;
+    const hasMore = rows.length > input.limit;
+    if (hasMore) {
+      rows = rows.slice(0, input.limit);
     }
-    const countSql = `
-      WITH combined AS (
-        SELECT u.id
-        FROM "user" u
-        WHERE true ${countSearchClauseUsers}
-        UNION ALL
-        SELECT i.id::text
-        FROM user_invitations i
-        WHERE i.accepted_at IS NULL
-          AND i.revoked_at IS NULL
-          AND i.expires_at > now()
-          ${countSearchClauseInvites}
-      )
-      SELECT COUNT(*)::text AS count FROM combined`;
-    const count = await this.pool.query<{ count: string }>(countSql, countParams);
 
-    const users = result.rows.map(mapRow);
-    return { users, total: Number(count.rows[0]?.count ?? users.length) };
+    const users = rows.map(mapRow);
+
+    let nextCursor: string | null = null;
+    if (hasMore && rows.length > 0) {
+      const last = rows[rows.length - 1];
+      nextCursor = encodeIdTiebreakerCursor({
+        v: 1,
+        id: last.id,
+        sortValue: last.sort_at.toISOString(),
+      });
+    }
+
+    let total: number | null = null;
+    if (!input.cursor) {
+      const countParams: unknown[] = [];
+      let countSearchClauseUsersInner = '';
+      let countSearchClauseInvitesInner = '';
+      if (searchRaw) {
+        countParams.push(`%${escapeLikePattern(searchRaw)}%`);
+        countSearchClauseUsersInner = `AND (lower(u.email) LIKE $1 ESCAPE '\\' OR lower(u.name) LIKE $1 ESCAPE '\\')`;
+        countSearchClauseInvitesInner = `AND (lower(i.invitee_email) LIKE $1 ESCAPE '\\' OR lower(i.invitee_name) LIKE $1 ESCAPE '\\')`;
+      }
+      const countSql = `
+        WITH combined AS (
+          SELECT u.id
+          FROM "user" u
+          WHERE true ${countSearchClauseUsersInner}
+          UNION ALL
+          SELECT i.id::text
+          FROM user_invitations i
+          WHERE i.accepted_at IS NULL
+            AND i.revoked_at IS NULL
+            AND i.expires_at > now()
+            ${countSearchClauseInvitesInner}
+        )
+        SELECT COUNT(*)::text AS count FROM combined`;
+      const count = await this.pool.query<{ count: string }>(countSql, countParams);
+      total = Number(count.rows[0]?.count ?? users.length);
+    }
+
+    return { users, total, hasMore, nextCursor };
   }
 
   createUser(input: {

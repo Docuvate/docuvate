@@ -54,12 +54,14 @@ export class ListDocumentReviewQueueUseCase {
   async execute(
     userId: string,
     subject: AuthorizationSubject,
-    options: { limit?: number; offset?: number } = {}
+    options: { limit: number; cursor?: string } = { limit: 50 }
   ): Promise<DocumentReviewQueueResponseDto> {
     await this.documentAuthz.assertCollection(subject, 'document:list');
-    const limit = Math.min(Math.max(options.limit ?? 40, 1), 100);
-    const offset = Math.max(options.offset ?? 0, 0);
-    const { total, rows } = await this.reviewQueueRepo.listPendingDocumentIds(userId, limit, offset);
+    const { rows, total, hasMore, nextCursor } = await this.reviewQueueRepo.listPendingDocumentPage(
+      userId,
+      options.limit,
+      options.cursor
+    );
     const catalog = await this.listRecognizedFields.execute(userId);
     const catalogKeys: ReadonlySet<string> = new Set(
       catalog.map((def: { key: string }) => def.key)
@@ -153,6 +155,6 @@ export class ListDocumentReviewQueueUseCase {
       });
     }
 
-    return { total, items };
+    return { items, hasMore, nextCursor, total };
   }
 }

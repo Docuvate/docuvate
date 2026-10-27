@@ -7,9 +7,12 @@ import type {
   DocumentReviewQueueSummaryDto,
   TagSuggestionDto,
 } from '@docuvate/contracts';
+import { CURSOR_LIST_DEFAULT_LIMIT, CURSOR_LIST_MAX_LIMIT } from '@docuvate/contracts';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, Max, Min } from 'class-validator';
+
+import { CursorListQueryDto } from './cursor-list-query.dto.js';
 
 export class DocumentReviewFieldSuggestionDtoClass {
   @ApiProperty()
@@ -66,11 +69,17 @@ export class DocumentReviewQueueItemDtoClass {
 }
 
 export class DocumentReviewQueueResponseDtoClass implements DocumentReviewQueueResponseDto {
-  @ApiProperty()
-  total!: number;
-
   @ApiProperty({ type: [DocumentReviewQueueItemDtoClass] })
   items!: DocumentReviewQueueItemDtoClass[];
+
+  @ApiProperty({ nullable: true })
+  nextCursor!: string | null;
+
+  @ApiProperty()
+  hasMore!: boolean;
+
+  @ApiProperty({ nullable: true })
+  total!: number | null;
 }
 
 export class DocumentReviewQueueSummaryDtoClass implements DocumentReviewQueueSummaryDto {
@@ -110,19 +119,7 @@ export class AcceptDocumentReviewBatchRequestDto {
   minConfidence?: number;
 }
 
-export class ReviewQueueQueryDto {
-  @ApiPropertyOptional({ default: 40 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(1)
-  @Max(100)
-  limit?: number;
-
-  @ApiPropertyOptional({ default: 0 })
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  offset?: number;
+export class ReviewQueueQueryDto extends CursorListQueryDto {
+  @ApiPropertyOptional({ default: CURSOR_LIST_DEFAULT_LIMIT, maximum: CURSOR_LIST_MAX_LIMIT })
+  declare limit?: number;
 }

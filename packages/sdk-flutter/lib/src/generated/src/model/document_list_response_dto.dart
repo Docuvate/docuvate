@@ -4,6 +4,7 @@
 
 // ignore_for_file: unused_element
 import 'package:built_collection/built_collection.dart';
+import 'package:docuvate/src/generated/src/model/document_list_library_ui_dto.dart';
 import 'package:built_value/json_object.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
@@ -16,6 +17,7 @@ part 'document_list_response_dto.g.dart';
 /// * [nextCursor] 
 /// * [hasMore] 
 /// * [total] - Total matching documents when `cursor` was omitted.
+/// * [libraryUi] 
 /// * [items] 
 @BuiltValue()
 abstract class DocumentListResponseDto implements Built<DocumentListResponseDto, DocumentListResponseDtoBuilder> {
@@ -28,6 +30,9 @@ abstract class DocumentListResponseDto implements Built<DocumentListResponseDto,
   /// Total matching documents when `cursor` was omitted.
   @BuiltValueField(wireName: r'total')
   num get total;
+
+  @BuiltValueField(wireName: r'libraryUi')
+  DocumentListLibraryUiDto? get libraryUi;
 
   @BuiltValueField(wireName: r'items')
   BuiltList<JsonObject> get items;
@@ -70,6 +75,13 @@ class _$DocumentListResponseDtoSerializer implements PrimitiveSerializer<Documen
       object.total,
       specifiedType: const FullType(num),
     );
+    if (object.libraryUi != null) {
+      yield r'libraryUi';
+      yield serializers.serialize(
+        object.libraryUi,
+        specifiedType: const FullType(DocumentListLibraryUiDto),
+      );
+    }
     yield r'items';
     yield serializers.serialize(
       object.items,
@@ -118,6 +130,13 @@ class _$DocumentListResponseDtoSerializer implements PrimitiveSerializer<Documen
             specifiedType: const FullType(num),
           ) as num;
           result.total = valueDes;
+          break;
+        case r'libraryUi':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(DocumentListLibraryUiDto),
+          ) as DocumentListLibraryUiDto;
+          result.libraryUi.replace(valueDes);
           break;
         case r'items':
           final valueDes = serializers.deserialize(

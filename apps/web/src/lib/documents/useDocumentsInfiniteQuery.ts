@@ -3,49 +3,40 @@
 import {
   DOCUMENT_LIST_DEFAULT_LIMIT,
   type DocumentDto,
-  type DocumentListLibraryUiDto,
   type DocumentListQuery,
+  type DocumentListResponseDto,
 } from '@docuvate/contracts';
-import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { listDocumentsPage } from '../api';
+import { useCursorInfiniteQuery } from '../pagination/useCursorInfiniteQuery';
 import { documentListQueryKey } from './documentListQueryKey';
 
-export interface DocumentsInfinitePage {
-  items: DocumentDto[];
-  nextCursor: string | null;
-  hasMore: boolean;
-  total: number | null;
-  libraryUi?: DocumentListLibraryUiDto;
-}
+export type DocumentsInfinitePage = DocumentListResponseDto;
 
 export function useDocumentsInfiniteQuery(filters: DocumentListQuery | null) {
   const queryKey = useMemo(() => documentListQueryKey(filters), [filters]);
 
-  return useInfiniteQuery<
-    DocumentsInfinitePage,
-    Error,
-    InfiniteData<DocumentsInfinitePage, string | undefined>,
-    readonly unknown[],
-    string | undefined
+  return useCursorInfiniteQuery<
+    DocumentDto,
+    DocumentListQuery,
+    DocumentListResponseDto
   >({
     queryKey,
     enabled: filters !== null,
-    staleTime: 30_000,
-    refetchOnMount: false,
-    initialPageParam: undefined,
-    queryFn: async ({ pageParam }) => {
+    extraParams: filters ?? {},
+    defaultLimit: DOCUMENT_LIST_DEFAULT_LIMIT,
+    getLimit: (params) => params.limit ?? DOCUMENT_LIST_DEFAULT_LIMIT,
+    fetchPage: async (params) => {
       if (filters === null) {
         return { items: [], nextCursor: null, hasMore: false, total: null };
       }
       return listDocumentsPage({
         ...filters,
-        cursor: pageParam,
-        limit: filters.limit ?? DOCUMENT_LIST_DEFAULT_LIMIT,
+        cursor: params.cursor,
+        limit: params.limit,
       });
     },
-    getNextPageParam: (lastPage) => (lastPage.hasMore ? lastPage.nextCursor ?? undefined : undefined),
   });
 }
 

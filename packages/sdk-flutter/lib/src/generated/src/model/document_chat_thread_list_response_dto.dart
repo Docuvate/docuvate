@@ -13,9 +13,21 @@ part 'document_chat_thread_list_response_dto.g.dart';
 /// DocumentChatThreadListResponseDto
 ///
 /// Properties:
+/// * [nextCursor] 
+/// * [hasMore] 
+/// * [total] 
 /// * [threads] 
 @BuiltValue()
 abstract class DocumentChatThreadListResponseDto implements Built<DocumentChatThreadListResponseDto, DocumentChatThreadListResponseDtoBuilder> {
+  @BuiltValueField(wireName: r'nextCursor')
+  String get nextCursor;
+
+  @BuiltValueField(wireName: r'hasMore')
+  bool get hasMore;
+
+  @BuiltValueField(wireName: r'total')
+  num get total;
+
   @BuiltValueField(wireName: r'threads')
   BuiltList<DocumentChatThreadDto> get threads;
 
@@ -42,6 +54,21 @@ class _$DocumentChatThreadListResponseDtoSerializer implements PrimitiveSerializ
     DocumentChatThreadListResponseDto object, {
     FullType specifiedType = FullType.unspecified,
   }) sync* {
+    yield r'nextCursor';
+    yield serializers.serialize(
+      object.nextCursor,
+      specifiedType: const FullType(String),
+    );
+    yield r'hasMore';
+    yield serializers.serialize(
+      object.hasMore,
+      specifiedType: const FullType(bool),
+    );
+    yield r'total';
+    yield serializers.serialize(
+      object.total,
+      specifiedType: const FullType(num),
+    );
     yield r'threads';
     yield serializers.serialize(
       object.threads,
@@ -70,6 +97,27 @@ class _$DocumentChatThreadListResponseDtoSerializer implements PrimitiveSerializ
       final key = serializedList[i] as String;
       final value = serializedList[i + 1];
       switch (key) {
+        case r'nextCursor':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(String),
+          ) as String;
+          result.nextCursor = valueDes;
+          break;
+        case r'hasMore':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(bool),
+          ) as bool;
+          result.hasMore = valueDes;
+          break;
+        case r'total':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(num),
+          ) as num;
+          result.total = valueDes;
+          break;
         case r'threads':
           final valueDes = serializers.deserialize(
             value,

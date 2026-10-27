@@ -10,10 +10,22 @@ import {
   requireRecord,
 } from '../../../shared/infrastructure/database/row-parse.js';
 import { PG_POOL } from '../../../shared/infrastructure/database/tokens.js';
+import {
+  buildDescIdTiebreakerKeyset,
+  decodeIdTiebreakerCursor,
+  encodeIdTiebreakerCursor,
+} from '../../../shared/infrastructure/pagination/id-tiebreaker-cursor.js';
 
 export interface PendingReviewDocumentRow {
   id: string;
   createdAt: Date;
+}
+
+export interface PendingReviewDocumentPage {
+  rows: PendingReviewDocumentRow[];
+  hasMore: boolean;
+  nextCursor: string | null;
+  total: number | null;
 }
 
 @Injectable()
@@ -39,12 +51,28 @@ export class PgDocumentReviewQueueRepository {
     return parseNumber(row.count, 0);
   }
 
-  async listPendingDocumentIds(
+  async listPendingDocumentPage(
     userId: string,
     limit: number,
-    offset: number
-  ): Promise<{ total: number; rows: PendingReviewDocumentRow[] }> {
-    const total = await this.countPendingDocuments(userId);
+    cursor?: string
+  ): Promise<PendingReviewDocumentPage> {
+    const fetchLimit = limit + 1;
+    const params: unknown[] = [userId];
+    let keysetSql = '';
+    if (cursor) {
+      const decoded = decodeIdTiebreakerCursor(cursor);
+      const keyset = buildDescIdTiebreakerKeyset(
+        'd.created_at',
+        'd.id',
+        decoded,
+        params.length + 1,
+        '::timestamptz'
+      );
+      keysetSql = ` AND ${keyset.conditionSql}`;
+      params.push(...keyset.params);
+    }
+    params.push(fetchLimit);
+
     const result = await this.pool.query(
       `SELECT d.id, d.created_at
        FROM documents d
@@ -57,18 +85,38 @@ export class PgDocumentReviewQueueRepository {
              AND m_version.role = 'version'
          )
          AND (${this.pendingConditionSql('d')})
-       ORDER BY d.created_at DESC
-       LIMIT $2 OFFSET $3`,
-      [userId, limit, offset]
+         ${keysetSql}
+       ORDER BY d.created_at DESC, d.id DESC
+       LIMIT $${String(params.length)}`,
+      params
     );
-    const rows = result.rows.map((raw) => {
+
+    let rows = result.rows.map((raw) => {
       const row = requireRecord(raw);
       return {
         id: parseString(row.id),
         createdAt: parseDate(row.created_at),
       };
     });
-    return { total, rows };
+
+    const hasMore = rows.length > limit;
+    if (hasMore) {
+      rows = rows.slice(0, limit);
+    }
+
+    let nextCursor: string | null = null;
+    if (hasMore && rows.length > 0) {
+      const last = rows[rows.length - 1];
+      nextCursor = encodeIdTiebreakerCursor({
+        v: 1,
+        id: last.id,
+        sortValue: last.createdAt.toISOString(),
+      });
+    }
+
+    const total = cursor ? null : await this.countPendingDocuments(userId);
+
+    return { rows, hasMore, nextCursor, total };
   }
 
   private pendingConditionSql(docAlias: string): string {

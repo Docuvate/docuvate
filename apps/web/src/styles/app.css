@@ -3587,6 +3587,14 @@ mark.global-search-mark {
   font-size: 0.875rem;
 }
 
+.doc-chat-thread-list-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .doc-chat-thread-list {
   list-style: none;
   margin: 0;
@@ -3598,7 +3606,6 @@ mark.global-search-mark {
   gap: var(--dv-space-2xs);
   flex: 1 1 auto;
   min-height: 0;
-  overflow-y: auto;
 }
 
 .doc-chat-thread-list > li {
@@ -11363,13 +11370,31 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 }
 
 .dateisystem-sidebar .dateisystem-tree-nav {
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   min-height: 0;
   min-width: 0;
   max-width: 100%;
-  overflow-x: clip;
-  overflow-y: visible;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   margin-bottom: var(--dv-space-xs);
+}
+
+.dateisystem-sidebar .dateisystem-tree-nav-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: clip;
+  overflow-y: auto;
+}
+
+.duplicate-set-list-virtual {
+  max-height: min(70vh, 960px);
+  overflow-y: auto;
+}
+
+.labels-todo-list-virtual-scroll {
+  max-height: min(70vh, 960px);
+  overflow-y: auto;
 }
 
 .dateisystem-tree-list,
@@ -12845,6 +12870,19 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   overflow-x: auto;
 }
 
+.labels-vocabulary-scroll-virtual {
+  max-height: min(70vh, 640px);
+  overflow-y: auto;
+}
+
+.labels-vocabulary-table-virtual-row {
+  table-layout: fixed;
+}
+
+.labels-vocabulary-virtual-row .labels-vocabulary-table {
+  margin: 0;
+}
+
 .labels-vocabulary-table {
   width: 100%;
   border-collapse: collapse;
@@ -13601,8 +13639,8 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
   word-break: normal;
 }
 
-@media (max-width: 480px) {
-  .admin-users-table--wide {
+@media (max-width: 640px) {
+  .admin-users-table.admin-users-table--spec {
     display: none;
   }
 
@@ -13612,6 +13650,53 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 
   .admin-users-table-wrap {
     overflow-x: visible;
+  }
+
+  .admin-invite-form--spec {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .admin-invite-form--spec .admin-invite-email-field {
+    width: 100%;
+  }
+
+  .admin-invite-form--spec .admin-invite-role-select,
+  .admin-invite-form--spec .admin-invite-submit {
+    width: 100%;
+  }
+
+  .admin-users-card-field .select-trigger {
+    width: 100%;
+  }
+
+  .admin-users-panel {
+    overflow: visible;
+    min-width: 0;
+  }
+
+  .admin-invite-panel,
+  .admin-users-card-list {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .admin-invite-form--spec .admin-invite-email-field input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .pagination.admin-users-pagination {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding-inline: var(--dv-space-xs);
+  }
+
+  .pagination.admin-users-pagination > span {
+    flex: 1 1 100%;
+    min-width: 0;
   }
 }
 .dashboard-add-row {
@@ -16146,6 +16231,81 @@ html[data-docuvate-theme='dark'] .connector-plugin-icon {
 .labels-vocabulary-grid__actions {
   display: flex;
   justify-content: flex-end;
+  gap: var(--dv-space-2xs);
+  flex-shrink: 0;
+}
+
+.labels-vocabulary-cell-truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labels-vocabulary-cell-truncate .chip,
+.labels-vocabulary-cell-truncate .chip-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labels-vocabulary-scroll--stacked {
+  max-height: min(70vh, 640px);
+  overflow: auto;
+}
+
+.labels-vocabulary-card-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--dv-space-sm);
+  padding: var(--dv-space-sm);
+  border-bottom: 1px solid var(--dv-color-border);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.labels-vocabulary-card-row__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.labels-vocabulary-card-row__line1 {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.labels-vocabulary-card-row__line1 .chip {
+  max-width: 100%;
+}
+
+.labels-vocabulary-card-row__line1 .chip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labels-vocabulary-card-row__line2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dv-space-2xs) var(--dv-space-sm);
+  margin-top: var(--dv-space-2xs);
+  font-size: var(--dv-font-size-sm);
+  line-height: 1.35;
+}
+
+.labels-vocabulary-card-row__count,
+.labels-vocabulary-card-row__auto {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.labels-vocabulary-card-row__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
   gap: var(--dv-space-2xs);
 }
 

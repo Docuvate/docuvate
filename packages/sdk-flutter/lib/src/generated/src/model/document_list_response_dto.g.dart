@@ -14,6 +14,8 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
   @override
   final num total;
   @override
+  final DocumentListLibraryUiDto? libraryUi;
+  @override
   final BuiltList<JsonObject> items;
 
   factory _$DocumentListResponseDto(
@@ -24,6 +26,7 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
       {required this.nextCursor,
       required this.hasMore,
       required this.total,
+      this.libraryUi,
       required this.items})
       : super._() {
     BuiltValueNullFieldError.checkNotNull(
@@ -52,6 +55,7 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
         nextCursor == other.nextCursor &&
         hasMore == other.hasMore &&
         total == other.total &&
+        libraryUi == other.libraryUi &&
         items == other.items;
   }
 
@@ -61,6 +65,7 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
     _$hash = $jc(_$hash, nextCursor.hashCode);
     _$hash = $jc(_$hash, hasMore.hashCode);
     _$hash = $jc(_$hash, total.hashCode);
+    _$hash = $jc(_$hash, libraryUi.hashCode);
     _$hash = $jc(_$hash, items.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
@@ -72,6 +77,7 @@ class _$DocumentListResponseDto extends DocumentListResponseDto {
           ..add('nextCursor', nextCursor)
           ..add('hasMore', hasMore)
           ..add('total', total)
+          ..add('libraryUi', libraryUi)
           ..add('items', items))
         .toString();
   }
@@ -94,6 +100,12 @@ class DocumentListResponseDtoBuilder
   num? get total => _$this._total;
   set total(num? total) => _$this._total = total;
 
+  DocumentListLibraryUiDtoBuilder? _libraryUi;
+  DocumentListLibraryUiDtoBuilder get libraryUi =>
+      _$this._libraryUi ??= new DocumentListLibraryUiDtoBuilder();
+  set libraryUi(DocumentListLibraryUiDtoBuilder? libraryUi) =>
+      _$this._libraryUi = libraryUi;
+
   ListBuilder<JsonObject>? _items;
   ListBuilder<JsonObject> get items =>
       _$this._items ??= new ListBuilder<JsonObject>();
@@ -109,6 +121,7 @@ class DocumentListResponseDtoBuilder
       _nextCursor = $v.nextCursor;
       _hasMore = $v.hasMore;
       _total = $v.total;
+      _libraryUi = $v.libraryUi?.toBuilder();
       _items = $v.items.toBuilder();
       _$v = null;
     }
@@ -140,10 +153,13 @@ class DocumentListResponseDtoBuilder
                   hasMore, r'DocumentListResponseDto', 'hasMore'),
               total: BuiltValueNullFieldError.checkNotNull(
                   total, r'DocumentListResponseDto', 'total'),
+              libraryUi: _libraryUi?.build(),
               items: items.build());
     } catch (_) {
       late String _$failedField;
       try {
+        _$failedField = 'libraryUi';
+        _libraryUi?.build();
         _$failedField = 'items';
         items.build();
       } catch (e) {

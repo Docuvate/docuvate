@@ -640,7 +640,7 @@ class AdminApi {
   ///
   /// Parameters:
   /// * [limit] 
-  /// * [offset] 
+  /// * [cursor] - Opaque keyset cursor from a previous response
   /// * [search] 
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
   /// * [headers] - Can be used to add additional headers to the request
@@ -652,8 +652,8 @@ class AdminApi {
   /// Returns a [Future] containing a [Response] with a [AdminUserListResponseDto] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<AdminUserListResponseDto>> listAdminUsers({ 
-    num? limit,
-    num? offset,
+    num? limit = 50,
+    String? cursor,
     String? search,
     CancelToken? cancelToken,
     Map<String, dynamic>? headers,
@@ -688,7 +688,7 @@ class AdminApi {
 
     final _queryParameters = <String, dynamic>{
       if (limit != null) r'limit': encodeQueryParameter(_serializers, limit, const FullType(num)),
-      if (offset != null) r'offset': encodeQueryParameter(_serializers, offset, const FullType(num)),
+      if (cursor != null) r'cursor': encodeQueryParameter(_serializers, cursor, const FullType(String)),
       if (search != null) r'search': encodeQueryParameter(_serializers, search, const FullType(String)),
     };
 

@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: LicenseRef-Docuvate-SUL-1.0
 import type { SavedDocumentViewDto } from '@docuvate/contracts';
 import { Bookmark, Settings2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 
-import { listSavedDocumentViews } from '../../lib/api';
+import { flattenCursorPages } from '../../lib/pagination/useCursorInfiniteQuery';
 import { routes } from '../../lib/routes';
+import { useSavedDocumentViewsInfiniteQuery } from '../../lib/saved-views/useSavedDocumentViewsInfiniteQuery';
 import { SAVED_VIEWS_CHANGED } from '../../lib/savedViewsEvents';
 import { savedViewSidebarLinkIsActive } from '../../lib/savedViewSidebarNav';
 
@@ -18,26 +19,27 @@ function sidebarLinkClass(isActive: boolean) {
 export function SavedViewsSidebar({ collapsed }: { collapsed: boolean }) {
   const { t } = useTranslation();
   const location = useLocation();
-  const [views, setViews] = useState<SavedDocumentViewDto[]>([]);
-
-  const reload = useCallback(() => {
-    void listSavedDocumentViews()
-      .then((items) => { setViews(items.filter((v) => v.pinnedSidebar).sort((a, b) => a.position - b.position)); }
-      )
-      .catch(() => { setViews([]); });
-  }, []);
+  const { data, hasNextPage, isFetchingNextPage, fetchNextPage, refetch } =
+    useSavedDocumentViewsInfiniteQuery();
+  const allViews = useMemo(() => flattenCursorPages(data?.pages), [data?.pages]);
+  const views = useMemo(
+    () => allViews.filter((v) => v.pinnedSidebar).sort((a, b) => a.position - b.position),
+    [allViews]
+  );
 
   useEffect(() => {
-    reload();
-  }, [reload]);
+    if (hasNextPage && !isFetchingNextPage) {
+      void fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     const onChanged = () => {
-      reload();
+      void refetch();
     };
     window.addEventListener(SAVED_VIEWS_CHANGED, onChanged);
     return () => { window.removeEventListener(SAVED_VIEWS_CHANGED, onChanged); };
-  }, [reload]);
+  }, [refetch]);
 
   if (views.length === 0) {
     return null;
@@ -59,7 +61,7 @@ export function SavedViewsSidebar({ collapsed }: { collapsed: boolean }) {
           <Settings2 size={20} strokeWidth={1.75} aria-hidden />
         </NavLink>
       </div>
-      {views.map((view) => {
+      {views.map((view: SavedDocumentViewDto) => {
         const linkIsActive = savedViewSidebarLinkIsActive(
           location.pathname,
           location.search,
