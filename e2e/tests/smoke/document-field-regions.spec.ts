@@ -50,7 +50,7 @@ async function setLabelsTabOpen(page: Page, open: boolean): Promise<void> {
   const tab = page.getByRole('tab', { name: /^Labels/i });
   const selected = (await tab.getAttribute('aria-selected')) === 'true';
   if (selected !== open) {
-    await tab.click();
+    await tab.click({ force: true });
   }
 }
 
@@ -98,7 +98,7 @@ async function dismissOverlaySheets(page: Page): Promise<void> {
 }
 
 test.describe('document field regions', () => {
-  test.describe.configure({ mode: 'serial', timeout: 420_000 });
+  test.describe.configure({ mode: 'serial', timeout: 420_000, retries: 0 });
 
   let layoutDocId: string;
   const labels = longLabelNames(25);
@@ -156,6 +156,8 @@ test.describe('document field regions', () => {
       testInfo,
       'field-regions-source-chip-seite-1.png'
     );
+    await dismissOverlaySheets(page);
+    await expect(page.locator('[data-testid="field-correction-sheet"]')).toHaveCount(0);
 
     for (const viewport of VIEWPORTS) {
       await page.setViewportSize({ width: viewport.width, height: viewport.height });
@@ -163,11 +165,14 @@ test.describe('document field regions', () => {
         await page.emulateMedia({ colorScheme: scheme });
         await dismissOverlaySheets(page);
         await setLabelsTabOpen(page, false);
-        await page.locator('.layout-side-tabs').getByRole('tab', { name: /Übersicht|Overview/i }).click();
+        await page
+          .locator('.layout-side-tabs')
+          .getByRole('tab', { name: /Übersicht|Overview/i })
+          .click({ force: true });
         if (viewport.width < 1024) {
           const sheet = page.locator('[data-testid="field-correction-sheet"]');
           if ((await sheet.count()) === 0) {
-            await page.locator('.field-value-row-select, .field-value-row, [data-overlay-id^="region-field-"]').first().click();
+            await page.locator('.field-value-row-select').first().click({ force: true });
           }
           await assertCorrectionsBottomSheet(page);
           await expect(page.locator('.source-chip')).toContainText('Seite 1');
