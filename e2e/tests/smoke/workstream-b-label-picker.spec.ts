@@ -106,8 +106,12 @@ async function provisionLongLabelRowFixture(
       headers: { origin: webOrigin },
       data: { name, color: '#7c3aed', matchingAlgorithm: 'none', match: '' },
     });
-    expect(response.ok()).toBeTruthy();
-    const body = (await response.json()) as { id: string };
+    const responseBody = await response.text();
+    expect(
+      response.ok(),
+      `create tag failed status=${response.status()} body=${responseBody}`
+    ).toBeTruthy();
+    const body = JSON.parse(responseBody) as { id: string };
     tagIds.push(body.id);
   }
 

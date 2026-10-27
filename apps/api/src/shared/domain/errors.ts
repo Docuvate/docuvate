@@ -48,7 +48,7 @@ export class ForbiddenError extends DomainError {
 
 export class ValidationError extends DomainError {
   constructor(detail: string, code: ErrorCode = ERROR_CODES.VALIDATION_FAILED) {
-    const detailKey = looksLikeI18nKey(detail) ? detail : errorCodeI18nKey(code);
+    const detailKey = looksLikeI18nKey(detail) ? detail : detail.trim();
     super(code, detailKey);
   }
 }
