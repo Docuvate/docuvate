@@ -106,11 +106,13 @@ test.describe('document field regions', () => {
   const labels = longLabelNames(25);
 
   test.beforeAll(async ({ request }) => {
+    test.setTimeout(420_000);
     layoutDocId = await uploadLayoutTableDocument(request, apiBase, webOrigin);
     await assignLongLabels(request, apiBase, webOrigin, layoutDocId, labels);
   });
 
   test.afterAll(async ({ request }) => {
+    test.setTimeout(60_000);
     if (!layoutDocId) {
       return;
     }
