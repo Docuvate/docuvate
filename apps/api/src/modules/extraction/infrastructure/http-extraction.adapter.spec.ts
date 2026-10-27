@@ -21,6 +21,6 @@ describe('HttpExtractionAdapter.extract deadline', () => {
       EXTRACTION_TIMEOUT_FAILURE_MESSAGE
     );
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock.mock.calls[0][1].signal).toBeDefined();
+    expect(fetchMock.mock.calls[0]?.[1]?.signal).toBeDefined();
   });
 });
