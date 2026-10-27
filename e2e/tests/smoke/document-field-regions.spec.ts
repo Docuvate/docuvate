@@ -12,6 +12,7 @@ import {
   assertNoClippedOrOverlappingChips,
   assertNoHorizontalOverflow,
   assertOverflowMissesHeader,
+  assertSourceChipShortForm,
   captureLoadedScreenshot,
   captureViewportScreenshot,
 } from '../../helpers/overflow-check';
@@ -186,7 +187,7 @@ test.describe('document field regions', () => {
     await expect(page.getByText(/Korrektur gespeichert|Correction saved/i)).toBeVisible({
       timeout: 30_000,
     });
-    await expect(page.locator('.source-chip')).toContainText('Seite 1');
+    await assertSourceChipShortForm(page, 'Seite 1');
     await assertFieldRegionRenderedWithValue(page);
     await captureLoadedScreenshot(
       page.locator('.document-detail-page'),
@@ -213,7 +214,7 @@ test.describe('document field regions', () => {
         if (viewport.width < 1024) {
           await openFieldCorrectionSheet(page);
           await assertCorrectionsBottomSheet(page);
-          await expect(page.locator('.source-chip')).toContainText('Seite 1');
+          await assertSourceChipShortForm(page, 'Seite 1');
           await assertNoHorizontalOverflow(page);
           if (scheme === 'light') {
             await captureViewportScreenshot(
@@ -229,7 +230,7 @@ test.describe('document field regions', () => {
             .locator('.layout-side-tabs')
             .getByRole('tab', { name: /Übersicht|Overview/i })
             .click({ force: true });
-          await expect(page.locator('.source-chip')).toContainText('Seite 1');
+          await assertSourceChipShortForm(page, 'Seite 1');
           await assertNoHorizontalOverflow(page);
         }
 

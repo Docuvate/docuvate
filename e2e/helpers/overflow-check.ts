@@ -280,6 +280,16 @@ export async function assertOverflowMissesHeader(page: Page): Promise<void> {
   expect(overlap.ok, overlap.reason).toBe(true);
 }
 
+export async function assertSourceChipShortForm(page: Page, expected: string): Promise<void> {
+  const chips = page.locator('.source-chip');
+  await expect(chips.first()).toBeVisible({ timeout: 10_000 });
+  const count = await chips.count();
+  expect(count).toBeGreaterThan(0);
+  for (let index = 0; index < count; index += 1) {
+    await expect(chips.nth(index)).toContainText(expected);
+  }
+}
+
 export async function assertFieldRegionRenderedWithValue(page: Page): Promise<void> {
   const overlay = page.locator('[data-overlay-id^="region-field-"]').first();
   await expect(overlay).toBeVisible({ timeout: 30_000 });
